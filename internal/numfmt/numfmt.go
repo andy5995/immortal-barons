@@ -14,13 +14,22 @@ import (
 // it is gold, troopers, or regions.
 type Number interface{ ~int | ~int64 }
 
-// A figure is printed in full however large it grows, with its thousands
-// grouped. That is what BRE does: `Bank: 2,000,000,000` and `Today
-// $1,846,153,847` are its own screens at the top of its range, so ten digits
-// need no abbreviating and nothing here needs a float. IB rendered a billion
-// and over as a fixed 4-decimal "1.8473B" until v0.0.8; the one place BRE
-// itself printed that form was a numeric prompt's ceiling, which IB no longer
-// shows either.
+// Format prints a figure in full however large it grows, with its thousands
+// grouped. That is what BRE's MONEY screens do: `Bank: 2,000,000,000` and
+// `Today $1,846,153,847` are its own screens at the top of its range, so ten
+// digits need no abbreviating and nothing here needs a float. IB rendered a
+// billion and over as a fixed 4-decimal "1.8473B" until v0.0.8; the one place
+// BRE itself printed that form was a numeric prompt's ceiling, which IB no
+// longer shows either.
+//
+// **This is one of FOUR ways BRE spells a figure, and it is chosen per SCREEN,
+// not per quantity.** The others are all below: GroupLong (grouped only past
+// four digits), Short (the score table's two-step k/m) and Thousands (the Daily
+// Bulletin's /1000 with an unconditional `k`). The sentence above read as a
+// global claim about BRE until 2026-08-30 and suppressed the question for
+// months — while a capture had carried `You took 78k Gold` since July, and the
+// removed Abbrev's own comment described BRE's k/m columns thirty lines down.
+// Do not generalise any of the four past the screens it belongs to.
 
 // groupSep maps a UI language to its thousands separator. All three are ASCII,
 // so they are CP437-safe (and CP437 mode forces English anyway). Unknown

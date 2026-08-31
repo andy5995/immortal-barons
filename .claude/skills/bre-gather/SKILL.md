@@ -810,7 +810,7 @@ to re-drive BRE for something already on disk. Both failures below happened on
 what pattern.** And check the file's mtime: a capture Andy took minutes ago is
 new data, and an earlier "not present" was true when it was made.
 
-## Parsing a `.cap` capture — three traps that produced wrong findings
+## Parsing a `.cap` capture — four traps that produced wrong findings
 
 The economy parser is `scripts/bre-econ.py` in this project's Claude dir (per-turn
 income, region counts, purchase markers, back-computed yields). Prefer it to
@@ -824,6 +824,21 @@ ad-hoc greps. Its `--shapes` mode censuses every distinct message form in a file
   rivers never produce food, when the line was simply below the cut.
 - **The Regions display WRAPS onto a second line.** Parsing only the first loses
   Mountains, Coastal and Technology — that mistake hid 18 tourism samples.
+
+- **Record how a figure is SPELLED before reading it as a value.** Converting
+  on sight destroys the evidence. On 2026-08-30 a grep for battle casualties
+  returned `You lost 116k Tanks!` and `You destroyed 1111 Troopers, 115k
+  Turrets, and 105k Tanks!`; both were read for magnitude, `115k` became
+  115,000, and the fact that BRE ABBREVIATES went unnoticed until Andy said so.
+  It was on screen twice. When a task touches how a figure is displayed, run the
+  census first — it is one command and it answers the whole question:
+
+      grep -aoE "[0-9]+[km]\b.{0,40}" cap/*.cap | sed -E 's/[0-9]+/N/g' \
+        | sort | uniq -c | sort -rn | head -40
+
+  That sweep also turns up formats you were not looking for: it found a fourth
+  number style in the Daily Bulletin (`12,468k` — divided once, suffixed, THEN
+  grouped, never reaching `m`) that no other screen uses.
 
 **And before explaining any per-unit figure, check whether the count you divided
 by changed that turn.** Purchases land between the report and the Regions
