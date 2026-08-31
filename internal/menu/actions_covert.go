@@ -72,7 +72,7 @@ func (row covertRow) action() Action {
 		if !row.Info && blockedByCovertProtection(s, w) {
 			return Stay
 		}
-		return pickAndStrike(s, w, string(row.Op), nil, false,
+		return pickAndStrike(s, w, string(row.Op), nil, false, false,
 			func(a, d *game.Empire) (string, error) { return row.Strike(w, a, d) })
 	}
 }

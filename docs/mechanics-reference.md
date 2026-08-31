@@ -2038,6 +2038,14 @@ quanta (trial: 5,053 troopers + 5,101 turrets + 839 tanks in one hit). A
 token force stripping five figures off a giant is the original's own
 behaviour, not an IB defect.
 
+**Corroborated in a live game, not only on a staged board (2026-08-31,
+`cap/kd3-01.cap`).** A 600-trooper/800-jet/800-tank raid on a realm holding
+12,527 regions, whose Full Defense ally added 11,508 troopers and 8,636 tanks:
+repelled at 20.5–20.6% of each type committed, and `You destroyed 0 Troopers,
+0 Turrets, 0 Tanks, and 0 Jets.` IB's own loop returns 0.206 attacker losses
+and no defender loss in roughly a third of runs at that ratio, so the capture
+is the modal outcome rather than a contradiction.
+
 **BRE's report under-tells the defender's jet losses; IB's does not.** Across
 those six battles the defender's jets fell 209,235 → 198,983 — the ground
 fraction applied to jets like every other type, matching IB — while BRE's
@@ -4127,18 +4135,20 @@ This is also the independent confirmation that **6 is Technology Agreement**, th
 value the Technology Agreement research bonus keys on. Menu index equals relation
 value for 1–8, so the Diplomacy menu's numbering *is* the enum.
 
-**Declaration Of War is the formal way to end an agreement, not a separate war
-system.** BRE's own instructions: *"This is used to break an agreement with
-another empire without causing internal troubles in your realm. The treaty is not
-officially broken until the other realm is notified."* Two consequences, both
-implemented:
+**Declaration Of War is a relation LABEL in the original, not an action.** It
+appears only in `format_diplomatic_status`, beside `Enemy`, `None` and the seven
+pacts, and the value is never stored (see the Full Defense Alliance guard below).
+BRE's instructions describe it as a way "to break an agreement with another empire
+without causing internal troubles" — but no routine bears that name, and the
+support-and-morale charge belongs to the breach path instead:
 
-- **Declaring war costs a quarter of both popular support and military morale**
-  and leaves the pair at **Enemy** (`World.DeclareWar`), mailing the other realm.
-- **Attacking a partner outright costs nothing.** It still breaches the pact —
-  the pair drops to Enemy (`World.breachTreaty`, called from `Attack`) — but the
-  breaker pays no price at home. The crown charges for the declaration, not for
-  the betrayal.
+- **Attacking a realm you hold a pact with tears the pact up and costs a quarter
+  of both popular support and military morale** (`World.BreachTreaty`, called
+  from the menu before the force is chosen and again from `Attack`). The pair is
+  left with **no relation**, not at Enemy: the original zeroes both rows.
+- **IB additionally offers a Declaration Of War menu item** (`World.DeclareWar`),
+  charging the same quarters and leaving the pair at Enemy. Whether that item
+  should exist at all is open (#242) — see the Declaration Of War entry below.
 
 **Every Diplomacy action that addresses a realm takes a LIST.** The Diplomacy
 menu calls the same toggling picker Send Message uses — the selection routine at
@@ -4162,8 +4172,8 @@ rather than the score table. IB's rules on top of that:
   is neither BRE's behaviour nor safe — it put the one destructive diplomatic act
   behind the same key as the constructive one. BRE's break-with-penalty prompt
   ("Are you sure you wish break your agreement?", `BRE.OVR` 0x1A838) belongs to
-  the shared target picker used by attacks, covert ops and trading, not to
-  diplomacy.
+  the shared target picker, not to diplomacy — and there only for the callers
+  that pass its breach flag, which is the four attacks and not trading.
 - **Marking several sends one proposal each**, skipping any realm that already
   holds that pact, and asks the covering message once for the whole batch.
 - **The covering message is optional, rides on the offer, and is mailed
@@ -4366,31 +4376,42 @@ and each carries a gameplay effect (#11 wired the last two):
   by three; the manual's "and maintain" has no separate charge behind it, because
   the one up-front `days x rate` payment is the whole cost.
 
-**Declaration Of War** is the menu's formal way to end an agreement, and it is
-expensive. BINARY-VERIFIED (BRE.OVR 0x01a838, `break_diplomatic_treaty`): once
-confirmed, popular support (record `+0x92`) and military morale (`+0x8e`) are each
-divided by four and multiplied by three — a quarter off both — and only then are
-the relation rows on *both* empires cleared. The screen's own message speaks of
-revolts and of morale dropping severely. IB matches (`DeclareWarKeepNumerator` /
-`DeclareWarKeepDenominator`, `DeclareWar`), charging only when a real pact stood,
-as BRE does: the option is offered at all only when the relation is a treaty.
+**Tearing up a pact is expensive, and the charge belongs to ATTACKING a partner.**
+BINARY-VERIFIED (BRE.OVR 0x01a838, `break_diplomatic_treaty`): once confirmed,
+popular support (record `+0x92`) and military morale (`+0x8e`) are each divided by
+four and multiplied by three — a quarter off both — and only then are the relation
+rows on *both* empires cleared, to 0 (None). The screen's own message speaks of
+revolts and of morale dropping severely.
 
-Two manual statements about it are **wrong about the shipped game**, and are
-recorded here so they are not "fixed" back in:
+That routine has exactly **one** caller: the shared target picker
+`choose_target_empire` (0x01aa99). At +0xc4a the picker reads the pair's relation
+word at `+0xae`, and calls the break only when it is a pact (`> 0`) **and** the
+caller passed the breach flag at `[bp+0x8]`. `resolve_regular_attack`,
+`launch_nuclear_attack`, `launch_chemical_attack` and `launch_biological_attack`
+all pass 1; `create_trade_offer`, `run_trading_market` and `run_coordinator_vote`
+pass 0. A returned `N` resets the target to `@`, aborting the attack outright.
 
-- "without causing internal troubles in your realm" — the code charges the two
-  quarters above. A disassembly outranks the docs, so IB follows the code.
-- "The treaty is not officially broken until the other realm is notified" — BRE
-  clears both rows in the same routine that prompts, with nothing waiting on the
-  message. There is no delayed-break window, and IB models none.
+So the confirmation, the charge and the break land *before* the force is chosen,
+which means the battle is then fought at the reduced morale. IB matches
+(`TreatyBreakKeepNumerator` / `TreatyBreakKeepDenominator`, `World.BreachTreaty`,
+`confirmBreach` in `internal/menu/actions_attack.go`). Live capture:
+`cap/kd3-01.cap`.
 
-Attacking a partner outright (`breachTreaty`) costs the breaker nothing, which
-is the original's behaviour: no attack path reads the relation, so there is
-nowhere for a penalty to be charged. IB charged 10 popular support here until
-the declaration routine was read, on the reasoning that a pact you can walk out
-of for free is not a pact. That priced the two exits the wrong way round. The
-original's asymmetry is deliberate — a declaration is a public act with a public
-cost, and a betrayal is punished by the other players rather than by the crown.
+**IB read this backwards until 2026-08-31**, charging the quarters on
+`DeclareWar` and nothing on the breach, on the stated reasoning that "no attack
+path in BRE reads the relation at all". The read is a level up, in the picker the
+attack shares with trading — the same mistake the gathering guide warns about
+under "A prompt's TEXT is not its behaviour — read the caller". Recorded so it is
+not reasoned back.
+
+One manual statement is **wrong about the shipped game**, and is recorded here so
+it is not "fixed" back in: *"The treaty is not officially broken until the other
+realm is notified"* — BRE clears both rows in the same routine that prompts, with
+nothing waiting on the message. There is no delayed-break window, and IB models
+none.
+
+**IB's Declaration Of War menu item has no counterpart in the original** and is
+an open question (#242): it charges the same quarters and leaves the pair at Enemy.
 
 The two newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the
 intent, not the numbers.

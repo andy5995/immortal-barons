@@ -216,6 +216,10 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 	if err := payArmsDealer(a, w.NukeCost(d)); err != nil {
 		return "", err
 	}
+	// A missile aimed at a pact partner tears the pact up and costs support and
+	// morale, exactly as a regular attack does — all four share one target picker
+	// in the original (see BreachTreaty). The menu asks first.
+	w.BreachTreaty(a, d)
 
 	regions := w.nuclearEffect(d)
 
@@ -303,6 +307,10 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 	if err := payArmsDealer(a, w.ChemCost(d)); err != nil {
 		return "", err
 	}
+	// A missile aimed at a pact partner tears the pact up and costs support and
+	// morale, exactly as a regular attack does — all four share one target picker
+	// in the original (see BreachTreaty). The menu asks first.
+	w.BreachTreaty(a, d)
 
 	regions, people := w.chemicalEffect(d)
 
@@ -322,6 +330,10 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	if err := payArmsDealer(a, w.BioCost(d)); err != nil {
 		return "", err
 	}
+	// A missile aimed at a pact partner tears the pact up and costs support and
+	// morale, exactly as a regular attack does — all four share one target picker
+	// in the original (see BreachTreaty). The menu asks first.
+	w.BreachTreaty(a, d)
 	// The Score lands on the sale, before any damage is rolled, so a plague
 	// that kills nobody still pays.
 	addScore(a, BioScoreAward)

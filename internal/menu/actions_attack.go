@@ -125,6 +125,7 @@ type targetRow struct {
 	attackable            bool
 	protected             bool
 	presence              string
+	pact                  string // the relation attacking this realm would break, "" for none
 }
 
 // snapshotTargets copies every LIVING rival (not just the attackable ones) under
@@ -151,6 +152,7 @@ func snapshotTargets(w *ctx) []targetRow {
 				people: e.People, troopers: e.Troopers,
 				attackable: attackable, protected: protected,
 				presence: presenceOf(e, false, w.Today),
+				pact:     w.Relation(p, e),
 			})
 		}
 	})
@@ -201,6 +203,9 @@ func regularAttack(s session.Session, w *ctx) Result {
 	}
 	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Attack which realm? (letter, RETURN to abort)")))
 	if !chosen {
+		return Stay
+	}
+	if !confirmBreach(s, w, rows, name) {
 		return Stay
 	}
 
@@ -375,14 +380,52 @@ func localAttack(s session.Session, w *ctx, label string, price costOf, endsTurn
 	if blockedByProtection(s, w) {
 		return Stay
 	}
-	return pickAndStrike(s, w, label, price, endsTurn, strike)
+	// The three missiles pass the picker's breach flag in the original; the
+	// covert menu, which calls pickAndStrike directly, does not.
+	return pickAndStrike(s, w, label, price, endsTurn, true, strike)
+}
+
+// confirmBreach is the original's guard on attacking a realm you hold a pact
+// with: the target picker asks before the force is chosen, a refusal aborts the
+// whole attack, and a yes tears the pact up and charges support and morale on
+// the spot (game.BreachTreaty). Keeping the charge here rather than inside the
+// resolver is what makes the battle fight at the reduced morale, and what makes
+// an attack that ends up committing nothing still cost the pact.
+//
+// Returns false when the player backed out.
+func confirmBreach(s session.Session, w *ctx, rows []targetRow, name string) bool {
+	pact := ""
+	for _, r := range rows {
+		if r.name == name {
+			pact = r.pact
+		}
+	}
+	if pact == "" || pact == game.RelationEnemy {
+		return true
+	}
+	fmt.Fprintf(s, "\n%s"+tr(s, "%s stands between you and %s.")+"%s\n",
+		ansi.FgBrightYellow, tr(s, pact), name, ansi.Reset)
+	if !AskYesNo(s, "Break the agreement?", true) {
+		return false
+	}
+	var broke string
+	w.mutatePlayer(func(p *game.Empire) error {
+		if d := findTarget(w, p, name); d != nil {
+			broke = w.World.BreachTreaty(p, d)
+		}
+		return nil
+	})
+	if broke != "" {
+		ok(s, "Agreement broken! Revolts spread through your realm — your people will not be ruled by an oath-breaker, and the army's morale goes with them.")
+	}
+	return true
 }
 
 // pickAndStrike is localAttack without the New Realm Protection gate: the
 // target list, the arms-broker quote, and the strike itself. The covert menu
 // calls it directly for the two operations the original lets a sheltered realm
 // still run (see covertInfoOp).
-func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
+func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTurn, breach bool, strike func(a, d *game.Empire) (string, error)) Result {
 	rows := snapshotTargets(w)
 	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")
@@ -390,6 +433,9 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 	}
 	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Choose a target (letter, RETURN to abort)")))
 	if !chosen {
+		return Stay
+	}
+	if breach && !confirmBreach(s, w, rows, name) {
 		return Stay
 	}
 	if price != nil {

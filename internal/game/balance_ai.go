@@ -204,27 +204,28 @@ const (
 // funny.
 const ProclamationChancePct = 35
 
-// Breaking a pact by ATTACKING a partner costs nothing — see breachTreaty. IB
-// used to charge 10 popular support here; the original charges nothing, because
-// no attack path reads the relation at all. Declaring war is the route that
-// costs (a quarter of both support and morale, DeclareWar).
-
-// Declaring war costs a quarter of BOTH popular support and military morale.
-// BINARY-VERIFIED (BRE.OVR 0x01a838, break_diplomatic_treaty): on the
+// Tearing up a pact costs a quarter of BOTH popular support and military
+// morale. BINARY-VERIFIED (BRE.OVR 0x01a838, break_diplomatic_treaty): on the
 // confirmation, popular support at record +0x92 and military morale at +0x8e are
 // each divided by four and multiplied by three, in that order, before either
 // side's relation row is cleared. The truncation is on the divide, so 99 keeps
 // 72 rather than 74 — hence a numerator and denominator here instead of a
 // percentage.
 //
-// This CONTRADICTS the manual, which says the declaration breaks a pact
-// "without causing internal troubles in your realm". The binary's own message on
-// the same screen speaks of revolts and morale dropping severely, so the manual
-// is describing an intention the shipped game does not honour, and the code
-// wins (a disassembly outranks the docs for mechanics).
+// The charge belongs to ATTACKING a realm you hold a pact with. That routine has
+// exactly one caller, the shared target picker choose_target_empire (0x01aa99),
+// which reads the pair's relation word at +0xae and calls it only when the
+// caller passes the breach flag — regular, nuclear, chemical and biological
+// attacks all pass 1, while create_trade_offer, run_trading_market and
+// run_coordinator_vote pass 0. Refusing the confirmation aborts the attack.
+//
+// IB read this the other way round until 2026-08-31, charging the fee on
+// DeclareWar and nothing on the breach, on the reasoning that no attack path
+// reads the relation — the read is a level up, in the picker the attack shares
+// with trading. Live capture: cap/kd3-01.cap.
 const (
-	DeclareWarKeepNumerator   = 3
-	DeclareWarKeepDenominator = 4
+	TreatyBreakKeepNumerator   = 3
+	TreatyBreakKeepDenominator = 4
 )
 
 // Trade-treaty income, per turn, per partner. BINARY-VERIFIED inside

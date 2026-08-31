@@ -93,11 +93,13 @@ func (w *World) CanBombingOp(e *Empire) bool {
 func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
 	a.AttacksToday++ // counts against the daily individual-attack cap (both human and AI)
 	f = f.clampTo(a) // only units the attacker actually holds can be committed
-	// Attacking a realm you hold an agreement with ends it the dishonourable way
-	// and costs popular support at home — the "internal troubles" BRE's manual
-	// says a Declaration Of War avoids (#88). Runs before the battle so the
-	// alliance reinforcement below sees the broken relation.
-	w.breachTreaty(a, d)
+	// Attacking a realm you hold an agreement with tears the agreement up and
+	// costs a quarter of both support and morale (BreachTreaty). The menu asks
+	// first and charges it there, so this is normally a no-op by the time the
+	// battle starts; it stands for the AI and for any caller that did not ask.
+	// Either way it runs before the strengths are read, so the battle is fought
+	// at the reduced morale and the alliance reinforcement below sees the break.
+	w.BreachTreaty(a, d)
 	var b strings.Builder
 	// The report is written in the ATTACKER's language: it is what that player
 	// reads at the end of their own turn. The defender's copy is filed as an

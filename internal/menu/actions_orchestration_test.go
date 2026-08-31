@@ -3,6 +3,8 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // These tests exercise the menu handlers' orchestration branches — the
@@ -251,4 +253,67 @@ func TestBuyLandLeavesWhenNothingIsAffordable(t *testing.T) {
 	if f.pos != 3 { // "C", "1", Enter — and no more
 		t.Errorf("read %d keys, want 3 — the screen kept prompting after the last purchase", f.pos)
 	}
+}
+
+// --- confirmBreach ------------------------------------------------------
+
+// Aiming an attack at a pact partner asks before anything is committed, and a
+// refusal aborts the whole attack — the original's target picker returns 'N' and
+// the caller drops the target. Both tests assert the prompt was REACHED (the
+// pact's name on screen) as well as the state effect, so a flow change upstream
+// cannot leave them green while never getting here.
+func TestBreachPromptRefusedAbortsTheAttack(t *testing.T) {
+	w, target := worldWithPact(t)
+	before, support := target.Land, w.Player().Support
+	f := &fakeSession{keys: []rune("An\r")} // target A, then decline the breach
+
+	regularAttack(f, w)
+
+	if !strings.Contains(f.out.String(), "Tariff Trade Agreement") {
+		t.Fatalf("the breach prompt was never reached; got:\n%s", f.out.String())
+	}
+	if got := w.World.Relation(w.Player(), target); got != "Tariff Trade Agreement" {
+		t.Errorf("a refused breach must leave the pact standing, got %q", got)
+	}
+	if target.Land != before {
+		t.Errorf("a refused breach still attacked: target Land %d -> %d", before, target.Land)
+	}
+	if w.Player().Support != support {
+		t.Errorf("a refused breach still charged support: %d -> %d", support, w.Player().Support)
+	}
+}
+
+func TestBreachPromptAcceptedBreaksThePactBeforeTheForcePrompts(t *testing.T) {
+	w, target := worldWithPact(t)
+	w.Player().Support, w.Player().Morale = 90, 80
+	f := &fakeSession{keys: []rune("Ay\r")} // target A, accept; force defaults via EOF
+
+	regularAttack(f, w)
+
+	if !strings.Contains(f.out.String(), "Tariff Trade Agreement") {
+		t.Fatalf("the breach prompt was never reached; got:\n%s", f.out.String())
+	}
+	if got := w.World.Relation(w.Player(), target); got != "" {
+		t.Errorf("a breached pact should leave no relation, got %q", got)
+	}
+	if w.Player().Support != 66 || w.Player().Morale != 60 {
+		t.Errorf("breach should charge a quarter of each: support %d (want 66), morale %d (want 60)",
+			w.Player().Support, w.Player().Morale)
+	}
+}
+
+// worldWithPact returns a world whose player holds a Tariff Trade Agreement with
+// the one attackable rival.
+func worldWithPact(t *testing.T) (*ctx, *game.Empire) {
+	t.Helper()
+	w := newWorld()
+	w.Player().Protection = 0
+	target := recipients(w)[0]
+	target.Protection = 0
+	w.World.ProposeTreaty(w.Player(), target, "Tariff Trade Agreement")
+	w.World.AcceptTreaty(target, w.Player().Name, "Tariff Trade Agreement")
+	if w.World.Relation(w.Player(), target) != "Tariff Trade Agreement" {
+		t.Fatal("setup: the pact did not form")
+	}
+	return w, target
 }

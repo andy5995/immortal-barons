@@ -515,13 +515,14 @@ func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 	}
 }
 
-// DeclareWar is BRE's Declaration Of War: the formal way to end an agreement.
-// Tearing up a pact in public costs a quarter of both popular support and
-// military morale — the original charges this even though its manual promises it
-// will not (see DeclareWarKeepNumerator). Only ending a real pact costs: BRE
-// offers the option at all only when a treaty stands, so declaring on a realm
-// you have no agreement with is free. The pair is left at Enemy and the other
-// realm is notified by mail.
+// DeclareWar is IB's formal way to end an agreement, and the one place the two
+// games are known to part company. "Declaration Of War" exists in the original
+// only as a RELATION label in format_diplomatic_status, beside Enemy, None and
+// the seven pacts; no routine a player invokes bears that name, and the support
+// and morale charge belongs to the breach path (see BreachTreaty). IB keeps the
+// menu item and the charge pending a decision on both (#242). Only ending a real
+// pact costs, the pair is left at Enemy, and the other realm is notified by
+// mail.
 //
 // The break is IMMEDIATE, and so is the original's, despite the manual's "the
 // treaty is not officially broken until the other realm is notified": BRE clears
@@ -529,8 +530,8 @@ func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 // waiting on the message being read. There is no delayed-break window to model.
 func (w *World) DeclareWar(a, b *Empire) {
 	if rel := w.Relation(a, b); rel != "" && rel != RelationEnemy {
-		a.Support = a.Support / DeclareWarKeepDenominator * DeclareWarKeepNumerator
-		a.Morale = a.Morale / DeclareWarKeepDenominator * DeclareWarKeepNumerator
+		a.Support = a.Support / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
+		a.Morale = a.Morale / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
 		a.addEvent(fmt.Sprintf("Tearing up the %s with %s set off revolts at home; support and morale fell sharply.", rel, b.Name))
 	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
@@ -540,25 +541,33 @@ func (w *World) DeclareWar(a, b *Empire) {
 	})
 }
 
-// breachTreaty ends a pact the dishonourable way — by attacking a realm you had
-// an agreement with. It costs the breaker NOTHING, which is the original's
-// behaviour: no attack path in BRE reads the relation at all, so there is
-// nowhere for a penalty to be charged. IB used to take popular support here on
-// the reasoning that a pact you can walk out of for free is not a pact; that
-// priced the two exits the wrong way round, since BRE charges a quarter of both
-// support and morale for the honest route (DeclareWar) and nothing for this one.
-// The original's asymmetry is the point: declaring war is a public act with a
-// public cost, and a betrayal is punished by the other players, not the crown.
+// BreachTreaty tears up a pact by aiming an attack at the realm that holds it,
+// and charges the breaker a quarter of both popular support and military morale
+// (TreatyBreakKeepNumerator). It returns the relation it ended, or "" when there
+// was nothing to break.
 //
-// A pair already at Enemy, or with no relation, is not a breach at all.
-func (w *World) breachTreaty(a, b *Empire) {
+// The original puts all of this in break_diplomatic_treaty (BRE.OVR 0x01a838),
+// reached only from the target picker its regular, nuclear, chemical and
+// biological attacks share — so the confirmation, the charge and the break all
+// land BEFORE the force is committed, and the battle is then fought at the
+// reduced morale. The caller asks first; refusing aborts the attack.
+//
+// The pair is left with NO relation rather than at Enemy: the original zeroes
+// both realms' relation words (0x624 and 0x646), and 0 is None in its enum.
+//
+// IB charged nothing here until 2026-08-31, on the reading that no attack path
+// consults the relation. It does, one level up.
+func (w *World) BreachTreaty(a, b *Empire) string {
 	rel := w.Relation(a, b)
 	if rel == "" || rel == RelationEnemy {
-		return
+		return ""
 	}
-	w.setRelation(a.Name, b.Name, RelationEnemy)
-	a.addEvent(fmt.Sprintf("You broke the %s with %s by attacking without declaring war.", rel, b.Name))
-	b.addEvent(fmt.Sprintf("%s attacked you, breaking the %s between your realms.", a.Name, rel))
+	a.Support = a.Support / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
+	a.Morale = a.Morale / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
+	w.setRelation(a.Name, b.Name, "")
+	a.addEvent(fmt.Sprintf("You tore up the %s with %s to attack it. Revolts broke out at home; support and morale fell sharply.", rel, b.Name))
+	b.addEvent(fmt.Sprintf("%s tore up the %s between your realms to attack you.", a.Name, rel))
+	return rel
 }
 
 // EnsureTreaties migrates a save that predates typed treaties: old untyped

@@ -221,12 +221,11 @@ func TestOneRelationPerPair(t *testing.T) {
 	}
 }
 
-// Breaking a pact by attacking a partner ends the relation and costs the
-// breaker NOTHING. That is the original's shape and it is deliberately the
-// opposite way round from intuition: the crown charges for the DECLARATION
-// (TestDeclareWarCostsSupportAndMorale), not for the betrayal, which the other
-// players are left to punish. IB charged 10 support here until it was read.
-func TestAttackingAPartnerBreachesAndCostsNothing(t *testing.T) {
+// Attacking a realm you hold a pact with tears the pact up, leaves the pair with
+// NO relation, and charges the breaker a quarter of both support and morale.
+// Golden literals, not the constants: 90 and 80 kept at three quarters are 66
+// and 60 (the truncation is on the divide, so 90/4*3 is 66, not 67).
+func TestAttackingAPartnerBreachesAndCostsSupportAndMorale(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
@@ -236,19 +235,22 @@ func TestAttackingAPartnerBreachesAndCostsNothing(t *testing.T) {
 
 	w.Attack(a, b, FullForce(a), true)
 
-	if got := w.Relation(a, b); got != RelationEnemy {
-		t.Errorf("attacking a partner should leave the pair at %q, got %q", RelationEnemy, got)
+	if got := w.Relation(a, b); got != "" {
+		t.Errorf("a breached pact should leave no relation, got %q", got)
 	}
-	if a.Support != 90 {
-		t.Errorf("breaching a pact should cost no support: 90 -> %d", a.Support)
+	if a.Support != 66 {
+		t.Errorf("breaching a pact should cost a quarter of support: 90 -> %d, want 66", a.Support)
+	}
+	if a.Morale != 60 {
+		t.Errorf("breaching a pact should cost a quarter of morale: 80 -> %d, want 60", a.Morale)
 	}
 	// Attacking a realm you had no pact with is not a breach.
 	c := w.AddHuman("c", "Gamma")
 	c.Protection = 0
-	a.Support = 90
+	a.Support, a.Morale = 90, 80
 	w.Attack(a, c, FullForce(a), true)
-	if a.Support != 90 {
-		t.Errorf("attacking a non-partner is no breach, 90 -> %d", a.Support)
+	if a.Support != 90 || a.Morale != 80 {
+		t.Errorf("attacking a non-partner is no breach, 90/80 -> %d/%d", a.Support, a.Morale)
 	}
 }
 
