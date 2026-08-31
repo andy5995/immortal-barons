@@ -559,6 +559,7 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 |---|---|---|
 | game `Outbound` | `--out` did not run or cannot take `game.lock` | Run `barons-ftn --out`; read its error |
 | `ftn-spool/out` | At least one target is busy or failed | Read the warning; inspect that peer's `.bsy`, path, or netmail directory |
+| `AttachDir` (default `data/att`), envelope still in `NetmailDir` | Normal. The attachment waits for the tosser to pack the `.msg` that names it | Nothing. Run/check the tosser |
 | `AttachDir` (default `data/att`) with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `NetmailDir`, BSO directory, and permissions |
 | `NetmailDir` `.msg` | The tosser has not packed outgoing netmail | Run/check the tosser and allow file attaches |
 | BSO `.?lo` | The mailer has not successfully sent the referenced bundle | Check peer address, password, route, and `.bsy` |
@@ -572,6 +573,26 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 One bad packet or busy peer does not stop unrelated destinations. Do not delete
 spool journals to make a warning disappear: they are the record that prevents
 partial work from being forgotten or blindly repeated.
+
+The same goes for the files in `AttachDir`, which look more disposable than
+they are. On a hub most of them are not this board's own mail at all: they are
+packets that arrived addressed to somebody else and were re-published toward
+their next hop. The board that sent one has already seen it handed over
+successfully, so it will never send it again — deleting the attachment loses
+that mail for good, and the recipient's only symptom is a board that went
+quiet.
+
+Before removing anything from `AttachDir`, decide which of the two rows above
+applies, because they look identical in a file listing:
+
+- Run `barons-ftn --status`. A receipt held in transit for another board names
+  that board and that peer's last error. Anything it still lists is owed to
+  somebody.
+- Find the envelope. Each `Queued <packet> for <next hop> as <message>` line
+  from the run that created the attachment names the `.msg` that carries it, so
+  the mapping is in the log. An envelope still sitting in `NetmailDir` means
+  the tosser has not packed it yet and the pair is fine. An envelope that has
+  gone while its attachment stayed is the fault worth chasing.
 
 ### What a healthy spool looks like
 
