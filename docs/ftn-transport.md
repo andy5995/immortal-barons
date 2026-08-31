@@ -87,6 +87,53 @@ event or after the receive command returns. The helper validates a complete ZIP
 and all member digests before publishing anything, but that validation cannot
 prove that an unrelated mailer is no longer writing the source file.
 
+### Scheduling it safely
+
+The sequence above is the whole of it, but a scheduled run wants two things
+around it. This shape comes from a Synchronet board running the transport in a
+league:
+
+```sh
+#!/bin/bash
+set -euo pipefail
+
+# One run at a time. A second invocation while this one is working exits
+# rather than queueing, since there is no FTN-wide inbound semaphore.
+exec 9>/sbbs/xtrn/imb/data/planetary-run.lock
+flock -n 9 || exit 0
+
+# Keep the output. Stall reports are written for a run nobody watched.
+exec >>/sbbs/xtrn/imb/data/planetary.log 2>&1
+echo "=== $(date --iso-8601=seconds) ==="
+
+cd /sbbs/xtrn/imb
+./barons-ftn --in
+./immortal-barons -planetary
+./barons-ftn --out
+/sbbs/exec/sbbsecho /sbbs/ctrl/sbbsecho.ini
+/sbbs/exec/jsexec -c/sbbs/ctrl /sbbs/exec/binkit.js
+```
+
+`flock -n` keeps an overlapping run from starting. A scheduler that fires
+hourly will one day fire while a slow run is still going, and the lock turns
+that collision into a clean exit rather than two processes competing for the
+same spools.
+
+The log matters more than it looks. `--out` names the peers a snapshot is
+still waiting on and how long they have been behind, and a scheduled run has
+nowhere to print that unless the output is kept, so the report is written for
+nobody. Redirecting to a file is what makes it worth having.
+
+`cd` into the installation directory. `-data` can then be left off, since it
+defaults to `./data`.
+
+`set -e` has a consequence worth choosing on purpose. A non-zero exit from
+`--in` stops the script, so `--out` and the mailer never run, and outbound
+mail stops with them. That may well be right: an outbound snapshot built on a
+failed inbound is worth skipping. It is still a decision rather than a default
+to inherit unread. Recoverable problems are reported as warnings and exit 0,
+so only a real failure trips it.
+
 ## `ftn.cfg` reference
 
 `ftn.cfg` lives in the directory selected by `-data`. Keywords ignore case.
