@@ -65,6 +65,20 @@ const Version = "0.0.9"
 // field it does not know, re-marshals without it, and the origin signature
 // fails — on ordinary scores, not just on the rename. Better that it holds the
 // packet and says why.
+//
+// **The operational rule for a bump, decided 2026-08-31 (#229).** A league does
+// not roll a protocol change through board by board. It closes the game, lets
+// every board finish sending what it has queued, and only then switches to the
+// new release together — so no packet is ever in flight across the boundary.
+//
+// That is what makes the hold behaviour acceptable rather than a defect: a held
+// packet is released only when the READER comes to speak the number the packet
+// already carries, so at a staggered upgrade the board that moves FIRST holds
+// everything from the boards still behind it and nothing ever releases it.
+//
+// A bump is therefore a coordinated event, not a rolling one; say so in the
+// release notes whenever this number moves. Full policy:
+// docs/dev/league-transitions.md.
 const Protocol = 2
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can

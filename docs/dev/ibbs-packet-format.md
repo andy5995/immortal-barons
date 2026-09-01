@@ -389,6 +389,14 @@ so accepting one for a packet that carries bulletins would apply content nothing
 signed. Adding a field to the payload means appending its old length to
 `payloadShapes` in `internal/game/ibbs_auth.go`.
 
+### Upgrading a league across a protocol bump
+
+**A league does not roll a protocol change through board by board.** It closes
+the game, lets every board finish sending what it has queued, and only then
+switches to the new release together. The policy, and why the hold behaviour
+makes it necessary, are in
+[`league-transitions.md`](league-transitions.md#protocol-bumps-drain-first).
+
 ### The Coordinator's version requirement
 
 `LeagueConfig.MinBoardVersion` lets the Coordinator require a game version of
