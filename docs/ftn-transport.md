@@ -685,6 +685,13 @@ first:
 Because `-in` accepts legacy raw JSON packets, steps 1–3 can be completed
 without coordinating an exact cutover minute.
 
+**This is the rolling case, and a protocol change is not.** The order above
+covers the transport container, which the game's `Protocol` number does not
+describe. When a release moves that number, the league closes the game, lets
+every board finish sending what it has queued, and switches together — see
+"Protocol bumps: drain first" in `dev/league-transitions.md`. Its release notes
+will say so.
+
 Before step 5, an `Attach` link with no `AttachDir` set gets one that lives
 under the data directory (see [Stored-message attach
 settings](#stored-message-attach-settings)) — a board whose data directory is

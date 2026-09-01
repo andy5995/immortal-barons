@@ -117,6 +117,15 @@ Watch it: a release with no assets is a release nobody can use.
    this — it gates on the game version, which does move for a formula change.
    Set it when a release changes gameplay a league would notice.
 
+   **If it did move, the release notes must say the upgrade is coordinated.** A
+   league does not roll a protocol change through board by board: it closes the
+   game, drains every board's outbound queue, and switches together (decided
+   2026-08-31, #229 — the reasoning is under "Protocol bumps: drain first" in
+   `league-transitions.md`). A held packet comes back only when the READER moves
+   to the number it already carries, so a staggered upgrade strands the board
+   that moves first. Saying this in the notes is the whole mechanism; nothing in
+   the code enforces it.
+
 10. **Delete any renamed or removed asset** left behind on the snapshot
    prerelease by hand. `replacesArtifacts` only replaces an asset of the same
    name, so a rename leaves the old file sitting beside the new one.
