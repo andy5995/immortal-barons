@@ -66,29 +66,22 @@ func TestGameSetupNamesTheLeague(t *testing.T) {
 	}
 }
 
-// Game Setup reports the money cap. A player who does not know the figure only
-// discovers it by losing gold to it, and the sysop can set it to anything from
-// two billion up, so it cannot be assumed.
-func TestGameSetupShowsTheMoneyCap(t *testing.T) {
-	for _, c := range []struct {
-		billions int
-		want     string
-	}{
-		{game.MoneyCapMinBillions, "2B"},
-		{50, "50B"},
-		{game.MoneyCapMaxBillions, "999B"},
-	} {
-		w := newWorld()
-		w.Config.MoneyCapBillions = c.billions
-		f := &fakeSession{keys: []rune("     ")}
-		gameSetup(f, w)
-		out := anyEscape.ReplaceAllString(f.out.String(), "")
-		if !strings.Contains(out, "Most gold you can hold") {
-			t.Fatal("Game Setup omits the money cap row")
-		}
-		if !strings.Contains(out, c.want) {
-			t.Errorf("cap %dB: screen should show %q", c.billions, c.want)
-		}
+// The money cap has no row on Game Setup. It had one until 2026-09-01, when the
+// setting stopped being editable (#205) and every new game began getting the
+// same two billion — a figure the screen no longer has to carry because it
+// cannot differ between boards a player might join.
+func TestGameSetupOmitsTheMoneyCap(t *testing.T) {
+	w := newWorld()
+	f := &fakeSession{keys: []rune("     ")}
+	gameSetup(f, w)
+	out := anyEscape.ReplaceAllString(f.out.String(), "")
+	// Assert the screen was reached before asserting what is missing from it —
+	// an empty screen would otherwise pass.
+	if !strings.Contains(out, "Turns per day") {
+		t.Fatalf("never reached Game Setup:\n%s", out)
+	}
+	if strings.Contains(out, "Most gold you can hold") {
+		t.Error("Game Setup still carries the money cap row")
 	}
 }
 

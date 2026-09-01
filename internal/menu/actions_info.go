@@ -177,12 +177,12 @@ func gameSetup(s session.Session, w *ctx) Result {
 	pair("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate),
 		"Investment rate", investRateStr(s, c))
 	row("Food market", foodMarketStr(s, c))
-	// Worth a line of its own: gold earned past this is destroyed, and a player
-	// who does not know the figure only finds out by losing some.
-	// The cap is held in whole billions, so the row names the count and the unit
-	// rather than spelling out ten digits.
-	row("Most gold you can hold", fmt.Sprintf(tr(s, "%sB in hand, and again in the bank"),
-		comma(w.MoneyCapBillions())))
+	// The money cap had a row here until 2026-09-01. It stopped earning one when
+	// the setting stopped being editable (#205): every new game gets the same 2
+	// billion, so the row told a player something they could not have found
+	// otherwise different. A board carried over from before #205 may still hold a
+	// raised value, which World.MoneyCapBillions honours and this screen no
+	// longer shows.
 	pause(s)
 
 	group("Forces and trade")
