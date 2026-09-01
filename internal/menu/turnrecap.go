@@ -28,7 +28,7 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	var bulletin game.DailyBulletin
 	var news []string
 	var boardID, date string
-	w.With(func() {
+	w.Read(func() {
 		if yesterday {
 			bulletin, news = w.BulletinYesterday, w.NewsYesterday
 		} else {

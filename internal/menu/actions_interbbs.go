@@ -32,7 +32,7 @@ func travelTimes(s session.Session, w *ctx) Result {
 		days float64
 	}
 	var planets []planet
-	w.With(func() {
+	w.Read(func() {
 		for _, name := range w.KnownBoards() {
 			planets = append(planets, planet{name, w.TravelTimes[name]})
 		}
@@ -98,7 +98,7 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var owners, names []string
 	var coordinatorName string
-	w.With(func() {
+	w.Read(func() {
 		for _, e := range w.Empires {
 			// Every realm holding a slot is a candidate, protected ones included,
 			// and so are you (#149). BRE builds the picker's key set in
@@ -161,7 +161,7 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 func dismantleAnnihilator(s session.Session, w *ctx) Result {
 	var isCoordinator, enabled bool
 	var d *game.Annihilator
-	w.With(func() {
+	w.Read(func() {
 		isCoordinator = w.BBSCoordinator() == w.Player()
 		enabled = w.Config.GooieKablooie
 		if w.Annihilator != nil {

@@ -31,7 +31,7 @@ func reviewTreatyOffers(s session.Session, w *ctx) {
 	for _, o := range offers {
 		var regions, netWorth, score int
 		var gone bool
-		w.With(func() {
+		w.Read(func() {
 			from := findRealm(w, o.From)
 			if from == nil {
 				gone = true
@@ -417,7 +417,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var rows []relationsRow
 	var pending []game.PendingProposal
-	w.With(func() {
+	w.Read(func() {
 		pending = w.ProposalsFrom(p)
 		for _, e := range w.Empires {
 			if e == p || !e.Alive {

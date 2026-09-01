@@ -52,7 +52,7 @@ func planetsNamed(w *ctx, want []string) []game.LeagueNode {
 // its own. It just cannot be picked as a destination.
 func addressablePlanets(w *ctx) []game.LeagueNode {
 	var list []game.LeagueNode
-	w.With(func() {
+	w.Read(func() {
 		for _, p := range w.LeaguePlanets() {
 			if w.Routable(p.Name) {
 				list = append(list, p)
@@ -65,7 +65,7 @@ func addressablePlanets(w *ctx) []game.LeagueNode {
 // addressable keeps the boards a packet from here can actually reach.
 func addressable(w *ctx, boards []string) []string {
 	var out []string
-	w.With(func() {
+	w.Read(func() {
 		for _, b := range boards {
 			if w.Routable(b) {
 				out = append(out, b)
@@ -418,7 +418,7 @@ func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result 
 // only bites on a malformed packet.
 func remoteRecipients(w *ctx, board string) []pickRow {
 	var rows []pickRow
-	w.With(func() {
+	w.Read(func() {
 		for _, b := range w.RemoteBoards {
 			if b.BoardID != board {
 				continue

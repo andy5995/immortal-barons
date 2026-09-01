@@ -38,7 +38,7 @@ func ipMarkets(s session.Session, w *ctx) Result {
 func browseRemoteMarket(s session.Session, w *ctx, board string) {
 	var rows []game.RemoteListing
 	var asOf string
-	w.With(func() {
+	w.Read(func() {
 		rows = append(rows, w.World.RemoteMarket(board)...)
 		for _, b := range w.World.RemoteBoards {
 			if b.BoardID == board {
@@ -143,7 +143,7 @@ func ipPendingBids(s session.Session, w *ctx) Result {
 	}
 	var rows []row
 	var total int64
-	w.With(func() {
+	w.Read(func() {
 		p := w.Player()
 		if p == nil {
 			return

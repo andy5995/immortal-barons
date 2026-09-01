@@ -36,7 +36,7 @@ type ipScoreRow struct {
 // BRE (docs/dev/bre-screens.md, "InterBBS Scores").
 func interbbsScores(s session.Session, w *ctx) Result {
 	var rows []ipScoreRow
-	w.With(func() {
+	w.Read(func() {
 		for _, b := range w.RemoteBoards {
 			for _, sc := range b.Scores {
 				score := sc.Score

@@ -132,7 +132,7 @@ func exposeEnemyOps(s session.Session, w *ctx) Result {
 // drawn, because it is a fact about the realm.
 func snapshotBribedTargets(w *ctx) []targetRow {
 	var rows []targetRow
-	w.With(func() {
+	w.Read(func() {
 		p := w.Player()
 		if p == nil {
 			return

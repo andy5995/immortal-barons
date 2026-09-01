@@ -40,7 +40,7 @@ type advisorData struct {
 
 func gatherAdvisorData(w *ctx) advisorData {
 	var d advisorData
-	w.With(func() {
+	w.Read(func() {
 		d.p = *w.Player()
 		d.foodGrown = w.FoodGrown(&d.p)
 		d.foodEaten = w.FoodDue(&d.p)

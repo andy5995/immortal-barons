@@ -600,7 +600,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 	// part of the game.
 	var names []string
 	var raiders []int
-	w.With(func() {
+	w.Read(func() {
 		for _, p := range w.Pirates {
 			names = append(names, p.Name)
 		}
@@ -663,7 +663,7 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	// bright-yellow, the note gray (docs/dev/bre-screens.md).
 	var funding, maint, perRegion, allowance, gold int64
 	var strength int
-	w.With(func() {
+	w.Read(func() {
 		p := w.Player()
 		funding, strength = p.SDIFunding, p.SDI
 		maint = w.SDIMaintenance(p)
@@ -827,7 +827,7 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 func annihilatorDefense(s session.Session, w *ctx) {
 	var d *game.Annihilator
 	var jets, needed int
-	w.With(func() {
+	w.Read(func() {
 		if w.Incoming == nil || w.Incoming.DaysLeft <= 0 {
 			return
 		}

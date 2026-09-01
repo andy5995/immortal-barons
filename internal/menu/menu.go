@@ -444,7 +444,7 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	// state), before any I/O.
 	var def *Item
 	var defLabel string
-	g.With(func() {
+	g.Read(func() {
 		if m.DefaultOnEnter != nil {
 			def = m.DefaultOnEnter(g)
 		} else if g.prefs().EnterExitsBuy && m.ExitOnEnter {
@@ -476,7 +476,7 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 		// Match the keypress and read the chosen item's label under the lock.
 		var it *Item
 		var itLabel string
-		g.With(func() {
+		g.Read(func() {
 			it = m.byKey(r, g)
 			if it != nil {
 				itLabel = it.displayLabel(g, playerLang(g))

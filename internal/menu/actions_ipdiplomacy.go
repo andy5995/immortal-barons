@@ -35,7 +35,7 @@ func planetaryTreaties(s session.Session, w *ctx) Result {
 		relation game.PlanetRelation
 	}
 	var rows []row
-	w.With(func() {
+	w.Read(func() {
 		for _, p := range w.LeaguePlanets() {
 			if p.Name == w.Config.BoardID {
 				continue

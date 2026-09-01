@@ -53,7 +53,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	var planets []string
 	var perDay int64
 	var maxDays int
-	w.With(func() {
+	w.Read(func() {
 		planets = w.KnownBoards()
 		perDay = w.SpyGuyCostPerDay()
 		maxDays = w.SpyGuyDaysAffordable(w.Player())

@@ -125,7 +125,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	if c.IBBS {
 		var boards int
 		var declaration, coordBoard string
-		w.With(func() {
+		w.Read(func() {
 			boards = len(w.LeagueNodes)
 			declaration = w.LeagueDiplomacy
 			coordBoard = w.CoordinatorBoardID()
@@ -284,7 +284,7 @@ func playerList(s session.Session, w *ctx) Result {
 		land, nw  int
 	}
 	var rows []row
-	w.With(func() {
+	w.Read(func() {
 		for _, e := range w.Empires {
 			if !e.Alive {
 				continue

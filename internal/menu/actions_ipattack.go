@@ -106,7 +106,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	}
 	var rows []gaRow
 	now := time.Now()
-	w.With(func() {
+	w.Read(func() {
 		if w.Player() == nil {
 			return
 		}

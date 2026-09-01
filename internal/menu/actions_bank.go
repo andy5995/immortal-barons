@@ -125,7 +125,7 @@ func listInvestments(s session.Session, w *ctx) Result {
 	var invs []game.Investment
 	var loans []game.Loan
 	var debt int64
-	w.With(func() {
+	w.Read(func() {
 		p := w.Player()
 		if p == nil {
 			return

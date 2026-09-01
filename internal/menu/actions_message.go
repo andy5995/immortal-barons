@@ -15,7 +15,7 @@ import (
 func readMessages(s session.Session, w *ctx) Result {
 	var hadMail bool
 	var news []string
-	w.With(func() {
+	w.Read(func() {
 		news = append([]string(nil), w.NewsToday...)
 		if p := w.Player(); p != nil {
 			hadMail = len(p.Mail) > 0
