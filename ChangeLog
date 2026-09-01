@@ -1,4 +1,5 @@
 (in-progress:)
+  * The InterPlanetary menu refuses five items until you play a turn
   * A realm's new name is announced on every planet, not just its own
   * The inter-BBS packet protocol moves to 2; boards must update together
   * The S3-Sabre dial aims the missile instead of changing nothing

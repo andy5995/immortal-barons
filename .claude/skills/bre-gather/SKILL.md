@@ -179,11 +179,13 @@ and on the sending side:
      Outbound mail for Test Planet Two - Node 2 created.
 ```
 
-**Also gating IP play:** most InterPlanetary Ops items silently do nothing until
-the caller has played a turn this entry — the menu redraws with no message. The
-explanation only appears on some items: *"You must play at least one turn per
-entry in the game to access this option."* An inert IP menu item is far more
-likely to be this than a broken mechanic.
+**Also gating IP play:** five InterPlanetary Ops items refuse until the caller
+has played a turn this entry, and every one of them SAYS so — *"You must play at
+least one turn per entry in the game to access this option."* This paragraph
+said the refusal was usually silent until the dispatch was read for #162; it is
+not, and "the item did nothing and said nothing" is therefore evidence AGAINST
+this gate, not for it. Which five, and where each is tested, is in
+`docs/mechanics-reference.md`.
 
 ### Disassembly: use the static map; never guess segment bases
 

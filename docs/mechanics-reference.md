@@ -3622,6 +3622,27 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   the same items except Join Group Attack, which it still refuses; whether the
   original really lets a sheltered realm join someone else's group attack, or
   refuses it further in, is untested here.
+- **Five items need a turn played THIS ENTRY, BINARY-VERIFIED (#162).** Send
+  Trade Deal, Create Group Attack, Indiv. Attack Force and Special Operations
+  (digits 3, 4, 6, 8) call `enforce_interbbs_turn_requirement` (`BRE.OVR`
+  0x020a12) from `run_interbbs_menu` (0x020caf) at sites 0x021038, 0x021051,
+  0x021076 and 0x02109b; Join Group Attack (digit 5) carries the same refusal
+  inline at 0x02d1c5, after drawing the party table and before the New Realm
+  Protection test. The other nine items are exempt — View IPScores, Terrorist
+  Ops, Send Message, Gooie Kablooie Ops, SDI Program, the diplomacy list, the
+  spy database, travel times and the bank — so a caller who has played no turn
+  can still bank, look and send mail, and can still buy terrorist ops. **Every
+  refusal prints**: the helper's whole body is the write, and the inline copy
+  writes too, so no gated item redraws silently.
+
+  What "played a turn" tests is a **process-lifetime global**, `BRE.EXE`
+  `DS:0x22fe` — zeroed once from the program entry point (0x4e94) and set to 1
+  when the turn state machine reaches stage 2 (0x628a, keyed on record +0x2b8).
+  It is not a save-record field, so it cannot mean "today": it means this run of
+  the door, which is what the refusal's own wording says. Because it is set at
+  the head of the turn, the InterPlanetary stage *inside* a turn is never the
+  one refused — only a visit made from the opening menu is. IB keeps the flag on
+  the session, not on the empire.
 - **Terrorist Ops — the nine operations differ, BINARY-VERIFIED (#166).** Commit
   agents; the op is queued and resolves on the target board's next packet run,
   where `resolve_received_covert_operation` (`BRE.OVR` 0x04a96b) dispatches on the

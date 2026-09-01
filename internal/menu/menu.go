@@ -52,6 +52,13 @@ type ctx struct {
 	// the next time the player enters the game. Messages are comparable values,
 	// and applyMailActions already matches them that way.
 	ignoredMail map[game.Message]bool
+	// turnPlayed records that this session has begun a turn, which is what the
+	// InterPlanetary menu's turn gate tests (#162). The original keeps the same
+	// thing in a process-lifetime global (BRE.EXE DS:0x22fe, zeroed once from
+	// the program entry point at 0x4e94 and set at 0x628a when the turn state
+	// machine reaches stage 2) — so it means THIS entry, never today, and
+	// nothing about it is persisted. A session field is the same lifetime.
+	turnPlayed bool
 	// noRealmPrefs backs ctx.prefs() when there is no active realm; see there.
 	noRealmPrefs *game.Prefs
 	// day is the date a bulletin file is written FOR. World.Today is

@@ -12,6 +12,30 @@ import (
 // battle: the spy guy, the InterPlanetary special ops, the spy database, the
 // terror-bombing table, and global recon.
 
+// needsTurnPlayed wraps an InterPlanetary item that the original refuses until
+// the caller has begun a turn this entry, printing the refusal in place of the
+// action. Five of the menu's items carry it, read out of the dispatch in
+// run_interbbs_menu (BRE.OVR 0x020caf): Send Trade Deal, Create Group Attack,
+// Indiv. Attack Force and Special Operations call
+// enforce_interbbs_turn_requirement (0x020a12) at sites 0x021038, 0x021051,
+// 0x021076 and 0x02109b, and Join Group Attack carries its own copy of the same
+// refusal inside the routine (0x02d1c5). The other nine items — the scores, the
+// terrorist ops, messages, the Gooie Kablooie, SDI, the diplomacy list, the spy
+// database, travel times and the bank — are exempt, and the exemption of
+// Terrorist Ops matches what play on a real board shows.
+//
+// Every refusal PRINTS: the helper's only job is to write the line, and the
+// inline copy writes it too, so no gated item redraws silently.
+func needsTurnPlayed(do Action) Action {
+	return func(s session.Session, w *ctx) Result {
+		if !w.turnPlayed {
+			ok(s, "You must play at least one turn each entry into the game before you can use this option.")
+			return Stay
+		}
+		return do(s, w)
+	}
+}
+
 // sendSpyGuy is the Special Operations "Send SpyGuy" item: post a watcher on
 // another PLANET for a paid number of days. He is not a covert agent — no agent
 // is spent, he cannot be caught, and he brings back no intelligence. What he

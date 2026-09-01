@@ -463,6 +463,7 @@ func TestInterPlanetarySpecialOpsMenu(t *testing.T) {
 	f := &fakeSession{keys: []rune("98000")}
 	w := newWorld()
 	w.Config.IBBS = true
+	w.turnPlayed = true // Special Operations is one of the five items the turn gate holds (#162)
 	if err := Run(f, w, BuildMenus().Game); err != nil {
 		t.Fatalf("got %v", err)
 	}

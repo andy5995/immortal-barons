@@ -245,17 +245,20 @@ func BuildMenus() *Menus {
 	// Send Trade Deal is the INTERPLANETARY deal, a separate mechanic from the
 	// Trading menu's (#195); it ran the local action, against a realm on the
 	// sender's own planet, until 2026-08-26.
+	//
+	// Five items refuse until the caller has begun a turn this entry — see
+	// needsTurnPlayed for which, and for where the original gates each (#162).
 	interplanetary.Items = []Item{
 		{Key: '1', Label: "View IPScores", Do: interbbsScores},
 		{Key: '2', Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
-		{Key: '3', Label: "Send Trade Deal", Do: sendIPTradeDeal},
-		{Key: '4', Label: "Create Group Attack", Do: createGroupAttack},
-		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
-		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
+		{Key: '3', Label: "Send Trade Deal", Do: needsTurnPlayed(sendIPTradeDeal)},
+		{Key: '4', Label: "Create Group Attack", Do: needsTurnPlayed(createGroupAttack)},
+		{Key: '5', Label: "Join Group Attack", Do: needsTurnPlayed(joinGroupAttack)},
+		{Key: '6', Label: "Indiv. Attack Force", Do: needsTurnPlayed(indivAttackForce)},
 		{Key: '7', Label: "Send Message", Do: gotoMenu(ipMessages)},
 		// Send SpyGuy is the one item here the two switches do not govern, so the
 		// menu stays reachable even with both off.
-		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
+		{Key: '8', Label: "Special Operations", Do: needsTurnPlayed(gotoMenu(ipSpecial))},
 		{Key: '9', Label: "Gooie Kablooie Ops", Do: gooieKablooie, Hidden: noAnnihilator},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'B', Label: "Trading", Do: gotoMenu(ipTrading), Hidden: noIPTrading},

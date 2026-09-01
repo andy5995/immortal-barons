@@ -157,6 +157,12 @@ func runTurn(s session.Session, w *ctx) Result {
 			return Stay
 		}
 
+		// The turn is now under way, which is what the InterPlanetary menu's gate
+		// tests. BRE sets its flag at stage 2 of the turn state machine, before
+		// any of that turn's screens, so the in-turn InterPlanetary stage is never
+		// the one refused — only a visit made from the opening menu is (#162).
+		w.turnPlayed = true
+
 		// New mail may arrive between turns (from another node), so check each
 		// turn, not just once in the pre-turn flow (#3).
 		readTurnMail(s, w, firstTurn)
