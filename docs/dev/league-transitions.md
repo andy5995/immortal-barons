@@ -95,6 +95,36 @@ disable an old board. The Coordinator's signed league-config packet is the
 cutover commit — before it, both versions understand the wire; after it, every
 acknowledged board understands bundles.
 
+**The premise of that last clause does not hold, and the proposal needs
+reworking around it (andy5995, 2026-08-31).** "Every acknowledged board
+understands bundles" assumes a board's game version tells you whether it can
+unwrap one. It does not: unwrapping is `barons-ftn -in`, the helper is optional,
+and a board reading `.brp` straight out of its mailer's directory is a supported
+setup that `docs/inter-bbs.md` documents. **Some boards will never run the
+helper**, whatever version of the game they are on — so raising
+`MinBoardVersion` can never be sufficient authority to start bundling toward
+them, and a design that flips the default on that signal would break exactly the
+boards #230 is about.
+
+What survives is the direction of the gate, not its input. Any automatic flip
+has to key on *whether the peer runs the helper*, which is a property of the
+LINK and not of the league — which is what `ftn.cfg`'s per-link `Raw`/`Bundled`
+already records. So the honest rule may simply be the one in force today:
+**bundling is per-link, indefinitely, and the sysop must know their peer.** That
+is less satisfying than a signed cutover, but it is true of the deployments that
+exist.
+
+Worth stating plainly what is given up by never bundling toward such a peer,
+since it is smaller than this section implies: the routing manifest (a bundle
+carries per-packet `Route` and `Covered`, so a forwarding board skips peers a
+broadcast has already reached; a raw packet rebuilds `Route` from its own
+`FromNode` and knows nothing about coverage), the loop check that reads the same
+`Route`, BSO coalescing (`appendBSOBundle` merges into a bundle already queued
+under the peer's `.bsy`), and fewer files. None of it is gameplay — every packet
+still arrives, applies, and is replay-checked. In a **star** topology routed
+through the Coordinator the manifest buys almost nothing, because there is only
+one path; it earns its keep in a mesh.
+
 `--status` should say which state it is in, in a line a sysop can paste:
 
 ```text
