@@ -4055,8 +4055,19 @@ which calls the recipient prompt at 0x1ed14 and a per-letter toggle at 0x1f1ac:
   or an office and never letter a realm.
 
 IB sends one packet message per marked realm, each narrowed with
-`IPMessage.ToEmpire` (the field the author-only reply already used), so
-addressing several barons needs no change to the packet's shape.
+`IPMessage.ToEmpire` (the field the author-only reply already used).
+
+**Every copy carries the WHOLE address, so a reader can see who else got it.**
+BRE renders the address as a run of realm letters — `Message To  : ABCDE`,
+captured live on a five-realm planet (`cap/eots-ibbs-02.cap`) — exactly as the
+local mail reader does. Because IB sends one message per recipient, each copy
+would otherwise know only itself, and a reader saw a single letter and could not
+tell whether the message went to them alone. `IPMessage.ToEmpires` carries the
+list (omitempty, added under Protocol 2); the receiving board renders it in its
+OWN empire order and drops any realm it does not have, since the sender's roster
+can be stale. A planet-wide message needs nothing on the wire — the receiving
+board renders every living realm's letter from its own roster. Fixed 2026-09-01;
+the interplanetary path was the only one that had it wrong.
 
 Two addresses are narrower than a planet. **Planet Coordinator** reaches the
 receiving planet's elected Coordinator alone — BRE heads such a message

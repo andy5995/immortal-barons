@@ -203,3 +203,93 @@ func TestIPMessageToNamedBaronsReachesOnlyThem(t *testing.T) {
 		}
 	}
 }
+
+// An interplanetary message addressed to several barons shows every recipient
+// the WHOLE address, as BRE does: `Message To  : ABCDE` (cap/eots-ibbs-02.cap).
+// Each copy travels separately, so without the list riding the packet a reader
+// sees only its own letter and cannot tell whether the message went to it alone.
+func TestIPMessageToBaronsShowsTheWholeAddress(t *testing.T) {
+	send := NewWorldSeed(DefaultConfig(), 1)
+	send.Config.BoardID = "Alpha BBS"
+	from := send.AddHuman("s", "Sender")
+
+	recv := NewWorldSeed(DefaultConfig(), 1)
+	recv.Config.BoardID = "Bravo BBS"
+	a := recv.AddHuman("a", "Anvil")
+	b := recv.AddHuman("b", "Bastion")
+	c := recv.AddHuman("c", "Crag")
+
+	send.SendIPMessageToBarons(from, "Bravo BBS", []string{"Anvil", "Bastion", "Crag"}, "all of you")
+
+	var delivered int
+	for _, p := range send.Outbox {
+		for _, m := range p.IPMessages {
+			recv.deliverIPMessage(m)
+			delivered++
+		}
+	}
+	if delivered != 3 {
+		t.Fatalf("expected one copy per baron, got %d", delivered)
+	}
+
+	want := recv.EmpireLetter(a) + recv.EmpireLetter(b) + recv.EmpireLetter(c)
+	for _, e := range []*Empire{a, b, c} {
+		if len(e.Mail) != 1 {
+			t.Fatalf("%s got %d messages, want 1", e.Name, len(e.Mail))
+		}
+		if got := e.Mail[0].To; got != want {
+			t.Errorf("%s sees Message To %q, want the whole address %q", e.Name, got, want)
+		}
+	}
+}
+
+// A realm the sender addressed but this board no longer has is dropped from the
+// rendered address rather than leaving a letter for a realm that is not there.
+func TestIPMessageAddressSkipsRealmsThisBoardDoesNotHave(t *testing.T) {
+	send := NewWorldSeed(DefaultConfig(), 1)
+	send.Config.BoardID = "Alpha BBS"
+	from := send.AddHuman("s", "Sender")
+
+	recv := NewWorldSeed(DefaultConfig(), 1)
+	recv.Config.BoardID = "Bravo BBS"
+	a := recv.AddHuman("a", "Anvil")
+
+	send.SendIPMessageToBarons(from, "Bravo BBS", []string{"Anvil", "Ghost"}, "hello")
+	for _, p := range send.Outbox {
+		for _, m := range p.IPMessages {
+			recv.deliverIPMessage(m)
+		}
+	}
+	if len(a.Mail) != 1 {
+		t.Fatalf("Anvil got %d messages, want 1", len(a.Mail))
+	}
+	if got, want := a.Mail[0].To, recv.EmpireLetter(a); got != want {
+		t.Errorf("Message To %q, want %q — a realm this board lacks must not appear", got, want)
+	}
+}
+
+// A planet-wide message is addressed to everyone, and the receiving board
+// renders that from its own roster rather than from anything on the wire.
+func TestIPMessageToAllShowsEveryLetter(t *testing.T) {
+	send := NewWorldSeed(DefaultConfig(), 1)
+	send.Config.BoardID = "Alpha BBS"
+	from := send.AddHuman("s", "Sender")
+
+	recv := NewWorldSeed(DefaultConfig(), 1)
+	recv.Config.BoardID = "Bravo BBS"
+	a := recv.AddHuman("a", "Anvil")
+	b := recv.AddHuman("b", "Bastion")
+
+	send.SendIPMessage(from, []string{"Bravo BBS"}, false, "everyone")
+	for _, p := range send.Outbox {
+		for _, m := range p.IPMessages {
+			recv.deliverIPMessage(m)
+		}
+	}
+	want := recv.EmpireLetter(a) + recv.EmpireLetter(b)
+	for _, e := range []*Empire{a, b} {
+		if len(e.Mail) != 1 || e.Mail[0].To != want {
+			t.Errorf("%s sees Message To %q, want %q", e.Name, e.Mail[0].To, want)
+		}
+	}
+}

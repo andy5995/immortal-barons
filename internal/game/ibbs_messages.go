@@ -1,5 +1,7 @@
 package game
 
+import "strings"
+
 // Interplanetary messages (BRE's "IP Messages"). A message is normally
 // addressed to a PLANET: the original offers one planet, several picked
 // planets, every planet, allied planets, or a planet's Coordinator, and the text
@@ -20,8 +22,16 @@ type IPMessage struct {
 	FromEmpire    string
 	ToCoordinator bool
 	ToEmpire      string
-	When          string
-	Body          string
+	// ToEmpires is the WHOLE address, on every copy, so a reader can see who else
+	// the message went to. BRE prints the address as a run of realm letters —
+	// `Message To  : ABCDE` (cap/eots-ibbs-02.cap) — and IB's local mail has done
+	// the same since it was built; only the interplanetary path was showing the
+	// reader its own letter alone, because it sends one message per recipient and
+	// each copy knew only itself. Empty for a Coordinator message and for the
+	// planet-wide case, which the receiving board renders from its own roster.
+	ToEmpires []string `json:",omitempty"`
+	When      string
+	Body      string
 }
 
 // SendIPMessage queues body for delivery on each of boards. An empty body or an
@@ -38,12 +48,37 @@ func (w *World) SendIPMessage(from *Empire, boards []string, toCoordinator bool,
 // packet's shape unchanged — ToEmpire already exists for the author-only reply,
 // and deliverIPMessage already honours it.
 func (w *World) SendIPMessageToBarons(from *Empire, board string, toEmpires []string, body string) {
+	addressed := make([]string, 0, len(toEmpires))
 	for _, name := range toEmpires {
-		if name == "" {
-			continue
+		if name != "" {
+			addressed = append(addressed, name)
 		}
-		w.sendIP(from, []string{board}, IPMessage{ToEmpire: name, Body: body})
 	}
+	for _, name := range addressed {
+		w.sendIP(from, []string{board}, IPMessage{ToEmpire: name, ToEmpires: addressed, Body: body})
+	}
+}
+
+// addressLetters renders an address as the run of realm letters BRE prints in
+// "Message To  :", in this board's own empire order. Names that do not resolve
+// here are dropped — a sender's roster can be stale — and an address that
+// resolves to nothing falls back to the reader's own letter, so the header is
+// never blank.
+func (w *World) addressLetters(names []string, fallback *Empire) string {
+	want := make(map[string]bool, len(names))
+	for _, n := range names {
+		want[n] = true
+	}
+	var b strings.Builder
+	for _, e := range w.Empires {
+		if want[e.Name] {
+			b.WriteString(w.EmpireLetter(e))
+		}
+	}
+	if b.Len() == 0 {
+		return w.EmpireLetter(fallback)
+	}
+	return b.String()
 }
 
 // sendIP queues one addressed message for each board. m carries the addressing
@@ -86,7 +121,7 @@ func (w *World) deliverIPMessage(m IPMessage) {
 		if to == nil {
 			return
 		}
-		msg.To = w.EmpireLetter(to)
+		msg.To = w.addressLetters(m.ToEmpires, to)
 		to.Mail = append(to.Mail, msg)
 		return
 	}
@@ -101,12 +136,21 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	}
 	// Every living realm, computer barons included — the same reach the local
 	// "send to all" has.
+	// A planet-wide message is addressed to everyone, so the letters are this
+	// board's own roster and no list has to ride the packet.
+	var everyone strings.Builder
+	for _, e := range w.Empires {
+		if e.Alive {
+			everyone.WriteString(w.EmpireLetter(e))
+		}
+	}
+	all := everyone.String()
 	for _, e := range w.Empires {
 		if !e.Alive {
 			continue
 		}
 		one := msg
-		one.To = w.EmpireLetter(e)
+		one.To = all
 		e.Mail = append(e.Mail, one)
 	}
 }

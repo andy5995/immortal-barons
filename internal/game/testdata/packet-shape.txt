@@ -172,6 +172,7 @@ IPMessage:
   FromEmpire
   ToCoordinator
   ToEmpire
+  ToEmpires `json:",omitempty"`
   When
   Body
 SpyGuyDispatch:
