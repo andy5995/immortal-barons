@@ -108,6 +108,17 @@ type RemoteSpecialOp struct {
 	Dial int `json:",omitempty"`
 }
 
+// CanSpecialOp reports whether e may launch op right now, on the per-day rule
+// that op is subject to: a missile is once a day each, a bombing op counts
+// against MaxBombingOps. The menu asks so a spent missile can be left off the
+// list, which is what the original does rather than refusing on selection.
+func (w *World) CanSpecialOp(e *Empire, op SpecialOp) bool {
+	if isMissileOp(op) {
+		return !e.MissileUsedToday[op]
+	}
+	return w.CanBombingOp(e)
+}
+
 // SpecialOpGoldCost prices one op for e.
 //
 // The four bombing ops carry the flat prices the original prints in the menu's
@@ -144,7 +155,13 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 	} else if !w.Config.BombingOps {
 		return ErrBombingOpsDisabled
 	}
-	if !w.CanBombingOp(e) {
+	if isMissileOp(op) {
+		// Each missile is its own once-a-day gate, not a share of the bombing
+		// allowance — see Empire.MissileUsedToday.
+		if e.MissileUsedToday[op] {
+			return ErrMissileSpentToday
+		}
+	} else if !w.CanBombingOp(e) {
 		return ErrBombingOpsExhausted
 	}
 	// The original requires the bombers for every op on this menu, missiles
@@ -164,7 +181,14 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 		dial = w.sabreDialFor(dial)
 	}
 	e.Gold -= cost
-	e.BombingOpsToday++
+	if isMissileOp(op) {
+		if e.MissileUsedToday == nil {
+			e.MissileUsedToday = map[SpecialOp]bool{}
+		}
+		e.MissileUsedToday[op] = true
+	} else {
+		e.BombingOpsToday++
+	}
 	w.NextAttackID++
 	w.InFlight = append(w.InFlight, InFlightStrike{
 		ID:           w.NextAttackID,

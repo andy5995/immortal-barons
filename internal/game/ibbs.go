@@ -25,6 +25,7 @@ var (
 	// and Missile Ops are the sysop's two switches over that menu, and the
 	// bomber floor is the original's delivery requirement.
 	ErrBombingOpsExhausted = errors.New("You have already launched all of your bombing operations for today.")
+	ErrMissileSpentToday   = errors.New("You have already launched that missile today.")
 	ErrBombingOpsDisabled  = errors.New("Bombing operations are not part of this game.")
 	ErrMissileOpsDisabled  = errors.New("Missile operations are not part of this game.")
 	ErrNeedBombers         = fmt.Errorf("You need at least %d Bombers to deliver a payload.", BombingBombersRequired)

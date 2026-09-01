@@ -133,6 +133,7 @@ LeagueConfig:
   AttackDamage
   AttackRewards
   SabreHandling `json:"SlappenheimerHandling"`
+  SabreConstantDial `json:",omitempty"`
 LeagueNode:
   Number
   Name

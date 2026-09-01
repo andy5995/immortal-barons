@@ -1613,9 +1613,31 @@ of what the effect names, and backfire is a continuous probability scaled by the
 target's troopers (`d.Troopers / SabreBackfireScale`). Those are playtest knobs;
 the table above is fidelity contract.
 
-The `None` handling mode disables the weapon (gated in the menu); `User Select`
-takes the player's dial, `Random` rolls one per launch, and `Constant` fires
-`SabreConstantDial` every time. The target's SDI intercepts on `Random(100) <=
+**Sabre Handling has four modes, and only one of them prompts.** BINARY-VERIFIED:
+the setting is one byte at `cfg+0x3d9`, and the Configuration Editor's own labels
+(`format_configuration_choice`, `BRE.OVR 0x5f1c`) name the four — None/Disabled,
+User Select/Original, Random, and a Constant that fires one fixed dial. **Only
+User Select ever asks the player for a number**: the launch menu's guard is a bare
+`cmp al,1` at `0x2a654`, and every other mode skips both the prompt and the two
+"Dial-technology is not 100% accurate" paragraphs of the blurb. A live board on a
+non-prompting mode is why two players reported the missile never asking them
+(`cap/eots-ibbs-02.cap`); that is the setting working, not a fault. The shipped
+DEFAULT has not been read — the one immediate write of 1 to that byte could not be
+attributed to an initializer.
+
+**IB stores the mode and the Constant's dial as two fields; the original packs
+them into one byte (DELIBERATE DIVERGENCE).** BRE has a single byte of a binary
+record to work with, so it encodes 0 None, 1 User Select, 2 Random and 200-210 a
+Constant firing `value - 200`. IB writes named JSON, so `SabreHandling` holds the
+mode and `SabreConstantDial` holds the number — the packing is a constraint of the
+original's file format, not one of its rules, and IB copies its rules. The
+behaviour is identical either way.
+
+IB had a four-value enum with the Constant's dial hard-coded until 2026-08-31.
+Because the mode order changed to the original's, `MigrateSabreHandling` carries
+an existing board's `SlappenheimerHandling` across on load: the old 0 meant User
+Select and now means None, so reading a file straight would have silently
+disabled the weapon on every upgraded board. The target's SDI intercepts on `Random(100) <=
 SDI/2` — BINARY-VERIFIED from the arriving-strike routine (`BRE.OVR ovr_0450a9
 +0x481`), which is where breins.txt's "up to 50% of incoming missiles" comes from
 and why a full shield stops half of them rather than halving one. The comparison
@@ -1629,6 +1651,21 @@ re-marshal without it and fail the origin signature. `omitempty` alone is the
 safe form only for a field that is also unsigned, which this is not. It
 therefore rides the `game.Protocol` bump to 2 that the rename news (#235) made
 in the same release.
+
+**The three missiles are once a day EACH, and do not touch the bombing
+allowance.** BINARY-VERIFIED: BRE keeps three flag bytes on the empire record —
+Nuclear Assault `+0x27e`, Chemical Bombing `+0x27f`, S3-Sabre `+0x280` — set when
+the strike launches (`BRE.OVR 0x2a1c4`, `0x2a2b1`, `0x2a64a`), tested while the
+Special Operations menu is DRAWN so a spent missile is left off the list
+altogether rather than refused on selection (`0x29f9c`, `0x29fd0`, `0x2a004`), and
+cleared together at daily maintenance (`0x08669`). They are booleans, not a
+counted allowance.
+
+`Maximum Bombing Operations Per Day` governs the four bombing ops and nothing
+else, and `Maximum Terrorist Ops Per Day` is a third allowance again — a live
+Game Setup screen shows them as 5 and 15 (`cap/eots-ibbs-02.cap`). IB counted
+every op on the menu against `MaxBombingOps` until 2026-08-31
+(`Empire.MissileUsedToday`, `World.CanSpecialOp`).
 
 The other interplanetary Special Operations, unchanged by this:
 

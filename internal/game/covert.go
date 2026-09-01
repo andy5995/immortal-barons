@@ -593,13 +593,14 @@ const (
 // Constant fires the same setting every time. The sysop's None mode is refused
 // in the menu, before a target is picked.
 func (w *World) sabreDialFor(dial int) int {
+	clamp := func(n int) int { return min(max(n, SabreDialMin), SabreDialMax) }
 	switch w.Config.SabreHandling {
 	case SabreRandom:
 		return w.rng.Intn(SabreDialMax - SabreDialMin + 1)
 	case SabreConstant:
-		return SabreConstantDial
+		return clamp(w.Config.SabreConstantDial)
 	}
-	return min(max(dial, SabreDialMin), SabreDialMax)
+	return clamp(dial)
 }
 
 // SabreAim turns the dial the firer set into the effect that lands, applying the

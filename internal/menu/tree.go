@@ -42,8 +42,25 @@ type Menus struct {
 // game/reset.hlp words them. IB used to hide the local Attack menu's WMDs behind
 // Missile Ops and Bomb Enemy Targets behind Bombing Ops; neither is BRE's, and
 // both are gone.
-func noBombingOps(w *ctx) bool  { return !w.Config.BombingOps }
-func noMissileOps(w *ctx) bool  { return !w.Config.MissileOps }
+func noBombingOps(w *ctx) bool { return !w.Config.BombingOps }
+func noMissileOps(w *ctx) bool { return !w.Config.MissileOps }
+
+// missileSpent hides a missile whose once-a-day launch has been used. The
+// original drops the item from the menu rather than refusing it on selection
+// (BRE.OVR 0x29f9c/0x29fd0/0x2a004 test the three flags while drawing), so a
+// player sees at a glance what is still available this day.
+func missileSpent(op game.SpecialOp) func(*ctx) bool {
+	return func(w *ctx) bool {
+		if noMissileOps(w) {
+			return true
+		}
+		// No lock here: draw already runs the whole menu inside w.With, so taking
+		// one deadlocks (it did, on TestInterPlanetarySpecialOpsMenu). Every other
+		// Hidden predicate reads straight through for the same reason.
+		p := w.Player()
+		return p != nil && !w.World.CanSpecialOp(p, op)
+	}
+}
 func noAnnihilator(w *ctx) bool { return !w.Config.GooieKablooie }
 
 // noIPTrading hides Trading when the league has turned it off. It is IB's own
@@ -331,9 +348,9 @@ func BuildMenus() *Menus {
 		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialOp(game.OpBombMarket), Hidden: noBombingOps},
 		{Key: '3', Label: "Bomb Trade Routes", Do: ipSpecialOp(game.OpBombRoutes), Hidden: noBombingOps},
 		{Key: '4', Label: "Undermine Investments", Do: ipSpecialOp(game.OpUndermine), Hidden: noBombingOps},
-		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialOp(game.OpNuclear), Hidden: noMissileOps},
-		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: noMissileOps},
-		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: noMissileOps},
+		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialOp(game.OpNuclear), Hidden: missileSpent(game.OpNuclear)},
+		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: missileSpent(game.OpChemical)},
+		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: missileSpent(game.OpSabre)},
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '0', Label: "Quit", Do: back},
 	}

@@ -32,6 +32,19 @@ func LoadConfig(dataDir string) (game.Config, error) {
 		return cfg, err
 	}
 	cfg.DataDir = dataDir
+	// The S3-Sabre setting was renumbered onto the original's encoding, and 0
+	// changed meaning, so a file written before that has to be read through its
+	// old key. Which key the document carries is the only way to tell the two
+	// apart, so probe it rather than the decoded value.
+	var keys map[string]json.RawMessage
+	if json.Unmarshal(data, &keys) == nil {
+		if _, ok := keys["SabreHandling"]; !ok {
+			var legacy game.SabreMode
+			if raw, ok := keys["SlappenheimerHandling"]; ok && json.Unmarshal(raw, &legacy) == nil {
+				cfg.SabreHandling = game.MigrateSabreHandling(legacy)
+			}
+		}
+	}
 	// The required version has its own file for the same reason bbs.cfg does: it
 	// is a thing a sysop edits and greps. A Coordinator's broadcast rewrites
 	// config.json, and SaveConfig then rewrites this file to match, so the two

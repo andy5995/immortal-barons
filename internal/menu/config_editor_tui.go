@@ -105,6 +105,7 @@ const (
 	helpAttackDamage       = "How much a conventional attack destroys on both sides: High, Medium, or Low."
 	helpAttackRewards      = "How much land and goods the winner of an attack gains: High, Medium, or Low."
 	helpSabre              = "How S3-Sabre missiles behave when fired."
+	helpSabreDial          = "Which dial Constant handling fires (0-10). Ignored by the other modes."
 	helpMaxAttacks         = "The most conventional attacks a player may launch in one day. 0 means no limit."
 	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
 	helpMaxTerrorOps       = "The most terrorist operations a player may launch in one day. 0 means no limit."
@@ -190,8 +191,11 @@ func newConfigTUI(w *game.World) *configTUI {
 	dmgVals := []game.Level{game.High, game.Medium, game.Low}
 	buyOpts := []string{"Yes", "No", "Limited"}
 	buyVals := []game.BuyMode{game.BuyYes, game.BuyNo, game.BuyLimited}
-	sabreOpts := []string{"User Select/Original", "None/Disabled", "Random", "Constant"}
 	sabreVals := []game.SabreMode{game.SabreUserSelect, game.SabreNone, game.SabreRandom, game.SabreConstant}
+	sabreOpts := make([]string, len(sabreVals))
+	for i, v := range sabreVals {
+		sabreOpts[i] = v.String()
+	}
 
 	timing := tview.NewForm()
 	t.addInt(timing, "Turns per day", helpTurnsPerDay, c.TurnsPerDay, 1, game.MaxTurnsPerDay, func(c *game.Config, n int) { c.TurnsPerDay = n })
@@ -221,6 +225,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	addChoice(t, mil, "Attack Damage", helpAttackDamage, dmgOpts, dmgVals, c.AttackDamage, func(c *game.Config, v game.Level) { c.AttackDamage = v })
 	addChoice(t, mil, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
 	addChoice(t, mil, "S3-Sabre Handling", helpSabre, sabreOpts, sabreVals, c.SabreHandling, func(c *game.Config, v game.SabreMode) { c.SabreHandling = v })
+	t.addInt(mil, "S3-Sabre Constant Dial", helpSabreDial, c.SabreConstantDial, game.SabreDialMin, game.SabreDialMax, func(c *game.Config, n int) { c.SabreConstantDial = n })
 	t.addInt(mil, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
 	if ibbs {
 		t.addInt(mil, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })

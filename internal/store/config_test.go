@@ -139,3 +139,39 @@ func TestLoadConfig_OlderFileKeepsTheLeaguePolicyDefaults(t *testing.T) {
 		t.Error("LocalAttackScoring should default off, as BRE ships it")
 	}
 }
+
+// A config.json written before the S3-Sabre setting took the original's
+// encoding carries the old key, whose 0 meant User Select and now means
+// None/Disabled. Reading it under the new numbering would have switched the
+// weapon off on every upgraded board, so the loader maps it across.
+func TestLegacySabreHandlingIsMigrated(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "config.json"),
+		[]byte(`{"SlappenheimerHandling":0}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.SabreHandling != game.SabreUserSelect {
+		t.Errorf("legacy 0 loaded as %v, want User Select", cfg.SabreHandling)
+	}
+}
+
+// A file carrying the new key is current, so a stale legacy key beside it is
+// ignored rather than allowed to overwrite the real setting.
+func TestNewSabreKeyWinsOverTheLegacyOne(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "config.json"),
+		[]byte(`{"SabreHandling":3,"SabreConstantDial":4,"SlappenheimerHandling":0}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.SabreHandling != game.SabreConstant || cfg.SabreConstantDial != 4 {
+		t.Errorf("SabreHandling = %v dial %d, want Constant dial 4", cfg.SabreHandling, cfg.SabreConstantDial)
+	}
+}

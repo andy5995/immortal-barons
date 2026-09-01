@@ -218,14 +218,40 @@ func (b BuyMode) String() string {
 	}
 }
 
-// SabreMode controls S3-Sabre missile handling (BRE's "Sabre Handling").
+// MigrateSabreHandling maps a pre-2026-08-31 SlappenheimerHandling value onto the
+// current modes. The old order was UserSelect 0, None 1, Random 2, Constant 3;
+// the first two swapped when the modes took the original's order, so reading an
+// old file straight would have turned the weapon off on every board that had it
+// on the old default. Random and Constant land where they were.
+func MigrateSabreHandling(old SabreMode) SabreMode {
+	switch old {
+	case 0:
+		return SabreUserSelect
+	case 1:
+		return SabreNone
+	}
+	return old
+}
+
+// SabreMode controls S3-Sabre missile handling. The four modes are the
+// original's, and so is which of them prompts — only User Select asks the player
+// for a dial (its launch menu's guard is a bare cmp al,1 at BRE.OVR 0x2a654);
+// None disables the weapon, Random rolls a dial per launch, and Constant fires
+// the same dial every time.
+//
+// The original packs the mode and the Constant's dial into ONE BYTE of a binary
+// record (cfg+0x3d9: 0 None, 1 User Select, 2 Random, 200-210 a Constant firing
+// value-200). IB does not copy that packing — it writes named JSON fields, so the
+// dial gets its own (Config.SabreConstantDial) and the file says what it means.
+// The rules are the fidelity contract; the byte layout is a constraint of the
+// original's format that IB does not share.
 type SabreMode int
 
 const (
-	SabreUserSelect SabreMode = iota // User Select/Original (BRE default)
-	SabreNone                        // None/Disabled
-	SabreRandom                      // random return
-	SabreConstant                    // constant return
+	SabreNone       SabreMode = iota // None/Disabled
+	SabreUserSelect                  // User Select/Original — the only mode that prompts
+	SabreRandom                      // a fresh dial every launch
+	SabreConstant                    // always SabreConstantDial
 )
 
 func (m SabreMode) String() string {
@@ -356,7 +382,11 @@ type Config struct {
 	AttackRewards Level   // land/goods gained from a win (never None)
 	// The JSON key keeps the name IB shipped this under so an existing
 	// config.json and an in-flight league packet still carry the setting.
-	SabreHandling SabreMode `json:"SlappenheimerHandling"` // S3-Sabre missile handling
+	SabreHandling SabreMode `json:"SabreHandling"` // S3-Sabre missile handling; see SabreMode
+	// SabreConstantDial is the dial Constant handling fires, 0-10. Ignored by
+	// every other mode. It is a field of its own because the original has nowhere
+	// to put one — see SabreMode.
+	SabreConstantDial int
 }
 
 // Config-editor upper bounds, from BRE's Configuration Help screens, which show
@@ -536,6 +566,7 @@ func DefaultConfig() Config {
 		AttackDamage:         Medium,
 		AttackRewards:        Medium,
 		SabreHandling:        SabreUserSelect,
+		SabreConstantDial:    SabreDialMax / 2, // only read under Constant handling
 	}
 }
 

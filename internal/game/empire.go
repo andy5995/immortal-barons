@@ -124,6 +124,15 @@ type Empire struct {
 	GroupAttacksToday int
 	TerrorOpsToday    int
 	BombingOpsToday   int
+	// MissileUsedToday is the once-a-day gate on each of the three Special
+	// Operations missiles, keyed by op. BRE keeps them as three separate flag
+	// BYTES on the empire record — Nuclear Assault at +0x27e, Chemical Bombing at
+	// +0x27f and the S3-Sabre at +0x280 — set when the strike launches (BRE.OVR
+	// 0x2a1c4, 0x2a2b1, 0x2a64a), tested when the menu is drawn so a spent
+	// missile's item is not listed at all (0x29f9c, 0x29fd0, 0x2a004), and cleared
+	// together at daily maintenance (0x08669). They are booleans, NOT a counted
+	// allowance: MaxBombingOps governs the four bombing ops and nothing else.
+	MissileUsedToday map[SpecialOp]bool `json:",omitempty"`
 	// RefundTaken records that this realm has already drawn the Queen's tax
 	// refund today (#93), and is cleared with the counters above.
 	//

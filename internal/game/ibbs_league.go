@@ -50,6 +50,7 @@ type LeagueConfig struct {
 	AttackDamage         Level
 	AttackRewards        Level
 	SabreHandling        SabreMode `json:"SlappenheimerHandling"`
+	SabreConstantDial    int       `json:",omitempty"`
 }
 
 // leagueRuleset extracts the league-wide rules from this board's config, for the
@@ -99,6 +100,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		AttackDamage:         c.AttackDamage,
 		AttackRewards:        c.AttackRewards,
 		SabreHandling:        c.SabreHandling,
+		SabreConstantDial:    c.SabreConstantDial,
 	}
 }
 
@@ -148,6 +150,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.AttackDamage = lc.AttackDamage
 	c.AttackRewards = lc.AttackRewards
 	c.SabreHandling = lc.SabreHandling
+	c.SabreConstantDial = lc.SabreConstantDial
 }
 
 // CoordinatorBoardID is the name of node #1 in the roster — the League

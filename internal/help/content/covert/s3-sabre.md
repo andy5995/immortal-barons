@@ -32,5 +32,13 @@ backfire — if the enemy keeps a very large trooper army, the missile may turn
 back and strike your own empire instead.
 
 Your sysop decides how the dial is set. Normally you choose it yourself, but the
-game can be set up to roll one for you each time, to use the same setting always,
-or to switch the weapon off entirely.
+game can be set up to roll one for you each time, to fix it at a dial the sysop
+chooses, or to switch the weapon off entirely. On a board set any way but
+"user select" you are never asked for a number — that is the setting doing its
+job, not a fault.
+
+You may fire each of the three missiles — nuclear, chemical and the S3-Sabre —
+once a day. A missile you have already used today is not listed on the Special
+Operations menu at all. They have their own allowance, so spending all three
+leaves your bombing operations untouched, and spending those leaves the missiles
+untouched.
