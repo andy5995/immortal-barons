@@ -763,6 +763,43 @@ func TestRunInForwardsOpaquePacketAtHub(t *testing.T) {
 	}
 }
 
+// A raw peer must get a bare packet when we are only RELAYING one to it, not
+// just when we originate it: it arrives under the same .BRP alias either way,
+// so a bundle it cannot unwrap is a file its game reads as a corrupt packet.
+func TestRunInForwardsRawToARawPeer(t *testing.T) {
+	data := newBundledSetup(t, "Alpha BBS", "Link 3 Obox obox3 Raw\n")
+	if err := os.Mkdir(filepath.Join(data, "obox3"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	raw := []byte("{\n \"FromBoard\":\"Bravo BBS\", \"ToBoard\":\"Charlie BBS\", \"FromNode\":2, \"ToNode\":3, \"Seq\":21, \"League\":100\n}\n")
+	var packet game.Packet
+	if err := json.Unmarshal(raw, &packet); err != nil {
+		t.Fatal(err)
+	}
+	body, _, err := makeBundle(2, "direct", []transportEntry{{Name: "transit.brp", Raw: raw, Packet: packet, Route: []int{2}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(data, "transport-in", "10000021.BRP"), body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	result, err := RunIn(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Queued) != 1 || result.Queued[0].NextHop != "Charlie BBS" {
+		t.Fatalf("forward result = %+v", result)
+	}
+	forwarded, err := os.ReadFile(result.Queued[0].PacketPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(forwarded) != string(raw) {
+		t.Fatalf("forwarded a %d-byte file beginning %q; want the packet verbatim",
+			len(forwarded), string(forwarded[:min(2, len(forwarded))]))
+	}
+}
+
 func TestOboxMeshFanoutCanBeDisabled(t *testing.T) {
 	data := newBundledSetup(t, "Bravo BBS", "OboxMeshFanout No\nLink 3 Obox obox3 Bundled\n")
 	if err := os.Mkdir(filepath.Join(data, "obox3"), 0o755); err != nil {

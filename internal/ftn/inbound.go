@@ -361,18 +361,51 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 				return receipt, err
 			}
 		}
+		target := batchTarget{
+			Node: number, Name: node.Name, Address: address.String(), Mode: link.Mode,
+			Directory: publishDir, QueueDir: link.Directory, Flavour: link.Flavour, Alias: alias,
+		}
+
+		// A forwarded packet obeys the same posture an originated one does: a
+		// peer that cannot read a bundle cannot read one it is only relaying
+		// through us either, and it arrives under the same .BRP alias, so the
+		// board has no way to tell it apart from a packet it can parse (#230).
+		if rawFor(transport, link) {
+			for i, entry := range groups[number] {
+				rawTarget := target
+				rawTarget.Raw = true
+				if i > 0 {
+					rawTarget.Alias, wrapped, err = nextAlias(dataDir, publishDir, world.Config.LeagueNumber, mine)
+					if err != nil {
+						return receipt, err
+					}
+					if wrapped {
+						result.Warnings = append(result.Warnings, "the four-character FTN attachment counter wrapped")
+					}
+					if link.Mode == LinkAttach {
+						if err := checkSubjectMargin(transport, filepath.Join(publishDir, rawTarget.Alias), result); err != nil {
+							return receipt, err
+						}
+					}
+				}
+				rawTarget.BundleFile = fmt.Sprintf("target-%03d-%03d.raw", number, i)
+				if err := replaceFileAtomic(filepath.Join(dir, rawTarget.BundleFile), entry.Raw, 0o644); err != nil {
+					return receipt, err
+				}
+				receipt.Targets = append(receipt.Targets, rawTarget)
+			}
+			continue
+		}
+
 		body, _, err := makeBundle(mine, delivery, groups[number])
 		if err != nil {
 			return receipt, err
 		}
-		bundleFile := fmt.Sprintf("target-%03d.bundle", number)
-		if err := replaceFileAtomic(filepath.Join(dir, bundleFile), body, 0o644); err != nil {
+		target.BundleFile = fmt.Sprintf("target-%03d.bundle", number)
+		if err := replaceFileAtomic(filepath.Join(dir, target.BundleFile), body, 0o644); err != nil {
 			return receipt, err
 		}
-		receipt.Targets = append(receipt.Targets, batchTarget{
-			Node: number, Name: node.Name, Address: address.String(), Mode: link.Mode,
-			Directory: publishDir, QueueDir: link.Directory, Flavour: link.Flavour, Alias: alias, BundleFile: bundleFile,
-		})
+		receipt.Targets = append(receipt.Targets, target)
 	}
 	return receipt, nil
 }
