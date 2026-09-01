@@ -135,7 +135,9 @@ type targetRow struct {
 // an empty result means no rivals are left at all.
 func snapshotTargets(w *ctx) []targetRow {
 	var rows []targetRow
-	w.With(func() {
+	// Read, not With: this only gathers, and With would save the world back once
+	// per visit to a target picker (see draw in menu.go).
+	w.Read(func() {
 		p := w.Player()
 		if p == nil {
 			return

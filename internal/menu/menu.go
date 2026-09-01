@@ -796,12 +796,22 @@ func draw(s session.Session, g *ctx, m *Menu) {
 	// Render the whole menu into an in-memory buffer while holding the world
 	// lock, then flush it to the session unlocked. Every item callback
 	// (hidden/label/Price/Owned/Status) reads shared empire and world
-	// state; running them all inside one g.With makes those reads race-free
+	// state; running them all inside one g.Read makes those reads race-free
 	// against the daily-maintenance ticker. Building a strings.Builder is not
 	// I/O, so the lock is never held across the actual write (the final
 	// Fprint below).
+	//
+	// Read, not With: the body only gathers. On a door With is flock -> reload ->
+	// fn -> SAVE, so drawing a menu through it rewrote world.json under the
+	// exclusive lock every other node is queued on, once per screen — and a
+	// failed save is session-fatal, so a caller could lose their session over a
+	// write no screen ever needed. Read keeps the lock and the reload, which is
+	// what makes what it gathers current, and drops only the write-back.
+	// Predicates called from here must not mutate; MemStore.Snapshot
+	// fingerprints the world either side of the body under a test binary and
+	// panics if one does.
 	var b strings.Builder
-	g.With(func() {
+	g.Read(func() {
 		col := m.Color
 		if col == "" {
 			col = ansi.FgBrightCyan
