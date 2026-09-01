@@ -270,7 +270,9 @@ func TestNeitherEditorOffersTheMoneyCap(t *testing.T) {
 	if got := tui.collect().MoneyCapBillions; got != 50 {
 		t.Errorf("a saved cap of 50 billion came back as %d", got)
 	}
-	if w.MoneyCap() != 50_000_000_000 {
-		t.Errorf("the saved cap yields %d gold, want 50,000,000,000", w.MoneyCap())
+	// The saved field still round-trips through the editor, but it no longer
+	// decides anything: the cap is fixed at BRE's 2 billion whatever it says.
+	if w.MoneyCap() != 2_000_000_000 {
+		t.Errorf("the cap yields %d gold, want the fixed 2,000,000,000", w.MoneyCap())
 	}
 }

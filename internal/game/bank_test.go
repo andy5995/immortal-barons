@@ -182,25 +182,24 @@ func TestDepositRespectsMoneyCapWithoutLosingGold(t *testing.T) {
 	}
 }
 
-// Deposits and withdrawals are unbounded up to the money cap: nothing gates the
-// bank per turn, so a per-action limit there only cost keystrokes. Investing is
-// the case that stays capped.
-func TestDepositAndWithdrawAreUnbounded(t *testing.T) {
+// One visit moves the whole amount: neither Deposit nor Withdraw has a
+// per-transaction limit of its own, so the only bound is the cap.
+func TestDepositAndWithdrawMoveTheWholeAmount(t *testing.T) {
 	w := NewWorldSeed(raisedCapConfig(), 1)
 	e := w.AddHuman("rich", "Croesus")
 
-	e.Gold, e.Bank = 10_000_000_000, 0
-	if err := w.Deposit(e, 10_000_000_000); err != nil {
+	e.Gold, e.Bank = 2_000_000_000, 0
+	if err := w.Deposit(e, 2_000_000_000); err != nil {
 		t.Fatalf("Deposit: %v", err)
 	}
-	if e.Bank != 10_000_000_000 || e.Gold != 0 {
-		t.Errorf("one visit banked %d leaving %d in hand, want all 10,000,000,000 banked", e.Bank, e.Gold)
+	if e.Bank != 2_000_000_000 || e.Gold != 0 {
+		t.Errorf("one visit banked %d leaving %d in hand, want all 2,000,000,000 banked", e.Bank, e.Gold)
 	}
-	if err := w.Withdraw(e, 10_000_000_000); err != nil {
+	if err := w.Withdraw(e, 2_000_000_000); err != nil {
 		t.Fatalf("Withdraw: %v", err)
 	}
-	if e.Gold != 10_000_000_000 || e.Bank != 0 {
-		t.Errorf("one visit withdrew %d leaving %d banked, want all 10,000,000,000 in hand", e.Gold, e.Bank)
+	if e.Gold != 2_000_000_000 || e.Bank != 0 {
+		t.Errorf("one visit withdrew %d leaving %d banked, want all 2,000,000,000 in hand", e.Gold, e.Bank)
 	}
 }
 
@@ -249,93 +248,72 @@ func TestInvestCapsOnePrincipal(t *testing.T) {
 	}
 }
 
-// Gold past the old 2-billion ceiling must survive a credit rather than being
-// clamped away: that ceiling was a 32-bit int limit, not a game rule.
-func TestGoldHoldsPastTwoBillion(t *testing.T) {
+// The gold field is 64-bit, which the cap alone no longer proves: a stored 2
+// billion fits an int32. What still needs the width is every intermediate the
+// game computes before clamping — a projected return, a loan's total owed, gold
+// plus bank — so the field is exercised past int32 directly.
+func TestGoldFieldIsSixtyFourBit(t *testing.T) {
 	w := NewWorldSeed(raisedCapConfig(), 1)
 	e := w.AddHuman("rich", "Croesus")
 	e.Gold = 5_000_000_000
 	e.Gold += 3_000_000_000
 	if e.Gold != 8_000_000_000 {
-		t.Errorf("gold = %d, want 8,000,000,000", e.Gold)
+		t.Errorf("gold = %d, want 8,000,000,000 (an int32 field would wrap)", e.Gold)
 	}
-	if e.Gold > w.MoneyCap() {
-		t.Errorf("gold %d should be well under the %d cap", e.Gold, w.MoneyCap())
+	if MoneyCapMax <= 2_147_483_647 {
+		t.Errorf("MoneyCapMax = %d, which no longer gives projections room past int32", MoneyCapMax)
 	}
 }
 
-// raisedCapConfig is the default ruleset with the money cap opened all the way
-// up, for the tests that exercise treasuries past the stock 2-billion ceiling.
-func raisedCapConfig() Config {
-	c := DefaultConfig()
-	c.MoneyCapBillions = MoneyCapMaxBillions
-	return c
-}
+// raisedCapConfig used to open the money cap all the way up for the tests that
+// exercise large treasuries. The cap is fixed at 2 billion since 2026-09-01, so
+// this is the default ruleset now; the helper survives to mark the call sites
+// that once needed a raised one.
+func raisedCapConfig() Config { return DefaultConfig() }
 
-// The money cap is the sysop's knob. It defaults to BRE's own 2 billion, refuses
-// to go below it (an old config.json has no such field at all, and a zero there
-// must not mean "no money allowed"), and stops at the widest figure the
-// abbreviated display renders.
-func TestMoneyCapKnob(t *testing.T) {
-	if w := NewWorldSeed(DefaultConfig(), 1); w.MoneyCap() != 2_000_000_000 {
-		t.Errorf("stock cap = %d, want BRE's 2,000,000,000", w.MoneyCap())
+// The money cap is BRE's own 2 billion and is no longer a knob: World.MoneyCap
+// returns it whatever config.json carries, a raised value a board saved while
+// the setting existed included (#205, fixed 2026-09-01).
+func TestMoneyCapIsFixed(t *testing.T) {
+	for _, saved := range []int{0, MoneyCapMinBillions, 50, 5000} {
+		cfg := DefaultConfig()
+		cfg.MoneyCapBillions = saved
+		if w := NewWorldSeed(cfg, 1); w.MoneyCap() != 2_000_000_000 {
+			t.Errorf("saved %dB gave %d, want BRE's 2,000,000,000", saved, w.MoneyCap())
+		}
 	}
 
-	cfg := DefaultConfig()
-	cfg.MoneyCapBillions = 0 // a save written before the knob existed
-	if w := NewWorldSeed(cfg, 1); w.MoneyCap() != 2_000_000_000 {
-		t.Errorf("missing field gave %d, want the 2,000,000,000 default", w.MoneyCap())
-	}
-
-	cfg.MoneyCapBillions = 5000 // past the ceiling
-	if w := NewWorldSeed(cfg, 1); w.MoneyCap() != MoneyCapMax {
-		t.Errorf("over-max gave %d, want %d", w.MoneyCap(), MoneyCapMax)
-	}
-
-	cfg.MoneyCapBillions = 50
-	w := NewWorldSeed(cfg, 1)
-	if w.MoneyCap() != 50_000_000_000 {
-		t.Errorf("cap = %d, want 50,000,000,000", w.MoneyCap())
-	}
-	// And the knob actually binds: a deposit stops at it rather than overflowing.
+	// And it binds: a deposit stops at it rather than overflowing.
+	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("rich", "Croesus")
-	e.Gold, e.Bank = 60_000_000_000, 0
-	if err := w.Deposit(e, 60_000_000_000); err != nil {
+	e.Gold, e.Bank = 3_000_000_000, 0
+	if err := w.Deposit(e, 3_000_000_000); err != nil {
 		t.Fatalf("Deposit: %v", err)
 	}
-	if e.Bank != 50_000_000_000 {
-		t.Errorf("banked %d, want it stopped at the 50,000,000,000 cap", e.Bank)
+	if e.Bank != 2_000_000_000 {
+		t.Errorf("banked %d, want it stopped at the 2,000,000,000 cap", e.Bank)
 	}
-	if e.Gold != 10_000_000_000 {
-		t.Errorf("gold left = %d, want the 10,000,000,000 that would not fit", e.Gold)
+	if e.Gold != 1_000_000_000 {
+		t.Errorf("gold left = %d, want the 1,000,000,000 that would not fit", e.Gold)
 	}
 }
 
-// A played turn trims a treasury back to the configured cap, so raising the knob
-// genuinely lets a realm keep more and lowering it genuinely binds. This is the
-// path that used to throw away everything above a hard-coded 2 billion.
-func TestTurnEndClampsToConfiguredCap(t *testing.T) {
-	for _, c := range []struct {
-		billions int
-		want     int64
-	}{
-		{MoneyCapMinBillions, 2_000_000_000},
-		{50, 50_000_000_000},
-		{MoneyCapMaxBillions, MoneyCapMax},
-	} {
+// A played turn trims a treasury back to the cap whatever a board's config.json
+// carries. This is the path that once threw away everything above a hard-coded
+// 2 billion, and then honoured a saved raised value until the cap was fixed.
+func TestTurnEndClampsToTheCap(t *testing.T) {
+	for _, saved := range []int{MoneyCapMinBillions, 50} {
 		cfg := DefaultConfig()
-		cfg.MoneyCapBillions = c.billions
+		cfg.MoneyCapBillions = saved
 		w := NewWorldSeed(cfg, 1)
 		e := w.AddHuman("rich", "Croesus")
 		e.Gold, e.Bank, e.Food = MoneyCapMax, MoneyCapMax, 1_000_000
 
 		w.processEconomy(e)
 
-		if e.Gold != c.want {
-			t.Errorf("cap %dB: gold settled at %d, want %d", c.billions, e.Gold, c.want)
-		}
-		if e.Bank != c.want {
-			t.Errorf("cap %dB: bank settled at %d, want %d", c.billions, e.Bank, c.want)
+		if e.Gold != 2_000_000_000 || e.Bank != 2_000_000_000 {
+			t.Errorf("saved %dB: settled at %d in hand and %d banked, want 2,000,000,000 each",
+				saved, e.Gold, e.Bank)
 		}
 	}
 }

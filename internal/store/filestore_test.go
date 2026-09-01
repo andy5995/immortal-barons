@@ -54,11 +54,12 @@ func TestFileStoreCrossStoreVisibility(t *testing.T) {
 func TestLargeMoneySurvivesSaveAndLoad(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.DataDir = t.TempDir()
-	cfg.MoneyCapBillions = game.MoneyCapMaxBillions
 
 	w := game.NewWorldSeed(cfg, 1)
 	e := w.AddHuman("croesus", "Croesus")
-	e.Gold, e.Bank, e.Debt = w.MoneyCap(), 123_456_789_012, 9_876_543_210
+	// Set past the hold cap deliberately: nothing clamps on the way to disk, and
+	// the round trip is the subject rather than the cap.
+	e.Gold, e.Bank, e.Debt = game.MoneyCapMax, 123_456_789_012, 9_876_543_210
 	if err := Save(w, cfg); err != nil {
 		t.Fatalf("save: %v", err)
 	}

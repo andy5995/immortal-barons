@@ -1,4 +1,5 @@
 (in-progress:)
+  * The most gold a realm may hold is fixed at two billion
   * Game Setup no longer lists the money cap
   * An interplanetary battle report lists its losses on one line
   * An interplanetary message shows every letter it was addressed to

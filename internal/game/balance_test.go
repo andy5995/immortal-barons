@@ -102,8 +102,6 @@ func TestRiverBadYearDud(t *testing.T) {
 // the result positive and growing. A wrapped int32 would go negative and the
 // balance would shrink instead of earning.
 func TestInterestNoInt32Overflow(t *testing.T) {
-	// A raised cap, so the earned figure is the one under test rather than the
-	// stock 2-billion ceiling clamping it on the way past.
 	w := NewWorldSeed(raisedCapConfig(), 1)
 	w.Config.InterestRate = 5000 // add ~50% of the balance this turn
 	e := w.AddHuman("h", "Realm")
@@ -111,23 +109,28 @@ func TestInterestNoInt32Overflow(t *testing.T) {
 	e.Food = 1_000_000             // avoid starvation noise; irrelevant to the bank math
 	e.Prefs.DepositEndTurn = false // the bank math is the subject; keep the turn's gold out of it
 	w.processEconomy(e)
-	// Golden figure for that balance at rate 5000 over the default 10 turns/day:
-	// 1,599,999,999 + 1,599,999,999×5000/(1000×10).
-	const want int64 = 2_399_999_998
-	if e.Bank != want {
-		t.Errorf("Bank = %d, want %d (int32 overflow would make it negative/small)", e.Bank, want)
+	// The balance earns its way to 2,399,999,998 (1,599,999,999 +
+	// 1,599,999,999×5000/(1000×10)) and the cap then trims it to 2 billion. The
+	// interesting part is the intermediate: it is past int32's 2,147,483,647, so
+	// a 32-bit sum would land negative or small and could never come to rest ON
+	// the cap. Seeing exactly the cap is what proves the arithmetic was 64-bit.
+	if e.Bank != w.MoneyCap() {
+		t.Errorf("Bank = %d, want the %d cap (an int32 sum would be negative or small)",
+			e.Bank, w.MoneyCap())
 	}
 }
 
-// A balance far past the old 2-billion ceiling must survive the turn intact:
-// that ceiling was a 32-bit int limit, and gold above it used to vanish.
-func TestBankHoldsPastTwoBillion(t *testing.T) {
+// A balance far past int32 must be TRIMMED to the cap by the turn, not corrupted
+// by it. The old 2-billion ceiling was a 32-bit limit and gold above it used to
+// vanish; the ceiling is a game rule now (#205) and the arithmetic that enforces
+// it still has to be 64-bit.
+func TestBankPastInt32TrimsToTheCap(t *testing.T) {
 	w := NewWorldSeed(raisedCapConfig(), 1)
 	e := w.AddHuman("h", "Realm")
 	e.Bank = 500_000_000_000
 	e.Food = 1_000_000
 	w.processEconomy(e)
-	if e.Bank < 500_000_000_000 {
-		t.Errorf("Bank = %d, want at least the 500,000,000,000 it started with", e.Bank)
+	if e.Bank != w.MoneyCap() {
+		t.Errorf("Bank = %d, want the %d cap", e.Bank, w.MoneyCap())
 	}
 }

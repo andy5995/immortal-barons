@@ -102,25 +102,27 @@ const (
 // not a literal in either binary in 32-bit or Real48 form, which fits: a cap
 // tested against a Turbo Pascal constant needs no constant of its own.
 const (
-	// What a realm may HOLD, on hand or in the bank, is Config.MoneyCapBillions,
-	// read through World.MoneyCap. It is no longer a setting (#205): the editors
-	// stopped offering it, so every new game gets the 2 billion above, BRE's own
-	// figure. A config.json written while the field existed is still honoured up
-	// to MoneyCapMaxBillions, which is why the range stays — clamping a saved
-	// value back down would take gold a league had been playing with.
+	// What a realm may HOLD, on hand or in the bank, is the 2 billion above,
+	// BRE's own figure, read through World.MoneyCap. It is no longer a setting
+	// (#205) and no longer varies: World.MoneyCapBillions returns this whatever
+	// Config.MoneyCapBillions says. A saved raised value was honoured until
+	// 2026-09-01, on the reasoning that clamping one down would take gold a
+	// league had been playing with; andy5995 knows of no board running one, so
+	// the variation cost more than it bought.
 	//
 	// GoldPerBillion names the unit the cap is set in, so the multiplier is not
 	// respelled at each site that converts between the two.
 	GoldPerBillion = 1_000_000_000
 
 	MoneyCapMinBillions = 2
-	MoneyCapMaxBillions = 999
 
-	// MoneyCapMax is the highest a saved cap can reach. Pure helpers that project
-	// a future figure (ExpectedReturn, LoanTotalOwed) clamp to it as an overflow
-	// guard; what a realm actually holds is clamped to the configured cap when
-	// the gold lands.
-	MoneyCapMax int64 = MoneyCapMaxBillions * GoldPerBillion
+	// MoneyCapMax is an ARITHMETIC ceiling, not a holding one: pure helpers that
+	// project a future figure (ExpectedReturn, LoanTotalOwed) clamp to it so the
+	// projection cannot overflow. It sits far above what a realm may hold,
+	// because a projection legitimately runs past the hold cap before the gold
+	// lands and is clamped to it.
+	moneyCapMaxBillions       = 999
+	MoneyCapMax         int64 = moneyCapMaxBillions * GoldPerBillion
 
 	// MaxInvestment is the most gold ONE investment may lock away. Deposits and
 	// withdrawals are deliberately unbounded (up to the money cap) — nothing gates the

@@ -580,13 +580,4 @@ func (w *World) MoneyCap() int64 { return int64(w.MoneyCapBillions()) * GoldPerB
 // missing field comes back as BRE's own 2 billion. No editor offers the field
 // any more (#205); a config.json that already carries a raised value keeps it,
 // since clamping on load would take gold a league had been playing with.
-func (w *World) MoneyCapBillions() int {
-	b := w.Config.MoneyCapBillions
-	if b < MoneyCapMinBillions {
-		b = MoneyCapMinBillions
-	}
-	if b > MoneyCapMaxBillions {
-		b = MoneyCapMaxBillions
-	}
-	return b
-}
+func (w *World) MoneyCapBillions() int { return MoneyCapMinBillions }
