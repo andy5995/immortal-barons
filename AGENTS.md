@@ -240,6 +240,11 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   the new reality when #N lands. A mechanic's entry must never still say it's
   unbuilt after you build it (the #58 region picker is how this drifted). Don't
   restate these numbers here — point to the spec.
+- **Name another project in the docs and link it, every time.** DeuceGate is
+  https://deucegate.bbsdev.net/, SyncTERM https://syncterm.bbsdev.net/. A reader
+  meeting the name for the first time
+  should not have to search for it, and a bare name in one file while another
+  links it reads as two different things.
 - **Single-source help details.** In the in-game help (`internal/help/content/`),
   each specific mechanic/unit fact (a ratio, a number, a unit property) belongs
   in ONE canonical file — the unit's or feature's own doc. Other help files that

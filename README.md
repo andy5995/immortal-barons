@@ -34,10 +34,51 @@ Learn more, follow progress, or get involved:
 - [Website](https://andy5995.github.io/immortal-barons/)
 - [Issue tracker](https://github.com/andy5995/immortal-barons/issues)
 - [Discussions](https://github.com/andy5995/immortal-barons/discussions)
-- [Boards hosting Immortal Barons](https://github.com/andy5995/immortal-barons/discussions/132)
-  — where to play, and where to list your own board
 
 We strongly recommend reading the [FAQ](docs/faq.md) first.
+
+## Where to play
+
+You do not need to download or install the game to play it. It runs on the board
+or the server you connect to. You can play on a BBS, or over SSH.
+
+### On a BBS
+
+Some boards run Immortal Barons as a door game. Connect with your usual BBS
+client. [Boards hosting Immortal
+Barons](https://github.com/andy5995/immortal-barons/discussions/132) lists them,
+and is where you can list your own board.
+
+### Over SSH
+
+A public server runs the game over SSH:
+
+```
+ssh -p 2222 yourname@85.119.83.118
+```
+
+Use any name you like. That name is your account on the server. The first time
+you play, the game asks you to name your realm, and that is the name other
+barons see.
+
+The server takes an SSH key, not a password. Your existing key works. If you do
+not have one, make one first:
+
+```
+ssh-keygen -t ed25519
+```
+
+The first time you connect, the server saves the key you used and links it to
+the name you chose. After that, only that key can log in under that name.
+
+If you prefer a graphical client, set the host to `85.119.83.118`, the port to
+`2222`, and the user name to the name you want. The client must let you choose a
+key file, because the server does not accept passwords.
+[PuTTY](https://putty.org/index.html) and
+[SyncTERM](https://syncterm.bbsdev.net/) can both do this.
+
+The server runs [DeuceGate](https://deucegate.bbsdev.net/), which starts the game
+as soon as you log in.
 
 ## Running
 
