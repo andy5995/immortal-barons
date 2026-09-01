@@ -58,7 +58,14 @@ const Version = "0.0.9"
 // Nothing guards the envelope. Before changing one, work out what a board
 // running the newest RELEASE does when it meets it — for the ZIP bundle the
 // answer was that its whole planetary run aborts (issue #230).
-const Protocol = 1
+// Moved to 2 in v0.0.9 for RemoteScore.FormerName (#235). It is omitempty, but
+// that is not enough here: the field is SIGNED, and Empire.FormerName is kept
+// for the life of the realm, so once any realm on a board has renamed, every
+// scores packet that board sends carries it forever. A v0.0.8 board drops the
+// field it does not know, re-marshals without it, and the origin signature
+// fails — on ordinary scores, not just on the rename. Better that it holds the
+// packet and says why.
+const Protocol = 2
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
 // apply. A packet that states no protocol is NOT one of them — see Protocol.

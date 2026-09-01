@@ -308,7 +308,7 @@ func (w *World) ExportScores() {
 		if e.Alive && e.Owner != "" {
 			s := RemoteScore{
 				Empire: e.Name, NetWorth: w.NetWorth(e), Land: e.Land, Score: e.Score,
-				Protected: e.Protection > 0,
+				Protected: e.Protection > 0, FormerName: e.FormerName,
 			}
 			if w.dupeCheckingOn() {
 				s.OwnerHash = dupeHash(e.Owner)

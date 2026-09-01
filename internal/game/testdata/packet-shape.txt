@@ -40,6 +40,7 @@ RemoteScore:
   Score
   Protected `json:",omitempty"`
   OwnerHash `json:",omitempty"`
+  FormerName `json:",omitempty"`
 RemoteAttack:
   ID
   FromBoard

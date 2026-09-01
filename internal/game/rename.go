@@ -208,6 +208,40 @@ func (w *World) rewriteRealmName(old, name string) {
 	}
 }
 
+// announceRemoteRenames tells this planet that a realm renamed itself on another
+// board (#235). Without it a rename is announced only where it happened: every
+// other board sees the old row stop coming and a new one start, with nothing
+// connecting the two, because ImportBoard replaces a board's snapshot whole.
+//
+// RemoteScore.FormerName carries the pair, but it cannot bound the news on its
+// own: Empire.FormerName is kept for the life of the realm — it is the marker
+// that spends the one rename — so it rides in every later export and the line
+// would be posted on every planetary run. What bounds it is the snapshot being
+// replaced. The news is filed only while `prev` still holds a realm under the
+// old name and does not yet hold one under the new, which is true of exactly the
+// one import that carries the change across.
+func (w *World) announceRemoteRenames(prev, next RemoteBoard) {
+	held := func(name string) bool {
+		for _, s := range prev.Scores {
+			if s.Empire == name {
+				return true
+			}
+		}
+		return false
+	}
+	for _, s := range next.Scores {
+		if s.Empire == "" || s.FormerName == "" || s.FormerName == s.Empire {
+			continue
+		}
+		if !held(s.FormerName) || held(s.Empire) {
+			continue
+		}
+		// setRealmName's wording, with the planet named: this is a realm the
+		// reader knows from the interplanetary screens, not one next door.
+		w.postNews(fmt.Sprintf("%s of %s is henceforth known as %s.", s.FormerName, next.BoardID, s.Empire))
+	}
+}
+
 // FindByNameOrFormer is FindByName widened to the name a realm used to carry,
 // for a reference that was written before a rename and cannot be rewritten —
 // an interplanetary packet already in the air. Local lookups keep using

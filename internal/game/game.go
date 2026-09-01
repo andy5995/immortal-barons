@@ -66,6 +66,16 @@ type RemoteScore struct {
 	// league — see dupe.go. Sent only while the sending board has Dupe Checking
 	// on, and absent from packets written before the field existed.
 	OwnerHash string `json:",omitempty"`
+	// FormerName is the name this realm carried before its one rename, so the
+	// rest of the league can say that the two rows are one realm (#235). Without
+	// it a rename reads on every other planet as one realm leaving and another
+	// arriving, since ImportBoard replaces a board's snapshot whole.
+	//
+	// Empire.FormerName is kept for the life of the realm — it is the marker
+	// that spends the one rename — so this rides in every later export too, and
+	// the receiving board is what bounds the announcement: ImportBoard posts the
+	// news only while the snapshot it is replacing still held the old name.
+	FormerName string `json:",omitempty"`
 }
 
 // RemoteBoard is a snapshot of another board's scores, imported via an
@@ -525,6 +535,7 @@ func (w *World) StoreErr() error { return w.storeErr }
 func (w *World) ImportBoard(b RemoteBoard) {
 	for i, existing := range w.RemoteBoards {
 		if existing.BoardID == b.BoardID {
+			w.announceRemoteRenames(existing, b)
 			w.RemoteBoards[i] = b
 			return
 		}

@@ -434,7 +434,8 @@ RemoteListing { "Realm": "Redlands", "Good": "Tank", "Qty": 100, "Price": 500 }
                 // listing may be gone, smaller or repriced. That staleness is
                 // the whole reason bids exist.
 RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
-                "Protected": true, "OwnerHash": "3f6a1c09b2d84e57" }
+                "Protected": true, "OwnerHash": "3f6a1c09b2d84e57",
+                "FormerName": "Vanaheim" }
                 // Protected = still under New Realm Protection, so the boards
                 // that read this leave it off their target lists. Absent in a
                 // packet written before the field existed, which reads as
@@ -449,6 +450,16 @@ RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
                 // person". Present only while the sending board has Dupe
                 // Checking on; absent otherwise and in older packets, and a
                 // board that sends none releases the locks it had asserted.
+                //
+                // FormerName is the name this realm carried before its one
+                // rename, so the receiving board can say the two rows are one
+                // realm rather than a departure and an arrival. It rides in
+                // every export for the rest of the realm's life, so the
+                // RECEIVER bounds the news: it posts the rename only while the
+                // snapshot it is replacing still held the old name. Introducing
+                // it moved Protocol to 2 — it is signed, and once a realm has
+                // renamed it is in every scores packet, so an older board would
+                // re-marshal without it and fail the origin signature.
 
 RemoteAttack  { "ID": 1, "FromBoard": "AlphaBBS", "TargetEmpire": "Victim",
                 "Offense": 150000, "Contributors": [ Contribution ] }

@@ -3093,7 +3093,14 @@ cover it:
 
 Other planets see the new name from this board's next score export
 (`ImportBoard` replaces a board's snapshot wholesale, so no ghost row is left),
-which is the same packet round trip every other cross-board fact takes.
+which is the same packet round trip every other cross-board fact takes. **They
+are told, too** (#235): the score carries `FormerName`, and each receiving board
+posts the rename to its own news. It posts it once — `Empire.FormerName` is kept
+for the life of the realm and so rides in every later export, so the bound is the
+snapshot being replaced. The news is filed only while that snapshot still held a
+realm under the old name, which is true of exactly the import that carries the
+change across. A board that joined the league after the rename says nothing,
+having never known the realm by the old name.
 
 ### Sysop edits to a player (`-players`, BRE's `VIEW`)
 
