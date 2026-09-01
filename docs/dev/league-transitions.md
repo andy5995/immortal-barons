@@ -7,6 +7,45 @@ after the v0.0.8 transport change, so the reasoning survives outside a comment
 thread. Where it describes what IB does today, that is marked and sourced; the
 rest is a target, and the numbers, names and file formats in it are not fixed.
 
+## Protocol bumps: drain first
+
+**DECIDED 2026-08-31 (#229), and the one part of this file that is settled
+policy rather than proposal.**
+
+When `game.Protocol` moves, a league does not upgrade board by board. It closes
+the game, lets every board finish sending what it already has queued, and only
+then switches to the new release together.
+
+The reason is how a held packet comes back. `SpeaksOurProtocol` is exact
+equality, and a packet whose protocol a build does not speak is held and released
+only when the READER itself comes to speak the number the packet already carries.
+That happens when the reader upgrades and never when the sender does — so in a
+staggered upgrade the board that moves **first** holds everything still arriving
+from the boards behind it, and nothing ever releases it. Its `held/` files
+survive; what they carried does not reach the game. The board that moves **last**
+is unaffected, because its backlog becomes readable the moment it moves. The cost
+lands on whoever moves first, which is the wrong way round.
+
+Draining the queues before anyone upgrades means no packet is ever in flight
+across the boundary, so the asymmetry has nothing to bite on.
+
+#229 proposed the other fix — a table of older protocols the newer build could
+read, with a migration per entry. The policy removes the need for it, and the
+issue was closed unbuilt. The distinction it drew is still worth keeping in mind
+when authoring a bump, because it says which kind of change is even convertible:
+an **additive** field is (the old packet leaves it unset and its signature still
+verifies under the older shape), while **renaming or changing the meaning of a
+signed field** is not (the origin signature was taken over the old rendering, so
+converting the packet destroys the proof of who sent it).
+
+This is narrower than the Coordinated rollout proposed below, and it does not
+depend on any of it: it needs no `MinBoardVersion` gate, no signed cutover
+commit, and no new tooling. It is what a league should do today.
+
+**v0.0.9 is the first release this applies to** — `Protocol` moved to 2 for
+`RemoteScore.FormerName` (#235) and the S3-Sabre's dial. Its release notes
+should say so.
+
 ## The problem it addresses
 
 A release can break a league in two different ways, and only one of them is
