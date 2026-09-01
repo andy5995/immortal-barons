@@ -1565,28 +1565,70 @@ replaced by BRE's single op with the six-slot table above. The interplanetary
 Special Operations menu is unchanged and keeps all eight items.
 
 The **S3-Sabre** is therefore an interplanetary weapon only, and the sysop's
-`S3-Sabre Handling` setting now gates it there. A disassembly of BRE's
-`SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and the
-manual never said which number did what, so from the player's seat the result
-was random; the target's SDI could intercept it and a heavily garrisoned target
-could turn it back on the attacker. IB keeps that feel but makes it honest: the
-**dial is a bluff** — the player still sets it 0-10 under User Select handling,
-but it changes nothing. The `None` handling mode disables the weapon (gated in
-the menu); `User Select`/`Random`/`Constant` all enable it and differ only in the
-(inert) dial. The target's SDI intercepts on `Random(100) <= SDI/2` —
-BINARY-VERIFIED from the arriving-strike routine (`BRE.OVR ovr_0450a9 +0x481`),
-which is where breins.txt's "up to 50% of incoming missiles" comes from and why a
-full shield stops half of them rather than halving one. The comparison is
-inclusive, so an unshielded realm still turns one shot in a hundred aside. Only
-about 3 launches in 10 (`SabreEffectHits`/`SabreEffectRange`) land a payload —
-the rest fizzle. A landed hit removes a random 5-30 % (`SabreBaseDamagePct` +
-`rng.Intn(SabreDamageSpread)`) of one asset, and ~1-in-`SabreMultiHitOdds`
-strafes several at once (BRE's
-"extremely devastating" outcome). Backfire is a continuous probability scaled by
-the target's Troopers (`d.Troopers / SabreBackfireScale`). BRE hid which
-field each effect hit, so IB picks its own spread (Troopers, Jets, Turrets,
-Tanks, Bombers, Carriers, Agents, Gold, Food, and Land — Land removed through the
-RegionMix so its Total stays equal to `Land`).
+`S3-Sabre Handling` setting gates it there.
+
+**The dial AIMS the missile. BINARY-VERIFIED, and it corrects this document.**
+Until 2026-08-31 this section said only 3 of the 11 dial settings did anything
+and that "from the player's seat the result was random", and IB implemented the
+dial as a bluff that changed nothing. Both were wrong. The arriving strike
+(`resolve_received_sabre_strike`, `BRE.OVR 0x04546e`) puts the dial through a
+mapper at `ovr_0450a9 +0xf9` whose entire body is a table onto the seven
+`^SABREHIT` lines of `game/ipreport.dat`:
+
+| Dial | Effect | What the original's switch writes back |
+| --- | --- | --- |
+| 0, 1 | Intelligence Headquarters | the HQ field, `+0x26f` |
+| 2, 3 | residential zones | population, `+0x62` |
+| 4 | military bases | troopers, jets, turrets and tanks (`+0x76`, `+0x7e`, `+0x82`, `+0x86`) |
+| 5, 6 | airbases | jets alone, `+0x7e` |
+| 7, 8 | regions incinerated | regions, through a helper |
+| 9, 10 | food supply | food, `+0x6e` |
+| 11 | regions DEVELOPED for the target | — |
+
+(Offsets are own-record, anchored on `-0xeeb` being Turrets, i.e. `+0x82`.)
+
+Two rolls blur it, which is what made the weapon read as arbitrary and why the
+original's manual never explained the numbers:
+
+- the dial is nudged by `Random(2) - Random(2)` and taken mod 11 before the table
+  is read (`+0x6f7`..`+0x767`) — so one lower at ¼, unchanged at ½, one higher
+  at ¼;
+- one launch in ten (`Random(10) == 0`, `+0x6d1`) discards the dial and takes
+  `Random(11)` instead (`+0x6e1`).
+
+So dial 4 lands on military bases half the time, while dial 5 lands on airbases
+three quarters of the time, because 5 and 6 both map there. That asymmetry
+matches the advice long-time players give — aim 4 at an army, 5 at a realm known
+to hold jets — which is the corroboration that prompted the re-read.
+
+Row 11 is unreachable from a dial: the input is taken mod 11, so the mapper's
+last row never fires from this path and the "developed regions" outcome belongs
+to another caller, not yet traced. IB leaves it as a no-op rather than inventing
+one.
+
+The remaining figures are IB's, because the original states none: only about 3
+launches in 10 (`SabreEffectHits`/`SabreEffectRange`) deliver a payload, a landed
+hit removes a random 5-30 % (`SabreBaseDamagePct` + `rng.Intn(SabreDamageSpread)`)
+of what the effect names, and backfire is a continuous probability scaled by the
+target's troopers (`d.Troopers / SabreBackfireScale`). Those are playtest knobs;
+the table above is fidelity contract.
+
+The `None` handling mode disables the weapon (gated in the menu); `User Select`
+takes the player's dial, `Random` rolls one per launch, and `Constant` fires
+`SabreConstantDial` every time. The target's SDI intercepts on `Random(100) <=
+SDI/2` — BINARY-VERIFIED from the arriving-strike routine (`BRE.OVR ovr_0450a9
++0x481`), which is where breins.txt's "up to 50% of incoming missiles" comes from
+and why a full shield stops half of them rather than halving one. The comparison
+is inclusive, so an unshielded realm still turns one shot in a hundred aside.
+
+The dial rides the packet as `RemoteSpecialOp.Dial`. It is `omitempty`, so a
+launch dialled to 0 is byte-identical to one from a board that predates the
+field — but every other setting is not, and the field is inside
+`boardSigningBytes`, so a board that predates it would drop the field,
+re-marshal without it and fail the origin signature. `omitempty` alone is the
+safe form only for a field that is also unsigned, which this is not. It
+therefore rides the `game.Protocol` bump to 2 that the rename news (#235) made
+in the same release.
 
 The other interplanetary Special Operations, unchanged by this:
 

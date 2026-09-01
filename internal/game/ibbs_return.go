@@ -281,7 +281,9 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	}
 	label := SpecialOpLabel(sent.Op)
 	if res.Backfired {
-		lost := w.sabreDamage(e)
+		// A backfire hits the firer, and the dial it was aimed with is gone by the
+		// time the answer gets home, so the wild roll stands in for it.
+		lost := w.sabreDamage(e, w.SabreAim(w.rng.Intn(SabreDialWrap)))
 		if lost == "" {
 			e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired, but the damage was negligible.",
 				label, res.TargetEmpire, sent.TargetBoard))

@@ -575,92 +575,99 @@ func (w *World) resolveBombEnemyTargets(a, d *Empire) string {
 	return fmt.Sprintf("Your agents bombed targets in %s: %d %s destroyed.", d.Name, lost, t.name)
 }
 
-// S3-Sabre tuning. In BRE only 3 of the missile's 11 dial settings
-// (1, 2, 3) did anything and the rest fizzled; the manual never said which
-// number did what. IB keeps the unpredictability but makes it honest: the dial
-// (0-10) is a bluff that changes nothing — every launch is the same random
-// gamble. Only about SabreEffectHits launches in SabreEffectRange
-// (3 in 10) deliver a payload; the rest fizzle. The sysop's None handling mode
-// disables the weapon entirely (gated in the menu).
+// S3-Sabre tuning. What the dial selects, and the two rolls that blur it, are
+// binary-verified and live in balance_costs.go beside the mapper's table. The
+// figures here are the ones the original does NOT state: how often a launch
+// delivers a payload at all, how hard a landed hit bites, and the backfire
+// chance. They are playtest knobs, not fidelity contract.
 const (
 	SabreEffectHits    = 3   // landing launches per SabreEffectRange...
 	SabreEffectRange   = 10  // ...i.e. a 3-in-10 chance to deliver a payload
 	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
 	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
 	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)
-	SabreMultiHitOdds  = 10  // 1-in-this a hit strafes several assets at once
 )
 
-// sabreResource pairs a strikeable field with its display name. BRE hid
-// which asset each effect hit, so IB picks its own spread of targets. Land and
-// Gold are not in this list — Land has to move through the RegionMix and Gold is
-// held in money width — so sabreDamage handles both beside the loop.
-type sabreResource struct {
-	name string
-	val  *int
+// sabreDialFor settles the dial the launch actually carries. Only User Select
+// handling uses the number the player typed; Random rolls one per launch and
+// Constant fires the same setting every time. The sysop's None mode is refused
+// in the menu, before a target is picked.
+func (w *World) sabreDialFor(dial int) int {
+	switch w.Config.SabreHandling {
+	case SabreRandom:
+		return w.rng.Intn(SabreDialMax - SabreDialMin + 1)
+	case SabreConstant:
+		return SabreConstantDial
+	}
+	return min(max(dial, SabreDialMin), SabreDialMax)
 }
 
-// sabreResources are the plain-count assets the missile can hit, taken
-// from the canonical table (#134) rather than listed again here. Land and gold
-// are handled apart by sabreDamage — one goes through the RegionMix and
-// the other is money-width.
-func sabreResources(e *Empire) []sabreResource {
-	res := make([]sabreResource, 0, len(AllGoods))
-	for _, g := range AllGoods {
-		res = append(res, sabreResource{g.Plural, g.Count(e)})
+// SabreAim turns the dial the firer set into the effect that lands, applying the
+// two rolls the original wraps around its mapper: one launch in SabreWildOdds
+// ignores the dial and takes a wholly random row, and otherwise the dial is
+// nudged by one either way before the table is read. See the table in
+// balance_costs.go for the binary's addresses.
+func (w *World) SabreAim(dial int) SabreEffect {
+	if w.rng.Intn(SabreWildOdds) == 0 {
+		return sabreDialTable[w.rng.Intn(SabreDialWrap)]
 	}
-	return res
+	n := dial + w.rng.Intn(SabreDialJitterSides) - w.rng.Intn(SabreDialJitterSides)
+	n %= SabreDialWrap
+	if n < 0 {
+		n += SabreDialWrap
+	}
+	return sabreDialTable[n]
 }
 
-// sabreDamage applies a landed S3-Sabre hit to e and returns a
-// human-readable list of what was destroyed (empty if the roll removed
-// nothing). Each hit removes a random 5-30% of one asset; usually a single
-// asset, but occasionally the missile strafes several at once — BRE's
-// "extremely devastating" outcome. Land is one of the targets, but must be
-// removed through the RegionMix (whose Total must always equal e.Land) rather
-// than by touching e.Land directly.
-func (w *World) sabreDamage(e *Empire) string {
-	res := sabreResources(e)
-	landIdx := len(res)    // one past the plain-int assets: Land
-	goldIdx := landIdx + 1 // and Gold, in money width
-	hits := 1
-	if w.rng.Intn(SabreMultiHitOdds) == 0 {
-		hits = 2 + w.rng.Intn(3) // 2-4 assets at once
-	}
-	seen := make(map[int]bool, hits)
+// sabreDamage applies a landed S3-Sabre hit to e and returns a human-readable
+// list of what was destroyed (empty if the roll removed nothing). The effect
+// decides WHAT is hit — the original's own mapping, read from the fields each
+// branch of its effect switch writes back — and IB's own 5-30% decides how much,
+// since the original states no figure.
+//
+// The field each branch touches, anchored on -0xeeb being Turrets (own +0x82):
+// the HQ at +0x26f, population at +0x62, food at +0x6e, jets alone at +0x7e for
+// airbases, and all four of troopers, jets, turrets and tanks for military
+// bases. Regions go through the RegionMix, whose Total must always equal e.Land.
+func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
+	pct := func() int { return SabreBaseDamagePct + w.rng.Intn(SabreDamageSpread) }
 	var parts []string
-	for k := 0; k < hits; k++ {
-		i := w.rng.Intn(goldIdx + 1)
-		if seen[i] {
-			continue
+	take := func(name string, n *int) {
+		lost := pctOf(*n, pct())
+		if lost <= 0 {
+			return
 		}
-		seen[i] = true
-		pct := SabreBaseDamagePct + w.rng.Intn(SabreDamageSpread)
-		if i == landIdx {
-			lost := e.Land * pct / 100
-			if lost <= 0 {
-				continue
-			}
+		*n -= lost
+		parts = append(parts, fmt.Sprintf("%d %s", lost, name))
+	}
+	switch eff {
+	case SabreHitHQ:
+		if e.HQ > 0 {
+			lost := max(1, e.HQ*pct()/100)
+			e.HQ = max(0, e.HQ-lost)
+			parts = append(parts, "part of the HeadQuarters")
+		}
+	case SabreHitPeople:
+		take("People", &e.People)
+	case SabreHitMilitaryBases:
+		take(Trooper.Plural, Trooper.Count(e))
+		take(Jet.Plural, Jet.Count(e))
+		take(Turret.Plural, Turret.Count(e))
+		take(Tank.Plural, Tank.Count(e))
+	case SabreHitAirbases:
+		take(Jet.Plural, Jet.Count(e))
+	case SabreHitFood:
+		take("Food", &e.Food)
+	case SabreHitRegions:
+		lost := e.Land * pct() / 100
+		if lost > 0 {
 			e.Regions.remove(lost)
 			e.syncLand()
 			parts = append(parts, fmt.Sprintf("%d Regions", lost))
-			continue
 		}
-		if i == goldIdx {
-			lost := pctOf(e.Gold, pct)
-			if lost <= 0 {
-				continue
-			}
-			e.Gold -= lost
-			parts = append(parts, fmt.Sprintf("%d Gold", lost))
-			continue
-		}
-		lost := pctOf(*res[i].val, pct)
-		if lost <= 0 {
-			continue
-		}
-		*res[i].val -= lost
-		parts = append(parts, fmt.Sprintf("%d %s", lost, res[i].name))
+	case SabreDevelopRegions:
+		// The mapper's last row, which no dial can reach (the input is taken mod
+		// 11). Left as a no-op rather than invented.
 	}
 	return strings.Join(parts, ", ")
 }
@@ -685,7 +692,7 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // missile impact rather than an agent op and reports it with the firing realm
 // and its planet, the same as an incoming nuclear or chemical strike. Agent ops
 // stay anonymous unless the agent is caught (see covertFoiled).
-func (w *World) sabreEffect(d *Empire, from string) (report string, hit, backfired bool) {
+func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, hit, backfired bool) {
 	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
 		return fmt.Sprintf("%s's SDI intercepted your S3-Sabre.", d.Name), false, false
 	}
@@ -695,7 +702,7 @@ func (w *World) sabreEffect(d *Empire, from string) (report string, hit, backfir
 	if w.sabreBackfires(d) {
 		return "The S3-Sabre backfired on the way out!", false, true
 	}
-	lost := w.sabreDamage(d)
+	lost := w.sabreDamage(d, w.SabreAim(dial))
 	if lost == "" {
 		return fmt.Sprintf("Your S3-Sabre reached %s but did negligible damage.", d.Name), false, false
 	}

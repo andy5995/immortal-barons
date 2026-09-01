@@ -91,19 +91,23 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		// The S3-Sabre's handling mode is the sysop's, and this is the only
 		// menu that fires one: in BRE the missile is an interplanetary Special
 		// Operation, so the local Covert menu never had it.
+		dial := 0
 		if op == game.OpSabre {
 			var mode game.SabreMode
 			w.Read(func() { mode = w.Config.SabreHandling })
-			if mode == game.SabreNone {
+			switch mode {
+			case game.SabreNone:
 				ok(s, "The S3-Sabre is disabled.")
 				return Stay
+			case game.SabreUserSelect:
+				// The dial aims the missile: it picks which of the target's assets
+				// the payload goes for. It is nudged by one either way in flight,
+				// so a setting is a tendency rather than a promise.
+				dial = min(max(promptInt(s, "Set the S3-Sabre dial (0-10)"), game.SabreDialMin), game.SabreDialMax)
 			}
-			// Under User Select handling the player dials the missile in (0-10).
-			// The dial is BRE's bluff — it changes nothing about the outcome —
-			// but we still prompt for it to keep the original's feel.
-			if mode == game.SabreUserSelect {
-				promptInt(s, "Set the S3-Sabre dial (0-10)")
-			}
+			// Random and Constant handling settle the dial in the game package,
+			// where the config and the RNG live; the value passed here is ignored
+			// under those modes.
 		}
 		label := game.SpecialOpLabel(op)
 		var board, baron string
@@ -140,7 +144,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 			return Stay
 		}
 		err := w.mutatePlayer(func(p *game.Empire) error {
-			return w.World.SendSpecialOp(p, board, baron, op)
+			return w.World.SendSpecialOp(p, board, baron, op, dial)
 		})
 		if err != nil {
 			fail(s, err)

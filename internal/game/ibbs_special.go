@@ -101,6 +101,11 @@ type RemoteSpecialOp struct {
 	FromEmpire   string
 	TargetEmpire string
 	Op           SpecialOp
+	// Dial is the S3-Sabre's aim, 0-10, and is meaningless for every other op.
+	// Optional and omitted when zero, which is the shape the Protocol comment
+	// calls a safe wire change: a board that predates it sends nothing and the
+	// receiver reads 0, a dial the mapper defines.
+	Dial int `json:",omitempty"`
 }
 
 // SpecialOpGoldCost prices one op for e.
@@ -131,7 +136,7 @@ func (w *World) SpecialOpGoldCost(e *Empire, op SpecialOp) int64 {
 // SendSpecialOp queues an op against targetEmpire on targetBoard. The gold goes
 // now and the op is booked in flight, so a packet that never comes back is
 // swept by the same lost-forces timer that returns an attack.
-func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op SpecialOp) error {
+func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op SpecialOp, dial int) error {
 	if isMissileOp(op) {
 		if !w.Config.MissileOps {
 			return ErrMissileOpsDisabled
@@ -155,6 +160,9 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 	if op.TargetsPlanet() {
 		targetEmpire = "" // nothing on the far side should look for a realm
 	}
+	if op == OpSabre {
+		dial = w.sabreDialFor(dial)
+	}
 	e.Gold -= cost
 	e.BombingOpsToday++
 	w.NextAttackID++
@@ -174,6 +182,7 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 		FromEmpire:   e.Name,
 		TargetEmpire: targetEmpire,
 		Op:           op,
+		Dial:         dial,
 	})
 	return nil
 }
@@ -225,7 +234,7 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 			target.Name, label, op.FromBoard))
 		return res
 	}
-	report, score, hit, backfired := w.applySpecialOp(op.Op, target, from)
+	report, score, hit, backfired := w.applySpecialOp(op.Op, target, from, op.Dial)
 	res.Report = report
 	res.Score = score
 	res.Won = hit
@@ -319,7 +328,7 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, hit boo
 //
 // Every branch calls the helper the LOCAL op calls, so the two menus cannot
 // drift apart: a change to what bombing a food market does lands on both.
-func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string) (report string, score int, hit, backfired bool) {
+func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report string, score int, hit, backfired bool) {
 	switch op {
 	case OpBombFood:
 		lost := bombFoodEffect(d)
@@ -369,7 +378,7 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string) (report str
 		return fmt.Sprintf("Chemical strike! %d regions of %s are now waste, and %d of its people are dead.", regions, d.Name, people), score, true, false
 
 	case OpSabre:
-		report, hit, backfired = w.sabreEffect(d, from)
+		report, hit, backfired = w.sabreEffect(d, from, dial)
 		return report, 0, hit, backfired
 	}
 	return fmt.Sprintf("Nothing came of the operation against %s.", d.Name), 0, false, false

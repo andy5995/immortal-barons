@@ -627,3 +627,79 @@ const (
 	// the rest returns. 15% matches attack.hlp's normal-attack losses.
 	GroupAttackLossPct = 15
 )
+
+// --- S3-Sabre: the dial, and what each setting hits (BINARY-VERIFIED) ---
+//
+// The dial IS the weapon's aim, not the bluff IB took it for until 2026-08-31.
+// The arriving strike (BRE.OVR resolve_received_sabre_strike, 0x04546e) puts the
+// dial through a mapper at ovr_0450a9 +0xf9 whose whole body is a table from the
+// dial's range onto the seven `^SABREHIT` lines of game/ipreport.dat:
+//
+//	0, 1  -> 1  Intelligence Headquarters
+//	2, 3  -> 2  residential zones
+//	4     -> 3  military bases
+//	5, 6  -> 4  airbases
+//	7, 8  -> 5  regions incinerated
+//	9, 10 -> 6  food supply
+//	11    -> 7  regions DEVELOPED for the target
+//
+// Two rolls sit on top of it, which is what made the weapon read as random from
+// the player's seat and is why the original's own manual never explained the
+// numbers:
+//
+//   - the dial is jittered by Random(2) - Random(2) before the mapper, then taken
+//     mod 11 (+0x6f7..+0x767) — so -1 at 1/4, unchanged at 1/2, +1 at 1/4;
+//   - one launch in ten (Random(10) == 0 at +0x6d1) discards the dial outright
+//     and takes Random(11) instead (+0x6e1).
+//
+// So dial 4 lands on military bases half the time, while dial 5 lands on
+// airbases three quarters of the time — 5 and 6 both map there. That asymmetry
+// is the shape of the advice experienced players give, which is the corroboration
+// that made this worth re-reading.
+//
+// Setting 11 is unreachable through this path: the input is taken mod 11, so the
+// mapper's last row never fires from a dial. Effect 7 belongs to another caller.
+const (
+	SabreDialMin = 0
+	SabreDialMax = 10
+
+	// SabreDialJitterSides is the size of each of the two Random() draws whose
+	// difference nudges the dial (binary: Random(2) twice).
+	SabreDialJitterSides = 2
+	// SabreDialWrap is the modulus applied after the jitter (binary: 11).
+	SabreDialWrap = 11
+	// SabreWildOdds: one launch in this many ignores the dial entirely.
+	SabreWildOdds = 10
+)
+
+// SabreEffect is one of the seven outcomes the mapper selects.
+type SabreEffect int
+
+const (
+	SabreHitHQ SabreEffect = iota + 1
+	SabreHitPeople
+	SabreHitMilitaryBases
+	SabreHitAirbases
+	SabreHitRegions
+	SabreHitFood
+	SabreDevelopRegions
+)
+
+// sabreDialTable is the mapper's table, indexed by the (jittered, wrapped) dial.
+// Index 11 is the mapper's last row, unreachable from a dial but kept so the
+// table is the binary's table rather than a truncation of it.
+var sabreDialTable = [12]SabreEffect{
+	SabreHitHQ, SabreHitHQ,
+	SabreHitPeople, SabreHitPeople,
+	SabreHitMilitaryBases,
+	SabreHitAirbases, SabreHitAirbases,
+	SabreHitRegions, SabreHitRegions,
+	SabreHitFood, SabreHitFood,
+	SabreDevelopRegions,
+}
+
+// SabreConstantDial is the dial a board fires on under Constant handling. IB's
+// own choice — the original's handling modes are a per-install setting and it
+// does not say what "constant" fires. The middle of the range keeps the mode
+// from being strictly better or worse than dialling by hand.
+const SabreConstantDial = 5

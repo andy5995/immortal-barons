@@ -31,7 +31,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	_ = target
 
 	goldBefore := attacker.Gold
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpBombFood); err != nil {
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpBombFood, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	cost := from.SpecialOpGoldCost(attacker, OpBombFood)
@@ -86,7 +86,7 @@ func TestSpecialOpBreaksOnNewRealmProtection(t *testing.T) {
 	// A MISSILE is the case protection covers: it is aimed at one realm. The
 	// bombing ops are aimed at the planet, where a new realm's shield has
 	// nothing to refuse.
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpNuclear); err != nil {
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpNuclear, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	answer := to.ApplyPacket(from.Outbox[0])
@@ -104,7 +104,7 @@ func TestSpecialOpNeedsBombers(t *testing.T) {
 	from, _, attacker, _ := specialOpWorlds(t)
 	attacker.Bombers = BombingBombersRequired - 1
 	for _, op := range []SpecialOp{OpBombFood, OpNuclear} {
-		if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", op); err != ErrNeedBombers {
+		if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", op, 0); err != ErrNeedBombers {
 			t.Errorf("%s with too few bombers: %v, want ErrNeedBombers", op, err)
 		}
 	}
@@ -118,12 +118,12 @@ func TestSpecialOpNeedsBombers(t *testing.T) {
 func TestSpecialOpHonoursTheSysopSwitches(t *testing.T) {
 	from, _, attacker, _ := specialOpWorlds(t)
 	from.Config.BombingOps = false
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", OpBombFood); err != ErrBombingOpsDisabled {
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", OpBombFood, 0); err != ErrBombingOpsDisabled {
 		t.Errorf("bombing op with Bombing Ops off: %v", err)
 	}
 	from.Config.BombingOps = true
 	from.Config.MissileOps = false
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", OpNuclear); err != ErrMissileOpsDisabled {
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", OpNuclear, 0); err != ErrMissileOpsDisabled {
 		t.Errorf("missile op with Missile Ops off: %v", err)
 	}
 }
@@ -132,7 +132,7 @@ func TestSpecialOpHonoursTheSysopSwitches(t *testing.T) {
 func TestLostSpecialOpIsGivenUp(t *testing.T) {
 	from, _, attacker, _ := specialOpWorlds(t)
 	from.Config.LostForcesDays = 3
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", OpBombFood); err != nil {
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", OpBombFood, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	from.GameDay += 4
@@ -221,7 +221,7 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 	from, to, attacker, target := specialOpWorlds(t)
 	to.FoodMarketSupply = 1000
 	target.Protection = 99 // would refuse a realm-aimed op
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpBombFood); err != nil {
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpBombFood, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	if got := from.Outbox[0].SpecialOps[0].TargetEmpire; got != "" {

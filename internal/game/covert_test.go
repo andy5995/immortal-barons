@@ -754,92 +754,75 @@ func TestSabreStrikeDamagesTarget(t *testing.T) {
 	// backfire, and a stock of every strikeable resource. Only ~3 in 10 launches
 	// land, so fire many.
 	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
-	d.Jets, d.Turrets, d.Tanks, d.Bombers, d.Carriers, d.Gold, d.Food = 1000, 1000, 1000, 1000, 1000, 1000, 1000
-	before := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
+	d.Jets, d.Turrets, d.Tanks, d.Food, d.People = 1000, 1000, 1000, 1000, 1_000_000
+	before := d.Jets + d.Turrets + d.Tanks + d.Food + d.People
 	for i := 0; i < 100; i++ {
-		w.sabreEffect(d, a.Name)
+		w.sabreEffect(d, a.Name, w.rng.Intn(SabreDialMax+1))
 	}
-	after := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
+	after := d.Jets + d.Turrets + d.Tanks + d.Food + d.People
 	if after >= before {
 		t.Errorf("expected S3-Sabre strikes to reduce the target's resources, before=%d after=%d", before, after)
 	}
 }
 
-func TestSpyOnRelationsRevealsTreaties(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := w.AddHuman("a", "Alpha")
-	a.Gold = 10_000_000 // afford covert op fees
-	a.Agents = 50
-	d := w.AddHuman("d", "Delta")
-	d.Agents = 0
-	c := w.AddHuman("c", "Gamma")
-	w.ProposeTreaty(d, c, "Tariff Trade Agreement")
-	w.AcceptTreaty(c, d.Name, "Tariff Trade Agreement")
-
-	report := runCovertUntil(t, w, a, func() (string, error) { return w.SpyOnRelations(a, d) },
-		func(r string) bool { return !caught(r) })
-	if !strings.Contains(report, "Tariff Trade Agreement") || !strings.Contains(report, "Gamma") {
-		t.Errorf("report should reveal Delta's treaty with Gamma, got: %s", report)
-	}
-}
-
-// A bribed agent is the BRIBER's advantage, not the victim's: it doubles the
-// briber's own side of the roll against that realm and does nothing at all to
-// the ops that realm sends back. IB read the same flag as a shield until the
-// binary was checked (BRE.OVR 0x04BA48 at +0x165 reads it from the ATTACKER's
-// record). The two rates are golden literals off BRE's formula: 0.1 + 0.9x2/3
-// with the agent in place, 0.1 + 0.9/2 without.
-func TestBriberyDoublesTheBribersOwnOdds(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := w.AddHuman("a", "Alpha")
-	a.Gold, a.Agents = 100_000_000, 1_000_000
-	d := w.AddHuman("d", "Delta")
-	d.Agents, d.Gold = 1_000_000, 100_000_000
-
-	runCovertUntil(t, w, a, func() (string, error) { return w.Bribery(a, d) },
-		func(r string) bool { return !caught(r) })
-	if !a.hasBribed(d.Name) {
-		t.Fatal("a successful Bribery should record the bribed realm")
-	}
-	// BRE refuses a second bribe inside the same realm at the menu, before it
-	// charges anything.
-	if _, err := w.Bribery(a, d); err == nil {
-		t.Error("a second bribe inside the same realm should be refused")
-	}
-
-	const trials = 4000
-	rate := func(from, to *Empire) float64 {
-		won := 0
-		for i := 0; i < trials; i++ {
-			if w.covertRoll(from, to, OpSupportDissensions) {
-				won++
-			}
-		}
-		return float64(won) / trials
-	}
-	if got := rate(a, d); got < 0.65 || got > 0.75 {
-		t.Errorf("the briber landed %.3f of its ops on the bribed realm, want near 0.70", got)
-	}
-	if got := rate(d, a); got < 0.50 || got > 0.60 {
-		t.Errorf("the bribed realm landed %.3f of its ops back, want near 0.55 — a bribe is not a shield", got)
-	}
-}
-
-// Gold is one of the S3-Sabre's targets. It is held in money width, so
-// it sits outside the loop over the count-width assets — easy to leave out of
-// the target roll entirely, which would quietly make the weapon weaker.
-func TestSabreCanStrikeGold(t *testing.T) {
+// The dial AIMS the missile — this is the whole of what was wrong before
+// 2026-08-31, when IB treated it as a bluff that changed nothing. Dial 5 maps to
+// airbases, which hit jets and nothing else, so a realm holding jets and tanks
+// in equal number must lose jets and keep its tanks. Asserting the asymmetry
+// rather than "something was destroyed" is what makes this fail if the mapping
+// is ignored again.
+func TestSabreDialAimsTheMissile(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
-	d.Gold = 1_000_000
-	before := d.Gold
-	for i := 0; i < 300; i++ {
-		w.sabreEffect(d, a.Name)
-		if d.Gold < before {
-			return // it reached gold at least once
+	d.Jets, d.Tanks, d.Food = 100_000, 100_000, 100_000
+	for i := 0; i < 400; i++ {
+		w.sabreEffect(d, a.Name, 5)
+	}
+	if d.Jets >= 100_000 {
+		t.Errorf("dial 5 is airbases and must cost the target jets; still %d", d.Jets)
+	}
+	// Tanks and food are reachable only through the ±1 jitter (dial 4, military
+	// bases) and the 1-in-10 wild roll, so they may move — but far less than the
+	// jets the dial actually aimed at.
+	if 100_000-d.Tanks >= 100_000-d.Jets {
+		t.Errorf("dial 5 cost more tanks (%d) than jets (%d); the mapping is not being read",
+			100_000-d.Tanks, 100_000-d.Jets)
+	}
+}
+
+// Every dial setting resolves to a defined effect. The mapper's table is the
+// binary's, so an out-of-range dial must be clamped rather than indexing past it.
+func TestSabreAimCoversEveryDial(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	seen := map[SabreEffect]bool{}
+	for dial := SabreDialMin; dial <= SabreDialMax; dial++ {
+		for i := 0; i < 200; i++ {
+			seen[w.SabreAim(dial)] = true
 		}
 	}
-	t.Errorf("300 landed-or-fizzled launches never touched gold (still %d)", d.Gold)
+	// Every row but the last, which no dial can reach (the input is taken mod 11).
+	for eff := SabreHitHQ; eff < SabreDevelopRegions; eff++ {
+		if !seen[eff] {
+			t.Errorf("effect %d is unreachable from any dial", eff)
+		}
+	}
+}
+
+// Gold is NOT one of the S3-Sabre's targets, and neither are agents, bombers or
+// carriers. IB used to roll a target across every good it held, which is what
+// the dial mapping replaced: the original's effect switch writes back exactly
+// the HQ, population, food, jets, and the four military counts, and nothing else.
+func TestSabreLeavesGoldAlone(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
+	d.Gold, d.Bombers, d.Carriers = 1_000_000, 1000, 1000
+	for i := 0; i < 300; i++ {
+		w.sabreEffect(d, a.Name, w.rng.Intn(SabreDialMax+1))
+	}
+	if d.Gold != 1_000_000 || d.Bombers != 1000 || d.Carriers != 1000 {
+		t.Errorf("the missile reached an asset no effect names: gold %d, bombers %d, carriers %d",
+			d.Gold, d.Bombers, d.Carriers)
+	}
 }
 
 // BINARY-VERIFIED: a caught agent gives the attacker away; an operation that

@@ -71,6 +71,7 @@ RemoteSpecialOp:
   FromEmpire
   TargetEmpire
   Op
+  Dial `json:",omitempty"`
 AttackResult:
   ID
   TargetBoard

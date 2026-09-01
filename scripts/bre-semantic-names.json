@@ -822,6 +822,11 @@
       "confidence": "high",
       "evidence": ["binary_strings: global-reset packet topic", "call_graph: incoming Inter-BBS data handler"]
     },
+    "0x0451a2": {
+      "name": "sabre_dial_to_effect",
+      "confidence": "high",
+      "evidence": ["disassembly: whole body is a compare chain on the single argument mapping 0..11 onto 1..7", "call_graph: sole caller is resolve_received_sabre_strike, which stores the result in the byte its 7-case effect switch reads", "data: the 7 results index the ^SABREHIT block of game/ipreport.dat, whose lines match the fields each effect branch writes back"]
+    },
     "0x04546e": {
       "name": "resolve_received_sabre_strike",
       "confidence": "high",
