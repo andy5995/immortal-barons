@@ -3003,7 +3003,13 @@ baron is directed to an item that is not there, and one on ConstructiveChaos
 reported exactly that. IB keeps the item hidden and replaces the second line
 while protection lasts, naming the turns left instead of the menu.
 
-## Game Setup and Send Trade Deal (captured live 2026-08-23, `cap/shsbbs.cap`)
+## Game Setup and Send Trade Deal (captured live 2026-08-23)
+
+**Citation repair, 2026-08-31.** The local-mode panel below was captured to
+`cap/shsbbs.cap`, which is no longer in `cap/`, so that half is no longer
+re-readable — it is kept because the league half below corroborates the layout
+and two surviving captures agree on it. Do not add to it without a fresh
+capture.
 
 ### The panel (System Menu → G)
 
@@ -3045,6 +3051,12 @@ Maximum Bombing Operations Per Day: 15
 Days before "lost" forces returned: 2
 Gooie Kablooies: Enabled     Bombing Ops: Enabled     Missile Ops: Enabled
 ```
+
+Re-captured on a 4-board league 2026-08-31 (`cap/eots-ibbs-02.cap`), identical in
+shape with different figures — `Maximum Terrorist Ops Per Day: 15`,
+`Maximum Bombing Operations Per Day: 5`, `Days before "lost" forces returned: 1`.
+**The panel does not report Sabre Handling**, which is why a capture cannot say
+what a board's S3-Sabre setting is; that lives only in the Configuration Editor.
 
 Note the three label widths in use: 21 for the paired rows, 36 for the
 "Maximum ... Per Day" block, and a three-up line for the switches whose labels
@@ -3120,6 +3132,74 @@ sentinel as `(0; 1.0737B)`, which reads like information about the other realm
 and is not. IB keeps its `(suggested)` hint on both sides where BRE has none,
 and keeps a real 2^30 ceiling internally so the figure stays inside an `int` on
 a 32-bit door build.
+
+## Special Operations (InterPlanetary Ops → 8) — captured live 2026-08-31, `cap/eots-ibbs-02.cap`
+
+Eight items, numbered 1-8 with a `(0) Quit`, in a **37-column** box. The four
+bombing ops carry a right-aligned price; the three missiles and Send SpyGuy show
+none, because those are priced off the target once one is named.
+
+```
+────────[Special Operations]─────────
+(1) Bomb Food Market      10,000,000
+(2) Bomb Trading Market   25,000,000
+(3) Bomb Trade Routes     25,000,000
+(4) Undermine Investments 75,000,000
+(5) Nuclear Assault
+(6) Chemical Bombing
+(7) S3-Sabre
+(8) Send SpyGuy
+(0) Quit
+─────────────────────────────────────
+```
+
+**A missile that has been fired today is dropped from the list.** Same capture,
+after Nuclear Assault and Chemical Bombing were used, then after the S3-Sabre:
+
+```
+(4) Undermine Investments 75,000,000      (4) Undermine Investments 75,000,000
+(7) S3-Sabre                              (8) Send SpyGuy
+(8) Send SpyGuy                           (0) Quit
+```
+
+The remaining items keep their own keys — 7 stays 7 while 5 and 6 are gone — so
+the menu is filtered, not renumbered. Mechanic and addresses in
+`docs/mechanics-reference.md`.
+
+**Reading this screen from a capture, watch what an echo proves.** `Choice> Quit
+Undermine Investments` appears in the same session and item 4 never disappears:
+the op was selected and then abandoned at the planet prompt (`Enter Planet Name
+or Number (? for list): None`). The echo records the keypress, not the outcome.
+The tell for a completed op is the row vanishing or the gold moving.
+
+## The S3-Sabre launch flow — captured live 2026-08-31, `cap/eots-ibbs-02.cap`
+
+Blurb, then planet, then target, then price, then a single confirm:
+
+```
+The S3-Sabre is a variable-return missile.  Capable of a variety of
+special effects, this missile can be extremely devastating.
+In addition, for reasons as of yet unknown, large quantities of Troopers
+on the target empire are known to cause the missle to backfire.
+NOTE: Sabre Attacks require 500 Bombers to deliver their payloads.
+Enter Planet Name or Number (? for list): The Eclipse
+Our current relations with The Eclipse: Enemy
+Choose a target[A-Y, ?, /Search, [ENTER]=Abort] Pirates Ahoy!
+Cost: 36122736 Gold
+Would you like to prepare the attack? (Y/n) Yes
+Attack Launched.
+```
+
+**No dial prompt, and the blurb is SHORT — both because of the board's Sabre
+Handling setting.** The binary's full blurb has two more paragraphs ("However,
+the S-3's Dial-technology is not 100% accurate…" and "The Sabre missile comes
+with a dial which can be set anywhere from 0 to 10…") and a
+`Enter a number for the dial: ` prompt, all of them behind the same guard: only
+the User Select setting shows them. Two players on this board reported the
+missile never asking them; this is the capture of that, and it is the setting
+working. See `docs/mechanics-reference.md` for the guard's address.
+
+Note `Cost:` here is printed bare — no comma grouping — where IB comma-groups it.
 
 ## Travel Times (InterPlanetary Ops → T) — captured live, `cap/eots-ibbs-01.cap`
 

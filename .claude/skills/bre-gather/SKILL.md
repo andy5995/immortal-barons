@@ -568,6 +568,29 @@ different routine (`create_trade_offer`). Prose, the routine's own strings, and
 the whereabouts of the nearest contradicting string — when all three line up,
 write the negative down and name them. One of the three alone is a hunch.
 
+**The field NEXT to the one you want disassembles just as plausibly.** A packet
+or record field is reached as `[bp-0x4]`, `[bp-0x3]` and so on, and the wrong one
+produces a switch that looks like a finding. The S3-Sabre's dial is `[bp-0x3]`;
+`[bp-0x4]` beside it is switched on 1/2/3 and picks turrets, tanks or troopers,
+which reads exactly like "only three dial settings do anything" — and that went
+into the spec, and into IB, for months. The dial's real handler was a mapper one
+call away covering the whole 0-10 range.
+
+Two habits stop it. **Count the branches against the data**: seven `^SABREHIT`
+lines and a switch with three cases is a mismatch that should be chased, not
+explained away. And **find where the value is CONSUMED, not just where it is
+compared** — following `[bp-0x5c9]` back to the routine that writes it was what
+produced the table.
+
+**A player's account of the original is evidence — weigh it, do not wave it
+away.** Experienced players said dial 4 hits military bases and 5 hits airbases.
+The spec said the dial did nothing. The players were right, and their account
+named the exact rows of the mapper's table. A play report cannot settle a
+constant, but it is strong enough to *reopen* one: when it contradicts a written
+finding, re-read the code before defending the note. Say in the write-up that a
+report prompted the re-read — it is how the next reader learns the note was
+tested rather than merely repeated.
+
 **A prompt's TEXT is not its behaviour — read the caller.** `find-string` on a
 prompt lands you in the routine that *prints* it, and that routine usually does
 nothing else. The input loop, the key table and the semantics are one level up,
@@ -841,6 +864,14 @@ ad-hoc greps. Its `--shapes` mode censuses every distinct message form in a file
   That sweep also turns up formats you were not looking for: it found a fourth
   number style in the Daily Bulletin (`12,468k` — divided once, suffixed, THEN
   grouped, never reaching `m`) that no other screen uses.
+
+- **An echoed menu selection is not a completed action.** These captures echo the
+  chosen item beside the prompt (`Choice> Quit    Undermine Investments`), and
+  that records the keypress only — the op may have been abandoned at the next
+  prompt. Reading a run of echoes as a run of actions produced a wrong claim
+  about which per-day allowance covers what, caught only because the sysop
+  remembered not going through with it. The tells for a completed action are a
+  state change on the next screen (a menu row gone, gold moved), not the echo.
 
 **And before explaining any per-unit figure, check whether the count you divided
 by changed that turn.** Purchases land between the report and the Regions
