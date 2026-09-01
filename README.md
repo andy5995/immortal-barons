@@ -72,10 +72,13 @@ The first time you connect, the server saves the key you used and links it to
 the name you chose. After that, only that key can log in under that name.
 
 If you prefer a graphical client, set the host to `85.119.83.118`, the port to
-`2222`, and the user name to the name you want. The client must let you choose a
-key file, because the server does not accept passwords.
-[PuTTY](https://putty.org/index.html) and
-[SyncTERM](https://syncterm.bbsdev.net/) can both do this.
+`2222`, and the user name to the name you want. The server signs you in with a
+key rather than a password. [PuTTY](https://putty.org/index.html) lets you point
+it at a key file. [SyncTERM](https://syncterm.bbsdev.net/) keeps a key of its
+own and uses it for you, so there is no file to choose.
+
+Keep your key. The server ties your name to the first key it sees, so a new key
+means a new name and a new realm.
 
 The server runs [DeuceGate](https://deucegate.bbsdev.net/), which starts the game
 as soon as you log in.
