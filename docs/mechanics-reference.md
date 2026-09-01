@@ -3613,7 +3613,31 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
      **private event report** — the attack type, the target realm and planet,
      the verdict, what was lost and what came home by unit type, and what it
      destroyed. That is BRE's own report structure, read off its returning-
-     attack routine (BRE.OVR 0x04136c); IB's wording is its own. Captured land
+     attack routine (BRE.OVR 0x04136c); IB's wording is its own.
+
+     **Each of those three is ONE line, naming only the unit types with a
+     count.** Two captures pin it. `cap/eots-ibbs-02.cap`:
+
+     ```
+     Normal Attack Results.  Target: Pirates Ahoy! (The Eclipse)
+     Date: 09/01/2026  02:39:02    Result: FAILURE
+     Your forces were crushed by the enemy!
+       31k Troopers, 18m Jets, 1506k Tanks, and 66k Bombers returned.
+       You lost 5924 Troopers, 3429k Jets, 280k Tanks, and 12k Bombers!
+       You destroyed 86k Jets and 1009k Tanks!
+     ```
+
+     The destroyed line naming two of four types is what settles the zeros: a
+     type that took no loss is left out. Items are comma-joined with a comma
+     before the final "and", the lost and destroyed lines end in "!" and the
+     returned line in ".", and the defender's types run **Troopers, Jets,
+     Turrets, Tanks** — `cap/20240527-134Pho_Lazarus_Public.cap` has
+     `1111 Troopers, 115k Turrets, and 105k Tanks!`, putting Turrets before
+     Tanks.
+
+     IB printed one line per unit type with zeros included until 2026-09-01, on
+     a misreading of that older capture's `1233k Tanks returned.` — an attacker
+     who sent only tanks, so a one-item list rather than a per-unit line. Captured land
      is **parked** on `Empire.PendingRegions` and the **region picker** — the
      same one a Regular Attack opens (#58) — runs at the start of the baron's
      next turn, because the result arrives while they are not in a session. A

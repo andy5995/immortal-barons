@@ -180,19 +180,18 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	default:
 		b.WriteString("Your forces were beaten off the field.\n")
 	}
-	// One line per unit type from here, zeros included, which is the shape of
-	// the original's returning report (resolve_returning_attack, BRE.OVR
-	// 0x04136c): its lines are unrolled per unit with no test on the count. A
-	// single "lost N" total is what this replaced.
-	writeUnitLines(&b, "You lost %s %s.", attackUnits(forceLosses(committed, back)))
+	// One line each from here, naming only the types that took a loss, which is
+	// the shape of the original's returning report (resolve_returning_attack,
+	// BRE.OVR 0x04136c) in two captures. See writeUnitLines.
+	writeUnitLines(&b, "You lost %s!", attackUnits(forceLosses(committed, back)))
 	// What the strike destroyed is only known where a battle was fought; a force
 	// that found no realm, or found it shielded, destroyed nothing and says so by
-	// omission rather than with four zeros.
+	// omitting the line.
 	switch res.outcome() {
 	case OutcomeWon, OutcomeRepelled:
-		writeUnitLines(&b, "You destroyed %s %s.", defenceUnits(res.Enemy))
+		writeUnitLines(&b, "You destroyed %s!", defenceUnits(res.Enemy))
 	}
-	writeUnitLines(&b, "%s %s returned.", attackUnits(back))
+	writeUnitLines(&b, "%s returned.", attackUnits(back))
 	return strings.TrimRight(b.String(), "\n")
 }
 

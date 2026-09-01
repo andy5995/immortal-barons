@@ -694,11 +694,11 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) stri
 		sent.Tanks += c.Tanks
 		sent.Bombers += c.Bombers
 	}
-	writeUnitLines(&b, "%s %s attacked.", attackUnits(sent))
+	writeUnitLines(&b, "%s attacked.", attackUnits(sent))
 	if won {
 		fmt.Fprintf(&b, "You lost %d regions.\n", regions)
 	}
-	writeUnitLines(&b, "You lost %s %s.", defenceUnits(lost))
+	writeUnitLines(&b, "You lost %s!", defenceUnits(lost))
 	return strings.TrimRight(b.String(), "\n")
 }
 
@@ -712,28 +712,62 @@ type unitCount struct {
 // original's reports print them — an attacker fields troopers, jets, tanks and
 // bombers; a defender loses troopers, jets, tanks and turrets.
 func attackUnits(f AttackForce) []unitCount {
-	return []unitCount{{f.Troopers, "troopers"}, {f.Jets, "jets"}, {f.Tanks, "tanks"}, {f.Bombers, "bombers"}}
+	return []unitCount{{f.Troopers, "Troopers"}, {f.Jets, "Jets"}, {f.Tanks, "Tanks"}, {f.Bombers, "Bombers"}}
 }
 
+// The order is the original's own: Troopers, Jets, Turrets, Tanks. Two captures
+// pin it between them — cap/20240527-134Pho_Lazarus_Public.cap has
+// "1111 Troopers, 115k Turrets, and 105k Tanks" (turrets BEFORE tanks) and
+// cap/eots-ibbs-02.cap has "86k Jets and 1009k Tanks" (jets before tanks).
 func defenceUnits(u UnitLoss) []unitCount {
-	return []unitCount{{u.Troopers, "troopers"}, {u.Jets, "jets"}, {u.Tanks, "tanks"}, {u.Turrets, "turrets"}}
+	return []unitCount{{u.Troopers, "Troopers"}, {u.Jets, "Jets"}, {u.Turrets, "Turrets"}, {u.Tanks, "Tanks"}}
 }
 
-// writeUnitLines writes one line per unit type, format taking the count and
-// the name, a zero printed rather than skipped: the original's report lines are
-// unrolled one per unit with no test on the count, so "You lost 0 Bombers"
-// appears on its screen and on this one.
-// The count is SHORTENED (numfmt.Short), so the format's first verb is %s.
-// BRE's interplanetary reports run it through the same helper its score table
-// uses — a capture has "1000k Tanks returned." and "115k Turrets"
-// (cap/20240527-134Pho_Lazarus_Public.cap). Its LOCAL resolver does not: a
-// staged local battle printed "10469 Troopers" whole, and
-// resolve_regular_attack is absent from the helper's caller list. That split is
-// deliberate on both sides — do not make the two agree.
+// writeUnitLines writes ONE line naming every unit type that took a loss, joined
+// with commas and an "and" before the last, and SKIPS a type that lost nothing.
+//
+// This corrects a reading that stood until 2026-09-01. The comment here used to
+// say the original unrolled a line per unit with no test on the count, citing
+// "1000k Tanks returned." from cap/20240527-134Pho_Lazarus_Public.cap — but that
+// attacker sent only tanks, so the line is a one-item list, not a per-unit line.
+// The same capture's next line, "You destroyed 1111 Troopers, 115k Turrets, and
+// 105k Tanks!", is the same list with three items, and cap/eots-ibbs-02.cap has
+// all three lines with mixed counts:
+//
+//	31k Troopers, 18m Jets, 1506k Tanks, and 66k Bombers returned.
+//	You lost 5924 Troopers, 3429k Jets, 280k Tanks, and 12k Bombers!
+//	You destroyed 86k Jets and 1009k Tanks!
+//
+// The destroyed line naming two of four types is what settles the zero question.
+//
+// The count is SHORTENED (numfmt.Short), so the format's verb is %s. That half of
+// the old comment stands: BRE's interplanetary reports run counts through the
+// same helper its score table uses, while its LOCAL resolver prints them whole
+// (a staged local battle printed "10469 Troopers", and resolve_regular_attack is
+// absent from the helper's caller list). Do not make the two agree.
 func writeUnitLines(b *strings.Builder, format string, units []unitCount) {
+	parts := make([]string, 0, len(units))
 	for _, u := range units {
-		fmt.Fprintf(b, format+"\n", numfmt.Short(u.n), u.name)
+		if u.n > 0 {
+			parts = append(parts, numfmt.Short(u.n)+" "+u.name)
+		}
 	}
+	if len(parts) == 0 {
+		return
+	}
+	fmt.Fprintf(b, format+"\n", joinAnd(parts))
+}
+
+// joinAnd renders a list as the original writes one: "a", "a and b",
+// "a, b, and c" — the comma before "and" is in every captured line.
+func joinAnd(parts []string) string {
+	switch len(parts) {
+	case 1:
+		return parts[0]
+	case 2:
+		return parts[0] + " and " + parts[1]
+	}
+	return strings.Join(parts[:len(parts)-1], ", ") + ", and " + parts[len(parts)-1]
 }
 
 // survivorsOfFrac returns each contributor's detachment reduced by the fraction

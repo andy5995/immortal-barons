@@ -112,18 +112,23 @@ func TestInvasionReportNamesEveryUnitLost(t *testing.T) {
 	ev := victim.Events[len(victim.Events)-1].Text
 	for _, want := range []string{
 		"held the field",
-		// Counts wear BRE's shortening on an interplanetary report, so 40,000
-		// troopers read "40k" (numfmt.Short). The three-digit and zero rows
-		// prove the rest of the line is left alone.
-		"40k troopers attacked.", "300 jets attacked.", "0 tanks attacked.", "0 bombers attacked.",
-		"You lost " + numfmt.Short(res.Enemy.Troopers) + " troopers.",
-		"You lost " + numfmt.Short(res.Enemy.Jets) + " jets.",
-		"You lost " + numfmt.Short(res.Enemy.Tanks) + " tanks.",
-		"You lost " + numfmt.Short(res.Enemy.Turrets) + " turrets.",
+		// One line naming only the types that were sent, joined the way the
+		// original joins them, and with counts shortened — 40,000 troopers read
+		// "40k" (numfmt.Short). Tanks and bombers were not sent, so they are
+		// absent rather than printed as zeros (see writeUnitLines).
+		"40k Troopers and 300 Jets attacked.",
+		// The defender lost no jets, so Jets is absent from its own line too —
+		// which is the zero-suppression this test exists to pin, on both lines.
+		"You lost " + numfmt.Short(res.Enemy.Troopers) + " Troopers, " +
+			numfmt.Short(res.Enemy.Turrets) + " Turrets, and " +
+			numfmt.Short(res.Enemy.Tanks) + " Tanks!",
 	} {
 		if !strings.Contains(ev, want) {
 			t.Errorf("the defender's report lacks %q:\n%s", want, ev)
 		}
+	}
+	if strings.Contains(ev, " 0 ") {
+		t.Errorf("a unit that took no loss must be left out, not printed as zero:\n%s", ev)
 	}
 	if strings.Contains(ev, "units") {
 		t.Errorf("the report still totals the losses as units:\n%s", ev)
@@ -153,7 +158,7 @@ func TestEachDefenderOnAPlanetWideStrikeReadsItsOwnLosses(t *testing.T) {
 	if res.Outcome != OutcomeRepelled && res.Outcome != OutcomeWon {
 		t.Fatalf("outcome %q; no battle was fought", res.Outcome)
 	}
-	lostTroopers := regexp.MustCompile(`You lost (\d+) troopers\.`)
+	lostTroopers := regexp.MustCompile(`You lost (\d+) Troopers`)
 	sum := 0
 	for _, v := range []*Empire{victim, second} {
 		ev := v.Events[len(v.Events)-1].Text
@@ -169,9 +174,11 @@ func TestEachDefenderOnAPlanetWideStrikeReadsItsOwnLosses(t *testing.T) {
 	}
 }
 
-// The returning report lists what came home, what was lost and what was
-// destroyed one unit type to a line, as the original's does.
-func TestReturningReportListsUnitsOnTheirOwnLines(t *testing.T) {
+// The returning report puts what came home, what was lost and what was destroyed
+// each on ONE line, naming only the types that have a count — the original's
+// shape in two captures (see writeUnitLines). This test asserted the opposite
+// until 2026-09-01, on a misreading of a one-item line.
+func TestReturningReportListsUnitsOnOneLine(t *testing.T) {
 	wA, wB, attacker, _ := twoBoardsSeed(t, 1)
 	force := AttackForce{Troopers: 500_000, Tanks: 5000}
 	if _, err := wA.CreateIndividualAttack(attacker, "boardB", "Victim", NormalAttack, force); err != nil {
@@ -183,17 +190,19 @@ func TestReturningReportListsUnitsOnTheirOwnLines(t *testing.T) {
 	if !strings.Contains(ev, "Normal Attack") {
 		t.Fatalf("never reached the returning report:\n%s", ev)
 	}
-	for _, want := range []string{
-		"You lost ", " troopers.", " jets.", " tanks.", " bombers.",
-		"You destroyed ", " turrets.",
-		" troopers returned.", " jets returned.", " tanks returned.", " bombers returned.",
-	} {
-		if !strings.Contains(ev, want) {
-			t.Errorf("the returning report lacks %q:\n%s", want, ev)
-		}
+	// Only troopers and tanks were sent, so only those two are named, joined by
+	// "and" with no jets or bombers beside them.
+	if !strings.Contains(ev, " Troopers and ") || !strings.Contains(ev, " Tanks returned.") {
+		t.Errorf("the returned line is not one joined list:\n%s", ev)
 	}
-	// One line per unit, not a comma list.
-	if strings.Contains(ev, "troopers, ") {
-		t.Errorf("units are still listed on one line:\n%s", ev)
+	if !strings.Contains(ev, "You destroyed ") || !strings.Contains(ev, ", and ") {
+		t.Errorf("the destroyed line is not one joined list:\n%s", ev)
+	}
+	// A type with no count is left out entirely rather than printed as a zero,
+	// and nothing is unrolled onto a line of its own.
+	for _, unwanted := range []string{" 0 ", "Jets", "Bombers"} {
+		if strings.Contains(ev, unwanted) {
+			t.Errorf("report names %q, which took no loss:\n%s", unwanted, ev)
+		}
 	}
 }
