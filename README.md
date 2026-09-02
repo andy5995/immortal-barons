@@ -51,7 +51,18 @@ and is where you can list your own board.
 
 ### Over SSH
 
-A public server runs the game over SSH:
+A public server runs the game over SSH. It signs you in with an SSH key, not a
+password. Your existing key works. If you do not have one, make one first:
+
+```
+ssh-keygen -t ed25519
+```
+
+Press Enter when it asks where to save the key. ssh looks for the key under that
+default name. If you save it somewhere else, name it when you connect, with
+`-i ~/.ssh/yourkey`.
+
+Then connect:
 
 ```
 ssh -p 2222 yourname@85.119.83.118
@@ -61,21 +72,27 @@ Use any name you like. That name is your account on the server. The first time
 you play, the game asks you to name your realm, and that is the name other
 barons see.
 
-The server takes an SSH key, not a password. Your existing key works. If you do
-not have one, make one first:
-
-```
-ssh-keygen -t ed25519
-```
-
 The first time you connect, the server saves the key you used and links it to
 the name you chose. After that, only that key can log in under that name.
 
+To save the port and the name, add this to `~/.ssh/config`:
+
+```
+Host barons
+    HostName 85.119.83.118
+    Port 2222
+    User yourname
+    IdentityFile ~/.ssh/id_ed25519
+```
+
+Change the `IdentityFile` line if your key has another name. Then connect with
+`ssh barons`.
+
 If you prefer a graphical client, set the host to `85.119.83.118`, the port to
-`2222`, and the user name to the name you want. The server signs you in with a
-key rather than a password. [PuTTY](https://putty.org/index.html) lets you point
-it at a key file. [SyncTERM](https://syncterm.bbsdev.net/) keeps a key of its
-own and uses it for you, so there is no file to choose.
+`2222`, and the user name to the name you want.
+[PuTTY](https://putty.org/index.html) lets you point it at a key file.
+[SyncTERM](https://syncterm.bbsdev.net/) keeps a key of its own and uses it for
+you, so there is no file to choose.
 
 Keep your key. The server ties your name to the first key it sees, so a new key
 means a new name and a new realm.
