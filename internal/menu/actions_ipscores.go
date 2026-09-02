@@ -31,10 +31,10 @@ type ipScoreRow struct {
 	score, nw, land int
 }
 
-// interbbsScores opens BRE's IP Scores submenu: eight ranking views (four
-// planet-level, four player-level) each showing a ranked table. Captured from
-// BRE (docs/dev/bre-screens.md, "InterBBS Scores").
-func interbbsScores(s session.Session, w *ctx) Result {
+// ipScoreRows gathers every realm the board knows of -- the league's, from the
+// score packets each board files, and its own -- as the flat list both the
+// on-screen rankings and the bulletin files rank.
+func ipScoreRows(w *ctx) []ipScoreRow {
 	var rows []ipScoreRow
 	w.Read(func() {
 		for _, b := range w.RemoteBoards {
@@ -64,6 +64,14 @@ func interbbsScores(s session.Session, w *ctx) Result {
 			}
 		}
 	})
+	return rows
+}
+
+// interbbsScores opens BRE's IP Scores submenu: eight ranking views (four
+// planet-level, four player-level) each showing a ranked table. Captured from
+// BRE (docs/dev/bre-screens.md, "InterBBS Scores").
+func interbbsScores(s session.Session, w *ctx) Result {
+	rows := ipScoreRows(w)
 	if len(rows) == 0 {
 		ok(s, "No inter-BBS scores have been imported yet.")
 		return Stay
@@ -152,6 +160,14 @@ type planetAgg struct {
 // scores per board; player views show individual empires with a Planet column.
 // Captured from BRE (docs/dev/bre-screens.md, "InterBBS Scores").
 func ipScoreRank(s session.Session, w *ctx, rows []ipScoreRow, kind ipRankKind) {
+	renderIPScoreRank(s, w.Term, rows, kind)
+	pause(s)
+}
+
+// renderIPScoreRank draws one ranking and nothing else. The bulletin files are
+// this same screen written to a file rather than a terminal, so they must not
+// be given a keypress to wait for.
+func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipRankKind) {
 	metric := tr(s, "Score")
 	switch kind {
 	case ipRankPlanetScore, ipRankPlayerScore:
@@ -299,19 +315,18 @@ func ipScoreRank(s session.Session, w *ctx, rows []ipScoreRow, kind ipRankKind) 
 		if isPlanet {
 			fmt.Fprintf(s, "%s(%s%3d%s) %s%s%s%s%18d%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, padColumn(w.Term, r.name, 22), ansi.Reset,
+				ansi.FgWhite, padColumn(term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset)
 		} else {
 			// The Planet column's own width is not captured; 21 ends it on the rule.
 			fmt.Fprintf(s, "%s(%s%3d%s) %s%s%s%s%18d%s     %s%s%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, padColumn(w.Term, r.name, 22), ansi.Reset,
+				ansi.FgWhite, padColumn(term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset,
-				ansi.FgWhite, fitColumn(w.Term, r.planet, 21), ansi.Reset)
+				ansi.FgWhite, fitColumn(term, r.planet, 21), ansi.Reset)
 		}
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule, ansi.Reset)
-	pause(s)
 }
 
 func metricValue(kind ipRankKind, score, nw, land int) int {

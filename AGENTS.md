@@ -446,10 +446,11 @@ UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
 and grow via the `.po` catalogs.
 
 **Bulletin files**: `BulletinDir` in `bbs.cfg` writes the scoreboard, today's
-and yesterday's news, and a World Report as `.ans` and `.txt` for a BBS bulletin
-menu (#233). Both forms are CP437, not UTF-8: a `.ans` file is a CP437 artifact,
-and emitting the rules as UTF-8 gave every ANSI viewer two mojibake characters
-per rule. The World Report is IB's own — every attack fought anywhere in the
+and yesterday's news, a World Report, and the league's eight InterBBS Scores
+rankings as `.ans` and `.txt` for a BBS bulletin menu (#233, #245). Both forms
+are CP437, not UTF-8: a `.ans` file is a CP437 artifact, and emitting the rules
+as UTF-8 gave every ANSI viewer two mojibake characters per rule. The nine
+league files are written only by a board in a league. The World Report is IB's own — every attack fought anywhere in the
 league, no WMD and no terror op, drawn from a structured log that rides with the
 scores rather than from the news prose, which is randomised and translated. A
 board playing alone writes the rest but no World Report. HTML generation was

@@ -269,21 +269,39 @@ happen, and the raider still gets their report. Both default to yes.
 ## Bulletin files for your BBS
 
 Set `BulletinDir` in `bbs.cfg` to a directory and the game writes its own
-bulletins there whenever it runs its daily or planetary step: the scoreboard,
-today's and yesterday's news, and a World Report of every battle fought in the
-league. Each is written twice — `.ans` with colour and `.txt` without — so you can
-point a bulletin menu entry at whichever your callers can read. Both are CP437,
-the character set your BBS software and ANSI art programs expect, so the rules
-and blocks come out as single characters. Leave the setting blank and none are
-written.
+bulletins there whenever it runs its daily or planetary step. Leave the setting
+blank and none are written.
+
+Every board writes three:
+
+- `scores` — the scoreboard
+- `tdynews` — today's planet news
+- `yesnews` — yesterday's planet news
+
+A board in a league writes nine more. These are the league's, so a board playing
+alone has nothing to put in them and writes none of them:
+
+- `world` — every battle fought anywhere in the league
+- `bbsscore` — top planets by score
+- `bbsworth` — top planets by net worth
+- `bbsland` — top planets by land
+- `bbswland` — top planets by net worth per region
+- `plyscore` — top players by score
+- `plyworth` — top players by net worth
+- `plyland` — top players by land
+- `plywland` — top players by net worth per region
+
+Each is written twice — `.ans` with colour and `.txt` without — so you can point
+a bulletin menu entry at whichever your callers can read. Both are CP437, the
+character set your BBS software and ANSI art programs expect, so the rules and
+blocks come out as single characters.
 
 To publish them on the web, run the `.ans` files through an ANSI-to-HTML
 converter: those already exist, and they give you styling choices a generated
 page never would.
 
-A stand-alone board gets these too, minus the World Report: that one is the
-league's wars, and a board playing alone has no world to report on. The
-scoreboard and news are the same screens the game shows a caller.
+Every one of these is a screen the game shows a caller, drawn to a file instead
+of a terminal.
 
 ## Adding AI barons to a running game
 

@@ -69,11 +69,13 @@ func WriteBulletins(w *game.World, dir string) []error {
 		{"tdynews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
 		{"yesnews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
 	}
-	// The World Report is the LEAGUE's wars. A board that plays alone has no
-	// world to report on, and a page headed "World Report" listing one planet's
-	// skirmishes would promise something the board does not have.
+	// The World Report and the eight league rankings are the LEAGUE's. A board
+	// that plays alone has no world to report on, and a page headed "World
+	// Report" listing one planet's skirmishes would promise something the board
+	// does not have; a "Top Planets" table of one planet says as little.
 	if w.Config.InterBBSEnabled() {
 		bulletins = append(bulletins, bulletinRender{"world", writeWorldReport})
+		bulletins = append(bulletins, rankBulletins()...)
 	}
 	var errs []error
 	for _, b := range bulletins {
@@ -234,4 +236,38 @@ func worldReportOutcome(s session.Session, b game.BattleLogEntry) (string, strin
 		return tr(s, "won"), ansi.FgBrightGreen
 	}
 	return tr(s, "held"), ansi.FgBrightCyan
+}
+
+// rankBulletinFiles pairs each league ranking with the file it is written to.
+// The original wrote these eight as BBSSCORE / PLYWLAND and the rest; IB keeps
+// its own lower-case names, matching the three it already writes, but the
+// ordering and the meanings are the original's. WLAND is net-worth DENSITY --
+// net worth per region -- not world land, which the name does not give away.
+var rankBulletinFiles = []struct {
+	base string
+	kind ipRankKind
+}{
+	{"bbsscore", ipRankPlanetScore},
+	{"bbsworth", ipRankPlanetNW},
+	{"bbsland", ipRankPlanetLand},
+	{"bbswland", ipRankPlanetDensity},
+	{"plyscore", ipRankPlayerScore},
+	{"plyworth", ipRankPlayerNW},
+	{"plyland", ipRankPlayerLand},
+	{"plywland", ipRankPlayerDensity},
+}
+
+// rankBulletins is the eight league rankings as bulletin files: the same tables
+// the InterBBS Scores menu draws, written out instead of paged.
+//
+// Each gathers its own rows rather than sharing one slice, because the renderer
+// sorts what it is given in place and these run one after another.
+func rankBulletins() []bulletinRender {
+	out := make([]bulletinRender, 0, len(rankBulletinFiles))
+	for _, r := range rankBulletinFiles {
+		out = append(out, bulletinRender{r.base, func(s session.Session, c *ctx) {
+			renderIPScoreRank(s, c.Term, ipScoreRows(c), r.kind)
+		}})
+	}
+	return out
 }

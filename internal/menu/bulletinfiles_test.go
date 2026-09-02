@@ -118,6 +118,94 @@ func TestStandAloneBoardWritesNoWorldReport(t *testing.T) {
 	}
 }
 
+// #245: the league's eight rankings, the same tables the InterBBS Scores menu
+// draws. They belong to the league, so only a league board writes them.
+func TestLeagueRankingBulletins(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.AICount = 2
+	cfg.BoardID = "Alpha BBS"
+	cfg.IBBS = true
+	w := game.NewWorldSeed(cfg, 7)
+	w.Today = "2026-09-02"
+	w.AddHuman("andy", "Tatooine")
+	w.RemoteBoards = []game.RemoteBoard{{
+		BoardID: "Delta BBS",
+		Scores: []game.RemoteScore{
+			{Empire: "Rigel VII", Score: 91000, NetWorth: 4200000, Land: 1800},
+			{Empire: "Ceti Alpha", Score: 77000, NetWorth: 3100000, Land: 2400},
+		},
+	}}
+	dir := t.TempDir()
+	if errs := WriteBulletins(w, dir); len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	// Each file carries the heading of the view it was drawn from, so a sysop
+	// naming a bulletin menu entry can tell which is which.
+	for base, want := range map[string]string{
+		"bbsscore": "Top Planets by Score",
+		"bbsworth": "Top Planets by Net Worth",
+		"bbsland":  "Top Planets by Land",
+		"bbswland": "Top Planets by Net Worth Density",
+		"plyscore": "Top Players by Score",
+		"plyworth": "Top Players by Net Worth",
+		"plyland":  "Top Players by Land",
+		"plywland": "Top Players by Net Worth Density",
+	} {
+		body, err := os.ReadFile(filepath.Join(dir, base+".txt"))
+		if err != nil {
+			t.Errorf("%s.txt: %v", base, err)
+			continue
+		}
+		text := string(body)
+		if !strings.Contains(text, want) {
+			t.Errorf("%s.txt is not headed %q:\n%s", base, want, text)
+		}
+		if _, err := os.Stat(filepath.Join(dir, base+".ans")); err != nil {
+			t.Errorf("%s.ans: %v", base, err)
+		}
+		// A planet view sums the realms on each board; a player view names them
+		// one by one and says which planet each is on.
+		if strings.HasPrefix(base, "bbs") {
+			if strings.Contains(text, "Rigel VII") {
+				t.Errorf("%s.txt is a planet ranking but lists a realm:\n%s", base, text)
+			}
+		} else if !strings.Contains(text, "Rigel VII") || !strings.Contains(text, "Delta BBS") {
+			t.Errorf("%s.txt lost a realm or its planet column:\n%s", base, text)
+		}
+	}
+	// Nothing waits for a keypress: these are files, and the pause that ends the
+	// on-screen ranking would sit in the middle of one.
+	body, err := os.ReadFile(filepath.Join(dir, "plyscore.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(strings.ToLower(string(body)), "press") {
+		t.Errorf("a ranking bulletin carries a pause prompt:\n%s", body)
+	}
+}
+
+// A board playing alone has no league, so it writes none of the nine league
+// files -- a "Top Planets" table of one planet says as little as a World Report
+// of one planet's skirmishes.
+func TestStandAloneBoardWritesNoLeagueRankings(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.AICount = 1
+	cfg.BoardID = "Solo BBS"
+	cfg.IBBS = false
+	w := game.NewWorldSeed(cfg, 1)
+	w.Today = "2026-09-02"
+	dir := t.TempDir()
+	if errs := WriteBulletins(w, dir); len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	for _, base := range []string{"bbsscore", "bbsworth", "bbsland", "bbswland",
+		"plyscore", "plyworth", "plyland", "plywland"} {
+		if _, err := os.Stat(filepath.Join(dir, base+".ans")); err == nil {
+			t.Errorf("a stand-alone board wrote %s.ans", base)
+		}
+	}
+}
+
 // The reported defect (#245): the files went out as UTF-8, so every box rule
 // reached PabloDraw, Moebius and a BBS bulletin display as two mojibake
 // characters. A .ans file is CP437, and so is the .txt beside it.
