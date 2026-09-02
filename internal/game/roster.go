@@ -396,8 +396,22 @@ func (w *World) AIEmpires() []*Empire {
 
 func (w *World) Targets(attacker *Empire) []*Empire {
 	var r []*Empire
+	for _, e := range w.OathBreakerTargets(attacker) {
+		if !w.AreAllied(attacker, e) {
+			r = append(r, e)
+		}
+	}
+	return r
+}
+
+// OathBreakerTargets is Targets with alliance partners on it: a baron may
+// attack one, and the original asks them to confirm breaking the pact and then
+// lets the battle happen. Only a caller that has ASKED belongs here — the AI
+// picks from Targets, which keeps its word.
+func (w *World) OathBreakerTargets(attacker *Empire) []*Empire {
+	var r []*Empire
 	for _, e := range w.Empires {
-		if e != attacker && e.Alive && e.Protection == 0 && !w.AreAllied(attacker, e) {
+		if e != attacker && e.Alive && e.Protection == 0 {
 			r = append(r, e)
 		}
 	}

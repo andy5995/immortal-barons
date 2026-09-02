@@ -108,7 +108,7 @@ func hiTokens(s string, words []string, color string) string {
 // targetRow snapshots the identity plus displayed fields of one living rival,
 // taken under the world lock so the picker list can be rendered and prompted
 // over safely (the snapshot ranges the shared w.Empires slice). The realm name
-// is the identity the resolving w.With re-finds by (see findTarget); a
+// is the identity the resolving w.With re-finds by (see targetList.find); a
 // pre-gathered pointer is not carried across the reload. attackable is false for
 // a realm the player can see in the list but cannot hit (shielded by New Realm
 // Protection or an alliance); protected says which of the two shields it is,
@@ -128,12 +128,47 @@ type targetRow struct {
 	pact                  string // the relation attacking this realm would break, "" for none
 }
 
+// targetList is one picker's posture toward an alliance partner: the rows it
+// shows, the wording it uses, and the pool a chosen name is re-resolved from
+// under the lock. The three must agree, so the choice is made once.
+type targetList struct{ oathBreaker bool }
+
+// warTargets is the war menu's list: an ALLIANCE PARTNER is on it, wearing its
+// letter, because the original lets you take one and asks first — its "Are you
+// sure you wish break your agreement?" then the broken-treaty revolt (a live
+// capture, `cap/kd3-01.cap` line 13411). Withholding the letter had made
+// confirmBreach unreachable for an alliance.
+var warTargets = targetList{oathBreaker: true}
+
+// covertTargets leaves an alliance partner out: those operations ask no breach
+// question, so a realm reachable from here would be struck with the pact
+// silently intact.
+var covertTargets = targetList{}
+
+func (l targetList) rows(w *ctx) []targetRow { return snapshotTargets(w, l.oathBreaker) }
+
+// prompts is the list's wording around ask. Only the nothing-to-choose notice
+// differs: on the war list an alliance is no reason a realm cannot be reached,
+// so protection is the only thing it can blame.
+func (l targetList) prompts(ask string) targetPrompt {
+	p := targetPrompt{
+		ask:     ask,
+		refuse:  "%s is under New Realm Protection and cannot be targeted yet.",
+		nothing: "None of these realms can be attacked — they are all under New Realm Protection.",
+	}
+	if !l.oathBreaker {
+		p.nothing = "None of these realms can be targeted — they are protected or allied with you."
+	}
+	return p
+}
+
 // snapshotTargets copies every LIVING rival (not just the attackable ones) under
 // the lock, marking which can be attacked. Listing the shielded realms — rather
 // than hiding them — keeps a player from reading "all rivals protected" as "the
-// world is empty". attackable mirrors game.Targets (protection, then alliance);
-// an empty result means no rivals are left at all.
-func snapshotTargets(w *ctx) []targetRow {
+// world is empty". attackable is protection alone when alliesAttackable is set,
+// and protection then alliance (game.Targets) otherwise; an empty result means
+// no rivals are left at all.
+func snapshotTargets(w *ctx, alliesAttackable bool) []targetRow {
 	var rows []targetRow
 	// Read, not With: this only gathers, and With would save the world back once
 	// per visit to a target picker (see draw in menu.go).
@@ -147,7 +182,7 @@ func snapshotTargets(w *ctx) []targetRow {
 				continue
 			}
 			protected := e.Protection > 0
-			attackable := !protected && !w.AreAllied(p, e)
+			attackable := !protected && (alliesAttackable || !w.AreAllied(p, e))
 			rows = append(rows, targetRow{
 				name: e.Name, letter: e.Letter(),
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
@@ -161,7 +196,7 @@ func snapshotTargets(w *ctx) []targetRow {
 	return rows
 }
 
-// findTarget re-resolves a target empire by realm name among attacker's
+// find re-resolves a target empire by realm name among attacker's
 // CURRENT valid targets. Call only from inside a w.With block, after the world
 // has reloaded. Matching by name (not by a pre-gathered pointer) is what makes
 // this safe across a reload: json.Unmarshal reuses *Empire pointers by slice
@@ -169,8 +204,16 @@ func snapshotTargets(w *ctx) []targetRow {
 // abdicates and the slots shift — a cached pointer silently rebinds to a
 // DIFFERENT realm. Names are unique (RealmNameTaken guards onboarding), so this
 // returns the intended realm or nil (gone/dead/protected/allied → not a target).
-func findTarget(w *ctx, attacker *game.Empire, name string) *game.Empire {
-	for _, t := range w.Targets(attacker) {
+func (l targetList) find(w *ctx, attacker *game.Empire, name string) *game.Empire {
+	// The breach path may resolve an alliance partner (confirmBreach resolves the
+	// realm through here too, in order to break the pact), while a covert caller
+	// must not — an alliance formed between the target snapshot and this reload
+	// would otherwise be struck with the pact silently intact.
+	pool := w.Targets
+	if l.oathBreaker {
+		pool = w.OathBreakerTargets
+	}
+	for _, t := range pool(attacker) {
 		if t.Name == name {
 			return t
 		}
@@ -198,12 +241,12 @@ func regularAttack(s session.Session, w *ctx) Result {
 		ok(s, "You have already launched all %d of your attacks for today.", w.Config.MaxIndividualAttacks)
 		return Stay
 	}
-	rows := snapshotTargets(w)
+	rows := warTargets.rows(w)
 	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Attack which realm? (letter, RETURN to abort)")))
+	name, chosen := pickAttackTarget(s, w.Term, rows, warTargets.prompts(tr(s, "Attack which realm? (letter, RETURN to abort)")))
 	if !chosen {
 		return Stay
 	}
@@ -238,7 +281,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 	var outcome game.BattleOutcome
 	var trimmed bool
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		d := findTarget(w, p, name)
+		d := warTargets.find(w, p, name)
 		if d == nil {
 			return errTargetGone
 		}
@@ -283,6 +326,16 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 		ansi.Reset)
 }
 
+// targetPrompt is the wording one target list uses: what it asks, what it says
+// when a shielded realm is picked, and what it says when nothing on the list can
+// be chosen at all. A parameter because the same table serves a strike, a covert
+// op and an interplanetary trade deal (#195), and only the words differ.
+type targetPrompt struct {
+	ask     string
+	refuse  string // takes the realm name
+	nothing string
+}
+
 // pickAttackTarget renders the living rivals in IB's familiar scores-table
 // layout (Id / Empire Name / Territory / Score / Net Worth, lettered ids) and
 // reads the player's single-key choice. Returns the chosen realm name, or
@@ -299,29 +352,10 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 // (#214). It withheld the letter until 2026-08-26, which said only that
 // something about the row was different and left the player to guess what; the
 // bracket says it outright, and pressing the letter now answers with the reason
-// rather than behaving like a mistyped key. An ALLIED realm still shows no
-// letter — that standing is the diplomacy screens' to report, and the alliance
-// is the player's own doing.
-// targetPrompt is the wording one target list uses: what it asks, what it says
-// when a shielded realm is picked, and what it says when nothing on the list can
-// be chosen at all. A parameter because the same table serves a strike, a covert
-// op and an interplanetary trade deal (#195), and only the words differ.
-type targetPrompt struct {
-	ask     string
-	refuse  string // takes the realm name
-	nothing string
-}
-
-// attackPrompts is the wording for the war lists, and the default everywhere the
-// caller has nothing more specific to say.
-func attackPrompts(ask string) targetPrompt {
-	return targetPrompt{
-		ask:     ask,
-		refuse:  "%s is under New Realm Protection and cannot be targeted yet.",
-		nothing: "None of these realms can be attacked — they are protected or allied with you.",
-	}
-}
-
+// rather than behaving like a mistyped key. An ALLIANCE PARTNER wears its
+// letter on the WAR menu's list and is attacked through the breach question,
+// as the original does it; on the covert list it has no letter, because those
+// operations ask nothing before they land (see warTargets and covertTargets).
 func pickAttackTarget(s session.Session, t Term, rows []targetRow, p targetPrompt) (name string, chosen bool) {
 	scoreTableHead(s, t)
 	byLetter := make(map[string]targetRow, len(rows))
@@ -412,7 +446,7 @@ func confirmBreach(s session.Session, w *ctx, rows []targetRow, name string) boo
 	}
 	var broke string
 	w.mutatePlayer(func(p *game.Empire) error {
-		if d := findTarget(w, p, name); d != nil {
+		if d := warTargets.find(w, p, name); d != nil {
 			broke = w.World.BreachTreaty(p, d)
 		}
 		return nil
@@ -428,12 +462,18 @@ func confirmBreach(s session.Session, w *ctx, rows []targetRow, name string) boo
 // calls it directly for the two operations the original lets a sheltered realm
 // still run (see covertInfoOp).
 func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTurn, breach bool, strike func(a, d *game.Empire) (string, error)) Result {
-	rows := snapshotTargets(w)
+	// A caller that asks the breach question can reach an alliance partner; one
+	// that does not, cannot.
+	list := covertTargets
+	if breach {
+		list = warTargets
+	}
+	rows := list.rows(w)
 	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Choose a target (letter, RETURN to abort)")))
+	name, chosen := pickAttackTarget(s, w.Term, rows, list.prompts(tr(s, "Choose a target (letter, RETURN to abort)")))
 	if !chosen {
 		return Stay
 	}
@@ -457,7 +497,7 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 	}
 	var report string
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		d := findTarget(w, p, name)
+		d := list.find(w, p, name)
 		if d == nil {
 			return errTargetGone
 		}

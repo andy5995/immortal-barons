@@ -4316,6 +4316,14 @@ rather than the score table. IB's rules on top of that:
   ("Are you sure you wish break your agreement?", `BRE.OVR` 0x1A838) belongs to
   the shared target picker, not to diplomacy — and there only for the callers
   that pass its breach flag, which is the four attacks and not trading.
+  **An alliance partner is on the war menu's target list, wearing its letter**,
+  which is what makes that prompt reachable — captured live in `cap/kd3-01.cap`
+  (line 13411): the ally is listed among the targets, choosing it asks the
+  question, and answering yes prints the broken-treaty revolt and fights the
+  battle. IB withheld the letter from an alliance partner until 2026-09-01, so
+  the one relation the prompt most needed to cover could never raise it. The
+  covert list still leaves an ally off, because those operations pass no breach
+  flag and would strike with the pact intact.
 - **Marking several sends one proposal each**, skipping any realm that already
   holds that pact, and asks the covering message once for the whole batch.
 - **The covering message is optional, rides on the offer, and is mailed

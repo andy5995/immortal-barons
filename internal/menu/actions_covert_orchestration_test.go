@@ -66,7 +66,7 @@ func TestSpecialAttackNoTargets(t *testing.T) {
 	// A living-but-protected rival is listed but unselectable, not "no rivals
 	// left" — the notice explains the survivors are shielded, so the player isn't
 	// misled into thinking the world is empty.
-	if !strings.Contains(f.out.String(), "protected or allied") {
+	if !strings.Contains(f.out.String(), "under New Realm") {
 		t.Errorf("expected the protected-rivals notice; got:\n%s", f.out.String())
 	}
 }

@@ -78,7 +78,7 @@ func TestScoresMarksOnlineRealms(t *testing.T) {
 func TestAttackPickerMarksOnlineRealms(t *testing.T) {
 	w, rival := twoRealmWorld(t, true)
 	f := &fakeSession{}
-	pickAttackTarget(f, w.Term, snapshotTargets(w), attackPrompts("Attack which realm?"))
+	pickAttackTarget(f, w.Term, warTargets.rows(w), warTargets.prompts("Attack which realm?"))
 
 	lines := plainLines(f.out.String())
 	if findLine(lines, "Net Worth") == "" {

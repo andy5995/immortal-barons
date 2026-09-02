@@ -1,4 +1,5 @@
 (in-progress:)
+  * A realm you have an alliance with can be attacked, after the breach prompt
   * An attack on a rival realm plays out over nine seconds before the report
   * A relayed packet is sent plain to a peer that cannot read a bundle
   * The most gold a realm may hold is fixed at two billion
