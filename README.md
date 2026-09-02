@@ -75,7 +75,15 @@ barons see.
 The first time you connect, the server saves the key you used and links it to
 the name you chose. After that, only that key can log in under that name.
 
-To save the port and the name, add this to `~/.ssh/config`:
+To avoid typing the address, port, name and key each time, put them in your SSH
+config file:
+
+| File | System |
+| --- | --- |
+| `~/.ssh/config` | Linux, macOS and the BSDs |
+| `C:\Users\<you>\.ssh\config` | Windows |
+
+Add this to it:
 
 ```
 Host barons
