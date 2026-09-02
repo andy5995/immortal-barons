@@ -33,10 +33,14 @@ import (
 // also what the door's own default charset writes, so a bulletin now looks
 // like the screen it was drawn from.
 
-// bulletinRender is one bulletin: the file's base name and how to draw it.
+// bulletinRender is one bulletin: the file's base name, the name it goes by on
+// its web page, and how to draw it. The title is a function of the session so
+// it comes from the same place the screen's own heading does, rather than being
+// restated here as a second copy that could drift.
 type bulletinRender struct {
-	base string
-	draw func(s session.Session, w *ctx)
+	base  string
+	title func(s session.Session) string
+	draw  func(s session.Session, w *ctx)
 }
 
 // WriteBulletins draws every bulletin file for this board. A blank directory
@@ -65,27 +69,60 @@ func WriteBulletins(w *game.World, dir string) []error {
 	// column measuring has to agree with or a realm name pads short.
 	c := &ctx{World: w, Term: Term{}, day: day}
 	bulletins := []bulletinRender{
-		{"scores", func(s session.Session, c *ctx) { printScores(s, c) }},
-		{"tdynews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
-		{"yesnews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
+		{"scores", titled("Scoreboard"), func(s session.Session, c *ctx) { printScores(s, c) }},
+		{"tdynews", titled("Today's News"), func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
+		{"yesnews", titled("Yesterday's News"), func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
 	}
 	// The World Report and the eight league rankings are the LEAGUE's. A board
 	// that plays alone has no world to report on, and a page headed "World
 	// Report" listing one planet's skirmishes would promise something the board
 	// does not have; a "Top Planets" table of one planet says as little.
 	if w.Config.InterBBSEnabled() {
-		bulletins = append(bulletins, bulletinRender{"world", writeWorldReport})
+		bulletins = append(bulletins, bulletinRender{"world", titled("World Report"), writeWorldReport})
 		bulletins = append(bulletins, rankBulletins()...)
 	}
-	var errs []error
+	// The web pages are drawn from a UTF-8 pass rather than from the CP437 bytes:
+	// a page is UTF-8, and the column measuring that pads a realm name has to
+	// agree with the charset it is measuring for. It is the same draw function
+	// either way, so this is one layout rendered twice, not two layouts.
+	web := &ctx{World: w, Term: Term{UTF8: true}, day: day}
+	// What the board calls itself on its own web pages. BoardID is the fallback
+	// because for most boards the two are the same word; it is not the default
+	// because BoardID has to match the league roster character for character,
+	// and a name written for a reader should not be pinned to that.
+	boardName := w.Config.BBSName
+	if boardName == "" {
+		boardName = w.Config.BoardID
+	}
+
+	errs := writeBulletinTemplates(dir)
 	for _, b := range bulletins {
 		var buf bytes.Buffer
 		b.draw(session.NewCP437Writer(session.NewWriter(&buf)), c)
 		if err := writeBulletinPair(dir, b.base, buf.Bytes()); err != nil {
 			errs = append(errs, err)
 		}
+		var page bytes.Buffer
+		s := session.NewWriter(&page)
+		b.draw(s, web)
+		names := pageNames{
+			title:    b.title(s),
+			bbs:      boardName,
+			boardURL: w.Config.BoardURL,
+			pageURL:  bulletinPageURL(w.Config.BulletinURL, b.base),
+			date:     day,
+			game:     tr(s, "Immortal Barons"),
+		}
+		if err := writeBulletinHTML(dir, b.base, names, page.Bytes()); err != nil {
+			errs = append(errs, err)
+		}
 	}
 	return errs
+}
+
+// titled names a bulletin whose page heading is not drawn from a table.
+func titled(name string) func(session.Session) string {
+	return func(s session.Session) string { return tr(s, name) }
 }
 
 // writeBulletinPair writes the coloured and the plain form of one bulletin.
@@ -265,9 +302,24 @@ var rankBulletinFiles = []struct {
 func rankBulletins() []bulletinRender {
 	out := make([]bulletinRender, 0, len(rankBulletinFiles))
 	for _, r := range rankBulletinFiles {
-		out = append(out, bulletinRender{r.base, func(s session.Session, c *ctx) {
-			renderIPScoreRank(s, c.Term, ipScoreRows(c), r.kind)
-		}})
+		out = append(out, bulletinRender{
+			r.base,
+			func(s session.Session) string { return ipScoreViewName(s, r.kind) },
+			func(s session.Session, c *ctx) {
+				renderIPScoreRank(s, c.Term, ipScoreRows(c), r.kind)
+			},
+		})
 	}
 	return out
+}
+
+// bulletinPageURL is where this bulletin's page will be read from, for a header
+// that wants to name its own address. It is empty when the sysop has not said
+// where the directory is served from, which is the common case and not an error:
+// a board serving no website still writes the files.
+func bulletinPageURL(base, name string) string {
+	if base == "" {
+		return ""
+	}
+	return strings.TrimSuffix(base, "/") + "/" + name + ".html"
 }

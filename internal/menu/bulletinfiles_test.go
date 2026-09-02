@@ -226,6 +226,10 @@ func TestBulletinsAreCP437NotUTF8(t *testing.T) {
 	}
 	var checked int
 	for _, e := range entries {
+		// The web pages beside them are UTF-8, as a web page is.
+		if ext := filepath.Ext(e.Name()); ext != ".ans" && ext != ".txt" {
+			continue
+		}
 		body, err := os.ReadFile(filepath.Join(dir, e.Name()))
 		if err != nil {
 			t.Fatal(err)

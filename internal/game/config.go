@@ -289,6 +289,23 @@ type Config struct {
 	// display. Machine-local like the packet directories, so it lives in bbs.cfg
 	// rather than the league's shared rules; blank writes none (#233).
 	BulletinDir string `json:"-"`
+	// BBSName is what this board is called, for the bulletin web pages to put in
+	// their titles. Separate from BoardID, which is the board's name in the
+	// LEAGUE and has to match the roster character for character: a sysop who
+	// wants "The Dog House BBS" on a web page should not have to send that string
+	// to every other board in the league to get it. Blank falls back to BoardID,
+	// which is right for the many boards where the two are the same word (#245).
+	BBSName string `json:"-"`
+	// BoardURL is the board's own website, for the bulletin pages to link its
+	// name back to. Blank leaves the name as plain text rather than as a link to
+	// nowhere (#245).
+	BoardURL string `json:"-"`
+	// BulletinURL is the public address BulletinDir is served from, which is the
+	// one thing the game cannot work out for itself: it knows where it writes the
+	// files and nothing about how the board's web server reaches them. It is what
+	// makes an absolute per-page URL possible, so a header can carry a canonical
+	// link or an og:url. Blank leaves that token empty (#245).
+	BulletinURL string `json:"-"`
 
 	// Lottery is whether this board offers the Queen's lottery, default on. It
 	// lives in bbs.cfg with the settings above for the reason the original keeps

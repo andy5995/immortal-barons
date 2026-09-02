@@ -14,6 +14,7 @@ func writeFixture(t *testing.T, root string) {
 		"README.md":                                   "# Immortal Barons\n\nOverview. See [door setup](docs/door-setup.md).\n",
 		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
 		"docs/door-setup.md":                          "# Door Setup\n\nSetup. See [leagues](docs/inter-bbs.md).\n",
+		"docs/bulletins.md":                           "# Bulletin Files\n\nWhat the game writes for your BBS menu and your website.\n",
 		"docs/inter-bbs.md":                           "# Inter-BBS Leagues\n\nLeague play.\n",
 		"docs/inter-bbs-troubleshooting.md":           "# Inter-BBS Troubleshooting\n\nWhen packets stop arriving.\n",
 		"docs/ftn-transport.md":                       "# FTN Transport\n\nTransport setup.\n",

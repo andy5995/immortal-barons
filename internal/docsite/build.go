@@ -101,6 +101,7 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav = append(nav, navNode{title: "Manual vs. Code", path: "manual-vs-code/index.md"})
 
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
+	nav = append(nav, navNode{title: "Bulletin Files", path: "bulletins/index.md"})
 	nav = append(nav, navNode{title: "Inter-BBS Leagues", path: "inter-bbs/index.md"})
 	nav = append(nav, navNode{title: "Inter-BBS Troubleshooting", path: "inter-bbs-troubleshooting/index.md"})
 	nav = append(nav, navNode{title: "FTN Transport", path: "ftn-transport/index.md"})

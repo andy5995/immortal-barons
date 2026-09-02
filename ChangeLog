@@ -1,4 +1,7 @@
 (in-progress:)
+  * Each bulletin is written as a web page and as a block to include in one
+  * The website gains a Bulletin Files page for sysops
+  * bbs.cfg takes a BBSName, a BoardURL and a BulletinURL for the web pages
   * A league board writes bulletin files for the eight InterBBS Scores rankings
   * Bulletin files are written in CP437, so ANSI viewers read their box rules
   * An inbox holds at most fifty messages; the oldest goes when a newer one arrives

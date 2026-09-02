@@ -514,6 +514,7 @@ var sitePages = []struct{ src, slug string }{
 	{"README.md", ""},
 	{"docs/playing.md", "guide"},
 	{"docs/door-setup.md", "door-setup"},
+	{"docs/bulletins.md", "bulletins"},
 	{"docs/inter-bbs.md", "inter-bbs"},
 	{"docs/inter-bbs-troubleshooting.md", "inter-bbs-troubleshooting"},
 	{"docs/ftn-transport.md", "ftn-transport"},

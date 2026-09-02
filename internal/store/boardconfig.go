@@ -30,6 +30,9 @@ const BoardConfigFile = "bbs.cfg"
 // written in this casing.
 const (
 	keyBoardID  = "BoardID"
+	keyBBSName  = "BBSName"
+	keyBoardURL = "BoardURL"
+	keyBullURL  = "BulletinURL"
 	keyLeague   = "LeagueNumber"
 	keyInbound  = "Inbound"
 	keyOutbound = "Outbound"
@@ -81,6 +84,12 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 		switch {
 		case strings.EqualFold(key, keyBoardID):
 			cfg.BoardID = value
+		case strings.EqualFold(key, keyBBSName):
+			cfg.BBSName = value
+		case strings.EqualFold(key, keyBoardURL):
+			cfg.BoardURL = value
+		case strings.EqualFold(key, keyBullURL):
+			cfg.BulletinURL = value
 		case strings.EqualFold(key, keyLeague):
 			// Out of range is left unset (0, "never set") rather than failing the
 			// whole import, the way the roster parser drops one bad node line
@@ -135,6 +144,16 @@ func BoardConfigText(cfg game.Config) string {
 	b.WriteString("# roster exactly, spelling and spacing included.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyBoardID, cfg.BoardID)
 
+	b.WriteString("# What your board is called, for the titles of the bulletin web pages.\n")
+	b.WriteString("# Write it however you want it read -- nothing else uses it, so it does\n")
+	b.WriteString("# not have to match the roster the way BoardID does. Left blank, the\n")
+	b.WriteString("# pages use BoardID.\n")
+	fmt.Fprintf(&b, "%s %s\n\n", keyBBSName, cfg.BBSName)
+
+	b.WriteString("# Your board's own website, if it has one. The bulletin pages link the\n")
+	b.WriteString("# name above back to it. Left blank, the name is plain text there.\n")
+	fmt.Fprintf(&b, "%s %s\n\n", keyBoardURL, cfg.BoardURL)
+
 	b.WriteString("# The number this league runs under, 1-999. Ask your Coordinator for\n")
 	b.WriteString("# it; a board playing in a league needs one. Left at 0 this board\n")
 	b.WriteString("# would take every league's packets as its own, so the transport\n")
@@ -150,9 +169,15 @@ func BoardConfigText(cfg game.Config) string {
 	b.WriteString("# Where the game writes its bulletin files: the scoreboard, today's and\n")
 	b.WriteString("# yesterday's news, the world report of the league's battles, and the\n")
 	b.WriteString("# league's eight rankings of top planets and top players. Each is\n")
-	b.WriteString("# written twice, with colour (.ans) and without (.txt), both in CP437,\n")
-	b.WriteString("# for a BBS to show on its own bulletin menu. Leave it blank to write\n")
-	b.WriteString("# none.\n")
+	b.WriteString("# The address the directory below is served from on the web, if it is.\n")
+	b.WriteString("# The game knows where it writes the files and nothing about how your\n")
+	b.WriteString("# web server reaches them, so this is what lets a page carry its own\n")
+	b.WriteString("# address in a canonical link or an og:url.\n")
+	fmt.Fprintf(&b, "%s %s\n\n", keyBullURL, cfg.BulletinURL)
+
+	b.WriteString("# written with colour (.ans), without it (.txt), and as two HTML files\n")
+	b.WriteString("# for a website. The .ans and .txt are CP437, for a BBS to show on its\n")
+	b.WriteString("# own bulletin menu. Leave it blank to write none.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyBulletin, cfg.BulletinDir)
 
 	b.WriteString("# Whether this board offers the Queen's lottery: a six-letter ticket,\n")

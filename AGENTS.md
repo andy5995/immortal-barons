@@ -328,6 +328,14 @@ mis-set this way before the disassembly corrected them.
 mechanic works, or restate any of its numbers, here — this file just points to
 the spec, which is the single source (the same rule as balance*.go for constants).
 
+`docs/bulletins.md` is the sysop page for the bulletin files: what is written,
+the four `bbs.cfg` lines, the six header tokens and the stylesheet. A new
+`docs/*.md` page has FOUR registration points and a missing one breaks a build
+rather than the page — `sitePages` and the linker map (`internal/docsite`), the
+nav in `buildNav`, the fixture in `assemble_test.go` (its nav check fails on a
+page it cannot find), and `scripts/build-archives.sh`, which no `--include=*.go`
+grep will ever match.
+
 `docs/dev/releasing.md` is the release checklist — the translation passes, the
 ChangeLog stamp, what to verify, and the **version bump after publishing**,
 which was missed on v0.0.5.
@@ -450,12 +458,32 @@ and yesterday's news, a World Report, and the league's eight InterBBS Scores
 rankings as `.ans` and `.txt` for a BBS bulletin menu (#233, #245). Both forms
 are CP437, not UTF-8: a `.ans` file is a CP437 artifact, and emitting the rules
 as UTF-8 gave every ANSI viewer two mojibake characters per rule. The nine
-league files are written only by a board in a league. The World Report is IB's own — every attack fought anywhere in the
-league, no WMD and no terror op, drawn from a structured log that rides with the
-scores rather than from the news prose, which is randomised and translated. A
-board playing alone writes the rest but no World Report. HTML generation was
-built and removed: a template compiled into the game is one a sysop cannot
-restyle, and ANSI-to-HTML converters already exist.
+league files are written only by a board in a league. The World Report is IB's
+own — every attack fought anywhere in the league, no WMD and no terror op, drawn
+from a structured log that rides with the scores rather than from the news prose,
+which is randomised and translated. A board playing alone writes the rest but no
+World Report. Each bulletin is also written as `<base>.html` (wrapped in
+`header.html` and `footer.html`) and `<base>.inc.html` (the bare `<pre>` block,
+to include in a page a board already builds), drawn from a UTF-8 pass of the same
+function. Those two wrappers and `bulletin.css` are written ONLY when absent and
+never rewritten: HTML generation was built and removed once because the template
+was compiled into the game and a sysop could not restyle it, so a run that
+overwrote an edited wrapper would reintroduce exactly that. Colours reach the
+page as `ansi-fg-N` / `ansi-bg-N` class names, never as inline styles — those
+names are the whole contract a replacement stylesheet has to meet. The game's
+name is hyperlinked to the site wherever a screen draws it, inside its colour
+span so the link does not repaint a heading, and marked by a highlight bar
+rather than an underline so colour is not the only thing distinguishing it. A
+wrapper's six tokens are filled per page — `{{title}}`, `{{bbs}}`,
+`{{boardurl}}`, `{{pageurl}}`, `{{date}}`, `{{game}}` — so a sysop's own meta
+tags can carry the page's address and date. `{{bbs}}` is `BBSName` from
+`bbs.cfg`, falling back to `BoardID`, which is a separate key because `BoardID`
+has to match the league roster character for character; `{{pageurl}}` needs
+`BulletinURL`, the one thing the game cannot derive, since it knows where it
+writes the files and nothing about how the board serves them. A tag left blank
+by a token is removed (`<link href="">`, `<meta content="">`) and an anchor is
+unwrapped keeping its text, so an unset key costs nothing rather than emitting a
+canonical link to nowhere.
 
 **Screen fidelity**: menus, tables, prompts, combat/raid reports, the four
 advisor pages, and the diplomacy screens (incoming treaty offer, View Treaties'

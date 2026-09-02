@@ -39,13 +39,10 @@ Set these on the **Caps & Node** page:
   both sides are set, two leagues can share an inbound directory: each game
   ignores the other's packets, and marks its own files `L042-`.
 - **Bulletin Dir** — where the game writes its own bulletin files for your BBS
-  to display: the scoreboard, today's and yesterday's news, a World Report of
-  every battle fought anywhere in the league, and the league's eight rankings
-  (top planets and top players, each by score, net worth, land, and net worth
-  per region). Each is written twice, once with colour (`.ans`) and once
-  without (`.txt`), both in CP437. Leave the setting blank and none are
-  written. [Bulletin files for your BBS](door-setup.md#bulletin-files-for-your-bbs)
-  names every file.
+  and your website to show: the scoreboard, the news, a World Report of every
+  battle fought anywhere in the league, and the league's eight rankings. Three
+  more settings go with it — **BBS Name**, **Board URL** and **Bulletin URL** —
+  and [Bulletin Files](bulletins.md) covers all four.
 - **Inbound Dir** — the directory where packets from other boards arrive. This
   is usually your mailer's inbound directory, where it puts every file it
   receives.
