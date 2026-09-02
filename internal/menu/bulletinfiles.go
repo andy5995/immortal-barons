@@ -25,6 +25,13 @@ import (
 // Two files per bulletin, as the original wrote them: .ans keeps the colour,
 // .txt is the same screen with the escapes stripped by the plain writer the
 // door already uses for a caller with no ANSI.
+//
+// Both are CP437, not UTF-8. A .ans file is a CP437 artifact by definition --
+// PabloDraw, Moebius and a BBS bulletin display all read it that way -- so
+// emitting the box rules as UTF-8 gave every one of them two mojibake
+// characters where one rule should be, which is how this was reported. It is
+// also what the door's own default charset writes, so a bulletin now looks
+// like the screen it was drawn from.
 
 // bulletinRender is one bulletin: the file's base name and how to draw it.
 type bulletinRender struct {
@@ -54,7 +61,9 @@ func WriteBulletins(w *game.World, dir string) []error {
 	if day == "" {
 		day = w.LastMaintDate
 	}
-	c := &ctx{World: w, Term: Term{UTF8: true}, day: day}
+	// Term{} is CP437 -- the charset these files are written in, and the one the
+	// column measuring has to agree with or a realm name pads short.
+	c := &ctx{World: w, Term: Term{}, day: day}
 	bulletins := []bulletinRender{
 		{"scores", func(s session.Session, c *ctx) { printScores(s, c) }},
 		{"tdynews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
@@ -69,7 +78,7 @@ func WriteBulletins(w *game.World, dir string) []error {
 	var errs []error
 	for _, b := range bulletins {
 		var buf bytes.Buffer
-		b.draw(session.NewWriter(&buf), c)
+		b.draw(session.NewCP437Writer(session.NewWriter(&buf)), c)
 		if err := writeBulletinPair(dir, b.base, buf.Bytes()); err != nil {
 			errs = append(errs, err)
 		}

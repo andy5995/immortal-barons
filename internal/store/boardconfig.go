@@ -149,8 +149,9 @@ func BoardConfigText(cfg game.Config) string {
 
 	b.WriteString("# Where the game writes its bulletin files: the scoreboard, today's and\n")
 	b.WriteString("# yesterday's news, and the world report of the league's battles. Each is\n")
-	b.WriteString("# written twice, with colour (.ans) and without (.txt), for a BBS to\n")
-	b.WriteString("# show on its own bulletin menu. Leave it blank to write none.\n")
+	b.WriteString("# written twice, with colour (.ans) and without (.txt), both in CP437,\n")
+	b.WriteString("# for a BBS to show on its own bulletin menu. Leave it blank to write\n")
+	b.WriteString("# none.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyBulletin, cfg.BulletinDir)
 
 	b.WriteString("# Whether this board offers the Queen's lottery: a six-letter ticket,\n")

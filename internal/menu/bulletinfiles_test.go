@@ -1,10 +1,12 @@
 package menu
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -113,5 +115,46 @@ func TestStandAloneBoardWritesNoWorldReport(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(dir, want)); err != nil {
 			t.Errorf("a stand-alone board did not write %s: %v", want, err)
 		}
+	}
+}
+
+// The reported defect (#245): the files went out as UTF-8, so every box rule
+// reached PabloDraw, Moebius and a BBS bulletin display as two mojibake
+// characters. A .ans file is CP437, and so is the .txt beside it.
+func TestBulletinsAreCP437NotUTF8(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.AICount = 2
+	cfg.BoardID = "Alpha BBS"
+	cfg.IBBS = true
+	w := game.NewWorldSeed(cfg, 1)
+	w.Today = "2026-09-02"
+	dir := t.TempDir()
+	if errs := WriteBulletins(w, dir); len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var checked int
+	for _, e := range entries {
+		body, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.ContainsFunc(body, func(r rune) bool { return r > 0x7f }) {
+			continue // nothing but ASCII in it, so there is nothing to encode
+		}
+		checked++
+		if utf8.Valid(body) {
+			t.Errorf("%s decodes as UTF-8, so its rules are multi-byte", e.Name())
+		}
+		// The horizontal rule is CP437 0xC4, one byte.
+		if !bytes.Contains(body, []byte{0xc4}) {
+			t.Errorf("%s carries no CP437 rule byte", e.Name())
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no bulletin carried a rule at all; the test proved nothing")
 	}
 }

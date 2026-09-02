@@ -272,8 +272,10 @@ Set `BulletinDir` in `bbs.cfg` to a directory and the game writes its own
 bulletins there whenever it runs its daily or planetary step: the scoreboard,
 today's and yesterday's news, and a World Report of every battle fought in the
 league. Each is written twice — `.ans` with colour and `.txt` without — so you can
-point a bulletin menu entry at whichever your callers can read. Leave the
-setting blank and none are written.
+point a bulletin menu entry at whichever your callers can read. Both are CP437,
+the character set your BBS software and ANSI art programs expect, so the rules
+and blocks come out as single characters. Leave the setting blank and none are
+written.
 
 To publish them on the web, run the `.ans` files through an ANSI-to-HTML
 converter: those already exist, and they give you styling choices a generated

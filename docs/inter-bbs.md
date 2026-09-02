@@ -41,8 +41,8 @@ Set these on the **Caps & Node** page:
 - **Bulletin Dir** — where the game writes its own bulletin files for your BBS
   to display: the scoreboard, today's and yesterday's news, and a World Report
   of every battle fought anywhere in the league. Each is written twice, once
-  with colour (`.ans`) and once without (`.txt`), so you can point a bulletin
-  menu entry at whichever your caller can read. Leave the setting blank and
+  with colour (`.ans`) and once without (`.txt`), both in CP437, so you can
+  point a bulletin menu entry at whichever your caller can read. Leave the setting blank and
   none are written. To publish them on the web, run the `.ans` files through an
   ANSI-to-HTML converter.
 - **Inbound Dir** — the directory where packets from other boards arrive. This
