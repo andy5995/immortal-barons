@@ -3222,6 +3222,9 @@ gate — IB had both and dropped them. Two deliberate differences remain:
 - **Enter does nothing at the message prompt.** Every other prompt in the game
   treats Enter as the default, which here would skip an unread message for a
   player holding Enter through the pre-turn stops. Only R/D/I/Q act.
+- **An inbox holds at most `MailboxMax` (50) messages**, local and
+  interplanetary together; the oldest goes when a newer one arrives. IB's own
+  bound, so a mail-bomb cannot grow the world file.
 
 Box geometry, measured from a live capture: a 76-column top rule carrying the
 date and time, and a short 41-column rule under the From/To headers (it does not

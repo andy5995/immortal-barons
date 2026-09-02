@@ -122,7 +122,7 @@ func (w *World) deliverIPMessage(m IPMessage) {
 			return
 		}
 		msg.To = w.addressLetters(m.ToEmpires, to)
-		to.Mail = append(to.Mail, msg)
+		to.deliver(msg)
 		return
 	}
 	if m.ToCoordinator {
@@ -131,7 +131,7 @@ func (w *World) deliverIPMessage(m IPMessage) {
 			return
 		}
 		msg.To = w.EmpireLetter(co)
-		co.Mail = append(co.Mail, msg)
+		co.deliver(msg)
 		return
 	}
 	// Every living realm, computer barons included — the same reach the local
@@ -151,7 +151,7 @@ func (w *World) deliverIPMessage(m IPMessage) {
 		}
 		one := msg
 		one.To = all
-		e.Mail = append(e.Mail, one)
+		e.deliver(one)
 	}
 }
 

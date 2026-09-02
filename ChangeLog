@@ -1,4 +1,6 @@
 (in-progress:)
+  * An inbox holds at most fifty messages; the oldest goes when a newer one arrives
+  * A typed line stops taking keys at 255 characters
   * A realm you have an alliance with can be attacked, after the breach prompt
   * An attack on a rival realm plays out over nine seconds before the report
   * A relayed packet is sent plain to a peer that cannot read a bundle

@@ -38,6 +38,13 @@ func GuardEnd(err *error) {
 	}
 }
 
+// LineMaxRunes bounds a typed line. Past it further keys are ignored (not
+// echoed) until Backspace or Enter, so a caller holding a key down over a
+// socket cannot grow the buffer for the whole session. Wider than any prompt's
+// own limit (a realm name, a message line) so those still report their own
+// error.
+const LineMaxRunes = 255
+
 // ReadLine reads a line of input terminated by Enter, echoing keystrokes
 // (the console runs in no-echo mode). Backspace/DEL erase the last rune.
 // It returns whatever was typed so far if the stream ends.
@@ -65,7 +72,7 @@ func ReadLineFrom(s Session, typed []rune) (string, error) {
 				fmt.Fprint(s, "\b \b")
 			}
 		default:
-			if r >= 32 {
+			if r >= 32 && len(b) < LineMaxRunes {
 				b = append(b, r)
 				fmt.Fprintf(s, "%c", r)
 			}

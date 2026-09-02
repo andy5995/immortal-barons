@@ -50,7 +50,15 @@ func (w *World) SendMail(from, to *Empire, m Message) {
 	if m.When == "" {
 		m.When = time.Now().Format(StampFormat)
 	}
-	to.Mail = append(to.Mail, m)
+	to.deliver(m)
+}
+
+// deliver puts m in the inbox and holds it at MailboxMax, oldest out first.
+func (e *Empire) deliver(m Message) {
+	e.Mail = append(e.Mail, m)
+	if n := len(e.Mail) - MailboxMax; n > 0 {
+		e.Mail = append(e.Mail[:0], e.Mail[n:]...)
+	}
 }
 
 // A message's "To" records the recipient's slot letter — see EmpireLetter in

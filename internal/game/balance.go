@@ -306,6 +306,12 @@ const (
 // present baron as absent costs nothing.
 const OnlineWindowSecs = 300
 
+// Mailbox cap — an inbox holds at most this many messages; the oldest is
+// discarded when a newer one arrives. IB's own: BRE's fixed-size record bounds
+// mail by construction, IB's JSON list does not, and a mail-bomb would otherwise
+// grow the world file without limit.
+const MailboxMax = 50
+
 // MoraleDesertBands are the per-turn desertion rate draws, worst band first:
 // the rate is Base + Random(Up) − Random(Down), and the index is
 // morale/MoraleDesertBandWidth. BINARY-VERIFIED (BRE.OVR 0xC20C, 0xC245, 0xC27D
