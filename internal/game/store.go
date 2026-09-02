@@ -46,7 +46,7 @@ func (m *MemStore) Transact(fn func()) error {
 // binary the world is fingerprinted either side of fn and a change panics, so
 // the misconversion fails loudly where it is cheap to fix.
 func (m *MemStore) Snapshot(fn func()) error {
-	if !underTest() {
+	if !UnderTest() {
 		return m.Transact(fn)
 	}
 	m.w.mu.Lock()
@@ -64,14 +64,14 @@ func (m *MemStore) Snapshot(fn func()) error {
 	return nil
 }
 
-// underTest reports whether this binary is `go test`. Checked through the flag
+// UnderTest reports whether this binary is `go test`. Checked through the flag
 // the test harness registers rather than by importing testing, which a
 // production package should not pull in.
 //
 // Called, not cached in a package var: testing.Init registers that flag from the
 // generated TestMain, which runs AFTER package-level initialization, so a var
 // would be computed while the answer was still no and the guard would never arm.
-func underTest() bool { return flag.Lookup("test.v") != nil }
+func UnderTest() bool { return flag.Lookup("test.v") != nil }
 
 // SetStore swaps the transaction backend (e.g. the door installs a file-backed
 // Store that reloads/saves per Transact).

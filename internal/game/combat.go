@@ -91,6 +91,24 @@ func (w *World) CanBombingOp(e *Empire) bool {
 // composition). captured is 0 on a loss, and excludes any waste taken, which
 // transfers as waste on both paths because nobody chooses to hold ruin.
 func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
+	o := w.AttackDetailed(a, d, f, autoCapture)
+	return o.Report, o.Captured
+}
+
+// BattleOutcome is one battle in structured form, for a caller that needs the
+// figures and not only the finished report. The menu stages an attack's
+// casualties across a few seconds before showing the whole report, which it
+// cannot do from prose it would have to parse back apart.
+type BattleOutcome struct {
+	Report       string
+	Captured     int
+	AttackerLoss UnitLoss
+	DefenderLoss UnitLoss
+}
+
+// AttackDetailed is Attack with the figures kept.
+func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) BattleOutcome {
+	var captured int
 	a.AttacksToday++ // counts against the daily individual-attack cap (both human and AI)
 	f = f.clampTo(a) // only units the attacker actually holds can be committed
 	// Attacking a realm you hold an agreement with tears the agreement up and
@@ -106,7 +124,6 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	// event further down and translated into THEIR language instead, because the
 	// two players need not share one.
 	tr := func(msgid string) string { return i18n.T(a.Language, msgid) }
-	fmt.Fprintf(&b, tr("%s attacks %s!")+"\n\n", a.Name, d.Name)
 
 	// Full Defense Alliance: each of the defender's partners sends 30% of its
 	// troopers and tanks to reinforce the defense (BRE-verified). Reported to the
@@ -244,7 +261,12 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			a.Name, defenderCasIn(d.Language, dloss)))
 		w.postCombatNews(a, d, false, false)
 	}
-	return b.String(), captured
+	return BattleOutcome{
+		Report:       b.String(),
+		Captured:     captured,
+		AttackerLoss: aloss,
+		DefenderLoss: dloss,
+	}
 }
 
 // defenderCasIn lists a defender's losses by unit type in lang — the attacker's

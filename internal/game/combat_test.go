@@ -485,7 +485,7 @@ func TestBombersBleedWithTheRestOfTheForce(t *testing.T) {
 	jetsBefore := d.Jets
 
 	report, _ := w.Attack(a, d, AttackForce{Troopers: 100_000, Bombers: 100_000}, true)
-	if !strings.Contains(report, "attacks") {
+	if !strings.Contains(report, "Your casualties") {
 		t.Fatalf("never reached the battle:\n%s", report)
 	}
 	troopersLost, bombersLost := 100_000-a.Troopers, 100_000-a.Bombers

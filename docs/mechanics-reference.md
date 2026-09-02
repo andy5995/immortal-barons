@@ -4863,6 +4863,14 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **A regular attack on a rival realm is drawn over nine seconds**, where BRE
+  prints the whole report at once. The realm being attacked is named, then a
+  third of each side's casualties, then "Pushing..." and two thirds, then the
+  report — three seconds apart. The figures are the battle's own: it is resolved
+  before any of this renders, and the staging only holds parts of the result
+  back. Pirate raids get none of it, and neither does any other strike. The wait
+  cannot be skipped, and it runs outside the world lock so it never queues the
+  other nodes.
 - **An interplanetary trade deal is refused at the picker when its target is
   under New Realm Protection**, where the original accepts it and destroys it on
   arrival with nobody told. See "Send Trade Deal" above.
