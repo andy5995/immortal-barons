@@ -3376,7 +3376,7 @@ baron, and a handle with no realm left forfeits its position the way
 InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 (verified against a disassembly of the original binary):
 
-- **Group Attack** — commit real forces, not gold. Each baron sends troopers,
+- **Group Attack** — commit real forces. Each baron sends troopers,
   jets, tanks and bombers (deducted from their army); the pooled detachments are
   the strike's offense, valued by the combat table (trooper 1, jet 2, tank 4,
   bombers not at all — see the air battle below). Survivors return to each contributor,
@@ -3393,7 +3393,13 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   before a day-long one, and a strike can be timed to land before the target's
   next turn (#124). Its whole-planet option is still a row in a numbered list
   rather than BRE's `(O)ne Dominion or (A)ll?` keypress, recorded in
-  `docs/dev/bre-screens.md` as an open divergence. **Indiv. Attack Force** commits the same four types
+  `docs/dev/bre-screens.md` as an open divergence. **The original also charges
+  GOLD to join one, and refuses the join when it cannot be met** — captured
+  2026-09-02, `cap/eots-ibbs-02.cap`. IB charges none, at either end, so a group
+  attack is currently its cheap way to send forces abroad; the rate behind the
+  captured figure is not yet read, and #252 tracks both. Its picker is a table of
+  the parties forming, with each one's committed forces by unit type; IB lists a
+  sentence per party instead (#251). **Indiv. Attack Force** commits the same four types
   (#62), picks a type (see below), and carries off
   `IndividualAttackReturnsPct` (200%) of what a group attack of the same weight
   would — BRE states the trade in both of its own docs: "You get twice as many

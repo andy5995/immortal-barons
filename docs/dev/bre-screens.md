@@ -87,9 +87,10 @@ recorded-but-unverified to capture-backed:
 | Incoming treaty-offer prompt | CORRECTED — it comes *before* the recap entries |
 
 **Still not reached, and still marked in place:** the Attack Type menu was not
-re-reached this run (it needs a live two-board league with recon data), but it
-is *not* unverified — it was captured end-to-end on 2026-08-11 and its entry
-carries those colours. What genuinely remains unverified is listed at each
+re-reached on 2026-08-16 (it needs a live two-board league with recon data), but
+it is *not* unverified — it was captured end-to-end on 2026-08-11 and its entry
+carries those colours. Its `(?) Help` browser and the Join Group Attack table
+were reached on **2026-09-02**, log kept as `cap/eots-ibbs-02.cap`. What genuinely remains unverified is listed at each
 screen; the biggest are the interplanetary screens that need a second board
 running, and the Diplomacy roster-flag contradiction recorded under Full Defense
 Alliance.
@@ -1272,7 +1273,7 @@ You have 0 gold.
 
 Gates seen: `Sorry....You are under New Realm Protection!` (Terrorist / Special
 Ops while protected), `There are not any attack parties at this time.` (Join
-Group Attack).
+Group Attack — its table, when parties ARE forming, is its own section below).
 
 **Send Trade Deal** (3). **The sending flow is not captured**; it was read out of
 the binary instead (#195). A different routine from the local deal —
@@ -1409,6 +1410,10 @@ captures — because the original lays it out in columns and its width tracks
 whichever items are showing. Sizing to content is the rule, not any of these
 numbers; a box that has to hold more is wider, and IB's Covert (34) and System
 (59 English) are wider than the original's for exactly that reason.
+
+Two ruled screens are not boxes and are not in that table: the Join Group Attack
+table runs **79** columns and the Attack Type help's topic list **75**, both
+from `cap/eots-ibbs-02.cap`.
 
 **IB sizes its rules from its own rendered body** as of 2026-08-26, taking a
 declared `Width` as a FLOOR rather than a fixed value. A width measured against
@@ -2887,9 +2892,45 @@ troopers only**; whether the other three types cost the same is **UNVERIFIED**.
      Planet Two!
 ```
 
-**Deliberate divergences in IB.** IB keeps its own `(?) Help` content (the
-Attack Types topic) rather than BRE's `attack.hlp` wording, and comma-groups the
-gold figure, as it does everywhere.
+**`(?) Help` opens a topic BROWSER, not a page** (captured 2026-09-02,
+`cap/eots-ibbs-02.cap`). The key echoes `List of Topics` beside the `Choice>`
+prompt, then:
+
+```
+─────══════════════─────────────────────────────────────────────────────────
+Normal Attack            Quick Strike             Extended Battle
+─────══════════════─────────────────────────────────────────────────────────
+Enter Topic (? for list): Quick Strike
+
+   Quick Strike - In the quick strike, you add the element of surprise to
+     your attack, and are able to fight at 110% of your normal strength.
+     ...
+
+Enter Topic (? for list): None
+```
+
+Both rules are 75 columns and `0;40;34` blue: five `─`, fifteen `═`, then `─` to
+the end. The three topic names are `1;37` bright white in 25-column fields. In a
+topic body the type's name is `1;31` bright red, the ` - ` after it `0;40;31`
+red, the prose `37` white, and each figure `36` cyan.
+
+The prompt is `Enter Topic (? for list): `, the same live-completion prompt as
+`Enter Planet Name or Number (? for list): ` — the capture shows `Quick Strike`
+completed from a partial answer. Enter alone answers `None` and returns to the
+Attack Type menu; choosing a topic prints that type only and asks again, so all
+three read without leaving.
+
+The bodies are `game/attack.hlp`, which holds exactly these three topics and
+nothing else.
+
+**One figure in that help is wrong in the original.** It says the quick strike
+fights at 110%; the resolver loads 1.2 (`BRE.OVR` 0x4055a). Anything reproducing
+this screen keeps 120%.
+
+**Deliberate divergences in IB.** IB writes its own help prose rather than
+BRE's `attack.hlp` wording, and comma-groups the gold figure as it does
+everywhere. It also prints ONE page covering all three types where BRE opens the
+browser above, which is a defect rather than a divergence (#253).
 
 ## Create Group Attack (captured live 2026-08-11, two-board league)
 
@@ -2927,6 +2968,88 @@ key is a guess at wording, not a captured string — **UNVERIFIED**.
 
 An empty force prints `Attack Aborted` (capital A on both words), where the
 attack-type menu's quit path prints `Attack aborted.` with a period.
+
+## Join Group Attack (captured live 2026-09-02, `cap/eots-ibbs-02.cap`)
+
+A table of the attack parties now forming, one row each, then a prompt. This is
+the screen a baron reads to decide whether a group is worth reinforcing, which
+is why every row carries the forces already committed rather than a total.
+
+```
+Id│By│    Planet    │ Individual Target │Troopers│ Jets │ Tanks │Bombers│ Leave
+──┼──┼──────────────┼───────────────────┼────────┼──────┼───────┼───────┼──────
+ 1│A │ The Eclipse  │  Land of Dreams   │   118k │4500k │ 6698k │   25k │   2h
+
+Join which group? 1
+```
+
+| Element | Colour |
+|---|---|
+| Column headings, the `Id` figure, the prompt | `0;40;37` white |
+| Every `│`, and the whole rule | `1;30` bright black |
+| The `By` letter | `1;33` bright yellow |
+| Planet, Individual Target | `1;37` bright white |
+| The four unit counts | `1;36` bright cyan |
+| `Leave` | `1;32` bright green |
+
+The rule carries `┼` (0xC5) under each `│` and `─` (0xC4) between. Column widths
+left to right are 2, 2, 14, 19, 8, 6, 7, 7, 6 — 79 with the separators, so the
+table is sized to the screen rather than to any house width.
+
+`Leave` is **hours remaining**, `2h`, not a clock time. `By` is the creating
+realm's Id letter. Unit counts are abbreviated the way the score table
+abbreviates — `118k`, `4500k`, and `18m` on a later row in the same capture.
+
+**Several parties list together**, ids ascending, up to three rows in
+`cap/20240527-134Pho_Lazarus_Public.cap`. A whole-planet target renders as `ALL`,
+centred in its 19-column field; `Leave` runs to three digits (`95h`, `50h`,
+`23h`).
+
+```
+Id│By│    Planet    │ Individual Target │Troopers│ Jets │ Tanks │Bombers│ Leave
+──┼──┼──────────────┼───────────────────┼────────┼──────┼───────┼───────┼──────
+ 1│A │The Undermine │        ALL        │      1 │    0 │ 1000k │     0 │  50h
+ 2│A │The Undermine │        ALL        │      1 │    0 │ 1000k │     0 │  50h
+ 3│A │The Undermine │        ALL        │      0 │    0 │ 1000k │     0 │  12h
+```
+
+**The `Id` is the party's own slot, not its position in the list.** A slot is
+taken when a party is created and freed only when that party's forces come home,
+so a list can show 2 and 3 with 1 absent while 1 is away. From a **play report**
+by the project's owner, not from a capture: no capture on disk shows a gap, and
+`create_group_attack`'s head (`BRE.OVR` 0x096b) is the per-day allowance check —
+the caller's record at `+0x27a` against the limit at `[0x103e]` — rather than the
+allocation. Reading the write to the party array would settle it.
+
+The `Id` field is **2 columns**, which is consistent with a small reused slot
+number and not with a running total.
+
+**IB's ids are neither.** `NextAttackID` is one monotonic counter shared by group
+attacks, individual attacks, special ops, trade deals, spy recon and terror ops,
+reset only when the world is (`internal/game/game.go`). So a season's third group
+attack can be #4127, which no 2-column field holds and which tells a player
+nothing. Tracked with the rest of the screen in #251.
+
+**Joining costs gold**, charged after the force prompts and refused when it
+cannot be met:
+
+```
+Join which group? 1
+Send how many Troopers? (0; 12,141) 12141
+Send how many Jets? (0; 12,378,520) 12378520
+Send how many Tanks? (0; 916,433) 916433
+Send how many Bombers? (0; 105,520) 105520
+This attack will cost 99,572,437 gold.
+Sorry, you can't afford that!
+```
+
+The rate behind `99,572,437` was not worked back to a formula, so whether a join
+is priced like an individual strike is **UNVERIFIED**. IB charges nothing at all
+for a group attack at either end (#252), and draws a numbered sentence per party
+instead of this table (#251).
+
+Enter alone at `Join which group?` answers `0` and returns to the menu. With no
+party forming, the item prints `There are not any attack parties at this time.`
 
 ## The lottery (first play of a game day)
 
