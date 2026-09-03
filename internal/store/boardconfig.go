@@ -128,69 +128,27 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 	return sc.Err()
 }
 
-// BoardConfigText renders bbs.cfg as the game would like to see it, comments
-// and all. It is printed for the sysop to paste rather than written: this file
-// is the board's own identity, a sysop edits it by hand more than anything else
-// in the game, and a rules reset that rewrote it put four correct settings back
-// to defaults (#152). The one exception is the migration below, which only ever
-// creates the file when it is missing.
+// BoardConfigText renders bbs.cfg as the game would like to see it: bare
+// setting lines, no comments. Every key is documented on the website, and a
+// generated comment block is one more copy of that prose to keep in step —
+// the last one drifted, splitting a sentence across two settings. It is
+// printed for the sysop to paste rather than written: this file is the board's
+// own identity, a sysop edits it by hand more than anything else in the game,
+// and a rules reset that rewrote it put four correct settings back to defaults
+// (#152). The one exception is the migration below, which only ever creates
+// the file when it is missing.
 func BoardConfigText(cfg game.Config) string {
 	var b strings.Builder
-	b.WriteString("# This board's own settings. The game's rules are in config.json,\n")
-	b.WriteString("# which the League Coordinator's broadcast may rewrite; nothing here\n")
-	b.WriteString("# is ever changed from outside. Edit freely, one setting per line.\n\n")
-
-	b.WriteString("# The name this board is known by in the league. It must match the\n")
-	b.WriteString("# roster exactly, spelling and spacing included.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyBoardID, cfg.BoardID)
-
-	b.WriteString("# What your board is called, for the titles of the bulletin web pages.\n")
-	b.WriteString("# Write it however you want it read -- nothing else uses it, so it does\n")
-	b.WriteString("# not have to match the roster the way BoardID does. Left blank, the\n")
-	b.WriteString("# pages use BoardID.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyBBSName, cfg.BBSName)
-
-	b.WriteString("# Your board's own website, if it has one. The bulletin pages link the\n")
-	b.WriteString("# name above back to it. Left blank, the name is plain text there.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyBoardURL, cfg.BoardURL)
-
-	b.WriteString("# The number this league runs under, 1-999. Ask your Coordinator for\n")
-	b.WriteString("# it; a board playing in a league needs one. Left at 0 this board\n")
-	b.WriteString("# would take every league's packets as its own, so the transport\n")
-	b.WriteString("# refuses to run until it is set.\n")
-	fmt.Fprintf(&b, "%s %d\n\n", keyLeague, cfg.LeagueNumber)
-
-	b.WriteString("# Where packets from the other boards arrive, and where this board\n")
-	b.WriteString("# writes packets for its uplink. A path with no drive letter and no\n")
-	b.WriteString("# leading slash is read as being inside the data directory.\n")
+	fmt.Fprintf(&b, "%s %s\n", keyBoardID, cfg.BoardID)
+	fmt.Fprintf(&b, "%s %s\n", keyBBSName, cfg.BBSName)
+	fmt.Fprintf(&b, "%s %s\n", keyBoardURL, cfg.BoardURL)
+	fmt.Fprintf(&b, "%s %d\n", keyLeague, cfg.LeagueNumber)
 	fmt.Fprintf(&b, "%s %s\n", keyInbound, cfg.InboundDir)
-	fmt.Fprintf(&b, "%s %s\n\n", keyOutbound, cfg.OutboundDir)
-
-	b.WriteString("# Where the game writes its bulletin files: the scoreboard, today's and\n")
-	b.WriteString("# yesterday's news, the world report of the league's battles, and the\n")
-	b.WriteString("# league's eight rankings of top planets and top players. Each is\n")
-	b.WriteString("# The address the directory below is served from on the web, if it is.\n")
-	b.WriteString("# The game knows where it writes the files and nothing about how your\n")
-	b.WriteString("# web server reaches them, so this is what lets a page carry its own\n")
-	b.WriteString("# address in a canonical link or an og:url.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyBullURL, cfg.BulletinURL)
-
-	b.WriteString("# written with colour (.ans), without it (.txt), and as two HTML files\n")
-	b.WriteString("# for a website. The .ans and .txt are CP437, for a BBS to show on its\n")
-	b.WriteString("# own bulletin menu. Leave it blank to write none.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyBulletin, cfg.BulletinDir)
-
-	b.WriteString("# Whether this board offers the Queen's lottery: a six-letter ticket,\n")
-	b.WriteString("# once a day, for 5,000 gold. Yes or no; the league does not decide it\n")
-	b.WriteString("# for you.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyLottery, yesNo(cfg.Lottery))
-
-	fmt.Fprintf(&b, "%s %s\n\n", keyPirate, yesNo(cfg.PirateNews))
-
-	b.WriteString("# A board that forwards for its neighbours has one link per neighbour:\n")
-	b.WriteString("# \"Link <node number> <directory>\". A board with nobody to forward for\n")
-	b.WriteString("# needs none of these — anything with no line of its own goes to\n")
-	b.WriteString("# Outbound above.\n")
+	fmt.Fprintf(&b, "%s %s\n", keyOutbound, cfg.OutboundDir)
+	fmt.Fprintf(&b, "%s %s\n", keyBullURL, cfg.BulletinURL)
+	fmt.Fprintf(&b, "%s %s\n", keyBulletin, cfg.BulletinDir)
+	fmt.Fprintf(&b, "%s %s\n", keyLottery, yesNo(cfg.Lottery))
+	fmt.Fprintf(&b, "%s %s\n", keyPirate, yesNo(cfg.PirateNews))
 	for _, n := range slices.Sorted(maps.Keys(cfg.OutboundDirs)) {
 		fmt.Fprintf(&b, "%s %d %s\n", keyLink, n, cfg.OutboundDirs[n])
 	}
