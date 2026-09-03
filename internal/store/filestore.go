@@ -66,7 +66,7 @@ func (fs *FileStore) Snapshot(fn func()) error {
 // Load applies. A missing file leaves the world as-is (it was seeded at Load),
 // so the first Transact simply saves it.
 func (fs *FileStore) reload() error {
-	data, err := os.ReadFile(worldPath(fs.cfg))
+	data, err := readWorldFile(worldPath(fs.cfg))
 	if os.IsNotExist(err) {
 		return nil
 	}

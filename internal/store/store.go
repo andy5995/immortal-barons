@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -29,9 +30,55 @@ func NewGame(cfg game.Config) *game.World {
 
 func worldPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, "world.json") }
 
+// Windows refuses an open of a file another process is replacing, and refuses a
+// replacing rename while another process has the file open (see
+// isSharingViolation). Both windows are the width of one rename, and both are
+// reachable the moment a second BBS node exists: a node starting a session
+// reads world.json outside the game lock, which is the one read that is not
+// serialized against another node's save. It surfaced as a Windows-only failure
+// of TestCrossProcessConcurrentPlay, where the second process lost its whole
+// session to "The process cannot access the file because it is being used by
+// another process".
+//
+// Retrying is the fix rather than locking the startup read, because a lock
+// there would deadlock any caller that already holds one, and because either
+// version of the file is a correct answer to that read — a node re-reads under
+// the lock before it changes anything.
+const (
+	shareRetries = 20
+	shareBackoff = 20 * time.Millisecond
+)
+
+// retryShared runs op until it stops failing on a sharing violation. Any other
+// error, including the last one, is returned as it is.
+func retryShared(op func() error) error {
+	err := op()
+	for i := 0; i < shareRetries && isSharingViolation(err); i++ {
+		time.Sleep(shareBackoff)
+		err = op()
+	}
+	return err
+}
+
+// readWorldFile reads a world file through retryShared.
+func readWorldFile(path string) ([]byte, error) {
+	var data []byte
+	err := retryShared(func() error {
+		var err error
+		data, err = os.ReadFile(path)
+		return err
+	})
+	return data, err
+}
+
+// renameWorldFile replaces a world file through retryShared.
+func renameWorldFile(from, to string) error {
+	return retryShared(func() error { return os.Rename(from, to) })
+}
+
 // Load reads the saved world, or returns a fresh one if none exists.
 func Load(cfg game.Config) (*game.World, error) {
-	data, err := os.ReadFile(worldPath(cfg))
+	data, err := readWorldFile(worldPath(cfg))
 	if os.IsNotExist(err) {
 		return nil, ErrNoWorld
 	}
@@ -105,14 +152,14 @@ func Save(w *game.World, cfg game.Config) error {
 	if err := os.WriteFile(tmp, data, 0o644); err != nil {
 		return err
 	}
-	return os.Rename(tmp, worldPath(cfg))
+	return renameWorldFile(tmp, worldPath(cfg))
 }
 
 // BackupWorld copies the current world file to world.json.bak, so a destructive
 // operation (like -reset) is recoverable. It reports whether a backup was made;
 // a missing world file (a fresh install) is not an error and returns false.
 func BackupWorld(cfg game.Config) (bool, error) {
-	data, err := os.ReadFile(worldPath(cfg))
+	data, err := readWorldFile(worldPath(cfg))
 	if os.IsNotExist(err) {
 		return false, nil
 	}
