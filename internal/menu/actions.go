@@ -35,9 +35,7 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 		if military && !buyMilitaryAllowed(s, w) {
 			return Stay
 		}
-		price := unit(w)
-		max := game.UnitsAffordable(p.Gold, price)
-		n := promptSuggested(s, fmt.Sprintf("%s — %d gold each. How many?", label, price), 0, max)
+		n := promptQuantity(s, label, unit(w), p.Gold)
 		if n <= 0 {
 			return Stay
 		}
@@ -57,6 +55,35 @@ func buyMilitaryAllowed(s session.Session, w *ctx) bool {
 	return true
 }
 
+// promptQuantity asks how many of a unit to buy, offering as the ceiling what
+// the treasury can afford at that price.
+func promptQuantity(s session.Session, label string, price int, gold int64) int {
+	return promptSuggested(s, fmt.Sprintf("%s — %d gold each. How many?", label, price),
+		0, game.UnitsAffordable(gold, price))
+}
+
+// buyCarriers is the plain carrier buy, preceded by a note of how many more the
+// realm's own jets need. Jets bought without lift are silently inert — the
+// Offense screen grounds them and nothing before it says so — and the carrier
+// screen is where a player can do something about it. The note is information
+// only: it changes neither the prompt nor its default.
+func buyCarriers(s session.Session, w *ctx) Result {
+	if !buyMilitaryAllowed(s, w) {
+		return Stay
+	}
+	p := w.Player()
+	if short := game.CarrierShortfall(p); short > 0 {
+		note := fmt.Sprintf(tr(s, "Your %s Jets need %s more Carriers before they can all fly."),
+			comma(p.Jets), comma(short))
+		fmt.Fprintf(s, "\n%s\n", hiNums(WrapIndented(note, "  ")))
+	}
+	n := promptQuantity(s, "Carriers", w.CarrierPrice(p), p.Gold)
+	if n <= 0 {
+		return Stay
+	}
+	return applyBuy(s, w, "Carriers", n, (*game.World).BuildCarriers)
+}
+
 // buyJets buys jets, offering — for an order big enough to need one — to fold
 // carriers into the same gold so the jets can actually reach a battle. Jets are
 // the one unit that is inert without another (JetsPerCarrier of them per
@@ -66,9 +93,7 @@ func buyJets(s session.Session, w *ctx) Result {
 	if !buyMilitaryAllowed(s, w) {
 		return Stay
 	}
-	price := w.JetPrice(w.Player())
-	n := promptSuggested(s, fmt.Sprintf("Jets — %d gold each. How many?", price),
-		0, game.UnitsAffordable(w.Player().Gold, price))
+	n := promptQuantity(s, "Jets", w.JetPrice(w.Player()), w.Player().Gold)
 	if n <= 0 {
 		return Stay
 	}

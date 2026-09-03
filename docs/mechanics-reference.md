@@ -4995,6 +4995,13 @@ checking IB against a capture:
   and arrives able to fight. The offer quotes both exact counts before asking. It
   counts only the carriers the purchase needs, not the lift the realm already
   owns, and it is skipped for an order of 100 or fewer.
+- **The carrier screen names the realm's own lift shortfall.** Before asking how
+  many to buy, IB says how many more carriers the jets already held would need.
+  Only the shortfall — the current holding is in the menu's own `# Owned` column
+  a few lines above. BRE mentions a carrier shortage only on the Military advisor
+  page, two screens from where it can be fixed. The note is information: it
+  changes neither the prompt nor its default, and a realm whose lift already
+  covers its jets sees nothing.
 - **An interplanetary recipient letter numbers the rows of a scores packet**,
   where BRE's is the realm's own slot on its home planet, gaps and all. See "IP
   Messages" above: the slot does not ride the wire.

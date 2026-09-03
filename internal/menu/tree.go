@@ -175,7 +175,7 @@ func BuildMenus() *Menus {
 		{Key: '8', Label: "Tanks", Price: priceTank, Owned: owned(tanks),
 			Do: buyUnit("Tanks", true, priceTank, (*game.World).BuildTanks)},
 		{Key: '9', Label: "Carriers", Price: priceCarrier, Owned: owned(carriers),
-			Do: buyUnit("Carriers", true, priceCarrier, (*game.World).BuildCarriers)},
+			Do: buyCarriers},
 		{Key: 'S', Label: "Sell", Do: gotoMenu(sell)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '?', Label: "Help", Do: helpBrowse},

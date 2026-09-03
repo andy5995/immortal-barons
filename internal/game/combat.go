@@ -500,3 +500,10 @@ func addScore(e *Empire, n int) {
 		e.Score = 0
 	}
 }
+
+// CarrierShortfall is how many more carriers the realm needs before every jet it
+// holds can reach a battle. Zero when its lift already covers them.
+func CarrierShortfall(e *Empire) int {
+	need := (e.Jets + JetsPerCarrier - 1) / JetsPerCarrier
+	return max(need-e.Carriers, 0)
+}
