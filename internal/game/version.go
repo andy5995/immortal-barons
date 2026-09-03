@@ -77,8 +77,7 @@ const Version = "0.0.9"
 // everything from the boards still behind it and nothing ever releases it.
 //
 // A bump is therefore a coordinated event, not a rolling one; say so in the
-// release notes whenever this number moves. Full policy:
-// docs/dev/league-transitions.md.
+// release notes whenever this number moves.
 const Protocol = 2
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can

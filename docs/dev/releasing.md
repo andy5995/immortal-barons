@@ -120,8 +120,7 @@ Watch it: a release with no assets is a release nobody can use.
    **If it did move, the release notes must say the upgrade is coordinated.** A
    league does not roll a protocol change through board by board: it closes the
    game, drains every board's outbound queue, and switches together (decided
-   2026-08-31, #229 — the reasoning is under "Protocol bumps: drain first" in
-   `league-transitions.md`). A held packet comes back only when the READER moves
+   2026-08-31, #229). A held packet comes back only when the READER moves
    to the number it already carries, so a staggered upgrade strands the board
    that moves first. Saying this in the notes is the whole mechanism; nothing in
    the code enforces it.
