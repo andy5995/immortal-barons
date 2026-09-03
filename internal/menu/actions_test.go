@@ -96,13 +96,13 @@ func TestAllocateCapturedOffersAdvisors(t *testing.T) {
 	}
 }
 
-// Quitting the allocator early (0) must not lose captured land: the unassigned
+// A session that drops mid-picker must not lose captured land: the unassigned
 // remainder defaults to Coastal so Land still rises by the full captured count.
 func TestAllocateCapturedRemainderToCoastal(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	beforeLand, beforeCoastal, beforeRiver := p.Land, p.Regions.Coastal, p.Regions.River
-	f := &fakeSession{keys: []rune("R3\r0")} // River 3, then quit: 7 remain
+	f := &fakeSession{keys: []rune("R3\r")} // River 3, then the stream ends: 7 remain
 	allocateCaptured(f, w, 10)
 	p = w.Player()
 	if p.Regions.River != beforeRiver+3 {
@@ -113,6 +113,27 @@ func TestAllocateCapturedRemainderToCoastal(t *testing.T) {
 	}
 	if p.Land != beforeLand+10 {
 		t.Errorf("Land = %d, want %d (no captured land lost)", p.Land, beforeLand+10)
+	}
+}
+
+// '0' and Enter do not leave the picker while land is still untyped: BRE's own
+// loop (select_regions_to_lose, BRE.OVR +0x124c) re-prompts until the remaining
+// count reaches zero. IB used to take '0' as quit and retype the rest as
+// Coastal, so a player who pressed it lost the choice they were making.
+func TestAllocateCapturedZeroDoesNotQuit(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	beforeMtn, beforeCoastal := p.Regions.Mountain, p.Regions.Coastal
+	// '0' twice, then Enter, then the real answer: none of the three may end it.
+	f := &fakeSession{keys: []rune("00\rM10\r")}
+	allocateCaptured(f, w, 10)
+	p = w.Player()
+	if p.Regions.Mountain != beforeMtn+10 {
+		t.Errorf("Mountain = %d, want %d — '0' quit the picker instead of re-prompting",
+			p.Regions.Mountain, beforeMtn+10)
+	}
+	if p.Regions.Coastal != beforeCoastal {
+		t.Errorf("Coastal = %d, want %d — the remainder was dumped as Coastal", p.Regions.Coastal, beforeCoastal)
 	}
 }
 

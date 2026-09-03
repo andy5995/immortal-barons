@@ -74,7 +74,7 @@ func promptRegionChoice(s session.Session, prompt string, extras bool) int {
 	for {
 		r, err := readKey(s)
 		if err != nil {
-			return -1
+			return inputEndedChoice
 		}
 		if r == '\r' || r == '\n' { // Enter leaves, like '0'
 			fmt.Fprint(s, "\n")
@@ -105,9 +105,15 @@ func promptRegionChoice(s session.Session, prompt string, extras bool) int {
 
 // advisorsChoice is returned by promptBuyRegionType when the player picks
 // the "(*) Advisors" entry instead of a region type.
+//
+// inputEndedChoice is the read having failed, which is NOT the same answer as
+// "0": a picker that must keep asking until every region is placed still has to
+// let go of a stream that has ended (AGENTS.md, the -reset editor that redrew
+// itself 300,616 times).
 const (
-	advisorsChoice  = -2
-	redisplayChoice = -3
+	advisorsChoice   = -2
+	redisplayChoice  = -3
+	inputEndedChoice = -4
 )
 
 // promptBuyRegionType is the picker with the Buy Regions screen's extra keys:
@@ -219,8 +225,16 @@ func allocateDecontaminated(s session.Session, w *ctx, n int) {
 
 // allocateRegions reuses the Buy Regions table and picker as an allocate-N loop
 // (no gold): the player assigns n untyped regions across types until none
-// remain. Any left unassigned when they quit early default to Coastal, so the
-// land is never lost.
+// remain. There is no quitting it — '0' and Enter re-prompt, because untyped
+// land is not a state the empire can hold. BRE does the same: its picker
+// (select_regions_to_lose, BRE.OVR 0x030ebb) sends CR, '?' and '*' alike to the
+// bottom of the loop at +0x124c, which reloads the remaining count and jumps
+// back to the prompt unless it has reached zero. IB used to treat '0' as quit
+// and dump the rest into Coastal, which silently retyped land the player was
+// still choosing for.
+//
+// Anything left when the INPUT ends still defaults to Coastal, so a dropped
+// session cannot lose captured land.
 //
 // reclaim is how many of the n are ALREADY counted as Coastal and must be taken
 // back before they are shared out, so the total does not double. It is 0 for
@@ -257,8 +271,11 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 			showTable()
 			continue
 		}
-		if t < 0 { // 0/Enter: assign the rest as Coastal and finish
+		if t == inputEndedChoice { // the stream is gone: assign the rest as Coastal
 			break
+		}
+		if t < 0 { // 0/Enter: not an answer while land is still untyped
+			continue
 		}
 		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", game.BuyableRegions[t].Name), remaining, remaining)
 		if got <= 0 {

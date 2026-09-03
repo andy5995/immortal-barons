@@ -1,4 +1,5 @@
 (in-progress:)
+  * The captured-region picker asks until every region is placed
   * Each bulletin is written as a web page and as a block to include in one
   * The website gains a Bulletin Files page for sysops
   * bbs.cfg takes a BBSName, a BoardURL and a BulletinURL for the web pages

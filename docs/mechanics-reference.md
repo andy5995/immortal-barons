@@ -1753,13 +1753,20 @@ unallocated land is not territory until it is placed: it does not count toward a
 nuclear strike's damage base, technology dilution, or the scores table's
 Territory column. IB's deferred-capture model already matches this.
 
+**The picker cannot be quit.** Its loop (`allocate_unassigned_regions`,
+`BRE.OVR 0x030ebb`) sends Enter, `?` and `*` alike to the bottom at `+0x124c`,
+which reloads the pool and jumps back to the prompt unless it has reached zero.
+Untyped land is not a state a realm can hold, so there is no answer that leaves.
+IB used to take `0` as quit and retype the remainder as Coastal; it now
+re-prompts, matching this.
+
 **Divergence:** IB has no persisted pool. It runs the picker at the moment the
-land is cleaned (or captured), and drops any remainder into Coastal if the player
-quits the picker early; the original keeps the pool on the empire record and
-re-offers it. Because the gold for decontamination is already spent, IB restores
-the cleaned land as Coastal *before* asking, and the picker reclaims it — so a
-session that drops between the payment and the question costs the player the
-choice of type, never the land.
+land is cleaned (or captured); the original keeps the pool on the empire record
+and `run_player_turn` re-offers whatever is left. Because the gold for
+decontamination is already spent, IB restores the cleaned land as Coastal
+*before* asking, and the picker reclaims it — so a session that drops between the
+payment and the question costs the player the choice of type, never the land.
+That dropped session is the one case where a remainder still becomes Coastal.
 
 **Region gold income (BRE-verified — disassembly of BRE.OVR, offsets
 0x342C0–0x34A4E).** Each gold region yields, per turn,

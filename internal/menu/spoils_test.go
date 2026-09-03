@@ -52,8 +52,8 @@ func TestSpoilsStageSilentWithNothingParked(t *testing.T) {
 	}
 }
 
-// Quitting the picker early still hands the land over (as Coastal) and still
-// clears the parked count, so it cannot be claimed a second time next turn.
+// A session that drops in the picker still hands the land over (as Coastal) and
+// still clears the parked count, so it cannot be claimed a second time next turn.
 func TestSpoilsStageQuitStillClearsPending(t *testing.T) {
 	w := newWorld()
 	var beforeLand int
@@ -62,7 +62,7 @@ func TestSpoilsStageQuitStillClearsPending(t *testing.T) {
 		p.PendingRegions = 10
 		beforeLand = p.Land
 	})
-	f := &fakeSession{keys: []rune("0")}
+	f := &fakeSession{}
 	spoilsStage(f, w)
 	p := w.Player()
 	if p.Land != beforeLand+10 {

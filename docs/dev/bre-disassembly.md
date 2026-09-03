@@ -487,7 +487,9 @@ region type while subtracting the same from the pool. Its four callers are the
 three that credit the pool — a won regular attack, a pirate raid, waste
 decontamination — plus `run_player_turn`, which re-offers whatever is left. The
 key handling is the region-picker's: a type letter, `?` to redisplay the list,
-`*` for the advisors, Enter to leave.
+`*` for the advisors. Enter does NOT leave — it falls to the loop bottom at
+`+0x124c` with the other two, which re-reads the pool and prompts again unless it
+is empty.
 
 Renamed in the catalog with `select_regions_to_lose` retired to `aliases`, so
 the old name still resolves — the convention `calculate_crown_tax` already
