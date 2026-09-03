@@ -65,6 +65,11 @@ type RemoteTerror struct {
 	// each one differently (#166). Absent on a packet written before that, which
 	// falls back to the blanket unit damage every op used to do.
 	Op TerrorOpType `json:",omitempty"`
+	// FromEmpire is the realm that sent the agents, carried so the target board
+	// can name it on the one line the original names it: the count of agents its
+	// security caught. Absent on a packet from a board that predates the field,
+	// which then names the board alone.
+	FromEmpire string `json:",omitempty"`
 	// Strength is the sender's covert pool, measured at home and carried across
 	// because the target board cannot see it. BRE does exactly this: the launcher
 	// calls the covert-pool routine for its own realm and writes the figure into
@@ -96,6 +101,7 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 	t := RemoteTerror{
 		ID:           w.NextAttackID,
 		FromBoard:    w.Config.BoardID,
+		FromEmpire:   e.Name,
 		TargetEmpire: targetEmpire,
 		Agents:       agents,
 		Op:           op,
@@ -147,29 +153,61 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	//
 	// NOT modelled: the original rolls each agent against the covert odds and
 	// only a winning agent lands. IB lands them all, as it always has here.
-	hit := 0
+	hit, caught := 0, 0
 	for i := 0; i < t.Agents; i++ {
 		// A packet with no strength recorded is from a board that predates the
 		// roll; its agents all land, which is what it was written expecting.
 		if t.Strength > 0 && !w.terrorAgentLands(t.Strength, defense) {
+			caught++
 			continue
 		}
 		if w.applyTerrorOp(t.Op, target) {
 			hit++
 		}
 	}
+	// The agents that did NOT get through are the only thing that gives the
+	// sender away, and they give it away whatever the rest of the batch did.
+	agentsCaught(target, t, caught)
 	res.Report = terrorOpReport(t.Op, hit)
 	if hit == 0 {
 		res.Outcome = OutcomeRepelled
-		target.addEvent(fmt.Sprintf("Terrorists from %s struck at %s and achieved nothing.", t.FromBoard, terrorOpTargetName(t.Op)))
-		w.postNews(fmt.Sprintf("Terrorists from %s reached %s and achieved nothing.", t.FromBoard, target.Name))
+		target.addEvent(fmt.Sprintf("Terrorists struck at your %s and achieved nothing.", terrorOpTargetName(t.Op)))
+		w.postNews(fmt.Sprintf("Terrorists reached %s and achieved nothing.", target.Name))
 		return res
 	}
-	target.addEvent(fmt.Sprintf("Terrorists from %s %s %s", t.FromBoard, terrorOpDamage(t.Op), timesSuffix(hit)))
-	w.postNews(fmt.Sprintf("Terrorists from %s struck %s's %s.", t.FromBoard, target.Name, terrorOpTargetName(t.Op)))
+	target.addEvent(fmt.Sprintf("Terrorists %s %s", terrorOpDamage(t.Op), timesSuffix(hit)))
+	w.postNews(fmt.Sprintf("Terrorists struck %s's %s.", target.Name, terrorOpTargetName(t.Op)))
 	res.Won = true
 	res.Outcome = OutcomeWon
 	return res
+}
+
+// agentsCaught files the one entry an interplanetary terror op gives its source
+// away on: the agents the target's security stopped, named by realm and board.
+//
+// BINARY-VERIFIED, and the reason every other line above it names nobody: the
+// original's received-op resolver (BRE.OVR 0x04a96b) counts the agents that
+// failed and files this line only when that count is non-zero, while the
+// per-operation lines for the agents that DID get through carry no source at
+// all. A live capture shows both halves in one recap: this line carries a count,
+// the realm and its planet, while the unit-loss and demoralization lines beside
+// it name nobody. See covertFoiled for the local sibling of the same rule.
+//
+// A packet with no realm recorded names the board alone rather than dropping
+// the line: the board is the part IB has always carried.
+func agentsCaught(target *Empire, t RemoteTerror, caught int) {
+	if caught <= 0 {
+		return
+	}
+	who := t.FromBoard
+	if t.FromEmpire != "" {
+		who = fmt.Sprintf("%s of %s", t.FromEmpire, t.FromBoard)
+	}
+	agents := "agents"
+	if caught == 1 {
+		agents = "agent"
+	}
+	target.addEvent(fmt.Sprintf("Your security caught %d %s from %s.", caught, agents, who))
 }
 
 // terrorAgentLands is whether one committed agent gets through, weighing the
@@ -222,13 +260,13 @@ func (w *World) resolveLegacyTerror(t RemoteTerror, target *Empire, res AttackRe
 		destroyed += loss
 	}
 	if destroyed == 0 {
-		target.addEvent(fmt.Sprintf("Terrorists from %s struck but destroyed nothing.", t.FromBoard))
-		w.postNews(fmt.Sprintf("Terrorists from %s reached %s and achieved nothing.", t.FromBoard, target.Name))
+		target.addEvent("Terrorists struck but destroyed nothing.")
+		w.postNews(fmt.Sprintf("Terrorists reached %s and achieved nothing.", target.Name))
 		return res
 	}
-	target.addEvent(fmt.Sprintf("Terrorists from %s destroyed %d of your forces!", t.FromBoard, destroyed))
-	w.postNews(fmt.Sprintf("Terrorists from %s destroyed %s of %s's forces!",
-		t.FromBoard, numfmt.Comma(int64(destroyed)), target.Name))
+	target.addEvent(fmt.Sprintf("Terrorists destroyed %d of your forces!", destroyed))
+	w.postNews(fmt.Sprintf("Terrorists destroyed %s of %s's forces!",
+		numfmt.Comma(int64(destroyed)), target.Name))
 	res.LandTaken = destroyed
 	res.Won = true
 	return res

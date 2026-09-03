@@ -1161,6 +1161,53 @@ func TestEachTerrorOpHitsItsOwnField(t *testing.T) {
 	}
 }
 
+// An arriving terror op names its sender on exactly one line — the agents the
+// target's security caught — and on none of the others. That is the original's
+// split (BRE.OVR 0x04a96b, and see agentsCaught); IB used to name the sending
+// BOARD on every line and the realm on none, which gave a success away and left
+// a caught batch anonymous.
+func TestTerrorNamesTheSenderOnlyWhereAgentsAreCaught(t *testing.T) {
+	events := func(e *Empire) string {
+		var b strings.Builder
+		for _, ev := range e.Events {
+			b.WriteString(ev.Text + "\n")
+		}
+		return b.String()
+	}
+
+	// A sender with no covert pool at all: every agent is caught, so the line
+	// that names them must appear.
+	cfg := DefaultConfig()
+	cfg.BoardID = "boardB"
+	w := NewWorldSeed(cfg, 3)
+	weak := w.AddHuman("victim", "Victim")
+	weak.Protection, weak.Agents, weak.Morale = 0, 1_000_000, 100
+	w.resolveRemoteTerror(RemoteTerror{
+		ID: 1, FromBoard: "The X-Bit BBS", FromEmpire: "Selby", TargetEmpire: "Victim",
+		Agents: 4, Op: TerrorOpDemoralize, Strength: 1,
+	})
+	if out := events(weak); !strings.Contains(out, "Selby of The X-Bit BBS") {
+		t.Errorf("a caught batch must name the realm and its board; got:\n%s", out)
+	}
+
+	// A sender that overwhelms the defence: nothing is caught, so nothing names
+	// it — not the realm, not the board.
+	w = NewWorldSeed(cfg, 3)
+	strong := w.AddHuman("victim", "Victim")
+	strong.Protection, strong.Agents, strong.Morale = 0, 1, 100
+	w.resolveRemoteTerror(RemoteTerror{
+		ID: 1, FromBoard: "The X-Bit BBS", FromEmpire: "Selby", TargetEmpire: "Victim",
+		Agents: 4, Op: TerrorOpDemoralize, Strength: 100_000_000,
+	})
+	out := events(strong)
+	if !strings.Contains(out, "Terrorists") {
+		t.Fatalf("the op never landed, so the test proves nothing; got:\n%s", out)
+	}
+	if strings.Contains(out, "Selby") || strings.Contains(out, "X-Bit") {
+		t.Errorf("an op that got through must name nobody; got:\n%s", out)
+	}
+}
+
 // Send Spy takes nothing from the target: it brings intelligence home instead.
 func TestTerrorSpyTakesNothing(t *testing.T) {
 	cfg := DefaultConfig()

@@ -1372,7 +1372,13 @@ wording:
 
 IB follows this in `internal/game/covert.go`: every foiled op goes through
 `covertFoiled`, which names the attacking realm, and every success event stays
-anonymous. The Expose Enemy Ops guard in `covertRoll` routes to the same branch,
+anonymous. An arriving **interplanetary terror op** follows it too, through
+`agentsCaught` (`ibbs_terror.go`) — the packet carries the sending realm in
+`RemoteTerror.FromEmpire` so the target board can name it, and it does so only on
+the count of agents its security stopped. Until 2026-09-03 that path had it
+backwards: every line named the sending BOARD, so an op that got through gave
+its source away, and a batch that was caught named no realm because the packet
+never carried one. The Expose Enemy Ops guard in `covertRoll` routes to the same branch,
 so **an exposed realm hands you its name nine times in ten** — which is most of
 what the shield buys.
 

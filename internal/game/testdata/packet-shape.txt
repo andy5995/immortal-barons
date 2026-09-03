@@ -65,6 +65,7 @@ RemoteTerror:
   TargetEmpire
   Agents
   Op `json:",omitempty"`
+  FromEmpire `json:",omitempty"`
   Strength `json:",omitempty"`
 RemoteSpecialOp:
   ID
