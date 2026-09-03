@@ -384,6 +384,39 @@ func (w *World) BuildJets(e *Empire, n int) error {
 	return buyUnit(&e.Jets, n, w.JetPrice(e), e)
 }
 
+// BuildJetsWithCarriers spends what n jets alone would have cost on jets AND the
+// carriers to lift them, so the purchase arrives able to fight instead of
+// sitting grounded. The gold is fixed at the plain buy's price: the budget buys
+// one carrier per whole flight (JetsPerCarrier jets plus its carrier) it covers,
+// and the remainder goes on bare jets. Fewer jets than asked for, never more
+// gold. IB's own — the original sells the two separately.
+//
+// The new jets always fit: the budget covered `carriers` whole flights, so what
+// is left after paying for the carriers still buys at least carriers x
+// JetsPerCarrier jets.
+func (w *World) BuildJetsWithCarriers(e *Empire, n int) (jets, carriers int, err error) {
+	jets, carriers = w.JetCarrierBundle(e, n)
+	if n <= 0 || e.Gold < goldCost(n, w.JetPrice(e)) {
+		return 0, 0, ErrCantAfford
+	}
+	e.Gold -= goldCost(jets, w.JetPrice(e)) + goldCost(carriers, w.CarrierPrice(e))
+	e.Jets += jets
+	e.Carriers += carriers
+	return jets, carriers, nil
+}
+
+// JetCarrierBundle is what BuildJetsWithCarriers would buy for the price of n
+// jets, without buying it — the buy screen quotes the exact counts before asking
+// whether to take them. It charges nothing and changes nothing.
+func (w *World) JetCarrierBundle(e *Empire, n int) (jets, carriers int) {
+	jetPrice, carrierPrice := w.JetPrice(e), w.CarrierPrice(e)
+	budget := goldCost(n, jetPrice)
+	flight := goldCost(JetsPerCarrier, jetPrice) + int64(carrierPrice)
+	carriers = int(budget / flight)
+	jets = UnitsAffordable(budget-goldCost(carriers, carrierPrice), jetPrice)
+	return jets, carriers
+}
+
 func (w *World) BuildTurrets(e *Empire, n int) error {
 	return buyUnit(&e.Turrets, n, w.TurretPrice(e), e)
 }

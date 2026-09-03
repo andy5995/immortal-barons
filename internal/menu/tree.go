@@ -163,7 +163,7 @@ func BuildMenus() *Menus {
 		{Key: '1', Label: "Troopers", Price: priceTrooper, Owned: owned(troopers),
 			Do: buyUnit("Troopers", true, priceTrooper, (*game.World).Recruit)},
 		{Key: '2', Label: "Jets", Price: priceJet, Owned: owned(jets),
-			Do: buyUnit("Jets", true, priceJet, (*game.World).BuildJets)},
+			Do: buyJets},
 		{Key: '3', Label: "Turrets", Price: priceTurret, Owned: owned(turrets),
 			Do: buyUnit("Turrets", true, priceTurret, (*game.World).BuildTurrets)},
 		{Key: '4', Label: "Bombers", Price: priceBomber, Owned: owned(bombers),

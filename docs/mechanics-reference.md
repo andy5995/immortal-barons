@@ -4987,6 +4987,14 @@ checking IB against a capture:
   id on that screen, so a bracket cannot mean anything else there. It is a
   standings roster rather than a picker, and the flag belongs where a realm is
   chosen.
+- **An order of more than 100 jets is offered carriers to lift them.** BRE sells
+  the two separately, so a realm can spend its treasury on an air force that
+  cannot leave the ground. IB asks once, defaulting to no: answer yes and the
+  gold the jets alone would have cost is spent on whole flights instead — one
+  carrier per 100 jets, the leftover on bare jets — so the order costs the same
+  and arrives able to fight. The offer quotes both exact counts before asking. It
+  counts only the carriers the purchase needs, not the lift the realm already
+  owns, and it is skipped for an order of 100 or fewer.
 - **An interplanetary recipient letter numbers the rows of a scores packet**,
   where BRE's is the realm's own slot on its home planet, gaps and all. See "IP
   Messages" above: the slot does not ride the wire.

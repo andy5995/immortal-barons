@@ -32,11 +32,7 @@ var errAttacksExhausted = errors.New("You have used all your attacks for today."
 func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
-		// The league's Buy Military knob can forbid buying army units on the
-		// open market (players must then build them through industry). Limited
-		// mode's daily market pool isn't built yet, so it behaves like Yes.
-		if military && w.Config.BuyMilitary == game.BuyNo {
-			fail(s, fmt.Errorf("Buying military units is disabled in this league."))
+		if military && !buyMilitaryAllowed(s, w) {
 			return Stay
 		}
 		price := unit(w)
@@ -45,24 +41,87 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 		if n <= 0 {
 			return Stay
 		}
-		// Re-resolve the empire against the freshly-reloaded world and let apply
-		// re-check gold atomically — the p/price gathered above (before the prompt)
-		// may be stale after a concurrent node's transaction.
-		err := w.mutatePlayer(func(p *game.Empire) error {
-			return apply(w.World, p, n)
-		})
-		if err != nil {
-			fail(s, err)
-		} else {
-			// No pause: the Spending menu redraws right after with updated Owned
-			// counts, so the confirmation stays visible above it instead of
-			// forcing an extra keypress (BRE-style). Gold isn't repeated here —
-			// it's in the Spending menu's status footer.
-			fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
-				fmt.Sprintf(tr(s, "%d %s purchased."), n, label), ansi.Reset)
-		}
+		return applyBuy(s, w, label, n, apply)
+	}
+}
+
+// buyMilitaryAllowed reports whether the league lets army units be bought on the
+// open market, printing the refusal when it does not. The knob's other setting
+// makes players build them through industry instead; Limited mode's daily market
+// pool isn't built yet, so it behaves like Yes.
+func buyMilitaryAllowed(s session.Session, w *ctx) bool {
+	if w.Config.BuyMilitary == game.BuyNo {
+		fail(s, fmt.Errorf("Buying military units is disabled in this league."))
+		return false
+	}
+	return true
+}
+
+// buyJets buys jets, offering — for an order big enough to need one — to fold
+// carriers into the same gold so the jets can actually reach a battle. Jets are
+// the one unit that is inert without another (JetsPerCarrier of them per
+// carrier), and a player who buys the flight and forgets the lift finds out at
+// the attack screen. IB's own; the original leaves the two purchases separate.
+func buyJets(s session.Session, w *ctx) Result {
+	if !buyMilitaryAllowed(s, w) {
 		return Stay
 	}
+	price := w.JetPrice(w.Player())
+	n := promptSuggested(s, fmt.Sprintf("Jets — %d gold each. How many?", price),
+		0, game.UnitsAffordable(w.Player().Gold, price))
+	if n <= 0 {
+		return Stay
+	}
+	if n <= game.JetsPerCarrier || !askCarriersIncluded(s, w, n) {
+		return applyBuy(s, w, "Jets", n, (*game.World).BuildJets)
+	}
+	var jets, carriers int
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		var e error
+		jets, carriers, e = w.World.BuildJetsWithCarriers(p, n)
+		return e
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
+		fmt.Sprintf(tr(s, "%s Jets and %s Carriers purchased."), comma(jets), comma(carriers)), ansi.Reset)
+	return Stay
+}
+
+// askCarriersIncluded puts the carrier offer to the player, quoting the exact
+// counts the same gold would buy rather than saying only that there will be
+// fewer jets — the trade is a question of how many, so the screen answers it
+// before asking. The explanation is a wrapped line of its own rather than a
+// longer question, because a translated question runs past 80 columns where
+// AskYesNo cannot break it.
+func askCarriersIncluded(s session.Session, w *ctx, n int) bool {
+	jets, carriers := w.JetCarrierBundle(w.Player(), n)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, WrapIndented(fmt.Sprintf(tr(s,
+		"For the same gold you can have %s Jets and %s Carriers to lift them, instead of %s Jets on their own."),
+		comma(jets), comma(carriers), comma(n)), "  "), ansi.Reset)
+	return askYesNoHere(s, "  Include carriers?", false)
+}
+
+// applyBuy is the shared "charge it, then say so" tail of the buy actions.
+func applyBuy(s session.Session, w *ctx, label string, n int, apply func(*game.World, *game.Empire, int) error) Result {
+	// Re-resolve the empire against the freshly-reloaded world and let apply
+	// re-check gold atomically — the price gathered before the prompt may be
+	// stale after a concurrent node's transaction.
+	if err := w.mutatePlayer(func(p *game.Empire) error {
+		return apply(w.World, p, n)
+	}); err != nil {
+		fail(s, err)
+		return Stay
+	}
+	// No pause: the Spending menu redraws right after with updated Owned
+	// counts, so the confirmation stays visible above it instead of
+	// forcing an extra keypress (BRE-style). Gold isn't repeated here —
+	// it's in the Spending menu's status footer.
+	fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
+		fmt.Sprintf(tr(s, "%s %s purchased."), comma(n), label), ansi.Reset)
+	return Stay
 }
 
 // sellUnit wraps a "prompt for quantity, sell, report" unit-selling action.
