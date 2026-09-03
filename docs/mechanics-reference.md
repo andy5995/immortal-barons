@@ -3922,13 +3922,48 @@ handler splits the same way: keys `1`-`4` all branch to ONE shared handler
 differing only by an index into a price table, while `5`, `6` and `7` each have
 their own (`BRE.OVR` 0x029ea9, dispatch at 0x105a-0x124c).
 
-**The effects are the local ops' effects**, called through the same helpers, so
-a retune lands on both menus: food halved, a share of the market position and
-its pending proceeds destroyed, the goods stripped out of the trade deals a
-strike reaches, a quarter off each investment's principal and matching return,
-and the three missiles' own damage. Every op needs the 500 Bombers the original requires of anything on this
+**The four bombing ops' effects are the local ops' effects**, called through the
+same helpers, so a retune lands on both menus: food halved, a share of the market
+position and its pending proceeds destroyed, the goods stripped out of the trade
+deals a strike reaches, a quarter off each investment's principal and matching
+return. Every op needs the 500 Bombers the original requires of anything on this
 menu, answers to the sysop's Bombing Ops / Missile Ops switches, counts against
 the daily bombing allowance, and is stopped by New Realm Protection.
+
+**The three missiles are NOT the local missiles** — read 2026-09-03, correcting
+this section, which had them sharing the local helpers. The receiving board runs
+one resolver for all three (`BRE.OVR ovr_0450a9 +0x3c5`, catalogued as
+`resolve_received_sabre_strike`; the op type is a byte it switches on at
+`+0x5b9`, `+0x62f` and `+0x6b6`), and that resolver carries its own gates and its
+own damage bands:
+
+| stage | rule | site |
+|---|---|---|
+| the realm is still there | identity match, else "no such realm" | `+0x432` |
+| New Realm Protection | `is_under_protection` → the strike fails | `+0x457` |
+| misfire | `Random(10) == 0` → the strike fails | `+0x467` |
+| SDI | `Random(100)` against the strength percentage → intercepted, and reported with its own line | `+0x481` |
+| nuclear damage | `10 + Random(5)` percent of the target's regions to waste, capped at 32,000 | `+0x5c0` |
+| chemical damage | `15 + Random(15)` percent of the target's PEOPLE, and nothing else — no land, no morale, no support | `+0x636` |
+
+So an arriving nuclear strike ruins a wider band than the local one
+(`7 + Random(3) - Random(3)`), and an arriving chemical strike is a
+population weapon alone where the local one ruins land, gasses a flat fifth and
+breaks morale and support. There is **no interplanetary biological strike** at
+all: the menu has none and `game/ipreport.dat` carries no line for one.
+
+The outcome lines come from that file — the planet's news line and the reader's
+own event line, in pairs, for each of the four nuclear outcomes, four chemical,
+and three S3-Sabre (`^SPECIAL_OPERATIONS`), with the attacker's own report in
+`^SPECIAL_RESULTS`. The chemical pair names no figure to the victim ("killed
+several million people in chemical bombings!") while the attacker is told
+"killing %A million people!", and the nuclear pair names the region count to
+both.
+
+**IB diverges on all six rows.** It runs `nuclearEffect` and `chemicalEffect` —
+the local bands, land damage and all — for an arriving strike, and applies the
+protection, misfire and SDI gates only to the S3-Sabre. Its event text names
+exact figures in both directions. Not yet reconciled.
 
 **Three IB decisions**, none of them established from the original:
 
@@ -4002,7 +4037,7 @@ two counts:
 | `run_interbbs_menu` (SDI Program screen) | `0x212f3`, `0x215df` | prints the strength on entry and again after gold is added |
 | arriving interplanetary attack (`ovr_03f4a0`) | `+0xed6` | inside the A..Y loop that builds the planet-wide land-weighted average |
 | arriving interplanetary attack (`ovr_03f4a0`) | `+0x10aa` | the named defender's own shield, applied to the incoming force |
-| arriving S3-Sabre (`ovr_0450a9`) | `+0x481` | the interception roll |
+| arriving missile (`ovr_0450a9`) | `+0x481` | the interception roll — one resolver, so it covers the arriving nuclear and chemical strikes as well as the S3-Sabre |
 
 The funding side above came off a live capture and is exact. **The combat side
 did not.** It arrived with the feature, carries no provenance, and does not
@@ -4015,11 +4050,12 @@ as IB's own until someone reads the original's code:
   most. (#113)
 - IB applies the SDI percentage to jet effectiveness and has no bomber term. The
   original caps jets at 30% and bombers at 20%, separately. (#113)
-- An S3-Sabre is intercepted on a roll against the SDI percentage. That
-  is now the only local weapon SDI touches: the nuclear, chemical and biological
-  routines were all read and none of the three consults it, so the damage
-  discount IB used to apply is gone (#103). Whether SDI should touch the
-  S3-Sabre either is still unread. (#113)
+- An arriving missile is intercepted on a roll against the SDI percentage —
+  nuclear, chemical and S3-Sabre alike, since one resolver handles the three
+  (read 2026-09-03; this entry used to say the Sabre alone, and left it open).
+  Nothing LOCAL is shielded: the local nuclear, chemical and biological routines
+  were all read and none of the three consults SDI, so the damage discount IB
+  used to apply is gone (#103).
 - **Jets** on an arriving strike fight at `1 - SDI x 0.3/100`, **bombers** at
   `1 - SDI x 0.2/100` (truncated). Linear in the percentage; the published "up to
   30% / 20%" are what they reach at SDI 100.

@@ -478,6 +478,16 @@ adjust, used by both the escrow loop and every accept-branch transfer),
 `store_trade_offer_record`, and `pack_trade_offer_packets` (the daily-maintenance
 step that exports deals to other boards).
 
+### Two catalog names to read with care
+
+`resolve_received_sabre_strike` (`BRE.OVR 0x04546e`) resolves **every** arriving
+interplanetary missile, not the S3-Sabre alone: it takes an op-type byte and
+switches on it at `+0x5b9` (nuclear), `+0x62f` (chemical) and `+0x6b6` (Sabre),
+and the gates ahead of that switch — protection, a `Random(10)` misfire, the SDI
+interception roll — are common to the three. Its outcome lines are the eleven in
+`game/ipreport.dat`'s `^SPECIAL_OPERATIONS` section, which covers all three
+weapons. Read anything about the arriving nuclear or chemical strike here.
+
 ### A catalog name corrected
 
 `allocate_unassigned_regions` (`BRE.OVR 0x030ebb`) was catalogued as
