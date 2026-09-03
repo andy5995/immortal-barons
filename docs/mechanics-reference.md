@@ -516,10 +516,20 @@ beside it are computed by helpers rather than stored.
 | a turn played | **flat 213** | `run_player_turn`, BRE.EXE 0x03a4f |
 | won attack | **82 x regions captured** | `resolve_regular_attack`, BRE.OVR 0x010405 |
 | total conquest | **192 x regions captured** | same routine, 0x0102b0 |
-| nuclear strike | **flat 900** | `launch_nuclear_attack` |
-| chemical strike | **flat 700** | `launch_chemical_attack` |
-| biological strike | **flat 400** | `launch_biological_attack` |
+| nuclear strike | **Random(900)** | `launch_nuclear_attack` |
+| chemical strike | **Random(700)** | `launch_chemical_attack` |
+| biological strike | **Random(400)** | `launch_biological_attack` |
 | won pirate raid | **Random(300) + 100** | `launch_pirate_raid` |
+
+**The three missiles are rolled, and the per-turn award is not** — corrected
+2026-09-03, after a 2026-08-23 pass recorded all four as flat. The four
+aggressive routines and the pirate raid write the field through the same
+sequence — `add di,0x286`, push the pointer, load the immediate, `call
+0c03:0ed0`, push the result, `call 0c03:0f10` — at `+0x24db`, `+0x29bd`,
+`+0x2c21` and `+0x1334`. The pirate site names `0ed0`: 100 is added to its result
+before the add, giving the `Random(300) + 100` already verified from play. The
+per-turn award at `BRE.EXE +0x3a4f` has no `0ed0` call between its immediate and
+the add, which is what a genuinely flat award looks like.
 
 The per-turn award is a plain `push 0x00D5` — size-independent and hardcoded,
 which closes a question that stood open for months: it is a constant, not the
@@ -552,7 +562,7 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 `add di,0x286` instead, so none of them matched. See the `bre-gather` skill.
 
 **IB implements all seven** (`ScorePerTurn`, `CombatScoreWinPerRegion`,
-`CombatScoreCrushPerRegion`, `NukeScoreAward`, `ChemScoreAward`, `BioScoreAward`,
+`CombatScoreCrushPerRegion`, `NukeScoreRoll`, `ChemScoreRoll`, `BioScoreRoll`,
 `PirateScoreBase`/`PirateScoreRoll`), with Score floored at 0.
 
 ## Attack types
@@ -644,9 +654,8 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 
   The attacker also gains **`Random(900)` Score**. Empire field +0x286 is the
   Score: it is written by eight aggressive actions and read by the empire status
-  screen, the scores table's middle column, and the recon record. The award is a
-  flat draw, not a share of the damage, so a strike that ruins nothing still
-  pays.
+  screen, the scores table's middle column, and the recon record. The draw is
+  unrelated to the damage, so a strike that ruins nothing still pays.
 
   **The sibling awards, recovered in the same pass (for #103):**
 

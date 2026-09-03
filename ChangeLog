@@ -1,4 +1,5 @@
 (in-progress:)
+  * A missile's Score award is a roll up to its ceiling
   * Maintenance charges nothing until the whole sequence is answered
   * The crown tax is asked last, after the decontamination and boost offers
   * The captured-region picker asks until every region is placed

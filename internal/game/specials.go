@@ -223,9 +223,9 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 
 	regions := w.nuclearEffect(d)
 
-	// The award is a flat draw, not a share of the damage: a strike on a small
-	// realm that ruined nothing still scores.
-	addScore(a, NukeScoreAward)
+	// The award is a draw, not a share of the damage: a strike on a small realm
+	// that ruined nothing still scores.
+	addScore(a, w.rng.Intn(NukeScoreRoll))
 
 	d.addEvent(fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", a.Name, regions))
 
@@ -314,7 +314,7 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 
 	regions, people := w.chemicalEffect(d)
 
-	addScore(a, ChemScoreAward)
+	addScore(a, w.rng.Intn(ChemScoreRoll))
 
 	d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d regions reduced to waste and %d dead. Famine follows.", a.Name, regions, people))
 
@@ -336,7 +336,7 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	w.BreachTreaty(a, d)
 	// The Score lands on the sale, before any damage is rolled, so a plague
 	// that kills nobody still pays.
-	addScore(a, BioScoreAward)
+	addScore(a, w.rng.Intn(BioScoreRoll))
 
 	popPct := BioPopKillPct + w.rng.Intn(BioPopKillJitterUp) - w.rng.Intn(BioPopKillJitterDown)
 	people := int(int64(d.People) * int64(popPct) / 100) // int64: see ChemicalStrike

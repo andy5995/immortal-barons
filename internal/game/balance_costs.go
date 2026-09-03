@@ -415,15 +415,21 @@ const (
 	// +0x22ae nuclear, +0x266c chemical, +0x2b6e biological), so this is one
 	// fact rather than three.
 	StrikeCostCap = 50_000_000
-	// A successful strike also pays the attacker a FLAT NukeScoreAward of Score —
-	// re-read 2026-08-23 and corrected: the routine loads the figure as an
-	// immediate and adds it, with no Random call anywhere near it. The earlier
-	// note here said Random(900) and IB rolled one, which halved the award on
-	// average. The pirate raid IS rolled (Random(300) + 100) — that is where the
-	// shape came from. It adds to empire field +0x286, the field the scores table
-	// prints in its Score column and every aggressive action credits. Siblings:
-	// chemical 700, biological 400 (both flat).
-	NukeScoreAward = 900
+	// A successful strike also pays the attacker Random(NukeScoreRoll) of Score,
+	// added to empire field +0x286 — the field the scores table prints in its
+	// Score column and every aggressive action credits. Siblings: chemical 700,
+	// biological 400, all three the same shape.
+	//
+	// The immediate IS the roll's ceiling, not the award. A note here said the
+	// opposite between 2026-08-23 and 2026-09-03, and the local strikes paid the
+	// flat figure while the interplanetary ones rolled. All four aggressive
+	// routines write the field identically — `add di,0x286`, push the pointer,
+	// load the immediate, `call 0c03:0ed0`, push the result, `call 0c03:0f10`
+	// (+0x24db nuclear, +0x29bd chemical, +0x2c21 biological, +0x1334 pirate).
+	// The pirate site settles what `0ed0` is: its result has 100 added to it
+	// before the add, which is the Random(300) + 100 award already verified from
+	// play.
+	NukeScoreRoll = 900
 	// Waste decontamination, BINARY-VERIFIED (BRE.OVR ovr_02e6b2 +0x458 and
 	// +0x4b1). A turn may clean min(max(waste/5, 10), waste) regions — 20% of
 	// what is ruined, but never fewer than 10 and never more than you hold — and
@@ -458,7 +464,7 @@ const (
 	ChemPopKillPct    = 20 // a flat fifth of the population, with no roll at all
 	ChemMoraleKeepNum = 3  // morale  := round(morale  * 3/4)
 	ChemMoraleKeepDen = 4
-	ChemScoreAward    = 700
+	ChemScoreRoll     = 700
 
 	// Biological strike. BINARY-VERIFIED (BRE.OVR launch_biological_attack,
 	// unit ovr_00e809 +0x2ac6). It touches no land at all — the routine never
@@ -480,7 +486,7 @@ const (
 	BioTroopKillJitterUp = 6
 	BioTroopKillJitterDn = 4
 	BioMoraleDivisor     = 2 // morale := morale / 2, truncated (an integer divide, not a real one)
-	BioScoreAward        = 400
+	BioScoreRoll         = 400
 
 	// Both the chemical and the biological strike leave popular support at
 	// round(support * 2/3). BINARY-VERIFIED from the same two routines, which

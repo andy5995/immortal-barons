@@ -391,13 +391,13 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 
 	case OpNuclear:
 		regions := w.nuclearEffect(d)
-		score = w.rng.Intn(NukeScoreAward)
+		score = w.rng.Intn(NukeScoreRoll)
 		d.addEvent(fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", from, regions))
 		return fmt.Sprintf("Nuclear strike! %d regions of %s are now waste.", regions, d.Name), score, true, false
 
 	case OpChemical:
 		regions, people := w.chemicalEffect(d)
-		score = w.rng.Intn(ChemScoreAward)
+		score = w.rng.Intn(ChemScoreRoll)
 		d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d regions reduced to waste and %d dead. Famine follows.", from, regions, people))
 		return fmt.Sprintf("Chemical strike! %d regions of %s are now waste, and %d of its people are dead.", regions, d.Name, people), score, true, false
 

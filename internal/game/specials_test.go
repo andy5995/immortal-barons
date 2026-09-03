@@ -443,10 +443,11 @@ func TestAIKeepsItsReserveOverDecontamination(t *testing.T) {
 	}
 }
 
-// A nuclear strike scores for the attacker, on a flat draw rather than a share
-// of the damage — so even a strike that ruins nothing pays. The award band is
-// asserted as golden literals, not as the constant.
+// A nuclear strike scores for the attacker on a draw, not on a share of the
+// damage — so even a strike that ruins nothing pays. The ceiling is asserted as
+// a golden literal, not as the constant.
 func TestNuclearStrikeScoresTheAttacker(t *testing.T) {
+	seen := map[int]bool{}
 	cfg := DefaultConfig()
 	cfg.AICount = 1
 	for seed := int64(1); seed <= 25; seed++ {
@@ -461,11 +462,16 @@ func TestNuclearStrikeScoresTheAttacker(t *testing.T) {
 		if _, err := w.NuclearStrike(a, d); err != nil {
 			t.Fatalf("seed %d: unexpected error: %v", seed, err)
 		}
-		// A FLAT 900, on every seed — the routine loads the figure as an
-		// immediate with no Random call. Golden literal, not the constant.
-		if a.Score != 900 {
-			t.Errorf("seed %d: scored %d, want a flat 900", seed, a.Score)
+		// Random(900): the immediate the routine loads is the roll's ceiling,
+		// which the pirate raid's identical site proves (+0x1334 adds 100 to the
+		// same call's result). Golden literal, not the constant.
+		if a.Score < 0 || a.Score >= 900 {
+			t.Errorf("seed %d: scored %d, want a draw over [0, 900)", seed, a.Score)
 		}
+		seen[a.Score] = true
+	}
+	if len(seen) < 2 {
+		t.Errorf("the award never varied across 25 seeds (%v) — it is not being rolled", seen)
 	}
 }
 
