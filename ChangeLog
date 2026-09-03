@@ -9,7 +9,7 @@
   * bbs.cfg takes a BBSName, a BoardURL and a BulletinURL for the web pages
   * A league board writes bulletin files for the eight InterBBS Scores rankings
   * Bulletin files are written in CP437, so ANSI viewers read their box rules
-  * An inbox holds at most fifty messages; the oldest goes when a newer one arrives
+  * An inbox holds fifty messages; the oldest goes when a new one arrives
   * A typed line stops taking keys at 255 characters
   * A realm you have an alliance with can be attacked, after the breach prompt
   * An attack on a rival realm plays out over nine seconds before the report
