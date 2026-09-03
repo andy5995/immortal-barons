@@ -250,8 +250,11 @@ flow runs in this order:
 2. **Armed-forces upkeep**, then **region maintenance** — each a "how much will
    you give?" prompt. The prompt's max is the amount **required** (you cannot
    overpay); if you can't afford it, the max is your gold.
-3. **Crown tax** — a per-turn tax to the Queen Royale (a non-player NPC monarch);
-   its prompt max is your available gold. The gold is not destroyed: it goes into
+3. **Crown tax** — a per-turn tax to the Queen Royale (a non-player NPC monarch),
+   asked **last of the whole sequence**, after the conditional prompts below
+   (`allocate_turn_budget`'s blocks in order, and a capture in
+   `docs/dev/bre-screens.md` shows the support boost ahead of it). Its prompt max
+   is your available gold. The gold is not destroyed: it goes into
    a planet-wide purse the Queen refunds out of (see **The Queen Royale's tax
    refund** below).
    The amount is **binary-verified**:
@@ -393,19 +396,33 @@ flow runs in this order:
    rather than the original's dark red, which sits at 2:1 against black, and
    states the match count in words so colour is not what tells a win from a miss.
 
-4. Conditional: SDI maintenance (with SDI), waste-region decontamination (with
-   waste regions), then the popular-support and military-morale boosts (shown
-   only below 100). Support/morale are *requested* (optional), not required.
-5. **Reconsider gate** — underpaying any *required* cost warns of disastrous
-   results and offers to reconsider. Yes **restarts the whole sequence from the
-   bank prompt**; No proceeds, with desertion/revolt for the shortfall.
+4. Conditional, and asked between the region maintenance and the crown tax: SDI
+   maintenance (with SDI), waste-region decontamination (with waste regions),
+   then the popular-support and military-morale boosts (shown only below 100).
+   Support/morale are *requested* (optional), not required.
+5. **Reconsider gate** — asked once, at the very end, and covering **five** of
+   the prompts: forces, regions, SDI, **decontamination** and the crown tax. Each
+   of those runs its answer through the same "was it the full amount" helper
+   (`+0x97f`, `+0xaa9`, `+0xc84`, `+0xd7b`, `+0x13d7`), which sets one flag byte
+   tested at `+0x145d`; neither boost calls it, so giving the crowd less than it
+   asked buys fewer points rather than counting as a shortfall. Underpaying warns
+   of disastrous results and offers to reconsider: Yes **restarts the whole
+   sequence from the bank prompt**; No proceeds, with desertion/revolt for the
+   shortfall.
+
+   **Nothing is charged until that gate is answered.** Gold, popular support,
+   morale, the waste pile and the region pool are all written afterwards, at
+   `+0x14e6`, which is what lets a restart re-ask everything with no gold moved.
+   IB matches this; it used to commit the required charges before the
+   decontamination question, which kept that question out of the check.
 
 Prompt colors (from a color capture): text plain white; the required and
 suggested amounts bright cyan, the max dark cyan, the `(…; …)` parens bright blue.
 
 IB implements steps 1, 2, 3, all of 4, and 5, with the required-capped prompts
-and these colors. The SDI prompt is `Your SDI Program requires N gold.`, asked after the
-region maintenance and before the crown tax (live capture).
+and these colors. The SDI prompt is `Your SDI Program requires N gold.`, asked
+after the region maintenance and before the decontamination offer (live
+capture).
 
 **Auto-Pay Maintenance bypasses itself, per turn, on more than affordability
 — BINARY-VERIFIED.** The silent one-line total only fires when Auto-Pay is on

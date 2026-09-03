@@ -16,12 +16,13 @@ import (
 // paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay
 // Maintenance on and enough gold, everything is paid silently. Otherwise
 // (pref off, can't afford a required cost, or the auto-pay bypass below
-// fires) it runs BRE's manual flow: an optional bank visit (draw savings to
-// cover upkeep), then the required armed-forces and region upkeep
-// (underpayment causes desertion/revolt), then optional support/morale
-// boosts. Underpaying a required cost warns of "disastrous results" and
-// offers to reconsider, which loops back to the bank visit — matching BRE,
-// where "reconsider" restarts the sequence.
+// fires) it runs BRE's manual flow, in its order: an optional bank visit (draw
+// savings to cover upkeep), the required armed-forces and region upkeep
+// (underpayment causes desertion/revolt), SDI upkeep, the decontamination
+// offer, the two optional support/morale boosts, and the crown tax last.
+// Underpaying anything but a boost warns of "disastrous results" and offers to
+// reconsider, which loops back to the bank visit — matching BRE, where
+// "reconsider" restarts the sequence with nothing yet charged.
 // paymentStage reports whether it printed BRE's auto-pay summary, the one line
 // the player has not already answered a prompt for. That decides the pause
 // before the Food Market: every auto-pay market turn in the captures pauses
@@ -48,7 +49,6 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarised bool) {
 
 	var forces, regions, sdi, crown, gold int64
 	var autoPay bool
-	var support, morale int
 	// due is game's own total, not these four added up here: a charge added to
 	// MaintenanceDue would otherwise be paid by Auto-Pay and left out of the
 	// figure shown. The four parts are still gathered for the itemised path.
@@ -95,10 +95,20 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarised bool) {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, tr(s, "You cannot cover all your maintenance this turn."), ansi.Reset)
 	}
 
-	// Gather the player's intended payments without applying them, so that if
-	// they underpay a required obligation we can warn ("DISASTEROUS results")
-	// and let them reconsider before the consequences land.
+	// Gather every payment WITHOUT applying any of it — the required upkeep, the
+	// decontamination bill and the two boosts alike — so a shortfall can be
+	// reconsidered before any of it lands. BRE keeps the whole budget in locals
+	// and writes gold, popular support, morale, the waste pile and the region
+	// pool only once the sequence has been answered (allocate_turn_budget,
+	// BRE.OVR +0x14e6). IB used to commit the required charges before it asked
+	// about decontamination, which is what kept that question out of the check.
+	//
+	// The order is the original's own, read off its blocks and corroborated by a
+	// capture (docs/dev/bre-screens.md): forces, regions, SDI, decontamination,
+	// popular support, military morale, and the crown tax LAST — IB billed the
+	// Queen fourth, before the three optional questions.
 	var forcesGold, regionsGold, sdiGold, crownGold int64
+	var deconGold, deconCost, supportGold, moraleGold int64
 	for {
 		// BRE opens the manual flow with a bank visit so a baron short on hand can
 		// draw savings to cover upkeep; the reconsider below loops back here. Gold
@@ -125,15 +135,29 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarised bool) {
 			sdiGold = promptSuggested(s, "How much will you give?", afford, afford)
 		}
 
-		// The crown tax comes last, and unlike the two above its prompt maximum is
-		// everything still in hand rather than the amount required — BRE lets a
-		// baron hand the Queen more than she asked for.
+		left := gold - forcesGold - regionsGold - sdiGold
+		deconGold, deconCost = promptDecontaminate(s, w, left)
+		left -= deconGold
+		supportGold = promptSupportBoost(s, w, left)
+		left -= supportGold
+		moraleGold = promptMoraleBoost(s, w, left)
+		left -= moraleGold
+
+		// Unlike the charges above, the crown tax's prompt maximum is everything
+		// still in hand rather than the amount required — BRE lets a baron hand the
+		// Queen more than she asked for.
 		fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale requires %s gold for Taxes.")+"%s",
 			ansi.FgWhite, ansi.FgBrightCyan+comma(crown)+ansi.FgWhite, ansi.Reset)
-		left := gold - forcesGold - regionsGold - sdiGold
 		crownGold = promptSuggested(s, "How much will you give?", min(crown, left), left)
 
-		if forcesGold >= forces && regionsGold >= regions && sdiGold >= sdi && crownGold >= crown {
+		// The two boosts are absent from this test on purpose: they are the only
+		// prompts in the sequence with no "was it the full amount" check behind
+		// them (BRE calls that helper at +0x97f, +0xaa9, +0xc84, +0xd7b and
+		// +0x13d7 — forces, regions, SDI, decontamination and the crown tax, and
+		// nowhere in either boost's block). Giving the crowd less than it asked
+		// for buys fewer points; it is not a debt.
+		if forcesGold >= forces && regionsGold >= regions && sdiGold >= sdi &&
+			deconGold >= deconCost && crownGold >= crown {
 			break // fully paid — no warning
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
@@ -143,16 +167,18 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarised bool) {
 		// Reconsider: loop back to the bank visit (gold is re-read at the top).
 	}
 
-	var forcesLost, regionsLost int
+	// One transaction: the whole budget lands together, as it does in the
+	// original, so a session that drops mid-sequence has spent nothing.
+	var forcesLost, regionsLost, cleaned, supportPts, moralePts int
 	if !withPlayer(w, func(p *game.Empire) {
 		forcesLost = w.World.PayForces(p, forcesGold)
 		regionsLost = w.World.PayRegions(p, regionsGold)
 		w.World.PaySDI(p, sdiGold)
+		cleaned = w.World.Decontaminate(p, deconGold)
+		supportPts = w.World.BoostSupport(p, supportGold)
+		moralePts = w.World.BoostMorale(p, moraleGold)
 		w.World.PayCrownTax(p, crownGold)
 		p.TurnProgress.MaintPaid = true // required charge committed; a later boot must not replay it (#10)
-		gold = p.Gold
-		support = p.Support
-		morale = p.Morale
 	}) {
 		return false
 	}
@@ -162,74 +188,93 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarised bool) {
 	if regionsLost > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgBrightRed, regionsLost, ansi.Reset)
 	}
-
-	decontaminateStage(s, w)
-	if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
-		return false
+	// Cleaned land has no type of its own until its owner names one.
+	if cleaned > 0 {
+		allocateDecontaminated(s, w, cleaned)
 	}
-
-	if support < 100 && gold > 0 {
-		var cost, maxGive int64
-		if !withPlayer(w, func(p *game.Empire) { cost, maxGive = p.SupportBoostCost(), min(p.SupportBoostMax(), p.Gold) }) {
-			return false
-		}
-		fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), cost)))
-		supportGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
-		var pts int
-		if !withPlayer(w, func(p *game.Empire) {
-			pts = w.World.BoostSupport(p, supportGold)
-			gold = p.Gold
-		}) {
-			return false
-		}
-		if pts > 0 {
-			fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Popular support rose %d points."), pts)))
-		}
+	if supportPts > 0 {
+		fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Popular support rose %d points."), supportPts)))
 	}
-
-	if morale < 100 && gold > 0 {
-		var cost, maxGive int64
-		if !withPlayer(w, func(p *game.Empire) {
-			cost, maxGive = w.World.MoraleBoostCost(p), min(w.World.MoraleBoostMax(p), p.Gold)
-		}) {
-			return false
-		}
-		fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), cost)))
-		moraleGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
-		var pts int
-		if !withPlayer(w, func(p *game.Empire) { pts = w.World.BoostMorale(p, moraleGold) }) {
-			return false
-		}
-		if pts > 0 {
-			fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Military morale rose %d points."), pts)))
-		}
+	if moralePts > 0 {
+		fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Military morale rose %d points."), moralePts)))
 	}
 	// Paid by hand: every figure was read as its prompt was answered, so there is
 	// no summary and the food stage that follows does not pause.
 	return false
 }
 
-// decontaminateStage offers to clean waste regions, in the maintenance slot the
-// original puts it in — after the SDI upkeep and before the popular-support and
-// morale boosts. Like those two it is optional: paying nothing leaves the ruined
-// land ruined, costing upkeep and earning nothing, so it competes for gold
-// rather than being billed.
-func decontaminateStage(s session.Session, w *ctx) {
+// promptDecontaminate asks BRE's decontamination question and returns what the
+// player offered along with what was asked, charging for neither. purse is what
+// is left after the required upkeep. It asks nothing — and returns 0, 0 — when
+// there is no waste, none of it may be cleaned this turn, or there is no gold
+// left to clean it with.
+func promptDecontaminate(s session.Session, w *ctx, purse int64) (give, cost int64) {
 	var waste, allowance int
-	var cost, gold int64
 	if !withPlayer(w, func(p *game.Empire) {
 		waste, allowance = p.Regions.Waste, w.World.DecontaminateAllowance(p)
-		cost, gold = w.World.DecontaminateCost(p), p.Gold
+		cost = w.World.DecontaminateCost(p)
 	}) {
-		return
+		return 0, 0
 	}
-	if waste <= 0 || allowance <= 0 || gold <= 0 {
-		return
+	if waste <= 0 || allowance <= 0 || purse <= 0 {
+		return 0, 0
 	}
 	fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(
 		tr(s, "%s gold will decontaminate %s of your %s waste regions."),
 		comma(cost), comma(int64(allowance)), comma(int64(waste)))))
-	give := promptSuggested(s, "How much will you give?", min(cost, gold), min(cost, gold))
+	afford := min(cost, purse)
+	return promptSuggested(s, "How much will you give?", afford, afford), cost
+}
+
+// promptSupportBoost and promptMoraleBoost ask the two optional boosts, again
+// without spending anything. Neither returns what was asked: no shortfall check
+// stands behind either prompt in the original, so nothing downstream compares
+// the two.
+func promptSupportBoost(s session.Session, w *ctx, purse int64) int64 {
+	var support int
+	var cost, maxGive int64
+	if !withPlayer(w, func(p *game.Empire) {
+		support, cost, maxGive = p.Support, p.SupportBoostCost(), min(p.SupportBoostMax(), purse)
+	}) {
+		return 0
+	}
+	if support >= 100 || maxGive <= 0 {
+		return 0
+	}
+	fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), cost)))
+	return promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
+}
+
+func promptMoraleBoost(s session.Session, w *ctx, purse int64) int64 {
+	var morale int
+	var cost, maxGive int64
+	if !withPlayer(w, func(p *game.Empire) {
+		morale, cost, maxGive = p.Morale, w.World.MoraleBoostCost(p), min(w.World.MoraleBoostMax(p), purse)
+	}) {
+		return 0
+	}
+	if morale >= 100 || maxGive <= 0 {
+		return 0
+	}
+	fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), cost)))
+	return promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
+}
+
+// decontaminateStage is the decontamination question on the AUTO-PAY path,
+// where the required upkeep has already been charged and there is no shortfall
+// sequence to fold it into. It sits in the slot the original puts it in — after
+// the SDI upkeep, before the popular-support and morale boosts. Like those two
+// it is optional: paying nothing leaves the ruined land ruined, costing upkeep
+// and earning nothing, so it competes for gold rather than being billed.
+func decontaminateStage(s session.Session, w *ctx) {
+	var gold int64
+	if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
+		return
+	}
+	give, _ := promptDecontaminate(s, w, gold)
+	if give <= 0 {
+		return
+	}
 	var cleaned int
 	if !withPlayer(w, func(p *game.Empire) { cleaned = w.World.Decontaminate(p, give) }) {
 		return

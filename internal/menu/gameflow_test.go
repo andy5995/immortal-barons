@@ -308,6 +308,41 @@ func TestPaymentStageBypassesAutoPayOnWaste(t *testing.T) {
 	}
 }
 
+// Underpaying the decontamination bill raises the same reconsider a short
+// upkeep payment does, and the crown tax is asked AFTER it: BRE checks every
+// prompt that has a "was it the full amount" helper behind it (+0xd7b covers
+// decontamination) once, at the end of the sequence, and bills the Queen last.
+// Declining still costs no waste — the pile is only ever reduced by what is
+// paid for.
+func TestPaymentStageDecontaminationJoinsTheShortfallCheck(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Prefs.AutoPayMaint = false
+	p.Gold = 100_000_000
+	p.Support, p.Morale = 100, 100 // skip both boost prompts
+	p.Regions.Waste = 50
+	// decline the bank; full forces and regions; nothing for the waste; the
+	// suggested crown tax; then decline the reconsider
+	f := &fakeSession{keys: []rune("n\r\r0\r\rn")}
+
+	paymentStage(f, w, BuildMenus().Bank)
+
+	out := f.out.String()
+	decon, queen := strings.Index(out, "decontaminate"), strings.Index(out, "Queen Royale")
+	if decon < 0 || queen < 0 {
+		t.Fatalf("expected both the decontamination offer and the crown tax; got:\n%s", out)
+	}
+	if queen < decon {
+		t.Errorf("the crown tax must be asked after the decontamination offer; got:\n%s", out)
+	}
+	if !strings.Contains(out, "disastrous") {
+		t.Errorf("paying nothing toward the waste must raise the reconsider; got:\n%s", out)
+	}
+	if p = w.Player(); p.Regions.Waste != 50 {
+		t.Errorf("Waste = %d, want 50 — declining to pay must not cost regions", p.Regions.Waste)
+	}
+}
+
 func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 	f := &fakeSession{keys: []rune("n\r\r\r")} // decline bank, accept suggested (full) for forces, regions, crown tax
 	w := newWorld()

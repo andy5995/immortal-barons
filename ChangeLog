@@ -1,4 +1,6 @@
 (in-progress:)
+  * Maintenance charges nothing until the whole sequence is answered
+  * The crown tax is asked last, after the decontamination and boost offers
   * The captured-region picker asks until every region is placed
   * Each bulletin is written as a web page and as a block to include in one
   * The website gains a Bulletin Files page for sysops
