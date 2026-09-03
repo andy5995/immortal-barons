@@ -355,7 +355,7 @@ that may be sold, which this project's licence permits, and they carry their
 authors' contact details. Facts are free to restate, so the file says them in
 its own words and links the originals. Nothing in FidoNet is an RFC.
 
-## Status (v0.0.8 released 2026-08-28; v0.0.9 in development)
+## Status (v0.0.9 released 2026-09-03; v0.0.10 in development)
 
 Persistent, multi-user door game. One shared JSON world; concurrent multi-node
 door play (each action reloads/re-validates/mutates/saves under a brief

@@ -10,13 +10,17 @@ title: 'Договоры и союзы'
 Treaties are agreements you send to other rulers. A treaty starts only when
 the other side accepts it. Each treaty type has its own topic.
 
-Two related actions also live on the Diplomacy menu. A Declaration of War
-ends an agreement at once, and it is costly: your people riot at being ruled
-by a faithless baron, and you lose a quarter of both your support and your
-army's morale. It costs nothing if you had no agreement to break. Attacking
-a partner without declaring war ends the agreement just as surely and costs
-you nothing at home, though the ruler you betrayed will have their own
-answer to that.
+Aiming an attack at a ruler you hold an agreement with tears the agreement
+up, and the game asks you to confirm it before you choose your force. Say
+yes and your people riot at being ruled by a faithless baron: you lose a
+quarter of both your support and your army's morale, and the battle is then
+fought at that lower morale. Say no and the attack is called off. The two
+realms are left with no agreement between them, and the ruler you betrayed
+will have their own answer to that. The same question comes up before a
+nuclear, chemical or biological strike.
+
+A Declaration of War, on the Diplomacy menu, ends an agreement at the same
+price without a battle. It costs nothing if you had no agreement to break.
 
 View Treaties shows your current relations with the other rulers in the
 game, and below that, the offers you have sent that nobody has answered yet.

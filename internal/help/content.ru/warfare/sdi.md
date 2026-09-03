@@ -7,16 +7,11 @@ title: 'Программа СОИ'
 
 # Программа СОИ
 
-The SDI Program is a shield you fund. When it is complete, it destroys about
-half of the missiles fired at you from other planets and cuts attacking
-jets' strength by about a quarter. It does nothing against a neighbour on
-your own planet, whose nuclear, chemical and biological missiles always
-land. Technology regions lower its upkeep.  The SDI Program is a shield you
-fund. It answers three things, and only these three: missiles fired at you
-from another planet, and the jets and bombers of a strike arriving from
-one. It does nothing against a neighbour on your own planet — not their
-army, and not their nuclear, chemical or biological missiles.  Technology
-regions lower its upkeep.
+The SDI Program is a shield you fund. It answers three things, and only
+these three: missiles fired at you from another planet, and the jets and
+bombers of a strike arriving from one. It does nothing against a neighbour
+on your own planet — not their army, and not their nuclear, chemical or
+biological missiles.  Technology regions lower its upkeep.
 
 At full strength it turns aside about half the missiles aimed at you, takes
 30% off an arriving realm's jets and 20% off its bombers. At half strength

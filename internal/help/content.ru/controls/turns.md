@@ -10,6 +10,10 @@ title: 'Ходы и защита'
 Каждый день вы получаете определённое число ходов. Когда они закончатся,
 возвращайтесь на следующий день за новыми.
 
+The day turns at midnight on the computer that runs the game. That is not
+always midnight where you are, so the entry menu shows the game's own time
+and how long is left of the day.
+
 Новые игроки получают Защиту нового королевства: несколько ходов, в течение
 которых вы не можете ни атаковать, ни быть атакованными. Это даёт время
 развиться.

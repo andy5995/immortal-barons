@@ -15,6 +15,11 @@ Without enough carriers, your jets cannot reach the enemy.
 
 Second, they carry goods for trade between empires.
 
+You do not have to buy them separately: a large jet order offers to include
+the carriers for them, for the same gold. If your jets outnumber what your
+carriers can lift, the carrier screen tells you how many more would cover
+them.
+
 Carriers are very cheap to keep. A common way to earn gold is to set your
 industry to build carriers and then sell them. This can earn more than
 producing gold directly.

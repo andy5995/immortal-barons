@@ -47,6 +47,7 @@ CALL_PATTERNS = [
     # nobody had ever been shown.
     re.compile(r'\bbuildTradeBasket\(s,\s*[^,]+,\s*' + STR),
     re.compile(r'\bstatusRowPrefix\(s,\s*' + STR),
+    re.compile(r'\btitled\(' + STR),  # bulletin page headings not drawn from a table
     re.compile(r'\b(?:Label|Title):\s*' + STR),
     re.compile(r'\bonOff\(' + STR),  # Preferences toggle labels (dynamic LabelFn)
 ]

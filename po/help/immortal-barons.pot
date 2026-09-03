@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-27 19:52-0500\n"
+"POT-Creation-Date: 2026-09-03 18:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -227,13 +227,22 @@ msgstr ""
 #: internal/help/content/controls/turns.md:16
 #, markdown-text
 msgid ""
+"The day turns at midnight on the computer that runs the game. That is not "
+"always midnight where you are, so the entry menu shows the game's own time "
+"and how long is left of the day."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/turns.md:20
+#, markdown-text
+msgid ""
 "New players get New Realm Protection: a number of turns during which you "
 "cannot attack or be attacked. It only ticks down on turns you actually play, "
 "so you are safe while you learn the game."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:19
+#: internal/help/content/controls/turns.md:23
 #, markdown-text
 msgid ""
 "A realm still under protection shows its letter in square brackets in the "
@@ -538,20 +547,69 @@ msgid "S3-Sabre"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:19
+#: internal/help/content/covert/s3-sabre.md:13
 #, markdown-text
 msgid ""
 "The S3-Sabre is an unreliable weapon of mass destruction, fired from the "
 "InterPlanetary menu's Special Operations at a baron on another "
-"planet. Before you fire, you set a dial from 0 to 10, but the dial is for "
-"show and changes nothing, so pick any number you like. The missile is a "
-"gamble every time. Most launches do nothing: it misses, it malfunctions, or "
-"the enemy's SDI shoots it down. When one does get through, it destroys part "
-"of one of the enemy's assets — troops, jets, tanks, turrets, bombers, "
-"carriers, agents, gold, food, or regions — and sometimes it wrecks several "
-"of these at once, which can be devastating. It can also backfire: if the "
-"enemy keeps a very large trooper army, the missile may turn back and strike "
-"your own empire instead."
+"planet. Before you fire, you set a dial from 0 to 10, and the dial aims it:"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:22
+#, markdown-text, no-wrap
+msgid ""
+"| Dial | What it goes for |\n"
+"| --- | --- |\n"
+"| 0, 1 | the enemy's Intelligence HeadQuarters |\n"
+"| 2, 3 | residential zones, killing people |\n"
+"| 4 | military bases — troops, jets, turrets and tanks together |\n"
+"| 5, 6 | airbases, and nothing but jets |\n"
+"| 7, 8 | regions, burning them to waste |\n"
+"| 9, 10 | the food supply |\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:28
+#, markdown-text
+msgid ""
+"The aim wanders by one setting either way in flight, and about one launch in "
+"ten ignores the dial altogether and hits whatever it likes. So a setting is "
+"a tendency, not a promise: 4 goes for military bases about half the time, "
+"while 5 goes for airbases about three times in four, because 5 and 6 both "
+"point there.  Aim 5 at a baron you know keeps a large air force."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:33
+#, markdown-text
+msgid ""
+"The missile is still a gamble on top of that. Most launches do nothing: it "
+"misses, it malfunctions, or the enemy's SDI shoots it down. It can also "
+"backfire — if the enemy keeps a very large trooper army, the missile may "
+"turn back and strike your own empire instead."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:39
+#, markdown-text
+msgid ""
+"Your sysop decides how the dial is set. Normally you choose it yourself, but "
+"the game can be set up to roll one for you each time, to fix it at a dial "
+"the sysop chooses, or to switch the weapon off entirely. On a board set any "
+"way but \"user select\" you are never asked for a number — that is the "
+"setting doing its job, not a fault."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:44
+#, markdown-text
+msgid ""
+"You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "
+"— once a day. A missile you have already used today is not listed on the "
+"Special Operations menu at all. They have their own allowance, so spending "
+"all three leaves your bombing operations untouched, and spending those "
+"leaves the missiles untouched."
 msgstr ""
 
 #. type: Title #
@@ -682,20 +740,29 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:19
+#: internal/help/content/diplomacy/treaties.md:20
 #, markdown-text
 msgid ""
-"Two related actions also live on the Diplomacy menu. A Declaration of War "
-"ends an agreement at once, and it is costly: your people riot at being ruled "
-"by a faithless baron, and you lose a quarter of both your support and your "
-"army's morale. It costs nothing if you had no agreement to break. Attacking "
-"a partner without declaring war ends the agreement just as surely and costs "
-"you nothing at home, though the ruler you betrayed will have their own "
-"answer to that."
+"Aiming an attack at a ruler you hold an agreement with tears the agreement "
+"up, and the game asks you to confirm it before you choose your force. Say "
+"yes and your people riot at being ruled by a faithless baron: you lose a "
+"quarter of both your support and your army's morale, and the battle is then "
+"fought at that lower morale. Say no and the attack is called off. The two "
+"realms are left with no agreement between them, and the ruler you betrayed "
+"will have their own answer to that. The same question comes up before a "
+"nuclear, chemical or biological strike."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:22
+#: internal/help/content/diplomacy/treaties.md:23
+#, markdown-text
+msgid ""
+"A Declaration of War, on the Diplomacy menu, ends an agreement at the same "
+"price without a battle. It costs nothing if you had no agreement to break."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:26
 #, markdown-text
 msgid ""
 "View Treaties shows your current relations with the other rulers in the "
@@ -703,7 +770,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:25
+#: internal/help/content/diplomacy/treaties.md:29
 #, markdown-text
 msgid ""
 "Once you hold a treaty, Send Message offers to write to all your allies at "
@@ -712,7 +779,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:29
+#: internal/help/content/diplomacy/treaties.md:33
 #, markdown-text
 msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
@@ -721,7 +788,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:32
+#: internal/help/content/diplomacy/treaties.md:36
 #, markdown-text
 msgid ""
 "Choosing the treaty you already hold with a ruler sends nothing. The game "
@@ -1018,7 +1085,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:17
+#: internal/help/content/economy/food.md:19
+#, markdown-text
+msgid ""
+"The market opens by itself at that point in your turn, and both bills are "
+"put to you, whether or not you have enough in store. Turn on Auto-Feed in "
+"Preferences and you skip all of it on any turn you can cover the two bills; "
+"on a turn you cannot, the market opens anyway."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/food.md:22
 #, markdown-text
 msgid ""
 "The market sells food to you for more than it pays to buy it back. So it is "
@@ -1026,7 +1103,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:21
+#: internal/help/content/economy/food.md:26
 #, markdown-text
 msgid ""
 "The price changes a little each day. It is the same for everyone on the "
@@ -1035,19 +1112,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:29
+#: internal/help/content/economy/food.md:31
 #, markdown-text
 msgid ""
-"Each turn your people eat first, and then part of whatever food is still in "
-"store spoils. A small store is safe: nothing rots until you are holding more "
-"than a thousand units. Above that the whole store loses a share, so the more "
-"you hoard the more you lose.  Each turn your people eat first, then your "
-"army, and then part of whatever food is still in store spoils. There is no "
-"safe amount. Even a small store loses some, and a large one loses more."
+"Each turn your people eat first, then your army, and then part of whatever "
+"food is still in store spoils. A small store is safe: nothing rots until you "
+"are holding more than a thousand units. Above that the whole store loses a "
+"share, so the more you hoard the more you lose."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:36
+#: internal/help/content/economy/food.md:38
 #, markdown-text
 msgid ""
 "Going short is billed twice, because the two needs are counted "
@@ -1059,7 +1134,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:41
+#: internal/help/content/economy/food.md:43
 #, markdown-text
 msgid ""
 "This turn's harvest arrives at the start of the turn, so you can sell it the "
@@ -1962,14 +2037,26 @@ msgid ""
 "are committing forces you will not hear about until the weekend."
 msgstr ""
 
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:43
+#, markdown-text
+msgid ""
+"Five of these items are shut until you have played a turn this visit: Send "
+"Trade Deal, Create Group Attack, Join Group Attack, Indiv. Attack Force and "
+"Special Operations. Anything that moves forces or goods costs you a turn "
+"first. The bank, your messages, the scores and the terrorist ops stay open, "
+"and once you have started a turn the whole menu is open for the rest of your "
+"visit."
+msgstr ""
+
 #. type: Title ##
-#: internal/help/content/interbbs/leagues.md:38
+#: internal/help/content/interbbs/leagues.md:44
 #, markdown-text, no-wrap
 msgid "Your BBS Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:46
+#: internal/help/content/interbbs/leagues.md:52
 #, markdown-text
 msgid ""
 "The barons on your own board elect one of their number Coordinator, and the "
@@ -1981,7 +2068,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:50
+#: internal/help/content/interbbs/leagues.md:56
 #, markdown-text
 msgid ""
 "You cannot vote while your realm is still under new-realm protection, and "
@@ -1990,7 +2077,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:53
+#: internal/help/content/interbbs/leagues.md:59
 #, markdown-text
 msgid ""
 "Every turn opens by telling you whether you hold the office or who your vote "
@@ -1998,7 +2085,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:56
+#: internal/help/content/interbbs/leagues.md:62
 #, markdown-text
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
@@ -2006,7 +2093,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:57
+#: internal/help/content/interbbs/leagues.md:63
 #, markdown-text
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
@@ -2724,7 +2811,17 @@ msgid "Second, they carry goods for trade between empires."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/carriers.md:20
+#: internal/help/content/military/carriers.md:21
+#, markdown-text
+msgid ""
+"You do not have to buy them separately: a large jet order offers to include "
+"the carriers for them, for the same gold. If your jets outnumber what your "
+"carriers can lift, the carrier screen tells you how many more would cover "
+"them."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/carriers.md:24
 #, markdown-text
 msgid ""
 "Carriers are very cheap to keep. A common way to earn gold is to set your "
@@ -2802,13 +2899,23 @@ msgstr ""
 #: internal/help/content/military/jets.md:24
 #, markdown-text
 msgid ""
+"Because that is easy to forget, an order of more than 100 jets asks whether "
+"to include the carriers to lift them. Say yes and the same gold buys both, "
+"so you end up with fewer jets than you asked for and every one of them able "
+"to fly."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/jets.md:28
+#, markdown-text
+msgid ""
 "An enemy SDI shield lowers your jets' attacking strength, but only when you "
 "are striking a named baron on another planet — a shield does nothing against "
 "jets attacking on its own planet."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/jets.md:26
+#: internal/help/content/military/jets.md:30
 #, markdown-text
 msgid ""
 "Jets are lost in battle like any other unit. Enemy turrets are part of the "
@@ -3690,23 +3797,18 @@ msgid "SDI Program"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:20
+#: internal/help/content/warfare/sdi.md:15
 #, markdown-text
 msgid ""
-"The SDI Program is a shield you fund. When it is complete, it destroys about "
-"half of the missiles fired at you from other planets and cuts attacking "
-"jets' strength by about a quarter. It does nothing against a neighbour on "
-"your own planet, whose nuclear, chemical and biological missiles always "
-"land. Technology regions lower its upkeep.  The SDI Program is a shield you "
-"fund. It answers three things, and only these three: missiles fired at you "
-"from another planet, and the jets and bombers of a strike arriving from "
-"one. It does nothing against a neighbour on your own planet — not their "
-"army, and not their nuclear, chemical or biological missiles.  Technology "
-"regions lower its upkeep."
+"The SDI Program is a shield you fund. It answers three things, and only "
+"these three: missiles fired at you from another planet, and the jets and "
+"bombers of a strike arriving from one. It does nothing against a neighbour "
+"on your own planet — not their army, and not their nuclear, chemical or "
+"biological missiles.  Technology regions lower its upkeep."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:25
+#: internal/help/content/warfare/sdi.md:20
 #, markdown-text
 msgid ""
 "At full strength it turns aside about half the missiles aimed at you, takes "
@@ -3716,25 +3818,25 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:26
+#: internal/help/content/warfare/sdi.md:21
 #, markdown-text, no-wrap
 msgid "How strong it is"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:29
+#: internal/help/content/warfare/sdi.md:24
 #, markdown-text
 msgid "Strength is the funding spread over your land, not the funding alone:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:31
+#: internal/help/content/warfare/sdi.md:26
 #, markdown-text, no-wrap
 msgid "    strength% = the square root of (funding / (10 x (regions + 1)))\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:37
+#: internal/help/content/warfare/sdi.md:32
 #, markdown-text
 msgid ""
 "capped at 100%. Two things follow. Every region you take thins your own "
@@ -3745,13 +3847,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:38
+#: internal/help/content/warfare/sdi.md:33
 #, markdown-text, no-wrap
 msgid "Funding it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:43
+#: internal/help/content/warfare/sdi.md:38
 #, markdown-text
 msgid ""
 "The program is a pot of gold, not something you buy once. Each turn you may "
@@ -3760,7 +3862,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:46
+#: internal/help/content/warfare/sdi.md:41
 #, markdown-text
 msgid ""
 "That amount is your allowance for the whole turn. Leaving the screen and "
@@ -3768,7 +3870,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:49
+#: internal/help/content/warfare/sdi.md:44
 #, markdown-text
 msgid ""
 "So a shield takes many turns to build, however rich you are. You cannot buy "
@@ -3776,13 +3878,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:50
+#: internal/help/content/warfare/sdi.md:45
 #, markdown-text, no-wrap
 msgid "Paying for it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:54
+#: internal/help/content/warfare/sdi.md:49
 #, markdown-text
 msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
@@ -3790,7 +3892,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:57
+#: internal/help/content/warfare/sdi.md:52
 #, markdown-text
 msgid ""
 "Pay it in full. If you pay short, the program shrinks to what you did pay "

@@ -36,6 +36,13 @@ Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
   schedule, so check it before you aim anything: against a planet three days
   away, you are committing forces you will not hear about until the weekend.
 
+Five of these items are shut until you have played a turn this visit: Send
+Trade Deal, Create Group Attack, Join Group Attack, Indiv. Attack Force and
+Special Operations. Anything that moves forces or goods costs you a turn
+first. The bank, your messages, the scores and the terrorist ops stay open,
+and once you have started a turn the whole menu is open for the rest of your
+visit.
+
 ## Your BBS Coordinator
 
 The barons on your own board elect one of their number Coordinator, and the

@@ -1,46 +1,44 @@
-(in-progress:)
-  * The carrier screen says how many more your jets need to fly
-  * A jet order over 100 offers to include the carriers to lift them
-  * An arriving terror op names its sender only if an agent is caught
-  * A missile's Score award is a roll up to its ceiling
-  * Maintenance charges nothing until the whole sequence is answered
-  * The crown tax is asked last, after the decontamination and boost offers
-  * The captured-region picker asks until every region is placed
-  * Each bulletin is written as a web page and as a block to include in one
-  * The website gains a Bulletin Files page for sysops
-  * bbs.cfg takes a BBSName, a BoardURL and a BulletinURL for the web pages
-  * A league board writes bulletin files for the eight InterBBS Scores rankings
-  * Bulletin files are written in CP437, so ANSI viewers read their box rules
-  * An inbox holds fifty messages; the oldest goes when a new one arrives
-  * A typed line stops taking keys at 255 characters
+2026-09-03 (v0.0.9)
+  * The inter-BBS packet protocol moves to 2; boards must update together
+  * Attacking a treaty partner breaks the pact and costs support and morale
   * A realm you have an alliance with can be attacked, after the breach prompt
   * An attack on a rival realm plays out over nine seconds before the report
-  * A relayed packet is sent plain to a peer that cannot read a bundle
-  * The most gold a realm may hold is fixed at two billion
-  * Game Setup no longer lists the money cap
-  * An interplanetary battle report lists its losses on one line
-  * An interplanetary message shows every letter it was addressed to
-  * Each missile may be fired once a day and is hidden once used
-  * The sysop picks which dial S3-Sabre Constant handling fires
-  * The InterPlanetary menu refuses five items until you play a turn
-  * A realm's new name is announced on every planet, not just its own
-  * The inter-BBS packet protocol moves to 2; boards must update together
-  * The S3-Sabre dial aims the missile instead of changing nothing
-  * Attacking a treaty partner breaks the pact and costs support and morale
+  * The captured-region picker asks until every region is placed
   * The bank opens on its own between Covert Operations and Spending each turn
+  * Maintenance charges nothing until the whole sequence is answered
+  * The crown tax is asked last, after the decontamination and boost offers
+  * With Auto-Feed off the Food Market opens every turn, as the original does
+  * A jet order over 100 offers to include the carriers to lift them
+  * The carrier screen says how many more your jets need to fly
+  * Each missile may be fired once a day and is hidden once used
+  * The S3-Sabre dial aims the missile instead of changing nothing
+  * A missile's Score award is a roll up to its ceiling
+  * The most gold a realm may hold is fixed at two billion, not a setting
+  * Set Industries stops asking for percentages once 100% is allocated
+  * The Military advisor reports the Mountain industry boost
+  * An inbox holds fifty messages; the oldest goes when a new one arrives
+  * An ignored message is not re-read at the head of every later turn
+  * A typed line stops taking keys at 255 characters
+  * The entry menu shows the planet's time and how long is left of the game day
   * Figures are shortened to k and m on score tables and battle reports
   * The Daily Bulletin shows Total Net Worth in thousands
-  * The entry menu shows the planet's time and how long is left of the game day
-  * The Food Market opens after a pause when maintenance was paid automatically
-  * The food-consumed line is shown only when the market did not open
+  * A protected realm is told why it cannot change its Coordinator vote
+  * The InterPlanetary menu refuses five items until you play a turn
+  * An interplanetary battle report lists its losses on one line
+  * An interplanetary message shows every letter it was addressed to
+  * An arriving terror op names its sender only if an agent is caught
+  * A realm's new name is announced on every planet, not just its own
+  * A relayed packet is sent plain to a peer that cannot read a bundle
+  * On Windows a second node no longer loses its session to a save in progress
+  * A league board writes bulletin files for the eight InterBBS Scores rankings
+  * Each bulletin is written as a web page and as a block to include in one
+  * bbs.cfg takes a BBSName, a BoardURL and a BulletinURL for the web pages
+  * Bulletin files are written in CP437, so ANSI viewers read their box rules
+  * The website gains a Bulletin Files page for sysops
+  * PirateNews in bbs.cfg keeps raids on the pirates out of the planet news
+  * The sysop picks which dial S3-Sabre Constant handling fires
   * BBSDEV.DRP joins the drop file formats offered by -set-dropfile
   * A drop file that names the caller's encoding and language is followed
-  * With Auto-Feed off the Food Market opens every turn, as the original does
-  * The Military advisor reports the Mountain industry boost
-  * Set Industries stops asking for percentages once 100% is allocated
-  * A protected realm is told why it cannot change its Coordinator vote
-  * An ignored message is not re-read at the head of every later turn
-  * PirateNews in bbs.cfg keeps raids on the pirates out of the planet news
 
 2026-08-28 (v0.0.8)
   * A prompt whose input has ended now ends the session instead of spinning,
