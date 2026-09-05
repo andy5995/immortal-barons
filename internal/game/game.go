@@ -205,6 +205,16 @@ type World struct {
 	// locally until they depart; Outbox holds packets queued for other boards;
 	// SpyDatabase holds spy reports shared across the planet.
 	GroupAttacks []GroupAttack
+	// NextAttackID is the wire key every interplanetary action takes its id from —
+	// group and individual attacks, special ops, trade deals, spy recon and terror
+	// ops all draw on it, and it is never reused within a season.
+	//
+	// That makes it a running total of everything the board has sent, which is
+	// exactly what a wire key wants and exactly what a player must not be shown
+	// (#254). Nothing player-facing carries it: a group attack is displayed and
+	// joined by its SLOT (GroupAttack.Slot, a small number reused once the party
+	// comes home), and no other action is referred to again once it is sent, so
+	// none of them shows a number at all.
 	NextAttackID int
 	// InFlight holds strikes that have left this board and are waiting for a
 	// result packet. A result clears the matching entry; one that waits too long

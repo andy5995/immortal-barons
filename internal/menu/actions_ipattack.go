@@ -219,17 +219,20 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
-	var id int
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		n, e := w.World.CreateIndividualAttack(p, board, target, kind, force)
-		id = n
+		_, e := w.World.CreateIndividualAttack(p, board, target, kind, force)
 		return e
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "%s force #%d is on its way to %s on %s.", kind, id, target, board)
+	// No number: the id a strike carries is a wire key off a counter shared with
+	// every other interplanetary action, so it is a running total of everything
+	// the board has ever sent rather than anything about this attack (#254). A
+	// group attack shows its SLOT because a baron joins one by that number; a
+	// lone strike is never referred to again, so there is nothing to show.
+	ok(s, "Your %s force is on its way to %s on %s.", kind, target, board)
 	return Stay
 }
 

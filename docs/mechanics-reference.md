@@ -3760,6 +3760,16 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   until #201, because the line was picked from `AttackResult.Won` rather than
   from the resolved outcome.
   ones held at zero, each defaulting to 0.
+- **The player never sees an attack's wire id** (#254). `World.NextAttackID` is
+  one counter shared by every interplanetary action — both attack kinds, special
+  ops, trade deals, spy recon and terror ops — and never reused, so it is a
+  running total of everything the board has ever sent. It stays that way, because
+  a wire key wants exactly that. What changed is that nothing shows it: a group
+  attack is displayed and joined by its **slot**, a small number the board hands
+  back once the party comes home (`GroupAttack.Slot`, which is what the two-
+  character Id column in the original's table is sized for), and an individual
+  strike now reports no number at all — it is never referred to again, so there
+  was nothing for one to mean.
 - **The price of a strike — BINARY-VERIFIED, and it is charged on all three
   paths** (#252). ONE routine prompts for the four counts, quotes the price and
   refuses a baron who cannot pay (`configure_attack_forces`, `BRE.OVR`
