@@ -20,8 +20,12 @@ import (
 func runCovertAction(t *testing.T, w *ctx, p *game.Empire, action func(session.Session, *ctx) Result) string {
 	t.Helper()
 	p.TurnProgress = game.TurnProgress{}
+	p.CovertOpsToday = nil
 	p.Gold, p.Agents = 1_000_000_000, 50
-	f := &fakeSession{keys: []rune("A ")} // pick target A, then the pause key
+	// Target A, ONE agent, then the pause key. The count prompt suggests the
+	// whole allowance, so a bare Enter here would send ten and these tests are
+	// about the single queued record.
+	f := &fakeSession{keys: []rune("A1\r ")}
 	if res := action(f, w); res != Stay {
 		t.Fatalf("covert action returned %v, want Stay", res)
 	}
@@ -308,7 +312,8 @@ func TestCovertMenuClosesWhenTheLastAgentIsSpent(t *testing.T) {
 // must not fire on any successful operation.
 func TestCovertMenuStaysOpenWhileAgentsRemain(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("4A 5A 0")}
+	// Item 4, target A, one agent, pause; then item 5 the same way; then quit.
+	f := &fakeSession{keys: []rune("4A1\r 5A1\r 0")}
 	w, _ := covertWorld()
 	p := w.Player()
 	p.Agents, p.Gold = 5, 1_000_000_000
@@ -388,5 +393,76 @@ func TestEveryCovertMenuActionQueuesItsOwnOp(t *testing.T) {
 				t.Errorf("the %q item took no allowance under its own name, got %v", op, p.CovertOpsToday)
 			}
 		})
+	}
+}
+
+// The count prompt is the whole point of the day's allowance being a day's: a
+// baron sends several agents at one target in one visit, as the interplanetary
+// Terrorist Ops screen lets them. Each is its own operation with its own fee,
+// its own agent and its own roll on arrival.
+func TestCovertOpSendsSeveralAgentsAtOnce(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	var target *game.Empire
+	for _, e := range w.Empires {
+		if e != p {
+			target = e
+			break
+		}
+	}
+	p.Protection, target.Protection, target.Agents = 0, 0, 0
+	p.Gold, p.Agents = 1_000_000_000, 50
+	p.CovertOpsToday = nil
+
+	f := &fakeSession{keys: []rune("A3\r ")} // target A, three agents, pause
+	if res := covertAction(game.OpDemoralizeForces)(f, w); res != Stay {
+		t.Fatalf("covert action returned %v, want Stay", res)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "How many agents to send?") {
+		t.Fatalf("never reached the count prompt:\n%s", out)
+	}
+	if len(w.CovertQueue) != 3 {
+		t.Fatalf("queued %d operations, want 3", len(w.CovertQueue))
+	}
+	for _, rec := range w.CovertQueue {
+		if rec.Op != game.OpDemoralizeForces || rec.Target != target.Name {
+			t.Errorf("queued %+v, want a Demoralize Forces against %s", rec, target.Name)
+		}
+	}
+	if p.Agents != 47 {
+		t.Errorf("three agents should have gone, %d left of 50", p.Agents)
+	}
+	if p.CovertOpsToday[game.OpDemoralizeForces] != 3 {
+		t.Errorf("the day's allowance should be down 3, got %v", p.CovertOpsToday)
+	}
+	if !strings.Contains(stripANSI(out), "3 agents have set out") {
+		t.Errorf("the acknowledgement should report the count:\n%s", out)
+	}
+}
+
+// The suggested count is the smallest of the three things that bound it, so a
+// baron cannot be offered a number the next prompt would refuse.
+func TestAgentsAvailableIsTheTightestBound(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.CovertOpsToday = nil
+	row := covertRows[4] // Demoralize Forces
+	if row.Op != game.OpDemoralizeForces {
+		t.Fatalf("this test indexes the wrong row: %q", row.Op)
+	}
+
+	p.Agents, p.Gold = 3, 1_000_000_000
+	if got := agentsAvailable(w, row); got != 3 {
+		t.Errorf("agents held should bound it: %d, want 3", got)
+	}
+	p.Agents, p.Gold = 50, int64(row.Cost)*2
+	if got := agentsAvailable(w, row); got != 2 {
+		t.Errorf("gold should bound it: %d, want 2", got)
+	}
+	p.Gold = 1_000_000_000
+	p.CovertOpsToday = map[game.CovertOp]int{game.OpDemoralizeForces: w.Config.TurnsPerDay - 1}
+	if got := agentsAvailable(w, row); got != 1 {
+		t.Errorf("the day's allowance should bound it: %d, want 1", got)
 	}
 }

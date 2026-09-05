@@ -1610,6 +1610,16 @@ that paces an op.
 The info ops stay uncapped (`capped=false`) and Expose Enemy Ops does not go
 through `covertCost` at all, exactly as in the original.
 
+**The menu asks how many agents to send**, as the interplanetary Terrorist Ops
+screen does, and sends that many at the one target — each its own operation with
+its own fee, its own agent and its own roll on arrival. The suggested count is
+the tightest of the three bounds: agents held, what today's allowance still
+permits, and what the gold in hand can pay the fee for. Without it the day's
+allowance is unusable in practice and invisible besides: nothing on the screen
+would say it existed, and spending it would mean walking the menu once per agent.
+The two info ops keep the single-agent flow — they are uncapped, they answer at
+once, and a second look at the same realm in the same breath says nothing new.
+
 > An earlier note here recorded the opposite from live play — Stir Revolts
 > followed by Set Up, refused. That could not be reconciled with the code on a
 > re-read (2026-08-16), and the code is unambiguous, so the live note is treated

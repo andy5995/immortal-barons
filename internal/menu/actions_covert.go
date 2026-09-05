@@ -67,14 +67,109 @@ var covertRows = []covertRow{
 
 // action is the menu Action for this operation: the caller's own New Realm
 // Protection gate (except for the two info ops), then the shared target picker.
+//
+// An EFFECT op then asks how many agents to send, as the interplanetary
+// Terrorist Ops screen does, and sends that many at the one target. The
+// allowance being a day's rather than a turn's is worth nothing if the only way
+// to spend it is to walk back through the menu for each agent (#257's sibling
+// complaint) — and nothing on the screen would say the allowance existed.
+//
+// The two INFO ops are unchanged: they are uncapped, they answer immediately,
+// and a second look at the same realm in the same breath tells you nothing.
 func (row covertRow) action() Action {
 	return func(s session.Session, w *ctx) Result {
-		if !row.Info && blockedByCovertProtection(s, w) {
+		if row.Info {
+			return pickAndStrike(s, w, string(row.Op), nil, false, false,
+				func(a, d *game.Empire) (string, error) { return row.Strike(w, a, d) })
+		}
+		if blockedByCovertProtection(s, w) {
 			return Stay
 		}
-		return pickAndStrike(s, w, string(row.Op), nil, false, false,
-			func(a, d *game.Empire) (string, error) { return row.Strike(w, a, d) })
+		return sendAgents(s, w, row)
 	}
+}
+
+// agentsAvailable is how many agents the player could send on this operation
+// right now: the agents held, what today's allowance still permits, and what the
+// gold in hand can pay the fee for, whichever runs out first.
+func agentsAvailable(w *ctx, row covertRow) int {
+	p := w.Player()
+	n := min(p.Agents, w.CovertOpsLeft(p, row.Op))
+	if row.Cost > 0 {
+		n = min(n, int(p.Gold/int64(row.Cost)))
+	}
+	return max(n, 0)
+}
+
+// sendAgents picks the target, asks how many agents to send, and sends them one
+// at a time — each is its own operation with its own fee, its own agent and its
+// own roll when it lands, exactly as sending them one per visit to the menu
+// would be. The count is a convenience, not a new mechanic.
+func sendAgents(s session.Session, w *ctx, row covertRow) Result {
+	rows := covertTargets.rows(w)
+	if len(rows) == 0 {
+		ok(s, "There are no rival empires left to attack.")
+		return Stay
+	}
+	name, chosen := pickAttackTarget(s, w.Term, rows,
+		covertTargets.prompts(tr(s, "Choose a target (letter, RETURN to abort)")))
+	if !chosen {
+		return Stay
+	}
+	// Asking before the count is what makes the refusal say which of the three
+	// ran out, rather than offering a prompt whose only honest answer is zero.
+	avail := agentsAvailable(w, row)
+	if avail < 1 {
+		p := w.Player()
+		switch {
+		case p.Agents < 1:
+			fail(s, game.ErrNoAgents)
+		case w.CovertOpsLeft(p, row.Op) < 1:
+			fail(s, game.ErrCovertCapReached)
+		default:
+			fail(s, game.ErrCantAfford)
+		}
+		return Stay
+	}
+	n := promptSuggested(s, "How many agents to send?", avail, avail)
+	if n <= 0 {
+		return Stay
+	}
+
+	var report string
+	var sent int
+	var err error
+	for ; sent < n; sent++ {
+		e := w.mutatePlayer(func(p *game.Empire) error {
+			d := covertTargets.find(w, p, name)
+			if d == nil {
+				return errTargetGone
+			}
+			var inner error
+			report, inner = row.Strike(w, p, d)
+			return inner
+		})
+		if e != nil {
+			err = e
+			break
+		}
+	}
+	// Whatever went, went: a run stopped part way by a price rise or a realm
+	// that died mid-send still sent the agents ahead of it, so the count is
+	// reported rather than the whole thing failing.
+	if sent == 0 {
+		fail(s, err)
+		return Stay
+	}
+	if sent > 1 {
+		report = fmt.Sprintf(tr(s, "%d agents have set out for %s."), sent, name)
+	}
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
+	if err != nil {
+		fail(s, err)
+	}
+	pause(s)
+	return Stay
 }
 
 // covertAction is the menu action for op. It panics on an op with no row, which

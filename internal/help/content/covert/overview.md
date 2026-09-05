@@ -41,9 +41,14 @@ is abandoned and the fee is not returned.
 Each covert operation may be run once for every turn in the day, and you may
 spend that allowance whenever you like — all of it in one turn, or one at a time.
 Running Stir Revolts uses up one Stir Revolts and leaves every other operation
-untouched. The allowance refills at the start of each new day. Send Spy and Spy
-on Relations only gather information, so they have no limit at all, and Expose
-Enemy Ops has none either.
+untouched. The allowance refills at the start of each new day.
+
+After you pick a target the game asks how many agents to send, and suggests as
+many as you can: whichever runs out first of the agents you hold, the allowance
+you have left today, and the gold to pay the fee. Each agent is a separate
+operation with its own fee and its own chance of being caught. Send Spy and Spy
+on Relations only gather information, so they have no limit at all and go one at
+a time, and Expose Enemy Ops has no limit either.
 
 When an operation fails, your agent is caught and lost, and the target is warned
 — and a caught agent talks, so the target is told your realm's name. An

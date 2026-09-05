@@ -178,6 +178,18 @@ func (w *World) CanRunCovertOp(a *Empire, op CovertOp) bool {
 	return underDailyCap(a.CovertOpsToday[op], w.CovertOpsAllowed())
 }
 
+// CovertOpsLeft is how many more times a may run op today. It is what the menu
+// suggests when it asks how many agents to send, alongside the agents held and
+// the gold in hand. An allowance of zero or less is no cap, and reports the
+// agents held instead — the only other thing bounding a send.
+func (w *World) CovertOpsLeft(a *Empire, op CovertOp) int {
+	allowed := w.CovertOpsAllowed()
+	if allowed <= 0 {
+		return a.Agents
+	}
+	return max(allowed-a.CovertOpsToday[op], 0)
+}
+
 // covertCost gates a covert op: the attacker must hold at least one agent and
 // enough gold for the op's fee, which is charged up front (BRE charges per op).
 // When capped, it also enforces the day's allowance for that ONE operation,
