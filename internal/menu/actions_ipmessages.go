@@ -198,6 +198,20 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 // line looking unchanged while the invisible typed text shortens, and it is what
 // the original does.
 func readPlanetAnswer(s session.Session, planets []game.LeagueNode, first rune) (string, error) {
+	return readCompletingAnswer(s, func(typed string) (string, int) {
+		p, n := matchPlanetCount(planets, typed)
+		if p == nil {
+			return "", n
+		}
+		return p.Name, n
+	}, first)
+}
+
+// readCompletingAnswer is that prompt's reader with the candidate set behind a
+// match function, so the Attack Type help's topic prompt is the same prompt
+// rather than a second one that merely looks like it (#253). match reports the
+// single completion and how many candidates the typed text still fits.
+func readCompletingAnswer(s session.Session, match func(string) (string, int), first rune) (string, error) {
 	var typed, shown []rune
 	shownColor := ""
 	// redraw brings the line on screen up to date with want, erasing only what
@@ -224,9 +238,9 @@ func readPlanetAnswer(s session.Session, planets []game.LeagueNode, first rune) 
 		shownColor = color
 	}
 	settle := func() {
-		switch p, n := matchPlanetCount(planets, string(typed)); {
-		case n == 1 && p != nil:
-			redraw([]rune(p.Name), ansi.FgBrightYellow)
+		switch name, n := match(string(typed)); {
+		case n == 1 && name != "":
+			redraw([]rune(name), ansi.FgBrightYellow)
 		case n > 1:
 			redraw(typed, ansi.FgBrightWhite)
 		default:

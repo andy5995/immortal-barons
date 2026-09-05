@@ -8,7 +8,6 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
-	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -238,23 +237,6 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 
 // errAttackAborted is BRE's wording when the attack-type menu is quit out of.
 var errAttackAborted = errors.New("Attack aborted.")
-
-// showAttackTypeHelp renders the Attack Types topic, which is where the three
-// variants' figures live. BRE's own menu carries the same (?) Help item, and
-// its help shows the same numbers, so the topic is the single source rather
-// than a blurb duplicated onto the menu.
-func showAttackTypeHelp(s session.Session, w *ctx) {
-	lang := "en"
-	if p := w.Player(); p != nil && p.Language != "" {
-		lang = p.Language
-	}
-	t, found := help.TopicByPath("interbbs/attack-types.md", lang)
-	if !found {
-		return
-	}
-	fmt.Fprintf(s, "\n%s\n", t.RenderANSI(78))
-	pause(s)
-}
 
 // promptAttackKind is BRE's attack-type menu, the choice an individual strike
 // makes and a group attack does not. Captured live from the original

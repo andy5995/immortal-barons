@@ -2970,8 +2970,14 @@ this screen keeps 120%.
 
 **Deliberate divergences in IB.** IB writes its own help prose rather than
 BRE's `attack.hlp` wording, and comma-groups the gold figure as it does
-everywhere. It also prints ONE page covering all three types where BRE opens the
-browser above, which is a defect rather than a divergence (#253).
+everywhere.
+
+IB opens the browser above as of 2026-09-05 (#253) — the rule, the three names
+in their 25-column fields, the completing `Enter Topic` prompt, Enter answering
+`None`. It printed one page until then. The page it printed also covered
+group-attack timing, the return path and the region picker, which
+`game/attack.hlp` has no counterpart for; that material stays on the Attack
+Types page under Game Instructions, and only the three type topics answer here.
 
 ## Create Group Attack (captured live 2026-08-11, two-board league)
 
