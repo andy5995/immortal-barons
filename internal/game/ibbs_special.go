@@ -389,17 +389,30 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 		d.addEvent(fmt.Sprintf("Agents from %s undermined your investments — %d gold in principal lost.", from, lost))
 		return fmt.Sprintf("You undermined %s's investments: %d gold lost.", d.Name, lost), 0, true, false
 
+	// The three missiles do NOT run the local helpers of the same name (#255).
+	// The receiving board resolves all three in one routine with its own gates
+	// and its own bands (BRE.OVR ovr_0450a9 +0x3c5) — an arriving nuclear strike
+	// ruins a wider swathe than a neighbour's, and an arriving chemical strike is
+	// a population weapon that touches no land at all.
 	case OpNuclear:
-		regions := w.nuclearEffect(d)
+		if stopped := w.arrivingMissileStopped(d, "nuclear strike"); stopped != "" {
+			d.addEvent(fmt.Sprintf("A nuclear strike from %s never reached your empire.", from))
+			return stopped, 0, false, false
+		}
+		regions := w.arrivingNuclearEffect(d)
 		score = w.rng.Intn(NukeScoreRoll)
 		d.addEvent(fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", from, regions))
 		return fmt.Sprintf("Nuclear strike! %d regions of %s are now waste.", regions, d.Name), score, true, false
 
 	case OpChemical:
-		regions, people := w.chemicalEffect(d)
+		if stopped := w.arrivingMissileStopped(d, "chemical strike"); stopped != "" {
+			d.addEvent(fmt.Sprintf("A chemical strike from %s never reached your empire.", from))
+			return stopped, 0, false, false
+		}
+		people := w.arrivingChemicalEffect(d)
 		score = w.rng.Intn(ChemScoreRoll)
-		d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d regions reduced to waste and %d dead. Famine follows.", from, regions, people))
-		return fmt.Sprintf("Chemical strike! %d regions of %s are now waste, and %d of its people are dead.", regions, d.Name, people), score, true, false
+		d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d of your people are dead.", from, people))
+		return fmt.Sprintf("Chemical strike! %d of %s's people are dead.", people, d.Name), score, true, false
 
 	case OpSabre:
 		report, hit, backfired = w.sabreEffect(d, from, dial)

@@ -4015,10 +4015,20 @@ several million people in chemical bombings!") while the attacker is told
 "killing %A million people!", and the nuclear pair names the region count to
 both.
 
-**IB diverges on all six rows.** It runs `nuclearEffect` and `chemicalEffect` —
-the local bands, land damage and all — for an arriving strike, and applies the
-protection, misfire and SDI gates only to the S3-Sabre. Its event text names
-exact figures in both directions. Not yet reconciled.
+**IB matches the gates and the bands** (#255, 2026-09-05). An arriving nuclear or
+chemical strike runs `arrivingNuclearEffect` / `arrivingChemicalEffect` against
+the bands above, behind `arrivingMissileStopped` — the misfire then SDI, after
+the realm-found and New-Realm-Protection gates the resolver already applied to
+every special op. The chemical strike touches nothing but the population.
+
+Two knowing differences remain. The **32,000 ceiling converts for people and not
+for regions**: the original counts population in millions, so the same figure is
+`IPMissilePeopleCap` = 32,000 × `PopBREUnitScale` here, while a region is a
+region in both games. And the **S3-Sabre keeps IB's own 3-in-10 delivery roll**
+instead of gaining the 1-in-10 misfire beside it — the invented roll is the
+stricter of the two, and stacking them is a balance question rather than part of
+this. IB's event text still names exact figures in both directions where the
+original tells the victim "several million".
 
 **Three IB decisions**, none of them established from the original:
 

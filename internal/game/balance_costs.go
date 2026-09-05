@@ -539,6 +539,36 @@ const (
 	// is inclusive in the original, so a realm with no program still intercepts
 	// on a zero roll (1%); that is faithful, not a rounding artifact.
 	SDIMissileInterceptPct = 50
+	// The arriving-missile resolver's own numbers, BINARY-VERIFIED
+	// (`BRE.OVR ovr_0450a9 +0x3c5`, the one routine the receiving board runs for
+	// all three missiles). These are NOT the local missiles' bands — an arriving
+	// nuclear strike ruins a wider swathe than a neighbour's, and an arriving
+	// chemical strike is a population weapon alone.
+	//
+	// MissileMisfireOdds is the gate ahead of SDI: one launch in this many is
+	// lost whatever the target does (`+0x467`).
+	MissileMisfireOdds = 10
+	// IPNukeWastePctBase + Random(IPNukeWastePctRoll) percent of the target's
+	// regions become waste (`+0x5c0`), so 10-14%.
+	IPNukeWastePctBase = 10
+	IPNukeWastePctRoll = 5
+	// IPChemKillPctBase + Random(IPChemKillPctRoll) percent of the target's
+	// PEOPLE die, and nothing else is touched — no land, no morale, no support
+	// (`+0x636`), so 15-29%.
+	IPChemKillPctBase = 15
+	IPChemKillPctRoll = 15
+	// IPMissileDamageCap clamps what one arriving strike takes, applied to the
+	// region and people counts after the percentage.
+	//
+	// The raw ceiling carries the ORIGINAL's units, so it converts for one of the
+	// two and not the other. Regions are regions in both games, and 32,000 of
+	// them is a realm far larger than anything a capture shows. Population is
+	// counted in millions there and in people here, so the same 32,000 is
+	// 32,000 million — PopBREUnitScale times as many of IB's people. Applying the
+	// raw figure to a head count instead caps a chemical strike at 32,000 dead,
+	// which a realm of a million people reaches on every hit.
+	IPMissileRegionCap = 32000
+	IPMissilePeopleCap = IPMissileRegionCap * PopBREUnitScale
 	// TerrorUnitLossDenom is what a terror op takes when the packet does not say
 	// WHICH operation it was — a strike written by a board old enough to predate
 	// the per-op dispatch. It removes 1/N of one random unit type per agent, the

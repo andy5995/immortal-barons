@@ -192,8 +192,17 @@ func payArmsDealer(a *Empire, cost int64) error {
 // already ruined absorbs part of the strike, and the same count goes straight
 // back on as waste — the realm's total never moves. Both the nuclear and the
 // chemical missile reach this through one shared helper in the original.
-func ruinToWaste(d *Empire, pct int) int {
-	ruined := d.Regions.remove(d.Land * pct / 100).Total()
+func ruinToWaste(d *Empire, pct int) int { return ruinToWasteCapped(d, pct, 0) }
+
+// ruinToWasteCapped is ruinToWaste with a ceiling on the regions taken; a cap of
+// zero or less means none. The arriving missiles carry the original's own cap,
+// the local ones have no such clamp.
+func ruinToWasteCapped(d *Empire, pct, cap int) int {
+	want := d.Land * pct / 100
+	if cap > 0 && want > cap {
+		want = cap
+	}
+	ruined := d.Regions.remove(want).Total()
 	d.Regions.Waste += ruined
 	d.syncLand()
 	return ruined
@@ -362,6 +371,45 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 // retune lands on both menus. They take no attacker: the fee, the score award
 // and the news line all belong to the side that fired, which cross-planet is a
 // different board entirely.
+
+// arrivingMissileStopped runs the two rolls the receiving board makes for ANY
+// arriving missile, after the realm has been found and its New Realm Protection
+// checked: the misfire, then SDI. BINARY-VERIFIED — the original resolves all
+// three missiles in one routine (`BRE.OVR ovr_0450a9 +0x3c5`) and both rolls sit
+// ahead of the damage switch, so a nuclear strike is stopped by the same shield
+// an S3-Sabre is.
+//
+// Returns the reason the strike ended, or "" when it gets through. The two
+// reasons are separate lines to the reader in the original, and stay separate
+// here: a shield that worked and a weapon that failed are different news.
+func (w *World) arrivingMissileStopped(d *Empire, label string) string {
+	if w.rng.Intn(MissileMisfireOdds) == 0 {
+		return fmt.Sprintf("The %s misfired and never reached %s.", label, d.Name)
+	}
+	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
+		return fmt.Sprintf("%s's SDI intercepted your %s.", d.Name, label)
+	}
+	return ""
+}
+
+// arrivingNuclearEffect and arrivingChemicalEffect are the damage an arriving
+// missile does, which is NOT what the local missile of the same name does. The
+// bands are the receiving resolver's own (see balance_costs.go), and the
+// chemical one touches nothing but the population — no land, no morale, no
+// support, where the local strike takes all three.
+func (w *World) arrivingNuclearEffect(d *Empire) int {
+	pct := IPNukeWastePctBase + w.rng.Intn(IPNukeWastePctRoll)
+	return ruinToWasteCapped(d, pct, IPMissileRegionCap)
+}
+
+func (w *World) arrivingChemicalEffect(d *Empire) int {
+	pct := IPChemKillPctBase + w.rng.Intn(IPChemKillPctRoll)
+	// int64 through the multiply: a big urban realm's head count times a
+	// percentage passes 2^31 on the 32-bit door builds.
+	dead := min(int(int64(d.People)*int64(pct)/100), IPMissilePeopleCap)
+	d.People -= dead
+	return dead
+}
 
 // nuclearEffect ruins a share of d's land into waste and reports the regions.
 // 7% ± a two-draw jitter, so the band is 5-9% and the extremes are rarer than

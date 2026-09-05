@@ -710,6 +710,12 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // and its planet, the same as an incoming nuclear or chemical strike. Agent ops
 // stay anonymous unless the agent is caught (see covertFoiled).
 func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, hit, backfired bool) {
+	// The shared arriving-missile gates, so the shield an S3-Sabre meets and the
+	// one a nuclear strike meets cannot drift apart (#255). IB's own 3-in-10
+	// delivery roll below is a stricter gate than the original's 1-in-10 misfire,
+	// which is why the misfire is not applied here as well: reconciling the two
+	// is a balance question of its own, not part of bringing the other two
+	// missiles up to the same resolver.
 	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
 		return fmt.Sprintf("%s's SDI intercepted your S3-Sabre.", d.Name), false, false
 	}
