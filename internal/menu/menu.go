@@ -998,6 +998,29 @@ func toggle(get func(*ctx) *bool) Action {
 	}
 }
 
+// itemLabelWidth is the label field inside a two-column cell: the cell is
+// cellWidth and the "  (K) " prefix takes 6, leaving 28, of which the last is
+// the gap before the next cell. BRE lays its own out the same way, one column
+// narrower on each side because it does not indent (docs/dev/bre-screens.md).
+const itemLabelWidth = 27
+
+// withPrice renders an item that carries its own price, the way BRE draws
+// Terrorist Ops on the InterPlanetary menu — `(2) Terrorist Ops       570,304`
+// — with the name at the left of the cell and the figure hard against its right
+// edge. A label and figure too wide to fit keep one space between them and push
+// the cell wider rather than being clipped.
+func withPrice(name string, price func(*ctx) int64) func(*ctx) string {
+	return func(g *ctx) string {
+		lang := playerLang(g)
+		label, fig := i18n.T(lang, name), formatGold(price(g), lang)
+		pad := itemLabelWidth - utf8.RuneCountInString(label) - utf8.RuneCountInString(fig)
+		if pad < 1 {
+			pad = 1
+		}
+		return label + strings.Repeat(" ", pad) + fig
+	}
+}
+
 func onOff(name string, get func(*ctx) *bool) func(*ctx) string {
 	return func(g *ctx) string {
 		// BRE shows a bare, right-aligned Yes/No (no brackets), verified against a

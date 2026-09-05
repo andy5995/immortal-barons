@@ -1072,10 +1072,18 @@ multiplies it by the count, and `SendTerror` takes that and adds the count to
 and counted a send as a single op, so fifteen agents cost what one did and the
 day's allowance was fifteen SENDS rather than fifteen agents.
 
-**Still missing: the price on the menu.** BRE draws it beside the item —
-`(2) Terrorist Ops       570,304` — and IB's InterPlanetary menu shows the item
-bare. The four Special Operations entries price themselves on their own menu —
-see "Interplanetary Special Operations" below.
+**The price is drawn on the menu**, as BRE draws it — the rate right-aligned
+against the cell's edge, `(2) Terrorist Ops       570,304`, the only item on that
+menu carrying a figure. IB's cell sits two columns right of the original's, which
+is the engine's standing indent rather than anything about this item.
+
+Note that the menu's figure and the charge disagree on the day's FIRST operation,
+in the original as in IB: the quote clamps `opsToday` up to 1 and the charge does
+not. It is the original's own off-by-one, kept rather than tidied, and it costs
+the player nothing — the charge is the lower of the two.
+
+The four Special Operations entries price themselves on their own menu — see
+"Interplanetary Special Operations" below.
 
 ### The two cost levels (Attack Costs, Terrorism Costs) — BINARY-VERIFIED
 

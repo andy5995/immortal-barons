@@ -267,7 +267,15 @@ func BuildMenus() *Menus {
 	// needsTurnPlayed for which, and for where the original gates each (#162).
 	interplanetary.Items = []Item{
 		{Key: '1', Label: "View IPScores", Do: interbbsScores},
-		{Key: '2', Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
+		// BRE prices this item on the menu itself, and it is the only item here
+		// that carries a figure. The rate quoted is for ONE agent, and a send
+		// costs it once per agent (see World.TerrorOpGoldCost).
+		{Key: '2', LabelFn: withPrice("Terrorist Ops", func(w *ctx) int64 {
+			if p := w.Player(); p != nil {
+				return w.TerrorOpGoldRate(p)
+			}
+			return 0
+		}), Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
 		{Key: '3', Label: "Send Trade Deal", Do: needsTurnPlayed(sendIPTradeDeal)},
 		{Key: '4', Label: "Create Group Attack", Do: needsTurnPlayed(createGroupAttack)},
 		{Key: '5', Label: "Join Group Attack", Do: needsTurnPlayed(joinGroupAttack)},
