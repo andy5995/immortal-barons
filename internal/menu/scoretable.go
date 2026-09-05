@@ -44,7 +44,7 @@ func scoreRows(w *ctx) (rows []ScoreRow, lastMaster string) {
 			// bright-yellow name. The '+' played-today marker is also
 			// suppressed: your own status is obvious from context.
 			self := e == w.Player()
-			rows = append(rows, ScoreRow{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Alive && e.Protection > 0, e.Land, e.Score, nw})
+			rows = append(rows, ScoreRow{e.Name, e.Letter(), e.Alive, self, presenceOf(w, e, self, w.Today), e.Alive && e.Protection > 0, e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
@@ -100,14 +100,21 @@ const (
 // presenceOf returns the display presence for an empire relative to the caller.
 // Self is always suppressed — a deliberate divergence from BRE, which shows the
 // `+` on the caller's own row too (docs/dev/bre-screens.md).
-func presenceOf(e *game.Empire, self bool, today string) string {
+//
+// The played-today `+` is shown only in a league game (#249). Off a league every
+// realm on the table is a neighbour the caller can attack, and an UNMARKED row
+// then says its baron has not been on today — which is intelligence a player
+// should not be handed for free. The leak is the absence of the mark rather than
+// its presence, so the fix is to draw it for nobody. `(O)` is unaffected: being
+// on the board right now is a different fact, and the BBS shows it elsewhere.
+func presenceOf(w *ctx, e *game.Empire, self bool, today string) string {
 	if self {
 		return presenceNone
 	}
 	if e.Online() {
 		return presenceOnline
 	}
-	if e.LastPlayed == today {
+	if e.LastPlayed == today && w.Config.IBBS {
 		return presencePlayed
 	}
 	return presenceNone

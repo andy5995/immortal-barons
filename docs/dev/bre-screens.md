@@ -883,6 +883,13 @@ capture shows the flag on the caller's own row too (`(E)+Your Empire`); IB
 omits it there — your own status is obvious from context, and the row is
 already singled out by its bright-yellow name.
 
+**And IB draws it only in a league game (#249).** Off a league every realm on
+this table is a neighbour the caller can attack, and the rows WITHOUT the mark
+then say which barons have not been on today — intelligence the original may
+hand out but IB does not. Whether BRE gates it the same way is unsettled: the
+2026-08-16 capture above was not recorded with the game's InterBBS setting, so it
+cannot say whether a local-only planet shows the flag at all.
+
 ```
 -*Barren Realms Elite*-
 

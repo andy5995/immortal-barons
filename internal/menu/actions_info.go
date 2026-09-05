@@ -290,7 +290,7 @@ func playerList(s session.Session, w *ctx) Result {
 				continue
 			}
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, presenceOf(e, self, w.Today), e.Protection > 0, e.Land, w.NetWorth(e)})
+			rows = append(rows, row{e.Name, presenceOf(w, e, self, w.Today), e.Protection > 0, e.Land, w.NetWorth(e)})
 		}
 	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)

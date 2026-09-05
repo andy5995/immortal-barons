@@ -188,7 +188,7 @@ func snapshotTargets(w *ctx, alliesAttackable bool) []targetRow {
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
 				attackable: attackable, protected: protected,
-				presence: presenceOf(e, false, w.Today),
+				presence: presenceOf(w, e, false, w.Today),
 				pact:     w.Relation(p, e),
 			})
 		}

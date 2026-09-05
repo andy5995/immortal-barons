@@ -106,7 +106,7 @@ func pickRows(w *ctx, opts pickOpts) (rows []pickRow, allies int) {
 			}
 			row := pickRow{
 				e: e, letter: rune('A' + e.Slot - 1), name: e.Name,
-				presence:  presenceOf(e, false, w.Today),
+				presence:  presenceOf(w, e, false, w.Today),
 				protected: e.Protection > 0,
 				land:      e.Land, score: e.Score, nw: w.NetWorth(e),
 			}

@@ -5004,6 +5004,12 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **The played-today `+` is drawn only in a league game** (#249). It marks a
+  realm that played a turn today but is not online now. Off a league the rows it
+  does NOT mark tell an attacker which barons have not been on today, so it is
+  drawn for nobody; `(O)` is unaffected. See "See Scores (local planet)" in
+  `docs/dev/bre-screens.md`, which also records that the original's own gating is
+  unsettled.
   straight from its regions-are-not-for-sale notice to the region table —
   confirmed in `cap/121125-666H4H_Camembert_Public.cap` and
   `cap/20240527-134Pho_Lazarus_Public.cap`, where the notice is followed

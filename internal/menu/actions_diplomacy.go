@@ -425,7 +425,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			}
 			rows = append(rows, relationsRow{
 				id: w.EmpireLetter(e), name: e.Name,
-				relations: relationsText(s, w.TreatiesBetween(p, e)), presence: presenceOf(e, false, w.Today),
+				relations: relationsText(s, w.TreatiesBetween(p, e)), presence: presenceOf(w, e, false, w.Today),
 				protected: e.Protection > 0,
 			})
 		}
