@@ -756,6 +756,15 @@ instruction's modrm. Six of the seven award sites reach it with a separate
   leave every region on the target's books as waste, and a percentage of a
   population never reaches zero. IB used to declare a realm "utterly conquered"
   on a chemical or biological strike; that was IB's own and is gone.
+
+  **No per-day cap on any of the three, locally.** Every "N per day" limit BRE
+  has is inter-BBS: the four `*` config knobs (Individual Attacks / Group Attacks
+  / Terrorist Attacks / Bombings per day), and the refusal strings that enforce
+  them (`… individual Strike(s) per day!`, `… Group Strike(s) per day!`,
+  `… Terrorist Operations per day!`) belong to `create_group_attack` and
+  `run_interbbs_attack_menu` alone. The three local launch routines hold no
+  counter and no such refusal — gold, turns, and the **Local Attacks** switch are
+  the only limits (verified 2026-09-05).
 - **Attack pirates** — the nine pirate factions are living raiders, not a
   fixed difficulty ladder: their strength is random (any faction can be the
   strongest). Their **names are IB-original** (BRE's coined names are its own
