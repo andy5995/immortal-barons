@@ -1,6 +1,10 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
+)
 
 // Planet-wide news, in the spirit of BRE's news.dat feed (see
 // docs/mechanics-reference.md, "News files"). Wording here is original — the
@@ -166,21 +170,20 @@ func (w *World) postInvestRateNews(before int) {
 // runs every maintenance day (matching BRE, which shows the title daily),
 // separate from endGame's one-time crowning of LastMaster at a league's end.
 func (w *World) postMasterNews() {
-	best := ""
+	var master *Empire
 	bestNW := 0
-	found := false
 	for _, e := range w.Empires {
 		if e.Alive {
-			if nw := w.NetWorth(e); !found || nw > bestNW {
+			if nw := w.NetWorth(e); master == nil || nw > bestNW {
 				bestNW = nw
-				best = e.Name
-				found = true
+				master = e
 			}
 		}
 	}
-	if !found {
+	if master == nil {
 		return
 	}
+	best := master.Name
 	switch {
 	case best == w.CurrentMaster:
 		w.postNews(fmt.Sprintf("%s retains the title of Planetary Master.", best))
@@ -190,6 +193,30 @@ func (w *World) postMasterNews() {
 		w.postNews(fmt.Sprintf("%s has seized the title of Planetary Master from %s!", best, w.CurrentMaster))
 	}
 	w.CurrentMaster = best
+	w.payMaster(master)
+}
+
+// payMaster hands the day's Planetary Master a share of the Queen's purse, the
+// same purse the tax refund is drawn from. BINARY-VERIFIED (BRE.OVR 0x007aeb,
+// update_planet_title): straight after filing the title news it credits the
+// holder's gold with pool/100 and takes the same amount back out of the pool
+// (config record +0x24), then files a personal notice on the holder's recap.
+func (w *World) payMaster(e *Empire) {
+	if w.RefundPool <= 0 {
+		return
+	}
+	pay := pctOf(w.RefundPool, MasterAwardPct)
+	if pay <= 0 {
+		return
+	}
+	w.RefundPool -= pay
+	w.creditGold(e, pay, "the Planetary Master's share")
+	// A computer baron takes the gold but gets no notice: the daily sweep in
+	// DailyMaintenance clears its recap anyway, and this runs after that sweep.
+	if e.Owner != "" {
+		e.addEvent(fmt.Sprintf("The Queen Royale sends you %s gold for holding the title of Planetary Master.",
+			numfmt.Comma(pay)))
+	}
 }
 
 // BattleLog is the world report's raw material: one line per attack fought

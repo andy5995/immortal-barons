@@ -1,3 +1,6 @@
+(in-progress:)
+  * The Planetary Master is paid a share of the Queen's purse each day
+
 2026-09-03 (v0.0.9)
   * The inter-BBS packet protocol moves to 2; boards must update together
   * Attacking a treaty partner breaks the pact and costs support and morale

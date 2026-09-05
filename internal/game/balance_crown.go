@@ -35,6 +35,14 @@ const (
 	QueenRefundCap      = 1_000_000   // ceiling while the realm is still protected
 )
 
+// The Planetary Master's daily share of the same purse.
+//
+// BINARY-VERIFIED (BRE.OVR 0x007aeb, update_planet_title, called only from
+// run_daily_maintenance): the title is settled once a day by net worth, and the
+// holder is paid pool/100, which is then subtracted from the pool. Uncapped and
+// ungated — the protection cap above applies to the refund only.
+const MasterAwardPct = 1 // percent of the Queen's purse, paid daily to the Master
+
 // --- The Queen's lottery ---
 //
 // A ticket is offered once a game day, in the same first-play event block as

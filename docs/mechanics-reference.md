@@ -351,6 +351,32 @@ flow runs in this order:
    named flags, not a 0–20 counter. The two agree on every path traced through
    the original.
 
+   ### The Planetary Master's share of the purse
+
+   The same purse pays the Planetary Master. **Fully binary-verified**
+   (`BRE.OVR 0x007aeb`, `update_planet_title`, whose only caller is
+   `run_daily_maintenance` — the daily update's "Awarding Planetary Master"
+   step):
+
+   ```
+   master  = the living realm with the highest net worth
+   payout  = purse / 100
+   purse  -= payout
+   ```
+
+   Settling the title and paying for it are one routine. It scans the realm
+   letters, takes the highest net worth among those still living, files the news
+   line, writes the winner's letter to the config record `+0x49`, then credits
+   that realm's gold (`+0x66`) and takes the same amount back out of the purse.
+   The award is **uncapped and ungated** — the New Realm Protection cap belongs
+   to the refund above and is not tested here.
+
+   Three news phrasings, chosen by what changed: the holder *keeps* the title,
+   *takes* it from a named predecessor, or *claims* it where there was no holder.
+   The winner additionally gets a personal notice on their own recap naming the
+   gold. **IB implements all of this** (`postMasterNews` / `payMaster`,
+   `MasterAwardPct`), in its own wording.
+
    ### The Queen's lottery
 
    The other half of the same first-play block, settled immediately after the
@@ -2903,8 +2929,11 @@ section is a record of what was claimed and how it was settled, so the word
   growth.
 - **Emperor gifts:** a very small realm (e.g. one left at 2 regions)
   receives daily gifts — stolen coins from the Emperor or free military
-  (e.g. thousands of tanks). This matches the "Gold for being" award text
-  in the original binary. It enables a "quit and idle" fast-start exploit.
+  (e.g. thousands of tanks). It enables a "quit and idle" fast-start exploit.
+  (This entry used to cite the original's "Gold for being" award text as
+  corroboration. That string belongs to the Planetary Master's daily share of
+  the Queen's purse — see its own section above — and says nothing about
+  gifts to small realms, which are still unverified.)
 - **Investment** is a separate, higher-return option than bank interest,
   but it ties money up until a set time (e.g. ~24 hours). Bank interest
   (~1%/turn) applies to money on hand *while you play*.

@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 // TestPostInvestRateNewsOnMove posts one economic news line when the rate
 // actually moves, and none when it doesn't.
@@ -100,5 +103,47 @@ func TestStarvationPostsCivilNews(t *testing.T) {
 	w.processEconomy(fed)
 	if len(w.NewsToday) != 0 {
 		t.Errorf("expected no starvation news for a well-fed empire, got %v", w.NewsToday)
+	}
+}
+
+// TestMasterIsPaidFromTheQueensPurse holds the daily award to its golden
+// figures: 1% of the purse, taken back out of the purse, credited to the
+// Master alone and announced on their own recap. An empty purse pays nothing
+// and files nothing.
+func TestMasterIsPaidFromTheQueensPurse(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	leader := w.AddHuman("leader", "Leaderland")
+	leader.Land = 1_000_000
+	other := w.AddHuman("other", "Otherland")
+
+	w.RefundPool = 500_000
+	leader.Gold, other.Gold = 0, 0
+	leader.Events, other.Events = nil, nil
+	w.postMasterNews()
+
+	if leader.Gold != 5_000 {
+		t.Errorf("Master's gold = %d, want 5000", leader.Gold)
+	}
+	if w.RefundPool != 495_000 {
+		t.Errorf("purse = %d, want 495000", w.RefundPool)
+	}
+	if other.Gold != 0 || len(other.Events) != 0 {
+		t.Errorf("a non-Master was paid: gold %d, events %v", other.Gold, other.Events)
+	}
+	if len(leader.Events) != 1 {
+		t.Fatalf("expected one award notice on the Master's recap, got %v", leader.Events)
+	}
+	if !strings.Contains(leader.Events[0].Text, "5,000") {
+		t.Errorf("award notice does not name the amount: %q", leader.Events[0].Text)
+	}
+
+	// An empty purse is silent.
+	w.RefundPool = 0
+	leader.Gold, leader.Events = 0, nil
+	w.postMasterNews()
+	if leader.Gold != 0 || len(leader.Events) != 0 {
+		t.Errorf("empty purse still paid: gold %d, events %v", leader.Gold, leader.Events)
 	}
 }
