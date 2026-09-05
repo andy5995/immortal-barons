@@ -333,14 +333,28 @@ func (w *World) ExpireTradeDeals(now time.Time) {
 	}
 }
 
-// forfeitPendingDeals tells each realm holding a deal on e that its trade fleet
-// found nobody there. Called when e leaves the world — eliminated, abdicated or
-// reaped as idle — where the goods would otherwise vanish with no word at all
-// (#174). They are forfeit, as they are on a rejection and on an expiry.
-func (w *World) forfeitPendingDeals(e *Empire) {
+// returnPendingDeals hands each escrowed shipment back to the realm that sent
+// it, and says so. Called when e leaves the world — eliminated, abdicated or
+// reaped as idle.
+//
+// This is the one forfeit case with nobody to blame for it (#248). A rejection
+// and an expiry both destroy the escrow, and deliberately: the target answered,
+// or could have. A target that is GONE was never offered the choice, so the
+// sender loses goods over something no player did. IB returns them instead.
+//
+// The original settles none of this — nothing on its elimination path clears a
+// trade record (`clear_trade_offer_record` is reached only from
+// `create_trade_offer` and `process_trade_offer`), so a departing realm takes
+// any pending offer with it silently. IB already diverged by telling the sender
+// at all; this carries the goods with the notice.
+//
+// addBasket is what returns them, so gold lands under the money cap and files
+// its own loss event if the realm is already at it.
+func (w *World) returnPendingDeals(e *Empire) {
 	for _, d := range e.TradeDeals {
 		if from := w.FindByName(d.From); from != nil && from != e {
-			from.addEvent(fmt.Sprintf("Your trade fleet could not find %s, and the goods you sent it with are lost.", e.Name))
+			w.addBasket(from, d.Send)
+			from.addEvent(fmt.Sprintf("Your trade fleet could not find %s, and has brought the goods home.", e.Name))
 		}
 	}
 	e.TradeDeals = nil

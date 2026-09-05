@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 )
@@ -341,9 +342,10 @@ func TestTradeDealWithNoExpiryNeverLapses(t *testing.T) {
 	}
 }
 
-// A realm leaving the world takes its pending deals with it, and every realm
-// waiting on one is told rather than watching goods never come back (#174).
-func TestRemovingARealmTellsWhoeverSentItADeal(t *testing.T) {
+// A realm leaving the world ends its pending deals, and the escrow comes HOME
+// rather than being destroyed: the target never declined and never could have
+// (#248, on top of the notice from #174).
+func TestRemovingARealmReturnsTheEscrowToTheSender(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
@@ -359,8 +361,11 @@ func TestRemovingARealmTellsWhoeverSentItADeal(t *testing.T) {
 	if len(from.Events) != before+1 {
 		t.Fatalf("the sender should be told the fleet found nobody, got %v", from.Events[before:])
 	}
-	if from.Tanks != 400 {
-		t.Errorf("the escrow goes with the realm: %d tanks, want 400", from.Tanks)
+	if from.Tanks != 500 {
+		t.Errorf("the escrow should come home: %d tanks, want the full 500 back", from.Tanks)
+	}
+	if got := from.Events[len(from.Events)-1].Text; !strings.Contains(got, "brought the goods home") {
+		t.Errorf("the sender should be told the goods came back, got %q", got)
 	}
 }
 

@@ -4809,9 +4809,22 @@ the 151-byte record (0xDC4) with no goods moving, the lapse branch does the same
 (0x511), and the branch for a target that can no longer be found does the same
 again (0x562) — every routine that moves goods sits inside the accept branch.
 So sending a deal is a bet: the goods leave when it is sent, and they come back
-only if the offer is taken. That settles #174 — the escrow is forfeit when the
-recipient dies, and the sender is told, which is what IB now does on all three
-paths. IB previously returned the goods on a decline.
+only if the offer is taken. That settles #174 — the sender is told on all three
+paths, which is what IB now does. IB previously returned the goods on a decline.
+
+**DELIBERATE DIVERGENCE on the third path: IB brings the goods home when the
+target is GONE** (#248). The other two forfeits stand exactly as the original has
+them, because in both the target answered or could have: a rejection is an answer
+and an expiry is a refusal to give one, so the bet was lost fairly. A target that
+has left the world — eliminated, abdicated, reaped as idle — was never offered
+the choice, and nothing any player did destroyed the shipment. The original does
+forfeit it (`process_trade_offer` 0x562, the branch behind `Your Trade Fleet
+could not find its target.`) — most likely a bug rather than a decision, since
+the other two branches have a reason this one does not, and all three share the
+same record-clearing code. Faithful to the routine, IB would burn a shipment
+because a THIRD party was reaped as idle. `World.returnPendingDeals`
+returns the escrow through `addBasket`, so returned gold lands under the money
+cap.
 
 **A pending deal is put again on every entry, and out of turns is asked
 nothing.** `run_player_turn` calls `process_trade_offer` behind a
