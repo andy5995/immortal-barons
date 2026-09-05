@@ -158,8 +158,8 @@ func TestSpyingIsRefusedOnAProtectedRealm(t *testing.T) {
 	if shielded.Agents != before {
 		t.Errorf("the target's agents moved (%d -> %d); an op ran", before, shielded.Agents)
 	}
-	if p := w.Player(); p.TurnProgress.CovertOpsUsed[game.OpSendSpy] {
-		t.Error("a refused spy still consumed the once-per-turn slot")
+	if p := w.Player(); p.CovertOpsToday[game.OpSendSpy] != 0 {
+		t.Error("a refused spy still consumed part of the day's allowance")
 	}
 }
 

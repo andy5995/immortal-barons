@@ -1276,8 +1276,8 @@ back, a realm really is one agent short.
 at record `+0xFD + digit` — read at `BRE.OVR 0x017AE0`, set at `0x017C4F` — so a
 turn holds one try of each item, not one item overall. Digits 1 and 6 (the info
 ops) skip the check and never set the byte; digit 9 (Expose Enemy Ops) is
-dispatched before either. IB matches this with `TurnProgress.CovertOpsUsed`,
-keyed by operation.
+dispatched before either. **IB counts the same allowance by the DAY instead** —
+see "Each effect op, TurnsPerDay times a day" below.
 
 **The covert menu closes when the last agent is spent.** Its wrapper
 (`enter_covert_operations_menu`, `BRE.OVR 0x0179db`) re-reads the 32-bit agent
@@ -1301,7 +1301,7 @@ bribe inside a realm you already hold one in, before charging (`0x01790A`).
 hold a bribed agent inside, chosen from a list of exactly those
 (`bribe_enemy_agents`, `BRE.OVR 0x01701B`, which walks the per-letter bribe array
 and lists every entry that is set). It writes `now + 1.0` days into a per-pair
-Real48 slot, charges the fee, spends no agent and takes no per-turn slot, and
+Real48 slot, charges the fee, spends no agent and takes no allowance, and
 blocks 9 attempts in 10 from that realm — the tenth lands normally. IB matches
 all of that; `Empire.ExposedFrom` holds the per-realm expiry.
 
@@ -1373,7 +1373,7 @@ confirmed from BRE (BRE.OVR string table plus a live capture, #73):
 - **(9) Expose Enemy Ops** — per BRE.OVR ("Bribed Agent will expose enemy
   operations for 24 Hours"), a one-day shield against ONE realm you already
   hold a bribed agent inside, blocking 9 of its attempts in 10. Spends no agent
-  and takes no per-turn slot, so it can be run repeatedly. IB models the 24
+  and takes no allowance, so it can be run repeatedly. IB models the 24
   hours as one game-day (`ExposeOpsShieldDays`). Cost `CostExposeEnemyOps`
   (600,000).
 - **(V) Visit Bank**.
@@ -1437,7 +1437,7 @@ queuing, and '1' and '6' resolve immediately through `report_spy_result` at
 
 **IB queues the six effect ops the same way** (`World.CovertQueue`,
 `internal/game/covert_queue.go`), read 2026-08-16 and built the same day. The
-menu path takes the fee, the agent and the once-per-turn slot and files a record;
+menu path takes the fee, the agent and one of the day’s allowance and files a record;
 `DailyMaintenance` drains the queue — before `aiPlay`, so an AI's operations wait
 a day exactly as a player's do — and files each result on the ATTACKER's event
 recap, which is where an asynchronous player reads it. Where the evidence sits:
@@ -1558,7 +1558,7 @@ Queen's refund cap uses. Digits 1 and 6, the info ops, jump past it (`0x01770B` 
 **IB matches this.** `covertOp` refuses the seven effect ops — including Expose
 Enemy Ops, which does not share the target picker — while `covertInfoOp` lets
 Send Spy and Spy on Relations through. The gate sits ahead of the fee, so a
-refused operation costs no gold, no agent and no per-turn slot, and it carries
+refused operation costs no gold, no agent and none of the day’s allowance, and it carries
 its own wording: the attack menus refuse because the TARGET is shielded, this
 refuses because the caller is.
 
@@ -1584,11 +1584,22 @@ is already set (`BRE.OVR 0x017AE0`, set at `0x017C4F`). So a turn holds one Stir
 Revolts, one Set Up, one Support Dissensions, and so on. The two *info* ops —
 **Send Spy** and **Spy on Relations** — skip the check outright (`0x017AC9`
 tests for digits '1' and '6') and never set a byte, and **Expose Enemy Ops** is
-dispatched at `0x017AA3` before the check is reached. IB matches this:
-`covertCost(..., capped)` records the operation in `TurnProgress.CovertOpsUsed`
-and returns `ErrCovertCapReached` only for a repeat of that same operation; the
-info ops pass `capped=false` and Expose Enemy Ops does not go through
-`covertCost` at all.
+dispatched at `0x017AA3` before the check is reached.
+
+**DELIBERATE DIVERGENCE — IB counts the same allowance by the DAY.** Each effect
+op may be run `Config.TurnsPerDay` times a day, in whatever turns the baron
+likes, counted in `Empire.CovertOpsToday` and cleared at daily maintenance beside
+`AttacksToday` and the rest. The ceiling is unchanged: BRE has no banked turns
+(`DailyMaintenance` sets `TurnsLeft = TurnsPerDay` flat), so one try per turn
+already came to `TurnsPerDay` tries a day, and a baron who wanted eight
+Demoralize Forces had to walk the covert menu on eight separate turns to get
+them. What moves is when they may be spent, not how many. Two second-order
+effects, both accepted: the fees and agents must be in hand at once rather than
+earned across the day, and the covert step's per-turn visit stops being the thing
+that paces an op.
+
+The info ops stay uncapped (`capped=false`) and Expose Enemy Ops does not go
+through `covertCost` at all, exactly as in the original.
 
 > An earlier note here recorded the opposite from live play — Stir Revolts
 > followed by Set Up, refused. That could not be reconciled with the code on a

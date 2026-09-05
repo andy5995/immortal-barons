@@ -384,8 +384,8 @@ func TestEveryCovertMenuActionQueuesItsOwnOp(t *testing.T) {
 			if rec := queuedOp(t, w); rec.Op != op {
 				t.Errorf("the %q item queued a %q", op, rec.Op)
 			}
-			if !p.TurnProgress.CovertOpsUsed[op] {
-				t.Errorf("the %q item took no per-turn slot under its own name, got %v", op, p.TurnProgress.CovertOpsUsed)
+			if p.CovertOpsToday[op] != 1 {
+				t.Errorf("the %q item took no allowance under its own name, got %v", op, p.CovertOpsToday)
 			}
 		})
 	}

@@ -27,7 +27,7 @@ const (
 // AllCovertOps is the whole set, in the order BRE's Covert Operations menu
 // lists it. It is the canonical list: a screen that offers these operations
 // names them through these constants rather than restating them as literals,
-// because the same string is the CovertOpsUsed key the per-turn gate reads out
+// because the same string is the CovertOpsToday key the per-day gate reads out
 // of the save file (#208).
 var AllCovertOps = []CovertOp{
 	OpSendSpy,
@@ -154,18 +154,34 @@ func (w *World) dissensionsPct() int {
 	return DissensionsPctBase + w.rng.Intn(DissensionsPctSpread) - w.rng.Intn(DissensionsPctSpread)
 }
 
-// ErrCovertCapReached is returned when an EFFECT covert op is attempted a second
-// time in one turn (BRE: "Limit one try per turn!"). BRE keeps the flag in a
+// ErrCovertCapReached is returned when an EFFECT covert op has already been run
+// its allowed number of times today. The allowance is per OPERATION and equals
+// Config.TurnsPerDay, so a day holds as many Stir Revolts as it holds turns, and
+// as many Set Ups beside them. Info ops (Send Spy, Spy on Relations) are exempt,
+// as they are in the original.
+//
+// BRE spells the same ceiling as one try of each operation per TURN, keyed by a
 // per-digit byte (`[es:di + 0xFD + digit]`, written at BRE.OVR 0x017C4F and read
-// at 0x017AE0), so the limit is one try of EACH operation, not one operation
-// overall. Info ops (Send Spy, Spy on Relations) are exempt: the menu skips the
-// check for digits 1 and 6, and their path never sets the byte.
-var ErrCovertCapReached = errors.New("You may run each covert operation only once per turn.")
+// at 0x017AE0). With no banked turns the two come to the same number of
+// operations a day; counting the day lets a baron send them when it suits rather
+// than one per visit to the menu. See Empire.CovertOpsToday.
+var ErrCovertCapReached = errors.New("You have run that covert operation as often as you may today.")
+
+// CovertOpsAllowed is the number of times one EFFECT covert operation may be run
+// per day: one for each turn of the day, which is what BRE's per-turn gate came
+// to. A TurnsPerDay of zero or less means no cap, the underDailyCap convention.
+func (w *World) CovertOpsAllowed() int { return w.Config.TurnsPerDay }
+
+// CanRunCovertOp reports whether a still has an allowance left for op today.
+// Info ops are uncapped and always report true.
+func (w *World) CanRunCovertOp(a *Empire, op CovertOp) bool {
+	return underDailyCap(a.CovertOpsToday[op], w.CovertOpsAllowed())
+}
 
 // covertCost gates a covert op: the attacker must hold at least one agent and
 // enough gold for the op's fee, which is charged up front (BRE charges per op).
-// When capped, it also enforces BRE's once-per-turn limit on that ONE operation,
-// marks it used, and SPENDS the agent — the three things BRE's commit_agent does
+// When capped, it also enforces the day's allowance for that ONE operation,
+// counts the run, and SPENDS the agent — the three things BRE's commit_agent does
 // together (BRE.OVR 0x01793C sets the per-digit byte, then decrements the agent
 // count at +0x26F) before the record is queued. A successful operation hands the
 // agent back when it resolves (covertReturned), so the net cost is still one
@@ -177,7 +193,7 @@ func (w *World) covertCost(a *Empire, op CovertOp, cost int64, capped bool) erro
 	if a.Agents < 1 {
 		return ErrNoAgents
 	}
-	if capped && a.TurnProgress.CovertOpsUsed[op] {
+	if capped && !w.CanRunCovertOp(a, op) {
 		return ErrCovertCapReached
 	}
 	if a.Gold < cost {
@@ -185,10 +201,10 @@ func (w *World) covertCost(a *Empire, op CovertOp, cost int64, capped bool) erro
 	}
 	a.Gold -= cost
 	if capped {
-		if a.TurnProgress.CovertOpsUsed == nil {
-			a.TurnProgress.CovertOpsUsed = make(map[CovertOp]bool, 1)
+		if a.CovertOpsToday == nil {
+			a.CovertOpsToday = make(map[CovertOp]int, 1)
 		}
-		a.TurnProgress.CovertOpsUsed[op] = true
+		a.CovertOpsToday[op]++
 		a.Agents--
 	}
 	return nil

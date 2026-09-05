@@ -56,8 +56,8 @@ func TestCovertEffectOpRefusedUnderProtection(t *testing.T) {
 	if len(w.CovertQueue) != 0 {
 		t.Errorf("a refused operation queued %d operations", len(w.CovertQueue))
 	}
-	if p.TurnProgress.CovertOpsUsed[game.OpDemoralizeForces] {
-		t.Error("a refused operation burned the per-turn slot")
+	if p.CovertOpsToday[game.OpDemoralizeForces] != 0 {
+		t.Error("a refused operation burned part of the day's allowance")
 	}
 }
 

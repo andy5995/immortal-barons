@@ -14,7 +14,6 @@ func TestTurnProgressPersistsJSON(t *testing.T) {
 	e := &Empire{}
 	e.TurnProgress = TurnProgress{
 		IncomeCollected: true, MaintPaid: true, AttackDone: true,
-		CovertOpsUsed: map[CovertOp]bool{OpBribery: true},
 	}
 
 	data, err := json.Marshal(e)

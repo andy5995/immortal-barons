@@ -1,4 +1,5 @@
 (in-progress:)
+  * The amount of allowed covert ops can be used in a single turn
   * The planet prompt colours its whole line by how many planets match
   * Ctrl-U erases a whole typed answer at any prompt
   * Join Group Attack draws the forces already pooled, in the original's table

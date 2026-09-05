@@ -15,7 +15,7 @@ import (
 //
 // The original tests this at the menu, immediately before the affordability
 // gate (`BRE.OVR 0x017716`, refusal string loaded at `0x01772E`), so a refused
-// operation costs no gold, no agent and no per-turn slot. IB keeps that
+// operation costs no gold, no agent and none of the day’s allowance. IB keeps that
 // placement.
 func blockedByCovertProtection(s session.Session, w *ctx) bool {
 	if w.Player().Protection > 0 {
@@ -26,11 +26,11 @@ func blockedByCovertProtection(s session.Session, w *ctx) bool {
 }
 
 // covertRow is one operation on the local Covert Operations menu: the typed op
-// the engine keys its once-per-turn slot off, the hotkey and fee the screen
+// the engine keys its daily allowance off, the hotkey and fee the screen
 // draws, and the resolver behind it. The menu's label is string(Op), so a
 // screen cannot name an operation except through the constant — the same string
-// is the CovertOpsUsed key persisted in the save file, and a menu literal that
-// drifted from it wrote a key nothing read, silently retiring the per-turn gate
+// is the CovertOpsToday key persisted in the save file, and a menu literal that
+// drifted from it wrote a key nothing read, silently retiring the gate
 // (#208). This is the units.go treatment (#134) applied to the covert set.
 type covertRow struct {
 	Op   game.CovertOp
@@ -44,7 +44,7 @@ type covertRow struct {
 }
 
 // covertRows are the eight operations, in BRE's menu order. Expose Enemy Ops is
-// deliberately absent: it takes no per-turn slot and no CovertOp, picks from its
+// deliberately absent: it takes no allowance and no CovertOp, picks from its
 // own list of bribed realms, and is wired by hand in tree.go.
 var covertRows = []covertRow{
 	{Op: game.OpSendSpy, Key: '1', Cost: game.CostSendSpy, Info: true,

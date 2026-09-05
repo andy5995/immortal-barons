@@ -195,27 +195,32 @@ func TestCovertOpTooPoor(t *testing.T) {
 	}
 }
 
-// BRE's "Limit one try per turn!" is keyed PER OPERATION (the per-digit byte at
-// record +0xFD), so a turn holds one try of each effect op rather than one op
-// overall. The info ops (Send Spy, Spy on Relations) are exempt entirely. The
-// slots clear next turn.
-func TestCovertEffectOpCappedOncePerTurnPerOperation(t *testing.T) {
+// The effect ops are capped PER OPERATION per DAY, at Config.TurnsPerDay: the
+// same ceiling BRE reaches with one try of each per turn, but spendable whenever
+// the baron likes rather than one per visit to the menu. The info ops (Send Spy,
+// Spy on Relations) are exempt entirely, and the allowance clears at daily
+// maintenance rather than at turn end.
+func TestCovertEffectOpCappedPerDayPerOperation(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents = 50, 0
+	a.Agents, d.Agents = 500, 0
 	a.Gold = 100_000_000
+	allowed := w.Config.TurnsPerDay
 
-	if _, err := w.StirRevolts(a, d); err != nil {
-		t.Fatalf("first try of an effect op should work: %v", err)
+	// The whole day's Stir Revolts, run back to back inside one turn.
+	for i := 0; i < allowed; i++ {
+		if _, err := w.StirRevolts(a, d); err != nil {
+			t.Fatalf("Stir Revolts %d of %d should work: %v", i+1, allowed, err)
+		}
 	}
 	if _, err := w.StirRevolts(a, d); !errors.Is(err, ErrCovertCapReached) {
-		t.Fatalf("a SECOND Stir Revolts should be capped, got %v", err)
+		t.Fatalf("Stir Revolts past the day's allowance should be capped, got %v", err)
 	}
-	// A different operation holds its own slot and is unaffected by the one above.
+	// A different operation holds its own allowance, untouched by the one above.
 	if _, err := w.SetUp(a, d); err != nil {
-		t.Errorf("a different effect op holds its own slot: %v", err)
+		t.Errorf("a different effect op holds its own allowance: %v", err)
 	}
 	if _, err := w.DemoralizeForces(a, d); err != nil {
-		t.Errorf("a different effect op holds its own slot: %v", err)
+		t.Errorf("a different effect op holds its own allowance: %v", err)
 	}
 	if _, err := w.SendSpy(a, d); err != nil {
 		t.Errorf("Send Spy is an info op, exempt from the cap: %v", err)
@@ -226,9 +231,16 @@ func TestCovertEffectOpCappedOncePerTurnPerOperation(t *testing.T) {
 	if _, err := w.SpyOnRelations(a, d); err != nil {
 		t.Errorf("Spy on Relations is an info op, exempt from the cap: %v", err)
 	}
-	a.TurnProgress = TurnProgress{} // next turn
+	// A new turn alone buys nothing back — the allowance is the day's.
+	a.TurnProgress = TurnProgress{}
+	if _, err := w.StirRevolts(a, d); !errors.Is(err, ErrCovertCapReached) {
+		t.Errorf("a fresh turn should not refill the day's allowance, got %v", err)
+	}
+	w.LastMaintDate = "2026-01-01"
+	w.DailyMaintenance("2026-01-02")
+	a.Gold, a.Agents = 100_000_000, 500
 	if _, err := w.StirRevolts(a, d); err != nil {
-		t.Errorf("the slots should reset next turn: %v", err)
+		t.Errorf("the allowance should refill at daily maintenance: %v", err)
 	}
 }
 
@@ -390,11 +402,11 @@ func TestCovertOpsFloorMoraleAndSupport(t *testing.T) {
 	for i := 0; i < 60; i++ {
 		// A foiled attempt costs an agent, and about half of these are foiled.
 		a.Gold, a.Agents = 10_000_000, 50
-		a.TurnProgress = TurnProgress{}
+		a.CovertOpsToday = nil
 		if _, err := w.DemoralizeForces(a, d); err != nil {
 			t.Fatal(err)
 		}
-		a.TurnProgress = TurnProgress{}
+		a.CovertOpsToday = nil
 		if _, err := w.StirRevolts(a, d); err != nil {
 			t.Fatal(err)
 		}
@@ -423,7 +435,7 @@ func TestBombEnemyTargetsHitsEverySlotInBand(t *testing.T) {
 		pastProtection(w)
 		for i := 0; i < 200; i++ {
 			a.Gold, a.Agents = 10_000_000, 10_000_000
-			a.TurnProgress = TurnProgress{}
+			a.CovertOpsToday = nil
 			d.Agents, d.People, d.Troopers = 100_000, 100_000, 100_000
 			d.Tanks, d.Jets, d.Food = 100_000, 100_000, 100_000
 			before := map[string]int{
@@ -509,7 +521,7 @@ func TestExposeEnemyOpsShieldsAgainstOneRealmOnly(t *testing.T) {
 	if _, err := w.ExposeEnemyOps(a, exposed); err != nil {
 		t.Fatal(err)
 	}
-	// It spends no agent and takes no per-turn slot: BRE's menu dispatches it
+	// It spends no agent and takes no allowance: BRE's menu dispatches it
 	// before it reaches either.
 	if a.Agents != agentsBefore {
 		t.Errorf("Expose Enemy Ops should spend no agent, %d -> %d", agentsBefore, a.Agents)
@@ -517,8 +529,8 @@ func TestExposeEnemyOpsShieldsAgainstOneRealmOnly(t *testing.T) {
 	if a.Gold != goldBefore-CostExposeEnemyOps {
 		t.Errorf("gold %d, want %d", a.Gold, goldBefore-CostExposeEnemyOps)
 	}
-	if len(a.TurnProgress.CovertOpsUsed) != 0 {
-		t.Errorf("Expose Enemy Ops should take no per-turn slot, got %v", a.TurnProgress.CovertOpsUsed)
+	if len(a.CovertOpsToday) != 0 {
+		t.Errorf("Expose Enemy Ops should take no allowance, got %v", a.CovertOpsToday)
 	}
 
 	const trials = 4000

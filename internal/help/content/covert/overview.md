@@ -38,10 +38,12 @@ those three answer you immediately.
 If the realm you aimed at is gone by the time your agent arrives, the operation
 is abandoned and the fee is not returned.
 
-You may run each covert operation once per turn. Running Stir Revolts blocks a
-second Stir Revolts until your next turn, but leaves every other operation open.
-Send Spy and Spy on Relations only gather information, so they have no limit at
-all, and Expose Enemy Ops has none either.
+Each covert operation may be run once for every turn in the day, and you may
+spend that allowance whenever you like — all of it in one turn, or one at a time.
+Running Stir Revolts uses up one Stir Revolts and leaves every other operation
+untouched. The allowance refills at the start of each new day. Send Spy and Spy
+on Relations only gather information, so they have no limit at all, and Expose
+Enemy Ops has none either.
 
 When an operation fails, your agent is caught and lost, and the target is warned
 — and a caught agent talks, so the target is told your realm's name. An

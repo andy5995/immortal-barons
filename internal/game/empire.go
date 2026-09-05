@@ -133,6 +133,17 @@ type Empire struct {
 	// together at daily maintenance (0x08669). They are booleans, NOT a counted
 	// allowance: MaxBombingOps governs the four bombing ops and nothing else.
 	MissileUsedToday map[SpecialOp]bool `json:",omitempty"`
+	// CovertOpsToday counts the EFFECT covert operations this realm has run
+	// today, keyed by operation, against a per-operation allowance of
+	// Config.TurnsPerDay. Reset with the counters above.
+	//
+	// DELIBERATE DIVERGENCE. BRE gates the same operations per TURN — one try of
+	// each, a per-digit byte at record +0xFD (BRE.OVR 0x017AE0/0x017C4F) — which
+	// with no banked turns comes to the same TurnsPerDay ceiling a day, spread one
+	// per turn. Counting the day instead leaves that ceiling untouched and lets a
+	// baron spend the allowance whenever they like, rather than returning to the
+	// covert menu each turn to send the same agent again.
+	CovertOpsToday map[CovertOp]int `json:",omitempty"`
 	// RefundTaken records that this realm has already drawn the Queen's tax
 	// refund today (#93), and is cleared with the counters above.
 	//
@@ -291,17 +302,11 @@ type Empire struct {
 // re-applying a resource effect; the rest prevent re-showing a menu the player
 // already exited. All are cleared at turn-commit (PlayTurn) and daily rollover.
 type TurnProgress struct {
-	IncomeCollected bool  // turn-start Manufacture + CollectIncome + regions-cap reset done
-	MaintPaid       bool  // paymentStage done (set with the forces/regions charge)
-	SDIFunded       int64 // gold put into the SDI program this turn, against its allowance
-	Fed             bool  // feedStage done
-	CovertDone      bool
-	// CovertOpsUsed holds the EFFECT covert operations already run this turn.
-	// BRE's "Limit one try per turn!" is keyed per OPERATION, so each item on the
-	// menu carries its own slot; info ops (Send Spy, Spy on Relations) never take
-	// one. A map rather than a bool is what makes TurnProgress uncomparable, so
-	// the whole-struct checks around it use reflect.DeepEqual.
-	CovertOpsUsed      map[CovertOp]bool `json:"covertOpsUsed,omitempty"`
+	IncomeCollected    bool  // turn-start Manufacture + CollectIncome + regions-cap reset done
+	MaintPaid          bool  // paymentStage done (set with the forces/regions charge)
+	SDIFunded          int64 // gold put into the SDI program this turn, against its allowance
+	Fed                bool  // feedStage done
+	CovertDone         bool
 	BankDone           bool
 	SpendingDone       bool
 	AttackDone         bool
