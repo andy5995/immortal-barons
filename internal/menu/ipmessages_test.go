@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -531,4 +532,120 @@ func TestPlanetPromptCompletesTheLineWhenTheMatchIsUnique(t *testing.T) {
 			t.Fatalf("picked %v, want The Eclipse — a completion must stay editable", got)
 		}
 	})
+}
+
+// renderLine replays a prompt's output into the line a terminal would show:
+// one entry per column, each carrying the colour in force when it was written.
+// Backspace-space-backspace erases, as every erase here does.
+func renderLine(out string) (text string, colors []string) {
+	var line []rune
+	color := ""
+	for i := 0; i < len(out); {
+		if strings.HasPrefix(out[i:], "\x1b[") {
+			j := strings.IndexByte(out[i:], 'm')
+			if j < 0 {
+				break
+			}
+			color = out[i : i+j+1]
+			i += j + 1
+			continue
+		}
+		switch out[i] {
+		case '\b':
+			if len(line) > 0 {
+				line = line[:len(line)-1]
+				colors = colors[:len(colors)-1]
+			}
+		case ' ':
+			// The blank of a "\b \b" erase, which the \b after it undoes.
+			if i+1 < len(out) && out[i+1] == '\b' {
+				break
+			}
+			line = append(line, ' ')
+			colors = append(colors, color)
+		case '\n', '\r':
+		default:
+			line = append(line, rune(out[i]))
+			colors = append(colors, color)
+		}
+		i++
+	}
+	return string(line), colors
+}
+
+// oneColor is the single colour every column of the line carries, or "" where
+// the line is not all one colour.
+func oneColor(colors []string) string {
+	if len(colors) == 0 {
+		return ""
+	}
+	for _, c := range colors[1:] {
+		if c != colors[0] {
+			return ""
+		}
+	}
+	return colors[0]
+}
+
+// TestPlanetPromptColorsTheWholeLine holds the live prompt to the original's
+// three states, each of which colours the WHOLE line: white while nothing
+// matches, bright white while several do, bright yellow the moment one does.
+// BINARY-VERIFIED (select_planet, BRE.OVR 0x021dd9: state 7 / 15 / 14 at
+// 0x159c, compared against the previous keystroke's at 0x16a3 to choose between
+// repainting the line and appending to it).
+//
+// IB used to colour only the characters it ADDED, so a completed name was left
+// part typed-colour and part yellow — this is what that test is for.
+func TestPlanetPromptColorsTheWholeLine(t *testing.T) {
+	planets := []game.LeagueNode{{Number: 1, Name: "Nova"}, {Number: 2, Name: "Novagate"}}
+	cases := []struct {
+		name, first, rest, wantText, wantColor string
+	}{
+		{"several match", "N", "ova", "Nova", ansi.FgBrightWhite},
+		{"one matches, and the name fills in", "N", "ovag", "Novagate", ansi.FgBrightYellow},
+		{"none match", "z", "z", "zz", ansi.FgWhite},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			fs := &fakeSession{keys: append([]rune(c.rest), '\r')}
+			got, err := readPlanetAnswer(fs, planets, rune(c.first[0]))
+			if err != nil {
+				t.Fatalf("readPlanetAnswer: %v", err)
+			}
+			if got != c.wantText {
+				t.Errorf("answer = %q, want %q", got, c.wantText)
+			}
+			text, colors := renderLine(fs.out.String())
+			if text != c.wantText {
+				t.Errorf("line reads %q, want %q", text, c.wantText)
+			}
+			if col := oneColor(colors); col != c.wantColor {
+				t.Errorf("line colours = %q (one colour: %q), want all %q",
+					colors, col, c.wantColor)
+			}
+		})
+	}
+}
+
+// TestPlanetPromptRepaintsWhenAMatchIsLost is the same rule in reverse: a
+// backspace that makes the answer ambiguous again must repaint the surviving
+// text, not leave it in the yellow a completion gave it.
+func TestPlanetPromptRepaintsWhenAMatchIsLost(t *testing.T) {
+	planets := []game.LeagueNode{{Number: 1, Name: "Nova"}, {Number: 2, Name: "Novagate"}}
+	keys := append([]rune("ovag"), 8, '\r') // "Novag" completes, then backspace
+	fs := &fakeSession{keys: keys}
+	got, err := readPlanetAnswer(fs, planets, 'N')
+	if err != nil {
+		t.Fatalf("readPlanetAnswer: %v", err)
+	}
+	if got != "Nova" {
+		t.Errorf("answer = %q, want %q — backspace edits the typed text", got, "Nova")
+	}
+	text, colors := renderLine(fs.out.String())
+	if text != "Nova" {
+		t.Errorf("line reads %q, want %q", text, "Nova")
+	}
+	if col := oneColor(colors); col != ansi.FgBrightWhite {
+		t.Errorf("line colours = %q, want all bright white once the match is lost", colors)
+	}
 }

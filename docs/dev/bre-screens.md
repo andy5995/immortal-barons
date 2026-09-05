@@ -2542,9 +2542,37 @@ The keystroke that makes the match unique is **not echoed**: the two characters
 already on screen are erased and the resolved name written over them, so the
 capture reads `st` + two `BS SP BS` + the name, with the `a` that triggered it
 appearing nowhere. Reading those bytes without the live behaviour beside them
-makes it look as though a two-character answer resolved. **IB matches the same
-text on ENTER** (`matchPlanet`), so the accepted keystrokes agree; the live
-completion is not built.
+makes it look as though a two-character answer resolved. **IB completes live
+too** since #183 (`readPlanetAnswer`).
+
+**The line's COLOUR is the match count, and the whole line carries it.** The
+routine keeps a state code — 7 (white) for no match, 15 (bright white) for
+several, 14 (yellow) for one, set at 0x159c — and compares it against the
+previous keystroke's at 0x16a3. Equal takes the cheap redraw (0x16b0: skip the
+common prefix, erase the rest, print the new tail); CHANGED erases the whole
+string and reprints all of it (0x1771). So a name that fills in is yellow end to
+end, not yellow only where the completion added characters. IB drew only the
+added text until 2026-09-05.
+
+**Backspace edits the TYPED text, not the completed name** (0x14a5: `Delete` of
+the last character of the typed buffer at `[bp-0x102]`), and the shown string at
+`[bp-0x302]` is rebuilt from it on every keystroke — cleared at 0x14fd, filled
+with the matched planet's name at 0x1669 when the count is one, otherwise copied
+from the typed text at 0x168e. **Enter answers with the completed planet**: the
+slot found during that pass (`[bp-0x308]`) wins outright, and the typed text is
+parsed as a roster number only when no planet resolved (0x1823).
+
+That combination is what #250 reported as a defect. It is the ORIGINAL's
+behaviour, not IB's invention: after a completion, each backspace shortens
+invisible typed text while the visible name is redrawn identically, until the
+answer goes ambiguous and the name collapses. Both the "dead" presses and the
+completed name winning on Enter are read out of the routine above.
+
+**One quirk NOT cloned:** the count loop increments once for a name match
+(0x1569) and again for a match against the planet's NUMBER rendered as a string
+(0x158e), so a planet matching both ways counts twice and is refused as
+ambiguous. IB's `matchPlanetCount` counts such a planet once. Reachable only
+where a planet's name contains its own roster number.
 
 ### The message editor
 

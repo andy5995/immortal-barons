@@ -183,33 +183,55 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 // it and is redrawn only when it changes, which is why an ambiguous keystroke
 // leaves the line alone exactly as the original leaves it.
 //
-// Typed text echoes bright white and a completed name bright yellow, from the
-// capture — the colour is what separates what the player wrote from what the
-// game filled in. Backspace edits the typed text, so a completion is never a
-// trap.
+// The LINE'S COLOUR is the match count, and the whole line carries it: white
+// while nothing matches, bright white while several do, bright yellow the moment
+// exactly one does and the name fills in. BINARY-VERIFIED (select_planet, BRE.OVR
+// 0x021dd9): it holds a state code per keystroke — 7 for none, 15 for several, 14
+// for one (0x159c) — and compares it against the previous keystroke's (0x16a3) to
+// pick between two redraws. IB drew only the ADDED text in the new colour, which
+// left a completed name half in the colour the player typed it in.
+//
+// Backspace edits the typed text, not the completed name, which is also the
+// original's (0x14a5 deletes the last character of the TYPED buffer at
+// [bp-0x102], and the shown string at [bp-0x302] is rebuilt from it every
+// keystroke). See #250: that means a backspace after a completion can leave the
+// line looking unchanged while the invisible typed text shortens, and it is what
+// the original does.
 func readPlanetAnswer(s session.Session, planets []game.LeagueNode, first rune) (string, error) {
 	var typed, shown []rune
+	shownColor := ""
 	// redraw brings the line on screen up to date with want, erasing only what
 	// actually has to change — appending a character to a line that is merely
 	// growing must not rewrite the whole thing.
+	//
+	// A COLOUR change is the exception and rewrites all of it, because the colour
+	// belongs to the whole line rather than to the characters added last: the
+	// original erases the entire string and reprints it (0x1771) where an
+	// unchanged colour takes the common-prefix path (0x16b0).
 	redraw := func(want []rune, color string) {
 		common := 0
-		for common < len(shown) && common < len(want) && shown[common] == want[common] {
-			common++
-		}
-		if common == len(shown) && common == len(want) {
-			return
+		if color == shownColor {
+			for common < len(shown) && common < len(want) && shown[common] == want[common] {
+				common++
+			}
+			if common == len(shown) && common == len(want) {
+				return
+			}
 		}
 		fmt.Fprint(s, strings.Repeat("\b \b", len(shown)-common))
 		fmt.Fprintf(s, "%s%s", color, string(want[common:]))
-		shown = append(append([]rune(nil), want[:common]...), want[common:]...)
+		shown = append([]rune(nil), want...)
+		shownColor = color
 	}
 	settle := func() {
-		if p := matchPlanet(planets, string(typed)); p != nil {
+		switch p, n := matchPlanetCount(planets, string(typed)); {
+		case n == 1 && p != nil:
 			redraw([]rune(p.Name), ansi.FgBrightYellow)
-			return
+		case n > 1:
+			redraw(typed, ansi.FgBrightWhite)
+		default:
+			redraw(typed, ansi.FgWhite)
 		}
-		redraw(typed, ansi.FgBrightWhite)
 	}
 	if first >= 32 {
 		typed = append(typed, first)
@@ -268,30 +290,47 @@ func readPlanetAnswer(s session.Session, planets []game.LeagueNode, first rune) 
 // text on ENTER instead; the accepted keystrokes are the same, the live
 // completion is not built.
 func matchPlanet(planets []game.LeagueNode, typed string) *game.LeagueNode {
+	p, n := matchPlanetCount(planets, typed)
+	if n != 1 {
+		return nil
+	}
+	return p
+}
+
+// matchPlanetCount is matchPlanet with the match COUNT as well as the planet,
+// which the live prompt needs and an accept/refuse caller does not: the original
+// colours its line by that count — none, one, or several are three different
+// states (BRE.OVR 0x159c) — while resolving on a count of exactly one.
+//
+// The planet is returned only when the count is one; at any other count there is
+// nothing to return, which is the same refusal an unknown answer gets.
+func matchPlanetCount(planets []game.LeagueNode, typed string) (*game.LeagueNode, int) {
 	if n, err := strconv.Atoi(typed); err == nil {
 		for i := range planets {
 			if planets[i].Number == n {
-				return &planets[i]
+				return &planets[i], 1
 			}
 		}
-		return nil
+		return nil, 0
 	}
 	typed = strings.ToUpper(strings.TrimSpace(typed))
 	if typed == "" {
-		return nil
+		return nil, 0
 	}
 	var found *game.LeagueNode
+	count := 0
 	for i := range planets {
 		if !strings.Contains(strings.ToUpper(planets[i].Name), typed) &&
 			!strings.Contains(strconv.Itoa(planets[i].Number), typed) {
 			continue
 		}
-		if found != nil {
-			return nil // more than one: refused, as the original refuses it
-		}
+		count++
 		found = &planets[i]
 	}
-	return found
+	if count != 1 {
+		return nil, count // more than one: refused, as the original refuses it
+	}
+	return found, 1
 }
 
 // pickPlanetNamed is the whole prompt for a screen that already knows which
