@@ -1015,12 +1015,13 @@ wrong side when it was written — idle-realm removal, the money cap, and
 unlimited food, each of which would have let two planets play a different
 game.
 
-**A terrorist op costs `(opsToday + 63) × total regions` gold — BINARY-VERIFIED.**
-The InterPlanetary Operations menu prices the op in its own cost column, and the
-price scales with the launcher's **region count** and **daily op count**, rising
-as a realm buys land or launches more ops. At opsToday ≤ 1 the per-region cost
-is 64 (confirmed against four captures); each additional op adds 1 per region,
-up to 163 at the cap of 100. Terrorism Costs scales the result:
+**A terrorist op costs `(opsToday + 63) × total regions` gold PER AGENT —
+BINARY-VERIFIED.** The InterPlanetary Operations menu prices the op in its own
+cost column, and the price scales with the launcher's **region count** and
+**daily op count**, rising as a realm buys land or launches more ops. The four
+menu readings below were all taken at opsToday ≤ 1, where the original's quote
+clamps the counter up to 1 and shows 64 per region; each additional op adds 1 per
+region, up to 163 at the cap of 100. Terrorism Costs scales the result:
 
 | Regions | × 64 | Price on the menu |
 | --- | --- | --- |
@@ -1077,10 +1078,13 @@ against the cell's edge, `(2) Terrorist Ops       570,304`, the only item on tha
 menu carrying a figure. IB's cell sits two columns right of the original's, which
 is the engine's standing indent rather than anything about this item.
 
-Note that the menu's figure and the charge disagree on the day's FIRST operation,
-in the original as in IB: the quote clamps `opsToday` up to 1 and the charge does
-not. It is the original's own off-by-one, kept rather than tidied, and it costs
-the player nothing — the charge is the lower of the two.
+**DELIBERATE DIVERGENCE on the day's first operation.** The original clamps
+`opsToday` up to 1 when it QUOTES and not when it charges, so the first op of a
+day is advertised at 64 a region and billed at 63. IB drops that clamp from the
+quote, so the menu shows 63 and the two agree. Nobody pays differently — the
+charge is untouched and is the capture-verified side — and the mismatch is
+visible once a day per player. The upper clamp at 100 is the original's and
+stays.
 
 The four Special Operations entries price themselves on their own menu — see
 "Interplanetary Special Operations" below.
@@ -5109,6 +5113,12 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **The Terrorist Ops rate on the InterPlanetary menu matches what is charged.**
+  The original quotes the day's FIRST operation at 64 a region and then bills 63,
+  because it clamps its ops-today counter up to 1 when quoting and not when
+  charging. IB quotes 63. Nobody pays differently and every later op is identical;
+  see "A terrorist op costs `(opsToday + 63) × total regions` gold" for the
+  formula and the captures behind it.
 - **A one-line message is quoted without asking for a line range** (#244). The
   original asks `Quote Message?`, `First Line to Quote` and `Last Line to Quote`
   whatever the message's length; with one line the last two have one possible

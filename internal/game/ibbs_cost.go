@@ -56,22 +56,19 @@ func (w *World) AttackGoldCost(e *Empire, f AttackForce) int64 {
 //	capped := clamp(terrorOpsToday, 1, 100)
 //	rate   := (capped + 63) * totalRegions * configMult
 //
-// For opsToday ≤ 1 the per-region rate is TerrorOpGoldPerRegion (64); each
-// subsequent op raises it by 1, up to 163 at the cap of 100. This is the figure
-// the InterPlanetary menu quotes beside the item.
+// Each op raises the per-region rate by 1, up to 163 at the cap of 100. This is
+// the figure the InterPlanetary menu quotes beside the item.
+//
+// DELIBERATE DIVERGENCE, and a one-line one: the original clamps `opsToday` up
+// to 1 HERE and not in the charge, so on the day's first operation it quotes 64
+// a region and then takes 63. IB drops the clamp so the two agree. It is visible
+// once a day per player, nobody pays differently, and the screen stops
+// contradicting the receipt. The upper clamp is the original's and stays.
 //
 // No ceiling: BRE clamps the attack price at AttackCostCap, and nothing in
 // the terrorist pricing routine does the same.
 func (w *World) TerrorOpGoldRate(e *Empire) int64 {
-	ops := int64(e.TerrorOpsToday)
-	switch {
-	case ops < 1:
-		ops = 1
-	case ops > 100:
-		ops = 100
-	}
-	cost := (ops + TerrorOpGoldPerRegion - 1) * int64(e.Land)
-	return cost * int64(w.Config.TerrorCosts.CostPercent()) / 100
+	return w.TerrorOpGoldCost(e, 1)
 }
 
 // TerrorOpGoldCost is what sending agents costs: the rate times the count. Each

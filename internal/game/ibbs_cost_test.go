@@ -60,15 +60,16 @@ func TestAttackGoldCostCapped(t *testing.T) {
 }
 
 func TestTerrorOpGoldCostByLevel(t *testing.T) {
-	// 5,000 regions at (0+63)=64 gold each is 320,000 at Medium.
+	// 5,000 regions at 63 gold each is 315,000 at Medium — the rate for the day's
+	// FIRST op, which IB quotes unclamped so it matches what is charged.
 	for _, tc := range []struct {
 		level Level
 		want  int64
 	}{
 		{None, 0},
-		{Low, 64_000},
-		{Medium, 320_000},
-		{High, 960_000},
+		{Low, 63_000},
+		{Medium, 315_000},
+		{High, 945_000},
 	} {
 		cfg := DefaultConfig()
 		cfg.TerrorCosts = tc.level
@@ -94,8 +95,8 @@ func TestTerrorOpGoldCostByCounter(t *testing.T) {
 		opsToday int
 		want     int64
 	}{
-		{0, 64_000},    // clamp to 1 → (1+63) * 1000
-		{1, 64_000},    // same: (1+63) * 1000
+		{0, 63_000},    // (0+63) * 1000 — the original quotes 64 here and charges 63
+		{1, 64_000},    // (1+63) * 1000
 		{2, 65_000},    // (2+63) * 1000
 		{100, 163_000}, // cap: (100+63) * 1000
 		{200, 163_000}, // clamped at 100

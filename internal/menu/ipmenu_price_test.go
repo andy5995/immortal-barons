@@ -33,8 +33,11 @@ func TestInterPlanetaryMenuPricesTerroristOps(t *testing.T) {
 	if line == "" {
 		t.Fatalf("the menu never drew Terrorist Ops:\n%s", out)
 	}
-	if !strings.Contains(line, "573,248") {
-		t.Errorf("the item should quote the one-agent rate (64 x 8,957):\n%q", line)
+	// 63 x 8,957 — the rate one agent is actually charged on the day's first op.
+	// The original quotes the clamped 64 here and then charges 63; IB quotes what
+	// it charges.
+	if !strings.Contains(line, "564,291") {
+		t.Errorf("the item should quote the one-agent rate it charges:\n%q", line)
 	}
 	t.Logf("drew: %q", line)
 }
