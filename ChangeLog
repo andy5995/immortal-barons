@@ -74,17 +74,18 @@ Immortal Barons ChangeLog
     resumable spools, shared locking, and attach, obox, or BSO links per peer
   * FTN handoffs coalesce unchanged signed game packets into 8.3-named ZIP
     bundles; BSO safely extends advertised bundles while holding the peer .bsy
-  * FTN handoffs send plain packets by default, so upgrading first cannot stop a
-    peer still on the old release; set "Bundled Yes" once the league can unwrap
-    a bundle
+  * FTN handoffs send plain packets by default, so upgrading first cannot stop
+    a peer still on the old release; set "Bundled Yes" once the league can
+    unwrap a bundle
   * Mesh bundles track their actual route and scheduled sibling branches;
-    identical canonical inbound packets are logged as duplicates, not collisions
+    identical canonical inbound packets are logged as duplicates, not
+    collisions
   * One rejected packet no longer strands valid packets in the same FTN bundle;
     its original wrapper is quarantined after the valid members finish
-  * barons-ftn file-locks its BSO semaphores and recovers only its own, and only
-    once it has gone stale
-  * An unset FTN attach directory now defaults to a shorter path, so a deep data
-    directory no longer overruns the attachment subject
+  * barons-ftn file-locks its BSO semaphores and recovers only its own, and
+    only once it has gone stale
+  * An unset FTN attach directory now defaults to a shorter path, so a deep
+    data directory no longer overruns the attachment subject
   * FTN aliases have a defined compatibility namespace for legacy league-0
     packets, so one cannot wedge an otherwise deliverable transport batch
   * The FTN transport, routing, locking, recovery and mixed-link setup have a
@@ -132,8 +133,8 @@ Immortal Barons ChangeLog
   * An em dash in a realm name no longer moves the score table's figures on a
     CP437 or ASCII terminal
   * A realm under New Realm Protection wears its letter in [brackets]
-  * A realm under New Realm Protection keeps its letter on the attack and covert
-    lists
+  * A realm under New Realm Protection keeps its letter on the attack and
+    covert lists
   * An abbreviated total steps its suffix through k, m and b with its size
   * A pirate raider is marked with its ASCII arrow on a 7-bit ASCII terminal
   * The Daily Bulletin box closes square on a CP437 or ASCII terminal
@@ -144,11 +145,11 @@ Immortal Barons ChangeLog
   * The turn's income opens under BRE's rule instead of a titled bar
   * reverted: bombers no longer fly a bombing run; they fight and are lost with
     the rest of the force, as the original has it
-  * reverted: an attack captures the same share of land whatever the two realms'
-    wealth per region, as the original does
+  * reverted: an attack captures the same share of land whatever the two
+    realms' wealth per region, as the original does
   * reverted: a realm is crushed only when its last region is taken, as the
     original decides it
-  * reverted: the Terrorist Ops menu is drawn at the width the original draws it
+  * reverted: the Terrorist Ops menu is drawn at the original's width
   * reverted: the Coordinator item reads Dismantle Gooie and the setting Gooie
     Kablooies, as the original words them
   * reverted: the Clingy Annihilator is named the Gooie Kablooie, as the
@@ -156,8 +157,8 @@ Immortal Barons ChangeLog
   * reverted: the R5-Slappenheimer is named the S3-Sabre, as the original names
     it
   * reverted: a realm's letter is parenthesised, as the original prints it
-  * reverted: the Money Cap is gone from the Configuration Editor; a saved value
-    still applies
+  * reverted: the Money Cap is gone from the Configuration Editor; a saved
+    value still applies
   * reverted: a figure of a billion or more is printed in full, as the original
     prints it
   * Create Group Attack gathers the known planets under the world lock, as the
@@ -199,13 +200,13 @@ Immortal Barons ChangeLog
   * Game Setup leads with the league, adding its number and its Coordinator
   * The League Name setting is removed; a league is identified by its number
   * Game Setup pairs settings two to a line, so a league board's fits two pages
-  * Missile Ops and Bombing Ops govern Special Operations alone, not local menus
+  * Missile Ops and Bombing Ops govern Special Operations, not local menus
   * A loan's ceiling falls as its repayment term lengthens
   * Net worth counts toward a loan ceiling only up to ten million
   * A trade deal's request side no longer quotes a ceiling for what it asks
   * A treaty proposal no longer mails a notice the offer screen already gives
   * Planetary Bulletin lines are wrapped to the screen
-  * The InterBBS Scores screen is headed Immortal Barons, not the original's name
+  * The InterBBS Scores screen is headed Immortal Barons
   * The 32-bit Windows build runs on Windows 7, 8, and Server 2008 R2 through
     2012 R2
 
@@ -285,9 +286,9 @@ Immortal Barons ChangeLog
   * "?" at a planet prompt shows the list on the keypress; it no longer waits
     for Enter as well
   * The door attaches to the caller's socket when a Unix BBS gives it no live
-    standard input. A native Synchronet door on Linux is handed the socket and a
-    standard input connected to nothing, so the caller was dropped the moment the
-    door started. Windows keeps its own rule, a drop file naming a socket
+    standard input. A native Synchronet door on Linux is handed the socket and
+    a standard input connected to nothing, so the caller was dropped the moment
+    the door started. Windows keeps its own rule, a drop file naming a socket
   * The door log records which I/O path was actually taken, not only what the
     drop file asked for
   * config-during-reset: a new Allow IP Allies to Trade at Market setting
@@ -302,16 +303,17 @@ Immortal Barons ChangeLog
     shown and broadcast while changing nothing (#56)
   * The "Paused" bar no longer runs into the screen drawn after it
   * config-during-reset: a new Money Cap setting sets how much gold a realm may
-    hold, on hand and again in the bank — two billion (the original's own limit)
-    up to 999 billion
+    hold, on hand and again in the bank — two billion (the original's own
+    limit) up to 999 billion
   * Diplomacy is on the opening menu as well as the System menu, and Game Setup
     is on the System menu as well as the opening menu
   * config-during-reset: a new Pirates setting (enabled) takes the pirates out
     of the game
   * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
   * A regular attack is fought out round by round: the side that breaks off
-    loses the share of its forces it will accept, and the winner loses only what
-    the strength ratio cost it, so a rout is cheap and an even fight is not
+    loses the share of its forces it will accept, and the winner loses only
+    what the strength ratio cost it, so a rout is cheap and an even fight is
+    not
   * Attack Rewards and Attack Damage follow the original's own tables — High
     takes a quarter of the defender's regions and costs a third of the force,
     and None still costs a little
@@ -324,24 +326,26 @@ Immortal Barons ChangeLog
     people its land can hold; they leave faster than they arrive, and faster
     still the harder it taxes. Above a 50% rate the turn's movement is docked a
     further quarter, whichever way it was going
-  * Computer-run realms keep buying land instead of stopping for good once their
-    upkeep catches up with their income; land and army now draw on one surplus
-  * A computer-run realm lists no military on the Trading Market where the sysop
-    has set Buy Military to anything but Yes: with the shop closed the market is
-    the planet's only supply, and stocking it would hand every enemy the units
-    the setting withholds
+  * Computer-run realms keep buying land instead of stopping for good once
+    their upkeep catches up with their income; land and army now draw on one
+    surplus
+  * A computer-run realm lists no military on the Trading Market where the
+    sysop has set Buy Military to anything but Yes: with the shop closed the
+    market is the planet's only supply, and stocking it would hand every enemy
+    the units the setting withholds
   * Food is two obligations: the people and the armed forces are billed apart
     and asked about apart, as in the original
-  * Every military unit eats — one food per 200 troopers and per 10,000 of every
-    other type, including units listed for sale
+  * Every military unit eats — one food per 200 troopers and per 10,000 of
+    every other type, including units listed for sale
   * River fishing follows the original's yield: a base of 110 plus a draw,
     raised by technology; rivers take a quarter of their output as food and pay
     the rest as gold
   * Military morale is bought back the way popular support is: the request is
     priced off the army's size, and paying part of it buys part of the points
-  * Military morale rises only by that boost — it no longer drifts back on its own
-  * Troopers, jets and tanks desert at a rate drawn from a band chosen by morale,
-    and stop deserting at 40; turrets, bombers and carriers never desert
+  * Military morale rises only by the boost, and no longer drifts back
+  * Troopers, jets and tanks desert at a rate drawn from a band chosen by
+    morale, and stop deserting at 40; turrets, bombers and carriers never
+    desert
   * Underpaying the armed forces costs military morale and underpaying land
     upkeep costs popular support, at the original's rates, and both land at
     rollover rather than mid-turn
@@ -356,18 +360,19 @@ Immortal Barons ChangeLog
     attacking a partner outright breaks the pact and costs nothing, as in the
     original
   * Stir Revolts and Demoralize Forces scale their target's stat instead of
-    docking a flat number of points; an AI's covert op cannot push either below 5
+    docking a flat number of points; an AI's covert op cannot push either below
+    5
   * An unpopular realm reaches the planet news even in a turn without a riot
-  * A nuclear strike ruins land rather than destroying it: the target keeps every
-    region and its upkeep but earns nothing from the ruined share
+  * A nuclear strike ruins land rather than destroying it: the target keeps
+    every region and its upkeep but earns nothing from the ruined share
   * A chemical strike ruins land into waste, gasses a fifth of the target's
     people and knocks down its military morale and popular support
   * A biological strike kills a share of the target's people and troopers and
     halves its military morale, leaving the land alone
-  * Each missile is priced by its target — the nuclear by its land, the chemical
-    by its people and land, the biological by its troopers, people and land —
-    quoted once the target is chosen, and can be declined; one the gold in hand
-    cannot cover is paid out of the bank
+  * Each missile is priced by its target — the nuclear by its land, the
+    chemical by its people and land, the biological by its troopers, people and
+    land — quoted once the target is chosen, and can be declined; one the gold
+    in hand cannot cover is paid out of the bank
   * A nuclear, chemical or biological strike raises the attacker's score, and
     none of them can wipe out a realm
   * Waste is a region type of its own, listed on the region tables; it is
@@ -376,38 +381,40 @@ Immortal Barons ChangeLog
   * Send Message addresses a list of realms: a letter marks or unmarks one, "Z"
     marks them all, and Enter closes the list and opens the editor
   * Diplomacy takes the same list: a treaty is offered to, and war declared on,
-    every marked realm at once, and "?" there lists relations rather than scores
+    every marked realm at once, and "?" there lists relations rather than
+    scores
   * Message target letters are the realm's own, so a fallen realm or the sender
     leaves a gap; they match the letters a message records as its recipients
-  * A message-editor line wraps at the ruler's 68th column, carrying the word in
-    progress down, and backspace at the start of a line re-opens the one above
+  * A message-editor line wraps at the ruler's 68th column, carrying the word
+    in progress down, and backspace at the start of a line re-opens the one
+    above
   * A message is removed from the inbox once it is replied to, like Delete
   * A reply asks which lines of the message to quote, and opens with them
   * Empire Status is one unboxed block in the original's layout instead of two
     boxed pages, listing only the fields the realm has something in
-  * Empire Status shows the cumulative score the scores board ranks on, where it
-    used to show net worth under that label
-  * The Score a turn earns is the net worth a realm starts with, rounded, rather
-    than a written-down 213; the same figure for a standard start, but it now
-    follows the starting setup if that is retuned
+  * Empire Status shows the cumulative score the scores board ranks on, where
+    it used to show net worth under that label
+  * The Score a turn earns is the net worth a realm starts with, rounded,
+    rather than a written-down 213; the same figure for a standard start, but
+    it now follows the starting setup if that is retuned
   * Today's News counts the planet live, so a new board's first day no longer
     reads as empty
   * "Since your last play" recap entries color the realm name and treaty type
     bright cyan
-  * See Scores, the attack target list and the View Treaties roster mark a baron
-    who is on the board with "(O)" beside their name
+  * See Scores, the attack target list and the View Treaties roster mark a
+    baron who is on the board with "(O)" beside their name
   * A pirate raid takes about a thirtieth of one kind of holding, named on its
     own line at the end of the income report, and reports its outcome as the
     original does: one of five random headlines, the loot, and what it cost
   * Pirates start with no army and no land and can field only what they have
     stolen, so a group left alone grows and a drained one is harmless
-  * Beating pirates recovers a third of their gold, regions, agents and troopers
-    and a quarter of their jets, turrets and tanks, and costs the attacker
-    casualties
+  * Beating pirates recovers a third of their gold, regions, agents and
+    troopers and a quarter of their jets, turrets and tanks, and costs the
+    attacker casualties
   * Pirates raid larger realms more often, a turn can carry more than one raid,
     and military listed on the Trading Market is not hidden from them
-  * Attack Pirates marks a faction that raided you since your last play with "->"
-    beside its name
+  * Attack Pirates marks a faction that raided you since your last play with
+    "->" beside its name
   * Combat reports, pirate raid results, planet news and "since your last play"
     events wrap between words; the terminal was splitting figures in half
   * A bank at the Money Cap pays its interest into gold in hand instead of
@@ -423,8 +430,8 @@ Immortal Barons ChangeLog
   * The whole bank balance earns interest; savings above 1.6 billion used to
     earn none, on a figure that came from a player guide and is in neither of
     the original's binaries
-  * A withdrawal takes only as much gold as will fit in hand, leaving the rest in
-    the bank
+  * A withdrawal takes only as much gold as will fit in hand, leaving the rest
+    in the bank
   * Figures of a billion or more are shown as "1.0000B" rather than in full
   * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
   * The Bombing Ops, Missile Ops and Clingy Annihilator settings take their
@@ -433,10 +440,10 @@ Immortal Barons ChangeLog
   * Added Waste, Population, and Morale and Support help topics
 
   Inter-BBS (league play only):
-  * Added the original's three sysop reports: "-lastpacket" writes when a packet
-    from each board was last processed, "-bbsinfo" every board with the version
-    it runs and when it was last heard from, and "-playerlist" every realm on
-    every board (League Coordinator only)
+  * Added the original's three sysop reports: "-lastpacket" writes when a
+    packet from each board was last processed, "-bbsinfo" every board with the
+    version it runs and when it was last heard from, and "-playerlist" every
+    realm on every board (League Coordinator only)
   * Packets carry the sending board's game version, so a Coordinator can see
     which boards are too old to read the newer ones
   * config-during-reset: the League Coordinator may require a game version of
@@ -451,8 +458,8 @@ Immortal Barons ChangeLog
   * A planet's market travels with its scores, so an ally sees what is offered
   * A bid holds the gold when it is sent. The far planet fills it only if the
     listing is still there at the same price and the alliance still stands when
-    the bid lands, pays its seller, and sends the goods back; otherwise the gold
-    comes home, with the reason
+    the bid lands, pays its seller, and sends the goods back; otherwise the
+    gold comes home, with the reason
   * A listing that shrank fills as far as it goes and refunds the rest
   * A bid whose answer never arrives is given up on and refunded, on the same
     timer that brings lost forces home
@@ -484,24 +491,24 @@ Immortal Barons ChangeLog
   * An interplanetary strike costs the defender units, not only regions
   * A returning report for a strike whose forces have already been given up as
     lost is discarded instead of raising a second army
-  * The sysop's Attack Damage setting reaches interplanetary strikes: None makes
-    them almost bloodless, Low halves the losses and High doubles them
+  * The sysop's Attack Damage setting reaches interplanetary strikes: None
+    makes them almost bloodless, Low halves the losses and High doubles them
   * The Attack Costs setting scales what an interplanetary strike charges, and
     the price is capped at 200,000,000 gold
   * A terrorist operation costs 64 gold per region the launcher owns, scaled by
     the Terrorism Costs setting, quoted before it is sent
   * Inter-BBS packets carry the sending board's signature, so a board whose key
-    is in the league roster cannot be impersonated, and the roster's node number
-    for each end, preferred over the board name for authentication, addressing
-    and identifying the League Coordinator
+    is in the league roster cannot be impersonated, and the roster's node
+    number for each end, preferred over the board name for authentication,
+    addressing and identifying the League Coordinator
   * Added "-gen-board-key" to create this board's packet-signing key
   * A reset advances this board's own generation marker, so a packet left over
     from the cleared game is discarded instead of applied to the new one
   * This board's own settings — name, league number, packet directories — moved
     out of config.json into "bbs.cfg", editable without the settings editor; an
     existing board migrates on its next save with nothing for the sysop to do
-  * "-ibbs-reset -import-bbs-cfg" takes a board's name, incoming-files directory
-    and league number from an original Barren Realms Elite BBS.CFG
+  * "-ibbs-reset -import-bbs-cfg" takes a board's name, incoming-files
+    directory and league number from an original Barren Realms Elite BBS.CFG
   * A league can be arranged as a tree instead of every board linking to every
     other one: the Coordinator writes the routing into the node list, and a
     member board then links only to its uplink (#106)
@@ -542,13 +549,13 @@ Immortal Barons ChangeLog
     adding "-board-id" sets a member board up in one command, without the
     settings editor
   * The league Coordinator now also sets the money cap, unlimited food and
-    idle-realm removal for every board; each was left to the local sysop, so two
-    planets in one season could play by different rules
-  * config-during-reset: added the Local Attacks (enabled), Local Attack Scoring
-    (disabled) and Dupe Checking (enabled) league settings, editable in both
-    Configuration Editors, shown on Game Setup and broadcast to the league
-  * With Local Attacks disabled, barons on one board cannot attack each other and
-    the Attack menu keeps only the pirate and alliance entries
+    idle-realm removal for every board; each was left to the local sysop, so
+    two planets in one season could play by different rules
+  * config-during-reset: added the Local Attacks (enabled), Local Attack
+    Scoring (disabled) and Dupe Checking (enabled) league settings, editable in
+    both Configuration Editors, shown on Game Setup and broadcast to the league
+  * With Local Attacks disabled, barons on one board cannot attack each other
+    and the Attack menu keeps only the pirate and alliance entries
   * With Local Attack Scoring disabled, a battle between barons on one board
     moves neither side's score
   * With Dupe Checking enabled, a caller found playing on another board in the
