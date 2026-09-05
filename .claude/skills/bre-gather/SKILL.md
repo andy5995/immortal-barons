@@ -672,7 +672,10 @@ block `find-string` reports, or the window opens after the test you want and
 shows only the message being built. Two practical notes on the tools, both of
 which cost invocations here: `lookup` takes **no** `--directory` (unlike
 `find-string`, `disasm` and `verify`) and returns a JSON **list**, not an
-object; and `--around` accepts an OVR offset, so convert from the block address
+object; a **bare address is not a selector** for it — `lookup 0x04dc1d` exits
+non-zero with `no catalog name or alias matches`, so feed it the durable id a
+`callees[]` entry already gave you (`bre0988:ovr:procedure:04dc1d`); and
+`--around` accepts an OVR offset, so convert from the block address
 `find-string` prints rather than guessing a unit-relative one.
 
 **An empty BYTE-PATTERN scan is not evidence of absence either — the compiler
