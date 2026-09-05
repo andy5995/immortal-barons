@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-03 18:40-0500\n"
+"POT-Creation-Date: 2026-09-05 18:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -74,11 +74,30 @@ msgstr ""
 #. type: Title ##
 #: internal/help/content/controls/interface.md:31
 #, markdown-text, no-wrap
+msgid "Typing an answer"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:39
+#, markdown-text
+msgid ""
+"Where a prompt takes something typed rather than one key — a number of "
+"troopers, a realm name, a line of a message — Backspace erases the last "
+"character and **Ctrl-U erases the whole answer**, leaving you back at the "
+"prompt with nothing typed. It is quicker than holding Backspace down over a "
+"mistyped 1000000000, and it is IB's own addition; the original has no such "
+"key. In the message editor it clears the line you are on, not the message — "
+"`/C` still does that."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/controls/interface.md:40
+#, markdown-text, no-wrap
 msgid "Choosing who an action goes to"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:38
+#: internal/help/content/controls/interface.md:47
 #, markdown-text
 msgid ""
 "Send Message asks `(A-Y,Z=All,?=List) Send to:` and takes a whole list, not "
@@ -89,7 +108,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:41
+#: internal/help/content/controls/interface.md:50
 #, markdown-text, no-wrap
 msgid ""
 "InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for "
@@ -98,7 +117,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:46
+#: internal/help/content/controls/interface.md:55
 #, markdown-text
 msgid ""
 "Every Diplomacy option that names a realm takes the same list: offer a "
@@ -109,7 +128,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:53
+#: internal/help/content/controls/interface.md:62
 #, markdown-text
 msgid ""
 "The letters belong to the realms, not to the rows, so a letter may be "
@@ -122,7 +141,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:57
+#: internal/help/content/controls/interface.md:66
 #, markdown-text
 msgid ""
 "A letter is freed when the realm holding it is swept from the map, and a "
@@ -131,13 +150,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/controls/interface.md:58
+#: internal/help/content/controls/interface.md:67
 #, markdown-text, no-wrap
 msgid "Who else is on"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:65
+#: internal/help/content/controls/interface.md:74
 #, markdown-text
 msgid ""
 "An `O` beside a realm's letter — on See Scores, the attack and message "
@@ -148,7 +167,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:66
+#: internal/help/content/controls/interface.md:75
 #, markdown-text
 msgid "Press `?` at a menu to open this help."
 msgstr ""
@@ -425,8 +444,8 @@ msgstr ""
 #: internal/help/content/covert/expose-enemy-ops.md:21
 #, markdown-text
 msgid ""
-"It costs no agent and takes no once-per-turn slot, so you may run it as "
-"often as you can pay for it. Anything the shield turns aside counts as a "
+"It costs no agent and takes no part of a daily allowance, so you may run it "
+"as often as you can pay for it. Anything the shield turns aside counts as a "
 "caught agent, so on top of blocking the damage you are told which realm sent "
 "it."
 msgstr ""
@@ -504,14 +523,26 @@ msgstr ""
 #: internal/help/content/covert/overview.md:45
 #, markdown-text
 msgid ""
-"You may run each covert operation once per turn. Running Stir Revolts blocks "
-"a second Stir Revolts until your next turn, but leaves every other operation "
-"open.  Send Spy and Spy on Relations only gather information, so they have "
-"no limit at all, and Expose Enemy Ops has none either."
+"Each covert operation may be run once for every turn in the day, and you may "
+"spend that allowance whenever you like — all of it in one turn, or one at a "
+"time.  Running Stir Revolts uses up one Stir Revolts and leaves every other "
+"operation untouched. The allowance refills at the start of each new day."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:51
+#: internal/help/content/covert/overview.md:52
+#, markdown-text
+msgid ""
+"After you pick a target the game asks how many agents to send, and suggests "
+"as many as you can: whichever runs out first of the agents you hold, the "
+"allowance you have left today, and the gold to pay the fee. Each agent is a "
+"separate operation with its own fee and its own chance of being caught. Send "
+"Spy and Spy on Relations only gather information, so they have no limit at "
+"all and go one at a time, and Expose Enemy Ops has no limit either."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:58
 #, markdown-text
 msgid ""
 "When an operation fails, your agent is caught and lost, and the target is "
@@ -522,7 +553,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:55
+#: internal/help/content/covert/overview.md:62
 #, markdown-text
 msgid ""
 "Each operation has its own topic. Some of the topics in this section cover "
@@ -531,7 +562,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:57
+#: internal/help/content/covert/overview.md:64
 #, markdown-text
 msgid ""
 "The Covert Operations menu appears during your turn, after the Attack "
@@ -1931,7 +1962,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:52
+#: internal/help/content/interbbs/attack-types.md:51
+#, markdown-text
+msgid ""
+"Join Group Attack lists every party still forming, with the troopers, jets, "
+"tanks and bombers already pooled in it and the hours it has left. Read those "
+"columns before you commit: they are how you tell a party worth reinforcing "
+"from one that will not survive the trip."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:57
 #, markdown-text
 msgid ""
 "Once a force leaves, it is out of your hands and out of your army until the "
@@ -1943,7 +1984,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:57
+#: internal/help/content/interbbs/attack-types.md:62
 #, markdown-text
 msgid ""
 "Land you capture abroad has no type until you give it one, so it waits for "
@@ -1954,7 +1995,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:60
+#: internal/help/content/interbbs/attack-types.md:65
 #, markdown-text
 msgid ""
 "If the answer never arrives — a board goes quiet, a packet is lost — your "

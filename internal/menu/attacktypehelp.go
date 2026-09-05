@@ -34,10 +34,14 @@ type attackTypeTopic struct {
 // quick strike's is 120% — the original's own help text says 110% while its
 // resolver loads 1.2 (BRE.OVR 0x4055a), so matching the browser's shape must
 // not drag that wrong number along with it.
+//
+// The fields are named so the UI-string extractor can find them: nothing else
+// on the menu side carries these literals, and `tr(s, t.name)` reads a variable
+// (scripts/gen-ui-pot.py keys on `name:` and `body:` for this table).
 var attackTypeTopics = []attackTypeTopic{
-	{"Normal Attack", "Your forces fight at full strength. Both sides break off once they have taken 15% losses, and you take the standard share of the defender's regions."},
-	{"Quick Strike", "Surprise lets you fight at 120% of your normal strength, but the battle is short and disorganised: both sides retreat at 8% losses, and you carry off only half the land a Normal Attack would."},
-	{"Extended Battle", "A grinding assault. Fatigue drops your forces to 85% strength, but they press until both sides have taken 20% losses, and they bring home 125% of a Normal Attack's land."},
+	{name: "Normal Attack", body: "Your forces fight at full strength. Both sides break off once they have taken 15% losses, and you take the standard share of the defender's regions."},
+	{name: "Quick Strike", body: "Surprise lets you fight at 120% of your normal strength, but the battle is short and disorganised: both sides retreat at 8% losses, and you carry off only half the land a Normal Attack would."},
+	{name: "Extended Battle", body: "A grinding assault. Fatigue drops your forces to 85% strength, but they press until both sides have taken 20% losses, and they bring home 125% of a Normal Attack's land."},
 }
 
 const (

@@ -50,6 +50,11 @@ CALL_PATTERNS = [
     re.compile(r'\btitled\(' + STR),  # bulletin page headings not drawn from a table
     re.compile(r'\b(?:Label|Title):\s*' + STR),
     re.compile(r'\bonOff\(' + STR),  # Preferences toggle labels (dynamic LabelFn)
+    re.compile(r'\bwithPrice\(' + STR),  # menu items that carry their own price
+    # The Attack Type help's three topics: the browser translates them through
+    # tr(s, t.name), which reads a variable, so the table's own fields are the
+    # msgids. The field names are unique to that table.
+    re.compile(r'\b(?:name|body):\s*' + STR),
 ]
 ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 

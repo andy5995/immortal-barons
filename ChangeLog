@@ -1,23 +1,23 @@
 Immortal Barons ChangeLog
 
-(in-progress:)
-  * The InterPlanetary menu quotes the Terrorist Ops rate beside the item
-  * A terrorist op charges per agent, and each agent spends one op
+2026-09-05 (v0.0.10)
   * A covert operation asks how many agents to send, and sends them together
-  * An arriving S3-Sabre meets the same gates as the other missiles
+  * Dropping regions asks for confirmation first, and defaults to no
+  * The Planetary Master is paid a share of the Queen's purse each day
+  * Replying to a one-line message no longer asks which lines to quote
+  * Ctrl-U erases a whole typed answer at any prompt
+  * The planet prompt colours its whole line by how many planets match
+  * The played-today mark on the score table is shown only in a league game
   * Attack Type help opens a browser over the three types, one at a time
-  * An individual interplanetary strike no longer reports a running-total id
   * Creating or joining an interplanetary group attack costs gold
   * An interplanetary strike is priced per unit type, off the launcher's size
+  * A terrorist op charges per agent, and each agent spends one op
+  * The InterPlanetary menu quotes the Terrorist Ops rate beside the item
   * An arriving nuclear or chemical strike can misfire or be shot down by SDI
+  * An arriving S3-Sabre meets the same gates as the other missiles
   * A trade fleet whose target has left the world brings the goods home
-  * Replying to a one-line message no longer asks which lines to quote
-  * The played-today mark on the score table is shown only in a league game
-  * Dropping regions asks for confirmation first, and defaults to no
-  * The planet prompt colours its whole line by how many planets match
-  * Ctrl-U erases a whole typed answer at any prompt
   * Join Group Attack draws the forces already pooled, in the original's table
-  * The Planetary Master is paid a share of the Queen's purse each day
+  * An individual interplanetary strike no longer reports a running-total id
 
 2026-09-03 (v0.0.9)
   * The inter-BBS packet protocol moves to 2; boards must update together
