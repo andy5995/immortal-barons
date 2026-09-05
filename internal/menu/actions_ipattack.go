@@ -79,7 +79,9 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		if e != nil {
 			return e
 		}
-		id, departAt = ga.ID, ga.DepartAt
+		// The SLOT, not the ID: it is the number the Join Group Attack table
+		// will show this party under, so it is the one a baron can act on.
+		id, departAt = ga.Slot, ga.DepartAt
 		return nil
 	})
 	if err != nil {
@@ -100,10 +102,6 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
-	type gaRow struct {
-		id   int
-		line string
-	}
 	var rows []gaRow
 	now := time.Now()
 	w.Read(func() {
@@ -116,29 +114,54 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 			}
 			tgt := ga.TargetEmpire
 			if tgt == "" {
-				tgt = tr(s, "the whole planet")
+				// A party aimed at the whole planet names no baron, and the
+				// original fills the column with ALL rather than a sentence
+				// (cap/20240527-134Pho_Lazarus_Public.cap).
+				tgt = tr(s, "ALL")
 			}
-			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves %s, %s offense)",
-				ga.ID, tgt, ga.TargetBoard, ga.DepartAt.Format(departFormat), comma(ga.Offense()))})
+			r := gaRow{
+				// The party's SLOT, which is what the two-column Id field holds
+				// and what the prompt is answered with; ga.ID is the world-wide
+				// counter behind it and never reaches the screen.
+				id:     ga.Slot,
+				attack: ga.ID,
+				by:     "?",
+				planet: ga.TargetBoard,
+				target: tgt,
+				hours:  hoursUntil(now, ga),
+			}
+			if len(ga.Contributors) > 0 {
+				if creator := w.FindByOwner(ga.Contributors[0].Owner); creator != nil {
+					r.by = creator.Letter()
+				}
+			}
+			// The columns show the force ALREADY POOLED, every contributor's
+			// detachment together -- what the player is deciding whether to
+			// reinforce, not what any one baron put in.
+			for _, c := range ga.Contributors {
+				r.troopers += c.Troopers
+				r.jets += c.Jets
+				r.tanks += c.Tanks
+				r.bombers += c.Bombers
+			}
+			rows = append(rows, r)
 		}
 	})
 	if len(rows) == 0 {
 		ok(s, "No group attacks are forming right now.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Join which attack?"), ansi.Reset)
-	for i, r := range rows {
-		fmt.Fprintf(s, "    %d) %s\n", i+1, r.line)
-	}
-	i := promptInt(s, "Attack (0 to cancel)?")
-	if i < 1 || i > len(rows) {
+	printGroupAttackTable(s, w.Term, rows)
+	// Answered with the Id the table SHOWS, not with a row number: the Id column
+	// is the attack's own id and it is what the player is reading off the screen.
+	id, slot := promptGroupChoice(s, rows)
+	if id == 0 {
 		return Stay
 	}
 	force := promptAttackForce(s, w.Player())
 	if force.Empty() {
 		return Stay
 	}
-	id := rows[i-1].id
 	// JoinGroupAttack re-validates against fresh state: the attack must still exist
 	// (ErrNoAttack), not yet have departed (ErrDeparted), and the baron must still
 	// hold the committed units (ErrCantAfford).
@@ -149,7 +172,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "You joined group attack #%d.", id)
+	ok(s, "You joined group attack #%d.", slot)
 	return Stay
 }
 

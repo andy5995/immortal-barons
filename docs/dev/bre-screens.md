@@ -3030,11 +3030,15 @@ allocation. Reading the write to the party array would settle it.
 The `Id` field is **2 columns**, which is consistent with a small reused slot
 number and not with a running total.
 
-**IB's ids are neither.** `NextAttackID` is one monotonic counter shared by group
-attacks, individual attacks, special ops, trade deals, spy recon and terror ops,
-reset only when the world is (`internal/game/game.go`). So a season's third group
-attack can be #4127, which no 2-column field holds and which tells a player
-nothing. Tracked with the rest of the screen in #251.
+**IB now numbers them the same way** (#251). `NextAttackID` is one monotonic
+counter shared by group attacks, individual attacks, special ops, trade deals,
+spy recon and terror ops, reset only when the world is
+(`internal/game/game.go`), so a season's third group attack can be #4127 — which
+no 2-column field holds and which tells a player nothing. That id stays where it
+was needed, on the packet that pairs a returning result with the strike that
+left; the table instead shows `GroupAttack.Slot`, the lowest number 1..99 no
+party is using. A party away keeps its number until its forces come home, so
+IB's list can show 2 and 3 with 1 absent exactly as the original's does.
 
 **Joining costs gold**, charged after the force prompts and refused when it
 cannot be met:
@@ -3051,8 +3055,16 @@ Sorry, you can't afford that!
 
 The rate behind `99,572,437` was not worked back to a formula, so whether a join
 is priced like an individual strike is **UNVERIFIED**. IB charges nothing at all
-for a group attack at either end (#252), and draws a numbered sentence per party
-instead of this table (#251).
+for a group attack at either end (#252).
+
+**IB draws this table** (#251), to these widths and colours, from
+`internal/menu/groupattacktable.go`; `TestGroupAttackTableMatchesTheCapture`
+compares its output to both captured rows above, character for character. Two
+divergences, neither visible on a captured row: a wait is rounded UP to the
+whole hour, so a party filed with an eight-hour delay reads `8h` for its first
+hour rather than dropping to `7h` the instant it is created; and a party saved
+before IB numbered them, which knows only the game day it leaves on, shows `?`
+in the `Leave` column rather than a figure invented for it.
 
 Enter alone at `Join which group?` answers `0` and returns to the menu. With no
 party forming, the item prints `There are not any attack parties at this time.`

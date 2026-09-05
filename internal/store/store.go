@@ -121,6 +121,7 @@ func repair(w *game.World, cfg game.Config) {
 	// and market rows it left — which EnsureTreaties has only just moved out of
 	// their legacy fields.
 	w.EnsureSlots()
+	w.EnsureAttackSlots()
 	w.EnsureNews()
 	loadLeagueNodes(w, cfg)
 	loadLeagueKeys(w, cfg)

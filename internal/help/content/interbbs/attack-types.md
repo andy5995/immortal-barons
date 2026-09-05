@@ -44,6 +44,11 @@ between 12 and 120, and it sits on the launch pad until then — other barons ca
 join it in the meantime, and the delay is how you time it to land before the
 target takes their next turn.
 
+Join Group Attack lists every party still forming, with the troopers, jets,
+tanks and bombers already pooled in it and the hours it has left. Read those
+columns before you commit: they are how you tell a party worth reinforcing from
+one that will not survive the trip.
+
 Once a force leaves, it is out of your hands and out of your army until the
 other planet's board resolves it and the answer travels back. When it does, you
 get a private report: what you sent, what came home, what it destroyed, and

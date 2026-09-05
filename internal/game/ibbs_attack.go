@@ -114,7 +114,20 @@ type GroupAttack struct {
 	// DepartDay is the pre-hours field, kept so a world saved before the change
 	// still knows when its pending attacks leave. Only read when DepartAt is
 	// zero; never written for a new attack.
-	DepartDay    int `json:",omitempty"`
+	DepartDay int `json:",omitempty"`
+	// Slot is the small number the Join Group Attack table shows in its Id
+	// column, and the number a player answers its prompt with. It is NOT the ID:
+	// GroupAttack.ID comes from one monotonic counter shared with individual
+	// attacks, special ops, trade bids and terror ops, so a season's third party
+	// can be #4127 -- which no two-column field holds and which tells a player
+	// nothing (docs/dev/bre-screens.md). The original numbers its parties by the
+	// slot each occupies in a fixed array, freed when that party's forces come
+	// home, so a list can show 2 and 3 with 1 absent while 1 is away.
+	//
+	// Local to this board and never on the wire: a packet carries the ID, which
+	// is what pairs a returning result with the strike that left. Zero in a world
+	// saved before the field existed, which EnsureAttackSlots fills in.
+	Slot         int `json:",omitempty"`
 	Contributors []Contribution
 }
 
@@ -306,6 +319,9 @@ type InFlightStrike struct {
 	// whole planet, and the target board's answer carries none of that.
 	Group bool `json:",omitempty"`
 	Whole bool `json:",omitempty"`
+	// Slot is the group party's Id, carried while it is away so the number is
+	// not handed to a new party until this one comes home. See GroupAttack.Slot.
+	Slot int `json:",omitempty"`
 	// An interplanetary trade bid's escrow (Kind "trade"): the gold held while
 	// the bid is away, and what it was bidding for, so the lost-packet timer can
 	// hand the money back and word the notice.
@@ -345,6 +361,7 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, h
 	w.NextAttackID++
 	w.GroupAttacks = append(w.GroupAttacks, GroupAttack{
 		ID:           w.NextAttackID,
+		Slot:         w.freeAttackSlot(),
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
 		DepartAt:     DepartureAfter(time.Now(), hours),
@@ -456,6 +473,7 @@ func (w *World) LaunchDueGroupAttacksAt(now time.Time) {
 		})
 		w.InFlight = append(w.InFlight, InFlightStrike{
 			ID:           ga.ID,
+			Slot:         ga.Slot,
 			Kind:         "attack",
 			TargetBoard:  ga.TargetBoard,
 			TargetEmpire: ga.TargetEmpire,
@@ -957,4 +975,76 @@ func raider(atk RemoteAttack) string {
 		return atk.FromBoard
 	}
 	return atk.FromEmpire + " of " + atk.FromBoard
+}
+
+// AttackSlots is how many group attack parties one board numbers. The original's
+// Id column is two characters wide (docs/dev/bre-screens.md), so 1..99 is every
+// number that fits it.
+const AttackSlots = 99
+
+// freeAttackSlot is the lowest number no party is using: neither one still
+// forming nor one away, since a party away still owns the number until its
+// forces come home. 0 when every number is taken, which the table spells "?" --
+// a board with 99 parties in the air at once is not a case worth a second
+// numbering scheme.
+func (w *World) freeAttackSlot() int {
+	taken := make(map[int]bool, len(w.GroupAttacks)+len(w.InFlight))
+	for _, ga := range w.GroupAttacks {
+		taken[ga.Slot] = true
+	}
+	for _, f := range w.InFlight {
+		if f.Group {
+			taken[f.Slot] = true
+		}
+	}
+	for n := 1; n <= AttackSlots; n++ {
+		if !taken[n] {
+			return n
+		}
+	}
+	return 0
+}
+
+// EnsureAttackSlots numbers the parties in a world saved before they carried a
+// slot, in the order they were created, and is idempotent: a world whose slots
+// are all distinct and in range comes back unchanged, so it may run on every
+// reload. A party away is numbered first, because it holds its number against
+// the ones still forming.
+func (w *World) EnsureAttackSlots() {
+	var taken [AttackSlots + 1]bool
+	claim := func(slot *int) bool {
+		if *slot >= 1 && *slot <= AttackSlots && !taken[*slot] {
+			taken[*slot] = true
+			return true
+		}
+		*slot = 0
+		return false
+	}
+	for i := range w.InFlight {
+		if w.InFlight[i].Group {
+			claim(&w.InFlight[i].Slot)
+		}
+	}
+	for i := range w.GroupAttacks {
+		claim(&w.GroupAttacks[i].Slot)
+	}
+	assign := func(slot *int) {
+		if *slot != 0 {
+			return
+		}
+		for n := 1; n <= AttackSlots; n++ {
+			if !taken[n] {
+				*slot, taken[n] = n, true
+				return
+			}
+		}
+	}
+	for i := range w.InFlight {
+		if w.InFlight[i].Group {
+			assign(&w.InFlight[i].Slot)
+		}
+	}
+	for i := range w.GroupAttacks {
+		assign(&w.GroupAttacks[i].Slot)
+	}
 }

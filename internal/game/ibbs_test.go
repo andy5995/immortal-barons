@@ -4,6 +4,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -1330,5 +1331,85 @@ func TestPlanetWideStrikeFightsEveryRealm(t *testing.T) {
 	}
 	if res.LandTaken != (4_000-big.Land)+(4_000-small.Land) {
 		t.Errorf("LandTaken %d does not match what the realms actually lost", res.LandTaken)
+	}
+}
+
+// TestAttackSlotsAreSmallAndReused holds the Join Group Attack table's Id to
+// what a two-column field can carry: a party takes the lowest free number, keeps
+// it while it is away, and gives it up only when its forces come home — so a
+// list can show 2 and 3 with 1 absent, which is how the original numbers them.
+func TestAttackSlotsAreSmallAndReused(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("h", "Realm")
+	e.Troopers = 100_000
+	e.Protection = 0
+	w.Config.MaxGroupAttacks = 10
+
+	var slots []int
+	for range 3 {
+		ga, err := w.CreateGroupAttack(e, "Mars", "", GroupAttackHoursMax, AttackForce{Troopers: 100})
+		if err != nil {
+			t.Fatalf("create: %v", err)
+		}
+		slots = append(slots, ga.Slot)
+	}
+	if want := []int{1, 2, 3}; !slices.Equal(slots, want) {
+		t.Fatalf("slots = %v, want %v", slots, want)
+	}
+
+	// The first party leaves. Its number goes with it, so the next party formed
+	// takes 4 rather than reusing 1 under a strike still in the air.
+	w.GroupAttacks[0].DepartAt = time.Now().Add(-time.Hour)
+	w.LaunchDueGroupAttacksAt(time.Now())
+	if n := len(w.InFlight); n != 1 {
+		t.Fatalf("in flight = %d, want 1", n)
+	}
+	if w.InFlight[0].Slot != 1 {
+		t.Errorf("the departed party carried slot %d away, want 1", w.InFlight[0].Slot)
+	}
+	ga, err := w.CreateGroupAttack(e, "Mars", "", GroupAttackHoursMax, AttackForce{Troopers: 100})
+	if err != nil {
+		t.Fatalf("create after launch: %v", err)
+	}
+	if ga.Slot != 4 {
+		t.Errorf("slot = %d, want 4 — 1 is still in the air", ga.Slot)
+	}
+
+	// Once it is home the number is free again.
+	w.InFlight = nil
+	if got := w.freeAttackSlot(); got != 1 {
+		t.Errorf("freeAttackSlot = %d, want 1 once the party is home", got)
+	}
+}
+
+// TestEnsureAttackSlotsNumbersALegacyWorld covers the migration: a world saved
+// before parties carried a slot gets distinct, in-range numbers, one already
+// away is numbered first because it holds its number against the ones forming,
+// and a second run changes nothing.
+func TestEnsureAttackSlotsNumbersALegacyWorld(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.GroupAttacks = []GroupAttack{{ID: 10}, {ID: 11}}
+	w.InFlight = []InFlightStrike{{ID: 9, Group: true}, {ID: 8, Kind: "terror"}}
+
+	w.EnsureAttackSlots()
+	if w.InFlight[0].Slot != 1 {
+		t.Errorf("the party away got slot %d, want 1", w.InFlight[0].Slot)
+	}
+	if w.InFlight[1].Slot != 0 {
+		t.Errorf("a terror op took slot %d; only group parties are numbered", w.InFlight[1].Slot)
+	}
+	got := []int{w.GroupAttacks[0].Slot, w.GroupAttacks[1].Slot}
+	if want := []int{2, 3}; !slices.Equal(got, want) {
+		t.Fatalf("forming slots = %v, want %v", got, want)
+	}
+
+	before := append([]GroupAttack(nil), w.GroupAttacks...)
+	w.EnsureAttackSlots()
+	for i := range before {
+		if w.GroupAttacks[i].Slot != before[i].Slot {
+			t.Errorf("a second run renumbered party %d: %d -> %d", i, before[i].Slot, w.GroupAttacks[i].Slot)
+		}
 	}
 }
