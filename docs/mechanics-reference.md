@@ -1684,10 +1684,16 @@ last row never fires from this path and the "developed regions" outcome belongs
 to another caller, not yet traced. IB leaves it as a no-op rather than inventing
 one.
 
-The remaining figures are IB's, because the original states none: only about 3
-launches in 10 (`SabreEffectHits`/`SabreEffectRange`) deliver a payload, a landed
-hit removes a random 5-30 % (`SabreBaseDamagePct` + `rng.Intn(SabreDamageSpread)`)
-of what the effect names, and backfire is a continuous probability scaled by the
+Whether a launch arrives is the original's, not IB's: the shared arriving-missile
+gates — the `Random(10)` misfire and then SDI — and nothing in the sabre's own
+branch asks a second time. IB had an invented 3-in-10 delivery roll here until
+2026-09-05, written before the resolver was read and three times harsher than the
+gate that turned out to exist; removing it takes the sabre from about 3 launches
+in 10 landing to about 9.
+
+The remaining figures ARE IB's, because the original states none: a landed hit
+removes a random 5-30 % (`SabreBaseDamagePct` + `rng.Intn(SabreDamageSpread)`) of
+what the effect names, and backfire is a continuous probability scaled by the
 target's troopers (`d.Troopers / SabreBackfireScale`). Those are playtest knobs;
 the table above is fidelity contract.
 
@@ -4056,14 +4062,14 @@ the bands above, behind `arrivingMissileStopped` — the misfire then SDI, after
 the realm-found and New-Realm-Protection gates the resolver already applied to
 every special op. The chemical strike touches nothing but the population.
 
-Two knowing differences remain. The **32,000 ceiling converts for people and not
+All three missiles meet the gates, the S3-Sabre included: its invented 3-in-10
+delivery roll is gone, replaced by the misfire the resolver actually carries.
+
+One knowing difference remains. The **32,000 ceiling converts for people and not
 for regions**: the original counts population in millions, so the same figure is
 `IPMissilePeopleCap` = 32,000 × `PopBREUnitScale` here, while a region is a
-region in both games. And the **S3-Sabre keeps IB's own 3-in-10 delivery roll**
-instead of gaining the 1-in-10 misfire beside it — the invented roll is the
-stricter of the two, and stacking them is a balance question rather than part of
-this. IB's event text still names exact figures in both directions where the
-original tells the victim "several million".
+region in both games. IB's event text also still names exact figures in both
+directions where the original tells the victim "several million".
 
 **Three IB decisions**, none of them established from the original:
 

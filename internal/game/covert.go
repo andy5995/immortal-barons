@@ -592,13 +592,11 @@ func (w *World) resolveBombEnemyTargets(a, d *Empire) string {
 }
 
 // S3-Sabre tuning. What the dial selects, and the two rolls that blur it, are
-// binary-verified and live in balance_costs.go beside the mapper's table. The
-// figures here are the ones the original does NOT state: how often a launch
-// delivers a payload at all, how hard a landed hit bites, and the backfire
-// chance. They are playtest knobs, not fidelity contract.
+// binary-verified and live in balance_costs.go beside the mapper's table, as is
+// whether a launch arrives at all (MissileMisfireOdds and SDI). The figures here
+// are the ones the original does NOT state: how hard a landed hit bites, and the
+// backfire chance. They are playtest knobs, not fidelity contract.
 const (
-	SabreEffectHits    = 3   // landing launches per SabreEffectRange...
-	SabreEffectRange   = 10  // ...i.e. a 3-in-10 chance to deliver a payload
 	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
 	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
 	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)
@@ -710,17 +708,19 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // and its planet, the same as an incoming nuclear or chemical strike. Agent ops
 // stay anonymous unless the agent is caught (see covertFoiled).
 func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, hit, backfired bool) {
-	// The shared arriving-missile gates, so the shield an S3-Sabre meets and the
-	// one a nuclear strike meets cannot drift apart (#255). IB's own 3-in-10
-	// delivery roll below is a stricter gate than the original's 1-in-10 misfire,
-	// which is why the misfire is not applied here as well: reconciling the two
-	// is a balance question of its own, not part of bringing the other two
-	// missiles up to the same resolver.
-	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
-		return fmt.Sprintf("%s's SDI intercepted your S3-Sabre.", d.Name), false, false
-	}
-	if w.rng.Intn(SabreEffectRange) >= SabreEffectHits {
-		return "The S3-Sabre fizzled and did no damage.", false, false
+	// The shared arriving-missile gates: the misfire, then SDI (#255). All three
+	// missiles meet them, because the receiving board resolves all three in one
+	// routine and both rolls sit ahead of its damage switch.
+	//
+	// IB used to fizzle 7 launches in 10 here instead. That roll was invented for
+	// a gap that the resolver turned out to fill — read on 2026-09-03, after the
+	// roll was written — and it is three times harsher than the original's gate,
+	// so it goes rather than stacking with it. The rolls INSIDE the original's
+	// sabre branch (`+0x6b6`) are the dial jitter, which SabreAim already models:
+	// one launch in ten ignores the dial entirely and the rest are nudged by one
+	// either way. Nothing there asks a second time whether the missile works.
+	if stopped := w.arrivingMissileStopped(d, "S3-Sabre"); stopped != "" {
+		return stopped, false, false
 	}
 	if w.sabreBackfires(d) {
 		return "The S3-Sabre backfired on the way out!", false, true

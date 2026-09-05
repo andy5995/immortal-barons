@@ -787,7 +787,10 @@ func TestSabreDialAimsTheMissile(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
 	d.Jets, d.Tanks, d.Food = 100_000, 100_000, 100_000
-	for i := 0; i < 400; i++ {
+	// Few enough launches that neither field bottoms out: about nine in ten now
+	// land (misfire + SDI, #255), where an invented 3-in-10 roll used to gate
+	// them, and a saturated field cannot show the asymmetry this asserts.
+	for i := 0; i < 25; i++ {
 		w.sabreEffect(d, a.Name, 5)
 	}
 	if d.Jets >= 100_000 {
