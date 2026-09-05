@@ -14,7 +14,6 @@ Immortal Barons ChangeLog
   * Replying to a one-line message no longer asks which lines to quote
   * The played-today mark on the score table is shown only in a league game
   * Dropping regions asks for confirmation first, and defaults to no
-  * The amount of allowed covert ops can be used in a single turn
   * The planet prompt colours its whole line by how many planets match
   * Ctrl-U erases a whole typed answer at any prompt
   * Join Group Attack draws the forces already pooled, in the original's table
