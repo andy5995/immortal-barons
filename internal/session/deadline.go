@@ -88,7 +88,10 @@ func (d *Deadline) Write(p []byte) (int, error) { return d.inner.Write(p) }
 // for every caller behind it — silently, since both have a defaulting answer.
 // The charset writer sits INSIDE this wrapper, so without them nothing above can
 // see the caller's real charset.
-func (d *Deadline) UTF8() bool  { return IsUTF8(d.inner) }
+func (d *Deadline) UTF8() bool { return IsUTF8(d.inner) }
+
+// Column forwards the cursor column from a tracker below (see ColumnTracker).
+func (d *Deadline) Column() int { n, _ := Column(d.inner); return n }
 func (d *Deadline) ASCII() bool { return IsASCII(d.inner) }
 func (d *Deadline) ANSI() bool  { return HasANSI(d.inner) }
 

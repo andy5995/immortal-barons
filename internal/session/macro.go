@@ -9,8 +9,8 @@ package session
 // runes are queued and returned by subsequent ReadKey calls before the
 // underlying session is read again. Runes replayed from the queue are returned
 // verbatim — a Ctrl-key inside a macro is NOT re-expanded, which keeps macros
-// from recursing. A Ctrl-<letter> with no macro is swallowed (a harmless
-// no-op) rather than passed through as an unhandled control character.
+// from recursing. A Ctrl-<letter> with no macro passes through unchanged, which
+// is what lets the line editors below see Ctrl-U.
 type MacroExpander struct {
 	inner  Session
 	lookup func(letter string) (string, bool)
@@ -35,11 +35,13 @@ func (m *MacroExpander) ReadKey() (rune, error) {
 		return r, err
 	}
 	// Ctrl-A..Ctrl-Z can trigger a macro — but NEVER intercept the control
-	// codes that double as essential line-editing keys (Backspace, LF, Enter),
-	// or ReadLine and single-key prompts would never see their terminator. Tab
-	// (Ctrl-I) IS allowed, since BRE's macro set includes Ctrl-I. An unmapped
-	// Ctrl-key just passes through (the menu ignores it).
-	if r >= 1 && r <= 26 && r != '\b' && r != '\n' && r != '\r' {
+	// codes that double as essential line-editing keys (Backspace, LF, Enter,
+	// and Ctrl-U for erase-line), or ReadLine and single-key prompts would never
+	// see their terminator. Tab (Ctrl-I) IS allowed, since BRE's macro set
+	// includes Ctrl-I; Ctrl-U is not in that set (D E F R I O K L), so reserving
+	// it costs a player nothing. An unmapped Ctrl-key just passes through (the
+	// menu ignores it).
+	if r >= 1 && r <= 26 && r != '\b' && r != '\n' && r != '\r' && r != KillLine {
 		letter := string(rune('A' + r - 1))
 		if seq, ok := m.lookup(letter); ok && seq != "" {
 			m.queue = []rune(seq)
@@ -60,3 +62,15 @@ func (m *MacroExpander) SetInputLine(line string) {
 		s.SetInputLine(line)
 	}
 }
+
+// UTF8, ASCII and ANSI forward the caller's charset and capability markers to
+// the inner session. Embedding is not used here (the expander wraps rather than
+// embeds), and this is the OUTERMOST wrapper on a live session — so without
+// these, IsUTF8/IsASCII asked at a prompt fall back to their defaults and report
+// UTF-8 for a CP437 caller. The line editors measure an echo through them.
+func (m *MacroExpander) UTF8() bool  { return IsUTF8(m.inner) }
+func (m *MacroExpander) ASCII() bool { return IsASCII(m.inner) }
+func (m *MacroExpander) ANSI() bool  { return HasANSI(m.inner) }
+
+// Column forwards the cursor column from a tracker below (see ColumnTracker).
+func (m *MacroExpander) Column() int { n, _ := Column(m.inner); return n }

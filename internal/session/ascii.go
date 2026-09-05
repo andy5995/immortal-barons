@@ -49,6 +49,9 @@ func (a *asciiWriter) ASCII() bool { return true }
 // on either side of the plain writer without hiding it from HasANSI.
 func (a *asciiWriter) ANSI() bool { return HasANSI(a.Session) }
 
+// Column forwards the cursor column from a tracker below (see ColumnTracker).
+func (a *asciiWriter) Column() int { n, _ := Column(a.Session); return n }
+
 // IsASCII reports whether s is held to 7-bit ASCII. A session that does not
 // advertise the marker is not — the same convention as IsUTF8/HasANSI.
 func IsASCII(s Session) bool {

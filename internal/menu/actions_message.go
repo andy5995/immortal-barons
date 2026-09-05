@@ -464,6 +464,10 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 
 	for len(lines) < msgMaxLines {
 		fmt.Fprintf(s, "%s%2d>%s ", ansi.FgBrightGreen, len(lines)+1, ansi.Reset)
+		// Where the line's text begins, so Ctrl-U can erase back to it without
+		// counting what was typed (session/column.go). Re-read after
+		// reopenPrev, which reprints a whole line.
+		textCol, _ := session.Column(s)
 
 		var b []rune
 		// restart abandons the line without recording it, after a command that
@@ -506,6 +510,18 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 					continue
 				}
 				b = reopenPrev()
+				textCol, _ = session.Column(s)
+				textCol -= len(b) // reopenPrev reprints the line it hands back
+				continue
+			}
+			if r == session.KillLine { // Ctrl-U: erase this line, not the message
+				// /C still clears the whole message. This clears only the line
+				// being typed, which is what the key means everywhere else, and
+				// it does NOT reopen the previous line the way an empty
+				// Backspace does -- an erase must not also move the cursor off
+				// the line it just emptied.
+				session.EraseBack(s, textCol, len(b))
+				b = b[:0]
 				continue
 			}
 			if r >= 32 {

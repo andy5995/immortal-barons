@@ -36,12 +36,15 @@ func (p *plainWriter) ANSI() bool { return false }
 // either side of the CP437 writer without hiding it from IsUTF8.
 func (p *plainWriter) UTF8() bool { return IsUTF8(p.Session) }
 
+// Column forwards the cursor column from a tracker below. The stripping above
+// is why this is safe: what the tracker counts is what the terminal receives.
+func (p *plainWriter) Column() int { n, _ := Column(p.Session); return n }
+
 // HasANSI reports whether s can render ANSI escape sequences. A session that
 // does not advertise the capability is treated as ANSI-capable — that is the
 // case for every base session except a legacy Windows console, and for the door
-// unless the dropfile says otherwise. Read it before any further wrapping, since
-// Deadline / MacroExpander / langSession do not forward the marker (the same
-// caveat as IsUTF8).
+// unless the dropfile says otherwise. Every wrapper forwards the marker, so it
+// reads the same from anywhere in the chain.
 func HasANSI(s Session) bool {
 	if c, ok := s.(interface{ ANSI() bool }); ok {
 		return c.ANSI()

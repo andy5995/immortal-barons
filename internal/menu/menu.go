@@ -234,6 +234,10 @@ func (l *langSession) UTF8() bool  { return session.IsUTF8(l.Session) }
 func (l *langSession) ASCII() bool { return session.IsASCII(l.Session) }
 func (l *langSession) ANSI() bool  { return session.HasANSI(l.Session) }
 
+// Column forwards the cursor column from the tracker below, which is what lets
+// a prompt inside the menu engine erase back to where its answer began.
+func (l *langSession) Column() int { n, _ := session.Column(l.Session); return n }
+
 // sessionLang extracts the caller's language from a wrapped Session, or "" for
 // a plain Session (e.g. tests) — which renders English.
 func sessionLang(s session.Session) string {

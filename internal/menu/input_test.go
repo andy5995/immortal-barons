@@ -1,6 +1,11 @@
 package menu
 
-import "testing"
+import (
+	"strings"
+	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/session"
+)
 
 func TestParseAmount(t *testing.T) {
 	cases := []struct {
@@ -80,5 +85,33 @@ func TestComma(t *testing.T) {
 		if got := comma(in); got != want {
 			t.Errorf("comma(%d) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+// TestEditAmountKillLine covers Ctrl-U in the numeric editor, which is the case
+// this key was asked for: a mistyped 1,000,000,000 cleared in one keystroke
+// instead of ten backspaces, with the field still editable afterwards.
+func TestEditAmountKillLine(t *testing.T) {
+	keys := append([]rune("1000000000"), session.KillLine)
+	keys = append(keys, []rune("25\r")...)
+	fs := &fakeSession{keys: keys}
+	if got := editAmount(fs, "", 0, 1_000_000_000); got != 25 {
+		t.Errorf("amount = %d, want 25", got)
+	}
+	if n := strings.Count(fs.out.String(), "\b \b"); n != 10 {
+		t.Errorf("erased %d digits, want 10", n)
+	}
+}
+
+// The k/m/b shortcuts expand in place, so Ctrl-U has to erase what is ON the
+// line -- every digit the expansion wrote -- not the keystrokes that produced
+// it. One "b" is ten columns.
+func TestEditAmountKillLineErasesAnExpandedShortcut(t *testing.T) {
+	fs := &fakeSession{keys: append([]rune{'1', 'b', session.KillLine}, []rune("7\r")...)}
+	if got := editAmount(fs, "", 0, 1_000_000_000); got != 7 {
+		t.Errorf("amount = %d, want 7", got)
+	}
+	if n := strings.Count(fs.out.String(), "\b \b"); n != 10 {
+		t.Errorf("erased %d columns, want 10 — 1b renders as ten digits", n)
 	}
 }

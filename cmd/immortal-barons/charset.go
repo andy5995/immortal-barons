@@ -32,14 +32,20 @@ func wantCharset(forceUTF8, forceCP437, forceASCII, local bool) charset {
 
 // encodeFor wraps s in the writer for cs. UTF-8 needs none: it is what the
 // engine already emits.
+//
+// A ColumnTracker goes UNDERNEATH whichever writer that is, so it counts the
+// bytes the terminal will actually receive rather than the ones the game
+// handed over — the difference between the two is the whole reason a line
+// editor cannot erase by counting what was typed. It is told the encoding
+// because it sits below the writer that chose it.
 func encodeFor(s session.Session, cs charset) session.Session {
 	switch cs {
 	case charsetCP437:
-		return session.NewCP437Writer(s)
+		return session.NewCP437Writer(session.NewColumnTracker(s, false))
 	case charsetASCII:
-		return session.NewASCIIWriter(s)
+		return session.NewASCIIWriter(session.NewColumnTracker(s, false))
 	default:
-		return s
+		return session.NewColumnTracker(s, true)
 	}
 }
 

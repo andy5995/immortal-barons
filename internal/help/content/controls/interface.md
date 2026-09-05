@@ -28,6 +28,15 @@ keys: Enter chooses the marked row, typing a few letters jumps to a title, and
 Backspace or `Q` goes back. If your terminal cannot show colour and cursor
 control, those lists are numbered instead — type the number and press Enter.
 
+## Typing an answer
+
+Where a prompt takes something typed rather than one key — a number of troopers,
+a realm name, a line of a message — Backspace erases the last character and
+**Ctrl-U erases the whole answer**, leaving you back at the prompt with nothing
+typed. It is quicker than holding Backspace down over a mistyped 1000000000, and
+it is IB's own addition; the original has no such key. In the message editor it
+clears the line you are on, not the message — `/C` still does that.
+
 ## Choosing who an action goes to
 
 Send Message asks `(A-Y,Z=All,?=List) Send to:` and takes a whole list, not one

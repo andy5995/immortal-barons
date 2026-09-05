@@ -336,10 +336,10 @@ func editAmount[T numfmt.Number](s session.Session, prefix string, suggested, ma
 		defer ls.SetInputLine("")
 	}
 
-	var b []rune
+	e := session.NewEditor(s, nil)
 	for {
 		if ls != nil {
-			ls.SetInputLine(prefix + string(b))
+			ls.SetInputLine(prefix + e.String())
 		}
 		r, err := readKey(s)
 		if err != nil {
@@ -347,47 +347,37 @@ func editAmount[T numfmt.Number](s session.Session, prefix string, suggested, ma
 		}
 		switch {
 		case r == '\r' || r == '\n':
-			if len(b) == 0 {
+			if e.Len() == 0 {
 				v := clampAmt(suggested, max)
 				fmt.Fprintf(s, "%d\n", v) // echo the kept value on the line
 				return v
 			}
-			v := parseAmount(string(b), max)
+			v := parseAmount(e.String(), max)
 			if v > max {
 				// BRE clamp-and-confirm (#9): an over-max entry is corrected to the
 				// max on screen and needs a SECOND Enter to commit — feedback and a
 				// chance to reconsider, not a silent one-keystroke clamp. Rewrite the
 				// field to the max in place and keep waiting.
-				str := strconv.FormatInt(int64(max), 10)
-				for range b {
-					fmt.Fprint(s, "\b \b")
-				}
-				fmt.Fprint(s, str)
-				b = []rune(str)
+				e.Kill()
+				e.PutString(strconv.FormatInt(int64(max), 10))
 				continue
 			}
 			fmt.Fprint(s, "\n")
 			return clampAmt(v, max)
-		case r == '>' && len(b) == 0:
-			str := strconv.FormatInt(int64(max), 10)
-			for _, c := range str {
-				b = append(b, c)
-			}
-			fmt.Fprint(s, str) // echo the prefilled max, still editable
+		case r == '>' && e.Len() == 0:
+			// The prefilled max stays editable, so it goes in a rune at a time
+			// like anything else the player typed.
+			e.PutString(strconv.FormatInt(int64(max), 10))
 		case r == 'k' || r == 'K': // expand in place: 1 k -> 1000
-			b = append(b, '0', '0', '0')
-			fmt.Fprint(s, "000")
+			e.PutString("000")
 		case r == 'm' || r == 'M':
-			b = append(b, '0', '0', '0', '0', '0', '0')
-			fmt.Fprint(s, "000000")
+			e.PutString("000000")
 		case r == 'b' || r == 'B': // expand in place: 1 b -> 1000000000
-			b = append(b, '0', '0', '0', '0', '0', '0', '0', '0', '0')
-			fmt.Fprint(s, "000000000")
+			e.PutString("000000000")
 		case r == 127 || r == 8: // backspace
-			if len(b) > 0 {
-				b = b[:len(b)-1]
-				fmt.Fprint(s, "\b \b")
-			}
+			e.Backspace()
+		case r == session.KillLine: // Ctrl-U: erase the whole field
+			e.Kill()
 		default:
 			// A numeric field takes only digits (its >/k/m/backspace shortcuts are
 			// handled above). Silently ignore any other rune so a stray printable byte
@@ -395,8 +385,7 @@ func editAmount[T numfmt.Number](s session.Session, prefix string, suggested, ma
 			// not drain, a paste — can't echo into the field (as the "→→" a caller saw)
 			// or corrupt the parsed amount.
 			if r >= '0' && r <= '9' {
-				b = append(b, r)
-				fmt.Fprintf(s, "%c", r)
+				e.Put(r)
 			}
 		}
 	}

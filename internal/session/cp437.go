@@ -83,6 +83,9 @@ func (c *cp437Writer) UTF8() bool { return false }
 // on either side of the plain writer without hiding it from HasANSI.
 func (c *cp437Writer) ANSI() bool { return HasANSI(c.Session) }
 
+// Column forwards the cursor column from a tracker below (see ColumnTracker).
+func (c *cp437Writer) Column() int { n, _ := Column(c.Session); return n }
+
 // CP437Width is how many COLUMNS s occupies once this writer has encoded it.
 // CP437 is single-byte, so every rune costs one column; the fallback pass is the
 // only thing that changes the count ("…" leaves as three dots), and a rune CP437

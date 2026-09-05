@@ -4984,6 +4984,21 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **Ctrl-U erases a whole typed answer**, at every prompt that takes one — the
+  numeric fields, `ReadLine`, and the message editor's current line. The
+  original has only Backspace, so correcting a mistyped 1000000000 there is ten
+  keystrokes. Ctrl-U is not among BRE's eight macro slots (D E F R I O K L), so
+  reserving it costs a player nothing, and `MacroExpander` refuses to bind it for
+  the same reason it refuses Backspace and Enter.
+
+  The erase walks back to a REMEMBERED COLUMN, not over a count of what was
+  typed: a `ColumnTracker` sits under the charset writer and counts what
+  actually reaches the terminal (`internal/session/column.go`). Measuring the
+  answer instead cannot be made right — the CP437 writer sends "…" as three
+  dots, a `k`/`m`/`b` shortcut writes digits nobody typed, and `>` prefills the
+  field — so the same five runes are five columns to a UTF-8 caller and eight to
+  a CP437 one. Backspace shares the mechanism and was fixed by it: it had erased
+  one column per rune.
 - **A regular attack on a rival realm is drawn over nine seconds**, where BRE
   prints the whole report at once. The realm being attacked is named, then a
   third of each side's casualties, then "Pushing..." and two thirds, then the

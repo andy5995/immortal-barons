@@ -45,8 +45,121 @@ func GuardEnd(err *error) {
 // error.
 const LineMaxRunes = 255
 
+// Editor is the line-editing state a prompt keeps: the runes typed and the
+// column each one started at, so an erase walks the cursor back to a column the
+// terminal actually reached rather than to a guess made from the answer.
+//
+// The columns come from a ColumnTracker under the charset writer (see
+// column.go), which is what makes this charset-blind: "…" costs one column to a
+// UTF-8 caller and three to a CP437 one, and neither this type nor its callers
+// have to know which. Where no tracker is present — a test double, a bulletin
+// rendered to a buffer — it falls back to one column per rune, which is exact
+// for the digits and ASCII those cases carry.
+type Editor struct {
+	s     Session
+	runes []rune
+	cols  []int // cols[i] is the column runes[i] began at
+	start int   // the column the answer began at, after the prompt
+}
+
+// NewEditor begins editing at the cursor's current column.
+func NewEditor(s Session, typed []rune) *Editor {
+	e := &Editor{s: s, start: col(s, 0)}
+	// Runes the caller already echoed: their columns are unknown individually,
+	// so they are measured as one each from the start. Only a peeked first key
+	// arrives this way, which is a single printable rune.
+	for i, r := range typed {
+		e.runes = append(e.runes, r)
+		e.cols = append(e.cols, e.start+i)
+	}
+	return e
+}
+
+// col reads the session's cursor column, or def where nothing tracks it.
+func col(s Session, def int) int {
+	if n, ok := Column(s); ok {
+		return n
+	}
+	return def
+}
+
+// Put echoes r and remembers where it landed.
+func (e *Editor) Put(r rune) {
+	e.cols = append(e.cols, col(e.s, e.start+len(e.runes)))
+	e.runes = append(e.runes, r)
+	fmt.Fprintf(e.s, "%c", r)
+}
+
+// PutString echoes a whole string as one unit — a k/m/b expansion, or the max
+// prefilled by ">" — which Backspace then removes a character at a time, as it
+// does for anything else on the line.
+func (e *Editor) PutString(str string) {
+	for _, r := range str {
+		e.Put(r)
+	}
+}
+
+// Backspace erases the last rune, walking back over every column it occupied.
+func (e *Editor) Backspace() {
+	if len(e.runes) == 0 {
+		return
+	}
+	to := e.cols[len(e.cols)-1]
+	e.runes = e.runes[:len(e.runes)-1]
+	e.cols = e.cols[:len(e.cols)-1]
+	EraseBack(e.s, to, 1)
+}
+
+// Kill erases the whole answer, back to the column it began at.
+func (e *Editor) Kill() {
+	if len(e.runes) == 0 {
+		return
+	}
+	n := len(e.runes)
+	e.runes = e.runes[:0]
+	e.cols = e.cols[:0]
+	EraseBack(e.s, e.start, n)
+}
+
+// EraseBack blanks every column between the cursor and column to, for a caller
+// that keeps its own buffer and so cannot use an Editor. Where nothing tracks
+// the cursor — a test double, a bulletin rendered to a buffer — it erases
+// fallback columns instead, which callers set to the rune count they echoed.
+//
+// Backspace-space-backspace rather than an ANSI erase, because a caller with no
+// ANSI has to be able to correct a typo too.
+func EraseBack(s Session, to, fallback int) {
+	n := fallback
+	if c, ok := Column(s); ok {
+		n = c - to
+	}
+	for range n {
+		fmt.Fprint(s, "\b \b")
+	}
+}
+
+// Len is how many runes are in the buffer, and String what they spell.
+func (e *Editor) Len() int       { return len(e.runes) }
+func (e *Editor) String() string { return string(e.runes) }
+
+// Reset empties the buffer WITHOUT erasing anything, for a caller that has
+// repainted the line itself.
+func (e *Editor) Reset() { e.runes, e.cols = e.runes[:0], e.cols[:0] }
+
+// KillLine is Ctrl-U, which erases everything typed so far and leaves the
+// cursor back at the prompt. The original has no such key: correcting a
+// mistyped 1000000000 there means holding Backspace down ten times, which is
+// the kind of wear this clone has no reason to reproduce. It is deliberately
+// the one line-editing key IB adds.
+//
+// Ctrl-U cannot be a macro slot, so nothing a player binds can shadow it: BRE's
+// fixed eight are D E F R I O K L (menu.macroKeys), and MacroExpander refuses
+// this rune outright for the same reason it refuses Backspace and Enter.
+const KillLine = 21
+
 // ReadLine reads a line of input terminated by Enter, echoing keystrokes
-// (the console runs in no-echo mode). Backspace/DEL erase the last rune.
+// (the console runs in no-echo mode). Backspace/DEL erase the last rune and
+// Ctrl-U the whole line.
 // It returns whatever was typed so far if the stream ends.
 func ReadLine(s Session) (string, error) { return ReadLineFrom(s, nil) }
 
@@ -56,25 +169,23 @@ func ReadLine(s Session) (string, error) { return ReadLineFrom(s, nil) }
 // to be the start of an ordinary answer. The caller has already echoed those
 // runes, so they are not echoed again.
 func ReadLineFrom(s Session, typed []rune) (string, error) {
-	b := append([]rune(nil), typed...)
+	e := NewEditor(s, typed)
 	for {
 		r, err := s.ReadKey()
 		if err != nil {
-			return string(b), err
+			return e.String(), err
 		}
 		switch r {
 		case '\r', '\n':
 			fmt.Fprint(s, "\n")
-			return string(b), nil
+			return e.String(), nil
 		case 127, 8: // DEL / backspace
-			if len(b) > 0 {
-				b = b[:len(b)-1]
-				fmt.Fprint(s, "\b \b")
-			}
+			e.Backspace()
+		case KillLine:
+			e.Kill()
 		default:
-			if r >= 32 && len(b) < LineMaxRunes {
-				b = append(b, r)
-				fmt.Fprintf(s, "%c", r)
+			if r >= 32 && e.Len() < LineMaxRunes {
+				e.Put(r)
 			}
 		}
 	}

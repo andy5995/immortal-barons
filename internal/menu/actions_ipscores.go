@@ -375,10 +375,10 @@ func askOneOrAll(s session.Session) (all, answered bool) {
 // "…" as three ASCII dots below every layer that counts columns, so a fitted
 // cell came out two columns wide for them and shifted every column after it
 // (#196) — the common case, since CP437 is the default.
-// Take the charset from Term, not from session.IsUTF8(s): the wrappers between
-// the charset writer and here — Deadline, MacroExpander, langSession — do not
-// forward the marker, so asking the Session reports UTF-8 for every caller.
-// Term is captured in play.Run before any of that wrapping.
+// Take the charset from Term rather than asking the Session. Every wrapper does
+// forward the marker now, so the two agree — but Term is captured once in
+// play.Run and passed down, which is what makes a cell's width the same on
+// every screen that draws one, however the session was wrapped for that call.
 //
 // It measures in COLUMNS, not runes, so a value carrying a character the writer
 // expands — an em dash in a realm name, which ValidRealmName accepts — is cut to
