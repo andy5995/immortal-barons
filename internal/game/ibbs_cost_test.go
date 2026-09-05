@@ -75,14 +75,14 @@ func TestTerrorOpGoldCostByLevel(t *testing.T) {
 		w := NewWorldSeed(cfg, 1)
 		e := w.AddHuman("alice", "Alethia")
 		e.Land = 5000
-		if got := w.TerrorOpGoldCost(e); got != tc.want {
-			t.Errorf("TerrorCosts %s: cost = %d, want %d", tc.level, got, tc.want)
+		if got := w.TerrorOpGoldRate(e); got != tc.want {
+			t.Errorf("TerrorCosts %s: rate = %d, want %d", tc.level, got, tc.want)
 		}
 	}
 }
 
-// BINARY-VERIFIED: the per-region cost rises with each op launched that day.
-// capped = clamp(opsToday, 1, 100); cost = (capped + 63) * regions * configMult.
+// BINARY-VERIFIED: the QUOTED rate rises with each op launched that day.
+// capped = clamp(opsToday, 1, 100); rate = (capped + 63) * regions * configMult.
 func TestTerrorOpGoldCostByCounter(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.TerrorCosts = Medium
@@ -101,8 +101,8 @@ func TestTerrorOpGoldCostByCounter(t *testing.T) {
 		{200, 163_000}, // clamped at 100
 	} {
 		e.TerrorOpsToday = tc.opsToday
-		if got := w.TerrorOpGoldCost(e); got != tc.want {
-			t.Errorf("opsToday=%d: cost = %d, want %d", tc.opsToday, got, tc.want)
+		if got := w.TerrorOpGoldRate(e); got != tc.want {
+			t.Errorf("opsToday=%d: rate = %d, want %d", tc.opsToday, got, tc.want)
 		}
 	}
 }
@@ -115,13 +115,14 @@ func TestSendTerrorChargesTheOp(t *testing.T) {
 	cfg.BoardID = "here"
 	w := NewWorldSeed(cfg, 1)
 	e := w.AddHuman("alice", "Alethia")
-	e.Land, e.Agents, e.Gold = 1000, 10, 100_000
+	e.Land, e.Agents, e.Gold = 1000, 10, 1_000_000
 
-	want := int64(1000 * 64) // Medium
+	// Four agents at the first-op rate of 63 a region, Medium.
+	want := int64(4 * 1000 * 63)
 	if err := w.SendTerror(e, "faraway", "Rome", 4, TerrorOpSpy); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
-	if e.Gold != 100_000-want {
+	if e.Gold != 1_000_000-want {
 		t.Errorf("gold = %d, want %d charged", e.Gold, want)
 	}
 
@@ -179,5 +180,61 @@ func TestGroupAttackIsChargedAtBothEnds(t *testing.T) {
 	}
 	if broke.Troopers != 100_000 {
 		t.Errorf("a refused join still committed units: %d troopers left", broke.Troopers)
+	}
+}
+
+// Each agent on a terrorist op is one operation: it pays its own share of the
+// fee and takes its own slot out of the day's allowance. CAPTURE-VERIFIED
+// against cap/eots-ibbs-02.cap, whose four sends the formula reproduces to the
+// gold. Golden literals: mirroring the constants would follow a retune silently.
+func TestTerrorOpChargesPerAgent(t *testing.T) {
+	for _, tc := range []struct {
+		agents, opsToday, regions int
+		want                      int64
+	}{
+		{8, 0, 8957, 4_514_328},
+		{7, 8, 8957, 4_451_629},
+		{7, 0, 6835, 3_014_235},
+		{8, 7, 6835, 3_827_600},
+	} {
+		cfg := DefaultConfig()
+		cfg.TerrorCosts = Medium
+		w := NewWorldSeed(cfg, 1)
+		e := w.AddHuman("alice", "Alethia")
+		e.Land, e.TerrorOpsToday = tc.regions, tc.opsToday
+		if got := w.TerrorOpGoldCost(e, tc.agents); got != tc.want {
+			t.Errorf("%d agents, %d ops used, %d regions: cost = %d, want the captured %d",
+				tc.agents, tc.opsToday, tc.regions, got, tc.want)
+		}
+	}
+}
+
+// And the allowance is counted in AGENTS, so eight sent out of fifteen leaves
+// seven — the number the original's next prompt offers.
+func TestTerrorOpAllowanceCountsAgents(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID, cfg.MaxTerrorOps = true, "boardA", 15
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alethia")
+	e.Land, e.Agents, e.Gold, e.Protection = 1000, 100, 100_000_000_000, 0
+	w.RemoteBoards = []RemoteBoard{{BoardID: "boardB"}}
+
+	if err := w.SendTerror(e, "boardB", "Victim", 8, TerrorOpDemoralize); err != nil {
+		t.Fatalf("send 8: %v", err)
+	}
+	if e.TerrorOpsToday != 8 {
+		t.Errorf("eight agents should spend eight ops, got %d", e.TerrorOpsToday)
+	}
+	if got := w.TerrorOpsLeft(e); got != 7 {
+		t.Errorf("allowance left = %d, want 7", got)
+	}
+	if err := w.SendTerror(e, "boardB", "Victim", 8, TerrorOpDemoralize); err != ErrTerrorOpsExhausted {
+		t.Errorf("eight more than the seven left: %v, want ErrTerrorOpsExhausted", err)
+	}
+	if err := w.SendTerror(e, "boardB", "Victim", 7, TerrorOpDemoralize); err != nil {
+		t.Fatalf("send the last 7: %v", err)
+	}
+	if w.CanTerrorOp(e) {
+		t.Error("the day's allowance is spent; CanTerrorOp should be false")
 	}
 }

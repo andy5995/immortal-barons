@@ -224,13 +224,26 @@ func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
 	if !found {
 		return Stay
 	}
-	agents := promptSuggested(s, "How many agents to send?", w.Player().Agents, w.Player().Agents)
+	// Each agent is one operation, so the maximum the prompt offers is the day's
+	// remaining ALLOWANCE, not the agents held — the original counts it down,
+	// `(1; 15)` then `(1; 7)` after eight have gone. Whichever of the two runs
+	// out first bounds it.
+	most := w.Player().Agents
+	if left := w.TerrorOpsLeft(w.Player()); left > 0 && left < most {
+		most = left
+	}
+	if most < 1 {
+		fail(s, game.ErrTerrorOpsExhausted)
+		return Stay
+	}
+	agents := promptSuggested(s, "How many agents to send?", most, most)
 	if agents <= 0 {
 		return Stay
 	}
-	// BRE prices the op on the menu itself; quote it here too, since the price
-	// climbs with the launcher's own region count and is easy to be surprised by.
-	okNoPause(s, "This operation will cost %s gold.", comma(w.TerrorOpGoldCost(w.Player())))
+	// BRE prices the op on the menu itself; quote the whole charge here, since it
+	// climbs with the launcher's own region count and with the ops already sent
+	// today, and is easy to be surprised by.
+	okNoPause(s, "This operation will cost %s gold.", comma(w.TerrorOpGoldCost(w.Player(), agents)))
 	if !askYesNoHere(s, "Send this Operation?", true) {
 		return Stay
 	}

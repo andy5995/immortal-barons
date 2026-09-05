@@ -1049,10 +1049,33 @@ by `total_regions`:
 For opsToday ≤ 1 the per-region cost is 64 (matching the four captures above);
 each subsequent op raises it by 1, up to 163 at the cap of 100. BINARY-VERIFIED.
 
-IB charges it: `World.TerrorOpGoldCost` applies the same formula, quoted before
-the confirm and taken in `SendTerror`. The four Special Operations entries
-price themselves on their own menu — see "Interplanetary Special Operations"
-below.
+**That figure is the rate for ONE AGENT, and each agent is one operation.** The
+send is charged `agents × rate` and spends `agents` out of the day's allowance,
+which is what the original's prompt counts down — `Send how many? (1; 15)` and
+then `(1; 7)` once eight have gone. CAPTURE-VERIFIED against four sends in
+`cap/eots-ibbs-02.cap`, reproduced to the gold:
+
+| agents | ops used before | regions | charged |
+|---:|---:|---:|---:|
+| 8 | 0 | 8,957 | 4,514,328 |
+| 7 | 8 | 8,957 | 4,451,629 |
+| 7 | 0 | 6,835 | 3,014,235 |
+| 8 | 7 | 6,835 | 3,827,600 |
+
+Note the first send of a day: the QUOTED rate clamps `opsToday` up to 1 and shows
+64 a region, while the charge uses the unclamped 63 (8 × 63 × 8,957 = 4,514,328,
+where 8 × 64 × 8,957 would be 4,585,984). The two agree from the second op on.
+
+IB charges it: `World.TerrorOpGoldRate` is the quoted rate, `TerrorOpGoldCost`
+multiplies it by the count, and `SendTerror` takes that and adds the count to
+`TerrorOpsToday`. Until 2026-09-05 IB charged ONE rate for any number of agents
+and counted a send as a single op, so fifteen agents cost what one did and the
+day's allowance was fifteen SENDS rather than fifteen agents.
+
+**Still missing: the price on the menu.** BRE draws it beside the item —
+`(2) Terrorist Ops       570,304` — and IB's InterPlanetary menu shows the item
+bare. The four Special Operations entries price themselves on their own menu —
+see "Interplanetary Special Operations" below.
 
 ### The two cost levels (Attack Costs, Terrorism Costs) — BINARY-VERIFIED
 

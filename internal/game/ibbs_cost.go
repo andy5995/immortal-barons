@@ -46,22 +46,23 @@ func (w *World) AttackGoldCost(e *Empire, f AttackForce) int64 {
 	return cost
 }
 
-// TerrorOpGoldCost is what a terrorist op costs e to launch: BRE prices it off
-// the launcher's own realm, scaled by the league's Terrorism Costs level.
-// The price climbs as a realm buys land (stopping large empires from spamming
-// ops for free) and as more ops are launched that day.
+// TerrorOpGoldRate is what ONE agent on a terrorist op costs e, before the
+// count: BRE prices it off the launcher's own realm, scaled by the league's
+// Terrorism Costs level. The rate climbs as a realm buys land (stopping large
+// empires from spamming ops for free) and as more ops go out that day.
 //
 // BINARY-VERIFIED formula (ovr_02aca8_entry_0000, BRE.OVR):
 //
 //	capped := clamp(terrorOpsToday, 1, 100)
-//	cost   := (capped + 63) * totalRegions * configMult
+//	rate   := (capped + 63) * totalRegions * configMult
 //
-// For opsToday ≤ 1 the per-region cost is TerrorOpGoldPerRegion (64); each
-// subsequent op raises it by 1, up to 163 at the cap of 100.
+// For opsToday ≤ 1 the per-region rate is TerrorOpGoldPerRegion (64); each
+// subsequent op raises it by 1, up to 163 at the cap of 100. This is the figure
+// the InterPlanetary menu quotes beside the item.
 //
 // No ceiling: BRE clamps the attack price at AttackCostCap, and nothing in
 // the terrorist pricing routine does the same.
-func (w *World) TerrorOpGoldCost(e *Empire) int64 {
+func (w *World) TerrorOpGoldRate(e *Empire) int64 {
 	ops := int64(e.TerrorOpsToday)
 	switch {
 	case ops < 1:
@@ -71,4 +72,32 @@ func (w *World) TerrorOpGoldCost(e *Empire) int64 {
 	}
 	cost := (ops + TerrorOpGoldPerRegion - 1) * int64(e.Land)
 	return cost * int64(w.Config.TerrorCosts.CostPercent()) / 100
+}
+
+// TerrorOpGoldCost is what sending agents costs: the rate times the count. Each
+// agent is one operation — it pays its own way and takes its own slot out of the
+// day's allowance — which is why the original's prompt counts DOWN the allowance
+// rather than the agents held.
+//
+// CAPTURE-VERIFIED against `cap/eots-ibbs-02.cap`, four sends whose charges the
+// formula reproduces to the gold:
+//
+//	8 agents, 0 ops used, 8,957 regions -> 4,514,328
+//	7 agents, 8 ops used, 8,957 regions -> 4,451,629
+//	7 agents, 0 ops used, 6,835 regions -> 3,014,235
+//	8 agents, 7 ops used, 6,835 regions -> 3,827,600
+//
+// Note the first send of a day: the QUOTED rate clamps opsToday up to 1 and so
+// shows 64 per region, while the charge uses the unclamped 63. The two agree
+// from the second op onward. IB follows the capture — the charge is what a
+// player can check — and quotes the clamped rate on the menu as the original
+// does.
+func (w *World) TerrorOpGoldCost(e *Empire, agents int) int64 {
+	ops := int64(e.TerrorOpsToday)
+	if ops > 100 {
+		ops = 100
+	}
+	rate := (ops + TerrorOpGoldPerRegion - 1) * int64(e.Land)
+	rate = rate * int64(w.Config.TerrorCosts.CostPercent()) / 100
+	return rate * int64(agents)
 }

@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A terrorist op charges per agent, and each agent spends one of the day's ops
   * A covert operation asks how many agents to send, and sends them together
   * An arriving S3-Sabre lands far more often, meeting the same gates as the other missiles
   * Attack Type help opens a browser over the three types, one at a time

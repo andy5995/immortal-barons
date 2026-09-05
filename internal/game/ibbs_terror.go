@@ -84,19 +84,30 @@ type RemoteTerror struct {
 // submenu, and it decides what lands: the target board dispatches on it as the
 // original does. It resolves on the target board's next packet run.
 func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int, op TerrorOpType) error {
+	// EACH AGENT IS ONE OPERATION. It pays its own share of the fee and takes its
+	// own slot out of the day's allowance, which is what the original's prompt
+	// counts down: `Send how many? (1; 15)` becomes `(1; 7)` after eight go out.
+	// IB charged one fee for any number of agents and counted the send as a
+	// single op until 2026-09-05.
+	if agents < 1 {
+		return ErrNoAgents
+	}
 	if !w.CanTerrorOp(e) {
+		return ErrTerrorOpsExhausted
+	}
+	if left := w.TerrorOpsLeft(e); left > 0 && agents > left {
 		return ErrTerrorOpsExhausted
 	}
 	if e.Agents < agents {
 		return ErrNoAgents
 	}
-	cost := w.TerrorOpGoldCost(e)
+	cost := w.TerrorOpGoldCost(e, agents)
 	if e.Gold < cost {
 		return ErrCantAfford
 	}
 	e.Gold -= cost
 	e.Agents -= agents
-	e.TerrorOpsToday++
+	e.TerrorOpsToday += agents
 	w.NextAttackID++
 	t := RemoteTerror{
 		ID:           w.NextAttackID,
