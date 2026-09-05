@@ -2,9 +2,9 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * The InterPlanetary menu quotes the Terrorist Ops rate beside the item
-  * A terrorist op charges per agent, and each agent spends one of the day's ops
+  * A terrorist op charges per agent, and each agent spends one op
   * A covert operation asks how many agents to send, and sends them together
-  * An arriving S3-Sabre lands far more often, meeting the same gates as the other missiles
+  * An arriving S3-Sabre meets the same gates as the other missiles
   * Attack Type help opens a browser over the three types, one at a time
   * An individual interplanetary strike no longer reports a running-total id
   * Creating or joining an interplanetary group attack costs gold
