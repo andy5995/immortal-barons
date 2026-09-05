@@ -304,11 +304,23 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 	okNoPause(s, "Regions added to your empire. You now hold %d land.", w.Player().Land)
 }
 
+// sellLand is the Sell menu's Regions item, and it drops rather than sells —
+// land has no sale price, so the item exists to say so and to offer the drop.
+// Dropping is irreversible and the item sits among eight that pay gold, so the
+// notice is followed by a confirmation defaulting to NO (#257): a player who
+// reached this expecting a sale can leave with a keypress, and one who meant it
+// says so before any region table is drawn.
 func sellLand(s session.Session, w *ctx) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "NOTE: You cannot sell Regions, only drop them..."), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "NOTE: Regions may not be sold, only dropped..."), ansi.Reset)
+	if !AskYesNo(s, "Drop regions?", false) {
+		return Stay
+	}
+	// The heading names what this screen does, so the region table below cannot be
+	// mistaken for the Buy Regions one it otherwise resembles.
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "-* Drop Regions *-"), ansi.Reset)
 	printRegionTable(s, p, false)
-	t := promptRegionType(s, tr(s, "Your choice?"))
+	t := promptRegionType(s, tr(s, "Which regions will you give up?"))
 	if t < 0 {
 		return Stay
 	}

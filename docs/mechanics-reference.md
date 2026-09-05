@@ -5004,6 +5004,17 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+  straight from its regions-are-not-for-sale notice to the region table —
+  confirmed in `cap/121125-666H4H_Camembert_Public.cap` and
+  `cap/20240527-134Pho_Lazarus_Public.cap`, where the notice is followed
+  immediately by the Key/Name/Owned list. IB puts a `Drop regions?` question
+  between them, defaulting to **no**, and heads the table `-* Drop Regions *-`.
+  The item sits among eight that pay gold and the drop cannot be undone, so a
+  player who arrived expecting a sale leaves on one keypress.
+
+  IB's notice is its own wording, `NOTE: Regions may not be sold, only
+  dropped...`. It read as the original's line verbatim until 2026-09-05, which
+  is display text and not ours to copy.
 - **Ctrl-U erases a whole typed answer**, at every prompt that takes one — the
   numeric fields, `ReadLine`, and the message editor's current line. The
   original has only Backspace, so correcting a mistyped 1000000000 there is ten
