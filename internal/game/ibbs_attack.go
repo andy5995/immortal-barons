@@ -354,9 +354,18 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, h
 	if !w.CanGroupAttack(e) {
 		return nil, ErrGroupAttacksExhausted
 	}
+	// A group attack is priced exactly as a strike sent alone (#252): one routine
+	// in the original prompts for the four counts and charges for them, and all
+	// three attack paths call it. Charging on the way in is what stops a group
+	// attack being the cheap way to move an army between planets.
+	cost := w.AttackGoldCost(e, f)
+	if e.Gold < cost {
+		return nil, ErrCantAfford
+	}
 	if err := e.commitForce(f); err != nil {
 		return nil, err
 	}
+	e.Gold -= cost
 	e.GroupAttacksToday++
 	w.NextAttackID++
 	w.GroupAttacks = append(w.GroupAttacks, GroupAttack{
@@ -391,7 +400,7 @@ func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire stri
 	if !w.CanAttack(e) {
 		return 0, ErrAttacksExhausted
 	}
-	cost := w.AttackGoldCost(f)
+	cost := w.AttackGoldCost(e, f)
 	if e.Gold < cost {
 		return 0, ErrCantAfford
 	}
@@ -437,9 +446,14 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 		if !w.CanGroupAttack(e) {
 			return ErrGroupAttacksExhausted
 		}
+		cost := w.AttackGoldCost(e, f)
+		if e.Gold < cost {
+			return ErrCantAfford
+		}
 		if err := e.commitForce(f); err != nil {
 			return err
 		}
+		e.Gold -= cost
 		e.GroupAttacksToday++
 		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, AttackForce: f, Tech: e.TechMilitaryFactor()})
 		return nil

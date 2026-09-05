@@ -3684,10 +3684,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   ordinary menu default. (An earlier reading of the disassembly's `bp-0xa`
   preset suggested Enter picked Normal Attack; the capture disproved it — that
   preset is only the variable's initial value.) The quit key prints BRE's
-  `Attack aborted.` Launching also **costs `IndividualAttackGoldPerUnit`
-  (1) gold per unit sent** — "This attack will cost 100 gold." for 100 troopers,
-  verified for troopers only — and BRE confirms with `Send this Attack? (Y/n)`
-  before it goes. Its force prompts ask about **every** unit type, including
+  `Attack aborted.` Launching also **costs gold, priced per unit type off the
+  LAUNCHER's own size** (see "The price of a strike" below), and BRE confirms
+  with `Send this Attack? (Y/n)` before it goes. Its force prompts ask about **every** unit type, including
   ones held at zero, each defaulting to 0.
 - **The round trip.** An interplanetary strike is four steps, not one, and each
   is on a different board's schedule (#107).
@@ -3760,9 +3759,35 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   and one for a loss and none for either of them. IB announced both as failures
   until #201, because the line was picked from `AttackResult.Won` rather than
   from the resolved outcome.
-  ones held at zero, each defaulting to 0. The sysop's **Attack Costs** level
-  scales that price and BRE clamps the result at `AttackCostCap`
-  (200,000,000 gold); see "The two cost levels" below.
+  ones held at zero, each defaulting to 0.
+- **The price of a strike — BINARY-VERIFIED, and it is charged on all three
+  paths** (#252). ONE routine prompts for the four counts, quotes the price and
+  refuses a baron who cannot pay (`configure_attack_forces`, `BRE.OVR`
+  0x02b83c), and its callers are `create_group_attack`,
+  `create_individual_attack` and `run_interbbs_attack_menu` — so creating a group
+  attack and joining one are charged exactly as a lone strike is. IB charged for
+  neither until 2026-09-05, which made the group attack the cheap way to move an
+  army between planets.
+
+  The rate is per unit type and climbs with the launcher's OWN region count,
+  the same self-limiting shape the terror-op price has:
+
+  | unit | gold each | unit offset |
+  |---|---|---|
+  | Trooper | `regions/5000 + 1` | `+0x39d` |
+  | Jet | `regions/1500 + 2` | `+0x35b` |
+  | Tank | `regions/5000 + 2` | `+0x319` |
+  | Bomber | `regions/2500 + 1` | `+0x2d7` |
+
+  Then the **Attack Costs** level scales it (÷5 at `+0x481`, ×3 at `+0x4ab`, zero
+  for None), then `AttackCostCap` (200,000,000) clamps it at `+0x4b9`, and only
+  then is it truncated to whole gold. See "The two cost levels" below.
+
+  Confirmed against `cap/eots-ibbs-02.cap`: a realm of 9,003 regions joining with
+  12,141 troopers, 12,378,520 jets, no tanks and 105,520 bombers is quoted
+  **99,572,437** gold, which the four rates above reproduce exactly. The earlier
+  reading of "1 gold per unit" came from a capture of a realm small enough for
+  every divisor to vanish, leaving the addend alone.
 - **Protection crosses the league.** A scores packet marks each realm still
   under New Realm Protection. The attack and terror target lists bracket those
   realms' letters and refuse the strike when one is picked — matching the local

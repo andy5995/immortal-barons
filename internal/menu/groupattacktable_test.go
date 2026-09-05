@@ -148,6 +148,7 @@ func TestJoinGroupAttackDrawsTheTableAndJoins(t *testing.T) {
 	commitOnFile(t, cfg, func(w *game.World) {
 		leader := w.AddHuman("leader", "Leaderland")
 		leader.Troopers, leader.Jets = 500_000, 20_000
+		leader.Gold = 10_000_000 // the strike is charged for (#252)
 		w.GameDay = 0
 		// A season's worth of ids already spent, so the party's own ID is four
 		// digits while its slot is 1 — the case the two-column Id field exists

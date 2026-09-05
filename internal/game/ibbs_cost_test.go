@@ -8,22 +8,42 @@ import "testing"
 // retune silently, and these figures came out of the binary.
 func TestAttackGoldCostByLevel(t *testing.T) {
 	f := AttackForce{Troopers: 1000, Tanks: 200, Jets: 300, Bombers: 100}
-	// 1600 units at the captured 1 gold each.
+	// A realm too small for any of the four divisors to bite pays the addends
+	// alone: 1000x1 + 200x2 + 300x2 + 100x1 = 2100 gold at Medium.
 	for _, tc := range []struct {
 		level Level
 		want  int64
 	}{
 		{None, 0},
-		{Low, 320},
-		{Medium, 1600},
-		{High, 4800},
+		{Low, 420},
+		{Medium, 2100},
+		{High, 6300},
 	} {
 		cfg := DefaultConfig()
 		cfg.AttackCosts = tc.level
 		w := NewWorldSeed(cfg, 1)
-		if got := w.AttackGoldCost(f); got != tc.want {
+		e := w.AddHuman("a", "Alpha")
+		e.Regions = RegionMix{}
+		if got := w.AttackGoldCost(e, f); got != tc.want {
 			t.Errorf("AttackCosts %s: cost = %d, want %d", tc.level, got, tc.want)
 		}
+	}
+}
+
+// The whole quoted price, against a live capture (#252). A realm of 9,003
+// regions joining with 12,141 troopers, 12,378,520 jets, no tanks and 105,520
+// bombers is quoted 99,572,437 gold in cap/eots-ibbs-02.cap. A golden literal:
+// mirroring the constants would follow a retune silently.
+func TestAttackGoldCostMatchesTheCapturedQuote(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AttackCosts = Medium
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("a", "Alpha")
+	e.Regions = RegionMix{Desert: 9003}
+
+	f := AttackForce{Troopers: 12_141, Jets: 12_378_520, Bombers: 105_520}
+	if got := w.AttackGoldCost(e, f); got != 99_572_437 {
+		t.Errorf("cost = %d, want the captured 99,572,437", got)
 	}
 }
 
@@ -32,8 +52,9 @@ func TestAttackGoldCostCapped(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AttackCosts = High
 	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("a", "Alpha")
 	f := AttackForce{Troopers: 500_000_000}
-	if got := w.AttackGoldCost(f); got != 200_000_000 {
+	if got := w.AttackGoldCost(e, f); got != 200_000_000 {
 		t.Errorf("cost = %d, want the 200,000,000 ceiling", got)
 	}
 }
@@ -113,5 +134,50 @@ func TestSendTerrorChargesTheOp(t *testing.T) {
 	}
 	if len(w.Outbox) != 1 || len(w.Outbox[0].Terrors) != 1 {
 		t.Errorf("a refused op queued a packet: %+v", w.Outbox)
+	}
+}
+
+// A group attack is charged at both ends (#252): creating one and joining one
+// each pay the same price a lone strike of that weight pays. Until this was
+// fixed the group attack was the free way to move an army between planets.
+func TestGroupAttackIsChargedAtBothEnds(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID = true, "boardA"
+	w := NewWorldSeed(cfg, 1)
+	leader := w.AddHuman("l", "Leader")
+	ally := w.AddHuman("a", "Ally")
+	for _, e := range []*Empire{leader, ally} {
+		e.Regions = RegionMix{Desert: 5000}
+		e.Troopers, e.Gold = 100_000, 1_000_000
+	}
+
+	f := AttackForce{Troopers: 40_000}
+	want := w.AttackGoldCost(leader, f)
+	if want == 0 {
+		t.Fatal("this test needs a non-zero price to prove anything")
+	}
+
+	ga, err := w.CreateGroupAttack(leader, "boardB", "Victim", GroupAttackHoursMin, f)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if leader.Gold != 1_000_000-want {
+		t.Errorf("creating cost %d, want %d", 1_000_000-leader.Gold, want)
+	}
+	if err := w.JoinGroupAttack(ally, ga.ID, f); err != nil {
+		t.Fatalf("join: %v", err)
+	}
+	if ally.Gold != 1_000_000-want {
+		t.Errorf("joining cost %d, want %d", 1_000_000-ally.Gold, want)
+	}
+
+	// And a baron who cannot pay is refused, with the units left where they are.
+	broke := w.AddHuman("b", "Broke")
+	broke.Regions, broke.Troopers, broke.Gold = RegionMix{Desert: 5000}, 100_000, want-1
+	if err := w.JoinGroupAttack(broke, ga.ID, f); err != ErrCantAfford {
+		t.Errorf("a baron who cannot pay: %v, want ErrCantAfford", err)
+	}
+	if broke.Troopers != 100_000 {
+		t.Errorf("a refused join still committed units: %d troopers left", broke.Troopers)
 	}
 }

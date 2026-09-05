@@ -83,6 +83,7 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
 
 	leader.Troopers, ally.Troopers = 1_000_000, 1_000_000 // troops to commit
+	leader.Gold, ally.Gold = 10_000_000, 10_000_000       // and the gold to send them (#252)
 	ga, err := wA.CreateGroupAttack(leader, "boardB", "Victim", GroupAttackHoursMin, AttackForce{Troopers: 100_000})
 	if err != nil {
 		t.Fatalf("create: %v", err)
@@ -235,6 +236,7 @@ func TestGroupAttackReturnsSurvivors(t *testing.T) {
 	target.syncLand()
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
 
+	leader.Gold = 10_000_000 // a group attack is charged for, as a lone strike is (#252)
 	_, err := wA.CreateGroupAttack(leader, "boardB", "Victim", GroupAttackHoursMin, AttackForce{Troopers: 100_000, Tanks: 1000})
 	if err != nil {
 		t.Fatalf("create: %v", err)

@@ -58,13 +58,19 @@ const (
 	GroupAttackHoursMin = 12
 	GroupAttackHoursMax = 120
 
-	// IndividualAttackGoldPerUnit is what launching an individual interplanetary
-	// strike costs, per unit sent. Captured live (2026-08-11): committing 100
-	// troopers and nothing else printed "This attack will cost 100 gold." The
-	// rate is confirmed for troopers only — whether jets, tanks and bombers cost
-	// the same per unit is NOT verified, so they use this rate until a capture
-	// says otherwise.
-	IndividualAttackGoldPerUnit = 1
+	// AttackUnitPrice is one unit type's share of an interplanetary strike's
+	// price: `totalRegions/Divisor + Add` gold for each unit of that type sent.
+	// The rate rises with the LAUNCHER's own size, which is what stops a large
+	// realm shipping armies across space for nothing.
+	//
+	// The 2026-08-11 capture that read this as a flat gold per unit — 100
+	// troopers quoted 100 gold — was a realm small enough for `regions/5000` to
+	// vanish, so it saw the addend alone.
+	//
+	// BINARY-VERIFIED in `configure_attack_forces` (BRE.OVR 0x02b83c): four
+	// real_divide / real_add / real_multiply groups, one per type, at unit
+	// offsets 0x2d7, 0x319, 0x35b and 0x39d. See World.AttackGoldCost for the
+	// capture that pins which pair belongs to which type.
 
 	// IndividualAttackReturnsPct is what an individual strike carries off
 	// relative to a group attack of the same weight. BRE's own docs state the
@@ -74,6 +80,23 @@ const (
 	// giving up the whole-planet target and the pooled forces.
 	IndividualAttackReturnsPct = 200
 )
+
+// AttackUnitPrice prices one unit type of an interplanetary strike, and
+// AttackPricePerUnit is the four of them. The set is declared through the
+// units.go rows rather than as its own list of names (#134), so a type cannot be
+// priced here under a name no other screen uses.
+type AttackUnitPrice struct {
+	Divisor int64
+	Add     int64
+	Count   func(AttackForce) int
+}
+
+var AttackPricePerUnit = []AttackUnitPrice{
+	{Divisor: 5000, Add: 1, Count: func(f AttackForce) int { return f.Troopers }},
+	{Divisor: 1500, Add: 2, Count: func(f AttackForce) int { return f.Jets }},
+	{Divisor: 5000, Add: 2, Count: func(f AttackForce) int { return f.Tanks }},
+	{Divisor: 2500, Add: 1, Count: func(f AttackForce) int { return f.Bombers }},
+}
 
 // The local Regular Attack. BINARY-VERIFIED against BRE's driver
 // (BRE.OVR 0xEF90) and the resolver it calls (0xE81F).

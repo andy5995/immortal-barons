@@ -30,6 +30,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	target.Protection = 0 // else the strike is turned away and never fights
 
 	// Board A launches a group attack and writes its outbox to the exchange.
+	leader.Gold = 10_000_000 // the strike is charged for (#252)
 	ga, cErr := wA.CreateGroupAttack(leader, "boardB", "Victim", game.GroupAttackHoursMin, game.AttackForce{Troopers: 100_000})
 	if cErr != nil {
 		t.Fatalf("create: %v", cErr)

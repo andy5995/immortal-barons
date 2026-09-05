@@ -72,6 +72,10 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if force.Empty() {
 		return Stay
 	}
+	// One routine in the original prompts for the four counts and quotes the
+	// price, and all three attack paths call it — so a group attack is quoted and
+	// charged exactly as a strike sent alone (#252).
+	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(p, force)))
 	var id int
 	var departAt time.Time
 	err := w.mutatePlayer(func(p *game.Empire) error {
@@ -162,6 +166,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if force.Empty() {
 		return Stay
 	}
+	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(w.Player(), force)))
 	// JoinGroupAttack re-validates against fresh state: the attack must still exist
 	// (ErrNoAttack), not yet have departed (ErrDeparted), and the baron must still
 	// hold the committed units (ErrCantAfford).
@@ -210,7 +215,7 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 	if force.Empty() {
 		return Stay
 	}
-	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(force)))
+	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(w.Player(), force)))
 	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
