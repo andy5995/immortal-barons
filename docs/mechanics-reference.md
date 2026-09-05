@@ -5004,12 +5004,20 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **A one-line message is quoted without asking for a line range** (#244). The
+  original asks `Quote Message?`, `First Line to Quote` and `Last Line to Quote`
+  whatever the message's length; with one line the last two have one possible
+  answer between them, so IB skips them and opens the editor with that line
+  quoted. `Quote Message?` itself stays — a reply that quotes nothing is a normal
+  thing to want. Two lines still offer four ranges, so the shortcut stops at one.
+  Both readers share `askQuote`, so the interplanetary one behaves the same.
 - **The played-today `+` is drawn only in a league game** (#249). It marks a
   realm that played a turn today but is not online now. Off a league the rows it
   does NOT mark tell an attacker which barons have not been on today, so it is
   drawn for nobody; `(O)` is unaffected. See "See Scores (local planet)" in
   `docs/dev/bre-screens.md`, which also records that the original's own gating is
   unsettled.
+- **Dropping regions asks first, and the picker names itself** (#257). BRE goes
   straight from its regions-are-not-for-sale notice to the region table —
   confirmed in `cap/121125-666H4H_Camembert_Public.cap` and
   `cap/20240527-134Pho_Lazarus_Public.cap`, where the notice is followed

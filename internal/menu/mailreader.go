@@ -160,6 +160,14 @@ func askQuote(s session.Session, m game.Message) []string {
 		return nil
 	}
 	n := len(strings.Split(m.Body, "\n"))
+	// A one-line message has one possible range, so IB does not ask for it (#244).
+	// The original asks all three questions whatever the length; here the second
+	// and third can only be answered 1 and 1, and a reader who wanted no quote at
+	// all has already said so at the prompt above. Two lines still offer four
+	// ranges, so the shortcut stops at one.
+	if n == 1 {
+		return quoteLines(m, 1, 1)
+	}
 	first := max(1, promptSuggestedTight(s, "First Line to Quote", 1, n))
 	last := promptSuggestedTight(s, "Last Line to Quote", n, n)
 	if last < first {

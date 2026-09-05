@@ -47,9 +47,9 @@ func TestMailReaderQuitKeepsRemaining(t *testing.T) {
 }
 
 func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
-	// r, Enter (Quote Message? = Yes), Enter (first line), Enter (last line),
-	// the reply text, /s.
-	f := &fakeSession{keys: []rune("r\r\r\rthanks\r/s")}
+	// r, Enter (Quote Message? = Yes), the reply text, /s. The message is one
+	// line, so no line range is asked for (#244).
+	f := &fakeSession{keys: []rune("r\rthanks\r/s")}
 	w := newWorld()
 	// A real recipient empire is the sender, so the reply can find them.
 	var sender *game.Empire
@@ -243,9 +243,9 @@ func TestAnAbandonedReplyCountsAsIgnored(t *testing.T) {
 		game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "second thoughts"},
 	)
 
-	// r, Enter (Quote Message? = Yes), Enter, Enter (the quoted line range), then
-	// abandon the editor; q at the second message.
-	f := &fakeSession{keys: []rune("r\r\r\r/Aq")}
+	// r, Enter (Quote Message? = Yes), then abandon the editor; q at the second
+	// message. Both are one line, so no line range is asked for (#244).
+	f := &fakeSession{keys: []rune("r\r/Aq")}
 	mailReader(f, w, true)
 	if got := len(w.Player().Mail); got != 2 {
 		t.Fatalf("nothing was sent, so nothing should be removed; Mail len = %d, want 2", got)
@@ -259,5 +259,36 @@ func TestAnAbandonedReplyCountsAsIgnored(t *testing.T) {
 	}
 	if !strings.Contains(out, "second thoughts") {
 		t.Errorf("Quit marks nothing, so the message behind it should return:\n%s", out)
+	}
+}
+
+// A one-line message has one possible line range, so IB asks for neither end of
+// it (#244) and quotes the line. Asserts the editor was reached, so a flow
+// change upstream cannot leave this passing on a script that ran dry.
+func TestMailReaderOneLineMessageSkipsTheRangePrompts(t *testing.T) {
+	// r, y (quote), the reply text, /s — with no answer for a range prompt.
+	f := &fakeSession{keys: []rune("rymy answer\r/s")}
+	w := newWorld()
+	var sender *game.Empire
+	w.With(func() { sender = recipients(w)[0] })
+	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "just the one line"})
+
+	mailReader(f, w, false)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Quote Message?") {
+		t.Fatalf("never reached the quote prompt:\n%s", out)
+	}
+	if strings.Contains(out, "Line to Quote") {
+		t.Errorf("a one-line message must not ask for a line range:\n%s", out)
+	}
+	if len(sender.Mail) != 1 {
+		t.Fatalf("Reply should mail the sender; got %d messages", len(sender.Mail))
+	}
+	body := sender.Mail[0].Body
+	for _, want := range []string{"> Quote From " + sender.Name, "> just the one line", "my answer"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("reply body missing %q:\n%s", want, body)
+		}
 	}
 }
