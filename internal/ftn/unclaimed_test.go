@@ -244,12 +244,90 @@ func TestScanUnclaimedAgesFromArrival(t *testing.T) {
 	dir := t.TempDir()
 	agedPacket(t, dir, "waiting.brp", 0)
 
-	if got := scanUnclaimed(dir, nil, time.Now()); len(got) != 0 {
+	if got := scanUnclaimed([]string{dir}, nil, time.Now()); len(got) != 0 {
 		t.Errorf("unclaimed = %+v, want nothing for a file that just arrived", got)
 	}
 	later := time.Now().Add(unclaimedAfter + time.Minute)
-	got := scanUnclaimed(dir, nil, later)
+	got := scanUnclaimed([]string{dir}, nil, later)
 	if len(got) != 1 || got[0].Age < unclaimedAfter {
 		t.Errorf("unclaimed = %+v, want the file once it is past the threshold", got)
+	}
+}
+
+// A mailer can deliver into more than one directory: ENiGMA files an
+// authenticated session into secInbound and an unauthenticated one into
+// inbound. Naming only the first reads nothing from the second while every
+// report stays healthy, which is how 43 packets collected on the test rig.
+func TestRunInReadsEveryInboundDirectory(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "InboundDir transport-sec\n")
+	secure := filepath.Join(data, "transport-sec")
+	if err := os.MkdirAll(secure, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body, err := json.Marshal(game.Packet{FromNode: 1, ToNode: 2, Seq: 7, League: 100})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(secure, "fromsecure.brp"), body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := RunIn(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Delivered != 1 {
+		t.Fatalf("delivered = %d, want the packet from the second inbound directory", result.Delivered)
+	}
+}
+
+// The same directories are watched by the report, so a packet stranded in the
+// second one is named rather than silently skipped.
+func TestStatusWatchesEveryInboundDirectory(t *testing.T) {
+	reportEverything(t)
+	data := newBundledSetup(t, "Bravo BBS", "InboundDir transport-sec\n")
+	agedPacket(t, filepath.Join(data, "transport-sec"), "stranded.brp", 0)
+
+	status, err := Status(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(status.Unclaimed) != 1 || filepath.Base(status.Unclaimed[0].Path) != "stranded.brp" {
+		t.Errorf("unclaimed = %+v, want the packet in the second inbound directory", status.Unclaimed)
+	}
+}
+
+// The envelope names a file, not a directory: an attach bundle filed into the
+// second inbound directory must still be found, or it is skipped by the direct
+// scan (attach is deliberately passed over there) and never ingested at all.
+func TestEnvelopeAttachmentFindsTheFileInAnyInboundDirectory(t *testing.T) {
+	first, second := t.TempDir(), t.TempDir()
+	name := "abcd0001.brp"
+	if err := os.WriteFile(filepath.Join(second, name), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	data := make([]byte, type2HeaderSize)
+	copy(data[72:144], name)
+
+	got, err := envelopeAttachment(data, []string{first, second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != filepath.Join(second, name) {
+		t.Errorf("resolved to %s, want the copy that exists in %s", got, second)
+	}
+}
+
+// A directory named in its own right and also reachable as a child of another
+// is one fault, not two.
+func TestScanUnclaimedReportsAFileOnce(t *testing.T) {
+	reportEverything(t)
+	parent := t.TempDir()
+	child := filepath.Join(parent, "unsecure")
+	agedPacket(t, child, "once.brp", 0)
+
+	got := scanUnclaimed([]string{parent, child}, nil, time.Now())
+	if len(got) != 1 {
+		t.Errorf("unclaimed = %+v, want the file reported once", got)
 	}
 }

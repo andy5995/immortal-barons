@@ -59,23 +59,21 @@ func (u Unclaimed) Where() string {
 // search: recursing into an arbitrary tree would be slow on a board whose
 // inbound is also its file base, and would report things that were never meant
 // for this board at all.
-func scanUnclaimed(inboundDir string, claimed map[string]bool, now time.Time) []Unclaimed {
-	if inboundDir == "" {
-		return nil
-	}
-	entries, err := os.ReadDir(inboundDir)
-	if err != nil {
-		return nil
-	}
+func scanUnclaimed(inboundDirs []string, claimed map[string]bool, now time.Time) []Unclaimed {
 	var out []Unclaimed
+	// A directory can be reached twice -- named in its own right and as a child
+	// of another named one -- and reporting the same file under two headings
+	// reads as two faults, one of them advising a move that is not needed.
+	reported := map[string]bool{}
 	add := func(dir, subdir string, entry os.DirEntry) {
 		if !store.IsPacketFile(entry.Name()) {
 			return
 		}
 		path := filepath.Join(dir, entry.Name())
-		if claimed[cleanAbsolute(path)] {
+		if claimed[cleanAbsolute(path)] || reported[cleanAbsolute(path)] {
 			return
 		}
+		reported[cleanAbsolute(path)] = true
 		info, err := entry.Info()
 		if err != nil {
 			return
@@ -86,25 +84,31 @@ func scanUnclaimed(inboundDir string, claimed map[string]bool, now time.Time) []
 		}
 		out = append(out, Unclaimed{Path: path, Age: age, Subdir: subdir})
 	}
-	var subdirs []string
-	for _, entry := range entries {
-		if isDirectory(inboundDir, entry) {
-			subdirs = append(subdirs, entry.Name())
-			continue
-		}
-		add(inboundDir, "", entry)
-	}
-	for _, name := range subdirs {
-		dir := filepath.Join(inboundDir, name)
-		children, err := os.ReadDir(dir)
+	for _, inboundDir := range inboundDirs {
+		entries, err := os.ReadDir(inboundDir)
 		if err != nil {
 			continue
 		}
-		for _, entry := range children {
-			if isDirectory(dir, entry) {
+		var subdirs []string
+		for _, entry := range entries {
+			if isDirectory(inboundDir, entry) {
+				subdirs = append(subdirs, entry.Name())
 				continue
 			}
-			add(dir, name, entry)
+			add(inboundDir, "", entry)
+		}
+		for _, name := range subdirs {
+			dir := filepath.Join(inboundDir, name)
+			children, err := os.ReadDir(dir)
+			if err != nil {
+				continue
+			}
+			for _, entry := range children {
+				if isDirectory(dir, entry) {
+					continue
+				}
+				add(dir, name, entry)
+			}
 		}
 	}
 	sort.Slice(out, func(a, b int) bool {

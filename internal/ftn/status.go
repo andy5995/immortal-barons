@@ -121,7 +121,7 @@ func Status(dataDir string) (SpoolStatus, error) {
 		for path := range envelopeReferenced(transport) {
 			claimed[path] = true
 		}
-		status.Unclaimed = scanUnclaimed(transport.InboundDir, claimed, now)
+		status.Unclaimed = scanUnclaimed(transport.InboundDirs, claimed, now)
 	}
 
 	bad, err := os.ReadDir(filepath.Join(dataDir, spoolDir, badSpoolDir))

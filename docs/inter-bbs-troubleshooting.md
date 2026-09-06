@@ -270,6 +270,13 @@ with no links at all produces exactly this.
 [Per-peer links](ftn-transport.md#per-peer-links) has the modes and what each
 one asks of the receiver.
 
+**The file is in a directory `ftn.cfg` never names.** A mailer that keeps a
+separate inbound for authenticated sessions delivers there instead, and a
+board naming only the other one reads nothing from it while both sides report
+a clean session. Give `ftn.cfg` an `InboundDir` line for each — see
+[Per-peer links](ftn-transport.md#per-peer-links) — and note that adding a
+session password can move deliveries from one to the other.
+
 **The file is in a subdirectory of `InboundDir`.** The report names the
 subdirectory. `-in` reads `InboundDir` and nothing below it, so no later run
 will take the file however long you wait.

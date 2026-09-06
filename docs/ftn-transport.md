@@ -149,9 +149,25 @@ OboxMeshFanout    Yes
 ```
 
 - `InboundDir` is required by `-in` and names received attachments and raw
-  obox/BSO bundles.
-- `InboundNetmailDir` names received `.msg` envelopes. It defaults to
-  `InboundDir` and normally stays the same.
+  obox/BSO bundles. **Give it once per directory the mailer delivers into.**
+  Several mailers use more than one: a session that authenticates with a
+  password and one that does not are filed apart, and the directory you leave
+  out is read by nothing. ENiGMA½ is the clear case — `secInbound` for an
+  authenticated session, `inbound` for the rest:
+
+  ```
+  InboundDir /enigma/mail/ftn_secin
+  InboundDir /enigma/mail/ftn_in
+  ```
+
+  Mystic files an unauthenticated session into an `unsecure` child of its
+  inbound. That child needs its own line too: `-in` reads each named directory
+  and does not descend into it. `-status` names any packet left unread in a
+  directory it can see, including such a child, so the report tells you a line
+  is missing.
+- `InboundNetmailDir` names received `.msg` envelopes. Left unset it means
+  every `InboundDir`, so the order of those lines cannot decide whether an
+  envelope is seen. Set it only to look somewhere else entirely.
 - `OboxMeshFanout` defaults to `Yes`. It controls only an unaddressed broadcast
   received without an attach envelope. See [Mesh warning](#mesh-warning).
 

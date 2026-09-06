@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * ftn.cfg takes an InboundDir line per directory the mailer delivers into
   * barons-ftn reports packets left unclaimed in the mailer's inbound
 
 2026-09-05 (v0.0.10)

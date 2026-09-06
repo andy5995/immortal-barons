@@ -50,6 +50,14 @@ type storedAttach struct {
 	Origin     Address
 }
 
+// inboundFile keeps a directory entry with the directory it came from. The two
+// scans below read several directories into one list, and pairing them by index
+// or by filename would put a file's path together from the wrong half.
+type inboundFile struct {
+	dir   string
+	entry os.DirEntry
+}
+
 // RunIn removes the FTN transport wrapper. It is intended for a mailer's
 // post-session hook: no general FTN inbound locking convention exists.
 func RunIn(dataDir string) (Result, error) {
@@ -58,7 +66,7 @@ func RunIn(dataDir string) (Result, error) {
 		return Result{}, err
 	}
 	defer adapterLock.Release()
-	if transport.InboundDir == "" {
+	if len(transport.InboundDirs) == 0 {
 		return Result{}, fmt.Errorf("%s: InboundDir is not set", filepath.Join(dataDir, ConfigFile))
 	}
 	root := filepath.Join(dataDir, spoolDir, inSpoolDir)
@@ -78,18 +86,27 @@ func RunIn(dataDir string) (Result, error) {
 			result.Warnings = append(result.Warnings, fmt.Sprintf("%s: %v", filepath.Base(attach.Path), err))
 		}
 	}
-	entries, err := os.ReadDir(transport.InboundDir)
-	if err != nil {
+	// Every directory the mailer delivers into, not just the first: one that is
+	// named but never read looks exactly like a transport that is working.
+	var entries []inboundFile
+	for _, dir := range transport.InboundDirs {
+		found, err := os.ReadDir(dir)
 		if os.IsNotExist(err) {
-			return result, nil
+			continue
 		}
-		return result, err
+		if err != nil {
+			return result, err
+		}
+		for _, entry := range found {
+			entries = append(entries, inboundFile{dir: dir, entry: entry})
+		}
 	}
-	for _, entry := range entries {
+	for _, found := range entries {
+		entry := found.entry
 		if entry.IsDir() || !store.IsPacketFile(entry.Name()) {
 			continue
 		}
-		path := filepath.Join(transport.InboundDir, entry.Name())
+		path := filepath.Join(found.dir, entry.Name())
 		if referenced[cleanAbsolute(path)] {
 			continue
 		}
@@ -119,7 +136,7 @@ func RunIn(dataDir string) (Result, error) {
 	for path := range referenced {
 		claimed[path] = true
 	}
-	for _, waiting := range scanUnclaimed(transport.InboundDir, claimed, time.Now()) {
+	for _, waiting := range scanUnclaimed(transport.InboundDirs, claimed, time.Now()) {
 		result.Warnings = append(result.Warnings, unclaimedWarning(waiting))
 	}
 	return result, nil
@@ -151,29 +168,48 @@ func unclaimedWarning(waiting Unclaimed) string {
 // parseStoredAttach that does not depend on who the message is addressed to, so
 // a REPORT can ask "does an envelope name this file?" without the roster and
 // board address a claim needs.
-func envelopeAttachment(data []byte, inboundDir string) (string, error) {
+func envelopeAttachment(data []byte, inboundDirs []string) (string, error) {
 	subject := strings.TrimPrefix(cStringField(data[72:144]), "^")
 	parts := strings.FieldsFunc(subject, func(r rune) bool { return r == ' ' || r == ',' })
 	if len(parts) != 1 {
 		return "", fmt.Errorf("file-attach subject names %d files, want one", len(parts))
 	}
 	attachment := parts[0]
+	if len(inboundDirs) == 0 {
+		return "", fmt.Errorf("no InboundDir is set")
+	}
 	if !filepath.IsAbs(attachment) {
-		attachment = filepath.Join(inboundDir, filepath.Base(attachment))
+		// The envelope names a file, not a directory, and the mailer may have
+		// filed it in any of the inbound directories -- an authenticated
+		// session and an unauthenticated one land apart. Resolving against the
+		// first listed would name a path that does not exist, and the direct
+		// scan cannot rescue it because an attach bundle is deliberately
+		// skipped there.
+		name := filepath.Base(attachment)
+		attachment = filepath.Join(inboundDirs[0], name)
+		for _, dir := range inboundDirs {
+			candidate := filepath.Join(dir, name)
+			if _, err := os.Stat(candidate); err == nil {
+				attachment = candidate
+				break
+			}
+		}
 	}
 	abs, err := filepath.Abs(attachment)
 	if err != nil {
 		return "", err
 	}
-	root, err := filepath.Abs(inboundDir)
-	if err != nil {
-		return "", err
+	for _, dir := range inboundDirs {
+		root, err := filepath.Abs(dir)
+		if err != nil {
+			continue
+		}
+		rel, err := filepath.Rel(root, abs)
+		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return abs, nil
+		}
 	}
-	rel, err := filepath.Rel(root, abs)
-	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return "", fmt.Errorf("attachment %s is outside InboundDir", attachment)
-	}
-	return abs, nil
+	return "", fmt.Errorf("attachment %s is outside every InboundDir", attachment)
 }
 
 // envelopeReferenced names every inbound file a stored-message envelope points
@@ -184,27 +220,25 @@ func envelopeAttachment(data []byte, inboundDir string) (string, error) {
 // RunIn's own warning instead, so nothing goes unmentioned by both.
 func envelopeReferenced(transport Config) map[string]bool {
 	referenced := map[string]bool{}
-	dir := transport.InboundNetmailDir
-	if dir == "" {
-		dir = transport.InboundDir
-	}
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return referenced
-	}
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".msg") {
+	for _, dir := range transport.netmailDirs() {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
 			continue
 		}
-		data, err := os.ReadFile(filepath.Join(dir, entry.Name()))
-		if err != nil || len(data) < type2HeaderSize {
-			continue
-		}
-		if binary.LittleEndian.Uint16(data[186:188])&attributeFileAttach == 0 {
-			continue
-		}
-		if abs, err := envelopeAttachment(data, transport.InboundDir); err == nil {
-			referenced[cleanAbsolute(abs)] = true
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".msg") {
+				continue
+			}
+			data, err := os.ReadFile(filepath.Join(dir, entry.Name()))
+			if err != nil || len(data) < type2HeaderSize {
+				continue
+			}
+			if binary.LittleEndian.Uint16(data[186:188])&attributeFileAttach == 0 {
+				continue
+			}
+			if abs, err := envelopeAttachment(data, transport.InboundDirs); err == nil {
+				referenced[cleanAbsolute(abs)] = true
+			}
 		}
 	}
 	return referenced
@@ -221,23 +255,27 @@ func shellQuote(path string) string {
 
 func scanStoredAttaches(transport Config, local Address, nodes []game.LeagueNode) ([]storedAttach, map[string]bool, error) {
 	referenced := map[string]bool{}
-	if transport.InboundNetmailDir == "" {
-		return nil, referenced, nil
-	}
-	entries, err := os.ReadDir(transport.InboundNetmailDir)
-	if os.IsNotExist(err) {
-		return nil, referenced, nil
-	}
-	if err != nil {
-		return nil, referenced, err
-	}
 	var out []storedAttach
-	for _, entry := range entries {
+	var entries []inboundFile
+	for _, dir := range transport.netmailDirs() {
+		found, err := os.ReadDir(dir)
+		if os.IsNotExist(err) {
+			continue
+		}
+		if err != nil {
+			return nil, referenced, err
+		}
+		for _, entry := range found {
+			entries = append(entries, inboundFile{dir: dir, entry: entry})
+		}
+	}
+	for _, found := range entries {
+		entry := found.entry
 		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".msg") {
 			continue
 		}
-		path := filepath.Join(transport.InboundNetmailDir, entry.Name())
-		attach, ok, err := parseStoredAttach(path, transport.InboundDir, local)
+		path := filepath.Join(found.dir, entry.Name())
+		attach, ok, err := parseStoredAttach(path, transport.InboundDirs, local)
 		if err != nil {
 			continue // unrelated or incomplete netmail is not ours to disturb
 		}
@@ -250,7 +288,7 @@ func scanStoredAttaches(transport Config, local Address, nodes []game.LeagueNode
 	return out, referenced, nil
 }
 
-func parseStoredAttach(path, inboundDir string, local Address) (storedAttach, bool, error) {
+func parseStoredAttach(path string, inboundDirs []string, local Address) (storedAttach, bool, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return storedAttach{}, false, err
@@ -276,7 +314,7 @@ func parseStoredAttach(path, inboundDir string, local Address) (storedAttach, bo
 		Zone: binary.LittleEndian.Uint16(data[178:180]), Net: binary.LittleEndian.Uint16(data[172:174]),
 		Node: binary.LittleEndian.Uint16(data[168:170]), Point: binary.LittleEndian.Uint16(data[182:184]),
 	}
-	abs, err := envelopeAttachment(data, inboundDir)
+	abs, err := envelopeAttachment(data, inboundDirs)
 	if err != nil {
 		return storedAttach{}, false, err
 	}

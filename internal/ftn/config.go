@@ -48,7 +48,14 @@ type Config struct {
 	SubjectPrefix string
 	// InboundDir is the mailer's receive directory. InboundNetmailDir is where
 	// received stored-message envelopes are found; empty means InboundDir.
+	//
+	// InboundDirs holds every directory named by an InboundDir line, in order;
+	// InboundDir is the first. A mailer can deliver into more than one -- ENiGMA
+	// files an authenticated session into secInbound and an unauthenticated one
+	// into inbound -- and a board that names only one silently never reads the
+	// other (#236).
 	InboundDir        string
+	InboundDirs       []string
 	InboundNetmailDir string
 	Links             map[int]Link
 	OboxMeshFanout    bool
@@ -156,7 +163,9 @@ func LoadConfig(dataDir string) (Config, error) {
 		case strings.EqualFold(key, "AttachDir"):
 			cfg.AttachDir = strings.TrimSpace(value)
 		case strings.EqualFold(key, "InboundDir"):
-			cfg.InboundDir = strings.TrimSpace(value)
+			if dir := strings.TrimSpace(value); dir != "" {
+				cfg.InboundDirs = append(cfg.InboundDirs, dir)
+			}
 		case strings.EqualFold(key, "InboundNetmailDir"):
 			cfg.InboundNetmailDir = strings.TrimSpace(value)
 		case strings.EqualFold(key, "Bundled"):
@@ -218,15 +227,46 @@ func LoadConfig(dataDir string) (Config, error) {
 	if cfg.AttachDir != "" && !filepath.IsAbs(cfg.AttachDir) {
 		cfg.AttachDir = filepath.Join(dataDir, cfg.AttachDir)
 	}
-	for _, field := range []*string{&cfg.InboundDir, &cfg.InboundNetmailDir} {
-		if *field != "" && !filepath.IsAbs(*field) {
-			*field = filepath.Join(dataDir, *field)
+	// Absolute and de-duplicated: the same directory named twice would have
+	// every file in it enumerated twice, and the second pass then warns about a
+	// source the first has already consumed. A NESTED directory is kept, not
+	// dropped: RunIn reads one level and does not descend, so a mailer's
+	// unsecure child needs its own line to be read at all.
+	seen := map[string]bool{}
+	dirs := cfg.InboundDirs[:0]
+	for _, dir := range cfg.InboundDirs {
+		if !filepath.IsAbs(dir) {
+			dir = filepath.Join(dataDir, dir)
 		}
+		dir = filepath.Clean(dir)
+		if seen[dir] {
+			continue
+		}
+		seen[dir] = true
+		dirs = append(dirs, dir)
+	}
+	cfg.InboundDirs = dirs
+	if len(cfg.InboundDirs) > 0 {
+		cfg.InboundDir = cfg.InboundDirs[0]
+	}
+	if cfg.InboundNetmailDir != "" && !filepath.IsAbs(cfg.InboundNetmailDir) {
+		cfg.InboundNetmailDir = filepath.Join(dataDir, cfg.InboundNetmailDir)
 	}
 	if cfg.InboundNetmailDir == "" {
 		cfg.InboundNetmailDir = cfg.InboundDir
 	}
 	return cfg, nil
+}
+
+// netmailDirs names where received .msg envelopes are looked for: the
+// configured directory when there is one, otherwise EVERY inbound directory.
+// Defaulting to the first alone made the order of the lines decide whether
+// envelopes were seen, which is not something a sysop would think to check.
+func (c Config) netmailDirs() []string {
+	if c.InboundNetmailDir != "" {
+		return []string{c.InboundNetmailDir}
+	}
+	return c.InboundDirs
 }
 
 func parseYesNo(value string) (bool, error) {
