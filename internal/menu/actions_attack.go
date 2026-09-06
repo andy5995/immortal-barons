@@ -808,7 +808,7 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 // startAnnihilator offers to begin construction, quoting what the planet will have to
 // raise for the target it picks.
 func startAnnihilator(s session.Session, w *ctx) Result {
-	ok(s, "This planet has no Gooie Kablooie.")
+	okNoPause(s, "This planet has no Gooie Kablooie.")
 	if !AskYesNo(s, "Would you like to begin construction?", false) {
 		return Stay
 	}
