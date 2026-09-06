@@ -10,7 +10,9 @@ import (
 
 func arrivedAt(info os.FileInfo) time.Time {
 	if st, ok := info.Sys().(*syscall.Stat_t); ok {
-		return time.Unix(st.Ctimespec.Sec, st.Ctimespec.Nsec)
+		// The fields are int32 on a 32-bit build, so convert rather
+		// than assume the width.
+		return time.Unix(int64(st.Ctimespec.Sec), int64(st.Ctimespec.Nsec))
 	}
 	return info.ModTime()
 }

@@ -1,4 +1,4 @@
-//go:build !linux && !openbsd && !darwin && !freebsd && !netbsd && !dragonfly
+//go:build !linux && !openbsd && !darwin && !freebsd && !netbsd && !dragonfly && !windows
 
 package ftn
 

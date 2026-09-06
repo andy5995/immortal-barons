@@ -27,6 +27,27 @@ func agedPacket(t *testing.T, dir, name string, _ time.Duration) string {
 	return path
 }
 
+// arrivalIsDistinguishable reports whether this platform can tell when a file
+// arrived from when its contents were last written. Where it cannot, arrivedAt
+// falls back to the modification time and the false alarm below is not
+// preventable, so the test has nothing to assert rather than something to fail.
+func arrivalIsDistinguishable(t *testing.T) bool {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "probe.brp")
+	if err := os.WriteFile(path, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	old := time.Now().Add(-9 * time.Hour)
+	if err := os.Chtimes(path, old, old); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return time.Since(arrivedAt(info)) < time.Hour
+}
+
 // reportEverything drops the age threshold for one test.
 func reportEverything(t *testing.T) {
 	t.Helper()
@@ -198,6 +219,9 @@ func TestStatusQuotesPathsAndSpareAnEnvelopedBundle(t *testing.T) {
 // with an old modification time -- which is what binkp gives it -- is not
 // reported. This is the false alarm the threshold exists to prevent.
 func TestAFreshlyDeliveredFileWithAnOldModTimeIsNotReported(t *testing.T) {
+	if !arrivalIsDistinguishable(t) {
+		t.Skip("this platform has no arrival time apart from the modification time")
+	}
 	data := newBundledSetup(t, "Bravo BBS", "")
 	path := agedPacket(t, filepath.Join(data, "transport-in"), "justarrived.brp", 0)
 	old := time.Now().Add(-9 * time.Hour)
