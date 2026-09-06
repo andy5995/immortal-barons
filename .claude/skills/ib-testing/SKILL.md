@@ -57,6 +57,14 @@ this" is a trigger to build a sandbox, not a disclaimer to ship.
 rig is sitting there** — a fresh world is faster, isolated and repeatable, and it
 cannot leave a test's leftovers behind to confuse the next session.
 
+**`go build ./cmd/a ./cmd/b` builds BOTH and writes NEITHER.** Go discards the
+binaries when given more than one main package, so a rebuild that prints no
+error can leave yesterday's binary in place — and the next verification run
+then tests the old code and "proves" the new code does not work. It cost a
+wrong conclusion here on 2026-09-06: a `-league-check` change was reported as
+not taking effect when the binary was 17 hours old. Build them one at a time,
+or pass `-o` for each, and check the mtime before believing a negative result.
+
 ## Fixed seeds
 
 A fixed-seed test may only assert what holds on OTHER seeds. A macro outcome
@@ -145,6 +153,22 @@ needs a prelude before any game key:
 — space to clear the splash pause, `1\r` to pick English, the realm name, then
 `y\r` to confirm it. Omit it and the realm gets named from your first keystroke
 and every key after that lands one screen early.
+
+**A single `printf` of the whole sequence can outrun the prompts.** Piping the
+lot at once works for short scripts and then stops working as the flow grows: the
+onboarding reads some answers with `ReadLine` and some as single keys, and a
+burst that arrives before a prompt is drawn is consumed by the prompt before it.
+The symptom is the run reaching a prompt and ending there, with the realm never
+created and no error — the same silent shape as the traps above. Pace it instead,
+which costs a few seconds and is reliable:
+
+    { printf ' '; sleep 1; printf '\r'; sleep 1; printf 'TesterRealm\r'; sleep 2
+      for i in $(seq 1 25); do printf '\r'; sleep 0.3; done
+      printf '0\ry\r'; } | immortal-barons -local -name Tester -data "$dir"
+
+Found 2026-09-05 verifying the Slackware package: the same key sequence failed
+three times unpaced and worked first try with the sleeps, creating the realm and
+reaching the Spending menu.
 
 **A scripted key sequence must assert it REACHED the screen it tests.** When the
 script runs dry the session ends *cleanly*, so any flow change upstream — a new
@@ -386,6 +410,15 @@ run to find:
 thing to reach for when a board goes quiet: it names each unfinished target by
 peer, how long it has waited, and the failure it recorded. It also works while
 the board's config is invalid, which `-in`/`-out` deliberately do not.
+
+It also lists packets **no run has claimed** — in neither spool, so no other
+count reaches them (#236). Two shapes, and the report tells them apart: a file
+in `InboundDir` itself is usually an attach bundle whose envelope will never
+arrive, and a file in a SUBDIRECTORY of it is one the mailer set aside because
+the session was not authenticated. Mystic uses `unsecure`, and `-in` reads
+`InboundDir` and nothing below it, so waiting never helps — fix the peer's
+session password, then move the files up a level. Both are reported only after
+an hour, so a file that just landed is never called a fault.
 
 ## Scheduling the exchange
 

@@ -36,6 +36,12 @@ type SpoolStatus struct {
 	Inbound    []ReceiptWait
 	Unreadable []string // spool directories whose journal will not parse
 	SetAside   int      // packets in the bad folder, which nothing retries
+	// Unclaimed are packet files sitting in the mailer's inbound that no run
+	// has taken. They are not in either spool -- that is the point: every
+	// report a sysop reaches for was healthy while thirty bundles collected
+	// unread, because a file never claimed is a file no journal knows about
+	// (#236).
+	Unclaimed []Unclaimed
 }
 
 // Status reads both spools without changing either. It is deliberately
@@ -87,25 +93,36 @@ func Status(dataDir string) (SpoolStatus, error) {
 		return status.Peers[a].Name < status.Peers[b].Name
 	})
 
-	inRoot := filepath.Join(dataDir, spoolDir, inSpoolDir)
-	if err := eachSpoolDir(inRoot, func(name, dir string) {
-		planPath := filepath.Join(dir, inboundReceiptFile)
-		receipt, err := loadInboundReceipt(planPath)
-		if err != nil {
-			if !os.IsNotExist(err) {
-				status.Unreadable = append(status.Unreadable, filepath.Join(inSpoolDir, name))
-			}
-			return
-		}
+	// One walk, two answers: what is pending, and which inbound files a receipt
+	// already accounts for. Reading the same journals twice to ask both was
+	// what this replaced.
+	claimed := map[string]bool{}
+	if err := eachInboundReceipt(dataDir, &status.Unreadable, func(receipt inboundReceipt, planPath string) {
 		status.Inbound = append(status.Inbound, ReceiptWait{
 			ID:     receipt.ID,
 			Age:    now.Sub(receiptAdvanced(receipt, planPath)),
 			Reason: receiptReason(receipt),
 		})
+		addClaimed(claimed, receipt)
 	}); err != nil {
 		return status, err
 	}
 	sort.Slice(status.Inbound, func(a, b int) bool { return status.Inbound[a].Age > status.Inbound[b].Age })
+
+	// Best-effort, and deliberately after the spools: --status is the one
+	// command that still works while ftn.cfg is invalid, which is exactly when
+	// a sysop is running it, so a config that will not load costs this section
+	// and nothing else.
+	if transport, err := LoadConfig(dataDir); err == nil {
+		// An attach bundle whose envelope is already here is waiting for the
+		// next -in, not abandoned. RunIn marks the same files claimed; a report
+		// that did not would FAIL a healthy board whose -in runs less often
+		// than the threshold.
+		for path := range envelopeReferenced(transport) {
+			claimed[path] = true
+		}
+		status.Unclaimed = scanUnclaimed(transport.InboundDir, claimed, now)
+	}
 
 	bad, err := os.ReadDir(filepath.Join(dataDir, spoolDir, badSpoolDir))
 	if err == nil {

@@ -1,5 +1,8 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * barons-ftn reports packets left unclaimed in the mailer's inbound
+
 2026-09-05 (v0.0.10)
   * A covert operation asks how many agents to send, and sends them together
   * Dropping regions asks for confirmation first, and defaults to no

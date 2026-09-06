@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -120,6 +121,15 @@ func reportStatus(dataDir string) error {
 	}
 	for _, dir := range status.Unreadable {
 		fmt.Printf("Unreadable journal in %s: neither retry state nor quarantine, and nothing will retry it.\n", dir)
+	}
+	if len(status.Unclaimed) > 0 {
+		fmt.Println("Unclaimed in the mailer's inbound, longest wait first:")
+		for _, waiting := range status.Unclaimed {
+			fmt.Printf("  %-24s %s: %s\n",
+				filepath.Base(waiting.Path), waiting.Age.Round(time.Minute), waiting.Where())
+		}
+		fmt.Println("  These are in neither spool, so nothing above counts them and nothing")
+		fmt.Println("  will retry them on its own.")
 	}
 	if status.SetAside > 0 {
 		fmt.Printf("Set aside: %d packet(s) nothing retries; read and clear them once the cause is fixed.\n", status.SetAside)

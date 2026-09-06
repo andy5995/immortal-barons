@@ -239,12 +239,19 @@ peer.
 
 ### Bundles collecting in the transport inbound
 
-`.BRP` files piling up in the transport's `InboundDir` while `-status` reports
-nothing pending is a specific fault, and not the one it looks like. The
-transport has not stalled and `-in` is running. It is reading those files,
-recognising them, and passing over them on every run.
+`.BRP` files pile up in the transport's `InboundDir` and never reach the game.
+The transport has not stalled and `-in` is running. It reads those files and
+passes over them on every run.
 
-Look at one:
+Both `-status` and `-in` now say so. `-status` lists them under **Unclaimed in
+the mailer's inbound**, and `-in` prints a warning once a file has waited an
+hour. Anything younger is not reported: a bundle and its envelope can arrive in
+either order, and an exchange runs on a schedule, so a file passed over once is
+normal.
+
+There are two causes, and the report tells you which one you have.
+
+**The file is in `InboundDir` itself.** Look at it:
 
 ```
 unzip -p /path/to/inbound/NNNNCCCC.BRP manifest.json
@@ -255,13 +262,22 @@ the `.msg` envelope that names it, and `-in` waits for that envelope rather
 than opening the bundle on its own. If this board's mail system never leaves a
 `.msg` file where `barons-ftn` reads them — Mystic tosses netmail into its own
 message bases and leaves none — the envelope never appears and the wait never
-ends. Nothing warns, on either board: the sender's logs report a clean handoff.
+ends.
 
 The fix is on the sending board, which has to reach this one by `Obox` or `BSO`
 instead. A peer with no `Link` line of its own sends `Attach`, so an `ftn.cfg`
 with no links at all produces exactly this.
 [Per-peer links](ftn-transport.md#per-peer-links) has the modes and what each
 one asks of the receiver.
+
+**The file is in a subdirectory of `InboundDir`.** The report names the
+subdirectory. `-in` reads `InboundDir` and nothing below it, so no later run
+will take the file however long you wait.
+
+A mailer keeps an unauthenticated session's files apart from the rest, and this
+is where they go. Mystic uses `unsecure`. Check the session password for that
+peer on both boards, then move the files up into `InboundDir` so the next `-in`
+can claim them.
 
 ### What a run tells you
 

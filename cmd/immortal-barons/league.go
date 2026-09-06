@@ -96,6 +96,9 @@ func runLeagueCheck(cfg game.Config) bool {
 	return allOK
 }
 
+// unclaimedChecksShown caps how many unclaimed packets are named one by one.
+const unclaimedChecksShown = 3
+
 // spoolChecks reports the FTN transport's own backlog, when there is one to
 // report. It answers here rather than only in barons-ftn's output because the
 // run that met a failure is long gone by the time a sysop asks why a board has
@@ -124,6 +127,24 @@ func spoolChecks(cfg game.Config) []store.Check {
 	for _, dir := range status.Unreadable {
 		checks = append(checks, store.Check{Name: "Unreadable journal", OK: false,
 			Detail: dir + " — neither retry state nor quarantine, and nothing will retry it"})
+	}
+	// Unlike a waiting peer, this one IS a fault: a packet nothing has claimed
+	// is in neither spool, so no other check here counts it, and -league-check
+	// reporting clean while bundles rot in the inbound is what #236 is about.
+	// Named individually up to a point, then counted: #236's own report has
+	// thirty bundles collecting, and a line each would bury every other check
+	// on this screen. They are sorted oldest first, so the ones shown are the
+	// ones worth acting on; -status lists the rest.
+	for i, waiting := range status.Unclaimed {
+		if i == unclaimedChecksShown {
+			checks = append(checks, store.Check{Name: "Unclaimed packets", OK: false,
+				Detail: fmt.Sprintf("%d more; barons-ftn -status lists them all",
+					len(status.Unclaimed)-unclaimedChecksShown)})
+			break
+		}
+		checks = append(checks, store.Check{Name: "Unclaimed packet", OK: false,
+			Detail: fmt.Sprintf("%s, %s: %s", filepath.Base(waiting.Path),
+				waiting.Age.Round(time.Minute), waiting.Where())})
 	}
 	if status.SetAside > 0 {
 		checks = append(checks, store.Check{Name: "Set-aside packets", OK: true,

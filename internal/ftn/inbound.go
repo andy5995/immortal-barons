@@ -110,7 +110,113 @@ func RunIn(dataDir string) (Result, error) {
 			result.Warnings = append(result.Warnings, fmt.Sprintf("%s: %v", entry.Name(), err))
 		}
 	}
+	// Anything still sitting in the mailer's inbound after this run had its
+	// chance. Saying so is the whole of #236: the run above passes over a
+	// bundle it cannot claim in silence, so a board can collect them for days
+	// while every report -- this count, --status, -league-check -- reads
+	// healthy.
+	claimed := claimedSources(dataDir)
+	for path := range referenced {
+		claimed[path] = true
+	}
+	for _, waiting := range scanUnclaimed(transport.InboundDir, claimed, time.Now()) {
+		result.Warnings = append(result.Warnings, unclaimedWarning(waiting))
+	}
 	return result, nil
+}
+
+// unclaimedWarning says what is waiting and, where the location settles it, why
+// no later run will help. It names no cause otherwise: a bundle can go unclaimed
+// for reasons this build has never met, and a wrong cause sends a sysop looking
+// in the wrong place -- which is the failure #236 is about, not an improvement
+// on it.
+func unclaimedWarning(waiting Unclaimed) string {
+	if waiting.Subdir != "" {
+		return fmt.Sprintf("%s has waited %s in the %s subdirectory of the mailer's inbound, which is not scanned; "+
+			"no later run will take it. A mailer files an unauthenticated session's files apart from the rest, "+
+			"so check the session password for that peer, then move the file up into InboundDir.",
+			filepath.Base(waiting.Path), waiting.Age.Round(time.Minute), waiting.Subdir)
+	}
+	waited := fmt.Sprintf("%s has waited %s in the mailer's inbound and no run has claimed it.",
+		filepath.Base(waiting.Path), waiting.Age.Round(time.Minute))
+	if isBundle(waiting.Path) {
+		return waited + fmt.Sprintf(" Read what it is with: unzip -p %s manifest.json",
+			shellQuote(waiting.Path))
+	}
+	return waited
+}
+
+// envelopeAttachment resolves the one file a stored message attaches, and
+// refuses a name that points outside InboundDir. It is the half of
+// parseStoredAttach that does not depend on who the message is addressed to, so
+// a REPORT can ask "does an envelope name this file?" without the roster and
+// board address a claim needs.
+func envelopeAttachment(data []byte, inboundDir string) (string, error) {
+	subject := strings.TrimPrefix(cStringField(data[72:144]), "^")
+	parts := strings.FieldsFunc(subject, func(r rune) bool { return r == ' ' || r == ',' })
+	if len(parts) != 1 {
+		return "", fmt.Errorf("file-attach subject names %d files, want one", len(parts))
+	}
+	attachment := parts[0]
+	if !filepath.IsAbs(attachment) {
+		attachment = filepath.Join(inboundDir, filepath.Base(attachment))
+	}
+	abs, err := filepath.Abs(attachment)
+	if err != nil {
+		return "", err
+	}
+	root, err := filepath.Abs(inboundDir)
+	if err != nil {
+		return "", err
+	}
+	rel, err := filepath.Rel(root, abs)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("attachment %s is outside InboundDir", attachment)
+	}
+	return abs, nil
+}
+
+// envelopeReferenced names every inbound file a stored-message envelope points
+// at, without checking who sent it or who it is addressed to. RunIn makes those
+// checks before it will CLAIM a bundle; a report only needs to know that
+// something already points at the file, so that one waiting for the next -in is
+// not called abandoned. An envelope that fails the fuller checks is reported by
+// RunIn's own warning instead, so nothing goes unmentioned by both.
+func envelopeReferenced(transport Config) map[string]bool {
+	referenced := map[string]bool{}
+	dir := transport.InboundNetmailDir
+	if dir == "" {
+		dir = transport.InboundDir
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return referenced
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".msg") {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, entry.Name()))
+		if err != nil || len(data) < type2HeaderSize {
+			continue
+		}
+		if binary.LittleEndian.Uint16(data[186:188])&attributeFileAttach == 0 {
+			continue
+		}
+		if abs, err := envelopeAttachment(data, transport.InboundDir); err == nil {
+			referenced[cleanAbsolute(abs)] = true
+		}
+	}
+	return referenced
+}
+
+// shellQuote makes a path safe to paste. InboundDir comes from ftn.cfg and may
+// hold spaces, and a command a sysop cannot paste is not advice.
+func shellQuote(path string) string {
+	if !strings.ContainsAny(path, " \t'\"\\$`&;|<>()*?[]#~") {
+		return path
+	}
+	return "'" + strings.ReplaceAll(path, "'", `'\''`) + "'"
 }
 
 func scanStoredAttaches(transport Config, local Address, nodes []game.LeagueNode) ([]storedAttach, map[string]bool, error) {
@@ -170,26 +276,9 @@ func parseStoredAttach(path, inboundDir string, local Address) (storedAttach, bo
 		Zone: binary.LittleEndian.Uint16(data[178:180]), Net: binary.LittleEndian.Uint16(data[172:174]),
 		Node: binary.LittleEndian.Uint16(data[168:170]), Point: binary.LittleEndian.Uint16(data[182:184]),
 	}
-	subject := strings.TrimPrefix(cStringField(data[72:144]), "^")
-	parts := strings.FieldsFunc(subject, func(r rune) bool { return r == ' ' || r == ',' })
-	if len(parts) != 1 {
-		return storedAttach{}, false, fmt.Errorf("file-attach subject names %d files, want one", len(parts))
-	}
-	attachment := parts[0]
-	if !filepath.IsAbs(attachment) {
-		attachment = filepath.Join(inboundDir, filepath.Base(attachment))
-	}
-	abs, err := filepath.Abs(attachment)
+	abs, err := envelopeAttachment(data, inboundDir)
 	if err != nil {
 		return storedAttach{}, false, err
-	}
-	root, err := filepath.Abs(inboundDir)
-	if err != nil {
-		return storedAttach{}, false, err
-	}
-	rel, err := filepath.Rel(root, abs)
-	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return storedAttach{}, false, fmt.Errorf("attachment %s is outside InboundDir", attachment)
 	}
 	if !store.IsPacketFile(filepath.Base(abs)) {
 		return storedAttach{}, false, nil

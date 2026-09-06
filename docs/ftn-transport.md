@@ -574,7 +574,8 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 | BSO `.?lo` | The mailer has not successfully sent the referenced bundle | Check peer address, password, route, and `.bsy` |
 | peer obox | The mailer has not sent or acknowledged the file | Check the peer session and outbox mapping |
 | transport `InboundDir` | `-in` did not run, ran before receive completion, or rejected the wrapper | Run it after the session and read warnings |
-| transport `InboundDir`, only `.BRP` files, `-status` says nothing pending | They are attach bundles whose `.msg` envelope never arrives here — see [Per-peer links](#per-peer-links) | `unzip -p FILE manifest.json` to confirm `"delivery": "attach"`; have the sender switch that link to `Obox` or `BSO` |
+| transport `InboundDir`, listed by `-status` as unclaimed | Attach bundles whose `.msg` envelope never arrives here — see [Per-peer links](#per-peer-links) | `unzip -p FILE manifest.json` to confirm `"delivery": "attach"`; have the sender switch that link to `Obox` or `BSO` |
+| a subdirectory of `InboundDir`, named by `-status` | The mailer filed an unauthenticated session's files apart from the rest; `-in` reads `InboundDir` and nothing below it | Fix the session password for that peer, then move the files up into `InboundDir` |
 | `ftn-spool/in` | Local publication or transit handoff is incomplete | Correct the named target; the next `-in` resumes it |
 | game `Inbound` | `-planetary` has not applied the unwrapped packets | Run `immortal-barons -planetary` |
 | `ftn-spool/bad` | An outbound packet was malformed/unroutable, or an inbound bundle contained a rejected member | Preserve it for diagnosis; correct the producing board, route, league, or roster |
@@ -636,11 +637,18 @@ What to read instead:
   the pending inbound receipts and which of the three ways each is stuck, any
   journal that will not parse, and how many packets are set aside. Reach for it
   before reading directories by hand.
+- **It also reports packets nobody has claimed**, which are in neither spool.
+  A file the transport never took is a file no journal knows about, so the
+  counts above cannot show it. `-status` lists any `.BRP` that has sat in the
+  mailer's `InboundDir`, or in a subdirectory of it, for over an hour, and `-in`
+  warns about the same files as it runs. The troubleshooting guide has the two
+  causes and what to do about each.
 - **`immortal-barons -league-check` reports the same backlog** alongside the
   rest of the league setup, for the sysop who has gone looking there first. A
   waiting peer is shown but not marked a fault — a peer can be legitimately
   offline for days — while a journal that cannot be read is a FAIL, because
-  nothing else will ever mention it.
+  nothing else will ever mention it. A packet nobody has claimed is a FAIL for
+  the same reason: it sits in neither spool, so no other line here counts it.
 - **`ftn-spool/bad`** only grows. Nothing is retried from it and nothing removes
   it; it is yours to read and clear once the producing board, route, league or
   roster is corrected.
