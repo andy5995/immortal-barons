@@ -151,7 +151,8 @@ func unclaimedWarning(waiting Unclaimed) string {
 	if waiting.Subdir != "" {
 		return fmt.Sprintf("%s has waited %s in the %s subdirectory of the mailer's inbound, which is not scanned; "+
 			"no later run will take it. A mailer files an unauthenticated session's files apart from the rest, "+
-			"so check the session password for that peer, then move the file up into InboundDir.",
+			"so give that directory its own InboundDir line in ftn.cfg, or check the session password for "+
+			"that peer and move the file up.",
 			filepath.Base(waiting.Path), waiting.Age.Round(time.Minute), waiting.Subdir)
 	}
 	waited := fmt.Sprintf("%s has waited %s in the mailer's inbound and no run has claimed it.",

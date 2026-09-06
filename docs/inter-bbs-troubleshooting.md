@@ -282,9 +282,10 @@ subdirectory. `-in` reads `InboundDir` and nothing below it, so no later run
 will take the file however long you wait.
 
 A mailer keeps an unauthenticated session's files apart from the rest, and this
-is where they go. Mystic uses `unsecure`. Check the session password for that
-peer on both boards, then move the files up into `InboundDir` so the next `-in`
-can claim them.
+is where they go. Mystic uses `unsecure`. Give that directory its own
+`InboundDir` line so `-in` reads it from now on, and move the waiting files up
+so the next run claims them. Checking the session password for that peer on both
+boards stops new deliveries landing there.
 
 ### What a run tells you
 

@@ -415,10 +415,10 @@ It also lists packets **no run has claimed** — in neither spool, so no other
 count reaches them (#236). Two shapes, and the report tells them apart: a file
 in `InboundDir` itself is usually an attach bundle whose envelope will never
 arrive, and a file in a SUBDIRECTORY of it is one the mailer set aside because
-the session was not authenticated. Mystic uses `unsecure`, and `-in` reads
-`InboundDir` and nothing below it, so waiting never helps — fix the peer's
-session password, then move the files up a level. Both are reported only after
-an hour, so a file that just landed is never called a fault.
+the session was not authenticated. Mystic uses `unsecure`, and `-in` reads each
+`InboundDir` and nothing below it, so waiting never helps — give that directory
+its own `InboundDir` line and move the waiting files up. Both are reported only
+after an hour, so a file that just landed is never called a fault.
 
 ## Scheduling the exchange
 

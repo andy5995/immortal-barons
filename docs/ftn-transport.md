@@ -143,9 +143,8 @@ paths are resolved beneath the data directory.
 ### Inbound settings
 
 ```ini
-InboundDir        /var/spool/binkp/inbound
-InboundNetmailDir /var/spool/binkp/inbound
-OboxMeshFanout    Yes
+InboundDir     /var/spool/binkp/inbound
+OboxMeshFanout Yes
 ```
 
 - `InboundDir` is required by `-in` and names received attachments and raw
@@ -264,10 +263,10 @@ between two boards, so the mode you send with is only half of it:
 
 - `Attach` requires the receiving board's mail system to leave the `.msg`
   envelope as a file where `barons-ftn -in` can read it — its
-  `InboundNetmailDir`, which defaults to `InboundDir`. Synchronet with SBBSecho
-  does that. **Mystic does not**: it tosses netmail into its own message bases
-  and leaves no `.msg` file behind, so a Mystic board can never claim an attach.
-  Reach a Mystic peer with `Obox` or `BSO`.
+  `InboundNetmailDir`, which unset means every `InboundDir`. Synchronet with
+  SBBSecho does that. **Mystic does not**: it tosses netmail into its own
+  message bases and leaves no `.msg` file behind, so a Mystic board can never
+  claim an attach. Reach a Mystic peer with `Obox` or `BSO`.
 - `Obox` and `BSO` need nothing of the receiver but its mailer, since the bundle
   arrives as an ordinary file in the inbound.
 
@@ -387,7 +386,6 @@ The hub can use a different local handoff for every child:
 
 ```ini
 InboundDir /srv/ftn/inbound
-InboundNetmailDir /srv/ftn/inbound
 NetmailDir /sbbs/fido/netmail
 AttachDir /srv/ib/attach
 Binkley Yes
@@ -591,7 +589,7 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 | peer obox | The mailer has not sent or acknowledged the file | Check the peer session and outbox mapping |
 | transport `InboundDir` | `-in` did not run, ran before receive completion, or rejected the wrapper | Run it after the session and read warnings |
 | transport `InboundDir`, listed by `-status` as unclaimed | Attach bundles whose `.msg` envelope never arrives here — see [Per-peer links](#per-peer-links) | `unzip -p FILE manifest.json` to confirm `"delivery": "attach"`; have the sender switch that link to `Obox` or `BSO` |
-| a subdirectory of `InboundDir`, named by `-status` | The mailer filed an unauthenticated session's files apart from the rest; `-in` reads `InboundDir` and nothing below it | Fix the session password for that peer, then move the files up into `InboundDir` |
+| a subdirectory of `InboundDir`, named by `-status` | The mailer filed an unauthenticated session's files apart from the rest; `-in` reads each `InboundDir` and nothing below it | Give that subdirectory its own `InboundDir` line, or fix the session password for that peer and move the waiting files up |
 | `ftn-spool/in` | Local publication or transit handoff is incomplete | Correct the named target; the next `-in` resumes it |
 | game `Inbound` | `-planetary` has not applied the unwrapped packets | Run `immortal-barons -planetary` |
 | `ftn-spool/bad` | An outbound packet was malformed/unroutable, or an inbound bundle contained a rejected member | Preserve it for diagnosis; correct the producing board, route, league, or roster |
