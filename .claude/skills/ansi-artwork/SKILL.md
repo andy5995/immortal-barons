@@ -75,10 +75,42 @@ palette colors — see `references/depth-and-3d.md`.
 
 ### What real art actually does with the ramp (measured, not asserted)
 
-Measured over `cap/x-bit.cap` — a live capture of The X-Bit BBS's logon and
-logoff screens, 19,005 block/shade cells with their colours. The numbers are
-worth knowing because two of them are not what the advice above would lead you
-to guess.
+`scripts/measure-ansi.py FILE...` reports all of the below for any capture —
+run it on new art rather than re-deriving. Figures here are from six captures:
+The X-Bit BBS's logon/logoff screens (`cap/x-bit.cap`, real art), four
+Immortal Barons / BRE game screens, and one colourless BBS capture. Captures are
+gitignored; they stay local as evidence, like `docs/dev/bre-screens.md`'s.
+
+**The headline: blending seams is not a nicety, it is what art does.** Across
+every coloured capture, **95–99% of adjacent-cell hue changes carry a shade or
+half glyph**; hard cuts are 1–5%. The advice above was right and this is the
+measurement of it.
+
+| | real art | game UI (IB/BRE) |
+| --- | --- | --- |
+| same-hue cells | **70%** | 12–18% |
+| shade `░▒▓` | 25% | 2–38% |
+| vertical half `▀▄` | 17% | 26–63% |
+| palette used | 16/16 fg, 8/8 bg | **8/16 fg, 4/8 bg** |
+| SGR per block cell | **0.73** | 6.2–9.9 |
+
+Two things to take from the split. **Art leans on same-hue pairs and the shade
+ramp; UI leans on half blocks across hues** — because UI is drawing *shapes*
+(boxes, bars, dividers) where a clean two-colour edge is the point, while art is
+drawing *surfaces* that need tone. And **art is attribute-dense**: colour runs
+average 2.9 cells with a median of 2, so expect roughly one SGR per three cells.
+A design that needs long single-colour runs is a UI design, not an art one.
+
+**Colourless art is a real mode.** One 27 MB capture carries zero SGR sequences
+and is 54% shade glyphs — the ramp alone doing all the work. If a target cannot
+be trusted with colour, `░▒▓█` still gives four tones plus the background.
+
+**Punctuation-as-dither is not a footnote, it is a large share of the cell
+count.** 45% of the "text" cells in the art capture are `bright black on black`
+at 2.8:1 contrast — that is not text at all, it is the sub-`░` ramp described
+below being used heavily. When measuring someone's art, do not read a low
+text-contrast figure as a legibility fault until you have checked whether those
+cells are lettering or fill.
 
 **Seven cells in ten are a SAME-HUE pair** — `fg` and `bg` set to the *same*
 colour index, differing only by the bright bit (`bright red on red`,
