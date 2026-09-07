@@ -389,6 +389,25 @@ so accepting one for a packet that carries bulletins would apply content nothing
 signed. Adding a field to the payload means appending its old length to
 `payloadShapes` in `internal/game/ibbs_auth.go`.
 
+**A refused packet is HELD, not destroyed (#185).** `ApplyPacket` returns on an
+origin refusal before it applies anything or records the packet as seen, so the
+file is moved to the `held/` directory rather than removed, and every later
+planetary run puts it back through the ordinary inbound path — league check,
+duplicate check, addressing, both signatures. A board that is given its roster
+key afterwards therefore applies its own backlog with nobody doing anything.
+
+That matters most for a **ruleset** broadcast. The Coordinator re-sends its
+roster and its bulletins on every planetary run, so those recover by themselves;
+`-league-config` is a manual command and is not part of that run, so a ruleset
+refused once used to be gone permanently — and a re-send would then be discarded
+as a duplicate. The incident that produced this had six boards and a
+signed-payload mismatch (above), with one member frozen at four roster entries
+against the league's six and not waiting on anything.
+
+The wait is bounded by `HeldMaxAge` (30 days, `internal/store/held.go`), measured
+from when the file was set aside: a board that is genuinely forging never starts
+verifying, and its packets would otherwise accumulate for the life of the league.
+
 ### Upgrading a league across a protocol bump
 
 **A league does not roll a protocol change through board by board.** It closes

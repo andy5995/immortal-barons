@@ -745,14 +745,24 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	if refused {
 		result.Refused++
 		if verbose {
-			fmt.Printf("  Refused packet from %s (%s): it does not match that board's key\n",
+			fmt.Printf("  Held packet from %s (%s): it does not match that board's key\n",
 				p.FromBoard, p.PacketType())
 		}
-	} else {
-		result.Applied++
-		if verbose {
-			fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
-		}
+		// HELD, not destroyed (#185). ApplyPacket returns empty on an origin
+		// refusal BEFORE it records anything — nothing was applied and the
+		// packet was never marked seen — so setting it aside and letting it
+		// take the ordinary inbound path again is safe, and every check runs
+		// afresh. That matters most for a ruleset broadcast: the Coordinator
+		// re-sends its roster and bulletins on every planetary run, but
+		// -league-config is a manual command, so a ruleset refused once used to
+		// be gone for good and a re-send would then be discarded as a
+		// duplicate. HeldMaxAge bounds the wait for a board that is simply
+		// forging.
+		return holdPacket(w.Config.DataDir, path)
+	}
+	result.Applied++
+	if verbose {
+		fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
 	}
 	return os.Remove(path)
 }

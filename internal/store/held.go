@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -17,6 +18,16 @@ import (
 // Held packets are re-read at the start of every planetary run, so a board that
 // upgrades applies its backlog on the next run with nobody doing anything.
 const HeldDir = "held"
+
+// HeldMaxAge bounds the wait. A packet held because it failed its signature
+// check may be a board that has not been given a key yet — which recovers — or
+// a board forging packets, which never will, and whose files would otherwise
+// pile up in the held directory for the life of the league. Both look the same
+// on arrival, so the only safe distinction is time: keep them long enough that
+// a Coordinator noticing and publishing a key rescues the backlog, and no
+// longer. Measured from the file's modification time, which is when this board
+// set it aside.
+const HeldMaxAge = 30 * 24 * time.Hour
 
 // heldPath is the data directory's held-packet folder.
 func heldPath(dataDir string) string { return filepath.Join(dataDir, HeldDir) }
@@ -59,10 +70,11 @@ func moveFile(src, dst string) error {
 	return os.Remove(src)
 }
 
-// holdPacket moves an inbound packet file aside to wait for a build that can
-// read it. A failure to move it is reported to the caller: silently leaving the
-// file in the inbound directory would have it re-read, re-held and re-announced
-// on every run for as long as the mismatch lasts.
+// holdPacket moves an inbound packet file aside to wait — for a build that can
+// read it, or for the roster key that would let its signature verify (#185). A
+// failure to move it is reported to the caller: silently leaving the file in the
+// inbound directory would have it re-read, re-held and re-announced on every run
+// for as long as the mismatch lasts.
 func holdPacket(dataDir, path string) error {
 	dir := heldPath(dataDir)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -94,6 +106,12 @@ func releaseHeld(dataDir, inboundDir string) (int, error) {
 			continue
 		}
 		path := filepath.Join(heldPath(dataDir), e.Name())
+		// Age it out first, so a packet that will never verify cannot be
+		// released, re-refused and re-held on every run forever.
+		if info, err := e.Info(); err == nil && time.Since(info.ModTime()) > HeldMaxAge {
+			os.Remove(path)
+			continue
+		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			continue
