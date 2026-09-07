@@ -207,9 +207,15 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		w.expireSpyGuys() // a watcher's stay is a day shorter, silently (SpyGuy)
 		w.adjustInvestRate()
 		rep.step("Setting the bank's rate")
+		// Roll FIRST, then open the new day. Everything posted since the last
+		// run belongs to the day that is ending; the Planetary Master line and
+		// the Queen's proclamation are the new day's, and in the original they
+		// are the first items under the Daily Bulletin box. Posting them before
+		// the roll put them straight into YESTERDAY and left Today's News empty
+		// every single day — which is what "No planetary bulletins." was.
+		w.rollNews()
 		w.postMasterNews()
 		w.postProclamationNews()
-		w.rollNews()
 		rep.step("Writing the daily news bulletin")
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
 			rep.step("Crowning the Planetary Master")
