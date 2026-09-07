@@ -800,10 +800,11 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 - **Attack pirates** — the nine pirate factions are living raiders, not a
   fixed difficulty ladder: their strength is random (any faction can be the
   strongest). Their **names are IB-original** (BRE's coined names are its own
-  creative work). Pirates raid players at random: IB rolls a **20%** chance per
-  turn that an empire is raided, plus a further **5%** chance of a *second* raid
-  by a different faction the same turn — about 1 turn in 5, matching the felt
-  frequency in BRE (the exact BRE rate is not measured). A raid carries off a
+  creative work). Pirates raid players at random; the rate and the retry are
+  binary-verified and given under "How often" below. (This paragraph used to
+  open by stating IB's old flat 20%-plus-5% guess as though it were current,
+  two sentences above the correction that retired it. Corrected 2026-09-08.)
+  A raid carries off a
   share of **one** of the victim's holdings, drawn at random — never bombers or
   carriers, and never the victim's regions; the game grants a raiding pirate new
   regions instead, so a pirate that just raided is fatter. The draw is BINARY-
@@ -822,6 +823,18 @@ instruction's modrm. Six of the seven award sites reach it with a separate
   recursive call), so a turn can carry several raids. IB's old flat 20% plus a
   5% "second raid by a different faction" was a guess; neither shape is in the
   binary.
+
+  **Open: the faction's own defence.** IB computes it as
+  `tanks + turrets/2 + troopers/3` (`PirateFaction.Defense`). The original's
+  raid resolver builds its faction strength at `launch_pirate_raid +0x0a45` as
+  `[rec+0x0c]/2 + [rec+0x00]/3 + [rec+0x04]` — the same SHAPE (one term whole,
+  one halved, one in thirds) but over faction-record offsets whose mapping to
+  unit types has not been pinned. If the record follows the order of the
+  captured-spoil name table (troopers, jets, turrets, tanks, gold, agents) then
+  the original weighs *jets* whole and *tanks* halved and ignores turrets, which
+  is not what IB does. Not changed on that reading: the field order is a
+  hypothesis, and the check that would settle it is the six add-sites in
+  `resolve_pirate_attack` that credit a faction with what it stole.
 
   How much it takes is BINARY-VERIFIED too (`BRE.OVR` at `0x35f66`: a 32-bit
   divide by `0x21`, then a min against `0x5dc0 + Random(0x3e8)`):
