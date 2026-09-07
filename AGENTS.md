@@ -429,6 +429,15 @@ into gameplay
 (tax/region caps, maintenance/attack Level presets, interest, Buy Military,
 etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 
+**An IB league is IB-only. IB and BRE games never intermix.** IB defines its own
+JSON `.brp` packets; BRE's IBBS format is binary, and neither reads the other.
+So no reasoning may rest on wire compatibility with the original — not "a packet
+stays readable to BRE", not a BRE board joining an IB league, not a strike
+arriving from one. Where IB reuses one of BRE's values (the attack-kind codes
+Quick=0/Normal=1/Extended=2, say), the reason is that the encoding stays
+checkable against the disassembly, never interoperability. This has been got
+wrong more than once, including in two code comments that shipped.
+
 **Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in Inbound/Outbound
 dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
 group attacks, and exports scores/news. `barons-ftn` is bidirectional since
