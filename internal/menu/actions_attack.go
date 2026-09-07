@@ -131,44 +131,49 @@ type targetRow struct {
 // targetList is one picker's posture toward an alliance partner: the rows it
 // shows, the wording it uses, and the pool a chosen name is re-resolved from
 // under the lock. The three must agree, so the choice is made once.
-type targetList struct{ oathBreaker bool }
+//
+// BRE has ONE picker, choose_target_empire (BRE.OVR 0x01aa99). An ally is always
+// on its roster; the only thing that varies is the breach flag its caller pushes
+// at `[bp+0x8]`, tested at +0xc5f. So `breach` is the whole of IB's posture too,
+// and no list hides a realm a pact merely stands in front of.
+type targetList struct{ breach bool }
 
-// warTargets is the war menu's list: an ALLIANCE PARTNER is on it, wearing its
-// letter, because the original lets you take one and asks first — its "Are you
-// sure you wish break your agreement?" then the broken-treaty revolt (a live
-// capture, `cap/kd3-01.cap` line 13411). Withholding the letter had made
-// confirmBreach unreachable for an alliance.
-var warTargets = targetList{oathBreaker: true}
+// warTargets asks before it lets you take an alliance partner — "Are you sure
+// you wish break your agreement?", then the broken-treaty revolt. The four
+// attacks use it, and so does every covert operation that spends an agent:
+// run_covert_operations_menu pushes the breach flag as 1 for all of them, and
+// `cap/kd3-01.cap` catches a Demoralize Forces raising the same question, word
+// for word, as a regular attack. IB kept an ally off the covert list until
+// 2026-09-06, which made the question unreachable there.
+var warTargets = targetList{breach: true}
 
-// covertTargets leaves an alliance partner out: those operations ask no breach
-// question, so a realm reachable from here would be struck with the pact
-// silently intact.
+// covertTargets reaches an alliance partner without a word. The covert menu
+// pushes the breach flag as 0 for exactly two choices, '1' and '6' — Send Spy
+// and Spy on Relations — and the picker then skips its break block and returns
+// the letter as it would for any rival: looking at an ally costs the pact
+// nothing. IB refused the target outright until 2026-09-06.
 var covertTargets = targetList{}
 
-func (l targetList) rows(w *ctx) []targetRow { return snapshotTargets(w, l.oathBreaker) }
+func (l targetList) rows(w *ctx) []targetRow { return snapshotTargets(w) }
 
-// prompts is the list's wording around ask. Only the nothing-to-choose notice
-// differs: on the war list an alliance is no reason a realm cannot be reached,
-// so protection is the only thing it can blame.
+// prompts is the list's wording around ask. New Realm Protection is the only
+// thing either list can blame for an empty roster: a pact never withholds a
+// realm from one, it only decides whether taking it asks first.
 func (l targetList) prompts(ask string) targetPrompt {
-	p := targetPrompt{
+	return targetPrompt{
 		ask:     ask,
 		refuse:  "%s is under New Realm Protection and cannot be targeted yet.",
 		nothing: "None of these realms can be attacked — they are all under New Realm Protection.",
 	}
-	if !l.oathBreaker {
-		p.nothing = "None of these realms can be targeted — they are protected or allied with you."
-	}
-	return p
 }
 
 // snapshotTargets copies every LIVING rival (not just the attackable ones) under
 // the lock, marking which can be attacked. Listing the shielded realms — rather
 // than hiding them — keeps a player from reading "all rivals protected" as "the
-// world is empty". attackable is protection alone when alliesAttackable is set,
-// and protection then alliance (game.Targets) otherwise; an empty result means
-// no rivals are left at all.
-func snapshotTargets(w *ctx, alliesAttackable bool) []targetRow {
+// world is empty". attackable is New Realm Protection and nothing else — a pact
+// is settled by the breach question, not by withholding the row; an empty result
+// means no rivals are left at all.
+func snapshotTargets(w *ctx) []targetRow {
 	var rows []targetRow
 	// Read, not With: this only gathers, and With would save the world back once
 	// per visit to a target picker (see draw in menu.go).
@@ -182,7 +187,7 @@ func snapshotTargets(w *ctx, alliesAttackable bool) []targetRow {
 				continue
 			}
 			protected := e.Protection > 0
-			attackable := !protected && (alliesAttackable || !w.AreAllied(p, e))
+			attackable := !protected
 			rows = append(rows, targetRow{
 				name: e.Name, letter: e.Letter(),
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
@@ -205,15 +210,10 @@ func snapshotTargets(w *ctx, alliesAttackable bool) []targetRow {
 // DIFFERENT realm. Names are unique (RealmNameTaken guards onboarding), so this
 // returns the intended realm or nil (gone/dead/protected/allied → not a target).
 func (l targetList) find(w *ctx, attacker *game.Empire, name string) *game.Empire {
-	// The breach path may resolve an alliance partner (confirmBreach resolves the
-	// realm through here too, in order to break the pact), while a covert caller
-	// must not — an alliance formed between the target snapshot and this reload
-	// would otherwise be struck with the pact silently intact.
-	pool := w.Targets
-	if l.oathBreaker {
-		pool = w.OathBreakerTargets
-	}
-	for _, t := range pool(attacker) {
+	// Every list resolves through the oath-breaker pool, because every list can
+	// reach an ally: the breach path breaks the pact on the way through, and the
+	// two info operations leave it standing.
+	for _, t := range w.OathBreakerTargets(attacker) {
 		if t.Name == name {
 			return t
 		}
@@ -353,9 +353,9 @@ type targetPrompt struct {
 // something about the row was different and left the player to guess what; the
 // bracket says it outright, and pressing the letter now answers with the reason
 // rather than behaving like a mistyped key. An ALLIANCE PARTNER wears its
-// letter on the WAR menu's list and is attacked through the breach question,
-// as the original does it; on the covert list it has no letter, because those
-// operations ask nothing before they land (see warTargets and covertTargets).
+// letter on every list, as the original does it: the operations that spend an
+// agent take it through the breach question, and the two info operations reach
+// it without one (see warTargets and covertTargets).
 func pickAttackTarget(s session.Session, t Term, rows []targetRow, p targetPrompt) (name string, chosen bool) {
 	scoreTableHead(s, t)
 	byLetter := make(map[string]targetRow, len(rows))
@@ -452,15 +452,18 @@ func confirmBreach(s session.Session, w *ctx, rows []targetRow, name string) boo
 		return nil
 	})
 	if broke != "" {
-		ok(s, "Agreement broken! Revolts spread through your realm — your people will not be ruled by an oath-breaker, and the army's morale goes with them.")
+		// No pause: the original prints the revolt and goes straight on to the
+		// operation, whether that is the force prompts or an agent going out
+		// (`cap/kd3-01.cap`, both hits for "wish break your agreement").
+		okNoPause(s, "Agreement broken! Revolts spread through your realm — your people will not be ruled by an oath-breaker, and the army's morale goes with them.")
 	}
 	return true
 }
 
 // pickAndStrike is localAttack without the New Realm Protection gate: the
 // target list, the arms-broker quote, and the strike itself. The covert menu
-// calls it directly for the two operations the original lets a sheltered realm
-// still run (see covertInfoOp).
+// calls it directly for the two info operations the original lets a sheltered
+// realm still run.
 func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTurn, breach bool, strike func(a, d *game.Empire) (string, error)) Result {
 	// A caller that asks the breach question can reach an alliance partner; one
 	// that does not, cannot.

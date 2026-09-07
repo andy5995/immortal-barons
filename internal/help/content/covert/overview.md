@@ -35,6 +35,11 @@ soften a realm you are about to attack in the same turn; plan it a day ahead.
 Send Spy and Spy on Relations are the exceptions, along with Expose Enemy Ops:
 those three answer you immediately.
 
+An agreement is no shelter. You may aim an operation at a ruler you hold a
+treaty with, and the game asks you to confirm before the agent goes. Saying yes
+tears the treaty up at the usual price in support and morale, and the agent is
+then sent. See Treaties and Alliances. Send Spy and Spy on Relations do not ask.
+
 If the realm you aimed at is gone by the time your agent arrives, the operation
 is abandoned and the fee is not returned.
 

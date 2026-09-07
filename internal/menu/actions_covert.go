@@ -106,14 +106,19 @@ func agentsAvailable(w *ctx, row covertRow) int {
 // own roll when it lands, exactly as sending them one per visit to the menu
 // would be. The count is a convenience, not a new mechanic.
 func sendAgents(s session.Session, w *ctx, row covertRow) Result {
-	rows := covertTargets.rows(w)
+	rows := warTargets.rows(w)
 	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
 	name, chosen := pickAttackTarget(s, w.Term, rows,
-		covertTargets.prompts(tr(s, "Choose a target (letter, RETURN to abort)")))
+		warTargets.prompts(tr(s, "Choose a target (letter, RETURN to abort)")))
 	if !chosen {
+		return Stay
+	}
+	// A pact is no shelter from an agent, in the original or here: the same
+	// question the war menu asks, and the same charge for answering yes.
+	if !confirmBreach(s, w, rows, name) {
 		return Stay
 	}
 	// Asking before the count is what makes the refusal say which of the three
@@ -141,7 +146,7 @@ func sendAgents(s session.Session, w *ctx, row covertRow) Result {
 	var err error
 	for ; sent < n; sent++ {
 		e := w.mutatePlayer(func(p *game.Empire) error {
-			d := covertTargets.find(w, p, name)
+			d := warTargets.find(w, p, name)
 			if d == nil {
 				return errTargetGone
 			}

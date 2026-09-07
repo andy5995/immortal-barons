@@ -4553,15 +4553,16 @@ rather than the score table. IB's rules on top of that:
   behind the same key as the constructive one. BRE's break-with-penalty prompt
   ("Are you sure you wish break your agreement?", `BRE.OVR` 0x1A838) belongs to
   the shared target picker, not to diplomacy — and there only for the callers
-  that pass its breach flag, which is the four attacks and not trading.
+  that pass its breach flag, which is the four attacks and the seven covert
+  operations that spend an agent, not trading and not the two that only look.
   **An alliance partner is on the war menu's target list, wearing its letter**,
   which is what makes that prompt reachable — captured live in `cap/kd3-01.cap`
-  (line 13411): the ally is listed among the targets, choosing it asks the
-  question, and answering yes prints the broken-treaty revolt and fights the
-  battle. IB withheld the letter from an alliance partner until 2026-09-01, so
-  the one relation the prompt most needed to cover could never raise it. The
-  covert list still leaves an ally off, because those operations pass no breach
-  flag and would strike with the pact intact.
+  (grep it for "wish break your agreement"): the ally is listed among the
+  targets, choosing it asks the question, and answering yes prints the
+  broken-treaty revolt and fights the battle. IB withheld the letter from an
+  alliance partner until 2026-09-01, so the one relation the prompt most needed
+  to cover could never raise it. **A covert operation reaches the same list and
+  asks the same question** — see the breach entry below.
 - **Marking several sends one proposal each**, skipping any realm that already
   holds that pact, and asks the covering message once for the whole batch.
 - **The covering message is optional, rides on the offer, and is mailed
@@ -4777,13 +4778,38 @@ word at `+0xae`, and calls the break only when it is a pact (`> 0`) **and** the
 caller passed the breach flag at `[bp+0x8]`. `resolve_regular_attack`,
 `launch_nuclear_attack`, `launch_chemical_attack` and `launch_biological_attack`
 all pass 1; `create_trade_offer`, `run_trading_market` and `run_coordinator_vote`
-pass 0. A returned `N` resets the target to `@`, aborting the attack outright.
+pass 0, and `run_covert_operations_menu` decides per operation (below). A
+returned `N` resets the target to `@`, aborting the attack outright.
+
+**A covert operation pays the same price for the same target, with two
+exceptions — BINARY-VERIFIED.** `run_covert_operations_menu` (0x017469) is a
+caller too, and it computes the flag rather than fixing it. At unit `+0xb19` it
+compares the menu choice against `'1'` and `'6'` — Send Spy and Spy on Relations
+— pushing **0** for those two and **1** for every other operation, then calls the
+picker once for whichever was chosen:
+
+    push 0                         { arg 1 }
+    al := (choice != '1' and choice != '6')
+    push al                        { arg 2 -> [bp+0x8], the breach flag }
+    push 'N'                       { arg 3 }
+    call choose_target_empire
+
+So an operation that spends an agent tears up a pact exactly as an army does, and
+the two that only gather information reach an ally without a word — the picker
+skips its break block and hands back the letter as it would for any rival.
+`cap/kd3-01.cap` confirms the charging half: a Demoralize Forces aimed at a realm
+holding a Full Defense Alliance draws the identical prompt and the identical
+four-line revolt, and then goes out anyway. Gold and the agent are both spent
+after the pact falls; **the break is the price of the target, not an alternative
+to the operation.** IB matches on both sides. Until 2026-09-06 it refused an ally
+as a covert target outright, so neither behaviour existed.
 
 So the confirmation, the charge and the break land *before* the force is chosen,
 which means the battle is then fought at the reduced morale. IB matches
 (`TreatyBreakKeepNumerator` / `TreatyBreakKeepDenominator`, `World.BreachTreaty`,
-`confirmBreach` in `internal/menu/actions_attack.go`). Live capture:
-`cap/kd3-01.cap`.
+`confirmBreach` in `internal/menu/actions_attack.go`). **No pause follows the
+revolt message** — the original prints it and goes straight on to the force
+prompts or to "Covert Agent Sent out". Live capture: `cap/kd3-01.cap`.
 
 **IB read this backwards until 2026-08-31**, charging the quarters on
 `DeclareWar` and nothing on the breach, on the stated reasoning that "no attack
