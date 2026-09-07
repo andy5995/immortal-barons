@@ -144,19 +144,12 @@ To build from source instead, see below.
 
 ## Build
 
-You only need this to build from source; if you downloaded a binary above, skip
-it. To build, you need Go 1.26 or newer. The game builds anywhere Go does —
-Linux, macOS, Windows, and the BSDs (DOS is not supported).
+You need Go 1.26 or newer. The game builds anywhere Go does — Linux, macOS,
+Windows, and the BSDs.
 
-To install Go, download an official installer or tarball from
-<https://go.dev/doc/install>. That same page also has the step-by-step install
-instructions for Windows, macOS, Linux, and the BSDs, and always offers a
-current version. On macOS you can also run `brew install go`; on any Linux with
-snap (preinstalled on Ubuntu), `snap install go --classic` tracks a current Go
-too. On Linux and the BSDs the
-package manager's Go is usually called `go` or `golang` (for example `go` on
-Arch, Alpine, and FreeBSD; `golang` on Debian, Ubuntu, and Fedora). A distro's
-package can be older than 1.26, though — if it is, use the official tarball.
+Install Go from <https://go.dev/doc/install>, which has current instructions for
+every platform. Your package manager may have Go as well, but check the version
+first: some distributions ship one older than 1.26.
 
 ```
 go build ./cmd/immortal-barons ./cmd/barons-ftn
