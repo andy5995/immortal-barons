@@ -73,6 +73,45 @@ what turns "3 solid stripes" into "a smooth gradient." A hue's family
 (dark → bright → white) blended this way yields 6–7 perceived shades from 3
 palette colors — see `references/depth-and-3d.md`.
 
+### What real art actually does with the ramp (measured, not asserted)
+
+Measured over `cap/x-bit.cap` — a live capture of The X-Bit BBS's logon and
+logoff screens, 19,005 block/shade cells with their colours. The numbers are
+worth knowing because two of them are not what the advice above would lead you
+to guess.
+
+**Seven cells in ten are a SAME-HUE pair** — `fg` and `bg` set to the *same*
+colour index, differing only by the bright bit (`bright red on red`,
+`bright blue on blue`, and above all `bright black on black`). Only three in ten
+put two different hues in one cell. So the workhorse is not blending two colours
+together; it is wringing tones out of ONE colour, where the palette gives you
+dark-bg, three shade mixes, and bright-fg — five steps per hue, no hue changes
+needed.
+
+**The two glyph classes divide the labour, and the split is sharp:**
+
+| | same-hue cells | cross-hue cells |
+| --- | --- | --- |
+| `█` solid | 72% | 9% |
+| `░ ▒ ▓` shades | 18% | 43% |
+| `▀ ▄` half blocks | **8%** | **40%** |
+
+Half blocks are five times more common once two hues meet. That is the tell:
+**shade glyphs are for tone inside a hue, half blocks are for detail across
+hues** — a cell holding two different colours stacked is buying vertical
+resolution, not blending. Reach for `▀`/`▄` at edges and boundaries, for the
+shade ramp in the middle of a shape.
+
+**Backgrounds stay overwhelmingly black** — 70% of coloured block cells, with
+only eight background colours used at all and magenta almost absent. And
+`black on black` alone is 42.6% of every block cell: negative space is *painted*
+with solid glyphs rather than left as spaces, which is what lets a piece sit on
+a coloured field without the art's own holes showing through.
+
+Left/right half blocks (`▌ ▐`) are rare — 3.3% against 17.4% for `▀`/`▄`.
+Character cells are about twice as tall as wide, so splitting vertically buys
+resolution where the eye needs it and splitting horizontally mostly does not.
+
 ### Extending the ramp past `░` with punctuation glyphs
 
 `░` is a big step from empty — 25% of the cell in one jump — so a fill that
