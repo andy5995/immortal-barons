@@ -31,6 +31,12 @@ package game
 // the four figures in that paragraph and wrong about the fourth, rather than
 // the case mapping being misread. Re-derived independently after the first
 // reading flagged itself as uncertain; do not "correct" 120 back to 110.
+//
+// Corroborated from live play 2026-09-08: an Extended Battle launched on a real
+// board reported 5,632k jets returned of 7,096k sent, a loss of 20.6% against
+// the 0.80 fraction read here. That is the retreat constant observed from
+// outside the binary, on the one attack type whose strength multiplier and
+// retreat fraction disagree in direction.
 const (
 	// A quick strike buys surprise: it hits harder but takes far less land, and
 	// the disorganised battle breaks off early.
