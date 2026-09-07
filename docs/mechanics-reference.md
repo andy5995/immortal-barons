@@ -5148,6 +5148,20 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **A defender's invasion report names the kind of strike.** BRE names it to the
+  attacker ("Extended Battle Results.") and never to the defender, whose recap
+  says only that a force "attacked!". IB appends it: `Invasion from X (Quick
+  Strike).` This is not cosmetic. The kind sets the attacker's strength (120 /
+  100 / 85), the share of land taken (50 / 100 / 125) and — through the retreat
+  fraction, which both sides share — how long the attrition race runs: a quick
+  strike breaks off at 8% losses rather than 15%, which is a short enough race
+  for a much weaker attacker to win it. Hiding that leaves a defender unable to
+  tell a cheap probe from a committed assault even after the fact, and the
+  figure is recoverable anyway by dividing the regions captured (see "the price
+  of a strike"), so the original's silence hides it only from players who do not
+  do the arithmetic. A group attack gets no choice of kind and reports
+  `(group attack)`; `AttackKind`'s zero value is `QuickStrike`, so the group
+  case is tested first (`invasionReport`).
 - **The Terrorist Ops rate on the InterPlanetary menu matches what is charged.**
   The original quotes the day's FIRST operation at 64 a region and then bills 63,
   because it clamps its ops-today counter up to 1 when quoting and not when

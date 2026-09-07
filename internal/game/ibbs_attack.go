@@ -165,10 +165,13 @@ func (g GroupAttack) Offense() int {
 }
 
 // AttackKind is how an individual interplanetary strike is pressed. The values
-// are BRE's own: its IBBS attack record stores Quick=0, Normal=1, Extended=2,
-// so a packet stays readable to the original. The zero value is QuickStrike
-// rather than the common case, which is BRE's encoding and not a default —
-// every send names its kind.
+// are BRE's own: its IBBS attack record stores Quick=0, Normal=1, Extended=2.
+// NOT for wire compatibility — IB defines its own JSON packets
+// (docs/dev/ibbs-packet-format.md) and never exchanges them with the original,
+// so no BRE board ever reads one of these. They match so that the encoding
+// stays checkable against the disassembly and the docs' cross-references mean
+// what they say. The zero value is QuickStrike rather than the common case,
+// which is BRE's encoding and not a default — every send names its kind.
 type AttackKind int
 
 const (
@@ -713,7 +716,19 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 // answered nothing a player wants to know after a battle.
 func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Invasion from %s.\n", raider(atk))
+	// DELIBERATE DIVERGENCE: the defender is told HOW the strike was pressed.
+	// BRE names the type to the attacker ("Extended Battle Results.") and never
+	// to the defender, whose recap says only that a force "attacked!". That gap
+	// is not cosmetic — the type sets the attacker's strength, the share of land
+	// it takes and, through the shared retreat fraction, how noisy the battle
+	// was — so a defender cannot tell a cheap probe from a committed assault
+	// even after the fact. Group attacks get no choice of type in the original,
+	// and Kind's zero value is QuickStrike, so Group MUST be tested first.
+	if atk.Group {
+		fmt.Fprintf(&b, "Invasion from %s (group attack).\n", raider(atk))
+	} else {
+		fmt.Fprintf(&b, "Invasion from %s (%s).\n", raider(atk), atk.Kind)
+	}
 	if won {
 		b.WriteString("Your forces lost the field.\n")
 	} else {

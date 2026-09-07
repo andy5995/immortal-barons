@@ -37,8 +37,10 @@ func TestAttackKindRatesMatchBRE(t *testing.T) {
 
 // TestAttackKindWireCodes pins the values BRE stores in its outbound attack
 // record (BRE.OVR's IBBS attack unit presets 1 and writes 0 for '2', 2 for '3').
-// A packet has to stay readable to the original, so these are not free to
-// renumber.
+// They are pinned to keep IB's encoding checkable against that disassembly, not
+// for interoperability: IB's packets are its own JSON and no BRE board reads
+// them. Renumbering would not break a peer, it would break the correspondence
+// every note about these values relies on.
 func TestAttackKindWireCodes(t *testing.T) {
 	for _, c := range []struct {
 		kind AttackKind
