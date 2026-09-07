@@ -107,6 +107,53 @@ func (w *World) resolveCivilWar(e *Empire) {
 	w.postCivilWarNews(e)
 }
 
+// freeTradeContagion spreads a Free Trade Agreement partner's misery. The two
+// realms' peasants mix, so the healthier side's military morale and popular
+// support are dragged DOWN toward the worse side's — never the other way, and
+// never past it. See FreeTradeContagionDrain for the binary evidence and for
+// what one pass is worth.
+//
+// It sits in DAILY MAINTENANCE rather than in PlayTurn for two reasons. BRE's
+// routine is a world-wide sweep of every pair on the planet, run beside a
+// session and gated only on the clock, so it reaches realms whose owner is not
+// playing — a per-turn hook would spare exactly the idle realm the pact is
+// supposed to infect, and would fire more often for a baron who plays more.
+// And its magnitude is denominated in elapsed time, not in turns, so hanging it
+// on the turn counter would make the sysop's Turns Per Day setting silently
+// retune it.
+func (w *World) freeTradeContagion() {
+	for _, t := range w.Treaties {
+		if t.Type != freeTradeAgreement {
+			continue
+		}
+		a, b := w.FindByName(t.A), w.FindByName(t.B)
+		if a == nil || b == nil || !a.Alive || !b.Alive {
+			continue
+		}
+		// Two independent rolls, as the original draws them: a pair can pass the
+		// misery along in morale without passing it along in support.
+		w.spreadMisery(&a.Morale, &b.Morale)
+		w.spreadMisery(&a.Support, &b.Support)
+	}
+}
+
+// spreadMisery drains the healthier of two stats toward the worse one on a
+// FreeTradeContagionOdds roll, clamped so it never overshoots past it. Equal
+// figures cost nothing, and the worse figure never moves at all.
+func (w *World) spreadMisery(x, y *int) {
+	high, low := x, y
+	if *y > *x {
+		high, low = y, x
+	}
+	if *high <= *low {
+		return
+	}
+	if w.rng.Intn(FreeTradeContagionOdds) != 0 {
+		return
+	}
+	*high = clampPct(max(*low, *high-FreeTradeContagionDrain))
+}
+
 // moraleDesertRate draws this turn's desertion percentage. BRE picks a band from
 // the morale figure and jitters it with two independent draws, so the milder
 // bands often come out zero or negative and nobody leaves.

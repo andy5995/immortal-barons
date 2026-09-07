@@ -2484,7 +2484,7 @@ access list** for the two fields: 62 sites in `BRE.OVR` and 4 in `BRE.EXE`.
 | Stir Revolts against you (local) | support `− (Random(4)+5)`, floor 5 | `BRE.OVR 0x4C00C` |
 | Demoralize Forces arriving in a packet | morale `× 6/7` | `BRE.OVR 0x4AC91` |
 | Stir Revolts arriving in a packet | support `× 11/13` | `BRE.OVR 0x4AE61` |
-| A Free Trade Agreement partner in worse shape | drags you toward them (NOT built in IB) | `BRE.OVR 0x99BF` |
+| A Free Trade Agreement partner in worse shape | drags you toward them (built, #153 — one 1-in-3 roll per stat per day, floored at the partner's figure, silent) | `BRE.OVR 0x99BF` |
 
 Both are clamped to `[0, 100]` where they are applied. **Every** covert op — not
 only an AI's — floors its victim at **5** of either stat (`BRE.OVR 0x4C02F`,

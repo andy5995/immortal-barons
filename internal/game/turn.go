@@ -154,6 +154,9 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		if len(w.Empires) > w.HumanCount() {
 			rep.step("Playing the computer barons' turns")
 		}
+		// Before the day's turns, so a realm plays with the figures its Free Trade
+		// partners left it. Silent, as in the original — no news, no recap line.
+		w.freeTradeContagion()
 		w.aiPlay(w.LastMaintDate)
 		// Pirate raids are per-turn now (maybePirateRaid in PlayTurn), not a daily
 		// sweep — so they land randomly across turns (~1-in-5) instead of clustering

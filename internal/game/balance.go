@@ -392,3 +392,28 @@ var TerrorOpLosses = map[TerrorOpType]TerrorPctLoss{
 // often than the original's, and never more than once however many turns it
 // took. The per-resource shares are eventMagnitudePct in events_random.go.
 const RandomEventChancePct = 9
+
+// The Free Trade Agreement's morale/support contagion — the pact's downside,
+// which the shipped instructions state outright: the income is large, "but due
+// to the contact of peasants between empires, bad morale and support will spread
+// throughout other realms if not controlled quickly".
+//
+// BINARY-VERIFIED (BRE.OVR 0x98dc, gated on relation == 3 at 0x99b4). For every
+// ordered pair holding a Free Trade Agreement, the HEALTHIER realm loses the
+// number of whole clock hours elapsed since the routine last ran, floored at the
+// partner's figure — morale on one 1-in-3 roll (0x9a03), popular support on a
+// second, independent one (0x9aff). Nothing in the routine ever RAISES a stat,
+// so the worse partner is never pulled up; the pact drags one way only. It is
+// also silent — the routine references no strings, so BRE files no news line and
+// no recap entry, and IB files none either.
+//
+// UNITS: BRE runs this beside a session on an hourly clock, so its expected loss
+// is a third of a point per elapsed hour whatever the board's traffic — 8 points
+// a stat a day either way, since the hours in a day are the same however they
+// are divided into passes. IB has no session clock; it applies the pass once in
+// daily maintenance with a full day's 24 hours, which is exactly BRE's own
+// once-a-day-session case and carries the same 8-point expectation.
+const (
+	FreeTradeContagionOdds  = 3  // binary: fires on Random(3) == 0
+	FreeTradeContagionDrain = 24 // binary: hours elapsed, one whole game day of them
+)
