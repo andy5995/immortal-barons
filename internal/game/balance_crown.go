@@ -77,3 +77,39 @@ var LotteryPrizes = [LotteryLetters + 1]int64{
 	4_000_000,
 	10_000_000,
 }
+
+// The crown purse's OTHER outlet: an occasional planet-wide handout.
+//
+// BINARY-VERIFIED (`write_economic_policy_news`, BRE.OVR 0x04F082), tail-called
+// from `process_end_of_turn` behind `Random(100) == 0` — about one player turn
+// in a hundred. It then rolls `Random(6)` and runs one of six crown events; two
+// of the six pay out of the purse and are the ones below. (The other four are
+// the investment-rate nudges and the crown-tax random walk; IB's investment
+// drift already stands in for the first pair, and the tax walk is a separate
+// question because IB holds that rate as a whole-percent sysop knob.)
+//
+// Both are shares of the WHOLE purse rather than per-realm allowances, so a
+// large league drains it faster than a small one — that asymmetry is the
+// original's, not an oversight.
+const (
+	// CrownEventChancePct is how often any crown event fires, per turn.
+	CrownEventChancePct = 1
+	// CrownEventKinds is the number of crown events rolled between (Random(6)).
+	CrownEventKinds = 6
+	// CrownGoldRoll and CrownTrooperRoll are which of those rolls pay out.
+	CrownGoldRoll    = 5
+	CrownTrooperRoll = 0
+
+	// CrownGoldDivisor: every living realm is paid trunc(purse/50), and the
+	// purse is charged that once PER REALM (`mov cx,0x32` at +0x198d, the share
+	// computed once before the loop).
+	CrownGoldDivisor = 50
+
+	// The trooper handout buys troopers out of the purse at CrownTrooperPrice
+	// gold each: the share is trunc(trunc(purse/1000)/livingRealms), so the
+	// division by 1000 IS the price (`mov cx,0x3e8` at +0x1683, then a second
+	// divide by the realm count at +0x168f). Capped at CrownTrooperMax
+	// (`0x61a8` at +0x16a2) and skipped entirely when it comes out at zero.
+	CrownTrooperPrice = 1000
+	CrownTrooperMax   = 25_000
+)

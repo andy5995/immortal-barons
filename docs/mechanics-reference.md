@@ -345,6 +345,38 @@ flow runs in this order:
    trip through a six-byte real loses the last unit. That is its float format,
    not a rule.
 
+   ### The Queen's purse also hands out gold and troopers (#219)
+
+   The refund above is not the purse's only outlet. BINARY-VERIFIED from
+   `write_economic_policy_news` (`BRE.OVR 0x04F082`), tail-called from
+   `process_end_of_turn` behind `Random(100) == 0` — about one turn in a
+   hundred. It then rolls `Random(6)` and runs one of six crown events; two pay
+   out of the purse, so a handout of either kind lands on roughly one turn in
+   six hundred.
+
+   - **Gold** (roll 5): `share = trunc(purse / 50)` (`mov cx,0x32`, +0x198d),
+     computed ONCE before the loop. Every living realm gains `share`, and the
+     purse is charged `share` **per realm** — so the last realm paid gets as
+     much as the first, and a large league drains the purse faster.
+   - **Troopers** (roll 0): `share = trunc(trunc(purse / 1000) / livingRealms)`
+     (`mov cx,0x3e8` at +0x1683, then a second divide at +0x168f), capped at
+     **25,000** (`0x61a8`, +0x16a2) and skipped entirely when it comes out at
+     zero. The division by 1,000 is the price: the crown buys the troopers.
+
+   Note the two divide in opposite directions — gold is a share of the whole
+   purse handed to each realm, troopers are a fixed pot split between them — so
+   a crowded planet gets *more* gold in total and *fewer* troopers each. That
+   asymmetry is the original's.
+
+   Capture evidence: nine gold handouts between 2,818,071 and 4,749,609 and six
+   trooper handouts between 529 and 25,000, the cap hit twice.
+
+   **IB implements both** (`internal/game/crown_handout.go`, constants in
+   `balance_crown.go`). The other four rolls are the investment-rate nudges
+   (IB's existing investment drift stands in for them) and the crown-tax random
+   walk, which is not ported: IB holds that rate as a whole-percent sysop knob,
+   so adopting a floating value is an ownership decision rather than a copy.
+
    IB expresses the trigger as a per-day flag on the empire (`RefundTaken`,
    cleared with the other daily counters) rather than re-deriving BRE's two
    tests, since it has no turn-stage counter to test — `TurnProgress` is a set of

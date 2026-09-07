@@ -59,6 +59,10 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	// process_end_of_turn tail-calls resolve_random_game_event once the turn is
 	// otherwise finished, so the notice surfaces on the next play.
 	maybeRandomEvent(w, e)
+	// The crown's own end-of-turn roll, from the same place (#219). Unlike the
+	// random event this is planet-wide: it is rolled by whoever is playing and
+	// paid to everyone.
+	w.maybeCrownHandout()
 }
 
 // MaintReport summarizes what a DailyMaintenance call did, so the login flow and
