@@ -1,6 +1,12 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Random events take a share of what you hold, not a flat handful, and fire
+    once per turn
+  * The Queen's purse hands out gold and troopers to the whole planet
+  * A Free Trade Agreement spreads a partner's low morale and support
+  * An invasion notice names the kind of strike that hit you
+  * A packet refused on its signature is held for later instead of destroyed
   * A covert operation against a treaty partner breaks the pact and costs
     support and morale
   * ftn.cfg takes an InboundDir line per directory the mailer delivers into
