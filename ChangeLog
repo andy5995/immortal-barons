@@ -1,8 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
-  * Random events take a share of what you hold, not a flat handful, and fire
-    once per turn
+  * Random events take a share of what you hold, not a flat handful, and are
+    rolled at the end of every turn rather than once a day
   * The Queen's purse hands out gold and troopers to the whole planet
   * A Free Trade Agreement spreads a partner's low morale and support
   * An invasion notice names the kind of strike that hit you
