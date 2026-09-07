@@ -2,13 +2,12 @@ package game
 
 import "fmt"
 
-// Random per-empire "while you were away" events, in the spirit of BRE's
-// events.dat file (see docs/mechanics-reference.md). Wording here is
-// original, not copied from the original's data file.
-
-// RandomEventChancePct is the odds (per empire, per maintenance day) that a
-// random event fires. Tunable.
-const RandomEventChancePct = 25
+// Random per-empire "while you were away" events. The MECHANIC is BRE's,
+// binary-verified from resolve_random_game_event (BRE.OVR ovr_00dde0 +0x05d3);
+// the WORDING is IB's own, because the original keeps its lines in a data file
+// (GAME\\EVENTS.DAT) and they are its expression, not its rules.
+//
+// See docs/mechanics-reference.md, "Random events".
 
 // eventResource names one of the seven resources a random event can move.
 type eventResource int
@@ -24,20 +23,24 @@ const (
 	numEventResources
 )
 
-// magRange is the inclusive [Min, Max] a random event's magnitude is drawn
-// from for one resource.
-type magRange struct{ Min, Max int }
-
-// eventMagnitude gives the roll range per resource. Food and People move in
-// bigger chunks than the military/agent counts.
-var eventMagnitude = [numEventResources]magRange{
-	eventTroopers: {1, 20},
-	eventJets:     {1, 5},
-	eventTurrets:  {1, 5},
-	eventTanks:    {1, 3},
-	eventAgents:   {1, 3},
-	eventFood:     {50, 500},
-	eventPeople:   {10, 200},
+// eventMagnitudePct is the share of what a realm ALREADY HOLDS that one event
+// moves, per resource. BINARY-VERIFIED: the original stores these as one byte
+// per resource in a ten-byte record beside the resource's name, at DGROUP
+// offset 0x476 (`BRE.EXE`, DS base 0x148a0), and reads the percent at +9.
+//
+// A share rather than a flat count is the whole character of the mechanic. A
+// fixed band cannot serve a realm holding four hundred troopers and one holding
+// four hundred thousand: IB drew troopers from 1-20 until 2026-09-08, so a
+// mature realm's "event" moved a rounding error and the feature was invisible
+// past the first day.
+var eventMagnitudePct = [numEventResources]int{
+	eventTroopers: 3,
+	eventJets:     5,
+	eventTurrets:  5,
+	eventTanks:    7,
+	eventAgents:   5,
+	eventFood:     15,
+	eventPeople:   4,
 }
 
 // eventGainLines and eventLoseLines hold 2-4 original one-line variants per
@@ -135,12 +138,19 @@ func resourcePtr(e *Empire, r eventResource) *int {
 	}
 }
 
-// maybeRandomEvent fires at most one "while you were away" random event for
-// e, with probability RandomEventChancePct. A "lose" category is skipped
-// when the resource is already 0 (a player is never told they lost units
-// they don't have), and the delta is clamped so the resource never goes
-// below 0. All randomness draws from w.rng for determinism.
+// maybeRandomEvent fires at most one random event for e at the END OF A TURN.
+// BINARY-VERIFIED shape (resolve_random_game_event): a realm under New Realm
+// Protection is skipped outright, the event fires on RandomEventChancePct of
+// turns, then one of the seven resources and one of gain/lose are drawn flat.
+// The amount is a share of what is held, and an amount that truncates to zero
+// means nothing happens at all — which is the original's own way of leaving a
+// realm with little of something alone.
 func maybeRandomEvent(w *World, e *Empire) {
+	// A protected realm is left out: the original tests is_under_protection
+	// before it even rolls (+0x05e6).
+	if e.Protection > 0 {
+		return
+	}
 	if w.rng.Intn(100) >= RandomEventChancePct {
 		return
 	}
@@ -154,8 +164,11 @@ func maybeRandomEvent(w *World, e *Empire) {
 		return
 	}
 
-	rng := eventMagnitude[r]
-	amount := rng.Min + w.rng.Intn(rng.Max-rng.Min+1)
+	// trunc(held x pct / 100); zero means the event does not happen.
+	amount := *ptr * eventMagnitudePct[r] / 100
+	if amount <= 0 {
+		return
+	}
 
 	var lines []string
 	if gain {

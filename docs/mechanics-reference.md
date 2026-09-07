@@ -2586,6 +2586,33 @@ IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
   a galactic official killing population, NOT a name for the League Coordinator,
   which is the office that owns a league's ruleset.
 
+  **The driving code, read 2026-09-08** (`resolve_random_game_event`,
+  `BRE.OVR ovr_00dde0 +0x05d3`, tail-called from `process_end_of_turn`). All of
+  it is BINARY-VERIFIED and IB now matches it:
+
+  - **Once per TURN, not once per day.** The roll sits at the end of a turn.
+  - **A realm under New Realm Protection is skipped** before any roll
+    (`is_under_protection`, +0x05e6).
+  - **`Random(100)`, and it proceeds only on 91..99** — nine turns in a hundred.
+    Everything else returns having done nothing.
+  - **`Random(7)+1` picks the resource** and **`Random(2)` picks gain or lose**,
+    both flat: no resource or direction is favoured.
+  - **The amount is a SHARE of what the realm already holds**,
+    `trunc(held x pct / 100)`, and an amount that truncates to zero means the
+    event does not happen. The percentages live one byte per resource in a
+    ten-byte record beside each resource's name, at DGROUP offset `0x476`
+    (`BRE.EXE`, DS base `0x148a0`), read at `+9`:
+
+    | Troopers | Jets | Turrets | Tanks | Agents | Food | People |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | 3% | 5% | 5% | 7% | 5% | 15% | 4% |
+
+  IB used a flat band per resource (troopers 1-20, food 50-500, ...) rolled at
+  25% once per maintenance day until 2026-09-08. Both halves were wrong, and the
+  magnitude one badly: a share scales with the realm, a band cannot, so a mature
+  realm's "event" moved a rounding error and the feature was invisible past the
+  first day. `RandomEventChancePct` and `eventMagnitudePct` carry the figures.
+
   **Not built:** IB has no sysop-editable events file. A sysop who wants their
   own events has nowhere to put them.
 

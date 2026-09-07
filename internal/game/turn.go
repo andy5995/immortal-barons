@@ -55,6 +55,10 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	e.RegionsBoughtThisTurn = 0
 	e.TurnProgress = TurnProgress{} // turn committed: the next turn starts with a clean slate (#10)
 	e.LastPlayed = today
+	// The random event is the LAST thing a turn does, as it is in the original:
+	// process_end_of_turn tail-calls resolve_random_game_event once the turn is
+	// otherwise finished, so the notice surfaces on the next play.
+	maybeRandomEvent(w, e)
 }
 
 // MaintReport summarizes what a DailyMaintenance call did, so the login flow and
@@ -150,11 +154,6 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		// Pirate raids are per-turn now (maybePirateRaid in PlayTurn), not a daily
 		// sweep — so they land randomly across turns (~1-in-5) instead of clustering
 		// on the day's first turn (#21).
-		for _, e := range w.Empires {
-			if e.Alive {
-				maybeRandomEvent(w, e)
-			}
-		}
 		for _, e := range w.Empires {
 			if e.Owner == "" {
 				e.Events = nil

@@ -88,7 +88,9 @@ func TestMaybeRandomEventGainIncreasesResourceAndAppendsOneLine(t *testing.T) {
 func TestDailyMaintenancePersistsHumanEventsButClearsAIEvents(t *testing.T) {
 	// A human empire's random event must survive maintenance (shown at their
 	// next login), while an AI/idle empire's events are cleared same-day
-	// since nobody will ever read them.
+	// since nobody will ever read them. The event now fires at the END OF A
+	// TURN (BRE's process_end_of_turn), so the turn is what has to be played
+	// -- driving DailyMaintenance alone can no longer produce one.
 	found := false
 	for seed := int64(0); seed < 300; seed++ {
 		cfg := DefaultConfig()
@@ -96,14 +98,21 @@ func TestDailyMaintenancePersistsHumanEventsButClearsAIEvents(t *testing.T) {
 		w := NewWorldSeed(cfg, seed)
 		w.Pirates = nil
 		human := w.AddHuman("h", "Realm")
-		human.Troopers, human.Jets, human.Turrets = 50, 10, 10
-		human.Tanks, human.Agents, human.Food, human.People = 10, 10, 1000, 500
+		human.Troopers, human.Jets, human.Turrets = 50_000, 10_000, 10_000
+		human.Tanks, human.Agents, human.Food, human.People = 10_000, 10_000, 100_000, 50_000
+		human.Protection = 0
 
 		ai := w.AddHuman("", "AIRealm")
 		ai.Owner = ""
-		ai.Troopers, ai.Jets, ai.Turrets = 50, 10, 10
-		ai.Tanks, ai.Agents, ai.Food, ai.People = 10, 10, 1000, 500
+		ai.Troopers, ai.Jets, ai.Turrets = 50_000, 10_000, 10_000
+		ai.Tanks, ai.Agents, ai.Food, ai.People = 10_000, 10_000, 100_000, 50_000
+		ai.Protection = 0
 
+		w.PlayTurn(human, "2026-07-01")
+		w.PlayTurn(ai, "2026-07-01")
+		if len(human.Events) == 0 {
+			continue
+		}
 		w.LastMaintDate = "2026-07-01"
 		w.DailyMaintenance("2026-07-02")
 
@@ -120,26 +129,65 @@ func TestDailyMaintenancePersistsHumanEventsButClearsAIEvents(t *testing.T) {
 	}
 }
 
-func TestMaybeRandomEventSkipsLoseOnZeroResource(t *testing.T) {
-	// An empire with everything at 0: any fired event must be a gain, since
-	// lose-on-zero is skipped. Run enough seeds to be confident lose-skip
-	// logic actually executes (rather than just never rolling lose).
-	sawEvent := false
-	for seed := int64(0); seed < 300; seed++ {
+// A realm holding nothing gets no event at all: the amount is a SHARE of what
+// is held, so it truncates to zero and the original returns without a word.
+// This is the behaviour that replaced a flat 1-20 roll, and it is the reason
+// the old "lose on zero is skipped" test could no longer fire anything.
+func TestRandomEventLeavesAnEmptyRealmAlone(t *testing.T) {
+	for seed := int64(0); seed < 500; seed++ {
 		w := NewWorldSeed(DefaultConfig(), seed)
 		e := &Empire{}
+		maybeRandomEvent(w, e)
+		if len(e.Events) != 0 {
+			t.Fatalf("seed %d: an empire holding nothing was given an event: %v", seed, e.Events)
+		}
+	}
+}
+
+// A realm under New Realm Protection is skipped before the roll is even made
+// (is_under_protection at resolve_random_game_event +0x05e6).
+func TestRandomEventSkipsProtectedRealms(t *testing.T) {
+	for seed := int64(0); seed < 500; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		e := &Empire{Protection: 1, Troopers: 1_000_000, Jets: 1_000_000, Turrets: 1_000_000,
+			Tanks: 1_000_000, Agents: 1_000_000, Food: 1_000_000, People: 1_000_000}
+		maybeRandomEvent(w, e)
+		if len(e.Events) != 0 {
+			t.Fatalf("seed %d: a protected realm was given an event: %v", seed, e.Events)
+		}
+	}
+}
+
+// The amount moved is exactly the resource's binary-verified share of what is
+// held. Asserted as golden literals rather than against eventMagnitudePct, so
+// a retune has to bring new evidence (see AGENTS.md).
+func TestRandomEventMovesTheVerifiedShare(t *testing.T) {
+	const held = 1_000_000
+	want := map[eventResource]int{
+		eventTroopers: 30_000,  // 3%
+		eventJets:     50_000,  // 5%
+		eventTurrets:  50_000,  // 5%
+		eventTanks:    70_000,  // 7%
+		eventAgents:   50_000,  // 5%
+		eventFood:     150_000, // 15%
+		eventPeople:   40_000,  // 4%
+	}
+	for seed := int64(0); seed < 400; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		e := &Empire{Troopers: held, Jets: held, Turrets: held,
+			Tanks: held, Agents: held, Food: held, People: held}
 		maybeRandomEvent(w, e)
 		if len(e.Events) == 0 {
 			continue
 		}
-		sawEvent = true
-		for r := eventResource(0); r < numEventResources; r++ {
-			if *resourcePtr(e, r) < 0 {
-				t.Fatalf("seed %d: zero-resource empire went negative on resource %d", seed, r)
+		for r, w2 := range want {
+			got := *resourcePtr(e, r)
+			if got == held {
+				continue // untouched
+			}
+			if got != held+w2 && got != held-w2 {
+				t.Fatalf("seed %d: resource %d moved to %d, want %d +/- %d", seed, r, got, held, w2)
 			}
 		}
-	}
-	if !sawEvent {
-		t.Fatal("no seed fired an event for a zero-resource empire; can't confirm lose-skip behavior")
 	}
 }

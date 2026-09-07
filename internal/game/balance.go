@@ -380,3 +380,15 @@ var TerrorOpLosses = map[TerrorOpType]TerrorPctLoss{
 	TerrorOpEmigrations:  {Base: 4, Spread: 7},
 	TerrorOpBombFood:     {Base: 0, Spread: 30},
 }
+
+// RandomEventChancePct is how often a realm's end-of-turn random event fires.
+// BINARY-VERIFIED: resolve_random_game_event (BRE.OVR ovr_00dde0 +0x05f2) rolls
+// Random(100) and proceeds only on 91..99 — nine values out of a hundred — then
+// returns without doing anything at all on the other ninety-one. It is tested
+// once per TURN, from process_end_of_turn, not once per maintenance day.
+//
+// IB rolled 25% once a day until 2026-09-08, which is both the wrong rate and
+// the wrong clock: a realm playing its full allowance saw the event far less
+// often than the original's, and never more than once however many turns it
+// took. The per-resource shares are eventMagnitudePct in events_random.go.
+const RandomEventChancePct = 9
