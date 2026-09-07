@@ -3935,6 +3935,15 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   destroyed random units whichever of the nine was sent; a packet from a board
   that predates the dispatch still gets that blanket effect
   (`TerrorUnitLossDenom`), since it names no operation.
+
+  **IB's returning report accounts for every agent, which the original's does
+  not.** `ipreport.dat`'s templates count successes, so a batch of 25 against a
+  headquarters that seven agents flatten reads exactly like a batch of 8: the
+  other seventeen land on a field already at zero, achieve nothing, and appear
+  nowhere. IB's line splits the batch three ways — got through, caught,
+  achieved nothing — so the sender can see when a batch was larger than the
+  target could absorb. The target's own event is unchanged and still counts only
+  the hits, because that is all the defender can observe.
 - **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
   original's name here, as it does for the Gooie Kablooie and the S3-Sabre
   (#218): players coming from the original look for these by name. Do not

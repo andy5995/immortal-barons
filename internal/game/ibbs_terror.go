@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
@@ -179,7 +180,7 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	// The agents that did NOT get through are the only thing that gives the
 	// sender away, and they give it away whatever the rest of the batch did.
 	agentsCaught(target, t, caught)
-	res.Report = terrorOpReport(t.Op, hit)
+	res.Report = terrorOpReport(t.Op, t.Agents, hit, caught)
 	if hit == 0 {
 		res.Outcome = OutcomeRepelled
 		target.addEvent(fmt.Sprintf("Terrorists struck at your %s and achieved nothing.", terrorOpTargetName(t.Op)))
@@ -388,11 +389,41 @@ func terrorOpDamage(op TerrorOpType) string {
 }
 
 // terrorOpReport is what the launching realm reads when the strike comes home.
-func terrorOpReport(op TerrorOpType, hit int) string {
-	if hit == 0 {
-		return fmt.Sprintf("Your agents reached their target and achieved nothing (%s).", op)
+// It accounts for every agent sent, because the three ways one can end differ
+// only in the report: an agent stopped by security and an agent that landed on a
+// target already at zero cost the same gold, and counting successes alone reads
+// the same whether the batch was the right size or three times too big.
+func terrorOpReport(op TerrorOpType, sent, hit, caught int) string {
+	if sent == 1 {
+		switch {
+		case hit == 1:
+			return fmt.Sprintf("%s: your agent got through.", op)
+		case caught == 1:
+			return fmt.Sprintf("%s: your agent was caught.", op)
+		}
+		return fmt.Sprintf("%s: your agent got through and achieved nothing.", op)
 	}
-	return fmt.Sprintf("%s: your agents got through %s", op, timesSuffix(hit))
+	var subject string
+	switch hit {
+	case 0:
+		subject = fmt.Sprintf("none of your %d agents", sent)
+	case sent:
+		subject = fmt.Sprintf("all %d of your agents", sent)
+	default:
+		subject = fmt.Sprintf("%d of your %d agents", hit, sent)
+	}
+	report := fmt.Sprintf("%s: %s got through.", op, subject)
+	var tail []string
+	if caught > 0 {
+		tail = append(tail, fmt.Sprintf("%d caught", caught))
+	}
+	if wasted := sent - hit - caught; wasted > 0 {
+		tail = append(tail, fmt.Sprintf("%d achieved nothing", wasted))
+	}
+	if len(tail) > 0 {
+		report += " " + strings.Join(tail, ", ") + "."
+	}
+	return report
 }
 
 // timesSuffix closes a report line with how many agents landed, counting rather
