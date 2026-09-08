@@ -274,10 +274,11 @@ func TestDailyMaintenanceInitialisesDate(t *testing.T) {
 	}
 }
 
-// Maintenance never advances more than ONE game day, however long the game sat
-// idle: missed days are lost, not banked. Catching them all up at once meant a
-// returning player met several days of raids, riots and AI turns in one login.
-func TestDailyMaintenanceAdvancesOneDayOnly(t *testing.T) {
+// Maintenance catches the game clock up to today, simulating every day that
+// passed while nobody logged in. The clock dates every packet a board files, so
+// a board left behind reports to its league under a day the league has passed —
+// and before this it could never catch up, advancing at most one day per call.
+func TestDailyMaintenanceCatchesUpMissedDays(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
 	w.LastMaintDate = "2026-07-01"
@@ -285,35 +286,83 @@ func TestDailyMaintenanceAdvancesOneDayOnly(t *testing.T) {
 	me.TurnsLeft = 0
 
 	// Four days with nobody playing, then one run.
-	if r := w.DailyMaintenance("2026-07-05"); r.Days != 1 {
-		t.Errorf("a four-day gap should still advance one day, reported %d", r.Days)
+	if r := w.DailyMaintenance("2026-07-05"); r.Days != 4 {
+		t.Errorf("a four-day gap should advance four days, reported %d", r.Days)
 	}
-	if w.GameDay != 1 {
-		t.Errorf("GameDay should advance by exactly 1, got %d", w.GameDay)
+	if w.GameDay != 4 {
+		t.Errorf("GameDay should advance by 4, got %d", w.GameDay)
 	}
-	if w.LastMaintDate != "2026-07-02" {
-		t.Errorf("the game clock should step one day, got %q", w.LastMaintDate)
+	if w.LastMaintDate != "2026-07-05" {
+		t.Errorf("the game clock should reach today, got %q", w.LastMaintDate)
 	}
 	if me.TurnsLeft != cfg.TurnsPerDay {
 		t.Errorf("turns should be refilled to %d, got %d", cfg.TurnsPerDay, me.TurnsLeft)
 	}
 
-	// A second login the same real day must not advance another game day, even
-	// though the game clock is still behind.
+	// A second login the same real day must not advance another game day.
 	me.TurnsLeft = 0
 	if r := w.DailyMaintenance("2026-07-05"); r.Days != 0 {
 		t.Errorf("a second run the same day should do nothing, reported %d", r.Days)
 	}
-	if w.GameDay != 1 {
-		t.Errorf("GameDay should stay at 1 on a same-day rerun, got %d", w.GameDay)
+	if w.GameDay != 4 {
+		t.Errorf("GameDay should stay at 4 on a same-day rerun, got %d", w.GameDay)
 	}
 
 	// The next real day advances one more.
 	if r := w.DailyMaintenance("2026-07-06"); r.Days != 1 {
 		t.Errorf("the next real day should advance one day, reported %d", r.Days)
 	}
-	if w.GameDay != 2 {
-		t.Errorf("GameDay should be 2 after a second day, got %d", w.GameDay)
+	if w.GameDay != 5 {
+		t.Errorf("GameDay should be 5 after a second day, got %d", w.GameDay)
+	}
+	if w.LastMaintDate != "2026-07-06" {
+		t.Errorf("the clock should stay level with today, got %q", w.LastMaintDate)
+	}
+}
+
+// There is no ceiling on the catch-up (MaxCatchUpDays is 0). A board dormant
+// for most of a year simulates every one of those days: measured at ~0.7ms a
+// day and flat in the number of realms, so a full year costs a quarter of a
+// second, and the days are worth more than the wait.
+func TestDailyMaintenanceCatchesUpWithoutACeiling(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-01-01"
+	w.AddHuman("me", "Mine")
+
+	r := w.DailyMaintenance("2026-07-05")
+	if r.Days != 185 {
+		t.Errorf("every missed day should be simulated, reported %d of 185", r.Days)
+	}
+	if w.GameDay != 185 {
+		t.Errorf("GameDay should advance by 185, got %d", w.GameDay)
+	}
+	if w.LastMaintDate != "2026-07-05" {
+		t.Errorf("the clock should reach today, got %q", w.LastMaintDate)
+	}
+}
+
+// The report names each stage once however many days ran, so a catch-up does
+// not print the same five lines five times over.
+func TestCatchUpReportsEachStageOnce(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-07-01"
+	w.AddHuman("me", "Mine")
+
+	r := w.DailyMaintenance("2026-07-05")
+	if r.Days != 4 {
+		t.Fatalf("expected a four-day catch-up, got %d", r.Days)
+	}
+	seen := map[string]int{}
+	for _, s := range r.Steps {
+		seen[s]++
+	}
+	for s, n := range seen {
+		if n > 1 {
+			t.Errorf("step %q reported %d times, want once", s, n)
+		}
+	}
+	if len(r.Steps) == 0 {
+		t.Error("a four-day catch-up reported no steps at all")
 	}
 }
 

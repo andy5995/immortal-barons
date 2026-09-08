@@ -295,6 +295,14 @@ const (
 	TravelSecondsCutoff = 1.0 / (24 * 60) // days; under this the screen reads in seconds
 )
 
+// MaxCatchUpDays bounds how many missed game days one DailyMaintenance call
+// simulates before it snaps the clock to today. **0 is no cap**, which is the
+// setting: a day the game skips is a day the board's league played without it,
+// so the days are worth more than the wait. IB's own knob either way — BRE has
+// no equivalent, because a DOS board ran maintenance from the BBS's nightly
+// event and never fell days behind.
+const MaxCatchUpDays = 0
+
 // Online indicator — how long after a baron's last menu action the roster
 // screens still mark them online. IB's own; BRE has no such display.
 //

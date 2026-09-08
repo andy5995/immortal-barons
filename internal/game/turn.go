@@ -83,12 +83,44 @@ type MaintReport struct {
 // step records a stage of daily maintenance for the caller's report.
 func (r *MaintReport) step(name string) { r.Steps = append(r.Steps, name) }
 
-// DailyMaintenance advances the world by AT MOST ONE game day per real day,
-// however long the game has sat idle. A realm nobody has touched for four days
-// comes back to one day of change, not four: skipped days are lost, not banked.
-// Catching up all of them at once meant a returning player met four days of
-// pirate raids, riots, AI turns and price moves in a single login, which is both
-// unreadable and unfair to whoever was actually playing.
+// dedupeSteps keeps the first occurrence of each stage. Catching several days
+// up runs the same stages once per day, and a report that said "Restocking the
+// food market" five times would describe the implementation rather than what
+// happened; Days already says how many days ran.
+func (r *MaintReport) dedupeSteps() {
+	seen := make(map[string]bool, len(r.Steps))
+	kept := r.Steps[:0]
+	for _, s := range r.Steps {
+		if !seen[s] {
+			seen[s] = true
+			kept = append(kept, s)
+		}
+	}
+	r.Steps = kept
+}
+
+// DailyMaintenance brings the world up to today, running one full day of
+// maintenance for each calendar day that has passed since the game clock last
+// moved. A board nobody logged into for four days catches all four up on the
+// next login, so LastMaintDate is the real date again once this returns.
+//
+// The clock CANNOT be allowed to lag. It dates every packet a board files
+// (Packet.Date), so a board a few days behind reports its scores and news to
+// the league under a day the rest of the league has already passed, and the gap
+// only ever grows: this ran at most one day per call, so a night the board was
+// down cost a day that nothing gave back. A league game advances whether or not
+// anyone on a given board plays, and no scheduled task is needed for that —
+// every login takes this path (internal/play).
+//
+// Catching up is a real simulation of those days, not a jump in the calendar:
+// the AI barons take their turns, land and turns accrue, investments mature.
+// What a returning player does NOT meet is several days of news at once, since
+// each day's rollNews rolls the day before it out of view.
+//
+// A board dormant longer than MaxCatchUpDays simulates that many days and then
+// snaps the clock to today, so a world untouched for a year cannot hold a
+// caller's login (and every other node's, behind the same flock) simulating
+// three hundred days.
 //
 // It is idempotent within a real day (LastMaintRun), so several callers logging
 // in on the same day run it once between them. The first call on a brand-new
@@ -114,13 +146,37 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		w.LastMaintDate = today
 		return MaintReport{}
 	}
-	// One game day per real day. LastMaintRun is the real date this last ran;
-	// LastMaintDate is the game clock, which falls behind while nobody plays.
+	// LastMaintRun is the real date this last ran; LastMaintDate is the game
+	// clock, which this call is about to bring level with it.
 	if w.LastMaintRun == today || w.LastMaintDate >= today {
 		w.removeDeadHusks()
 		return MaintReport{}
 	}
-	rep := MaintReport{Days: 1}
+	var rep MaintReport
+	for w.LastMaintDate < today {
+		if MaxCatchUpDays > 0 && rep.Days >= MaxCatchUpDays {
+			break
+		}
+		rep.Days++
+		w.advanceOneDay(today, &rep)
+	}
+	w.LastMaintRun = today
+	// Only reachable under a cap. The days beyond it are lost, but the clock is
+	// not, or the board would go on filing packets under a stale date.
+	if w.LastMaintDate < today {
+		w.LastMaintDate = today
+	}
+	rep.dedupeSteps()
+	// Sweep stale husks even when no day rolled over (e.g. a same-day -maint on
+	// an already-current world), so past-day dead realms don't linger. A realm
+	// that died today (DiedDay == GameDay) is kept by removeDeadHusks.
+	w.removeDeadHusks()
+	return rep
+}
+
+// advanceOneDay runs one game day of maintenance and steps the clock to the
+// next date. Called once per day being caught up; see DailyMaintenance.
+func (w *World) advanceOneDay(today string, rep *MaintReport) {
 	{
 		rep.step("Paying out trading market sales")
 		w.settleMarketProceeds()                   // "Depositing trading market money" — pay sellers at day-end (#17)
@@ -221,18 +277,12 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 			rep.step("Crowning the Planetary Master")
 			w.endGame()
 		}
-		w.LastMaintRun = today
 		if next := w.nextDate(w.LastMaintDate); next != w.LastMaintDate {
 			w.LastMaintDate = next
 		} else {
 			w.LastMaintDate = today // malformed date; snap to today rather than stall
 		}
 	}
-	// Sweep stale husks even when no day rolled over (e.g. a same-day -maint on
-	// an already-current world), so past-day dead realms don't linger. A realm
-	// that died today (DiedDay == GameDay) is kept by removeDeadHusks.
-	w.removeDeadHusks()
-	return rep
 }
 
 // rollNews snapshots the day's planet totals into BulletinToday (rolling the

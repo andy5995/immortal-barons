@@ -3469,6 +3469,45 @@ original message's recipient list except the reader; `S` opens the same
 multi-select picker as Send Message. IB replies to the author alone, and asks its
 two-way `Public Reply?` only for interplanetary mail.
 
+### The game clock, and days nobody played
+
+The world keeps two dates. `LastMaintDate` is the **game clock** — the day the
+game believes it is, and the date stamped on the news masthead and on every
+inter-BBS packet the board files. `LastMaintRun` is the real date maintenance
+last ran, and is what keeps several callers logging in on one day from running
+it several times.
+
+The clock tracks the real calendar. A day that passes with nobody logging in is
+simulated on the next login: land and turns accrue, the AI barons take their
+turns, investments mature, and each day's news rolls the day before it out of
+view, so a player returning after a week reads one day of news rather than
+seven. **No scheduled task is needed for this** — every login runs daily
+maintenance inside its own transaction (`internal/play`). `-maint` from a
+nightly job is still worth running on a board with real callers, because it
+moves the work off a caller's login, but a board that never runs it no longer
+falls behind.
+
+The clock **must not** be allowed to lag, which is why this is not left to the
+sysop's cron. A board a few days behind reports its scores, news and battles to
+its league under a day the league has already passed. Until 2026-09-08 the
+clock advanced at most one day per call, so a night the board was down cost a
+day that nothing ever gave back, and the gap only grew.
+
+`GameDay` counts maintenance runs, so catching up keeps it level with the
+calendar: a board played twice a month reaches game day 60 on the same date as
+one played daily. Seasons (`Config.GameLength`) are counted in game days, which
+is why this matters to a league — a board that fell behind used to reach the end
+of a season later in real time than an active one. `GameDay` was never out of
+step with the game clock; the two lagged real time together.
+
+**There is no ceiling on a catch-up.** `MaxCatchUpDays` is the knob and it is
+set to `0`, meaning no cap; a day the game skips is a day the board's league
+played without it. Simulating one day measures at about 0.7ms and is flat in the
+number of realms, so even a board dormant for a year catches up in a quarter of
+a second — well inside the login's exclusive lock. Setting the constant above
+zero would cap the catch-up and snap the clock to today, losing the days beyond
+it but never the date.
+
 ## Menu fidelity vs BRE
 
 IB's menus match BRE's layout, item order, and hotkeys where practical (#17 menu

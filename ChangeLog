@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A board catches up the days that passed while nobody played, instead of
+    falling a day further behind for each one
   * Help on the Terrorist Ops and Special Operations menus explains what each
     operation does
   * The World Report lists nuclear, chemical and biological strikes as well as

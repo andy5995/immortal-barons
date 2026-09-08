@@ -94,7 +94,7 @@ func TestBulletinsWriteBothWebForms(t *testing.T) {
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
@@ -147,7 +147,7 @@ func TestBulletinTemplatesAreWrittenOnceAndNotOverwritten(t *testing.T) {
 	cfg.AICount = 1
 	cfg.BoardID = "Solo BBS"
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
@@ -229,7 +229,7 @@ func TestEveryBulletinPageLinksTheGameName(t *testing.T) {
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
@@ -281,7 +281,7 @@ func TestPageTitleNamesTheBoard(t *testing.T) {
 	cfg.BoardID = "Avalon"
 	cfg.BBSName = "The Dog House BBS"
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	if got, want := title(t, w), "Scoreboard | Immortal Barons | The Dog House BBS"; got != want {
 		t.Errorf("title = %q, want %q", got, want)
 	}
@@ -290,7 +290,7 @@ func TestPageTitleNamesTheBoard(t *testing.T) {
 	// word anyway.
 	cfg.BBSName = ""
 	w = game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	if got, want := title(t, w), "Scoreboard | Immortal Barons | Avalon"; got != want {
 		t.Errorf("title with no BBSName = %q, want %q", got, want)
 	}
@@ -299,7 +299,7 @@ func TestPageTitleNamesTheBoard(t *testing.T) {
 	// up rather than reading "Scoreboard | Immortal Barons | ".
 	cfg.BoardID = ""
 	w = game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	if got, want := title(t, w), "Scoreboard | Immortal Barons"; got != want {
 		t.Errorf("title with no board name at all = %q, want %q", got, want)
 	}
@@ -359,14 +359,14 @@ func TestBoardNameLinksToTheBoardsSite(t *testing.T) {
 	cfg.BBSName = "The Dog House BBS"
 	cfg.BoardURL = "https://doghouse.example/"
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	if got, want := board(t, w), `<a href="https://doghouse.example/">The Dog House BBS</a>`; got != want {
 		t.Errorf("board line = %q, want %q", got, want)
 	}
 
 	cfg.BoardURL = ""
 	w = game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	if got, want := board(t, w), "The Dog House BBS"; got != want {
 		t.Errorf("board line with no URL = %q, want %q", got, want)
 	}
@@ -375,7 +375,7 @@ func TestBoardNameLinksToTheBoardsSite(t *testing.T) {
 	// rather than printing a blank line above every bulletin.
 	cfg.BBSName, cfg.BoardID = "", ""
 	w = game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	if got := board(t, w); got != "" {
 		t.Errorf("board line with nothing set = %q, want empty", got)
 	}
@@ -427,7 +427,7 @@ func TestHeaderCanCarryPageURLAndDate(t *testing.T) {
 	cfg.BBSName = "The Dog House BBS"
 	cfg.BulletinURL = "https://doghouse.example/bulletins/"
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)

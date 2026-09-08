@@ -57,14 +57,12 @@ func WriteBulletins(w *game.World, dir string) []error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return []error{err}
 	}
-	// Today is a per-SESSION field, empty in the scheduled run that writes these
-	// files, so the bulletins would carry no date at all. The game day is the
-	// right one for a bulletin anyway: it is the day the news being reported
-	// belongs to, not the wall clock of whoever ran the step.
-	day := w.Today
-	if day == "" {
-		day = w.LastMaintDate
-	}
+	// The game clock, never the session's wall-clock Today: it is the day the
+	// news being reported belongs to, not the day of whoever ran the step, and
+	// Today is a per-SESSION field that the scheduled run leaves empty anyway.
+	// It is also the date the in-game news screen prints, so a bulletin file and
+	// the screen showing the same news cannot disagree about what day it is.
+	day := w.LastMaintDate
 	// Term{} is CP437 -- the charset these files are written in, and the one the
 	// column measuring has to agree with or a realm name pads short.
 	c := &ctx{World: w, Term: Term{}, day: day}

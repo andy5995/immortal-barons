@@ -20,7 +20,7 @@ func TestWriteBulletinsWritesBothFormsOfEach(t *testing.T) {
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true // a league board, so the World Report is among the set
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-08-27"
+	w.Today, w.LastMaintDate = "2026-08-27", "2026-08-27"
 	dir := t.TempDir()
 
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
@@ -99,7 +99,7 @@ func TestStandAloneBoardWritesNoWorldReport(t *testing.T) {
 	cfg.BoardID = "Solo BBS"
 	cfg.IBBS = false
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-08-27"
+	w.Today, w.LastMaintDate = "2026-08-27", "2026-08-27"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
@@ -126,7 +126,7 @@ func TestLeagueRankingBulletins(t *testing.T) {
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 7)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	w.AddHuman("andy", "Tatooine")
 	w.RemoteBoards = []game.RemoteBoard{{
 		BoardID: "Delta BBS",
@@ -193,7 +193,7 @@ func TestStandAloneBoardWritesNoLeagueRankings(t *testing.T) {
 	cfg.BoardID = "Solo BBS"
 	cfg.IBBS = false
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
@@ -215,7 +215,7 @@ func TestBulletinsAreCP437NotUTF8(t *testing.T) {
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 1)
-	w.Today = "2026-09-02"
+	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
