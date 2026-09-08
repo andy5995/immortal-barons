@@ -468,9 +468,12 @@ rankings as `.ans` and `.txt` for a BBS bulletin menu (#233, #245). Both forms
 are CP437, not UTF-8: a `.ans` file is a CP437 artifact, and emitting the rules
 as UTF-8 gave every ANSI viewer two mojibake characters per rule. The nine
 league files are written only by a board in a league. The World Report is IB's
-own — every attack fought anywhere in the league, no WMD and no terror op, drawn
-from a structured log that rides with the scores rather than from the news prose,
-which is randomised and translated. A board playing alone writes the rest but no
+own — every attack and every WMD strike fought anywhere in the league, but no
+terror op, drawn from a structured log that rides with the scores rather than
+from the news prose, which is randomised and translated. Strikes were excluded
+until 2026-09-07; they were added because a league whose fighting is mostly
+missiles saw an empty report. A strike carries `Weapon` and is worded by its
+warhead rather than by an outcome, since it takes no ground. A board playing alone writes the rest but no
 World Report. Each bulletin is also written as `<base>.html` (wrapped in
 `header.html` and `footer.html`) and `<base>.inc.html` (the bare `<pre>` block,
 to include in a page a board already builds), drawn from a UTF-8 pass of the same

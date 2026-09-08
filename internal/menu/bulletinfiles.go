@@ -210,10 +210,12 @@ var worldRule = strings.Repeat("─", 2+planetCol+1+sideCol+1+sideCol+1+8)
 // board has heard from, newest first. Asked for by a sysop who had each board's
 // own scoreboard and wanted to see the fighting (#233).
 //
-// ATTACKS only. A nuclear, chemical or biological strike is not here, nor a
-// terror op: the report is about armies meeting, and a weapon landing on a city
-// is a different story the news already tells. Nothing filters them out at this
-// end — they never enter the log, which is why they cannot leak in later.
+// ATTACKS and WMD STRIKES. A terror op is still not here: the report is about
+// force landing on a realm, and a covert operation is a different story the news
+// already tells. Strikes were excluded until 2026-09-07 on the reasoning that a
+// weapon landing on a city is not armies meeting -- true, but it left the report
+// blank in a league whose fighting is mostly missiles, which is how it was first
+// noticed. Nothing filters terror ops out at this end; they never enter the log.
 func writeWorldReport(s session.Session, w *ctx) {
 	var battles []game.BattleLogEntry
 	var here string
@@ -265,6 +267,12 @@ func writeWorldReport(s session.Session, w *ctx) {
 // terminal and in the plain-text file.
 func worldReportOutcome(s session.Session, b game.BattleLogEntry) (string, string) {
 	switch {
+	// A WMD strike is not an attack and does not win or hold ground, so it is
+	// worded by its warhead instead of by an outcome. Its own colour too, so a
+	// reader scanning the column can tell the two kinds of violence apart --
+	// and the WORD differs, which is what carries it in the plain-text file.
+	case b.Weapon != "":
+		return tr(s, b.Weapon), ansi.FgBrightMagenta
 	case b.Crushed:
 		return tr(s, "CRUSHED"), ansi.FgBrightRed
 	case b.Won && b.Land > 0:

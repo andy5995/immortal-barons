@@ -235,3 +235,4 @@ BattleLogEntry:
   Land
   Crushed
   Remote
+  Weapon `json:",omitempty"`

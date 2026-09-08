@@ -95,6 +95,10 @@ func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
 // postStrikeNews broadcasts a WMD strike (weapon = "nuclear"/"chemical"/
 // "biological"), matching BRE's NUKE/CHEM/BIO news categories.
 func (w *World) postStrikeNews(a, d *Empire, weapon string) {
+	// Logged for the world report alongside conventional battles (#233). The
+	// report used to carry attacks only, which left it blank in a league whose
+	// fighting is mostly missiles.
+	w.logBattle(BattleLogEntry{Attacker: a.Name, Defender: d.Name, Won: true, Weapon: weapon})
 	lines := []string{
 		fmt.Sprintf("ALERT: %s struck %s with %s weapons!", a.Name, d.Name, weapon),
 		fmt.Sprintf("%s unleashed %s fire upon %s.", a.Name, weapon, d.Name),
@@ -240,6 +244,17 @@ type BattleLogEntry struct {
 	// Remote marks a strike that crossed planets, which reads differently from
 	// two neighbours fighting and is worth telling apart in the report.
 	Remote bool
+	// Weapon names the warhead when the entry is a WMD strike rather than an
+	// attack -- "nuclear", "chemical", "biological". Empty for a conventional
+	// battle, which is every entry written before strikes were logged, so an
+	// older board's packets read as attacks and are right to.
+	//
+	// NO PROTOCOL BUMP for this field, deliberately. Battles are stripped before
+	// signing (see StampOutbox), so the signed bytes do not change; the tag is
+	// omitempty, so an older board never sees it; and SpeaksOurProtocol is an
+	// exact match, so bumping would HOLD every packet from a board still on the
+	// old build for a purely additive field. See the golden shape test.
+	Weapon string `json:",omitempty"`
 }
 
 // MaxBattleLog bounds the log. A league that fights hard produces a few dozen

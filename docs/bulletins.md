@@ -37,7 +37,7 @@ playing alone has nothing to put in them and writes none of them:
 
 | Bulletin | Shows |
 | --- | --- |
-| `world` | Every battle fought anywhere in the league |
+| `world` | Every battle and WMD strike fought anywhere in the league |
 | `bbsscore` | Top planets by score |
 | `bbsworth` | Top planets by net worth |
 | `bbsland` | Top planets by land |
