@@ -346,9 +346,10 @@ func BuildMenus() *Menus {
 	// is read by `run_bombing_operations_menu` (0x029EA9) alone, whose only caller
 	// is the InterBBS menu, so the table belongs to THIS menu and to no other.
 	// Labels/order are binary-verified; the Send SpyGuy hotkey wasn't recoverable
-	// from the overlay dispatch, so IB numbers it 8 with the rest. Only Send SpyGuy is wired; the
-	// bombing/WMD variants are recorded-but-inert until interplanetary covert
-	// strikes are built. ('?'/'0' are IB's menu convention; BRE exits via ESC/Q
+	// from the overlay dispatch, so IB numbers it 8 with the rest. All eight are built: the four bombing ops
+	// resolve in applySpecialOp, the three missiles in the arriving-missile
+	// resolver, and Send SpyGuy in the watcher path. This said only Send SpyGuy
+	// was wired until 2026-09-08, long after the rest landed. ('?'/'0' are IB's menu convention; BRE exits via ESC/Q
 	// with no listed items.) The original numbers them 1-8 with no Help item,
 	// as the live capture draws it; IB adds one anyway (see opshelp.go), since
 	// several of these are inert and nothing on the menu said which.

@@ -37,22 +37,23 @@ var terrorOpTopics = []attackTypeTopic{
 	{name: "Sabotage HQ", body: "Knocks the target's HeadQuarters back. HQ is what makes its tanks worth more than three troopers each, so this weakens every tank it owns."},
 }
 
-// ipSpecialOpTopics documents the eight InterPlanetary Special Operations.
-// Several are recorded-but-inert pending the interplanetary covert strikes, and
-// the topics say so rather than describing something that will not happen.
+// ipSpecialOpTopics documents the eight InterPlanetary Special Operations. All
+// eight are built and resolve on the receiving board: the four bombing ops in
+// applySpecialOp, the three missiles in the arriving-missile resolver, and
+// Send SpyGuy in the watcher path. An earlier draft of these topics called four
+// of them "recorded but not yet built", copied from a stale comment in tree.go
+// -- the captures show them landing and reporting.
 var ipSpecialOpTopics = []attackTypeTopic{
-	{name: "Bomb Food Market", body: "Aimed at the food market of another planet. Recorded but not yet built: sending it costs you nothing and does nothing."},
-	{name: "Bomb Trading Market", body: "Aimed at another planet's trading market. Recorded but not yet built."},
-	{name: "Bomb Trade Routes", body: "Aimed at the trade routes between planets. Recorded but not yet built."},
-	{name: "Undermine Investments", body: "Aimed at another planet's invested gold. Recorded but not yet built."},
-	{name: "Nuclear Assault", body: "A nuclear missile at a realm on another planet. One of each missile per game day, and the target's SDI may stop it."},
+	{name: "Bomb Food Market", body: "Burns half of the target's stored food. Nothing on the market is touched, whatever the name suggests: it is the realm's own stores."},
+	{name: "Bomb Trading Market", body: "Destroys a quarter of what the target has listed on the trading market, and a quarter of the proceeds still owed to it. Worth nothing against a realm selling nothing."},
+	{name: "Bomb Trade Routes", body: "Aimed at deals in transit. Two strikes in three come to nothing at all; one that lands leaves only a twentieth of the goods in each deal it hits."},
+	{name: "Undermine Investments", body: "Destroys a quarter of the principal the target has invested, and the return it was owed with it. A realm holding no investments loses nothing."},
+	{name: "Nuclear Assault", body: "A nuclear missile at a realm on another planet. One of each missile per game day, and the target's SDI may stop it. An arriving strike ruins a wider swathe than a neighbour's does."},
 	{name: "Chemical Bombing", body: "A chemical missile at a realm on another planet. It kills population rather than ruining land."},
-	{name: "S3-Sabre", body: "A variable-return missile. What it destroys depends on a dial, and whether you are asked for that dial at all is a setting your sysop chooses."},
+	{name: "S3-Sabre", body: "A variable-return missile: what it destroys depends on a dial, and it can strike your own realm instead. Whether you are asked for that dial is a setting your sysop chooses."},
 	{name: "Send SpyGuy", body: "Posts a watcher on another planet for a number of days you pay for. He gathers no intelligence; he reports the group attacks and Gooie Kablooies being readied against your planet, as planet news."},
 }
 
-// Both are menu Items, so they return Stay: the reader lands back on the
-// menu they asked from, which is where they were choosing an op.
 func showTerrorOpHelp(s session.Session, w *ctx) Result {
 	showTopicHelp(s, terrorOpTopics)
 	return Stay
