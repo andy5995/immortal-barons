@@ -41,10 +41,19 @@ const (
 )
 
 const (
-	// Region price rises with land owned: BRE ≈ 917 + Land×33 (live-sampled). See
-	// World.LandPrice. PriceLand is the base; LandPerRegion the per-owned climb.
-	PriceLand     = 917
-	LandPerRegion = 33
+	// Region price rises with land owned. BINARY-VERIFIED and confirmed by
+	// driving BRE (2026-09-08):
+	//
+	//	price = RegionPriceBase + climb x (owned + 1/2)
+	//
+	// RegionPriceBase is the routine's own `add ax,0x384` (BRE.OVR 0x3019C) and
+	// LandPerRegion its `add ax,0x21`. The HALF STEP is why IB read the base as
+	// 917 for years: 900 + 33/2 rounds to 917, so a hardcoded 917 is exactly
+	// right at the un-surcharged climb and 17 gold a region short at the
+	// surcharged one. Two live quotes on one staged 1,000-region realm pin both
+	// arms -- 33,917 protected (climb 33) and 68,934 unprotected (climb 68).
+	RegionPriceBase = 900
+	LandPerRegion   = 33
 	// The Region Cost Change knob is a BIG-REALM SURCHARGE on the per-region
 	// climb, not a scale on the price. BINARY-VERIFIED (BRE.OVR 0x3019C): the
 	// level selects one of the values below, a flag turns it on only at

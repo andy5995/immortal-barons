@@ -94,7 +94,7 @@ func (e *Empire) spend(n, unit int) error {
 }
 
 // regionCost is the gold cost of the next region when the empire already owns
-// `owned` regions: Prices.Land + owned × the per-region climb. LandPrice,
+// `owned` regions: RegionPriceBase + climb x (owned + 1/2). LandPrice,
 // MaxAffordableRegions and BuyRegions all build on it.
 //
 // The climb is where the sysop's Region Cost Change setting lands, and it does
@@ -112,13 +112,33 @@ func (e *Empire) spend(n, unit int) error {
 //
 // IB used to multiply the WHOLE price by a percentage of the level instead,
 // which is the wrong shape and hits small realms the original never touches.
-func (w *World) regionCost(owned int) int {
-	return w.Prices.Land + owned*w.regionClimb(owned)
+func (w *World) regionCost(e *Empire, owned int) int {
+	climb := w.regionClimb(e, owned)
+	// The half step is BRE's, not a rounding artefact: its price routine values
+	// the next region at the MIDPOINT of the step it spans, so the figure moves
+	// with the climb. (climb+1)/2 is that half rounded up, which reproduces both
+	// live quotes exactly -- 33 -> 17 and 68 -> 34. See RegionPriceBase.
+	return RegionPriceBase + owned*climb + (climb+1)/2
 }
 
 // regionClimb is the per-region price step at the given size — see regionCost.
-func (w *World) regionClimb(owned int) int {
-	if owned < RegionCostSurchargeAt {
+//
+// NEW REALM PROTECTION WAIVES THE SURCHARGE ENTIRELY, whatever the realm's
+// size. BINARY-VERIFIED (BRE.OVR 0x3019C): the guard tests is_under_protection
+// (056d:19b5) on the caller FIRST and zeroes the multiplier flag when it holds,
+// only then comparing total_regions (056d:0ec6) against RegionCostSurchargeAt.
+// Two gates, and IB modelled only the second.
+//
+// It is not a corner case. Protection is spent per TURN PLAYED, so a sysop who
+// sets a long allowance — 130 turns in one captured league game against this
+// install's 0 — leaves a realm shielded well past 300 regions, and the original
+// sells it land at the un-surcharged climb the whole time. Confirmed by driving
+// BRE with a staged realm (2026-09-08): 1,000 regions, Region Cost Change
+// Medium, Protection Turns 0, and the Spending Menu quoted 68,934 = 934 + 1000
+// x 68, the surcharged climb. The same fit against 65 purchase screens from a
+// game with 130 protection turns matches 33 exactly and 68 not at all.
+func (w *World) regionClimb(e *Empire, owned int) int {
+	if owned < RegionCostSurchargeAt || e.Protection > 0 {
 		return LandPerRegion
 	}
 	return LandPerRegion + w.Config.RegionCosts.RegionCostSurcharge()
@@ -144,7 +164,7 @@ func (w *World) regionBuyLimit(e *Empire) int {
 
 // LandPrice is the current gold cost of the next region for empire e.
 func (w *World) LandPrice(e *Empire) int {
-	return w.regionCost(e.Land)
+	return w.regionCost(e, e.Land)
 }
 
 // MaxAffordableRegions is the most regions e can buy at the current rising
@@ -158,7 +178,7 @@ func (w *World) MaxAffordableRegions(e *Empire) int {
 		if n >= limit {
 			return n
 		}
-		cost := int64(w.regionCost(e.Land + n))
+		cost := int64(w.regionCost(e, e.Land+n))
 		if total+cost > e.Gold {
 			return n
 		}
@@ -182,7 +202,7 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	}
 	var total int64
 	for i := 0; i < n; i++ {
-		total += int64(w.regionCost(e.Land + i))
+		total += int64(w.regionCost(e, e.Land+i))
 	}
 	if e.Gold < total {
 		return ErrCantAfford // must afford the whole purchase

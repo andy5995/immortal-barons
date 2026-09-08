@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * New Realm Protection waives the big-realm surcharge on land, and a region
+    costs what the original charges at every size
   * The Preferences screen lines its Yes/No column up in every language, and
     answers in the player's own
   * A board catches up the days that passed while nobody played, instead of

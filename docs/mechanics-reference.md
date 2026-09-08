@@ -1211,9 +1211,15 @@ It does not scale the price. Config byte **+0x185**, read at `BRE.OVR 0x3019C`,
 selects a value and the routine then does:
 
 ```
-flag  = (regions >= 300) ? 1 : 0        -- cmp against 0x12C
+flag  = protected ? 0                   -- call is_under_protection (056d:19b5)
+      : (total_regions >= 300) ? 1 : 0  -- call total_regions (056d:0ec6), cmp 0x12C
 climb = 33 + flag x value               -- mul [bp-0x6], add 0x21
 ```
+
+**New Realm Protection waives the surcharge outright**, whatever the realm's
+size — the protection test comes FIRST and zeroes the flag before the size is
+even looked at. The count it compares is `total_regions`, which sums all NINE
+region fields including Waste, not the eight the purchase screen lists.
 
 | Level | Value added | Climb below 300 regions | Climb at 300+ |
 | --- | --- | --- | --- |
@@ -1232,7 +1238,18 @@ every realm sampled was under the threshold, so the knob had never engaged — a
 33 was right all along, for the realms that were measured.
 
 IB used to multiply the whole price by a percentage of the level, which is the
-wrong shape and taxes small realms the original leaves alone.
+wrong shape and taxes small realms the original leaves alone. It then applied the
+surcharge to PROTECTED realms as well, which the original never does (fixed
+2026-09-08); a sysop who sets a long allowance leaves realms shielded well past
+300 regions, and BRE sells them land at the un-surcharged climb throughout. One
+captured league game runs 130 protection turns against this project's test
+install's 0, which is why its purchase screens fit a climb of 33 and not 68.
+
+**Verified by driving BRE**, not inferred: a staged realm of 1,000 regions with
+Region Cost Change Medium and Protection Turns 0 was quoted **68,934** gold a
+region on the Spending Menu — `934 + 1000 x 68`, the surcharged climb, with 934
+the walking base of the moment (the purchase screen says outright that "Region
+prices are constantly changing", so the base is not a constant to pin).
 
 ### All five cost knobs, side by side (#56)
 

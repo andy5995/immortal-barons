@@ -127,8 +127,9 @@ func TestLandPriceRisesWithHoldings(t *testing.T) {
 	e.Regions = RegionMix{}
 	e.Land = 0
 	base := w.LandPrice(e)
-	if base != w.Prices.Land {
-		t.Errorf("LandPrice at Land=0: want %d, got %d", w.Prices.Land, base)
+	// An empty realm still pays the half step: 900 + 33/2 rounds to 917.
+	if want := RegionPriceBase + (LandPerRegion+1)/2; base != want {
+		t.Errorf("LandPrice at Land=0: want %d, got %d", want, base)
 	}
 
 	e.Land = 50
@@ -152,7 +153,7 @@ func TestBuyLandIncremental(t *testing.T) {
 	const n = 5
 	total := 0
 	for i := 0; i < n; i++ {
-		total += w.regionCost(e.Land + i)
+		total += w.regionCost(e, e.Land+i)
 	}
 
 	if err := w.BuyLand(e, n); err != nil {
@@ -176,7 +177,7 @@ func TestBuyLandRejectsWhenBroke(t *testing.T) {
 	const n = 5
 	total := 0
 	for i := 0; i < n; i++ {
-		total += w.regionCost(e.Land + i)
+		total += w.regionCost(e, e.Land+i)
 	}
 	e.Gold = int64(total - 1)
 	startGold := e.Gold
@@ -626,11 +627,13 @@ func TestRegionCostChangeIsABigRealmSurcharge(t *testing.T) {
 		cfg := DefaultConfig()
 		cfg.RegionCosts = l
 		w := NewWorldSeed(cfg, 1)
-		return w.regionCost(owned)
+		// Protection waives the surcharge outright, so the realm priced here
+		// must be past it or every level would agree at any size.
+		return w.regionCost(&Empire{Protection: 0}, owned)
 	}
 	// Under the threshold every level agrees, because the knob has not engaged.
 	const small = RegionCostSurchargeAt - 1
-	base := PriceLand + small*LandPerRegion
+	base := RegionPriceBase + small*LandPerRegion + (LandPerRegion+1)/2
 	for _, l := range []Level{None, Low, Medium, High} {
 		if got := price(l, small); got != base {
 			t.Errorf("%v at %d regions = %d, want %d — the knob must be inert below the threshold",
@@ -646,9 +649,41 @@ func TestRegionCostChangeIsABigRealmSurcharge(t *testing.T) {
 	}{
 		{None, 33}, {Low, 33 + 15}, {Medium, 33 + 35}, {High, 33 + 55},
 	} {
-		want := PriceLand + big*c.climb
+		want := RegionPriceBase + big*c.climb + (c.climb+1)/2
 		if got := price(c.level, big); got != want {
 			t.Errorf("%v at %d regions = %d, want %d (climb %d)", c.level, big, got, want, c.climb)
 		}
+	}
+}
+
+// New Realm Protection waives the region-cost surcharge outright, however large
+// the realm. BINARY-VERIFIED: the guard (BRE.OVR 0x3019C) tests
+// is_under_protection before it compares total_regions against the threshold,
+// and IB applied the surcharge regardless until 2026-09-08.
+//
+// The unprotected figure is a golden literal from driving BRE itself with a
+// staged realm: 1,000 regions, Region Cost Change Medium, Protection Turns 0 --
+// its Spending Menu quoted 68,934 a region. Asserting the constant instead
+// would follow a retune silently, which is the point of the fidelity contract.
+func TestProtectionWaivesTheRegionSurcharge(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.RegionCosts = Medium
+	w := NewWorldSeed(cfg, 1)
+
+	const owned = 1000
+	shielded := w.regionCost(&Empire{Protection: 5}, owned)
+	exposed := w.regionCost(&Empire{Protection: 0}, owned)
+
+	// Both figures are BRE's own, quoted by its Spending Menu for ONE staged
+	// realm of 1,000 regions at Region Cost Change Medium, with only Protection
+	// Turns changed between the two runs (0, then 100).
+	if exposed != 68_934 {
+		t.Errorf("unprotected at %d regions should pay 68,934, got %d", owned, exposed)
+	}
+	if shielded != 33_917 {
+		t.Errorf("protected at %d regions should pay 33,917, got %d", owned, shielded)
+	}
+	if shielded >= exposed {
+		t.Error("protection must make land cheaper, not dearer")
 	}
 }

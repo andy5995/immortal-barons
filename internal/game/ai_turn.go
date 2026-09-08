@@ -141,7 +141,7 @@ func (w *World) aiExpandLand(e *Empire) {
 	limit := min(w.regionBuyLimit(e), e.LandAvailable)
 	n, total := 0, int64(0)
 	for n < limit {
-		cost := int64(w.regionCost(e.Land + n))
+		cost := int64(w.regionCost(e, e.Land+n))
 		if total+cost > budget {
 			break
 		}

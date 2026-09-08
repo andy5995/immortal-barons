@@ -452,7 +452,7 @@ func (w *World) PlanetTotals() PlanetTotals { return planetTotals(w) }
 // pulling it back to anyway.
 func defaultPrices() Prices {
 	return Prices{
-		Land:    PriceLand,
+		Land:    RegionPriceBase,
 		Trooper: midPrice(PriceLoTrooper, PriceHiTrooper),
 		Jet:     midPrice(PriceLoJet, PriceHiJet),
 		Turret:  midPrice(PriceLoTurret, PriceHiTurret),
