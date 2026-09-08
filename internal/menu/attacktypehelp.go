@@ -52,6 +52,7 @@ const (
 	topicRuleDouble = 15
 	// Each name sits in a 25-column field, so three fill the rule exactly.
 	topicNameWidth = 25
+	topicsPerRow   = 3
 )
 
 func topicRule() string {
@@ -60,15 +61,21 @@ func topicRule() string {
 		strings.Repeat("─", topicRuleWidth-topicRuleSingle-topicRuleDouble) + ansi.Reset
 }
 
-// showAttackTypeList draws the rule, the three names, and the rule again.
-func showAttackTypeList(s session.Session) {
+// showTopicList draws the rule, the topic names, and the rule again. Three
+// names fill the rule exactly, so a longer set wraps onto further rows rather
+// than running past it -- the Attack Type menu has exactly three and looks the
+// same as it always did, while the nine terror ops need three rows.
+func showTopicList(s session.Session, topics []attackTypeTopic) {
 	fmt.Fprintf(s, "\n%s\n", topicRule())
-	var b strings.Builder
-	b.WriteString(ansi.FgBrightWhite)
-	for _, t := range attackTypeTopics {
-		fmt.Fprintf(&b, "%-*s", topicNameWidth, tr(s, t.name))
+	for i := 0; i < len(topics); i += topicsPerRow {
+		end := min(i+topicsPerRow, len(topics))
+		var b strings.Builder
+		b.WriteString(ansi.FgBrightWhite)
+		for _, t := range topics[i:end] {
+			fmt.Fprintf(&b, "%-*s", topicNameWidth, tr(s, t.name))
+		}
+		fmt.Fprintf(s, "%s%s\n", strings.TrimRight(b.String(), " "), ansi.Reset)
 	}
-	fmt.Fprintf(s, "%s%s\n", strings.TrimRight(b.String(), " "), ansi.Reset)
 	fmt.Fprintf(s, "%s\n", topicRule())
 }
 
@@ -84,12 +91,12 @@ func showAttackTypeTopic(s session.Session, t attackTypeTopic) {
 // names, case-insensitively and by prefix — the same shape as the planet
 // prompt, which is what the capture shows this one behaving as. It reports the
 // single match and how many topics the text still fits.
-func matchAttackTypeTopic(typed string) (name string, n int) {
+func matchTopic(topics []attackTypeTopic, typed string) (name string, n int) {
 	want := strings.ToLower(strings.TrimSpace(typed))
 	if want == "" {
 		return "", 0
 	}
-	for _, t := range attackTypeTopics {
+	for _, t := range topics {
 		if strings.HasPrefix(strings.ToLower(t.name), want) {
 			name, n = t.name, n+1
 		}
@@ -102,8 +109,12 @@ func matchAttackTypeTopic(typed string) (name string, n int) {
 
 // showAttackTypeHelp is the (?) Help item: the topic list, then the prompt,
 // asked again after each topic until the reader answers with Enter.
-func showAttackTypeHelp(s session.Session, w *ctx) {
-	showAttackTypeList(s)
+func showAttackTypeHelp(s session.Session, w *ctx) { showTopicHelp(s, attackTypeTopics) }
+
+// showTopicHelp is the browser itself: the topic list, then the prompt, asked
+// again after each topic until the reader answers with Enter.
+func showTopicHelp(s session.Session, topics []attackTypeTopic) {
+	showTopicList(s, topics)
 	for {
 		// The prompt's shape is the planet picker's, which the capture shows it
 		// sharing — including the live completion, which finished "Quick Strike"
@@ -119,7 +130,7 @@ func showAttackTypeHelp(s session.Session, w *ctx) {
 		}
 		if r == '?' {
 			fmt.Fprintf(s, "?%s\n", ansi.Reset)
-			showAttackTypeList(s)
+			showTopicList(s, topics)
 			continue
 		}
 		// Enter alone answers None and returns to the menu, as the capture ends.
@@ -128,13 +139,14 @@ func showAttackTypeHelp(s session.Session, w *ctx) {
 			fmt.Fprint(s, ansi.Reset)
 			return
 		}
-		line, err := readCompletingAnswer(s, matchAttackTypeTopic, r)
+		match := func(typed string) (string, int) { return matchTopic(topics, typed) }
+		line, err := readCompletingAnswer(s, match, r)
 		fmt.Fprint(s, ansi.Reset)
 		if err != nil {
 			return
 		}
-		name, _ := matchAttackTypeTopic(line)
-		for _, t := range attackTypeTopics {
+		name, _ := matchTopic(topics, line)
+		for _, t := range topics {
 			if t.name == name {
 				showAttackTypeTopic(s, t)
 				break

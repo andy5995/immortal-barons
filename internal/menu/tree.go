@@ -349,8 +349,9 @@ func BuildMenus() *Menus {
 	// from the overlay dispatch, so IB numbers it 8 with the rest. Only Send SpyGuy is wired; the
 	// bombing/WMD variants are recorded-but-inert until interplanetary covert
 	// strikes are built. ('?'/'0' are IB's menu convention; BRE exits via ESC/Q
-	// with no listed items.) Numbered 1-8 with no Help item, as the live capture
-	// draws it.
+	// with no listed items.) The original numbers them 1-8 with no Help item,
+	// as the live capture draws it; IB adds one anyway (see opshelp.go), since
+	// several of these are inert and nothing on the menu said which.
 	ipSpecial.Items = []Item{
 		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialOp(game.OpBombFood), Hidden: noBombingOps},
 		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialOp(game.OpBombMarket), Hidden: noBombingOps},
@@ -360,16 +361,24 @@ func BuildMenus() *Menus {
 		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: missileSpent(game.OpChemical)},
 		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: missileSpent(game.OpSabre)},
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
+		{Key: '?', Label: "Help", Do: showIPSpecialOpHelp},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	ipSpecial.Status = goldStatus
 	ipSpecial.DefaultOnEnter = quitOnEnter(ipSpecial)
 
 	// Terrorist Ops submenu: BRE's 9-item sub-menu under IP Operations item '2'.
-	// All sub-ops share the same mechanical effect (each agent destroys 1/7 of
-	// one random unit type) and the same gold cost; the labels are cosmetic flavor.
-	// Order, labels and hotkeys match the binary-verified string table. Numbered
-	// 1-9 with no Help item, as BRE draws it.
+	// Order, labels and hotkeys match the binary-verified string table.
+	//
+	// The ops are NOT interchangeable. A comment here said they shared one
+	// effect -- "each agent destroys 1/7 of one random unit type", labels
+	// cosmetic -- until 2026-09-08; TerrorOpLosses and applyTerrorOp give each
+	// its own holding and its own band, all binary-verified, so the claim had
+	// been wrong since that table landed.
+	//
+	// The original numbers them 1-9 with no Help item and IB adds one anyway
+	// (see opshelp.go): the ops differ materially and the menu said nothing
+	// about how.
 	terrorOps.Items = []Item{
 		{Key: '1', Label: "Send Spy", Do: terrorOp(game.TerrorOpSpy)},
 		{Key: '2', Label: "Bomb Intelligence", Do: terrorOp(game.TerrorOpBombIntel)},
@@ -380,6 +389,7 @@ func BuildMenus() *Menus {
 		{Key: '7', Label: "Spread Propaganda", Do: terrorOp(game.TerrorOpPropaganda)},
 		{Key: '8', Label: "Bomb Food Stores", Do: terrorOp(game.TerrorOpBombFood)},
 		{Key: '9', Label: "Sabotage HQ", Do: terrorOp(game.TerrorOpSabotageHQ)},
+		{Key: '?', Label: "Help", Do: showTerrorOpHelp},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	terrorOps.DefaultOnEnter = quitOnEnter(terrorOps)

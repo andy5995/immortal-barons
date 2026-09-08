@@ -78,7 +78,7 @@ func TestMatchAttackTypeTopic(t *testing.T) {
 		{"", "", 0},
 		{"zzz", "", 0},
 	} {
-		if got, n := matchAttackTypeTopic(tc.typed); got != tc.want || n != tc.n {
+		if got, n := matchTopic(attackTypeTopics, tc.typed); got != tc.want || n != tc.n {
 			t.Errorf("%q -> %q,%d; want %q,%d", tc.typed, got, n, tc.want, tc.n)
 		}
 	}

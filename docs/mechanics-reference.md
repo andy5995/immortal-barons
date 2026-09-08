@@ -5220,6 +5220,21 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **The Terrorist Ops and Special Operations menus carry a (?) Help browser.**
+  The original lists the ops and nothing else — nine numbered items and a Quit
+  on Terrorist Ops, eight and a Quit on Special Operations, confirmed across the
+  captures — while their PARENT InterPlanetary menu does have Help, so those two
+  submenus are the one place the help key stops answering. IB adds one in the
+  shape the Attack Type menu already uses: a browser the reader stays inside, so
+  the ops can be read one after another.
+
+  The reason is that the nine terror ops are not interchangeable. Each lands on
+  a different holding at its own rate — agents 2-4%, troopers 2-4%, jets 3-7%,
+  population 4-10%, food 0-29%, plus morale, support and HQ — all binary-verified
+  in `TerrorOpLosses` and `applyTerrorOp`. A comment in `tree.go` called the
+  labels "cosmetic flavor" until 2026-09-08, which had been wrong since that
+  table landed; the menu offered a real choice and said nothing about it.
+
 - **A defender's invasion report names the kind of strike.** BRE names it to the
   attacker ("Extended Battle Results.") and never to the defender, whose recap
   says only that a force "attacked!". IB appends it: `Invasion from X (Quick
