@@ -115,7 +115,7 @@ msgstr ""
 
 #: internal/menu/tree.go:642
 msgid "%s  You have %s gold."
-msgstr ""
+msgstr "%s  U heeft %s goud."
 
 #: internal/menu/actions.go:148
 msgid "%s %s purchased."
@@ -214,7 +214,7 @@ msgstr ""
 
 #: internal/menu/tree.go:640
 msgid "%s units of food available today."
-msgstr ""
+msgstr "%s eenheden voedsel vandaag beschikbaar."
 
 #: internal/menu/actions_attack.go:490
 msgid "%s — an arms broker wants %s gold for the missile."
@@ -397,7 +397,7 @@ msgstr ""
 
 #: internal/menu/tree.go:305
 msgid "All Planets"
-msgstr ""
+msgstr "Alle planeten"
 
 #: internal/menu/tree.go:241
 msgid "Alliance Strength"
@@ -410,7 +410,7 @@ msgstr "Voedselmarkt"
 
 #: internal/menu/tree.go:306
 msgid "Allied Planets"
-msgstr ""
+msgstr "Bondgenoten"
 
 #: internal/menu/actions_info.go:32
 msgid ""
@@ -521,7 +521,7 @@ msgstr ""
 
 #: internal/menu/tree.go:226
 msgid "Bids Out"
-msgstr ""
+msgstr "Open biedingen"
 
 #: internal/menu/tree.go:236
 msgid "Biological Attack"
@@ -687,7 +687,7 @@ msgstr ""
 
 #: internal/menu/tree.go:131
 msgid "Chopper's Fair Market"
-msgstr ""
+msgstr "Choppers Eerlijke Markt"
 
 #: internal/menu/turnrecap.go:467
 msgid "Civil war! Famine cost you %d%% of your realm and its forces."
@@ -833,7 +833,7 @@ msgstr "Diplomatielijst"
 
 #: internal/menu/tree.go:468
 msgid "Dismantle Gooie"
-msgstr ""
+msgstr "Gooie ontmantelen"
 
 #: internal/menu/actions_interbbs.go:189
 msgid "Dismantling it refunds nothing — the gold is spent."
@@ -918,7 +918,7 @@ msgstr ""
 
 #: internal/menu/tree.go:548
 msgid "Entry"
-msgstr ""
+msgstr "Start"
 
 #: internal/menu/tree.go:326
 msgid "Expose Enemy Ops"
@@ -975,7 +975,7 @@ msgstr ""
 
 #: internal/menu/tree.go:662
 msgid "Game started on %s"
-msgstr ""
+msgstr "Spel begonnen op %s"
 
 #: internal/menu/actions_realm.go:35
 msgid "Glad you changed your mind!"
@@ -983,7 +983,7 @@ msgstr ""
 
 #: internal/menu/tree.go:471
 msgid "Global Recon Request"
-msgstr ""
+msgstr "Wereldwijde verkenning"
 
 #: internal/menu/empire_status_screen.go:95
 msgid "Gold"
@@ -995,7 +995,7 @@ msgstr ""
 
 #: internal/menu/tree.go:92
 msgid "Goldie Luck's Bank"
-msgstr ""
+msgstr "Goldie Lucks Bank"
 
 #: internal/menu/actions_trade.go:78
 msgid "Good"
@@ -1007,7 +1007,7 @@ msgstr ""
 
 #: internal/menu/tree.go:287
 msgid "Gooie Kablooie Ops"
-msgstr ""
+msgstr "Gooie Kablooie-ops"
 
 #: internal/menu/actions_attack.go:770
 msgid "Gooie Kablooie operations are switched off in this game."
@@ -1638,7 +1638,7 @@ msgstr ""
 
 #: internal/menu/tree.go:686
 msgid "Planetary time: %s   New day in %s"
-msgstr ""
+msgstr "Planeettijd: %s   Nieuwe dag over %s"
 
 #: internal/menu/tree.go:550
 msgid "Play"
@@ -1764,7 +1764,7 @@ msgstr ""
 
 #: internal/menu/tree.go:361
 msgid "S3-Sabre"
-msgstr ""
+msgstr "S3-Sabre"
 
 #: internal/menu/tree.go:288
 msgid "SDI Program"
@@ -1783,7 +1783,7 @@ msgstr ""
 
 #: internal/menu/tree.go:382
 msgid "Sabotage HQ"
-msgstr ""
+msgstr "HQ saboteren"
 
 #: internal/menu/actions_message.go:491
 msgid "Save"
@@ -1815,7 +1815,7 @@ msgstr "Status bekijken"
 
 #: internal/menu/tree.go:304
 msgid "Select Planets"
-msgstr ""
+msgstr "Planeten kiezen"
 
 #: internal/menu/tree.go:91
 msgid "Sell"
@@ -1924,7 +1924,7 @@ msgstr ""
 
 #: internal/menu/tree.go:303
 msgid "Single Planet"
-msgstr ""
+msgstr "Eén planeet"
 
 #: internal/menu/actions.go:178
 msgid "Sold %d. Gold: %d"
@@ -1954,7 +1954,7 @@ msgstr "Uitgavenmenu"
 
 #: internal/menu/tree.go:380
 msgid "Spread Propaganda"
-msgstr ""
+msgstr "Propaganda verspreiden"
 
 #: internal/menu/tree.go:291
 msgid "Spy Database"
@@ -1974,7 +1974,7 @@ msgstr ""
 
 #: internal/menu/tree.go:379
 msgid "Stir Emigrations"
-msgstr ""
+msgstr "Emigratie aanwakkeren"
 
 #: internal/game/covert.go:18
 msgid "Stir Revolts"
@@ -2173,7 +2173,7 @@ msgstr ""
 
 #: internal/menu/tree.go:657
 msgid "The game begins %s."
-msgstr ""
+msgstr "Het spel begint %s."
 
 #: internal/menu/actions_iptrade.go:111
 msgid "The gold is held until the answer comes back."
@@ -2387,7 +2387,7 @@ msgstr ""
 
 #: internal/menu/tree.go:638
 msgid "Unlimited supply today."
-msgstr ""
+msgstr "Vandaag onbeperkte voorraad."
 
 #: internal/menu/tree.go:430
 msgid "Use Enter To Exit BUY Menu"
@@ -2667,19 +2667,19 @@ msgstr ""
 
 #: internal/menu/tree.go:631
 msgid "You have %s gold and %d agents."
-msgstr ""
+msgstr "U heeft %s goud en %d agenten."
 
 #: internal/menu/tree.go:617
 msgid "You have %s gold and %d turns."
-msgstr ""
+msgstr "U heeft %s goud en %d beurten."
 
 #: internal/menu/tree.go:615
 msgid "You have %s gold and 1 turn."
-msgstr ""
+msgstr "U heeft %s goud en 1 beurt."
 
 #: internal/menu/tree.go:626
 msgid "You have %s gold."
-msgstr ""
+msgstr "U heeft %s goud."
 
 #: internal/menu/empire_status_screen.go:227
 msgid "You have %s turns of protection left."
