@@ -138,13 +138,24 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 		}
 	}
 
-	// Reload the shared world from disk and assert ALL purchases survived. A
-	// new empire starts with 100 troopers and no Industrial regions, so nothing
-	// but the buys changes the count — the final value is exactly 100 + 3×buy.
+	// Reload the shared world from disk and assert ALL purchases survived.
+	//
+	// A new empire starts with 100 troopers and no Industrial regions, so the
+	// buys are the only thing that moves the count PER PLAYER. One thing can
+	// move it for everyone at once: the crown's trooper handout pays every
+	// living realm the same share out of the Queen's purse, and this test seeds
+	// a purse deliberately (above) so the refund's pause is deterministic.
+	//
+	// So the invariant is not an exact count, it is that every player's surplus
+	// over its own buys is the SAME. A lost or clobbered write is one player's
+	// own shortfall; a planet-wide grant lands on everyone equally. That
+	// distinguishes the two without letting a handout mask a lost buy, which a
+	// plain >= would.
 	w, err := store.Load(cfg)
 	if err != nil {
 		t.Fatalf("reload world: %v", err)
 	}
+	surplus := map[string]int{}
 	for _, p := range players {
 		e := w.FindByOwner(p.handle)
 		if e == nil {
@@ -155,9 +166,23 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 			dump()
 			t.Errorf("%s realm = %q, want %q", p.handle, e.Name, p.realm)
 		}
-		if want := 100 + 3*p.buy; e.Troopers != want {
+		want := 100 + 3*p.buy
+		if e.Troopers < want {
 			dump()
-			t.Errorf("%s troopers = %d, want %d (its purchase was lost or clobbered by the other node)", p.handle, e.Troopers, want)
+			t.Errorf("%s troopers = %d, want at least %d (its purchase was lost or clobbered by the other node)", p.handle, e.Troopers, want)
+		}
+		surplus[p.handle] = e.Troopers - want
+	}
+	var first string
+	for h, s := range surplus {
+		if first == "" {
+			first = h
+			continue
+		}
+		if s != surplus[first] {
+			dump()
+			t.Errorf("troopers above the buys differ per player (%s +%d, %s +%d); a crown handout pays every realm the same, so this is a lost or clobbered write",
+				first, surplus[first], h, s)
 		}
 	}
 }
