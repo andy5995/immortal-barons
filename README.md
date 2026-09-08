@@ -49,6 +49,10 @@ client. [Boards hosting Immortal
 Barons](https://github.com/andy5995/immortal-barons/discussions/132) lists them,
 and is where you can list your own board.
 
+#### Inter-BBS news and scores from live-testing
+
+[ContructiveChaos BBS](https://conchaos.synchro.net/doors.html?id=imbarons)
+
 ### Over SSH
 
 A public server runs the game over SSH. It signs you in with an SSH key, not a
