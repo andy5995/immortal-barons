@@ -274,7 +274,7 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 // bracketed [ON]/[OFF] (verified against a live BRE Preferences capture).
 func TestPreferenceLabelUsesBareYesNo(t *testing.T) {
 	w := newWorld()
-	label := onOff("Auto-Feed Empire", func(g *ctx) *bool { return &g.prefs().AutoFeed })
+	label := onOff([]string{"Auto-Feed Empire"}, "Auto-Feed Empire", func(g *ctx) *bool { return &g.prefs().AutoFeed })
 
 	w.Player().Prefs.AutoFeed = true
 	on := label(w)

@@ -49,7 +49,14 @@ CALL_PATTERNS = [
     re.compile(r'\bstatusRowPrefix\(s,\s*' + STR),
     re.compile(r'\btitled\(' + STR),  # bulletin page headings not drawn from a table
     re.compile(r'\b(?:Label|Title):\s*' + STR),
-    re.compile(r'\bonOff\(' + STR),  # Preferences toggle labels (dynamic LabelFn)
+    # Preferences toggle labels. They live in the toggleRow table rather than in
+    # the onOff() call, because the value column is sized from the whole group
+    # and onOff is handed the group plus a field off the row -- so no literal
+    # reaches it. Name: is unique to that table outside tests, which are skipped.
+    re.compile(r'\bName:\s*' + STR),
+    # The two answers those rows show. Consts, so nothing calls i18n.T on a
+    # literal; the declaration is the msgid (as for CovertOp below).
+    re.compile(r'\btoggle(?:Yes|No)\s*=\s*' + STR),
     re.compile(r'\bwithPrice\(' + STR),  # menu items that carry their own price
     # The Attack Type help's three topics: the browser translates them through
     # tr(s, t.name), which reads a variable, so the table's own fields are the

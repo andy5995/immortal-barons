@@ -248,13 +248,25 @@ func tradePactIncome(e, other *Empire, perHead, selfCut, partnerCut int) int64 {
 // does not substitute for holding tech yourself. Binary-verified; applied in
 // advanceTech, where the provenance is.
 
-// A Full Defense Alliance is LOCAL ONLY. BRE's manual says so of the treaty
-// itself — "effective only in Local Games" — and the binary matches: the
-// relation row belongs to one planet's empire records and never rides an
-// inter-BBS packet. So the three helpers below feed the local battle
-// (combat.go's Attack) and the Alliance Strength screen, and nothing in the
-// interplanetary path may call them: resolveRemoteAttack meets an arriving
-// strike with the target's own Defense() alone. Pinned by
+// A Full Defense Alliance is LOCAL ONLY, on three agreeing readings of the
+// original (2026-09-08):
+//
+//   - Both `docs/bre.doc` and `game/breins.txt` say "effective only in Local
+//     Games", and the distinction is deliberate rather than offhand: the
+//     Intelligence Alliance entry four paragraphs earlier says that treaty aids
+//     "other empires on the planet AND in Inter-planetary conflict".
+//   - send_defensive_aid (BRE.OVR 0x01177a) has exactly ONE caller,
+//     run_attack_menu, reached on the local Attack Menu's 'A' key
+//     (cmp al,0x41 at 0x37bb) — with no game-mode test on it, so the aid is
+//     live in a league game, just not across planets.
+//   - resolve_received_invasion (0x040012), which meets an arriving strike,
+//     calls no aid routine at all; its battle helper resolve_invasion_battle
+//     (0x03fae7) calls nothing but arithmetic, so no other realm is consulted.
+//
+// So the three helpers below feed the local battle (combat.go's Attack) and the
+// Alliance Strength screen, and nothing in the interplanetary path may call
+// them: resolveRemoteAttack meets an arriving strike with the target's own
+// Defense() alone. Pinned by
 // TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes.
 
 // AllyContribution is one row of BRE's Alliance Strength screen: what a partner

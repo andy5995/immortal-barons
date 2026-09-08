@@ -1021,14 +1021,90 @@ func withPrice(name string, price func(*ctx) int64) func(*ctx) string {
 	}
 }
 
-func onOff(name string, get func(*ctx) *bool) func(*ctx) string {
+// toggleRow is one Yes/No line of a group that shares a single value column.
+// The group is rendered together (toggleItems) rather than row by row, because
+// where that column falls depends on the WIDEST label in the caller's language,
+// which no row can know on its own.
+type toggleRow struct {
+	Key  rune
+	Name string
+	Get  func(*ctx) *bool
+}
+
+// toggleItems turns a group of Yes/No rows into menu items whose values line up
+// with each other. The accessor is written once per row and used for both the
+// label and the toggle.
+func toggleItems(rows []toggleRow) []Item {
+	group := make([]string, len(rows))
+	for i, r := range rows {
+		group[i] = r.Name
+	}
+	items := make([]Item, 0, len(rows))
+	for _, r := range rows {
+		items = append(items, Item{Key: r.Key, LabelFn: onOff(group, r.Name, r.Get), Do: toggle(r.Get)})
+	}
+	return items
+}
+
+// toggleLabelMin is the label field BRE leaves before a Yes/No column, measured
+// from a live Preferences capture. It is a FLOOR, not the width: English fits
+// inside it (27 columns at the longest) but a translation need not, and a fixed
+// 28 pushed the value a column right on the two Dutch labels that run to 29 and
+// four columns right on the German one at 32 — so the column came out ragged in
+// every language except the one it was measured in.
+const toggleLabelMin = 28
+
+// toggleLabelWidth is the label field a group of Yes/No rows shares: BRE's own
+// width, widened to fit the longest label once translated.
+func toggleLabelWidth(lang string, group []string) int {
+	w := toggleLabelMin
+	for _, n := range group {
+		if c := utf8.RuneCountInString(i18n.T(lang, n)); c > w {
+			w = c
+		}
+	}
+	return w
+}
+
+// toggleValueWidth is the Yes/No column itself, which is not 3 in every
+// language: German answers "Nein" and Dutch "Nee". Taken from the pair rather
+// than from either word, so the two align with each other whichever is showing.
+func toggleValueWidth(lang string) int {
+	w := 0
+	for _, s := range []string{toggleYes, toggleNo} {
+		if c := utf8.RuneCountInString(i18n.T(lang, s)); c > w {
+			w = c
+		}
+	}
+	return w
+}
+
+// The two answers, as msgids. Named so the renderer and the width agree on
+// exactly which strings are being measured.
+const (
+	toggleYes = "Yes"
+	toggleNo  = "No"
+)
+
+func onOff(group []string, name string, get func(*ctx) *bool) func(*ctx) string {
 	return func(g *ctx) string {
 		// BRE shows a bare, right-aligned Yes/No (no brackets), verified against a
-		// live Preferences capture.
-		state := "No"
+		// live Preferences capture. The words are translated -- they are prose the
+		// player reads, not a key they type; the row is chosen by its number.
+		state := toggleNo
 		if *get(g) {
-			state = "Yes"
+			state = toggleYes
 		}
-		return fmt.Sprintf("%-28s %3s", i18n.T(playerLang(g), name), state)
+		lang := playerLang(g)
+		label, value := i18n.T(lang, name), i18n.T(lang, state)
+		pad := toggleLabelWidth(lang, group) - utf8.RuneCountInString(label) + 1
+		if pad < 1 {
+			pad = 1
+		}
+		vpad := toggleValueWidth(lang) - utf8.RuneCountInString(value)
+		if vpad < 0 {
+			vpad = 0
+		}
+		return label + strings.Repeat(" ", pad+vpad) + value
 	}
 }

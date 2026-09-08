@@ -27,6 +27,7 @@ type Menus struct {
 	System         *Menu
 	Game           *Menu
 	Food           *Menu
+	Prefs          *Menu // System > Preferences; exported so its layout is testable
 }
 
 // noBombingOps, noMissileOps and noAnnihilator are the sysop's three special-
@@ -431,21 +432,15 @@ func BuildMenus() *Menus {
 	// Item set and order mirror BRE's Preferences submenu (the three "Visit …
 	// Menu" skip-toggles, then the four behaviour toggles). The 'L' language
 	// picker is IB's own addition, kept at the end.
-	prefs.Items = []Item{
-		{Key: '1', LabelFn: onOff("Visit Covert Menu", func(w *ctx) *bool { return &w.prefs().VisitCovert }),
-			Do: toggle(func(w *ctx) *bool { return &w.prefs().VisitCovert })},
-		{Key: '2', LabelFn: onOff("Visit Trading Menu", func(w *ctx) *bool { return &w.prefs().VisitTrading }),
-			Do: toggle(func(w *ctx) *bool { return &w.prefs().VisitTrading })},
-		{Key: '3', LabelFn: onOff("Visit Message Menu", func(w *ctx) *bool { return &w.prefs().VisitMessage }),
-			Do: toggle(func(w *ctx) *bool { return &w.prefs().VisitMessage })},
-		{Key: '4', LabelFn: onOff("Use Enter To Exit BUY Menu", func(w *ctx) *bool { return &w.prefs().EnterExitsBuy }),
-			Do: toggle(func(w *ctx) *bool { return &w.prefs().EnterExitsBuy })},
-		{Key: '5', LabelFn: onOff("Deposit gold at End of Turn", func(w *ctx) *bool { return &w.prefs().DepositEndTurn }),
-			Do: toggle(func(w *ctx) *bool { return &w.prefs().DepositEndTurn })},
-		{Key: '6', LabelFn: onOff("Auto-Pay Maintenance", func(w *ctx) *bool { return &w.prefs().AutoPayMaint }),
-			Do: toggle(func(w *ctx) *bool { return &w.prefs().AutoPayMaint })},
-		{Key: '7', LabelFn: onOff("Auto-Feed Empire", func(w *ctx) *bool { return &w.prefs().AutoFeed }),
-			Do: toggle(func(w *ctx) *bool { return &w.prefs().AutoFeed })},
+	prefs.Items = append(toggleItems([]toggleRow{
+		{Key: '1', Name: "Visit Covert Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitCovert }},
+		{Key: '2', Name: "Visit Trading Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitTrading }},
+		{Key: '3', Name: "Visit Message Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitMessage }},
+		{Key: '4', Name: "Use Enter To Exit BUY Menu", Get: func(w *ctx) *bool { return &w.prefs().EnterExitsBuy }},
+		{Key: '5', Name: "Deposit gold at End of Turn", Get: func(w *ctx) *bool { return &w.prefs().DepositEndTurn }},
+		{Key: '6', Name: "Auto-Pay Maintenance", Get: func(w *ctx) *bool { return &w.prefs().AutoPayMaint }},
+		{Key: '7', Name: "Auto-Feed Empire", Get: func(w *ctx) *bool { return &w.prefs().AutoFeed }},
+	}), []Item{
 		{Key: 'L', LabelFn: func(w *ctx) string {
 			// playerLang, not the raw stored code: on a CP437 session it names the
 			// language actually rendering (the CP437-safe fallback), and its
@@ -460,7 +455,7 @@ func BuildMenus() *Menus {
 			Hidden: func(w *ctx) bool { return w.Player().FormerName != "" },
 			Dimmed: func(w *ctx) bool { return w.Player().Protection > 0 }},
 		{Key: '0', Label: "Quit", Do: back},
-	}
+	}...)
 	prefs.DefaultOnEnter = quitOnEnter(prefs)
 
 	// The Coordinator Menu belongs to the elected BBS Coordinator (see the
@@ -606,6 +601,7 @@ func BuildMenus() *Menus {
 		System:         system,
 		Game:           gameMenu,
 		Food:           food,
+		Prefs:          prefs,
 	}
 }
 

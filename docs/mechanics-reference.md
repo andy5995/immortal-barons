@@ -4756,6 +4756,21 @@ and each carries a gameplay effect (#11 wired the last two):
   a player's units disappear from a battle they were never told about.
   See the `bre-binary-verified-math` memory.
 
+  **It does NOT defend against an interplanetary attack**, and that is what the
+  "Local Games" note means — not that the treaty is inert in a league game.
+  BINARY-VERIFIED (2026-09-08) on three agreeing readings: `send_defensive_aid`
+  (`BRE.OVR 0x01177a`) has exactly one caller, `run_attack_menu`, on the local
+  Attack Menu's `A` key (`cmp al,0x41` at `0x37bb`) and with no game-mode test,
+  so the aid is live on-planet in a league; `resolve_received_invasion`
+  (`0x040012`), which meets an arriving strike, calls no aid routine at all, and
+  its battle helper `resolve_invasion_battle` (`0x03fae7`) calls nothing but
+  arithmetic; and BRE draws the distinction itself in prose, describing the
+  Intelligence Alliance as aiding "other empires on the planet and in
+  Inter-planetary conflict" while the Full Defense Alliance is "effective only
+  in Local Games". IB matches — `resolveRemoteAttack` meets a strike with the
+  target's own `Defense()` alone, pinned by
+  `TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes`.
+
   **Who is told is wider than who helps, and the line is filed unconditionally.**
   BINARY-VERIFIED. The report loop's guard is `cmp word [es:di-0xebf],0x5 / jg`
   (`BRE.OVR 0x10545`) — every relation ABOVE 5 — while the detachment share is
