@@ -418,6 +418,48 @@ the roster just shrinks; and **the slot letter is `(fileoffset − 2489) / 1069`
 BRE thinks exists. Proof of the method: `cap/small-vs-large-20260830.cap`, six
 staged battles the binary accepted and fought.
 
+**The HEADER is sealed too, and `bre-stage.py` does not reseal it.** Everything
+before slot A — the 2489 bytes holding the game's own settings — carries its own
+CRC-32 at **offset 2485**, over bytes 0..2489 with those four zeroed, the same
+algorithm as a record's. Patch a setting and BRE refuses the whole game with
+*"Status File has been tampered with!"* until it is resealed:
+
+```python
+struct.pack_into('<I', d, 2485, 0)
+struct.pack_into('<I', d, 2485, zlib.crc32(bytes(d[:2489])) ^ 0xFFFFFFFF)
+```
+
+That is what makes a **config knob** testable, not just a realm's fields. Mapped
+so far, all confirmed against the Game Setup screen: **+0x00/+0x02/+0x04** the
+game-start date (year, month, day), **+0x36** Turns per day, **+0x38** Turns of
+Protection, **+0x185** Region Cost Change. Changing one and re-reading the
+screen is the cheapest way to prove what a byte means.
+
+**"Computer Clock has been tampered with" means the DOS date is BEHIND the date
+the game last ran at, not that anything is broken.** An install driven with
+synthetic dates sits in the future, so `DATE` must be set forward past it —
+bisect a few years, it costs one launch each (this install needed 06-30-2027).
+Do NOT go hunting for a corrupted file; the message names the clock and means
+it.
+
+**Read a price off the screen that quotes it, not out of arithmetic.** The
+**Spending Menu prints the region price directly** in its Price column beside
+`# Owned`, so one staged realm gives the formula at that size with no algebra.
+The purchase screen's *"You can afford N regions"* looks equivalent and is not:
+it is `min(affordable, Max Purchasable Regions)`, so a run of identical N across
+wildly different gold is the CAP, not a price — 750 in one captured game, and
+mistaking it for affordability produced a wrong price model here on 2026-09-08.
+
+**A per-game SETTING can silently disable the mechanic you are fitting.** Fitting
+a formula across captures is worthless until the **System Menu > (G) Game Setup**
+screen from the SAME session is read: it prints every knob at once. A league
+game running `Protection Turns: 130` keeps realms shielded past 800 regions, and
+BRE waives the region-cost surcharge entirely while a realm is protected — so 65
+purchase screens fitted a climb of 33 and "proved" the surcharge did not exist.
+Two live runs on one staged realm, changing only that setting, gave 33,917 and
+68,934 and settled it in minutes. **When a fit disagrees with the code, suspect
+the setting before the code.**
+
 ## Running BRE headless (tmux + dosemu2 harness)
 
 BRE can be driven scriptably and its screens scraped as plain text

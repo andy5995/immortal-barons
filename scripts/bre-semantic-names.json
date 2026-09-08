@@ -17,6 +17,8 @@
     }
   },
   "overlay_procedures": {
+    "0x03018a": {"name": "decontamination_price_at_size", "confidence": "high", "evidence": ["call_graph: sole caller is calculate_waste_decontamination_cost, so this prices decontamination rather than a land purchase despite sharing the region-price shape", "disassembly: reads Region Cost Change (config +0x185) into a 4-way switch, calls is_under_protection then total_regions, forms climb = 0x21 + flag*value and returns climb*total + 0x384"]},
+    "0x030237": {"name": "region_price_over_range", "confidence": "high", "evidence": ["call_graph: the land-price function proper -- called by purchase_regions, run_buy_regions_menu and run_system_menu, and by itself to split a span at the surcharge threshold", "disassembly: gates on is_under_protection BEFORE comparing the count to 0x12c, so a protected realm never pays the surcharge at any size", "live: one staged 1,000-region realm at Region Cost Change Medium was quoted 33,917 with Protection Turns 100 and 68,934 with 0 (2026-09-08), fixing base 0x384 and the half-step from real_to_integer_round"]},
     "0x01351e": {
       "name": "enter_system_menu",
       "confidence": "high",

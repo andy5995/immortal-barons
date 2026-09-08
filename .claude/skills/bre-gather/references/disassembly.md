@@ -709,3 +709,33 @@ correctly it is opponent-proportional like every other roll in the loop.
 `pop` and see which register triple it fills. More generally — when a decoded
 rule comes out backwards, suspect the operand order before suspecting the game.
 A mechanic that makes no sense is nearly always a misread, not a quirk.
+
+## Two gates read as one, and other guard-reading traps
+
+**A guard often tests more than the thing you came for; read to the flag, not to
+the first `cmp`.** The region-cost surcharge (`region_price_over_range`,
+`BRE.OVR 0x030237`) calls `is_under_protection` and zeroes its multiplier flag
+BEFORE it ever compares the region count to `0x12c`. Reading only the compare
+gives a rule that is right about the threshold and wrong about who it applies
+to, and IB shipped exactly that for months. Follow the branches to where the
+flag is finally set.
+
+**A large `add di,<imm16>` before a call is usually the RECORD BASE, not a field
+offset.** `add di,0xf093` (-3949) appears at over a hundred sites and is simply
+"address realm[letter]" against `[0x28b0]`; the value it reaches is decided by
+the call that follows. Here `call 056d:0ec6` is `total_regions`, which sums the
+NINE region fields (`+0x96` through `+0xb6`, Waste included) — so the compared
+quantity is the region total, not whatever field the displacement seems to name.
+Look up the callee before interpreting the displacement.
+
+**Name a routine from its CALLERS, and check them after you name it.** Two
+routines in `ovr_02ff05` compute a region price the same way. The one whose sole
+caller is `calculate_waste_decontamination_cost` prices decontamination; the one
+called by `purchase_regions`, `run_buy_regions_menu` and `run_system_menu` is
+the land price. Naming the first `region_price_at_size` on the strength of its
+arithmetic was wrong, and its caller list said so immediately.
+
+**A price built through `real_to_integer_round` carries a half step.** BRE's land
+price is `0x384 + climb x (owned + 1/2)`, and the half is why a base sampled at
+the un-surcharged climb (900 + 33/2 = 917) is exactly right there and 17 gold
+short at the surcharged one. A constant fitted at one climb is not a constant.
