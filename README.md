@@ -156,7 +156,8 @@ go build ./cmd/immortal-barons ./cmd/barons-ftn
 ```
 
 This produces the `immortal-barons` game and the optional `barons-ftn` inter-BBS
-transport helper. See "Running" above to start the game; the Door Setup guide
+transport helper. See "Running" above to start the game; the
+[FTN Transport guide](https://andy5995.github.io/immortal-barons/ftn-transport/)
 explains the helper.
 
 ## Character set
