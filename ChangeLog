@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Computer barons pay the same rising price for land a player does when they
+    expand to feed themselves
   * New Realm Protection waives the big-realm surcharge on land, and a region
     costs what the original charges at every size
   * The Preferences screen lines its Yes/No column up in every language, and

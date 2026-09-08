@@ -275,3 +275,48 @@ func TestAIObeysAZeroTaxCeiling(t *testing.T) {
 		t.Errorf("AI taxed at %d%% under a Max Tax Rate of 10, want the ceiling", ai.Tax)
 	}
 }
+
+// The AI closes a food shortage by BUYING land, at the price a human of that
+// size pays. It used to charge a flat Prices.Land and write the regions in
+// directly, so a large baron expanded for a few hundred gold a region while a
+// player that size paid six figures, and the purchase never reached
+// RegionsBoughtThisTurn so the per-turn cap did not see it either.
+func TestAIBuysFoodLandAtTheClimbingPrice(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("ai", "Hungry")
+	e.AIProfile = AIProfileAggressor
+	e.Regions = RegionMix{Urban: 5000} // big, and produces no food
+	e.syncLand()
+	e.Protection = 0
+	// Stocked past the food buffer so step 1 buys nothing and the gold spent
+	// below is land alone; production still cannot cover consumption, which is
+	// what sends it to the land-buying branch.
+	e.Food = w.FoodDue(e) * AIFoodBufferTurns * 2
+	e.LandAvailable = 10_000
+	e.Gold = 500_000_000
+
+	// Drive the economy step directly: routing through aiPlay leaves whether
+	// this branch runs to the seed, and a test that skips proves nothing.
+	if w.FoodGrown(e) >= w.FoodDue(e) {
+		t.Fatalf("fixture is not in food shortage: grows %d, owes %d", w.FoodGrown(e), w.FoodDue(e))
+	}
+	goldBefore, landBefore := e.Gold, e.Land
+	w.aiManageEconomy(e)
+
+	bought := e.Land - landBefore
+	if bought <= 0 {
+		t.Fatalf("a starving baron with %d gold bought no land", goldBefore)
+	}
+	spent := goldBefore - e.Gold
+	// The flat-price bug would have charged about RegionPriceBase per region.
+	// At 5,000 regions the real climb is orders of magnitude above that.
+	cheapest := int64(bought) * int64(RegionPriceBase) * 2
+	if spent < cheapest {
+		t.Errorf("bought %d regions for %d gold — a flat price, not the climbing one (%d+ expected)",
+			bought, spent, cheapest)
+	}
+	if e.RegionsBoughtThisTurn < bought {
+		t.Errorf("bought %d regions but RegionsBoughtThisTurn is %d — the per-turn cap cannot see them",
+			bought, e.RegionsBoughtThisTurn)
+	}
+}

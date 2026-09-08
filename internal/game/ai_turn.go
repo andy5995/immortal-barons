@@ -77,22 +77,25 @@ func (w *World) aiManageEconomy(e *Empire) {
 	//    turn, so the old 5-region trickle never caught up and the population
 	//    outran its food into starvation; the food buffer in step 1 rides out the
 	//    turn while this closes the gap.
-	if produced < upkeep && e.Gold > int64(w.Prices.Land) {
+	//
+	//    It buys through BuyRegions, the same door aiExpandLand and a human use,
+	//    so the rising holdings-based price and the per-turn cap apply. This
+	//    path used to charge a FLAT Prices.Land and write the regions in by
+	//    hand: a 5,000-region baron closed its food gap at a few hundred gold a
+	//    region where a player that size pays six figures, and the purchase was
+	//    invisible to RegionsBoughtThisTurn, so it escaped the cap as well.
+	if produced < upkeep {
 		n := (upkeep-produced)/FoodAgriBase + 1 // conservative: the floor of the yield band
-		if afford := UnitsAffordable(e.Gold, w.Prices.Land); n > afford {
-			n = afford
-		}
 		if n > AIAgriBuyMax {
 			n = AIAgriBuyMax
+		}
+		if afford := w.MaxAffordableRegions(e); n > afford {
+			n = afford
 		}
 		if n > e.LandAvailable {
 			n = e.LandAvailable // this realm's land allowance is finite
 		}
-		if n > 0 {
-			e.Regions.Agricultural += n
-			e.syncLand()
-			e.Gold -= goldCost(n, w.Prices.Land)
-			e.LandAvailable -= n
+		if n > 0 && w.BuyRegions(e, &e.Regions.Agricultural, n) == nil {
 			return
 		}
 	}
