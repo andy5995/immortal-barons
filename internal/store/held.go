@@ -51,16 +51,28 @@ func copyThenRemove(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	// Closed before the source is removed, NOT deferred: Windows refuses to
+	// delete a file that is still open, so a deferred close leaves the copy
+	// made and the original in place — a packet delivered twice on the one
+	// platform this path matters most on, since the copy runs when inbound is a
+	// different mount from the data directory. The close is repeated on every
+	// error return below rather than deferred for that reason.
 	// Written under a temporary name and renamed into place, so a run
 	// interrupted mid-copy cannot leave a half-packet that later reads as a
 	// corrupt one. The rename is within one directory, so it cannot hit EXDEV.
 	tmp := dst + ".part"
 	out, err := os.Create(tmp)
 	if err != nil {
+		in.Close()
 		return err
 	}
 	if _, err := io.Copy(out, in); err != nil {
+		in.Close()
+		out.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if err := in.Close(); err != nil {
 		out.Close()
 		os.Remove(tmp)
 		return err

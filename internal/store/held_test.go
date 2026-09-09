@@ -139,6 +139,12 @@ func TestMoveFileKeepsTheModificationTime(t *testing.T) {
 	if err := copyThenRemove(src, dst); err != nil {
 		t.Fatal(err)
 	}
+	// The source must be GONE: this is a move. Windows refuses to delete a file
+	// that is still open, which is how a deferred close in the copy path showed
+	// up as a packet delivered twice there and nowhere else.
+	if _, err := os.Stat(src); !os.IsNotExist(err) {
+		t.Errorf("the source survived the move (stat err = %v)", err)
+	}
 	info, err := os.Stat(dst)
 	if err != nil {
 		t.Fatal(err)
