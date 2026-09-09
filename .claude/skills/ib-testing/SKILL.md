@@ -65,6 +65,42 @@ wrong conclusion here on 2026-09-06: a `-league-check` change was reported as
 not taking effect when the binary was 17 hours old. Build them one at a time,
 or pass `-o` for each, and check the mtime before believing a negative result.
 
+**`World.Today` is a PLAY-SESSION field and is empty in a planetary run.** It is
+set in `internal/play` and nowhere else, so anything in `internal/store` or the
+engine that dates something off it silently gets `""` on the `-planetary` path —
+and a unit test that builds its world with `NewWorldSeed` sees the same empty
+value, so the test agrees with the bug. Date something by the wall clock
+(`RecordedTimeFormat`, as `LastPacketFrom` does) when the question is real
+elapsed time, and by `LastMaintDate` when it is the game clock. Caught 2026-09-09
+on a grace window that would never have opened on a real board.
+
+**Per-run state that depends on the world being RELOADED is per-process state.**
+The once-per-run hold notices deduplicate through an unexported map on the World,
+which a door clears for free by loading the world afresh every run. Two
+`RunPlanetary` calls sharing one World in a test reported the fault once and then
+went silent, which reads as a broken notice rather than a test artefact. If a
+run has "once per run" bookkeeping, clear it at the top of the run
+(`World.BeginRun`), not by trusting the reload.
+
+**Testing a MIXED-VERSION league costs one worktree.** To prove a change does not
+force every board to upgrade, build the released tag beside the working tree and
+run one board on it:
+
+    git worktree add /tmp/scratch/v0.0.10 v0.0.10
+    (cd /tmp/scratch/v0.0.10 && go build -o /tmp/scratch/ib-v0010 ./cmd/immortal-barons)
+
+Then drive that board's steps with the old binary and the rest with the new one,
+and check BOTH directions apply — a packet the old board accepts proves nothing
+about the packet it sends back. `git worktree remove --force` afterwards.
+
+**The rig finds a class of defect the unit tests cannot: what the run SAYS.** One
+session's rig run turned up a ruleset hold reported as "held for a protocol this
+build does not read" (wrong fault, wrong fix), a release line claiming a format
+change that had not happened, and one notice per held file where the sysop needed
+one per fault. Every unit test passed throughout — they assert counters and
+state, and nobody had read a whole run's output. Read the output, not just the
+assertions.
+
 ## Fixed seeds
 
 A fixed-seed test may only assert what holds on OTHER seeds. A macro outcome
