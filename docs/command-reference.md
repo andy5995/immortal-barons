@@ -180,7 +180,9 @@ These options are for games that link several BBSes together (a "league"). See
   modifier, not a mode: it takes effect when used with `-full` or `-planetary`.
   Without one of those, it is ignored.
 - **`-league-config`** — Send this board's league settings to the whole league,
-  then exit. Only the league coordinator (node #1) uses this.
+  then exit. Only the league coordinator (node #1) uses this. A `-planetary` run
+  on the coordinator's board sends them too, so a member that missed one
+  broadcast catches up on its own; use this to push a change immediately.
 - **`-league-check`** — Check this board's league setup — the roster, the board
   name, the packet directories and the keys — and report everything that is
   wrong at once, then exit. Run it after joining a league, and whenever a

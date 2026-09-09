@@ -728,6 +728,11 @@ adopts the settings on its next `-planetary` run. A member accepts them only
 when the packet comes from node 1 *and* carries the Coordinator's signature, so
 no other board can change the league rules.
 
+The Coordinator's own `-planetary` run sends the same settings, so a board that
+was down for a broadcast, or joined the league after it, is brought into line on
+the next exchange rather than playing its own numbers for the rest of the
+season. `-league-config` is for pushing a change out immediately.
+
 ### League bulletins
 
 Bulletins the whole league reads are yours to write. Put them in

@@ -163,13 +163,20 @@ func (w *World) IsLeagueCoordinator() bool {
 }
 
 // ExportLeagueConfig queues a broadcast packet carrying this board's league
-// rules. Only meaningful from the coordinator; member boards accept it only
-// when it comes from node #1 (see ApplyPacket).
+// rules. Only the Coordinator sends it; member boards accept it only when it
+// comes from node #1 (see ApplyPacket). It goes out on every planetary run,
+// like the roster, so a board that was down for one broadcast — or joined the
+// league after it — heals on the next run instead of playing its own numbers
+// for the rest of the season (#264). The original does the same on its
+// planetary step.
 //
 // Prepended, not appended — see ExportNodeList's doc comment for why: the
 // same Seq-ordering reasoning applies to every packet type
 // CarriesCoordinatorOrders recognizes, this one included.
 func (w *World) ExportLeagueConfig() {
+	if !w.IsLeagueCoordinator() {
+		return
+	}
 	w.Outbox = append([]Packet{{
 		FromBoard:    w.Config.BoardID,
 		Date:         w.LastMaintDate,

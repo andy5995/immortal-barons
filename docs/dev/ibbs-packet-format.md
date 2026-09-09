@@ -396,11 +396,12 @@ planetary run puts it back through the ordinary inbound path — league check,
 duplicate check, addressing, both signatures. A board that is given its roster
 key afterwards therefore applies its own backlog with nobody doing anything.
 
-That matters most for a **ruleset** broadcast. The Coordinator re-sends its
-roster and its bulletins on every planetary run, so those recover by themselves;
-`-league-config` is a manual command and is not part of that run, so a ruleset
-refused once used to be gone permanently — and a re-send would then be discarded
-as a duplicate. The incident that produced this had six boards and a
+That mattered most for a **ruleset** broadcast, back when the ruleset was the
+one Coordinator-authored thing that did not repeat: a ruleset refused once was
+gone permanently, and a re-send would then be discarded as a duplicate. The
+Coordinator now re-sends its ruleset alongside its roster and its bulletins on
+every planetary run (#264), so all three recover by themselves; `-league-config`
+remains the way to push a change without waiting for the next run. The incident that produced this had six boards and a
 signed-payload mismatch (above), with one member frozen at four roster entries
 against the league's six and not waiting on anything.
 

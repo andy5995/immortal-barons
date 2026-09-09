@@ -93,6 +93,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	w.ArriveAnnihilator() // a weapon whose flight is over lands before anything else moves
 	w.ExportScores()
 	w.ExportNodeList()
+	w.ExportLeagueConfig()
 	w.ExportBulletins(leagueBulletins)
 	w.PingTravelTimes()
 	w.ExportAnnihilatorStatus()

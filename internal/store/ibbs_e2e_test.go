@@ -1,6 +1,8 @@
 package store
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
 	"os"
 	"path/filepath"
 	"testing"
@@ -216,4 +218,49 @@ func findRemoteBoard(boards []game.RemoteBoard, id string) *game.RemoteBoard {
 		}
 	}
 	return nil
+}
+
+// TestPlanetaryRunRebroadcastsTheRuleset covers the healing case in #264: the
+// Coordinator's ruleset rides every planetary run, so a member that missed the
+// one-shot -league-config broadcast still ends up playing the league's rules.
+func TestPlanetaryRunRebroadcastsTheRuleset(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "The Eclipse"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pub, sec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := newBoard(t, filepath.Join(dir, "a"), "Nova Hub", roster)
+	b := newBoard(t, filepath.Join(dir, "b"), "The Eclipse", roster)
+	a.w.Config.DataDir, b.w.Config.DataDir = filepath.Join(dir, "a"), filepath.Join(dir, "b")
+	a.w.CoordKey, a.w.CoordPub = sec, pub
+	b.w.CoordPub = pub
+	a.w.Config.TurnsPerDay = 12
+	b.w.Config.TurnsPerDay = 10
+
+	a.run(t)
+	if n := deliver(t, a, b); n == 0 {
+		t.Fatal("the Coordinator wrote no packets")
+	}
+	b.run(t)
+	if got := b.w.Config.TurnsPerDay; got != 12 {
+		t.Errorf("member plays %d turns a day, want the Coordinator's 12", got)
+	}
+
+	// A member never dictates back: its own run must not queue a ruleset.
+	b.w.Config.TurnsPerDay = 10
+	b.run(t)
+	if n := deliver(t, b, a); n > 0 {
+		a.run(t)
+	}
+	if got := a.w.Config.TurnsPerDay; got != 12 {
+		t.Errorf("Coordinator adopted a member's ruleset: %d turns a day", got)
+	}
 }
