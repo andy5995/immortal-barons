@@ -119,6 +119,15 @@ empire record (les di,[0x28d8])
                 nine counts +0x96..+0xb6 are what "total regions" sums
   +0xa6  int32  Industrial count
   +0xae  int32  Mountain count
+  +0xba  int32  regions OWED to this realm and not yet typed — a tenth slot in
+                the region block that `total_regions` deliberately skips. The
+                picker at BRE.OVR 0x030ebb drains it ("N Regions left", "How
+                many <type> regions?"), and it is fed by a won attack, a pirate
+                raid, and the S3-Sabre's backfire, which adds 10-19% of the
+                TARGET's total regions to it. Named `select_regions_to_lose` in
+                the generated catalog, which has the direction backwards: its
+                callers are `resolve_regular_attack`, `launch_pirate_raid` and
+                `run_player_turn`.
   +0xbe  int32  technology levels: FIFTEEN counters, +0xbe .. +0xf9, one per
                 research slot. Only slots 0-5 do anything; 6-14 are pure
                 dilution. Never decremented anywhere in the binary.

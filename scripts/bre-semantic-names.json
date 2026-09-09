@@ -570,9 +570,9 @@
       "evidence": ["binary_strings: region drop, collapse, quit, and termination topics", "call_graph: called from asset sale and can terminate a realm"]
     },
     "0x030ebb": {
-      "name": "select_regions_to_lose",
+      "name": "distribute_owed_regions",
       "confidence": "high",
-      "evidence": ["binary_strings: regions remaining, selection, and quit topics", "call_graph: shared by combat, pirate, budget, and turn-loss paths"]
+      "evidence": ["binary_strings: regions remaining, per-type quantity prompt, and quit topics", "reads the caller's own record +0xBA and returns at once when it is zero: the pool of regions owed and not yet typed", "call_graph: resolve_regular_attack, launch_pirate_raid, allocate_turn_budget, run_player_turn -- gains, not losses; the previous name select_regions_to_lose had the direction backwards", "the S3-Sabre backfire adds 10-19% of the target's total regions to the same field"]
     },
     "0x0314d5": {
       "name": "show_civilian_advisor_report",
