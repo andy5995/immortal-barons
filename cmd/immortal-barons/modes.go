@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -98,7 +99,28 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 	}
 	reportPlanetary(cfg, run)
 	writeBulletins(cfg, w)
-	return store.Save(w, cfg)
+	if err := store.Save(w, cfg); err != nil {
+		return err
+	}
+	// After the save, so a hook that hangs or a run that ends non-zero cannot
+	// cost the work the run just did — and so the faults reported here are not
+	// reported again by the next run.
+	return reportFaults(cfg, run)
+}
+
+// reportFaults raises the alarm for a run that met a fault the sysop has not
+// been told about: the command they configured, and a non-zero exit for the
+// scheduler that started this. Both are deliberately keyed to NEW faults, not to
+// faults outstanding: a board that has been unreachable for a week must not fail
+// its unit every quarter of an hour, or the failure stops meaning anything.
+func reportFaults(cfg game.Config, run store.PlanetaryRun) error {
+	if len(run.NewFaults) == 0 {
+		return nil
+	}
+	runFaultHook(cfg, run.NewFaults)
+	// stderr, because that is what a scheduler mails and what a journal marks.
+	fmt.Fprintf(os.Stderr, "immortal-barons -planetary: %s\n", strings.Join(run.NewFaults, " "))
+	return errFaults
 }
 
 // writeBulletins refreshes the files the BBS shows on its own bulletin menu.
@@ -266,6 +288,10 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 	}
 	lock.Release()
 	reportPlanetary(cfg, run)
+	// The hook, but not the exit code: this run has a caller waiting behind it,
+	// and a door that exits non-zero on a league fault is a door the BBS reports
+	// as broken to the player who just played it.
+	runFaultHook(cfg, run.NewFaults)
 
 	// Step 2: play a turn. Detect whether we have -local with a name or a drop
 	// file to identify the caller.

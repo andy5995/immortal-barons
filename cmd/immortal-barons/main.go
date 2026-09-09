@@ -35,13 +35,21 @@ import (
 // no one to answer it, say) can tell that the reset did not happen.
 var errCancelled = errors.New("cancelled")
 
+// errFaults ends a planetary run non-zero because it recorded a transport fault
+// nobody has been told about yet (#187). The game cannot raise an alarm itself —
+// a board is a headless server — but whatever runs the step on a timer already
+// has one: cron mails a failing job, systemd marks the unit failed, Windows Task
+// Scheduler records the result. The reason is on stderr by the time this is
+// returned, so it is reported as quietly as a cancellation.
+var errFaults = errors.New("transport faults")
+
 // exitOn reports a mode's failure and exits non-zero, staying quiet for a
 // cancellation the sysop already saw.
 func exitOn(mode string, err error) {
 	if err == nil {
 		return
 	}
-	if !errors.Is(err, errCancelled) {
+	if !errors.Is(err, errCancelled) && !errors.Is(err, errFaults) {
 		fmt.Fprintln(os.Stderr, "immortal-barons "+mode+":", err)
 	}
 	os.Exit(1)

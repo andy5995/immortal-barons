@@ -1061,6 +1061,7 @@ var perBoardConfigFields = map[string]string{
 	// never whether it happens or what it takes. The original keeps its
 	// LOCALPIRATENEWS switch in RESOURCE.DAT for the same reason.
 	"PirateNews": "whether pirate raids reach this board's news feed",
+	"OnFault":    "a command on THIS machine, run when a planetary run meets a new transport fault (#187)",
 }
 
 // TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config

@@ -40,6 +40,7 @@ const (
 	keyLottery  = "Lottery"
 	keyBulletin = "BulletinDir"
 	keyPirate   = "PirateNews"
+	keyOnFault  = "OnFault"
 )
 
 // boolWord maps the words a sysop is likely to write to what ParseBool takes.
@@ -109,6 +110,8 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
 				cfg.Lottery = b
 			}
+		case strings.EqualFold(key, keyOnFault):
+			cfg.OnFault = value
 		case strings.EqualFold(key, keyPirate):
 			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
 				cfg.PirateNews = b
@@ -149,6 +152,9 @@ func BoardConfigText(cfg game.Config) string {
 	fmt.Fprintf(&b, "%s %s\n", keyBulletin, cfg.BulletinDir)
 	fmt.Fprintf(&b, "%s %s\n", keyLottery, yesNo(cfg.Lottery))
 	fmt.Fprintf(&b, "%s %s\n", keyPirate, yesNo(cfg.PirateNews))
+	if cfg.OnFault != "" {
+		fmt.Fprintf(&b, "%s %s\n", keyOnFault, cfg.OnFault)
+	}
 	for _, n := range slices.Sorted(maps.Keys(cfg.OutboundDirs)) {
 		fmt.Fprintf(&b, "%s %d %s\n", keyLink, n, cfg.OutboundDirs[n])
 	}

@@ -322,6 +322,19 @@ type Config struct {
 	// a sysop who wants the raids out of the news wants them out.
 	PirateNews bool `json:"-"`
 
+	// OnFault is a command the sysop supplies, run after a planetary run that
+	// recorded a NEW transport fault (#187). The game cannot notify anybody
+	// itself: a board is a headless server, often reached only over ssh and
+	// sometimes running as a service, so there is no desktop to put a window on
+	// and no user session to speak to. What every board does have is whatever
+	// its operator already watches — mail, a phone push, a chat webhook, a
+	// monitoring agent — and one command line is how that is reached without the
+	// game knowing anything about any of them.
+	//
+	// Per-board, so it lives in bbs.cfg: it names a program on THIS machine, and
+	// a Coordinator's broadcast must never be able to set it.
+	OnFault string `json:"-"`
+
 	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
 	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 

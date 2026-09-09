@@ -169,7 +169,10 @@ These options are for games that link several BBSes together (a "league"). See
   editor just as `-board-id` does. It prints the `bbs.cfg` to save, the same as
   the flags do.
 - **`-planetary`** — Run the inter-BBS step, then exit: read incoming packets,
-  run the group attacks, and write outgoing packets.
+  run the group attacks, and write outgoing packets. A run that meets a fault it
+  has not reported before exits non-zero and runs `bbs.cfg`'s `OnFault` command,
+  so whatever runs this on a timer raises the alarm — see "Being told when the
+  league stops moving" in the inter-BBS guide.
 - **`-full`** — Run the full cycle, then exit: read inbound packets, play a
   turn, and write outbound packets. This is the same as running `-planetary`,
   then the door (or `-local`), then `-planetary` again, but in one step. It

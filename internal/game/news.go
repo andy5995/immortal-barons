@@ -38,6 +38,13 @@ func (w *World) noteSysop(format string, a ...any) {
 	w.SysopNotices = append(w.SysopNotices, line)
 }
 
+// BeginRun clears the once-per-run bookkeeping the hold notices keep. On a door
+// the world is loaded fresh for every planetary run, so this was implicit and
+// invisible — until two runs shared one World in a test and the second reported
+// nothing, which is also what a caller doing two runs in one process would get.
+// Per-run state that depends on being reloaded is per-process state.
+func (w *World) BeginRun() { w.heldNoted = nil }
+
 // NoteRulesetHold records that a board's packets are being set aside because
 // the rules it says it is playing by are not the league's (#264). Once per
 // board per run, for the reason NoteProtocolHold gives.

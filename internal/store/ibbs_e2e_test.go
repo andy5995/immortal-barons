@@ -385,3 +385,54 @@ func TestARulesChangeDoesNotDestroyPacketsInFlight(t *testing.T) {
 		t.Errorf("the Coordinator received %d messages across its own rules change, want 1", got)
 	}
 }
+
+// #187: the alarm fires on a fault the sysop has not been told about, and stays
+// quiet while the same fault persists. A run that fails its scheduler's unit
+// every fifteen minutes for a week is a unit nobody looks at.
+func TestOnlyANewFaultRaisesTheAlarm(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "The Eclipse"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pub, sec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := newBoard(t, filepath.Join(dir, "a"), "Nova Hub", roster)
+	b := newBoard(t, filepath.Join(dir, "b"), "The Eclipse", roster)
+	a.w.Config.DataDir, b.w.Config.DataDir = filepath.Join(dir, "a"), filepath.Join(dir, "b")
+	a.w.CoordKey, a.w.CoordPub = sec, pub
+	b.w.CoordPub = pub
+	b.w.Config.TurnsPerDay = 12
+
+	// First offence: the fault is new, so the run reports it as one.
+	b.run(t)
+	deliver(t, b, a)
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(run.NewFaults) == 0 {
+		t.Fatal("the first run to meet a fault raised no alarm")
+	}
+
+	// The same board, still out of step: reported in the run's notices as before,
+	// but no longer new.
+	b.run(t)
+	deliver(t, b, a)
+	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(run.Notices) == 0 {
+		t.Error("a fault that persists stopped being reported")
+	}
+	if len(run.NewFaults) != 0 {
+		t.Errorf("an unchanged fault raised the alarm again: %v", run.NewFaults)
+	}
+}

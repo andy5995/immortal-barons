@@ -161,3 +161,19 @@ alphabet is not shorter than the same name in another.
 - If your empire is attacked while you are at the menus, a notice appears the
   next time you press a key. Orders you already typed are adjusted to what you
   still hold, and the game tells you when that happens.
+
+## How do I find out when my league stops exchanging packets?
+
+- The planetary run **exits non-zero** the first time it meets a fault — a
+  packet refused, quarantined, or held — so whatever runs it on a timer raises
+  the alarm for you: `cron` mails a failing job, `systemd` marks the unit failed,
+  Windows Task Scheduler records the result.
+- A fault that persists keeps being reported in the run's output and in
+  `planetary.log`, but only its first run exits non-zero. A board unreachable for
+  a week must not fail its timer every fifteen minutes.
+- For a push the scheduler cannot send, put one command in `bbs.cfg`:
+  `OnFault  ntfy publish mybbs "$IB_FAULTS"`. It runs after such a run with the
+  faults in `$IB_FAULTS` and your board's name in `$IB_BOARD`, and it is your own
+  shell line — mail, a chat webhook, `wall`, anything.
+- The inter-BBS guide has the details, under "Being told when the league stops
+  moving".

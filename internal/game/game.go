@@ -174,6 +174,13 @@ type World struct {
 	// for them — no player can act on one, and the news cap is 20 lines, so a
 	// fault that repeats every exchange silently deletes the day's real events.
 	SysopNotices []string `json:"-"`
+
+	// LastFaultNotices is the previous run's notices, kept so a run can tell a
+	// NEW fault from one it has already reported (#187). A fault that persists
+	// is reported on every run, as it should be, but only its first run exits
+	// non-zero and runs the sysop's hook: an alarm that fires for a week is an
+	// alarm nobody reads by the second day.
+	LastFaultNotices []string `json:",omitempty"`
 	// heldNoted dedupes the protocol-hold notice to one per board per run. Not
 	// persisted: a new run should say so again.
 	heldNoted map[string]bool

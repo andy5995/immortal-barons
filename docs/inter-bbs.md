@@ -216,6 +216,7 @@ Inbound       inbound
 Outbound      outbound
 Lottery       yes
 PirateNews    yes
+OnFault       mail -s "IB fault" sysop@example.net <<< "$IB_FAULTS"
 ```
 
 Lines starting with `#` or `;` are comments, and `-ibbs-reset` prints a commented
@@ -228,6 +229,40 @@ the Queen's lottery; set `PirateNews` to `no` and pirate raids stop being writte
 up in the planet news, though they go on happening and the raider is still told
 how theirs went. Boards in one league may answer these differently, so a league
 that wants everyone on the same footing has to agree them between themselves.
+
+## Being told when the league stops moving
+
+The game cannot raise an alarm by itself. A board is a server, usually headless
+and often reached only over ssh, so there is no desktop to put a window on and
+nobody watching a screen when a packet is refused at four in the morning. What
+every board does have is whatever already runs the planetary step on a timer, and
+that is where the alarm belongs.
+
+**A planetary run exits non-zero when it meets a fault it has not reported
+before** — a packet refused, quarantined, or held, whether for a format this
+build cannot read or for a ruleset that is not the league's. `cron` mails the
+output of a job that fails, `systemd` marks the unit failed and will run an
+`OnFailure=` unit, and Windows Task Scheduler records the result. Nothing new has
+to be installed for any of that.
+
+Only a **new** fault ends the run non-zero. A fault that persists is still
+reported on every run, in the run's own output and in `planetary.log`, but a
+board that has been unreachable for a week must not fail its timer every fifteen
+minutes: an alarm that fires forever is one nobody reads by the second day.
+
+For anything the scheduler cannot do — a push to your phone, a message in a chat
+room — `bbs.cfg` takes one command:
+
+```
+OnFault  ntfy publish mybbs "$IB_FAULTS"
+```
+
+It runs after such a run, once, with the faults in `$IB_FAULTS`, the board's name
+in `$IB_BOARD`, and its data directory in `$IB_DATA`; on a Unix board they are
+also the command's first argument. It is your shell's line, so a pipeline works,
+and anything at all can be on the other end of it — `mail`, `curl` to a webhook,
+`notify-send`, `wall`. It is given 30 seconds and then abandoned, and if it fails
+the run says so and carries on: the hook is the alarm, not the work.
 
 These settings sit apart from `config.json` because `config.json` holds the
 league's rules, and those are overwritten when the Coordinator's settings packet

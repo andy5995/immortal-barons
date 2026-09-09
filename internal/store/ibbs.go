@@ -50,6 +50,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	// read may be readable now, and it has been waiting since it arrived.
 	// Before any packet is judged: what this board takes to be the league's rules
 	// now, and what it took them to be before that (#264).
+	w.BeginRun()
 	w.NoteLeagueRuleset()
 	released, err := releaseHeld(w.Config.DataDir, inboundDir)
 	if err != nil {
@@ -106,6 +107,12 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	// Drained, not copied: they belong to this run, and leaving them on the
 	// world would repeat them in the next one.
 	run.Notices, w.SysopNotices = w.SysopNotices, nil
+	// Which of them the sysop has not been alarmed about yet (#187). Compared by
+	// the notice text, which names the board and the fault, so a fault that
+	// changes boards or changes kind is a new one and a fault that persists
+	// unchanged is not.
+	run.NewFaults = newNotices(run.Notices, w.LastFaultNotices)
+	w.LastFaultNotices = append([]string(nil), run.Notices...)
 	// Also to disk: the run report goes to stdout, which a scheduled run throws
 	// away, and a scheduler is how the setup guide says to drive this step.
 	//
@@ -128,20 +135,21 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 // it: a run that says nothing is indistinguishable from one that failed to find
 // its directories.
 type PlanetaryRun struct {
-	Applied       int  // packets read from the inbound directory and applied here
-	Forwarded     int  // packets that arrived for another board and were passed on
-	Sent          int  // packet files written, forwarded ones included
-	RosterUpdated bool // the Coordinator's roster replaced this board's copy
-	OtherLeague   int  // packets skipped: wrong league number
-	MeshCopy      int  // packets skipped: not addressed here, mesh mode
-	AlreadySeen   int  // packets skipped: duplicate/replay
-	Refused       int  // packets refused: the sender's signature did not match the roster
-	Held          int  // packets set aside: they speak a protocol this build cannot read
-	HeldRules     int  // packets set aside: their sender is not playing the league's rules (#264)
-	Quarantined   int  // packets that could not be parsed at all and were set aside
-	Deferred      int  // packets left untouched, too young to trust as a complete write
-	Released      int  // held packets this build can now read, returned to inbound
-	Bulletins     int  // league bulletins broadcast (Coordinator's board only)
+	Applied       int      // packets read from the inbound directory and applied here
+	Forwarded     int      // packets that arrived for another board and were passed on
+	Sent          int      // packet files written, forwarded ones included
+	RosterUpdated bool     // the Coordinator's roster replaced this board's copy
+	OtherLeague   int      // packets skipped: wrong league number
+	MeshCopy      int      // packets skipped: not addressed here, mesh mode
+	AlreadySeen   int      // packets skipped: duplicate/replay
+	Refused       int      // packets refused: the sender's signature did not match the roster
+	NewFaults     []string // notices this run that the previous run did not carry (#187)
+	Held          int      // packets set aside: they speak a protocol this build cannot read
+	HeldRules     int      // packets set aside: their sender is not playing the league's rules (#264)
+	Quarantined   int      // packets that could not be parsed at all and were set aside
+	Deferred      int      // packets left untouched, too young to trust as a complete write
+	Released      int      // held packets this build can now read, returned to inbound
+	Bulletins     int      // league bulletins broadcast (Coordinator's board only)
 	// Notices are transport faults for the sysop -- an undeliverable packet,
 	// orders that failed their check. They are reported here rather than in the
 	// planet's news: no player can act on one, and the news cap would let a
@@ -806,4 +814,23 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
 	}
 	return os.Remove(path)
+}
+
+// newNotices returns the notices in now that were not in before. Order is
+// preserved, so a caller reporting them shows them as the run did.
+func newNotices(now, before []string) []string {
+	if len(now) == 0 {
+		return nil
+	}
+	had := make(map[string]bool, len(before))
+	for _, n := range before {
+		had[n] = true
+	}
+	var fresh []string
+	for _, n := range now {
+		if !had[n] {
+			fresh = append(fresh, n)
+		}
+	}
+	return fresh
 }
