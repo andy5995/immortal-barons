@@ -1,6 +1,12 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The League Coordinator sends the league's rules on every planetary run, so
+    a board that missed a broadcast is brought back into line
+  * Packets from a board playing by rules the league never agreed are held, and
+    that board is told why
+  * A planetary run that meets a new transport fault exits non-zero and can run
+    a command of the sysop's own (bbs.cfg "OnFault")
   * Computer barons pay the same rising price for land a player does when they
     expand to feed themselves
   * New Realm Protection waives the big-realm surcharge on land, and a region
