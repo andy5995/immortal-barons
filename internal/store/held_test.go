@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -119,5 +120,30 @@ func TestOnlyANewerBoardsBacklogIsEverReleased(t *testing.T) {
 				t.Errorf("released %d, want %d — nothing else ever brings this packet back", moved, tc.want)
 			}
 		})
+	}
+}
+
+// A held packet's age is what expires it, so a move must not restart the clock
+// — the copy fallback (inbound is often the mailer's own mount) once did (#264).
+func TestMoveFileKeepsTheModificationTime(t *testing.T) {
+	dir := t.TempDir()
+	src := filepath.Join(dir, "a.brp")
+	if err := os.WriteFile(src, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	old := time.Now().Add(-20 * 24 * time.Hour)
+	if err := os.Chtimes(src, old, old); err != nil {
+		t.Fatal(err)
+	}
+	dst := filepath.Join(dir, "b.brp")
+	if err := copyThenRemove(src, dst); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(dst)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := info.ModTime(); got.Sub(old).Abs() > time.Second {
+		t.Errorf("the copy is stamped %v, want the source's %v", got, old)
 	}
 }

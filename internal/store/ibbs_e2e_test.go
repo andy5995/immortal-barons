@@ -264,3 +264,124 @@ func TestPlanetaryRunRebroadcastsTheRuleset(t *testing.T) {
 		t.Errorf("Coordinator adopted a member's ruleset: %d turns a day", got)
 	}
 }
+
+// TestPacketsFromADivergentBoardAreHeld is the enforcement half of #264. A
+// board playing by rules the Coordinator never sent would otherwise feed its
+// scores, strikes and trades into everyone else's game.
+func TestPacketsFromADivergentBoardAreHeld(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "The Eclipse"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pub, sec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := newBoard(t, filepath.Join(dir, "a"), "Nova Hub", roster)
+	b := newBoard(t, filepath.Join(dir, "b"), "The Eclipse", roster)
+	a.w.Config.DataDir, b.w.Config.DataDir = filepath.Join(dir, "a"), filepath.Join(dir, "b")
+	a.w.CoordKey, a.w.CoordPub = sec, pub
+	b.w.CoordPub = pub
+
+	// The Eclipse plays 12 turns a day; the league plays 10.
+	b.w.Config.TurnsPerDay = 12
+	b.w.SendIPMessage(b.w.Empires[0], []string{"Nova Hub"}, false, "We claim the outer belt.")
+	b.run(t)
+	if n := deliver(t, b, a); n == 0 {
+		t.Fatal("The Eclipse wrote no packets")
+	}
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if run.HeldRules == 0 {
+		t.Error("a packet from a board playing its own rules was not held")
+	}
+	if run.Held != 0 {
+		t.Errorf("a ruleset hold was counted as a protocol hold (%d), which names the wrong fault", run.Held)
+	}
+	if got := len(a.w.Empires[0].Mail); got != 0 {
+		t.Errorf("the Coordinator applied %d messages from a divergent board", got)
+	}
+
+	// The board comes into line — but the packet it already sent states the
+	// rules it was written under, so releasing it must not apply it.
+	b.w.Config.TurnsPerDay = 10
+	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.w.Empires[0].Mail); got != 0 {
+		t.Errorf("a packet written under the wrong rules was applied after release: %d messages", got)
+	}
+
+	// What it sends AFTERWARDS is the league's game, and goes through.
+	b.w.SendIPMessage(b.w.Empires[0], []string{"Nova Hub"}, false, "Terms accepted.")
+	b.run(t)
+	deliver(t, b, a)
+	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.w.Empires[0].Mail); got != 1 {
+		t.Errorf("the Coordinator holds %d messages from a board back in step, want 1", got)
+	}
+
+	// And the board is named on BBSINFO throughout, which is the report #264 was
+	// filed against: a board whose packets are only ever held has no APPLIED
+	// packet to record a fingerprint from, and read "unknown" before the hold
+	// recorded one too.
+	if got := a.w.BoardRuleset["The Eclipse"]; got == "" {
+		t.Error("a divergent board's rules were never recorded, so BBSINFO cannot mark it")
+	}
+}
+
+// A rules change must not destroy the traffic already in flight when it lands:
+// those packets state the rules they were written under, and that fingerprint
+// never becomes current again (#264, RulesetGraceDays).
+func TestARulesChangeDoesNotDestroyPacketsInFlight(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "The Eclipse"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pub, sec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := newBoard(t, filepath.Join(dir, "a"), "Nova Hub", roster)
+	b := newBoard(t, filepath.Join(dir, "b"), "The Eclipse", roster)
+	a.w.Config.DataDir, b.w.Config.DataDir = filepath.Join(dir, "a"), filepath.Join(dir, "b")
+	a.w.CoordKey, a.w.CoordPub = sec, pub
+	b.w.CoordPub = pub
+
+	// Both boards in step, and the Coordinator has recorded the league's rules.
+	a.run(t)
+	deliver(t, a, b)
+	b.run(t)
+
+	// The Eclipse writes under the rules it has, and the Coordinator changes them
+	// while that packet is on the wire.
+	b.w.SendIPMessage(b.w.Empires[0], []string{"Nova Hub"}, false, "We claim the outer belt.")
+	b.run(t)
+	deliver(t, b, a)
+	a.w.Config.TurnsPerDay = 12
+
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if run.HeldRules != 0 {
+		t.Errorf("a rules change held %d packets that were already in flight", run.HeldRules)
+	}
+	if got := len(a.w.Empires[0].Mail); got != 1 {
+		t.Errorf("the Coordinator received %d messages across its own rules change, want 1", got)
+	}
+}

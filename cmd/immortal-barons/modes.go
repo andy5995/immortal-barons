@@ -114,7 +114,7 @@ func writeBulletins(cfg game.Config, w *game.World) {
 // for a command whose whole job is moving mail: a sysop cannot tell a run that
 // had nothing to do from one that read the wrong directory.
 func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.Quarantined + run.Deferred
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.HeldRules + run.Quarantined + run.Deferred
 	switch {
 	case run.Applied == 0 && skipped == 0:
 		fmt.Printf("No packets waiting in %s\n", cfg.Inbound())
@@ -139,7 +139,11 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 		fmt.Printf("Passed %d packets on towards the boards they are addressed to.\n", run.Forwarded)
 	}
 	if run.Released > 0 {
-		fmt.Printf("Released %d held packet(s): this board can now read their format.\n", run.Released)
+		// Deliberately not "this board can now read their format": a packet is
+		// held for several reasons now, and a release is only a return to the
+		// inbound queue for re-checking — the run's own held count says whether
+		// any of them were set aside again.
+		fmt.Printf("Returned %d held packet(s) to the inbound queue to be checked again.\n", run.Released)
 	}
 	if run.Held > 0 {
 		// Not "once the builds match": that is true only of a packet from a
@@ -148,6 +152,10 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 		// theirs brings it back, so the per-board notices say which is which.
 		fmt.Printf("Held %d packet(s) for a protocol this build cannot read; they are in %s. The notes below say, per board, whether upgrading releases them.\n",
 			run.Held, filepath.Join(cfg.DataDir, store.HeldDir))
+	}
+	if run.HeldRules > 0 {
+		fmt.Printf("Held %d packet(s) from a board that is not playing the league's rules; they are in %s. The notes below name it.\n",
+			run.HeldRules, filepath.Join(cfg.DataDir, store.HeldDir))
 	}
 	if run.Quarantined > 0 {
 		fmt.Printf("Set aside %d packet(s) that could not be read at all; they are in %s.\n",
@@ -191,7 +199,7 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 // e.g. "skipped 3: 2 already seen, 1 for another league". Each reason is shown
 // only when its count is above zero.
 func skipSummary(run store.PlanetaryRun) string {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.Quarantined + run.Deferred
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.HeldRules + run.Quarantined + run.Deferred
 	if skipped == 0 {
 		return ""
 	}
@@ -217,6 +225,9 @@ func skipSummary(run store.PlanetaryRun) string {
 	// somebody has to act before those packets move.
 	if run.Held > 0 {
 		parts = append(parts, fmt.Sprintf("%d held for a protocol this build does not read", run.Held))
+	}
+	if run.HeldRules > 0 {
+		parts = append(parts, fmt.Sprintf("%d held: the sending board is not playing the league's rules", run.HeldRules))
 	}
 	if run.AlreadySeen > 0 {
 		parts = append(parts, fmt.Sprintf("%d already seen", run.AlreadySeen))

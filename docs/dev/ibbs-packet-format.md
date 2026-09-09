@@ -221,6 +221,10 @@ map of it, not a second definition.
   "TradeFills": [ IPTradeFill ],    // their answers coming home (#47)
   "Market":  [ RemoteListing ],     // FromBoard's market, riding its scores (#47)
   "Version": "0.0.5",               // the sender's game version, for BBSINFO
+  "Ruleset": "51511b59",            // fingerprint of the league rules the sender plays
+                                     // by (#264). A gate: a packet whose rules are not
+                                     // the league's is HELD. Outside the origin
+                                     // signature, like Protocol — see Packet.Ruleset
   "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
   "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
   "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
@@ -228,8 +232,9 @@ map of it, not a second definition.
   "Signature": "base64",            // ed25519 over the coordinator-authored parts
   "BoardSig": "base64",             // ed25519 by the SENDING board over the whole packet, so
                                      // FromBoard is proven rather than claimed (#118).
-                                     // boardSigningBytes zeroes exactly two fields first:
-                                     // BoardSig itself and Hops, which every hub increments.
+                                     // boardSigningBytes zeroes the fields that must not be
+                                     // signed first: BoardSig itself, Hops (which every hub
+                                     // increments), Protocol, Ruleset and Battles.
                                      // Signature IS covered, so a coordinator order cannot be
                                      // lifted out of one packet and grafted into another.
   "League": 42,                     // league number; a board in two leagues ignores the other's.

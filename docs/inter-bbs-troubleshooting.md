@@ -377,6 +377,28 @@ refuses your orders will not reset, and will then be a board playing a different
 season from everyone else. Confirm with `-bbsinfo` that every board is being
 heard from *before* you send it.
 
+**Boards playing by different rules.** Your ruleset goes out on every
+`-planetary` run of yours, so a board that was down for one broadcast is brought
+into line on the next exchange. What that cannot catch is a sysop editing
+`config.json` after adopting it: `BBSINFO.LST` marks such a board "other rules",
+and marks your own board on a line under the table when its rules are not the
+ones you last sent.
+
+Its packets are also **held**, not applied — a board playing its own
+turns-per-day or attack limits would otherwise feed that into everyone else's
+game. Each packet states the rules it was written under, so the ones sent while
+it was off never apply, whatever it does afterwards; they expire on the ordinary
+held-packet timer. Its traffic flows again as soon as it takes your ruleset, and it
+is told so by a bounce naming the reason — it cannot see your held directory.
+
+Changing the rules yourself costs nothing either way. Boards adopt on their own
+next run, so for a day the ones that have adopted look divergent to the ones that
+have not; those packets state the rules that are about to be the league's and go
+through as soon as the receiving board catches up. Packets already in flight
+under the old rules keep applying for a week after the change. Packets from the
+Coordinator are never held this way, since the ruleset that heals a board travels
+in them.
+
 **Version floors.** If you require a minimum release, a board below it has every
 packet refused, and its sysop sees only that their packets bounce. `BBSINFO.LST`
 marks those boards; tell them what the floor is rather than letting them work it

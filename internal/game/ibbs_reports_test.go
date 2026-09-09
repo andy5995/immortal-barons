@@ -162,3 +162,57 @@ func TestEveryOutboundPacketStatesItsVersion(t *testing.T) {
 		}
 	}
 }
+
+// #264: a board's rules are its own until something compares them. The report
+// is read on the Coordinator's board, where its own config IS the league's, and
+// on a member, where the reference is the Coordinator's last-reported one.
+func TestBBSInfoFlagsRulesetDivergence(t *testing.T) {
+	roster := []LeagueNode{{Number: 1, Name: "Alpha BBS"}, {Number: 2, Name: "Bravo BBS"}}
+
+	coord := func() *World {
+		cfg := DefaultConfig()
+		cfg.IBBS, cfg.BoardID = true, "Alpha BBS"
+		w := NewWorldSeed(cfg, 1)
+		w.LeagueNodes = roster
+		w.LastPacketFrom = map[string]string{"Bravo BBS": "08/15/2026 09:34:36"}
+		return w
+	}
+
+	// Same rules on both boards: nothing to say.
+	w := coord()
+	w.BoardRuleset = map[string]string{"Bravo BBS": w.Config.RulesetFingerprint()}
+	if got := w.BBSInfoReport(); strings.Contains(got, "other rules") {
+		t.Errorf("a board playing the league's rules was flagged:\n%s", got)
+	}
+
+	// The 10-against-12 case the issue was filed for.
+	w = coord()
+	other := w.Config
+	other.TurnsPerDay = 12
+	w.BoardRuleset = map[string]string{"Bravo BBS": other.RulesetFingerprint()}
+	if got := w.BBSInfoReport(); !strings.Contains(got, "other rules") {
+		t.Errorf("a board playing different rules was not flagged:\n%s", got)
+	}
+
+	// A board that has never reported is unknown, not divergent.
+	w = coord()
+	if got := w.BBSInfoReport(); strings.Contains(got, "other rules") {
+		t.Errorf("a board that has reported nothing was flagged:\n%s", got)
+	}
+
+	// On a member board the Coordinator's is the reference, and the member's own
+	// divergence — a sysop edit after adopting — is said outright.
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID = true, "Bravo BBS"
+	m := NewWorldSeed(cfg, 1)
+	m.LeagueNodes = roster
+	m.LastPacketFrom = map[string]string{"Alpha BBS": "08/15/2026 09:34:36"}
+	m.BoardRuleset = map[string]string{"Alpha BBS": m.Config.RulesetFingerprint()}
+	if got := m.BBSInfoReport(); strings.Contains(got, "has not sent") {
+		t.Errorf("a member in step with the Coordinator was flagged:\n%s", got)
+	}
+	m.Config.TurnsPerDay = 12
+	if got := m.BBSInfoReport(); !strings.Contains(got, "has not sent") {
+		t.Errorf("a member's own edited ruleset was not reported:\n%s", got)
+	}
+}

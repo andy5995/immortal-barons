@@ -41,6 +41,12 @@ func moveFile(src, dst string) error {
 	if err := os.Rename(src, dst); err == nil {
 		return nil
 	}
+	return copyThenRemove(src, dst)
+}
+
+// copyThenRemove is moveFile's cross-filesystem half, split out so a test can
+// reach it without staging two mounts.
+func copyThenRemove(src, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
 		return err
@@ -62,6 +68,14 @@ func moveFile(src, dst string) error {
 	if err := out.Close(); err != nil {
 		os.Remove(tmp)
 		return err
+	}
+	// The copy carries the source's modification time with it. HeldMaxAge is
+	// measured from that stamp, and a ruleset-held packet is released to inbound
+	// and held again on every run (#264) — so a fresh mtime per copy would restart
+	// its clock every time and it would never age out. os.Rename keeps the stamp;
+	// this path has to be made to.
+	if info, err := os.Stat(src); err == nil {
+		_ = os.Chtimes(tmp, info.ModTime(), info.ModTime())
 	}
 	if err := os.Rename(tmp, dst); err != nil {
 		os.Remove(tmp)

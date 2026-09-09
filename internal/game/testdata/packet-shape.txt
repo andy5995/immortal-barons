@@ -22,6 +22,7 @@ Packet:
   TradeDeals `json:",omitempty"`
   Notice `json:",omitempty"`
   Version `json:",omitempty"`
+  Ruleset `json:",omitempty"`
   Seq
   Signature
   BoardSig

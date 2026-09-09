@@ -48,6 +48,9 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	before := w.LeagueNodes
 	// Before anything else: a packet held for a protocol this build could not
 	// read may be readable now, and it has been waiting since it arrived.
+	// Before any packet is judged: what this board takes to be the league's rules
+	// now, and what it took them to be before that (#264).
+	w.NoteLeagueRuleset()
 	released, err := releaseHeld(w.Config.DataDir, inboundDir)
 	if err != nil {
 		return run, err
@@ -63,6 +66,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.AlreadySeen = inResult.AlreadySeen
 	run.Refused = inResult.Refused
 	run.Held = inResult.Held
+	run.HeldRules = inResult.HeldRules
 	run.Quarantined = inResult.Quarantined
 	run.Deferred = inResult.Deferred
 	// A member board that just adopted the Coordinator's roster has to persist
@@ -133,6 +137,7 @@ type PlanetaryRun struct {
 	AlreadySeen   int  // packets skipped: duplicate/replay
 	Refused       int  // packets refused: the sender's signature did not match the roster
 	Held          int  // packets set aside: they speak a protocol this build cannot read
+	HeldRules     int  // packets set aside: their sender is not playing the league's rules (#264)
 	Quarantined   int  // packets that could not be parsed at all and were set aside
 	Deferred      int  // packets left untouched, too young to trust as a complete write
 	Released      int  // held packets this build can now read, returned to inbound
@@ -301,8 +306,14 @@ type InboundResult struct {
 	MeshCopy    int
 	AlreadySeen int
 	Refused     int
-	// Held counts packets set aside for a protocol this build cannot read.
-	Held int
+	// Held counts packets set aside for a protocol this build cannot read, and
+	// HeldRules those set aside because their sender is not playing the league's
+	// rules. Two counters rather than one because the two need different acts
+	// from different people — an upgrade on one board or the other, against a
+	// ruleset the sending board has not taken — and a run that reported both as
+	// "held for a protocol" sent the sysop looking for the wrong fault.
+	Held      int
+	HeldRules int
 	// Quarantined counts packets that could not even be parsed as JSON and
 	// were set aside instead of stopping the run. See quarantinePacket.
 	Quarantined int
@@ -739,6 +750,35 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	// news and then returns the same empty packet it returns for a
 	// replay or for anything with no reply to send.
 	refused := w.OriginRefused(p)
+	// Held for the same reason and by the same means as a protocol mismatch: a
+	// board playing by rules the Coordinator never sent is playing a different
+	// game, and its scores, strikes and trades would carry that into every other
+	// board's. Checked AFTER the origin check, so the fingerprint has been
+	// through the sending board's own signature wherever the roster carries a
+	// key for it.
+	//
+	// The test is on the fingerprint the PACKET carries — the rules it was
+	// written under — so a packet produced under rules the league never agreed is
+	// never applied, whatever its board does afterwards: it is held, re-checked
+	// on every later run, and expires at HeldMaxAge. Packets in flight across a
+	// legitimate rules change are the case RulesetGraceDays covers.
+	if !refused && w.RulesetDivergent(p) {
+		result.HeldRules++
+		// Recorded here as well as on an applied packet: a board that has never
+		// played the league's rules has no applied packet to learn it from, and
+		// BBSINFO would report the one board this is about as "unknown".
+		w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
+		if first := w.NoteRulesetHold(p.FromBoard); first {
+			// The board at fault is the only one that can fix it, and it cannot
+			// see this board's held directory (#187).
+			w.Outbox = append(w.Outbox, w.BounceRuleset(p))
+		}
+		if verbose {
+			fmt.Printf("  Held packet from %s (%s): it is not playing the league's rules\n",
+				p.FromBoard, p.PacketType())
+		}
+		return holdPacket(w.Config.DataDir, path)
+	}
 	applyResult := w.ApplyPacket(p)
 	if applyResult.HasPayload() {
 		w.Outbox = append(w.Outbox, applyResult)

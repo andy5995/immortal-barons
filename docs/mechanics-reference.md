@@ -5222,6 +5222,50 @@ no separators, no leading dot, `.txt` or `.ans` only — and an oversized file i
 refused at both ends. An unsigned set, or one from a board that is not node #1,
 is refused like a forged ruleset.
 
+### Playing by the league's rules
+
+Every packet carries a fingerprint of the ruleset its sender was playing by,
+taken over the broadcast ruleset alone — the per-board settings are meant to
+differ. It is deliberately outside the origin signature, like the protocol
+number: a board asserts its own rules, so signing would prove who wrote the
+field and never that it is true, and a board set on playing its own game would
+write the Coordinator's fingerprint just as happily. The gate is against
+misconfiguration — the board that missed a broadcast, the sysop who edited the
+config afterwards — and not against a board that lies.
+
+A packet whose fingerprint is not the league's is **held**: a board running its
+own turns-per-day or attack limits would otherwise feed that into every other
+board's game. The fingerprint describes the packet, not the board, so a packet
+written while a board was out of step never applies however quickly its sysop
+puts the config back — it is re-checked on each later run and expires on the
+held-packet timer. Three cases are deliberately not divergent: a packet from the
+Coordinator, whose ruleset is the league's and whose packets carry the change
+that heals a board; a packet stating no fingerprint, from a board older than the
+field; and every packet at all on a board that does not yet know what the
+league's rules are, which on a member is until the Coordinator has been heard
+from.
+
+A rules change is not divergence, and neither direction of one loses traffic. A
+board that has adopted the change looks divergent to one that has not, and those
+packets state the rules that are about to be the league's, so they are released
+and applied as soon as the receiving board catches up. The opposite direction —
+packets already in flight, written under the rules that have just been replaced
+— is covered by a grace window: a board keeps the ruleset it held before the
+change and goes on applying packets stating it for a week. Both are needed,
+because round trips are measured in days and every board adopts on its own next
+run, so a league always has traffic in flight at a change.
+
+`BBSINFO.LST` reports the same thing: a board whose fingerprint differs is
+marked, and a board whose own rules are not the ones the Coordinator sent says so
+under the table. A held packet records its sender's fingerprint as an applied one
+does, so the board whose traffic is being held entirely is named there rather
+than reading as unknown.
+
+The board being held is told as well, once per run, by the same plain-text bounce
+that answers a packet from a board below the league's version floor (#187). It is
+the only board that can fix the fault, and it cannot see another board's held
+directory.
+
 ## How Immortal Barons differs right now
 
 Now matching this reference (as of v0.0.4):

@@ -82,6 +82,19 @@ type Packet struct {
 	// taken over the marshalled packet, so a board that does not know this field
 	// must still see byte-identical bytes for every packet that omits it.
 	Version string `json:",omitempty"`
+	// Ruleset fingerprints the league rules the sender is playing by, and a
+	// packet whose rules are not the league's is HELD (#264).
+	//
+	// It is excluded from the origin signature, like Protocol and for the same
+	// reason: it rides EVERY packet, so signing it would refuse everything from
+	// a board that does not know the field and re-marshals without it — a
+	// coordinated league-wide upgrade, bought for nothing. For nothing because
+	// the signature would prove only that the sender wrote the field, never that
+	// it is true: a board asserts its OWN rules, so one determined to play its
+	// own game writes the Coordinator's fingerprint and signs that just as
+	// happily. The gate stops a board that is misconfigured — the case #264 was
+	// filed for — and nothing here pretends it stops one that is lying.
+	Ruleset string `json:",omitempty"`
 	// Seq numbers this board's outbound packets so the far side can spot one it
 	// has already applied, and Signature authenticates the parts only the
 	// Coordinator may author (#53).
@@ -359,6 +372,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 			}
 			w.BoardVersion[p.FromBoard] = p.Version
 		}
+		w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
 	}
 	// Anything that dictates to this board has to be signed by the Coordinator.
 	// Positional trust — believing whoever names themselves node 1 — is what this
@@ -511,6 +525,26 @@ func (w *World) bounceVersion(p Packet) Packet {
 		FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate,
 		Notice: fmt.Sprintf("this league requires v%s and your board runs %s; upgrade and the packet will be accepted",
 			w.Config.MinBoardVersion, ver),
+	}
+}
+
+// BounceRuleset tells a board that its packets are being held because the rules
+// it is playing by are not the league's (#187, #264). Without it the fault is
+// visible only on the board doing the holding, and the board at fault — the one
+// that can actually fix it — sees its traffic vanish with no reason given.
+//
+// Notice-only, for the reason bounceVersion gives: the packet it refers to is
+// aimed at THIS board, and handing it back would have the sender apply its own
+// strikes against its own realms.
+//
+// The receiving sysop reads it as an ordinary refusal notice, so no new channel
+// is invented, and it goes out once per board per run — a divergent board sends
+// a whole run's traffic, and one bounce per file would bury the line that
+// matters.
+func (w *World) BounceRuleset(p Packet) Packet {
+	return Packet{
+		FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate,
+		Notice: "your packets are being held here: the league rules your board is playing by are not the ones the League Coordinator sent. Take the Coordinator's ruleset, which goes out on every planetary run, and anything you send afterwards is applied",
 	}
 }
 

@@ -295,6 +295,7 @@ func (w *World) StampOutbox() {
 		// version of the board that wrote it.
 		w.Outbox[i].Version = Version
 		w.Outbox[i].Protocol = Protocol
+		w.Outbox[i].Ruleset = w.Config.RulesetFingerprint()
 		w.Outbox[i].FromNode = w.NodeNumber(w.Config.BoardID)
 		if w.Outbox[i].ToBoard != "" {
 			w.Outbox[i].ToNode = w.NodeNumber(w.Outbox[i].ToBoard)
@@ -358,6 +359,7 @@ func boardSigningBytes(p Packet) ([]byte, error) {
 	p.BoardSig = nil
 	p.Hops = 0
 	p.Protocol = 0
+	p.Ruleset = ""  // see Packet.Ruleset: excluded for Protocol's reason, and it buys nothing signed
 	p.Battles = nil // see Packet.Battles: unsigned so it can be added at all
 	return json.Marshal(p)
 }

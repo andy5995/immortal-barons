@@ -112,6 +112,7 @@ func (w *World) BBSInfoReport() string {
 	for _, n := range w.LeagueNodes {
 		node[n.Name] = n.Number
 	}
+	league := w.leagueRulesetFingerprint()
 	for i, name := range peers {
 		num := i + 1
 		if n, ok := node[name]; ok {
@@ -132,9 +133,35 @@ func (w *World) BBSInfoReport() string {
 		if !w.BoardMeetsMinVersion(raw) {
 			ver += fmt.Sprintf("  (below v%s)", w.Config.MinBoardVersion)
 		}
+		// The rules a board PLAYS BY are a different question from the version it
+		// runs, and until #264 nothing anywhere asked it: a board that missed a
+		// ruleset broadcast, or whose sysop edited config.json after adopting one,
+		// played its own numbers all season with every screen silent about it.
+		if fp := w.BoardRuleset[name]; fp != "" && league != "" && fp != league {
+			ver += "  (other rules)"
+		}
 		fmt.Fprintf(&b, "%2d) %-28s %-22s %s\n", num, name, when, ver)
 	}
+	// The local board is not a row in its own report, so its own divergence has
+	// to be said outright — and it is the case the Coordinator's re-broadcast
+	// cannot heal on its own, because a sysop can edit the config back again
+	// between any two runs.
+	if league != "" && w.Config.RulesetFingerprint() != league {
+		fmt.Fprintf(&b, "\nThis board is playing rules the League Coordinator has not sent.\n")
+	}
 	return b.String()
+}
+
+// leagueRulesetFingerprint is the fingerprint of the rules the league is
+// supposed to be playing by: the Coordinator's. On the Coordinator's own board
+// that is its config; elsewhere it is whatever the Coordinator last reported,
+// which is empty until a packet from it has been applied — and an unknown
+// reference must flag nobody rather than flag everybody.
+func (w *World) leagueRulesetFingerprint() string {
+	if w.IsLeagueCoordinator() {
+		return w.Config.RulesetFingerprint()
+	}
+	return w.BoardRuleset[w.CoordinatorBoardID()]
 }
 
 // PlayerListReport lists every realm on every board — this one from its own

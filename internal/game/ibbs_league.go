@@ -1,6 +1,12 @@
 package game
 
-import "fmt"
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"time"
+)
 
 // ibbs_league.go — the league: its ruleset, its roster of boards, who
 // coordinates it, and the season reset.
@@ -162,6 +168,22 @@ func (w *World) IsLeagueCoordinator() bool {
 	return w.Config.BoardID != "" && w.Config.BoardID == w.CoordinatorBoardID()
 }
 
+// RulesetFingerprint identifies the league rules this board is actually playing
+// by. It is taken over the broadcast ruleset alone, never the whole config:
+// perBoardConfigFields are MEANT to differ from board to board, so hashing them
+// would report every board in a healthy league as divergent (#264).
+//
+// Short by design — it is compared, never inverted, and it is printed on a
+// report a sysop reads.
+func (c Config) RulesetFingerprint() string {
+	b, err := json.Marshal(c.leagueRuleset())
+	if err != nil {
+		return ""
+	}
+	sum := sha256.Sum256(b)
+	return hex.EncodeToString(sum[:4])
+}
+
 // ExportLeagueConfig queues a broadcast packet carrying this board's league
 // rules. Only the Coordinator sends it; member boards accept it only when it
 // comes from node #1 (see ApplyPacket). It goes out on every planetary run,
@@ -182,6 +204,102 @@ func (w *World) ExportLeagueConfig() {
 		Date:         w.LastMaintDate,
 		LeagueConfig: w.Config.leagueRuleset(),
 	}}, w.Outbox...)
+}
+
+// RulesetDivergent reports whether a packet comes from a board playing by rules
+// that are not the league's, which is grounds to HOLD it: a board running its
+// own turns-per-day or attack limits feeds scores, strikes and trades into
+// everyone else's game (#264).
+//
+// Three cases are deliberately NOT divergent, and each of them would break the
+// league if they were:
+//
+//   - a packet from the COORDINATOR, whose ruleset is the league's by
+//     definition. It is also the packet that carries a change, so holding it
+//     would throw away the only thing that heals a board that has fallen behind;
+//   - a packet from a board that states no fingerprint at all, which is a board
+//     older than the field;
+//   - anything at all until this board knows what the league's rules are — on a
+//     member that is the Coordinator's last-reported fingerprint, so a board
+//     that has not heard from the Coordinator yet holds nobody.
+func (w *World) RulesetDivergent(p Packet) bool {
+	if p.Ruleset == "" || w.senderIsCoordinator(p) {
+		return false
+	}
+	league := w.leagueRulesetFingerprint()
+	if league == "" || p.Ruleset == league {
+		return false
+	}
+	return !w.withinRulesetGrace(p.Ruleset)
+}
+
+// RulesetGraceDays is how long a packet stating the PREVIOUS league ruleset is
+// still applied after a change. Without it a rules change destroys the traffic
+// already in flight when it lands: those packets state the rules they were
+// written under, that fingerprint never becomes current again, and they would be
+// re-held on every run until they expired. Round trips between boards are
+// measured in days (Travel Times), and boards adopt a change on their own next
+// planetary run, so a league always has such packets in flight at a change.
+//
+// A week is long enough for a slow link and a board that runs its planetary step
+// once a day, and short enough that it cannot cover a board simply playing its
+// own game.
+const RulesetGraceDays = 7
+
+// withinRulesetGrace reports whether a fingerprint is the ruleset this board
+// held until recently. Both halves are needed: an unset date means no change has
+// been recorded, and an unparseable one is a corrupt clock, neither of which may
+// silently widen the gate.
+func (w *World) withinRulesetGrace(fp string) bool {
+	if fp == "" || fp != w.PrevLeagueRuleset || w.PrevRulesetAt == "" {
+		return false
+	}
+	changed, err := time.Parse(RecordedTimeFormat, w.PrevRulesetAt)
+	if err != nil {
+		return false
+	}
+	return time.Since(changed) <= RulesetGraceDays*24*time.Hour
+}
+
+// NoteLeagueRuleset records the rules this board now takes to be the league's,
+// keeping the one before it so packets written under it are still applied for
+// RulesetGraceDays. Called at the top of a planetary run, which is both where a
+// change from the Coordinator lands and where the gate is applied.
+func (w *World) NoteLeagueRuleset() {
+	fp := w.leagueRulesetFingerprint()
+	if fp == "" || fp == w.LeagueRuleset {
+		return
+	}
+	if w.LeagueRuleset != "" {
+		w.PrevLeagueRuleset = w.LeagueRuleset
+		w.PrevRulesetAt = time.Now().Format(RecordedTimeFormat)
+	}
+	w.LeagueRuleset = fp
+}
+
+// NoteBoardRuleset records what a board says it is playing by. Called on a
+// packet that is APPLIED and on one that is HELD for divergence: a board that
+// has never played the league's rules has no applied packet to learn it from,
+// and leaving it unrecorded is what kept BBSINFO reporting the very board this
+// was built for as "unknown" rather than divergent.
+func (w *World) NoteBoardRuleset(board, fingerprint string) {
+	if board == "" || fingerprint == "" || board == w.Config.BoardID {
+		return
+	}
+	if w.BoardRuleset == nil {
+		w.BoardRuleset = map[string]string{}
+	}
+	w.BoardRuleset[board] = fingerprint
+}
+
+// senderIsCoordinator reports whether a packet was written by node #1. It is
+// deliberately NOT fromCoordinator, which answers a different question — that
+// one is false on the Coordinator's own board, because nobody dictates to it.
+func (w *World) senderIsCoordinator(p Packet) bool {
+	if p.FromNode != 0 {
+		return p.FromNode == 1
+	}
+	return p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID()
 }
 
 // ExportNodeList queues a broadcast of the league roster. Only the Coordinator

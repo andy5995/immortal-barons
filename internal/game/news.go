@@ -24,7 +24,47 @@ func (w *World) postNews(line string) {
 // noteSysop records a transport fault for whoever runs the game. See
 // World.SysopNotices for why these do not go to the planet's news.
 func (w *World) noteSysop(format string, a ...any) {
-	w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(format, a...))
+	line := fmt.Sprintf(format, a...)
+	// One fault, one line. A run can meet the same fault on several packets —
+	// a board whose traffic is held sends a batch, and every file in it bounces
+	// the same notice back — and repeating it once per file buries whatever else
+	// the run has to say. Seen on the test rig: three identical held-ruleset
+	// notices in one run.
+	for _, have := range w.SysopNotices {
+		if have == line {
+			return
+		}
+	}
+	w.SysopNotices = append(w.SysopNotices, line)
+}
+
+// NoteRulesetHold records that a board's packets are being set aside because
+// the rules it says it is playing by are not the league's (#264). Once per
+// board per run, for the reason NoteProtocolHold gives.
+//
+// The notice says which side has to move, because the two cases recover
+// differently. A board sending packets that state rules the league never agreed
+// has THOSE files expire at HeldMaxAge; what unblocks its traffic is that board
+// taking the Coordinator's ruleset, which goes out on every planetary run. The
+// reverse case — this board being the one behind after a ruleset change, so
+// boards that adopted first look divergent — clears itself, because held packets
+// are re-checked on every run.
+// Returns whether this is the first hold from that board this run, which is
+// what decides whether a bounce goes back to it (see World.BounceRuleset).
+func (w *World) NoteRulesetHold(board string) bool {
+	// Keyed by REASON as well as board: heldNoted is shared with
+	// NoteProtocolHold, and a bare board key would have whichever hold fired
+	// first silence the other for the rest of the run.
+	key := "ruleset:" + board
+	if w.heldNoted == nil {
+		w.heldNoted = map[string]bool{}
+	}
+	if w.heldNoted[key] {
+		return false
+	}
+	w.heldNoted[key] = true
+	w.noteSysop("Packets from %s are being held: the rules it is playing by are not the league's. Its traffic flows again once it takes the Coordinator's ruleset, which goes out on every planetary run; the packets already held expire on the ordinary held-packet timer.", board)
+	return true
 }
 
 // NoteProtocolHold records that a board's packets are being set aside because
@@ -32,13 +72,14 @@ func (w *World) noteSysop(format string, a ...any) {
 // per packet — a mismatch affects every packet that board sends, and repeating
 // it per file buries the one line that matters.
 func (w *World) NoteProtocolHold(board string, protocol int) {
+	key := "protocol:" + board // see NoteRulesetHold: one keyspace, several reasons
 	if w.heldNoted == nil {
 		w.heldNoted = map[string]bool{}
 	}
-	if w.heldNoted[board] {
+	if w.heldNoted[key] {
 		return
 	}
-	w.heldNoted[board] = true
+	w.heldNoted[key] = true
 	// Which way the mismatch runs decides whether waiting fixes it, and the
 	// sysop's next move differs completely: upgrading this board releases a
 	// newer board's packets, while an older board's are held by a format this

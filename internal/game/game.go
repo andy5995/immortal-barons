@@ -187,6 +187,26 @@ type World struct {
 	LastPacketFrom map[string]string `json:",omitempty"`
 	BoardVersion   map[string]string `json:",omitempty"`
 
+	// LeagueRuleset is the fingerprint of the rules this board last took to be
+	// the league's, PrevLeagueRuleset the one before it, and PrevRulesetAt a
+	// WALL-CLOCK stamp of when it was superseded. The pair is what stops a rules
+	// change from destroying the traffic already in flight when it happens — see
+	// RulesetDivergent (#264).
+	//
+	// Wall clock, not the game date, for the reason LastPacketFrom gives: a
+	// planetary run has no Today (it is a play-session field), and the question
+	// is how long a packet has been on the wire, which is real elapsed time.
+	LeagueRuleset     string `json:",omitempty"`
+	PrevLeagueRuleset string `json:",omitempty"`
+	PrevRulesetAt     string `json:",omitempty"`
+
+	// BoardRuleset records the fingerprint of the league rules each board last
+	// said it was PLAYING BY, which is not the same question as which rules the
+	// Coordinator last sent: a board that missed a broadcast, or whose sysop
+	// edited config.json after adopting one, reports its own (#264). Read only
+	// by BBSInfoReport.
+	BoardRuleset map[string]string `json:",omitempty"`
+
 	// TravelTimes is the average packet round trip to each other board, in days,
 	// and LastTravelPing the game day the probes for it last went out — see
 	// ibbs_travel.go.

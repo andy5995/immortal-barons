@@ -212,7 +212,10 @@ These options are for games that link several BBSes together (a "league"). See
   quiet.
 - **`-bbsinfo`** — Write `BBSINFO.LST`, then exit: every board, when it was last
   heard from, and the game version it runs. A board below a version the
-  coordinator requires is marked.
+  coordinator requires is marked, and so is one playing by rules other than the
+  coordinator's — as is this board itself, on a line under the table. Neither
+  mark stops anything: they say what is true, and the fix is the coordinator's
+  next broadcast or the sysop's own config.
 - **`-playerlist`** — Write `PLAYERLIST.LST`, then exit: every realm on every
   board. Only the league coordinator (node #1) may write this one.
 
