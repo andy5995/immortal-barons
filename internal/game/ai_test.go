@@ -276,11 +276,10 @@ func TestAIObeysAZeroTaxCeiling(t *testing.T) {
 	}
 }
 
-// The AI closes a food shortage by BUYING land, at the price a human of that
-// size pays. It used to charge a flat Prices.Land and write the regions in
-// directly, so a large baron expanded for a few hundred gold a region while a
-// player that size paid six figures, and the purchase never reached
-// RegionsBoughtThisTurn so the per-turn cap did not see it either.
+// Pins the food-shortage branch of aiManageEconomy: it buys AGRICULTURAL land,
+// through BuyRegions, so it pays the climbing holdings-based price and lands in
+// RegionsBoughtThisTurn. Agricultural is what separates it from the ordinary
+// expansion that runs next — aiNextRegionType never picks that type.
 func TestAIBuysFoodLandAtTheClimbingPrice(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("ai", "Hungry")
@@ -288,17 +287,29 @@ func TestAIBuysFoodLandAtTheClimbingPrice(t *testing.T) {
 	e.Regions = RegionMix{Urban: 5000} // big, and produces no food
 	e.syncLand()
 	e.Protection = 0
+	// A populace far past what the land feeds, so the shortfall asks for more
+	// regions than AIAgriBuyMax, and gold for only a fraction of that cap —
+	// which puts both clamps in the path rather than just the first one.
+	e.People = 3_000_000
 	// Stocked past the food buffer so step 1 buys nothing and the gold spent
 	// below is land alone; production still cannot cover consumption, which is
 	// what sends it to the land-buying branch.
 	e.Food = w.FoodDue(e) * AIFoodBufferTurns * 2
 	e.LandAvailable = 10_000
-	e.Gold = 500_000_000
+	e.Gold = 7_000_000
 
 	// Drive the economy step directly: routing through aiPlay leaves whether
 	// this branch runs to the seed, and a test that skips proves nothing.
 	if w.FoodGrown(e) >= w.FoodDue(e) {
 		t.Fatalf("fixture is not in food shortage: grows %d, owes %d", w.FoodGrown(e), w.FoodDue(e))
+	}
+	shortfall := (w.FoodDue(e)-w.FoodGrown(e))/FoodAgriBase + 1
+	afford := w.MaxAffordableRegions(e)
+	if shortfall <= AIAgriBuyMax {
+		t.Fatalf("fixture leaves the AIAgriBuyMax clamp unexercised: shortfall is %d regions, cap %d", shortfall, AIAgriBuyMax)
+	}
+	if afford <= 0 || afford >= AIAgriBuyMax {
+		t.Fatalf("fixture leaves the affordability clamp unexercised: affords %d of %d", afford, AIAgriBuyMax)
 	}
 	goldBefore, landBefore := e.Gold, e.Land
 	w.aiManageEconomy(e)
@@ -306,6 +317,13 @@ func TestAIBuysFoodLandAtTheClimbingPrice(t *testing.T) {
 	bought := e.Land - landBefore
 	if bought <= 0 {
 		t.Fatalf("a starving baron with %d gold bought no land", goldBefore)
+	}
+	if e.Regions.Agricultural != bought {
+		t.Fatalf("bought %d regions but %d are Agricultural — this is ordinary expansion, not the food branch",
+			bought, e.Regions.Agricultural)
+	}
+	if bought != afford {
+		t.Errorf("bought %d regions, want the %d it could afford", bought, afford)
 	}
 	spent := goldBefore - e.Gold
 	// The flat-price bug would have charged about RegionPriceBase per region.

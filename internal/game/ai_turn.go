@@ -95,7 +95,9 @@ func (w *World) aiManageEconomy(e *Empire) {
 		if n > e.LandAvailable {
 			n = e.LandAvailable // this realm's land allowance is finite
 		}
-		if n > 0 && w.BuyRegions(e, &e.Regions.Agricultural, n) == nil {
+		if n > 0 {
+			// n is already inside every bound BuyRegions checks, so it cannot fail.
+			w.BuyRegions(e, &e.Regions.Agricultural, n)
 			return
 		}
 	}

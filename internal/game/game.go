@@ -10,6 +10,8 @@ import (
 // how a fresh one is built, and the lock every mutation goes through.
 
 type Prices struct {
+	// Land is persisted for save-format compatibility but no longer read:
+	// region pricing comes from regionCost, which climbs with holdings.
 	Land, Trooper, Jet, Turret, Tank, Carrier, Bomber int
 }
 
