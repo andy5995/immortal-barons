@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * On Windows, a packet moved between directories on different drives is no
+    longer delivered twice
   * The League Coordinator sends the league's rules on every planetary run, so
     a board that missed a broadcast is brought back into line
   * Packets from a board playing by rules the league never agreed are held, and
