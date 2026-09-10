@@ -464,6 +464,61 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 	return ErrNoAttack
 }
 
+// DisbandGroupAttackByCoordinator calls off a party still forming, on the
+// elected BBS Coordinator's order (#270). The planet can already stand down its
+// Gooie Kablooie that way, and a group attack is the same kind of commitment:
+// other barons join it, the whole planet answers for it, and until now nothing
+// on the planet could stop it once it was filed.
+//
+// Every contributor's detachment goes back to the realm that sent it — not to
+// the Coordinator and not to whoever filed the attack — which the per-baron
+// contributions make exact. The GOLD is not refunded, and neither is the day's
+// group-attack allowance: both were spent, exactly as they are on a dismantled
+// Gooie.
+//
+// Only before the force departs. Once it has left it is in flight, and the
+// lost-forces timer is what governs it from there.
+func (w *World) DisbandGroupAttackByCoordinator(e *Empire, id int, now time.Time) error {
+	if w.BBSCoordinator() != e {
+		return ErrNotPlanetCO
+	}
+	for i := range w.GroupAttacks {
+		g := w.GroupAttacks[i]
+		if g.ID != id {
+			continue
+		}
+		if g.Due(now, w.GameDay) {
+			return ErrDeparted
+		}
+		w.GroupAttacks = append(w.GroupAttacks[:i], w.GroupAttacks[i+1:]...)
+		for _, c := range g.Contributors {
+			owner := w.FindByOwner(c.Owner)
+			if owner == nil {
+				continue
+			}
+			owner.Troopers += c.Troopers
+			owner.Jets += c.Jets
+			owner.Tanks += c.Tanks
+			owner.Bombers += c.Bombers
+			// Told, rather than left to find the forces back with no explanation:
+			// this is a planet-politics act by somebody else, the same as the
+			// Gooie being stood down over its builder's head.
+			owner.addEvent(fmt.Sprintf(
+				"The BBS Coordinator called off the attack party aimed at %s. Your forces have returned home.",
+				g.TargetBoard))
+		}
+		w.postNews(fmt.Sprintf("The BBS Coordinator called off the attack party aimed at %s.", g.TargetBoard))
+		// The watcher who reported the party assembling reports it called off, so
+		// the target planet is not left bracing for a strike that is not coming —
+		// the same courtesy a dismantled Gooie extends (scrapAnnihilator).
+		w.reportToSpy(g.TargetBoard, fmt.Sprintf(
+			"Our agent on %s reports the attack party assembling against our planet has been called off.",
+			w.Config.BoardID))
+		return nil
+	}
+	return ErrNoAttack
+}
+
 // LaunchDueGroupAttacks turns every group attack whose departure has arrived
 // into an outbound RemoteAttack and removes it from the pending list. Run
 // during the PLANETARY maintenance step, which is why the window is worth

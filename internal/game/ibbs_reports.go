@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-// RecordedTimeFormat is how these reports stamp a time, copied from the
-// original's own BBSINFO.LST: MM/DD/YYYY HH:MM:SS.
-const RecordedTimeFormat = "01/02/2006 15:04:05"
-
 // The three sysop reports the original offers on its command line, described in
 // its own documentation (docs/bre.doc, "Command-Line Options"):
 //
@@ -72,8 +68,8 @@ func (w *World) LastPacketReport() string {
 		b.WriteString("No other boards are known yet.\n")
 		return b.String()
 	}
-	fmt.Fprintf(&b, "%-28s %-12s %s\n", "Planet", "Processed", "Sequence")
-	fmt.Fprintf(&b, "%s\n", strings.Repeat("-", 52))
+	fmt.Fprintf(&b, "%-28s %-24s %s\n", "Planet", "Processed", "Sequence")
+	fmt.Fprintf(&b, "%s\n", strings.Repeat("-", 64))
 	for _, name := range peers {
 		when := w.LastPacketFrom[name]
 		if when == "" {
@@ -83,7 +79,7 @@ func (w *World) LastPacketReport() string {
 		if n, ok := w.HighSeq[name]; ok {
 			seq = fmt.Sprintf("%d", n)
 		}
-		fmt.Fprintf(&b, "%-28s %-12s %s\n", FitColumn(name, 27), when, seq)
+		fmt.Fprintf(&b, "%-28s %-24s %s\n", FitColumn(name, 27), when, seq)
 	}
 	return b.String()
 }
@@ -102,7 +98,7 @@ func (w *World) LastPacketReport() string {
 // carrying them (docs/dev/ibbs-packet-format.md).
 func (w *World) BBSInfoReport() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "%3s %-28s %-22s %s\n", "###", "BBS Name", "Last Recon", "BRE Version")
+	fmt.Fprintf(&b, "%3s %-28s %-24s %s\n", "###", "BBS Name", "Last Recon", "BRE Version")
 	peers := w.knownPeers()
 	if len(peers) == 0 {
 		b.WriteString("No other boards are known yet.\n")
@@ -140,7 +136,7 @@ func (w *World) BBSInfoReport() string {
 		if fp := w.BoardRuleset[name]; fp != "" && league != "" && fp != league {
 			ver += "  (other rules)"
 		}
-		fmt.Fprintf(&b, "%2d) %-28s %-22s %s\n", num, name, when, ver)
+		fmt.Fprintf(&b, "%2d) %-28s %-24s %s\n", num, name, when, ver)
 	}
 	// The local board is not a row in its own report, so its own divergence has
 	// to be said outright — and it is the case the Coordinator's re-broadcast

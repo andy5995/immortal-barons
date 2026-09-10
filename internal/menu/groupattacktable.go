@@ -68,7 +68,7 @@ type gaRow struct {
 	jets     int
 	tanks    int
 	bombers  int
-	hours    int // whole hours until the force leaves; -1 when unknown
+	left     time.Duration // until the force leaves; negative when unknown
 }
 
 // gaSep is the column separator, and gaCross the rule's junction under it. The
@@ -115,7 +115,7 @@ func printGroupAttackRow(s session.Session, t Term, r gaRow) {
 		ansi.FgBrightCyan + gaFigure(numfmt.Short(r.jets), gaWidthJets),
 		ansi.FgBrightCyan + gaFigure(numfmt.Short(r.tanks), gaWidthTanks),
 		ansi.FgBrightCyan + gaFigure(numfmt.Short(r.bombers), gaWidthBombers),
-		ansi.FgBrightGreen + gaFigure(gaLeave(r.hours), gaWidthLeave),
+		ansi.FgBrightGreen + gaFigure(gaLeave(r.left), gaWidthLeave),
 	}
 	fmt.Fprintf(s, "%s%s\n", strings.TrimRight(strings.Join(cells, sep), " "), ansi.Reset)
 }
@@ -155,34 +155,36 @@ func gaPad(t Term, text string, width int, oddLeft bool) string {
 	return strings.Repeat(" ", left) + text + strings.Repeat(" ", pad-left)
 }
 
-// gaLeave spells the wait the way the original does: whole hours and an "h",
-// never a clock time. A clock time has to be subtracted from the current time
-// before it means anything, and the current time is not on this screen.
+// gaLeave spells the wait as a duration, never a clock time: a clock time has to
+// be subtracted from the current time before it means anything, and the current
+// time is not on this screen.
+//
+// The original spells it in whole hours, which is coarser than the game knows —
+// `DepartAt` is an instant, and "1h" covers everything from a second to a full
+// hour (#269). IB steps down to minutes and then seconds as the departure nears,
+// in the shape shortDuration defines, so a baron can tell whether there is time
+// to join.
 //
 // An attack saved before departures carried an hour (GroupAttack.DepartDay)
-// knows only the game day it leaves on, which cannot be rendered in hours; it
+// knows only the game day it leaves on, which cannot be rendered as a wait; it
 // shows "?" rather than a figure invented for it.
-func gaLeave(hours int) string {
-	if hours < 0 {
+func gaLeave(left time.Duration) string {
+	if left < 0 {
 		return "?"
 	}
-	return fmt.Sprintf("%dh", hours)
+	return shortDuration(left)
 }
 
-// hoursUntil is the whole hours a forming attack still has before it leaves,
-// rounded UP so an attack filed with an eight-hour delay reads "8h" for its
-// first hour rather than dropping to "7h" the instant it is created. A legacy
-// attack that carries only a departure DAY returns -1, which gaLeave spells
-// "?".
-func hoursUntil(now time.Time, g game.GroupAttack) int {
+// leftUntil is what a forming attack still has before it leaves. A legacy attack
+// that carries only a departure DAY returns -1, which gaLeave spells "?".
+func leftUntil(now time.Time, g game.GroupAttack) time.Duration {
 	if g.DepartAt.IsZero() {
 		return -1
 	}
-	left := g.DepartAt.Sub(now)
-	if left <= 0 {
-		return 0
+	if left := g.DepartAt.Sub(now); left > 0 {
+		return left
 	}
-	return int((left + time.Hour - 1) / time.Hour)
+	return 0
 }
 
 // promptGroupChoice asks the original's own question -- "Join which group?",

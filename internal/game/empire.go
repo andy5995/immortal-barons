@@ -94,6 +94,10 @@ type Empire struct {
 	Support     int    // 0-100, popular support; erodes with high tax, slashes Coastal income when low
 	Morale      int    // 0-100, military morale; low morale weakens combat and causes desertion
 	Language    string // help/UI language ("" = English; "de", "ru")
+	// TimeZone is the IANA zone this player reads times in ("" = UTC). Stamps are
+	// stored in UTC and rendered here, so a league's boards can be on different
+	// clocks without a time meaning two things (#267).
+	TimeZone string `json:",omitempty"`
 
 	// LandAvailable is how much unclaimed land this realm may still buy — BRE's
 	// "Daily Land Creation" allowance. BINARY-VERIFIED as a PER-EMPIRE field

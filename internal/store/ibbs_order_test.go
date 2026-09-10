@@ -138,7 +138,7 @@ func TestReadInboundBootstrapRosterSurvivesADecoyClaim(t *testing.T) {
 	}
 	found := false
 	for _, line := range w.NewsToday {
-		if line == "GIFT" {
+		if line.Text == "GIFT" {
 			found = true
 		}
 	}
@@ -342,7 +342,7 @@ func TestReadInboundForgedCoordinatorClaimDoesNotJumpTheQueue(t *testing.T) {
 		}
 		forgerAt, honestAt := -1, -1
 		for i, line := range w.NewsToday {
-			switch line {
+			switch line.Text {
 			case "FORGER":
 				forgerAt = i
 			case "HONEST":
@@ -512,7 +512,7 @@ func TestReadInboundUnreadableFileDoesNotAbortTheRun(t *testing.T) {
 	}
 	found := false
 	for _, line := range w.NewsToday {
-		if line == "GOOD" {
+		if line.Text == "GOOD" {
 			found = true
 		}
 	}
@@ -721,7 +721,7 @@ func TestReadInboundCoordinatorGroupWithoutLeagueUpdateDoesNotJumpQueue(t *testi
 		}
 		coordAt, honestAt := -1, -1
 		for i, line := range w.NewsToday {
-			switch line {
+			switch line.Text {
 			case "COORD":
 				coordAt = i
 			case "HONEST":
@@ -791,7 +791,7 @@ func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing
 		if _, err := ReadInbound(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
-		if len(w.NewsToday) < 2 || w.NewsToday[0] != "COORD" {
+		if len(w.NewsToday) < 2 || w.NewsToday[0].Text != "COORD" {
 			t.Fatalf("trial %d: the Coordinator's roster-update group must apply first, got NewsToday=%v",
 				trial, w.NewsToday)
 		}
@@ -864,7 +864,7 @@ func TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority(t *tes
 		}
 		coordAt, honestAt := -1, -1
 		for i, line := range w.NewsToday {
-			switch line {
+			switch line.Text {
 			case "COORD":
 				coordAt = i
 			case "HONEST":
@@ -928,7 +928,7 @@ func TestReadInboundUnsignedLeagueUpdateDoesNotJumpQueue(t *testing.T) {
 		}
 		coordAt, honestAt := -1, -1
 		for i, line := range w.NewsToday {
-			switch line {
+			switch line.Text {
 			case "COORD":
 				coordAt = i
 			case "HONEST":
@@ -986,7 +986,7 @@ func TestReadInboundAppliedOrderIsReproducibleWithFixedShuffleSource(t *testing.
 		if _, err := ReadInbound(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
-		orders = append(orders, strings.Join(w.NewsToday, ","))
+		orders = append(orders, w.NewsToday.Join(","))
 	}
 	for i := 1; i < len(orders); i++ {
 		if orders[i] != orders[0] {

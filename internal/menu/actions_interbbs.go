@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -11,7 +12,7 @@ import (
 
 // actions_interbbs.go — planet-level inter-BBS business that is not an attack,
 // an op or a score: how long packets take to reach each board, who this board
-// elects as Coordinator, and standing down a Gooie Kablooie.
+// elects as Coordinator, and standing down a Gooie Kablooie or an attack party.
 
 // Travel Times geometry, measured off a live BRE capture: a 75-column inset
 // rule above and below the list, and each planet's name in a 30-column field
@@ -150,6 +151,45 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	ok(s, "Your vote is recorded. You may change it any time.")
+	return Stay
+}
+
+// disbandGroupAttack is the Coordinator calling off an attack party still
+// assembling here (#270). IB's own item: the original's Coordinator can stand
+// down the planet's Gooie Kablooie and nothing else, but a group attack is the
+// same kind of planet-level commitment — other barons join it, and until this
+// nothing on the planet could stop it once it was filed.
+func disbandGroupAttack(s session.Session, w *ctx) Result {
+	var isCoordinator bool
+	w.Read(func() { isCoordinator = w.BBSCoordinator() == w.Player() })
+	if !isCoordinator {
+		ok(s, "Only the BBS Coordinator may call off an attack party.")
+		return Stay
+	}
+	rows := formingGroupRows(s, w)
+	if len(rows) == 0 {
+		ok(s, "No group attacks are forming right now.")
+		return Stay
+	}
+	printGroupAttackTable(s, w.Term, rows)
+	id, slot := promptGroupChoice(s, rows)
+	if id == 0 {
+		return Stay
+	}
+	okNoPause(s, "Every contributor gets their forces back. The gold they spent is gone.")
+	if !AskYesNo(s, "Call it off?", false) {
+		return Stay
+	}
+	// Re-checked inside the transaction: a vote on another node can unseat the
+	// caller, and the party can depart, between the gate above and here.
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		return w.World.DisbandGroupAttackByCoordinator(p, id, time.Now())
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "Attack party #%d has been called off and its forces sent home.", slot)
 	return Stay
 }
 

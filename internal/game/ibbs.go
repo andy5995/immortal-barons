@@ -365,7 +365,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		// shows MM/DD/YYYY HH:MM:SS, and the question ("has this board gone
 		// quiet?") is about real elapsed time, which a game date cannot answer on
 		// a league whose clock has stalled.
-		w.LastPacketFrom[p.FromBoard] = time.Now().Format(RecordedTimeFormat)
+		w.LastPacketFrom[p.FromBoard] = Recorded(time.Now())
 		if p.Version != "" {
 			if w.BoardVersion == nil {
 				w.BoardVersion = map[string]string{}

@@ -152,6 +152,21 @@ func renderNewsMasthead(s session.Session, t Term, date string) {
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, rule, ansi.Reset)
 }
 
+// newsStamped is one news entry as it is read: the clock time it happened at,
+// on the reader's own zone, then what happened. A line saved before news carried
+// a time (or written by a board that did not stamp it) shows the text alone
+// rather than a time invented for it.
+//
+// Only the time, never the date: every screen that draws the feed is headed by
+// the day it belongs to, and repeating that date twenty times says nothing.
+func newsStamped(s session.Session, n game.NewsLine) string {
+	at := game.TimeOfDay(n.At, sessionZone(s))
+	if at == "" {
+		return n.Text
+	}
+	return at + "  " + n.Text
+}
+
 // hiTerm is a name the news highlighter should color where it appears.
 type hiTerm struct{ text, color string }
 

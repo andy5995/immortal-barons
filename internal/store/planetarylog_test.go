@@ -28,7 +28,7 @@ func TestPlanetaryLogStampsAndAppends(t *testing.T) {
 	if len(lines) != 3 {
 		t.Fatalf("got %d lines, want 3: %q", len(lines), lines)
 	}
-	if !strings.HasPrefix(lines[0], "2026-08-23 17:45:02  first fault") {
+	if !strings.HasPrefix(lines[0], "2026-08-23 17:45:02 UTC  first fault") {
 		t.Errorf("line not stamped as expected: %q", lines[0])
 	}
 	if !strings.Contains(lines[2], "third fault") {

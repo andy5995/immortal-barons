@@ -115,8 +115,8 @@ func TestRefusalNoticeCarriesTheReason(t *testing.T) {
 		t.Errorf("the notice %q does not say why it was refused", line)
 	}
 	for _, n := range w.NewsToday {
-		if strings.Contains(n, "was refused") {
-			t.Errorf("a transport fault reached the planet's news: %q", n)
+		if strings.Contains(n.Text, "was refused") {
+			t.Errorf("a transport fault reached the planet's news: %q", n.Text)
 		}
 	}
 }

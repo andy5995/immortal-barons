@@ -25,7 +25,7 @@ func TestBulletinNewsNamesTheBulletinThatChanged(t *testing.T) {
 	if !w.RecordBulletins(bulletin.Local, []BulletinFile{file("news.txt", "Board news", "Board news\nv1\n")}) {
 		t.Fatal("the first recording reported no change")
 	}
-	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0], "Board news") {
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "Board news") {
 		t.Fatalf("the first bulletin filed %v", w.NewsToday)
 	}
 	// An added bulletin is news, and it says which one.
@@ -34,7 +34,7 @@ func TestBulletinNewsNamesTheBulletinThatChanged(t *testing.T) {
 		file("news.txt", "Board news", "Board news\nv1\n"),
 		file("party.txt", "Anniversary party", "Anniversary party\ncome along\n"),
 	})
-	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0], "Anniversary party") {
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "Anniversary party") {
 		t.Fatalf("adding a bulletin filed %v", w.NewsToday)
 	}
 	// An edit to a file already listed is news too, and the unedited one is not.
@@ -43,7 +43,7 @@ func TestBulletinNewsNamesTheBulletinThatChanged(t *testing.T) {
 		file("news.txt", "Board news", "Board news\nv2\n"),
 		file("party.txt", "Anniversary party", "Anniversary party\ncome along\n"),
 	})
-	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0], "Board news") {
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "Board news") {
 		t.Fatalf("editing a bulletin filed %v", w.NewsToday)
 	}
 	// Recording the same set again says nothing at all.
@@ -88,7 +88,7 @@ func TestAnUpgradedBoardTakesItsExistingBulletinsAsTheBaseline(t *testing.T) {
 		file("party.txt", "Anniversary party", "come along\n"),
 		file("new.txt", "Fresh off the press", "Fresh off the press\n"),
 	})
-	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0], "Fresh off the press") {
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "Fresh off the press") {
 		t.Errorf("after the baseline, news is %v", w.NewsToday)
 	}
 }
@@ -96,14 +96,14 @@ func TestAnUpgradedBoardTakesItsExistingBulletinsAsTheBaseline(t *testing.T) {
 func TestGalacticBulletinNewsSaysGalactic(t *testing.T) {
 	w := bulletinWorld(t)
 	w.RecordBulletins(bulletin.League, []BulletinFile{file("rules.txt", "League rules", "League rules\n")})
-	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0], "galactic bulletin") {
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "galactic bulletin") {
 		t.Fatalf("league news is %v", w.NewsToday)
 	}
 	// The two scopes are counted apart: a local file of the same name is its own
 	// bulletin, not an edit of the league's.
 	w.NewsToday = nil
 	w.RecordBulletins(bulletin.Local, []BulletinFile{file("rules.txt", "House rules", "House rules\n")})
-	if len(w.NewsToday) != 1 || strings.Contains(w.NewsToday[0], "galactic") {
+	if len(w.NewsToday) != 1 || strings.Contains(w.NewsToday[0].Text, "galactic") {
 		t.Fatalf("local news is %v", w.NewsToday)
 	}
 }

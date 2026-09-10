@@ -254,8 +254,11 @@ func (w *World) withinRulesetGrace(fp string) bool {
 	if fp == "" || fp != w.PrevLeagueRuleset || w.PrevRulesetAt == "" {
 		return false
 	}
-	changed, err := time.Parse(RecordedTimeFormat, w.PrevRulesetAt)
-	if err != nil {
+	// A stamp written before stamps carried a zone cannot be placed on a clock
+	// (ParseStamp), so the grace closes rather than widening by whatever the
+	// board's offset from UTC happens to be.
+	changed, ok := ParseStamp(w.PrevRulesetAt)
+	if !ok {
 		return false
 	}
 	return time.Since(changed) <= RulesetGraceDays*24*time.Hour
@@ -272,7 +275,7 @@ func (w *World) NoteLeagueRuleset() {
 	}
 	if w.LeagueRuleset != "" {
 		w.PrevLeagueRuleset = w.LeagueRuleset
-		w.PrevRulesetAt = time.Now().Format(RecordedTimeFormat)
+		w.PrevRulesetAt = Recorded(time.Now())
 	}
 	w.LeagueRuleset = fp
 }

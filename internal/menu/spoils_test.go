@@ -88,8 +88,8 @@ func TestCreateGroupAttackAsksHours(t *testing.T) {
 		p.Troopers = 10_000
 	})
 	// planet 1, "O" for one baron, baron 1 (Redlands), 3 hours, 500 troopers, then
-	// zero for the other three types.
-	f := &fakeSession{keys: []rune("1\roA3\r500\r\r\r\r")} // planet 1, One Dominion, baron A
+	// zero for the other three types, then "y" to the cost confirmation.
+	f := &fakeSession{keys: []rune("1\roA3\r500\r\r\r\ry")} // planet 1, One Dominion, baron A
 	createGroupAttack(f, w)
 
 	out := f.out.String()
@@ -126,8 +126,8 @@ func TestGroupAttackWholePlanetSkipsTheBaronList(t *testing.T) {
 		p.Protection = 0
 		p.Troopers = 10_000
 	})
-	// planet 1, "A" for the whole planet, 12 hours, 500 troopers, then zeroes.
-	f := &fakeSession{keys: []rune("1\ra12\r500\r\r\r\r")}
+	// planet 1, "A" for the whole planet, 12 hours, 500 troopers, zeroes, then "y".
+	f := &fakeSession{keys: []rune("1\ra12\r500\r\r\r\ry")}
 	createGroupAttack(f, w)
 
 	out := f.out.String()
@@ -150,5 +150,45 @@ func TestGroupAttackWholePlanetSkipsTheBaronList(t *testing.T) {
 	}
 	if target != "" {
 		t.Errorf("TargetEmpire = %q, want it empty for the whole planet", target)
+	}
+}
+
+// The cost quote is the first time a player sees what a strike costs, so it is
+// followed by a confirmation that defaults to NO: Enter files nothing and spends
+// nothing. The original asks the same question and defaults to yes; IB's
+// divergence is the default (docs/dev/bre-screens.md).
+func TestGroupAttackConfirmationDefaultsToNo(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Config.BoardID = "Alpha"
+		w.World.ImportBoard(game.RemoteBoard{
+			BoardID: "Mars",
+			Scores:  []game.RemoteScore{{Empire: "Redlands"}},
+		})
+		p := w.Player()
+		p.Protection = 0
+		p.Troopers, p.Gold = 10_000, 1_000_000
+	})
+	// Everything as far as the quote, then Enter — which is No.
+	f := &fakeSession{keys: []rune("1\ra12\r500\r\r\r\r\r")}
+	createGroupAttack(f, w)
+
+	out := f.out.String()
+	if !strings.Contains(out, "This attack will cost") {
+		t.Fatalf("the script never reached the quote; output was: %q", out)
+	}
+	if !strings.Contains(out, "Send this Attack?") {
+		t.Errorf("no confirmation was asked for; output was: %q", out)
+	}
+	var count int
+	var gold int64
+	w.With(func() {
+		count, gold = len(w.World.GroupAttacks), w.Player().Gold
+	})
+	if count != 0 {
+		t.Errorf("a declined attack was filed anyway: %d parties", count)
+	}
+	if gold != 1_000_000 {
+		t.Errorf("a declined attack cost %d gold", 1_000_000-gold)
 	}
 }

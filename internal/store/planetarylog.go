@@ -32,7 +32,9 @@ func AppendPlanetaryLog(dataDir string, notices []string, when time.Time) {
 		return
 	}
 	path := filepath.Join(dataDir, PlanetaryLogFile)
-	stamp := when.Format("2006-01-02 15:04:05")
+	// UTC, and marked: a sysop reading this beside another board's log, or beside
+	// a packet's own stamp, is comparing two clocks otherwise (#267).
+	stamp := when.UTC().Format("2006-01-02 15:04:05 MST")
 
 	var lines []string
 	if old, err := os.ReadFile(path); err == nil {

@@ -21,14 +21,14 @@ func TestMasterNewsLandsInTodaysNews(t *testing.T) {
 	w.LastMaintDate = "2026-07-01"
 	w.DailyMaintenance("2026-07-02")
 
-	joined := strings.Join(w.NewsToday, "\n")
+	joined := w.NewsToday.Join("\n")
 	if !strings.Contains(joined, "Planetary Master") {
 		t.Fatalf("Today's News carries no Planetary Master line.\ntoday:     %v\nyesterday: %v",
 			w.NewsToday, w.NewsYesterday)
 	}
 	for _, l := range w.NewsYesterday {
-		if strings.Contains(l, "Planetary Master") {
-			t.Errorf("the Master line was filed under yesterday: %q", l)
+		if strings.Contains(l.Text, "Planetary Master") {
+			t.Errorf("the Master line was filed under yesterday: %q", l.Text)
 		}
 	}
 }
@@ -50,10 +50,10 @@ func TestNewsRollsWhileTodayStillOpens(t *testing.T) {
 	w.LastMaintDate = "2026-07-02"
 	w.DailyMaintenance("2026-07-03")
 
-	if !strings.Contains(strings.Join(w.NewsToday, "\n"), "Planetary Master") {
+	if !strings.Contains(w.NewsToday.Join("\n"), "Planetary Master") {
 		t.Errorf("day two did not open with the Master line: %v", w.NewsToday)
 	}
-	if !strings.Contains(strings.Join(w.NewsYesterday, "\n"), "something that happened") {
+	if !strings.Contains(w.NewsYesterday.Join("\n"), "something that happened") {
 		t.Errorf("the day's own news did not roll back: %v", w.NewsYesterday)
 	}
 }

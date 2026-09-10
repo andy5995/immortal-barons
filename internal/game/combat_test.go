@@ -233,7 +233,7 @@ func TestAttackPostsPlanetaryNews(t *testing.T) {
 	if len(w.NewsToday) != before+1 {
 		t.Fatalf("attack should post one planetary news line, got %d new", len(w.NewsToday)-before)
 	}
-	if last := w.NewsToday[len(w.NewsToday)-1]; !strings.Contains(last, "Attacker") {
+	if last := w.NewsToday[len(w.NewsToday)-1].Text; !strings.Contains(last, "Attacker") {
 		t.Errorf("news should name the attacker: %q", last)
 	}
 }

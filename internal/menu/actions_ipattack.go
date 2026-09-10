@@ -71,10 +71,16 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if force.Empty() {
 		return Stay
 	}
-	// One routine in the original prompts for the four counts and quotes the
-	// price, and all three attack paths call it — so a group attack is quoted and
-	// charged exactly as a strike sent alone (#252).
+	// One routine in the original prompts for the four counts, quotes the price
+	// and asks to confirm, and all three attack paths call it — so a group attack
+	// is quoted, confirmed and charged exactly as a strike sent alone (#252).
+	// IB defaults the confirmation to NO where the original defaults to yes: the
+	// quote is the first time the player sees what the strike costs, and the sum
+	// is large enough that a held Enter must not spend it.
 	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(p, force)))
+	if !askYesNoHere(s, "Send this Attack?", false) {
+		return Stay
+	}
 	var id int
 	var departAt time.Time
 	err := w.mutatePlayer(func(p *game.Empire) error {
@@ -91,65 +97,24 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "Group attack #%d formed against %s on %s, leaving at %s.", id, pick, board, departAt.Format(departFormat))
+	ok(s, "Group attack #%d formed against %s on %s, leaving at %s.", id, pick, board,
+		departAt.In(sessionZone(s)).Format(departFormat))
 	return Stay
 }
 
 // departFormat is how a group attack's departure is shown. It is a wall-clock
 // instant rather than a game day, so the hour has to be on it — that is the
-// whole point of asking in hours.
-const departFormat = "01/02 15:04"
+// whole point of asking in hours. It carries its zone for the reason every
+// other stamp does: the force is aimed at a board that may be on another one
+// (#267).
+const departFormat = "01/02 15:04 MST"
 
 // joinGroupAttack adds the player's offense to a group attack still forming.
 func joinGroupAttack(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
-	var rows []gaRow
-	now := time.Now()
-	w.Read(func() {
-		if w.Player() == nil {
-			return
-		}
-		for _, ga := range w.GroupAttacks {
-			if ga.Due(now, w.GameDay) {
-				continue
-			}
-			tgt := ga.TargetEmpire
-			if tgt == "" {
-				// A party aimed at the whole planet names no baron, and the
-				// original fills the column with ALL rather than a sentence
-				// (cap/20240527-134Pho_Lazarus_Public.cap).
-				tgt = tr(s, "ALL")
-			}
-			r := gaRow{
-				// The party's SLOT, which is what the two-column Id field holds
-				// and what the prompt is answered with; ga.ID is the world-wide
-				// counter behind it and never reaches the screen.
-				id:     ga.Slot,
-				attack: ga.ID,
-				by:     "?",
-				planet: ga.TargetBoard,
-				target: tgt,
-				hours:  hoursUntil(now, ga),
-			}
-			if len(ga.Contributors) > 0 {
-				if creator := w.FindByOwner(ga.Contributors[0].Owner); creator != nil {
-					r.by = creator.Letter()
-				}
-			}
-			// The columns show the force ALREADY POOLED, every contributor's
-			// detachment together -- what the player is deciding whether to
-			// reinforce, not what any one baron put in.
-			for _, c := range ga.Contributors {
-				r.troopers += c.Troopers
-				r.jets += c.Jets
-				r.tanks += c.Tanks
-				r.bombers += c.Bombers
-			}
-			rows = append(rows, r)
-		}
-	})
+	rows := formingGroupRows(s, w)
 	if len(rows) == 0 {
 		ok(s, "No group attacks are forming right now.")
 		return Stay
@@ -166,6 +131,9 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(w.Player(), force)))
+	if !askYesNoHere(s, "Send this Attack?", false) {
+		return Stay
+	}
 	// JoinGroupAttack re-validates against fresh state: the attack must still exist
 	// (ErrNoAttack), not yet have departed (ErrDeparted), and the baron must still
 	// hold the committed units (ErrCantAfford).
@@ -215,7 +183,7 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(w.Player(), force)))
-	if !askYesNoHere(s, "Send this Attack?", true) {
+	if !askYesNoHere(s, "Send this Attack?", false) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
@@ -417,4 +385,56 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 		}
 	})
 	return board, baron, sc, true
+}
+
+// formingGroupRows is every party still assembling here, as the table's rows.
+// Two screens read it: Join Group Attack, and the Coordinator's own call-off
+// (#270), which lists the same parties before asking which one to disband.
+func formingGroupRows(s session.Session, w *ctx) []gaRow {
+	var rows []gaRow
+	now := time.Now()
+	w.Read(func() {
+		if w.Player() == nil {
+			return
+		}
+		for _, ga := range w.GroupAttacks {
+			if ga.Due(now, w.GameDay) {
+				continue
+			}
+			tgt := ga.TargetEmpire
+			if tgt == "" {
+				// A party aimed at the whole planet names no baron, and the
+				// original fills the column with ALL rather than a sentence
+				// (cap/20240527-134Pho_Lazarus_Public.cap).
+				tgt = tr(s, "ALL")
+			}
+			r := gaRow{
+				// The party's SLOT, which is what the two-column Id field holds
+				// and what the prompt is answered with; ga.ID is the world-wide
+				// counter behind it and never reaches the screen.
+				id:     ga.Slot,
+				attack: ga.ID,
+				by:     "?",
+				planet: ga.TargetBoard,
+				target: tgt,
+				left:   leftUntil(now, ga),
+			}
+			if len(ga.Contributors) > 0 {
+				if creator := w.FindByOwner(ga.Contributors[0].Owner); creator != nil {
+					r.by = creator.Letter()
+				}
+			}
+			// The columns show the force ALREADY POOLED, every contributor's
+			// detachment together -- what the player is deciding whether to
+			// reinforce, not what any one baron put in.
+			for _, c := range ga.Contributors {
+				r.troopers += c.Troopers
+				r.jets += c.Jets
+				r.tanks += c.Tanks
+				r.bombers += c.Bombers
+			}
+			rows = append(rows, r)
+		}
+	})
+	return rows
 }

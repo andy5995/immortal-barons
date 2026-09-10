@@ -125,7 +125,7 @@ func TestSpyGuyReportsAGroupAttackAsNewsAtHome(t *testing.T) {
 
 	// It lands in the paying planet's news, where every baron there reads it.
 	ours.ApplyPacket(Packet{FromBoard: "Nova Hub", ToBoard: "Wildside", News: carried})
-	if news := strings.Join(ours.NewsToday, "\n"); !strings.Contains(news, "Nova Hub") {
+	if news := ours.NewsToday.Join("\n"); !strings.Contains(news, "Nova Hub") {
 		t.Errorf("the report never reached the planet news: %q", news)
 	}
 }

@@ -911,6 +911,17 @@ overlay, and *Dismantle Gooie* sits on the Coordinator Ops menu
 (`run_interbbs_operations_menu`) beside Modify Diplomacy and Global Recon
 Request, not on the weapon's own desk.
 
+**The Coordinator can call off a group attack too — IB's own, keyed past the
+original's four (#270).** *Call Off Attack Party* lists the parties still
+assembling here and disbands the one chosen: every contributor's troopers, jets,
+tanks and bombers go back to the realm that sent them, each contributor is told
+in their recap, and the planet's news carries it. The gold is not refunded and
+the day's group-attack allowance is not given back, both as on a dismantled
+Gooie. It applies only before the force departs — once it has left, the
+lost-forces timer governs it. The reasoning is the Gooie's: a group attack is a
+planet-level commitment other barons join, so the office that can stand down the
+doomsday weapon can stand down the war party.
+
 The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
 (the routine at 0x277A0-0x27950), in millions of gold:
 
@@ -5350,6 +5361,28 @@ checking IB against a capture:
   labels "cosmetic flavor" until 2026-09-08, which had been wrong since that
   table landed; the menu offered a real choice and said nothing about it.
 
+- **Every time IB prints carries its zone, and every news line carries its
+  hour** (#267). The original stamps a recap rule, a message header and its own
+  sysop reports with a bare `MM/DD/YYYY  HH:MM:SS`, and stamps no news line at
+  all. IB appends the zone to all of them and adds a clock time to each news
+  entry. A league's boards are not on one clock, and a bulletin written on one is
+  read on the others, so an unmarked time is right for whoever wrote it and wrong
+  for most of the people reading it. Times are stored in UTC (`game.StoredStamp`)
+  and rendered on the reader's own zone, which each player sets in Preferences —
+  UTC by default, the board's own clock, or any IANA zone. A stamp written before
+  this is shown as it stands rather than converted, since the clock it was
+  written on is not recoverable. News lines carry the hour only: the date is on
+  the heading above them. The entry menu's `Planetary time` is the one exception
+  and stays on the board's clock, because its whole point is the host's own
+  midnight, which the countdown beside it is measuring to.
+- **`Send this Attack?` defaults to No.** The original asks it after quoting the
+  price and defaults to yes. The quote is the first time a player sees the sum
+  and it can run to millions, so IB defaults the confirmation to no; it also asks
+  on all three attack paths, where it was reached only from the individual strike
+  until now. See "Force prompts and confirmation" in `docs/dev/bre-screens.md`.
+- **The Join Group Attack table counts down in minutes and seconds near the
+  end** (#269), where the original's `Leave` column prints whole hours however
+  little is left. See "Join Group Attack" in `docs/dev/bre-screens.md`.
 - **A defender's invasion report names the kind of strike.** BRE names it to the
   attacker ("Extended Battle Results.") and never to the defender, whose recap
   says only that a force "attacked!". IB appends it: `Invasion from X (Quick

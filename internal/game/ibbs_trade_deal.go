@@ -165,7 +165,7 @@ func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods Tr
 		FromEmpire: from.Name,
 		ToEmpire:   toEmpire,
 		Goods:      goods,
-		When:       timeNow().Format(StampFormat),
+		When:       StoredStamp(timeNow()),
 	})
 	from.addEvent(fmt.Sprintf("You shipped a trade deal to %s of %s, at a cost of %s gold and %d carriers.",
 		toEmpire, toBoard, numfmt.Comma(cost), need))

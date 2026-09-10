@@ -14,9 +14,9 @@ import (
 
 func readMessages(s session.Session, w *ctx) Result {
 	var hadMail bool
-	var news []string
+	var news game.NewsFeed
 	w.Read(func() {
-		news = append([]string(nil), w.NewsToday...)
+		news = append(game.NewsFeed(nil), w.NewsToday...)
 		if p := w.Player(); p != nil {
 			hadMail = len(p.Mail) > 0
 		}
@@ -32,7 +32,7 @@ func readMessages(s session.Session, w *ctx) Result {
 			// Wrapped, not left to the terminal: a news line already runs past 80
 			// columns with an ordinary board name in it, and a translated one is
 			// longer still.
-			fmt.Fprintf(s, "%s\n", WrapIndented(b, "  "))
+			fmt.Fprintf(s, "%s\n", WrapIndented(newsStamped(s, b), "  "))
 		}
 	}
 	if !hadMail && len(news) == 0 {

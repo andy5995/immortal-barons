@@ -99,7 +99,7 @@ func TestMinimumVersionGatesPackets(t *testing.T) {
 	if note := strings.Join(w.SysopNotices, "\n"); !strings.Contains(note, "requires v0.0.5") {
 		t.Errorf("the refusal should say why:\n%s", note)
 	}
-	if strings.Contains(strings.Join(w.NewsToday, "\n"), "requires v0.0.5") {
+	if strings.Contains(w.NewsToday.Join("\n"), "requires v0.0.5") {
 		t.Error("a transport fault reached the planet's news")
 	}
 	// A board that states no version cannot prove it meets the bar.

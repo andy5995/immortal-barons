@@ -589,9 +589,9 @@ func TestRenderDailyBulletinNoTitle(t *testing.T) {
 func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	w := newWorld()
 	w.BulletinToday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 111}}
-	w.NewsToday = []string{"today-line"}
+	w.NewsToday = game.News("today-line")
 	w.BulletinYesterday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 222}}
-	w.NewsYesterday = []string{"yesterday-line"}
+	w.NewsYesterday = game.News("yesterday-line")
 	live := w.PlanetTotals() // today's Totals are computed live, not the stored 111 (#109)
 
 	fToday := &fakeSession{keys: []rune(" ")}
@@ -642,7 +642,7 @@ func TestShowBulletinTodayNotStaleOnFreshBoard(t *testing.T) {
 func TestShowBulletinMastheadAndBox(t *testing.T) {
 	w := newWorld()
 	w.BulletinToday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 111}}
-	w.NewsToday = []string{"alpha-line", "beta-line"}
+	w.NewsToday = game.News("alpha-line", "beta-line")
 	f := &fakeSession{keys: []rune(" ")}
 	showBulletinToday(f, w)
 	out := f.out.String()
@@ -703,10 +703,10 @@ func TestNewsItemHighlights(t *testing.T) {
 	if other == "" {
 		t.Fatal("need a second empire to prove own and other share a color")
 	}
-	w.NewsToday = []string{
+	w.NewsToday = game.News(
 		self + " routed the " + game.PirateFactions[0] + " and took 1,375 regions from " +
 			other + "; now Planetary Master!",
-	}
+	)
 	f := &fakeSession{keys: []rune(" ")}
 	showBulletinToday(f, w)
 	out := f.out.String()

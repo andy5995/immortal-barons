@@ -1,6 +1,16 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Creating or joining a group attack now asks to confirm after quoting the
+    price, and every attack's confirmation defaults to No
+  * Every time the game shows now says which time zone it is on, and each news
+    entry carries the hour it happened
+  * Preferences: choose the clock times are shown on — UTC, this board's, or a
+    time zone from a list
+  * The Join Group Attack table counts down in minutes and seconds as a party
+    nears departure, instead of whole hours
+  * The BBS Coordinator can call off an attack party still assembling, sending
+    every contributor's forces home
   * On Windows, a packet moved between directories on different drives is no
     longer delivered twice
   * The League Coordinator sends the league's rules on every planetary run, so

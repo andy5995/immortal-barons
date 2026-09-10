@@ -29,7 +29,8 @@ func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 	commitOnFile(t, cfg, func(w *game.World) { w.AddHuman("decoy", "Decoyland") })
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("1\r500\r")}, // pick attack 1, send 500 troopers
+		// pick attack 1, send 500 troopers, zeroes, then "y" to the cost.
+		fakeSession: fakeSession{keys: []rune("1\r500\r\r\r\ry")},
 		marker:      "Send how many Troopers",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
@@ -65,7 +66,7 @@ func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 	})
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("1\r500\r")},
+		fakeSession: fakeSession{keys: []rune("1\r500\r\r\r\ry")},
 		marker:      "Send how many Troopers",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) {

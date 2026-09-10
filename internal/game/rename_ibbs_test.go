@@ -11,7 +11,7 @@ import (
 func renameNewsCount(w *World, from, to string) int {
 	n := 0
 	for _, line := range w.NewsToday {
-		if strings.Contains(line, from) && strings.Contains(line, to) && strings.Contains(line, "henceforth known as") {
+		if strings.Contains(line.Text, from) && strings.Contains(line.Text, to) && strings.Contains(line.Text, "henceforth known as") {
 			n++
 		}
 	}
@@ -39,7 +39,7 @@ func TestRemoteRenameIsAnnouncedOnce(t *testing.T) {
 	}
 	// The board this happened on must be named: the reader knows this realm from
 	// the interplanetary screens, not from next door.
-	if !strings.Contains(strings.Join(w.NewsToday, "\n"), "Far BBS") {
+	if !strings.Contains(w.NewsToday.Join("\n"), "Far BBS") {
 		t.Errorf("the announcement does not name the planet: %v", w.NewsToday)
 	}
 	// Every later export carries FormerName too. This is the repeat the bound exists to stop.

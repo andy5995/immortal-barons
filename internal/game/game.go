@@ -141,8 +141,8 @@ type World struct {
 	// key stays "Bulletin" (the field's old name) so old saves load their
 	// lines into today's news. BulletinToday/BulletinYesterday are the frozen
 	// daily headers of planet-wide totals; see rollNews.
-	NewsToday         []string `json:"Bulletin"`
-	NewsYesterday     []string
+	NewsToday         NewsFeed `json:"Bulletin"`
+	NewsYesterday     NewsFeed
 	BulletinToday     DailyBulletin
 	BulletinYesterday DailyBulletin
 	// Battles is the league-wide attack log the world report is drawn from. It

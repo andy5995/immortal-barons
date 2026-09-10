@@ -227,7 +227,9 @@ func mailChoice(s session.Session) rune {
 // white labels/body, bright-cyan sender, bright-green recipients, bright-blue
 // quotes, bright-white date), then the [R]/[D]/[I]/[Q] prompt.
 func renderMessage(s session.Session, m game.Message) {
-	when := m.When
+	// The stamp was stored in UTC by whoever sent it; the reader sees it on their
+	// own clock (#267).
+	when := game.StampIn(m.When, sessionZone(s))
 	fill := mailBoxWidth - 1 - len([]rune(when)) - 5
 	if fill < 0 {
 		fill = 0

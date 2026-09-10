@@ -14,9 +14,12 @@ var sgr = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 
 // The rule must come out byte-for-byte as BRE draws it (cap/bre-kd3-treaty-replies.cap).
 func TestEventRuleMatchesBRE(t *testing.T) {
-	when := time.Date(2026, 7, 31, 7, 43, 11, 0, time.Local)
-	got := sgr.ReplaceAllString(eventRule(1, when), "")
-	want := "─────(1)────────────────────────────────────────07/31/2026  07:43:11────────"
+	when := time.Date(2026, 7, 31, 7, 43, 11, 0, time.UTC)
+	got := sgr.ReplaceAllString(eventRule(1, when, time.UTC), "")
+	// The zone is IB's, not the original's: a league's boards are not on one
+	// clock, so every stamp says which one it is on (#267, and the divergence is
+	// recorded in docs/dev/bre-screens.md). The geometry is still BRE's.
+	want := "─────(1)────────────────────────────────────────07/31/2026  07:43:11 UTC────"
 	if got != want {
 		t.Errorf("rule =\n%q\nwant\n%q", got, want)
 	}
@@ -28,7 +31,7 @@ func TestEventRuleMatchesBRE(t *testing.T) {
 // An event carried over from a save written before events had a timestamp still
 // gets its rule — an unbroken one, with no blank gap where the stamp would be.
 func TestEventRuleWithoutTimestamp(t *testing.T) {
-	got := sgr.ReplaceAllString(eventRule(2, time.Time{}), "")
+	got := sgr.ReplaceAllString(eventRule(2, time.Time{}, time.UTC), "")
 	if strings.Contains(got, " ") {
 		t.Errorf("undated rule should be solid, got %q", got)
 	}
@@ -41,7 +44,7 @@ func TestEventRuleWithoutTimestamp(t *testing.T) {
 func TestShowTurnEventsNumbersAndStampsEachEntry(t *testing.T) {
 	f := &fakeSession{keys: []rune("\r")}
 	w := newWorld()
-	when := time.Date(2026, 7, 31, 9, 7, 7, 0, time.Local)
+	when := time.Date(2026, 7, 31, 9, 7, 7, 0, time.UTC)
 	w.Player().Events = []game.Event{
 		{When: when, Text: "Beta accepted your Full Defense Alliance proposal."},
 		{When: when, Text: "Gamma rejected your Full Defense Alliance proposal."},
@@ -50,7 +53,7 @@ func TestShowTurnEventsNumbersAndStampsEachEntry(t *testing.T) {
 	showTurnEvents(f, w)
 
 	out := sgr.ReplaceAllString(f.out.String(), "")
-	for _, want := range []string{"(1)", "(2)", "07/31/2026  09:07:07", "Beta accepted", "Gamma rejected"} {
+	for _, want := range []string{"(1)", "(2)", "07/31/2026  09:07:07 UTC", "Beta accepted", "Gamma rejected"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("recap missing %q:\n%s", want, out)
 		}

@@ -652,8 +652,11 @@ this change.
 
 **IB's opening menu carries a clock above the title rule; BRE's carries none.**
 A second header line under `Game started on <date>` reads `Planetary time: HH:MM
-   New day in H:MM` — the door host's wall clock and the time left of the game
-day, which turns at that host's local midnight. It is its own row because one
+   New day in H:MM` — the door host's wall clock, marked with its zone (#267),
+and the time left of the game day, which turns at that host's local midnight.
+It is the one time on any screen that stays on the BOARD's clock whatever zone
+the reader picked: drawn in UTC beside the countdown, the two halves would no
+longer add up to a round hour. It is its own row because one
 row would run past 80 columns in German or Russian, and the header is not
 wrapped. Nothing on BRE's screens tells a player when
 the day turns, and the boundary is the server's, not the caller's, so a player in
@@ -2344,6 +2347,12 @@ Opium accepted your Full Defense Alliance proposal.
 DTF accepted your Full Defense Alliance proposal.
 ```
 
+**IB marks the stamp's zone, where BRE leaves it bare** (#267): the rule reads
+`07/31/2026  07:43:11 UTC` on a player set to UTC, four columns wider, which the
+8 `─` tail absorbs — the rule is still 76 columns and the stamp still starts at
+48. Times are stored in UTC and drawn on whichever clock the reader picked in
+Preferences, because a league's boards are not on one.
+
 Measured: 5 `─`, `(N)`, **40** `─`, the 20-column stamp, 8 `─` — **76 columns**,
 with the stamp starting at column 48. This block showed 48 fill columns, which
 would run the line to 84 and wrap; 13 rules across two captures all measure 76.
@@ -2725,7 +2734,10 @@ redraws the menu.
 the three items it had built `1`-`3`, so each sat on the original's key for its
 neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` now
 holds IB's Dismantle Gooie (#45), and Player List has moved to `5`,
-past the original's four.
+past the original's four. **Call Off Attack Party** (#270) is IB's own too, on
+`6` for the same reason: it disbands a group attack still assembling here and
+hands every contributor their forces back, which is the Gooie lever applied to
+the other planet-level commitment barons join.
 
 **The Coordinator gets no player list in the original.** The two coordinator
 roles are different offices: the **BBS Coordinator** whose menu this is was
@@ -2923,6 +2935,14 @@ This attack will cost 100 gold.
 Send this Attack? (Y/n) Yes
 ```
 
+**IB asks this on all three attack paths, and defaults it to NO.** The original
+prompts for the counts, quotes the price and asks to confirm in one shared
+routine, so a group attack — created or joined — is confirmed exactly as a lone
+strike is; IB quoted the price on those two and then filed the attack without
+asking, which is how it was reported. The default is IB's one divergence here:
+the quote is the first time the player sees the sum, and it can run to millions,
+so a held Enter must not spend it.
+
 100 troopers cost 100 gold, so the rate is 1 gold per unit — **verified for
 troopers only**; whether the other three types cost the same is **UNVERIFIED**.
 
@@ -3044,7 +3064,16 @@ left to right are 2, 2, 14, 19, 8, 6, 7, 7, 6 — 79 with the separators, so the
 table is sized to the screen rather than to any house width.
 
 `Leave` is **hours remaining**, `2h`, not a clock time. `By` is the creating
-realm's Id letter. Unit counts are abbreviated the way the score table
+realm's Id letter.
+
+**IB steps `Leave` down to minutes and then seconds as the departure nears**
+(#269) — `3h`, `90m`, `45s` — where the original prints whole hours to the last
+second. The departure is an instant (`GroupAttack.DepartAt`) and travel times are
+measured to the second, so whole hours were rounder than what the game knows, and
+"1h" covered everything from a second to a full hour. The form is at most four
+columns, so it still sits in the original's 6-column cell; `shortDuration` in
+`internal/menu/duration.go` defines it, and the incoming views (#268) spell a
+wait the same way. Unit counts are abbreviated the way the score table
 abbreviates — `118k`, `4500k`, and `18m` on a later row in the same capture.
 
 **Several parties list together**, ids ascending, up to three rows in

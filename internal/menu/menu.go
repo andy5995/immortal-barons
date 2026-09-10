@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -201,6 +202,16 @@ func playerLang(c *ctx) string {
 	return ""
 }
 
+// playerZone is the active caller's zone, from their Preferences ("" = UTC).
+// Times are stored in UTC and rendered here, so two barons on boards an ocean
+// apart each read a stamp on their own clock (#267).
+func playerZone(c *ctx) *time.Location {
+	if c == nil {
+		return time.UTC
+	}
+	return c.Player().Location()
+}
+
 // langSession wraps a Session so downstream output helpers can learn the
 // caller's language from the Session alone (they receive s but not the World).
 // The language is read live from the active empire, so a mid-session change in
@@ -212,6 +223,10 @@ type langSession struct {
 }
 
 func (l *langSession) Lang() string { return playerLang(l.c) }
+
+// Zone is read live from the active empire, for the same reason Lang is: a
+// change in Preferences shows on the next screen drawn.
+func (l *langSession) Zone() *time.Location { return playerZone(l.c) }
 
 // SetInputLine forwards the prompt-restore hook down to the inner session so an
 // idle/time warning can reprint the caller's current input line.
@@ -245,6 +260,15 @@ func sessionLang(s session.Session) string {
 		return lp.Lang()
 	}
 	return ""
+}
+
+// sessionZone extracts the caller's zone from a wrapped Session, or UTC for a
+// plain Session (e.g. tests and the bulletin files, which have no reader).
+func sessionZone(s session.Session) *time.Location {
+	if z, ok := s.(interface{ Zone() *time.Location }); ok {
+		return z.Zone()
+	}
+	return time.UTC
 }
 
 // tr translates msgid to the session's language, for direct-print call sites

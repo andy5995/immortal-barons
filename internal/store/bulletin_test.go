@@ -38,7 +38,7 @@ func TestSyncReadsTheBoardsOwnBulletinsAndFilesTheNews(t *testing.T) {
 	if _, err := SyncBulletins(w); err != nil {
 		t.Fatal(err)
 	}
-	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0], "Board news") {
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "Board news") {
 		t.Fatalf("the sysop's first bulletin filed %v", w.NewsToday)
 	}
 	w.NewsToday = nil
@@ -46,7 +46,7 @@ func TestSyncReadsTheBoardsOwnBulletinsAndFilesTheNews(t *testing.T) {
 	if _, err := SyncBulletins(w); err != nil {
 		t.Fatal(err)
 	}
-	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0], "Anniversary party") {
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "Anniversary party") {
 		t.Fatalf("news is %v", w.NewsToday)
 	}
 	// A board in no league has no Coordinator to fill bull/league, so what its
@@ -213,7 +213,7 @@ func TestAMemberBoardCannotDictateBulletins(t *testing.T) {
 
 func newsMentions(w *game.World, want string) bool {
 	for _, line := range w.NewsToday {
-		if strings.Contains(line, want) {
+		if strings.Contains(line.Text, want) {
 			return true
 		}
 	}

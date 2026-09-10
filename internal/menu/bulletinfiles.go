@@ -171,7 +171,7 @@ func dayBefore(date string) string {
 // shows, with its masthead.
 func writeNewsBulletin(s session.Session, w *ctx, today bool) {
 	var date string
-	var lines []string
+	var lines game.NewsFeed
 	var bulletin game.DailyBulletin
 	w.Read(func() {
 		if today {
@@ -190,7 +190,7 @@ func writeNewsBulletin(s session.Session, w *ctx, today bool) {
 		return
 	}
 	for _, line := range lines {
-		fmt.Fprintf(s, "  %s\n", strings.TrimSpace(line))
+		fmt.Fprintf(s, "  %s\n", strings.TrimSpace(newsStamped(s, line)))
 	}
 }
 

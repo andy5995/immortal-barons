@@ -330,7 +330,7 @@ func TestBothPlanetsReportAnInterplanetaryStrike(t *testing.T) {
 	if !res.Won {
 		t.Fatalf("the strike should have won; outcome %q", res.Outcome)
 	}
-	news := strings.Join(def.NewsToday, "\n")
+	news := def.NewsToday.Join("\n")
 	if !strings.Contains(news, "Ironhold of Alpha") {
 		t.Errorf("the defending planet's news should name the raider, got:\n%s", news)
 	}
@@ -348,7 +348,7 @@ func TestBothPlanetsReportAnInterplanetaryStrike(t *testing.T) {
 		Contributors: []Contribution{{Owner: "iron"}},
 	})
 	org.applyAttackResult(res)
-	if home := strings.Join(org.NewsToday, "\n"); !strings.Contains(home, "Ironhold") {
+	if home := org.NewsToday.Join("\n"); !strings.Contains(home, "Ironhold") {
 		t.Errorf("our own planet's news should name the realm that struck, got:\n%s", home)
 	}
 }
@@ -369,7 +369,7 @@ func TestAGroupAttackNamesNoBaron(t *testing.T) {
 		Offense:      10_000_000,
 		Contributors: []Contribution{{Owner: "a"}, {Owner: "b"}},
 	})
-	news := strings.Join(def.NewsToday, "\n")
+	news := def.NewsToday.Join("\n")
 	if !strings.Contains(news, "Alpha") {
 		t.Errorf("the planet should still be named, got:\n%s", news)
 	}
@@ -433,7 +433,7 @@ func TestArrivingStrikeIsWordedForTheSideThatWon(t *testing.T) {
 				if !strings.Contains(recap, c.event) {
 					t.Errorf("seed %d: the defender's recap of a %q should say %q:\n%s", seed, c.want, c.event, recap)
 				}
-				line := wB.NewsToday[len(wB.NewsToday)-1]
+				line := wB.NewsToday[len(wB.NewsToday)-1].Text
 				if !strings.Contains(line, c.news) {
 					t.Errorf("seed %d: the defending planet's news of a %q should say %q:\n%s", seed, c.want, c.news, line)
 				}
@@ -444,7 +444,7 @@ func TestArrivingStrikeIsWordedForTheSideThatWon(t *testing.T) {
 				// And the attacking planet is told the same thing about it.
 				wA.Outbox, wA.NewsToday = nil, nil
 				wA.ApplyPacket(result)
-				home := wA.NewsToday[len(wA.NewsToday)-1]
+				home := wA.NewsToday[len(wA.NewsToday)-1].Text
 				if (c.want == OutcomeWon) != strings.Contains(home, "triumph") {
 					t.Errorf("seed %d: the attacking planet's news of a %q reads:\n%s", seed, c.want, home)
 				}
@@ -483,8 +483,8 @@ func TestAStrikeThatFoughtNobodyIsNotAnnouncedAsADefeat(t *testing.T) {
 				t.Fatal("the baron was told nothing about their own strike")
 			}
 			for _, line := range wA.NewsToday {
-				if strings.Contains(line, "failure") {
-					t.Errorf("a %q strike was announced to the planet as a defeat:\n%s", c.want, line)
+				if strings.Contains(line.Text, "failure") {
+					t.Errorf("a %q strike was announced to the planet as a defeat:\n%s", c.want, line.Text)
 				}
 			}
 		})

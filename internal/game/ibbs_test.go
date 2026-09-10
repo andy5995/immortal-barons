@@ -978,7 +978,7 @@ func TestUnchangedLeagueBroadcastIsQuiet(t *testing.T) {
 	broadcast() // second carries nothing new
 
 	for _, line := range member.NewsToday {
-		t.Errorf("an unchanged broadcast posted news: %q", line)
+		t.Errorf("an unchanged broadcast posted news: %q", line.Text)
 	}
 
 	// A roster that really changed is still reported.

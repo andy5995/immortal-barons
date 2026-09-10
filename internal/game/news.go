@@ -1,7 +1,9 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
@@ -12,10 +14,63 @@ import (
 // match: regular-attack wins/losses and total conquests go to every player's
 // news, not just the victim.
 
+// NewsLine is one entry in the planetary news feed: what happened, and when.
+//
+// The time is stored in UTC and shown on the reader's own clock (#267). The DATE
+// is not on the line because the screen it is drawn on is headed by the day the
+// feed belongs to. The original stamps no news line at all; IB does, because a
+// feed a player meets once a day says more with the hour on it.
+type NewsLine struct {
+	At   string `json:",omitempty"`
+	Text string
+}
+
+// UnmarshalJSON accepts a bare string as well as an object, so a world saved
+// before news lines carried a time still loads. Such a line keeps its text and
+// shows no time, rather than one invented for it — the same shape
+// Message.UnmarshalJSON has, for the same reason.
+func (n *NewsLine) UnmarshalJSON(b []byte) error {
+	var text string
+	if err := json.Unmarshal(b, &text); err == nil {
+		*n = NewsLine{Text: text}
+		return nil
+	}
+	type plain NewsLine // avoid recursing into this method
+	var p plain
+	if err := json.Unmarshal(b, &p); err != nil {
+		return err
+	}
+	*n = NewsLine(p)
+	return nil
+}
+
+// NewsFeed is one day's news.
+type NewsFeed []NewsLine
+
+// Join is the feed's text, one line per entry — for a caller that wants the
+// prose and not the times (tests, and any search over what was said).
+func (f NewsFeed) Join(sep string) string {
+	out := make([]string, len(f))
+	for i, n := range f {
+		out[i] = n.Text
+	}
+	return strings.Join(out, sep)
+}
+
+// News builds a feed from bare text — lines with no time of their own, which is
+// what a test writes and what a world saved before news was stamped carries.
+func News(lines ...string) NewsFeed {
+	f := make(NewsFeed, len(lines))
+	for i, l := range lines {
+		f[i] = NewsLine{Text: l}
+	}
+	return f
+}
+
 // postNews appends a system news line to the planetary bulletin, keeping only
 // the most recent entries (same cap as player bulletins).
 func (w *World) postNews(line string) {
-	w.NewsToday = append(w.NewsToday, line)
+	w.NewsToday = append(w.NewsToday, NewsLine{At: StoredStamp(timeNow()), Text: line})
 	if len(w.NewsToday) > 20 {
 		w.NewsToday = w.NewsToday[len(w.NewsToday)-20:]
 	}

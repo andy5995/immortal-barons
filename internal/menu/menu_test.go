@@ -895,7 +895,7 @@ func TestChangeRealmNameFromPreferences(t *testing.T) {
 	if p.Name != "Newland" || p.FormerName != "Testland" {
 		t.Fatalf("realm = %q (was %q); want Newland (was Testland)", p.Name, p.FormerName)
 	}
-	if !strings.Contains(strings.Join(w.NewsToday, "\n"), "Testland is henceforth known as Newland.") {
+	if !strings.Contains(w.NewsToday.Join("\n"), "Testland is henceforth known as Newland.") {
 		t.Errorf("the planet should be told: %v", w.NewsToday)
 	}
 }

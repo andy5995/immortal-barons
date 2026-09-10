@@ -430,8 +430,8 @@ func BuildMenus() *Menus {
 	messages.DefaultOnEnter = quitOnEnter(messages)
 
 	// Item set and order mirror BRE's Preferences submenu (the three "Visit …
-	// Menu" skip-toggles, then the four behaviour toggles). The 'L' language
-	// picker is IB's own addition, kept at the end.
+	// Menu" skip-toggles, then the four behaviour toggles). The 'L' language and
+	// 'T' time-zone pickers are IB's own additions, kept at the end.
 	prefs.Items = append(toggleItems([]toggleRow{
 		{Key: '1', Name: "Visit Covert Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitCovert }},
 		{Key: '2', Name: "Visit Trading Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitTrading }},
@@ -451,6 +451,9 @@ func BuildMenus() *Menus {
 		// Industry goes from the System menu. A realm still under New Realm
 		// Protection sees it greyed rather than missing, so it can be found again
 		// when protection ends; choosing it then says why it is refused.
+		{Key: 'T', LabelFn: func(w *ctx) string {
+			return i18n.T(playerLang(w), "Time Zone") + ": " + timeZoneName(playerLang(w), w.Player().TimeZone)
+		}, Do: pickTimeZone},
 		{Key: 'N', Label: "Change Realm Name", Do: changeRealmName,
 			Hidden: func(w *ctx) bool { return w.Player().FormerName != "" },
 			Dimmed: func(w *ctx) bool { return w.Player().Protection > 0 }},
@@ -477,6 +480,9 @@ func BuildMenus() *Menus {
 		{Key: '3', Label: "Global Recon Request", Do: globalReconRequest},
 		{Key: '4', Label: "View Diplomacy", Do: planetaryTreaties},
 		{Key: '5', Label: "Player List", Do: playerList},
+		// IB's own, keyed past the original's four for the reason Player List is.
+		{Key: '6', Label: "Call Off Attack Party", Do: disbandGroupAttack,
+			Hidden: func(w *ctx) bool { return len(w.GroupAttacks) == 0 }},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	coord.DefaultOnEnter = quitOnEnter(coord)
@@ -680,6 +686,11 @@ func gameMenuStatus(w *ctx) string {
 // game day, which turns at that host's local midnight — the player's only way of
 // telling when turns refresh, since the boundary is the server's, not theirs.
 //
+// This one stays on the BOARD's clock whatever the reader picked in Preferences
+// (#267), and only gains the zone marker. It is the one time on any screen whose
+// point is the host's own midnight: rendered in UTC beside the countdown, the two
+// halves no longer add up to a round hour, and the line stops explaining itself.
+//
 // It returns nothing when the host's date has moved off the world's own: a
 // sysop's pinned -date, or a session held open across midnight, both leave the
 // wall clock describing a day the world is not on, and a wrong countdown is
@@ -691,5 +702,5 @@ func planetaryClock(now time.Time, today, lang string) string {
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, 1)
 	left := midnight.Sub(now)
 	return fmt.Sprintf(i18n.T(lang, "Planetary time: %s   New day in %s"),
-		now.Format("15:04"), fmt.Sprintf("%d:%02d", int(left.Hours()), int(left.Minutes())%60))
+		now.Format("15:04 MST"), fmt.Sprintf("%d:%02d", int(left.Hours()), int(left.Minutes())%60))
 }

@@ -9,16 +9,18 @@ import (
 // the door host's local midnight — so the countdown, not the clock, is the part
 // that has to be right.
 func TestPlanetaryClockCountsDownToMidnight(t *testing.T) {
+	// The clock stays on the host's own zone whatever the reader picked (#267);
+	// only the marker is new.
 	now := time.Date(2026, 8, 30, 23, 47, 12, 0, time.Local)
 	got := planetaryClock(now, "2026-08-30", "en")
-	want := "Planetary time: 23:47   New day in 0:12"
+	want := "Planetary time: 23:47 " + now.Format("MST") + "   New day in 0:12"
 	if got != want {
 		t.Errorf("planetaryClock = %q, want %q", got, want)
 	}
 
 	now = time.Date(2026, 8, 30, 9, 5, 0, 0, time.Local)
 	got = planetaryClock(now, "2026-08-30", "en")
-	want = "Planetary time: 09:05   New day in 14:55"
+	want = "Planetary time: 09:05 " + now.Format("MST") + "   New day in 14:55"
 	if got != want {
 		t.Errorf("planetaryClock = %q, want %q", got, want)
 	}

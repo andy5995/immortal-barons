@@ -28,7 +28,7 @@ func TestGroupAttackTableMatchesTheCapture(t *testing.T) {
 	fs := &fakeSession{}
 	row := gaRow{
 		id: 1, by: "A", planet: "The Eclipse", target: "Land of Dreams",
-		troopers: 118_000, jets: 4_500_000, tanks: 6_698_000, bombers: 25_000, hours: 2,
+		troopers: 118_000, jets: 4_500_000, tanks: 6_698_000, bombers: 25_000, left: 2 * time.Hour,
 	}
 	printGroupAttackTable(fs, Term{UTF8: true}, []gaRow{row})
 
@@ -53,7 +53,7 @@ func TestGroupAttackTableMatchesTheCapture(t *testing.T) {
 	// three digits.
 	fs = &fakeSession{}
 	printGroupAttackRow(fs, Term{UTF8: true}, gaRow{
-		id: 3, by: "A", planet: "The Undermine", target: "ALL", tanks: 1_000_000, hours: 12,
+		id: 3, by: "A", planet: "The Undermine", target: "ALL", tanks: 1_000_000, left: 12 * time.Hour,
 	})
 	if got := strings.TrimRight(stripANSI(fs.out.String()), "\n"); got != gaCapturedAllRow {
 		t.Errorf("whole-planet row:\n got %q\nwant %q", got, gaCapturedAllRow)
@@ -66,7 +66,7 @@ func TestGroupAttackTableMatchesTheCapture(t *testing.T) {
 func TestGroupAttackTableClipsAnOverlongName(t *testing.T) {
 	fs := &fakeSession{}
 	printGroupAttackTable(fs, Term{UTF8: true}, []gaRow{{
-		id: 9, by: "B", planet: strings.Repeat("W", 40), target: strings.Repeat("X", 40), hours: 12,
+		id: 9, by: "B", planet: strings.Repeat("W", 40), target: strings.Repeat("X", 40), left: 12 * time.Hour,
 	}})
 	lines := strings.Split(strings.TrimLeft(stripANSI(fs.out.String()), "\n"), "\n")
 	if len(lines) < 3 {
@@ -82,9 +82,12 @@ func TestGroupAttackTableClipsAnOverlongName(t *testing.T) {
 
 // TestGroupAttackLeaveIsWholeHours covers the Leave column's three cases: the
 // wait rounds UP so a freshly filed attack reads its full delay, a force
-// already due reads 0h, and a legacy attack that knows only its departure DAY
+// already due reads 0s, and a legacy attack that knows only its departure DAY
 // reads "?" rather than a figure invented for it.
-func TestGroupAttackLeaveIsWholeHours(t *testing.T) {
+//
+// The form steps down as the departure nears (#269): the original's whole hours
+// while the wait is long, then minutes, then seconds.
+func TestGroupAttackLeaveCountsDown(t *testing.T) {
 	now := time.Now()
 	cases := []struct {
 		name string
@@ -92,12 +95,15 @@ func TestGroupAttackLeaveIsWholeHours(t *testing.T) {
 		want string
 	}{
 		{"just filed", game.GroupAttack{DepartAt: now.Add(8*time.Hour - time.Second)}, "8h"},
-		{"an hour off", game.GroupAttack{DepartAt: now.Add(time.Hour)}, "1h"},
-		{"already due", game.GroupAttack{DepartAt: now.Add(-time.Hour)}, "0h"},
+		{"a long wait keeps whole hours", game.GroupAttack{DepartAt: now.Add(2 * time.Hour)}, "2h"},
+		{"under an hour and change, minutes", game.GroupAttack{DepartAt: now.Add(90 * time.Minute)}, "90m"},
+		{"an hour off", game.GroupAttack{DepartAt: now.Add(time.Hour)}, "60m"},
+		{"nearly away, seconds", game.GroupAttack{DepartAt: now.Add(45 * time.Second)}, "45s"},
+		{"already due", game.GroupAttack{DepartAt: now.Add(-time.Hour)}, "0s"},
 		{"legacy, day only", game.GroupAttack{DepartDay: 4}, "?"},
 	}
 	for _, c := range cases {
-		if got := gaLeave(hoursUntil(now, c.ga)); got != c.want {
+		if got := gaLeave(leftUntil(now, c.ga)); got != c.want {
 			t.Errorf("%s: Leave = %q, want %q", c.name, got, c.want)
 		}
 	}
@@ -165,7 +171,7 @@ func TestJoinGroupAttackDrawsTheTableAndJoins(t *testing.T) {
 		slot = ga.Slot
 	})
 
-	fs := &fakeSession{keys: []rune(strconv.Itoa(slot) + "\r500\r")}
+	fs := &fakeSession{keys: []rune(strconv.Itoa(slot) + "\r500\r\r\r\ry")}
 	joinGroupAttack(fs, b)
 
 	out := stripANSI(fs.out.String())

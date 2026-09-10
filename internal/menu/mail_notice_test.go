@@ -3,6 +3,7 @@ package menu
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -83,5 +84,22 @@ func TestRenderMessageBoxGeometry(t *testing.T) {
 	}
 	if n := len([]rune(sep)); n != mailSepWidth {
 		t.Errorf("separator is %d columns, want %d: %q", n, mailSepWidth, sep)
+	}
+}
+
+// A stamp is stored in UTC and read on the clock the player picked in
+// Preferences (#267) — the reason a league's mail can be timed at all.
+func TestMailStampReadsOnThePlayersClock(t *testing.T) {
+	w := newWorld()
+	w.Player().TimeZone = "Asia/Tokyo"
+	f := &fakeSession{}
+	s := &langSession{Session: f, c: w}
+
+	renderMessage(s, game.Message{From: "Alice", To: "A", Body: "hi",
+		When: game.StoredStamp(time.Date(2026, 7, 30, 0, 24, 5, 0, time.UTC))})
+
+	out := sgr.ReplaceAllString(f.out.String(), "")
+	if !strings.Contains(out, "07/30/2026  09:24:05 JST") {
+		t.Errorf("the stamp is not on the reader's clock:\n%s", out)
 	}
 }

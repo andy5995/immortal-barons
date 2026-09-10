@@ -75,7 +75,7 @@ func TestRenameEmpireRewritesReferences(t *testing.T) {
 		t.Errorf("exposedFrom = %v, want only New:4", other.ExposedFrom)
 	}
 	// The planet is told.
-	if !strings.Contains(strings.Join(w.NewsToday, "\n"), "Old is henceforth known as New.") {
+	if !strings.Contains(w.NewsToday.Join("\n"), "Old is henceforth known as New.") {
 		t.Errorf("news = %v, want the rename announced", w.NewsToday)
 	}
 }

@@ -66,7 +66,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	if len(wA.NewsToday) == 0 {
 		t.Fatalf("board A should have a bulletin entry for the strike outcome")
 	}
-	if news := wA.NewsToday[0]; !strings.Contains(news, "Victim") || !strings.Contains(news, "boardB") {
+	if news := wA.NewsToday[0].Text; !strings.Contains(news, "Victim") || !strings.Contains(news, "boardB") {
 		t.Errorf("bulletin should name the target and board, got %q", news)
 	}
 	// The target had nothing standing, so the force is barely touched and the

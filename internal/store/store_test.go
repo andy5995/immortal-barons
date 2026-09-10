@@ -386,7 +386,7 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	if got.GameDay != 7 || got.InvestRate != 100 {
 		t.Errorf("world scalars: day=%d rate=%d, want 7 and 100", got.GameDay, got.InvestRate)
 	}
-	if len(got.NewsToday) != 1 || got.NewsToday[0] != "A bulletin line from an old save" {
+	if len(got.NewsToday) != 1 || got.NewsToday[0].Text != "A bulletin line from an old save" {
 		t.Errorf(`the legacy "Bulletin" key must load into NewsToday, got %v`, got.NewsToday)
 	}
 	e := got.FindByOwner("khan")

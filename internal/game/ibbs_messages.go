@@ -89,7 +89,7 @@ func (w *World) sendIP(from *Empire, boards []string, m IPMessage) {
 	}
 	m.FromBoard = w.Config.BoardID
 	m.FromEmpire = from.Name
-	m.When = timeNow().Format(StampFormat)
+	m.When = StoredStamp(timeNow())
 	for _, b := range boards {
 		// BRE's planet list includes the board you are calling from, so a message
 		// can be addressed home. Queueing that as a packet would send it out to a
@@ -113,7 +113,7 @@ func (w *World) sendIP(from *Empire, boards []string, m IPMessage) {
 func (w *World) deliverIPMessage(m IPMessage) {
 	when := m.When
 	if when == "" {
-		when = timeNow().Format(StampFormat)
+		when = StoredStamp(timeNow())
 	}
 	msg := Message{From: m.FromEmpire, FromBoard: m.FromBoard, When: when, Body: m.Body}
 	if m.ToEmpire != "" {

@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-// StampFormat is how the original prints a date and time — two spaces between
-// them. Used for a message's When and for a recap entry's stamp.
-const StampFormat = "01/02/2006  15:04:05"
-
 // Message is one piece of empire mail: who sent it, the recipient letter(s) it
 // was addressed to, when it was sent, and the body. Body lines beginning with
 // "> " are quoted text — a reply quotes the message it answers.
@@ -48,7 +44,7 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 func (w *World) SendMail(from, to *Empire, m Message) {
 	m.From = from.Name
 	if m.When == "" {
-		m.When = time.Now().Format(StampFormat)
+		m.When = StoredStamp(time.Now())
 	}
 	to.deliver(m)
 }

@@ -26,7 +26,7 @@ func showBulletinYesterday(s session.Session, w *ctx) Result { return showBullet
 // BulletinYesterday/NewsYesterday instead of today's.
 func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	var bulletin game.DailyBulletin
-	var news []string
+	var news game.NewsFeed
 	var boardID, date string
 	w.Read(func() {
 		if yesterday {
@@ -63,7 +63,8 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 			// Wrapped continuation lines indent 5 spaces, as BRE draws them
 			// (docs/dev/bre-screens.md). Wrap before colouring: hiNewsItem's
 			// escapes are invisible on screen but count against the margin.
-			fmt.Fprintf(s, "\n%s %s\n", newsItemArrow, hiNewsItem(wrapHanging(b, "", newsItemIndent), terms))
+			fmt.Fprintf(s, "\n%s %s\n", newsItemArrow,
+				hiNewsItem(wrapHanging(newsStamped(s, b), "", newsItemIndent), terms))
 		}
 	}
 	pause(s)
@@ -129,7 +130,7 @@ func showTurnEvents(s session.Session, w *ctx) {
 			rows = 0
 		}
 		rows += entryRows
-		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When), hiNums(body))
+		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When, sessionZone(s)), hiNums(body))
 	}
 	pause(s)
 }
@@ -190,12 +191,12 @@ const (
 // there are; a world saved before events carried one draws an unbroken rule.
 // The capture only shows single-digit counters, so which of the two the original
 // holds fixed past nine — the column or the 76-column width — is a guess.
-func eventRule(n int, when time.Time) string {
+func eventRule(n int, when time.Time, loc *time.Location) string {
 	head := fmt.Sprintf("─────%s(%s%d%s)", dim(ansi.FgBrightYellow), ansi.FgBrightYellow, n, dim(ansi.FgBrightYellow))
 	plain := len([]rune(fmt.Sprintf("─────(%d)", n)))
 	stamp := ""
 	if !when.IsZero() {
-		stamp = when.Format(game.StampFormat)
+		stamp = game.Stamp(when, loc)
 	}
 	fill := eventStampColumn - plain
 	if fill < 1 {

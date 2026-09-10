@@ -31,7 +31,7 @@ func TestPlanetTotalsSumsOnlyLivingEmpires(t *testing.T) {
 func TestPostNewsLandsInNewsToday(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.postNews("test line")
-	if len(w.NewsToday) != 1 || w.NewsToday[0] != "test line" {
+	if len(w.NewsToday) != 1 || w.NewsToday[0].Text != "test line" {
 		t.Errorf("NewsToday = %v, want [\"test line\"]", w.NewsToday)
 	}
 }
@@ -74,7 +74,7 @@ func TestRollNewsRotatesBulletinAndNews(t *testing.T) {
 	// exact line count.
 	found := false
 	for _, line := range w.NewsYesterday {
-		if line == "day two news" {
+		if line.Text == "day two news" {
 			found = true
 		}
 	}

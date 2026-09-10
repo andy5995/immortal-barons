@@ -245,7 +245,7 @@ func TestEndToEndSignedExchangeOverTheFileDrop(t *testing.T) {
 	}
 }
 
-func newsText(w *World) string { return strings.Join(w.NewsToday, "\n") }
+func newsText(w *World) string { return w.NewsToday.Join("\n") }
 
 // TestForgeryCannotPoisonTheReplayCounter pins the ORDER of the two ingest
 // guards. SeenPacket raises HighSeq[FromBoard] as a side effect, so checking
