@@ -16,6 +16,7 @@ Packet:
   IPMessages
   SpyGuys `json:",omitempty"`
   News `json:",omitempty"`
+  Threats `json:",omitempty"`
   TradeBids `json:",omitempty"`
   TradeFills `json:",omitempty"`
   Market `json:",omitempty"`
@@ -180,6 +181,13 @@ IPMessage:
 SpyGuyDispatch:
   FromBoard
   Days
+Threat:
+  FromBoard
+  Kind
+  ID
+  Target
+  At `json:",omitempty"`
+  Gone `json:",omitempty"`
 IPTradeBid:
   ID
   FromBoard

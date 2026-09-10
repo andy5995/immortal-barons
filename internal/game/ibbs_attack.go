@@ -382,7 +382,7 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, h
 	g := &w.GroupAttacks[len(w.GroupAttacks)-1]
 	// A watcher from the target planet sees the force assembling and sends the
 	// hours home — the whole reason his planet paid for him.
-	w.reportToSpy(targetBoard, groupAttackSpyLine(w.Config.BoardID, *g))
+	w.reportGroupAttack(targetBoard, *g)
 	return g, nil
 }
 
@@ -514,6 +514,7 @@ func (w *World) DisbandGroupAttackByCoordinator(e *Empire, id int, now time.Time
 		w.reportToSpy(g.TargetBoard, fmt.Sprintf(
 			"Our agent on %s reports the attack party assembling against our planet has been called off.",
 			w.Config.BoardID))
+		w.reportThreatGone(g.TargetBoard, ThreatAttack, g.ID)
 		return nil
 	}
 	return ErrNoAttack

@@ -4120,6 +4120,21 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   - **Reports are PLANET NEWS on the paying planet**, not mail: every report
     goes out through `append_news_record`, which writes a `NEWS_DATA` packet.
 
+  **IB adds an Incoming view, keyed `I` on the InterPlanetary menu (#268).** The
+  original's reports are news lines and nothing else, and a news line is frozen:
+  "leaves in 12 hours" means twelve hours from whenever it was written, and a
+  baron reading it later has to know when that was. The lines are unchanged — a
+  log that reads differently depending on when you open it is a worse log — and
+  a `game.Threat` record now rides beside each one, so the view counts the same
+  threat down live in the short form the Join Group Attack table uses (`3h`,
+  `90m`, `away`). It is no new knowledge: a record is written only where a
+  report was already going out, so a planet with no watcher posted sees an empty
+  list, and the watched planet is still never told it is being watched. A weapon
+  already in the air is listed from the status packet that announces it (#63)
+  rather than twice, with its arrival in whole days, which is all `ArrivesDay`
+  knows. Records are dropped when the threat is called off, and
+  `ThreatMemoryHours` (24) after its hour has passed.
+
   IB implements all of it. **What IB had before was its own invention** — a
   per-baron Send Recon that spent an agent, warned the target, and filed figures
   in the Spy Database. That errand is gone; the Spy Database is now filled the

@@ -136,12 +136,41 @@ func (w *World) reportToSpy(board, line string) {
 func (w *World) reportStandingThreats(board string) {
 	for _, g := range w.GroupAttacks {
 		if g.TargetBoard == board {
-			w.reportToSpy(board, groupAttackSpyLine(w.Config.BoardID, g))
+			w.reportGroupAttack(board, g)
 		}
 	}
 	if d := w.Annihilator; d != nil && d.TargetBoard == board && !d.Launched {
-		w.reportToSpy(board, annihilatorSpyLine(w.Config.BoardID, d))
+		w.reportAnnihilator(board, d)
 	}
+}
+
+// reportGroupAttack and reportAnnihilator send a watcher the sentence and the
+// record together (#268). Every warning goes through one of these two, so a
+// threat cannot reach a planet's news without reaching its Incoming view.
+func (w *World) reportGroupAttack(board string, g GroupAttack) {
+	w.reportToSpy(board, groupAttackSpyLine(w.Config.BoardID, g))
+	w.reportThreat(board, Threat{
+		Kind:   ThreatAttack,
+		ID:     g.ID,
+		Target: g.TargetEmpire,
+		At:     ThreatAt(g.DepartAt),
+	})
+}
+
+func (w *World) reportAnnihilator(board string, d *Annihilator) {
+	w.reportToSpy(board, annihilatorSpyLine(w.Config.BoardID, d))
+	if !d.Funded {
+		// Still being paid for: there is no launch date to name yet, and the
+		// view says so rather than counting down to a guess.
+		w.reportThreat(board, Threat{Kind: ThreatGooie})
+		return
+	}
+	w.reportThreat(board, Threat{Kind: ThreatGooie, At: ThreatAt(d.LaunchAt)})
+}
+
+// reportThreatGone tells a watcher his planet is off the hook.
+func (w *World) reportThreatGone(board, kind string, id int) {
+	w.reportThreat(board, Threat{Kind: kind, ID: id, Gone: true})
 }
 
 // hoursUntil rounds up the whole hours left before t, floored at one: a strike

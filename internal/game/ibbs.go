@@ -59,6 +59,12 @@ type Packet struct {
 	// carries neither.
 	SpyGuys []SpyGuyDispatch `json:",omitempty"`
 	News    []string         `json:",omitempty"`
+	// Threats are those same reports as records rather than sentences, so the
+	// reader's Incoming view can count them down (#268). They ride beside the
+	// News lines, never instead of them: the line is the original's own report
+	// and stays exactly as it is written. omitempty for the reason every field
+	// around it is.
+	Threats []Threat `json:",omitempty"`
 	// Interplanetary trading (IB's own). All three are omitempty ON PURPOSE: the
 	// origin signature is taken over the marshalled packet, so a board too old to
 	// know these fields would drop them on unmarshal and then fail to verify a
@@ -194,6 +200,8 @@ func (p Packet) PacketType() string {
 		return "spyguys"
 	case len(p.News) > 0:
 		return "news"
+	case len(p.Threats) > 0:
+		return "threats"
 	case len(p.TradeBids) > 0 || len(p.TradeFills) > 0:
 		return "trade"
 	case len(p.TradeDeals) > 0:
@@ -215,7 +223,7 @@ func (p Packet) HasPayload() bool {
 		len(p.SpecialOps) > 0 ||
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
-		len(p.SpyGuys) > 0 || len(p.News) > 0 ||
+		len(p.SpyGuys) > 0 || len(p.News) > 0 || len(p.Threats) > 0 ||
 		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || len(p.TradeDeals) > 0 || p.Notice != "" ||
 		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil
 }
@@ -458,6 +466,11 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	for _, line := range p.News {
 		w.postNews(line)
+	}
+	// The same reports as records, for the Incoming view. Applied after the news
+	// so a called-off threat cannot be re-filed by a line in the same packet.
+	for _, t := range p.Threats {
+		w.noteThreat(t)
 	}
 	// Another planet's wars, for the world report. Kept apart from the news:
 	// these are records, not sentences, and the report renders them itself.

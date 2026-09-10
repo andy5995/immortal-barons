@@ -159,7 +159,7 @@ func (w *World) StartAnnihilator(e *Empire, board string) error {
 		Intact:      100,
 	}
 	w.postNews(fmt.Sprintf("Construction of a Gooie Kablooie aimed at %s has begun.", board))
-	w.reportToSpy(board, annihilatorSpyLine(w.Config.BoardID, w.Annihilator))
+	w.reportAnnihilator(board, w.Annihilator)
 	return nil
 }
 
@@ -194,7 +194,7 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 		d.LaunchAt = timeNow().Add(AnnihilatorBuildDays * 24 * time.Hour)
 		w.postNews(fmt.Sprintf("The Gooie Kablooie is complete. It launches at %s in %d hours.",
 			d.TargetBoard, AnnihilatorBuildDays*24))
-		w.reportToSpy(d.TargetBoard, annihilatorSpyLine(w.Config.BoardID, d))
+		w.reportAnnihilator(d.TargetBoard, d)
 	}
 	return millions, nil
 }
@@ -243,6 +243,7 @@ func (w *World) scrapAnnihilator() error {
 	w.ExportAnnihilatorGone(board) // let the target stop watching for it (#63)
 	w.postNews("The Gooie Kablooie has been dismantled.")
 	w.reportToSpy(board, fmt.Sprintf("Our agent on %s reports their Gooie Kablooie has been dismantled.", w.Config.BoardID))
+	w.reportThreatGone(board, ThreatGooie, 0)
 	return nil
 }
 

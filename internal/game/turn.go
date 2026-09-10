@@ -261,6 +261,7 @@ func (w *World) advanceOneDay(today string, rep *MaintReport) {
 		}
 		rep.step("Settling investments and loans")
 		w.expireSpyGuys() // a watcher's stay is a day shorter, silently (SpyGuy)
+		w.expireThreats() // and what he warned of drops off the list once it is long past
 		w.adjustInvestRate()
 		rep.step("Setting the bank's rate")
 		// Roll FIRST, then open the new day. Everything posted since the last

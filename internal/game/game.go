@@ -145,6 +145,10 @@ type World struct {
 	NewsYesterday     NewsFeed
 	BulletinToday     DailyBulletin
 	BulletinYesterday DailyBulletin
+	// Threats is what other planets have aimed at this one, as watchers reported
+	// it — records beside the frozen news lines, so the Incoming view can count
+	// them down live (#268). See threats.go.
+	Threats []Threat `json:",omitempty"`
 	// Battles is the league-wide attack log the world report is drawn from. It
 	// travels with the scores broadcast, so every board can show the whole
 	// league's wars rather than only its own (#233).

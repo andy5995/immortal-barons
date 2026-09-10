@@ -286,6 +286,10 @@ func BuildMenus() *Menus {
 		// menu stays reachable even with both off.
 		{Key: '8', Label: "Special Operations", Do: needsTurnPlayed(gotoMenu(ipSpecial))},
 		{Key: '9', Label: "Gooie Kablooie Ops", Do: gooieKablooie, Hidden: noAnnihilator},
+		// IB's own (#268), keyed past the original's nine: what other planets have
+		// aimed at this one, counting down. The original has no such screen — its
+		// warnings are news lines, frozen at the moment they were written.
+		{Key: 'I', Label: "Incoming", Do: showIncoming},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'B', Label: "Trading", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
