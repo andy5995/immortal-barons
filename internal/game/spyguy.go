@@ -175,8 +175,16 @@ func groupAttackSpyLine(from string, g GroupAttack) string {
 // annihilatorSpyLine reports the state of the weapon being built for us.
 func annihilatorSpyLine(from string, d *Annihilator) string {
 	if d.Funded {
+		// Off the weapon's own instant, not off the build constant: a watcher
+		// posted after the funding reported a full three days every time. A
+		// record saved before launches carried an instant knows only whole days,
+		// so it keeps the old figure rather than being told "in 1 hours".
+		hours := AnnihilatorBuildDays * 24
+		if !d.LaunchAt.IsZero() {
+			hours = hoursUntil(d.LaunchAt)
+		}
 		return fmt.Sprintf("Our agent on %s reports their Gooie Kablooie is funded and launches in %d hours.",
-			from, AnnihilatorBuildDays*24)
+			from, hours)
 	}
 	return fmt.Sprintf("Our agent on %s reports work has begun on a Gooie Kablooie aimed at us.", from)
 }

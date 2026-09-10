@@ -95,6 +95,12 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	// overtaken by the recovery timer.
 	w.ReturnLostForces()
 	w.LaunchDueGroupAttacks()
+	// The weapon goes on the same step, for the same reason a group attack does:
+	// the planetary run happens several times a day, and a launch scheduled to
+	// the hour is a lie if only daily maintenance can fire it (#114 built it on
+	// maintenance alone). Maintenance still calls it, for a board that runs no
+	// planetary step at all.
+	w.LaunchDueAnnihilator()
 	w.ArriveAnnihilator() // a weapon whose flight is over lands before anything else moves
 	w.ExportScores()
 	w.ExportNodeList()

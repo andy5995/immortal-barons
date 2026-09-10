@@ -906,7 +906,14 @@ off the weapon still aimed at its new ally, over the builder's head (#45, built
 reaching its target is the whole trigger** (#114, built 2026-08-23). The funding
 routine stamps a launch date of `now + 3.0 days` (BRE.OVR 0x27a47, a Real48
 3.0) and reports the hours left — "Gooie Kablooie Complete. / Launch to <planet>
-in N hours. / Gooie is awaiting launch." No launch prompt exists anywhere in the
+in N hours. / Gooie is awaiting launch." **IB stamps the same instant** (`Annihilator.LaunchAt`), and did not until
+2026-09-10: it scheduled by whole game day, so the desk could only ever say 72,
+48, 24 or 0 hours, and said **0 for the whole of launch day** — the weapon's day
+had come but the launch waits for a run. The weapon now goes on the planetary
+run as well as at daily maintenance, for the reason a group attack does (the
+planetary step runs several times a day), and the desk counts down in the short
+form the Join Group Attack table uses. A record saved before the instant still
+launches on its game day. No launch prompt exists anywhere in the
 overlay, and *Dismantle Gooie* sits on the Coordinator Ops menu
 (`run_interbbs_operations_menu`) beside Modify Diplomacy and Global Recon
 Request, not on the weapon's own desk.

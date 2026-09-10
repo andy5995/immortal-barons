@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 // Annihilator is the planet's doomsday weapon — one at a time, funded
@@ -21,9 +22,18 @@ type Annihilator struct {
 	// Funded and Launched are explicit rather than inferred from their day
 	// fields: day 0 is a real game day, so a zero FundedDay cannot mean "not
 	// funded yet".
-	Funded      bool
-	FundedDay   int
-	LaunchDay   int // funding day + AnnihilatorBuildDays; it goes by itself (#114)
+	Funded    bool
+	FundedDay int
+	// LaunchAt is the instant the weapon goes. The original stamps a launch
+	// DATE-TIME of now + 3.0 days (BRE.OVR 0x27e47, a Real48) and announces the
+	// hours off it, so its figure is exact; IB scheduled by whole game day until
+	// this, which could only ever say 72, 48, 24 or 0 hours — and said 0 for the
+	// whole of launch day, since the launch waits for a run. Same fix, and the
+	// same reason, as GroupAttack.DepartAt (#124).
+	LaunchAt time.Time `json:",omitempty"`
+	// LaunchDay is the pre-instant field, kept so a world saved before the change
+	// still launches its weapon. Only read when LaunchAt is zero.
+	LaunchDay   int `json:",omitempty"`
 	Launched    bool
 	LaunchedDay int
 	ArrivesDay  int
@@ -33,6 +43,31 @@ type Annihilator struct {
 	// zero. Zero also means "not landed", which is why the flying weapon and the
 	// besieging one are never the same record — the target keeps its own.
 	DaysLeft int
+}
+
+// LaunchDue reports whether the weapon's hour has come. A record saved before
+// launches carried an instant has only the game day it was scheduled against.
+func (d *Annihilator) LaunchDue(now time.Time, gameDay int) bool {
+	if d.LaunchAt.IsZero() {
+		return gameDay >= d.LaunchDay
+	}
+	return !now.Before(d.LaunchAt)
+}
+
+// LaunchIn is what is left before the weapon goes, or 0 once its hour has come
+// (it then leaves on the next run). A record with no instant falls back to whole
+// days, which is all such a record knows.
+func (d *Annihilator) LaunchIn(now time.Time, gameDay int) time.Duration {
+	var left time.Duration
+	if d.LaunchAt.IsZero() {
+		left = time.Duration(d.LaunchDay-gameDay) * 24 * time.Hour
+	} else {
+		left = d.LaunchAt.Sub(now)
+	}
+	if left < 0 {
+		return 0
+	}
+	return left
 }
 
 var (
@@ -156,6 +191,7 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 		d.Funded = true
 		d.FundedDay = w.GameDay
 		d.LaunchDay = w.GameDay + AnnihilatorBuildDays
+		d.LaunchAt = timeNow().Add(AnnihilatorBuildDays * 24 * time.Hour)
 		w.postNews(fmt.Sprintf("The Gooie Kablooie is complete. It launches at %s in %d hours.",
 			d.TargetBoard, AnnihilatorBuildDays*24))
 		w.reportToSpy(d.TargetBoard, annihilatorSpyLine(w.Config.BoardID, d))
@@ -167,9 +203,13 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 // construction has run its AnnihilatorBuildDays. No baron decides this: the
 // original has no launch prompt anywhere, and funding reaching its target is the
 // whole trigger (#114). Run once a day from maintenance.
-func (w *World) LaunchDueAnnihilator() {
+func (w *World) LaunchDueAnnihilator() { w.LaunchDueAnnihilatorAt(timeNow()) }
+
+// LaunchDueAnnihilatorAt is LaunchDueAnnihilator against a given instant, for
+// tests and for a caller with a clock of its own.
+func (w *World) LaunchDueAnnihilatorAt(now time.Time) {
 	d := w.Annihilator
-	if d == nil || !d.Funded || d.Launched || w.GameDay < d.LaunchDay {
+	if d == nil || !d.Funded || d.Launched || !d.LaunchDue(now, w.GameDay) {
 		return
 	}
 	d.Launched = true

@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A funded Gooie Kablooie counts down to the hour it actually launches,
+    instead of reading "in 0 hours" for its whole last day
   * Creating or joining a group attack now asks to confirm after quoting the
     price, and every attack's confirmation defaults to No
   * Every time the game shows now says which time zone it is on, and each news

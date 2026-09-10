@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -783,12 +784,15 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 	case d.Funded:
 		// Nobody presses a button here: the weapon launches itself once
 		// construction has run, and only the Coordinator can stand it down (#114).
-		var hours int
-		w.Read(func() { hours = (d.LaunchDay - w.GameDay) * 24 })
-		if hours < 0 {
-			hours = 0
+		var left time.Duration
+		w.Read(func() { left = d.LaunchIn(time.Now(), w.GameDay) })
+		if left <= 0 {
+			// Its hour has come and it goes on the next run. "in 0 hours" was what
+			// this said for the whole of launch day, which is what sent us looking.
+			ok(s, "The Gooie Kablooie is complete and launches at %s on the next run.", d.TargetBoard)
+			break
 		}
-		ok(s, "The Gooie Kablooie is complete. It launches at %s in %d hours.", d.TargetBoard, hours)
+		ok(s, "The Gooie Kablooie is complete. It launches at %s in %s.", d.TargetBoard, shortDuration(left))
 	default:
 		millions := promptSuggested(s, "How many million gold do you wish to put in?", 0, d.CostMillion-d.PaidMillion)
 		if millions > 0 {

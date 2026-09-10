@@ -655,8 +655,10 @@ func TestGooieKablooieLifecycle(t *testing.T) {
 	if w.Annihilator.Launched {
 		t.Error("the weapon launched before construction finished")
 	}
+	// The clock, not the day counter: the launch is scheduled to an instant now
+	// (#114's day-grained schedule read "in 0 hours" for a whole day).
 	w.GameDay += AnnihilatorBuildDays
-	w.LaunchDueAnnihilator()
+	w.LaunchDueAnnihilatorAt(w.Annihilator.LaunchAt)
 	if !w.Annihilator.Launched {
 		t.Fatal("a finished weapon did not launch itself")
 	}
