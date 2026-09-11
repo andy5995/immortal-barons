@@ -5413,11 +5413,11 @@ checking IB against a capture:
   the heading above them. The entry menu's `Planetary time` is the one exception
   and stays on the board's clock, because its whole point is the host's own
   midnight, which the countdown beside it is measuring to.
-- **`Send this Attack?` defaults to No.** The original asks it after quoting the
-  price and defaults to yes. The quote is the first time a player sees the sum
-  and it can run to millions, so IB defaults the confirmation to no; it also asks
-  on all three attack paths, where it was reached only from the individual strike
-  until now. See "Force prompts and confirmation" in `docs/dev/bre-screens.md`.
+- **A cost confirmation defaults to No.** The original asks `Send this Attack?`
+  after quoting the price and defaults to yes. The quote is the first time a
+  player sees the sum and it can run to millions, so IB defaults every such
+  confirmation to no — the three attack paths (where it was reached only from the
+  individual strike until 2026-09-10) and the Special Operations send alike. See "Force prompts and confirmation" in `docs/dev/bre-screens.md`.
 - **The Join Group Attack table counts down in minutes and seconds near the
   end** (#269), where the original's `Leave` column prints whole hours however
   little is left. See "Join Group Attack" in `docs/dev/bre-screens.md`.

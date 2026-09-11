@@ -179,7 +179,10 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		}
 		cost := w.World.SpecialOpGoldCost(w.Player(), op)
 		okNoPause(s, "This operation will cost %s gold.", comma(cost))
-		if !askYesNoHere(s, "Send this Operation?", true) {
+		// Default NO, as every other prompt that spends a quoted sum does: an op
+		// runs to tens of millions and the quote above is the first time the
+		// player sees it.
+		if !askYesNoHere(s, "Send this Operation?", false) {
 			return Stay
 		}
 		err := w.mutatePlayer(func(p *game.Empire) error {
