@@ -650,8 +650,16 @@ Menu`), since there the word says where the item goes. The German and Russian
 catalogs had already dropped their "Menü"/"Меню" element for Diplomacy before
 this change.
 
+**IB's opening menu names the build above the title rule.** BRE puts its own
+name in the title rule itself, which IB cannot copy — `[Entry]` stands there
+instead — so the first header line reads `Immortal Barons  v<version>`, above
+`Game started on <date>`. It is drawn with the header rather than once per
+session: the opening menu is the screen a caller returns to from every submenu,
+and printing the version after the splash alone left every redraw after the
+first without it.
+
 **IB's opening menu carries a clock above the title rule; BRE's carries none.**
-A second header line under `Game started on <date>` reads `Planetary time: HH:MM
+A third header line under `Game started on <date>` reads `Planetary time: HH:MM
    New day in H:MM` — the door host's wall clock, marked with its zone (#267),
 and the time left of the game day, which turns at that host's local midnight.
 It is the one time on any screen that stays on the BOARD's clock whatever zone

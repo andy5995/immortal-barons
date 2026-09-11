@@ -853,8 +853,10 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		if m.Header != nil {
 			if h := m.Header(g); h != "" {
 				// Figures in bright-white against white body text, the same accent the
-				// footer uses.
-				fmt.Fprintf(&b, "%s%s%s\n", ansi.FgWhite, hiNumsReset(h, ansi.FgBrightWhite, ansi.FgWhite), ansi.Reset)
+				// footer uses. The blank line above it separates the header from
+				// whatever answered the last prompt, which otherwise sits directly
+				// against it.
+				fmt.Fprintf(&b, "\n%s%s%s\n", ansi.FgWhite, hiNumsReset(h, ansi.FgBrightWhite, ansi.FgWhite), ansi.Reset)
 			}
 		}
 		// The item block is built FIRST and the rules sized from it: a box has to

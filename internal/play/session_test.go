@@ -42,11 +42,13 @@ type drainSpySession struct {
 
 func (d *drainSpySession) DrainInput() { d.drained = true }
 
-// TestPreMenuBannerNamesTheBuild pins where the program name and version are
-// stated: under the maintenance notice, above the opening menu's "Game started
-// on" header. The order is what the test is for — the two neighbors are
-// printed by different packages, so nothing else holds them in sequence.
-func TestPreMenuBannerNamesTheBuild(t *testing.T) {
+// TestOpeningMenuNamesTheBuild pins the version to the opening menu's HEADER,
+// above "Game started on", rather than to a one-off line printed after the
+// splash: a caller returning from any submenu redraws the header and nothing
+// else, which is what used to leave the version showing on the first screen
+// only. Escapes are stripped because the header highlights digit runs, which
+// splits the version string.
+func TestOpeningMenuNamesTheBuild(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorldSeed(cfg, 1)
 	w.StartedDate = "2026-08-27"
@@ -54,18 +56,21 @@ func TestPreMenuBannerNamesTheBuild(t *testing.T) {
 	if _, err := Session(f, Identity{Handle: "Khan"}, w, cfg, "", game.MaintReport{}, func() error { return nil }); err != nil {
 		t.Fatal(err)
 	}
-	out := f.out.String()
+	out := ansiEsc.ReplaceAllString(f.out.String(), "")
 	// Reached the opening menu, not just "produced some output".
 	if !strings.Contains(out, "Today's News") || !strings.Contains(out, "Game started on") {
 		t.Fatalf("never reached the opening menu:\n%s", out)
 	}
-	maint := strings.Index(out, "Maintenance has already been run today.")
 	banner := strings.Index(out, game.NameVersion())
 	started := strings.Index(out, "Game started on")
-	if maint < 0 || banner < 0 {
-		t.Fatalf("maint notice at %d, %q at %d:\n%s", maint, game.NameVersion(), banner, out)
+	if banner < 0 {
+		t.Fatalf("%q is missing from the opening menu:\n%s", game.NameVersion(), out)
 	}
-	if !(maint < banner && banner < started) {
-		t.Fatalf("want maintenance(%d) < version(%d) < game-started(%d)", maint, banner, started)
+	if banner > started {
+		t.Errorf("want the version(%d) above game-started(%d)", banner, started)
+	}
+	// Drawn with the header, so it comes back on every redraw of the menu.
+	if n := strings.Count(out, game.NameVersion()); n != strings.Count(out, "Game started on") {
+		t.Errorf("version appears %d times, the header %d", n, strings.Count(out, "Game started on"))
 	}
 }

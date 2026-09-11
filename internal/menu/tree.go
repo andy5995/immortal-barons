@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -686,9 +687,14 @@ func foodMarketStatus(w *ctx) string {
 	return fmt.Sprintf(i18n.T(lang, "%s  You have %s gold."), supply, formatGold(w.Player().Gold, lang))
 }
 
-// gameMenuStatus is the line ABOVE the opening menu's title rule, where BRE puts
-// it. The game day is deliberately absent — BRE does not show it there, and it
-// used to sit in a footer under the menu.
+// gameMenuStatus is the block ABOVE the opening menu's title rule, where BRE
+// puts it. The game day is deliberately absent — BRE does not show it there, and
+// it used to sit in a footer under the menu.
+//
+// The build is named on its first line because the opening menu is the one
+// screen a caller always comes back to: printing it once per session instead
+// left every redraw after the first without it, which reads as the version
+// coming and going.
 //
 // It reports World.StartedDate, the day the game actually began, NOT
 // Config.GameStartDate: the latter is the date a sysop scheduled the game for
@@ -697,20 +703,21 @@ func foodMarketStatus(w *ctx) string {
 // the game begins instead.
 func gameMenuStatus(w *ctx) string {
 	lang := playerLang(w)
-	if d := w.Config.GameStartDate; d != "" && w.Today != "" && !w.Config.GameStarted(w.Today) {
-		return fmt.Sprintf(i18n.T(lang, "The game begins %s."), d)
+	lines := []string{game.NameVersion()}
+	switch {
+	case w.Config.GameStartDate != "" && w.Today != "" && !w.Config.GameStarted(w.Today):
+		lines = append(lines, fmt.Sprintf(i18n.T(lang, "The game begins %s."), w.Config.GameStartDate))
+	case w.StartedDate == "":
+		// No maintenance has run yet, so the game has not begun.
+	default:
+		lines = append(lines, fmt.Sprintf(i18n.T(lang, "Game started on %s"), w.StartedDate))
+		// Its own line: one row would run past 80 columns in German or Russian,
+		// and the header is not wrapped.
+		if clock := planetaryClock(time.Now(), w.Today, lang); clock != "" {
+			lines = append(lines, clock)
+		}
 	}
-	if w.StartedDate == "" {
-		return "" // no maintenance has run yet, so the game has not begun
-	}
-	started := fmt.Sprintf(i18n.T(lang, "Game started on %s"), w.StartedDate)
-	clock := planetaryClock(time.Now(), w.Today, lang)
-	if clock == "" {
-		return started
-	}
-	// Its own line: one row would run past 80 columns in German or Russian, and
-	// the header is not wrapped.
-	return started + "\n" + clock
+	return strings.Join(lines, "\n")
 }
 
 // planetaryClock reports the door host's wall clock and how long is left of the
