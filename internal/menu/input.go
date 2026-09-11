@@ -45,30 +45,10 @@ func readKey(s session.Session) (rune, error) {
 // its default. A no-op for sessions with no input buffer (web, test fakes).
 func drainInput(s session.Session) { session.Drain(s) }
 
-// consumeEscape drains the rest of a terminal escape sequence after an ESC:
-// a CSI "ESC [ … final" (arrows ABCD, PgUp/PgDn/Home/End as "…~", etc.) or an
-// SS3 "ESC O x" (arrows in application mode). Best-effort; a stream error just
-// stops (the caller's next read surfaces it). A lone ESC keypress has no trailing
-// bytes, so this consumes the following keystroke — an accepted trade-off, since
-// arrow/navigation keys always arrive as a full burst and a bare ESC is rare in
-// menu navigation.
-func consumeEscape(s session.Session) {
-	r, err := s.ReadKey()
-	if err != nil {
-		return
-	}
-	switch r {
-	case '[': // CSI: read until a final byte in 0x40–0x7E ('A'..'D', '~', 'H', 'F', …)
-		for {
-			c, err := s.ReadKey()
-			if err != nil || (c >= 0x40 && c <= 0x7e) {
-				return
-			}
-		}
-	case 'O': // SS3: exactly one more byte
-		s.ReadKey()
-	}
-}
+// consumeEscape drains the rest of a terminal escape sequence after an ESC.
+// The knowledge lives in session.ConsumeEscape, because the line reader down
+// there meets the same bytes and used to take them as typed text.
+func consumeEscape(s session.Session) { session.ConsumeEscape(s) }
 
 // Navigation keys returned by readNavKey.
 const (

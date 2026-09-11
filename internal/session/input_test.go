@@ -121,3 +121,29 @@ func TestMacroExpanderForwardsTheCharset(t *testing.T) {
 		t.Error("the cursor column did not reach through the macro expander")
 	}
 }
+
+// A terminal's escape sequences must never reach the field as text. A click in
+// SyncTERM sends an X10 mouse report — ESC [ M and three printable coordinate
+// bytes — and the reader used to drop the ESC (it is below 32) and take the rest
+// as typed characters.
+func TestReadLineSwallowsEscapeSequences(t *testing.T) {
+	for _, c := range []struct {
+		name string
+		keys []rune
+	}{
+		{"mouse report", []rune{0x1b, '[', 'M', ' ', '!', '!'}},
+		{"arrow key", []rune{0x1b, '[', 'A'}},
+		{"application arrow", []rune{0x1b, 'O', 'B'}},
+		{"function key", []rune{0x1b, '[', '1', '5', '~'}},
+	} {
+		keys := append([]rune("No"), c.keys...)
+		keys = append(keys, []rune("va\r")...)
+		got, err := ReadLine(&scriptedKeys{keys: keys})
+		if err != nil {
+			t.Fatalf("%s: %v", c.name, err)
+		}
+		if got != "Nova" {
+			t.Errorf("%s: read %q, want Nova", c.name, got)
+		}
+	}
+}

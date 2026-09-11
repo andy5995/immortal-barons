@@ -253,7 +253,11 @@ func readCompletingAnswer(s session.Session, match func(string) (string, int), f
 		settle()
 	}
 	for {
-		r, err := s.ReadKey()
+		// readKey, not the session's own: it swallows escape sequences, and this
+		// prompt used to take their tails as typed text. A click in SyncTERM sends
+		// a mouse report, and its three coordinate bytes are printable — they went
+		// into the field, repeatedly, with no way to clear them.
+		r, err := readKey(s)
 		if err != nil {
 			return string(shown), err
 		}
@@ -268,6 +272,9 @@ func readCompletingAnswer(s session.Session, match func(string) (string, int), f
 				typed = typed[:len(typed)-1]
 				settle()
 			}
+		case r == session.KillLine: // Ctrl-U: start the answer again
+			typed = typed[:0]
+			settle()
 		case r >= 32:
 			typed = append(typed, r)
 			settle()

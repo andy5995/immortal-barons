@@ -157,6 +157,51 @@ func (e *Editor) Reset() { e.runes, e.cols = e.runes[:0], e.cols[:0] }
 // this rune outright for the same reason it refuses Backspace and Enter.
 const KillLine = 21
 
+// ConsumeEscape drains the rest of a terminal escape sequence after an ESC has
+// been read: a CSI "ESC [ … final" (arrows ABCD, PgUp/PgDn/Home/End as "…~"), or
+// an SS3 "ESC O x" (arrows in application mode). Best-effort; a stream error just
+// stops, and the caller's next read surfaces it. A lone ESC keypress has no
+// trailing bytes, so this consumes the following keystroke — an accepted
+// trade-off, since navigation keys always arrive as a full burst and a bare ESC
+// is rare.
+//
+// An X10 MOUSE REPORT is the one CSI whose final byte is not the end of it:
+// "ESC [ M" is followed by exactly three bytes — button, column, row — each an
+// ordinary printable. Stopping at the M leaves those three in the stream and the
+// reader takes them as typed characters. A stray click in SyncTERM filled a
+// planet prompt with `[M` and three more, over and over, and nothing on that
+// screen could clear it.
+func ConsumeEscape(s Session) {
+	r, err := s.ReadKey()
+	if err != nil {
+		return
+	}
+	switch r {
+	case '[': // CSI: read until a final byte in 0x40–0x7E
+		first := true
+		for {
+			c, err := s.ReadKey()
+			if err != nil {
+				return
+			}
+			if first && c == 'M' { // mouse report: three coordinate bytes follow
+				for range 3 {
+					if _, err := s.ReadKey(); err != nil {
+						return
+					}
+				}
+				return
+			}
+			first = false
+			if c >= 0x40 && c <= 0x7e {
+				return
+			}
+		}
+	case 'O': // SS3: exactly one more byte
+		s.ReadKey()
+	}
+}
+
 // ReadLine reads a line of input terminated by Enter, echoing keystrokes
 // (the console runs in no-echo mode). Backspace/DEL erase the last rune and
 // Ctrl-U the whole line.
@@ -183,6 +228,8 @@ func ReadLineFrom(s Session, typed []rune) (string, error) {
 			e.Backspace()
 		case KillLine:
 			e.Kill()
+		case 0x1b: // an escape sequence: swallow it whole, never echo its tail
+			ConsumeEscape(s)
 		default:
 			if r >= 32 && e.Len() < LineMaxRunes {
 				e.Put(r)
