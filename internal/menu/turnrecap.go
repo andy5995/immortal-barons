@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -231,10 +232,18 @@ func readTurnMail(s session.Session, w *ctx, announceEmpty bool) {
 	mailReader(s, w, true)
 }
 
-// manufacturedUnits lists what the Industrial Zones built this turn, one unit
-// type per line under a heading, and nothing at all on a turn that built
-// nothing. A type that produced none is left out, as every other line of this
-// report is.
+// manufacturedUnits lists what the Industrial Zones built this turn, as the
+// bracketed cells the Empire Status block draws its Military row with — the
+// figure and the unit in one cell, three to a line, the rest indented under the
+// first bracket. It drew one line per unit type until 2026-09-10, which spent
+// six lines of a screen the player reads every turn on six figures.
+//
+// A type that produced none is left out, as every other line of this report is,
+// and a turn that built nothing prints nothing at all.
+//
+// The block sits between two short rules, the same divider the gold total is
+// drawn under, because it is the one part of the income report that is not
+// gold and it now runs across rather than down.
 //
 // This is a DELIBERATE DIVERGENCE from the original, which ends every one of
 // those lines with "were manufactured by Industrial Zones." — five words
@@ -242,16 +251,7 @@ func readTurnMail(s session.Session, w *ctx, announceEmpty bool) {
 // docs/dev/bre-screens.md and docs/mechanics-reference.md; do not "fix" it back
 // to match a capture.
 func manufacturedUnits(s session.Session, made []int) {
-	width := 0
-	for _, n := range made {
-		if w := len(comma(n)); n > 0 && w > width {
-			width = w
-		}
-	}
-	if width == 0 {
-		return
-	}
-	fmt.Fprintf(s, "\n  %s\n", tr(s, "Your Industrial Zones built:"))
+	var cells []statusItem
 	for i, g := range game.MilitaryGoods {
 		if made[i] == 0 {
 			continue
@@ -260,8 +260,22 @@ func manufacturedUnits(s session.Session, made []int) {
 		if made[i] == 1 {
 			name = g.Singular
 		}
-		fmt.Fprintf(s, "    %s%*s%s  %s\n", ansi.FgBrightCyan, width, comma(made[i]), ansi.Reset, tr(s, name))
+		cells = append(cells, statusCell(comma(made[i]), tr(s, name)))
 	}
+	if len(cells) == 0 {
+		return
+	}
+	// The label is laid out plain and coloured on the way out: statusRows
+	// measures it with a rune count, which an escape sequence would inflate.
+	label := tr(s, "Your Industrial Zones built:") + " "
+	bar := strings.Repeat("─", utf8.RuneCountInString(label))
+	indent := strings.Repeat(" ", utf8.RuneCountInString(label)+2)
+
+	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, bar, ansi.Reset)
+	for _, l := range statusRows("  "+label, indent, cells, statusMilitaryPerLine) {
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, l, ansi.Reset)
+	}
+	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, bar, ansi.Reset)
 }
 
 // incomeReport itemizes p's per-turn income by source. It shows exactly the
@@ -343,11 +357,9 @@ func incomeReport(s session.Session, w *ctx) {
 	// manufacturing figures (cap/eots-ibbs-01.cap). BRE prints no interest line at
 	// all; the wording is IB's own, in the style of the lines above it.
 	if interest > 0 || invested > 0 {
-		// A blank line ahead of them, as with the raid notices below: what the
-		// realm PRODUCED and what the bank paid are two different things, and the
-		// unit list right above ends in an indented column of its own. BRE runs
-		// its investment line straight on from the production lines.
-		fmt.Fprintln(s)
+		// No blank line: the production block closes on a rule of its own, which
+		// already separates what the realm produced from what the bank paid. BRE
+		// runs its investment line straight on from the production lines too.
 		if interest > 0 {
 			amt(ansi.FgBrightCyan, interest, "gold was earned in bank interest.")
 		}

@@ -958,9 +958,13 @@ below. Nothing closes the maintenance lines — the pause follows them directly.
 The rules are omitted from the block below only to keep the field list readable.
 
 **Deliberate divergence:** BRE ends each manufacturing line with "were
-manufactured by Industrial Zones." IB says that once, as a heading, and lists
-the units under it — one per line, figure first, and no line for a type that
-built none.
+manufactured by Industrial Zones." IB says that once, as a label, and lays the
+units out ACROSS the line as bracketed `[899 Troopers]` cells — the Empire
+Status block's own Military row, three to a line with the rest indented under
+the first bracket — between two short blue rules. A type that built none is left
+out, and a turn that built nothing prints nothing. It was one line per unit type
+until 2026-09-10, which spent six lines of a screen the player reads every turn
+on six figures.
 
 **The bank's returns close the block.** After the manufacturing lines BRE prints
 `N gold was earned from investment returns.` — the day's matured investments, and

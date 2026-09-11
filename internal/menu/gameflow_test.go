@@ -1139,7 +1139,7 @@ func TestManufacturedUnitsAreListedOnce(t *testing.T) {
 		if strings.Contains(line, "Industrial Zones built") {
 			built++
 		}
-		if strings.Contains(line, " 0  ") {
+		if strings.Contains(line, "[0 ") {
 			t.Errorf("a unit type that built none should be left out: %q", line)
 		}
 		if n := len([]rune(line)); n > 80 {
@@ -1149,11 +1149,24 @@ func TestManufacturedUnitsAreListedOnce(t *testing.T) {
 	if built != 1 {
 		t.Errorf("manufacturing opened %d lines, want 1:\n%s", built, out)
 	}
-	if !strings.Contains(out, "1  Carrier\n") {
+	if !strings.Contains(out, "[1 Carrier]") {
 		t.Errorf("a count of one should take the singular name:\n%s", out)
 	}
-	if strings.Contains(out, "1 Carriers") {
+	if strings.Contains(out, "[1 Carriers]") {
 		t.Errorf("plural on a count of one:\n%s", out)
+	}
+	// The cells wrap under the label rather than running off the screen, which a
+	// realm with big figures in every unit type is what proves.
+	f2 := &fakeSession{keys: []rune(" ")}
+	w2 := newWorld()
+	p2 := w2.Player()
+	p2.Regions.Industrial = 400_000
+	w2.World.Manufacture(p2)
+	incomeReport(f2, w2)
+	for _, line := range strings.Split(stripANSI(f2.out.String()), "\n") {
+		if n := len([]rune(line)); n > 80 {
+			t.Errorf("a big producer runs to %d columns: %q", n, line)
+		}
 	}
 }
 

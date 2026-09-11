@@ -5476,9 +5476,11 @@ checking IB against a capture:
 - **An interplanetary trade deal is refused at the picker when its target is
   under New Realm Protection**, where the original accepts it and destroys it on
   arrival with nobody told. See "Send Trade Deal" above.
-- **Manufacturing is a list, not six sentences.** BRE ends each line with "were
-  manufactured by Industrial Zones."; IB says that once as a heading and lists
-  the units under it, one per line, with no line for a type that built none.
+- **Manufacturing is a row of cells, not six sentences.** BRE ends each line
+  with "were manufactured by Industrial Zones."; IB says that once as a label and
+  lays the figures across the line as the Empire Status block's bracketed
+  `[899 Troopers]` cells, between two short rules, with nothing shown for a type
+  that built none.
 - **Daily maintenance names IB's own tasks.** The shape is BRE's — a marked
   header, an indented line per task as it is carried out, a bright closing
   line — but the tasks are IB's, in IB's words, and only the ones with something

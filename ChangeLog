@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * What the Industrial Zones built is listed across two lines in the bracketed
+    form the status screen uses, instead of one line per unit type
   * InterPlanetary menu: "Incoming" lists the group attacks and Gooie Kablooies
     aimed at this planet, counting down as you read
   * A funded Gooie Kablooie counts down to the hour it actually launches,
