@@ -1418,3 +1418,36 @@ func TestEnsureAttackSlotsNumbersALegacyWorld(t *testing.T) {
 		}
 	}
 }
+
+// KnownBoards and ScoredBoards are different sets, and an action that needs a
+// baron by name needs the second. A planet reaches the roster when the
+// Coordinator lists it and can be addressed from then on; its scores arrive only
+// when it next exchanges packets, so a freshly listed planet is known and
+// unscored.
+func TestScoredBoardsIsNotKnownBoards(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID = true, "Alpha"
+	w := NewWorldSeed(cfg, 1)
+	w.LeagueNodes = []LeagueNode{
+		{Number: 1, Name: "Alpha"},
+		{Number: 2, Name: "Listed"},  // on the roster, never heard from
+		{Number: 3, Name: "Talking"}, // on the roster and exchanging
+	}
+	w.ImportBoard(RemoteBoard{BoardID: "Talking",
+		Scores: []RemoteScore{{Empire: "Victim", Land: 50}}})
+
+	known := w.KnownBoards()
+	if len(known) != 2 || !contains(strings.Join(known, ","), "Listed") {
+		t.Errorf("KnownBoards = %v, want both other planets", known)
+	}
+	scored := w.ScoredBoards()
+	if len(scored) != 1 || scored[0] != "Talking" {
+		t.Errorf("ScoredBoards = %v, want only the planet that has sent scores", scored)
+	}
+	// And this board is never in either: a packet is not addressed to itself.
+	for _, name := range append(known, scored...) {
+		if name == "Alpha" {
+			t.Errorf("this board appears in its own planet list: %v / %v", known, scored)
+		}
+	}
+}

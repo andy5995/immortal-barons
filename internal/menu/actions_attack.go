@@ -820,11 +820,7 @@ func startAnnihilator(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var boards []string
-	w.Read(func() {
-		for _, b := range w.RemoteBoards {
-			boards = append(boards, b.BoardID)
-		}
-	})
+	w.Read(func() { boards = w.ScoredBoards() })
 	if noScoredPlanets(s, len(boards)) {
 		return Stay
 	}

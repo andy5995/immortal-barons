@@ -397,6 +397,24 @@ func (w *World) KnownBoards() []string {
 	return boards
 }
 
+// ScoredBoards names every planet this board holds SCORES for — the realms on
+// it are known by name, so it can be attacked, terrorised, traded with or
+// messaged by baron.
+//
+// This is a SMALLER set than KnownBoards and the difference matters. A planet
+// reaches the roster the moment the Coordinator lists it, and can be addressed
+// from then on; its scores arrive only when it next exchanges packets. So a
+// freshly listed planet is known and unscored, and an action that needs a baron
+// there has nobody to offer. Three screens derived this set by hand, which said
+// nothing about why it differed from the other one.
+func (w *World) ScoredBoards() []string {
+	boards := make([]string, 0, len(w.RemoteBoards))
+	for _, b := range w.RemoteBoards {
+		boards = append(boards, b.BoardID)
+	}
+	return boards
+}
+
 // VoteCoordinator records voter's vote for the empire owned by forOwner to be
 // the BBS Coordinator.
 func (w *World) VoteCoordinator(voter *Empire, forOwner string) {

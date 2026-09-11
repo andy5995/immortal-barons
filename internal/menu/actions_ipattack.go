@@ -31,8 +31,8 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	var boards []string
 	scores := map[string][]remoteBaron{}
 	w.Read(func() {
+		boards = w.ScoredBoards()
 		for _, b := range w.RemoteBoards {
-			boards = append(boards, b.BoardID)
 			scores[b.BoardID] = remoteBarons(b.Scores)
 		}
 	})
@@ -320,9 +320,9 @@ func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, ref
 	var boards []string
 	var scores map[string][]remoteBaron
 	w.Read(func() {
+		boards = w.ScoredBoards()
 		scores = map[string][]remoteBaron{}
 		for _, b := range w.RemoteBoards {
-			boards = append(boards, b.BoardID)
 			scores[b.BoardID] = remoteBarons(b.Scores)
 		}
 	})

@@ -139,11 +139,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 			// market, its trading market, its bank — so there is no baron to
 			// name and asking for one would be asking a question with no answer.
 			var boards []string
-			w.Read(func() {
-				for _, b := range w.World.RemoteBoards {
-					boards = append(boards, b.BoardID)
-				}
-			})
+			w.Read(func() { boards = w.ScoredBoards() })
 			if noPlanets(s, len(boards)) {
 				return Stay
 			}
