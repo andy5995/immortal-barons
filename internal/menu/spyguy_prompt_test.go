@@ -76,7 +76,9 @@ func TestSpyGuyStillShortIsRefused(t *testing.T) {
 	if !strings.Contains(out, "gold more than you have in hand") {
 		t.Fatalf("the shortfall was not named:\n%s", out)
 	}
-	if !strings.Contains(out, game.ErrCantAfford.Error()) {
+	// The refusal is the ops menu's, printed before the bank is offered rather
+	// than by the send failing afterwards.
+	if !strings.Contains(out, game.ErrCantAffordOp.Error()) {
 		t.Errorf("the send was not refused:\n%s", out)
 	}
 	var sent bool

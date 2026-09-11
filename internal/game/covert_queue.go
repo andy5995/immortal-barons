@@ -45,9 +45,11 @@ func (w *World) queueCovertOp(a, d *Empire, op CovertOp, partner string) {
 }
 
 // covertSent is what the attacker is told at the menu, in place of a result: the
-// agent has gone, and the outcome arrives on the recap after maintenance.
+// agent has gone, and the outcome arrives on the recap after maintenance. The
+// original's own wording, which names no target — the agent leaving is the whole
+// of what it reports.
 func covertSent(d *Empire) string {
-	return fmt.Sprintf("Your agent has set out for %s.", d.Name)
+	return "Covert Agent Sent out"
 }
 
 // resolveCovertQueue drains every agent in the field, as BRE's daily maintenance

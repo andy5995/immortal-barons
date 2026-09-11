@@ -77,10 +77,10 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	if days < 1 {
 		return Stay
 	}
-	// A trip to the bank can change the answer, so what he costs is measured
-	// again on the way out and the send is what decides it.
-	if short := spyGuyShortfall(w, perDay, days); short > 0 {
-		offerBank(s, w, short)
+	// The same helper every other op on this menu uses: the refusal, the bank,
+	// and then the stay if they came back with the gold for it.
+	if !affordOrBank(s, w, perDay*int64(days), game.ErrCantAffordOp) {
+		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.SendSpyGuy(p, board, days)
@@ -91,21 +91,6 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	}
 	ok(s, "Your SpyGuy leaves for %s, and will watch it for %d days.", board, days)
 	return Stay
-}
-
-// spyGuyShortfall is what the stay costs beyond the gold in hand, or 0 when it
-// is covered. Read fresh, since another node may have moved this realm's gold.
-func spyGuyShortfall(w *ctx, perDay int64, days int) int64 {
-	var gold int64
-	w.Read(func() {
-		if p := w.Player(); p != nil {
-			gold = p.Gold
-		}
-	})
-	if short := perDay*int64(days) - gold; short > 0 {
-		return short
-	}
-	return 0
 }
 
 // ipSpecialOp drives every item on the interplanetary Special Operations menu
@@ -185,6 +170,11 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		if !askYesNoHere(s, "Send this Operation?", false) {
 			return Stay
 		}
+		// Accepted but short: the refusal, then the bank, rather than the send
+		// simply failing at a price the player has just agreed to.
+		if !affordOrBank(s, w, cost, game.ErrCantAffordOp) {
+			return Stay
+		}
 		err := w.mutatePlayer(func(p *game.Empire) error {
 			return w.World.SendSpecialOp(p, board, baron, op, dial)
 		})
@@ -254,15 +244,24 @@ func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
 		fail(s, game.ErrTerrorOpsExhausted)
 		return Stay
 	}
-	agents := promptSuggested(s, "How many agents to send?", most, most)
+	// The original's own wording for the three lines of a dispatch — the count,
+	// the price, and what went. They are prompts and labels rather than prose:
+	// short, functional, and dictated by what is being asked (see AGENTS.md on
+	// where that line falls).
+	agents := promptSuggested(s, "Send how many?", most, most)
 	if agents <= 0 {
 		return Stay
 	}
-	// BRE prices the op on the menu itself; quote the whole charge here, since it
-	// climbs with the launcher's own region count and with the ops already sent
-	// today, and is easy to be surprised by.
-	okNoPause(s, "This operation will cost %s gold.", comma(w.TerrorOpGoldCost(w.Player(), agents)))
-	if !askYesNoHere(s, "Send this Operation?", true) {
+	// BRE prices the op on the menu itself and quotes the whole charge here too,
+	// since it climbs with the launcher's own region count and with the ops
+	// already sent today, and is easy to be surprised by.
+	cost := w.TerrorOpGoldCost(w.Player(), agents)
+	if !askYesNoHere(s, fmt.Sprintf(tr(s, "This will cost you %s gold.  Accept?"), comma(cost)), false) {
+		return Stay
+	}
+	// Accepted but short: the bank is opened here rather than the send simply
+	// being refused, and the refusal follows only if they come back no richer.
+	if !affordOrBank(s, w, cost, game.ErrCantAffordOp) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
@@ -272,7 +271,7 @@ func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "Your %s agents depart for %s on %s.", op, baron, board)
+	ok(s, "%s %s sent out.", comma(agents), agentWord(s, agents))
 	return Stay
 }
 
@@ -309,4 +308,13 @@ func opPrice(op game.SpecialOp) func(*ctx) int {
 		}
 		return int(w.SpecialOpGoldCost(p, op))
 	}
+}
+
+// agentWord is "agent" or "agents", which the original picks the same way: the
+// singular is the stem and the plural takes the "s".
+func agentWord(s session.Session, n int) string {
+	if n == 1 {
+		return tr(s, "agent")
+	}
+	return tr(s, "agents")
 }

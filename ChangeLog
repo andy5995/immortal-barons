@@ -1,6 +1,9 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Covert and terror operations ask, price and confirm in the original's own
+    words, and every operation — the SpyGuy's stay included — offers the bank
+    when you cannot afford what you just agreed to
   * Game Setup shows how many transport faults a board has recorded, and a
     player addressing a planet nothing has come back from is told so
   * Selling units pays exactly the price the Sell menu quotes, for each unit

@@ -578,6 +578,13 @@ func okNoPause(s session.Session, format string, a ...any) {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, WrapIndented(msg, "  "), ansi.Reset)
 }
 
+// failNoPause prints a refusal without waiting on a key, for the caller that
+// asks a question straight after it (affordOrBank).
+func failNoPause(s session.Session, err error) {
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+		wrapHanging(i18n.T(sessionLang(s), err.Error()), "  ! ", "    "), ansi.Reset)
+}
+
 func fail(s session.Session, err error) {
 	// The "!" is what tells a failure from a success on a terminal that shows no
 	// colour, or to a reader who cannot tell this red from the white above it.

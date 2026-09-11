@@ -30,7 +30,7 @@ func runCovertAction(t *testing.T, w *ctx, p *game.Empire, action func(session.S
 		t.Fatalf("covert action returned %v, want Stay", res)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "has set out for") {
+	if !strings.Contains(out, "Sent out") {
 		t.Fatalf("the action never reached its acknowledgement screen, got:\n%s", out)
 	}
 	return out
@@ -145,8 +145,10 @@ func TestDemoralizeForcesQueuesAgainstTheChosenTarget(t *testing.T) {
 	target.Morale = 100
 
 	out := runCovertAction(t, w, p, covertAction(game.OpDemoralizeForces))
-	if !strings.Contains(out, target.Name) {
-		t.Errorf("the acknowledgement should name the chosen target %q: %s", target.Name, out)
+	// The acknowledgement is the original's and names nobody; the queue below is
+	// what proves the op went against the realm chosen.
+	if !strings.Contains(out, "Sent out") {
+		t.Errorf("the action never reached its acknowledgement screen, got: %s", out)
 	}
 	rec := queuedOp(t, w)
 	if rec.Op != game.OpDemoralizeForces || rec.Target != target.Name || rec.Attacker != p.Name {
@@ -289,7 +291,7 @@ func TestCovertMenuClosesWhenTheLastAgentIsSpent(t *testing.T) {
 	}
 	out := stripANSI(f.out.String())
 	// It reached the operation: the agent went out and was spent.
-	if !strings.Contains(out, "has set out for") {
+	if !strings.Contains(out, "Sent out") {
 		t.Fatalf("the first operation never ran:\n%s", out)
 	}
 	if p.Agents != 0 {
@@ -419,7 +421,7 @@ func TestCovertOpSendsSeveralAgentsAtOnce(t *testing.T) {
 		t.Fatalf("covert action returned %v, want Stay", res)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "How many agents to send?") {
+	if !strings.Contains(out, "Send how many?") {
 		t.Fatalf("never reached the count prompt:\n%s", out)
 	}
 	if len(w.CovertQueue) != 3 {
@@ -436,7 +438,7 @@ func TestCovertOpSendsSeveralAgentsAtOnce(t *testing.T) {
 	if p.CovertOpsToday[game.OpDemoralizeForces] != 3 {
 		t.Errorf("the day's allowance should be down 3, got %v", p.CovertOpsToday)
 	}
-	if !strings.Contains(stripANSI(out), "3 agents have set out") {
+	if !strings.Contains(stripANSI(out), "3 agents sent out.") {
 		t.Errorf("the acknowledgement should report the count:\n%s", out)
 	}
 }

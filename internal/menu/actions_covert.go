@@ -132,11 +132,22 @@ func sendAgents(s session.Session, w *ctx, row covertRow) Result {
 		case w.CovertOpsLeft(p, row.Op) < 1:
 			fail(s, game.ErrCovertCapReached)
 		default:
-			fail(s, game.ErrCantAfford)
+			// Short of gold, and the only one of the three a player can fix where
+			// they stand: the refusal, then the bank. The price of ONE agent is
+			// what is asked for, since that is the smallest send there is. The
+			// target picked above stands — coming back from the bank must not
+			// mean choosing it again.
+			if !affordOrBank(s, w, int64(row.Cost), game.ErrCantAffordCovert) {
+				return Stay
+			}
+			avail = agentsAvailable(w, row)
 		}
-		return Stay
+		if avail < 1 {
+			return Stay
+		}
 	}
-	n := promptSuggested(s, "How many agents to send?", avail, avail)
+	// The original's prompt, as on the interplanetary side.
+	n := promptSuggested(s, "Send how many?", avail, avail)
 	if n <= 0 {
 		return Stay
 	}
@@ -167,7 +178,7 @@ func sendAgents(s session.Session, w *ctx, row covertRow) Result {
 		return Stay
 	}
 	if sent > 1 {
-		report = fmt.Sprintf(tr(s, "%d agents have set out for %s."), sent, name)
+		report = fmt.Sprintf(tr(s, "%d agents sent out."), sent)
 	}
 	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
 	if err != nil {

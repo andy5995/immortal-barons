@@ -2,10 +2,25 @@
 
 Immortal Barons is a from-scratch Go clone of the 1990s BBS door game
 *Barren Realms Elite* (BRE). It is an independent reimplementation of the
-game's rules and mechanics — no original code, text, or art is used. Do not
-copy verbatim display text/art from the original into this repo, and never
-put John Dailey's (or any third party's) private contact info into any
-artifact here.
+game's rules and mechanics — no original code or art is used, and its prose is
+its own. Never put John Dailey's (or any third party's) private contact info
+into any artifact here.
+
+**Where the line on the original's TEXT falls.** Its *prose* is not reused:
+news lines, result reports, help and instruction text, flavour and narration are
+all written here. What may match the original word for word is the **functional
+furniture of a screen** — a question prompt, a field label, a menu item, a short
+refusal — because those are dictated by what is being asked rather than by how
+anyone chose to say it, and because IB's own versions were already all but
+identical. The covert and terror operation menus were aligned that way on
+2026-09-11 (`Send how many?`, `This will cost you N gold.  Accept?`,
+`N agents sent out.`, and the two menus' own refusals).
+
+Two things this does NOT license, and both have bitten before: **code or art**
+(source, decompiled routines, ANSI screens, logos) stays out entirely, and the
+original's **product name** never goes on an IB screen — see below. When in
+doubt about a string, ask: is this the game asking a question, or the game
+telling a story? The first may match; the second is ours.
 
 **Never put the original's NAME on IB's own screens.** Cloning a captured screen
 copies its layout and colours; the product name in its header is branding, not

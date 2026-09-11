@@ -195,12 +195,17 @@ func bankRates(s session.Session, w *ctx) Result {
 // The original does none of this: its prompts simply cap what they offer at what
 // the gold covers, so a short baron is never told there is more to be had. See
 // docs/mechanics-reference.md.
-func offerBank(s session.Session, w *ctx, short int64) {
+// It reports whether the player actually went in, which decides whether the
+// caller says anything more: someone who declined has the refusal a line above
+// them and needs no second telling, while someone who walked into the bank and
+// back has a screen of bank menu between them and it.
+func offerBank(s session.Session, w *ctx, short int64) (visited bool) {
 	okNoPause(s, "That costs %s gold more than you have in hand.", comma(short))
 	if w.bank == nil || !AskYesNo(s, "Visit the bank?", true) {
-		return
+		return false
 	}
 	if err := Run(s, w, w.bank); err != nil {
 		session.End(err)
 	}
+	return true
 }

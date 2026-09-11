@@ -53,6 +53,50 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 	}
 }
 
+// affordOrBank is what happens when a quoted price is beyond the gold in hand:
+// the refusal, and then the bank, opened where the player stands. It reports
+// whether they can now pay — a trip to the bank changes the answer, so the cost
+// is measured again on the way out, and someone who comes back no richer simply
+// stops, the refusal already said.
+//
+// EVERY path that quotes a price and then spends it goes through this: the
+// covert menu, terror ops, the interplanetary Special Operations, and the
+// SpyGuy's stay. Each passes its own refusal, because the original words them
+// differently per menu. Reach for it wherever a new one appears — a price a
+// player has just agreed to should not fail against a bank balance they were
+// never offered the chance to draw on.
+func affordOrBank(s session.Session, w *ctx, cost int64, refusal error) bool {
+	short := func() int64 {
+		var gold int64
+		w.Read(func() {
+			if p := w.Player(); p != nil {
+				gold = p.Gold
+			}
+		})
+		return cost - gold
+	}
+	n := short()
+	if n <= 0 {
+		return true
+	}
+	// One beat, not two: the refusal prints WITHOUT its pause, because the
+	// question that follows is what the player is being asked to answer. A pause
+	// between them makes the refusal look like the end of the road, which is
+	// exactly what it no longer is.
+	failNoPause(s, refusal)
+	visited := offerBank(s, w, n)
+	if short() <= 0 {
+		return true
+	}
+	// Came back from the bank no richer: say why nothing is going to happen. The
+	// first refusal is a screen of bank menu away by now, and an action that just
+	// stops is the thing this whole path exists to avoid.
+	if visited {
+		fail(s, refusal)
+	}
+	return false
+}
+
 // buyer adapts one row to applyBuy's transaction shape.
 func buyer(g *game.Good) func(*game.World, *game.Empire, int) error {
 	return func(w *game.World, e *game.Empire, n int) error { return w.Buy(e, g, n) }

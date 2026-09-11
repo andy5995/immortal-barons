@@ -1027,8 +1027,15 @@ strictly limited. The idea/expression line:
   Read a disassembly to learn a *constant or formula*, then
   write our own implementation — transcribing its code is a derivative work and
   is infringing.
-- **Display text verbatim**: menu descriptions, prompts, news/bulletin lines,
-  help text, tutorial prose, end-of-turn messages. Reconstruct in our own words.
+- **Display PROSE verbatim**: menu descriptions, news/bulletin lines, help text,
+  tutorial prose, end-of-turn messages, result reports. Reconstruct in our own
+  words. The line moved on 2026-09-11 and now runs between prose and the
+  functional furniture of a screen: a question prompt, a field label, a menu
+  item or a short refusal MAY match the original word for word, because those
+  are dictated by what is being asked rather than by how anyone chose to say it.
+  AGENTS.md carries the rule and the test to apply — is the game asking a
+  question, or telling a story? The covert and terror operation menus are the
+  worked example.
 - **ANSI art, logos, splash/end screens** (`game/bre.ans`, `breend.ans`, etc.).
 - **Distinctive flavor names** are Andy's call, one at a time. The nine pirate
   factions carry IB's own names; the Gooie Kablooie, the S3-Sabre and SpyGuy keep

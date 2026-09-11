@@ -36,8 +36,11 @@ func TestEffectOpsOnlyQueueAtTheMenu(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s: %v", tc.op, err)
 		}
-		if !strings.Contains(report, d.Name) {
-			t.Errorf("%s: the acknowledgement should name the target: %q", tc.op, report)
+		// The acknowledgement is the original's: the agent left, and that is all
+		// it says. It named the target until 2026-09-11. The QUEUE below is what
+		// proves the op went against the realm chosen.
+		if !strings.Contains(report, "Sent out") {
+			t.Errorf("%s: the acknowledgement should say the agent went: %q", tc.op, report)
 		}
 		if len(w.CovertQueue) != 1 || w.CovertQueue[0].Op != tc.op || w.CovertQueue[0].Target != d.Name {
 			t.Fatalf("%s: queue holds %+v", tc.op, w.CovertQueue)
