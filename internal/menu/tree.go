@@ -215,8 +215,8 @@ func BuildMenus() *Menus {
 
 	bank.Items = []Item{
 		{Key: 'C', Label: "Cash Relief / Loans", Do: cashRelief},
-		{Key: 'D', Label: "Deposit Funds", Do: money("Deposit", func(p *game.Empire) int64 { return p.Gold }, (*game.World).Deposit)},
-		{Key: 'W', Label: "Withdraw Funds", Do: money("Withdraw", func(p *game.Empire) int64 { return p.Bank }, (*game.World).Withdraw)},
+		{Key: 'D', Label: "Deposit Funds", Do: money("Deposit how many gold?", func(p *game.Empire) int64 { return p.Gold }, (*game.World).Deposit)},
+		{Key: 'W', Label: "Withdraw Funds", Do: money("Withdraw how many gold?", func(p *game.Empire) int64 { return p.Bank }, (*game.World).Withdraw)},
 		{Key: 'I', Label: "Investments", Do: investFunds},
 		{Key: 'L', Label: "List Investments / Loans", Do: listInvestments},
 		{Key: 'V', Label: "View Bank Rates", Do: bankRates},
@@ -226,8 +226,10 @@ func BuildMenus() *Menus {
 	bank.Status = func(w *ctx) string {
 		p := w.Player()
 		lang := playerLang(w)
-		// Plain text: the menu footer highlights the figures itself.
-		return fmt.Sprintf("You have %s gold in hand and %s gold in the bank.",
+		// Plain text: the menu footer highlights the figures itself. Through
+		// i18n.T like every other status line — it was a bare Sprintf, so the one
+		// line a player reads on every visit to the bank stayed English.
+		return fmt.Sprintf(i18n.T(lang, "You have %s gold in hand and %s gold in the bank."),
 			formatGold(p.Gold, lang), formatGold(p.Bank, lang))
 	}
 

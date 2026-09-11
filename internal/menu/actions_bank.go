@@ -11,10 +11,14 @@ import (
 
 // money wraps a bank action that moves a gold amount, offering max as the
 // largest sensible value for that action (e.g. Withdraw's max is p.Bank).
-func money(label string, max func(*game.Empire) int64, apply func(*game.World, *game.Empire, int64) error) Action {
+//
+// The WHOLE prompt is the msgid. It was built by concatenation — the action's
+// name plus " how many gold?" — which no catalog can hold and no translator can
+// reorder, so both prompts stayed English whatever language the caller read.
+func money(prompt string, max func(*game.Empire) int64, apply func(*game.World, *game.Empire, int64) error) Action {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
-		n := promptSuggested(s, label+" how many gold?", 0, max(p))
+		n := promptSuggested(s, prompt, 0, max(p))
 		if n <= 0 {
 			return Stay
 		}

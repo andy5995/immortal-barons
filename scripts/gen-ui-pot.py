@@ -47,6 +47,9 @@ CALL_PATTERNS = [
     # nobody had ever been shown.
     re.compile(r'\bbuildTradeBasket\(s,\s*[^,]+,\s*' + STR),
     re.compile(r'\bstatusRowPrefix\(s,\s*' + STR),
+    # The bank's deposit/withdraw prompt: money() hands its first argument
+    # straight to promptSuggested, so the caller writes the msgid.
+    re.compile(r'\bmoney\(' + STR),
     re.compile(r'\btitled\(' + STR),  # bulletin page headings not drawn from a table
     re.compile(r'\b(?:Label|Title):\s*' + STR),
     # Preferences toggle labels. They live in the toggleRow table rather than in
