@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Combat, covert and pirate tunables are declared with the rest of the
+    game's numbers, so retuning them means looking in one place
   * The seven treaty types are declared once, so a pact cannot silently stop
     applying because its name was typed differently somewhere
   * The InterPlanetary Special Operations menu is one column, in the original's

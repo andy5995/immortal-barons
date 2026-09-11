@@ -268,3 +268,41 @@ const (
 	// effectively free.
 	RegionUpkeepPerLand = 913
 )
+
+// Moved here from combat.go and covert.go (#211): a tunable belongs in the data
+// file for its subject rather than beside the formula that reads it.
+
+const (
+	// JetsPerCarrier is how many jets one carrier can transport to a battle; jets
+	// beyond that are grounded (not "usable" — BRE's Offense/attack force screen).
+	JetsPerCarrier = 100
+
+	// A Normal attack captures max(RegularAttackCaptureFloor, the Attack Rewards
+	// share of the loser's regions), capped at what the loser holds. The floor is
+	// BINARY-VERIFIED: BRE.OVR 0x1009f pushes 15 into the max, 0x100c3 the
+	// defender's own region count into the min. The share itself is a per-level
+	// table — see AttackCaptureMediumPct in balance.go.
+	RegularAttackCaptureFloor = 15
+
+	// LandDefenseBonus is how much a region adds when the AI sizes up a rival --
+	// cheap, lightly-held land looks softer. IB's own, and a playtest knob.
+	//
+	// It is deliberately NOT in the battle math any more. It was until
+	// 2026-08-24, and two independent lines say the original has no per-region
+	// defence: its defence builder sums troopers, turrets and tanks and never
+	// reads a region count, and a live capture discriminates -- 112 turrets
+	// losing exactly 2 to a 3-jet attack matches a land-free defence, where any
+	// per-region bonus makes that figure odd for every possible round count.
+	LandDefenseBonus = 2
+)
+
+// S3-Sabre tuning. What the dial selects, and the two rolls that blur it, are
+// binary-verified and live in balance_costs.go beside the mapper's table, as is
+// whether a launch arrives at all (MissileMisfireOdds and SDI). The figures here
+// are the ones the original does NOT state: how hard a landed hit bites, and the
+// backfire chance. They are playtest knobs, not fidelity contract.
+const (
+	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
+	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
+	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)
+)

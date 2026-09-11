@@ -603,17 +603,6 @@ func (w *World) resolveBombEnemyTargets(a, d *Empire) string {
 	return fmt.Sprintf("Your agents bombed targets in %s: %d %s destroyed.", d.Name, lost, t.name)
 }
 
-// S3-Sabre tuning. What the dial selects, and the two rolls that blur it, are
-// binary-verified and live in balance_costs.go beside the mapper's table, as is
-// whether a launch arrives at all (MissileMisfireOdds and SDI). The figures here
-// are the ones the original does NOT state: how hard a landed hit bites, and the
-// backfire chance. They are playtest knobs, not fidelity contract.
-const (
-	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
-	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
-	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)
-)
-
 // sabreDialFor settles the dial the launch actually carries. Only User Select
 // handling uses the number the player typed; Random rolls one per launch and
 // Constant fires the same setting every time. The sysop's None mode is refused

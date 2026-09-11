@@ -186,7 +186,7 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   constant in a dedicated data file, not a bare literal in the formula code.**
   Those files are `internal/game/balance*.go`, split by subject — `_regions`,
   `_crown`, `_start`, `_ai`, `_prices`, `_hq`, `_costs`, `_combat`, `_networth`,
-  and `balance.go` itself for the rest. Put a new number in the file for its
+  `_pirates`, and `balance.go` itself for the rest. Put a new number in the file for its
   mechanic; the rule is the separation from the formulas, not any one filename.
   This covers unit costs, prices, rates, caps, starting-setup values, score
   weights, food/industry figures, penalties — all of it. When you add a

@@ -7,30 +7,6 @@ import (
 	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
-const (
-	// JetsPerCarrier is how many jets one carrier can transport to a battle; jets
-	// beyond that are grounded (not "usable" — BRE's Offense/attack force screen).
-	JetsPerCarrier = 100
-
-	// A Normal attack captures max(RegularAttackCaptureFloor, the Attack Rewards
-	// share of the loser's regions), capped at what the loser holds. The floor is
-	// BINARY-VERIFIED: BRE.OVR 0x1009f pushes 15 into the max, 0x100c3 the
-	// defender's own region count into the min. The share itself is a per-level
-	// table — see AttackCaptureMediumPct in balance.go.
-	RegularAttackCaptureFloor = 15
-
-	// LandDefenseBonus is how much a region adds when the AI sizes up a rival --
-	// cheap, lightly-held land looks softer. IB's own, and a playtest knob.
-	//
-	// It is deliberately NOT in the battle math any more. It was until
-	// 2026-08-24, and two independent lines say the original has no per-region
-	// defence: its defence builder sums troopers, turrets and tanks and never
-	// reads a region count, and a live capture discriminates -- 112 turrets
-	// losing exactly 2 to a 3-jet attack matches a land-free defence, where any
-	// per-region bonus makes that figure odd for every possible round count.
-	LandDefenseBonus = 2
-)
-
 // returningForces opens a battle report. BRE puts the casualties first and the
 // verdict last, under a line about the army coming home worn out, and it prints
 // the same opening whether the attack won or lost — so a player reads what the
