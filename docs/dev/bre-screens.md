@@ -3368,6 +3368,14 @@ none, because those are priced off the target once one is named.
 ─────────────────────────────────────
 ```
 
+**IB draws this menu to the same shape**: one column, the red accent the table
+above gives it (bright red, for the contrast reason recorded there), and the four
+bombing prices in a right-aligned column — its own `Key Item Price` header row
+included, the same addition the Covert Operations screen makes. The box is 38
+against BRE's 37, for the reason the covert menu's is 34 against 32. The menu was
+two columns in the InterPlanetary menu's yellow, with no prices at all, until
+2026-09-10.
+
 **A missile that has been fired today is dropped from the list.** Same capture,
 after Nuclear Assault and Chemical Bombing were used, then after the S3-Sabre:
 

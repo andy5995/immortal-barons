@@ -295,3 +295,15 @@ func globalReconRequest(s session.Session, w *ctx) Result {
 	ok(s, "Recon requests created to all %d planets. The reports will reach the Spy Database.", boards)
 	return Stay
 }
+
+// opPrice is a special operation's menu price: what this board would charge the
+// caller today, sysop cost dial included, so the column and the bill agree.
+func opPrice(op game.SpecialOp) func(*ctx) int {
+	return func(w *ctx) int {
+		p := w.Player()
+		if p == nil {
+			return 0
+		}
+		return int(w.SpecialOpGoldCost(p, op))
+	}
+}

@@ -101,7 +101,15 @@ func BuildMenus() *Menus {
 	// figures BRE prints bare — a recorded divergence. So 34 follows BRE's rule,
 	// sizing the box to its own content, where 32 would clip every priced row.
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus, Width: 34}
-	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
+	// One column and the red accent, both from the captures: the menu is eight
+	// priced items in a 37-column box (docs/dev/bre-screens.md), and its accent
+	// is in the red family with Spending and Trading, not the InterPlanetary
+	// menu's yellow it had inherited. IB uses BRIGHT red where BRE uses plain
+	// `31`, as those two do, for the contrast reason recorded there. Width 38,
+	// one past BRE's 37, for the reason the covert menu is 34 against BRE's 32:
+	// the engine indents every item two columns, and the default 62 is this
+	// file's rule constant rather than a house width.
+	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightRed, ExitOnEnter: true, Width: 38}
 	// BRE's Terrorist Ops submenu (IP Operations item '2') shows 9 named
 	// operations; all share the same mechanical effect (each agent destroys
 	// 1/7 of a random unit type) but BRE carries the op type in the packet
@@ -110,7 +118,11 @@ func BuildMenus() *Menus {
 	// Width 23 from the capture (docs/dev/bre-screens.md): four rules, the title,
 	// four more. Sized to its own content, as the original sizes every box — the
 	// 62-column default is not a house width, it is this file's rule constant.
-	terrorOps := &Menu{Title: "Terrorist Ops", Color: ansi.FgBrightYellow, ExitOnEnter: true, Width: 23}
+	// Red, with Special Operations and Spending: the accent table read off every
+	// capture puts this menu in the red family, not the InterPlanetary menu's
+	// yellow it had inherited (docs/dev/bre-screens.md). Bright red for the
+	// contrast reason recorded there.
+	terrorOps := &Menu{Title: "Terrorist Ops", Color: ansi.FgBrightRed, ExitOnEnter: true, Width: 23}
 	// BRE draws IP Messages as a narrow single-column box (24 columns, measured
 	// across every capture) rather than at the full menu width. A comment here
 	// said 25 until the widths were swept.
@@ -358,11 +370,16 @@ func BuildMenus() *Menus {
 	// with no listed items.) The original numbers them 1-8 with no Help item,
 	// as the live capture draws it; IB adds one anyway (see opshelp.go), since
 	// several of these are inert and nothing on the menu said which.
+	// The four bombing ops carry their price on the menu, as the original prints
+	// it (docs/dev/bre-screens.md) — a flat figure, so it can be quoted before a
+	// target is named. The three missiles and Send SpyGuy show none and cannot:
+	// a missile is priced off the launcher's own land and the SpyGuy off the
+	// planet's, both of which the op quotes for itself once asked.
 	ipSpecial.Items = []Item{
-		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialOp(game.OpBombFood), Hidden: noBombingOps},
-		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialOp(game.OpBombMarket), Hidden: noBombingOps},
-		{Key: '3', Label: "Bomb Trade Routes", Do: ipSpecialOp(game.OpBombRoutes), Hidden: noBombingOps},
-		{Key: '4', Label: "Undermine Investments", Do: ipSpecialOp(game.OpUndermine), Hidden: noBombingOps},
+		{Key: '1', Label: "Bomb Food Market", Price: opPrice(game.OpBombFood), Do: ipSpecialOp(game.OpBombFood), Hidden: noBombingOps},
+		{Key: '2', Label: "Bomb Trading Market", Price: opPrice(game.OpBombMarket), Do: ipSpecialOp(game.OpBombMarket), Hidden: noBombingOps},
+		{Key: '3', Label: "Bomb Trade Routes", Price: opPrice(game.OpBombRoutes), Do: ipSpecialOp(game.OpBombRoutes), Hidden: noBombingOps},
+		{Key: '4', Label: "Undermine Investments", Price: opPrice(game.OpUndermine), Do: ipSpecialOp(game.OpUndermine), Hidden: noBombingOps},
 		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialOp(game.OpNuclear), Hidden: missileSpent(game.OpNuclear)},
 		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: missileSpent(game.OpChemical)},
 		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: missileSpent(game.OpSabre)},
