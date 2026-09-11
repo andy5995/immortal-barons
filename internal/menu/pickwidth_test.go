@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // TestPickerFitsScreen renders the treaty picker's roster with the longest
@@ -24,7 +25,7 @@ func TestPickerFitsScreen(t *testing.T) {
 		}
 	}
 	f := &fakeSession{keys: []rune("?0")}
-	negotiateTreaty("Free Trade Agreement")(f, w)
+	negotiateTreaty(game.FreeTradeAgreement)(f, w)
 	for _, l := range strings.Split(sgr.ReplaceAllString(f.out.String(), ""), "\n") {
 		if n := len([]rune(strings.TrimRight(l, " "))); n >= ansi.ScreenCols {
 			t.Errorf("line is %d columns, over the %d-column screen:\n%s", n, ansi.ScreenCols, l)

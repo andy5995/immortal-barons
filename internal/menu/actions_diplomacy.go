@@ -128,20 +128,6 @@ func allyFigure(s session.Session, n int) string {
 	return comma(n)
 }
 
-// treatyDescriptions explains, in plain English, what each pact does in IB —
-// shown when the player opens that treaty type's negotiation (BRE shows a pact
-// blurb before the send-to list). Wording is IB's own (not copied from BRE) and
-// describes IB's actual mechanics (see internal/game/diplomacy.go).
-var treatyDescriptions = map[string]string{
-	"Full Defense Alliance":  "Neither realm may attack the other. If either is attacked, the ally sends 30% of its troopers and tanks to reinforce the defense.",
-	"Tariff Trade Agreement": "Opens a taxed trade route. Both realms earn a modest income each turn, scaled to population.",
-	"Free Trade Agreement":   "Opens an open trade route. Both realms earn a larger income each turn — about double a tariff — scaled to population.",
-	"Protective Trade":       "Guards the trade route between the two realms: deals in transit between you survive covert bombing, whoever fires. Markets are not covered.",
-	"Terrorist Prevention":   "Pools covert agents for defense, making both realms harder to spy on and sabotage.",
-	"Intelligence Alliance":  "Shares intelligence — partner agents strengthen your covert operations, both attacking and defending.",
-	"Technology Agreement":   "Shares technology — the partner with less advanced tech is pulled up toward the more advanced one.",
-}
-
 // diplomacyPickOpts configures the realm picker for every Diplomacy action that
 // addresses a realm. The Diplomacy menu calls BRE's selection routine the same
 // way each time — a multi-select list whose '?' lists Relations rather than the
@@ -153,14 +139,16 @@ var diplomacyPickOpts = pickOpts{prompt: "Send to:", allowAll: true, relations: 
 // single realm negotiates with it instead — proposing, or accepting a matching
 // offer from them. Treaty types are direct
 // menu items rather than hiding behind a single "Modify Diplomacy" item.
-func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
+func negotiateTreaty(pact *game.Pact) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
+		ttype := pact.Name
 		// Show what this pact does before choosing a partner, as BRE does — its
-		// blurb sits above the "Send to:" prompt.
-		if desc := treatyDescriptions[ttype]; desc != "" {
+		// blurb sits above the "Send to:" prompt. The blurb comes off the row,
+		// translated here.
+		if pact.Desc != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n%s%s%s\n",
 				ansi.FgBrightYellow, tr(s, ttype), ansi.Reset,
-				ansi.Dim, WrapIndented(tr(s, desc), "  "), ansi.Reset)
+				ansi.Dim, WrapIndented(tr(s, pact.Desc), "  "), ansi.Reset)
 		}
 		picked := pickRecipients(s, w, diplomacyPickOpts)
 		if len(picked) == 0 {
@@ -486,4 +474,15 @@ func writeRelationsTable(s session.Session, t Term, rows []relationsRow) {
 			ansi.FgBrightBlue, r.relations, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)
+}
+
+// pactItems numbers a run of pacts from '1', in the order the caller lists them.
+// The label and the action both come from the row, so the item a player presses
+// and the treaty that gets stored cannot disagree (#207).
+func pactItems(pacts []*game.Pact) []Item {
+	items := make([]Item, 0, len(pacts))
+	for i, p := range pacts {
+		items = append(items, Item{Key: rune('1' + i), Label: p.Name, Do: negotiateTreaty(p)})
+	}
+	return items
 }

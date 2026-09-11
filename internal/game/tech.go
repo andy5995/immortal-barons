@@ -93,7 +93,7 @@ func (w *World) advanceTech(e *Empire) {
 		return
 	}
 	points := TechResearchMul * techResearchPoints(tech, total)
-	for _, ally := range w.alliesOf(e, "Technology Agreement") {
+	for _, ally := range w.alliesOf(e, technologyAgreement) {
 		points += techResearchPoints(min(tech, ally.Regions.Technology), total)
 	}
 	for range points {

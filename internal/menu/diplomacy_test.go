@@ -50,7 +50,7 @@ func TestNegotiateTreatyProposesToTarget(t *testing.T) {
 		t.Fatal("newWorld() should seed at least one AI empire")
 	}
 
-	action := negotiateTreaty("Free Trade Agreement")
+	action := negotiateTreaty(game.FreeTradeAgreement)
 	// Mark the first (only) listed empire by BRE's lettered Id, close the list
 	// with RETURN, then decline the covering note.
 	f := &fakeSession{keys: []rune("A\rn")}
@@ -93,7 +93,7 @@ func TestNegotiateTreatyAcceptsMatchingOffer(t *testing.T) {
 	}
 	w.World.ProposeTreaty(target, p, "Intelligence Alliance")
 
-	action := negotiateTreaty("Intelligence Alliance")
+	action := negotiateTreaty(game.IntelligenceAlliance)
 	f := &fakeSession{keys: []rune("A\ry")} // mark the empire, close the list, confirm the accept
 	if res := action(f, w); res != Stay {
 		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
@@ -167,7 +167,7 @@ func TestNegotiateTreatyProposesToSeveralRealms(t *testing.T) {
 	}
 	first, second, untouched := rows[0], rows[2], rows[1]
 
-	action := negotiateTreaty("Full Defense Alliance")
+	action := negotiateTreaty(game.FullDefenseAlliance)
 	// Marked out of order, to pin that the send follows the marks and not the
 	// order they were pressed in.
 	keys := string(second.letter) + string(first.letter) + "\rn"
@@ -235,7 +235,7 @@ func TestNegotiateTreatyToAllAllies(t *testing.T) {
 	treatyWith(w, rows[2].e)
 	stranger := rows[1]
 
-	action := negotiateTreaty("Technology Agreement")
+	action := negotiateTreaty(game.TechnologyAgreement)
 	f := &fakeSession{keys: []rune("*\rn")}
 	if res := action(f, w); res != Stay {
 		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
@@ -261,7 +261,7 @@ func TestDiplomacyPickerListsRelations(t *testing.T) {
 	}
 	treatyWith(w, rows[0].e)
 
-	action := negotiateTreaty("Protective Trade")
+	action := negotiateTreaty(game.ProtectiveTrade)
 	f := &fakeSession{keys: []rune("?\r")} // list, then close the list with nothing marked
 	if res := action(f, w); res != Stay {
 		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
@@ -293,7 +293,7 @@ func TestNegotiateTreatyAlreadyHeldChangesNothing(t *testing.T) {
 	p, target := w.Player(), rows[0].e
 	treatyWith(w, target) // a standing Free Trade Agreement
 
-	action := negotiateTreaty("Free Trade Agreement")
+	action := negotiateTreaty(game.FreeTradeAgreement)
 	f := &fakeSession{keys: []rune(string(rows[0].letter) + "\r")} // mark the realm, close the list
 	if res := action(f, w); res != Stay {
 		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
@@ -328,7 +328,7 @@ func TestNegotiateTreatyProposesDifferentTypeToPartner(t *testing.T) {
 	p, target := w.Player(), rows[0].e
 	treatyWith(w, target) // a standing Free Trade Agreement
 
-	action := negotiateTreaty("Tariff Trade Agreement")
+	action := negotiateTreaty(game.TariffTradeAgreement)
 	f := &fakeSession{keys: []rune(string(rows[0].letter) + "\rn")} // mark, close the list, decline the note
 	if res := action(f, w); res != Stay {
 		t.Fatalf("negotiateTreaty action = %v, want Stay", res)

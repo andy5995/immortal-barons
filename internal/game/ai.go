@@ -61,9 +61,9 @@ func aiAcceptsTreaty(profile, ttype string) bool {
 	case AIProfileDiplomat:
 		return true
 	case AIProfileAggressor:
-		return ttype == "Tariff Trade Agreement" || ttype == "Technology Agreement"
+		return ttype == tariffTradeAgreement || ttype == technologyAgreement
 	default: // balanced
-		return ttype != intelligenceAlliance && ttype != "Technology Agreement"
+		return ttype != intelligenceAlliance && ttype != technologyAgreement
 	}
 }
 

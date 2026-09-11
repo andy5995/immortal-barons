@@ -17,24 +17,18 @@ import (
 //   - Protective Trade spares the two realms' trade deals when trade routes are
 //     bombed (bombRoutesEffect) and cuts the cost of sending a deal between them
 //     (TradeDealGoldPerDayBetween). It shields no market.
-var TreatyTypes = []string{
-	"Full Defense Alliance",
-	"Tariff Trade Agreement",
-	"Free Trade Agreement",
-	"Protective Trade",
-	"Terrorist Prevention",
-	"Intelligence Alliance",
-	"Technology Agreement",
-}
-
-const (
-	fullDefenseAlliance  = "Full Defense Alliance"
-	intelligenceAlliance = "Intelligence Alliance"
-	terroristPrevention  = "Terrorist Prevention"
-	protectiveTrade      = "Protective Trade"
-	tariffTradeAgreement = "Tariff Trade Agreement"
-	freeTradeAgreement   = "Free Trade Agreement"
-	technologyAgreement  = "Technology Agreement"
+//
+// The seven names live on the rows in treaties.go, which is also where
+// TreatyTypes is built (#207). These are the short spellings this package reads
+// them by.
+var (
+	fullDefenseAlliance  = FullDefenseAlliance.Name
+	intelligenceAlliance = IntelligenceAlliance.Name
+	terroristPrevention  = TerroristPrevention.Name
+	protectiveTrade      = ProtectiveTrade.Name
+	tariffTradeAgreement = TariffTradeAgreement.Name
+	freeTradeAgreement   = FreeTradeAgreement.Name
+	technologyAgreement  = TechnologyAgreement.Name
 )
 
 // HasPact reports whether a and b hold one of the seven treaties — neither None

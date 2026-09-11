@@ -428,19 +428,23 @@ func BuildMenus() *Menus {
 	// Treaty types are direct menu items, matching BRE's Diplomacy menu
 	// layout (#68) instead of hiding behind a single "Modify Diplomacy"
 	// item. Order and hotkeys match BRE.OVR's string table.
-	diplomacy.Items = []Item{
-		{Key: '1', Label: "Tariff Trade Agreement", Do: negotiateTreaty("Tariff Trade Agreement")},
-		{Key: '2', Label: "Protective Trade", Do: negotiateTreaty("Protective Trade")},
-		{Key: '3', Label: "Free Trade Agreement", Do: negotiateTreaty("Free Trade Agreement")},
-		{Key: '4', Label: "Terrorist Prevention", Do: negotiateTreaty("Terrorist Prevention")},
-		{Key: '5', Label: "Intelligence Alliance", Do: negotiateTreaty("Intelligence Alliance")},
-		{Key: '6', Label: "Technology Agreement", Do: negotiateTreaty("Technology Agreement")},
-		{Key: '7', Label: "Full Defense Alliance", Do: negotiateTreaty("Full Defense Alliance")},
+	// The pacts in the original's own menu order, each named by its row rather
+	// than by a string typed here: the name is a save-file key, so a typo is a
+	// treaty that silently stops applying (#207).
+	diplomacy.Items = append(pactItems([]*game.Pact{
+		game.TariffTradeAgreement,
+		game.ProtectiveTrade,
+		game.FreeTradeAgreement,
+		game.TerroristPrevention,
+		game.IntelligenceAlliance,
+		game.TechnologyAgreement,
+		game.FullDefenseAlliance,
+	}), []Item{
 		{Key: '8', Label: "Declaration Of War", Do: declareWar},
 		{Key: '9', Label: "View Treaties", Do: viewDiplomacy},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: '0', Label: "Quit", Do: back},
-	}
+	}...)
 	diplomacy.DefaultOnEnter = quitOnEnter(diplomacy)
 
 	messages.Items = []Item{
