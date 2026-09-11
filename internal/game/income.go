@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"hash/fnv"
 	"io"
+	"math"
+	"math/big"
 )
 
 // income.go — what a realm earns and grows in a turn: the per-region draw, the
@@ -218,7 +220,9 @@ func industryMountainBoost(r RegionMix) (num, den int) {
 // exact fraction.
 func MountainIndustryPercent(r RegionMix) int {
 	num, den := industryMountainBoost(r)
-	return (num*100 + den/2) / den
+	// int64: the fraction is a pair of raw land counts, and `int` is 32 bits on
+	// the 32-bit door builds this project supports.
+	return int((int64(num)*100 + int64(den)/2) / int64(den))
 }
 
 // ProjectedProduction computes the units e would manufacture this turn at its
@@ -247,16 +251,56 @@ func (w *World) ProjectedProduction(e *Empire) []int {
 		case e.Specialized != "":
 			spec = 100 - SpecialtyPenaltyPct
 		}
-		n := int64(e.Regions.Industrial) * UnitPointsPerRegion *
-			int64(pct) * int64(spec) * int64(boostNum) * int64(e.TechUnitFactor())
-		d := int64(cost) * 100 * 100 * int64(boostDen) * TechFactorUnit
-		return int((n + d/2) / d)
+		return unitsMade(e.Regions.Industrial, pct, spec, boostNum, boostDen, e.TechUnitFactor(), cost)
 	}
 	out := make([]int, len(MilitaryGoods))
 	for i, g := range MilitaryGoods {
 		out[i] = made(g.Plural, *g.Prod(e), g.Cost)
 	}
 	return out
+}
+
+// unitsMade is that chain, evaluated exactly and ROUNDED ONCE at the end.
+//
+// It is arbitrary-precision because int64 is not wide enough. Six factors are
+// multiplied before anything is divided, and two of them — the mountain boost's
+// numerator and denominator — are RAW LAND COUNTS rather than a reduced
+// fraction, so the product grows with the SQUARE of the realm's size. It passed
+// int64 at about 14,400 industrial regions and wrapped negative, which a realm
+// that size reaches: the original's own capture in docs/dev/bre-screens.md shows
+// one holding 14,203. Production then came back negative and was SUBTRACTED from
+// the army.
+//
+// Dividing in stages instead would have fixed the overflow and broken the
+// rounding, which is binary-verified: BRE keeps the whole chain in floating
+// point and rounds once (see ProjectedProduction). This keeps every figure the
+// engine produced below the old ceiling exactly as it was.
+func unitsMade(industrial, pct, spec, boostNum, boostDen, tech, cost int) int {
+	if industrial <= 0 || pct <= 0 || cost <= 0 || boostDen <= 0 {
+		return 0
+	}
+	n := big.NewInt(int64(industrial))
+	for _, f := range []int64{UnitPointsPerRegion, int64(pct), int64(spec), int64(boostNum), int64(tech)} {
+		n.Mul(n, big.NewInt(f))
+	}
+	d := big.NewInt(int64(cost))
+	for _, f := range []int64{100, 100, int64(boostDen), TechFactorUnit} {
+		d.Mul(d, big.NewInt(f))
+	}
+	// (n + d/2) / d — the round-half-up the whole chain is verified against.
+	n.Add(n, new(big.Int).Rsh(d, 1))
+	n.Div(n, d)
+	if !n.IsInt64() {
+		// Unreachable on any realm the game can build; a count that does not fit
+		// is held at the top rather than wrapped, which is the failure this
+		// function exists to end.
+		return math.MaxInt
+	}
+	made := n.Int64()
+	if made > math.MaxInt {
+		return math.MaxInt
+	}
+	return int(made)
 }
 
 // Manufacture converts e's Industrial regions into production points and spends

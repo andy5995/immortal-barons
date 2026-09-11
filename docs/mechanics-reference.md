@@ -2017,6 +2017,17 @@ up to half, but the boost is a *share* of the realm, so it dilutes as an empire
 expands elsewhere. BRE keeps the whole chain in floating point and rounds once at
 the end.
 
+**IB evaluates that chain in exact arbitrary-precision arithmetic**
+(`unitsMade`, `internal/game/income.go`), because int64 is not wide enough for
+it. Six factors are multiplied before anything is divided, and the boost rides
+as a pair of RAW LAND COUNTS rather than a reduced fraction, so the product grows
+with the square of the realm's size: it passed int64 at around 6,000 industrial
+regions with research behind it and wrapped, handing back counts that were wrong
+and often negative — which were then added to the army. Dividing in stages would
+have fixed the overflow and moved the rounding, which is binary-verified, so the
+arithmetic was widened instead; every figure below the old ceiling is unchanged,
+and `TestExactProductionMatchesTheOldFormula` holds it there.
+
 ## Technology (binary-verified)
 
 Read from the original binary and confirmed against live play. **IB implements

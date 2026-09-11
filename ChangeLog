@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A large realm's Industrial Zones produce the units they should, instead of
+    wrong or negative counts once the realm passed a few thousand regions
   * Send SpyGuy offers the full fifteen days whatever your gold, and opens the
     bank when the stay costs more than you are carrying
   * What the Industrial Zones built is listed across two lines in the bracketed
