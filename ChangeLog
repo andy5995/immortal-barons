@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The bank, spending, attack, covert, trading and message menus read in
+    German, Dutch and Russian
   * German, Dutch and Russian name the units and region types, and the help
     topics for every unit and region read in German and Russian
   * The region table shows translated names, and lines up when they are not
