@@ -38,8 +38,7 @@ func travelTimes(s session.Session, w *ctx) Result {
 			planets = append(planets, planet{name, w.TravelTimes[name]})
 		}
 	})
-	if len(planets) == 0 {
-		ok(s, "No other planets are known yet.")
+	if noPlanets(s, len(planets)) {
 		return Stay
 	}
 	rule := rule75(ansi.FgBrightBlack)
@@ -160,10 +159,7 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 // same kind of planet-level commitment — other barons join it, and until this
 // nothing on the planet could stop it once it was filed.
 func disbandGroupAttack(s session.Session, w *ctx) Result {
-	var isCoordinator bool
-	w.Read(func() { isCoordinator = w.BBSCoordinator() == w.Player() })
-	if !isCoordinator {
-		ok(s, "Only the BBS Coordinator may call off an attack party.")
+	if !coordinatorOnly(s, w, "Only the BBS Coordinator may call off an attack party.") {
 		return Stay
 	}
 	rows := formingGroupRows(s, w)

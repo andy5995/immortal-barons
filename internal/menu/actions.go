@@ -393,3 +393,41 @@ func setTaxRate(s session.Session, w *ctx) Result {
 	ok(s, "Tax rate set to %d%%.", rate)
 	return Stay
 }
+
+// noPlanets and noScoredPlanets are the guard every interplanetary action opens
+// with: this board knows of no other planet, so there is nothing to act on. The
+// GATHER differs from one caller to the next — some want travel times, some the
+// SpyGuy's rate, some the roster's relations — so what is shared is the check
+// and its wording, which was written out a dozen times in two variants.
+//
+// The two differ in what a player can do about it. A board with no roster is
+// waiting on the Coordinator; a board with a roster but no SCORES is waiting on
+// the next exchange, and only that one is worth telling them to wait for.
+func noPlanets(s session.Session, n int) bool {
+	if n > 0 {
+		return false
+	}
+	ok(s, "No other planets are known yet.")
+	return true
+}
+
+func noScoredPlanets(s session.Session, n int) bool {
+	if n > 0 {
+		return false
+	}
+	ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+	return true
+}
+
+// coordinatorOnly gates an action on the elected BBS Coordinator's office,
+// printing the caller's own refusal when the player does not hold it. Each site
+// words the refusal for what it is refusing, which is why the message is a
+// parameter rather than one sentence for all of them.
+func coordinatorOnly(s session.Session, w *ctx, refusal string) bool {
+	var held bool
+	w.Read(func() { held = w.BBSCoordinator() == w.Player() })
+	if !held {
+		ok(s, refusal)
+	}
+	return held
+}

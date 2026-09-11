@@ -825,8 +825,7 @@ func startAnnihilator(s session.Session, w *ctx) Result {
 			boards = append(boards, b.BoardID)
 		}
 	})
-	if len(boards) == 0 {
-		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+	if noScoredPlanets(s, len(boards)) {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)

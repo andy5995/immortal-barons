@@ -43,8 +43,7 @@ func planetaryTreaties(s session.Session, w *ctx) Result {
 			rows = append(rows, row{p.Number, p.Name, w.PlanetRelationWith(p.Name)})
 		}
 	})
-	if len(rows) == 0 {
-		ok(s, "No other planets are known yet.")
+	if noPlanets(s, len(rows)) {
 		return Stay
 	}
 	rule := ansi.FgBrightBlack + insetRule(treatyRuleWidth, treatyRuleDouble) + ansi.Reset
@@ -68,10 +67,7 @@ func planetaryTreaties(s session.Session, w *ctx) Result {
 // not mean is BRE's own note, reproduced below — the chart tells this planet's
 // own players something and binds nothing.
 func diplomacyModification(s session.Session, w *ctx) Result {
-	var isCoordinator bool
-	w.Read(func() { isCoordinator = w.BBSCoordinator() == w.Player() })
-	if !isCoordinator {
-		ok(s, "Only the BBS Coordinator may set planetary diplomacy.")
+	if !coordinatorOnly(s, w, "Only the BBS Coordinator may set planetary diplomacy.") {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Diplomacy Modification"), ansi.Reset)
@@ -86,8 +82,7 @@ func diplomacyModification(s session.Session, w *ctx) Result {
 	}
 	var planets []string
 	w.Read(func() { planets = w.KnownBoards() })
-	if len(planets) == 0 {
-		ok(s, "No other planets are known yet.")
+	if noPlanets(s, len(planets)) {
 		return Stay
 	}
 	// pickPlanetNamed, not pickAddressee: this chart is kept here and sent

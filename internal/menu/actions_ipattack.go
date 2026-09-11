@@ -36,8 +36,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 			scores[b.BoardID] = remoteBarons(b.Scores)
 		}
 	})
-	if len(boards) == 0 {
-		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+	if noScoredPlanets(s, len(boards)) {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
@@ -327,8 +326,7 @@ func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, ref
 			scores[b.BoardID] = remoteBarons(b.Scores)
 		}
 	})
-	if len(boards) == 0 {
-		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+	if noScoredPlanets(s, len(boards)) {
 		return "", ""
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, planetPrompt), ansi.Reset)

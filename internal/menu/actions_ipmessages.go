@@ -448,8 +448,7 @@ func ipMessageCoordinator(s session.Session, w *ctx) Result {
 // realm.
 func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result {
 	planets := addressablePlanets(w)
-	if len(planets) == 0 {
-		ok(s, "No other planets are known yet.")
+	if noPlanets(s, len(planets)) {
 		return Stay
 	}
 	p := pickPlanet(s, w, planets)
@@ -545,8 +544,7 @@ func composeIPMessageToBarons(s session.Session, w *ctx, board string, barons []
 
 func ipMessageSelect(s session.Session, w *ctx) Result {
 	planets := addressablePlanets(w)
-	if len(planets) == 0 {
-		ok(s, "No other planets are known yet.")
+	if noPlanets(s, len(planets)) {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "To end selection, hit enter at the prompt."), ansi.Reset)
@@ -572,8 +570,7 @@ func ipMessageSelect(s session.Session, w *ctx) Result {
 func ipMessageAll(s session.Session, w *ctx) Result {
 	var all []string
 	w.Read(func() { all = w.KnownBoards() })
-	if len(all) == 0 {
-		ok(s, "No other planets are known yet.")
+	if noPlanets(s, len(all)) {
 		return Stay
 	}
 	return composeIPMessage(s, w, all, false)

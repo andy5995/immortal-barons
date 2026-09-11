@@ -56,8 +56,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 		planets = w.KnownBoards()
 		perDay = w.SpyGuyCostPerDay()
 	})
-	if len(planets) == 0 {
-		ok(s, "No other planets are known yet.")
+	if noPlanets(s, len(planets)) {
 		return Stay
 	}
 	// The price is quoted before the target is picked, as BRE quotes it: it is
@@ -145,8 +144,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 					boards = append(boards, b.BoardID)
 				}
 			})
-			if len(boards) == 0 {
-				ok(s, "No other planets are known yet.")
+			if noPlanets(s, len(boards)) {
 				return Stay
 			}
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightYellow, fmt.Sprintf(tr(s, "%s against which planet?"), label), ansi.Reset)
