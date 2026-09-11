@@ -120,9 +120,11 @@ func TestEditAmountKillLineErasesAnExpandedShortcut(t *testing.T) {
 // Leaning on m used to lay down zeroes of its own — "000000000000000" at a
 // Withdraw prompt, which parses as nothing anybody meant.
 func TestAmountShortcutsNeedAFigureToMultiply(t *testing.T) {
+	// int64 throughout: `int` is 32 bits on the 32-bit door builds, and a ceiling
+	// of nine billion in an int is what broke the 386 vet job.
 	for _, c := range []struct {
 		keys string
-		want int
+		want int64
 	}{
 		{"mmmkkk\r", 0},     // nothing typed: the shortcuts are inert
 		{"0mm\r", 0},        // a leading zero is not a figure to scale
@@ -132,7 +134,7 @@ func TestAmountShortcutsNeedAFigureToMultiply(t *testing.T) {
 		{"3m5\r", 30_000_005}, // the zeroes go in where they are typed, then the 5
 	} {
 		fs := &fakeSession{keys: []rune(c.keys)}
-		if got := editAmount(fs, "", 0, 9_000_000_000); got != c.want {
+		if got := editAmount(fs, "", int64(0), int64(9_000_000_000)); got != c.want {
 			t.Errorf("keys %q gave %d, want %d", c.keys, got, c.want)
 		}
 	}
