@@ -72,6 +72,8 @@ stale.
 go build ./...
 go test ./...
 go test ./internal/play/ -race        # the concurrency tests — run these when touching the store
+GOARCH=386 go vet ./...    # CI runs this over the WHOLE tree; an int constant past
+                           # 2^31 fails here and nowhere else (it has, on a test)
 go run ./cmd/immortal-barons -local   # play locally in your terminal
 gofmt -w .                 # always run before committing
 python3 scripts/gen-ui-pot.py && scripts/merge-ui-po.sh   # UI strings — see below
