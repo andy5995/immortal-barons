@@ -75,7 +75,7 @@ func drawIndustry(s session.Session, w *ctx, p *game.Empire, rows []prodRow) {
 		// that will pay it, so the figure shown is the one credited.
 		per := w.ProjectedIndustrialGold(p, pct)
 		if i < prodUnitCount {
-			per = proj[i]
+			per = int64(proj[i])
 		}
 		fmt.Fprintf(s, "       %s"+tr(s, "(%s per year)")+"%s", ansi.FgRed, comma(per), ansi.Reset)
 		// The original tags the specialized row at the end of the line, where it

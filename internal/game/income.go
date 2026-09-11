@@ -87,7 +87,7 @@ func (w *World) regionDraw(e *Empire, salt, n int) int {
 // Dividing by 100 before applying the percentage is BRE's own order, and it is
 // why industry is the one region type whose total does not divide evenly by its
 // region count — the division discards the remainder.
-func (w *World) industrialGold(e *Empire) int {
+func (w *World) industrialGold(e *Empire) int64 {
 	allocated := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
 	// Whatever is not building units pays gold, whether the player set it aside
 	// on the Gold row or simply left it unallocated.
@@ -102,12 +102,16 @@ func (w *World) industrialGold(e *Empire) int {
 // capacity pays out this turn. Shared with the Set Industries screen so the
 // figure a player is shown is the one industrialGold will credit — regionDraw
 // varies by empire and game day, not per call, so the two always agree.
-func (w *World) ProjectedIndustrialGold(e *Empire, pct int) int {
+func (w *World) ProjectedIndustrialGold(e *Empire, pct int) int64 {
 	if pct <= 0 {
 		return 0
 	}
 	perRegion := w.regionDraw(e, 5, IndustryGoldRate) + IndustryGoldBase
-	return perRegion * e.Regions.Industrial / 100 * pct
+	// int64 for the reason every other money line is: `int` is 32 bits on the
+	// 32-bit door builds, and this product is a per-region rate in the thousands
+	// times a region count, which passes int32 at about 840,000 regions — the
+	// same shape of overflow the unit pool had (see unitsMade).
+	return int64(perRegion) * int64(e.Regions.Industrial) / 100 * int64(pct)
 }
 
 // riverGold is one River region's hydropower gold this turn: the full yield
@@ -145,7 +149,7 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 		Tourism:    scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
 		Solar:      scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
 		Rivers:     scale(int64(riverGold) * int64(e.Regions.River)),
-		Industrial: scale(int64(w.industrialGold(e))),
+		Industrial: scale(w.industrialGold(e)),
 		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
 		Food:       w.FoodProduced(e),
 		RiverFood:  w.riverFood(e),

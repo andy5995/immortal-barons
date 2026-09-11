@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Industrial gold is figured in the same width as the rest of the money, so a
+    32-bit build cannot wrap it on a very large realm
   * A large realm's Industrial Zones produce the units they should, instead of
     wrong or negative counts once the realm passed a few thousand regions
   * Send SpyGuy offers the full fifteen days whatever your gold, and opens the
