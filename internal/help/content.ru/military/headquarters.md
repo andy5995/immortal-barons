@@ -7,13 +7,13 @@ title: Штаб
 
 # Штаб
 
-Your HeadQuarters is the command center of your army. It is a one-time
-building project that advances a little each turn until it is complete.
+Штаб — командный центр вашей армии. Это разовая стройка, которая каждый ход
+немного продвигается, пока не будет закончена.
 
-Build it early. The price goes up every turn you play, so the longer you
-wait, the more it costs. The price does not depend on how large your realm
-is — only on how long you have been playing.
+Стройте его рано. Цена растёт с каждым сыгранным ходом, поэтому чем дольше
+вы тянете, тем дороже. Цена не зависит от размера державы — только от того,
+как долго вы играете.
 
-While it is being built — and more so once it is finished — it raises how
-much your tanks add to both attack and defense. Enemies can bomb your
-HeadQuarters with covert operations to weaken your tanks.
+Пока он строится — и тем более когда достроен — он увеличивает вклад ваших
+танков и в атаку, и в защиту. Враги могут бомбить ваш штаб тайными
+операциями, чтобы ослабить танки.

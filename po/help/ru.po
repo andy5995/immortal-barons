@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-10 22:18-0500\n"
+"POT-Creation-Date: 2026-09-10 22:29-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2715,6 +2715,8 @@ msgid ""
 "Agents are your spies. They carry out covert operations — spying, sabotage, "
 "bombing enemy targets, bribery, and more."
 msgstr ""
+"Агенты — ваши шпионы. Они проводят тайные операции: разведку, диверсии, "
+"бомбардировку вражеских целей, подкуп и другое."
 
 #. type: Plain text
 #: internal/help/content/military/agents.md:19
@@ -2726,6 +2728,12 @@ msgid ""
 "Alliance or a Terrorist Prevention treaty, which lend an ally's agents to "
 "one side of the reckoning."
 msgstr ""
+"Агенты — это то, что вы тратите, а не то, чем побеждаете. Каждая операция "
+"требует одного агента, а провал стоит вам его. Сами по себе ваши агенты не "
+"меняют шансы на успех, как и агенты цели: о том, что их меняет, рассказано в "
+"разделе «Тайные операции». Число агентов важно рядом с разведывательным "
+"союзом или договором о противодействии террору, которые одалживают одной из "
+"сторон агентов союзника."
 
 #. type: Plain text
 #: internal/help/content/military/agents.md:22
@@ -2734,6 +2742,9 @@ msgid ""
 "leave you unable to act. Agents do not fight in normal battles. See the "
 "Covert Operations topic for what they can do."
 msgstr ""
+"Запас агентов даёт вам запас прочности: череда неудач не оставит вас без "
+"возможности действовать. В обычных сражениях агенты не участвуют. О том, что "
+"они умеют, см. раздел «Тайные операции»."
 
 #. type: Title #
 #: internal/help/content/military/bombers.md:1
@@ -2749,6 +2760,8 @@ msgid ""
 "their own — an offense of 0 and a defense of 0 — and their only job is to "
 "carry payloads."
 msgstr ""
+"Бомбардировщики — транспортная авиация. Своей силы атаки и защиты у них нет "
+"— атака 0 и защита 0 — и их единственная задача нести боевую нагрузку."
 
 #. type: Plain text
 #: internal/help/content/military/bombers.md:16
@@ -2756,6 +2769,8 @@ msgid ""
 "Missiles and interplanetary bombings need bombers to deliver them. Without "
 "enough bombers, you cannot launch those attacks."
 msgstr ""
+"Ракетам и межпланетным бомбардировкам нужны бомбардировщики-носители. Без "
+"достаточного их числа такие удары не запустить."
 
 #. type: Plain text
 #: internal/help/content/military/bombers.md:19
@@ -2763,6 +2778,8 @@ msgid ""
 "In a normal attack, your bombers first destroy the enemy jets that are on "
 "the ground, which weakens the enemy's next strike."
 msgstr ""
+"В обычной атаке ваши бомбардировщики сначала уничтожают вражеские самолёты "
+"на земле, что ослабляет следующий удар противника."
 
 #. type: Plain text
 #: internal/help/content/military/bombers.md:21
@@ -2770,6 +2787,8 @@ msgid ""
 "Bombers add a large amount to your net worth, so a fleet of them raises your "
 "score as well as your reach."
 msgstr ""
+"Бомбардировщики заметно поднимают ваш капитал, так что их флот повышает и "
+"очки, и дальность вашей руки."
 
 #. type: Title #
 #: internal/help/content/military/carriers.md:1
@@ -2784,6 +2803,8 @@ msgid ""
 "Carriers are a support unit with no attack or defense strength of their "
 "own.  They do two jobs."
 msgstr ""
+"Авианосцы — вспомогательные части без собственной силы атаки и защиты. У них "
+"две задачи."
 
 #. type: Plain text
 #: internal/help/content/military/carriers.md:15
@@ -2791,11 +2812,14 @@ msgid ""
 "First, they move your jets to a battle: one carrier carries up to 100 jets.  "
 "Without enough carriers, your jets cannot reach the enemy."
 msgstr ""
+"Во-первых, они доставляют ваши самолёты к месту боя: один авианосец берёт до "
+"100 самолётов. Без достаточного числа авианосцев ваши самолёты до врага не "
+"долетят."
 
 #. type: Plain text
 #: internal/help/content/military/carriers.md:17
 msgid "Second, they carry goods for trade between empires."
-msgstr ""
+msgstr "Во-вторых, они возят товары для торговли между державами."
 
 #. type: Plain text
 #: internal/help/content/military/carriers.md:21
@@ -2805,6 +2829,10 @@ msgid ""
 "carriers can lift, the carrier screen tells you how many more would cover "
 "them."
 msgstr ""
+"Покупать их отдельно не обязательно: при крупном заказе самолётов вам "
+"предложат включить авианосцы для них за то же золото. Если самолётов больше, "
+"чем могут поднять авианосцы, экран авианосцев покажет, скольких ещё не "
+"хватает."
 
 #. type: Plain text
 #: internal/help/content/military/carriers.md:24
@@ -2813,6 +2841,9 @@ msgid ""
 "industry to build carriers and then sell them. This can earn more than "
 "producing gold directly."
 msgstr ""
+"Авианосцы очень дёшевы в содержании. Распространённый способ заработать — "
+"поставить промышленность на постройку авианосцев и продавать их. Это может "
+"приносить больше, чем прямая добыча золота."
 
 #. type: Title #
 #: internal/help/content/military/headquarters.md:1
@@ -2823,16 +2854,12 @@ msgstr "Штаб"
 
 #. type: Plain text
 #: internal/help/content/military/headquarters.md:12
-#, fuzzy
-#| msgid ""
-#| "Your HeadQuarters coordinates your army. It is a one-time building "
-#| "project that advances a little each turn until it is complete."
 msgid ""
 "Your HeadQuarters is the command center of your army. It is a one-time "
 "building project that advances a little each turn until it is complete."
 msgstr ""
-"Ваш штаб управляет армией. Это единовременный строительный проект, который "
-"каждый ход понемногу продвигается, пока не будет завершён."
+"Штаб — командный центр вашей армии. Это разовая стройка, которая каждый ход "
+"немного продвигается, пока не будет закончена."
 
 #. type: Plain text
 #: internal/help/content/military/headquarters.md:16
@@ -2841,21 +2868,20 @@ msgid ""
 "wait, the more it costs. The price does not depend on how large your realm "
 "is — only on how long you have been playing."
 msgstr ""
+"Стройте его рано. Цена растёт с каждым сыгранным ходом, поэтому чем дольше "
+"вы тянете, тем дороже. Цена не зависит от размера державы — только от того, "
+"как долго вы играете."
 
 #. type: Plain text
 #: internal/help/content/military/headquarters.md:19
-#, fuzzy
-#| msgid ""
-#| "While it is being built — and more so once finished — it raises how much "
-#| "your Tanks add to both attack and defense. Enemies can bomb your HQ with "
-#| "covert operations to weaken your tanks."
 msgid ""
 "While it is being built — and more so once it is finished — it raises how "
 "much your tanks add to both attack and defense. Enemies can bomb your "
 "HeadQuarters with covert operations to weaken your tanks."
 msgstr ""
-"Пока штаб строится — и ещё сильнее по завершении — он увеличивает вклад "
-"ваших танков в атаку и защиту."
+"Пока он строится — и тем более когда достроен — он увеличивает вклад ваших "
+"танков и в атаку, и в защиту. Враги могут бомбить ваш штаб тайными "
+"операциями, чтобы ослабить танки."
 
 #. type: Title #
 #: internal/help/content/military/jets.md:1
@@ -2871,6 +2897,9 @@ msgid ""
 "0, so they add nothing to your defense. One jet is about twice as strong on "
 "attack as a trooper."
 msgstr ""
+"Самолёты — чисто ударная авиация. У них атака 2 и защита 0, так что в "
+"оборону они не добавляют ничего. Один самолёт в атаке примерно вдвое сильнее "
+"солдата."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:16
@@ -2878,6 +2907,8 @@ msgid ""
 "Jets are cheap to buy but expensive to keep, so do not buy more than you "
 "will use."
 msgstr ""
+"Самолёты дёшевы при покупке и дороги в содержании, поэтому не берите больше, "
+"чем используете."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:20
@@ -2886,6 +2917,8 @@ msgid ""
 "and one carrier moves up to 100 jets. Without enough carriers, your jets "
 "cannot join the attack."
 msgstr ""
+"Сами по себе самолёты до боя не доберутся. Их везут авианосцы, один берёт до "
+"100 самолётов. Без достаточного их числа ваши самолёты в атаке не участвуют."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:24
@@ -2895,6 +2928,9 @@ msgid ""
 "so you end up with fewer jets than you asked for and every one of them able "
 "to fly."
 msgstr ""
+"Поскольку об этом легко забыть, при заказе более 100 самолётов вас спросят, "
+"включить ли авианосцы для них. Согласитесь — и то же золото купит и то, и "
+"другое: самолётов будет меньше, чем вы просили, зато полетят все."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:28
@@ -2903,6 +2939,9 @@ msgid ""
 "are striking a named baron on another planet — a shield does nothing against "
 "jets attacking on its own planet."
 msgstr ""
+"Вражеский щит СОИ снижает силу атаки ваших самолётов, но только когда вы "
+"бьёте по названному барону на другой планете: против самолётов, атакующих на "
+"своей планете, щит бесполезен."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:30
@@ -2910,6 +2949,9 @@ msgid ""
 "Jets are lost in battle like any other unit. Enemy turrets are part of the "
 "defense your attack has to beat; they do not single out your jets."
 msgstr ""
+"Самолёты гибнут в бою, как и любые другие части. Вражеские турели — часть "
+"обороны, которую должна одолеть ваша атака, отдельно за самолётами они не "
+"охотятся."
 
 #. type: Title #
 #: internal/help/content/military/tanks.md:1
@@ -2925,6 +2967,9 @@ msgid ""
 "defense. A tank is worth three troopers on its own. With a finished "
 "HeadQuarters it is worth five, on both attack and defense."
 msgstr ""
+"Танки — сильнейшие универсальные части, мощные и в атаке, и в обороне. Сам "
+"по себе танк стоит трёх солдат. С достроенным штабом — пяти, и в атаке, и в "
+"обороне."
 
 #. type: Plain text
 #: internal/help/content/military/tanks.md:16
@@ -2933,12 +2978,16 @@ msgid ""
 "and cheap to maintain, so over a long game tanks are the most efficient "
 "force."
 msgstr ""
+"Они дороги при покупке и дёшевы в содержании. Танковую армию дорого собрать "
+"и дёшево держать, поэтому за долгую игру танки — самая выгодная сила."
 
 #. type: Plain text
 #: internal/help/content/military/tanks.md:18
 msgid ""
 "High military morale also makes your tanks more effective, so keep it up."
 msgstr ""
+"Высокий боевой дух делает ваши танки ещё действеннее, так что поддерживайте "
+"его."
 
 #. type: Plain text
 #: internal/help/content/military/tanks.md:20
@@ -2946,6 +2995,8 @@ msgid ""
 "Grow your economy first, and then turn your gold into tanks for a force that "
 "wins both attacks and defenses."
 msgstr ""
+"Сначала поднимите экономику, а затем обратите золото в танки — в силу, "
+"которая выигрывает и атаки, и обороны."
 
 #. type: Title #
 #: internal/help/content/military/troopers.md:1
@@ -2961,6 +3012,8 @@ msgid ""
 "They fight on both attack and defense, with an offense of 1 and a defense of "
 "1."
 msgstr ""
+"Солдаты — ваши рядовые бойцы, самые дешёвые и самые слабые. Они сражаются и "
+"в атаке, и в обороне, с атакой 1 и защитой 1."
 
 #. type: Plain text
 #: internal/help/content/military/troopers.md:16
@@ -2969,6 +3022,9 @@ msgid ""
 "as one tank, but a tank is worth several troopers in a fight. Troopers are "
 "the better value early in the game, and tanks become stronger later."
 msgstr ""
+"Они дёшевы и при покупке, и в содержании. Примерно семь солдат стоят как "
+"один танк, но танк в бою стоит нескольких солдат. В начале игры выгоднее "
+"солдаты, позже сильнее танки."
 
 #. type: Plain text
 #: internal/help/content/military/troopers.md:21
@@ -2978,6 +3034,9 @@ msgid ""
 "large trooper army needs a strong food supply, and a large armored one "
 "barely registers."
 msgstr ""
+"Едят все военные части, но солдат ест в пятьдесят раз больше любой другой: "
+"единица еды кормит 200 солдат или 10 000 кого угодно ещё. Большой солдатской "
+"армии нужно крепкое продовольствие, а большая бронетанковая почти незаметна."
 
 #. type: Plain text
 #: internal/help/content/military/troopers.md:26
@@ -2987,12 +3046,18 @@ msgid ""
 "empire that fired it. Troopers are a common target of enemy covert "
 "operations, which can make them desert."
 msgstr ""
+"Большая солдатская армия к тому же отпугивает вражеские удары S3-Sabre. Чем "
+"больше у вас солдат, тем вероятнее, что эта ракета ударит по той державе, "
+"которая её пустила. Солдаты — частая цель вражеских тайных операций, из-за "
+"которых они дезертируют."
 
 #. type: Plain text
 #: internal/help/content/military/troopers.md:27
 msgid ""
 "Buy troopers early to survive, and build more tanks as your economy grows."
 msgstr ""
+"Покупайте солдат рано, чтобы выжить, и стройте больше танков по мере роста "
+"экономики."
 
 #. type: Title #
 #: internal/help/content/military/turrets.md:1
@@ -3008,6 +3073,8 @@ msgid ""
 "have a defense of 2 and an offense of 0, which is about twice as strong on "
 "defense as a trooper."
 msgstr ""
+"Турели — чисто оборонительные части, зеркало самолётов. У них защита 2 и "
+"атака 0, то есть в обороне они примерно вдвое сильнее солдата."
 
 #. type: Plain text
 #: internal/help/content/military/turrets.md:17
@@ -3016,6 +3083,9 @@ msgid ""
 "attacking troops. They do not stop a neighbor's missiles — nothing does, "
 "nuclear, chemical or biological alike."
 msgstr ""
+"Турели сбивают атакующие самолёты, уничтожают атакующие танки и убивают "
+"атакующие войска. Ракеты соседа они не останавливают — их не останавливает "
+"ничто, ни ядерные, ни химические, ни биологические."
 
 #. type: Plain text
 #: internal/help/content/military/turrets.md:20
@@ -3023,6 +3093,8 @@ msgid ""
 "Covert operations cannot destroy your turrets, so they form a stable core "
 "for your defense."
 msgstr ""
+"Тайные операции не могут уничтожить ваши турели, поэтому они образуют "
+"устойчивое ядро обороны."
 
 #. type: Plain text
 #: internal/help/content/military/turrets.md:23
@@ -3030,6 +3102,8 @@ msgid ""
 "Some strategy guides call this unit a \"Missile Base.\" It is the same "
 "defensive unit."
 msgstr ""
+"Некоторые руководства называют эту часть «ракетной базой». Это та же самая "
+"оборонительная часть."
 
 #. type: Plain text
 #: internal/help/content/military/turrets.md:25
@@ -3037,6 +3111,8 @@ msgid ""
 "Build turrets to defend your regions, and pair them with troopers and tanks "
 "so you can both defend and attack."
 msgstr ""
+"Стройте турели для защиты регионов и сочетайте их с солдатами и танками, "
+"чтобы уметь и обороняться, и наступать."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-agricultural.md:1

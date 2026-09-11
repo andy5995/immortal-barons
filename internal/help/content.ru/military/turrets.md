@@ -7,19 +7,18 @@ title: Турели
 
 # Турели
 
-Turrets are a defense-only unit — the defensive counterpart to jets. They
-have a defense of 2 and an offense of 0, which is about twice as strong on
-defense as a trooper.
+Турели — чисто оборонительные части, зеркало самолётов. У них защита 2 и
+атака 0, то есть в обороне они примерно вдвое сильнее солдата.
 
-Turrets shoot down attacking jets, destroy attacking tanks, and kill
-attacking troops. They do not stop a neighbor's missiles — nothing does,
-nuclear, chemical or biological alike.
+Турели сбивают атакующие самолёты, уничтожают атакующие танки и убивают
+атакующие войска. Ракеты соседа они не останавливают — их не останавливает
+ничто, ни ядерные, ни химические, ни биологические.
 
-Covert operations cannot destroy your turrets, so they form a stable core
-for your defense.
+Тайные операции не могут уничтожить ваши турели, поэтому они образуют
+устойчивое ядро обороны.
 
-Some strategy guides call this unit a "Missile Base." It is the same
-defensive unit.
+Некоторые руководства называют эту часть «ракетной базой». Это та же самая
+оборонительная часть.
 
-Build turrets to defend your regions, and pair them with troopers and tanks
-so you can both defend and attack.
+Стройте турели для защиты регионов и сочетайте их с солдатами и танками,
+чтобы уметь и обороняться, и наступать.

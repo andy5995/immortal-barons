@@ -7,19 +7,20 @@ title: Авианосцы
 
 # Авианосцы
 
-Carriers are a support unit with no attack or defense strength of their
-own.  They do two jobs.
+Авианосцы — вспомогательные части без собственной силы атаки и защиты. У них
+две задачи.
 
-First, they move your jets to a battle: one carrier carries up to 100 jets.
-Without enough carriers, your jets cannot reach the enemy.
+Во-первых, они доставляют ваши самолёты к месту боя: один авианосец берёт до
+100 самолётов. Без достаточного числа авианосцев ваши самолёты до врага не
+долетят.
 
-Second, they carry goods for trade between empires.
+Во-вторых, они возят товары для торговли между державами.
 
-You do not have to buy them separately: a large jet order offers to include
-the carriers for them, for the same gold. If your jets outnumber what your
-carriers can lift, the carrier screen tells you how many more would cover
-them.
+Покупать их отдельно не обязательно: при крупном заказе самолётов вам
+предложат включить авианосцы для них за то же золото. Если самолётов больше,
+чем могут поднять авианосцы, экран авианосцев покажет, скольких ещё не
+хватает.
 
-Carriers are very cheap to keep. A common way to earn gold is to set your
-industry to build carriers and then sell them. This can earn more than
-producing gold directly.
+Авианосцы очень дёшевы в содержании. Распространённый способ заработать —
+поставить промышленность на постройку авианосцев и продавать их. Это может
+приносить больше, чем прямая добыча золота.

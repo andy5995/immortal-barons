@@ -7,15 +7,14 @@ title: Бомбардировщики
 
 # Бомбардировщики
 
-Bombers are delivery aircraft. They have no attack or defense strength of
-their own — an offense of 0 and a defense of 0 — and their only job is to
-carry payloads.
+Бомбардировщики — транспортная авиация. Своей силы атаки и защиты у них нет
+— атака 0 и защита 0 — и их единственная задача нести боевую нагрузку.
 
-Missiles and interplanetary bombings need bombers to deliver them. Without
-enough bombers, you cannot launch those attacks.
+Ракетам и межпланетным бомбардировкам нужны бомбардировщики-носители. Без
+достаточного их числа такие удары не запустить.
 
-In a normal attack, your bombers first destroy the enemy jets that are on
-the ground, which weakens the enemy's next strike.
+В обычной атаке ваши бомбардировщики сначала уничтожают вражеские самолёты
+на земле, что ослабляет следующий удар противника.
 
-Bombers add a large amount to your net worth, so a fleet of them raises your
-score as well as your reach.
+Бомбардировщики заметно поднимают ваш капитал, так что их флот повышает и
+очки, и дальность вашей руки.

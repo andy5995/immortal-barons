@@ -7,19 +7,19 @@ title: Geschütztürme
 
 # Geschütztürme
 
-Turrets are a defense-only unit — the defensive counterpart to jets. They
-have a defense of 2 and an offense of 0, which is about twice as strong on
-defense as a trooper.
+Türme sind eine reine Verteidigungseinheit — das defensive Gegenstück zu
+Jets. Sie haben Verteidigung 2 und Angriff 0, sind in der Verteidigung also
+etwa doppelt so stark wie ein Soldat.
 
-Turrets shoot down attacking jets, destroy attacking tanks, and kill
-attacking troops. They do not stop a neighbor's missiles — nothing does,
-nuclear, chemical or biological alike.
+Türme schießen angreifende Jets ab, zerstören angreifende Panzer und töten
+angreifende Truppen. Die Raketen eines Nachbarn halten sie nicht auf — das
+tut nichts, weder bei nuklearen noch bei chemischen oder biologischen.
 
-Covert operations cannot destroy your turrets, so they form a stable core
-for your defense.
+Verdeckte Operationen können Ihre Türme nicht zerstören, sie bilden also
+einen beständigen Kern Ihrer Verteidigung.
 
-Some strategy guides call this unit a "Missile Base." It is the same
-defensive unit.
+Manche Strategieführer nennen diese Einheit „Raketenbasis“. Es ist dieselbe
+Verteidigungseinheit.
 
-Build turrets to defend your regions, and pair them with troopers and tanks
-so you can both defend and attack.
+Bauen Sie Türme, um Ihre Regionen zu verteidigen, und stellen Sie ihnen
+Soldaten und Panzer zur Seite, damit Sie verteidigen und angreifen können.

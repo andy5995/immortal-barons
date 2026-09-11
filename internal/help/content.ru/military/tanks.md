@@ -7,15 +7,15 @@ title: Танки
 
 # Танки
 
-Tanks are the strongest general-purpose unit, powerful on both attack and
-defense. A tank is worth three troopers on its own. With a finished
-HeadQuarters it is worth five, on both attack and defense.
+Танки — сильнейшие универсальные части, мощные и в атаке, и в обороне. Сам
+по себе танк стоит трёх солдат. С достроенным штабом — пяти, и в атаке, и в
+обороне.
 
-They cost a lot to buy but little to keep. A tank army is expensive to build
-and cheap to maintain, so over a long game tanks are the most efficient
-force.
+Они дороги при покупке и дёшевы в содержании. Танковую армию дорого собрать
+и дёшево держать, поэтому за долгую игру танки — самая выгодная сила.
 
-High military morale also makes your tanks more effective, so keep it up.
+Высокий боевой дух делает ваши танки ещё действеннее, так что поддерживайте
+его.
 
-Grow your economy first, and then turn your gold into tanks for a force that
-wins both attacks and defenses.
+Сначала поднимите экономику, а затем обратите золото в танки — в силу,
+которая выигрывает и атаки, и обороны.

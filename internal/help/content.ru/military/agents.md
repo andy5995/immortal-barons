@@ -7,16 +7,16 @@ title: 'Тайные агенты'
 
 # Тайные агенты
 
-Agents are your spies. They carry out covert operations — spying, sabotage,
-bombing enemy targets, bribery, and more.
+Агенты — ваши шпионы. Они проводят тайные операции: разведку, диверсии,
+бомбардировку вражеских целей, подкуп и другое.
 
-Agents are what you spend, not what you win with. Each operation needs one,
-and a failed operation costs you it. On their own, your agents do not change
-your chance of success, and neither do the target's — the Covert Operations
-topic covers what does. Where the count tells is alongside an Intelligence
-Alliance or a Terrorist Prevention treaty, which lend an ally's agents to
-one side of the reckoning.
+Агенты — это то, что вы тратите, а не то, чем побеждаете. Каждая операция
+требует одного агента, а провал стоит вам его. Сами по себе ваши агенты не
+меняют шансы на успех, как и агенты цели: о том, что их меняет, рассказано в
+разделе «Тайные операции». Число агентов важно рядом с разведывательным
+союзом или договором о противодействии террору, которые одалживают одной из
+сторон агентов союзника.
 
-What a stock of agents buys you is staying power: a run of failures does not
-leave you unable to act. Agents do not fight in normal battles. See the
-Covert Operations topic for what they can do.
+Запас агентов даёт вам запас прочности: череда неудач не оставит вас без
+возможности действовать. В обычных сражениях агенты не участвуют. О том, что
+они умеют, см. раздел «Тайные операции».

@@ -7,16 +7,18 @@ title: 'Verdeckte Agenten'
 
 # Verdeckte Agenten
 
-Agents are your spies. They carry out covert operations — spying, sabotage,
-bombing enemy targets, bribery, and more.
+Agenten sind Ihre Spione. Sie führen verdeckte Operationen aus — Spionage,
+Sabotage, Bombardierung feindlicher Ziele, Bestechung und mehr.
 
-Agents are what you spend, not what you win with. Each operation needs one,
-and a failed operation costs you it. On their own, your agents do not change
-your chance of success, and neither do the target's — the Covert Operations
-topic covers what does. Where the count tells is alongside an Intelligence
-Alliance or a Terrorist Prevention treaty, which lend an ally's agents to
-one side of the reckoning.
+Agenten sind das, was Sie ausgeben, nicht das, womit Sie gewinnen. Jede
+Operation braucht einen, und eine gescheiterte Operation kostet ihn. Für
+sich genommen ändert die Zahl Ihrer Agenten Ihre Erfolgsaussicht nicht, und
+die des Ziels ebenso wenig — was sie ändert, steht im Thema Verdeckte
+Operationen. Ins Gewicht fällt die Zahl neben einem Geheimdienstbündnis oder
+einem Abkommen zur Terrorabwehr, die einer Seite der Rechnung die Agenten
+eines Verbündeten leihen.
 
-What a stock of agents buys you is staying power: a run of failures does not
-leave you unable to act. Agents do not fight in normal battles. See the
-Covert Operations topic for what they can do.
+Was Ihnen ein Vorrat an Agenten bringt, ist Durchhaltevermögen: Eine Reihe
+von Fehlschlägen lässt Sie nicht handlungsunfähig zurück. Agenten kämpfen
+nicht in gewöhnlichen Schlachten. Was sie können, steht im Thema Verdeckte
+Operationen.

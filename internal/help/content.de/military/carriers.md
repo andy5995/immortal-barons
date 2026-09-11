@@ -7,19 +7,19 @@ title: Träger
 
 # Träger
 
-Carriers are a support unit with no attack or defense strength of their
-own.  They do two jobs.
+Träger sind eine Unterstützungseinheit ohne eigene Angriffs- oder
+Verteidigungsstärke. Sie haben zwei Aufgaben.
 
-First, they move your jets to a battle: one carrier carries up to 100 jets.
-Without enough carriers, your jets cannot reach the enemy.
+Erstens bringen sie Ihre Jets zur Schlacht: Ein Träger nimmt bis zu 100 Jets
+auf. Ohne genügend Träger erreichen Ihre Jets den Feind nicht.
 
-Second, they carry goods for trade between empires.
+Zweitens befördern sie Waren für den Handel zwischen Reichen.
 
-You do not have to buy them separately: a large jet order offers to include
-the carriers for them, for the same gold. If your jets outnumber what your
-carriers can lift, the carrier screen tells you how many more would cover
-them.
+Sie müssen sie nicht getrennt kaufen: Eine große Jet-Bestellung bietet an,
+die Träger dafür einzuschließen, zum selben Gold. Übersteigen Ihre Jets das,
+was Ihre Träger heben können, sagt Ihnen der Träger-Bildschirm, wie viele
+weitere nötig wären.
 
-Carriers are very cheap to keep. A common way to earn gold is to set your
-industry to build carriers and then sell them. This can earn more than
-producing gold directly.
+Träger sind sehr günstig im Unterhalt. Ein verbreiteter Weg, Gold zu
+verdienen, ist es, die Industrie Träger bauen zu lassen und sie dann zu
+verkaufen. Das kann mehr einbringen, als Gold unmittelbar zu erzeugen.

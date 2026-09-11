@@ -7,22 +7,21 @@ title: Пехота
 
 # Пехота
 
-Troopers are your basic soldiers — the cheapest and weakest fighting
-unit. They fight on both attack and defense, with an offense of 1 and a
-defense of 1.
+Солдаты — ваши рядовые бойцы, самые дешёвые и самые слабые. Они сражаются и
+в атаке, и в обороне, с атакой 1 и защитой 1.
 
-They are cheap to buy and cheap to keep. About seven troopers cost as much
-as one tank, but a tank is worth several troopers in a fight. Troopers are
-the better value early in the game, and tanks become stronger later.
+Они дёшевы и при покупке, и в содержании. Примерно семь солдат стоят как
+один танк, но танк в бою стоит нескольких солдат. В начале игры выгоднее
+солдаты, позже сильнее танки.
 
-Every military unit eats, but a trooper eats fifty times as much as any
-other: one unit of food feeds 200 troopers, or 10,000 of anything else. So a
-large trooper army needs a strong food supply, and a large armored one
-barely registers.
+Едят все военные части, но солдат ест в пятьдесят раз больше любой другой:
+единица еды кормит 200 солдат или 10 000 кого угодно ещё. Большой солдатской
+армии нужно крепкое продовольствие, а большая бронетанковая почти незаметна.
 
-A large trooper army also discourages enemy S3-Sabre strikes. The more
-troopers you hold, the more likely that missile is to backfire onto the
-empire that fired it. Troopers are a common target of enemy covert
-operations, which can make them desert.
+Большая солдатская армия к тому же отпугивает вражеские удары S3-Sabre. Чем
+больше у вас солдат, тем вероятнее, что эта ракета ударит по той державе,
+которая её пустила. Солдаты — частая цель вражеских тайных операций, из-за
+которых они дезертируют.
 
-Buy troopers early to survive, and build more tanks as your economy grows.
+Покупайте солдат рано, чтобы выжить, и стройте больше танков по мере роста
+экономики.

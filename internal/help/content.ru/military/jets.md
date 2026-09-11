@@ -7,25 +7,24 @@ title: Истребители
 
 # Истребители
 
-Jets are an attack-only aircraft. They have an offense of 2 and a defense of
-0, so they add nothing to your defense. One jet is about twice as strong on
-attack as a trooper.
+Самолёты — чисто ударная авиация. У них атака 2 и защита 0, так что в
+оборону они не добавляют ничего. Один самолёт в атаке примерно вдвое сильнее
+солдата.
 
-Jets are cheap to buy but expensive to keep, so do not buy more than you
-will use.
+Самолёты дёшевы при покупке и дороги в содержании, поэтому не берите больше,
+чем используете.
 
-Jets cannot reach a battle on their own. You need carriers to carry them,
-and one carrier moves up to 100 jets. Without enough carriers, your jets
-cannot join the attack.
+Сами по себе самолёты до боя не доберутся. Их везут авианосцы, один берёт до
+100 самолётов. Без достаточного их числа ваши самолёты в атаке не участвуют.
 
-Because that is easy to forget, an order of more than 100 jets asks whether
-to include the carriers to lift them. Say yes and the same gold buys both,
-so you end up with fewer jets than you asked for and every one of them able
-to fly.
+Поскольку об этом легко забыть, при заказе более 100 самолётов вас спросят,
+включить ли авианосцы для них. Согласитесь — и то же золото купит и то, и
+другое: самолётов будет меньше, чем вы просили, зато полетят все.
 
-An enemy SDI shield lowers your jets' attacking strength, but only when you
-are striking a named baron on another planet — a shield does nothing against
-jets attacking on its own planet.
+Вражеский щит СОИ снижает силу атаки ваших самолётов, но только когда вы
+бьёте по названному барону на другой планете: против самолётов, атакующих на
+своей планете, щит бесполезен.
 
-Jets are lost in battle like any other unit. Enemy turrets are part of the
-defense your attack has to beat; they do not single out your jets.
+Самолёты гибнут в бою, как и любые другие части. Вражеские турели — часть
+обороны, которую должна одолеть ваша атака, отдельно за самолётами они не
+охотятся.

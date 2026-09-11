@@ -7,15 +7,15 @@ title: Bomber
 
 # Bomber
 
-Bombers are delivery aircraft. They have no attack or defense strength of
-their own — an offense of 0 and a defense of 0 — and their only job is to
-carry payloads.
+Bomber sind Trägerflugzeuge. Sie haben keine eigene Angriffs- oder
+Verteidigungsstärke — Angriff 0 und Verteidigung 0 — und ihre einzige
+Aufgabe ist es, Nutzlasten zu tragen.
 
-Missiles and interplanetary bombings need bombers to deliver them. Without
-enough bombers, you cannot launch those attacks.
+Raketen und interplanetare Bombardierungen brauchen Bomber als Träger. Ohne
+genügend Bomber können Sie diese Angriffe nicht starten.
 
-In a normal attack, your bombers first destroy the enemy jets that are on
-the ground, which weakens the enemy's next strike.
+Bei einem normalen Angriff zerstören Ihre Bomber zuerst die feindlichen Jets
+am Boden, was den nächsten Schlag des Feindes schwächt.
 
-Bombers add a large amount to your net worth, so a fleet of them raises your
-score as well as your reach.
+Bomber erhöhen Ihren Nettowert beträchtlich, eine Flotte davon hebt also
+Ihre Punktzahl ebenso wie Ihre Reichweite.

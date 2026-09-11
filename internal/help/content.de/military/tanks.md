@@ -7,15 +7,16 @@ title: Panzer
 
 # Panzer
 
-Tanks are the strongest general-purpose unit, powerful on both attack and
-defense. A tank is worth three troopers on its own. With a finished
-HeadQuarters it is worth five, on both attack and defense.
+Panzer sind die stärkste Allzweckeinheit, mächtig im Angriff wie in der
+Verteidigung. Ein Panzer ist für sich drei Soldaten wert. Mit fertigem
+Hauptquartier ist er fünf wert, im Angriff wie in der Verteidigung.
 
-They cost a lot to buy but little to keep. A tank army is expensive to build
-and cheap to maintain, so over a long game tanks are the most efficient
-force.
+Sie kosten viel im Kauf, aber wenig im Unterhalt. Eine Panzerarmee ist teuer
+aufzubauen und günstig zu halten, über ein langes Spiel sind Panzer also die
+wirtschaftlichste Streitmacht.
 
-High military morale also makes your tanks more effective, so keep it up.
+Hohe Kampfmoral macht Ihre Panzer zusätzlich wirksamer, halten Sie sie also
+hoch.
 
-Grow your economy first, and then turn your gold into tanks for a force that
-wins both attacks and defenses.
+Bauen Sie zuerst Ihre Wirtschaft auf und verwandeln Sie Ihr Gold dann in
+Panzer, für eine Streitmacht, die Angriffe wie Verteidigungen gewinnt.

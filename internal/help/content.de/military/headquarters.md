@@ -7,13 +7,15 @@ title: Hauptquartier
 
 # Hauptquartier
 
-Your HeadQuarters is the command center of your army. It is a one-time
-building project that advances a little each turn until it is complete.
+Ihr Hauptquartier ist die Kommandozentrale Ihrer Armee. Es ist ein
+einmaliges Bauvorhaben, das jeden Zug ein Stück vorankommt, bis es fertig
+ist.
 
-Build it early. The price goes up every turn you play, so the longer you
-wait, the more it costs. The price does not depend on how large your realm
-is — only on how long you have been playing.
+Bauen Sie es früh. Der Preis steigt mit jedem Zug, den Sie spielen, je
+länger Sie warten, desto teurer wird es also. Der Preis hängt nicht von der
+Größe Ihres Reiches ab, nur davon, wie lange Sie schon spielen.
 
-While it is being built — and more so once it is finished — it raises how
-much your tanks add to both attack and defense. Enemies can bomb your
-HeadQuarters with covert operations to weaken your tanks.
+Während es gebaut wird — und noch mehr, sobald es fertig ist — erhöht es,
+was Ihre Panzer zu Angriff und Verteidigung beitragen. Feinde können Ihr
+Hauptquartier mit verdeckten Operationen bombardieren, um Ihre Panzer zu
+schwächen.

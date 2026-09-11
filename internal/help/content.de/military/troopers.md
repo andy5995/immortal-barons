@@ -7,22 +7,24 @@ title: Soldaten
 
 # Soldaten
 
-Troopers are your basic soldiers — the cheapest and weakest fighting
-unit. They fight on both attack and defense, with an offense of 1 and a
-defense of 1.
+Soldaten sind Ihre einfachen Kämpfer — die günstigste und schwächste
+Kampfeinheit. Sie kämpfen im Angriff wie in der Verteidigung, mit Angriff 1
+und Verteidigung 1.
 
-They are cheap to buy and cheap to keep. About seven troopers cost as much
-as one tank, but a tank is worth several troopers in a fight. Troopers are
-the better value early in the game, and tanks become stronger later.
+Sie sind günstig im Kauf und günstig im Unterhalt. Etwa sieben Soldaten
+kosten so viel wie ein Panzer, doch ein Panzer ist im Kampf mehrere Soldaten
+wert. Früh im Spiel sind Soldaten das bessere Geschäft, später werden Panzer
+stärker.
 
-Every military unit eats, but a trooper eats fifty times as much as any
-other: one unit of food feeds 200 troopers, or 10,000 of anything else. So a
-large trooper army needs a strong food supply, and a large armored one
-barely registers.
+Jede Militäreinheit isst, ein Soldat aber fünfzigmal so viel wie jede
+andere: Eine Einheit Nahrung ernährt 200 Soldaten oder 10.000 von allem
+anderen. Eine große Soldatenarmee braucht also eine starke
+Nahrungsversorgung, eine große Panzerarmee fällt kaum ins Gewicht.
 
-A large trooper army also discourages enemy S3-Sabre strikes. The more
-troopers you hold, the more likely that missile is to backfire onto the
-empire that fired it. Troopers are a common target of enemy covert
-operations, which can make them desert.
+Eine große Soldatenarmee schreckt zudem feindliche S3-Sabre-Schläge ab. Je
+mehr Soldaten Sie halten, desto eher schlägt diese Rakete auf das Reich
+zurück, das sie abgefeuert hat. Soldaten sind ein häufiges Ziel feindlicher
+verdeckter Operationen, die sie zur Fahnenflucht bringen können.
 
-Buy troopers early to survive, and build more tanks as your economy grows.
+Kaufen Sie früh Soldaten, um zu überleben, und bauen Sie mehr Panzer,
+während Ihre Wirtschaft wächst.
