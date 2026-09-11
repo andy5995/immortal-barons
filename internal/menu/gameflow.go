@@ -27,6 +27,7 @@ func GameLoop(s session.Session, w *game.World, handle string, t Term) (err erro
 	c.Player()
 	w.Unlock()
 	menus := BuildMenus()
+	c.bank = menus.Bank
 	// Expand Ctrl-<letter> into the active player's saved macro keystrokes.
 	// This single wrap covers every front-end, since all of them reach the
 	// menu through GameLoop.

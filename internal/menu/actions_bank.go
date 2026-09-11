@@ -186,3 +186,21 @@ func bankRates(s session.Session, w *ctx) Result {
 	pause(s)
 	return Stay
 }
+
+// offerBank tells a caller how far short they are and offers them the Bank
+// where they stand, rather than making them leave the flow, find it, and start
+// again. It returns once they are done there; the caller re-checks what it can
+// now afford, because a visit is no guarantee they came back with anything.
+//
+// The original does none of this: its prompts simply cap what they offer at what
+// the gold covers, so a short baron is never told there is more to be had. See
+// docs/mechanics-reference.md.
+func offerBank(s session.Session, w *ctx, short int64) {
+	okNoPause(s, "That costs %s gold more than you have in hand.", comma(short))
+	if w.bank == nil || !AskYesNo(s, "Visit the bank?", true) {
+		return
+	}
+	if err := Run(s, w, w.bank); err != nil {
+		session.End(err)
+	}
+}

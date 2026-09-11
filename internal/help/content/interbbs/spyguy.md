@@ -21,8 +21,10 @@ from the size of **your own** planet — every region every realm here holds —
 a crowded planet pays more for the same man. The rate is quoted before you pick
 a target, since it is the same wherever you send him.
 
-You choose how long he stays, up to fifteen days or as many days as your gold
-covers, whichever runs out first.
+You choose how long he stays, up to fifteen days. If the stay costs more than
+you are carrying, the shortfall is named and the bank is opened for you; come
+back with it and the man goes, come back without it and nothing is sent or
+charged.
 
 ## What he reports
 

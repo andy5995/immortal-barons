@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Send SpyGuy offers the full fifteen days whatever your gold, and opens the
+    bank when the stay costs more than you are carrying
   * What the Industrial Zones built is listed across two lines in the bracketed
     form the status screen uses, instead of one line per unit type
   * InterPlanetary menu: "Incoming" lists the group attacks and Gooie Kablooies

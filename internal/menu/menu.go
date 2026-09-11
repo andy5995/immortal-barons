@@ -38,6 +38,11 @@ type ctx struct {
 	cached    *game.Empire
 	cachedGen uint64
 	cachedSet bool
+	// bank is the Bank menu, so an action that finds the caller short of gold can
+	// open it where they stand instead of telling them to go and find it (the
+	// SpyGuy's stay is the first). Per-session, because BuildMenus is: a package
+	// global would be shared by every session in one process.
+	bank *Menu
 	// seenEvents high-water-marks how many of the active empire's Events this
 	// session has already accounted for, so the post-action check can show only
 	// the ones another node appended while the player sat at a menu. The first

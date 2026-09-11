@@ -4103,7 +4103,12 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
     stay at once. The same shape as Terrorist Ops, which is total regions × 64.
   - **Stay**: the caller is asked "How many days would you like him to remain?",
     defaulting to 3, bounded by `SpyGuyMaxDays` (15) and by what the gold
-    covers. The 15 is corroborated by `whatsnew.doc` — "Extended SpyGuy to
+    covers. **IB offers the full 15 whatever the gold, and deals with the money
+    afterwards**: the original's cap tells a short baron that 8 days is the
+    length of the office rather than the length of their purse. When the stay
+    cannot be paid for, IB names the shortfall and opens the Bank where the
+    baron stands (`offerBank`); the send is re-checked on the way out, so
+    someone who comes back no richer is refused there and charged nothing. The 15 is corroborated by `whatsnew.doc` — "Extended SpyGuy to
     function for up to 15 days (previously, max was 10)".
   - **The watched board holds the counter**, one byte per foreign board, and
     keeps the LONGER of a stay already running and a newly paid one. Daily

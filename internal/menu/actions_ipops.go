@@ -52,11 +52,9 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	}
 	var planets []string
 	var perDay int64
-	var maxDays int
 	w.Read(func() {
 		planets = w.KnownBoards()
 		perDay = w.SpyGuyCostPerDay()
-		maxDays = w.SpyGuyDaysAffordable(w.Player())
 	})
 	if len(planets) == 0 {
 		ok(s, "No other planets are known yet.")
@@ -66,21 +64,23 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	// the same on every planet, being drawn from the sender's own size.
 	fmt.Fprintf(s, "\n%s"+tr(s, "A SpyGuy costs %s%s%s gold per day.")+"%s\n",
 		ansi.FgWhite, ansi.FgBrightCyan, comma(perDay), ansi.FgWhite, ansi.Reset)
-	if maxDays < 1 {
-		fail(s, game.ErrCantAfford)
-		return Stay
-	}
 	board := pickAddressee(s, w, planets)
 	if board == "" {
 		return Stay
 	}
-	suggested := game.SpyGuyDefaultDays
-	if suggested > maxDays {
-		suggested = maxDays
-	}
-	days := promptSuggested(s, "How many days would you like him to remain?", suggested, maxDays)
+	// The whole stay the man can be paid for, not the part this baron happens to
+	// have the gold for. The original offers only what the gold covers, which
+	// tells a short baron nothing about what the office is actually for; IB
+	// offers the length and deals with the money afterwards, where the bank is.
+	days := promptSuggested(s, "How many days would you like him to remain?",
+		game.SpyGuyDefaultDays, game.SpyGuyMaxDays)
 	if days < 1 {
 		return Stay
+	}
+	// A trip to the bank can change the answer, so what he costs is measured
+	// again on the way out and the send is what decides it.
+	if short := spyGuyShortfall(w, perDay, days); short > 0 {
+		offerBank(s, w, short)
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.SendSpyGuy(p, board, days)
@@ -91,6 +91,21 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	}
 	ok(s, "Your SpyGuy leaves for %s, and will watch it for %d days.", board, days)
 	return Stay
+}
+
+// spyGuyShortfall is what the stay costs beyond the gold in hand, or 0 when it
+// is covered. Read fresh, since another node may have moved this realm's gold.
+func spyGuyShortfall(w *ctx, perDay int64, days int) int64 {
+	var gold int64
+	w.Read(func() {
+		if p := w.Player(); p != nil {
+			gold = p.Gold
+		}
+	})
+	if short := perDay*int64(days) - gold; short > 0 {
+		return short
+	}
+	return 0
 }
 
 // ipSpecialOp drives every item on the interplanetary Special Operations menu
