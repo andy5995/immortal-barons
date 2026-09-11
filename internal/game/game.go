@@ -185,6 +185,13 @@ type World struct {
 	// non-zero and runs the sysop's hook: an alarm that fires for a week is an
 	// alarm nobody reads by the second day.
 	LastFaultNotices []string `json:",omitempty"`
+	// FaultsSeen counts the transport faults recorded since FaultsSince, for the
+	// line Game Setup shows a sysop (#187). The log and the run report are where
+	// the faults themselves live; this is only the count that gives an operator
+	// a reason to open them, since a scheduled run's output goes nowhere anybody
+	// reads. Cleared by -reset with the rest of the world.
+	FaultsSeen  int    `json:",omitempty"`
+	FaultsSince string `json:",omitempty"` // the day the count started, YYYY-MM-DD
 	// heldNoted dedupes the protocol-hold notice to one per board per run. Not
 	// persisted: a new run should say so again.
 	heldNoted map[string]bool

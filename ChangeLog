@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Game Setup shows how many transport faults a board has recorded, and a
+    player addressing a planet nothing has come back from is told so
   * Selling units pays exactly the price the Sell menu quotes, for each unit
     sold, matching the original
   * Buying and selling units runs off the one unit table, so a unit cannot be

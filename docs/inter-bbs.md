@@ -250,6 +250,20 @@ reported on every run, in the run's own output and in `planetary.log`, but a
 board that has been unreachable for a week must not fail its timer every fifteen
 minutes: an alarm that fires forever is one nobody reads by the second day.
 
+**The count is on Game Setup too**, for the operator who does not read scheduler
+mail: one line, `Transport faults   4 faults since 2026-08-23 — see
+planetary.log`, and nothing at all on a board with nothing wrong. It counts the
+new faults each run found, so it measures how much is wrong rather than how often
+the step runs.
+
+**Your players get the other half of it.** Someone addressing a planet nothing
+has come back from in over three days is told so at the planet prompt, before the
+turn is spent — `Nothing has come from Nite Eyes BBS in 5 days; anything sent
+there may be waiting a while.` It is a warning, not a refusal: a packet posted
+into a quiet link still arrives when the link comes back. Nobody is told about
+the board's health in general, and nothing goes into the news: one fault must not
+become a line in every player's recap for as long as it lasts.
+
 For anything the scheduler cannot do — a push to your phone, a message in a chat
 room — `bbs.cfg` takes one command:
 

@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -389,11 +390,30 @@ func relationColored(s session.Session, r game.PlanetRelation) string {
 // names — a message, a terror op, a database lookup.
 func showRelation(s session.Session, w *ctx, planet string) {
 	var r game.PlanetRelation
-	w.Read(func() { r = w.PlanetRelationWith(planet) })
+	var silent int
+	w.Read(func() {
+		r = w.PlanetRelationWith(planet)
+		if w.LinkQuiet(planet, time.Now()) {
+			silent = w.LinkSilentDays(planet, time.Now())
+		}
+	})
 	fmt.Fprintf(s, "%s%s %s%s%s: %s%s\n",
 		ansi.FgWhite, tr(s, "Our current relations with"),
 		ansi.FgBrightWhite, planet, ansi.FgWhite,
 		relationColored(s, r), ansi.Reset)
+	// The other half of #187: a baron spending a turn on a planet nothing has
+	// come back from is told so HERE, where the planet is chosen and the turn is
+	// not yet spent. It is a warning about this action, not about the board's
+	// health — the sysop's half of that is a count on Game Setup — and it does
+	// not refuse the send: silence is not proof the link is down, and a packet
+	// posted into a quiet link still arrives when the link comes back.
+	if silent > 0 {
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightYellow,
+			WrapIndented(fmt.Sprintf(
+				tr(s, "Nothing has come from %s in %d days; anything sent there may be waiting a while."),
+				planet, silent), "  "),
+			ansi.Reset)
+	}
 }
 
 // The five IP Messages items: one planet, as many as the sender keeps naming,

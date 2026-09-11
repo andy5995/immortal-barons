@@ -1,5 +1,7 @@
 package game
 
+import "time"
+
 // Packet routing. Where the Coordinator has arranged the league as a tree, the
 // HOST lines in the roster (BRE's BRNODES.DAT) say which neighbour each board
 // hands a packet to. A leaf board then configures one link, to its uplink,
@@ -209,4 +211,38 @@ func (w *World) addressBroadcasts(packets []Packet) []Packet {
 		}
 	}
 	return out
+}
+
+// LinkSilentDays is how many whole days it has been since a packet from board
+// was processed here, or -1 when this board has never heard from it at all.
+//
+// Silence is a DIFFERENT question from routability (#187): Routable asks whether
+// this board can address a packet to that one, which the roster answers, while
+// this asks whether anything is actually coming back. A planet can be perfectly
+// routable and utterly unreachable — its sysop's mailer down, its outbound never
+// collected — and until now nothing anywhere said so.
+func (w *World) LinkSilentDays(board string, now time.Time) int {
+	at, ok := ParseStamp(w.LastPacketFrom[board])
+	if !ok {
+		return -1
+	}
+	if d := int(now.Sub(at) / (24 * time.Hour)); d > 0 {
+		return d
+	}
+	return 0
+}
+
+// LinkSilentMax is how long a planet may go quiet before a player addressing it
+// is warned. Packets move on the sysop's schedule — a board that exchanges mail
+// once a day is normal, and one that polls twice a week is a setup, not a fault
+// — so this is deliberately several days rather than hours.
+const LinkSilentMax = 3
+
+// LinkQuiet reports that a planet this board HAS heard from has since gone
+// quiet for longer than LinkSilentMax. A planet never heard from is not quiet,
+// it is new: every league starts that way, and warning about it would make the
+// warning meaningless on the day a board joins.
+func (w *World) LinkQuiet(board string, now time.Time) bool {
+	d := w.LinkSilentDays(board, now)
+	return d > LinkSilentMax
 }

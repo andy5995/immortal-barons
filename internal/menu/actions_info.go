@@ -123,9 +123,10 @@ func gameSetup(s session.Session, w *ctx) Result {
 	// player who reads the ruleset without knowing whose it is asks the wrong
 	// person to change it.
 	if c.IBBS {
-		var boards int
-		var declaration, coordBoard string
+		var boards, faults int
+		var declaration, coordBoard, faultsSince string
 		w.Read(func() {
+			faults, faultsSince = w.FaultsSeen, w.FaultsSince
 			boards = len(w.LeagueNodes)
 			declaration = w.LeagueDiplomacy
 			coordBoard = w.CoordinatorBoardID()
@@ -158,6 +159,13 @@ func gameSetup(s session.Session, w *ctx) Result {
 		row("This planet", fitColumn(w.Term, c.BoardID, 50))
 		if declaration != "" {
 			row("League declaration", declaration)
+		}
+		// The transport faults, for the operator who does not read scheduler mail
+		// (#187). A count and where to look, never the faults themselves: the log
+		// holds those, and a screen every player opens is not the place for a
+		// board's plumbing. Shown only when there is something to report.
+		if faults > 0 {
+			row("Transport faults", faultLine(s, faults, faultsSince))
 		}
 	}
 
@@ -316,4 +324,22 @@ func seeScores(s session.Session, w *ctx) Result {
 	printScores(s, w)
 	pause(s)
 	return Stay
+}
+
+// faultLine is the Game Setup row that tells a sysop the transport has been
+// failing and where the detail is (#187). It names the count and the day the
+// count began; a board that has faulted since before it kept the date says only
+// how many.
+func faultLine(s session.Session, n int, since string) string {
+	if since == "" {
+		return fmt.Sprintf(tr(s, "%s — see planetary.log"), faultCount(s, n))
+	}
+	return fmt.Sprintf(tr(s, "%s since %s — see planetary.log"), faultCount(s, n), since)
+}
+
+func faultCount(s session.Session, n int) string {
+	if n == 1 {
+		return tr(s, "1 fault")
+	}
+	return fmt.Sprintf(tr(s, "%d faults"), n)
 }

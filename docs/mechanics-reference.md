@@ -3679,6 +3679,24 @@ baron, and a handle with no realm left forfeits its position the way
 
 ## Interplanetary operations (IB implementation)
 
+**When packets stop flowing, both ends are told — separately (#187).** The
+sysop's half is a count: each planetary run adds the faults the previous run did
+not carry to a tally on the world, and Game Setup shows one line naming the
+count, the day it started, and where to read them — only when there is something
+to report. The faults themselves stay in `planetary.log` and the run report,
+which a scheduled run throws away, which is why the count exists at all.
+
+The player's half is about THEIR action, never the board's health. Picking a
+planet nothing has come back from in more than `LinkSilentMax` days prints a
+warning at the prompt, before the turn is spent. Deliberately not a refusal —
+silence is not proof a link is down, and a packet posted into a quiet link still
+arrives when the link comes back — and deliberately not the routability test:
+`Routable` asks whether this board can ADDRESS a packet there, which the roster
+answers, while `LinkQuiet` asks whether anything is coming back. A planet never
+heard from is new, not quiet, so a league's first day warns about nobody. No
+broadcast and no per-empire event: one fault must not become a line in every
+player's recap, every turn, for as long as it lasts.
+
 InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 (verified against a disassembly of the original binary):
 

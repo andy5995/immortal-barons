@@ -119,6 +119,12 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	// unchanged is not.
 	run.NewFaults = newNotices(run.Notices, w.LastFaultNotices)
 	w.LastFaultNotices = append([]string(nil), run.Notices...)
+	// The count a sysop is shown in Game Setup (#187). Only the NEW ones are
+	// counted, for the reason they are separated at all: a fault that repeats
+	// every run for a week is one problem, and counting it once a run would make
+	// the figure a measure of how often the step runs rather than of how much is
+	// wrong.
+	w.CountFaults(len(run.NewFaults))
 	// Also to disk: the run report goes to stdout, which a scheduled run throws
 	// away, and a scheduler is how the setup guide says to drive this step.
 	//

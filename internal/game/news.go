@@ -402,3 +402,21 @@ func (w *World) mergeBattles(in []BattleLogEntry) {
 		w.logBattle(b)
 	}
 }
+
+// CountFaults adds this run's new transport faults to the tally Game Setup
+// shows, starting the count's clock the first time there is anything to count
+// (#187). A scheduled planetary run's output goes to a mailbox nobody reads, so
+// this is the one place an operator meets the fact that something is wrong
+// without having been told to go looking.
+func (w *World) CountFaults(n int) {
+	if n <= 0 {
+		return
+	}
+	if w.FaultsSeen == 0 {
+		// The game clock, not the wall clock: it is the date every other thing
+		// on that screen is measured in, and a board pinned to a -date would
+		// otherwise report a span it did not play.
+		w.FaultsSince = w.LastMaintDate
+	}
+	w.FaultsSeen += n
+}
