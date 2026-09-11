@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Selling units pays exactly the price the Sell menu quotes, for each unit
+    sold, matching the original
   * Buying and selling units runs off the one unit table, so a unit cannot be
     priced one way on the menu and charged another
   * Combat, covert and pirate tunables are declared with the rest of the

@@ -395,6 +395,9 @@ func TestStartHQCantAfford(t *testing.T) {
 	}
 }
 
+// A sale pays the QUOTED per-unit price, n times — the division falls per unit,
+// not over the total (#204, binary-verified in sellUnit's comment). It divided
+// the total until 2026-09-11, which paid a shade more than the menu said.
 func TestSellUnitsThirdPrice(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
@@ -408,12 +411,12 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	if e.Troopers != 0 {
 		t.Errorf("Troopers: want 0, got %d", e.Troopers)
 	}
-	wantGold := int64(10 * w.UnitPrice(e, Trooper) / 3)
+	wantGold := int64(10 * UnitSellPrice(w.UnitPrice(e, Trooper)))
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}
 
-	// Selling a partial amount only removes n and pays n*price/3.
+	// Selling a partial amount only removes n and pays n x the quoted price.
 	e.Jets = 8
 	e.Gold = 0
 	if err := w.Sell(e, Jet, 3); err != nil {
@@ -422,7 +425,7 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	if e.Jets != 5 {
 		t.Errorf("Jets: want 5, got %d", e.Jets)
 	}
-	wantGold = int64(3 * w.UnitPrice(e, Jet) / 3)
+	wantGold = int64(3 * UnitSellPrice(w.UnitPrice(e, Jet)))
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}

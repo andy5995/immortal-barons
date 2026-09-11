@@ -2218,7 +2218,17 @@ allocations to 15%.
 
 The stored value is what the Spending menu shows and what a buy/sell charges
 within the turn (shown == charged; buy and sell route through the same accessor,
-sell = buy/3 truncated), and it persists across days via the save. Steps are
+sell = buy/3 truncated), and it persists across days via the save.
+
+**Where that division falls is BINARY-VERIFIED, and it falls PER UNIT (#204).**
+`sell_empire_assets` (`BRE.OVR 0x0166a9`) loads the unit's 32-bit price and
+divides it by 3 into a local as its first arithmetic (0x04c7-0x04db); only at
+0x0702 does it multiply that local by the quantity before adding the result to
+gold. The same local is the one item `'7'` overwrites with a flat `0x64` — 100,
+IB's `SellAgentPrice` — which is what puts the reading beyond doubt. So a sale
+pays the quoted price n times, and a quoted price times a quantity is exactly
+what the seller receives. IB divided the whole sale instead until 2026-09-11,
+which paid slightly MORE than the menu quoted, by more as the quantity grew. Steps are
 deterministic (keyed per empire and turn, the same `GameDay`/`TurnsLeft` basis
 region yields use) so play is reproducible and concurrency-safe. The walk is
 per-empire, AI empires included — each is keyed on its own name.

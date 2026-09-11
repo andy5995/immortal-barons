@@ -433,18 +433,23 @@ func (w *World) sellUnit(stock *int, n, price int, e *Empire) error {
 		n = *stock
 	}
 	*stock -= n
-	// The divide is over the WHOLE sale, not per unit: n*price/3, which is what
-	// TestSellUnitsThirdPrice pins. Paying UnitSellPrice(price) n times instead
-	// would round each unit down separately and pay less than the sale is worth.
-	w.creditGold(e, goldCost(n, price)/UnitSellPriceDivisor, "a unit sale")
+	// PER UNIT, then times the quantity — the quoted price is what is paid, n
+	// times (#204). BINARY-VERIFIED: sell_empire_assets (BRE.OVR 0x0166a9)
+	// loads the unit's 32-bit price, divides it by 3 into a local at its very
+	// first arithmetic (0x04c7-0x04db), and only at 0x0702 multiplies that local
+	// by the quantity before adding it to gold. The same local is what item '7'
+	// is overwritten with at a flat 100, which is IB's SellAgentPrice — so the
+	// slot is the per-unit sell price beyond doubt.
+	//
+	// IB divided the whole sale instead until 2026-09-11, which paid a shade
+	// MORE than the menu quoted and by more as the quantity grew.
+	w.creditGold(e, goldCost(n, UnitSellPrice(price)), "a unit sale")
 	return nil
 }
 
-// UnitSellPrice is the per-unit buy-back price the Sell menu quotes for a unit
-// bought at `buy`. It is the same rule sellUnit pays at, but the sale divides
-// its total rather than each unit, so a quoted price times the quantity can come
-// out a gold or two under what is actually paid. That is the original's
-// arithmetic, not a rounding bug to correct.
+// UnitSellPrice is the per-unit buy-back price: a third of the buy price,
+// truncated, which is both what the Sell menu quotes and what the sale pays for
+// each unit. See sellUnit for where the original's own division falls.
 func UnitSellPrice(buy int) int { return buy / UnitSellPriceDivisor }
 
 func (w *World) SellAgents(e *Empire, n int) error {
