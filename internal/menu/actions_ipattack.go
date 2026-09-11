@@ -74,40 +74,27 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	// One routine in the original prompts for the four counts, quotes the price
 	// and asks to confirm, and all three attack paths call it — so a group attack
 	// is quoted, confirmed and charged exactly as a strike sent alone (#252).
-	// IB defaults the confirmation to NO where the original defaults to yes: the
-	// quote is the first time the player sees what the strike costs, and the sum
-	// is large enough that a held Enter must not spend it.
 	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(p, force)))
-	if !askYesNoHere(s, "Send this Attack?", false) {
+	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
-	var id int
-	var departAt time.Time
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		ga, e := w.World.CreateGroupAttack(p, board, target, hours, force)
-		if e != nil {
-			return e
-		}
-		// The SLOT, not the ID: it is the number the Join Group Attack table
-		// will show this party under, so it is the one a baron can act on.
-		id, departAt = ga.Slot, ga.DepartAt
-		return nil
+		_, e := w.World.CreateGroupAttack(p, board, target, hours, force)
+		return e
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "Group attack #%d formed against %s on %s, leaving at %s.", id, pick, board,
-		departAt.In(sessionZone(s)).Format(departFormat))
+	// Nothing is printed. The original returns straight to the menu on a
+	// successful creation — four completed runs in
+	// cap/20240527-134Pho_Lazarus_Public.cap agree byte for byte, and
+	// create_group_attack calls no printer after the confirm
+	// (docs/dev/bre-screens.md). IB announced the party's number and departure
+	// here until 2026-09-11: useful, and not what the original does. The number
+	// is on the Join Group Attack table, which is where a baron joins by it.
 	return Stay
 }
-
-// departFormat is how a group attack's departure is shown. It is a wall-clock
-// instant rather than a game day, so the hour has to be on it — that is the
-// whole point of asking in hours. It carries its zone for the reason every
-// other stamp does: the force is aimed at a board that may be on another one
-// (#267).
-const departFormat = "01/02 15:04 MST"
 
 // joinGroupAttack adds the player's offense to a group attack still forming.
 func joinGroupAttack(s session.Session, w *ctx) Result {
@@ -131,7 +118,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(w.Player(), force)))
-	if !askYesNoHere(s, "Send this Attack?", false) {
+	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
 	// JoinGroupAttack re-validates against fresh state: the attack must still exist
@@ -183,7 +170,7 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(w.Player(), force)))
-	if !askYesNoHere(s, "Send this Attack?", false) {
+	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {

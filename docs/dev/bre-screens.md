@@ -2939,13 +2939,13 @@ This attack will cost 100 gold.
 Send this Attack? (Y/n) Yes
 ```
 
-**IB asks this on all three attack paths, and defaults it to NO.** The original
-prompts for the counts, quotes the price and asks to confirm in one shared
-routine, so a group attack — created or joined — is confirmed exactly as a lone
-strike is; IB quoted the price on those two and then filed the attack without
-asking, which is how it was reported. The default is IB's one divergence here:
-the quote is the first time the player sees the sum, and it can run to millions,
-so a held Enter must not spend it.
+**IB asks this on all three attack paths.** The original prompts for the counts,
+quotes the price and asks to confirm in one shared routine, so a group attack —
+created or joined — is confirmed exactly as a lone strike is; IB quoted the price
+on those two and then filed the attack without asking, which is how it was
+reported. The default is the original's, YES: `(Y/n)` here, and on the `Accept?`
+prompts throughout `cap/121125-666H4H_Camembert_Public.cap`. IB defaulted these
+to no for a day in September 2026; matching the original won.
 
 100 troopers cost 100 gold, so the rate is 1 gold per unit — **verified for
 troopers only**; whether the other three types cost the same is **UNVERIFIED**.
@@ -3019,6 +3019,32 @@ Send how many Tanks? (0; 0) 0
 Send how many Bombers? (0; 0) 0
 Attack Aborted
 ```
+
+**A SUCCESSFUL creation prints nothing at all.** The capture above aborts on a
+zero force, but `cap/20240527-134Pho_Lazarus_Public.cap` carries several that go
+through, and every one reads the same way (byte-checked at 131765, 131786,
+133390, 133411):
+
+```
+Send how many Bombers? (0; 0) 0
+This attack will cost 7,040,000 gold.
+Send this Attack? (Y/n) Yes
+
+──────────────────[InterPlanetary Operations]───────────────────
+```
+
+A blank line, then the menu. No confirmation, no party number, no departure time
+— and NOT the Join table either, which the code confirms: `create_group_attack`
+(BRE.OVR 0x02c0df) never calls the table's renderer, its only substantive calls
+being `configure_attack_forces`, `initialize_attack_record` and
+`append_news_record` twice. The two news records are the whole of what a
+successful creation produces.
+
+**IB matches that silence.** It printed `Group attack #N formed against X on Y,
+leaving at Z` here until 2026-09-11, on the reasoning that the slot number is how
+another baron joins the party — but the number and the countdown are both on the
+Join Group Attack table, which is where a baron joins by them, so the line was
+telling a player what the next screen tells them anyway.
 
 **The force prompts are identical to the individual strike's** — all four unit
 types, including ones held at zero, every default 0. There is no attack-type

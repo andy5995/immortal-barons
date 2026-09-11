@@ -164,10 +164,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		}
 		cost := w.World.SpecialOpGoldCost(w.Player(), op)
 		okNoPause(s, "This operation will cost %s gold.", comma(cost))
-		// Default NO, as every other prompt that spends a quoted sum does: an op
-		// runs to tens of millions and the quote above is the first time the
-		// player sees it.
-		if !askYesNoHere(s, "Send this Operation?", false) {
+		if !askYesNoHere(s, "Send this Operation?", true) {
 			return Stay
 		}
 		// Accepted but short: the refusal, then the bank, rather than the send
@@ -256,7 +253,7 @@ func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
 	// since it climbs with the launcher's own region count and with the ops
 	// already sent today, and is easy to be surprised by.
 	cost := w.TerrorOpGoldCost(w.Player(), agents)
-	if !askYesNoHere(s, fmt.Sprintf(tr(s, "This will cost you %s gold.  Accept?"), comma(cost)), false) {
+	if !askYesNoHere(s, fmt.Sprintf(tr(s, "This will cost you %s gold.  Accept?"), comma(cost)), true) {
 		return Stay
 	}
 	// Accepted but short: the bank is opened here rather than the send simply

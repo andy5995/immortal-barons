@@ -153,11 +153,10 @@ func TestGroupAttackWholePlanetSkipsTheBaronList(t *testing.T) {
 	}
 }
 
-// The cost quote is the first time a player sees what a strike costs, so it is
-// followed by a confirmation that defaults to NO: Enter files nothing and spends
-// nothing. The original asks the same question and defaults to yes; IB's
-// divergence is the default (docs/dev/bre-screens.md).
-func TestGroupAttackConfirmationDefaultsToNo(t *testing.T) {
+// The cost quote is followed by a confirmation, and it defaults to YES as the
+// original's does — `Send this Attack? (Y/n)`, captured. Answering no files
+// nothing and spends nothing.
+func TestGroupAttackConfirmationCanDecline(t *testing.T) {
 	w := newWorld()
 	w.With(func() {
 		w.World.Config.BoardID = "Alpha"
@@ -169,8 +168,8 @@ func TestGroupAttackConfirmationDefaultsToNo(t *testing.T) {
 		p.Protection = 0
 		p.Troopers, p.Gold = 10_000, 1_000_000
 	})
-	// Everything as far as the quote, then Enter — which is No.
-	f := &fakeSession{keys: []rune("1\ra12\r500\r\r\r\r\r")}
+	// Everything as far as the quote, then "n".
+	f := &fakeSession{keys: []rune("1\ra12\r500\r\r\r\rn")}
 	createGroupAttack(f, w)
 
 	out := f.out.String()
