@@ -10,7 +10,7 @@ msgstr ""
 
 #: internal/menu/actions.go:194
 msgid "  Include carriers?"
-msgstr ""
+msgstr "  Träger einschließen?"
 
 #: internal/menu/actions_info.go:260
 msgid " (floating)"
@@ -62,9 +62,8 @@ msgid "%d %s regions purchased. Gold: %d"
 msgstr ""
 
 #: internal/menu/actions_covert.go:181
-#, fuzzy
 msgid "%d agents sent out."
-msgstr "Sprache auf %s gesetzt."
+msgstr "%d Agenten ausgesandt."
 
 #: internal/menu/actions_info.go:251
 #, fuzzy
@@ -123,7 +122,7 @@ msgstr "%s  Ihr habt %s Gold."
 
 #: internal/menu/actions.go:213
 msgid "%s %s purchased."
-msgstr ""
+msgstr "%s %s gekauft."
 
 #: internal/menu/actions_ipops.go:277
 msgid "%s %s sent out."
@@ -140,7 +139,7 @@ msgstr "Gold bezahlt."
 
 #: internal/menu/actions.go:179
 msgid "%s Jets and %s Carriers purchased."
-msgstr ""
+msgstr "%s Jets und %s Träger gekauft."
 
 #: internal/menu/actions_iptrade.go:66
 #, fuzzy
@@ -610,7 +609,7 @@ msgstr "Bomber"
 
 #: internal/game/covert.go:23
 msgid "Bomb Enemy Targets"
-msgstr ""
+msgstr "Feindliche Ziele bombardieren"
 
 #: internal/menu/opshelp.go:47
 #, fuzzy
@@ -653,7 +652,7 @@ msgstr ""
 
 #: internal/game/covert.go:24
 msgid "Bribery"
-msgstr ""
+msgstr "Bestechung"
 
 #: internal/menu/advisors.go:257
 msgid ""
@@ -925,7 +924,7 @@ msgstr "Demoralisieren"
 
 #: internal/game/covert.go:21
 msgid "Demoralize Forces"
-msgstr ""
+msgstr "Truppen demoralisieren"
 
 # Bank
 #: internal/menu/tree.go:218
@@ -1045,11 +1044,11 @@ msgstr ""
 
 #: internal/menu/actions.go:301
 msgid "Edit which macro [D,E,F,R,I,O,K,L]?"
-msgstr ""
+msgstr "Welches Makro bearbeiten [D,E,F,R,I,O,K,L]?"
 
 #: internal/menu/actions.go:324
 msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
-msgstr ""
+msgstr "Makro Strg-%c bearbeiten    Strg-%c beendet die Eingabe."
 
 #: internal/menu/actions_info.go:305
 msgid "Empire"
@@ -1448,15 +1447,15 @@ msgstr "Bevölkerung"
 
 #: internal/menu/actions.go:366
 msgid "Macro Ctrl-%c cleared."
-msgstr ""
+msgstr "Makro Strg-%c gelöscht."
 
 #: internal/menu/actions.go:364
 msgid "Macro Ctrl-%c saved."
-msgstr ""
+msgstr "Makro Strg-%c gespeichert."
 
 #: internal/menu/actions.go:290
 msgid "Macro Editor"
-msgstr ""
+msgstr "Makro-Editor"
 
 #: internal/menu/turnstages.go:93
 msgid "Maintenance:"
@@ -1575,7 +1574,7 @@ msgstr ""
 
 #: internal/menu/actions.go:386
 msgid "New tax rate?"
-msgstr ""
+msgstr "Neuer Steuersatz?"
 
 #: internal/menu/menu.go:1115
 msgid "No"
@@ -1615,11 +1614,11 @@ msgstr ""
 
 #: internal/menu/actions.go:410
 msgid "No other planets are known yet."
-msgstr ""
+msgstr "Es sind noch keine anderen Planeten bekannt."
 
 #: internal/menu/actions.go:418
 msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
-msgstr ""
+msgstr "Es sind noch keine anderen Planeten bekannt. Warten Sie auf die InterBBS-Punkte."
 
 #: internal/menu/actions_iptrade.go:25
 msgid "No planet is marked Allied, so no market is open to you."
@@ -2099,9 +2098,8 @@ msgid "Send how many jets?"
 msgstr ""
 
 #: internal/menu/actions_covert.go:150
-#, fuzzy
 msgid "Send how many?"
-msgstr "Nachricht senden"
+msgstr "Wie viele senden?"
 
 #: internal/menu/actions_iptrade.go:112
 msgid "Send the bid?"
@@ -2143,7 +2141,7 @@ msgstr "Steuersatz setzen"
 
 #: internal/game/covert.go:19
 msgid "Set Up"
-msgstr ""
+msgstr "Hineinlegen"
 
 #: internal/menu/actions_ipops.go:141
 msgid "Set the S3-Sabre dial (0-10)"
@@ -2172,7 +2170,7 @@ msgstr "Einzelner Planet"
 
 #: internal/menu/actions.go:243
 msgid "Sold %d. Gold: %d"
-msgstr ""
+msgstr "%d verkauft. Gold: %d"
 
 #: internal/game/economy.go:14
 #, fuzzy
@@ -2217,7 +2215,7 @@ msgstr "Hilfe-Datenbank"
 
 #: internal/game/covert.go:22
 msgid "Spy on Relations"
-msgstr ""
+msgstr "Beziehungen ausspähen"
 
 #: internal/menu/actions_interbbs.go:226
 msgid "Stand it down?"
@@ -2229,7 +2227,7 @@ msgstr "Auswanderung schüren"
 
 #: internal/game/covert.go:18
 msgid "Stir Revolts"
-msgstr ""
+msgstr "Aufstände schüren"
 
 #: internal/menu/actions_attack.go:886
 #, fuzzy
@@ -2238,7 +2236,7 @@ msgstr "Aktueller Steuersatz: %d%%"
 
 #: internal/game/covert.go:20
 msgid "Support Dissensions"
-msgstr ""
+msgstr "Zwietracht fördern"
 
 #: internal/menu/attacktypehelp.go:43
 msgid ""
@@ -2867,7 +2865,7 @@ msgstr ""
 
 #: internal/menu/actions_covert.go:217
 msgid "Whose operations should your agent expose (letter, RETURN to abort)"
-msgstr ""
+msgstr "Wessen Operationen soll Ihr Agent aufdecken (Buchstabe, EINGABE bricht ab)"
 
 #: internal/menu/tree.go:219
 msgid "Withdraw Funds"
@@ -3089,11 +3087,11 @@ msgstr ""
 
 #: internal/game/covert.go:168
 msgid "You have run that covert operation as often as you may today."
-msgstr ""
+msgstr "Sie haben diese verdeckte Operation heute so oft ausgeführt, wie Sie dürfen."
 
 #: internal/menu/actions.go:262
 msgid "You have started work on your HeadQuarters."
-msgstr ""
+msgstr "Sie haben mit dem Bau Ihres Hauptquartiers begonnen."
 
 #: internal/menu/actions_message.go:557
 msgid "You have used all %d lines."
@@ -3101,12 +3099,11 @@ msgstr ""
 
 #: internal/game/covert.go:367
 msgid "You hold no bribed agent inside that realm."
-msgstr ""
+msgstr "Sie haben keinen bestochenen Agenten in diesem Reich."
 
 #: internal/game/covert.go:371
-#, fuzzy
 msgid "You hold no bribed agents to work through."
-msgstr "Du hast keine Agenten für diese Operation."
+msgstr "Sie haben keine bestochenen Agenten, durch die Sie wirken könnten."
 
 #: internal/menu/turnstages.go:449
 msgid "You hold the office of %s."
@@ -3167,7 +3164,7 @@ msgstr ""
 
 #: internal/menu/actions.go:141
 msgid "Your %s Jets need %s more Carriers before they can all fly."
-msgstr ""
+msgstr "Ihre %s Jets brauchen %s weitere Träger, damit alle fliegen können."
 
 #: internal/menu/actions_ipattack.go:197
 msgid "Your %s force is on its way to %s on %s."
@@ -3290,7 +3287,7 @@ msgstr ""
 
 #: internal/menu/actions.go:246
 msgid "Your holdings changed while you decided — only what remained was sold."
-msgstr ""
+msgstr "Ihr Bestand hat sich während Ihrer Entscheidung geändert - verkauft wurde nur, was übrig war."
 
 #: internal/menu/actions_industry.go:157
 msgid "Your industry is already specialized in %s."

@@ -171,6 +171,10 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 ## Conventions
 
 - Run `gofmt -w .` before every commit; keep `go vet` clean.
+- **The German catalog must stay CP437-representable** — it is the one
+  translation a CP437 door still renders, which `TestPlayerLangCP437Fallback`
+  enforces by falling the whole language back to English when it is not. An em
+  dash is the character that breaks it; use a hyphen in German UI strings.
 - **American spelling, everywhere** — code, comments, docs, help topics, the
   ChangeLog and anything a player reads. The tree was swept on 2026-09-11
   (color, behavior, neighbor, defense, center, gray, recognize, …); a British

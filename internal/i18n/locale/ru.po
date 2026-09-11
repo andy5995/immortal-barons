@@ -10,7 +10,7 @@ msgstr ""
 
 #: internal/menu/actions.go:194
 msgid "  Include carriers?"
-msgstr ""
+msgstr "  Добавить авианосцы?"
 
 #: internal/menu/actions_info.go:260
 msgid " (floating)"
@@ -62,9 +62,8 @@ msgid "%d %s regions purchased. Gold: %d"
 msgstr ""
 
 #: internal/menu/actions_covert.go:181
-#, fuzzy
 msgid "%d agents sent out."
-msgstr "Язык установлен на %s."
+msgstr "Отправлено агентов: %d."
 
 #: internal/menu/actions_info.go:251
 #, fuzzy
@@ -123,7 +122,7 @@ msgstr "%s  У вас %s золота."
 
 #: internal/menu/actions.go:213
 msgid "%s %s purchased."
-msgstr ""
+msgstr "Куплено: %s %s."
 
 #: internal/menu/actions_ipops.go:277
 msgid "%s %s sent out."
@@ -140,7 +139,7 @@ msgstr "золота уплачено."
 
 #: internal/menu/actions.go:179
 msgid "%s Jets and %s Carriers purchased."
-msgstr ""
+msgstr "Куплено самолётов: %s, авианосцев: %s."
 
 #: internal/menu/actions_iptrade.go:66
 #, fuzzy
@@ -610,7 +609,7 @@ msgstr "Бомбардировщики"
 
 #: internal/game/covert.go:23
 msgid "Bomb Enemy Targets"
-msgstr ""
+msgstr "Бомбить цели врага"
 
 #: internal/menu/opshelp.go:47
 #, fuzzy
@@ -653,7 +652,7 @@ msgstr ""
 
 #: internal/game/covert.go:24
 msgid "Bribery"
-msgstr ""
+msgstr "Подкуп"
 
 #: internal/menu/advisors.go:257
 msgid ""
@@ -925,7 +924,7 @@ msgstr "Деморализовать"
 
 #: internal/game/covert.go:21
 msgid "Demoralize Forces"
-msgstr ""
+msgstr "Деморализовать войска"
 
 # Bank
 #: internal/menu/tree.go:218
@@ -1045,11 +1044,11 @@ msgstr ""
 
 #: internal/menu/actions.go:301
 msgid "Edit which macro [D,E,F,R,I,O,K,L]?"
-msgstr ""
+msgstr "Какой макрос изменить [D,E,F,R,I,O,K,L]?"
 
 #: internal/menu/actions.go:324
 msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
-msgstr ""
+msgstr "Правка макроса Ctrl-%c    Ctrl-%c завершает правку."
 
 #: internal/menu/actions_info.go:305
 msgid "Empire"
@@ -1448,15 +1447,15 @@ msgstr "Население"
 
 #: internal/menu/actions.go:366
 msgid "Macro Ctrl-%c cleared."
-msgstr ""
+msgstr "Макрос Ctrl-%c очищен."
 
 #: internal/menu/actions.go:364
 msgid "Macro Ctrl-%c saved."
-msgstr ""
+msgstr "Макрос Ctrl-%c сохранён."
 
 #: internal/menu/actions.go:290
 msgid "Macro Editor"
-msgstr ""
+msgstr "Редактор макросов"
 
 #: internal/menu/turnstages.go:93
 msgid "Maintenance:"
@@ -1575,7 +1574,7 @@ msgstr ""
 
 #: internal/menu/actions.go:386
 msgid "New tax rate?"
-msgstr ""
+msgstr "Новая ставка налога?"
 
 #: internal/menu/menu.go:1115
 msgid "No"
@@ -1615,11 +1614,11 @@ msgstr ""
 
 #: internal/menu/actions.go:410
 msgid "No other planets are known yet."
-msgstr ""
+msgstr "Другие планеты пока неизвестны."
 
 #: internal/menu/actions.go:418
 msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
-msgstr ""
+msgstr "Другие планеты пока неизвестны. Дождитесь очков InterBBS."
 
 #: internal/menu/actions_iptrade.go:25
 msgid "No planet is marked Allied, so no market is open to you."
@@ -2098,9 +2097,8 @@ msgid "Send how many jets?"
 msgstr ""
 
 #: internal/menu/actions_covert.go:150
-#, fuzzy
 msgid "Send how many?"
-msgstr "Отправить сообщение"
+msgstr "Сколько отправить?"
 
 #: internal/menu/actions_iptrade.go:112
 msgid "Send the bid?"
@@ -2142,7 +2140,7 @@ msgstr "Налоговая ставка"
 
 #: internal/game/covert.go:19
 msgid "Set Up"
-msgstr ""
+msgstr "Подставить"
 
 #: internal/menu/actions_ipops.go:141
 msgid "Set the S3-Sabre dial (0-10)"
@@ -2171,7 +2169,7 @@ msgstr "Одна планета"
 
 #: internal/menu/actions.go:243
 msgid "Sold %d. Gold: %d"
-msgstr ""
+msgstr "Продано: %d. Золото: %d"
 
 #: internal/game/economy.go:14
 #, fuzzy
@@ -2216,7 +2214,7 @@ msgstr "База помощи"
 
 #: internal/game/covert.go:22
 msgid "Spy on Relations"
-msgstr ""
+msgstr "Разведать отношения"
 
 #: internal/menu/actions_interbbs.go:226
 msgid "Stand it down?"
@@ -2228,7 +2226,7 @@ msgstr "Разжигать эмиграцию"
 
 #: internal/game/covert.go:18
 msgid "Stir Revolts"
-msgstr ""
+msgstr "Разжечь мятежи"
 
 #: internal/menu/actions_attack.go:886
 #, fuzzy
@@ -2237,7 +2235,7 @@ msgstr "Текущая налоговая ставка: %d%%"
 
 #: internal/game/covert.go:20
 msgid "Support Dissensions"
-msgstr ""
+msgstr "Поддержать раздор"
 
 #: internal/menu/attacktypehelp.go:43
 msgid ""
@@ -2861,7 +2859,7 @@ msgstr ""
 
 #: internal/menu/actions_covert.go:217
 msgid "Whose operations should your agent expose (letter, RETURN to abort)"
-msgstr ""
+msgstr "Чьи операции должен раскрыть ваш агент (буква, ВВОД — отмена)"
 
 #: internal/menu/tree.go:219
 msgid "Withdraw Funds"
@@ -3080,11 +3078,11 @@ msgstr ""
 
 #: internal/game/covert.go:168
 msgid "You have run that covert operation as often as you may today."
-msgstr ""
+msgstr "Сегодня вы провели эту тайную операцию столько раз, сколько разрешено."
 
 #: internal/menu/actions.go:262
 msgid "You have started work on your HeadQuarters."
-msgstr ""
+msgstr "Вы начали строительство штаба."
 
 #: internal/menu/actions_message.go:557
 msgid "You have used all %d lines."
@@ -3092,12 +3090,11 @@ msgstr ""
 
 #: internal/game/covert.go:367
 msgid "You hold no bribed agent inside that realm."
-msgstr ""
+msgstr "У вас нет подкупленного агента в этой державе."
 
 #: internal/game/covert.go:371
-#, fuzzy
 msgid "You hold no bribed agents to work through."
-msgstr "У вас нет агентов для этой операции."
+msgstr "У вас нет подкупленных агентов, через которых можно действовать."
 
 #: internal/menu/turnstages.go:449
 msgid "You hold the office of %s."
@@ -3157,7 +3154,7 @@ msgstr ""
 
 #: internal/menu/actions.go:141
 msgid "Your %s Jets need %s more Carriers before they can all fly."
-msgstr ""
+msgstr "Вашим самолётам (%s) не хватает ещё %s авианосцев, чтобы взлететь всем."
 
 #: internal/menu/actions_ipattack.go:197
 msgid "Your %s force is on its way to %s on %s."
@@ -3280,7 +3277,7 @@ msgstr ""
 
 #: internal/menu/actions.go:246
 msgid "Your holdings changed while you decided — only what remained was sold."
-msgstr ""
+msgstr "Пока вы решали, ваши запасы изменились — продано только то, что осталось."
 
 #: internal/menu/actions_industry.go:157
 msgid "Your industry is already specialized in %s."

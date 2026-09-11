@@ -14,7 +14,7 @@ msgstr ""
 
 #: internal/menu/actions.go:194
 msgid "  Include carriers?"
-msgstr ""
+msgstr "  Vliegdekschepen meenemen?"
 
 #: internal/menu/actions_info.go:260
 msgid " (floating)"
@@ -65,9 +65,8 @@ msgid "%d %s regions purchased. Gold: %d"
 msgstr ""
 
 #: internal/menu/actions_covert.go:181
-#, fuzzy
 msgid "%d agents sent out."
-msgstr "Taal ingesteld op %s."
+msgstr "%d agenten uitgestuurd."
 
 #: internal/menu/actions_info.go:251
 msgid "%d days"
@@ -123,7 +122,7 @@ msgstr "%s  U heeft %s goud."
 
 #: internal/menu/actions.go:213
 msgid "%s %s purchased."
-msgstr ""
+msgstr "%s %s gekocht."
 
 #: internal/menu/actions_ipops.go:277
 msgid "%s %s sent out."
@@ -139,7 +138,7 @@ msgstr ""
 
 #: internal/menu/actions.go:179
 msgid "%s Jets and %s Carriers purchased."
-msgstr ""
+msgstr "%s straaljagers en %s vliegdekschepen gekocht."
 
 #: internal/menu/actions_iptrade.go:66
 #, fuzzy
@@ -1031,11 +1030,11 @@ msgstr ""
 
 #: internal/menu/actions.go:301
 msgid "Edit which macro [D,E,F,R,I,O,K,L]?"
-msgstr ""
+msgstr "Welke macro bewerken [D,E,F,R,I,O,K,L]?"
 
 #: internal/menu/actions.go:324
 msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
-msgstr ""
+msgstr "Macro Ctrl-%c bewerken    Ctrl-%c beëindigt het bewerken."
 
 #: internal/menu/actions_info.go:305
 msgid "Empire"
@@ -1426,15 +1425,15 @@ msgstr ""
 
 #: internal/menu/actions.go:366
 msgid "Macro Ctrl-%c cleared."
-msgstr ""
+msgstr "Macro Ctrl-%c gewist."
 
 #: internal/menu/actions.go:364
 msgid "Macro Ctrl-%c saved."
-msgstr ""
+msgstr "Macro Ctrl-%c opgeslagen."
 
 #: internal/menu/actions.go:290
 msgid "Macro Editor"
-msgstr ""
+msgstr "Macro-editor"
 
 #: internal/menu/turnstages.go:93
 msgid "Maintenance:"
@@ -1551,7 +1550,7 @@ msgstr ""
 
 #: internal/menu/actions.go:386
 msgid "New tax rate?"
-msgstr ""
+msgstr "Nieuw belastingtarief?"
 
 #: internal/menu/menu.go:1115
 msgid "No"
@@ -1591,11 +1590,11 @@ msgstr ""
 
 #: internal/menu/actions.go:410
 msgid "No other planets are known yet."
-msgstr ""
+msgstr "Er zijn nog geen andere planeten bekend."
 
 #: internal/menu/actions.go:418
 msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
-msgstr ""
+msgstr "Er zijn nog geen andere planeten bekend. Wacht op de InterBBS-scores."
 
 #: internal/menu/actions_iptrade.go:25
 msgid "No planet is marked Allied, so no market is open to you."
@@ -2065,9 +2064,8 @@ msgid "Send how many jets?"
 msgstr ""
 
 #: internal/menu/actions_covert.go:150
-#, fuzzy
 msgid "Send how many?"
-msgstr "Bericht versturen"
+msgstr "Hoeveel sturen?"
 
 #: internal/menu/actions_iptrade.go:112
 #, fuzzy
@@ -2111,7 +2109,7 @@ msgstr "Belastingtarief instellen"
 
 #: internal/game/covert.go:19
 msgid "Set Up"
-msgstr "In de val lokken"
+msgstr "Erin luizen"
 
 #: internal/menu/actions_ipops.go:141
 msgid "Set the S3-Sabre dial (0-10)"
@@ -2139,7 +2137,7 @@ msgstr "Eén planeet"
 
 #: internal/menu/actions.go:243
 msgid "Sold %d. Gold: %d"
-msgstr ""
+msgstr "%d verkocht. Goud: %d"
 
 #: internal/game/economy.go:14
 msgid "Sorry! You cannot afford that!"
@@ -2181,7 +2179,7 @@ msgstr ""
 
 #: internal/game/covert.go:22
 msgid "Spy on Relations"
-msgstr "Relaties bespioneren"
+msgstr "Betrekkingen bespioneren"
 
 #: internal/menu/actions_interbbs.go:226
 msgid "Stand it down?"
@@ -2193,7 +2191,7 @@ msgstr "Emigratie aanwakkeren"
 
 #: internal/game/covert.go:18
 msgid "Stir Revolts"
-msgstr "Opstanden aanwakkeren"
+msgstr "Opstanden stoken"
 
 #: internal/menu/actions_attack.go:886
 #, fuzzy
@@ -2815,7 +2813,7 @@ msgstr ""
 
 #: internal/menu/actions_covert.go:217
 msgid "Whose operations should your agent expose (letter, RETURN to abort)"
-msgstr ""
+msgstr "Wiens operaties moet uw agent blootleggen (letter, ENTER om af te breken)"
 
 #: internal/menu/tree.go:219
 msgid "Withdraw Funds"
@@ -3030,13 +3028,12 @@ msgid "You have reached your region purchase limit for this turn."
 msgstr ""
 
 #: internal/game/covert.go:168
-#, fuzzy
 msgid "You have run that covert operation as often as you may today."
-msgstr "Sorry, u hebt vandaag al uw beurten gebruikt."
+msgstr "U hebt die geheime operatie vandaag zo vaak uitgevoerd als is toegestaan."
 
 #: internal/menu/actions.go:262
 msgid "You have started work on your HeadQuarters."
-msgstr ""
+msgstr "U bent begonnen met de bouw van uw hoofdkwartier."
 
 #: internal/menu/actions_message.go:557
 msgid "You have used all %d lines."
@@ -3044,11 +3041,11 @@ msgstr ""
 
 #: internal/game/covert.go:367
 msgid "You hold no bribed agent inside that realm."
-msgstr ""
+msgstr "U hebt geen omgekochte agent binnen dat rijk."
 
 #: internal/game/covert.go:371
 msgid "You hold no bribed agents to work through."
-msgstr ""
+msgstr "U hebt geen omgekochte agenten om via te werken."
 
 #: internal/menu/turnstages.go:449
 msgid "You hold the office of %s."
@@ -3108,7 +3105,7 @@ msgstr ""
 
 #: internal/menu/actions.go:141
 msgid "Your %s Jets need %s more Carriers before they can all fly."
-msgstr ""
+msgstr "Uw %s straaljagers hebben %s vliegdekschepen meer nodig om allemaal te kunnen vliegen."
 
 #: internal/menu/actions_ipattack.go:197
 msgid "Your %s force is on its way to %s on %s."
@@ -3224,7 +3221,7 @@ msgstr ""
 
 #: internal/menu/actions.go:246
 msgid "Your holdings changed while you decided — only what remained was sold."
-msgstr ""
+msgstr "Uw bezit veranderde terwijl u besloot — alleen wat overbleef is verkocht."
 
 #: internal/menu/actions_industry.go:157
 msgid "Your industry is already specialized in %s."
