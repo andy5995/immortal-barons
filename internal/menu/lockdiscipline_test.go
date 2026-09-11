@@ -26,9 +26,9 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 
 	const iterations = 400
 	// Match the price buyUnit's gather uses to the price Recruit actually charges
-	// (the per-turn fluctuating TrooperPrice; constant here since no turn is
+	// (the per-turn fluctuating trooper price; constant here since no turn is
 	// played), so gold accounting reconciles exactly.
-	unitPrice := w.TrooperPrice(p)
+	unitPrice := w.UnitPrice(p, game.Trooper)
 	initialGold := int64(unitPrice * iterations) // enough to fund every buy
 	p.Gold = initialGold
 
@@ -38,7 +38,7 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	cW := &ctx{World: w, handle: p.Owner}
 	cR := &ctx{World: w, handle: p.Owner}
 	price := func(_ *ctx) int { return unitPrice }
-	apply := func(gw *game.World, e *game.Empire, n int) error { return gw.Recruit(e, n) }
+	apply := func(gw *game.World, e *game.Empire, n int) error { return gw.Buy(e, game.Trooper, n) }
 	action := buyUnit("Troopers", false, price, apply)
 
 	var wg sync.WaitGroup
@@ -91,7 +91,7 @@ func TestBuyRefusesInsufficientGold(t *testing.T) {
 	action := buyUnit("Troopers", false, price, func(gw *game.World, e *game.Empire, n int) error {
 		// Simulate gold being drained between the prompt and the apply.
 		e.Gold = 5
-		return gw.Recruit(e, n)
+		return gw.Buy(e, game.Trooper, n)
 	})
 
 	f := &fakeSession{keys: []rune("10\r")}

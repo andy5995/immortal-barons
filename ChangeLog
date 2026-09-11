@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Buying and selling units runs off the one unit table, so a unit cannot be
+    priced one way on the menu and charged another
   * Combat, covert and pirate tunables are declared with the rest of the
     game's numbers, so retuning them means looking in one place
   * The seven treaty types are declared once, so a pact cannot silently stop

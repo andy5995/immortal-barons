@@ -461,6 +461,6 @@ func (w *World) aiUnderThreat(e *Empire) bool {
 func (w *World) aiSellIdleCarriers(e *Empire) {
 	need := (e.Jets + JetsPerCarrier - 1) / JetsPerCarrier
 	if surplus := e.Carriers - need; surplus > 0 {
-		w.SellCarriers(e, surplus) // same sell path a human uses (buy price / 3)
+		w.Sell(e, Carrier, surplus) // same sell path a human uses (buy price / 3)
 	}
 }

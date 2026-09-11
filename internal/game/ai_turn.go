@@ -207,10 +207,10 @@ func (w *World) aiBuildForces(e *Empire) {
 	}
 	w.aiSellIdleCarriers(e)
 	w.aiBuyCarriers(e)
-	buy(mix.trooper, w.TrooperPrice(e), &e.Troopers)
-	buy(mix.turret, w.TurretPrice(e), &e.Turrets)
-	buy(mix.tank, w.TankPrice(e), &e.Tanks)
-	buy(mix.jet, w.JetPrice(e), &e.Jets)
+	buy(mix.trooper, w.UnitPrice(e, Trooper), &e.Troopers)
+	buy(mix.turret, w.UnitPrice(e, Turret), &e.Turrets)
+	buy(mix.tank, w.UnitPrice(e, Tank), &e.Tanks)
+	buy(mix.jet, w.UnitPrice(e, Jet), &e.Jets)
 	if want := e.Land * AIAgentsPerRegion; e.Agents < want {
 		buy(mix.agent, w.AgentPrice(e), &e.Agents)
 	}
@@ -221,7 +221,7 @@ func (w *World) aiBuildForces(e *Empire) {
 // jet contributes nothing, so this is the highest-value military gold the AI can
 // spend. Capped at the shortfall so it never over-buys hulls.
 func (w *World) aiBuyCarriers(e *Empire) {
-	price := w.CarrierPrice(e)
+	price := w.UnitPrice(e, Carrier)
 	if price <= 0 {
 		return
 	}
@@ -310,7 +310,7 @@ func (w *World) aiListSurplus(e *Empire) {
 			w.SetMarketListing(e, good, qty, shop*(100-AIMarketUndercutPct)/100)
 		}
 	}
-	list("Jet", e.Jets-e.Carriers*JetsPerCarrier, w.JetPrice(e))
+	list("Jet", e.Jets-e.Carriers*JetsPerCarrier, w.UnitPrice(e, Jet))
 	list("Food", e.Food-w.FoodDue(e)*AIFoodBufferTurns, w.FoodBuyPrice())
 }
 
@@ -318,10 +318,10 @@ func (w *World) aiListSurplus(e *Empire) {
 // goods the shop does not sell at a per-unit price.
 func (w *World) shopPrice(e *Empire, good string) int {
 	g := GoodByName(good)
-	if g == nil || g.Price == nil {
+	if g == nil {
 		return 0
 	}
-	return g.Price(w, e)
+	return w.UnitPrice(e, g)
 }
 
 // aiManageDebt borrows to cover a maintenance shortfall and repays out of a

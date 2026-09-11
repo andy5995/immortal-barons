@@ -143,51 +143,45 @@ func BuildMenus() *Menus {
 	system := &Menu{Title: "System", Color: ansi.FgBrightBlue, Columns: 2, Width: 59}
 	food := &Menu{Title: "Chopper's Fair Market", Color: ansi.FgBrightCyan}
 
-	// owned adapts a per-empire count into a menu column function.
+	// owned adapts a per-empire count into a menu column function, and price the
+	// same for a good's current price. Both read the goods table, so the figure
+	// shown is the figure the buy or sell charges (#30, #209).
 	owned := func(f func(*game.Empire) int) func(*ctx) int {
 		return func(w *ctx) int { return f(w.Player()) }
 	}
-	troopers := func(p *game.Empire) int { return p.Troopers }
-	jets := func(p *game.Empire) int { return p.Jets }
-	turrets := func(p *game.Empire) int { return p.Turrets }
-	bombers := func(p *game.Empire) int { return p.Bombers }
-	agents := func(p *game.Empire) int { return p.Agents }
-	tanks := func(p *game.Empire) int { return p.Tanks }
-	carriers := func(p *game.Empire) int { return p.Carriers }
-	land := func(p *game.Empire) int { return p.Land }
-	// Prices fluctuate per empire per turn (#30); the display closures call the
-	// same accessors the buy/sell paths charge through, so shown == charged.
-	priceTrooper := func(w *ctx) int { return w.TrooperPrice(w.Player()) }
-	priceJet := func(w *ctx) int { return w.JetPrice(w.Player()) }
-	priceTurret := func(w *ctx) int { return w.TurretPrice(w.Player()) }
-	priceBomber := func(w *ctx) int { return w.BomberPrice(w.Player()) }
-	priceAgent := func(w *ctx) int { return w.AgentPrice(w.Player()) }
-	priceTank := func(w *ctx) int { return w.TankPrice(w.Player()) }
-	priceCarrier := func(w *ctx) int { return w.CarrierPrice(w.Player()) }
+	ownedGood := func(g *game.Good) func(*ctx) int {
+		return owned(func(p *game.Empire) int { return *g.Count(p) })
+	}
+	price := func(g *game.Good) func(*ctx) int {
+		return func(w *ctx) int { return w.UnitPrice(w.Player(), g) }
+	}
 	// sellPrice is the buy-back price shown on the Sell menu; game.UnitSellPrice
 	// is the same rule the sell itself is paid at (agents are the exception — a
 	// flat SellAgentPrice).
-	sellPrice := func(f func(*ctx) int) func(*ctx) int {
-		return func(w *ctx) int { return game.UnitSellPrice(f(w)) }
+	sellPrice := func(g *game.Good) func(*ctx) int {
+		return func(w *ctx) int { return game.UnitSellPrice(w.UnitPrice(w.Player(), g)) }
 	}
+	land := func(p *game.Empire) int { return p.Land }
 
+	// BRE's own key order for this menu, which is not the table's: each item
+	// names the row it buys and takes its label, price and count from it.
 	buy.Items = []Item{
 		{Key: '*', Label: "System Menu", Do: gotoMenu(system)},
-		{Key: '1', Label: "Troopers", Price: priceTrooper, Owned: owned(troopers),
-			Do: buyUnit("Troopers", true, priceTrooper, (*game.World).Recruit)},
-		{Key: '2', Label: "Jets", Price: priceJet, Owned: owned(jets),
+		{Key: '1', Label: "Troopers", Price: price(game.Trooper), Owned: ownedGood(game.Trooper),
+			Do: buyGood(game.Trooper)},
+		{Key: '2', Label: "Jets", Price: price(game.Jet), Owned: ownedGood(game.Jet),
 			Do: buyJets},
-		{Key: '3', Label: "Turrets", Price: priceTurret, Owned: owned(turrets),
-			Do: buyUnit("Turrets", true, priceTurret, (*game.World).BuildTurrets)},
-		{Key: '4', Label: "Bombers", Price: priceBomber, Owned: owned(bombers),
-			Do: buyUnit("Bombers", true, priceBomber, (*game.World).BuildBombers)},
+		{Key: '3', Label: "Turrets", Price: price(game.Turret), Owned: ownedGood(game.Turret),
+			Do: buyGood(game.Turret)},
+		{Key: '4', Label: "Bombers", Price: price(game.Bomber), Owned: ownedGood(game.Bomber),
+			Do: buyGood(game.Bomber)},
 		{Key: '5', Label: "HeadQuarters", Price: func(w *ctx) int { return w.HQPrice(w.Player()) }, Owned: owned(func(p *game.Empire) int { return p.HQ }), Do: buildHQ},
 		{Key: '6', Label: "Regions", Price: func(w *ctx) int { return w.LandPrice(w.Player()) }, Owned: owned(land), Do: buyLand},
-		{Key: '7', Label: "Covert Agents", Price: priceAgent, Owned: owned(agents),
-			Do: buyUnit("Covert Agents", false, priceAgent, (*game.World).RecruitAgents)},
-		{Key: '8', Label: "Tanks", Price: priceTank, Owned: owned(tanks),
-			Do: buyUnit("Tanks", true, priceTank, (*game.World).BuildTanks)},
-		{Key: '9', Label: "Carriers", Price: priceCarrier, Owned: owned(carriers),
+		{Key: '7', Label: "Covert Agents", Price: price(game.Agent), Owned: ownedGood(game.Agent),
+			Do: buyGood(game.Agent)},
+		{Key: '8', Label: "Tanks", Price: price(game.Tank), Owned: ownedGood(game.Tank),
+			Do: buyGood(game.Tank)},
+		{Key: '9', Label: "Carriers", Price: price(game.Carrier), Owned: ownedGood(game.Carrier),
 			Do: buyCarriers},
 		{Key: 'S', Label: "Sell", Do: gotoMenu(sell)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
@@ -197,21 +191,23 @@ func BuildMenus() *Menus {
 
 	sell.Items = []Item{
 		{Key: 'B', Label: "Buy", Do: back},
-		{Key: '1', Label: "Troopers", Price: sellPrice(priceTrooper), Owned: owned(troopers),
-			Do: sellUnit("Sell Troopers", troopers, (*game.World).SellTroopers)},
-		{Key: '2', Label: "Jets", Price: sellPrice(priceJet), Owned: owned(jets),
-			Do: sellUnit("Sell Jets", jets, (*game.World).SellJets)},
-		{Key: '3', Label: "Turrets", Price: sellPrice(priceTurret), Owned: owned(turrets),
-			Do: sellUnit("Sell Turrets", turrets, (*game.World).SellTurrets)},
-		{Key: '4', Label: "Bombers", Price: sellPrice(priceBomber), Owned: owned(bombers),
-			Do: sellUnit("Sell Bombers", bombers, (*game.World).SellBombers)},
+		{Key: '1', Label: "Troopers", Price: sellPrice(game.Trooper), Owned: ownedGood(game.Trooper),
+			Do: sellGood(game.Trooper)},
+		{Key: '2', Label: "Jets", Price: sellPrice(game.Jet), Owned: ownedGood(game.Jet),
+			Do: sellGood(game.Jet)},
+		{Key: '3', Label: "Turrets", Price: sellPrice(game.Turret), Owned: ownedGood(game.Turret),
+			Do: sellGood(game.Turret)},
+		{Key: '4', Label: "Bombers", Price: sellPrice(game.Bomber), Owned: ownedGood(game.Bomber),
+			Do: sellGood(game.Bomber)},
 		{Key: '6', Label: "Regions", Price: func(w *ctx) int { return 0 }, Owned: owned(land), Do: sellLand},
-		{Key: '7', Label: "Covert Agents", Price: func(w *ctx) int { return game.SellAgentPrice }, Owned: owned(agents),
-			Do: sellUnit("Sell Covert Agents", agents, (*game.World).SellAgents)},
-		{Key: '8', Label: "Tanks", Price: sellPrice(priceTank), Owned: owned(tanks),
-			Do: sellUnit("Sell Tanks", tanks, (*game.World).SellTanks)},
-		{Key: '9', Label: "Carriers", Price: sellPrice(priceCarrier), Owned: owned(carriers),
-			Do: sellUnit("Sell Carriers", carriers, (*game.World).SellCarriers)},
+		// The agent is the exception at both ends: a flat buy-back price, and its
+		// own sell path rather than the table's.
+		{Key: '7', Label: "Covert Agents", Price: func(w *ctx) int { return game.SellAgentPrice }, Owned: ownedGood(game.Agent),
+			Do: sellUnit("Sell Covert Agents", func(p *game.Empire) int { return p.Agents }, (*game.World).SellAgents)},
+		{Key: '8', Label: "Tanks", Price: sellPrice(game.Tank), Owned: ownedGood(game.Tank),
+			Do: sellGood(game.Tank)},
+		{Key: '9', Label: "Carriers", Price: sellPrice(game.Carrier), Owned: ownedGood(game.Carrier),
+			Do: sellGood(game.Carrier)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	sell.DefaultOnEnter = quitOnEnter(sell)

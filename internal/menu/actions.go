@@ -27,8 +27,18 @@ var errTargetGone = errors.New("Your target is no longer there.")
 // node on the same handle, or a day that did not roll as expected).
 var errAttacksExhausted = errors.New("You have used all your attacks for today.")
 
-// buyUnit wraps a "prompt for quantity, apply, report" economy action. The
-// max offered is what the empire can currently afford at unit's price.
+// buyGood is the Spending menu's action for one row of the goods table (#209):
+// the row carries the label, the price and the stock, so the three cannot be
+// paired up wrongly at the call site the way twelve hand-written items could.
+func buyGood(g *game.Good) Action {
+	return buyUnit(g.Plural, g.Military,
+		func(w *ctx) int { return w.UnitPrice(w.Player(), g) }, buyer(g))
+}
+
+// buyUnit is the mechanism under it — prompt for a quantity, apply, report —
+// with the price and the transaction passed in. Kept separate from the row so a
+// test can drive it with a price that moves under the prompt, which is how the
+// lock discipline is checked.
 func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
@@ -41,6 +51,17 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 		}
 		return applyBuy(s, w, label, n, apply)
 	}
+}
+
+// buyer adapts one row to applyBuy's transaction shape.
+func buyer(g *game.Good) func(*game.World, *game.Empire, int) error {
+	return func(w *game.World, e *game.Empire, n int) error { return w.Buy(e, g, n) }
+}
+
+// sellGood is the same for the Sell menu.
+func sellGood(g *game.Good) Action {
+	return sellUnit("Sell "+g.Plural, func(e *game.Empire) int { return *g.Count(e) },
+		func(w *game.World, e *game.Empire, n int) error { return w.Sell(e, g, n) })
 }
 
 // buyMilitaryAllowed reports whether the league lets army units be bought on the
@@ -77,11 +98,11 @@ func buyCarriers(s session.Session, w *ctx) Result {
 			comma(p.Jets), comma(short))
 		fmt.Fprintf(s, "\n%s\n", hiNums(WrapIndented(note, "  ")))
 	}
-	n := promptQuantity(s, "Carriers", w.CarrierPrice(p), p.Gold)
+	n := promptQuantity(s, "Carriers", w.UnitPrice(p, game.Carrier), p.Gold)
 	if n <= 0 {
 		return Stay
 	}
-	return applyBuy(s, w, "Carriers", n, (*game.World).BuildCarriers)
+	return applyBuy(s, w, "Carriers", n, buyer(game.Carrier))
 }
 
 // buyJets buys jets, offering — for an order big enough to need one — to fold
@@ -93,12 +114,12 @@ func buyJets(s session.Session, w *ctx) Result {
 	if !buyMilitaryAllowed(s, w) {
 		return Stay
 	}
-	n := promptQuantity(s, "Jets", w.JetPrice(w.Player()), w.Player().Gold)
+	n := promptQuantity(s, "Jets", w.UnitPrice(w.Player(), game.Jet), w.Player().Gold)
 	if n <= 0 {
 		return Stay
 	}
 	if n <= game.JetsPerCarrier || !askCarriersIncluded(s, w, n) {
-		return applyBuy(s, w, "Jets", n, (*game.World).BuildJets)
+		return applyBuy(s, w, "Jets", n, buyer(game.Jet))
 	}
 	var jets, carriers int
 	err := w.mutatePlayer(func(p *game.Empire) error {

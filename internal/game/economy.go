@@ -292,12 +292,19 @@ func curPrice(stored, base int) int {
 // these, so shown == charged within a turn; each empire sees its own prices.
 // Regions have no equivalent — their price rises with holdings (see regionCost)
 // but takes no per-turn walk.
-func (w *World) TrooperPrice(e *Empire) int { return curPrice(e.Prices.Trooper, w.Prices.Trooper) }
-func (w *World) JetPrice(e *Empire) int     { return curPrice(e.Prices.Jet, w.Prices.Jet) }
-func (w *World) TurretPrice(e *Empire) int  { return curPrice(e.Prices.Turret, w.Prices.Turret) }
-func (w *World) TankPrice(e *Empire) int    { return curPrice(e.Prices.Tank, w.Prices.Tank) }
-func (w *World) BomberPrice(e *Empire) int  { return curPrice(e.Prices.Bomber, w.Prices.Bomber) }
-func (w *World) CarrierPrice(e *Empire) int { return curPrice(e.Prices.Carrier, w.Prices.Carrier) }
+// UnitPrice is what one of g costs e right now: the realm's own stored walk
+// value, falling back to the world base until seeded, and a good with a rule of
+// its own (the covert agent) through that rule. One function over the table
+// where there were six near-identical methods (#209).
+func (w *World) UnitPrice(e *Empire, g *Good) int {
+	switch {
+	case g.Stored != nil:
+		return curPrice(*g.Stored(&e.Prices), *g.Stored(&w.Prices))
+	case g.Price != nil:
+		return g.Price(w, e)
+	}
+	return 0
+}
 
 // AgentPrice is what a covert agent costs e right now. Agents take no walk: like
 // the HeadQuarters price this climbs with the empire's lifetime turn count, but
@@ -349,12 +356,24 @@ func (w *World) stepPrice(e *Empire, stored, lo, hi, step int, tag string) int {
 // turn from PlayTurn (after the turn's buys), so a price is stable during a turn
 // (shown == charged) and drifts turn to turn, persisting across days via the save.
 func (w *World) stepPrices(e *Empire) {
-	e.Prices.Trooper = w.stepPrice(e, e.Prices.Trooper, PriceLoTrooper, PriceHiTrooper, PriceStepTrooper, "trooper")
-	e.Prices.Jet = w.stepPrice(e, e.Prices.Jet, PriceLoJet, PriceHiJet, PriceStepJet, "jet")
-	e.Prices.Turret = w.stepPrice(e, e.Prices.Turret, PriceLoTurret, PriceHiTurret, PriceStepTurret, "turret")
-	e.Prices.Tank = w.stepPrice(e, e.Prices.Tank, PriceLoTank, PriceHiTank, PriceStepTank, "tank")
-	e.Prices.Bomber = w.stepPrice(e, e.Prices.Bomber, PriceLoBomber, PriceHiBomber, PriceStepBomber, "bomber")
-	e.Prices.Carrier = w.stepPrice(e, e.Prices.Carrier, PriceLoCarrier, PriceHiCarrier, PriceStepCarrier, "carrier")
+	// Each price is keyed by its own tag, so the order this walks the table in
+	// does not reach the numbers (draw.go).
+	for _, g := range MilitaryGoods {
+		slot := g.Stored(&e.Prices)
+		*slot = w.stepPrice(e, *slot, g.WalkLo, g.WalkHi, g.WalkStep, g.WalkTag)
+	}
+}
+
+// Buy buys n of g at its current price, and Sell sells n back. One pair over the
+// table where there were twelve one-line methods, one per unit per direction
+// (#209): the row carries the stock and the price, so a unit added to the table
+// is buyable and sellable without a method of its own.
+func (w *World) Buy(e *Empire, g *Good, n int) error {
+	return buyUnit(g.Count(e), n, w.UnitPrice(e, g), e)
+}
+
+func (w *World) Sell(e *Empire, g *Good, n int) error {
+	return w.sellUnit(g.Count(e), n, w.UnitPrice(e, g), e)
 }
 
 // buyUnit buys n of a unit at its current price, the mirror of sellUnit: spend
@@ -365,14 +384,6 @@ func buyUnit(stock *int, n, price int, e *Empire) error {
 	}
 	*stock += n
 	return nil
-}
-
-func (w *World) Recruit(e *Empire, n int) error {
-	return buyUnit(&e.Troopers, n, w.TrooperPrice(e), e)
-}
-
-func (w *World) BuildJets(e *Empire, n int) error {
-	return buyUnit(&e.Jets, n, w.JetPrice(e), e)
 }
 
 // BuildJetsWithCarriers spends what n jets alone would have cost on jets AND the
@@ -387,10 +398,10 @@ func (w *World) BuildJets(e *Empire, n int) error {
 // JetsPerCarrier jets.
 func (w *World) BuildJetsWithCarriers(e *Empire, n int) (jets, carriers int, err error) {
 	jets, carriers = w.JetCarrierBundle(e, n)
-	if n <= 0 || e.Gold < goldCost(n, w.JetPrice(e)) {
+	if n <= 0 || e.Gold < goldCost(n, w.UnitPrice(e, Jet)) {
 		return 0, 0, ErrCantAfford
 	}
-	e.Gold -= goldCost(jets, w.JetPrice(e)) + goldCost(carriers, w.CarrierPrice(e))
+	e.Gold -= goldCost(jets, w.UnitPrice(e, Jet)) + goldCost(carriers, w.UnitPrice(e, Carrier))
 	e.Jets += jets
 	e.Carriers += carriers
 	return jets, carriers, nil
@@ -400,24 +411,12 @@ func (w *World) BuildJetsWithCarriers(e *Empire, n int) (jets, carriers int, err
 // jets, without buying it — the buy screen quotes the exact counts before asking
 // whether to take them. It charges nothing and changes nothing.
 func (w *World) JetCarrierBundle(e *Empire, n int) (jets, carriers int) {
-	jetPrice, carrierPrice := w.JetPrice(e), w.CarrierPrice(e)
+	jetPrice, carrierPrice := w.UnitPrice(e, Jet), w.UnitPrice(e, Carrier)
 	budget := goldCost(n, jetPrice)
 	flight := goldCost(JetsPerCarrier, jetPrice) + int64(carrierPrice)
 	carriers = int(budget / flight)
 	jets = UnitsAffordable(budget-goldCost(carriers, carrierPrice), jetPrice)
 	return jets, carriers
-}
-
-func (w *World) BuildTurrets(e *Empire, n int) error {
-	return buyUnit(&e.Turrets, n, w.TurretPrice(e), e)
-}
-
-func (w *World) BuildCarriers(e *Empire, n int) error {
-	return buyUnit(&e.Carriers, n, w.CarrierPrice(e), e)
-}
-
-func (w *World) BuildTanks(e *Empire, n int) error {
-	return buyUnit(&e.Tanks, n, w.TankPrice(e), e)
 }
 
 func (w *World) RecruitAgents(e *Empire, n int) error {
@@ -447,36 +446,6 @@ func (w *World) sellUnit(stock *int, n, price int, e *Empire) error {
 // out a gold or two under what is actually paid. That is the original's
 // arithmetic, not a rounding bug to correct.
 func UnitSellPrice(buy int) int { return buy / UnitSellPriceDivisor }
-
-func (w *World) SellTroopers(e *Empire, n int) error {
-	return w.sellUnit(&e.Troopers, n, w.TrooperPrice(e), e)
-}
-
-func (w *World) SellJets(e *Empire, n int) error {
-	return w.sellUnit(&e.Jets, n, w.JetPrice(e), e)
-}
-
-// BuildBombers buys n bombers directly (they can also be produced by Industrial
-// regions). Old saves lacking a Bomber price default to it via NewWorld.
-func (w *World) BuildBombers(e *Empire, n int) error {
-	return buyUnit(&e.Bombers, n, w.BomberPrice(e), e)
-}
-
-func (w *World) SellBombers(e *Empire, n int) error {
-	return w.sellUnit(&e.Bombers, n, w.BomberPrice(e), e)
-}
-
-func (w *World) SellTurrets(e *Empire, n int) error {
-	return w.sellUnit(&e.Turrets, n, w.TurretPrice(e), e)
-}
-
-func (w *World) SellTanks(e *Empire, n int) error {
-	return w.sellUnit(&e.Tanks, n, w.TankPrice(e), e)
-}
-
-func (w *World) SellCarriers(e *Empire, n int) error {
-	return w.sellUnit(&e.Carriers, n, w.CarrierPrice(e), e)
-}
 
 func (w *World) SellAgents(e *Empire, n int) error {
 	// BRE sells agents at a flat SellAgentPrice, not buy/3 like other units.

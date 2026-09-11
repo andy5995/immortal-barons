@@ -480,7 +480,7 @@ func TestAIBuysBelowShopPrice(t *testing.T) {
 	bot.Protection, bot.Gold = 0, 10_000_000
 	before := bot.Troopers
 
-	cheap := w.TrooperPrice(bot) / 2 // well under the discount threshold
+	cheap := w.UnitPrice(bot, Trooper) / 2 // well under the discount threshold
 	if err := w.SetMarketListing(seller, "Trooper", 1000, cheap); err != nil {
 		t.Fatalf("list: %v", err)
 	}
@@ -507,7 +507,7 @@ func TestAIIgnoresOverpricedListings(t *testing.T) {
 	bot.Protection, bot.Gold = 0, 10_000_000
 	before := bot.Troopers
 
-	w.SetMarketListing(seller, "Trooper", 1000, w.TrooperPrice(bot)*2)
+	w.SetMarketListing(seller, "Trooper", 1000, w.UnitPrice(bot, Trooper)*2)
 	w.aiShopMarket(bot)
 
 	if bot.Troopers != before {

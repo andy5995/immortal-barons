@@ -43,7 +43,7 @@ func TestAttackedWhileOnlineDefenderBuysConsistently(t *testing.T) {
 			postAttackTroopers, postAttackLand = e.Troopers, e.Land
 		},
 	}
-	buyTroopers := buyUnit("Troopers", false, func(w *ctx) int { return w.TrooperPrice(w.Player()) }, (*game.World).Recruit)
+	buyTroopers := buyGood(game.Trooper)
 	buyTroopers(fb, b)
 
 	if postAttackTroopers >= 10000 || postAttackLand >= startLand {
@@ -85,7 +85,7 @@ func TestAllyBledWhileOnlineBuysConsistently(t *testing.T) {
 			postBleedTroopers = committedEmpire(t, cfg, "carol").Troopers
 		},
 	}
-	buyTroopers := buyUnit("Troopers", false, func(w *ctx) int { return w.TrooperPrice(w.Player()) }, (*game.World).Recruit)
+	buyTroopers := buyGood(game.Trooper)
 	buyTroopers(fb, b)
 
 	if postBleedTroopers >= 10000 {

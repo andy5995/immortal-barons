@@ -251,7 +251,7 @@ func TestSellReportsActualSold(t *testing.T) {
 			commitOnFile(t, cfg, func(w *game.World) { w.FindByOwner("bob").Troopers = 100 })
 		},
 	}
-	sell := sellUnit("Sell Troopers", func(e *game.Empire) int { return e.Troopers }, (*game.World).SellTroopers)
+	sell := sellGood(game.Trooper)
 	sell(fb, b)
 
 	out := fb.out.String()

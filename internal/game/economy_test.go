@@ -22,12 +22,12 @@ func TestConcurrentPerEmpirePricing(t *testing.T) {
 		w.stepPrices(e1)
 		w.stepPrices(e2)
 	}
-	if w.TrooperPrice(e1) == w.TrooperPrice(e2) {
-		t.Fatalf("walks did not diverge: both %d", w.TrooperPrice(e1))
+	if w.UnitPrice(e1, Trooper) == w.UnitPrice(e2, Trooper) {
+		t.Fatalf("walks did not diverge: both %d", w.UnitPrice(e1, Trooper))
 	}
 
 	const n = 200
-	p1, p2 := w.TrooperPrice(e1), w.TrooperPrice(e2)
+	p1, p2 := w.UnitPrice(e1, Trooper), w.UnitPrice(e2, Trooper)
 	e1.Troopers, e2.Troopers = 0, 0
 	e1.Gold, e2.Gold = int64(n*p1), int64(n*p2)
 
@@ -40,7 +40,7 @@ func TestConcurrentPerEmpirePricing(t *testing.T) {
 		go func(e *Empire) {
 			defer wg.Done()
 			for i := 0; i < n; i++ {
-				if err := w.Recruit(e, 1); err != nil {
+				if err := w.Buy(e, Trooper, 1); err != nil {
 					t.Errorf("%s Recruit #%d: %v", e.Name, i, err)
 					return
 				}
@@ -66,10 +66,10 @@ func TestUnitPriceWalk(t *testing.T) {
 
 	// A fresh empire is unseeded → sits at the world base, and reads are stable
 	// within a turn (no step between two reads).
-	if got := w.TrooperPrice(e); got != base {
+	if got := w.UnitPrice(e, Trooper); got != base {
 		t.Fatalf("fresh empire trooper price = %d, want base %d", got, base)
 	}
-	if a, b := w.TrooperPrice(e), w.TrooperPrice(e); a != b {
+	if a, b := w.UnitPrice(e, Trooper), w.UnitPrice(e, Trooper); a != b {
 		t.Fatalf("price not stable within a turn: %d vs %d", a, b)
 	}
 
@@ -79,7 +79,7 @@ func TestUnitPriceWalk(t *testing.T) {
 	for i := 0; i < 60; i++ {
 		w.GameDay, e.TurnsLeft = i/16, i%16
 		w.stepPrices(e)
-		p := w.TrooperPrice(e)
+		p := w.UnitPrice(e, Trooper)
 		if p < PriceLoTrooper || p > PriceHiTrooper {
 			t.Errorf("step %d: price %d out of band [%d,%d]", i, p, PriceLoTrooper, PriceHiTrooper)
 		}
@@ -102,17 +102,17 @@ func TestUnitPriceWalk(t *testing.T) {
 		w.GameDay, f.TurnsLeft = i/16, i%16
 		w.stepPrices(f)
 	}
-	if w.TrooperPrice(e) == w.TrooperPrice(f) &&
-		w.BomberPrice(e) == w.BomberPrice(f) &&
+	if w.UnitPrice(e, Trooper) == w.UnitPrice(f, Trooper) &&
+		w.UnitPrice(e, Bomber) == w.UnitPrice(f, Bomber) &&
 		w.AgentPrice(e) == w.AgentPrice(f) {
 		t.Error("two empires walked to identical prices on every unit; walk is not per-empire")
 	}
 
 	// Shown == charged: a buy charges the stored price (stable, no step mid-buy).
 	e.Gold, e.Troopers = 1<<30, 0
-	price := w.TrooperPrice(e)
+	price := w.UnitPrice(e, Trooper)
 	before := e.Gold
-	if err := w.Recruit(e, 3); err != nil {
+	if err := w.Buy(e, Trooper, 3); err != nil {
 		t.Fatalf("Recruit: %v", err)
 	}
 	if spent := before - e.Gold; spent != int64(3*price) {
@@ -402,13 +402,13 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	e.Gold = 0
 
 	// Clamped to owned: selling more than owned only sells what's owned.
-	if err := w.SellTroopers(e, 15); err != nil {
+	if err := w.Sell(e, Trooper, 15); err != nil {
 		t.Fatalf("SellTroopers: %v", err)
 	}
 	if e.Troopers != 0 {
 		t.Errorf("Troopers: want 0, got %d", e.Troopers)
 	}
-	wantGold := int64(10 * w.TrooperPrice(e) / 3)
+	wantGold := int64(10 * w.UnitPrice(e, Trooper) / 3)
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}
@@ -416,13 +416,13 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	// Selling a partial amount only removes n and pays n*price/3.
 	e.Jets = 8
 	e.Gold = 0
-	if err := w.SellJets(e, 3); err != nil {
+	if err := w.Sell(e, Jet, 3); err != nil {
 		t.Fatalf("SellJets: %v", err)
 	}
 	if e.Jets != 5 {
 		t.Errorf("Jets: want 5, got %d", e.Jets)
 	}
-	wantGold = int64(3 * w.JetPrice(e) / 3)
+	wantGold = int64(3 * w.UnitPrice(e, Jet) / 3)
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}
@@ -548,14 +548,14 @@ func TestBuildAndSellBombers(t *testing.T) {
 	e := w.AddHuman("me", "Mine")
 	e.Gold = 1_000_000
 
-	if err := w.BuildBombers(e, 10); err != nil {
+	if err := w.Buy(e, Bomber, 10); err != nil {
 		t.Fatal(err)
 	}
 	if e.Bombers != 10 {
 		t.Errorf("expected 10 bombers, got %d", e.Bombers)
 	}
 	before := e.Gold
-	if err := w.SellBombers(e, 5); err != nil {
+	if err := w.Sell(e, Bomber, 5); err != nil {
 		t.Fatal(err)
 	}
 	if e.Bombers != 5 {
@@ -609,7 +609,7 @@ func TestPriceWalkRevertsToMid(t *testing.T) {
 		for i := 0; i < turns; i++ {
 			w.GameDay, e.TurnsLeft = i/16, i%16
 			w.stepPrices(e)
-			sum += w.BomberPrice(e)
+			sum += w.UnitPrice(e, Bomber)
 		}
 		if avg := sum / turns; avg < mid*9/10 || avg > mid*11/10 {
 			t.Errorf("%s: mean bomber price %d over %d turns, want within 10%% of mid %d", name, avg, turns, mid)

@@ -484,15 +484,11 @@ func (w *World) PlanetTotals() PlanetTotals { return planetTotals(w) }
 // at the centre of its walk band, which is where BRE's mean-reverting walk keeps
 // pulling it back to anyway.
 func defaultPrices() Prices {
-	return Prices{
-		Land:    RegionPriceBase,
-		Trooper: midPrice(PriceLoTrooper, PriceHiTrooper),
-		Jet:     midPrice(PriceLoJet, PriceHiJet),
-		Turret:  midPrice(PriceLoTurret, PriceHiTurret),
-		Tank:    midPrice(PriceLoTank, PriceHiTank),
-		Carrier: midPrice(PriceLoCarrier, PriceHiCarrier),
-		Bomber:  midPrice(PriceLoBomber, PriceHiBomber),
+	p := Prices{Land: RegionPriceBase}
+	for _, g := range MilitaryGoods {
+		*g.Stored(&p) = midPrice(g.WalkLo, g.WalkHi)
 	}
+	return p
 }
 
 // Lock/Unlock guard the shared World when a single process runs concurrent

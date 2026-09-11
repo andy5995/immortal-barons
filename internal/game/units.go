@@ -35,9 +35,19 @@ type Good struct {
 	// one; gold is the exception the trade code handles beside the loop, since
 	// it alone is held in money width.
 	Basket func(b *TradeBasket) *int
-	// Price is what the shop charges for one, and is nil for a good the shop
-	// does not sell at a per-unit price.
+	// Price is a good whose price follows a rule of its own rather than the
+	// walk — the covert agent's, which climbs with the realm's age. Nil for the
+	// six walk units (see Stored) and for a good the shop does not sell.
 	Price func(w *World, e *Empire) int
+	// Stored points at the good's slot in a Prices set — the per-empire walk
+	// value stepPrices advances once a turn, and the world's own base behind it.
+	// Nil for a good whose price takes no walk (agents, food, regions).
+	Stored func(p *Prices) *int
+	// Walk is the band that price wanders inside and the step it moves by. The
+	// tag keys the draw, so it is part of the save's arithmetic and must not be
+	// renamed: change it and every realm's prices jump (#210, draw.go).
+	WalkLo, WalkHi, WalkStep int
+	WalkTag                  string
 	// Cost is the production cost in points, and NetWorth the good's weight in
 	// net worth, in thousandths. Both are 0 where they do not apply; the
 	// figures themselves live in balance.go.
@@ -65,8 +75,9 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdTroopers },
 		Made:   func(e *Empire) *int { return &e.MadeTroopers },
 		Basket: func(b *TradeBasket) *int { return &b.Troopers },
-		Price:  func(w *World, e *Empire) int { return w.TrooperPrice(e) },
-		Cost:   CostTrooper, NetWorth: NetWorthTrooper,
+		Stored: func(p *Prices) *int { return &p.Trooper },
+		WalkLo: PriceLoTrooper, WalkHi: PriceHiTrooper, WalkStep: PriceStepTrooper, WalkTag: "trooper",
+		Cost: CostTrooper, NetWorth: NetWorthTrooper,
 		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Jet = &Good{
@@ -75,8 +86,9 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdJets },
 		Made:   func(e *Empire) *int { return &e.MadeJets },
 		Basket: func(b *TradeBasket) *int { return &b.Jets },
-		Price:  func(w *World, e *Empire) int { return w.JetPrice(e) },
-		Cost:   CostJet, NetWorth: NetWorthJet,
+		Stored: func(p *Prices) *int { return &p.Jet },
+		WalkLo: PriceLoJet, WalkHi: PriceHiJet, WalkStep: PriceStepJet, WalkTag: "jet",
+		Cost: CostJet, NetWorth: NetWorthJet,
 		ShipWeight: 100, CarrierPer: 100,
 	}
 	Turret = &Good{
@@ -85,8 +97,9 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdTurrets },
 		Made:   func(e *Empire) *int { return &e.MadeTurrets },
 		Basket: func(b *TradeBasket) *int { return &b.Turrets },
-		Price:  func(w *World, e *Empire) int { return w.TurretPrice(e) },
-		Cost:   CostTurret, NetWorth: NetWorthTurret,
+		Stored: func(p *Prices) *int { return &p.Turret },
+		WalkLo: PriceLoTurret, WalkHi: PriceHiTurret, WalkStep: PriceStepTurret, WalkTag: "turret",
+		Cost: CostTurret, NetWorth: NetWorthTurret,
 		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Bomber = &Good{
@@ -95,8 +108,9 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdBombers },
 		Made:   func(e *Empire) *int { return &e.MadeBombers },
 		Basket: func(b *TradeBasket) *int { return &b.Bombers },
-		Price:  func(w *World, e *Empire) int { return w.BomberPrice(e) },
-		Cost:   CostBomber, NetWorth: NetWorthBomber,
+		Stored: func(p *Prices) *int { return &p.Bomber },
+		WalkLo: PriceLoBomber, WalkHi: PriceHiBomber, WalkStep: PriceStepBomber, WalkTag: "bomber",
+		Cost: CostBomber, NetWorth: NetWorthBomber,
 		ShipWeight: 300, CarrierPer: 0,
 	}
 	Tank = &Good{
@@ -105,8 +119,9 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdTanks },
 		Made:   func(e *Empire) *int { return &e.MadeTanks },
 		Basket: func(b *TradeBasket) *int { return &b.Tanks },
-		Price:  func(w *World, e *Empire) int { return w.TankPrice(e) },
-		Cost:   CostTank, NetWorth: NetWorthTank,
+		Stored: func(p *Prices) *int { return &p.Tank },
+		WalkLo: PriceLoTank, WalkHi: PriceHiTank, WalkStep: PriceStepTank, WalkTag: "tank",
+		Cost: CostTank, NetWorth: NetWorthTank,
 		ShipWeight: 100, CarrierPer: 5000,
 	}
 	Carrier = &Good{
@@ -115,8 +130,9 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdCarriers },
 		Made:   func(e *Empire) *int { return &e.MadeCarriers },
 		Basket: func(b *TradeBasket) *int { return &b.Carriers },
-		Price:  func(w *World, e *Empire) int { return w.CarrierPrice(e) },
-		Cost:   CostCarrier, NetWorth: NetWorthCarrier,
+		Stored: func(p *Prices) *int { return &p.Carrier },
+		WalkLo: PriceLoCarrier, WalkHi: PriceHiCarrier, WalkStep: PriceStepCarrier, WalkTag: "carrier",
+		Cost: CostCarrier, NetWorth: NetWorthCarrier,
 		ShipWeight: 100, CarrierPer: 0,
 	}
 	Agent = &Good{
