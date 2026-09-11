@@ -299,7 +299,7 @@ func BuildMenus() *Menus {
 		// IB's own (#268), keyed past the original's nine: what other planets have
 		// aimed at this one, counting down. The original has no such screen — its
 		// warnings are news lines, frozen at the moment they were written.
-		{Key: 'I', Label: "Incoming", Do: showIncoming},
+		{Key: 'I', Label: "Incoming Attacks", Do: showIncoming},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'B', Label: "Trading", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},

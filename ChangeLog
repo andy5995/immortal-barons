@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The Incoming screen reads in German, Dutch and Russian
   * Join Group Attack shows the parties forming before it asks for a turn to
     have been played, as the original does
   * A stray mouse click no longer fills a prompt with stray characters, and

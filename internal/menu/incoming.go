@@ -27,10 +27,16 @@ import (
 // Column widths. Sized to this screen's own content, as BRE sizes each of its
 // boxes: 2 of indent and four columns with a space between them come to the
 // 62-column house rule the menus are drawn to.
+//
+// Threat is 16 rather than 15 because of the TRANSLATIONS, not the English:
+// "Групповая атака" is exactly 15 and filled the cell edge to edge, leaving no
+// gap before the column after it. English is the shortest thing this table ever
+// holds, so sizing to it is how a table comes out looking broken in every other
+// language.
 const (
 	inWidthPlanet = 17
-	inWidthThreat = 15
-	inWidthTarget = 19
+	inWidthThreat = 16
+	inWidthTarget = 18
 	inWidthWhen   = 6
 )
 
@@ -48,7 +54,7 @@ type inRow struct {
 func showIncoming(s session.Session, w *ctx) Result {
 	rows := incomingRows(s, w)
 
-	head := tr(s, "Incoming")
+	head := tr(s, "Incoming Attacks")
 	banner := ansi.FgRed + "──" + ansi.FgBrightRed + "═" + ansi.FgBrightWhite + head +
 		ansi.FgBrightRed + "═" + ansi.FgRed + "──" + ansi.Reset
 	indent := (len([]rune(rule)) - (5 + visWidth(w.Term, head))) / 2
@@ -88,7 +94,7 @@ func showIncoming(s session.Session, w *ctx) Result {
 			ansi.FgBrightWhite, padColumn(w.Term, fitColumn(w.Term, r.planet, inWidthPlanet), inWidthPlanet),
 			r.color, padColumn(w.Term, r.threat, inWidthThreat),
 			ansi.FgWhite, padColumn(w.Term, fitColumn(w.Term, r.target, inWidthTarget), inWidthTarget),
-			whenColor, inWidthWhen, r.when, ansi.Reset)
+			whenColor, inWidthWhen, fitColumn(w.Term, r.when, inWidthWhen), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgRed), rule, ansi.Reset)
 	pause(s)
@@ -113,7 +119,7 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 				threat: tr(s, "Gooie Kablooie"),
 				color:  ansi.FgBrightRed,
 				target: tr(s, "this planet"),
-				when:   incomingDays(d.ArrivesDay - w.GameDay),
+				when:   incomingDays(s, d.ArrivesDay-w.GameDay),
 			})
 		}
 		for _, t := range w.IncomingThreats() {
@@ -122,8 +128,9 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 			if t.Kind == game.ThreatGooie && t.FromBoard == flying {
 				continue
 			}
-			r := inRow{planet: t.FromBoard, when: incomingWhen(now, t)}
-			r.away = r.when == incomingAway
+			r := inRow{}
+			r.planet = t.FromBoard
+			r.when, r.away = incomingWhen(s, now, t)
 			switch t.Kind {
 			case game.ThreatGooie:
 				r.threat, r.color = tr(s, "Gooie Kablooie"), ansi.FgBrightRed
@@ -147,29 +154,29 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 // uses (#269), so a force leaving and a force arriving read alike. A threat past
 // its hour says so instead of counting down to nothing, and one whose hour was
 // never named — a Gooie still being paid for — says that too.
-func incomingWhen(now time.Time, t game.Threat) string {
+// It reports whether the threat is already away as a flag rather than leaving
+// the caller to compare the rendered text — which stopped being possible the
+// moment the text was translated.
+func incomingWhen(s session.Session, now time.Time, t game.Threat) (string, bool) {
 	at := t.When()
 	if at.IsZero() {
-		return "?"
+		return "?", false
 	}
 	if left := at.Sub(now); left > 0 {
-		return shortDuration(left)
+		return shortDuration(left), false
 	}
 	// Its hour has come: the force has left, or the weapon has gone up. Either
 	// way it is on its way here and the row stays for a day (ThreatMemoryHours),
 	// because that is the moment the warning matters most.
-	return incomingAway
+	return tr(s, "away"), true
 }
-
-// incomingAway is what the When column says once a threat's hour has passed.
-const incomingAway = "away"
 
 // incomingDays spells a flight measured in whole game days, which is all the
 // weapon's arrival is known to (Annihilator.ArrivesDay). It is deliberately a
 // different unit from the countdowns above, and reads as one.
-func incomingDays(days int) string {
+func incomingDays(s session.Session, days int) string {
 	if days <= 0 {
-		return "now"
+		return tr(s, "now")
 	}
 	return fmt.Sprintf("%dd", days)
 }
