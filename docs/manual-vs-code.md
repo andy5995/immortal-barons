@@ -108,14 +108,14 @@ v0.988 does not mean it was ever wrong.
 ### Tanks do not defend against chemical missiles
 
 The changelog announces that they do. No chemical, biological or nuclear routine
-in the shipped version reads the target's tanks, turrets or missile defence at
+in the shipped version reads the target's tanks, turrets or missile defense at
 all — the only things any of them look at are the realm's name, its region count,
 its population, its morale and its support.
 
 **Immortal Barons** used to reduce all three weapons by the target's SDI. That
 was the clone's own invention and is gone.
 
-### Missile bases do not stop a neighbour's nuclear strike
+### Missile bases do not stop a neighbor's nuclear strike
 
 Same shape. The local nuclear routine reads a realm's name and region count and
 nothing else. The "up to 50% of incoming missiles" the documentation advertises
@@ -168,7 +168,7 @@ early.
 
 ### "Funding / Region: 0,000 Gold"
 
-The missile-defence screen prints that line at every funding level, up to seven
+The missile-defense screen prints that line at every funding level, up to seven
 million. It was written down here for months as unexplained and probably a fault.
 
 It is a display convention. The program stores the funding in whole thousands and
@@ -195,7 +195,7 @@ corrected: the original is right by its own convention, and a line that reads
 
 None of the above is an argument against the documentation. Sweeping it first is
 still the fastest way to learn what a mechanic is and roughly where to look —
-between them, the manual and the help gave the whole treaty catalogue, the
+between them, the manual and the help gave the whole treaty catalog, the
 group-attack timing bounds, and three of the four attack figures correctly.
 
 The rule that came out of it is narrower: read the prose to find the question,

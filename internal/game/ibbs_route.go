@@ -3,7 +3,7 @@ package game
 import "time"
 
 // Packet routing. Where the Coordinator has arranged the league as a tree, the
-// HOST lines in the roster (BRE's BRNODES.DAT) say which neighbour each board
+// HOST lines in the roster (BRE's BRNODES.DAT) say which neighbor each board
 // hands a packet to. A leaf board then configures one link, to its uplink,
 // however many boards the league has — which is what makes a twenty-board
 // league something a hobbyist sysop can join (#106). Until a Coordinator writes
@@ -18,7 +18,7 @@ const MaxPacketHops = 25
 // Routed reports whether this league is arranged as a tree — whether the roster
 // carries HOST lines.
 //
-// It is the switch for every behaviour on this page, because the alternative is
+// It is the switch for every behavior on this page, because the alternative is
 // not "no routing" but a different transport. An unrouted league is a mesh whose
 // transport copies each outbound file to every board, so a packet addressed
 // elsewhere is a copy the addressee already got directly: forwarding it would
@@ -107,7 +107,7 @@ func (w *World) hostOf() map[int]int {
 
 // NextHop is the planet a packet for dest should be handed to. It is dest
 // itself when the two boards link directly, which is both the answer for a
-// league with no routing at all and the answer for a neighbour in the tree.
+// league with no routing at all and the answer for a neighbor in the tree.
 // An unroutable destination also comes back as dest: sending it straight at a
 // board that may not answer beats holding it here where nobody will look.
 func (w *World) NextHop(dest string) string {

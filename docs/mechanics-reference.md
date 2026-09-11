@@ -17,9 +17,9 @@ code, not from `attack.hlp` or a strategy guide.
 
 | Piece | Local regular | Interplanetary individual | Group |
 | --- | --- | --- | --- |
-| Offence weights | verified | verified (flat tank 2, no bombers) | as individual |
+| Offense weights | verified | verified (flat tank 2, no bombers) | as individual |
 | Per-contributor technology | own realm's, in the resolver | verified: `technology_factor(1.4, slot 5)`, fixed per slot on the sending board | as individual, per contributor |
-| Defence weights | verified | verified (own tank factor) | as individual |
+| Defense weights | verified | verified (own tank factor) | as individual |
 | Morale factor | verified (`0.6m+50`) | verified (`m/1.75+50`) | as individual |
 | Attrition loop | verified (with upset roll) | verified (no upset roll) | as individual |
 | Per-round flat loss | verified, and scale-corrected | same constant | same |
@@ -42,9 +42,9 @@ Still open, and each is IB's own or unread rather than known-correct:
 - **There is no bombing run.** IB flew the attacker's bombers against the
   defender's airfields first — three grounded jets per bomber, one bomber shot
   down per 25 turrets — and no routine in the original does either: turrets are
-  one addend in the defence pool, and the local resolver applies ONE loss
+  one addend in the defense pool, and the local resolver applies ONE loss
   fraction to troopers, jets, tanks and bombers alike (proc `+0x1581..+0x1631`).
-  Bombers add no offence locally and bleed with the rest; both removed 2026-08-26.
+  Bombers add no offense locally and bleed with the rest; both removed 2026-08-26.
 - **There is no capture-density modifier.** IB scaled the local capture by the
   two realms' net worth per region; the original reads the defender's region
   count and the level constant and nothing else. Removed 2026-08-26.
@@ -56,12 +56,12 @@ Still open, and each is IB's own or unread rather than known-correct:
   `record + 8`. So every contributor to a group attack brings their own
   research, fixed when they joined, and the target board multiplies each slot by
   it without recomputing anything. IB carries it as `Contribution.Tech` and
-  applies it in the same places the original does: the offence, the SDI ratio,
-  and the spoils split. The neighbouring `+0x18` is the attack's gold cost.
+  applies it in the same places the original does: the offense, the SDI ratio,
+  and the spoils split. The neighboring `+0x18` is the attack's gold cost.
 - **The catalog name `resolve_received_invasion__calculate_attacker_strength`
   is wrong.** That block reads defender-shaped fields, and the attacker's
   strength provably comes from `calculate_attack_force_offense` on the force
-  record. It is the whole-planet defence loop, now understood (below).
+  record. It is the whole-planet defense loop, now understood (below).
 
 **What a turret actually does (exhaustive, 2026-08-24).** Every reference to the
 turret field in the overlay was enumerated — 46 sites, all of them mapped — by
@@ -70,8 +70,8 @@ realm's at `-0xeeb`). The result:
 
 | What | Where | Turrets are... |
 | --- | --- | --- |
-| A neighbour's regular attack | `resolve_regular_attack` | **defence** — one term in the pool |
-| An arriving interplanetary invasion | `resolve_received_invasion` | **defence** — one term in the pool |
+| A neighbor's regular attack | `resolve_regular_attack` | **defense** — one term in the pool |
+| An arriving interplanetary invasion | `resolve_received_invasion` | **defense** — one term in the pool |
 | Civil unrest | `resolve_civil_unrest` | destroyed (read, then written back) |
 | An S3-Sabre missile | `resolve_received_sabre_strike` | destroyed (read, then written back) |
 | A covert operation | `resolve_received_covert_operation` | read |
@@ -85,7 +85,7 @@ attacker brought in order to decide what a turret does.
 
 Two consequences, both contradicting the guide-sourced table below:
 
-- **Turrets do not shoot down jets.** No defence term reads the attacker's jets,
+- **Turrets do not shoot down jets.** No defense term reads the attacker's jets,
   and a live capture settles it from the other side: 112 turrets destroyed none
   of 3 attacking jets.
 - **Turrets do not intercept nuclear, chemical or biological missiles.** No WMD
@@ -136,7 +136,7 @@ HQ is an `int32` at empire record `+0x26b`, holding percent complete.
 - Bombers are excluded from the sum and accumulated separately, matching
   `breins.txt` ("no offensive or defensive strength").
 - **The price rises with the empire's lifetime turn count.** The military units
-  walk around the centre of a fixed band; a HeadQuarters only ever climbs (5,039
+  walk around the center of a fixed band; a HeadQuarters only ever climbs (5,039
   … 12,649 across the captures). Covert agents price the same way — see the
   covert-agent entry under the price walk below. `BRE.OVR 0x128BA`:
 
@@ -452,7 +452,7 @@ flow runs in this order:
    through `creditGold`, which reports what the ceiling ate rather than deleting
    a win it has just announced. And IB draws an unmatched letter in bright red
    rather than the original's dark red, which sits at 2:1 against black, and
-   states the match count in words so colour is not what tells a win from a miss.
+   states the match count in words so color is not what tells a win from a miss.
 
 4. Conditional, and asked between the region maintenance and the crown tax: SDI
    maintenance (with SDI), waste-region decontamination (with waste regions),
@@ -682,7 +682,7 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 
   ```
   cost    = min(targetRegions * 3543, 50,000,000)
-  percent = 7 + Random(3) - Random(3)          -- a 5-9% band, centred on 7
+  percent = 7 + Random(3) - Random(3)          -- a 5-9% band, centerd on 7
   ruined  = targetRegions * percent / 100      -- truncated
   ```
 
@@ -735,7 +735,7 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 
   ```
   cost    = min(targetPopulation * 94 + targetRegions * 2037, 50,000,000)
-  percent = 3 + Random(3) - Random(3)          -- a 1-5% band, centred on 3
+  percent = 3 + Random(3) - Random(3)          -- a 1-5% band, centerd on 3
   ruined  = targetRegions * percent / 100      -- truncated, then made Waste
   killed  = targetPopulation * 20 / 100        -- a FLAT fifth, no roll at all
   morale  = round(morale  * 3/4)               -- record +0x8e
@@ -824,7 +824,7 @@ instruction's modrm. Six of the seven award sites reach it with a separate
   5% "second raid by a different faction" was a guess; neither shape is in the
   binary.
 
-  **Open: the faction's own defence.** IB computes it as
+  **Open: the faction's own defense.** IB computes it as
   `tanks + turrets/2 + troopers/3` (`PirateFaction.Defense`). The original's
   raid resolver builds its faction strength at `launch_pirate_raid +0x0a45` as
   `[rec+0x0c]/2 + [rec+0x00]/3 + [rec+0x04]` — the same SHAPE (one term whole,
@@ -1363,7 +1363,7 @@ What that means in play:
   **Consequence: agents defend against nothing on the local menu.** Stockpiling
   them buys staying power against the one-per-failure loss and the attacking side
   of the roll once an Intelligence Alliance is in play, and nothing else. The
-  only defences that exist are Expose Enemy Ops and a Terrorist Prevention treaty
+  only defenses that exist are Expose Enemy Ops and a Terrorist Prevention treaty
   — and the latter, per the entry below, works backwards.
 - **The divisor is integer division, so a thin realm is worse off than the
   cancellation suggests.** At 1 agent, `A = 1 div 2 = 0` and a Demoralize Forces
@@ -1450,7 +1450,7 @@ all of that; `Empire.ExposedFrom` holds the per-realm expiry.
 > block and the bribed-realms-only picker are all binary-verified, all read by
 > `covertRoll`, and nothing else in IB writes that expiry, so the verified half
 > of the mechanic would become dead code behind a dead menu item. **IB therefore
-> keeps the intended behaviour** — the shield lands on the realm you picked —
+> keeps the intended behavior** — the shield lands on the realm you picked —
 > which diverges on one instruction's index and reproduces everything else the
 > routine does. The artifact is recorded here instead of built.
 >
@@ -1550,7 +1550,7 @@ there:
 ### The local resolver, read 2026-08-16
 
 The six EFFECT ops are queued by the menu ("Covert Agent Sent out") and resolved
-out of daily maintenance by **`BRE.OVR 0x04be9f`** — catalogued
+out of daily maintenance by **`BRE.OVR 0x04be9f`** — catalogd
 `run_ai_covert_operations`, which is a **misnomer**: it walks the queued 19-byte
 covert records of every player and is the only resolver the local menu reaches.
 It dispatches on the MENU DIGIT, with cases for 2, 3, 4, 5, 7 and 8 only. Digits
@@ -1600,7 +1600,7 @@ a realm you attack in the same turn. IB resolved every operation on the spot
 until this landed, which made covert a tactical move; in the original it is a
 strategic one, planned a day ahead. The AI's pre-battle demoralize (`aiWageWar`)
 was removed with the same change — it could no longer affect the battle it was
-paid for, and `aiCovertOps` already makes that judgement a day earlier.
+paid for, and `aiCovertOps` already makes that judgment a day earlier.
 
 **A whole family of spec figures was sourced from the WRONG resolver.** The
 inter-BBS packet path, `resolve_received_covert_operation` (`BRE.OVR 0x04a68e`),
@@ -1621,7 +1621,7 @@ Two figures the same reading corrected on the way past:
 - **The floor of 5 on morale and support is not the computer's.** `0x4C02F` and
   `0x4C2E0` sit in this resolver, which runs every player's queued op, so every
   successful Stir Revolts and Demoralize Forces stops at 5. IB applied it only
-  after an AI op (`aiCovertFloor`), which has been removed in favour of the
+  after an AI op (`aiCovertFloor`), which has been removed in favor of the
   universal `CovertStatFloor`.
 - **A successful op hands the attacker an agent back** (`agents += 1` on the
   attacker's record in every case). Since the menu spends one agent when the op
@@ -1840,7 +1840,7 @@ record to work with, so it encodes 0 None, 1 User Select, 2 Random and 200-210 a
 Constant firing `value - 200`. IB writes named JSON, so `SabreHandling` holds the
 mode and `SabreConstantDial` holds the number — the packing is a constraint of the
 original's file format, not one of its rules, and IB copies its rules. The
-behaviour is identical either way.
+behavior is identical either way.
 
 IB had a four-value enum with the Constant's dial hard-coded until 2026-08-31.
 Because the mode order changed to the original's, `MigrateSabreHandling` carries
@@ -2123,7 +2123,7 @@ level frozen at zero Technology regions, buying 500 regions moved food decay fro
 
 Together those two properties mean a player can bank research cheaply while
 small, then liquidate the regions and keep the benefit — but cannot expand
-afterwards without giving most of it back. **IB keeps this behaviour
+afterwards without giving most of it back. **IB keeps this behavior
 deliberately**: the exploit is self-limiting, because a realm that stays small to
 preserve its technology pays for that in income, military and land.
 
@@ -2189,7 +2189,7 @@ for each of the six military units (`Empire.Prices`) and steps it once per turn
 `mid` is the midpoint of `[lo, hi]`. Whichever side of it a price sits on, the
 move that would carry the price further out is divided by 1..3 while the move
 back is taken in full, so the walk is **mean-reverting** and prices sit near the
-centre of a band they are free to roam.
+center of a band they are free to roam.
 
 The three tables are arrays of six words in `BRE.EXE`'s data segment (`DS:0x508`
 step, `DS:0x514` low, `DS:0x520` high):
@@ -2287,7 +2287,7 @@ them into whole troopers: **1 : 2 : 3.5..4.5**. Notes:
 - A separate pass scans every empire for treaty type **7** (Full Defense
   Alliance) and contributes **30**, which matches IB's `AllyDefenseContribPct`.
 
-**A lost defence damages the HeadQuarters**: `Random(3)+5` points off, clamped
+**A lost defense damages the HeadQuarters**: `Random(3)+5` points off, clamped
 at zero (`0xFFA2`, subtracted via `0c03:0fe3`). So a HeadQuarters is not
 permanent — a realm under repeated attack loses the tank bonus it spent 20 turns
 building. IB had no HQ damage at all.
@@ -2352,7 +2352,7 @@ repelled at 20.4–20.7% losses every time, while the defender lost NOTHING in
 three of the six, ~1% in one and ~2% in two — the upset roll's ~1%-per-hit
 quanta (trial: 5,053 troopers + 5,101 turrets + 839 tanks in one hit). A
 token force stripping five figures off a giant is the original's own
-behaviour, not an IB defect.
+behavior, not an IB defect.
 
 **Corroborated in a live game, not only on a staged board (2026-08-31,
 `cap/kd3-01.cap`).** A 600-trooper/800-jet/800-tank raid on a realm holding
@@ -2604,7 +2604,7 @@ The `3 × People` term is per BRE unit, so IB divides its own count by
 the crown charges twenty times the price.
 Note the deficit **charged for** is capped at 15, but the award is a plain ratio
 of what you paid — so **overpaying by half buys 22 points, not 15**. That is the
-original's behaviour, not an IB addition. The `+1` on each side is the same shape
+original's behavior, not an IB addition. The `+1` on each side is the same shape
 the crown-tax penalty uses.
 
 **The morale boost — binary-verified (BRE.OVR 0x2F6BA, 0x2F6CA, 0x2F82C and
@@ -2682,7 +2682,7 @@ IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
   **IB's `eventResource` set is those same seven, with the same gain/lose
   split**, so the structure matches; only the wording is IB's own, and
   deliberately — the 71 lines are the original's expression, not its mechanics,
-  so they may not be copied (see the licence note in the `bre-gather` skill).
+  so they may not be copied (see the license note in the `bre-gather` skill).
   One of them is where "galactic coordinator" appears in BRE: a joke event about
   a galactic official killing population, NOT a name for the League Coordinator,
   which is the office that owns a league's ruleset.
@@ -2697,7 +2697,7 @@ IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
   - **`Random(100)`, and it proceeds only on 91..99** — nine turns in a hundred.
     Everything else returns having done nothing.
   - **`Random(7)+1` picks the resource** and **`Random(2)` picks gain or lose**,
-    both flat: no resource or direction is favoured.
+    both flat: no resource or direction is favored.
   - **The amount is a SHARE of what the realm already holds**,
     `trunc(held x pct / 100)`, and an amount that truncates to zero means the
     event does not happen. The percentages live one byte per resource in a
@@ -2808,7 +2808,7 @@ section is a record of what was claimed and how it was settled, so the word
   discarded, and the Game Setup screen reports the ceiling so a player can see
   what they play under.
 
-  A `config.json` written while the field existed is **honoured, not clamped**:
+  A `config.json` written while the field existed is **honored, not clamped**:
   `MoneyCapBillions` still reads back through the 2..999 range. Clamping a
   league's saved cap on load would take gold it had been playing with, and the
   field remains the mechanism whatever sets it later (#202). `LeagueConfig`
@@ -2861,13 +2861,13 @@ section is a record of what was claimed and how it was settled, so the word
   a thousand, then `k`, `m` and `b`, truncated rather than rounded
   (`numfmt.Abbrev`). 1,373,000,000 renders `1b`; 34,833,289 renders `34m`.
 
-  This is a **deliberate divergence**, and the shape of BRE's own behaviour is
+  This is a **deliberate divergence**, and the shape of BRE's own behavior is
   worth recording so it is not "corrected" back. BRE does not step: each of its
   columns picks one suffix and keeps it however far the figure runs. Its See
   Scores board prints `1962k` and `12m` in the SAME row — Score fixed on `k`,
   Net Worth fixed on `m`, at one magnitude — and its Daily Bulletin holds `k` to
   `25,750k`. No capture reaches billion scale in any abbreviated column, so
-  BRE's behaviour there is unknown either way. IB steps because one rule across
+  BRE's behavior there is unknown either way. IB steps because one rule across
   every screen beats two columns that disagree, and it keeps any figure inside
   four digits and a letter.
 - **Food market (issue #19):** food is bought and sold against a **shared
@@ -3297,7 +3297,7 @@ IB matches all of it.
   every screen that shows an `Id` or takes a selection letter — See Scores, the
   attack picker, the recipient picker, `-*Relations*-`, the letters a message
   records in `Message To  :` — reads `'A' + Slot - 1`. A realm keeps its letter
-  however many neighbours die, are pruned, or join, and the See Scores board
+  however many neighbors die, are pruned, or join, and the See Scores board
   letters by slot rather than by rank, so its rows are not in letter order.
 - **The id is parenthesised as BRE parenthesises it, and BRACKETED for a realm
   under New Realm Protection** — `[C]` against `(C)`, IB's own flag (#214). BRE
@@ -3505,7 +3505,7 @@ else is ignored silently, the caller's own letter and dead slots included. One
 composition then goes to every selected realm, and every copy carries the same
 `Message To  :` letters in letter order — which is what the boxed capture's
 `Message To  : ABCE` is. Verified against the selection routine at `BRE.OVR`
-0x1b65e and its per-letter toggle at 0x1b575; layout and colours are in
+0x1b65e and its per-letter toggle at 0x1b575; layout and colors are in
 `docs/dev/bre-screens.md`. Two consequences worth stating outright:
 
 - **`Z` does not send.** It only marks everyone; the message is not composed
@@ -3641,7 +3641,7 @@ holds: it has no regions left; it has no population left; nobody has played it
 for the configured idle limit (`DeletionDays`, default 7, per `docs/bre.doc`); or
 it was created and never played and the game is more than three days old. The
 slot in play is exempt. Two things follow. A crushed realm stays visible for the
-rest of the game day, which is why the loser's neighbours can still see what
+rest of the game day, which is why the loser's neighbors can still see what
 happened — IB's one-day husk (`removeDeadHusks`) is the same window. And
 abdication has to reach the player "the next day" because it also goes through
 this sweep: the deletion routine has exactly two callers, that sweep and the
@@ -3763,8 +3763,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   `resolve_received_invasion` (`BRE.OVR 0x040012`):
 
   ```
-  A0 = attacker offence (troopers, jets, tanks + morale) x the strength column
-  B0 = defender defence (troopers, turrets, tanks; tanks x HQ%/100 + 1.5)
+  A0 = attacker offense (troopers, jets, tanks + morale) x the strength column
+  B0 = defender defense (troopers, turrets, tanks; tanks x HQ%/100 + 1.5)
   C0 = defender's jets
   L  = attacker's bombers, summed over all 25 contributor slots
   f  = the retreat share above, as a survival fraction (0.92 / 0.85 / 0.80)
@@ -3785,7 +3785,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   on its opponent's share and on nothing else.
 
   So the loser pays the retreat share and the winner pays only what the strength
-  ratio cost it. A force far weaker than the defence reaches its own threshold
+  ratio cost it. A force far weaker than the defense reaches its own threshold
   after a round or two, which is what stops a token strike from hurting anybody.
   Handing the defender the share outright instead let 100 troopers and 1,000
   tanks destroy 7,696 units of a 97,000-unit realm, as much as a full invasion.
@@ -3793,7 +3793,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   **Jets fight their own battle, and only bombers are in it.** The defender's
   loss fraction is applied to troopers (`+0x76`), turrets (`+0x82`) and tanks
   (`+0x86`); the air fraction is applied to jets (`+0x7e`) alone. Bombers are
-  absent from the offence builder, which is what gives them this job instead. A
+  absent from the offense builder, which is what gives them this job instead. A
   strike carrying no bombers costs the defender no jets however hard it presses,
   and nothing on the ground shields the airfield — turrets and tanks are in the
   ground strength and never enter the air roll.
@@ -3821,8 +3821,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   carried as a letter, and `Z` means all — the same "Z=All" convention BRE's own
   multi-select picker uses. On seeing it (`+0x0d3d`) the resolver loops `A`..`Y`
   (`+0x0d47`), skipping a realm on a per-letter flag, and for each one computes
-  the ordinary defence expression — including that realm's technology military
-  factor, slot 5 capped at 1.4 (`056d:1a42`) — summing them into the defence and
+  the ordinary defense expression — including that realm's technology military
+  factor, slot 5 capped at 1.4 (`056d:1a42`) — summing them into the defense and
   pooling their jets into the air battle. Then ONE battle is fought against the
   total, and the capture runs per realm, reading `total_regions` on whichever it
   is taking from.
@@ -3854,39 +3854,39 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   original reported **0 jets lost and 2 turrets destroyed**. Both figures fall
   out exactly, and each pins a separate thing — zero jets only if the strengths
   stay fractional rather than being truncated to integers first, and two turrets
-  only with the flat term at the right scale and **no per-region defence bonus**
+  only with the flat term at the right scale and **no per-region defense bonus**
   (IB carried one of 2 per region; with it the figure is odd for every possible
   round count). `TestCapturedJetsVersusTurrets`.
 
   That capture also disposes of the guide's claim that turrets are the
   "counterpart to jets" which shoot them down: 112 turrets destroyed none of 3
-  jets, and the defence is one undifferentiated pool.
+  jets, and the defense is one undifferentiated pool.
 
-  **The shield reaches the air battle, not the offence.** The resolver calls the
+  **The shield reaches the air battle, not the offense.** The resolver calls the
   SDI-strength routine (`0x56d:0x1139`) at `+0x10aa` and hands the resulting
-  percentage as the second argument to BOTH the offence builder and the
-  bomber-count routine. The offence builder uses it to blunt the jets; the
+  percentage as the second argument to BOTH the offense builder and the
+  bomber-count routine. The offense builder uses it to blunt the jets; the
   bomber routine returns `trunc((1 - SDI x 0.2/100) x bombers)`, which is exactly
   the published "up to 20%" figure. So `SDIBomberReductionPct` applies to `L`
-  rather than to any offence term.
+  rather than to any offense term.
 
   **The builders' own weights, read 2026-08-24.** Both differ from the LOCAL
   resolver's, which is why applying one set to both battles was wrong.
 
-  Offence, per contributor slot (`ovr_03f4a0 +0x0000`):
+  Offense, per contributor slot (`ovr_03f4a0 +0x0000`):
 
   ```
   (troopers x 0.5  +  jets x (1 - SDI x 0.3/100)  +  tanks x 2) x factor(+0x1c)
   ```
 
   Doubled into trooper units that is **trooper 1, jet 2, tank 4** — the table IB
-  already uses, so its offence values were right. Bombers are absent, as above.
+  already uses, so its offense values were right. Bombers are absent, as above.
   The per-contributor `+0x1c` factor is the contributor's Technology military
   factor, written by `configure_attack_forces` when they commit their forces
   (see "Attack fidelity status"); IB's `Contribution.Tech` is the same value,
   and the shield is applied BEFORE it, as here.
 
-  Defence (`resolve_received_invasion +0x0f9d`):
+  Defense (`resolve_received_invasion +0x0f9d`):
 
   ```
   round( (troopers x 0.5 + turrets + tanks x (HQ/100 + 1.5)) x (morale/175 + 0.5) )
@@ -3900,7 +3900,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   | Morale factor | `50 + 0.6 x morale` (`+0x0b72`) | `50 + morale/1.75` (`+0x1040`) |
 
   The tank factors cross at HQ 50: a realm with no HeadQuarters defends an
-  invasion **worse** than a neighbour's attack, and a finished one better. The
+  invasion **worse** than a neighbor's attack, and a finished one better. The
   morale slope is gentler, so full morale holds at 107% against an invasion and
   110% at home. `remoteTankStrength`, `remoteMoraleFactor`, `remoteDefense`.
 
@@ -4290,7 +4290,7 @@ the daily bombing allowance, and is stopped by New Realm Protection.
 
 **The three missiles are NOT the local missiles** — read 2026-09-03, correcting
 this section, which had them sharing the local helpers. The receiving board runs
-one resolver for all three (`BRE.OVR ovr_0450a9 +0x3c5`, catalogued as
+one resolver for all three (`BRE.OVR ovr_0450a9 +0x3c5`, catalogd as
 `resolve_received_sabre_strike`; the op type is a byte it switches on at
 `+0x5b9`, `+0x62f` and `+0x6b6`), and that resolver carries its own gates and its
 own damage bands:
@@ -4435,7 +4435,7 @@ as IB's own until someone reads the original's code:
   always zero. Only a strike aimed at a named baron meets a shield. IB follows
   this rather than correcting it — it is what the original does, and the
   alternative reading would be a guess.
-- **Nothing local is touched.** Not a neighbour's attack, not a nuclear, chemical
+- **Nothing local is touched.** Not a neighbor's attack, not a nuclear, chemical
   or biological missile, and not the Gooie Kablooie (#111). IB applied
   `(100 - SDI)` in four such places until 2026-08-14; all four were IB's own
   invention and are gone.
@@ -4655,7 +4655,7 @@ caller's own):
   be changed from the System menu.
 
 The office and the realm name are the bright segment of the line, the rest the
-body colour. A baron who has not voted is named **"No one"**: the formatter
+body color. A baron who has not voted is named **"No one"**: the formatter
 (`format_no_recipient`, `BRE.OVR 0x0176f`) falls back to that literal when the
 stored vote is not a realm letter A-Y, and takes the same path when the realm it
 names has zero net worth — so a choice that has since died reads the same as
@@ -4743,7 +4743,7 @@ menu calls the same toggling picker Send Message uses — the selection routine 
 `BRE.OVR` 0x1b65e, reached from two sites inside its diplomacy menu (0x1c800
 +0x08e7 and +0x0a79) — so one action proposes a pact to, or declares war on, as
 many realms as are marked. Letters toggle, `Z` marks the whole `A`..`Y` range,
-`?` lists, RETURN closes and an empty list cancels; the full behaviour is under
+`?` lists, RETURN closes and an empty list cancels; the full behavior is under
 "Sending: the recipient picker addresses a LIST" above. One thing differs here,
 and BRE passes it to the routine as a flag: `?` lists the `-*Relations*-` table
 rather than the score table. IB's rules on top of that:
@@ -4757,7 +4757,7 @@ rather than the score table. IB's rules on top of that:
   the send loop at +0x0995 goes straight to `"<pact> proposed to <realm>"` with no
   test of the relation row, while the Declaration Of War loop at +0x0ADA is the
   only one that reads it. IB used to offer to BREAK the standing pact here, which
-  is neither BRE's behaviour nor safe — it put the one destructive diplomatic act
+  is neither BRE's behavior nor safe — it put the one destructive diplomatic act
   behind the same key as the constructive one. BRE's break-with-penalty prompt
   ("Are you sure you wish break your agreement?", `BRE.OVR` 0x1A838) belongs to
   the shared target picker, not to diplomacy — and there only for the callers
@@ -4848,7 +4848,7 @@ and each carries a gameplay effect (#11 wired the last two):
   stay home, agents are covert); the attacker's battle report notes the
   reinforcements, and the committed detachment bleeds at the defender's casualty
   rate (`bleedAllies`), which also **tells each partner what it lost and in whose
-  defence** — BRE files that line in the same loop iteration as the deduction
+  defense** — BRE files that line in the same loop iteration as the deduction
   (`BRE.OVR 0x00ef90`, the aid loop in `resolve_regular_attack`), and without it
   a player's units disappear from a battle they were never told about.
   See the `bre-binary-verified-math` memory.
@@ -4877,7 +4877,7 @@ and each carries a gameplay effect (#11 wired the last two):
   instructions between guard and deduction contain no branch of any kind, and the
   recap filer itself (`04ef:002f`) is 25 instructions with no conditional jump —
   there is no zero-total test and no dedup, so a partner that sent nothing is
-  told so. IB matches both behaviours (`battleNotified`).
+  told so. IB matches both behaviors (`battleNotified`).
 
   **A Declaration Of War does NOT qualify, though relation 8 would pass the
   guard.** The value is never stored: `break_diplomatic_treaty` writes
@@ -4897,7 +4897,7 @@ and each carries a gameplay effect (#11 wired the last two):
   time, so a partner appears on exactly one of the two lists. IB credited an
   alliance partner 30% of its agents as well until 2026-08-16, lending help the
   original never lends; `AllyDefenders` now splits the rows by treaty.
-  **The "only in Local Games" note is a rule, not a caveat, and IB honours it**:
+  **The "only in Local Games" note is a rule, not a caveat, and IB honors it**:
   the relation lives in one planet's empire records and never rides a packet, so
   an arriving interplanetary strike meets the target's own `Defense()` and
   nothing more — `resolveRemoteAttack` does not consult `allyDefenseBoost`, and
@@ -5025,7 +5025,7 @@ holding a Full Defense Alliance draws the identical prompt and the identical
 four-line revolt, and then goes out anyway. Gold and the agent are both spent
 after the pact falls; **the break is the price of the target, not an alternative
 to the operation.** IB matches on both sides. Until 2026-09-06 it refused an ally
-as a covert target outright, so neither behaviour existed.
+as a covert target outright, so neither behavior existed.
 
 So the confirmation, the charge and the break land *before* the force is chosen,
 which means the battle is then fought at the reduced morale. IB matches
@@ -5038,7 +5038,7 @@ prompts or to "Covert Agent Sent out". Live capture: `cap/kd3-01.cap`.
 `DeclareWar` and nothing on the breach, on the stated reasoning that "no attack
 path in BRE reads the relation at all". The read is a level up, in the picker the
 attack shares with trading — the same mistake the gathering guide warns about
-under "A prompt's TEXT is not its behaviour — read the caller". Recorded so it is
+under "A prompt's TEXT is not its behavior — read the caller". Recorded so it is
 not reasoned back.
 
 One manual statement is **wrong about the shipped game**, and is recorded here so
@@ -5353,7 +5353,7 @@ Now matching this reference (as of v0.0.4):
 - Offense/defense split in combat, with the correct unit values
   (trooper 1/1, jet 2/0, turret 0/2, tank 4/4)
 - Turrets (defense-only) and carriers (jets can only attack if carried)
-- Bombers in a regular attack add no offence and bleed with the rest of the
+- Bombers in a regular attack add no offense and bleed with the rest of the
   committed force, as the original's resolver treats them; there is no airfield
   strike and turrets shoot nothing down
 - Interactive maintenance stage at turn start: pay armed-forces upkeep and
@@ -5539,7 +5539,7 @@ checking IB against a capture:
   to withhold the letter entirely, which said a row was different without saying
   how. The bracket is the whole flag: no marker follows the name, the row keeps
   its width, and the SHAPE carries it, so it survives a monochrome terminal and
-  a reader who cannot separate the two colours. Everything unshielded keeps
+  a reader who cannot separate the two colors. Everything unshielded keeps
   BRE's own parentheses. Picking the letter is still answered with the refusal,
   so the shield is stated twice rather than mimed.
 

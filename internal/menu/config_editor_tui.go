@@ -79,7 +79,7 @@ func ibbsOnlyLabels() map[string]bool { return ibbsOnlyLabelSet }
 var fieldBgColor = tcell.NewHexColor(0x0d2b50)
 
 // Per-field help shown in the bottom pane when a field is focused. The facts are
-// BRE's (rates, caps, behaviour); the wording is our own — BRE's help text is
+// BRE's (rates, caps, behavior); the wording is our own — BRE's help text is
 // copyrighted, so it is paraphrased, not copied.
 const (
 	defaultHelp            = "Move with Tab / Shift-Tab; each field's help appears here."
@@ -290,7 +290,7 @@ func rootLayout(t *configTUI) tview.Primitive {
 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText("Immortal Barons — Configuration Editor")
 	t.tabs = tview.NewTextView().SetDynamicColors(true).SetRegions(true)
 	// Clicking a tab highlights its region; use that as a click handler, then clear
-	// the highlight so renderTabs' colour stays the source of the active-tab look.
+	// the highlight so renderTabs' color stays the source of the active-tab look.
 	t.tabs.SetHighlightedFunc(func(added, _, _ []string) {
 		if len(added) == 0 {
 			return
@@ -588,7 +588,7 @@ func addChoice[T comparable](t *configTUI, form *tview.Form, label, help string,
 // cycleField is a choose-one-of-N form field: it shows the current option and
 // cycles with ↑/↓ (also ←/→ or Space), or a click while already focused. No
 // popup — for a handful of options that beats a dropdown. It carries its own
-// zebra background (SetFormAttributes ignores the Form's uniform field colours)
+// zebra background (SetFormAttributes ignores the Form's uniform field colors)
 // and a brighter background while focused.
 type cycleField struct {
 	*tview.Box
@@ -714,7 +714,7 @@ func (c *cycleField) MouseHandler() func(tview.MouseAction, *tcell.EventMouse, f
 
 // styledField wraps a form field to force its field foreground/background,
 // overriding the Form's uniform per-field styling (it repaints every field the
-// same colour on each Draw). Used for the yellow dropdowns and the zebra-striped
+// same color on each Draw). Used for the yellow dropdowns and the zebra-striped
 // inputs, which stack with no blank line between them.
 type styledField struct {
 	tview.FormItem

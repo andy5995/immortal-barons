@@ -61,7 +61,7 @@ three files you can edit, further down, are yours and are not counted here.
 
 ## For your BBS menu
 
-Each bulletin is written twice: `.ans` with colour and `.txt` without. Point a
+Each bulletin is written twice: `.ans` with color and `.txt` without. Point a
 bulletin menu entry at whichever your callers can read.
 
 Both are CP437, the character set BBS software and ANSI art programs expect, so
@@ -129,11 +129,11 @@ you do, those pages simply carry no address. A link is handled the same way but
 keeps its text, so your board's name reads as plain text when `BoardURL` is not
 set, instead of linking back to the page being read.
 
-### Colours and the stylesheet
+### Colors and the stylesheet
 
-The colours arrive as class names, `<span class="ansi-fg-14">` and
+The colors arrive as class names, `<span class="ansi-fg-14">` and
 `<span class="ansi-bg-4">`, numbered 0 to 15. A stylesheet can repaint a class;
-it could not repaint a colour written into the tag.
+it could not repaint a color written into the tag.
 
 `bulletin.css` is a starting point rather than a requirement. The only thing
 naming it is a `<link>` in the default header, so pointing that at your own
@@ -143,15 +143,15 @@ The pages it draws are black to the edges and set in one monospace face, so the
 bulletin sits on the same ground it was drawn for.
 
 The game's own name, at the top of every bulletin, links to the game's website.
-It carries no underline and keeps whatever colour the screen drew it in; a
+It carries no underline and keeps whatever color the screen drew it in; a
 highlight bar marks it and brightens when you point at it, the way a DOS menu
 marks the line under the cursor.
 
-If you write your own sheet, note that the dark half of the sixteen colours is
+If you write your own sheet, note that the dark half of the sixteen colors is
 too dim to read as body text on black. The game's own screens keep every figure
-and heading on a bright colour or white and use the dark ones for parentheses
+and heading on a bright color or white and use the dark ones for parentheses
 and banner dashes, so this is a limit of the palette rather than of any one
-page. `bulletin.css` lifts the dark colours for a reader whose system asks for
+page. `bulletin.css` lifts the dark colors for a reader whose system asks for
 more contrast.
 
 ## The `bbs.cfg` lines

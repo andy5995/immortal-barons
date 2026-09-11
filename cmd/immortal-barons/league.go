@@ -177,7 +177,7 @@ func runLeagueRoutes(cfg game.Config) error {
 				continue
 			}
 			others++
-			// A Link line is the sysop saying this neighbour's files go in a
+			// A Link line is the sysop saying this neighbor's files go in a
 			// directory of its own, which is what a per-node queue needs. An
 			// unaddressed broadcast is never written to one of those.
 			if dir, ok := cfg.OutboundLink(w.NodeNumber(p.Name)); ok && dir != broadcastDir {
@@ -349,7 +349,7 @@ func runGenBoardKey(cfg game.Config) {
 	pub, err := store.GenerateBoardKey(cfg.DataDir)
 	if err != nil {
 		if os.IsExist(err) {
-			fmt.Fprintln(os.Stderr, "immortal-barons -gen-board-key: this board already has a signing key. Replacing it makes every packet this board sends fail its neighbours' checks until the Coordinator publishes the new one, so delete", filepath.Join(cfg.DataDir, store.BoardKeyFile), "only if you mean to do that.")
+			fmt.Fprintln(os.Stderr, "immortal-barons -gen-board-key: this board already has a signing key. Replacing it makes every packet this board sends fail its neighbors' checks until the Coordinator publishes the new one, so delete", filepath.Join(cfg.DataDir, store.BoardKeyFile), "only if you mean to do that.")
 		} else {
 			fmt.Fprintln(os.Stderr, "immortal-barons -gen-board-key:", err)
 		}

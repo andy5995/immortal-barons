@@ -269,7 +269,7 @@ happen, and the raider still gets their report. Both default to yes.
 ## Bulletin files for your BBS
 
 Set `BulletinDir` in `bbs.cfg` to a directory and the game writes its scoreboard,
-its news and its league rankings there: twelve bulletins, each as a coloured
+its news and its league rankings there: twelve bulletins, each as a colored
 `.ans`, a plain `.txt`, and two HTML files for your website. Leave the setting
 blank and none are written.
 

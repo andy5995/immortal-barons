@@ -6,7 +6,7 @@ package game
 // Go at all, so a player whose zone is not here types its name instead.
 //
 // One name per populated offset, preferring the city a reader is likeliest to
-// recognise. A name that is only an alias of another (Europe/Kiev, US/Eastern)
+// recognize. A name that is only an alias of another (Europe/Kiev, US/Eastern)
 // is left out: it would read as a second choice that does the same thing.
 
 // ZoneRegion is one heading in the picker and the zones under it.

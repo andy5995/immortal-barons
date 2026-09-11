@@ -69,7 +69,7 @@ func Proclamation(quote, deed string) string {
 }
 
 // postProclamationNews adds one royal proclamation to the day's news, on a
-// chance so the feed does not turn into a quote book. Flavour only: it moves
+// chance so the feed does not turn into a quote book. Flavor only: it moves
 // nothing in the economy. Draws from the world rng, like the rest of the day's
 // randomness.
 func (w *World) postProclamationNews() {

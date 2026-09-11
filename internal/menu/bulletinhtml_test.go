@@ -9,7 +9,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// The colours reach the page as class names, never as inline styles: a class is
+// The colors reach the page as class names, never as inline styles: a class is
 // what a replacement stylesheet can restyle, and those names are the whole
 // contract between a generated page and the sheet painting it (#245).
 func TestANSIToHTMLCarriesColoursAsClasses(t *testing.T) {
@@ -27,7 +27,7 @@ func TestANSIToHTMLCarriesColoursAsClasses(t *testing.T) {
 		}
 	}
 	if strings.Contains(got, "style=") {
-		t.Errorf("a colour was written as an inline style, which cannot be restyled:\n%s", got)
+		t.Errorf("a color was written as an inline style, which cannot be restyled:\n%s", got)
 	}
 	if strings.Contains(got, "\x1b") {
 		t.Errorf("an escape survived into the page:\n%s", got)
@@ -46,11 +46,11 @@ func TestANSIToHTMLBoldAndBackground(t *testing.T) {
 	// Reverse video swaps the pair, so a reversed cell shows what a terminal
 	// shows rather than nothing at all.
 	if got := ansiToHTML([]byte("\x1b[7mhighlight"), "Immortal Barons"); !strings.Contains(got, `class="ansi-fg-0 ansi-bg-7"`) {
-		t.Errorf("reverse video did not swap the colours:\n%s", got)
+		t.Errorf("reverse video did not swap the colors:\n%s", got)
 	}
 }
 
-// Everything that is not a colour is dropped: a page has no cursor to move and
+// Everything that is not a color is dropped: a page has no cursor to move and
 // no wrap to toggle, and a stray escape byte on screen is the visible failure.
 func TestANSIToHTMLDropsNonColourEscapes(t *testing.T) {
 	got := ansiToHTML([]byte("\x1b[2J\x1b[H\x1b[?7lclean\x1b[?7h\x1b[2K"), "Immortal Barons")
@@ -208,10 +208,10 @@ func TestGameNameLinksToItsSite(t *testing.T) {
 	if !strings.Contains(got, want) {
 		t.Errorf("the game name is not linked:\n%s", got)
 	}
-	// The link sits INSIDE the colour span, so it keeps the colour the screen
+	// The link sits INSIDE the color span, so it keeps the color the screen
 	// drew the name in rather than repainting a heading.
 	if !strings.Contains(got, `<span class="ansi-fg-15"><a href=`) {
-		t.Errorf("the link was written outside its colour span:\n%s", got)
+		t.Errorf("the link was written outside its color span:\n%s", got)
 	}
 	// Nothing else on the page becomes a link.
 	if strings.Count(got, "<a href=") != 1 {
@@ -305,10 +305,10 @@ func TestPageTitleNamesTheBoard(t *testing.T) {
 	}
 }
 
-// The link in the block carries no underline: it keeps the colour the screen
+// The link in the block carries no underline: it keeps the color the screen
 // drew the name in, and a highlight bar marks it, the way a DOS menu marks the
 // line under the cursor. The bar is what a reader sees without hovering, so the
-// link is not distinguished by colour alone.
+// link is not distinguished by color alone.
 func TestBlockLinkIsMarkedWithoutAnUnderline(t *testing.T) {
 	dir := t.TempDir()
 	if errs := writeBulletinTemplates(dir); len(errs) != 0 {
@@ -328,7 +328,7 @@ func TestBlockLinkIsMarkedWithoutAnUnderline(t *testing.T) {
 	}
 	// Motion is decoration and has to be optional.
 	if !strings.Contains(string(css), "prefers-reduced-motion") {
-		t.Error("the stylesheet does not honour prefers-reduced-motion")
+		t.Error("the stylesheet does not honor prefers-reduced-motion")
 	}
 }
 

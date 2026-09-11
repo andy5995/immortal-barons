@@ -14,12 +14,12 @@ until they are cleaned up.
 
 You are quoted a price once you name a target, and you can walk away from
 it. The price is set by the size of the realm you are aiming at — a large
-neighbour needs a large missile — up to a ceiling, so the very biggest
+neighbor needs a large missile — up to a ceiling, so the very biggest
 realms are proportionally cheap to hit.
 
 About 7% of the target's land is ruined per strike, varying a couple of
 points either way. Nothing shoots the missile down: an SDI program defends
-against missiles arriving from another planet, not from a neighbour on your
+against missiles arriving from another planet, not from a neighbor on your
 own.
 
 A successful strike raises your score, whether or not it did much damage.

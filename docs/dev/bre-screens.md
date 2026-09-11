@@ -17,7 +17,7 @@ proven way to read BRE's colors headlessly; see the `bre-gather` skill).
 `**UNVERIFIED**`.** That literal string is the one marker; `grep -n UNVERIFIED
 docs/dev/bre-screens.md` lists every gap in the file. A marked claim is a
 recorded guess or a reading taken from somewhere other than a live screen — do
-not build a colour or layout decision on one without re-capturing first. An
+not build a color or layout decision on one without re-capturing first. An
 unmarked claim was read off a capture, and the entry says which.
 
 **Captures are not in git** (`cap/` is excluded and `*.cap` is gitignored as
@@ -59,7 +59,7 @@ was re-captured on 2026-08-17 with the log kept as `cap/covert-menu-20260817.cap
 
 ### 2026-08-16, pass one — the file against the captures on disk
 
-Every claim was checked against four colour captures plus one large monochrome
+Every claim was checked against four color captures plus one large monochrome
 public-board session. Roughly seventeen screens were misdescribed and corrected;
 each correction below says so and names the capture. That pass also found about
 a third of the file resting on no capture at all, which is what pass two went
@@ -67,7 +67,7 @@ after.
 
 ### 2026-08-16, pass two — driving BRE for the screens with no evidence
 
-A fresh session under dosemu2 (`script`-wrapped, so SGR colour survives) against
+A fresh session under dosemu2 (`script`-wrapped, so SGR color survives) against
 a three-realm local game, then a `BRE RESET` for the editor. These went from
 recorded-but-unverified to capture-backed:
 
@@ -77,8 +77,8 @@ recorded-but-unverified to capture-backed:
 | Regular Attack force entry | confirmed |
 | Regular Attack post-battle report (WIN) + region picker | confirmed |
 | Covert Operations menu | CORRECTED — accent is green, and the fees are on screen |
-| SDI Program colours | confirmed, plus the post-funding echo |
-| Configuration Editor | confirmed, plus the highlight colour and the edit screen |
+| SDI Program colors | confirmed, plus the post-funding echo |
+| Configuration Editor | confirmed, plus the highlight color and the edit screen |
 | Message editor | confirmed |
 | Game Setup | CORRECTED — it is bracketed by a rule this file omitted |
 | Travel Times | CORRECTED — the unmeasured case |
@@ -89,7 +89,7 @@ recorded-but-unverified to capture-backed:
 **Still not reached, and still marked in place:** the Attack Type menu was not
 re-reached on 2026-08-16 (it needs a live two-board league with recon data), but
 it is *not* unverified — it was captured end-to-end on 2026-08-11 and its entry
-carries those colours. Its `(?) Help` browser and the Join Group Attack table
+carries those colors. Its `(?) Help` browser and the Join Group Attack table
 were reached on **2026-09-02**, log kept as `cap/eots-ibbs-02.cap`. What genuinely remains unverified is listed at each
 screen; the biggest are the interplanetary screens that need a second board
 running, and the Diplomacy roster-flag contradiction recorded under Full Defense
@@ -222,7 +222,7 @@ nowhere.
 
 **IB steps the suffix instead**, `k`/`m`/`b` by magnitude and nothing below a
 thousand, one rule on every screen (`numfmt.Abbrev`). A deliberate divergence:
-two columns spelling the same magnitude two ways is the part of BRE's behaviour
+two columns spelling the same magnitude two ways is the part of BRE's behavior
 worth losing, and stepping holds any figure to four digits and a letter.
 
 ## Status bar (bottom line, every screen)
@@ -297,7 +297,7 @@ Choose a Target [A-Y,?=List RETURN to Abort]
 **IB keeps the capture's `(A)`, and BRACKETS the id of a realm under New Realm
 Protection: `[C]` (#214).** That bracket is the entire flag — nothing follows the
 name, the row keeps its width, and the shape carries the meaning, so it reads on
-a monochrome terminal and to anyone who cannot separate the two colours. BRE
+a monochrome terminal and to anyone who cannot separate the two colors. BRE
 flags nothing; it has no need to, since its own list is drawn before any of this
 is decided. The divergence is not local to this screen: See Scores, the covert
 target list and the recipient picker draw the same table and change with it.
@@ -556,7 +556,7 @@ Each advisor prints prose (no inner border); key numbers are highlighted. The
 **Deliberate divergence — IB gives all four advisors a named greeting, in `96`
 bright-cyan.** The original names only the MILITARY one: `", your military
 advisor."` is the single greeting string in `BRE.OVR`, and the capture shows no
-opening line for the other three and no colour for advisor prose. IB coins a
+opening line for the other three and no color for advisor prose. IB coins a
 name and a line of character for each of the four, which Andy approved on
 2026-08-15. Do not "correct" this back.
 
@@ -669,7 +669,7 @@ the host clock as Synchronet's own `dropfiles.c` takes it.
 
 **Box widths vary per screen** — BRE sizes each box to its content rather than
 to one house width. Re-measured 2026-08-16 across every capture on disk
-(`cap/`, plus the two older colour captures), counting the title line and the
+(`cap/`, plus the two older color captures), counting the title line and the
 closing rule of each box: 14/16 (Specialization), 17 (Attack Pirates), 16
 (Advisors), 20 (Trading), 23 (Attack Menu, Terrorist Ops), 26 (Coordinator
 Ops), 28 (Diplomacy), 36 (Preferences), 37 (Special Operations), 38 (InterBBS
@@ -787,7 +787,7 @@ item cells (`(1) ` plus a 22-column label field).
 
 Header line: `93` bright-yellow `Barren Realms Elite ` + `97` `v0.988` + `37`
 `: News File` with the date right-aligned. Then a blank line, then the banner,
-indented 24 columns — centred over the 75-column rule below it, not over the
+indented 24 columns — centerd over the 75-column rule below it, not over the
 80-column screen: `31` red `──` + `91` bright-red `═` + `97` bright-white
 `The Queen's Quadrant` + `91` `═` + `31` `──`, then a full-width `33` yellow rule.
 
@@ -805,7 +805,7 @@ bright-cyan value; **negative** change = `96` bright-cyan for the whole thing
 (minus sign included — direction is not color-coded).
 
 **IB matched this on 2026-08-16**, having drawn a rise in `32` green and a fall
-in `31` red. The old colouring was also a contrast defect: `31` red on black
+in `31` red. The old coloring was also a contrast defect: `31` red on black
 measures **2.7:1** on the VGA palette (#AA0000, relative luminance 0.0853,
 `(0.0853 + 0.05) / 0.05`), under the 4.5:1 text minimum. `96` bright cyan is
 17.1:1 and `92` bright green 15.8:1, both far clear of it. Nothing is lost by
@@ -887,7 +887,7 @@ omits it there — your own status is obvious from context, and the row is
 already singled out by its bright-yellow name.
 
 **And IB draws it only in a league game (#249).** Off a league every realm on
-this table is a neighbour the caller can attack, and the rows WITHOUT the mark
+this table is a neighbor the caller can attack, and the rows WITHOUT the mark
 then say which barons have not been on today — intelligence the original may
 hand out but IB does not. Whether BRE gates it the same way is unsettled: the
 2026-08-16 capture above was not recorded with the game's InterBBS setting, so it
@@ -1358,7 +1358,7 @@ Test Planet Two               No Data
 zero and not a blank. The `planet    N.NN hours` form this file recorded is the
 measured case only; both belong in the same column. (`31` red on black measures
 2.7:1 on the VGA palette, under the 4.5:1 minimum — IB should not copy the
-colour for its own "no data" state, and the word carries the meaning without it.)
+color for its own "no data" state, and the word carries the meaning without it.)
 
 **SDI Program** (A):
 ```
@@ -1480,10 +1480,10 @@ Enter Planet Name or Number (? for list): Starship Junkyard
 **IB substitutes its own name in the title, deliberately.** The original heads
 this screen with its product name (`Barren Realms Elite: Top Planets by Score`),
 so cloning the layout faithfully means putting OURS there — a title is branding,
-not a mechanic, and the licence line is that IB may replicate the original's
+not a mechanic, and the license line is that IB may replicate the original's
 shape but never present itself as the original. IB printed the original's name
 here until 2026-08-23, which is the one place in the whole game it ever did.
-Colours and geometry are unchanged.
+Colors and geometry are unchanged.
 
 Gray accent. A menu of eight ranking views + Quit; each opens a `»Planetary
 Post«` table.
@@ -1785,16 +1785,16 @@ Reached by `BRE RESET` from the DOS prompt: `Are you sure you wish to reset the
 Game? (Y/n)` → the editor → `[ESC]` to save → `Would you like this to be a
 league-wide reset? (Y/n)` → `Your BRE game has been reset...Thank you!`
 
-**That league-wide prompt only appears on a board BRE recognises as a league
+**That league-wide prompt only appears on a board BRE recognizes as a league
 member** (its `bbs.cfg` FTN address matching an entry in `BRNODES.DAT`). A
 standalone install never asks it, which makes it the quickest confirmation that
 an InterBBS test board is configured correctly.
 
 Two pages, moved through with **PG-DN / PG-UP**; `[ESC]` saves and quits.
-**Re-captured with colour 2026-08-16** — the colour-by-type table below had been
+**Re-captured with color 2026-08-16** — the color-by-type table below had been
 presented as fact with no capture behind it, and it holds. Fields are
-**colour-coded by type, and every value is the BRIGHT form of its label's
-colour** — labels `3x`, values `9x`:
+**color-coded by type, and every value is the BRIGHT form of its label's
+color** — labels `3x`, values `9x`:
 
 | field type | label | value | seen on |
 |---|---|---|---|
@@ -1805,9 +1805,9 @@ colour** — labels `3x`, values `9x`:
 Three additions the earlier entry did not have:
 
 - **The highlighted field is `97` bright-white on BOTH label and value**, which
-  is how the cursor is shown — the type colour is replaced, not brightened. The
+  is how the cursor is shown — the type color is replaced, not brightened. The
   `92`/`97` alternative the old table gave for a date value was this highlight
-  being read as a date colour.
+  being read as a date color.
 - **`Buy Military` is a preset field**, not a number, and takes the magenta pair
   even though its values are `Yes`/`No`.
 - The footer's `*` and the three bracketed key names (`PG-DN`, `PG-UP`, `ESC`)
@@ -1816,7 +1816,7 @@ Three additions the earlier entry did not have:
 The `: ` separator and the trailing pad are `37` white. A `*` prefix marks an
 InterBBS-only setting; the footer states it. The title rule is **72 columns** —
 5 `─`, 2 `═`, the 40-column title, 6 `═`, 19 `─` — and it is drawn in mixed
-colours: the outer `─` runs `90` gray, the inner `─` and `═` `37` white, with
+colors: the outer `─` runs `90` gray, the inner `─` and `═` `37` white, with
 the title itself split across `91` bright-red and `31` red and `97` runs. That
 last is not a scheme worth copying; record it and move on.
 
@@ -1934,7 +1934,7 @@ Trade Deal sent to <realm>
 It will arrive at earliest on Turn #<n> of that empire today.
 ```
 
-The turn number is `0e` bright-yellow against `07` grey body text. The figure
+The turn number is `0e` bright-yellow against `07` gray body text. The figure
 is the sender's own turn of the day; the mechanic behind it is in
 `docs/mechanics-reference.md`. **Deliberate divergence:** IB says the same thing
 in its own words rather than reproducing BRE's sentence.
@@ -1975,7 +1975,7 @@ Listing moves the goods out of `Owned` into `For Sale` immediately.
 
 **The market exits on ESC — not `0`, not Enter.** Its screen lists no Quit key
 and the `Your Choice?` prompt silently redraws on both, so a driver that presses
-`0` until it recognises a screen will loop forever. `tmux send-keys -H 1b` leaves
+`0` until it recognizes a screen will loop forever. `tmux send-keys -H 1b` leaves
 it, and pops the Trading submenu with it, landing on the System Menu.
 
 **The `*` marks a good that is not a military unit.** It is part of the stored
@@ -2010,7 +2010,7 @@ that. The second pass exists because the first one's log was not retained; every
 figure below now has a file behind it.
 
 The menu's accent is **green**, and it prices every operation on the menu
-itself. Colours, byte for byte: border `32` green, brackets `92` bright-green,
+itself. Colors, byte for byte: border `32` green, brackets `92` bright-green,
 title `97` bright-white, item parens `32`, item keys `92`, labels and prices
 `37` white. IB chose bright-green for this menu before any capture existed, and
 the capture bears that out.
@@ -2075,7 +2075,7 @@ You have 4,732,202 gold and 100 agents.
 Choice> Quit
 ```
 
-Colours: the rule and the parentheses `32` green, the title brackets and the
+Colors: the rule and the parentheses `32` green, the title brackets and the
 hotkeys `92` bright-green, the title `97` bright-white, and both the item label
 **and its price** `37` white. The footer follows the menu-footer convention —
 body `37` white, the two figures `97` bright-white. **32 columns** (6 `─` +
@@ -2153,15 +2153,15 @@ read directly rather than inferred:
   per-turn covert step carries an extra gate on the byte at `DS:0x6d52`, which is
   the preference; the System-menu item does not, matching what the captures show.
 
-**Why the disassembly could not have settled the colours** — worth keeping,
-because the same reasoning applies to every screen whose colours are still
+**Why the disassembly could not have settled the colors** — worth keeping,
+because the same reasoning applies to every screen whose colors are still
 missing. Neither binary contains a single literal ANSI escape, so BRE holds
-colour as a Turbo Pascal attribute and builds the escape at write time; the draw
+color as a Turbo Pascal attribute and builds the escape at write time; the draw
 routine passes only key, label and cost, and neither it nor
-`enter_covert_operations_menu` sets an attribute. The colour comes from the
+`enter_covert_operations_menu` sets an attribute. The color comes from the
 shared output helpers (`0dc9:0608` formats the line, `0735:0000` writes it),
 which every screen uses. **A `script`-wrapped live capture is the only cheap way
-to get a screen's colours**, which is how this one was finally closed.
+to get a screen's colors**, which is how this one was finally closed.
 
 Corroboration worth keeping: a 2012 public-board capture renders the Help "List
 of Topics" divider as CP437 `ÄÄÄÄÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄÄÄ…` — 5 `─` then 15 `═` — the
@@ -2238,7 +2238,7 @@ Total Forces                29      3271      NONE
 
 **Incoming proposal**, in the "since your last play" block — **immediately after
 the `Since your last play, this has happened:` header and BEFORE the numbered
-recap entries**, not after them. Re-captured 2026-08-16 and every colour below
+recap entries**, not after them. Re-captured 2026-08-16 and every color below
 held; only the position was wrong. It carries NO rule and NO timestamp: unlike a
 recap entry it is a prompt, not a log line. Two lines, unindented, the second
 running straight into the prompt; the figures are NOT comma-grouped:
@@ -2439,7 +2439,7 @@ calls at 0x1b575:
 ```
 
 - **A letter toggles that realm.** Selecting echoes the letter in bright cyan
-  (`1;36`) and returns the colour to `37`; pressing it again writes `BS`/space/`BS`
+  (`1;36`) and returns the color to `37`; pressing it again writes `BS`/space/`BS`
   to rub it out and re-draws the letters that are left (0x1034 adds and echoes,
   0x10d2 removes and erases).
 - **`Z` toggles every letter A..Y in turn** — the same toggle applied to the whole
@@ -2508,9 +2508,9 @@ editor's banner. That settles three things a reading of the code leaves open:
 the letters toggle, the erase-and-redraw is what a middle deselect looks like,
 and **RETURN with nothing marked sends nothing** (the code simply never fills
 its recipient table in that case, which is undefined rather than defined
-behaviour; the capture defines it).
+behavior; the capture defines it).
 
-**`?` is not echoed.** The capture shows the key produce a colour change and a
+**`?` is not echoed.** The capture shows the key produce a color change and a
 CRLF, then the roster, then the prompt again. IB echoes the word "List" instead,
 as it already does on the local picker.
 
@@ -2561,11 +2561,11 @@ with `s`. It did not.
 The keystroke that makes the match unique is **not echoed**: the two characters
 already on screen are erased and the resolved name written over them, so the
 capture reads `st` + two `BS SP BS` + the name, with the `a` that triggered it
-appearing nowhere. Reading those bytes without the live behaviour beside them
+appearing nowhere. Reading those bytes without the live behavior beside them
 makes it look as though a two-character answer resolved. **IB completes live
 too** since #183 (`readPlanetAnswer`).
 
-**The line's COLOUR is the match count, and the whole line carries it.** The
+**The line's Color is the match count, and the whole line carries it.** The
 routine keeps a state code — 7 (white) for no match, 15 (bright white) for
 several, 14 (yellow) for one, set at 0x159c — and compares it against the
 previous keystroke's at 0x16a3. Equal takes the cheap redraw (0x16b0: skip the
@@ -2583,7 +2583,7 @@ slot found during that pass (`[bp-0x308]`) wins outright, and the typed text is
 parsed as a roster number only when no planet resolved (0x1823).
 
 That combination is what #250 reported as a defect. It is the ORIGINAL's
-behaviour, not IB's invention: after a completion, each backspace shortens
+behavior, not IB's invention: after a completion, each backspace shortens
 invisible typed text while the visible name is redrawn identically, until the
 answer goes ambiguous and the name collapses. Both the "dead" presses and the
 completed name winning on Enter are read out of the routine above.
@@ -2669,7 +2669,7 @@ a keypress can wrap, so they are never re-flowed however long they are.
 - IB erases nothing on a margin split, so the screen matches what is saved.
 - IB trims the space it broke at rather than storing it.
 - IB draws the banner and ruler bright cyan. That predates this capture and is
-  recorded here rather than changed, since the colour is not what the wrap fix
+  recorded here rather than changed, since the color is not what the wrap fix
   was about.
 
 ## Planetary diplomacy (captured live 2026-08-08, league game)
@@ -2715,7 +2715,7 @@ color as above.
 ### Diplomacy Modification (BBS Coordinator only)
 
 Not reachable in the capture — the caller was not the elected Coordinator — so
-this is read from the binary rather than observed, so its layout and colours are **UNVERIFIED**. It is reached from the System
+this is read from the binary rather than observed, so its layout and colors are **UNVERIFIED**. It is reached from the System
 Menu's `Coordinator Menu` item (`BRE.OVR` 0x13920).
 
 The menu has **four items, keyed `1`-`4`**, and its handler settles both the
@@ -2736,7 +2736,7 @@ redraws the menu.
 
 **IB's keys match this table as of 2026-08-18 and did not before**: it numbered
 the three items it had built `1`-`3`, so each sat on the original's key for its
-neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` now
+neighbor, and its own Player List sat on `4`, View Diplomacy's key. Key `1` now
 holds IB's Dismantle Gooie (#45), and Player List has moved to `5`,
 past the original's four. **Call Off Attack Party** (#270) is IB's own too, on
 `6` for the same reason: it disbands a group attack still assembling here and
@@ -2906,7 +2906,7 @@ rather than to the kind of thing.
 does. Note the `(?) Help` item and that **Enter takes Quit**, not the first item.
 (Not re-reached on 2026-08-16 — the menu needs a live two-board league with recon
 data, and a single-board attempt stops at `Sorry, we don't have any information
-on that planet yet.` The colours below are from the 2026-08-11 capture and stand.)
+on that planet yet.` The colors below are from the 2026-08-11 capture and stand.)
 
 ```
 ────[Attack Type]────
@@ -2919,7 +2919,7 @@ on that planet yet.` The colours below are from the 2026-08-11 capture and stand
 Choice> Quit
 ```
 
-Colours: rules, parentheses and the closing rule are **red (31)**; the item
+Colors: rules, parentheses and the closing rule are **red (31)**; the item
 digits and the `[` `]` around the title are **bright red (91)**; the title
 `Attack Type` is **bright white (97)**; item labels are **white (37)**. The
 prompt is `Choice` in white, `>` in bright white, and the `Quit` default in
@@ -3080,7 +3080,7 @@ Id│By│    Planet    │ Individual Target │Troopers│ Jets │ Tanks │B
 Join which group? 1
 ```
 
-| Element | Colour |
+| Element | Color |
 |---|---|
 | Column headings, the `Id` figure, the prompt | `0;40;37` white |
 | Every `│`, and the whole rule | `1;30` bright black |
@@ -3108,7 +3108,7 @@ abbreviates — `118k`, `4500k`, and `18m` on a later row in the same capture.
 
 **Several parties list together**, ids ascending, up to three rows in
 `cap/20240527-134Pho_Lazarus_Public.cap`. A whole-planet target renders as `ALL`,
-centred in its 19-column field; `Leave` runs to three digits (`95h`, `50h`,
+centerd in its 19-column field; `Leave` runs to three digits (`95h`, `50h`,
 `23h`).
 
 ```
@@ -3157,7 +3157,7 @@ The rate behind `99,572,437` was not worked back to a formula, so whether a join
 is priced like an individual strike is **UNVERIFIED**. IB charges nothing at all
 for a group attack at either end (#252).
 
-**IB draws this table** (#251), to these widths and colours, from
+**IB draws this table** (#251), to these widths and colors, from
 `internal/menu/groupattacktable.go`; `TestGroupAttackTableMatchesTheCapture`
 compares its output to both captured rows above, character for character. Two
 divergences, neither visible on a captured row: a wait is rounded UP to the
@@ -3171,7 +3171,7 @@ party forming, the item prints `There are not any attack parties at this time.`
 
 ## The lottery (first play of a game day)
 
-Captured with colour in `cap/kd3-01.cap`, declined in `cap/eots-ibbs-01.cap`,
+Captured with color in `cap/kd3-01.cap`, declined in `cap/eots-ibbs-01.cap`,
 and played several times in `cap/20240527-134Pho_Lazarus_Public.cap` (that one
 holds no escape sequences). It follows the Queen Royale's tax refund and is the
 second half of the same first-play block.
@@ -3185,7 +3185,7 @@ Choose your 6 letters: ESC[1;36m AGNTYI
 Winning Letters: ESC[0;40;31m D ESC[31m K ESC[31m M ESC[31m M ESC[1;33m I ESC[0;40;31m U
 ```
 
-| Element | Colour |
+| Element | Color |
 |---|---|
 | ticket letters, as they are typed | `1;36` bright cyan |
 | a drawn letter that matched | `1;33` yellow |
@@ -3203,7 +3203,7 @@ stalls on a player who just wants it over with.
 
 **IB deviates on two points.** An unmatched letter is drawn in bright red, not
 dark red, which sits at about 2:1 against black; and the result line states the
-match count in words, so nothing depends on telling two colours apart. Both are
+match count in words, so nothing depends on telling two colors apart. Both are
 deliberate — see `docs/mechanics-reference.md`.
 
 ## The Coordinator notice (top of every InterBBS turn)
@@ -3213,16 +3213,16 @@ header, and only in an InterBBS game. One of two lines, chosen by comparing the
 elected Coordinator's id against the caller's own (`run_door_session`,
 `BRE.EXE 013a:0cf7`).
 
-To the Coordinator (`cap/treaty-order-20260817.cap`, and colour-stripped in
+To the Coordinator (`cap/treaty-order-20260817.cap`, and color-stripped in
 `cap/20240527-134Pho_Lazarus_Public.cap`) — the office is the bright segment,
-BRE's colour `0x0f`, and the line returns to `0x07` after it:
+BRE's color `0x0f`, and the line returns to `0x07` after it:
 
 ```
 You are currently the ESC[0fm BBS Coordinator ESC[07m
 ```
 
 To everyone else (`cap/eots-ibbs-01.cap`), the voted realm is the bright
-segment, and a second line follows in the body colour:
+segment, and a second line follows in the body color:
 
 ```
 Your current vote for BBS coordinator is: ESC[1;37m Dynoland ESC[0;40;37m

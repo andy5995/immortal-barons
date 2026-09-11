@@ -14,7 +14,7 @@ import (
 )
 
 // groupattacktable.go — the nine-column table Join Group Attack lists the
-// forming strikes in (#251). Captured live, with colours, in
+// forming strikes in (#251). Captured live, with colors, in
 // cap/eots-ibbs-02.cap; the layout and every column width below are read off
 // that capture rather than chosen here.
 //
@@ -80,7 +80,7 @@ const (
 )
 
 // printGroupAttackTable draws the head, the rule and one line per forming
-// attack. Colours are the capture's: white headings and Id, bright-black
+// attack. Colors are the capture's: white headings and Id, bright-black
 // separators and rule, a bright-yellow By letter, bright-white names, bright-cyan
 // unit counts and a bright-green Leave.
 func printGroupAttackTable(s session.Session, t Term, rows []gaRow) {
@@ -103,7 +103,7 @@ func printGroupAttackTable(s session.Session, t Term, rows []gaRow) {
 // printGroupAttackRow draws one forming attack. A unit count is right-justified
 // one column short of its cell and given a trailing space, which is how the
 // capture spaces the figures off the separator to their right; the text columns
-// are centred in theirs.
+// are centerd in theirs.
 func printGroupAttackRow(s session.Session, t Term, r gaRow) {
 	sep := ansi.FgBrightBlack + gaSep
 	cells := []string{
@@ -136,7 +136,7 @@ func gaFigure(text string, width int) string {
 	return fmt.Sprintf("%*s ", width-1, text)
 }
 
-// gaPad centres text in width. Where the padding does not divide evenly the two
+// gaPad centers text in width. Where the padding does not divide evenly the two
 // callers want opposite halves, and the capture shows both: a HEADING keeps its
 // odd column on the left ("Leave" sits under a 6-wide column as " Leave"), while
 // a data cell keeps it on the right ("The Eclipse" sits one column in on a

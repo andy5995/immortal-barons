@@ -22,7 +22,7 @@ import (
 // is the point of the seam, and it is why these files cannot drift away from
 // what the game shows. Do NOT add a second layout here.
 //
-// Two files per bulletin, as the original wrote them: .ans keeps the colour,
+// Two files per bulletin, as the original wrote them: .ans keeps the color,
 // .txt is the same screen with the escapes stripped by the plain writer the
 // door already uses for a caller with no ANSI.
 //
@@ -123,7 +123,7 @@ func titled(name string) func(session.Session) string {
 	return func(s session.Session) string { return tr(s, name) }
 }
 
-// writeBulletinPair writes the coloured and the plain form of one bulletin.
+// writeBulletinPair writes the colored and the plain form of one bulletin.
 // The plain one goes through the same writer a caller with no ANSI gets, so the
 // two can never disagree about what stripping means.
 func writeBulletinPair(dir, base string, ansi []byte) error {
@@ -247,9 +247,9 @@ func writeWorldReport(s session.Session, w *ctx) {
 		if planet == "" || planet == here {
 			planet = tr(s, "here")
 		}
-		// The outcome is what a reader scans for, so it carries the colour --
+		// The outcome is what a reader scans for, so it carries the color --
 		// and the WORDS differ too, so the plain file and a monochrome terminal
-		// say the same thing colour alone would.
+		// say the same thing color alone would.
 		outcome, color := worldReportOutcome(s, b)
 		fmt.Fprintf(s, "  %s%s %s %s %s%s%s\n",
 			ansi.FgWhite, padColumn(w.Term, planet, planetCol),
@@ -260,13 +260,13 @@ func writeWorldReport(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule, ansi.Reset)
 }
 
-// worldReportOutcome words one battle. Colour never carries the meaning on its
+// worldReportOutcome words one battle. Color never carries the meaning on its
 // own -- the words differ too, so the report reads the same on a monochrome
 // terminal and in the plain-text file.
 func worldReportOutcome(s session.Session, b game.BattleLogEntry) (string, string) {
 	switch {
 	// A WMD strike is not an attack and does not win or hold ground, so it is
-	// worded by its warhead instead of by an outcome. Its own colour too, so a
+	// worded by its warhead instead of by an outcome. Its own color too, so a
 	// reader scanning the column can tell the two kinds of violence apart --
 	// and the WORD differs, which is what carries it in the plain-text file.
 	case b.Weapon != "":

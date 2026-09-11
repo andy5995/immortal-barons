@@ -28,7 +28,7 @@ type Empire struct {
 	// and the public identity every screen addresses it by: the Id column and
 	// every picker letter is 'A' + Slot - 1, so slot 1 is A and slot 25 is Y.
 	// It is assigned once at creation and never moves, so a realm keeps its
-	// letter for its whole life however many neighbours die or join.
+	// letter for its whole life however many neighbors die or join.
 	//
 	// BRE stores its empires in a 25-entry array and uses the letter as the
 	// index straight into it — the diplomatic relation row is 25 words, "one
@@ -367,7 +367,7 @@ func moraleFactor(morale int) int {
 // the slope is not the same. BINARY-VERIFIED: the local builder multiplies morale
 // by Real48 0.6 and adds 50 (BRE.OVR +0x0b72), the invasion builder divides it by
 // Real48 175 and adds 0.5 (+0x1040). So a defender at full morale holds at 110%
-// against a neighbour and 107% against an invasion.
+// against a neighbor and 107% against an invasion.
 func remoteMoraleFactor(morale int) int {
 	return MoraleCombatFloor + RemoteMoraleSlopeNum*morale/RemoteMoraleSlopeDen
 }

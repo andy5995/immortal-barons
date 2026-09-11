@@ -108,7 +108,7 @@ func TestCreateGroupAttackAsksHours(t *testing.T) {
 		t.Fatalf("group attacks = %d, want 1", count)
 	}
 	if wait < float64(game.GroupAttackHoursMin)-1 {
-		t.Errorf("a 3-hour delay was honoured (%.1fh); the floor is %d", wait, game.GroupAttackHoursMin)
+		t.Errorf("a 3-hour delay was honored (%.1fh); the floor is %d", wait, game.GroupAttackHoursMin)
 	}
 }
 

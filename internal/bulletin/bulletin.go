@@ -213,7 +213,7 @@ func isUTF8Text(data []byte) bool {
 }
 
 // stripANSI removes CSI escape sequences from a line, so a title authored in
-// colour lists as its text.
+// color lists as its text.
 func stripANSI(line string) string {
 	var sb strings.Builder
 	runes := []rune(line)

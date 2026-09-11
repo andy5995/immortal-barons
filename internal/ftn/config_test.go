@@ -28,7 +28,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Error("Binkley = false, want true")
 	}
 	if cfg.AttachDir != "" || cfg.SubjectMode != SubjectAbsolute {
-		t.Errorf("an ftn.cfg without the new keys changed behaviour: AttachDir = %q, SubjectMode = %v",
+		t.Errorf("an ftn.cfg without the new keys changed behavior: AttachDir = %q, SubjectMode = %v",
 			cfg.AttachDir, cfg.SubjectMode)
 	}
 }
@@ -117,7 +117,7 @@ func TestLoadConfigMixedLinks(t *testing.T) {
 	if cfg.OboxMeshFanout || cfg.InboundDir != filepath.Join(data, "in") {
 		t.Fatalf("inbound/fanout = %q/%v", cfg.InboundDir, cfg.OboxMeshFanout)
 	}
-	if cfg.Links[2].Mode != LinkAttach || cfg.Links[3].Mode != LinkObox || cfg.Links[4].Mode != LinkBSO || cfg.Links[4].Flavour != "Continuous" {
+	if cfg.Links[2].Mode != LinkAttach || cfg.Links[3].Mode != LinkObox || cfg.Links[4].Mode != LinkBSO || cfg.Links[4].Flavor != "Continuous" {
 		t.Fatalf("links = %#v", cfg.Links)
 	}
 }
@@ -149,7 +149,7 @@ func TestConfigLoadsWithoutNetmailDirForAReceiveOnlyBoard(t *testing.T) {
 
 // Raw composes with every handoff mode, because the envelope is what an old
 // peer cannot parse, not the way the file travels. It is read off the end of
-// the line so BSO's optional flavour keeps its own position — and it is the
+// the line so BSO's optional flavor keeps its own position — and it is the
 // default, so a link with no keyword is raw and `Bundled` is the opt-out.
 func TestRawComposesWithEveryLinkMode(t *testing.T) {
 	dir := t.TempDir()
@@ -184,8 +184,8 @@ func TestRawComposesWithEveryLinkMode(t *testing.T) {
 		5: {LinkObox, false, "Normal"},   // Bundled is how a sysop opts out
 	} {
 		got := cfg.Links[node]
-		if got.Mode != want.mode || got.Raw != want.raw || got.Flavour != want.flav {
-			t.Errorf("node %d = %+v, want mode %v raw %v flavour %q", node, got, want.mode, want.raw, want.flav)
+		if got.Mode != want.mode || got.Raw != want.raw || got.Flavor != want.flav {
+			t.Errorf("node %d = %+v, want mode %v raw %v flavor %q", node, got, want.mode, want.raw, want.flav)
 		}
 	}
 

@@ -1201,7 +1201,7 @@ func TestQuarantinePacketFailureLeavesFileInPlaceAndDoesNotAbortBatch(t *testing
 }
 
 // TestUniqueNameCapsAtMaxQuarantineCopies: without
-// a cap, a neighbour whose transport keeps redelivering one broken file
+// a cap, a neighbor whose transport keeps redelivering one broken file
 // under the same name accumulates same-named copies without limit, and
 // every new arrival re-stats every copy already there. Past
 // maxQuarantineCopies, uniqueName has to fail loudly instead of continuing

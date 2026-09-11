@@ -344,7 +344,7 @@ func TestLostDefenceDamagesHQ(t *testing.T) {
 	w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000}, true)
 	lost := before - d.HQ
 	if lost < 5 || lost > 7 {
-		t.Fatalf("a lost defence cost the HeadQuarters %d points, want 5..7", lost)
+		t.Fatalf("a lost defense cost the HeadQuarters %d points, want 5..7", lost)
 	}
 
 	// Repeated defeats flatten it, and it never goes negative.
@@ -399,19 +399,19 @@ func TestRepelledAttackLeavesHQAlone(t *testing.T) {
 //
 // Both figures are golden literals and each pins something different. Zero jets
 // lost only comes out if the strengths stay fractional — a truncated 6.6 costs a
-// jet. Two turrets only comes out if the defence carries NO per-region bonus:
+// jet. Two turrets only comes out if the defense carries NO per-region bonus:
 // with one the figure is odd for every possible number of rounds.
 //
 // It also settles what turrets do. 112 of them shot down none of 3 jets, so they
-// are not the "counterpart to jets" the strategy guides call them; the defence is
+// are not the "counterpart to jets" the strategy guides call them; the defense is
 // one undifferentiated pool and nothing on the ground singles out an aircraft.
 func TestCapturedJetsVersusTurrets(t *testing.T) {
 	const (
 		jets    = 3
 		turrets = 112
 	)
-	ap := float64(jets) * 2 * float64(moraleFactor(100)) / 100    // jet offence 2
-	dp := float64(turrets) * 2 * float64(moraleFactor(100)) / 100 // turret defence 2
+	ap := float64(jets) * 2 * float64(moraleFactor(100)) / 100    // jet offense 2
+	dp := float64(turrets) * 2 * float64(moraleFactor(100)) / 100 // turret defense 2
 	if ap != 6.6 || dp != 246.4 {
 		t.Fatalf("strengths are %v and %v, want 6.6 and 246.4 — the capture's inputs moved", ap, dp)
 	}

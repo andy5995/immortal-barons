@@ -12,7 +12,7 @@ import (
 // battlestage.go — a regular attack on a rival realm is drawn over nine
 // seconds instead of landing all at once: the realm being hit, a third of the
 // casualties, a push, two thirds, then the whole report. An IB addition, not
-// the original's behaviour (docs/mechanics-reference.md).
+// the original's behavior (docs/mechanics-reference.md).
 //
 // The figures are REAL — the battle is resolved before any of this runs, and
 // each stage shows a share of the losses it produced. Nothing here changes an
@@ -50,7 +50,7 @@ func stageBattle(s session.Session, defender string, o game.BattleOutcome) {
 // side on its own line.
 func stageLosses(s session.Session, o game.BattleOutcome, n int) {
 	a, d := partialLoss(o.AttackerLoss, n), partialLoss(o.DefenderLoss, n)
-	// Wrap before colouring, as wrapReport says: six-digit losses on four unit
+	// Wrap before coloring, as wrapReport says: six-digit losses on four unit
 	// types already pass column 80, and a translation runs longer still.
 	fmt.Fprintf(s, "\n%s\n", hiNums(WrapIndented(fmt.Sprintf(
 		tr(s, "Your losses so far: %d troopers, %d jets, %d tanks, %d bombers"),

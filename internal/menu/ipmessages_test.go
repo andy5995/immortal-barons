@@ -395,7 +395,7 @@ func TestIPMessageWithoutARosterWritesToTheWholePlanet(t *testing.T) {
 	}
 }
 
-// matchPlanet, against select_planet (BRE.OVR 0x021dd9) — #183. The behaviour
+// matchPlanet, against select_planet (BRE.OVR 0x021dd9) — #183. The behavior
 // each case pins is read out of the binary, not guessed: see the doc comment on
 // matchPlanet for the offsets.
 func TestMatchPlanetFollowsTheOriginalsParser(t *testing.T) {
@@ -535,7 +535,7 @@ func TestPlanetPromptCompletesTheLineWhenTheMatchIsUnique(t *testing.T) {
 }
 
 // renderLine replays a prompt's output into the line a terminal would show:
-// one entry per column, each carrying the colour in force when it was written.
+// one entry per column, each carrying the color in force when it was written.
 // Backspace-space-backspace erases, as every erase here does.
 func renderLine(out string) (text string, colors []string) {
 	var line []rune
@@ -573,8 +573,8 @@ func renderLine(out string) (text string, colors []string) {
 	return string(line), colors
 }
 
-// oneColor is the single colour every column of the line carries, or "" where
-// the line is not all one colour.
+// oneColor is the single color every column of the line carries, or "" where
+// the line is not all one color.
 func oneColor(colors []string) string {
 	if len(colors) == 0 {
 		return ""
@@ -588,14 +588,14 @@ func oneColor(colors []string) string {
 }
 
 // TestPlanetPromptColorsTheWholeLine holds the live prompt to the original's
-// three states, each of which colours the WHOLE line: white while nothing
+// three states, each of which colors the WHOLE line: white while nothing
 // matches, bright white while several do, bright yellow the moment one does.
 // BINARY-VERIFIED (select_planet, BRE.OVR 0x021dd9: state 7 / 15 / 14 at
 // 0x159c, compared against the previous keystroke's at 0x16a3 to choose between
 // repainting the line and appending to it).
 //
-// IB used to colour only the characters it ADDED, so a completed name was left
-// part typed-colour and part yellow — this is what that test is for.
+// IB used to color only the characters it ADDED, so a completed name was left
+// part typed-color and part yellow — this is what that test is for.
 func TestPlanetPromptColorsTheWholeLine(t *testing.T) {
 	planets := []game.LeagueNode{{Number: 1, Name: "Nova"}, {Number: 2, Name: "Novagate"}}
 	cases := []struct {
@@ -620,7 +620,7 @@ func TestPlanetPromptColorsTheWholeLine(t *testing.T) {
 				t.Errorf("line reads %q, want %q", text, c.wantText)
 			}
 			if col := oneColor(colors); col != c.wantColor {
-				t.Errorf("line colours = %q (one colour: %q), want all %q",
+				t.Errorf("line colors = %q (one color: %q), want all %q",
 					colors, col, c.wantColor)
 			}
 		})
@@ -646,6 +646,6 @@ func TestPlanetPromptRepaintsWhenAMatchIsLost(t *testing.T) {
 		t.Errorf("line reads %q, want %q", text, "Nova")
 	}
 	if col := oneColor(colors); col != ansi.FgBrightWhite {
-		t.Errorf("line colours = %q, want all bright white once the match is lost", colors)
+		t.Errorf("line colors = %q, want all bright white once the match is lost", colors)
 	}
 }

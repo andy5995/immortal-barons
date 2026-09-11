@@ -50,5 +50,5 @@ side.
 
 Committing more agents therefore does more damage on average, but it never makes
 one agent likelier to land. A Terrorist Prevention pact adds its partners'
-agents to the defence, which is what makes a well-allied realm expensive to
+agents to the defense, which is what makes a well-allied realm expensive to
 work on.

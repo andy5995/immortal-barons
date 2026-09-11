@@ -31,7 +31,7 @@ func (w *World) LocalAttacksAllowed() bool {
 
 // localAttacksScore reports whether winning a local attack moves either side's
 // score. BRE's Local Attack Scoring is off by default so barons cannot farm
-// score off their neighbours; off a league it never applies.
+// score off their neighbors; off a league it never applies.
 func (w *World) localAttacksScore() bool {
 	return !w.Config.IBBS || w.Config.LocalAttackScoring
 }
@@ -239,7 +239,7 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 	} else {
 		// A repelled attack scores nothing for either side. The original's only two
 		// Score writes are on the winning-ATTACK paths, and neither touches a
-		// second realm's record — a successful defence is its own reward.
+		// second realm's record — a successful defense is its own reward.
 
 		fmt.Fprint(&b, tr(returningForces)+"\n")
 		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
@@ -306,7 +306,7 @@ func absorbMilitary(a, d *Empire) {
 // the attacker at ~20.5% every time while the defender lost nothing in three,
 // ~1% in one and ~2% in two — the upset roll's 1%-per-hit quanta
 // (cap/small-vs-large-20260830.cap, 2026-08-30). A token force stripping
-// thousands of units off a giant is the original's behaviour, not a defect.
+// thousands of units off a giant is the original's behavior, not a defect.
 func (w *World) battleAttrition(ap, dp float64, retreatPct int) (attackerWins bool, aLost, dLost float64) {
 	survive := float64(100-retreatPct) / 100
 	a0, d0 := ap, dp
@@ -338,7 +338,7 @@ func (w *World) battleAttrition(ap, dp float64, retreatPct int) (attackerWins bo
 //
 // The fractions are OUTCOMES of the fight. retreatPct is only where the loop
 // stops, which is what keeps a token force from hurting anybody: a strike far
-// weaker than the defence reaches its own threshold almost at once, so the
+// weaker than the defense reaches its own threshold almost at once, so the
 // defender's fraction comes out near zero. Handing the defender retreatPct
 // outright instead is what let a 1,100-unit strike destroy 7,696 units (#199).
 func (w *World) remoteBattleAttrition(ap, dp, jets, bombers, retreatPct int) (attackerWins bool, aLost, dLost, jetLost float64) {
@@ -447,7 +447,7 @@ func (f AttackForce) clampTo(e *Empire) AttackForce {
 // groundOffense is the committed force's regular-attack strength, mirroring
 // Empire.Offense on the sent units (troopers 1, jets 2, tanks 3.5–4.5 by HQ), scaled by
 // Technology. Bombers are excluded: the original's local resolver keeps them out
-// of the offence sum (docs/mechanics-reference.md) though it bleeds them with
+// of the offense sum (docs/mechanics-reference.md) though it bleeds them with
 // the rest. (Distinct from offense(), which values a group-attack detachment flat.)
 func (f AttackForce) groundOffense(e *Empire) int {
 	sum := f.Troopers + f.Jets*2 + tankStrength(f.Tanks, e.HQ)
@@ -459,7 +459,7 @@ func (f AttackForce) groundOffense(e *Empire) int {
 // keeps them out of harm's way. BINARY-VERIFIED (resolve_regular_attack, proc
 // +0x1581..+0x1631): one Real48 loss fraction is multiplied into each of the
 // four committed counts in turn and subtracted from troopers, jets, tanks and
-// bombers alike. Bombers add no offence locally but bleed with the rest; IB
+// bombers alike. Bombers add no offense locally but bleed with the rest; IB
 // used to fly them on a bombing run of its own instead, with anti-air losses
 // and grounded-jet kills the original has no trace of (#200).
 func loseCommitted(e *Empire, f AttackForce, frac float64) UnitLoss {

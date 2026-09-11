@@ -57,7 +57,7 @@ type batchTarget struct {
 	Mode       LinkMode `json:"mode"`
 	Directory  string   `json:"directory"`
 	QueueDir   string   `json:"queue_dir,omitempty"`
-	Flavour    string   `json:"flavour,omitempty"`
+	Flavor     string   `json:"flavor,omitempty"`
 	Alias      string   `json:"alias"`
 	BundleFile string   `json:"bundle_file"`
 	Message    string   `json:"message,omitempty"`
@@ -409,7 +409,7 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 		}
 		target := batchTarget{
 			Node: nodeNumber, Name: node.Name, Address: address.String(), Mode: link.Mode,
-			Directory: dir, QueueDir: link.Directory, Flavour: link.Flavour, Alias: alias,
+			Directory: dir, QueueDir: link.Directory, Flavor: link.Flavor, Alias: alias,
 		}
 
 		// A raw peer gets one file per packet, because a raw file IS one packet:
@@ -511,7 +511,7 @@ func linkFor(config Config, node int) Link {
 	if link, ok := config.Links[node]; ok {
 		return link
 	}
-	return Link{Mode: LinkAttach, Flavour: "Normal"}
+	return Link{Mode: LinkAttach, Flavor: "Normal"}
 }
 
 // attachmentDirectory's default deliberately does NOT nest under spoolDir
@@ -584,7 +584,7 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 		}
 		queued.Message = "obox"
 	case LinkBSO:
-		busy, flow, err := bsoPaths(target.QueueDir, address, target.Flavour)
+		busy, flow, err := bsoPaths(target.QueueDir, address, target.Flavor)
 		if err != nil {
 			return Queued{}, err
 		}

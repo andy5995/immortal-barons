@@ -42,7 +42,7 @@ type RemoteListing struct {
 
 // IPTradeBid is a buy order travelling to another planet. Price is what the
 // buyer was quoted, and the far board fills the bid only at that price — a
-// seller who has since raised it is not made to honour the old one, and a buyer
+// seller who has since raised it is not made to honor the old one, and a buyer
 // who would have paid more is not charged it.
 type IPTradeBid struct {
 	ID         int
@@ -72,7 +72,7 @@ func TradeBidCost(qty, price int) int64 { return int64(qty) * int64(price) }
 
 // SendTradeBid escrows the gold for a bid and queues it for the target planet.
 // The bid is only offered to a planet the Coordinator has marked Allied — this
-// is a favour between allies, not an open exchange.
+// is a favor between allies, not an open exchange.
 func (w *World) SendTradeBid(e *Empire, targetBoard, seller, good string, qty, price int) (int, error) {
 	if e.Protection > 0 {
 		return 0, ErrInProtection

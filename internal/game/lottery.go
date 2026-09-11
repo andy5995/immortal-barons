@@ -73,7 +73,7 @@ func LotteryPrize(n int) int64 {
 // and pays the rest into gold in hand through creditGold, which holds it at the
 // cap and files an event naming what was lost. The bank's own interest already
 // spills the same way; silently deleting a win the player just watched being
-// announced is the behaviour IB does not copy.
+// announced is the behavior IB does not copy.
 func (w *World) PayLotteryPrize(e *Empire, n int) int64 {
 	prize := LotteryPrize(n)
 	if prize <= 0 {

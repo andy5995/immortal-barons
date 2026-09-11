@@ -144,7 +144,7 @@ func TestSpecializationBoxIsFourteenColumnsWithAnOverhangingTitle(t *testing.T) 
 		t.Errorf("Specialized = %q, want Quit to leave it unset", got)
 	}
 	// No fill either side of the title, and the brackets and title keep the
-	// colours a filled title line uses: dim accent, bright brackets, bright white.
+	// colors a filled title line uses: dim accent, bright brackets, bright white.
 	const title = "\x1b[31m\x1b[91m[\x1b[97mSpecialization\x1b[91m]\x1b[31m\x1b[0m"
 	if !strings.Contains(out, title) {
 		t.Errorf("the title line should overhang the box unfilled, got:\n%q", out)

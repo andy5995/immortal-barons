@@ -14,7 +14,7 @@ import (
 // Technology military factor, written into their own force slot by the
 // original's configure_attack_forces (technology_factor(1.4, slot 5), stored at
 // the slot's +0x1c). Golden literals: 1.4 is the verified ceiling, and the
-// offence table (trooper 1, jet 2, tank 4) is verified too.
+// offense table (trooper 1, jet 2, tank 4) is verified too.
 func TestContributorTechnologyScalesTheOffence(t *testing.T) {
 	for _, c := range []struct {
 		name string
@@ -36,7 +36,7 @@ func TestContributorTechnologyScalesTheOffence(t *testing.T) {
 				got = c.c.offenseAgainstSDI(c.sdi)
 			}
 			if got != c.want {
-				t.Errorf("offence = %d, want %d", got, c.want)
+				t.Errorf("offense = %d, want %d", got, c.want)
 			}
 		})
 	}
@@ -67,16 +67,16 @@ func TestAStrikeCarriesEachContributorsTechnology(t *testing.T) {
 		t.Errorf("a fully researched realm's slot carries %d, want the 1.4 ceiling (14000)", teched.Tech)
 	}
 	if techOff <= plainOff {
-		t.Fatalf("the researched strike left with offence %d, the plain one %d; technology must make it stronger", techOff, plainOff)
+		t.Fatalf("the researched strike left with offense %d, the plain one %d; technology must make it stronger", techOff, plainOff)
 	}
 	// Exactly the ceiling's worth: the same force at x1.4.
 	if want := plainOff * 14000 / TechFactorUnit; techOff != want {
-		t.Errorf("researched offence = %d, want %d (the plain %d x 1.4)", techOff, want, plainOff)
+		t.Errorf("researched offense = %d, want %d (the plain %d x 1.4)", techOff, want, plainOff)
 	}
 }
 
 // Spoils are split by what each baron's forces are worth, technology included:
-// the original's returning routine runs the same offence builder that reads the
+// the original's returning routine runs the same offense builder that reads the
 // slot's factor, so a researched realm's thousand troopers earn more land than
 // an unresearched realm's thousand.
 func TestGroupSpoilsWeighByTechnology(t *testing.T) {

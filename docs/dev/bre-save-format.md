@@ -87,7 +87,7 @@ empire record (les di,[0x28d8])
                 worth, the roster, the coordinator vote, the Technology
                 Agreement partner loop — always through the indexed
                 other-empire pointer, never written anywhere. It has to be
-                tested everywhere because BRE initialises every unused slot
+                tested everywhere because BRE initializes every unused slot
                 with the STARTING TEMPLATE, so an empty record still carries a
                 plausible region mix.
   +0x6a  int32  bank balance

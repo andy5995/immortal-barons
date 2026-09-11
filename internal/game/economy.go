@@ -261,7 +261,7 @@ func (w *World) BuyFoodMarket(e *Empire, n int) error {
 //
 // aiSetTax comes through here too, so a setting of 0 means nobody taxes rather
 // than only the humans (#203). BRE caps nothing here, so the ceiling is IB's
-// own and there is no reference behaviour to copy.
+// own and there is no reference behavior to copy.
 func (w *World) SetTax(e *Empire, n int) {
 	e.Tax = min(max(n, 0), w.Config.MaxTaxRate)
 }
@@ -320,7 +320,7 @@ func (w *World) AgentPrice(e *Empire) int {
 	return AgentPriceBase + AgentPricePerTurn*e.TurnsPlayed + w.priceJitter(e, "agent", AgentPriceJitter)
 }
 
-// midPrice is a band's centre — the point BRE's walk reverts towards.
+// midPrice is a band's center — the point BRE's walk reverts towards.
 func midPrice(lo, hi int) int { return (lo + hi) / 2 }
 
 // walkRoll is a deterministic draw in [0, n) for the k-th random number BRE's

@@ -224,9 +224,9 @@ func (s PirateSpoil) marketGood() string {
 // front-end owns the wording and the faction's color, so the engine stores the
 // parts rather than a sentence.
 //
-// Slot is the faction's index in World.Pirates. The colour BRE paints a faction
+// Slot is the faction's index in World.Pirates. The color BRE paints a faction
 // belongs to its SLOT, not its name (PIRATECOLOR is indexed by faction number),
-// so the front-end must not look the colour up by name — a world seeded under
+// so the front-end must not look the color up by name — a world seeded under
 // different faction names would find no match and fall back to plain body text.
 type PirateHit struct {
 	Faction string
@@ -303,7 +303,7 @@ func breTally(parts []string) string {
 
 // raidLoot is the "You took" tally. The order is BRE's, from the captured
 // screen in docs/dev/bre-screens.md. Regions are omitted when the faction holds
-// no land, which that capture records as BRE's own behaviour; Agents have no
+// no land, which that capture records as BRE's own behavior; Agents have no
 // BRE counterpart and follow the units it does list.
 //
 // EVERY field is shortened (numfmt.Short), gold and unit counts alike — the

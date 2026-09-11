@@ -249,7 +249,7 @@ const (
 	//
 	// The cap is on the deficit the crown CHARGES for, not on the award — paying
 	// the SupportBoostMaxPct maximum buys proportionally more. That is the
-	// original's behaviour; a test pins it so it does not get "fixed".
+	// original's behavior; a test pins it so it does not get "fixed".
 	MaxSupportBoostPerTurn = 15
 	SupportBoostPerPerson  = 3
 	SupportBoostFlat       = 500
@@ -391,7 +391,7 @@ const (
 	// ovr_00e809 +0x225e): the missile is priced off the TARGET's size, not sold
 	// at a flat rate — cost = min(targetRegions * 3543, 50,000,000) — and it
 	// ruins `7 + Random(3) - Random(3)` percent of the target's regions, a 5-9%
-	// band centred on 7. Nothing in that routine reads the target's SDI or
+	// band centerd on 7. Nothing in that routine reads the target's SDI or
 	// turrets, so a local nuclear strike is not intercepted; SDI's "up to 50% of
 	// incoming missiles" (breins.txt) is the interplanetary path.
 	// SpyGuy — the interplanetary watcher on the InterPlanetary Special
@@ -407,7 +407,7 @@ const (
 	SpyGuyDefaultDays   = 3
 
 	NukeCostPerRegion = 3_543
-	NukeWastePct      = 7 // centre of the band
+	NukeWastePct      = 7 // center of the band
 	NukeWasteJitter   = 3 // each of the two Random(3) draws
 	// StrikeCostCap is the arms dealer's ceiling on a missile, shared by all
 	// three missiles. BINARY-VERIFIED: each routine hands the same literal
@@ -459,7 +459,7 @@ const (
 	// bases do not.
 	ChemCostPerPop    = 94
 	ChemCostPerRegion = 2_037
-	ChemWastePct      = 3  // centre of the band: 3 + Random(3) - Random(3), so 1-5%
+	ChemWastePct      = 3  // center of the band: 3 + Random(3) - Random(3), so 1-5%
 	ChemWasteJitter   = 3  // each of the two Random(3) draws
 	ChemPopKillPct    = 20 // a flat fifth of the population, with no roll at all
 	ChemMoraleKeepNum = 3  // morale  := round(morale  * 3/4)
@@ -524,7 +524,7 @@ const (
 	// screens that print it, an arriving interplanetary attack (BRE.OVR
 	// ovr_03f4a0 +0xed6 for the planet-wide average, +0x10aa for the named
 	// defender), and an arriving S3-Sabre bombing op (ovr_0450a9 +0x481). Nothing
-	// local consults it — neither a neighbour's attack nor a nuclear, chemical or
+	// local consults it — neither a neighbor's attack nor a nuclear, chemical or
 	// biological missile — so the three effects below are all of it, and they are
 	// the three the original's own instructions name.
 	//
@@ -542,7 +542,7 @@ const (
 	// The arriving-missile resolver's own numbers, BINARY-VERIFIED
 	// (`BRE.OVR ovr_0450a9 +0x3c5`, the one routine the receiving board runs for
 	// all three missiles). These are NOT the local missiles' bands — an arriving
-	// nuclear strike ruins a wider swathe than a neighbour's, and an arriving
+	// nuclear strike ruins a wider swathe than a neighbor's, and an arriving
 	// chemical strike is a population weapon alone.
 	//
 	// MissileMisfireOdds is the gate ahead of SDI: one launch in this many is

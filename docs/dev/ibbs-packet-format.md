@@ -14,7 +14,7 @@ config" below):
 
 - `InboundDir` — packets from other boards arrive here.
 - `OutboundDir` — the game writes packets for other boards here.
-- `OutboundDirs` — per-neighbour override of `OutboundDir`, keyed by roster node
+- `OutboundDirs` — per-neighbor override of `OutboundDir`, keyed by roster node
   number (`Config.OutboundLink`). Only a board that HOSTs others needs any.
 
 Both are resolved against `DataDir` unless absolute (`Config.Inbound()` /
@@ -245,7 +245,7 @@ map of it, not a second definition.
                                      // therefore both need a number.
   "Hops": 0,                        // boards that have forwarded this; capped by MaxPacketHops
   "Epoch": 3,                       // sender's World.Epoch, so a packet a reset has outlived is
-                                     // recognised as stale rather than applied (#104). 0 = sender
+                                     // recognized as stale rather than applied (#104). 0 = sender
                                      // predates the field, trusted rather than rejected.
   "FromNode": 2,                    // sender's roster node number, preferred over FromBoard for
   "ToNode": 1                       // identity (auth, addressing, the Coordinator check, #105).

@@ -410,7 +410,7 @@ func TestOnlyANewFaultRaisesTheAlarm(t *testing.T) {
 	b.w.CoordPub = pub
 	b.w.Config.TurnsPerDay = 12
 
-	// First offence: the fault is new, so the run reports it as one.
+	// First offense: the fault is new, so the run reports it as one.
 	b.run(t)
 	deliver(t, b, a)
 	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)

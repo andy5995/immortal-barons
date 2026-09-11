@@ -62,7 +62,7 @@ var (
 //
 // A control character is refused outright rather than merely uncounted — an
 // escape in a realm name is printed on every screen that lists it, and would
-// move the cursor or recolour the row.
+// move the cursor or recolor the row.
 func ValidRealmName(name string) bool {
 	alnum, total := 0, 0
 	for _, r := range strings.TrimSpace(name) {

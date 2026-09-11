@@ -71,7 +71,7 @@ const Version = "0.0.11"
 // every board finish sending what it has queued, and only then switches to the
 // new release together — so no packet is ever in flight across the boundary.
 //
-// That is what makes the hold behaviour acceptable rather than a defect: a held
+// That is what makes the hold behavior acceptable rather than a defect: a held
 // packet is released only when the READER comes to speak the number the packet
 // already carries, so at a staggered upgrade the board that moves FIRST holds
 // everything from the boards still behind it and nothing ever releases it.

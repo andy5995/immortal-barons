@@ -70,7 +70,7 @@ A run that skipped anything names each reason:
 | mesh copy | a copy addressed to somebody else, in a mesh setup | nothing |
 
 Three more lines appear when they apply. **Passed N packets on** is this board
-forwarding for a neighbour, which is routing working. **Released N held
+forwarding for a neighbor, which is routing working. **Released N held
 packets** means an upgrade here freed a backlog. **The League Coordinator's
 roster replaced this board's copy** means an order arrived and was accepted —
 the one line that tells a member board its Coordinator link is alive.
@@ -184,7 +184,7 @@ have applied cleanly on the next one.
 
 A second file quarantined under the same name (a mailer retrying a bad
 transfer, say) is kept as its own numbered copy rather than overwriting the
-first. If a neighbour's transport keeps redelivering one broken file
+first. If a neighbor's transport keeps redelivering one broken file
 without limit, `bad` stops accepting new copies of it past roughly a
 thousand and the planetary run's log says so — clearing the folder of
 copies you have already looked at is a sysop task; nothing does it for you.

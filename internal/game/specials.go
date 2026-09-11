@@ -220,7 +220,7 @@ func roundDiv(a, b int) int { return (2*a + b) / (2 * b) }
 //
 // The strike is not intercepted. Nothing in the original's local nuclear path
 // consults the target's SDI or turrets — SDI shoots down interplanetary
-// missiles, not a neighbour's.
+// missiles, not a neighbor's.
 func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 	if err := payArmsDealer(a, w.NukeCost(d)); err != nil {
 		return "", err

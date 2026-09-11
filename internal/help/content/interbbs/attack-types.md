@@ -19,7 +19,7 @@ everyone else's forces.
   once they have taken 15% losses, and you take the standard share of the
   defender's regions.
 - **Quick Strike** — surprise lets you fight at 120% of your normal strength,
-  but the battle is short and disorganised: both sides retreat at 8% losses, and
+  but the battle is short and disorganized: both sides retreat at 8% losses, and
   you carry off only half the land a Normal Attack would.
 - **Extended Battle** — a grinding assault. Fatigue drops your forces to 85%
   strength, but they press until both sides have taken 20% losses and bring home

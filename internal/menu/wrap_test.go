@@ -51,15 +51,15 @@ func TestWrapReportKeepsTheReportsOwnLines(t *testing.T) {
 	}
 }
 
-// Wrapping has to happen before the figures are coloured: the escapes take no
+// Wrapping has to happen before the figures are colored: the escapes take no
 // columns on screen but are counted by every length measurement, so a report
-// coloured first wraps far short of the margin.
+// colored first wraps far short of the margin.
 func TestWrapBeforeColouringKeepsLinesFull(t *testing.T) {
 	text := "You broke the Dunkleoids and recovered 104 troopers, 62 jets, 116 turrets, 19 tanks, 4999 gold, 6 regions."
 	right := strings.Split(hiNums(wrapReport(text)), "\n")
 	wrong := strings.Split(wrapReport(hiNums(text)), "\n")
 	if len(wrong) <= len(right) {
-		t.Skip("no colouring applied in this build, nothing to compare")
+		t.Skip("no coloring applied in this build, nothing to compare")
 	}
 	if len(right) != 2 {
 		t.Errorf("wrapped to %d lines, want 2 for a 106-column report", len(right))

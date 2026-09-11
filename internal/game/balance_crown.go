@@ -57,7 +57,7 @@ const MasterAwardPct = 1 // percent of the Queen's purse, paid daily to the Mast
 // binary.
 //
 // The price is charged the moment the offer is accepted and is never named on
-// screen, which is BRE's behaviour and not an oversight here. The offer is
+// screen, which is BRE's behavior and not an oversight here. The offer is
 // withheld entirely from a realm that cannot pay it.
 const (
 	LotteryTicketPrice = 5_000 // charged on "yes", never displayed

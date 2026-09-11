@@ -44,7 +44,7 @@ func (d *drainSpySession) DrainInput() { d.drained = true }
 
 // TestPreMenuBannerNamesTheBuild pins where the program name and version are
 // stated: under the maintenance notice, above the opening menu's "Game started
-// on" header. The order is what the test is for — the two neighbours are
+// on" header. The order is what the test is for — the two neighbors are
 // printed by different packages, so nothing else holds them in sequence.
 func TestPreMenuBannerNamesTheBuild(t *testing.T) {
 	cfg := cfgIn(t.TempDir())

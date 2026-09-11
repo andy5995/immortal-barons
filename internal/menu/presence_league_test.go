@@ -7,7 +7,7 @@ import (
 )
 
 // The played-today '+' is league-only (#249). Off a league it would tell an
-// attacker which neighbours have not been on today — by the rows it does NOT
+// attacker which neighbors have not been on today — by the rows it does NOT
 // mark — so it is drawn for nobody. The (O) online mark is unaffected either way.
 func TestPlayedTodayMarkIsLeagueOnly(t *testing.T) {
 	for _, tc := range []struct {

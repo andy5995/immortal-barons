@@ -36,6 +36,6 @@ of your planet.  About a third of the jets you send do not come home.
 
 No single wave can finish it, however many jets you send. That is the point:
 the weapon is built to need the whole planet's air forces, and a planet that
-cannot organise loses the land.
+cannot organize loses the land.
 
 An SDI program is no help against it, and neither is anything else you own.

@@ -30,7 +30,7 @@ func (f AttackForce) units() int { return f.Troopers + f.Jets + f.Tanks + f.Bomb
 
 // offense values the detachment by the combat table (trooper 1, jet 2, tank 4).
 //
-// BOMBERS ADD NOTHING. BRE's interplanetary offence builder (ovr_03f4a0 +0x0000)
+// BOMBERS ADD NOTHING. BRE's interplanetary offense builder (ovr_03f4a0 +0x0000)
 // reads the force record's troopers, jets and tanks (+0x4, +0x8, +0xc) and never
 // its bombers (+0x10), because bombers fight the air battle against the
 // defender's jets instead (remoteBattleAttrition). IB used to value one at a
@@ -44,7 +44,7 @@ func (f AttackForce) offense() int {
 // jets are blunted in proportion to the percentage and nothing else in the force
 // is touched. Basis points, so the ceiling lands exactly where the original's
 // reals do. The shield's effect on the BOMBERS is not here — they carry no
-// offence at all, so it lands on the air battle instead (bombersAgainstSDI).
+// offense at all, so it lands on the air battle instead (bombersAgainstSDI).
 func (f AttackForce) offenseAgainstSDI(sdi int) int {
 	jets := f.Jets * 2 * (10_000 - SDIJetReductionPct*sdi) / 10_000
 	return f.Troopers + jets + f.Tanks*4
@@ -53,7 +53,7 @@ func (f AttackForce) offenseAgainstSDI(sdi int) int {
 // bombersAgainstSDI is the bomber count that reaches the airfields, which is the
 // only thing the air battle is decided by. BRE hands the SDI percentage to the
 // bomber-count routine (ovr_03f4a0 +0x015a) exactly as it hands it to the
-// offence builder, and that routine returns trunc((1 - SDI*0.2/100) * bombers).
+// offense builder, and that routine returns trunc((1 - SDI*0.2/100) * bombers).
 func (f AttackForce) bombersAgainstSDI(sdi int) int {
 	return f.Bombers * (10_000 - SDIBomberReductionPct*sdi) / 10_000
 }
@@ -68,7 +68,7 @@ type Contribution struct {
 	// it rides the packet so the target board can weigh this slot by it.
 	//
 	// BINARY-VERIFIED, and the piece #200 recorded as unread: the original's
-	// force slot carries a Real48 at +0x1c that the offence builder multiplies
+	// force slot carries a Real48 at +0x1c that the offense builder multiplies
 	// into that slot's troopers/jets/tanks total. Its writer is
 	// configure_attack_forces (BRE.OVR ovr_02b783 +0x7f2..+0x825): it loads 1.4,
 	// pushes slot 5, calls technology_factor, and stores the result into the
@@ -257,7 +257,7 @@ type AttackResult struct {
 	// SUCCESS, FAILURE, NOT FOUND or PROTECTED, and a baron whose force never
 	// found its target is owed a different sentence from one that was beaten.
 	// Empty in a packet written before this existed, which reads as Won deciding
-	// between success and failure — the behaviour that packet was written under.
+	// between success and failure — the behavior that packet was written under.
 	Outcome AttackOutcome `json:",omitempty"`
 	// Enemy is what the strike destroyed on the defender, by unit type. BRE's
 	// returning report itemises it beside the attacker's own casualties; without
@@ -564,7 +564,7 @@ func (w *World) LaunchDueGroupAttacksAt(now time.Time) {
 // strike's kind, so the shield is applied as the ratio between the blunted and
 // the whole force rather than recomputed from scratch.
 //
-// A GROUP attack passes through untouched, which is the original's behaviour and
+// A GROUP attack passes through untouched, which is the original's behavior and
 // not an oversight: it feeds the planet's land-weighted average shield through
 // an expression that divides by 100 a second time (BRE.OVR ovr_03f4a0 +0xf18),
 // and since no average can reach 100 the truncated result is always zero. Only a
@@ -660,7 +660,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		w.postNews(fmt.Sprintf("A strike by %s broke on %s's New Realm Protection.", raider(atk), target.Name))
 		return res
 	}
-	// Measure the defence BEFORE the battle costs it — the fight is decided by
+	// Measure the defense BEFORE the battle costs it — the fight is decided by
 	// what was standing when the force arrived, not by what is left afterwards.
 	// The shield takes its share of the arriving jets and bombers first.
 	offense := atk.offenseAgainstSDI(target)
@@ -801,7 +801,7 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) stri
 	if won {
 		fmt.Fprintf(&b, "You lost %d regions.\n", regions)
 	}
-	writeUnitLines(&b, "You lost %s!", defenceUnits(lost))
+	writeUnitLines(&b, "You lost %s!", defenseUnits(lost))
 	return strings.TrimRight(b.String(), "\n")
 }
 
@@ -811,7 +811,7 @@ type unitCount struct {
 	name string
 }
 
-// attackUnits and defenceUnits are the two sides' unit lists in the order the
+// attackUnits and defenseUnits are the two sides' unit lists in the order the
 // original's reports print them — an attacker fields troopers, jets, tanks and
 // bombers; a defender loses troopers, jets, tanks and turrets.
 func attackUnits(f AttackForce) []unitCount {
@@ -822,7 +822,7 @@ func attackUnits(f AttackForce) []unitCount {
 // pin it between them — cap/20240527-134Pho_Lazarus_Public.cap has
 // "1111 Troopers, 115k Turrets, and 105k Tanks" (turrets BEFORE tanks) and
 // cap/eots-ibbs-02.cap has "86k Jets and 1009k Tanks" (jets before tanks).
-func defenceUnits(u UnitLoss) []unitCount {
+func defenseUnits(u UnitLoss) []unitCount {
 	return []unitCount{{u.Troopers, "Troopers"}, {u.Jets, "Jets"}, {u.Turrets, "Turrets"}, {u.Tanks, "Tanks"}}
 }
 
@@ -875,7 +875,7 @@ func joinAnd(parts []string) string {
 
 // survivorsOfFrac returns each contributor's detachment reduced by the fraction
 // the battle actually cost the attacker, for a strike that was fought. A force
-// far stronger than the defence is barely touched; an evenly matched one pays
+// far stronger than the defense is barely touched; an evenly matched one pays
 // close to the full retreat share.
 func survivorsOfFrac(cs []Contribution, lost float64) []Contribution {
 	keep := 1 - lost
@@ -951,7 +951,7 @@ func (w *World) remoteTarget(name string) *Empire {
 // rather than at a named baron.
 //
 // BRE marks that target with the letter Z — "Z=All" in its own picker — and on
-// seeing it loops A..Y, summing each realm's defence and pooling their jets
+// seeing it loops A..Y, summing each realm's defense and pooling their jets
 // before ONE battle (resolve_received_invasion +0x0d3d, the loop at +0x0d47).
 // Each realm is measured exactly as a lone defender would be, technology factor
 // and all; the planet is simply the sum. IB used to send the whole strike

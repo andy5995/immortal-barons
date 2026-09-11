@@ -184,13 +184,13 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 // it and is redrawn only when it changes, which is why an ambiguous keystroke
 // leaves the line alone exactly as the original leaves it.
 //
-// The LINE'S COLOUR is the match count, and the whole line carries it: white
+// The LINE'S Color is the match count, and the whole line carries it: white
 // while nothing matches, bright white while several do, bright yellow the moment
 // exactly one does and the name fills in. BINARY-VERIFIED (select_planet, BRE.OVR
 // 0x021dd9): it holds a state code per keystroke — 7 for none, 15 for several, 14
 // for one (0x159c) — and compares it against the previous keystroke's (0x16a3) to
-// pick between two redraws. IB drew only the ADDED text in the new colour, which
-// left a completed name half in the colour the player typed it in.
+// pick between two redraws. IB drew only the ADDED text in the new color, which
+// left a completed name half in the color the player typed it in.
 //
 // Backspace edits the typed text, not the completed name, which is also the
 // original's (0x14a5 deletes the last character of the TYPED buffer at
@@ -219,10 +219,10 @@ func readCompletingAnswer(s session.Session, match func(string) (string, int), f
 	// actually has to change — appending a character to a line that is merely
 	// growing must not rewrite the whole thing.
 	//
-	// A COLOUR change is the exception and rewrites all of it, because the colour
+	// A Color change is the exception and rewrites all of it, because the color
 	// belongs to the whole line rather than to the characters added last: the
 	// original erases the entire string and reprints it (0x1771) where an
-	// unchanged colour takes the common-prefix path (0x16b0).
+	// unchanged color takes the common-prefix path (0x16b0).
 	redraw := func(want []rune, color string) {
 		common := 0
 		if color == shownColor {
@@ -321,7 +321,7 @@ func matchPlanet(planets []game.LeagueNode, typed string) *game.LeagueNode {
 
 // matchPlanetCount is matchPlanet with the match COUNT as well as the planet,
 // which the live prompt needs and an accept/refuse caller does not: the original
-// colours its line by that count — none, one, or several are three different
+// colors its line by that count — none, one, or several are three different
 // states (BRE.OVR 0x159c) — while resolving on a count of exactly one.
 //
 // The planet is returned only when the count is one; at any other count there is

@@ -26,7 +26,7 @@ func runSpectate(cfg game.Config, days int) error {
 	fmt.Printf("Play %d day(s) of computer-baron turns? This advances the game and SAVES the result. (y/N) ", days)
 	answer, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 	if a := strings.ToLower(strings.TrimSpace(answer)); a != "y" && a != "yes" {
-		fmt.Println("Cancelled; the game is unchanged.")
+		fmt.Println("Canceled; the game is unchanged.")
 		return nil
 	}
 

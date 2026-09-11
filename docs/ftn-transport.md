@@ -253,7 +253,7 @@ The modes are:
 - `Obox` atomically publishes the bundle in the named peer-specific directory.
   The mailer must treat a final-name appearance as a complete file.
 - `BSO` takes the destination's `.bsy`, then either merges into a compatible
-  Barons bundle already named by that flavour's flow file or publishes a new
+  Barons bundle already named by that flavor's flow file or publishes a new
   bundle in `AttachDir` and adds a delete-after-send flow entry. The directory
   must be the exact root for that address's zone; `barons-ftn` does not guess
   domain-to-zone mappings.
@@ -277,7 +277,7 @@ of its own uses `Attach`, an `ftn.cfg` carrying no links at all cannot reach a
 Mystic board — which is how this was found on a three-board test rig, after 30
 bundles had collected.
 
-BSO flavours are `Immediate`, `Continuous` (also accepted as `Crash`),
+BSO flavors are `Immediate`, `Continuous` (also accepted as `Crash`),
 `Direct`, `Normal`, and `Hold`; `Normal` is the default. A point address uses
 the standard `<net><node>.pnt/<point>.?lo` layout automatically.
 
@@ -286,7 +286,7 @@ transport links continues to send every next hop through the existing `.msg`
 chain. This fallback applies to addressed routing. Once any `Link` is present,
 unaddressed mesh fanout uses only the explicitly listed peers; otherwise the
 helper would invent graph edges and defeat a ring or partial mesh. List every
-direct fanout neighbour, including one that uses `Attach`. A hub may freely mix
+direct fanout neighbor, including one that uses `Attach`. A hub may freely mix
 all three modes.
 
 Paths in a `Link` line must not contain spaces. `NetmailDir`, `AttachDir`, and

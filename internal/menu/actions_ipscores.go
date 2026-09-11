@@ -291,7 +291,7 @@ func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipR
 	// DELIBERATE DIVERGENCE, and one that must never be "corrected" back: the
 	// original heads this screen with its OWN product name, so copying the layout
 	// faithfully means substituting ours. A title is branding, not a mechanic —
-	// see the licence note in the bre-gather skill. IB printed the original's name
+	// see the license note in the bre-gather skill. IB printed the original's name
 	// here until 2026-08-23.
 	fmt.Fprintf(s, "\n%s%s%s: %s%s%s\n", ansi.FgBrightWhite, tr(s, "Immortal Barons"),
 		ansi.FgBrightBlack, ansi.FgBrightRed, viewName, ansi.Reset)

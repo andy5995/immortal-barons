@@ -223,7 +223,7 @@ of the repository.
 
 This does **not** replace dosemu2 for everything — dosemu2 is still the only way
 to scrape screens as text (see above), and that is most of what this skill does.
-The two are complementary: **dosemu2 for behaviour and screens, the static map
+The two are complementary: **dosemu2 for behavior and screens, the static map
 for normal structure and constants, and a DOSBox debugger for dynamic
 validation.** Static catalog lookup is the normal path; the debugger is an
 exceptional validation tool, not a prerequisite for following overlays.
@@ -353,13 +353,13 @@ keyword's label right before it. **This also answers "who sets it"** — a
 RESOURCE.DAT keyword is the local sysop's, per installation, never the League
 Coordinator's or the game data's.
 
-**Per-character colour in a capture is DATA, not decoration.** `cat -v` a `.cap`
-and read where the escape sequences fall between characters: BRE colours each
+**Per-character color in a capture is DATA, not decoration.** `cat -v` a `.cap`
+and read where the escape sequences fall between characters: BRE colors each
 letter of a lottery draw as it prints it, so one captured line
 (`ESC[0;40;31m D ESC[31m K … ESC[1;33m I …` against the ticket `AGNTYI`) proves
 the scoring rule — the yellow letter is at a different position in the draw than
 on the ticket, so matching cannot be positional. A whole disassembly session was
-about to be spent on that question. Look for the colour capture before deciding a
+about to be spent on that question. Look for the color capture before deciding a
 rule needs code: ANSI-stripped skimming throws exactly this away.
 
 **Know where the prose actually is: BRE ships only TWO `.hlp` files** —
@@ -527,7 +527,7 @@ order.
   from the menu tree, when `runTurn` presents it every turn behind a default-on
   preference.)
 - **Rates, probabilities, thresholds, and formulas → NO.** The strings and help
-  text give you the *trigger* and the qualitative behaviour ("Riots have broken
+  text give you the *trigger* and the qualitative behavior ("Riots have broken
   out due to high tax rates!"), never the numbers behind them (the riot chance %,
   emigration rate, growth formula, damage math). `breins.txt` even says outright
   that "much information has been left out of the documentation." Those live in
@@ -633,7 +633,7 @@ finding, re-read the code before defending the note. Say in the write-up that a
 report prompted the re-read — it is how the next reader learns the note was
 tested rather than merely repeated.
 
-**A prompt's TEXT is not its behaviour — read the caller.** `find-string` on a
+**A prompt's TEXT is not its behavior — read the caller.** `find-string` on a
 prompt lands you in the routine that *prints* it, and that routine usually does
 nothing else. The input loop, the key table and the semantics are one level up,
 in `callers[]`. `(A-Y,Z=All,?=List) Send to:` had been cloned as a single
@@ -686,7 +686,7 @@ defender's notice passed `[bp-0x3]` and the ally's, 100 bytes later, passed
 recipient slots is what separates "the attacker was told about the ally" from
 "the ally was told", which is the whole finding. Quote the slot when recording a
 result like this; without it the claim is an inference about plausible
-behaviour, not a reading.
+behavior, not a reading.
 
 **A refusal string's OWNER is not its condition — disassemble the compare.**
 `find-string` tells you which routine can print a refusal. It does not tell you
@@ -694,7 +694,7 @@ what triggers it, and a routine usually holds several refusals whose branches
 sit next to each other. Real case (2026-08-15): "You do not have relations with
 that realm." belongs to `create_trade_offer`, which is enough to say trade deals
 involve relations — but the branch immediately below it calls `056d:19b5`, the
-**protection** predicate, so reading the neighbourhood would have attributed the
+**protection** predicate, so reading the neighborhood would have attributed the
 wrong rule. Disassembling the guard itself gave both the rule and its threshold:
 
 ```
@@ -845,7 +845,7 @@ actually wanted.
 What must be in front of you BEFORE you open it:
 
 - **Read `docs/dev/bre-save-format.md`'s entry for the mechanic first**, every
-  time, even when the task arrives as fresh evidence to analyse. A whole session
+  time, even when the task arrives as fresh evidence to analyze. A whole session
   went into recovering the Queen Royale refund formula that was already written
   down there. Grep the file for the mechanic's noun; it costs one command.
 - **Grep the shipped help and docs before either** (`game/*.hlp`, `docs/bre.doc`,
@@ -928,7 +928,7 @@ changed denominator was mistaken for a changed mechanic.
 Every screen ever scraped in this project sits in the session transcripts at
 `~/.claude/projects/-home-andy-src-andy5995-immortal-barons/*.jsonl`. They are
 JSON-escaped (`\\u001b`, `\\r\\n`) but a small Python pass unescapes and strips
-ANSI, and they hold the *surrounding* screens that a summarised table in
+ANSI, and they hold the *surrounding* screens that a summarized table in
 `docs/dev/` dropped. That is what settled the SDI curve: the write-up recorded
 funding and strength but not the realm's region count, and the count was sitting
 in a menu two screens away in the transcript.
@@ -1007,7 +1007,7 @@ units the per-region figure sits slightly above the constant, and the gap is
 
 So when a capture is needed to settle an arithmetic question, **ask for Auto-Pay
 ON**, not off. Auto-Pay OFF is for learning the prompt *sequence*, wording, and
-colours (see the maintenance-flow section of `docs/mechanics-reference.md`).
+colors (see the maintenance-flow section of `docs/mechanics-reference.md`).
 
 ## License boundaries — BRE is proprietary, not open source
 
@@ -1045,7 +1045,7 @@ strictly limited. The idea/expression line:
 use its name/logo as our branding.
 
 **The trap is SCREEN TITLES.** A captured screen is copied for its layout and
-colours, and the original's product name sits right there in the header looking
+colors, and the original's product name sits right there in the header looking
 like part of the design. It is not — it is the branding, and it is the one
 element of a captured screen that must be substituted rather than reproduced. IB
 shipped `Barren Realms Elite: Top Planets by Score` as its own InterBBS Scores
@@ -1150,7 +1150,7 @@ Update the skill in the same pass that produced the discovery, not "later."
 
 **Put it in the right file.** This SKILL.md is loaded on EVERY session that
 touches BRE, so it earns its size only by holding what changes whether you start
-correctly: the source ladder, the licence line, the "check the notes and the
+correctly: the source ladder, the license line, the "check the notes and the
 shipped docs first" rules, and the calibration lessons. Detail that matters only
 once you are already doing the work belongs in `references/`:
 

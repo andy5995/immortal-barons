@@ -39,7 +39,7 @@ package game
 // retreat fraction disagree in direction.
 const (
 	// A quick strike buys surprise: it hits harder but takes far less land, and
-	// the disorganised battle breaks off early.
+	// the disorganized battle breaks off early.
 	QuickStrikeStrengthPct = 120 // binary: Real48 1.2 (attack.hlp says 110%)
 	QuickStrikeCapturePct  = 50
 	QuickStrikeLossPct     = 8
@@ -289,9 +289,9 @@ const (
 	//
 	// It is deliberately NOT in the battle math any more. It was until
 	// 2026-08-24, and two independent lines say the original has no per-region
-	// defence: its defence builder sums troopers, turrets and tanks and never
+	// defense: its defense builder sums troopers, turrets and tanks and never
 	// reads a region count, and a live capture discriminates -- 112 turrets
-	// losing exactly 2 to a 3-jet attack matches a land-free defence, where any
+	// losing exactly 2 to a 3-jet attack matches a land-free defense, where any
 	// per-region bonus makes that figure odd for every possible round count.
 	LandDefenseBonus = 2
 )

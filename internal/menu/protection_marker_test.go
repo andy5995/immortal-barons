@@ -132,7 +132,7 @@ func TestProtectedRemoteBaronIsListedAndRefused(t *testing.T) {
 }
 
 // Protection bars SPYING as surely as it bars a strike — Andy's call, and the
-// behaviour every path already had. docs/mechanics-reference.md claimed the
+// behavior every path already had. docs/mechanics-reference.md claimed the
 // opposite until 2026-08-26 ("a protected realm is a legal SPY target, so a spy
 // list carries no flag at all"), and a hostile/observing constant pair encoded
 // that claim in the interplanetary picker with only the hostile half ever

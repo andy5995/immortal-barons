@@ -332,17 +332,17 @@ restrict uses to one or more exact procedures after resolving their durable
 IDs. Detailed output contains original program text and must not be committed.
 
 `disasm` accepts three boundary-safe selectors. `--procedure` prints the exact
-catalogued body ranges for an overlay or resident procedure. `--unit` prints an
+catalogd body ranges for an overlay or resident procedure. `--unit` prints an
 overlay unit and optionally accepts a half-open, unit-relative `--start/--end`
 range. `--around` accepts a canonical OVR file offset, resident logical
 `SEGMENT:OFFSET`, durable site ID, or exact procedure selector.
 
 An `--around` address is never assumed to be an instruction boundary. The tool
-finds the containing catalogued code block, supplies all catalogued roots to
+finds the containing catalogd code block, supplies all catalogd roots to
 the decoder, and anchors the window at the nearest containing/preceding root.
 It prints both the requested offset and synchronization anchor in the header,
 never prints instructions before that anchor, and rejects an address in a
-catalogued data span instead of guessing. This same synchronization is used by
+catalogd data span instead of guessing. This same synchronization is used by
 `xrefs --show-sites`.
 
 Useful audit queries are:
@@ -413,7 +413,7 @@ Two integer helpers in `0c03` the catalog does not name yet, identified from two
 independent call sites each while reading the nuclear strike and the waste
 decontamination routines:
 
-| Address     | Behaviour                                                        |
+| Address     | Behavior                                                        |
 |-------------|------------------------------------------------------------------|
 | `0c03:129b` | `max` of two int32 arguments                                     |
 | `0c03:12e1` | `min` of two int32 arguments                                     |
@@ -490,7 +490,7 @@ weapons. Read anything about the arriving nuclear or chemical strike here.
 
 ### A catalog name corrected
 
-`allocate_unassigned_regions` (`BRE.OVR 0x030ebb`) was catalogued as
+`allocate_unassigned_regions` (`BRE.OVR 0x030ebb`) was catalogd as
 `select_regions_to_lose`, which the field access list contradicts: it returns
 immediately when the pool is empty, and its body adds the chosen count to a
 region type while subtracting the same from the pool. Its four callers are the

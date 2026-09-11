@@ -392,7 +392,7 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 	// The three missiles do NOT run the local helpers of the same name (#255).
 	// The receiving board resolves all three in one routine with its own gates
 	// and its own bands (BRE.OVR ovr_0450a9 +0x3c5) — an arriving nuclear strike
-	// ruins a wider swathe than a neighbour's, and an arriving chemical strike is
+	// ruins a wider swathe than a neighbor's, and an arriving chemical strike is
 	// a population weapon that touches no land at all.
 	case OpNuclear:
 		if stopped := w.arrivingMissileStopped(d, "nuclear strike"); stopped != "" {

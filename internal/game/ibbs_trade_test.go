@@ -166,7 +166,7 @@ func TestInterplanetaryBidRefundedWhenThePacketIsLost(t *testing.T) {
 	}
 }
 
-// Bidding is a favour between allies: any other standing is refused, and the
+// Bidding is a favor between allies: any other standing is refused, and the
 // gold never leaves.
 func TestInterplanetaryBidNeedsAnAlliedPlanet(t *testing.T) {
 	for _, r := range []PlanetRelation{PlanetNone, PlanetPeace, PlanetEnemy} {

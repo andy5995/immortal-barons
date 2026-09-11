@@ -74,7 +74,7 @@ type aiForceMix struct{ trooper, turret, tank, jet, agent int }
 // aiForceShares returns the gold shares an AI of the given profile spends its
 // military budget on (#36, #71, #72). A diplomat never attacks, so it buys
 // defense; an aggressor leans into offense; a balanced realm sits between and
-// can punish a weak neighbour.
+// can punish a weak neighbor.
 func aiForceShares(profile string) aiForceMix {
 	switch profile {
 	case AIProfileAggressor:
@@ -138,13 +138,13 @@ func (w *World) aiWageWar(e *Empire) {
 		// No pre-battle covert strike here any more: an agent sent now lands at
 		// the NEXT daily maintenance, so it can no longer soften the target of
 		// the attack being launched in this turn. aiCovertOps already demoralizes
-		// the realm this AI could follow up against, which is the same judgement
+		// the realm this AI could follow up against, which is the same judgment
 		// a day earlier — where the original puts it.
 		//
 		// autoCapture is false so the AI ALLOCATES what it takes, the way a human
 		// does at the capture prompt (#58), instead of inheriting whatever mix the
 		// loser happened to hold. Captured land goes into whichever type this realm
-		// is furthest short of, the same judgement it uses when buying.
+		// is furthest short of, the same judgment it uses when buying.
 		if _, captured := w.Attack(e, target, FullForce(e), false); captured > 0 {
 			w.GrantRegions(e, e.aiNextRegionType(), captured)
 		}

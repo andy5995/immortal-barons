@@ -62,7 +62,7 @@ func TestPlainSessionGetsNumberedList(t *testing.T) {
 			if !strings.Contains(out, "1) Alpha") || !strings.Contains(out, "0) Back") {
 				t.Errorf("plain list should be numbered with a Back line, got:\n%s", out)
 			}
-			// Colour escapes are still emitted here — the session wrapper strips
+			// Color escapes are still emitted here — the session wrapper strips
 			// them on the way out. What must not appear is a repaint: the cursor
 			// and erase controls the lightbar draws between frames.
 			for _, ctl := range []string{ansi.Home, ansi.Clear, ansi.EraseLine, ansi.EraseDown} {

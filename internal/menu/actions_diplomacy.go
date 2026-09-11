@@ -467,7 +467,7 @@ func writeRelationsTable(s session.Session, t Term, rows []relationsRow) {
 		// of its own — as the two score tables get — would move Relations, and
 		// this screen is one of the closest matches to the original. The cost is
 		// that the mark has no heading here; the Scores screen is where a player
-		// meets it labelled.
+		// meets it labeled.
 		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
 			ansi.Reset,
 			nameCell(s, t, r.name, ansi.FgBrightCyan, r.presence, relationsNameWidth),

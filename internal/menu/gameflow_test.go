@@ -199,7 +199,7 @@ func TestIncomeReportSurfacesAndClearsPirateRaids(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")} // one key for the pause
 	w := newWorld()
 	p := w.Player()
-	// Slot 3 is the fourth band, painted plain red by BRE's palette. The colour
+	// Slot 3 is the fourth band, painted plain red by BRE's palette. The color
 	// is keyed on the slot, not the name, so a world with other names still
 	// gets it.
 	p.PirateHits = []game.PirateHit{{Faction: "Sharks", Slot: 3, Spoil: game.SpoilTanks, Amount: 7777}}
@@ -545,7 +545,7 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 
 	for _, want := range []string{
 		"wildside — Daily Bulletin",
-		// The sign carries its own colour, so it and its figure are asserted apart.
+		// The sign carries its own color, so it and its figure are asserted apart.
 		// BRE's spelling: grouped only past four digits, so the 5,838 change
 		// prints bare, and Net Worth is divided to thousands with a "k" that
 		// never steps to "m" (numfmt.Thousands).
@@ -557,10 +557,10 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 			t.Errorf("expected output to contain %q, got:\n%s", want, out)
 		}
 	}
-	// BRE's colouring, as golden escape literals off bre-01-color.cap: the figure
+	// BRE's coloring, as golden escape literals off bre-01-color.cap: the figure
 	// is `96` bright cyan whichever way the day went, and only a rise paints its
 	// `+` in `92` bright green. Direction is carried by the sign, so a reader who
-	// sees no colour at all still gets it.
+	// sees no color at all still gets it.
 	if !strings.Contains(out, "\x1b[96m-\x1b[96m5838") {
 		t.Error("a falling figure and its minus sign should both be bright cyan")
 	}
@@ -571,7 +571,7 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 		t.Error("an unchanged figure should not be painted as a rise")
 	}
 	if strings.Contains(out, ansi.FgRed) {
-		t.Errorf("nothing in the bulletin is red — direction is not colour-coded:\n%q", out)
+		t.Errorf("nothing in the bulletin is red — direction is not color-coded:\n%q", out)
 	}
 }
 

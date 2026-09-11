@@ -43,7 +43,7 @@ func TestMoraleBoostCostAndAward(t *testing.T) {
 		t.Errorf("paying half bought %d points, want 7 (15 x 3251/6501, truncated)", got)
 	}
 
-	// Overpaying really does buy past the charged deficit — the same behaviour
+	// Overpaying really does buy past the charged deficit — the same behavior
 	// the support boost has, and not an IB addition.
 	w, e = mk()
 	e.Morale = 40

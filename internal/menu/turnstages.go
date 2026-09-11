@@ -29,7 +29,7 @@ import (
 // there (22 across cap/eots-ibbs-01.cap and
 // cap/121125-666H4H_Camembert_Public.cap), and the one manual market turn does
 // not (cap/kd3-01.cap, market reached straight off the Queen Royale prompt).
-func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarised bool) {
+func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarized bool) {
 	// Skip entirely on a replayed turn whose maintenance was already paid before an
 	// idle-boot (#10). MaintPaid is set inside the charge transaction below, so
 	// reaching here with it set means the required forces/regions charge already
@@ -431,7 +431,7 @@ func showCoordinatorNotice(s session.Session, w *ctx) {
 		}
 	})
 
-	// Wrapped before colouring, so a translation longer than the English does
+	// Wrapped before coloring, so a translation longer than the English does
 	// not break past column 80 — then the one name the line is about is
 	// brightened, as BRE brightens it. A name the wrap has split across two
 	// lines simply stays unhighlighted.
@@ -506,7 +506,7 @@ func showLottery(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgWhite, tr(s, "Drawn:"), ansi.Reset)
 	for i, c := range draw {
 		// A matched letter is bright yellow and an unmatched one bright red, but
-		// the count below says the same thing in words: colour alone must not be
+		// the count below says the same thing in words: color alone must not be
 		// what tells a win from a miss. Bright red rather than the original's
 		// dark red, which sits at 2:1 against black.
 		color := ansi.FgBrightRed
@@ -526,7 +526,7 @@ func showLottery(s session.Session, w *ctx) {
 // readLotteryTicket reads the six letters of a ticket, one keypress each,
 // accepting only A-Z. Enter takes a random letter for that slot, so a player who
 // does not care can hold it down and still hold a playable ticket — the
-// original's behaviour, and the reason its prompt takes no Enter to finish.
+// original's behavior, and the reason its prompt takes no Enter to finish.
 func readLotteryTicket(s session.Session, w *ctx) []byte {
 	// The random fallbacks are drawn in one go, under the world lock, rather than
 	// one at a time while the player types: the draw needs the lock and nothing

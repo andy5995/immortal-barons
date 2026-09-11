@@ -35,7 +35,7 @@ func TestForgedPacketIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := signedBoard(t, "Home", "Neighbour", peerPub)
+	w := signedBoard(t, "Home", "Neighbor", peerPub)
 	e := w.AddHuman("tester", "Testland")
 	e.Protection = 0
 	e.Troopers = 5000
@@ -44,13 +44,13 @@ func TestForgedPacketIsRefused(t *testing.T) {
 
 	// Unsigned, and claiming to be the roster board whose key we hold.
 	forged := Packet{
-		FromBoard: "Neighbour",
+		FromBoard: "Neighbor",
 		ToBoard:   "Home",
 		// Both harms the issue names, on one packet: survivors credited to a
 		// local realm's owner, and a strike aimed at that realm.
 		Results: []AttackResult{{ID: 1, Won: true,
 			Survivors: []Contribution{{Owner: "tester", AttackForce: AttackForce{Troopers: 999999}}}}},
-		Attacks: []RemoteAttack{{ID: 2, FromBoard: "Neighbour", TargetEmpire: "Testland", Offense: 1 << 30}},
+		Attacks: []RemoteAttack{{ID: 2, FromBoard: "Neighbor", TargetEmpire: "Testland", Offense: 1 << 30}},
 	}
 	w.ApplyPacket(forged)
 
@@ -78,12 +78,12 @@ func TestSignedPacketIsApplied(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := signedBoard(t, "Home", "Neighbour", peerPub)
+	w := signedBoard(t, "Home", "Neighbor", peerPub)
 
-	sender := NewWorldSeed(Config{BoardID: "Neighbour"}, 1)
+	sender := NewWorldSeed(Config{BoardID: "Neighbor"}, 1)
 	sender.BoardKey = peerSec
 	sender.Outbox = []Packet{{
-		FromBoard: "Neighbour",
+		FromBoard: "Neighbor",
 		ToBoard:   "Home",
 		Scores:    []RemoteScore{{Empire: "Farland", NetWorth: 12345}},
 	}}
@@ -107,12 +107,12 @@ func TestTamperedPacketIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := signedBoard(t, "Home", "Neighbour", peerPub)
+	w := signedBoard(t, "Home", "Neighbor", peerPub)
 
-	sender := NewWorldSeed(Config{BoardID: "Neighbour"}, 1)
+	sender := NewWorldSeed(Config{BoardID: "Neighbor"}, 1)
 	sender.BoardKey = peerSec
 	sender.Outbox = []Packet{{
-		FromBoard: "Neighbour",
+		FromBoard: "Neighbor",
 		ToBoard:   "Home",
 		Scores:    []RemoteScore{{Empire: "Farland", NetWorth: 100}},
 	}}
@@ -133,11 +133,11 @@ func TestHopsDoNotBreakTheSignature(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := signedBoard(t, "Home", "Neighbour", peerPub)
+	w := signedBoard(t, "Home", "Neighbor", peerPub)
 
-	sender := NewWorldSeed(Config{BoardID: "Neighbour"}, 1)
+	sender := NewWorldSeed(Config{BoardID: "Neighbor"}, 1)
 	sender.BoardKey = peerSec
-	sender.Outbox = []Packet{{FromBoard: "Neighbour", ToBoard: "Home", Scores: []RemoteScore{{Empire: "Farland"}}}}
+	sender.Outbox = []Packet{{FromBoard: "Neighbor", ToBoard: "Home", Scores: []RemoteScore{{Empire: "Farland"}}}}
 	sender.StampOutbox()
 	p := sender.Outbox[0]
 	p.Hops += 2 // as a hub does
@@ -153,8 +153,8 @@ func TestHopsDoNotBreakTheSignature(t *testing.T) {
 // discovered as a surprise.
 func TestKeylessRosterStillApplies(t *testing.T) {
 	w := NewWorldSeed(Config{BoardID: "Home"}, 1)
-	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "Neighbour"}} // no PublicKey
-	p := Packet{FromBoard: "Neighbour", ToBoard: "Home", Scores: []RemoteScore{{Empire: "Farland"}}}
+	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "Neighbor"}} // no PublicKey
+	p := Packet{FromBoard: "Neighbor", ToBoard: "Home", Scores: []RemoteScore{{Empire: "Farland"}}}
 
 	if _, checked := w.VerifyBoardOrigin(p); checked {
 		t.Error("a roster entry with no key must report itself unchecked, not failed")
@@ -260,17 +260,17 @@ func TestForgeryCannotPoisonTheReplayCounter(t *testing.T) {
 		t.Fatal(err)
 	}
 	w := NewWorldSeed(Config{BoardID: "Home"}, 1)
-	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "Neighbour", PublicKey: hex.EncodeToString(pub)}}
+	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "Neighbor", PublicKey: hex.EncodeToString(pub)}}
 
-	w.ApplyPacket(Packet{FromBoard: "Neighbour", ToBoard: "Home", Seq: 999999,
+	w.ApplyPacket(Packet{FromBoard: "Neighbor", ToBoard: "Home", Seq: 999999,
 		Scores: []RemoteScore{{Empire: "Junk"}}})
-	if got := w.HighSeq["Neighbour"]; got != 0 {
+	if got := w.HighSeq["Neighbor"]; got != 0 {
 		t.Errorf("a refused packet moved the replay counter to %d", got)
 	}
 
-	sender := NewWorldSeed(Config{BoardID: "Neighbour"}, 1)
+	sender := NewWorldSeed(Config{BoardID: "Neighbor"}, 1)
 	sender.BoardKey = sec
-	sender.Outbox = []Packet{{FromBoard: "Neighbour", ToBoard: "Home",
+	sender.Outbox = []Packet{{FromBoard: "Neighbor", ToBoard: "Home",
 		Scores: []RemoteScore{{Empire: "Farland", NetWorth: 500}}}}
 	sender.StampOutbox()
 	w.ApplyPacket(sender.Outbox[0])

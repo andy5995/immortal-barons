@@ -166,7 +166,7 @@ var (
 
 // mixOrder is the order RegionMix declares its fields in, and the order a
 // proportional add or remove walks them. It is NOT arbitrary: remove() breaks a
-// remainder tie in favour of the field it meets first, so reordering this
+// remainder tie in favor of the field it meets first, so reordering this
 // changes which region loses a unit when two are the same size.
 var mixOrder = []*Region{Coastal, Mountain, Desert, River, Agricultural, Urban, Industrial, Technology, Waste}
 

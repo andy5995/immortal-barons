@@ -12,7 +12,7 @@ import (
 )
 
 // #233: the files a BBS shows on its own bulletin menu. Each is written twice,
-// coloured and plain, and the plain one is the same screen with the escapes
+// colored and plain, and the plain one is the same screen with the escapes
 // stripped -- not a second layout that could drift.
 func TestWriteBulletinsWritesBothFormsOfEach(t *testing.T) {
 	cfg := game.DefaultConfig()
@@ -83,10 +83,10 @@ func TestWorldReportShowsAttacksAndNamesTheOutcome(t *testing.T) {
 	if strings.Index(text, "Elderberry") > strings.Index(text, "Apples") {
 		t.Error("the report is oldest-first; the newest battle should lead")
 	}
-	// Colour never carries the meaning alone, so the plain file says as much as
-	// the coloured one.
+	// Color never carries the meaning alone, so the plain file says as much as
+	// the colored one.
 	if !strings.Contains(text, "CRUSHED") || !strings.Contains(text, "held") {
-		t.Error("the plain report lost an outcome that only colour distinguished")
+		t.Error("the plain report lost an outcome that only color distinguished")
 	}
 }
 

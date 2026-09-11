@@ -11,7 +11,7 @@ import (
 // actions_iptradedeal.go — the InterPlanetary Operations menu's Send Trade Deal.
 //
 // This item ran the LOCAL trade action until #195, so the interplanetary menu
-// offered a deal to a neighbour on the sender's own planet. The two are separate
+// offered a deal to a neighbor on the sender's own planet. The two are separate
 // routines in the original with different economics, and only this one is
 // reachable from that menu (BRE.OVR 0x024212, sole caller run_interbbs_menu).
 // See game.SendIPTradeDeal for what the mechanic is and where IB diverges.

@@ -83,7 +83,7 @@ everywhere the game speaks of them.
 
 The keyword is built at run time by appending the faction digit to the base
 string, and the value indexes an array: names are 31 bytes apart from `DS:0x1293`,
-colours one byte apart from `DS:0x13c9` (`BRE.OVR 0x5726c`, `0x572c7`). So each
+colors one byte apart from `DS:0x13c9` (`BRE.OVR 0x5726c`, `0x572c7`). So each
 of the nine factions can be renamed and recoloured per board. IB reached the
 same place from the other direction: its factions carry IB-original names
 because the original's cannot be copied.

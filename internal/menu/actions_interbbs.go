@@ -81,7 +81,7 @@ func turnaroundLabel(s session.Session, days float64) (string, string) {
 }
 
 // plural renders a whole-number count, picking the singular wording at one. The
-// two forms are separate translatable strings because a PO catalogue cannot
+// two forms are separate translatable strings because a PO catalog cannot
 // derive one from the other, and languages do not agree on where the plural
 // starts.
 func plural(s session.Session, n float64, one, many string) string {

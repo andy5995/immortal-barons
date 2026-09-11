@@ -345,21 +345,21 @@ func TestCovertMenuNamesEveryOpThroughItsConstant(t *testing.T) {
 		t.Fatalf("the run never reached the Covert Operations menu, got:\n%s", out)
 	}
 
-	labelled := map[game.CovertOp]bool{}
+	labeled := map[game.CovertOp]bool{}
 	for _, it := range menus.Covert.Items {
 		if it.Key < '1' || it.Key > '8' { // '9' is Expose Enemy Ops, which is no CovertOp
 			continue
 		}
 		op := game.CovertOp(it.Label)
 		if !slices.Contains(game.AllCovertOps, op) {
-			t.Errorf("Covert item %c is labelled %q, which is no game.CovertOp — a label that drifts from the constant writes a covertOpsUsed key nothing reads", it.Key, it.Label)
+			t.Errorf("Covert item %c is labeled %q, which is no game.CovertOp — a label that drifts from the constant writes a covertOpsUsed key nothing reads", it.Key, it.Label)
 			continue
 		}
-		labelled[op] = true
+		labeled[op] = true
 	}
 	for _, op := range game.AllCovertOps {
-		if !labelled[op] {
-			t.Errorf("no Covert menu item is labelled %q", op)
+		if !labeled[op] {
+			t.Errorf("no Covert menu item is labeled %q", op)
 		}
 		if !strings.Contains(out, string(op)) {
 			t.Errorf("the drawn menu never shows %q; output:\n%s", op, out)
@@ -367,7 +367,7 @@ func TestCovertMenuNamesEveryOpThroughItsConstant(t *testing.T) {
 	}
 }
 
-// Every effect operation on the menu queues the op it is labelled with. This is
+// Every effect operation on the menu queues the op it is labeled with. This is
 // the other half of the pairing: the screen names an op through its constant,
 // and the action behind that name reaches the resolver that files the same
 // constant into the queue and into the per-turn gate. The two info operations

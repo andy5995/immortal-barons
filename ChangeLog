@@ -19,7 +19,7 @@ Immortal Barons ChangeLog
   * The seven treaty types are declared once, so a pact cannot silently stop
     applying because its name was typed differently somewhere
   * The InterPlanetary Special Operations menu is one column, in the original's
-    colour, and prices its four bombing operations
+    color, and prices its four bombing operations
   * At a "how many" prompt, k/m/b only multiply a figure already typed, instead
     of filling the field with zeroes on their own
   * Industrial gold is figured in the same width as the rest of the money, so a
@@ -83,7 +83,7 @@ Immortal Barons ChangeLog
   * The Planetary Master is paid a share of the Queen's purse each day
   * Replying to a one-line message no longer asks which lines to quote
   * Ctrl-U erases a whole typed answer at any prompt
-  * The planet prompt colours its whole line by how many planets match
+  * The planet prompt colors its whole line by how many planets match
   * The played-today mark on the score table is shown only in a league game
   * Attack Type help opens a browser over the three types, one at a time
   * Creating or joining an interplanetary group attack costs gold
@@ -386,7 +386,7 @@ Immortal Barons ChangeLog
     is on the System menu as well as the opening menu
   * config-during-reset: a new Pirates setting (enabled) takes the pirates out
     of the game
-  * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
+  * "-reset" honors "-no-ansi", "-ascii" and "-cp437"
   * A regular attack is fought out round by round: the side that breaks off
     loses the share of its forces it will accept, and the winner loses only
     what the strength ratio cost it, so a rout is cheap and an even fight is
@@ -591,7 +591,7 @@ Immortal Barons ChangeLog
     member board then links only to its uplink (#106)
   * On a board that forwards for others, a packet arriving for another board is
     passed on instead of being left in the inbound directory (#106)
-  * A board that forwards for its neighbours can give each one its own outbound
+  * A board that forwards for its neighbors can give each one its own outbound
     directory, with "OutboundDirs" in config.json
   * A board may route some traffic its own way with an "ibroute.cfg" file
   * Added "-league-routes", which prints where this board sends each planet's
@@ -609,7 +609,7 @@ Immortal Barons ChangeLog
   * SDI strength is its funding spread over the realm's land, so taking regions
     thins the shield that covers them
   * SDI answers only strikes from another planet: it blunts an arriving realm's
-    jets and bombers and intercepts incoming missiles, leaving a neighbour's
+    jets and bombers and intercepts incoming missiles, leaving a neighbor's
     missiles and bombing runs and the Clingy Annihilator alone
   * A group attack is not blunted by its target's SDI, as in the original
   * Clingy Annihilator Ops answers to 9 on the InterPlanetary Operations menu,

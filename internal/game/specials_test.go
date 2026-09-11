@@ -377,7 +377,7 @@ func TestNukeCostScalesWithTarget(t *testing.T) {
 	}
 }
 
-// The damage band is 5-9% of the target's regions, centred on 7 — assert the
+// The damage band is 5-9% of the target's regions, centerd on 7 — assert the
 // band as golden literals rather than as the constants, so a retune has to
 // produce new evidence rather than following the code.
 func TestNuclearStrikeDamageBand(t *testing.T) {

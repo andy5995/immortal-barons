@@ -46,7 +46,7 @@ func (w *World) SendIPMessage(from *Empire, boards []string, toCoordinator bool,
 // to:` prompt: the address is a set of realms on the chosen planet, not the
 // planet itself. N messages rather than a recipient list on one keeps the
 // packet's shape unchanged — ToEmpire already exists for the author-only reply,
-// and deliverIPMessage already honours it.
+// and deliverIPMessage already honors it.
 func (w *World) SendIPMessageToBarons(from *Empire, board string, toEmpires []string, body string) {
 	addressed := make([]string, 0, len(toEmpires))
 	for _, name := range toEmpires {

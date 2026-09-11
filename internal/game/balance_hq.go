@@ -36,7 +36,7 @@ const (
 //
 // Doubled into trooper units those are (350 + HQ)/100 and (300 + 2*HQ)/100. They
 // cross at HQ 50 and diverge either side of it, so a realm with no HeadQuarters
-// defends an invasion WORSE than a neighbour's attack, and a finished one better.
+// defends an invasion WORSE than a neighbor's attack, and a finished one better.
 //
 // This is the reading the block above records as rejected — "300 rising to 500".
 // It was not a misread, it was the other resolver's constant, and IB applied the
@@ -69,7 +69,7 @@ const (
 	HQBuildStart   = 5
 	HQBuildPerTurn = 5
 
-	// What a lost defence costs the HeadQuarters: Random(3)+5 points off, then
+	// What a lost defense costs the HeadQuarters: Random(3)+5 points off, then
 	// clamped at zero. BINARY-VERIFIED (BRE.OVR 0xFFA2, subtracted via the
 	// sub32 helper 0c03:0fe3). So a realm under repeated attack loses the tank
 	// bonus it spent 20 turns building, and a HeadQuarters is not permanent.

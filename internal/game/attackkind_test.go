@@ -92,7 +92,7 @@ func TestAttackKindCasualtiesAndCapture(t *testing.T) {
 		victim.syncLand()
 		res := w.resolveRemoteAttack(RemoteAttack{
 			ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: kind,
-			// Far above any starting defence, so every variant wins and the
+			// Far above any starting defense, so every variant wins and the
 			// difference on show is the kind's own rates.
 			Offense:      50_000_000,
 			Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
@@ -105,7 +105,7 @@ func TestAttackKindCasualtiesAndCapture(t *testing.T) {
 		}
 		got[kind] = outcome{res.Survivors[0].Troopers, res.LandTaken}
 	}
-	// A force this far above the defence is almost never the side that gets hit,
+	// A force this far above the defense is almost never the side that gets hit,
 	// so it walks away nearly whole WHATEVER its type: the published 8/15/20 is
 	// where the loop stops, not what the winner pays (#199). The kinds differ
 	// here only in what they carry off, asserted below.
@@ -185,7 +185,7 @@ func TestIndividualAttackDoublesReturns(t *testing.T) {
 }
 
 // TestTokenStrikeCostsTheDefenderAlmostNothing is the guard for #199: a strike
-// far weaker than the defence must cost the defender almost nothing, because it
+// far weaker than the defense must cost the defender almost nothing, because it
 // reaches its OWN retreat threshold after a round or two and breaks off. The
 // figures are the ones a live league reported — 100 troopers and 1,000 tanks,
 // 1,100 gold, against a realm holding ~97,000 units — where the defender lost
@@ -209,7 +209,7 @@ func TestTokenStrikeCostsTheDefenderAlmostNothing(t *testing.T) {
 		Contributors: []Contribution{{Owner: "alice", AttackForce: force}},
 	})
 	if res.Won {
-		t.Fatal("a 1,100-unit force overran a realm holding 97,000; the defence is not being fought")
+		t.Fatal("a 1,100-unit force overran a realm holding 97,000; the defense is not being fought")
 	}
 	if lost := res.Enemy.Total(); lost > before/25 {
 		t.Errorf("the defender lost %d of %d units to a token strike; the flat rate this replaced took 8%% (%d)",

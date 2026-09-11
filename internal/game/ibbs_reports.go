@@ -91,7 +91,7 @@ func (w *World) LastPacketReport() string {
 // league): a right-aligned number and ")", the board name, a MM/DD/YYYY
 // HH:MM:SS timestamp under "Last Recon", and a "v"-prefixed version. One row in
 // that capture is printed in red; what marks a row that way is NOT known, so IB
-// colours nothing rather than invent a rule.
+// colors nothing rather than invent a rule.
 //
 // A version older than this board's is worth a sysop's eye: the packet format
 // has gained fields, and a board that predates them cannot verify a packet

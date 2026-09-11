@@ -108,6 +108,6 @@ ANSI tutorial — it's the raster convention adapted to cells):
 
 - 16colo.rs — the living archive; browse the Blocktronics / ACiD / iCE group
   pages for dimensional pieces (`https://16colo.rs/`).
-- roysac.com tutorials — Halaster's shading, Newt's greyscale, Lord Soth's tips.
+- roysac.com tutorials — Halaster's shading, Newt's grayscale, Lord Soth's tips.
 - Moebius editor (`https://blocktronics.github.io/moebius/`) — its half-block
   brush is what makes the sub-pixel technique practical to draw by hand.

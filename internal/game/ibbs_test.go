@@ -249,7 +249,7 @@ func TestGroupAttackReturnsSurvivors(t *testing.T) {
 	result := wB.ApplyPacket(wA.Outbox[0]) // B resolves, returns survivors to A
 	wA.ApplyPacket(result)                 // A restores survivors
 
-	// The target is defenceless, so there is no battle to bleed in and the whole
+	// The target is defenseless, so there is no battle to bleed in and the whole
 	// detachment comes home. A flat retreat share used to take 15% from a force
 	// nobody fired on (#199).
 	if leader.Troopers != 100_000 || leader.Tanks != 1000 {
@@ -770,7 +770,7 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 
 // The weapon is a siege: a tenth of every realm's regions the day it lands and a
 // twentieth on each of the four days after, then it burns out. The SDI is no
-// defence — only jets can reach it (#111, #112) — and a realm still under
+// defense — only jets can reach it (#111, #112) — and a realm still under
 // new-realm protection is passed over.
 func TestAnnihilatorBesiegesThePlanetForFiveDays(t *testing.T) {
 	cfg := DefaultConfig()
@@ -1039,7 +1039,7 @@ var perBoardConfigFields = map[string]string{
 	"BoardID":         "this board's name in the league",
 	"InboundDir":      "packet path, this machine's business",
 	"OutboundDir":     "packet path, this machine's business",
-	"OutboundDirs":    "per-neighbour packet paths on this machine",
+	"OutboundDirs":    "per-neighbor packet paths on this machine",
 	"BulletinDir":     "where this board writes its own bulletin files, a path on this machine",
 	"BBSName":         "what this board calls itself on its own web pages",
 	"BoardURL":        "this board's own website, linked from those pages",
@@ -1100,7 +1100,7 @@ func TestEveryGameRuleIsBroadcast(t *testing.T) {
 
 // A Coordinator-set string reaches the member boards. Tested on the required
 // version, which is the kind that matters: a floor only the Coordinator's own
-// board honours is worse than none, because each sysop then enforces a
+// board honors is worse than none, because each sysop then enforces a
 // different one on the same league.
 func TestCoordinatorStringsTravelWithTheRuleset(t *testing.T) {
 	co := DefaultConfig()
@@ -1196,7 +1196,7 @@ func TestTerrorNamesTheSenderOnlyWhereAgentsAreCaught(t *testing.T) {
 		t.Errorf("a caught batch must name the realm and its board; got:\n%s", out)
 	}
 
-	// A sender that overwhelms the defence: nothing is caught, so nothing names
+	// A sender that overwhelms the defense: nothing is caught, so nothing names
 	// it — not the realm, not the board.
 	w = NewWorldSeed(cfg, 3)
 	strong := w.AddHuman("victim", "Victim")
@@ -1290,7 +1290,7 @@ func TestTerrorReturnReportSaysWhyNothingHappened(t *testing.T) {
 
 // A group attack aimed at the PLANET fights every living realm at once, not the
 // strongest one. BRE marks that target with the letter Z and, on seeing it,
-// loops A..Y summing each realm's defence and pooling their jets before a single
+// loops A..Y summing each realm's defense and pooling their jets before a single
 // battle (resolve_received_invasion +0x0d3d). IB sent the whole strike against
 // the biggest baron and left everyone else untouched.
 func TestPlanetWideStrikeFightsEveryRealm(t *testing.T) {
@@ -1309,7 +1309,7 @@ func TestPlanetWideStrikeFightsEveryRealm(t *testing.T) {
 	big.Troopers *= 4 // make one clearly the strongest
 	shielded.Protection = 5
 
-	// Every realm in the pool must be measured, so the defence a planet-wide
+	// Every realm in the pool must be measured, so the defense a planet-wide
 	// strike meets is strictly greater than the strongest realm's alone.
 	if got, want := len(w.planetDefenders()), 2; got != want {
 		t.Fatalf("planetDefenders = %d, want %d (the protected realm is out)", got, want)

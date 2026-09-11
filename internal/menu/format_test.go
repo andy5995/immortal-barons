@@ -113,7 +113,7 @@ func TestWrapIndented(t *testing.T) {
 	}
 }
 
-// A failure must be distinguishable from a success without colour: on a
+// A failure must be distinguishable from a success without color: on a
 // monochrome terminal, or one the escapes were stripped for, the two otherwise
 // print identically.
 func TestFailureIsMarkedWithoutColour(t *testing.T) {

@@ -44,7 +44,7 @@ func lightbarSelect(s session.Session, title string, items []string, backLabel s
 		for i, it := range all {
 			fmt.Fprint(s, ansi.EraseLine)
 			// The ">" marker carries the selection on its own: reverse video alone
-			// says nothing on a monochrome terminal or to a reader with a colour
+			// says nothing on a monochrome terminal or to a reader with a color
 			// vision deficiency. Both rows put the title in the same column.
 			if i == sel {
 				fmt.Fprintf(s, "  %s>%s %s%s%s\n", ansi.FgBrightWhite, ansi.Reset, ansi.Reverse, it, ansi.Reset)

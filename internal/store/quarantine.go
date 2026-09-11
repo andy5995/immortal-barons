@@ -28,7 +28,7 @@ const BadDir = "bad"
 const quarantineGrace = 5 * time.Minute
 
 // maxQuarantineCopies bounds how many same-named copies uniqueName will
-// step around before giving up. Without a cap, a neighbour whose transport
+// step around before giving up. Without a cap, a neighbor whose transport
 // keeps redelivering one broken file under the same name accumulates
 // pkt.brp, pkt.2.brp, pkt.3.brp without limit, and every new arrival
 // re-stats every copy already there — the cost of quarantining one more

@@ -37,7 +37,7 @@ func TestAttackPiratesColorsFactions(t *testing.T) {
 
 // TestPirateColorsMatchTheFactions checks the one thing a slot-keyed palette
 // cannot check for itself: that slot i still paints the faction it says it
-// does. The colours are looked up by index into a list that lives in another
+// does. The colors are looked up by index into a list that lives in another
 // package, so reordering or renaming game.PirateFactions would repaint every
 // faction below the change without any compile error.
 func TestPirateColorsMatchTheFactions(t *testing.T) {
@@ -50,7 +50,7 @@ func TestPirateColorsMatchTheFactions(t *testing.T) {
 			t.Errorf("slot %d paints %q, but game.PirateFactions has %q there", i, got, want)
 		}
 		if pirateColors[i].Color == "" {
-			t.Errorf("slot %d (%s) has no colour", i, want)
+			t.Errorf("slot %d (%s) has no color", i, want)
 		}
 	}
 }

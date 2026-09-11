@@ -17,9 +17,9 @@ which publishes numbered documents in several series:
 
 ## Why no copy is kept here
 
-FTSC documents carry their own licences, and FTS-0001's forbids distribution
+FTSC documents carry their own licenses, and FTS-0001's forbids distribution
 "as part of or packaged with any product or other sales transaction for which
-any fee is charged". A project under a permissive licence grants everyone the
+any fee is charged". A project under a permissive license grants everyone the
 right to sell copies, so bundling the document would make the combined work
 undistributable under the terms the project advertises. The documents are also
 signed with their authors' postal and email addresses, which do not belong in
@@ -46,7 +46,7 @@ with one another:
    format. An extension called *Type-2+* is in general use.
 5. The original **transfer protocol** (XModem over dial-up). This part is
    obsolete and not implementable over sockets; it is the reason FTS-0001 is
-   sometimes described as a bad document, which is a judgement on this section
+   sometimes described as a bad document, which is a judgment on this section
    and not on the formats above.
 
 **"Type-2" names the packet header.** A stored message has no type number, so
@@ -144,7 +144,7 @@ Revision 003 defines the filesystem queue commonly called BSO or FLO:
 A flow file is `<net><node>.?lo`, with one pathname per line. Its leading
 directive controls the attachment after a successful send: `^` deletes it,
 `#` truncates it, `~` skips the line, and no prefix leaves it in place. The five
-flavours are Immediate (`.ilo`), Continuous (`.clo`, commonly called crash),
+flavors are Immediate (`.ilo`), Continuous (`.clo`, commonly called crash),
 Direct (`.dlo`), Normal (`.flo`), and Hold (`.hlo`). A point uses
 `<net><node>.pnt/<point>.?lo`, with hexadecimal fixed-width components.
 

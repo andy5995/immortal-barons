@@ -38,7 +38,7 @@ const (
 type inRow struct {
 	planet string
 	threat string
-	color  string // the threat word's colour; the WORDS differ too
+	color  string // the threat word's color; the WORDS differ too
 	target string
 	when   string
 	away   bool // its hour has come and it is on its way here
@@ -78,7 +78,7 @@ func showIncoming(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgRed), rule, ansi.Reset)
 	for _, r := range rows {
 		// A force already away is painted bright red rather than yellow — and it
-		// also says "away" where the others carry a figure, so the colour is
+		// also says "away" where the others carry a figure, so the color is
 		// never the only thing that marks it.
 		whenColor := ansi.FgBrightYellow
 		if r.away {

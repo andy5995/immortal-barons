@@ -600,7 +600,7 @@ func TestAgentPriceRatchet(t *testing.T) {
 }
 
 // TestPriceWalkRevertsToMid checks the damping that makes BRE's walk cluster
-// prices near the centre of a band they are free to roam. Several empires, since
+// prices near the center of a band they are free to roam. Several empires, since
 // the claim is about the walk and one empire is one trajectory.
 func TestPriceWalkRevertsToMid(t *testing.T) {
 	mid := midPrice(PriceLoBomber, PriceHiBomber)

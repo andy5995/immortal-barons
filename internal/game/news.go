@@ -345,7 +345,7 @@ type BattleLogEntry struct {
 	Land     int  // regions taken, 0 on a defeat
 	Crushed  bool // the defender was wiped out
 	// Remote marks a strike that crossed planets, which reads differently from
-	// two neighbours fighting and is worth telling apart in the report.
+	// two neighbors fighting and is worth telling apart in the report.
 	Remote bool
 	// Weapon names the warhead when the entry is a WMD strike rather than an
 	// attack -- "nuclear", "chemical", "biological". Empty for a conventional

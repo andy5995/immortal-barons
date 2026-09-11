@@ -102,7 +102,7 @@ const (
 // `+` on the caller's own row too (docs/dev/bre-screens.md).
 //
 // The played-today `+` is shown only in a league game (#249). Off a league every
-// realm on the table is a neighbour the caller can attack, and an UNMARKED row
+// realm on the table is a neighbor the caller can attack, and an UNMARKED row
 // then says its baron has not been on today — which is intelligence a player
 // should not be handed for free. The leak is the absence of the mark rather than
 // its presence, so the fix is to draw it for nobody. `(O)` is unaffected: being
@@ -176,7 +176,7 @@ func nameCell(s session.Session, t Term, name, nameColor string, presence string
 		strings.Repeat(" ", max(width-mark-visWidth(t, name), 0))
 }
 
-// idCell draws the id in BRE's colours — magenta brackets, bright-white letter,
+// idCell draws the id in BRE's colors — magenta brackets, bright-white letter,
 // e.g. 35( 1;37A 35) — keeping whichever pair scoreID chose, since the pair is
 // what says whether the realm is shielded.
 func idCell(id string) string {
@@ -226,7 +226,7 @@ func scoreTableRow(s session.Session, t Term, id, name, nameColor string, presen
 }
 
 // scoreTableRowStr is scoreTableRow with the three figures already rendered,
-// for a caller that has them as strings. The columns and colours are the shared
+// for a caller that has them as strings. The columns and colors are the shared
 // part and the one that drifts.
 func scoreTableRowStr(s session.Session, t Term, id, name, nameColor, presence, land, score, nw string) {
 	fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
@@ -246,8 +246,8 @@ func scoreTableRowStr(s session.Session, t Term, id, name, nameColor, presence, 
 // The BRACKETS ARE THE PROTECTION FLAG (#214), and IB's own addition: a realm
 // under New Realm Protection wears [C] where every other realm wears (C). One
 // glyph does the whole job, so a shielded realm needs no marker after its name
-// and the row stays the width it was. The shape carries it, not the colour, so
-// it survives a monochrome terminal and a reader who cannot tell the two colours
+// and the row stays the width it was. The shape carries it, not the color, so
+// it survives a monochrome terminal and a reader who cannot tell the two colors
 // apart. Everything unshielded keeps BRE's own parentheses.
 func scoreID(letter string, protected bool) string {
 	if protected {

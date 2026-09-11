@@ -154,9 +154,9 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
        SMIL/CSS inside it never runs.
 
        This is a background-image, NOT a mask: a mask is single-channel alpha,
-       so it can only ever paint one flat colour. The shading (gradient-lit
+       so it can only ever paint one flat color. The shading (gradient-lit
        hull, a cylinder-shaded gun, a contact shadow under the hull) has to
-       live in the artwork, which means the colour is baked in rather than
+       live in the artwork, which means the color is baked in rather than
        themed from a CSS variable. Desert tan, darkened one step so the hull,
        turret and gun — the largest areas — each clear WCAG 1.4.11's 3:1
        non-text contrast against BOTH the white and the slate background

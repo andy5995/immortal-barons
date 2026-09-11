@@ -11,8 +11,8 @@ import (
 )
 
 // Empire Status is BRE's status block, not a boxed screen: a `-*realm*-` title
-// over a plain run of labelled lines, with nothing drawn around it (the capture
-// and its colours are in docs/dev/bre-screens.md). Labels are white, every
+// over a plain run of labeled lines, with nothing drawn around it (the capture
+// and its colors are in docs/dev/bre-screens.md). Labels are white, every
 // figure bright cyan, and a field whose figure is zero is left out — so the
 // block is as tall as the realm is rich.
 //
@@ -43,7 +43,7 @@ func statusRule() string {
 }
 
 // statusItem is one bracketed `[figure Label]` cell. width is its visible width,
-// which the colour escapes in text make uncountable.
+// which the color escapes in text make uncountable.
 type statusItem struct {
 	text  string
 	width int
@@ -80,7 +80,7 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 	// caller's thousands separator holds here too.
 	money := func(n int64) string { return formatGold(n, p.Language) }
 	count := func(n int) string { return formatGold(n, p.Language) }
-	// row writes one white line; the figures inside it carry their own colour.
+	// row writes one white line; the figures inside it carry their own color.
 	row := func(format string, a ...any) {
 		fmt.Fprintf(&b, "%s%s%s\n", ansi.FgWhite, fmt.Sprintf(format, a...), ansi.Reset)
 	}

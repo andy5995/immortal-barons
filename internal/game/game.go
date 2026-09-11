@@ -488,7 +488,7 @@ func (w *World) PlanetTotals() PlanetTotals { return planetTotals(w) }
 // defaultPrices is the world's starting price table, from balance.go. Used at
 // world creation and re-applied on -reset, so a reset always installs the
 // current prices instead of carrying the old world's stale ones. Each unit starts
-// at the centre of its walk band, which is where BRE's mean-reverting walk keeps
+// at the center of its walk band, which is where BRE's mean-reverting walk keeps
 // pulling it back to anyway.
 func defaultPrices() Prices {
 	p := Prices{Land: RegionPriceBase}

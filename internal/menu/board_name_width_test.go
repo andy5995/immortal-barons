@@ -11,7 +11,7 @@ import (
 // A long board name must not widen any screen that shows it. The roster cap sits
 // at 512 bytes deliberately — routing compares board names, so the stored value
 // cannot be shortened — which makes fitting the column at draw time the only
-// defence, on every screen rather than the two that were looked at first.
+// defense, on every screen rather than the two that were looked at first.
 //
 // Each case must REACH the table it tests: interbbsScores opens on a view picker
 // and renders no rows until one is chosen, which is how an earlier version of
@@ -31,7 +31,7 @@ func TestLongBoardNameNeverWidensAScreen(t *testing.T) {
 			w.LeagueNodes = []game.LeagueNode{
 				{Number: 1, Name: long, City: "Somewhere"},
 				{Number: 2, Name: longRemote, City: "Elsewhere"},
-				// A short neighbour, so a column that shifts under the long name has
+				// A short neighbor, so a column that shifts under the long name has
 				// something to be out of line WITH.
 				{Number: 3, Name: "Zed BBS", City: "Nowhere"},
 			}

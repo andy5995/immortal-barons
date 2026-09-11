@@ -7,7 +7,7 @@ its own. Never put John Dailey's (or any third party's) private contact info
 into any artifact here.
 
 **Where the line on the original's TEXT falls.** Its *prose* is not reused:
-news lines, result reports, help and instruction text, flavour and narration are
+news lines, result reports, help and instruction text, flavor and narration are
 all written here. What may match the original word for word is the **functional
 furniture of a screen** — a question prompt, a field label, a menu item, a short
 refusal — because those are dictated by what is being asked rather than by how
@@ -23,7 +23,7 @@ doubt about a string, ask: is this the game asking a question, or the game
 telling a story? The first may match; the second is ours.
 
 **Never put the original's NAME on IB's own screens.** Cloning a captured screen
-copies its layout and colours; the product name in its header is branding, not
+copies its layout and colors; the product name in its header is branding, not
 design, and must be replaced with IB's. The InterBBS Scores view shipped as
 "Barren Realms Elite: Top Planets by Score" for months because the title came
 along with the layout (fixed 2026-08-23; `TestScreensDoNotWearTheOriginalsName`
@@ -75,9 +75,9 @@ Markdown and are meant for any agent working here.
 | `bre-gather` | Reconstructing or checking any detail of the original — a menu, a constant, a screen layout. Read it BEFORE working from memory |
 | `ib-testing` | Running the game to answer a question: verifying a number, reproducing something seen in play, exercising inter-BBS features |
 | `ftn` | Anything touching FidoNet transport — packets, file attaches, BSO outbound, binkp, a mailer or tosser that is not delivering |
-| `ansi-artwork` | Drawing or fixing text-mode art: a splash screen, a banner, a box border, colours that render wrong over telnet |
+| `ansi-artwork` | Drawing or fixing text-mode art: a splash screen, a banner, a box border, colors that render wrong over telnet |
 
-A guide describing a flag, path or behaviour that no longer exists is worse
+A guide describing a flag, path or behavior that no longer exists is worse
 than no guide, because it will be believed. Fix one in place when you find it
 stale.
 
@@ -116,7 +116,7 @@ when preparing a release (the whole sequence is in `docs/dev/releasing.md`),
 when a new translation is added, or when the parity test forces it (below).
 Reworded English with a stale translation still renders: the PO catalogs fall
 back per string, so the reader sees English for what has moved on, which is the
-intended behaviour and not a defect to chase. Running the passes on every text
+intended behavior and not a defect to chase. Running the passes on every text
 edit instead churns the `.po` files and the `content.de/` and `content.ru/`
 trees on unrelated commits.
 
@@ -171,6 +171,10 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 ## Conventions
 
 - Run `gofmt -w .` before every commit; keep `go vet` clean.
+- **American spelling, everywhere** — code, comments, docs, help topics, the
+  ChangeLog and anything a player reads. The tree was swept on 2026-09-11
+  (color, behavior, neighbor, defense, center, gray, recognize, …); a British
+  spelling that creeps back in is a defect like any other inconsistency.
 - **Money is `int64`, everywhere.** `Empire.Gold`/`Bank`/`Debt`, investments,
   loans, prices that can reach money scale. Plain `int` is 32 bits on the
   32-bit door builds this project supports, which is what once capped gold in
@@ -367,8 +371,8 @@ config file reads, including the 21 its own manual never mentions),
 `ftn-standards.md` describes the FTN formats themselves — the stored-message
 header, the attribute bits, the kludge lines — and which FTSC document defines
 each. Put FTN facts there and IB's use of them in `ibbs-packet-format.md`. No
-FTSC document is vendored: their licences forbid distribution inside a work
-that may be sold, which this project's licence permits, and they carry their
+FTSC document is vendored: their licenses forbid distribution inside a work
+that may be sold, which this project's license permits, and they carry their
 authors' contact details. Facts are free to restate, so the file says them in
 its own words and links the originals. Nothing in FidoNet is an RFC.
 
@@ -497,12 +501,12 @@ to include in a page a board already builds), drawn from a UTF-8 pass of the sam
 function. Those two wrappers and `bulletin.css` are written ONLY when absent and
 never rewritten: HTML generation was built and removed once because the template
 was compiled into the game and a sysop could not restyle it, so a run that
-overwrote an edited wrapper would reintroduce exactly that. Colours reach the
+overwrote an edited wrapper would reintroduce exactly that. Colors reach the
 page as `ansi-fg-N` / `ansi-bg-N` class names, never as inline styles — those
 names are the whole contract a replacement stylesheet has to meet. The game's
-name is hyperlinked to the site wherever a screen draws it, inside its colour
+name is hyperlinked to the site wherever a screen draws it, inside its color
 span so the link does not repaint a heading, and marked by a highlight bar
-rather than an underline so colour is not the only thing distinguishing it. A
+rather than an underline so color is not the only thing distinguishing it. A
 wrapper's six tokens are filled per page — `{{title}}`, `{{bbs}}`,
 `{{boardurl}}`, `{{pageurl}}`, `{{date}}`, `{{game}}` — so a sysop's own meta
 tags can carry the page's address and date. `{{bbs}}` is `BBSName` from
@@ -534,7 +538,7 @@ file (region Rate/Base pairs, the coastal support curve, unit costs and the
 specialization modifiers, industrial gold and the unit pool, the crown tax).
 Those are the fidelity contract — changing one means the game stops matching the
 original, so it needs new evidence, not taste. The rest (prices, `LandPriceStep`,
-AI behaviour, IB's own additions) are the playtest knobs. Keep both matching
+AI behavior, IB's own additions) are the playtest knobs. Keep both matching
 `docs/mechanics-reference.md`.
 
 Stubbed / not built: a TIMED league auto-reset (a daily Planetary Master leader

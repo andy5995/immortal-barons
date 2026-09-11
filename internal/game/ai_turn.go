@@ -1,7 +1,7 @@
 package game
 
 // ai_turn.go — how a computer baron spends its turn. ai.go holds the profiles
-// and skills that colour these choices; this is the sequence each one runs.
+// and skills that color these choices; this is the sequence each one runs.
 
 // aiPlay runs each AI empire's turns for one day.
 func (w *World) aiPlay(today string) {
@@ -38,7 +38,7 @@ func (w *World) aiPlay(today string) {
 			w.aiListSurplus(e)   // offer what it cannot use instead of paying upkeep on it (#69)
 			w.aiProposeTreaty(e) // open diplomacy, not just answer it (#73)
 			w.aiCovertOps(e)     // spy/agitate/shield, not just one pre-war demoralize (#57)
-			w.aiWageWar(e)       // strike a weak neighbour when clearly favored (#36, #71)
+			w.aiWageWar(e)       // strike a weak neighbor when clearly favored (#36, #71)
 			w.PlayTurn(e, today)
 		}
 	}

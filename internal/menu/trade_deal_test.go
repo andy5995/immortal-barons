@@ -78,7 +78,7 @@ func TestBasketSummary(t *testing.T) {
 
 // An ignored deal stays pending and is put to the player again the next time
 // they enter the game, however often that is in a day (#175). Nothing expires it
-// and nothing marks it seen, which is BRE's behaviour: run_player_turn calls
+// and nothing marks it seen, which is BRE's behavior: run_player_turn calls
 // process_trade_offer on every entry that has a turn to play (BRE.EXE 0x3855),
 // with no per-day gate anywhere on the path.
 func TestIgnoredTradeDealComesBackOnTheNextEntry(t *testing.T) {

@@ -52,7 +52,7 @@ func TestAttackPiratesMarksRaider(t *testing.T) {
 // A turn can carry more than one raid, and the raids can come from different
 // factions — so the mark has to appear beside EVERY faction that hit, not just
 // the first. raiderSlots collects the distinct set of slots; this pins that the
-// screen honours all of them.
+// screen honors all of them.
 func TestAttackPiratesMarksEveryRaider(t *testing.T) {
 	w := newWorld()
 	p := w.Player()

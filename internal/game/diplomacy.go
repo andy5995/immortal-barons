@@ -340,7 +340,7 @@ func (w *World) allyDefenseBoost(d *Empire) int {
 // one, and that it is filed unconditionally are taken from the original; its
 // sentence is not reproduced.
 //
-// Colour needs nothing here: showTurnEvents paints realm names bright-cyan and
+// Color needs nothing here: showTurnEvents paints realm names bright-cyan and
 // highlights figures, both from a live capture, so naming both realms and both
 // counts styles this line like every other recap entry.
 //
@@ -371,7 +371,7 @@ func (w *World) bleedAllies(a, d *Empire, frac float64) {
 			ally.Troopers -= troopers
 			ally.Tanks -= tanks
 		}
-		ally.addEvent(fmt.Sprintf("%s attacked %s: you lost %d troopers and %d tanks in the defence.",
+		ally.addEvent(fmt.Sprintf("%s attacked %s: you lost %d troopers and %d tanks in the defense.",
 			a.Name, d.Name, troopers, tanks))
 	}
 }

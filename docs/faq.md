@@ -82,7 +82,7 @@ for what each setting does.
 
 ## The screen is full of things like `[94m`. What can I do?
 
-That is a terminal printing the game's colour codes instead of acting on them.
+That is a terminal printing the game's color codes instead of acting on them.
 The door sends plain text on its own when your BBS reports that a caller has no
 ANSI support, so first check that the caller has graphics turned on in their BBS
 profile. To see the plain version yourself, run with `-no-ansi`. Lists that

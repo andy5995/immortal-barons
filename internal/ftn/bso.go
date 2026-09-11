@@ -28,7 +28,7 @@ type bsyLock struct {
 	lock *store.FileLock
 }
 
-func bsoPaths(root string, address Address, flavour string) (busy, flow string, err error) {
+func bsoPaths(root string, address Address, flavor string) (busy, flow string, err error) {
 	base := fmt.Sprintf("%04x%04x", address.Net, address.Node)
 	dir := root
 	if address.Point != 0 {
@@ -38,9 +38,9 @@ func bsoPaths(root string, address Address, flavour string) (busy, flow string, 
 	ext := map[string]string{
 		"Immediate": ".ilo", "Continuous": ".clo", "Direct": ".dlo",
 		"Normal": ".flo", "Hold": ".hlo",
-	}[normalFlavour(flavour)]
+	}[normalFlavour(flavor)]
 	if ext == "" {
-		return "", "", fmt.Errorf("unknown BSO flavour %q", flavour)
+		return "", "", fmt.Errorf("unknown BSO flavor %q", flavor)
 	}
 	return filepath.Join(dir, base+".bsy"), filepath.Join(dir, base+ext), nil
 }

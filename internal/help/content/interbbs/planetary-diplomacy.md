@@ -40,7 +40,7 @@ So ask your Coordinator to mark a planet Allied before you plan to trade there.
 ## Using it
 
 Read the list before you commit forces. Your Coordinator marks a planet Enemy
-after seeing something you may not have seen — a raid on a neighbour, a strike
+after seeing something you may not have seen — a raid on a neighbor, a strike
 on your own board, a message that went badly. It is the cheapest warning you
 will get.
 

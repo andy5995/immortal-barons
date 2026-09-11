@@ -90,7 +90,7 @@ type Term struct {
 	// Plain reports that the session CANNOT render ANSI escapes (a legacy Windows
 	// console, or a door caller whose dropfile clears the ANSI flag). The escapes
 	// are stripped before they reach such a caller, so any screen that depends on
-	// them for more than colour — the lightbar, which also repaints in place —
+	// them for more than color — the lightbar, which also repaints in place —
 	// needs a plain alternative. Negative so the zero value is the capable,
 	// ordinary case.
 	Plain bool
@@ -317,10 +317,10 @@ type Item struct {
 	Do      Action            // nil => heading/separator, not selectable
 	Hidden  func(*ctx) bool   // nil => always shown
 	Color   string            // overrides the menu color for this item's key+label; e.g. to tint an entry the color of the submenu it opens
-	// Dimmed greys an item that is listed but cannot be used yet: its key is
+	// Dimmed grays an item that is listed but cannot be used yet: its key is
 	// drawn in the menu's dim accent instead of the bright one. The label keeps
 	// its normal white, because a menu's dim accent is not guaranteed legible
-	// (dim blue on black is not). The grey is a hint and nothing more — choosing
+	// (dim blue on black is not). The gray is a hint and nothing more — choosing
 	// such an item says plainly why it is refused, so a caller who cannot see
 	// the difference loses nothing.
 	Dimmed func(*ctx) bool
@@ -691,7 +691,7 @@ func insetRule(width, double int) string {
 }
 
 // rule75 is BRE's 75-column inset rule — 5 `─`, 15 `═`, 55 `─`
-// (docs/dev/bre-screens.md) — in the accent colour of the screen drawing it.
+// (docs/dev/bre-screens.md) — in the accent color of the screen drawing it.
 //
 // BRE serves every screen that wants it from one routine, and so does this: the
 // scores board, the -*Relations*- roster, the recipient picker, the planet list,

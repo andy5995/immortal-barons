@@ -24,7 +24,7 @@ import (
 const BoardConfigFile = "bbs.cfg"
 
 // The keywords, one per line, rather than BRE's seven positional lines.
-// Positional cannot express the per-neighbour links at all, and a field left
+// Positional cannot express the per-neighbor links at all, and a field left
 // blank in one silently shifts every field after it — which is most of what
 // BRE's own troubleshooting section is about. Matched case-insensitively;
 // written in this casing.

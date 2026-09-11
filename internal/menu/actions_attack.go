@@ -346,7 +346,7 @@ type targetPrompt struct {
 // A REALM'S LETTER IS ITS OWN — its permanent slot letter, not a count of the
 // rows above it. A fallen realm therefore leaves a gap, exactly as it does in
 // the message picker. Numbering the rows instead re-letters everyone the moment
-// a neighbour dies, so the key that attacked one realm yesterday attacks a
+// a neighbor dies, so the key that attacked one realm yesterday attacks a
 // different one today.
 //
 // A realm under New Realm Protection KEEPS ITS LETTER and wears it in brackets
@@ -383,7 +383,7 @@ func pickAttackTarget(s session.Session, t Term, rows []targetRow, p targetPromp
 		return "", false
 	}
 	// A letter with no realm behind it — a gap, or past the end — aborts rather
-	// than selecting a neighbour.
+	// than selecting a neighbor.
 	row, found := byLetter[string(unicode.ToUpper(r))]
 	if !found {
 		fmt.Fprint(s, "\n")
@@ -546,7 +546,7 @@ func biologicalAttack(s session.Session, w *ctx) Result {
 // after the faction-name array): 0a 0e 0c 04 05 0d 09 03 0b.
 //
 // The lookup is by SLOT, not by name, so a saved world whose factions carry
-// other names still gets coloured (see pirateColor). That leaves this list
+// other names still gets colored (see pirateColor). That leaves this list
 // paired with a list in another package by position alone, so each row carries
 // the faction it paints and TestPirateColorsMatchTheFactions checks the pairing
 // — a reordering of game.PirateFactions would otherwise repaint every faction

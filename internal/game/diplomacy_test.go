@@ -431,7 +431,7 @@ func TestBleedAlliesTellsThePartner(t *testing.T) {
 // BRE has no suppression anywhere on that path: no branch between the loop
 // guard and the deduction, and no zero test inside the recap filer. Skipping
 // the line would be a deliberate divergence, so this pins the faithful
-// behaviour against a future "fix".
+// behavior against a future "fix".
 func TestBleedAlliesTellsAPartnerThatLostNothing(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
@@ -456,7 +456,7 @@ func TestBleedAlliesTellsAPartnerThatLostNothing(t *testing.T) {
 
 // BRE's report loop admits every relation ABOVE 5, while only 7 sets a
 // detachment share — so a Technology Agreement partner is told about a battle
-// it took no part in, and loses nothing to it. Golden behaviour read from the
+// it took no part in, and loses nothing to it. Golden behavior read from the
 // guard at BRE.OVR 0x10545 against the share at 0xf541.
 func TestTechnologyAgreementPartnerIsToldAboutTheBattle(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
@@ -600,7 +600,7 @@ func TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes(t *testing
 
 	// Far above the victim's OWN defense and far below the ally's. A knife-edge
 	// margin would not do since the battle is fought out round by round: only a
-	// gap this wide makes the outcome name which defence was counted.
+	// gap this wide makes the outcome name which defense was counted.
 	res := w.resolveRemoteAttack(RemoteAttack{
 		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: NormalAttack,
 		Offense:      victim.Defense() * 20,

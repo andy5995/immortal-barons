@@ -175,8 +175,8 @@ func TestARoutedBoardAddressesABroadcastPerPlanet(t *testing.T) {
 	}
 }
 
-// A board hosting two others sends each neighbour's traffic to that
-// neighbour's own link, because a mailer collects one directory per link.
+// A board hosting two others sends each neighbor's traffic to that
+// neighbor's own link, because a mailer collects one directory per link.
 func TestPacketsGoToTheLinkForTheirNextHop(t *testing.T) {
 	base, toCharlie := t.TempDir(), t.TempDir()
 
@@ -265,7 +265,7 @@ func TestAnAlreadySeenPacketIsSkipped(t *testing.T) {
 		t.Fatalf("first apply: applied=%d, want 1", result.Applied)
 	}
 
-	// Write the same packet again. SeenPacket should recognise it.
+	// Write the same packet again. SeenPacket should recognize it.
 	writePacket(t, inbound, "second", p)
 	result, err = ReadInbound(w, inbound, false)
 	if err != nil {

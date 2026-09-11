@@ -9,7 +9,7 @@ in_game: true
 
 The SDI Program is a shield you fund. It answers three things, and only these
 three: missiles fired at you from another planet, and the jets and bombers of a
-strike arriving from one. It does nothing against a neighbour on your own planet
+strike arriving from one. It does nothing against a neighbor on your own planet
 — not their army, and not their nuclear, chemical or biological missiles.
 Technology regions lower its upkeep.
 

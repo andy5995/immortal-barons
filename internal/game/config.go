@@ -283,7 +283,7 @@ type Config struct {
 	BoardID      string         `json:"-"` // name of this board in exported inter-BBS packets
 	InboundDir   string         `json:"-"` // inter-BBS packets arrive here (RunPlanetary reads them); relative to DataDir
 	OutboundDir  string         `json:"-"` // inter-BBS packets are written here for the transport to move; relative to DataDir
-	OutboundDirs map[int]string `json:"-"` // per-neighbour override of OutboundDir, keyed by roster node number (#106)
+	OutboundDirs map[int]string `json:"-"` // per-neighbor override of OutboundDir, keyed by roster node number (#106)
 	LeagueNumber int            `json:"-"` // the Coordinator's league number, 1-999; tells two leagues apart in one inbound directory
 	// BulletinDir is where the game writes its own bulletin files for the BBS to
 	// display. Machine-local like the packet directories, so it lives in bbs.cfg
@@ -347,7 +347,7 @@ type Config struct {
 	IdleDaysRemove       int    // days a realm may go unplayed before it is removed; 0 = never
 	InitialMarketLand    int    // land on the market at reset
 	LandPerDay           int    // land added to the market each day
-	MoneyCapBillions     int    // most gold a realm may hold, on hand and again in the bank, in whole billions; no longer editable (#205), but an existing raised value is honoured
+	MoneyCapBillions     int    // most gold a realm may hold, on hand and again in the bank, in whole billions; no longer editable (#205), but an existing raised value is honored
 	InterestRate         int    // bank interest (BRE: % over 10 days; 200 = 20%/day)
 	StdInvestRate        int    // standard investment rate (BRE: % over 10 days)
 	SteadyInvest         bool   // steady (fixed) investment rate instead of floating
@@ -515,7 +515,7 @@ func (c Config) Bulletins() string {
 // Outbound is Inbound's counterpart; see it for how a path is resolved.
 func (c Config) Outbound() string { return c.resolveDir(c.OutboundDir) }
 
-// OutboundLink is this board's own link to one neighbour, and reports whether
+// OutboundLink is this board's own link to one neighbor, and reports whether
 // one is configured at all. Only a board that HOSTs others needs any: everything
 // a leaf board sends goes to its uplink, which is the plain Outbound directory.
 func (c Config) OutboundLink(node int) (string, bool) {

@@ -62,12 +62,12 @@ than original strings.
 
 Start with identified names, then inspect unclassified roots only when the
 desired behavior has no semantic match. `disasm --procedure NAME_OR_ID` prints
-exact catalogued body ranges. `disasm --around ADDRESS` accepts an OVR file
+exact catalogd body ranges. `disasm --around ADDRESS` accepts an OVR file
 offset, resident `SEGMENT:OFFSET`, durable site ID, or procedure, and safely
 synchronizes to the containing block's nearest preceding catalog root. The
 header names that anchor; an address in data is rejected rather than decoded
 from an arbitrary byte. Whole-unit and `--start/--end` views remain available.
-The tool skips catalogued non-code spans and verifies exact v0.988 hashes.
+The tool skips catalogd non-code spans and verifies exact v0.988 hashes.
 Capstone 5 supplies typed 16-bit operands for reachability; `ndisasm` is only
 the optional text renderer.
 
@@ -160,7 +160,7 @@ garbage value means the bytes are in the wrong order, not that the constant is
 strange.
 
 Getting the divide backwards inverts a whole formula and the mistake survives
-plausibility checks, so confirm the direction against a *labelled* screen figure
+plausibility checks, so confirm the direction against a *labeled* screen figure
 or a captured number before building on it.
 
 ### A stored figure may not be in the units the screen prints
@@ -183,7 +183,7 @@ Record layout and helper addresses live in `docs/dev/bre-save-format.md`; extend
 that file rather than re-deriving.
 
 **Read that file's entry for the mechanic BEFORE opening a disassembler — every
-time, even when the task arrives as fresh evidence to analyse.** A whole session
+time, even when the task arrives as fresh evidence to analyze.** A whole session
 went into recovering the Queen Royale refund formula from the binary when the
 pool offset, both rates, the cap, the gating predicate and the crown-tax feed
 were already written down there from an earlier pass. The trigger for the miss is
@@ -430,7 +430,7 @@ without `find-string --details` and without anything private leaving the session
 Semantic names in the catalog carry a `naming.status`, and even an `identified`
 one can be wrong about which side of a mechanic a block computes. Real case
 (2026-08-14): `resolve_received_invasion__calculate_attacker_strength` sums
-Turrets (+0x82) and military morale (+0x8e) — a *defence* expression, and it
+Turrets (+0x82) and military morale (+0x8e) — a *defense* expression, and it
 loops over empire indices rather than reading the arriving packet. The block that
 actually scales the attacker sits after it, in the type switch. Nothing was lost
 because the offsets were checked against `docs/dev/bre-save-format.md` first;
@@ -499,7 +499,7 @@ one above the first. That is a slot-in-use counter, and no amount of reading cal
 sites would have said so. **Find the record base by locating the realm-name
 ShortStrings and taking their spacing** — do not assume the header size.
 
-Note that BRE **initialises every unused slot with the starting template**, so an
+Note that BRE **initializes every unused slot with the starting template**, so an
 empty record still carries a plausible region mix and a plausible name-less
 header. Without the in-use marker every scan would see 25 live realms; that is
 exactly why the marker is tested everywhere.
@@ -512,7 +512,7 @@ offsets (`0x2940 + segment*16 + offset`). The SDI strength routine is
 `0x06809` in the catalog and `0x9149` in the file, and the 0x2940 difference
 reads as the catalog disagreeing with the tool. It does not. Subtract or add the
 header before comparing the two, and check the arithmetic on a block whose
-neighbour you already know — two spans a fixed distance apart in both maps is the
+neighbor you already know — two spans a fixed distance apart in both maps is the
 confirmation.
 
 ### "Call sites" means instructions; a mechanic's reach means routines

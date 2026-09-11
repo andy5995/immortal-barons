@@ -2,7 +2,7 @@ package game
 
 import "testing"
 
-// A realm's letter is its identity for the whole game, so a neighbour falling
+// A realm's letter is its identity for the whole game, so a neighbor falling
 // and being swept must not renumber it. Before slots the letter was the empire's
 // position in the Empires slice, and a removal moved every realm below the gap
 // up one — the key that mailed a realm yesterday reached a different one today.

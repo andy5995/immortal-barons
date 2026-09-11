@@ -1,10 +1,10 @@
 package game
 
-// balance_ai.go — AI economic behaviour.
+// balance_ai.go — AI economic behavior.
 // Split out of balance.go; the provenance rules in that file's header
 // apply here too, and each section below carries its own.
 
-// --- AI economic behaviour (reconstructed / tunable) ---
+// --- AI economic behavior (reconstructed / tunable) ---
 //
 // The AI mimics a human managing its realm: it keeps a few turns of food in
 // reserve, and when its food production can't cover its army it expands
@@ -20,7 +20,7 @@ const (
 	// personality (#36, #71, #72). Each profile's five shares sum to 100.
 	//
 	//   diplomat  — never attacks, so it buys defense and wastes nothing on punch
-	//   balanced  — mixed; strikes only when overwhelmingly favoured
+	//   balanced  — mixed; strikes only when overwhelmingly favored
 	//   aggressor — offense-heavy, and funds agents for pre-war covert work
 	//
 	// Carriers are NOT a share: jets cannot fight without them (JetsPerCarrier),
@@ -35,7 +35,7 @@ const (
 	AIForceJetPct     = 10
 	AIForceAgentPct   = 5
 
-	AIForceTrooperPctMixed = 35 // balanced: can defend, can punish a weak neighbour
+	AIForceTrooperPctMixed = 35 // balanced: can defend, can punish a weak neighbor
 	AIForceTurretPctMixed  = 25
 	AIForceTankPctMixed    = 25
 	AIForceJetPctMixed     = 10
@@ -141,7 +141,7 @@ const (
 	AIProdTrooperPctMixed, AIProdJetPctMixed, AIProdTurretPctMixed, AIProdBomberPctMixed, AIProdTankPctMixed = 20, 15, 30, 0, 20
 	AIProdTrooperPctWar, AIProdJetPctWar, AIProdTurretPctWar, AIProdBomberPctWar, AIProdTankPctWar           = 20, 25, 5, 10, 35
 
-	// Threat response. The AI built the same force mix whether or not a neighbour
+	// Threat response. The AI built the same force mix whether or not a neighbor
 	// could flatten it. When the strongest rival's offense outweighs this realm's
 	// effective defense, it spends AIThreatBudgetPct of its gold on military
 	// instead of the usual share, and buys the emergency mix below — turret-heavy,
@@ -199,7 +199,7 @@ const (
 )
 
 // ProclamationChancePct is how often the Queen Royale's daily proclamation
-// appears in the planetary news (see news_quotes.go). Flavour only — it moves
+// appears in the planetary news (see news_quotes.go). Flavor only — it moves
 // nothing in the economy, so it is tuned purely for how often a joke stays
 // funny.
 const ProclamationChancePct = 35

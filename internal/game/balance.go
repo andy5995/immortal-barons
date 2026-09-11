@@ -105,7 +105,7 @@ const (
 	// What a realm may HOLD, on hand or in the bank, is the 2 billion above,
 	// BRE's own figure, read through World.MoneyCap. It is no longer a setting
 	// (#205) and no longer varies: World.MoneyCapBillions returns this whatever
-	// Config.MoneyCapBillions says. A saved raised value was honoured until
+	// Config.MoneyCapBillions says. A saved raised value was honored until
 	// 2026-09-01, on the reasoning that clamping one down would take gold a
 	// league had been playing with; andy5995 knows of no board running one, so
 	// the variation cost more than it bought.

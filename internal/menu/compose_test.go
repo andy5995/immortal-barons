@@ -119,7 +119,7 @@ func TestComposeMessageSplitsAnOverlongWord(t *testing.T) {
 	}
 	// Nothing is carried, so nothing may be erased. BRE erases one cell here
 	// anyway and its screen ends up a character short of what it saves; that is
-	// a display fault, not behaviour to copy.
+	// a display fault, not behavior to copy.
 	if strings.Contains(f.out.String(), "\b \b") {
 		t.Error("a margin split erased characters that were not carried")
 	}

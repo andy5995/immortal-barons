@@ -62,7 +62,7 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 		terms := newsHighlightTerms(w)
 		for _, b := range news {
 			// Wrapped continuation lines indent 5 spaces, as BRE draws them
-			// (docs/dev/bre-screens.md). Wrap before colouring: hiNewsItem's
+			// (docs/dev/bre-screens.md). Wrap before coloring: hiNewsItem's
 			// escapes are invisible on screen but count against the margin.
 			fmt.Fprintf(s, "\n%s %s\n", newsItemArrow,
 				hiNewsItem(wrapHanging(newsStamped(s, b), "", newsItemIndent), terms))
@@ -265,7 +265,7 @@ func manufacturedUnits(s session.Session, made []int) {
 	if len(cells) == 0 {
 		return
 	}
-	// The label is laid out plain and coloured on the way out: statusRows
+	// The label is laid out plain and colored on the way out: statusRows
 	// measures it with a rune count, which an escape sequence would inflate.
 	label := tr(s, "Your Industrial Zones built:") + " "
 	bar := strings.Repeat("─", utf8.RuneCountInString(label))

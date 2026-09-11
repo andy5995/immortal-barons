@@ -21,7 +21,7 @@ import (
 // here.
 //
 // The PROSE is IB's own, as everywhere. What is copied from the capture is the
-// structure, the figures and the colours.
+// structure, the figures and the colors.
 
 // attackTypeTopic is one entry in the browser: the name the reader types (or
 // completes) and the body printed when they do.
@@ -40,7 +40,7 @@ type attackTypeTopic struct {
 // (scripts/gen-ui-pot.py keys on `name:` and `body:` for this table).
 var attackTypeTopics = []attackTypeTopic{
 	{name: "Normal Attack", body: "Your forces fight at full strength. Both sides break off once they have taken 15% losses, and you take the standard share of the defender's regions."},
-	{name: "Quick Strike", body: "Surprise lets you fight at 120% of your normal strength, but the battle is short and disorganised: both sides retreat at 8% losses, and you carry off only half the land a Normal Attack would."},
+	{name: "Quick Strike", body: "Surprise lets you fight at 120% of your normal strength, but the battle is short and disorganized: both sides retreat at 8% losses, and you carry off only half the land a Normal Attack would."},
 	{name: "Extended Battle", body: "A grinding assault. Fatigue drops your forces to 85% strength, but they press until both sides have taken 20% losses, and they bring home 125% of a Normal Attack's land."},
 }
 

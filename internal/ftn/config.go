@@ -82,7 +82,7 @@ const (
 type Link struct {
 	Mode      LinkMode
 	Directory string
-	Flavour   string
+	Flavor    string
 	// Raw sends this peer one unbundled game packet per file, the shape every
 	// board understood before the bundled transport. It is a modifier on the
 	// handoff rather than a mode of its own, because a peer that cannot read a
@@ -282,7 +282,7 @@ func parseYesNo(value string) (bool, error) {
 func parseLink(value, dataDir string) (int, Link, error) {
 	fields := strings.Fields(value)
 	// Raw is read off the end first so it composes with every mode without the
-	// mode parsers having to know about it, and so BSO's optional flavour keeps
+	// mode parsers having to know about it, and so BSO's optional flavor keeps
 	// its own position.
 	raw, rawSet := false, false
 	if n := len(fields); n > 0 {
@@ -294,13 +294,13 @@ func parseLink(value, dataDir string) (int, Link, error) {
 		}
 	}
 	if len(fields) < 2 {
-		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavour], each optionally followed by Raw or Bundled")
+		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavor], each optionally followed by Raw or Bundled")
 	}
 	node, err := strconv.Atoi(fields[0])
 	if err != nil || node < 1 || node > 999 {
 		return 0, Link{}, fmt.Errorf("node %q is outside 1..999", fields[0])
 	}
-	link := Link{Flavour: "Normal"}
+	link := Link{Flavor: "Normal"}
 	switch strings.ToLower(fields[1]) {
 	case "attach":
 		if len(fields) != 2 {
@@ -314,13 +314,13 @@ func parseLink(value, dataDir string) (int, Link, error) {
 		link.Mode, link.Directory = LinkObox, fields[2]
 	case "bso":
 		if len(fields) < 3 || len(fields) > 4 {
-			return 0, Link{}, fmt.Errorf("BSO wants a directory and optional flavour")
+			return 0, Link{}, fmt.Errorf("BSO wants a directory and optional flavor")
 		}
 		link.Mode, link.Directory = LinkBSO, fields[2]
 		if len(fields) == 4 {
-			link.Flavour = normalFlavour(fields[3])
-			if link.Flavour == "" {
-				return 0, Link{}, fmt.Errorf("unknown BSO flavour %q", fields[3])
+			link.Flavor = normalFlavour(fields[3])
+			if link.Flavor == "" {
+				return 0, Link{}, fmt.Errorf("unknown BSO flavor %q", fields[3])
 			}
 		}
 	default:

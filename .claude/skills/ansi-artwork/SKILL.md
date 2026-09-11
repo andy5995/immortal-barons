@@ -78,11 +78,11 @@ palette colors — see `references/depth-and-3d.md`.
 `scripts/measure-ansi.py FILE...` reports all of the below for any capture —
 run it on new art rather than re-deriving. Figures here are from six captures:
 The X-Bit BBS's logon/logoff screens (`cap/x-bit.cap`, real art), four
-Immortal Barons / BRE game screens, and one colourless BBS capture. Captures are
+Immortal Barons / BRE game screens, and one colorless BBS capture. Captures are
 gitignored; they stay local as evidence, like `docs/dev/bre-screens.md`'s.
 
 **The headline: blending seams is not a nicety, it is what art does.** Across
-every coloured capture, **95–99% of adjacent-cell hue changes carry a shade or
+every colored capture, **95–99% of adjacent-cell hue changes carry a shade or
 half glyph**; hard cuts are 1–5%. The advice above was right and this is the
 measurement of it.
 
@@ -96,14 +96,14 @@ measurement of it.
 
 Two things to take from the split. **Art leans on same-hue pairs and the shade
 ramp; UI leans on half blocks across hues** — because UI is drawing *shapes*
-(boxes, bars, dividers) where a clean two-colour edge is the point, while art is
-drawing *surfaces* that need tone. And **art is attribute-dense**: colour runs
+(boxes, bars, dividers) where a clean two-color edge is the point, while art is
+drawing *surfaces* that need tone. And **art is attribute-dense**: color runs
 average 2.9 cells with a median of 2, so expect roughly one SGR per three cells.
-A design that needs long single-colour runs is a UI design, not an art one.
+A design that needs long single-color runs is a UI design, not an art one.
 
-**Colourless art is a real mode.** One 27 MB capture carries zero SGR sequences
+**Colorless art is a real mode.** One 27 MB capture carries zero SGR sequences
 and is 54% shade glyphs — the ramp alone doing all the work. If a target cannot
-be trusted with colour, `░▒▓█` still gives four tones plus the background.
+be trusted with color, `░▒▓█` still gives four tones plus the background.
 
 **Punctuation-as-dither is not a footnote, it is a large share of the cell
 count.** 45% of the "text" cells in the art capture are `bright black on black`
@@ -113,10 +113,10 @@ text-contrast figure as a legibility fault until you have checked whether those
 cells are lettering or fill.
 
 **Seven cells in ten are a SAME-HUE pair** — `fg` and `bg` set to the *same*
-colour index, differing only by the bright bit (`bright red on red`,
+color index, differing only by the bright bit (`bright red on red`,
 `bright blue on blue`, and above all `bright black on black`). Only three in ten
-put two different hues in one cell. So the workhorse is not blending two colours
-together; it is wringing tones out of ONE colour, where the palette gives you
+put two different hues in one cell. So the workhorse is not blending two colors
+together; it is wringing tones out of ONE color, where the palette gives you
 dark-bg, three shade mixes, and bright-fg — five steps per hue, no hue changes
 needed.
 
@@ -130,15 +130,15 @@ needed.
 
 Half blocks are five times more common once two hues meet. That is the tell:
 **shade glyphs are for tone inside a hue, half blocks are for detail across
-hues** — a cell holding two different colours stacked is buying vertical
+hues** — a cell holding two different colors stacked is buying vertical
 resolution, not blending. Reach for `▀`/`▄` at edges and boundaries, for the
 shade ramp in the middle of a shape.
 
-**Backgrounds stay overwhelmingly black** — 70% of coloured block cells, with
-only eight background colours used at all and magenta almost absent. And
+**Backgrounds stay overwhelmingly black** — 70% of colored block cells, with
+only eight background colors used at all and magenta almost absent. And
 `black on black` alone is 42.6% of every block cell: negative space is *painted*
 with solid glyphs rather than left as spaces, which is what lets a piece sit on
-a coloured field without the art's own holes showing through.
+a colored field without the art's own holes showing through.
 
 Left/right half blocks (`▌ ▐`) are rare — 3.3% against 17.4% for `▀`/`▄`.
 Character cells are about twice as tall as wide, so splitting vertically buys
@@ -180,7 +180,7 @@ black background in dim blue/cyan for the star haze, and `■` appearing on
 
 Two cautions. The coverage figures are eyeballed off an 8x16 VGA cell, so treat
 them as ordering, not measurements — and the ordering itself shifts with the
-font, since a dot glyph's size is not standardised the way a block's is. And
+font, since a dot glyph's size is not standardized the way a block's is. And
 these are 7-bit-safe only for `. , '` — `∙ ° ■` are CP437 high bytes and carry
 the usual encoding rule.
 
@@ -252,7 +252,7 @@ px = c2 if (BAYER[y & 3][x & 3] + 0.5) / 16 < t else c1
 **Spend a cell on `▌`/`▐` where an edge runs near-vertical.** The half-block
 canvas subdivides a cell vertically and not at all horizontally, so the left
 and right limbs of any curve staircase while the top and bottom ones come out
-clean — the missing axis, not a missing colour. `▌` (U+258C) and `▐` (U+2590)
+clean — the missing axis, not a missing color. `▌` (U+258C) and `▐` (U+2590)
 supply it: one cell puts the edge on the half-column. Sample coverage as two
 halves (`sx < 2` vs `sx >= 2` on the sub-grid) and use one when the cell is
 part-covered, the two halves disagree strongly, and the cell's two pixels agree
@@ -271,7 +271,7 @@ cells asking for it — and it is the obvious move once the dither is written.
 Measured against a plain `coverage >= 0.5`, it looked identical along a
 diagonal and left stray lit pixels adrift off the limb, which read as noise.
 With `▌`/`▐` doing the near-vertical work, a crisp edge is better than a
-scattered one at small sizes. Dither the *colours*, threshold the *shape*.
+scattered one at small sizes. Dither the *colors*, threshold the *shape*.
 
 Four traps, all of which produce a *worse* picture than the staircase you
 started with:
@@ -280,19 +280,19 @@ started with:
   pushes the edge pixel further down that ramp, where it lands on another
   fully-saturated entry — more steps, not fewer.
 - **Do not composite toward the background and match the result.** Nearest-RGB
-  reaches for the grey run (232–255) constantly, because a dim teal really is
-  closer to a dark grey than to anything in the cube. Every disc picks up a
-  grey rind. Fix: match a saturated target against indices 16–231 only.
+  reaches for the gray run (232–255) constantly, because a dim teal really is
+  closer to a dark gray than to anything in the cube. Every disc picks up a
+  gray rind. Fix: match a saturated target against indices 16–231 only.
 - **Find the second color by RANKING the palette, not by extrapolating.**
   Stepping past the nearest entry and matching again leaves the local
-  neighbourhood and returns an unrelated hue — it sprayed bright green pixels
+  neighborhood and returns an unrelated hue — it sprayed bright green pixels
   across an orange planet.
 - **Only dither between close pairs.** Past roughly 90 in RGB distance the two
   stop reading as an intermediate tone and read as a checkerboard. This bites
   first on a shadow side, where a ramp's floor sits next to black.
 
 **Interpolate the ramp too.** Sampling a seven-entry ramp at a discrete index
-quantises a sphere into seven bands. Interpolate between neighbouring entries
+quantises a sphere into seven bands. Interpolate between neighboring entries
 in RGB at a continuous brightness, then dither the result; the two together are
 what remove the terracing.
 
@@ -308,26 +308,26 @@ the pixel-resolution dither.
 checkerboard and at true size reads as a blend, so a zoomed preview will talk
 you into "fixing" something that is already right.
 
-## File size: group cells by colour, not by position
+## File size: group cells by color, not by position
 
-Colour changes dominate an ANSI file. On this repo's dithered splash, 11,049 of
+Color changes dominate an ANSI file. On this repo's dithered splash, 11,049 of
 12,914 bytes are escape sequences against 1,865 printable cells — roughly six
-bytes of SGR per cell, because dithering makes neighbouring cells differ
-constantly and a naive left-to-right emitter re-states the colour for each one.
+bytes of SGR per cell, because dithering makes neighboring cells differ
+constantly and a naive left-to-right emitter re-states the color for each one.
 
 Scene files solve this with **multi-pass overpainting**: paint a row in one
-colour pair, skip over everything else with `ESC[<n>C` (cursor forward), then
-`ESC[A` back up to the same display row and paint the cells of the next colour.
-A row is built in layers, so one SGR run covers every cell of that colour in
-the row rather than one run per colour change. A 1993-era 82-row piece examined
+color pair, skip over everything else with `ESC[<n>C` (cursor forward), then
+`ESC[A` back up to the same display row and paint the cells of the next color.
+A row is built in layers, so one SGR run covers every cell of that color in
+the row rather than one run per color change. A 1993-era 82-row piece examined
 here spends 144 `ESC[A` and 249 `ESC[C` to hold itself to 1,542 SGR sequences
-over ~6,500 cells — about one colour change per four cells.
+over ~6,500 cells — about one color change per four cells.
 
 Worth knowing, rarely worth building: a multi-pass emitter is markedly more
 complex, and `ESC[A` interacts with the column-80 wrap rules above. Reach for it
 when the file has to be small (a slow link, an embedded asset), not by default.
 
-Cheaper wins first, in order: stop re-emitting `ESC[0m` before every coloured
+Cheaper wins first, in order: stop re-emitting `ESC[0m` before every colored
 glyph when the background is already the default (968 bytes, 7.5%, on the file
 measured above); emit `ESC[<n>C` instead of a run of spaces once the run is
 longer than the escape; and only then consider passes.
@@ -505,7 +505,7 @@ Three rules learned the hard way on the Immortal Barons splash:
   a lit patch of ocean — a shading artifact, not a continent. Basalt against
   lava, olive against teal, tundra against deep blue.
 - **When a body is cut off by the frame, work out which part of its ramp is
-  actually on screen.** A planet whose centre sits off-canvas may show only its
+  actually on screen.** A planet whose center sits off-canvas may show only its
   LIT quadrant, in which case it never touches the bottom of its ramps and
   darkening their floors — the obvious move — changes nothing at all. What
   governs how dark that mass reads is the ramp's TOP. Terrain frequency is
@@ -596,8 +596,8 @@ the wordmark reads as stripes instead of metal.
 
 **The drop shadow is what breaks legibility at this size.** A diagonal (+1,+1)
 shadow crosses the one-column letter gap and welds each letter to the next:
-"IMMORTAL" rendered as "INNORTAL", with the M's centre diagonal lost in the
-neighbouring shadow. Two fixes, both needed: put the shadow **directly beneath**
+"IMMORTAL" rendered as "INNORTAL", with the M's center diagonal lost in the
+neighboring shadow. Two fixes, both needed: put the shadow **directly beneath**
 (+0,+1) so it never enters the gap, and thin any glyph whose diagonal is only
 one pixel wide (an `M` apex on one row, not two). This is invisible in the
 source — only a render shows it.

@@ -169,7 +169,7 @@ func writePickRoster(s session.Session, t Term, rows []pickRow, opts pickOpts) {
 // "A-Y" whatever the realm count — BRE prints it that way even in a two-realm
 // game (docs/dev/bre-screens.md).
 //
-// BRE colours the prompt piece by piece: bright-blue parens, bright-cyan
+// BRE colors the prompt piece by piece: bright-blue parens, bright-cyan
 // selection keys, plain cyan for the connecting text, white for the trailing
 // prompt, and the answer echoes bright cyan. Same scheme as its y/n hints.
 func writePickPrompt(s session.Session, allies int, opts pickOpts) {
@@ -388,7 +388,7 @@ func msgRuler(width int) string {
 // after msgWrapMinBreakCol; that space is dropped, since the line ends there
 // now. With no space in reach — a single word longer than the search window —
 // the whole line stays and nothing is carried, so the word is split at the
-// margin. Both behaviours are BRE's.
+// margin. Both behaviors are BRE's.
 func wrapMessageLine(b []rune) (head, carry []rune) {
 	for c := len(b); c >= msgWrapMinBreakCol; c-- {
 		if b[c-1] == ' ' {
@@ -432,7 +432,7 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 	// reopenPrev implements BRE's backspace at column 1: the line above is taken
 	// back out of the message and re-opened with the cursor at its end — the way
 	// to undo a wrap you did not want. BRE redraws that line under a fresh prompt
-	// below rather than moving the cursor up a row, and colours the prompt bright
+	// below rather than moving the cursor up a row, and colors the prompt bright
 	// red where a new line is green, so a line being revisited reads as one.
 	reopenPrev := func() []rune {
 		if len(lines) == 0 {

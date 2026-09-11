@@ -131,7 +131,7 @@ func TestDailyMaintenancePersistsHumanEventsButClearsAIEvents(t *testing.T) {
 
 // A realm holding nothing gets no event at all: the amount is a SHARE of what
 // is held, so it truncates to zero and the original returns without a word.
-// This is the behaviour that replaced a flat 1-20 roll, and it is the reason
+// This is the behavior that replaced a flat 1-20 roll, and it is the reason
 // the old "lose on zero is skipped" test could no longer fire anything.
 func TestRandomEventLeavesAnEmptyRealmAlone(t *testing.T) {
 	for seed := int64(0); seed < 500; seed++ {

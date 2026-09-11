@@ -8,7 +8,7 @@ import (
 )
 
 // statusLines renders the Empire Status block for a test world and returns its
-// lines without colour, blank leading and trailing rows trimmed.
+// lines without color, blank leading and trailing rows trimmed.
 func statusLines(w *ctx) []string {
 	out := sgr.ReplaceAllString(empireStatusBlock(&fakeSession{}, w), "")
 	return strings.Split(strings.Trim(out, "\n"), "\n")
@@ -66,7 +66,7 @@ func TestEmpireStatusMatchesTheCapturedFieldOrder(t *testing.T) {
 	}
 }
 
-// The original's colours, from a live capture: the title's `-*`/`*-` brackets
+// The original's colors, from a live capture: the title's `-*`/`*-` brackets
 // bright cyan around a bright-white realm name, every figure bright cyan, the
 // label text around it white.
 func TestEmpireStatusUsesTheCapturedColours(t *testing.T) {

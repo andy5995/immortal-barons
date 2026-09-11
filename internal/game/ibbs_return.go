@@ -189,7 +189,7 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	// omitting the line.
 	switch res.outcome() {
 	case OutcomeWon, OutcomeRepelled:
-		writeUnitLines(&b, "You destroyed %s!", defenceUnits(res.Enemy))
+		writeUnitLines(&b, "You destroyed %s!", defenseUnits(res.Enemy))
 	}
 	writeUnitLines(&b, "%s returned.", attackUnits(back))
 	return strings.TrimRight(b.String(), "\n")

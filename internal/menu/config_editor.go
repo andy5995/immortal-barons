@@ -47,7 +47,7 @@ func cycleSabre(m game.SabreMode) game.SabreMode {
 // ConfigEditor runs the Configuration Editor standalone (used by the door's
 // -reset command, BRE's "reset" being the settings screen). It edits w.Config
 // in place, saves config.json when the sysop exits with S, and reports whether
-// they saved (true) or cancelled with Q/0 (false) — so -reset can abort.
+// they saved (true) or canceled with Q/0 (false) — so -reset can abort.
 func ConfigEditor(s session.Session, w *game.World) (saved bool) {
 	// -reset runs this on a bare console with no GameLoop above it, so recover
 	// an End panic (a closed stdin during editing) here and report "not saved"
@@ -69,7 +69,7 @@ func ConfigEditor(s session.Session, w *game.World) (saved bool) {
 // back to config.json. Defaults and the turns/day cap come from BRE's compiled
 // code; other caps are generous where BRE's exact max isn't confirmed. The
 // inter-BBS fields (marked *, as the original marks them) are the ones that do
-// nothing on a stand-alone board. Returns true if saved, false if cancelled.
+// nothing on a stand-alone board. Returns true if saved, false if canceled.
 //
 // Changes take effect going forward (a new TurnsPerDay applies at the next
 // daily maintenance; AICount does not retroactively add or remove AI empires).
@@ -111,7 +111,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			}
 			return true
 		case "q", "quit", "cancel", "0":
-			ok(s, "Cancelled — no changes were saved.")
+			ok(s, "Canceled — no changes were saved.")
 			return false
 		}
 		n, err := strconv.Atoi(choice)

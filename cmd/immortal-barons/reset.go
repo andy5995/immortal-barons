@@ -142,7 +142,7 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		if noANSI {
 			c.SetPlain()
 		}
-		// The editor honours the same charset flags the rest of the game does, so
+		// The editor honors the same charset flags the rest of the game does, so
 		// a terminal that reads neither CP437 nor UTF-8 gets its rules in ASCII.
 		s := encodeFor(session.Session(c), cs)
 		fmt.Fprint(s, "\r\nConfigure the game below (starting from defaults). Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")

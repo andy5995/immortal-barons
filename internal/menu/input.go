@@ -516,7 +516,7 @@ func WrapIndented(text, indent string) string { return wrapHanging(text, indent,
 // combat or raid report through it would run every line into one paragraph —
 // each line has to be wrapped on its own.
 //
-// Wrap BEFORE colouring. hiNums and friends insert escape sequences that no
+// Wrap BEFORE coloring. hiNums and friends insert escape sequences that no
 // terminal displays but every length count sees, so a report wrapped afterwards
 // breaks far short of the margin.
 func wrapReport(text string) string {
@@ -567,7 +567,7 @@ func failNoPause(s session.Session, err error) {
 
 func fail(s session.Session, err error) {
 	// The "!" is what tells a failure from a success on a terminal that shows no
-	// colour, or to a reader who cannot tell this red from the white above it.
+	// color, or to a reader who cannot tell this red from the white above it.
 	// ok() prints the same shape without it.
 	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightRed, wrapHanging(i18n.T(sessionLang(s), err.Error()), "  ! ", "    "), ansi.Reset)
 	pause(s)

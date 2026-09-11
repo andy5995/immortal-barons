@@ -1,6 +1,6 @@
 ---
 name: ib-testing
-description: Use when testing Immortal Barons behaviour — verifying a mechanic's numbers, reproducing something seen in play, exercising inter-BBS features, or changing game state outside the menus. Covers which of the three test surfaces to reach for, how to set config without the editor, and the traps that cost hours. Triggers on "test this", "verify the balance", "reproduce what I saw", "set up a league", driving `-local` from a script, or any question answered by running the game rather than reading it.
+description: Use when testing Immortal Barons behavior — verifying a mechanic's numbers, reproducing something seen in play, exercising inter-BBS features, or changing game state outside the menus. Covers which of the three test surfaces to reach for, how to set config without the editor, and the traps that cost hours. Triggers on "test this", "verify the balance", "reproduce what I saw", "set up a league", driving `-local` from a script, or any question answered by running the game rather than reading it.
 ---
 
 # Testing Immortal Barons
@@ -53,7 +53,7 @@ The recurring failure is not reaching for a harness at all: fidelity work
 feels fixed and external, and simulation stops feeling available. "I haven't verified
 this" is a trigger to build a sandbox, not a disclaimer to ship.
 
-**A question about game behaviour belongs in a throwaway world even when a live
+**A question about game behavior belongs in a throwaway world even when a live
 rig is sitting there** — a fresh world is faster, isolated and repeatable, and it
 cannot leave a test's leftovers behind to confuse the next session.
 
@@ -143,7 +143,7 @@ never typed anywhere. That is why `-dupe-check` exists.
     immortal-barons -local -dupe-check off     # this run only; `on` to force it on
 
 **A testing override must not reach disk.** `-dupe-check` is a per-invocation
-switch, not a setting: it changes behaviour for one run and leaves `config.json`
+switch, not a setting: it changes behavior for one run and leaves `config.json`
 untouched, so a test session cannot leave a league rule changed behind it.
 
 The obvious implementation is wrong, and the reason generalises. Overriding the
@@ -248,7 +248,7 @@ Check these first when a mechanic appears not to work:
   and IP messages are reachable at the entry menu without a turn. IB has no
   such check anywhere in `internal/game` or `internal/menu`. So when a test
   reaches an IP op without playing a turn, **that is the bug, not the
-  baseline** — do not write the permissive behaviour into an expectation.
+  baseline** — do not write the permissive behavior into an expectation.
   Issue #162.
 - **A `LeagueNumber` of 0 fails `-league-check` on a league board, and
   `barons-ftn` refuses to run** (#227). `ReadInbound` skips a packet just when

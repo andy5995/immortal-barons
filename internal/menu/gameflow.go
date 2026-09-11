@@ -183,7 +183,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		}
 
 		showTurnIntro(s, w, replaying)
-		summarised := paymentStage(s, w, menus.Bank)
+		summarized := paymentStage(s, w, menus.Bank)
 		// Was the realm already fed before this pass? On a replay it may have been
 		// (fed before the boot), in which case the feed stage and its "food consumed"
 		// summary are both skipped — so the replay lands at the first unfinished
@@ -196,7 +196,7 @@ func runTurn(s session.Session, w *ctx) Result {
 			func(tp *game.TurnProgress) { tp.Fed = true },
 			func() error {
 				var err error
-				silentFeed, err = feedStage(s, w, menus.Food, summarised)
+				silentFeed, err = feedStage(s, w, menus.Food, summarized)
 				return err
 			}); err != nil {
 			return Stay

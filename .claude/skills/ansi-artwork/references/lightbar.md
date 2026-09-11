@@ -186,7 +186,7 @@ loop:
                 'B': selected = (selected + 1) % len;       render(items, selected)
                 // 'C'/'D' left/right if the menu uses them
         else:
-            return CANCELLED          // bare ESC
+            return Canceled          // bare ESC
     else if b == '\r' or b == '\n' or b == ' ':
         return selected
     else if hotkey := matchHotkey(items, b):

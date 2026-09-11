@@ -37,7 +37,7 @@ also contains `barons-ftn`, an optional helper for leagues carried over FTN.
 ## Notes before you run it
 
 - **Windows may show a warning.** The binaries are not signed, so Windows
-  SmartScreen may say the file is not recognised. This is expected.
+  SmartScreen may say the file is not recognized. This is expected.
 - **macOS may block the file** the first time, for the same reason. Open it
   from the Finder with a right-click, then choose Open.
 - **On Windows 7, use the 32-bit build.** The 64-bit one needs Windows 10 or

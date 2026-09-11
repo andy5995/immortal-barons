@@ -404,7 +404,7 @@ func TestAISellsIdleCarriers(t *testing.T) {
 // Exercises the real call path: a threatened realm going through aiBuildForces
 // must come out turret-heavy. The unit tests above call aiUnderThreat directly,
 // so they kept passing when the call site in aiBuildForces was accidentally
-// reverted and the behaviour became unreachable from actual play.
+// reverted and the behavior became unreachable from actual play.
 func TestThreatResponseReachesBuildForces(t *testing.T) {
 	build := func(threatened bool) *Empire {
 		w := NewWorldSeed(DefaultConfig(), 1)

@@ -11,7 +11,7 @@ import (
 // The Technology advisor closes with BRE's set-apart NOTE, not another body
 // line: a bright-cyan "NOTE:" and a cyan body hanging under it
 // (docs/dev/bre-screens.md). IB folded it into ordinary white prose until
-// 2026-08-15, which lost both the label and the colour.
+// 2026-08-15, which lost both the label and the color.
 func TestTechnologyAdvisorClosesWithBREsNoteBlock(t *testing.T) {
 	f := &fakeSession{}
 	w := newWorld()

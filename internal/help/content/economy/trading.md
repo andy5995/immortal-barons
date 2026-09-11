@@ -57,7 +57,7 @@ send to your own planet — for that, use the deal above.
 
 Trade matters most when several realms work together. A few ideas:
 
-**Specialise, then supply your partners.** Your industry can favour one unit
+**Specialize, then supply your partners.** Your industry can favor one unit
 type, which makes that unit cheaper for you than for anyone else. If you build
 tanks and a partner builds turrets, each of you can sell to the other below the
 price they would pay to build it themselves. Both realms come out ahead.
@@ -66,6 +66,6 @@ price they would pay to build it themselves. Both realms come out ahead.
 a price meant as a gift to an ally may end up arming a rival. To be sure the
 goods reach the realm you mean them for, send a trade deal instead.
 
-**Trade is bigger between planets.** In a league, whole planets specialise, and
+**Trade is bigger between planets.** In a league, whole planets specialize, and
 an ally's market is often the cheapest place to buy. See the Interplanetary
 Trading topic.

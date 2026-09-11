@@ -43,7 +43,7 @@ one a caller has, or when their terminal is set to something else entirely
   below).
 
 You can use only one at a time. A separate option, `-no-ansi`, controls whether
-the game sends colour and cursor control at all; the two questions are
+the game sends color and cursor control at all; the two questions are
 independent, and a terminal can need both. See the
 [Command Reference](command-reference.md) for the full list of command-line
 options.

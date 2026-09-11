@@ -177,7 +177,7 @@ type PlanetaryRun struct {
 // A packet goes to the link for its NEXT hop, not for its final destination:
 // with HOST routing in the roster, everything a leaf board sends lands in the
 // one directory its uplink collects from (#106). dir is that directory; a board
-// that hosts others configures a separate one per neighbour.
+// that hosts others configures a separate one per neighbor.
 func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 	packets := append(append([]game.Packet(nil), w.Outbox...), w.Transit...)
 	// Backstop the protocol stamp. StampOutbox sets it on everything this board

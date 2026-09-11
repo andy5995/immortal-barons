@@ -58,7 +58,7 @@ that is the stage that failed. Ask for listings, not opinions.
    SBBSecho that is fatal to the entire run (`sbbsecho.c:5941`), so one bad
    path presents as "nothing tosses".
 4. **The outbound queue.** List the outbound root *and* any `outbound.<zonehex>`
-   siblings, and glob all five flavours — `.?lo` and `.?ut`, not just `.flo`.
+   siblings, and glob all five flavors — `.?lo` and `.?ut`, not just `.flo`.
    Nothing there means the tosser never queued it. Files in the *main* outbound
    for a private zone means the domain is missing and both tosser and mailer
    fell back to it silently (`sbbsecho.c:164-172`, `binkit.js:170-175`). Check
@@ -122,15 +122,15 @@ path-length theory on the receiving board.
 | `<net><node>.csy` | a same-system call lock — OPTIONAL (§5.2); `.hld` and `.try` also exist (§5.3, §5.4) |
 | `<net><node>.pnt/` | subdirectory for a point destination |
 
-**The flavour letter is the `?`, and there are five** (FTS-5005.003 §3.2). The
+**The flavor letter is the `?`, and there are five** (FTS-5005.003 §3.2). The
 order below is the priority for deciding whether to *poll* — not the order a
 mailer sends files, which is whatever it finds in the directory:
 
-| flavour | packet | flow | means |
+| flavor | packet | flow | means |
 |---|---|---|---|
 | Immediate | `iut` | `ilo` | poll now, ignoring every restriction |
-| Continuous | `cut` | `clo` | poll honouring internal but not external restrictions (remote is CM) |
-| Direct | `dut` | `dlo` | poll honouring all restrictions |
+| Continuous | `cut` | `clo` | poll honoring internal but not external restrictions (remote is CM) |
+| Direct | `dut` | `dlo` | poll honoring all restrictions |
 | Normal | `out` | `flo` | as Direct, but may be rerouted |
 | Hold | `hut` | `hlo` | do not poll; hand over when *they* call |
 
@@ -155,7 +155,7 @@ Line prefixes in a flow file (FTS-5005.003 §3.1) say what to do with the file
 | `~` | skip this line — how an already-processed line is marked |
 | none | send, keep |
 
-`-`, `!` and `@` are optional alternates; §3.1 says to recognise them on read
+`-`, `!` and `@` are optional alternates; §3.1 says to recognize them on read
 and not emit them.
 
 **List the full path.** §3.1 gives two reasons, and the second is the one that
@@ -222,13 +222,13 @@ relying on it.
 ## Myths this file used to repeat
 
 Each was believed, written down, and disproved. They are the errors most likely
-to be repeated by someone reasoning from one board's behaviour.
+to be repeated by someone reasoning from one board's behavior.
 
 | myth | truth |
 |---|---|
 | "An inbound poll sends nothing of yours" | binkp is bidirectional; BinkIT queues outbound files from its inbound auth callback (`binkit.js:1008`). A board that looked one-way had never run its tosser. |
 | "`^` / `FLAGS KFS` signal the attach" | `0x0010` signals the attach. Those two mean delete-after-send, and the tosser reads them. |
-| "Hold flavour is never sent" | It suppresses the *poll*; FTS-5005.003 §3.2 requires sending when the remote initiates. |
+| "Hold flavor is never sent" | It suppresses the *poll*; FTS-5005.003 §3.2 requires sending when the remote initiates. |
 | "The attachment path travels to the far side" | SBBSecho rewrites the Subject to the bare filename before packing (`sbbsecho.c:5944`). |
 
 ## Debugging
@@ -252,8 +252,8 @@ not a build target.
 
 ## Do not vendor FTSC documents
 
-FTS-0001's licence forbids distribution as part of anything sold for a fee,
-which a permissive licence grants everyone the right to do, and the documents
+FTS-0001's license forbids distribution as part of anything sold for a fee,
+which a permissive license grants everyone the right to do, and the documents
 carry their authors' postal addresses. Restate the facts and cite the number;
 `docs/dev/ftn-standards.md` has the reasoning in full.
 
@@ -269,7 +269,7 @@ Two rules, both learned the hard way on this file:
 
 - **Name the layer.** Protocol, document, tosser, mailer, or one board's
   config. Most FTN facts are not protocol facts, and every error found here so
-  far was a one-implementation behaviour written as a general rule.
+  far was a one-implementation behavior written as a general rule.
 - **Cite what proved it** — a document section, or a file and line. Prefer
   deleting a wrong line to hedging it; "usually" keeps a false claim in
   circulation.

@@ -142,7 +142,7 @@ func TestSDIStrengthThinsOverMoreLand(t *testing.T) {
 
 // An arriving individual strike loses 30% of its jets' contribution to a full
 // shield, and 20% of the bombers that reach the airfields. The two land in
-// different places: bombers carry no offence at all, so the shield's effect on
+// different places: bombers carry no offense at all, so the shield's effect on
 // them shows up in the air battle's bomber count instead.
 func TestSDIBluntsArrivingJetsAndBombers(t *testing.T) {
 	f := AttackForce{Troopers: 1_000, Jets: 1_000, Tanks: 1_000, Bombers: 1_000}
@@ -290,7 +290,7 @@ func TestSDIAllowanceIsPerTurnNotPerVisit(t *testing.T) {
 	}
 }
 
-// A realm defends an INVASION with different arithmetic than a neighbour's
+// A realm defends an INVASION with different arithmetic than a neighbor's
 // attack. Golden literals from the two builders, not the constants: BRE keeps a
 // separate tank factor and a separate morale slope for an arriving strike, and
 // IB used the local pair for both until 2026-08-24.
@@ -325,10 +325,10 @@ func TestInvasionUsesItsOwnDefenceArithmetic(t *testing.T) {
 	e := &Empire{Troopers: 1_000, Turrets: 1_000, Tanks: 1_000, HQ: 0, Morale: 100}
 	e.EnsureMorale()
 	if got, want := e.Defense(), 1_000+2_000+tankStrength(1_000, 0); got != want {
-		t.Errorf("local defence = %d, want %d", got, want)
+		t.Errorf("local defense = %d, want %d", got, want)
 	}
 	if got, want := e.remoteDefense(), (1_000+2_000+remoteTankStrength(1_000, 0))*107/100; got != want {
-		t.Errorf("invasion defence = %d, want %d", got, want)
+		t.Errorf("invasion defense = %d, want %d", got, want)
 	}
 }
 

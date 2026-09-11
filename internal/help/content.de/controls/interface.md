@@ -27,7 +27,7 @@ chooses Quit.
 
 The help browser and other pick-a-topic lists move a highlight with the
 arrow keys: Enter chooses the marked row, typing a few letters jumps to a
-title, and Backspace or `Q` goes back. If your terminal cannot show colour
+title, and Backspace or `Q` goes back. If your terminal cannot show color
 and cursor control, those lists are numbered instead — type the number and
 press Enter.
 

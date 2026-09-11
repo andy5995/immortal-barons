@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// twoBoards sets up an attacker on boardA and a fat, defenceless victim on
+// twoBoards sets up an attacker on boardA and a fat, defenseless victim on
 // boardB, which is the shape every round-trip test below needs.
 func twoBoards(t *testing.T) (wA, wB *World, attacker, victim *Empire) {
 	t.Helper()
@@ -70,7 +70,7 @@ func TestIndividualStrikeRoundTrip(t *testing.T) {
 
 	wA.Outbox = nil
 	wA.ApplyPacket(result)
-	// The strike overwhelmed the defence, so it was barely touched and nearly the
+	// The strike overwhelmed the defense, so it was barely touched and nearly the
 	// whole detachment comes home. What it paid is the battle's outcome, not the
 	// type's threshold (#199).
 	if attacker.Troopers < 500_000+499_000 || attacker.Tanks < 5000+4990 {
@@ -245,14 +245,14 @@ func TestAttackDamageRescalesInterplanetaryLosses(t *testing.T) {
 }
 
 // The departure window is BRE's, in hours: a delay under twelve or over 120 is
-// pulled back into the window rather than honoured. Golden literals.
+// pulled back into the window rather than honored. Golden literals.
 func TestGroupAttackDepartureWindow(t *testing.T) {
 	base := time.Date(2026, 8, 14, 9, 0, 0, 0, time.UTC)
 	for _, c := range []struct {
-		asked, honoured int
+		asked, honored int
 	}{{0, 12}, {12, 12}, {36, 36}, {120, 120}, {500, 120}} {
 		got := DepartureAfter(base, c.asked)
-		if want := base.Add(time.Duration(c.honoured) * time.Hour); !got.Equal(want) {
+		if want := base.Add(time.Duration(c.honored) * time.Hour); !got.Equal(want) {
 			t.Errorf("asking for %dh departed at %v, want %v", c.asked, got, want)
 		}
 	}
@@ -319,7 +319,7 @@ func TestBothPlanetsReportAnInterplanetaryStrike(t *testing.T) {
 	victim.Regions.Urban = 200
 	victim.syncLand()
 
-	// A force that plainly beats that defence, sent by a named realm.
+	// A force that plainly beats that defense, sent by a named realm.
 	atk := RemoteAttack{
 		ID: 7, FromBoard: "Alpha", FromEmpire: "Ironhold", TargetEmpire: "Redlands",
 		Offense:      10_000_000,

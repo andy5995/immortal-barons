@@ -284,7 +284,7 @@ arrives. The game reads `bbs.cfg` and never writes it, so nothing — not the
 Coordinator, not a reset — changes what you put there. The settings editor shows
 the four above but will not change them, and says so.
 
-A board that forwards packets for its neighbours adds a line per neighbour —
+A board that forwards packets for its neighbors adds a line per neighbor —
 see "Routing" below.
 
 ## The node list: `ibnodes.dat`
@@ -390,7 +390,7 @@ order". A league uses both.
 A league of twenty boards where every board links to every other one costs each
 sysop nineteen links to configure, and one board joining costs all twenty an
 edit. So the Coordinator can arrange the league as a tree instead, and every
-board works out from the roster which neighbour to hand a packet to.
+board works out from the roster which neighbor to hand a packet to.
 
 The Coordinator writes the tree into the node list, on each board's **first
 line**: the board's own number, the word `HOST`, and the numbers it forwards
@@ -432,9 +432,9 @@ directory they are written in.
 
 ### A board that hosts others
 
-A board forwarding for its neighbours has a separate link to each of them, and a
+A board forwarding for its neighbors has a separate link to each of them, and a
 mailer usually wants each link's files in its own directory. Add a `Link` line
-to `bbs.cfg` for each, giving the neighbour's node number and the directory:
+to `bbs.cfg` for each, giving the neighbor's node number and the directory:
 
 ```
 Link 3  /home/bbs/filebox/league_node3
@@ -523,7 +523,7 @@ scores, the roster, a ruleset change, a season reset — needs both:
 
 If your boards all dial one hub, that is a star, and the roster should say so
 with `HOST` lines. A star described as a mesh sends every broadcast to the hub's
-one neighbour, and the Coordinator is the last to find out, because its own
+one neighbor, and the Coordinator is the last to find out, because its own
 view stays complete.
 
 Run it as often as you like. More often means shorter travel times between
@@ -536,7 +536,7 @@ BRE hands each packet to your mailer. It writes the packet to its own
 `\OUTBOUND` directory, then drops a `.msg` wrapper in your netmail directory so
 the mailer knows to attach the file and send it. Four of `BBS.CFG`'s seven lines
 serve that wrapper: the sysop name and node address that go inside it, the
-netmail directory it is written to, and which mailer's flavour to use.
+netmail directory it is written to, and which mailer's flavor to use.
 
 Immortal Barons normally stops one step earlier. It writes the packet and
 leaves it there, so the game itself has no wrapper, netmail directory, or mailer
@@ -613,7 +613,7 @@ for boards that cannot read a
 bundle](ftn-transport.md#plain-packets-for-boards-that-cannot-read-a-bundle).
 
 The helper and game share a locking contract. Attach and obox bundles are
-immutable; BSO handoffs honour the destination `.bsy` and can safely coalesce
+immutable; BSO handoffs honor the destination `.bsy` and can safely coalesce
 new snapshots into a compatible advertised bundle while holding it. See
 [FTN Transport with `barons-ftn`](ftn-transport.md) for the complete
 configuration reference, mixed-link examples, event schedules, 8.3 aliases,
@@ -673,7 +673,7 @@ Binkley    No
   local, file-attach, and kill-sent header attributes.
 - **AttachDir** and **SubjectPath** are optional and control the attachment
   pathname. They are described under [Attachment pathnames](#attachment-pathnames)
-  below. Omitting both keeps the behaviour of every earlier release.
+  below. Omitting both keeps the behavior of every earlier release.
 
 The helper gets this board's address and every destination address from
 `ibnodes.dat`. Use complete `zone:net/node` addresses there; a point may add

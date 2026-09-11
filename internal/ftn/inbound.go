@@ -491,7 +491,7 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 		}
 		target := batchTarget{
 			Node: number, Name: node.Name, Address: address.String(), Mode: link.Mode,
-			Directory: publishDir, QueueDir: link.Directory, Flavour: link.Flavour, Alias: alias,
+			Directory: publishDir, QueueDir: link.Directory, Flavor: link.Flavor, Alias: alias,
 		}
 
 		// A forwarded packet obeys the same posture an originated one does: a

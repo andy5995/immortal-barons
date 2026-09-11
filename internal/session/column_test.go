@@ -15,7 +15,7 @@ func TestColumnTrackerCounts(t *testing.T) {
 		want  int
 	}{
 		{"plain text", false, "abc", 3},
-		{"a colour escape occupies nothing", false, "\x1b[1;33mabc\x1b[0m", 3},
+		{"a color escape occupies nothing", false, "\x1b[1;33mabc\x1b[0m", 3},
 		{"a newline starts the line over", false, "abcdef\nxy", 2},
 		{"a carriage return does too", false, "abcdef\rxy", 2},
 		{"backspace walks back", false, "abc\b\b", 1},

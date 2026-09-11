@@ -300,7 +300,7 @@ func TestMoneyCapIsFixed(t *testing.T) {
 
 // A played turn trims a treasury back to the cap whatever a board's config.json
 // carries. This is the path that once threw away everything above a hard-coded
-// 2 billion, and then honoured a saved raised value until the cap was fixed.
+// 2 billion, and then honored a saved raised value until the cap was fixed.
 func TestTurnEndClampsToTheCap(t *testing.T) {
 	for _, saved := range []int{MoneyCapMinBillions, 50} {
 		cfg := DefaultConfig()
@@ -341,7 +341,7 @@ func TestInterestOnAFullBankOverflowsIntoGold(t *testing.T) {
 }
 
 // ...but the treasury has the same cap, so a baron whose hand is ALSO full does
-// lose the overflow. That is the documented behaviour, not an accident: raising
+// lose the overflow. That is the documented behavior, not an accident: raising
 // the sysop's Money Cap is the way out.
 func TestInterestIsLostWhenBothPursesAreFull(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)

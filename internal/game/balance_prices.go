@@ -182,7 +182,7 @@ const (
 //
 // mid is the band's midpoint. Whichever side of it a price sits on, the move that
 // would carry the price further out is divided by 1..3 while the move back is
-// taken in full, so the walk is pulled towards the centre of a band it is free to
+// taken in full, so the walk is pulled towards the center of a band it is free to
 // roam. Captured prices sit near mid for exactly this reason.
 //
 // The stored price is what the Spending menu shows AND what a buy/sell charges

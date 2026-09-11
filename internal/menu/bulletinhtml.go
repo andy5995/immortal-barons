@@ -15,7 +15,7 @@ import (
 // template compiled into the binary and a sysop could not restyle it. The
 // templates here are written to the bulletin directory instead, and only when
 // they are absent, so an edited one survives every later run. Nothing in the
-// generated page styles itself: the colours arrive as class names, and the
+// generated page styles itself: the colors arrive as class names, and the
 // stylesheet holding them is a starting point a sysop may replace outright.
 //
 // Two pages per bulletin, because boards do both things with a scoreboard:
@@ -82,7 +82,7 @@ const defaultFooterHTML = `</body>
 </html>
 `
 
-// defaultBulletinCSS paints the sixteen ANSI colours and the small amount of
+// defaultBulletinCSS paints the sixteen ANSI colors and the small amount of
 // page around them. The only thing that names it is the <link> in the default
 // header, so pointing that at your own sheet is a one-line edit and this file
 // then goes unused.
@@ -90,27 +90,27 @@ const defaultFooterHTML = `</body>
 // The page is the terminal rather than a web page holding a picture of one:
 // black to the edges, one monospace face throughout, and a measure of 80
 // columns because that is the width every screen in the game was drawn to. So
-// hierarchy is carried by weight and colour out of the sixteen, not by a second
+// hierarchy is carried by weight and color out of the sixteen, not by a second
 // typeface, and the block needs no frame to separate it from its surroundings.
 //
-// Contrast, measured against #000. The eight bright colours and white all clear
+// Contrast, measured against #000. The eight bright colors and white all clear
 // 4.5:1 (bright red 5.3, bright green 15.3, bright yellow 19.6, white 21), and
-// so does light grey #AAAAAA at 9.0. The seven remaining dark ones do not, and
+// so does light gray #AAAAAA at 9.0. The seven remaining dark ones do not, and
 // cannot: dark blue #0000AA is 1.6:1 and dark red #AA0000 is 2.7:1. That is a
 // property of the CGA palette rather than of this sheet, and repainting them
 // would stop the art being the art. What saves the page is where IB puts them
-// -- every figure and heading is on a bright colour or white, and the dark half
+// -- every figure and heading is on a bright color or white, and the dark half
 // draws parentheses and banner dashes. A reader who has asked their system for
 // more contrast gets the dark half lifted anyway, in the block at the end.
 //
-// ONE deviation from CGA, and it is deliberate: colour 8 is #757575 here rather
-// than #555555, which is 1.7:1 and unreadable. It is the colour IB rules and
+// ONE deviation from CGA, and it is deliberate: color 8 is #757575 here rather
+// than #555555, which is 1.7:1 and unreadable. It is the color IB rules and
 // column separators are drawn in, so it carries structure on every bulletin,
 // and #757575 is the least change that reaches 4.6:1. Terminals do not agree on
 // this entry anyway. The other fifteen are the CGA values exactly.
 const defaultBulletinCSS = `:root {
   --ground: #000000;
-  --body: #aaaaaa;       /* CGA light grey, 9.0:1 */
+  --body: #aaaaaa;       /* CGA light gray, 9.0:1 */
   --bright: #ffffff;     /* 21:1 */
   --rule: #757575;       /* 4.6:1 */
   --accent: #55ffff;     /* CGA bright cyan, 16.0:1 */
@@ -166,7 +166,7 @@ pre.ansi {
    heading and its own rules.
    margin-inline stays auto here -- a shorthand "margin: 0" would cancel the
    centring set above and leave the block against the left edge while the
-   heading over it stayed centred.
+   heading over it stayed centerd.
    overflow-y is named explicitly because setting overflow-x alone makes the
    other axis compute to auto, and the browser then paints a vertical
    scrollbar track down the side of a block that never scrolls. */
@@ -179,8 +179,8 @@ pre.ansi {
 }
 
 /* The game's name links to its site wherever a screen draws it. It carries no
-   underline and keeps whatever colour the screen gave it, so it does not
-   repaint a heading; hovering lights a bar behind it in that same colour, the
+   underline and keeps whatever color the screen gave it, so it does not
+   repaint a heading; hovering lights a bar behind it in that same color, the
    way a DOS menu highlights the line under the cursor. */
 pre.ansi a {
   color: inherit;
@@ -235,7 +235,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
 .ansi-bg-15 { background: #ffffff }
 
 /* A reader who has asked for more contrast gets the dark half of the palette
-   lifted to its bright counterpart, which clears 4.5:1 on black. The colours
+   lifted to its bright counterpart, which clears 4.5:1 on black. The colors
    stop being the CGA ones; that is the trade the request asks for. */
 @media (prefers-contrast: more) {
   pre.ansi { color: #e0e0e0 }
@@ -389,7 +389,7 @@ func ansiToHTML(rendered []byte, gameName string) string {
 	st.fg, st.bg = -1, -1
 	open := ""
 	// text is written a run at a time -- everything up to the next escape --
-	// rather than a rune at a time, so one span carries a whole coloured field
+	// rather than a rune at a time, so one span carries a whole colored field
 	// and html.EscapeString runs once over it.
 	write := func(run string) {
 		if run == "" {
@@ -405,7 +405,7 @@ func ansiToHTML(rendered []byte, gameName string) string {
 			open = class
 		}
 		escaped := html.EscapeString(run)
-		// The name sits inside one colour run at every site that draws it, so
+		// The name sits inside one color run at every site that draws it, so
 		// this finds it whole. A run that does not carry it is untouched.
 		if link != "" && strings.Contains(escaped, link) {
 			escaped = strings.ReplaceAll(escaped,
@@ -440,8 +440,8 @@ func ansiToHTML(rendered []byte, gameName string) string {
 	return out.String()
 }
 
-// sgrState is the colour the writer is currently in: the two indices into the
-// sixteen-colour palette, plus the two attributes that move a colour between
+// sgrState is the color the writer is currently in: the two indices into the
+// sixteen-color palette, plus the two attributes that move a color between
 // its halves.
 type sgrState struct {
 	fg, bg  int // -1 is the terminal's own default, which the stylesheet paints
@@ -451,7 +451,7 @@ type sgrState struct {
 
 // apply folds one SGR sequence's parameters into the state. A parameter this
 // does not know is ignored rather than reset: the bulletins emit a small set,
-// and a sequence from somewhere else should not blank the colour mid-line.
+// and a sequence from somewhere else should not blank the color mid-line.
 func (s *sgrState) apply(params []int) {
 	for _, p := range params {
 		switch {
@@ -485,14 +485,14 @@ func (s *sgrState) apply(params []int) {
 //
 // Bold brightens a dark foreground, which is the convention every terminal
 // follows and the one BRE's own 1;30 gray relies on. Reverse swaps the two,
-// after that brightening, so a reversed cell shows the colours a terminal shows.
+// after that brightening, so a reversed cell shows the colors a terminal shows.
 func (s sgrState) class() string {
 	fg, bg := s.fg, s.bg
 	if s.bold && fg >= 0 && fg < 8 {
 		fg += 8
 	}
 	if s.reverse {
-		// A default swapped into the other slot has to become a real colour, or
+		// A default swapped into the other slot has to become a real color, or
 		// the reversal shows nothing: black text on the page's own foreground.
 		if fg < 0 {
 			fg = 7
@@ -513,7 +513,7 @@ func (s sgrState) class() string {
 }
 
 // scanEscape measures the escape sequence at the head of text and reports
-// whether it is an SGR (colour) one, with its parameters. Everything else --
+// whether it is an SGR (color) one, with its parameters. Everything else --
 // cursor moves, the erase codes, the DECAWM wrap toggles -- is measured so it
 // can be dropped, since a page has no cursor to move.
 //
@@ -547,7 +547,7 @@ func parseSGRParams(body string) []int {
 	if body == "" {
 		return []int{0}
 	}
-	// A private-parameter introducer (ESC[?...m) is not a colour; ignore it.
+	// A private-parameter introducer (ESC[?...m) is not a color; ignore it.
 	if body[0] < '0' || body[0] > '9' {
 		if body[0] != ';' {
 			return nil

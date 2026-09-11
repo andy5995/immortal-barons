@@ -61,7 +61,7 @@ func TestMissingBoardConfigChangesNothing(t *testing.T) {
 	}
 }
 
-// What the game offers the sysop to paste, the game must read back — including the per-neighbour
+// What the game offers the sysop to paste, the game must read back — including the per-neighbor
 // links, which BRE's positional format could not carry at all.
 func TestBoardConfigRoundTrip(t *testing.T) {
 	dir := t.TempDir()

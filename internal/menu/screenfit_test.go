@@ -11,7 +11,7 @@ import (
 
 var anyEscape = regexp.MustCompile("\x1b\\[[0-9;?]*[A-Za-z]")
 
-// screenRows counts the rows a rendered screen occupies, ignoring colour.
+// screenRows counts the rows a rendered screen occupies, ignoring color.
 func screenRows(out string) int {
 	out = anyEscape.ReplaceAllString(out, "")
 	out = strings.TrimSuffix(out, "\n")

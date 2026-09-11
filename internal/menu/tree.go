@@ -453,7 +453,7 @@ func BuildMenus() *Menus {
 	messages.DefaultOnEnter = quitOnEnter(messages)
 
 	// Item set and order mirror BRE's Preferences submenu (the three "Visit …
-	// Menu" skip-toggles, then the four behaviour toggles). The 'L' language and
+	// Menu" skip-toggles, then the four behavior toggles). The 'L' language and
 	// 'T' time-zone pickers are IB's own additions, kept at the end.
 	prefs.Items = append(toggleItems([]toggleRow{
 		{Key: '1', Name: "Visit Covert Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitCovert }},
@@ -472,7 +472,7 @@ func BuildMenus() *Menus {
 		}, Do: pickLanguage},
 		// IB's own, and once spent it is gone for good — the way Specialize
 		// Industry goes from the System menu. A realm still under New Realm
-		// Protection sees it greyed rather than missing, so it can be found again
+		// Protection sees it grayed rather than missing, so it can be found again
 		// when protection ends; choosing it then says why it is refused.
 		{Key: 'T', LabelFn: func(w *ctx) string {
 			return i18n.T(playerLang(w), "Time Zone") + ": " + timeZoneName(playerLang(w), w.Player().TimeZone)
@@ -495,7 +495,7 @@ func BuildMenus() *Menus {
 	//
 	// Player List is IB's own, keyed past the original's four rather than
 	// displacing one. IB numbered its three built items 1-3 until 2026-08-18,
-	// which put every one of them on the original's key for its neighbour.
+	// which put every one of them on the original's key for its neighbor.
 	coord.Items = []Item{
 		{Key: '1', Label: "Dismantle Gooie", Do: dismantleAnnihilator,
 			Hidden: noAnnihilator},

@@ -80,7 +80,7 @@ func TestSpecialAttackCancel(t *testing.T) {
 	localAttack(f, w, "Send Spy", nil, false, recordingStrike(&called, &a, &d))
 
 	if called {
-		t.Error("strike ran after the player cancelled")
+		t.Error("strike ran after the player canceled")
 	}
 }
 

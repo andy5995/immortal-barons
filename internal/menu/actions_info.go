@@ -189,7 +189,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	// the setting stopped being editable (#205): every new game gets the same 2
 	// billion, so the row told a player something they could not have found
 	// otherwise different. A board carried over from before #205 may still hold a
-	// raised value, which World.MoneyCapBillions honours and this screen no
+	// raised value, which World.MoneyCapBillions honors and this screen no
 	// longer shows.
 	pause(s)
 

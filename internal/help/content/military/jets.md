@@ -27,4 +27,4 @@ striking a named baron on another planet — a shield does nothing against jets
 attacking on its own planet.
 
 Jets are lost in battle like any other unit. Enemy turrets are part of the
-defence your attack has to beat; they do not single out your jets.
+defense your attack has to beat; they do not single out your jets.

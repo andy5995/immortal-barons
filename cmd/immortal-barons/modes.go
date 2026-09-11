@@ -202,7 +202,7 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 		fmt.Printf("Broadcast %d league bulletins to the league.\n", run.Bulletins)
 	}
 	// Where the files went is only one directory when this board has no
-	// per-neighbour links; naming it otherwise would be wrong for most of them.
+	// per-neighbor links; naming it otherwise would be wrong for most of them.
 	where := " to " + cfg.Outbound()
 	if len(cfg.OutboundDirs) > 0 {
 		where = ""

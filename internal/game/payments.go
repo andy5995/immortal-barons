@@ -22,7 +22,7 @@ const (
 	// and adds 0.5 (BRE.OVR resolve_received_invasion +0x1040), where the local
 	// resolver multiplies by 0.6 and adds 50 (+0x0b72). Same floor, gentler
 	// slope, so a defender at full morale holds at 107% against an invasion and
-	// 110% against a neighbour. Binary-verified; see remoteMoraleFactor.
+	// 110% against a neighbor. Binary-verified; see remoteMoraleFactor.
 	RemoteMoraleSlopeNum = 100
 	RemoteMoraleSlopeDen = 175
 )

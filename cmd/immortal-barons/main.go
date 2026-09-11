@@ -33,7 +33,7 @@ import (
 // reason is already on screen, so exitOn adds no second message — but the exit
 // status must still be non-zero, so an unattended run (a drop file chooser with
 // no one to answer it, say) can tell that the reset did not happen.
-var errCancelled = errors.New("cancelled")
+var errCancelled = errors.New("canceled")
 
 // errFaults ends a planetary run non-zero because it recorded a transport fault
 // nobody has been told about yet (#187). The game cannot raise an alarm itself —

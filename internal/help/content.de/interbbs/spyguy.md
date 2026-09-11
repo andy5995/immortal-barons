@@ -52,7 +52,7 @@ comes home.
 
 Post him where the threat is, not where the grudge is. The planet that just
 lost a battle to you is the one assembling the answer, and the rate is the
-same whether you watch a rival or a neighbour you trust.
+same whether you watch a rival or a neighbor you trust.
 
 A short stay renewed is worth more than one long stay bought early: the days
 run whether anything happens or not.

@@ -213,7 +213,7 @@ func TestPickRecipientsAllAllies(t *testing.T) {
 		t.Fatalf("pickRecipients(\"*%c\\r\") = %v, want the ally %s plus %s",
 			extra.letter, got, ally.name, extra.name)
 	}
-	// Strip the SGR runs: BRE colours each piece of this prompt separately, so
+	// Strip the SGR runs: BRE colors each piece of this prompt separately, so
 	// the escape sequences sit between the '*' and its label.
 	if !strings.Contains(sgr.ReplaceAllString(f.out.String(), ""), "*=All Allies") {
 		t.Errorf("prompt should offer *=All Allies:\n%s", f.out.String())
@@ -369,7 +369,7 @@ func TestSendMessageEmptySelectionCancels(t *testing.T) {
 	}
 	for _, r := range rows {
 		if len(r.e.Mail) != 0 {
-			t.Errorf("%s got mail from a cancelled send", r.name)
+			t.Errorf("%s got mail from a canceled send", r.name)
 		}
 	}
 }

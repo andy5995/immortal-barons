@@ -97,14 +97,14 @@ func changeRealmName(s session.Session, w *ctx) Result {
 	// The same naming screen the realm was christened on (AskRealmName), so the
 	// prompt, the rejection and the confirmation read alike. An empty line here
 	// cancels rather than offering to quit — this is a menu, not onboarding.
-	name, cancelled := AskRealmName(s, playerLang(w), "",
+	name, canceled := AskRealmName(s, playerLang(w), "",
 		func(n string) bool {
 			var taken bool
 			w.Read(func() { taken = w.RealmNameTaken(n) })
 			return taken
 		},
 		func() bool { return true })
-	if cancelled {
+	if canceled {
 		return Stay
 	}
 	old := p.Name
