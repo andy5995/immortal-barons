@@ -2,10 +2,10 @@
 category: regions
 in_game: true
 order: 6
-title: Agricultural
+title: Пашня
 ---
 
-# Agricultural Regions
+# Пахотные регионы
 
-Agricultural regions grow food. They are your main source of food if you are
-not buying it from the market.
+Пахотные регионы выращивают еду. Это ваш основной источник продовольствия,
+если вы не покупаете его на рынке.

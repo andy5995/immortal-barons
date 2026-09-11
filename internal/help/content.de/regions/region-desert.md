@@ -2,10 +2,11 @@
 category: regions
 in_game: true
 order: 4
-title: Desert
+title: Wüste
 ---
 
-# Desert Regions
+# Wüstenregionen
 
-Desert regions are good for solar power. Their income swings with
-conditions, but on average it beats mountains and trails good Coastal land.
+Wüstenregionen eignen sich für Solarkraft. Ihre Einnahmen schwanken mit den
+Bedingungen, liegen im Mittel aber über denen der Gebirge und knapp unter
+guten Küstenregionen.

@@ -2,24 +2,26 @@
 category: regions
 in_game: true
 order: 8
-title: Industrial
+title: Industrie
 ---
 
-# Industrial Regions
+# Industrieregionen
 
-Industrial regions build military units for you each turn. A good base of
-Mountain regions makes your industry produce more.
+Industrieregionen bauen Ihnen in jedem Zug Militäreinheiten. Ein guter
+Bestand an Gebirgsregionen lässt Ihre Industrie mehr herstellen.
 
-Use Set Industries to say which units they build. You give each unit type a
-percentage of your industry. The screen shows how many of each unit that
-percentage builds. You can change it at any time.
+Mit Industrie einstellen legen Sie fest, welche Einheiten gebaut
+werden. Jedem Einheitentyp geben Sie einen Prozentsatz Ihrer Industrie. Der
+Bildschirm zeigt, wie viele Einheiten dieser Anteil baut. Sie können das
+jederzeit ändern.
 
-The percentages do not have to add up to 100. Any share you leave unassigned
-earns gold instead. So the choice is units or gold: if you assign the full
-100% to units, your industry earns no gold.
+Die Prozentsätze müssen zusammen keine 100 ergeben. Jeder nicht vergebene
+Anteil bringt stattdessen Gold. Die Wahl lautet also Einheiten oder Gold:
+Vergeben Sie volle 100% an Einheiten, verdient Ihre Industrie kein Gold.
 
-Specialize marks one unit type as your focus. It does not replace your
-percentage split. Your industries make more of the specialized unit and
-fewer of every other unit. Specializing cannot be undone, so choose with
-care. Trading with other specialized empires is the most efficient way to
-get the units you no longer make well.
+Spezialisieren hebt einen Einheitentyp als Ihren Schwerpunkt hervor. Es
+ersetzt Ihre Aufteilung nicht. Ihre Industrie baut mehr von der
+spezialisierten Einheit und weniger von jeder anderen. Eine Spezialisierung
+lässt sich nicht rückgängig machen, wählen Sie also mit Bedacht. Der Handel
+mit anderen spezialisierten Reichen ist der beste Weg an die Einheiten zu
+kommen, die Sie nicht mehr gut bauen.

@@ -2,15 +2,15 @@
 category: regions
 in_game: true
 order: 7
-title: Urban
+title: Город
 ---
 
-# Urban Regions
+# Городские регионы
 
-Urban regions are home to your people. The more urban regions you own, the
-more people can live in your empire.
+Городские регионы — дом для ваших людей. Чем больше городских регионов, тем
+больше народу может жить в вашей державе.
 
-An urban region earns no gold by itself, but it still costs the same
-maintenance as every other region. Its worth is indirect: more people means
-more tax income. More people also eat more food, so grow your Agricultural
-land alongside your Urban land.
+Сам по себе городской регион золота не приносит, но содержание стоит столько
+же, сколько у любого другого. Его польза косвенна: больше людей — больше
+налогов. Больше людей и едят больше, поэтому расширяйте пашню вместе с
+городами.

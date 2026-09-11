@@ -2,19 +2,19 @@
 category: regions
 in_game: true
 order: 5
-title: River
+title: Река
 ---
 
-# River Regions
+# Речные регионы
 
-River regions give you gold from hydroelectric power. They also fish, so
-every river grows a small amount of food each turn. You get both together.
+Речные регионы дают золото от гидроэнергетики. Там же ловят рыбу, поэтому
+каждая река каждый ход даёт немного еды. Вы получаете и то, и другое сразу.
 
-A river pays less gold than a Coastal, Desert or Mountain region, because
-part of its output goes to fishing instead. What it gives you in return is
-steadiness: river gold barely swings from turn to turn, while the others can
-have a poor turn.
+Река платит меньше золота, чем прибрежный, пустынный или горный регион,
+потому что часть её отдачи уходит на рыболовство. Взамен вы получаете
+ровность: речное золото почти не колеблется от хода к ходу, тогда как у
+остальных бывает плохой ход.
 
-The food is a bonus, not a food supply. One river grows about a tenth of
-what one agricultural region grows. Buy rivers for the gold and the
-steadiness; buy agricultural regions when you need to feed people.
+Еда здесь — приятное дополнение, а не снабжение. Одна река даёт примерно
+десятую часть того, что даёт один пахотный регион. Покупайте реки ради
+золота и ровности, а пашню — когда нужно кормить людей.

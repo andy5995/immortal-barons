@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-05 18:44-0500\n"
+"POT-Creation-Date: 2026-09-10 22:18-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,7 +66,7 @@ msgstr ""
 msgid ""
 "The help browser and other pick-a-topic lists move a highlight with the "
 "arrow keys: Enter chooses the marked row, typing a few letters jumps to a "
-"title, and Backspace or `Q` goes back. If your terminal cannot show colour "
+"title, and Backspace or `Q` goes back. If your terminal cannot show color "
 "and cursor control, those lists are numbered instead — type the number and "
 "press Enter."
 msgstr ""
@@ -252,7 +252,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:20
+#: internal/help/content/controls/turns.md:21
+#, markdown-text
+msgid ""
+"Every time the game prints says which clock it is on. Times start out in "
+"UTC, which every planet in a league agrees on, and Preferences will show "
+"them on another clock instead: this board's own, or a time zone you pick "
+"from a list.  The countdown to the new day is the same length of time "
+"whichever you choose."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/turns.md:25
 #, markdown-text
 msgid ""
 "New players get New Realm Protection: a number of turns during which you "
@@ -261,7 +272,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:23
+#: internal/help/content/controls/turns.md:28
 #, markdown-text
 msgid ""
 "A realm still under protection shows its letter in square brackets in the "
@@ -512,7 +523,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:40
+#: internal/help/content/covert/overview.md:42
+#, markdown-text
+msgid ""
+"An agreement is no shelter. You may aim an operation at a ruler you hold a "
+"treaty with, and the game asks you to confirm before the agent goes. Saying "
+"yes tears the treaty up at the usual price in support and morale, and the "
+"agent is then sent. See Treaties and Alliances. Send Spy and Spy on "
+"Relations do not ask."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:45
 #, markdown-text
 msgid ""
 "If the realm you aimed at is gone by the time your agent arrives, the "
@@ -520,7 +542,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:45
+#: internal/help/content/covert/overview.md:50
 #, markdown-text
 msgid ""
 "Each covert operation may be run once for every turn in the day, and you may "
@@ -530,7 +552,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:52
+#: internal/help/content/covert/overview.md:57
 #, markdown-text
 msgid ""
 "After you pick a target the game asks how many agents to send, and suggests "
@@ -542,7 +564,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:58
+#: internal/help/content/covert/overview.md:63
 #, markdown-text
 msgid ""
 "When an operation fails, your agent is caught and lost, and the target is "
@@ -553,7 +575,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:62
+#: internal/help/content/covert/overview.md:67
 #, markdown-text
 msgid ""
 "Each operation has its own topic. Some of the topics in this section cover "
@@ -562,7 +584,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:64
+#: internal/help/content/covert/overview.md:69
 #, markdown-text
 msgid ""
 "The Covert Operations menu appears during your turn, after the Attack "
@@ -771,7 +793,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:20
+#: internal/help/content/diplomacy/treaties.md:22
 #, markdown-text
 msgid ""
 "Aiming an attack at a ruler you hold an agreement with tears the agreement "
@@ -781,11 +803,13 @@ msgid ""
 "fought at that lower morale. Say no and the attack is called off. The two "
 "realms are left with no agreement between them, and the ruler you betrayed "
 "will have their own answer to that. The same question comes up before a "
-"nuclear, chemical or biological strike."
+"nuclear, chemical or biological strike, and before a covert operation that "
+"sends an agent. Send Spy and Spy on Relations only look, so they do not ask "
+"and cost you nothing."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:23
+#: internal/help/content/diplomacy/treaties.md:25
 #, markdown-text
 msgid ""
 "A Declaration of War, on the Diplomacy menu, ends an agreement at the same "
@@ -793,7 +817,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:26
+#: internal/help/content/diplomacy/treaties.md:28
 #, markdown-text
 msgid ""
 "View Treaties shows your current relations with the other rulers in the "
@@ -801,7 +825,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:29
+#: internal/help/content/diplomacy/treaties.md:31
 #, markdown-text
 msgid ""
 "Once you hold a treaty, Send Message offers to write to all your allies at "
@@ -810,7 +834,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:33
+#: internal/help/content/diplomacy/treaties.md:35
 #, markdown-text
 msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
@@ -819,7 +843,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:36
+#: internal/help/content/diplomacy/treaties.md:38
 #, markdown-text
 msgid ""
 "Choosing the treaty you already hold with a ruler sends nothing. The game "
@@ -840,8 +864,19 @@ msgstr ""
 msgid ""
 "A Free Trade Agreement lets people and goods move freely, with no border "
 "tax. You earn a lot from income taxes — nearly twice what a Tariff Trade "
-"Agreement pays, on the same count of the smaller realm's people. But people "
-"mixing across borders can spread low morale and low support, so watch it."
+"Agreement pays, on the same count of the smaller realm's people."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-free-trade.md:19
+#, markdown-text
+msgid ""
+"People mixing across borders spread low morale and low support. Each day the "
+"healthier of the two realms drifts down toward the worse one, as far as its "
+"figure and no further. The drift runs one way only: the worse realm is never "
+"lifted by the contact. Signing with a struggling neighbor buys the income at "
+"the price of your own peace at home, so keep an eye on their figures as well "
+"as your own."
 msgstr ""
 
 #. type: Title #
@@ -1706,7 +1741,7 @@ msgstr ""
 #: internal/help/content/economy/trading.md:64
 #, markdown-text, no-wrap
 msgid ""
-"**Specialise, then supply your partners.** Your industry can favour one "
+"**Specialize, then supply your partners.** Your industry can favor one "
 "unit\n"
 "type, which makes that unit cheaper for you than for anyone else. If you "
 "build\n"
@@ -1730,7 +1765,7 @@ msgstr ""
 #: internal/help/content/economy/trading.md:71
 #, markdown-text, no-wrap
 msgid ""
-"**Trade is bigger between planets.** In a league, whole planets specialise, "
+"**Trade is bigger between planets.** In a league, whole planets specialize, "
 "and\n"
 "an ally's market is often the cheapest place to buy. See the "
 "Interplanetary\n"
@@ -1910,7 +1945,7 @@ msgstr ""
 #, markdown-text
 msgid ""
 "**Quick Strike** — surprise lets you fight at 120% of your normal strength, "
-"but the battle is short and disorganised: both sides retreat at 8% losses, "
+"but the battle is short and disorganized: both sides retreat at 8% losses, "
 "and you carry off only half the land a Normal Attack would."
 msgstr ""
 
@@ -2241,8 +2276,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Read the list before you commit forces. Your Coordinator marks a planet "
-"Enemy after seeing something you may not have seen — a raid on a neighbour, "
-"a strike on your own board, a message that went badly. It is the cheapest "
+"Enemy after seeing something you may not have seen — a raid on a neighbor, a "
+"strike on your own board, a message that went badly. It is the cheapest "
 "warning you will get."
 msgstr ""
 
@@ -2294,21 +2329,23 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:26
+#: internal/help/content/interbbs/spyguy.md:28
 #, markdown-text
 msgid ""
-"You choose how long he stays, up to fifteen days or as many days as your "
-"gold covers, whichever runs out first."
+"You choose how long he stays, up to fifteen days. If the stay costs more "
+"than you are carrying, the shortfall is named and the bank is opened for "
+"you; come back with it and the man goes, come back without it and nothing is "
+"sent or charged."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:27
+#: internal/help/content/interbbs/spyguy.md:29
 #, markdown-text, no-wrap
 msgid "What he reports"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:31
+#: internal/help/content/interbbs/spyguy.md:33
 #, markdown-text
 msgid ""
 "Two things, and both arrive as **planetary news** where everyone here can "
@@ -2316,7 +2353,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:36
+#: internal/help/content/interbbs/spyguy.md:38
 #, markdown-text
 msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
@@ -2324,7 +2361,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:36
+#: internal/help/content/interbbs/spyguy.md:38
 #, markdown-text
 msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
@@ -2332,7 +2369,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:39
+#: internal/help/content/interbbs/spyguy.md:41
 #, markdown-text
 msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
@@ -2340,13 +2377,49 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:40
+#: internal/help/content/interbbs/spyguy.md:42
+#, markdown-text, no-wrap
+msgid "Reading what he sends"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:47
+#, markdown-text
+msgid ""
+"Each report arrives as planet news, dated, saying what was aimed at you and "
+"how long it had left when he wrote it. That line never changes afterwards, "
+"so hours later it no longer tells you how long is left."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:52
+#, markdown-text, no-wrap
+msgid ""
+"**Incoming**, on the InterPlanetary menu, is the same warnings kept current: "
+"one\n"
+"row per threat, the soonest at the top, counting down as you read — `3h`, "
+"then\n"
+"`90m`, then `away` once the force has left. A weapon already flying is "
+"listed\n"
+"with the days until it lands.\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:55
+#, markdown-text
+msgid ""
+"An empty list is not proof of peace. It means nothing has been reported, and "
+"only a watcher posted on another planet can report anything."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/spyguy.md:56
 #, markdown-text, no-wrap
 msgid "Why it matters"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:46
+#: internal/help/content/interbbs/spyguy.md:62
 #, markdown-text
 msgid ""
 "A weapon still on the ground is the builders' own business: nobody tells you "
@@ -2356,7 +2429,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:50
+#: internal/help/content/interbbs/spyguy.md:66
 #, markdown-text
 msgid ""
 "The planet you are watching is told nothing. There is no discovery, no "
@@ -2365,22 +2438,22 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:51
+#: internal/help/content/interbbs/spyguy.md:67
 #, markdown-text, no-wrap
 msgid "Strategy"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:56
+#: internal/help/content/interbbs/spyguy.md:72
 #, markdown-text
 msgid ""
 "Post him where the threat is, not where the grudge is. The planet that just "
 "lost a battle to you is the one assembling the answer, and the rate is the "
-"same whether you watch a rival or a neighbour you trust."
+"same whether you watch a rival or a neighbor you trust."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:58
+#: internal/help/content/interbbs/spyguy.md:74
 #, markdown-text
 msgid ""
 "A short stay renewed is worth more than one long stay bought early: the days "
@@ -2525,7 +2598,7 @@ msgstr ""
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "
 "makes one agent likelier to land. A Terrorist Prevention pact adds its "
-"partners' agents to the defence, which is what makes a well-allied realm "
+"partners' agents to the defense, which is what makes a well-allied realm "
 "expensive to work on."
 msgstr ""
 
@@ -2960,7 +3033,7 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Jets are lost in battle like any other unit. Enemy turrets are part of the "
-"defence your attack has to beat; they do not single out your jets."
+"defense your attack has to beat; they do not single out your jets."
 msgstr ""
 
 #. type: Title #
@@ -3074,7 +3147,7 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Turrets shoot down attacking jets, destroy attacking tanks, and kill "
-"attacking troops. They do not stop a neighbour's missiles — nothing does, "
+"attacking troops. They do not stop a neighbor's missiles — nothing does, "
 "nuclear, chemical or biological alike."
 msgstr ""
 
@@ -3577,8 +3650,8 @@ msgstr ""
 msgid ""
 "You are quoted a price once you name a target, and you can walk away from "
 "it. The price is set by the size of the realm you are aiming at — a large "
-"neighbour needs a large missile — up to a ceiling, so the very biggest "
-"realms are proportionally cheap to hit."
+"neighbor needs a large missile — up to a ceiling, so the very biggest realms "
+"are proportionally cheap to hit."
 msgstr ""
 
 #. type: Plain text
@@ -3587,7 +3660,7 @@ msgstr ""
 msgid ""
 "About 7% of the target's land is ruined per strike, varying a couple of "
 "points either way. Nothing shoots the missile down: an SDI program defends "
-"against missiles arriving from another planet, not from a neighbour on your "
+"against missiles arriving from another planet, not from a neighbor on your "
 "own."
 msgstr ""
 
@@ -3764,7 +3837,7 @@ msgstr ""
 msgid ""
 "No single wave can finish it, however many jets you send. That is the point: "
 "the weapon is built to need the whole planet's air forces, and a planet that "
-"cannot organise loses the land."
+"cannot organize loses the land."
 msgstr ""
 
 #. type: Plain text
@@ -3843,8 +3916,8 @@ msgstr ""
 msgid ""
 "The SDI Program is a shield you fund. It answers three things, and only "
 "these three: missiles fired at you from another planet, and the jets and "
-"bombers of a strike arriving from one. It does nothing against a neighbour "
-"on your own planet — not their army, and not their nuclear, chemical or "
+"bombers of a strike arriving from one. It does nothing against a neighbor on "
+"your own planet — not their army, and not their nuclear, chemical or "
 "biological missiles.  Technology regions lower its upkeep."
 msgstr ""
 

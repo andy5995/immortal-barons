@@ -2,24 +2,25 @@
 category: regions
 in_game: true
 order: 9
-title: Technology
+title: Technologie
 ---
 
-# Technology Regions
+# Technologieregionen
 
-Technology regions make your whole empire more efficient. The bonus is not
-instant: it builds up slowly the longer you hold Technology regions, and it
-builds faster when they are a larger share of your land. Bigger empires need
-more Technology regions to reach the same level.
+Technologieregionen machen Ihr ganzes Reich leistungsfähiger. Der Bonus
+wirkt nicht sofort: Er wächst langsam, je länger Sie Technologieregionen
+halten, und schneller, wenn sie einen größeren Anteil Ihres Landes
+ausmachen. Größere Reiche brauchen mehr Technologieregionen für dieselbe
+Stufe.
 
-Technology helps in several ways:
+Technologie hilft auf mehrere Arten:
 
-- Your army fights harder.
-- Your income goes up, including tax income.
-- Your food regions grow more food.
-- Your upkeep goes down, on both your units and your regions.
-- Less of your stored food spoils.
+- Ihre Armee kämpft stärker.
+- Ihre Einnahmen steigen, die Steuern eingeschlossen.
+- Ihre Nahrungsregionen erzeugen mehr Nahrung.
+- Ihr Unterhalt sinkt, für Einheiten wie für Regionen.
+- Weniger Ihrer eingelagerten Nahrung verdirbt.
 
-Technology regions produce no gold by themselves. Their worth is the boost
-they give to everything else. They can be costly to keep at first, but over
-a long game they pay off.
+Technologieregionen bringen selbst kein Gold. Ihr Wert liegt im Schub, den
+sie allem anderen geben. Anfangs können sie teuer im Unterhalt sein, über
+ein langes Spiel zahlen sie sich aus.

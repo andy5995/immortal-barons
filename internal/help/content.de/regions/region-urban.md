@@ -2,15 +2,15 @@
 category: regions
 in_game: true
 order: 7
-title: Urban
+title: Stadt
 ---
 
-# Urban Regions
+# Stadtregionen
 
-Urban regions are home to your people. The more urban regions you own, the
-more people can live in your empire.
+Stadtregionen sind die Heimat Ihrer Leute. Je mehr Stadtregionen Sie
+besitzen, desto mehr Menschen können in Ihrem Reich leben.
 
-An urban region earns no gold by itself, but it still costs the same
-maintenance as every other region. Its worth is indirect: more people means
-more tax income. More people also eat more food, so grow your Agricultural
-land alongside your Urban land.
+Eine Stadtregion bringt selbst kein Gold, kostet aber denselben Unterhalt
+wie jede andere Region. Ihr Wert ist mittelbar: mehr Menschen heißt mehr
+Steuern. Mehr Menschen essen auch mehr, erweitern Sie Ihr Ackerland also
+zusammen mit Ihren Städten.

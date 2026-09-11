@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-05 18:44-0500\n"
+"POT-Creation-Date: 2026-09-10 22:18-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -75,7 +75,7 @@ msgstr ""
 msgid ""
 "The help browser and other pick-a-topic lists move a highlight with the "
 "arrow keys: Enter chooses the marked row, typing a few letters jumps to a "
-"title, and Backspace or `Q` goes back. If your terminal cannot show colour "
+"title, and Backspace or `Q` goes back. If your terminal cannot show color "
 "and cursor control, those lists are numbered instead — type the number and "
 "press Enter."
 msgstr ""
@@ -264,7 +264,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:20
+#: internal/help/content/controls/turns.md:21
+msgid ""
+"Every time the game prints says which clock it is on. Times start out in "
+"UTC, which every planet in a league agrees on, and Preferences will show "
+"them on another clock instead: this board's own, or a time zone you pick "
+"from a list.  The countdown to the new day is the same length of time "
+"whichever you choose."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/turns.md:25
 msgid ""
 "New players get New Realm Protection: a number of turns during which you "
 "cannot attack or be attacked. It only ticks down on turns you actually play, "
@@ -275,7 +285,7 @@ msgstr ""
 "aufzubauen."
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:23
+#: internal/help/content/controls/turns.md:28
 msgid ""
 "A realm still under protection shows its letter in square brackets in the "
 "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
@@ -512,14 +522,24 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:40
+#: internal/help/content/covert/overview.md:42
+msgid ""
+"An agreement is no shelter. You may aim an operation at a ruler you hold a "
+"treaty with, and the game asks you to confirm before the agent goes. Saying "
+"yes tears the treaty up at the usual price in support and morale, and the "
+"agent is then sent. See Treaties and Alliances. Send Spy and Spy on "
+"Relations do not ask."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:45
 msgid ""
 "If the realm you aimed at is gone by the time your agent arrives, the "
 "operation is abandoned and the fee is not returned."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:45
+#: internal/help/content/covert/overview.md:50
 msgid ""
 "Each covert operation may be run once for every turn in the day, and you may "
 "spend that allowance whenever you like — all of it in one turn, or one at a "
@@ -528,7 +548,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:52
+#: internal/help/content/covert/overview.md:57
 msgid ""
 "After you pick a target the game asks how many agents to send, and suggests "
 "as many as you can: whichever runs out first of the agents you hold, the "
@@ -539,7 +559,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:58
+#: internal/help/content/covert/overview.md:63
 msgid ""
 "When an operation fails, your agent is caught and lost, and the target is "
 "warned — and a caught agent talks, so the target is told your realm's name. "
@@ -549,7 +569,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:62
+#: internal/help/content/covert/overview.md:67
 msgid ""
 "Each operation has its own topic. Some of the topics in this section cover "
 "InterPlanetary Special Operations instead, which are aimed at another planet "
@@ -557,7 +577,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:64
+#: internal/help/content/covert/overview.md:69
 msgid ""
 "The Covert Operations menu appears during your turn, after the Attack menu. "
 "If you do not see it, turn on \"Visit Covert Menu\" in the Preferences menu."
@@ -763,7 +783,7 @@ msgstr ""
 "die andere Seite ihn annimmt. Dies sind die Arten."
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:20
+#: internal/help/content/diplomacy/treaties.md:22
 msgid ""
 "Aiming an attack at a ruler you hold an agreement with tears the agreement "
 "up, and the game asks you to confirm it before you choose your force. Say "
@@ -772,25 +792,27 @@ msgid ""
 "fought at that lower morale. Say no and the attack is called off. The two "
 "realms are left with no agreement between them, and the ruler you betrayed "
 "will have their own answer to that. The same question comes up before a "
-"nuclear, chemical or biological strike."
+"nuclear, chemical or biological strike, and before a covert operation that "
+"sends an agent. Send Spy and Spy on Relations only look, so they do not ask "
+"and cost you nothing."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:23
+#: internal/help/content/diplomacy/treaties.md:25
 msgid ""
 "A Declaration of War, on the Diplomacy menu, ends an agreement at the same "
 "price without a battle. It costs nothing if you had no agreement to break."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:26
+#: internal/help/content/diplomacy/treaties.md:28
 msgid ""
 "View Treaties shows your current relations with the other rulers in the "
 "game, and below that, the offers you have sent that nobody has answered yet."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:29
+#: internal/help/content/diplomacy/treaties.md:31
 msgid ""
 "Once you hold a treaty, Send Message offers to write to all your allies at "
 "once.  It reaches every ruler you have an agreement with, whatever kind it "
@@ -798,7 +820,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:33
+#: internal/help/content/diplomacy/treaties.md:35
 msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
 "you send a second, different offer to the same ruler, it takes the place of "
@@ -806,7 +828,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:36
+#: internal/help/content/diplomacy/treaties.md:38
 msgid ""
 "Choosing the treaty you already hold with a ruler sends nothing. The game "
 "tells you the agreement still stands and returns you to the menu. "
@@ -830,12 +852,22 @@ msgstr "Freihandelsabkommen"
 msgid ""
 "A Free Trade Agreement lets people and goods move freely, with no border "
 "tax. You earn a lot from income taxes — nearly twice what a Tariff Trade "
-"Agreement pays, on the same count of the smaller realm's people. But people "
-"mixing across borders can spread low morale and low support, so watch it."
+"Agreement pays, on the same count of the smaller realm's people."
 msgstr ""
 "Menschen und Waren bewegen sich frei, ohne Grenzabgabe. Sie verdienen viel "
 "an Einkommensteuern. Aber die Vermischung der Völker kann die Stimmung in "
 "anderen Reichen trüben."
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-free-trade.md:19
+msgid ""
+"People mixing across borders spread low morale and low support. Each day the "
+"healthier of the two realms drifts down toward the worse one, as far as its "
+"figure and no further. The drift runs one way only: the worse realm is never "
+"lifted by the contact. Signing with a struggling neighbor buys the income at "
+"the price of your own peace at home, so keep an eye on their figures as well "
+"as your own."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-full-defense.md:1
@@ -946,7 +978,7 @@ msgstr ""
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:8
 #, no-wrap
 msgid "Technology Agreement"
-msgstr "Technologieabkommen"
+msgstr "Technologie"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:12
@@ -1686,7 +1718,7 @@ msgstr ""
 #: internal/help/content/economy/trading.md:64
 #, no-wrap
 msgid ""
-"**Specialise, then supply your partners.** Your industry can favour one unit\n"
+"**Specialize, then supply your partners.** Your industry can favor one unit\n"
 "type, which makes that unit cheaper for you than for anyone else. If you build\n"
 "tanks and a partner builds turrets, each of you can sell to the other below the\n"
 "price they would pay to build it themselves. Both realms come out ahead.\n"
@@ -1705,7 +1737,7 @@ msgstr ""
 #: internal/help/content/economy/trading.md:71
 #, no-wrap
 msgid ""
-"**Trade is bigger between planets.** In a league, whole planets specialise, and\n"
+"**Trade is bigger between planets.** In a league, whole planets specialize, and\n"
 "an ally's market is often the cheapest place to buy. See the Interplanetary\n"
 "Trading topic.\n"
 msgstr ""
@@ -1866,7 +1898,7 @@ msgstr ""
 #: internal/help/content/interbbs/attack-types.md:27
 msgid ""
 "**Quick Strike** — surprise lets you fight at 120% of your normal strength, "
-"but the battle is short and disorganised: both sides retreat at 8% losses, "
+"but the battle is short and disorganized: both sides retreat at 8% losses, "
 "and you carry off only half the land a Normal Attack would."
 msgstr ""
 
@@ -2175,8 +2207,8 @@ msgstr ""
 #: internal/help/content/interbbs/planetary-diplomacy.md:46
 msgid ""
 "Read the list before you commit forces. Your Coordinator marks a planet "
-"Enemy after seeing something you may not have seen — a raid on a neighbour, "
-"a strike on your own board, a message that went badly. It is the cheapest "
+"Enemy after seeing something you may not have seen — a raid on a neighbor, a "
+"strike on your own board, a message that went badly. It is the cheapest "
 "warning you will get."
 msgstr ""
 
@@ -2225,55 +2257,89 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:26
+#: internal/help/content/interbbs/spyguy.md:28
 msgid ""
-"You choose how long he stays, up to fifteen days or as many days as your "
-"gold covers, whichever runs out first."
+"You choose how long he stays, up to fifteen days. If the stay costs more "
+"than you are carrying, the shortfall is named and the bank is opened for "
+"you; come back with it and the man goes, come back without it and nothing is "
+"sent or charged."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:27
+#: internal/help/content/interbbs/spyguy.md:29
 #, fuzzy, no-wrap
 #| msgid "What you need"
 msgid "What he reports"
 msgstr "Was Sie brauchen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:31
+#: internal/help/content/interbbs/spyguy.md:33
 msgid ""
 "Two things, and both arrive as **planetary news** where everyone here can "
 "read them:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:36
+#: internal/help/content/interbbs/spyguy.md:38
 msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
 "on it, with the hours left before it leaves"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:36
+#: internal/help/content/interbbs/spyguy.md:38
 msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
 "funding is complete, and if it is stood down again"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:39
+#: internal/help/content/interbbs/spyguy.md:41
 msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
 "sent late is not wasted."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:40
+#: internal/help/content/interbbs/spyguy.md:42
+#, fuzzy, no-wrap
+#| msgid "Registering the door"
+msgid "Reading what he sends"
+msgstr "Den Door registrieren"
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:47
+msgid ""
+"Each report arrives as planet news, dated, saying what was aimed at you and "
+"how long it had left when he wrote it. That line never changes afterwards, "
+"so hours later it no longer tells you how long is left."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:52
+#, no-wrap
+msgid ""
+"**Incoming**, on the InterPlanetary menu, is the same warnings kept current: one\n"
+"row per threat, the soonest at the top, counting down as you read — `3h`, then\n"
+"`90m`, then `away` once the force has left. A weapon already flying is listed\n"
+"with the days until it lands.\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:55
+msgid ""
+"An empty list is not proof of peace. It means nothing has been reported, and "
+"only a watcher posted on another planet can report anything."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/spyguy.md:56
 #, no-wrap
 msgid "Why it matters"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:46
+#: internal/help/content/interbbs/spyguy.md:62
 msgid ""
 "A weapon still on the ground is the builders' own business: nobody tells you "
 "it exists. You learn of it when it launches — and by then it is two days out "
@@ -2282,7 +2348,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:50
+#: internal/help/content/interbbs/spyguy.md:66
 msgid ""
 "The planet you are watching is told nothing. There is no discovery, no "
 "trial, and no execution; when the days you paid for run out, your man simply "
@@ -2290,21 +2356,21 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:51
+#: internal/help/content/interbbs/spyguy.md:67
 #, no-wrap
 msgid "Strategy"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:56
+#: internal/help/content/interbbs/spyguy.md:72
 msgid ""
 "Post him where the threat is, not where the grudge is. The planet that just "
 "lost a battle to you is the one assembling the answer, and the rate is the "
-"same whether you watch a rival or a neighbour you trust."
+"same whether you watch a rival or a neighbor you trust."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:58
+#: internal/help/content/interbbs/spyguy.md:74
 msgid ""
 "A short stay renewed is worth more than one long stay bought early: the days "
 "run whether anything happens or not."
@@ -2436,7 +2502,7 @@ msgstr ""
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "
 "makes one agent likelier to land. A Terrorist Prevention pact adds its "
-"partners' agents to the defence, which is what makes a well-allied realm "
+"partners' agents to the defense, which is what makes a well-allied realm "
 "expensive to work on."
 msgstr ""
 
@@ -2849,7 +2915,7 @@ msgstr ""
 #: internal/help/content/military/jets.md:30
 msgid ""
 "Jets are lost in battle like any other unit. Enemy turrets are part of the "
-"defence your attack has to beat; they do not single out your jets."
+"defense your attack has to beat; they do not single out your jets."
 msgstr ""
 
 #. type: Title #
@@ -2954,7 +3020,7 @@ msgstr ""
 #: internal/help/content/military/turrets.md:17
 msgid ""
 "Turrets shoot down attacking jets, destroy attacking tanks, and kill "
-"attacking troops. They do not stop a neighbour's missiles — nothing does, "
+"attacking troops. They do not stop a neighbor's missiles — nothing does, "
 "nuclear, chemical or biological alike."
 msgstr ""
 
@@ -2983,85 +3049,72 @@ msgstr ""
 #: internal/help/content/regions/region-agricultural.md:1
 #, no-wrap
 msgid "Agricultural"
-msgstr ""
+msgstr "Ackerland"
 
 #. type: Title #
 #: internal/help/content/regions/region-agricultural.md:8
 #, no-wrap
 msgid "Agricultural Regions"
-msgstr ""
+msgstr "Ackerland-Regionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-agricultural.md:11
-#, fuzzy
-#| msgid ""
-#| "Grows food. This is your main source of food if you are not buying it."
 msgid ""
 "Agricultural regions grow food. They are your main source of food if you are "
 "not buying it from the market."
 msgstr ""
-"Baut Nahrung an. Das ist Ihre Hauptquelle für Nahrung, wenn Sie sie nicht "
-"kaufen."
+"Ackerland-Regionen erzeugen Nahrung. Sie sind Ihre wichtigste "
+"Nahrungsquelle, wenn Sie nicht auf dem Markt einkaufen."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-coastal.md:1
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Coastal"
-msgstr "Gebiete"
+msgstr "Küste"
 
 #. type: Title #
 #: internal/help/content/regions/region-coastal.md:8
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Coastal Regions"
-msgstr "Gebiete"
+msgstr "Küstenregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-coastal.md:12
-#, fuzzy
-#| msgid ""
-#| "Best for tourism income. In good times it makes the most gold. But with "
-#| "low public support, your people lose interest and tourism drops sharply."
 msgid ""
 "Coastal regions are your best source of tourism income. In good times they "
 "make the most gold. But when public support is low, your people lose "
 "interest and tourism income drops sharply."
 msgstr ""
-"Am besten für Tourismuseinnahmen. In guten Zeiten bringt es das meiste Gold. "
-"Aber bei geringer Zustimmung des Volkes bricht Ihr Tourismus ein."
+"Küstenregionen sind Ihre beste Einnahmequelle aus dem Tourismus. In guten "
+"Zeiten bringen sie das meiste Gold. Ist der Rückhalt in der Bevölkerung aber "
+"gering, verlieren Ihre Leute das Interesse und die Tourismuseinnahmen "
+"brechen ein."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-desert.md:1
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Desert"
-msgstr "Gebiete"
+msgstr "Wüste"
 
 #. type: Title #
 #: internal/help/content/regions/region-desert.md:8
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Desert Regions"
-msgstr "Gebiete"
+msgstr "Wüstenregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-desert.md:11
-#, fuzzy
-#| msgid ""
-#| "Good for solar power. Income swings with conditions, but on average it "
-#| "beats mountains and trails good Coastal land."
 msgid ""
 "Desert regions are good for solar power. Their income swings with "
 "conditions, but on average it beats mountains and trails good Coastal land."
 msgstr ""
-"Gut für Solarenergie. Die Einnahmen schwanken je nach Bedingungen, liegen im "
-"Schnitt aber über den Bergen und unter der Küste."
+"Wüstenregionen eignen sich für Solarkraft. Ihre Einnahmen schwanken mit den "
+"Bedingungen, liegen im Mittel aber über denen der Gebirge und knapp unter "
+"guten Küstenregionen."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-industrial.md:1
-#, fuzzy, no-wrap
-#| msgid "Industry"
+#, no-wrap
 msgid "Industrial"
 msgstr "Industrie"
 
@@ -3069,20 +3122,16 @@ msgstr "Industrie"
 #: internal/help/content/regions/region-industrial.md:8
 #, no-wrap
 msgid "Industrial Regions"
-msgstr ""
+msgstr "Industrieregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-industrial.md:12
-#, fuzzy
-#| msgid ""
-#| "Builds military each turn. In some games this is your only way to get new "
-#| "units.  A good base of Mountain regions makes your industry produce more."
 msgid ""
 "Industrial regions build military units for you each turn. A good base of "
 "Mountain regions makes your industry produce more."
 msgstr ""
-"Baut jede Runde Militär. In manchen Spielen ist dies Ihr einziger Weg zu "
-"neuen Einheiten. Eine gute Grundlage an Bergen steigert die Ausbeute."
+"Industrieregionen bauen Ihnen in jedem Zug Militäreinheiten. Ein guter "
+"Bestand an Gebirgsregionen lässt Ihre Industrie mehr herstellen."
 
 #. type: Plain text
 #: internal/help/content/regions/region-industrial.md:16
@@ -3091,6 +3140,10 @@ msgid ""
 "percentage of your industry. The screen shows how many of each unit that "
 "percentage builds. You can change it at any time."
 msgstr ""
+"Mit Industrie einstellen legen Sie fest, welche Einheiten gebaut werden. "
+"Jedem Einheitentyp geben Sie einen Prozentsatz Ihrer Industrie. Der "
+"Bildschirm zeigt, wie viele Einheiten dieser Anteil baut. Sie können das "
+"jederzeit ändern."
 
 #. type: Plain text
 #: internal/help/content/regions/region-industrial.md:20
@@ -3099,14 +3152,12 @@ msgid ""
 "earns gold instead. So the choice is units or gold: if you assign the full "
 "100% to units, your industry earns no gold."
 msgstr ""
+"Die Prozentsätze müssen zusammen keine 100 ergeben. Jeder nicht vergebene "
+"Anteil bringt stattdessen Gold. Die Wahl lautet also Einheiten oder Gold: "
+"Vergeben Sie volle 100% an Einheiten, verdient Ihre Industrie kein Gold."
 
 #. type: Plain text
 #: internal/help/content/regions/region-industrial.md:25
-#, fuzzy
-#| msgid ""
-#| "Use Set Industries to split your production across unit types by "
-#| "percentage. Or use Specialize to send all of your production into one "
-#| "unit type. Specializing cannot be undone, so choose with care."
 msgid ""
 "Specialize marks one unit type as your focus. It does not replace your "
 "percentage split. Your industries make more of the specialized unit and "
@@ -3114,51 +3165,47 @@ msgid ""
 "care. Trading with other specialized empires is the most efficient way to "
 "get the units you no longer make well."
 msgstr ""
-"Mit „Industrien festlegen“ verteilen Sie Ihre Produktion prozentual auf "
-"Einheitentypen. Oder wählen Sie mit „Spezialisieren“ einen einzigen Typ für "
-"höhere Ausbeute — aber Sie können danach nichts anderes mehr bauen."
+"Spezialisieren hebt einen Einheitentyp als Ihren Schwerpunkt hervor. Es "
+"ersetzt Ihre Aufteilung nicht. Ihre Industrie baut mehr von der "
+"spezialisierten Einheit und weniger von jeder anderen. Eine Spezialisierung "
+"lässt sich nicht rückgängig machen, wählen Sie also mit Bedacht. Der Handel "
+"mit anderen spezialisierten Reichen ist der beste Weg an die Einheiten zu "
+"kommen, die Sie nicht mehr gut bauen."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-mountain.md:1
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Mountain"
-msgstr "Gebiete"
+msgstr "Gebirge"
 
 #. type: Title #
 #: internal/help/content/regions/region-mountain.md:8
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Mountain Regions"
-msgstr "Gebiete"
+msgstr "Gebirgsregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-mountain.md:12
-#, fuzzy
-#| msgid ""
-#| "Mines natural resources. Income is lower on average, but steady — few "
-#| "things change it. Mountains also boost how much your Industrial regions "
-#| "produce."
 msgid ""
 "Mountain regions mine natural resources. Their income is lower on average, "
 "but steady, because few things change it. Mountains also boost how much your "
 "Industrial regions produce."
 msgstr ""
-"Baut Bodenschätze ab. Die Einnahmen sind im Schnitt niedriger, aber stabil — "
-"kaum etwas beeinflusst sie. Berge steigern zudem die Industrieleistung."
+"Gebirgsregionen bauen Bodenschätze ab. Ihre Einnahmen sind im Mittel "
+"geringer, dafür stetig, weil wenig sie beeinflusst. Gebirge steigern "
+"außerdem die Produktion Ihrer Industrieregionen."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-river.md:1
 #, no-wrap
 msgid "River"
-msgstr ""
+msgstr "Fluss"
 
 #. type: Title #
 #: internal/help/content/regions/region-river.md:8
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "River Regions"
-msgstr "Gebiete"
+msgstr "Flussregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-river.md:12
@@ -3166,6 +3213,9 @@ msgid ""
 "River regions give you gold from hydroelectric power. They also fish, so "
 "every river grows a small amount of food each turn. You get both together."
 msgstr ""
+"Flussregionen bringen Ihnen Gold aus Wasserkraft. Es wird dort auch "
+"gefischt, jeder Fluss erzeugt also jeden Zug etwas Nahrung. Sie bekommen "
+"beides zugleich."
 
 #. type: Plain text
 #: internal/help/content/regions/region-river.md:17
@@ -3175,6 +3225,10 @@ msgid ""
 "steadiness: river gold barely swings from turn to turn, while the others can "
 "have a poor turn."
 msgstr ""
+"Ein Fluss zahlt weniger Gold als eine Küsten-, Wüsten- oder Gebirgsregion, "
+"weil ein Teil seines Ertrags in den Fischfang geht. Dafür erhalten Sie "
+"Stetigkeit: Flussgold schwankt von Zug zu Zug kaum, während die anderen "
+"einen schlechten Zug haben können."
 
 #. type: Plain text
 #: internal/help/content/regions/region-river.md:20
@@ -3183,28 +3237,27 @@ msgid ""
 "what one agricultural region grows. Buy rivers for the gold and the "
 "steadiness; buy agricultural regions when you need to feed people."
 msgstr ""
+"Die Nahrung ist eine Zugabe, keine Versorgung. Ein Fluss erzeugt etwa ein "
+"Zehntel dessen, was eine Ackerland-Region erzeugt. Kaufen Sie Flüsse für das "
+"Gold und die Stetigkeit, Ackerland, wenn Sie Menschen ernähren müssen."
 
 #. type: Title #
 #: internal/help/content/regions/regions.md:1
 #: internal/help/content/regions/regions.md:8
 #, no-wrap
 msgid "Regions"
-msgstr "Gebiete"
+msgstr "Regionen"
 
 #. type: Plain text
 #: internal/help/content/regions/regions.md:13
-#, fuzzy
-#| msgid ""
-#| "Land is made of regions. You buy regions from a market, and the price "
-#| "rises as you buy more. There are eight region types, each with a "
-#| "different job."
 msgid ""
 "Land is made of regions. You buy regions from a market, and the price rises "
 "as you buy more. There are eight region types, each with a different job. "
 "Each type has its own topic."
 msgstr ""
-"Land besteht aus Gebieten. Sie kaufen Gebiete auf einem Markt, und der Preis "
-"steigt, je mehr Sie kaufen. Es gibt mehrere Arten."
+"Land besteht aus Regionen. Sie kaufen Regionen auf einem Markt, und der "
+"Preis steigt, je mehr Sie kaufen. Es gibt acht Regionsarten, jede mit einer "
+"eigenen Aufgabe. Zu jeder Art gibt es ein eigenes Thema."
 
 #. type: Plain text
 #: internal/help/content/regions/regions.md:16
@@ -3213,66 +3266,65 @@ msgid ""
 "same for all region types, and it is large. It is often the biggest bill you "
 "pay.  Technology regions lower the cost."
 msgstr ""
+"Jede Region, die Sie besitzen, kostet jeden Zug Gold an Unterhalt. Die "
+"Kosten sind für alle Regionsarten gleich und hoch. Oft ist es Ihre größte "
+"Rechnung. Technologieregionen senken sie."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-technology.md:1
-#, fuzzy, no-wrap
-#| msgid "Technology Agreement"
+#, no-wrap
 msgid "Technology"
-msgstr "Technologieabkommen"
+msgstr "Technologie"
 
 #. type: Title #
 #: internal/help/content/regions/region-technology.md:8
-#, fuzzy, no-wrap
-#| msgid "Technology Agreement"
+#, no-wrap
 msgid "Technology Regions"
-msgstr "Technologieabkommen"
+msgstr "Technologieregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-technology.md:14
-#, fuzzy
-#| msgid ""
-#| "Raises your efficiency. A larger share of Technology regions boosts your "
-#| "income and your army and lowers some upkeep. Bigger empires need more "
-#| "Technology to get the same benefit."
 msgid ""
 "Technology regions make your whole empire more efficient. The bonus is not "
 "instant: it builds up slowly the longer you hold Technology regions, and it "
 "builds faster when they are a larger share of your land. Bigger empires need "
 "more Technology regions to reach the same level."
 msgstr ""
-"Steigert Ihre Effizienz. Ein größerer Anteil an Technologiegebieten erhöht "
-"Ihr Einkommen und Ihre Armee und senkt den Unterhalt."
+"Technologieregionen machen Ihr ganzes Reich leistungsfähiger. Der Bonus "
+"wirkt nicht sofort: Er wächst langsam, je länger Sie Technologieregionen "
+"halten, und schneller, wenn sie einen größeren Anteil Ihres Landes "
+"ausmachen. Größere Reiche brauchen mehr Technologieregionen für dieselbe "
+"Stufe."
 
 #. type: Plain text
 #: internal/help/content/regions/region-technology.md:16
 msgid "Technology helps in several ways:"
-msgstr ""
+msgstr "Technologie hilft auf mehrere Arten:"
 
 #. type: Bullet: '- '
 #: internal/help/content/regions/region-technology.md:22
 msgid "Your army fights harder."
-msgstr ""
+msgstr "Ihre Armee kämpft stärker."
 
 #. type: Bullet: '- '
 #: internal/help/content/regions/region-technology.md:22
 msgid "Your income goes up, including tax income."
-msgstr ""
+msgstr "Ihre Einnahmen steigen, die Steuern eingeschlossen."
 
 #. type: Bullet: '- '
 #: internal/help/content/regions/region-technology.md:22
 msgid "Your food regions grow more food."
-msgstr ""
+msgstr "Ihre Nahrungsregionen erzeugen mehr Nahrung."
 
 #. type: Bullet: '- '
 #: internal/help/content/regions/region-technology.md:22
 msgid "Your upkeep goes down, on both your units and your regions."
-msgstr ""
+msgstr "Ihr Unterhalt sinkt, für Einheiten wie für Regionen."
 
 #. type: Bullet: '- '
 #: internal/help/content/regions/region-technology.md:22
 msgid "Less of your stored food spoils."
-msgstr ""
+msgstr "Weniger Ihrer eingelagerten Nahrung verdirbt."
 
 #. type: Plain text
 #: internal/help/content/regions/region-technology.md:25
@@ -3281,32 +3333,30 @@ msgid ""
 "they give to everything else. They can be costly to keep at first, but over "
 "a long game they pay off."
 msgstr ""
+"Technologieregionen bringen selbst kein Gold. Ihr Wert liegt im Schub, den "
+"sie allem anderen geben. Anfangs können sie teuer im Unterhalt sein, über "
+"ein langes Spiel zahlen sie sich aus."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-urban.md:1
 #, no-wrap
 msgid "Urban"
-msgstr ""
+msgstr "Stadt"
 
 #. type: Title #
 #: internal/help/content/regions/region-urban.md:8
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Urban Regions"
-msgstr "Gebiete"
+msgstr "Stadtregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-urban.md:12
-#, fuzzy
-#| msgid ""
-#| "Home to your people. More urban regions means more people can live in "
-#| "your empire."
 msgid ""
 "Urban regions are home to your people. The more urban regions you own, the "
 "more people can live in your empire."
 msgstr ""
-"Heimat Ihres Volkes. Mehr Stadtgebiete bedeuten, dass mehr Menschen in Ihrem "
-"Imperium leben können."
+"Stadtregionen sind die Heimat Ihrer Leute. Je mehr Stadtregionen Sie "
+"besitzen, desto mehr Menschen können in Ihrem Reich leben."
 
 #. type: Plain text
 #: internal/help/content/regions/region-urban.md:16
@@ -3316,19 +3366,22 @@ msgid ""
 "more tax income. More people also eat more food, so grow your Agricultural "
 "land alongside your Urban land."
 msgstr ""
+"Eine Stadtregion bringt selbst kein Gold, kostet aber denselben Unterhalt "
+"wie jede andere Region. Ihr Wert ist mittelbar: mehr Menschen heißt mehr "
+"Steuern. Mehr Menschen essen auch mehr, erweitern Sie Ihr Ackerland also "
+"zusammen mit Ihren Städten."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-waste.md:1
 #, no-wrap
 msgid "Waste"
-msgstr ""
+msgstr "Ödland"
 
 #. type: Title #
 #: internal/help/content/regions/region-waste.md:8
-#, fuzzy, no-wrap
-#| msgid "Regions"
+#, no-wrap
 msgid "Waste Regions"
-msgstr "Gebiete"
+msgstr "Ödlandregionen"
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:12
@@ -3336,6 +3389,8 @@ msgid ""
 "Waste is land a nuclear or chemical strike has ruined. You cannot buy it and "
 "you cannot sell it — an enemy gives it to you."
 msgstr ""
+"Ödland ist Land, das ein nuklearer oder chemischer Schlag verwüstet hat. Sie "
+"können es weder kaufen noch verkaufen — ein Feind schenkt es Ihnen."
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:16
@@ -3345,6 +3400,10 @@ msgid ""
 "takes several strikes and ignores them ends up paying for land that does no "
 "work."
 msgstr ""
+"Ödland bleibt in Ihren Büchern. Es zählt zu Ihrem Gebiet, kostet denselben "
+"Unterhalt wie jede andere Region und bringt Ihnen nichts. Ein Reich, das "
+"mehrere Schläge einsteckt und sie hinnimmt, zahlt am Ende für Land, das "
+"nichts leistet."
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:19
@@ -3352,6 +3411,8 @@ msgid ""
 "Cleaning it up is called decontamination, and it is offered during "
 "maintenance whenever you hold any. Two limits apply:"
 msgstr ""
+"Die Beseitigung heißt Dekontamination und wird bei der Wartung angeboten, "
+"sobald Sie welches halten. Es gelten zwei Grenzen:"
 
 #. type: Bullet: '- '
 #: internal/help/content/regions/region-waste.md:25
@@ -3360,6 +3421,9 @@ msgid ""
 "regions** and never more than you actually hold. A big mess takes several "
 "turns to clear no matter how rich you are."
 msgstr ""
+"Sie können **je Zug ein Fünftel Ihres Ödlands** reinigen, nie weniger als "
+"**10 Regionen** und nie mehr, als Sie tatsächlich halten. Eine große "
+"Verwüstung braucht mehrere Züge, wie reich Sie auch sind."
 
 #. type: Bullet: '- '
 #: internal/help/content/regions/region-waste.md:25
@@ -3367,6 +3431,8 @@ msgid ""
 "Each cleaned region costs **half the going price of new land**. Agricultural "
 "research cuts that further, down to a quarter."
 msgstr ""
+"Jede gereinigte Region kostet **die Hälfte des laufenden Preises für neues "
+"Land**. Agrarforschung senkt das weiter, bis auf ein Viertel."
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:28
@@ -3374,6 +3440,8 @@ msgid ""
 "Paying part of the bill cleans part of the pile, so a short turn is not a "
 "wasted one."
 msgstr ""
+"Wer einen Teil der Rechnung zahlt, reinigt einen Teil des Haufens, ein "
+"knapper Zug ist also kein vergeudeter."
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:31
@@ -3381,6 +3449,8 @@ msgid ""
 "Cleaned land has no type until you give it one. You are asked to share it "
 "out across region types, the same way you share out land you have conquered."
 msgstr ""
+"Gereinigtes Land hat keine Art, bis Sie ihm eine geben. Sie werden gebeten, "
+"es auf die Regionsarten aufzuteilen, genau wie erobertes Land."
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:34
@@ -3390,6 +3460,10 @@ msgid ""
 "clean-up rate means you cannot fix it all at once when you finally get round "
 "to it."
 msgstr ""
+"Strategie: früh dekontaminieren. Der Unterhalt auf verwüstetem Land läuft "
+"jeden Zug, ein Haufen, den Sie liegen lassen, besteuert Sie also still bis "
+"zum Spielende, und die Reinigungsrate bedeutet, dass Sie es nicht auf einmal "
+"beheben können, wenn Sie sich endlich darum kümmern."
 
 #. type: Title #
 #: internal/help/content/warfare/attack-biological.md:1
@@ -3484,8 +3558,8 @@ msgstr ""
 msgid ""
 "You are quoted a price once you name a target, and you can walk away from "
 "it. The price is set by the size of the realm you are aiming at — a large "
-"neighbour needs a large missile — up to a ceiling, so the very biggest "
-"realms are proportionally cheap to hit."
+"neighbor needs a large missile — up to a ceiling, so the very biggest realms "
+"are proportionally cheap to hit."
 msgstr ""
 
 #. type: Plain text
@@ -3493,7 +3567,7 @@ msgstr ""
 msgid ""
 "About 7% of the target's land is ruined per strike, varying a couple of "
 "points either way. Nothing shoots the missile down: an SDI program defends "
-"against missiles arriving from another planet, not from a neighbour on your "
+"against missiles arriving from another planet, not from a neighbor on your "
 "own."
 msgstr ""
 
@@ -3663,7 +3737,7 @@ msgstr ""
 msgid ""
 "No single wave can finish it, however many jets you send. That is the point: "
 "the weapon is built to need the whole planet's air forces, and a planet that "
-"cannot organise loses the land."
+"cannot organize loses the land."
 msgstr ""
 
 #. type: Plain text
@@ -3741,8 +3815,8 @@ msgstr "SDI-Programm"
 msgid ""
 "The SDI Program is a shield you fund. It answers three things, and only "
 "these three: missiles fired at you from another planet, and the jets and "
-"bombers of a strike arriving from one. It does nothing against a neighbour "
-"on your own planet — not their army, and not their nuclear, chemical or "
+"bombers of a strike arriving from one. It does nothing against a neighbor on "
+"your own planet — not their army, and not their nuclear, chemical or "
 "biological missiles.  Technology regions lower its upkeep."
 msgstr ""
 

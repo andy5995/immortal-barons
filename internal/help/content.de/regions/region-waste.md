@@ -2,35 +2,35 @@
 category: regions
 in_game: true
 order: 10
-title: Waste
+title: Ödland
 ---
 
-# Waste Regions
+# Ödlandregionen
 
-Waste is land a nuclear or chemical strike has ruined. You cannot buy it and
-you cannot sell it — an enemy gives it to you.
+Ödland ist Land, das ein nuklearer oder chemischer Schlag verwüstet hat. Sie
+können es weder kaufen noch verkaufen — ein Feind schenkt es Ihnen.
 
-Waste stays on your books. It counts toward your territory, it costs the
-same upkeep as any other region, and it earns you nothing. A realm that
-takes several strikes and ignores them ends up paying for land that does no
-work.
+Ödland bleibt in Ihren Büchern. Es zählt zu Ihrem Gebiet, kostet denselben
+Unterhalt wie jede andere Region und bringt Ihnen nichts. Ein Reich, das
+mehrere Schläge einsteckt und sie hinnimmt, zahlt am Ende für Land, das
+nichts leistet.
 
-Cleaning it up is called decontamination, and it is offered during
-maintenance whenever you hold any. Two limits apply:
+Die Beseitigung heißt Dekontamination und wird bei der Wartung angeboten,
+sobald Sie welches halten. Es gelten zwei Grenzen:
 
-- You can clean a **fifth of your waste each turn**, but never fewer than
-  **10 regions** and never more than you actually hold. A big mess takes
-  several turns to clear no matter how rich you are.
-- Each cleaned region costs **half the going price of new
-  land**. Agricultural research cuts that further, down to a quarter.
+- Sie können **je Zug ein Fünftel Ihres Ödlands** reinigen, nie weniger als
+  **10 Regionen** und nie mehr, als Sie tatsächlich halten. Eine große
+  Verwüstung braucht mehrere Züge, wie reich Sie auch sind.
+- Jede gereinigte Region kostet **die Hälfte des laufenden Preises für neues
+  Land**. Agrarforschung senkt das weiter, bis auf ein Viertel.
 
-Paying part of the bill cleans part of the pile, so a short turn is not a
-wasted one.
+Wer einen Teil der Rechnung zahlt, reinigt einen Teil des Haufens, ein
+knapper Zug ist also kein vergeudeter.
 
-Cleaned land has no type until you give it one. You are asked to share it
-out across region types, the same way you share out land you have conquered.
+Gereinigtes Land hat keine Art, bis Sie ihm eine geben. Sie werden gebeten,
+es auf die Regionsarten aufzuteilen, genau wie erobertes Land.
 
-Strategy: decontaminate early. The upkeep on ruined land runs every turn, so
-a pile you leave alone quietly taxes you for the rest of the game, and the
-clean-up rate means you cannot fix it all at once when you finally get round
-to it.
+Strategie: früh dekontaminieren. Der Unterhalt auf verwüstetem Land läuft
+jeden Zug, ein Haufen, den Sie liegen lassen, besteuert Sie also still bis
+zum Spielende, und die Reinigungsrate bedeutet, dass Sie es nicht auf einmal
+beheben können, wenn Sie sich endlich darum kümmern.

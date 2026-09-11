@@ -433,14 +433,12 @@ msgid "Add how much gold for funding?"
 msgstr ""
 
 #: internal/menu/actions_regions.go:57
-#, fuzzy
 msgid "Advisors"
 msgstr "Советники"
 
 #: internal/game/units.go:139
-#, fuzzy
 msgid "Agent"
-msgstr "Агенты"
+msgstr "Агент"
 
 #: internal/menu/empire_status_screen.go:107
 #, fuzzy
@@ -452,6 +450,10 @@ msgid ""
 "Agreement broken! Revolts spread through your realm — your people will not "
 "be ruled by an oath-breaker, and the army's morale goes with them."
 msgstr ""
+
+#: internal/game/regions.go:160
+msgid "Agricultural"
+msgstr "Пашня"
 
 #: internal/menu/incoming.go:82
 msgid "Aimed At"
@@ -634,9 +636,8 @@ msgid "Bomb Trading Market"
 msgstr "Рынок еды"
 
 #: internal/game/units.go:106
-#, fuzzy
 msgid "Bomber"
-msgstr "Бомбардировщики"
+msgstr "Бомбардировщик"
 
 #: internal/menu/tree.go:177
 msgid "Bombers"
@@ -713,9 +714,8 @@ msgid "Care to try your luck on the Queen's lottery?"
 msgstr ""
 
 #: internal/game/units.go:128
-#, fuzzy
 msgid "Carrier"
-msgstr "Авианосцы"
+msgstr "Авианосец"
 
 #: internal/menu/tree.go:185
 msgid "Carriers"
@@ -788,6 +788,10 @@ msgstr ""
 #: internal/menu/actions_message.go:494
 msgid "Clear"
 msgstr "Очистить"
+
+#: internal/game/regions.go:156
+msgid "Coastal"
+msgstr "Побережье"
 
 #: internal/menu/actions_attack.go:671
 msgid "Commit how many Jets?"
@@ -931,6 +935,10 @@ msgstr "Внести средства"
 #: internal/menu/tree.go:468
 msgid "Deposit gold at End of Turn"
 msgstr "Вносить золото в конце хода"
+
+#: internal/game/regions.go:158
+msgid "Desert"
+msgstr "Пустыня"
 
 #: internal/menu/opshelp.go:30
 msgid ""
@@ -1102,7 +1110,6 @@ msgid "First Line to Quote"
 msgstr ""
 
 #: internal/menu/empire_status_screen.go:104
-#, fuzzy
 msgid "Food"
 msgstr "Еда"
 
@@ -1289,6 +1296,10 @@ msgstr "Атаки на подходе"
 msgid "Indiv. Attack Force"
 msgstr "Одиночная атака"
 
+#: internal/game/regions.go:162
+msgid "Industrial"
+msgstr "Промышленность"
+
 #: internal/menu/actions_industry.go:67
 msgid "Industrial Production"
 msgstr "Промышленное производство"
@@ -1349,9 +1360,8 @@ msgid "Item"
 msgstr ""
 
 #: internal/game/units.go:84
-#, fuzzy
 msgid "Jet"
-msgstr "Самолёты"
+msgstr "Самолёт"
 
 #: internal/menu/tree.go:173
 msgid "Jets"
@@ -1371,7 +1381,7 @@ msgstr ""
 
 #: internal/menu/actions_iptrade.go:73
 msgid "Key"
-msgstr ""
+msgstr "Кл."
 
 #: internal/menu/opshelp.go:37
 msgid ""
@@ -1520,6 +1530,10 @@ msgstr ""
 msgid "Morale is low. Desertion is a real risk before our next battle."
 msgstr ""
 
+#: internal/game/regions.go:157
+msgid "Mountain"
+msgstr "Горы"
+
 #: internal/menu/actions_diplomacy.go:126
 msgid "NONE"
 msgstr ""
@@ -1530,7 +1544,7 @@ msgstr ""
 
 #: internal/menu/actions_ipscores.go:309
 msgid "Name"
-msgstr ""
+msgstr "Название"
 
 #: internal/game/spyguy.go:34
 msgid "Name the planet to watch."
@@ -1797,9 +1811,8 @@ msgid "Overdue debt: $%s (grows each turn until repaid)"
 msgstr ""
 
 #: internal/menu/actions_regions.go:37
-#, fuzzy
 msgid "Owned"
-msgstr "# Есть"
+msgstr "Есть"
 
 #: internal/menu/turnstages.go:541
 msgid "Pick your six letters:"
@@ -1972,6 +1985,10 @@ msgstr ""
 #: internal/menu/turnrecap.go:477
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Из-за высоких налогов начались бунты!"
+
+#: internal/game/regions.go:159
+msgid "River"
+msgstr "Река"
 
 #: internal/menu/opshelp.go:53
 msgid "S3-Sabre"
@@ -2242,9 +2259,8 @@ msgid "Taken: another realm already answers to that name."
 msgstr "Занято: другая держава уже носит это имя."
 
 #: internal/game/units.go:117
-#, fuzzy
 msgid "Tank"
-msgstr "Танки"
+msgstr "Танк"
 
 #: internal/menu/actions_diplomacy.go:98
 msgid "Tanks"
@@ -2269,6 +2285,10 @@ msgstr "Налоговая ставка установлена на %d%%."
 #: internal/menu/advisors.go:182
 msgid "Taxes are high enough to risk riots. Consider lowering them."
 msgstr ""
+
+#: internal/game/regions.go:163
+msgid "Technology"
+msgstr "Технологии"
 
 #: internal/menu/advisors.go:273
 msgid ""
@@ -2607,9 +2627,8 @@ msgstr "Налоговая ставка установлена на %d%%."
 
 # Buy / sell items
 #: internal/game/units.go:73
-#, fuzzy
 msgid "Trooper"
-msgstr "Солдаты"
+msgstr "Солдат"
 
 # Buy / sell items
 #: internal/menu/actions_diplomacy.go:98
@@ -2628,9 +2647,8 @@ msgid "Turns per day"
 msgstr "Осталось ходов сегодня: %d"
 
 #: internal/game/units.go:95
-#, fuzzy
 msgid "Turret"
-msgstr "Турели"
+msgstr "Турель"
 
 #: internal/menu/tree.go:175
 msgid "Turrets"
@@ -2669,6 +2687,10 @@ msgstr "Сегодня запас неограничен."
 #: cmd/immortal-barons/league.go:128
 msgid "Unreadable journal"
 msgstr ""
+
+#: internal/game/regions.go:161
+msgid "Urban"
+msgstr "Город"
 
 #: internal/menu/tree.go:467
 msgid "Use Enter To Exit BUY Menu"
@@ -2744,7 +2766,7 @@ msgstr ""
 
 #: internal/menu/empire_status_screen.go:154
 msgid "Waste"
-msgstr ""
+msgstr "Пустошь"
 
 #: internal/menu/advisors.go:193
 msgid "We earn about %s gold each turn, %d%% of the world total."
@@ -3674,9 +3696,6 @@ msgstr "─»>Пауза<«─"
 
 #~ msgid "Tariff Trade Agreement"
 #~ msgstr "Тарифное соглашение"
-
-#~ msgid "Technology Agreement"
-#~ msgstr "Технологическое соглашение"
 
 #~ msgid "Terrorist Prevention"
 #~ msgstr "Защита от террора"

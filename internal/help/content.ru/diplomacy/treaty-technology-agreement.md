@@ -2,10 +2,10 @@
 category: diplomacy
 in_game: true
 order: 7
-title: 'Технологическое соглашение'
+title: Технологии
 ---
 
-# Технологическое соглашение
+# Технологии
 
 A Technology Agreement shares science between the two realms. Each side's
 research runs faster while the pact holds.

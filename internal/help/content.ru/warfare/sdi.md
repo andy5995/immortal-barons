@@ -9,8 +9,8 @@ title: 'Программа СОИ'
 
 The SDI Program is a shield you fund. It answers three things, and only
 these three: missiles fired at you from another planet, and the jets and
-bombers of a strike arriving from one. It does nothing against a neighbor
-on your own planet — not their army, and not their nuclear, chemical or
+bombers of a strike arriving from one. It does nothing against a neighbor on
+your own planet — not their army, and not their nuclear, chemical or
 biological missiles.  Technology regions lower its upkeep.
 
 At full strength it turns aside about half the missiles aimed at you, takes

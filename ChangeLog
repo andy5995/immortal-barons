@@ -1,6 +1,10 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * German, Dutch and Russian name the units and region types, and the region
+    help topics read in German and Russian
+  * The region table shows translated names, and lines up when they are not
+    written in the Latin alphabet
   * InterPlanetary menu: "Trade" gathers the interplanetary markets, the bids
     you have out and Send Trade Deal on one item
   * The Incoming screen reads in German, Dutch and Russian

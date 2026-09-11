@@ -79,6 +79,11 @@ ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 GAME_PATTERNS = [
     re.compile(r'\bCovertOp\s*=\s*' + STR),
     re.compile(r'\b(?:Singular|Plural):\s*' + STR),
+    # The region table's names, for the same reason as the goods' above: every
+    # screen translates a region by the name it reads off the row, so nothing
+    # on the menu side is a literal. All nine reached the status screen, the
+    # region table and the buy/sell lists untranslated until this was added.
+    re.compile(r'&Region\{Name:\s*' + STR),
     re.compile(r'\btr\(' + STR),
     re.compile(r'\bi18n\.T\([^,]+,\s*' + STR),
 ]

@@ -2,11 +2,11 @@
 category: regions
 in_game: true
 order: 2
-title: Coastal
+title: Побережье
 ---
 
-# Coastal Regions
+# Прибрежные регионы
 
-Coastal regions are your best source of tourism income. In good times they
-make the most gold. But when public support is low, your people lose
-interest and tourism income drops sharply.
+Прибрежные регионы — ваш лучший источник дохода от туризма. В хорошие
+времена они приносят больше всего золота. Но когда поддержка населения
+низка, люди теряют интерес и доход от туризма резко падает.

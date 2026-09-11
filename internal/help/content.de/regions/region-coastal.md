@@ -2,11 +2,12 @@
 category: regions
 in_game: true
 order: 2
-title: Coastal
+title: Küste
 ---
 
-# Coastal Regions
+# Küstenregionen
 
-Coastal regions are your best source of tourism income. In good times they
-make the most gold. But when public support is low, your people lose
-interest and tourism income drops sharply.
+Küstenregionen sind Ihre beste Einnahmequelle aus dem Tourismus. In guten
+Zeiten bringen sie das meiste Gold. Ist der Rückhalt in der Bevölkerung aber
+gering, verlieren Ihre Leute das Interesse und die Tourismuseinnahmen
+brechen ein.

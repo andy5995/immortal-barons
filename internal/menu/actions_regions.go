@@ -33,15 +33,28 @@ func regionRule(s session.Session) {
 // captured-region picker carry them (docs/dev/bre-screens.md, measured from
 // cap/kd3-01.cap) — one routine draws both screens in the original. The drop
 // screen is left without them: no capture of it exists to say either way.
-func printRegionTable(s session.Session, p *game.Empire, advisors bool) {
-	fmt.Fprintf(s, "%s%-5s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Owned"), ansi.Reset)
+// The names are TRANSLATED and padded by column rather than by byte. Both were
+// wrong until 2026-09-11: the table printed reg.Name raw, so it stayed English
+// on a screen the status block beside it had already localized, and %-14s counts
+// bytes — which pads a Cyrillic name to half its width and walks the column
+// after it.
+func printRegionTable(s session.Session, t Term, p *game.Empire, advisors bool) {
+	// Each heading is clipped one column short of its field before being padded
+	// to it, so a word that exactly fills the column still leaves a gap: German
+	// "Taste" is five characters in a five-wide Key field and ran straight into
+	// the heading beside it.
+	head := func(msgid string, width int) string {
+		return padColumn(t, fitColumn(t, tr(s, msgid), width-1), width)
+	}
+	fmt.Fprintf(s, "%s%s%s%s%s\n", ansi.FgBrightWhite,
+		head("Key", 5), head("Name", 15), tr(s, "Owned"), ansi.Reset)
 	regionRule(s)
 	for _, reg := range game.BuyableRegions {
 		// BRE's region table (docs/dev/bre-screens.md): magenta parens, a
 		// bright-white key letter, a bright-yellow name, a bright-white Owned count.
-		fmt.Fprintf(s, " %s(%s%c%s)%s %s%-14s%s %s%5d%s\n",
+		fmt.Fprintf(s, " %s(%s%c%s)%s %s%s%s %s%5d%s\n",
 			ansi.FgMagenta, ansi.FgBrightWhite, reg.Key, ansi.FgMagenta, ansi.Reset,
-			ansi.FgBrightYellow, reg.Name, ansi.Reset,
+			ansi.FgBrightYellow, padColumn(t, tr(s, reg.Name), 14), ansi.Reset,
 			ansi.FgBrightWhite, *reg.Count(&p.Regions), ansi.Reset)
 	}
 	// Waste has no key: it cannot be bought or sold, only decontaminated during
@@ -49,8 +62,8 @@ func printRegionTable(s session.Session, p *game.Empire, advisors bool) {
 	// behind and what it is still paying upkeep on. The blank key column is
 	// sized from the "(X)" the rows above print, so the two stay aligned.
 	if p.Regions.Waste > 0 {
-		fmt.Fprintf(s, " %*s %s%-14s%s %s%5d%s\n",
-			len("(X)"), "", ansi.FgBrightRed, tr(s, "Waste"), ansi.Reset,
+		fmt.Fprintf(s, " %*s %s%s%s %s%5d%s\n",
+			len("(X)"), "", ansi.FgBrightRed, padColumn(t, tr(s, "Waste"), 14), ansi.Reset,
 			ansi.FgBrightRed, p.Regions.Waste, ansi.Reset)
 	}
 	if advisors {
@@ -134,7 +147,7 @@ func buyLand(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "\n%s"+tr(s, "Buy Regions — %d gold each.")+"%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
 		fmt.Fprintf(s, "%s\n", tr(s, "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."))
 		fmt.Fprintf(s, tr(s, "You can afford %s%d%s regions.")+"\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
-		printRegionTable(s, p, true)
+		printRegionTable(s, w.Term, p, true)
 	}
 	showMenu()
 	for {
@@ -250,7 +263,7 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 	}
 	showTable := func() {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, headline, ansi.Reset)
-		printRegionTable(s, w.Player(), true)
+		printRegionTable(s, w.Term, w.Player(), true)
 	}
 	showTable()
 
@@ -319,7 +332,7 @@ func sellLand(s session.Session, w *ctx) Result {
 	// The heading names what this screen does, so the region table below cannot be
 	// mistaken for the Buy Regions one it otherwise resembles.
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "-* Drop Regions *-"), ansi.Reset)
-	printRegionTable(s, p, false)
+	printRegionTable(s, w.Term, p, false)
 	t := promptRegionType(s, tr(s, "Which regions will you give up?"))
 	if t < 0 {
 		return Stay

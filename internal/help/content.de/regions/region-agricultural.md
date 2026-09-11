@@ -2,10 +2,10 @@
 category: regions
 in_game: true
 order: 6
-title: Agricultural
+title: Ackerland
 ---
 
-# Agricultural Regions
+# Ackerland-Regionen
 
-Agricultural regions grow food. They are your main source of food if you are
-not buying it from the market.
+Ackerland-Regionen erzeugen Nahrung. Sie sind Ihre wichtigste
+Nahrungsquelle, wenn Sie nicht auf dem Markt einkaufen.

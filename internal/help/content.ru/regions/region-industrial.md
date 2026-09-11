@@ -2,24 +2,24 @@
 category: regions
 in_game: true
 order: 8
-title: Industrial
+title: Промышленность
 ---
 
-# Industrial Regions
+# Промышленные регионы
 
-Industrial regions build military units for you each turn. A good base of
-Mountain regions makes your industry produce more.
+Промышленные регионы каждый ход строят для вас военные части. Хорошая база
+горных регионов увеличивает их выпуск.
 
-Use Set Industries to say which units they build. You give each unit type a
-percentage of your industry. The screen shows how many of each unit that
-percentage builds. You can change it at any time.
+В меню «Настроить промышленность» вы задаёте, какие части строить. Каждому
+типу частей вы отдаёте долю промышленности в процентах. На экране видно,
+сколько частей даёт эта доля. Менять можно в любой момент.
 
-The percentages do not have to add up to 100. Any share you leave unassigned
-earns gold instead. So the choice is units or gold: if you assign the full
-100% to units, your industry earns no gold.
+Проценты не обязаны давать в сумме 100. Любая нераспределённая доля вместо
+частей приносит золото. Выбор такой: части или золото — отдав частям все
+100%, вы не получите с промышленности золота.
 
-Specialize marks one unit type as your focus. It does not replace your
-percentage split. Your industries make more of the specialized unit and
-fewer of every other unit. Specializing cannot be undone, so choose with
-care. Trading with other specialized empires is the most efficient way to
-get the units you no longer make well.
+Специализация отмечает один тип частей как ваш основной. Она не заменяет
+распределение по процентам. Промышленность строит больше выбранного типа и
+меньше всех остальных. Отменить специализацию нельзя, выбирайте
+внимательно. Торговля с другими специализированными державами — самый
+выгодный способ получить то, что вы больше не строите хорошо.

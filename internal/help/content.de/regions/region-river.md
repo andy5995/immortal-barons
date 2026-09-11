@@ -2,19 +2,20 @@
 category: regions
 in_game: true
 order: 5
-title: River
+title: Fluss
 ---
 
-# River Regions
+# Flussregionen
 
-River regions give you gold from hydroelectric power. They also fish, so
-every river grows a small amount of food each turn. You get both together.
+Flussregionen bringen Ihnen Gold aus Wasserkraft. Es wird dort auch
+gefischt, jeder Fluss erzeugt also jeden Zug etwas Nahrung. Sie bekommen
+beides zugleich.
 
-A river pays less gold than a Coastal, Desert or Mountain region, because
-part of its output goes to fishing instead. What it gives you in return is
-steadiness: river gold barely swings from turn to turn, while the others can
-have a poor turn.
+Ein Fluss zahlt weniger Gold als eine Küsten-, Wüsten- oder Gebirgsregion,
+weil ein Teil seines Ertrags in den Fischfang geht. Dafür erhalten Sie
+Stetigkeit: Flussgold schwankt von Zug zu Zug kaum, während die anderen
+einen schlechten Zug haben können.
 
-The food is a bonus, not a food supply. One river grows about a tenth of
-what one agricultural region grows. Buy rivers for the gold and the
-steadiness; buy agricultural regions when you need to feed people.
+Die Nahrung ist eine Zugabe, keine Versorgung. Ein Fluss erzeugt etwa ein
+Zehntel dessen, was eine Ackerland-Region erzeugt. Kaufen Sie Flüsse für das
+Gold und die Stetigkeit, Ackerland, wenn Sie Menschen ernähren müssen.

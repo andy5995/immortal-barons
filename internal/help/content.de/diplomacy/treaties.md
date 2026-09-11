@@ -17,7 +17,9 @@ quarter of both your support and your army's morale, and the battle is then
 fought at that lower morale. Say no and the attack is called off. The two
 realms are left with no agreement between them, and the ruler you betrayed
 will have their own answer to that. The same question comes up before a
-nuclear, chemical or biological strike.
+nuclear, chemical or biological strike, and before a covert operation that
+sends an agent. Send Spy and Spy on Relations only look, so they do not ask
+and cost you nothing.
 
 A Declaration of War, on the Diplomacy menu, ends an agreement at the same
 price without a battle. It costs nothing if you had no agreement to break.

@@ -21,8 +21,10 @@ drawn from the size of **your own** planet — every region every realm here
 holds — so a crowded planet pays more for the same man. The rate is quoted
 before you pick a target, since it is the same wherever you send him.
 
-You choose how long he stays, up to fifteen days or as many days as your
-gold covers, whichever runs out first.
+You choose how long he stays, up to fifteen days. If the stay costs more
+than you are carrying, the shortfall is named and the bank is opened for
+you; come back with it and the man goes, come back without it and nothing is
+sent or charged.
 
 ## What he reports
 
@@ -36,6 +38,20 @@ read them:
 
 He also reports whatever is already under way the day he arrives, so a man
 sent late is not wasted.
+
+## Reading what he sends
+
+Each report arrives as planet news, dated, saying what was aimed at you and
+how long it had left when he wrote it. That line never changes afterwards,
+so hours later it no longer tells you how long is left.
+
+**Incoming**, on the InterPlanetary menu, is the same warnings kept current: one
+row per threat, the soonest at the top, counting down as you read — `3h`, then
+`90m`, then `away` once the force has left. A weapon already flying is listed
+with the days until it lands.
+
+An empty list is not proof of peace. It means nothing has been reported, and
+only a watcher posted on another planet can report anything.
 
 ## Why it matters
 

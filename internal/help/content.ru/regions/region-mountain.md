@@ -2,11 +2,11 @@
 category: regions
 in_game: true
 order: 3
-title: Mountain
+title: Горы
 ---
 
-# Mountain Regions
+# Горные регионы
 
-Mountain regions mine natural resources. Their income is lower on average,
-but steady, because few things change it. Mountains also boost how much your
-Industrial regions produce.
+Горные регионы добывают полезные ископаемые. Доход с них в среднем ниже,
+зато ровный, потому что мало что на него влияет. Горы также увеличивают
+выпуск ваших промышленных регионов.

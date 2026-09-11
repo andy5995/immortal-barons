@@ -2,11 +2,11 @@
 category: regions
 in_game: true
 order: 3
-title: Mountain
+title: Gebirge
 ---
 
-# Mountain Regions
+# Gebirgsregionen
 
-Mountain regions mine natural resources. Their income is lower on average,
-but steady, because few things change it. Mountains also boost how much your
-Industrial regions produce.
+Gebirgsregionen bauen Bodenschätze ab. Ihre Einnahmen sind im Mittel
+geringer, dafür stetig, weil wenig sie beeinflusst. Gebirge steigern
+außerdem die Produktion Ihrer Industrieregionen.

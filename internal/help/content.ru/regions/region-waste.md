@@ -2,35 +2,34 @@
 category: regions
 in_game: true
 order: 10
-title: Waste
+title: Пустошь
 ---
 
-# Waste Regions
+# Пустоши
 
-Waste is land a nuclear or chemical strike has ruined. You cannot buy it and
-you cannot sell it — an enemy gives it to you.
+Пустошь — это земля, разорённая ядерным или химическим ударом. Её нельзя ни
+купить, ни продать: её дарит вам враг.
 
-Waste stays on your books. It counts toward your territory, it costs the
-same upkeep as any other region, and it earns you nothing. A realm that
-takes several strikes and ignores them ends up paying for land that does no
-work.
+Пустошь остаётся на вашем балансе. Она считается территорией, стоит столько
+же на содержание, сколько любой регион, и не приносит ничего. Держава,
+которая получает удар за ударом и не разбирает завалы, в итоге платит за
+землю, которая не работает.
 
-Cleaning it up is called decontamination, and it is offered during
-maintenance whenever you hold any. Two limits apply:
+Расчистка называется дезактивацией и предлагается во время обслуживания,
+пока у вас есть пустошь. Действуют два ограничения:
 
-- You can clean a **fifth of your waste each turn**, but never fewer than
-  **10 regions** and never more than you actually hold. A big mess takes
-  several turns to clear no matter how rich you are.
-- Each cleaned region costs **half the going price of new
-  land**. Agricultural research cuts that further, down to a quarter.
+- За ход можно очистить **пятую часть пустоши**, но не менее **10 регионов**
+  и не больше, чем у вас есть. Большой завал разбирается за несколько ходов,
+  как бы вы ни были богаты.
+- Каждый очищенный регион стоит **половину текущей цены новой
+  земли**. Аграрные исследования снижают это до четверти.
 
-Paying part of the bill cleans part of the pile, so a short turn is not a
-wasted one.
+Оплатив часть счёта, вы расчистите часть завала, так что скудный ход не
+пропадает зря.
 
-Cleaned land has no type until you give it one. You are asked to share it
-out across region types, the same way you share out land you have conquered.
+У очищенной земли нет типа, пока вы его не зададите. Вас попросят
+распределить её по типам регионов — так же, как захваченную землю.
 
-Strategy: decontaminate early. The upkeep on ruined land runs every turn, so
-a pile you leave alone quietly taxes you for the rest of the game, and the
-clean-up rate means you cannot fix it all at once when you finally get round
-to it.
+Стратегия: дезактивируйте рано. Содержание разорённой земли идёт каждый ход,
+поэтому оставленный завал тихо облагает вас налогом до конца игры, а предел
+расчистки не даст исправить всё разом, когда вы наконец возьмётесь.

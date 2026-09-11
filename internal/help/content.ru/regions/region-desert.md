@@ -2,10 +2,11 @@
 category: regions
 in_game: true
 order: 4
-title: Desert
+title: Пустыня
 ---
 
-# Desert Regions
+# Пустынные регионы
 
-Desert regions are good for solar power. Their income swings with
-conditions, but on average it beats mountains and trails good Coastal land.
+Пустынные регионы хороши для солнечной энергетики. Их доход колеблется в
+зависимости от условий, но в среднем превосходит горы и немного уступает
+хорошему побережью.

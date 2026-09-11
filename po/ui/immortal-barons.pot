@@ -413,6 +413,10 @@ msgstr ""
 msgid "Agreement broken! Revolts spread through your realm — your people will not be ruled by an oath-breaker, and the army's morale goes with them."
 msgstr ""
 
+#: internal/game/regions.go:160
+msgid "Agricultural"
+msgstr ""
+
 #: internal/menu/incoming.go:82
 msgid "Aimed At"
 msgstr ""
@@ -725,6 +729,10 @@ msgstr ""
 msgid "Clear"
 msgstr ""
 
+#: internal/game/regions.go:156
+msgid "Coastal"
+msgstr ""
+
 #: internal/menu/actions_attack.go:671
 msgid "Commit how many Jets?"
 msgstr ""
@@ -851,6 +859,10 @@ msgstr ""
 
 #: internal/menu/tree.go:468
 msgid "Deposit gold at End of Turn"
+msgstr ""
+
+#: internal/game/regions.go:158
+msgid "Desert"
 msgstr ""
 
 #: internal/menu/opshelp.go:30
@@ -1185,6 +1197,10 @@ msgstr ""
 msgid "Indiv. Attack Force"
 msgstr ""
 
+#: internal/game/regions.go:162
+msgid "Industrial"
+msgstr ""
+
 #: internal/menu/actions_industry.go:67
 msgid "Industrial Production"
 msgstr ""
@@ -1395,6 +1411,10 @@ msgstr ""
 
 #: internal/menu/advisors.go:233
 msgid "Morale is low. Desertion is a real risk before our next battle."
+msgstr ""
+
+#: internal/game/regions.go:157
+msgid "Mountain"
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:126
@@ -1809,6 +1829,10 @@ msgstr ""
 msgid "Riots have broken out due to high tax rates!"
 msgstr ""
 
+#: internal/game/regions.go:159
+msgid "River"
+msgstr ""
+
 #: internal/menu/opshelp.go:53
 msgid "S3-Sabre"
 msgstr ""
@@ -2083,6 +2107,10 @@ msgstr ""
 
 #: internal/menu/advisors.go:182
 msgid "Taxes are high enough to risk riots. Consider lowering them."
+msgstr ""
+
+#: internal/game/regions.go:163
+msgid "Technology"
 msgstr ""
 
 #: internal/menu/advisors.go:273
@@ -2459,6 +2487,10 @@ msgstr ""
 
 #: cmd/immortal-barons/league.go:128
 msgid "Unreadable journal"
+msgstr ""
+
+#: internal/game/regions.go:161
+msgid "Urban"
 msgstr ""
 
 #: internal/menu/tree.go:467

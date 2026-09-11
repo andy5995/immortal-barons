@@ -2,24 +2,24 @@
 category: regions
 in_game: true
 order: 9
-title: Technology
+title: Технологии
 ---
 
-# Technology Regions
+# Технологические регионы
 
-Technology regions make your whole empire more efficient. The bonus is not
-instant: it builds up slowly the longer you hold Technology regions, and it
-builds faster when they are a larger share of your land. Bigger empires need
-more Technology regions to reach the same level.
+Технологические регионы делают всю вашу державу эффективнее. Прибавка не
+мгновенна: она копится тем дольше, чем дольше вы держите такие регионы, и
+быстрее, когда их доля в вашей земле больше. Крупным державам нужно больше
+технологических регионов для того же уровня.
 
-Technology helps in several ways:
+Технологии помогают в нескольких вещах:
 
-- Your army fights harder.
-- Your income goes up, including tax income.
-- Your food regions grow more food.
-- Your upkeep goes down, on both your units and your regions.
-- Less of your stored food spoils.
+- Ваша армия сражается упорнее.
+- Ваши доходы растут, включая налоговые.
+- Ваши пахотные регионы дают больше еды.
+- Ваше содержание дешевеет — и частей, и регионов.
+- Меньше запасённой еды портится.
 
-Technology regions produce no gold by themselves. Their worth is the boost
-they give to everything else. They can be costly to keep at first, but over
-a long game they pay off.
+Сами по себе технологические регионы золота не дают. Их ценность — в
+прибавке ко всему остальному. Поначалу их дорого содержать, но за долгую
+игру они окупаются.
