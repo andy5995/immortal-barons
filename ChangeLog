@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * InterPlanetary menu: "Trade" gathers the interplanetary markets, the bids
+    you have out and Send Trade Deal on one item
   * The Incoming screen reads in German, Dutch and Russian
   * Join Group Attack shows the parties forming before it asks for a turn to
     have been played, as the original does

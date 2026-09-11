@@ -1450,7 +1450,12 @@ this screen existed to size it from. That is the trap AGENTS.md names: the
 original sizes each box to its own content, and the captures in this file run
 16, 20, 21, 23, 28, 32, 38, 44, 46 and 52 columns with no house width among them.
 
-Item names, keys and order match IB's exactly.
+Item names, keys and order match IB's exactly, with one deliberate divergence:
+**IB's item 3 is `Trade`, a submenu**, where the original's is `Send Trade Deal`
+itself. That deal, the interplanetary markets and the bids still out are the
+three halves of one activity, and IB had them on two unrelated-looking items —
+`(3) Send Trade Deal` and a `(B) Trading` of its own making. The submenu holds
+all three; `Send Trade Deal` keeps its turn gate inside it (#162).
 
 **Special Operations** (8) is numbered **1-8** with no Help item, and prices its
 first four entries: Bomb Food Market 10,000,000; Bomb Trading Market 25,000,000;

@@ -5450,6 +5450,10 @@ checking IB against a capture:
   op prompts, both captured. IB defaulted these to no for a day; matching the
   original won. See "Force prompts and confirmation" in
   `docs/dev/bre-screens.md`.
+- **The InterPlanetary menu's item 3 is `Trade`, a submenu**, where the
+  original's is `Send Trade Deal` itself. The deal, the markets and the bids out
+  are one activity and were on two unrelated-looking items. See the
+  InterPlanetary menu in `docs/dev/bre-screens.md`.
 - **The Join Group Attack table counts down in minutes and seconds near the
   end** (#269), where the original's `Leave` column prints whole hours however
   little is left. See "Join Group Attack" in `docs/dev/bre-screens.md`.

@@ -442,8 +442,11 @@ func TestInterPlanetaryMenuMatchesBRE(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	out := f.out.String()
+	// "Trade" where the original has "Send Trade Deal": IB's item 3 opens a
+	// submenu holding that deal, the markets and the bids out — a deliberate
+	// divergence (docs/dev/bre-screens.md).
 	for _, want := range []string{
-		"View IPScores", "Terrorist Ops", "Send Trade Deal", "Create Group Attack",
+		"View IPScores", "Terrorist Ops", "Trade", "Create Group Attack",
 		"Join Group Attack", "Indiv. Attack Force", "Send Message", "Special Operations",
 		"SDI Program", "Gooie Kablooie Ops", "Diplomacy List", "Spy Database",
 		"Travel Times", "Visit Bank", "Help", "Quit",

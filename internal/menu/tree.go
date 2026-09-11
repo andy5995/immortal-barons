@@ -19,6 +19,7 @@ type Menus struct {
 	Attack         *Menu
 	InterPlanetary *Menu
 	IPSpecial      *Menu // the interplanetary "Special Operations" submenu
+	IPTrading      *Menu // the interplanetary "Trade" submenu (InterPlanetary item 3)
 	TerrorOps      *Menu
 	Covert         *Menu
 	Trading        *Menu
@@ -230,7 +231,12 @@ func BuildMenus() *Menus {
 			formatGold(p.Gold, lang), formatGold(p.Bank, lang))
 	}
 
+	// Everything that trades across planets, under the InterPlanetary menu's
+	// item 3: the markets, the bids still out, and the one-way deal that used to
+	// sit on that key by itself. A player looking to trade had to know that two
+	// unrelated-looking items were the two halves of it.
 	ipTrading.Items = []Item{
+		{Key: '1', Label: "Send Trade Deal", Do: needsTurnPlayed(sendIPTradeDeal)},
 		{Key: 'M', Label: "Markets", Do: ipMarkets},
 		{Key: 'B', Label: "Bids Out", Do: ipPendingBids},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
@@ -285,7 +291,7 @@ func BuildMenus() *Menus {
 			}
 			return 0
 		}), Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
-		{Key: '3', Label: "Send Trade Deal", Do: needsTurnPlayed(sendIPTradeDeal)},
+		{Key: '3', Label: "Trade", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: '4', Label: "Create Group Attack", Do: needsTurnPlayed(createGroupAttack)},
 		// Not wrapped in needsTurnPlayed: the table of forming parties is drawn
 		// first and the gate is tested before the join itself (joinGroupAttack).
@@ -301,7 +307,6 @@ func BuildMenus() *Menus {
 		// warnings are news lines, frozen at the moment they were written.
 		{Key: 'I', Label: "Incoming Attacks", Do: showIncoming},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
-		{Key: 'B', Label: "Trading", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
 		{Key: 'T', Label: "Travel Times", Do: travelTimes},
@@ -622,6 +627,7 @@ func BuildMenus() *Menus {
 		Attack:         attack,
 		InterPlanetary: interplanetary,
 		IPSpecial:      ipSpecial,
+		IPTrading:      ipTrading,
 		TerrorOps:      terrorOps,
 		Covert:         covert,
 		Trading:        trading,

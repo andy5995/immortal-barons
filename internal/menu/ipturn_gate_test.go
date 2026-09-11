@@ -19,11 +19,13 @@ const refusalMarker = "at least one turn each entry"
 // half of this that play on a real board confirms.
 func TestInterPlanetaryTurnGateCoversTheRightItems(t *testing.T) {
 	gated := map[rune]string{
-		'3': "Send Trade Deal",
 		'4': "Create Group Attack",
 		'6': "Indiv. Attack Force",
 		'8': "Special Operations",
 	}
+	// Send Trade Deal is gated too, but it no longer sits on this menu: it moved
+	// under item 3's Trade submenu, and carries its gate there.
+	//
 	// Join Group Attack is gated too, but not by the wrapper: it draws the table
 	// of forming parties first and refuses the JOIN, which is tested on its own
 	// below — a baron deciding whether to spend a turn is exactly the one who
@@ -153,5 +155,24 @@ func TestJoinGroupAttackShowsTheTableBeforeTheTurnGate(t *testing.T) {
 	}
 	if strings.Contains(out, "Join which group?") {
 		t.Errorf("it asked which party to join before a turn was played:\n%s", out)
+	}
+}
+
+// Send Trade Deal keeps the turn gate in its new home under Trade.
+func TestSendTradeDealKeepsItsGateUnderTrade(t *testing.T) {
+	w := newWorld()
+	w.Config.IBBS = true
+	w.Config.IPTrading = true
+	w.turnPlayed = false
+	it := BuildMenus().IPTrading.byKey('1', w)
+	if it == nil {
+		t.Fatal("Send Trade Deal is not on the Trade submenu")
+	}
+	f := &fakeSession{}
+	if got := it.Do(f, w); got != Stay {
+		t.Errorf("returned %v before a turn was played, want Stay", got)
+	}
+	if !strings.Contains(stripANSI(f.out.String()), refusalMarker) {
+		t.Errorf("it did not refuse before a turn was played:\n%s", f.out.String())
 	}
 }
