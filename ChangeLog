@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Join Group Attack shows the parties forming before it asks for a turn to
+    have been played, as the original does
   * A stray mouse click no longer fills a prompt with stray characters, and
     Ctrl-U clears the planet prompt as it does every other field
   * Covert and terror operations ask, price and confirm in the original's own

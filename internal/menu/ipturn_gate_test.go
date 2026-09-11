@@ -3,6 +3,8 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // refusalMarker is a distinctive fragment of the turn gate's refusal, short
@@ -19,10 +21,14 @@ func TestInterPlanetaryTurnGateCoversTheRightItems(t *testing.T) {
 	gated := map[rune]string{
 		'3': "Send Trade Deal",
 		'4': "Create Group Attack",
-		'5': "Join Group Attack",
 		'6': "Indiv. Attack Force",
 		'8': "Special Operations",
 	}
+	// Join Group Attack is gated too, but not by the wrapper: it draws the table
+	// of forming parties first and refuses the JOIN, which is tested on its own
+	// below — a baron deciding whether to spend a turn is exactly the one who
+	// wants to see what is forming.
+	//
 	// The exempt items whose action only opens another menu, so invoking one
 	// reads no keys and writes nothing of its own.
 	exempt := map[rune]string{
@@ -117,5 +123,35 @@ func TestInterPlanetaryTurnGateOpensOnceATurnIsPlayed(t *testing.T) {
 	}
 	if !strings.Contains(out, "No other planets are known yet") {
 		t.Errorf("Create Group Attack did not run after a turn was played:\n%s", out)
+	}
+}
+
+// Join Group Attack shows what is forming before it refuses — the original's own
+// order, its refusal sitting inline after the party table (#162). IB refused the
+// whole item from the menu until 2026-09-11, which told a baron nothing about
+// whether starting a turn would be worth it.
+func TestJoinGroupAttackShowsTheTableBeforeTheTurnGate(t *testing.T) {
+	w := newWorld()
+	w.turnPlayed = false
+	w.With(func() {
+		w.World.Config.IBBS = true
+		p := w.Player()
+		p.Protection = 0
+		p.Troopers = 10_000
+		w.World.CreateGroupAttack(p, "Mars", "", game.GroupAttackHoursMax,
+			game.AttackForce{Troopers: 1000})
+	})
+	f := &fakeSession{}
+	joinGroupAttack(f, w)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Mars") || !strings.Contains(out, "Leave") {
+		t.Errorf("the table of forming parties was not drawn:\n%s", out)
+	}
+	if !strings.Contains(out, refusalMarker) {
+		t.Errorf("the join was not refused before a turn was played:\n%s", out)
+	}
+	if strings.Contains(out, "Join which group?") {
+		t.Errorf("it asked which party to join before a turn was played:\n%s", out)
 	}
 }

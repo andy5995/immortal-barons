@@ -287,7 +287,9 @@ func BuildMenus() *Menus {
 		}), Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
 		{Key: '3', Label: "Send Trade Deal", Do: needsTurnPlayed(sendIPTradeDeal)},
 		{Key: '4', Label: "Create Group Attack", Do: needsTurnPlayed(createGroupAttack)},
-		{Key: '5', Label: "Join Group Attack", Do: needsTurnPlayed(joinGroupAttack)},
+		// Not wrapped in needsTurnPlayed: the table of forming parties is drawn
+		// first and the gate is tested before the join itself (joinGroupAttack).
+		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
 		{Key: '6', Label: "Indiv. Attack Force", Do: needsTurnPlayed(indivAttackForce)},
 		{Key: '7', Label: "Send Message", Do: gotoMenu(ipMessages)},
 		// Send SpyGuy is the one item here the two switches do not govern, so the

@@ -172,6 +172,7 @@ func TestJoinGroupAttackDrawsTheTableAndJoins(t *testing.T) {
 	})
 
 	fs := &fakeSession{keys: []rune(strconv.Itoa(slot) + "\r500\r\r\r\ry")}
+	b.turnPlayed = true // the join is gated on it; the table above is not
 	joinGroupAttack(fs, b)
 
 	out := stripANSI(fs.out.String())

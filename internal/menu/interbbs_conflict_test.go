@@ -36,6 +36,7 @@ func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
 		},
 	}
+	b.turnPlayed = true // the join is gated on it; the table above is not
 	joinGroupAttack(fb, b)
 
 	w := committedWorld(t, cfg)
@@ -74,6 +75,8 @@ func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 			})
 		},
 	}
+	b.turnPlayed = true // the join is gated on it; the table above is not
+	b.turnPlayed = true
 	joinGroupAttack(fb, b)
 
 	w := committedWorld(t, cfg)

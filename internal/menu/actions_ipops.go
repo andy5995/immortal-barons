@@ -28,12 +28,24 @@ import (
 // inline copy writes it too, so no gated item redraws silently.
 func needsTurnPlayed(do Action) Action {
 	return func(s session.Session, w *ctx) Result {
-		if !w.turnPlayed {
-			ok(s, "You must play at least one turn each entry into the game before you can use this option.")
+		if !turnPlayedThisEntry(s, w) {
 			return Stay
 		}
 		return do(s, w)
 	}
+}
+
+// turnPlayedThisEntry is the same gate as a check rather than a wrapper, for an
+// action that has something to SHOW before it refuses. Join Group Attack is the
+// one, and this is the ORIGINAL's shape rather than a liberty taken with it: its
+// refusal for that item is inline rather than in the shared helper, after the
+// party table is drawn (see #162 in docs/mechanics-reference.md).
+func turnPlayedThisEntry(s session.Session, w *ctx) bool {
+	if w.turnPlayed {
+		return true
+	}
+	ok(s, "You must play at least one turn each entry into the game before you can use this option.")
+	return false
 }
 
 // sendSpyGuy is the Special Operations "Send SpyGuy" item: post a watcher on

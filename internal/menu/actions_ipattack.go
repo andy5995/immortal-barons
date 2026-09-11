@@ -97,15 +97,24 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 
 // joinGroupAttack adds the player's offense to a group attack still forming.
 func joinGroupAttack(s session.Session, w *ctx) Result {
-	if blockedByProtection(s, w) {
-		return Stay
-	}
 	rows := formingGroupRows(s, w)
 	if len(rows) == 0 {
 		ok(s, "No group attacks are forming right now.")
 		return Stay
 	}
 	printGroupAttackTable(s, w.Term, rows)
+	// Both gates are tested HERE, after the table, and in this order — the
+	// original's own (docs/mechanics-reference.md, #162): its refusal sits inline
+	// at BRE.OVR 0x02d1c5, after the party table is drawn and before the New
+	// Realm Protection test. Reading what is forming costs nothing, and a baron
+	// who has not started their turn is exactly the one deciding whether to. IB
+	// refused the whole item from the menu until 2026-09-11.
+	if !turnPlayedThisEntry(s, w) {
+		return Stay
+	}
+	if blockedByProtection(s, w) {
+		return Stay
+	}
 	// Answered with the Id the table SHOWS, not with a row number: the Id column
 	// is the attack's own id and it is what the player is reading off the screen.
 	id, slot := promptGroupChoice(s, rows)

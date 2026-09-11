@@ -4057,7 +4057,10 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   0x020a12) from `run_interbbs_menu` (0x020caf) at sites 0x021038, 0x021051,
   0x021076 and 0x02109b; Join Group Attack (digit 5) carries the same refusal
   inline at 0x02d1c5, after drawing the party table and before the New Realm
-  Protection test. The other nine items are exempt — View IPScores, Terrorist
+  Protection test. **IB matches that order** as of 2026-09-11: it wrapped the
+  item in the shared gate until then, so a baron who had not begun a turn was
+  refused from the menu and never saw what was forming — which is the one thing
+  that would tell them whether beginning one was worth it. The other nine items are exempt — View IPScores, Terrorist
   Ops, Send Message, Gooie Kablooie Ops, SDI Program, the diplomacy list, the
   spy database, travel times and the bank — so a caller who has played no turn
   can still bank, look and send mail, and can still buy terrorist ops. **Every
