@@ -26,19 +26,13 @@ const (
 	MountainRate, MountainBase = 400, 3550  // ore — smallest Rate, most stable
 	CoastalRate, CoastalBase   = 1000, 3750 // tourism — × support factor
 	DesertRate, DesertBase     = 2000, 3000 // solar — widest swing
-	RiverRate, RiverBase       = 100, 5000  // hydro — highest base, occasional bad-year dud
+	RiverRate, RiverBase       = 100, 5000  // hydro — highest base
 )
 
-// RiverDudChancePct is the chance a River's hydropower has a "bad year" and pays
-// half. Kept at the ~10% the game has always used.
-//
-// UNVERIFIED, and the live evidence is against it: across roughly 29 captured
-// hydropower turns every figure was a clean Base + [0, Rate) draw, with no
-// halved value. That is not conclusive on its own (a true 10% rate survives 29
-// samples about 5% of the time), so the mechanic is left in place rather than
-// removed on borderline evidence — but it should be settled before anyone tunes
-// it. Removing it entirely is the likelier correct answer.
-const RiverDudChancePct = 10
+// A River's hydropower has NO "bad year": IB carried a RiverDudChancePct of 10
+// that halved the yield, and the production routine in the original binary has
+// no such branch — its only fork is the Random(4) fishing roll. Removing it is
+// what makes IB's river pay BRE's expected gold exactly (see riverGold).
 
 // CrownTaxSupportPenalty bounds the popular support a baron loses by failing to
 // pay the Queen's tax in full. It is a ceiling the penalty approaches but never

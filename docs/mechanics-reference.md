@@ -2005,7 +2005,11 @@ band came from 12 turns — the sample size at which any uniform looks narrow.
 BRE.OVR:
 
 - **Gold** — `yield×55/100 + 2,500` per region, paid on the **unallocated %**
-  only (so allocating everything to units earns no industrial gold).
+  only (so allocating everything to units earns no industrial gold). It takes
+  **no technology factor**: every other gold block in the production routine
+  opens with `technology_factor(1.5, slot 0)` and the industrial one does not.
+  IB scaled it until 2026-09-11, which also made the figure on Set Industries
+  disagree with the one credited.
 - **Units** — a flat **2,100** points per region, unaffected by the yield draw,
   which is why unit output is identical turn to turn while gold varies.
   Costs: trooper 100 / jet 140 / turret 150 / tank 500 / bomber 1,500 /
@@ -2890,7 +2894,11 @@ section is a record of what was claimed and how it was settled, so the word
   turn.
 
   The split is **expectation-preserving** — it is BRE's average, not a buff or a
-  nerf — so no rebalancing follows from it. What it removes is the variance. At
+  nerf — so no rebalancing follows from it. What it removes is the variance.
+  It is exact as of 2026-09-11: IB had also rolled a 10% "bad year" that halved
+  the hydropower gold, which cost 5% of the expectation and which the production
+  routine has no branch for. Its only fork is the `Random(4)` fishing roll, so
+  the constant was removed. At
   24 rivers the swing is ~121,000 gold present or absent; a player who commits to
   rivers at scale faces millions of gold appearing and vanishing with no way to
   plan around it, and a food source that shows up a quarter of the time is close

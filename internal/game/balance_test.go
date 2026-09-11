@@ -69,31 +69,18 @@ func TestIndustrialGoldCreditedOnce(t *testing.T) {
 	}
 }
 
-// TestRiverBadYearDud exercises both River branches across game-days: the dud
-// (RiverBase/2, no swing) and the normal yield (>= RiverBase).
-func TestRiverBadYearDud(t *testing.T) {
+// TestRiverGoldHasNoBadYear holds the river to BRE's band. The original rolls
+// only Random(4) for fishing and has no halving branch, so every hydropower turn
+// pays Base + [0, Rate) less the food share. Golden literals: 5,000..5,099 at
+// 75% is 3,750..3,824.
+func TestRiverGoldHasNoBadYear(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("h", "Realm")
-	// riverGold is net of the food share (RiverFishShare), so both branches are
-	// scaled the same way.
-	share := func(n int) int { return n * (100 - RiverFishShare) / 100 }
-	sawDud, sawNormal := false, false
-	for day := 0; day < 200 && !(sawDud && sawNormal); day++ {
+	for day := 0; day < 200; day++ {
 		w.GameDay = day
-		switch g := w.riverGold(e); {
-		case g == share(RiverBase/2):
-			sawDud = true
-		case g >= share(RiverBase):
-			sawNormal = true
-		default:
-			t.Fatalf("day %d: riverGold=%d outside expected values", day, g)
+		if g := w.riverGold(e); g < 3750 || g > 3824 {
+			t.Fatalf("day %d: riverGold=%d, want 3750..3824", day, g)
 		}
-	}
-	if !sawDud {
-		t.Error("expected at least one River bad-year dud across 200 days")
-	}
-	if !sawNormal {
-		t.Error("expected at least one normal River year across 200 days")
 	}
 }
 

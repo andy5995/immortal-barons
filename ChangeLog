@@ -1,6 +1,10 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Rivers pay the original's full hydropower gold: the 10% "bad year" that
+    halved it was IB's own and is gone
+  * Industrial gold is no longer raised by technology research, which the
+    original does not do and which disagreed with the Set Industries figure
   * The bank, spending, attack, covert, trading and message menus read in
     German, Dutch and Russian
   * German, Dutch and Russian name the units and region types, and the help

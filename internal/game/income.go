@@ -104,22 +104,20 @@ func (w *World) ProjectedIndustrialGold(e *Empire, pct int) int64 {
 
 // riverGold is one River region's hydropower gold this turn: the full yield
 // less the share taken as food (see RiverFishShare). Rivers have the highest
-// base but an occasional "bad year" (a small deterministic chance, keyed off a
-// separate yield salt) that halves the take.
+// base, and no bad year — BRE's own river either runs hydropower or fishes,
+// with nothing else to roll (BRE.OVR, the production routine's river block).
 func (w *World) riverGold(e *Empire) int {
 	yield := w.regionDraw(e, 4, RiverRate) + RiverBase
-	if w.regionDraw(e, 40, 100) < RiverDudChancePct {
-		yield = RiverBase / 2
-	}
 	return yield * (100 - RiverFishShare) / 100
 }
 
 // IncomeThisTurn itemizes e's income for the current turn. Each region's gold
 // is BRE's perRegion = Base + [0, Rate) times its region count; Coastal is
 // additionally scaled by a support floor (0.10 + 0.90·support, so tourism never
-// zeroes out). TechFactor scales every gold source (the tech-factor's role as
-// an income multiplier is otherwise deferred to #20). Products are widened to
-// int64 so they stay correct on 32-bit builds even at money-cap scale.
+// zeroes out). The gold technology factor scales each REGION gold source, as it
+// does in the original; industrial gold and the trade bonus are untouched by it.
+// Products are widened to int64 so they stay correct on 32-bit builds even at
+// money-cap scale.
 func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	// Region income and population tax draw on DIFFERENT research slots in BRE,
 	// so they scale independently.
@@ -132,12 +130,15 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
 	riverGold := w.riverGold(e)
 	return IncomeBreakdown{
-		Taxes:      scaleTax(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
-		Ore:        scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
-		Tourism:    scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
-		Solar:      scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
-		Rivers:     scale(int64(riverGold) * int64(e.Regions.River)),
-		Industrial: scale(w.industrialGold(e)),
+		Taxes:   scaleTax(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
+		Ore:     scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
+		Tourism: scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
+		Solar:   scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
+		Rivers:  scale(int64(riverGold) * int64(e.Regions.River)),
+		// Industrial gold is NOT technology-scaled: every other gold block in
+		// BRE's production routine opens with technology_factor(1.5, slot 0)
+		// and the industrial one does not.
+		Industrial: int(w.industrialGold(e)),
 		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
 		Food:       w.FoodProduced(e),
 		RiverFood:  w.riverFood(e),
