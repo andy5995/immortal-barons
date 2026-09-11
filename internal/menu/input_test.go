@@ -115,3 +115,25 @@ func TestEditAmountKillLineErasesAnExpandedShortcut(t *testing.T) {
 		t.Errorf("erased %d columns, want 10 — 1b renders as ten digits", n)
 	}
 }
+
+// k/m/b multiply what is already typed, so they do nothing on an empty field.
+// Leaning on m used to lay down zeroes of its own — "000000000000000" at a
+// Withdraw prompt, which parses as nothing anybody meant.
+func TestAmountShortcutsNeedAFigureToMultiply(t *testing.T) {
+	for _, c := range []struct {
+		keys string
+		want int
+	}{
+		{"mmmkkk\r", 0},     // nothing typed: the shortcuts are inert
+		{"0mm\r", 0},        // a leading zero is not a figure to scale
+		{"5m\r", 5_000_000}, // and they still work where they should
+		{"12k\r", 12_000},
+		{"2b\r", 2_000_000_000},
+		{"3m5\r", 30_000_005}, // the zeroes go in where they are typed, then the 5
+	} {
+		fs := &fakeSession{keys: []rune(c.keys)}
+		if got := editAmount(fs, "", 0, 9_000_000_000); got != c.want {
+			t.Errorf("keys %q gave %d, want %d", c.keys, got, c.want)
+		}
+	}
+}

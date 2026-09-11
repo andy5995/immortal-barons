@@ -368,12 +368,22 @@ func editAmount[T numfmt.Number](s session.Session, prefix string, suggested, ma
 			// The prefilled max stays editable, so it goes in a rune at a time
 			// like anything else the player typed.
 			e.PutString(strconv.FormatInt(int64(max), 10))
+		// k/m/b multiply what has been typed, so they need something to multiply:
+		// pressed on an empty field they used to lay down a run of zeroes on their
+		// own, and "000000000000000" is what a player got for leaning on m. They
+		// take effect only when the field opens with a digit 1-9.
 		case r == 'k' || r == 'K': // expand in place: 1 k -> 1000
-			e.PutString("000")
+			if amountStarted(e.String()) {
+				e.PutString("000")
+			}
 		case r == 'm' || r == 'M':
-			e.PutString("000000")
+			if amountStarted(e.String()) {
+				e.PutString("000000")
+			}
 		case r == 'b' || r == 'B': // expand in place: 1 b -> 1000000000
-			e.PutString("000000000")
+			if amountStarted(e.String()) {
+				e.PutString("000000000")
+			}
 		case r == 127 || r == 8: // backspace
 			e.Backspace()
 		case r == session.KillLine: // Ctrl-U: erase the whole field
@@ -390,6 +400,17 @@ func editAmount[T numfmt.Number](s session.Session, prefix string, suggested, ma
 		}
 	}
 	return clampAmt(suggested, max)
+}
+
+// amountStarted reports whether a field holds a figure the k/m/b shortcuts can
+// multiply: one that opens with a digit 1-9. A field that is empty, or that
+// opens with a zero, has nothing for them to scale.
+func amountStarted(field string) bool {
+	if field == "" {
+		return false
+	}
+	r := []rune(field)[0]
+	return r >= '1' && r <= '9'
 }
 
 func clampAmt[T numfmt.Number](n, max T) T {

@@ -3,6 +3,8 @@ Immortal Barons ChangeLog
 (in-progress:)
   * The InterPlanetary Special Operations menu is one column, in the original's
     colour, and prices its four bombing operations
+  * At a "how many" prompt, k/m/b only multiply a figure already typed, instead
+    of filling the field with zeroes on their own
   * Industrial gold is figured in the same width as the rest of the money, so a
     32-bit build cannot wrap it on a very large realm
   * A large realm's Industrial Zones produce the units they should, instead of
