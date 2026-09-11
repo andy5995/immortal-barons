@@ -1,9 +1,6 @@
 package game
 
 import (
-	"encoding/binary"
-	"hash/fnv"
-	"io"
 	"math"
 	"math/big"
 )
@@ -62,16 +59,7 @@ func (w *World) CrownTax(e *Empire) int64 {
 // of Rate/100 — the same range and mean, but coarser. Live play shows the finer
 // steps (one ore turn came out at Base + 279, which is not a multiple of 4).
 func (w *World) regionDraw(e *Empire, salt, n int) int {
-	if n <= 0 {
-		return 0
-	}
-	h := fnv.New32a()
-	var buf [8]byte
-	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
-	binary.LittleEndian.PutUint32(buf[4:8], uint32(salt))
-	h.Write(buf[:])
-	io.WriteString(h, e.Name)
-	return int(h.Sum32() % uint32(n))
+	return newDraw().num(w.GameDay).num(salt).text(e.Name).roll(n)
 }
 
 // industrialGold is the empire's TOTAL industrial gold this turn (not per

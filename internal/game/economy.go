@@ -1,10 +1,7 @@
 package game
 
 import (
-	"encoding/binary"
 	"errors"
-	"hash/fnv"
-	"io"
 )
 
 var (
@@ -22,13 +19,8 @@ var (
 // within [FoodBuyPriceMin, 3×FoodBuyPriceMin] — BRE's [20,60] band (IB is
 // BRE-native scale). Deterministic per game-day, so it holds for the whole day.
 func (w *World) FoodBuyPrice() int {
-	h := fnv.New32a()
-	var buf [4]byte
-	binary.LittleEndian.PutUint32(buf[:], uint32(w.GameDay))
-	h.Write(buf[:])
-	io.WriteString(h, "foodprice")
-	span := uint32(2*FoodBuyPriceMin + 1) // range min .. 3×min
-	return FoodBuyPriceMin + int(h.Sum32()%span)
+	span := 2*FoodBuyPriceMin + 1 // range min .. 3×min
+	return FoodBuyPriceMin + newDraw().num(w.GameDay).text("foodprice").roll(span)
 }
 
 // FoodSellPrice is today's price the market pays per unit sold: buy/3 (BRE's
@@ -50,17 +42,7 @@ func (w *World) HQPrice(e *Empire) int {
 
 // priceJitter is a deterministic draw in [0, n) for empire e this turn.
 func (w *World) priceJitter(e *Empire, tag string, n int) int {
-	if n <= 0 {
-		return 0
-	}
-	h := fnv.New32a()
-	var buf [8]byte
-	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
-	binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsPlayed))
-	h.Write(buf[:])
-	io.WriteString(h, tag)
-	io.WriteString(h, e.Name)
-	return int(h.Sum32() % uint32(n))
+	return newDraw().num(w.GameDay).num(e.TurnsPlayed).text(tag).text(e.Name).roll(n)
 }
 
 // StartHQ begins HeadQuarters construction (HQBuildStart% the first turn); it
@@ -331,18 +313,7 @@ func midPrice(lo, hi int) int { return (lo + hi) / 2 }
 // price walk needs for one unit this turn. Keyed per empire and turn (like
 // priceJitter and riversFish) so the walk is reproducible and needs no shared RNG.
 func (w *World) walkRoll(e *Empire, tag string, k, n int) int {
-	if n <= 0 {
-		return 0
-	}
-	h := fnv.New32a()
-	var buf [12]byte
-	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
-	binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsLeft))
-	binary.LittleEndian.PutUint32(buf[8:12], uint32(k))
-	h.Write(buf[:])
-	io.WriteString(h, tag)
-	io.WriteString(h, e.Name)
-	return int(h.Sum32() % uint32(n))
+	return newDraw().num(w.GameDay).num(e.TurnsLeft).num(k).text(tag).text(e.Name).roll(n)
 }
 
 // stepPrice advances one stored per-empire price by one turn of BRE's walk (the
