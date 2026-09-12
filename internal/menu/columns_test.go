@@ -130,3 +130,37 @@ func TestGameMenuMessagesAndHelp(t *testing.T) {
 		t.Errorf("Game menu should not contain the old Help Database / (B) item:\n%s", out)
 	}
 }
+
+// A unit count or price wider than its column must widen the column for every
+// row, not push its own row one place right of the rest. The columns are
+// right-aligned, so the proof is that every row of the table — header included —
+// ends at the same column.
+func TestWideFiguresKeepTheTableColumnsAligned(t *testing.T) {
+	menus := BuildMenus()
+	f := &fakeSession{}
+	w := newWorld()
+	p := w.Player()
+	p.Jets = 10_481_900
+	p.Troopers = 49
+
+	draw(f, w, menus.Spending)
+
+	var ends []int
+	var rows []string
+	for _, ln := range strings.Split(stripANSI(f.out.String()), "\n") {
+		ln = strings.TrimRight(ln, " \r")
+		if !strings.Contains(ln, "# Owned") && !strings.Contains(ln, "10,481,900") && !strings.Contains(ln, "(1) Troopers") {
+			continue
+		}
+		ends = append(ends, len([]rune(ln)))
+		rows = append(rows, ln)
+	}
+	if len(ends) != 3 {
+		t.Fatalf("expected the header and two unit rows, got %d:\n%s", len(ends), f.out.String())
+	}
+	for i, n := range ends {
+		if n != ends[0] {
+			t.Errorf("row %d ends at column %d, the header at %d:\n%s", i, n, ends[0], strings.Join(rows, "\n"))
+		}
+	}
+}

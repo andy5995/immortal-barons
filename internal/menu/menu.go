@@ -803,6 +803,38 @@ func (m *Menu) labelWidth(g *ctx, lang string) int {
 	return w
 }
 
+// columnCells renders the Price and # Owned cell of every visible item once,
+// and returns the width to draw each column at: BRE's 8 and 9, widened to fit
+// the longest value on the menu. The widths cannot be constants for the same
+// reason labelWidth's cannot — a value that outgrows its column pushes its own
+// row one place right of every other row's, and unit counts and prices both
+// reach eight and nine digits in a long game. The cells come back rendered
+// because each one calls into shared world state, which is read once here
+// rather than again while drawing.
+func (m *Menu) columnCells(g *ctx, lang string) (price, owned []string, pw, ow int) {
+	price, owned = make([]string, len(m.Items)), make([]string, len(m.Items))
+	pw, ow = 8, 9
+	for i := range m.Items {
+		it := &m.Items[i]
+		if it.hidden(g) || it.Do == nil {
+			continue
+		}
+		if it.Price != nil {
+			price[i] = formatGold(it.Price(g), lang)
+			if n := utf8.RuneCountInString(price[i]); n > pw {
+				pw = n
+			}
+		}
+		if it.Owned != nil {
+			owned[i] = formatGold(it.Owned(g), lang)
+			if n := utf8.RuneCountInString(owned[i]); n > ow {
+				ow = n
+			}
+		}
+	}
+	return price, owned, pw, ow
+}
+
 // padLabel pads s to w visible columns. fmt's %-*s counts bytes, which
 // under-pads any label carrying a non-ASCII rune.
 func padLabel(s string, w int) string {
@@ -865,16 +897,18 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		var body strings.Builder
 		cols := m.hasColumns(g)
 		ownedCol := cols && m.hasOwnedColumn(g)
-		lw := 0
+		lw, pw, ow := 0, 0, 0
+		var priceCell, ownedCell []string
 		if cols {
 			lw = m.labelWidth(g, lang)
+			priceCell, ownedCell, pw, ow = m.columnCells(g, lang)
 		}
 		if cols && ownedCol {
-			fmt.Fprintf(&body, "%s  Key %s %8s %9s%s\n",
-				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
+			fmt.Fprintf(&body, "%s  Key %s %*s %*s%s\n",
+				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), pw, i18n.T(lang, "Price"), ow, i18n.T(lang, "# Owned"), ansi.Reset)
 		} else if cols {
-			fmt.Fprintf(&body, "%s  Key %s %8s%s\n",
-				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), i18n.T(lang, "Price"), ansi.Reset)
+			fmt.Fprintf(&body, "%s  Key %s %*s%s\n",
+				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), pw, i18n.T(lang, "Price"), ansi.Reset)
 		}
 		if m.Columns >= 2 && !cols {
 			drawItemsColumns(&body, g, m, col, lang, m.Columns)
@@ -889,23 +923,17 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					continue
 				}
 				if cols {
-					price, owned := "", ""
-					if it.Price != nil {
-						price = formatGold(it.Price(g), lang)
-					}
-					if it.Owned != nil {
-						owned = formatGold(it.Owned(g), lang)
-					}
+					price, owned := priceCell[i], ownedCell[i]
 					// BRE (live capture): normal-accent parens with a bright-accent key,
 					// white label, bright-white Price, white Owned.
 					if ownedCol {
-						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%8s%s %s%9s%s\n",
+						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%*s%s %s%*s%s\n",
 							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
-							ansi.FgBrightWhite, price, ansi.Reset, ansi.FgWhite, owned, ansi.Reset)
+							ansi.FgBrightWhite, pw, price, ansi.Reset, ansi.FgWhite, ow, owned, ansi.Reset)
 					} else {
-						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%8s%s\n",
+						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%*s%s\n",
 							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
-							ansi.FgBrightWhite, price, ansi.Reset)
+							ansi.FgBrightWhite, pw, price, ansi.Reset)
 					}
 					continue
 				}
