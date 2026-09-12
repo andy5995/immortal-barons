@@ -66,17 +66,21 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 // player has just agreed to should not fail against a bank balance they were
 // never offered the chance to draw on.
 func affordOrBank(s session.Session, w *ctx, cost int64, refusal error) bool {
-	short := func() int64 {
+	// present reports the caller's own empire; gone is a realm that changed under
+	// the session (another node, a reset). The helper stands aside then rather
+	// than refusing on a zero purse, so the action that follows reports what
+	// actually happened instead of a shortfall that was never the problem.
+	short := func() (n int64, present bool) {
 		var gold int64
 		w.Read(func() {
 			if p := w.Player(); p != nil {
-				gold = p.Gold
+				gold, present = p.Gold, true
 			}
 		})
-		return cost - gold
+		return cost - gold, present
 	}
-	n := short()
-	if n <= 0 {
+	n, present := short()
+	if !present || n <= 0 {
 		return true
 	}
 	// One beat, not two: the refusal prints WITHOUT its pause, because the
@@ -85,7 +89,7 @@ func affordOrBank(s session.Session, w *ctx, cost int64, refusal error) bool {
 	// exactly what it no longer is.
 	failNoPause(s, refusal)
 	visited := offerBank(s, w, n)
-	if short() <= 0 {
+	if n, present := short(); !present || n <= 0 {
 		return true
 	}
 	// Came back from the bank no richer: say why nothing is going to happen. The

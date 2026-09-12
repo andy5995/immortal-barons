@@ -47,12 +47,12 @@ func TestSpyGuyShortOfGoldIsOfferedTheBank(t *testing.T) {
 	if perDay == 0 {
 		t.Fatal("this test needs a non-zero daily rate to prove anything")
 	}
-	// planet 1, 15 days, "y" to the bank, (W)ithdraw everything, quit the bank.
-	f := &fakeSession{keys: []rune("1\r15\ryW1000000000\r0\r\r")}
+	// planet 1, 15 days, (1) Withdraw the shortfall.
+	f := &fakeSession{keys: []rune("1\r15\r1\r")}
 	sendSpyGuy(f, w)
 
 	out := stripANSI(f.out.String())
-	if !strings.Contains(out, "Visit the bank?") {
+	if !strings.Contains(out, "Withdraw") || !strings.Contains(out, "Visit the bank") {
 		t.Fatalf("no bank offer:\n%s", out)
 	}
 	if !strings.Contains(out, "will watch it for 15 days") {
@@ -78,7 +78,7 @@ func TestSpyGuyStillShortIsRefused(t *testing.T) {
 	}
 	// The refusal is the ops menu's, printed before the bank is offered rather
 	// than by the send failing afterwards.
-	if !strings.Contains(out, game.ErrCantAffordOp.Error()) {
+	if !strings.Contains(out, game.ErrCantAfford.Error()) {
 		t.Errorf("the send was not refused:\n%s", out)
 	}
 	var sent bool

@@ -28,18 +28,17 @@ func TestCovertShortOfGoldIsOfferedTheBank(t *testing.T) {
 		}
 	})
 	w.bank = BuildMenus().Bank
-	// Target A, "y" to the bank, withdraw the lot, quit the bank, one agent, pause.
-	// Target A, "y" to the bank, withdraw the lot, quit the bank, one agent, and
-	// the acknowledgement's pause. The refusal itself does not pause: the bank
-	// question follows it straight away.
-	f := &fakeSession{keys: []rune("AyW1000000000\r01\r ")}
+	// Target A, (1) Withdraw the shortfall, one agent, and the acknowledgement's
+	// pause. The refusal itself does not pause: the offer follows it straight
+	// away.
+	f := &fakeSession{keys: []rune("A11\r ")}
 	sendAgents(f, w, row)
 
 	out := stripANSI(f.out.String())
-	if !strings.Contains(out, game.ErrCantAffordCovert.Error()) {
+	if !strings.Contains(out, game.ErrCantAfford.Error()) {
 		t.Fatalf("the refusal was not shown first:\n%s", out)
 	}
-	if !strings.Contains(out, "Visit the bank?") {
+	if !strings.Contains(out, "Withdraw") || !strings.Contains(out, "Visit the bank") {
 		t.Fatalf("no bank offer:\n%s", out)
 	}
 	if !strings.Contains(out, "Sent out") {
@@ -76,7 +75,7 @@ func TestCovertStillShortSendsNothing(t *testing.T) {
 	sendAgents(f, w, row)
 
 	out := stripANSI(f.out.String())
-	if !strings.Contains(out, game.ErrCantAffordCovert.Error()) {
+	if !strings.Contains(out, game.ErrCantAfford.Error()) {
 		t.Fatalf("no refusal:\n%s", out)
 	}
 	if strings.Contains(out, "Sent out") {
@@ -105,11 +104,11 @@ func TestBankVisitThatChangesNothingSaysSoAgain(t *testing.T) {
 		p.Gold, p.Bank = 0, 0
 	})
 	w.bank = BuildMenus().Bank
-	f := &fakeSession{keys: []rune("Mars\ryy0 ")} // accept, visit the bank, quit it
+	f := &fakeSession{keys: []rune("Mars\ry10 ")} // accept, (1) Visit the bank, quit it
 	ipSpecialOp(game.OpBombFood)(f, w)
 
 	out := stripANSI(f.out.String())
-	if n := strings.Count(out, game.ErrCantAffordOp.Error()); n != 2 {
+	if n := strings.Count(out, game.ErrCantAfford.Error()); n != 2 {
 		t.Errorf("the refusal appears %d times, want twice — once before the bank and once after:\n%s", n, out)
 	}
 	var sent int
@@ -138,7 +137,51 @@ func TestDecliningTheBankIsNotToldTwice(t *testing.T) {
 	ipSpecialOp(game.OpBombFood)(f, w)
 
 	out := stripANSI(f.out.String())
-	if n := strings.Count(out, game.ErrCantAffordOp.Error()); n != 1 {
+	if n := strings.Count(out, game.ErrCantAfford.Error()); n != 1 {
 		t.Errorf("the refusal appears %d times, want once:\n%s", n, out)
+	}
+}
+
+// A missile beyond the gold in hand is refused and the bank offered, and what
+// is withdrawn pays for it. The original spends the bank without asking; see
+// payArmsDealer on the divergence.
+func TestMissileShortOfGoldIsOfferedTheBank(t *testing.T) {
+	w := newWorld()
+	w.bank = BuildMenus().Bank
+	w.With(func() {
+		p := w.Player()
+		p.Protection, p.Gold, p.Bank = 0, 0, 1_000_000_000
+		for _, e := range w.World.Empires {
+			e.Protection = 0
+		}
+	})
+	// Target A, buy it, (1) Withdraw the shortfall, pause.
+	f := &fakeSession{keys: []rune("Ay1 ")}
+	nuclearAttack(f, w)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, game.ErrCantAfford.Error()) || !strings.Contains(out, "Withdraw") {
+		t.Fatalf("the missile was not refused and offered the bank:\n%s", out)
+	}
+	var gold, bank int64
+	w.Read(func() { p := w.Player(); gold, bank = p.Gold, p.Bank })
+	if gold+bank >= 1_000_000_000 {
+		t.Errorf("nothing was spent after the withdrawal: gold %d, bank %d", gold, bank)
+	}
+}
+
+// The offer's second option opens the bank menu itself, for the baron who wants
+// a loan rather than the withdrawal it suggests.
+func TestShortOfGoldOfferOpensTheBankMenu(t *testing.T) {
+	w := newWorld()
+	w.bank = BuildMenus().Bank
+	w.With(func() { p := w.Player(); p.Gold, p.Bank = 0, 5_000 })
+
+	f := &fakeSession{keys: []rune("20")} // (2) Visit the bank, then quit it
+	if !offerBank(f, w, 1_000) {
+		t.Error("visiting the bank should report the visit")
+	}
+	if out := stripANSI(f.out.String()); !strings.Contains(out, "Goldie Luck's Bank") {
+		t.Errorf("the bank menu was not drawn:\n%s", out)
 	}
 }

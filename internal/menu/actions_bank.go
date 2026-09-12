@@ -3,6 +3,8 @@ package menu
 import (
 	"fmt"
 	"sort"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -205,9 +207,81 @@ func bankRates(s session.Session, w *ctx) Result {
 // back has a screen of bank menu between them and it.
 func offerBank(s session.Session, w *ctx, short int64) (visited bool) {
 	okNoPause(s, "That costs %s gold more than you have in hand.", comma(short))
-	if w.bank == nil || !AskYesNo(s, "Visit the bank?", true) {
+	if w.bank == nil {
 		return false
 	}
+	var bank int64
+	w.Read(func() {
+		if p := w.Player(); p != nil {
+			bank = p.Bank
+		}
+	})
+	// Withdrawing is offered only when savings can actually cover the shortfall;
+	// an option that cannot lead anywhere is worse than one line fewer. The bank
+	// itself is always worth opening, because the loan desk can reach a price the
+	// account cannot.
+	type option struct {
+		label string
+		do    func() bool
+	}
+	var opts []option
+	if bank >= short {
+		opts = append(opts, option{
+			fmt.Sprintf(tr(s, "Withdraw %s gold"), comma(short)),
+			func() bool {
+				// The figure is already on the option, so there is nothing left to
+				// ask: World.Withdraw straight away, the same call the Bank menu's
+				// Withdraw Funds makes, under the same reload.
+				if err := w.mutatePlayer(func(p *game.Empire) error {
+					return w.World.Withdraw(p, short)
+				}); err != nil {
+					fail(s, err)
+				}
+				return true
+			},
+		})
+	}
+	opts = append(opts, option{tr(s, "Visit the bank"), func() bool { return runBank(s, w) }})
+
+	labels := make([]string, len(opts))
+	for i, o := range opts {
+		labels[i] = o.label
+	}
+	drawGoldNeeded(s, labels)
+	if n := ChoiceQuit(s, len(opts)); n >= 1 {
+		return opts[n-1].do()
+	}
+	return false
+}
+
+// drawGoldNeeded draws the offer as a boxed menu in the bank's own accent,
+// sized to its widest item — the engine's own item shape and closing rule, so a
+// prompt that interrupts a purchase looks like the rest of the game rather than
+// a bare list.
+func drawGoldNeeded(s session.Session, labels []string) {
+	col := ansi.FgBrightCyan // Goldie Luck's Bank's accent
+	keys := make([]rune, len(labels))
+	for i := range labels {
+		keys[i] = rune('1' + i)
+	}
+	labels = append(labels, tr(s, "Quit"))
+	keys = append(keys, '0')
+	width := 0
+	for _, label := range labels {
+		if n := 6 + utf8.RuneCountInString(label); n > width {
+			width = n
+		}
+	}
+	fmt.Fprintf(s, "\n%s\n", titleRule(col, tr(s, "Gold Needed"), width))
+	for i, label := range labels {
+		fmt.Fprintf(s, "  %s(%s%c%s)%s %s%s%s\n",
+			dim(col), col, keys[i], dim(col), ansi.Reset, ansi.FgWhite, label, ansi.Reset)
+	}
+	fmt.Fprintf(s, "%s%s%s\n", dim(col), strings.Repeat("─", width), ansi.Reset)
+}
+
+// runBank opens the Bank menu and reports that it was visited.
+func runBank(s session.Session, w *ctx) bool {
 	if err := Run(s, w, w.bank); err != nil {
 		session.End(err)
 	}

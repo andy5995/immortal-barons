@@ -100,7 +100,7 @@ func TestBuyRefusesInsufficientGold(t *testing.T) {
 	if p.Troopers != startTroopers {
 		t.Fatalf("stale purchase applied: Troopers = %d, want unchanged %d", p.Troopers, startTroopers)
 	}
-	if !strings.Contains(strings.ToLower(f.out.String()), "afford") {
+	if !strings.Contains(f.out.String(), game.ErrCantAfford.Error()) {
 		t.Fatalf("expected an insufficient-gold refusal, got: %q", f.out.String())
 	}
 }

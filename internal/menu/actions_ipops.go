@@ -90,7 +90,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	}
 	// The same helper every other op on this menu uses: the refusal, the bank,
 	// and then the stay if they came back with the gold for it.
-	if !affordOrBank(s, w, perDay*int64(days), game.ErrCantAffordOp) {
+	if !affordOrBank(s, w, perDay*int64(days), game.ErrCantAfford) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
@@ -175,7 +175,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		}
 		// Accepted but short: the refusal, then the bank, rather than the send
 		// simply failing at a price the player has just agreed to.
-		if !affordOrBank(s, w, cost, game.ErrCantAffordOp) {
+		if !affordOrBank(s, w, cost, game.ErrCantAfford) {
 			return Stay
 		}
 		err := w.mutatePlayer(func(p *game.Empire) error {
@@ -264,7 +264,7 @@ func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
 	}
 	// Accepted but short: the bank is opened here rather than the send simply
 	// being refused, and the refusal follows only if they come back no richer.
-	if !affordOrBank(s, w, cost, game.ErrCantAffordOp) {
+	if !affordOrBank(s, w, cost, game.ErrCantAfford) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {

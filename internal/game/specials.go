@@ -170,20 +170,20 @@ func (w *World) BioCost(d *Empire) int64 {
 	return BioCostForTarget(d.Troopers, d.People, d.Land)
 }
 
-// payArmsDealer settles a missile's price against gold in hand and then against
-// the bank. Drawing on the bank is the original's rule, not a convenience: the
-// affordability test it runs before confirming the sale compares the price
-// against gold PLUS bank, and the deduction that follows takes whatever gold in
-// hand cannot cover straight out of the bank rather than refusing the sale.
+// payArmsDealer settles a missile's price against gold in hand.
+//
+// A DELIBERATE DIVERGENCE since 2026-09-12. The original draws on the bank as
+// well — its affordability test compares the price against gold PLUS bank, and
+// the deduction takes whatever gold in hand cannot cover straight out of the
+// bank rather than refusing the sale. IB refuses instead and the menu offers the
+// bank (offerBank), so savings are spent by an answer the player gave rather
+// than by a purchase that reached past what they were holding. Do not "fix" this
+// back to the original's rule without asking.
 func payArmsDealer(a *Empire, cost int64) error {
-	if a.Gold+a.Bank < cost {
+	if a.Gold < cost {
 		return ErrCantAfford
 	}
 	a.Gold -= cost
-	if a.Gold < 0 {
-		a.Bank += a.Gold
-		a.Gold = 0
-	}
 	return nil
 }
 

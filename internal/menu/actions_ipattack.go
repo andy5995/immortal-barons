@@ -77,6 +77,9 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
+	if !affordOrBank(s, w, w.AttackGoldCost(p, force), game.ErrCantAfford) {
+		return Stay
+	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		_, e := w.World.CreateGroupAttack(p, board, target, hours, force)
 		return e
@@ -129,6 +132,9 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
+	if !affordOrBank(s, w, w.AttackGoldCost(w.Player(), force), game.ErrCantAfford) {
+		return Stay
+	}
 	// JoinGroupAttack re-validates against fresh state: the attack must still exist
 	// (ErrNoAttack), not yet have departed (ErrDeparted), and the baron must still
 	// hold the committed units (ErrCantAfford).
@@ -179,6 +185,9 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 	}
 	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(w.Player(), force)))
 	if !askYesNoHere(s, "Send this Attack?", true) {
+		return Stay
+	}
+	if !affordOrBank(s, w, w.AttackGoldCost(w.Player(), force), game.ErrCantAfford) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {

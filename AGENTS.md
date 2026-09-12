@@ -14,7 +14,10 @@ refusal — because those are dictated by what is being asked rather than by how
 anyone chose to say it, and because IB's own versions were already all but
 identical. The covert and terror operation menus were aligned that way on
 2026-09-11 (`Send how many?`, `This will cost you N gold.  Accept?`,
-`N agents sent out.`, and the two menus' own refusals).
+`N agents sent out.`). Their two separate can't-afford refusals were aligned
+with them and then dropped again on 2026-09-12: every site short of gold now
+says the same thing in IB's own words, because three near-identical refusals in
+two registers read as three different systems talking.
 
 Two things this does NOT license, and both have bitten before: **code or art**
 (source, decompiled routines, ANSI screens, logos) stays out entirely, and the

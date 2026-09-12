@@ -5,21 +5,18 @@ import (
 )
 
 var (
-	ErrCantAfford = errors.New("You cannot afford that.")
-	// The covert and terror menus refuse in the original's own words, which
-	// differ between the two — short functional refusals, of a piece with their
-	// prompts (see AGENTS.md on where that line falls). The original doubles the
-	// space after "Sorry!"; the wrapper every message goes through collapses runs
-	// of spaces, so one is what would reach the screen either way.
-	ErrCantAffordCovert = errors.New("Sorry! You cannot afford that!")
-	ErrCantAffordOp     = errors.New("You can't afford that!")
-	ErrNoBank           = errors.New("You do not have that much in the bank.")
-	ErrNoDebt           = errors.New("You do not owe that much.")
-	ErrNoAgents         = errors.New("You have no agents for that operation.")
-	ErrHQExists         = errors.New("Your HeadQuarters is already under construction or built.")
-	ErrRegionCap        = errors.New("You have reached your region purchase limit for this turn.")
-	ErrNoFoodSupply     = errors.New("The food market is out of food for today.")
-	ErrNoLand           = errors.New("There is no unclaimed land left on the planet today.")
+	// One refusal for every site that runs out of gold. The covert and terror
+	// menus carried the original's own two wordings until 2026-09-12; they were
+	// collapsed into this because three near-identical refusals in two registers
+	// read as three different systems talking.
+	ErrCantAfford   = errors.New("You do not have enough gold for that.")
+	ErrNoBank       = errors.New("You do not have that much in the bank.")
+	ErrNoDebt       = errors.New("You do not owe that much.")
+	ErrNoAgents     = errors.New("You have no agents for that operation.")
+	ErrHQExists     = errors.New("Your HeadQuarters is already under construction or built.")
+	ErrRegionCap    = errors.New("You have reached your region purchase limit for this turn.")
+	ErrNoFoodSupply = errors.New("The food market is out of food for today.")
+	ErrNoLand       = errors.New("There is no unclaimed land left on the planet today.")
 )
 
 // FoodBuyPrice is today's price to buy one unit of food, varying planet-wide

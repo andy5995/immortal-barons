@@ -498,6 +498,13 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 		if !AskYesNo(s, "Buy it?", false) {
 			return Stay
 		}
+		// Accepted but short: the refusal, then the bank, rather than the sale
+		// failing at a price the player has just agreed to. The same helper the
+		// ops menus use — and the reason payArmsDealer no longer reaches into
+		// the bank on its own.
+		if !affordOrBank(s, w, price(target), game.ErrCantAfford) {
+			return Stay
+		}
 	}
 	var report string
 	err := w.mutatePlayer(func(p *game.Empire) error {

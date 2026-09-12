@@ -706,9 +706,16 @@ instruction's modrm. Six of the seven award sites reach it with a separate
   that prints the figure and takes a yes before deducting anything — so IB asks
   for the target first, then quotes. **That routine settles the bill against
   gold in hand PLUS the bank**: it compares the price against the sum, then takes
-  whatever gold on hand cannot cover straight out of the bank. IB used to refuse
-  a sale a banked fortune could have paid for; all three missiles now draw the
-  same way.
+  whatever gold on hand cannot cover straight out of the bank.
+
+  **IB diverges here, deliberately, since 2026-09-12.** A missile is charged
+  against gold in hand only; short of it, the sale is refused and the screen
+  offers the bank — withdraw the shortfall where you stand, or open the bank
+  menu. Savings are then spent by an answer the player gave rather than by a
+  purchase that reached past what they were holding. The same offer covers every
+  other quoted price that can outrun the purse (covert ops, the three
+  interplanetary ops, attacks, trade deals); buying regions keeps its own
+  refusal.
 
   The attacker also gains **`Random(900)` Score**. Empire field +0x286 is the
   Score: it is written by eight aggressive actions and read by the empire status

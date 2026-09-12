@@ -221,26 +221,24 @@ func TestStrikesCannotEliminateARealm(t *testing.T) {
 	}
 }
 
-// The arms dealer takes what gold in hand cannot cover out of the bank rather
-// than refusing the sale.
-func TestMissileDrawsOnTheBank(t *testing.T) {
+// The bank is not reached past: a missile the gold in hand cannot cover is
+// refused with the savings untouched, and the menu offers the bank from there.
+// The original spends the bank itself — see payArmsDealer on the divergence.
+func TestMissileLeavesTheBankAlone(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	cost := w.NukeCost(d)
 	a.Gold, a.Bank = cost-1_000, 5_000
 
-	if _, err := w.NuclearStrike(a, d); err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if _, err := w.NuclearStrike(a, d); err != ErrCantAfford {
+		t.Fatalf("expected ErrCantAfford, got %v", err)
 	}
-	if a.Gold != 0 {
-		t.Errorf("gold in hand = %d, want 0", a.Gold)
-	}
-	if a.Bank != 4_000 {
-		t.Errorf("bank = %d, want 4000 (the 1000 shortfall drawn out)", a.Bank)
+	if a.Gold != cost-1_000 || a.Bank != 5_000 {
+		t.Errorf("gold/bank = %d/%d, want %d/5000 untouched", a.Gold, a.Bank, cost-1_000)
 	}
 }
 
-// Gold plus bank still has to cover it.
-func TestMissileRefusedWhenGoldAndBankFallShort(t *testing.T) {
+// Gold in hand has to cover it.
+func TestMissileRefusedWhenGoldFallsShort(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Gold, a.Bank = 1, 1
 

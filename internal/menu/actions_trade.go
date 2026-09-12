@@ -205,6 +205,12 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 		days = game.TradeDealMinDays
 	}
 
+	// The gold being offered and the span's fee are both paid on sending, so the
+	// bank is offered against the pair of them.
+	if !affordOrBank(s, w, int64(send.Gold)+int64(days)*perDay, game.ErrCantAfford) {
+		return Stay
+	}
+
 	// Read inside the mutation, so the turn reported to the sender is the very
 	// one stamped on the deal even if sending ever comes to cost a turn.
 	var arrives int

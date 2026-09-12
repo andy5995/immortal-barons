@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Purchases in some cases will give a prompt to withdraw or visit the bank
+    if the player doesn't have enough gold on hand
   * Rivers pay the original's full hydropower gold: the 10% "bad year" that
     halved it was IB's own and is gone
   * Industrial gold is no longer raised by technology research, which the

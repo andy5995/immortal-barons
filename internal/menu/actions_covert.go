@@ -137,7 +137,7 @@ func sendAgents(s session.Session, w *ctx, row covertRow) Result {
 			// what is asked for, since that is the smallest send there is. The
 			// target picked above stands — coming back from the bank must not
 			// mean choosing it again.
-			if !affordOrBank(s, w, int64(row.Cost), game.ErrCantAffordCovert) {
+			if !affordOrBank(s, w, int64(row.Cost), game.ErrCantAfford) {
 				return Stay
 			}
 			avail = agentsAvailable(w, row)

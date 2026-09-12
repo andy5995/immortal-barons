@@ -3167,8 +3167,8 @@ Sorry, you can't afford that!
 ```
 
 The rate behind `99,572,437` was not worked back to a formula, so whether a join
-is priced like an individual strike is **UNVERIFIED**. IB charges nothing at all
-for a group attack at either end (#252).
+is priced like an individual strike is **UNVERIFIED**. IB charges for a group
+attack at both ends, at the individual strike's rate (#252).
 
 **IB draws this table** (#251), to these widths and colors, from
 `internal/menu/groupattacktable.go`; `TestGroupAttackTableMatchesTheCapture`
