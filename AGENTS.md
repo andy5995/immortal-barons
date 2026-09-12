@@ -427,7 +427,9 @@ the InterPlanetary Special Operations menu's alone),
 diplomacy treaties, trading, region types + food market, SDI, Gooie Kablooie,
 player mail + a BRE-style multi-line message editor + planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
 Specialize, Write Macros, four named advisors (Civilian/Economic/Military/
-Technology), an About screen, a first-run language picker, and a
+Technology), an About screen, a first-run language picker, a Welcome menu that
+offers the rules, scores and instructions before a newcomer names their realm
+(#28), and a
 rising land-market price (expansion self-limiting). The menu tree mirrors BRE:
 the Diplomacy, Covert, and InterPlanetary Operations menus are matched
 item-for-item where a mechanic exists (recorded-but-inert items are flagged in

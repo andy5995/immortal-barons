@@ -19,7 +19,7 @@ func TestConcurrentDoorSessionsFileStore(t *testing.T) {
 	var wg sync.WaitGroup
 	run := func(handle, realm string) {
 		defer wg.Done()
-		f := &fakeSession{keys: []rune(" \r" + realm + "\r0")} // splash, English, realm, quit
+		f := &fakeSession{keys: []rune(" \r1" + realm + "\r0")} // splash, English, realm, quit
 		reason, err := Run(f, Identity{Handle: handle}, cfg, "2026-07-05")
 		if err != nil {
 			t.Errorf("%s: %v", handle, err)

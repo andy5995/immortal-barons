@@ -250,6 +250,18 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			s = onboardLang{Session: s, lang: lang}
 		}
 
+		// The board's rules, the instructions, the help browser and the
+		// scoreboards, offered before the realm is named rather than two menus in
+		// and a realm too late (#28). Quitting here leaves without a realm, which
+		// is a normal way to end a first visit.
+		create, err := menu.Welcome(s, w, id.Handle, lang, term)
+		if err != nil {
+			return "", err
+		}
+		if !create {
+			return "quit", save()
+		}
+
 		// Prompt for a realm name and insert atomically. Re-check under the
 		// same lock that does the insert: while we prompted, another goroutine
 		// may have onboarded this handle, filled the board, or claimed the name

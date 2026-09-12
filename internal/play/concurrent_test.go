@@ -58,7 +58,7 @@ func TestConcurrentSessionsShareWorld(t *testing.T) {
 		go func(i int) {
 			defer sessions.Done()
 			// splash dismiss, realm name, then quit.
-			f := &fakeSession{keys: []rune(fmt.Sprintf(" \rRealm%d\r0", i))}
+			f := &fakeSession{keys: []rune(fmt.Sprintf(" \r1Realm%d\r0", i))}
 			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", game.MaintReport{}, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}
@@ -133,7 +133,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 		sessions.Add(1)
 		go func(i int) {
 			defer sessions.Done()
-			f := &fakeSession{keys: []rune(fmt.Sprintf(" \rRealm%d\r0", i))}
+			f := &fakeSession{keys: []rune(fmt.Sprintf(" \r1Realm%d\r0", i))}
 			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", game.MaintReport{}, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}
@@ -141,7 +141,8 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 	}
 
 	// The turn-playing session: splash, Enter for English at the first-run
-	// language picker, realm name + confirm, Play Game, dismiss the income/
+	// language picker, (1) Create Realm at the Welcome menu, realm name +
+	// confirm, Play Game, dismiss the income/
 	// status/maintenance pauses (auto-pay covers the payments), detour through
 	// System Menu -> Diplomacy -> View Treaties (ranges w.Empires), then quit
 	// back out and let the script run dry. Derived by DRIVING the current flow
@@ -159,7 +160,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 	// script lands in whatever menu happens to be on screen. Three spaces used to
 	// be enough and stopped being so when unit prices changed; do not trim them
 	// back to the minimum that passes today.
-	turnKeys := " \rTurnPlayer\ry" + "1        0*D9 000000nn0"
+	turnKeys := " \r1TurnPlayer\ry" + "1        0*D9 000000nn0"
 	sessions.Add(1)
 	var turnOut *fakeSession
 	go func() {

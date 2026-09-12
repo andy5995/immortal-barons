@@ -79,7 +79,7 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	// locale-independent.
 	script := func(realm string, buy int) string {
 		b := "1" + strconv.Itoa(buy) + "\r"
-		return " " + realm + "\ry1    0" + b + b + b + "00n0"
+		return " 1" + realm + "\ry1    0" + b + b + b + "00n0"
 	}
 
 	type player struct {

@@ -43,6 +43,14 @@ type ctx struct {
 	// SpyGuy's stay is the first). Per-session, because BuildMenus is: a package
 	// global would be shared by every session in one process.
 	bank *Menu
+	// noEmpire marks a session running before the caller has a realm (the Welcome
+	// menu). It turns OFF the post-action elimination check, which reads a
+	// missing empire as a dead one.
+	noEmpire bool
+	// lang is the language chosen by the first-run picker, before any empire
+	// exists to carry it. The Welcome menu renders in it; once the realm is
+	// created the empire's own Language is what playerLang reads.
+	lang string
 	// seenEvents high-water-marks how many of the active empire's Events this
 	// session has already accounted for, so the post-action check can show only
 	// the ones another node appended while the player sat at a menu. The first
@@ -192,8 +200,11 @@ func playerLang(c *ctx) string {
 	if c == nil {
 		return ""
 	}
-	p := c.Player()
-	if p == nil || p.Language == "" {
+	lang := c.lang // the first-run pick, for a session with no empire yet
+	if p := c.Player(); p != nil && p.Language != "" {
+		lang = p.Language
+	}
+	if lang == "" {
 		return ""
 	}
 	// A UTF-8 session renders any language. A CP437 or ASCII session renders only
@@ -201,8 +212,8 @@ func playerLang(c *ctx) string {
 	// (Cyrillic, CJK) falls back to English rather than mojibake. This one render-time guard
 	// also keeps a language set on a UTF-8 session from breaking when the same
 	// empire is later reached through a CP437 door.
-	if langFits(c.Term, p.Language) {
-		return p.Language
+	if langFits(c.Term, lang) {
+		return lang
 	}
 	return ""
 }
@@ -603,6 +614,13 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 // the only per-action transaction, this refresh costs nothing beyond the write
 // already happening here.
 func postActionCheck(g *ctx) (news []string, dead bool) {
+	// The Welcome menu runs before there is an empire at all, so the nil below
+	// means "not created yet" rather than "killed while you sat here". Without
+	// this a newcomer reading the rules was told their empire had collapsed and
+	// the session ended under them.
+	if g.noEmpire {
+		return nil, false
+	}
 	g.With(func() {
 		p := g.Player()
 		if p == nil {

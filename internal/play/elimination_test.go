@@ -33,7 +33,7 @@ func markDead(t *testing.T, cfg game.Config, handle string, gameDay, diedDay int
 // kept (no new realm).
 func TestLoginDeadSameDayEndsSession(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \rKhanate\r0")}
+	f1 := &fakeSession{keys: []rune(" \r1Khanate\r0")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -70,13 +70,13 @@ func TestLoginDeadSameDayEndsSession(t *testing.T) {
 // notice does not fire on the login path; the player simply onboards fresh.
 func TestLoginDeadPastDayRebuilds(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \rKhanate\r0")}
+	f1 := &fakeSession{keys: []rune(" \r1Khanate\r0")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
 	markDead(t, cfg, "khan", 5, 3)
 
-	f2 := &fakeSession{keys: []rune(" \rRebornia\r0")}
+	f2 := &fakeSession{keys: []rune(" \r1Rebornia\r0")}
 	if _, err := Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}

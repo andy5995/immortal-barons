@@ -63,7 +63,7 @@ func TestReadErrorDuringOnboardingSurfacesInReason(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// splash dismiss, Enter (English), realm name, then the Confirm? read errors.
 	f := &errAfterSession{
-		keys: []rune(" \rTestrealm\r"),
+		keys: []rune(" \r1Testrealm\r"),
 		err:  errors.New("winsock-boom-10054"),
 	}
 	reason, _ := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
@@ -101,7 +101,7 @@ func TestOnboardsThenPersists(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// splash dismiss, Enter for the language prompt (English), realm name
 	// "Khanate", then Quit
-	f := &fakeSession{keys: []rune(" \rKhanate\r0")}
+	f := &fakeSession{keys: []rune(" \r1Khanate\r0")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := &fakeSession{keys: []rune(" \rSurplusia\r0")}
+	f := &fakeSession{keys: []rune(" \r1Surplusia\r0")}
 	reason, err := Run(f, Identity{Handle: "Surplus"}, cfg, "2026-07-03")
 	if err != nil {
 		t.Fatal(err)
@@ -165,7 +165,7 @@ func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
 
 func TestReturningPlayerResumes(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \rKhanate\r0")}
+	f1 := &fakeSession{keys: []rune(" \r1Khanate\r0")}
 	Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	f2 := &fakeSession{keys: []rune(" 0")} // no naming or language prompt second time
 	Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03")
@@ -179,8 +179,9 @@ func TestReturningPlayerResumes(t *testing.T) {
 
 func TestFirstRunLanguageSelection(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	// splash dismiss, "2" (Deutsch) at the language prompt, realm name, Quit
-	f := &fakeSession{keys: []rune(" 2\rKhanate\r0")}
+	// splash dismiss, "2" (Deutsch) at the language prompt, (1) Create Realm at
+	// the Welcome menu, realm name, Quit
+	f := &fakeSession{keys: []rune(" 2\r1Khanate\r0")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -200,8 +201,8 @@ func TestFirstRunLanguageSelection(t *testing.T) {
 // and created the empire, not merely that it produced output.
 func TestDropfileLanguageSkipsThePicker(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	// splash dismiss, realm name, Quit — no language keypress
-	f := &fakeSession{keys: []rune(" Khanate\r0")}
+	// splash dismiss, (1) Create Realm, realm name, Quit — no language keypress
+	f := &fakeSession{keys: []rune(" 1Khanate\r0")}
 	if _, err := Run(f, Identity{Handle: "Khan", Language: "de"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -225,7 +226,7 @@ func TestDropfileLanguageSkipsThePicker(t *testing.T) {
 // in place rather than silently choosing for the caller.
 func TestUnshippedDropfileLanguageStillPrompts(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f := &fakeSession{keys: []rune(" 2\rKhanate\r0")}
+	f := &fakeSession{keys: []rune(" 2\r1Khanate\r0")}
 	if _, err := Run(f, Identity{Handle: "Khan", Language: ""}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -288,7 +289,7 @@ func TestIdleBootAtRealmNamePromptCreatesNoRealm(t *testing.T) {
 	// The deadline decorator returns ErrSessionEnded once it boots; the reader
 	// stands in for it, running dry at the realm-name prompt.
 	f := &errAfterSession{
-		keys: []rune(" \r"), // splash dismiss, Enter for English
+		keys: []rune(" \r1"), // splash dismiss, Enter for English
 		err:  session.ErrSessionEnded,
 	}
 	reason, err := Run(f, Identity{Handle: "Bobby"}, cfg, "2026-07-03")
@@ -314,8 +315,10 @@ func TestIdleBootAtRealmNamePromptCreatesNoRealm(t *testing.T) {
 // into "Re" and "ich" at the margin.
 func TestOnboardingOutputFitsTheScreen(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	// Splash dismiss, German at the language picker, then a name too short to
-	// pass, so the invalid-name message is printed before naming the realm.
+	// Splash dismiss, German at the language picker, (1) Create Realm at the
+	// Welcome menu, then a name too short to pass, so the invalid-name message is
+	// printed before naming the realm. The German Welcome menu is measured on the
+	// way past, which is the point of the 80-column sweep below.
 	lang := 0
 	for i, l := range i18n.Languages {
 		if l.Code == "de" {
@@ -325,7 +328,7 @@ func TestOnboardingOutputFitsTheScreen(t *testing.T) {
 	if lang == 0 {
 		t.Skip("no German catalog")
 	}
-	f := &fakeSession{keys: []rune(" " + strconv.Itoa(lang) + "\rx\rDrachenfels\ry0")}
+	f := &fakeSession{keys: []rune(" " + strconv.Itoa(lang) + "\r1x\rDrachenfels\ry0")}
 	if _, err := Run(f, Identity{Handle: "Johnny"}, cfg, "2026-07-03"); err != nil {
 		t.Fatalf("run: %v", err)
 	}
@@ -344,3 +347,45 @@ func TestOnboardingOutputFitsTheScreen(t *testing.T) {
 var ansiEsc = regexp.MustCompile(`\x1b\[[0-9;?]*[a-zA-Z]`)
 
 func stripANSI(s string) string { return ansiEsc.ReplaceAllString(s, "") }
+
+// The Welcome menu stands between the language picker and the realm-name
+// prompt (#28), so a first-time caller can read the board's rules before
+// committing to a game. Asserts it was REACHED and that the name prompt follows
+// it, not merely that some output appeared.
+func TestWelcomeMenuComesBeforeNaming(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	f := &fakeSession{keys: []rune(" \r1Khanate\r0")} // splash, English, (1) Create Realm, name, Quit
+	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
+		t.Fatal(err)
+	}
+	out := stripANSI(f.out.String())
+	welcome := strings.Index(out, "[Welcome]")
+	if welcome < 0 {
+		t.Fatalf("the Welcome menu was never drawn:\n%s", out)
+	}
+	if name := strings.Index(out, "Name your Realm:"); name < 0 || name < welcome {
+		t.Errorf("the realm-name prompt should follow the Welcome menu (welcome at %d, prompt at %d)", welcome, name)
+	}
+	w, _ := store.Load(cfg)
+	if e := w.FindByOwner("khan"); e == nil || e.Name != "Khanate" {
+		t.Error("Create Realm should have led to the name prompt and an empire")
+	}
+}
+
+// Quitting from the Welcome menu leaves without a realm — a normal way to end a
+// first visit, and the reason the menu cannot simply fall through to naming.
+func TestQuittingTheWelcomeMenuCreatesNoRealm(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	f := &fakeSession{keys: []rune(" \r0")} // splash, English, Quit at Welcome
+	reason, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reason != "quit" {
+		t.Errorf("session reason = %q, want quit", reason)
+	}
+	w, _ := store.Load(cfg)
+	if e := w.FindByOwner("khan"); e != nil {
+		t.Errorf("a realm was created for a caller who quit: %q", e.Name)
+	}
+}

@@ -3293,6 +3293,22 @@ block and line-drawing glyphs is accepted (#151). Control characters are
 refused outright — an escape in a realm name would move the cursor on every
 screen that lists it.
 
+**IB adds a Welcome menu before the naming step (#28), where the original asks
+its one Instructions question afterwards.** It stands between the first-run
+language picker and `Name your Realm:`, styled like the opening menu, and
+carries Create Realm, See Scores, Instructions, Game Setup, Help, and — in a
+league — InterBBS Scores. Enter takes Create Realm; Quit ends the visit with no
+realm created, which is why the caller is asked rather than dropped straight
+into naming.
+
+The reason it is a menu rather than a screen: what a newcomer needs before
+committing is the board's own rules — turns per day, protection, the caps — and
+those live on Game Setup, which a player otherwise met two menus in and a realm
+too late. Every item reuses the action the opening or System menu already calls,
+so nothing here is a second rendering of an existing screen, and each reads the
+world rather than the caller's empire, which is what lets them run before one
+exists.
+
 ## Realm slots: the planet holds 25, and a letter is a realm's name
 
 **A planet holds exactly 25 realms, and each holds one permanent slot.** BRE

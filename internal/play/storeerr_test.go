@@ -42,7 +42,7 @@ func TestRunReportsASessionWhoseSavesFailed(t *testing.T) {
 
 	// Splash dismiss, Enter (English), realm name, confirm — enough to reach a
 	// transaction that must be written.
-	f := &fakeSession{keys: []rune(" \rTestrealm\ry")}
+	f := &fakeSession{keys: []rune(" \r1Testrealm\ry")}
 	_, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	if err == nil {
 		t.Fatal("Run returned no error for a session whose saves all failed; a lost turn must not look like a completed one")
