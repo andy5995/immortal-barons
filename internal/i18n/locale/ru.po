@@ -24,6 +24,11 @@ msgstr ""
 msgid " — choose a topic:"
 msgstr ""
 
+#: internal/menu/actions_attack.go:910
+#, fuzzy
+msgid "#"
+msgstr "##"
+
 #: internal/menu/menu.go:926
 msgid "# Owned"
 msgstr "# Есть"
@@ -116,7 +121,7 @@ msgstr ""
 msgid "%d units deserted for lack of pay."
 msgstr "%d единиц дезертировало из-за отсутствия жалованья."
 
-#: internal/menu/actions_attack.go:927
+#: internal/menu/actions_attack.go:961
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr "Уничтожено %d%% Gooie Kablooie!"
 
@@ -204,7 +209,7 @@ msgid ""
 "instead."
 msgstr ""
 
-#: internal/menu/actions_attack.go:922
+#: internal/menu/actions_attack.go:956
 msgid "%s jets were destroyed in the attack!"
 msgstr "В атаке уничтожено самолётов: %s!"
 
@@ -903,7 +908,7 @@ msgstr "Бюллетени"
 msgid "Date"
 msgstr "Дата"
 
-#: internal/menu/actions_attack.go:893
+#: internal/menu/actions_attack.go:911
 msgid "Days Until Self-Destruct"
 msgstr "Дней до самоуничтожения"
 
@@ -1021,8 +1026,8 @@ msgstr "Демонтировать Gooie"
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr ""
 
-#: internal/menu/actions_attack.go:899
-msgid "Do you wish to attack the Gooie Kablooie?"
+#: internal/menu/actions_attack.go:902
+msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Атаковать Gooie Kablooie?"
 
 #: internal/menu/actions_message.go:619
@@ -1090,6 +1095,11 @@ msgstr "У вас осталось %s%s ходов защиты."
 msgid "End of Turn Statistics:"
 msgstr "Статистика конца хода:"
 
+#: internal/menu/actions_attack.go:927
+#, fuzzy
+msgid "Enter Gooie Number"
+msgstr "Введите название планеты или номер"
+
 #: internal/menu/actions_ipmessages.go:128
 msgid "Enter Planet Name or Number"
 msgstr "Введите название планеты или номер"
@@ -1146,7 +1156,7 @@ msgstr "В продаже"
 msgid "Free software under the MIT License."
 msgstr ""
 
-#: internal/menu/actions_attack.go:893
+#: internal/menu/actions_attack.go:911
 msgid "From"
 msgstr "От"
 
@@ -1198,7 +1208,7 @@ msgstr "Товар"
 msgid "Goods you ship:"
 msgstr "Товары, которые вы отправляете:"
 
-#: internal/menu/incoming.go:119
+#: internal/menu/incoming.go:122
 msgid "Gooie Kablooie"
 msgstr "Gooie Kablooie"
 
@@ -1210,7 +1220,7 @@ msgstr "Операции Gooie Kablooie"
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "Операции Gooie Kablooie в этой игре отключены."
 
-#: internal/menu/incoming.go:139
+#: internal/menu/incoming.go:142
 msgid "Group attack"
 msgstr "Групповая атака"
 
@@ -1375,8 +1385,9 @@ msgstr "К ним это попадёт не раньше хода %d их дн�
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Постройка обойдётся планете в %s млн золота. Принять?"
 
-#: internal/menu/actions_attack.go:897
-msgid "It would take %s jets to destroy it outright."
+#: internal/menu/actions_attack.go:917
+#, fuzzy
+msgid "It would take %s jets to destroy one outright."
 msgstr "Чтобы уничтожить его разом, нужно %s самолётов."
 
 #: internal/menu/menu.go:926
@@ -1719,7 +1730,7 @@ msgstr "Предложение — товары, которые вы шлёте:
 msgid "One Dominion"
 msgstr ""
 
-#: internal/menu/actions_attack.go:903
+#: internal/menu/actions_attack.go:906
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr "Атаковать Gooie Kablooie могут только самолёты, а их у вас нет."
 
@@ -1727,7 +1738,7 @@ msgstr "Атаковать Gooie Kablooie могут только самолёт
 msgid "Only the BBS Coordinator may stand the weapon down."
 msgstr ""
 
-#: internal/game/annihilator.go:81
+#: internal/game/annihilator.go:87
 msgid "Only the elected BBS Coordinator may do that."
 msgstr ""
 
@@ -2109,7 +2120,7 @@ msgstr "Сколько танков отправить?"
 msgid "Send how many Troopers?"
 msgstr "Сколько солдат отправить?"
 
-#: internal/menu/actions_attack.go:906
+#: internal/menu/actions_attack.go:940
 msgid "Send how many jets?"
 msgstr "Сколько самолётов отправить?"
 
@@ -2240,7 +2251,7 @@ msgstr "Разжигать эмиграцию"
 msgid "Stir Revolts"
 msgstr "Разжечь мятежи"
 
-#: internal/menu/actions_attack.go:893
+#: internal/menu/actions_attack.go:911
 msgid "Strength"
 msgstr "Сила"
 
@@ -2348,7 +2359,7 @@ msgstr "Цена этой позиции недействительна."
 msgid "That realm is under new realm protection."
 msgstr "У вас осталось %s%s ходов защиты."
 
-#: internal/game/annihilator.go:77
+#: internal/game/annihilator.go:83
 msgid "The Gooie Kablooie has already launched."
 msgstr ""
 
@@ -2360,7 +2371,7 @@ msgstr ""
 msgid "The Gooie Kablooie has been dismantled."
 msgstr ""
 
-#: internal/game/annihilator.go:78
+#: internal/game/annihilator.go:84
 msgid "The Gooie Kablooie has not landed yet. Nothing can reach it up there."
 msgstr ""
 
@@ -2368,7 +2379,7 @@ msgstr ""
 msgid "The Gooie Kablooie is aimed at %s."
 msgstr ""
 
-#: internal/game/annihilator.go:76
+#: internal/game/annihilator.go:82
 msgid "The Gooie Kablooie is already paid for."
 msgstr ""
 
@@ -2384,7 +2395,7 @@ msgstr "Gooie Kablooie готов. Старт по %s через %s."
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr "Gooie Kablooie уже в пути. Сделать с ним больше нечего."
 
-#: internal/menu/actions_attack.go:924
+#: internal/menu/actions_attack.go:958
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "Gooie Kablooie УНИЧТОЖЕН!"
 
@@ -2473,6 +2484,11 @@ msgstr "Не осталось вражеских империй для атак�
 msgid "There are no rival empires left to attack."
 msgstr "Соперников для нападения не осталось."
 
+#: internal/menu/actions_attack.go:938
+#, fuzzy
+msgid "There are only %d to choose from."
+msgstr "Не осталось вражеских империй для атаки."
+
 #: internal/menu/actions_bank.go:98
 msgid "There is a %d-day minimum on investments."
 msgstr "Минимальный срок вклада — %d дн."
@@ -2522,7 +2538,7 @@ msgstr ""
 msgid "This planet has no Gooie Kablooie."
 msgstr "На этой планете нет Gooie Kablooie."
 
-#: internal/game/annihilator.go:74
+#: internal/game/annihilator.go:80
 msgid "This planet is already building a Gooie Kablooie."
 msgstr ""
 
@@ -3398,7 +3414,7 @@ msgstr "Агенты"
 msgid "agents"
 msgstr "Агенты"
 
-#: internal/menu/incoming.go:171
+#: internal/menu/incoming.go:174
 msgid "away"
 msgstr "в пути"
 
@@ -3489,7 +3505,7 @@ msgid ""
 "it, then exit"
 msgstr ""
 
-#: internal/game/ibbs_auth.go:370
+#: internal/game/ibbs_auth.go:386
 msgid "no board key is loaded"
 msgstr ""
 
@@ -3509,7 +3525,7 @@ msgstr ""
 msgid "nothing"
 msgstr "ничего"
 
-#: internal/menu/incoming.go:179
+#: internal/menu/incoming.go:182
 msgid "now"
 msgstr "сейчас"
 
@@ -3639,7 +3655,7 @@ msgid ""
 "settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
-#: internal/menu/incoming.go:121
+#: internal/menu/incoming.go:124
 msgid "this planet"
 msgstr "эта планета"
 
