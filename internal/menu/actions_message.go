@@ -98,7 +98,7 @@ type pickRow struct {
 // pickRows collects the realms a picker may address, plus how many treaty
 // partners the caller has (which decides whether the all-allies key is live).
 func pickRows(w *ctx, opts pickOpts) (rows []pickRow, allies int) {
-	w.With(func() {
+	w.Read(func() {
 		p := w.Player()
 		for _, e := range w.Empires {
 			if !e.Alive || e == p || e.Slot < 1 || e.Slot > pickLetters {

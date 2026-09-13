@@ -170,7 +170,7 @@ func negotiateTreaty(pact *game.Pact) func(session.Session, *ctx) Result {
 		// the existing rules hold: a new offer replaces a pending one, and a realm
 		// already holding this pact is left alone.
 		var names []string
-		w.With(func() {
+		w.Read(func() {
 			p := w.Player()
 			for _, name := range chosen {
 				e := findRealm(w, name)
@@ -205,7 +205,7 @@ func negotiateTreaty(pact *game.Pact) func(session.Session, *ctx) Result {
 // already-consumed offer forms no duplicate treaty.
 func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
 	var held, offered, gone bool
-	w.With(func() {
+	w.Read(func() {
 		p := w.Player()
 		e := findRealm(w, ename)
 		if p == nil || e == nil {

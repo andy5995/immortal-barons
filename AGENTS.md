@@ -202,6 +202,13 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   pass every test and lose the change only on a door — `MemStore.Snapshot`
   fingerprints the world either side of the body under a test binary and panics
   on a change, which is what makes the split enforceable rather than a habit.
+
+  **The reverse — a pure read routed through `With` — no test can catch**, since
+  the body changes nothing and the fingerprints match either way; only a door
+  pays for it. Every `With` site in the tree was read and audited on 2026-09-12
+  (#238) and the seventeen that remain all mutate. A NEW `With` is therefore the
+  thing to check at review: name the mutation it makes, and if you cannot, it is
+  a `Read`.
 - **Every path that pays gold in goes through `World.creditGold`.** It holds
   gold in hand at the configured cap (`World.MoneyCap`, the sysop's
   `MoneyCapBillions`) and files an event naming what was lost and where it came

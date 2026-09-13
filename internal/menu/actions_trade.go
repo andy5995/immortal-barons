@@ -179,7 +179,7 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	// what the sender can pay for — the original has no other limit.
 	perDay := int64(game.TradeDealGoldPerDay)
 	var purse int64
-	w.With(func() {
+	w.Read(func() {
 		if p, recip := w.Player(), findRealm(w, toName); p != nil && recip != nil {
 			perDay = w.World.TradeDealGoldPerDayBetween(p, recip)
 			purse = p.Gold

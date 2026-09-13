@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Drawing a screen that only reads no longer rewrites the game file
   * New players get a Welcome menu before naming their realm, with the game
     setup, instructions, help and scores on it
   * Purchases in some cases will give a prompt to withdraw or visit the bank
