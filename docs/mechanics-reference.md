@@ -3792,12 +3792,11 @@ purpose:
   same list — RETURN still closes it, so letters can be added or removed after.
 - **Diplomacy is on the opening menu as well as System.** BRE lists it under
   System alone.
-- **Buy Regions closes itself when the gold runs out.** A purchase that leaves
-  the player unable to afford another region says so and returns to the Spending
-  menu; BRE asks again, so a player who has just spent their last gold reads
-  "You can afford 0 regions" and quits by hand. Reaching the day's region cap
-  does not close the screen — a capped player may still want its Advisors
-  entry.
+- **Buy Regions closes itself the moment nothing more can be bought**, whether
+  from gold or the day's region cap, and says which reason applies; BRE asks
+  again regardless, so a player there reads "You can afford 0 regions" and
+  quits by hand. Advisors is reachable from the System menu, so holding the
+  screen open for it once buying is impossible is not worth the trade.
 - **About lives in the Help browser** (keyed `A`), not on the Game/System menus,
   so `I` stays BRE's InterBBS Scores key.
 - **Menu items carry a 2-space left margin** where BRE's start at column 0 — a

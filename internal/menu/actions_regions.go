@@ -149,6 +149,28 @@ func buyLand(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, tr(s, "You can afford %s%d%s regions.")+"\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
 		printRegionTable(s, w.Term, p, true)
 	}
+	// exitIfLimited prints why nothing more can be bought and reports whether
+	// it did, so the caller can leave the screen. It fires both before a
+	// purchase (a player who enters, or returns to the picker, already at
+	// either limit) and right after one that spends the last of it — without
+	// it a capped or gold-out player who picks a region type is asked "Buy
+	// how many X regions? (0; 0)" with no way to tell why the answer can only
+	// be zero. Gold and the day's region cap zero the same count for
+	// different reasons, so the message names which one applies; reusing
+	// game.ErrRegionCap's text keeps it in one place with BuyRegions' own
+	// refusal. Advisors stays reachable from the System menu, so holding the
+	// screen open for it is not worth the trap.
+	exitIfLimited := func() bool {
+		if w.MaxAffordableRegions(p) != 0 {
+			return false
+		}
+		msg := tr(s, "You cannot afford another region.")
+		if regionCapReached(w, p) {
+			msg = tr(s, game.ErrRegionCap.Error())
+		}
+		fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightWhite, msg, ansi.Reset)
+		return true
+	}
 	showMenu()
 	for {
 		switch t := promptBuyRegionType(s); {
@@ -160,6 +182,9 @@ func buyLand(s session.Session, w *ctx) Result {
 		case t < 0:
 			return Stay
 		default:
+			if exitIfLimited() {
+				return Stay
+			}
 			n := promptSuggested(s, fmt.Sprintf("Buy how many %s regions?", game.BuyableRegions[t].Name), 0, w.MaxAffordableRegions(p))
 			if n <= 0 {
 				continue
@@ -186,13 +211,7 @@ func buyLand(s session.Session, w *ctx) Result {
 			// here rather than waiting for the next menu redraw.
 			flushSessionNews(s, w)
 			p = w.Player() // refresh the display pointer for the next iteration
-			// Out of gold, so stop asking. BRE keeps prompting; a player who has
-			// just spent their last gold would have to read the "you can afford
-			// 0" line and quit by hand. Reaching the day's region cap is NOT
-			// this case — a capped player may still want the Advisors entry on
-			// this screen, so the loop stays open for them.
-			if err == nil && w.MaxAffordableRegions(p) == 0 && !regionCapReached(w, p) {
-				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightWhite, tr(s, "You cannot afford another region."), ansi.Reset)
+			if err == nil && exitIfLimited() {
 				return Stay
 			}
 		}

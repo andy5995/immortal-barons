@@ -225,24 +225,62 @@ func TestBuyLandAdvisorsThenContinuesLoop(t *testing.T) {
 	}
 }
 
-func TestBuyLandCapBlocksButLoopContinues(t *testing.T) {
-	menus := BuildMenus()
+// Reaching the day's region cap leaves the screen the same way running out of
+// gold does. Advisors is a convenience for the act of buying, not a reason to
+// hold the screen open once buying is impossible — it stays reachable from the
+// System menu regardless. The keys run past the cap-hitting purchase; anything
+// still being read means the screen did not let go.
+func TestBuyLandLeavesWhenCapReached(t *testing.T) {
 	w := newWorld()
+	p := w.Player()
 	w.Config.MaxRegions = 5
-	w.Player().Gold = 1_000_000
-	before := w.Player().Land
+	p.Gold = 1_000_000
+	before := p.Land
 
-	// Buy Land -> C -> 5 (hits the cap) -> pause -> C again -> > (offer is
-	// now clamped to 0, so nothing more is bought) -> * (Advisors) -> pause
-	// -> 0 (quit the buy loop) -> 0 (quit Spending menu).
-	f := &fakeSession{keys: []rune("6C5\r C>\r * 00")}
-	Run(f, w, menus.Spending)
-	if got := w.Player().Land - before; got != 5 {
+	// C -> 5 (hits the cap) -> C -> 1 (would have been read had the screen
+	// still been open).
+	f := &fakeSession{keys: []rune("C5\rC1\r")}
+	buyLand(f, w)
+
+	if got := p.Land - before; got != 5 {
 		t.Fatalf("want 5 regions bought before hitting the cap, got %d", got)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, ansi.FgBrightWhite+"Advisors") {
-		t.Errorf("expected Advisors to still be reachable after the cap blocked further buys, got:\n%s", out)
+	if !strings.Contains(out, "You have reached your region purchase limit for this turn.") {
+		t.Errorf("no reason given for leaving:\n%s", out)
+	}
+	if f.pos != 3 { // "C", "5", Enter — and no more
+		t.Errorf("read %d keys, want 3 — the screen kept prompting after hitting the cap", f.pos)
+	}
+}
+
+// A player who enters the Buy Regions screen already at the cap — not from a
+// purchase made this visit — must not be asked to buy at all. Before the fix
+// this was a silent loop: pick a region type, get asked "Buy how many X
+// regions? (0; 0)", and land back at the picker with nothing said about why.
+func TestBuyLandLeavesWhenAlreadyCappedOnEntry(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Gold = 1_000_000
+	w.Config.MaxRegions = 5
+	p.RegionsBoughtThisTurn = 5 // the day's allowance is already spent
+	before := p.Regions.Coastal
+	f := &fakeSession{keys: []rune("C1\r")} // would buy 1 if the screen stayed open
+
+	buyLand(f, w)
+
+	if p.Regions.Coastal != before {
+		t.Errorf("regions changed on an already-capped entry: %d -> %d", before, p.Regions.Coastal)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "You have reached your region purchase limit for this turn.") {
+		t.Errorf("no reason given for leaving:\n%s", out)
+	}
+	if strings.Contains(out, "Buy how many") {
+		t.Errorf("should not have prompted for an amount when already capped:\n%s", out)
+	}
+	if f.pos != 1 { // "C" only — no more read once the cap message is shown
+		t.Errorf("read %d keys, want 1 — the screen kept prompting on an already-capped entry", f.pos)
 	}
 }
 
