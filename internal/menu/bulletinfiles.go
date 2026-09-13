@@ -175,7 +175,7 @@ func writeNewsBulletin(s session.Session, w *ctx, today bool) {
 	var bulletin game.DailyBulletin
 	w.Read(func() {
 		if today {
-			date, lines, bulletin = w.day, w.NewsToday, w.BulletinToday
+			date, lines, bulletin = w.day, w.NewsToday, w.TodaysBulletin()
 		} else {
 			// The frozen day carries no date of its own, so the masthead names
 			// the day it is: the one before the board's current date.

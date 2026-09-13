@@ -539,11 +539,26 @@ func planetTotals(w *World) PlanetTotals {
 	return t
 }
 
-// PlanetTotals computes today's totals live, over the empires that exist
-// right now. rollNews only freezes a BulletinToday.Totals snapshot at daily
-// maintenance, so a board still on its first game day (or any realm created
-// since the last maintenance) would otherwise report an empty planet (#109).
-func (w *World) PlanetTotals() PlanetTotals { return planetTotals(w) }
+// TodaysBulletin is the Daily Bulletin to draw for today. BRE builds the whole
+// box — Totals AND Change — once, inside daily maintenance, and never
+// recomputes it (BRE.OVR 0x00851c, run_daily_maintenance: "Total Population"
+// and "Change: " are both referenced from nowhere else). IB matches that
+// exactly, with one exception: a board whose maintenance has never run has no
+// snapshot to print, so BulletinToday.Totals is still its zero value, and a
+// live total is the only honest thing to show (#109) — a board reporting an
+// empty planet on day one, while the scoreboard beside it already shows
+// populated realms, reads as a broken install. Change stays zero in that case;
+// there is no yesterday to have changed from. Both showBulletin and
+// writeNewsBulletin call this for TODAY so the screen and the written file can
+// never disagree about it — yesterday's bulletin, once rolled, needs no such
+// fallback and is read straight from BulletinYesterday.
+func (w *World) TodaysBulletin() DailyBulletin {
+	b := w.BulletinToday
+	if b.Totals == (PlanetTotals{}) {
+		b.Totals = planetTotals(w)
+	}
+	return b
+}
 
 // defaultPrices is the world's starting price table, from balance.go. Used at
 // world creation and re-applied on -reset, so a reset always installs the

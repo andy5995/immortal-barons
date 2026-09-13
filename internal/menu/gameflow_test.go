@@ -586,13 +586,18 @@ func TestRenderDailyBulletinNoTitle(t *testing.T) {
 	}
 }
 
+// Once a day's snapshot exists (rollNews has run at least once), showing it
+// means showing the FROZEN figures, exactly as BRE prints them — not the live
+// totals. This is the case #002 in the ib bot-chat thread found broken: the
+// screen used to override Totals with live values even here, leaving it
+// disagreeing with Change (still the frozen delta) and with the written
+// bulletin file (which never had the override).
 func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	w := newWorld()
 	w.BulletinToday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 111}}
 	w.NewsToday = game.News("today-line")
 	w.BulletinYesterday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 222}}
 	w.NewsYesterday = game.News("yesterday-line")
-	live := w.PlanetTotals() // today's Totals are computed live, not the stored 111 (#109)
 
 	fToday := &fakeSession{keys: []rune(" ")}
 	showBulletinToday(fToday, w)
@@ -600,8 +605,8 @@ func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	if !strings.Contains(todayOut, "today-line") || strings.Contains(todayOut, "yesterday-line") {
 		t.Errorf("showBulletinToday should show only today's news, got:\n%s", todayOut)
 	}
-	if !strings.Contains(todayOut, numfmt.GroupLong(live.Population, "")) {
-		t.Error("showBulletinToday should render today's LIVE totals")
+	if !strings.Contains(todayOut, "111") {
+		t.Error("showBulletinToday should render today's FROZEN snapshot, not live totals")
 	}
 
 	fYesterday := &fakeSession{keys: []rune(" ")}
@@ -615,27 +620,88 @@ func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	}
 }
 
-// Regression test for #109: rollNews only freezes a BulletinToday.Totals
-// snapshot at daily maintenance, so a board still on its first game day (or
-// any realm created since the last maintenance) had a zero-valued snapshot
-// while the scoreboard beside it already showed living, populated realms.
-// Today's News must reflect the CURRENT totals, not that stale snapshot.
+// Regression test for #109: a board whose maintenance has never run has no
+// snapshot at all — BulletinToday.Totals is still its zero value, as
+// game.NewWorldSeed leaves it — and would otherwise report an empty planet
+// while the scoreboard beside it already shows living, populated realms.
+// TodaysBulletin falls back to a live total in exactly this one case.
 func TestShowBulletinTodayNotStaleOnFreshBoard(t *testing.T) {
 	w := newWorld()
 	// A brand-new board: no maintenance has ever rolled a snapshot, so
-	// BulletinToday is still its zero value, as game.NewWorldSeed leaves it.
+	// BulletinToday is still its zero value.
 	w.BulletinToday = game.DailyBulletin{}
-	live := w.PlanetTotals()
-	if live.Population == 0 {
-		t.Fatal("test setup: expected the seeded world to already have living, populated empires")
+	// Give the planet one population the assertion can name outright. Asking
+	// the engine for the figure and then asserting the engine printed it
+	// passes whatever either side does, which is the shape this file's own
+	// rule about scripted tests warns about.
+	for _, e := range w.Empires {
+		e.People = 0
 	}
+	w.Player().People = 4242
 
 	f := &fakeSession{keys: []rune(" ")}
 	showBulletinToday(f, w)
 	out := f.out.String()
 
-	if !strings.Contains(out, numfmt.GroupLong(live.Population, "")) {
-		t.Errorf("expected Today's News to show the live population %d, got:\n%s", live.Population, out)
+	if !strings.Contains(out, numfmt.GroupLong(4242, "")) {
+		t.Errorf("expected Today's News to show the live population 4242, got:\n%s", out)
+	}
+}
+
+// The screen (showBulletinToday) and the written bulletin file
+// (writeNewsBulletin) must draw the SAME Daily Bulletin box once a real
+// snapshot exists. Before this fix the screen overrode Totals with a live
+// value while the file did not, so the two disagreed about the same day —
+// both now go through World.TodaysBulletin, and this guards against a future
+// display fix special-casing one call site again.
+func TestShowBulletinAndWrittenFileAgreeOnce(t *testing.T) {
+	w := newWorld()
+	// A real, non-zero frozen snapshot, as rollNews leaves one after the
+	// first real daily maintenance.
+	w.BulletinToday = game.DailyBulletin{
+		Totals: game.PlanetTotals{Population: 100, Regions: 200, NetWorth: 300},
+		Change: game.PlanetTotals{Population: 1, Regions: 2, NetWorth: 3},
+	}
+	// Drift the live totals away from the frozen snapshot, the way a played
+	// turn would — without this, a live-recompute bug in only one call site
+	// would go unnoticed because live and frozen still happen to agree.
+	w.Player().Land += 500
+
+	bulletinBoxLines := func(out string) []string {
+		var lines []string
+		for _, l := range strings.Split(stripANSI(out), "\n") {
+			if strings.Contains(l, "Total Population:") ||
+				strings.Contains(l, "Total Regions:") ||
+				strings.Contains(l, "Total Net Worth:") {
+				lines = append(lines, l)
+			}
+		}
+		return lines
+	}
+
+	screen := &fakeSession{keys: []rune(" ")}
+	showBulletinToday(screen, w)
+	screenBox := bulletinBoxLines(screen.out.String())
+
+	file := &fakeSession{}
+	writeNewsBulletin(file, w, true)
+	fileBox := bulletinBoxLines(file.out.String())
+
+	if len(screenBox) != 3 || len(fileBox) != 3 {
+		t.Fatalf("expected 3 bulletin rows each, got screen=%d file=%d\nscreen:\n%s\nfile:\n%s",
+			len(screenBox), len(fileBox), screen.out.String(), file.out.String())
+	}
+	for i := range screenBox {
+		if screenBox[i] != fileBox[i] {
+			t.Errorf("screen and file disagree on row %d:\nscreen: %q\nfile:   %q", i, screenBox[i], fileBox[i])
+		}
+	}
+	// And both must show the FROZEN snapshot (200/+2), not the drifted live
+	// total — otherwise the two could still "agree" by both recomputing live.
+	for _, box := range [][]string{screenBox, fileBox} {
+		if !strings.Contains(box[1], "200") || !strings.Contains(box[1], "+2") {
+			t.Errorf("expected the frozen Regions snapshot (200, +2), got: %q", box[1])
+		}
 	}
 }
 

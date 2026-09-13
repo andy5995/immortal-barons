@@ -5688,6 +5688,18 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **The Daily Bulletin is drawn live, once, before a board's first-ever
+  maintenance has rolled a snapshot.** BRE builds the whole box — Totals AND
+  Change — exactly once, inside daily maintenance (`run_daily_maintenance`,
+  BRE.OVR 0x00851c: both "Total Population" and "Change: " are referenced from
+  nowhere else), and never recomputes it; IB matches that permanently once a
+  real snapshot exists (`World.TodaysBulletin`). The one exception is a board
+  with no snapshot at all yet, which would otherwise read as an empty planet
+  while the scoreboard beside it already shows populated realms (#109); Change
+  stays zero there, since there is no yesterday to have changed from. Until
+  2026-09-13 the screen recomputed Totals live EVERY day, forever, while Change
+  stayed the frozen delta and the written bulletin file used neither override —
+  so the screen, the file, and BRE's own model all disagreed with each other.
 - **The Terrorist Ops and Special Operations menus carry a (?) Help browser.**
   The original lists the ops and nothing else — nine numbered items and a Quit
   on Terrorist Ops, eight and a Quit on Special Operations, confirmed across the

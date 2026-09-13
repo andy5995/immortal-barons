@@ -33,13 +33,7 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 		if yesterday {
 			bulletin, news = w.BulletinYesterday, w.NewsYesterday
 		} else {
-			bulletin, news = w.BulletinToday, w.NewsToday
-			// Totals are recomputed live rather than trusted from the snapshot:
-			// rollNews only takes one at daily maintenance, so on a board's first
-			// day (or for any realm created since the last maintenance) the
-			// snapshot is still zero-valued while living empires already exist
-			// (#109). Change stays the frozen day-over-day delta rollNews took.
-			bulletin.Totals = w.PlanetTotals()
+			bulletin, news = w.TodaysBulletin(), w.NewsToday
 		}
 		// Only name the board in a league, where several planets file news into
 		// one feed. On a stand-alone board the prefix is noise — and the default
