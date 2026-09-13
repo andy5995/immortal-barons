@@ -1,6 +1,16 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Twelve help topics no longer describe mechanics the game has changed or
+    never had
+  * The Daily Bulletin's totals and the change beside them are measured at the
+    same moment, and the screen and the written news file show the same figures
+  * Buy Regions closes when the day's region allowance is spent, rather than
+    asking for an amount that can only be zero
+  * The German and Russian help carries the corrected topics instead of
+    dropping back to English part-way through a page
+  * The German help renders on a CP437 door again: fourteen strings used
+    characters CP437 does not have
   * A node no longer holds on to game state that another node has removed
   * A weapon aimed at this planet is no longer refused for arriving late, so a
     board that was down when it landed still gets the siege
