@@ -11,10 +11,10 @@ title: 'Перемещение по меню'
 пункт меню. У каждого пункта клавиша показана в скобках, например
 `(1)`. Нажмите эту клавишу — и он сразу выполнится.
 
-Every menu leaves with the `0` key, labeled "Quit". On a turn menu
-(Spending, Attack, Covert, Trading), Quit moves you to the next step of your
-turn; you cannot go back to that menu until your next turn. On a side menu
-(like the Bank or the System Menu), Quit takes you back to where you were.
+Любое меню закрывается клавишей `0` с надписью "Quit". В меню хода (Расходы,
+Атака, Разведка, Торговля) Quit переводит вас к следующему шагу хода;
+вернуться в это меню можно будет только в следующем ходу. В боковом меню
+(например, Банк или Системное меню) Quit возвращает вас туда, где вы были.
 
 Системное меню открывается клавишей `*` из меню Расходов. В нём собраны
 дополнительные пункты: Настройки, Задать налог и Показать инструкции.

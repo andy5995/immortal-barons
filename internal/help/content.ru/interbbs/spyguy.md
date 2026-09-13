@@ -14,7 +14,7 @@ his hosts turn something on your planet.
 
 Send him from InterPlanetary Operations, under Special Operations.
 
-## What he costs
+## Сколько он стоит
 
 Gold, by the day, and the whole stay is paid up front. The daily rate is
 drawn from the size of **your own** planet — every region every realm here
@@ -26,7 +26,7 @@ than you are carrying, the shortfall is named and the bank is opened for
 you; come back with it and the man goes, come back without it and nothing is
 sent or charged.
 
-## What he reports
+## Что он сообщает
 
 Two things, and both arrive as **planetary news** where everyone here can
 read them:
@@ -39,7 +39,7 @@ read them:
 He also reports whatever is already under way the day he arrives, so a man
 sent late is not wasted.
 
-## Reading what he sends
+## Чтение того, что он присылает
 
 Each report arrives as planet news, dated, saying what was aimed at you and
 how long it had left when he wrote it. That line never changes afterwards,

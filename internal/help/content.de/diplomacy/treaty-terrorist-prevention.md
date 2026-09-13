@@ -7,5 +7,5 @@ title: Terrorabwehr
 
 # Terrorabwehr
 
-Terrorist Prevention links the two realms' intelligence agencies. They help
-each other find and stop covert and terrorist attacks.
+Terrorabwehr verbindet die Geheimdienste der beiden Reiche. Sie helfen
+einander, verdeckte und terroristische Angriffe zu finden und zu verhindern.

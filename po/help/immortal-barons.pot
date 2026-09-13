@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-13 05:51-0500\n"
+"POT-Creation-Date: 2026-09-13 17:46-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -477,19 +477,21 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:19
+#: internal/help/content/covert/overview.md:21
 #, markdown-text
 msgid ""
 "What agents do NOT do is change your odds. The chance an operation lands is "
 "set by the operation itself: the simpler ones land just over half the time, "
 "the harder ones less often. Your agents make no difference to it, and "
-"neither do the target's. Two things do change it: a bribed agent inside the "
-"target doubles your chance against that realm, and a realm that has exposed "
-"your agent turns nine of your attempts in ten away."
+"neither do the target's. Three things do change it: a bribed agent inside "
+"the target doubles your chance against that realm, a realm that has exposed "
+"your agent turns nine of your attempts in ten away, and an Intelligence "
+"Alliance or Terrorist Prevention treaty lends an ally's agents to your side "
+"or the target's. See Agents."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:23
+#: internal/help/content/covert/overview.md:25
 #, markdown-text
 msgid ""
 "Each operation also costs gold. The menu shows the price next to each one, "
@@ -499,7 +501,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:29
+#: internal/help/content/covert/overview.md:31
 #, markdown-text
 msgid ""
 "While your realm is under New Realm Protection, your agents may not move "
@@ -510,7 +512,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:37
+#: internal/help/content/covert/overview.md:39
 #, markdown-text
 msgid ""
 "Most operations do not happen on the spot. When you choose one, your agent "
@@ -523,7 +525,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:42
+#: internal/help/content/covert/overview.md:44
 #, markdown-text
 msgid ""
 "An agreement is no shelter. You may aim an operation at a ruler you hold a "
@@ -534,7 +536,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:45
+#: internal/help/content/covert/overview.md:47
 #, markdown-text
 msgid ""
 "If the realm you aimed at is gone by the time your agent arrives, the "
@@ -542,7 +544,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:50
+#: internal/help/content/covert/overview.md:52
 #, markdown-text
 msgid ""
 "Each covert operation may be run once for every turn in the day, and you may "
@@ -552,7 +554,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:57
+#: internal/help/content/covert/overview.md:59
 #, markdown-text
 msgid ""
 "After you pick a target the game asks how many agents to send, and suggests "
@@ -564,7 +566,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:63
+#: internal/help/content/covert/overview.md:65
 #, markdown-text
 msgid ""
 "When an operation fails, your agent is caught and lost, and the target is "
@@ -575,7 +577,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:67
+#: internal/help/content/covert/overview.md:69
 #, markdown-text
 msgid ""
 "Each operation has its own topic. Some of the topics in this section cover "
@@ -584,12 +586,12 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:69
+#: internal/help/content/covert/overview.md:72
 #, markdown-text
 msgid ""
-"The Covert Operations menu appears during your turn, after the Attack "
-"menu. If you do not see it, turn on \"Visit Covert Menu\" in the Preferences "
-"menu."
+"The Covert Operations menu appears during your turn, before the Spending and "
+"Attack menus. If you do not see it, turn on \"Visit Covert Menu\" in the "
+"Preferences menu."
 msgstr ""
 
 #. type: Title #
@@ -682,15 +684,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/send-spy.md:16
+#: internal/help/content/covert/send-spy.md:17
 #, markdown-text
 msgid ""
-"Just over half of all spies get through, whoever you send them against — see "
-"the Covert Operations overview for what does and does not move the odds."
+"It succeeds more often than most operations, whoever you send it against — "
+"see the Covert Operations overview for the odds and what does and does not "
+"move them."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/send-spy.md:18
+#: internal/help/content/covert/send-spy.md:19
 #, markdown-text
 msgid ""
 "Send Spy answers on the spot. It is one of the few operations that does not "
@@ -1266,18 +1269,20 @@ msgid "when it drops under 10, it starts pulling Morale down with it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:30
+#: internal/help/content/economy/morale-and-support.md:32
 #, markdown-text
 msgid ""
 "Military Morale scales how hard your army fights, both attacking and "
 "defending.  A full-morale army fights above its paper strength. A broken one "
 "fights at about half. When Morale falls under 40, troopers, jets and tanks "
 "begin to desert each turn, and the lower it goes the more of them "
-"leave. Turrets, bombers and carriers never desert."
+"leave. Bombers, carriers, and turrets never desert over Morale — but "
+"underpaying your armed forces' upkeep deserts turrets too, along with "
+"troopers, jets and tanks, whatever Morale reads."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:34
+#: internal/help/content/economy/morale-and-support.md:36
 #, markdown-text
 msgid ""
 "There is one more effect that is easy to miss. Auto-Pay Maintenance only "
@@ -1287,13 +1292,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:35
+#: internal/help/content/economy/morale-and-support.md:37
 #, markdown-text, no-wrap
 msgid "What lowers them"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:48
+#: internal/help/content/economy/morale-and-support.md:50
 #, markdown-text
 msgid ""
 "Underpaying your armed forces costs Morale. Underpaying your land upkeep, "
@@ -1302,22 +1307,22 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:48
+#: internal/help/content/economy/morale-and-support.md:50
 #, markdown-text
 msgid "A riot from high taxes costs Support."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:48
+#: internal/help/content/economy/morale-and-support.md:50
 #, markdown-text
 msgid ""
-"Declaring war on a ruler you hold an agreement with costs you a quarter of "
-"each. Attacking that ruler without declaring war first ends the agreement "
-"too, but costs you nothing."
+"Declaring war on a ruler you hold an agreement with costs you "
+"nothing. Attacking that ruler without declaring war first ends the agreement "
+"too, and costs you a quarter of each."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:48
+#: internal/help/content/economy/morale-and-support.md:50
 #, markdown-text
 msgid ""
 "A chemical or biological strike on your realm hurts both. The plague is far "
@@ -1325,7 +1330,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:48
+#: internal/help/content/economy/morale-and-support.md:50
 #, markdown-text
 msgid ""
 "Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
@@ -1333,13 +1338,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:49
+#: internal/help/content/economy/morale-and-support.md:51
 #, markdown-text, no-wrap
 msgid "Paying them back"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:55
+#: internal/help/content/economy/morale-and-support.md:57
 #, markdown-text
 msgid ""
 "At the maintenance stage the crown asks for gold to buy back up to fifteen "
@@ -1350,7 +1355,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:59
+#: internal/help/content/economy/morale-and-support.md:61
 #, markdown-text
 msgid ""
 "What you pay buys points in proportion, so paying half the request buys "
@@ -1373,13 +1378,13 @@ msgid "Net Worth is your overall score. It ranks every empire (see Scores)."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/net-worth.md:14
+#: internal/help/content/economy/net-worth.md:15
 #, markdown-text
 msgid ""
-"It counts mostly your land and your military strength, minus your "
-"debt. Gold, food, and people are not counted directly. So a rich empire with "
-"little land or army still scores low. To climb the ranks, hold land and a "
-"strong army."
+"It counts mostly your land and your military strength. Gold, food, people, "
+"and debt are not counted at all. So a rich empire with little land or army "
+"still scores low, and a loan does not cost you rank. To climb the ranks, "
+"hold land and a strong army."
 msgstr ""
 
 #. type: Title #
@@ -1497,24 +1502,24 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:24
+#: internal/help/content/economy/taxes.md:25
 #, markdown-text
 msgid ""
 "Taxes also decide how many people your realm can hold. A low rate lets it "
-"hold many more, a high one far fewer, and past 50% people leave faster "
-"still. A realm that is already shrinking loses people quicker the harder it "
-"taxes. Support works the same way: the higher it stands, the more people "
-"your land can hold."
+"hold many more, a high one far fewer, and past a punitive rate people leave "
+"faster still — see Population for the threshold. A realm that is already "
+"shrinking loses people quicker the harder it taxes. Support works the same "
+"way: the higher it stands, the more people your land can hold."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:25
+#: internal/help/content/economy/taxes.md:26
 #, markdown-text, no-wrap
 msgid "The Queen Royale's tax"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:29
+#: internal/help/content/economy/taxes.md:30
 #, markdown-text
 msgid ""
 "The Queen takes a share of what you earn each turn. You may pay her less "
@@ -1522,7 +1527,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:34
+#: internal/help/content/economy/taxes.md:35
 #, markdown-text
 msgid ""
 "Every coin she collects goes into her purse, and she gives part of that "
@@ -1532,7 +1537,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:37
+#: internal/help/content/economy/taxes.md:38
 #, markdown-text
 msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
@@ -1540,13 +1545,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:38
+#: internal/help/content/economy/taxes.md:39
 #, markdown-text, no-wrap
 msgid "The lottery"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:44
+#: internal/help/content/economy/taxes.md:45
 #, markdown-text
 msgid ""
 "Once a day, as she hands back your refund, the Queen offers a lottery "
@@ -1557,7 +1562,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:49
+#: internal/help/content/economy/taxes.md:50
 #, markdown-text
 msgid ""
 "Pick six letters, one keypress each, and press Enter for any you would "
@@ -1567,43 +1572,43 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:56
+#: internal/help/content/economy/taxes.md:57
 #, markdown-text
 msgid "1 letter: 2,500 gold"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:56
+#: internal/help/content/economy/taxes.md:57
 #, markdown-text
 msgid "2 letters: 10,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:56
+#: internal/help/content/economy/taxes.md:57
 #, markdown-text
 msgid "3 letters: 500,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:56
+#: internal/help/content/economy/taxes.md:57
 #, markdown-text
 msgid "4 letters: 1,000,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:56
+#: internal/help/content/economy/taxes.md:57
 #, markdown-text
 msgid "5 letters: 4,000,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:56
+#: internal/help/content/economy/taxes.md:57
 #, markdown-text
 msgid "6 letters: 10,000,000"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:60
+#: internal/help/content/economy/taxes.md:61
 #, markdown-text
 msgid ""
 "Winnings go into your bank. One match still leaves you 2,500 down on the "
@@ -2114,25 +2119,26 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:43
+#: internal/help/content/interbbs/leagues.md:45
 #, markdown-text
 msgid ""
 "Five of these items are shut until you have played a turn this visit: Send "
 "Trade Deal, Create Group Attack, Join Group Attack, Indiv. Attack Force and "
 "Special Operations. Anything that moves forces or goods costs you a turn "
-"first. The bank, your messages, the scores and the terrorist ops stay open, "
-"and once you have started a turn the whole menu is open for the rest of your "
-"visit."
+"first — Join Group Attack lets you see who is forming a party before it asks "
+"for that turn, so you can decide whether starting one is worth it. The bank, "
+"your messages, the scores and the terrorist ops stay open, and once you have "
+"started a turn the whole menu is open for the rest of your visit."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/leagues.md:44
+#: internal/help/content/interbbs/leagues.md:46
 #, markdown-text, no-wrap
 msgid "Your BBS Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:52
+#: internal/help/content/interbbs/leagues.md:54
 #, markdown-text
 msgid ""
 "The barons on your own board elect one of their number Coordinator, and the "
@@ -2144,7 +2150,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:56
+#: internal/help/content/interbbs/leagues.md:58
 #, markdown-text
 msgid ""
 "You cannot vote while your realm is still under new-realm protection, and "
@@ -2153,7 +2159,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:59
+#: internal/help/content/interbbs/leagues.md:61
 #, markdown-text
 msgid ""
 "Every turn opens by telling you whether you hold the office or who your vote "
@@ -2161,7 +2167,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:62
+#: internal/help/content/interbbs/leagues.md:64
 #, markdown-text
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
@@ -2169,7 +2175,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:63
+#: internal/help/content/interbbs/leagues.md:65
 #, markdown-text
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
@@ -2730,7 +2736,9 @@ msgstr ""
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 #, markdown-text
-msgid "**Attacks.** You may attack another barony (once per turn)."
+msgid ""
+"**Attacks.** You may attack another barony, a limited number of times per "
+"day."
 msgstr ""
 
 #. type: Bullet: '- '
@@ -3006,23 +3014,23 @@ msgstr ""
 #: internal/help/content/military/jets.md:20
 #, markdown-text
 msgid ""
-"Jets cannot reach a battle on their own. You need carriers to carry them, "
-"and one carrier moves up to 100 jets. Without enough carriers, your jets "
+"Jets cannot reach a battle on their own. You need carriers to carry them — "
+"see Carriers for how many each one lifts. Without enough carriers, your jets "
 "cannot join the attack."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/jets.md:24
+#: internal/help/content/military/jets.md:25
 #, markdown-text
 msgid ""
-"Because that is easy to forget, an order of more than 100 jets asks whether "
-"to include the carriers to lift them. Say yes and the same gold buys both, "
-"so you end up with fewer jets than you asked for and every one of them able "
-"to fly."
+"Because that is easy to forget, an order larger than one carrier's worth "
+"asks whether to include the carriers to lift them. Say yes and the same gold "
+"buys both, so you end up with fewer jets than you asked for and every one of "
+"them able to fly."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/jets.md:28
+#: internal/help/content/military/jets.md:29
 #, markdown-text
 msgid ""
 "An enemy SDI shield lowers your jets' attacking strength, but only when you "
@@ -3031,7 +3039,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/jets.md:30
+#: internal/help/content/military/jets.md:31
 #, markdown-text
 msgid ""
 "Jets are lost in battle like any other unit. Enemy turrets are part of the "
@@ -3050,8 +3058,9 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Tanks are the strongest general-purpose unit, powerful on both attack and "
-"defense. A tank is worth three troopers on its own. With a finished "
-"HeadQuarters it is worth five, on both attack and defense."
+"defense. A tank is worth three and a half troopers on its own. With a "
+"finished HeadQuarters it is worth four and a half, on both attack and "
+"defense."
 msgstr ""
 
 #. type: Plain text
@@ -3558,17 +3567,17 @@ msgid "Biological Attack"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-biological.md:13
+#: internal/help/content/warfare/attack-biological.md:14
 #, markdown-text
 msgid ""
 "A Biological Attack releases a plague. It kills about a tenth of the enemy's "
-"people and a sixth of their troopers, and it halves their military "
-"morale. It does not touch their land at all — no regions are ruined and none "
-"change hands."
+"people and a sixth of their troopers, and it halves their military morale "
+"while also knocking their popular support down to two-thirds. It does not "
+"touch their land at all — no regions are ruined and none change hands."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-biological.md:16
+#: internal/help/content/warfare/attack-biological.md:17
 #, markdown-text
 msgid ""
 "The missile is priced off all three of the things it hurts: the target's "
@@ -3576,7 +3585,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-biological.md:19
+#: internal/help/content/warfare/attack-biological.md:20
 #, markdown-text
 msgid ""
 "Strategy: this is the anti-army weapon of the three. Halved morale weakens "
@@ -3898,16 +3907,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:30
+#: internal/help/content/warfare/pirates.md:29
 #, markdown-text
 msgid ""
-"Listing military on the Trading Market does not hide it. Pirates raid your "
-"listing about as readily as your camp, so escrow protects goods from other "
-"barons, not from bandits."
+"Listing military on the Trading Market does not hide it from pirates, but it "
+"does help some: your camp is raided about twice as often as your listing."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:32
+#: internal/help/content/warfare/pirates.md:31
 #, markdown-text
 msgid ""
 "Tip: a faction you keep beaten stays harmless, because its army is only what "
@@ -3922,46 +3930,46 @@ msgid "SDI Program"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:15
+#: internal/help/content/warfare/sdi.md:14
 #, markdown-text
 msgid ""
 "The SDI Program is a shield you fund. It answers three things, and only "
 "these three: missiles fired at you from another planet, and the jets and "
 "bombers of a strike arriving from one. It does nothing against a neighbor on "
 "your own planet — not their army, and not their nuclear, chemical or "
-"biological missiles.  Technology regions lower its upkeep."
+"biological missiles."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:20
+#: internal/help/content/warfare/sdi.md:19
 #, markdown-text
 msgid ""
 "At full strength it turns aside about half the missiles aimed at you, takes "
 "30% off an arriving realm's jets and 20% off its bombers. At half strength "
-"it does half of each. Only a strike aimed at you by name meets your shield; "
-"one aimed at the planet as a whole goes through it."
+"it does half of each. Only a strike aimed at you alone meets your shield; a "
+"group attack goes through it even when you are one of its named targets."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:21
+#: internal/help/content/warfare/sdi.md:20
 #, markdown-text, no-wrap
 msgid "How strong it is"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:24
+#: internal/help/content/warfare/sdi.md:23
 #, markdown-text
 msgid "Strength is the funding spread over your land, not the funding alone:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:26
+#: internal/help/content/warfare/sdi.md:25
 #, markdown-text, no-wrap
 msgid "    strength% = the square root of (funding / (10 x (regions + 1)))\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:32
+#: internal/help/content/warfare/sdi.md:31
 #, markdown-text
 msgid ""
 "capped at 100%. Two things follow. Every region you take thins your own "
@@ -3972,13 +3980,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:33
+#: internal/help/content/warfare/sdi.md:32
 #, markdown-text, no-wrap
 msgid "Funding it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:38
+#: internal/help/content/warfare/sdi.md:37
 #, markdown-text
 msgid ""
 "The program is a pot of gold, not something you buy once. Each turn you may "
@@ -3987,7 +3995,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:41
+#: internal/help/content/warfare/sdi.md:40
 #, markdown-text
 msgid ""
 "That amount is your allowance for the whole turn. Leaving the screen and "
@@ -3995,7 +4003,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:44
+#: internal/help/content/warfare/sdi.md:43
 #, markdown-text
 msgid ""
 "So a shield takes many turns to build, however rich you are. You cannot buy "
@@ -4003,13 +4011,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:45
+#: internal/help/content/warfare/sdi.md:44
 #, markdown-text, no-wrap
 msgid "Paying for it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:49
+#: internal/help/content/warfare/sdi.md:48
 #, markdown-text
 msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
@@ -4017,7 +4025,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:52
+#: internal/help/content/warfare/sdi.md:51
 #, markdown-text
 msgid ""
 "Pay it in full. If you pay short, the program shrinks to what you did pay "

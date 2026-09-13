@@ -15,13 +15,13 @@ Jets sind günstig im Kauf, aber teuer im Unterhalt, kaufen Sie also nicht
 mehr, als Sie einsetzen werden.
 
 Jets erreichen eine Schlacht nicht allein. Sie brauchen Träger, die sie
-befördern, und ein Träger nimmt bis zu 100 Jets auf. Ohne genügend Träger
-können Ihre Jets am Angriff nicht teilnehmen.
+befördern - siehe Träger dafür, wie viele jeder hebt. Ohne genug Träger
+können Ihre Jets nicht am Angriff teilnehmen.
 
-Weil das leicht zu vergessen ist, fragt eine Bestellung von mehr als 100
-Jets, ob die Träger zum Heben gleich mitkommen sollen. Sagen Sie ja, kauft
-dasselbe Gold beides, Sie erhalten also weniger Jets als erbeten und jeder
-einzelne kann fliegen.
+Weil das leicht zu vergessen ist, fragt eine Bestellung, die über die Ladung
+eines Trägers hinausgeht, ob die Träger zum Heben mitgekauft werden
+sollen. Sagen Sie ja, dann kauft dasselbe Gold beides: Sie erhalten weniger
+Jets als bestellt, aber jeder einzelne kann fliegen.
 
 Ein feindlicher SDI-Schild senkt die Angriffsstärke Ihrer Jets, aber nur,
 wenn Sie einen benannten Baron auf einem anderen Planeten angreifen — gegen

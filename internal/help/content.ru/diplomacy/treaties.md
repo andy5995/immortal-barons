@@ -7,8 +7,9 @@ title: 'Договоры и союзы'
 
 # Договоры и союзы
 
-Treaties are agreements you send to other rulers. A treaty starts only when
-the other side accepts it. Each treaty type has its own topic.
+Договоры - это соглашения, которые вы отправляете другим правителям. Договор
+вступает в силу лишь тогда, когда другая сторона его принимает. У каждого
+вида договора своя тема.
 
 Aiming an attack at a ruler you hold an agreement with tears the agreement
 up, and the game asks you to confirm it before you choose your force. Say

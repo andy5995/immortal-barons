@@ -12,7 +12,7 @@ title: Банк
 
 - Внести — перевести золото из казны в банк.
 - Снять — вернуть золото из банка в казну.
-- Cash Relief / Loans — borrow gold, or pay back what you already owe.
+- Денежная помощь / Кредиты - занять золото или вернуть уже взятое.
 
 Deposits and withdrawals have no size limit. One investment locks away at
 most two billion gold, though you may open as many as you like.
@@ -50,8 +50,8 @@ support. Debt keeps growing each turn until you repay it, so clear it early.
 
 ## Инвестиции
 
-You can lock gold away as an investment for 2 to 10 days. It pays back your
-gold plus interest when it matures. The interest rate floats — it rises and
-falls with how much everyone is investing — so check the rate before you
-commit.  A common tactic is to keep several investments running at once,
-each for a different length, so one matures every day.
+Вы можете вложить золото на срок от 2 до 10 дней. По окончании срока оно
+возвращается с процентами. Процентная ставка плавает - она растёт и падает
+вместе с тем, сколько вкладывают все, - поэтому проверьте её, прежде чем
+вкладывать.  Распространённая тактика: держать несколько вкладов сразу,
+каждый на свой срок, чтобы один созревал каждый день.

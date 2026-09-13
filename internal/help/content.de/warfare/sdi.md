@@ -11,12 +11,12 @@ The SDI Program is a shield you fund. It answers three things, and only
 these three: missiles fired at you from another planet, and the jets and
 bombers of a strike arriving from one. It does nothing against a neighbor on
 your own planet — not their army, and not their nuclear, chemical or
-biological missiles.  Technology regions lower its upkeep.
+biological missiles.
 
 At full strength it turns aside about half the missiles aimed at you, takes
 30% off an arriving realm's jets and 20% off its bombers. At half strength
-it does half of each. Only a strike aimed at you by name meets your shield;
-one aimed at the planet as a whole goes through it.
+it does half of each. Only a strike aimed at you alone meets your shield; a
+group attack goes through it even when you are one of its named targets.
 
 ## How strong it is
 

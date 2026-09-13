@@ -2,10 +2,10 @@
 category: interbbs
 in_game: true
 order: 3
-title: 'Attack Types'
+title: Angriffsarten
 ---
 
-# Attack Types
+# Angriffsarten
 
 When you send your own strike force at a baron on another planet, you choose
 how to press the attack. Group attacks have no such choice — they always

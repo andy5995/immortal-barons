@@ -7,9 +7,10 @@ title: 'Соглашение о свободной торговле'
 
 # Соглашение о свободной торговле
 
-A Free Trade Agreement lets people and goods move freely, with no border
-tax. You earn a lot from income taxes — nearly twice what a Tariff Trade
-Agreement pays, on the same count of the smaller realm's people.
+Соглашение о свободной торговле позволяет людям и товарам передвигаться
+свободно, без пограничного сбора. Вы много зарабатываете на подоходном
+налоге - почти вдвое больше, чем платит таможенное торговое соглашение, при
+том же числе жителей меньшего государства.
 
 People mixing across borders spread low morale and low support. Each day the
 healthier of the two realms drifts down toward the worse one, as far as its

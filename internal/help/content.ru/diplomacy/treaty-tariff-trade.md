@@ -7,8 +7,9 @@ title: 'Тарифное торговое соглашение'
 
 # Тарифное торговое соглашение
 
-A Tariff Trade Agreement is trade between two realms, with a tax on goods
-that cross the border. Both sides earn extra income each turn, counted on
-whichever of the two realms has FEWER people — so a pact with a small realm
-earns little, and the best partner is one as populous as you. A realm still
-under new-realm protection earns a reduced rate.
+Таможенное торговое соглашение - это торговля между двумя государствами с
+налогом на товары, пересекающие границу. Обе стороны получают дополнительный
+доход каждый ход, считая по тому из двух государств, у которого МЕНЬШЕ
+жителей: пакт с маленьким государством приносит мало, и лучший партнёр -
+тот, кто населён так же, как вы. Государство, ещё находящееся под защитой
+новичка, получает сниженную ставку.

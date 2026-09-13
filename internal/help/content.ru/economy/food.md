@@ -7,10 +7,10 @@ title: 'Рынок еды и порча'
 
 # Рынок еды и порча
 
-Your people and your armed forces eat food every turn. They are billed
-separately, and you are asked about each in turn, so it is possible to feed
-one and not the other. Agricultural regions grow food, and you can buy more
-at the Food Market.
+Ваш народ и ваши войска едят каждый ход. Счета выставляются отдельно, и о
+каждом вас спрашивают по очереди, так что можно накормить одних и оставить
+голодными других. Сельскохозяйственные области выращивают пищу, ещё её можно
+купить на продовольственном рынке.
 
 The market opens by itself at that point in your turn, and both bills are
 put to you, whether or not you have enough in store. Turn on Auto-Feed in

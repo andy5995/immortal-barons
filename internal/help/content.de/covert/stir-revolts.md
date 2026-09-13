@@ -7,5 +7,6 @@ title: 'Stir Revolts'
 
 # Stir Revolts
 
-Stir Revolts spreads propaganda that lowers the target's public support. Low
-support weakens their troopers and their economy.
+Aufstände schüren verbreitet Propaganda, die die öffentliche Zustimmung des
+Ziels senkt. Geringe Zustimmung schwächt seine Soldaten und seine
+Wirtschaft.

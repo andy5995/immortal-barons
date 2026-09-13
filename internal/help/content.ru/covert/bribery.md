@@ -7,9 +7,10 @@ title: Bribery
 
 # Bribery
 
-Bribery pays one of the enemy's own agents to work for you. From then on,
-every covert operation YOU run against that realm is twice as likely to
-land. It does nothing to the operations they run against you.
+Подкуп заставляет одного из агентов противника работать на вас. С этого
+момента любая тайная операция, которую ВЫ проводите против этого
+государства, удаётся вдвое чаще. На операции, которые оно проводит против
+вас, это не влияет.
 
 The agent stays on your payroll for the rest of the game, and you can only
 hold one inside a realm — the menu refuses a second attempt, at no cost. It

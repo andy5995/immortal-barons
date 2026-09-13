@@ -10,7 +10,7 @@ title: Handel
 There are two ways to move goods between realms: the Trading Market, and a
 trade deal.
 
-## The Trading Market
+## Der Handelsmarkt
 
 You can put any of your goods on the market and set your own price. The
 market is open: any realm on your planet can see what is listed and buy it,

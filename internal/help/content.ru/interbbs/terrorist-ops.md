@@ -2,10 +2,10 @@
 category: interbbs
 in_game: true
 order: 6
-title: 'Terrorist Ops'
+title: 'Террористические операции'
 ---
 
-# Terrorist Ops
+# Террористические операции
 
 Terrorist Ops send agents against a realm on another planet. You choose the
 operation, then how many agents to commit. The agents are spent when you
@@ -26,7 +26,7 @@ that gets through takes its own bite:
   which is what they defend and attack with.
 - **Demoralize Forces** — takes a seventh off military morale.
 - **Cause Dissensions** — a few percent of their troopers desert.
-- **Bomb Air Bases** — burns a slice of their jets on the ground.
+- **Бомбить авиабазы** - сжигает часть их истребителей на земле.
 - **Stir Emigrations** — drives people out of the realm.
 - **Spread Propaganda** — costs them popular support.
 - **Bomb Food Storages** — the widest swing of the nine: it can take almost

@@ -19,7 +19,8 @@ Wenn das Spiel nach einer Menge fragt, zeigt es zwei Zahlen in Klammern, wie
   Sie sehen `1000`.
 - `m` fügt sechs Nullen hinzu. Drücken Sie `2` und dann `m`, und Sie sehen
   `2000000`.
-- `b` adds nine zeros. Press `3` then `b` and you see `3000000000`.
+- `b` fügt neun Nullen hinzu. Drücken Sie `3` und dann `b`, und Sie sehen
+  `3000000000`.
 
 Wenn Sie eine Zahl eingeben, die größer als das Maximum ist, senkt das Spiel
 sie beim Drücken der Eingabetaste auf das Maximum.

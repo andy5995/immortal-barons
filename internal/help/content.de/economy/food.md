@@ -7,10 +7,11 @@ title: 'Nahrungsmarkt und Verderb'
 
 # Nahrungsmarkt und Verderb
 
-Your people and your armed forces eat food every turn. They are billed
-separately, and you are asked about each in turn, so it is possible to feed
-one and not the other. Agricultural regions grow food, and you can buy more
-at the Food Market.
+Ihr Volk und Ihre Streitkräfte verbrauchen jede Runde Nahrung. Sie werden
+getrennt abgerechnet, und Sie werden nacheinander zu beiden gefragt, sodass
+Sie das eine versorgen und das andere hungern lassen
+können. Landwirtschaftsgebiete bauen Nahrung an, und weitere können Sie auf
+dem Nahrungsmarkt kaufen.
 
 The market opens by itself at that point in your turn, and both bills are
 put to you, whether or not you have enough in store. Turn on Auto-Feed in

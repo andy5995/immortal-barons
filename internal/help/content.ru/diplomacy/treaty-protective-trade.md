@@ -7,11 +7,12 @@ title: 'Защищённая торговля'
 
 # Защищённая торговля
 
-Protective Trade places guards along the trade routes between two
-realms. Deals in transit between the two of you survive enemy bombing,
-whoever fires the strike: the guard is on the route itself, so it holds
-against every attacker, not only against your partner. It also cuts the cost
-of sending a trade deal to that partner to a third of the usual daily rate.
+Защищённая торговля выставляет охрану вдоль торговых путей между двумя
+государствами. Сделки, идущие между вами двумя, переживают вражескую
+бомбардировку, кто бы ни нанёс удар: охрана стоит на самом пути и потому
+держит против любого нападающего, а не только против вашего партнёра. Кроме
+того, она снижает стоимость отправки сделки этому партнёру до трети обычной
+дневной ставки.
 
 The guard covers deals with that partner only. Anything you have in transit
 to another realm can still be bombed, and so can goods you have listed on

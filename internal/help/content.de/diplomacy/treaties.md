@@ -7,8 +7,9 @@ title: 'Verträge und Bündnisse'
 
 # Verträge und Bündnisse
 
-Treaties are agreements you send to other rulers. A treaty starts only when
-the other side accepts it. Each treaty type has its own topic.
+Verträge sind Abkommen, die Sie anderen Herrschern senden. Ein Vertrag
+beginnt erst, wenn die andere Seite ihn annimmt. Jede Vertragsart hat ihr
+eigenes Thema.
 
 Aiming an attack at a ruler you hold an agreement with tears the agreement
 up, and the game asks you to confirm it before you choose your force. Say

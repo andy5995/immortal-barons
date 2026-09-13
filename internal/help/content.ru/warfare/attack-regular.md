@@ -7,8 +7,8 @@ title: 'Обычная атака'
 
 # Обычная атака
 
-A Regular Attack is a direct assault with your army. Your attack strength is
-compared to the enemy's defense.
+Обычная атака - это прямой штурм вашей армией. Ваша сила атаки сравнивается
+с обороной противника.
 
 First you choose how many of each unit to send: Troopers, Jets, Tanks, and
 Bombers. Jets can only fight if you have carriers to carry them. Units you

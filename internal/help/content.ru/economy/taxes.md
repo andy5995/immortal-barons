@@ -17,10 +17,10 @@ title: 'Налоги, поддержка и бунты'
 уровня. Бунт обрушивает поддержку и прогоняет часть народа.
 
 Taxes also decide how many people your realm can hold. A low rate lets it
-hold many more, a high one far fewer, and past 50% people leave faster
-still. A realm that is already shrinking loses people quicker the harder it
-taxes. Support works the same way: the higher it stands, the more people
-your land can hold.
+hold many more, a high one far fewer, and past a punitive rate people leave
+faster still — see Population for the threshold. A realm that is already
+shrinking loses people quicker the harder it taxes. Support works the same
+way: the higher it stands, the more people your land can hold.
 
 ## The Queen Royale's tax
 

@@ -7,8 +7,9 @@ title: Zoll-Handelsabkommen
 
 # Zoll-Handelsabkommen
 
-A Tariff Trade Agreement is trade between two realms, with a tax on goods
-that cross the border. Both sides earn extra income each turn, counted on
-whichever of the two realms has FEWER people — so a pact with a small realm
-earns little, and the best partner is one as populous as you. A realm still
-under new-realm protection earns a reduced rate.
+Ein Zollhandelsabkommen ist Handel zwischen zwei Reichen, mit einer Abgabe
+auf Waren, die die Grenze überqueren. Beide Seiten verdienen jede Runde
+zusätzlich, gerechnet auf dasjenige der beiden Reiche, das WENIGER Menschen
+hat - ein Pakt mit einem kleinen Reich bringt also wenig ein, und der beste
+Partner ist einer, der so bevölkert ist wie Sie. Ein Reich, das noch unter
+dem Schutz für neue Reiche steht, erhält einen verminderten Satz.

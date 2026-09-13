@@ -7,9 +7,10 @@ title: Freihandelsabkommen
 
 # Freihandelsabkommen
 
-A Free Trade Agreement lets people and goods move freely, with no border
-tax. You earn a lot from income taxes — nearly twice what a Tariff Trade
-Agreement pays, on the same count of the smaller realm's people.
+Ein Freihandelsabkommen lässt Menschen und Waren frei ziehen, ohne
+Grenzabgabe. Sie verdienen viel an Einkommensteuern - fast doppelt so viel
+wie ein Zollhandelsabkommen zahlt, bei derselben Zahl der Menschen des
+kleineren Reiches.
 
 People mixing across borders spread low morale and low support. Each day the
 healthier of the two realms drifts down toward the worse one, as far as its

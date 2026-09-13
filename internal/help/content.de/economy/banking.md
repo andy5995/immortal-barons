@@ -12,7 +12,8 @@ kann nicht von Piraten oder Angriffen geraubt werden.
 
 - Einzahlen — Gold aus Ihrer Schatzkammer auf die Bank überweisen.
 - Abheben — Gold von der Bank zurück in Ihre Schatzkammer holen.
-- Cash Relief / Loans — borrow gold, or pay back what you already owe.
+- Finanzhilfe / Kredite - Gold leihen oder zurückzahlen, was Sie bereits
+  schulden.
 
 Deposits and withdrawals have no size limit. One investment locks away at
 most two billion gold, though you may open as many as you like.
@@ -50,8 +51,9 @@ support. Debt keeps growing each turn until you repay it, so clear it early.
 
 ## Investitionen
 
-You can lock gold away as an investment for 2 to 10 days. It pays back your
-gold plus interest when it matures. The interest rate floats — it rises and
-falls with how much everyone is investing — so check the rate before you
-commit.  A common tactic is to keep several investments running at once,
-each for a different length, so one matures every day.
+Sie können Gold für 2 bis 10 Tage als Investition anlegen. Es zahlt Ihr Gold
+plus Zinsen zurück, wenn die Laufzeit endet. Der Zinssatz schwankt - er
+steigt und fällt damit, wie viel alle investieren -, prüfen Sie ihn also,
+bevor Sie sich festlegen.  Eine verbreitete Taktik ist, mehrere
+Investitionen zugleich laufen zu lassen, jede mit anderer Laufzeit, sodass
+täglich eine fällig wird.

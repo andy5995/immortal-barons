@@ -7,5 +7,5 @@ title: Geheimdienstbündnis
 
 # Geheimdienstbündnis
 
-An Intelligence Alliance means the two realms give each other covert help in
-operations, both at home and between planets.
+Ein Geheimdienstbündnis bedeutet, dass die beiden Reiche einander verdeckte
+Hilfe bei Operationen leisten, daheim wie zwischen Planeten.

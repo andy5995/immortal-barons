@@ -7,5 +7,5 @@ title: 'Stir Revolts'
 
 # Stir Revolts
 
-Stir Revolts spreads propaganda that lowers the target's public support. Low
-support weakens their troopers and their economy.
+Разжигание мятежей распространяет пропаганду, снижающую народную поддержку
+цели. Низкая поддержка ослабляет её солдат и её экономику.

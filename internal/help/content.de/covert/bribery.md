@@ -7,9 +7,10 @@ title: Bribery
 
 # Bribery
 
-Bribery pays one of the enemy's own agents to work for you. From then on,
-every covert operation YOU run against that realm is twice as likely to
-land. It does nothing to the operations they run against you.
+Bestechung bezahlt einen der eigenen Agenten des Feindes dafür, für Sie zu
+arbeiten. Von da an gelingt jede verdeckte Operation, die SIE gegen dieses
+Reich führen, doppelt so wahrscheinlich. Auf die Operationen, die es gegen
+Sie führt, wirkt sie nicht.
 
 The agent stays on your payroll for the rest of the game, and you can only
 hold one inside a realm — the menu refuses a second attempt, at no cost. It

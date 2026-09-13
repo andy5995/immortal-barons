@@ -11,10 +11,11 @@ Drücken Sie eine Taste zur Auswahl. Sie drücken nicht die Eingabetaste, um
 einen Menüpunkt zu wählen. Jeder Punkt zeigt seine Taste in Klammern, wie
 `(1)`. Drücken Sie diese Taste, und er wird sofort ausgeführt.
 
-Every menu leaves with the `0` key, labeled "Quit". On a turn menu
-(Spending, Attack, Covert, Trading), Quit moves you to the next step of your
-turn; you cannot go back to that menu until your next turn. On a side menu
-(like the Bank or the System Menu), Quit takes you back to where you were.
+Jedes Menü verlassen Sie mit der Taste `0`, beschriftet "Quit". In einem
+Zugmenü (Ausgaben, Angriff, Verdeckt, Handel) bringt Quit Sie zum nächsten
+Schritt Ihres Zuges; Sie können erst in Ihrem nächsten Zug zu diesem Menü
+zurückkehren. In einem Nebenmenü (etwa der Bank oder dem Systemmenü) bringt
+Quit Sie dorthin zurück, wo Sie waren.
 
 Das Systemmenü öffnet sich mit der Taste `*` im Ausgabenmenü. Es enthält
 zusätzliche Optionen wie Einstellungen, Steuersatz festlegen und Anweisungen

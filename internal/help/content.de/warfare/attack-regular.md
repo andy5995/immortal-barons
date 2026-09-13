@@ -7,8 +7,8 @@ title: 'Regulärer Angriff'
 
 # Regulärer Angriff
 
-A Regular Attack is a direct assault with your army. Your attack strength is
-compared to the enemy's defense.
+Ein normaler Angriff ist ein direkter Sturm mit Ihrer Armee. Ihre
+Angriffsstärke wird mit der Verteidigung des Feindes verglichen.
 
 First you choose how many of each unit to send: Troopers, Jets, Tanks, and
 Bombers. Jets can only fight if you have carriers to carry them. Units you

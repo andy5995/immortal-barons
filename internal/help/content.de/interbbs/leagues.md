@@ -39,9 +39,10 @@ Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
 Five of these items are shut until you have played a turn this visit: Send
 Trade Deal, Create Group Attack, Join Group Attack, Indiv. Attack Force and
 Special Operations. Anything that moves forces or goods costs you a turn
-first. The bank, your messages, the scores and the terrorist ops stay open,
-and once you have started a turn the whole menu is open for the rest of your
-visit.
+first — Join Group Attack lets you see who is forming a party before it asks
+for that turn, so you can decide whether starting one is worth it. The bank,
+your messages, the scores and the terrorist ops stay open, and once you have
+started a turn the whole menu is open for the rest of your visit.
 
 ## Your BBS Coordinator
 

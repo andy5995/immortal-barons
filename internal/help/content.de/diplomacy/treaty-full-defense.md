@@ -7,9 +7,10 @@ title: 'Volles Verteidigungsbündnis'
 
 # Volles Verteidigungsbündnis
 
-A Full Defense Alliance is the strongest alliance. You commit a large part
-of your troopers and tanks to defend an ally in need. It works only in local
-(single-board) games.
+Ein volles Verteidigungsbündnis ist das stärkste Bündnis. Sie verpflichten
+einen großen Teil Ihrer Soldaten und Panzer zur Verteidigung eines
+Verbündeten in Not. Es gilt nur in lokalen Spielen (auf einem einzelnen
+Board).
 
 Those forces can die in a battle you were not part of. When that happens you
 are told what you lost, who you were defending, and who attacked them, so

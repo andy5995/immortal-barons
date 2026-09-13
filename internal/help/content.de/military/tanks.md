@@ -8,8 +8,9 @@ title: Panzer
 # Panzer
 
 Panzer sind die stärkste Allzweckeinheit, mächtig im Angriff wie in der
-Verteidigung. Ein Panzer ist für sich drei Soldaten wert. Mit fertigem
-Hauptquartier ist er fünf wert, im Angriff wie in der Verteidigung.
+Verteidigung. Ein Panzer ist für sich dreieinhalb Soldaten wert. Mit einem
+fertigen Hauptquartier ist er viereinhalb wert, im Angriff wie in der
+Verteidigung.
 
 Sie kosten viel im Kauf, aber wenig im Unterhalt. Eine Panzerarmee ist teuer
 aufzubauen und günstig zu halten, über ein langes Spiel sind Panzer also die

@@ -7,9 +7,9 @@ title: 'Полный оборонительный союз'
 
 # Полный оборонительный союз
 
-A Full Defense Alliance is the strongest alliance. You commit a large part
-of your troopers and tanks to defend an ally in need. It works only in local
-(single-board) games.
+Полный оборонительный союз - самый сильный союз. Вы обязуетесь направить
+значительную часть своих солдат и танков на защиту союзника в беде. Он
+действует только в локальных играх (на одной доске).
 
 Those forces can die in a battle you were not part of. When that happens you
 are told what you lost, who you were defending, and who attacked them, so

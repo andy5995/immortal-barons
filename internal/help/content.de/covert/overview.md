@@ -13,9 +13,11 @@ one agent to run any of them, and a failed one costs you that agent.
 What agents do NOT do is change your odds. The chance an operation lands is
 set by the operation itself: the simpler ones land just over half the time,
 the harder ones less often. Your agents make no difference to it, and
-neither do the target's. Two things do change it: a bribed agent inside the
-target doubles your chance against that realm, and a realm that has exposed
-your agent turns nine of your attempts in ten away.
+neither do the target's. Three things do change it: a bribed agent inside
+the target doubles your chance against that realm, a realm that has exposed
+your agent turns nine of your attempts in ten away, and an Intelligence
+Alliance or Terrorist Prevention treaty lends an ally's agents to your side
+or the target's. See Agents.
 
 Each operation also costs gold. The menu shows the price next to each one,
 and the footer shows how much gold and how many agents you have. You pay the
@@ -67,6 +69,6 @@ Each operation has its own topic. Some of the topics in this section cover
 InterPlanetary Special Operations instead, which are aimed at another planet
 and need Bombers to deliver their payloads; each says so.
 
-The Covert Operations menu appears during your turn, after the Attack
-menu. If you do not see it, turn on "Visit Covert Menu" in the Preferences
-menu.
+The Covert Operations menu appears during your turn, before the Spending and
+Attack menus. If you do not see it, turn on "Visit Covert Menu" in the
+Preferences menu.

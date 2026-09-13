@@ -7,5 +7,5 @@ title: 'Противодействие терроризму'
 
 # Противодействие терроризму
 
-Terrorist Prevention links the two realms' intelligence agencies. They help
-each other find and stop covert and terrorist attacks.
+Предотвращение терроризма связывает разведки двух государств. Они помогают
+друг другу находить и пресекать тайные и террористические нападения.

@@ -2,10 +2,10 @@
 category: covert
 in_game: true
 order: 14
-title: 'Undermine Investments'
+title: 'Investitionen untergraben'
 ---
 
-# Undermine Investments
+# Investitionen untergraben
 
 Undermine Investments is an InterPlanetary operation, on the Special
 Operations menu. It damages the pending bank investments of every realm on

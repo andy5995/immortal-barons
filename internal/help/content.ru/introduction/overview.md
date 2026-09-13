@@ -30,9 +30,9 @@ side has to work together to win.
 
 ## Turns
 
-You get a set number of turns each day. A turn is one round of play: you
-collect income, pay your costs, and give your orders. When your turns for
-the day run out, you come back the next day for more.
+Каждый день вы получаете определённое число ходов. Ход - это один круг игры:
+вы собираете доход, оплачиваете расходы и отдаёте приказы. Когда ходы на
+день кончаются, вы возвращаетесь за новыми на следующий день.
 
 ## What happens in a turn
 
@@ -49,7 +49,8 @@ A turn moves through these steps in order:
 - **Covert Operations.** Spying and sabotage. This step appears only if you
   keep it turned on and hold at least one covert agent.
 - **Spending.** You buy land, military, and other things.
-- **Attacks.** You may attack another barony (once per turn).
+- **Attacks.** You may attack another barony, a limited number of times per
+  day.
 - **Trading.** Trade goods with other baronies, if you keep this step turned
   on.
 - **InterPlanetary Operations.** Actions against other planets, in linked
@@ -76,7 +77,7 @@ linked game the league's own notices are listed first, under "Galactic", and
 every planet in the league sees the same ones. When a notice is put up or
 changed, it is named in the day's news.
 
-## Reading the rest
+## Чтение остального
 
 The sections that follow explain each part of the game in turn: the
 controls, your military, your economy, warfare, covert operations,

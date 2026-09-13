@@ -7,8 +7,8 @@ title: Technologie
 
 # Technologie
 
-A Technology Agreement shares science between the two realms. Each side's
-research runs faster while the pact holds.
+Ein Technologieabkommen teilt die Wissenschaft zwischen den beiden
+Reichen. Die Forschung jeder Seite läuft schneller, solange der Pakt hält.
 
 The help it gives you is bounded by whichever of you holds fewer Technology
 regions, so it speeds up work you are already doing rather than standing in

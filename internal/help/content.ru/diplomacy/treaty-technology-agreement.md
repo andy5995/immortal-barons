@@ -7,8 +7,8 @@ title: Технологии
 
 # Технологии
 
-A Technology Agreement shares science between the two realms. Each side's
-research runs faster while the pact holds.
+Технологическое соглашение делит науку между двумя
+государствами. Исследования каждой стороны идут быстрее, пока пакт держится.
 
 The help it gives you is bounded by whichever of you holds fewer Technology
 regions, so it speeds up work you are already doing rather than standing in
