@@ -1649,7 +1649,8 @@
       "confidence": "high",
       "evidence": ["instruction_behavior: signed-compares two DX:AX arguments and returns the greater int32", "call_graph: used for economy, attack, and decontamination lower bounds"]
     },
-    "0c03:12e1": {
+    "0c03:0fe3": {"name": "sub_i32_indirect", "confidence": "high", "evidence": ["instruction_behavior: negates its int32 argument (not dx / neg ax / sbb dx,-1) and tail-calls add_i32_indirect at 0c03:0f10, so it subtracts from the pointed-to int32", "call_graph: allocate_turn_budget pairs it with add_i32_indirect to move decontaminated regions out of Waste (+0xb6) and into the untyped-regions pool (+0xba)"]},
+  "0c03:12e1": {
       "name": "min_i32",
       "confidence": "high",
       "evidence": ["instruction_behavior: signed-compares two DX:AX arguments and returns the lesser int32", "call_graph: used for maintenance, economy, combat, trade, and spoil caps"]

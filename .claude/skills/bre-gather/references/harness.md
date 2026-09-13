@@ -301,6 +301,32 @@ The landmines:
   `EXITEMU`, and only THEN `tmux kill-session` (the pane is already back at the
   DOS prompt, so nothing is lost).
 
+- **A generic Enter/quit driver spends the player's gold and burns their turns.**
+  A catch-all that answers every `Choice>` with `0` and every `(Y/n)` with Enter
+  walks the whole menu tree, ends turns, and answers money prompts on the way —
+  on 2026-09-12 it took a staged attacker from 1,000,038,170 gold to 34,482 and
+  used four turns before anyone noticed, which meant re-staging. Every branch
+  must match a NAMED prompt, and the fallback must **capture and stop**, never
+  press a key. The same rule the "Name your Realm" landmine states, for the same
+  reason: the catch-all is where a driver silently does something expensive.
+- **Clearing the clock-tamper check idle-removes the realms you staged.** The
+  date probe has to jump forward to whatever the install's stored date is (ten
+  months, here), and every skipped day is a day of maintenance — so a realm
+  staged BEFORE the jump is swept by the idle purge and the roster just shrinks.
+  Two orders work: probe the date first and stage afterwards, or stage by
+  CLONING a realm that survived the jump, which carries its last-played stamps
+  with it. `bre-clone-slot.py` (this project's Claude scripts dir) does the
+  second: `bre-clone-slot.py GAME.DAT A B "CALLER" "Realm" coastal=500 ...`
+  copies a record, renames it and reseals the CRC. The tell that it happened is
+  `?=List` at any target picker showing fewer realms than the save's `dump`.
+- **`pgrep -f <script>.sh` matches the waiting loop's own command line**, so
+  `until ! pgrep -f drive.sh; do sleep 4; done` never exits — it finds itself.
+  Match the interpreter too (`pgrep -af "bash .*drive.sh"`), or key the wait on
+  a marker the driver echoes into its log.
+- **`bre-launch.sh` hardcodes `\GAMES\BRE-DOS`.** Use `bre-launch-dir.sh
+  <BOARD-DIR> <capfile> [date]` when driving a scratch copy, which is every time
+  a run is going to create state (see the "do not play in bre-dos" rule above).
+
 ### Driving turns and reading the in-game economy (2026-07-14, proven)
 
 Once inside a turn you can scrape income/status numbers per turn. Hard-won rules:

@@ -1984,6 +1984,27 @@ decontamination is already spent, IB restores the cleaned land as Coastal
 payment and the question costs the player the choice of type, never the land.
 That dropped session is the one case where a remainder still becomes Coastal.
 
+**Confirmed in live play 2026-09-12** (`cap/nuke-waste-20260912.cap`, and see
+"Nuclear strike, waste, and decontamination" in `docs/dev/bre-screens.md`). A
+2,000-region realm with no technology was nuked: the missile was quoted at
+**7,086,000 gold = 3,543 per region**, matching `NukeCostPerRegion`; **120
+regions** were ruined (6%, inside the 5-9% band); every region type lost exactly
+6% and the total land did not move. On the victim's next turn the bill was
+**1,642,800 for 24 regions** — `waste/5`, at 68,450 each, half the 136,900
+region price — and paying it printed the revived count and opened the picker
+with 24 untyped regions to place.
+
+**Nothing dumps waste automatically, and no rule ever forces it.** Every writer
+of the Waste field `+0xb6` was enumerated across both binaries and all four
+addressing idioms: the ruin helper adds, the decontamination step subtracts,
+`confirm_end_game` clears, and `process_end_of_turn` zeroes it together with the
+eight other region counts — that last one guarded by **population** falling
+below 1, which wipes the realm's whole region block, not by anything about
+waste. So a nuked realm holds its waste, paying upkeep on land that produces
+nothing, until its owner pays to decontaminate or **drops** the regions from the
+Sell menu. Both halves of the manual's "must either be dropped or slowly
+repaired" are player actions.
+
 **Region gold income (BRE-verified — disassembly of BRE.OVR, offsets
 0x342C0–0x34A4E).** Each gold region yields, per turn,
 `perRegion = Base + Random(Rate)` — a uniform integer draw over the **whole**

@@ -1052,7 +1052,8 @@ line after the units.
 Military cells are declared Troopers, Jets, Turrets, Tanks, Bombers, Carriers.
 Region cells are Rivers, Agricultural, Desert, Industrial, Urban, Mountains,
 Coastal, Technology, **Waste** — the ninth count at record `+0xb6`, absent from
-this capture only because the realm held none. That row order is the status
+that capture only because the realm held none; `cap/nuke-waste-20260912.cap`
+shows it present, as the last cell of the row (`[120 Waste]`). That row order is the status
 block's alone: the record itself, the Buy Regions screen and every other display
 lead with Coastal (`bre-save-format.md`, `+0x96`).
 
@@ -3505,3 +3506,95 @@ IB matches all of it — `KnownBoards()` drops `Config.BoardID` and nothing else
 and the constants are `travelRuleWidth`/`travelRuleDouble`/`travelNameWidth`.
 Its sub-hour tiers (seconds, minutes) are IB's own; BRE never needed them,
 because no 1990s FidoNet link answered in under a minute.
+
+## Nuclear strike, waste, and decontamination
+
+Driven live 2026-09-12; the raw log is `cap/nuke-waste-20260912.cap`. The
+attacker held 600 Bombers and a billion gold; the target was staged at exactly
+**2,000 regions** (500 Coastal, 300 River, 400 Agricultural, 200 each of Desert,
+Industrial, Urban and Mountain) with **no Technology and no turrets**, so every
+figure below is uninflated. Region maintenance came out at 1,826,000 for 2,000
+regions — **913.000 per region exactly**, the known constant, which is the
+cross-check that the realm carried no research.
+
+**The target picker** is the shared one, `Choose a Target [A-Y,?=List RETURN to
+Abort]`, and it echoes the chosen realm's NAME rather than its letter. `?` draws
+the `-*Barren Realms Elite*-` roster.
+
+**The arms dealer quotes the price and asks to confirm**, in two lines of its own
+flavor prose (not reproduced here — IB writes its own; see AGENTS.md on where
+that line falls). The figure is what matters:
+
+- **7,086,000 gold for a 2,000-region target = 3,543 per region**, matching
+  `NukeCostPerRegion` exactly. The quote is taken from the target's region
+  count alone.
+- The confirm is a `Deal? (Y/n)` — **default yes**, unlike IB's, which defaults
+  to no because a missile can cost tens of millions.
+
+**The strike reports the ruined count in one line.** Here, **120 regions** out of
+2,000 — 6%, inside the 5-9% band (`NukeWastePct` 7, plus and minus a `Random(3)`
+each).
+
+**The removal is proportional and exact.** Reading the save either side of the
+strike, every type lost precisely 6% and all 120 went to Waste, with total land
+unchanged:
+
+```
+before  500 C / 300 R / 400 A / 200 D / 200 I / 200 U / 200 M   waste 0    = 2000
+after   470 C / 282 R / 376 A / 188 D / 188 I / 188 U / 188 M   waste 120  = 2000
+```
+
+**The victim's status block** carries `[120 Waste]` as the last cell of the
+Regions row.
+
+**Decontamination is a maintenance-sequence prompt, not a menu item.** The full
+order in `allocate_turn_budget` is Bank → Armed Forces → regions → SDI →
+decontamination → popular support → military morale → Queen Royale taxes; a step
+is skipped when it has nothing to ask for (this realm saw no SDI step at zero
+funding and no morale/support steps at 100%). The prompt names the whole
+allowance's bill and offers it as both the suggested and the maximum value:
+
+```
+1,642,800 gold is required to decontamine some waste regions.
+How much will you give? (1,642,800; 1,642,800)
+```
+
+(`decontamine` is the original's own spelling.) The arithmetic, all of it
+matching the constants in `balance_costs.go`:
+
+- **24 regions** cleaned from 120 of waste — `waste/5`, the 20% allowance.
+- **68,450 gold each**, half the 136,900 region price at this size, the food
+  technology factor being 1.0 here.
+
+**Paying prints the revived count and then opens the region picker**, because
+cleaned land comes back UNTYPED — it is moved out of Waste (`+0xb6`) and into the
+untyped-regions slot (`+0xba`), the same pool a won attack fills, and the owner
+names the types:
+
+```
+24 Waste regions have been revived.
+
+Key Name            Owned
+─────═════───────────────
+(C) Coastal           470
+(R) River             282
+...
+(T) Technology          0
+(*) Advisors
+─────═════───────────────
+[24 Regions left] Your choice?
+```
+
+Allocating all 24 to Coastal left the save at waste 96 / coastal 494, total
+still 2,000.
+
+**Nothing ever dumps waste automatically.** Every writer of `+0xb6` was
+enumerated across both binaries and all four addressing idioms (`add di,0xb6`,
+`[di+0xb6]` and their `es:`-prefixed forms): the ruin helper adds to it,
+`allocate_turn_budget` subtracts what was decontaminated, `confirm_end_game`
+clears it, and `process_end_of_turn` (`+0xd470`) zeroes it along with all eight
+other region counts — that last one guarded by **population**, not waste
+(`+0x62` falling below 1 wipes the realm's whole region block). So a nuked realm
+carries its waste, paying maintenance on it, until the owner either pays to
+decontaminate or drops the regions from the Sell menu (`run_drop_regions_menu`,
+whose only caller is `sell_empire_assets`).
