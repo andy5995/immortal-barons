@@ -2359,6 +2359,15 @@ You destroyed 14 Troopers, 0 Turrets, 1948 Tanks, and 0 Jets.
 You lost the battle!
 ```
 
+**The allies line and the casualty lines are spelled differently, on one
+screen.** The allies line groups past four digits and the casualty lines stay
+bare at any size. Every figure in the capture above is four digits or fewer, so
+it cannot show this; a later one (2026-09-13) has the same line reading
+`8636 Tanks` in one battle and `11,508 Troopers` / `248,073,416 Tanks` in
+another, beside `You lost 4197 Troopers, 81294 Jets`. IB matches both
+(`numfmt.GroupLong` on the allies line, bare on the casualties). Do not tidy the
+screen into one spelling.
+
 **Deliberate divergence — the defender-jets figure in a LOSING report.** BRE's
 `You destroyed … and N Jets` slot shows only the bombers-vs-jets air tally, and
 prints 0 while the defender's jets silently bleed at the same ground fraction

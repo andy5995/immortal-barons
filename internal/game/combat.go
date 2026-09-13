@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/i18n"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // returningForces opens a battle report. BRE puts the casualties first and the
@@ -121,8 +122,14 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 		allyTroopers += ally.Troopers * AllyDefenseContribPct / 100
 		allyTanks += ally.Tanks * AllyDefenseContribPct / 100
 	}
+	// GroupLong, not bare and not Format: the original groups THIS line past four
+	// digits while leaving the casualty lines on the same screen bare at any size
+	// — a live capture has it sending "8636 Tanks" and, in another battle,
+	// "11,508 Troopers" and "248,073,416 Tanks", beside "You lost 81294 Jets".
+	// The spelling is chosen per line here, not per screen.
 	if allyTroopers+allyTanks > 0 {
-		fmt.Fprintf(&b, tr("%s's allies send %d troopers and %d tanks to aid the defense.")+"\n\n", d.Name, allyTroopers, allyTanks)
+		fmt.Fprintf(&b, tr("%s's allies send %s troopers and %s tanks to aid the defense.")+"\n\n",
+			d.Name, numfmt.GroupLong(allyTroopers, a.Language), numfmt.GroupLong(allyTanks, a.Language))
 	}
 
 	// Military morale scales each side's unit effectiveness (the land defense

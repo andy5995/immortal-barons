@@ -530,3 +530,38 @@ func TestConquestIsTheLandAlone(t *testing.T) {
 		t.Errorf("the report claims a total conquest while the loser holds %d regions:\n%s", d.Land, report)
 	}
 }
+
+// The allies line groups past four digits where the casualty lines beside it
+// stay bare at any size. Both spellings are the original's, on one screen, and
+// the difference is per line rather than per screen — so a sweep that made the
+// report internally consistent would be a regression.
+func TestAllyLineGroupsPastFourDigitsAndCasualtiesDoNot(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 3)
+	a := w.AddHuman("att", "Attacker")
+	d := w.AddHuman("def", "Defender")
+	ally := w.AddHuman("ally", "Ally")
+	for _, e := range []*Empire{a, d, ally} {
+		e.Protection = 0
+		e.Regions = RegionMix{Agricultural: 2000}
+		e.syncLand()
+	}
+	// Four digits after the 30% cut stay bare; five and up group.
+	ally.Troopers = 40_000 // 30% = 12,000 — groups
+	ally.Tanks = 20_000    // 30% =  6000  — bare
+	w.ProposeTreaty(ally, d, fullDefenseAlliance)
+	if !w.AcceptTreaty(d, ally.Name, fullDefenseAlliance) {
+		t.Fatal("the alliance was not formed, so there is no ally line to check")
+	}
+
+	a.Troopers, a.Tanks = 90_000, 90_000
+	d.Troopers, d.Tanks = 50_000, 50_000
+	report, _ := w.Attack(a, d, AttackForce{Troopers: a.Troopers, Tanks: a.Tanks}, false)
+
+	if !strings.Contains(report, "12,000 troopers") {
+		t.Errorf("a five-digit ally figure was not grouped:\n%s", report)
+	}
+	if !strings.Contains(report, "6000 tanks") {
+		t.Errorf("a four-digit ally figure was grouped; the original leaves it bare:\n%s", report)
+	}
+}

@@ -126,8 +126,16 @@ func Short[T Number](n T) string {
 //
 // This is NOT Format's rule, and the two are deliberately separate. Format
 // groups at any size and is what IB prints for money and event text; this one
-// belongs to the score table's Territory column, where matching the original
-// matters more than internal consistency.
+// is for the places the original groups this way, where matching it matters
+// more than internal consistency.
+//
+// TWO such places are known: the score table's Territory column, and the battle
+// report's "allies send" line. The second was found on 2026-09-13 in a live
+// capture that sends "8636 Tanks" in one battle and "11,508 Troopers" plus
+// "248,073,416 Tanks" in another — and prints "You lost 81294 Jets" bare on the
+// very same screen. So the choice is per LINE, not only per screen, which is
+// narrower than the note above this function had it. Do not make a screen
+// internally consistent on the strength of one of its lines.
 func GroupLong[T Number](n T, lang string) string {
 	v := int64(n)
 	neg := v < 0
