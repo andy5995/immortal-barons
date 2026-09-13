@@ -150,6 +150,19 @@ misconfiguration, and it shows up as the smaller one failing every transaction
 with a store error rather than as anything that mentions clocks. If a rig board
 starts refusing to load, check the offsets before anything else.
 
+**Every tool that touches the world needs the offset, not just the game.** A
+throwaway Go helper that loads and saves through `internal/store` is a second
+node as far as the guard is concerned, so running it unshifted beside a shifted
+board is refused — correctly, and with the right message. Have such a helper read
+`IB_CLOCK_OFFSET` and call `game.SetClockOffset` before it loads anything.
+
+**A staged realm is idle-removed across a date jump.** Advancing several days to
+reach a weapon's arrival runs several days of maintenance, and a realm that was
+written straight into `world.json` and never played is swept as a husk on the
+way — so the board arrives at the moment under test with no barons and nothing
+to drive the screen with. Stage the realm, jump the clock, then re-add the realm
+before driving a turn.
+
 A banner prints on stderr on every run while a shift is in force. That is
 deliberate: a shifted board is fine on a rig and an accident anywhere else, and
 the banner is the only thing between them.
