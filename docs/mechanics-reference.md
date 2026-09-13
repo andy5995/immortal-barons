@@ -1033,14 +1033,44 @@ weapon in one wave. The jets are spent whether they connect or not.
 **Several planets can besiege this one at once**, one weapon per builder board,
 and the jets pick their target from the original's numbered list (" #  From /
 Strength / Days Until Self-Destruct", with its "Enter Gooie Number" prompt —
-both strings are in `launch_gooie_kablooie`). IB tracked a single weapon until
+both strings are in `launch_gooie_kablooie`, which despite its name is the
+DEFENDER's screen — its only caller is `run_player_turn` at `0x03dc1`, a direct
+call after the Attack menu and BEFORE the InterPlanetary menu, so it is a forced
+turn stage rather than a menu item, which is where IB calls it from too). IB tracked a single weapon until
 2026-09-13, and a second board's was not merely unlisted but folded into the
 first's record: the launch warning fires only on the transition to flying, so
 that planet's weapon was never announced, and whether it landed came down to
-whether its next status happened to arrive before its arrival instant. With one
-weapon on the ground the list is a single row and there is no prompt, which is
-how the screen read before. `World.Incoming` is the list; `IncomingOne` is the
-pre-list save field, migrated by `EnsureIncoming`.
+whether its next status happened to arrive before its arrival instant. The three questions are asked in the
+original's order, which is load-bearing: the yes/no FIRST, as an early way out of
+a screen every baron is shown at the start of their turn (a "no" leaves at
+`0x0f29` before the table is drawn); then the jets check, so a baron with none is
+told rather than shown a list they cannot act on; then the number, asked even
+when only ONE weapon is on the ground — the row loop has no count comparison
+before the prompt. `World.Incoming` is the list; `IncomingOne` is the pre-list
+save field, migrated by `EnsureIncoming`.
+
+**The numbers are dense, and they have to be.** The "#" is the row loop's own
+counter, incremented only for a record that passes the filter, and the typed
+number is resolved by re-walking the list with that same predicate rather than by
+indexing it — so a planet under two weapons always sees 1 and 2 with no gap, and
+a weapon still in flight can be neither numbered nor selected by any number that
+can be typed. IB's `Landed()` plus `landed[pick-1]` is the same arrangement.
+
+**A number past the end is asked again, not treated as a cancel.** The original
+reads it through a shared bounded-integer editor (`BRE.EXE 0x090e9`, reached from
+both of this screen's number prompts and from `resolve_regular_attack`), which on
+an over-max value shows the limit and loops back to its input loop keeping the
+buffer. Only an empty answer leaves, because empty substitutes the MINIMUM and
+this call site's minimum is zero. A negative cannot be typed at all: the editor
+accepts digits, backspace, K, M, `>` and Enter, and silently discards everything
+else. IB cancelled on any out-of-range value until 2026-09-13, which threw a
+baron out of a forced turn screen for a typo.
+
+The gate on the whole screen is the same field twice over: the original counts
+only records whose days-until-self-destruct is under five and skips the screen
+when none qualify, and that same byte is what prints in the "Days Until
+Self-Destruct" column. So the prompt is withheld unless a weapon has landed and
+is counting down, which is what `Landed()` selects.
 
 **The arrival crosses as an INSTANT, never as a day number.** `GameDay` is each
 board's own count from its own first maintenance, so two boards' day numbers have

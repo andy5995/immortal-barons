@@ -872,9 +872,19 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 // would never see it (#112).
 //
 // Several planets can be besieging this one at once, so the weapons are listed
-// and picked by number, as the original does. With one on the ground the list is
-// a single row and it is attacked without a prompt — asking which of one is
-// noise, and it is how the screen read for its whole life before the list.
+// and picked by number, as the original does.
+//
+// The ORDER of the three questions is the original's and is not arbitrary. The
+// yes/no comes first, as an early way out: this screen is forced on every baron
+// at the start of their turn, and one who is not spending jets today should not
+// have to read a table to say so. In the original a "no" leaves the routine
+// before the table is drawn at all (BRE.OVR 0x0f29), and the jets check sits
+// between the two, so a baron with no jets is told so rather than shown a list
+// of things they cannot touch. The number is asked last, and asked even when
+// there is only ONE weapon on the ground — verified from the row loop, which
+// has no count comparison before the prompt. IB skipped it in that case for a
+// few hours on 2026-09-13, on the reasoning that asking which of one is noise;
+// that was invented before the original's screen had been read.
 func annihilatorDefense(s session.Session, w *ctx) {
 	var landed []game.Annihilator
 	var jets, needed int
@@ -889,6 +899,14 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	}
 	withPlayer(w, func(p *game.Empire) { jets = p.Jets })
 
+	if !AskYesNo(s, "Do you wish to attack a Gooie Kablooie?", false) {
+		return
+	}
+	if jets < 1 {
+		ok(s, "Only jets can attack a Gooie Kablooie, and you have none.")
+		return
+	}
+
 	fmt.Fprintf(s, "\n%s%-4s %-24s %-14s %s%s\n", ansi.FgWhite, tr(s, "#"),
 		tr(s, "From"), tr(s, "Strength"), tr(s, "Days Until Self-Destruct"), ansi.Reset)
 	for i, d := range landed {
@@ -898,20 +916,26 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(
 		tr(s, "It would take %s jets to destroy one outright."), comma(needed))))
 
-	target := landed[0]
-	if len(landed) > 1 {
+	// A number past the end is ASKED AGAIN, not taken as a cancel: the original's
+	// bounded-integer reader loops back to its input loop on an over-max value
+	// and shows the limit (BRE.EXE 0x92eb, reached from both of this screen's
+	// number prompts), so only an empty answer leaves. IB cancelled on any
+	// out-of-range value until 2026-09-13, which threw a baron out of a forced
+	// turn screen for a typo.
+	var target game.Annihilator
+	for {
 		pick := promptInt(s, tr(s, "Enter Gooie Number"))
-		if pick < 1 || pick > len(landed) {
+		if pick < 1 {
 			return
 		}
-		target = landed[pick-1]
-	}
-	if !AskYesNo(s, "Do you wish to attack the Gooie Kablooie?", false) {
-		return
-	}
-	if jets < 1 {
-		ok(s, "Only jets can attack a Gooie Kablooie, and you have none.")
-		return
+		if pick <= len(landed) {
+			target = landed[pick-1]
+			break
+		}
+		// failNoPause, not fail: the original loops straight back to its input
+		// loop, so a keypress between the refusal and the re-ask is one the
+		// original does not want and the baron did not earn.
+		failNoPause(s, fmt.Errorf(tr(s, "There are only %d to choose from."), len(landed)))
 	}
 	send := promptSuggested(s, "Send how many jets?", 0, jets)
 	if send < 1 {

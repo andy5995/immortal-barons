@@ -24,8 +24,9 @@ func TestAnnihilatorDefenseSendsJetsAtALandedWeapon(t *testing.T) {
 			ArrivesDay: w.GameDay, DaysLeft: game.AnnihilatorSiegeDays,
 		}}
 	})
-	// "y" to attack, then the whole air force.
-	f := &fakeSession{keys: []rune("y200000\r")}
+	// "y" to attack, weapon 1 (asked even for one, as the original asks), then
+	// the whole air force.
+	f := &fakeSession{keys: []rune("y1\r200000\r")}
 	annihilatorDefense(f, w)
 
 	out := stripANSI(f.out.String())
@@ -77,8 +78,8 @@ func TestAnnihilatorDefensePicksAmongSeveralWeapons(t *testing.T) {
 			})
 		}
 	})
-	// Weapon 2, "y" to attack, then the whole air force.
-	f := &fakeSession{keys: []rune("2\ry200000\r")}
+	// "y" to attack, then weapon 2, then the whole air force.
+	f := &fakeSession{keys: []rune("y2\r200000\r")}
 	annihilatorDefense(f, w)
 
 	out := stripANSI(f.out.String())
@@ -101,5 +102,102 @@ func TestAnnihilatorDefensePicksAmongSeveralWeapons(t *testing.T) {
 	}
 	if other != 100 {
 		t.Errorf("the weapon NOT picked is %d%% intact, want 100: one sortie hit both", other)
+	}
+}
+
+// Saying no leaves before the table is drawn. The original asks first for this
+// reason: the screen is forced on every baron at the start of their turn, and
+// one who is not spending jets today should not have to read a list to decline.
+func TestAnnihilatorDefenseAsksBeforeDrawingTheList(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.Config.IBBS = true
+		p := w.Player()
+		p.Regions = game.RegionMix{Agricultural: 5000}
+		p.Jets = 200_000
+		w.Incoming = []*game.Annihilator{{
+			Creator: "Wildside", Launched: true, Intact: 100,
+			ArrivesDay: w.GameDay, DaysLeft: game.AnnihilatorSiegeDays,
+		}}
+	})
+	f := &fakeSession{keys: []rune("n")}
+	annihilatorDefense(f, w)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Do you wish to attack") {
+		t.Fatalf("the question was never asked:\n%s", out)
+	}
+	for _, unwanted := range []string{"Days Until Self-Destruct", "Wildside", "Enter Gooie Number"} {
+		if strings.Contains(out, unwanted) {
+			t.Errorf("declining still drew %q:\n%s", unwanted, out)
+		}
+	}
+}
+
+// A baron with no jets is told so instead of being shown a list of things they
+// cannot touch — the original's order too, its jet check sitting between the
+// question and the table.
+func TestAnnihilatorDefenseTellsAJetlessBaronBeforeTheList(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.Config.IBBS = true
+		p := w.Player()
+		p.Regions = game.RegionMix{Agricultural: 5000}
+		p.Jets = 0
+		w.Incoming = []*game.Annihilator{{
+			Creator: "Wildside", Launched: true, Intact: 100,
+			ArrivesDay: w.GameDay, DaysLeft: game.AnnihilatorSiegeDays,
+		}}
+	})
+	f := &fakeSession{keys: []rune("y\r")}
+	annihilatorDefense(f, w)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "you have none") {
+		t.Errorf("a baron with no jets was not told:\n%s", out)
+	}
+	if strings.Contains(out, "Days Until Self-Destruct") {
+		t.Errorf("the list was drawn for a baron who cannot attack:\n%s", out)
+	}
+}
+
+// A number past the end is asked again rather than taken as a cancel. The
+// original's number reader loops on an over-max value and shows the limit, so a
+// typo must not throw a baron out of a screen they are shown once a turn.
+func TestAnnihilatorDefenseAsksAgainForANumberPastTheEnd(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.Config.IBBS = true
+		p := w.Player()
+		p.Regions = game.RegionMix{Agricultural: 5000}
+		p.Jets = 200_000
+		for _, from := range []string{"Wildside", "The Eclipse"} {
+			w.Incoming = append(w.Incoming, &game.Annihilator{
+				Creator: from, Launched: true, Intact: 100,
+				ArrivesDay: w.GameDay, DaysLeft: game.AnnihilatorSiegeDays,
+			})
+		}
+	})
+	// "y", then a number past the end, then a good one, then the air force. No
+	// key between the refusal and the re-ask: a pause there would be one the
+	// original does not ask for, and a stray key in this script would hide it.
+	f := &fakeSession{keys: []rune("y9\r1\r200000\r")}
+	annihilatorDefense(f, w)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "only 2 to choose from.") {
+		t.Errorf("an out-of-range number was not refused with the limit:\n%s", out)
+	}
+	if !strings.Contains(out, "jets were destroyed") {
+		t.Errorf("the screen gave up instead of asking again:\n%s", out)
+	}
+	var intact int
+	w.With(func() {
+		if d := w.IncomingFrom("Wildside"); d != nil {
+			intact = d.Intact
+		}
+	})
+	if intact >= 100 {
+		t.Errorf("weapon 1 is %d%% intact — the retry picked something else", intact)
 	}
 }
