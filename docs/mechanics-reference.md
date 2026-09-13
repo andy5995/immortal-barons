@@ -103,7 +103,7 @@ One limit worth stating: the scan sees the two displacement idioms, not the
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
 | Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. **What it defends against is exactly two things — see "What a turret actually does" below.** |
 | Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
-| Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
+| Bomber | 0 | 0 | Carries bombs and special ops, which need 500 of them. Adds NOTHING to a local attack: it is outside the offense sum and bleeds with the rest of the committed force, so sending one is a pure loss. The grounded-jet strike this row described until 2026-09-13 was IB's own and went under #200. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
 | HeadQuarters | — | — | Raises tank effectiveness; enemies bomb it to weaken your tanks. |
 

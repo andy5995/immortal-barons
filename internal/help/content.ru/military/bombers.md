@@ -13,8 +13,10 @@ title: Бомбардировщики
 Ракетам и межпланетным бомбардировкам нужны бомбардировщики-носители. Без
 достаточного их числа такие удары не запустить.
 
-В обычной атаке ваши бомбардировщики сначала уничтожают вражеские самолёты
-на земле, что ослабляет следующий удар противника.
+Bombers do nothing in an attack on your own planet. They add no strength to
+it, and they take casualties with the rest of the force, so sending them
+costs you bombers and buys you nothing. Hold them back and spend them on the
+attacks that need them.
 
 Бомбардировщики заметно поднимают ваш капитал, так что их флот повышает и
 очки, и дальность вашей руки.

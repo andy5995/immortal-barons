@@ -133,7 +133,7 @@ as mojibake on a board running UTF-8.
 screens all pick by Id letter. The rule is about reading, not typing.)
 
 Control characters are refused outright: an escape sequence in a realm name
-would move the cursor or recolour the row on every screen that lists it.
+would move the cursor or recolor the row on every screen that lists it.
 
 Letters of any alphabet count, so a Cyrillic or German name qualifies on its own
 letters. The limit is counted in characters rather than bytes, so a name in one

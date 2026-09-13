@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-10 22:29-0500\n"
+"POT-Creation-Date: 2026-09-13 05:51-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2880,15 +2880,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:19
+#: internal/help/content/military/bombers.md:21
 #, markdown-text
 msgid ""
-"In a normal attack, your bombers first destroy the enemy jets that are on "
-"the ground, which weakens the enemy's next strike."
+"Bombers do nothing in an attack on your own planet. They add no strength to "
+"it, and they take casualties with the rest of the force, so sending them "
+"costs you bombers and buys you nothing. Hold them back and spend them on the "
+"attacks that need them."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:21
+#: internal/help/content/military/bombers.md:23
 #, markdown-text
 msgid ""
 "Bombers add a large amount to your net worth, so a fleet of them raises your "
@@ -3708,13 +3710,24 @@ msgstr ""
 #: internal/help/content/warfare/attack-regular.md:20
 #, markdown-text
 msgid ""
-"Your bombers fly first and destroy enemy jets that are on the ground. Then "
-"the armies clash. Only the units you sent add to your attack, and only they "
-"can be lost. Both sides lose about 15% of the forces that fought."
+"Only the units you sent add to your attack, and only they can be "
+"lost. Bombers are the exception: they add no strength to an attack on your "
+"own planet, so sending them loses you bombers for nothing."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-regular.md:25
+#: internal/help/content/warfare/attack-regular.md:26
+#, markdown-text
+msgid ""
+"The two armies grind each other down until one has lost as much as it is "
+"willing to lose, and that share is a setting on this board rather than a "
+"fixed figure.  What it costs the winner depends on how one-sided the fight "
+"was: an attacker who badly outmatches the defender walks away having lost "
+"very little, and an evenly matched one pays nearly the full share."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:31
 #, markdown-text
 msgid ""
 "If you win, you capture a share of the enemy's regions. You do not take "
@@ -3724,17 +3737,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-regular.md:30
+#: internal/help/content/warfare/attack-regular.md:34
 #, markdown-text
 msgid ""
-"How big that share is also depends on how developed the enemy is. Compare "
-"its net worth to its number of regions. An enemy with low net worth for its "
-"size has cheap, lightly held land, and you capture more of it. An enemy with "
-"high net worth for its size is well developed, and you capture less."
+"How big that share is depends on this board's settings and on how much land "
+"the enemy holds, not on how developed it is."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-regular.md:33
+#: internal/help/content/warfare/attack-regular.md:37
 #, markdown-text
 msgid ""
 "Strategy hint: a large empire with low net worth is a soft target. It has "
