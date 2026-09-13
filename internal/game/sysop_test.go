@@ -67,7 +67,7 @@ func TestRenameOwnerRewritesEveryHandleReference(t *testing.T) {
 		{ID: 3, Contributors: []Contribution{{Owner: "someone"}}},
 	}
 	w.Annihilator = &Annihilator{Creator: "someone"}
-	w.Incoming = &Annihilator{Creator: "someone"} // another planet's builder, same spelling
+	w.Incoming = []*Annihilator{{Creator: "someone"}} // another planet's builder, same spelling
 	old.CoordinatorVote = "someone"
 	other.CoordinatorVote = "someone"
 
@@ -95,8 +95,8 @@ func TestRenameOwnerRewritesEveryHandleReference(t *testing.T) {
 	if w.Annihilator.Creator != "andy5995" {
 		t.Errorf("annihilator creator = %q, want andy5995", w.Annihilator.Creator)
 	}
-	if w.Incoming.Creator != "someone" {
-		t.Errorf("incoming creator = %q, want someone: it is a handle on ANOTHER board", w.Incoming.Creator)
+	if w.Incoming[0].Creator != "someone" {
+		t.Errorf("incoming creator = %q, want someone: it is a handle on ANOTHER board", w.Incoming[0].Creator)
 	}
 	if old.CoordinatorVote != "andy5995" || other.CoordinatorVote != "andy5995" {
 		t.Errorf("votes = %q/%q, want both andy5995", old.CoordinatorVote, other.CoordinatorVote)

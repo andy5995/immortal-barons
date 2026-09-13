@@ -1028,10 +1028,19 @@ what makes it cooperative: no single air force, however large, can finish the
 weapon in one wave. The jets are spent whether they connect or not.
 
 **IB's own divergences here.** The flight is a fixed two days
-(`AnnihilatorFlightDays`) where BRE's is the league's real packet transit; and IB
-tracks one incoming weapon at a time, so the original's numbered picker
-(" #  From / Strength / Days Until Self-Destruct") is a single row with no
-"Enter Gooie Number" prompt.
+(`AnnihilatorFlightDays`) where BRE's is the league's real packet transit.
+
+**Several planets can besiege this one at once**, one weapon per builder board,
+and the jets pick their target from the original's numbered list (" #  From /
+Strength / Days Until Self-Destruct", with its "Enter Gooie Number" prompt —
+both strings are in `launch_gooie_kablooie`). IB tracked a single weapon until
+2026-09-13, and a second board's was not merely unlisted but folded into the
+first's record: the launch warning fires only on the transition to flying, so
+that planet's weapon was never announced, and whether it landed came down to
+whether its next status happened to arrive before its arrival instant. With one
+weapon on the ground the list is a single row and there is no prompt, which is
+how the screen read before. `World.Incoming` is the list; `IncomingOne` is the
+pre-list save field, migrated by `EnsureIncoming`.
 
 **The arrival crosses as an INSTANT, never as a day number.** `GameDay` is each
 board's own count from its own first maintenance, so two boards' day numbers have
@@ -1080,19 +1089,14 @@ the last weapon from each builder board this planet has finished with — burned
 out, shot down, or dismantled. A first sighting whose instant matches that
 board's entry is a copy that outlived its weapon and is refused, where without it
 the siege would run a second time. For the same reason the instant **pins the
-weapon's identity**: once one is on the books, a status carrying a different
-instant is about a different weapon and does not rewrite the live one's arrival.
+weapon's identity**: once one from a board is on the books, a status from that
+board carrying a different instant is about their next weapon and does not
+rewrite the live one's arrival.
 The builder is free to start a second weapon the day after the first lands
 (`RetireSpentAnnihilator`), so with `AnnihilatorBuildDays` + `AnnihilatorFlightDays`
 against `AnnihilatorSiegeDays` a second generation routinely reports during the
 first's siege. A weapon with no instant — from a board that predates the field —
 cannot be recorded either way, and is left to the "already due" test.
-
-Neither of those addresses the separate limitation that `w.Incoming` is a single
-slot: a second BOARD's weapon arriving while one is besieging us is folded into
-the existing record and its warning is never posted, because the launch news
-fires only on the transition to flying. That is a known gap, not something the
-identity pin creates or fixes.
 
 The target planet is told when the weapon **launches**, with the arrival time in
 hours, which is the early warning that gives the planet time to raise jets —

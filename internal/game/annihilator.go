@@ -30,7 +30,7 @@ type Annihilator struct {
 	// this, which could only ever say 72, 48, 24 or 0 hours — and said 0 for the
 	// whole of launch day, since the launch waits for a run. Same fix, and the
 	// same reason, as GroupAttack.DepartAt (#124).
-	LaunchAt time.Time `json:",omitempty"`
+	LaunchAt time.Time
 	// LaunchDay is the pre-instant field, kept so a world saved before the change
 	// still launches its weapon. Only read when LaunchAt is zero.
 	LaunchDay   int `json:",omitempty"`
@@ -40,8 +40,10 @@ type Annihilator struct {
 	// ArrivesAt is the arrival instant, stamped at launch. ArrivesDay is this
 	// board's own day count and is meaningless to the target, so this is what
 	// the status packet carries across.
-	ArrivesAt time.Time `json:",omitempty"`
-	Intact    int       // percent of the weapon still standing; jets whittle this down
+	// No `omitempty` on either instant: it cannot omit a zero struct, so the tag
+	// does nothing but suggest it can.
+	ArrivesAt time.Time
+	Intact    int // percent of the weapon still standing; jets whittle this down
 	// DaysLeft is the siege countdown once it has landed on the target planet:
 	// AnnihilatorSiegeDays on arrival, one less after every day's damage, gone at
 	// zero. Zero also means "not landed", which is why the flying weapon and the
@@ -284,15 +286,62 @@ func (w *World) AnnihilatorJetsNeeded() int64 {
 	return need
 }
 
-// InterceptAnnihilator sends jets at the weapon squatting on this planet.
-// Nothing but jets can reach it, and they are spent whether or not they knock
-// anything off. Returns the percentage destroyed by this sortie and the jets
-// lost doing it.
-func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, int, error) {
-	if w.Incoming == nil {
+// EnsureIncoming migrates a save written while this planet tracked a single
+// incoming weapon into the list that replaced it.
+func (w *World) EnsureIncoming() {
+	if w.IncomingOne == nil {
+		return
+	}
+	if w.IncomingFrom(w.IncomingOne.Creator) == nil {
+		w.Incoming = append(w.Incoming, w.IncomingOne)
+	}
+	w.IncomingOne = nil
+}
+
+// IncomingFrom is the weapon this planet is tracking from a given board, or nil.
+func (w *World) IncomingFrom(board string) *Annihilator {
+	for _, d := range w.Incoming {
+		if d.Creator == board {
+			return d
+		}
+	}
+	return nil
+}
+
+// Landed is every weapon that has arrived and is besieging the planet — the set
+// the jets can reach. The original's numbered picker lists exactly these.
+func (w *World) Landed() []*Annihilator {
+	var out []*Annihilator
+	for _, d := range w.Incoming {
+		if d.DaysLeft > 0 {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
+// forgetIncoming removes a weapon this planet has finished with, recording it so
+// a late copy of its status cannot raise it again.
+func (w *World) forgetIncoming(d *Annihilator) {
+	w.markAnnihilatorDone(d)
+	for i, x := range w.Incoming {
+		if x == d {
+			w.Incoming = append(w.Incoming[:i], w.Incoming[i+1:]...)
+			return
+		}
+	}
+}
+
+// InterceptAnnihilator sends jets at the weapon from board squatting on this
+// planet. Nothing but jets can reach it, and they are spent whether or not they
+// knock anything off. Returns the percentage destroyed by this sortie and the
+// jets lost doing it.
+func (w *World) InterceptAnnihilator(e *Empire, board string, jets int) (int, int, error) {
+	d := w.IncomingFrom(board)
+	if d == nil {
 		return 0, 0, ErrNoAnnihilator
 	}
-	if w.Incoming.DaysLeft <= 0 {
+	if d.DaysLeft <= 0 {
 		return 0, 0, ErrAnnihilatorAloft
 	}
 	if e.Jets < 1 {
@@ -308,8 +357,8 @@ func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, int, error) {
 	if knocked > AnnihilatorMaxSortiePct {
 		knocked = AnnihilatorMaxSortiePct
 	}
-	if knocked > w.Incoming.Intact {
-		knocked = w.Incoming.Intact
+	if knocked > d.Intact {
+		knocked = d.Intact
 	}
 	// 33% of the wing does not come home, give or take five points either way.
 	lossPct := AnnihilatorJetLossPct + w.rng.Intn(AnnihilatorJetLossSpread) - w.rng.Intn(AnnihilatorJetLossSpread)
@@ -319,15 +368,14 @@ func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, int, error) {
 	}
 	e.Jets -= lost
 
-	w.Incoming.Intact -= knocked
-	if w.Incoming.Intact <= 0 {
-		w.markAnnihilatorDone(w.Incoming)
-		w.Incoming = nil
-		w.postNews(fmt.Sprintf("%s destroyed the Gooie Kablooie!", e.Name))
+	d.Intact -= knocked
+	if d.Intact <= 0 {
+		w.forgetIncoming(d)
+		w.postNews(fmt.Sprintf("%s destroyed the Gooie Kablooie from %s!", e.Name, d.Creator))
 		return knocked, lost, nil
 	}
-	w.postNews(fmt.Sprintf("%s knocked %d%% off the Gooie Kablooie; it is still at %d%% strength.",
-		e.Name, knocked, w.Incoming.Intact))
+	w.postNews(fmt.Sprintf("%s knocked %d%% off the Gooie Kablooie from %s; it is still at %d%% strength.",
+		e.Name, knocked, d.Creator, d.Intact))
 	return knocked, lost, nil
 }
 
@@ -350,8 +398,13 @@ func (w *World) RetireSpentAnnihilator() {
 // the weapon's own battered strength changes the figure (#111); a realm under
 // new-realm protection is passed over.
 func (w *World) TickAnnihilator() {
-	d := w.Incoming
-	if d == nil || d.DaysLeft <= 0 {
+	for _, d := range append([]*Annihilator(nil), w.Incoming...) {
+		w.tickOneAnnihilator(d)
+	}
+}
+
+func (w *World) tickOneAnnihilator(d *Annihilator) {
+	if d.DaysLeft <= 0 {
 		return
 	}
 	pct := AnnihilatorLaterDayPct
@@ -391,8 +444,7 @@ func (w *World) TickAnnihilator() {
 	}
 	d.DaysLeft--
 	if d.DaysLeft <= 0 {
-		w.markAnnihilatorDone(d)
-		w.Incoming = nil
-		w.postNews("The Gooie Kablooie has burned itself out.")
+		w.forgetIncoming(d)
+		w.postNews(fmt.Sprintf("The Gooie Kablooie from %s has burned itself out.", d.Creator))
 	}
 }

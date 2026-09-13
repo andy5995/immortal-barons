@@ -871,31 +871,41 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 // whole planet's air forces and a baron who never opens the InterPlanetary menu
 // would never see it (#112).
 //
-// IB tracks one incoming weapon at a time, so the original's numbered picker is
-// a single row here and there is no "Enter Gooie Number" prompt.
+// Several planets can be besieging this one at once, so the weapons are listed
+// and picked by number, as the original does. With one on the ground the list is
+// a single row and it is attacked without a prompt — asking which of one is
+// noise, and it is how the screen read for its whole life before the list.
 func annihilatorDefense(s session.Session, w *ctx) {
-	var d *game.Annihilator
+	var landed []game.Annihilator
 	var jets, needed int
 	w.Read(func() {
-		if w.Incoming == nil || w.Incoming.DaysLeft <= 0 {
-			return
+		for _, d := range w.Landed() {
+			landed = append(landed, *d)
 		}
-		c := *w.Incoming
-		d = &c
 		needed = int(w.AnnihilatorJetsNeeded())
 	})
-	if d == nil {
+	if len(landed) == 0 {
 		return
 	}
 	withPlayer(w, func(p *game.Empire) { jets = p.Jets })
 
-	fmt.Fprintf(s, "\n%s%-24s %-14s %s%s\n", ansi.FgWhite,
+	fmt.Fprintf(s, "\n%s%-4s %-24s %-14s %s%s\n", ansi.FgWhite, tr(s, "#"),
 		tr(s, "From"), tr(s, "Strength"), tr(s, "Days Until Self-Destruct"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s %-14s %d%s\n", ansi.FgBrightWhite,
-		padColumn(w.Term, d.Creator, 24), fmt.Sprintf("%d%%", d.Intact), d.DaysLeft, ansi.Reset)
+	for i, d := range landed {
+		fmt.Fprintf(s, "%s%-4d %s %-14s %d%s\n", ansi.FgBrightWhite, i+1,
+			padColumn(w.Term, d.Creator, 24), fmt.Sprintf("%d%%", d.Intact), d.DaysLeft, ansi.Reset)
+	}
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(
-		tr(s, "It would take %s jets to destroy it outright."), comma(needed))))
+		tr(s, "It would take %s jets to destroy one outright."), comma(needed))))
 
+	target := landed[0]
+	if len(landed) > 1 {
+		pick := promptInt(s, tr(s, "Enter Gooie Number"))
+		if pick < 1 || pick > len(landed) {
+			return
+		}
+		target = landed[pick-1]
+	}
 	if !AskYesNo(s, "Do you wish to attack the Gooie Kablooie?", false) {
 		return
 	}
@@ -910,7 +920,7 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	var knocked, lost int
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		var e error
-		knocked, lost, e = w.World.InterceptAnnihilator(p, send)
+		knocked, lost, e = w.World.InterceptAnnihilator(p, target.Creator, send)
 		return e
 	})
 	if err != nil {
@@ -918,7 +928,7 @@ func annihilatorDefense(s session.Session, w *ctx) {
 		return
 	}
 	var gone bool
-	w.Read(func() { gone = w.Incoming == nil })
+	w.Read(func() { gone = w.IncomingFrom(target.Creator) == nil })
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s jets were destroyed in the attack!"), comma(lost))))
 	if gone {
 		ok(s, "The Gooie Kablooie was DESTROYED!")

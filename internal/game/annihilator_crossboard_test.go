@@ -31,21 +31,21 @@ func TestAnIncomingGooieLandsWhateverTheLocalDayCounterReads(t *testing.T) {
 			FromBoard: "xbit", Funded: true, Launched: true,
 			ArrivesAt: Recorded(now.Add(2 * 24 * time.Hour)), ArrivesDay: 12, Intact: 100,
 		})
-		if w.Incoming == nil {
+		if len(w.Incoming) == 0 {
 			t.Fatalf("GameDay %d: the weapon vanished — no record, and the planet was told nothing", day)
 		}
-		if got := w.Incoming.ArrivesDay - w.GameDay; got != 2 {
+		if got := w.Incoming[0].ArrivesDay - w.GameDay; got != 2 {
 			t.Errorf("GameDay %d: arrival is %d days off on our count, want 2", day, got)
 		}
 		// It has not landed yet...
 		w.ArriveAnnihilator()
-		if w.Incoming.DaysLeft != 0 {
+		if w.Incoming[0].DaysLeft != 0 {
 			t.Errorf("GameDay %d: landed two days early", day)
 		}
 		// ...and it lands when our own clock reaches it.
 		w.GameDay += 2
 		w.ArriveAnnihilator()
-		if w.Incoming.DaysLeft == 0 {
+		if w.Incoming[0].DaysLeft == 0 {
 			t.Errorf("GameDay %d: the weapon never landed", day)
 		}
 	}
@@ -73,17 +73,25 @@ func TestTheIncomingGooieCountdownIsMeasuredHere(t *testing.T) {
 	}
 }
 
-// A weapon that has been and gone is still ignored — the builder's board
-// re-announcing it must not raise a second siege. Judged on the real interval
-// now, not on two unrelated counters.
-func TestAStaleGooieStatusRaisesNoSiege(t *testing.T) {
+// AGE ALONE no longer refuses a weapon, and this test asserted the opposite
+// until 2026-09-13. What refuses one is knowing it has already been dealt with
+// (AnnihilatorDone, above), because a board that was offline across the arrival
+// is indistinguishable by age from a board being told about a weapon twice — and
+// refusing both to catch the second is what made a weapon vanish. An old status
+// from a board whose weapon this planet never finished with is a siege it
+// missed, and it lands.
+func TestAnOldStatusIsNotRefusedOnAgeAlone(t *testing.T) {
 	w := incomingWorld(t, 40)
 	w.applyAnnihilatorStatus(&AnnihilatorStatus{
 		FromBoard: "xbit", Funded: true, Launched: true,
 		ArrivesAt: Recorded(timeNow().Add(-30 * 24 * time.Hour)), Intact: 100,
 	})
-	if w.Incoming != nil {
-		t.Errorf("a month-old weapon started a fresh siege: %+v", w.Incoming)
+	if len(w.Incoming) != 1 {
+		t.Fatalf("a weapon this planet never dealt with was refused on age: %+v", w.Incoming)
+	}
+	w.ArriveAnnihilator()
+	if w.Incoming[0].DaysLeft == 0 {
+		t.Error("it was recorded but never landed")
 	}
 }
 
@@ -190,7 +198,7 @@ func TestAWeaponWithNoInstantFallsBackInsteadOfVanishing(t *testing.T) {
 		t.Fatalf("a zero instant was put on the wire as %q", st.ArrivesAt)
 	}
 	w.applyAnnihilatorStatus(st)
-	if w.Incoming == nil {
+	if len(w.Incoming) == 0 {
 		t.Fatal("the weapon vanished: a missing instant must fall back to the day number, not drop it")
 	}
 }
@@ -217,29 +225,32 @@ func TestTheDayFieldStaysOnTheWireSoOlderBoardsStillVerify(t *testing.T) {
 func TestAFinishedGooieIsNotLandedTwiceByALateStatus(t *testing.T) {
 	w := incomingWorld(t, 10)
 	now := timeNow()
+	// The arrival is in the PAST, which is what a late copy looks like in real
+	// play: the siege takes AnnihilatorSiegeDays, so by the time the record is
+	// closed the instant is days old and age alone cannot be what refuses the
+	// copy. Only the stamp can.
 	st := &AnnihilatorStatus{
 		FromBoard: "xbit", Funded: true, Launched: true,
-		ArrivesAt: Recorded(now.Add(2 * 24 * time.Hour)), ArrivesDay: 12, Intact: 100,
+		ArrivesAt: Recorded(now.Add(-time.Hour)), ArrivesDay: 12, Intact: 100,
 	}
 	w.applyAnnihilatorStatus(st)
-	if w.Incoming == nil {
+	if len(w.Incoming) == 0 {
 		t.Fatal("the weapon never arrived on the books")
 	}
-	w.GameDay += 2
 	w.ArriveAnnihilator()
-	if w.Incoming.DaysLeft == 0 {
+	if w.Incoming[0].DaysLeft == 0 {
 		t.Fatal("the weapon never landed")
 	}
 	for i := 0; i < AnnihilatorSiegeDays; i++ {
 		w.TickAnnihilator()
 	}
-	if w.Incoming != nil {
+	if len(w.Incoming) > 0 {
 		t.Fatalf("the siege never ended after %d days", AnnihilatorSiegeDays)
 	}
 
 	// The builder's board announcing it once more, before it retired the record.
 	w.applyAnnihilatorStatus(st)
-	if w.Incoming != nil {
+	if len(w.Incoming) > 0 {
 		t.Error("a late copy of a burned-out weapon raised a second siege")
 	}
 
@@ -248,7 +259,7 @@ func TestAFinishedGooieIsNotLandedTwiceByALateStatus(t *testing.T) {
 		FromBoard: "xbit", Funded: true, Launched: true,
 		ArrivesAt: Recorded(now.Add(20 * 24 * time.Hour)), ArrivesDay: 30, Intact: 100,
 	})
-	if w.Incoming == nil {
+	if len(w.Incoming) == 0 {
 		t.Error("the builder's next weapon was refused as though it were the old one")
 	}
 }
@@ -268,14 +279,118 @@ func TestALiveGooieKeepsItsOwnArrivalInstant(t *testing.T) {
 	})
 	w.GameDay += 2
 	w.ArriveAnnihilator()
-	if w.Incoming == nil || w.Incoming.DaysLeft == 0 {
+	if len(w.Incoming) == 0 || w.Incoming[0].DaysLeft == 0 {
 		t.Fatal("the weapon never landed")
 	}
 	w.applyAnnihilatorStatus(&AnnihilatorStatus{
 		FromBoard: "xbit", Funded: true, Launched: true,
 		ArrivesAt: Recorded(now.Add(9 * 24 * time.Hour)), ArrivesDay: 40, Intact: 100,
 	})
-	if got := Recorded(w.Incoming.ArrivesAt); got != first {
+	if got := Recorded(w.Incoming[0].ArrivesAt); got != first {
 		t.Errorf("the besieging weapon's arrival was rewritten to %s, want %s", got, first)
+	}
+}
+
+// Two planets can besiege this one at once. Until 2026-09-13 the second board's
+// weapon was folded into the first's record: its warning was never posted,
+// because the launch news fires only on the transition to flying, and whether it
+// landed at all came down to whether its next status happened to arrive before
+// its arrival instant.
+func TestTwoPlanetsCanAimAtThisOneAtOnce(t *testing.T) {
+	w := incomingWorld(t, 10)
+	now := timeNow()
+	for _, from := range []string{"xbit", "The Eclipse"} {
+		w.applyAnnihilatorStatus(&AnnihilatorStatus{
+			FromBoard: from, Funded: true, Launched: true,
+			ArrivesAt: Recorded(now.Add(2 * 24 * time.Hour)), ArrivesDay: 12, Intact: 100,
+		})
+	}
+	if len(w.Incoming) != 2 {
+		t.Fatalf("tracking %d weapons, want 2: %+v", len(w.Incoming), w.Incoming)
+	}
+	// Both planets were named to the barons, not just the first.
+	news := w.NewsToday.Join("\n")
+	for _, from := range []string{"xbit", "The Eclipse"} {
+		if !strings.Contains(news, from) {
+			t.Errorf("no warning names %s — that planet's weapon arrives unannounced:\n%s", from, news)
+		}
+	}
+	// And both land.
+	w.GameDay += 2
+	w.ArriveAnnihilator()
+	for _, d := range w.Incoming {
+		if d.DaysLeft == 0 {
+			t.Errorf("the weapon from %s never landed", d.Creator)
+		}
+	}
+	// Shooting one down leaves the other besieging.
+	e := &Empire{Name: "Defender", Alive: true, Jets: 400_000}
+	e.Regions = RegionMix{Agricultural: 5000}
+	e.syncLand()
+	w.Empires = append(w.Empires, e)
+	for i := 0; i < 20 && w.IncomingFrom("xbit") != nil; i++ {
+		e.Jets = 400_000
+		if _, _, err := w.InterceptAnnihilator(e, "xbit", 400_000); err != nil {
+			t.Fatalf("InterceptAnnihilator: %v", err)
+		}
+	}
+	if w.IncomingFrom("xbit") != nil {
+		t.Error("the weapon from xbit survived twenty full sorties")
+	}
+	if w.IncomingFrom("The Eclipse") == nil {
+		t.Error("shooting down one planet's weapon removed the other planet's too")
+	}
+}
+
+// A save written while the planet tracked a single incoming weapon keeps it.
+func TestAPreListSaveKeepsItsIncomingWeapon(t *testing.T) {
+	w := incomingWorld(t, 10)
+	w.IncomingOne = &Annihilator{Creator: "xbit", Launched: true, Intact: 100, DaysLeft: 3}
+	w.EnsureIncoming()
+	if len(w.Incoming) != 1 || w.Incoming[0].Creator != "xbit" {
+		t.Fatalf("the weapon was lost in the migration: %+v", w.Incoming)
+	}
+	if w.IncomingOne != nil {
+		t.Error("the legacy field was left set, so the next load would add it twice")
+	}
+	w.EnsureIncoming()
+	if len(w.Incoming) != 1 {
+		t.Errorf("a second migration pass duplicated the weapon: %+v", w.Incoming)
+	}
+}
+
+// A board that was down across the arrival must find its planet under siege when
+// it comes back. The original has no such problem — it sends one attack packet
+// AT arrival, and the target applies it whenever it next reads inbound — so a
+// status whose arrival has already passed lands retroactively rather than being
+// refused as stale. Refusing it is how a weapon disappeared between two boards.
+func TestAnOfflineTargetStillGetsTheSiegeWhenItComesBack(t *testing.T) {
+	w := incomingWorld(t, 10)
+	w.applyAnnihilatorStatus(&AnnihilatorStatus{
+		FromBoard: "xbit", Funded: true, Launched: true,
+		ArrivesAt: Recorded(timeNow().Add(-2 * 24 * time.Hour)), ArrivesDay: 12, Intact: 100,
+	})
+	if len(w.Incoming) == 0 {
+		t.Fatal("the weapon was refused as stale — the planet it hit was told nothing")
+	}
+	if w.Incoming[0].ArrivesDay > w.GameDay {
+		t.Errorf("arrival is day %d with the clock at %d: an instant in the past must not read as future",
+			w.Incoming[0].ArrivesDay, w.GameDay)
+	}
+	w.ArriveAnnihilator()
+	if w.Incoming[0].DaysLeft == 0 {
+		t.Error("the weapon is on the books but never landed")
+	}
+}
+
+// The age test still governs a status with no instant, where nothing else can
+// tell a live weapon from one long gone.
+func TestALegacyStatusWithNoInstantIsStillJudgedByAge(t *testing.T) {
+	w := incomingWorld(t, 40)
+	w.applyAnnihilatorStatus(&AnnihilatorStatus{
+		FromBoard: "xbit", Funded: true, Launched: true, ArrivesDay: 12, Intact: 100,
+	})
+	if len(w.Incoming) > 0 {
+		t.Errorf("a month-old legacy status started a fresh siege: %+v", w.Incoming)
 	}
 }

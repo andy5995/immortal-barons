@@ -49,22 +49,22 @@ func (w *World) enqueueAnnihilator(board string, st *AnnihilatorStatus) {
 // pointing at us, and posts the warning its barons need.
 func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 	if st.Dismantled {
-		if w.Incoming != nil && w.Incoming.Creator == st.FromBoard {
-			w.markAnnihilatorDone(w.Incoming)
-			w.Incoming = nil
+		if d := w.IncomingFrom(st.FromBoard); d != nil {
+			w.forgetIncoming(d)
 			w.postNews(fmt.Sprintf("The Gooie Kablooie being built at %s has been dismantled.", st.FromBoard))
 		}
 		return
 	}
 	// A weapon we have already finished with, announced once more by a board
 	// that had not yet retired the record. Without this the siege runs again.
-	if w.Incoming == nil {
+	in := w.IncomingFrom(st.FromBoard)
+	if in == nil {
 		done, haveDone := ParseStamp(w.AnnihilatorDone[st.FromBoard])
 		if at, ok := ParseStamp(st.ArrivesAt); ok && haveDone && at.Equal(done) {
 			return
 		}
 	}
-	first := w.Incoming == nil
+	first := in == nil
 	// How far off the arrival is, measured on OUR clock. The packet carries an
 	// instant for this reason: st.ArrivesDay counts from the sender's own first
 	// maintenance and says nothing about our calendar, so comparing it against
@@ -75,33 +75,32 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 	if at, ok := ParseStamp(st.ArrivesAt); ok {
 		days = daysUntil(at, timeNow())
 	}
-	// A status for a weapon that has already been and gone — the builder's board
-	// announcing it once more before it retires the record, or one it has since
-	// lost to jets — must not raise a second siege. "Already due" is a sound
-	// test again now that it is measured on the real interval: a live weapon
-	// flies for AnnihilatorFlightDays and its status leaves on the next run, so
-	// it reaches us with the arrival still ahead. It was NOT sound against two
-	// unrelated day counters, which is what dropped live weapons.
-	if first && st.Launched && days < 0 {
+	// Age decides only for a status with NO instant, where there is nothing else
+	// to go on: such a packet's day number counts from the SENDER's first
+	// maintenance and means nothing here, so an old one is likelier a weapon
+	// already gone than a live one, and that is the best a legacy packet allows.
+	//
+	// With an instant, identity decides instead (AnnihilatorDone, above), and an
+	// arrival already in the past must still LAND. A board that was down across
+	// the arrival has to find its planet under siege when it comes back: the
+	// original has no such problem, because it sends one attack packet at arrival
+	// and the target applies it whenever it next reads inbound. Refusing a late
+	// status here is the silent disappearance this field exists to end.
+	if _, haveInstant := ParseStamp(st.ArrivesAt); first && st.Launched && !haveInstant && days < 0 {
 		return
 	}
 	if first {
-		w.Incoming = &Annihilator{Creator: st.FromBoard, Intact: 100}
+		in = &Annihilator{Creator: st.FromBoard, Intact: 100}
+		w.Incoming = append(w.Incoming, in)
 	}
-	in := w.Incoming
-	// The instant identifies the weapon, so once one is on the books a status
-	// carrying a DIFFERENT instant is about some other weapon and must not
-	// rewrite this one's — otherwise the stamp filed when this weapon ends
-	// records the wrong arrival and stops recognizing this weapon's own late
-	// copies. The builder is free to start a second weapon the day after the
-	// first lands, so a second generation routinely reports during the first's
-	// five-day siege.
-	//
-	// This does not fix, and is not meant to fix, the fact that w.Incoming is a
-	// single slot: a second BOARD's weapon is already lost here today, because
-	// wasFlying is true by then and the arrival warning never fires. The pin
-	// stops the record being corrupted; it does not make the planet able to
-	// watch two weapons at once.
+	// The instant identifies the weapon, so once one from this board is on the
+	// books a status carrying a DIFFERENT instant is about some other weapon of
+	// theirs and must not rewrite this one's — otherwise the stamp filed when
+	// this weapon ends records the wrong arrival and stops recognizing this
+	// weapon's own late copies. The builder is free to start a second the day
+	// after the first lands, so a second generation routinely reports during the
+	// first's siege. The records are per builder board, so this is only ever the
+	// same board's next weapon; a different board gets its own row.
 	if at, ok := ParseStamp(st.ArrivesAt); ok && !first && !in.ArrivesAt.IsZero() && !at.Equal(in.ArrivesAt) {
 		return
 	}
@@ -136,19 +135,18 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 // daily tick's (#112). Called from the planetary step, so the warning has had
 // every day of the flight to reach the barons.
 func (w *World) ArriveAnnihilator() {
-	if w.Incoming == nil || !w.Incoming.Launched || w.Incoming.DaysLeft > 0 {
-		return
+	for _, d := range w.Incoming {
+		if !d.Launched || d.DaysLeft > 0 || w.GameDay < d.ArrivesDay {
+			continue
+		}
+		d.DaysLeft = AnnihilatorSiegeDays
 	}
-	if w.GameDay < w.Incoming.ArrivesDay {
-		return
-	}
-	w.Incoming.DaysLeft = AnnihilatorSiegeDays
 }
 
 // daysUntil is how many whole days from now to at, rounded UP so a weapon due in
-// any part of a day still reads as that day rather than as already landed. It
-// goes negative for an instant in the past, which is how a late status is told
-// from a stale one.
+// any part of a day still reads as that day rather than as already landed. The
+// division truncates toward zero, so an arrival less than a day ago reads as 0
+// and only one further back reads negative.
 func daysUntil(at, now time.Time) int {
 	d := at.Sub(now)
 	days := int(d / (24 * time.Hour))

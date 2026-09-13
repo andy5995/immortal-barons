@@ -63,9 +63,9 @@ func TestIncomingListsAFlyingWeaponOnce(t *testing.T) {
 	w := newWorld()
 	w.With(func() {
 		w.World.GameDay = 10
-		w.World.Incoming = &game.Annihilator{
+		w.World.Incoming = []*game.Annihilator{{
 			Creator: "The Eclipse", Launched: true, ArrivesDay: 12, Intact: 100,
-		}
+		}}
 		w.World.Threats = []game.Threat{
 			{FromBoard: "The Eclipse", Kind: game.ThreatGooie,
 				At: game.ThreatAt(time.Now().Add(-time.Hour))},

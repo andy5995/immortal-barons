@@ -555,17 +555,17 @@ func TestAGooieKablooieCrossesBetweenBoardsAndLands(t *testing.T) {
 	if _, err := RunPlanetary(b.w, b.inbound, b.outbound, false); err != nil {
 		t.Fatal(err)
 	}
-	if b.w.Incoming == nil {
+	if len(b.w.Incoming) == 0 {
 		t.Fatal("the weapon vanished in transit: the target has no record of it and was told nothing")
 	}
-	if !b.w.Incoming.Launched {
+	if !b.w.Incoming[0].Launched {
 		t.Error("the target does not know the weapon is in the air")
 	}
 
 	// It lands when the TARGET's own clock reaches the arrival, and besieges.
-	b.w.GameDay = b.w.Incoming.ArrivesDay
+	b.w.GameDay = b.w.Incoming[0].ArrivesDay
 	b.w.ArriveAnnihilator()
-	if b.w.Incoming.DaysLeft == 0 {
+	if b.w.Incoming[0].DaysLeft == 0 {
 		t.Fatalf("the weapon reached the planet and did not land: %+v", b.w.Incoming)
 	}
 	before := victim.Land

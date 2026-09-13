@@ -165,6 +165,7 @@ func repair(w *game.World, cfg game.Config) {
 	w.EnsureInvestRate()
 	w.EnsurePrefs() // older saves keep the preferences on the world
 	w.EnsurePirates()
+	w.EnsureIncoming()
 	w.EnsureTreaties()
 	w.EnsureMarket()
 	// After the treaty and market migrations, not before: an over-full save

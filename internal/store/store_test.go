@@ -511,6 +511,8 @@ func TestReloadForgetsWhatAnotherNodeRemoved(t *testing.T) {
 	fs := NewFileStore(w, cfg)
 
 	// This node is holding things the file on disk does not have.
+	w.Incoming = []*game.Annihilator{{Creator: "xbit", Launched: true, DaysLeft: 3}}
+	w.AnnihilatorDone = map[string]string{"xbit": "stale"}
 	w.Threats = []game.Threat{{FromBoard: "xbit"}}
 	w.Battles = []game.BattleLogEntry{{}}
 
@@ -521,6 +523,8 @@ func TestReloadForgetsWhatAnotherNodeRemoved(t *testing.T) {
 		name string
 		n    int
 	}{
+		{"Incoming", len(w.Incoming)},
+		{"AnnihilatorDone", len(w.AnnihilatorDone)},
 		{"Threats", len(w.Threats)},
 		{"Battles", len(w.Battles)},
 	} {

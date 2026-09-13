@@ -19,10 +19,10 @@ func TestAnnihilatorDefenseSendsJetsAtALandedWeapon(t *testing.T) {
 		p = w.Player()
 		p.Regions = game.RegionMix{Agricultural: 5000}
 		p.Jets = 200_000
-		w.Incoming = &game.Annihilator{
+		w.Incoming = []*game.Annihilator{{
 			Creator: "Wildside", Launched: true, Intact: 100,
 			ArrivesDay: w.GameDay, DaysLeft: game.AnnihilatorSiegeDays,
-		}
+		}}
 	})
 	// "y" to attack, then the whole air force.
 	f := &fakeSession{keys: []rune("y200000\r")}
@@ -36,8 +36,8 @@ func TestAnnihilatorDefenseSendsJetsAtALandedWeapon(t *testing.T) {
 	}
 	var intact, jets int
 	w.With(func() {
-		if w.Incoming != nil {
-			intact = w.Incoming.Intact
+		if len(w.Incoming) > 0 {
+			intact = w.Incoming[0].Intact
 		}
 		jets = w.Player().Jets
 	})
@@ -57,5 +57,49 @@ func TestAnnihilatorDefenseIsSilentWithNothingToFight(t *testing.T) {
 	annihilatorDefense(f, w)
 	if out := f.out.String(); out != "" {
 		t.Errorf("the defense prompt spoke with no weapon on the planet:\n%s", out)
+	}
+}
+
+// With more than one weapon on the ground the screen lists them and asks which,
+// as the original does. The jets must reach the one that was picked.
+func TestAnnihilatorDefensePicksAmongSeveralWeapons(t *testing.T) {
+	w := newWorld()
+	var p *game.Empire
+	w.With(func() {
+		w.Config.IBBS = true
+		p = w.Player()
+		p.Regions = game.RegionMix{Agricultural: 5000}
+		p.Jets = 200_000
+		for _, from := range []string{"Wildside", "The Eclipse"} {
+			w.Incoming = append(w.Incoming, &game.Annihilator{
+				Creator: from, Launched: true, Intact: 100,
+				ArrivesDay: w.GameDay, DaysLeft: game.AnnihilatorSiegeDays,
+			})
+		}
+	})
+	// Weapon 2, "y" to attack, then the whole air force.
+	f := &fakeSession{keys: []rune("2\ry200000\r")}
+	annihilatorDefense(f, w)
+
+	out := stripANSI(f.out.String())
+	for _, want := range []string{"Enter Gooie Number", "Wildside", "The Eclipse", "jets were destroyed"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("the defense screen never showed %q:\n%s", want, out)
+		}
+	}
+	var picked, other int
+	w.With(func() {
+		if d := w.IncomingFrom("The Eclipse"); d != nil {
+			picked = d.Intact
+		}
+		if d := w.IncomingFrom("Wildside"); d != nil {
+			other = d.Intact
+		}
+	})
+	if picked >= 100 {
+		t.Errorf("the weapon picked is %d%% intact — the jets went somewhere else", picked)
+	}
+	if other != 100 {
+		t.Errorf("the weapon NOT picked is %d%% intact, want 100: one sortie hit both", other)
 	}
 }

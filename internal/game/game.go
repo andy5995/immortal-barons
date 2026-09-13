@@ -275,15 +275,33 @@ type World struct {
 	// it is in the air, which is what gives the jets something to shoot at (#16,
 	// #63).
 	Annihilator *Annihilator
-	Incoming    *Annihilator
+	// Incoming is every weapon aimed at this planet that a board has told us
+	// about — one per builder. It was a single slot until 2026-09-13, which
+	// silently folded a second board's weapon into the first's record: the
+	// launch news fires only on the transition to flying, so the second planet's
+	// warning was never posted, and whether its weapon landed at all came down
+	// to whether its next status happened to arrive before its arrival instant.
+	// The original tracks several too, which is what its numbered picker is for.
+	Incoming []*Annihilator `json:"IncomingGooies,omitempty"`
+	// IncomingOne is the pre-list field, migrated by EnsureIncoming. The JSON key
+	// stays "Incoming" so a save written before the list loads its weapon.
+	IncomingOne *Annihilator `json:"Incoming,omitempty"`
 	// AnnihilatorDone is the arrival instant of the last weapon from each board
-	// that this planet has finished with — burned out, shot down, or dismantled.
-	// A board re-announces a weapon in flight on every planetary run so a single
-	// lost packet cannot leave the target unwarned (a divergence: the original
-	// sends one attack packet at arrival and never repeats), and the price of
-	// repeating is that a copy can outlive the weapon and raise the siege a
-	// second time. Matching the instant is what tells a late copy of a finished
-	// weapon from the first word of a new one. Keyed by builder board.
+	// that this planet has finished with — burned out, or shot down. A board
+	// re-announces a weapon in flight on every planetary run so a single lost
+	// packet cannot leave the target unwarned (a divergence: the original sends
+	// one attack packet at arrival and never repeats), and the price of repeating
+	// is that a copy can outlive the weapon and raise the siege a second time.
+	// Matching the instant is what tells a late copy of a finished weapon from
+	// the first word of a new one, and it has to be identity rather than age: a
+	// board that was offline across the arrival looks exactly like one being told
+	// twice, and refusing both to catch the second is what lost a weapon.
+	//
+	// Dismantling records nothing, and cannot: a weapon can only be scrapped
+	// before it launches, so it has no arrival instant to record. The removal
+	// still runs through forgetIncoming, which is the single exit from Incoming
+	// and where the write lives; it is simply a no-op on that path.
+	// Keyed by builder board.
 	AnnihilatorDone map[string]string `json:",omitempty"`
 	// BulletinDigest fingerprints every bulletin this board holds, keyed
 	// "<scope>/<name>", so an edited file can be told from an untouched one

@@ -698,10 +698,10 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 
 	// Under construction: a warning, and nothing to shoot at yet.
 	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{FromBoard: "Wildside"}})
-	if target.Incoming == nil {
+	if len(target.Incoming) == 0 {
 		t.Fatal("target was not told about the weapon being built")
 	}
-	if target.Incoming.Launched {
+	if target.Incoming[0].Launched {
 		t.Error("a weapon still under construction is marked as flying")
 	}
 
@@ -709,18 +709,18 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
 		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay + 2, Intact: 100,
 	}})
-	if !target.Incoming.Launched {
+	if !target.Incoming[0].Launched {
 		t.Fatal("target does not know the weapon has launched")
 	}
-	if _, _, err := target.InterceptAnnihilator(defender, 1000); err != ErrAnnihilatorAloft {
+	if _, _, err := target.InterceptAnnihilator(defender, "Wildside", 1000); err != ErrAnnihilatorAloft {
 		t.Errorf("jets reached a weapon still in flight: %v", err)
 	}
 
 	// It lands. Now the jets have something to fight.
 	target.GameDay += 2
 	target.ArriveAnnihilator()
-	if target.Incoming.DaysLeft != AnnihilatorSiegeDays {
-		t.Fatalf("siege countdown is %d, want %d", target.Incoming.DaysLeft, AnnihilatorSiegeDays)
+	if target.Incoming[0].DaysLeft != AnnihilatorSiegeDays {
+		t.Fatalf("siege countdown is %d, want %d", target.Incoming[0].DaysLeft, AnnihilatorSiegeDays)
 	}
 	needed := target.AnnihilatorJetsNeeded()
 	if want := int64(9000 * (9000/AnnihilatorJetsLandDivisor + AnnihilatorJetsLandBase)); needed != want {
@@ -728,14 +728,14 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	}
 
 	// No single sortie can finish it, however many jets it carries.
-	knocked, lost, err := target.InterceptAnnihilator(defender, 400_000)
+	knocked, lost, err := target.InterceptAnnihilator(defender, "Wildside", 400_000)
 	if err != nil {
 		t.Fatalf("InterceptAnnihilator: %v", err)
 	}
 	if knocked != AnnihilatorMaxSortiePct {
 		t.Errorf("one sortie knocked %d%% off, want the %d%% ceiling", knocked, AnnihilatorMaxSortiePct)
 	}
-	if target.Incoming == nil {
+	if len(target.Incoming) == 0 {
 		t.Fatal("one sortie destroyed the weapon; the ceiling must forbid that")
 	}
 	if lost < 1 || lost >= 400_000 {
@@ -747,10 +747,10 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 
 	// A second wave finishes it, and then the siege is over.
 	defender.Jets = 400_000
-	if _, _, err := target.InterceptAnnihilator(defender, 400_000); err != nil {
+	if _, _, err := target.InterceptAnnihilator(defender, "Wildside", 400_000); err != nil {
 		t.Fatalf("InterceptAnnihilator: %v", err)
 	}
-	if target.Incoming != nil {
+	if len(target.Incoming) > 0 {
 		t.Fatalf("weapon survived a second full wave: %+v", target.Incoming)
 	}
 	before := defender.Land
@@ -763,7 +763,7 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
 		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay - 1, Intact: 100,
 	}})
-	if target.Incoming != nil {
+	if len(target.Incoming) > 0 {
 		t.Errorf("a spent weapon came back: %+v", target.Incoming)
 	}
 }
@@ -787,7 +787,7 @@ func TestAnnihilatorBesiegesThePlanetForFiveDays(t *testing.T) {
 	shielded.SDI = SDIMax
 	newcomer.Protection = 5
 
-	w.Incoming = &Annihilator{Creator: "Wildside", Launched: true, ArrivesDay: w.GameDay, Intact: 100}
+	w.Incoming = []*Annihilator{{Creator: "Wildside", Launched: true, ArrivesDay: w.GameDay, Intact: 100}}
 	w.ArriveAnnihilator()
 
 	// Day one: a tenth, shield or no shield.
@@ -810,7 +810,7 @@ func TestAnnihilatorBesiegesThePlanetForFiveDays(t *testing.T) {
 			t.Errorf("day %d: %d land, want %d", day, plain.Land, want)
 		}
 	}
-	if w.Incoming != nil {
+	if len(w.Incoming) > 0 {
 		t.Fatalf("the weapon outlasted its %d days: %+v", AnnihilatorSiegeDays, w.Incoming)
 	}
 	// A battered weapon bites just as deep as a fresh one, so five days of it

@@ -111,9 +111,12 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 		// launched it says so openly, and the whole flight is visible (#63). Its
 		// row comes first because there is nothing left to be done about it but
 		// shoot it down when it lands.
-		flying := ""
-		if d := w.Incoming; d != nil && d.Launched {
-			flying = d.Creator
+		flying := map[string]bool{}
+		for _, d := range w.Incoming {
+			if !d.Launched {
+				continue
+			}
+			flying[d.Creator] = true
 			rows = append(rows, inRow{
 				planet: d.Creator,
 				threat: tr(s, "Gooie Kablooie"),
@@ -125,7 +128,7 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 		for _, t := range w.IncomingThreats() {
 			// The weapon in the air above and the weapon that was being built are
 			// the same weapon. One row for it, the one that is still true.
-			if t.Kind == game.ThreatGooie && t.FromBoard == flying {
+			if t.Kind == game.ThreatGooie && flying[t.FromBoard] {
 				continue
 			}
 			r := inRow{}
