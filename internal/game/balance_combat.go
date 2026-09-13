@@ -137,6 +137,25 @@ const (
 	// the constants are what SURVIVES — 0.99, 0.90, 0.80, 0.70 — so the losses
 	// are their complements. attack.hlp's flat "15%" describes the interplanetary
 	// variants, not this table.
+	// Corroborated from live play of the original, 2026-09-13, and this is the
+	// observation that pins the SHAPE rather than the number: a losing attacker's
+	// troopers, jets and tanks each came back short by 20.636%, 20.639% and
+	// 20.639% — ONE fraction applied to every committed type, which is what
+	// loseCommitted does and what the binary was read as doing. Two things
+	// follow. That board was on Medium, since the figure sits just past that
+	// floor; and it sits PAST it rather than on it, because the per-round loop
+	// stops the first time a side crosses the threshold and overshoots by part of
+	// a round, where a flat 20% would land exactly on it.
+	//
+	// It was a LOCAL regular attack — the original asks for no attack type there,
+	// going straight from target to force counts — so it speaks to this table and
+	// not to the interplanetary Extended Battle above, whose own live
+	// corroboration happens to sit at the same 20%.
+	//
+	// The force counts are deliberately not written down here: that game is still
+	// running and this file is public, so the figures would identify the battle
+	// and the players in it. The capture is kept locally, under the gitignored
+	// cap/ directory.
 	AttackRetreatNonePct   = 1
 	AttackRetreatLowPct    = 10
 	AttackRetreatMediumPct = 20
