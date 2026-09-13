@@ -48,7 +48,7 @@ A turn moves through these steps in order:
 - **Covert Operations.** Spying and sabotage. This step appears only if you keep
   it turned on and hold at least one covert agent.
 - **Spending.** You buy land, military, and other things.
-- **Attacks.** You may attack another barony (once per turn).
+- **Attacks.** You may attack another barony, a limited number of times per day.
 - **Trading.** Trade goods with other baronies, if you keep this step turned on.
 - **InterPlanetary Operations.** Actions against other planets, in linked games.
 - **Messages.** You may send a message to another player.

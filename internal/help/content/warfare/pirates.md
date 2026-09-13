@@ -24,9 +24,8 @@ raid often recovers what a faction took from you; two or three will if it is fat
 Attacking costs you casualties whether you win or lose, so do not raid a faction
 that holds nothing.
 
-Listing military on the Trading Market does not hide it. Pirates raid your
-listing about as readily as your camp, so escrow protects goods from other
-barons, not from bandits.
+Listing military on the Trading Market does not hide it from pirates, but it
+does help some: your camp is raided about twice as often as your listing.
 
 Tip: a faction you keep beaten stays harmless, because its army is only what it has
 managed to steal. Big realms are raided more often than small ones.

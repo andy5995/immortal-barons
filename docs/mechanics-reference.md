@@ -102,7 +102,7 @@ One limit worth stating: the scan sees the two displacement idioms, not the
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy S3-Sabre likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
 | Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. **What it defends against is exactly two things — see "What a turret actually does" below.** |
-| Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
+| Tank | **3.5–4.5** | **3.5–4.5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (`TankStrengthPctBase`/`PerHQ`, `balance_hq.go`: 3.5 at 0%, 4 at 50%, 4.5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value; its own "3-5" range is wider than what IB implements — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
 | Bomber | 0 | 0 | Carries bombs and special ops, which need 500 of them. Adds NOTHING to a local attack: it is outside the offense sum and bleeds with the rest of the committed force, so sending one is a pure loss. The grounded-jet strike this row described until 2026-09-13 was IB's own and went under #200. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
 | HeadQuarters | — | — | Raises tank effectiveness; enemies bomb it to weaken your tanks. |
@@ -5108,7 +5108,7 @@ and each carries a gameplay effect (#11 wired the last two):
   in `internal/game/diplomacy.go`, `AllyDefenseContribPct = 30` in `balance*.go`):
   when a realm is attacked, each Full Defense Alliance partner adds 30% of its
   troopers + tanks to the defender's battle power (valued as the ally's own
-  `Defense()` weighs them — tanks 3–5 troopers by HQ, morale- and tech-scaled; turrets
+  `Defense()` weighs them — tanks 3.5–4.5 troopers by HQ, morale- and tech-scaled; turrets
   stay home, agents are covert); the attacker's battle report notes the
   reinforcements, and the committed detachment bleeds at the defender's casualty
   rate (`bleedAllies`), which also **tells each partner what it lost and in whose

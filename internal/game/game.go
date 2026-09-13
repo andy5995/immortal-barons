@@ -651,7 +651,7 @@ func (w *World) ImportBoard(b RemoteBoard) {
 
 // NetWorth is the empire's strategic score at BRE scale: land dominates at
 // the reference net-worth weight (~12.5 per region), military counts at the
-// table weights, and debt subtracts. Weights are ×10 to keep the fractional
+// table weights, and debt is not deducted. Weights are ×10 to keep the fractional
 // per-unit values (trooper 0.25, jet 0.325, …) in integer math, then /10.
 // Gold, bank, food, and population are NOT counted at face value — net worth
 // is a ranking score, not a cash tally (a cash-rich baron still scores low).

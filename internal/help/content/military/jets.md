@@ -14,13 +14,14 @@ as a trooper.
 Jets are cheap to buy but expensive to keep, so do not buy more than you will
 use.
 
-Jets cannot reach a battle on their own. You need carriers to carry them, and
-one carrier moves up to 100 jets. Without enough carriers, your jets cannot join
-the attack.
+Jets cannot reach a battle on their own. You need carriers to carry them — see
+Carriers for how many each one lifts. Without enough carriers, your jets cannot
+join the attack.
 
-Because that is easy to forget, an order of more than 100 jets asks whether to
-include the carriers to lift them. Say yes and the same gold buys both, so you
-end up with fewer jets than you asked for and every one of them able to fly.
+Because that is easy to forget, an order larger than one carrier's worth asks
+whether to include the carriers to lift them. Say yes and the same gold buys
+both, so you end up with fewer jets than you asked for and every one of them
+able to fly.
 
 An enemy SDI shield lowers your jets' attacking strength, but only when you are
 striking a named baron on another planet — a shield does nothing against jets

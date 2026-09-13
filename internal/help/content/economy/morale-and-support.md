@@ -25,8 +25,10 @@ Popular Support:
 Military Morale scales how hard your army fights, both attacking and defending.
 A full-morale army fights above its paper strength. A broken one fights at about
 half. When Morale falls under 40, troopers, jets and tanks begin to desert each
-turn, and the lower it goes the more of them leave. Turrets, bombers and
-carriers never desert.
+turn, and the lower it goes the more of them leave. Bombers, carriers, and
+turrets never desert over Morale — but underpaying your armed forces' upkeep
+deserts turrets too, along with troopers, jets and tanks, whatever Morale
+reads.
 
 There is one more effect that is easy to miss. Auto-Pay Maintenance only pays
 your bills silently while **both** numbers read exactly 100. Let either slip and
@@ -38,9 +40,9 @@ you are back to answering the maintenance prompts by hand every turn.
   Queen's tax, or your people's food costs Support. Underfeeding the army costs
   Morale.
 - A riot from high taxes costs Support.
-- Declaring war on a ruler you hold an agreement with costs you a quarter of
-  each. Attacking that ruler without declaring war first ends the agreement too,
-  but costs you nothing.
+- Declaring war on a ruler you hold an agreement with costs you nothing. Attacking
+  that ruler without declaring war first ends the agreement too, and costs you a
+  quarter of each.
 - A chemical or biological strike on your realm hurts both. The plague is far
   worse for your army than the gas is.
 - Enemy agents can lower either one directly. See Stir Revolts and Demoralize

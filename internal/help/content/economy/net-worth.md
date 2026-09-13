@@ -9,6 +9,7 @@ in_game: true
 
 Net Worth is your overall score. It ranks every empire (see Scores).
 
-It counts mostly your land and your military strength, minus your debt. Gold,
-food, and people are not counted directly. So a rich empire with little land or
-army still scores low. To climb the ranks, hold land and a strong army.
+It counts mostly your land and your military strength. Gold, food, people, and
+debt are not counted at all. So a rich empire with little land or army still
+scores low, and a loan does not cost you rank. To climb the ranks, hold land
+and a strong army.
