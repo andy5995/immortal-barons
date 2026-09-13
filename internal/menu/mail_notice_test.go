@@ -87,6 +87,19 @@ func TestRenderMessageBoxGeometry(t *testing.T) {
 	}
 }
 
+// A message from the planet itself — deliverIPMessage's bounce for an
+// interplanetary message it could not deliver — has no baron to name, so the
+// board's own name stands in rather than rendering an empty sender.
+func TestRenderMessageNamesTheBoardForASystemNotice(t *testing.T) {
+	f := &fakeSession{}
+	renderMessage(f, game.Message{FromBoard: "The Eclipse", To: "A", When: "07/30/2026  00:24:05", Body: "no such realm there"})
+
+	out := sgr.ReplaceAllString(f.out.String(), "")
+	if !strings.Contains(out, "Message From: The Eclipse") {
+		t.Errorf("a system notice should show the board as its sender:\n%s", out)
+	}
+}
+
 // A stamp is stored in UTC and read on the clock the player picked in
 // Preferences (#267) — the reason a league's mail can be timed at all.
 func TestMailStampReadsOnThePlayersClock(t *testing.T) {

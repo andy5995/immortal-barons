@@ -293,3 +293,120 @@ func TestIPMessageToAllShowsEveryLetter(t *testing.T) {
 		}
 	}
 }
+
+// A message addressed to a realm that is not (or no longer) on the target
+// planet used to vanish with no trace (Andy's report, #146's silent-failure
+// half). It now bounces back as an ordinary IP message — no new packet field —
+// carrying why, the original date, the address, and the body.
+func TestIPMessageToUnknownRealmBouncesBack(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := ipWorld("Nova Hub")
+	there := ipWorld("The Eclipse")
+
+	here.SendIPMessageToBarons(here.Empires[0], "The Eclipse", []string{"Ghost Realm"}, "Where are you?")
+	if len(here.Outbox) != 1 || len(here.Outbox[0].IPMessages) != 1 {
+		t.Fatalf("message not queued: %+v", here.Outbox)
+	}
+	there.ApplyPacket(here.Outbox[0])
+
+	if len(there.Outbox) != 1 || len(there.Outbox[0].IPMessages) != 1 {
+		t.Fatalf("no bounce was queued: %+v", there.Outbox)
+	}
+	bounce := there.Outbox[0].IPMessages[0]
+	if bounce.FromEmpire != "" {
+		t.Errorf("a bounce speaks for the planet, not a baron: FromEmpire = %q", bounce.FromEmpire)
+	}
+	if bounce.ToEmpire != "Iron Dominion" {
+		t.Errorf("bounce ToEmpire = %q, want the original sender", bounce.ToEmpire)
+	}
+
+	here.ApplyPacket(there.Outbox[0])
+	sender := here.Empires[0]
+	if len(sender.Mail) != 1 {
+		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(sender.Mail))
+	}
+	got := sender.Mail[0]
+	if got.From != "" || got.FromBoard != "The Eclipse" {
+		t.Errorf("bounce mail From=%q FromBoard=%q, want empty From and the target board", got.From, got.FromBoard)
+	}
+	if !strings.Contains(got.Body, "Ghost Realm of The Eclipse could not be delivered") ||
+		!strings.Contains(got.Body, "no such realm there") {
+		t.Errorf("bounce body should say why: %q", got.Body)
+	}
+	if !strings.Contains(got.Body, "To: Ghost Realm.") {
+		t.Errorf("bounce body should show the address: %q", got.Body)
+	}
+	if !strings.Contains(got.Body, "Where are you?") {
+		t.Errorf("bounce body should quote the original message: %q", got.Body)
+	}
+}
+
+// The Coordinator failure is a different fact from a realm not found — no
+// office elected yet, rather than a wrong or dead name — and gets its own
+// wording so the sender knows to wait or address the planet instead.
+func TestIPMessageToUnelectedCoordinatorBouncesBack(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := ipWorld("Nova Hub")
+	there := ipWorld("The Eclipse") // nobody has voted, so there is no Coordinator
+
+	here.SendIPMessage(here.Empires[0], []string{"The Eclipse"}, true, "Coordinator, respond.")
+	there.ApplyPacket(here.Outbox[0])
+	if len(there.Outbox) != 1 || len(there.Outbox[0].IPMessages) != 1 {
+		t.Fatalf("no bounce was queued: %+v", there.Outbox)
+	}
+
+	here.ApplyPacket(there.Outbox[0])
+	sender := here.Empires[0]
+	if len(sender.Mail) != 1 {
+		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(sender.Mail))
+	}
+	if !strings.Contains(sender.Mail[0].Body, "No Coordinator has been elected") {
+		t.Errorf("bounce body should say why: %q", sender.Mail[0].Body)
+	}
+}
+
+// The loop guard: a bounce is itself an IPMessage with no FromEmpire, so if it
+// ALSO cannot be delivered — the original sender has since died too — nothing
+// sends a second bounce chasing it. Two boards that can no longer reach each
+// other's barons must not bounce a failure back and forth forever.
+func TestIPMessageBounceDoesNotLoopWhenSenderIsAlsoGone(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := ipWorld("Nova Hub")
+	there := ipWorld("The Eclipse")
+
+	here.SendIPMessageToBarons(here.Empires[0], "The Eclipse", []string{"Ghost Realm"}, "Where are you?")
+	there.ApplyPacket(here.Outbox[0])
+	if len(there.Outbox) != 1 {
+		t.Fatalf("no bounce was queued: %+v", there.Outbox)
+	}
+
+	// The original sender is gone too by the time the bounce comes home. here's
+	// own Outbox already holds the original outbound message (nothing drains it
+	// here — that is the transport's job), so the check is that applying the
+	// bounce adds nothing further to it, not that it stays empty.
+	here.Empires[0].Alive = false
+	beforePackets, beforeMsgs := len(here.Outbox), len(here.Outbox[0].IPMessages)
+
+	here.ApplyPacket(there.Outbox[0])
+	if len(here.Outbox) != beforePackets || len(here.Outbox[0].IPMessages) != beforeMsgs {
+		t.Fatalf("a bounce that cannot itself be delivered must die quietly, not bounce again: %+v", here.Outbox)
+	}
+}
+
+// A message to your OWN planet is delivered without a packet at all (see
+// sendIP), so a failure on it bounces back at once, in the same call, with no
+// round trip.
+func TestIPMessageToOwnUnknownRealmBouncesBackLocally(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := ipWorld("Nova Hub")
+
+	here.SendIPMessageToBarons(here.Empires[0], "Nova Hub", []string{"Ghost Realm"}, "hello?")
+
+	sender := here.Empires[0]
+	if len(sender.Mail) != 1 {
+		t.Fatalf("a message to your own unreachable planet should bounce back at once; Mail len = %d, want 1", len(sender.Mail))
+	}
+	if !strings.Contains(sender.Mail[0].Body, "Ghost Realm") {
+		t.Errorf("bounce body should name the realm: %q", sender.Mail[0].Body)
+	}
+}

@@ -4794,8 +4794,31 @@ file, and no news or report template carries a message category. IB filed a
 planet news line for each arrival — naming the sender of a planet-wide message,
 and reporting one addressed to the Coordinator or to a realm that had since
 died — which put private mail in front of the whole planet. Removed 2026-08-18
-(#146). A message to a Coordinator on a planet that has elected none, or to a
-realm that has died, is now simply not delivered.
+(#146).
+
+**A message to a Coordinator on a planet that has elected none, or to a realm
+that has died or was mistyped, now bounces back to its sender — a deliberate
+divergence, decided 2026-09-13, not a fidelity fix.** It went undelivered and
+unreported for over a year; disassembling `process_interbbs_message_packet`
+(`BRE.OVR` 0x048f2f) settles what it does on this point too: the handler is
+file I/O only — `rewrite_typed_file`/`seek_typed_record`/`write_typed_record`
+and nothing else — with no check that the addressee exists and no call that
+queues a reply. **BRE has the same silent failure IB just removed for arrivals,
+and never tells the sender either.** IB chooses to do better: `deliverIPMessage`
+sends the two failures back as an ordinary `IPMessage`, addressed to the
+original sender with `FromEmpire` left empty — a notice from the planet, not
+from a baron, which is also the loop guard: a bounce is never generated for a
+message whose own `FromEmpire` is already empty, so a bounce that cannot itself
+be delivered (the original sender has since died too) dies quietly instead of
+answering forever. No packet field changed and no protocol bump was needed —
+`Packet.IPMessages` already carries realm-addressed mail in both directions.
+The notice reads as an ordinary message quoting the original body, its date,
+and its address (`IPMessage.ToEmpires`, already on the wire) — mail, not a
+recap event. That is deliberately different from how an unreachable strike or
+terror op reports home (`applyAttackResult`, `OutcomeNotFound`, a private
+recap line): a message has a natural place to be handed back — the mailbox the
+sender already reads — where a strike has nothing else to show. The two are not
+meant to converge.
 
 **Replying is BRE's own.** It ships a SECOND message reader for interplanetary
 mail (`DATA\MSG.BRF`, strings at `BRE.OVR` 0x1F94C), separate from the local one
@@ -5768,6 +5791,10 @@ checking IB against a capture:
   quoted. `Quote Message?` itself stays — a reply that quotes nothing is a normal
   thing to want. Two lines still offer four ranges, so the shortcut stops at one.
   Both readers share `askQuote`, so the interplanetary one behaves the same.
+- **An IP message that cannot be delivered bounces back to its sender**, where
+  BRE writes it and drops it, permanently, with no report to anyone. See "A
+  message to a Coordinator ... now bounces back" under IP Messages, above, for
+  the disassembly finding and why it is mail rather than a recap event.
 - **The played-today `+` is drawn only in a league game** (#249). It marks a
   realm that played a turn today but is not online now. Off a league the rows it
   does NOT mark tell an attacker which barons have not been on today, so it is

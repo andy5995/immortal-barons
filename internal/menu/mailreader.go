@@ -58,6 +58,15 @@ func mailReader(s session.Session, w *ctx, skipIgnored bool) {
 		case 'D':
 			deleted = append(deleted, m)
 		case 'R':
+			if m.FromBoard != "" && m.From == "" {
+				// A notice from the planet itself (deliverIPMessage's bounce for a
+				// message that could not be delivered), not from a baron — there is
+				// no author to answer, and an empty ToEmpire would otherwise read as
+				// a planet-wide reply and broadcast it. Treat it like any other
+				// unhandled key.
+				w.ignoreMail(m)
+				break
+			}
 			// Both questions come before the editor opens, as the original asks
 			// them: who the reply is addressed to, then how much of the message it
 			// carries over.
@@ -239,7 +248,13 @@ func renderMessage(s session.Session, m game.Message) {
 		ansi.FgBrightWhite, when,
 		ansi.FgCyan, strings.Repeat("─", 5), ansi.Reset)
 	from := m.From
-	if m.FromBoard != "" {
+	switch {
+	case m.From == "" && m.FromBoard != "":
+		// A notice from the planet itself — deliverIPMessage's bounce for a
+		// message that could not be delivered — rather than from any one baron
+		// there, so the board's own name stands in for a sender.
+		from = m.FromBoard
+	case m.FromBoard != "":
 		from = fmt.Sprintf(tr(s, "%s on %s"), m.From, m.FromBoard)
 	}
 	fmt.Fprintf(s, "%s│ %s%s%s%s%s\n",

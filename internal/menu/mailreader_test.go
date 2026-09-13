@@ -80,6 +80,23 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 	}
 }
 
+// A message from the planet itself (deliverIPMessage's bounce for an
+// interplanetary message it could not deliver) has no author: From is empty
+// while FromBoard names the board, which is the only way IB expresses "this
+// is a notice, not a baron's mail". Replying to it would otherwise mail the
+// empty ToEmpire deliverIPMessage reads as "the whole planet" — one wrong key
+// broadcasting a private problem — so Reply is a no-op here, same as any other
+// unhandled key.
+func TestMailReaderReplyToSystemNoticeIsANoOp(t *testing.T) {
+	f := &fakeSession{keys: []rune("r")}
+	w := newWorld()
+	seedMail(w, game.Message{FromBoard: "The Eclipse", To: "A", When: "07/24/2026", Body: "no such realm there"})
+	mailReader(f, w, false)
+	if got := len(w.Player().Mail); got != 1 {
+		t.Fatalf("a system notice has no author to reply to; Mail len = %d, want 1 (kept)", got)
+	}
+}
+
 // TestMailReaderAbortedReplyKeepsMessage checks the other half of #122: a reply
 // started, then aborted with /a, leaves the original message in the inbox — only
 // a reply that actually goes out removes it.
