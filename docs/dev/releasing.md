@@ -85,7 +85,7 @@ Watch it: a release with no assets is a release nobody can use.
 
 ## After publishing
 
-8. **Bump `Version` in `internal/game/game.go`** to the next patch. This is the
+8. **Bump `Version` in `internal/game/version.go`** to the next patch. This is the
    step that gets forgotten, because the release feels finished once the assets
    are up.
 
