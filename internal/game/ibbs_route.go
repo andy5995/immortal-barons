@@ -238,6 +238,38 @@ func (w *World) LinkSilentDays(board string, now time.Time) int {
 // — so this is deliberately several days rather than hours.
 const LinkSilentMax = 3
 
+// LinkSilentAlarmDays is how long a board may go quiet before the SYSOP is told,
+// as against LinkSilentMax, which warns a PLAYER addressing it. The two differ
+// on purpose. A player's warning is cheap to be wrong about — it says a message
+// may sit a while, and a board that polls every few days will trip it harmlessly
+// — where a sysop notice that cries wolf at every slow-but-working link is noise
+// in the one channel that is supposed to mean something is broken. A full week
+// of silence is not a polling schedule.
+const LinkSilentAlarmDays = 7
+
+// NoteSilentLinks raises one sysop notice per board that has stopped answering,
+// so the operator meets a dead link in the planetary run's own output rather
+// than by opening a report they have no reason to suspect. The existing fault
+// plumbing does the rest: the run reports it, newNotices counts it once when it
+// first appears rather than once per run, and it keeps appearing in the log for
+// as long as it is true.
+//
+// The transport fault counter cannot see this on its own — a fault there is a
+// packet that ARRIVED and could not be read, so a board sending nothing at all
+// produces none, and silence reads as health. That is how a board sat three
+// days without traffic while its Travel Times figure still showed 40 minutes.
+//
+// A board never heard from is not reported, matching LinkSilent: that is every
+// league before its first exchange, and a notice on every fresh setup would
+// teach the sysop to ignore this one.
+func (w *World) NoteSilentLinks(now time.Time) {
+	for _, board := range w.knownPeers() {
+		if days := w.LinkSilentDays(board, now); days > LinkSilentAlarmDays {
+			w.noteSysop("No packet has been processed from %s in %d days. Its mailer, or ours, may not be moving files.", board, days)
+		}
+	}
+}
+
 // LinkQuiet reports that a planet this board HAS heard from has since gone
 // quiet for longer than LinkSilentMax. A planet never heard from is not quiet,
 // it is new: every league starts that way, and warning about it would make the

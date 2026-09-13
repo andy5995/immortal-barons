@@ -107,6 +107,9 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	w.ExportLeagueConfig()
 	w.ExportBulletins(leagueBulletins)
 	w.PingTravelTimes()
+	// After the inbound packets, so a board that answered on this very run is
+	// never reported as quiet.
+	w.NoteSilentLinks(time.Now())
 	w.ExportAnnihilatorStatus()
 	w.StampOutbox()
 	run.Forwarded = len(w.Transit)

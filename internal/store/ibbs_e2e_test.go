@@ -5,7 +5,10 @@ import (
 	"crypto/rand"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -434,5 +437,63 @@ func TestOnlyANewFaultRaisesTheAlarm(t *testing.T) {
 	}
 	if len(run.NewFaults) != 0 {
 		t.Errorf("an unchanged fault raised the alarm again: %v", run.NewFaults)
+	}
+}
+
+// A board that has simply stopped sending reaches the sysop through the run's
+// own output, counted once rather than once per run. Nothing else catches this:
+// a transport fault is a packet that ARRIVED and could not be read, so a board
+// sending nothing at all produces none and silence reads as health.
+func TestASilentBoardReachesTheSysopThroughTheRun(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "The Eclipse"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	a := newBoard(t, filepath.Join(dir, "a"), "Nova Hub", roster)
+	b := newBoard(t, filepath.Join(dir, "b"), "The Eclipse", roster)
+	a.w.Config.DataDir, b.w.Config.DataDir = filepath.Join(dir, "a"), filepath.Join(dir, "b")
+
+	// They talk once, so the link is known to have worked — a board never heard
+	// from is new rather than quiet and is deliberately not reported.
+	b.run(t)
+	deliver(t, b, a)
+	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+		t.Fatal(err)
+	}
+	if a.w.LinkSilentDays("The Eclipse", time.Now()) != 0 {
+		t.Fatal("the two boards did not actually exchange a packet")
+	}
+
+	// The Eclipse goes quiet. Backdate what Nova Hub last heard, which is what a
+	// week of its mailer not running looks like from here.
+	a.w.LastPacketFrom["The Eclipse"] = game.Recorded(time.Now().Add(-(game.LinkSilentAlarmDays + 1) * 24 * time.Hour))
+
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.ContainsFunc(run.Notices, func(n string) bool { return strings.Contains(n, "The Eclipse") }) {
+		t.Fatalf("the silent board was not reported to the sysop: %v", run.Notices)
+	}
+	if len(run.NewFaults) == 0 {
+		t.Error("the first run to notice the silence raised no alarm")
+	}
+
+	// Still quiet on the next run: still reported, no longer new — the count is a
+	// measure of how much is wrong, not of how often the step runs.
+	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.ContainsFunc(run.Notices, func(n string) bool { return strings.Contains(n, "The Eclipse") }) {
+		t.Error("a silence that persists stopped being reported")
+	}
+	if len(run.NewFaults) != 0 {
+		t.Errorf("the same silence raised the alarm again: %v", run.NewFaults)
 	}
 }

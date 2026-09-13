@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The planetary run tells the sysop when a board has stopped sending
   * Travel Times marks a figure nothing has refreshed lately, so a link that
     stopped delivering no longer reads as a fast one
   * Drawing a screen that only reads no longer rewrites the game file

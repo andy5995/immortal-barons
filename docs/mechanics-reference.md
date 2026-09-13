@@ -3738,6 +3738,22 @@ count, the day it started, and where to read them — only when there is somethi
 to report. The faults themselves stay in `planetary.log` and the run report,
 which a scheduled run throws away, which is why the count exists at all.
 
+**A board that has simply gone SILENT is one of those faults** — and it had to be
+added, because the tally could not see it. A fault is a packet that arrived and
+could not be read, so a board sending nothing at all produces none and silence
+reads as health. `NoteSilentLinks` runs each planetary step, after the inbound
+packets so a board that answered on that very run is never named, and raises one
+notice per board quiet longer than `LinkSilentAlarmDays`. The existing plumbing
+does the rest: `newNotices` counts it once when it first appears rather than once
+per run, and it keeps appearing in the log while it is true.
+
+`LinkSilentAlarmDays` (7) is deliberately longer than the `LinkSilentMax` (3) a
+player's warning uses. Being wrong at a player costs a needless caution about a
+message that may sit a while; being wrong at a sysop puts noise in the one
+channel that is supposed to mean something broke, and a board polling every few
+days is a setup rather than a fault. A board never heard from is not reported
+either way — that is every league before its first exchange.
+
 The player's half is about THEIR action, never the board's health. Picking a
 planet nothing has come back from in more than `LinkSilentMax` days prints a
 warning at the prompt, before the turn is spent. Deliberately not a refusal —

@@ -3,6 +3,7 @@ package game
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 // The routing tree from BRE's own documentation (docs/bre.doc, "Host Routing
@@ -285,5 +286,56 @@ func TestTheOutboxBackstopSparesAnUnrosteredBoard(t *testing.T) {
 
 	if len(w.Outbox) != 1 || len(w.SysopNotices) != 0 {
 		t.Errorf("Outbox = %+v, notices = %q; the backstop stranded an unrostered board", w.Outbox, w.SysopNotices)
+	}
+}
+
+// A board that has stopped answering has to reach the SYSOP, who otherwise
+// meets it only by opening a report they have no reason to suspect. The
+// transport fault counter cannot see it: a fault there is a packet that arrived
+// and could not be read, so a board sending nothing produces none and silence
+// reads as health.
+func TestASilentBoardIsReportedToTheSysop(t *testing.T) {
+	now := time.Date(2026, 9, 12, 12, 0, 0, 0, time.UTC)
+	w := routingWorld(1)
+	w.LastPacketFrom = map[string]string{
+		planetName(2): Recorded(now.Add(-(LinkSilentAlarmDays + 2) * 24 * time.Hour)),
+		planetName(3): Recorded(now.Add(-time.Hour)),
+		// planetName(4) has never been heard from at all.
+	}
+
+	w.NoteSilentLinks(now)
+
+	joined := strings.Join(w.SysopNotices, "\n")
+	if !strings.Contains(joined, planetName(2)) {
+		t.Errorf("a board silent for %d days was not reported:\n%s", LinkSilentAlarmDays+2, joined)
+	}
+	if !strings.Contains(joined, "9 days") {
+		t.Errorf("the notice should say how long the silence has run:\n%s", joined)
+	}
+	if strings.Contains(joined, planetName(3)) {
+		t.Errorf("a board that answered an hour ago was reported quiet:\n%s", joined)
+	}
+	// Never heard from is every league before its first exchange; a notice on
+	// each fresh setup teaches the sysop to ignore this one.
+	if strings.Contains(joined, planetName(4)) {
+		t.Errorf("a board never heard from was reported quiet:\n%s", joined)
+	}
+}
+
+// The sysop's threshold is deliberately longer than the one a player addressing
+// the planet sees: a link that polls every few days works, and a notice that
+// fires on it is noise in the channel that is supposed to mean something broke.
+func TestTheSysopAlarmIsSlowerThanThePlayerWarning(t *testing.T) {
+	now := time.Date(2026, 9, 12, 12, 0, 0, 0, time.UTC)
+	w := routingWorld(1)
+	quiet := LinkSilentMax + 1 // past the player's warning, inside the sysop's
+	w.LastPacketFrom = map[string]string{planetName(2): Recorded(now.Add(-time.Duration(quiet) * 24 * time.Hour))}
+
+	if !w.LinkQuiet(planetName(2), now) {
+		t.Fatalf("%d days should already warn a player", quiet)
+	}
+	w.NoteSilentLinks(now)
+	if len(w.SysopNotices) != 0 {
+		t.Errorf("the sysop was alarmed at %d days:\n%s", quiet, strings.Join(w.SysopNotices, "\n"))
 	}
 }
