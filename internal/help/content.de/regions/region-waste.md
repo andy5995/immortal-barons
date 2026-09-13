@@ -8,7 +8,7 @@ title: Ödland
 # Ödlandregionen
 
 Ödland ist Land, das ein nuklearer oder chemischer Schlag verwüstet hat. Sie
-können es weder kaufen noch verkaufen — ein Feind schenkt es Ihnen.
+können es weder kaufen noch verkaufen - ein Feind schenkt es Ihnen.
 
 Ödland bleibt in Ihren Büchern. Es zählt zu Ihrem Gebiet, kostet denselben
 Unterhalt wie jede andere Region und bringt Ihnen nichts. Ein Reich, das

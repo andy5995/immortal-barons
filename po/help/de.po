@@ -969,12 +969,12 @@ msgstr ""
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:16
 msgid "Deposit — move gold from your treasury into the bank."
-msgstr "Einzahlen — Gold aus Ihrer Schatzkammer auf die Bank überweisen."
+msgstr "Einzahlen - Gold aus Ihrer Schatzkammer auf die Bank überweisen."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:16
 msgid "Withdraw — move gold from the bank back to your treasury."
-msgstr "Abheben — Gold von der Bank zurück in Ihre Schatzkammer holen."
+msgstr "Abheben - Gold von der Bank zurück in Ihre Schatzkammer holen."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:16
@@ -1911,7 +1911,7 @@ msgid ""
 "Group Attack — several rulers on your board join one strike against a "
 "distant enemy. The gains are shared among those who take part."
 msgstr ""
-"Gruppenangriff — mehrere Herrscher Ihres Boards schließen sich zu einem "
+"Gruppenangriff - mehrere Herrscher Ihres Boards schließen sich zu einem "
 "Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag "
 "geteilt."
 
@@ -1926,7 +1926,7 @@ msgstr ""
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
 msgid "IP Scores — see how the boards rank against each other."
-msgstr "IP-Punkte — sehen, wie die Boards zueinander stehen."
+msgstr "IP-Punkte - sehen, wie die Boards zueinander stehen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
@@ -2611,7 +2611,7 @@ msgid ""
 "Agents are your spies. They carry out covert operations — spying, sabotage, "
 "bombing enemy targets, bribery, and more."
 msgstr ""
-"Agenten sind Ihre Spione. Sie führen verdeckte Operationen aus — Spionage, "
+"Agenten sind Ihre Spione. Sie führen verdeckte Operationen aus - Spionage, "
 "Sabotage, Bombardierung feindlicher Ziele, Bestechung und mehr."
 
 #. type: Plain text
@@ -2627,7 +2627,7 @@ msgstr ""
 "Agenten sind das, was Sie ausgeben, nicht das, womit Sie gewinnen. Jede "
 "Operation braucht einen, und eine gescheiterte Operation kostet ihn. Für "
 "sich genommen ändert die Zahl Ihrer Agenten Ihre Erfolgsaussicht nicht, und "
-"die des Ziels ebenso wenig — was sie ändert, steht im Thema Verdeckte "
+"die des Ziels ebenso wenig - was sie ändert, steht im Thema Verdeckte "
 "Operationen. Ins Gewicht fällt die Zahl neben einem Geheimdienstbündnis oder "
 "einem Abkommen zur Terrorabwehr, die einer Seite der Rechnung die Agenten "
 "eines Verbündeten leihen."
@@ -2659,7 +2659,7 @@ msgid ""
 "carry payloads."
 msgstr ""
 "Bomber sind Trägerflugzeuge. Sie haben keine eigene Angriffs- oder "
-"Verteidigungsstärke — Angriff 0 und Verteidigung 0 — und ihre einzige "
+"Verteidigungsstärke - Angriff 0 und Verteidigung 0 - und ihre einzige "
 "Aufgabe ist es, Nutzlasten zu tragen."
 
 #. type: Plain text
@@ -2778,7 +2778,7 @@ msgid ""
 "much your tanks add to both attack and defense. Enemies can bomb your "
 "HeadQuarters with covert operations to weaken your tanks."
 msgstr ""
-"Während es gebaut wird — und noch mehr, sobald es fertig ist — erhöht es, "
+"Während es gebaut wird - und noch mehr, sobald es fertig ist - erhöht es, "
 "was Ihre Panzer zu Angriff und Verteidigung beitragen. Feinde können Ihr "
 "Hauptquartier mit verdeckten Operationen bombardieren, um Ihre Panzer zu "
 "schwächen."
@@ -2835,7 +2835,7 @@ msgid ""
 "jets attacking on its own planet."
 msgstr ""
 "Ein feindlicher SDI-Schild senkt die Angriffsstärke Ihrer Jets, aber nur, "
-"wenn Sie einen benannten Baron auf einem anderen Planeten angreifen — gegen "
+"wenn Sie einen benannten Baron auf einem anderen Planeten angreifen - gegen "
 "Jets, die auf dem eigenen Planeten angreifen, richtet ein Schild nichts aus."
 
 #. type: Plain text
@@ -2906,7 +2906,7 @@ msgid ""
 "They fight on both attack and defense, with an offense of 1 and a defense of "
 "1."
 msgstr ""
-"Soldaten sind Ihre einfachen Kämpfer — die günstigste und schwächste "
+"Soldaten sind Ihre einfachen Kämpfer - die günstigste und schwächste "
 "Kampfeinheit. Sie kämpfen im Angriff wie in der Verteidigung, mit Angriff 1 "
 "und Verteidigung 1."
 
@@ -2970,7 +2970,7 @@ msgid ""
 "have a defense of 2 and an offense of 0, which is about twice as strong on "
 "defense as a trooper."
 msgstr ""
-"Türme sind eine reine Verteidigungseinheit — das defensive Gegenstück zu "
+"Türme sind eine reine Verteidigungseinheit - das defensive Gegenstück zu "
 "Jets. Sie haben Verteidigung 2 und Angriff 0, sind in der Verteidigung also "
 "etwa doppelt so stark wie ein Soldat."
 
@@ -2982,7 +2982,7 @@ msgid ""
 "nuclear, chemical or biological alike."
 msgstr ""
 "Türme schießen angreifende Jets ab, zerstören angreifende Panzer und töten "
-"angreifende Truppen. Die Raketen eines Nachbarn halten sie nicht auf — das "
+"angreifende Truppen. Die Raketen eines Nachbarn halten sie nicht auf - das "
 "tut nichts, weder bei nuklearen noch bei chemischen oder biologischen."
 
 #. type: Plain text
@@ -3000,7 +3000,7 @@ msgid ""
 "Some strategy guides call this unit a \"Missile Base.\" It is the same "
 "defensive unit."
 msgstr ""
-"Manche Strategieführer nennen diese Einheit „Raketenbasis“. Es ist dieselbe "
+"Manche Strategieführer nennen diese Einheit \"Raketenbasis\". Es ist dieselbe "
 "Verteidigungseinheit."
 
 #. type: Plain text
@@ -3357,7 +3357,7 @@ msgid ""
 "you cannot sell it — an enemy gives it to you."
 msgstr ""
 "Ödland ist Land, das ein nuklearer oder chemischer Schlag verwüstet hat. Sie "
-"können es weder kaufen noch verkaufen — ein Feind schenkt es Ihnen."
+"können es weder kaufen noch verkaufen - ein Feind schenkt es Ihnen."
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:16

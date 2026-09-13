@@ -10,8 +10,8 @@ title: Bankwesen
 Die Bank verwahrt Ihr Gold sicher und wirft Zinsen ab. Gold auf der Bank
 kann nicht von Piraten oder Angriffen geraubt werden.
 
-- Einzahlen — Gold aus Ihrer Schatzkammer auf die Bank überweisen.
-- Abheben — Gold von der Bank zurück in Ihre Schatzkammer holen.
+- Einzahlen - Gold aus Ihrer Schatzkammer auf die Bank überweisen.
+- Abheben - Gold von der Bank zurück in Ihre Schatzkammer holen.
 - Finanzhilfe / Kredite - Gold leihen oder zurückzahlen, was Sie bereits
   schulden.
 

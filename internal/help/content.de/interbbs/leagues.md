@@ -10,13 +10,13 @@ title: 'Ligen und Inter-BBS-Spiel'
 Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
 über die lokalen Herrscher zum Sieg über andere Planeten.
 
-- Gruppenangriff — mehrere Herrscher Ihres Boards schließen sich zu einem
+- Gruppenangriff - mehrere Herrscher Ihres Boards schließen sich zu einem
   Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag
   geteilt.
 - Indiv. Attack Force — your own strike against one named baron. You keep
   the whole take rather than sharing it, and you choose how to press the
   attack (see Attack Types).
-- IP-Punkte — sehen, wie die Boards zueinander stehen.
+- IP-Punkte - sehen, wie die Boards zueinander stehen.
 - Send Message — write to another planet. Name the planet, then pick which
   barons on it should read the letter, using the same `Send to:` list the
   Diplomacy and message screens use here: a letter marks a baron, the same

@@ -24,7 +24,7 @@ sollen. Sagen Sie ja, dann kauft dasselbe Gold beides: Sie erhalten weniger
 Jets als bestellt, aber jeder einzelne kann fliegen.
 
 Ein feindlicher SDI-Schild senkt die Angriffsstärke Ihrer Jets, aber nur,
-wenn Sie einen benannten Baron auf einem anderen Planeten angreifen — gegen
+wenn Sie einen benannten Baron auf einem anderen Planeten angreifen - gegen
 Jets, die auf dem eigenen Planeten angreifen, richtet ein Schild nichts aus.
 
 Jets gehen in der Schlacht verloren wie jede andere Einheit. Feindliche

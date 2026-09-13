@@ -7,7 +7,7 @@ title: Soldaten
 
 # Soldaten
 
-Soldaten sind Ihre einfachen Kämpfer — die günstigste und schwächste
+Soldaten sind Ihre einfachen Kämpfer - die günstigste und schwächste
 Kampfeinheit. Sie kämpfen im Angriff wie in der Verteidigung, mit Angriff 1
 und Verteidigung 1.
 

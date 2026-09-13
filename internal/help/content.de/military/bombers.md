@@ -8,7 +8,7 @@ title: Bomber
 # Bomber
 
 Bomber sind Trägerflugzeuge. Sie haben keine eigene Angriffs- oder
-Verteidigungsstärke — Angriff 0 und Verteidigung 0 — und ihre einzige
+Verteidigungsstärke - Angriff 0 und Verteidigung 0 - und ihre einzige
 Aufgabe ist es, Nutzlasten zu tragen.
 
 Raketen und interplanetare Bombardierungen brauchen Bomber als Träger. Ohne
