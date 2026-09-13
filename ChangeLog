@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * An interplanetary message that cannot be delivered comes back to the
+    sender with the reason, the date it was sent and who it was addressed to
   * Twelve help topics no longer describe mechanics the game has changed or
     never had
   * The Daily Bulletin's totals and the change beside them are measured at the
