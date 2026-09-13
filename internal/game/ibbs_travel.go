@@ -89,5 +89,30 @@ func (w *World) recordTravelTime(tc TimeCheck) {
 	if w.TravelTimes == nil {
 		w.TravelTimes = map[string]float64{}
 	}
+	if w.TravelSeen == nil {
+		w.TravelSeen = map[string]string{}
+	}
 	w.TravelTimes[tc.To] = (w.TravelTimes[tc.To] + TravelAvgNewWeight*elapsed) / TravelAvgDenom
+	// Stamped with the arrival, not with tc.Sent: the question the screen has to
+	// answer is how long ago this board last heard back, and on a link that has
+	// stopped those two are days apart.
+	w.TravelSeen[tc.To] = timeNow().Format(time.RFC3339)
+}
+
+// TravelAge is how long ago the last completed round trip to `board` came home,
+// and whether that is known at all. A board measured before the stamp was kept
+// reports ok=false rather than an invented age.
+func (w *World) TravelAge(board string) (age time.Duration, ok bool) {
+	seen, found := w.TravelSeen[board]
+	if !found {
+		return 0, false
+	}
+	at, err := time.Parse(time.RFC3339, seen)
+	if err != nil {
+		return 0, false
+	}
+	if d := timeNow().Sub(at); d > 0 {
+		return d, true
+	}
+	return 0, true
 }

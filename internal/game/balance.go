@@ -293,6 +293,12 @@ const (
 	// not a mechanic — the stored figure is unchanged.
 	TravelMinutesCutoff = 1.0 / 24        // days; under this the screen reads in minutes
 	TravelSecondsCutoff = 1.0 / (24 * 60) // days; under this the screen reads in seconds
+	// TravelStaleDays is how old the newest completed round trip may be before
+	// the screen says so. Probes go out once per game day, so a delivering link
+	// refreshes daily and two days means at least one exchange was missed
+	// entirely. IB's own: the original shows the average with no age at all, and
+	// a frozen figure reads exactly like a fast one.
+	TravelStaleDays = 2
 )
 
 // MaxCatchUpDays bounds how many missed game days one DailyMaintenance call

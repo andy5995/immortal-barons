@@ -159,3 +159,47 @@ func TestTravelProbesOverlapWhenTheRoundTripIsSlow(t *testing.T) {
 		t.Errorf("average after three overlapping round trips = %v days, want %v", got, want)
 	}
 }
+
+// A figure that nothing has refreshed has to be distinguishable from a fresh
+// one, which the average alone cannot do: it is a bare number that stays put
+// when the link stops delivering. The arrival is what is stamped, since the
+// question is how long ago this board last heard back.
+func TestTravelAgeIsTheTimeSinceTheEchoCameHome(t *testing.T) {
+	advance := holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	w := travelWorld("Nova Hub")
+	w.recordTravelTime(TimeCheck{From: "Nova Hub", To: "Nite Eyes", Sent: timeNow().Add(-time.Hour).Format(time.RFC3339)})
+
+	if age, ok := w.TravelAge("Nite Eyes"); !ok || age != 0 {
+		t.Fatalf("just measured: age %v ok %v, want 0 and known", age, ok)
+	}
+	// The link stops delivering. No echo comes home, so nothing updates — and
+	// the average is exactly as it was, which is the whole problem.
+	before := w.TravelTimes["Nite Eyes"]
+	advance(73 * time.Hour)
+	if w.TravelTimes["Nite Eyes"] != before {
+		t.Errorf("the average moved without an echo: %v -> %v", before, w.TravelTimes["Nite Eyes"])
+	}
+	age, ok := w.TravelAge("Nite Eyes")
+	if !ok {
+		t.Fatal("the age of a measured board should be known")
+	}
+	if got := int(age.Hours()); got != 73 {
+		t.Errorf("age = %d hours, want 73", got)
+	}
+}
+
+// A world saved before the stamp was kept has the average and no arrival time.
+// It reports unknown rather than an invented age, so the screen says nothing
+// instead of calling a figure of unknown vintage fresh or stale.
+func TestTravelAgeIsUnknownForAWorldSavedBeforeItWasKept(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	w := travelWorld("Nova Hub")
+	w.TravelTimes = map[string]float64{"Nite Eyes": 0.5}
+
+	if age, ok := w.TravelAge("Nite Eyes"); ok || age != 0 {
+		t.Errorf("age %v ok %v, want unknown", age, ok)
+	}
+	if _, ok := w.TravelAge("Never Heard Of"); ok {
+		t.Error("a board with no measurement at all should report unknown too")
+	}
+}

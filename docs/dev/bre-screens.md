@@ -1369,6 +1369,24 @@ measured case only; both belong in the same column. (`31` red on black measures
 2.7:1 on the VGA palette, under the 4.5:1 minimum — IB should not copy the
 color for its own "no data" state, and the word carries the meaning without it.)
 
+**IB adds the measurement's AGE, which the original has nowhere.** The stored
+average is a bare number with no timestamp in either game, so a link that stops
+delivering leaves its last good figure on the screen indefinitely — a board read
+`40 minutes` through a three-day outage, which is the one thing this screen
+exists to rule out. IB stamps each arrival (`World.TravelSeen`) and appends
+`(N days old)` past `TravelStaleDays`:
+
+```
+Nite Eyes                     40 minutes  (3 days old)
+Fresh Board                   2 minutes
+Never Answered                No Data
+```
+
+It is words rather than a color, for the reason the red above is called out: the
+note has to survive a monochrome terminal, and how old is what the reader needs,
+which no color carries. A figure whose arrival was never stamped — a world saved
+before this was kept — is left unmarked rather than guessed at either way.
+
 **SDI Program** (A):
 ```
 Total Funding: 0,000 Gold

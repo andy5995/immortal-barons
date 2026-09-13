@@ -4541,6 +4541,20 @@ answers in seconds, where BRE's format prints `0.00 hours` and reads as "never
 measured". The stored figure and the averaging are unchanged; this is the
 display only, and it is a deliberate readability divergence.
 
+**IB also shows how old each figure is, which neither game's stored average
+carries.** The average is written only when a probe completes the round trip
+home, so a link that stops delivering freezes the screen at its last good
+measurement — indistinguishable from a fast one, and the daily probe does not
+help, since it only queues into an outbox that is not draining. Nothing else
+catches it either: the transport fault counter counts packets that ARRIVED and
+could not be read, so a board receiving nothing at all reports zero faults. A
+board showed `40 minutes` through a three-day outage on that combination.
+`World.TravelSeen` stamps each arrival and the screen appends `(N days old)`
+once the newest completed trip is older than `TravelStaleDays` (2 — probes go
+out once per game day, so two days means an exchange was missed entirely). A
+figure carried over from a world saved before the stamp existed is left
+unmarked, rather than being called fresh or stale on no evidence.
+
 IB implements the mechanic as described. Constants: `TravelAvgNewWeight`,
 `TravelAvgDenom`, `TravelHoursCutoff` in `balance*.go`. The probes ride along with
 whatever else the inter-BBS run is sending, once per game day

@@ -29,19 +29,27 @@ msgstr ""
 msgid "##"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:76
+#: internal/menu/actions_interbbs.go:87
+msgid "%.0f days"
+msgstr ""
+
+#: internal/menu/actions_interbbs.go:89
+msgid "%.0f hours"
+msgstr ""
+
+#: internal/menu/actions_interbbs.go:113
 msgid "%.0f minutes"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:74
+#: internal/menu/actions_interbbs.go:111
 msgid "%.0f seconds"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:80
+#: internal/menu/actions_interbbs.go:117
 msgid "%.2f days"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:78
+#: internal/menu/actions_interbbs.go:115
 msgid "%.2f hours"
 msgstr ""
 
@@ -237,6 +245,10 @@ msgstr ""
 msgid "(%d times)"
 msgstr ""
 
+#: internal/menu/actions_interbbs.go:78
+msgid "(%s old)"
+msgstr ""
+
 #: internal/menu/actions_industry.go:80
 msgid "(%s per year)"
 msgstr ""
@@ -249,7 +261,7 @@ msgstr ""
 msgid "(not enough carriers)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:121
+#: internal/menu/actions_interbbs.go:158
 msgid "(your current vote)"
 msgstr ""
 
@@ -265,15 +277,23 @@ msgstr ""
 msgid "/-Command?"
 msgstr ""
 
+#: internal/menu/actions_interbbs.go:87
+msgid "1 day"
+msgstr ""
+
 #: internal/menu/actions_info.go:342
 msgid "1 fault"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:76
+#: internal/menu/actions_interbbs.go:89
+msgid "1 hour"
+msgstr ""
+
+#: internal/menu/actions_interbbs.go:113
 msgid "1 minute"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:74
+#: internal/menu/actions_interbbs.go:111
 msgid "1 second"
 msgstr ""
 
@@ -481,7 +501,7 @@ msgstr ""
 msgid "Attack Type"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:188
+#: internal/menu/actions_interbbs.go:225
 msgid "Attack party #%d has been called off and its forces sent home."
 msgstr ""
 
@@ -505,7 +525,7 @@ msgstr ""
 msgid "Auto-Pay Maintenance"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:45
+#: internal/menu/actions_interbbs.go:49
 msgid "Average Turn Around Times to All BBSes"
 msgstr ""
 
@@ -641,7 +661,7 @@ msgstr ""
 msgid "Call Off Attack Party"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:176
+#: internal/menu/actions_interbbs.go:213
 msgid "Call it off?"
 msgstr ""
 
@@ -913,7 +933,7 @@ msgstr ""
 msgid "Dismantle Gooie"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:225
+#: internal/menu/actions_interbbs.go:262
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr ""
 
@@ -1001,7 +1021,7 @@ msgstr ""
 msgid "Entry"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:175
+#: internal/menu/actions_interbbs.go:212
 msgid "Every contributor gets their forces back. The gold they spent is gone."
 msgstr ""
 
@@ -1473,7 +1493,7 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:72
+#: internal/menu/actions_interbbs.go:109
 msgid "No Data"
 msgstr ""
 
@@ -1589,7 +1609,7 @@ msgstr ""
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:209
+#: internal/menu/actions_interbbs.go:246
 msgid "Only the BBS Coordinator may stand the weapon down."
 msgstr ""
 
@@ -2053,7 +2073,7 @@ msgstr ""
 msgid "Spy on Relations"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:226
+#: internal/menu/actions_interbbs.go:263
 msgid "Stand it down?"
 msgstr ""
 
@@ -2169,11 +2189,11 @@ msgstr ""
 msgid "The Gooie Kablooie has already launched."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:221
+#: internal/menu/actions_interbbs.go:258
 msgid "The Gooie Kablooie has already launched. Nothing can call it back."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:238
+#: internal/menu/actions_interbbs.go:275
 msgid "The Gooie Kablooie has been dismantled."
 msgstr ""
 
@@ -2181,7 +2201,7 @@ msgstr ""
 msgid "The Gooie Kablooie has not landed yet. Nothing can reach it up there."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:224
+#: internal/menu/actions_interbbs.go:261
 msgid "The Gooie Kablooie is aimed at %s."
 msgstr ""
 
@@ -2217,7 +2237,7 @@ msgstr ""
 msgid "The S3-Sabre is disabled."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:134
+#: internal/menu/actions_interbbs.go:171
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
@@ -2273,7 +2293,7 @@ msgstr ""
 msgid "Their losses so far: %d troopers, %d turrets, %d tanks, %d jets"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:130
+#: internal/menu/actions_interbbs.go:167
 msgid "There are no barons to vote for yet."
 msgstr ""
 
@@ -2337,7 +2357,7 @@ msgstr ""
 msgid "This planet is already building a Gooie Kablooie."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:217
+#: internal/menu/actions_interbbs.go:254
 msgid "This planet is not building a Gooie Kablooie."
 msgstr ""
 
@@ -2557,7 +2577,7 @@ msgstr ""
 msgid "Visit the bank"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:140
+#: internal/menu/actions_interbbs.go:177
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
@@ -2649,7 +2669,7 @@ msgstr ""
 msgid "While you were at the menus, this has happened:"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:136
+#: internal/menu/actions_interbbs.go:173
 msgid "Who should be the BBS Coordinator?"
 msgstr ""
 
@@ -3109,7 +3129,7 @@ msgstr ""
 msgid "Your vote for BBS Coordinator is %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:152
+#: internal/menu/actions_interbbs.go:189
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 

@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Travel Times marks a figure nothing has refreshed lately, so a link that
+    stopped delivering no longer reads as a fast one
   * Drawing a screen that only reads no longer rewrites the game file
   * New players get a Welcome menu before naming their realm, with the game
     setup, instructions, help and scores on it

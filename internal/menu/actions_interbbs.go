@@ -31,11 +31,15 @@ func travelTimes(s session.Session, w *ctx) Result {
 	type planet struct {
 		name string
 		days float64
+		age  time.Duration
+		aged bool
 	}
 	var planets []planet
 	w.Read(func() {
 		for _, name := range w.KnownBoards() {
-			planets = append(planets, planet{name, w.TravelTimes[name]})
+			p := planet{name: name, days: w.TravelTimes[name]}
+			p.age, p.aged = w.TravelAge(name)
+			planets = append(planets, p)
 		}
 	})
 	if noPlanets(s, len(planets)) {
@@ -46,11 +50,44 @@ func travelTimes(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "%s\n", rule)
 	for _, p := range planets {
 		label, col := turnaroundLabel(s, p.days)
-		fmt.Fprintf(s, "%s%-*s%s%s%s\n", ansi.FgWhite, travelNameWidth, fitColumn(w.Term, p.name, travelNameWidth-1), col, label, ansi.Reset)
+		fmt.Fprintf(s, "%s%-*s%s%s%s%s\n", ansi.FgWhite, travelNameWidth, fitColumn(w.Term, p.name, travelNameWidth-1),
+			col, label, ansi.Reset, staleNote(s, p.days, p.age, p.aged))
 	}
 	fmt.Fprintf(s, "%s\n", rule)
 	pause(s)
 	return Stay
+}
+
+// staleNote marks a figure that nothing has refreshed lately. The average
+// carries no age of its own, so a board whose packets stopped moving keeps
+// showing its last good round trip — reading exactly like a fast link, which is
+// the one thing this screen exists to tell apart. IB's own: the original prints
+// the figure alone.
+//
+// It is words rather than a color, because a color alone says nothing to a
+// reader on a monochrome terminal or one who cannot tell this red from that
+// green — and because the useful part is HOW old, which no color can carry.
+func staleNote(s session.Session, days float64, age time.Duration, known bool) string {
+	if days <= 0 || !known || age < game.TravelStaleDays*24*time.Hour {
+		return ""
+	}
+	// Kept short deliberately: the row already spends 30 columns on the name and
+	// up to twelve on the figure, and a translation of this runs longer than the
+	// English, so a wordier note would push the line past the 80th column.
+	return fmt.Sprintf("%s  %s%s", ansi.FgBrightYellow,
+		fmt.Sprintf(tr(s, "(%s old)"), roughAge(s, age)), ansi.Reset)
+}
+
+// roughAge renders a span in the largest unit that still says something useful:
+// a link measured in seconds is out of date after hours, and one out of date by
+// weeks does not need the hours spelled out.
+func roughAge(s session.Session, d time.Duration) string {
+	switch days := int(d.Hours() / 24); {
+	case days >= 1:
+		return plural(s, float64(days), "1 day", "%.0f days")
+	default:
+		return plural(s, math.Round(d.Hours()), "1 hour", "%.0f hours")
+	}
 }
 
 // turnaroundLabel renders one average round trip and its color. BRE quantizes

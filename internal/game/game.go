@@ -230,6 +230,13 @@ type World struct {
 	// ibbs_travel.go.
 	TravelTimes    map[string]float64
 	LastTravelPing string
+	// TravelSeen is when each board's last probe came home, RFC3339. The average
+	// above carries no age of its own, so a link that stops delivering leaves its
+	// last good figure on the screen forever, reading as a healthy transport —
+	// which is what happened to a board whose packets had not moved for three
+	// days. Absent for a board measured before this was kept, which is why the
+	// screen says nothing rather than guessing at an age.
+	TravelSeen map[string]string `json:",omitempty"`
 
 	// Market holds every empire's listings on the general Trading Market (#17);
 	// listed goods are escrowed out of the seller's inventory. MarketProceeds
