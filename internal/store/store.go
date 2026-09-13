@@ -86,11 +86,27 @@ func Load(cfg game.Config) (*game.World, error) {
 		return nil, err
 	}
 	w := game.NewWorld(cfg) // seeds rng; JSON overwrites exported fields
+	clearRandomSeeded(w)
 	if err := json.Unmarshal(data, w); err != nil {
 		return nil, err
 	}
 	repair(w, cfg)
 	return w, nil
+}
+
+// clearRandomSeeded empties the world fields that a FRESH game fills with random
+// values, so that the save file is what decides whether they are there. It runs
+// on the world the JSON is about to be unmarshalled into, which is a fresh
+// NewWorld (or a previously loaded world, on reload) — and `encoding/json`
+// leaves a field alone when the document has no key for it, so without this a
+// save written before the field existed silently inherits the fresh game's roll,
+// a DIFFERENT one on every load, never saved by a read-only transaction. The
+// nine pirate factions are the case that bit: a pre-factions save showed a new
+// hoard on the Attack Pirates screen every time it was drawn. The matching
+// backfill is repair's EnsurePirates, which puts the names back without a hoard
+// because such a game is already under way.
+func clearRandomSeeded(w *game.World) {
+	w.Pirates = nil
 }
 
 // repair re-runs the migration/normalization Load applies after unmarshalling:

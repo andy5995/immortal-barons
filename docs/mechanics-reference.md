@@ -806,7 +806,9 @@ instruction's modrm. Six of the seven award sites reach it with a separate
   the only limits (verified 2026-09-05).
 - **Attack pirates** — the nine pirate factions are living raiders, not a
   fixed difficulty ladder: their strength is random (any faction can be the
-  strongest). Their **names are IB-original** (BRE's coined names are its own
+  strongest). **They START with a hoard**, so raiding one pays from the first
+  turn rather than only after players have been robbed for days — see "The
+  starting hoard" below. Their **names are IB-original** (BRE's coined names are its own
   creative work). Pirates raid players at random; the rate and the retry are
   binary-verified and given under "How often" below. (This paragraph used to
   open by stating IB's old flat 20%-plus-5% guess as though it were current,
@@ -822,6 +824,50 @@ instruction's modrm. Six of the seven award sites reach it with a separate
   two things, which is this draw and not a display limit. **Faces 11-15 read the
   victim's Trading Market listing instead of its inventory** — see the escrow
   entry below.
+
+  **The starting hoard (BINARY-VERIFIED).** A `BRE RESET` leaves all nine
+  factions holding stock, and IB seeded them empty until 2026-09-12 — which made
+  a new league's Attack Pirates screen worthless, since a faction with nothing
+  stolen has nothing to take back. The figures come from **54 faction records
+  across six live resets** (`cap/pirate-seed-20260912*.cap`), read out of
+  `game.dat`, where the table sits in the 541 bytes past the 25 empire slots —
+  base 25, stride 57, eight int32 fields, the sixth always zero (the slot a
+  faction never holds). In memory it is `DS:0x7940`, same stride.
+
+  | field | generator | read at |
+  | --- | --- | --- |
+  | troopers | `Random(7000)` | `mov ax,0x1b58` |
+  | jets | `Random(4000)` | `mov ax,0x0fa0` |
+  | turrets | `Random(7000)` | `mov ax,0x1b58` |
+  | tanks | `Random(9000)` | `mov ax,0x2328` |
+  | regions | `Random(75)` | `mov ax,0x004b` |
+  | (unused) | always 0 | `xor ax,ax` into +0x2d |
+  | agents | **50 + `Random(1000)`** | `mov ax,0x3e8` then `add ax,0x32` |
+  | gold | **500,000 + `Random(300)` × `Random(300)`** | two draws, `mul dx`, `add ax,0xa120` / `adc dx,0x7` |
+
+  The loop runs nine times (`cmp word [bp-0x2],0x9`), one per faction.
+
+  **Why a static search could not find this, which is worth keeping.** No scan
+  locates the seeder: not the pointer form (`add di,0x794x`), not direct or
+  immediate stores, not even every occurrence of the raw displacement bytes
+  anywhere in either binary. That search returns nine references in
+  `launch_pirate_raid` and three in `resolve_pirate_attack` and nothing else, and
+  IB's own code asserted "nothing seeds a faction" on the strength of it. The
+  reset builds the records at a DIFFERENT address and writes them straight to
+  `DATA\GAME.TMP`, so the address a scan looks for is never touched at reset.
+  **A search that comes up empty bounds what was searched, not what exists.**
+
+  What did find it: a write watchpoint under a DOSBox built with the heavy
+  debugger. `BPINT 21 40` on the DOS write showed the file being composed —
+  2,489 bytes of header, then 26,725 of empire slots, then **513 = 9 × 57** from
+  `DS:0x7960` — and a `BPM` on that region caught the seeder mid-write
+  (`1398:797E - 00 -> 03`). The recipe is in the `bre-gather` skill.
+
+  Fitting 54 live samples had got five of the seven right and both of the others
+  wrong in a way the samples could not show: agents looked like a flat
+  `Random(1050)` because its floor of 50 is invisible in a range, and gold's
+  product-of-two-draws looked like a wide flat roll fitted to the mean. A
+  distribution fit can match an average and still be the wrong mechanism.
 
   **How often**: the roll is `Random(20) <= min(6, regions/1200 + 2)`
   (`0x35db5`), so exposure RISES WITH THE REALM — 3-in-20 for a small realm up

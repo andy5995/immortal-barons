@@ -739,3 +739,72 @@ arithmetic was wrong, and its caller list said so immediately.
 price is `0x384 + climb x (owned + 1/2)`, and the half is why a base sampled at
 the un-surcharged climb (900 + 33/2 = 917) is exactly right there and 17 gold
 short at the surcharged one. A constant fitted at one climb is not a constant.
+
+
+## The heavy debugger actually works — build it, it is three minutes
+
+`bre-disasm.py debugger --run` wants a `dosbox` binary with the HEAVY debugger,
+and no packaged build has one: Arch's `dosbox`, the AUR `dosbox-x` (its PKGBUILD
+calls upstream's plain `./build`) and the dosbox-x AppImage all ship without it.
+The AppImage accepts `-break-start` and does nothing, which reads like the
+debugger failing rather than being absent — check with
+`strings <binary> | grep -c BPM` before believing either.
+
+Build it from Andy's own 0.74-3 tree with
+`scripts/build-dosbox-debugger.sh` (this project's Claude scripts dir); the
+binary lands at `~/src/dosbox-0.74-3-debug/dosbox-debug`. One build fix is
+baked in: DOSBox 0.74 reads `WINDOW`'s internals, which ncurses 6 hides, so it
+needs `-DNCURSES_OPAQUE=0` **at configure time** — putting it on the make
+command line wipes the SDL include path configure found.
+
+Driving it headlessly, all three proven 2026-09-12:
+
+- **The debugger renders to the launching TERMINAL** (Register / Data / Code /
+  Output panes), so run it inside tmux and scrape the pane as text — the same
+  trick that makes dosemu2 usable, and the reason this beats dosbox-x.
+- **The DOS screen is the SDL window**, on an Xvfb display. Type into it with
+  `xdotool key --window $W`, and READ it with `import -window $W shot.png` —
+  screenshots are how you see the DOS side, since only the debugger is text.
+- **Keys go to different places.** DOS input goes to the SDL window via xdotool;
+  debugger commands go to the tmux pane via `send-keys`. F5 (continue) is a key
+  in the SDL window's sense but must reach the curses console, and typed
+  debugger commands proved intermittent — `D seg:off` and `BPM seg:off` took,
+  later commands did not. Re-break with `alt+Pause` before each one and verify
+  the `DEBUG:` line appeared rather than assuming it did.
+
+**Chain the two breakpoints: DOS write first, memory watchpoint second.** This
+is what read BRE's pirate seeds after every static search failed, and it
+generalises to anything composed on its way to disk.
+
+`BPM` on the address the RUNNING game uses found nothing — a whole `BRE RESET`
+seeded nine factions without tripping it, because the reset builds the records
+somewhere else and writes them straight to `DATA\GAME.TMP`. So find the buffer
+first:
+
+1. `BPINT 21 40` breaks on every DOS write. Walk them with F5 and read `CX`
+   (length) and `DS:DX` (buffer) at each: the file is composed in pieces, and
+   the piece you want is the one whose LENGTH matches the structure —
+   513 = 9 x 57 for nine 57-byte faction records, against 2,489 for the header
+   and 26,725 for the 25 empire slots.
+2. That buffer address IS where the values were built. `BPM` on it, re-run, and
+   the break lands in the seeder with the Code Overview showing the instruction
+   that wrote (`1398:797E - 00 -> 03`).
+3. Then find those bytes in `BRE.OVR` (`grep -abo` for the immediate sequence)
+   and disassemble it properly with this repo's tool, which is far easier to
+   read than scrolling the debugger.
+
+**A breakpoint is set for ONE process load.** Re-running the program may reload
+it, and a breakpoint set from the previous run points at whatever now occupies
+that memory. Break in during the run that matters, read `DS` there, and set the
+breakpoint then.
+
+**A leading Enter RESUMES execution — do not send one before a command.** The
+debugger's typed input looked intermittent for a whole session because of this:
+`alt+Pause` to break, then send the command directly. An `Enter` first restarts
+the machine, and every command after it goes nowhere. The tell is that the
+Output pane keeps scrolling while nothing you type is echoed.
+
+**Watch one byte that MUST change.** `BPM` reports old -> new, so it only fires
+on a change. Pick a byte certain to differ — a high byte of a large value — or
+zero the region first and watch any of it. A watchpoint on a byte that happens
+to be rewritten with the same value is indistinguishable from no write at all.

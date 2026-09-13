@@ -58,6 +58,34 @@ const (
 	// 0x3629c onward and 0x36a59 onward, each a min against a literal), which
 	// supersedes the earlier reading of the BRE.EXE table at 0x14ede: that
 	// table is some other set of limits, not these.
+	// Seeds for a new game. BINARY-VERIFIED, read from the seeding loop itself
+	// (`ovr_0571fe_entry_010a`, BRE.OVR 0x57320-0x57402: nine iterations, one
+	// Random per field, closed by `cmp word [bp-0x2],0x9`). Found with a write
+	// watchpoint during a live `BRE RESET`, after a static search for the table's
+	// writers came up empty -- the reset composes the records and then writes
+	// them to GAME.TMP, so nothing else ever references the address.
+	//
+	// This mattered because IB seeded NOTHING, so a new league's factions held
+	// nothing to steal back and raiding paid zero until players had been robbed
+	// for days. The original's factions are worth attacking from the first turn.
+	PirateSeedTroopersRoll = 7_000 // mov ax,0x1b58
+	PirateSeedJetsRoll     = 4_000 // mov ax,0x0fa0
+	PirateSeedTurretsRoll  = 7_000 // mov ax,0x1b58
+	PirateSeedTanksRoll    = 9_000 // mov ax,0x2328
+	PirateSeedRegionsRoll  = 75    // mov ax,0x004b
+	// Agents alone carry a floor: `call Random(1000)` then `add ax,0x32`, so the
+	// band is 50..1049 rather than 0..999. Fitting 54 samples read that as a flat
+	// Random(1050) -- close on the mean, wrong at both ends.
+	PirateSeedAgentsRoll = 1_000
+	PirateSeedAgentsBase = 50
+	// Gold is 500,000 plus the PRODUCT of two Random(300) draws
+	// (`mul dx` at +0x1ed, then `add ax,0xa120` / `adc dx,0x7`). A product of two
+	// uniforms is right-skewed, which is why 54 samples would not fit a flat roll
+	// -- median 14,073 against a mean of 18,891 -- and why the fitted constant was
+	// the wrong SHAPE even where it matched the average. Range 500,000..589,401.
+	PirateSeedGoldBase = 500_000
+	PirateSeedGoldRoll = 300 // ...drawn twice and multiplied
+
 	PirateCapGold     = 600_000_000 // binary (0x23c34600)
 	PirateCapRegions  = 300         // binary (0x12c, clamped at the end of every raid)
 	PirateCapAgents   = 200_000     // binary (0x30d40)

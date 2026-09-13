@@ -350,7 +350,14 @@ type World struct {
 	// names never perturbs the gameplay rng — seed-reproducible combat/events stay
 	// identical no matter how many names are drawn.
 	nameRng *rand.Rand
-	store   Store // transaction backend for With: in-memory (web) or file-per-action (door)
+	// setupRng is a THIRD stream, for one-time world setup that is random but not
+	// gameplay — currently the pirate factions' starting hoards. It is separate
+	// for nameRng's reason: seeding nine factions costs 72 draws, and taking them
+	// from the gameplay rng shifts every roll after it, so adding a setup step
+	// silently re-runs every fixed-seed test's trajectory. Three unrelated tests
+	// failed that way when the hoards were added.
+	setupRng *rand.Rand
+	store    Store // transaction backend for With: in-memory (web) or file-per-action (door)
 	// storeErr holds the first Transact this session could not commit. It is
 	// deliberately unexported and unserialized: it describes this process's
 	// failure to write the file, not anything about the world's own state.
@@ -369,7 +376,12 @@ func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano(
 func NewWorldSeed(cfg Config, seed int64) *World {
 	// nameRng is salted off the same seed so names are deterministic per seed yet
 	// draw from a stream independent of gameplay rng.
-	w := &World{Config: cfg, rng: rand.New(rand.NewSource(seed)), nameRng: rand.New(rand.NewSource(seed ^ 0x4149_6e61_6d65))}
+	w := &World{
+		Config:   cfg,
+		rng:      rand.New(rand.NewSource(seed)),
+		nameRng:  rand.New(rand.NewSource(seed ^ 0x4149_6e61_6d65)),
+		setupRng: rand.New(rand.NewSource(seed ^ 0x5365_7475_7021)),
+	}
 	w.store = &MemStore{w}
 	w.initFreshGame()
 	return w
@@ -447,7 +459,12 @@ func (w *World) initFreshGame() {
 	w.AutoPayMaint, w.AutoFeed = d.AutoPayMaint, d.AutoFeed
 	w.seedAIEmpires()
 	w.Pirates = nil
-	w.EnsurePirates() // a no-op when the sysop has turned pirates off
+	if w.Config.Pirates {
+		// seedPirates, not EnsurePirates: a FRESH game gets the starting hoard.
+		// EnsurePirates is the migration path for a save that predates the
+		// factions, and deliberately leaves an under-way game's pirates empty.
+		w.seedPirates()
+	}
 }
 
 // EnsureInvestRate repairs InvestRate after loading a save that predates

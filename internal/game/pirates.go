@@ -53,15 +53,34 @@ func (p *PirateFaction) Defense() int {
 	return p.LootTanks + p.LootTurrets/2 + p.LootTroopers/3
 }
 
-// seedPirates creates the nine factions EMPTY. Nothing in the original seeds a
-// faction with an army or with land: the only writes to its record anywhere in the
-// overlay are the raid-steal path and the raid-resolution path, so a faction
-// holds exactly what it has taken from players. A new game therefore opens with
-// nine factions that can rob you from day one and cannot yet defend themselves.
+// seedPirates creates the nine factions with a starting hoard, as the original
+// does -- so raiding one pays from the first turn rather than only after players
+// have been robbed for days.
+//
+// IB created them EMPTY until 2026-09-12, on the reasoning that the only writes
+// to a faction record anywhere in the overlay are the raid-steal and
+// raid-resolution paths. That search was sound and its conclusion wrong: the
+// reset composes the records and writes them straight to GAME.TMP, so nothing
+// else references the address a scan would look for. A search that comes up
+// empty bounds what was searched, not what exists.
+//
+// The rolls are in balance_pirates.go, read out of the seeding loop.
 func (w *World) seedPirates() {
 	w.Pirates = make([]PirateFaction, len(PirateFactions))
 	for i, name := range PirateFactions {
-		w.Pirates[i] = PirateFaction{Name: name}
+		w.Pirates[i] = PirateFaction{
+			Name:         name,
+			LootTroopers: w.setupRng.Intn(PirateSeedTroopersRoll),
+			LootJets:     w.setupRng.Intn(PirateSeedJetsRoll),
+			LootTurrets:  w.setupRng.Intn(PirateSeedTurretsRoll),
+			LootTanks:    w.setupRng.Intn(PirateSeedTanksRoll),
+			LootAgents:   PirateSeedAgentsBase + w.setupRng.Intn(PirateSeedAgentsRoll),
+			Land:         w.setupRng.Intn(PirateSeedRegionsRoll),
+			// Two draws multiplied, as the original does it: the product is what
+			// makes a rich faction rare rather than a flat one-in-N.
+			Gold: PirateSeedGoldBase +
+				int64(w.setupRng.Intn(PirateSeedGoldRoll))*int64(w.setupRng.Intn(PirateSeedGoldRoll)),
+		}
 	}
 }
 
@@ -72,9 +91,33 @@ func battleLoss(have, pct int) int { return have * pct / 100 }
 // again if the sysop turns pirates back on. Turning them OFF leaves the factions'
 // records alone rather than emptying them, so a faction keeps whatever it had
 // stolen and the switch is reversible.
+//
+// It seeds only when there are NO factions, so a world created before the
+// starting hoard existed is not retrofitted: its nine factions stay as they are
+// and go on accumulating from raids. That is deliberate — handing every running
+// league's pirates an army overnight would rewrite the balance of games already
+// in progress — but it does mean the hoard reaches an existing game only on a
+// -reset.
 func (w *World) EnsurePirates() {
-	if w.Config.Pirates && len(w.Pirates) == 0 {
-		w.seedPirates()
+	if !w.Config.Pirates || len(w.Pirates) != 0 {
+		return
+	}
+	// NAMES ONLY, no hoard. This runs from the store's repair pass, which fires
+	// on every reload — so seeding random hoards here would hand the factions a
+	// different army on every transaction, and one seeded during a read-only
+	// transaction is never saved: the Attack Pirates screen would show a
+	// different strength each time it was drawn until some write happened to
+	// commit one. It was idempotent before only because the empty seed was.
+	//
+	// It is also the right answer on its own terms: this path exists to migrate
+	// a save that predates the factions, and such a game is already under way.
+	// Only a fresh game gets the hoard (seedPirates, from initFreshGame) — and
+	// that is now the ONLY caller of seedPirates, just as the store's repair
+	// pass is the only caller of this, so neither path can drift into the
+	// other's job without someone noticing.
+	w.Pirates = make([]PirateFaction, len(PirateFactions))
+	for i, name := range PirateFactions {
+		w.Pirates[i] = PirateFaction{Name: name}
 	}
 }
 

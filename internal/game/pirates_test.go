@@ -6,17 +6,79 @@ import (
 	"testing"
 )
 
-// A faction starts with nothing. Its army is stolen goods, so a fresh game's
-// factions cannot defend themselves until they have robbed somebody.
-func TestSeedPiratesStartEmpty(t *testing.T) {
+// A faction starts with a hoard, so raiding one pays from the first turn. IB
+// seeded them empty until 2026-09-12, which made the Attack Pirates screen
+// worthless in a new league; six live BRE resets produce nine populated records
+// every time. Ranges are the measured ones (balance_pirates.go).
+func TestSeedPiratesStartWithAHoard(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	if len(w.Pirates) != len(PirateFactions) {
 		t.Fatalf("want %d factions, got %d", len(PirateFactions), len(w.Pirates))
 	}
+	seeded := map[string]int{}
 	for _, p := range w.Pirates {
-		if p.Defense() != 0 || p.Land != 0 || p.Gold != 0 || p.LootAgents != 0 {
-			t.Errorf("%s seeded with holdings: %+v", p.Name, p)
+		if p.Defense() <= 0 {
+			t.Errorf("%s cannot defend itself: %+v", p.Name, p)
 		}
+		// 500,000 plus a product of two Random(300) draws: floor and ceiling both.
+		hi := int64(PirateSeedGoldBase) + int64(PirateSeedGoldRoll-1)*int64(PirateSeedGoldRoll-1)
+		if p.Gold < PirateSeedGoldBase || p.Gold > hi {
+			t.Errorf("%s gold %d outside [%d,%d]", p.Name, p.Gold, PirateSeedGoldBase, hi)
+		}
+		if p.LootAgents < PirateSeedAgentsBase {
+			t.Errorf("%s agents %d is under the floor %d", p.Name, p.LootAgents, PirateSeedAgentsBase)
+		}
+		for _, f := range fields(&p) {
+			if f.got < 0 || f.got >= f.max {
+				t.Errorf("%s %s = %d, outside [0,%d)", p.Name, f.name, f.got, f.max)
+			}
+			seeded[f.name] += f.got
+		}
+	}
+	// A range check alone passes a field that is never seeded at all, since 0 is
+	// inside every range — so require each to have landed non-zero somewhere in
+	// the nine. The narrowest roll is regions at 75, where nine consecutive zeros
+	// is a 1-in-10^17 event.
+	for _, f := range fields(&w.Pirates[0]) {
+		if seeded[f.name] == 0 {
+			t.Errorf("%s was zero for every faction — it is not being seeded", f.name)
+		}
+	}
+}
+
+type seedField struct {
+	name string
+	got  int
+	max  int
+}
+
+func fields(p *PirateFaction) []seedField {
+	return []seedField{
+		{"troopers", p.LootTroopers, PirateSeedTroopersRoll},
+		{"jets", p.LootJets, PirateSeedJetsRoll},
+		{"turrets", p.LootTurrets, PirateSeedTurretsRoll},
+		{"tanks", p.LootTanks, PirateSeedTanksRoll},
+		{"agents", p.LootAgents - PirateSeedAgentsBase, PirateSeedAgentsRoll},
+		{"land", p.Land, PirateSeedRegionsRoll},
+	}
+}
+
+// The hoards come from a stream of their own. Seeding nine factions costs 63
+// draws, and taking them from the gameplay rng would shift every roll after it —
+// which silently re-runs the trajectory of every fixed-seed test in the tree
+// (three failed exactly that way when the seeding landed). Asserts the gameplay
+// stream is untouched by proving a world built WITHOUT pirates draws the same
+// next number as one built with them.
+func TestSeedingPiratesDoesNotDisturbTheGameplayStream(t *testing.T) {
+	with := NewWorldSeed(DefaultConfig(), 99)
+	cfg := DefaultConfig()
+	cfg.Pirates = false
+	without := NewWorldSeed(cfg, 99)
+	if len(with.Pirates) == 0 {
+		t.Fatal("the pirates-on world seeded no factions, so this proves nothing")
+	}
+	if a, b := with.rng.Intn(1_000_000), without.rng.Intn(1_000_000); a != b {
+		t.Errorf("gameplay rng diverged: with pirates %d, without %d", a, b)
 	}
 }
 
@@ -551,5 +613,32 @@ func TestPirateNewsSwitchSilencesTheNewsOnly(t *testing.T) {
 	body := func(r string) string { _, rest, _ := strings.Cut(r, "\n"); return rest }
 	if body(offReport) != body(report) {
 		t.Errorf("the switch changed what the raid took or cost:\n%q\nwant\n%q", body(offReport), body(report))
+	}
+}
+
+// The migration path must be idempotent: it runs from the store's repair pass on
+// EVERY reload, so seeding a random hoard there would give the factions a
+// different army on each transaction — and one seeded during a read-only
+// transaction is never saved, so the screen would change each time it was drawn.
+// A game already under way keeps empty factions; only a fresh game is seeded.
+func TestEnsurePiratesIsIdempotentAndSeedsNoHoard(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Pirates = nil // a save that predates the factions
+
+	w.EnsurePirates()
+	first := append([]PirateFaction(nil), w.Pirates...)
+	for i := 0; i < 5; i++ {
+		w.EnsurePirates()
+	}
+	if len(w.Pirates) != len(PirateFactions) {
+		t.Fatalf("factions: %d, want %d", len(w.Pirates), len(PirateFactions))
+	}
+	for i, p := range w.Pirates {
+		if p != first[i] {
+			t.Errorf("%s changed on a later reload: %+v then %+v", p.Name, first[i], p)
+		}
+		if p.Defense() != 0 || p.Gold != 0 || p.Land != 0 {
+			t.Errorf("%s was handed a hoard by the migration path: %+v", p.Name, p)
+		}
 	}
 }

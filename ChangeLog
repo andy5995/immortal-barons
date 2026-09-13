@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Pirate factions start with a hoard, so raiding one is worth doing in a
+    new game
   * Declaring war no longer costs support and morale, which the original
     does not charge for it
   * The planetary run tells the sysop when a board has stopped sending

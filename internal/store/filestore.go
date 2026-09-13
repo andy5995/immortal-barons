@@ -73,6 +73,7 @@ func (fs *FileStore) reload() error {
 	if err != nil {
 		return err
 	}
+	clearRandomSeeded(fs.w)
 	if err := json.Unmarshal(data, fs.w); err != nil {
 		return err
 	}
