@@ -4805,20 +4805,58 @@ This is also the independent confirmation that **6 is Technology Agreement**, th
 value the Technology Agreement research bonus keys on. Menu index equals relation
 value for 1–8, so the Diplomacy menu's numbering *is* the enum.
 
-**Declaration Of War is a relation LABEL in the original, not an action.** It
-appears only in `format_diplomatic_status`, beside `Enemy`, `None` and the seven
-pacts, and the value is never stored (see the Full Defense Alliance guard below).
-BRE's instructions describe it as a way "to break an agreement with another empire
-without causing internal troubles" — but no routine bears that name, and the
-support-and-morale charge belongs to the breach path instead:
+**Declaration Of War is a menu item in the original as well as a relation
+label** — `(8) Declaration Of War`, between Full Defense Alliance and View
+Treaties, captured live from BRE's own Diplomacy Menu
+(`cap/nuke-waste-20260912.cap`). Its menu index is its relation value, as the
+table above says of 1–8.
+
+This corrects what this file and `World.DeclareWar` both said until 2026-09-12
+(#242): that the original had no such item and the string was a label only. The
+reading behind that took the menu's own consecutive ShortString table — the
+Turbo Pascal idiom where declaration order is menu order — for a list of relation
+names. `run_diplomacy_menu` calls `format_diplomatic_status` to draw its items
+from exactly that table.
+
+**The declaration is free; the breach is not.** The two are separate paths and
+only one of them charges:
 
 - **Attacking a realm you hold a pact with tears the pact up and costs a quarter
   of both popular support and military morale** (`World.BreachTreaty`, called
   from the menu before the force is chosen and again from `Attack`). The pair is
   left with **no relation**, not at Enemy: the original zeroes both rows.
-- **IB additionally offers a Declaration Of War menu item** (`World.DeclareWar`),
-  charging the same quarters and leaving the pair at Enemy. Whether that item
-  should exist at all is open (#242) — see the Declaration Of War entry below.
+- **Declaring war costs nothing** (`World.DeclareWar`). `break_diplomatic_treaty`
+  holds the charge and has exactly one caller, the target picker the four attacks
+  share; `run_diplomacy_menu` is not among that picker's callers, so a
+  declaration cannot reach it. The menu's only action strings are the three it
+  shares with the seven pacts (`" proposed to "`, `"You do not have formal
+  relations with "`, `"Message sent to "`), so a declaration is proposed and
+  mailed like any other relation. BRE's manual calls it a way "to break an
+  agreement with another empire without causing internal troubles", which is
+  what a free exit is; IB charged for it until 2026-09-12.
+
+**What the declaration stores: NOTHING — it leaves the pair at None (0).** Read
+2026-09-12, and it corrects a guess made earlier the same day that the original
+writes 8.
+
+The Diplomacy menu never writes the relation. Its war branch first tests that a
+relation exists at all (`cmp word [es:di+0xae],0` — otherwise `"You do not have
+formal relations with "`), then builds a record and mails it. The relation is
+written on the RECEIVING side, in `process_diplomatic_proposal`, which carries
+the strings `" declared "`, `"war"`, `" on your empire."`, `"Your treaty with "`
+and `" has been broken."` — and zeroes both realms' relation rows (`xor ax,ax`
+into `+0xae`, and into the other record at its `0x42d` stride).
+
+So **the two exits agree in the original**: a declaration and a breach both leave
+0. Relation **8 is a menu index and a display label, never a stored value** — and
+so is **−1 Enemy**. Every write of the field found in `BRE.OVR` stores zero
+(`process_end_of_turn`'s realm wipe, `break_diplomatic_treaty`, `confirm_end_game`
+and this handler); none writes 8 or −1. Only 0–7 are ever persisted.
+
+**IB diverges here:** `World.DeclareWar` leaves `RelationEnemy`, which has no
+counterpart in the original's saved state. The pact-accept write was not read, so
+"only 0–7 are persisted" rests on the four writes enumerated above rather than on
+a reading of every store.
 
 **Every Diplomacy action that addresses a realm takes a LIST.** The Diplomacy
 menu calls the same toggling picker Send Message uses — the selection routine at
@@ -4961,13 +4999,17 @@ and each carries a gameplay effect (#11 wired the last two):
   there is no zero-total test and no dedup, so a partner that sent nothing is
   told so. IB matches both behaviors (`battleNotified`).
 
-  **A Declaration Of War does NOT qualify, though relation 8 would pass the
-  guard.** The value is never stored: `break_diplomatic_treaty` writes
-  `xor ax,ax` to both relation rows (`0x1a8f0`, `0x1a912`), leaving 0 behind, so
-  8 exists only as a display string. This settles the contradiction in
-  `docs/dev/bre-save-format.md`, whose `+0x130` entry appears twice — once
-  correctly saying 8 and 9 are menu items never stored, once wrongly listing 8 as
-  a stored enum value.
+  **A Declaration Of War does NOT qualify**, and the reasoning that first said so
+  was incomplete rather than wrong (#242). It rested on `break_diplomatic_treaty`
+  zeroing both relation rows (`0x1a8f0`, `0x1a912`), which only covers the BREACH
+  path — the declaration is menu item 8 and never reaches that routine. What
+  settles it is the declaration's own handler, `process_diplomatic_proposal`
+  ("<X> declared war on your empire.", "Your treaty with <X> has been broken."),
+  which zeroes both rows as well. Relation 8 is a menu index and a display label
+  and is never stored, so `docs/dev/bre-save-format.md`'s two `+0x130` entries
+  are settled in favour of the one saying 8 and 9 are menu items only. See
+  "Declaration Of War is a menu item in the original as well as a relation label"
+  above.
 
   **The Alliance Strength screen has three figure columns and TWO treaties feed
   them.** BINARY-VERIFIED at `BRE.OVR 0x01177a` (`send_defensive_aid`), which
@@ -5129,8 +5171,13 @@ realm is notified"* — BRE clears both rows in the same routine that prompts, w
 nothing waiting on the message. There is no delayed-break window, and IB models
 none.
 
-**IB's Declaration Of War menu item has no counterpart in the original** and is
-an open question (#242): it charges the same quarters and leaves the pair at Enemy.
+**Declaring war is free in both games** (#242): the original carries the menu
+item and does not reach the routine that charges. See "Declaration Of War is a
+menu item in the original as well as a relation label" above. IB leaves the pair
+at **Enemy**, where the original leaves **None** — its declaration handler zeroes
+both relation rows, the same state its breach path leaves. That divergence is
+IB's own and still open; this sentence claimed the original wrote 8 until
+2026-09-13, which was a guess made before the handler was read.
 
 The two newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the
 intent, not the numbers.

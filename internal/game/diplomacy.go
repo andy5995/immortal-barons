@@ -521,14 +521,30 @@ func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 	}
 }
 
-// DeclareWar is IB's formal way to end an agreement, and the one place the two
-// games are known to part company. "Declaration Of War" exists in the original
-// only as a RELATION label in format_diplomatic_status, beside Enemy, None and
-// the seven pacts; no routine a player invokes bears that name, and the support
-// and morale charge belongs to the breach path (see BreachTreaty). IB keeps the
-// menu item and the charge pending a decision on both (#242). Only ending a real
-// pact costs, the pair is left at Enemy, and the other realm is notified by
-// mail.
+// DeclareWar is the Diplomacy menu's Declaration Of War, and it is FREE (#242).
+//
+// The original has the item — `(8) Declaration Of War` sits between Full Defense
+// Alliance and View Treaties on its Diplomacy Menu, captured live, and its menu
+// index is its relation value (the enum runs -1 Enemy, 0 None, 1..7 pacts, 8
+// Declaration Of War). This file and the reference doc both said for a while
+// that the original had no such item, on a reading that took the menu's own
+// consecutive ShortString table for a list of relation labels.
+//
+// It does not charge support or morale, and IB no longer does either.
+// `break_diplomatic_treaty` — which holds that charge — has exactly one caller,
+// the target picker the four attacks share, and `run_diplomacy_menu` is not
+// among that picker's callers, so the declaration never reaches it. The menu's
+// only action strings are the three it shares with the seven pacts (" proposed
+// to ", "You do not have formal relations with ", "Message sent to "), so a
+// declaration is proposed and mailed like any other relation.
+//
+// IB stores the outcome as RelationEnemy, which the original's saved state has
+// no counterpart for: its declaration leaves the pair at None. The menu never
+// writes the relation — it mails a record, and the receiving side's
+// `process_diplomatic_proposal` ("<X> declared war on your empire.", "Your
+// treaty with <X> has been broken.") zeroes BOTH realms' relation rows. Relation
+// 8 is a menu index and a display label, never a stored value, and so is -1
+// Enemy. See docs/mechanics-reference.md; #242 tracks whether IB should follow.
 //
 // The break is IMMEDIATE, and so is the original's, despite the manual's "the
 // treaty is not officially broken until the other realm is notified": BRE clears
@@ -536,9 +552,7 @@ func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 // waiting on the message being read. There is no delayed-break window to model.
 func (w *World) DeclareWar(a, b *Empire) {
 	if rel := w.Relation(a, b); rel != "" && rel != RelationEnemy {
-		a.Support = a.Support / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
-		a.Morale = a.Morale / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
-		a.addEvent(fmt.Sprintf("Tearing up the %s with %s set off revolts at home; support and morale fell sharply.", rel, b.Name))
+		a.addEvent(fmt.Sprintf("You tore up the %s with %s by declaring war.", rel, b.Name))
 	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
 	w.SendMail(a, b, Message{

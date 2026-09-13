@@ -614,12 +614,15 @@ func TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes(t *testing
 	}
 }
 
-// Declaring war is the costly route, not the cheap one: BRE takes a quarter off
-// both popular support and military morale (v/4*3, truncating on the divide).
-// Golden literals from the binary — 99 keeps 72, not 74. Declaring on a realm
-// you hold no agreement with costs nothing, because BRE offers the option only
-// against a standing treaty.
-func TestDeclareWarCostsSupportAndMorale(t *testing.T) {
+// Declaring war is FREE (#242). The original's Diplomacy Menu carries the item
+// — captured live at `(8) Declaration Of War` — and it does not reach
+// `break_diplomatic_treaty`, which is where the support-and-morale charge lives
+// and whose only caller is the target picker the four attacks share. A
+// declaration is proposed and mailed like any other relation.
+//
+// The pact still ends, immediately, and the pair is left hostile; only the
+// charge is gone.
+func TestDeclaringWarIsFreeAndStillEndsThePact(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
@@ -634,11 +637,8 @@ func TestDeclareWarCostsSupportAndMorale(t *testing.T) {
 	w.ProposeTreaty(a, b, fullDefenseAlliance)
 	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
 	w.DeclareWar(a, b)
-	if a.Support != 72 {
-		t.Errorf("support after declaring war = %d, want 72", a.Support)
-	}
-	if a.Morale != 75 {
-		t.Errorf("morale after declaring war = %d, want 75", a.Morale)
+	if a.Support != 99 || a.Morale != 100 {
+		t.Errorf("declaring war charged the breaker %d/%d; the original charges nothing", a.Support, a.Morale)
 	}
 	if w.AreAllied(a, b) {
 		t.Error("the alliance should end the moment war is declared, as BRE ends it")
