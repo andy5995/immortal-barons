@@ -276,6 +276,15 @@ type World struct {
 	// #63).
 	Annihilator *Annihilator
 	Incoming    *Annihilator
+	// AnnihilatorDone is the arrival instant of the last weapon from each board
+	// that this planet has finished with — burned out, shot down, or dismantled.
+	// A board re-announces a weapon in flight on every planetary run so a single
+	// lost packet cannot leave the target unwarned (a divergence: the original
+	// sends one attack packet at arrival and never repeats), and the price of
+	// repeating is that a copy can outlive the weapon and raise the siege a
+	// second time. Matching the instant is what tells a late copy of a finished
+	// weapon from the first word of a new one. Keyed by builder board.
+	AnnihilatorDone map[string]string `json:",omitempty"`
 	// BulletinDigest fingerprints every bulletin this board holds, keyed
 	// "<scope>/<name>", so an edited file can be told from an untouched one
 	// without keeping a second copy of it. BulletinsKnown marks the scopes

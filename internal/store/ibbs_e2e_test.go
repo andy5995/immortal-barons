@@ -497,3 +497,80 @@ func TestASilentBoardReachesTheSysopThroughTheRun(t *testing.T) {
 		t.Errorf("the same silence raised the alarm again: %v", run.NewFaults)
 	}
 }
+
+// The Gooie Kablooie, driven across two real boards through real packet
+// directories — the path no test covered, and the one where a live weapon went
+// missing between two test boards. The boards' GameDay counters are deliberately
+// far apart, because that is the condition that broke it: the counter is each
+// board's own count from its own first maintenance, so the sender's day numbers
+// mean nothing here.
+func TestAGooieKablooieCrossesBetweenBoardsAndLands(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "xbit"},
+		{Number: 2, Name: "unix bit"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	a := newBoard(t, filepath.Join(dir, "a"), "xbit", roster)
+	b := newBoard(t, filepath.Join(dir, "b"), "unix bit", roster)
+	a.w.Config.DataDir, b.w.Config.DataDir = filepath.Join(dir, "a"), filepath.Join(dir, "b")
+	// Out of step, as real boards are.
+	a.w.GameDay, b.w.GameDay = 4, 61
+
+	builder := a.w.FindByOwner("baron-xbit")
+	if builder == nil {
+		t.Fatal("the building board has no baron")
+	}
+	builder.Land = 5000
+	a.w.ImportBoard(game.RemoteBoard{BoardID: "unix bit"})
+	victim := b.w.FindByOwner("baron-unix bit")
+	victim.Land, victim.Protection = 8000, 0
+	victim.EnsureRegions()
+
+	if err := a.w.StartAnnihilator(builder, "unix bit"); err != nil {
+		t.Fatalf("StartAnnihilator: %v", err)
+	}
+	cost := a.w.Annihilator.CostMillion
+	builder.Gold = int64(cost) * game.AnnihilatorMillion
+	if _, err := a.w.FundAnnihilator(builder, cost); err != nil {
+		t.Fatalf("FundAnnihilator: %v", err)
+	}
+	if !a.w.Annihilator.Funded {
+		t.Fatal("the weapon did not report itself funded")
+	}
+
+	// Time passes on the builder's board and it launches itself.
+	a.w.GameDay += game.AnnihilatorBuildDays
+	a.w.LaunchDueAnnihilatorAt(time.Now().Add(game.AnnihilatorBuildDays * 24 * time.Hour))
+	if !a.w.Annihilator.Launched {
+		t.Fatal("a fully funded weapon never launched")
+	}
+
+	// The status rides a real packet to the target.
+	a.run(t)
+	deliver(t, a, b)
+	if _, err := RunPlanetary(b.w, b.inbound, b.outbound, false); err != nil {
+		t.Fatal(err)
+	}
+	if b.w.Incoming == nil {
+		t.Fatal("the weapon vanished in transit: the target has no record of it and was told nothing")
+	}
+	if !b.w.Incoming.Launched {
+		t.Error("the target does not know the weapon is in the air")
+	}
+
+	// It lands when the TARGET's own clock reaches the arrival, and besieges.
+	b.w.GameDay = b.w.Incoming.ArrivesDay
+	b.w.ArriveAnnihilator()
+	if b.w.Incoming.DaysLeft == 0 {
+		t.Fatalf("the weapon reached the planet and did not land: %+v", b.w.Incoming)
+	}
+	before := victim.Land
+	b.w.TickAnnihilator()
+	if victim.Land >= before {
+		t.Errorf("the siege did no damage: land %d, was %d", victim.Land, before)
+	}
+}

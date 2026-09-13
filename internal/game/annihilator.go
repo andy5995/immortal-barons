@@ -37,7 +37,11 @@ type Annihilator struct {
 	Launched    bool
 	LaunchedDay int
 	ArrivesDay  int
-	Intact      int // percent of the weapon still standing; jets whittle this down
+	// ArrivesAt is the arrival instant, stamped at launch. ArrivesDay is this
+	// board's own day count and is meaningless to the target, so this is what
+	// the status packet carries across.
+	ArrivesAt time.Time `json:",omitempty"`
+	Intact    int       // percent of the weapon still standing; jets whittle this down
 	// DaysLeft is the siege countdown once it has landed on the target planet:
 	// AnnihilatorSiegeDays on arrival, one less after every day's damage, gone at
 	// zero. Zero also means "not landed", which is why the flying weapon and the
@@ -215,6 +219,9 @@ func (w *World) LaunchDueAnnihilatorAt(now time.Time) {
 	d.Launched = true
 	d.LaunchedDay = w.GameDay
 	d.ArrivesDay = w.GameDay + AnnihilatorFlightDays
+	// The instant as well as the day: the day number is this board's own count
+	// and means nothing on the target's, which is what the status packet carries.
+	d.ArrivesAt = now.Add(AnnihilatorFlightDays * 24 * time.Hour)
 	w.postNews(fmt.Sprintf("The Gooie Kablooie has launched at %s.", d.TargetBoard))
 }
 
@@ -227,11 +234,13 @@ func (w *World) DismantleAnnihilatorByCoordinator(e *Empire) error {
 	if w.BBSCoordinator() != e {
 		return ErrNotPlanetCO
 	}
-	return w.scrapAnnihilator()
+	return w.scrapAnnihilator(e)
 }
 
-// scrapAnnihilator is the dismantling itself, without asking who ordered it.
-func (w *World) scrapAnnihilator() error {
+// scrapAnnihilator is the dismantling itself. orderedBy is the baron who called
+// it, named in the notice; the office is the only way to order one, so it is
+// never nil.
+func (w *World) scrapAnnihilator(orderedBy *Empire) error {
 	if w.Annihilator == nil {
 		return ErrNoAnnihilator
 	}
@@ -242,6 +251,18 @@ func (w *World) scrapAnnihilator() error {
 	w.Annihilator = nil
 	w.ExportAnnihilatorGone(board) // let the target stop watching for it (#63)
 	w.postNews("The Gooie Kablooie has been dismantled.")
+	// Every baron on the planet is told directly, not just in the news. The
+	// weapon is funded out of the planet's own pockets and one office holder can
+	// scrap it, so the people who paid for it must not have to notice a news
+	// line to find out — and a weapon that simply stops being mentioned reads
+	// exactly like one that went missing in transit.
+	who := fmt.Sprintf("%s, the BBS Coordinator,", orderedBy.Name)
+	for _, e := range w.Empires {
+		if !e.Alive {
+			continue
+		}
+		e.addEvent(fmt.Sprintf("%s dismantled the Gooie Kablooie aimed at %s. Nothing was refunded.", who, board))
+	}
 	w.reportToSpy(board, fmt.Sprintf("Our agent on %s reports their Gooie Kablooie has been dismantled.", w.Config.BoardID))
 	w.reportThreatGone(board, ThreatGooie, 0)
 	return nil
@@ -300,6 +321,7 @@ func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, int, error) {
 
 	w.Incoming.Intact -= knocked
 	if w.Incoming.Intact <= 0 {
+		w.markAnnihilatorDone(w.Incoming)
 		w.Incoming = nil
 		w.postNews(fmt.Sprintf("%s destroyed the Gooie Kablooie!", e.Name))
 		return knocked, lost, nil
@@ -369,6 +391,7 @@ func (w *World) TickAnnihilator() {
 	}
 	d.DaysLeft--
 	if d.DaysLeft <= 0 {
+		w.markAnnihilatorDone(d)
 		w.Incoming = nil
 		w.postNews("The Gooie Kablooie has burned itself out.")
 	}

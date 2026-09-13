@@ -1033,8 +1033,72 @@ tracks one incoming weapon at a time, so the original's numbered picker
 (" #  From / Strength / Days Until Self-Destruct") is a single row with no
 "Enter Gooie Number" prompt.
 
+**The arrival crosses as an INSTANT, never as a day number.** `GameDay` is each
+board's own count from its own first maintenance, so two boards' day numbers have
+no relation to each other — and the status packet crosses between boards. Sending
+`ArrivesDay` meant the target measured the sender's calendar against its own: a
+target whose counter had run ahead **dropped a live weapon silently** (no record,
+no news, nothing destroyed — a weapon that simply vanished between two test
+boards), and one whose counter was behind was told it was 1,392 hours away.
+`AnnihilatorStatus.ArrivesAt` carries the instant and the target translates it
+onto its own count. Same fix, and the same reason, as `GroupAttack.DepartAt`.
+
+Two wire details, both load-bearing. It is an RFC3339 **string**, not a
+`time.Time`, because `omitempty` does not omit a zero struct: as a struct it
+would ride on every packet in the league and change the bytes every board signs.
+And it is **excluded from the origin signature** (`boardSigningBytes`, as
+`Battles` is), because signing covers the marshalled packet — a board that
+predates the field drops it on parse, re-marshals without it, and the signature
+fails, refusing the WHOLE status rather than merely reading it without an
+instant. `omitempty` does not prevent that: it protects every packet that does
+not carry the field, never the one that does. That distinction is what the
+Bulletins breakage (1da5698) cost a six-board league, and it is why no protocol
+bump is needed here. The threat feed a SpyGuy reads was
+already instant-based (`ThreatAt(d.LaunchAt)`) and was never affected.
+
+**Dismantling tells every baron on the planet directly**, in their own event log,
+not only in the planet news: the weapon is funded out of the planet's pockets and
+one office holder can scrap it, so the people who paid must not have to notice a
+news line to learn it is gone. Nothing is refunded, and the notice says so. It
+also says who ordered it. Without that notice a scrapped weapon is
+indistinguishable, from the funders' side, from one that went missing in transit.
+
+**The builder re-announces a weapon in flight on every planetary run, and this is
+IB's own design.** The original sends nothing at all during the flight and one
+attack packet at arrival: `process_gooie_launch` runs on the BUILDER's board
+(the flag it gates on, written only in `fund_gooie_kablooie`, is the builder's
+own weapon state), compares the weapon's arrival against the clock, and calls
+`write_gooie_attack_packet` when it is due. The packet IS the arrival, so a
+target that was down simply applies it whenever it next reads inbound, and there
+is nothing to announce twice. IB repeats instead so that one lost packet cannot
+leave a planet unwarned — chosen 2026-09-13 over matching the original exactly
+(which loses the warning) and over a single announcement at launch (which
+restores the silent failure the repetition exists to prevent).
+
+Repeating has a price, and `World.AnnihilatorDone` is it: the arrival instant of
+the last weapon from each builder board this planet has finished with — burned
+out, shot down, or dismantled. A first sighting whose instant matches that
+board's entry is a copy that outlived its weapon and is refused, where without it
+the siege would run a second time. For the same reason the instant **pins the
+weapon's identity**: once one is on the books, a status carrying a different
+instant is about a different weapon and does not rewrite the live one's arrival.
+The builder is free to start a second weapon the day after the first lands
+(`RetireSpentAnnihilator`), so with `AnnihilatorBuildDays` + `AnnihilatorFlightDays`
+against `AnnihilatorSiegeDays` a second generation routinely reports during the
+first's siege. A weapon with no instant — from a board that predates the field —
+cannot be recorded either way, and is left to the "already due" test.
+
+Neither of those addresses the separate limitation that `w.Incoming` is a single
+slot: a second BOARD's weapon arriving while one is besieging us is folded into
+the existing record and its warning is never posted, because the launch news
+fires only on the transition to flying. That is a known gap, not something the
+identity pin creates or fixes.
+
 The target planet is told when the weapon **launches**, with the arrival time in
-hours, which is what makes interception possible (#63). **It is not told while
+hours, which is the early warning that gives the planet time to raise jets —
+interception itself is only possible once the weapon is on the ground
+(`InterceptAnnihilator` refuses one still aloft, as the original does; #63).
+**It is not told while
 the weapon is being built** — that is what a SpyGuy is for. Both of BRE's
 construction strings, "Gooie Kablooie destined for our planet is under
 construction at ..." and "Gooie Kablooie arrives from ... in N Hours.", belong

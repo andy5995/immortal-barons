@@ -163,6 +163,7 @@ AnnihilatorStatus:
   FromBoard
   Funded
   Launched
+  ArrivesAt `json:",omitempty"`
   ArrivesDay
   Intact
   Dismantled

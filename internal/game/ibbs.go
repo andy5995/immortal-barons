@@ -247,9 +247,34 @@ type LeagueReset struct {
 // target can scramble jets: a weapon nobody can see is one nobody can shoot at
 // (#63).
 type AnnihilatorStatus struct {
-	FromBoard  string
-	Funded     bool
-	Launched   bool
+	FromBoard string
+	Funded    bool
+	Launched  bool
+	// ArrivesAt is WHEN the weapon lands, as an instant. It is not a day number
+	// because GameDay is each board's own count from its own first maintenance,
+	// so two boards' day numbers have no relation — and this record crosses
+	// between boards. Sending a day number meant the target measured the
+	// sender's calendar against its own: a target whose counter had run ahead
+	// dropped a live weapon silently (no record, no news, nothing destroyed),
+	// and one whose counter was behind was told the thing was 1,392 hours away.
+	// Same fix, and the same reason, as GroupAttack.DepartAt and
+	// Annihilator.LaunchAt.
+	// A STRING (RFC3339 via Recorded), not a time.Time: `omitempty` does not omit
+	// a zero struct, so a time.Time field would ride on every packet in the
+	// league and change the bytes every board signs — the failure the frozen
+	// wire-shape test exists to catch. TimeCheck.Sent is a string for the same
+	// reason.
+	ArrivesAt string `json:",omitempty"`
+	// ArrivesDay is the pre-instant field. Kept only so a packet from a board
+	// that has not been upgraded still lands something rather than nothing; it
+	// is read only when ArrivesAt is absent, and it carries the old hazard.
+	//
+	// NO `omitempty`, deliberately. Adding one drops the field from every status
+	// whose day is zero — every dismantle notice — and a board on the older
+	// struct then re-marshals it WITH `"ArrivesDay":0`, so the signature fails
+	// and the whole packet is refused, mail and scores with it. omitempty is
+	// safe on a NEW field and unsafe on an existing one, which is the opposite
+	// of the intuition.
 	ArrivesDay int
 	Intact     int
 	Dismantled bool // the builders scrapped it; stop watching for it

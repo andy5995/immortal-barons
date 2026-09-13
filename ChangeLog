@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A Gooie Kablooie no longer goes missing between boards whose game days
+    differ, and dismantling one now tells every baron on the planet
   * Pirate factions start with a hoard, so raiding one is worth doing in a
     new game
   * Declaring war no longer costs support and morale, which the original
