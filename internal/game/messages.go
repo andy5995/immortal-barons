@@ -2,7 +2,6 @@ package game
 
 import (
 	"encoding/json"
-	"time"
 )
 
 // Message is one piece of empire mail: who sent it, the recipient letter(s) it
@@ -44,7 +43,7 @@ func (m *Message) UnmarshalJSON(b []byte) error {
 func (w *World) SendMail(from, to *Empire, m Message) {
 	m.From = from.Name
 	if m.When == "" {
-		m.When = StoredStamp(time.Now())
+		m.When = StoredStamp(timeNow())
 	}
 	to.deliver(m)
 }

@@ -6,6 +6,7 @@ package store
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -92,7 +93,59 @@ func Load(cfg game.Config) (*game.World, error) {
 		return nil, err
 	}
 	repair(w, cfg)
+	if err := checkClockOffset(w); err != nil {
+		return nil, err
+	}
 	return w, nil
+}
+
+// ClockRewindVar lets an operator load a world that was written under a LARGER
+// test-clock shift than the one now in force. It exists because the refusal has
+// to be overridable on a rig that is deliberately winding back, and it is a
+// separate variable so that winding back is never something a run does by
+// simply forgetting to set the offset.
+const ClockRewindVar = "IB_CLOCK_REWIND"
+
+// checkClockOffset refuses a world whose instants were written from a clock
+// further ahead than this run's, and otherwise records this run's shift so the
+// next load can make the same check. See World.ClockOffset.
+func checkClockOffset(w *game.World) error {
+	now := game.ClockOffset()
+	var saved time.Duration
+	if w.ClockOffset != "" {
+		// An unreadable value is NOT treated as a shift. Failing closed would be
+		// the usual instinct for a guard, but this one guards a testing knob that
+		// is empty in every real game, and a hand-edited or future-format value
+		// would then end a real board's session over something that is no evidence
+		// of a shifted clock at all. Say so and carry on.
+		d, err := time.ParseDuration(w.ClockOffset)
+		if err != nil {
+			fmt.Fprintf(os.Stderr,
+				"immortal-barons: ignoring an unreadable ClockOffset %q in world.json (%v)\n",
+				w.ClockOffset, err)
+		}
+		saved = d
+	}
+	if saved > now && os.Getenv(ClockRewindVar) == "" {
+		return fmt.Errorf(
+			"this game was last written with its clock shifted by %s and this run is shifted by %s, "+
+				"so its instants are in the future and weapons and probes would never resolve; "+
+				"run with a shift of at least %s, or set %s=1 to load it anyway",
+			saved, now, saved, ClockRewindVar)
+	}
+	return nil
+}
+
+// stampClockOffset records the shift this run's instants were written under. It
+// belongs to SAVE, not to load: a world created by -reset and saved without ever
+// being loaded still has shifted instants in it, and recording on load would
+// leave that file claiming a real clock.
+func stampClockOffset(w *game.World) {
+	if d := game.ClockOffset(); d != 0 {
+		w.ClockOffset = d.String()
+	} else {
+		w.ClockOffset = ""
+	}
 }
 
 // clearRandomSeeded empties the world fields a FRESH game fills with a RANDOM
@@ -197,6 +250,7 @@ func Save(w *game.World, cfg game.Config) error {
 	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
 		return err
 	}
+	stampClockOffset(w)
 	data, err := json.MarshalIndent(w, "", "  ")
 	if err != nil {
 		return err

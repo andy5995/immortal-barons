@@ -83,6 +83,9 @@ func (fs *FileStore) reload() error {
 	}
 	copySaved(fs.w, nw)
 	repair(fs.w, fs.cfg)
+	if err := checkClockOffset(fs.w); err != nil {
+		return err
+	}
 	// Unmarshal replaced every *Empire; tell per-session caches to re-resolve
 	// their active empire by handle.
 	fs.w.MarkReloaded()

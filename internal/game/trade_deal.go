@@ -230,7 +230,7 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 		From:          from.Name,
 		Send:          send,
 		Demand:        demand,
-		Expires:       time.Now().AddDate(0, 0, clampTradeDealDays(days)),
+		Expires:       timeNow().AddDate(0, 0, clampTradeDealDays(days)),
 		ArrivesOnTurn: w.TurnOfDay(from),
 	})
 	// The offer mails nothing: the recipient meets it at turn start, where the

@@ -115,19 +115,8 @@ func main() {
 		// game's own output.
 		fmt.Fprintf(os.Stderr, "immortal-barons: Dupe Checking forced %s for this run only; the saved setting is unchanged.\n", word)
 	}
-	today := time.Now().Format("2006-01-02")
-	// IB_GAME_DATE overrides the game's "today" for testing (e.g.
-	// IB_GAME_DATE=2026-07-17 to advance a day and run daily maintenance without
-	// changing the system clock). An env var, not a flag, so it stays out of -help
-	// and off a casual player's radar. A malformed value errors rather than
-	// silently using the real date.
-	if d := os.Getenv("IB_GAME_DATE"); d != "" {
-		if _, err := time.Parse("2006-01-02", d); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons: IB_GAME_DATE must be YYYY-MM-DD:", err)
-			os.Exit(2)
-		}
-		today = d
-	}
+	applyTestClock()
+	today := game.Today()
 
 	if *o.maint {
 		exitOn("-maint", runMaint(cfg, today))
@@ -318,4 +307,69 @@ func parseOnOff(v string) (on, ok bool) {
 		return false, true
 	}
 	return false, false
+}
+
+// applyTestClock shifts the game's clock for a test rig, from IB_CLOCK_OFFSET
+// (a Go duration, e.g. 72h) or the older IB_GAME_DATE (a date, translated into
+// the offset that reaches it). Env vars, not flags, so they stay out of -help
+// and off a casual player's radar; a malformed value errors rather than silently
+// using the real clock.
+//
+// It is ONE offset rather than a date plus a real time of day, because every
+// instant the game writes and the date string it files under both come off it —
+// a weapon's arrival, the Travel Times probe, daily maintenance. Two clocks set
+// separately would agree only by construction and drift the moment one of them
+// was set alone.
+//
+// The banner prints on EVERY run while a shift is in force, not once. A board
+// run with a shifted clock writes shifted instants into its save and onto the
+// wire, and those outlive the run: a weapon stamped days ahead never lands on a
+// real target. That is the point on a rig and an accident anywhere else, and the
+// only thing standing between the two is whoever is reading the terminal.
+func applyTestClock() {
+	off, date := os.Getenv("IB_CLOCK_OFFSET"), os.Getenv("IB_GAME_DATE")
+	var shift time.Duration
+	switch {
+	case off != "":
+		d, err := time.ParseDuration(off)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons: IB_CLOCK_OFFSET must be a duration such as 72h:", err)
+			os.Exit(2)
+		}
+		shift = d
+	case date != "":
+		now := time.Now()
+		// ParseInLocation, not Parse, and the target carries THIS moment's time of
+		// day rather than midnight. Parse yields midnight UTC, which measured
+		// against a local midnight is short by the zone: on UTC-5 a run asking for
+		// 2026-09-16 landed on the 15th, a whole game day adrift with nothing on
+		// screen to say so. Keeping the wall time also means a DST change inside
+		// the span cannot drag the result across midnight.
+		d, err := time.ParseInLocation("2006-01-02", date, now.Location())
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons: IB_GAME_DATE must be YYYY-MM-DD:", err)
+			os.Exit(2)
+		}
+		target := time.Date(d.Year(), d.Month(), d.Day(),
+			now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+		shift = target.Sub(now)
+	default:
+		return
+	}
+	// Backwards is where the confusing failures live: every interval the game
+	// measures goes negative at once, so weapons read as long gone and probes as
+	// never sent, and it all looks like the game losing things rather than like
+	// the clock. Forwards is the use case; backwards has to be asked for twice.
+	if shift < 0 && os.Getenv(store.ClockRewindVar) == "" {
+		fmt.Fprintf(os.Stderr,
+			"immortal-barons: that would move the clock BACK by %s, which reads as every "+
+				"weapon and probe having expired; set %s=1 if that is what you want.\n",
+			-shift, store.ClockRewindVar)
+		os.Exit(2)
+	}
+	game.SetClockOffset(shift)
+	fmt.Fprintf(os.Stderr,
+		"immortal-barons: TEST CLOCK shifted by %s — the game believes it is %s. "+
+			"Instants written now, in this save and in outbound packets, carry that shift.\n",
+		shift, game.Today())
 }

@@ -294,6 +294,10 @@ func TestSaveLoadRoundTripAllFields(t *testing.T) {
 		"World.Alliances":       true,
 		"Empire.AllianceOffers": true,
 		"World.IncomingOne":     true,
+		// Rewritten on load to the shift THIS run is under, which is none in a
+		// test — it records the clock the save was written by, not a value that
+		// travels with it.
+		"World.ClockOffset": true,
 	}
 
 	if err := Save(w, cfg); err != nil {

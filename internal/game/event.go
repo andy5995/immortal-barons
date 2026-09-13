@@ -33,5 +33,5 @@ func (ev *Event) UnmarshalJSON(b []byte) error {
 
 // addEvent files a line on this realm's recap, stamped now.
 func (e *Empire) addEvent(text string) {
-	e.Events = append(e.Events, Event{When: time.Now(), Text: text})
+	e.Events = append(e.Events, Event{When: timeNow(), Text: text})
 }

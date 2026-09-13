@@ -303,6 +303,15 @@ type World struct {
 	// and where the write lives; it is simply a no-op on that path.
 	// Keyed by builder board.
 	AnnihilatorDone map[string]string `json:",omitempty"`
+	// ClockOffset is the test-clock shift in force when this world was last
+	// written (see clock.go), as a Go duration. Empty in every real game. It is
+	// here, in the shared game data rather than in a per-install file, because
+	// what it guards is IN the game data: once a board has written instants from
+	// a shifted clock, a later run on a smaller shift reads them as far-future
+	// events — a weapon that never lands, a probe that never returns. Loading
+	// refuses that rather than letting the game quietly disagree with itself, and
+	// a save restored from a backup taken under a shift still refuses.
+	ClockOffset string
 	// BulletinDigest fingerprints every bulletin this board holds, keyed
 	// "<scope>/<name>", so an edited file can be told from an untouched one
 	// without keeping a second copy of it. BulletinsKnown marks the scopes

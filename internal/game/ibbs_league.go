@@ -275,7 +275,7 @@ func (w *World) NoteLeagueRuleset() {
 	}
 	if w.LeagueRuleset != "" {
 		w.PrevLeagueRuleset = w.LeagueRuleset
-		w.PrevRulesetAt = Recorded(time.Now())
+		w.PrevRulesetAt = Recorded(timeNow())
 	}
 	w.LeagueRuleset = fp
 }

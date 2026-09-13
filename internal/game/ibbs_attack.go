@@ -376,7 +376,7 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, h
 		Slot:         w.freeAttackSlot(),
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
-		DepartAt:     DepartureAfter(time.Now(), hours),
+		DepartAt:     DepartureAfter(timeNow(), hours),
 		Contributors: []Contribution{{Owner: e.Owner, AttackForce: f, Tech: e.TechMilitaryFactor()}},
 	})
 	g := &w.GroupAttacks[len(w.GroupAttacks)-1]
@@ -443,7 +443,7 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 		if ga.ID != id {
 			continue
 		}
-		if ga.Due(time.Now(), w.GameDay) {
+		if ga.Due(timeNow(), w.GameDay) {
 			return ErrDeparted
 		}
 		if !w.CanGroupAttack(e) {
@@ -525,7 +525,7 @@ func (w *World) DisbandGroupAttackByCoordinator(e *Empire, id int, now time.Time
 // during the PLANETARY maintenance step, which is why the window is worth
 // having in hours: the step runs several times a day, so a 12-hour delay really
 // does leave before a day-long one.
-func (w *World) LaunchDueGroupAttacks() { w.LaunchDueGroupAttacksAt(time.Now()) }
+func (w *World) LaunchDueGroupAttacks() { w.LaunchDueGroupAttacksAt(timeNow()) }
 
 // LaunchDueGroupAttacksAt is LaunchDueGroupAttacks against a given instant, so a
 // test can watch a strike sit and then leave without waiting for the clock.

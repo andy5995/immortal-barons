@@ -109,6 +109,51 @@ one trajectory. Run several and assert the property, or assert an exact computed
 figure — those stay deterministic. Run `GOARCH=386 go test ./...` when the change
 touches money, to catch the 32-bit overflows the 64-bit build hides.
 
+## Moving the clock: `IB_CLOCK_OFFSET`
+
+Anything the game schedules in real time — a Gooie Kablooie's three-day build and
+two-day flight, a group attack's departure, the Travel Times probe — is read from
+one clock, and `IB_CLOCK_OFFSET` shifts it. It takes a Go duration, and the game's
+date string comes off the same clock, so the instants and the day counter cannot
+disagree:
+
+```
+IB_CLOCK_OFFSET=72h ./immortal-barons -data ./data -maint
+IB_CLOCK_OFFSET=120h ./immortal-barons -data ./data -planetary
+```
+
+`faketime` does NOT work here, whatever its man page suggests: Go reads the clock
+without going through libc, so an `LD_PRELOAD` shim never sees it. This was
+checked, not assumed. `IB_GAME_DATE=YYYY-MM-DD` still works and is translated
+into the equivalent offset.
+
+**The offset only ever goes forward, and the game enforces it.** A board writes
+its shifted instants into `world.json` and into the packets it sends, and those
+outlive the run: from a smaller shift they are in the future, so a weapon never
+lands and a probe never returns. Loading a world written under a LARGER shift is
+refused, naming both figures and `IB_CLOCK_REWIND=1`, which overrides it. So the
+rule for a rig is: once a board has been run shifted, every later run of that
+board uses a shift at least as large, until its data directory is reset.
+
+**The offset never goes backwards either.** A shift that would move the clock
+back is refused for the same reason, since every interval the game measures goes
+negative at once and the result reads as the game losing things rather than as a
+clock problem. `IB_CLOCK_REWIND=1` overrides both refusals.
+
+**Shift every board on the rig by the same amount, or Travel Times lies.** A
+round trip measured between two boards on the same offset is still real, because
+both stamps move together. Mixed offsets produce a figure that looks plausible
+and is not.
+
+Two nodes sharing one data directory under DIFFERENT offsets is the same
+misconfiguration, and it shows up as the smaller one failing every transaction
+with a store error rather than as anything that mentions clocks. If a rig board
+starts refusing to load, check the offsets before anything else.
+
+A banner prints on stderr on every run while a shift is in force. That is
+deliberate: a shifted board is fine on a rig and an accident anywhere else, and
+the banner is the only thing between them.
+
 ## Changing game state without the menus
 
 `config.json` holds the game rules, and `store.repair` overwrites

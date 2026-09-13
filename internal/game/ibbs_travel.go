@@ -26,9 +26,6 @@ type TimeCheck struct {
 	Sent string
 }
 
-// timeNow is time.Now, indirected so a test can hold the clock still.
-var timeNow = time.Now
-
 // PingTravelTimes queues a TIME_CHECK to every other known board, once per game
 // day. Without a fresh probe the screen would freeze at whatever the last
 // exchange measured, and a transport that has since slowed down would go
