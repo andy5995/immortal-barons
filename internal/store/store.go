@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -94,19 +95,53 @@ func Load(cfg game.Config) (*game.World, error) {
 	return w, nil
 }
 
-// clearRandomSeeded empties the world fields that a FRESH game fills with random
-// values, so that the save file is what decides whether they are there. It runs
-// on the world the JSON is about to be unmarshalled into, which is a fresh
-// NewWorld (or a previously loaded world, on reload) — and `encoding/json`
-// leaves a field alone when the document has no key for it, so without this a
-// save written before the field existed silently inherits the fresh game's roll,
-// a DIFFERENT one on every load, never saved by a read-only transaction. The
-// nine pirate factions are the case that bit: a pre-factions save showed a new
-// hoard on the Attack Pirates screen every time it was drawn. The matching
-// backfill is repair's EnsurePirates, which puts the names back without a hoard
-// because such a game is already under way.
+// clearRandomSeeded empties the world fields a FRESH game fills with a RANDOM
+// value, so that the save decides whether they are there.
+//
+// It is deliberately narrow. Unmarshalling a save over a fresh world is how
+// back-compat works here: `encoding/json` leaves a field alone when the document
+// has no key for it, so a save written before a field existed comes up with that
+// field's fresh-game default, which is what the migration contract wants — the
+// v0.0.3 fixture carries seven top-level keys and relies on inheriting some
+// thirty. Zeroing them all instead looks tidier and breaks that: it left the
+// fixture with every unit price at 0.
+//
+// A RANDOM default is the exception, because inheriting one is not a default at
+// all, it is a fresh roll per load. The nine pirate factions are the case that
+// bit: a save predating them showed a different hoard every time the Attack
+// Pirates screen was drawn, and whichever one a write happened to catch stuck.
+// repair's EnsurePirates then backfills the names without a hoard, an under-way
+// game not being something to retrofit.
 func clearRandomSeeded(w *game.World) {
 	w.Pirates = nil
+}
+
+// copySaved copies everything the SAVE owns from src onto dst, leaving dst's own
+// process state alone: fields marked `json:"-"` (the config, the league roster,
+// the keys, the sysop notices) and every unexported field, which is what keeps
+// the lock and the three rngs intact.
+//
+// It is how reload gets a world that says what the file says and nothing more.
+// Unmarshalling straight into the live world cannot: an absent key leaves the
+// field alone, so there it means "whatever this process last held" rather than
+// "the fresh default", and more than twenty `omitempty` fields on World go
+// missing from the file whenever they are empty. A node kept a weapon whose
+// siege another node had ended, and wrote it back on its next transaction; the
+// same went for Threats and Battles. Unmarshalling into a fresh world instead
+// gives absent its proper meaning, and this copies the result across.
+//
+// A new field is covered the day it is added, with nobody having to know this
+// exists, which is why it is reflection rather than a list to keep up to date.
+func copySaved(dst, src *game.World) {
+	d, s := reflect.ValueOf(dst).Elem(), reflect.ValueOf(src).Elem()
+	t := d.Type()
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		if !f.IsExported() || f.Tag.Get("json") == "-" {
+			continue
+		}
+		d.Field(i).Set(s.Field(i))
+	}
 }
 
 // repair re-runs the migration/normalization Load applies after unmarshalling:

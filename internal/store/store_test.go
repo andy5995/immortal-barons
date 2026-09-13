@@ -287,11 +287,13 @@ func TestSaveLoadRoundTripAllFields(t *testing.T) {
 	e.SDIFunding = 10_000_000
 	e.SDI = game.SDIStrength(e.SDIFunding, e.Land)
 
-	// Legacy fields the EnsureTreaties migration deliberately nils on load — zero
-	// after a round trip is their correct state, not a loss.
+	// Legacy fields a migration deliberately nils on load — zero after a round
+	// trip is their correct state, not a loss. EnsureTreaties nils the first two,
+	// EnsureIncoming the third (into World.Incoming).
 	migrated := map[string]bool{
 		"World.Alliances":       true,
 		"Empire.AllianceOffers": true,
+		"World.IncomingOne":     true,
 	}
 
 	if err := Save(w, cfg); err != nil {
@@ -380,6 +382,14 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	got, err := Load(cfg)
 	if err != nil {
 		t.Fatal(err)
+	}
+	// A key the fixture does not carry must come up with the FRESH GAME's value,
+	// not zero: that inheritance is how every save-format migration here works,
+	// and Prices is the one where losing it is silent and expensive — curPrice
+	// falls back to base when a realm's own walk is unseeded, so a zeroed table
+	// hands out free units rather than erroring.
+	if got.Prices.Trooper == 0 || got.Prices.Land == 0 {
+		t.Errorf("the fixture came back with no prices (%+v); an absent key must inherit the fresh default", got.Prices)
 	}
 	// The fixture's rate, 12, is in the whole percents that release used; loading
 	// converts it to tenths and holds it at the band's 10.0%/day ceiling.
@@ -481,6 +491,41 @@ func TestPreferencesMigrateOntoEveryRealm(t *testing.T) {
 	for _, e := range w.Empires {
 		if got, want := e.Prefs, game.DefaultPrefs(); got != want {
 			t.Errorf("%s: prefs = %+v, want the defaults %+v", e.Name, got, want)
+		}
+	}
+}
+
+// The save file decides what the world holds, and a load must not leave behind
+// anything it does not mention. Both load paths unmarshal into a world that
+// already has content, and encoding/json leaves a field alone when the key is
+// absent — so every `omitempty` collection another node emptied would otherwise
+// survive, and the next write would persist it back. That is a weapon whose
+// siege has ended running again, a stale threat counting down, a battle in the
+// world report that nobody fought.
+func TestReloadForgetsWhatAnotherNodeRemoved(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	w := game.NewWorld(cfg)
+	if err := Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	fs := NewFileStore(w, cfg)
+
+	// This node is holding things the file on disk does not have.
+	w.Threats = []game.Threat{{FromBoard: "xbit"}}
+	w.Battles = []game.BattleLogEntry{{}}
+
+	if err := fs.reload(); err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range []struct {
+		name string
+		n    int
+	}{
+		{"Threats", len(w.Threats)},
+		{"Battles", len(w.Battles)},
+	} {
+		if c.n != 0 {
+			t.Errorf("reload kept %d stale %s the save does not mention", c.n, c.name)
 		}
 	}
 }

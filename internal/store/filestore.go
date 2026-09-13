@@ -73,10 +73,15 @@ func (fs *FileStore) reload() error {
 	if err != nil {
 		return err
 	}
-	clearRandomSeeded(fs.w)
-	if err := json.Unmarshal(data, fs.w); err != nil {
+	// Into a FRESH world, then copied across — never straight into fs.w. See
+	// copySaved: unmarshalling into the live world makes an absent key mean
+	// "whatever this process last held".
+	nw := game.NewWorld(fs.cfg)
+	clearRandomSeeded(nw)
+	if err := json.Unmarshal(data, nw); err != nil {
 		return err
 	}
+	copySaved(fs.w, nw)
 	repair(fs.w, fs.cfg)
 	// Unmarshal replaced every *Empire; tell per-session caches to re-resolve
 	// their active empire by handle.
