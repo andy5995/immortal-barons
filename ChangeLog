@@ -6,7 +6,7 @@ Immortal Barons ChangeLog
   * The Queen's purse hands gold and troopers to the whole planet
   * Rivers pay the original's full hydropower gold
   * Industrial gold is no longer raised by technology research
-  * A large realm's Industrial Zones produce the units they should
+  * A large realm's Industrial Zones no longer destroy units they should build
   * Industrial gold cannot wrap on a 32-bit build
   * Declaring war no longer costs support and morale
   * A covert operation against a treaty partner breaks the pact
