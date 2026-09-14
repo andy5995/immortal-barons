@@ -1,5 +1,9 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * A backfiring S3-Sabre develops land for the realm it was aimed at, and
+    costs the realm that fired it nothing
+
 2026-09-13 (v0.1.0)
   * New players get a Welcome menu before naming their realm
   * Random events take a share of what a realm holds, rolled every turn
