@@ -907,13 +907,20 @@ func annihilatorDefense(s session.Session, w *ctx) {
 		return
 	}
 
+	// The list is framed like every other one the game draws — heading, rule,
+	// rows, rule — rather than left as bare columns. No capture of this screen
+	// exists, so the divider is the house one (rule75, as Travel Times and the
+	// scores board use) in the dark gray rule characters take as decoration.
+	rule := rule75(ansi.FgBrightBlack)
 	fmt.Fprintf(s, "\n%s%-4s %-24s %-14s %s%s\n", ansi.FgWhite, tr(s, "#"),
 		tr(s, "From"), tr(s, "Strength"), tr(s, "Days Until Self-Destruct"), ansi.Reset)
+	fmt.Fprintf(s, "%s\n", rule)
 	for i, d := range landed {
 		fmt.Fprintf(s, "%s%-4d %s %-14s %d%s\n", ansi.FgBrightWhite, i+1,
 			padColumn(w.Term, d.Creator, 24), fmt.Sprintf("%d%%", d.Intact), d.DaysLeft, ansi.Reset)
 	}
-	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(
+	fmt.Fprintf(s, "%s\n", rule)
+	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(
 		tr(s, "It would take %s jets to destroy one outright."), comma(needed))))
 
 	// A number past the end is ASKED AGAIN, not taken as a cancel: the original's
@@ -924,7 +931,7 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	// turn screen for a typo.
 	var target game.Annihilator
 	for {
-		pick := promptInt(s, tr(s, "Enter Gooie Number"))
+		pick := promptInt(s, "Enter Gooie Number (0 to cancel)?")
 		if pick < 1 {
 			return
 		}
