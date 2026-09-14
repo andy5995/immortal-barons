@@ -1416,6 +1416,22 @@ letter, and Terrorist Ops carries a gold cost in the menu's price column
 (471,360 / 532,544 / 533,568 across the capture — it grows with something, and
 three points do not say what).
 
+**The Gooie Kablooie defense screen — NO CAPTURE, two IB choices.** This is the
+turn stage that offers the planet's barons a sortie against a weapon on the
+ground (stage 12 of `run_player_turn`), not the Ops item above it. Its strings
+are read out of `launch_gooie_kablooie` and its geometry is unknown, so two
+things on it are IB's and are not to be "corrected" against the original:
+
+- The weapon list is framed by a `rule75` above and below, the divider the
+  scores board and Travel Times draw. BRE sizes each box to its own content and
+  there is no capture of this one to take a width from.
+- The prompt reads `Enter Gooie Number (0 to cancel)?`, where the string in the
+  binary is the bare `Enter Gooie Number`. BRE's bounded-integer reader supplies
+  its own limit text, which IB's `promptInt` does not, so the cancel key is said
+  in the message instead — the form the vote, help and diplomacy pickers already
+  use. The string is a new msgid: de and ru show the English until the next
+  translation pass.
+
 **Terrorist Ops** (2), captured 2026-08-26 in `cap/eots-ibbs-01.cap`. Nine
 numbered operations and a Quit, in this order, and **no price column** — the cost
 is quoted once on the parent menu beside the item, not per operation, which is
