@@ -265,9 +265,19 @@ type Empire struct {
 	ProdInitialized bool
 	Specialized     string // "" = none, else a unit type name; specialization concentrates output
 
-	// Transient per-turn stats for the end-of-turn report; not persisted.
-	LastSpoiled   int `json:"-"`
-	LastPopGrowth int `json:"-"`
+	// Per-turn stats for the income report and End of Turn Statistics. They are
+	// PERSISTED, and the reason is the door's transaction model rather than the
+	// game clock: the stage that computes one of these and the screen that prints
+	// it are separate transactions, and a FileStore transaction is
+	// flock → reload → fn → save, with reload unmarshalling into a fresh world.
+	// So a `json:"-"` field is zero by the time the screen asks for it, on a door
+	// and on -local alike, while MemStore keeps the same object and every test
+	// passes. That is how the "Your Industrial Zones built:" line came to be
+	// missing from every real board (found 2026-09-14). Each is rewritten
+	// unconditionally by the turn stage that owns it, so a persisted value cannot
+	// go stale.
+	LastSpoiled   int `json:"lastSpoiled,omitempty"`
+	LastPopGrowth int `json:"lastPopGrowth,omitempty"`
 	// LastInterest is the savings interest credited at the end of the previous
 	// turn and InvestReturnsToday what today's matured investments paid. Both are
 	// reported at the START of a turn, so unlike the transients above they have to
@@ -286,18 +296,19 @@ type Empire struct {
 	PendingMoralePenalty  int `json:"pendingMoralePenalty,omitempty"`
 	// CivilWarSeverity is the percentage a pending civil war will destroy, filed
 	// by a severe food shortfall (BRE empire record +0x2bb) and spent at rollover.
-	CivilWarSeverity    int   `json:"civilWarSeverity,omitempty"`
-	LastCivilWar        int   `json:"-"` // severity of the civil war that fired this turn, 0 if none
-	LastRiot            bool  `json:"-"`
-	LastMoraleDesertion int   `json:"-"`
-	MadeTroopers        int   `json:"-"`
-	MadeJets            int   `json:"-"`
-	MadeTurrets         int   `json:"-"`
-	MadeBombers         int   `json:"-"`
-	MadeTanks           int   `json:"-"`
-	MadeCarriers        int   `json:"-"`
-	LastGoldPaid        int64 `json:"-"`
-	LastFoodConsumed    int   `json:"-"`
+	CivilWarSeverity    int  `json:"civilWarSeverity,omitempty"`
+	LastCivilWar        int  `json:"lastCivilWar,omitempty"` // severity of the civil war that fired this turn, 0 if none
+	LastRiot            bool `json:"lastRiot,omitempty"`
+	LastMoraleDesertion int  `json:"lastMoraleDesertion,omitempty"`
+	MadeTroopers        int  `json:"madeTroopers,omitempty"`
+	MadeJets            int  `json:"madeJets,omitempty"`
+	MadeTurrets         int  `json:"madeTurrets,omitempty"`
+	MadeBombers         int  `json:"madeBombers,omitempty"`
+	MadeTanks           int  `json:"madeTanks,omitempty"`
+	MadeCarriers        int  `json:"madeCarriers,omitempty"`
+	// Written but never read on a screen; left unpersisted deliberately.
+	LastGoldPaid     int64 `json:"-"`
+	LastFoodConsumed int   `json:"-"`
 }
 
 // TurnProgress marks the stages of the current turn that have already completed,
