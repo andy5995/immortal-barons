@@ -9,6 +9,11 @@ concurrency:
 # change under internal/ that leaves the build files alone.
 on:
   workflow_dispatch:
+  # A publish is the moment the formula goes stale: the release exists and the
+  # pin still names the one before it. Nothing pushes a commit then, so without
+  # this the pin check would not run until the next unrelated change.
+  release:
+    types: [ published ]
   push:
     branches: [ trunk ]
     paths: &shared_paths
@@ -23,8 +28,44 @@ on:
     paths: *shared_paths
 
 jobs:
+  # The formula pins a published tarball by URL, so it can only be bumped after
+  # a release exists -- which is what makes it easy to forget. It was, at v0.0.5
+  # and again at v0.1.0, both times leaving the tap installing the previous
+  # version with nothing failing. docs/dev/releasing.md carries the step; this
+  # is the part that does not depend on anyone reading it.
+  pin:
+    name: formula pins the latest release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Compare the pinned tag against the latest release
+      run: |
+        pinned=$(sed -nE 's#.*releases/download/(v[^/]+)/.*#\1#p' \
+                 HomebrewFormula/immortal-barons.rb | head -1)
+        [ -n "$pinned" ] || { echo "::error::no release URL found in the formula"; exit 1; }
+        latest=$(gh release view --json tagName --jq .tagName 2>/dev/null || true)
+        if [ -z "$latest" ]; then
+          echo "no published release yet; nothing to compare against"
+          exit 0
+        fi
+        echo "formula pins $pinned; latest release is $latest"
+        if [ "$pinned" != "$latest" ]; then
+          echo "::error::the formula still pins $pinned but $latest is published." \
+               "Bump url and sha256 in HomebrewFormula/immortal-barons.rb" \
+               "(docs/dev/releasing.md, 'Bump the Homebrew formula')."
+          exit 1
+        fi
+
   formula:
     name: audit and install
+    # A publish changes no files, so the macOS build has nothing new to test --
+    # the pin job is the whole point of running on that event.
+    if: github.event_name != 'release'
     runs-on: macos-latest
     env:
       # A plain "brew install --dry-run" will otherwise auto-update Homebrew
