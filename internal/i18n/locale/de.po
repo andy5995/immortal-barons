@@ -24,7 +24,7 @@ msgstr ""
 msgid " — choose a topic:"
 msgstr ""
 
-#: internal/menu/actions_attack.go:910
+#: internal/menu/actions_attack.go:915
 #, fuzzy
 msgid "#"
 msgstr "##"
@@ -87,17 +87,17 @@ msgstr "vor %d Tagen"
 msgid "%d faults"
 msgstr ""
 
-#: internal/menu/turnstages.go:244
+#: internal/menu/turnstages.go:240
 #, fuzzy
 msgid "%d gold is requested to boost popular support."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
-#: internal/menu/turnstages.go:259
+#: internal/menu/turnstages.go:255
 #, fuzzy
 msgid "%d gold is requested to improve military morale."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
-#: internal/menu/turnstages.go:523
+#: internal/menu/turnstages.go:519
 msgid "%d matched! You win %s gold, paid straight into your bank."
 msgstr ""
 
@@ -105,7 +105,7 @@ msgstr ""
 msgid "%d regions are clean again — choose which types to hold them as."
 msgstr ""
 
-#: internal/menu/turnstages.go:189
+#: internal/menu/turnstages.go:185
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d Regionen rebellierten mangels Unterhalt."
 
@@ -117,11 +117,11 @@ msgstr ""
 msgid "%d troopers, %d turrets, %d tanks, %d jets"
 msgstr ""
 
-#: internal/menu/turnstages.go:186
+#: internal/menu/turnstages.go:182
 msgid "%d units deserted for lack of pay."
 msgstr "%d Einheiten desertierten mangels Sold."
 
-#: internal/menu/actions_attack.go:961
+#: internal/menu/actions_attack.go:968
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr "%d%% des Gooie Kablooie zerstört!"
 
@@ -182,11 +182,11 @@ msgstr "vor %d Tagen"
 msgid "%s gold is held against these bids."
 msgstr "%s Gold ist für diese Gebote zurückgelegt."
 
-#: internal/menu/turnstages.go:127
+#: internal/menu/turnstages.go:123
 msgid "%s gold is required to maintain your regions."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
-#: internal/menu/turnstages.go:223
+#: internal/menu/turnstages.go:219
 #, fuzzy
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
@@ -209,7 +209,7 @@ msgid ""
 "instead."
 msgstr ""
 
-#: internal/menu/actions_attack.go:956
+#: internal/menu/actions_attack.go:963
 msgid "%s jets were destroyed in the attack!"
 msgstr "%s Jets wurden beim Angriff zerstört!"
 
@@ -583,7 +583,7 @@ msgstr ""
 msgid "Awaiting a reply:"
 msgstr ""
 
-#: internal/menu/turnstages.go:448
+#: internal/menu/turnstages.go:444
 #, fuzzy
 msgid "BBS Coordinator"
 msgstr "Koordinator"
@@ -730,7 +730,7 @@ msgstr ""
 msgid "Canceled — no changes were saved."
 msgstr ""
 
-#: internal/menu/turnstages.go:487
+#: internal/menu/turnstages.go:483
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr ""
 
@@ -839,7 +839,7 @@ msgstr "Konfigurationseditor"
 msgid "Confirm?"
 msgstr "Bestätigen?"
 
-#: internal/menu/gameflow.go:311
+#: internal/menu/gameflow.go:333
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -908,7 +908,7 @@ msgstr "Spielaushänge"
 msgid "Date"
 msgstr "Datum"
 
-#: internal/menu/actions_attack.go:911
+#: internal/menu/actions_attack.go:916
 msgid "Days Until Self-Destruct"
 msgstr "Tage bis zur Selbstzerstörung"
 
@@ -1038,7 +1038,7 @@ msgstr "Möchtest du eine weitere Nachricht senden?"
 msgid "Do you wish to target (O)ne Dominion or (A)ll?"
 msgstr ""
 
-#: internal/menu/turnstages.go:116
+#: internal/menu/turnstages.go:112
 #, fuzzy
 msgid "Do you wish to visit the bank?"
 msgstr "Möchtest du eine weitere Nachricht senden?"
@@ -1047,7 +1047,7 @@ msgstr "Möchtest du eine weitere Nachricht senden?"
 msgid "Done"
 msgstr "Fertig"
 
-#: internal/menu/turnstages.go:506
+#: internal/menu/turnstages.go:502
 msgid "Drawn:"
 msgstr ""
 
@@ -1095,9 +1095,9 @@ msgstr "Du hast noch %s%s Züge Schutz."
 msgid "End of Turn Statistics:"
 msgstr "Statistik am Zugende:"
 
-#: internal/menu/actions_attack.go:927
+#: internal/menu/actions_attack.go:934
 #, fuzzy
-msgid "Enter Gooie Number"
+msgid "Enter Gooie Number (0 to cancel)?"
 msgstr "Planetennamen oder Nummer eingeben"
 
 #: internal/menu/actions_ipmessages.go:128
@@ -1156,7 +1156,7 @@ msgstr "Zu verkaufen"
 msgid "Free software under the MIT License."
 msgstr ""
 
-#: internal/menu/actions_attack.go:911
+#: internal/menu/actions_attack.go:916
 msgid "From"
 msgstr "Von"
 
@@ -1192,7 +1192,7 @@ msgstr ""
 msgid "Gold Needed"
 msgstr "Gold benötigt"
 
-#: internal/menu/turnstages.go:88
+#: internal/menu/turnstages.go:84
 msgid "Gold paid."
 msgstr "Gold bezahlt."
 
@@ -1276,7 +1276,7 @@ msgstr ""
 msgid "How much to repay?"
 msgstr "Wie viel zurückzahlen?"
 
-#: internal/menu/turnstages.go:125
+#: internal/menu/turnstages.go:121
 msgid "How much will you give?"
 msgstr ""
 
@@ -1385,7 +1385,7 @@ msgstr "Es erreicht sie frühestens in Zug %d ihres Tages."
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Die Finanzierung kostet Ihren Planeten %s Millionen Gold. Annehmen?"
 
-#: internal/menu/actions_attack.go:917
+#: internal/menu/actions_attack.go:924
 #, fuzzy
 msgid "It would take %s jets to destroy one outright."
 msgstr "Es bräuchte %s Jets, um ihn auf einen Schlag zu zerstören."
@@ -1489,7 +1489,7 @@ msgstr "Makro Strg-%c gespeichert."
 msgid "Macro Editor"
 msgstr "Makro-Editor"
 
-#: internal/menu/turnstages.go:93
+#: internal/menu/turnstages.go:89
 msgid "Maintenance:"
 msgstr "Unterhalt:"
 
@@ -1540,7 +1540,7 @@ msgstr "Nachrichten lesen"
 msgid "Military"
 msgstr "Militär"
 
-#: internal/menu/turnstages.go:199
+#: internal/menu/turnstages.go:195
 msgid "Military morale rose %d points."
 msgstr ""
 
@@ -1630,7 +1630,7 @@ msgstr ""
 msgid "No inter-BBS scores have been imported yet."
 msgstr ""
 
-#: internal/menu/turnstages.go:520
+#: internal/menu/turnstages.go:516
 msgid "No matches. The Queen thanks you for your contribution."
 msgstr ""
 
@@ -1852,7 +1852,7 @@ msgstr "Überfällige Schuld: %s (wächst jeden Zug bis zur Tilgung)"
 msgid "Owned"
 msgstr "Besitz"
 
-#: internal/menu/turnstages.go:541
+#: internal/menu/turnstages.go:537
 msgid "Pick your six letters:"
 msgstr ""
 
@@ -1911,7 +1911,7 @@ msgstr "Spieler auf %s"
 msgid "Popular Support"
 msgstr "Rückhalt"
 
-#: internal/menu/turnstages.go:196
+#: internal/menu/turnstages.go:192
 #, fuzzy
 msgid "Popular support rose %d points."
 msgstr "Rückhalt"
@@ -2106,7 +2106,7 @@ msgstr "SpyGuy senden"
 msgid "Send Trade Deal"
 msgstr "Handelsangebot senden"
 
-#: internal/menu/gameflow.go:282
+#: internal/menu/gameflow.go:304
 #, fuzzy
 msgid "Send a message?"
 msgstr "Nachricht senden"
@@ -2127,7 +2127,7 @@ msgstr "Wie viele Panzer senden?"
 msgid "Send how many Troopers?"
 msgstr "Wie viele Soldaten senden?"
 
-#: internal/menu/actions_attack.go:940
+#: internal/menu/actions_attack.go:947
 msgid "Send how many jets?"
 msgstr "Wie viele Jets senden?"
 
@@ -2258,7 +2258,7 @@ msgstr "Auswanderung schüren"
 msgid "Stir Revolts"
 msgstr "Aufstände schüren"
 
-#: internal/menu/actions_attack.go:911
+#: internal/menu/actions_attack.go:916
 msgid "Strength"
 msgstr "Stärke"
 
@@ -2404,15 +2404,15 @@ msgstr "Der Gooie Kablooie ist fertig. Er startet in %s nach %s."
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr "Der Gooie Kablooie ist unterwegs. Mehr lässt sich nicht mehr tun."
 
-#: internal/menu/actions_attack.go:958
+#: internal/menu/actions_attack.go:965
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "Der Gooie Kablooie wurde ZERSTÖRT!"
 
-#: internal/menu/turnstages.go:399
+#: internal/menu/turnstages.go:395
 msgid "The Queen Royale opens her coffers and refunds you %s gold!"
 msgstr ""
 
-#: internal/menu/turnstages.go:149
+#: internal/menu/turnstages.go:145
 msgid "The Queen Royale requires %s gold for Taxes."
 msgstr ""
 
@@ -2497,7 +2497,7 @@ msgstr ""
 "Es sind keine gegnerischen Reiche mehr da, die man angreifen könnte.Es sind "
 "keine gegnerischen Imperien mehr übrig, die du angreifen kannst."
 
-#: internal/menu/actions_attack.go:938
+#: internal/menu/actions_attack.go:945
 #, fuzzy
 msgid "There are only %d to choose from."
 msgstr ""
@@ -2929,7 +2929,7 @@ msgstr "Einkommensbericht:"
 msgid "Would you like to begin construction?"
 msgstr "Möchten Sie mit dem Bau beginnen?"
 
-#: internal/menu/turnstages.go:164
+#: internal/menu/turnstages.go:160
 msgid "Would you like to reconsider?"
 msgstr ""
 
@@ -2964,7 +2964,7 @@ msgstr ""
 msgid "You can afford %s%d%s regions."
 msgstr "Das kannst du dir nicht leisten."
 
-#: internal/menu/turnstages.go:464
+#: internal/menu/turnstages.go:460
 msgid "You can change it from the System menu."
 msgstr ""
 
@@ -2981,7 +2981,7 @@ msgstr "Sie können sich zu diesem Preis nicht eine Einheit leisten."
 msgid "You cannot buy from your own listing."
 msgstr ""
 
-#: internal/menu/turnstages.go:461
+#: internal/menu/turnstages.go:457
 #, fuzzy
 msgid ""
 "You cannot change it until your new-realm protection ends, %d turns from now."
@@ -2989,7 +2989,7 @@ msgstr ""
 "Du kannst dein Reich nicht umbenennen, solange es unter Schutz eines neuen "
 "Reiches steht."
 
-#: internal/menu/turnstages.go:95
+#: internal/menu/turnstages.go:91
 msgid "You cannot cover all your maintenance this turn."
 msgstr "Du kannst diesen Zug nicht deinen gesamten Unterhalt decken."
 
@@ -3144,7 +3144,7 @@ msgstr "Sie haben keinen bestochenen Agenten in diesem Reich."
 msgid "You hold no bribed agents to work through."
 msgstr "Sie haben keine bestochenen Agenten, durch die Sie wirken könnten."
 
-#: internal/menu/turnstages.go:449
+#: internal/menu/turnstages.go:445
 msgid "You hold the office of %s."
 msgstr ""
 
@@ -3248,7 +3248,7 @@ msgid "Your Prices"
 msgstr "Deine Nachrichten:"
 
 # Turn pipeline — maintenance
-#: internal/menu/turnstages.go:132
+#: internal/menu/turnstages.go:128
 #, fuzzy
 msgid "Your SDI Program requires %s gold."
 msgstr "Deine Streitkräfte benötigen %s Gold."
@@ -3257,7 +3257,7 @@ msgstr "Deine Streitkräfte benötigen %s Gold."
 msgid "Your SpyGuy leaves for %s, and will watch it for %d days."
 msgstr ""
 
-#: internal/menu/turnstages.go:163
+#: internal/menu/turnstages.go:159
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
@@ -3266,12 +3266,12 @@ msgid "Your allies will send the following to aid you in defense:"
 msgstr ""
 
 # Turn pipeline — maintenance
-#: internal/menu/turnstages.go:123
+#: internal/menu/turnstages.go:119
 msgid "Your armed forces require %s gold."
 msgstr "Deine Streitkräfte benötigen %s Gold."
 
 # Turn pipeline — maintenance
-#: internal/menu/turnstages.go:356
+#: internal/menu/turnstages.go:352
 #, fuzzy
 msgid "Your armed forces require %s units of food."
 msgstr "Deine Streitkräfte benötigen %s Gold."
@@ -3364,7 +3364,7 @@ msgstr "Ihre Nachricht ist unterwegs zu %d Planeten."
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
-#: internal/menu/turnstages.go:355
+#: internal/menu/turnstages.go:351
 msgid "Your people need %s units of food."
 msgstr ""
 
@@ -3407,7 +3407,7 @@ msgstr "Rückhalt"
 msgid "Your shipment is on its way to %s of %s."
 msgstr "Ihre Lieferung ist unterwegs zu %s von %s."
 
-#: internal/menu/turnstages.go:455
+#: internal/menu/turnstages.go:451
 msgid "Your vote for BBS Coordinator is %s."
 msgstr ""
 
@@ -3536,7 +3536,7 @@ msgstr ""
 msgid "no coordinator key is loaded"
 msgstr ""
 
-#: internal/menu/turnstages.go:453
+#: internal/menu/turnstages.go:449
 msgid "no one"
 msgstr ""
 
@@ -3690,7 +3690,7 @@ msgstr ""
 msgid "troops deserted due to low morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:213
+#: internal/menu/gameflow.go:212
 #, fuzzy
 msgid "units of Food consumed."
 msgstr "Nahrungseinheiten verbraucht."

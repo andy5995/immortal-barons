@@ -1,12 +1,9 @@
 Immortal Barons ChangeLog
 
-(in-progress:)
-  * The Industrial Zones build line and the End of Turn Statistics figures
-    are no longer blank on a door or in -local play
-  * A Gooie Kablooie on the planet can be attacked on every turn, not once
-    per entry
-  * A backfiring S3-Sabre develops land for the realm it was aimed at, and
-    costs the realm that fired it nothing
+2026-09-14 (v0.1.1)
+  * The industry build line and the end-of-turn figures are no longer blank
+  * A Gooie Kablooie on the planet can be attacked on every turn
+  * A backfiring S3-Sabre develops the target's land, and costs nothing
 
 2026-09-13 (v0.1.0)
   * New players get a Welcome menu before naming their realm
