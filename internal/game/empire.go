@@ -306,9 +306,6 @@ type Empire struct {
 	MadeBombers         int  `json:"madeBombers,omitempty"`
 	MadeTanks           int  `json:"madeTanks,omitempty"`
 	MadeCarriers        int  `json:"madeCarriers,omitempty"`
-	// Written but never read on a screen; left unpersisted deliberately.
-	LastGoldPaid     int64 `json:"-"`
-	LastFoodConsumed int   `json:"-"`
 }
 
 // TurnProgress marks the stages of the current turn that have already completed,

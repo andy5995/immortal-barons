@@ -57,8 +57,8 @@ func TestPayForcesFullNoDesertion(t *testing.T) {
 	if e.Troopers != before {
 		t.Errorf("troopers should be unchanged, %d -> %d", before, e.Troopers)
 	}
-	if e.LastGoldPaid != req {
-		t.Errorf("LastGoldPaid: want %d, got %d", req, e.LastGoldPaid)
+	if want := int64(100000) - req; e.Gold != want {
+		t.Errorf("gold after paying in full: want %d, got %d", want, e.Gold)
 	}
 }
 
@@ -172,9 +172,6 @@ func TestClampGiveLimitsToGold(t *testing.T) {
 	w.PayForces(e, 1_000_000) // asks to give a fortune
 	if e.Gold != 0 {
 		t.Errorf("cannot pay more than gold on hand, gold=%d", e.Gold)
-	}
-	if e.LastGoldPaid != 50 {
-		t.Errorf("LastGoldPaid should equal what was affordable (50), got %d", e.LastGoldPaid)
 	}
 }
 

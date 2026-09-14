@@ -197,18 +197,6 @@ func TestAgriFoodBandMatchesLiveBRE(t *testing.T) {
 	}
 }
 
-func TestProcessEconomyTracksConsumed(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("tester", "Testland")
-	wantFood := e.FoodUpkeep()
-
-	w.PlayTurn(e, "2026-07-03")
-
-	if e.LastFoodConsumed != wantFood {
-		t.Errorf("LastFoodConsumed: want %d, got %d", wantFood, e.LastFoodConsumed)
-	}
-}
-
 func TestForcesUpkeepFormula(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")

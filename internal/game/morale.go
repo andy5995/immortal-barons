@@ -56,7 +56,6 @@ func civilWarSeverity(need, given int64, thresholdPct int) int {
 // stat penalties and the civil war.
 func (w *World) feed(e *Empire) {
 	peopleNeed, armyNeed := e.PeopleFoodUpkeep(), e.ForcesFoodUpkeep()
-	e.LastFoodConsumed = peopleNeed + armyNeed
 
 	toPeople := min(e.Food, peopleNeed)
 	toArmy := min(e.Food-toPeople, armyNeed)

@@ -201,8 +201,7 @@ func (e *Empire) FoodUpkeepAtCapacity() int {
 }
 
 // clampGive limits a payment to what the empire can actually afford and
-// deducts it, recording it in the turn's LastGoldPaid tally. Returns the
-// amount actually paid.
+// deducts it. Returns the amount actually paid.
 func (e *Empire) clampGive(given int64) int64 {
 	if given > e.Gold {
 		given = e.Gold
@@ -211,7 +210,6 @@ func (e *Empire) clampGive(given int64) int64 {
 		given = 0
 	}
 	e.Gold -= given
-	e.LastGoldPaid += given
 	return given
 }
 
