@@ -9,8 +9,9 @@ The game is written in Go. It is an independent remake, inspired by the
 1990s BBS door game *Barren Realms Elite*. See [Heritage](#heritage) below.
 
 > **Early release.** The game is playable and inter-BBS (IBBS) league play
-> works, but it is not finished: some game values are still being balanced, and
-> a league has so far only been run between boards belonging to one operator.
+> works. A six-board league is running now as a live test, across boards run by
+> several operators. It is a test rather than a real game: everyone taking part
+> knows more live play is wanted before a real one begins.
 
 ## Status
 
@@ -21,13 +22,16 @@ any AI) act on their own turns. The game runs locally or as a native BBS door.
 The core game is playable — economy, military and war, covert operations,
 diplomacy, and messaging all work. Leagues and inter-BBS play are built as well:
 boards trade packets, and barons attack, message, and buy from an ally's market
-across planets. That has been run between two boards on one machine; a league
-spread across boards run by different sysops has not been tried yet.
+across planets. Six boards run by several operators are playing a test league
+now, which is the first time the game has been played across boards belonging to
+different people.
 
-Balance is the unfinished part. The values read from the original's own program
-— region income, unit costs, industrial output, the crown tax — now match it,
-but the rest are still being tuned, so parts of the game may be too easy or too
-hard.
+Most of the game's numbers are read from the original's own program rather than
+guessed: region income, the coastal support curve, unit costs and the
+specialization modifiers, industrial output and the unit pool, the crown tax,
+and the whole technology system. Those are fixed — changing one would mean the
+game stops matching the original. The rest are tuning values, and changes to
+them from here should be small.
 
 Learn more, follow progress, or get involved:
 

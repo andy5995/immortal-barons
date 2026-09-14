@@ -59,11 +59,11 @@
   the Coordinator's bulletins are sent to every board and shown to all players
   under a "Galactic" heading.
 - A reset option turns the pirates off. BRE always has them.
-- Some game values — such as attack rewards and several economy rates — may not
-  match BRE exactly. The ones read out of BRE's own program do match: region
-  income, unit prices, industrial output, and the crown tax. The rest are being
-  tuned as more of the original is worked out, and a few mechanics are still
-  being built.
+- Most game values are read out of BRE's own program and match it: region
+  income, the coastal support curve, unit prices and the specialization
+  modifiers, industrial output and the unit pool, the crown tax, and the
+  technology system. A few — some attack rewards and economy rates — are tuning
+  values that BRE never states, and a few mechanics are still being built.
 
 ## Is winsock supported?
 
