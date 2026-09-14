@@ -261,11 +261,23 @@ func runTurn(s session.Session, w *ctx) Result {
 		// 0x03df0) — so it is offered on EVERY turn, not once per entry. It ran
 		// once before the loop until 2026-09-14, which gave a baron playing three
 		// turns one sortie against a weapon the original lets them hit three times.
-		if err := runStageOnce(w,
-			func(tp game.TurnProgress) bool { return tp.GooieDefenseDone },
-			func(tp *game.TurnProgress) { tp.GooieDefenseDone = true },
-			func() error { annihilatorDefense(s, w); return nil }); err != nil {
-			return Stay
+		//
+		// The landed check goes first, and through Read. runStageOnce costs two
+		// world transactions — one to read the flag, one to write it — and on a
+		// door each is flock -> reload -> SAVE of the whole world under the lock
+		// every other node is queued on. Almost every board has no weapon on the
+		// ground, where the stage body returns without drawing anything, so the
+		// stage would buy two saves a turn for a screen nobody sees.
+		besieged := false
+		w.Read(func() { besieged = len(w.Landed()) > 0 })
+		if besieged {
+			// annihilatorDefense cannot fail: it prompts and returns, and a stream
+			// end leaves through session.End rather than an error. Same shape as the
+			// Message stage below.
+			_ = runStageOnce(w,
+				func(tp game.TurnProgress) bool { return tp.GooieDefenseDone },
+				func(tp *game.TurnProgress) { tp.GooieDefenseDone = true },
+				func() error { annihilatorDefense(s, w); return nil })
 		}
 		if w.prefs().VisitTrading {
 			if err := runStageOnce(w,

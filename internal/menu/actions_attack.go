@@ -865,18 +865,18 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 }
 
 // annihilatorDefense is the planet's answer to a Gooie Kablooie squatting on
-// it: throw jets at the thing until it dies. The original asks every baron this
-// at the top of their turn rather than hiding it behind a menu item
-// (run_player_turn calls the routine directly), because the weapon needs the
-// whole planet's air forces and a baron who never opens the InterPlanetary menu
-// would never see it (#112).
+// it: throw jets at the thing until it dies. The original forces it on every
+// baron as a turn stage rather than hiding it behind a menu item — stage 12 of
+// run_player_turn, after the Attack menu — because the weapon needs the whole
+// planet's air forces and a baron who never opens the InterPlanetary menu would
+// never see it (#112). gameflow.go calls it from the same place.
 //
 // Several planets can be besieging this one at once, so the weapons are listed
 // and picked by number, as the original does.
 //
 // The ORDER of the three questions is the original's and is not arbitrary. The
 // yes/no comes first, as an early way out: this screen is forced on every baron
-// at the start of their turn, and one who is not spending jets today should not
+// on every turn, and one who is not spending jets today should not
 // have to read a table to say so. In the original a "no" leaves the routine
 // before the table is drawn at all (BRE.OVR 0x0f29), and the jets check sits
 // between the two, so a baron with no jets is told so rather than shown a list
