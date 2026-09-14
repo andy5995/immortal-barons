@@ -314,6 +314,7 @@ type TurnProgress struct {
 	BankDone           bool
 	SpendingDone       bool
 	AttackDone         bool
+	GooieDefenseDone   bool
 	TradingDone        bool
 	InterPlanetaryDone bool
 	MessageDone        bool

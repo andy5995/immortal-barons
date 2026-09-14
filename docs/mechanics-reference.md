@@ -1034,9 +1034,12 @@ weapon in one wave. The jets are spent whether they connect or not.
 and the jets pick their target from the original's numbered list (" #  From /
 Strength / Days Until Self-Destruct", with its "Enter Gooie Number" prompt —
 both strings are in `launch_gooie_kablooie`, which despite its name is the
-DEFENDER's screen — its only caller is `run_player_turn` at `0x03dc1`, a direct
-call after the Attack menu and BEFORE the InterPlanetary menu, so it is a forced
-turn stage rather than a menu item, which is where IB calls it from too). IB tracked a single weapon until
+DEFENDER's screen — its only caller is `run_player_turn` at `0x03dc1`, stage 12
+of that routine's turn state machine, after the Attack menu (stage 11,
+`0x03da5`) and before the Trading Market (stage 13, `0x03df0`) and the
+InterPlanetary menu (stage 14, `0x03e06`), so it is a forced turn stage rather
+than a menu item and is offered on EVERY turn. IB ran it once per
+ENTRY, ahead of the turn loop, until 2026-09-14). IB tracked a single weapon until
 2026-09-13, and a second board's was not merely unlisted but folded into the
 first's record: the launch warning fires only on the transition to flying, so
 that planet's weapon was never announced, and whether it landed came down to

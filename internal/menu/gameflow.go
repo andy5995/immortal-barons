@@ -145,7 +145,6 @@ func runTurn(s session.Session, w *ctx) Result {
 
 	showCoordinatorNotice(s, w)
 	openTurnRecap(s, w)
-	annihilatorDefense(s, w)
 
 	firstTurn := true
 	for {
@@ -255,6 +254,17 @@ func runTurn(s session.Session, w *ctx) Result {
 			func(tp game.TurnProgress) bool { return tp.AttackDone },
 			func(tp *game.TurnProgress) { tp.AttackDone = true },
 			func() error { return Run(s, w, menus.Attack) }); err != nil {
+			return Stay
+		}
+		// The Gooie defense is stage 12 of BRE's turn state machine, between the
+		// Attack menu (stage 11, BRE.EXE 0x03da5) and the Trading Market (stage 13,
+		// 0x03df0) — so it is offered on EVERY turn, not once per entry. It ran
+		// once before the loop until 2026-09-14, which gave a baron playing three
+		// turns one sortie against a weapon the original lets them hit three times.
+		if err := runStageOnce(w,
+			func(tp game.TurnProgress) bool { return tp.GooieDefenseDone },
+			func(tp *game.TurnProgress) { tp.GooieDefenseDone = true },
+			func() error { annihilatorDefense(s, w); return nil }); err != nil {
 			return Stay
 		}
 		if w.prefs().VisitTrading {
