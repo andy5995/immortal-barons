@@ -1,123 +1,69 @@
 Immortal Barons ChangeLog
 
-(in-progress:)
-  * An interplanetary message that cannot be delivered comes back to the
-    sender with the reason, the date it was sent and who it was addressed to
-  * Twelve help topics no longer describe mechanics the game has changed or
-    never had
-  * The Daily Bulletin's totals and the change beside them are measured at the
-    same moment, and the screen and the written news file show the same figures
-  * Buy Regions closes when the day's region allowance is spent, rather than
-    asking for an amount that can only be zero
-  * The German and Russian help carries the corrected topics instead of
-    dropping back to English part-way through a page
-  * The German help renders on a CP437 door again: fourteen strings used
-    characters CP437 does not have
-  * A node no longer holds on to game state that another node has removed
-  * A weapon aimed at this planet is no longer refused for arriving late, so a
-    board that was down when it landed still gets the siege
-  * Two planets can now aim a Gooie Kablooie at the same one at once, and the
-    jets pick which to attack
-  * A Gooie Kablooie no longer goes missing between boards whose game days
-    differ, and dismantling one now tells every baron on the planet
-  * Pirate factions start with a hoard, so raiding one is worth doing in a
-    new game
-  * Declaring war no longer costs support and morale, which the original
-    does not charge for it
-  * The planetary run tells the sysop when a board has stopped sending
-  * Travel Times marks a figure nothing has refreshed lately, so a link that
-    stopped delivering no longer reads as a fast one
-  * Drawing a screen that only reads no longer rewrites the game file
-  * New players get a Welcome menu before naming their realm, with the game
-    setup, instructions, help and scores on it
-  * Purchases in some cases will give a prompt to withdraw or visit the bank
-    if the player doesn't have enough gold on hand
-  * Rivers pay the original's full hydropower gold: the 10% "bad year" that
-    halved it was IB's own and is gone
-  * Industrial gold is no longer raised by technology research, which the
-    original does not do and which disagreed with the Set Industries figure
-  * The bank, spending, attack, covert, trading and message menus read in
-    German, Dutch and Russian
-  * German, Dutch and Russian name the units and region types, and the help
-    topics for every unit and region read in German and Russian
-  * The region table shows translated names, and lines up when they are not
-    written in the Latin alphabet
-  * InterPlanetary menu: "Trade" gathers the interplanetary markets, the bids
-    you have out and Send Trade Deal on one item
-  * The Incoming screen reads in German, Dutch and Russian
-  * Join Group Attack shows the parties forming before it asks for a turn to
-    have been played, as the original does
-  * A stray mouse click no longer fills a prompt with stray characters, and
-    Ctrl-U clears the planet prompt as it does every other field
-  * Covert and terror operations ask, price and confirm in the original's own
-    words, and every operation — the SpyGuy's stay included — offers the bank
-    when you cannot afford what you just agreed to
-  * Game Setup shows how many transport faults a board has recorded, and a
-    player addressing a planet nothing has come back from is told so
-  * Selling units pays exactly the price the Sell menu quotes, for each unit
-    sold, matching the original
-  * Buying and selling units runs off the one unit table, so a unit cannot be
-    priced one way on the menu and charged another
-  * Combat, covert and pirate tunables are declared with the rest of the
-    game's numbers, so retuning them means looking in one place
-  * The seven treaty types are declared once, so a pact cannot silently stop
-    applying because its name was typed differently somewhere
-  * The InterPlanetary Special Operations menu is one column, in the original's
-    color, and prices its four bombing operations
-  * At a "how many" prompt, k/m/b only multiply a figure already typed, instead
-    of filling the field with zeroes on their own
-  * Industrial gold is figured in the same width as the rest of the money, so a
-    32-bit build cannot wrap it on a very large realm
-  * A large realm's Industrial Zones produce the units they should, instead of
-    wrong or negative counts once the realm passed a few thousand regions
-  * Send SpyGuy offers the full fifteen days whatever your gold, and opens the
-    bank when the stay costs more than you are carrying
-  * What the Industrial Zones built is listed across two lines in the bracketed
-    form the status screen uses, instead of one line per unit type
-  * InterPlanetary menu: "Incoming" lists the group attacks and Gooie Kablooies
-    aimed at this planet, counting down as you read
-  * A funded Gooie Kablooie counts down to the hour it actually launches,
-    instead of reading "in 0 hours" for its whole last day
-  * Creating or joining a group attack now asks to confirm after quoting the
-    price, as the original does
-  * Every time the game shows now says which time zone it is on, and each news
-    entry carries the hour it happened
-  * Preferences: choose the clock times are shown on — UTC, this board's, or a
-    time zone from a list
-  * The Join Group Attack table counts down in minutes and seconds as a party
-    nears departure, instead of whole hours
-  * The BBS Coordinator can call off an attack party still assembling, sending
-    every contributor's forces home
-  * On Windows, a packet moved between directories on different drives is no
-    longer delivered twice
-  * The League Coordinator sends the league's rules on every planetary run, so
-    a board that missed a broadcast is brought back into line
-  * Packets from a board playing by rules the league never agreed are held, and
-    that board is told why
-  * A planetary run that meets a new transport fault exits non-zero and can run
-    a command of the sysop's own (bbs.cfg "OnFault")
-  * Computer barons pay the same rising price for land a player does when they
-    expand to feed themselves
-  * New Realm Protection waives the big-realm surcharge on land, and a region
-    costs what the original charges at every size
-  * The Preferences screen lines its Yes/No column up in every language, and
-    answers in the player's own
-  * A board catches up the days that passed while nobody played, instead of
-    falling a day further behind for each one
-  * Help on the Terrorist Ops and Special Operations menus explains what each
-    operation does
-  * The World Report lists nuclear, chemical and biological strikes as well as
-    attacks
-  * Today's News opens with the Planetary Master line again, instead of it
-    going straight to yesterday's
-  * Random events take a share of what you hold, not a flat handful, and are
-    rolled at the end of every turn rather than once a day
-  * The Queen's purse hands out gold and troopers to the whole planet
+2026-09-13 (v0.1.0)
+  * New players get a Welcome menu before naming their realm
+  * Random events take a share of what a realm holds, rolled every turn
+  * The Queen's purse hands gold and troopers to the whole planet
+  * Rivers pay the original's full hydropower gold
+  * Industrial gold is no longer raised by technology research
+  * A large realm's Industrial Zones produce the units they should
+  * Industrial gold cannot wrap on a 32-bit build
+  * Declaring war no longer costs support and morale
+  * A covert operation against a treaty partner breaks the pact
   * A Free Trade Agreement spreads a partner's low morale and support
-  * An invasion notice names the kind of strike that hit you
-  * A packet refused on its signature is held for later instead of destroyed
-  * A covert operation against a treaty partner breaks the pact and costs
-    support and morale
+  * Pirate factions start with a hoard, so raiding one is worth doing
+  * Computer barons pay the same rising land price a player does
+  * New Realm Protection waives the big-realm surcharge on land
+  * Selling units pays exactly the price the Sell menu quotes
+  * Buying and selling run off one unit table, so prices cannot disagree
+  * Buy Regions closes when the day's region allowance is spent
+  * A purchase beyond the gold in hand offers the bank
+  * Send SpyGuy offers the full fifteen days whatever the gold
+  * At a "how many" prompt, k/m/b only multiply a figure already typed
+  * A stray mouse click no longer fills a prompt, and Ctrl-U clears it
+  * Covert and terror operations ask, price and confirm in BRE's words
+  * Creating or joining a group attack confirms after quoting the price
+  * Join Group Attack shows the parties forming before asking for a turn
+  * The Join Group Attack table counts down in minutes and seconds
+  * A funded Gooie Kablooie counts down to the hour it launches
+  * InterPlanetary "Incoming" lists the attacks aimed at this planet
+  * Two planets can aim a Gooie Kablooie at the same one at once
+  * A Gooie Kablooie no longer goes missing between boards
+  * A weapon is no longer refused for arriving late
+  * An invasion notice names the kind of strike that hit
+  * An interplanetary message that cannot be delivered comes back
+  * InterPlanetary "Trade" gathers the markets, bids and Send Trade Deal
+  * InterPlanetary Special Operations is one column and prices its ops
+  * What the Industrial Zones built is listed in the bracketed form
+  * The Daily Bulletin's totals and their change are measured together
+  * Today's News opens with the Planetary Master line again
+  * The World Report lists nuclear, chemical and biological strikes
+  * Every clock says which time zone it is on, and news carries the hour
+  * Preferences: choose the clock — UTC, the board's, or a named zone
+  * The Preferences screen lines its Yes/No column up in every language
+  * Twelve help topics no longer describe mechanics the game changed
+  * Help on the Terrorist and Special Operations menus explains each op
+  * The German help renders on a CP437 door again
+  * Six more menus read in German, Dutch and Russian
+  * German, Dutch and Russian name the units and region types
+  * The help topics for every unit and region read in German and Russian
+  * The region table shows translated names, and lines up in any script
+  * The Incoming screen reads in German, Dutch and Russian
+  * Game Setup shows how many transport faults a board has recorded
+  * A player addressing a planet nothing has come back from is told so
+  * The BBS Coordinator can call off an attack party still assembling
+  * Drawing a screen that only reads no longer rewrites the game file
+  * A node no longer holds game state another node has removed
+  * A board catches up the days that passed while nobody played
+  * Combat, covert and pirate tunables are declared with the rest
+  * The seven treaty types are declared once
+  * The League Coordinator sends the league's rules on every run
+  * Packets from a board playing by unagreed rules are held, and it is told
+  * A packet refused on its signature is held for later, not destroyed
+  * The planetary run tells the sysop when a board has stopped sending
+  * Travel Times marks a figure nothing has refreshed lately
+  * A planetary run meeting a new fault exits non-zero and can run OnFault
+  * On Windows, a packet moved across drives is no longer delivered twice
   * ftn.cfg takes an InboundDir line per directory the mailer delivers into
   * barons-ftn reports packets left unclaimed in the mailer's inbound
 

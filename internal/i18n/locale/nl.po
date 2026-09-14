@@ -69,11 +69,11 @@ msgstr ""
 msgid "%d %s bought."
 msgstr ""
 
-#: internal/menu/actions_regions.go:354
+#: internal/menu/actions_regions.go:373
 msgid "%d %s regions dropped. You now hold %d land."
 msgstr ""
 
-#: internal/menu/actions_regions.go:182
+#: internal/menu/actions_regions.go:207
 msgid "%d %s regions purchased. Gold: %d"
 msgstr ""
 
@@ -101,7 +101,7 @@ msgstr ""
 msgid "%d matched! You win %s gold, paid straight into your bank."
 msgstr ""
 
-#: internal/menu/actions_regions.go:236
+#: internal/menu/actions_regions.go:255
 msgid "%d regions are clean again — choose which types to hold them as."
 msgstr ""
 
@@ -109,11 +109,11 @@ msgstr ""
 msgid "%d regions revolted for lack of upkeep."
 msgstr ""
 
-#: internal/game/combat.go:161
+#: internal/game/combat.go:168
 msgid "%d troopers, %d jets, %d tanks, %d bombers"
 msgstr ""
 
-#: internal/game/combat.go:265
+#: internal/game/combat.go:272
 msgid "%d troopers, %d turrets, %d tanks, %d jets"
 msgstr ""
 
@@ -165,11 +165,11 @@ msgstr ""
 msgid "%s against which planet?"
 msgstr ""
 
-#: internal/game/combat.go:236
+#: internal/game/combat.go:243
 msgid "%s attacked you and took %d regions. You lost %s."
 msgstr ""
 
-#: internal/game/combat.go:248
+#: internal/game/combat.go:255
 msgid "%s attacked you and was repelled. You lost %s."
 msgstr ""
 
@@ -189,7 +189,7 @@ msgstr ""
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr ""
 
-#: internal/menu/turnrecap.go:420
+#: internal/menu/turnrecap.go:414
 msgid "%s have captured %s %s"
 msgstr ""
 
@@ -219,7 +219,7 @@ msgstr ""
 msgid "%s offers you a trade deal."
 msgstr "%s biedt u een handelsovereenkomst aan."
 
-#: internal/menu/mailreader.go:243
+#: internal/menu/mailreader.go:258
 msgid "%s on %s"
 msgstr "%s op %s"
 
@@ -251,11 +251,11 @@ msgstr "%s — een wapenhandelaar vraagt %s goud voor de raket."
 msgid "%s — see planetary.log"
 msgstr ""
 
-#: internal/game/combat.go:125
-msgid "%s's allies send %d troopers and %d tanks to aid the defense."
+#: internal/game/combat.go:131
+msgid "%s's allies send %s troopers and %s tanks to aid the defense."
 msgstr ""
 
-#: internal/menu/turnrecap.go:124
+#: internal/menu/turnrecap.go:118
 msgid "(%d times)"
 msgstr ""
 
@@ -283,7 +283,7 @@ msgstr ""
 msgid ", "
 msgstr ""
 
-#: internal/menu/actions_regions.go:334
+#: internal/menu/actions_regions.go:353
 msgid "-* Drop Regions *-"
 msgstr ""
 
@@ -795,7 +795,7 @@ msgstr ""
 msgid "Chopper's Fair Market"
 msgstr "Choppers Eerlijke Markt"
 
-#: internal/menu/turnrecap.go:480
+#: internal/menu/turnrecap.go:474
 msgid "Civil war! Famine cost you %d%% of your realm and its forces."
 msgstr ""
 
@@ -917,7 +917,7 @@ msgid ""
 "morale."
 msgstr ""
 
-#: internal/game/combat.go:247
+#: internal/game/combat.go:254
 msgid "Defeat! Your forces were beaten off the field."
 msgstr ""
 
@@ -925,11 +925,11 @@ msgstr ""
 msgid "Defender"
 msgstr ""
 
-#: internal/menu/mailreader.go:214
+#: internal/menu/mailreader.go:223
 msgid "Delete"
 msgstr "Wissen"
 
-#: internal/menu/mailreader.go:262
+#: internal/menu/mailreader.go:277
 msgid "Delete,"
 msgstr "Wissen,"
 
@@ -1045,7 +1045,7 @@ msgid ""
 "and its food bill at once."
 msgstr ""
 
-#: internal/menu/actions_regions.go:329
+#: internal/menu/actions_regions.go:348
 #, fuzzy
 msgid "Drop regions?"
 msgstr "Regio's"
@@ -1078,7 +1078,7 @@ msgstr "Rijksstatus"
 msgid "End Protection"
 msgstr "Bescherming beëindigen"
 
-#: internal/menu/turnrecap.go:463
+#: internal/menu/turnrecap.go:457
 msgid "End of Turn Statistics:"
 msgstr ""
 
@@ -1123,7 +1123,7 @@ msgstr ""
 msgid "FTN spool"
 msgstr ""
 
-#: internal/menu/mailreader.go:171
+#: internal/menu/mailreader.go:180
 msgid "First Line to Quote"
 msgstr "Eerste regel om te citeren"
 
@@ -1289,11 +1289,11 @@ msgstr ""
 msgid "Idle warnings before boot"
 msgstr ""
 
-#: internal/menu/mailreader.go:217
+#: internal/menu/mailreader.go:226
 msgid "Ignore"
 msgstr "Negeren"
 
-#: internal/menu/mailreader.go:263
+#: internal/menu/mailreader.go:278
 msgid "Ignore, or"
 msgstr "Negeren, of"
 
@@ -1427,7 +1427,7 @@ msgstr "Taal ingesteld op %s."
 msgid "Language:"
 msgstr "Taal:"
 
-#: internal/menu/mailreader.go:172
+#: internal/menu/mailreader.go:181
 msgid "Last Line to Quote"
 msgstr "Laatste regel om te citeren"
 
@@ -1500,11 +1500,11 @@ msgstr ""
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr "Maximaal zinvolle uitgave dit jaar: %s goud."
 
-#: internal/menu/mailreader.go:246
+#: internal/menu/mailreader.go:261
 msgid "Message From: "
 msgstr "Bericht van: "
 
-#: internal/menu/mailreader.go:248
+#: internal/menu/mailreader.go:263
 msgid "Message To  : "
 msgstr "Bericht aan: "
 
@@ -1550,7 +1550,7 @@ msgstr "Bergen"
 msgid "NONE"
 msgstr ""
 
-#: internal/menu/actions_regions.go:328
+#: internal/menu/actions_regions.go:347
 msgid "NOTE: Regions may not be sold, only dropped..."
 msgstr ""
 
@@ -1635,7 +1635,7 @@ msgid "No planet is marked Allied, so no market is open to you."
 msgstr ""
 "Geen planeet is als bondgenoot aangemerkt, dus er staat u geen markt open."
 
-#: internal/menu/turnrecap.go:58
+#: internal/menu/turnrecap.go:52
 msgid "No planetary bulletins."
 msgstr ""
 
@@ -1910,7 +1910,7 @@ msgstr "Prijs"
 msgid "Proposed a %s to %s."
 msgstr ""
 
-#: internal/menu/mailreader.go:64
+#: internal/menu/mailreader.go:73
 msgid "Public Reply?"
 msgstr "Openbaar antwoorden?"
 
@@ -1930,7 +1930,7 @@ msgstr "Stoppen"
 msgid "Quit?"
 msgstr "Stoppen?"
 
-#: internal/menu/mailreader.go:159
+#: internal/menu/mailreader.go:168
 msgid "Quote Message?"
 msgstr "Bericht citeren?"
 
@@ -1948,7 +1948,7 @@ msgstr ""
 msgid "Regions"
 msgstr "Regio's"
 
-#: internal/menu/actions_regions.go:317
+#: internal/menu/actions_regions.go:336
 msgid "Regions added to your empire. You now hold %d land."
 msgstr ""
 
@@ -1973,7 +1973,7 @@ msgstr ""
 msgid "Repay some now?"
 msgstr "Nu iets aflossen?"
 
-#: internal/menu/mailreader.go:261
+#: internal/menu/mailreader.go:276
 msgid "Reply,"
 msgstr "Antwoorden,"
 
@@ -1985,7 +1985,7 @@ msgstr "Verzoek — waren die u terug wilt:"
 msgid "Returns expected to be approximately %s gold."
 msgstr "De opbrengst wordt ongeveer %s goud."
 
-#: internal/menu/turnrecap.go:477
+#: internal/menu/turnrecap.go:471
 msgid "Riots have broken out due to high tax rates!"
 msgstr ""
 
@@ -2159,7 +2159,7 @@ msgstr "Instructies tonen"
 msgid "Show times in:"
 msgstr ""
 
-#: internal/menu/turnrecap.go:119
+#: internal/menu/turnrecap.go:113
 msgid "Since your last play, this has happened:"
 msgstr ""
 
@@ -2402,7 +2402,7 @@ msgstr ""
 msgid "The empire that sent this deal is gone."
 msgstr "Het rijk dat deze overeenkomst stuurde bestaat niet meer."
 
-#: internal/game/combat.go:223
+#: internal/game/combat.go:230
 msgid "The enemy lost: %s."
 msgstr ""
 
@@ -2695,7 +2695,7 @@ msgstr ""
 msgid "Version every board must run (blank for no requirement, e.g. 0.0.5):"
 msgstr ""
 
-#: internal/game/combat.go:224
+#: internal/game/combat.go:231
 msgid "Victory! You captured %d regions."
 msgstr ""
 
@@ -2834,7 +2834,7 @@ msgstr "Wanneer wilt u de lening terugbetalen [aantal dagen]?"
 msgid "Which part of the world?"
 msgstr ""
 
-#: internal/menu/actions_regions.go:336
+#: internal/menu/actions_regions.go:355
 msgid "Which regions will you give up?"
 msgstr ""
 
@@ -2908,7 +2908,7 @@ msgstr ""
 msgid "You can change it from the System menu."
 msgstr ""
 
-#: internal/menu/actions_regions.go:195
+#: internal/menu/actions_regions.go:167
 msgid "You cannot afford another region."
 msgstr ""
 
@@ -2939,7 +2939,7 @@ msgstr ""
 "Je kunt je rijk niet hernoemen zolang het onder bescherming van een nieuw "
 "rijk staat."
 
-#: internal/menu/actions_regions.go:213
+#: internal/menu/actions_regions.go:232
 msgid "You captured %d regions — choose which types to hold them as."
 msgstr ""
 
@@ -2947,7 +2947,7 @@ msgstr ""
 msgid "You committed no forces; the attack is called off."
 msgstr "U hebt geen troepen ingezet; de aanval gaat niet door."
 
-#: internal/game/combat.go:234
+#: internal/game/combat.go:241
 msgid "You crushed %s completely and seized the remains of its military!"
 msgstr ""
 
@@ -3175,7 +3175,7 @@ msgstr ""
 msgid "Your HeadQuarters is already under construction or built."
 msgstr ""
 
-#: internal/menu/turnrecap.go:270
+#: internal/menu/turnrecap.go:264
 msgid "Your Industrial Zones built:"
 msgstr ""
 
@@ -3219,7 +3219,7 @@ msgid ""
 "back."
 msgstr ""
 
-#: internal/game/combat.go:222
+#: internal/game/combat.go:229
 msgid "Your casualties: %s."
 msgstr ""
 
@@ -3227,11 +3227,11 @@ msgstr ""
 msgid "Your choice?"
 msgstr ""
 
-#: internal/menu/turnrecap.go:471
+#: internal/menu/turnrecap.go:465
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
-#: internal/menu/turnrecap.go:473
+#: internal/menu/turnrecap.go:467
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
@@ -3245,7 +3245,7 @@ msgstr ""
 msgid "Your empire is no more. Return on a later day to build a new realm."
 msgstr ""
 
-#: internal/menu/actions_regions.go:224
+#: internal/menu/actions_regions.go:243
 msgid ""
 "Your forces brought home %d regions — choose which types to hold them as."
 msgstr ""
@@ -3332,7 +3332,7 @@ msgstr ""
 msgid "Your realm will be named %s."
 msgstr "Je rijk krijgt de naam %s."
 
-#: internal/game/combat.go:226
+#: internal/game/combat.go:233
 msgid "Your score rose by %d."
 msgstr ""
 
@@ -3352,7 +3352,7 @@ msgstr ""
 msgid "Zone?"
 msgstr ""
 
-#: internal/menu/actions_regions.go:277
+#: internal/menu/actions_regions.go:296
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 
@@ -3639,7 +3639,7 @@ msgstr "deze planeet"
 msgid "took %d"
 msgstr ""
 
-#: internal/menu/turnrecap.go:482
+#: internal/menu/turnrecap.go:476
 msgid "troops deserted due to low morale."
 msgstr ""
 
@@ -3647,7 +3647,7 @@ msgstr ""
 msgid "units of Food consumed."
 msgstr ""
 
-#: internal/menu/turnrecap.go:475
+#: internal/menu/turnrecap.go:469
 msgid "units of food spoiled."
 msgstr ""
 
