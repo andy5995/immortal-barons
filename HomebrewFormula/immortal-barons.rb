@@ -11,8 +11,8 @@ class ImmortalBarons < Formula
   # This is the vendored-source tarball the release workflow publishes, not the
   # auto-generated tag archive: the repo does not commit vendor/, so only this
   # asset lets the build skip a module download.
-  url "https://github.com/andy5995/immortal-barons/releases/download/v0.0.10/immortal-barons-v0.0.10-vendored-source.tar.gz"
-  sha256 "ad739ea7a28026e81a0cd185e722d243cea6e7fa6400a826a192acde98888124"
+  url "https://github.com/andy5995/immortal-barons/releases/download/v0.1.0/immortal-barons-v0.1.0-vendored-source.tar.gz"
+  sha256 "830e1a590bac0df684c0ceb868c3d7118677ca2933ecb93c4ecb5ac6fee2bf21"
   license "MIT"
   head "https://github.com/andy5995/immortal-barons.git", branch: "trunk"
 
@@ -20,7 +20,7 @@ class ImmortalBarons < Formula
 
   def install
     system "go", "build", *std_go_args, "./cmd/immortal-barons"
-    # Every path here must exist in the v0.0.9 tarball this formula pins, NOT
+    # Every path here must exist in the tarball this formula pins, NOT
     # in the current tree -- trunk drifts as docs are added, and naming a file
     # no release has shipped fails the install with ENOENT. The vendored
     # tarball carries the whole docs/ tree, so check a pin bump against

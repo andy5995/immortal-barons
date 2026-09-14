@@ -151,4 +151,7 @@ Watch it: a release with no assets is a release nobody can use.
    straight away.
 
    Missed at v0.0.5, which left the formula installing v0.0.4 until it was
-   noticed.
+   noticed, and again at v0.1.0, which shipped with the formula still on
+   v0.0.10. Both times the release itself was clean and only the tap was
+   stale, so nothing failed — the formula just went on installing the
+   previous version. Nothing reports this; it is caught by reading this step.
