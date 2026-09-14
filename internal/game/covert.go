@@ -681,11 +681,26 @@ func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
 			e.syncLand()
 			parts = append(parts, fmt.Sprintf("%d Regions", lost))
 		}
-	case SabreDevelopRegions:
-		// The mapper's last row, which no dial can reach (the input is taken mod
-		// 11). Left as a no-op rather than invented.
 	}
 	return strings.Join(parts, ", ")
+}
+
+// sabreDevelop is the mapper's last row: the backfire hands the TARGET
+// 10-19% of its own region count as land it may keep, untyped, and returns how
+// many. BINARY-VERIFIED — the original computes
+// trunc((Random(10) + 10) / 100 x total regions) and adds it to the record's
+// untyped-region slot (+0xBA), which its own total_regions deliberately skips
+// and its region picker drains. PendingRegions is IB's slot of the same kind,
+// fed by a won interplanetary strike and drained by the same picker, so the
+// land arrives without a type and the owner chooses at the start of their next
+// turn (#107, #266).
+func (w *World) sabreDevelop(d *Empire) int {
+	got := d.Land * (SabreDevelopBasePct + w.rng.Intn(SabreDevelopSpread)) / 100
+	if got <= 0 {
+		return 0
+	}
+	d.PendingRegions += got
+	return got
 }
 
 // sabreBackfires reports whether the missile turns back on whoever
@@ -698,10 +713,11 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // arrived from another planet (#49). It runs the same shield, fizzle and
 // backfire rolls the local strike runs, in the same order.
 //
-// A backfire cannot be applied here — the realm it would hurt is on the board
-// that fired — so it is reported instead, and the launching board takes the
-// damage when the answer gets home. That is the one thing the two versions do
-// differently, and the delay is the packet's, not a rule of its own.
+// A backfire is applied HERE, to the realm that was aimed at: it costs the
+// board that fired nothing and develops land for the target (#266, and
+// sabreDevelop for what the original computes). The firer learns of it when the
+// answer gets home, which is a delay the packet imposes rather than a rule of
+// its own.
 //
 // This is the one covert event in this file that names the source on SUCCESS,
 // and it is deliberate: BRE treats a Sabre that lands from another planet as a
@@ -724,7 +740,14 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, hi
 		return stopped, false, false
 	}
 	if w.sabreBackfires(d) {
-		return "The S3-Sabre backfired on the way out!", false, true
+		// A backfire is the original's route to the mapper's last row: it does not
+		// hurt the firer, it DEVELOPS land for the realm they aimed at (#266). The
+		// firer is told when the answer gets home; the target sees it now.
+		if got := w.sabreDevelop(d); got > 0 {
+			d.addEvent(fmt.Sprintf("An S3-Sabre from %s broke up over your realm, and the fallout left %d Regions fit to settle.", from, got))
+			return fmt.Sprintf("Your S3-Sabre broke up over %s and opened %d Regions for them to settle.", d.Name, got), false, true
+		}
+		return fmt.Sprintf("Your S3-Sabre broke up over %s with nothing to open for them.", d.Name), false, true
 	}
 	lost := w.sabreDamage(d, w.SabreAim(dial))
 	if lost == "" {

@@ -723,7 +723,9 @@ const (
 
 // sabreDialTable is the mapper's table, indexed by the (jittered, wrapped) dial.
 // Index 11 is the mapper's last row, unreachable from a dial but kept so the
-// table is the binary's table rather than a truncation of it.
+// table is the binary's table rather than a truncation of it. Its effect is not
+// handled in sabreDamage and is not meant to be: a backfire applies it directly
+// (sabreEffect -> sabreDevelop, #266), which is the only route to it.
 var sabreDialTable = [12]SabreEffect{
 	SabreHitHQ, SabreHitHQ,
 	SabreHitPeople, SabreHitPeople,

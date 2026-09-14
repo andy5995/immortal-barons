@@ -324,4 +324,13 @@ const (
 	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
 	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
 	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)
+
+	// What a backfire develops for the TARGET, and these two ARE binary-verified
+	// despite sitting beside the knobs above: the original computes
+	// trunc((Random(10) + 10) / 100 x the target's total regions) and adds it to
+	// the untyped-region slot (BRE.OVR, resolve_received_sabre_strike effect 7 at
+	// +0x0C23, the only branch calling the region helper at 0xc03:0xf10). Changing
+	// either means the game stops matching the original (#266).
+	SabreDevelopBasePct = 10 // a backfire develops at least this % of the target's land
+	SabreDevelopSpread  = 10 // random % headroom on top of the base (10-19% total)
 )

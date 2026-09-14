@@ -908,3 +908,76 @@ func TestSuccessfulCovertOpsStayAnonymous(t *testing.T) {
 		t.Errorf("a successful covert op named the attacker: %q", text)
 	}
 }
+
+// A backfiring S3-Sabre develops land for the realm it was AIMED at, and the
+// share is the original's: 10-19% of that realm's regions, handed over untyped
+// (#266). Golden literals rather than the constants, because these two are
+// binary-verified and a retune has to fail this test rather than follow it.
+func TestSabreBackfireDevelopsTheTargetsLand(t *testing.T) {
+	w := testWorld()
+	d := w.AddHuman("victim", "Victim")
+	d.Regions = RegionMix{Agricultural: 1000}
+	d.syncLand()
+	if d.Land != 1000 {
+		t.Fatalf("fixture: Land = %d, want 1000", d.Land)
+	}
+
+	// Many rolls, because the share is random inside a fixed band.
+	low, high := 0, 0
+	for i := 0; i < 400; i++ {
+		d.PendingRegions = 0
+		got := w.sabreDevelop(d)
+		if got < 100 || got > 190 {
+			t.Fatalf("developed %d regions off 1000, want 100-190 (10-19%%)", got)
+		}
+		if d.PendingRegions != got {
+			t.Fatalf("PendingRegions = %d, want %d", d.PendingRegions, got)
+		}
+		if got == 100 {
+			low++
+		}
+		if got == 190 {
+			high++
+		}
+	}
+	// Both ends of the band have to be reachable, or the roll is not the
+	// original's even when every sample sits inside the range.
+	if low == 0 || high == 0 {
+		t.Errorf("band ends unreached in 400 rolls: 10%% hit %d times, 19%% hit %d", low, high)
+	}
+
+	// The land arrives with no type: it is counted nowhere until the owner picks.
+	if d.Land != 1000 || d.Regions.Total() != 1000 {
+		t.Errorf("Land = %d and mix totals %d, want both still 1000 — developed land is untyped until allocated",
+			d.Land, d.Regions.Total())
+	}
+}
+
+// The firer loses nothing to a backfire. The original's return path writes no
+// field of their record; IB damaged them until 2026-09-14, which was invented
+// before that path was read (#266).
+func TestSabreBackfireCostsTheFirerNothing(t *testing.T) {
+	w := testWorld()
+	e := w.AddHuman("firer", "Firer")
+	e.Regions = RegionMix{Agricultural: 500}
+	e.syncLand()
+	e.Troopers, e.Jets, e.Tanks, e.Turrets, e.People, e.Food, e.HQ = 900, 800, 700, 600, 500_000, 400, 50
+	before := *e
+
+	sent := InFlightStrike{Kind: "special", Op: OpSabre, Owner: "firer",
+		TargetBoard: "Far", TargetEmpire: "Victim"}
+	w.applySpecialOpResult(sent, AttackResult{TargetBoard: "Far", TargetEmpire: "Victim", Backfired: true})
+
+	if e.Troopers != before.Troopers || e.Jets != before.Jets || e.Tanks != before.Tanks ||
+		e.Turrets != before.Turrets || e.People != before.People || e.Food != before.Food ||
+		e.HQ != before.HQ || e.Land != before.Land {
+		t.Errorf("the firer lost something to its own backfire:\n before %+v\n after  %+v", before, *e)
+	}
+	if len(e.Events) == 0 {
+		t.Fatal("the firer was told nothing about the backfire")
+	}
+	last := e.Events[len(e.Events)-1].Text
+	if !strings.Contains(last, "backfired") {
+		t.Errorf("backfire event = %q, want it to say the strike backfired", last)
+	}
+}

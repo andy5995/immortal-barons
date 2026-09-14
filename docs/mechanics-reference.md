@@ -1956,9 +1956,60 @@ matches the advice long-time players give — aim 4 at an army, 5 at a realm kno
 to hold jets — which is the corroboration that prompted the re-read.
 
 Row 11 is unreachable from a dial: the input is taken mod 11, so the mapper's
-last row never fires from this path and the "developed regions" outcome belongs
-to another caller, not yet traced. IB leaves it as a no-op rather than inventing
-one.
+last row never fires from this path. **It fires on the BACKFIRE instead**, and
+that is the whole of what a backfire does (#266, read 2026-09-14).
+
+A backfiring missile costs the realm that fired it nothing. `process_sabre_return`
+runs from `+0x0F9C` to its `retf` at `+0x1173` composing report strings and
+writes no field of the firer's record; the dispatch into its develop-regions
+block is at `+0x0FD6` and keys on a status byte of 0 or 3-and-above, not on 3
+alone. What the backfire does is hand the TARGET land: effect 7 of the arriving
+resolver (`+0x0C23`) is the only branch calling the region helper at
+`0xc03:0xf10`, and it adds `trunc((Random(10) + 10) / 100 x the target's total
+regions)` to record field `+0xBA` — the untyped-region slot that `total_regions`
+skips and the region picker drains, NOT a finished region count. So the target
+gains 10-19% more land and chooses its types at their next turn.
+
+**In 0.988 that code is unreachable, and IB restores it deliberately.** The
+effect index is set from the mapper and from nowhere else (`+0x0777`), and every
+input the mapper is given is in 0-10: the nudged dial is taken mod 11, and both
+wildcard branches (`+0x06BD` and `+0x06E1`) roll `Random(11)`. The mapper
+returns 7 only for an input of exactly 11, which no path produces. So the
+region-granting branch sits in the shipped 0.988 binary and never runs, while
+`process_sabre_return` still reports row 11 on the backfire — a report of
+something that did not happen.
+
+**What BRE 0.953 does and does not establish.** In 0.953 the weapon is the XL-2
+StarFire, and its firer-side effect table carries seven entries whose seventh
+reads `backfired and developed unused regions!` — naming both the trigger and
+the untyped land. 0.953 also has **no dial**: the blurb and the `Enter a number
+for the dial:` prompt that 0.988 carries are absent from it entirely, so the
+dial and its mod-11 wrap postdate that version.
+
+That is a string and an absence, NOT an executing branch. Nobody here has read
+0.953's effect-selection code — its overlay is outside the catalog the
+`bre-disasm` tooling is pinned to — so "0.953 performed the effect" is
+reasonable inference and not a verified fact. It is worth stating plainly
+because 0.988 is itself proof that a report line can outlive the behaviour it
+describes, which is the same trap in the other direction. Long-time players say
+the effect used to fire and had stopped by the last release; 0.953's string and
+missing dial are consistent with that and do not prove it.
+
+**The divergence does not rest on 0.953.** It rests on player demand and on
+0.988's own arithmetic. 0.953 is corroboration that the mechanic once existed,
+nothing more. (Binary kept out of tree; Andy's copy extracted to
+`~/bre-0953-private/` from `bre0953.zip`.)
+
+**So this is a DELIBERATE DIVERGENCE, not a fidelity fix (#266).** IB performs
+what 0.988 only reports. The reason is player demand, not a judgement about the
+original: the effect was removed from BRE more than twenty-five years ago, and
+players of this game have asked for it back. What makes restoring it cheap and
+exact rather than an invention is that the arriving resolver still carries the
+arithmetic — the share and the untyped slot are the original's, read from its
+own code; only their reachability is IB's. IB applies it to
+`Empire.PendingRegions`, the slot of the same kind a won interplanetary strike
+already feeds (#107). IB damaged the FIRER on a backfire until 2026-09-14; that
+was invented before the return path was read, and it is gone.
 
 Whether a launch arrives is the original's, not IB's: the shared arriving-missile
 gates — the `Random(10)` misfire and then SDI — and nothing in the sabre's own

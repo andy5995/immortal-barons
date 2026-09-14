@@ -280,17 +280,16 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	}
 	label := SpecialOpLabel(sent.Op)
 	if res.Backfired {
-		// A backfire hits the firer, and the dial it was aimed with is gone by the
-		// time the answer gets home, so the wild roll stands in for it.
-		lost := w.sabreDamage(e, w.SabreAim(w.rng.Intn(SabreDialWrap)))
-		if lost == "" {
-			e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired, but the damage was negligible.",
-				label, res.TargetEmpire, sent.TargetBoard))
-			return
-		}
-		e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired! You lost %s.",
-			label, res.TargetEmpire, sent.TargetBoard, lost))
-		w.postNews(fmt.Sprintf("%s's %s turned on its own realm.", e.Name, label))
+		// A backfire costs the firer NOTHING. The original's return path composes a
+		// report and writes no field of the firer's record at all
+		// (process_sabre_return, BRE.OVR +0x0F9C through its retf at +0x1173) — the
+		// harm is that the missile developed land for the realm it was aimed at,
+		// which the target's own board applied when it resolved the strike
+		// (sabreDevelop). IB damaged the firer here until 2026-09-14; that was
+		// invented before the return path was read (#266).
+		e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired, and broke up over their land instead of yours.",
+			label, res.TargetEmpire, sent.TargetBoard))
+		w.postNews(fmt.Sprintf("%s's %s broke up over the realm it was aimed at.", e.Name, label))
 		return
 	}
 	switch res.outcome() {
