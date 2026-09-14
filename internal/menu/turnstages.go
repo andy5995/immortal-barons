@@ -380,6 +380,10 @@ func askFoodGift(s session.Session, label string, need int, stock *int) bool {
 // day, and announces it. BRE prints this in the opening recap right after the
 // mail, which is where this sits. Silent when the realm has already drawn today
 // or the purse has nothing in it — a fresh planet that has collected no tax yet.
+//
+// No pause: whatever follows takes a keypress of its own — the lottery offer on
+// a board that runs one, the income report's pause otherwise — so the line stays
+// on screen either way and a pause here only costs a second key.
 func showQueenRefund(s session.Session, w *ctx) {
 	var paid int64
 	withPlayer(w, func(p *game.Empire) {
@@ -394,7 +398,6 @@ func showQueenRefund(s session.Session, w *ctx) {
 	}
 	fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale opens her coffers and refunds you %s gold!")+"%s\n",
 		ansi.FgWhite, ansi.FgBrightYellow+comma(paid)+ansi.FgWhite, ansi.Reset)
-	pause(s)
 }
 
 // showCoordinatorNotice tells an inter-BBS caller where they stand on the BBS
