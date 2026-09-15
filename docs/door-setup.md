@@ -44,7 +44,7 @@ To skip the editor and use the current `config.json` as it stands, run
 
 These same two commands restart the game later on — see "Starting a fresh game".
 
-## Registering the door
+## Adding the door to your BBS
 
 Set up the game as an external program (a "door") in your BBS software.
 
