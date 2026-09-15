@@ -29,9 +29,7 @@ and it burns itself out. Left alone it will cost you better than a quarter of
 your land.
 
 Only jets can reach it. Your realm is asked at the start of your turn whether you
-want to attack it, and the screen tells you how many jets it would take to
-destroy the thing outright — a figure that grows with the size of your planet.
-About a third of the jets you send do not come home.
+want to attack it. About a third of the jets you send do not come home.
 
 No single wave can finish it, however many jets you send. That is the point: the
 weapon is built to need the whole planet's air forces, and a planet that cannot

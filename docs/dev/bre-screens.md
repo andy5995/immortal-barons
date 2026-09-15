@@ -1432,6 +1432,18 @@ things on it are IB's and are not to be "corrected" against the original:
   use. The string is a new msgid: de and ru show the English until the next
   translation pass.
 
+**It quotes NO required-jets figure, and must not.** IB printed
+`It would take N jets to destroy one outright.` under the table until
+2026-09-15, off `AnnihilatorJetsNeeded`. It was invented here and it was wrong
+twice over: the original's screen has no such line — its whole string set is the
+yes/no, the no-jets refusal, the two headings, `Enter Gooie Number`, `Send how
+many Jets? `, ` Jets were destroyed in the attack!`, ` DESTROYED!` and `% of the
+Gooie Destroyed!`, and `take`/`need`/`would` match nothing in the binary at all —
+and the number named the full requirement while a sortie is capped at 75%, so a
+baron who sent exactly it got 75% and burned the last quarter of their wing for
+nothing. The player judges the weapon from Strength and Days Until
+Self-Destruct, as the original leaves them to.
+
 **Terrorist Ops** (2), captured 2026-08-26 in `cap/eots-ibbs-01.cap`. Nine
 numbered operations and a Quit, in this order, and **no price column** — the cost
 is quoted once on the parent menu beside the item, not per operation, which is

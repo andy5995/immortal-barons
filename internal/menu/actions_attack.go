@@ -887,12 +887,11 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 // that was invented before the original's screen had been read.
 func annihilatorDefense(s session.Session, w *ctx) {
 	var landed []game.Annihilator
-	var jets, needed int
+	var jets int
 	w.Read(func() {
 		for _, d := range w.Landed() {
 			landed = append(landed, *d)
 		}
-		needed = int(w.AnnihilatorJetsNeeded())
 	})
 	if len(landed) == 0 {
 		return
@@ -920,8 +919,6 @@ func annihilatorDefense(s session.Session, w *ctx) {
 			padColumn(w.Term, d.Creator, 24), fmt.Sprintf("%d%%", d.Intact), d.DaysLeft, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
-	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(
-		tr(s, "It would take %s jets to destroy one outright."), comma(needed))))
 
 	// A number past the end is ASKED AGAIN, not taken as a cancel: the original's
 	// bounded-integer reader loops back to its input loop on an over-max value

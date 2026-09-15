@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-14 18:22-0500\n"
+"POT-Creation-Date: 2026-09-15 17:33-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3842,17 +3842,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:35
+#: internal/help/content/warfare/gooie-kablooie.md:33
 #, markdown-text
 msgid ""
 "Only jets can reach it. Your realm is asked at the start of your turn "
-"whether you want to attack it, and the screen tells you how many jets it "
-"would take to destroy the thing outright — a figure that grows with the size "
-"of your planet.  About a third of the jets you send do not come home."
+"whether you want to attack it. About a third of the jets you send do not "
+"come home."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:39
+#: internal/help/content/warfare/gooie-kablooie.md:37
 #, markdown-text
 msgid ""
 "No single wave can finish it, however many jets you send. That is the point: "
@@ -3861,7 +3860,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:40
+#: internal/help/content/warfare/gooie-kablooie.md:38
 #, markdown-text
 msgid "An SDI program is no help against it, and neither is anything else you own."
 msgstr ""
