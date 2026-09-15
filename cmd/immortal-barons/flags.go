@@ -50,6 +50,11 @@ type opts struct {
 	asciiOut        *bool
 	noANSI          *bool
 	version         *bool
+	// help and helpShort take -help and -h away from the flag package's built-in
+	// special case (flag.go parseOne), which calls flag.Usage for them. flag.Usage
+	// is the SHORT form now, so the full list needs a flag of its own to reach.
+	help      *bool
+	helpShort *bool
 }
 
 // defineFlags registers every flag and returns the pointers. preDoor is the
@@ -94,6 +99,8 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		asciiOut:        flag.Bool("ascii", false, i18n.T(lang, "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor UTF-8 (box rules and accents degrade to ASCII look-alikes)")),
 		noANSI:          flag.Bool("no-ansi", false, i18n.T(lang, "send plain text with no ANSI escapes, as a terminal that cannot render them gets (for testing that path on a terminal that can)")),
 		version:         flag.Bool("version", false, i18n.T(lang, "print the version, then exit")),
+		help:            flag.Bool("help", false, i18n.T(lang, "print every option, grouped by who needs it, then exit")),
+		helpShort:       flag.Bool("h", false, i18n.T(lang, "print every option, grouped by who needs it, then exit")),
 	}
 }
 

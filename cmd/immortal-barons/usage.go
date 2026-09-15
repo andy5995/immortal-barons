@@ -26,7 +26,21 @@ var usageGroups = []struct {
 	// Development tools, kept out of the sysop section: a board never needs
 	// these, and they advance, expose or override game state.
 	{"Testing and balance", []string{"dump", "spectate", "dupe-check"}},
-	{"Info", []string{"version"}},
+	{"Info", []string{"version", "help", "h"}},
+}
+
+// shortUsage is what a MISTAKE gets: the synopsis and where the full list is,
+// rather than the list itself, in the shape `go build -badflag` answers in.
+// -help still prints all of it.
+//
+// The reason is this program's own terminal, not a convention — Go's toolchain
+// contains both designs and `go tool pprof` dumps 138 lines on a bad flag
+// without anyone calling it a fault. But a door runs on an 80x24 screen, where
+// groupedUsage's 119 lines are five screenfuls and the line saying what was
+// actually wrong has scrolled away by the end of them.
+func shortUsage(w io.Writer, lang string) {
+	fmt.Fprintf(w, "%s\n", i18n.T(lang, "usage: immortal-barons [options]"))
+	fmt.Fprintf(w, "%s\n", i18n.T(lang, "Run 'immortal-barons -help' for the full list of options."))
 }
 
 // groupedUsage returns a flag.Usage function that prints fs's flags under the

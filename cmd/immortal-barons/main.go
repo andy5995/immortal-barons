@@ -66,8 +66,16 @@ func main() {
 	o := defineFlags(lang, preDoor)
 	// Group -help by audience (Play / Character set / Sysop / Inter-BBS / Info)
 	// instead of the flat alphabetical default; mirrors docs/command-reference.md (#34).
-	flag.Usage = groupedUsage(flag.CommandLine, lang)
+	// flag.Usage is what a BAD invocation gets — the flag package calls it on
+	// any parse error — so it is the short form. -help reaches the full list
+	// through its own flag (see opts.help).
+	flag.Usage = func() { shortUsage(flag.CommandLine.Output(), lang) }
 	flag.Parse()
+
+	if *o.help || *o.helpShort {
+		groupedUsage(flag.CommandLine, lang)()
+		return
+	}
 
 	if *o.version {
 		printVersion()
@@ -86,8 +94,8 @@ func main() {
 	// A stray word alongside a mode flag is a mistake, not something to ignore.
 	// (Unknown -flags are already rejected by the flag package.)
 	if flag.NArg() > 0 && o.explicitMode() {
-		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
-		flag.Usage() // show -help, the common convention for a bad invocation
+		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n", flag.Arg(0))
+		flag.Usage()
 		os.Exit(2)
 	}
 
