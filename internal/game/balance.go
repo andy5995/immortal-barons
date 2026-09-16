@@ -342,6 +342,16 @@ var MoraleDesertBands = [MoraleDesertBandTop / MoraleDesertBandWidth]struct{ Bas
 	{5, 2, 5},   // morale 30-39
 }
 
+// CivilWarReportBands are the severity ceilings the end-of-turn report words a
+// civil war by: <=10, <=25, <=40, <=60, and everything above. BINARY-VERIFIED
+// (resolve_civil_unrest — five `cmp al,imm8` pairs at BRE.OVR 0xC899, 0xC8F0,
+// 0xC947, 0xC99E and 0xC9F4), which prints one of five messages and never names
+// what caused the collapse. Neither may IB: the severity accumulator is fed by
+// both a food shortfall and unpaid region maintenance.
+//
+// A var rather than a const only because Go has no constant arrays.
+var CivilWarReportBands = [4]int{10, 25, 40, 60}
+
 // Interplanetary Special Operations prices (#49).
 //
 // The four bombing ops carry the figures the original prints in that menu's own

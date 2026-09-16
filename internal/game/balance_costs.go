@@ -307,9 +307,12 @@ const (
 	// --- Civil war (BRE.OVR 0xC59A) ---
 	//
 	// Severity is a percentage, filed by a food shortfall (see
-	// CivilWarSeverityScale). When it fires, the realm loses that percentage of
-	// every military unit type — held AND escrowed on the market — and of its
-	// regions, and popular support is divided by CivilWarSupportDivisor.
+	// CivilWarSeverityScale) OR by unpaid region maintenance (see
+	// RegionCivilWarThresholdPct) — two triggers into one accumulator, which is
+	// why nothing downstream may name a cause. When it fires, the realm loses
+	// that percentage of every military unit type — held AND escrowed on the
+	// market — and of its regions, and popular support is divided by
+	// CivilWarSupportDivisor.
 	CivilWarSupportDivisor = 2   // binary: support is halved
 	CivilWarPerCent        = 100 // severity is a percentage of each holding
 

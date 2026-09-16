@@ -242,11 +242,13 @@ func (w *World) postRiotNews(e *Empire) {
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
 
-// postCivilWarNews broadcasts a realm collapsing into civil war after a famine.
+// postCivilWarNews broadcasts a realm collapsing into civil war. It names no
+// cause: hunger is only one of the two triggers, and unpaid land upkeep is the
+// commoner one (see CivilWarReportBands).
 func (w *World) postCivilWarNews(e *Empire) {
 	lines := []string{
-		fmt.Sprintf("Civil war breaks out in %s as the hungry turn on the crown.", e.Name),
-		fmt.Sprintf("The realm of %s tears itself apart over empty food stores.", e.Name),
+		fmt.Sprintf("Civil war breaks out in %s as the people turn on the crown.", e.Name),
+		fmt.Sprintf("The realm of %s tears itself apart.", e.Name),
 	}
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }

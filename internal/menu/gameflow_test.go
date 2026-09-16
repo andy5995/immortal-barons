@@ -1475,3 +1475,81 @@ func TestTurnRecapCountsRepeatedEntries(t *testing.T) {
 		t.Error("a one-off entry should carry no count")
 	}
 }
+
+// The civil-war line is banded by severity and names no cause. Both halves are
+// the regression: IB reported every civil war as a famine, and unpaid land
+// upkeep — the easier of the two triggers — fires one on a realm with a full
+// granary. Ceilings are golden literals off the binary (BRE.OVR 0xC899 and the
+// four pairs after it), not a rebuild from CivilWarReportBands.
+func TestCivilWarLineIsBandedAndBlamesNothing(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	seen := map[string]bool{}
+	for _, sev := range []int{1, 10, 11, 25, 26, 40, 41, 60, 61, 100} {
+		line := civilWarLine(f, sev)
+		seen[line] = true
+		if strings.Contains(strings.ToLower(line), "famine") ||
+			strings.Contains(strings.ToLower(line), "hunger") {
+			t.Errorf("severity %d names a cause: %q", sev, line)
+		}
+		if !strings.Contains(line, "%d%%") {
+			t.Errorf("severity %d drops the percentage: %q", sev, line)
+		}
+	}
+	if len(seen) != 5 {
+		t.Errorf("want 5 distinct band messages, got %d", len(seen))
+	}
+	for _, edge := range [][2]int{{10, 11}, {25, 26}, {40, 41}, {60, 61}} {
+		if civilWarLine(f, edge[0]) == civilWarLine(f, edge[1]) {
+			t.Errorf("severities %d and %d should fall in different bands", edge[0], edge[1])
+		}
+	}
+}
+
+// Feeding the realm takes the food THERE, at the prompt, as the original does
+// (allocate_food, BRE.OVR 0x38104) — not at rollover. The difference is the
+// whole of a real turn: a baron fed his people in full, sold what the granary
+// still showed, bought land with the proceeds, and starved at rollover for food
+// he had already handed over — reported to him as a famine.
+func TestFoodIsTakenAtThePromptNotAtRollover(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	need := p.PeopleFoodUpkeep() + p.ForcesFoodUpkeep()
+	if need <= 0 {
+		t.Fatal("the test realm owes no food")
+	}
+	p.Food = need * 4
+
+	w.World.FeedGiven(p, p.PeopleFoodUpkeep(), p.ForcesFoodUpkeep())
+	if got := p.Food; got != need*3 {
+		t.Fatalf("the granary should be down by the two helpings: want %d, got %d", need*3, got)
+	}
+	if p.CivilWarSeverity != 0 || p.PendingSupportPenalty != 0 || p.PendingMoralePenalty != 0 {
+		t.Fatalf("a realm fed in full owes no penalty: %+v", *p)
+	}
+
+	// Everything left is now genuinely surplus: sell the lot, and the rollover
+	// must not feed anyone a second time.
+	p.Food = 0
+	p.TurnProgress.Fed = true
+	w.World.PlayTurn(p, w.Today)
+	if p.CivilWarSeverity != 0 || p.LastCivilWar != 0 {
+		t.Errorf("selling the surplus after feeding must not cause a famine (severity %d, reported %d)",
+			p.CivilWarSeverity, p.LastCivilWar)
+	}
+	if p.Support < 100 {
+		t.Errorf("popular support should be untouched, got %d", p.Support)
+	}
+}
+
+// The other half of the same rule: a turn that never reached the food stage is
+// still fed at rollover, so the AI and an abandoned turn are charged as before.
+func TestAnUnfedTurnIsStillFedAtRollover(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Food = 0
+	p.TurnProgress.Fed = false
+	w.World.PlayTurn(p, w.Today)
+	if p.LastCivilWar == 0 {
+		t.Error("an empty granary at rollover should still starve a realm that never fed")
+	}
+}

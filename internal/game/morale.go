@@ -54,11 +54,40 @@ func civilWarSeverity(need, given int64, thresholdPct int) int {
 // are fed first and the army from what is left, which is the order BRE prompts
 // in. Nobody emigrates: BRE has no starvation attrition at all, only the two
 // stat penalties and the civil war.
+//
+// This is the automatic path — the AI, and a caller whose turn ended without
+// reaching the food stage. A baron who answered the two prompts has already
+// been through FeedGiven, and TurnProgress.Fed keeps the rollover from taking a
+// second helping.
 func (w *World) feed(e *Empire) {
 	peopleNeed, armyNeed := e.PeopleFoodUpkeep(), e.ForcesFoodUpkeep()
-
 	toPeople := min(e.Food, peopleNeed)
 	toArmy := min(e.Food-toPeople, armyNeed)
+	w.applyFeeding(e, peopleNeed, toPeople, armyNeed, toArmy)
+}
+
+// FeedGiven settles the two food obligations with the amounts the baron handed
+// over at their prompts, and is the whole of that turn's feeding.
+//
+// The original resolves the obligation AT the prompt: allocate_food scores
+// given/need and applies both penalties there and then (BRE.OVR 0x38104), so
+// the food is out of the granary before the turn continues and whatever is left
+// is genuinely surplus. IB recorded the answers and consumed at rollover
+// instead until 2026-09-16, which meant food that had already been "given" was
+// still on the shelf for the market to sell — a baron who fed his people in
+// full, sold the excess and bought land starved at rollover for it, and was
+// told he had suffered a famine he had paid to avoid.
+func (w *World) FeedGiven(e *Empire, toPeople, toArmy int) {
+	w.applyFeeding(e, e.PeopleFoodUpkeep(), toPeople, e.ForcesFoodUpkeep(), toArmy)
+}
+
+// applyFeeding draws the two helpings out of the granary and files what either
+// shortfall costs: popular support for the people's, military morale for the
+// army's, and a civil war when the people got under FoodCivilWarThresholdPct of
+// their need. Both penalties are pending until rollover, as BRE files them.
+func (w *World) applyFeeding(e *Empire, peopleNeed, toPeople, armyNeed, toArmy int) {
+	toPeople = clampHelping(toPeople, peopleNeed, e.Food)
+	toArmy = clampHelping(toArmy, armyNeed, e.Food-toPeople)
 	e.Food -= toPeople + toArmy
 
 	e.PendingSupportPenalty += shortfallPenalty(int64(peopleNeed), int64(toPeople), StarvationPenaltyScale)
@@ -67,6 +96,13 @@ func (w *World) feed(e *Empire) {
 	if toPeople < peopleNeed || toArmy < armyNeed {
 		w.postStarvationNews(e)
 	}
+}
+
+// clampHelping holds one helping to what was owed and to what is on the shelf.
+// The prompts clamp too, but they read the granary a screen earlier and the
+// engine may not take a front-end's word for what is in it.
+func clampHelping(give, need, have int) int {
+	return max(0, min(give, min(need, have)))
 }
 
 // resolveCivilWar spends a pending civil war: popular support is halved, and the
@@ -102,7 +138,11 @@ func (w *World) resolveCivilWar(e *Empire) {
 			l.Qty = l.Qty / CivilWarPerCent * keep
 		}
 	}
-	e.addEvent("Famine tipped your realm into civil war.")
+	// No event is filed. The Events log is the asynchronous channel — what other
+	// nodes did to this realm while its baron was away or at a menu — and a civil
+	// war resolves inside the baron's OWN turn, immediately before the end-of-turn
+	// report states it. Filing one had the player told twice, the second time
+	// under "While you were at the menus, this has happened".
 	w.postCivilWarNews(e)
 }
 

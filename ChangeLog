@@ -1,5 +1,10 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * Food given to your people and army leaves the granary at the prompt, so
+    whatever is left is safe to sell
+  * A civil war is reported by how much it destroyed, not blamed on famine
+
 2026-09-14 (v0.1.1)
   * The industry build line and the end-of-turn figures are no longer blank
   * A Gooie Kablooie on the planet can be attacked on every turn

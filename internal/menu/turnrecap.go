@@ -471,8 +471,35 @@ func endOfTurnStats(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
 	}
 	if p.LastCivilWar > 0 {
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(tr(s, "Civil war! Famine cost you %d%% of your realm and its forces."), p.LastCivilWar)), ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(civilWarLine(s, p.LastCivilWar), p.LastCivilWar)), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
+}
+
+// civilWarLine words a civil war by how much it destroyed, as the original does
+// — five messages on the severity bands in game.CivilWarReportBands.
+//
+// None of them says what caused it, and none may: severity is filed by a food
+// shortfall AND by unpaid region maintenance, and the second is the easier
+// trigger by far (anything under 90% of what land upkeep was due). IB blamed
+// famine outright here until 2026-09-16, which told a realm sitting on a food
+// surplus that its granary had emptied.
+//
+// Each branch translates its own literal so the string extractor sees it; a
+// helper that returns an untranslated literal for the caller to tr() is how
+// peopleMood's five lines have stayed out of the catalogs.
+func civilWarLine(s session.Session, sev int) string {
+	b := game.CivilWarReportBands
+	switch {
+	case sev <= b[0]:
+		return tr(s, "Civil war! Scattered revolts cost you %d%% of your realm and its forces.")
+	case sev <= b[1]:
+		return tr(s, "Civil war! The revolt spreads, taking %d%% of your realm and its forces.")
+	case sev <= b[2]:
+		return tr(s, "Civil war! Rebellion costs you %d%% of your realm and its forces.")
+	case sev <= b[3]:
+		return tr(s, "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces.")
+	}
+	return tr(s, "Civil war! Your realm all but falls apart — %d%% of it is gone.")
 }

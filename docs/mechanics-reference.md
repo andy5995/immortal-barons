@@ -2978,6 +2978,16 @@ When it fires, at severity `S` percent:
 - `S`% of **every one of the six unit types** is destroyed — held *and* escrowed
   on the Trading Market (`BRE.OVR 0xC663`), so a listing is no shelter.
 
+The end-of-turn report then words it on **five severity bands** — `<=10`,
+`<=25`, `<=40`, `<=60`, above — one message each, and **none of them names a
+cause** (`resolve_civil_unrest`, five `cmp al,imm8` pairs at `BRE.OVR` `0xC899`,
+`0xC8F0`, `0xC947`, `0xC99E` and `0xC9F4`). That is not a stylistic choice of the original's: severity is one
+accumulator fed by both triggers, so at the point it is reported the cause is
+no longer known. IB reported every civil war as a famine until 2026-09-16,
+which told a realm sitting on a food surplus that its granary had emptied; it
+now bands the line as the original does (`game.CivilWarReportBands`,
+`menu.civilWarLine`), in its own prose.
+
 **IB implements all of this** (`internal/game/morale.go`, `resolveCivilWar`),
 with one divergence: IB has no planet-wide land pool — its Daily Land Creation
 allowance is per-empire — so the destroyed regions are simply gone rather than
@@ -3296,6 +3306,18 @@ section is a record of what was claimed and how it was settled, so the word
   **popular support**, the army's costs the same in **military morale**, and a
   people's ratio under 65% lights a **civil war** (above). IB feeds the people
   first and the army from what is left, matching the order BRE prompts in.
+
+  **The food leaves the granary AT the prompt, not at rollover.** `allocate_food`
+  scores `given/need` and applies both penalties where the baron answers, so
+  everything still on the shelf afterwards is genuinely surplus and safe to sell.
+  IB recorded the answers and consumed at rollover until 2026-09-16, which made
+  the food market able to sell food that had already been handed over: a baron
+  fed his realm in full, sold what the granary still showed, bought land with the
+  proceeds, and took a 30% civil war at rollover for a famine he had paid to
+  avoid. `menu.feedStage` now commits through `World.FeedGiven` once the sequence
+  is answered — a reconsider re-asks against the untouched granary — and the
+  rollover's automatic `feed` runs only for a turn that never reached the stage
+  (the AI's, or an abandoned one), gated on `TurnProgress.Fed`.
 
   **The stage's two shapes differ in more than the market.** `cap/eots-ibbs-01.cap`
   carries 130 silent turns and 8 market ones, and they print differently:

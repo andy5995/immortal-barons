@@ -426,7 +426,12 @@ func (w *World) processEconomy(e *Empire) {
 	// support for the people's shortfall, military morale for the army's, and a
 	// civil war when the people got under two thirds of their need. Both penalties
 	// are filed and applied at rollover, as BRE files them.
-	w.feed(e)
+	// Only when the food stage did not already settle it. A baron answers the two
+	// prompts and the food leaves the granary there (FeedGiven), as it does in the
+	// original; the AI and a turn that never reached the stage are fed here.
+	if !e.TurnProgress.Fed {
+		w.feed(e)
+	}
 
 	// Food spoilage (BRE-verified by driving the original, 2026-07-16): FoodSpoilPct
 	// (5%) of the ENTIRE stored food spoils each turn — floor(0.05 × food).
