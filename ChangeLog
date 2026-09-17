@@ -1,9 +1,10 @@
 Immortal Barons ChangeLog
 
-(in-progress:)
-  * Food given to your people and army leaves the granary at the prompt, so
-    whatever is left is safe to sell
+2026-09-17 (v0.1.2)
+  * Food is taken when you feed your realm, so the rest is safe to sell
+  * Portuguese translation added; Dutch filled out and offered to CP437 callers
   * A civil war is reported by how much it destroyed, not blamed on famine
+  * A bad command line is answered in three lines, with -help for the rest
 
 2026-09-14 (v0.1.1)
   * The industry build line and the end-of-turn figures are no longer blank

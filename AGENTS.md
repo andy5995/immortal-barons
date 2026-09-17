@@ -390,7 +390,7 @@ that may be sold, which this project's license permits, and they carry their
 authors' contact details. Facts are free to restate, so the file says them in
 its own words and links the originals. Nothing in FidoNet is an RFC.
 
-## Status (v0.1.1 released 2026-09-14; v0.1.2 in development)
+## Status (v0.1.2 released 2026-09-17; v0.1.3 in development)
 
 Persistent, multi-user door game. One shared JSON world; concurrent multi-node
 door play (each action reloads/re-validates/mutates/saves under a brief
@@ -496,8 +496,13 @@ that rides the packets) ride the same transport. An individual strike picks its
 type — Normal Attack / Quick Strike / Extended Battle, BRE-verified from
 `game/attack.hlp` and a disassembly; a group attack gets no choice and fights as
 a Normal Attack. **Localization**: help docs (po4a) and
-UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
-and grow via the `.po` catalogs.
+UI strings (`internal/i18n`) render in the caller's language. Portuguese (pt,
+Brazilian) and Dutch are complete on the help side and all but complete on the
+UI side; German and Russian are seeded. All four grow via the `.po` catalogs,
+and a machine translation is expected to be corrected by a native speaker's PR
+rather than defended. A catalog using any character outside CP437 is not offered
+to a CP437 caller at all — de and nl fit, pt and ru do not — so a stray em dash
+in a Latin-script catalog silently costs that language its door audience.
 
 **Bulletin files**: `BulletinDir` in `bbs.cfg` writes the scoreboard, today's
 and yesterday's news, a World Report, and the league's eight InterBBS Scores
