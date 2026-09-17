@@ -518,20 +518,21 @@ func BuildMenus() *Menus {
 	}
 	coord.DefaultOnEnter = quitOnEnter(coord)
 
-	// BRE-style Price / # Owned columns: the buy price on Buy Food, the sell price
-	// on Sell Food, and the caller's current food holdings on both — so the player
-	// can see what they hold before buying or selling. The daily supply and gold on
-	// hand go in the status line below (see foodMarketStatus).
-	foodOwned := owned(func(p *game.Empire) int { return p.Food })
+	// A Price column but no "# Owned" one: there is a single holding behind both
+	// rows, so a column repeated the same figure twice. The original carries it in
+	// the footer instead, beside the gold ("You have 37,505 gold and 1608 units of
+	// food.", cap/121125-666H4H_Camembert_Public.cap), and its own market screen
+	// has no Owned column at all — see foodMarketStatus.
 	food.Items = []Item{
 		{Key: 'B', Label: "Buy Food", Do: buyFoodMarket,
-			Price: func(w *ctx) int { return w.FoodBuyPrice() }, Owned: foodOwned},
+			Price: func(w *ctx) int { return w.FoodBuyPrice() }},
 		{Key: 'S', Label: "Sell Food", Do: sellFoodMarket,
-			Price: func(w *ctx) int { return w.FoodSellPrice() }, Owned: foodOwned},
+			Price: func(w *ctx) int { return w.FoodSellPrice() }},
 		{Key: 'A', Label: "Visit Advisors", Do: visitAdvisors},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	food.Header = foodMarketSupply
 	food.Status = foodMarketStatus
 	food.DefaultOnEnter = quitOnEnter(food)
 
@@ -676,15 +677,27 @@ func covertStatus(w *ctx) string {
 	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d agents."), formatGold(p.Gold, playerLang(w)), p.Agents)
 }
 
-// foodMarketStatus is the Food Market status line: today's planet-wide supply
-// (or "Unlimited" when the sysop toggled it) plus the caller's gold on hand.
+// foodMarketSupply is today's planet-wide supply, drawn ABOVE the market's
+// title rule as the original draws it (cap/121125-666H4H_Camembert_Public.cap),
+// or "Unlimited" when the sysop has switched the limit off. It was joined to
+// the footer below until the food holding moved there and the pair ran to 89
+// columns; they are two lines in the original for the same reason.
+func foodMarketSupply(w *ctx) string {
+	lang := playerLang(w)
+	if w.Config.FoodUnlimited {
+		return i18n.T(lang, "Unlimited supply today.")
+	}
+	return fmt.Sprintf(i18n.T(lang, "%s units of food available today."), formatGold(w.FoodMarketSupply, lang))
+}
+
+// foodMarketStatus is what the caller holds — gold and food, in the original's
+// own sentence. The food belongs here rather than in a "# Owned" column because
+// one holding stands behind both menu rows, so a column printed it twice.
 func foodMarketStatus(w *ctx) string {
 	lang := playerLang(w)
-	supply := i18n.T(lang, "Unlimited supply today.")
-	if !w.Config.FoodUnlimited {
-		supply = fmt.Sprintf(i18n.T(lang, "%s units of food available today."), comma(w.FoodMarketSupply))
-	}
-	return fmt.Sprintf(i18n.T(lang, "%s  You have %s gold."), supply, formatGold(w.Player().Gold, lang))
+	p := w.Player()
+	return fmt.Sprintf(i18n.T(lang, "You have %s gold and %s units of food."),
+		formatGold(p.Gold, lang), formatGold(p.Food, lang))
 }
 
 // gameMenuStatus is the block ABOVE the opening menu's title rule, where BRE

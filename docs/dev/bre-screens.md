@@ -1693,6 +1693,14 @@ We are buying for 9 and selling for 26.
 You have 3,229,328 gold and 5321 units of food.
 ```
 
+**IB matches this since 2026-09-17, footer included.** It had drawn the market
+as an ordinary priced menu with a `# Owned` column, which printed the one food
+holding twice — once on the Buy row and once on the Sell row — while the footer
+carried the supply and the gold. The holding now sits in the footer beside the
+gold, in the sentence above, and the supply line moved to the header, above the
+title rule, where the original puts it. The two were one line briefly and ran to
+89 columns, which is the other reason the original splits them.
+
 Then the per-turn feed prompts: `Your People Need N units of food` /
 `How much will you give? (N; N)` and `Your Armed Forces Require N units of food`.
 
