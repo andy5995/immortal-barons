@@ -1510,18 +1510,28 @@ func TestCivilWarLineIsBandedAndBlamesNothing(t *testing.T) {
 // whole of a real turn: a baron fed his people in full, sold what the granary
 // still showed, bought land with the proceeds, and starved at rollover for food
 // he had already handed over — reported to him as a famine.
+//
+// Driven through feedStage rather than through World.FeedGiven, because the
+// wiring is the fix: deleting the commit from the stage left the whole suite
+// green when this was written the other way round.
 func TestFoodIsTakenAtThePromptNotAtRollover(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
-	need := p.PeopleFoodUpkeep() + p.ForcesFoodUpkeep()
-	if need <= 0 {
-		t.Fatal("the test realm owes no food")
-	}
+	p.Prefs.AutoFeed = false // the prompted path; the silent one is the test below
+	p.People = 100000        // eats 7,500
+	need := p.PeopleFoodUpkeep() + w.ForcesFoodDue(p)
 	p.Food = need * 4
 
-	w.World.FeedGiven(p, p.PeopleFoodUpkeep(), p.ForcesFoodUpkeep())
-	if got := p.Food; got != need*3 {
-		t.Fatalf("the granary should be down by the two helpings: want %d, got %d", need*3, got)
+	// dismiss the pause, quit the market, take each prompt's default in full
+	f := &fakeSession{keys: []rune(" 0\r\r")}
+	if _, err := feedStage(f, w, BuildMenus().Food, true); err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	if !strings.Contains(f.out.String(), "people need ") {
+		t.Fatalf("the script never reached the people's prompt:\n%s", f.out.String())
+	}
+	if got, want := p.Food, need*3; got != want {
+		t.Fatalf("the granary should be down by the two helpings at the prompt: want %d, got %d", want, got)
 	}
 	if p.CivilWarSeverity != 0 || p.PendingSupportPenalty != 0 || p.PendingMoralePenalty != 0 {
 		t.Fatalf("a realm fed in full owes no penalty: %+v", *p)
@@ -1530,7 +1540,6 @@ func TestFoodIsTakenAtThePromptNotAtRollover(t *testing.T) {
 	// Everything left is now genuinely surplus: sell the lot, and the rollover
 	// must not feed anyone a second time.
 	p.Food = 0
-	p.TurnProgress.Fed = true
 	w.World.PlayTurn(p, w.Today)
 	if p.CivilWarSeverity != 0 || p.LastCivilWar != 0 {
 		t.Errorf("selling the surplus after feeding must not cause a famine (severity %d, reported %d)",
@@ -1538,6 +1547,30 @@ func TestFoodIsTakenAtThePromptNotAtRollover(t *testing.T) {
 	}
 	if p.Support < 100 {
 		t.Errorf("popular support should be untouched, got %d", p.Support)
+	}
+}
+
+// The silent Auto-Feed path takes the food at the same point, for the same
+// reason — it is the path most barons are on, and it commits without a prompt
+// to assert on, so only the granary says whether it ran.
+func TestAutoFeedTakesTheFoodWithoutPrompting(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Prefs.AutoFeed = true
+	p.People = 100000
+	need := p.PeopleFoodUpkeep() + w.ForcesFoodDue(p)
+	p.Food = need * 2
+
+	f := &fakeSession{keys: []rune(" ")}
+	silent, err := feedStage(f, w, BuildMenus().Food, true)
+	if err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	if !silent {
+		t.Fatalf("a realm with food to spare and Auto-Feed on takes the silent path, got:\n%s", f.out.String())
+	}
+	if got, want := p.Food, need; got != want {
+		t.Errorf("Auto-Feed should draw the food at the stage: want %d, got %d", want, got)
 	}
 }
 

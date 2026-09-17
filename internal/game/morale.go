@@ -79,6 +79,11 @@ func (w *World) feed(e *Empire) {
 // told he had suffered a famine he had paid to avoid.
 func (w *World) FeedGiven(e *Empire, toPeople, toArmy int) {
 	w.applyFeeding(e, e.PeopleFoodUpkeep(), toPeople, e.ForcesFoodUpkeep(), toArmy)
+	// Whoever feeds, records it. The turn pipeline marks the stage done too, but
+	// the flag that stops the rollover taking a second helping belongs with the
+	// helping it is about — a caller that feeds without going through the stage
+	// runner would otherwise be charged twice for one meal.
+	e.TurnProgress.Fed = true
 }
 
 // applyFeeding draws the two helpings out of the granary and files what either

@@ -345,6 +345,12 @@ func feedStage(s session.Session, w *ctx, food *Menu, pauseFirst bool) (silent b
 	// underfed, looping back above the market call. (IB consumes food
 	// automatically, so the given amounts gate the reconsider; buying enough food
 	// is the real fix.)
+	//
+	// Nothing changes hands inside the loop: a reconsider goes back to the market
+	// and re-asks, so the granary has to still hold what the last pass offered.
+	// The single commit below is the one exit, which is what keeps a later third
+	// exit from quietly leaving the food on the shelf.
+	var toPeople, toArmy int
 	for {
 		if err := Run(s, w, food); err != nil {
 			return false, err
@@ -354,31 +360,28 @@ func feedStage(s session.Session, w *ctx, food *Menu, pauseFirst bool) (silent b
 		}) {
 			return false, nil
 		}
-		toPeople, shortPeople := askFoodGift(s, tr(s, "Your people need %s units of food."), people, &have)
-		toArmy, shortArmy := askFoodGift(s, tr(s, "Your armed forces require %s units of food."), forces, &have)
+		var shortPeople, shortArmy bool
+		toPeople, shortPeople = askFoodGift(s, tr(s, "Your people need %s units of food."), people, &have)
+		toArmy, shortArmy = askFoodGift(s, tr(s, "Your armed forces require %s units of food."), forces, &have)
 		if !shortPeople && !shortArmy {
-			// Both met: hand the food over and proceed. Nothing is committed until
-			// the sequence is answered, so a reconsider below re-asks against the
-			// granary the player actually still has.
-			withPlayer(w, func(p *game.Empire) { w.World.FeedGiven(p, toPeople, toArmy) })
-			return false, nil
+			break
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
 		if !AskYesNo(s, "Would you like to reconsider?", true) {
-			// Proceed despite underfeeding — what was given still changes hands, and
-			// the shortfall is charged against what was owed.
-			withPlayer(w, func(p *game.Empire) { w.World.FeedGiven(p, toPeople, toArmy) })
-			return false, nil
+			break // proceed underfed: what was given still changes hands
 		}
 	}
+	withPlayer(w, func(p *game.Empire) { w.World.FeedGiven(p, toPeople, toArmy) })
+	return false, nil
 }
 
 // askFoodGift runs one of BRE's two food prompts: it states the obligation,
 // offers as much of the remaining stock as the obligation asks for, and draws
 // what the player gives out of a RUNNING COPY of that stock, so the second
 // prompt sees what the first spent without the granary itself moving until the
-// whole sequence is answered. Returns what was given and whether it fell short. A zero obligation is
-// skipped, as in BRE, where the prompt only appears when something is owed.
+// whole sequence is answered. Returns what was given and whether it fell short.
+// A zero obligation is skipped, as in BRE, where the prompt only appears when
+// something is owed.
 func askFoodGift(s session.Session, label string, need int, stock *int) (give int, short bool) {
 	if need <= 0 {
 		return 0, false
