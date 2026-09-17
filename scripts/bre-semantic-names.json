@@ -614,6 +614,16 @@
       "confidence": "high",
       "evidence": ["binary_strings: industrial specialization, unit choice, and benefit topics", "call_graph: called from game settings"]
     },
+    "0x037418": {
+      "name": "people_food_need",
+      "confidence": "high",
+      "evidence": ["disasm: loads the population longint at record +0x62, multiplies by Real48 1.5 and truncates", "call_graph: called by allocate_food for the civilian obligation and by trade_food for the sell default"]
+    },
+    "0x037459": {
+      "name": "forces_food_need",
+      "confidence": "medium",
+      "evidence": ["disasm: sums held and market-escrowed unit counts (+0x86/+0x8a and +0x21d/+0x22d/+0x231), each scaled by one Real48 weight", "call_graph: paired with people_food_need at both of its call sites, as the armed-forces half of the food bill"]
+    },
     "0x03792a": {
       "name": "trade_food",
       "confidence": "high",

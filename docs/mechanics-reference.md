@@ -3319,6 +3319,23 @@ section is a record of what was claimed and how it was settled, so the word
   rollover's automatic `feed` runs only for a turn that never reached the stage
   (the AI's, or an abandoned one), gated on `TurnProgress.Fed`.
 
+  **The Food Market's two defaults reserve a meal UNCONDITIONALLY — do not make
+  them notice that this turn's obligations are already paid.** `trade_food`
+  (`BRE.OVR 0x3792a`, unit offset `+0x8c7`) builds the sell default as a plain
+  `Food − (people_food_need + forces_food_need)`, with no test anywhere for
+  whether the food stage has run; the buy default is its inverse. Captures agree:
+  `(1458; 1608)` and `(14,785,682; 15,279,399)`, each short of the max by a meal.
+  IB's `FoodDue` in `menu.sellFoodMarket` matches that exactly.
+
+  It reads like a bug once feeding moved to the prompt — the reserved meal has
+  already been eaten, so the screen appears to hold back food the baron could
+  sell — and it was "fixed" that way on 2026-09-17 and reverted the same day.
+  After feeding, the meal it reserves is the NEXT turn's, which is the one thing
+  standing between a baron who empties his granary on purpose and the famine
+  this whole section is about. The two helpers are named in
+  `scripts/bre-semantic-names.json`: `people_food_need` is population at record
+  `+0x62` × Real48 1.5, `forces_food_need` sums held and market-escrowed units.
+
   **The stage's two shapes differ in more than the market.** `cap/eots-ibbs-01.cap`
   carries 130 silent turns and 8 market ones, and they print differently:
 
