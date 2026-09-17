@@ -78,3 +78,23 @@ func TestThousandsMatchesBRE(t *testing.T) {
 		}
 	}
 }
+
+// Every language the game ships gets its own thousands separator, because a
+// figure is read in the same breath as the sentence around it. Brazilian
+// Portuguese and Dutch both group with a point; Dutch fell back to the English
+// comma until 2026-09-17, which put "10,000 goud" in Dutch prose.
+func TestGroupSeparatorPerLanguage(t *testing.T) {
+	for _, c := range []struct{ lang, want string }{
+		{"", "1,847,392"},
+		{"en", "1,847,392"},
+		{"de", "1.847.392"},
+		{"nl", "1.847.392"},
+		{"pt", "1.847.392"},
+		{"ru", "1 847 392"},
+		{"xx", "1,847,392"}, // a language the game does not ship reads as English
+	} {
+		if got := Format(1847392, c.lang); got != c.want {
+			t.Errorf("Format(1847392, %q) = %q, want %q", c.lang, got, c.want)
+		}
+	}
+}

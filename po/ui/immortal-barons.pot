@@ -21,7 +21,7 @@ msgstr ""
 msgid " — choose a topic:"
 msgstr ""
 
-#: internal/menu/actions_attack.go:915
+#: internal/menu/actions_attack.go:914
 msgid "#"
 msgstr ""
 
@@ -89,7 +89,7 @@ msgstr ""
 msgid "%d gold is requested to improve military morale."
 msgstr ""
 
-#: internal/menu/turnstages.go:519
+#: internal/menu/turnstages.go:539
 msgid "%d matched! You win %s gold, paid straight into your bank."
 msgstr ""
 
@@ -113,16 +113,12 @@ msgstr ""
 msgid "%d units deserted for lack of pay."
 msgstr ""
 
-#: internal/menu/actions_attack.go:968
+#: internal/menu/actions_attack.go:965
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr ""
 
 #: internal/menu/actions_info.go:185
 msgid "%d%% over 10 days"
-msgstr ""
-
-#: internal/menu/tree.go:687
-msgid "%s  You have %s gold."
 msgstr ""
 
 #: internal/menu/actions.go:217
@@ -197,7 +193,7 @@ msgstr ""
 msgid "%s is set in %s, which the game reads but never writes. Edit that file instead."
 msgstr ""
 
-#: internal/menu/actions_attack.go:963
+#: internal/menu/actions_attack.go:960
 msgid "%s jets were destroyed in the attack!"
 msgstr ""
 
@@ -229,7 +225,7 @@ msgstr ""
 msgid "%s turns"
 msgstr ""
 
-#: internal/menu/tree.go:685
+#: internal/menu/tree.go:690
 msgid "%s units of food available today."
 msgstr ""
 
@@ -301,7 +297,7 @@ msgstr ""
 msgid "1 second"
 msgstr ""
 
-#: internal/menu/news.go:127
+#: internal/menu/news.go:130
 msgid ": News File"
 msgstr ""
 
@@ -389,7 +385,7 @@ msgstr ""
 msgid "ALL"
 msgstr ""
 
-#: internal/menu/tree.go:539
+#: internal/menu/tree.go:540
 msgid "Abdicate"
 msgstr ""
 
@@ -537,7 +533,7 @@ msgstr ""
 msgid "Awaiting a reply:"
 msgstr ""
 
-#: internal/menu/turnstages.go:444
+#: internal/menu/turnstages.go:464
 msgid "BBS Coordinator"
 msgstr ""
 
@@ -673,7 +669,7 @@ msgstr ""
 msgid "Canceled — no changes were saved."
 msgstr ""
 
-#: internal/menu/turnstages.go:483
+#: internal/menu/turnstages.go:503
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr ""
 
@@ -693,7 +689,7 @@ msgstr ""
 msgid "Cause Dissensions"
 msgstr ""
 
-#: internal/menu/news.go:70
+#: internal/menu/news.go:73
 msgid "Change"
 msgstr ""
 
@@ -745,8 +741,24 @@ msgstr ""
 msgid "Chopper's Fair Market"
 msgstr ""
 
-#: internal/menu/turnrecap.go:474
-msgid "Civil war! Famine cost you %d%% of your realm and its forces."
+#: internal/menu/turnrecap.go:500
+msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
+msgstr ""
+
+#: internal/menu/turnrecap.go:496
+msgid "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
+msgstr ""
+
+#: internal/menu/turnrecap.go:498
+msgid "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
+msgstr ""
+
+#: internal/menu/turnrecap.go:502
+msgid "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
+msgstr ""
+
+#: internal/menu/turnrecap.go:504
+msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr ""
 
 #: internal/menu/actions_message.go:494
@@ -789,11 +801,11 @@ msgstr ""
 msgid "Coordinator"
 msgstr ""
 
-#: internal/menu/tree.go:585
+#: internal/menu/tree.go:586
 msgid "Coordinator Menu"
 msgstr ""
 
-#: internal/menu/tree.go:583
+#: internal/menu/tree.go:584
 msgid "Coordinator Vote"
 msgstr ""
 
@@ -833,7 +845,7 @@ msgstr ""
 msgid "Cuts the target's popular support by a fixed fraction. Low support costs it income and invites unrest."
 msgstr ""
 
-#: internal/menu/news.go:44
+#: internal/menu/news.go:47
 msgid "Daily Bulletin"
 msgstr ""
 
@@ -841,7 +853,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: internal/menu/actions_attack.go:916
+#: internal/menu/actions_attack.go:915
 msgid "Days Until Self-Destruct"
 msgstr ""
 
@@ -941,7 +953,7 @@ msgstr ""
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr ""
 
-#: internal/menu/actions_attack.go:902
+#: internal/menu/actions_attack.go:901
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr ""
 
@@ -961,7 +973,7 @@ msgstr ""
 msgid "Done"
 msgstr ""
 
-#: internal/menu/turnstages.go:502
+#: internal/menu/turnstages.go:522
 msgid "Drawn:"
 msgstr ""
 
@@ -993,11 +1005,11 @@ msgstr ""
 msgid "Empire Name"
 msgstr ""
 
-#: internal/menu/tree.go:552
+#: internal/menu/tree.go:553
 msgid "Empire Status"
 msgstr ""
 
-#: internal/menu/tree.go:540
+#: internal/menu/tree.go:541
 msgid "End Protection"
 msgstr ""
 
@@ -1005,7 +1017,7 @@ msgstr ""
 msgid "End of Turn Statistics:"
 msgstr ""
 
-#: internal/menu/actions_attack.go:934
+#: internal/menu/actions_attack.go:931
 msgid "Enter Gooie Number (0 to cancel)?"
 msgstr ""
 
@@ -1025,7 +1037,7 @@ msgstr ""
 msgid "Entire Planet"
 msgstr ""
 
-#: internal/menu/tree.go:591
+#: internal/menu/tree.go:592
 msgid "Entry"
 msgstr ""
 
@@ -1053,7 +1065,7 @@ msgstr ""
 msgid "Food"
 msgstr ""
 
-#: internal/menu/tree.go:553
+#: internal/menu/tree.go:554
 msgid "Food Market"
 msgstr ""
 
@@ -1065,7 +1077,7 @@ msgstr ""
 msgid "Free software under the MIT License."
 msgstr ""
 
-#: internal/menu/actions_attack.go:916
+#: internal/menu/actions_attack.go:915
 msgid "From"
 msgstr ""
 
@@ -1081,7 +1093,7 @@ msgstr ""
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
-#: internal/menu/tree.go:713
+#: internal/menu/tree.go:725
 msgid "Game started on %s"
 msgstr ""
 
@@ -1173,11 +1185,11 @@ msgstr ""
 msgid "How many would you like to borrow?"
 msgstr ""
 
-#: internal/menu/actions_food.go:20
+#: internal/menu/actions_food.go:19
 msgid "How much food to buy?"
 msgstr ""
 
-#: internal/menu/actions_food.go:38
+#: internal/menu/actions_food.go:48
 msgid "How much food to sell?"
 msgstr ""
 
@@ -1257,7 +1269,7 @@ msgstr ""
 msgid "InterPlanetary Operations"
 msgstr ""
 
-#: internal/menu/tree.go:600
+#: internal/menu/tree.go:601
 msgid "InterPlanetary Ops"
 msgstr ""
 
@@ -1283,10 +1295,6 @@ msgstr ""
 
 #: internal/menu/actions_attack.go:841
 msgid "It will cost your planet %s million gold to fund. Accept?"
-msgstr ""
-
-#: internal/menu/actions_attack.go:924
-msgid "It would take %s jets to destroy one outright."
 msgstr ""
 
 #: internal/menu/menu.go:926
@@ -1521,7 +1529,7 @@ msgstr ""
 msgid "No inter-BBS scores have been imported yet."
 msgstr ""
 
-#: internal/menu/turnstages.go:516
+#: internal/menu/turnstages.go:536
 msgid "No matches. The Queen thanks you for your contribution."
 msgstr ""
 
@@ -1613,7 +1621,7 @@ msgstr ""
 msgid "One Dominion"
 msgstr ""
 
-#: internal/menu/actions_attack.go:906
+#: internal/menu/actions_attack.go:905
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr ""
 
@@ -1625,7 +1633,7 @@ msgstr ""
 msgid "Only the elected BBS Coordinator may do that."
 msgstr ""
 
-#: cmd/immortal-barons/usage.go:70
+#: cmd/immortal-barons/usage.go:84
 msgid "Other"
 msgstr ""
 
@@ -1717,7 +1725,7 @@ msgstr ""
 msgid "Owned"
 msgstr ""
 
-#: internal/menu/turnstages.go:537
+#: internal/menu/turnstages.go:557
 msgid "Pick your six letters:"
 msgstr ""
 
@@ -1749,11 +1757,11 @@ msgstr ""
 msgid "Planetary Treaties"
 msgstr ""
 
-#: internal/menu/tree.go:742
+#: internal/menu/tree.go:754
 msgid "Planetary time: %s   New day in %s"
 msgstr ""
 
-#: internal/menu/tree.go:593
+#: internal/menu/tree.go:594
 msgid "Play"
 msgstr ""
 
@@ -1873,6 +1881,10 @@ msgstr ""
 msgid "River"
 msgstr ""
 
+#: cmd/immortal-barons/usage.go:43
+msgid "Run 'immortal-barons -help' for the full list of options."
+msgstr ""
+
 #: internal/menu/opshelp.go:53
 msgid "S3-Sabre"
 msgstr ""
@@ -1917,7 +1929,7 @@ msgstr ""
 msgid "See Scores"
 msgstr ""
 
-#: internal/menu/tree.go:594
+#: internal/menu/tree.go:595
 msgid "See Status"
 msgstr ""
 
@@ -1969,7 +1981,7 @@ msgstr ""
 msgid "Send how many Troopers?"
 msgstr ""
 
-#: internal/menu/actions_attack.go:947
+#: internal/menu/actions_attack.go:944
 msgid "Send how many jets?"
 msgstr ""
 
@@ -2005,11 +2017,11 @@ msgstr ""
 msgid "Set %s price"
 msgstr ""
 
-#: internal/menu/tree.go:565
+#: internal/menu/tree.go:566
 msgid "Set Industries"
 msgstr ""
 
-#: internal/menu/tree.go:560
+#: internal/menu/tree.go:561
 msgid "Set Tax Rate"
 msgstr ""
 
@@ -2025,7 +2037,7 @@ msgstr ""
 msgid "Set-aside packets"
 msgstr ""
 
-#: internal/menu/tree.go:566
+#: internal/menu/tree.go:567
 msgid "Show Instructions"
 msgstr ""
 
@@ -2057,7 +2069,7 @@ msgstr ""
 msgid "Specialization"
 msgstr ""
 
-#: internal/menu/tree.go:567
+#: internal/menu/tree.go:568
 msgid "Specialize Industry"
 msgstr ""
 
@@ -2093,7 +2105,7 @@ msgstr ""
 msgid "Stir Revolts"
 msgstr ""
 
-#: internal/menu/actions_attack.go:916
+#: internal/menu/actions_attack.go:915
 msgid "Strength"
 msgstr ""
 
@@ -2229,11 +2241,11 @@ msgstr ""
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr ""
 
-#: internal/menu/actions_attack.go:965
+#: internal/menu/actions_attack.go:962
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr ""
 
-#: internal/menu/turnstages.go:395
+#: internal/menu/turnstages.go:416
 msgid "The Queen Royale opens her coffers and refunds you %s gold!"
 msgstr ""
 
@@ -2269,7 +2281,7 @@ msgstr ""
 msgid "The food market is out of food for today."
 msgstr ""
 
-#: internal/menu/tree.go:709
+#: internal/menu/tree.go:721
 msgid "The game begins %s."
 msgstr ""
 
@@ -2313,7 +2325,7 @@ msgstr ""
 msgid "There are no rival empires left to attack."
 msgstr ""
 
-#: internal/menu/actions_attack.go:945
+#: internal/menu/actions_attack.go:942
 msgid "There are only %d to choose from."
 msgstr ""
 
@@ -2521,7 +2533,7 @@ msgstr ""
 msgid "Unlimited"
 msgstr ""
 
-#: internal/menu/tree.go:683
+#: internal/menu/tree.go:688
 msgid "Unlimited supply today."
 msgstr ""
 
@@ -2713,7 +2725,7 @@ msgstr ""
 msgid "Would you like to reconsider?"
 msgstr ""
 
-#: internal/menu/tree.go:564
+#: internal/menu/tree.go:565
 msgid "Write Macros"
 msgstr ""
 
@@ -2741,7 +2753,7 @@ msgstr ""
 msgid "You can afford %s%d%s regions."
 msgstr ""
 
-#: internal/menu/turnstages.go:460
+#: internal/menu/turnstages.go:480
 msgid "You can change it from the System menu."
 msgstr ""
 
@@ -2757,7 +2769,7 @@ msgstr ""
 msgid "You cannot buy from your own listing."
 msgstr ""
 
-#: internal/menu/turnstages.go:457
+#: internal/menu/turnstages.go:477
 msgid "You cannot change it until your new-realm protection ends, %d turns from now."
 msgstr ""
 
@@ -2817,15 +2829,19 @@ msgstr ""
 msgid "You have %s Troopers, %s usable Jets, %s Tanks, and %s Bombers."
 msgstr ""
 
-#: internal/menu/tree.go:676
+#: internal/menu/tree.go:677
 msgid "You have %s gold and %d agents."
 msgstr ""
 
-#: internal/menu/tree.go:662
+#: internal/menu/tree.go:663
 msgid "You have %s gold and %d turns."
 msgstr ""
 
-#: internal/menu/tree.go:660
+#: internal/menu/tree.go:698
+msgid "You have %s gold and %s units of food."
+msgstr ""
+
+#: internal/menu/tree.go:661
 msgid "You have %s gold and 1 turn."
 msgstr ""
 
@@ -2833,7 +2849,7 @@ msgstr ""
 msgid "You have %s gold in hand and %s gold in the bank."
 msgstr ""
 
-#: internal/menu/tree.go:671
+#: internal/menu/tree.go:672
 msgid "You have %s gold."
 msgstr ""
 
@@ -2909,7 +2925,7 @@ msgstr ""
 msgid "You hold no bribed agents to work through."
 msgstr ""
 
-#: internal/menu/turnstages.go:445
+#: internal/menu/turnstages.go:465
 msgid "You hold the office of %s."
 msgstr ""
 
@@ -3021,7 +3037,7 @@ msgstr ""
 msgid "Your armed forces require %s gold."
 msgstr ""
 
-#: internal/menu/turnstages.go:352
+#: internal/menu/turnstages.go:365
 msgid "Your armed forces require %s units of food."
 msgstr ""
 
@@ -3101,7 +3117,7 @@ msgstr ""
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
-#: internal/menu/turnstages.go:351
+#: internal/menu/turnstages.go:364
 msgid "Your people need %s units of food."
 msgstr ""
 
@@ -3137,7 +3153,7 @@ msgstr ""
 msgid "Your shipment is on its way to %s of %s."
 msgstr ""
 
-#: internal/menu/turnstages.go:451
+#: internal/menu/turnstages.go:471
 msgid "Your vote for BBS Coordinator is %s."
 msgstr ""
 
@@ -3153,7 +3169,7 @@ msgstr ""
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:88
+#: cmd/immortal-barons/flags.go:93
 msgid "add N computer barons to the running game, then exit"
 msgstr ""
 
@@ -3169,31 +3185,31 @@ msgstr ""
 msgid "away"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:75
+#: cmd/immortal-barons/flags.go:80
 msgid "check this board's league setup — roster, board name, packet directories, keys — and report everything wrong at once, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:64
+#: cmd/immortal-barons/flags.go:69
 msgid "choose which drop file format your BBS writes, save it, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:73
+#: cmd/immortal-barons/flags.go:78
 msgid "create this board's packet-signing key, print the public half to send to the League Coordinator, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:71
+#: cmd/immortal-barons/flags.go:76
 msgid "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:84
+#: cmd/immortal-barons/flags.go:89
 msgid "directory the game writes packets to for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:83
+#: cmd/immortal-barons/flags.go:88
 msgid "directory where packets from the other boards arrive, for -ibbs-reset (default \"inbound\", under the data directory)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:65
+#: cmd/immortal-barons/flags.go:70
 msgid "folder that holds the game data"
 msgstr ""
 
@@ -3201,19 +3217,19 @@ msgstr ""
 msgid "for list"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:93
+#: cmd/immortal-barons/flags.go:98
 msgid "force CP437 output (the door default; overrides the -local locale detection)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:91
+#: cmd/immortal-barons/flags.go:96
 msgid "force Dupe Checking `on|off` for this run only, for testing a league lockout. Nothing is saved: the sysop's setting is left as it is"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:92
+#: cmd/immortal-barons/flags.go:97
 msgid "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:94
+#: cmd/immortal-barons/flags.go:99
 msgid "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor UTF-8 (box rules and accents degrade to ASCII look-alikes)"
 msgstr ""
 
@@ -3225,7 +3241,7 @@ msgstr ""
 msgid "here"
 msgstr ""
 
-#: cmd/immortal-barons/usage.go:40
+#: cmd/immortal-barons/usage.go:54
 msgid "immortal-barons — a Barren Realms Elite clone. Options:"
 msgstr ""
 
@@ -3233,7 +3249,7 @@ msgstr ""
 msgid "in return for %s."
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:80
+#: cmd/immortal-barons/flags.go:85
 msgid "list the players and change a caller's name, rename their realm, or remove it, then exit"
 msgstr ""
 
@@ -3245,7 +3261,7 @@ msgstr ""
 msgid "no coordinator key is loaded"
 msgstr ""
 
-#: internal/menu/turnstages.go:449
+#: internal/menu/turnstages.go:469
 msgid "no one"
 msgstr ""
 
@@ -3269,27 +3285,31 @@ msgstr ""
 msgid "path to the BBS drop file"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:61
+#: cmd/immortal-barons/flags.go:66
 msgid "play in your own terminal, not as a BBS door"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:89
+#: cmd/immortal-barons/flags.go:94
 msgid "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:90
+#: cmd/immortal-barons/flags.go:102
+msgid "print every option, grouped by who needs it, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/flags.go:95
 msgid "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:96
+#: cmd/immortal-barons/flags.go:101
 msgid "print the version, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:76
+#: cmd/immortal-barons/flags.go:81
 msgid "print which board each planet's packets are handed to, and the directory they are written in, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:72
+#: cmd/immortal-barons/flags.go:77
 msgid "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"
 msgstr ""
 
@@ -3297,47 +3317,47 @@ msgstr ""
 msgid "run -set-dropfile first"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:66
+#: cmd/immortal-barons/flags.go:71
 msgid "run the daily maintenance, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:68
+#: cmd/immortal-barons/flags.go:73
 msgid "run the full cycle: read inbound packets, play a turn, write outbound packets, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:67
+#: cmd/immortal-barons/flags.go:72
 msgid "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:95
+#: cmd/immortal-barons/flags.go:100
 msgid "send plain text with no ANSI escapes, as a terminal that cannot render them gets (for testing that path on a terminal that can)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:70
+#: cmd/immortal-barons/flags.go:75
 msgid "send this board's league settings to the whole league (node #1 only), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:69
+#: cmd/immortal-barons/flags.go:74
 msgid "show each packet as it is read and written (use with -full or -planetary)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:86
+#: cmd/immortal-barons/flags.go:91
 msgid "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:87
+#: cmd/immortal-barons/flags.go:92
 msgid "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:81
+#: cmd/immortal-barons/flags.go:86
 msgid "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:74
+#: cmd/immortal-barons/flags.go:79
 msgid "start a new season across the whole league on DATE (node #1 only), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:85
+#: cmd/immortal-barons/flags.go:90
 msgid "take this board's name, inbound directory and league number from an original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset"
 msgstr ""
 
@@ -3353,7 +3373,7 @@ msgstr ""
 msgid "this board is not the League Coordinator"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:82
+#: cmd/immortal-barons/flags.go:87
 msgid "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
@@ -3377,23 +3397,27 @@ msgstr ""
 msgid "units of food spoiled."
 msgstr ""
 
+#: cmd/immortal-barons/usage.go:42
+msgid "usage: immortal-barons [options]"
+msgstr ""
+
 #: internal/menu/bulletinfiles.go:279
 msgid "won"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:78
+#: cmd/immortal-barons/flags.go:83
 msgid "write BBSINFO.LST — every board, when it was last heard from, and the version it runs, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:77
+#: cmd/immortal-barons/flags.go:82
 msgid "write LASTPACKET.LST — when a packet from each other board was last processed here, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:79
+#: cmd/immortal-barons/flags.go:84
 msgid "write PLAYERLIST.LST — every realm on every board (League Coordinator only), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:62
+#: cmd/immortal-barons/flags.go:67
 msgid "your player name (only used with -local)"
 msgstr ""
 

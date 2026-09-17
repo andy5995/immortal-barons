@@ -98,11 +98,16 @@ translated Markdown. Changed English is marked for review.
 
 ## Add a new language
 
-Register the language in one place, then create and translate its two catalogs.
-Use the two-letter language code (for example `es` for Spanish). Everything else
-picks the language up on its own: the in-game menu, the website, and the refresh
-scripts all read the language set from the list below and from the catalog files
-on disk.
+Create and translate the two catalogs, and register the language in the places
+listed below. Use the two-letter language code (for example `es` for Spanish).
+
+Steps 1 and 2 are all an **interface-only** language needs — the in-game menu,
+the website and the refresh scripts read the language set from that list and
+from the catalog files on disk. A language that also translates the **help
+pages** needs steps 3 and 4 as well; `//go:embed` takes no variables, so the
+Go side cannot discover a new content tree on its own, and the game panics at
+startup if the tree is missing. This page claimed step 1 was the only wiring
+until 2026-09-17; it was not.
 
 1. Add one line to `Languages` in `internal/i18n/languages.go`:
 
@@ -126,9 +131,41 @@ on disk.
 
 3. Create the **help** catalog: add `<code>:po/help/<code>.po` to the
    `[po4a_paths]` line in `po4a.cfg`, then run `scripts/gen-help-translations.sh`.
-   It creates `po/help/<code>.po` and the translated pages.
+   It creates `po/help/<code>.po` and the translated pages under
+   `internal/help/content.<code>/`.
+
+4. Register that tree in `internal/help/help.go`, in **two** places — the
+   `//go:embed` line and the `translated` map:
+
+   ```go
+   //go:embed content content.de content.nl content.pt content.ru
+   ```
+
+   ```go
+   "<code>": indexByPath(loadDir("content.<code>")),
+   ```
+
+   Run `go test ./internal/help/` afterwards: a tree that is embedded but not
+   mapped is silently unused, and one that is mapped but not embedded panics.
+
+5. If the language groups thousands with something other than a comma, add it to
+   `groupSep` in `internal/numfmt/numfmt.go` (German and Brazilian Portuguese use
+   `.`, Russian a space). Leaving it out is not a failure — the language just
+   shows comma-grouped figures.
 
 Then translate the two new `.po` files as described above.
+
+### Your language may be UTF-8 only, and that is decided by your catalog
+
+Nothing needs doing for this, but it is worth knowing which side of the line you
+are on: a catalog that uses any character outside CP437 is not offered to callers
+on a CP437 terminal at all. German and Dutch fit; Portuguese does not, because
+`ã` and `õ` are not in the code page, and neither is Cyrillic.
+
+The characters that cost a Latin-script language its place are usually not
+letters — an em dash (`—`), an ellipsis (`…`) or a curly quote will do it on
+their own. Use `-`, `...` and straight quotes and a Dutch or German catalog stays
+CP437-safe. Dutch was excluded for months over three em dashes.
 
 ## Character set: some languages are UTF-8 only
 

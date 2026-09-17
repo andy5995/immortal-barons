@@ -31,10 +31,10 @@ type Number interface{ ~int | ~int64 }
 // removed Abbrev's own comment described BRE's k/m columns thirty lines down.
 // Do not generalise any of the four past the screens it belongs to.
 
-// groupSep maps a UI language to its thousands separator. All three are ASCII,
-// so they are CP437-safe (and CP437 mode forces English anyway). Unknown
+// groupSep maps a UI language to its thousands separator. All of them are
+// ASCII, so they are CP437-safe (and CP437 mode forces English anyway). Unknown
 // languages fall back to the comma.
-var groupSep = map[string]byte{"": ',', "en": ',', "de": '.', "ru": ' '}
+var groupSep = map[string]byte{"": ',', "en": ',', "de": '.', "ru": ' ', "pt": '.', "nl": '.'}
 
 // Format renders n for display with lang's thousands separator: en 1,847,392 /
 // de 1.847.392 / ru "1 847 392".

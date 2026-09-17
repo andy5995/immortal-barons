@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-13 17:42-0500\n"
+"POT-Creation-Date: 2026-09-17 04:23-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -42,7 +42,12 @@ msgid ""
 "(Spending, Attack, Covert, Trading), Quit moves you to the next step of your "
 "turn; you cannot go back to that menu until your next turn. On a side menu "
 "(like the Bank or the System Menu), Quit takes you back to where you were."
-msgstr "Любое меню закрывается клавишей `0` с надписью \"Quit\". В меню хода (Расходы, Атака, Разведка, Торговля) Quit переводит вас к следующему шагу хода; вернуться в это меню можно будет только в следующем ходу. В боковом меню (например, Банк или Системное меню) Quit возвращает вас туда, где вы были."
+msgstr ""
+"Любое меню закрывается клавишей `0` с надписью \"Quit\". В меню хода "
+"(Расходы, Атака, Разведка, Торговля) Quit переводит вас к следующему шагу "
+"хода; вернуться в это меню можно будет только в следующем ходу. В боковом "
+"меню (например, Банк или Системное меню) Quit возвращает вас туда, где вы "
+"были."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:20
@@ -213,7 +218,9 @@ msgstr ""
 #. type: Bullet: '- '
 #: internal/help/content/controls/numbers.md:19
 msgid "`b` adds nine zeros. Press `3` then `b` and you see `3000000000`."
-msgstr "`b` добавляет девять нулей. Нажмите `3`, затем `b`, и вы увидите `3000000000`."
+msgstr ""
+"`b` добавляет девять нулей. Нажмите `3`, затем `b`, и вы увидите "
+"`3000000000`."
 
 #. type: Plain text
 #: internal/help/content/controls/numbers.md:21
@@ -371,7 +378,11 @@ msgid ""
 "Bribery pays one of the enemy's own agents to work for you. From then on, "
 "every covert operation YOU run against that realm is twice as likely to "
 "land. It does nothing to the operations they run against you."
-msgstr "Подкуп заставляет одного из агентов противника работать на вас. С этого момента любая тайная операция, которую ВЫ проводите против этого государства, удаётся вдвое чаще. На операции, которые оно проводит против вас, это не влияет."
+msgstr ""
+"Подкуп заставляет одного из агентов противника работать на вас. С этого "
+"момента любая тайная операция, которую ВЫ проводите против этого "
+"государства, удаётся вдвое чаще. На операции, которые оно проводит против "
+"вас, это не влияет."
 
 #. type: Plain text
 #: internal/help/content/covert/bribery.md:19
@@ -706,7 +717,9 @@ msgstr ""
 msgid ""
 "Stir Revolts spreads propaganda that lowers the target's public support. Low "
 "support weakens their troopers and their economy."
-msgstr "Разжигание мятежей распространяет пропаганду, снижающую народную поддержку цели. Низкая поддержка ослабляет её солдат и её экономику."
+msgstr ""
+"Разжигание мятежей распространяет пропаганду, снижающую народную поддержку "
+"цели. Низкая поддержка ослабляет её солдат и её экономику."
 
 #. type: Title #
 #: internal/help/content/covert/support-dissensions.md:1
@@ -725,6 +738,7 @@ msgstr ""
 #. type: Title #
 #: internal/help/content/covert/undermine-investments.md:1
 #: internal/help/content/covert/undermine-investments.md:8
+#, no-wrap
 msgid "Undermine Investments"
 msgstr "Подрыв инвестиций"
 
@@ -749,7 +763,10 @@ msgstr "Договоры и союзы"
 msgid ""
 "Treaties are agreements you send to other rulers. A treaty starts only when "
 "the other side accepts it. Each treaty type has its own topic."
-msgstr "Договоры - это соглашения, которые вы отправляете другим правителям. Договор вступает в силу лишь тогда, когда другая сторона его принимает. У каждого вида договора своя тема."
+msgstr ""
+"Договоры - это соглашения, которые вы отправляете другим правителям. Договор "
+"вступает в силу лишь тогда, когда другая сторона его принимает. У каждого "
+"вида договора своя тема."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:22
@@ -817,7 +834,11 @@ msgid ""
 "A Free Trade Agreement lets people and goods move freely, with no border "
 "tax. You earn a lot from income taxes — nearly twice what a Tariff Trade "
 "Agreement pays, on the same count of the smaller realm's people."
-msgstr "Соглашение о свободной торговле позволяет людям и товарам передвигаться свободно, без пограничного сбора. Вы много зарабатываете на подоходном налоге - почти вдвое больше, чем платит таможенное торговое соглашение, при том же числе жителей меньшего государства."
+msgstr ""
+"Соглашение о свободной торговле позволяет людям и товарам передвигаться "
+"свободно, без пограничного сбора. Вы много зарабатываете на подоходном "
+"налоге - почти вдвое больше, чем платит таможенное торговое соглашение, при "
+"том же числе жителей меньшего государства."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaty-free-trade.md:19
@@ -843,7 +864,10 @@ msgid ""
 "A Full Defense Alliance is the strongest alliance. You commit a large part "
 "of your troopers and tanks to defend an ally in need. It works only in local "
 "(single-board) games."
-msgstr "Полный оборонительный союз - самый сильный союз. Вы обязуетесь направить значительную часть своих солдат и танков на защиту союзника в беде. Он действует только в локальных играх (на одной доске)."
+msgstr ""
+"Полный оборонительный союз - самый сильный союз. Вы обязуетесь направить "
+"значительную часть своих солдат и танков на защиту союзника в беде. Он "
+"действует только в локальных играх (на одной доске)."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaty-full-defense.md:16
@@ -865,7 +889,9 @@ msgstr "Разведывательный союз"
 msgid ""
 "An Intelligence Alliance means the two realms give each other covert help in "
 "operations, both at home and between planets."
-msgstr "Разведывательный союз означает, что оба государства оказывают друг другу тайную помощь в операциях - и дома, и между планетами."
+msgstr ""
+"Разведывательный союз означает, что оба государства оказывают друг другу "
+"тайную помощь в операциях - и дома, и между планетами."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-protective-trade.md:1
@@ -882,7 +908,13 @@ msgid ""
 "the strike: the guard is on the route itself, so it holds against every "
 "attacker, not only against your partner. It also cuts the cost of sending a "
 "trade deal to that partner to a third of the usual daily rate."
-msgstr "Защищённая торговля выставляет охрану вдоль торговых путей между двумя государствами. Сделки, идущие между вами двумя, переживают вражескую бомбардировку, кто бы ни нанёс удар: охрана стоит на самом пути и потому держит против любого нападающего, а не только против вашего партнёра. Кроме того, она снижает стоимость отправки сделки этому партнёру до трети обычной дневной ставки."
+msgstr ""
+"Защищённая торговля выставляет охрану вдоль торговых путей между двумя "
+"государствами. Сделки, идущие между вами двумя, переживают вражескую "
+"бомбардировку, кто бы ни нанёс удар: охрана стоит на самом пути и потому "
+"держит против любого нападающего, а не только против вашего партнёра. Кроме "
+"того, она снижает стоимость отправки сделки этому партнёру до трети обычной "
+"дневной ставки."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaty-protective-trade.md:18
@@ -907,7 +939,13 @@ msgid ""
 "whichever of the two realms has FEWER people — so a pact with a small realm "
 "earns little, and the best partner is one as populous as you. A realm still "
 "under new-realm protection earns a reduced rate."
-msgstr "Таможенное торговое соглашение - это торговля между двумя государствами с налогом на товары, пересекающие границу. Обе стороны получают дополнительный доход каждый ход, считая по тому из двух государств, у которого МЕНЬШЕ жителей: пакт с маленьким государством приносит мало, и лучший партнёр - тот, кто населён так же, как вы. Государство, ещё находящееся под защитой новичка, получает сниженную ставку."
+msgstr ""
+"Таможенное торговое соглашение - это торговля между двумя государствами с "
+"налогом на товары, пересекающие границу. Обе стороны получают дополнительный "
+"доход каждый ход, считая по тому из двух государств, у которого МЕНЬШЕ "
+"жителей: пакт с маленьким государством приносит мало, и лучший партнёр - "
+"тот, кто населён так же, как вы. Государство, ещё находящееся под защитой "
+"новичка, получает сниженную ставку."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:1
@@ -921,7 +959,9 @@ msgstr "Технологии"
 msgid ""
 "A Technology Agreement shares science between the two realms. Each side's "
 "research runs faster while the pact holds."
-msgstr "Технологическое соглашение делит науку между двумя государствами. Исследования каждой стороны идут быстрее, пока пакт держится."
+msgstr ""
+"Технологическое соглашение делит науку между двумя государствами. "
+"Исследования каждой стороны идут быстрее, пока пакт держится."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:17
@@ -945,7 +985,9 @@ msgstr "Противодействие терроризму"
 msgid ""
 "Terrorist Prevention links the two realms' intelligence agencies. They help "
 "each other find and stop covert and terrorist attacks."
-msgstr "Предотвращение терроризма связывает разведки двух государств. Они помогают друг другу находить и пресекать тайные и террористические нападения."
+msgstr ""
+"Предотвращение терроризма связывает разведки двух государств. Они помогают "
+"друг другу находить и пресекать тайные и террористические нападения."
 
 #. type: Title #
 #: internal/help/content/economy/banking.md:1
@@ -1062,7 +1104,12 @@ msgid ""
 "falls with how much everyone is investing — so check the rate before you "
 "commit.  A common tactic is to keep several investments running at once, "
 "each for a different length, so one matures every day."
-msgstr "Вы можете вложить золото на срок от 2 до 10 дней. По окончании срока оно возвращается с процентами. Процентная ставка плавает - она растёт и падает вместе с тем, сколько вкладывают все, - поэтому проверьте её, прежде чем вкладывать.  Распространённая тактика: держать несколько вкладов сразу, каждый на свой срок, чтобы один созревал каждый день."
+msgstr ""
+"Вы можете вложить золото на срок от 2 до 10 дней. По окончании срока оно "
+"возвращается с процентами. Процентная ставка плавает - она растёт и падает "
+"вместе с тем, сколько вкладывают все, - поэтому проверьте её, прежде чем "
+"вкладывать.  Распространённая тактика: держать несколько вкладов сразу, "
+"каждый на свой срок, чтобы один созревал каждый день."
 
 #. type: Title #
 #: internal/help/content/economy/food.md:1
@@ -1078,7 +1125,11 @@ msgid ""
 "separately, and you are asked about each in turn, so it is possible to feed "
 "one and not the other. Agricultural regions grow food, and you can buy more "
 "at the Food Market."
-msgstr "Ваш народ и ваши войска едят каждый ход. Счета выставляются отдельно, и о каждом вас спрашивают по очереди, так что можно накормить одних и оставить голодными других. Сельскохозяйственные области выращивают пищу, ещё её можно купить на продовольственном рынке."
+msgstr ""
+"Ваш народ и ваши войска едят каждый ход. Счета выставляются отдельно, и о "
+"каждом вас спрашивают по очереди, так что можно накормить одних и оставить "
+"голодными других. Сельскохозяйственные области выращивают пищу, ещё её можно "
+"купить на продовольственном рынке."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:19
@@ -1161,6 +1212,7 @@ msgstr ""
 
 #. type: Title ##
 #: internal/help/content/economy/morale-and-support.md:17
+#, no-wrap
 msgid "What they do"
 msgstr "Что они делают"
 
@@ -1290,7 +1342,11 @@ msgid ""
 "and debt are not counted at all. So a rich empire with little land or army "
 "still scores low, and a loan does not cost you rank. To climb the ranks, "
 "hold land and a strong army."
-msgstr "Учитываются в основном ваши земли и военная сила. Золото, пища, люди и долги не учитываются вовсе. Богатое государство с малой землёй или армией всё равно стоит низко, а кредит не стоит вам места в таблице. Чтобы подняться, держите землю и сильную армию."
+msgstr ""
+"Учитываются в основном ваши земли и военная сила. Золото, пища, люди и долги "
+"не учитываются вовсе. Богатое государство с малой землёй или армией всё "
+"равно стоит низко, а кредит не стоит вам места в таблице. Чтобы подняться, "
+"держите землю и сильную армию."
 
 #. type: Title #
 #: internal/help/content/economy/population.md:1
@@ -1520,6 +1576,7 @@ msgstr ""
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:13
+#, no-wrap
 msgid "The Trading Market"
 msgstr "Торговый рынок"
 
@@ -1767,6 +1824,7 @@ msgstr ""
 #. type: Title #
 #: internal/help/content/interbbs/attack-types.md:1
 #: internal/help/content/interbbs/attack-types.md:8
+#, no-wrap
 msgid "Attack Types"
 msgstr "Виды атак"
 
@@ -2142,6 +2200,7 @@ msgstr ""
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:17
+#, no-wrap
 msgid "What he costs"
 msgstr "Сколько он стоит"
 
@@ -2165,6 +2224,7 @@ msgstr ""
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:29
+#, no-wrap
 msgid "What he reports"
 msgstr "Что он сообщает"
 
@@ -2198,6 +2258,7 @@ msgstr ""
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:42
+#, no-wrap
 msgid "Reading what he sends"
 msgstr "Чтение того, что он присылает"
 
@@ -2273,6 +2334,7 @@ msgstr ""
 #. type: Title #
 #: internal/help/content/interbbs/terrorist-ops.md:1
 #: internal/help/content/interbbs/terrorist-ops.md:8
+#, no-wrap
 msgid "Terrorist Ops"
 msgstr "Террористические операции"
 
@@ -2457,7 +2519,10 @@ msgid ""
 "You get a set number of turns each day. A turn is one round of play: you "
 "collect income, pay your costs, and give your orders. When your turns for "
 "the day run out, you come back the next day for more."
-msgstr "Каждый день вы получаете определённое число ходов. Ход - это один круг игры: вы собираете доход, оплачиваете расходы и отдаёте приказы. Когда ходы на день кончаются, вы возвращаетесь за новыми на следующий день."
+msgstr ""
+"Каждый день вы получаете определённое число ходов. Ход - это один круг игры: "
+"вы собираете доход, оплачиваете расходы и отдаёте приказы. Когда ходы на "
+"день кончаются, вы возвращаетесь за новыми на следующий день."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:37
@@ -2581,6 +2646,7 @@ msgstr ""
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:76
+#, no-wrap
 msgid "Reading the rest"
 msgstr "Чтение остального"
 
@@ -2807,7 +2873,10 @@ msgid ""
 "Jets cannot reach a battle on their own. You need carriers to carry them — "
 "see Carriers for how many each one lifts. Without enough carriers, your jets "
 "cannot join the attack."
-msgstr "Истребители не могут добраться до боя сами. Их должны нести авианосцы - сколько поднимает каждый, смотрите в теме Авианосцы. Без достаточного числа авианосцев ваши истребители не вступят в бой."
+msgstr ""
+"Истребители не могут добраться до боя сами. Их должны нести авианосцы - "
+"сколько поднимает каждый, смотрите в теме Авианосцы. Без достаточного числа "
+"авианосцев ваши истребители не вступят в бой."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:25
@@ -2816,7 +2885,11 @@ msgid ""
 "asks whether to include the carriers to lift them. Say yes and the same gold "
 "buys both, so you end up with fewer jets than you asked for and every one of "
 "them able to fly."
-msgstr "Поскольку об этом легко забыть, заказ больше того, что поднимает один авианосец, спрашивает, добавить ли авианосцы для их перевозки. Ответьте да, и то же золото купит и то и другое: истребителей окажется меньше, чем вы просили, зато летать сможет каждый."
+msgstr ""
+"Поскольку об этом легко забыть, заказ больше того, что поднимает один "
+"авианосец, спрашивает, добавить ли авианосцы для их перевозки. Ответьте да, "
+"и то же золото купит и то и другое: истребителей окажется меньше, чем вы "
+"просили, зато летать сможет каждый."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:29
@@ -2853,7 +2926,10 @@ msgid ""
 "defense. A tank is worth three and a half troopers on its own. With a "
 "finished HeadQuarters it is worth four and a half, on both attack and "
 "defense."
-msgstr "Танки - самая сильная универсальная единица, мощная и в атаке, и в обороне. Сам по себе танк стоит трёх с половиной солдат. При достроенном штабе - четырёх с половиной, и в атаке, и в обороне."
+msgstr ""
+"Танки - самая сильная универсальная единица, мощная и в атаке, и в обороне. "
+"Сам по себе танк стоит трёх с половиной солдат. При достроенном штабе - "
+"четырёх с половиной, и в атаке, и в обороне."
 
 #. type: Plain text
 #: internal/help/content/military/tanks.md:16
@@ -3545,7 +3621,9 @@ msgstr "Обычная атака"
 msgid ""
 "A Regular Attack is a direct assault with your army. Your attack strength is "
 "compared to the enemy's defense."
-msgstr "Обычная атака - это прямой штурм вашей армией. Ваша сила атаки сравнивается с обороной противника."
+msgstr ""
+"Обычная атака - это прямой штурм вашей армией. Ваша сила атаки сравнивается "
+"с обороной противника."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:16
@@ -3670,16 +3748,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:35
+#: internal/help/content/warfare/gooie-kablooie.md:33
 msgid ""
 "Only jets can reach it. Your realm is asked at the start of your turn "
-"whether you want to attack it, and the screen tells you how many jets it "
-"would take to destroy the thing outright — a figure that grows with the size "
-"of your planet.  About a third of the jets you send do not come home."
+"whether you want to attack it. About a third of the jets you send do not "
+"come home."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:39
+#: internal/help/content/warfare/gooie-kablooie.md:37
 msgid ""
 "No single wave can finish it, however many jets you send. That is the point: "
 "the weapon is built to need the whole planet's air forces, and a planet that "
@@ -3687,7 +3764,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:40
+#: internal/help/content/warfare/gooie-kablooie.md:38
 msgid ""
 "An SDI program is no help against it, and neither is anything else you own."
 msgstr ""
@@ -3716,7 +3793,13 @@ msgid ""
 "troopers, jets, turrets, tanks, agents, or gold, about a thirtieth of it. "
 "They never take bombers, carriers, or your regions. The raid also gives the "
 "faction new regions, so a pirate that just robbed someone holds more land."
-msgstr "Пираты грабят игроков наугад. Налёт - это не битва: фракция, не владеющая ничем, всё равно может вас ограбить. Каждый налёт уносит **один** вид добычи: ваших солдат, истребители, турели, танки, агентов или золото, примерно одну тридцатую. Бомбардировщиков, авианосцы и ваши области они не берут никогда. Налёт также даёт фракции новые области, так что пират, только что кого-то ограбивший, владеет большей землёй."
+msgstr ""
+"Пираты грабят игроков наугад. Налёт - это не битва: фракция, не владеющая "
+"ничем, всё равно может вас ограбить. Каждый налёт уносит **один** вид "
+"добычи: ваших солдат, истребители, турели, танки, агентов или золото, "
+"примерно одну тридцатую. Бомбардировщиков, авианосцы и ваши области они не "
+"берут никогда. Налёт также даёт фракции новые области, так что пират, только "
+"что кого-то ограбивший, владеет большей землёй."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:26

@@ -22,10 +22,15 @@ import (
 )
 
 // content embeds the English source (content/) plus the po4a-generated
-// per-language trees (content.<lang>/). All three are committed; the language
+// per-language trees (content.<lang>/). All of them are committed; the language
 // dirs are regenerated from po/help/*.po by scripts/gen-help-translations.sh.
 //
-//go:embed content content.de content.ru
+// A new language needs a line here AND one in the translated map below — the
+// embed pattern takes no variables and loadDir panics on a tree it cannot
+// reach, so neither is optional. docs/translating.md said the only wiring was
+// languages.go until 2026-09-17; it was not.
+//
+//go:embed content content.de content.nl content.pt content.ru
 var content embed.FS
 
 // Topic is one help article, parsed from a content/<category>/<file>.md file.
@@ -72,6 +77,8 @@ var (
 	all        = loadDir("content")
 	translated = map[string]map[string]Topic{
 		"de": indexByPath(loadDir("content.de")),
+		"nl": indexByPath(loadDir("content.nl")),
+		"pt": indexByPath(loadDir("content.pt")),
 		"ru": indexByPath(loadDir("content.ru")),
 	}
 )
