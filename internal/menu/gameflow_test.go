@@ -1553,3 +1553,26 @@ func TestAnUnfedTurnIsStillFedAtRollover(t *testing.T) {
 		t.Error("an empty granary at rollover should still starve a realm that never fed")
 	}
 }
+
+// A news line's clock time is divided from the report by a rule, not by
+// whitespace: with two spaces the zone abbreviation read as the sentence's first
+// word ("08:56:57 UTC Salt Covenant retains..."). The rule is a plain glyph in
+// the text so the wrap counts one column for it, and bright red on the screen —
+// 31 is 2.71:1 on black, under the 3:1 floor for a graphical object.
+func TestNewsStampIsDividedFromTheReport(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	n := game.NewsLine{At: "09/17/2026  08:56:57 UTC", Text: "Salt Covenant retains the title."}
+	if got, want := newsStamped(f, n), "08:56:57 UTC │ Salt Covenant retains the title."; got != want {
+		t.Errorf("newsStamped = %q, want %q", got, want)
+	}
+	drawn := hiNewsItem(newsStamped(f, n), newsHighlightTerms(w))
+	if !strings.Contains(drawn, ansi.FgBrightRed+newsStampRule) {
+		t.Errorf("the rule should be drawn in bright red, got %q", drawn)
+	}
+	// An unstamped line — a world saved before news carried a time — shows the
+	// report alone rather than a bare rule with nothing in front of it.
+	if got := newsStamped(f, game.NewsLine{Text: "No time on this one."}); got != "No time on this one." {
+		t.Errorf("an unstamped line should carry no rule, got %q", got)
+	}
+}

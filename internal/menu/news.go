@@ -33,6 +33,9 @@ const (
 	// (docs/dev/bre-screens.md) — this was a 54-wide double-line box until
 	// 2026-08-16, following a code block in that file that no capture produces.
 	newsBoxInner = 64
+	// newsStampRule divides a news line's clock time from the report itself.
+	// CP437 0xB3, so it survives the bulletin files' encoding.
+	newsStampRule = "│"
 )
 
 // renderDailyBulletin draws the boxed blue Daily Bulletin: planet-wide totals
@@ -159,12 +162,18 @@ func renderNewsMasthead(s session.Session, t Term, date string) {
 //
 // Only the time, never the date: every screen that draws the feed is headed by
 // the day it belongs to, and repeating that date twenty times says nothing.
+//
+// The stamp and the report are divided by a rule rather than by whitespace: two
+// spaces left the zone abbreviation reading as the first word of the sentence.
+// It is a plain glyph here so the wrap counts it as the one column it occupies;
+// the news screen colors it through newsHighlightTerms, and the destinations
+// that take the line as text keep it as a character.
 func newsStamped(s session.Session, n game.NewsLine) string {
 	at := game.TimeOfDay(n.At, sessionZone(s))
 	if at == "" {
 		return n.Text
 	}
-	return at + "  " + n.Text
+	return at + " " + newsStampRule + " " + n.Text
 }
 
 // hiTerm is a name the news highlighter should color where it appears.
@@ -232,6 +241,11 @@ func newsHighlightTerms(w *ctx) []hiTerm {
 		terms = append(terms, hiTerm{f, ansi.FgBrightRed})
 	}
 	terms = append(terms, hiTerm{"Planetary Master", ansi.FgBrightWhite})
+	// Bright red, not the arrow's plain red: a rule carrying structure is a
+	// non-text graphical object, and 31 on black is 2.71:1 against the 3:1 floor
+	// (WCAG 2.1 SC 1.4.11) where 1;31 is 6.68:1. The same divergence, for the
+	// same reason, as the pirate factions above.
+	terms = append(terms, hiTerm{newsStampRule, ansi.FgBrightRed})
 	return terms
 }
 
