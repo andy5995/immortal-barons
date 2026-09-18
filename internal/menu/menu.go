@@ -855,6 +855,11 @@ func (m *Menu) columnCells(g *ctx, lang string) (price, owned []string, pw, ow i
 
 // padLabel pads s to w visible columns. fmt's %-*s counts bytes, which
 // under-pads any label carrying a non-ASCII rune.
+// keyCellWidth is the printable width of a menu row's key cell — "(X)", three
+// columns. The column header is padded to at least this, and the rows to the
+// header when a translated "Key" is wider.
+const keyCellWidth = 3
+
 func padLabel(s string, w int) string {
 	if n := utf8.RuneCountInString(s); n < w {
 		return s + strings.Repeat(" ", w-n)
@@ -917,16 +922,30 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		ownedCol := cols && m.hasOwnedColumn(g)
 		lw, pw, ow := 0, 0, 0
 		var priceCell, ownedCell []string
+		// The key column is "(X)" wide — three columns — unless the caller's word
+		// for "Key" is longer, which it is in most languages ("Tecla", "Taste",
+		// "Клавиша"). The header and the rows below take their width from the same
+		// figure, because a header padded on its own slides off its column. This
+		// header was a bare English literal until 2026-09-17, alone among the four
+		// while Item, Price and # Owned beside it all translated.
+		keyPad := ""
+		kw := keyCellWidth
 		if cols {
 			lw = m.labelWidth(g, lang)
 			priceCell, ownedCell, pw, ow = m.columnCells(g, lang)
+			if n := utf8.RuneCountInString(i18n.T(lang, "Key")); n > kw {
+				kw = n
+			}
+			keyPad = strings.Repeat(" ", kw-keyCellWidth)
 		}
 		if cols && ownedCol {
-			fmt.Fprintf(&body, "%s  Key %s %*s %*s%s\n",
-				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), pw, i18n.T(lang, "Price"), ow, i18n.T(lang, "# Owned"), ansi.Reset)
+			fmt.Fprintf(&body, "%s  %s %s %*s %*s%s\n",
+				ansi.FgWhite, padLabel(i18n.T(lang, "Key"), kw), padLabel(i18n.T(lang, "Item"), lw),
+				pw, i18n.T(lang, "Price"), ow, i18n.T(lang, "# Owned"), ansi.Reset)
 		} else if cols {
-			fmt.Fprintf(&body, "%s  Key %s %*s%s\n",
-				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), pw, i18n.T(lang, "Price"), ansi.Reset)
+			fmt.Fprintf(&body, "%s  %s %s %*s%s\n",
+				ansi.FgWhite, padLabel(i18n.T(lang, "Key"), kw), padLabel(i18n.T(lang, "Item"), lw),
+				pw, i18n.T(lang, "Price"), ansi.Reset)
 		}
 		if m.Columns >= 2 && !cols {
 			drawItemsColumns(&body, g, m, col, lang, m.Columns)
@@ -945,12 +964,12 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					// BRE (live capture): normal-accent parens with a bright-accent key,
 					// white label, bright-white Price, white Owned.
 					if ownedCol {
-						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%*s%s %s%*s%s\n",
-							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
+						fmt.Fprintf(&body, "  %s(%s%c%s)%s%s %s%s%s %s%*s%s %s%*s%s\n",
+							dim(col), col, it.Key, dim(col), ansi.Reset, keyPad, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, pw, price, ansi.Reset, ansi.FgWhite, ow, owned, ansi.Reset)
 					} else {
-						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%*s%s\n",
-							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
+						fmt.Fprintf(&body, "  %s(%s%c%s)%s%s %s%s%s %s%*s%s\n",
+							dim(col), col, it.Key, dim(col), ansi.Reset, keyPad, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, pw, price, ansi.Reset)
 					}
 					continue

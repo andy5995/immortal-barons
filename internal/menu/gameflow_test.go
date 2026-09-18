@@ -7,6 +7,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
@@ -1607,5 +1608,80 @@ func TestNewsStampIsDividedFromTheReport(t *testing.T) {
 	// report alone rather than a bare rule with nothing in front of it.
 	if got := newsStamped(f, game.NewsLine{Text: "No time on this one."}); got != "No time on this one." {
 		t.Errorf("an unstamped line should carry no rule, got %q", got)
+	}
+}
+
+// All four column headers translate, and the key column widens to whichever of
+// "Key" and "(X)" is wider so the rows stay under their header. "Key" was a bare
+// English literal beside three translated headers until 2026-09-17; translating
+// it without widening would have slid every row off its column.
+func TestKeyColumnHeaderTranslatesAndStaysAligned(t *testing.T) {
+	for _, lang := range []string{"", "pt"} {
+		f := &fakeSession{keys: []rune("0")}
+		w := newWorld()
+		w.Player().Agents = 5
+		w.Player().Language = lang
+		if err := Run(f, w, BuildMenus().Covert); err != nil {
+			t.Fatalf("[%s] Run: %v", lang, err)
+		}
+		var head, row string
+		for _, l := range strings.Split(stripANSI(f.out.String()), "\n") {
+			if head == "" && strings.Contains(l, i18n.T(lang, "Price")) && strings.Contains(l, i18n.T(lang, "Item")) {
+				head = l
+			} else if head != "" && row == "" && strings.Contains(l, "(1)") {
+				row = l
+			}
+		}
+		if head == "" || row == "" {
+			t.Fatalf("[%s] never reached the Covert menu's columns:\n%s", lang, stripANSI(f.out.String()))
+		}
+		key := i18n.T(lang, "Key")
+		if lang != "" && key == "Key" {
+			t.Fatalf("[%s] this test needs a language that translates \"Key\"", lang)
+		}
+		if !strings.HasPrefix(head, "  "+key+" ") {
+			t.Errorf("[%s] header should open with the translated Key: %q", lang, head)
+		}
+		// Both columns have to start in the same place, whatever the word's length.
+		labelStart := func(s string, after int) int {
+			for i := after; i < len(s); i++ {
+				if s[i] != ' ' {
+					return i
+				}
+			}
+			return -1
+		}
+		if h, r := strings.Index(head, i18n.T(lang, "Item")), labelStart(row, strings.Index(row, "(1)")+3); h != r {
+			t.Errorf("[%s] label column starts at %d in the header and %d in the row:\n  %q\n  %q", lang, h, r, head, row)
+		}
+	}
+}
+
+// No menu may run past the 80th column in any language the game ships. A door
+// terminal breaks an over-long line mid-word, and a translation is longer than
+// the English it came from — German "Geschütztürme" against "Turrets" — so this
+// is checked per language rather than on the English alone. It also covers the
+// key column, which widens to fit a translated "Key" and so pushes every priced
+// row out by the difference.
+func TestPricedMenusFitEightyColumnsInEveryLanguage(t *testing.T) {
+	menus := BuildMenus()
+	for _, lang := range append([]string{""}, i18n.Codes()...) {
+		for _, m := range []struct {
+			name string
+			menu *Menu
+		}{{"Covert", menus.Covert}, {"Spending", menus.Spending}, {"Food", menus.Food}} {
+			f := &fakeSession{keys: []rune("0")}
+			w := newWorld()
+			w.Player().Agents = 5
+			w.Player().Language = lang
+			if err := Run(f, w, m.menu); err != nil {
+				t.Fatalf("[%s %s] Run: %v", lang, m.name, err)
+			}
+			for _, l := range strings.Split(stripANSI(f.out.String()), "\n") {
+				if n := len([]rune(strings.TrimRight(l, " "))); n > 80 {
+					t.Errorf("[%s %s] line runs to %d columns: %q", lang, m.name, n, l)
+				}
+			}
+		}
 	}
 }

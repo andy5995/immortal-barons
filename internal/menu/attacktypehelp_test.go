@@ -22,7 +22,10 @@ func TestAttackTypeHelpBrowsesThreeTopics(t *testing.T) {
 	if !strings.Contains(out, "Enter Topic") {
 		t.Fatalf("never reached the topic prompt:\n%s", out)
 	}
-	if !strings.Contains(out, "120%") {
+	// "120 percent", not "120%": a bare % before a letter is a fmt verb the
+	// translations cannot reproduce, so the three bodies spell the word out
+	// (attacktypehelp.go).
+	if !strings.Contains(out, "120 percent") {
 		t.Errorf("the chosen topic's body never printed:\n%s", out)
 	}
 	// The page's group-attack material belongs to Game Instructions now, not here.
@@ -43,7 +46,7 @@ func TestAttackTypeHelpEnterLeavesImmediately(t *testing.T) {
 	if !strings.Contains(out, "Normal Attack") {
 		t.Fatalf("the list is drawn on entry:\n%s", out)
 	}
-	if strings.Contains(out, "120%") {
+	if strings.Contains(out, "120 percent") {
 		t.Errorf("no topic body should print:\n%s", out)
 	}
 }

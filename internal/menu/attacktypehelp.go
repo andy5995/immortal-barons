@@ -38,10 +38,18 @@ type attackTypeTopic struct {
 // The fields are named so the UI-string extractor can find them: nothing else
 // on the menu side carries these literals, and `tr(s, t.name)` reads a variable
 // (scripts/gen-ui-pot.py keys on `name:` and `body:` for this table).
+// The figures are spelled "percent" rather than written with a % sign, and that
+// is not a style choice: a bare % before a letter reads to fmt as a verb, so
+// "15% losses" carries a %-verb the translation cannot reproduce and
+// TestCatalogFormatVerbsMatch rejects the entry. These three bodies were
+// untranslatable in every language until 2026-09-17 for that reason, and German
+// and Russian had simply left them in English. Escaping as %% is no fix — the
+// strings reach the screen through tr(), never through Printf, so %% would
+// render literally.
 var attackTypeTopics = []attackTypeTopic{
-	{name: "Normal Attack", body: "Your forces fight at full strength. Both sides break off once they have taken 15% losses, and you take the standard share of the defender's regions."},
-	{name: "Quick Strike", body: "Surprise lets you fight at 120% of your normal strength, but the battle is short and disorganized: both sides retreat at 8% losses, and you carry off only half the land a Normal Attack would."},
-	{name: "Extended Battle", body: "A grinding assault. Fatigue drops your forces to 85% strength, but they press until both sides have taken 20% losses, and they bring home 125% of a Normal Attack's land."},
+	{name: "Normal Attack", body: "Your forces fight at full strength. Both sides break off once they have taken 15 percent losses, and you take the standard share of the defender's regions."},
+	{name: "Quick Strike", body: "Surprise lets you fight at 120 percent of your normal strength, but the battle is short and disorganized: both sides retreat at 8 percent losses, and you carry off only half the land a Normal Attack would."},
+	{name: "Extended Battle", body: "A grinding assault. Fatigue drops your forces to 85 percent strength, but they press until both sides have taken 20 percent losses, and they bring home 125 percent of a Normal Attack's land."},
 }
 
 const (
