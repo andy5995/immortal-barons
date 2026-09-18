@@ -278,6 +278,12 @@ type Empire struct {
 	// go stale.
 	LastSpoiled   int `json:"lastSpoiled,omitempty"`
 	LastPopGrowth int `json:"lastPopGrowth,omitempty"`
+	// LastRandomEvent is the line this turn's random event printed, or "" when
+	// none fired. It is a report line rather than an Event because the original
+	// PRINTS it in the End of Turn Statistics block and files nothing: three
+	// instances across cap/kd3-01.cap and cap/eots-ibbs-01.cap all sit as the
+	// last line of that block, after the food-spoilage line.
+	LastRandomEvent string `json:"lastRandomEvent,omitempty"`
 	// LastInterest is the savings interest credited at the end of the previous
 	// turn and InvestReturnsToday what today's matured investments paid. Both are
 	// reported at the START of a turn, so unlike the transients above they have to

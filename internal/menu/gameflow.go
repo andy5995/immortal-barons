@@ -310,8 +310,23 @@ func runTurn(s session.Session, w *ctx) Result {
 
 		// "Deposit gold at End of Turn" is banked inside PlayTurn now, just ahead of
 		// the interest, so the deposit earns on the turn that made it (#216).
+		//
+		// The rollover files a random event against THIS baron (maybeRandomEvent,
+		// the last thing a turn does), and the mid-session notice is the channel
+		// for what OTHER nodes did while the player sat at a menu — so the
+		// high-water mark moves past anything the rollover just wrote. Without
+		// this the event surfaces at the caller's next keypress under "While you
+		// were at the menus, this has happened", which is both the wrong framing
+		// and the wrong moment. The original PRINTS its random event in the End of
+		// Turn Statistics and files nothing — resolve_random_game_event calls the
+		// output helpers, never the asynchronous recap filer, and its only caller
+		// is process_end_of_turn — so IB prints it there too and this guard now
+		// covers any future rollover filer rather than that one. Same defect as
+		// the civil war's event in 7d462ec7, whose fix removed one filer without
+		// checking its siblings.
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PlayTurn(p, w.Today)
+			w.seenEvents, w.seenEventsSet = len(p.Events), true
 		}) {
 			return abort()
 		}

@@ -262,3 +262,36 @@ func TestSellReportsActualSold(t *testing.T) {
 		t.Fatalf("expected the holdings-changed note, got: %q", out)
 	}
 }
+
+// A random event is filed against the caller's OWN realm by their own turn
+// rollover, so it must not reach the mid-session notice — that channel is for
+// what other nodes did while the player sat at a menu, and it would tell the
+// baron "While you were at the menus" about something they did themselves.
+//
+// It surfaced on the LAST turn of a day, where there is no next turn-start
+// recap to carry it: the original files the event at end of turn and shows it on
+// the NEXT play (process_end_of_turn tail-calls resolve_random_game_event).
+// Same defect as the civil war's event in 7d462ec7, whose fix removed one filer
+// without checking its siblings.
+func TestRolloverEventsSkipTheMidSessionNotice(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Events = nil
+
+	// Stand in for the rollover: an event filed against this baron's own realm,
+	// with the high-water mark moved past it as gameflow does after PlayTurn.
+	p.Events = append(p.Events, game.Event{Text: "A salvage crew hands over 989 flyable jets."})
+	w.seenEvents, w.seenEventsSet = len(p.Events), true
+
+	if news := w.takeSessionNews(p); len(news) != 0 {
+		t.Errorf("the rollover's own event leaked into the mid-session notice: %q", news)
+	}
+
+	// An event from ANOTHER node, filed after that, still gets through — the
+	// channel is not simply switched off.
+	p.Events = append(p.Events, game.Event{Text: "Mallory attacked you and took 3 regions."})
+	news := w.takeSessionNews(p)
+	if len(news) != 1 || !strings.Contains(news[0], "Mallory") {
+		t.Errorf("an event from another node should still show, got %q", news)
+	}
+}

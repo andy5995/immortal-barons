@@ -1685,3 +1685,42 @@ func TestPricedMenusFitEightyColumnsInEveryLanguage(t *testing.T) {
 		}
 	}
 }
+
+// A random event is the turn's own report, printed as the LAST line of the End
+// of Turn Statistics block, where the original prints it — three instances
+// across cap/kd3-01.cap and cap/eots-ibbs-01.cap all sit there, after the
+// food-spoilage line and before the closing rule ("54 troopers are killed in a
+// riot at a local tavern.", "91 troopers are recruited in a local tavern.").
+// IB filed it as an asynchronous event until 2026-09-18, which told the baron
+// "While you were at the menus" about something he had done himself.
+func TestRandomEventClosesTheEndOfTurnBlock(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	p := w.Player()
+	p.LastSpoiled = 9594
+	p.LastRandomEvent = "A salvage crew hands over 989 flyable jets."
+	endOfTurnStats(f, w)
+
+	lines := strings.Split(strings.TrimRight(stripANSI(f.out.String()), "\n"), "\n")
+	var spoiled, event, closing int
+	for i, l := range lines {
+		switch {
+		case strings.Contains(l, "food spoiled"):
+			spoiled = i
+		case strings.Contains(l, "salvage crew"):
+			event = i
+		case strings.Contains(l, "═"):
+			closing = i // the last rule wins
+		}
+	}
+	if event == 0 {
+		t.Fatalf("the event never printed:\n%s", stripANSI(f.out.String()))
+	}
+	if !(spoiled < event && event < closing) {
+		t.Errorf("want spoilage < event < closing rule, got %d < %d < %d:\n%s",
+			spoiled, event, closing, stripANSI(f.out.String()))
+	}
+	if event != closing-1 {
+		t.Errorf("the event should be the last line before the rule, got line %d of %d", event, closing)
+	}
+}

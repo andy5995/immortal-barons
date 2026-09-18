@@ -65,11 +65,13 @@ func TestMaybeRandomEventGainIncreasesResourceAndAppendsOneLine(t *testing.T) {
 			snapshot[r] = *resourcePtr(e, r)
 		}
 		maybeRandomEvent(w, e)
-		if len(e.Events) == 0 {
+		if e.LastRandomEvent == "" {
 			continue // didn't fire this seed; try another
 		}
-		if len(e.Events) != 1 {
-			t.Fatalf("seed %d: expected exactly 1 event line, got %d", seed, len(e.Events))
+		// The line is a report on the turn, not an asynchronous notice: the
+		// original prints it in the End of Turn Statistics and files nothing.
+		if len(e.Events) != 0 {
+			t.Fatalf("seed %d: the event was filed as a notice: %+v", seed, e.Events)
 		}
 		changed := false
 		for r := eventResource(0); r < numEventResources; r++ {
@@ -85,47 +87,39 @@ func TestMaybeRandomEventGainIncreasesResourceAndAppendsOneLine(t *testing.T) {
 	t.Fatal("no seed in range fired an event; RandomEventChancePct or rng usage may have changed")
 }
 
+// A human empire's filed events survive daily maintenance, to be read at their
+// next login, while an AI or ownerless realm's are cleared the same day because
+// nobody will ever read them.
+//
+// It files the events directly rather than waiting for a mechanic to produce
+// one. It used to drive the random event and assert on what that left behind,
+// and when the random event stopped being an Event at all (it prints in the End
+// of Turn Statistics, where the original prints it) this test went on passing on
+// whatever else happened to fire that turn -- covering something other than its
+// own name.
 func TestDailyMaintenancePersistsHumanEventsButClearsAIEvents(t *testing.T) {
-	// A human empire's random event must survive maintenance (shown at their
-	// next login), while an AI/idle empire's events are cleared same-day
-	// since nobody will ever read them. The event now fires at the END OF A
-	// TURN (BRE's process_end_of_turn), so the turn is what has to be played
-	// -- driving DailyMaintenance alone can no longer produce one.
-	found := false
-	for seed := int64(0); seed < 300; seed++ {
-		cfg := DefaultConfig()
-		cfg.AICount = 0
-		w := NewWorldSeed(cfg, seed)
-		w.Pirates = nil
-		human := w.AddHuman("h", "Realm")
-		human.Troopers, human.Jets, human.Turrets = 50_000, 10_000, 10_000
-		human.Tanks, human.Agents, human.Food, human.People = 10_000, 10_000, 100_000, 50_000
-		human.Protection = 0
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	w.Pirates = nil
 
-		ai := w.AddHuman("", "AIRealm")
-		ai.Owner = ""
-		ai.Troopers, ai.Jets, ai.Turrets = 50_000, 10_000, 10_000
-		ai.Tanks, ai.Agents, ai.Food, ai.People = 10_000, 10_000, 100_000, 50_000
-		ai.Protection = 0
+	human := w.AddHuman("h", "Realm")
+	human.Protection = 0
+	human.addEvent("Mallory attacked you and took 3 regions.")
 
-		w.PlayTurn(human, "2026-07-01")
-		w.PlayTurn(ai, "2026-07-01")
-		if len(human.Events) == 0 {
-			continue
-		}
-		w.LastMaintDate = "2026-07-01"
-		w.DailyMaintenance("2026-07-02")
+	ai := w.AddHuman("", "AIRealm")
+	ai.Owner = ""
+	ai.Protection = 0
+	ai.addEvent("Mallory attacked you and took 3 regions.")
 
-		if len(ai.Events) != 0 {
-			t.Fatalf("seed %d: AI empire events should be cleared same-day, got %v", seed, ai.Events)
-		}
-		if len(human.Events) > 0 {
-			found = true
-			break
-		}
+	w.LastMaintDate = "2026-07-01"
+	w.DailyMaintenance("2026-07-02")
+
+	if len(human.Events) != 1 {
+		t.Errorf("a human's events should survive maintenance, got %v", human.Events)
 	}
-	if !found {
-		t.Fatal("no seed in range produced a surviving human event; RandomEventChancePct or placement may be wrong")
+	if len(ai.Events) != 0 {
+		t.Errorf("an ownerless realm's events should be cleared, got %v", ai.Events)
 	}
 }
 

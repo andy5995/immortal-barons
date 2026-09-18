@@ -474,6 +474,14 @@ func endOfTurnStats(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(civilWarLine(s, p.LastCivilWar), p.LastCivilWar)), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
+	// The random event closes the block, which is where the original prints it:
+	// three instances across cap/kd3-01.cap and cap/eots-ibbs-01.cap all sit as
+	// the last line before the closing rule ("54 troopers are killed in a riot at
+	// a local tavern.", "1050218 jets claiming to have been abducted by aliens
+	// have returned."). It is the turn's own report, not an asynchronous notice.
+	if p.LastRandomEvent != "" {
+		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(tr(s, p.LastRandomEvent), "  ")))
+	}
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
 }
 

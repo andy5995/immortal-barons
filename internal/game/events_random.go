@@ -146,6 +146,9 @@ func resourcePtr(e *Empire, r eventResource) *int {
 // means nothing happens at all — which is the original's own way of leaving a
 // realm with little of something alone.
 func maybeRandomEvent(w *World, e *Empire) {
+	// Cleared first, so every early return below leaves last turn's line behind
+	// rather than reprinting it.
+	e.LastRandomEvent = ""
 	// A protected realm is left out: the original tests is_under_protection
 	// before it even rolls (+0x05e6).
 	if e.Protection > 0 {
@@ -187,5 +190,13 @@ func maybeRandomEvent(w *World, e *Empire) {
 	}
 
 	line := lines[w.rng.Intn(len(lines))]
-	e.addEvent(fmt.Sprintf(line, amount))
+	// Reported in the turn's own End of Turn Statistics, not filed as an event.
+	// The original prints it there and files nothing (resolve_random_game_event
+	// calls the output helpers and never the asynchronous recap filer, and its
+	// only caller is process_end_of_turn); the captures put it as the last line
+	// of that block, under the food-spoilage line. IB filed it as an event until
+	// 2026-09-18, which left it to surface at the next turn's recap — or, on the
+	// last turn of a day when there is no next recap, at the caller's next
+	// keypress under "While you were at the menus, this has happened".
+	e.LastRandomEvent = fmt.Sprintf(line, amount)
 }
