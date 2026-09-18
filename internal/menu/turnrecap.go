@@ -456,7 +456,9 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	p := &snap
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
-	fmt.Fprintf(s, "  %s\n", tr(s, peopleMood(p.Support)))
+	// BRE sets the mood line off with a blank line, and sets the random event
+	// off with another below (cap/kd3-01.cap, raw \r\n).
+	fmt.Fprintf(s, "  %s\n\n", tr(s, peopleMood(p.Support)))
 	// A flat turn prints "gained 0" rather than nothing: BRE does (cap/kd3-01.cap,
 	// twice, both on riot turns), and IB used to skip the line entirely, so a
 	// realm whose growth was suppressed — most often by an empty granary — was
@@ -480,7 +482,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	// a local tavern.", "1050218 jets claiming to have been abducted by aliens
 	// have returned."). It is the turn's own report, not an asynchronous notice.
 	if p.LastRandomEvent != "" {
-		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(tr(s, p.LastRandomEvent), "  ")))
+		fmt.Fprintf(s, "\n%s\n", hiNums(WrapIndented(tr(s, p.LastRandomEvent), "  ")))
 	}
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
 }
