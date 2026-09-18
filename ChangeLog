@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * An attack is confirmed before it is sent
   * An interplanetary missile costs what the target's size sets, not yours
   * A random event is reported with the turn that caused it
 

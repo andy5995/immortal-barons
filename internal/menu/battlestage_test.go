@@ -18,7 +18,7 @@ func TestRegularAttackStagesTheBattle(t *testing.T) {
 	target := recipients(w)[0]
 	target.Protection = 0
 	troopersBefore := target.Troopers
-	f := &fakeSession{keys: []rune("A")}
+	f := &fakeSession{keys: []rune("A\r\r\r\ry")}
 
 	regularAttack(f, w)
 

@@ -5879,6 +5879,15 @@ checking IB against a capture:
   op prompts, both captured. IB defaulted these to no for a day; matching the
   original won. See "Force prompts and confirmation" in
   `docs/dev/bre-screens.md`.
+- **The LOCAL Regular Attack is confirmed too, where the original launches it
+  off the last force prompt.** `Send this Attack?` belongs to the interplanetary
+  `configure_attack_forces` alone (`BRE.OVR` 0x2b83c), which asks it after
+  quoting a gold cost; a local attack costs nothing and
+  `resolve_regular_attack` (0x00ef90) never asks. IB asks because every local
+  force prompt defaults to the MAXIMUM, unlike the interplanetary ones which
+  default to 0, so a held Enter commits the entire army irreversibly with no
+  step in between. Same wording, same YES default. See "Force selection" in
+  `docs/dev/bre-screens.md`.
 - **The InterPlanetary menu's item 3 is `Trade`, a submenu**, where the
   original's is `Send Trade Deal` itself. The deal, the markets and the bids out
   are one activity and were on two unrelated-looking items. See the

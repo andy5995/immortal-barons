@@ -278,6 +278,15 @@ func regularAttack(s session.Session, w *ctx) Result {
 		ok(s, "You committed no forces; the attack is called off.")
 		return Stay
 	}
+	// IB's own: the original confirms only the interplanetary attacks, where the
+	// prompt follows the gold cost it is really asking about. A local attack
+	// costs nothing and BRE launches it off the last force prompt — but every one
+	// of those prompts defaults to ALL, so a held Enter commits the whole army
+	// irreversibly. Recorded in docs/mechanics-reference.md.
+	fmt.Fprint(s, "\n")
+	if !askYesNoHere(s, "Send this Attack?", true) {
+		return Stay
+	}
 
 	var outcome game.BattleOutcome
 	var trimmed bool

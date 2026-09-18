@@ -65,7 +65,7 @@ func TestAttackingAnAllyAsksToBreakThePactFirst(t *testing.T) {
 		t.Fatal("the test could not form the alliance it is about")
 	}
 	before := ally.Troopers
-	f := &fakeSession{keys: []rune("Ay")} // pick the ally, then agree to break the pact
+	f := &fakeSession{keys: []rune("Ay\r\r\r\ry")} // the ally, break the pact, the four force defaults, confirm
 
 	regularAttack(f, w)
 

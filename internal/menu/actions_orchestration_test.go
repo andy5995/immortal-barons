@@ -70,7 +70,7 @@ func TestRegularAttackHitsTarget(t *testing.T) {
 	target := recipients(w)[0]
 	target.Protection = 0 // clear the rival's new-realm protection so it is attackable
 	before := target.Land
-	f := &fakeSession{keys: []rune("A")} // target A; full-force defaults via EOF
+	f := &fakeSession{keys: []rune("A\r\r\r\ry")} // target A, the four full-force defaults, then confirm
 
 	regularAttack(f, w)
 

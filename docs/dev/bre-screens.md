@@ -330,6 +330,16 @@ Send how many Troopers? (4359; 4359)
      How many Bombers? (0; 0)
 ```
 
+**IB adds a `Send this Attack? (Y/n)` confirmation here; the original has none.**
+`Send this Attack?` is one string (`BRE.OVR` 0x2b82b) in `configure_attack_forces`
+(0x2b83c), whose only callers are `create_group_attack`, `create_individual_attack`
+and `run_interbbs_attack_menu` — the interplanetary paths, where the prompt follows
+the gold cost it is really asking about. The local `resolve_regular_attack`
+(0x00ef90) touches no such string and quotes no cost, and launches off the last
+force prompt. IB asks anyway because every default above **is** the maximum, so a
+held Enter commits the whole army with nothing in between. The wording and the YES
+default are the original's.
+
 ### Post-battle result (WIN)
 
 Re-captured live 2026-08-16 (a winning attack that took 79 regions), and the
