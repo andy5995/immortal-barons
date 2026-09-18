@@ -11,7 +11,12 @@ func TestEachMissileIsOncePerDay(t *testing.T) {
 	w.Config.IBBS, w.Config.MaxBombingOps = true, 5
 	e := w.AddHuman("a", "Alpha")
 	e.Protection, e.Bombers, e.Gold = 0, BombingBombersRequired, 1<<40
-	w.RemoteBoards = []RemoteBoard{{BoardID: "Bravo BBS"}}
+	// With a score for the target: a missile is priced off the target's
+	// last-known land, and the engine refuses one it cannot price.
+	w.RemoteBoards = []RemoteBoard{{
+		BoardID: "Bravo BBS",
+		Scores:  []RemoteScore{{Empire: "Anyone", Land: 1000}},
+	}}
 
 	for _, op := range []SpecialOp{OpNuclear, OpChemical, OpSabre} {
 		if !w.CanSpecialOp(e, op) {

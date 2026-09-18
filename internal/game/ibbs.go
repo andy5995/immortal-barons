@@ -29,6 +29,9 @@ var (
 	ErrBombingOpsDisabled  = errors.New("Bombing operations are not part of this game.")
 	ErrMissileOpsDisabled  = errors.New("Missile operations are not part of this game.")
 	ErrNeedBombers         = fmt.Errorf("You need at least %d Bombers to deliver a payload.", BombingBombersRequired)
+	// A missile is priced off the target's last-known size, so a realm this
+	// board holds no scores for cannot be quoted — and must not be free.
+	ErrNoTargetSize = errors.New("No scores have reached us from that realm, so the arms dealer cannot price a missile for it.")
 )
 
 // Packet carries inter-BBS actions from one board to another (or, with an empty

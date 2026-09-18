@@ -4637,13 +4637,42 @@ for regions**: the original counts population in millions, so the same figure is
 region in both games. IB's event text also still names exact figures in both
 directions where the original tells the victim "several million".
 
-**Three IB decisions**, none of them established from the original:
+**Interplanetary missile prices — binary-verified AND capture-confirmed.** The
+three missiles are priced off the TARGET's last-known territory, at a rate of
+their own each, and uncapped:
 
-- **The three missiles are priced off the LAUNCHER's land**
-  (`IPMissileGoldPerRegion`), scaled by Terrorism Costs. The local versions
-  price off the target's size, which is exactly what a board cannot know about a
-  realm on another planet, and the original's menu shows no price for them. This
-  one is a playtest knob.
+| Missile | gold per region of the target |
+| --- | --- |
+| Nuclear Assault | 2,559 |
+| Chemical Bombing | 2,694 |
+| S3-Sabre | 4,453 |
+
+`prepare_bombing_attack` (`BRE.OVR ovr_029088 +0x4e4`) branches on the menu key
+and multiplies one per-target longint by each constant. Which field that longint
+held was settled by capture rather than by reading further: `cap/eots-ibbs-02.cap`
+quotes three costs against `Pirates Ahoy!`, whose IPScores row reads **8,112**
+Territory, and 20,758,608 / 21,853,728 / 36,122,736 divide by it exactly; a
+fourth quote of 15,340,585 is 4,453 × 3,445 against another target.
+
+Three things follow, all of them differences from the local path. The rates are
+NOT the local ones (a local nuke is 3,543 a region against 2,559 here), so the
+two paths being priced differently is the original's design. There is **no
+`StrikeCostCap`** — the 50,000,000 literal is in all three local routines and in
+none of these branches. And the price is quoted as `Cost: N Gold` AFTER the
+target is chosen, which is why the menu's price column is blank for these three:
+the column was never where it lived.
+
+IB priced them off the LAUNCHER until 2026-09-18, reasoning that a board cannot
+know how big a realm on another planet is. It can — the scores it imports carry
+`Land` per remote realm, which is the same Territory column the capture reads —
+and `World.RemoteLand` is that lookup. A realm this board holds no scores for
+cannot be priced, and the engine refuses the launch rather than sending a free
+missile (`ErrNoTargetSize`); the menu only offers scored barons, so that guard is
+the engine refusing a call the menu would not make. The sysop's Terror Costs dial
+scales the four bombing ops only, as the original applies no such knob here.
+
+**Two IB decisions**, neither established from the original:
+
 - **A backfiring S3-Sabre is reported home and applied there.** The roll
   happens where the target lives, but the realm it hurts is on the board that
   fired, so the damage lands when the answer arrives.

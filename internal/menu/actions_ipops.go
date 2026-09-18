@@ -168,7 +168,10 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 				return Stay
 			}
 		}
-		cost := w.World.SpecialOpGoldCost(w.Player(), op)
+		// After the target is chosen, because the three missiles are priced off
+		// what that realm holds — which is also where the original quotes it
+		// ("Cost: N Gold", prepare_bombing_attack).
+		cost := w.World.SpecialOpGoldCost(w.Player(), op, w.World.RemoteLand(board, baron))
 		okNoPause(s, "This operation will cost %s gold.", comma(cost))
 		if !askYesNoHere(s, "Send this Operation?", true) {
 			return Stay
@@ -303,13 +306,18 @@ func globalReconRequest(s session.Session, w *ctx) Result {
 
 // opPrice is a special operation's menu price: what this board would charge the
 // caller today, sysop cost dial included, so the column and the bill agree.
+//
+// Only the four bombing ops carry one. A missile's price depends on the target,
+// which nobody has picked yet at the time the menu is drawn — which is exactly
+// why the original leaves those three cells of its price column blank and quotes
+// the figure after target selection instead.
 func opPrice(op game.SpecialOp) func(*ctx) int {
 	return func(w *ctx) int {
 		p := w.Player()
 		if p == nil {
 			return 0
 		}
-		return int(w.SpecialOpGoldCost(p, op))
+		return int(w.SpecialOpGoldCost(p, op, 0))
 	}
 }
 

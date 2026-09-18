@@ -20,6 +20,17 @@ func specialOpWorlds(t *testing.T) (from, to *World, attacker, target *Empire) {
 	to = NewWorldSeed(cfgB, 2)
 	target = to.AddHuman("ecl", "Bravo Hold")
 	target.Protection = 0
+	target.Regions = RegionMix{Desert: 500, Mountain: 500}
+	target.syncLand()
+
+	// The sending board knows the far realm only through the scores a packet
+	// brought it, and an interplanetary missile is priced off exactly that. A
+	// fixture without it is a board that has never heard of the target, which
+	// the engine now refuses rather than pricing at zero.
+	from.ImportBoard(RemoteBoard{
+		BoardID: "Bravo BBS",
+		Scores:  []RemoteScore{{Empire: target.Name, Land: target.Land}},
+	})
 	return from, to, attacker, target
 }
 
@@ -34,7 +45,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpBombFood, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
-	cost := from.SpecialOpGoldCost(attacker, OpBombFood)
+	cost := from.SpecialOpGoldCost(attacker, OpBombFood, 0) // planet-wide: no target size
 	if attacker.Gold != goldBefore-cost {
 		t.Errorf("gold %d, want %d", attacker.Gold, goldBefore-cost)
 	}
@@ -234,5 +245,45 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 	}
 	if got := answer.Results[0].outcome(); got != OutcomeWon {
 		t.Errorf("outcome %q, want %q", got, OutcomeWon)
+	}
+}
+
+// The three interplanetary missiles are priced off the TARGET's last-known
+// territory, at a rate of their own each, and uncapped. Golden literals from a
+// live capture rather than a rebuild from the constants: cap/eots-ibbs-02.cap
+// quotes three costs against `Pirates Ahoy!`, whose IPScores row reads 8,112
+// Territory, and they divide exactly — 20,758,608 / 21,853,728 / 36,122,736.
+// Asserting the constant instead would follow a retune silently, which is the
+// opposite of what a fidelity figure is for.
+func TestInterplanetaryMissilePricesMatchTheCapture(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("a", "Alpha")
+	for _, c := range []struct {
+		op   SpecialOp
+		want int64
+	}{
+		{OpNuclear, 20_758_608},
+		{OpChemical, 21_853_728},
+		{OpSabre, 36_122_736},
+	} {
+		if got := w.SpecialOpGoldCost(e, c.op, 8112); got != c.want {
+			t.Errorf("%s against 8,112 regions = %d, want %d", c.op, got, c.want)
+		}
+	}
+	// Uncapped: StrikeCostCap is the LOCAL path's ceiling and appears in none of
+	// the three interplanetary branches.
+	if got := w.SpecialOpGoldCost(e, OpNuclear, 100_000); got <= StrikeCostCap {
+		t.Errorf("the interplanetary price is capped at %d: got %d", StrikeCostCap, got)
+	}
+	// The launcher's own size does not enter into it.
+	e.Regions = RegionMix{Desert: 9000}
+	e.syncLand()
+	if got := w.SpecialOpGoldCost(e, OpNuclear, 8112); got != 20_758_608 {
+		t.Errorf("price moved with the launcher's land: %d", got)
+	}
+	// The sysop's Terror Costs dial scales the bombing ops, not the missiles.
+	w.Config.TerrorCosts = Level(2)
+	if got := w.SpecialOpGoldCost(e, OpNuclear, 8112); got != 20_758_608 {
+		t.Errorf("Terror Costs moved a missile price: %d", got)
 	}
 }

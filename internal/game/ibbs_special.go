@@ -119,15 +119,51 @@ func (w *World) CanSpecialOp(e *Empire, op SpecialOp) bool {
 	return w.CanBombingOp(e)
 }
 
-// SpecialOpGoldCost prices one op for e.
+// RemoteLand is the last-known region count for a realm on another planet, from
+// the scores this board has imported, or 0 when no packet has named it yet.
+// That figure is what the original prices an interplanetary missile off — the
+// Territory column of the IPScores screen, which is this field.
+//
+// It goes stale between packets, and that is the original's behavior too: it
+// quotes from whatever the last scores said, so a realm that has grown since is
+// nuked at the old price.
+func (w *World) RemoteLand(board, empire string) int {
+	for i := range w.RemoteBoards {
+		if w.RemoteBoards[i].BoardID != board {
+			continue
+		}
+		for _, s := range w.RemoteBoards[i].Scores {
+			if s.Empire == empire {
+				return s.Land
+			}
+		}
+	}
+	return 0
+}
+
+// SpecialOpGoldCost prices one op against a target holding targetLand regions.
 //
 // The four bombing ops carry the flat prices the original prints in the menu's
-// own price column (captured live; see docs/dev/bre-screens.md). The three
-// missiles show NO price there, and cannot: the local versions price off the
-// TARGET's size, which is exactly what a board does not know about a realm on
-// another planet. So they are priced off the launcher instead, the way terror
-// ops already are — an IB decision, recorded in docs/mechanics-reference.md.
-func (w *World) SpecialOpGoldCost(e *Empire, op SpecialOp) int64 {
+// own price column (captured live; see docs/dev/bre-screens.md) and ignore the
+// target entirely — they are aimed at a planet, not a baron.
+//
+// The three missiles are priced off the TARGET's last-known territory, at a rate
+// of their own per missile (IPNukeGoldPerRegion and friends, binary-verified and
+// capture-confirmed; see balance.go). Uncapped: StrikeCostCap is the local
+// path's ceiling and does not appear on this one.
+//
+// The sysop's Terror Costs dial scales the bombing ops only. The original
+// applies no such knob to the missiles, and leaving it on them would have moved
+// a price this now matches exactly.
+func (w *World) SpecialOpGoldCost(e *Empire, op SpecialOp, targetLand int) int64 {
+	switch op {
+	case OpNuclear:
+		return int64(targetLand) * IPNukeGoldPerRegion
+	case OpChemical:
+		return int64(targetLand) * IPChemGoldPerRegion
+	case OpSabre:
+		return int64(targetLand) * IPSabreGoldPerRegion
+	}
 	var cost int64
 	switch op {
 	case OpBombFood:
@@ -138,8 +174,6 @@ func (w *World) SpecialOpGoldCost(e *Empire, op SpecialOp) int64 {
 		cost = IPBombRoutesCost
 	case OpUndermine:
 		cost = IPUndermineCost
-	default:
-		cost = int64(e.Land) * IPMissileGoldPerRegion
 	}
 	return cost * int64(w.Config.TerrorCosts.CostPercent()) / 100
 }
@@ -170,7 +204,17 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 	if e.Bombers < BombingBombersRequired {
 		return ErrNeedBombers
 	}
-	cost := w.SpecialOpGoldCost(e, op)
+	// Priced off what the last scores said the target holds, which is what the
+	// original quotes from; a planet-wide op ignores it.
+	targetLand := w.RemoteLand(targetBoard, targetEmpire)
+	if isMissileOp(op) && targetLand <= 0 {
+		// No scores for that realm, so no price — and a missile that costs
+		// nothing is worse than one that cannot be sent. The menu only offers
+		// barons this board holds scores for, so this is the engine refusing a
+		// call the menu would not have made.
+		return ErrNoTargetSize
+	}
+	cost := w.SpecialOpGoldCost(e, op, targetLand)
 	if e.Gold < cost {
 		return ErrCantAfford
 	}

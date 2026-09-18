@@ -409,6 +409,16 @@ const (
 	SpyGuyMaxDays       = 15
 	SpyGuyDefaultDays   = 3
 
+	// The arms dealer charges by the size of the realm you are AIMING AT, not by
+	// your own: BINARY-VERIFIED in launch_nuclear_attack (BRE.OVR ovr_00e809
+	// +0x2287..+0x22b6), which multiplies the target's region count by the literal
+	// 0xdd7 = 3,543 and hands the product to the resident min helper against
+	// 0x02faf080 = StrikeCostCap. The per-region rate had been carried here
+	// untagged, which under the project's own "dated, not decided" rule invited a
+	// re-derivation; it is read, not fitted.
+	//
+	// It LOOKS static in play, and that is the cap rather than the formula: every
+	// realm past ~14,000 regions quotes the same 50,000,000.
 	NukeCostPerRegion = 3_543
 	NukeWastePct      = 7 // center of the band
 	NukeWasteJitter   = 3 // each of the two Random(3) draws

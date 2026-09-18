@@ -358,18 +358,40 @@ var CivilWarReportBands = [4]int{10, 25, 40, 60}
 // price column, read off a live capture (docs/dev/bre-screens.md). They are
 // fidelity constants, not playtest knobs.
 //
-// The three missiles print NO price there. The local versions price off the
-// TARGET's size, which a board cannot know about a realm on another planet, so
-// IB prices them off the launcher's own land the way terror ops already are.
-// That per-region rate IS a playtest knob — it is IB's, with nothing in the
-// original to match it against.
+// The three missiles print no price in that column because the original does not
+// put it there: it quotes "Cost: N Gold" after the target is chosen, and prices
+// off the TARGET's last-known territory, at a rate of its own per missile.
+//
+// BINARY-VERIFIED (prepare_bombing_attack, BRE.OVR ovr_029088 +0x4e4: three
+// branches on the menu key, each multiplying one per-target longint by its own
+// constant) AND CONFIRMED against a live capture, which is what settled which
+// field the longint holds. cap/eots-ibbs-02.cap quotes three costs against
+// `Pirates Ahoy!`, whose IPScores row reads 8,112 Territory:
+//
+//	20,758,608 / 8,112 = 2,559   Nuclear Assault
+//	21,853,728 / 8,112 = 2,694   Chemical Bombing
+//	36,122,736 / 8,112 = 4,453   S3-Sabre
+//
+// and a fourth quote of 15,340,585 is 4,453 x 3,445, a Sabre at another target.
+//
+// These are NOT the local rates — a local nuke is 3,543 a region against 2,559
+// here — so the two paths being priced differently is the original's design.
+// There is also no StrikeCostCap on this path: the 50,000,000 literal appears in
+// all three local routines and in none of these three branches.
+//
+// IB priced these off the LAUNCHER until 2026-09-18, on the reasoning that a
+// board cannot know how big a realm on another planet is. It can: the scores it
+// imports carry Land per remote realm (RemoteScore), which is the same Territory
+// column the capture above reads.
 const (
 	IPBombFoodCost   int64 = 10_000_000
 	IPBombMarketCost int64 = 25_000_000
 	IPBombRoutesCost int64 = 25_000_000
 	IPUndermineCost  int64 = 75_000_000
 
-	IPMissileGoldPerRegion int64 = 20_000
+	IPNukeGoldPerRegion  int64 = 2_559
+	IPChemGoldPerRegion  int64 = 2_694
+	IPSabreGoldPerRegion int64 = 4_453
 )
 
 // UndermineInvestmentDivisor is the share of each investment's principal an
