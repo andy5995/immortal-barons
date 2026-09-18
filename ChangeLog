@@ -1,5 +1,9 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * An interplanetary missile costs what the target's size sets, not yours
+  * A random event is reported with the turn that caused it
+
 2026-09-17 (v0.1.2)
   * Food is taken when you feed your realm, so the rest is safe to sell
   * Portuguese translation added; Dutch filled out and offered to CP437 callers
