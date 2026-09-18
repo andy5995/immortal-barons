@@ -7,62 +7,61 @@ title: 'Виды атак'
 
 # Виды атак
 
-When you send your own strike force at a baron on another planet, you choose
-how to press the attack. Group attacks have no such choice — they always
-fight as a Normal Attack.
+Отправляя собственный ударный отряд на барона с другой планеты, вы
+выбираете, как вести бой. У групповых атак такого выбора нет — они всегда
+идут как Обычная атака.
 
-Going alone also pays better: your own strike takes twice the land a group
-attack of the same weight would. What you give up is the whole-planet target
-and everyone else's forces.
+Действовать в одиночку и выгоднее: ваш собственный удар приносит вдвое
+больше земли, чем групповая атака той же силы. Взамен вы отказываетесь от
+удара по всей планете и от чужих войск.
 
-- **Normal Attack** — your forces fight at full strength. Both sides break
-  off once they have taken 15% losses, and you take the standard share of
-  the defender's regions.
-- **Quick Strike** — surprise lets you fight at 120% of your normal
-  strength, but the battle is short and disorganized: both sides retreat at
-  8% losses, and you carry off only half the land a Normal Attack would.
-- **Extended Battle** — a grinding assault. Fatigue drops your forces to 85%
-  strength, but they press until both sides have taken 20% losses and bring
-  home 125% of a Normal Attack's land.
+- **Обычная атака** — ваши войска дерутся в полную силу. Обе стороны выходят
+  из боя, потеряв 15% состава, и вы получаете обычную долю регионов
+  обороняющегося.
+- **Быстрый удар** — внезапность даёт вам 120% обычной силы, но бой короток
+  и беспорядочен: обе стороны отходят при потерях в 8%, и вы уносите лишь
+  половину земли, которую дала бы Обычная атака.
+- **Затяжной бой** — изматывающий штурм. Усталость снижает силу ваших войск
+  до 85%, но они давят, пока обе стороны не потеряют 20% состава, и приносят
+  125% земли от Обычная атака.
 
-The choice is really about what you are short of. Land is the thing you
-cannot buy back quickly, so an Extended Battle is the one that changes the
-map — pay for it when you already have the men to spare and can afford to be
-weak for a day. A Quick Strike costs you least and hits above its weight,
-which makes it the honest answer when you are not sure you can win: you find
-out cheaply, and your army is still standing.
+На деле выбор зависит от того, чего вам не хватает. Землю быстро не купишь,
+поэтому именно Затяжной бой меняет карту — платите за неё, когда людей в
+избытке и вы можете позволить себе день слабости. Быстрый удар обходится
+дешевле всего и бьёт выше своего веса, а потому честно отвечает на вопрос,
+когда вы не уверены в победе: вы узнаёте ответ дёшево, и армия остаётся при
+вас.
 
-Remember that your strength is measured on arrival, not on
-departure. Against a distant planet the defender has days to build turrets
-before your force lands, so the extra weight a Quick Strike carries is worth
-less than it looks against a target you cannot reach quickly.
+Помните, что сила отряда считается в момент прибытия, а не отправления. У
+далёкой планеты есть дни, чтобы настроить турелей, пока ваш отряд в пути,
+так что прибавка Быстрый удар стоит меньше, чем кажется, против цели, до
+которой долго лететь.
 
-## While the force is away, and when it comes back
+## Пока отряд в пути и когда он возвращается
 
-A group attack does not leave the moment you file it. You set the wait in
-hours, between 12 and 120, and it sits on the launch pad until then — other
-barons can join it in the meantime, and the delay is how you time it to land
-before the target takes their next turn.
+Групповая атака не уходит в тот же миг, когда вы её объявили. Вы задаёте
+задержку в часах — от 12 до 120 — и отряд стоит на стартовой площадке до
+срока: за это время к нему могут присоединиться другие бароны, а сама
+задержка позволяет рассчитать удар так, чтобы он пришёлся до следующего хода
+цели.
 
-Join Group Attack lists every party still forming, with the troopers, jets,
-tanks and bombers already pooled in it and the hours it has left. Read those
-columns before you commit: they are how you tell a party worth reinforcing
-from one that will not survive the trip.
+«Присоединиться к атаке» показывает все формирующиеся отряды, собранных в
+них солдат, самолёты, танки и бомбардировщики и оставшиеся часы. Прочтите
+эти столбцы, прежде чем вступать: по ним видно, какой отряд стоит усилить, а
+какой не переживёт похода.
 
-Once a force leaves, it is out of your hands and out of your army until the
-other planet's board resolves it and the answer travels back. When it does,
-you get a private report: what you sent, what came home, what it destroyed,
-and whether it found the target at all. A force that found no such realm, or
-found it still under New Realm Protection, is told so rather than counted as
-a defeat.
+Ушедший отряд вам больше не подчиняется и в вашу армию не входит, пока доска
+другой планеты не разрешит бой и ответ не вернётся обратно. Когда он придёт,
+вы получите личный отчёт: что вы отправили, что вернулось, что было
+уничтожено и нашлась ли цель вообще. Если такой державы не нашлось или она
+ещё под защитой новых держав, вам так и скажут, а не запишут это поражением.
 
-Land you capture abroad has no type until you give it one, so it waits for
-you and the region picker comes up at the start of your next turn — the same
-question a Regular Attack asks at home. On a group attack the regions are
-shared between the barons who paid for them, in proportion to what each
-committed.
+У захваченной за пределами планеты земли нет типа, пока вы его не назначите,
+поэтому она ждёт вас, и выбор типа регионов появится в начале вашего
+следующего хода — тот же вопрос, что задаёт обычная атака дома. При
+групповой атаке регионы делятся между заплатившими за них баронами
+соразмерно вкладу каждого.
 
-If the answer never arrives — a board goes quiet, a packet is lost — your
-forces come home by themselves after the number of days your sysop has set,
-and a report that turns up after that is thrown away rather than paid out
-twice.
+Если ответ так и не придёт — доска замолчала, пакет потерялся, — ваши войска
+вернутся домой сами через столько дней, сколько назначил ваш сисоп, а отчёт,
+пришедший позже, будет отброшен, чтобы не заплатить дважды.

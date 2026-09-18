@@ -12,6 +12,7 @@ einen großen Teil Ihrer Soldaten und Panzer zur Verteidigung eines
 Verbündeten in Not. Es gilt nur in lokalen Spielen (auf einem einzelnen
 Board).
 
-Those forces can die in a battle you were not part of. When that happens you
-are told what you lost, who you were defending, and who attacked them, so
-watch your report after an ally has been raided.
+Diese Streitkräfte können in einer Schlacht sterben, an der Sie nicht
+beteiligt waren. Geschieht das, wird Ihnen gesagt, was Sie verloren haben,
+wen Sie verteidigt haben und wer ihn angegriffen hat; achten Sie also auf
+Ihren Bericht, nachdem ein Verbündeter überfallen wurde.

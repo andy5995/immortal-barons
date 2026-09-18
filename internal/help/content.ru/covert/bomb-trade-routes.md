@@ -2,17 +2,18 @@
 category: covert
 in_game: true
 order: 13
-title: 'Bomb Trade Routes'
+title: 'Бомбить торговые пути'
 ---
 
-# Bomb Trade Routes
+# Бомбить торговые пути
 
-Bomb Trade Routes is an InterPlanetary operation, on the Special Operations
-menu. It hits the trade deals in transit across another planet. Most strikes
-come to nothing and some deals slip through, but a deal the bombers reach
-arrives all but empty — only a few percent of every good in it is
-left. Standing treaties are not touched.
+Бомбить торговые пути — межпланетная операция из меню Спецоперации. Она бьёт
+по торговым сделкам, идущим через другую планету. Большинство ударов ни к
+чему не приводят, часть сделок проскакивает, но сделка, до которой
+бомбардировщики добрались, приходит почти пустой: от каждого товара в ней
+остаётся лишь несколько процентов. Действующие договоры при этом не
+затрагиваются.
 
-A deal is spared when the two realms trading it hold Protective Trade with
-each other. Your own agreements with the target count for nothing here, so a
-partner can bomb you as easily as an enemy can.
+Сделка уцелеет, если обе торгующие державы связаны между собой Защищённой
+торговлей. Ваши собственные соглашения с целью здесь не значат ничего, так
+что партнёр может разбомбить вас так же легко, как и враг.

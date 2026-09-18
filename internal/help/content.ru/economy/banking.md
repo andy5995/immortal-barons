@@ -14,39 +14,40 @@ title: Банк
 - Снять — вернуть золото из банка в казну.
 - Денежная помощь / Кредиты - занять золото или вернуть уже взятое.
 
-Deposits and withdrawals have no size limit. One investment locks away at
-most two billion gold, though you may open as many as you like.
+У вкладов и снятий нет предела по размеру. Один вклад запирает не больше
+двух миллиардов золота, но открыть их можно сколько угодно.
 
-Interest is paid at the end of every turn, on whatever is in the bank at
-that moment. If you have turned on Deposit gold at End of Turn, in
-Preferences, your gold is put in the bank first, so the gold you earned this
-turn earns interest this turn. It goes in after the pirates have had their
-chance at it, so it is no protection against a raid.
+Проценты начисляются в конце каждого хода на то, что лежит в банке в этот
+момент. Если вы включили Вносить золото в конце хода в Настройках, ваше
+золото сначала попадает в банк, так что заработанное за этот ход приносит
+проценты в этом же ходу. Оно уходит туда уже после того, как своё попробуют
+взять пираты, так что от налёта это не защита.
 
-The start of your next turn tells you what the bank paid: the interest, and
-what any investment that matured today paid back.
+В начале следующего хода вам сообщают, что заплатил банк: проценты и то, что
+вернул созревший сегодня вклад.
 
-You can hold at most two billion gold, in hand and the same again in the
-bank.  Gold you earn above that is lost. Spend it before you get there.
+На руках можно держать не больше двух миллиардов золота и столько же в
+банке.  Заработанное сверх этого пропадает. Тратьте, не доводя до предела.
 
-A full bank still pays its interest, into your gold in hand rather than the
-bank. Once both are full, it goes nowhere.
+Полный банк всё равно платит проценты — но на руки, а не в банк. Когда полны
+оба, они не идут никуда.
 
-The game tells you when gold is lost this way. Your event log names the
-amount and where it came from.
+Игра сообщает, когда золото теряется таким образом. В вашем журнале событий
+названы сумма и то, откуда она пришла.
 
-## Cash Relief / Loans
+## Помощь / Займы
 
-When you borrow, you first pick how many days you have to pay it back (1 to
-10).  A longer term has a higher daily interest rate, and the interest
-builds up each day (it compounds), so a long loan costs much more in
-total. The bank tells you the rate and the most it will lend you, then you
-choose how much to take.
+Беря заём, вы сначала выбираете, за сколько дней его вернёте (от 1 до 10).
+Чем длиннее срок, тем выше дневная ставка, а проценты каждый день
+начисляются и на проценты, так что долгий заём обходится намного
+дороже. Банк называет ставку и предельную сумму, которую даст, а затем вы
+выбираете, сколько взять.
 
-You must repay the full amount on the due date. The bank takes it from your
-gold first, then from your savings. If you cannot pay it all, the rest
-becomes a debt with an extra penalty added, and your people lose some
-support. Debt keeps growing each turn until you repay it, so clear it early.
+Вернуть нужно всю сумму в назначенный день. Банк берёт её сначала из золота
+на руках, потом из сбережений. Если заплатить всё не вышло, остаток
+становится долгом с добавленным штрафом, а ваш народ теряет часть
+поддержки. Долг растёт с каждым ходом, пока вы его не погасите, так что
+закрывайте его пораньше.
 
 ## Инвестиции
 

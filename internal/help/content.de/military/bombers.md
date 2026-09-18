@@ -14,10 +14,11 @@ Aufgabe ist es, Nutzlasten zu tragen.
 Raketen und interplanetare Bombardierungen brauchen Bomber als Träger. Ohne
 genügend Bomber können Sie diese Angriffe nicht starten.
 
-Bombers do nothing in an attack on your own planet. They add no strength to
-it, and they take casualties with the rest of the force, so sending them
-costs you bombers and buys you nothing. Hold them back and spend them on the
-attacks that need them.
+Bomber richten bei einem Angriff auf Ihrem eigenen Planeten nichts aus. Sie
+tragen nichts zu seiner Stärke bei und erleiden mit der übrigen Truppe
+Verluste; sie mitzuschicken kostet Sie also Bomber und bringt Ihnen
+nichts. Halten Sie sie zurück und setzen Sie sie bei den Angriffen ein, die
+sie brauchen.
 
-Bomber erhöhen Ihren Nettowert beträchtlich, eine Flotte davon hebt also
-Ihre Punktzahl ebenso wie Ihre Reichweite.
+Bomber erhöhen Ihr Vermögen beträchtlich, eine Flotte davon hebt also Ihre
+Punktzahl ebenso wie Ihre Reichweite.

@@ -2,17 +2,19 @@
 category: covert
 in_game: true
 order: 13
-title: 'Bomb Trade Routes'
+title: 'Handelswege bombardieren'
 ---
 
-# Bomb Trade Routes
+# Handelswege bombardieren
 
-Bomb Trade Routes is an InterPlanetary operation, on the Special Operations
-menu. It hits the trade deals in transit across another planet. Most strikes
-come to nothing and some deals slip through, but a deal the bombers reach
-arrives all but empty — only a few percent of every good in it is
-left. Standing treaties are not touched.
+Handelswege bombardieren ist eine interplanetare Operation im Menü
+Spezialoperationen. Sie trifft die Handelsgeschäfte, die über einen anderen
+Planeten unterwegs sind. Die meisten Schläge gehen ins Leere und manche
+Geschäfte kommen durch, aber ein Geschäft, das die Bomber erreichen, trifft
+so gut wie leer ein - nur wenige Prozent jeder Ware darin bleiben
+übrig. Bestehende Verträge werden nicht berührt.
 
-A deal is spared when the two realms trading it hold Protective Trade with
-each other. Your own agreements with the target count for nothing here, so a
-partner can bomb you as easily as an enemy can.
+Ein Geschäft bleibt verschont, wenn die beiden handelnden Reiche
+untereinander Geschützten Handel halten. Ihre eigenen Abkommen mit dem Ziel
+zählen hier nichts, ein Partner kann Sie also ebenso leicht bombardieren wie
+ein Feind.

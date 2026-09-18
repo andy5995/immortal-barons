@@ -7,68 +7,72 @@ title: Торговля
 
 # Торговля
 
-There are two ways to move goods between realms: the Trading Market, and a
-trade deal.
+Перемещать товары между державами можно двумя способами: через Торговый
+рынок и через торговую сделку.
 
 ## Торговый рынок
 
-You can put any of your goods on the market and set your own price. The
-market is open: any realm on your planet can see what is listed and buy it,
-and you can buy from any of them.
+Любой свой товар можно выставить на рынок по собственной цене. Рынок
+открытый: любая держава вашей планеты видит выставленное и может его купить,
+а вы можете купить у любой из них.
 
-Goods you list leave your hands at once. They are held for the buyer, and
-you are paid when someone buys them. You still pay upkeep on them while they
-wait, and pirates can raid them, so do not list more than you mean to sell.
+Выставленный товар уходит из ваших рук сразу. Он придерживается для
+покупателя, а платят вам, когда его купят. Пока он ждёт, вы платите за него
+содержание, и его могут отнять пираты, так что не выставляйте больше, чем
+собираетесь продать.
 
-## Trade deals
+## Торговые сделки
 
-A trade deal is an offer to one realm. You put goods and gold in it, and you
-may ask for goods and gold in return. The other realm reads the offer and
-accepts or refuses it. You need a treaty with that realm to send one.
+Торговая сделка — это предложение одной державе. Вы кладёте в неё товары и
+золото и можете попросить товары и золото взамен. Другая держава читает
+предложение и принимает его или отказывается. Чтобы отправить сделку, нужен
+договор с этой державой.
 
-A trade deal costs a fee for each day you send it for, and it needs carriers
-to move the goods. How many depends on what you are shipping: one carrier
-holds a thousand troopers or turrets, a hundred jets, five thousand tanks,
-or a hundred thousand gold, and food, bombers, agents and carriers take no
-room at all. A Protective Trade treaty with that realm makes the fee
-cheaper.
+Торговая сделка стоит платы за каждый день, на который вы её отправляете, и
+требует авианосцев для перевозки товаров. Сколько именно — зависит от груза:
+один авианосец берёт тысячу солдат или турелей, сотню самолётов, пять тысяч
+танков или сто тысяч золота, а еда, бомбардировщики, агенты и авианосцы не
+занимают места вовсе. Защищённая торговля с этой державой делает плату
+дешевле.
 
-The days you pay for are how long the offer stands. What you put in the deal
-leaves your realm the moment you send it, and it comes back only if the
-offer is accepted: a refusal, a deal nobody answers before its days run out,
-and a realm that falls before it replies all cost you the goods. Send to
-someone who is playing, and give them enough days to get to it.
+Оплаченные дни — это срок, в течение которого держится
+предложение. Вложенное в сделку покидает вашу державу в момент отправки и
+возвращается, только если предложение приняли: отказ, сделка, на которую
+никто не ответил до истечения срока, и держава, павшая прежде чем ответить,
+— всё это стоит вам товаров. Отправляйте тому, кто играет, и давайте ему
+довольно дней, чтобы он успел добраться до сделки.
 
-## Deals to another planet
+## Сделки на другую планету
 
-In a league game the InterPlanetary Operations menu sends a deal to a realm
-on another planet. It works differently from the one above, so read this
-before you use it.
+В лиговой игре меню Межпланетные операции отправляет сделку державе на
+другой планете. Работает она иначе, чем описанная выше, так что прочтите
+это, прежде чем ею пользоваться.
 
-You cannot ask for anything back. The goods are a gift, and the realm you
-send them to has no say: they arrive and are added to what that realm
-holds. There is no offer to accept or refuse, so nothing is ever returned to
-you.
+Попросить что-либо взамен нельзя. Товары — это подарок, и у державы, которой
+вы их шлёте, нет выбора: они приходят и добавляются к тому, чем она
+владеет. Никакого предложения принять или отклонить нет, поэтому вам ничего
+и никогда не возвращается.
 
-You pay once, not per day, and you need no treaty with the realm or its
-planet.  The fee depends on what is in the deal, and it is shown before you
-confirm. You cannot send to a realm that is still under new-realm
-protection, and you cannot send to your own planet — for that, use the deal
-above.
+Платите вы один раз, а не за каждый день, и договор ни с державой, ни с её
+планетой не нужен.  Плата зависит от содержимого сделки и показывается до
+подтверждения. Нельзя отправить державе, которая ещё под защитой новой
+державы, и нельзя отправить на собственную планету — для этого есть сделка,
+описанная выше.
 
-## Getting the most from trade
+## Как выжать из торговли больше
 
-Trade matters most when several realms work together. A few ideas:
+Торговля важнее всего там, где несколько держав работают сообща. Несколько
+мыслей:
 
-**Specialize, then supply your partners.** Your industry can favor one unit
-type, which makes that unit cheaper for you than for anyone else. If you build
-tanks and a partner builds turrets, each of you can sell to the other below the
-price they would pay to build it themselves. Both realms come out ahead.
+**Специализируйтесь, а затем снабжайте партнёров.** Ваша промышленность может отдать
+предпочтение одному виду частей, и он обойдётся вам дешевле, чем кому-либо ещё.
+Если вы строите танки, а партнёр — турели, каждый может продать другому дешевле
+той цены, что тот заплатил бы за собственную постройку. В выигрыше обе державы.
 
-**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so
-a price meant as a gift to an ally may end up arming a rival. To be sure the
-goods reach the realm you mean them for, send a trade deal instead.
+**Дешёвое предложение достаётся тому, кто успел первым.** Купить его может любой,
+так что цена, задуманная как подарок союзнику, может вооружить соперника. Чтобы
+товары наверняка дошли до нужной державы, отправьте вместо этого торговую сделку.
 
-**Trade is bigger between planets.** In a league, whole planets specialize, and
-an ally's market is often the cheapest place to buy. See the Interplanetary
-Trading topic.
+**Между планетами торговля крупнее.** В лиге специализируются целые планеты, и
+рынок союзника часто оказывается самым дешёвым местом для покупки. См. тему
+Межпланетная торговля.

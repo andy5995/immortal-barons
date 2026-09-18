@@ -7,14 +7,14 @@ title: 'Биологическая атака'
 
 # Биологическая атака
 
-A Biological Attack releases a plague. It kills about a tenth of the enemy's
-people and a sixth of their troopers, and it halves their military morale
-while also knocking their popular support down to two-thirds. It does not
-touch their land at all — no regions are ruined and none change hands.
+Биологическая атака выпускает чуму. Она убивает около десятой части народа
+врага и шестой части его солдат, вдвое снижает боевой дух армии и заодно
+сбивает поддержку народа до двух третей. Земли она не трогает вовсе — ни
+один регион не превращается в пустошь и ни один не переходит из рук в руки.
 
-The missile is priced off all three of the things it hurts: the target's
-troopers, their people, and their regions. Nothing intercepts it.
+Ракету оценивают по всем трём вещам, которым она вредит: по солдатам цели,
+её народу и её регионам. Перехватить её нечем.
 
-Strategy: this is the anti-army weapon of the three. Halved morale weakens
-every tank and trooper the target owns, so a plague the turn before you
-march is worth more than the casualties alone suggest.
+Стратегия: из трёх это оружие против армии. Вдвое сниженный боевой дух
+ослабляет каждый танк и каждого солдата цели, так что чума за ход до
+наступления стоит больше, чем можно решить по одним потерям.

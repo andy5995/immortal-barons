@@ -7,10 +7,11 @@ title: Piraten
 
 # Piraten
 
-Nine pirate factions live in the world. A faction owns nothing at the start
-of a game. Everything it has, it stole, and what it can put in the field is
-only what it holds. So the factions are all weak on day one, and the ones
-nobody fights are the dangerous ones later.
+In der Welt leben neun Piratenfraktionen. Eine Fraktion besitzt zu
+Spielbeginn nichts. Alles, was sie hat, hat sie gestohlen, und was sie ins
+Feld führen kann, ist nur das, was sie hält. Am ersten Tag sind die
+Fraktionen also alle schwach, und die, die niemand bekämpft, sind später die
+gefährlichen.
 
 Piraten überfallen Spieler zufällig. Ein Überfall ist keine Schlacht - eine
 Fraktion, die nichts besitzt, kann Sie trotzdem berauben. Jeder Überfall
@@ -19,14 +20,17 @@ Agenten oder Gold, etwa ein Dreißigstel davon. Bomber, Träger und Ihre
 Gebiete nehmen sie nie. Der Überfall gibt der Fraktion außerdem neue
 Gebiete, sodass ein Pirat, der gerade jemanden beraubt hat, mehr Land hält.
 
-You can attack a faction to take goods back. A win returns a third of its
-gold, regions, agents and troopers, and a quarter of its jets, turrets and
-tanks. One raid often recovers what a faction took from you; two or three
-will if it is fat.  Attacking costs you casualties whether you win or lose,
-so do not raid a faction that holds nothing.
+Sie können eine Fraktion angreifen, um sich Beute zurückzuholen. Ein Sieg
+bringt ein Drittel ihres Goldes, ihrer Regionen, Agenten und Soldaten zurück
+und ein Viertel ihrer Jets, Geschütztürme und Panzer. Ein Überfall holt oft
+zurück, was eine Fraktion Ihnen genommen hat; zwei oder drei tun es, wenn
+sie fett ist.  Ein Angriff kostet Sie Verluste, ob Sie gewinnen oder
+verlieren, überfallen Sie also keine Fraktion, die nichts hält.
 
-Listing military on the Trading Market does not hide it from pirates, but it
-does help some: your camp is raided about twice as often as your listing.
+Militär auf dem Handelsmarkt anzubieten verbirgt es nicht vor den Piraten,
+hilft aber ein wenig: Ihr Lager wird etwa doppelt so oft überfallen wie Ihr
+Angebot.
 
-Tip: a faction you keep beaten stays harmless, because its army is only what
-it has managed to steal. Big realms are raided more often than small ones.
+Tipp: Eine Fraktion, die Sie niedergehalten haben, bleibt harmlos, denn ihre
+Armee ist nur das, was sie zusammenstehlen konnte. Große Reiche werden öfter
+überfallen als kleine.

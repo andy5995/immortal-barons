@@ -7,24 +7,22 @@ title: 'Ядерная атака'
 
 # Ядерная атака
 
-A Nuclear Attack ruins a slice of the enemy's regions, turning them to
-waste. It takes no land from them and kills nobody: the target keeps every
-region, pays upkeep on all of them, and earns nothing from the ruined ones
-until they are cleaned up.
+Ядерная атака обращает часть регионов врага в пустошь. Земли у него она не
+отнимает и никого не убивает: цель сохраняет все свои регионы, платит за
+содержание всех и ничего не получает с разорённых, пока их не расчистят.
 
-You are quoted a price once you name a target, and you can walk away from
-it. The price is set by the size of the realm you are aiming at — a large
-neighbor needs a large missile — up to a ceiling, so the very biggest realms
-are proportionally cheap to hit.
+Цену вам называют после выбора цели, и от неё можно отказаться. Её задаёт
+размер державы, в которую вы целитесь, — крупному соседу нужна крупная
+ракета, — но до потолка, так что по самым большим державам бить сравнительно
+дёшево.
 
-About 7% of the target's land is ruined per strike, varying a couple of
-points either way. Nothing shoots the missile down: an SDI program defends
-against missiles arriving from another planet, not from a neighbor on your
-own.
+За один удар в пустошь обращается около 7% земли цели, с разбросом в пару
+процентов в обе стороны. Сбить ракету нечем: программа SDI защищает от
+ракет, приходящих с другой планеты, а не от соседа по вашей собственной.
 
-A successful strike raises your score, whether or not it did much damage.
+Удавшийся удар повышает ваши очки, много ли он навредил или нет.
 
-Strategy: a nuclear strike wears a rival down. It cannot finish one off and
-it hands you nothing you can use; it makes an enemy's territory expensive to
-hold while you build toward a real attack. Against a small realm the damage
-rounds away to almost nothing, so save the gold for a large one.
+Стратегия: ядерный удар изматывает соперника. Добить им нельзя, и вам он не
+даёт ничего полезного; он делает владение вражеской землёй дорогим, пока вы
+готовите настоящее наступление. Против малой державы урон округляется почти
+до нуля, так что берегите золото для крупной.

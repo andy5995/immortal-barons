@@ -2,21 +2,22 @@
 category: covert
 in_game: true
 order: 8
-title: Bribery
+title: Подкуп
 ---
 
-# Bribery
+# Подкуп
 
 Подкуп заставляет одного из агентов противника работать на вас. С этого
 момента любая тайная операция, которую ВЫ проводите против этого
 государства, удаётся вдвое чаще. На операции, которые оно проводит против
 вас, это не влияет.
 
-The agent stays on your payroll for the rest of the game, and you can only
-hold one inside a realm — the menu refuses a second attempt, at no cost. It
-is also what Expose Enemy Ops needs before it can shield you from that
-realm. Since the bribe itself is only carried out at daily maintenance, the
-earliest you can expose that realm is the day after you pay for the bribe.
+Агент остаётся на вашем содержании до конца игры, и внутри одной державы
+можно держать только одного — на вторую попытку меню ответит отказом, и это
+ничего не стоит. Он же нужен операции Раскрыть операции врага, чтобы
+прикрыть вас от этой державы. Поскольку сам подкуп совершается только во
+время ежедневного обслуживания, раскрыть эту державу вы сможете не раньше
+следующего дня после оплаты.
 
-Bribery is the hardest operation on the menu to land, so expect to pay for
-several attempts.
+Подкуп — самая трудная операция в меню, так что рассчитывайте оплатить
+несколько попыток.

@@ -2,63 +2,68 @@
 category: economy
 in_game: true
 order: 14
-title: 'Morale and Support'
+title: 'Moral und Rückhalt'
 ---
 
-# Morale and Support
+# Moral und Rückhalt
 
-Your realm has two moods, each a number from 0 to 100. Popular Support is
-what your people think of you. Military Morale is what your army thinks of
-you.
+Ihr Reich hat zwei Stimmungen, jede eine Zahl von 0 bis 100. Rückhalt ist,
+was Ihr Volk von Ihnen hält. Kampfmoral ist, was Ihr Heer von Ihnen hält.
 
-Both start at 100 when you found your realm. Nothing ever raises them for
-free.  They fall when you go short, and the only way back up is to pay for
-it at the maintenance stage each turn.
+Beide beginnen bei 100, wenn Sie Ihr Reich gründen. Nichts hebt sie jemals
+umsonst.  Sie fallen, wenn Sie knapp werden, und der einzige Weg zurück nach
+oben führt darüber, in der Unterhaltsstufe jedes Zuges dafür zu bezahlen.
 
 ## Was sie tun
 
-Popular Support:
+Rückhalt:
 
-- sets your Coastal (tourism) income, which collapses when Support is low
-- sets how many people your land can hold
-- when it drops under 10, it starts pulling Morale down with it
+- bestimmt Ihr Küsteneinkommen (Tourismus), das bei niedrigem Rückhalt
+  zusammenbricht
+- bestimmt, wie viele Menschen Ihr Land fassen kann
+- zieht die Moral mit hinab, sobald er unter 10 fällt
 
-Military Morale scales how hard your army fights, both attacking and
-defending.  A full-morale army fights above its paper strength. A broken one
-fights at about half. When Morale falls under 40, troopers, jets and tanks
-begin to desert each turn, and the lower it goes the more of them
-leave. Bombers, carriers, and turrets never desert over Morale — but
-underpaying your armed forces' upkeep deserts turrets too, along with
-troopers, jets and tanks, whatever Morale reads.
+Die Kampfmoral bestimmt, wie hart Ihr Heer kämpft, im Angriff wie in der
+Verteidigung.  Ein Heer bei voller Moral kämpft über seiner rechnerischen
+Stärke. Ein gebrochenes kämpft mit etwa der Hälfte. Fällt die Moral unter
+40, beginnen Soldaten, Jets und Panzer jeden Zug zu desertieren, und je
+tiefer sie fällt, desto mehr gehen. Bomber, Träger und Geschütztürme
+desertieren nie wegen der Moral - aber wer den Unterhalt seiner Streitkräfte
+zu knapp bezahlt, verliert auch Geschütztürme durch Fahnenflucht, zusammen
+mit Soldaten, Jets und Panzern, was die Moral auch anzeigen mag.
 
-There is one more effect that is easy to miss. Auto-Pay Maintenance only
-pays your bills silently while **both** numbers read exactly 100. Let either
-slip and you are back to answering the maintenance prompts by hand every
-turn.
+Es gibt noch eine Wirkung, die leicht zu übersehen ist. Unterhalt
+automatisch zahlen zahlt Ihre Rechnungen nur so lange stillschweigend, wie
+**beide** Zahlen genau 100 anzeigen. Lassen Sie eine davon rutschen, und Sie
+beantworten die Unterhaltsfragen jeden Zug wieder von Hand.
 
-## What lowers them
+## Was sie senkt
 
-- Underpaying your armed forces costs Morale. Underpaying your land upkeep,
-  the Queen's tax, or your people's food costs Support. Underfeeding the
-  army costs Morale.
-- A riot from high taxes costs Support.
-- Declaring war on a ruler you hold an agreement with costs you
-  nothing. Attacking that ruler without declaring war first ends the
-  agreement too, and costs you a quarter of each.
-- A chemical or biological strike on your realm hurts both. The plague is
-  far worse for your army than the gas is.
-- Enemy agents can lower either one directly. See Stir Revolts and
-  Demoralize Forces.
+- Wer seine Streitkräfte zu knapp bezahlt, kostet sich Moral. Wer den
+  Unterhalt seines Landes, die Steuer der Königin oder die Nahrung seines
+  Volkes zu knapp bezahlt, kostet sich Rückhalt. Wer das Heer zu knapp
+  verpflegt, kostet sich Moral.
+- Ein Aufruhr wegen hoher Steuern kostet Rückhalt.
+- Einem Herrscher, mit dem Sie ein Abkommen halten, den Krieg zu erklären,
+  kostet Sie nichts. Diesen Herrscher anzugreifen, ohne zuvor den Krieg zu
+  erklären, beendet das Abkommen ebenfalls und kostet Sie ein Viertel von
+  beidem.
+- Ein chemischer oder biologischer Schlag auf Ihr Reich schadet beidem. Die
+  Seuche ist für Ihr Heer weit schlimmer als das Gas.
+- Feindliche Agenten können jedes von beiden unmittelbar senken. Siehe
+  Aufstände schüren und Truppen demoralisieren.
 
-## Paying them back
+## Sie zurückkaufen
 
-At the maintenance stage the crown asks for gold to buy back up to fifteen
-points of each. Support is priced by the size of your population, Morale by
-the size of your army — troopers, turrets and tanks cost most, jets least,
-bombers and carriers nothing. Units you have listed on the Trading Market
-still count.
+In der Unterhaltsstufe verlangt die Krone Gold, um bis zu fünfzehn Punkte
+von jedem zurückzukaufen. Der Rückhalt wird nach der Größe Ihrer Bevölkerung
+berechnet, die Moral nach der Größe Ihres Heeres - Soldaten, Geschütztürme
+und Panzer kosten am meisten, Jets am wenigsten, Bomber und Träger
+nichts. Einheiten, die Sie auf dem Handelsmarkt gelistet haben, zählen
+weiterhin mit.
 
-What you pay buys points in proportion, so paying half the request buys
-about half the points. You may pay up to half again as much as is asked, and
-that really does buy more than fifteen points. Neither number can pass 100,
-so overpaying a nearly-content realm wastes the difference.
+Was Sie zahlen, kauft Punkte im Verhältnis, die Hälfte der Forderung zu
+zahlen kauft also etwa die Hälfte der Punkte. Sie dürfen bis zum
+Anderthalbfachen des Geforderten zahlen, und das kauft tatsächlich mehr als
+fünfzehn Punkte. Keine der beiden Zahlen kann 100 überschreiten, ein nahezu
+zufriedenes Reich zu überzahlen verschwendet also die Differenz.

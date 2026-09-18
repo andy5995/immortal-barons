@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-17 04:23-0500\n"
+"POT-Creation-Date: 2026-09-17 05:51-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -66,6 +66,10 @@ msgid ""
 "happens if you turn on \"Enter exits Buy menu\" in Preferences; on a side "
 "menu, Enter always chooses Quit."
 msgstr ""
+"Eingabe ohne weitere Taste wählt ebenfalls Beenden - die Eingabezeile zeigt "
+"\\\"Beenden\\\", damit Sie sehen, was Eingabe bewirkt. In einem Zugmenü "
+"geschieht das nur, wenn Sie \\\"Mit Enter das Kaufmenü verlassen\\\" in den "
+"Einstellungen einschalten; in einem Nebenmenü wählt Eingabe immer Beenden."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:30
@@ -76,12 +80,18 @@ msgid ""
 "and cursor control, those lists are numbered instead — type the number and "
 "press Enter."
 msgstr ""
+"Der Hilfebrowser und andere Themenlisten bewegen eine Markierung mit den "
+"Pfeiltasten: Eingabe wählt die markierte Zeile, das Tippen einiger "
+"Buchstaben springt zu einem Titel, und Rücktaste oder `Q` führt zurück. Wenn "
+"Ihr Terminal weder Farbe noch Cursorsteuerung darstellen kann, sind diese "
+"Listen stattdessen nummeriert - tippen Sie die Nummer und drücken Sie "
+"Eingabe."
 
 #. type: Title ##
 #: internal/help/content/controls/interface.md:31
 #, no-wrap
 msgid "Typing an answer"
-msgstr ""
+msgstr "Eine Antwort eintippen"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:39
@@ -94,12 +104,20 @@ msgid ""
 "key. In the message editor it clears the line you are on, not the message — "
 "`/C` still does that."
 msgstr ""
+"Wo eine Eingabezeile etwas Getipptes statt einer einzelnen Taste erwartet - "
+"eine Zahl von Soldaten, einen Reichsnamen, eine Zeile einer Nachricht -, "
+"löscht die Rücktaste das letzte Zeichen und **Strg-U löscht die ganze "
+"Antwort**, so dass Sie ohne Eingetipptes wieder an der Eingabezeile stehen. "
+"Das geht schneller, als die Rücktaste über einer vertippten 1000000000 "
+"gedrückt zu halten, und es ist eine eigene Ergänzung von IB; das Original "
+"kennt keine solche Taste. Im Nachrichteneditor löscht sie die Zeile, in der "
+"Sie stehen, nicht die Nachricht - das tut weiterhin `/C`."
 
 #. type: Title ##
 #: internal/help/content/controls/interface.md:40
 #, no-wrap
 msgid "Choosing who an action goes to"
-msgstr ""
+msgstr "Wählen, an wen eine Aktion geht"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:47
@@ -110,6 +128,13 @@ msgid ""
 "marks your treaty partners. **Press Enter when the list is right** — that is "
 "what opens the editor. Enter with nothing marked leaves without sending."
 msgstr ""
+"Nachricht senden fragt `(A-Y,Z=All,?=List) Send to:` und nimmt eine ganze "
+"Liste entgegen, nicht einen einzelnen Namen. Drücken Sie den Buchstaben "
+"eines Reiches, um es aufzunehmen, und denselben Buchstaben erneut, um es "
+"wieder zu streichen. `Z` markiert alle auf einmal, `?` zeigt die Liste der "
+"Reiche, und `*` markiert Ihre Vertragspartner. **Drücken Sie Eingabe, wenn "
+"die Liste stimmt** - das ist es, was den Editor öffnet. Eingabe ohne jede "
+"Markierung beendet den Vorgang, ohne zu senden."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:50
@@ -118,6 +143,8 @@ msgid ""
 "InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for the\n"
 "barons on the planet you named.\n"
 msgstr ""
+"Interplanetare Operationen -> Nachricht senden -> Einzelner Planet nutzt dieselbe\n"
+"Eingabezeile für die Barone auf dem genannten Planeten.\n"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:55
@@ -128,6 +155,11 @@ msgid ""
 "full negotiation with it — you can accept its offer or break the pact you "
 "hold."
 msgstr ""
+"Jede Diplomatie-Option, die ein Reich benennt, nimmt dieselbe Liste: Bieten "
+"Sie mehreren Reichen zugleich einen Vertrag an, oder erklären Sie mehreren "
+"den Krieg. Dort zeigt `?` Ihre Beziehungen statt der Punkte. Markieren Sie "
+"nur ein Reich, erhalten Sie die volle Verhandlung mit ihm - Sie können sein "
+"Angebot annehmen oder den Pakt brechen, den Sie halten."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:62
@@ -140,6 +172,13 @@ msgid ""
 "The letters of everyone a message went to appear at the top of it when it is "
 "read."
 msgstr ""
+"Die Buchstaben gehören den Reichen, nicht den Zeilen, daher kann ein "
+"Buchstabe in der Liste fehlen: Er ist entweder Ihr eigener oder gehört einem "
+"gefallenen Reich. Ein Reich behält seinen Buchstaben, solange es besteht, "
+"gleich wer sonst hinzukommt oder fällt, und es ist auf jedem Bildschirm "
+"derselbe Buchstabe - die Spalte `Id` in Punkte ansehen ist ebenfalls dieser "
+"Buchstabe, weshalb jene Zeilen nicht nach Buchstaben geordnet sind. Die "
+"Buchstaben aller Empfänger einer Nachricht stehen beim Lesen oben in ihr."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:66
@@ -148,12 +187,16 @@ msgid ""
 "later baron may be given it. So a letter names whoever holds it today, not "
 "whoever held it when an old message was written."
 msgstr ""
+"Ein Buchstabe wird frei, wenn das Reich, das ihn hält, von der Karte getilgt "
+"wird, und ein späterer Baron kann ihn erhalten. Ein Buchstabe nennt also den "
+"heutigen Inhaber, nicht den, der ihn hielt, als eine alte Nachricht "
+"geschrieben wurde."
 
 #. type: Title ##
 #: internal/help/content/controls/interface.md:67
 #, no-wrap
 msgid "Who else is on"
-msgstr ""
+msgstr "Wer sonst noch online ist"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:74
@@ -164,6 +207,12 @@ msgid ""
 "off, and also a few minutes after their last keypress, so someone sitting on "
 "one screen can drop off the list without having left."
 msgstr ""
+"Ein `O` neben dem Buchstaben eines Reiches - in Punkte ansehen, in den "
+"Ziellisten für Angriff und Nachricht und in der Verträge ansehen-Liste - "
+"bedeutet, dass dieser Baron mit Ihnen auf dem Board ist. Ihr eigenes Reich "
+"trägt es nie. Es verschwindet, wenn er sich abmeldet, und auch einige "
+"Minuten nach seinem letzten Tastendruck, so dass jemand, der auf einem "
+"Bildschirm verweilt, von der Liste fallen kann, ohne gegangen zu sein."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:75
@@ -257,6 +306,9 @@ msgid ""
 "always midnight where you are, so the entry menu shows the game's own time "
 "and how long is left of the day."
 msgstr ""
+"Der Tag wechselt um Mitternacht auf dem Rechner, der das Spiel betreibt. Das "
+"ist nicht überall dann Mitternacht, wo Sie sind, daher zeigt das "
+"Eingangsmenü die spieleigene Zeit und wie viel vom Tag noch bleibt."
 
 #. type: Plain text
 #: internal/help/content/controls/turns.md:21
@@ -267,6 +319,11 @@ msgid ""
 "from a list.  The countdown to the new day is the same length of time "
 "whichever you choose."
 msgstr ""
+"Jede Zeit, die das Spiel ausgibt, nennt die Uhr, auf die sie sich bezieht. "
+"Zeiten stehen anfangs in UTC, worauf sich jeder Planet einer Liga "
+"verständigt, und die Einstellungen zeigen sie auf Wunsch auf einer anderen "
+"Uhr: der dieses Boards oder einer Zeitzone, die Sie aus einer Liste wählen.  "
+"Der Countdown zum neuen Tag ist gleich lang, welche Sie auch wählen."
 
 #. type: Plain text
 #: internal/help/content/controls/turns.md:25
@@ -286,13 +343,16 @@ msgid ""
 "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
 "see who cannot be attacked yet."
 msgstr ""
+"Ein Reich, das noch unter Schutz steht, zeigt seinen Buchstaben in eckigen "
+"Klammern in den Listen der Reiche - `[C]`, wo jedes andere Reich `(C)` zeigt "
+"-, so dass Sie sehen, wer noch nicht angegriffen werden kann."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-enemy-targets.md:1
 #: internal/help/content/covert/bomb-enemy-targets.md:8
 #, no-wrap
 msgid "Bomb Enemy Targets"
-msgstr ""
+msgstr "Feindliche Ziele bombardieren"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-enemy-targets.md:15
@@ -303,6 +363,12 @@ msgid ""
 "hit their people, their troopers, their own agents, their tanks, their jets, "
 "or their food store."
 msgstr ""
+"Feindliche Ziele bombardieren schickt Ihre Agenten aus, um in einem "
+"feindlichen Reich Bomben zu legen. Sie wählen das Reich und sonst nichts: "
+"Gelingt die Operation, sucht sich Ihr Dienst zufällig einen Besitz des "
+"Feindes aus und zerstört einen Teil davon. Es kann seine Menschen treffen, "
+"seine Soldaten, seine eigenen Agenten, seine Panzer, seine Jets oder seinen "
+"Nahrungsvorrat."
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-enemy-targets.md:19
@@ -312,13 +378,19 @@ msgid ""
 "short of food can be pushed into starvation by a single lucky raid. You "
 "cannot aim for it, though, so the operation is a gamble rather than a plan."
 msgstr ""
+"Die Nahrung ist der große Fang. Ein Schlag, der die Kornspeicher erreicht, "
+"verbrennt einen großen Teil davon, weit mehr als die wenigen Prozent, die "
+"die anderen fünf verlieren, so dass ein Reich, das ohnehin knapp an Nahrung "
+"ist, von einem einzigen Glückstreffer in den Hunger getrieben werden kann. "
+"Zielen können Sie darauf aber nicht, daher ist die Operation ein Glücksspiel "
+"und kein Plan."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-food-market.md:1
 #: internal/help/content/covert/bomb-food-market.md:8
 #, no-wrap
 msgid "Bomb Food Market"
-msgstr ""
+msgstr "Nahrungsmarkt bombardieren"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-food-market.md:12
@@ -327,13 +399,17 @@ msgid ""
 "menu. It destroys much of another planet's food market supply. A large loss "
 "can start a food shortage across that whole planet."
 msgstr ""
+"Nahrungsmarkt bombardieren ist eine interplanetare Operation im Menü "
+"Spezialoperationen. Sie zerstört einen großen Teil des Nahrungsmarktbestands "
+"eines anderen Planeten. Ein großer Verlust kann auf diesem ganzen Planeten "
+"eine Nahrungsknappheit auslösen."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-trade-routes.md:1
 #: internal/help/content/covert/bomb-trade-routes.md:8
 #, no-wrap
 msgid "Bomb Trade Routes"
-msgstr ""
+msgstr "Handelswege bombardieren"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trade-routes.md:14
@@ -344,6 +420,12 @@ msgid ""
 "arrives all but empty — only a few percent of every good in it is left. "
 "Standing treaties are not touched."
 msgstr ""
+"Handelswege bombardieren ist eine interplanetare Operation im Menü "
+"Spezialoperationen. Sie trifft die Handelsgeschäfte, die über einen anderen "
+"Planeten unterwegs sind. Die meisten Schläge gehen ins Leere und manche "
+"Geschäfte kommen durch, aber ein Geschäft, das die Bomber erreichen, trifft "
+"so gut wie leer ein - nur wenige Prozent jeder Ware darin bleiben übrig. "
+"Bestehende Verträge werden nicht berührt."
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trade-routes.md:17
@@ -352,13 +434,17 @@ msgid ""
 "each other. Your own agreements with the target count for nothing here, so a "
 "partner can bomb you as easily as an enemy can."
 msgstr ""
+"Ein Geschäft bleibt verschont, wenn die beiden handelnden Reiche "
+"untereinander Geschützten Handel halten. Ihre eigenen Abkommen mit dem Ziel "
+"zählen hier nichts, ein Partner kann Sie also ebenso leicht bombardieren wie "
+"ein Feind."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-trading-market.md:1
 #: internal/help/content/covert/bomb-trading-market.md:8
 #, no-wrap
 msgid "Bomb Trading Market"
-msgstr ""
+msgstr "Handelsmarkt bombardieren"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trading-market.md:12
@@ -367,13 +453,17 @@ msgid ""
 "Operations menu. It destroys a share of everything listed on another "
 "planet's trading market, and the gold sellers there were waiting on."
 msgstr ""
+"Handelsmarkt bombardieren ist eine interplanetare Operation im Menü "
+"Spezialoperationen. Sie zerstört einen Teil von allem, was auf dem "
+"Handelsmarkt eines anderen Planeten gelistet ist, und dazu das Gold, auf das "
+"die Verkäufer dort warteten."
 
 #. type: Title #
 #: internal/help/content/covert/bribery.md:1
 #: internal/help/content/covert/bribery.md:8
 #, no-wrap
 msgid "Bribery"
-msgstr ""
+msgstr "Bestechung"
 
 #. type: Plain text
 #: internal/help/content/covert/bribery.md:13
@@ -396,6 +486,12 @@ msgid ""
 "realm. Since the bribe itself is only carried out at daily maintenance, the "
 "earliest you can expose that realm is the day after you pay for the bribe."
 msgstr ""
+"Der Agent bleibt für den Rest des Spiels auf Ihrer Lohnliste, und Sie können "
+"nur einen in einem Reich halten - das Menü weist einen zweiten Versuch ab, "
+"ohne Kosten. Er ist außerdem das, was Feindoperationen aufdecken braucht, "
+"bevor es Sie gegen dieses Reich abschirmen kann. Da die Bestechung selbst "
+"erst bei der täglichen Verwaltung ausgeführt wird, können Sie dieses Reich "
+"frühestens am Tag nach der Zahlung für die Bestechung aufdecken."
 
 #. type: Plain text
 #: internal/help/content/covert/bribery.md:21
@@ -403,13 +499,15 @@ msgid ""
 "Bribery is the hardest operation on the menu to land, so expect to pay for "
 "several attempts."
 msgstr ""
+"Bestechung ist die Operation im Menü, die am schwersten gelingt; rechnen Sie "
+"also damit, mehrere Versuche zu bezahlen."
 
 #. type: Title #
 #: internal/help/content/covert/demoralize-forces.md:1
 #: internal/help/content/covert/demoralize-forces.md:8
 #, no-wrap
 msgid "Demoralize Forces"
-msgstr ""
+msgstr "Truppen demoralisieren"
 
 #. type: Plain text
 #: internal/help/content/covert/demoralize-forces.md:12
@@ -417,6 +515,8 @@ msgid ""
 "Demoralize Forces lowers the target's military morale. Low morale weakens "
 "their army in battle and can cause desertion."
 msgstr ""
+"Truppen demoralisieren senkt die Kampfmoral des Ziels. Niedrige Moral "
+"schwächt sein Heer in der Schlacht und kann zu Fahnenflucht führen."
 
 #. type: Plain text
 #: internal/help/content/covert/demoralize-forces.md:14
@@ -424,13 +524,15 @@ msgid ""
 "Your agent only reaches them at daily maintenance, so send one the day "
 "before the battle you want it to affect, not the turn of it."
 msgstr ""
+"Ihr Agent erreicht sie erst bei der täglichen Verwaltung; schicken Sie ihn "
+"also am Tag vor der Schlacht, auf die er wirken soll, nicht in deren Zug."
 
 #. type: Title #
 #: internal/help/content/covert/expose-enemy-ops.md:1
 #: internal/help/content/covert/expose-enemy-ops.md:8
 #, no-wrap
 msgid "Expose Enemy Ops"
-msgstr ""
+msgstr "Feindoperationen aufdecken"
 
 #. type: Plain text
 #: internal/help/content/covert/expose-enemy-ops.md:13
@@ -439,6 +541,10 @@ msgid ""
 "For the next day, nine in ten of that realm's covert operations against you "
 "are caught before they do anything."
 msgstr ""
+"Feindoperationen aufdecken wendet einen bestochenen Agenten gegen den "
+"Dienst, der ihn beschäftigt. Für den nächsten Tag werden neun von zehn "
+"verdeckten Operationen dieses Reiches gegen Sie aufgehalten, bevor sie "
+"irgendetwas ausrichten."
 
 #. type: Plain text
 #: internal/help/content/covert/expose-enemy-ops.md:18
@@ -448,6 +554,10 @@ msgid ""
 "an agent on your payroll there is nothing to expose. A tenth of that realm's "
 "attempts still get through."
 msgstr ""
+"Es wirkt gegen EIN Reich - das Reich, in dem der Agent sitzt -, daher listet "
+"das Menü nur die Reiche auf, die Sie bereits bestochen haben. Bestechung "
+"kommt zuerst; ohne einen Agenten auf Ihrer Lohnliste gibt es nichts "
+"aufzudecken. Ein Zehntel der Versuche dieses Reiches kommt weiterhin durch."
 
 #. type: Plain text
 #: internal/help/content/covert/expose-enemy-ops.md:21
@@ -457,6 +567,10 @@ msgid ""
 "caught agent, so on top of blocking the damage you are told which realm sent "
 "it."
 msgstr ""
+"Es kostet keinen Agenten und keinen Teil eines Tageskontingents, Sie dürfen "
+"es also so oft ausführen, wie Sie es bezahlen können. Alles, was der Schild "
+"abwehrt, zählt als gefasster Agent, so dass Ihnen zusätzlich zum "
+"abgewendeten Schaden gesagt wird, welches Reich ihn geschickt hat."
 
 #. type: Title #
 #: internal/help/content/covert/overview.md:1
@@ -471,6 +585,9 @@ msgid ""
 "Covert operations are secret missions run by your agents. You need at least "
 "one agent to run any of them, and a failed one costs you that agent."
 msgstr ""
+"Verdeckte Operationen sind Geheimeinsätze, die Ihre Agenten ausführen. Sie "
+"brauchen für jede von ihnen mindestens einen Agenten, und eine gescheiterte "
+"kostet Sie diesen Agenten."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:21
@@ -484,6 +601,15 @@ msgid ""
 "Alliance or Terrorist Prevention treaty lends an ally's agents to your side "
 "or the target's. See Agents."
 msgstr ""
+"Was Agenten NICHT tun, ist Ihre Aussichten verändern. Wie wahrscheinlich "
+"eine Operation gelingt, bestimmt die Operation selbst: Die einfacheren "
+"gelingen etwas mehr als die Hälfte der Male, die schwereren seltener. Ihre "
+"Agenten ändern daran nichts, und die des Ziels ebenso wenig. Drei Dinge "
+"ändern es doch: Ein bestochener Agent im Ziel verdoppelt Ihre Aussicht gegen "
+"dieses Reich, ein Reich, das Ihren Agenten aufgedeckt hat, wehrt neun von "
+"zehn Ihrer Versuche ab, und ein Geheimdienstbündnis oder ein Abkommen zur "
+"Terrorabwehr leiht die Agenten eines Verbündeten Ihrer Seite oder der des "
+"Ziels. Siehe Verdeckte Agenten."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:25
@@ -493,6 +619,10 @@ msgid ""
 "gold when you send the operation. If you cannot pay, the operation does not "
 "run."
 msgstr ""
+"Jede Operation kostet außerdem Gold. Das Menü zeigt den Preis neben jeder, "
+"und die Fußzeile zeigt, wie viel Gold und wie viele Agenten Sie haben. Sie "
+"zahlen das Gold, wenn Sie die Operation losschicken. Können Sie nicht "
+"zahlen, läuft die Operation nicht."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:31
@@ -503,6 +633,12 @@ msgid ""
 "Spy and Spy on Relations only gather information, so those two stay open to "
 "you for as long as the shield lasts."
 msgstr ""
+"Solange Ihr Reich unter dem Schutz für neue Reiche steht, dürfen Ihre "
+"Agenten nicht gegen ein anderes Reich vorgehen: Jede Operation, die auf ihr "
+"Ziel wirkt, wird abgewiesen, und die Abweisung kostet nichts - kein Gold, "
+"keinen Agenten, keinen Zug. Spion senden und Beziehungen ausspähen sammeln "
+"nur Auskünfte, diese beiden bleiben Ihnen also offen, solange der Schild "
+"hält."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:39
@@ -515,6 +651,14 @@ msgid ""
 "plan it a day ahead.  Send Spy and Spy on Relations are the exceptions, "
 "along with Expose Enemy Ops: those three answer you immediately."
 msgstr ""
+"Die meisten Operationen geschehen nicht auf der Stelle. Wenn Sie eine "
+"wählen, bricht Ihr Agent auf: Die Gebühr und der Agent gehen sofort, die "
+"Operation selbst wird während der nächsten täglichen Verwaltung ausgeführt. "
+"Das Ergebnis erwartet Sie im Bericht Ihres nächsten Zuges - ob der Agent "
+"durchkam und was er ausrichtete. Eine Operation kann ein Reich also nicht in "
+"demselben Zug weichklopfen, in dem Sie es angreifen wollen; planen Sie einen "
+"Tag voraus.  Spion senden und Beziehungen ausspähen sind die Ausnahmen, "
+"zusammen mit Feindoperationen aufdecken: Diese drei antworten Ihnen sofort."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:44
@@ -525,6 +669,11 @@ msgid ""
 "agent is then sent. See Treaties and Alliances. Send Spy and Spy on "
 "Relations do not ask."
 msgstr ""
+"Ein Abkommen ist kein Schutz. Sie dürfen eine Operation gegen einen "
+"Herrscher richten, mit dem Sie einen Vertrag halten, und das Spiel fragt "
+"nach, bevor der Agent geht. Ein Ja zerreißt den Vertrag zum üblichen Preis "
+"an Rückhalt und Moral, und der Agent wird dann geschickt. Siehe Verträge und "
+"Bündnisse. Spion senden und Beziehungen ausspähen fragen nicht."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:47
@@ -532,6 +681,9 @@ msgid ""
 "If the realm you aimed at is gone by the time your agent arrives, the "
 "operation is abandoned and the fee is not returned."
 msgstr ""
+"Ist das Reich, auf das Sie gezielt haben, bei der Ankunft Ihres Agenten "
+"nicht mehr da, wird die Operation abgebrochen, und die Gebühr wird nicht "
+"erstattet."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:52
@@ -541,6 +693,11 @@ msgid ""
 "time.  Running Stir Revolts uses up one Stir Revolts and leaves every other "
 "operation untouched. The allowance refills at the start of each new day."
 msgstr ""
+"Jede verdeckte Operation darf einmal je Zug des Tages ausgeführt werden, und "
+"Sie dürfen dieses Kontingent ausgeben, wann Sie wollen - alles in einem Zug "
+"oder eines nach dem anderen.  Ein Einsatz von Aufstände schüren verbraucht "
+"ein Aufstände schüren und lässt jede andere Operation unberührt. Das "
+"Kontingent füllt sich zu Beginn jedes neuen Tages wieder auf."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:59
@@ -552,6 +709,14 @@ msgid ""
 "Spy and Spy on Relations only gather information, so they have no limit at "
 "all and go one at a time, and Expose Enemy Ops has no limit either."
 msgstr ""
+"Nachdem Sie ein Ziel gewählt haben, fragt das Spiel, wie viele Agenten Sie "
+"schicken wollen, und schlägt so viele vor, wie Sie können: je nachdem, was "
+"zuerst ausgeht - die Agenten, die Sie halten, das Kontingent, das Ihnen "
+"heute bleibt, oder das Gold für die Gebühr. Jeder Agent ist eine eigene "
+"Operation mit eigener Gebühr und eigener Gefahr, gefasst zu werden. Spion "
+"senden und Beziehungen ausspähen sammeln nur Auskünfte, sie haben also "
+"überhaupt keine Grenze und gehen einzeln los, und Feindoperationen aufdecken "
+"hat ebenfalls keine Grenze."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:65
@@ -562,6 +727,11 @@ msgid ""
 "The only way anyone learns who is running operations against them is by "
 "catching an agent."
 msgstr ""
+"Wenn eine Operation scheitert, wird Ihr Agent gefasst und ist verloren, und "
+"das Ziel ist gewarnt - und ein gefasster Agent redet, dem Ziel wird also der "
+"Name Ihres Reiches genannt. Eine Operation, die gelingt, wird dem Ziel ohne "
+"Namen gemeldet. Der einzige Weg, zu erfahren, wer Operationen gegen einen "
+"führt, ist das Fassen eines Agenten."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:69
@@ -570,6 +740,10 @@ msgid ""
 "InterPlanetary Special Operations instead, which are aimed at another planet "
 "and need Bombers to deliver their payloads; each says so."
 msgstr ""
+"Jede Operation hat ihr eigenes Thema. Einige Themen in diesem Abschnitt "
+"behandeln stattdessen interplanetare Spezialoperationen, die auf einen "
+"anderen Planeten gerichtet sind und Bomber brauchen, um ihre Fracht "
+"auszuliefern; jedes sagt das dazu."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:72
@@ -578,13 +752,16 @@ msgid ""
 "Attack menus. If you do not see it, turn on \"Visit Covert Menu\" in the "
 "Preferences menu."
 msgstr ""
+"Das Menü Geheimoperationen erscheint während Ihres Zuges, vor den Menüs "
+"Ausgaben und Angriff. Wenn Sie es nicht sehen, schalten Sie \\"
+"\"Geheimdienstmenü\\\" im Menü Einstellungen ein."
 
 #. type: Title #
 #: internal/help/content/covert/s3-sabre.md:1
 #: internal/help/content/covert/s3-sabre.md:8
 #, no-wrap
 msgid "S3-Sabre"
-msgstr ""
+msgstr "S3-Sabre"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:13
@@ -593,6 +770,10 @@ msgid ""
 "InterPlanetary menu's Special Operations at a baron on another planet. "
 "Before you fire, you set a dial from 0 to 10, and the dial aims it:"
 msgstr ""
+"Die S3-Sabre ist eine unzuverlässige Massenvernichtungswaffe, die aus den "
+"Spezialoperationen des InterPlanetary-Menüs auf einen Baron auf einem "
+"anderen Planeten abgefeuert wird. Vor dem Abschuss stellen Sie einen Regler "
+"von 0 bis 10 ein, und der Regler richtet sie aus:"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:22
@@ -607,6 +788,14 @@ msgid ""
 "| 7, 8 | regions, burning them to waste |\n"
 "| 9, 10 | the food supply |\n"
 msgstr ""
+"| Regler | Worauf sie zielt |\n"
+"| --- | --- |\n"
+"| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes |\n"
+"| 2, 3 | Wohngebiete, wobei Menschen sterben |\n"
+"| 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |\n"
+"| 5, 6 | Luftwaffenbasen, und nichts als Jets |\n"
+"| 7, 8 | Regionen, die zu Ödland verbrennen |\n"
+"| 9, 10 | den Nahrungsvorrat |\n"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:28
@@ -617,6 +806,12 @@ msgid ""
 "while 5 goes for airbases about three times in four, because 5 and 6 both "
 "point there.  Aim 5 at a baron you know keeps a large air force."
 msgstr ""
+"Das Ziel wandert im Flug um eine Stufe nach oben oder unten, und etwa jeder "
+"zehnte Abschuss missachtet den Regler ganz und trifft, was ihm beliebt. Eine "
+"Einstellung ist also eine Neigung, kein Versprechen: 4 geht etwa in der "
+"Hälfte der Fälle auf Militärbasen, während 5 etwa in drei von vier Fällen "
+"auf Luftwaffenbasen geht, weil 5 und 6 beide dorthin weisen.  Richten Sie 5 "
+"auf einen Baron, von dem Sie wissen, dass er eine große Luftwaffe hält."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:33
@@ -626,6 +821,11 @@ msgid ""
 "backfire — if the enemy keeps a very large trooper army, the missile may "
 "turn back and strike your own empire instead."
 msgstr ""
+"Darüber hinaus bleibt die Rakete ein Glücksspiel. Die meisten Abschüsse "
+"bewirken nichts: Sie verfehlt, sie versagt, oder die SDI des Feindes holt "
+"sie herunter. Sie kann auch nach hinten losgehen - hält der Feind ein sehr "
+"großes Heer an Soldaten, kann die Rakete umkehren und Ihr eigenes Reich "
+"treffen."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:39
@@ -636,6 +836,12 @@ msgid ""
 "way but \"user select\" you are never asked for a number — that is the "
 "setting doing its job, not a fault."
 msgstr ""
+"Ihr Sysop entscheidet, wie der Regler gesetzt wird. Normalerweise wählen Sie "
+"ihn selbst, aber das Spiel kann so eingerichtet werden, dass es jedes Mal "
+"einen für Sie auswürfelt, ihn auf einen vom Sysop gewählten Wert festlegt "
+"oder die Waffe ganz abschaltet. Auf einem Board, das anders als auf \\\"user "
+"select\\\" eingestellt ist, werden Sie nie nach einer Zahl gefragt - das ist "
+"die Einstellung bei der Arbeit, kein Fehler."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:44
@@ -646,13 +852,18 @@ msgid ""
 "all three leaves your bombing operations untouched, and spending those "
 "leaves the missiles untouched."
 msgstr ""
+"Sie dürfen jede der drei Raketen - die nukleare, die chemische und die S3-"
+"Sabre - einmal am Tag abfeuern. Eine Rakete, die Sie heute schon genutzt "
+"haben, steht überhaupt nicht im Menü Spezialoperationen. Sie haben ihr "
+"eigenes Kontingent, alle drei auszugeben lässt Ihre Bombenoperationen also "
+"unberührt, und diese auszugeben lässt die Raketen unberührt."
 
 #. type: Title #
 #: internal/help/content/covert/send-spy.md:1
 #: internal/help/content/covert/send-spy.md:8
 #, no-wrap
 msgid "Send Spy"
-msgstr ""
+msgstr "Spion senden"
 
 #. type: Plain text
 #: internal/help/content/covert/send-spy.md:13
@@ -661,6 +872,10 @@ msgid ""
 "troops, defenses, gold, and more, so you can plan an attack. If the mission "
 "fails, your spy is caught and does not return."
 msgstr ""
+"Spion senden sammelt militärische Aufklärung über einen Feind. Es enthüllt "
+"sein Land, seine Truppen, seine Verteidigung, sein Gold und mehr, so dass "
+"Sie einen Angriff planen können. Scheitert der Einsatz, wird Ihr Spion "
+"gefasst und kehrt nicht zurück."
 
 #. type: Plain text
 #: internal/help/content/covert/send-spy.md:17
@@ -669,6 +884,9 @@ msgid ""
 "see the Covert Operations overview for the odds and what does and does not "
 "move them."
 msgstr ""
+"Es gelingt häufiger als die meisten Operationen, gegen wen Sie es auch "
+"schicken - die Aussichten, und was sie bewegt und was nicht, stehen in der "
+"Übersicht zu den verdeckten Operationen."
 
 #. type: Plain text
 #: internal/help/content/covert/send-spy.md:19
@@ -677,13 +895,16 @@ msgid ""
 "wait for daily maintenance, which is what makes it useful right before an "
 "attack."
 msgstr ""
+"Spion senden antwortet auf der Stelle. Es ist eine der wenigen Operationen, "
+"die nicht auf die tägliche Verwaltung warten, und genau das macht es "
+"unmittelbar vor einem Angriff nützlich."
 
 #. type: Title #
 #: internal/help/content/covert/set-up.md:1
 #: internal/help/content/covert/set-up.md:8
 #, no-wrap
 msgid "Set Up"
-msgstr ""
+msgstr "Hineinlegen"
 
 #. type: Plain text
 #: internal/help/content/covert/set-up.md:12
@@ -692,13 +913,17 @@ msgid ""
 "believing the other declared war. Their alliance is voided. Use it to strip "
 "a defensive pact off an enemy you plan to attack."
 msgstr ""
+"Hineinlegen bringt das Ziel und einen seiner Partner im Vollen "
+"Verteidigungsbündnis dazu, zu glauben, der jeweils andere habe den Krieg "
+"erklärt. Ihr Bündnis wird nichtig. Nutzen Sie es, um einem Feind, den Sie "
+"angreifen wollen, den Verteidigungspakt abzustreifen."
 
 #. type: Title #
 #: internal/help/content/covert/spy-on-relations.md:1
 #: internal/help/content/covert/spy-on-relations.md:8
 #, no-wrap
 msgid "Spy on Relations"
-msgstr ""
+msgstr "Beziehungen ausspähen"
 
 #. type: Plain text
 #: internal/help/content/covert/spy-on-relations.md:11
@@ -707,13 +932,16 @@ msgid ""
 "is useful before a war, so you can see which alliances might come to their "
 "defense."
 msgstr ""
+"Beziehungen ausspähen enthüllt jeden Vertrag, den das Ziel mit anderen "
+"Herrschern hält. Das ist vor einem Krieg nützlich, denn so sehen Sie, welche "
+"Bündnisse ihm zu Hilfe kommen könnten."
 
 #. type: Title #
 #: internal/help/content/covert/stir-revolts.md:1
 #: internal/help/content/covert/stir-revolts.md:8
 #, no-wrap
 msgid "Stir Revolts"
-msgstr ""
+msgstr "Aufstände schüren"
 
 #. type: Plain text
 #: internal/help/content/covert/stir-revolts.md:11
@@ -729,7 +957,7 @@ msgstr ""
 #: internal/help/content/covert/support-dissensions.md:8
 #, no-wrap
 msgid "Support Dissensions"
-msgstr ""
+msgstr "Zwietracht fördern"
 
 #. type: Plain text
 #: internal/help/content/covert/support-dissensions.md:11
@@ -737,6 +965,8 @@ msgid ""
 "Support Dissensions turns the target's own troopers against them. Some of "
 "their army deserts and flees."
 msgstr ""
+"Zwietracht fördern wendet die eigenen Soldaten des Ziels gegen es. Ein Teil "
+"seines Heeres desertiert und flieht."
 
 #. type: Title #
 #: internal/help/content/covert/undermine-investments.md:1
@@ -753,6 +983,10 @@ msgid ""
 "another planet, trimming about a quarter off the money they were due to get "
 "back."
 msgstr ""
+"Investitionen untergraben ist eine interplanetare Operation im Menü "
+"Spezialoperationen. Sie schädigt die laufenden Bankanlagen jedes Reiches auf "
+"einem anderen Planeten und streicht etwa ein Viertel des Geldes, das sie "
+"zurückerhalten sollten."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaties.md:1
@@ -785,6 +1019,18 @@ msgid ""
 "sends an agent. Send Spy and Spy on Relations only look, so they do not ask "
 "and cost you nothing."
 msgstr ""
+"Einen Angriff auf einen Herrscher zu richten, mit dem Sie ein Abkommen "
+"halten, zerreißt das Abkommen, und das Spiel fragt nach, bevor Sie Ihre "
+"Streitmacht wählen. Sagen Sie ja, empört sich Ihr Volk darüber, von einem "
+"treulosen Baron regiert zu werden: Sie verlieren ein Viertel Ihres Rückhalts "
+"und ein Viertel der Moral Ihres Heeres, und die Schlacht wird dann mit "
+"dieser geringeren Moral geschlagen. Sagen Sie nein, wird der Angriff "
+"abgeblasen. Die beiden Reiche bleiben ohne Abkommen zurück, und der "
+"Herrscher, den Sie verraten haben, wird seine eigene Antwort darauf haben. "
+"Dieselbe Frage kommt vor einem nuklearen, chemischen oder biologischen "
+"Schlag und vor einer verdeckten Operation, die einen Agenten schickt. Spion "
+"senden und Beziehungen ausspähen schauen nur, sie fragen also nicht und "
+"kosten Sie nichts."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:25
@@ -792,6 +1038,9 @@ msgid ""
 "A Declaration of War, on the Diplomacy menu, ends an agreement at the same "
 "price without a battle. It costs nothing if you had no agreement to break."
 msgstr ""
+"Eine Kriegserklärung im Menü Diplomatie beendet ein Abkommen zum selben "
+"Preis ohne Schlacht. Sie kostet nichts, wenn Sie kein Abkommen zu brechen "
+"hatten."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:28
@@ -799,6 +1048,9 @@ msgid ""
 "View Treaties shows your current relations with the other rulers in the "
 "game, and below that, the offers you have sent that nobody has answered yet."
 msgstr ""
+"Verträge ansehen zeigt Ihre derzeitigen Beziehungen zu den anderen "
+"Herrschern im Spiel, und darunter die Angebote, die Sie gesendet haben und "
+"die noch niemand beantwortet hat."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:31
@@ -807,6 +1059,9 @@ msgid ""
 "once.  It reaches every ruler you have an agreement with, whatever kind it "
 "is."
 msgstr ""
+"Sobald Sie einen Vertrag halten, bietet Nachricht senden an, an alle Ihre "
+"Verbündeten zugleich zu schreiben.  Es erreicht jeden Herrscher, mit dem Sie "
+"ein Abkommen haben, welcher Art auch immer."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:35
@@ -815,6 +1070,10 @@ msgid ""
 "you send a second, different offer to the same ruler, it takes the place of "
 "the first one, because two realms can hold only one agreement at a time."
 msgstr ""
+"Ein Angebot wartet, bis der andere Herrscher einen Zug spielt. Es läuft "
+"nicht ab. Senden Sie ein zweites, anderes Angebot an denselben Herrscher, "
+"tritt es an die Stelle des ersten, denn zwei Reiche können immer nur ein "
+"Abkommen zugleich halten."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:38
@@ -823,6 +1082,10 @@ msgid ""
 "tells you the agreement still stands and returns you to the menu. "
 "Declaration of War is the way to end one."
 msgstr ""
+"Den Vertrag zu wählen, den Sie mit einem Herrscher bereits halten, sendet "
+"nichts. Das Spiel teilt Ihnen mit, dass das Abkommen weiterhin besteht, und "
+"bringt Sie zum Menü zurück. Eine Kriegserklärung ist der Weg, eines zu "
+"beenden."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-free-trade.md:1
@@ -853,6 +1116,13 @@ msgid ""
 "the price of your own peace at home, so keep an eye on their figures as well "
 "as your own."
 msgstr ""
+"Menschen, die über die Grenzen ziehen, tragen niedrige Moral und niedrigen "
+"Rückhalt weiter. Jeden Tag treibt das gesündere der beiden Reiche auf das "
+"schlechtere zu, bis zu dessen Wert und nicht weiter. Das Gefälle läuft nur "
+"in eine Richtung: Das schlechtere Reich wird durch den Kontakt nie "
+"angehoben. Mit einem strauchelnden Nachbarn zu unterzeichnen erkauft das "
+"Einkommen mit dem eigenen Frieden daheim; behalten Sie also seine Werte "
+"ebenso im Auge wie Ihre eigenen."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-full-defense.md:1
@@ -880,6 +1150,10 @@ msgid ""
 "are told what you lost, who you were defending, and who attacked them, so "
 "watch your report after an ally has been raided."
 msgstr ""
+"Diese Streitkräfte können in einer Schlacht sterben, an der Sie nicht "
+"beteiligt waren. Geschieht das, wird Ihnen gesagt, was Sie verloren haben, "
+"wen Sie verteidigt haben und wer ihn angegriffen hat; achten Sie also auf "
+"Ihren Bericht, nachdem ein Verbündeter überfallen wurde."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-intelligence-alliance.md:1
@@ -927,6 +1201,9 @@ msgid ""
 "to another realm can still be bombed, and so can goods you have listed on "
 "the trading market."
 msgstr ""
+"Die Wache deckt nur Geschäfte mit diesem Partner. Alles, was Sie zu einem "
+"anderen Reich unterwegs haben, kann weiterhin bombardiert werden, und ebenso "
+"Waren, die Sie auf dem Handelsmarkt gelistet haben."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-tariff-trade.md:1
@@ -976,6 +1253,12 @@ msgid ""
 "however advanced its partner is — buy the regions first, then find an ally "
 "who has done the same."
 msgstr ""
+"Die Hilfe, die es Ihnen bringt, ist durch denjenigen von Ihnen beiden "
+"begrenzt, der weniger Technologie-Regionen hält; es beschleunigt also "
+"Arbeit, die Sie ohnehin leisten, statt sie zu ersetzen. Ein Reich ohne "
+"eigene Technologie gewinnt durch den Pakt nichts, wie fortgeschritten sein "
+"Partner auch sei - kaufen Sie erst die Regionen und suchen Sie dann einen "
+"Verbündeten, der dasselbe getan hat."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-terrorist-prevention.md:1
@@ -1032,6 +1315,9 @@ msgid ""
 "Deposits and withdrawals have no size limit. One investment locks away at "
 "most two billion gold, though you may open as many as you like."
 msgstr ""
+"Einzahlungen und Abhebungen haben keine Betragsgrenze. Eine Anlage bindet "
+"höchstens zwei Milliarden Gold, Sie dürfen aber so viele eröffnen, wie Sie "
+"wollen."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:25
@@ -1042,6 +1328,12 @@ msgid ""
 "turn earns interest this turn. It goes in after the pirates have had their "
 "chance at it, so it is no protection against a raid."
 msgstr ""
+"Zinsen werden am Ende jedes Zuges auf das gezahlt, was in diesem Augenblick "
+"auf der Bank liegt. Wenn Sie Gold am Zugende einzahlen in den Einstellungen "
+"eingeschaltet haben, wird Ihr Gold zuerst zur Bank gebracht, so dass das in "
+"diesem Zug verdiente Gold in diesem Zug Zinsen bringt. Es geht erst hinein, "
+"nachdem die Piraten ihre Gelegenheit daran hatten, es ist also kein Schutz "
+"vor einem Überfall."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:28
@@ -1049,6 +1341,8 @@ msgid ""
 "The start of your next turn tells you what the bank paid: the interest, and "
 "what any investment that matured today paid back."
 msgstr ""
+"Der Beginn Ihres nächsten Zuges sagt Ihnen, was die Bank gezahlt hat: die "
+"Zinsen und das, was eine heute fällig gewordene Anlage zurückgezahlt hat."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:31
@@ -1056,6 +1350,9 @@ msgid ""
 "You can hold at most two billion gold, in hand and the same again in the "
 "bank.  Gold you earn above that is lost. Spend it before you get there."
 msgstr ""
+"Sie können höchstens zwei Milliarden Gold halten, in der Hand, und noch "
+"einmal so viel auf der Bank.  Gold, das Sie darüber hinaus verdienen, ist "
+"verloren. Geben Sie es aus, bevor Sie dorthin kommen."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:34
@@ -1063,6 +1360,8 @@ msgid ""
 "A full bank still pays its interest, into your gold in hand rather than the "
 "bank. Once both are full, it goes nowhere."
 msgstr ""
+"Eine volle Bank zahlt weiterhin ihre Zinsen, und zwar in Ihr Gold in der "
+"Hand statt auf die Bank. Sind beide voll, verfallen sie."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:37
@@ -1070,12 +1369,14 @@ msgid ""
 "The game tells you when gold is lost this way. Your event log names the "
 "amount and where it came from."
 msgstr ""
+"Das Spiel teilt Ihnen mit, wenn Gold auf diese Weise verloren geht. Ihr "
+"Ereignisprotokoll nennt den Betrag und woher er kam."
 
 #. type: Title ##
 #: internal/help/content/economy/banking.md:38
 #, no-wrap
 msgid "Cash Relief / Loans"
-msgstr ""
+msgstr "Beihilfe / Kredite"
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:44
@@ -1086,6 +1387,12 @@ msgid ""
 "The bank tells you the rate and the most it will lend you, then you choose "
 "how much to take."
 msgstr ""
+"Wenn Sie borgen, wählen Sie zuerst, wie viele Tage Sie zur Rückzahlung haben "
+"(1 bis 10).  Eine längere Laufzeit hat einen höheren Tageszins, und die "
+"Zinsen wachsen jeden Tag weiter auf (sie werden mitverzinst), ein langer "
+"Kredit kostet insgesamt also viel mehr. Die Bank nennt Ihnen den Satz und "
+"den Höchstbetrag, den sie Ihnen leiht, und dann wählen Sie, wie viel Sie "
+"nehmen."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:49
@@ -1095,6 +1402,11 @@ msgid ""
 "becomes a debt with an extra penalty added, and your people lose some "
 "support. Debt keeps growing each turn until you repay it, so clear it early."
 msgstr ""
+"Sie müssen den vollen Betrag am Fälligkeitstag zurückzahlen. Die Bank nimmt "
+"ihn zuerst aus Ihrem Gold, dann aus Ihren Ersparnissen. Können Sie nicht "
+"alles zahlen, wird der Rest zu einer Schuld, auf die ein Strafaufschlag "
+"kommt, und Ihr Volk verliert etwas Rückhalt. Schulden wachsen jeden Zug "
+"weiter, bis Sie sie tilgen; räumen Sie sie also früh aus."
 
 #. type: Title ##
 #: internal/help/content/economy/banking.md:50
@@ -1147,6 +1459,11 @@ msgid ""
 "Preferences and you skip all of it on any turn you can cover the two bills; "
 "on a turn you cannot, the market opens anyway."
 msgstr ""
+"Der Markt öffnet sich an dieser Stelle Ihres Zuges von selbst, und beide "
+"Rechnungen werden Ihnen vorgelegt, ob Sie genug im Vorrat haben oder nicht. "
+"Schalten Sie Reich autom. versorgen in den Einstellungen ein, und Sie "
+"überspringen all das in jedem Zug, in dem Sie die beiden Rechnungen decken "
+"können; in einem Zug, in dem Sie es nicht können, öffnet der Markt trotzdem."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:22
@@ -1164,6 +1481,9 @@ msgid ""
 "planet that day, and it stays the same until the next day. Buy on a cheap "
 "day if you can."
 msgstr ""
+"Der Preis ändert sich täglich ein wenig. Er ist an diesem Tag für jeden auf "
+"dem Planeten gleich, und er bleibt bis zum nächsten Tag gleich. Kaufen Sie "
+"an einem billigen Tag, wenn Sie können."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:31
@@ -1173,6 +1493,11 @@ msgid ""
 "are holding more than a thousand units. Above that the whole store loses a "
 "share, so the more you hoard the more you lose."
 msgstr ""
+"Jeden Zug isst zuerst Ihr Volk, dann Ihr Heer, und dann verdirbt ein Teil "
+"der Nahrung, die noch im Vorrat liegt. Ein kleiner Vorrat ist sicher: Nichts "
+"verdirbt, solange Sie nicht mehr als tausend Einheiten halten. Darüber "
+"verliert der ganze Vorrat einen Anteil, je mehr Sie also horten, desto mehr "
+"verlieren Sie."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:38
@@ -1184,6 +1509,13 @@ msgid ""
 "falls into civil war. A civil war halves your Support and destroys a share "
 "of your land and of every kind of unit you own, listed ones included."
 msgstr ""
+"Knappheit wird doppelt berechnet, denn die beiden Bedürfnisse werden "
+"getrennt gezählt. Was Ihrem Volk fehlt, kostet Rückhalt, und was Ihrem Heer "
+"fehlt, kostet Kampfmoral. Niemand verlässt Ihr Reich deswegen - aber wenn "
+"Ihr Volk unter etwa zwei Drittel dessen bekommt, was es braucht, fällt das "
+"Reich in einen Bürgerkrieg. Ein Bürgerkrieg halbiert Ihren Rückhalt und "
+"zerstört einen Teil Ihres Landes und jeder Art von Einheit, die Sie "
+"besitzen, die gelisteten eingeschlossen."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:43
@@ -1194,13 +1526,18 @@ msgid ""
 "spoils too, so listing it is not a way to store it. A high technology level "
 "slows spoilage."
 msgstr ""
+"Die Ernte dieses Zuges trifft zu Beginn des Zuges ein, Sie können sie also "
+"im selben Zug verkaufen. Ihren Überschuss jeden Zug abzuverkaufen, statt ihn "
+"zu horten, ist der Weg, nichts an Verderb zu verlieren. Nahrung, die Sie auf "
+"dem Handelsmarkt gelistet haben, verdirbt ebenfalls, das Listen ist also "
+"kein Weg, sie zu lagern. Ein hoher Technologiestand verlangsamt den Verderb."
 
 #. type: Title #
 #: internal/help/content/economy/morale-and-support.md:1
 #: internal/help/content/economy/morale-and-support.md:8
 #, no-wrap
 msgid "Morale and Support"
-msgstr ""
+msgstr "Moral und Rückhalt"
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:12
@@ -1209,6 +1546,8 @@ msgid ""
 "what your people think of you. Military Morale is what your army thinks of "
 "you."
 msgstr ""
+"Ihr Reich hat zwei Stimmungen, jede eine Zahl von 0 bis 100. Rückhalt ist, "
+"was Ihr Volk von Ihnen hält. Kampfmoral ist, was Ihr Heer von Ihnen hält."
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:16
@@ -1217,6 +1556,9 @@ msgid ""
 "free.  They fall when you go short, and the only way back up is to pay for "
 "it at the maintenance stage each turn."
 msgstr ""
+"Beide beginnen bei 100, wenn Sie Ihr Reich gründen. Nichts hebt sie jemals "
+"umsonst.  Sie fallen, wenn Sie knapp werden, und der einzige Weg zurück nach "
+"oben führt darüber, in der Unterhaltsstufe jedes Zuges dafür zu bezahlen."
 
 #. type: Title ##
 #: internal/help/content/economy/morale-and-support.md:17
@@ -1227,22 +1569,24 @@ msgstr "Was sie tun"
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:20
 msgid "Popular Support:"
-msgstr ""
+msgstr "Rückhalt:"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:24
 msgid "sets your Coastal (tourism) income, which collapses when Support is low"
 msgstr ""
+"bestimmt Ihr Küsteneinkommen (Tourismus), das bei niedrigem Rückhalt "
+"zusammenbricht"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:24
 msgid "sets how many people your land can hold"
-msgstr ""
+msgstr "bestimmt, wie viele Menschen Ihr Land fassen kann"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:24
 msgid "when it drops under 10, it starts pulling Morale down with it"
-msgstr ""
+msgstr "zieht die Moral mit hinab, sobald er unter 10 fällt"
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:32
@@ -1255,6 +1599,14 @@ msgid ""
 "your armed forces' upkeep deserts turrets too, along with troopers, jets and "
 "tanks, whatever Morale reads."
 msgstr ""
+"Die Kampfmoral bestimmt, wie hart Ihr Heer kämpft, im Angriff wie in der "
+"Verteidigung.  Ein Heer bei voller Moral kämpft über seiner rechnerischen "
+"Stärke. Ein gebrochenes kämpft mit etwa der Hälfte. Fällt die Moral unter "
+"40, beginnen Soldaten, Jets und Panzer jeden Zug zu desertieren, und je "
+"tiefer sie fällt, desto mehr gehen. Bomber, Träger und Geschütztürme "
+"desertieren nie wegen der Moral - aber wer den Unterhalt seiner Streitkräfte "
+"zu knapp bezahlt, verliert auch Geschütztürme durch Fahnenflucht, zusammen "
+"mit Soldaten, Jets und Panzern, was die Moral auch anzeigen mag."
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:36
@@ -1264,12 +1616,16 @@ msgid ""
 "slip and you are back to answering the maintenance prompts by hand every "
 "turn."
 msgstr ""
+"Es gibt noch eine Wirkung, die leicht zu übersehen ist. Unterhalt "
+"automatisch zahlen zahlt Ihre Rechnungen nur so lange stillschweigend, wie "
+"**beide** Zahlen genau 100 anzeigen. Lassen Sie eine davon rutschen, und Sie "
+"beantworten die Unterhaltsfragen jeden Zug wieder von Hand."
 
 #. type: Title ##
 #: internal/help/content/economy/morale-and-support.md:37
 #, no-wrap
 msgid "What lowers them"
-msgstr ""
+msgstr "Was sie senkt"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
@@ -1278,11 +1634,15 @@ msgid ""
 "the Queen's tax, or your people's food costs Support. Underfeeding the army "
 "costs Morale."
 msgstr ""
+"Wer seine Streitkräfte zu knapp bezahlt, kostet sich Moral. Wer den "
+"Unterhalt seines Landes, die Steuer der Königin oder die Nahrung seines "
+"Volkes zu knapp bezahlt, kostet sich Rückhalt. Wer das Heer zu knapp "
+"verpflegt, kostet sich Moral."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
 msgid "A riot from high taxes costs Support."
-msgstr ""
+msgstr "Ein Aufruhr wegen hoher Steuern kostet Rückhalt."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
@@ -1291,6 +1651,10 @@ msgid ""
 "Attacking that ruler without declaring war first ends the agreement too, and "
 "costs you a quarter of each."
 msgstr ""
+"Einem Herrscher, mit dem Sie ein Abkommen halten, den Krieg zu erklären, "
+"kostet Sie nichts. Diesen Herrscher anzugreifen, ohne zuvor den Krieg zu "
+"erklären, beendet das Abkommen ebenfalls und kostet Sie ein Viertel von "
+"beidem."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
@@ -1298,6 +1662,8 @@ msgid ""
 "A chemical or biological strike on your realm hurts both. The plague is far "
 "worse for your army than the gas is."
 msgstr ""
+"Ein chemischer oder biologischer Schlag auf Ihr Reich schadet beidem. Die "
+"Seuche ist für Ihr Heer weit schlimmer als das Gas."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
@@ -1305,12 +1671,14 @@ msgid ""
 "Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
 "Forces."
 msgstr ""
+"Feindliche Agenten können jedes von beiden unmittelbar senken. Siehe "
+"Aufstände schüren und Truppen demoralisieren."
 
 #. type: Title ##
 #: internal/help/content/economy/morale-and-support.md:51
 #, no-wrap
 msgid "Paying them back"
-msgstr ""
+msgstr "Sie zurückkaufen"
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:57
@@ -1321,6 +1689,11 @@ msgid ""
 "bombers and carriers nothing. Units you have listed on the Trading Market "
 "still count."
 msgstr ""
+"In der Unterhaltsstufe verlangt die Krone Gold, um bis zu fünfzehn Punkte "
+"von jedem zurückzukaufen. Der Rückhalt wird nach der Größe Ihrer Bevölkerung "
+"berechnet, die Moral nach der Größe Ihres Heeres - Soldaten, Geschütztürme "
+"und Panzer kosten am meisten, Jets am wenigsten, Bomber und Träger nichts. "
+"Einheiten, die Sie auf dem Handelsmarkt gelistet haben, zählen weiterhin mit."
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:61
@@ -1330,18 +1703,23 @@ msgid ""
 "that really does buy more than fifteen points. Neither number can pass 100, "
 "so overpaying a nearly-content realm wastes the difference."
 msgstr ""
+"Was Sie zahlen, kauft Punkte im Verhältnis, die Hälfte der Forderung zu "
+"zahlen kauft also etwa die Hälfte der Punkte. Sie dürfen bis zum "
+"Anderthalbfachen des Geforderten zahlen, und das kauft tatsächlich mehr als "
+"fünfzehn Punkte. Keine der beiden Zahlen kann 100 überschreiten, ein nahezu "
+"zufriedenes Reich zu überzahlen verschwendet also die Differenz."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
 #: internal/help/content/economy/net-worth.md:8
 #, no-wrap
 msgid "Net Worth"
-msgstr "Nettowert"
+msgstr "Vermögen"
 
 #. type: Plain text
 #: internal/help/content/economy/net-worth.md:11
 msgid "Net Worth is your overall score. It ranks every empire (see Scores)."
-msgstr "Nettowert"
+msgstr "Vermögen"
 
 #. type: Plain text
 #: internal/help/content/economy/net-worth.md:15
@@ -1361,7 +1739,7 @@ msgstr ""
 #: internal/help/content/economy/population.md:8
 #, no-wrap
 msgid "Population"
-msgstr ""
+msgstr "Bevölkerung"
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:13
@@ -1370,11 +1748,14 @@ msgid ""
 "managing directly. Each turn some move in or move out, until the realm "
 "settles at the number it can support."
 msgstr ""
+"Ihr Volk zahlt Ihre Steuern, wie viele Sie halten, gehört also zu dem, was "
+"sich unmittelbar zu steuern lohnt. Jeden Zug ziehen einige zu oder fort, bis "
+"sich das Reich bei der Zahl einpendelt, die es tragen kann."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:15
 msgid "Three things set that number:"
-msgstr ""
+msgstr "Drei Dinge bestimmen diese Zahl:"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/population.md:24
@@ -1384,12 +1765,17 @@ msgid ""
 "and Industrial zones come next; Desert holds the fewest. Raw land does "
 "nothing on its own; it is the kind of region that counts."
 msgstr ""
+"**Was Ihr Land ist.** Stadtregionen beherbergen weit mehr Menschen als jeder "
+"andere Typ - mehr als das Zehnfache dessen, was eine Küsten- oder "
+"Gebirgsregion fasst. Flüsse und Industriegebiete kommen als Nächstes; die "
+"Wüste fasst am wenigsten. Rohes Land tut für sich genommen nichts; es ist "
+"die Art der Region, die zählt."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/population.md:24
 msgid ""
 "**Popular Support.** The higher it stands, the more people your land holds."
-msgstr ""
+msgstr "**Rückhalt.** Je höher er steht, desto mehr Menschen fasst Ihr Land."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/population.md:24
@@ -1398,6 +1784,9 @@ msgid ""
 "one drives the number down sharply, and past 50% people keep leaving on top "
 "of that."
 msgstr ""
+"**Ihr Steuersatz.** Ein niedriger Satz lässt Ihr Reich weit mehr Menschen "
+"halten. Ein hoher drückt die Zahl scharf hinab, und über 50% gehen darüber "
+"hinaus laufend Menschen fort."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:27
@@ -1405,6 +1794,9 @@ msgid ""
 "Support and taxes multiply together, so a realm with poor support and heavy "
 "taxes holds a small fraction of what its land could otherwise carry."
 msgstr ""
+"Rückhalt und Steuern wirken miteinander multiplikativ, ein Reich mit "
+"schwachem Rückhalt und schweren Steuern hält also einen kleinen Bruchteil "
+"dessen, was sein Land sonst tragen könnte."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:32
@@ -1414,6 +1806,11 @@ msgid ""
 "A realm can grow by at most half its size in one turn. When people are "
 "leaving, they leave faster the harder you tax."
 msgstr ""
+"Die Bewegung je Zug ist ein Anteil des Abstands, nicht Ihrer Bevölkerung, "
+"ein Reich weit unter seiner Grenze füllt sich also rasch, während eines, das "
+"ihr schon nahe ist, sich kaum ändert. Ein Reich kann in einem Zug höchstens "
+"um die Hälfte seiner Größe wachsen. Wenn Menschen fortgehen, gehen sie umso "
+"schneller, je härter Sie besteuern."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:35
@@ -1421,6 +1818,8 @@ msgid ""
 "Selling Urban land lowers what your realm can hold, and the people then "
 "drain away over the following turns rather than all at once."
 msgstr ""
+"Stadtland zu verkaufen senkt, was Ihr Reich fassen kann, und die Menschen "
+"sickern dann über die folgenden Züge ab statt auf einmal."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:37
@@ -1428,6 +1827,8 @@ msgid ""
 "Tip: population growth outruns food if you buy Urban regions and no farms. "
 "Your civilian advisor warns you before that wall arrives."
 msgstr ""
+"Tipp: Das Bevölkerungswachstum überholt die Nahrung, wenn Sie Stadtregionen "
+"und keine Farmen kaufen. Ihr Zivilberater warnt Sie, bevor diese Wand kommt."
 
 #. type: Title #
 #: internal/help/content/economy/taxes.md:1
@@ -1475,12 +1876,19 @@ msgid ""
 "shrinking loses people quicker the harder it taxes. Support works the same "
 "way: the higher it stands, the more people your land can hold."
 msgstr ""
+"Steuern entscheiden auch, wie viele Menschen Ihr Reich fassen kann. Ein "
+"niedriger Satz lässt es weit mehr fassen, ein hoher weit weniger, und "
+"jenseits eines strafenden Satzes gehen Menschen noch schneller fort - die "
+"Schwelle steht im Thema Bevölkerung. Ein Reich, das ohnehin schrumpft, "
+"verliert umso schneller Menschen, je härter es besteuert. Mit dem Rückhalt "
+"verhält es sich ebenso: Je höher er steht, desto mehr Menschen fasst Ihr "
+"Land."
 
 #. type: Title ##
 #: internal/help/content/economy/taxes.md:26
 #, no-wrap
 msgid "The Queen Royale's tax"
-msgstr ""
+msgstr "Die Steuer der Queen Royale"
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:30
@@ -1488,6 +1896,9 @@ msgid ""
 "The Queen takes a share of what you earn each turn. You may pay her less "
 "than she asks, but a short payment costs Popular Support."
 msgstr ""
+"Die Königin nimmt jeden Zug einen Anteil dessen, was Sie verdienen. Sie "
+"dürfen ihr weniger zahlen, als sie verlangt, aber eine gekürzte Zahlung "
+"kostet Rückhalt."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:35
@@ -1497,6 +1908,10 @@ msgid ""
 "or 7% once it holds more than 100 million gold. A realm still under New "
 "Realm Protection gets at most 1 million."
 msgstr ""
+"Jede Münze, die sie einzieht, geht in ihre Truhe, und einen Teil davon gibt "
+"sie zurück. Sie zahlt Ihnen beim ersten Spielen jedes Tages: 2% der Truhe, "
+"oder 7%, sobald darin mehr als 100 Millionen Gold liegen. Ein Reich, das "
+"noch unter dem Schutz für neue Reiche steht, erhält höchstens 1 Million."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:38
@@ -1504,12 +1919,15 @@ msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
 "first to play on a given day takes the largest share, so play early."
 msgstr ""
+"Alle Barone schöpfen aus derselben Truhe, und jede Rückzahlung leert sie ein "
+"wenig. Wer an einem Tag zuerst spielt, nimmt den größten Anteil; spielen Sie "
+"also früh."
 
 #. type: Title ##
 #: internal/help/content/economy/taxes.md:39
 #, no-wrap
 msgid "The lottery"
-msgstr ""
+msgstr "Die Lotterie"
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:45
@@ -1520,6 +1938,11 @@ msgid ""
 "ticket at all.  Either way the day's offer is spent: there is no asking "
 "again later."
 msgstr ""
+"Einmal am Tag, während sie Ihre Rückzahlung aushändigt, bietet die Königin "
+"ein Lotterielos an.  Es kostet 5.000 Gold, abgezogen, sobald Sie ja sagen - "
+"sie erwähnt den Preis nicht, und einem Baron, der weniger als das in der "
+"Hand hat, wird überhaupt kein Los angeboten.  So oder so ist das Angebot des "
+"Tages verbraucht: Später noch einmal zu fragen, gibt es nicht."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:50
@@ -1529,36 +1952,41 @@ msgid ""
 "of the drawn letters your ticket covers, not where they sit, and each letter "
 "on your ticket can only be spent once."
 msgstr ""
+"Wählen Sie sechs Buchstaben, je einen Tastendruck, und drücken Sie Eingabe "
+"für jeden, den Sie lieber dem Zufall überlassen. Danach werden sechs "
+"Buchstaben gezogen. Es zählt, wie viele der gezogenen Buchstaben Ihr Los "
+"abdeckt, nicht wo sie stehen, und jeder Buchstabe auf Ihrem Los kann nur "
+"einmal angerechnet werden."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "1 letter: 2,500 gold"
-msgstr ""
+msgstr "1 Buchstabe: 2.500 Gold"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "2 letters: 10,000"
-msgstr ""
+msgstr "2 Buchstaben: 10.000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "3 letters: 500,000"
-msgstr ""
+msgstr "3 Buchstaben: 500.000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "4 letters: 1,000,000"
-msgstr ""
+msgstr "4 Buchstaben: 1.000.000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "5 letters: 4,000,000"
-msgstr ""
+msgstr "5 Buchstaben: 4.000.000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "6 letters: 10,000,000"
-msgstr ""
+msgstr "6 Buchstaben: 10.000.000"
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:61
@@ -1568,6 +1996,10 @@ msgid ""
 "by losing. Your sysop can switch the lottery off, so a board that never "
 "offers you one is not broken."
 msgstr ""
+"Gewinne gehen auf Ihre Bank. Ein Treffer lässt Sie auf dem Los immer noch "
+"2.500 im Minus, und die meisten Lose treffen nichts - die Königin hat ihre "
+"Truhe nicht durch Verlieren gefüllt. Ihr Sysop kann die Lotterie abschalten, "
+"ein Board, das Ihnen nie eines anbietet, ist also nicht kaputt."
 
 #. type: Title #
 #: internal/help/content/economy/trading.md:1
@@ -1582,6 +2014,8 @@ msgid ""
 "There are two ways to move goods between realms: the Trading Market, and a "
 "trade deal."
 msgstr ""
+"Es gibt zwei Wege, Waren zwischen Reichen zu bewegen: den Handelsmarkt und "
+"ein Handelsgeschäft."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:13
@@ -1596,6 +2030,9 @@ msgid ""
 "market is open: any realm on your planet can see what is listed and buy it, "
 "and you can buy from any of them."
 msgstr ""
+"Sie können jede Ihrer Waren auf den Markt stellen und Ihren eigenen Preis "
+"festlegen. Der Markt ist offen: Jedes Reich auf Ihrem Planeten sieht, was "
+"gelistet ist, und kann es kaufen, und Sie können von jedem von ihnen kaufen."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:22
@@ -1604,12 +2041,16 @@ msgid ""
 "you are paid when someone buys them. You still pay upkeep on them while they "
 "wait, and pirates can raid them, so do not list more than you mean to sell."
 msgstr ""
+"Waren, die Sie listen, verlassen sofort Ihre Hand. Sie werden für den Käufer "
+"verwahrt, und Sie werden bezahlt, wenn jemand sie kauft. Sie zahlen "
+"weiterhin Unterhalt auf sie, während sie warten, und Piraten können sie "
+"überfallen; listen Sie also nicht mehr, als Sie zu verkaufen gedenken."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:23
 #, no-wrap
 msgid "Trade deals"
-msgstr ""
+msgstr "Handelsgeschäfte"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:28
@@ -1618,6 +2059,10 @@ msgid ""
 "may ask for goods and gold in return. The other realm reads the offer and "
 "accepts or refuses it. You need a treaty with that realm to send one."
 msgstr ""
+"Ein Handelsgeschäft ist ein Angebot an ein einzelnes Reich. Sie legen Waren "
+"und Gold hinein und dürfen Waren und Gold dafür verlangen. Das andere Reich "
+"liest das Angebot und nimmt es an oder lehnt es ab. Sie brauchen einen "
+"Vertrag mit diesem Reich, um eines zu senden."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:34
@@ -1628,6 +2073,12 @@ msgid ""
 "or a hundred thousand gold, and food, bombers, agents and carriers take no "
 "room at all. A Protective Trade treaty with that realm makes the fee cheaper."
 msgstr ""
+"Ein Handelsgeschäft kostet eine Gebühr für jeden Tag, für den Sie es senden, "
+"und es braucht Träger, um die Waren zu bewegen. Wie viele, hängt davon ab, "
+"was Sie verschiffen: Ein Träger fasst tausend Soldaten oder Geschütztürme, "
+"hundert Jets, fünftausend Panzer oder hunderttausend Gold, und Nahrung, "
+"Bomber, Agenten und Träger brauchen überhaupt keinen Platz. Ein Vertrag über "
+"Geschützten Handel mit diesem Reich macht die Gebühr billiger."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:40
@@ -1638,12 +2089,19 @@ msgid ""
 "and a realm that falls before it replies all cost you the goods. Send to "
 "someone who is playing, and give them enough days to get to it."
 msgstr ""
+"Die Tage, für die Sie zahlen, sind die Zeit, die das Angebot steht. Was Sie "
+"in das Geschäft legen, verlässt Ihr Reich in dem Augenblick, in dem Sie es "
+"senden, und es kommt nur zurück, wenn das Angebot angenommen wird: eine "
+"Ablehnung, ein Geschäft, das niemand beantwortet, bevor seine Tage ablaufen, "
+"und ein Reich, das fällt, bevor es antwortet, kosten Sie allesamt die Waren. "
+"Senden Sie an jemanden, der spielt, und geben Sie ihm genug Tage, um dazu zu "
+"kommen."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:41
 #, no-wrap
 msgid "Deals to another planet"
-msgstr ""
+msgstr "Geschäfte zu einem anderen Planeten"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:46
@@ -1652,6 +2110,9 @@ msgid ""
 "on another planet. It works differently from the one above, so read this "
 "before you use it."
 msgstr ""
+"In einem Ligaspiel sendet das Menü Interplanetare Operationen ein Geschäft "
+"an ein Reich auf einem anderen Planeten. Es arbeitet anders als das oben "
+"beschriebene, lesen Sie dies also, bevor Sie es nutzen."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:50
@@ -1660,6 +2121,10 @@ msgid ""
 "send them to has no say: they arrive and are added to what that realm holds. "
 "There is no offer to accept or refuse, so nothing is ever returned to you."
 msgstr ""
+"Sie können nichts dafür verlangen. Die Waren sind ein Geschenk, und das "
+"Reich, dem Sie sie senden, hat kein Mitspracherecht: Sie treffen ein und "
+"werden dem hinzugefügt, was dieses Reich hält. Es gibt kein Angebot zum "
+"Annehmen oder Ablehnen, daher wird Ihnen nie etwas zurückgegeben."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:55
@@ -1670,17 +2135,25 @@ msgid ""
 "protection, and you cannot send to your own planet — for that, use the deal "
 "above."
 msgstr ""
+"Sie zahlen einmal, nicht je Tag, und Sie brauchen weder einen Vertrag mit "
+"dem Reich noch mit seinem Planeten.  Die Gebühr hängt davon ab, was in dem "
+"Geschäft liegt, und sie wird Ihnen vor der Bestätigung angezeigt. Sie können "
+"nicht an ein Reich senden, das noch unter dem Schutz für neue Reiche steht, "
+"und Sie können nicht an Ihren eigenen Planeten senden - nutzen Sie dafür das "
+"Geschäft von oben."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:56
 #, no-wrap
 msgid "Getting the most from trade"
-msgstr ""
+msgstr "Das Beste aus dem Handel herausholen"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:59
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
+"Der Handel zählt am meisten, wenn mehrere Reiche zusammenarbeiten. Ein paar "
+"Ideen:"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:64
@@ -1691,6 +2164,10 @@ msgid ""
 "tanks and a partner builds turrets, each of you can sell to the other below the\n"
 "price they would pay to build it themselves. Both realms come out ahead.\n"
 msgstr ""
+"**Spezialisieren Sie sich und beliefern Sie Ihre Partner.** Ihre Industrie kann\n"
+"einen Einheitentyp bevorzugen, was diese Einheit für Sie billiger macht als für\n"
+"alle anderen. Wenn Sie Panzer bauen und ein Partner Geschütztürme, kann jeder\n"
+"von Ihnen dem anderen unter dem Preis verkaufen, den der andere für den Eigenbau zahlen würde. Beide Reiche kommen besser weg.\n"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:68
@@ -1700,6 +2177,9 @@ msgid ""
 "a price meant as a gift to an ally may end up arming a rival. To be sure the\n"
 "goods reach the realm you mean them for, send a trade deal instead.\n"
 msgstr ""
+"**Ein billiges Angebot nimmt, wer zuerst da ist.** Jeder kann es kaufen, ein\n"
+"Preis, der als Geschenk an einen Verbündeten gedacht war, kann also am Ende\n"
+"einen Rivalen bewaffnen. Damit die Waren sicher das Reich erreichen, für das Sie sie bestimmt haben, senden Sie stattdessen ein Handelsgeschäft.\n"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:71
@@ -1709,13 +2189,16 @@ msgid ""
 "an ally's market is often the cheapest place to buy. See the Interplanetary\n"
 "Trading topic.\n"
 msgstr ""
+"**Zwischen Planeten ist der Handel größer.** In einer Liga spezialisieren sich\n"
+"ganze Planeten, und der Markt eines Verbündeten ist oft der billigste Ort zum\n"
+"Kaufen. Siehe das Thema Interplanetarer Handel.\n"
 
 #. type: Title #
 #: internal/help/content/interbbs/allied-markets.md:1
 #: internal/help/content/interbbs/allied-markets.md:8
 #, no-wrap
 msgid "Allied Markets"
-msgstr ""
+msgstr "Märkte der Verbündeten"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:12
@@ -1724,6 +2207,9 @@ msgid ""
 "Trading from the InterPlanetary Operations menu, then Markets, and choose a "
 "planet."
 msgstr ""
+"In einem Ligaspiel können Sie vom Handelsmarkt eines anderen Planeten "
+"kaufen. Öffnen Sie Handel im Menü Interplanetare Operationen, dann Märkte, "
+"und wählen Sie einen Planeten."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:15
@@ -1731,12 +2217,15 @@ msgid ""
 "Only planets your Coordinator has marked Allied are listed. Buying across "
 "planets is an Immortal Barons feature, and a league may switch it off."
 msgstr ""
+"Aufgeführt werden nur Planeten, die Ihr Koordinator als verbündet "
+"gekennzeichnet hat. Der Kauf über Planetengrenzen hinweg ist eine Eigenheit "
+"von Immortal Barons, und eine Liga kann ihn abschalten."
 
 #. type: Title ##
 #: internal/help/content/interbbs/allied-markets.md:16
 #, no-wrap
 msgid "Your order is a bid, not a purchase"
-msgstr ""
+msgstr "Ihre Bestellung ist ein Gebot, kein Kauf"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:22
@@ -1747,11 +2236,16 @@ msgid ""
 "arrives the goods may have been sold, the amount may have shrunk, or the "
 "price may have changed."
 msgstr ""
+"Was Sie sehen, ist der Markt jenes Planeten **so, wie er war, als wir "
+"zuletzt von ihm hörten**.  Der Bildschirm nennt Ihnen das Datum. Nachrichten "
+"reisen zwischen Planeten in Paketen, und ein Paket braucht, so lange es "
+"braucht; bis Ihre Bestellung eintrifft, können die Waren also verkauft, die "
+"Menge geschrumpft oder der Preis ein anderer sein."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:24
 msgid "So your order is a bid. When you send it:"
-msgstr ""
+msgstr "Ihre Bestellung ist also ein Gebot. Wenn Sie sie senden:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
@@ -1759,6 +2253,9 @@ msgid ""
 "Your gold is **held straight away**. It leaves your treasury but is not "
 "spent yet, and it is not counted as gold you have."
 msgstr ""
+"Ihr Gold wird **sofort einbehalten**. Es verlässt Ihre Schatzkammer, ist "
+"aber noch nicht ausgegeben, und es zählt nicht mehr zu dem Gold, das Sie "
+"besitzen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
@@ -1766,16 +2263,22 @@ msgid ""
 "When the bid arrives, the other planet sells to you **only if the goods are "
 "still there at the same price, and you are still allies**."
 msgstr ""
+"Wenn das Gebot eintrifft, verkauft Ihnen der andere Planet nur, **wenn die "
+"Ware noch da ist, der Preis derselbe ist und Sie noch verbündet sind**."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
 msgid "If it sells, the goods come back to you on the next packet."
 msgstr ""
+"Kommt der Verkauf zustande, trifft die Ware mit dem nächsten Paket bei Ihnen "
+"ein."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
 msgid "If it does not, your gold comes back instead, and you are told why."
 msgstr ""
+"Kommt er nicht zustande, kehrt stattdessen Ihr Gold zurück, und Sie erfahren "
+"den Grund."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:35
@@ -1784,12 +2287,15 @@ msgid ""
 "there was and the rest of your gold returns. You are never charged for goods "
 "that did not arrive."
 msgstr ""
+"Hat der Verkäufer noch einen Teil, aber nicht alles, worauf Sie geboten "
+"haben, erhalten Sie, was vorhanden war, und der Rest Ihres Goldes kommt "
+"zurück. Für Ware, die nie eintrifft, zahlen Sie nie."
 
 #. type: Title ##
 #: internal/help/content/interbbs/allied-markets.md:36
 #, no-wrap
 msgid "Waiting, and getting your gold back"
-msgstr ""
+msgstr "Warten, und das Gold zurückbekommen"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:41
@@ -1799,6 +2305,9 @@ msgid ""
 "gold is held against them. That gold is invisible everywhere else, so this is\n"
 "where to look when your treasury seems short.\n"
 msgstr ""
+"**Offene Gebote** im Handelsmenü listet jedes Gebot auf, das noch wartet, und\n"
+"wie viel Gold dafür zurückgelegt ist. Dieses Gold ist sonst nirgends sichtbar,\n"
+"hier schauen Sie also nach, wenn Ihre Schatzkammer knapp wirkt.\n"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:46
@@ -1808,12 +2317,17 @@ msgid ""
 "forces, and your gold is returned. If the answer turns up later than that, "
 "it is ignored rather than paid twice."
 msgstr ""
+"Geht ein Paket verloren, geht nichts verloren. Ein Gebot, das nie "
+"beantwortet wird, wird nach ebenso vielen Tagen aufgegeben, wie Ihr Sysop "
+"für verschollene Angriffstruppen eingestellt hat, und Ihr Gold kommt zurück. "
+"Trifft die Antwort später doch noch ein, wird sie verworfen, statt ein "
+"zweites Mal zu zahlen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/allied-markets.md:47
 #, no-wrap
 msgid "Two things worth knowing"
-msgstr ""
+msgstr "Zweierlei, das man wissen sollte"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:52
@@ -1822,6 +2336,9 @@ msgid ""
 "therefore stop selling to you before you have heard about it, and your bid "
 "will come back refused. That is not a fault."
 msgstr ""
+"Jeder Planet führt seine eigene Liste, mit wem er verbündet ist. Ein Planet "
+"kann Ihnen den Verkauf also aufkündigen, bevor Sie davon gehört haben, und "
+"Ihr Gebot kommt abgelehnt zurück. Das ist kein Fehler."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:54
@@ -1829,6 +2346,8 @@ msgid ""
 "Your sysop can turn this feature off for the whole league, in which case "
 "Trading does not appear on the InterPlanetary Operations menu."
 msgstr ""
+"Ihr Sysop kann diese Möglichkeit für die ganze Liga abschalten; dann "
+"erscheint Handel gar nicht erst im Menü Interplanetare Operationen."
 
 #. type: Title #
 #: internal/help/content/interbbs/attack-types.md:1
@@ -1844,6 +2363,10 @@ msgid ""
 "how to press the attack. Group attacks have no such choice — they always "
 "fight as a Normal Attack."
 msgstr ""
+"Wenn Sie Ihre eigene Streitmacht gegen einen Baron auf einem anderen "
+"Planeten führen, wählen Sie selbst, wie hart Sie zuschlagen. Bei einem "
+"Gruppenangriff gibt es diese Wahl nicht - er kämpft immer als Normaler "
+"Angriff."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:17
@@ -1852,6 +2375,9 @@ msgid ""
 "attack of the same weight would. What you give up is the whole-planet target "
 "and everyone else's forces."
 msgstr ""
+"Allein zu gehen zahlt sich auch besser aus: Ihr eigener Schlag nimmt doppelt "
+"so viel Land wie ein Gruppenangriff desselben Gewichts. Dafür verzichten Sie "
+"auf das planetenweite Ziel und auf die Truppen aller anderen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/attack-types.md:27
@@ -1860,6 +2386,9 @@ msgid ""
 "once they have taken 15% losses, and you take the standard share of the "
 "defender's regions."
 msgstr ""
+"**Normaler Angriff** - Ihre Truppen kämpfen mit voller Stärke. Beide Seiten "
+"brechen ab, sobald sie 15% Verluste erlitten haben, und Sie nehmen den "
+"üblichen Anteil an den Regionen des Verteidigers."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/attack-types.md:27
@@ -1868,6 +2397,10 @@ msgid ""
 "but the battle is short and disorganized: both sides retreat at 8% losses, "
 "and you carry off only half the land a Normal Attack would."
 msgstr ""
+"**Schneller Schlag** - die Überraschung lässt Sie mit 120% Ihrer normalen "
+"Stärke kämpfen, doch die Schlacht ist kurz und ungeordnet: Beide Seiten "
+"ziehen sich bei 8% Verlusten zurück, und Sie tragen nur halb so viel Land "
+"davon wie bei einer Normaler Angriff."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/attack-types.md:27
@@ -1876,6 +2409,10 @@ msgid ""
 "strength, but they press until both sides have taken 20% losses and bring "
 "home 125% of a Normal Attack's land."
 msgstr ""
+"**Ausgedehnte Schlacht** - ein zermürbender Sturm. Die Erschöpfung drückt "
+"Ihre Truppen auf 85% Stärke, doch sie halten durch, bis beide Seiten 20% "
+"Verluste erlitten haben, und bringen 125% des Landes einer Normaler Angriff "
+"heim."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:34
@@ -1887,6 +2424,13 @@ msgid ""
 "which makes it the honest answer when you are not sure you can win: you find "
 "out cheaply, and your army is still standing."
 msgstr ""
+"Die Wahl richtet sich danach, woran es Ihnen fehlt. Land ist das, was Sie "
+"nicht rasch zurückkaufen können, also ist die Ausgedehnte Schlacht "
+"diejenige, die die Karte verändert - leisten Sie sie sich, wenn Sie Männer "
+"übrig haben und es sich erlauben können, einen Tag lang schwach zu sein. Ein "
+"Schneller Schlag kostet Sie am wenigsten und schlägt über seinem Gewicht, "
+"was ihn zur ehrlichen Antwort macht, wenn Sie nicht sicher sind, ob Sie "
+"gewinnen: Sie finden es günstig heraus, und Ihre Armee steht noch."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:39
@@ -1896,12 +2440,17 @@ msgid ""
 "force lands, so the extra weight a Quick Strike carries is worth less than "
 "it looks against a target you cannot reach quickly."
 msgstr ""
+"Denken Sie daran, dass Ihre Stärke bei der Ankunft gemessen wird, nicht beim "
+"Abmarsch. Gegen einen fernen Planeten hat der Verteidiger Tage Zeit, "
+"Geschütztürme zu bauen, ehe Ihre Truppen landen; das Mehrgewicht eines "
+"Schneller Schlag ist gegen ein Ziel, das Sie nicht schnell erreichen, also "
+"weniger wert, als es aussieht."
 
 #. type: Title ##
 #: internal/help/content/interbbs/attack-types.md:40
 #, no-wrap
 msgid "While the force is away, and when it comes back"
-msgstr ""
+msgstr "Während die Truppe fort ist, und wenn sie zurückkommt"
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:46
@@ -1911,6 +2460,11 @@ msgid ""
 "barons can join it in the meantime, and the delay is how you time it to land "
 "before the target takes their next turn."
 msgstr ""
+"Ein Gruppenangriff bricht nicht in dem Augenblick auf, in dem Sie ihn "
+"anmelden. Sie setzen die Wartezeit in Stunden fest, zwischen 12 und 120, und "
+"bis dahin steht er auf der Rampe - andere Barone können sich in der "
+"Zwischenzeit anschließen, und über die Verzögerung legen Sie es so, dass er "
+"landet, bevor das Ziel seinen nächsten Zug nimmt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:51
@@ -1920,6 +2474,11 @@ msgid ""
 "columns before you commit: they are how you tell a party worth reinforcing "
 "from one that will not survive the trip."
 msgstr ""
+"Gruppenangriff beitreten listet jede Gruppe auf, die sich noch sammelt, mit "
+"den Soldaten, Jets, Panzern und Bombern, die schon zusammengelegt sind, und "
+"den verbleibenden Stunden. Lesen Sie diese Spalten, bevor Sie sich binden: "
+"An ihnen erkennen Sie eine Gruppe, die eine Verstärkung wert ist, von einer, "
+"die den Weg nicht überlebt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:57
@@ -1931,6 +2490,13 @@ msgid ""
 "found it still under New Realm Protection, is told so rather than counted as "
 "a defeat."
 msgstr ""
+"Ist eine Streitmacht erst einmal fort, ist sie Ihrer Hand und Ihrer Armee "
+"entzogen, bis das Board des anderen Planeten sie auswertet und die Antwort "
+"zurückreist. Dann erhalten Sie einen persönlichen Bericht: was Sie geschickt "
+"haben, was heimgekommen ist, was es zerstört hat, und ob es das Ziel "
+"überhaupt gefunden hat. Eine Streitmacht, die kein solches Reich fand oder "
+"es noch unter Neureich-Schutz antraf, erfährt das, statt als Niederlage zu "
+"gelten."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:62
@@ -1941,6 +2507,11 @@ msgid ""
 "shared between the barons who paid for them, in proportion to what each "
 "committed."
 msgstr ""
+"Land, das Sie in der Fremde erobern, hat keine Art, bis Sie ihm eine geben; "
+"es wartet also auf Sie, und zu Beginn Ihres nächsten Zuges erscheint die "
+"Regionenauswahl - dieselbe Frage, die ein Normaler Angriff daheim stellt. "
+"Bei einem Gruppenangriff werden die Regionen unter den Baronen aufgeteilt, "
+"die dafür bezahlt haben, im Verhältnis dessen, was jeder eingebracht hat."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:65
@@ -1950,6 +2521,10 @@ msgid ""
 "and a report that turns up after that is thrown away rather than paid out "
 "twice."
 msgstr ""
+"Trifft die Antwort nie ein - ein Board verstummt, ein Paket geht verloren -, "
+"kehren Ihre Truppen nach der von Ihrem Sysop eingestellten Zahl von Tagen "
+"von selbst heim, und ein Bericht, der danach noch auftaucht, wird verworfen, "
+"statt ein zweites Mal ausgezahlt zu werden."
 
 #. type: Title #
 #: internal/help/content/interbbs/leagues.md:1
@@ -1985,6 +2560,9 @@ msgid ""
 "whole take rather than sharing it, and you choose how to press the attack "
 "(see Attack Types)."
 msgstr ""
+"Einzelangriff - Ihr eigener Schlag gegen einen benannten Baron. Sie behalten "
+"die ganze Beute, statt sie zu teilen, und Sie wählen, wie hart Sie "
+"zuschlagen (siehe Angriffsarten)."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
@@ -2006,6 +2584,19 @@ msgid ""
 "planet's scores, there is no roster to pick from and the letter goes to "
 "everyone there."
 msgstr ""
+"Nachricht senden - an einen anderen Planeten schreiben. Nennen Sie den "
+"Planeten und wählen Sie dann, welche Barone dort den Brief lesen sollen, "
+"über dieselbe `Send to:`-Liste, die auch die Diplomatie- und "
+"Nachrichtenschirme hier benutzen: Ein Buchstabe markiert einen Baron, "
+"derselbe Buchstabe noch einmal nimmt ihn wieder heraus, `Z` markiert alle, `?"
+"` zeigt die Liste der Barone des Planeten, und die Eingabetaste öffnet den "
+"Editor. Die Eingabetaste ohne Markierung verlässt den Schirm, ohne zu "
+"senden. Die vier übrigen Punkte wenden sich an die ganze Liga, an Ihre "
+"verbündeten Planeten, an mehrere von Ihnen genannte Planeten oder allein an "
+"den Koordinator eines Planeten. Eine Antwort fragt, ob sie öffentlich ist: "
+"ja, und der ganze Planet des Absenders liest sie, nein, und nur der Baron, "
+"der sie geschrieben hat.  Hat Ihr Board die Punkte jenes Planeten noch nicht "
+"erhalten, gibt es keine Liste zum Auswählen, und der Brief geht an alle dort."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
@@ -2013,6 +2604,9 @@ msgid ""
 "Diplomacy List — where your board says it stands with each other planet. It "
 "binds nobody, but it is your Coordinator telling you who to watch."
 msgstr ""
+"Diplomatieliste - hier sagt Ihr Board, wie es zu jedem anderen Planeten "
+"steht. Es bindet niemanden, aber es ist Ihr Koordinator, der Ihnen sagt, wen "
+"Sie im Auge behalten sollten."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
@@ -2022,6 +2616,11 @@ msgid ""
 "so check it before you aim anything: against a planet three days away, you "
 "are committing forces you will not hear about until the weekend."
 msgstr ""
+"Reisezeiten - wie lange eine Nachricht oder ein Schlag wirklich bis zu jedem "
+"Planeten braucht und wie lange die Antwort zurück. Boards tauschen Post nach "
+"dem Zeitplan ihrer Sysops aus, sehen Sie also nach, bevor Sie zielen: Gegen "
+"einen Planeten, der drei Tage entfernt ist, binden Sie Truppen, von denen "
+"Sie erst am Wochenende wieder hören."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:45
@@ -2034,12 +2633,21 @@ msgid ""
 "your messages, the scores and the terrorist ops stay open, and once you have "
 "started a turn the whole menu is open for the rest of your visit."
 msgstr ""
+"Fünf dieser Punkte bleiben verschlossen, bis Sie bei diesem Besuch einen Zug "
+"gespielt haben: Handelsangebot senden, Gruppenangriff erstellen, "
+"Gruppenangriff beitreten, Einzelangriff und Spezialoperationen. Alles, was "
+"Truppen oder Waren bewegt, kostet Sie zuerst einen Zug - Gruppenangriff "
+"beitreten lässt Sie sehen, wer sich gerade sammelt, bevor es diesen Zug "
+"verlangt, damit Sie entscheiden können, ob sich ein eigener lohnt. Die Bank, "
+"Ihre Nachrichten, die Punkte und die Terroroperationen bleiben offen, und "
+"sobald Sie einen Zug begonnen haben, steht das ganze Menü für den Rest Ihres "
+"Besuchs offen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/leagues.md:46
 #, no-wrap
 msgid "Your BBS Coordinator"
-msgstr ""
+msgstr "Ihr BBS-Koordinator"
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:54
@@ -2051,6 +2659,12 @@ msgid ""
 "included, and you may change your mind whenever you like — the office goes "
 "to whoever holds the most votes at the time."
 msgstr ""
+"Die Barone Ihres eigenen Boards wählen einen aus ihrer Mitte zum "
+"Koordinator, und der Koordinator spricht für das Board: Er legt fest, wie es "
+"zu jedem anderen Planeten steht, und er allein kann eine Weltuntergangswaffe "
+"abblasen. Gewählt wird im Systemmenü, unter Koordinatorwahl. Jedes lebende "
+"Reich ist wählbar, Sie selbst eingeschlossen, und Sie dürfen Ihre Stimme "
+"jederzeit ändern - das Amt fällt dem zu, der gerade die meisten Stimmen hält."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:58
@@ -2059,6 +2673,9 @@ msgid ""
 "the item is not on the menu until that ends — though the notice below will "
 "already be naming your vote."
 msgstr ""
+"Solange Ihr Reich noch unter Neureich-Schutz steht, können Sie nicht wählen, "
+"und der Punkt erscheint erst danach im Menü - obwohl der Hinweis darunter "
+"Ihre Stimme bereits nennt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:61
@@ -2066,6 +2683,8 @@ msgid ""
 "Every turn opens by telling you whether you hold the office or who your vote "
 "is currently for, so you never have to go looking."
 msgstr ""
+"Jeder Zug beginnt damit, dass Ihnen gesagt wird, ob Sie das Amt innehaben "
+"oder wem Ihre Stimme derzeit gilt; Sie müssen also nie danach suchen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:64
@@ -2090,7 +2709,7 @@ msgstr ""
 #: internal/help/content/interbbs/planetary-diplomacy.md:8
 #, no-wrap
 msgid "Planetary Diplomacy"
-msgstr ""
+msgstr "Planetare Diplomatie"
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:15
@@ -2101,6 +2720,11 @@ msgid ""
 "the mark for a planet whenever you name one, on the line that reads \"Our "
 "current relations with...\"."
 msgstr ""
+"Ihr Board führt eine kurze Liste darüber, wie es zu jedem der anderen "
+"Planeten steht. Jeder ist als **Enemy**, **None**, **Peace** oder **Allied** "
+"vermerkt. Öffnen Sie sie aus dem Menü Interplanetare Operationen mit "
+"**Diplomatieliste**. Den Vermerk zu einem Planeten sehen Sie auch, sobald "
+"Sie einen nennen, auf der Zeile \\\"Unsere derzeitigen Beziehungen zu...\\\"."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:18
@@ -2108,12 +2732,14 @@ msgid ""
 "Only your board's Coordinator can change the list. It is on the Coordinator "
 "Menu, under Diplomacy Modification."
 msgstr ""
+"Nur der Koordinator Ihres Boards kann die Liste ändern. Sie liegt im "
+"Koordinatormenü, unter Diplomatieänderung."
 
 #. type: Title ##
 #: internal/help/content/interbbs/planetary-diplomacy.md:19
 #, no-wrap
 msgid "What it does and does not do"
-msgstr ""
+msgstr "Was sie bewirkt und was nicht"
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:23
@@ -2121,6 +2747,9 @@ msgid ""
 "The list is a note from your Coordinator to the barons on your own board. It "
 "tells you what your board thinks of a planet. Mostly it only describes:"
 msgstr ""
+"Die Liste ist eine Notiz Ihres Koordinators an die Barone Ihres eigenen "
+"Boards. Sie sagt Ihnen, was Ihr Board von einem Planeten hält. Meist "
+"beschreibt sie nur:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:28
@@ -2128,6 +2757,9 @@ msgid ""
 "It does not stop an attack. You can still attack a planet marked Allied, and "
 "a planet marked Enemy can still attack you."
 msgstr ""
+"Sie hält keinen Angriff auf. Sie können einen als Allied vermerkten Planeten "
+"trotzdem angreifen, und ein als Enemy vermerkter Planet kann Sie trotzdem "
+"angreifen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:28
@@ -2135,11 +2767,13 @@ msgid ""
 "The other planets never see it. They keep their own list, and it may say "
 "something quite different about you."
 msgstr ""
+"Die anderen Planeten sehen sie nie. Sie führen ihre eigene Liste, und die "
+"mag etwas ganz anderes über Sie sagen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:30
 msgid "Two things do use it:"
-msgstr ""
+msgstr "Zweierlei nutzt sie tatsächlich:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:37
@@ -2150,6 +2784,12 @@ msgid ""
 "fill it. If an alliance ends while your bid is travelling, your gold comes "
 "back."
 msgstr ""
+"**Handel.** Auf dem Markt eines anderen Planeten dürfen Sie nur kaufen, "
+"solange Ihr Board diesen Planeten als **Allied** vermerkt. Beide Boards "
+"müssen sich einig sein: Ihres muss deren Planeten Allied nennen, damit Ihr "
+"Gebot losgeht, und deren Board muss Ihren Allied nennen, damit es erfüllt "
+"wird. Endet das Bündnis, während Ihr Gebot unterwegs ist, kommt Ihr Gold "
+"zurück."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:37
@@ -2157,6 +2797,8 @@ msgid ""
 "**Messages.** Writing to **Allied Planets** from the IP Messages menu sends "
 "to every planet the list marks Allied."
 msgstr ""
+"**Nachrichten.** Wer aus dem Menü IP-Nachrichten an **Verbündete Planeten** "
+"schreibt, sendet an jeden Planeten, den die Liste als Allied führt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:39
@@ -2164,12 +2806,14 @@ msgid ""
 "So ask your Coordinator to mark a planet Allied before you plan to trade "
 "there."
 msgstr ""
+"Bitten Sie Ihren Koordinator also, einen Planeten als Allied zu vermerken, "
+"bevor Sie dort handeln wollen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/planetary-diplomacy.md:40
 #, no-wrap
 msgid "Using it"
-msgstr ""
+msgstr "Die Liste nutzen"
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:46
@@ -2179,6 +2823,11 @@ msgid ""
 "strike on your own board, a message that went badly. It is the cheapest "
 "warning you will get."
 msgstr ""
+"Lesen Sie die Liste, bevor Sie Truppen binden. Ihr Koordinator vermerkt "
+"einen Planeten als Enemy, nachdem er etwas gesehen hat, was Sie vielleicht "
+"nicht gesehen haben - einen Überfall auf einen Nachbarn, einen Schlag gegen "
+"Ihr eigenes Board, eine Nachricht, die übel ausging. Es ist die billigste "
+"Warnung, die Sie bekommen werden."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:48
@@ -2186,13 +2835,15 @@ msgid ""
 "If you disagree with a mark, say so. The Coordinator is elected, and the "
 "list follows whoever holds the post."
 msgstr ""
+"Wenn Sie mit einem Vermerk nicht einverstanden sind, sagen Sie es. Der "
+"Koordinator ist gewählt, und die Liste folgt dem, der das Amt hält."
 
 #. type: Title #
 #: internal/help/content/interbbs/spyguy.md:1
 #: internal/help/content/interbbs/spyguy.md:8
 #, no-wrap
 msgid "Send SpyGuy"
-msgstr ""
+msgstr "SpyGuy senden"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:14
@@ -2202,11 +2853,18 @@ msgid ""
 "no figures for the Spy Database. What he does is send word home the moment "
 "his hosts turn something on your planet."
 msgstr ""
+"Ein SpyGuy ist ein Beobachter, den Sie auf einem anderen Planeten postieren. "
+"Er ist keiner Ihrer Agenten: Ihn zu schicken kostet keinen Agenten, er kann "
+"nicht gefasst werden, und er bringt keine Zahlen für die Spionagedatenbank "
+"mit. Was er tut, ist Nachricht nach Hause schicken, sobald seine Gastgeber "
+"etwas gegen Ihren Planeten in Gang setzen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:16
 msgid "Send him from InterPlanetary Operations, under Special Operations."
 msgstr ""
+"Schicken Sie ihn aus dem Menü Interplanetare Operationen, unter "
+"Spezialoperationen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:17
@@ -2222,6 +2880,11 @@ msgid ""
 "holds — so a crowded planet pays more for the same man. The rate is quoted "
 "before you pick a target, since it is the same wherever you send him."
 msgstr ""
+"Gold, nach Tagen, und der ganze Aufenthalt wird im Voraus bezahlt. Der "
+"Tagessatz richtet sich nach der Größe **Ihres eigenen** Planeten - nach "
+"jeder Region, die hier jedes Reich hält -, ein voller Planet zahlt für "
+"denselben Mann also mehr. Der Satz wird genannt, bevor Sie ein Ziel wählen, "
+"denn er ist überall gleich, wohin Sie ihn auch schicken."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:28
@@ -2231,6 +2894,10 @@ msgid ""
 "you; come back with it and the man goes, come back without it and nothing is "
 "sent or charged."
 msgstr ""
+"Sie bestimmen, wie lange er bleibt, bis zu fünfzehn Tage. Kostet der "
+"Aufenthalt mehr, als Sie bei sich haben, wird der Fehlbetrag genannt und die "
+"Bank für Sie geöffnet; kommen Sie mit dem Geld zurück, geht der Mann, kommen "
+"Sie ohne, wird nichts geschickt und nichts berechnet."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:29
@@ -2244,6 +2911,8 @@ msgid ""
 "Two things, and both arrive as **planetary news** where everyone here can "
 "read them:"
 msgstr ""
+"Zweierlei, und beides trifft als **Planetennachricht** ein, wo jeder hier es "
+"lesen kann:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/spyguy.md:38
@@ -2251,6 +2920,8 @@ msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
 "on it, with the hours left before it leaves"
 msgstr ""
+"ein **Gruppenangriff**, der gegen diesen Planeten oder gegen ein einzelnes "
+"Reich darauf zusammengestellt wird, mit den Stunden bis zum Abflug"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/spyguy.md:38
@@ -2258,6 +2929,8 @@ msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
 "funding is complete, and if it is stood down again"
 msgstr ""
+"ein **Gooie Kablooie**, der für uns gebaut wird - wann die Arbeit beginnt, "
+"wann die Finanzierung steht, und ob er wieder eingestellt wird"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:41
@@ -2265,6 +2938,8 @@ msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
 "sent late is not wasted."
 msgstr ""
+"Er meldet auch, was an dem Tag seiner Ankunft bereits im Gange ist, ein spät "
+"geschickter Mann ist also nicht vergeudet."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:42
@@ -2279,6 +2954,10 @@ msgid ""
 "how long it had left when he wrote it. That line never changes afterwards, "
 "so hours later it no longer tells you how long is left."
 msgstr ""
+"Jede Meldung trifft als Planetennachricht ein, mit Datum, und sagt, was auf "
+"Sie gerichtet war und wie viel Zeit ihm blieb, als er schrieb. Diese Zeile "
+"ändert sich danach nie, Stunden später sagt sie Ihnen also nicht mehr, wie "
+"viel Zeit noch bleibt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:52
@@ -2289,6 +2968,11 @@ msgid ""
 "`90m`, then `away` once the force has left. A weapon already flying is listed\n"
 "with the days until it lands.\n"
 msgstr ""
+"**Angriffe im Anflug** im InterPlanetary-Menü führt dieselben Warnungen\n"
+"aktuell: eine Zeile je Bedrohung, die nächste oben, herunterzählend,\n"
+"während Sie lesen - `3h`, dann `90m`, dann `away`, sobald die Truppe fort\n"
+"ist. Eine Waffe, die schon fliegt, wird mit den Tagen bis zum Einschlag\n"
+"geführt.\n"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:55
@@ -2296,12 +2980,15 @@ msgid ""
 "An empty list is not proof of peace. It means nothing has been reported, and "
 "only a watcher posted on another planet can report anything."
 msgstr ""
+"Eine leere Liste ist kein Beweis für Frieden. Sie heißt nur, dass nichts "
+"gemeldet wurde, und melden kann nur ein Beobachter, den Sie auf einem "
+"anderen Planeten postiert haben."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:56
 #, no-wrap
 msgid "Why it matters"
-msgstr ""
+msgstr "Warum das zählt"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:62
@@ -2311,6 +2998,11 @@ msgid ""
 "with only your jets between it and your regions. A SpyGuy on the right "
 "planet buys you the days you need to raise them."
 msgstr ""
+"Eine Waffe, die noch am Boden steht, ist die Sache ihrer Erbauer allein: "
+"Niemand sagt Ihnen, dass es sie gibt. Sie erfahren davon, wenn sie startet - "
+"und dann ist sie zwei Tage entfernt, und zwischen ihr und Ihren Regionen "
+"stehen nur Ihre Jets. Ein SpyGuy auf dem richtigen Planeten erkauft Ihnen "
+"die Tage, die Sie brauchen, um sie aufzustellen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:66
@@ -2319,12 +3011,15 @@ msgid ""
 "trial, and no execution; when the days you paid for run out, your man simply "
 "comes home."
 msgstr ""
+"Dem beobachteten Planeten wird nichts gesagt. Es gibt keine Enttarnung, "
+"keinen Prozess und keine Hinrichtung; sind die bezahlten Tage um, kommt Ihr "
+"Mann einfach heim."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:67
 #, no-wrap
 msgid "Strategy"
-msgstr ""
+msgstr "Strategie"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:72
@@ -2333,6 +3028,10 @@ msgid ""
 "lost a battle to you is the one assembling the answer, and the rate is the "
 "same whether you watch a rival or a neighbor you trust."
 msgstr ""
+"Postieren Sie ihn dort, wo die Bedrohung ist, nicht dort, wo der Groll ist. "
+"Der Planet, der eben eine Schlacht gegen Sie verloren hat, ist der, der die "
+"Antwort zusammenstellt, und der Satz ist derselbe, ob Sie einen Rivalen "
+"beobachten oder einen Nachbarn, dem Sie trauen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:74
@@ -2340,6 +3039,8 @@ msgid ""
 "A short stay renewed is worth more than one long stay bought early: the days "
 "run whether anything happens or not."
 msgstr ""
+"Ein kurzer, erneuerter Aufenthalt ist mehr wert als ein langer, früh "
+"gekaufter: Die Tage laufen, ob etwas geschieht oder nicht."
 
 #. type: Title #
 #: internal/help/content/interbbs/terrorist-ops.md:1
@@ -2357,6 +3058,12 @@ msgid ""
 "planet once the packet reaches it — so the word comes back a day or more "
 "later."
 msgstr ""
+"Terroroperationen schicken Agenten gegen ein Reich auf einem anderen "
+"Planeten. Sie wählen die Operation und dann, wie viele Agenten Sie "
+"einsetzen. Die Agenten sind verbraucht, sobald Sie sie schicken, was immer "
+"sie erreichen, und der Schlag wird auf dem Planeten des Ziels ausgewertet, "
+"sobald das Paket dort ankommt - die Nachricht kommt also einen Tag später "
+"oder mehr zurück."
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:17
@@ -2364,12 +3071,14 @@ msgid ""
 "Every operation is answered by New Realm Protection: a sheltered realm takes "
 "nothing at all."
 msgstr ""
+"Jeder Operation antwortet der Neureich-Schutz: Ein geschütztes Reich nimmt "
+"überhaupt keinen Schaden."
 
 #. type: Title ##
 #: internal/help/content/interbbs/terrorist-ops.md:18
 #, no-wrap
 msgid "What each operation does"
-msgstr ""
+msgstr "Was jede Operation bewirkt"
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:22
@@ -2377,11 +3086,14 @@ msgid ""
 "The nine are not interchangeable. Each aims at one thing, and each agent "
 "that gets through takes its own bite:"
 msgstr ""
+"Die neun sind nicht austauschbar. Jede zielt auf eine Sache, und jeder "
+"Agent, der durchkommt, nimmt seinen eigenen Bissen:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Send Spy** — brings intelligence home and costs the target nothing."
 msgstr ""
+"**Spion senden** - bringt Erkenntnisse heim und kostet das Ziel nichts."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
@@ -2389,16 +3101,18 @@ msgid ""
 "**Bomb Intelligence Agencies** — kills a few percent of their agents, which "
 "is what they defend and attack with."
 msgstr ""
+"**Geheimdienst bombardieren** - tötet ein paar Prozent ihrer Agenten, mit "
+"denen sie verteidigen und angreifen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Demoralize Forces** — takes a seventh off military morale."
-msgstr ""
+msgstr "**Truppen demoralisieren** - nimmt ein Siebtel der Kampfmoral."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Cause Dissensions** — a few percent of their troopers desert."
-msgstr ""
+msgstr "**Zwietracht säen** - ein paar Prozent ihrer Soldaten laufen davon."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
@@ -2410,12 +3124,12 @@ msgstr ""
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Stir Emigrations** — drives people out of the realm."
-msgstr ""
+msgstr "**Auswanderung schüren** - treibt Menschen aus dem Reich."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Spread Propaganda** — costs them popular support."
-msgstr ""
+msgstr "**Propaganda verbreiten** - kostet sie Rückhalt im Volk."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
@@ -2423,17 +3137,20 @@ msgid ""
 "**Bomb Food Storages** — the widest swing of the nine: it can take almost a "
 "third of what is in store, or almost nothing."
 msgstr ""
+"**Bomb Food Storages** - der größte Ausschlag der neun: Es kann fast ein "
+"Drittel der Vorräte treffen, oder fast nichts."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
 msgstr ""
+"**HQ sabotieren** - wirft ihr Hauptquartier um einen festen Betrag zurück."
 
 #. type: Title ##
 #: internal/help/content/interbbs/terrorist-ops.md:35
 #, no-wrap
 msgid "Picking one"
-msgstr ""
+msgstr "Die Wahl treffen"
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:41
@@ -2443,12 +3160,17 @@ msgid ""
 "troopers, jets, morale. Grinding down a realm you cannot reach yet argues "
 "for the ones that cost it growth: food, people, support."
 msgstr ""
+"Richten Sie die Operation nach dem, was Sie als Nächstes vorhaben. Wer ein "
+"Reich vor einem interplanetaren Angriff weichklopfen will, greift zu denen, "
+"die dünner machen, was zurückschlägt - Soldaten, Jets, Moral. Wer ein Reich "
+"zermürben will, das er noch nicht erreichen kann, greift zu denen, die es "
+"Wachstum kosten: Nahrung, Menschen, Rückhalt."
 
 #. type: Title ##
 #: internal/help/content/interbbs/terrorist-ops.md:42
 #, no-wrap
 msgid "Getting through"
-msgstr ""
+msgstr "Durchkommen"
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:50
@@ -2460,6 +3182,13 @@ msgid ""
 "agents in five get through. There is a small chance either way that has "
 "nothing to do with either side."
 msgstr ""
+"Für jeden Agenten wird einzeln gewürfelt, wobei Ihre Agenten gegen ihre "
+"aufgewogen werden. Die Abwägung zieht aus jeder Seite die Wurzel und gibt "
+"dem Verteidiger den Vorteil, Agenten helfen also, aber mit stark fallendem "
+"Ertrag: Die vierfache Zahl bringt Ihnen den doppelten Vorsprung, und bei "
+"zwei gleich starken Reichen kommen etwa zwei von fünf Agenten durch. In "
+"beide Richtungen bleibt eine kleine Chance, die mit keiner der beiden Seiten "
+"zu tun hat."
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:54
@@ -2469,18 +3198,22 @@ msgid ""
 "partners' agents to the defense, which is what makes a well-allied realm "
 "expensive to work on."
 msgstr ""
+"Mehr Agenten einzusetzen richtet im Mittel also mehr Schaden an, macht aber "
+"nie einen einzelnen Agenten wahrscheinlicher erfolgreich. Ein Terrorabwehr-"
+"Pakt zählt die Agenten der Partner zur Verteidigung hinzu, und das macht ein "
+"gut verbündetes Reich teuer zu bearbeiten."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/introduction/overview.md:1
 #, no-wrap
 msgid "How to Play"
-msgstr ""
+msgstr "Spielanleitung"
 
 #. type: Title #
 #: internal/help/content/introduction/overview.md:8
 #, no-wrap
 msgid "Immortal Barons — How to Play"
-msgstr ""
+msgstr "Immortal Barons - Spielanleitung"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:14
@@ -2490,6 +3223,10 @@ msgid ""
 "dealings with the other barons. The other players want the same thing, so "
 "you face steady competition."
 msgstr ""
+"Sie herrschen über eine Baronie: ein kleines Königreich auf einem Planeten. "
+"Ihr Ziel ist es, das stärkste Reich aufzubauen. Dazu dienen Ihnen Ihre "
+"Wirtschaft, Ihr Militär und Ihr Umgang mit den anderen Baronen. Die anderen "
+"Spieler wollen dasselbe, Sie stehen also in stetem Wettbewerb."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:20
@@ -2500,6 +3237,11 @@ msgid ""
 "away until a realm falls; a sysop may also seat fewer than 25 players, and "
 "any computer-run barons take seats of their own."
 msgstr ""
+"Ein Planet hat Platz für 25 Baronien, jede auf einem seiner 25 Plätze. Ihr "
+"Platz gehört Ihnen, solange Ihr Reich besteht, und sein Buchstabe ist es, "
+"unter dem alle anderen Sie nennen. Sind alle Plätze belegt, wird ein neuer "
+"Anrufer abgewiesen, bis ein Reich fällt; ein Sysop kann auch weniger als 25 "
+"Spieler zulassen, und computergesteuerte Barone belegen eigene Plätze."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:25
@@ -2509,6 +3251,10 @@ msgid ""
 "once: the option disappears afterwards, and the whole planet is told of the "
 "change."
 msgstr ""
+"Sie benennen Ihr Reich bei Ihrem ersten Anruf und dürfen diesen Namen einmal "
+"ändern - im Menü Einstellungen, nachdem Ihr Neureich-Schutz abgelaufen ist. "
+"Nur ein einziges Mal: Danach verschwindet die Möglichkeit, und der ganze "
+"Planet erfährt von der Änderung."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:30
@@ -2518,12 +3264,16 @@ msgid ""
 "the goal is not just the strongest barony, but the strongest planet. Your "
 "side has to work together to win."
 msgstr ""
+"Viele Mailboxen können ihre Spiele miteinander verbinden. Tun sie das, ist "
+"jedes Board ein Planet, und Ihr Planet tritt gegen die anderen an. Dann gilt "
+"es nicht nur, die stärkste Baronie zu haben, sondern den stärksten Planeten. "
+"Ihre Seite muss zusammenarbeiten, um zu gewinnen."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:31
 #, no-wrap
 msgid "Turns"
-msgstr ""
+msgstr "Züge"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:36
@@ -2541,12 +3291,12 @@ msgstr ""
 #: internal/help/content/introduction/overview.md:37
 #, no-wrap
 msgid "What happens in a turn"
-msgstr ""
+msgstr "Was in einem Zug geschieht"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:40
 msgid "A turn moves through these steps in order:"
-msgstr ""
+msgstr "Ein Zug durchläuft diese Schritte der Reihe nach:"
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
@@ -2554,6 +3304,8 @@ msgid ""
 "**News and mail.** You see what happened since your last turn, and read any "
 "new messages from other players."
 msgstr ""
+"**Nachrichten und Post.** Sie sehen, was seit Ihrem letzten Zug geschehen "
+"ist, und lesen neue Nachrichten anderer Spieler."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
@@ -2561,11 +3313,15 @@ msgid ""
 "**Production and income.** Your industry builds military units, and your "
 "income for the turn arrives."
 msgstr ""
+"**Produktion und Einnahmen.** Ihre Industrie baut Militäreinheiten, und Ihre "
+"Einnahmen für den Zug treffen ein."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid "**Reports.** You see an income report and your full Empire Status."
 msgstr ""
+"**Berichte.** Sie sehen einen Einnahmenbericht und Ihren vollständigen "
+"Reichsstatus."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
@@ -2573,6 +3329,9 @@ msgid ""
 "**Upkeep.** You pay to maintain your military and your land, and you feed "
 "your people and your army. Short food or gold causes trouble, so watch these."
 msgstr ""
+"**Unterhalt.** Sie bezahlen den Unterhalt Ihres Militärs und Ihres Landes "
+"und ernähren Ihr Volk und Ihre Armee. Zu wenig Nahrung oder Gold bringt "
+"Ärger, behalten Sie beides also im Auge."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
@@ -2580,11 +3339,13 @@ msgid ""
 "**Covert Operations.** Spying and sabotage. This step appears only if you "
 "keep it turned on and hold at least one covert agent."
 msgstr ""
+"**Verdeckte Operationen.** Spionage und Sabotage. Dieser Schritt erscheint "
+"nur, wenn Sie ihn eingeschaltet lassen und mindestens einen Agenten haben."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid "**Spending.** You buy land, military, and other things."
-msgstr ""
+msgstr "**Ausgaben.** Sie kaufen Land, Militär und anderes."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
@@ -2592,6 +3353,7 @@ msgid ""
 "**Attacks.** You may attack another barony, a limited number of times per "
 "day."
 msgstr ""
+"**Angriffe.** Sie dürfen eine andere Baronie angreifen, begrenzt oft je Tag."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
@@ -2599,6 +3361,8 @@ msgid ""
 "**Trading.** Trade goods with other baronies, if you keep this step turned "
 "on."
 msgstr ""
+"**Handel.** Waren mit anderen Baronien handeln, wenn Sie diesen Schritt "
+"eingeschaltet lassen."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
@@ -2606,23 +3370,28 @@ msgid ""
 "**InterPlanetary Operations.** Actions against other planets, in linked "
 "games."
 msgstr ""
+"**Interplanetare Operationen.** Aktionen gegen andere Planeten, in "
+"verbundenen Spielen."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid "**Messages.** You may send a message to another player."
 msgstr ""
+"**Nachrichten.** Sie dürfen einem anderen Spieler eine Nachricht senden."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**End of turn.** Your economy and population settle, and the turn closes."
 msgstr ""
+"**Zugende.** Ihre Wirtschaft und Ihre Bevölkerung setzen sich, und der Zug "
+"schließt."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:57
 #, no-wrap
 msgid "The System menu"
-msgstr ""
+msgstr "Das Systemmenü"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:63
@@ -2632,6 +3401,10 @@ msgid ""
 "visit the bank, use the food market, set your preferences, and write macros. "
 "Open it when you need it."
 msgstr ""
+"Manches wird Ihnen nicht in jedem Zug vorgelegt. Im **Systemmenü** setzen "
+"Sie Ihren Steuersatz, ändern, was Ihre Industrie baut, öffnen die "
+"Diplomatie, gehen zur Bank, nutzen den Nahrungsmarkt, setzen Ihre "
+"Einstellungen und schreiben Makros. Öffnen Sie es, wenn Sie es brauchen."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:67
@@ -2640,12 +3413,15 @@ msgid ""
 "menu.  They are not automatic stops in each turn, so visit them yourself "
 "when you want to change your plans."
 msgstr ""
+"In diesem Spiel liegen **Diplomatie** und das **Ändern der Produktion** im "
+"Systemmenü.  Sie sind keine festen Halte in jedem Zug, suchen Sie sie also "
+"selbst auf, wenn Sie Ihre Pläne ändern wollen."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:68
 #, no-wrap
 msgid "Game Bulletins"
-msgstr ""
+msgstr "Spielaushänge"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:75
@@ -2656,6 +3432,12 @@ msgid ""
 "and every planet in the league sees the same ones. When a notice is put up "
 "or changed, it is named in the day's news."
 msgstr ""
+"Ihr Sysop kann Aushänge für die Spieler anschlagen. Wählen Sie "
+"**Spielaushänge** im Eröffnungsmenü, um die Liste zu sehen, und dann einen "
+"über seine Nummer. In einem verbundenen Spiel stehen die Aushänge der Liga "
+"zuerst, unter \\\"Galactic\\\", und jeder Planet der Liga sieht dieselben. "
+"Wird ein Aushang angeschlagen oder geändert, wird er in den Nachrichten des "
+"Tages genannt."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:76
@@ -2671,6 +3453,11 @@ msgid ""
 "diplomacy, and linked inter-board play. Press a key to move from one section "
 "to the next. You can stop at any time."
 msgstr ""
+"Die folgenden Abschnitte erklären der Reihe nach jeden Teil des Spiels: die "
+"Bedienung, Ihr Militär, Ihre Wirtschaft, die Kriegführung, verdeckte "
+"Operationen, die Diplomatie und das verbundene Spiel über mehrere Boards. "
+"Drücken Sie eine Taste, um von einem Abschnitt zum nächsten zu gehen. Sie "
+"können jederzeit aufhören."
 
 #. type: Title #
 #: internal/help/content/military/agents.md:1
@@ -2753,6 +3540,11 @@ msgid ""
 "costs you bombers and buys you nothing. Hold them back and spend them on the "
 "attacks that need them."
 msgstr ""
+"Bomber richten bei einem Angriff auf Ihrem eigenen Planeten nichts aus. Sie "
+"tragen nichts zu seiner Stärke bei und erleiden mit der übrigen Truppe "
+"Verluste; sie mitzuschicken kostet Sie also Bomber und bringt Ihnen nichts. "
+"Halten Sie sie zurück und setzen Sie sie bei den Angriffen ein, die sie "
+"brauchen."
 
 #. type: Plain text
 #: internal/help/content/military/bombers.md:23
@@ -2760,8 +3552,8 @@ msgid ""
 "Bombers add a large amount to your net worth, so a fleet of them raises your "
 "score as well as your reach."
 msgstr ""
-"Bomber erhöhen Ihren Nettowert beträchtlich, eine Flotte davon hebt also "
-"Ihre Punktzahl ebenso wie Ihre Reichweite."
+"Bomber erhöhen Ihr Vermögen beträchtlich, eine Flotte davon hebt also Ihre "
+"Punktzahl ebenso wie Ihre Reichweite."
 
 #. type: Title #
 #: internal/help/content/military/carriers.md:1
@@ -3532,6 +4324,11 @@ msgid ""
 "while also knocking their popular support down to two-thirds. It does not "
 "touch their land at all — no regions are ruined and none change hands."
 msgstr ""
+"Ein Biologischer Angriff setzt eine Seuche frei. Sie tötet etwa ein Zehntel "
+"der Menschen des Feindes und ein Sechstel seiner Soldaten, halbiert seine "
+"Kampfmoral und drückt seinen Rückhalt im Volk auf zwei Drittel. Sein Land "
+"rührt sie überhaupt nicht an - keine Region wird verwüstet, und keine "
+"wechselt den Besitzer."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-biological.md:17
@@ -3539,6 +4336,8 @@ msgid ""
 "The missile is priced off all three of the things it hurts: the target's "
 "troopers, their people, and their regions. Nothing intercepts it."
 msgstr ""
+"Die Rakete wird nach allen drei Dingen bepreist, die sie trifft: den "
+"Soldaten des Ziels, seinen Menschen und seinen Regionen. Nichts fängt sie ab."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-biological.md:20
@@ -3547,6 +4346,10 @@ msgid ""
 "every tank and trooper the target owns, so a plague the turn before you "
 "march is worth more than the casualties alone suggest."
 msgstr ""
+"Strategie: Das ist die Waffe der drei gegen die Armee. Halbierte Moral "
+"schwächt jeden Panzer und jeden Soldaten des Ziels, eine Seuche in dem Zug, "
+"bevor Sie marschieren, ist also mehr wert, als die Verluste allein vermuten "
+"lassen."
 
 #. type: Title #
 #: internal/help/content/warfare/attack-chemical.md:1
@@ -3564,6 +4367,11 @@ msgid ""
 "knocks down both their military morale and their popular support. It leaves "
 "their troopers alone."
 msgstr ""
+"Ein Chemischer Angriff tut dem Land, was ein Atomangriff tut, nur in "
+"kleinerem Maß, und vergast danach das Reich darunter. Er verwüstet etwa ein "
+"Drittel so viele Regionen zu Ödland, tötet ein Fünftel der Menschen des "
+"Feindes auf der Stelle und drückt sowohl seine Kampfmoral als auch seinen "
+"Rückhalt im Volk. Seine Soldaten lässt er unberührt."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-chemical.md:18
@@ -3572,6 +4380,10 @@ msgid ""
 "as the population grows; a realm knocked down to two-thirds support earns "
 "less and fights worse until it has climbed back."
 msgstr ""
+"Der Schaden an Moral und Rückhalt ist der Teil, der bleibt. Verluste wachsen "
+"mit der Bevölkerung nach; ein Reich, das auf zwei Drittel Rückhalt gedrückt "
+"wurde, verdient weniger und kämpft schlechter, bis es sich wieder "
+"hochgearbeitet hat."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-chemical.md:22
@@ -3580,6 +4392,9 @@ msgid ""
 "its land, so gassing a crowded realm is expensive. Nothing intercepts it — "
 "not SDI, not turrets, not tanks."
 msgstr ""
+"Der Waffenhändler bepreist die Rakete nach der Bevölkerung des Ziels wie "
+"nach seinem Land, ein volles Reich zu vergasen ist also teuer. Nichts fängt "
+"sie ab - kein SDI, keine Geschütztürme, keine Panzer."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-chemical.md:25
@@ -3588,6 +4403,10 @@ msgid ""
 "in the field. A Nuclear Attack hurts their land harder, but only a chemical "
 "strike touches the people paying for their army."
 msgstr ""
+"Strategie: Das ist die Waffe für einen reichen, dicht besiedelten Rivalen, "
+"den Sie im Feld nicht schlagen können. Ein Atomangriff trifft sein Land "
+"härter, aber nur ein chemischer Schlag rührt die Menschen an, die seine "
+"Armee bezahlen."
 
 #. type: Title #
 #: internal/help/content/warfare/attack-nuclear.md:1
@@ -3604,6 +4423,10 @@ msgid ""
 "region, pays upkeep on all of them, and earns nothing from the ruined ones "
 "until they are cleaned up."
 msgstr ""
+"Ein Atomangriff verwüstet einen Teil der Regionen des Feindes und macht sie "
+"zu Ödland. Er nimmt ihm kein Land und tötet niemanden: Das Ziel behält jede "
+"Region, zahlt auf alle Unterhalt und verdient an den verwüsteten nichts, bis "
+"sie gereinigt sind."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:19
@@ -3613,6 +4436,11 @@ msgid ""
 "neighbor needs a large missile — up to a ceiling, so the very biggest realms "
 "are proportionally cheap to hit."
 msgstr ""
+"Sobald Sie ein Ziel nennen, wird Ihnen ein Preis genannt, und Sie dürfen "
+"davon zurücktreten. Der Preis richtet sich nach der Größe des Reiches, auf "
+"das Sie zielen - ein großer Nachbar braucht eine große Rakete -, bis zu "
+"einer Obergrenze; die allergrößten Reiche sind also im Verhältnis günstig zu "
+"treffen."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:23
@@ -3622,12 +4450,18 @@ msgid ""
 "against missiles arriving from another planet, not from a neighbor on your "
 "own."
 msgstr ""
+"Etwa 7% des Landes eines Ziels werden je Schlag verwüstet, mit ein paar "
+"Punkten Schwankung nach oben oder unten. Nichts holt die Rakete herunter: "
+"Ein SDI-Programm wehrt Raketen ab, die von einem anderen Planeten kommen, "
+"nicht die eines Nachbarn auf Ihrem eigenen."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:25
 msgid ""
 "A successful strike raises your score, whether or not it did much damage."
 msgstr ""
+"Ein erfolgreicher Schlag hebt Ihre Punktzahl, ob er nun viel Schaden "
+"anrichtete oder nicht."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:29
@@ -3637,6 +4471,11 @@ msgid ""
 "hold while you build toward a real attack. Against a small realm the damage "
 "rounds away to almost nothing, so save the gold for a large one."
 msgstr ""
+"Strategie: Ein Atomschlag zermürbt einen Rivalen. Er kann ihn nicht "
+"erledigen und bringt Ihnen nichts Brauchbares ein; er macht das Gebiet eines "
+"Feindes teuer im Halten, während Sie auf einen richtigen Angriff "
+"hinarbeiten. Gegen ein kleines Reich rundet sich der Schaden auf fast "
+"nichts, heben Sie das Gold also für ein großes auf."
 
 #. type: Title #
 #: internal/help/content/warfare/attack-regular.md:1
@@ -3661,6 +4500,10 @@ msgid ""
 "Bombers. Jets can only fight if you have carriers to carry them. Units you "
 "keep at home do not fight and cannot be lost."
 msgstr ""
+"Zuerst wählen Sie, wie viele Einheiten jeder Art Sie schicken: Soldaten, "
+"Jets, Panzer und Bomber. Jets können nur kämpfen, wenn Sie Träger haben, die "
+"sie befördern. Einheiten, die Sie daheim lassen, kämpfen nicht und können "
+"nicht verloren gehen."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:20
@@ -3669,6 +4512,10 @@ msgid ""
 "Bombers are the exception: they add no strength to an attack on your own "
 "planet, so sending them loses you bombers for nothing."
 msgstr ""
+"Nur die Einheiten, die Sie geschickt haben, tragen zu Ihrem Angriff bei, und "
+"nur sie können verloren gehen. Die Bomber sind die Ausnahme: Sie tragen bei "
+"einem Angriff auf Ihrem eigenen Planeten nichts zur Stärke bei, sie "
+"mitzuschicken kostet Sie also Bomber für nichts."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:26
@@ -3679,6 +4526,12 @@ msgid ""
 "was: an attacker who badly outmatches the defender walks away having lost "
 "very little, and an evenly matched one pays nearly the full share."
 msgstr ""
+"Die beiden Heere zermürben einander, bis eines so viel verloren hat, wie es "
+"zu verlieren bereit ist, und dieser Anteil ist eine Einstellung dieses "
+"Boards, keine feste Größe.  Was es den Sieger kostet, hängt davon ab, wie "
+"einseitig der Kampf war: Ein Angreifer, der dem Verteidiger weit überlegen "
+"ist, geht mit sehr wenig Verlust davon, ein gleich starker zahlt fast den "
+"vollen Anteil."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:31
@@ -3688,6 +4541,11 @@ msgid ""
 "lose all of its regions in one attack. A large empire loses only part, so "
 "you must attack it again and again to take it down."
 msgstr ""
+"Gewinnen Sie, erobern Sie einen Teil der Regionen des Feindes. Sein Gold "
+"nehmen Sie nicht. Ein Normaler Angriff bringt Ihnen Land, kein Geld. Ein "
+"kleines Reich kann in einem einzigen Angriff alle seine Regionen verlieren. "
+"Ein großes verliert nur einen Teil, Sie müssen es also wieder und wieder "
+"angreifen, um es niederzuringen."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:34
@@ -3695,6 +4553,8 @@ msgid ""
 "How big that share is depends on this board's settings and on how much land "
 "the enemy holds, not on how developed it is."
 msgstr ""
+"Wie groß dieser Anteil ist, hängt von den Einstellungen dieses Boards ab und "
+"davon, wie viel Land der Feind hält, nicht davon, wie weit er entwickelt ist."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:37
@@ -3704,6 +4564,10 @@ msgid ""
 "take a big piece of land. A small, dense empire gives you less land for the "
 "same effort."
 msgstr ""
+"Strategiehinweis: Ein großes Reich mit niedrigem Vermögen ist ein weiches "
+"Ziel. Es hat viel Land, aber wenig Kraft, es zu verteidigen. Sie gewinnen "
+"die Schlacht leicht und nehmen ein großes Stück Land. Ein kleines, dichtes "
+"Reich gibt Ihnen für denselben Aufwand weniger Land."
 
 #. type: Title #
 #: internal/help/content/warfare/attacks.md:1
@@ -3719,6 +4583,9 @@ msgid ""
 "your army to missiles and planet-wide weapons. Each kind of attack has its "
 "own topic."
 msgstr ""
+"Sie können andere Reiche auf mehrere Arten treffen, vom geraden Sturm mit "
+"Ihrer Armee bis zu Raketen und planetenweiten Waffen. Jede Angriffsart hat "
+"ihr eigenes Thema."
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:15
@@ -3727,13 +4594,17 @@ msgid ""
 "appears the next time you press a key. An order you already typed is reduced "
 "to what you still hold, and the game tells you when it does that."
 msgstr ""
+"Sie können auch angegriffen werden, während Sie spielen. Geschieht das, "
+"erscheint beim nächsten Tastendruck ein Hinweis. Ein Befehl, den Sie bereits "
+"eingegeben haben, wird auf das gekürzt, was Ihnen noch bleibt, und das Spiel "
+"sagt Ihnen, wenn es das tut."
 
 #. type: Title #
 #: internal/help/content/warfare/gooie-kablooie.md:1
 #: internal/help/content/warfare/gooie-kablooie.md:8
 #, no-wrap
 msgid "Gooie Kablooie"
-msgstr ""
+msgstr "Gooie Kablooie"
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:12
@@ -3741,6 +4612,9 @@ msgid ""
 "The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy "
 "planet rather than at one baron, and your planet can only have one at a time."
 msgstr ""
+"Der Gooie Kablooie ist die letzte aller Waffen. Er zielt auf einen ganzen "
+"feindlichen Planeten statt auf einen einzelnen Baron, und Ihr Planet kann "
+"immer nur einen haben."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:17
@@ -3750,6 +4624,10 @@ msgid ""
 "time.  The price depends on the size of the target planet: aiming at a "
 "planet much larger than yours costs more."
 msgstr ""
+"Niemand kauft die Waffe allein. Ein Baron beginnt die Arbeit und nennt den "
+"Zielplaneten. Danach kann jeder Baron hier Geld hineinlegen, je eine Million "
+"Gold.  Der Preis hängt von der Größe des Zielplaneten ab: Auf einen Planeten "
+"zu zielen, der viel größer ist als Ihrer, kostet mehr."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:22
@@ -3759,12 +4637,16 @@ msgid ""
 "off is your elected Coordinator, and only before it leaves the ground. The "
 "gold is spent either way."
 msgstr ""
+"Ist das letzte Geld beisammen, baut die Waffe noch drei Tage und startet "
+"dann von selbst. Niemand entscheidet das. Der Einzige, der sie abblasen "
+"kann, ist Ihr gewählter Koordinator, und nur, bevor sie den Boden verlässt. "
+"Das Gold ist so oder so ausgegeben."
 
 #. type: Title ##
 #: internal/help/content/warfare/gooie-kablooie.md:23
 #, no-wrap
 msgid "Being on the receiving end"
-msgstr ""
+msgstr "Wenn es Sie trifft"
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:30
@@ -3775,6 +4657,12 @@ msgid ""
 "days are up and it burns itself out. Left alone it will cost you better than "
 "a quarter of your land."
 msgstr ""
+"Eine Waffe, die auf Ihren Planeten gerichtet ist, geht nicht hoch und "
+"verschwindet. Sie trifft ein, bleibt auf Ihrem Planeten und frisst ihn. Am "
+"Tag der Landung nimmt sie ein Zehntel der Regionen jedes Reiches. An jedem "
+"Tag danach nimmt sie ein weiteres Zwanzigstel, bis fünf Tage um sind und sie "
+"ausbrennt. Lässt man sie gewähren, kostet sie Sie mehr als ein Viertel Ihres "
+"Landes."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:33
@@ -3783,6 +4671,9 @@ msgid ""
 "whether you want to attack it. About a third of the jets you send do not "
 "come home."
 msgstr ""
+"Nur Jets erreichen sie. Ihr Reich wird zu Beginn Ihres Zuges gefragt, ob Sie "
+"sie angreifen wollen. Etwa ein Drittel der Jets, die Sie schicken, kommt "
+"nicht heim."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:37
@@ -3791,12 +4682,18 @@ msgid ""
 "the weapon is built to need the whole planet's air forces, and a planet that "
 "cannot organize loses the land."
 msgstr ""
+"Keine einzelne Welle kann sie erledigen, wie viele Jets Sie auch schicken. "
+"Das ist der Sinn: Die Waffe ist darauf gebaut, die Luftstreitkräfte des "
+"ganzen Planeten zu erfordern, und ein Planet, der sich nicht abstimmen kann, "
+"verliert das Land."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:38
 msgid ""
 "An SDI program is no help against it, and neither is anything else you own."
 msgstr ""
+"Ein SDI-Programm hilft dagegen nicht, und nichts anderes, was Sie besitzen, "
+"auch nicht."
 
 #. type: Title #
 #: internal/help/content/warfare/pirates.md:1
@@ -3813,6 +4710,11 @@ msgid ""
 "only what it holds. So the factions are all weak on day one, and the ones "
 "nobody fights are the dangerous ones later."
 msgstr ""
+"In der Welt leben neun Piratenfraktionen. Eine Fraktion besitzt zu "
+"Spielbeginn nichts. Alles, was sie hat, hat sie gestohlen, und was sie ins "
+"Feld führen kann, ist nur das, was sie hält. Am ersten Tag sind die "
+"Fraktionen also alle schwach, und die, die niemand bekämpft, sind später die "
+"gefährlichen."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:20
@@ -3839,6 +4741,12 @@ msgid ""
 "will if it is fat.  Attacking costs you casualties whether you win or lose, "
 "so do not raid a faction that holds nothing."
 msgstr ""
+"Sie können eine Fraktion angreifen, um sich Beute zurückzuholen. Ein Sieg "
+"bringt ein Drittel ihres Goldes, ihrer Regionen, Agenten und Soldaten zurück "
+"und ein Viertel ihrer Jets, Geschütztürme und Panzer. Ein Überfall holt oft "
+"zurück, was eine Fraktion Ihnen genommen hat; zwei oder drei tun es, wenn "
+"sie fett ist.  Ein Angriff kostet Sie Verluste, ob Sie gewinnen oder "
+"verlieren, überfallen Sie also keine Fraktion, die nichts hält."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:29
@@ -3846,6 +4754,9 @@ msgid ""
 "Listing military on the Trading Market does not hide it from pirates, but it "
 "does help some: your camp is raided about twice as often as your listing."
 msgstr ""
+"Militär auf dem Handelsmarkt anzubieten verbirgt es nicht vor den Piraten, "
+"hilft aber ein wenig: Ihr Lager wird etwa doppelt so oft überfallen wie Ihr "
+"Angebot."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:31
@@ -3853,6 +4764,9 @@ msgid ""
 "Tip: a faction you keep beaten stays harmless, because its army is only what "
 "it has managed to steal. Big realms are raided more often than small ones."
 msgstr ""
+"Tipp: Eine Fraktion, die Sie niedergehalten haben, bleibt harmlos, denn ihre "
+"Armee ist nur das, was sie zusammenstehlen konnte. Große Reiche werden öfter "
+"überfallen als kleine."
 
 #. type: Title #
 #: internal/help/content/warfare/sdi.md:1
@@ -3870,6 +4784,12 @@ msgid ""
 "your own planet — not their army, and not their nuclear, chemical or "
 "biological missiles."
 msgstr ""
+"Das SDI-Programm ist ein Schild, den Sie finanzieren. Es antwortet auf drei "
+"Dinge, und nur auf diese drei: auf Raketen, die von einem anderen Planeten "
+"auf Sie abgefeuert werden, und auf die Jets und Bomber eines Schlages, der "
+"von dort kommt. Gegen einen Nachbarn auf Ihrem eigenen Planeten tut es "
+"nichts - weder gegen seine Armee noch gegen seine nuklearen, chemischen oder "
+"biologischen Raketen."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:19
@@ -3879,23 +4799,30 @@ msgid ""
 "it does half of each. Only a strike aimed at you alone meets your shield; a "
 "group attack goes through it even when you are one of its named targets."
 msgstr ""
+"Bei voller Stärke lenkt es etwa die Hälfte der auf Sie gerichteten Raketen "
+"ab, nimmt 30% der Jets und 20% der Bomber eines eintreffenden Reiches. Bei "
+"halber Stärke tut es von jedem die Hälfte. Nur ein Schlag, der allein auf "
+"Sie zielt, trifft auf Ihren Schild; ein Gruppenangriff geht durch ihn "
+"hindurch, selbst wenn Sie eines seiner benannten Ziele sind."
 
 #. type: Title ##
 #: internal/help/content/warfare/sdi.md:20
 #, no-wrap
 msgid "How strong it is"
-msgstr ""
+msgstr "Wie stark er ist"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:23
 msgid "Strength is the funding spread over your land, not the funding alone:"
 msgstr ""
+"Die Stärke ist die Finanzierung, verteilt über Ihr Land, nicht die "
+"Finanzierung allein:"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:25
 #, no-wrap
 msgid "    strength% = the square root of (funding / (10 x (regions + 1)))\n"
-msgstr ""
+msgstr "    Stärke% = die Wurzel aus (Finanzierung / (10 x (Regionen + 1)))\n"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:31
@@ -3906,12 +4833,18 @@ msgid ""
 "8,000 regions the first 1% wants about 80,000 gold in the pot, while going "
 "from 9% to 10% wants another 1.5 million."
 msgstr ""
+"gedeckelt bei 100%. Zweierlei folgt daraus. Jede Region, die Sie nehmen, "
+"dünnt Ihren eigenen Schild aus, derselbe Topf, der ein kleines Reich gut "
+"schützt, ist über einem großen also fast nutzlos. Und jedes weitere Prozent "
+"kostet mehr als das vorige: Bei über 8.000 Regionen verlangt das erste 1% "
+"etwa 80.000 Gold im Topf, während der Weg von 9% auf 10% weitere 1,5 "
+"Millionen verlangt."
 
 #. type: Title ##
 #: internal/help/content/warfare/sdi.md:32
 #, no-wrap
 msgid "Funding it"
-msgstr ""
+msgstr "Die Finanzierung"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:37
@@ -3920,6 +4853,10 @@ msgid ""
 "add up to a set amount: a fifth of what is already in the pot, and never "
 "less than 250,000 gold. Gold goes in only in whole thousands."
 msgstr ""
+"Das Programm ist ein Topf voll Gold, nichts, was man einmal kauft. In jedem "
+"Zug dürfen Sie einen festen Betrag nachlegen: ein Fünftel dessen, was schon "
+"im Topf ist, und nie weniger als 250.000 Gold. Gold geht nur in vollen "
+"Tausendern hinein."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:40
@@ -3927,6 +4864,8 @@ msgid ""
 "That amount is your allowance for the whole turn. Leaving the screen and "
 "coming back does not give you a second one."
 msgstr ""
+"Dieser Betrag ist Ihr Rahmen für den ganzen Zug. Den Schirm zu verlassen und "
+"wiederzukommen gibt Ihnen keinen zweiten."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:43
@@ -3934,12 +4873,15 @@ msgid ""
 "So a shield takes many turns to build, however rich you are. You cannot buy "
 "one the turn you need it, so start early if you expect missiles."
 msgstr ""
+"Ein Schild braucht also viele Züge, so reich Sie auch sind. Sie können ihn "
+"nicht in dem Zug kaufen, in dem Sie ihn brauchen, fangen Sie also früh an, "
+"wenn Sie mit Raketen rechnen."
 
 #. type: Title ##
 #: internal/help/content/warfare/sdi.md:44
 #, no-wrap
 msgid "Paying for it"
-msgstr ""
+msgstr "Was er kostet"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:48
@@ -3947,6 +4889,9 @@ msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
 "the maintenance prompts, after your regions and before the Queen's tax."
 msgstr ""
+"In jedem Zug verlangt das Programm **4% seiner gesamten Finanzierung** als "
+"Unterhalt, bei den Unterhaltsfragen, nach Ihren Regionen und vor der Steuer "
+"der Königin."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:51
@@ -3955,6 +4900,10 @@ msgid ""
 "for, and the shield weakens with it. A large pot is a large bill every turn, "
 "so grow it at a pace your income can carry."
 msgstr ""
+"Zahlen Sie voll. Zahlen Sie zu wenig, schrumpft das Programm auf das, wofür "
+"Sie bezahlt haben, und der Schild schwächt sich mit ihm. Ein großer Topf ist "
+"jeden Zug eine große Rechnung, lassen Sie ihn also in einem Tempo wachsen, "
+"das Ihre Einnahmen tragen."
 
 #~ msgid ""
 #~ "In a normal attack, your bombers first destroy the enemy jets that are on "

@@ -2,55 +2,54 @@
 category: interbbs
 in_game: true
 order: 4
-title: 'Allied Markets'
+title: 'Рынки союзников'
 ---
 
-# Allied Markets
+# Рынки союзников
 
-In a league game you can buy from another planet's Trading Market. Open
-Trading from the InterPlanetary Operations menu, then Markets, and choose a
-planet.
+В лиговой игре вы можете покупать на Торговом рынке другой планеты. Откройте
+Торговля в меню Межпланетные операции, затем пункт Рынки и выберите планету.
 
-Only planets your Coordinator has marked Allied are listed. Buying across
-planets is an Immortal Barons feature, and a league may switch it off.
+В списке только те планеты, которые ваш координатор отметил как
+союзные. Покупка между планетами — возможность Immortal Barons, и лига может
+её отключить.
 
-## Your order is a bid, not a purchase
+## Ваш заказ — заявка, а не покупка
 
-What you see is that planet's market **as it was when we last heard from
-it**.  The screen tells you the date. News travels between planets in
-packets, and a packet takes as long as it takes, so by the time your order
-arrives the goods may have been sold, the amount may have shrunk, or the
-price may have changed.
+Вы видите рынок той планеты **таким, каким он был, когда мы в последний раз
+получали от неё вести**.  Экран показывает дату. Новости идут между
+планетами пакетами, а пакет идёт столько, сколько идёт, так что к приходу
+вашего заказа товар может быть уже продан, количество — уменьшиться, а цена
+— измениться.
 
-So your order is a bid. When you send it:
+Итак, ваш заказ — это заявка. Когда вы её отправляете:
 
-- Your gold is **held straight away**. It leaves your treasury but is not
-  spent yet, and it is not counted as gold you have.
-- When the bid arrives, the other planet sells to you **only if the goods
-  are still there at the same price, and you are still allies**.
-- If it sells, the goods come back to you on the next packet.
-- If it does not, your gold comes back instead, and you are told why.
+- Ваше золото **удерживается сразу же**. Оно покидает казну, но ещё не
+  потрачено и уже не считается золотом в вашем распоряжении.
+- Когда заявка приходит, другая планета продаёт вам товар **только если он
+  ещё на месте и по той же цене, а вы по-прежнему союзники**.
+- Если сделка состоялась, товар придёт к вам со следующим пакетом.
+- Если нет, вместо него вернётся ваше золото, и вам объяснят причину.
 
-If the seller still has some but not all of what you asked for, you get what
-there was and the rest of your gold returns. You are never charged for goods
-that did not arrive.
+Если у продавца осталась лишь часть заказанного, вы получите то, что было, а
+остаток золота вернётся. За непришедший товар с вас никогда не берут плату.
 
-## Waiting, and getting your gold back
+## Ожидание и возврат золота
 
-**Bids Out** on the Trading menu lists every bid you have waiting and how much
-gold is held against them. That gold is invisible everywhere else, so this is
-where to look when your treasury seems short.
+**Открытые заявки** в меню торговли показывают все ваши заявки в пути и то,
+сколько золота под них удержано. Это золото нигде больше не видно, так что
+сюда и стоит смотреть, когда казна кажется пустее, чем должна быть.
 
-Nothing is lost if a packet goes missing. A bid that never gets an answer is
-given up on after the same number of days your sysop set for lost attack
-forces, and your gold is returned. If the answer turns up later than that,
-it is ignored rather than paid twice.
+Ничего не пропадает, даже если пакет потерялся. Заявка, оставшаяся без
+ответа, аннулируется через столько же дней, сколько ваш сисоп отвёл
+пропавшим ударным силам, и золото возвращается. Если ответ придёт позже
+этого срока, его не примут, чтобы не заплатить дважды.
 
-## Two things worth knowing
+## Две вещи, которые стоит знать
 
-Each planet keeps its own list of who it is allied with. A planet can
-therefore stop selling to you before you have heard about it, and your bid
-will come back refused. That is not a fault.
+Каждая планета ведёт свой собственный список союзников. Поэтому планета
+может перестать продавать вам ещё до того, как вы об этом узнаете, и ваша
+заявка вернётся с отказом. Это не сбой.
 
-Your sysop can turn this feature off for the whole league, in which case
-Trading does not appear on the InterPlanetary Operations menu.
+Ваш сисоп может отключить эту возможность для всей лиги — тогда пункт
+торговли в меню межпланетных операций просто не появится.

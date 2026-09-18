@@ -7,68 +7,78 @@ title: 'Verdeckte Operationen'
 
 # Verdeckte Operationen
 
-Covert operations are secret missions run by your agents. You need at least
-one agent to run any of them, and a failed one costs you that agent.
+Verdeckte Operationen sind Geheimeinsätze, die Ihre Agenten ausführen. Sie
+brauchen für jede von ihnen mindestens einen Agenten, und eine gescheiterte
+kostet Sie diesen Agenten.
 
-What agents do NOT do is change your odds. The chance an operation lands is
-set by the operation itself: the simpler ones land just over half the time,
-the harder ones less often. Your agents make no difference to it, and
-neither do the target's. Three things do change it: a bribed agent inside
-the target doubles your chance against that realm, a realm that has exposed
-your agent turns nine of your attempts in ten away, and an Intelligence
-Alliance or Terrorist Prevention treaty lends an ally's agents to your side
-or the target's. See Agents.
+Was Agenten NICHT tun, ist Ihre Aussichten verändern. Wie wahrscheinlich
+eine Operation gelingt, bestimmt die Operation selbst: Die einfacheren
+gelingen etwas mehr als die Hälfte der Male, die schwereren seltener. Ihre
+Agenten ändern daran nichts, und die des Ziels ebenso wenig. Drei Dinge
+ändern es doch: Ein bestochener Agent im Ziel verdoppelt Ihre Aussicht gegen
+dieses Reich, ein Reich, das Ihren Agenten aufgedeckt hat, wehrt neun von
+zehn Ihrer Versuche ab, und ein Geheimdienstbündnis oder ein Abkommen zur
+Terrorabwehr leiht die Agenten eines Verbündeten Ihrer Seite oder der des
+Ziels. Siehe Verdeckte Agenten.
 
-Each operation also costs gold. The menu shows the price next to each one,
-and the footer shows how much gold and how many agents you have. You pay the
-gold when you send the operation. If you cannot pay, the operation does not
-run.
+Jede Operation kostet außerdem Gold. Das Menü zeigt den Preis neben jeder,
+und die Fußzeile zeigt, wie viel Gold und wie viele Agenten Sie haben. Sie
+zahlen das Gold, wenn Sie die Operation losschicken. Können Sie nicht
+zahlen, läuft die Operation nicht.
 
-While your realm is under New Realm Protection, your agents may not move
-against another realm: every operation that has an effect on its target is
-refused, and the refusal costs nothing — no gold, no agent, no turn. Send
-Spy and Spy on Relations only gather information, so those two stay open to
-you for as long as the shield lasts.
+Solange Ihr Reich unter dem Schutz für neue Reiche steht, dürfen Ihre
+Agenten nicht gegen ein anderes Reich vorgehen: Jede Operation, die auf ihr
+Ziel wirkt, wird abgewiesen, und die Abweisung kostet nichts - kein Gold,
+keinen Agenten, keinen Zug. Spion senden und Beziehungen ausspähen sammeln
+nur Auskünfte, diese beiden bleiben Ihnen also offen, solange der Schild
+hält.
 
-Most operations do not happen on the spot. When you choose one, your agent
-sets out: the fee and the agent go at once, and the operation itself is
-carried out during the next daily maintenance. The result waits for you on
-your next turn's report — whether the agent got through, and what it did. So
-an operation cannot soften a realm you are about to attack in the same turn;
-plan it a day ahead.  Send Spy and Spy on Relations are the exceptions,
-along with Expose Enemy Ops: those three answer you immediately.
+Die meisten Operationen geschehen nicht auf der Stelle. Wenn Sie eine
+wählen, bricht Ihr Agent auf: Die Gebühr und der Agent gehen sofort, die
+Operation selbst wird während der nächsten täglichen Verwaltung
+ausgeführt. Das Ergebnis erwartet Sie im Bericht Ihres nächsten Zuges - ob
+der Agent durchkam und was er ausrichtete. Eine Operation kann ein Reich
+also nicht in demselben Zug weichklopfen, in dem Sie es angreifen wollen;
+planen Sie einen Tag voraus.  Spion senden und Beziehungen ausspähen sind
+die Ausnahmen, zusammen mit Feindoperationen aufdecken: Diese drei antworten
+Ihnen sofort.
 
-An agreement is no shelter. You may aim an operation at a ruler you hold a
-treaty with, and the game asks you to confirm before the agent goes. Saying
-yes tears the treaty up at the usual price in support and morale, and the
-agent is then sent. See Treaties and Alliances. Send Spy and Spy on
-Relations do not ask.
+Ein Abkommen ist kein Schutz. Sie dürfen eine Operation gegen einen
+Herrscher richten, mit dem Sie einen Vertrag halten, und das Spiel fragt
+nach, bevor der Agent geht. Ein Ja zerreißt den Vertrag zum üblichen Preis
+an Rückhalt und Moral, und der Agent wird dann geschickt. Siehe Verträge und
+Bündnisse. Spion senden und Beziehungen ausspähen fragen nicht.
 
-If the realm you aimed at is gone by the time your agent arrives, the
-operation is abandoned and the fee is not returned.
+Ist das Reich, auf das Sie gezielt haben, bei der Ankunft Ihres Agenten
+nicht mehr da, wird die Operation abgebrochen, und die Gebühr wird nicht
+erstattet.
 
-Each covert operation may be run once for every turn in the day, and you may
-spend that allowance whenever you like — all of it in one turn, or one at a
-time.  Running Stir Revolts uses up one Stir Revolts and leaves every other
-operation untouched. The allowance refills at the start of each new day.
+Jede verdeckte Operation darf einmal je Zug des Tages ausgeführt werden, und
+Sie dürfen dieses Kontingent ausgeben, wann Sie wollen - alles in einem Zug
+oder eines nach dem anderen.  Ein Einsatz von Aufstände schüren verbraucht
+ein Aufstände schüren und lässt jede andere Operation unberührt. Das
+Kontingent füllt sich zu Beginn jedes neuen Tages wieder auf.
 
-After you pick a target the game asks how many agents to send, and suggests
-as many as you can: whichever runs out first of the agents you hold, the
-allowance you have left today, and the gold to pay the fee. Each agent is a
-separate operation with its own fee and its own chance of being caught. Send
-Spy and Spy on Relations only gather information, so they have no limit at
-all and go one at a time, and Expose Enemy Ops has no limit either.
+Nachdem Sie ein Ziel gewählt haben, fragt das Spiel, wie viele Agenten Sie
+schicken wollen, und schlägt so viele vor, wie Sie können: je nachdem, was
+zuerst ausgeht - die Agenten, die Sie halten, das Kontingent, das Ihnen
+heute bleibt, oder das Gold für die Gebühr. Jeder Agent ist eine eigene
+Operation mit eigener Gebühr und eigener Gefahr, gefasst zu werden. Spion
+senden und Beziehungen ausspähen sammeln nur Auskünfte, sie haben also
+überhaupt keine Grenze und gehen einzeln los, und Feindoperationen aufdecken
+hat ebenfalls keine Grenze.
 
-When an operation fails, your agent is caught and lost, and the target is
-warned — and a caught agent talks, so the target is told your realm's
-name. An operation that succeeds is reported to the target with no name
-attached. The only way anyone learns who is running operations against them
-is by catching an agent.
+Wenn eine Operation scheitert, wird Ihr Agent gefasst und ist verloren, und
+das Ziel ist gewarnt - und ein gefasster Agent redet, dem Ziel wird also der
+Name Ihres Reiches genannt. Eine Operation, die gelingt, wird dem Ziel ohne
+Namen gemeldet. Der einzige Weg, zu erfahren, wer Operationen gegen einen
+führt, ist das Fassen eines Agenten.
 
-Each operation has its own topic. Some of the topics in this section cover
-InterPlanetary Special Operations instead, which are aimed at another planet
-and need Bombers to deliver their payloads; each says so.
+Jede Operation hat ihr eigenes Thema. Einige Themen in diesem Abschnitt
+behandeln stattdessen interplanetare Spezialoperationen, die auf einen
+anderen Planeten gerichtet sind und Bomber brauchen, um ihre Fracht
+auszuliefern; jedes sagt das dazu.
 
-The Covert Operations menu appears during your turn, before the Spending and
-Attack menus. If you do not see it, turn on "Visit Covert Menu" in the
-Preferences menu.
+Das Menü Geheimoperationen erscheint während Ihres Zuges, vor den Menüs
+Ausgaben und Angriff. Wenn Sie es nicht sehen, schalten Sie
+\"Geheimdienstmenü\" im Menü Einstellungen ein.

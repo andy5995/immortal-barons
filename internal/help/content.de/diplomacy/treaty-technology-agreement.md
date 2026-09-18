@@ -10,8 +10,9 @@ title: Technologie
 Ein Technologieabkommen teilt die Wissenschaft zwischen den beiden
 Reichen. Die Forschung jeder Seite läuft schneller, solange der Pakt hält.
 
-The help it gives you is bounded by whichever of you holds fewer Technology
-regions, so it speeds up work you are already doing rather than standing in
-for it. A realm with no Technology of its own gains nothing from the pact,
-however advanced its partner is — buy the regions first, then find an ally
-who has done the same.
+Die Hilfe, die es Ihnen bringt, ist durch denjenigen von Ihnen beiden
+begrenzt, der weniger Technologie-Regionen hält; es beschleunigt also
+Arbeit, die Sie ohnehin leisten, statt sie zu ersetzen. Ein Reich ohne
+eigene Technologie gewinnt durch den Pakt nichts, wie fortgeschritten sein
+Partner auch sei - kaufen Sie erst die Regionen und suchen Sie dann einen
+Verbündeten, der dasselbe getan hat.

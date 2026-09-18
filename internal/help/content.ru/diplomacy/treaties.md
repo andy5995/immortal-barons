@@ -11,31 +11,33 @@ title: 'Договоры и союзы'
 вступает в силу лишь тогда, когда другая сторона его принимает. У каждого
 вида договора своя тема.
 
-Aiming an attack at a ruler you hold an agreement with tears the agreement
-up, and the game asks you to confirm it before you choose your force. Say
-yes and your people riot at being ruled by a faithless baron: you lose a
-quarter of both your support and your army's morale, and the battle is then
-fought at that lower morale. Say no and the attack is called off. The two
-realms are left with no agreement between them, and the ruler you betrayed
-will have their own answer to that. The same question comes up before a
-nuclear, chemical or biological strike, and before a covert operation that
-sends an agent. Send Spy and Spy on Relations only look, so they do not ask
-and cost you nothing.
+Нападение на правителя, с которым у вас соглашение, рвёт это соглашение, и
+игра просит подтверждения, прежде чем вы выберете войска. Ответите «да» — и
+ваш народ бунтует против вероломного барона: вы теряете четверть поддержки и
+четверть боевого духа армии, и бой идёт уже при этом пониженном
+духе. Ответите «нет» — нападение отменяется. Между двумя державами не
+остаётся никакого соглашения, и преданный вами правитель ответит на это
+по-своему. Тот же вопрос задаётся перед ядерным, химическим или
+биологическим ударом и перед тайной операцией, отправляющей
+агента. Отправить шпиона и Разведать отношения только смотрят, поэтому они
+не спрашивают и ничего вам не стоят.
 
-A Declaration of War, on the Diplomacy menu, ends an agreement at the same
-price without a battle. It costs nothing if you had no agreement to break.
+Объявление войны в меню Дипломатия прекращает соглашение по той же цене, но
+без боя. Если соглашения не было, оно не стоит ничего.
 
-View Treaties shows your current relations with the other rulers in the
-game, and below that, the offers you have sent that nobody has answered yet.
+Показать договоры выводит ваши нынешние отношения с другими правителями
+игры, а ниже — отправленные вами предложения, на которые ещё никто не
+ответил.
 
-Once you hold a treaty, Send Message offers to write to all your allies at
-once.  It reaches every ruler you have an agreement with, whatever kind it
-is.
+Как только у вас есть договор, Отправить сообщение предлагает написать сразу
+всем союзникам.  Оно дойдёт до каждого правителя, с которым у вас есть
+соглашение, какого бы вида оно ни было.
 
-An offer waits until the other ruler plays a turn. It does not run out. If
-you send a second, different offer to the same ruler, it takes the place of
-the first one, because two realms can hold only one agreement at a time.
+Предложение ждёт, пока другой правитель не сыграет ход. Оно не
+истекает. Если вы пошлёте тому же правителю второе, другое предложение, оно
+займёт место первого, потому что две державы могут держать между собой лишь
+одно соглашение.
 
-Choosing the treaty you already hold with a ruler sends nothing. The game
-tells you the agreement still stands and returns you to the
-menu. Declaration of War is the way to end one.
+Выбор договора, который у вас с правителем уже есть, ничего не
+отправляет. Игра сообщает, что соглашение по-прежнему в силе, и возвращает
+вас в меню. Прекратить его можно объявлением войны.

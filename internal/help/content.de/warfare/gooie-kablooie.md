@@ -7,34 +7,37 @@ title: 'Gooie Kablooie'
 
 # Gooie Kablooie
 
-The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy
-planet rather than at one baron, and your planet can only have one at a
-time.
+Der Gooie Kablooie ist die letzte aller Waffen. Er zielt auf einen ganzen
+feindlichen Planeten statt auf einen einzelnen Baron, und Ihr Planet kann
+immer nur einen haben.
 
-Nobody buys the weapon alone. One baron starts the work and names the target
-planet. After that, any baron here can put money in, a million gold at a
-time.  The price depends on the size of the target planet: aiming at a
-planet much larger than yours costs more.
+Niemand kauft die Waffe allein. Ein Baron beginnt die Arbeit und nennt den
+Zielplaneten. Danach kann jeder Baron hier Geld hineinlegen, je eine Million
+Gold.  Der Preis hängt von der Größe des Zielplaneten ab: Auf einen Planeten
+zu zielen, der viel größer ist als Ihrer, kostet mehr.
 
-When the last of the money is in, the weapon builds for three more days and
-then launches itself. Nobody decides that. The only person who can call it
-off is your elected Coordinator, and only before it leaves the ground. The
-gold is spent either way.
+Ist das letzte Geld beisammen, baut die Waffe noch drei Tage und startet
+dann von selbst. Niemand entscheidet das. Der Einzige, der sie abblasen
+kann, ist Ihr gewählter Koordinator, und nur, bevor sie den Boden
+verlässt. Das Gold ist so oder so ausgegeben.
 
-## Being on the receiving end
+## Wenn es Sie trifft
 
-A weapon aimed at your planet does not go off and disappear. It arrives,
-sits on your planet, and eats it. The day it lands it takes a tenth of every
-realm's regions. Every day after that it takes another twentieth, until five
-days are up and it burns itself out. Left alone it will cost you better than
-a quarter of your land.
+Eine Waffe, die auf Ihren Planeten gerichtet ist, geht nicht hoch und
+verschwindet. Sie trifft ein, bleibt auf Ihrem Planeten und frisst ihn. Am
+Tag der Landung nimmt sie ein Zehntel der Regionen jedes Reiches. An jedem
+Tag danach nimmt sie ein weiteres Zwanzigstel, bis fünf Tage um sind und sie
+ausbrennt. Lässt man sie gewähren, kostet sie Sie mehr als ein Viertel Ihres
+Landes.
 
-Only jets can reach it. Your realm is asked at the start of your turn
-whether you want to attack it. About a third of the jets you send do not
-come home.
+Nur Jets erreichen sie. Ihr Reich wird zu Beginn Ihres Zuges gefragt, ob Sie
+sie angreifen wollen. Etwa ein Drittel der Jets, die Sie schicken, kommt
+nicht heim.
 
-No single wave can finish it, however many jets you send. That is the point:
-the weapon is built to need the whole planet's air forces, and a planet that
-cannot organize loses the land.
+Keine einzelne Welle kann sie erledigen, wie viele Jets Sie auch
+schicken. Das ist der Sinn: Die Waffe ist darauf gebaut, die
+Luftstreitkräfte des ganzen Planeten zu erfordern, und ein Planet, der sich
+nicht abstimmen kann, verliert das Land.
 
-An SDI program is no help against it, and neither is anything else you own.
+Ein SDI-Programm hilft dagegen nicht, und nichts anderes, was Sie besitzen,
+auch nicht.

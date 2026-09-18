@@ -2,10 +2,10 @@
 category: covert
 in_game: true
 order: 5
-title: 'Support Dissensions'
+title: 'Поддержать раздор'
 ---
 
-# Support Dissensions
+# Поддержать раздор
 
-Support Dissensions turns the target's own troopers against them. Some of
-their army deserts and flees.
+Поддержать раздор обращает собственных солдат цели против неё. Часть её
+армии дезертирует и разбегается.

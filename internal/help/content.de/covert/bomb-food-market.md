@@ -2,11 +2,12 @@
 category: covert
 in_game: true
 order: 11
-title: 'Bomb Food Market'
+title: 'Nahrungsmarkt bombardieren'
 ---
 
-# Bomb Food Market
+# Nahrungsmarkt bombardieren
 
-Bomb Food Market is an InterPlanetary operation, on the Special Operations
-menu. It destroys much of another planet's food market supply. A large loss
-can start a food shortage across that whole planet.
+Nahrungsmarkt bombardieren ist eine interplanetare Operation im Menü
+Spezialoperationen. Sie zerstört einen großen Teil des Nahrungsmarktbestands
+eines anderen Planeten. Ein großer Verlust kann auf diesem ganzen Planeten
+eine Nahrungsknappheit auslösen.

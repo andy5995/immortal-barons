@@ -2,19 +2,20 @@
 category: covert
 in_game: true
 order: 2
-title: 'Send Spy'
+title: 'Spion senden'
 ---
 
-# Send Spy
+# Spion senden
 
-Send Spy gathers military intelligence on an enemy. It reveals their land,
-troops, defenses, gold, and more, so you can plan an attack. If the mission
-fails, your spy is caught and does not return.
+Spion senden sammelt militärische Aufklärung über einen Feind. Es enthüllt
+sein Land, seine Truppen, seine Verteidigung, sein Gold und mehr, so dass
+Sie einen Angriff planen können. Scheitert der Einsatz, wird Ihr Spion
+gefasst und kehrt nicht zurück.
 
-It succeeds more often than most operations, whoever you send it against —
-see the Covert Operations overview for the odds and what does and does not
-move them.
+Es gelingt häufiger als die meisten Operationen, gegen wen Sie es auch
+schicken - die Aussichten, und was sie bewegt und was nicht, stehen in der
+Übersicht zu den verdeckten Operationen.
 
-Send Spy answers on the spot. It is one of the few operations that does not
-wait for daily maintenance, which is what makes it useful right before an
-attack.
+Spion senden antwortet auf der Stelle. Es ist eine der wenigen Operationen,
+die nicht auf die tägliche Verwaltung warten, und genau das macht es
+unmittelbar vor einem Angriff nützlich.

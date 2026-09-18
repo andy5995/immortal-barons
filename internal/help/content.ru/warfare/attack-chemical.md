@@ -7,20 +7,19 @@ title: 'Химическая атака'
 
 # Химическая атака
 
-A Chemical Attack does what a Nuclear Attack does to land, on a smaller
-scale, and then gasses the realm underneath it. It ruins about a third as
-many regions into waste, kills a fifth of the enemy's people outright, and
-knocks down both their military morale and their popular support. It leaves
-their troopers alone.
+Химическая атака делает с землёй то же, что ядерная, но в меньшем размере, а
+затем травит державу под собой. Она обращает в пустошь примерно втрое меньше
+регионов, сразу убивает пятую часть народа врага и сбивает и боевой дух его
+армии, и поддержку народа. Солдат она не трогает.
 
-The morale and support damage is the part that lasts. Casualties come back
-as the population grows; a realm knocked down to two-thirds support earns
-less and fights worse until it has climbed back.
+Урон боевому духу и поддержке — это то, что остаётся надолго. Потери
+восполняются ростом населения; держава, сбитая до двух третей поддержки,
+зарабатывает меньше и дерётся хуже, пока не выкарабкается обратно.
 
-The arms broker prices the missile off the target's population as well as
-its land, so gassing a crowded realm is expensive. Nothing intercepts it —
-not SDI, not turrets, not tanks.
+Торговец оружием назначает цену за ракету и по населению цели, и по её
+земле, так что травить густонаселённую державу дорого. Перехватить её нечем
+— ни SDI, ни турелями, ни танками.
 
-Strategy: this is the weapon to use on a rich, crowded rival you cannot beat
-in the field. A Nuclear Attack hurts their land harder, but only a chemical
-strike touches the people paying for their army.
+Стратегия: это оружие против богатого густонаселённого соперника, которого
+вам не одолеть в поле. Ядерная атака сильнее бьёт по его земле, но только
+химический удар достаёт до людей, оплачивающих его армию.

@@ -32,7 +32,7 @@ msgstr " - kies een onderwerp:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:926
+#: internal/menu/menu.go:944
 msgid "# Owned"
 msgstr "Aantal"
 
@@ -354,12 +354,12 @@ msgstr ""
 msgid "A computer baron has no caller to rename."
 msgstr "Een computerbaron heeft geen gebruiker om te hernoemen."
 
-#: internal/menu/attacktypehelp.go:44
+#: internal/menu/attacktypehelp.go:52
 msgid ""
-"A grinding assault. Fatigue drops your forces to 85% strength, but they "
-"press until both sides have taken 20% losses, and they bring home 125% of a "
-"Normal Attack's land."
-msgstr ""
+"A grinding assault. Fatigue drops your forces to 85 percent strength, but "
+"they press until both sides have taken 20 percent losses, and they bring "
+"home 125 percent of a Normal Attack's land."
+msgstr "Een slijtageslag. Vermoeidheid brengt uw troepen terug op 85 procent sterkte, maar ze zetten door tot beide partijen 20 procent verliezen hebben geleden, en ze brengen 125 procent mee van het land van een gewone aanval."
 
 #: internal/menu/config_editor.go:220
 msgid "A league board has no computer barons."
@@ -1146,7 +1146,7 @@ msgstr "Voer het Gooie-nummer in (0 om te annuleren)?"
 msgid "Enter Planet Name or Number"
 msgstr "Voer planeetnaam of nummer in"
 
-#: internal/menu/attacktypehelp.go:123
+#: internal/menu/attacktypehelp.go:131
 msgid "Enter Topic"
 msgstr "Voer het onderwerp in"
 
@@ -1171,7 +1171,7 @@ msgstr ""
 msgid "Expose Enemy Ops"
 msgstr "Vijandelijke operaties onthullen"
 
-#: internal/menu/attacktypehelp.go:44
+#: internal/menu/attacktypehelp.go:52
 msgid "Extended Battle"
 msgstr "Langdurige slag"
 
@@ -1215,7 +1215,7 @@ msgstr "Spelinstellingen"
 msgid "Game length in days (0 = endless)"
 msgstr "Speelduur in dagen (0 = eindeloos)"
 
-#: internal/menu/tree.go:725
+#: internal/menu/tree.go:726
 msgid "Game started on %s"
 msgstr "Spel begonnen op %s"
 
@@ -1423,7 +1423,7 @@ msgstr "Het bereikt hen niet eerder dan beurt %d van hun dag."
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "De financiering kost uw planeet %s miljoen goud. Akkoord?"
 
-#: internal/menu/menu.go:926
+#: internal/menu/menu.go:943
 msgid "Item"
 msgstr "Item"
 
@@ -1637,7 +1637,7 @@ msgstr "Nieuw aantal %s te koop"
 msgid "New tax rate?"
 msgstr "Nieuw belastingtarief?"
 
-#: internal/menu/menu.go:1163
+#: internal/menu/menu.go:1182
 msgid "No"
 msgstr "Nee"
 
@@ -1703,7 +1703,7 @@ msgstr ""
 "Geen van die planeten staat op de competitielijst, dus er kan nog niets "
 "naartoe."
 
-#: internal/menu/attacktypehelp.go:42
+#: internal/menu/attacktypehelp.go:50
 msgid "Normal Attack"
 msgstr "Gewone aanval"
 
@@ -1930,7 +1930,7 @@ msgstr "Planetaire belasting (%)"
 msgid "Planetary Treaties"
 msgstr "Planetaire verdragen"
 
-#: internal/menu/tree.go:754
+#: internal/menu/tree.go:755
 msgid "Planetary time: %s   New day in %s"
 msgstr "Planeettijd: %s   Nieuwe dag over %s"
 
@@ -1988,7 +1988,7 @@ msgstr "Openbaar antwoorden?"
 msgid "Pushing..."
 msgstr "Bezig met verzenden..."
 
-#: internal/menu/attacktypehelp.go:43
+#: internal/menu/attacktypehelp.go:51
 msgid "Quick Strike"
 msgstr "Snelle aanval"
 
@@ -2300,12 +2300,12 @@ msgstr "Sterkte"
 msgid "Support Dissensions"
 msgstr "Tweedracht steunen"
 
-#: internal/menu/attacktypehelp.go:43
+#: internal/menu/attacktypehelp.go:51
 msgid ""
-"Surprise lets you fight at 120% of your normal strength, but the battle is "
-"short and disorganized: both sides retreat at 8% losses, and you carry off "
-"only half the land a Normal Attack would."
-msgstr ""
+"Surprise lets you fight at 120 percent of your normal strength, but the "
+"battle is short and disorganized: both sides retreat at 8 percent losses, "
+"and you carry off only half the land a Normal Attack would."
+msgstr "Door de verrassing vecht u op 120 procent van uw normale sterkte, maar de slag is kort en rommelig: beide partijen trekken zich terug bij 8 procent verliezen, en u neemt maar de helft mee van het land dat een gewone aanval zou opleveren."
 
 #: internal/menu/tree.go:145
 msgid "System"
@@ -2480,7 +2480,7 @@ msgstr "De vijand verloor: %s."
 msgid "The food market is out of food for today."
 msgstr "De voedselmarkt is door haar voorraad heen voor vandaag."
 
-#: internal/menu/tree.go:721
+#: internal/menu/tree.go:722
 msgid "The game begins %s."
 msgstr "Het spel begint %s."
 
@@ -2967,7 +2967,7 @@ msgstr "Macro's schrijven"
 msgid "Writing to:"
 msgstr "Schrijven aan:"
 
-#: internal/menu/menu.go:1162
+#: internal/menu/menu.go:1181
 msgid "Yes"
 msgstr "Ja"
 
@@ -3007,7 +3007,9 @@ msgstr "U kunt niet van uw eigen aanbod kopen."
 #: internal/menu/turnstages.go:477
 msgid ""
 "You cannot change it until your new-realm protection ends, %d turns from now."
-msgstr "U kunt dit pas wijzigen als uw bescherming voor nieuwe rijken afloopt, over %d beurten."
+msgstr ""
+"U kunt dit pas wijzigen als uw bescherming voor nieuwe rijken afloopt, over "
+"%d beurten."
 
 #: internal/menu/turnstages.go:91
 msgid "You cannot cover all your maintenance this turn."
@@ -3074,7 +3076,7 @@ msgstr "U hebt %s goud en %d agenten."
 msgid "You have %s gold and %d turns."
 msgstr "U heeft %s goud en %d beurten."
 
-#: internal/menu/tree.go:698
+#: internal/menu/tree.go:699
 msgid "You have %s gold and %s units of food."
 msgstr "U heeft %s goud en %s eenheden voedsel."
 
@@ -3351,11 +3353,12 @@ msgstr ""
 "Uw troepen veranderden terwijl u de aanval voorbereidde - alleen eenheden "
 "die nog onder uw bevel stonden zijn gestuurd."
 
-#: internal/menu/attacktypehelp.go:42
+#: internal/menu/attacktypehelp.go:50
 msgid ""
 "Your forces fight at full strength. Both sides break off once they have "
-"taken 15% losses, and you take the standard share of the defender's regions."
-msgstr ""
+"taken 15 percent losses, and you take the standard share of the defender's "
+"regions."
+msgstr "Uw troepen vechten op volle sterkte. Beide partijen breken af zodra ze 15 procent verliezen hebben geleden, en u neemt het gebruikelijke deel van de regio's van de verdediger."
 
 #: internal/menu/actions.go:250
 msgid "Your holdings changed while you decided — only what remained was sold."
@@ -3629,7 +3632,9 @@ msgstr "toont alle opties, gegroepeerd naar wie ze nodig heeft, en sluit af"
 msgid ""
 "print the normalized game world as JSON, then exit (after load-time "
 "migration; for scripts and balance checks)"
-msgstr "toont de genormaliseerde spelwereld als JSON en sluit af (na de migratie bij het laden; voor scripts en balanscontroles)"
+msgstr ""
+"toont de genormaliseerde spelwereld als JSON en sluit af (na de migratie bij "
+"het laden; voor scripts en balanscontroles)"
 
 #: cmd/immortal-barons/flags.go:101
 msgid "print the version, then exit"
@@ -3663,7 +3668,9 @@ msgstr "voer het dagelijkse onderhoud uit en sluit af"
 msgid ""
 "run the full cycle: read inbound packets, play a turn, write outbound "
 "packets, then exit"
-msgstr "voert de hele cyclus uit: inkomende pakketten lezen, een beurt spelen, uitgaande pakketten schrijven, daarna afsluiten"
+msgstr ""
+"voert de hele cyclus uit: inkomende pakketten lezen, een beurt spelen, "
+"uitgaande pakketten schrijven, daarna afsluiten"
 
 #: cmd/immortal-barons/flags.go:72
 msgid ""
@@ -3723,7 +3730,9 @@ msgstr ""
 #: cmd/immortal-barons/flags.go:79
 msgid ""
 "start a new season across the whole league on DATE (node #1 only), then exit"
-msgstr "start op DATUM een nieuw seizoen in de hele competitie (alleen knooppunt #1) en sluit af"
+msgstr ""
+"start op DATUM een nieuw seizoen in de hele competitie (alleen knooppunt #1) "
+"en sluit af"
 
 #: cmd/immortal-barons/flags.go:90
 msgid ""

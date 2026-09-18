@@ -2,11 +2,11 @@
 category: covert
 in_game: true
 order: 11
-title: 'Bomb Food Market'
+title: 'Бомбить рынок еды'
 ---
 
-# Bomb Food Market
+# Бомбить рынок еды
 
-Bomb Food Market is an InterPlanetary operation, on the Special Operations
-menu. It destroys much of another planet's food market supply. A large loss
-can start a food shortage across that whole planet.
+Бомбить рынок еды — межпланетная операция из меню Спецоперации. Она
+уничтожает большую часть запасов рынка еды на другой планете. Крупная потеря
+способна вызвать нехватку еды на всей той планете.

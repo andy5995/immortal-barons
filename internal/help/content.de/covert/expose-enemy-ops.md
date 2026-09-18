@@ -2,21 +2,22 @@
 category: covert
 in_game: true
 order: 9
-title: 'Expose Enemy Ops'
+title: 'Feindoperationen aufdecken'
 ---
 
-# Expose Enemy Ops
+# Feindoperationen aufdecken
 
-Expose Enemy Ops turns a bribed agent against the service that employs
-it. For the next day, nine in ten of that realm's covert operations against
-you are caught before they do anything.
+Feindoperationen aufdecken wendet einen bestochenen Agenten gegen den
+Dienst, der ihn beschäftigt. Für den nächsten Tag werden neun von zehn
+verdeckten Operationen dieses Reiches gegen Sie aufgehalten, bevor sie
+irgendetwas ausrichten.
 
-It works against ONE realm — the realm the agent is inside — so the menu
-lists only the realms you have already bribed. Bribery comes first; without
-an agent on your payroll there is nothing to expose. A tenth of that realm's
-attempts still get through.
+Es wirkt gegen EIN Reich - das Reich, in dem der Agent sitzt -, daher listet
+das Menü nur die Reiche auf, die Sie bereits bestochen haben. Bestechung
+kommt zuerst; ohne einen Agenten auf Ihrer Lohnliste gibt es nichts
+aufzudecken. Ein Zehntel der Versuche dieses Reiches kommt weiterhin durch.
 
-It costs no agent and takes no part of a daily allowance, so you may run it
-as often as you can pay for it. Anything the shield turns aside counts as a
-caught agent, so on top of blocking the damage you are told which realm sent
-it.
+Es kostet keinen Agenten und keinen Teil eines Tageskontingents, Sie dürfen
+es also so oft ausführen, wie Sie es bezahlen können. Alles, was der Schild
+abwehrt, zählt als gefasster Agent, so dass Ihnen zusätzlich zum
+abgewendeten Schaden gesagt wird, welches Reich ihn geschickt hat.

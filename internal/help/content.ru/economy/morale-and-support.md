@@ -2,63 +2,65 @@
 category: economy
 in_game: true
 order: 14
-title: 'Morale and Support'
+title: 'Боевой дух и поддержка'
 ---
 
-# Morale and Support
+# Боевой дух и поддержка
 
-Your realm has two moods, each a number from 0 to 100. Popular Support is
-what your people think of you. Military Morale is what your army thinks of
-you.
+У вашей державы два настроения, каждое — число от 0 до 100. Поддержка народа
+— то, что думает о вас народ. Боевой дух — то, что думает о вас армия.
 
-Both start at 100 when you found your realm. Nothing ever raises them for
-free.  They fall when you go short, and the only way back up is to pay for
-it at the maintenance stage each turn.
+Оба начинаются со 100, когда вы основываете державу. Даром их не поднимает
+ничто.  Они падают, когда вы недодаёте, и единственный путь вверх —
+заплатить за это на этапе содержания в каждом ходу.
 
 ## Что они делают
 
-Popular Support:
+Поддержка народа:
 
-- sets your Coastal (tourism) income, which collapses when Support is low
-- sets how many people your land can hold
-- when it drops under 10, it starts pulling Morale down with it
+- задаёт ваш доход от Побережья (туризм), который рушится при низкой
+  поддержке
+- задаёт, сколько людей вмещает ваша земля
+- опустившись ниже 10, начинает тянуть за собой вниз и Боевой дух
 
-Military Morale scales how hard your army fights, both attacking and
-defending.  A full-morale army fights above its paper strength. A broken one
-fights at about half. When Morale falls under 40, troopers, jets and tanks
-begin to desert each turn, and the lower it goes the more of them
-leave. Bombers, carriers, and turrets never desert over Morale — but
-underpaying your armed forces' upkeep deserts turrets too, along with
-troopers, jets and tanks, whatever Morale reads.
+Боевой дух определяет, насколько упорно дерётся ваша армия — и в нападении,
+и в обороне.  Армия с полным духом дерётся выше своей бумажной
+силы. Сломленная — примерно вполовину слабее. Когда Боевой дух падает ниже
+40, солдаты, самолёты и танки начинают дезертировать каждый ход, и чем ниже
+он опускается, тем больше их уходит. Бомбардировщики, авианосцы и турели
+из-за Боевого духа не дезертируют никогда — но если недоплачивать содержание
+вооружённым силам, вместе с солдатами, самолётами и танками разбегаются и
+турели, каков бы ни был Боевой дух.
 
-There is one more effect that is easy to miss. Auto-Pay Maintenance only
-pays your bills silently while **both** numbers read exactly 100. Let either
-slip and you are back to answering the maintenance prompts by hand every
-turn.
+Есть ещё один эффект, который легко упустить. Автооплата содержания молча
+платит по вашим счетам, только пока **оба** числа показывают ровно
+100. Стоит любому из них просесть — и вы снова отвечаете на запросы
+содержания вручную каждый ход.
 
-## What lowers them
+## Что их снижает
 
-- Underpaying your armed forces costs Morale. Underpaying your land upkeep,
-  the Queen's tax, or your people's food costs Support. Underfeeding the
-  army costs Morale.
-- A riot from high taxes costs Support.
-- Declaring war on a ruler you hold an agreement with costs you
-  nothing. Attacking that ruler without declaring war first ends the
-  agreement too, and costs you a quarter of each.
-- A chemical or biological strike on your realm hurts both. The plague is
-  far worse for your army than the gas is.
-- Enemy agents can lower either one directly. See Stir Revolts and
-  Demoralize Forces.
+- Недоплата вооружённым силам стоит Боевого духа. Недоплата содержания
+  земель, налога Королевы или еды для народа стоит Поддержки. Недокорм армии
+  стоит Боевого духа.
+- Бунт из-за высоких налогов стоит Поддержки.
+- Объявление войны правителю, с которым у вас соглашение, не стоит вам
+  ничего. Нападение на такого правителя без объявления войны тоже прекращает
+  соглашение и стоит вам четверти каждого из двух показателей.
+- Химический или биологический удар по вашей державе бьёт по обоим. Для
+  армии чума куда хуже, чем газ.
+- Вражеские агенты могут снизить любой из них напрямую. См. Разжечь мятежи и
+  Деморализовать войска.
 
-## Paying them back
+## Как их вернуть
 
-At the maintenance stage the crown asks for gold to buy back up to fifteen
-points of each. Support is priced by the size of your population, Morale by
-the size of your army — troopers, turrets and tanks cost most, jets least,
-bombers and carriers nothing. Units you have listed on the Trading Market
-still count.
+На этапе содержания корона просит золота, чтобы выкупить до пятнадцати
+пунктов каждого. Поддержка стоит по численности вашего населения, Боевой дух
+— по размеру армии: дороже всего обходятся солдаты, турели и танки, дешевле
+всего самолёты, а бомбардировщики и авианосцы не стоят ничего. Части,
+выставленные вами на Торговый рынок, тоже считаются.
 
-What you pay buys points in proportion, so paying half the request buys
-about half the points. You may pay up to half again as much as is asked, and
-that really does buy more than fifteen points. Neither number can pass 100,
-so overpaying a nearly-content realm wastes the difference.
+Заплаченное покупает пункты соразмерно, так что половина запрошенного купит
+примерно половину пунктов. Заплатить можно в полтора раза больше
+запрошенного, и это действительно даёт больше пятнадцати пунктов. Ни одно из
+двух чисел не может превысить 100, так что переплата у почти довольной
+державы пропадает впустую.

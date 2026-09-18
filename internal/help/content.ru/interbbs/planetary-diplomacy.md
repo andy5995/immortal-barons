@@ -2,49 +2,49 @@
 category: interbbs
 in_game: true
 order: 2
-title: 'Planetary Diplomacy'
+title: 'Планетарная дипломатия'
 ---
 
-# Planetary Diplomacy
+# Планетарная дипломатия
 
-Your board keeps a short list of where it stands with each of the other
-planets. Each one is marked **Enemy**, **None**, **Peace** or
-**Allied**. Open it from InterPlanetary Operations with **Diplomacy
-List**. You also see the mark for a planet whenever you name one, on the
-line that reads "Our current relations with...".
+Ваша доска ведёт короткий список того, как она относится к каждой из прочих
+планет. Каждая помечена как **Enemy**, **None**, **Peace** или
+**Allied**. Открыть его можно из межпланетных операций пунктом **Список
+дипломатии**. Пометку планеты вы также видите каждый раз, когда называете
+её, в строке \"Наши нынешние отношения с...\".
 
-Only your board's Coordinator can change the list. It is on the Coordinator
-Menu, under Diplomacy Modification.
+Менять список может только координатор вашей доски. Это делается в меню
+координатора, пунктом изменения дипломатии.
 
-## What it does and does not do
+## Что он делает и чего не делает
 
-The list is a note from your Coordinator to the barons on your own board. It
-tells you what your board thinks of a planet. Mostly it only describes:
+Список — это записка вашего координатора баронам собственной доски. Он
+говорит, что ваша доска думает о планете. По большей части он только
+описывает:
 
-- It does not stop an attack. You can still attack a planet marked Allied,
-  and a planet marked Enemy can still attack you.
-- The other planets never see it. They keep their own list, and it may say
-  something quite different about you.
+- Он не мешает атаке. Вы по-прежнему можете напасть на планету, помеченную
+  Allied, а планета, помеченная Enemy, по-прежнему может напасть на вас.
+- Другие планеты его не видят. У них свой список, и о вас в нём может быть
+  сказано совсем иное.
 
-Two things do use it:
+Две вещи всё же им пользуются:
 
-- **Trading.** You may only buy at another planet's market while your board
-  marks that planet **Allied**. Both boards must agree: yours has to call
-  theirs Allied for your bid to go, and theirs has to call yours Allied to
-  fill it. If an alliance ends while your bid is travelling, your gold comes
-  back.
-- **Messages.** Writing to **Allied Planets** from the IP Messages menu
-  sends to every planet the list marks Allied.
+- **Торговля.** Покупать на рынке другой планеты вы можете, только пока ваша
+  доска помечает её как **Allied**. Согласны должны быть обе доски: ваша
+  должна назвать их союзниками, чтобы заявка ушла, а их — назвать союзниками
+  вас, чтобы её выполнить. Если союз распался, пока заявка в пути, золото
+  вернётся к вам.
+- **Сообщения.** Письмо **Союзным планетам** из меню межпланетных сообщений
+  уходит всем планетам, помеченным в списке как Allied.
 
-So ask your Coordinator to mark a planet Allied before you plan to trade
-there.
+Поэтому попросите координатора пометить планету как Allied заранее, если
+собираетесь там торговать.
 
-## Using it
+## Как этим пользоваться
 
-Read the list before you commit forces. Your Coordinator marks a planet
-Enemy after seeing something you may not have seen — a raid on a neighbor, a
-strike on your own board, a message that went badly. It is the cheapest
-warning you will get.
+Читайте список, прежде чем двигать войска. Координатор помечает планету как
+Enemy, увидев то, чего вы могли не увидеть: налёт на соседа, удар по вашей
+доске, скверно окончившийся разговор. Дешевле предупреждения вы не получите.
 
-If you disagree with a mark, say so. The Coordinator is elected, and the
-list follows whoever holds the post.
+Если вы не согласны с пометкой, скажите об этом. Координатора выбирают, и
+список идёт за тем, кто занимает должность.

@@ -496,13 +496,25 @@ that rides the packets) ride the same transport. An individual strike picks its
 type — Normal Attack / Quick Strike / Extended Battle, BRE-verified from
 `game/attack.hlp` and a disassembly; a group attack gets no choice and fights as
 a Normal Attack. **Localization**: help docs (po4a) and
-UI strings (`internal/i18n`) render in the caller's language. Portuguese (pt,
-Brazilian) and Dutch are complete on the help side and all but complete on the
-UI side; German and Russian are seeded. All four grow via the `.po` catalogs,
-and a machine translation is expected to be corrected by a native speaker's PR
-rather than defended. A catalog using any character outside CP437 is not offered
-to a CP437 caller at all — de and nl fit, pt and ru do not — so a stray em dash
-in a Latin-script catalog silently costs that language its door audience.
+UI strings (`internal/i18n`) render in the caller's language. All four shipped
+languages — German, Russian, Dutch and Brazilian Portuguese — are now complete
+or near-complete on both sides; what is left untranslated is punctuation and
+proper names. Every one is a machine translation, unreviewed by a native
+speaker, and is expected to be corrected by a PR rather than defended.
+
+Two traps, both of which have already cost this project something:
+
+A catalog using any character outside CP437 is not offered to a CP437 caller at
+all — de and nl fit, pt and ru do not — so a stray em dash in a Latin-script
+catalog silently costs that language its door audience. Dutch was excluded for
+months over three of them.
+
+`msgmerge` fills a new entry from whichever old one has the most similar
+ENGLISH, so a `#, fuzzy` msgstr is a guess about spelling and not about meaning.
+De and ru each carried 105 such entries ("Bomb AirBases" as the German for Bomb
+Trade Routes) and several had a verb the English does not — `%s` against `%d` —
+which would have failed the build the moment anyone cleared the markers in bulk.
+Read a fuzzy entry before clearing it; never un-fuzzy a catalog wholesale.
 
 **Bulletin files**: `BulletinDir` in `bbs.cfg` writes the scoreboard, today's
 and yesterday's news, a World Report, and the league's eight InterBBS Scores

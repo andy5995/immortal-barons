@@ -7,10 +7,11 @@ title: Angriffe
 
 # Angriffe
 
-You can strike other empires in several ways, from a direct assault with
-your army to missiles and planet-wide weapons. Each kind of attack has its
-own topic.
+Sie können andere Reiche auf mehrere Arten treffen, vom geraden Sturm mit
+Ihrer Armee bis zu Raketen und planetenweiten Waffen. Jede Angriffsart hat
+ihr eigenes Thema.
 
-You can also be attacked while you are playing. If that happens, a notice
-appears the next time you press a key. An order you already typed is reduced
-to what you still hold, and the game tells you when it does that.
+Sie können auch angegriffen werden, während Sie spielen. Geschieht das,
+erscheint beim nächsten Tastendruck ein Hinweis. Ein Befehl, den Sie bereits
+eingegeben haben, wird auf das gekürzt, was Ihnen noch bleibt, und das Spiel
+sagt Ihnen, wenn es das tut.

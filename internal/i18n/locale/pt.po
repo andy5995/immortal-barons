@@ -32,7 +32,7 @@ msgstr " — escolha um tópico:"
 msgid "#"
 msgstr ""
 
-#: internal/menu/menu.go:926
+#: internal/menu/menu.go:944
 msgid "# Owned"
 msgstr "Qtd."
 
@@ -352,12 +352,12 @@ msgstr ""
 msgid "A computer baron has no caller to rename."
 msgstr "Um barão do computador não tem usuário para renomear."
 
-#: internal/menu/attacktypehelp.go:44
+#: internal/menu/attacktypehelp.go:52
 msgid ""
-"A grinding assault. Fatigue drops your forces to 85% strength, but they "
-"press until both sides have taken 20% losses, and they bring home 125% of a "
-"Normal Attack's land."
-msgstr ""
+"A grinding assault. Fatigue drops your forces to 85 percent strength, but "
+"they press until both sides have taken 20 percent losses, and they bring "
+"home 125 percent of a Normal Attack's land."
+msgstr "Um assalto desgastante. O cansaço reduz suas forças a 85 por cento da força, mas elas insistem até os dois lados perderem 20 por cento, e trazem para casa 125 por cento da terra de um Ataque Normal."
 
 #: internal/menu/config_editor.go:220
 msgid "A league board has no computer barons."
@@ -1140,7 +1140,7 @@ msgstr "Informe o número do Gooie (0 para cancelar)?"
 msgid "Enter Planet Name or Number"
 msgstr "Informe o nome ou o número do planeta"
 
-#: internal/menu/attacktypehelp.go:123
+#: internal/menu/attacktypehelp.go:131
 msgid "Enter Topic"
 msgstr "Informe o tópico"
 
@@ -1165,7 +1165,7 @@ msgstr ""
 msgid "Expose Enemy Ops"
 msgstr "Expor as Operações Inimigas"
 
-#: internal/menu/attacktypehelp.go:44
+#: internal/menu/attacktypehelp.go:52
 msgid "Extended Battle"
 msgstr "Batalha Prolongada"
 
@@ -1209,7 +1209,7 @@ msgstr "Configuração do Jogo"
 msgid "Game length in days (0 = endless)"
 msgstr "Duração do jogo em dias (0 = sem fim)"
 
-#: internal/menu/tree.go:725
+#: internal/menu/tree.go:726
 msgid "Game started on %s"
 msgstr "O jogo começou em %s"
 
@@ -1417,7 +1417,7 @@ msgstr "Chega a eles no turno %d do dia deles, não antes."
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Vai custar %s milhões de ouro ao seu planeta para financiar. Aceita?"
 
-#: internal/menu/menu.go:926
+#: internal/menu/menu.go:943
 msgid "Item"
 msgstr "Item"
 
@@ -1633,7 +1633,7 @@ msgstr "Nova quantidade de %s à venda"
 msgid "New tax rate?"
 msgstr "Novo imposto?"
 
-#: internal/menu/menu.go:1163
+#: internal/menu/menu.go:1182
 msgid "No"
 msgstr "Não"
 
@@ -1701,7 +1701,7 @@ msgstr ""
 "Nenhum desses planetas está na lista da liga, então ainda não dá para enviar "
 "nada a eles."
 
-#: internal/menu/attacktypehelp.go:42
+#: internal/menu/attacktypehelp.go:50
 msgid "Normal Attack"
 msgstr "Ataque Normal"
 
@@ -1923,7 +1923,7 @@ msgstr "Imposto Planetário (%)"
 msgid "Planetary Treaties"
 msgstr "Tratados Planetários"
 
-#: internal/menu/tree.go:754
+#: internal/menu/tree.go:755
 msgid "Planetary time: %s   New day in %s"
 msgstr "Hora planetária: %s   Novo dia em %s"
 
@@ -1981,7 +1981,7 @@ msgstr "Resposta pública?"
 msgid "Pushing..."
 msgstr "Enviando..."
 
-#: internal/menu/attacktypehelp.go:43
+#: internal/menu/attacktypehelp.go:51
 msgid "Quick Strike"
 msgstr "Ataque Rápido"
 
@@ -2293,12 +2293,12 @@ msgstr "Força"
 msgid "Support Dissensions"
 msgstr "Apoiar Dissidências"
 
-#: internal/menu/attacktypehelp.go:43
+#: internal/menu/attacktypehelp.go:51
 msgid ""
-"Surprise lets you fight at 120% of your normal strength, but the battle is "
-"short and disorganized: both sides retreat at 8% losses, and you carry off "
-"only half the land a Normal Attack would."
-msgstr ""
+"Surprise lets you fight at 120 percent of your normal strength, but the "
+"battle is short and disorganized: both sides retreat at 8 percent losses, "
+"and you carry off only half the land a Normal Attack would."
+msgstr "A surpresa deixa você lutar com 120 por cento da sua força normal, mas a batalha é curta e desorganizada: os dois lados se retiram com 8 por cento de perdas, e você leva apenas metade da terra que um Ataque Normal levaria."
 
 #: internal/menu/tree.go:145
 msgid "System"
@@ -2474,7 +2474,7 @@ msgstr "O inimigo perdeu: %s."
 msgid "The food market is out of food for today."
 msgstr "O mercado de comida ficou sem comida por hoje."
 
-#: internal/menu/tree.go:721
+#: internal/menu/tree.go:722
 msgid "The game begins %s."
 msgstr "O jogo começa em %s."
 
@@ -2964,7 +2964,7 @@ msgstr "Escrever Macros"
 msgid "Writing to:"
 msgstr "Escrevendo para:"
 
-#: internal/menu/menu.go:1162
+#: internal/menu/menu.go:1181
 msgid "Yes"
 msgstr "Sim"
 
@@ -3073,7 +3073,7 @@ msgstr "Você tem %s de ouro e %d agentes."
 msgid "You have %s gold and %d turns."
 msgstr "Você tem %s de ouro e %d turnos."
 
-#: internal/menu/tree.go:698
+#: internal/menu/tree.go:699
 msgid "You have %s gold and %s units of food."
 msgstr "Você tem %s de ouro e %s unidades de comida."
 
@@ -3342,11 +3342,12 @@ msgstr ""
 "Suas forças mudaram enquanto você preparava o ataque — só foram enviadas as "
 "unidades ainda sob seu comando."
 
-#: internal/menu/attacktypehelp.go:42
+#: internal/menu/attacktypehelp.go:50
 msgid ""
 "Your forces fight at full strength. Both sides break off once they have "
-"taken 15% losses, and you take the standard share of the defender's regions."
-msgstr ""
+"taken 15 percent losses, and you take the standard share of the defender's "
+"regions."
+msgstr "Suas forças lutam com força total. Os dois lados se retiram depois de 15 por cento de perdas, e você leva a parcela padrão das regiões do defensor."
 
 #: internal/menu/actions.go:250
 msgid "Your holdings changed while you decided — only what remained was sold."

@@ -2,13 +2,13 @@
 category: covert
 in_game: true
 order: 6
-title: 'Demoralize Forces'
+title: 'Truppen demoralisieren'
 ---
 
-# Demoralize Forces
+# Truppen demoralisieren
 
-Demoralize Forces lowers the target's military morale. Low morale weakens
-their army in battle and can cause desertion.
+Truppen demoralisieren senkt die Kampfmoral des Ziels. Niedrige Moral
+schwächt sein Heer in der Schlacht und kann zu Fahnenflucht führen.
 
-Your agent only reaches them at daily maintenance, so send one the day
-before the battle you want it to affect, not the turn of it.
+Ihr Agent erreicht sie erst bei der täglichen Verwaltung; schicken Sie ihn
+also am Tag vor der Schlacht, auf die er wirken soll, nicht in deren Zug.

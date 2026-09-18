@@ -13,52 +13,59 @@ Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
 - Gruppenangriff - mehrere Herrscher Ihres Boards schließen sich zu einem
   Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag
   geteilt.
-- Indiv. Attack Force — your own strike against one named baron. You keep
-  the whole take rather than sharing it, and you choose how to press the
-  attack (see Attack Types).
+- Einzelangriff - Ihr eigener Schlag gegen einen benannten Baron. Sie
+  behalten die ganze Beute, statt sie zu teilen, und Sie wählen, wie hart
+  Sie zuschlagen (siehe Angriffsarten).
 - IP-Punkte - sehen, wie die Boards zueinander stehen.
-- Send Message — write to another planet. Name the planet, then pick which
-  barons on it should read the letter, using the same `Send to:` list the
-  Diplomacy and message screens use here: a letter marks a baron, the same
-  letter again takes them off, `Z` marks everyone, `?` shows the planet's
-  roster, and Enter opens the editor. Enter with nobody marked leaves
-  without sending. The other four items address the whole league, your
-  allied planets, several planets you name, or one planet's Coordinator
-  alone. A reply asks whether it is public: yes and the sender's whole
-  planet reads it, no and only the baron who wrote does.  If your board has
-  not yet received that planet's scores, there is no roster to pick from and
-  the letter goes to everyone there.
-- Diplomacy List — where your board says it stands with each other
-  planet. It binds nobody, but it is your Coordinator telling you who to
-  watch.
-- Travel Times — how long a message or a strike actually takes to reach each
-  planet and get an answer back. Boards trade mail on their sysops'
-  schedule, so check it before you aim anything: against a planet three days
-  away, you are committing forces you will not hear about until the weekend.
+- Nachricht senden - an einen anderen Planeten schreiben. Nennen Sie den
+  Planeten und wählen Sie dann, welche Barone dort den Brief lesen sollen,
+  über dieselbe `Send to:`-Liste, die auch die Diplomatie- und
+  Nachrichtenschirme hier benutzen: Ein Buchstabe markiert einen Baron,
+  derselbe Buchstabe noch einmal nimmt ihn wieder heraus, `Z` markiert alle,
+  `?` zeigt die Liste der Barone des Planeten, und die Eingabetaste öffnet
+  den Editor. Die Eingabetaste ohne Markierung verlässt den Schirm, ohne zu
+  senden. Die vier übrigen Punkte wenden sich an die ganze Liga, an Ihre
+  verbündeten Planeten, an mehrere von Ihnen genannte Planeten oder allein
+  an den Koordinator eines Planeten. Eine Antwort fragt, ob sie öffentlich
+  ist: ja, und der ganze Planet des Absenders liest sie, nein, und nur der
+  Baron, der sie geschrieben hat.  Hat Ihr Board die Punkte jenes Planeten
+  noch nicht erhalten, gibt es keine Liste zum Auswählen, und der Brief geht
+  an alle dort.
+- Diplomatieliste - hier sagt Ihr Board, wie es zu jedem anderen Planeten
+  steht. Es bindet niemanden, aber es ist Ihr Koordinator, der Ihnen sagt,
+  wen Sie im Auge behalten sollten.
+- Reisezeiten - wie lange eine Nachricht oder ein Schlag wirklich bis zu
+  jedem Planeten braucht und wie lange die Antwort zurück. Boards tauschen
+  Post nach dem Zeitplan ihrer Sysops aus, sehen Sie also nach, bevor Sie
+  zielen: Gegen einen Planeten, der drei Tage entfernt ist, binden Sie
+  Truppen, von denen Sie erst am Wochenende wieder hören.
 
-Five of these items are shut until you have played a turn this visit: Send
-Trade Deal, Create Group Attack, Join Group Attack, Indiv. Attack Force and
-Special Operations. Anything that moves forces or goods costs you a turn
-first — Join Group Attack lets you see who is forming a party before it asks
-for that turn, so you can decide whether starting one is worth it. The bank,
-your messages, the scores and the terrorist ops stay open, and once you have
-started a turn the whole menu is open for the rest of your visit.
+Fünf dieser Punkte bleiben verschlossen, bis Sie bei diesem Besuch einen Zug
+gespielt haben: Handelsangebot senden, Gruppenangriff erstellen,
+Gruppenangriff beitreten, Einzelangriff und Spezialoperationen. Alles, was
+Truppen oder Waren bewegt, kostet Sie zuerst einen Zug - Gruppenangriff
+beitreten lässt Sie sehen, wer sich gerade sammelt, bevor es diesen Zug
+verlangt, damit Sie entscheiden können, ob sich ein eigener lohnt. Die Bank,
+Ihre Nachrichten, die Punkte und die Terroroperationen bleiben offen, und
+sobald Sie einen Zug begonnen haben, steht das ganze Menü für den Rest Ihres
+Besuchs offen.
 
-## Your BBS Coordinator
+## Ihr BBS-Koordinator
 
-The barons on your own board elect one of their number Coordinator, and the
-Coordinator speaks for the board: they set where it stands with each other
-planet, and they alone can call off a doomsday weapon. Vote from the System
-menu, under Coordinator Vote. Any living realm can be voted for, yourself
-included, and you may change your mind whenever you like — the office goes
-to whoever holds the most votes at the time.
+Die Barone Ihres eigenen Boards wählen einen aus ihrer Mitte zum
+Koordinator, und der Koordinator spricht für das Board: Er legt fest, wie es
+zu jedem anderen Planeten steht, und er allein kann eine Weltuntergangswaffe
+abblasen. Gewählt wird im Systemmenü, unter Koordinatorwahl. Jedes lebende
+Reich ist wählbar, Sie selbst eingeschlossen, und Sie dürfen Ihre Stimme
+jederzeit ändern - das Amt fällt dem zu, der gerade die meisten Stimmen
+hält.
 
-You cannot vote while your realm is still under new-realm protection, and
-the item is not on the menu until that ends — though the notice below will
-already be naming your vote.
+Solange Ihr Reich noch unter Neureich-Schutz steht, können Sie nicht wählen,
+und der Punkt erscheint erst danach im Menü - obwohl der Hinweis darunter
+Ihre Stimme bereits nennt.
 
-Every turn opens by telling you whether you hold the office or who your vote
-is currently for, so you never have to go looking.
+Jeder Zug beginnt damit, dass Ihnen gesagt wird, ob Sie das Amt innehaben
+oder wem Ihre Stimme derzeit gilt; Sie müssen also nie danach suchen.
 
 Ein Ligaspiel hat eine feste Dauer. Wenn es endet, wird die Welt
 zurückgesetzt und ein neues Spiel beginnt.

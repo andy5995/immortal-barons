@@ -2,73 +2,73 @@
 category: interbbs
 in_game: true
 order: 5
-title: 'Send SpyGuy'
+title: 'Отправить SpyGuy'
 ---
 
-# Send SpyGuy
+# Отправить SpyGuy
 
-A SpyGuy is a watcher you post on another planet. He is not one of your
-agents: sending him spends no agent, he cannot be caught, and he brings back
-no figures for the Spy Database. What he does is send word home the moment
-his hosts turn something on your planet.
+SpyGuy — это наблюдатель, которого вы размещаете на другой планете. Он не из
+ваших агентов: его отправка не тратит агента, поймать его нельзя, и никаких
+цифр для базы данных разведки он не приносит. Его дело — дать знать домой в
+тот же миг, когда хозяева замыслят что-то против вашей планеты.
 
-Send him from InterPlanetary Operations, under Special Operations.
+Отправить его можно из межпланетных операций, пунктом «Спецоперации».
 
 ## Сколько он стоит
 
-Gold, by the day, and the whole stay is paid up front. The daily rate is
-drawn from the size of **your own** planet — every region every realm here
-holds — so a crowded planet pays more for the same man. The rate is quoted
-before you pick a target, since it is the same wherever you send him.
+Золотом, по дням, и весь срок оплачивается вперёд. Дневная ставка считается
+от размера **вашей собственной** планеты — всех регионов всех держав на ней,
+— так что за того же человека густонаселённая планета платит больше. Ставку
+называют до выбора цели, ведь она одинакова, куда бы вы его ни послали.
 
-You choose how long he stays, up to fifteen days. If the stay costs more
-than you are carrying, the shortfall is named and the bank is opened for
-you; come back with it and the man goes, come back without it and nothing is
-sent or charged.
+Срок вы выбираете сами, до пятнадцати дней. Если он стоит больше, чем у вас
+на руках, вам назовут нехватку и откроют банк; вернётесь с деньгами —
+человек уйдёт, вернётесь без них — ничего не отправят и не спишут.
 
 ## Что он сообщает
 
-Two things, and both arrive as **planetary news** where everyone here can
-read them:
+Две вещи, и обе приходят как **планетарные новости**, которые прочтут все
+здесь:
 
-- a **group attack** being assembled against this planet, or against one
-  realm on it, with the hours left before it leaves
-- a **Gooie Kablooie** being built for us — when the work starts, when the
-  funding is complete, and if it is stood down again
+- **групповая атака**, собираемая против этой планеты или против одной
+  державы на ней, с указанием часов до её выхода
+- строящийся против нас **Gooie Kablooie** — когда работы начались, когда
+  сбор денег завершён и если его всё же остановили
 
-He also reports whatever is already under way the day he arrives, so a man
-sent late is not wasted.
+Он также сообщает обо всём, что уже готовится в день его прибытия, так что
+посланный поздно человек не пропадает зря.
 
 ## Чтение того, что он присылает
 
-Each report arrives as planet news, dated, saying what was aimed at you and
-how long it had left when he wrote it. That line never changes afterwards,
-so hours later it no longer tells you how long is left.
+Каждое донесение приходит как новость планеты, с датой, и говорит, что
+нацелено на вас и сколько времени оставалось на момент написания. Эта строка
+потом не меняется, так что спустя часы она уже не показывает, сколько
+осталось.
 
-**Incoming**, on the InterPlanetary menu, is the same warnings kept current: one
-row per threat, the soonest at the top, counting down as you read — `3h`, then
-`90m`, then `away` once the force has left. A weapon already flying is listed
-with the days until it lands.
+**Атаки на подходе** в межпланетном меню — те же предупреждения, но живые: одна
+строка на угрозу, ближайшая сверху, и отсчёт идёт прямо у вас на глазах — `3h`,
+потом `90m`, потом `away`, когда отряд ушёл. Уже летящее оружие показано с
+числом дней до падения.
 
-An empty list is not proof of peace. It means nothing has been reported, and
-only a watcher posted on another planet can report anything.
+Пустой список — не доказательство мира. Он означает лишь, что никто ни о чём
+не донёс, а донести может только наблюдатель, размещённый на другой планете.
 
-## Why it matters
+## Почему это важно
 
-A weapon still on the ground is the builders' own business: nobody tells you
-it exists. You learn of it when it launches — and by then it is two days out
-with only your jets between it and your regions. A SpyGuy on the right
-planet buys you the days you need to raise them.
+Оружие, ещё стоящее на земле, — дело одних строителей: о его существовании
+вам никто не скажет. Вы узнаёте о нём при запуске — а к этому времени до
+него два дня пути, и между ним и вашими регионами только ваши
+самолёты. SpyGuy на нужной планете покупает вам дни, за которые их можно
+поднять.
 
-The planet you are watching is told nothing. There is no discovery, no
-trial, and no execution; when the days you paid for run out, your man simply
-comes home.
+Планете, за которой вы следите, не говорят ничего. Ни разоблачения, ни суда,
+ни казни: когда оплаченные дни выйдут, ваш человек просто вернётся домой.
 
-## Strategy
+## Стратегия
 
-Post him where the threat is, not where the grudge is. The planet that just
-lost a battle to you is the one assembling the answer, and the rate is the
-same whether you watch a rival or a neighbor you trust.
+Размещайте его там, где угроза, а не там, где обида. Планета, только что
+проигравшая вам бой, и есть та, что готовит ответ, а ставка одинакова,
+следите ли вы за соперником или за соседом, которому доверяете.
 
-A short stay renewed is worth more than one long stay bought early: the days
-run whether anything happens or not.
+Короткий срок, продлеваемый раз за разом, стоит больше одного длинного,
+купленного заранее: дни идут, случается что-нибудь или нет.

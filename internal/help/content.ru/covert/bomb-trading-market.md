@@ -2,11 +2,11 @@
 category: covert
 in_game: true
 order: 12
-title: 'Bomb Trading Market'
+title: 'Бомбить торговый рынок'
 ---
 
-# Bomb Trading Market
+# Бомбить торговый рынок
 
-Bomb Trading Market is an InterPlanetary operation, on the Special
-Operations menu. It destroys a share of everything listed on another
-planet's trading market, and the gold sellers there were waiting on.
+Бомбить торговый рынок — межпланетная операция из меню Спецоперации. Она
+уничтожает часть всего, что выставлено на торговом рынке другой планеты,
+вместе с золотом, которого ждали тамошние продавцы.

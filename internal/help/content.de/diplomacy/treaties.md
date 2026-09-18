@@ -11,31 +11,37 @@ Verträge sind Abkommen, die Sie anderen Herrschern senden. Ein Vertrag
 beginnt erst, wenn die andere Seite ihn annimmt. Jede Vertragsart hat ihr
 eigenes Thema.
 
-Aiming an attack at a ruler you hold an agreement with tears the agreement
-up, and the game asks you to confirm it before you choose your force. Say
-yes and your people riot at being ruled by a faithless baron: you lose a
-quarter of both your support and your army's morale, and the battle is then
-fought at that lower morale. Say no and the attack is called off. The two
-realms are left with no agreement between them, and the ruler you betrayed
-will have their own answer to that. The same question comes up before a
-nuclear, chemical or biological strike, and before a covert operation that
-sends an agent. Send Spy and Spy on Relations only look, so they do not ask
-and cost you nothing.
+Einen Angriff auf einen Herrscher zu richten, mit dem Sie ein Abkommen
+halten, zerreißt das Abkommen, und das Spiel fragt nach, bevor Sie Ihre
+Streitmacht wählen. Sagen Sie ja, empört sich Ihr Volk darüber, von einem
+treulosen Baron regiert zu werden: Sie verlieren ein Viertel Ihres Rückhalts
+und ein Viertel der Moral Ihres Heeres, und die Schlacht wird dann mit
+dieser geringeren Moral geschlagen. Sagen Sie nein, wird der Angriff
+abgeblasen. Die beiden Reiche bleiben ohne Abkommen zurück, und der
+Herrscher, den Sie verraten haben, wird seine eigene Antwort darauf
+haben. Dieselbe Frage kommt vor einem nuklearen, chemischen oder
+biologischen Schlag und vor einer verdeckten Operation, die einen Agenten
+schickt. Spion senden und Beziehungen ausspähen schauen nur, sie fragen also
+nicht und kosten Sie nichts.
 
-A Declaration of War, on the Diplomacy menu, ends an agreement at the same
-price without a battle. It costs nothing if you had no agreement to break.
+Eine Kriegserklärung im Menü Diplomatie beendet ein Abkommen zum selben
+Preis ohne Schlacht. Sie kostet nichts, wenn Sie kein Abkommen zu brechen
+hatten.
 
-View Treaties shows your current relations with the other rulers in the
-game, and below that, the offers you have sent that nobody has answered yet.
+Verträge ansehen zeigt Ihre derzeitigen Beziehungen zu den anderen
+Herrschern im Spiel, und darunter die Angebote, die Sie gesendet haben und
+die noch niemand beantwortet hat.
 
-Once you hold a treaty, Send Message offers to write to all your allies at
-once.  It reaches every ruler you have an agreement with, whatever kind it
-is.
+Sobald Sie einen Vertrag halten, bietet Nachricht senden an, an alle Ihre
+Verbündeten zugleich zu schreiben.  Es erreicht jeden Herrscher, mit dem Sie
+ein Abkommen haben, welcher Art auch immer.
 
-An offer waits until the other ruler plays a turn. It does not run out. If
-you send a second, different offer to the same ruler, it takes the place of
-the first one, because two realms can hold only one agreement at a time.
+Ein Angebot wartet, bis der andere Herrscher einen Zug spielt. Es läuft
+nicht ab. Senden Sie ein zweites, anderes Angebot an denselben Herrscher,
+tritt es an die Stelle des ersten, denn zwei Reiche können immer nur ein
+Abkommen zugleich halten.
 
-Choosing the treaty you already hold with a ruler sends nothing. The game
-tells you the agreement still stands and returns you to the
-menu. Declaration of War is the way to end one.
+Den Vertrag zu wählen, den Sie mit einem Herrscher bereits halten, sendet
+nichts. Das Spiel teilt Ihnen mit, dass das Abkommen weiterhin besteht, und
+bringt Sie zum Menü zurück. Eine Kriegserklärung ist der Weg, eines zu
+beenden.

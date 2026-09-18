@@ -10,29 +10,29 @@ title: 'Обычная атака'
 Обычная атака - это прямой штурм вашей армией. Ваша сила атаки сравнивается
 с обороной противника.
 
-First you choose how many of each unit to send: Troopers, Jets, Tanks, and
-Bombers. Jets can only fight if you have carriers to carry them. Units you
-keep at home do not fight and cannot be lost.
+Сперва вы выбираете, сколько единиц каждого рода отправить: солдат,
+самолётов, танков и бомбардировщиков. Самолёты могут драться, только если у
+вас есть авианосцы, чтобы их нести. Оставленные дома не воюют и потеряны
+быть не могут.
 
-Only the units you sent add to your attack, and only they can be
-lost. Bombers are the exception: they add no strength to an attack on your
-own planet, so sending them loses you bombers for nothing.
+К силе атаки прибавляются только отправленные вами единицы, и только они
+могут погибнуть. Исключение — бомбардировщики: в атаке на своей планете силы
+они не добавляют, так что их отправка лишает вас бомбардировщиков впустую.
 
-The two armies grind each other down until one has lost as much as it is
-willing to lose, and that share is a setting on this board rather than a
-fixed figure.  What it costs the winner depends on how one-sided the fight
-was: an attacker who badly outmatches the defender walks away having lost
-very little, and an evenly matched one pays nearly the full share.
+Две армии перемалывают друг друга, пока одна не потеряет столько, сколько
+готова потерять, и эта доля — настройка данной доски, а не постоянная
+величина.  Чего это стоит победителю, зависит от того, насколько неравным
+был бой: атакующий, сильно превосходящий обороняющегося, уходит почти без
+потерь, а равный ему платит почти всю долю сполна.
 
-If you win, you capture a share of the enemy's regions. You do not take
-their gold. A Regular Attack gives you land, not money. A small empire can
-lose all of its regions in one attack. A large empire loses only part, so
-you must attack it again and again to take it down.
+В случае победы вы захватываете часть регионов врага. Его золото вам не
+достаётся. Обычная атака даёт землю, а не деньги. Малая империя может
+лишиться всех своих регионов за одну атаку. Большая теряет лишь часть, так
+что её придётся бить снова и снова, чтобы свалить.
 
-How big that share is depends on this board's settings and on how much land
-the enemy holds, not on how developed it is.
+Насколько велика эта часть, зависит от настроек данной доски и от того,
+сколько земли у врага, а не от того, насколько она развита.
 
-Strategy hint: a large empire with low net worth is a soft target. It has
-much land but little strength to defend it. You win the battle easily and
-take a big piece of land. A small, dense empire gives you less land for the
-same effort.
+Подсказка: большая империя с низким состоянием — лёгкая добыча. Земли у неё
+много, а сил её оборонять мало. Бой вы выигрываете легко и забираете большой
+кусок земли. Малая и плотная империя даст вам меньше земли за те же усилия.

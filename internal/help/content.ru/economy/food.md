@@ -10,34 +10,34 @@ title: 'Рынок еды и порча'
 Ваш народ и ваши войска едят каждый ход. Счета выставляются отдельно, и о
 каждом вас спрашивают по очереди, так что можно накормить одних и оставить
 голодными других. Сельскохозяйственные области выращивают пищу, ещё её можно
-купить на продовольственном рынке.
+купить на рынке еды.
 
-The market opens by itself at that point in your turn, and both bills are
-put to you, whether or not you have enough in store. Turn on Auto-Feed in
-Preferences and you skip all of it on any turn you can cover the two bills;
-on a turn you cannot, the market opens anyway.
+Рынок открывается сам в этот момент хода, и оба счёта ставятся перед вами
+независимо от того, хватает ли у вас запасов. Включите Автокормление империи
+в Настройках — и на любом ходу, когда вам хватает на оба счёта, вы это
+пропускаете; на ходу, когда не хватает, рынок всё равно откроется.
 
 Рынок продаёт еду дороже, чем платит при обратной покупке. Поэтому хранить
 излишки там невыгодно.
 
-The price changes a little each day. It is the same for everyone on the
-planet that day, and it stays the same until the next day. Buy on a cheap
-day if you can.
+Цена немного меняется каждый день. Она одинакова для всех на планете в этот
+день и держится до следующего дня. Покупайте в дешёвый день, если можете.
 
-Each turn your people eat first, then your army, and then part of whatever
-food is still in store spoils. A small store is safe: nothing rots until you
-are holding more than a thousand units. Above that the whole store loses a
-share, so the more you hoard the more you lose.
+Каждый ход сначала ест ваш народ, затем армия, а потом часть оставшегося
+запаса портится. Небольшой запас в безопасности: ничего не гниёт, пока у вас
+не больше тысячи единиц. Сверх этого свою долю теряет весь запас, так что
+чем больше копите, тем больше теряете.
 
-Going short is billed twice, because the two needs are counted
-apart. Whatever your people go without costs Popular Support, and whatever
-your army goes without costs Military Morale. Nobody leaves your realm over
-it — but if your people get under about two thirds of what they need, the
-realm falls into civil war. A civil war halves your Support and destroys a
-share of your land and of every kind of unit you own, listed ones included.
+Недостача оплачивается дважды, потому что две нужды считаются порознь. Всё,
+чего недополучил народ, стоит вам Поддержки народа, а всё, чего недополучила
+армия, — Боевого духа. Из державы за это никто не уходит, но если народ
+получит меньше примерно двух третей нужного, держава сваливается в
+гражданскую войну. Гражданская война вдвое срезает вашу Поддержку и
+уничтожает часть ваших земель и часть каждого вида ваших частей, включая
+выставленные на рынок.
 
-This turn's harvest arrives at the start of the turn, so you can sell it the
-same turn. Selling your surplus down each turn, instead of hoarding it, is
-how you lose nothing to spoilage. Food you have listed on the Trading Market
-spoils too, so listing it is not a way to store it. A high technology level
-slows spoilage.
+Урожай этого хода приходит в начале хода, так что продать его можно в том же
+ходу. Продавать излишки каждый ход, а не копить их, — вот как не терять
+ничего на порче. Продовольствие, выставленное вами на Торговый рынок, тоже
+портится, так что выставление — не способ его хранить. Высокий уровень
+технологий замедляет порчу.

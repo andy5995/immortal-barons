@@ -7,34 +7,33 @@ title: 'Gooie Kablooie'
 
 # Gooie Kablooie
 
-The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy
-planet rather than at one baron, and your planet can only have one at a
-time.
+Gooie Kablooie — абсолютное оружие. Оно нацелено на целую вражескую планету,
+а не на одного барона, и у вашей планеты может быть только одно такое зараз.
 
-Nobody buys the weapon alone. One baron starts the work and names the target
-planet. After that, any baron here can put money in, a million gold at a
-time.  The price depends on the size of the target planet: aiming at a
-planet much larger than yours costs more.
+В одиночку его никто не покупает. Один барон начинает работы и называет
+планету-цель. Дальше деньги может вкладывать любой барон отсюда, по миллиону
+золота за раз.  Цена зависит от размера планеты-цели: целиться в планету
+намного крупнее вашей дороже.
 
-When the last of the money is in, the weapon builds for three more days and
-then launches itself. Nobody decides that. The only person who can call it
-off is your elected Coordinator, and only before it leaves the ground. The
-gold is spent either way.
+Когда внесена последняя часть денег, оружие строится ещё три дня, а затем
+запускается само. Этого никто не решает. Отменить запуск может только ваш
+выборный координатор и только пока оружие не ушло с земли. Золото потрачено
+в любом случае.
 
-## Being on the receiving end
+## Когда бьют по вам
 
-A weapon aimed at your planet does not go off and disappear. It arrives,
-sits on your planet, and eats it. The day it lands it takes a tenth of every
-realm's regions. Every day after that it takes another twentieth, until five
-days are up and it burns itself out. Left alone it will cost you better than
-a quarter of your land.
+Оружие, нацеленное на вашу планету, не взрывается и не исчезает. Оно
+прибывает, садится на вашу планету и поедает её. В день падения оно забирает
+десятую часть регионов у каждой державы. Каждый следующий день — ещё
+двадцатую, и так пять дней, пока оно не выгорит. Если его не трогать, оно
+обойдётся вам больше чем в четверть вашей земли.
 
-Only jets can reach it. Your realm is asked at the start of your turn
-whether you want to attack it. About a third of the jets you send do not
-come home.
+Достать его могут только самолёты. В начале хода вашу державу спрашивают,
+хотите ли вы его атаковать. Около трети отправленных самолётов не
+возвращаются.
 
-No single wave can finish it, however many jets you send. That is the point:
-the weapon is built to need the whole planet's air forces, and a planet that
-cannot organize loses the land.
+Одной волной его не прикончить, сколько самолётов ни пошли. В том и смысл:
+оружие рассчитано на то, чтобы потребовать воздушные силы всей планеты, и
+планета, не умеющая договориться, теряет землю.
 
-An SDI program is no help against it, and neither is anything else you own.
+Программа SDI против него не помогает, как и всё прочее, что у вас есть.

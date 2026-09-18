@@ -19,62 +19,63 @@ title: 'Перемещение по меню'
 Системное меню открывается клавишей `*` из меню Расходов. В нём собраны
 дополнительные пункты: Настройки, Задать налог и Показать инструкции.
 
-Pressing Enter with no other key also chooses Quit — the prompt shows "Quit"
-so you can see what Enter will do. On a turn menu, this only happens if you
-turn on "Enter exits Buy menu" in Preferences; on a side menu, Enter always
-chooses Quit.
+Нажатие Enter без всякой другой клавиши тоже выбирает Выход — в приглашении
+показано \"Выход\", чтобы вы видели, что сделает Enter. В меню хода это
+происходит, только если включить \"Enter — выход из меню покупок\" в
+Настройках; в боковом меню Enter выбирает Выход всегда.
 
-The help browser and other pick-a-topic lists move a highlight with the
-arrow keys: Enter chooses the marked row, typing a few letters jumps to a
-title, and Backspace or `Q` goes back. If your terminal cannot show color
-and cursor control, those lists are numbered instead — type the number and
-press Enter.
+В справочнике и других списках выбора темы подсветка двигается стрелками:
+Enter выбирает отмеченную строку, набор нескольких букв перескакивает к
+нужному названию, а Backspace или `Q` возвращает назад. Если ваш терминал не
+умеет показывать цвет и управлять курсором, такие списки становятся
+нумерованными — наберите номер и нажмите Enter.
 
-## Typing an answer
+## Ввод ответа
 
-Where a prompt takes something typed rather than one key — a number of
-troopers, a realm name, a line of a message — Backspace erases the last
-character and **Ctrl-U erases the whole answer**, leaving you back at the
-prompt with nothing typed. It is quicker than holding Backspace down over a
-mistyped 1000000000, and it is IB's own addition; the original has no such
-key. In the message editor it clears the line you are on, not the message —
-`/C` still does that.
+Там, где запрос ждёт набранного текста, а не одной клавиши — числа солдат,
+названия державы, строки сообщения, — Backspace стирает последний символ, а
+**Ctrl-U стирает весь ответ**, возвращая вас к приглашению с пустой
+строкой. Это быстрее, чем держать Backspace над ошибочно набранным
+1000000000, и это собственное добавление IB: в оригинале такой клавиши
+нет. В редакторе сообщений она очищает строку, на которой вы стоите, а не
+всё сообщение — это по-прежнему делает `/C`.
 
-## Choosing who an action goes to
+## Выбор того, кому адресовано действие
 
-Send Message asks `(A-Y,Z=All,?=List) Send to:` and takes a whole list, not
-one name. Press a realm's letter to add it and press the same letter again
-to take it off. `Z` marks everyone at once, `?` shows the roster, and `*`
-marks your treaty partners. **Press Enter when the list is right** — that is
-what opens the editor. Enter with nothing marked leaves without sending.
+Отправить сообщение спрашивает `(A-Y,Z=All,?=List) Send to:` и принимает
+целый список, а не одно имя. Нажмите букву державы, чтобы добавить её, и ту
+же букву ещё раз, чтобы убрать. `Z` отмечает сразу всех, `?` показывает
+список держав, а `*` отмечает ваших партнёров по договорам. **Нажмите Enter,
+когда список готов** — именно это открывает редактор. Enter без единой
+отметки выходит, ничего не отправив.
 
-InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for the
-barons on the planet you named.
+Межпланетные операции -> Отправить сообщение -> Одна планета используют тот же запрос для
+баронов на названной вами планете.
 
-Every Diplomacy option that names a realm takes the same list: offer a
-treaty to several realms at once, or declare war on several. There `?` shows
-your relations rather than the scores. Mark one realm only and you get the
-full negotiation with it — you can accept its offer or break the pact you
-hold.
+Любой пункт Дипломатии, называющий державу, принимает тот же список:
+предложите договор сразу нескольким державам или объявите войну сразу
+нескольким. Там `?` показывает ваши отношения, а не очки. Отметьте только
+одну державу — и вы получите с ней полноценные переговоры: можно принять её
+предложение или разорвать заключённый договор.
 
-The letters belong to the realms, not to the rows, so a letter may be
-missing from the list: it is either yours or a realm that has fallen. A
-realm keeps its letter for as long as it stands, whoever else joins or
-falls, and it is the same letter on every screen — the `Id` column on See
-Scores is that letter too, which is why those rows are not in letter
-order. The letters of everyone a message went to appear at the top of it
-when it is read.
+Буквы принадлежат державам, а не строкам, поэтому буквы в списке могут
+пропускаться: такая буква либо ваша, либо принадлежит павшей
+державе. Держава сохраняет свою букву, пока стоит, кто бы ни присоединялся и
+ни падал, и это одна и та же буква на всех экранах — колонка `Id` в Очках и
+есть эта буква, потому её строки идут не по алфавиту. Буквы всех, кому ушло
+сообщение, показаны в его начале при чтении.
 
-A letter is freed when the realm holding it is swept from the map, and a
-later baron may be given it. So a letter names whoever holds it today, not
-whoever held it when an old message was written.
+Буква освобождается, когда владевшую ею державу стирают с карты, и позже её
+может получить другой барон. Поэтому буква называет того, кто владеет ею
+сегодня, а не того, кто владел ею, когда писалось старое сообщение.
 
-## Who else is on
+## Кто ещё в игре
 
-An `O` beside a realm's letter — on See Scores, the attack and message
-target lists, and the View Treaties roster — means that baron is on the
-board with you. Your own realm never carries it. It clears when they log
-off, and also a few minutes after their last keypress, so someone sitting on
-one screen can drop off the list without having left.
+Буква `O` рядом с буквой державы — в Очках, в списках целей для атаки и для
+сообщений и в списке отношений на экране Показать договоры — означает, что
+этот барон сейчас на доске вместе с вами. У вашей собственной державы её не
+бывает. Она пропадает, когда игрок выходит, а также через несколько минут
+после его последнего нажатия клавиши, так что засидевшийся на одном экране
+может исчезнуть из списка, никуда не уходя.
 
 Нажмите `?` в любом меню, чтобы открыть эту справку.

@@ -2,10 +2,10 @@
 category: covert
 in_game: true
 order: 5
-title: 'Support Dissensions'
+title: 'Zwietracht fördern'
 ---
 
-# Support Dissensions
+# Zwietracht fördern
 
-Support Dissensions turns the target's own troopers against them. Some of
-their army deserts and flees.
+Zwietracht fördern wendet die eigenen Soldaten des Ziels gegen es. Ein Teil
+seines Heeres desertiert und flieht.

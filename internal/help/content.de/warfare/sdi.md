@@ -7,46 +7,54 @@ title: SDI-Programm
 
 # SDI-Programm
 
-The SDI Program is a shield you fund. It answers three things, and only
-these three: missiles fired at you from another planet, and the jets and
-bombers of a strike arriving from one. It does nothing against a neighbor on
-your own planet — not their army, and not their nuclear, chemical or
-biological missiles.
+Das SDI-Programm ist ein Schild, den Sie finanzieren. Es antwortet auf drei
+Dinge, und nur auf diese drei: auf Raketen, die von einem anderen Planeten
+auf Sie abgefeuert werden, und auf die Jets und Bomber eines Schlages, der
+von dort kommt. Gegen einen Nachbarn auf Ihrem eigenen Planeten tut es
+nichts - weder gegen seine Armee noch gegen seine nuklearen, chemischen oder
+biologischen Raketen.
 
-At full strength it turns aside about half the missiles aimed at you, takes
-30% off an arriving realm's jets and 20% off its bombers. At half strength
-it does half of each. Only a strike aimed at you alone meets your shield; a
-group attack goes through it even when you are one of its named targets.
+Bei voller Stärke lenkt es etwa die Hälfte der auf Sie gerichteten Raketen
+ab, nimmt 30% der Jets und 20% der Bomber eines eintreffenden Reiches. Bei
+halber Stärke tut es von jedem die Hälfte. Nur ein Schlag, der allein auf
+Sie zielt, trifft auf Ihren Schild; ein Gruppenangriff geht durch ihn
+hindurch, selbst wenn Sie eines seiner benannten Ziele sind.
 
-## How strong it is
+## Wie stark er ist
 
-Strength is the funding spread over your land, not the funding alone:
+Die Stärke ist die Finanzierung, verteilt über Ihr Land, nicht die
+Finanzierung allein:
 
-    strength% = the square root of (funding / (10 x (regions + 1)))
+    Stärke% = die Wurzel aus (Finanzierung / (10 x (Regionen + 1)))
 
-capped at 100%. Two things follow. Every region you take thins your own
-shield, so the same pot that shields a small realm well is nearly useless
-over a large one. And each further percent costs more than the last: over
-8,000 regions the first 1% wants about 80,000 gold in the pot, while going
-from 9% to 10% wants another 1.5 million.
+gedeckelt bei 100%. Zweierlei folgt daraus. Jede Region, die Sie nehmen,
+dünnt Ihren eigenen Schild aus, derselbe Topf, der ein kleines Reich gut
+schützt, ist über einem großen also fast nutzlos. Und jedes weitere Prozent
+kostet mehr als das vorige: Bei über 8.000 Regionen verlangt das erste 1%
+etwa 80.000 Gold im Topf, während der Weg von 9% auf 10% weitere 1,5
+Millionen verlangt.
 
-## Funding it
+## Die Finanzierung
 
-The program is a pot of gold, not something you buy once. Each turn you may
-add up to a set amount: a fifth of what is already in the pot, and never
-less than 250,000 gold. Gold goes in only in whole thousands.
+Das Programm ist ein Topf voll Gold, nichts, was man einmal kauft. In jedem
+Zug dürfen Sie einen festen Betrag nachlegen: ein Fünftel dessen, was schon
+im Topf ist, und nie weniger als 250.000 Gold. Gold geht nur in vollen
+Tausendern hinein.
 
-That amount is your allowance for the whole turn. Leaving the screen and
-coming back does not give you a second one.
+Dieser Betrag ist Ihr Rahmen für den ganzen Zug. Den Schirm zu verlassen und
+wiederzukommen gibt Ihnen keinen zweiten.
 
-So a shield takes many turns to build, however rich you are. You cannot buy
-one the turn you need it, so start early if you expect missiles.
+Ein Schild braucht also viele Züge, so reich Sie auch sind. Sie können ihn
+nicht in dem Zug kaufen, in dem Sie ihn brauchen, fangen Sie also früh an,
+wenn Sie mit Raketen rechnen.
 
-## Paying for it
+## Was er kostet
 
-Every turn the program asks for **4% of its total funding** as upkeep, in
-the maintenance prompts, after your regions and before the Queen's tax.
+In jedem Zug verlangt das Programm **4% seiner gesamten Finanzierung** als
+Unterhalt, bei den Unterhaltsfragen, nach Ihren Regionen und vor der Steuer
+der Königin.
 
-Pay it in full. If you pay short, the program shrinks to what you did pay
-for, and the shield weakens with it. A large pot is a large bill every turn,
-so grow it at a pace your income can carry.
+Zahlen Sie voll. Zahlen Sie zu wenig, schrumpft das Programm auf das, wofür
+Sie bezahlt haben, und der Schild schwächt sich mit ihm. Ein großer Topf ist
+jeden Zug eine große Rechnung, lassen Sie ihn also in einem Tempo wachsen,
+das Ihre Einnahmen tragen.

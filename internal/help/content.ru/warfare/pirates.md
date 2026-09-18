@@ -7,26 +7,28 @@ title: Пираты
 
 # Пираты
 
-Nine pirate factions live in the world. A faction owns nothing at the start
-of a game. Everything it has, it stole, and what it can put in the field is
-only what it holds. So the factions are all weak on day one, and the ones
-nobody fights are the dangerous ones later.
+В мире живут девять пиратских группировок. В начале игры группировке не
+принадлежит ничего. Всё, что у неё есть, — краденое, и выставить в поле она
+может лишь то, чем владеет. Поэтому в первый день все они слабы, а опасными
+потом становятся те, с которыми никто не дрался.
 
 Пираты грабят игроков наугад. Налёт - это не битва: фракция, не владеющая
 ничем, всё равно может вас ограбить. Каждый налёт уносит **один** вид
-добычи: ваших солдат, истребители, турели, танки, агентов или золото,
-примерно одну тридцатую. Бомбардировщиков, авианосцы и ваши области они не
-берут никогда. Налёт также даёт фракции новые области, так что пират, только
-что кого-то ограбивший, владеет большей землёй.
+добычи: ваших солдат, самолёты, турели, танки, агентов или золото, примерно
+одну тридцатую. Бомбардировщиков, авианосцы и ваши области они не берут
+никогда. Налёт также даёт фракции новые области, так что пират, только что
+кого-то ограбивший, владеет большей землёй.
 
-You can attack a faction to take goods back. A win returns a third of its
-gold, regions, agents and troopers, and a quarter of its jets, turrets and
-tanks. One raid often recovers what a faction took from you; two or three
-will if it is fat.  Attacking costs you casualties whether you win or lose,
-so do not raid a faction that holds nothing.
+Напав на группировку, можно вернуть добро назад. Победа возвращает треть её
+золота, регионов, агентов и солдат и четверть её самолётов, турелей и
+танков. Одного налёта часто хватает, чтобы вернуть отнятое; двух-трёх хватит
+наверняка, если группировка разжирела.  Атака стоит вам потерь и при победе,
+и при поражении, так что не трогайте группировку, у которой ничего нет.
 
-Listing military on the Trading Market does not hide it from pirates, but it
-does help some: your camp is raided about twice as often as your listing.
+Выставленная на торговый рынок военная техника не скрыта от пиратов, но
+кое-что это всё же даёт: ваш лагерь грабят примерно вдвое чаще, чем вашу
+выставленную партию.
 
-Tip: a faction you keep beaten stays harmless, because its army is only what
-it has managed to steal. Big realms are raided more often than small ones.
+Совет: группировка, которую вы держите битой, остаётся безобидной, потому
+что её армия — лишь то, что она сумела украсть. Большие державы грабят чаще
+малых.

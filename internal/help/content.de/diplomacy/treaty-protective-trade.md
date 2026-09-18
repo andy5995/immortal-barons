@@ -14,6 +14,6 @@ dem Weg selbst und hält daher gegen jeden Angreifer, nicht nur gegen Ihren
 Partner. Außerdem senkt sie die Kosten für das Senden eines Handelsgeschäfts
 an diesen Partner auf ein Drittel des üblichen Tagessatzes.
 
-The guard covers deals with that partner only. Anything you have in transit
-to another realm can still be bombed, and so can goods you have listed on
-the trading market.
+Die Wache deckt nur Geschäfte mit diesem Partner. Alles, was Sie zu einem
+anderen Reich unterwegs haben, kann weiterhin bombardiert werden, und ebenso
+Waren, die Sie auf dem Handelsmarkt gelistet haben.

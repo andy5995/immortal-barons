@@ -21,62 +21,68 @@ Das Systemmenü öffnet sich mit der Taste `*` im Ausgabenmenü. Es enthält
 zusätzliche Optionen wie Einstellungen, Steuersatz festlegen und Anweisungen
 anzeigen.
 
-Pressing Enter with no other key also chooses Quit — the prompt shows "Quit"
-so you can see what Enter will do. On a turn menu, this only happens if you
-turn on "Enter exits Buy menu" in Preferences; on a side menu, Enter always
-chooses Quit.
+Eingabe ohne weitere Taste wählt ebenfalls Beenden - die Eingabezeile zeigt
+\"Beenden\", damit Sie sehen, was Eingabe bewirkt. In einem Zugmenü
+geschieht das nur, wenn Sie \"Mit Enter das Kaufmenü verlassen\" in den
+Einstellungen einschalten; in einem Nebenmenü wählt Eingabe immer Beenden.
 
-The help browser and other pick-a-topic lists move a highlight with the
-arrow keys: Enter chooses the marked row, typing a few letters jumps to a
-title, and Backspace or `Q` goes back. If your terminal cannot show color
-and cursor control, those lists are numbered instead — type the number and
-press Enter.
+Der Hilfebrowser und andere Themenlisten bewegen eine Markierung mit den
+Pfeiltasten: Eingabe wählt die markierte Zeile, das Tippen einiger
+Buchstaben springt zu einem Titel, und Rücktaste oder `Q` führt zurück. Wenn
+Ihr Terminal weder Farbe noch Cursorsteuerung darstellen kann, sind diese
+Listen stattdessen nummeriert - tippen Sie die Nummer und drücken Sie
+Eingabe.
 
-## Typing an answer
+## Eine Antwort eintippen
 
-Where a prompt takes something typed rather than one key — a number of
-troopers, a realm name, a line of a message — Backspace erases the last
-character and **Ctrl-U erases the whole answer**, leaving you back at the
-prompt with nothing typed. It is quicker than holding Backspace down over a
-mistyped 1000000000, and it is IB's own addition; the original has no such
-key. In the message editor it clears the line you are on, not the message —
-`/C` still does that.
+Wo eine Eingabezeile etwas Getipptes statt einer einzelnen Taste erwartet -
+eine Zahl von Soldaten, einen Reichsnamen, eine Zeile einer Nachricht -,
+löscht die Rücktaste das letzte Zeichen und **Strg-U löscht die ganze
+Antwort**, so dass Sie ohne Eingetipptes wieder an der Eingabezeile
+stehen. Das geht schneller, als die Rücktaste über einer vertippten
+1000000000 gedrückt zu halten, und es ist eine eigene Ergänzung von IB; das
+Original kennt keine solche Taste. Im Nachrichteneditor löscht sie die
+Zeile, in der Sie stehen, nicht die Nachricht - das tut weiterhin `/C`.
 
-## Choosing who an action goes to
+## Wählen, an wen eine Aktion geht
 
-Send Message asks `(A-Y,Z=All,?=List) Send to:` and takes a whole list, not
-one name. Press a realm's letter to add it and press the same letter again
-to take it off. `Z` marks everyone at once, `?` shows the roster, and `*`
-marks your treaty partners. **Press Enter when the list is right** — that is
-what opens the editor. Enter with nothing marked leaves without sending.
+Nachricht senden fragt `(A-Y,Z=All,?=List) Send to:` und nimmt eine ganze
+Liste entgegen, nicht einen einzelnen Namen. Drücken Sie den Buchstaben
+eines Reiches, um es aufzunehmen, und denselben Buchstaben erneut, um es
+wieder zu streichen. `Z` markiert alle auf einmal, `?` zeigt die Liste der
+Reiche, und `*` markiert Ihre Vertragspartner. **Drücken Sie Eingabe, wenn
+die Liste stimmt** - das ist es, was den Editor öffnet. Eingabe ohne jede
+Markierung beendet den Vorgang, ohne zu senden.
 
-InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for the
-barons on the planet you named.
+Interplanetare Operationen -> Nachricht senden -> Einzelner Planet nutzt dieselbe
+Eingabezeile für die Barone auf dem genannten Planeten.
 
-Every Diplomacy option that names a realm takes the same list: offer a
-treaty to several realms at once, or declare war on several. There `?` shows
-your relations rather than the scores. Mark one realm only and you get the
-full negotiation with it — you can accept its offer or break the pact you
-hold.
+Jede Diplomatie-Option, die ein Reich benennt, nimmt dieselbe Liste: Bieten
+Sie mehreren Reichen zugleich einen Vertrag an, oder erklären Sie mehreren
+den Krieg. Dort zeigt `?` Ihre Beziehungen statt der Punkte. Markieren Sie
+nur ein Reich, erhalten Sie die volle Verhandlung mit ihm - Sie können sein
+Angebot annehmen oder den Pakt brechen, den Sie halten.
 
-The letters belong to the realms, not to the rows, so a letter may be
-missing from the list: it is either yours or a realm that has fallen. A
-realm keeps its letter for as long as it stands, whoever else joins or
-falls, and it is the same letter on every screen — the `Id` column on See
-Scores is that letter too, which is why those rows are not in letter
-order. The letters of everyone a message went to appear at the top of it
-when it is read.
+Die Buchstaben gehören den Reichen, nicht den Zeilen, daher kann ein
+Buchstabe in der Liste fehlen: Er ist entweder Ihr eigener oder gehört einem
+gefallenen Reich. Ein Reich behält seinen Buchstaben, solange es besteht,
+gleich wer sonst hinzukommt oder fällt, und es ist auf jedem Bildschirm
+derselbe Buchstabe - die Spalte `Id` in Punkte ansehen ist ebenfalls dieser
+Buchstabe, weshalb jene Zeilen nicht nach Buchstaben geordnet sind. Die
+Buchstaben aller Empfänger einer Nachricht stehen beim Lesen oben in ihr.
 
-A letter is freed when the realm holding it is swept from the map, and a
-later baron may be given it. So a letter names whoever holds it today, not
-whoever held it when an old message was written.
+Ein Buchstabe wird frei, wenn das Reich, das ihn hält, von der Karte getilgt
+wird, und ein späterer Baron kann ihn erhalten. Ein Buchstabe nennt also den
+heutigen Inhaber, nicht den, der ihn hielt, als eine alte Nachricht
+geschrieben wurde.
 
-## Who else is on
+## Wer sonst noch online ist
 
-An `O` beside a realm's letter — on See Scores, the attack and message
-target lists, and the View Treaties roster — means that baron is on the
-board with you. Your own realm never carries it. It clears when they log
-off, and also a few minutes after their last keypress, so someone sitting on
-one screen can drop off the list without having left.
+Ein `O` neben dem Buchstaben eines Reiches - in Punkte ansehen, in den
+Ziellisten für Angriff und Nachricht und in der Verträge ansehen-Liste -
+bedeutet, dass dieser Baron mit Ihnen auf dem Board ist. Ihr eigenes Reich
+trägt es nie. Es verschwindet, wenn er sich abmeldet, und auch einige
+Minuten nach seinem letzten Tastendruck, so dass jemand, der auf einem
+Bildschirm verweilt, von der Liste fallen kann, ohne gegangen zu sein.
 
 Drücken Sie `?` in einem Menü, um diese Hilfe zu öffnen.

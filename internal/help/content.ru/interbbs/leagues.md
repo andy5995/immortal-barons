@@ -12,52 +12,53 @@ title: 'Лиги и межсистемная (Inter-BBS) игра'
 
 - Групповая атака — несколько правителей вашей доски объединяются в один
   удар по дальнему врагу. Добыча делится по вкладу.
-- Indiv. Attack Force — your own strike against one named baron. You keep
-  the whole take rather than sharing it, and you choose how to press the
-  attack (see Attack Types).
+- «Одиночная атака» — ваш собственный удар по одному названному
+  барону. Добычу вы не делите ни с кем и сами выбираете, как вести бой
+  (см. типы атак).
 - Межпланетный счёт — посмотреть, как доски соотносятся друг с другом.
-- Send Message — write to another planet. Name the planet, then pick which
-  barons on it should read the letter, using the same `Send to:` list the
-  Diplomacy and message screens use here: a letter marks a baron, the same
-  letter again takes them off, `Z` marks everyone, `?` shows the planet's
-  roster, and Enter opens the editor. Enter with nobody marked leaves
-  without sending. The other four items address the whole league, your
-  allied planets, several planets you name, or one planet's Coordinator
-  alone. A reply asks whether it is public: yes and the sender's whole
-  planet reads it, no and only the baron who wrote does.  If your board has
-  not yet received that planet's scores, there is no roster to pick from and
-  the letter goes to everyone there.
-- Diplomacy List — where your board says it stands with each other
-  planet. It binds nobody, but it is your Coordinator telling you who to
-  watch.
-- Travel Times — how long a message or a strike actually takes to reach each
-  planet and get an answer back. Boards trade mail on their sysops'
-  schedule, so check it before you aim anything: against a planet three days
-  away, you are committing forces you will not hear about until the weekend.
+- «Отправить сообщение» — письмо на другую планету. Назовите планету, а
+  затем отметьте баронов на ней, которые прочтут письмо, тем же списком
+  `Send to:`, что используют экраны дипломатии и сообщений: буква отмечает
+  барона, та же буква снимает отметку, `Z` отмечает всех, `?` показывает
+  состав планеты, а Enter открывает редактор. Enter без единой отметки
+  просто выходит, ничего не отправив. Остальные четыре пункта адресуют
+  письмо всей лиге, союзным планетам, нескольким названным планетам или
+  одному координатору планеты. При ответе спрашивается, публичен ли он: да —
+  и письмо прочтёт вся планета отправителя, нет — только написавший его
+  барон.  Если ваша доска ещё не получила очки той планеты, выбирать не из
+  кого, и письмо уходит всем, кто там есть.
+- «Список дипломатии» — то, как ваша доска относится к каждой из прочих
+  планет. Никого ни к чему не обязывает, но это ваш координатор говорит вам,
+  за кем следить.
+- «Время в пути» — сколько на деле идёт сообщение или удар до каждой планеты
+  и сколько ждать ответа. Доски обмениваются почтой по расписанию своих
+  сисопов, так что сверяйтесь с этим экраном, прежде чем целиться: против
+  планеты в трёх днях пути вы отправляете войска, о судьбе которых узнаете
+  только к выходным.
 
-Five of these items are shut until you have played a turn this visit: Send
-Trade Deal, Create Group Attack, Join Group Attack, Indiv. Attack Force and
-Special Operations. Anything that moves forces or goods costs you a turn
-first — Join Group Attack lets you see who is forming a party before it asks
-for that turn, so you can decide whether starting one is worth it. The bank,
-your messages, the scores and the terrorist ops stay open, and once you have
-started a turn the whole menu is open for the rest of your visit.
+Пять пунктов закрыты, пока вы не сыграли ход за этот заход: «Отправить
+сделку», «Создать групповую атаку», «Присоединиться к атаке», «Одиночная
+атака» и «Спецоперации». Всё, что двигает войска или товар, сперва стоит вам
+хода — «Присоединиться к атаке» даёт посмотреть, кто собирает отряд, ещё до
+того, как потребует ход, чтобы вы решили, стоит ли овчинка выделки. Банк,
+ваши сообщения, очки и террористические операции открыты всегда, а начав
+ход, вы получаете всё меню до конца захода.
 
-## Your BBS Coordinator
+## Координатор вашей BBS
 
-The barons on your own board elect one of their number Coordinator, and the
-Coordinator speaks for the board: they set where it stands with each other
-planet, and they alone can call off a doomsday weapon. Vote from the System
-menu, under Coordinator Vote. Any living realm can be voted for, yourself
-included, and you may change your mind whenever you like — the office goes
-to whoever holds the most votes at the time.
+Бароны вашей доски выбирают одного из своих координатором, и координатор
+говорит от имени доски: он определяет, как она относится к каждой планете, и
+только он может отменить оружие судного дня. Голосуйте из меню «Система»,
+пункт голосования за координатора. Голосовать можно за любую живую державу,
+включая свою, и менять решение сколько угодно — должность достаётся тому, за
+кем на данный момент больше голосов.
 
-You cannot vote while your realm is still under new-realm protection, and
-the item is not on the menu until that ends — though the notice below will
-already be naming your vote.
+Голосовать, пока ваша держава под защитой новых держав, нельзя, и пункта в
+меню до её окончания нет — хотя надпись ниже уже назовёт ваш голос.
 
-Every turn opens by telling you whether you hold the office or who your vote
-is currently for, so you never have to go looking.
+Каждый ход начинается с того, что вам сообщают, занимаете ли вы эту
+должность или за кого сейчас отдан ваш голос, так что искать ничего не
+придётся.
 
 У лиговой игры есть заданная длительность. По её окончании мир сбрасывается
 и начинается новая игра.

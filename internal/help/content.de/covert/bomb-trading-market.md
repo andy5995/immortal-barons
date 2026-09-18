@@ -2,11 +2,12 @@
 category: covert
 in_game: true
 order: 12
-title: 'Bomb Trading Market'
+title: 'Handelsmarkt bombardieren'
 ---
 
-# Bomb Trading Market
+# Handelsmarkt bombardieren
 
-Bomb Trading Market is an InterPlanetary operation, on the Special
-Operations menu. It destroys a share of everything listed on another
-planet's trading market, and the gold sellers there were waiting on.
+Handelsmarkt bombardieren ist eine interplanetare Operation im Menü
+Spezialoperationen. Sie zerstört einen Teil von allem, was auf dem
+Handelsmarkt eines anderen Planeten gelistet ist, und dazu das Gold, auf das
+die Verkäufer dort warteten.

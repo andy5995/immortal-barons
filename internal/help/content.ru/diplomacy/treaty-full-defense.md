@@ -11,6 +11,6 @@ title: 'Полный оборонительный союз'
 значительную часть своих солдат и танков на защиту союзника в беде. Он
 действует только в локальных играх (на одной доске).
 
-Those forces can die in a battle you were not part of. When that happens you
-are told what you lost, who you were defending, and who attacked them, so
-watch your report after an ally has been raided.
+Эти войска могут погибнуть в бою, в котором вы не участвовали. Тогда вам
+сообщают, что вы потеряли, кого защищали и кто на них напал, — так что после
+налёта на союзника загляните в свой отчёт.

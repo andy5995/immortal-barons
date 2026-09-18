@@ -16,46 +16,48 @@ title: 'Налоги, поддержка и бунты'
 Бунты становятся вероятнее по мере роста налога выше безопасного
 уровня. Бунт обрушивает поддержку и прогоняет часть народа.
 
-Taxes also decide how many people your realm can hold. A low rate lets it
-hold many more, a high one far fewer, and past a punitive rate people leave
-faster still — see Population for the threshold. A realm that is already
-shrinking loses people quicker the harder it taxes. Support works the same
-way: the higher it stands, the more people your land can hold.
+Налоги ещё и решают, сколько людей вмещает ваша держава. Низкая ставка
+позволяет держать намного больше, высокая — намного меньше, а при
+разорительной ставке люди уезжают ещё быстрее: порог см. в теме
+Население. Держава, которая уже убывает, теряет людей тем быстрее, чем
+тяжелее налоги. Поддержка работает так же: чем она выше, тем больше людей
+вмещает ваша земля.
 
-## The Queen Royale's tax
+## Налог Королевы Рояль
 
-The Queen takes a share of what you earn each turn. You may pay her less
-than she asks, but a short payment costs Popular Support.
+Королева забирает долю вашего заработка каждый ход. Заплатить ей меньше, чем
+она просит, можно, но недоплата стоит Поддержки народа.
 
-Every coin she collects goes into her purse, and she gives part of that
-purse back. She pays you the first time you play each day: 2% of the purse,
-or 7% once it holds more than 100 million gold. A realm still under New
-Realm Protection gets at most 1 million.
+Каждая собранная монета идёт в её казну, и часть этой казны она отдаёт
+обратно. Она платит вам при первом заходе в игру каждый день: 2% казны, а
+если в ней больше 100 миллионов золота — 7%. Держава под защитой новой
+державы получает не больше 1 миллиона.
 
-All barons draw on the same purse, and each refund empties it a little. The
-first to play on a given day takes the largest share, so play early.
+Все бароны черпают из одной казны, и каждая выплата немного её
+опустошает. Тот, кто сыграл в этот день первым, берёт самую большую долю,
+так что играйте пораньше.
 
-## The lottery
+## Лотерея
 
-Once a day, as she hands back your refund, the Queen offers a lottery
-ticket.  It costs 5,000 gold, taken as soon as you say yes — she does not
-mention the price, and a baron with less than that in hand is not offered a
-ticket at all.  Either way the day's offer is spent: there is no asking
-again later.
+Раз в день, отдавая вам выплату, Королева предлагает лотерейный билет.  Он
+стоит 5 000 золота, и они списываются сразу, как только вы согласитесь: цену
+она не называет, а барону, у которого на руках меньше, билет не предлагают
+вовсе.  В любом случае предложение этого дня израсходовано: попросить позже
+нельзя.
 
-Pick six letters, one keypress each, and press Enter for any you would
-rather leave to chance. Six letters are then drawn. What counts is how many
-of the drawn letters your ticket covers, not where they sit, and each letter
-on your ticket can only be spent once.
+Выберите шесть букв, по одному нажатию на каждую, и нажмите Enter для тех,
+что хотите оставить на волю случая. Затем разыгрываются шесть букв. Важно,
+сколько выпавших букв покрывает ваш билет, а не где они стоят, и каждая
+буква билета засчитывается лишь один раз.
 
-- 1 letter: 2,500 gold
-- 2 letters: 10,000
-- 3 letters: 500,000
-- 4 letters: 1,000,000
-- 5 letters: 4,000,000
-- 6 letters: 10,000,000
+- 1 буква: 2 500 золота
+- 2 буквы: 10 000
+- 3 буквы: 500 000
+- 4 буквы: 1 000 000
+- 5 букв: 4 000 000
+- 6 букв: 10 000 000
 
-Winnings go into your bank. One match still leaves you 2,500 down on the
-ticket, and most tickets match nothing — the Queen did not build her purse
-by losing. Your sysop can switch the lottery off, so a board that never
-offers you one is not broken.
+Выигрыш идёт в ваш банк. Одно совпадение всё равно оставляет вас в минусе на
+2 500 от цены билета, а большинство билетов не совпадает вовсе — не
+проигрышами Королева набила свою казну. Ваш сисоп может отключить лотерею,
+так что доска, на которой билет не предлагают никогда, не сломана.

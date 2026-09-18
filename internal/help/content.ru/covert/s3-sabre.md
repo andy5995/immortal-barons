@@ -7,38 +7,38 @@ title: S3-Sabre
 
 # S3-Sabre
 
-The S3-Sabre is an unreliable weapon of mass destruction, fired from the
-InterPlanetary menu's Special Operations at a baron on another
-planet. Before you fire, you set a dial from 0 to 10, and the dial aims it:
+S3-Sabre — ненадёжное оружие массового поражения, запускаемое из
+Спецопераций меню Межпланетные операции по барону на другой планете. Перед
+пуском вы ставите шкалу от 0 до 10, и она задаёт наведение:
 
-| Dial | What it goes for |
+| Шкала | Куда бьёт |
 | --- | --- |
-| 0, 1 | the enemy's Intelligence HeadQuarters |
-| 2, 3 | residential zones, killing people |
-| 4 | military bases — troops, jets, turrets and tanks together |
-| 5, 6 | airbases, and nothing but jets |
-| 7, 8 | regions, burning them to waste |
-| 9, 10 | the food supply |
+| 0, 1 | вражеский Штаб разведки |
+| 2, 3 | жилые кварталы, убивая людей |
+| 4 | военные базы — войска, самолёты, турели и танки разом |
+| 5, 6 | авиабазы, и только самолёты |
+| 7, 8 | регионы, выжигая их в пустошь |
+| 9, 10 | запасы еды |
 
-The aim wanders by one setting either way in flight, and about one launch in
-ten ignores the dial altogether and hits whatever it likes. So a setting is
-a tendency, not a promise: 4 goes for military bases about half the time,
-while 5 goes for airbases about three times in four, because 5 and 6 both
-point there.  Aim 5 at a baron you know keeps a large air force.
+В полёте наведение сбивается на одно деление в любую сторону, а примерно
+один пуск из десяти вовсе не слушается шкалы и бьёт куда придётся. Так что
+настройка — это склонность, а не обещание: 4 идёт по военным базам примерно
+в половине случаев, а 5 бьёт по авиабазам примерно в трёх случаях из
+четырёх, потому что и 5, и 6 указывают туда.  Ставьте 5 на барона, о котором
+знаете, что он держит большой воздушный флот.
 
-The missile is still a gamble on top of that. Most launches do nothing: it
-misses, it malfunctions, or the enemy's SDI shoots it down. It can also
-backfire — if the enemy keeps a very large trooper army, the missile may
-turn back and strike your own empire instead.
+Сверх того ракета и сама по себе — азартная игра. Большинство пусков не дают
+ничего: промах, отказ или вражеская SDI сбивает её. Она может и обернуться
+против вас: если враг держит очень большую солдатскую армию, ракета может
+развернуться и ударить по вашей собственной империи.
 
-Your sysop decides how the dial is set. Normally you choose it yourself, but
-the game can be set up to roll one for you each time, to fix it at a dial
-the sysop chooses, or to switch the weapon off entirely. On a board set any
-way but "user select" you are never asked for a number — that is the setting
-doing its job, not a fault.
+Как выставляется шкала, решает ваш сисоп. Обычно вы выбираете её сами, но
+игру можно настроить так, чтобы значение каждый раз бросалось случайно, было
+закреплено на выбранном сисопом делении или чтобы оружие было отключено
+вовсе. На доске с любой настройкой, кроме \"user select\", номер у вас не
+спросят — это работа настройки, а не неисправность.
 
-You may fire each of the three missiles — nuclear, chemical and the S3-Sabre
-— once a day. A missile you have already used today is not listed on the
-Special Operations menu at all. They have their own allowance, so spending
-all three leaves your bombing operations untouched, and spending those
-leaves the missiles untouched.
+Каждую из трёх ракет — ядерную, химическую и S3-Sabre — можно пустить раз в
+день. Ракета, уже потраченная сегодня, вовсе не показывается в меню
+Спецоперации. У них свой запас, поэтому все три пуска не трогают ваши
+бомбовые операции, а бомбовые операции не трогают ракеты.

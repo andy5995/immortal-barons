@@ -2,11 +2,12 @@
 category: covert
 in_game: true
 order: 7
-title: 'Set Up'
+title: Hineinlegen
 ---
 
-# Set Up
+# Hineinlegen
 
-Set Up tricks the target and one of its Full Defense Alliance partners into
-believing the other declared war. Their alliance is voided. Use it to strip
-a defensive pact off an enemy you plan to attack.
+Hineinlegen bringt das Ziel und einen seiner Partner im Vollen
+Verteidigungsbündnis dazu, zu glauben, der jeweils andere habe den Krieg
+erklärt. Ihr Bündnis wird nichtig. Nutzen Sie es, um einem Feind, den Sie
+angreifen wollen, den Verteidigungspakt abzustreifen.

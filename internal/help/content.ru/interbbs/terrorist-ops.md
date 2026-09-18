@@ -7,49 +7,49 @@ title: 'Террористические операции'
 
 # Террористические операции
 
-Terrorist Ops send agents against a realm on another planet. You choose the
-operation, then how many agents to commit. The agents are spent when you
-send them, whatever they achieve, and the strike resolves on the target's
-planet once the packet reaches it — so the word comes back a day or more
-later.
+Террористические операции отправляют агентов против державы на другой
+планете. Вы выбираете операцию, затем число агентов. Агенты тратятся в
+момент отправки, чего бы они ни добились, а сам удар разрешается на планете
+цели, когда до неё дойдёт пакет, — так что весть вернётся день спустя или
+позже.
 
-Every operation is answered by New Realm Protection: a sheltered realm takes
-nothing at all.
+На любую операцию отвечает защита новых держав: укрытая ею держава не
+получает вообще ничего.
 
-## What each operation does
+## Что делает каждая операция
 
-The nine are not interchangeable. Each aims at one thing, and each agent
-that gets through takes its own bite:
+Девять операций не взаимозаменяемы. Каждая бьёт по чему-то одному, и каждый
+прошедший агент откусывает свой кусок:
 
-- **Send Spy** — brings intelligence home and costs the target nothing.
-- **Bomb Intelligence Agencies** — kills a few percent of their agents,
-  which is what they defend and attack with.
-- **Demoralize Forces** — takes a seventh off military morale.
-- **Cause Dissensions** — a few percent of their troopers desert.
-- **Бомбить авиабазы** - сжигает часть их истребителей на земле.
-- **Stir Emigrations** — drives people out of the realm.
-- **Spread Propaganda** — costs them popular support.
-- **Bomb Food Storages** — the widest swing of the nine: it can take almost
-  a third of what is in store, or almost nothing.
-- **Sabotage HQ** — sets back their HeadQuarters by a fixed amount.
+- **Отправить шпиона** — приносит сведения домой и не стоит цели ничего.
+- **Бомбить разведку** — убивает несколько процентов их агентов, а ими они и
+  защищаются, и нападают.
+- **Деморализовать войска** — отнимает седьмую часть боевого духа армии.
+- **Сеять раздор** — несколько процентов их солдат дезертируют.
+- **Бомбить авиабазы** - сжигает часть их самолётов на земле.
+- **Разжигать эмиграцию** — гонит людей прочь из державы.
+- **Распространять пропаганду** — стоит им поддержки народа.
+- **Бомбить склады еды** — самый непредсказуемый из девяти: может уничтожить
+  почти треть запасов, а может почти ничего.
+- **Диверсия в штабе** — отбрасывает их штаб назад на постоянную величину.
 
-## Picking one
+## Как выбрать
 
-Match the operation to what you plan next. Softening a realm before an
-interplanetary attack argues for the ones that thin what fights back —
-troopers, jets, morale. Grinding down a realm you cannot reach yet argues
-for the ones that cost it growth: food, people, support.
+Подбирайте операцию под то, что вы задумали дальше. Если вы смягчаете
+державу перед межпланетной атакой, берите те, что прореживают её оборону:
+солдат, самолёты, боевой дух. Если вы изматываете державу, до которой пока
+не дотянуться, берите те, что стоят ей роста: еда, люди, поддержка.
 
-## Getting through
+## Как агенты прорываются
 
-Each agent is rolled for on its own, weighing your agents against
-theirs. The weighing takes the square root of each side and gives the
-defender the better of it, so agents help but with sharply falling returns:
-four times as many buys you twice the edge, and two evenly matched realms
-see about two agents in five get through. There is a small chance either way
-that has nothing to do with either side.
+За каждого агента бросается отдельный жребий, где ваши агенты взвешиваются
+против их. Взвешивание берёт квадратный корень от каждой стороны и отдаёт
+перевес обороняющемуся, так что агенты помогают, но отдача резко падает:
+вчетверо больше агентов даёт лишь вдвое больший перевес, а у двух равных
+держав проходит примерно двое агентов из пяти. Есть и небольшая случайность
+в обе стороны, не зависящая ни от одной из сторон.
 
-Committing more agents therefore does more damage on average, but it never
-makes one agent likelier to land. A Terrorist Prevention pact adds its
-partners' agents to the defense, which is what makes a well-allied realm
-expensive to work on.
+Поэтому чем больше агентов вы отправите, тем больше урона в среднем, но
+вероятность прорыва для отдельного агента от этого не растёт. Договор о
+противодействии терроризму добавляет к обороне агентов партнёров — потому-то
+державу с хорошими союзниками так дорого обрабатывать.

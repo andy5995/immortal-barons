@@ -2,21 +2,21 @@
 category: covert
 in_game: true
 order: 9
-title: 'Expose Enemy Ops'
+title: 'Раскрыть операции врага'
 ---
 
-# Expose Enemy Ops
+# Раскрыть операции врага
 
-Expose Enemy Ops turns a bribed agent against the service that employs
-it. For the next day, nine in ten of that realm's covert operations against
-you are caught before they do anything.
+Раскрыть операции врага обращает подкупленного агента против службы, которая
+его нанимает. На ближайший день девять из десяти тайных операций этой
+державы против вас пресекаются прежде, чем успевают что-либо сделать.
 
-It works against ONE realm — the realm the agent is inside — so the menu
-lists only the realms you have already bribed. Bribery comes first; without
-an agent on your payroll there is nothing to expose. A tenth of that realm's
-attempts still get through.
+Она работает против ОДНОЙ державы — той, внутри которой сидит агент, —
+поэтому меню перечисляет только те державы, где вы уже провели
+Подкуп. Подкуп идёт первым: без агента на вашем содержании раскрывать
+нечего. Десятая часть попыток этой державы всё же проходит.
 
-It costs no agent and takes no part of a daily allowance, so you may run it
-as often as you can pay for it. Anything the shield turns aside counts as a
-caught agent, so on top of blocking the damage you are told which realm sent
-it.
+Она не стоит агента и не расходует дневной запас, так что запускать её можно
+столько раз, сколько сумеете оплатить. Всё, что отвёл этот щит, считается
+пойманным агентом, так что вдобавок к предотвращённому ущербу вам сообщают,
+какая держава его подослала.

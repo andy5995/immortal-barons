@@ -12,9 +12,9 @@ title: 'Соглашение о свободной торговле'
 налоге - почти вдвое больше, чем платит таможенное торговое соглашение, при
 том же числе жителей меньшего государства.
 
-People mixing across borders spread low morale and low support. Each day the
-healthier of the two realms drifts down toward the worse one, as far as its
-figure and no further. The drift runs one way only: the worse realm is never
-lifted by the contact. Signing with a struggling neighbor buys the income at
-the price of your own peace at home, so keep an eye on their figures as well
-as your own.
+Люди, переходящие через границы, разносят низкий боевой дух и низкую
+поддержку. Каждый день более благополучная из двух держав сползает к худшей
+— но не ниже её показателя. Снос идёт только в одну сторону: худшую державу
+такое соседство никогда не поднимает. Договор с бедствующим соседом покупает
+доход ценой спокойствия у себя дома, так что следите за его показателями не
+меньше, чем за своими.

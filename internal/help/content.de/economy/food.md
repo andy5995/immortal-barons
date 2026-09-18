@@ -13,32 +13,35 @@ Sie das eine versorgen und das andere hungern lassen
 können. Landwirtschaftsgebiete bauen Nahrung an, und weitere können Sie auf
 dem Nahrungsmarkt kaufen.
 
-The market opens by itself at that point in your turn, and both bills are
-put to you, whether or not you have enough in store. Turn on Auto-Feed in
-Preferences and you skip all of it on any turn you can cover the two bills;
-on a turn you cannot, the market opens anyway.
+Der Markt öffnet sich an dieser Stelle Ihres Zuges von selbst, und beide
+Rechnungen werden Ihnen vorgelegt, ob Sie genug im Vorrat haben oder
+nicht. Schalten Sie Reich autom. versorgen in den Einstellungen ein, und Sie
+überspringen all das in jedem Zug, in dem Sie die beiden Rechnungen decken
+können; in einem Zug, in dem Sie es nicht können, öffnet der Markt trotzdem.
 
 Der Markt verkauft Ihnen Nahrung teurer, als er beim Rückkauf zahlt. Er ist
 also kein Ort, um überschüssige Nahrung zu lagern.
 
-The price changes a little each day. It is the same for everyone on the
-planet that day, and it stays the same until the next day. Buy on a cheap
-day if you can.
+Der Preis ändert sich täglich ein wenig. Er ist an diesem Tag für jeden auf
+dem Planeten gleich, und er bleibt bis zum nächsten Tag gleich. Kaufen Sie
+an einem billigen Tag, wenn Sie können.
 
-Each turn your people eat first, then your army, and then part of whatever
-food is still in store spoils. A small store is safe: nothing rots until you
-are holding more than a thousand units. Above that the whole store loses a
-share, so the more you hoard the more you lose.
+Jeden Zug isst zuerst Ihr Volk, dann Ihr Heer, und dann verdirbt ein Teil
+der Nahrung, die noch im Vorrat liegt. Ein kleiner Vorrat ist sicher: Nichts
+verdirbt, solange Sie nicht mehr als tausend Einheiten halten. Darüber
+verliert der ganze Vorrat einen Anteil, je mehr Sie also horten, desto mehr
+verlieren Sie.
 
-Going short is billed twice, because the two needs are counted
-apart. Whatever your people go without costs Popular Support, and whatever
-your army goes without costs Military Morale. Nobody leaves your realm over
-it — but if your people get under about two thirds of what they need, the
-realm falls into civil war. A civil war halves your Support and destroys a
-share of your land and of every kind of unit you own, listed ones included.
+Knappheit wird doppelt berechnet, denn die beiden Bedürfnisse werden
+getrennt gezählt. Was Ihrem Volk fehlt, kostet Rückhalt, und was Ihrem Heer
+fehlt, kostet Kampfmoral. Niemand verlässt Ihr Reich deswegen - aber wenn
+Ihr Volk unter etwa zwei Drittel dessen bekommt, was es braucht, fällt das
+Reich in einen Bürgerkrieg. Ein Bürgerkrieg halbiert Ihren Rückhalt und
+zerstört einen Teil Ihres Landes und jeder Art von Einheit, die Sie
+besitzen, die gelisteten eingeschlossen.
 
-This turn's harvest arrives at the start of the turn, so you can sell it the
-same turn. Selling your surplus down each turn, instead of hoarding it, is
-how you lose nothing to spoilage. Food you have listed on the Trading Market
-spoils too, so listing it is not a way to store it. A high technology level
-slows spoilage.
+Die Ernte dieses Zuges trifft zu Beginn des Zuges ein, Sie können sie also
+im selben Zug verkaufen. Ihren Überschuss jeden Zug abzuverkaufen, statt ihn
+zu horten, ist der Weg, nichts an Verderb zu verlieren. Nahrung, die Sie auf
+dem Handelsmarkt gelistet haben, verdirbt ebenfalls, das Listen ist also
+kein Weg, sie zu lagern. Ein hoher Technologiestand verlangsamt den Verderb.

@@ -2,18 +2,19 @@
 category: covert
 in_game: true
 order: 10
-title: 'Bomb Enemy Targets'
+title: 'Бомбить цели врага'
 ---
 
-# Bomb Enemy Targets
+# Бомбить цели врага
 
-Bomb Enemy Targets sends your agents to plant bombs across an enemy
-realm. You choose the realm and nothing else: if the operation lands, your
-agency picks one of the enemy's holdings at random and destroys part of
-it. It may hit their people, their troopers, their own agents, their tanks,
-their jets, or their food store.
+Бомбить цели врага отправляет ваших агентов закладывать бомбы по всей
+вражеской державе. Вы выбираете только державу и ничего больше: если
+операция удалась, ваша агентура наугад берёт одно из владений врага и
+разрушает его часть. Удар может прийтись по его населению, его солдатам, его
+собственным агентам, его танкам, его самолётам или его запасам еды.
 
-Food is the prize. A strike that reaches the granaries burns a large share
-of it, far more than the few percent the other five lose, so a realm already
-short of food can be pushed into starvation by a single lucky raid. You
-cannot aim for it, though, so the operation is a gamble rather than a plan.
+Главная добыча — еда. Удар, дошедший до амбаров, сжигает большую её долю,
+куда больше тех нескольких процентов, что теряют остальные пять целей, так
+что державу, у которой и без того мало еды, один удачный налёт может довести
+до голода. Но прицелиться в амбары нельзя, поэтому операция — скорее ставка,
+чем план.

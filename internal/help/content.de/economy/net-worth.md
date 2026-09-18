@@ -2,12 +2,12 @@
 category: economy
 in_game: true
 order: 13
-title: Nettowert
+title: Vermögen
 ---
 
-# Nettowert
+# Vermögen
 
-Nettowert
+Vermögen
 
 Es zählt vor allem Ihr Land und Ihre militärische Stärke. Gold, Nahrung,
 Menschen und Schulden zählen überhaupt nicht. Ein reiches Reich mit wenig

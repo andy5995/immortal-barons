@@ -2,11 +2,12 @@
 category: covert
 in_game: true
 order: 7
-title: 'Set Up'
+title: Подставить
 ---
 
-# Set Up
+# Подставить
 
-Set Up tricks the target and one of its Full Defense Alliance partners into
-believing the other declared war. Their alliance is voided. Use it to strip
-a defensive pact off an enemy you plan to attack.
+Подставить внушает цели и одному из её партнёров по Полному оборонительному
+союзу, что другой объявил войну. Их союз распадается. Пользуйтесь этим,
+чтобы лишить оборонительного договора врага, на которого собираетесь
+напасть.

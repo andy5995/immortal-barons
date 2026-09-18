@@ -65,7 +65,7 @@ msgid ""
 "\"Quit\" so you can see what Enter will do. On a turn menu, this only "
 "happens if you turn on \"Enter exits Buy menu\" in Preferences; on a side "
 "menu, Enter always chooses Quit."
-msgstr ""
+msgstr "Нажатие Enter без всякой другой клавиши тоже выбирает Выход — в приглашении показано \\\"Выход\\\", чтобы вы видели, что сделает Enter. В меню хода это происходит, только если включить \\\"Enter — выход из меню покупок\\\" в Настройках; в боковом меню Enter выбирает Выход всегда."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:30
@@ -75,13 +75,13 @@ msgid ""
 "title, and Backspace or `Q` goes back. If your terminal cannot show color "
 "and cursor control, those lists are numbered instead — type the number and "
 "press Enter."
-msgstr ""
+msgstr "В справочнике и других списках выбора темы подсветка двигается стрелками: Enter выбирает отмеченную строку, набор нескольких букв перескакивает к нужному названию, а Backspace или `Q` возвращает назад. Если ваш терминал не умеет показывать цвет и управлять курсором, такие списки становятся нумерованными — наберите номер и нажмите Enter."
 
 #. type: Title ##
 #: internal/help/content/controls/interface.md:31
 #, no-wrap
 msgid "Typing an answer"
-msgstr ""
+msgstr "Ввод ответа"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:39
@@ -93,13 +93,13 @@ msgid ""
 "mistyped 1000000000, and it is IB's own addition; the original has no such "
 "key. In the message editor it clears the line you are on, not the message — "
 "`/C` still does that."
-msgstr ""
+msgstr "Там, где запрос ждёт набранного текста, а не одной клавиши — числа солдат, названия державы, строки сообщения, — Backspace стирает последний символ, а **Ctrl-U стирает весь ответ**, возвращая вас к приглашению с пустой строкой. Это быстрее, чем держать Backspace над ошибочно набранным 1000000000, и это собственное добавление IB: в оригинале такой клавиши нет. В редакторе сообщений она очищает строку, на которой вы стоите, а не всё сообщение — это по-прежнему делает `/C`."
 
 #. type: Title ##
 #: internal/help/content/controls/interface.md:40
 #, no-wrap
 msgid "Choosing who an action goes to"
-msgstr ""
+msgstr "Выбор того, кому адресовано действие"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:47
@@ -109,7 +109,7 @@ msgid ""
 "to take it off. `Z` marks everyone at once, `?` shows the roster, and `*` "
 "marks your treaty partners. **Press Enter when the list is right** — that is "
 "what opens the editor. Enter with nothing marked leaves without sending."
-msgstr ""
+msgstr "Отправить сообщение спрашивает `(A-Y,Z=All,?=List) Send to:` и принимает целый список, а не одно имя. Нажмите букву державы, чтобы добавить её, и ту же букву ещё раз, чтобы убрать. `Z` отмечает сразу всех, `?` показывает список держав, а `*` отмечает ваших партнёров по договорам. **Нажмите Enter, когда список готов** — именно это открывает редактор. Enter без единой отметки выходит, ничего не отправив."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:50
@@ -117,7 +117,7 @@ msgstr ""
 msgid ""
 "InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for the\n"
 "barons on the planet you named.\n"
-msgstr ""
+msgstr "Межпланетные операции -> Отправить сообщение -> Одна планета используют тот же запрос для\nбаронов на названной вами планете.\n"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:55
@@ -127,7 +127,7 @@ msgid ""
 "your relations rather than the scores. Mark one realm only and you get the "
 "full negotiation with it — you can accept its offer or break the pact you "
 "hold."
-msgstr ""
+msgstr "Любой пункт Дипломатии, называющий державу, принимает тот же список: предложите договор сразу нескольким державам или объявите войну сразу нескольким. Там `?` показывает ваши отношения, а не очки. Отметьте только одну державу — и вы получите с ней полноценные переговоры: можно принять её предложение или разорвать заключённый договор."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:62
@@ -139,7 +139,7 @@ msgid ""
 "Scores is that letter too, which is why those rows are not in letter order. "
 "The letters of everyone a message went to appear at the top of it when it is "
 "read."
-msgstr ""
+msgstr "Буквы принадлежат державам, а не строкам, поэтому буквы в списке могут пропускаться: такая буква либо ваша, либо принадлежит павшей державе. Держава сохраняет свою букву, пока стоит, кто бы ни присоединялся и ни падал, и это одна и та же буква на всех экранах — колонка `Id` в Очках и есть эта буква, потому её строки идут не по алфавиту. Буквы всех, кому ушло сообщение, показаны в его начале при чтении."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:66
@@ -147,13 +147,13 @@ msgid ""
 "A letter is freed when the realm holding it is swept from the map, and a "
 "later baron may be given it. So a letter names whoever holds it today, not "
 "whoever held it when an old message was written."
-msgstr ""
+msgstr "Буква освобождается, когда владевшую ею державу стирают с карты, и позже её может получить другой барон. Поэтому буква называет того, кто владеет ею сегодня, а не того, кто владел ею, когда писалось старое сообщение."
 
 #. type: Title ##
 #: internal/help/content/controls/interface.md:67
 #, no-wrap
 msgid "Who else is on"
-msgstr ""
+msgstr "Кто ещё в игре"
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:74
@@ -163,7 +163,7 @@ msgid ""
 "board with you. Your own realm never carries it. It clears when they log "
 "off, and also a few minutes after their last keypress, so someone sitting on "
 "one screen can drop off the list without having left."
-msgstr ""
+msgstr "Буква `O` рядом с буквой державы — в Очках, в списках целей для атаки и для сообщений и в списке отношений на экране Показать договоры — означает, что этот барон сейчас на доске вместе с вами. У вашей собственной державы её не бывает. Она пропадает, когда игрок выходит, а также через несколько минут после его последнего нажатия клавиши, так что засидевшийся на одном экране может исчезнуть из списка, никуда не уходя."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:75
@@ -253,7 +253,7 @@ msgid ""
 "The day turns at midnight on the computer that runs the game. That is not "
 "always midnight where you are, so the entry menu shows the game's own time "
 "and how long is left of the day."
-msgstr ""
+msgstr "День сменяется в полночь на том компьютере, где запущена игра. Это не всегда полночь у вас, поэтому в стартовом меню показаны собственное время игры и то, сколько осталось до конца дня."
 
 #. type: Plain text
 #: internal/help/content/controls/turns.md:21
@@ -263,7 +263,7 @@ msgid ""
 "them on another clock instead: this board's own, or a time zone you pick "
 "from a list.  The countdown to the new day is the same length of time "
 "whichever you choose."
-msgstr ""
+msgstr "Каждое время, которое печатает игра, сопровождается указанием часов, по которым оно дано. Сначала время идёт по UTC, с которым согласны все планеты лиги, а Настройки переведут его на другие часы: на время этой доски или на выбранный из списка часовой пояс. Отсчёт до нового дня одинаков при любом выборе."
 
 #. type: Plain text
 #: internal/help/content/controls/turns.md:25
@@ -272,7 +272,7 @@ msgid ""
 "cannot attack or be attacked. It only ticks down on turns you actually play, "
 "so you are safe while you learn the game."
 msgstr ""
-"Новые игроки получают Защиту нового королевства: несколько ходов, в течение "
+"Новые игроки получают защиту новой державы: несколько ходов, в течение "
 "которых вы не можете ни атаковать, ни быть атакованными. Это даёт время "
 "развиться."
 
@@ -282,14 +282,14 @@ msgid ""
 "A realm still under protection shows its letter in square brackets in the "
 "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
 "see who cannot be attacked yet."
-msgstr ""
+msgstr "Держава, всё ещё находящаяся под защитой, показывает свою букву в квадратных скобках в списках держав — `[C]`, тогда как все остальные показаны как `(C)`, — так видно, кого пока нельзя атаковать."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-enemy-targets.md:1
 #: internal/help/content/covert/bomb-enemy-targets.md:8
 #, no-wrap
 msgid "Bomb Enemy Targets"
-msgstr ""
+msgstr "Бомбить цели врага"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-enemy-targets.md:15
@@ -299,7 +299,7 @@ msgid ""
 "picks one of the enemy's holdings at random and destroys part of it. It may "
 "hit their people, their troopers, their own agents, their tanks, their jets, "
 "or their food store."
-msgstr ""
+msgstr "Бомбить цели врага отправляет ваших агентов закладывать бомбы по всей вражеской державе. Вы выбираете только державу и ничего больше: если операция удалась, ваша агентура наугад берёт одно из владений врага и разрушает его часть. Удар может прийтись по его населению, его солдатам, его собственным агентам, его танкам, его самолётам или его запасам еды."
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-enemy-targets.md:19
@@ -308,14 +308,14 @@ msgid ""
 "of it, far more than the few percent the other five lose, so a realm already "
 "short of food can be pushed into starvation by a single lucky raid. You "
 "cannot aim for it, though, so the operation is a gamble rather than a plan."
-msgstr ""
+msgstr "Главная добыча — еда. Удар, дошедший до амбаров, сжигает большую её долю, куда больше тех нескольких процентов, что теряют остальные пять целей, так что державу, у которой и без того мало еды, один удачный налёт может довести до голода. Но прицелиться в амбары нельзя, поэтому операция — скорее ставка, чем план."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-food-market.md:1
 #: internal/help/content/covert/bomb-food-market.md:8
 #, no-wrap
 msgid "Bomb Food Market"
-msgstr ""
+msgstr "Бомбить рынок еды"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-food-market.md:12
@@ -323,14 +323,14 @@ msgid ""
 "Bomb Food Market is an InterPlanetary operation, on the Special Operations "
 "menu. It destroys much of another planet's food market supply. A large loss "
 "can start a food shortage across that whole planet."
-msgstr ""
+msgstr "Бомбить рынок еды — межпланетная операция из меню Спецоперации. Она уничтожает большую часть запасов рынка еды на другой планете. Крупная потеря способна вызвать нехватку еды на всей той планете."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-trade-routes.md:1
 #: internal/help/content/covert/bomb-trade-routes.md:8
 #, no-wrap
 msgid "Bomb Trade Routes"
-msgstr ""
+msgstr "Бомбить торговые пути"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trade-routes.md:14
@@ -340,7 +340,7 @@ msgid ""
 "come to nothing and some deals slip through, but a deal the bombers reach "
 "arrives all but empty — only a few percent of every good in it is left. "
 "Standing treaties are not touched."
-msgstr ""
+msgstr "Бомбить торговые пути — межпланетная операция из меню Спецоперации. Она бьёт по торговым сделкам, идущим через другую планету. Большинство ударов ни к чему не приводят, часть сделок проскакивает, но сделка, до которой бомбардировщики добрались, приходит почти пустой: от каждого товара в ней остаётся лишь несколько процентов. Действующие договоры при этом не затрагиваются."
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trade-routes.md:17
@@ -348,14 +348,14 @@ msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "
 "each other. Your own agreements with the target count for nothing here, so a "
 "partner can bomb you as easily as an enemy can."
-msgstr ""
+msgstr "Сделка уцелеет, если обе торгующие державы связаны между собой Защищённой торговлей. Ваши собственные соглашения с целью здесь не значат ничего, так что партнёр может разбомбить вас так же легко, как и враг."
 
 #. type: Title #
 #: internal/help/content/covert/bomb-trading-market.md:1
 #: internal/help/content/covert/bomb-trading-market.md:8
 #, no-wrap
 msgid "Bomb Trading Market"
-msgstr ""
+msgstr "Бомбить торговый рынок"
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trading-market.md:12
@@ -363,14 +363,14 @@ msgid ""
 "Bomb Trading Market is an InterPlanetary operation, on the Special "
 "Operations menu. It destroys a share of everything listed on another "
 "planet's trading market, and the gold sellers there were waiting on."
-msgstr ""
+msgstr "Бомбить торговый рынок — межпланетная операция из меню Спецоперации. Она уничтожает часть всего, что выставлено на торговом рынке другой планеты, вместе с золотом, которого ждали тамошние продавцы."
 
 #. type: Title #
 #: internal/help/content/covert/bribery.md:1
 #: internal/help/content/covert/bribery.md:8
 #, no-wrap
 msgid "Bribery"
-msgstr ""
+msgstr "Подкуп"
 
 #. type: Plain text
 #: internal/help/content/covert/bribery.md:13
@@ -392,42 +392,42 @@ msgid ""
 "is also what Expose Enemy Ops needs before it can shield you from that "
 "realm. Since the bribe itself is only carried out at daily maintenance, the "
 "earliest you can expose that realm is the day after you pay for the bribe."
-msgstr ""
+msgstr "Агент остаётся на вашем содержании до конца игры, и внутри одной державы можно держать только одного — на вторую попытку меню ответит отказом, и это ничего не стоит. Он же нужен операции Раскрыть операции врага, чтобы прикрыть вас от этой державы. Поскольку сам подкуп совершается только во время ежедневного обслуживания, раскрыть эту державу вы сможете не раньше следующего дня после оплаты."
 
 #. type: Plain text
 #: internal/help/content/covert/bribery.md:21
 msgid ""
 "Bribery is the hardest operation on the menu to land, so expect to pay for "
 "several attempts."
-msgstr ""
+msgstr "Подкуп — самая трудная операция в меню, так что рассчитывайте оплатить несколько попыток."
 
 #. type: Title #
 #: internal/help/content/covert/demoralize-forces.md:1
 #: internal/help/content/covert/demoralize-forces.md:8
 #, no-wrap
 msgid "Demoralize Forces"
-msgstr ""
+msgstr "Деморализовать войска"
 
 #. type: Plain text
 #: internal/help/content/covert/demoralize-forces.md:12
 msgid ""
 "Demoralize Forces lowers the target's military morale. Low morale weakens "
 "their army in battle and can cause desertion."
-msgstr ""
+msgstr "Деморализовать войска снижает боевой дух армии цели. Низкий боевой дух ослабляет её войска в бою и может вызвать дезертирство."
 
 #. type: Plain text
 #: internal/help/content/covert/demoralize-forces.md:14
 msgid ""
 "Your agent only reaches them at daily maintenance, so send one the day "
 "before the battle you want it to affect, not the turn of it."
-msgstr ""
+msgstr "Ваш агент доберётся до них только при ежедневном обслуживании, поэтому отправляйте его за день до нужного сражения, а не в том же ходу."
 
 #. type: Title #
 #: internal/help/content/covert/expose-enemy-ops.md:1
 #: internal/help/content/covert/expose-enemy-ops.md:8
 #, no-wrap
 msgid "Expose Enemy Ops"
-msgstr ""
+msgstr "Раскрыть операции врага"
 
 #. type: Plain text
 #: internal/help/content/covert/expose-enemy-ops.md:13
@@ -435,7 +435,7 @@ msgid ""
 "Expose Enemy Ops turns a bribed agent against the service that employs it. "
 "For the next day, nine in ten of that realm's covert operations against you "
 "are caught before they do anything."
-msgstr ""
+msgstr "Раскрыть операции врага обращает подкупленного агента против службы, которая его нанимает. На ближайший день девять из десяти тайных операций этой державы против вас пресекаются прежде, чем успевают что-либо сделать."
 
 #. type: Plain text
 #: internal/help/content/covert/expose-enemy-ops.md:18
@@ -444,7 +444,7 @@ msgid ""
 "lists only the realms you have already bribed. Bribery comes first; without "
 "an agent on your payroll there is nothing to expose. A tenth of that realm's "
 "attempts still get through."
-msgstr ""
+msgstr "Она работает против ОДНОЙ державы — той, внутри которой сидит агент, — поэтому меню перечисляет только те державы, где вы уже провели Подкуп. Подкуп идёт первым: без агента на вашем содержании раскрывать нечего. Десятая часть попыток этой державы всё же проходит."
 
 #. type: Plain text
 #: internal/help/content/covert/expose-enemy-ops.md:21
@@ -453,7 +453,7 @@ msgid ""
 "as often as you can pay for it. Anything the shield turns aside counts as a "
 "caught agent, so on top of blocking the damage you are told which realm sent "
 "it."
-msgstr ""
+msgstr "Она не стоит агента и не расходует дневной запас, так что запускать её можно столько раз, сколько сумеете оплатить. Всё, что отвёл этот щит, считается пойманным агентом, так что вдобавок к предотвращённому ущербу вам сообщают, какая держава его подослала."
 
 #. type: Title #
 #: internal/help/content/covert/overview.md:1
@@ -467,7 +467,7 @@ msgstr "Тайные операции"
 msgid ""
 "Covert operations are secret missions run by your agents. You need at least "
 "one agent to run any of them, and a failed one costs you that agent."
-msgstr ""
+msgstr "Тайные операции — это секретные задания, которые выполняют ваши агенты. Для любой из них нужен хотя бы один агент, а провалившаяся стоит вам этого агента."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:21
@@ -480,7 +480,7 @@ msgid ""
 "your agent turns nine of your attempts in ten away, and an Intelligence "
 "Alliance or Terrorist Prevention treaty lends an ally's agents to your side "
 "or the target's. See Agents."
-msgstr ""
+msgstr "Чего агенты НЕ делают, так это не меняют ваши шансы. Вероятность успеха задана самой операцией: простые удаются чуть чаще, чем в половине случаев, трудные — реже. Ваши агенты на неё не влияют, и агенты цели тоже. Влияют три вещи: подкупленный агент внутри цели удваивает ваш шанс против этой державы, держава, раскрывшая вашего агента, отводит девять ваших попыток из десяти, а Разведывательный союз или Противодействие терроризму отдаёт агентов союзника вашей стороне или стороне цели. См. Агенты."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:25
@@ -489,7 +489,7 @@ msgid ""
 "and the footer shows how much gold and how many agents you have. You pay the "
 "gold when you send the operation. If you cannot pay, the operation does not "
 "run."
-msgstr ""
+msgstr "Каждая операция стоит ещё и золота. Меню показывает цену рядом с каждой, а нижняя строка — сколько у вас золота и агентов. Золото списывается, когда вы отправляете операцию. Если платить нечем, операция не проводится."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:31
@@ -499,7 +499,7 @@ msgid ""
 "refused, and the refusal costs nothing — no gold, no agent, no turn. Send "
 "Spy and Spy on Relations only gather information, so those two stay open to "
 "you for as long as the shield lasts."
-msgstr ""
+msgstr "Пока ваша держава под защитой новой державы, ваши агенты не могут действовать против другой державы: любая операция, влияющая на цель, отклоняется, и отказ не стоит ничего — ни золота, ни агента, ни хода. Отправить шпиона и Разведать отношения только собирают сведения, поэтому эти две остаются вам доступны всё время, пока держится защита."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:39
@@ -511,7 +511,7 @@ msgid ""
 "an operation cannot soften a realm you are about to attack in the same turn; "
 "plan it a day ahead.  Send Spy and Spy on Relations are the exceptions, "
 "along with Expose Enemy Ops: those three answer you immediately."
-msgstr ""
+msgstr "Большинство операций происходят не сразу. Когда вы выбираете операцию, агент отправляется в путь: плата и агент уходят немедленно, а сама операция выполняется во время следующего ежедневного обслуживания. Результат ждёт вас в отчёте следующего хода — прошёл ли агент и что он сделал. Поэтому операция не может ослабить державу, на которую вы собираетесь напасть тем же ходом: планируйте её на день вперёд.  Исключения — Отправить шпиона и Разведать отношения, а также Раскрыть операции врага: эти три отвечают немедленно."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:44
@@ -521,14 +521,14 @@ msgid ""
 "yes tears the treaty up at the usual price in support and morale, and the "
 "agent is then sent. See Treaties and Alliances. Send Spy and Spy on "
 "Relations do not ask."
-msgstr ""
+msgstr "Соглашение — не укрытие. Вы можете направить операцию на правителя, с которым у вас договор, и игра попросит подтверждения, прежде чем агент уйдёт. Ответ «да» рвёт договор по обычной цене в поддержке и боевом духе, после чего агент отправляется. См. Договоры и союзы. Отправить шпиона и Разведать отношения не спрашивают."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:47
 msgid ""
 "If the realm you aimed at is gone by the time your agent arrives, the "
 "operation is abandoned and the fee is not returned."
-msgstr ""
+msgstr "Если державы, на которую вы нацелились, к прибытию агента уже нет, операция отменяется, а плата не возвращается."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:52
@@ -537,7 +537,7 @@ msgid ""
 "spend that allowance whenever you like — all of it in one turn, or one at a "
 "time.  Running Stir Revolts uses up one Stir Revolts and leaves every other "
 "operation untouched. The allowance refills at the start of each new day."
-msgstr ""
+msgstr "Каждую тайную операцию можно провести по одному разу на каждый ход в дне, и тратить этот запас можно как угодно — весь за один ход или по одной.  Запуск операции Разжечь мятежи расходует один запуск Разжечь мятежи и не трогает остальные операции. Запас пополняется в начале каждого нового дня."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:59
@@ -548,7 +548,7 @@ msgid ""
 "separate operation with its own fee and its own chance of being caught. Send "
 "Spy and Spy on Relations only gather information, so they have no limit at "
 "all and go one at a time, and Expose Enemy Ops has no limit either."
-msgstr ""
+msgstr "После выбора цели игра спрашивает, сколько агентов отправить, и предлагает столько, сколько вы можете: смотря что кончится раньше — имеющиеся агенты, оставшийся на сегодня запас или золото на оплату. Каждый агент — отдельная операция со своей платой и своим риском попасться. Отправить шпиона и Разведать отношения только собирают сведения, поэтому у них нет предела вовсе и идут они по одному; у Раскрыть операции врага предела тоже нет."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:65
@@ -558,7 +558,7 @@ msgid ""
 "An operation that succeeds is reported to the target with no name attached. "
 "The only way anyone learns who is running operations against them is by "
 "catching an agent."
-msgstr ""
+msgstr "Когда операция проваливается, ваш агент пойман и потерян, а цель предупреждена — и пойманный агент заговорит, так что цели назовут имя вашей державы. Об удавшейся операции цели сообщают, не называя никого. Единственный способ узнать, кто ведёт против вас операции, — поймать агента."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:69
@@ -566,7 +566,7 @@ msgid ""
 "Each operation has its own topic. Some of the topics in this section cover "
 "InterPlanetary Special Operations instead, which are aimed at another planet "
 "and need Bombers to deliver their payloads; each says so."
-msgstr ""
+msgstr "У каждой операции своя тема. Некоторые темы этого раздела описывают межпланетные спецоперации, которые нацелены на другую планету и требуют бомбардировщиков для доставки; о каждой из них сказано отдельно."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:72
@@ -574,14 +574,14 @@ msgid ""
 "The Covert Operations menu appears during your turn, before the Spending and "
 "Attack menus. If you do not see it, turn on \"Visit Covert Menu\" in the "
 "Preferences menu."
-msgstr ""
+msgstr "Меню Тайные операции появляется во время вашего хода, перед меню Расходы и Атака. Если вы его не видите, включите \\\"Меню тайных операций\\\" в меню Настройки."
 
 #. type: Title #
 #: internal/help/content/covert/s3-sabre.md:1
 #: internal/help/content/covert/s3-sabre.md:8
 #, no-wrap
 msgid "S3-Sabre"
-msgstr ""
+msgstr "S3-Sabre"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:13
@@ -589,7 +589,7 @@ msgid ""
 "The S3-Sabre is an unreliable weapon of mass destruction, fired from the "
 "InterPlanetary menu's Special Operations at a baron on another planet. "
 "Before you fire, you set a dial from 0 to 10, and the dial aims it:"
-msgstr ""
+msgstr "S3-Sabre — ненадёжное оружие массового поражения, запускаемое из Спецопераций меню Межпланетные операции по барону на другой планете. Перед пуском вы ставите шкалу от 0 до 10, и она задаёт наведение:"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:22
@@ -603,7 +603,7 @@ msgid ""
 "| 5, 6 | airbases, and nothing but jets |\n"
 "| 7, 8 | regions, burning them to waste |\n"
 "| 9, 10 | the food supply |\n"
-msgstr ""
+msgstr "| Шкала | Куда бьёт |\n| --- | --- |\n| 0, 1 | вражеский Штаб разведки |\n| 2, 3 | жилые кварталы, убивая людей |\n| 4 | военные базы — войска, самолёты, турели и танки разом |\n| 5, 6 | авиабазы, и только самолёты |\n| 7, 8 | регионы, выжигая их в пустошь |\n| 9, 10 | запасы еды |\n"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:28
@@ -613,7 +613,7 @@ msgid ""
 "a tendency, not a promise: 4 goes for military bases about half the time, "
 "while 5 goes for airbases about three times in four, because 5 and 6 both "
 "point there.  Aim 5 at a baron you know keeps a large air force."
-msgstr ""
+msgstr "В полёте наведение сбивается на одно деление в любую сторону, а примерно один пуск из десяти вовсе не слушается шкалы и бьёт куда придётся. Так что настройка — это склонность, а не обещание: 4 идёт по военным базам примерно в половине случаев, а 5 бьёт по авиабазам примерно в трёх случаях из четырёх, потому что и 5, и 6 указывают туда.  Ставьте 5 на барона, о котором знаете, что он держит большой воздушный флот."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:33
@@ -622,7 +622,7 @@ msgid ""
 "misses, it malfunctions, or the enemy's SDI shoots it down. It can also "
 "backfire — if the enemy keeps a very large trooper army, the missile may "
 "turn back and strike your own empire instead."
-msgstr ""
+msgstr "Сверх того ракета и сама по себе — азартная игра. Большинство пусков не дают ничего: промах, отказ или вражеская SDI сбивает её. Она может и обернуться против вас: если враг держит очень большую солдатскую армию, ракета может развернуться и ударить по вашей собственной империи."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:39
@@ -632,7 +632,7 @@ msgid ""
 "the sysop chooses, or to switch the weapon off entirely. On a board set any "
 "way but \"user select\" you are never asked for a number — that is the "
 "setting doing its job, not a fault."
-msgstr ""
+msgstr "Как выставляется шкала, решает ваш сисоп. Обычно вы выбираете её сами, но игру можно настроить так, чтобы значение каждый раз бросалось случайно, было закреплено на выбранном сисопом делении или чтобы оружие было отключено вовсе. На доске с любой настройкой, кроме \\\"user select\\\", номер у вас не спросят — это работа настройки, а не неисправность."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:44
@@ -642,14 +642,14 @@ msgid ""
 "Special Operations menu at all. They have their own allowance, so spending "
 "all three leaves your bombing operations untouched, and spending those "
 "leaves the missiles untouched."
-msgstr ""
+msgstr "Каждую из трёх ракет — ядерную, химическую и S3-Sabre — можно пустить раз в день. Ракета, уже потраченная сегодня, вовсе не показывается в меню Спецоперации. У них свой запас, поэтому все три пуска не трогают ваши бомбовые операции, а бомбовые операции не трогают ракеты."
 
 #. type: Title #
 #: internal/help/content/covert/send-spy.md:1
 #: internal/help/content/covert/send-spy.md:8
 #, no-wrap
 msgid "Send Spy"
-msgstr ""
+msgstr "Отправить шпиона"
 
 #. type: Plain text
 #: internal/help/content/covert/send-spy.md:13
@@ -657,7 +657,7 @@ msgid ""
 "Send Spy gathers military intelligence on an enemy. It reveals their land, "
 "troops, defenses, gold, and more, so you can plan an attack. If the mission "
 "fails, your spy is caught and does not return."
-msgstr ""
+msgstr "Отправить шпиона собирает военные сведения о враге. Раскрываются его земли, войска, оборона, золото и многое другое, так что вы можете спланировать нападение. Если задание провалится, вашего шпиона поймают и он не вернётся."
 
 #. type: Plain text
 #: internal/help/content/covert/send-spy.md:17
@@ -665,7 +665,7 @@ msgid ""
 "It succeeds more often than most operations, whoever you send it against — "
 "see the Covert Operations overview for the odds and what does and does not "
 "move them."
-msgstr ""
+msgstr "Она удаётся чаще большинства операций, против кого бы вы её ни послали, — о шансах и о том, что на них влияет, а что нет, см. обзор Тайные операции."
 
 #. type: Plain text
 #: internal/help/content/covert/send-spy.md:19
@@ -673,14 +673,14 @@ msgid ""
 "Send Spy answers on the spot. It is one of the few operations that does not "
 "wait for daily maintenance, which is what makes it useful right before an "
 "attack."
-msgstr ""
+msgstr "Отправить шпиона отвечает сразу. Это одна из немногих операций, которые не ждут ежедневного обслуживания, чем она и полезна прямо перед нападением."
 
 #. type: Title #
 #: internal/help/content/covert/set-up.md:1
 #: internal/help/content/covert/set-up.md:8
 #, no-wrap
 msgid "Set Up"
-msgstr ""
+msgstr "Подставить"
 
 #. type: Plain text
 #: internal/help/content/covert/set-up.md:12
@@ -688,14 +688,14 @@ msgid ""
 "Set Up tricks the target and one of its Full Defense Alliance partners into "
 "believing the other declared war. Their alliance is voided. Use it to strip "
 "a defensive pact off an enemy you plan to attack."
-msgstr ""
+msgstr "Подставить внушает цели и одному из её партнёров по Полному оборонительному союзу, что другой объявил войну. Их союз распадается. Пользуйтесь этим, чтобы лишить оборонительного договора врага, на которого собираетесь напасть."
 
 #. type: Title #
 #: internal/help/content/covert/spy-on-relations.md:1
 #: internal/help/content/covert/spy-on-relations.md:8
 #, no-wrap
 msgid "Spy on Relations"
-msgstr ""
+msgstr "Разведать отношения"
 
 #. type: Plain text
 #: internal/help/content/covert/spy-on-relations.md:11
@@ -703,14 +703,14 @@ msgid ""
 "Spy on Relations reveals every treaty the target holds with other rulers. It "
 "is useful before a war, so you can see which alliances might come to their "
 "defense."
-msgstr ""
+msgstr "Разведать отношения раскрывает все договоры цели с другими правителями. Это полезно перед войной: видно, какие союзы могут прийти ей на помощь."
 
 #. type: Title #
 #: internal/help/content/covert/stir-revolts.md:1
 #: internal/help/content/covert/stir-revolts.md:8
 #, no-wrap
 msgid "Stir Revolts"
-msgstr ""
+msgstr "Разжечь мятежи"
 
 #. type: Plain text
 #: internal/help/content/covert/stir-revolts.md:11
@@ -726,14 +726,14 @@ msgstr ""
 #: internal/help/content/covert/support-dissensions.md:8
 #, no-wrap
 msgid "Support Dissensions"
-msgstr ""
+msgstr "Поддержать раздор"
 
 #. type: Plain text
 #: internal/help/content/covert/support-dissensions.md:11
 msgid ""
 "Support Dissensions turns the target's own troopers against them. Some of "
 "their army deserts and flees."
-msgstr ""
+msgstr "Поддержать раздор обращает собственных солдат цели против неё. Часть её армии дезертирует и разбегается."
 
 #. type: Title #
 #: internal/help/content/covert/undermine-investments.md:1
@@ -749,7 +749,7 @@ msgid ""
 "Operations menu. It damages the pending bank investments of every realm on "
 "another planet, trimming about a quarter off the money they were due to get "
 "back."
-msgstr ""
+msgstr "Подрыв инвестиций — межпланетная операция из меню Спецоперации. Она портит незавершённые банковские вклады всех держав другой планеты, срезая около четверти суммы, которую те должны были получить обратно."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaties.md:1
@@ -781,21 +781,21 @@ msgid ""
 "nuclear, chemical or biological strike, and before a covert operation that "
 "sends an agent. Send Spy and Spy on Relations only look, so they do not ask "
 "and cost you nothing."
-msgstr ""
+msgstr "Нападение на правителя, с которым у вас соглашение, рвёт это соглашение, и игра просит подтверждения, прежде чем вы выберете войска. Ответите «да» — и ваш народ бунтует против вероломного барона: вы теряете четверть поддержки и четверть боевого духа армии, и бой идёт уже при этом пониженном духе. Ответите «нет» — нападение отменяется. Между двумя державами не остаётся никакого соглашения, и преданный вами правитель ответит на это по-своему. Тот же вопрос задаётся перед ядерным, химическим или биологическим ударом и перед тайной операцией, отправляющей агента. Отправить шпиона и Разведать отношения только смотрят, поэтому они не спрашивают и ничего вам не стоят."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:25
 msgid ""
 "A Declaration of War, on the Diplomacy menu, ends an agreement at the same "
 "price without a battle. It costs nothing if you had no agreement to break."
-msgstr ""
+msgstr "Объявление войны в меню Дипломатия прекращает соглашение по той же цене, но без боя. Если соглашения не было, оно не стоит ничего."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:28
 msgid ""
 "View Treaties shows your current relations with the other rulers in the "
 "game, and below that, the offers you have sent that nobody has answered yet."
-msgstr ""
+msgstr "Показать договоры выводит ваши нынешние отношения с другими правителями игры, а ниже — отправленные вами предложения, на которые ещё никто не ответил."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:31
@@ -803,7 +803,7 @@ msgid ""
 "Once you hold a treaty, Send Message offers to write to all your allies at "
 "once.  It reaches every ruler you have an agreement with, whatever kind it "
 "is."
-msgstr ""
+msgstr "Как только у вас есть договор, Отправить сообщение предлагает написать сразу всем союзникам.  Оно дойдёт до каждого правителя, с которым у вас есть соглашение, какого бы вида оно ни было."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:35
@@ -811,7 +811,7 @@ msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
 "you send a second, different offer to the same ruler, it takes the place of "
 "the first one, because two realms can hold only one agreement at a time."
-msgstr ""
+msgstr "Предложение ждёт, пока другой правитель не сыграет ход. Оно не истекает. Если вы пошлёте тому же правителю второе, другое предложение, оно займёт место первого, потому что две державы могут держать между собой лишь одно соглашение."
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:38
@@ -819,7 +819,7 @@ msgid ""
 "Choosing the treaty you already hold with a ruler sends nothing. The game "
 "tells you the agreement still stands and returns you to the menu. "
 "Declaration of War is the way to end one."
-msgstr ""
+msgstr "Выбор договора, который у вас с правителем уже есть, ничего не отправляет. Игра сообщает, что соглашение по-прежнему в силе, и возвращает вас в меню. Прекратить его можно объявлением войны."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-free-trade.md:1
@@ -849,7 +849,7 @@ msgid ""
 "lifted by the contact. Signing with a struggling neighbor buys the income at "
 "the price of your own peace at home, so keep an eye on their figures as well "
 "as your own."
-msgstr ""
+msgstr "Люди, переходящие через границы, разносят низкий боевой дух и низкую поддержку. Каждый день более благополучная из двух держав сползает к худшей — но не ниже её показателя. Снос идёт только в одну сторону: худшую державу такое соседство никогда не поднимает. Договор с бедствующим соседом покупает доход ценой спокойствия у себя дома, так что следите за его показателями не меньше, чем за своими."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-full-defense.md:1
@@ -875,7 +875,7 @@ msgid ""
 "Those forces can die in a battle you were not part of. When that happens you "
 "are told what you lost, who you were defending, and who attacked them, so "
 "watch your report after an ally has been raided."
-msgstr ""
+msgstr "Эти войска могут погибнуть в бою, в котором вы не участвовали. Тогда вам сообщают, что вы потеряли, кого защищали и кто на них напал, — так что после налёта на союзника загляните в свой отчёт."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-intelligence-alliance.md:1
@@ -922,7 +922,7 @@ msgid ""
 "The guard covers deals with that partner only. Anything you have in transit "
 "to another realm can still be bombed, and so can goods you have listed on "
 "the trading market."
-msgstr ""
+msgstr "Защита распространяется только на сделки с этим партнёром. Всё, что у вас в пути к другой державе, разбомбить по-прежнему можно, как и товары, выставленные вами на торговом рынке."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-tariff-trade.md:1
@@ -971,7 +971,7 @@ msgid ""
 "for it. A realm with no Technology of its own gains nothing from the pact, "
 "however advanced its partner is — buy the regions first, then find an ally "
 "who has done the same."
-msgstr ""
+msgstr "Помощь, которую он даёт, ограничена тем из вас двоих, у кого меньше регионов Технологий, так что он ускоряет работу, которую вы и так ведёте, а не заменяет её. Держава без собственных Технологий не получает от такого союза ничего, каким бы передовым ни был партнёр: сначала купите регионы, потом ищите союзника, сделавшего то же самое."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-terrorist-prevention.md:1
@@ -1025,7 +1025,7 @@ msgstr "Денежная помощь / Кредиты - занять золот
 msgid ""
 "Deposits and withdrawals have no size limit. One investment locks away at "
 "most two billion gold, though you may open as many as you like."
-msgstr ""
+msgstr "У вкладов и снятий нет предела по размеру. Один вклад запирает не больше двух миллиардов золота, но открыть их можно сколько угодно."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:25
@@ -1035,41 +1035,41 @@ msgid ""
 "Preferences, your gold is put in the bank first, so the gold you earned this "
 "turn earns interest this turn. It goes in after the pirates have had their "
 "chance at it, so it is no protection against a raid."
-msgstr ""
+msgstr "Проценты начисляются в конце каждого хода на то, что лежит в банке в этот момент. Если вы включили Вносить золото в конце хода в Настройках, ваше золото сначала попадает в банк, так что заработанное за этот ход приносит проценты в этом же ходу. Оно уходит туда уже после того, как своё попробуют взять пираты, так что от налёта это не защита."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:28
 msgid ""
 "The start of your next turn tells you what the bank paid: the interest, and "
 "what any investment that matured today paid back."
-msgstr ""
+msgstr "В начале следующего хода вам сообщают, что заплатил банк: проценты и то, что вернул созревший сегодня вклад."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:31
 msgid ""
 "You can hold at most two billion gold, in hand and the same again in the "
 "bank.  Gold you earn above that is lost. Spend it before you get there."
-msgstr ""
+msgstr "На руках можно держать не больше двух миллиардов золота и столько же в банке.  Заработанное сверх этого пропадает. Тратьте, не доводя до предела."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:34
 msgid ""
 "A full bank still pays its interest, into your gold in hand rather than the "
 "bank. Once both are full, it goes nowhere."
-msgstr ""
+msgstr "Полный банк всё равно платит проценты — но на руки, а не в банк. Когда полны оба, они не идут никуда."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:37
 msgid ""
 "The game tells you when gold is lost this way. Your event log names the "
 "amount and where it came from."
-msgstr ""
+msgstr "Игра сообщает, когда золото теряется таким образом. В вашем журнале событий названы сумма и то, откуда она пришла."
 
 #. type: Title ##
 #: internal/help/content/economy/banking.md:38
 #, no-wrap
 msgid "Cash Relief / Loans"
-msgstr ""
+msgstr "Помощь / Займы"
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:44
@@ -1079,7 +1079,7 @@ msgid ""
 "builds up each day (it compounds), so a long loan costs much more in total. "
 "The bank tells you the rate and the most it will lend you, then you choose "
 "how much to take."
-msgstr ""
+msgstr "Беря заём, вы сначала выбираете, за сколько дней его вернёте (от 1 до 10).  Чем длиннее срок, тем выше дневная ставка, а проценты каждый день начисляются и на проценты, так что долгий заём обходится намного дороже. Банк называет ставку и предельную сумму, которую даст, а затем вы выбираете, сколько взять."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:49
@@ -1088,7 +1088,7 @@ msgid ""
 "gold first, then from your savings. If you cannot pay it all, the rest "
 "becomes a debt with an extra penalty added, and your people lose some "
 "support. Debt keeps growing each turn until you repay it, so clear it early."
-msgstr ""
+msgstr "Вернуть нужно всю сумму в назначенный день. Банк берёт её сначала из золота на руках, потом из сбережений. Если заплатить всё не вышло, остаток становится долгом с добавленным штрафом, а ваш народ теряет часть поддержки. Долг растёт с каждым ходом, пока вы его не погасите, так что закрывайте его пораньше."
 
 #. type: Title ##
 #: internal/help/content/economy/banking.md:50
@@ -1129,7 +1129,7 @@ msgstr ""
 "Ваш народ и ваши войска едят каждый ход. Счета выставляются отдельно, и о "
 "каждом вас спрашивают по очереди, так что можно накормить одних и оставить "
 "голодными других. Сельскохозяйственные области выращивают пищу, ещё её можно "
-"купить на продовольственном рынке."
+"купить на рынке еды."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:19
@@ -1138,7 +1138,7 @@ msgid ""
 "put to you, whether or not you have enough in store. Turn on Auto-Feed in "
 "Preferences and you skip all of it on any turn you can cover the two bills; "
 "on a turn you cannot, the market opens anyway."
-msgstr ""
+msgstr "Рынок открывается сам в этот момент хода, и оба счёта ставятся перед вами независимо от того, хватает ли у вас запасов. Включите Автокормление империи в Настройках — и на любом ходу, когда вам хватает на оба счёта, вы это пропускаете; на ходу, когда не хватает, рынок всё равно откроется."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:22
@@ -1155,7 +1155,7 @@ msgid ""
 "The price changes a little each day. It is the same for everyone on the "
 "planet that day, and it stays the same until the next day. Buy on a cheap "
 "day if you can."
-msgstr ""
+msgstr "Цена немного меняется каждый день. Она одинакова для всех на планете в этот день и держится до следующего дня. Покупайте в дешёвый день, если можете."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:31
@@ -1164,7 +1164,7 @@ msgid ""
 "food is still in store spoils. A small store is safe: nothing rots until you "
 "are holding more than a thousand units. Above that the whole store loses a "
 "share, so the more you hoard the more you lose."
-msgstr ""
+msgstr "Каждый ход сначала ест ваш народ, затем армия, а потом часть оставшегося запаса портится. Небольшой запас в безопасности: ничего не гниёт, пока у вас не больше тысячи единиц. Сверх этого свою долю теряет весь запас, так что чем больше копите, тем больше теряете."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:38
@@ -1175,7 +1175,7 @@ msgid ""
 "but if your people get under about two thirds of what they need, the realm "
 "falls into civil war. A civil war halves your Support and destroys a share "
 "of your land and of every kind of unit you own, listed ones included."
-msgstr ""
+msgstr "Недостача оплачивается дважды, потому что две нужды считаются порознь. Всё, чего недополучил народ, стоит вам Поддержки народа, а всё, чего недополучила армия, — Боевого духа. Из державы за это никто не уходит, но если народ получит меньше примерно двух третей нужного, держава сваливается в гражданскую войну. Гражданская война вдвое срезает вашу Поддержку и уничтожает часть ваших земель и часть каждого вида ваших частей, включая выставленные на рынок."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:43
@@ -1185,14 +1185,14 @@ msgid ""
 "how you lose nothing to spoilage. Food you have listed on the Trading Market "
 "spoils too, so listing it is not a way to store it. A high technology level "
 "slows spoilage."
-msgstr ""
+msgstr "Урожай этого хода приходит в начале хода, так что продать его можно в том же ходу. Продавать излишки каждый ход, а не копить их, — вот как не терять ничего на порче. Продовольствие, выставленное вами на Торговый рынок, тоже портится, так что выставление — не способ его хранить. Высокий уровень технологий замедляет порчу."
 
 #. type: Title #
 #: internal/help/content/economy/morale-and-support.md:1
 #: internal/help/content/economy/morale-and-support.md:8
 #, no-wrap
 msgid "Morale and Support"
-msgstr ""
+msgstr "Боевой дух и поддержка"
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:12
@@ -1200,7 +1200,7 @@ msgid ""
 "Your realm has two moods, each a number from 0 to 100. Popular Support is "
 "what your people think of you. Military Morale is what your army thinks of "
 "you."
-msgstr ""
+msgstr "У вашей державы два настроения, каждое — число от 0 до 100. Поддержка народа — то, что думает о вас народ. Боевой дух — то, что думает о вас армия."
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:16
@@ -1208,7 +1208,7 @@ msgid ""
 "Both start at 100 when you found your realm. Nothing ever raises them for "
 "free.  They fall when you go short, and the only way back up is to pay for "
 "it at the maintenance stage each turn."
-msgstr ""
+msgstr "Оба начинаются со 100, когда вы основываете державу. Даром их не поднимает ничто.  Они падают, когда вы недодаёте, и единственный путь вверх — заплатить за это на этапе содержания в каждом ходу."
 
 #. type: Title ##
 #: internal/help/content/economy/morale-and-support.md:17
@@ -1219,22 +1219,22 @@ msgstr "Что они делают"
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:20
 msgid "Popular Support:"
-msgstr ""
+msgstr "Поддержка народа:"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:24
 msgid "sets your Coastal (tourism) income, which collapses when Support is low"
-msgstr ""
+msgstr "задаёт ваш доход от Побережья (туризм), который рушится при низкой поддержке"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:24
 msgid "sets how many people your land can hold"
-msgstr ""
+msgstr "задаёт, сколько людей вмещает ваша земля"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:24
 msgid "when it drops under 10, it starts pulling Morale down with it"
-msgstr ""
+msgstr "опустившись ниже 10, начинает тянуть за собой вниз и Боевой дух"
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:32
@@ -1246,7 +1246,7 @@ msgid ""
 "Bombers, carriers, and turrets never desert over Morale — but underpaying "
 "your armed forces' upkeep deserts turrets too, along with troopers, jets and "
 "tanks, whatever Morale reads."
-msgstr ""
+msgstr "Боевой дух определяет, насколько упорно дерётся ваша армия — и в нападении, и в обороне.  Армия с полным духом дерётся выше своей бумажной силы. Сломленная — примерно вполовину слабее. Когда Боевой дух падает ниже 40, солдаты, самолёты и танки начинают дезертировать каждый ход, и чем ниже он опускается, тем больше их уходит. Бомбардировщики, авианосцы и турели из-за Боевого духа не дезертируют никогда — но если недоплачивать содержание вооружённым силам, вместе с солдатами, самолётами и танками разбегаются и турели, каков бы ни был Боевой дух."
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:36
@@ -1255,13 +1255,13 @@ msgid ""
 "pays your bills silently while **both** numbers read exactly 100. Let either "
 "slip and you are back to answering the maintenance prompts by hand every "
 "turn."
-msgstr ""
+msgstr "Есть ещё один эффект, который легко упустить. Автооплата содержания молча платит по вашим счетам, только пока **оба** числа показывают ровно 100. Стоит любому из них просесть — и вы снова отвечаете на запросы содержания вручную каждый ход."
 
 #. type: Title ##
 #: internal/help/content/economy/morale-and-support.md:37
 #, no-wrap
 msgid "What lowers them"
-msgstr ""
+msgstr "Что их снижает"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
@@ -1269,12 +1269,12 @@ msgid ""
 "Underpaying your armed forces costs Morale. Underpaying your land upkeep, "
 "the Queen's tax, or your people's food costs Support. Underfeeding the army "
 "costs Morale."
-msgstr ""
+msgstr "Недоплата вооружённым силам стоит Боевого духа. Недоплата содержания земель, налога Королевы или еды для народа стоит Поддержки. Недокорм армии стоит Боевого духа."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
 msgid "A riot from high taxes costs Support."
-msgstr ""
+msgstr "Бунт из-за высоких налогов стоит Поддержки."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
@@ -1282,27 +1282,27 @@ msgid ""
 "Declaring war on a ruler you hold an agreement with costs you nothing. "
 "Attacking that ruler without declaring war first ends the agreement too, and "
 "costs you a quarter of each."
-msgstr ""
+msgstr "Объявление войны правителю, с которым у вас соглашение, не стоит вам ничего. Нападение на такого правителя без объявления войны тоже прекращает соглашение и стоит вам четверти каждого из двух показателей."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
 msgid ""
 "A chemical or biological strike on your realm hurts both. The plague is far "
 "worse for your army than the gas is."
-msgstr ""
+msgstr "Химический или биологический удар по вашей державе бьёт по обоим. Для армии чума куда хуже, чем газ."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:50
 msgid ""
 "Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
 "Forces."
-msgstr ""
+msgstr "Вражеские агенты могут снизить любой из них напрямую. См. Разжечь мятежи и Деморализовать войска."
 
 #. type: Title ##
 #: internal/help/content/economy/morale-and-support.md:51
 #, no-wrap
 msgid "Paying them back"
-msgstr ""
+msgstr "Как их вернуть"
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:57
@@ -1312,7 +1312,7 @@ msgid ""
 "the size of your army — troopers, turrets and tanks cost most, jets least, "
 "bombers and carriers nothing. Units you have listed on the Trading Market "
 "still count."
-msgstr ""
+msgstr "На этапе содержания корона просит золота, чтобы выкупить до пятнадцати пунктов каждого. Поддержка стоит по численности вашего населения, Боевой дух — по размеру армии: дороже всего обходятся солдаты, турели и танки, дешевле всего самолёты, а бомбардировщики и авианосцы не стоят ничего. Части, выставленные вами на Торговый рынок, тоже считаются."
 
 #. type: Plain text
 #: internal/help/content/economy/morale-and-support.md:61
@@ -1321,7 +1321,7 @@ msgid ""
 "about half the points. You may pay up to half again as much as is asked, and "
 "that really does buy more than fifteen points. Neither number can pass 100, "
 "so overpaying a nearly-content realm wastes the difference."
-msgstr ""
+msgstr "Заплаченное покупает пункты соразмерно, так что половина запрошенного купит примерно половину пунктов. Заплатить можно в полтора раза больше запрошенного, и это действительно даёт больше пятнадцати пунктов. Ни одно из двух чисел не может превысить 100, так что переплата у почти довольной державы пропадает впустую."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -1353,7 +1353,7 @@ msgstr ""
 #: internal/help/content/economy/population.md:8
 #, no-wrap
 msgid "Population"
-msgstr ""
+msgstr "Население"
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:13
@@ -1361,12 +1361,12 @@ msgid ""
 "Your people pay your taxes, so how many you hold is one of the things worth "
 "managing directly. Each turn some move in or move out, until the realm "
 "settles at the number it can support."
-msgstr ""
+msgstr "Ваш народ платит ваши налоги, так что его численность — одна из тех вещей, которыми стоит управлять напрямую. Каждый ход кто-то приезжает, а кто-то уезжает, пока держава не осядет на числе, которое способна прокормить."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:15
 msgid "Three things set that number:"
-msgstr ""
+msgstr "Это число задают три вещи:"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/population.md:24
@@ -1375,13 +1375,13 @@ msgid ""
 "type — more than ten times what a Coastal or Mountain region holds. Rivers "
 "and Industrial zones come next; Desert holds the fewest. Raw land does "
 "nothing on its own; it is the kind of region that counts."
-msgstr ""
+msgstr "**Чем является ваша земля.** Городские регионы вмещают куда больше людей, чем любой другой тип, — больше чем вдесятеро против Побережья или Гор. Дальше идут Реки и Промышленные зоны; меньше всего вмещает Пустыня. Голая земля сама по себе не даёт ничего: считается именно тип региона."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/population.md:24
 msgid ""
 "**Popular Support.** The higher it stands, the more people your land holds."
-msgstr ""
+msgstr "**Поддержка народа.** Чем она выше, тем больше людей вмещает ваша земля."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/population.md:24
@@ -1389,14 +1389,14 @@ msgid ""
 "**Your tax rate.** A low rate lets your realm hold many more people. A high "
 "one drives the number down sharply, and past 50% people keep leaving on top "
 "of that."
-msgstr ""
+msgstr "**Ваша налоговая ставка.** Низкая ставка позволяет державе держать намного больше людей. Высокая резко сбивает это число, а после 50% люди вдобавок продолжают уезжать."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:27
 msgid ""
 "Support and taxes multiply together, so a realm with poor support and heavy "
 "taxes holds a small fraction of what its land could otherwise carry."
-msgstr ""
+msgstr "Поддержка и налоги перемножаются, так что держава со слабой поддержкой и тяжёлыми налогами держит лишь малую долю того, что иначе выдержала бы её земля."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:32
@@ -1405,21 +1405,21 @@ msgid ""
 "far below its limit fills quickly while one already near it barely changes. "
 "A realm can grow by at most half its size in one turn. When people are "
 "leaving, they leave faster the harder you tax."
-msgstr ""
+msgstr "Движение за ход — это доля разрыва, а не доля вашего населения, поэтому держава далеко ниже своего предела заполняется быстро, а та, что уже у предела, почти не меняется. За один ход держава может вырасти самое большее наполовину. Когда люди уезжают, они уезжают тем быстрее, чем тяжелее вы облагаете их налогом."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:35
 msgid ""
 "Selling Urban land lowers what your realm can hold, and the people then "
 "drain away over the following turns rather than all at once."
-msgstr ""
+msgstr "Продажа Городской земли снижает то, сколько людей вмещает ваша держава, и они затем утекают в течение следующих ходов, а не разом."
 
 #. type: Plain text
 #: internal/help/content/economy/population.md:37
 msgid ""
 "Tip: population growth outruns food if you buy Urban regions and no farms. "
 "Your civilian advisor warns you before that wall arrives."
-msgstr ""
+msgstr "Совет: если покупать Городские регионы и не заводить хозяйств, рост населения обгонит еду. Ваш гражданский советник предупредит вас прежде, чем вы упрётесь в эту стену."
 
 #. type: Title #
 #: internal/help/content/economy/taxes.md:1
@@ -1465,20 +1465,20 @@ msgid ""
 "faster still — see Population for the threshold. A realm that is already "
 "shrinking loses people quicker the harder it taxes. Support works the same "
 "way: the higher it stands, the more people your land can hold."
-msgstr ""
+msgstr "Налоги ещё и решают, сколько людей вмещает ваша держава. Низкая ставка позволяет держать намного больше, высокая — намного меньше, а при разорительной ставке люди уезжают ещё быстрее: порог см. в теме Население. Держава, которая уже убывает, теряет людей тем быстрее, чем тяжелее налоги. Поддержка работает так же: чем она выше, тем больше людей вмещает ваша земля."
 
 #. type: Title ##
 #: internal/help/content/economy/taxes.md:26
 #, no-wrap
 msgid "The Queen Royale's tax"
-msgstr ""
+msgstr "Налог Королевы Рояль"
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:30
 msgid ""
 "The Queen takes a share of what you earn each turn. You may pay her less "
 "than she asks, but a short payment costs Popular Support."
-msgstr ""
+msgstr "Королева забирает долю вашего заработка каждый ход. Заплатить ей меньше, чем она просит, можно, но недоплата стоит Поддержки народа."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:35
@@ -1487,20 +1487,20 @@ msgid ""
 "purse back. She pays you the first time you play each day: 2% of the purse, "
 "or 7% once it holds more than 100 million gold. A realm still under New "
 "Realm Protection gets at most 1 million."
-msgstr ""
+msgstr "Каждая собранная монета идёт в её казну, и часть этой казны она отдаёт обратно. Она платит вам при первом заходе в игру каждый день: 2% казны, а если в ней больше 100 миллионов золота — 7%. Держава под защитой новой державы получает не больше 1 миллиона."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:38
 msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
 "first to play on a given day takes the largest share, so play early."
-msgstr ""
+msgstr "Все бароны черпают из одной казны, и каждая выплата немного её опустошает. Тот, кто сыграл в этот день первым, берёт самую большую долю, так что играйте пораньше."
 
 #. type: Title ##
 #: internal/help/content/economy/taxes.md:39
 #, no-wrap
 msgid "The lottery"
-msgstr ""
+msgstr "Лотерея"
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:45
@@ -1510,7 +1510,7 @@ msgid ""
 "mention the price, and a baron with less than that in hand is not offered a "
 "ticket at all.  Either way the day's offer is spent: there is no asking "
 "again later."
-msgstr ""
+msgstr "Раз в день, отдавая вам выплату, Королева предлагает лотерейный билет.  Он стоит 5 000 золота, и они списываются сразу, как только вы согласитесь: цену она не называет, а барону, у которого на руках меньше, билет не предлагают вовсе.  В любом случае предложение этого дня израсходовано: попросить позже нельзя."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:50
@@ -1519,37 +1519,37 @@ msgid ""
 "rather leave to chance. Six letters are then drawn. What counts is how many "
 "of the drawn letters your ticket covers, not where they sit, and each letter "
 "on your ticket can only be spent once."
-msgstr ""
+msgstr "Выберите шесть букв, по одному нажатию на каждую, и нажмите Enter для тех, что хотите оставить на волю случая. Затем разыгрываются шесть букв. Важно, сколько выпавших букв покрывает ваш билет, а не где они стоят, и каждая буква билета засчитывается лишь один раз."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "1 letter: 2,500 gold"
-msgstr ""
+msgstr "1 буква: 2 500 золота"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "2 letters: 10,000"
-msgstr ""
+msgstr "2 буквы: 10 000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "3 letters: 500,000"
-msgstr ""
+msgstr "3 буквы: 500 000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "4 letters: 1,000,000"
-msgstr ""
+msgstr "4 буквы: 1 000 000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "5 letters: 4,000,000"
-msgstr ""
+msgstr "5 букв: 4 000 000"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/taxes.md:57
 msgid "6 letters: 10,000,000"
-msgstr ""
+msgstr "6 букв: 10 000 000"
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:61
@@ -1558,7 +1558,7 @@ msgid ""
 "ticket, and most tickets match nothing — the Queen did not build her purse "
 "by losing. Your sysop can switch the lottery off, so a board that never "
 "offers you one is not broken."
-msgstr ""
+msgstr "Выигрыш идёт в ваш банк. Одно совпадение всё равно оставляет вас в минусе на 2 500 от цены билета, а большинство билетов не совпадает вовсе — не проигрышами Королева набила свою казну. Ваш сисоп может отключить лотерею, так что доска, на которой билет не предлагают никогда, не сломана."
 
 #. type: Title #
 #: internal/help/content/economy/trading.md:1
@@ -1572,7 +1572,7 @@ msgstr "Торговля"
 msgid ""
 "There are two ways to move goods between realms: the Trading Market, and a "
 "trade deal."
-msgstr ""
+msgstr "Перемещать товары между державами можно двумя способами: через Торговый рынок и через торговую сделку."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:13
@@ -1586,7 +1586,7 @@ msgid ""
 "You can put any of your goods on the market and set your own price. The "
 "market is open: any realm on your planet can see what is listed and buy it, "
 "and you can buy from any of them."
-msgstr ""
+msgstr "Любой свой товар можно выставить на рынок по собственной цене. Рынок открытый: любая держава вашей планеты видит выставленное и может его купить, а вы можете купить у любой из них."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:22
@@ -1594,13 +1594,13 @@ msgid ""
 "Goods you list leave your hands at once. They are held for the buyer, and "
 "you are paid when someone buys them. You still pay upkeep on them while they "
 "wait, and pirates can raid them, so do not list more than you mean to sell."
-msgstr ""
+msgstr "Выставленный товар уходит из ваших рук сразу. Он придерживается для покупателя, а платят вам, когда его купят. Пока он ждёт, вы платите за него содержание, и его могут отнять пираты, так что не выставляйте больше, чем собираетесь продать."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:23
 #, no-wrap
 msgid "Trade deals"
-msgstr ""
+msgstr "Торговые сделки"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:28
@@ -1608,7 +1608,7 @@ msgid ""
 "A trade deal is an offer to one realm. You put goods and gold in it, and you "
 "may ask for goods and gold in return. The other realm reads the offer and "
 "accepts or refuses it. You need a treaty with that realm to send one."
-msgstr ""
+msgstr "Торговая сделка — это предложение одной державе. Вы кладёте в неё товары и золото и можете попросить товары и золото взамен. Другая держава читает предложение и принимает его или отказывается. Чтобы отправить сделку, нужен договор с этой державой."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:34
@@ -1618,7 +1618,7 @@ msgid ""
 "holds a thousand troopers or turrets, a hundred jets, five thousand tanks, "
 "or a hundred thousand gold, and food, bombers, agents and carriers take no "
 "room at all. A Protective Trade treaty with that realm makes the fee cheaper."
-msgstr ""
+msgstr "Торговая сделка стоит платы за каждый день, на который вы её отправляете, и требует авианосцев для перевозки товаров. Сколько именно — зависит от груза: один авианосец берёт тысячу солдат или турелей, сотню самолётов, пять тысяч танков или сто тысяч золота, а еда, бомбардировщики, агенты и авианосцы не занимают места вовсе. Защищённая торговля с этой державой делает плату дешевле."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:40
@@ -1628,13 +1628,13 @@ msgid ""
 "offer is accepted: a refusal, a deal nobody answers before its days run out, "
 "and a realm that falls before it replies all cost you the goods. Send to "
 "someone who is playing, and give them enough days to get to it."
-msgstr ""
+msgstr "Оплаченные дни — это срок, в течение которого держится предложение. Вложенное в сделку покидает вашу державу в момент отправки и возвращается, только если предложение приняли: отказ, сделка, на которую никто не ответил до истечения срока, и держава, павшая прежде чем ответить, — всё это стоит вам товаров. Отправляйте тому, кто играет, и давайте ему довольно дней, чтобы он успел добраться до сделки."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:41
 #, no-wrap
 msgid "Deals to another planet"
-msgstr ""
+msgstr "Сделки на другую планету"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:46
@@ -1642,7 +1642,7 @@ msgid ""
 "In a league game the InterPlanetary Operations menu sends a deal to a realm "
 "on another planet. It works differently from the one above, so read this "
 "before you use it."
-msgstr ""
+msgstr "В лиговой игре меню Межпланетные операции отправляет сделку державе на другой планете. Работает она иначе, чем описанная выше, так что прочтите это, прежде чем ею пользоваться."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:50
@@ -1650,7 +1650,7 @@ msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
 "send them to has no say: they arrive and are added to what that realm holds. "
 "There is no offer to accept or refuse, so nothing is ever returned to you."
-msgstr ""
+msgstr "Попросить что-либо взамен нельзя. Товары — это подарок, и у державы, которой вы их шлёте, нет выбора: они приходят и добавляются к тому, чем она владеет. Никакого предложения принять или отклонить нет, поэтому вам ничего и никогда не возвращается."
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:55
@@ -1660,18 +1660,18 @@ msgid ""
 "confirm. You cannot send to a realm that is still under new-realm "
 "protection, and you cannot send to your own planet — for that, use the deal "
 "above."
-msgstr ""
+msgstr "Платите вы один раз, а не за каждый день, и договор ни с державой, ни с её планетой не нужен.  Плата зависит от содержимого сделки и показывается до подтверждения. Нельзя отправить державе, которая ещё под защитой новой державы, и нельзя отправить на собственную планету — для этого есть сделка, описанная выше."
 
 #. type: Title ##
 #: internal/help/content/economy/trading.md:56
 #, no-wrap
 msgid "Getting the most from trade"
-msgstr ""
+msgstr "Как выжать из торговли больше"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:59
 msgid "Trade matters most when several realms work together. A few ideas:"
-msgstr ""
+msgstr "Торговля важнее всего там, где несколько держав работают сообща. Несколько мыслей:"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:64
@@ -1681,7 +1681,7 @@ msgid ""
 "type, which makes that unit cheaper for you than for anyone else. If you build\n"
 "tanks and a partner builds turrets, each of you can sell to the other below the\n"
 "price they would pay to build it themselves. Both realms come out ahead.\n"
-msgstr ""
+msgstr "**Специализируйтесь, а затем снабжайте партнёров.** Ваша промышленность может отдать\nпредпочтение одному виду частей, и он обойдётся вам дешевле, чем кому-либо ещё.\nЕсли вы строите танки, а партнёр — турели, каждый может продать другому дешевле\nтой цены, что тот заплатил бы за собственную постройку. В выигрыше обе державы.\n"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:68
@@ -1690,7 +1690,7 @@ msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so\n"
 "a price meant as a gift to an ally may end up arming a rival. To be sure the\n"
 "goods reach the realm you mean them for, send a trade deal instead.\n"
-msgstr ""
+msgstr "**Дешёвое предложение достаётся тому, кто успел первым.** Купить его может любой,\nтак что цена, задуманная как подарок союзнику, может вооружить соперника. Чтобы\nтовары наверняка дошли до нужной державы, отправьте вместо этого торговую сделку.\n"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:71
@@ -1699,14 +1699,14 @@ msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, and\n"
 "an ally's market is often the cheapest place to buy. See the Interplanetary\n"
 "Trading topic.\n"
-msgstr ""
+msgstr "**Между планетами торговля крупнее.** В лиге специализируются целые планеты, и\nрынок союзника часто оказывается самым дешёвым местом для покупки. См. тему\nМежпланетная торговля.\n"
 
 #. type: Title #
 #: internal/help/content/interbbs/allied-markets.md:1
 #: internal/help/content/interbbs/allied-markets.md:8
 #, no-wrap
 msgid "Allied Markets"
-msgstr ""
+msgstr "Рынки союзников"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:12
@@ -1714,20 +1714,20 @@ msgid ""
 "In a league game you can buy from another planet's Trading Market. Open "
 "Trading from the InterPlanetary Operations menu, then Markets, and choose a "
 "planet."
-msgstr ""
+msgstr "В лиговой игре вы можете покупать на Торговом рынке другой планеты. Откройте Торговля в меню Межпланетные операции, затем пункт Рынки и выберите планету."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:15
 msgid ""
 "Only planets your Coordinator has marked Allied are listed. Buying across "
 "planets is an Immortal Barons feature, and a league may switch it off."
-msgstr ""
+msgstr "В списке только те планеты, которые ваш координатор отметил как союзные. Покупка между планетами — возможность Immortal Barons, и лига может её отключить."
 
 #. type: Title ##
 #: internal/help/content/interbbs/allied-markets.md:16
 #, no-wrap
 msgid "Your order is a bid, not a purchase"
-msgstr ""
+msgstr "Ваш заказ — заявка, а не покупка"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:22
@@ -1737,36 +1737,36 @@ msgid ""
 "packets, and a packet takes as long as it takes, so by the time your order "
 "arrives the goods may have been sold, the amount may have shrunk, or the "
 "price may have changed."
-msgstr ""
+msgstr "Вы видите рынок той планеты **таким, каким он был, когда мы в последний раз получали от неё вести**.  Экран показывает дату. Новости идут между планетами пакетами, а пакет идёт столько, сколько идёт, так что к приходу вашего заказа товар может быть уже продан, количество — уменьшиться, а цена — измениться."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:24
 msgid "So your order is a bid. When you send it:"
-msgstr ""
+msgstr "Итак, ваш заказ — это заявка. Когда вы её отправляете:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
 msgid ""
 "Your gold is **held straight away**. It leaves your treasury but is not "
 "spent yet, and it is not counted as gold you have."
-msgstr ""
+msgstr "Ваше золото **удерживается сразу же**. Оно покидает казну, но ещё не потрачено и уже не считается золотом в вашем распоряжении."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
 msgid ""
 "When the bid arrives, the other planet sells to you **only if the goods are "
 "still there at the same price, and you are still allies**."
-msgstr ""
+msgstr "Когда заявка приходит, другая планета продаёт вам товар **только если он ещё на месте и по той же цене, а вы по-прежнему союзники**."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
 msgid "If it sells, the goods come back to you on the next packet."
-msgstr ""
+msgstr "Если сделка состоялась, товар придёт к вам со следующим пакетом."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/allied-markets.md:31
 msgid "If it does not, your gold comes back instead, and you are told why."
-msgstr ""
+msgstr "Если нет, вместо него вернётся ваше золото, и вам объяснят причину."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:35
@@ -1774,13 +1774,13 @@ msgid ""
 "If the seller still has some but not all of what you asked for, you get what "
 "there was and the rest of your gold returns. You are never charged for goods "
 "that did not arrive."
-msgstr ""
+msgstr "Если у продавца осталась лишь часть заказанного, вы получите то, что было, а остаток золота вернётся. За непришедший товар с вас никогда не берут плату."
 
 #. type: Title ##
 #: internal/help/content/interbbs/allied-markets.md:36
 #, no-wrap
 msgid "Waiting, and getting your gold back"
-msgstr ""
+msgstr "Ожидание и возврат золота"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:41
@@ -1789,7 +1789,7 @@ msgid ""
 "**Bids Out** on the Trading menu lists every bid you have waiting and how much\n"
 "gold is held against them. That gold is invisible everywhere else, so this is\n"
 "where to look when your treasury seems short.\n"
-msgstr ""
+msgstr "**Открытые заявки** в меню торговли показывают все ваши заявки в пути и то,\nсколько золота под них удержано. Это золото нигде больше не видно, так что\nсюда и стоит смотреть, когда казна кажется пустее, чем должна быть.\n"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:46
@@ -1798,13 +1798,13 @@ msgid ""
 "given up on after the same number of days your sysop set for lost attack "
 "forces, and your gold is returned. If the answer turns up later than that, "
 "it is ignored rather than paid twice."
-msgstr ""
+msgstr "Ничего не пропадает, даже если пакет потерялся. Заявка, оставшаяся без ответа, аннулируется через столько же дней, сколько ваш сисоп отвёл пропавшим ударным силам, и золото возвращается. Если ответ придёт позже этого срока, его не примут, чтобы не заплатить дважды."
 
 #. type: Title ##
 #: internal/help/content/interbbs/allied-markets.md:47
 #, no-wrap
 msgid "Two things worth knowing"
-msgstr ""
+msgstr "Две вещи, которые стоит знать"
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:52
@@ -1812,14 +1812,14 @@ msgid ""
 "Each planet keeps its own list of who it is allied with. A planet can "
 "therefore stop selling to you before you have heard about it, and your bid "
 "will come back refused. That is not a fault."
-msgstr ""
+msgstr "Каждая планета ведёт свой собственный список союзников. Поэтому планета может перестать продавать вам ещё до того, как вы об этом узнаете, и ваша заявка вернётся с отказом. Это не сбой."
 
 #. type: Plain text
 #: internal/help/content/interbbs/allied-markets.md:54
 msgid ""
 "Your sysop can turn this feature off for the whole league, in which case "
 "Trading does not appear on the InterPlanetary Operations menu."
-msgstr ""
+msgstr "Ваш сисоп может отключить эту возможность для всей лиги — тогда пункт торговли в меню межпланетных операций просто не появится."
 
 #. type: Title #
 #: internal/help/content/interbbs/attack-types.md:1
@@ -1834,7 +1834,7 @@ msgid ""
 "When you send your own strike force at a baron on another planet, you choose "
 "how to press the attack. Group attacks have no such choice — they always "
 "fight as a Normal Attack."
-msgstr ""
+msgstr "Отправляя собственный ударный отряд на барона с другой планеты, вы выбираете, как вести бой. У групповых атак такого выбора нет — они всегда идут как Обычная атака."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:17
@@ -1842,7 +1842,7 @@ msgid ""
 "Going alone also pays better: your own strike takes twice the land a group "
 "attack of the same weight would. What you give up is the whole-planet target "
 "and everyone else's forces."
-msgstr ""
+msgstr "Действовать в одиночку и выгоднее: ваш собственный удар приносит вдвое больше земли, чем групповая атака той же силы. Взамен вы отказываетесь от удара по всей планете и от чужих войск."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/attack-types.md:27
@@ -1850,7 +1850,7 @@ msgid ""
 "**Normal Attack** — your forces fight at full strength. Both sides break off "
 "once they have taken 15% losses, and you take the standard share of the "
 "defender's regions."
-msgstr ""
+msgstr "**Обычная атака** — ваши войска дерутся в полную силу. Обе стороны выходят из боя, потеряв 15% состава, и вы получаете обычную долю регионов обороняющегося."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/attack-types.md:27
@@ -1858,7 +1858,7 @@ msgid ""
 "**Quick Strike** — surprise lets you fight at 120% of your normal strength, "
 "but the battle is short and disorganized: both sides retreat at 8% losses, "
 "and you carry off only half the land a Normal Attack would."
-msgstr ""
+msgstr "**Быстрый удар** — внезапность даёт вам 120% обычной силы, но бой короток и беспорядочен: обе стороны отходят при потерях в 8%, и вы уносите лишь половину земли, которую дала бы Обычная атака."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/attack-types.md:27
@@ -1866,7 +1866,7 @@ msgid ""
 "**Extended Battle** — a grinding assault. Fatigue drops your forces to 85% "
 "strength, but they press until both sides have taken 20% losses and bring "
 "home 125% of a Normal Attack's land."
-msgstr ""
+msgstr "**Затяжной бой** — изматывающий штурм. Усталость снижает силу ваших войск до 85%, но они давят, пока обе стороны не потеряют 20% состава, и приносят 125% земли от Обычная атака."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:34
@@ -1877,7 +1877,7 @@ msgid ""
 "weak for a day. A Quick Strike costs you least and hits above its weight, "
 "which makes it the honest answer when you are not sure you can win: you find "
 "out cheaply, and your army is still standing."
-msgstr ""
+msgstr "На деле выбор зависит от того, чего вам не хватает. Землю быстро не купишь, поэтому именно Затяжной бой меняет карту — платите за неё, когда людей в избытке и вы можете позволить себе день слабости. Быстрый удар обходится дешевле всего и бьёт выше своего веса, а потому честно отвечает на вопрос, когда вы не уверены в победе: вы узнаёте ответ дёшево, и армия остаётся при вас."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:39
@@ -1886,13 +1886,13 @@ msgid ""
 "Against a distant planet the defender has days to build turrets before your "
 "force lands, so the extra weight a Quick Strike carries is worth less than "
 "it looks against a target you cannot reach quickly."
-msgstr ""
+msgstr "Помните, что сила отряда считается в момент прибытия, а не отправления. У далёкой планеты есть дни, чтобы настроить турелей, пока ваш отряд в пути, так что прибавка Быстрый удар стоит меньше, чем кажется, против цели, до которой долго лететь."
 
 #. type: Title ##
 #: internal/help/content/interbbs/attack-types.md:40
 #, no-wrap
 msgid "While the force is away, and when it comes back"
-msgstr ""
+msgstr "Пока отряд в пути и когда он возвращается"
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:46
@@ -1901,7 +1901,7 @@ msgid ""
 "hours, between 12 and 120, and it sits on the launch pad until then — other "
 "barons can join it in the meantime, and the delay is how you time it to land "
 "before the target takes their next turn."
-msgstr ""
+msgstr "Групповая атака не уходит в тот же миг, когда вы её объявили. Вы задаёте задержку в часах — от 12 до 120 — и отряд стоит на стартовой площадке до срока: за это время к нему могут присоединиться другие бароны, а сама задержка позволяет рассчитать удар так, чтобы он пришёлся до следующего хода цели."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:51
@@ -1910,7 +1910,7 @@ msgid ""
 "tanks and bombers already pooled in it and the hours it has left. Read those "
 "columns before you commit: they are how you tell a party worth reinforcing "
 "from one that will not survive the trip."
-msgstr ""
+msgstr "«Присоединиться к атаке» показывает все формирующиеся отряды, собранных в них солдат, самолёты, танки и бомбардировщики и оставшиеся часы. Прочтите эти столбцы, прежде чем вступать: по ним видно, какой отряд стоит усилить, а какой не переживёт похода."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:57
@@ -1921,7 +1921,7 @@ msgid ""
 "and whether it found the target at all. A force that found no such realm, or "
 "found it still under New Realm Protection, is told so rather than counted as "
 "a defeat."
-msgstr ""
+msgstr "Ушедший отряд вам больше не подчиняется и в вашу армию не входит, пока доска другой планеты не разрешит бой и ответ не вернётся обратно. Когда он придёт, вы получите личный отчёт: что вы отправили, что вернулось, что было уничтожено и нашлась ли цель вообще. Если такой державы не нашлось или она ещё под защитой новых держав, вам так и скажут, а не запишут это поражением."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:62
@@ -1931,7 +1931,7 @@ msgid ""
 "question a Regular Attack asks at home. On a group attack the regions are "
 "shared between the barons who paid for them, in proportion to what each "
 "committed."
-msgstr ""
+msgstr "У захваченной за пределами планеты земли нет типа, пока вы его не назначите, поэтому она ждёт вас, и выбор типа регионов появится в начале вашего следующего хода — тот же вопрос, что задаёт обычная атака дома. При групповой атаке регионы делятся между заплатившими за них баронами соразмерно вкладу каждого."
 
 #. type: Plain text
 #: internal/help/content/interbbs/attack-types.md:65
@@ -1940,7 +1940,7 @@ msgid ""
 "forces come home by themselves after the number of days your sysop has set, "
 "and a report that turns up after that is thrown away rather than paid out "
 "twice."
-msgstr ""
+msgstr "Если ответ так и не придёт — доска замолчала, пакет потерялся, — ваши войска вернутся домой сами через столько дней, сколько назначил ваш сисоп, а отчёт, пришедший позже, будет отброшен, чтобы не заплатить дважды."
 
 #. type: Title #
 #: internal/help/content/interbbs/leagues.md:1
@@ -1974,7 +1974,7 @@ msgid ""
 "Indiv. Attack Force — your own strike against one named baron. You keep the "
 "whole take rather than sharing it, and you choose how to press the attack "
 "(see Attack Types)."
-msgstr ""
+msgstr "«Одиночная атака» — ваш собственный удар по одному названному барону. Добычу вы не делите ни с кем и сами выбираете, как вести бой (см. типы атак)."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
@@ -1995,14 +1995,14 @@ msgid ""
 "only the baron who wrote does.  If your board has not yet received that "
 "planet's scores, there is no roster to pick from and the letter goes to "
 "everyone there."
-msgstr ""
+msgstr "«Отправить сообщение» — письмо на другую планету. Назовите планету, а затем отметьте баронов на ней, которые прочтут письмо, тем же списком `Send to:`, что используют экраны дипломатии и сообщений: буква отмечает барона, та же буква снимает отметку, `Z` отмечает всех, `?` показывает состав планеты, а Enter открывает редактор. Enter без единой отметки просто выходит, ничего не отправив. Остальные четыре пункта адресуют письмо всей лиге, союзным планетам, нескольким названным планетам или одному координатору планеты. При ответе спрашивается, публичен ли он: да — и письмо прочтёт вся планета отправителя, нет — только написавший его барон.  Если ваша доска ещё не получила очки той планеты, выбирать не из кого, и письмо уходит всем, кто там есть."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
 msgid ""
 "Diplomacy List — where your board says it stands with each other planet. It "
 "binds nobody, but it is your Coordinator telling you who to watch."
-msgstr ""
+msgstr "«Список дипломатии» — то, как ваша доска относится к каждой из прочих планет. Никого ни к чему не обязывает, но это ваш координатор говорит вам, за кем следить."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:37
@@ -2011,7 +2011,7 @@ msgid ""
 "planet and get an answer back. Boards trade mail on their sysops' schedule, "
 "so check it before you aim anything: against a planet three days away, you "
 "are committing forces you will not hear about until the weekend."
-msgstr ""
+msgstr "«Время в пути» — сколько на деле идёт сообщение или удар до каждой планеты и сколько ждать ответа. Доски обмениваются почтой по расписанию своих сисопов, так что сверяйтесь с этим экраном, прежде чем целиться: против планеты в трёх днях пути вы отправляете войска, о судьбе которых узнаете только к выходным."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:45
@@ -2023,13 +2023,13 @@ msgid ""
 "for that turn, so you can decide whether starting one is worth it. The bank, "
 "your messages, the scores and the terrorist ops stay open, and once you have "
 "started a turn the whole menu is open for the rest of your visit."
-msgstr ""
+msgstr "Пять пунктов закрыты, пока вы не сыграли ход за этот заход: «Отправить сделку», «Создать групповую атаку», «Присоединиться к атаке», «Одиночная атака» и «Спецоперации». Всё, что двигает войска или товар, сперва стоит вам хода — «Присоединиться к атаке» даёт посмотреть, кто собирает отряд, ещё до того, как потребует ход, чтобы вы решили, стоит ли овчинка выделки. Банк, ваши сообщения, очки и террористические операции открыты всегда, а начав ход, вы получаете всё меню до конца захода."
 
 #. type: Title ##
 #: internal/help/content/interbbs/leagues.md:46
 #, no-wrap
 msgid "Your BBS Coordinator"
-msgstr ""
+msgstr "Координатор вашей BBS"
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:54
@@ -2040,7 +2040,7 @@ msgid ""
 "menu, under Coordinator Vote. Any living realm can be voted for, yourself "
 "included, and you may change your mind whenever you like — the office goes "
 "to whoever holds the most votes at the time."
-msgstr ""
+msgstr "Бароны вашей доски выбирают одного из своих координатором, и координатор говорит от имени доски: он определяет, как она относится к каждой планете, и только он может отменить оружие судного дня. Голосуйте из меню «Система», пункт голосования за координатора. Голосовать можно за любую живую державу, включая свою, и менять решение сколько угодно — должность достаётся тому, за кем на данный момент больше голосов."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:58
@@ -2048,14 +2048,14 @@ msgid ""
 "You cannot vote while your realm is still under new-realm protection, and "
 "the item is not on the menu until that ends — though the notice below will "
 "already be naming your vote."
-msgstr ""
+msgstr "Голосовать, пока ваша держава под защитой новых держав, нельзя, и пункта в меню до её окончания нет — хотя надпись ниже уже назовёт ваш голос."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:61
 msgid ""
 "Every turn opens by telling you whether you hold the office or who your vote "
 "is currently for, so you never have to go looking."
-msgstr ""
+msgstr "Каждый ход начинается с того, что вам сообщают, занимаете ли вы эту должность или за кого сейчас отдан ваш голос, так что искать ничего не придётся."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:64
@@ -2080,7 +2080,7 @@ msgstr ""
 #: internal/help/content/interbbs/planetary-diplomacy.md:8
 #, no-wrap
 msgid "Planetary Diplomacy"
-msgstr ""
+msgstr "Планетарная дипломатия"
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:15
@@ -2090,46 +2090,46 @@ msgid ""
 "Open it from InterPlanetary Operations with **Diplomacy List**. You also see "
 "the mark for a planet whenever you name one, on the line that reads \"Our "
 "current relations with...\"."
-msgstr ""
+msgstr "Ваша доска ведёт короткий список того, как она относится к каждой из прочих планет. Каждая помечена как **Enemy**, **None**, **Peace** или **Allied**. Открыть его можно из межпланетных операций пунктом **Список дипломатии**. Пометку планеты вы также видите каждый раз, когда называете её, в строке \\\"Наши нынешние отношения с...\\\"."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:18
 msgid ""
 "Only your board's Coordinator can change the list. It is on the Coordinator "
 "Menu, under Diplomacy Modification."
-msgstr ""
+msgstr "Менять список может только координатор вашей доски. Это делается в меню координатора, пунктом изменения дипломатии."
 
 #. type: Title ##
 #: internal/help/content/interbbs/planetary-diplomacy.md:19
 #, no-wrap
 msgid "What it does and does not do"
-msgstr ""
+msgstr "Что он делает и чего не делает"
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:23
 msgid ""
 "The list is a note from your Coordinator to the barons on your own board. It "
 "tells you what your board thinks of a planet. Mostly it only describes:"
-msgstr ""
+msgstr "Список — это записка вашего координатора баронам собственной доски. Он говорит, что ваша доска думает о планете. По большей части он только описывает:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:28
 msgid ""
 "It does not stop an attack. You can still attack a planet marked Allied, and "
 "a planet marked Enemy can still attack you."
-msgstr ""
+msgstr "Он не мешает атаке. Вы по-прежнему можете напасть на планету, помеченную Allied, а планета, помеченная Enemy, по-прежнему может напасть на вас."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:28
 msgid ""
 "The other planets never see it. They keep their own list, and it may say "
 "something quite different about you."
-msgstr ""
+msgstr "Другие планеты его не видят. У них свой список, и о вас в нём может быть сказано совсем иное."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:30
 msgid "Two things do use it:"
-msgstr ""
+msgstr "Две вещи всё же им пользуются:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:37
@@ -2139,27 +2139,27 @@ msgid ""
 "theirs Allied for your bid to go, and theirs has to call yours Allied to "
 "fill it. If an alliance ends while your bid is travelling, your gold comes "
 "back."
-msgstr ""
+msgstr "**Торговля.** Покупать на рынке другой планеты вы можете, только пока ваша доска помечает её как **Allied**. Согласны должны быть обе доски: ваша должна назвать их союзниками, чтобы заявка ушла, а их — назвать союзниками вас, чтобы её выполнить. Если союз распался, пока заявка в пути, золото вернётся к вам."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:37
 msgid ""
 "**Messages.** Writing to **Allied Planets** from the IP Messages menu sends "
 "to every planet the list marks Allied."
-msgstr ""
+msgstr "**Сообщения.** Письмо **Союзным планетам** из меню межпланетных сообщений уходит всем планетам, помеченным в списке как Allied."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:39
 msgid ""
 "So ask your Coordinator to mark a planet Allied before you plan to trade "
 "there."
-msgstr ""
+msgstr "Поэтому попросите координатора пометить планету как Allied заранее, если собираетесь там торговать."
 
 #. type: Title ##
 #: internal/help/content/interbbs/planetary-diplomacy.md:40
 #, no-wrap
 msgid "Using it"
-msgstr ""
+msgstr "Как этим пользоваться"
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:46
@@ -2168,21 +2168,21 @@ msgid ""
 "Enemy after seeing something you may not have seen — a raid on a neighbor, a "
 "strike on your own board, a message that went badly. It is the cheapest "
 "warning you will get."
-msgstr ""
+msgstr "Читайте список, прежде чем двигать войска. Координатор помечает планету как Enemy, увидев то, чего вы могли не увидеть: налёт на соседа, удар по вашей доске, скверно окончившийся разговор. Дешевле предупреждения вы не получите."
 
 #. type: Plain text
 #: internal/help/content/interbbs/planetary-diplomacy.md:48
 msgid ""
 "If you disagree with a mark, say so. The Coordinator is elected, and the "
 "list follows whoever holds the post."
-msgstr ""
+msgstr "Если вы не согласны с пометкой, скажите об этом. Координатора выбирают, и список идёт за тем, кто занимает должность."
 
 #. type: Title #
 #: internal/help/content/interbbs/spyguy.md:1
 #: internal/help/content/interbbs/spyguy.md:8
 #, no-wrap
 msgid "Send SpyGuy"
-msgstr ""
+msgstr "Отправить SpyGuy"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:14
@@ -2191,12 +2191,12 @@ msgid ""
 "agents: sending him spends no agent, he cannot be caught, and he brings back "
 "no figures for the Spy Database. What he does is send word home the moment "
 "his hosts turn something on your planet."
-msgstr ""
+msgstr "SpyGuy — это наблюдатель, которого вы размещаете на другой планете. Он не из ваших агентов: его отправка не тратит агента, поймать его нельзя, и никаких цифр для базы данных разведки он не приносит. Его дело — дать знать домой в тот же миг, когда хозяева замыслят что-то против вашей планеты."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:16
 msgid "Send him from InterPlanetary Operations, under Special Operations."
-msgstr ""
+msgstr "Отправить его можно из межпланетных операций, пунктом «Спецоперации»."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:17
@@ -2211,7 +2211,7 @@ msgid ""
 "drawn from the size of **your own** planet — every region every realm here "
 "holds — so a crowded planet pays more for the same man. The rate is quoted "
 "before you pick a target, since it is the same wherever you send him."
-msgstr ""
+msgstr "Золотом, по дням, и весь срок оплачивается вперёд. Дневная ставка считается от размера **вашей собственной** планеты — всех регионов всех держав на ней, — так что за того же человека густонаселённая планета платит больше. Ставку называют до выбора цели, ведь она одинакова, куда бы вы его ни послали."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:28
@@ -2220,7 +2220,7 @@ msgid ""
 "than you are carrying, the shortfall is named and the bank is opened for "
 "you; come back with it and the man goes, come back without it and nothing is "
 "sent or charged."
-msgstr ""
+msgstr "Срок вы выбираете сами, до пятнадцати дней. Если он стоит больше, чем у вас на руках, вам назовут нехватку и откроют банк; вернётесь с деньгами — человек уйдёт, вернётесь без них — ничего не отправят и не спишут."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:29
@@ -2233,28 +2233,28 @@ msgstr "Что он сообщает"
 msgid ""
 "Two things, and both arrive as **planetary news** where everyone here can "
 "read them:"
-msgstr ""
+msgstr "Две вещи, и обе приходят как **планетарные новости**, которые прочтут все здесь:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/spyguy.md:38
 msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
 "on it, with the hours left before it leaves"
-msgstr ""
+msgstr "**групповая атака**, собираемая против этой планеты или против одной державы на ней, с указанием часов до её выхода"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/spyguy.md:38
 msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
 "funding is complete, and if it is stood down again"
-msgstr ""
+msgstr "строящийся против нас **Gooie Kablooie** — когда работы начались, когда сбор денег завершён и если его всё же остановили"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:41
 msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
 "sent late is not wasted."
-msgstr ""
+msgstr "Он также сообщает обо всём, что уже готовится в день его прибытия, так что посланный поздно человек не пропадает зря."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:42
@@ -2268,7 +2268,7 @@ msgid ""
 "Each report arrives as planet news, dated, saying what was aimed at you and "
 "how long it had left when he wrote it. That line never changes afterwards, "
 "so hours later it no longer tells you how long is left."
-msgstr ""
+msgstr "Каждое донесение приходит как новость планеты, с датой, и говорит, что нацелено на вас и сколько времени оставалось на момент написания. Эта строка потом не меняется, так что спустя часы она уже не показывает, сколько осталось."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:52
@@ -2278,20 +2278,20 @@ msgid ""
 "row per threat, the soonest at the top, counting down as you read — `3h`, then\n"
 "`90m`, then `away` once the force has left. A weapon already flying is listed\n"
 "with the days until it lands.\n"
-msgstr ""
+msgstr "**Атаки на подходе** в межпланетном меню — те же предупреждения, но живые: одна\nстрока на угрозу, ближайшая сверху, и отсчёт идёт прямо у вас на глазах — `3h`,\nпотом `90m`, потом `away`, когда отряд ушёл. Уже летящее оружие показано с\nчислом дней до падения.\n"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:55
 msgid ""
 "An empty list is not proof of peace. It means nothing has been reported, and "
 "only a watcher posted on another planet can report anything."
-msgstr ""
+msgstr "Пустой список — не доказательство мира. Он означает лишь, что никто ни о чём не донёс, а донести может только наблюдатель, размещённый на другой планете."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:56
 #, no-wrap
 msgid "Why it matters"
-msgstr ""
+msgstr "Почему это важно"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:62
@@ -2300,7 +2300,7 @@ msgid ""
 "it exists. You learn of it when it launches — and by then it is two days out "
 "with only your jets between it and your regions. A SpyGuy on the right "
 "planet buys you the days you need to raise them."
-msgstr ""
+msgstr "Оружие, ещё стоящее на земле, — дело одних строителей: о его существовании вам никто не скажет. Вы узнаёте о нём при запуске — а к этому времени до него два дня пути, и между ним и вашими регионами только ваши самолёты. SpyGuy на нужной планете покупает вам дни, за которые их можно поднять."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:66
@@ -2308,13 +2308,13 @@ msgid ""
 "The planet you are watching is told nothing. There is no discovery, no "
 "trial, and no execution; when the days you paid for run out, your man simply "
 "comes home."
-msgstr ""
+msgstr "Планете, за которой вы следите, не говорят ничего. Ни разоблачения, ни суда, ни казни: когда оплаченные дни выйдут, ваш человек просто вернётся домой."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:67
 #, no-wrap
 msgid "Strategy"
-msgstr ""
+msgstr "Стратегия"
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:72
@@ -2322,14 +2322,14 @@ msgid ""
 "Post him where the threat is, not where the grudge is. The planet that just "
 "lost a battle to you is the one assembling the answer, and the rate is the "
 "same whether you watch a rival or a neighbor you trust."
-msgstr ""
+msgstr "Размещайте его там, где угроза, а не там, где обида. Планета, только что проигравшая вам бой, и есть та, что готовит ответ, а ставка одинакова, следите ли вы за соперником или за соседом, которому доверяете."
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:74
 msgid ""
 "A short stay renewed is worth more than one long stay bought early: the days "
 "run whether anything happens or not."
-msgstr ""
+msgstr "Короткий срок, продлеваемый раз за разом, стоит больше одного длинного, купленного заранее: дни идут, случается что-нибудь или нет."
 
 #. type: Title #
 #: internal/help/content/interbbs/terrorist-ops.md:1
@@ -2346,82 +2346,82 @@ msgid ""
 "send them, whatever they achieve, and the strike resolves on the target's "
 "planet once the packet reaches it — so the word comes back a day or more "
 "later."
-msgstr ""
+msgstr "Террористические операции отправляют агентов против державы на другой планете. Вы выбираете операцию, затем число агентов. Агенты тратятся в момент отправки, чего бы они ни добились, а сам удар разрешается на планете цели, когда до неё дойдёт пакет, — так что весть вернётся день спустя или позже."
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:17
 msgid ""
 "Every operation is answered by New Realm Protection: a sheltered realm takes "
 "nothing at all."
-msgstr ""
+msgstr "На любую операцию отвечает защита новых держав: укрытая ею держава не получает вообще ничего."
 
 #. type: Title ##
 #: internal/help/content/interbbs/terrorist-ops.md:18
 #, no-wrap
 msgid "What each operation does"
-msgstr ""
+msgstr "Что делает каждая операция"
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:22
 msgid ""
 "The nine are not interchangeable. Each aims at one thing, and each agent "
 "that gets through takes its own bite:"
-msgstr ""
+msgstr "Девять операций не взаимозаменяемы. Каждая бьёт по чему-то одному, и каждый прошедший агент откусывает свой кусок:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Send Spy** — brings intelligence home and costs the target nothing."
-msgstr ""
+msgstr "**Отправить шпиона** — приносит сведения домой и не стоит цели ничего."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid ""
 "**Bomb Intelligence Agencies** — kills a few percent of their agents, which "
 "is what they defend and attack with."
-msgstr ""
+msgstr "**Бомбить разведку** — убивает несколько процентов их агентов, а ими они и защищаются, и нападают."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Demoralize Forces** — takes a seventh off military morale."
-msgstr ""
+msgstr "**Деморализовать войска** — отнимает седьмую часть боевого духа армии."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Cause Dissensions** — a few percent of their troopers desert."
-msgstr ""
+msgstr "**Сеять раздор** — несколько процентов их солдат дезертируют."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Bomb Air Bases** — burns a slice of their jets on the ground."
-msgstr "**Бомбить авиабазы** - сжигает часть их истребителей на земле."
+msgstr "**Бомбить авиабазы** - сжигает часть их самолётов на земле."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Stir Emigrations** — drives people out of the realm."
-msgstr ""
+msgstr "**Разжигать эмиграцию** — гонит людей прочь из державы."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Spread Propaganda** — costs them popular support."
-msgstr ""
+msgstr "**Распространять пропаганду** — стоит им поддержки народа."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid ""
 "**Bomb Food Storages** — the widest swing of the nine: it can take almost a "
 "third of what is in store, or almost nothing."
-msgstr ""
+msgstr "**Бомбить склады еды** — самый непредсказуемый из девяти: может уничтожить почти треть запасов, а может почти ничего."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
-msgstr ""
+msgstr "**Диверсия в штабе** — отбрасывает их штаб назад на постоянную величину."
 
 #. type: Title ##
 #: internal/help/content/interbbs/terrorist-ops.md:35
 #, no-wrap
 msgid "Picking one"
-msgstr ""
+msgstr "Как выбрать"
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:41
@@ -2430,13 +2430,13 @@ msgid ""
 "interplanetary attack argues for the ones that thin what fights back — "
 "troopers, jets, morale. Grinding down a realm you cannot reach yet argues "
 "for the ones that cost it growth: food, people, support."
-msgstr ""
+msgstr "Подбирайте операцию под то, что вы задумали дальше. Если вы смягчаете державу перед межпланетной атакой, берите те, что прореживают её оборону: солдат, самолёты, боевой дух. Если вы изматываете державу, до которой пока не дотянуться, берите те, что стоят ей роста: еда, люди, поддержка."
 
 #. type: Title ##
 #: internal/help/content/interbbs/terrorist-ops.md:42
 #, no-wrap
 msgid "Getting through"
-msgstr ""
+msgstr "Как агенты прорываются"
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:50
@@ -2447,7 +2447,7 @@ msgid ""
 "many buys you twice the edge, and two evenly matched realms see about two "
 "agents in five get through. There is a small chance either way that has "
 "nothing to do with either side."
-msgstr ""
+msgstr "За каждого агента бросается отдельный жребий, где ваши агенты взвешиваются против их. Взвешивание берёт квадратный корень от каждой стороны и отдаёт перевес обороняющемуся, так что агенты помогают, но отдача резко падает: вчетверо больше агентов даёт лишь вдвое больший перевес, а у двух равных держав проходит примерно двое агентов из пяти. Есть и небольшая случайность в обе стороны, не зависящая ни от одной из сторон."
 
 #. type: Plain text
 #: internal/help/content/interbbs/terrorist-ops.md:54
@@ -2456,19 +2456,19 @@ msgid ""
 "makes one agent likelier to land. A Terrorist Prevention pact adds its "
 "partners' agents to the defense, which is what makes a well-allied realm "
 "expensive to work on."
-msgstr ""
+msgstr "Поэтому чем больше агентов вы отправите, тем больше урона в среднем, но вероятность прорыва для отдельного агента от этого не растёт. Договор о противодействии терроризму добавляет к обороне агентов партнёров — потому-то державу с хорошими союзниками так дорого обрабатывать."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/introduction/overview.md:1
 #, no-wrap
 msgid "How to Play"
-msgstr ""
+msgstr "Как играть"
 
 #. type: Title #
 #: internal/help/content/introduction/overview.md:8
 #, no-wrap
 msgid "Immortal Barons — How to Play"
-msgstr ""
+msgstr "Immortal Barons — как играть"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:14
@@ -2477,7 +2477,7 @@ msgid ""
 "strongest empire. You do this through your economy, your military, and your "
 "dealings with the other barons. The other players want the same thing, so "
 "you face steady competition."
-msgstr ""
+msgstr "Вы правите баронством: небольшой державой на планете. Ваша цель — построить сильнейшую империю. Добиваются этого экономикой, армией и отношениями с другими баронами. Остальные игроки хотят того же, так что соперничество не утихает."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:20
@@ -2487,7 +2487,7 @@ msgid ""
 "everyone else names you. When every seat is taken, a new caller is turned "
 "away until a realm falls; a sysop may also seat fewer than 25 players, and "
 "any computer-run barons take seats of their own."
-msgstr ""
+msgstr "На планете помещается 25 баронств, каждое занимает одно из её 25 мест. Ваше место остаётся за вами, пока стоит ваша держава, и его буквой вас называют все прочие. Когда все места заняты, нового звонящего разворачивают, пока какая-нибудь держава не падёт; сисоп может посадить и меньше 25 игроков, а бароны под управлением компьютера занимают места наравне со всеми."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:25
@@ -2496,7 +2496,7 @@ msgid ""
 "from the Preferences menu, after your New Realm Protection has ended. Only "
 "once: the option disappears afterwards, and the whole planet is told of the "
 "change."
-msgstr ""
+msgstr "Имя своей державе вы даёте при первом звонке и можете сменить его один раз — из меню «Настройки», после того как ваша защита новых держав закончится. Только один раз: потом пункт исчезает, а о смене имени узнаёт вся планета."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:30
@@ -2505,13 +2505,13 @@ msgid ""
 "each board is one planet, and your planet competes against the others. Then "
 "the goal is not just the strongest barony, but the strongest planet. Your "
 "side has to work together to win."
-msgstr ""
+msgstr "Многие BBS умеют связывать свои игры в одну. Тогда каждая доска — отдельная планета, и ваша планета соперничает с прочими. Целью становится не только сильнейшее баронство, но и сильнейшая планета. Чтобы победить, своим придётся действовать сообща."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:31
 #, no-wrap
 msgid "Turns"
-msgstr ""
+msgstr "Ходы"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:36
@@ -2528,88 +2528,88 @@ msgstr ""
 #: internal/help/content/introduction/overview.md:37
 #, no-wrap
 msgid "What happens in a turn"
-msgstr ""
+msgstr "Что происходит за ход"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:40
 msgid "A turn moves through these steps in order:"
-msgstr ""
+msgstr "Ход проходит эти шаги по порядку:"
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**News and mail.** You see what happened since your last turn, and read any "
 "new messages from other players."
-msgstr ""
+msgstr "**Новости и почта.** Вы узнаёте, что случилось с вашего прошлого хода, и читаете новые сообщения от других игроков."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Production and income.** Your industry builds military units, and your "
 "income for the turn arrives."
-msgstr ""
+msgstr "**Производство и доход.** Ваша промышленность строит военную технику, и приходит доход за ход."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid "**Reports.** You see an income report and your full Empire Status."
-msgstr ""
+msgstr "**Отчёты.** Вы видите отчёт о доходах и полный «Статус империи»."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Upkeep.** You pay to maintain your military and your land, and you feed "
 "your people and your army. Short food or gold causes trouble, so watch these."
-msgstr ""
+msgstr "**Содержание.** Вы платите за содержание армии и земли и кормите народ и войско. Нехватка еды или золота ведёт к бедам, так что следите за ними."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Covert Operations.** Spying and sabotage. This step appears only if you "
 "keep it turned on and hold at least one covert agent."
-msgstr ""
+msgstr "**Тайные операции.** Шпионаж и диверсии. Этот шаг появляется, только если вы его не отключили и у вас есть хотя бы один агент."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid "**Spending.** You buy land, military, and other things."
-msgstr ""
+msgstr "**Траты.** Вы покупаете землю, военную технику и прочее."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Attacks.** You may attack another barony, a limited number of times per "
 "day."
-msgstr ""
+msgstr "**Атаки.** Вы можете напасть на другое баронство, ограниченное число раз в день."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Trading.** Trade goods with other baronies, if you keep this step turned "
 "on."
-msgstr ""
+msgstr "**Торговля.** Обмен товарами с другими баронствами, если вы оставили этот шаг включённым."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**InterPlanetary Operations.** Actions against other planets, in linked "
 "games."
-msgstr ""
+msgstr "**Межпланетные операции.** Действия против других планет в связанных играх."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid "**Messages.** You may send a message to another player."
-msgstr ""
+msgstr "**Сообщения.** Вы можете отправить сообщение другому игроку."
 
 #. type: Bullet: '- '
 #: internal/help/content/introduction/overview.md:56
 msgid ""
 "**End of turn.** Your economy and population settle, and the turn closes."
-msgstr ""
+msgstr "**Конец хода.** Ваша экономика и население приходят в равновесие, и ход закрывается."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:57
 #, no-wrap
 msgid "The System menu"
-msgstr ""
+msgstr "Меню «Система»"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:63
@@ -2618,7 +2618,7 @@ msgid ""
 "can set your tax rate, change what your industry builds, open diplomacy, "
 "visit the bank, use the food market, set your preferences, and write macros. "
 "Open it when you need it."
-msgstr ""
+msgstr "Кое-что не навязывают вам каждый ход. Из меню **«Система»** вы можете задать налоговую ставку, сменить то, что строит промышленность, открыть дипломатию, зайти в банк, воспользоваться рынком еды, настроить свои предпочтения и написать макросы. Открывайте его, когда понадобится."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:67
@@ -2626,13 +2626,13 @@ msgid ""
 "In this game, **diplomacy** and **changing production** live on the System "
 "menu.  They are not automatic stops in each turn, so visit them yourself "
 "when you want to change your plans."
-msgstr ""
+msgstr "В этой игре **дипломатия** и **смена производства** находятся в меню «Система».  Они не являются обязательными остановками каждого хода, так что заходите туда сами, когда захотите изменить планы."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:68
 #, no-wrap
 msgid "Game Bulletins"
-msgstr ""
+msgstr "Бюллетени игры"
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:75
@@ -2642,7 +2642,7 @@ msgid ""
 "linked game the league's own notices are listed first, under \"Galactic\", "
 "and every planet in the league sees the same ones. When a notice is put up "
 "or changed, it is named in the day's news."
-msgstr ""
+msgstr "Ваш сисоп может вывешивать объявления для игроков. Выберите **«Бюллетени»** в начальном меню, чтобы увидеть список, а затем укажите номер. В связанной игре собственные объявления лиги идут первыми, под заголовком \\\"Galactic\\\", и их видят все планеты лиги. Когда объявление вывешивают или меняют, о нём говорится в новостях дня."
 
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:76
@@ -2657,7 +2657,7 @@ msgid ""
 "controls, your military, your economy, warfare, covert operations, "
 "diplomacy, and linked inter-board play. Press a key to move from one section "
 "to the next. You can stop at any time."
-msgstr ""
+msgstr "Следующие разделы по очереди разбирают каждую часть игры: управление, армию, экономику, войну, тайные операции, дипломатию и связанную игру между досками. Нажмите клавишу, чтобы перейти к следующему разделу. Остановиться можно в любой момент."
 
 #. type: Title #
 #: internal/help/content/military/agents.md:1
@@ -2736,7 +2736,7 @@ msgid ""
 "it, and they take casualties with the rest of the force, so sending them "
 "costs you bombers and buys you nothing. Hold them back and spend them on the "
 "attacks that need them."
-msgstr ""
+msgstr "В атаке на своей планете бомбардировщики бесполезны. Силы они не прибавляют, а потери несут наравне со всеми, так что их отправка стоит вам бомбардировщиков и не даёт ничего. Держите их дома и тратьте на те атаки, где они нужны."
 
 #. type: Plain text
 #: internal/help/content/military/bombers.md:23
@@ -2874,9 +2874,9 @@ msgid ""
 "see Carriers for how many each one lifts. Without enough carriers, your jets "
 "cannot join the attack."
 msgstr ""
-"Истребители не могут добраться до боя сами. Их должны нести авианосцы - "
+"Самолёты не могут добраться до боя сами. Их должны нести авианосцы - "
 "сколько поднимает каждый, смотрите в теме Авианосцы. Без достаточного числа "
-"авианосцев ваши истребители не вступят в бой."
+"авианосцев ваши самолёты не вступят в бой."
 
 #. type: Plain text
 #: internal/help/content/military/jets.md:25
@@ -2888,7 +2888,7 @@ msgid ""
 msgstr ""
 "Поскольку об этом легко забыть, заказ больше того, что поднимает один "
 "авианосец, спрашивает, добавить ли авианосцы для их перевозки. Ответьте да, "
-"и то же золото купит и то и другое: истребителей окажется меньше, чем вы "
+"и то же золото купит и то и другое: самолётов окажется меньше, чем вы "
 "просили, зато летать сможет каждый."
 
 #. type: Plain text
@@ -2996,7 +2996,7 @@ msgid ""
 msgstr ""
 "Едят все военные части, но солдат ест в пятьдесят раз больше любой другой: "
 "единица еды кормит 200 солдат или 10 000 кого угодно ещё. Большой солдатской "
-"армии нужно крепкое продовольствие, а большая бронетанковая почти незаметна."
+"армии нужен надёжный запас еды, а большая бронетанковая почти незаметна."
 
 #. type: Plain text
 #: internal/help/content/military/troopers.md:26
@@ -3092,8 +3092,8 @@ msgid ""
 "Agricultural regions grow food. They are your main source of food if you are "
 "not buying it from the market."
 msgstr ""
-"Пахотные регионы выращивают еду. Это ваш основной источник продовольствия, "
-"если вы не покупаете его на рынке."
+"Пахотные регионы выращивают еду. Это ваш основной источник еды, если вы не "
+"покупаете её на рынке."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-coastal.md:1
@@ -3502,14 +3502,14 @@ msgid ""
 "people and a sixth of their troopers, and it halves their military morale "
 "while also knocking their popular support down to two-thirds. It does not "
 "touch their land at all — no regions are ruined and none change hands."
-msgstr ""
+msgstr "Биологическая атака выпускает чуму. Она убивает около десятой части народа врага и шестой части его солдат, вдвое снижает боевой дух армии и заодно сбивает поддержку народа до двух третей. Земли она не трогает вовсе — ни один регион не превращается в пустошь и ни один не переходит из рук в руки."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-biological.md:17
 msgid ""
 "The missile is priced off all three of the things it hurts: the target's "
 "troopers, their people, and their regions. Nothing intercepts it."
-msgstr ""
+msgstr "Ракету оценивают по всем трём вещам, которым она вредит: по солдатам цели, её народу и её регионам. Перехватить её нечем."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-biological.md:20
@@ -3517,7 +3517,7 @@ msgid ""
 "Strategy: this is the anti-army weapon of the three. Halved morale weakens "
 "every tank and trooper the target owns, so a plague the turn before you "
 "march is worth more than the casualties alone suggest."
-msgstr ""
+msgstr "Стратегия: из трёх это оружие против армии. Вдвое сниженный боевой дух ослабляет каждый танк и каждого солдата цели, так что чума за ход до наступления стоит больше, чем можно решить по одним потерям."
 
 #. type: Title #
 #: internal/help/content/warfare/attack-chemical.md:1
@@ -3534,7 +3534,7 @@ msgid ""
 "many regions into waste, kills a fifth of the enemy's people outright, and "
 "knocks down both their military morale and their popular support. It leaves "
 "their troopers alone."
-msgstr ""
+msgstr "Химическая атака делает с землёй то же, что ядерная, но в меньшем размере, а затем травит державу под собой. Она обращает в пустошь примерно втрое меньше регионов, сразу убивает пятую часть народа врага и сбивает и боевой дух его армии, и поддержку народа. Солдат она не трогает."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-chemical.md:18
@@ -3542,7 +3542,7 @@ msgid ""
 "The morale and support damage is the part that lasts. Casualties come back "
 "as the population grows; a realm knocked down to two-thirds support earns "
 "less and fights worse until it has climbed back."
-msgstr ""
+msgstr "Урон боевому духу и поддержке — это то, что остаётся надолго. Потери восполняются ростом населения; держава, сбитая до двух третей поддержки, зарабатывает меньше и дерётся хуже, пока не выкарабкается обратно."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-chemical.md:22
@@ -3550,7 +3550,7 @@ msgid ""
 "The arms broker prices the missile off the target's population as well as "
 "its land, so gassing a crowded realm is expensive. Nothing intercepts it — "
 "not SDI, not turrets, not tanks."
-msgstr ""
+msgstr "Торговец оружием назначает цену за ракету и по населению цели, и по её земле, так что травить густонаселённую державу дорого. Перехватить её нечем — ни SDI, ни турелями, ни танками."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-chemical.md:25
@@ -3558,7 +3558,7 @@ msgid ""
 "Strategy: this is the weapon to use on a rich, crowded rival you cannot beat "
 "in the field. A Nuclear Attack hurts their land harder, but only a chemical "
 "strike touches the people paying for their army."
-msgstr ""
+msgstr "Стратегия: это оружие против богатого густонаселённого соперника, которого вам не одолеть в поле. Ядерная атака сильнее бьёт по его земле, но только химический удар достаёт до людей, оплачивающих его армию."
 
 #. type: Title #
 #: internal/help/content/warfare/attack-nuclear.md:1
@@ -3574,7 +3574,7 @@ msgid ""
 "waste. It takes no land from them and kills nobody: the target keeps every "
 "region, pays upkeep on all of them, and earns nothing from the ruined ones "
 "until they are cleaned up."
-msgstr ""
+msgstr "Ядерная атака обращает часть регионов врага в пустошь. Земли у него она не отнимает и никого не убивает: цель сохраняет все свои регионы, платит за содержание всех и ничего не получает с разорённых, пока их не расчистят."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:19
@@ -3583,7 +3583,7 @@ msgid ""
 "it. The price is set by the size of the realm you are aiming at — a large "
 "neighbor needs a large missile — up to a ceiling, so the very biggest realms "
 "are proportionally cheap to hit."
-msgstr ""
+msgstr "Цену вам называют после выбора цели, и от неё можно отказаться. Её задаёт размер державы, в которую вы целитесь, — крупному соседу нужна крупная ракета, — но до потолка, так что по самым большим державам бить сравнительно дёшево."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:23
@@ -3592,13 +3592,13 @@ msgid ""
 "points either way. Nothing shoots the missile down: an SDI program defends "
 "against missiles arriving from another planet, not from a neighbor on your "
 "own."
-msgstr ""
+msgstr "За один удар в пустошь обращается около 7% земли цели, с разбросом в пару процентов в обе стороны. Сбить ракету нечем: программа SDI защищает от ракет, приходящих с другой планеты, а не от соседа по вашей собственной."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:25
 msgid ""
 "A successful strike raises your score, whether or not it did much damage."
-msgstr ""
+msgstr "Удавшийся удар повышает ваши очки, много ли он навредил или нет."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-nuclear.md:29
@@ -3607,7 +3607,7 @@ msgid ""
 "it hands you nothing you can use; it makes an enemy's territory expensive to "
 "hold while you build toward a real attack. Against a small realm the damage "
 "rounds away to almost nothing, so save the gold for a large one."
-msgstr ""
+msgstr "Стратегия: ядерный удар изматывает соперника. Добить им нельзя, и вам он не даёт ничего полезного; он делает владение вражеской землёй дорогим, пока вы готовите настоящее наступление. Против малой державы урон округляется почти до нуля, так что берегите золото для крупной."
 
 #. type: Title #
 #: internal/help/content/warfare/attack-regular.md:1
@@ -3631,7 +3631,7 @@ msgid ""
 "First you choose how many of each unit to send: Troopers, Jets, Tanks, and "
 "Bombers. Jets can only fight if you have carriers to carry them. Units you "
 "keep at home do not fight and cannot be lost."
-msgstr ""
+msgstr "Сперва вы выбираете, сколько единиц каждого рода отправить: солдат, самолётов, танков и бомбардировщиков. Самолёты могут драться, только если у вас есть авианосцы, чтобы их нести. Оставленные дома не воюют и потеряны быть не могут."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:20
@@ -3639,7 +3639,7 @@ msgid ""
 "Only the units you sent add to your attack, and only they can be lost. "
 "Bombers are the exception: they add no strength to an attack on your own "
 "planet, so sending them loses you bombers for nothing."
-msgstr ""
+msgstr "К силе атаки прибавляются только отправленные вами единицы, и только они могут погибнуть. Исключение — бомбардировщики: в атаке на своей планете силы они не добавляют, так что их отправка лишает вас бомбардировщиков впустую."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:26
@@ -3649,7 +3649,7 @@ msgid ""
 "fixed figure.  What it costs the winner depends on how one-sided the fight "
 "was: an attacker who badly outmatches the defender walks away having lost "
 "very little, and an evenly matched one pays nearly the full share."
-msgstr ""
+msgstr "Две армии перемалывают друг друга, пока одна не потеряет столько, сколько готова потерять, и эта доля — настройка данной доски, а не постоянная величина.  Чего это стоит победителю, зависит от того, насколько неравным был бой: атакующий, сильно превосходящий обороняющегося, уходит почти без потерь, а равный ему платит почти всю долю сполна."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:31
@@ -3658,14 +3658,14 @@ msgid ""
 "their gold. A Regular Attack gives you land, not money. A small empire can "
 "lose all of its regions in one attack. A large empire loses only part, so "
 "you must attack it again and again to take it down."
-msgstr ""
+msgstr "В случае победы вы захватываете часть регионов врага. Его золото вам не достаётся. Обычная атака даёт землю, а не деньги. Малая империя может лишиться всех своих регионов за одну атаку. Большая теряет лишь часть, так что её придётся бить снова и снова, чтобы свалить."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:34
 msgid ""
 "How big that share is depends on this board's settings and on how much land "
 "the enemy holds, not on how developed it is."
-msgstr ""
+msgstr "Насколько велика эта часть, зависит от настроек данной доски и от того, сколько земли у врага, а не от того, насколько она развита."
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:37
@@ -3674,7 +3674,7 @@ msgid ""
 "much land but little strength to defend it. You win the battle easily and "
 "take a big piece of land. A small, dense empire gives you less land for the "
 "same effort."
-msgstr ""
+msgstr "Подсказка: большая империя с низким состоянием — лёгкая добыча. Земли у неё много, а сил её оборонять мало. Бой вы выигрываете легко и забираете большой кусок земли. Малая и плотная империя даст вам меньше земли за те же усилия."
 
 #. type: Title #
 #: internal/help/content/warfare/attacks.md:1
@@ -3689,7 +3689,7 @@ msgid ""
 "You can strike other empires in several ways, from a direct assault with "
 "your army to missiles and planet-wide weapons. Each kind of attack has its "
 "own topic."
-msgstr ""
+msgstr "Бить по другим империям можно по-разному: от прямого наступления армией до ракет и оружия планетарного масштаба. Каждому виду атаки посвящён свой раздел."
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:15
@@ -3697,21 +3697,21 @@ msgid ""
 "You can also be attacked while you are playing. If that happens, a notice "
 "appears the next time you press a key. An order you already typed is reduced "
 "to what you still hold, and the game tells you when it does that."
-msgstr ""
+msgstr "Напасть могут и на вас, пока вы играете. Если так случится, извещение появится при следующем нажатии клавиши. Уже отданный приказ урежут до того, что у вас осталось, и игра об этом скажет."
 
 #. type: Title #
 #: internal/help/content/warfare/gooie-kablooie.md:1
 #: internal/help/content/warfare/gooie-kablooie.md:8
 #, no-wrap
 msgid "Gooie Kablooie"
-msgstr ""
+msgstr "Gooie Kablooie"
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:12
 msgid ""
 "The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy "
 "planet rather than at one baron, and your planet can only have one at a time."
-msgstr ""
+msgstr "Gooie Kablooie — абсолютное оружие. Оно нацелено на целую вражескую планету, а не на одного барона, и у вашей планеты может быть только одно такое зараз."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:17
@@ -3720,7 +3720,7 @@ msgid ""
 "planet. After that, any baron here can put money in, a million gold at a "
 "time.  The price depends on the size of the target planet: aiming at a "
 "planet much larger than yours costs more."
-msgstr ""
+msgstr "В одиночку его никто не покупает. Один барон начинает работы и называет планету-цель. Дальше деньги может вкладывать любой барон отсюда, по миллиону золота за раз.  Цена зависит от размера планеты-цели: целиться в планету намного крупнее вашей дороже."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:22
@@ -3729,13 +3729,13 @@ msgid ""
 "then launches itself. Nobody decides that. The only person who can call it "
 "off is your elected Coordinator, and only before it leaves the ground. The "
 "gold is spent either way."
-msgstr ""
+msgstr "Когда внесена последняя часть денег, оружие строится ещё три дня, а затем запускается само. Этого никто не решает. Отменить запуск может только ваш выборный координатор и только пока оружие не ушло с земли. Золото потрачено в любом случае."
 
 #. type: Title ##
 #: internal/help/content/warfare/gooie-kablooie.md:23
 #, no-wrap
 msgid "Being on the receiving end"
-msgstr ""
+msgstr "Когда бьют по вам"
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:30
@@ -3745,7 +3745,7 @@ msgid ""
 "realm's regions. Every day after that it takes another twentieth, until five "
 "days are up and it burns itself out. Left alone it will cost you better than "
 "a quarter of your land."
-msgstr ""
+msgstr "Оружие, нацеленное на вашу планету, не взрывается и не исчезает. Оно прибывает, садится на вашу планету и поедает её. В день падения оно забирает десятую часть регионов у каждой державы. Каждый следующий день — ещё двадцатую, и так пять дней, пока оно не выгорит. Если его не трогать, оно обойдётся вам больше чем в четверть вашей земли."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:33
@@ -3753,7 +3753,7 @@ msgid ""
 "Only jets can reach it. Your realm is asked at the start of your turn "
 "whether you want to attack it. About a third of the jets you send do not "
 "come home."
-msgstr ""
+msgstr "Достать его могут только самолёты. В начале хода вашу державу спрашивают, хотите ли вы его атаковать. Около трети отправленных самолётов не возвращаются."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:37
@@ -3761,13 +3761,13 @@ msgid ""
 "No single wave can finish it, however many jets you send. That is the point: "
 "the weapon is built to need the whole planet's air forces, and a planet that "
 "cannot organize loses the land."
-msgstr ""
+msgstr "Одной волной его не прикончить, сколько самолётов ни пошли. В том и смысл: оружие рассчитано на то, чтобы потребовать воздушные силы всей планеты, и планета, не умеющая договориться, теряет землю."
 
 #. type: Plain text
 #: internal/help/content/warfare/gooie-kablooie.md:38
 msgid ""
 "An SDI program is no help against it, and neither is anything else you own."
-msgstr ""
+msgstr "Программа SDI против него не помогает, как и всё прочее, что у вас есть."
 
 #. type: Title #
 #: internal/help/content/warfare/pirates.md:1
@@ -3783,7 +3783,7 @@ msgid ""
 "of a game. Everything it has, it stole, and what it can put in the field is "
 "only what it holds. So the factions are all weak on day one, and the ones "
 "nobody fights are the dangerous ones later."
-msgstr ""
+msgstr "В мире живут девять пиратских группировок. В начале игры группировке не принадлежит ничего. Всё, что у неё есть, — краденое, и выставить в поле она может лишь то, чем владеет. Поэтому в первый день все они слабы, а опасными потом становятся те, с которыми никто не дрался."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:20
@@ -3796,7 +3796,7 @@ msgid ""
 msgstr ""
 "Пираты грабят игроков наугад. Налёт - это не битва: фракция, не владеющая "
 "ничем, всё равно может вас ограбить. Каждый налёт уносит **один** вид "
-"добычи: ваших солдат, истребители, турели, танки, агентов или золото, "
+"добычи: ваших солдат, самолёты, турели, танки, агентов или золото, "
 "примерно одну тридцатую. Бомбардировщиков, авианосцы и ваши области они не "
 "берут никогда. Налёт также даёт фракции новые области, так что пират, только "
 "что кого-то ограбивший, владеет большей землёй."
@@ -3809,21 +3809,21 @@ msgid ""
 "tanks. One raid often recovers what a faction took from you; two or three "
 "will if it is fat.  Attacking costs you casualties whether you win or lose, "
 "so do not raid a faction that holds nothing."
-msgstr ""
+msgstr "Напав на группировку, можно вернуть добро назад. Победа возвращает треть её золота, регионов, агентов и солдат и четверть её самолётов, турелей и танков. Одного налёта часто хватает, чтобы вернуть отнятое; двух-трёх хватит наверняка, если группировка разжирела.  Атака стоит вам потерь и при победе, и при поражении, так что не трогайте группировку, у которой ничего нет."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:29
 msgid ""
 "Listing military on the Trading Market does not hide it from pirates, but it "
 "does help some: your camp is raided about twice as often as your listing."
-msgstr ""
+msgstr "Выставленная на торговый рынок военная техника не скрыта от пиратов, но кое-что это всё же даёт: ваш лагерь грабят примерно вдвое чаще, чем вашу выставленную партию."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:31
 msgid ""
 "Tip: a faction you keep beaten stays harmless, because its army is only what "
 "it has managed to steal. Big realms are raided more often than small ones."
-msgstr ""
+msgstr "Совет: группировка, которую вы держите битой, остаётся безобидной, потому что её армия — лишь то, что она сумела украсть. Большие державы грабят чаще малых."
 
 #. type: Title #
 #: internal/help/content/warfare/sdi.md:1
@@ -3840,7 +3840,7 @@ msgid ""
 "bombers of a strike arriving from one. It does nothing against a neighbor on "
 "your own planet — not their army, and not their nuclear, chemical or "
 "biological missiles."
-msgstr ""
+msgstr "Программа SDI — щит, который вы финансируете. Она отвечает на три вещи, и только на них: на ракеты, выпущенные по вам с другой планеты, и на самолёты и бомбардировщики удара, приходящего оттуда же. Против соседа по вашей собственной планете она не даёт ничего — ни против его армии, ни против его ядерных, химических или биологических ракет."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:19
@@ -3849,24 +3849,24 @@ msgid ""
 "30% off an arriving realm's jets and 20% off its bombers. At half strength "
 "it does half of each. Only a strike aimed at you alone meets your shield; a "
 "group attack goes through it even when you are one of its named targets."
-msgstr ""
+msgstr "В полную силу она отводит примерно половину нацеленных на вас ракет, снимает 30% самолётов и 20% бомбардировщиков прибывающей державы. В половину силы — половину от каждого. С вашим щитом встречается только удар, нацеленный на вас одного; групповая атака проходит сквозь него, даже если вы в числе названных целей."
 
 #. type: Title ##
 #: internal/help/content/warfare/sdi.md:20
 #, no-wrap
 msgid "How strong it is"
-msgstr ""
+msgstr "Насколько она сильна"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:23
 msgid "Strength is the funding spread over your land, not the funding alone:"
-msgstr ""
+msgstr "Сила — это не одно только финансирование, а финансирование, размазанное по вашей земле:"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:25
 #, no-wrap
 msgid "    strength% = the square root of (funding / (10 x (regions + 1)))\n"
-msgstr ""
+msgstr "    сила% = квадратный корень из (финансирование / (10 x (регионы + 1)))\n"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:31
@@ -3876,13 +3876,13 @@ msgid ""
 "over a large one. And each further percent costs more than the last: over "
 "8,000 regions the first 1% wants about 80,000 gold in the pot, while going "
 "from 9% to 10% wants another 1.5 million."
-msgstr ""
+msgstr "с потолком в 100%. Отсюда следует два вывода. Каждый взятый регион истончает ваш собственный щит, так что та же копилка, что хорошо прикрывает малую державу, над большой почти бесполезна. И каждый следующий процент стоит дороже предыдущего: при 8 000 регионов первый 1% требует около 80 000 золота, а подъём с 9% до 10% — ещё полутора миллионов."
 
 #. type: Title ##
 #: internal/help/content/warfare/sdi.md:32
 #, no-wrap
 msgid "Funding it"
-msgstr ""
+msgstr "Как её финансировать"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:37
@@ -3890,34 +3890,34 @@ msgid ""
 "The program is a pot of gold, not something you buy once. Each turn you may "
 "add up to a set amount: a fifth of what is already in the pot, and never "
 "less than 250,000 gold. Gold goes in only in whole thousands."
-msgstr ""
+msgstr "Программа — это копилка золота, а не разовая покупка. Каждый ход вы можете добавить не более установленной суммы: пятую часть того, что уже лежит в копилке, но никак не меньше 250 000 золота. Золото кладётся только целыми тысячами."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:40
 msgid ""
 "That amount is your allowance for the whole turn. Leaving the screen and "
 "coming back does not give you a second one."
-msgstr ""
+msgstr "Эта сумма — ваш лимит на весь ход. Выйти с экрана и вернуться, чтобы получить второй, не получится."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:43
 msgid ""
 "So a shield takes many turns to build, however rich you are. You cannot buy "
 "one the turn you need it, so start early if you expect missiles."
-msgstr ""
+msgstr "Поэтому щит строится не один ход, как бы вы ни были богаты. Купить его в тот ход, когда он понадобился, нельзя, так что начинайте заранее, если ждёте ракет."
 
 #. type: Title ##
 #: internal/help/content/warfare/sdi.md:44
 #, no-wrap
 msgid "Paying for it"
-msgstr ""
+msgstr "Как за неё платить"
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:48
 msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
 "the maintenance prompts, after your regions and before the Queen's tax."
-msgstr ""
+msgstr "Каждый ход программа требует **4% всего своего финансирования** на содержание, в запросах о содержании, после ваших регионов и до налога королевы."
 
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:51
@@ -3925,7 +3925,7 @@ msgid ""
 "Pay it in full. If you pay short, the program shrinks to what you did pay "
 "for, and the shield weakens with it. A large pot is a large bill every turn, "
 "so grow it at a pace your income can carry."
-msgstr ""
+msgstr "Платите полностью. Если заплатите меньше, программа усохнет до оплаченного, а вместе с ней ослабнет и щит. Большая копилка — большой счёт каждый ход, так что растите её в темпе, который тянет ваш доход."
 
 #~ msgid ""
 #~ "In a normal attack, your bombers first destroy the enemy jets that are on "

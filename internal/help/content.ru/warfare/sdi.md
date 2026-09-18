@@ -7,46 +7,51 @@ title: 'Программа СОИ'
 
 # Программа СОИ
 
-The SDI Program is a shield you fund. It answers three things, and only
-these three: missiles fired at you from another planet, and the jets and
-bombers of a strike arriving from one. It does nothing against a neighbor on
-your own planet — not their army, and not their nuclear, chemical or
-biological missiles.
+Программа SDI — щит, который вы финансируете. Она отвечает на три вещи, и
+только на них: на ракеты, выпущенные по вам с другой планеты, и на самолёты
+и бомбардировщики удара, приходящего оттуда же. Против соседа по вашей
+собственной планете она не даёт ничего — ни против его армии, ни против его
+ядерных, химических или биологических ракет.
 
-At full strength it turns aside about half the missiles aimed at you, takes
-30% off an arriving realm's jets and 20% off its bombers. At half strength
-it does half of each. Only a strike aimed at you alone meets your shield; a
-group attack goes through it even when you are one of its named targets.
+В полную силу она отводит примерно половину нацеленных на вас ракет, снимает
+30% самолётов и 20% бомбардировщиков прибывающей державы. В половину силы —
+половину от каждого. С вашим щитом встречается только удар, нацеленный на
+вас одного; групповая атака проходит сквозь него, даже если вы в числе
+названных целей.
 
-## How strong it is
+## Насколько она сильна
 
-Strength is the funding spread over your land, not the funding alone:
+Сила — это не одно только финансирование, а финансирование, размазанное по
+вашей земле:
 
-    strength% = the square root of (funding / (10 x (regions + 1)))
+    сила% = квадратный корень из (финансирование / (10 x (регионы + 1)))
 
-capped at 100%. Two things follow. Every region you take thins your own
-shield, so the same pot that shields a small realm well is nearly useless
-over a large one. And each further percent costs more than the last: over
-8,000 regions the first 1% wants about 80,000 gold in the pot, while going
-from 9% to 10% wants another 1.5 million.
+с потолком в 100%. Отсюда следует два вывода. Каждый взятый регион истончает
+ваш собственный щит, так что та же копилка, что хорошо прикрывает малую
+державу, над большой почти бесполезна. И каждый следующий процент стоит
+дороже предыдущего: при 8 000 регионов первый 1% требует около 80 000
+золота, а подъём с 9% до 10% — ещё полутора миллионов.
 
-## Funding it
+## Как её финансировать
 
-The program is a pot of gold, not something you buy once. Each turn you may
-add up to a set amount: a fifth of what is already in the pot, and never
-less than 250,000 gold. Gold goes in only in whole thousands.
+Программа — это копилка золота, а не разовая покупка. Каждый ход вы можете
+добавить не более установленной суммы: пятую часть того, что уже лежит в
+копилке, но никак не меньше 250 000 золота. Золото кладётся только целыми
+тысячами.
 
-That amount is your allowance for the whole turn. Leaving the screen and
-coming back does not give you a second one.
+Эта сумма — ваш лимит на весь ход. Выйти с экрана и вернуться, чтобы
+получить второй, не получится.
 
-So a shield takes many turns to build, however rich you are. You cannot buy
-one the turn you need it, so start early if you expect missiles.
+Поэтому щит строится не один ход, как бы вы ни были богаты. Купить его в тот
+ход, когда он понадобился, нельзя, так что начинайте заранее, если ждёте
+ракет.
 
-## Paying for it
+## Как за неё платить
 
-Every turn the program asks for **4% of its total funding** as upkeep, in
-the maintenance prompts, after your regions and before the Queen's tax.
+Каждый ход программа требует **4% всего своего финансирования** на
+содержание, в запросах о содержании, после ваших регионов и до налога
+королевы.
 
-Pay it in full. If you pay short, the program shrinks to what you did pay
-for, and the shield weakens with it. A large pot is a large bill every turn,
-so grow it at a pace your income can carry.
+Платите полностью. Если заплатите меньше, программа усохнет до оплаченного,
+а вместе с ней ослабнет и щит. Большая копилка — большой счёт каждый ход,
+так что растите её в темпе, который тянет ваш доход.

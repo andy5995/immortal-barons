@@ -17,46 +17,51 @@ Aufstände werden wahrscheinlicher, je weiter Ihr Steuersatz über ein
 sicheres Maß steigt. Ein Aufstand lässt Ihre Zustimmung einbrechen und
 vertreibt einen Teil Ihres Volkes.
 
-Taxes also decide how many people your realm can hold. A low rate lets it
-hold many more, a high one far fewer, and past a punitive rate people leave
-faster still — see Population for the threshold. A realm that is already
-shrinking loses people quicker the harder it taxes. Support works the same
-way: the higher it stands, the more people your land can hold.
+Steuern entscheiden auch, wie viele Menschen Ihr Reich fassen kann. Ein
+niedriger Satz lässt es weit mehr fassen, ein hoher weit weniger, und
+jenseits eines strafenden Satzes gehen Menschen noch schneller fort - die
+Schwelle steht im Thema Bevölkerung. Ein Reich, das ohnehin schrumpft,
+verliert umso schneller Menschen, je härter es besteuert. Mit dem Rückhalt
+verhält es sich ebenso: Je höher er steht, desto mehr Menschen fasst Ihr
+Land.
 
-## The Queen Royale's tax
+## Die Steuer der Queen Royale
 
-The Queen takes a share of what you earn each turn. You may pay her less
-than she asks, but a short payment costs Popular Support.
+Die Königin nimmt jeden Zug einen Anteil dessen, was Sie verdienen. Sie
+dürfen ihr weniger zahlen, als sie verlangt, aber eine gekürzte Zahlung
+kostet Rückhalt.
 
-Every coin she collects goes into her purse, and she gives part of that
-purse back. She pays you the first time you play each day: 2% of the purse,
-or 7% once it holds more than 100 million gold. A realm still under New
-Realm Protection gets at most 1 million.
+Jede Münze, die sie einzieht, geht in ihre Truhe, und einen Teil davon gibt
+sie zurück. Sie zahlt Ihnen beim ersten Spielen jedes Tages: 2% der Truhe,
+oder 7%, sobald darin mehr als 100 Millionen Gold liegen. Ein Reich, das
+noch unter dem Schutz für neue Reiche steht, erhält höchstens 1 Million.
 
-All barons draw on the same purse, and each refund empties it a little. The
-first to play on a given day takes the largest share, so play early.
+Alle Barone schöpfen aus derselben Truhe, und jede Rückzahlung leert sie ein
+wenig. Wer an einem Tag zuerst spielt, nimmt den größten Anteil; spielen Sie
+also früh.
 
-## The lottery
+## Die Lotterie
 
-Once a day, as she hands back your refund, the Queen offers a lottery
-ticket.  It costs 5,000 gold, taken as soon as you say yes — she does not
-mention the price, and a baron with less than that in hand is not offered a
-ticket at all.  Either way the day's offer is spent: there is no asking
-again later.
+Einmal am Tag, während sie Ihre Rückzahlung aushändigt, bietet die Königin
+ein Lotterielos an.  Es kostet 5.000 Gold, abgezogen, sobald Sie ja sagen -
+sie erwähnt den Preis nicht, und einem Baron, der weniger als das in der
+Hand hat, wird überhaupt kein Los angeboten.  So oder so ist das Angebot des
+Tages verbraucht: Später noch einmal zu fragen, gibt es nicht.
 
-Pick six letters, one keypress each, and press Enter for any you would
-rather leave to chance. Six letters are then drawn. What counts is how many
-of the drawn letters your ticket covers, not where they sit, and each letter
-on your ticket can only be spent once.
+Wählen Sie sechs Buchstaben, je einen Tastendruck, und drücken Sie Eingabe
+für jeden, den Sie lieber dem Zufall überlassen. Danach werden sechs
+Buchstaben gezogen. Es zählt, wie viele der gezogenen Buchstaben Ihr Los
+abdeckt, nicht wo sie stehen, und jeder Buchstabe auf Ihrem Los kann nur
+einmal angerechnet werden.
 
-- 1 letter: 2,500 gold
-- 2 letters: 10,000
-- 3 letters: 500,000
-- 4 letters: 1,000,000
-- 5 letters: 4,000,000
-- 6 letters: 10,000,000
+- 1 Buchstabe: 2.500 Gold
+- 2 Buchstaben: 10.000
+- 3 Buchstaben: 500.000
+- 4 Buchstaben: 1.000.000
+- 5 Buchstaben: 4.000.000
+- 6 Buchstaben: 10.000.000
 
-Winnings go into your bank. One match still leaves you 2,500 down on the
-ticket, and most tickets match nothing — the Queen did not build her purse
-by losing. Your sysop can switch the lottery off, so a board that never
-offers you one is not broken.
+Gewinne gehen auf Ihre Bank. Ein Treffer lässt Sie auf dem Los immer noch
+2.500 im Minus, und die meisten Lose treffen nichts - die Königin hat ihre
+Truhe nicht durch Verlieren gefüllt. Ihr Sysop kann die Lotterie abschalten,
+ein Board, das Ihnen nie eines anbietet, ist also nicht kaputt.

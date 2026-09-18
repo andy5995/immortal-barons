@@ -2,18 +2,21 @@
 category: covert
 in_game: true
 order: 10
-title: 'Bomb Enemy Targets'
+title: 'Feindliche Ziele bombardieren'
 ---
 
-# Bomb Enemy Targets
+# Feindliche Ziele bombardieren
 
-Bomb Enemy Targets sends your agents to plant bombs across an enemy
-realm. You choose the realm and nothing else: if the operation lands, your
-agency picks one of the enemy's holdings at random and destroys part of
-it. It may hit their people, their troopers, their own agents, their tanks,
-their jets, or their food store.
+Feindliche Ziele bombardieren schickt Ihre Agenten aus, um in einem
+feindlichen Reich Bomben zu legen. Sie wählen das Reich und sonst nichts:
+Gelingt die Operation, sucht sich Ihr Dienst zufällig einen Besitz des
+Feindes aus und zerstört einen Teil davon. Es kann seine Menschen treffen,
+seine Soldaten, seine eigenen Agenten, seine Panzer, seine Jets oder seinen
+Nahrungsvorrat.
 
-Food is the prize. A strike that reaches the granaries burns a large share
-of it, far more than the few percent the other five lose, so a realm already
-short of food can be pushed into starvation by a single lucky raid. You
-cannot aim for it, though, so the operation is a gamble rather than a plan.
+Die Nahrung ist der große Fang. Ein Schlag, der die Kornspeicher erreicht,
+verbrennt einen großen Teil davon, weit mehr als die wenigen Prozent, die
+die anderen fünf verlieren, so dass ein Reich, das ohnehin knapp an Nahrung
+ist, von einem einzigen Glückstreffer in den Hunger getrieben werden
+kann. Zielen können Sie darauf aber nicht, daher ist die Operation ein
+Glücksspiel und kein Plan.

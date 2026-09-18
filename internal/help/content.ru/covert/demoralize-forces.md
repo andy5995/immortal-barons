@@ -2,13 +2,13 @@
 category: covert
 in_game: true
 order: 6
-title: 'Demoralize Forces'
+title: 'Деморализовать войска'
 ---
 
-# Demoralize Forces
+# Деморализовать войска
 
-Demoralize Forces lowers the target's military morale. Low morale weakens
-their army in battle and can cause desertion.
+Деморализовать войска снижает боевой дух армии цели. Низкий боевой дух
+ослабляет её войска в бою и может вызвать дезертирство.
 
-Your agent only reaches them at daily maintenance, so send one the day
-before the battle you want it to affect, not the turn of it.
+Ваш агент доберётся до них только при ежедневном обслуживании, поэтому
+отправляйте его за день до нужного сражения, а не в том же ходу.

@@ -2,21 +2,22 @@
 category: covert
 in_game: true
 order: 8
-title: Bribery
+title: Bestechung
 ---
 
-# Bribery
+# Bestechung
 
 Bestechung bezahlt einen der eigenen Agenten des Feindes dafür, für Sie zu
 arbeiten. Von da an gelingt jede verdeckte Operation, die SIE gegen dieses
 Reich führen, doppelt so wahrscheinlich. Auf die Operationen, die es gegen
 Sie führt, wirkt sie nicht.
 
-The agent stays on your payroll for the rest of the game, and you can only
-hold one inside a realm — the menu refuses a second attempt, at no cost. It
-is also what Expose Enemy Ops needs before it can shield you from that
-realm. Since the bribe itself is only carried out at daily maintenance, the
-earliest you can expose that realm is the day after you pay for the bribe.
+Der Agent bleibt für den Rest des Spiels auf Ihrer Lohnliste, und Sie können
+nur einen in einem Reich halten - das Menü weist einen zweiten Versuch ab,
+ohne Kosten. Er ist außerdem das, was Feindoperationen aufdecken braucht,
+bevor es Sie gegen dieses Reich abschirmen kann. Da die Bestechung selbst
+erst bei der täglichen Verwaltung ausgeführt wird, können Sie dieses Reich
+frühestens am Tag nach der Zahlung für die Bestechung aufdecken.
 
-Bribery is the hardest operation on the menu to land, so expect to pay for
-several attempts.
+Bestechung ist die Operation im Menü, die am schwersten gelingt; rechnen Sie
+also damit, mehrere Versuche zu bezahlen.

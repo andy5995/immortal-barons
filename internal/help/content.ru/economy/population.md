@@ -2,37 +2,40 @@
 category: economy
 in_game: true
 order: 13
-title: Population
+title: Население
 ---
 
-# Population
+# Население
 
-Your people pay your taxes, so how many you hold is one of the things worth
-managing directly. Each turn some move in or move out, until the realm
-settles at the number it can support.
+Ваш народ платит ваши налоги, так что его численность — одна из тех вещей,
+которыми стоит управлять напрямую. Каждый ход кто-то приезжает, а кто-то
+уезжает, пока держава не осядет на числе, которое способна прокормить.
 
-Three things set that number:
+Это число задают три вещи:
 
-- **What your land is.** Urban regions house far more people than any other
-  type — more than ten times what a Coastal or Mountain region holds. Rivers
-  and Industrial zones come next; Desert holds the fewest. Raw land does
-  nothing on its own; it is the kind of region that counts.
-- **Popular Support.** The higher it stands, the more people your land
-  holds.
-- **Your tax rate.** A low rate lets your realm hold many more people. A
-  high one drives the number down sharply, and past 50% people keep leaving
-  on top of that.
+- **Чем является ваша земля.** Городские регионы вмещают куда больше людей,
+  чем любой другой тип, — больше чем вдесятеро против Побережья или
+  Гор. Дальше идут Реки и Промышленные зоны; меньше всего вмещает
+  Пустыня. Голая земля сама по себе не даёт ничего: считается именно тип
+  региона.
+- **Поддержка народа.** Чем она выше, тем больше людей вмещает ваша земля.
+- **Ваша налоговая ставка.** Низкая ставка позволяет державе держать намного
+  больше людей. Высокая резко сбивает это число, а после 50% люди вдобавок
+  продолжают уезжать.
 
-Support and taxes multiply together, so a realm with poor support and heavy
-taxes holds a small fraction of what its land could otherwise carry.
+Поддержка и налоги перемножаются, так что держава со слабой поддержкой и
+тяжёлыми налогами держит лишь малую долю того, что иначе выдержала бы её
+земля.
 
-Movement each turn is a share of the gap, not of your population, so a realm
-far below its limit fills quickly while one already near it barely
-changes. A realm can grow by at most half its size in one turn. When people
-are leaving, they leave faster the harder you tax.
+Движение за ход — это доля разрыва, а не доля вашего населения, поэтому
+держава далеко ниже своего предела заполняется быстро, а та, что уже у
+предела, почти не меняется. За один ход держава может вырасти самое большее
+наполовину. Когда люди уезжают, они уезжают тем быстрее, чем тяжелее вы
+облагаете их налогом.
 
-Selling Urban land lowers what your realm can hold, and the people then
-drain away over the following turns rather than all at once.
+Продажа Городской земли снижает то, сколько людей вмещает ваша держава, и
+они затем утекают в течение следующих ходов, а не разом.
 
-Tip: population growth outruns food if you buy Urban regions and no
-farms. Your civilian advisor warns you before that wall arrives.
+Совет: если покупать Городские регионы и не заводить хозяйств, рост
+населения обгонит еду. Ваш гражданский советник предупредит вас прежде, чем
+вы упрётесь в эту стену.

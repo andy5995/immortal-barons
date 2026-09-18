@@ -10,8 +10,8 @@ title: Технологии
 Технологическое соглашение делит науку между двумя
 государствами. Исследования каждой стороны идут быстрее, пока пакт держится.
 
-The help it gives you is bounded by whichever of you holds fewer Technology
-regions, so it speeds up work you are already doing rather than standing in
-for it. A realm with no Technology of its own gains nothing from the pact,
-however advanced its partner is — buy the regions first, then find an ally
-who has done the same.
+Помощь, которую он даёт, ограничена тем из вас двоих, у кого меньше регионов
+Технологий, так что он ускоряет работу, которую вы и так ведёте, а не
+заменяет её. Держава без собственных Технологий не получает от такого союза
+ничего, каким бы передовым ни был партнёр: сначала купите регионы, потом
+ищите союзника, сделавшего то же самое.

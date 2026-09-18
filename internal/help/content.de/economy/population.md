@@ -2,37 +2,39 @@
 category: economy
 in_game: true
 order: 13
-title: Population
+title: Bevölkerung
 ---
 
-# Population
+# Bevölkerung
 
-Your people pay your taxes, so how many you hold is one of the things worth
-managing directly. Each turn some move in or move out, until the realm
-settles at the number it can support.
+Ihr Volk zahlt Ihre Steuern, wie viele Sie halten, gehört also zu dem, was
+sich unmittelbar zu steuern lohnt. Jeden Zug ziehen einige zu oder fort, bis
+sich das Reich bei der Zahl einpendelt, die es tragen kann.
 
-Three things set that number:
+Drei Dinge bestimmen diese Zahl:
 
-- **What your land is.** Urban regions house far more people than any other
-  type — more than ten times what a Coastal or Mountain region holds. Rivers
-  and Industrial zones come next; Desert holds the fewest. Raw land does
-  nothing on its own; it is the kind of region that counts.
-- **Popular Support.** The higher it stands, the more people your land
-  holds.
-- **Your tax rate.** A low rate lets your realm hold many more people. A
-  high one drives the number down sharply, and past 50% people keep leaving
-  on top of that.
+- **Was Ihr Land ist.** Stadtregionen beherbergen weit mehr Menschen als
+  jeder andere Typ - mehr als das Zehnfache dessen, was eine Küsten- oder
+  Gebirgsregion fasst. Flüsse und Industriegebiete kommen als Nächstes; die
+  Wüste fasst am wenigsten. Rohes Land tut für sich genommen nichts; es ist
+  die Art der Region, die zählt.
+- **Rückhalt.** Je höher er steht, desto mehr Menschen fasst Ihr Land.
+- **Ihr Steuersatz.** Ein niedriger Satz lässt Ihr Reich weit mehr Menschen
+  halten. Ein hoher drückt die Zahl scharf hinab, und über 50% gehen darüber
+  hinaus laufend Menschen fort.
 
-Support and taxes multiply together, so a realm with poor support and heavy
-taxes holds a small fraction of what its land could otherwise carry.
+Rückhalt und Steuern wirken miteinander multiplikativ, ein Reich mit
+schwachem Rückhalt und schweren Steuern hält also einen kleinen Bruchteil
+dessen, was sein Land sonst tragen könnte.
 
-Movement each turn is a share of the gap, not of your population, so a realm
-far below its limit fills quickly while one already near it barely
-changes. A realm can grow by at most half its size in one turn. When people
-are leaving, they leave faster the harder you tax.
+Die Bewegung je Zug ist ein Anteil des Abstands, nicht Ihrer Bevölkerung,
+ein Reich weit unter seiner Grenze füllt sich also rasch, während eines, das
+ihr schon nahe ist, sich kaum ändert. Ein Reich kann in einem Zug höchstens
+um die Hälfte seiner Größe wachsen. Wenn Menschen fortgehen, gehen sie umso
+schneller, je härter Sie besteuern.
 
-Selling Urban land lowers what your realm can hold, and the people then
-drain away over the following turns rather than all at once.
+Stadtland zu verkaufen senkt, was Ihr Reich fassen kann, und die Menschen
+sickern dann über die folgenden Züge ab statt auf einmal.
 
-Tip: population growth outruns food if you buy Urban regions and no
-farms. Your civilian advisor warns you before that wall arrives.
+Tipp: Das Bevölkerungswachstum überholt die Nahrung, wenn Sie Stadtregionen
+und keine Farmen kaufen. Ihr Zivilberater warnt Sie, bevor diese Wand kommt.

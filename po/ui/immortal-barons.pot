@@ -25,7 +25,7 @@ msgstr ""
 msgid "#"
 msgstr ""
 
-#: internal/menu/menu.go:926
+#: internal/menu/menu.go:944
 msgid "# Owned"
 msgstr ""
 
@@ -337,8 +337,8 @@ msgstr ""
 msgid "A computer baron has no caller to rename."
 msgstr ""
 
-#: internal/menu/attacktypehelp.go:44
-msgid "A grinding assault. Fatigue drops your forces to 85% strength, but they press until both sides have taken 20% losses, and they bring home 125% of a Normal Attack's land."
+#: internal/menu/attacktypehelp.go:52
+msgid "A grinding assault. Fatigue drops your forces to 85 percent strength, but they press until both sides have taken 20 percent losses, and they bring home 125 percent of a Normal Attack's land."
 msgstr ""
 
 #: internal/menu/config_editor.go:220
@@ -1025,7 +1025,7 @@ msgstr ""
 msgid "Enter Planet Name or Number"
 msgstr ""
 
-#: internal/menu/attacktypehelp.go:123
+#: internal/menu/attacktypehelp.go:131
 msgid "Enter Topic"
 msgstr ""
 
@@ -1049,7 +1049,7 @@ msgstr ""
 msgid "Expose Enemy Ops"
 msgstr ""
 
-#: internal/menu/attacktypehelp.go:44
+#: internal/menu/attacktypehelp.go:52
 msgid "Extended Battle"
 msgstr ""
 
@@ -1093,7 +1093,7 @@ msgstr ""
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
-#: internal/menu/tree.go:725
+#: internal/menu/tree.go:726
 msgid "Game started on %s"
 msgstr ""
 
@@ -1297,7 +1297,7 @@ msgstr ""
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr ""
 
-#: internal/menu/menu.go:926
+#: internal/menu/menu.go:943
 msgid "Item"
 msgstr ""
 
@@ -1505,7 +1505,7 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/menu.go:1163
+#: internal/menu/menu.go:1182
 msgid "No"
 msgstr ""
 
@@ -1565,7 +1565,7 @@ msgstr ""
 msgid "None of those planets is on the league roster, so nothing can be sent to them yet."
 msgstr ""
 
-#: internal/menu/attacktypehelp.go:42
+#: internal/menu/attacktypehelp.go:50
 msgid "Normal Attack"
 msgstr ""
 
@@ -1757,7 +1757,7 @@ msgstr ""
 msgid "Planetary Treaties"
 msgstr ""
 
-#: internal/menu/tree.go:754
+#: internal/menu/tree.go:755
 msgid "Planetary time: %s   New day in %s"
 msgstr ""
 
@@ -1809,7 +1809,7 @@ msgstr ""
 msgid "Pushing..."
 msgstr ""
 
-#: internal/menu/attacktypehelp.go:43
+#: internal/menu/attacktypehelp.go:51
 msgid "Quick Strike"
 msgstr ""
 
@@ -2113,8 +2113,8 @@ msgstr ""
 msgid "Support Dissensions"
 msgstr ""
 
-#: internal/menu/attacktypehelp.go:43
-msgid "Surprise lets you fight at 120% of your normal strength, but the battle is short and disorganized: both sides retreat at 8% losses, and you carry off only half the land a Normal Attack would."
+#: internal/menu/attacktypehelp.go:51
+msgid "Surprise lets you fight at 120 percent of your normal strength, but the battle is short and disorganized: both sides retreat at 8 percent losses, and you carry off only half the land a Normal Attack would."
 msgstr ""
 
 #: internal/menu/tree.go:145
@@ -2281,7 +2281,7 @@ msgstr ""
 msgid "The food market is out of food for today."
 msgstr ""
 
-#: internal/menu/tree.go:721
+#: internal/menu/tree.go:722
 msgid "The game begins %s."
 msgstr ""
 
@@ -2733,7 +2733,7 @@ msgstr ""
 msgid "Writing to:"
 msgstr ""
 
-#: internal/menu/menu.go:1162
+#: internal/menu/menu.go:1181
 msgid "Yes"
 msgstr ""
 
@@ -2837,7 +2837,7 @@ msgstr ""
 msgid "You have %s gold and %d turns."
 msgstr ""
 
-#: internal/menu/tree.go:698
+#: internal/menu/tree.go:699
 msgid "You have %s gold and %s units of food."
 msgstr ""
 
@@ -3077,8 +3077,8 @@ msgstr ""
 msgid "Your forces changed while you prepared the attack — only units still under your command were sent."
 msgstr ""
 
-#: internal/menu/attacktypehelp.go:42
-msgid "Your forces fight at full strength. Both sides break off once they have taken 15% losses, and you take the standard share of the defender's regions."
+#: internal/menu/attacktypehelp.go:50
+msgid "Your forces fight at full strength. Both sides break off once they have taken 15 percent losses, and you take the standard share of the defender's regions."
 msgstr ""
 
 #: internal/menu/actions.go:250

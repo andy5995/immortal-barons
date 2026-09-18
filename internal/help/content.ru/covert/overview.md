@@ -7,68 +7,67 @@ title: 'Тайные операции'
 
 # Тайные операции
 
-Covert operations are secret missions run by your agents. You need at least
-one agent to run any of them, and a failed one costs you that agent.
+Тайные операции — это секретные задания, которые выполняют ваши агенты. Для
+любой из них нужен хотя бы один агент, а провалившаяся стоит вам этого
+агента.
 
-What agents do NOT do is change your odds. The chance an operation lands is
-set by the operation itself: the simpler ones land just over half the time,
-the harder ones less often. Your agents make no difference to it, and
-neither do the target's. Three things do change it: a bribed agent inside
-the target doubles your chance against that realm, a realm that has exposed
-your agent turns nine of your attempts in ten away, and an Intelligence
-Alliance or Terrorist Prevention treaty lends an ally's agents to your side
-or the target's. See Agents.
+Чего агенты НЕ делают, так это не меняют ваши шансы. Вероятность успеха
+задана самой операцией: простые удаются чуть чаще, чем в половине случаев,
+трудные — реже. Ваши агенты на неё не влияют, и агенты цели тоже. Влияют три
+вещи: подкупленный агент внутри цели удваивает ваш шанс против этой державы,
+держава, раскрывшая вашего агента, отводит девять ваших попыток из десяти, а
+Разведывательный союз или Противодействие терроризму отдаёт агентов союзника
+вашей стороне или стороне цели. См. Агенты.
 
-Each operation also costs gold. The menu shows the price next to each one,
-and the footer shows how much gold and how many agents you have. You pay the
-gold when you send the operation. If you cannot pay, the operation does not
-run.
+Каждая операция стоит ещё и золота. Меню показывает цену рядом с каждой, а
+нижняя строка — сколько у вас золота и агентов. Золото списывается, когда вы
+отправляете операцию. Если платить нечем, операция не проводится.
 
-While your realm is under New Realm Protection, your agents may not move
-against another realm: every operation that has an effect on its target is
-refused, and the refusal costs nothing — no gold, no agent, no turn. Send
-Spy and Spy on Relations only gather information, so those two stay open to
-you for as long as the shield lasts.
+Пока ваша держава под защитой новой державы, ваши агенты не могут
+действовать против другой державы: любая операция, влияющая на цель,
+отклоняется, и отказ не стоит ничего — ни золота, ни агента, ни
+хода. Отправить шпиона и Разведать отношения только собирают сведения,
+поэтому эти две остаются вам доступны всё время, пока держится защита.
 
-Most operations do not happen on the spot. When you choose one, your agent
-sets out: the fee and the agent go at once, and the operation itself is
-carried out during the next daily maintenance. The result waits for you on
-your next turn's report — whether the agent got through, and what it did. So
-an operation cannot soften a realm you are about to attack in the same turn;
-plan it a day ahead.  Send Spy and Spy on Relations are the exceptions,
-along with Expose Enemy Ops: those three answer you immediately.
+Большинство операций происходят не сразу. Когда вы выбираете операцию, агент
+отправляется в путь: плата и агент уходят немедленно, а сама операция
+выполняется во время следующего ежедневного обслуживания. Результат ждёт вас
+в отчёте следующего хода — прошёл ли агент и что он сделал. Поэтому операция
+не может ослабить державу, на которую вы собираетесь напасть тем же ходом:
+планируйте её на день вперёд.  Исключения — Отправить шпиона и Разведать
+отношения, а также Раскрыть операции врага: эти три отвечают немедленно.
 
-An agreement is no shelter. You may aim an operation at a ruler you hold a
-treaty with, and the game asks you to confirm before the agent goes. Saying
-yes tears the treaty up at the usual price in support and morale, and the
-agent is then sent. See Treaties and Alliances. Send Spy and Spy on
-Relations do not ask.
+Соглашение — не укрытие. Вы можете направить операцию на правителя, с
+которым у вас договор, и игра попросит подтверждения, прежде чем агент
+уйдёт. Ответ «да» рвёт договор по обычной цене в поддержке и боевом духе,
+после чего агент отправляется. См. Договоры и союзы. Отправить шпиона и
+Разведать отношения не спрашивают.
 
-If the realm you aimed at is gone by the time your agent arrives, the
-operation is abandoned and the fee is not returned.
+Если державы, на которую вы нацелились, к прибытию агента уже нет, операция
+отменяется, а плата не возвращается.
 
-Each covert operation may be run once for every turn in the day, and you may
-spend that allowance whenever you like — all of it in one turn, or one at a
-time.  Running Stir Revolts uses up one Stir Revolts and leaves every other
-operation untouched. The allowance refills at the start of each new day.
+Каждую тайную операцию можно провести по одному разу на каждый ход в дне, и
+тратить этот запас можно как угодно — весь за один ход или по одной.  Запуск
+операции Разжечь мятежи расходует один запуск Разжечь мятежи и не трогает
+остальные операции. Запас пополняется в начале каждого нового дня.
 
-After you pick a target the game asks how many agents to send, and suggests
-as many as you can: whichever runs out first of the agents you hold, the
-allowance you have left today, and the gold to pay the fee. Each agent is a
-separate operation with its own fee and its own chance of being caught. Send
-Spy and Spy on Relations only gather information, so they have no limit at
-all and go one at a time, and Expose Enemy Ops has no limit either.
+После выбора цели игра спрашивает, сколько агентов отправить, и предлагает
+столько, сколько вы можете: смотря что кончится раньше — имеющиеся агенты,
+оставшийся на сегодня запас или золото на оплату. Каждый агент — отдельная
+операция со своей платой и своим риском попасться. Отправить шпиона и
+Разведать отношения только собирают сведения, поэтому у них нет предела
+вовсе и идут они по одному; у Раскрыть операции врага предела тоже нет.
 
-When an operation fails, your agent is caught and lost, and the target is
-warned — and a caught agent talks, so the target is told your realm's
-name. An operation that succeeds is reported to the target with no name
-attached. The only way anyone learns who is running operations against them
-is by catching an agent.
+Когда операция проваливается, ваш агент пойман и потерян, а цель
+предупреждена — и пойманный агент заговорит, так что цели назовут имя вашей
+державы. Об удавшейся операции цели сообщают, не называя
+никого. Единственный способ узнать, кто ведёт против вас операции, — поймать
+агента.
 
-Each operation has its own topic. Some of the topics in this section cover
-InterPlanetary Special Operations instead, which are aimed at another planet
-and need Bombers to deliver their payloads; each says so.
+У каждой операции своя тема. Некоторые темы этого раздела описывают
+межпланетные спецоперации, которые нацелены на другую планету и требуют
+бомбардировщиков для доставки; о каждой из них сказано отдельно.
 
-The Covert Operations menu appears during your turn, before the Spending and
-Attack menus. If you do not see it, turn on "Visit Covert Menu" in the
-Preferences menu.
+Меню Тайные операции появляется во время вашего хода, перед меню Расходы и
+Атака. Если вы его не видите, включите \"Меню тайных операций\" в меню
+Настройки.

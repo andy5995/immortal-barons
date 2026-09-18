@@ -7,14 +7,17 @@ title: 'Biologischer Angriff'
 
 # Biologischer Angriff
 
-A Biological Attack releases a plague. It kills about a tenth of the enemy's
-people and a sixth of their troopers, and it halves their military morale
-while also knocking their popular support down to two-thirds. It does not
-touch their land at all — no regions are ruined and none change hands.
+Ein Biologischer Angriff setzt eine Seuche frei. Sie tötet etwa ein Zehntel
+der Menschen des Feindes und ein Sechstel seiner Soldaten, halbiert seine
+Kampfmoral und drückt seinen Rückhalt im Volk auf zwei Drittel. Sein Land
+rührt sie überhaupt nicht an - keine Region wird verwüstet, und keine
+wechselt den Besitzer.
 
-The missile is priced off all three of the things it hurts: the target's
-troopers, their people, and their regions. Nothing intercepts it.
+Die Rakete wird nach allen drei Dingen bepreist, die sie trifft: den
+Soldaten des Ziels, seinen Menschen und seinen Regionen. Nichts fängt sie
+ab.
 
-Strategy: this is the anti-army weapon of the three. Halved morale weakens
-every tank and trooper the target owns, so a plague the turn before you
-march is worth more than the casualties alone suggest.
+Strategie: Das ist die Waffe der drei gegen die Armee. Halbierte Moral
+schwächt jeden Panzer und jeden Soldaten des Ziels, eine Seuche in dem Zug,
+bevor Sie marschieren, ist also mehr wert, als die Verluste allein vermuten
+lassen.

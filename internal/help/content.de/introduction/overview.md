@@ -2,85 +2,89 @@
 category: introduction
 in_game: false
 order: 0
-title: 'How to Play'
+title: Spielanleitung
 ---
 
-# Immortal Barons — How to Play
+# Immortal Barons - Spielanleitung
 
-You rule a barony: a small kingdom on a planet. Your goal is to build the
-strongest empire. You do this through your economy, your military, and your
-dealings with the other barons. The other players want the same thing, so
-you face steady competition.
+Sie herrschen über eine Baronie: ein kleines Königreich auf einem
+Planeten. Ihr Ziel ist es, das stärkste Reich aufzubauen. Dazu dienen Ihnen
+Ihre Wirtschaft, Ihr Militär und Ihr Umgang mit den anderen Baronen. Die
+anderen Spieler wollen dasselbe, Sie stehen also in stetem Wettbewerb.
 
-A planet has room for 25 baronies, each holding one of its 25 seats. Your
-seat is yours for as long as your realm stands, and its letter is how
-everyone else names you. When every seat is taken, a new caller is turned
-away until a realm falls; a sysop may also seat fewer than 25 players, and
-any computer-run barons take seats of their own.
+Ein Planet hat Platz für 25 Baronien, jede auf einem seiner 25 Plätze. Ihr
+Platz gehört Ihnen, solange Ihr Reich besteht, und sein Buchstabe ist es,
+unter dem alle anderen Sie nennen. Sind alle Plätze belegt, wird ein neuer
+Anrufer abgewiesen, bis ein Reich fällt; ein Sysop kann auch weniger als 25
+Spieler zulassen, und computergesteuerte Barone belegen eigene Plätze.
 
-You name your realm when you first call, and you may change that name once —
-from the Preferences menu, after your New Realm Protection has ended. Only
-once: the option disappears afterwards, and the whole planet is told of the
-change.
+Sie benennen Ihr Reich bei Ihrem ersten Anruf und dürfen diesen Namen einmal
+ändern - im Menü Einstellungen, nachdem Ihr Neureich-Schutz abgelaufen
+ist. Nur ein einziges Mal: Danach verschwindet die Möglichkeit, und der
+ganze Planet erfährt von der Änderung.
 
-Many bulletin board systems can link their games together. When they do,
-each board is one planet, and your planet competes against the others. Then
-the goal is not just the strongest barony, but the strongest planet. Your
-side has to work together to win.
+Viele Mailboxen können ihre Spiele miteinander verbinden. Tun sie das, ist
+jedes Board ein Planet, und Ihr Planet tritt gegen die anderen an. Dann gilt
+es nicht nur, die stärkste Baronie zu haben, sondern den stärksten
+Planeten. Ihre Seite muss zusammenarbeiten, um zu gewinnen.
 
-## Turns
+## Züge
 
 Sie erhalten jeden Tag eine feste Zahl von Zügen. Ein Zug ist eine Runde
 Spiel: Sie sammeln Einnahmen, zahlen Ihre Kosten und erteilen Ihre
 Befehle. Sind Ihre Züge für den Tag aufgebraucht, kommen Sie am nächsten Tag
 für weitere zurück.
 
-## What happens in a turn
+## Was in einem Zug geschieht
 
-A turn moves through these steps in order:
+Ein Zug durchläuft diese Schritte der Reihe nach:
 
-- **News and mail.** You see what happened since your last turn, and read
-  any new messages from other players.
-- **Production and income.** Your industry builds military units, and your
-  income for the turn arrives.
-- **Reports.** You see an income report and your full Empire Status.
-- **Upkeep.** You pay to maintain your military and your land, and you feed
-  your people and your army. Short food or gold causes trouble, so watch
-  these.
-- **Covert Operations.** Spying and sabotage. This step appears only if you
-  keep it turned on and hold at least one covert agent.
-- **Spending.** You buy land, military, and other things.
-- **Attacks.** You may attack another barony, a limited number of times per
-  day.
-- **Trading.** Trade goods with other baronies, if you keep this step turned
-  on.
-- **InterPlanetary Operations.** Actions against other planets, in linked
-  games.
-- **Messages.** You may send a message to another player.
-- **End of turn.** Your economy and population settle, and the turn closes.
+- **Nachrichten und Post.** Sie sehen, was seit Ihrem letzten Zug geschehen
+  ist, und lesen neue Nachrichten anderer Spieler.
+- **Produktion und Einnahmen.** Ihre Industrie baut Militäreinheiten, und
+  Ihre Einnahmen für den Zug treffen ein.
+- **Berichte.** Sie sehen einen Einnahmenbericht und Ihren vollständigen
+  Reichsstatus.
+- **Unterhalt.** Sie bezahlen den Unterhalt Ihres Militärs und Ihres Landes
+  und ernähren Ihr Volk und Ihre Armee. Zu wenig Nahrung oder Gold bringt
+  Ärger, behalten Sie beides also im Auge.
+- **Verdeckte Operationen.** Spionage und Sabotage. Dieser Schritt erscheint
+  nur, wenn Sie ihn eingeschaltet lassen und mindestens einen Agenten haben.
+- **Ausgaben.** Sie kaufen Land, Militär und anderes.
+- **Angriffe.** Sie dürfen eine andere Baronie angreifen, begrenzt oft je
+  Tag.
+- **Handel.** Waren mit anderen Baronien handeln, wenn Sie diesen Schritt
+  eingeschaltet lassen.
+- **Interplanetare Operationen.** Aktionen gegen andere Planeten, in
+  verbundenen Spielen.
+- **Nachrichten.** Sie dürfen einem anderen Spieler eine Nachricht senden.
+- **Zugende.** Ihre Wirtschaft und Ihre Bevölkerung setzen sich, und der Zug
+  schließt.
 
-## The System menu
+## Das Systemmenü
 
-Some choices are not forced on you every turn. From the **System menu** you
-can set your tax rate, change what your industry builds, open diplomacy,
-visit the bank, use the food market, set your preferences, and write
-macros. Open it when you need it.
+Manches wird Ihnen nicht in jedem Zug vorgelegt. Im **Systemmenü** setzen
+Sie Ihren Steuersatz, ändern, was Ihre Industrie baut, öffnen die
+Diplomatie, gehen zur Bank, nutzen den Nahrungsmarkt, setzen Ihre
+Einstellungen und schreiben Makros. Öffnen Sie es, wenn Sie es brauchen.
 
-In this game, **diplomacy** and **changing production** live on the System
-menu.  They are not automatic stops in each turn, so visit them yourself
-when you want to change your plans.
+In diesem Spiel liegen **Diplomatie** und das **Ändern der Produktion** im
+Systemmenü.  Sie sind keine festen Halte in jedem Zug, suchen Sie sie also
+selbst auf, wenn Sie Ihre Pläne ändern wollen.
 
-## Game Bulletins
+## Spielaushänge
 
-Your sysop can put up notices for players to read. Choose **Game Bulletins**
-from the opening menu to see the list, then pick one by its number. In a
-linked game the league's own notices are listed first, under "Galactic", and
-every planet in the league sees the same ones. When a notice is put up or
-changed, it is named in the day's news.
+Ihr Sysop kann Aushänge für die Spieler anschlagen. Wählen Sie
+**Spielaushänge** im Eröffnungsmenü, um die Liste zu sehen, und dann einen
+über seine Nummer. In einem verbundenen Spiel stehen die Aushänge der Liga
+zuerst, unter \"Galactic\", und jeder Planet der Liga sieht dieselben. Wird
+ein Aushang angeschlagen oder geändert, wird er in den Nachrichten des Tages
+genannt.
 
 ## Den Rest lesen
 
-The sections that follow explain each part of the game in turn: the
-controls, your military, your economy, warfare, covert operations,
-diplomacy, and linked inter-board play. Press a key to move from one section
-to the next. You can stop at any time.
+Die folgenden Abschnitte erklären der Reihe nach jeden Teil des Spiels: die
+Bedienung, Ihr Militär, Ihre Wirtschaft, die Kriegführung, verdeckte
+Operationen, die Diplomatie und das verbundene Spiel über mehrere
+Boards. Drücken Sie eine Taste, um von einem Abschnitt zum nächsten zu
+gehen. Sie können jederzeit aufhören.

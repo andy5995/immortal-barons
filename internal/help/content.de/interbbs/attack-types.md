@@ -7,62 +7,71 @@ title: Angriffsarten
 
 # Angriffsarten
 
-When you send your own strike force at a baron on another planet, you choose
-how to press the attack. Group attacks have no such choice — they always
-fight as a Normal Attack.
+Wenn Sie Ihre eigene Streitmacht gegen einen Baron auf einem anderen
+Planeten führen, wählen Sie selbst, wie hart Sie zuschlagen. Bei einem
+Gruppenangriff gibt es diese Wahl nicht - er kämpft immer als Normaler
+Angriff.
 
-Going alone also pays better: your own strike takes twice the land a group
-attack of the same weight would. What you give up is the whole-planet target
-and everyone else's forces.
+Allein zu gehen zahlt sich auch besser aus: Ihr eigener Schlag nimmt doppelt
+so viel Land wie ein Gruppenangriff desselben Gewichts. Dafür verzichten Sie
+auf das planetenweite Ziel und auf die Truppen aller anderen.
 
-- **Normal Attack** — your forces fight at full strength. Both sides break
-  off once they have taken 15% losses, and you take the standard share of
-  the defender's regions.
-- **Quick Strike** — surprise lets you fight at 120% of your normal
-  strength, but the battle is short and disorganized: both sides retreat at
-  8% losses, and you carry off only half the land a Normal Attack would.
-- **Extended Battle** — a grinding assault. Fatigue drops your forces to 85%
-  strength, but they press until both sides have taken 20% losses and bring
-  home 125% of a Normal Attack's land.
+- **Normaler Angriff** - Ihre Truppen kämpfen mit voller Stärke. Beide
+  Seiten brechen ab, sobald sie 15% Verluste erlitten haben, und Sie nehmen
+  den üblichen Anteil an den Regionen des Verteidigers.
+- **Schneller Schlag** - die Überraschung lässt Sie mit 120% Ihrer normalen
+  Stärke kämpfen, doch die Schlacht ist kurz und ungeordnet: Beide Seiten
+  ziehen sich bei 8% Verlusten zurück, und Sie tragen nur halb so viel Land
+  davon wie bei einer Normaler Angriff.
+- **Ausgedehnte Schlacht** - ein zermürbender Sturm. Die Erschöpfung drückt
+  Ihre Truppen auf 85% Stärke, doch sie halten durch, bis beide Seiten 20%
+  Verluste erlitten haben, und bringen 125% des Landes einer Normaler
+  Angriff heim.
 
-The choice is really about what you are short of. Land is the thing you
-cannot buy back quickly, so an Extended Battle is the one that changes the
-map — pay for it when you already have the men to spare and can afford to be
-weak for a day. A Quick Strike costs you least and hits above its weight,
-which makes it the honest answer when you are not sure you can win: you find
-out cheaply, and your army is still standing.
+Die Wahl richtet sich danach, woran es Ihnen fehlt. Land ist das, was Sie
+nicht rasch zurückkaufen können, also ist die Ausgedehnte Schlacht
+diejenige, die die Karte verändert - leisten Sie sie sich, wenn Sie Männer
+übrig haben und es sich erlauben können, einen Tag lang schwach zu sein. Ein
+Schneller Schlag kostet Sie am wenigsten und schlägt über seinem Gewicht,
+was ihn zur ehrlichen Antwort macht, wenn Sie nicht sicher sind, ob Sie
+gewinnen: Sie finden es günstig heraus, und Ihre Armee steht noch.
 
-Remember that your strength is measured on arrival, not on
-departure. Against a distant planet the defender has days to build turrets
-before your force lands, so the extra weight a Quick Strike carries is worth
-less than it looks against a target you cannot reach quickly.
+Denken Sie daran, dass Ihre Stärke bei der Ankunft gemessen wird, nicht beim
+Abmarsch. Gegen einen fernen Planeten hat der Verteidiger Tage Zeit,
+Geschütztürme zu bauen, ehe Ihre Truppen landen; das Mehrgewicht eines
+Schneller Schlag ist gegen ein Ziel, das Sie nicht schnell erreichen, also
+weniger wert, als es aussieht.
 
-## While the force is away, and when it comes back
+## Während die Truppe fort ist, und wenn sie zurückkommt
 
-A group attack does not leave the moment you file it. You set the wait in
-hours, between 12 and 120, and it sits on the launch pad until then — other
-barons can join it in the meantime, and the delay is how you time it to land
-before the target takes their next turn.
+Ein Gruppenangriff bricht nicht in dem Augenblick auf, in dem Sie ihn
+anmelden. Sie setzen die Wartezeit in Stunden fest, zwischen 12 und 120, und
+bis dahin steht er auf der Rampe - andere Barone können sich in der
+Zwischenzeit anschließen, und über die Verzögerung legen Sie es so, dass er
+landet, bevor das Ziel seinen nächsten Zug nimmt.
 
-Join Group Attack lists every party still forming, with the troopers, jets,
-tanks and bombers already pooled in it and the hours it has left. Read those
-columns before you commit: they are how you tell a party worth reinforcing
-from one that will not survive the trip.
+Gruppenangriff beitreten listet jede Gruppe auf, die sich noch sammelt, mit
+den Soldaten, Jets, Panzern und Bombern, die schon zusammengelegt sind, und
+den verbleibenden Stunden. Lesen Sie diese Spalten, bevor Sie sich binden:
+An ihnen erkennen Sie eine Gruppe, die eine Verstärkung wert ist, von einer,
+die den Weg nicht überlebt.
 
-Once a force leaves, it is out of your hands and out of your army until the
-other planet's board resolves it and the answer travels back. When it does,
-you get a private report: what you sent, what came home, what it destroyed,
-and whether it found the target at all. A force that found no such realm, or
-found it still under New Realm Protection, is told so rather than counted as
-a defeat.
+Ist eine Streitmacht erst einmal fort, ist sie Ihrer Hand und Ihrer Armee
+entzogen, bis das Board des anderen Planeten sie auswertet und die Antwort
+zurückreist. Dann erhalten Sie einen persönlichen Bericht: was Sie geschickt
+haben, was heimgekommen ist, was es zerstört hat, und ob es das Ziel
+überhaupt gefunden hat. Eine Streitmacht, die kein solches Reich fand oder
+es noch unter Neureich-Schutz antraf, erfährt das, statt als Niederlage zu
+gelten.
 
-Land you capture abroad has no type until you give it one, so it waits for
-you and the region picker comes up at the start of your next turn — the same
-question a Regular Attack asks at home. On a group attack the regions are
-shared between the barons who paid for them, in proportion to what each
-committed.
+Land, das Sie in der Fremde erobern, hat keine Art, bis Sie ihm eine geben;
+es wartet also auf Sie, und zu Beginn Ihres nächsten Zuges erscheint die
+Regionenauswahl - dieselbe Frage, die ein Normaler Angriff daheim
+stellt. Bei einem Gruppenangriff werden die Regionen unter den Baronen
+aufgeteilt, die dafür bezahlt haben, im Verhältnis dessen, was jeder
+eingebracht hat.
 
-If the answer never arrives — a board goes quiet, a packet is lost — your
-forces come home by themselves after the number of days your sysop has set,
-and a report that turns up after that is thrown away rather than paid out
-twice.
+Trifft die Antwort nie ein - ein Board verstummt, ein Paket geht verloren -,
+kehren Ihre Truppen nach der von Ihrem Sysop eingestellten Zahl von Tagen
+von selbst heim, und ein Bericht, der danach noch auftaucht, wird verworfen,
+statt ein zweites Mal ausgezahlt zu werden.

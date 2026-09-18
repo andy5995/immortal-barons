@@ -2,73 +2,81 @@
 category: interbbs
 in_game: true
 order: 5
-title: 'Send SpyGuy'
+title: 'SpyGuy senden'
 ---
 
-# Send SpyGuy
+# SpyGuy senden
 
-A SpyGuy is a watcher you post on another planet. He is not one of your
-agents: sending him spends no agent, he cannot be caught, and he brings back
-no figures for the Spy Database. What he does is send word home the moment
-his hosts turn something on your planet.
+Ein SpyGuy ist ein Beobachter, den Sie auf einem anderen Planeten
+postieren. Er ist keiner Ihrer Agenten: Ihn zu schicken kostet keinen
+Agenten, er kann nicht gefasst werden, und er bringt keine Zahlen für die
+Spionagedatenbank mit. Was er tut, ist Nachricht nach Hause schicken, sobald
+seine Gastgeber etwas gegen Ihren Planeten in Gang setzen.
 
-Send him from InterPlanetary Operations, under Special Operations.
+Schicken Sie ihn aus dem Menü Interplanetare Operationen, unter
+Spezialoperationen.
 
 ## Was er kostet
 
-Gold, by the day, and the whole stay is paid up front. The daily rate is
-drawn from the size of **your own** planet — every region every realm here
-holds — so a crowded planet pays more for the same man. The rate is quoted
-before you pick a target, since it is the same wherever you send him.
+Gold, nach Tagen, und der ganze Aufenthalt wird im Voraus bezahlt. Der
+Tagessatz richtet sich nach der Größe **Ihres eigenen** Planeten - nach
+jeder Region, die hier jedes Reich hält -, ein voller Planet zahlt für
+denselben Mann also mehr. Der Satz wird genannt, bevor Sie ein Ziel wählen,
+denn er ist überall gleich, wohin Sie ihn auch schicken.
 
-You choose how long he stays, up to fifteen days. If the stay costs more
-than you are carrying, the shortfall is named and the bank is opened for
-you; come back with it and the man goes, come back without it and nothing is
-sent or charged.
+Sie bestimmen, wie lange er bleibt, bis zu fünfzehn Tage. Kostet der
+Aufenthalt mehr, als Sie bei sich haben, wird der Fehlbetrag genannt und die
+Bank für Sie geöffnet; kommen Sie mit dem Geld zurück, geht der Mann, kommen
+Sie ohne, wird nichts geschickt und nichts berechnet.
 
 ## Was er meldet
 
-Two things, and both arrive as **planetary news** where everyone here can
-read them:
+Zweierlei, und beides trifft als **Planetennachricht** ein, wo jeder hier es
+lesen kann:
 
-- a **group attack** being assembled against this planet, or against one
-  realm on it, with the hours left before it leaves
-- a **Gooie Kablooie** being built for us — when the work starts, when the
-  funding is complete, and if it is stood down again
+- ein **Gruppenangriff**, der gegen diesen Planeten oder gegen ein einzelnes
+  Reich darauf zusammengestellt wird, mit den Stunden bis zum Abflug
+- ein **Gooie Kablooie**, der für uns gebaut wird - wann die Arbeit beginnt,
+  wann die Finanzierung steht, und ob er wieder eingestellt wird
 
-He also reports whatever is already under way the day he arrives, so a man
-sent late is not wasted.
+Er meldet auch, was an dem Tag seiner Ankunft bereits im Gange ist, ein spät
+geschickter Mann ist also nicht vergeudet.
 
 ## Lesen, was er sendet
 
-Each report arrives as planet news, dated, saying what was aimed at you and
-how long it had left when he wrote it. That line never changes afterwards,
-so hours later it no longer tells you how long is left.
+Jede Meldung trifft als Planetennachricht ein, mit Datum, und sagt, was auf
+Sie gerichtet war und wie viel Zeit ihm blieb, als er schrieb. Diese Zeile
+ändert sich danach nie, Stunden später sagt sie Ihnen also nicht mehr, wie
+viel Zeit noch bleibt.
 
-**Incoming**, on the InterPlanetary menu, is the same warnings kept current: one
-row per threat, the soonest at the top, counting down as you read — `3h`, then
-`90m`, then `away` once the force has left. A weapon already flying is listed
-with the days until it lands.
+**Angriffe im Anflug** im InterPlanetary-Menü führt dieselben Warnungen
+aktuell: eine Zeile je Bedrohung, die nächste oben, herunterzählend,
+während Sie lesen - `3h`, dann `90m`, dann `away`, sobald die Truppe fort
+ist. Eine Waffe, die schon fliegt, wird mit den Tagen bis zum Einschlag
+geführt.
 
-An empty list is not proof of peace. It means nothing has been reported, and
-only a watcher posted on another planet can report anything.
+Eine leere Liste ist kein Beweis für Frieden. Sie heißt nur, dass nichts
+gemeldet wurde, und melden kann nur ein Beobachter, den Sie auf einem
+anderen Planeten postiert haben.
 
-## Why it matters
+## Warum das zählt
 
-A weapon still on the ground is the builders' own business: nobody tells you
-it exists. You learn of it when it launches — and by then it is two days out
-with only your jets between it and your regions. A SpyGuy on the right
-planet buys you the days you need to raise them.
+Eine Waffe, die noch am Boden steht, ist die Sache ihrer Erbauer allein:
+Niemand sagt Ihnen, dass es sie gibt. Sie erfahren davon, wenn sie startet -
+und dann ist sie zwei Tage entfernt, und zwischen ihr und Ihren Regionen
+stehen nur Ihre Jets. Ein SpyGuy auf dem richtigen Planeten erkauft Ihnen
+die Tage, die Sie brauchen, um sie aufzustellen.
 
-The planet you are watching is told nothing. There is no discovery, no
-trial, and no execution; when the days you paid for run out, your man simply
-comes home.
+Dem beobachteten Planeten wird nichts gesagt. Es gibt keine Enttarnung,
+keinen Prozess und keine Hinrichtung; sind die bezahlten Tage um, kommt Ihr
+Mann einfach heim.
 
-## Strategy
+## Strategie
 
-Post him where the threat is, not where the grudge is. The planet that just
-lost a battle to you is the one assembling the answer, and the rate is the
-same whether you watch a rival or a neighbor you trust.
+Postieren Sie ihn dort, wo die Bedrohung ist, nicht dort, wo der Groll
+ist. Der Planet, der eben eine Schlacht gegen Sie verloren hat, ist der, der
+die Antwort zusammenstellt, und der Satz ist derselbe, ob Sie einen Rivalen
+beobachten oder einen Nachbarn, dem Sie trauen.
 
-A short stay renewed is worth more than one long stay bought early: the days
-run whether anything happens or not.
+Ein kurzer, erneuerter Aufenthalt ist mehr wert als ein langer, früh
+gekaufter: Die Tage laufen, ob etwas geschieht oder nicht.

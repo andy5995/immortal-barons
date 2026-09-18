@@ -7,24 +7,27 @@ title: Atomangriff
 
 # Atomangriff
 
-A Nuclear Attack ruins a slice of the enemy's regions, turning them to
-waste. It takes no land from them and kills nobody: the target keeps every
-region, pays upkeep on all of them, and earns nothing from the ruined ones
-until they are cleaned up.
+Ein Atomangriff verwüstet einen Teil der Regionen des Feindes und macht sie
+zu Ödland. Er nimmt ihm kein Land und tötet niemanden: Das Ziel behält jede
+Region, zahlt auf alle Unterhalt und verdient an den verwüsteten nichts, bis
+sie gereinigt sind.
 
-You are quoted a price once you name a target, and you can walk away from
-it. The price is set by the size of the realm you are aiming at — a large
-neighbor needs a large missile — up to a ceiling, so the very biggest realms
-are proportionally cheap to hit.
+Sobald Sie ein Ziel nennen, wird Ihnen ein Preis genannt, und Sie dürfen
+davon zurücktreten. Der Preis richtet sich nach der Größe des Reiches, auf
+das Sie zielen - ein großer Nachbar braucht eine große Rakete -, bis zu
+einer Obergrenze; die allergrößten Reiche sind also im Verhältnis günstig zu
+treffen.
 
-About 7% of the target's land is ruined per strike, varying a couple of
-points either way. Nothing shoots the missile down: an SDI program defends
-against missiles arriving from another planet, not from a neighbor on your
-own.
+Etwa 7% des Landes eines Ziels werden je Schlag verwüstet, mit ein paar
+Punkten Schwankung nach oben oder unten. Nichts holt die Rakete herunter:
+Ein SDI-Programm wehrt Raketen ab, die von einem anderen Planeten kommen,
+nicht die eines Nachbarn auf Ihrem eigenen.
 
-A successful strike raises your score, whether or not it did much damage.
+Ein erfolgreicher Schlag hebt Ihre Punktzahl, ob er nun viel Schaden
+anrichtete oder nicht.
 
-Strategy: a nuclear strike wears a rival down. It cannot finish one off and
-it hands you nothing you can use; it makes an enemy's territory expensive to
-hold while you build toward a real attack. Against a small realm the damage
-rounds away to almost nothing, so save the gold for a large one.
+Strategie: Ein Atomschlag zermürbt einen Rivalen. Er kann ihn nicht
+erledigen und bringt Ihnen nichts Brauchbares ein; er macht das Gebiet eines
+Feindes teuer im Halten, während Sie auf einen richtigen Angriff
+hinarbeiten. Gegen ein kleines Reich rundet sich der Schaden auf fast
+nichts, heben Sie das Gold also für ein großes auf.

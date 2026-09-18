@@ -7,68 +7,74 @@ title: Handel
 
 # Handel
 
-There are two ways to move goods between realms: the Trading Market, and a
-trade deal.
+Es gibt zwei Wege, Waren zwischen Reichen zu bewegen: den Handelsmarkt und
+ein Handelsgeschäft.
 
 ## Der Handelsmarkt
 
-You can put any of your goods on the market and set your own price. The
-market is open: any realm on your planet can see what is listed and buy it,
-and you can buy from any of them.
+Sie können jede Ihrer Waren auf den Markt stellen und Ihren eigenen Preis
+festlegen. Der Markt ist offen: Jedes Reich auf Ihrem Planeten sieht, was
+gelistet ist, und kann es kaufen, und Sie können von jedem von ihnen kaufen.
 
-Goods you list leave your hands at once. They are held for the buyer, and
-you are paid when someone buys them. You still pay upkeep on them while they
-wait, and pirates can raid them, so do not list more than you mean to sell.
+Waren, die Sie listen, verlassen sofort Ihre Hand. Sie werden für den Käufer
+verwahrt, und Sie werden bezahlt, wenn jemand sie kauft. Sie zahlen
+weiterhin Unterhalt auf sie, während sie warten, und Piraten können sie
+überfallen; listen Sie also nicht mehr, als Sie zu verkaufen gedenken.
 
-## Trade deals
+## Handelsgeschäfte
 
-A trade deal is an offer to one realm. You put goods and gold in it, and you
-may ask for goods and gold in return. The other realm reads the offer and
-accepts or refuses it. You need a treaty with that realm to send one.
+Ein Handelsgeschäft ist ein Angebot an ein einzelnes Reich. Sie legen Waren
+und Gold hinein und dürfen Waren und Gold dafür verlangen. Das andere Reich
+liest das Angebot und nimmt es an oder lehnt es ab. Sie brauchen einen
+Vertrag mit diesem Reich, um eines zu senden.
 
-A trade deal costs a fee for each day you send it for, and it needs carriers
-to move the goods. How many depends on what you are shipping: one carrier
-holds a thousand troopers or turrets, a hundred jets, five thousand tanks,
-or a hundred thousand gold, and food, bombers, agents and carriers take no
-room at all. A Protective Trade treaty with that realm makes the fee
-cheaper.
+Ein Handelsgeschäft kostet eine Gebühr für jeden Tag, für den Sie es senden,
+und es braucht Träger, um die Waren zu bewegen. Wie viele, hängt davon ab,
+was Sie verschiffen: Ein Träger fasst tausend Soldaten oder Geschütztürme,
+hundert Jets, fünftausend Panzer oder hunderttausend Gold, und Nahrung,
+Bomber, Agenten und Träger brauchen überhaupt keinen Platz. Ein Vertrag über
+Geschützten Handel mit diesem Reich macht die Gebühr billiger.
 
-The days you pay for are how long the offer stands. What you put in the deal
-leaves your realm the moment you send it, and it comes back only if the
-offer is accepted: a refusal, a deal nobody answers before its days run out,
-and a realm that falls before it replies all cost you the goods. Send to
-someone who is playing, and give them enough days to get to it.
+Die Tage, für die Sie zahlen, sind die Zeit, die das Angebot steht. Was Sie
+in das Geschäft legen, verlässt Ihr Reich in dem Augenblick, in dem Sie es
+senden, und es kommt nur zurück, wenn das Angebot angenommen wird: eine
+Ablehnung, ein Geschäft, das niemand beantwortet, bevor seine Tage ablaufen,
+und ein Reich, das fällt, bevor es antwortet, kosten Sie allesamt die
+Waren. Senden Sie an jemanden, der spielt, und geben Sie ihm genug Tage, um
+dazu zu kommen.
 
-## Deals to another planet
+## Geschäfte zu einem anderen Planeten
 
-In a league game the InterPlanetary Operations menu sends a deal to a realm
-on another planet. It works differently from the one above, so read this
-before you use it.
+In einem Ligaspiel sendet das Menü Interplanetare Operationen ein Geschäft
+an ein Reich auf einem anderen Planeten. Es arbeitet anders als das oben
+beschriebene, lesen Sie dies also, bevor Sie es nutzen.
 
-You cannot ask for anything back. The goods are a gift, and the realm you
-send them to has no say: they arrive and are added to what that realm
-holds. There is no offer to accept or refuse, so nothing is ever returned to
-you.
+Sie können nichts dafür verlangen. Die Waren sind ein Geschenk, und das
+Reich, dem Sie sie senden, hat kein Mitspracherecht: Sie treffen ein und
+werden dem hinzugefügt, was dieses Reich hält. Es gibt kein Angebot zum
+Annehmen oder Ablehnen, daher wird Ihnen nie etwas zurückgegeben.
 
-You pay once, not per day, and you need no treaty with the realm or its
-planet.  The fee depends on what is in the deal, and it is shown before you
-confirm. You cannot send to a realm that is still under new-realm
-protection, and you cannot send to your own planet — for that, use the deal
-above.
+Sie zahlen einmal, nicht je Tag, und Sie brauchen weder einen Vertrag mit
+dem Reich noch mit seinem Planeten.  Die Gebühr hängt davon ab, was in dem
+Geschäft liegt, und sie wird Ihnen vor der Bestätigung angezeigt. Sie können
+nicht an ein Reich senden, das noch unter dem Schutz für neue Reiche steht,
+und Sie können nicht an Ihren eigenen Planeten senden - nutzen Sie dafür das
+Geschäft von oben.
 
-## Getting the most from trade
+## Das Beste aus dem Handel herausholen
 
-Trade matters most when several realms work together. A few ideas:
+Der Handel zählt am meisten, wenn mehrere Reiche zusammenarbeiten. Ein paar
+Ideen:
 
-**Specialize, then supply your partners.** Your industry can favor one unit
-type, which makes that unit cheaper for you than for anyone else. If you build
-tanks and a partner builds turrets, each of you can sell to the other below the
-price they would pay to build it themselves. Both realms come out ahead.
+**Spezialisieren Sie sich und beliefern Sie Ihre Partner.** Ihre Industrie kann
+einen Einheitentyp bevorzugen, was diese Einheit für Sie billiger macht als für
+alle anderen. Wenn Sie Panzer bauen und ein Partner Geschütztürme, kann jeder
+von Ihnen dem anderen unter dem Preis verkaufen, den der andere für den Eigenbau zahlen würde. Beide Reiche kommen besser weg.
 
-**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so
-a price meant as a gift to an ally may end up arming a rival. To be sure the
-goods reach the realm you mean them for, send a trade deal instead.
+**Ein billiges Angebot nimmt, wer zuerst da ist.** Jeder kann es kaufen, ein
+Preis, der als Geschenk an einen Verbündeten gedacht war, kann also am Ende
+einen Rivalen bewaffnen. Damit die Waren sicher das Reich erreichen, für das Sie sie bestimmt haben, senden Sie stattdessen ein Handelsgeschäft.
 
-**Trade is bigger between planets.** In a league, whole planets specialize, and
-an ally's market is often the cheapest place to buy. See the Interplanetary
-Trading topic.
+**Zwischen Planeten ist der Handel größer.** In einer Liga spezialisieren sich
+ganze Planeten, und der Markt eines Verbündeten ist oft der billigste Ort zum
+Kaufen. Siehe das Thema Interplanetarer Handel.

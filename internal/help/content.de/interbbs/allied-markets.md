@@ -2,55 +2,60 @@
 category: interbbs
 in_game: true
 order: 4
-title: 'Allied Markets'
+title: 'Märkte der Verbündeten'
 ---
 
-# Allied Markets
+# Märkte der Verbündeten
 
-In a league game you can buy from another planet's Trading Market. Open
-Trading from the InterPlanetary Operations menu, then Markets, and choose a
-planet.
+In einem Ligaspiel können Sie vom Handelsmarkt eines anderen Planeten
+kaufen. Öffnen Sie Handel im Menü Interplanetare Operationen, dann Märkte,
+und wählen Sie einen Planeten.
 
-Only planets your Coordinator has marked Allied are listed. Buying across
-planets is an Immortal Barons feature, and a league may switch it off.
+Aufgeführt werden nur Planeten, die Ihr Koordinator als verbündet
+gekennzeichnet hat. Der Kauf über Planetengrenzen hinweg ist eine Eigenheit
+von Immortal Barons, und eine Liga kann ihn abschalten.
 
-## Your order is a bid, not a purchase
+## Ihre Bestellung ist ein Gebot, kein Kauf
 
-What you see is that planet's market **as it was when we last heard from
-it**.  The screen tells you the date. News travels between planets in
-packets, and a packet takes as long as it takes, so by the time your order
-arrives the goods may have been sold, the amount may have shrunk, or the
-price may have changed.
+Was Sie sehen, ist der Markt jenes Planeten **so, wie er war, als wir
+zuletzt von ihm hörten**.  Der Bildschirm nennt Ihnen das Datum. Nachrichten
+reisen zwischen Planeten in Paketen, und ein Paket braucht, so lange es
+braucht; bis Ihre Bestellung eintrifft, können die Waren also verkauft, die
+Menge geschrumpft oder der Preis ein anderer sein.
 
-So your order is a bid. When you send it:
+Ihre Bestellung ist also ein Gebot. Wenn Sie sie senden:
 
-- Your gold is **held straight away**. It leaves your treasury but is not
-  spent yet, and it is not counted as gold you have.
-- When the bid arrives, the other planet sells to you **only if the goods
-  are still there at the same price, and you are still allies**.
-- If it sells, the goods come back to you on the next packet.
-- If it does not, your gold comes back instead, and you are told why.
+- Ihr Gold wird **sofort einbehalten**. Es verlässt Ihre Schatzkammer, ist
+  aber noch nicht ausgegeben, und es zählt nicht mehr zu dem Gold, das Sie
+  besitzen.
+- Wenn das Gebot eintrifft, verkauft Ihnen der andere Planet nur, **wenn die
+  Ware noch da ist, der Preis derselbe ist und Sie noch verbündet sind**.
+- Kommt der Verkauf zustande, trifft die Ware mit dem nächsten Paket bei
+  Ihnen ein.
+- Kommt er nicht zustande, kehrt stattdessen Ihr Gold zurück, und Sie
+  erfahren den Grund.
 
-If the seller still has some but not all of what you asked for, you get what
-there was and the rest of your gold returns. You are never charged for goods
-that did not arrive.
+Hat der Verkäufer noch einen Teil, aber nicht alles, worauf Sie geboten
+haben, erhalten Sie, was vorhanden war, und der Rest Ihres Goldes kommt
+zurück. Für Ware, die nie eintrifft, zahlen Sie nie.
 
-## Waiting, and getting your gold back
+## Warten, und das Gold zurückbekommen
 
-**Bids Out** on the Trading menu lists every bid you have waiting and how much
-gold is held against them. That gold is invisible everywhere else, so this is
-where to look when your treasury seems short.
+**Offene Gebote** im Handelsmenü listet jedes Gebot auf, das noch wartet, und
+wie viel Gold dafür zurückgelegt ist. Dieses Gold ist sonst nirgends sichtbar,
+hier schauen Sie also nach, wenn Ihre Schatzkammer knapp wirkt.
 
-Nothing is lost if a packet goes missing. A bid that never gets an answer is
-given up on after the same number of days your sysop set for lost attack
-forces, and your gold is returned. If the answer turns up later than that,
-it is ignored rather than paid twice.
+Geht ein Paket verloren, geht nichts verloren. Ein Gebot, das nie
+beantwortet wird, wird nach ebenso vielen Tagen aufgegeben, wie Ihr Sysop
+für verschollene Angriffstruppen eingestellt hat, und Ihr Gold kommt
+zurück. Trifft die Antwort später doch noch ein, wird sie verworfen, statt
+ein zweites Mal zu zahlen.
 
-## Two things worth knowing
+## Zweierlei, das man wissen sollte
 
-Each planet keeps its own list of who it is allied with. A planet can
-therefore stop selling to you before you have heard about it, and your bid
-will come back refused. That is not a fault.
+Jeder Planet führt seine eigene Liste, mit wem er verbündet ist. Ein Planet
+kann Ihnen den Verkauf also aufkündigen, bevor Sie davon gehört haben, und
+Ihr Gebot kommt abgelehnt zurück. Das ist kein Fehler.
 
-Your sysop can turn this feature off for the whole league, in which case
-Trading does not appear on the InterPlanetary Operations menu.
+Ihr Sysop kann diese Möglichkeit für die ganze Liga abschalten; dann
+erscheint Handel gar nicht erst im Menü Interplanetare Operationen.

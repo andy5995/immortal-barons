@@ -7,50 +7,53 @@ title: Terroroperationen
 
 # Terroroperationen
 
-Terrorist Ops send agents against a realm on another planet. You choose the
-operation, then how many agents to commit. The agents are spent when you
-send them, whatever they achieve, and the strike resolves on the target's
-planet once the packet reaches it — so the word comes back a day or more
-later.
+Terroroperationen schicken Agenten gegen ein Reich auf einem anderen
+Planeten. Sie wählen die Operation und dann, wie viele Agenten Sie
+einsetzen. Die Agenten sind verbraucht, sobald Sie sie schicken, was immer
+sie erreichen, und der Schlag wird auf dem Planeten des Ziels ausgewertet,
+sobald das Paket dort ankommt - die Nachricht kommt also einen Tag später
+oder mehr zurück.
 
-Every operation is answered by New Realm Protection: a sheltered realm takes
-nothing at all.
+Jeder Operation antwortet der Neureich-Schutz: Ein geschütztes Reich nimmt
+überhaupt keinen Schaden.
 
-## What each operation does
+## Was jede Operation bewirkt
 
-The nine are not interchangeable. Each aims at one thing, and each agent
-that gets through takes its own bite:
+Die neun sind nicht austauschbar. Jede zielt auf eine Sache, und jeder
+Agent, der durchkommt, nimmt seinen eigenen Bissen:
 
-- **Send Spy** — brings intelligence home and costs the target nothing.
-- **Bomb Intelligence Agencies** — kills a few percent of their agents,
-  which is what they defend and attack with.
-- **Demoralize Forces** — takes a seventh off military morale.
-- **Cause Dissensions** — a few percent of their troopers desert.
+- **Spion senden** - bringt Erkenntnisse heim und kostet das Ziel nichts.
+- **Geheimdienst bombardieren** - tötet ein paar Prozent ihrer Agenten, mit
+  denen sie verteidigen und angreifen.
+- **Truppen demoralisieren** - nimmt ein Siebtel der Kampfmoral.
+- **Zwietracht säen** - ein paar Prozent ihrer Soldaten laufen davon.
 - **Luftwaffenstützpunkte bombardieren** - verbrennt einen Teil ihrer Jets
   am Boden.
-- **Stir Emigrations** — drives people out of the realm.
-- **Spread Propaganda** — costs them popular support.
-- **Bomb Food Storages** — the widest swing of the nine: it can take almost
-  a third of what is in store, or almost nothing.
-- **Sabotage HQ** — sets back their HeadQuarters by a fixed amount.
+- **Auswanderung schüren** - treibt Menschen aus dem Reich.
+- **Propaganda verbreiten** - kostet sie Rückhalt im Volk.
+- **Bomb Food Storages** - der größte Ausschlag der neun: Es kann fast ein
+  Drittel der Vorräte treffen, oder fast nichts.
+- **HQ sabotieren** - wirft ihr Hauptquartier um einen festen Betrag zurück.
 
-## Picking one
+## Die Wahl treffen
 
-Match the operation to what you plan next. Softening a realm before an
-interplanetary attack argues for the ones that thin what fights back —
-troopers, jets, morale. Grinding down a realm you cannot reach yet argues
-for the ones that cost it growth: food, people, support.
+Richten Sie die Operation nach dem, was Sie als Nächstes vorhaben. Wer ein
+Reich vor einem interplanetaren Angriff weichklopfen will, greift zu denen,
+die dünner machen, was zurückschlägt - Soldaten, Jets, Moral. Wer ein Reich
+zermürben will, das er noch nicht erreichen kann, greift zu denen, die es
+Wachstum kosten: Nahrung, Menschen, Rückhalt.
 
-## Getting through
+## Durchkommen
 
-Each agent is rolled for on its own, weighing your agents against
-theirs. The weighing takes the square root of each side and gives the
-defender the better of it, so agents help but with sharply falling returns:
-four times as many buys you twice the edge, and two evenly matched realms
-see about two agents in five get through. There is a small chance either way
-that has nothing to do with either side.
+Für jeden Agenten wird einzeln gewürfelt, wobei Ihre Agenten gegen ihre
+aufgewogen werden. Die Abwägung zieht aus jeder Seite die Wurzel und gibt
+dem Verteidiger den Vorteil, Agenten helfen also, aber mit stark fallendem
+Ertrag: Die vierfache Zahl bringt Ihnen den doppelten Vorsprung, und bei
+zwei gleich starken Reichen kommen etwa zwei von fünf Agenten durch. In
+beide Richtungen bleibt eine kleine Chance, die mit keiner der beiden Seiten
+zu tun hat.
 
-Committing more agents therefore does more damage on average, but it never
-makes one agent likelier to land. A Terrorist Prevention pact adds its
-partners' agents to the defense, which is what makes a well-allied realm
-expensive to work on.
+Mehr Agenten einzusetzen richtet im Mittel also mehr Schaden an, macht aber
+nie einen einzelnen Agenten wahrscheinlicher erfolgreich. Ein
+Terrorabwehr-Pakt zählt die Agenten der Partner zur Verteidigung hinzu, und
+das macht ein gut verbündetes Reich teuer zu bearbeiten.

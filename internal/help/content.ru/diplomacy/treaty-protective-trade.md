@@ -14,6 +14,6 @@ title: 'Защищённая торговля'
 того, она снижает стоимость отправки сделки этому партнёру до трети обычной
 дневной ставки.
 
-The guard covers deals with that partner only. Anything you have in transit
-to another realm can still be bombed, and so can goods you have listed on
-the trading market.
+Защита распространяется только на сделки с этим партнёром. Всё, что у вас в
+пути к другой державе, разбомбить по-прежнему можно, как и товары,
+выставленные вами на торговом рынке.

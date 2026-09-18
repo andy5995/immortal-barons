@@ -15,39 +15,44 @@ kann nicht von Piraten oder Angriffen geraubt werden.
 - Finanzhilfe / Kredite - Gold leihen oder zurückzahlen, was Sie bereits
   schulden.
 
-Deposits and withdrawals have no size limit. One investment locks away at
-most two billion gold, though you may open as many as you like.
+Einzahlungen und Abhebungen haben keine Betragsgrenze. Eine Anlage bindet
+höchstens zwei Milliarden Gold, Sie dürfen aber so viele eröffnen, wie Sie
+wollen.
 
-Interest is paid at the end of every turn, on whatever is in the bank at
-that moment. If you have turned on Deposit gold at End of Turn, in
-Preferences, your gold is put in the bank first, so the gold you earned this
-turn earns interest this turn. It goes in after the pirates have had their
-chance at it, so it is no protection against a raid.
+Zinsen werden am Ende jedes Zuges auf das gezahlt, was in diesem Augenblick
+auf der Bank liegt. Wenn Sie Gold am Zugende einzahlen in den Einstellungen
+eingeschaltet haben, wird Ihr Gold zuerst zur Bank gebracht, so dass das in
+diesem Zug verdiente Gold in diesem Zug Zinsen bringt. Es geht erst hinein,
+nachdem die Piraten ihre Gelegenheit daran hatten, es ist also kein Schutz
+vor einem Überfall.
 
-The start of your next turn tells you what the bank paid: the interest, and
-what any investment that matured today paid back.
+Der Beginn Ihres nächsten Zuges sagt Ihnen, was die Bank gezahlt hat: die
+Zinsen und das, was eine heute fällig gewordene Anlage zurückgezahlt hat.
 
-You can hold at most two billion gold, in hand and the same again in the
-bank.  Gold you earn above that is lost. Spend it before you get there.
+Sie können höchstens zwei Milliarden Gold halten, in der Hand, und noch
+einmal so viel auf der Bank.  Gold, das Sie darüber hinaus verdienen, ist
+verloren. Geben Sie es aus, bevor Sie dorthin kommen.
 
-A full bank still pays its interest, into your gold in hand rather than the
-bank. Once both are full, it goes nowhere.
+Eine volle Bank zahlt weiterhin ihre Zinsen, und zwar in Ihr Gold in der
+Hand statt auf die Bank. Sind beide voll, verfallen sie.
 
-The game tells you when gold is lost this way. Your event log names the
-amount and where it came from.
+Das Spiel teilt Ihnen mit, wenn Gold auf diese Weise verloren geht. Ihr
+Ereignisprotokoll nennt den Betrag und woher er kam.
 
-## Cash Relief / Loans
+## Beihilfe / Kredite
 
-When you borrow, you first pick how many days you have to pay it back (1 to
-10).  A longer term has a higher daily interest rate, and the interest
-builds up each day (it compounds), so a long loan costs much more in
-total. The bank tells you the rate and the most it will lend you, then you
-choose how much to take.
+Wenn Sie borgen, wählen Sie zuerst, wie viele Tage Sie zur Rückzahlung haben
+(1 bis 10).  Eine längere Laufzeit hat einen höheren Tageszins, und die
+Zinsen wachsen jeden Tag weiter auf (sie werden mitverzinst), ein langer
+Kredit kostet insgesamt also viel mehr. Die Bank nennt Ihnen den Satz und
+den Höchstbetrag, den sie Ihnen leiht, und dann wählen Sie, wie viel Sie
+nehmen.
 
-You must repay the full amount on the due date. The bank takes it from your
-gold first, then from your savings. If you cannot pay it all, the rest
-becomes a debt with an extra penalty added, and your people lose some
-support. Debt keeps growing each turn until you repay it, so clear it early.
+Sie müssen den vollen Betrag am Fälligkeitstag zurückzahlen. Die Bank nimmt
+ihn zuerst aus Ihrem Gold, dann aus Ihren Ersparnissen. Können Sie nicht
+alles zahlen, wird der Rest zu einer Schuld, auf die ein Strafaufschlag
+kommt, und Ihr Volk verliert etwas Rückhalt. Schulden wachsen jeden Zug
+weiter, bis Sie sie tilgen; räumen Sie sie also früh aus.
 
 ## Investitionen
 

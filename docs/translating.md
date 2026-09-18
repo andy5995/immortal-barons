@@ -45,6 +45,14 @@ msgstr "Regionen kaufen"
 - A `#, fuzzy` line above an entry marks a guess that needs review. The game
   treats it as untranslated (it shows English) until you check the entry and
   remove the `#, fuzzy` line.
+- **Read a fuzzy entry before you clear its marker, and never clear them in
+  bulk.** The guess comes from `msgmerge`, which fills a new entry from whichever
+  old one has the most similar ENGLISH — so it is a guess about spelling, not
+  about meaning. Real examples cleared from this project in September 2026: the
+  Dutch for *Bomb Trade Routes* sitting under `Bomb AirBases`, and "Attacker"
+  translated as the word for the attack menu. Several also carried a different
+  format verb from their English (`%s` where the English has `%d`), which breaks
+  the build.
 - Keep every placeholder — `%d`, `%s`, and so on — exactly as it appears in the
   `msgid`, in the same order. A wrong placeholder can break the display. A test
   checks this.

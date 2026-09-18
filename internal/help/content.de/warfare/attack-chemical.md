@@ -7,20 +7,22 @@ title: 'Chemischer Angriff'
 
 # Chemischer Angriff
 
-A Chemical Attack does what a Nuclear Attack does to land, on a smaller
-scale, and then gasses the realm underneath it. It ruins about a third as
-many regions into waste, kills a fifth of the enemy's people outright, and
-knocks down both their military morale and their popular support. It leaves
-their troopers alone.
+Ein Chemischer Angriff tut dem Land, was ein Atomangriff tut, nur in
+kleinerem Maß, und vergast danach das Reich darunter. Er verwüstet etwa ein
+Drittel so viele Regionen zu Ödland, tötet ein Fünftel der Menschen des
+Feindes auf der Stelle und drückt sowohl seine Kampfmoral als auch seinen
+Rückhalt im Volk. Seine Soldaten lässt er unberührt.
 
-The morale and support damage is the part that lasts. Casualties come back
-as the population grows; a realm knocked down to two-thirds support earns
-less and fights worse until it has climbed back.
+Der Schaden an Moral und Rückhalt ist der Teil, der bleibt. Verluste wachsen
+mit der Bevölkerung nach; ein Reich, das auf zwei Drittel Rückhalt gedrückt
+wurde, verdient weniger und kämpft schlechter, bis es sich wieder
+hochgearbeitet hat.
 
-The arms broker prices the missile off the target's population as well as
-its land, so gassing a crowded realm is expensive. Nothing intercepts it —
-not SDI, not turrets, not tanks.
+Der Waffenhändler bepreist die Rakete nach der Bevölkerung des Ziels wie
+nach seinem Land, ein volles Reich zu vergasen ist also teuer. Nichts fängt
+sie ab - kein SDI, keine Geschütztürme, keine Panzer.
 
-Strategy: this is the weapon to use on a rich, crowded rival you cannot beat
-in the field. A Nuclear Attack hurts their land harder, but only a chemical
-strike touches the people paying for their army.
+Strategie: Das ist die Waffe für einen reichen, dicht besiedelten Rivalen,
+den Sie im Feld nicht schlagen können. Ein Atomangriff trifft sein Land
+härter, aber nur ein chemischer Schlag rührt die Menschen an, die seine
+Armee bezahlen.

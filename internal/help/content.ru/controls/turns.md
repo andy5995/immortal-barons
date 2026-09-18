@@ -10,20 +10,20 @@ title: 'Ходы и защита'
 Каждый день вы получаете определённое число ходов. Когда они закончатся,
 возвращайтесь на следующий день за новыми.
 
-The day turns at midnight on the computer that runs the game. That is not
-always midnight where you are, so the entry menu shows the game's own time
-and how long is left of the day.
+День сменяется в полночь на том компьютере, где запущена игра. Это не всегда
+полночь у вас, поэтому в стартовом меню показаны собственное время игры и
+то, сколько осталось до конца дня.
 
-Every time the game prints says which clock it is on. Times start out in
-UTC, which every planet in a league agrees on, and Preferences will show
-them on another clock instead: this board's own, or a time zone you pick
-from a list.  The countdown to the new day is the same length of time
-whichever you choose.
+Каждое время, которое печатает игра, сопровождается указанием часов, по
+которым оно дано. Сначала время идёт по UTC, с которым согласны все планеты
+лиги, а Настройки переведут его на другие часы: на время этой доски или на
+выбранный из списка часовой пояс. Отсчёт до нового дня одинаков при любом
+выборе.
 
-Новые игроки получают Защиту нового королевства: несколько ходов, в течение
+Новые игроки получают защиту новой державы: несколько ходов, в течение
 которых вы не можете ни атаковать, ни быть атакованными. Это даёт время
 развиться.
 
-A realm still under protection shows its letter in square brackets in the
-lists of realms — `[C]`, where every other realm shows `(C)` — so you can
-see who cannot be attacked yet.
+Держава, всё ещё находящаяся под защитой, показывает свою букву в квадратных
+скобках в списках держав — `[C]`, тогда как все остальные показаны как
+`(C)`, — так видно, кого пока нельзя атаковать.

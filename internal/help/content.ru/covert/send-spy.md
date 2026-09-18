@@ -2,19 +2,17 @@
 category: covert
 in_game: true
 order: 2
-title: 'Send Spy'
+title: 'Отправить шпиона'
 ---
 
-# Send Spy
+# Отправить шпиона
 
-Send Spy gathers military intelligence on an enemy. It reveals their land,
-troops, defenses, gold, and more, so you can plan an attack. If the mission
-fails, your spy is caught and does not return.
+Отправить шпиона собирает военные сведения о враге. Раскрываются его земли,
+войска, оборона, золото и многое другое, так что вы можете спланировать
+нападение. Если задание провалится, вашего шпиона поймают и он не вернётся.
 
-It succeeds more often than most operations, whoever you send it against —
-see the Covert Operations overview for the odds and what does and does not
-move them.
+Она удаётся чаще большинства операций, против кого бы вы её ни послали, — о
+шансах и о том, что на них влияет, а что нет, см. обзор Тайные операции.
 
-Send Spy answers on the spot. It is one of the few operations that does not
-wait for daily maintenance, which is what makes it useful right before an
-attack.
+Отправить шпиона отвечает сразу. Это одна из немногих операций, которые не
+ждут ежедневного обслуживания, чем она и полезна прямо перед нападением.
