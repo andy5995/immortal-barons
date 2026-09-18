@@ -129,12 +129,11 @@ type World struct {
 	// shows this, the way BRE prints its start date above the menu.
 	StartedDate string
 	// LastMaintRun is the REAL date maintenance last actually ran, as distinct
-	// from LastMaintDate, which is the game's own clock. The two diverge whenever
-	// a game sits idle: maintenance advances the game clock by at most one day per
-	// real day, so a realm left alone for a week comes back to one day's worth of
-	// change, not seven. Without a separate record of when it last ran, every
-	// login on the same real day would advance another game day while the clock
-	// was still behind.
+	// from LastMaintDate, which is the game's own clock. It guards against a
+	// second run on the same real date. The two no longer diverge for long:
+	// since 990bf776 DailyMaintenance simulates every missed day in one call,
+	// uncapped (MaxCatchUpDays), so a board left idle for a week catches up in
+	// full on its next run rather than staying a week behind.
 	LastMaintRun string
 
 	// NewsToday/NewsYesterday split the planetary news feed by day; the JSON
