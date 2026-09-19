@@ -517,7 +517,7 @@ func WrapIndented(text, indent string) string { return wrapHanging(text, indent,
 // each line has to be wrapped on its own.
 //
 // Wrap BEFORE coloring. hiNums and friends insert escape sequences that no
-// terminal displays but every length count sees, so a report wrapped afterwards
+// terminal displays but every length count sees, so a report wrapped afterward
 // breaks far short of the margin.
 func wrapReport(text string) string {
 	lines := strings.Split(text, "\n")

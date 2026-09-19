@@ -85,7 +85,7 @@ func TestAttackingAnAllyAsksToBreakThePactFirst(t *testing.T) {
 // does. BRE runs both through one picker (choose_target_empire, BRE.OVR
 // 0x01aa99), and `cap/kd3-01.cap` catches the covert half word for word: the
 // same "Are you sure you wish break your agreement?" ahead of a Demoralize
-// Forces, the same revolt, and the operation still going out afterwards. IB left
+// Forces, the same revolt, and the operation still going out afterward. IB left
 // an ally off the covert list entirely until 2026-09-06, so the question could
 // never be reached.
 func TestACovertOpAgainstAnAllyBreaksThePactFirst(t *testing.T) {

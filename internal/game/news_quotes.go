@@ -13,7 +13,7 @@ import "fmt"
 // House rules for adding to the pool:
 //
 //   - The figure must be historical, not living, and the line must be clearly
-//     BENT — a recognisable cadence twisted onto taxes, land, war or the
+//     BENT — a recognizable cadence twisted onto taxes, land, war or the
 //     treasury. A verbatim quotation is neither funny nor ours to ship.
 //   - Attribute nothing. The Queen says these; the joke is that she believes
 //     they are hers. Naming the real author turns a parody into a misquotation.

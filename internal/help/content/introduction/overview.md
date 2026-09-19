@@ -20,7 +20,7 @@ take seats of their own.
 
 You name your realm when you first call, and you may change that name once —
 from the Preferences menu, after your New Realm Protection has ended. Only
-once: the option disappears afterwards, and the whole planet is told of the
+once: the option disappears afterward, and the whole planet is told of the
 change.
 
 Many bulletin board systems can link their games together. When they do, each

@@ -235,7 +235,7 @@ to be repeated by someone reasoning from one board's behavior.
 
 Judge a session by **whether the queue drained**, not by the mailer's last
 line: a transfer that completed can still end on a complaint about pending
-acknowledgements. Then walk the stages above and find the first directory still
+acknowledgments. Then walk the stages above and find the first directory still
 holding the file.
 
 **If it is in none of them and never arrived, do not conclude the fault is

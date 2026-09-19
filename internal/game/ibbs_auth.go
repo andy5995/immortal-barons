@@ -218,7 +218,7 @@ func (w *World) NextSeq() uint64 {
 // IsPacketSeen reports whether a packet has already been applied here, without
 // recording it. Use this for a read-only check — for example, counting skipped
 // packets in ReadInbound — where the caller will call SeenPacket or ApplyPacket
-// afterwards and needs the side effects to fire exactly once.
+// afterward and needs the side effects to fire exactly once.
 func (w *World) IsPacketSeen(p Packet) bool {
 	key := packetKey(p)
 	if w.SeenPackets != nil && w.SeenPackets[key] {

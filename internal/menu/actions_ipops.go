@@ -82,7 +82,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	// The whole stay the man can be paid for, not the part this baron happens to
 	// have the gold for. The original offers only what the gold covers, which
 	// tells a short baron nothing about what the office is actually for; IB
-	// offers the length and deals with the money afterwards, where the bank is.
+	// offers the length and deals with the money afterward, where the bank is.
 	days := promptSuggested(s, "How many days would you like him to remain?",
 		game.SpyGuyDefaultDays, game.SpyGuyMaxDays)
 	if days < 1 {

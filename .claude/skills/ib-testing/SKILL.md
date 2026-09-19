@@ -46,7 +46,7 @@ reach this?" — if yes, script the menu.
   `PlayTurn` loop leaves gold unchanged every day and reads as a broken
   economy. Drive days with `DailyMaintenance` instead.
 
-Delete the throwaway file afterwards.
+Delete the throwaway file afterward.
 
 The recurring failure is not reaching for a harness at all: fidelity work
 (reading the binary, parsing captures) puts you in a mode where the data source
@@ -91,7 +91,7 @@ run one board on it:
 
 Then drive that board's steps with the old binary and the rest with the new one,
 and check BOTH directions apply — a packet the old board accepts proves nothing
-about the packet it sends back. `git worktree remove --force` afterwards.
+about the packet it sends back. `git worktree remove --force` afterward.
 
 **The rig finds a class of defect the unit tests cannot: what the run SAYS.** One
 session's rig run turned up a ruleset hold reported as "held for a protocol this
@@ -367,7 +367,7 @@ stored-message attach and SBBSecho — over one binkp link.
   for NON-interactive shells, so scripts, `cron` jobs, systemd units and tool-run
   commands must still set it themselves: `SBBSCTRL=$SBBS/ctrl <command>`.
 - `SYMLINK=1` points `$SBBS/exec/*` back into the clone, so **the clone must not
-  be cleaned away** afterwards.
+  be cleaned away** afterward.
 
 ## Configuring Synchronet
 

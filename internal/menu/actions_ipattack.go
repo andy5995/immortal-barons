@@ -23,7 +23,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	p := w.Player()
-	// Gathered once, under the lock, and read from the copy afterwards (#206).
+	// Gathered once, under the lock, and read from the copy afterward (#206).
 	// ImportBoard appends to RemoteBoards as inbound packets are applied, which
 	// on a multi-node board is another process's transaction — so walking the
 	// slice unlocked is a torn read of its header, and a pointer INTO it held

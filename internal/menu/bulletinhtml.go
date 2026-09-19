@@ -423,7 +423,7 @@ func ansiToHTML(rendered []byte, gameName string) string {
 		write(text[:i])
 		params, isSGR, n := scanEscape(text[i:])
 		if n == 0 {
-			// A lone ESC that begins nothing recognisable: drop the byte, and go
+			// A lone ESC that begins nothing recognizable: drop the byte, and go
 			// on from after it so an unterminated sequence cannot stall the loop.
 			text = text[i+1:]
 			continue
@@ -517,7 +517,7 @@ func (s sgrState) class() string {
 // cursor moves, the erase codes, the DECAWM wrap toggles -- is measured so it
 // can be dropped, since a page has no cursor to move.
 //
-// It reports n == 0 for an ESC that begins nothing recognisable, so the caller
+// It reports n == 0 for an ESC that begins nothing recognizable, so the caller
 // drops the single byte rather than swallowing the line after it.
 func scanEscape(text string) (params []int, isSGR bool, n int) {
 	if len(text) < 2 || text[0] != 0x1b {

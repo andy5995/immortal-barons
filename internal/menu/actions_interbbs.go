@@ -97,7 +97,7 @@ func roughAge(s session.Session, d time.Duration) string {
 // otherwise print 0.00 hours and read as no measurement at all.
 func turnaroundLabel(s session.Session, days float64) (string, string) {
 	// Round FIRST, then pick the tier from the ROUNDED figure. Choosing the tier
-	// from the raw value and rounding afterwards prints the boundary in the
+	// from the raw value and rounding afterward prints the boundary in the
 	// lower unit: a 59.6-minute link read "60 minutes" on one row while a
 	// 60.1-minute one read "1.00 hours" on the next -- the same duration in two
 	// units, on the same screen.

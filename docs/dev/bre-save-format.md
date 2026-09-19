@@ -348,7 +348,7 @@ and support. The attack resolver never deletes anything: a realm crushed at
 `0x050d74`'s other caller is `confirm_end_game`, which wipes the whole relation
 table at the end of a season.
 
-Runtime helpers worth recognising when reading this code:
+Runtime helpers worth recognizing when reading this code:
 
 ```
 0c03:0ed0   Random(n)                   0fd0:178e   int -> real

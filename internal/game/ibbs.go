@@ -585,7 +585,7 @@ func (w *World) bounceVersion(p Packet) Packet {
 func (w *World) BounceRuleset(p Packet) Packet {
 	return Packet{
 		FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate,
-		Notice: "your packets are being held here: the league rules your board is playing by are not the ones the League Coordinator sent. Take the Coordinator's ruleset, which goes out on every planetary run, and anything you send afterwards is applied",
+		Notice: "your packets are being held here: the league rules your board is playing by are not the ones the League Coordinator sent. Take the Coordinator's ruleset, which goes out on every planetary run, and anything you send afterward is applied",
 	}
 }
 

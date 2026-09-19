@@ -90,7 +90,7 @@ func TestComma(t *testing.T) {
 
 // TestEditAmountKillLine covers Ctrl-U in the numeric editor, which is the case
 // this key was asked for: a mistyped 1,000,000,000 cleared in one keystroke
-// instead of ten backspaces, with the field still editable afterwards.
+// instead of ten backspaces, with the field still editable afterward.
 func TestEditAmountKillLine(t *testing.T) {
 	keys := append([]rune("1000000000"), session.KillLine)
 	keys = append(keys, []rune("25\r")...)

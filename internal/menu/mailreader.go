@@ -35,7 +35,7 @@ type mailReply struct {
 // and acts on a single keypress each: [R]eply, [D]elete, [I]gnore, [Q]uit.
 // Ignore keeps the message for next time — BRE lets a message be ignored
 // indefinitely — and only Delete removes it. Deletions and replies are
-// collected during the read and applied under the world lock afterwards, so the
+// collected during the read and applied under the world lock afterward, so the
 // lock is never held while waiting on the player and a message that arrives
 // mid-read survives (issues #2, #5).
 // skipIgnored is true for the turn-start stop, which passes over what this

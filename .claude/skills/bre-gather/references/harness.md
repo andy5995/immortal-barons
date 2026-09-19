@@ -260,7 +260,7 @@ The landmines:
   and `CD` there instead. BRE reads its data relative to the current directory,
   and `bbs.cfg` only names outbound paths, so a copied board runs standalone
   with no edits. Andy's own install is then untouched by construction and there
-  is nothing to restore afterwards — which beats snapshot-and-restore, because a
+  is nothing to restore afterward — which beats snapshot-and-restore, because a
   restore you forget is a restore that did not happen. Say which directory you
   made so he can delete it.
 - **`~/.dosemu/drive_c/dat-bak/` holds ready-made scenarios.** `saved4` is three
@@ -313,7 +313,7 @@ The landmines:
   date probe has to jump forward to whatever the install's stored date is (ten
   months, here), and every skipped day is a day of maintenance — so a realm
   staged BEFORE the jump is swept by the idle purge and the roster just shrinks.
-  Two orders work: probe the date first and stage afterwards, or stage by
+  Two orders work: probe the date first and stage afterward, or stage by
   CLONING a realm that survived the jump, which carries its last-played stamps
   with it. `bre-clone-slot.py` (this project's Claude scripts dir) does the
   second: `bre-clone-slot.py GAME.DAT A B "CALLER" "Realm" coastal=500 ...`

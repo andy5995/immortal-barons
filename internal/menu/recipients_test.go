@@ -197,7 +197,7 @@ func treatyWith(w *ctx, e *game.Empire) {
 
 // '*' marks the treaty partners and nobody else — IB's own key, composing with
 // the multi-select rather than short-circuiting it: the list still closes on
-// RETURN, so a letter can be added to or taken off the allies afterwards.
+// RETURN, so a letter can be added to or taken off the allies afterward.
 func TestPickRecipientsAllAllies(t *testing.T) {
 	w := newWorld()
 	w.With(func() { w.AddAIEmpires(2) })

@@ -111,7 +111,7 @@ const (
 // AgentPriceBase + AgentPricePerTurn×TurnsPlayed + Random(AgentPriceJitter), with
 // no cap. Agents therefore take no part in the unit walk: their price ratchets for
 // as long as the realm keeps playing and never comes back down, so a covert
-// programme started late costs 20 gold a turn more than one started early, for
+// program started late costs 20 gold a turn more than one started early, for
 // every agent, forever.
 //
 // The 30 consecutive turns in `cap/eots-covert-agents.cap` pin it. Solving each

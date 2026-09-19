@@ -3759,7 +3759,7 @@ def context_boundaries(context: dict) -> tuple[dict[int, str], list[tuple[int, i
 
 
 def code_regions(size: int, data: list[tuple[int, int, str]]) -> list[tuple[int, int]]:
-    """The parts of a context that are NOT catalogued data, in order."""
+    """The parts of a context that are NOT cataloged data, in order."""
     regions = []
     cursor = 0
     for start, end, _name in sorted(data):
@@ -3775,7 +3775,7 @@ def code_regions(size: int, data: list[tuple[int, int, str]]) -> list[tuple[int,
 def ndisasm_context(context: dict) -> list[tuple[int, str]]:
     labels, data = context_boundaries(context)
     code = context["code"]
-    # The catalogued data chunks are cut out HERE rather than handed to ndisasm
+    # The cataloged data chunks are cut out HERE rather than handed to ndisasm
     # as -k ranges. ndisasm 3.02's -k skips its range and then stops
     # disassembling altogether instead of resuming after it — verified with a
     # four-byte skip, which prints one "skipping" line and nothing else — so a
@@ -3815,7 +3815,7 @@ def containing_code_block(context: dict, target: int) -> tuple[int, int, str]:
             candidates.append((start, end, block["name"]))
     if not candidates:
         raise BREError(
-            f"{context['id']} offset {hx(target, 5)} is not inside catalogued code; "
+            f"{context['id']} offset {hx(target, 5)} is not inside cataloged code; "
             "refusing to guess a disassembly boundary"
         )
     return max(candidates, key=lambda item: item[0])

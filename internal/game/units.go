@@ -5,7 +5,7 @@ package game
 // Before this, every screen, switch and report that needed the set wrote its own
 // literal list — a dozen of them, in several orders and in two naming forms —
 // and three of those lists were coupled BY POSITION to a list in another file,
-// so reordering one half silently mislabelled the other. Each row is declared
+// so reordering one half silently mislabeled the other. Each row is declared
 // once here and referred to by its variable, which is what makes the coupling a
 // compile error rather than a wrong label.
 //

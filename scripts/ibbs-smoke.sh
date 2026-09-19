@@ -87,7 +87,7 @@ done
 # ---------------------------------------------------------------------------
 # Part 2: the same exchange, routed (#106). Alpha and Charlie have no link to
 # each other — Bravo hosts them both, and has to pass Alpha's packet on. Here
-# each board's outbound directory IS its neighbour's inbound directory, which
+# each board's outbound directory IS its neighbor's inbound directory, which
 # is what a mailer's per-link filebox amounts to, so there is no transport step
 # to run: if Charlie learns about Alpha, Bravo relayed it.
 # ---------------------------------------------------------------------------
@@ -131,7 +131,7 @@ CFG
   case "$id" in
     # The leaves send everything to their uplink, whoever it is addressed to.
     AlphaBBS|CharlieBBS) echo "Outbound $r/BravoBBS/in" >> "$r/$id/bbs.cfg" ;;
-    # The hub has one link per neighbour.
+    # The hub has one link per neighbor.
     BravoBBS)
       echo "Outbound $r/BravoBBS/out" >> "$r/$id/bbs.cfg"
       echo "Link 1 $r/AlphaBBS/in" >> "$r/$id/bbs.cfg"

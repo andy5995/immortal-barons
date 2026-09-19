@@ -14,7 +14,7 @@ import (
 // change the world between the check and the change.
 type Store interface {
 	Transact(fn func()) error
-	// Snapshot runs fn over a FRESH world without saving afterwards. A screen
+	// Snapshot runs fn over a FRESH world without saving afterward. A screen
 	// that only reads still needs the reload — another node may have moved the
 	// world since this session's last action — but it has nothing to write back,
 	// and writing anyway is not free: on a door that is a full rewrite of

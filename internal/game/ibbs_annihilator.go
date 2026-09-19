@@ -170,7 +170,7 @@ func arrivalStamp(at time.Time) string {
 }
 
 // markAnnihilatorDone records that this planet has finished with in, so a copy
-// of its status arriving afterwards is recognized as a weapon already dealt
+// of its status arriving afterward is recognized as a weapon already dealt
 // with rather than as a new one. See World.AnnihilatorDone. A weapon with no
 // arrival instant — from a board that predates the field — cannot be recorded,
 // and is left to the days < 0 test as before.

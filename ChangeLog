@@ -775,7 +775,7 @@ Immortal Barons ChangeLog
     keypress, and attack/sell orders trimmed by concurrent losses say so
   * A realm whose owner never played a turn is removed at the next
     maintenance, and so is any realm left unplayed for 10 days; you can
-    always start a new realm afterwards (#83)
+    always start a new realm afterward (#83)
   * Maintenance now advances the game at most one day at a time, so the
     computer barons cannot race ahead while nobody is playing
   * Read Messages now shows one message at a time (Reply/Delete/Ignore/

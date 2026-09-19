@@ -604,7 +604,7 @@ func TestTurnaroundLabelUnits(t *testing.T) {
 		{3.0 / 24, "3.00 hours"},
 		{3 * day, "3.00 days"},
 		// The boundaries, which is where this went wrong: the tier used to be
-		// chosen from the raw value and the figure rounded afterwards, so a
+		// chosen from the raw value and the figure rounded afterward, so a
 		// link just under an hour printed "60 minutes" while one just over it
 		// printed "1.00 hours" -- the same duration in two units, one above the
 		// other on the Travel Times screen.

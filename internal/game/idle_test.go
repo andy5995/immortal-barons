@@ -6,7 +6,7 @@ import (
 )
 
 // A caller who creates a realm and never takes a turn is erased at the next
-// maintenance, and may build a fresh realm normally afterwards.
+// maintenance, and may build a fresh realm normally afterward.
 func TestUnplayedRealmErasedAtMaintenance(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-07-01"

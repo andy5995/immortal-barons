@@ -1178,7 +1178,7 @@ it. Wherever a file stops is the step that did not run.
 
 Judge a run by whether the outbound emptied, not by BinkIT's last line: a
 session that transferred everything can still end on a complaint about files
-pending acknowledgement.
+pending acknowledgment.
 
 Put those four lines in a shell script and give it a lock, so the door's
 clean-up and the timed event cannot run it at once:

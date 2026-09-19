@@ -782,7 +782,7 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	//
 	// The test is on the fingerprint the PACKET carries — the rules it was
 	// written under — so a packet produced under rules the league never agreed is
-	// never applied, whatever its board does afterwards: it is held, re-checked
+	// never applied, whatever its board does afterward: it is held, re-checked
 	// on every later run, and expires at HeldMaxAge. Packets in flight across a
 	// legitimate rules change are the case RulesetGraceDays covers.
 	if !refused && w.RulesetDivergent(p) {

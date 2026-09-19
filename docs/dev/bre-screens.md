@@ -48,7 +48,7 @@ trade barter precedes the treaty. IB had both the other way round.
 The same routine says **which of those stops a player out of turns still gets**:
 the two offer calls sit behind a turns-remaining test (`0x3842`), while the
 entries and the mailbox are called on either path (`0x385F`), and "Sorry, you
-have used all of your turns today." is only reached afterwards (`0x38D7` ->
+have used all of your turns today." is only reached afterward (`0x38D7` ->
 `0x3F8D`). So entering with no turns left shows the recap and the mail and asks
 nothing about pending offers. Neither stop has a per-day gate: a pending barter
 is put again on every entry that has a turn to play, which is what #175 asks.
@@ -282,7 +282,7 @@ You have crushed the enemy completely!  You captured all 8 Regions!
 You also get all the remains of your opponent's military...
 ```
 
-The captured-region picker still runs afterwards, exactly as on an ordinary win
+The captured-region picker still runs afterward, exactly as on an ordinary win
 — the conqueror places the last 8 regions by type before the turn ends.
 
 Thereafter the realm keeps its row on the score board, with **`DEAD` in the
@@ -2330,7 +2330,7 @@ there is no per-item wording.
 
 **UNVERIFIED — Diplomacy's roster flag.** Diplomacy passes 0 for the roster flag, which lists
 `-*Relations*-` rather than the score table — yet the capture above is filed
-under a treaty proposal and shows the score table. One of the two is mislabelled
+under a treaty proposal and shows the score table. One of the two is mislabeled
 and it has not been re-captured; the capture's own note only says it was taken
 "at a `Send to:` prompt", which the message path also has. IB follows the flag
 and lists Relations at a Diplomacy prompt.

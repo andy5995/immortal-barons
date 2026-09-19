@@ -467,7 +467,7 @@ BRE can be driven scriptably and its screens scraped as plain text
 `script`). **The full harness — prerequisites, the launch recipe, and the dozen
 landmines that each cost a session — is in `references/harness.md`, together with
 the turn-by-turn flow for driving a game. Read it BEFORE driving the emulator;
-skimming it afterwards is how the landmines get rediscovered.**
+skimming it afterward is how the landmines get rediscovered.**
 
 Three things belong here rather than in the reference, because they decide
 whether you should open it at all:

@@ -839,7 +839,7 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	// A number past the end is ASKED AGAIN, not taken as a cancel: the original's
 	// bounded-integer reader loops back to its input loop on an over-max value
 	// and shows the limit (BRE.EXE 0x92eb, reached from both of this screen's
-	// number prompts), so only an empty answer leaves. IB cancelled on any
+	// number prompts), so only an empty answer leaves. IB canceled on any
 	// out-of-range value until 2026-09-13, which threw a baron out of a forced
 	// turn screen for a typo.
 	var target game.Annihilator

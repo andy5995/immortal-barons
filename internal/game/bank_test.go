@@ -129,7 +129,7 @@ func TestInvestRateMigration(t *testing.T) {
 	// The rate is held in tenths of a percent per day. A save from before
 	// investments existed reads zero; one written while the rate was a whole
 	// percent reads somewhere in the old 1..25 band, which is below the new
-	// floor and so is recognisable as the older unit.
+	// floor and so is recognizable as the older unit.
 	for _, c := range []struct{ stored, want int }{
 		{0, DefaultInvestRate},
 		{5, 50},            // 5%/day, in band once scaled

@@ -85,7 +85,7 @@ func endProtection(s session.Session, w *ctx) Result {
 // rename). It is refused while the realm is under New Realm Protection: a realm
 // nobody can touch should not also be able to shed the name its rivals know it
 // by. The item stays on the menu, drawn dim, until the rename is spent, so a
-// player who reads about it under protection can find it again afterwards.
+// player who reads about it under protection can find it again afterward.
 func changeRealmName(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if p.Protection > 0 {

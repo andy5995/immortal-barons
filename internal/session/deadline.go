@@ -53,7 +53,7 @@ type Deadline struct {
 
 // InputLineSetter is implemented by Deadline and forwarded by the session
 // wrappers. A prompt registers the line it is editing so an interrupting
-// idle/time warning can restore that line, and the cursor, afterwards.
+// idle/time warning can restore that line, and the cursor, afterward.
 type InputLineSetter interface {
 	SetInputLine(line string)
 }

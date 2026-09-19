@@ -146,7 +146,7 @@ func (w *World) AnnihilatorQuote(board string) int {
 }
 
 // StartAnnihilator begins construction of the planet's one Gooie Kablooie, aimed at
-// board. It raises no money by itself — the barons fund it afterwards.
+// board. It raises no money by itself — the barons fund it afterward.
 func (w *World) StartAnnihilator(e *Empire, board string) error {
 	if !w.Config.GooieKablooie {
 		return ErrAnnihilatorDisabled

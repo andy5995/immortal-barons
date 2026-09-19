@@ -153,7 +153,7 @@ until 2026-09-17; it was not.
    "<code>": indexByPath(loadDir("content.<code>")),
    ```
 
-   Run `go test ./internal/help/` afterwards: a tree that is embedded but not
+   Run `go test ./internal/help/` afterward: a tree that is embedded but not
    mapped is silently unused, and one that is mapped but not embedded panics.
 
 5. If the language groups thousands with something other than a comma, add it to

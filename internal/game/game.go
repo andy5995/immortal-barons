@@ -361,7 +361,7 @@ type World struct {
 
 	// Player preferences, kept here only so an older save can be
 	// migrated: EnsurePrefs copies them onto each realm, and nothing reads them
-	// afterwards. New code wants Empire.Prefs.
+	// afterward. New code wants Empire.Prefs.
 	EnterExitsBuy  bool
 	DepositEndTurn bool
 	AutoPayMaint   bool

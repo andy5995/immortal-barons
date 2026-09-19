@@ -464,7 +464,7 @@ ones you last sent.
 Its packets are also **held**, not applied — a board playing its own
 turns-per-day or attack limits would otherwise feed that into everyone else's
 game. Each packet states the rules it was written under, so the ones sent while
-it was off never apply, whatever it does afterwards; they expire on the ordinary
+it was off never apply, whatever it does afterward; they expire on the ordinary
 held-packet timer. Its traffic flows again as soon as it takes your ruleset, and it
 is told so by a bounce naming the reason — it cannot see your held directory.
 

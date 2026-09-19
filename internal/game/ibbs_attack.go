@@ -661,7 +661,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		return res
 	}
 	// Measure the defense BEFORE the battle costs it — the fight is decided by
-	// what was standing when the force arrived, not by what is left afterwards.
+	// what was standing when the force arrived, not by what is left afterward.
 	// The shield takes its share of the arriving jets and bombers first.
 	offense := atk.offenseAgainstSDI(target)
 	def, pooledJets := 0, 0
@@ -693,7 +693,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		// casualties are. A defender who beat the strike off still loses units,
 		// and pairing a bare "repelled" with a count of the reader's own dead
 		// reads as a contradiction (#201) — the original settles the battle first
-		// and itemises afterwards (BRE.OVR resolve_received_invasion). Everyone
+		// and itemises afterward (BRE.OVR resolve_received_invasion). Everyone
 		// who stood is told: a planet-wide strike bleeds every realm, and only
 		// the strongest of them was hearing about it.
 		for i, e := range defenders {

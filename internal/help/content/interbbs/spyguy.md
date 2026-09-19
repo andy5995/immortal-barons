@@ -42,7 +42,7 @@ late is not wasted.
 ## Reading what he sends
 
 Each report arrives as planet news, dated, saying what was aimed at you and how
-long it had left when he wrote it. That line never changes afterwards, so hours
+long it had left when he wrote it. That line never changes afterward, so hours
 later it no longer tells you how long is left.
 
 **Incoming**, on the InterPlanetary menu, is the same warnings kept current: one

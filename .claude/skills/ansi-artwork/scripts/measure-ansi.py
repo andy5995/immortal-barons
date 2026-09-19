@@ -2,7 +2,7 @@
 """measure-ansi.py -- measure real ANSI art or screens, instead of asserting.
 
 Counts what a capture actually DOES: how it spends the palette, which glyph
-classes carry tone versus detail, whether colour seams are blended or hard-cut,
+classes carry tone versus detail, whether color seams are blended or hard-cut,
 whether text is readable, and whether lines will wrap at column 80.
 
     measure-ansi.py FILE [FILE...]        one block per file
@@ -118,7 +118,7 @@ def measure(path):
             else:
                 hard += 1
 
-    #  Colour-run length: cells drawn before the attribute changes.
+    #  Color-run length: cells drawn before the attribute changes.
     runs, cur = [], 1
     for (_, f1, b1), (_, f2, b2) in zip(seq, seq[1:]):
         if (f1, b1) == (f2, b2):
@@ -163,7 +163,7 @@ def report(m):
           f"   vert-half {pct(vh, tb)}   horiz-half {pct(hh, tb)}")
     seams = m['blended'] + m['hard']
     if m['sgr'] == 0:
-        print("  SEAMS     n/a -- capture carries no colour (0 SGR sequences); the")
+        print("  SEAMS     n/a -- capture carries no color (0 SGR sequences); the")
         print("            role/seam figures below are meaningless without it")
     else:
         print(f"  SEAMS     {pct(m['blended'], seams)} blended, {pct(m['hard'], seams)} hard-cut  ({seams:,} hue changes)")

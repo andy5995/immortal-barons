@@ -60,7 +60,7 @@ func ParseStamp(s string) (time.Time, bool) {
 }
 
 // StampIn re-renders a stored stamp into loc, for a reader whose Preferences
-// name a zone. An unrecognised or zone-less stamp is returned unchanged.
+// name a zone. An unrecognized or zone-less stamp is returned unchanged.
 func StampIn(when string, loc *time.Location) string {
 	t, ok := ParseStamp(when)
 	if !ok {

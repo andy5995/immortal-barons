@@ -486,7 +486,7 @@ a question of running `barons-ftn -in`, not of its release: the helper is
 optional, a board reading `.brp` from its mailer's directory is a supported
 setup, and such a board cannot unwrap a bundle however current its game (#230,
 and the rule above `game.Protocol`). Two ed25519 key pairs guard it: the
-Coordinator's (`coord.key`, recorded once by hand) authorises league orders, and
+Coordinator's (`coord.key`, recorded once by hand) authorizes league orders, and
 each board's own (`board.key`, published on an optional seventh roster line)
 proves which board a packet came from. A roster entry with no key is applied
 unchecked — where every league starts — so "cannot check" and "failed the check"

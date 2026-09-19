@@ -26,7 +26,7 @@ func spyGuyWorld(t *testing.T, gold, bank int64) *ctx {
 
 // The prompt offers the whole stay a SpyGuy can be paid for, not the part this
 // baron's gold covers: the ceiling is the office's, and the money is dealt with
-// afterwards.
+// afterward.
 func TestSpyGuyOffersTheFullStay(t *testing.T) {
 	w := spyGuyWorld(t, 1_000_000_000, 0)
 	f := &fakeSession{keys: []rune("1\r\r\r")} // planet 1, default days, pause
@@ -77,7 +77,7 @@ func TestSpyGuyStillShortIsRefused(t *testing.T) {
 		t.Fatalf("the shortfall was not named:\n%s", out)
 	}
 	// The refusal is the ops menu's, printed before the bank is offered rather
-	// than by the send failing afterwards.
+	// than by the send failing afterward.
 	if !strings.Contains(out, game.ErrCantAfford.Error()) {
 		t.Errorf("the send was not refused:\n%s", out)
 	}

@@ -14,7 +14,7 @@ import (
 // runCovertAction drives a covert menu action against target A and returns what
 // the screen showed. An EFFECT operation no longer resolves at the menu — it is
 // queued for daily maintenance — so there is nothing random to retry here: the
-// acknowledgement is the screen under test and the queue is the state effect.
+// acknowledgment is the screen under test and the queue is the state effect.
 // What a queued operation then DOES is asserted in the game package, against the
 // resolver that does it.
 func runCovertAction(t *testing.T, w *ctx, p *game.Empire, action func(session.Session, *ctx) Result) string {
@@ -31,7 +31,7 @@ func runCovertAction(t *testing.T, w *ctx, p *game.Empire, action func(session.S
 	}
 	out := f.out.String()
 	if !strings.Contains(out, "Sent out") {
-		t.Fatalf("the action never reached its acknowledgement screen, got:\n%s", out)
+		t.Fatalf("the action never reached its acknowledgment screen, got:\n%s", out)
 	}
 	return out
 }
@@ -145,10 +145,10 @@ func TestDemoralizeForcesQueuesAgainstTheChosenTarget(t *testing.T) {
 	target.Morale = 100
 
 	out := runCovertAction(t, w, p, covertAction(game.OpDemoralizeForces))
-	// The acknowledgement is the original's and names nobody; the queue below is
+	// The acknowledgment is the original's and names nobody; the queue below is
 	// what proves the op went against the realm chosen.
 	if !strings.Contains(out, "Sent out") {
-		t.Errorf("the action never reached its acknowledgement screen, got: %s", out)
+		t.Errorf("the action never reached its acknowledgment screen, got: %s", out)
 	}
 	rec := queuedOp(t, w)
 	if rec.Op != game.OpDemoralizeForces || rec.Target != target.Name || rec.Attacker != p.Name {
@@ -184,7 +184,7 @@ func TestBombEnemyTargetsNeedsNoBombers(t *testing.T) {
 
 	out := runCovertAction(t, w, p, covertAction(game.OpBombEnemyTargets))
 	if !strings.Contains(out, target.Name) {
-		t.Errorf("the acknowledgement should name the chosen target %q: %s", target.Name, out)
+		t.Errorf("the acknowledgment should name the chosen target %q: %s", target.Name, out)
 	}
 	if rec := queuedOp(t, w); rec.Op != game.OpBombEnemyTargets || rec.Target != target.Name {
 		t.Errorf("queued %+v, want a Bomb Enemy Targets against %s", rec, target.Name)
@@ -439,7 +439,7 @@ func TestCovertOpSendsSeveralAgentsAtOnce(t *testing.T) {
 		t.Errorf("the day's allowance should be down 3, got %v", p.CovertOpsToday)
 	}
 	if !strings.Contains(stripANSI(out), "3 agents sent out.") {
-		t.Errorf("the acknowledgement should report the count:\n%s", out)
+		t.Errorf("the acknowledgment should report the count:\n%s", out)
 	}
 }
 

@@ -187,7 +187,7 @@ time, even when the task arrives as fresh evidence to analyze.** A whole session
 went into recovering the Queen Royale refund formula from the binary when the
 pool offset, both rates, the cap, the gating predicate and the crown-tax feed
 were already written down there from an earlier pass. The trigger for the miss is
-worth recognising: new data (a pile of captures) makes the question feel new, so
+worth recognizing: new data (a pile of captures) makes the question feel new, so
 the notes never get checked. Grep the file for the mechanic's noun first; it
 costs one command and tells you what is genuinely unanswered.
 
@@ -609,7 +609,7 @@ captures held 47 payouts ranging from 354 to 14,000,000 — and fourteen of them
 were exactly 1,000,000, which is the shape of a **cap**, not of a formula. Going
 in knowing a cap existed made the routine's structure obvious on first read.
 
-Two signatures worth recognising in a value list:
+Two signatures worth recognizing in a value list:
 
 - **The same value many times, with others spread around it** — a clamp.
 - **A value one below a round number** (999,999 beside many 1,000,000s) — a cap

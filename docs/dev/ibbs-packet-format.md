@@ -72,7 +72,7 @@ Inbound publication is the mirror image:
 
 No lock shared with the game is required for this inbound handoff. A rename
 that lands before `ReadInbound` takes its directory snapshot is processed in
-that run; one that lands afterwards waits intact for the next run. The atomic
+that run; one that lands afterward waits intact for the next run. The atomic
 name transition makes both outcomes safe. A transport still needs its own lock
 or an equivalent no-replace publication primitive to keep two of its workers
 from racing through the collision check.
@@ -399,7 +399,7 @@ origin refusal before it applies anything or records the packet as seen, so the
 file is moved to the `held/` directory rather than removed, and every later
 planetary run puts it back through the ordinary inbound path — league check,
 duplicate check, addressing, both signatures. A board that is given its roster
-key afterwards therefore applies its own backlog with nobody doing anything.
+key afterward therefore applies its own backlog with nobody doing anything.
 
 That mattered most for a **ruleset** broadcast, back when the ruleset was the
 one Coordinator-authored thing that did not repeat: a ruleset refused once was

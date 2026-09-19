@@ -188,7 +188,7 @@ func TestAIAttackSendsNoAgentAhead(t *testing.T) {
 // and budget-limited, should buy the SAME amount of land in a turn: the exposed
 // one additionally funds a defensive force, but that must come out of what's left
 // AFTER expansion, not out of the expansion budget. Regression guard for the
-// "strong first day, stalls afterwards" behavior — the AI was skimming half its
+// "strong first day, stalls afterward" behavior — the AI was skimming half its
 // gold for military before the land step, starving the compounding land engine
 // right when protection ended.
 func TestAIExpansionSurvivesProtectionLapse(t *testing.T) {

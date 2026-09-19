@@ -101,7 +101,7 @@ func (w *World) RegionsDue(e *Empire) int64 {
 }
 
 // MaintenanceDue is the whole maintenance bill for one turn: the armed forces,
-// the regions, the SDI programme and the Queen's crown tax. The pay-by-hand
+// the regions, the SDI program and the Queen's crown tax. The pay-by-hand
 // path charges the four separately, prompt by prompt; Auto-Pay settles this one
 // figure in a line.
 func (w *World) MaintenanceDue(e *Empire) int64 {

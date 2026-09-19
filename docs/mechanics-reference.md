@@ -469,7 +469,7 @@ flow runs in this order:
    shortfall.
 
    **Nothing is charged until that gate is answered.** Gold, popular support,
-   morale, the waste pile and the region pool are all written afterwards, at
+   morale, the waste pile and the region pool are all written afterward, at
    `+0x14e6`, which is what lets a restart re-ask everything with no gold moved.
    IB matches this; it used to commit the required charges before the
    decontamination question, which kept that question out of the check.
@@ -871,7 +871,7 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 
   **How often**: the roll is `Random(20) <= min(6, regions/1200 + 2)`
   (`0x35db5`), so exposure RISES WITH THE REALM — 3-in-20 for a small realm up
-  to a 7-in-20 ceiling at 4,800 regions. Afterwards, landed or not, a 1-in-10
+  to a 7-in-20 ceiling at 4,800 regions. Afterward, landed or not, a 1-in-10
   roll re-runs the whole routine with a freshly picked faction (`0x363ba`, a
   recursive call), so a turn can carry several raids. IB's old flat 20% plus a
   5% "second raid by a different faction" was a guess; neither shape is in the
@@ -1066,7 +1066,7 @@ an over-max value shows the limit and loops back to its input loop keeping the
 buffer. Only an empty answer leaves, because empty substitutes the MINIMUM and
 this call site's minimum is zero. A negative cannot be typed at all: the editor
 accepts digits, backspace, K, M, `>` and Enter, and silently discards everything
-else. IB cancelled on any out-of-range value until 2026-09-13, which threw a
+else. IB canceled on any out-of-range value until 2026-09-13, which threw a
 baron out of a forced turn screen for a typo.
 
 The gate on the whole screen is the same field twice over: the original counts
@@ -1993,7 +1993,7 @@ That is a string and an absence, NOT an executing branch. Nobody here has read
 0.953's effect-selection code — its overlay is outside the catalog the
 `bre-disasm` tooling is pinned to — so "0.953 performed the effect" is
 reasonable inference and not a verified fact. It is worth stating plainly
-because 0.988 is itself proof that a report line can outlive the behaviour it
+because 0.988 is itself proof that a report line can outlive the behavior it
 describes, which is the same trap in the other direction. Long-time players say
 the effect used to fire and had stopped by the last release; 0.953's string and
 missing dial are consistent with that and do not prove it.
@@ -2004,7 +2004,7 @@ nothing more. (Binary kept out of tree; Andy's copy extracted to
 `~/bre-0953-private/` from `bre0953.zip`.)
 
 **So this is a DELIBERATE DIVERGENCE, not a fidelity fix (#266).** IB performs
-what 0.988 only reports. The reason is player demand, not a judgement about the
+what 0.988 only reports. The reason is player demand, not a judgment about the
 original: the effect was removed from BRE more than twenty-five years ago, and
 players of this game have asked for it back. What makes restoring it cheap and
 exact rather than an invention is that the arriving resolver still carries the
@@ -2353,7 +2353,7 @@ level frozen at zero Technology regions, buying 500 regions moved food decay fro
 
 Together those two properties mean a player can bank research cheaply while
 small, then liquidate the regions and keep the benefit — but cannot expand
-afterwards without giving most of it back. **IB keeps this behavior
+afterward without giving most of it back. **IB keeps this behavior
 deliberately**: the exploit is self-limiting, because a realm that stays small to
 preserve its technology pays for that in income, military and land.
 
@@ -2865,7 +2865,7 @@ IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
   50 → 25%, 71 → ~50%, 100 → 100%.
 - **Riot effect:** each riot removes **`People div 15`** (~6.67%) of the
   population and docks **`tax div 3`** popular support. (An earlier reading had
-  the `tax div 3` term cancelling population growth — wrong; it is the support
+  the `tax div 3` term canceling population growth — wrong; it is the support
   penalty, confirmed by live capture below.)
 - **Support drifts with the tax rate every turn, riot or not:**
 
@@ -3309,7 +3309,7 @@ section is a record of what was claimed and how it was settled, so the word
 
   **The food leaves the granary AT the prompt, not at rollover.** `allocate_food`
   scores `given/need` and applies both penalties where the baron answers, so
-  everything still on the shelf afterwards is genuinely surplus and safe to sell.
+  everything still on the shelf afterward is genuinely surplus and safe to sell.
   IB recorded the answers and consumed at rollover until 2026-09-16, which made
   the food market able to sell food that had already been handed over: a baron
   fed his realm in full, sold what the granary still showed, bought land with the
@@ -3453,7 +3453,7 @@ Investments / Loans**, and **View Bank Rates**.
   rather than creating a second record. Since a day is several turns, this is
   reachable within a single day — invest on one turn and again on a later turn
   of the same day at the same term, and the two are indistinguishable
-  afterwards. It also explains the shape of the money cap above: BRE bounds
+  afterward. It also explains the shape of the money cap above: BRE bounds
   *what may be invested in a day*, which is the same unit its storage uses.
 
   Only `+0x2f5`/`+0x2f7` (one dword's halves) appear across the bank code, so
@@ -3552,7 +3552,7 @@ refused outright — an escape in a realm name would move the cursor on every
 screen that lists it.
 
 **IB adds a Welcome menu before the naming step (#28), where the original asks
-its one Instructions question afterwards.** It stands between the first-run
+its one Instructions question afterward.** It stands between the first-run
 language picker and `Name your Realm:`, styled like the opening menu, and
 carries Create Realm, See Scores, Instructions, Game Setup, Help, and — in a
 league — InterBBS Scores. Enter takes Create Realm; Quit ends the visit with no
@@ -4450,7 +4450,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   - **Stay**: the caller is asked "How many days would you like him to remain?",
     defaulting to 3, bounded by `SpyGuyMaxDays` (15) and by what the gold
     covers. **IB offers the full 15 whatever the gold, and deals with the money
-    afterwards**: the original's cap tells a short baron that 8 days is the
+    afterward**: the original's cap tells a short baron that 8 days is the
     length of the office rather than the length of their purse. When the stay
     cannot be paid for, IB names the shortfall and opens the Bank where the
     baron stands (`offerBank`); the send is re-checked on the way out, so
@@ -5295,7 +5295,7 @@ and each carries a gameplay effect (#11 wired the last two):
   ("<X> declared war on your empire.", "Your treaty with <X> has been broken."),
   which zeroes both rows as well. Relation 8 is a menu index and a display label
   and is never stored, so `docs/dev/bre-save-format.md`'s two `+0x130` entries
-  are settled in favour of the one saying 8 and 9 are menu items only. See
+  are settled in favor of the one saying 8 and 9 are menu items only. See
   "Declaration Of War is a menu item in the original as well as a relation label"
   above.
 
@@ -5645,7 +5645,7 @@ own recap, is worded from the single outcome the battle resolved to, and says
 which side held the field before it counts any casualties** — a defender who
 beats a strike off still loses units, and pairing a bare "repelled" with a count
 of the reader's own dead reads as a contradiction (#201). The original settles
-the battle first and itemises afterwards (`BRE.OVR resolve_received_invasion`). An INDIVIDUAL strike is named on both sides —
+the battle first and itemises afterward (`BRE.OVR resolve_received_invasion`). An INDIVIDUAL strike is named on both sides —
 the packet carries `RemoteAttack.FromEmpire`, so the defending planet reads
 "Ironhold of Alpha" and not merely "Alpha" — while a GROUP attack is anonymous
 on both, since it is the planet's doing and naming one of several contributors
@@ -5728,7 +5728,7 @@ number: a board asserts its own rules, so signing would prove who wrote the
 field and never that it is true, and a board set on playing its own game would
 write the Coordinator's fingerprint just as happily. The gate is against
 misconfiguration — the board that missed a broadcast, the sysop who edited the
-config afterwards — and not against a board that lies.
+config afterward — and not against a board that lies.
 
 A packet whose fingerprint is not the league's is **held**: a board running its
 own turns-per-day or attack limits would otherwise feed that into every other

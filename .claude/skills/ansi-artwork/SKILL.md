@@ -120,7 +120,7 @@ together; it is wringing tones out of ONE color, where the palette gives you
 dark-bg, three shade mixes, and bright-fg — five steps per hue, no hue changes
 needed.
 
-**The two glyph classes divide the labour, and the split is sharp:**
+**The two glyph classes divide the labor, and the split is sharp:**
 
 | | same-hue cells | cross-hue cells |
 | --- | --- | --- |

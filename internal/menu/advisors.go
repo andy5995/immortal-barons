@@ -93,7 +93,7 @@ type advisorLine struct {
 }
 
 // hiTerms replaces each {braced} run in s with emph-colored text, returning to
-// base afterwards. Runs after word-wrapping (a braced phrase has no spaces, so
+// base afterward. Runs after word-wrapping (a braced phrase has no spaces, so
 // it can never straddle a wrap) and before hiNumsReset, which passes the escape
 // sequences this inserts through untouched.
 func hiTerms(s, emph, base string) string {

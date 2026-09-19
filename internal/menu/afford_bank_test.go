@@ -28,7 +28,7 @@ func TestCovertShortOfGoldIsOfferedTheBank(t *testing.T) {
 		}
 	})
 	w.bank = BuildMenus().Bank
-	// Target A, (1) Withdraw the shortfall, one agent, and the acknowledgement's
+	// Target A, (1) Withdraw the shortfall, one agent, and the acknowledgment's
 	// pause. The refusal itself does not pause: the offer follows it straight
 	// away.
 	f := &fakeSession{keys: []rune("A11\r ")}
