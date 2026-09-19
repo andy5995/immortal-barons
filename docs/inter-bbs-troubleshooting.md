@@ -344,9 +344,16 @@ the roster or the routing rather than at that board.
 ## A board that answers some of the time
 
 A link that delivers, stops for a few days, then delivers again is harder to
-read than one that has stopped for good. Travel Times, on the InterPlanetary
-Operations menu, marks any board whose last probe came home more than two days
-ago:
+read than one that has stopped for good.
+
+**The first two signs of it are a PLAYER's, not a sysop's.** Travel Times is on
+the InterPlanetary Operations menu and the returning-strike notices land on a
+baron's own recap, so a sysop who does not play sees neither, and a player who
+does cannot run any of the commands below. Which half of this section you can
+act on depends on which you are; the rest of it is worth reading either way, so
+a player knows what to report and a sysop knows what to ask for.
+
+Travel Times marks any board whose last probe came home more than two days ago:
 
 ```
 Nite Eyes BBS                 40 minutes  (2 days old)
@@ -370,7 +377,8 @@ says only that one of them did not.
 
 ### Narrowing it from your own board
 
-You can tell which side the fault is on without any access to theirs.
+With shell access to your own board you can tell which side the fault is on
+without any access to theirs.
 
 - Read the timestamps in your own data directory. `TravelSeen` is when each
   board's probe last came home, to the second, which is what the mark rounds to
@@ -397,8 +405,29 @@ Two patterns settle it without waiting for a reply:
   Check it is on the roster and routable; an unroutable board is skipped every
   day rather than measured and found slow.
 
-If the fault is on their side, the sysop can answer three questions from the
-list below without sending you anything.
+A strike is the same signal on the same link, and it reaches the baron who sent
+it rather than the sysop. One sent to that board and never heard about turns up
+on that baron's recap opening `No word came back from <board>.`, with the rest
+of the line saying what came home — the agents, the force sent against a realm,
+the gold from a bid. That is the lost-forces timer giving back what it can, and
+the lines date the outage as well as confirming it. A player seeing a run of
+them against one board has found the same fault from the other end, and it is
+worth passing on.
+
+### What a second board's screen tells you
+
+Travel Times on another board settles it, and any player there can read it —
+this one does not need a sysop. Ask for the same row.
+
+- **Stale on both** — that board is answering nobody, so the fault is its own
+  run or its own transport, and the next section is for its sysop.
+- **Stale on yours, clear on theirs** — that board is answering. The fault is
+  the path between it and you.
+
+The second case is the one to look for, because from your own board the two look
+identical. A board answering its neighbors while your probes go unanswered
+points at the route rather than at the board, so check that your roster places
+it the same way the other board's roster does.
 
 ### If the board is yours
 
