@@ -11,9 +11,10 @@
 // INSTALL.CFG.
 //
 // The sysop declares which format their BBS writes once (stored in door.json,
-// set with -set-dropfile); ParseDropfileAs then reads that format regardless of
-// the file's name. ParseDropfile still auto-dispatches on the filename for a
-// bare path.
+// set with -set-dropfile); ParseDropfileAs then reads that format whatever the
+// file is named, except when the name is unmistakably a DIFFERENT supported
+// format, which is a misconfiguration worth naming rather than parsing.
+// ParseDropfile still auto-dispatches on the filename for a bare path.
 package door
 
 import (
@@ -146,7 +147,36 @@ func ParseDropfileAs(path, format string) (*Caller, error) {
 	if !ok {
 		return nil, fmt.Errorf("unknown dropfile format %q (want %s)", format, formatNames())
 	}
-	return checkCaller(f.read(path))
+	c, err := checkCaller(f.read(path))
+	if err != nil {
+		return nil, explainFormatMismatch(path, f, err)
+	}
+	return c, nil
+}
+
+// explainFormatMismatch replaces a parse failure with the likelier cause when the
+// file's NAME belongs to a different supported format. The two settings are
+// independent — -set-dropfile names the format, the command line names the file —
+// so a sysop who changes one and not the other has the door reading, say, an
+// 11-line DOOR32.SYS as a DOOR.SYS and being told it is "too short". That error
+// sends them looking at the BBS that wrote the file, which is the one place the
+// fault is not. A sysop hit this on 2026-09-18.
+//
+// The name is only ever used to EXPLAIN a failure, never to refuse a file that
+// parses: a BBS may write a format under whatever name it likes, and a setup
+// that works today must go on working.
+func explainFormatMismatch(path string, want Format, err error) error {
+	lower := strings.ToLower(filepath.Base(path))
+	if want.match(lower) {
+		return err
+	}
+	for _, f := range Formats {
+		if f.ID != want.ID && f.match(lower) {
+			return fmt.Errorf("%s does not parse as %s (%v), and its name says it is a %s: point the door at the %s your BBS writes, or run -set-dropfile and choose %s",
+				filepath.Base(path), want.Name, err, f.Name, want.File, f.Name)
+		}
+	}
+	return err
 }
 
 // ParseDropfile reads the dropfile at path, dispatching on its filename. Used

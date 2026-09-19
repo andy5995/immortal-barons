@@ -67,6 +67,10 @@ Set up the game as an external program (a "door") in your BBS software.
   directory for the configured format. With BBSDEV.DRP the game reads the
   `BBSDEV_DRP` environment variable first, which is how that format expects a
   BBS to name the file.
+  - `-set-dropfile` and `-dropfile` are separate settings: one names the format,
+    the other names the file. Change the format and the command line keeps
+    pointing at the old file, so change both. When a drop file fails to load and
+    its name belongs to another supported format, the door says so.
 - The caller's handle from the drop file becomes the name of their realm.
 - A drop file that names the caller's terminal encoding and language is
   followed: the game sends that encoding, and a new player skips the language

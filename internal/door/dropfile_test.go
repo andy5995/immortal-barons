@@ -289,3 +289,44 @@ func TestParseTooShortFilesError(t *testing.T) {
 		})
 	}
 }
+
+// A sysop who changes the configured format but leaves the BBS command line
+// pointing at the old file used to be told only that the file was "too short" —
+// an error about the file's contents, when the fault is the pairing. The report
+// that prompted this had an 11-line DOOR32.SYS read as DOOR.SYS and as
+// DORINFO1.DEF.
+func TestMismatchedNameAndFormatNamesBoth(t *testing.T) {
+	p := write(t, "door32.sys",
+		"2\n7\n57600\nImmortal BBS\n42\nJohn Q Sysop\nKhan\n80\n30\n1\n4\n")
+	for _, format := range []string{"doorsys", "dorinfo", "pcboard", "bbsdev"} {
+		t.Run(format, func(t *testing.T) {
+			_, err := ParseDropfileAs(p, format)
+			if err == nil {
+				t.Fatalf("reading door32.sys as %s should fail", format)
+			}
+			for _, want := range []string{"door32.sys", "DOOR32.SYS", "-set-dropfile"} {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("error does not name %s: %v", want, err)
+				}
+			}
+		})
+	}
+}
+
+// The name only ever EXPLAINS a failure. A file that parses is accepted whatever
+// it is called, so a board writing one format under another's name goes on
+// working — and a name the registry does not know is no obstacle either.
+func TestNameNeverRefusesAFileThatParses(t *testing.T) {
+	body := "2\n7\n57600\nImmortal BBS\n42\nJohn Q Sysop\nKhan\n80\n30\n1\n4\n"
+	for _, name := range []string{"door32.sys", "node1.drp", "door.sys", "dorinfo1.def"} {
+		t.Run(name, func(t *testing.T) {
+			c, err := ParseDropfileAs(write(t, name, body), "door32")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if c.Handle != "Khan" {
+				t.Errorf("Handle = %q, want Khan", c.Handle)
+			}
+		})
+	}
+}
