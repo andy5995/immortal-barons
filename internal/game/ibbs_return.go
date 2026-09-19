@@ -195,9 +195,14 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	return strings.TrimRight(b.String(), "\n")
 }
 
-// strikeTarget names what the strike was aimed at, which the answer alone
-// cannot: a whole-planet strike has no named realm on the way out, and one that
-// found nothing has none on the way back either.
+// strikeTarget names what the strike was aimed at AND the board it went to,
+// which the answer alone cannot: a whole-planet strike has no named realm on
+// the way out, and one that found nothing has none on the way back either.
+//
+// strikeAim (ibbs_attack.go) is the same decision for a notice that has already
+// named the board and so wants the target alone — hence "the whole planet"
+// there against "the whole of <board>" here. The wordings differ because the
+// sentences do; the whole-planet test is the part that must not.
 func strikeTarget(sent InFlightStrike, res AttackResult) string {
 	name := res.TargetEmpire
 	if name == "" {
@@ -287,8 +292,8 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 		// which the target's own board applied when it resolved the strike
 		// (sabreDevelop). IB damaged the firer here until 2026-09-14; that was
 		// invented before the return path was read (#266).
-		e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired, and broke up over their land instead of yours.",
-			label, res.TargetEmpire, sent.TargetBoard))
+		e.addEvent(fmt.Sprintf("Your %s against %s backfired, and broke up over their land instead of yours.",
+			label, strikeTarget(sent, res)))
 		w.postNews(fmt.Sprintf("%s's %s broke up over the realm it was aimed at.", e.Name, label))
 		return
 	}
@@ -297,8 +302,8 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 		e.addEvent(fmt.Sprintf("Your %s found no realm named %s on %s.", label, sent.TargetEmpire, sent.TargetBoard))
 		return
 	case OutcomeProtected:
-		e.addEvent(fmt.Sprintf("Your %s against %s of %s broke on their New Realm Protection.",
-			label, res.TargetEmpire, sent.TargetBoard))
+		e.addEvent(fmt.Sprintf("Your %s against %s broke on their New Realm Protection.",
+			label, strikeTarget(sent, res)))
 		return
 	}
 	if res.Score > 0 {
@@ -306,7 +311,7 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	}
 	report := res.Report
 	if report == "" {
-		report = fmt.Sprintf("Your %s against %s of %s is over.", label, res.TargetEmpire, sent.TargetBoard)
+		report = fmt.Sprintf("Your %s against %s is over.", label, strikeTarget(sent, res))
 	}
-	e.addEvent(fmt.Sprintf("%s (%s of %s): %s", label, res.TargetEmpire, sent.TargetBoard, report))
+	e.addEvent(fmt.Sprintf("%s (%s): %s", label, strikeTarget(sent, res), report))
 }

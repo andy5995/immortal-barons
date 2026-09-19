@@ -992,6 +992,23 @@ func (w *World) takeInFlight(id int) (InFlightStrike, bool) {
 //
 // Run from the planetary step, after inbound packets have been applied, so a
 // result that did arrive this run is never overtaken by the timer.
+// strikeAim names what a stalled strike was aimed at, for the recovery notices,
+// which have already named the board and so want the target alone. It is
+// strikeTarget (ibbs_return.go) without a result to read: nothing came back,
+// which is the whole reason these notices exist. Both take Whole OR an empty
+// name as the whole-planet form — a group attack aimed at the planet rather
+// than at one baron, and the four bombing ops, which TargetsPlanet routes past
+// the target lookup entirely.
+//
+// Without it a timed-out planet-wide strike read "your force sent against  has
+// returned home", with a hole where the name goes (league recap, 2026-09-19).
+func strikeAim(f InFlightStrike) string {
+	if f.Whole || f.TargetEmpire == "" {
+		return "the whole planet"
+	}
+	return f.TargetEmpire
+}
+
 func (w *World) ReturnLostForces() int {
 	days := w.Config.LostForcesDays
 	if days <= 0 {
@@ -1027,7 +1044,7 @@ func (w *World) ReturnLostForces() int {
 		if f.Kind == "special" {
 			if e := w.FindByOwner(f.Owner); e != nil {
 				e.addEvent(fmt.Sprintf("No word came back from %s. Your %s against %s is presumed lost.",
-					f.TargetBoard, SpecialOpLabel(f.Op), f.TargetEmpire))
+					f.TargetBoard, SpecialOpLabel(f.Op), strikeAim(f)))
 			}
 			continue
 		}
@@ -1040,7 +1057,7 @@ func (w *World) ReturnLostForces() int {
 			e.Jets += c.Jets
 			e.Tanks += c.Tanks
 			e.Bombers += c.Bombers
-			e.addEvent(fmt.Sprintf("No word came back from %s. Your force sent against %s has returned home.", f.TargetBoard, f.TargetEmpire))
+			e.addEvent(fmt.Sprintf("No word came back from %s. Your force sent against %s has returned home.", f.TargetBoard, strikeAim(f)))
 		}
 	}
 	w.InFlight = waiting
