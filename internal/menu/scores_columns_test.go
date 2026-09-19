@@ -3,6 +3,7 @@ package menu
 import (
 	"bytes"
 	"io"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -11,7 +12,9 @@ import (
 
 // TestPrintScoresBREHeader checks the local scores board matches BRE's layout:
 // the game-name banner, BRE's column labels/order (Id, Empire Name, Territory,
-// Score, Net Worth), lettered [A]/[B] ids, and (dead) on an eliminated empire.
+// Score, Net Worth), lettered [A]/[B] ids, and DEAD in the TERRITORY column of
+// an eliminated empire — where BRE puts it (cap/kd3-01.cap), rather than as a
+// suffix on the name.
 func TestPrintScoresBREHeader(t *testing.T) {
 	w := newWorld()
 	f := &fakeSession{}
@@ -26,10 +29,18 @@ func TestPrintScoresBREHeader(t *testing.T) {
 	printScores(f, w)
 	out := f.out.String()
 	plain := stripANSI(out)
-	for _, want := range []string{"Immortal Barons", "Id", "Empire Name", "Territory", "Score", "Net Worth", "(dead)", "(A)"} {
+	for _, want := range []string{"Immortal Barons", "Id", "Empire Name", "Territory", "Score", "Net Worth", "(A)"} {
 		if !strings.Contains(plain, want) {
 			t.Errorf("scores output missing %q:\n%s", want, plain)
 		}
+	}
+	// DEAD stands in the territory column, so it is followed by the two figures
+	// and preceded by the name — asserting the bare word would pass on a suffix.
+	if !regexp.MustCompile(`\(A\)[^\n]+ DEAD +\d`).MatchString(plain) {
+		t.Errorf("DEAD is not in the territory column:\n%s", plain)
+	}
+	if strings.Contains(plain, "(dead)") {
+		t.Errorf("the name still carries a (dead) suffix:\n%s", plain)
 	}
 	if strings.Contains(out, "Rank") || strings.Contains(out, "Land") {
 		t.Errorf("scores output still uses old labels:\n%s", out)

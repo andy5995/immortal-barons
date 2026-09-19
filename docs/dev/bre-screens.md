@@ -272,6 +272,43 @@ Choice> Quit
 
 ---
 
+## Total conquest, and how a dead realm is listed
+
+Captured live in `cap/kd3-01.cap` (2026-09-18), the attack that eliminated a
+realm. The win line is replaced, and a second line announces the military:
+
+```
+You have crushed the enemy completely!  You captured all 8 Regions!
+You also get all the remains of your opponent's military...
+```
+
+The captured-region picker still runs afterwards, exactly as on an ordinary win
+— the conqueror places the last 8 regions by type before the turn ends.
+
+Thereafter the realm keeps its row on the score board, with **`DEAD` in the
+TERRITORY column** where the region count would be, right-aligned like a figure.
+The name is untouched and both figures are still printed:
+
+```
+(P) Epoch Times                               DEAD     17927         986
+```
+
+**IB matched this on 2026-09-18.** It had been appending `(dead)` to the NAME
+and printing the territory figure, which cost the name column seven characters
+and left the territory column claiming the realm still held land.
+
+**Open question — the 986.** That realm shows a net worth of 986 with no
+territory, having just had "all the remains" of its military taken. Net worth is
+land plus units (`BRE.EXE` 0x8F53), so a realm with neither should read 0. Either
+the transfer leaves some unit type behind, or the dead row prints a stored figure
+rather than a recomputed one. The check that would settle it is the arithmetic
+in `resolve_regular_attack` after the block the catalog names
+`__transfer_defeated_military` (`BRE.OVR` 0x01012b) — that block opens with the
+report-string assembly, so the transfer itself is further in and has not been
+read. **IB does not reproduce the 986**: `absorbMilitary` takes all six unit
+types, so a crushed realm computes 0. IB stopped FORCING the zero in the same
+change, since the forcing rested on a claim this capture disproves.
+
 ## Regular Attack
 
 ### Target list

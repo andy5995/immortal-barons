@@ -3831,6 +3831,10 @@ msgstr "─»>Enter om door te gaan, Q om te stoppen<«─"
 msgid "─»>Paused<«─"
 msgstr "─»>Gepauzeerd<«─"
 
+#: internal/menu/scoretable.go:80
+msgid "DEAD"
+msgstr "DOOD"
+
 #~ msgid "%s  You have %s gold."
 #~ msgstr "%s  U heeft %s goud."
 

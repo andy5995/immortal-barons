@@ -3651,6 +3651,10 @@ msgstr "─»>Eingabe zum Fortfahren, Q zum Beenden<«─"
 msgid "─»>Paused<«─"
 msgstr "─»>Pause<«─"
 
+#: internal/menu/scoretable.go:80
+msgid "DEAD"
+msgstr "TOT"
+
 #~ msgid "%s  You have %s gold."
 #~ msgstr "%s  Ihr habt %s Gold."
 

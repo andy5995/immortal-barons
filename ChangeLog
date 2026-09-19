@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * An eliminated realm is listed as DEAD where its territory would be
   * A drop file naming a socket but no handle is taken as stdio, not refused
   * A drop file that will not load is checked against its name for the reason
   * The end-of-turn statistics are spaced as the original spaces them

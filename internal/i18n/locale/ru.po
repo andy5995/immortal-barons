@@ -3635,6 +3635,10 @@ msgstr "─»>Enter - продолжить, Q - выход<«─"
 msgid "─»>Paused<«─"
 msgstr "─»>Пауза<«─"
 
+#: internal/menu/scoretable.go:80
+msgid "DEAD"
+msgstr "ПОГИБ"
+
 #~ msgid "%s  You have %s gold."
 #~ msgstr "%s  У вас %s золота."
 

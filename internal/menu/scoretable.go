@@ -32,10 +32,13 @@ func scoreRows(w *ctx) (rows []ScoreRow, lastMaster string) {
 	w.Read(func() {
 		rows = make([]ScoreRow, 0, len(w.Empires))
 		for _, e := range w.Empires {
+			// Not forced to zero: the original prints a non-zero net worth beside
+			// DEAD (docs/dev/bre-screens.md). It can be large, because only the
+			// conquest path empties a realm — a realm that starves its population
+			// dies owning everything (turn.go kills on `Land <= 0 || People <= 0`),
+			// as does one abdicating. That husk is telling the truth about what it
+			// holds; DEAD is what says it cannot defend it.
 			nw := w.NetWorth(e)
-			if !e.Alive {
-				nw = 0 // BRE's scores screen values a dead realm at nothing
-			}
 			// Net Worth is the asset value (land + military). Score is BRE's
 			// cumulative metric (Empire.Score): the day-start net worth awarded per
 			// turn played, minus small riot/spoilage dings — separate from wealth.
@@ -60,15 +63,21 @@ func printScores(s session.Session, w *ctx) {
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
 	scoreTableHead(s, w.Term)
 	for _, r := range rows {
-		name := r.Name
-		if !r.Alive {
-			name += " " + tr(s, "(dead)")
-		}
 		nameColor := ansi.FgBrightWhite
 		if r.IsPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, w.Term, scoreID(r.Letter, r.Protected), name, nameColor, r.Presence, r.Land, r.Score, r.NW)
+		if !r.Alive {
+			// BRE puts DEAD in the TERRITORY column, where the region count would
+			// be, and leaves the name alone — `(P) Epoch Times  DEAD  17927  986`
+			// (cap/kd3-01.cap). IB used to append "(dead)" to the name instead,
+			// which cost the name column seven characters and left the territory
+			// column claiming the realm still held land.
+			scoreTableRowStr(s, w.Term, scoreID(r.Letter, r.Protected), r.Name, nameColor, r.Presence,
+				tr(s, "DEAD"), numfmt.Short(r.Score), numfmt.Short(r.NW))
+			continue
+		}
+		scoreTableRow(s, w.Term, scoreID(r.Letter, r.Protected), r.Name, nameColor, r.Presence, r.Land, r.Score, r.NW)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
