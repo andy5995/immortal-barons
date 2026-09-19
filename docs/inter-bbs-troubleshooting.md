@@ -341,6 +341,83 @@ has the detail):
 A board missing from these entirely was never heard from at all, which points at
 the roster or the routing rather than at that board.
 
+## A board that answers some of the time
+
+A link that delivers, stops for a few days, then delivers again is harder to
+read than one that has stopped for good. Travel Times, on the InterPlanetary
+Operations menu, marks any board whose last probe came home more than two days
+ago:
+
+```
+Nite Eyes BBS                 40 minutes  (2 days old)
+```
+
+The figure is an average of the round trips that finished. It freezes during an
+outage rather than climbing, so a stopped link and a fast one print the same
+number. The mark is what tells them apart. Only a probe coming home clears it,
+so a mark that appears, goes away for a day, then comes back means that board
+answered once and went quiet again.
+
+**Game Setup does not report this.** Its Transport faults row counts notices,
+and a board has to be silent for seven days before one is written. A link that
+recovers every two or three days never reaches that. The row also gives one
+count for the whole board and never names a link.
+
+The probe is a round trip. Your board sends a record, the far board sends it
+straight back untouched, and your board times the journey. Four things have to
+work — your outbound, their run, their outbound, your inbound — and the mark
+says only that one of them did not.
+
+### Narrowing it from your own board
+
+You can tell which side the fault is on without any access to theirs.
+
+- Read the timestamps in your own data directory. `TravelSeen` is when each
+  board's probe last came home, to the second, which is what the mark rounds to
+  whole days:
+
+  ```
+  jq '{TravelSeen, TravelTimes}' world.json
+  ```
+
+- Run `-lastpacket` for when each board was last heard from at all.
+
+Those two answer different questions, and the pair is what localises the fault:
+
+| Heard from | Travel Times | Where the fault is |
+| --- | --- | --- |
+| recently | stale | your outbound to them, or their run is not processing what you send |
+| stale | stale | nothing is coming back: their run, their outbound, or your inbound |
+
+Two patterns settle it without waiting for a reply:
+
+- **Several boards going stale on the same day, and recovering together**, is
+  your own outbound. No probe can come home while nothing is going out.
+- **A board that reads `No Data` and never changes** is not being probed at all.
+  Check it is on the roster and routable; an unroutable board is skipped every
+  day rather than measured and found slow.
+
+If the fault is on their side, the sysop can answer three questions from the
+list below without sending you anything.
+
+### If the board is yours
+
+The mark on someone else's screen says your board stopped answering for a while.
+Work down the path a packet takes:
+
+- **Is the planetary run happening?** Check the timestamps in `planetary.log`.
+  A run every day leaves a line every day; a gap in the log is a gap in the
+  service, and the usual cause is a scheduler that stopped rather than the game.
+- **Is anything waiting in the inbound directory?** Packets sitting unread mean
+  the run is not reaching them, or is failing before it gets that far.
+- **Is anything stuck in the outbound directory?** Packets written and never
+  collected mean the game is fine and the mailer is not moving them.
+- **Does the mailer log show the transfers?** With `barons-ftn`, its own run is
+  the next place to look.
+
+A run that happens but finds nothing to do still answers probes, so a board that
+is quiet on someone's screen while its own log looks healthy points at the
+transport on either side of the game rather than at the game.
 ## For the League Coordinator
 
 Everything above applies to the Coordinator's own board too. These are the
