@@ -820,9 +820,9 @@
       "evidence": ["binary_strings: time-check packet topic", "call_graph: incoming packet handler using load/save time-state helpers"]
     },
     "0x044adf": {
-      "name": "clear_outbound_reports",
+      "name": "initialize_new_game",
       "confidence": "high",
-      "evidence": ["binary_strings: report and outbound-node data topics", "call_graph: reset workflow clearing network report files"]
+      "evidence": ["binary_strings: data, report and outbound directory topics plus the version stamp", "disassembly: writes the default settings block at 0x44db9 - the four per-day attack allowances among them", "call_graph: called by reset_game_data; calls initialize_planet_data and validate_registration", "supersedes clear_outbound_reports, which named only its first step"]
     },
     "0x044e97": {
       "name": "create_global_reset_packet",
@@ -1087,7 +1087,7 @@
     "0x044978": {
       "name": "remove_outbound_report_file",
       "confidence": "medium",
-      "evidence": ["binary_strings: removal result topic", "call_graph: file-removal helper called by clear_outbound_reports"]
+      "evidence": ["binary_strings: removal result topic", "call_graph: file-removal helper called by initialize_new_game"]
     },
     "0x0450b4": {
       "name": "write_special_operation_packet",

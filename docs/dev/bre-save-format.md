@@ -271,7 +271,34 @@ config record (les di,[0x28b4])
   +0x38  int16  Turns of Protection (compared against empire +0x281)
   +0x42  int16  Planetary Tax Rate, tenths of a percent (default 50 = 5.0%,
                 editor maximum 200 = 20.0%)
+  +0x62  int16  Maximum Individual Attacks Per Day   (reset default 1)
+  +0x64  int16  Maximum Group Attacks Per Day        (reset default 1)
+  +0x66  int16  Maximum Terrorist Ops Per Day        (reset default 10)
+  +0x68  int16  Maximum Bombing Operations Per Day   (reset default 5)
 ```
+
+**How the four allowance offsets were pinned, and what is still assumed.** They
+came from the PRINTER rather than from guessing at the layout: `show_game_settings`
+(`BRE.OVR` 0x013c44) loads each label and prints the field beside it, so the
+label/field pairs can be read straight off in order — string `cs:0x399` with
+`[0x28b4]+0x62`, `0x3be` with `+0x64`, `0x3e3` with `+0x66`. Four consecutive
+words against four consecutive lines of the Game Setup screen, which is what
+makes the identification self-checking rather than a single lucky match.
+
+The **defaults** are the block at `BRE.OVR` 0x44db9 — `26 C7 45 62 01 00`,
+`… 64 01 00`, `… 66 0A 00`, `… 68 05 00`, four ES-prefixed word writes in a row —
+inside `initialize_new_game`, the routine `reset_game_data` calls to clear the
+data, report and outbound directories and stamp the version. Corroborated from
+play: `cap/20240527-134Pho_Lazarus_Public.cap` shows a board sitting at Terrorist
+Ops **10** while its sysop had raised Individual and Group to 2 — an untouched
+default at exactly the value the binary writes.
+
+**The assumed part is that the in-memory settings record and the `game.dat`
+header share one numbering.** These offsets are into the record reached through
+`[0x28b4]`; the header's own known landmarks (`+0x36` turns per day, `+0x38`
+protection) sit at the same numbers, and `+0x62` in a local `game.dat` reads a
+plausible 1 — but no rendered Game Setup screen has been captured from that same
+install to confirm it. Reading one would settle it.
 
 **`+0x72` is a per-turn accumulator, not a running total.** It is zeroed at the
 start of the income phase and added to at exactly six sites, one per income
