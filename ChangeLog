@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A drop file naming a socket but no handle is taken as stdio, not refused
   * A drop file that will not load is checked against its name for the reason
   * The end-of-turn statistics are spaced as the original spaces them
   * An attack is confirmed before it is sent

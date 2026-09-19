@@ -190,14 +190,26 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		os.Exit(1)
 	}
+	if caller.StdioRedirect {
+		// Say it on the console as well as in the log. This used to be a refusal
+		// the sysop read on their BBS console, and a fallback nobody is told about
+		// looks exactly like the freeze it was meant to cure — the door has taken
+		// the only path left to it, but if the BBS was not in fact redirecting,
+		// stdin is not the caller and this line is the only clue.
+		fmt.Fprintln(os.Stderr, "immortal-barons: the drop file names a socket but no handle, so the caller is being read from standard I/O.")
+		fmt.Fprintln(os.Stderr, "If your BBS is not redirecting the connection through standard I/O, give the door the socket handle instead.")
+	}
 
 	// Diagnostic (data/ib-door.log): a silent no-splash bounce (issue #37) leaves
-	// no other trace, so record what the dropfile gave us at launch — the I/O mode,
+	// no other trace, so record what the launch resolved to — the I/O mode,
 	// time-left, and socket handle name the environment. A file (not stderr) so a
 	// remote tester needs no door-config change to capture it.
-	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s stdin-tty=%v ansi=%v charset=%q language=%q",
-		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS, session.StdinIsTerminal(), caller.ANSI,
-		caller.Charset, caller.Language)
+	//
+	// io and socket are POST-fallback: a drop file that named a socket with no
+	// handle reads as stdio here, and stdio-redirect is what says so happened.
+	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d stdio-redirect=%v os=%s stdin-tty=%v ansi=%v charset=%q language=%q",
+		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, caller.StdioRedirect,
+		runtime.GOOS, session.StdinIsTerminal(), caller.ANSI, caller.Charset, caller.Language)
 
 	s, closeSession, err := openSession(caller)
 	// ...and separately, which backend actually opened. The line above reports

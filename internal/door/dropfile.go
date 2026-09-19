@@ -79,6 +79,18 @@ func fromBytes(parse func([]byte) (*Caller, error)) func(string) (*Caller, error
 	}
 }
 
+// formatByFileName finds the format a file's name belongs to, so the two callers
+// that ask that question — the bare-path dispatcher and the mismatch explainer —
+// cannot come to different answers about the same name.
+func formatByFileName(lowerName string) (Format, bool) {
+	for _, f := range Formats {
+		if f.match(lowerName) {
+			return f, true
+		}
+	}
+	return Format{}, false
+}
+
 // match reports whether a lower-cased file name looks like this format.
 func (f Format) match(lowerName string) bool {
 	if f.matches != nil {
@@ -129,6 +141,13 @@ type Caller struct {
 	Socket      int    // socket/comm handle when IO is IOSocket
 	BBSID       string // BBS software name/version, if provided
 
+	// StdioRedirect records that the drop file named socket mode with no usable
+	// handle, so IO was read as stdio instead. IO and Socket then describe what
+	// the door will DO rather than what the file said, and this flag is the only
+	// surviving trace of the difference — which a sysop chasing a dead session
+	// has to be able to see, so the launch diagnostic prints it.
+	StdioRedirect bool
+
 	// Charset and Language are what the BBS says about the caller's terminal
 	// and the caller themself. Only BBSDEV.DRP carries them; the older formats
 	// leave both empty, which means "the door decides", as it always has.
@@ -167,27 +186,20 @@ func ParseDropfileAs(path, format string) (*Caller, error) {
 // that works today must go on working.
 func explainFormatMismatch(path string, want Format, err error) error {
 	lower := strings.ToLower(filepath.Base(path))
-	if want.match(lower) {
+	f, ok := formatByFileName(lower)
+	if !ok || f.ID == want.ID {
 		return err
 	}
-	for _, f := range Formats {
-		if f.ID != want.ID && f.match(lower) {
-			return fmt.Errorf("%s does not parse as %s (%v), and its name says it is a %s: point the door at the %s your BBS writes, or run -set-dropfile and choose %s",
-				filepath.Base(path), want.Name, err, f.Name, want.File, f.Name)
-		}
-	}
-	return err
+	return fmt.Errorf("%s does not parse as %s (%v), and its name says it is a %s: point the door at the %s your BBS writes, or run -set-dropfile and choose %s",
+		filepath.Base(path), want.Name, err, f.Name, want.File, f.Name)
 }
 
 // ParseDropfile reads the dropfile at path, dispatching on its filename. Used
 // when the format isn't configured (a bare path).
 func ParseDropfile(path string) (*Caller, error) {
 	base := filepath.Base(path)
-	lower := strings.ToLower(base)
-	for _, f := range Formats {
-		if f.match(lower) {
-			return checkCaller(f.read(path))
-		}
+	if f, ok := formatByFileName(strings.ToLower(base)); ok {
+		return checkCaller(f.read(path))
 	}
 	return nil, fmt.Errorf("unsupported dropfile %q (want %s)", base, formatNames())
 }
@@ -279,10 +291,16 @@ func parseDoor32(l []string) (*Caller, error) {
 	default:
 		c.IO = IOLocal
 	}
-	// Socket mode with no handle would attach to fd 0 (stdin) instead of the
-	// caller — fail rather than talk to the wrong stream.
+	// Socket mode with no handle is a BBS saying it has redirected the connection
+	// through standard I/O: it set the comm type it always sets and had no
+	// descriptor to hand over. ScorpioWeb writes exactly this for an SSH caller
+	// with stdio redirection on (reported 2026-09-17). Take it as stdio rather
+	// than as a socket: attaching to a handle of -1 or 0 would fail or, worse,
+	// read the door's own stdin as if it were the caller.
 	if c.IO == IOSocket && sock <= 0 {
-		return nil, fmt.Errorf("line 2 (socket handle): socket mode needs a handle, got %d", sock)
+		c.IO = IOStdio
+		c.Socket = 0
+		c.StdioRedirect = true
 	}
 	if c.Handle == "" {
 		c.Handle = c.RealName
@@ -316,8 +334,12 @@ func parseDoorSys(l []string) (*Caller, error) {
 	case strings.HasPrefix(m, "COM0:SOCKET"):
 		c.IO = IOSocket
 		c.Socket = atoi(m[len("COM0:SOCKET"):])
+		// Same reading as parseDoor32's: a socket named with no usable handle is
+		// a board that has redirected the connection. Less likely to arrive here,
+		// since this format has COM0:STDIO to say so outright — but atoi swallows
+		// a malformed suffix to 0, and a board can write COM0:SOCKET-1.
 		if c.Socket <= 0 {
-			return nil, fmt.Errorf("line 1 (%s): socket mode needs a handle", m)
+			c.IO, c.Socket, c.StdioRedirect = IOStdio, 0, true
 		}
 	case strings.HasPrefix(m, "COM0"):
 		c.IO = IOLocal

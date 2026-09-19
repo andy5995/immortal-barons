@@ -251,11 +251,59 @@ func TestParseRejectsNonNumericField(t *testing.T) {
 	}
 }
 
-// Socket mode with no handle would attach to fd 0 (stdin) rather than the caller.
-func TestParseDoor32RejectsSocketModeWithoutHandle(t *testing.T) {
-	p := write(t, "door32.sys", "2\n0\n38400\nBBS\n1\nReal Name\nKhan\n10\n30\n1\n1\n")
-	if _, err := ParseDropfile(p); err == nil {
-		t.Error("expected an error for socket mode with handle 0")
+// Socket mode with no handle is a BBS that has redirected the connection through
+// standard I/O and had no descriptor to name. ScorpioWeb writes -1 there for an
+// SSH caller with stdio redirection on; the door used to refuse the launch, and
+// the caller saw the BBS freeze. Both formats that can say "socket" are held to
+// the same reading, and to the same three fields — StdioRedirect among them,
+// because the launch diagnostic reports it and nothing else would notice it
+// going missing on one path.
+func TestSocketWithoutHandleFallsBackToStdio(t *testing.T) {
+	door32 := func(handle string) (string, string) {
+		return "door32.sys", "2\n" + handle + "\n38400\nBBS\n1\nReal Name\nKhan\n10\n30\n1\n1\n"
+	}
+	doorSys := func(mode string) (string, string) {
+		l := make([]string, 21)
+		l[0], l[3], l[9], l[18], l[19] = mode, "1", "Khan", "30", "GR"
+		return "door.sys", strings.Join(l, "\n") + "\n"
+	}
+	for _, c := range []struct {
+		name  string
+		build func(string) (string, string)
+		spell string
+	}{
+		{"door32/-1", door32, "-1"},
+		{"door32/0", door32, "0"},
+		{"doorsys/-1", doorSys, "COM0:SOCKET-1"},
+		{"doorsys/empty", doorSys, "COM0:SOCKET"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			name, body := c.build(c.spell)
+			got, err := ParseDropfile(write(t, name, body))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got.IO != IOStdio || got.Socket != 0 || !got.StdioRedirect {
+				t.Errorf("IO/Socket/StdioRedirect = %v/%d/%v, want IOStdio/0/true",
+					got.IO, got.Socket, got.StdioRedirect)
+			}
+			if got.Handle != "Khan" {
+				t.Errorf("Handle = %q, want Khan", got.Handle)
+			}
+		})
+	}
+}
+
+// A real handle still means the socket, which is what Synchronet hands a native
+// door with I/O interception off.
+func TestParseDoor32KeepsARealSocketHandle(t *testing.T) {
+	p := write(t, "door32.sys", "2\n58\n38400\nBBS\n1\nReal Name\nKhan\n10\n30\n1\n1\n")
+	c, err := ParseDropfile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.IO != IOSocket || c.Socket != 58 {
+		t.Errorf("IO/Socket = %v/%d, want IOSocket/58", c.IO, c.Socket)
 	}
 }
 
