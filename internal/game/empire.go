@@ -118,11 +118,15 @@ type Empire struct {
 	// in the turn rather than per purchase. Reset to 0 at the start of each
 	// turn (see runTurn in internal/menu/gameflow.go).
 	RegionsBoughtThisTurn int
-	// AttacksToday counts individual (conventional) attacks launched since the day
-	// began, enforcing Config.MaxIndividualAttacks across every turn in the day.
+	// AttacksToday counts Individual Attack Forces sent to other boards since the
+	// day began, enforcing Config.MaxIndividualAttacks across every turn in the
+	// day. Local attacks are not counted and not capped — see CanAttack.
 	// Persisted so it survives the per-action reload/save cycle of door play; reset
 	// to 0 at daily maintenance (see DailyMaintenance).
 	AttacksToday int
+	// LocalAttacksToday counts attacks made on this board since the day began,
+	// against Config.MaxLocalAttacks. Reset at daily maintenance.
+	LocalAttacksToday int `json:",omitempty"`
 	// The interplanetary allowances, counted and reset the same way as
 	// AttacksToday, against Config.MaxGroupAttacks / MaxTerrorOps / MaxBombingOps.
 	GroupAttacksToday int

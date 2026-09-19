@@ -166,11 +166,7 @@ func refuseInProtection(s session.Session, w *ctx, refusal string) bool {
 }
 
 func regularAttack(s session.Session, w *ctx) Result {
-	if blockedByProtection(s, w) {
-		return Stay
-	}
-	if !w.CanAttack(w.Player()) {
-		ok(s, "You have already launched all %d of your attacks for today.", w.Config.MaxIndividualAttacks)
+	if blockedByProtection(s, w) || blockedByLocalCap(s, w) {
 		return Stay
 	}
 	rows := warTargets.rows(w)
@@ -226,9 +222,6 @@ func regularAttack(s session.Session, w *ctx) Result {
 		if d == nil {
 			return errTargetGone
 		}
-		if !w.CanAttack(p) {
-			return errAttacksExhausted
-		}
 		// The committed force was typed against the pre-prompt holdings; if a
 		// concurrent node's strike thinned them meanwhile, clampTo in Attack sends
 		// only what remains — note it so the player learns the numbers moved.
@@ -260,7 +253,24 @@ func regularAttack(s session.Session, w *ctx) Result {
 // transaction that applies the strike, not after the Attack menu returns: the
 // strike is saved before its report's pause, and a session ending there would
 // otherwise resume the turn at the Attack menu with a second attack to make.
-func chargeAttackStage(p *game.Empire) { p.TurnProgress.AttackDone = true }
+//
+// It also counts the attack against Config.MaxLocalAttacks, in the same save,
+// so the day's count and the turn's charge cannot disagree.
+func chargeAttackStage(p *game.Empire) {
+	p.TurnProgress.AttackDone = true
+	p.LocalAttacksToday++
+}
+
+// blockedByLocalCap refuses a local attack once the day's Config.MaxLocalAttacks
+// is spent. That limit is IB's own and off by default; the turn's one attack is
+// the original's rule and is enforced by the Attack menu stage.
+func blockedByLocalCap(s session.Session, w *ctx) bool {
+	if w.CanAttackLocally(w.Player()) {
+		return false
+	}
+	ok(s, "You have already made all %d of your attacks for today.", w.Config.MaxLocalAttacks)
+	return true
+}
 
 // warnTrimmedForce tells the player their committed force was clamped because
 // a concurrent node's strike thinned their holdings between the prompt and the
@@ -370,7 +380,7 @@ type costOf func(t targetRow) int64
 // routine, which prints it and asks for a yes before anything is deducted — so
 // a missile priced off the target has somewhere to read that target from.
 func localAttack(s session.Session, w *ctx, label string, price costOf, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
-	if blockedByProtection(s, w) {
+	if blockedByProtection(s, w) || (endsTurn && blockedByLocalCap(s, w)) {
 		return Stay
 	}
 	// The three missiles pass the picker's breach flag in the original; the
@@ -602,7 +612,7 @@ func raidedSlot(raiders []int, slot int) bool {
 }
 
 func attackPirates(s session.Session, w *ctx) Result {
-	if blockedByProtection(s, w) {
+	if blockedByProtection(s, w) || blockedByLocalCap(s, w) {
 		return Stay
 	}
 	// BRE lists only the colored faction names — a faction's strength and hoard

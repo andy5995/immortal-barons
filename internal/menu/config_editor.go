@@ -318,6 +318,11 @@ func configPages(ibbs bool) []cfgPage {
 		num(11, "Max Players Per BBS", "Max Players Per BBS (1-25; 0 = unlimited)",
 			func(c *game.Config) int { return c.MaxPlayers },
 			func(c *game.Config, v int) { c.MaxPlayers = v }, 0, game.MaxPlayersPerBoard),
+		{n: 49, label: "Max Local Attacks/Day",
+			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxLocalAttacks) },
+			edit: func(s session.Session, c *game.Config) {
+				c.MaxLocalAttacks = promptSuggested(s, "Max Local Attacks/Day (0 = unlimited)", c.MaxLocalAttacks, 100)
+			}},
 		boardOwned(23, "Board ID", func(c *game.Config) string { return c.BoardID }),
 		boardOwned(41, "League Number", func(c *game.Config) string {
 			return fmt.Sprintf("%d (0 = not set; a league board needs one)", c.LeagueNumber)
@@ -374,6 +379,7 @@ var ibbsOnlyFields = map[int]bool{
 	41: true, // League Number
 	39: true, // GameInbound
 	40: true, // GameOutbound
+	27: true, // Max Individual Attacks/Day — the original's "InterBBS: Max Individual Attacks"
 	30: true, // Max Group Attacks/Day
 	31: true, // Max Terrorist Ops/Day
 	32: true, // Max Bombing Ops/Day

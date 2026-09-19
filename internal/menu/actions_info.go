@@ -201,9 +201,9 @@ func gameSetup(s session.Session, w *ctx) Result {
 	group("Attacking")
 	pair("Attack damage", tr(s, c.AttackDamage.String()),
 		"Attack rewards", tr(s, c.AttackRewards.String()))
-	pair("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"),
-		"Attack costs", tr(s, c.AttackCosts.String()))
-	row("S3-Sabre", tr(s, c.SabreHandling.String()))
+	pair("Attack costs", tr(s, c.AttackCosts.String()),
+		"S3-Sabre", tr(s, c.SabreHandling.String()))
+	pair("Attacks per turn", "1", "Attacks per day", countOr(c.MaxLocalAttacks, "Unlimited"))
 	if !c.MissileOps || !c.BombingOps {
 		pair("Missile ops", onOffStr(c.MissileOps), "Bombing ops", onOffStr(c.BombingOps))
 	}
@@ -219,15 +219,16 @@ func gameSetup(s session.Session, w *ctx) Result {
 		// The interplanetary rules only mean anything once this board is in a
 		// league, so they stay hidden on a stand-alone board.
 		group("Interplanetary")
-		pair("Group attacks per day", countOr(c.MaxGroupAttacks, "Unlimited"),
-			"Terrorist ops per day", countOr(c.MaxTerrorOps, "Unlimited"))
-		pair("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"),
-			"Terrorism costs", tr(s, c.TerrorCosts.String()))
-		pair("Lost forces return", lostForcesStr(s, c),
-			"Gooie Kablooies", onOffStr(c.GooieKablooie))
+		pair("Individual attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"),
+			"Group attacks per day", countOr(c.MaxGroupAttacks, "Unlimited"))
+		pair("Terrorist ops per day", countOr(c.MaxTerrorOps, "Unlimited"),
+			"Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"))
+		pair("Terrorism costs", tr(s, c.TerrorCosts.String()),
+			"Lost forces return", lostForcesStr(s, c))
+		pair("Gooie Kablooies", onOffStr(c.GooieKablooie),
+			"Local attacks", onOffStr(c.LocalAttacks))
 		pair("Allied market trading", onOffStr(c.IPTrading),
 			"Local attack scoring", onOffStr(c.LocalAttackScoring))
-		row("Local attacks", onOffStr(c.LocalAttacks))
 	}
 	pause(s)
 	return Stay

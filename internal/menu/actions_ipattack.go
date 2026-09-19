@@ -167,9 +167,20 @@ func promptAttackForce(s session.Session, p *game.Empire) game.AttackForce {
 
 // indivAttackForce is BRE's "Indiv. Attack Force": one baron striking one named
 // baron on another planet. It leaves at once rather than assembling like a group
-// attack, and it spends one of the day's individual attacks (#62).
+// attack, and it spends one of the day's interplanetary individual attacks — the
+// only thing that allowance binds (#62).
 func indivAttackForce(s session.Session, w *ctx) Result {
 	if blockedByIPProtection(s, w) {
+		return Stay
+	}
+	// Refuse up front, not after the whole flow. This screen is the only one
+	// Config.MaxIndividualAttacks binds, and the default is 1 — so a second
+	// strike in a day is the ordinary case, and without this the player picks a
+	// board, a baron and an attack type, types four force figures, reads the
+	// gold quote, confirms, and may be walked through the bank, before
+	// CreateIndividualAttack throws it all away with ErrAttacksExhausted.
+	if !w.CanAttack(w.Player()) {
+		ok(s, "You have already sent all %d of your attack forces for today.", w.Config.MaxIndividualAttacks)
 		return Stay
 	}
 	board, target := pickRemoteBaron(s, w)

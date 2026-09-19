@@ -354,7 +354,8 @@ type Config struct {
 	MaxTaxRate           int    // highest tax rate a player may set (IB divergence: BRE caps nothing)
 	PlanetaryTaxRate     int    // crown tax on each turn's gold income, as a whole percent (5 = 5%)
 	MaxRegions           int    // most regions a player may own
-	MaxIndividualAttacks int    // most individual (conventional) attacks a player may launch per day; 0 = unlimited (BRE "Maximum Individual Attacks Per Day")
+	MaxLocalAttacks      int    // most attacks a player may make on this board per day, on top of one per turn; 0 = unlimited (IB's own: BRE paces a local attack by the turn alone)
+	MaxIndividualAttacks int    // most Individual Attack Forces a player may send to other boards per day; 0 = unlimited (BRE "InterBBS: Max Individual Attacks")
 	MaxGroupAttacks      int    // most group (interplanetary) attacks a player may join or lead per day; 0 = unlimited
 	MaxTerrorOps         int    // most terrorist ops a player may launch per day; 0 = unlimited
 	MaxBombingOps        int    // most bombing ops a player may launch per day; 0 = unlimited
@@ -570,10 +571,11 @@ func DefaultConfig() Config {
 		MaxTaxRate:           50,
 		PlanetaryTaxRate:     5,
 		MaxRegions:           500,
-		MaxIndividualAttacks: 3, // Andy's choice for the modern door; BRE has the setting but its stock default is unverified
-		MaxGroupAttacks:      4,
-		MaxTerrorOps:         25,
-		MaxBombingOps:        4,
+		MaxLocalAttacks:      0,  // Andy's choice: the turn paces a local attack, as in BRE, and no day cap is added
+		MaxIndividualAttacks: 1,  // BINARY-VERIFIED: BRE's reset writes 1 (BRE.OVR 0x44db9, settings record +0x62)
+		MaxGroupAttacks:      1,  // BINARY-VERIFIED: BRE's reset writes 1 (BRE.OVR 0x44db9, settings record +0x64)
+		MaxTerrorOps:         10, // BINARY-VERIFIED: BRE's reset writes 10 (settings record +0x66)
+		MaxBombingOps:        5,  // BINARY-VERIFIED: BRE's reset writes 5 (settings record +0x68)
 		LostForcesDays:       3,
 		MinBoardVersion:      "",   // no requirement until a Coordinator sets one
 		IPTrading:            true, // IB's own feature; a league that wants it off says so

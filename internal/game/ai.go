@@ -122,9 +122,6 @@ func (w *World) aiWageWar(e *Empire) {
 	if !w.LocalAttacksAllowed() {
 		return // a league that has turned local fighting off binds the AI too
 	}
-	if !w.CanAttack(e) {
-		return // used up the day's individual-attack allotment
-	}
 	var target *Empire
 	for _, t := range w.Targets(e) {
 		if target == nil || effectiveDefense(t) < effectiveDefense(target) {

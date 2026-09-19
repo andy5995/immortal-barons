@@ -188,6 +188,7 @@ func (w *World) advanceOneDay(today string, rep *MaintReport) {
 				e.TurnsLeft = w.Config.TurnsPerDay
 				// Fresh day: every per-day attack allotment resets.
 				e.AttacksToday = 0
+				e.LocalAttacksToday = 0
 				e.GroupAttacksToday = 0
 				e.TerrorOpsToday = 0
 				e.BombingOpsToday = 0

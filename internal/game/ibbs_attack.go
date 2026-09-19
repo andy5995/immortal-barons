@@ -428,9 +428,10 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, h
 // CreateIndividualAttack sends one baron's detachment against one named remote
 // baron, BRE's "Indiv. Attack Force". Unlike a group attack it assembles nothing
 // and waits for nobody: the force leaves on this run and the strike is in flight
-// straight away. It spends one of the day's individual attacks, the same
-// allowance a conventional attack at home draws on, and it must name a target —
-// there is no whole-planet form.
+// straight away. It spends one of the day's individual attacks — an allowance
+// this strike draws on ALONE, since an attack at home is paced by the turn and
+// counted nowhere (see CanAttack) — and it must name a target: there is no
+// whole-planet form.
 //
 // kind picks how the strike is pressed; it scales the offense that leaves here
 // and travels with the packet so the target board can apply the matching

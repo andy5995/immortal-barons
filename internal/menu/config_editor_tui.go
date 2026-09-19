@@ -105,7 +105,8 @@ const (
 	helpAttackRewards      = "How much land and goods the winner of an attack gains: High, Medium, or Low."
 	helpSabre              = "How S3-Sabre missiles behave when fired."
 	helpSabreDial          = "Which dial Constant handling fires (0-10). Ignored by the other modes."
-	helpMaxAttacks         = "The most conventional attacks a player may launch in one day. 0 means no limit."
+	helpMaxLocalAttacks    = "The most attacks a player may make on this board in one day, counting regular attacks, missiles and pirate raids. A player can make only one per turn whatever this says. 0 means no daily limit beyond that."
+	helpMaxAttacks         = "The most Individual Attack Forces a player may send to other boards in one day. 0 means no limit. Attacks on this board are limited by the turn instead: one per turn, uncounted."
 	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
 	helpMaxTerrorOps       = "The most terrorist operations a player may launch in one day. 0 means no limit."
 	helpMaxBombingOps      = "The most bombing operations a player may launch in one day. 0 means no limit."
@@ -224,8 +225,8 @@ func newConfigTUI(w *game.World) *configTUI {
 	addChoice(t, mil, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
 	addChoice(t, mil, "S3-Sabre Handling", helpSabre, sabreOpts, sabreVals, c.SabreHandling, func(c *game.Config, v game.SabreMode) { c.SabreHandling = v })
 	t.addInt(mil, "S3-Sabre Constant Dial", helpSabreDial, c.SabreConstantDial, game.SabreDialMin, game.SabreDialMax, func(c *game.Config, n int) { c.SabreConstantDial = n })
-	t.addInt(mil, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
 	if ibbs {
+		t.addInt(mil, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
 		t.addInt(mil, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
 		t.addInt(mil, "Max Terrorist Ops/Day (0=unlimited)", helpMaxTerrorOps, c.MaxTerrorOps, 0, 100, func(c *game.Config, n int) { c.MaxTerrorOps = n })
 		t.addInt(mil, "Max Bombing Ops/Day (0=unlimited)", helpMaxBombingOps, c.MaxBombingOps, 0, 100, func(c *game.Config, n int) { c.MaxBombingOps = n })
@@ -235,6 +236,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	if ibbs {
 		addChoice(t, mil, "Terrorism Costs", helpTerrorCosts, costOpts, costVals, c.TerrorCosts, func(c *game.Config, v game.Level) { c.TerrorCosts = v })
 	}
+	t.addInt(mil, "Max Local Attacks/Day (0=unlimited)", helpMaxLocalAttacks, c.MaxLocalAttacks, 0, 100, func(c *game.Config, n int) { c.MaxLocalAttacks = n })
 	t.addBool(mil, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
 	t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 	if ibbs {

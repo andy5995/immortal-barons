@@ -72,10 +72,10 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// once nothing displayed it; its number is retired rather than reused, so an
 	// old note naming 48 cannot land on a different setting. 21 was the AI-baron
 	// count, retired with the barons themselves in v0.1.3, and its number is held
-	// back the same way.
-	const fields = 45
-	for n := 1; n <= 47; n++ {
-		if n == 21 || n == 22 {
+	// back the same way. 49 (local attacks per day) is IB's own.
+	const fields = 46
+	for n := 1; n <= 49; n++ {
+		if n == 21 || n == 22 || n == 48 {
 			continue
 		}
 		if _, ok := seen[n]; !ok {

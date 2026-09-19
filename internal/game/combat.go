@@ -15,11 +15,27 @@ import (
 // order and the per-unit breakdown are the original's (docs/dev/bre-screens.md).
 const returningForces = "Your forces have returned from the field, exhausted."
 
-// CanAttack reports whether e may launch another individual (conventional)
-// attack today. Config.MaxIndividualAttacks <= 0 means unlimited (matching the
-// MaxRegions "<= 0 = no cap" convention).
+// CanAttack reports whether e may send another Individual Attack Force to
+// another board today. Config.MaxIndividualAttacks <= 0 means unlimited
+// (matching the MaxRegions "<= 0 = no cap" convention).
+//
+// It is an INTERPLANETARY allowance and nothing else. The original's own editor
+// help names the setting "InterBBS: Max Individual Attacks" and describes it as
+// "the number of individual Inter-BBS Attacks allowed per day" (game/reset.hlp),
+// and its three local launch routines hold no counter and no such refusal — the
+// "… individual Strike(s) per day!" string belongs to run_interbbs_attack_menu.
+// A local attack is paced by the turn instead: run_attack_menu (BRE.OVR 0x3621)
+// clears a flag on entry and breaks its loop the moment a handler sets it, so
+// one completed attack of any kind ends that turn's visit to the menu.
 func (w *World) CanAttack(e *Empire) bool {
 	return underDailyCap(e.AttacksToday, w.Config.MaxIndividualAttacks)
+}
+
+// CanAttackLocally reports whether e may make another attack on this board
+// today. It is IB's own allowance, off at its default of 0: the turn already
+// limits a local attack to one, as in the original.
+func (w *World) CanAttackLocally(e *Empire) bool {
+	return underDailyCap(e.LocalAttacksToday, w.Config.MaxLocalAttacks)
 }
 
 // LocalAttacksAllowed reports whether barons on this board may attack each
@@ -98,7 +114,9 @@ type BattleOutcome struct {
 // AttackDetailed is Attack with the figures kept.
 func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) BattleOutcome {
 	var captured int
-	a.AttacksToday++ // counts against the daily individual-attack cap (both human and AI)
+	// No daily counter here: the local attack is limited by the turn, not by a
+	// per-day allowance (see CanAttack). AttacksToday counts interplanetary
+	// individual strikes alone.
 	f = f.clampTo(a) // only units the attacker actually holds can be committed
 	// Attacking a realm you hold an agreement with tears the agreement up and
 	// costs a quarter of both support and morale (BreachTreaty). The menu asks

@@ -700,16 +700,62 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   last regions in one, which eliminates it (and the conqueror absorbs its
   surviving military).
 
-  A player (human or AI) may launch at most `Config.MaxIndividualAttacks`
-  regular attacks per **day** (BRE's "Maximum Individual Attacks Per Day",
-  default **3**; `0` = unlimited). The count resets at daily maintenance and is
-  shared across all of the day's turns, so it caps total aggression, not
-  attacks-per-turn. Only conventional/regular attacks count — WMD strikes and
-  pirate raids are not limited by it. An **individual interplanetary attack**
-  (BRE's "Indiv. Attack Force", #62) draws on the same allowance: one baron
-  striking one named baron on another planet, leaving at once rather than
-  assembling like a group attack. Group attacks, terrorist ops and bombing ops
-  have their own separate per-day allowances.
+  **A local attack is paced by the TURN, and by nothing else — there is no
+  per-day allowance on it.** BINARY-VERIFIED (`run_attack_menu`, `BRE.OVR`
+  0x3621-0x3803): the routine clears a flag at 0x3630, and its loop at 0x3635
+  re-runs only while the choice is not the quit key **and** that flag is still
+  zero, so the first handler to complete an attack breaks the loop and sets
+  empire record `+0x274`. One completed attack of ANY kind — regular, nuclear,
+  chemical, biological or a pirate raid — ends that turn's visit to the menu, so
+  a baron gets at most `TurnsPerDay` attacks a day and cannot press two in one
+  turn. `cap/kd3-01.cap` agrees across 188 turns: never two attacks in one turn,
+  and up to six in a day on eight turns.
+
+  `Config.MaxIndividualAttacks` is therefore an **interplanetary** allowance
+  only, spent by the **Indiv. Attack Force** (#62) — one baron striking one named
+  baron on another planet. BRE's own editor help calls the setting
+  "InterBBS: Max Individual Attacks" and its text "the number of individual
+  Inter-BBS Attacks allowed per day" (`game/reset.hlp` 202-208), and the three
+  local launch routines hold no counter and no refusal string; `…  individual
+  Strike(s) per day!` belongs to `run_interbbs_attack_menu` (verified
+  2026-09-05). IB counted local attacks against it, and defaulted it to 3, until
+  2026-09-18 — which cost a baron on an eight-turn board five of their attacks a
+  day. The count resets at daily maintenance. Group attacks, terrorist ops and
+  bombing ops have their own separate allowances.
+
+  **The default is 1. BINARY-VERIFIED** (`BRE.OVR` 0x44db9, in the reset routine
+  `reset_game_data` calls): the reset writes four consecutive words into the
+  settings record, which `show_game_settings` prints as four consecutive screen
+  lines —
+
+  | Field | Screen line | Default |
+  | --- | --- | --- |
+  | `+0x62` | Maximum Individual Attacks Per Day | 1 |
+  | `+0x64` | Maximum Group Attacks Per Day | 1 |
+  | `+0x66` | Maximum Terrorist Ops Per Day | 10 |
+  | `+0x68` | Maximum Bombing Operations Per Day | 5 |
+
+  The offsets are pinned by the printer rather than assumed: `show_game_settings`
+  loads string `cs:0x399` and prints `[0x28b4]+0x62` beside it, then `0x3be`
+  with `+0x64` and `0x3e3` with `+0x66`. `cap/20240527-134Pho_Lazarus_Public.cap`
+  corroborates — that board left Terrorist Ops at 10 while raising Individual
+  and Group to 2. IB's reset writes all four of these defaults (from
+  2026-09-23; Group, Terror and Bombing were 4, 25 and 4 before).
+
+  A cap of 1 binds only the interplanetary strike, which is repeatable inside a
+  turn because `indivAttackForce` returns to the InterPlanetary menu. Nothing
+  else paces it, which is why the original ships a cap here and none at home.
+
+  **IB adds a local allowance of its own: `Config.MaxLocalAttacks`** (Max Local
+  Attacks/Day, default **0** = no daily limit). The original has no such setting;
+  a sysop who wants one can cap a baron's attacks on the board per day on top of
+  the turn's one attack. It counts every local attack that ends the turn —
+  regular, nuclear, chemical, biological and a pirate raid — in
+  `Empire.LocalAttacksToday`, incremented in the same save as the strike, and
+  resets at daily maintenance. A spent allowance is refused before a target is
+  chosen. It is a league rule, carried in the ruleset with `omitempty`, so a
+  league that leaves it at 0 sends the same bytes and fingerprint as before it
+  existed.
 - **Nuclear attack** — turns enemy regions into waste. BINARY-VERIFIED
   (`BRE.OVR` `launch_nuclear_attack`, unit `ovr_00e809` +0x225e):
 

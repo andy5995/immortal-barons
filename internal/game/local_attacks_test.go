@@ -71,7 +71,9 @@ func TestLocalAttackScoringOffMovesNoScore(t *testing.T) {
 // A league that has turned local fighting off binds the AI too, or the computer
 // barons would be the only ones still at war.
 func TestAIStandsDownWhenLocalAttacksAreOff(t *testing.T) {
-	setUp := func(allowed bool) *Empire {
+	// The land the victim still holds afterward is the marker: a local attack
+	// spends no counter, so there is nothing on the attacker to read.
+	setUp := func(allowed bool) int {
 		cfg := DefaultConfig()
 		cfg.IBBS = true
 		cfg.LocalAttacks = allowed
@@ -84,14 +86,14 @@ func TestAIStandsDownWhenLocalAttacksAreOff(t *testing.T) {
 		victim.Protection, victim.Troopers, victim.Land = 0, 10, 400
 		victim.Regions = RegionMix{Agricultural: 400}
 		w.aiWageWar(ai)
-		return ai
+		return victim.Land
 	}
 
 	// The control: this AI, this target, is one the aggression check would take.
-	if ai := setUp(true); ai.AttacksToday == 0 {
+	if left := setUp(true); left == 400 {
 		t.Fatal("the AI declined an easy target even with local attacks allowed, so the test proves nothing")
 	}
-	if ai := setUp(false); ai.AttacksToday != 0 {
-		t.Errorf("the AI attacked %d times with local attacks disabled", ai.AttacksToday)
+	if left := setUp(false); left != 400 {
+		t.Errorf("the victim is down to %d regions: the AI attacked with local attacks disabled", left)
 	}
 }

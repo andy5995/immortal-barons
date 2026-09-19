@@ -33,30 +33,34 @@ type LeagueConfig struct {
 	PlanetaryTaxRate     int
 	MaxRegions           int
 	MaxIndividualAttacks int
-	MaxGroupAttacks      int
-	MaxTerrorOps         int
-	MaxBombingOps        int
-	LostForcesDays       int
-	BombingOps           bool
-	MissileOps           bool
-	GooieKablooie        bool `json:"ClingyAnnihilator"`
-	LocalAttacks         bool
-	LocalAttackScoring   bool
-	DupeChecking         bool
-	MinBoardVersion      string
-	IPTrading            bool
-	Pirates              bool
-	MaxPlayers           int
-	BuyMilitary          BuyMode
-	MaintCosts           Level
-	TradeCosts           Level
-	RegionCosts          Level
-	AttackCosts          Level
-	TerrorCosts          Level
-	AttackDamage         Level
-	AttackRewards        Level
-	SabreHandling        SabreMode `json:"SlappenheimerHandling"`
-	SabreConstantDial    int       `json:",omitempty"`
+	// MaxLocalAttacks is omitted at its default of 0, so a league that leaves it
+	// unset sends the same bytes, and has the same fingerprint, as before it
+	// existed.
+	MaxLocalAttacks    int `json:",omitempty"`
+	MaxGroupAttacks    int
+	MaxTerrorOps       int
+	MaxBombingOps      int
+	LostForcesDays     int
+	BombingOps         bool
+	MissileOps         bool
+	GooieKablooie      bool `json:"ClingyAnnihilator"`
+	LocalAttacks       bool
+	LocalAttackScoring bool
+	DupeChecking       bool
+	MinBoardVersion    string
+	IPTrading          bool
+	Pirates            bool
+	MaxPlayers         int
+	BuyMilitary        BuyMode
+	MaintCosts         Level
+	TradeCosts         Level
+	RegionCosts        Level
+	AttackCosts        Level
+	TerrorCosts        Level
+	AttackDamage       Level
+	AttackRewards      Level
+	SabreHandling      SabreMode `json:"SlappenheimerHandling"`
+	SabreConstantDial  int       `json:",omitempty"`
 }
 
 // leagueRuleset extracts the league-wide rules from this board's config, for the
@@ -83,6 +87,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		PlanetaryTaxRate:     c.PlanetaryTaxRate,
 		MaxRegions:           c.MaxRegions,
 		MaxIndividualAttacks: c.MaxIndividualAttacks,
+		MaxLocalAttacks:      c.MaxLocalAttacks,
 		MaxGroupAttacks:      c.MaxGroupAttacks,
 		MaxTerrorOps:         c.MaxTerrorOps,
 		MaxBombingOps:        c.MaxBombingOps,
@@ -133,6 +138,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.PlanetaryTaxRate = lc.PlanetaryTaxRate
 	c.MaxRegions = lc.MaxRegions
 	c.MaxIndividualAttacks = lc.MaxIndividualAttacks
+	c.MaxLocalAttacks = lc.MaxLocalAttacks
 	c.MaxGroupAttacks = lc.MaxGroupAttacks
 	c.MaxTerrorOps = lc.MaxTerrorOps
 	c.MaxBombingOps = lc.MaxBombingOps
