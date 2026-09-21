@@ -30,6 +30,17 @@ type TimeCheck struct {
 // day. Without a fresh probe the screen would freeze at whatever the last
 // exchange measured, and a transport that has since slowed down would go
 // unnoticed.
+//
+// The once-a-day cadence is the ORIGINAL'S, not a choice made here: BRE sends
+// its probe from daily maintenance, and the call chain has a single caller at
+// each step (write_interbbs_time_check_packet <- ovr_044601_entry_02a8 <-
+// run_daily_maintenance). Verified 2026-09-21, because the header above claims
+// verification for the mechanic, the echo and the averaging weights and said
+// nothing about how often the probe goes out.
+//
+// What it costs is real and is #287: a probe lost to a dead link gets no
+// replacement until the next game day, so a link that recovers goes on reading
+// stale until the day after.
 func (w *World) PingTravelTimes() {
 	if w.Config.BoardID == "" {
 		return
