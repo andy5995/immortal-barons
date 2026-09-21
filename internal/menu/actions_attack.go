@@ -69,8 +69,14 @@ func (l targetList) rows(w *ctx) []targetRow { return snapshotTargets(w) }
 // realm from one, it only decides whether taking it asks first.
 func (l targetList) prompts(ask string) targetPrompt {
 	return targetPrompt{
-		ask:     ask,
-		refuse:  "%s is under New Realm Protection and cannot be targeted yet.",
+		ask: ask,
+		// The original's own words, from its shared target picker
+		// (choose_target_empire). A short refusal is functional furniture, so it
+		// may match, and it names no realm because the player just typed one.
+		// BRE scopes six of these: this picker says "That empire…", the covert
+		// menu and the trade offer have their own, and a returning strike that
+		// finds its target shielded has a fifth. Do not reuse one for another.
+		refuse:  "That empire is in protection.",
 		nothing: "None of these realms can be attacked — they are all under New Realm Protection.",
 	}
 }
@@ -307,7 +313,16 @@ func pickAttackTarget(s session.Session, t Term, rows []targetRow, p targetPromp
 	}
 	fmt.Fprintf(s, "%c\n", unicode.ToUpper(r))
 	if !row.attackable {
-		ok(s, p.refuse, row.name)
+		// A refusal may or may not name the realm: the local list uses the
+		// original's wording, which does not, while the interplanetary one names
+		// the baron because the player chose from several planets' rosters.
+		// Tested on the ENGLISH format — a translation has to carry the same
+		// verbs, which is what the catalogs are checked for.
+		if strings.Contains(p.refuse, "%s") {
+			ok(s, p.refuse, row.name)
+		} else {
+			ok(s, p.refuse)
+		}
 		return "", false
 	}
 	return row.name, true

@@ -309,6 +309,41 @@ read. **IB does not reproduce the 986**: `absorbMilitary` takes all six unit
 types, so a crushed realm computes 0. IB stopped FORCING the zero in the same
 change, since the forcing rested on a claim this capture disproves.
 
+## New Realm Protection refusals — SIX distinct strings, scoped by situation
+
+The original does not have one protection message. It has six, and each belongs
+to the routine that prints it — read out of the binary 2026-09-21, with
+`find-string` naming the referring routine for each:
+
+| String | Routine | When |
+| --- | --- | --- |
+| `That empire is in protection.` | `choose_target_empire` | the TARGET you picked is shielded |
+| `You are in protection.` | `choose_target_empire` | YOUR realm is shielded |
+| `Our empire is in protection, my lord.` | `run_covert_operations_menu` | your realm is shielded, at the covert menu |
+| `That realm is still in protection.` | `create_trade_offer` | a trade offer to a shielded realm |
+| `Sorry, this option is not available in protection.` | `fund_gooie_kablooie` | funding the weapon while shielded |
+| `Your forces found their target was in protection.` | `resolve_returning_attack` | an interplanetary strike finds its target shielded on arrival |
+
+`choose_target_empire` is the SHARED picker, so one string covers the attack and
+covert lists — which is why IB sharing a single `targetList.prompts()` refusal
+across both is right. What is not right is reusing any of the other five for a
+situation they do not belong to.
+
+**Do not source the picker's wording from a capture without checking which
+screen it came from.** `cap/kd3-01.cap` lines 1051 and 1075 show
+`That realm is still in protection.` directly under a `Choose a Target` prompt,
+which reads as the attack picker and is not: the menu drawn immediately after it
+is Trading, and the binary assigns that string to `create_trade_offer`. IB briefly
+took the trade wording for its attack picker on that basis (2026-09-21, corrected
+the same day).
+
+**A local refusal costs nothing.** The picker refuses before any force is named,
+so nothing is committed and no turn is spent. That is the opposite of the
+interplanetary Group Attack, where the detachment travels, is refused at the far
+end, and comes home reduced by `GroupAttackLossPct` — the case
+`docs/mechanics-reference.md` documents. Reading the group-attack cost onto a
+local attack is the mistake this note exists to stop.
+
 ## Regular Attack
 
 ### Target list

@@ -79,8 +79,8 @@ func TestAttackingAProtectedRealmIsStillRefused(t *testing.T) {
 	if !strings.Contains(plain, "Empire Name") {
 		t.Fatalf("the script never reached the target list:\n%s", plain)
 	}
-	if !strings.Contains(plain, "New Realm Protection") || !strings.Contains(plain, shielded.Name) {
-		t.Errorf("pressing a shielded realm's letter was not refused by name:\n%s", plain)
+	if !strings.Contains(plain, "in protection") {
+		t.Errorf("pressing a shielded realm's letter was not refused:\n%s", plain)
 	}
 	if strings.Contains(plain, "Send how many Troopers?") {
 		t.Errorf("the force prompts were reached for a shielded target:\n%s", plain)
@@ -151,7 +151,7 @@ func TestSpyingIsRefusedOnAProtectedRealm(t *testing.T) {
 	if !strings.Contains(out, shielded.Name) {
 		t.Fatalf("never reached a target list holding %s:\n%s", shielded.Name, out)
 	}
-	if !strings.Contains(out, "New Realm Protection") {
+	if !strings.Contains(out, "in protection") {
 		t.Errorf("spying on a protected realm was not refused:\n%s", out)
 	}
 	// And no report came back, which is what a spy that ran would produce.
