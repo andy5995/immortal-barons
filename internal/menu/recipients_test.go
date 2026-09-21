@@ -15,7 +15,6 @@ import (
 // letter that realm answers to everywhere else.
 func TestEveryLivingRealmIsAddressableByEveryOther(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 0
 	w := game.NewWorldSeed(cfg, 1)
 	for i := 0; i < 25; i++ { // fill the planet
 		if e := w.AddHuman(string(rune('a'+i)), "Realm"+string(rune('A'+i))); e == nil {

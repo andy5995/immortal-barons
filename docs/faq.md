@@ -88,21 +88,14 @@ ANSI support, so first check that the caller has graphics turned on in their BBS
 profile. To see the plain version yourself, run with `-no-ansi`. Lists that
 normally use a moving highlight are numbered in that mode, so they stay usable.
 
-## How do I add AI barons (computer opponents)?
+## AI barons (computer opponents) were removed in v0.1.3
 
-- Set the number of AI barons before you start a game. A fresh game has none by
-  default.
-- Open the Configuration Editor (run `immortal-barons -reset`, or the
-  Coordinator menu in game) and set the **AI empires** field.
-- The AI barons are created when you reset the game. To add more to a game that
-  is already running — **without** resetting — run
-  `immortal-barons -add-ai N` (it adds N new AI barons and exits). Lowering the
-  count still needs a reset.
-- Once in the game, the AI barons take their turns on their own during daily
-  maintenance. See [Daily maintenance](https://andy5995.github.io/immortal-barons/door-setup/#daily-maintenance)
-  for when that runs.
-- A board in a league game has no AI barons, and none can be added. League play
-  is between the boards' own players.
+A baron could not answer a treaty offer or read a message, so the strategy
+players know from the original did not work against one.
+
+A board upgrading from any earlier version loses its barons the first time
+v0.1.3 loads the game. The news names each one, and any treaty it held ends
+with it. Player realms are untouched.
 
 ## A player changed their name on my BBS. How do I move their realm?
 

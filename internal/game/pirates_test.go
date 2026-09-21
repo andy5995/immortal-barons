@@ -226,8 +226,8 @@ func TestPirateSpoilWeights(t *testing.T) {
 
 func TestPirateRaidOnAIRecordsNoNotice(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	ai := w.Empires[0] // seeded AI empire (Owner == "")
 	stockAll(w, ai, 100)
 
@@ -308,7 +308,6 @@ func TestRaidFactionLandlessCapturesNoRegions(t *testing.T) {
 
 func TestPiratesSkipProtectedEmpires(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	safe := w.AddHuman("safe", "Safe")
 	safe.Protection = 100
@@ -334,7 +333,6 @@ func TestPiratesSkipProtectedEmpires(t *testing.T) {
 // on about 1 in 2.6 — so the test pins both ends of the band, not one figure.
 func TestPirateRaidFrequencyScalesWithRealmSize(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	for _, c := range []struct{ land, wantK int }{
 		{100, 2},    // floor
 		{2_400, 4},  // two steps up

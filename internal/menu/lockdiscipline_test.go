@@ -19,8 +19,8 @@ import (
 // That is what gives this test teeth: it fails without the lock, passes with it.
 func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 1
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	p := w.AddHuman("alice", "Alice")
 	startTroopers := p.Troopers
 
@@ -117,9 +117,9 @@ func TestBuyRefusesInsufficientGold(t *testing.T) {
 // Read away and -race reports a DATA RACE, which is what gives this teeth.
 func TestConcurrentGroupAttackGatherIsRaceFree(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 1
 	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	p := w.AddHuman("alice", "Alice")
 	p.Protection = 0 // a new realm cannot attack, and would return before the gather
 

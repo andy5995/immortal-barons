@@ -8,8 +8,8 @@ import (
 func newAttackerAndTarget(t *testing.T) (*World, *Empire, *Empire) {
 	t.Helper()
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	a := w.AddHuman("att", "Attacker")
 	a.Protection = 0
 	a.Gold = 10_000_000 // enough to afford covert/WMD op costs; gold-asserting tests reset it
@@ -190,8 +190,8 @@ func TestBioCostReadsTroopersPeopleAndLand(t *testing.T) {
 func TestStrikesCannotEliminateARealm(t *testing.T) {
 	for seed := int64(1); seed <= 20; seed++ {
 		cfg := DefaultConfig()
-		cfg.AICount = 1
 		w := NewWorldSeed(cfg, seed)
+		w.AddAIEmpires(1)
 		a := w.AddHuman("att", "Attacker")
 		a.Protection, a.Gold = 0, 1_000_000_000
 		d := w.Empires[0]
@@ -380,9 +380,9 @@ func TestNukeCostScalesWithTarget(t *testing.T) {
 // produce new evidence rather than following the code.
 func TestNuclearStrikeDamageBand(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	for seed := int64(1); seed <= 40; seed++ {
 		w := NewWorldSeed(cfg, seed)
+		w.AddAIEmpires(1)
 		a := w.AddHuman("att", "Attacker")
 		a.Protection, a.Gold = 0, 1_000_000_000
 		d := w.Empires[0]
@@ -403,8 +403,8 @@ func TestNuclearStrikeDamageBand(t *testing.T) {
 // against an AI and temporary against a human, which is the wrong way round.
 func TestAIDecontaminatesAfterAStrike(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 7)
+	w.AddAIEmpires(1)
 	ai := w.Empires[0]
 	ai.Regions = RegionMix{Coastal: 800, Agricultural: 200, Waste: 200}
 	ai.syncLand()
@@ -424,8 +424,8 @@ func TestAIDecontaminatesAfterAStrike(t *testing.T) {
 // A broke AI leaves the waste alone rather than spending its food reserve on it.
 func TestAIKeepsItsReserveOverDecontamination(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 7)
+	w.AddAIEmpires(1)
 	ai := w.Empires[0]
 	ai.Regions = RegionMix{Coastal: 800, Waste: 200}
 	ai.syncLand()
@@ -447,9 +447,9 @@ func TestAIKeepsItsReserveOverDecontamination(t *testing.T) {
 func TestNuclearStrikeScoresTheAttacker(t *testing.T) {
 	seen := map[int]bool{}
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	for seed := int64(1); seed <= 25; seed++ {
 		w := NewWorldSeed(cfg, seed)
+		w.AddAIEmpires(1)
 		a := w.AddHuman("att", "Attacker")
 		a.Protection, a.Gold, a.Score = 0, 1_000_000_000, 0
 		d := w.Empires[0]
@@ -531,8 +531,8 @@ func TestDecontaminatePriceUsesFoodTechnology(t *testing.T) {
 // a second time as a type of the winner's choosing.
 func TestCaptureFromARuinedRealmDoesNotCreateLand(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 3)
+	w.AddAIEmpires(1)
 	a := w.AddHuman("att", "Attacker")
 	a.Protection = 0
 	a.Troopers, a.Tanks = 500_000, 50_000

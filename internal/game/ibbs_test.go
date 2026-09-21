@@ -369,8 +369,8 @@ func distinctFrom(t *testing.T, v reflect.Value) reflect.Value {
 func TestLeagueBoardGetsNoAIBarons(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
-	cfg.AICount = 5
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(5)
 	if got := len(w.Empires); got != 0 {
 		t.Errorf("a league board seeded %d empires, want 0", got)
 	}
@@ -381,11 +381,13 @@ func TestLeagueBoardGetsNoAIBarons(t *testing.T) {
 		t.Errorf("league board has %d empires after an injection attempt, want 0", got)
 	}
 
-	// The same config off a league seeds normally, so the guard is the league
-	// flag and not something else.
+	// The same config off a league takes them, so the guard is the league flag
+	// and not something else. (Nothing a sysop can reach seeds a baron since
+	// v0.1.3; IB_ADD_AI comes through here.)
 	cfg.IBBS = false
-	if solo := NewWorldSeed(cfg, 1); len(solo.Empires) != 5 {
-		t.Errorf("stand-alone board seeded %d AI barons, want 5", len(solo.Empires))
+	solo := NewWorldSeed(cfg, 1)
+	if added := solo.AddAIEmpires(5); added != 5 {
+		t.Errorf("stand-alone board took %d AI barons, want 5", added)
 	}
 }
 
@@ -1048,7 +1050,6 @@ var perBoardConfigFields = map[string]string{
 	"IBBS":            "whether this board plays in a league at all",
 	"IdleTimeoutSecs": "when to boot a silent caller and free the world lock",
 	"MaxIdleWarnings": "how many warnings before that boot",
-	"AICount":         "a league board never gets AI barons, so the value is inert there",
 	// Not a rule and not a setting: the -dupe-check switch, in force for one
 	// run and never saved. Broadcasting it would push one tester's override
 	// onto every board in the league.
@@ -1345,7 +1346,6 @@ func TestPlanetWideStrikeFightsEveryRealm(t *testing.T) {
 // list can show 2 and 3 with 1 absent, which is how the original numbers them.
 func TestAttackSlotsAreSmallAndReused(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	e := w.AddHuman("h", "Realm")
 	e.Troopers = 100_000

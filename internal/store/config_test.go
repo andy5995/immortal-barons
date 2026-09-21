@@ -35,7 +35,6 @@ func TestSaveConfig_LoadConfig_RoundTrip(t *testing.T) {
 	fillValue(reflect.ValueOf(&cfg).Elem())
 	cfg.DataDir = dir
 	cfg.TurnsPerDay = 15
-	cfg.AICount = 3
 	cfg.GameLength = 30
 
 	if err := SaveConfig(cfg); err != nil {

@@ -101,7 +101,7 @@ func TestAnOldStatusIsNotRefusedOnAgeAlone(t *testing.T) {
 // in transit — which is how one actually did.
 func TestDismantlingTheGooieTellsEveryBaron(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.IBBS, cfg.BoardID, cfg.AICount = true, "xbit", 0
+	cfg.IBBS, cfg.BoardID = true, "xbit"
 	w := NewWorldSeed(cfg, 1)
 	co := w.AddHuman("co", "Coordinator's Realm")
 	other := w.AddHuman("other", "Someone Else")

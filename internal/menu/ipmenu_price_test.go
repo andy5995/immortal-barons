@@ -12,7 +12,7 @@ import (
 func TestInterPlanetaryMenuPricesTerroristOps(t *testing.T) {
 	menus := BuildMenus()
 	cfg := game.DefaultConfig()
-	cfg.IBBS, cfg.AICount = true, 0
+	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 1)
 	p := w.AddHuman("alice", "Alethia")
 	p.Land, p.TerrorOpsToday = 8957, 0

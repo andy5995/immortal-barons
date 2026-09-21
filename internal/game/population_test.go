@@ -36,7 +36,6 @@ func TestANewRealmStartsBelowItsCapacity(t *testing.T) {
 func TestPopulationMovesTowardCapacity(t *testing.T) {
 	for seed := int64(1); seed <= 8; seed++ {
 		cfg := DefaultConfig()
-		cfg.AICount = 0
 		w := NewWorldSeed(cfg, seed)
 		e := w.AddHuman("tester", "Testland")
 		before := e.People
@@ -61,7 +60,6 @@ func TestPopulationMovesTowardCapacity(t *testing.T) {
 func TestAnEmptyGranaryDoesNotStopGrowth(t *testing.T) {
 	for seed := int64(1); seed <= 8; seed++ {
 		cfg := DefaultConfig()
-		cfg.AICount = 0
 		w := NewWorldSeed(cfg, seed)
 		e := w.AddHuman("tester", "Testland")
 		e.Food = 0

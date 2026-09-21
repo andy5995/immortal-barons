@@ -71,8 +71,8 @@ func ConfigEditor(s session.Session, w *game.World) (saved bool) {
 // inter-BBS fields (marked *, as the original marks them) are the ones that do
 // nothing on a stand-alone board. Returns true if saved, false if canceled.
 //
-// Changes take effect going forward (a new TurnsPerDay applies at the next
-// daily maintenance; AICount does not retroactively add or remove AI empires).
+// Changes take effect going forward: a new TurnsPerDay applies at the next
+// daily maintenance rather than to the turn in hand.
 func runConfigEditor(s session.Session, w *game.World) bool {
 	c := &w.Config
 	pages := configPages(c.IBBS)
@@ -214,14 +214,6 @@ func configPages(ibbs bool) []cfgPage {
 		{n: 20, label: "Join Cutoff Date",
 			value: func(c *game.Config) string { return dateOr(c.JoinDate, "always open") },
 			edit:  func(s session.Session, c *game.Config) { c.JoinDate = promptDate(s, "Join Cutoff Date", c.JoinDate) }},
-		{n: 21, label: "AI empires", value: aiCountStr,
-			edit: func(s session.Session, c *game.Config) {
-				if c.IBBS {
-					ok(s, "A league board has no computer barons.")
-					return
-				}
-				c.AICount = promptSuggested(s, "AI empires", c.AICount, 5)
-			}},
 		// 45 is past the original's own field numbers, which end at 44: pirates are
 		// IB's switch, so it takes the next free number rather than one of BRE's.
 		toggle(46, "Allow IP Allies to Trade at Market", func(c *game.Config) bool { return c.IPTrading },
@@ -415,14 +407,6 @@ func findConfigField(pages []cfgPage, n int) *cfgField {
 		}
 	}
 	return nil
-}
-
-// aiCountStr renders the AI-baron count, or says why a league board has none.
-func aiCountStr(c *game.Config) string {
-	if c.IBBS {
-		return "0 (none in a league)"
-	}
-	return fmt.Sprintf("%d", c.AICount)
 }
 
 // dateOr renders an ISO date, or a placeholder when it is unset.

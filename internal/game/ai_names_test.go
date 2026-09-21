@@ -11,8 +11,8 @@ import (
 // two-word name.
 func TestAIBaronNamesFromMatrix(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 30
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(30)
 
 	ais := w.AIEmpires()
 	if len(ais) != 25 {
@@ -35,9 +35,9 @@ func TestAIBaronNamesFromMatrix(t *testing.T) {
 // name lineup — the matrix + RNG gives game-to-game variety.
 func TestAIBaronNamesVaryBySeed(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 10
 	names := func(seed int64) []string {
 		w := NewWorldSeed(cfg, seed)
+		w.AddAIEmpires(10)
 		var out []string
 		for _, e := range w.AIEmpires() {
 			out = append(out, e.Name)

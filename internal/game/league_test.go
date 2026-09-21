@@ -8,8 +8,8 @@ import (
 func TestDailyMaintenanceEndsGameAtGameLength(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.GameLength = 3
-	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	w.LastMaintDate = "2026-06-27" // 3 days before target
 	// Capture the ended game's empire names BEFORE maintenance resets the world:
 	// LastMaster records the just-ended game's master, whose (now varied) name need
@@ -32,15 +32,15 @@ func TestDailyMaintenanceEndsGameAtGameLength(t *testing.T) {
 	if w.GameDay >= cfg.GameLength {
 		t.Errorf("expected GameDay to have reset below GameLength, got %d", w.GameDay)
 	}
-	if len(w.Empires) != cfg.AICount {
-		t.Errorf("expected %d AI empires after reset, got %d", cfg.AICount, len(w.Empires))
+	if len(w.Empires) != 0 {
+		t.Errorf("expected no empires after reset, got %d", len(w.Empires))
 	}
 }
 
 func TestDailyMaintenanceEndlessByDefault(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	w.LastMaintDate = "2026-06-20"
 	// One game day per real day: ten days of play takes ten daily runs.
 	for d := 21; d <= 30; d++ {
@@ -69,8 +69,8 @@ func TestDailyMaintenanceEndlessByDefault(t *testing.T) {
 
 func TestEndGame(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	winner := w.Empires[0]
 	winner.Land = 1_000_000
 
@@ -82,8 +82,8 @@ func TestEndGame(t *testing.T) {
 	if w.GameDay != 0 {
 		t.Errorf("expected GameDay reset to 0, got %d", w.GameDay)
 	}
-	if len(w.Empires) != cfg.AICount {
-		t.Errorf("expected %d AI empires after reset, got %d", cfg.AICount, len(w.Empires))
+	if len(w.Empires) != 0 {
+		t.Errorf("expected no empires after reset, got %d", len(w.Empires))
 	}
 	if w.Alliances != nil {
 		t.Errorf("expected Alliances reset to nil, got %v", w.Alliances)
@@ -92,7 +92,6 @@ func TestEndGame(t *testing.T) {
 
 func TestEndGameCrownsSoleSurvivorWithNegativeNetWorth(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	survivor := w.AddHuman("s", "Survivor")
 	survivor.Land = 1

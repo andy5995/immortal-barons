@@ -470,7 +470,6 @@ func TestAIAllocatesCapturedLand(t *testing.T) {
 // cheaper. It should take a clearly-undercut listing.
 func TestAIBuysBelowShopPrice(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	seller := w.AddHuman("seller", "Sellville")
 	seller.Protection, seller.Troopers = 0, 5000
@@ -498,7 +497,6 @@ func TestAIBuysBelowShopPrice(t *testing.T) {
 // than the shop, and buying it would make the market a trap for the AI.
 func TestAIIgnoresOverpricedListings(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	seller := w.AddHuman("seller", "Sellville")
 	seller.Troopers = 5000
@@ -519,7 +517,6 @@ func TestAIIgnoresOverpricedListings(t *testing.T) {
 // takes a short loan when it cannot meet the turn's maintenance.
 func TestAIBorrowsToCoverShortfall(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.AddAIEmpires(1)
 	bot := w.Empires[0]
@@ -552,7 +549,6 @@ func TestAIBorrowsToCoverShortfall(t *testing.T) {
 // A solvent AI must not borrow — debt it does not need still compounds.
 func TestAISolventDoesNotBorrow(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.AddAIEmpires(1)
 	bot := w.Empires[0]
@@ -570,7 +566,6 @@ func TestAISolventDoesNotBorrow(t *testing.T) {
 // than starve holding it.
 func TestAISellsRegionsWhenStarving(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.AddAIEmpires(1)
 	bot := w.Empires[0]
@@ -597,7 +592,6 @@ func TestAISellsRegionsWhenStarving(t *testing.T) {
 // A well-fed AI must not sell land — that would dismantle a healthy realm.
 func TestAIWellFedKeepsItsRegions(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.AddAIEmpires(1)
 	bot := w.Empires[0]

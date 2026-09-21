@@ -24,12 +24,13 @@ func TestLoadMissingReturnsErrNoWorld(t *testing.T) {
 	}
 }
 
-func TestNewGameSeedsAI(t *testing.T) {
+// Computer barons were retired in v0.1.3: nothing a sysop can set brings one
+// back, so a fresh game opens on an empty planet.
+func TestNewGameSeedsNoAI(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	cfg.AICount = 3
 	w := NewGame(cfg)
-	if len(w.Empires) != 3 {
-		t.Errorf("NewGame should seed %d AI, got %d", 3, len(w.Empires))
+	if len(w.Empires) != 0 {
+		t.Errorf("NewGame should seed no empires, got %d", len(w.Empires))
 	}
 }
 
@@ -37,6 +38,40 @@ func TestNewGameSeedsAI(t *testing.T) {
 // point of queuing an operation for daily maintenance is that the sender hangs
 // up in between, so a queue held only in memory would lose the fee, the agent
 // and the operation together.
+// Loading a world saved before v0.1.3 sweeps its computer barons, and the sweep
+// is recorded so a baron seeded afterwards (IB_ADD_AI) is not swept in turn.
+// Delete with internal/game/retire_ai.go.
+func TestLoadRetiresAIBaronsOnce(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	w := game.NewWorldSeed(cfg, 1)
+	w.AddHuman("alice", "Alethia")
+	w.AddAIEmpires(3)
+	w.AIRetired = false // as a world saved before the retirement comes off disk
+	if err := Save(w, cfg); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if len(got.Empires) != 1 {
+		t.Fatalf("load left %d empires, want only the caller's realm", len(got.Empires))
+	}
+
+	got.AddAIEmpires(2)
+	if err := Save(got, cfg); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+	again, err := Load(cfg)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if n := len(again.AIEmpires()); n != 2 {
+		t.Errorf("a second load swept barons seeded after the migration: %d left, want 2", n)
+	}
+}
+
 func TestCovertQueueSurvivesTheSession(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorldSeed(cfg, 1)
@@ -400,7 +435,10 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	if got.GameDay != 7 || got.InvestRate != 100 {
 		t.Errorf("world scalars: day=%d rate=%d, want 7 and 100", got.GameDay, got.InvestRate)
 	}
-	if len(got.NewsToday) != 1 || got.NewsToday[0].Text != "A bulletin line from an old save" {
+	// The fixture carries computer barons, and loading it retires them, which
+	// files a line each — so this checks the legacy line is FIRST, not alone.
+	// Once internal/game/retire_ai.go goes, the length check can come back.
+	if len(got.NewsToday) == 0 || got.NewsToday[0].Text != "A bulletin line from an old save" {
 		t.Errorf(`the legacy "Bulletin" key must load into NewsToday, got %v`, got.NewsToday)
 	}
 	e := got.FindByOwner("khan")

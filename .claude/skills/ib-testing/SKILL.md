@@ -37,9 +37,10 @@ reach this?" — if yes, script the menu.
 
 **Two facts the engine harness needs, both of which cost an hour when missed:**
 
-- **`DefaultConfig().AICount` is 0** (`internal/game/config.go:429`), so
-  `NewWorldSeed(DefaultConfig(), seed)` builds a world with **no empires**. Set
-  `cfg.AICount` before the call, or add empires after.
+- **`NewWorldSeed(DefaultConfig(), seed)` builds a world with NO empires.**
+  Nothing seeds one: computer barons were retired in v0.1.3 and the `AICount`
+  setting went with them. Call `w.AddAIEmpires(n)` or `w.AddHuman(...)` after
+  the world exists.
 - **`PlayTurn` does not collect income.** `CollectIncome`, `Manufacture` and
   `GrowFood` are separate turn-start calls the caller makes
   (`internal/game/turn.go`, `internal/menu/gameflow.go:57-59`). A naive
@@ -127,6 +128,31 @@ without going through libc, so an `LD_PRELOAD` shim never sees it. This was
 checked, not assumed. `IB_GAME_DATE=YYYY-MM-DD` still works and is translated
 into the equivalent offset.
 
+## Seeding computer barons: `IB_ADD_AI`
+
+Barons were retired as a game feature in v0.1.3 — a computer realm cannot answer
+a treaty offer or a message, so the diplomacy the game is built on had nothing to
+work against. The code that plays them is kept, because a populated planet is
+what a screen with rivals on it, a multi-day economy run and the score table have
+to be checked against. `IB_ADD_AI=N` is the only way in:
+
+```
+IB_ADD_AI=3 ./immortal-barons -data ./data
+```
+
+It adds N barons to the world and exits, printing what it is about to do. It
+refuses on a league board, it takes 1 to 25, and it exits 2 on anything else
+rather than rounding the value.
+
+**It writes.** The barons are in `world.json` afterwards, holding realm slots and
+taking a turn every daily maintenance until the game is reset. That is the
+difference from `IB_CLOCK_OFFSET`, which colors one run and is gone.
+
+**Loading a world saved before v0.1.3 removes its barons** and records that it
+has done so, which is why a baron seeded here survives the next load
+(`internal/game/retire_ai.go`, deleted a few releases on). A rig carried over
+from an older build loses the barons it had; seed them again here.
+
 **The offset only ever goes forward, and the game enforces it.** A board writes
 its shifted instants into `world.json` and into the packets it sends, and those
 outlive the run: from a smaller shift they are in the future, so a weapon never
@@ -185,8 +211,7 @@ The flags that exist for testing, none of which need the editor:
 | flag | does |
 |---|---|
 | `-dump` | print the normalized world as JSON after load-time migration — the inspection tool for "reproduce what I saw" |
-| `-spectate N` | play N days of computer-baron turns and print standings, the built-in balance probe. **Advances and saves**, so never point it at a rig you care about |
-| `-add-ai N` | add N computer barons to a running game (refused under IBBS) |
+| `-spectate N` | play N days of computer-baron turns and print standings, the built-in balance probe. Needs `IB_ADD_AI` first, or it has nothing to watch. **Advances and saves**, so never point it at a rig you care about |
 | `-reset-from-config` | rebuild the world from the current `config.json`, no editor |
 | `-league-check` | report roster, board name, packet directories and keys at once — run this before blaming a league test |
 | `-league-routes` | print which board each planet's packets are handed to |
@@ -235,7 +260,7 @@ Two traps, both of which fail silently:
 
 - **A line of input ends with `\r`, not `\n`.** The session reads CR; a `\n`
   never terminates the line and the run desyncs with no error.
-- **A league board seeds no computer barons.** `AddAIEmpires` refuses while IBBS
+- **A league board takes no computer barons.** `AddAIEmpires` refuses while IBBS
   is on, so create a human realm on each side first, or a packet arrives with
   nobody to receive it.
 

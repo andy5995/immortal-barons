@@ -13,9 +13,9 @@ import (
 func protectionWorld(t *testing.T) (*ctx, *game.Empire, *game.Empire) {
 	t.Helper()
 	cfg := game.DefaultConfig()
-	cfg.AICount = 2
 	cfg.Lottery = false
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	w.AddHuman("tester", "Testland")
 	c := &ctx{World: w, handle: "tester", Term: Term{UTF8: true}}
 	c.Today = "2026-07-03"

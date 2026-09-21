@@ -89,7 +89,6 @@ const (
 	helpIdleRemove         = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
 	helpStartDate          = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
 	helpJoinDate           = "New players may not join after this date. Blank leaves joining open."
-	helpAICount            = "Number of computer-run empires seeded when the world is reset. They take slots from the planet's 25 realms, so each one is a caller who cannot enroll. A league board never gets any, whatever this says."
 	helpInitialLand        = "Land for sale on the market when the game resets."
 	helpLandPerDay         = "Land added to the market each day."
 	helpInterest           = "Bank interest paid over 10 days, credited at the end of each turn. The maximum (200) works out to 20% per day. High rates let banking dominate the game, so a low value (under about 40) keeps play balanced."
@@ -204,7 +203,6 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(timing, "Remove idle realms (days, 0=never)", helpIdleRemove, c.IdleDaysRemove, 0, game.MaxIdleDaysRemove, func(c *game.Config, n int) { c.IdleDaysRemove = n })
 	t.addDate(timing, "Game Start Date (YYYY-MM-DD)", helpStartDate, c.GameStartDate, func(c *game.Config, v string) { c.GameStartDate = v })
 	t.addDate(timing, "Join Cutoff Date (YYYY-MM-DD)", helpJoinDate, c.JoinDate, func(c *game.Config, v string) { c.JoinDate = v })
-	t.addInt(timing, "AI empires", helpAICount, c.AICount, 0, 5, func(c *game.Config, n int) { c.AICount = n })
 	t.addBool(timing, "Pirates", helpPirates, c.Pirates, func(c *game.Config, b bool) { c.Pirates = b })
 
 	econ := tview.NewForm()

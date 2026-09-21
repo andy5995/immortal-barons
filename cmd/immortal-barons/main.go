@@ -126,6 +126,21 @@ func main() {
 	applyTestClock()
 	today := game.Today()
 
+	// Before every mode: seeding barons is a development hook that writes to the
+	// world and exits, so it must not also run a turn. See testseed.go. A mode
+	// flag alongside it is refused rather than ignored — the var is easy to
+	// leave set in a shell, and silently swallowing a -reset is the one outcome
+	// that cannot be undone.
+	if n, ok := addAIRequested(); ok {
+		if o.explicitMode() {
+			fmt.Fprintf(os.Stderr,
+				"immortal-barons: %s is set, which seeds barons and exits; unset it to run another mode\n", AddAIVar)
+			os.Exit(2)
+		}
+		exitOn(AddAIVar, runAddAI(cfg, n))
+		return
+	}
+
 	if *o.maint {
 		exitOn("-maint", runMaint(cfg, today))
 		return
@@ -218,11 +233,6 @@ func main() {
 
 	if *o.setDrop {
 		exitOn("-set-dropfile", runSetDrop(cfg.DataDir))
-		return
-	}
-
-	if *o.addAI > 0 {
-		exitOn("-add-ai", runAddAI(cfg, *o.addAI))
 		return
 	}
 

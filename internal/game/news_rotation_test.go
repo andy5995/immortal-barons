@@ -4,7 +4,6 @@ import "testing"
 
 func TestPlanetTotalsSumsOnlyLivingEmpires(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
 	alive := w.AddHuman("alive", "Alive")
@@ -38,7 +37,6 @@ func TestPostNewsLandsInNewsToday(t *testing.T) {
 
 func TestRollNewsRotatesBulletinAndNews(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.Pirates = nil // keep news deterministic: no random pirate-raid lines
 	e := w.AddHuman("h", "Realm")

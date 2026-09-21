@@ -165,6 +165,12 @@ type World struct {
 	// after v0.0.5, so a world saved before it loads with an empty queue.
 	CovertQueue []QueuedCovertOp `json:",omitempty"`
 
+	// AIRetired records that RetireAIBarons has swept this world. Written even
+	// when false, because absent has to mean "saved before the sweep existed"
+	// rather than inheriting a fresh world's true. TEMPORARY, added in v0.1.3 —
+	// it goes when internal/game/retire_ai.go does.
+	AIRetired bool
+
 	Alliances     []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
 	Treaties      []Treaty
 	LastMaster    string // crowned at league end (endGame); shown as "Last Planetary Master"
@@ -441,7 +447,6 @@ func (w *World) ResetForNewSeason(startDate string) {
 	w.Outbox, w.Transit = outbox, transit // mail for the other boards must still go out
 	w.StartedDate = startDate
 	w.LastMaintDate = startDate
-	w.seedAIEmpires() // a no-op on a league board, which never has any
 }
 
 // initFreshGame installs a brand-new game's state onto w, keeping only its
@@ -492,7 +497,10 @@ func (w *World) initFreshGame() {
 	w.VisitCovert, w.VisitTrading, w.VisitMessage = d.VisitCovert, d.VisitTrading, d.VisitMessage
 	w.EnterExitsBuy, w.DepositEndTurn = d.EnterExitsBuy, d.DepositEndTurn
 	w.AutoPayMaint, w.AutoFeed = d.AutoPayMaint, d.AutoFeed
-	w.seedAIEmpires()
+	// A fresh game has no barons to sweep, and saying so here keeps the
+	// retirement migration off every new world. TEMPORARY (v0.1.3) — goes with
+	// internal/game/retire_ai.go.
+	w.AIRetired = true
 	w.Pirates = nil
 	if w.Config.Pirates {
 		// seedPirates, not EnsurePirates: a FRESH game gets the starting hoard.

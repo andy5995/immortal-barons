@@ -99,7 +99,6 @@ func TestMaybeRandomEventGainIncreasesResourceAndAppendsOneLine(t *testing.T) {
 // own name.
 func TestDailyMaintenancePersistsHumanEventsButClearsAIEvents(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.Pirates = nil
 

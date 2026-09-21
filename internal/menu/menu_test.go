@@ -36,12 +36,12 @@ func (f *fakeSession) Write(p []byte) (int, error) { return f.out.Write(p) }
 // newWorld builds a fresh test ctx with an active human empire.
 func newWorld() *ctx {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 1
 	// Off unless a test asks for it: the lottery offer is a prompt at the head of
 	// the first turn, and every scripted turn below would have to spend a key on
 	// it. TestLotteryOfferComesWithTheDaysFirstTurn turns it back on.
 	cfg.Lottery = false
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	w.AddHuman("tester", "Testland")
 	c := &ctx{World: w, handle: "tester", Term: Term{UTF8: true}}
 	c.Today = "2026-07-03"

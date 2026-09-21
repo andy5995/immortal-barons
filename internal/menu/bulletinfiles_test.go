@@ -16,10 +16,10 @@ import (
 // stripped -- not a second layout that could drift.
 func TestWriteBulletinsWritesBothFormsOfEach(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 2
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true // a league board, so the World Report is among the set
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	w.Today, w.LastMaintDate = "2026-08-27", "2026-08-27"
 	dir := t.TempDir()
 
@@ -56,10 +56,10 @@ func TestWriteBulletinsWritesBothFormsOfEach(t *testing.T) {
 // keeps it out rather than a filter here that could be forgotten.
 func TestWorldReportShowsAttacksAndNamesTheOutcome(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 2
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true // the World Report is the league's, so only a league board writes one
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	w.Battles = []game.BattleLogEntry{
 		{Date: "2026-08-27", Attacker: "Apples", Defender: "Bananas", Won: true, Land: 12},
 		{Date: "2026-08-27", Planet: "Delta BBS", Attacker: "Cherries", Defender: "Dates", Crushed: true, Won: true},
@@ -95,10 +95,10 @@ func TestWorldReportShowsAttacksAndNamesTheOutcome(t *testing.T) {
 // promise something the board does not have.
 func TestStandAloneBoardWritesNoWorldReport(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 1
 	cfg.BoardID = "Solo BBS"
 	cfg.IBBS = false
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	w.Today, w.LastMaintDate = "2026-08-27", "2026-08-27"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
@@ -122,10 +122,10 @@ func TestStandAloneBoardWritesNoWorldReport(t *testing.T) {
 // draws. They belong to the league, so only a league board writes them.
 func TestLeagueRankingBulletins(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 2
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 7)
+	w.AddAIEmpires(2)
 	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	w.AddHuman("andy", "Tatooine")
 	w.RemoteBoards = []game.RemoteBoard{{
@@ -189,10 +189,10 @@ func TestLeagueRankingBulletins(t *testing.T) {
 // of one planet's skirmishes.
 func TestStandAloneBoardWritesNoLeagueRankings(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 1
 	cfg.BoardID = "Solo BBS"
 	cfg.IBBS = false
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
@@ -211,10 +211,10 @@ func TestStandAloneBoardWritesNoLeagueRankings(t *testing.T) {
 // characters. A .ans file is CP437, and so is the .txt beside it.
 func TestBulletinsAreCP437NotUTF8(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 2
 	cfg.BoardID = "Alpha BBS"
 	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	w.Today, w.LastMaintDate = "2026-09-02", "2026-09-02"
 	dir := t.TempDir()
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {

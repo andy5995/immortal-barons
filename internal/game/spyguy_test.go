@@ -11,7 +11,6 @@ func spyWorlds(t *testing.T) (ours, theirs *World, payer *Empire) {
 	t.Helper()
 	cfgA := DefaultConfig()
 	cfgA.IBBS = true
-	cfgA.AICount = 0
 	cfgA.BoardID = "Wildside"
 	ours = NewWorldSeed(cfgA, 1)
 	payer = ours.AddHuman("alice", "Alethia")
@@ -20,7 +19,6 @@ func spyWorlds(t *testing.T) (ours, theirs *World, payer *Empire) {
 
 	cfgB := DefaultConfig()
 	cfgB.IBBS = true
-	cfgB.AICount = 0
 	cfgB.BoardID = "Nova Hub"
 	theirs = NewWorldSeed(cfgB, 2)
 	return ours, theirs, payer

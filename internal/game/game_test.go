@@ -7,8 +7,9 @@ import (
 
 func testWorld() *World {
 	cfg := DefaultConfig()
-	cfg.AICount = 2
-	return NewWorldSeed(cfg, 1)
+	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
+	return w
 }
 
 // pastProtection clears New Realm Protection on every realm in w. Every trade
@@ -66,7 +67,6 @@ func TestAddHumanAndFindByOwner(t *testing.T) {
 
 func TestAddAIEmpires(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
 	if got := w.AddAIEmpires(3); got != 3 {
@@ -112,7 +112,6 @@ func TestAddAIEmpires(t *testing.T) {
 // pickers letter, so a board cannot be given more of them than can be addressed.
 func TestAddAIEmpiresStopsAtPlanetSlots(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
 	if got := w.AddAIEmpires(100); got != 25 {
@@ -134,7 +133,6 @@ func TestAddAIEmpiresStopsAtPlanetSlots(t *testing.T) {
 // runs out of slots first.
 func TestNewAINameExhaustsPool(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
 	pool := len(aiNameModifiers) * len(aiNameNouns) // every modifier x noun combination

@@ -9,8 +9,8 @@ import (
 
 func TestAttackRecordsVictimEvent(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	a := w.AddHuman("att", "Attacker")
 	a.Troopers = 100000 // overwhelming, deterministic win
 	d := w.Empires[0]
@@ -221,8 +221,8 @@ func TestRepelledAttackMovesNoScore(t *testing.T) {
 
 func TestAttackPostsPlanetaryNews(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	a := w.AddHuman("att", "Attacker")
 	a.Troopers = 100000 // overwhelming, deterministic win
 	d := w.Empires[0]
@@ -475,8 +475,8 @@ func TestCombatReportTranslatesInEveryLanguage(t *testing.T) {
 // turrets and grounded-jet kills that no routine in the original performs.
 func TestBombersBleedWithTheRestOfTheForce(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	a := w.AddHuman("att", "Attacker")
 	a.Troopers, a.Bombers = 100_000, 100_000
 	d := w.Empires[0]
@@ -510,8 +510,8 @@ func TestBombersBleedWithTheRestOfTheForce(t *testing.T) {
 // crowned one when the defender was left with no people, until #200.
 func TestConquestIsTheLandAlone(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	a := w.AddHuman("att", "Attacker")
 	a.Troopers = 1_000_000
 	d := w.Empires[0]

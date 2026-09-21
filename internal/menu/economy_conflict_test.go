@@ -31,7 +31,6 @@ func twoNodeWorld(t *testing.T, handle, realm string, cfgSetup func(*game.Config
 	t.Helper()
 	cfg = game.DefaultConfig()
 	cfg.DataDir = t.TempDir()
-	cfg.AICount = 0
 	if cfgSetup != nil {
 		cfgSetup(&cfg)
 	}

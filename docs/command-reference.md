@@ -86,7 +86,6 @@ then exit.
 - **`-reset-from-config`** — Start a new game using the current `config.json`,
   without opening the editor. It clears all empires and rebuilds the world. The
   old world is saved first.
-- **`-add-ai N`** — Add N computer barons to the running game, then exit.
 - **`-players`** — List the players and edit one of them, then exit. This is the
   original's `VIEW` command. Pick a realm by its Id letter, then choose
   **D**elete realm, **P**layer name, **R**ealm name, or **Q**uit. Deleting asks
@@ -118,10 +117,12 @@ or override game state.
     immortal-barons -data ./sandbox -spectate 30
     ```
 
-    This is a balance-checking tool, not something a board needs to run. It
-    exists so the computer barons can be watched playing against each other, to
-    see whether they expand sensibly, whether wars happen, and whether the game
-    collapses to one realm too quickly.
+    This is a balance-checking tool for development, not something a board
+    needs to run. It watches computer barons play against each other, to see
+    whether they expand sensibly, whether wars happen, and whether the game
+    collapses to one realm too quickly. Computer barons were retired in v0.1.3
+    and nothing a sysop can set creates them, so on a board's own game this has
+    nothing to watch.
 
     **It plays real turns and saves the result.** Two things guard against
     running it by mistake: it asks before starting, and the default answer is

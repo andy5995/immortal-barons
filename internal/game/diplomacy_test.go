@@ -246,8 +246,8 @@ func TestTradeTreatyIsNotAnAlliance(t *testing.T) {
 
 func TestTargetsExcludesAllies(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
 	for _, e := range w.Empires {

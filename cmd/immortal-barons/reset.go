@@ -236,31 +236,3 @@ func preparePacketDirs(cfg game.Config) {
 		}
 	}
 }
-
-// runAddAI injects up to n new AI barons into the running world (no reset),
-// picking unused names from the pool. It reports how many were actually added,
-// and why it stopped short: the planet's realm slots run out long before the
-// name pool does.
-func runAddAI(cfg game.Config, n int) error {
-	lock, err := store.Lock(cfg, true)
-	if err != nil {
-		return err
-	}
-	defer lock.Release()
-	w, err := store.Load(cfg)
-	if err != nil {
-		return err
-	}
-	added := w.AddAIEmpires(n)
-	if err := store.Save(w, cfg); err != nil {
-		return err
-	}
-	fmt.Printf("Added %d AI barons.\n", added)
-	switch {
-	case added < n && w.PlanetFull():
-		fmt.Printf("(Requested %d, but the planet's %d realms are all held.)\n", n, game.PlanetSlots)
-	case added < n:
-		fmt.Printf("(Requested %d, but the AI name pool is exhausted.)\n", n)
-	}
-	return nil
-}

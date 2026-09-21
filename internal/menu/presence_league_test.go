@@ -20,7 +20,6 @@ func TestPlayedTodayMarkIsLeagueOnly(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := game.DefaultConfig()
-			cfg.AICount = 0
 			cfg.IBBS = tc.ibbs
 			w := game.NewWorldSeed(cfg, 1)
 			w.AddHuman("alice", "Alicia")
@@ -38,7 +37,6 @@ func TestPlayedTodayMarkIsLeagueOnly(t *testing.T) {
 // Online is a different fact and stays visible whether or not a league is on.
 func TestOnlineMarkIsNotLeagueGated(t *testing.T) {
 	cfg := game.DefaultConfig()
-	cfg.AICount = 0
 	cfg.IBBS = false
 	w := game.NewWorldSeed(cfg, 1)
 	w.AddHuman("alice", "Alicia")

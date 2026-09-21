@@ -41,7 +41,6 @@ type opts struct {
 	importBoardCfg  *string
 	ibbsReset       *bool
 	resetFromConfig *bool
-	addAI           *int
 	spectate        *int
 	dump            *bool
 	dupeCheck       *string
@@ -90,7 +89,6 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		importBoardCfg:  flag.String("import-bbs-cfg", "", i18n.T(lang, "take this board's name, inbound directory and league number from an original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset")),
 		ibbsReset:       flag.Bool("ibbs-reset", false, i18n.T(lang, "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings")),
 		resetFromConfig: flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)")),
-		addAI:           flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit")),
 		spectate:        flag.Int("spectate", 0, i18n.T(lang, "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms")),
 		dump:            flag.Bool("dump", false, i18n.T(lang, "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)")),
 		dupeCheck:       flag.String("dupe-check", "", i18n.T(lang, "force Dupe Checking `on|off` for this run only, for testing a league lockout. Nothing is saved: the sysop's setting is left as it is")),
@@ -112,5 +110,5 @@ func (o *opts) explicitMode() bool {
 	return *o.maint || *o.planetary || *o.full || *o.leagueConfig || *o.leagueRoutes ||
 		*o.leagueCheck || *o.reset || *o.resetFromConfig || *o.ibbsReset ||
 		*o.lastPacket || *o.bbsInfo || *o.playerList || *o.players ||
-		*o.addAI > 0 || *o.dump || *o.spectate > 0 || *o.local || *o.setDrop
+		*o.dump || *o.spectate > 0 || *o.local || *o.setDrop
 }

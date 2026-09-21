@@ -7,8 +7,8 @@ import (
 
 func TestPlayTurnAffectsOnlyActingEmpire(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(2)
 	other := w.Empires[1]
 	otherGold := other.Gold
 	me := w.AddHuman("me", "Mine")

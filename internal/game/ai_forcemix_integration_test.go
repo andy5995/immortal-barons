@@ -10,8 +10,8 @@ import "testing"
 // still pass.
 func TestAIForceMixFiresInSeededGame(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 3
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(3)
 	w.LastMaintDate = "2026-07-31"
 	for _, d := range []string{"2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04",
 		"2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08"} {

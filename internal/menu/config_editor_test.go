@@ -70,10 +70,12 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// (allied market trading) and 47 (required version) are IB's own, numbered
 	// past the last of the original's own fields. 48 was a league name, removed
 	// once nothing displayed it; its number is retired rather than reused, so an
-	// old note naming 48 cannot land on a different setting.
-	const fields = 46
+	// old note naming 48 cannot land on a different setting. 21 was the AI-baron
+	// count, retired with the barons themselves in v0.1.3, and its number is held
+	// back the same way.
+	const fields = 45
 	for n := 1; n <= 47; n++ {
-		if n == 22 {
+		if n == 21 || n == 22 {
 			continue
 		}
 		if _, ok := seen[n]; !ok {

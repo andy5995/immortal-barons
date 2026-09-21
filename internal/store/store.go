@@ -167,6 +167,11 @@ func stampClockOffset(w *game.World) {
 // game not being something to retrofit.
 func clearRandomSeeded(w *game.World) {
 	w.Pirates = nil
+	// Same shape as a random default, for the opposite reason: a fresh world is
+	// born already swept of computer barons, and inheriting that would tell the
+	// migration a pre-v0.1.3 save had nothing to do. TEMPORARY — goes with
+	// internal/game/retire_ai.go.
+	w.AIRetired = false
 }
 
 // copySaved copies everything the SAVE owns from src onto dst, leaving dst's own
@@ -228,6 +233,11 @@ func repair(w *game.World, cfg game.Config) {
 	w.EnsureSlots()
 	w.EnsureAttackSlots()
 	w.EnsureNews()
+	// After EnsureSlots and the treaty/market migrations: retiring a baron frees
+	// its slot and has to forget the pacts and market rows it leaves, which those
+	// have only just moved out of their legacy fields. TEMPORARY (v0.1.3) — goes
+	// with internal/game/retire_ai.go.
+	w.RetireAIBarons()
 	loadLeagueNodes(w, cfg)
 	loadLeagueKeys(w, cfg)
 }

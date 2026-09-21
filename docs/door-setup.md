@@ -36,8 +36,8 @@ immortal-barons -reset -data /path/to/data
 This opens the **Configuration Editor**, starting from the built-in defaults: a
 menu of every game setting (turns per day, protection turns, land and market
 settings, interest and investment rates, tax and region limits, costs and attack
-settings, number of AI barons, game length, and more). Change what you like,
-then press `S` to save `config.json` and seed the world, or `Q` to cancel.
+settings, game length, and more). Change what you like, then press `S` to save
+`config.json` and create the world, or `Q` to cancel.
 
 To skip the editor and use the current `config.json` as it stands, run
 `-reset-from-config` instead.
@@ -99,7 +99,7 @@ Mystic writes the file name in lower case (`door32.sys`), which matters on Linux
 because file names there are case-sensitive. Keep the game's data directory
 separate from the BBS's own files.
 
-Before the first caller connects, seed the game as in "First-time setup" above,
+Before the first caller connects, set the game up as in "First-time setup" above,
 pointing it at this board's data directory:
 
 ```
@@ -195,8 +195,9 @@ for the options and how to test each one.
 
 ## Daily maintenance
 
-Maintenance moves the game forward one day. It lets the AI barons take their
-turns, runs pirate raids, and refreshes each player's turns.
+Maintenance moves the game forward one day. It refreshes each player's turns,
+pays out investments and loans that have matured, settles the trading market,
+and rolls the news over to a new day.
 
 **You usually do not need to schedule this.** Maintenance runs on its own the
 first time a player logs in on a new day. Days with no play are skipped, and the
@@ -207,8 +208,8 @@ immortal-barons -maint -data /path/to/data
 ```
 
 Run that from a nightly event if you want the game to keep moving on quiet days.
-It matters most on a league board, where the AI barons, pirates and inter-BBS
-packets should keep to a schedule even when no local player logs in.
+It matters most on a league board, where the pirates and the inter-BBS packets
+should keep to a schedule even when no local player logs in.
 
 ## Bulletins
 
@@ -250,10 +251,10 @@ The two commands that create the game also restart it:
 - **`-reset-from-config`** keeps the `config.json` you already have, opens no
   editor, and only clears the world.
 
-Both clear all empires (players re-create their realm the next time they log in)
-and re-seed the AI barons on a fresh day one. Neither picks a winner. Each saves
-the old world to `world.json.bak` in the data directory first, so you can
-restore it if you reset by mistake.
+Both clear all empires (players re-create their realm the next time they log
+in) and start again at day one. Neither picks a winner. Each saves the old
+world to `world.json.bak` in the data directory first, so you can restore it if
+you reset by mistake.
 
 ### The config file is portable
 
@@ -279,19 +280,6 @@ blank and none are written.
 
 [Bulletin Files](bulletins.md) covers all of it — every file, the `bbs.cfg`
 lines, and the header, footer and stylesheet you can edit.
-
-## Adding AI barons to a running game
-
-To drop more AI opponents into a game that is already going, without resetting:
-
-```
-immortal-barons -add-ai N -data /path/to/data
-```
-
-This adds N new AI barons and exits. It leaves existing players and AI alone.
-(To set the AI count for a brand-new game instead, use the Configuration Editor
-via `-reset`.) A board in a league game has no AI barons, and this command
-adds none.
 
 ## Editing a player
 

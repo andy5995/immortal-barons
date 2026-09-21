@@ -11,7 +11,6 @@ import (
 func dropCtx(t *testing.T) (*ctx, *game.Empire) {
 	t.Helper()
 	cfg := game.DefaultConfig()
-	cfg.AICount = 0
 	w := game.NewWorldSeed(cfg, 1)
 	p := w.AddHuman("alice", "Alicia")
 	w.GrantRegions(p, game.Desert.Count(&p.Regions), 40)

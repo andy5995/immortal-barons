@@ -8,7 +8,6 @@ import "testing"
 // up one — the key that mailed a realm yesterday reached a different one today.
 func TestSlotLetterSurvivesANeighboursRemoval(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	first := w.AddHuman("a", "Alpha")
 	second := w.AddHuman("b", "Bravo")
@@ -37,7 +36,6 @@ func TestSlotLetterSurvivesANeighboursRemoval(t *testing.T) {
 // named by nobody (#144).
 func TestPlanetHoldsTwentyFiveRealms(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
 	for i := 0; i < 25; i++ {
@@ -77,7 +75,6 @@ func TestPlanetHoldsTwentyFiveRealms(t *testing.T) {
 // mean "unlimited" and bounded nothing at all. Both now stop at the slots.
 func TestBaronsAndCallersShareThePlanetsSlots(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	cfg.MaxPlayers = 0 // "no cap of my own"
 	w := NewWorldSeed(cfg, 1)
 
@@ -100,7 +97,6 @@ func TestBaronsAndCallersShareThePlanetsSlots(t *testing.T) {
 // dropEmpires forgets all of it.
 func TestFreedSlotIsReusedAndInheritsNothing(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	ally := w.AddHuman("ally", "Allyria")
 	doomed := w.AddHuman("doomed", "Doomedia")
@@ -144,7 +140,6 @@ func TestFreedSlotIsReusedAndInheritsNothing(t *testing.T) {
 // reload — so it must renumber nobody the second time.
 func TestEnsureSlotsBackfillsOnceAndIsIdempotent(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	for i := 0; i < 4; i++ {
 		w.AddHuman(handleFor(i), realmFor(i))
@@ -176,7 +171,6 @@ func TestEnsureSlotsBackfillsOnceAndIsIdempotent(t *testing.T) {
 // callers keep their slots ahead of the computer barons.
 func TestEnsureSlotsDropsAnOverFullWorldsSurplus(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.AddAIEmpires(24)
 	late := w.AddHuman("late", "Lateland") // the 25th

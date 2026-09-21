@@ -21,7 +21,6 @@ func distinctConfig() game.Config {
 	c.GameLength = 4
 	c.GameStartDate = "2026-01-02"
 	c.JoinDate = "2026-03-04"
-	c.AICount = 5
 	c.InitialMarketLand = 6
 	c.LandPerDay = 7
 	// The two bank rates carry BRE's own floors, so a round-trip fixture has to

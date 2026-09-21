@@ -11,7 +11,6 @@ import (
 // Today's News empty every day -- the "No planetary bulletins." report.
 func TestMasterNewsLandsInTodaysNews(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	w.Pirates = nil
 	e := w.AddHuman("h", "Realm")
@@ -37,7 +36,6 @@ func TestMasterNewsLandsInTodaysNews(t *testing.T) {
 // back -- so the roll is happening, not merely skipped.
 func TestNewsRollsWhileTodayStillOpens(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 2)
 	w.Pirates = nil
 	e := w.AddHuman("h", "Realm")

@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// roster.go — the planet's set of realms: seeding the AI barons, admitting a
-// caller, and taking a realm off the board again.
+// roster.go — the planet's set of realms: generating a computer baron,
+// admitting a caller, and taking a realm off the board again.
 
 // AI baron names are built from a modifier x noun matrix rather than a fixed
 // list, so a game can field far more distinct barons and the lineup varies
@@ -50,8 +50,7 @@ func (w *World) newAIName(used map[string]bool) (string, bool) {
 }
 
 // addAIEmpire appends one AI empire (Owner "") with the standard AI starting
-// setup and returns it, or nil when the planet has no free slot. Shared by
-// seedAIEmpires and AddAIEmpires.
+// setup and returns it, or nil when the planet has no free slot.
 func (w *World) addAIEmpire(name string) *Empire {
 	slot := w.freeSlot()
 	if slot == 0 {
@@ -73,11 +72,6 @@ func (w *World) addAIEmpire(name string) *Empire {
 	}
 	w.Empires = append(w.Empires, e)
 	return e
-}
-
-// seedAIEmpires appends Config.AICount AI empires to the world.
-func (w *World) seedAIEmpires() {
-	w.AddAIEmpires(w.Config.AICount)
 }
 
 // AddAIEmpires injects up to n new AI barons into the live world, generating

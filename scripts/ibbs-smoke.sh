@@ -33,7 +33,7 @@ DROP
 for id in "${boards[@]}"; do
   mkdir -p "$tmp/$id" "$tmp/$id/in" "$tmp/$id/out"
   cat > "$tmp/$id/config.json" <<CFG
-{"TurnsPerDay":10,"ProtectionTurns":20,"AICount":2,"DataDir":"$tmp/$id","GameLength":30,"IBBS":true}
+{"TurnsPerDay":10,"ProtectionTurns":20,"DataDir":"$tmp/$id","GameLength":30,"IBBS":true}
 CFG
   # This board's own identity and directories: bbs.cfg, not config.json.
   cat > "$tmp/$id/bbs.cfg" <<CFG

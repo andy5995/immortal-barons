@@ -10,10 +10,11 @@ import (
 func welcomeWorld(t *testing.T, ibbs bool) *game.World {
 	t.Helper()
 	cfg := game.DefaultConfig()
-	cfg.AICount = 1
 	cfg.IBBS = ibbs
 	cfg.BoardID = "Alpha"
-	return game.NewWorldSeed(cfg, 1)
+	w := game.NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
+	return w
 }
 
 // InterBBS Scores is on the Welcome menu only where there is a league to score,

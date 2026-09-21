@@ -203,12 +203,12 @@ func TestPaySDIShortfallShrinksTheProgram(t *testing.T) {
 
 func TestNuclearStrikeIgnoresSDI(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 1
 
 	// The defenders need REAL regions, not a bare Land figure: the strike ends
 	// in syncLand, which recomputes Land from the mix, so a fixture that only
 	// sets Land measures the fixture's lie.
 	w1 := NewWorldSeed(cfg, 42)
+	w1.AddAIEmpires(1)
 	a1 := w1.AddHuman("att", "Attacker")
 	a1.Gold = 100_000_000
 	d1 := w1.Empires[0]
@@ -218,6 +218,7 @@ func TestNuclearStrikeIgnoresSDI(t *testing.T) {
 	d1.SDI = 0
 
 	w2 := NewWorldSeed(cfg, 42)
+	w2.AddAIEmpires(1)
 	a2 := w2.AddHuman("att", "Attacker")
 	a2.Gold = 100_000_000
 	d2 := w2.Empires[0]

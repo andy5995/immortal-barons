@@ -273,7 +273,6 @@ func (m SabreMode) String() string {
 // from BRE's reset-init code and Configuration Help screens.
 type Config struct {
 	// Per-board (not part of the league ruleset).
-	AICount int
 	DataDir string
 	IBBS    bool // participate in inter-BBS play (gates the interplanetary menus)
 
@@ -547,7 +546,6 @@ func (c Config) JoinOpen(today string) bool {
 
 func DefaultConfig() Config {
 	return Config{
-		AICount:         0,
 		DataDir:         "./data",
 		BoardID:         "local",
 		Lottery:         true,

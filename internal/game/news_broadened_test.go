@@ -35,7 +35,6 @@ func TestPostInvestRateNewsOnMove(t *testing.T) {
 // champion) is untouched by postMasterNews throughout.
 func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	leader := w.AddHuman("leader", "Leaderland")
 	leader.Land = 1000
@@ -78,7 +77,6 @@ func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 // posts one planet-news line, and a well-fed empire posts none.
 func TestStarvationPostsCivilNews(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
 	starving := w.AddHuman("starving", "Famineburg")
@@ -112,7 +110,6 @@ func TestStarvationPostsCivilNews(t *testing.T) {
 // and files nothing.
 func TestMasterIsPaidFromTheQueensPurse(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	leader := w.AddHuman("leader", "Leaderland")
 	leader.Land = 1_000_000

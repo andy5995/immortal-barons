@@ -35,8 +35,8 @@ func TestTheAIDoesNotBuyForcesOutOfItsWorkingReserve(t *testing.T) {
 func TestAnUnthreatenedAIKeepsExpanding(t *testing.T) {
 	for seed := int64(1); seed <= 4; seed++ {
 		cfg := DefaultConfig()
-		cfg.AICount = 1 // alone on the planet, so nothing can take its land
 		w := NewWorldSeed(cfg, seed)
+		w.AddAIEmpires(1) // alone on the planet, so nothing can take its land
 
 		day := func(n int) { w.DailyMaintenance(fmt.Sprintf("2026-09-%02d", n)) }
 		for n := 1; n <= 15; n++ {

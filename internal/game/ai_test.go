@@ -70,7 +70,6 @@ func TestAIAggressorAcceptsTradePact(t *testing.T) {
 func warWorld(t *testing.T) (*World, *Empire, *Empire) {
 	t.Helper()
 	cfg := DefaultConfig()
-	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	agg := w.AddHuman("agg", "Aggressor")
 	agg.AIProfile = AIProfileAggressor

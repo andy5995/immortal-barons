@@ -126,8 +126,8 @@ func TestIdleRemovalDisabledByZero(t *testing.T) {
 // AI barons are never reaped: they are played every day by definition.
 func TestAIBaronsAreNeverReaped(t *testing.T) {
 	cfg := DefaultConfig()
-	cfg.AICount = 3
 	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(3)
 	w.LastMaintDate = "2026-07-20"
 	for _, e := range w.AIEmpires() {
 		e.LastPlayed = "" // as if never played
