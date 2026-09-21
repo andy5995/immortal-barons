@@ -4703,11 +4703,8 @@ missile (`ErrNoTargetSize`); the menu only offers scored barons, so that guard i
 the engine refusing a call the menu would not make. The sysop's Terror Costs dial
 scales the four bombing ops only, as the original applies no such knob here.
 
-**Two IB decisions**, neither established from the original:
+**One IB decision**, not established from the original:
 
-- **A backfiring S3-Sabre is reported home and applied there.** The roll
-  happens where the target lives, but the realm it hurts is on the board that
-  fired, so the damage lands when the answer arrives.
 - **A lost packet returns nothing**, because a Special Operation commits no
   forces and no agents — only gold, already spent on launching it. The sender is
   told the strike was never heard of again rather than left waiting.

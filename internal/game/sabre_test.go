@@ -147,7 +147,11 @@ func TestSabreBackfireCostsTheFirerNothing(t *testing.T) {
 
 	sent := InFlightStrike{Kind: "special", Op: OpSabre, Owner: "firer",
 		TargetBoard: "Far", TargetEmpire: "Victim"}
-	w.applySpecialOpResult(sent, AttackResult{TargetBoard: "Far", TargetEmpire: "Victim", Backfired: true})
+	// Report is what the TARGET's board composed and sent home, which is what the
+	// firer is shown; a result without one is the fallback case, below.
+	told := "Your S3-Sabre broke up over Victim and opened 3 Regions for them to settle."
+	w.applySpecialOpResult(sent, AttackResult{TargetBoard: "Far", TargetEmpire: "Victim",
+		Backfired: true, Report: told})
 
 	if e.Troopers != before.Troopers || e.Jets != before.Jets || e.Tanks != before.Tanks ||
 		e.Turrets != before.Turrets || e.People != before.People || e.Food != before.Food ||
@@ -158,7 +162,14 @@ func TestSabreBackfireCostsTheFirerNothing(t *testing.T) {
 		t.Fatal("the firer was told nothing about the backfire")
 	}
 	last := e.Events[len(e.Events)-1].Text
-	if !strings.Contains(last, "backfired") {
-		t.Errorf("backfire event = %q, want it to say the strike backfired", last)
+	if !strings.Contains(last, told) {
+		t.Errorf("backfire event = %q, want it to carry the target board's report %q", last, told)
+	}
+
+	// With no report to relay, the firer still learns what happened rather than
+	// getting a bare heading.
+	w.applySpecialOpResult(sent, AttackResult{TargetBoard: "Far", TargetEmpire: "Victim", Backfired: true})
+	if last := e.Events[len(e.Events)-1].Text; !strings.Contains(last, "backfired") {
+		t.Errorf("reportless backfire event = %q, want it to say the strike backfired", last)
 	}
 }

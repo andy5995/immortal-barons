@@ -50,7 +50,7 @@ var ipSpecialOpTopics = []attackTypeTopic{
 	{name: "Undermine Investments", body: "Destroys a quarter of the principal the target has invested, and the return it was owed with it. A realm holding no investments loses nothing."},
 	{name: "Nuclear Assault", body: "A nuclear missile at a realm on another planet. One of each missile per game day, and the target's SDI may stop it. An arriving strike ruins a wider swathe than a neighbor's does."},
 	{name: "Chemical Bombing", body: "A chemical missile at a realm on another planet. It kills population rather than ruining land."},
-	{name: "S3-Sabre", body: "A variable-return missile: what it destroys depends on a dial, and it can strike your own realm instead. Whether you are asked for that dial is a setting your sysop chooses."},
+	{name: "S3-Sabre", body: "A variable-return missile: what it destroys depends on a dial. It can backfire, which costs you nothing but opens new land for the realm you aimed at. Whether you are asked for that dial is a setting your sysop chooses."},
 	{name: "Send SpyGuy", body: "Posts a watcher on another planet for a number of days you pay for. He gathers no intelligence; he reports the group attacks and Gooie Kablooies being readied against your planet, as planet news."},
 }
 

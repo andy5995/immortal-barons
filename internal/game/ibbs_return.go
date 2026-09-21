@@ -292,8 +292,15 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 		// which the target's own board applied when it resolved the strike
 		// (sabreDevelop). IB damaged the firer here until 2026-09-14; that was
 		// invented before the return path was read (#266).
-		e.addEvent(fmt.Sprintf("Your %s against %s backfired, and broke up over their land instead of yours.",
-			label, strikeTarget(sent, res)))
+		// The target's board composed the report, land opened and all, so use it
+		// rather than restating the outcome here: IB said "broke up over their
+		// land instead of yours" until this was fixed, which named a thing that
+		// cannot happen and read as a lucky escape rather than a loss.
+		report := res.Report
+		if report == "" {
+			report = fmt.Sprintf("Your %s backfired and broke up over the realm it was aimed at.", label)
+		}
+		e.addEvent(fmt.Sprintf("%s (%s): %s", label, strikeTarget(sent, res), report))
 		w.postNews(fmt.Sprintf("%s's %s broke up over the realm it was aimed at.", e.Name, label))
 		return
 	}
