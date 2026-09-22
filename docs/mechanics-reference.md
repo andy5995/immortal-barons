@@ -625,6 +625,35 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 
 ## Attack types
 
+**One LOCAL attack per turn, of any kind.** This bounds the Attack Menu and
+nothing else. The interplanetary attacks described below are not subject to it:
+they run on their own per-day allowances — the sysop's Max Individual Attacks,
+Max Group Attacks and Max Terrorist Operations — which `reset.hlp` describes as
+deliberately adjustable so a realm can or cannot destroy "a smaller opponent in
+several strikes at once". IB models those as `Empire.AttacksToday`,
+`GroupAttacksToday` and `TerrorOpsToday` against the matching `Config` caps.
+
+The Attack Menu is a forced turn stage
+(stage 11 of `run_player_turn`, `BRE.EXE 0x03da5`), and `run_attack_menu`
+(`BRE.OVR 0x011e2a`) re-draws it only while the key pressed is not the quit key
+AND the flag at `[0x22d8]` is clear. All four handlers —
+`resolve_regular_attack`, `launch_nuclear_attack`, `launch_chemical_attack`,
+`launch_biological_attack` — set that flag in the same block that reports the
+strike landed. So a conventional attack and a WMD are interchangeable and
+neither leaves room for the other, and `launch_nuclear_attack` has exactly one
+caller, so no second route to a local missile exists.
+
+Aborting does not spend the turn. Declining the arms dealer's price returns to
+the menu with the flag clear — captured live in `cap/kd3-01.cap`, where
+`Deal? (Y/n) No` is followed by a redrawn Attack Menu while the same prompt
+answered `Yes` goes straight to End of Turn Statistics.
+
+**The accounting sits ABOVE the strike in both games, which is what makes it
+easy to misread.** Neither `launch_nuclear_attack` nor IB's `NuclearStrike`
+touches a turn counter; the original uses `[0x22d8]` around the menu loop and IB
+uses `TurnProgress.AttackDone` around the menu stage. Reading the strike routine
+alone suggests, wrongly, that missiles are unlimited.
+
 - **Regular attack** — direct assault; the winner takes some of the
   loser's regions. Losses are asymmetric, and the asymmetry is an outcome of the
   strength ratio rather than a pair of rates: see "The regular attack's

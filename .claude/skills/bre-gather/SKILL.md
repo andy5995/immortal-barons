@@ -910,6 +910,16 @@ ad-hoc greps. Its `--shapes` mode censuses every distinct message form in a file
   number style in the Daily Bulletin (`12,468k` — divided once, suffixed, THEN
   grouped, never reaching `m`) that no other screen uses.
 
+- **Count news events against `news.dat`'s templates, never with an ad-hoc
+  grep.** Each category holds a handful of one-line variants with `%F`/`%T`
+  placeholders (`^NUKE` has four), and BRE draws ONE per event — so counting the
+  four exact template shapes both proves the one-line-per-event mapping and
+  gives an exact total. An improvised pattern gets it wrong in both directions:
+  excluding lines that name two realms (to separate attacker from target) threw
+  away `EXTRA!  EXTRA!  %T was hit by Nuclear Missiles launched by %F!` and
+  undercounted a realm's strikes by a third, on a count the whole finding rested
+  on. Read the category out of `game/news.dat` first, then count its shapes.
+
 - **An echoed menu selection is not a completed action.** These captures echo the
   chosen item beside the prompt (`Choice> Quit    Undermine Investments`), and
   that records the keypress only — the op may have been abandoned at the next
