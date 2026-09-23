@@ -111,7 +111,7 @@ release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
 **po4a** for the help docs and a small **in-house PO reader** (`internal/i18n`,
 no runtime dependency) for UI strings. They are two separate generation passes —
 a help topic goes through `gen-help-translations.sh` (which rewrites
-`content.de/`, `content.ru/` and `po/help/`), a `tr()` string through the
+each `content.<lang>/` tree and `po/help/`), a `tr()` string through the
 `gen-ui-pot.py` pair — and running one does not regenerate the other.
 
 **Do not regenerate translations as a matter of course.** Run these passes only
@@ -120,8 +120,8 @@ when a new translation is added, or when the parity test forces it (below).
 Reworded English with a stale translation still renders: the PO catalogs fall
 back per string, so the reader sees English for what has moved on, which is the
 intended behavior and not a defect to chase. Running the passes on every text
-edit instead churns the `.po` files and the `content.de/` and `content.ru/`
-trees on unrelated commits.
+edit instead churns the `.po` files and the `content.<lang>/` trees on
+unrelated commits.
 
 The one case that cannot wait: **adding, renaming, or removing a help topic
 requires `gen-help-translations.sh` in the same change.**
@@ -141,8 +141,9 @@ stream). Front-ends attach different streams; the engine is unchanged.
 - `internal/ftn` — optional bidirectional FTN transport, run by `-maint`,
   `-planetary` and `-full` around the planetary step (unwrap before, handoff
   after the save; `cmd/immortal-barons/transport.go`) and configured by its own
-  lines in `bbs.cfg`: groups unchanged `.brp` packets into 8.3-named ZIP
-  handoffs for stored-message attach, obox, or BSO/FLO, safely coalesces
+  lines in `bbs.cfg`: hands `.brp` packets on unchanged (plain by default, or
+  grouped into 8.3-named ZIP bundles for a `Bundled` peer) by stored-message
+  attach, obox, or BSO/FLO, safely coalesces
   advertised BSO bundles while holding the peer `.bsy`, then validates/unwraps
   and routes them on receive. Its lock is never taken while the world lock is
   held, and `-full` never waits for it
@@ -157,7 +158,7 @@ stream). Front-ends attach different streams; the engine is unchanged.
 - `internal/play` — session bootstrap (load world → onboard/find empire → run)
 - `internal/door` — dropfile parsing (`DOOR32.SYS`/`DOOR.SYS`)
 - `internal/help` — embedded categorized Markdown help + Markdown→ANSI renderer,
-  per-language content (`content/`, `content.de/`, `content.ru/`)
+  per-language content (`content/`, then `content.de/`, `.nl/`, `.pt/`, `.ru/`)
 - `internal/docsite` + `cmd/barons-docs` — assembles the documentation website
   from the committed Markdown, so the site and the in-game help share one
   source. `go run ./cmd/barons-docs -out build/docs` writes `site-src/` and a
@@ -396,13 +397,16 @@ its own words and links the originals. Nothing in FidoNet is an RFC.
 
 ## Status (v0.1.2 released 2026-09-17; v0.2.0 in development)
 
-Persistent, multi-user door game. One shared JSON world; concurrent multi-node
-door play (each action reloads/re-validates/mutates/saves under a brief
-exclusive flock — a pluggable `Store`: file-per-action for the door, in-memory
-by default; #5); per-caller empires keyed by BBS handle; per-turn economy
-(idle empires stagnate) split from a daily maintenance step; turns-per-day
-and new-realm protection; an event log for asynchronous play. Sole front-end:
-`cmd/immortal-barons` (door + `-local` local play).
+Persistent, multi-user door game: one shared JSON world, concurrent multi-node
+door play, per-caller empires keyed by BBS handle. Sole front-end:
+`cmd/immortal-barons` (door + `-local`). What is built, and how each mechanic
+works, is in `docs/mechanics-reference.md`. The player's view is the in-game
+help (`internal/help/content/`); the sysop's is `docs/` (`door-setup.md`,
+`inter-bbs.md`, `ftn-transport.md`, `bulletins.md`, `charset.md`,
+`command-reference.md`). The wire format is `docs/dev/ibbs-packet-format.md`,
+and BRE's screens, with IB's deliberate divergences beside each, are
+`docs/dev/bre-screens.md`. This section keeps only the rules those pages do not
+state as rules.
 
 **Network-facing front-ends: security posture.** The experimental browser
 front-end was REMOVED (2026-08-01); an SSH front-end (#84) is under
@@ -426,50 +430,6 @@ Phrasing: state the fact and the risk, and leave the decision to the operator.
 Don't tell them whether to run it — including for a LAN, which is not
 automatically safe either.
 
-Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
-jets and bombers; a winning attacker chooses the captured region
-types and both sides' casualties are reported by unit type), nuclear/chemical/
-biological strikes, pirate raids (now rolled per turn, not once a day; the nine
-factions carry IB-original names, not BRE's), covert operations (spy, stir revolts, set up,
-support dissensions,
-demoralize forces, bribery, expose enemy ops, and a single Bomb Enemy Targets
-terror-bombing op; the eight-item bombing table, S3-Sabre among it, is
-the InterPlanetary Special Operations menu's alone),
-diplomacy treaties, trading, region types + food market, SDI, Gooie Kablooie,
-player mail + a BRE-style multi-line message editor + planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
-Specialize, Write Macros, four named advisors (Civilian/Economic/Military/
-Technology), an About screen, a first-run language picker, a Welcome menu that
-offers the rules, scores and instructions before a newcomer names their realm
-(#28), and a
-rising land-market price (expansion self-limiting). The menu tree mirrors BRE:
-the Diplomacy, Covert, and InterPlanetary Operations menus are matched
-item-for-item where a mechanic exists (recorded-but-inert items are flagged in
-`docs/mechanics-reference.md`). Menus share a uniform exit — `'0'` labeled
-"Quit" with a `DefaultOnEnter` hook so Enter triggers the default (Play/Quit on
-the opening menu; Quit on submenus). A **Play** turn opens with the
-"since your last play" event log — shown when you start your turn, not before
-the opening menu; Diplomacy and Change Production are no longer pre-turn stops
-(they moved to the System menu, #70). Each recap entry sits under its own
-numbered, timestamped rule, as BRE draws it. A pending trade barter and then a
-pending treaty offer are answered BEFORE those entries, with the proposer's
-stats inline — the order in BRE's own `run_player_turn`. Mail then
-follows unasked — BRE has no "read them now?" gate — one message per box, and
-Enter is inert at the `[R]/[D]/[I]/[Q]` prompt so a held key cannot skip an
-unread message. **v0.0.4 diplomacy additions:** the proposer is told whether an
-offer was accepted or rejected (BRE's wording, filed asynchronously on their
-recap); View Treaties renders BRE's `-*Relations*-` roster of every living
-realm; and IB additionally lists the offers YOU sent, which BRE shows nowhere
-(#92) — a new proposal to the same realm replaces the pending one, and
-proposals do not expire (#95 tracks whether BRE expires them). A **daily news
-system** renders a Daily Bulletin header (planet totals with day-over-day
-change) and a Today/Yesterday split of planet news (battles, WMD strikes,
-pirate raids, riots, bank-rate moves, Planetary Master changes — original
-wording), plus random per-empire "while you were away" events. The **sysop
-Configuration Editor** edits the full BRE field set and those knobs are wired
-into gameplay
-(tax/region caps, maintenance/attack Level presets, interest, Buy Military,
-etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
-
 **An IB league is IB-only. IB and BRE games never intermix.** IB defines its own
 JSON `.brp` packets; BRE's IBBS format is binary, and neither reads the other.
 So no reasoning may rest on wire compatibility with the original — not "a packet
@@ -479,41 +439,9 @@ Quick=0/Normal=1/Extended=2, say), the reason is that the encoding stays
 checkable against the disassembly, never interoperability. This has been got
 wrong more than once, including in two code comments that shipped.
 
-**Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in the
-GameInbound/GameOutbound dirs; the sysop's transport moves them; `-planetary`
-processes inbound, launches group attacks, and exports scores/news. The game's
-own FTN transport has run inside `-maint`/`-planetary`/`-full` since #246, as
-the original's PLANETARY and FULL write their own netmail (it was the separate
-`barons-ftn` before; a leftover `ftn.cfg` and the old `bbs.cfg` spellings are
-refused with the lines to paste, #241). BRE's BBS.CFG has no key names, only
-positions; lines 4, 5 and 7 are IB's `IncomingFileDir`, `OutgoingNetmailDir` and
-`Mailer`.
-Private game directories sit behind resumable spools, with attach / obox / BSO
-links per peer. The transport sends plain packets by default and bundles only
-when a board says `Bundled Yes`, because a board that cannot unwrap a ZIP aborts
-its whole inbound run on the first one it meets. Whether a peer can is a
-question of whether it has an `IncomingFileDir`, not of its release: the
-transport is optional, a board reading `.brp` from its mailer's directory is a
-supported setup, and such a board cannot unwrap a bundle however current its
-game (#230, and the rule above `game.Protocol`).
-Two ed25519 key pairs guard it: the
-Coordinator's (`coord.key`, recorded once by hand) authorizes league orders, and
-each board's own (`board.key`, published on an optional seventh roster line)
-proves which board a packet came from. A roster entry with no key is applied
-unchecked — where every league starts — so "cannot check" and "failed the check"
-are deliberately different outcomes (`docs/mechanics-reference.md`). IP Messages (planet-addressed mail, with
-an IB-only reply path) and Travel Times (measured round trips, kept by a probe
-that rides the packets) ride the same transport. An individual strike picks its
-type — Normal Attack / Quick Strike / Extended Battle, BRE-verified from
-`game/attack.hlp` and a disassembly; a group attack gets no choice and fights as
-a Normal Attack. **Localization**: help docs (po4a) and
-UI strings (`internal/i18n`) render in the caller's language. All four shipped
-languages — German, Russian, Dutch and Brazilian Portuguese — are now complete
-or near-complete on both sides; what is left untranslated is punctuation and
-proper names. Every one is a machine translation, unreviewed by a native
-speaker, and is expected to be corrected by a PR rather than defended.
-
-Two traps, both of which have already cost this project something:
+**Translations.** All four catalogs (de, nl, pt, ru) are machine translation,
+unreviewed by a native speaker, and are expected to be corrected by a PR rather
+than defended. Two traps, both of which have already cost this project something:
 
 A catalog using any character outside CP437 is not offered to a CP437 caller at
 all — de and nl fit, pt and ru do not — so a stray em dash in a Latin-script
@@ -527,54 +455,19 @@ Trade Routes) and several had a verb the English does not — `%s` against `%d` 
 which would have failed the build the moment anyone cleared the markers in bulk.
 Read a fuzzy entry before clearing it; never un-fuzzy a catalog wholesale.
 
-**Bulletin files**: `BulletinDir` in `bbs.cfg` writes the scoreboard, today's
-and yesterday's news, a World Report, and the league's eight InterBBS Scores
-rankings as `.ans` and `.txt` for a BBS bulletin menu (#233, #245). Both forms
-are CP437, not UTF-8: a `.ans` file is a CP437 artifact, and emitting the rules
-as UTF-8 gave every ANSI viewer two mojibake characters per rule. The nine
-league files are written only by a board in a league. The World Report is IB's
-own — every attack and every WMD strike fought anywhere in the league, but no
-terror op, drawn from a structured log that rides with the scores rather than
-from the news prose, which is randomised and translated. Strikes were excluded
-until 2026-09-07; they were added because a league whose fighting is mostly
-missiles saw an empty report. A strike carries `Weapon` and is worded by its
-warhead rather than by an outcome, since it takes no ground. A board playing alone writes the rest but no
-World Report. Each bulletin is also written as `<base>.html` (wrapped in
-`header.html` and `footer.html`) and `<base>.inc.html` (the bare `<pre>` block,
-to include in a page a board already builds), drawn from a UTF-8 pass of the same
-function. Those two wrappers and `bulletin.css` are written ONLY when absent and
-never rewritten: HTML generation was built and removed once because the template
-was compiled into the game and a sysop could not restyle it, so a run that
-overwrote an edited wrapper would reintroduce exactly that. Colors reach the
-page as `ansi-fg-N` / `ansi-bg-N` class names, never as inline styles — those
-names are the whole contract a replacement stylesheet has to meet. The game's
-name is hyperlinked to the site wherever a screen draws it, inside its color
-span so the link does not repaint a heading, and marked by a highlight bar
-rather than an underline so color is not the only thing distinguishing it. A
-wrapper's six tokens are filled per page — `{{title}}`, `{{bbs}}`,
-`{{boardurl}}`, `{{pageurl}}`, `{{date}}`, `{{game}}` — so a sysop's own meta
-tags can carry the page's address and date. `{{bbs}}` is `BBSName` from
-`bbs.cfg`, falling back to `BoardID`, which is a separate key because `BoardID`
-has to match the league roster character for character; `{{pageurl}}` needs
-`BulletinURL`, the one thing the game cannot derive, since it knows where it
-writes the files and nothing about how the board serves them. A tag left blank
-by a token is removed (`<link href="">`, `<meta content="">`) and an anchor is
-unwrapped keeping its text, so an unset key costs nothing rather than emitting a
-canonical link to nowhere.
+**Bulletin files** (`docs/bulletins.md`). `header.html`, `footer.html` and
+`bulletin.css` are written ONLY when absent and never rewritten: HTML generation
+was built and removed once because the template was compiled into the game and
+a sysop could not restyle it, so a run that overwrote an edited wrapper would
+reintroduce exactly that. Colors reach the page as `ansi-fg-N` / `ansi-bg-N`
+class names, never as inline styles — those names are the whole contract a
+replacement stylesheet has to meet. The `.ans` and `.txt` forms are CP437, not
+UTF-8.
 
-**Screen fidelity**: menus, tables, prompts, combat/raid reports, the four
-advisor pages, and the diplomacy screens (incoming treaty offer, View Treaties'
-`-*Relations*-` roster, Alliance Strength) match BRE's captured layout and ANSI
-colors — figures are highlighted (bright-white or yellow) against dimmer body
-text, per `docs/dev/bre-screens.md`. **Deliberate divergences** are recorded
-there, each beside the screen it belongs to, with the ones most likely to read
-as bugs also listed under "Screen output that deliberately diverges" in
-`docs/mechanics-reference.md`. They must not be "corrected" back —
-IB comma-groups figures BRE prints bare — except on the score table, whose three
-columns follow the original exactly since 2026-08-30 (`internal/numfmt`) — and
-the offer's stats line separates
-fields with `│` where BRE uses `; `, among others. IB also lists the treaty
-offers you have SENT, which BRE shows nowhere (#92).
+**Screen fidelity.** Deliberate divergences from BRE's screens are recorded in
+`docs/dev/bre-screens.md` beside the screen each belongs to, and the ones most
+likely to read as bugs also under "Screen output that deliberately diverges" in
+`docs/mechanics-reference.md`. They must not be "corrected" back.
 
 Key gameplay knobs are constants in `balance*.go`, but they are no longer all
 free to tune: a growing set is **binary-verified** and marked as such in that
@@ -593,41 +486,21 @@ fuller subsystems (flagged in `docs/mechanics-reference.md`).
 
 ## Primary goal: run as a BBS door
 
-The main goal is to run as a native door game under modern BBS software
-(Synchronet, Mystic). Native means no DOSBox/DOSEMU. Linux is the primary
-target, but the game builds and runs on macOS, Windows, and the BSDs (per-OS
-file lock, `x/term` console) — so a Windows Synchronet door is in scope too.
-The stage decomposes into:
+A native door under modern BBS software (Synchronet, Mystic): no DOSBox or
+DOSEMU. Linux is the primary target, but the game builds and runs on macOS,
+Windows and the BSDs, so a Windows Synchronet door is in scope too. The
+dropfile + stdio/socket front-end, concurrent persistence (#5) and sysop config
+are done. Dropfile field maps and the I/O contract are in
+`docs/mechanics-reference.md`, cross-checked against the Synchronet source
+(`~/src/sbbs/src/xpdoor/dropfiles.c`). On Unix, stdio is correct even when a
+socket is reported, since Synchronet/Mystic (`EX_STDIO`) pipe the socket to
+stdin/stdout and handle telnet themselves; `session.Socket` is for a Windows
+door. Serial/FOSSIL doors are unsupported.
 
-1. **Dropfile + stdio/socket front-end** (`cmd/immortal-barons`) — DONE. Parses
-   `DOOR32.SYS`/`DOOR.SYS` (`internal/door`), runs the game over a stdio
-   `Session` (`session.Stdio`, which adds `\r\n`), honors the ANSI flag and
-   a hard time-left cutoff, and names the realm from the caller's handle.
-   The socket backend is built too: `session.Socket` attaches to the
-   `DOOR32.SYS` line-2 handle (a winsock handle on Windows, a plain fd socket on
-   *nix) via `net.FileConn`, and `openSession` wires it for a Windows door that
-   reports a socket. On Unix, stdio is correct even when a socket is reported —
-   Synchronet/Mystic (`EX_STDIO`) pipe the socket to stdin/stdout and handle
-   telnet themselves. Serial/FOSSIL doors are explicitly unsupported.
-2. **Persistence / multi-user** — DONE, now concurrent multi-node (#5). A
-   persistent empire per caller in a shared JSON world; each door action
-   reloads/re-validates/mutates/saves under a brief exclusive flock (a pluggable
-   `Store`: file-per-action for the door, in-memory for the web), so several BBS
-   nodes play at once. Keyed by BBS handle, with turns-per-day and daily
-   maintenance (`internal/store`, `internal/play`, `internal/game/store.go`).
-3. **Sysop config** — DONE. `config.json` with defaults + an in-game
-   Configuration Editor (Coordinator menu); `-reset` writes the file (and
-   seeds/re-seeds the world). The knobs are wired into gameplay and broadcast
-   across a league.
-
-Remaining toward the goal: validation of the door under real BBS software
-(Synchronet/Mystic on Windows for the socket backend; needs Andy's env),
-including confirming the assumption that the BBS performs telnet negotiation
-before launching the door (the socket backend does no IAC handling).
-
-Dropfile field maps and the I/O contract are documented in
-`docs/mechanics-reference.md` and cross-checked against the Synchronet
-source (`~/src/sbbs/src/xpdoor/dropfiles.c`).
+Remaining: more validation under real BBS software on Windows (one sysop has
+reported the socket path working with a live caller), including the assumption
+that the BBS performs telnet negotiation before launching the door (the socket
+backend does no IAC handling).
 
 ## Commits
 
