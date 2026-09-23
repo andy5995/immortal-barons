@@ -79,7 +79,7 @@ func TestSpecialOpsTellTheReceivingPlanet(t *testing.T) {
 			target.People = 50_000
 			target.Regions = RegionMix{Desert: 500, Mountain: 500}
 			target.syncLand()
-			target.Investments = []Investment{{Amount: 1_000_000, Return: 1_200_000, MaturesDay: to.GameDay + 5}}
+			target.Investments = []Investment{{Amount: 1_000_000, Return: 1_200_000, MaturesDay: to.GameDay + 3}}
 
 			aimed := ""
 			if isMissileOp(op) {

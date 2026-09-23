@@ -1,26 +1,67 @@
 package game
 
-// bombing.go — the target-side effects a bombing op has, shared by the local
-// Bomb Enemy Targets covert op and its InterPlanetary terror counterparts (#49).
+// bombing.go — what an interplanetary bombing run does to the planet it lands
+// on: the landing roll every run meets, and the effect of each of the four
+// Special Operations that pass it (#49). ibbs_special.go calls them for a run
+// that arrived in a packet; diplomacy.go consults the trade-route one.
 //
-// They live apart from covert.go because they are not the covert menu's alone:
-// ibbs_special.go runs them for a strike that arrived in a packet, with no
-// agent and no covert roll involved, and diplomacy.go consults the trade-route
-// one. What stays in covert.go is the covert OP itself — BombEnemyTargets,
-// resolveBombEnemyTargets and the six-slot target table they roll on — which is
-// a Covert Operations menu item and nothing else.
+// The original's LOCAL Covert menu shares none of this. Its Bomb Enemy Targets
+// is one op with its own six-slot table (covert.go), and the four bombing ops
+// here belong to the InterPlanetary Special Operations menu alone.
 //
-// Each function here is the part of an op that touches the TARGET only: no
-// attacker, no success roll, no fee. That is exactly the part a board can run
-// for a strike it received, and keeping one copy is what stops the two menus
-// drifting apart when a number is tuned.
+// Each function is the part of a run that touches the TARGET planet only: no
+// attacker, no fee. The figures are the original's receiver's, read from
+// resolve_received_bombing (BRE.OVR 0x04a09a); see balance_prices.go.
 
-// The effects the local Bomb Enemy Targets ops and their interplanetary
-// counterparts share (#49). Each one is the part of an op that touches the
-// TARGET only — no attacker, no success roll, no fee — which is exactly the
-// part a board can run for a strike that arrived in a packet. Keeping them here
-// rather than duplicating the arithmetic is what stops the two menus drifting
-// apart when a number is tuned.
+// bombFoodMarketEffect burns a 20-99% share of the planet's food-market supply,
+// rolled once, and reports the units lost (see BombFoodMarketLossPctMin).
+func (w *World) bombFoodMarketEffect() int {
+	lost := foodMarketLoss(w.FoodMarketSupply, BombFoodMarketLossPctMin+w.rng.Intn(BombFoodMarketLossPctSpread))
+	w.FoodMarketSupply -= lost
+	return lost
+}
+
+// foodMarketLoss is Trunc(supply x pct / 100), the food a run destroys.
+func foodMarketLoss(supply, pct int) int { return int(int64(supply) * int64(pct) / 100) }
+
+// marketKept is Trunc(qty x (100 - pct) / 100), what a bombed listing keeps.
+func marketKept(qty, pct int) int { return int(int64(qty) * int64(100-pct) / 100) }
+
+// undermineKept is Round(x x (100 - pct) / 100), halves away from zero, what an
+// undermined investment keeps.
+func undermineKept(x int64, pct int) int64 { return (2*x*int64(100-pct) + 100) / 200 }
+
+// bombMarketLossPct is the one 5-9% share a Bomb Trading Market run takes off
+// every listing it reaches.
+func (w *World) bombMarketLossPct() int {
+	return BombMarketLossPctMin + w.rng.Intn(BombMarketLossPctSpread)
+}
+
+// undermineLossPct is the one 2-5% share an Undermine Investments run takes off
+// every investment it reaches.
+func (w *World) undermineLossPct() int {
+	return UndermineLossPctMin + w.rng.Intn(UndermineLossPctSpread)
+}
+
+// undermineEffect cuts each of d's investments that is at most
+// UndermineReachDays from maturity to Round(x x (100 - pct) / 100), principal and
+// return alike, and reports the principal lost. The original keeps one figure
+// per day left to maturity and cuts the first four; IB keeps each investment
+// apart, so it cuts every one in that window.
+func (w *World) undermineEffect(d *Empire, pct int) int64 {
+	var lost int64
+	for i := range d.Investments {
+		inv := &d.Investments[i]
+		if inv.MaturesDay-w.GameDay > UndermineReachDays {
+			continue
+		}
+		kept := undermineKept(inv.Amount, pct)
+		lost += inv.Amount - kept
+		inv.Amount = kept
+		inv.Return = undermineKept(inv.Return, pct)
+	}
+	return lost
+}
 
 // bombingLands reports whether an arriving bombing run comes to anything at
 // all. BINARY-VERIFIED (BRE.OVR 0x04a09a, see BombingLandOdds): the original
@@ -31,9 +72,8 @@ func (w *World) bombingLands() bool {
 	return w.rng.Intn(BombingLandOdds) == 0
 }
 
-// bombRoutesEffect wrecks the goods riding in pending trade deals and reports
-// how many deals it hit: every deal on the planet when only is nil, otherwise
-// every deal `only` is a party to, whichever side of it that realm is on.
+// bombRoutesEffect wrecks the goods riding in the planet's pending trade deals
+// and reports how many deals it hit.
 //
 // BINARY-VERIFIED against BRE.OVR 0x051077, which walks the pending deals and,
 // for each, rolls a `random(3)` that lets one deal in three escape, skips a deal
@@ -46,15 +86,7 @@ func (w *World) bombingLands() bool {
 // and +9), never the firing realm's own. So a deal between a pair who hold the
 // pact survives a strike from anyone, and holding it with the victim buys the
 // attacker nothing.
-//
-// Scope is IB's own call, not BRE's. The original's Bomb Trade Routes is
-// interplanetary and planet-wide, so it never had to say which deals a strike
-// against ONE realm reaches, and its local Covert item 7 is a different op
-// entirely. IB takes both sides of a deal — a realm's trade routes run in both
-// directions, and counting only inbound deals would let a realm dodge the op by
-// never accepting one. The local covert op and its interplanetary counterpart
-// call this same helper, so neither menu can become the cheaper way to do it.
-func (w *World) bombRoutesEffect(only *Empire) (hit int) {
+func (w *World) bombRoutesEffect() (hit int) {
 	for _, to := range w.Empires {
 		if !to.Alive {
 			continue
@@ -62,9 +94,6 @@ func (w *World) bombRoutesEffect(only *Empire) (hit int) {
 		for i := range to.TradeDeals {
 			deal := &to.TradeDeals[i]
 			from := w.FindByName(deal.From)
-			if only != nil && to != only && from != only {
-				continue
-			}
 			if w.rng.Intn(BombRoutesDealHitOdds) != 0 {
 				continue
 			}

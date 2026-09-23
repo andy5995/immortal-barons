@@ -212,24 +212,19 @@ func (w *World) giveGood(e *Empire, good string, n int) {
 	}
 }
 
-// bombMarketPosition destroys pct% of d's listed goods (per listing) and pct% of
-// its pending sale proceeds, returning the totals wiped. BRE's Bomb Enemy Trade
-// Market "destroys a portion of all goods stored in an opposing planet's trading
-// market" (community strategy guide).
-func (w *World) bombMarketPosition(d *Empire, pct int) (goods int, proceeds int64) {
+// bombMarketPosition cuts each of d's listings to Trunc(qty x (100 - pct) / 100),
+// as the original cuts each For Sale escrow count (see BombMarketLossPctMin),
+// and returns the goods destroyed. The pending sale gold is not touched: the
+// original's branch reads and writes the escrow counts and nothing else.
+func (w *World) bombMarketPosition(d *Empire, pct int) (goods int) {
 	for i := range w.Market {
 		if w.Market[i].Realm == d.Name {
-			loss := w.Market[i].Qty * pct / 100
-			w.Market[i].Qty -= loss
-			goods += loss
+			kept := marketKept(w.Market[i].Qty, pct)
+			goods += w.Market[i].Qty - kept
+			w.Market[i].Qty = kept
 		}
 	}
-	if w.MarketProceeds != nil {
-		loss := pctOf(w.MarketProceeds[d.Name], pct)
-		w.MarketProceeds[d.Name] -= loss
-		proceeds += loss
-	}
-	return goods, proceeds
+	return goods
 }
 
 // forgetMarketPosition destroys what the market still holds for a departed

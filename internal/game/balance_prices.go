@@ -197,9 +197,34 @@ const (
 	PriceCeilJitter  = 100
 )
 
-// BombMarketLossPct is the share (percent) of a target's listed goods and pending
-// market proceeds destroyed by a successful Bomb Trading Market covert op (#17).
-const BombMarketLossPct = 25
+// What a bombing run that lands destroys. BINARY-VERIFIED against the three
+// branches of `resolve_received_bombing` (BRE.OVR 0x04a09a). Each draws ONE
+// percentage per run, shared by every realm and every good it reaches:
+//
+//   - Bomb Food Market (+0x13d): pct = Random(80)+20, 20-99; the planet's food
+//     supply (config record +0x1c) loses Trunc(supply x (pct / 100)).
+//   - Bomb Trading Market (+0x1b7): pct = Random(5)+5, 5-9; each occupied slot's
+//     nine For Sale escrow counts (record +0x211..+0x231) become
+//     Trunc(qty x (100 - pct) / 100). Nothing else is touched — no gold, no
+//     pending proceeds.
+//   - Undermine Investments (+0x2e8): pct = Random(4)+2, 2-5; the first FOUR
+//     slots of each occupied realm's investment array (record +0x2c1, one int32
+//     per day left to maturity: `run_bank` adds a new investment at
+//     +0x2c1 + 4 x days, +0x121a, and daily maintenance shifts the array down a
+//     day, +0x12e3) become Round(value / 100 x (100 - pct)).
+//
+// IB computes these in integers. The original's Real48 `pct / 100` (food) and
+// `value / 100` (investments) are inexact, so a product that lands exactly on a
+// whole number can come out one lower there; the market form is exact.
+const (
+	BombFoodMarketLossPctMin    = 20
+	BombFoodMarketLossPctSpread = 80 // Random(80)+20: 20-99%
+	BombMarketLossPctMin        = 5
+	BombMarketLossPctSpread     = 5 // Random(5)+5: 5-9%
+	UndermineLossPctMin         = 2
+	UndermineLossPctSpread      = 4 // Random(4)+2: 2-5%
+	UndermineReachDays          = 3 // slots 0-3: investments at most 3 days from maturity
+)
 
 // BombingLandOdds is the landing roll every arriving interplanetary bombing run
 // meets: 1-in-this lands, and the rest come to nothing. BINARY-VERIFIED:

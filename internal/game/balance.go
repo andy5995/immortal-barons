@@ -394,10 +394,6 @@ const (
 	IPSabreGoldPerRegion int64 = 4_453
 )
 
-// UndermineInvestmentDivisor is the share of each investment's principal an
-// Undermine Investments op destroys: a quarter.
-const UndermineInvestmentDivisor = 4
-
 // TerrorPctLoss is the band one landed terror agent takes off the field its
 // operation aims at: Base + Random(Spread) percent, truncated.
 type TerrorPctLoss struct {

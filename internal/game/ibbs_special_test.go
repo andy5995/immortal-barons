@@ -79,8 +79,9 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	landNextBombingRun(to)
 	answer := to.ApplyPacket(from.Outbox[0])
 
-	if to.FoodMarketSupply != 2000 {
-		t.Errorf("the planet's food market holds %d, want half of 4000", to.FoodMarketSupply)
+	// A landed run burns 20-99% of the supply (TestBombingDamageMatchesTheOriginal).
+	if to.FoodMarketSupply < 40 || to.FoodMarketSupply > 3200 {
+		t.Errorf("the planet's food market holds %d, want 1-80%% of 4000 left", to.FoodMarketSupply)
 	}
 	if len(answer.Results) != 1 {
 		t.Fatalf("target board sent no answer: %+v", answer.Results)
@@ -172,18 +173,77 @@ func TestLostSpecialOpIsGivenUp(t *testing.T) {
 	}
 }
 
-// The interplanetary ops must run the SAME effect as their local counterparts,
-// not a second copy of the arithmetic that can drift when one is tuned.
-func TestSpecialOpsShareTheLocalEffects(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 3)
-	d := w.AddHuman("d", "Target")
-
-	d.Investments = []Investment{{Amount: 1000, Return: 1200}}
-	if lost := undermineEffect(d); lost != 250 {
-		t.Errorf("undermineEffect lost %d, want a quarter of 1000", lost)
+// What a landed bombing run destroys is the original's arithmetic, read from
+// resolve_received_bombing (BRE.OVR 0x04a09a). Golden literals, each checked
+// against the Real48 port of the linked runtime (scripts/bre_real48.py), so a
+// retune of the constants fails here instead of following along.
+func TestBombingDamageMatchesTheOriginal(t *testing.T) {
+	for _, c := range []struct{ supply, pct, want int }{
+		{1000, 20, 200}, {1000, 99, 990}, {4000, 37, 1480}, {10000, 53, 5300},
+	} {
+		if got := foodMarketLoss(c.supply, c.pct); got != c.want {
+			t.Errorf("food market %d at %d%%: lost %d, want %d", c.supply, c.pct, got, c.want)
+		}
 	}
-	if d.Investments[0].Amount != 750 || d.Investments[0].Return != 950 {
-		t.Errorf("investment now %+v; the return must fall by the same gold as the principal", d.Investments[0])
+	for _, c := range []struct{ qty, pct, want int }{
+		{100, 5, 95}, {37, 9, 33}, {20, 7, 18},
+	} {
+		if got := marketKept(c.qty, c.pct); got != c.want {
+			t.Errorf("listing %d at %d%%: kept %d, want %d", c.qty, c.pct, got, c.want)
+		}
+	}
+	for _, c := range []struct {
+		value int64
+		pct   int
+		want  int64
+	}{
+		{1000, 2, 980}, {1234, 5, 1172}, {1200, 3, 1164}, {1000, 5, 950},
+	} {
+		if got := undermineKept(c.value, c.pct); got != c.want {
+			t.Errorf("investment %d at %d%%: kept %d, want %d", c.value, c.pct, got, c.want)
+		}
+	}
+
+	// The three draws cover exactly the original's ranges: Random(80)+20,
+	// Random(5)+5 and Random(4)+2.
+	w := NewWorldSeed(DefaultConfig(), 3)
+	for _, c := range []struct {
+		name     string
+		draw     func() int
+		min, max int
+	}{
+		{"food", func() int { return BombFoodMarketLossPctMin + w.rng.Intn(BombFoodMarketLossPctSpread) }, 20, 99},
+		{"market", w.bombMarketLossPct, 5, 9},
+		{"undermine", w.undermineLossPct, 2, 5},
+	} {
+		seen := map[int]bool{}
+		for range 5000 {
+			p := c.draw()
+			if p < c.min || p > c.max {
+				t.Fatalf("%s drew %d%%, outside %d-%d", c.name, p, c.min, c.max)
+			}
+			seen[p] = true
+		}
+		if len(seen) != c.max-c.min+1 {
+			t.Errorf("%s drew %d distinct shares in 5000, want all %d", c.name, len(seen), c.max-c.min+1)
+		}
+	}
+
+	// Undermining reaches only investments at most three days from maturity —
+	// the original's first four slots of a per-day array.
+	d := w.AddHuman("d", "Target")
+	d.Investments = []Investment{
+		{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 3},
+		{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 4},
+	}
+	if lost := w.undermineEffect(d, 5); lost != 50 {
+		t.Errorf("undermined %d, want 50 from the near investment alone", lost)
+	}
+	if d.Investments[0] != (Investment{Amount: 950, Return: 1140, MaturesDay: w.GameDay + 3}) {
+		t.Errorf("near investment now %+v", d.Investments[0])
+	}
+	if d.Investments[1].Amount != 1000 || d.Investments[1].Return != 1200 {
+		t.Errorf("an investment four days out was touched: %+v", d.Investments[1])
 	}
 }
 
@@ -252,8 +312,8 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 	}
 	landNextBombingRun(to)
 	answer := to.ApplyPacket(from.Outbox[0])
-	if to.FoodMarketSupply != 500 {
-		t.Errorf("the planet's food market holds %d, want 500 — protection must not shield the planet",
+	if to.FoodMarketSupply >= 1000 {
+		t.Errorf("the planet's food market holds %d, want less than 1000 — protection must not shield the planet",
 			to.FoodMarketSupply)
 	}
 	if got := answer.Results[0].outcome(); got != OutcomeWon {
@@ -269,7 +329,7 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 func TestBombingOpsIgnoreTheTargetsProtection(t *testing.T) {
 	from, to, attacker, target := specialOpWorlds(t)
 	target.Protection = 99
-	target.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: to.GameDay + 5}}
+	target.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: to.GameDay + 3}}
 	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpUndermine, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
@@ -278,8 +338,9 @@ func TestBombingOpsIgnoreTheTargetsProtection(t *testing.T) {
 	if got := answer.Results[0].outcome(); got != OutcomeWon {
 		t.Fatalf("outcome %q, want %q — report %q", got, OutcomeWon, answer.Results[0].Report)
 	}
-	if got := target.Investments[0].Amount; got != 750 {
-		t.Errorf("a protected realm's investment holds %d, want 750: protection must not shield it", got)
+	// A landed run takes 2-5% (TestBombingDamageMatchesTheOriginal).
+	if got := target.Investments[0].Amount; got < 950 || got > 980 {
+		t.Errorf("a protected realm's investment holds %d, want 950-980: protection must not shield it", got)
 	}
 }
 

@@ -2121,15 +2121,15 @@ The other interplanetary Special Operations, unchanged by this. Two runs in
 three of the four bombing ops are driven off before they land (`BombingLandOdds`,
 see "What a Special Operation posts" below):
 
-- **Bomb Food Market** — destroy a planet's food-market supply.
-- **Bomb Trading Market** — destroy a share of what is listed on a planet's
-  trading market, and the pending proceeds with it.
+- **Bomb Food Market** — burn 20-99% of a planet's food-market supply.
+- **Bomb Trading Market** — destroy 5-9% of everything listed on a planet's
+  trading market. Pending sale gold is untouched.
 - **Bomb Trade Routes** — wreck the goods riding in the planet's pending trade
   deals: each deal has one chance in three of being hit, and a deal that is hit keeps 5-9% of every good in it. A deal
   whose own two parties hold Protective Trade is spared (see that pact under
   Diplomacy for the BRE rule and its addresses).
-- **Undermine Investments** — trim a quarter off the principal of a planet's
-  pending bank investments.
+- **Undermine Investments** — trim 2-5% off every investment on the planet
+  that is at most three days from maturity, principal and return alike.
 - **Nuclear Assault** / **Chemical Bombing** — the WAR menu's strikes, aimed
   across planets.
 
@@ -4690,11 +4690,28 @@ handler splits the same way: keys `1`-`4` all branch to ONE shared handler
 differing only by an index into a price table, while `5`, `6` and `7` each have
 their own (`BRE.OVR` 0x029ea9, dispatch at 0x105a-0x124c).
 
-**The four bombing ops' effects are the local ops' effects**, called through the
-same helpers, so a retune lands on both menus: food halved, a share of the market
-position and its pending proceeds destroyed, the goods stripped out of the trade
-deals a strike reaches, a quarter off each investment's principal and matching
-return. Every op needs the 500 Bombers the original requires of anything on this
+**What a landed bombing run destroys — BINARY-VERIFIED** from the three branches
+of `resolve_received_bombing` (`BRE.OVR 0x04a09a`). Each draws one percentage
+per run, shared by every realm and good it reaches:
+
+| Op | draw | site | what it reaches | result |
+|---|---|---|---|---|
+| Bomb Food Market | `Random(80)+20`, 20-99% | `+0x13d` | the planet's food supply (config `+0x1c`) | loses `Trunc(supply × (pct / 100))` |
+| Bomb Trading Market | `Random(5)+5`, 5-9% | `+0x1b7` | every occupied slot's nine For Sale escrow counts (`+0x211`..`+0x231`) | each becomes `Trunc(qty × (100 − pct) / 100)` |
+| Undermine Investments | `Random(4)+2`, 2-5% | `+0x2e8` | the first four slots of each occupied slot's investment array (`+0x2c1`) | each becomes `Round(value / 100 × (100 − pct))` |
+
+The investment array is one int32 per day left to maturity: `run_bank` adds a
+new investment at `+0x2c1 + 4 × days` (`+0x121a`, in the branch that prints the
+two-day minimum), and daily maintenance moves every slot down a day
+(`+0x12e3`). So Undermine reaches only what matures within three days, and IB
+cuts each of its individual investments in that window. Neither the market nor
+the investment branch touches any gold: IB destroyed a quarter of the pending
+sale proceeds and of every investment, and burned half the food market, until
+2026-09-23; those figures were IB's own. The constants are in `balance_prices.go`; IB computes in integers,
+where the original's inexact Real48 `pct / 100` and `value / 100` can land one
+lower on a product that comes out whole.
+
+Every op needs the 500 Bombers the original requires of anything on this
 menu, answers to the sysop's Bombing Ops / Missile Ops switches, and counts
 against the daily bombing allowance.
 
@@ -5718,8 +5735,8 @@ Market`. Any empire can list goods for other empires to buy:
   Escrowing therefore does not hide military; it moves about a third of the raid
   risk onto the listing. Listing also does **not** dodge
   your own economy: escrowed **military units still cost maintenance** and escrowed
-  **food still spoils**. `Bomb Trading Market` (covert) destroys a share
-  (`BombMarketLossPct`) of a target's listed goods and pending proceeds.
+  **food still spoils**. `Bomb Trading Market` (Special Operations) destroys
+  5-9% of every listing on the planet (`BombMarketLossPctMin`), and no proceeds.
 
 Negotiated empire-to-empire trade deals carrying goods with demands (BRE's other
 trading half) are built: `SendTradeDeal` takes a full basket each way, escrows

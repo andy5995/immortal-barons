@@ -598,12 +598,12 @@ func dealUntouched(deal TradeDeal) bool {
 		deal.Demand == (TradeBasket{Tanks: bombDealQty})
 }
 
-// bombRoutes runs one Bomb Trade Routes strike against d through the helper the
-// interplanetary op calls, skipping the fee and the one-effect-op-per-turn cap so
-// a test can repeat it.
-func bombRoutes(w *World, d *Empire) {
+// bombRoutes runs one Bomb Trade Routes strike through the helper the
+// interplanetary op calls, skipping the fee so a test can repeat it. The
+// fixture's deals all involve d, so the planet-wide strike is a strike on d.
+func bombRoutes(w *World, _ *Empire) {
 	if w.bombingLands() {
-		w.bombRoutesEffect(d)
+		w.bombRoutesEffect()
 	}
 }
 
@@ -721,8 +721,8 @@ func TestBombTradeRoutesVoidsTwoStrikesInThree(t *testing.T) {
 }
 
 // BRE's market bombing reads no relation at all, so Protective Trade between
-// attacker and victim does not shield a listing. The 25% loss is asserted as the
-// exact computed figure, which stays deterministic across seeds.
+// attacker and victim does not shield a listing. The loss is asserted as the
+// exact computed figure at a fixed share, which stays deterministic across seeds.
 func TestBombTradingMarketIsNotGatedByAnyRelation(t *testing.T) {
 	for seed := int64(1); seed <= 5; seed++ {
 		w, a, d, _, _ := bombRoutesFixture(t, seed)
@@ -731,21 +731,21 @@ func TestBombTradingMarketIsNotGatedByAnyRelation(t *testing.T) {
 		if err := w.SetMarketListing(d, "Tank", 20, 1000); err != nil {
 			t.Fatalf("seed %d: list: %v", seed, err)
 		}
-		w.bombMarketPosition(d, BombMarketLossPct)
-		if got := w.MarketForSale(d.Name, "Tank"); got != 15 {
-			t.Errorf("seed %d: expected 15 tanks left after a 25%% strike, got %d", seed, got)
+		w.bombMarketPosition(d, 7)
+		if got := w.MarketForSale(d.Name, "Tank"); got != 18 {
+			t.Errorf("seed %d: expected 18 tanks left after a 7%% strike, got %d", seed, got)
 		}
 	}
 }
 
 func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
-	_, _, d := newAttackerAndTarget(t)
-	d.Investments = []Investment{{Amount: 1000, Return: 1100, MaturesDay: 5}}
-	if lost := undermineEffect(d); lost != 250 {
-		t.Errorf("expected 250 principal destroyed, got %d", lost)
+	w, _, d := newAttackerAndTarget(t)
+	d.Investments = []Investment{{Amount: 1000, Return: 1100, MaturesDay: w.GameDay + 3}}
+	if lost := w.undermineEffect(d, 2); lost != 20 {
+		t.Errorf("expected 20 principal destroyed, got %d", lost)
 	}
-	if d.Investments[0].Amount != 750 {
-		t.Errorf("expected 750 principal remaining, got %d", d.Investments[0].Amount)
+	if d.Investments[0].Amount != 980 {
+		t.Errorf("expected 980 principal remaining, got %d", d.Investments[0].Amount)
 	}
 }
 

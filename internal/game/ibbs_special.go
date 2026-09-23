@@ -7,8 +7,9 @@ import (
 )
 
 // Interplanetary Special Operations (#49) — the InterPlanetary Ops menu's
-// Special Operations submenu, where every op is aimed at a baron on another
-// planet.
+// Special Operations submenu, where every op is aimed at another planet: the
+// four bombing ops at the planet as a whole, the three missiles at one baron
+// on it.
 //
 // The original resolves these the same way IB already resolves terror ops: its
 // menu handler (`run_bombing_operations_menu`, BRE.OVR 0x029ea9) calls
@@ -18,11 +19,11 @@ import (
 // applies it and answers, and the lost-forces timer hands the op back if the
 // answer never arrives.
 //
-// The EFFECTS are deliberately not written here: each one calls the same helper
-// the local Bomb Enemy Targets op calls, so a tuning change lands on both. What
-// differs cross-planet is only what cannot travel — the attacker is not present
-// to roll a covert success against, and its score is awarded when the answer
-// comes home rather than on the spot.
+// The bombing EFFECTS live in bombing.go and the missiles' in specials.go and
+// sabre.go. Neither is the local menu's: the original resolves an arriving op in
+// receivers of its own, with their own rolls and bands, and IB follows those.
+// The attacker is not present on the board that resolves it, so its score is
+// awarded when the answer comes home rather than on the spot.
 
 // SpecialOp names one interplanetary Special Operation. The values are IB's own
 // wire strings, not the original's op codes: the packet format is a clean-room
@@ -409,9 +410,9 @@ func planetOpNews(op SpecialOp, from string, outcome specialOutcome) string {
 		return fmt.Sprintf("Bombers from %s found nothing moving on the planet's trade routes.", from)
 	case OpUndermine:
 		if outcome == specialHit {
-			return fmt.Sprintf("Agents from %s undermined investments across the planet.", from)
+			return fmt.Sprintf("Bombers from %s undermined investments across the planet.", from)
 		}
-		return fmt.Sprintf("Agents from %s found nothing invested in the planet's bank to undermine.", from)
+		return fmt.Sprintf("Bombers from %s found nothing invested in the planet's bank to undermine.", from)
 	}
 	return fmt.Sprintf("An operation from %s against this planet came to nothing.", from)
 }
@@ -434,11 +435,10 @@ func planetOpObject(op SpecialOp, whose string) string {
 
 // applyPlanetOp runs one of the four bombing ops against the whole planet.
 //
-// Each is the planet-wide reading of the local op's effect: the food market's
-// own supply rather than one realm's stores, every listing on the Trading Market
-// rather than one realm's position, every realm's trade agreements, every
-// realm's investments. The per-realm helpers are still the ones doing the work,
-// so the local menu and this one stay in step.
+// Each reaches what the whole planet holds, as the original's receiver does: the
+// food market's supply, every listing on the Trading Market, every pending
+// trade deal, every realm's investments near maturity. The landing roll comes
+// first and covers all four.
 func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome specialOutcome) {
 	living := func() []*Empire {
 		var out []*Empire
@@ -463,31 +463,28 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome
 
 	switch op {
 	case OpBombFood:
-		lost := w.FoodMarketSupply / 2
+		lost := w.bombFoodMarketEffect()
 		if lost <= 0 {
 			return "The food market on that planet was already bare.", specialNothing
 		}
-		w.FoodMarketSupply -= lost
 		tell(fmt.Sprintf("Bombers from %s hit the planet's food market — %s units of supply destroyed.",
 			from, numfmt.Comma(int64(lost))))
 		return fmt.Sprintf("You destroyed %d units of the planet's food supply.", lost), specialHit
 
 	case OpBombMarket:
-		goods, proceeds := 0, int64(0)
+		goods, pct := 0, w.bombMarketLossPct()
 		for _, e := range living() {
-			g, p := w.bombMarketPosition(e, BombMarketLossPct)
-			goods, proceeds = goods+g, proceeds+p
+			goods += w.bombMarketPosition(e, pct)
 		}
-		if goods == 0 && proceeds == 0 {
+		if goods == 0 {
 			return "Nothing was listed on that planet's trading market.", specialNothing
 		}
-		tell(fmt.Sprintf("Bombers from %s wrecked the planet's trading market — %s listed goods and %s gold in proceeds destroyed.",
-			from, numfmt.Comma(int64(goods)), numfmt.Comma(proceeds)))
-		return fmt.Sprintf("You wrecked the planet's trading market: %d goods and %d gold in proceeds.", goods, proceeds), specialHit
+		tell(fmt.Sprintf("Bombers from %s wrecked the planet's trading market — %s listed goods destroyed.",
+			from, numfmt.Comma(int64(goods))))
+		return fmt.Sprintf("You wrecked the planet's trading market: %d listed goods destroyed.", goods), specialHit
 
 	case OpBombRoutes:
-		// nil takes every deal on the planet.
-		hit := w.bombRoutesEffect(nil)
+		hit := w.bombRoutesEffect()
 		if hit == 0 {
 			return "Nothing worth hitting was moving on that planet's trade routes.", specialNothing
 		}
@@ -496,13 +493,14 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome
 
 	case OpUndermine:
 		var lost int64
+		pct := w.undermineLossPct()
 		for _, e := range living() {
-			lost += undermineEffect(e)
+			lost += w.undermineEffect(e, pct)
 		}
 		if lost == 0 {
 			return "Nothing was invested on that planet to undermine.", specialNothing
 		}
-		tell(fmt.Sprintf("Agents from %s undermined the planet's bank — %s gold in principal lost.",
+		tell(fmt.Sprintf("Bombers from %s undermined the planet's bank — %s gold in principal lost.",
 			from, numfmt.Comma(lost)))
 		return fmt.Sprintf("You undermined the planet's investments: %d gold lost.", lost), specialHit
 	}

@@ -96,8 +96,8 @@ func TestPlanetOpNewsFollowsTheOutcome(t *testing.T) {
 	if !res.Won || news != "Bombers from Selby of Home hit the planet's food market." {
 		t.Errorf("stocked market: won=%v news %q", res.Won, news)
 	}
-	if w.FoodMarketSupply != 5_000 {
-		t.Errorf("stocked market: supply %d after the hit, want 5000", w.FoodMarketSupply)
+	if w.FoodMarketSupply < 100 || w.FoodMarketSupply > 8_000 {
+		t.Errorf("stocked market: supply %d after the hit, want 1-80%% of 10000 left", w.FoodMarketSupply)
 	}
 
 	landNextBombingRun(w)
@@ -108,7 +108,7 @@ func TestPlanetOpNewsFollowsTheOutcome(t *testing.T) {
 
 	landNextBombingRun(w)
 	res, news = resolveOneSpecial(t, w, RemoteSpecialOp{ID: 4, FromBoard: "Home", FromEmpire: "Selby", Op: OpUndermine})
-	if res.Won || news != "Agents from Selby of Home found nothing invested in the planet's bank to undermine." {
+	if res.Won || news != "Bombers from Selby of Home found nothing invested in the planet's bank to undermine." {
 		t.Errorf("nothing invested: won=%v news %q", res.Won, news)
 	}
 }
@@ -173,7 +173,7 @@ func TestEveryBombingOpMeetsTheLandingRoll(t *testing.T) {
 		for seed := int64(1); seed <= runs; seed++ {
 			w, d := specialNewsBoard(seed)
 			w.FoodMarketSupply = 10_000
-			d.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 5}}
+			d.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 3}}
 			res, news := resolveOneSpecial(t, w, RemoteSpecialOp{ID: 1, FromBoard: "Home", FromEmpire: "Selby", Op: tc.op})
 			if !strings.Contains(res.Report, "driven off") {
 				continue
@@ -298,8 +298,36 @@ func TestBombingOpsNeverReachTheRealmResolver(t *testing.T) {
 		if res.Outcome == OutcomeProtected || res.Outcome == OutcomeNotFound {
 			t.Errorf("%s answered %q: it went looking for a realm", op, res.Outcome)
 		}
-		if !strings.HasPrefix(news, "Bombers from Selby of Home ") && !strings.HasPrefix(news, "Agents from Selby of Home ") {
+		if !strings.HasPrefix(news, "Bombers from Selby of Home ") {
 			t.Errorf("%s posted %q, which is not a planet-wide line", op, news)
 		}
+	}
+}
+
+// Every line a bombing op posts names the same carrier, whichever op and however
+// it ended: the original's one failure line for all four has forces caught
+// planting bombs, and its Undermine success line names forces too
+// (game/ipreport.dat, ^BOMBING_HITS). IB's Undermine lines said "Agents" while
+// its failure line said "Bombers", so one op read as two different raids.
+func TestBombingNewsNamesOneCarrier(t *testing.T) {
+	landed, drivenOff := false, false
+	for seed := int64(1); seed <= 30; seed++ {
+		w, d := specialNewsBoard(seed)
+		d.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 3}}
+		before := len(d.Events)
+		res, news := resolveOneSpecial(t, w, RemoteSpecialOp{ID: 1, FromBoard: "Home", FromEmpire: "Selby", Op: OpUndermine})
+		landed = landed || res.Won
+		drivenOff = drivenOff || strings.Contains(res.Report, "driven off")
+		if !strings.HasPrefix(news, "Bombers from Selby of Home ") {
+			t.Errorf("seed %d: news %q", seed, news)
+		}
+		for _, ev := range d.Events[before:] {
+			if !strings.HasPrefix(ev.Text, "Bombers from Selby of Home ") {
+				t.Errorf("seed %d: event %q", seed, ev.Text)
+			}
+		}
+	}
+	if !landed || !drivenOff {
+		t.Errorf("30 seeds reached landed=%v, driven off=%v; both lines must be checked", landed, drivenOff)
 	}
 }

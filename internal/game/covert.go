@@ -602,17 +602,3 @@ func (w *World) resolveBombEnemyTargets(a, d *Empire) string {
 	d.addEvent(fmt.Sprintf("Terrorists bombed targets across your realm — %d %s destroyed.", lost, t.name))
 	return fmt.Sprintf("Your agents bombed targets in %s: %d %s destroyed.", d.Name, lost, t.name)
 }
-
-// undermineEffect trims a quarter off the principal and matching return of each
-// of d's pending investments, and reports the principal lost. Zero means d had
-// nothing invested.
-func undermineEffect(d *Empire) int64 {
-	var lost int64
-	for i := range d.Investments {
-		cut := d.Investments[i].Amount / UndermineInvestmentDivisor
-		d.Investments[i].Amount -= cut
-		d.Investments[i].Return -= cut
-		lost += cut
-	}
-	return lost
-}
