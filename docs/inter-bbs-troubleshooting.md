@@ -50,6 +50,27 @@ because by the time anyone asks why a board went quiet the run that failed is
 long gone. Those lines are the same ones `-ftn-status` prints; see [Using the
 FTN transport](#using-the-ftn-transport-to-see-where-a-packet-stopped) below.
 
+## Settings the game refuses or ignores
+
+**`-maint` or `-planetary` stops with "uses setting names this version no longer
+reads" or "ftn.cfg is no longer read".** The board was set up by an older
+release. The message lists the lines to change, with the new names already
+filled in. Put them in `bbs.cfg` and delete `ftn.cfg`; see [Upgrading from
+`barons-ftn`](ftn-transport.md#upgrading-from-barons-ftn). Until then, a door
+started with `-full` still lets callers play, but skips the league exchange.
+
+**"unknown setting ... is ignored".** A line in `bbs.cfg` has a key the game
+does not know, usually a spelling mistake. The setting keeps its default, which
+can make a board go quiet without an error: a misspelled `GameInbound` makes the
+game read the default `inbound` directory. The warning gives the line number and,
+when one is close, the key you probably meant.
+
+**"want Yes or No".** A yes/no setting such as `Lottery` or `PirateNews` has some
+other value. It keeps its default until the value is `Yes` or `No`.
+
+On a league board, these warnings print on every `-maint`, `-planetary`,
+`-full`, `-ftn-status` and `-league-check` run.
+
 ## Step 2: read the run report
 
 Every `-planetary` run prints what it did. The counters are the fastest
@@ -69,6 +90,7 @@ A run that skipped anything names each reason:
 | already seen | a duplicate or a replay of a packet already applied | nothing; this is the replay guard working |
 | for another league | its league number is not yours | nothing, if you share an inbound directory with another league. Otherwise, check `LeagueNumber` in `bbs.cfg` on both boards |
 | mesh copy | a copy addressed to somebody else, in a mesh setup | nothing |
+| transport bundle(s) left for the next unwrap | a bundle in `GameInbound` that this run did not unwrap: another run held the transport lock, or the unwrap failed | nothing, if the next run unwraps it. If it stays, read the unwrap warning the run printed |
 
 Three more lines appear when they apply. **Passed N packets on** is this board
 forwarding for a neighbor, which is routing working. **Returned N held
