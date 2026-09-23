@@ -39,6 +39,28 @@ func IsPacketFile(name string) bool {
 	return strings.EqualFold(filepath.Ext(name), PacketExt)
 }
 
+// bundleMagic opens every FTN transport bundle: the ZIP local-header signature.
+var bundleMagic = []byte("PK\x03\x04")
+
+// IsBundle reports whether a packet file's contents are an FTN transport bundle
+// rather than a game packet. A bundle travels under the same .brp name as a
+// packet, so only its first bytes tell the two apart (#230).
+func IsBundle(data []byte) bool { return bytes.HasPrefix(data, bundleMagic) }
+
+// IsBundleFile is IsBundle for a file on disk, reading only its first bytes.
+func IsBundleFile(path string) bool {
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	head := make([]byte, len(bundleMagic))
+	if _, err := io.ReadFull(f, head); err != nil {
+		return false
+	}
+	return IsBundle(head)
+}
+
 // RunPlanetary is the inter-BBS maintenance step (BRE's "BRE PLANETARY"): it
 // reads and applies inbound packets, launches any group attacks whose day has
 // come, exports this board's scores to the league, and writes the outbox. Run
@@ -70,6 +92,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.HeldRules = inResult.HeldRules
 	run.Quarantined = inResult.Quarantined
 	run.Deferred = inResult.Deferred
+	run.Bundles = inResult.Bundles
 	// A member board that just adopted the Coordinator's roster has to persist
 	// it: the roster is read from ibnodes.dat at startup, not from the world
 	// file (#64).
@@ -181,6 +204,7 @@ type PlanetaryRun struct {
 	HeldRules     int      // packets set aside: their sender is not playing the league's rules (#264)
 	Quarantined   int      // packets that could not be parsed at all and were set aside
 	Deferred      int      // packets left untouched, too young to trust as a complete write
+	Bundles       int      // FTN transport bundles left in inbound for the unwrap to take (#230)
 	Released      int      // held packets this build can now read, returned to inbound
 	// RecoveryPaused names the boards whose packets are held for a protocol
 	// difference while forces, agents or gold still wait on them; the lost-forces
@@ -370,6 +394,11 @@ type InboundResult struct {
 	// can otherwise hold one under the grace window indefinitely with no
 	// visible symptom at all.
 	Deferred int
+	// Bundles counts FTN transport bundles found in the inbound directory. The
+	// unwrap before the planetary step turns each into plain packets; one still
+	// here was not unwrapped this run, and parsing it as a packet would set a
+	// readable bundle aside as corrupt (#230).
+	Bundles int
 	// OrderNotice, when non-empty, names the order groups were actually
 	// applied in for a batch contested by more than one origin — the line
 	// a league dispute would be settled from. Deliberately separate from
@@ -547,6 +576,16 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			// avoid. Same defer-or-quarantine treatment as an unparseable
 			// packet gets.
 			deferOrQuarantine(w, &result, path, e, err, verbose)
+			continue
+		}
+		// A bundle is left for the unwrap step, which runs before this one on a
+		// league board. Off a league nothing will ever unwrap it, so it falls
+		// through to the parse below and is set aside like any foreign file.
+		if IsBundle(data) && w.Config.InterBBSEnabled() {
+			result.Bundles++
+			if verbose {
+				fmt.Printf("  Left transport bundle %s for the unwrap to take\n", e.Name())
+			}
 			continue
 		}
 		var p game.Packet

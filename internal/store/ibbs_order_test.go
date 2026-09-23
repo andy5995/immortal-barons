@@ -1225,3 +1225,32 @@ func TestUniqueNameCapsAtMaxQuarantineCopies(t *testing.T) {
 		t.Fatal("expected an error once every slot up to maxQuarantineCopies is taken, got nil")
 	}
 }
+
+// A bundle is left for the unwrap step only on a league board, where that step
+// runs first. Off a league nothing will unwrap it, so an old one is set aside
+// like any other file that is not a packet, instead of sitting there forever.
+func TestReadInboundSetsAsideABundleOffTheLeague(t *testing.T) {
+	inbound := t.TempDir()
+	bundle := filepath.Join(inbound, "255W01EM.BRP")
+	if err := os.WriteFile(bundle, []byte("PK\x03\x04not really a zip"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	old := time.Now().Add(-2 * quarantineGrace)
+	if err := os.Chtimes(bundle, old, old); err != nil {
+		t.Fatal(err)
+	}
+	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
+	w := game.NewWorldSeed(cfg, 1)
+
+	result, err := ReadInbound(w, inbound, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Bundles != 0 || result.Quarantined != 1 {
+		t.Errorf("off a league: Bundles=%d Quarantined=%d, want 0 and 1", result.Bundles, result.Quarantined)
+	}
+	if _, err := os.Stat(filepath.Join(cfg.DataDir, BadDir, "255W01EM.BRP")); err != nil {
+		t.Errorf("the bundle was not set aside in %s: %v", BadDir, err)
+	}
+}

@@ -170,8 +170,10 @@ remains in the packet.
 A leading JSON object instead of ZIP is accepted as one legacy entry, allowing
 receivers to be upgraded before senders. This is receive-only compatibility,
 not an FTN wire format: new senders always publish ZIP, even for one packet.
-New bundled output requires the receiving board's unwrap step (an
-`IncomingFileDir` line); the planetary step itself still reads JSON only.
+New bundled output requires a receiver on v0.2.0 or later, whose unwrap reads a
+bundle in an `IncomingFileDir` or in `GameInbound` before the planetary step;
+the planetary step itself still reads JSON only, and leaves a bundle it meets
+for the next unwrap.
 
 ## Packet files (`*.brp`)
 

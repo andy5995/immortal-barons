@@ -177,7 +177,7 @@ func writeBulletins(cfg game.Config, w *game.World) {
 // for a command whose whole job is moving mail: a sysop cannot tell a run that
 // had nothing to do from one that read the wrong directory.
 func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.HeldRules + run.Quarantined + run.Deferred
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.HeldRules + run.Quarantined + run.Deferred + run.Bundles
 	switch {
 	case run.Applied == 0 && skipped == 0:
 		fmt.Printf("No packets waiting in %s\n", cfg.Inbound())
@@ -265,7 +265,7 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 // e.g. "skipped 3: 2 already seen, 1 for another league". Each reason is shown
 // only when its count is above zero.
 func skipSummary(run store.PlanetaryRun) string {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.HeldRules + run.Quarantined + run.Deferred
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.HeldRules + run.Quarantined + run.Deferred + run.Bundles
 	if skipped == 0 {
 		return ""
 	}
@@ -286,6 +286,9 @@ func skipSummary(run store.PlanetaryRun) string {
 	// second time.
 	if run.Deferred > 0 {
 		parts = append(parts, fmt.Sprintf("%d left in place, too new to trust as complete", run.Deferred))
+	}
+	if run.Bundles > 0 {
+		parts = append(parts, fmt.Sprintf("%d transport bundle(s) left for the next unwrap", run.Bundles))
 	}
 	// Held ranks next: nothing is lost, but the league is out of step and
 	// somebody has to act before those packets move.

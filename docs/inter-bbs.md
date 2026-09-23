@@ -612,10 +612,11 @@ immortal-barons -maint -data /path/to/data
 ```
 
 It is optional. A board whose mailer or tosser drops `.brp` files straight into
-`GameInbound` keeps working without it, and that is a supported way to run. The
-one thing such a board cannot do is receive a ZIP bundle, so no peer may enable
-`Bundled` toward it until it sets `IncomingFileDir` — see [Plain packets for
-boards that cannot read a
+`GameInbound` keeps working without it, and that is a supported way to run. It
+reads a ZIP bundle too: the same modes unwrap one found in `GameInbound`. A
+board on an older release cannot, so no peer may enable `Bundled` until every
+board it sends to is on v0.2.0 or later — see [Plain packets for boards that
+cannot read a
 bundle](ftn-transport.md#plain-packets-for-boards-that-cannot-read-a-bundle).
 
 A minimal attach setup on Synchronet adds three lines to `bbs.cfg`:

@@ -1,7 +1,6 @@
 package ftn
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -174,21 +173,4 @@ func claimedSources(dataDir string) map[string]bool {
 		addClaimed(claimed, receipt)
 	})
 	return claimed
-}
-
-// isBundle reports whether the file opens with the ZIP local-header signature.
-// Only a bundle carries a manifest, and a transport file may equally be a plain
-// JSON packet or a truncated download, so the advice to read one has to be
-// earned rather than offered to everything that failed to be claimed.
-func isBundle(path string) bool {
-	f, err := os.Open(path)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
-	var magic [4]byte
-	if _, err := io.ReadFull(f, magic[:]); err != nil {
-		return false
-	}
-	return magic == [4]byte{'P', 'K', 0x03, 0x04}
 }

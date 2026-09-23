@@ -79,7 +79,7 @@ func runIn(dataDir string, wait bool) (Result, error) {
 		return Result{}, err
 	}
 	var result Result
-	if err := resumeInboundReceipts(root, board, dataDir, transport, world, nodes, origin, &result); err != nil {
+	if err := resumeInboundReceipts(root, board, dataDir, transport, world, nodes, origin, nil, &result); err != nil {
 		return result, err
 	}
 	attaches, referenced, err := scanStoredAttaches(transport, origin, nodes)
@@ -87,7 +87,7 @@ func runIn(dataDir string, wait bool) (Result, error) {
 		return result, err
 	}
 	for _, attach := range attaches {
-		if err := ingestTransportFile(root, board, dataDir, transport, world, nodes, origin, attach.Attachment, attach.Path, "attach", attach.Origin, &result); err != nil {
+		if err := ingestTransportFile(root, board, dataDir, transport, world, nodes, origin, attach.Attachment, attach.Path, "attach", attach.Origin, true, &result); err != nil {
 			result.Warnings = append(result.Warnings, fmt.Sprintf("%s: %v", filepath.Base(attach.Path), err))
 		}
 	}
@@ -128,7 +128,7 @@ func runIn(dataDir string, wait bool) (Result, error) {
 		if manifest.Delivery == "attach" {
 			continue // wait for its stored-message envelope
 		}
-		if err := ingestTransportFile(root, board, dataDir, transport, world, nodes, origin, path, "", manifest.Delivery, Address{}, &result); err != nil {
+		if err := ingestTransportFile(root, board, dataDir, transport, world, nodes, origin, path, "", manifest.Delivery, Address{}, true, &result); err != nil {
 			result.Warnings = append(result.Warnings, fmt.Sprintf("%s: %v", entry.Name(), err))
 		}
 	}
@@ -162,7 +162,7 @@ func unclaimedWarning(waiting Unclaimed) string {
 	}
 	waited := fmt.Sprintf("%s has waited %s in the mailer's inbound and no run has claimed it.",
 		filepath.Base(waiting.Path), waiting.Age.Round(time.Minute))
-	if isBundle(waiting.Path) {
+	if store.IsBundleFile(waiting.Path) {
 		return waited + fmt.Sprintf(" Read what it is with: unzip -p %s manifest.json",
 			shellQuote(waiting.Path))
 	}
@@ -330,7 +330,10 @@ func parseStoredAttach(path string, inboundDirs []string, local Address) (stored
 	return storedAttach{Path: path, Attachment: abs, Origin: origin}, true, nil
 }
 
-func ingestTransportFile(root string, board game.Config, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, origin Address, source, envelope, via string, sender Address, result *Result) error {
+// ingestTransportFile claims one received transport file. With forward false it
+// is a bundle found in the game's own inbound: no FTN hop is taken from it, and
+// it may have come by either delivery, since no envelope was matched to it.
+func ingestTransportFile(root string, board game.Config, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, origin Address, source, envelope, via string, sender Address, forward bool, result *Result) error {
 	raw, err := os.ReadFile(source)
 	if err != nil {
 		return err
@@ -339,7 +342,7 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 	if err != nil {
 		return err
 	}
-	if manifest.Format == bundleFormat && manifest.Delivery != via {
+	if forward && manifest.Format == bundleFormat && manifest.Delivery != via {
 		return fmt.Errorf("bundle delivery %q does not match %s handoff", manifest.Delivery, via)
 	}
 	transmitter, hasTransmitter := bundleTransmitter(entries)
@@ -361,7 +364,7 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return err
 		}
-		receipt, err = buildInboundReceipt(dir, id, source, envelope, via, entries, board.LeagueNumber, dataDir, transport, world, nodes, result)
+		receipt, err = buildInboundReceipt(dir, id, source, envelope, via, entries, board.LeagueNumber, dataDir, transport, world, nodes, forward, result)
 		if err == nil {
 			receipt.Created = time.Now()
 			err = saveInboundReceipt(planPath, receipt)
@@ -377,7 +380,7 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 	return processInboundReceipt(dir, planPath, &receipt, board, dataDir, transport, origin, result)
 }
 
-func buildInboundReceipt(dir, id, source, envelope, via string, entries []transportEntry, boardLeague int, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, result *Result) (inboundReceipt, error) {
+func buildInboundReceipt(dir, id, source, envelope, via string, entries []transportEntry, boardLeague int, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, forward bool, result *Result) (inboundReceipt, error) {
 	receipt := inboundReceipt{ID: id, Source: source, Envelope: envelope}
 	groups := map[int][]transportEntry{}
 	mine := world.NodeNumber(world.Config.BoardID)
@@ -390,12 +393,18 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 			continue
 		}
 		addressedToMe := world.AddressedToMe(entry.Packet)
-		if addressedToMe {
+		// Unforwarded, a packet in transit goes into the game's inbound as it
+		// would have arrived unbundled, and the planetary step passes it on --
+		// or, in a mesh, does not -- by the rules it applies to that one.
+		if addressedToMe || !forward && world.Routed() {
 			spoolFile := fmt.Sprintf("local-%06d.brp", i)
 			if err := writeFileAtomic(filepath.Join(dir, spoolFile), entry.Raw, 0o644); err != nil {
 				return receipt, err
 			}
 			receipt.Local = append(receipt.Local, inboundLocal{Name: entry.Name, SpoolFile: spoolFile})
+		}
+		if !forward {
+			continue
 		}
 		if entry.Packet.ToNode == 0 && entry.Packet.ToBoard == "" {
 			if via == "direct" && transport.OboxMeshFanout {
@@ -649,7 +658,9 @@ func saveInboundReceipt(path string, receipt inboundReceipt) error {
 	return replaceFileAtomic(path, data, 0o644)
 }
 
-func resumeInboundReceipts(root string, board game.Config, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, origin Address, result *Result) error {
+// resumeInboundReceipts finishes every receipt a run left incomplete, or only
+// those own accepts when it is set.
+func resumeInboundReceipts(root string, board game.Config, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, origin Address, own func(inboundReceipt) bool, result *Result) error {
 	entries, err := os.ReadDir(root)
 	if err != nil {
 		return err
@@ -671,6 +682,9 @@ func resumeInboundReceipts(root string, board game.Config, dataDir string, trans
 			result.Warnings = append(result.Warnings, fmt.Sprintf(
 				"inbound spool %s has an unreadable %s and is being left alone: %v",
 				entry.Name(), filepath.Base(planPath), err))
+			continue
+		}
+		if own != nil && !own(receipt) {
 			continue
 		}
 		if err := processInboundReceipt(dir, planPath, &receipt, board, dataDir, transport, origin, result); err != nil {

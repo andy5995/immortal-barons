@@ -156,8 +156,9 @@ OboxMeshFanout  Yes
 ```
 
 - `IncomingFileDir` is the directory the mailer delivers received files into:
-  attachments and raw obox/BSO bundles. The unwrap step runs only when it is
-  set. **Give it once per directory the mailer delivers into.**
+  attachments and raw obox/BSO bundles. Only a directory named here is
+  unwrapped, apart from `GameInbound`, which always is. **Give it once per
+  directory the mailer delivers into.**
   Several mailers use more than one: a session that authenticates with a
   password and one that does not are filed apart, and the directory you leave
   out is read by nothing. ENiGMA½ is the clear case — `secInbound` for an
@@ -317,16 +318,22 @@ removes the file by hand. So a sysop who upgrades and configures nothing keeps
 sending what every board already understands, and has to ask for the faster
 shape rather than arrive at it.
 
-**The test is whether the peer has an `IncomingFileDir`, not what release it
-is on.** Only the transport's unwrap step opens a bundle, and it runs only on a
-board that names its mailer's directory that way. A board whose `GameInbound`
-reads `.brp` files straight out of its mailer's directory — the file-drop
-arrangement described under [Optional FTN
-handoff](inter-bbs.md#optional-ftn-handoff) — cannot unwrap a bundle however
-new its game is, and needs an `IncomingFileDir` line before anyone sends it
-one. A board on a release older than the bundled transport cannot either.
+**The test is what release the peer runs, not how it is set up.** From v0.2.0,
+`-planetary`, `-maint` and `-full` unwrap a bundle wherever it lands: in an
+`IncomingFileDir`, or straight in `GameInbound`. So a board whose mailer drops
+files into `GameInbound` — the file-drop arrangement described under [Optional
+FTN handoff](inter-bbs.md#optional-ftn-handoff) — reads a bundle with no FTN
+settings at all. A board on an older release cannot read one, whatever it has
+configured.
 
-Turn bundling on for the whole board once every peer can unwrap one:
+A bundle found in `GameInbound` is checked as one from `IncomingFileDir` is,
+and its packets are written beside it for the planetary step. A packet in it
+addressed to another board is passed on by the planetary step, as it would be
+had it arrived unbundled; nothing is forwarded over FTN from there. A file that
+starts like a bundle but cannot be read is set aside in `ftn-spool/bad` once it
+is five minutes old.
+
+Turn bundling on for the whole board once every peer runs v0.2.0 or later:
 
 ```ini
 Bundled Yes
@@ -609,7 +616,8 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 | a subdirectory of `IncomingFileDir`, named by `-ftn-status` | The mailer filed an unauthenticated session's files apart from the rest; the unwrap step reads each `IncomingFileDir` and nothing below it | Give that subdirectory its own `IncomingFileDir` line, or fix the session password for that peer and move the waiting files up |
 | `ftn-spool/in` | Local publication or transit handoff is incomplete | Correct the named target; the next run resumes it |
 | `GameInbound` | The planetary step has not applied the unwrapped packets | Run `immortal-barons -planetary` |
-| `ftn-spool/bad` | An outbound packet was malformed/unroutable, or an inbound bundle contained a rejected member | Preserve it for diagnosis; correct the producing board, route, league, or roster |
+| `GameInbound`, a bundle | The unwrap did not run, another run held the transport lock, or the bundle's sender is not on this board's roster yet | Run `immortal-barons -planetary` and read its warnings |
+| `ftn-spool/bad` | An outbound packet was malformed/unroutable, an inbound bundle contained a rejected member, or a file in `GameInbound` started like a bundle and could not be read | Preserve it for diagnosis; correct the producing board, route, league, or roster |
 
 One bad packet or busy peer does not stop unrelated destinations. Do not delete
 spool journals to make a warning disappear: they are the record that prevents
@@ -733,18 +741,17 @@ The packet format does not change in this release, so boards can upgrade one at 
 
 ### Turning bundles on
 
-A board sent a ZIP bundle needs the unwrap step, which means an
-`IncomingFileDir` line. Without one the bundle reaches the game, which cannot
-parse it as a JSON packet. Give every receiver its `IncomingFileDir` before
-any sender switches to bundles:
+A board sent a ZIP bundle needs a release that unwraps one: v0.2.0 or later,
+which reads a bundle in `IncomingFileDir` and in `GameInbound` alike. An older
+release cannot parse it as a JSON packet. Upgrade every receiver before any
+sender switches to bundles:
 
-1. Configure `IncomingFileDir` on every board and run `-planetary` after
-   receive sessions.
+1. Upgrade every board, and run `-planetary` after receive sessions.
 2. Verify that raw `.brp` traffic is still delivered to the game.
 3. Configure the per-peer `Link` modes.
 4. Turn on `Bundled Yes` on the senders.
 
-Because the unwrap step accepts raw JSON packets, steps 1–2 can be completed
+Because the unwrap accepts raw JSON packets, steps 1–2 can be completed
 without coordinating an exact cutover minute.
 
 **This is the rolling case, and a protocol change is not.** The order above

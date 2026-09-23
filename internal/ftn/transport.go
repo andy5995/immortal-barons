@@ -169,11 +169,7 @@ func lastAdvanced(plan batchPlan, planPath string) time.Time {
 const lockFile = "barons-ftn.lock"
 
 func transportContext(dataDir string, wait bool) (game.Config, Config, []game.LeagueNode, *game.World, Address, *store.FileLock, error) {
-	board, err := store.LoadConfig(dataDir)
-	if err != nil {
-		return game.Config{}, Config{}, nil, nil, Address{}, nil, err
-	}
-	adapterLock, err := store.LockPath(filepath.Join(board.DataDir, lockFile), wait)
+	board, nodes, world, adapterLock, err := leagueContext(dataDir, wait)
 	if err != nil {
 		return game.Config{}, Config{}, nil, nil, Address{}, nil, err
 	}
@@ -181,21 +177,10 @@ func transportContext(dataDir string, wait bool) (game.Config, Config, []game.Le
 		adapterLock.Release()
 		return game.Config{}, Config{}, nil, nil, Address{}, nil, err
 	}
-	// Before any packet moves: a board with no league number accepts every
-	// league's packets and has its own accepted everywhere, so it is not
-	// configured to be exchanging mail yet (#227).
-	if err := store.CheckLeagueNumber(board); err != nil {
-		return fail(err)
-	}
 	transport, err := LoadConfig(dataDir)
 	if err != nil {
 		return fail(err)
 	}
-	nodes, err := store.ParseNodeList(filepath.Join(dataDir, store.NodeListFile))
-	if err != nil {
-		return fail(err)
-	}
-	world := &game.World{Config: board, LeagueNodes: nodes}
 	mine := world.NodeNumber(board.BoardID)
 	originNode := nodeByNumber(nodes, mine)
 	if originNode == nil {
@@ -206,6 +191,32 @@ func transportContext(dataDir string, wait bool) (game.Config, Config, []game.Le
 		return fail(fmt.Errorf("this board %q: %w", board.BoardID, err))
 	}
 	return board, transport, nodes, world, origin, adapterLock, nil
+}
+
+// leagueContext is the part of transportContext that needs no FTN settings: the
+// board, its roster, and the transport lock, which it returns held.
+func leagueContext(dataDir string, wait bool) (game.Config, []game.LeagueNode, *game.World, *store.FileLock, error) {
+	board, err := store.LoadConfig(dataDir)
+	if err != nil {
+		return game.Config{}, nil, nil, nil, err
+	}
+	adapterLock, err := store.LockPath(filepath.Join(board.DataDir, lockFile), wait)
+	if err != nil {
+		return game.Config{}, nil, nil, nil, err
+	}
+	// Before any packet moves: a board with no league number accepts every
+	// league's packets and has its own accepted everywhere, so it is not
+	// configured to be exchanging mail yet (#227).
+	if err := store.CheckLeagueNumber(board); err != nil {
+		adapterLock.Release()
+		return game.Config{}, nil, nil, nil, err
+	}
+	nodes, err := store.ParseNodeList(filepath.Join(dataDir, store.NodeListFile))
+	if err != nil {
+		adapterLock.Release()
+		return game.Config{}, nil, nil, nil, err
+	}
+	return board, nodes, &game.World{Config: board, LeagueNodes: nodes}, adapterLock, nil
 }
 
 func processPendingBatches(root, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, origin Address, result *Result) error {

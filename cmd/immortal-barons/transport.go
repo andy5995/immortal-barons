@@ -113,20 +113,25 @@ func editDistance(a, b string) int {
 	return prev[len(b)]
 }
 
-// transportIn unwraps what the mailer delivered into the game's inbound. It
-// never fails the run it is part of: whatever is already in the game's inbound
-// is applied either way, and a fault in the mailer's directory is not a reason
-// to hold those back. With wait false it gives up at once when another run
-// holds the transport lock -- that run is doing this same work.
+// transportIn unwraps what the mailer delivered into the game's inbound, and
+// then any bundle that was delivered straight into the game's inbound. It never
+// fails the run it is part of: whatever is already in the game's inbound is
+// applied either way, and a fault in the mailer's directory is not a reason to
+// hold those back. With wait false it gives up at once when another run holds
+// the transport lock -- that run is doing this same work.
 func transportIn(cfg game.Config, wait bool, out io.Writer) {
 	tc, err := ftn.LoadConfig(cfg.DataDir)
 	if err != nil {
 		transportWarn(fmt.Sprintf("FTN unwrap skipped: %v. Applying what is already in %s.", err, cfg.Inbound()))
+	} else if tc.Receives() && mailerIn(cfg, wait, out) {
 		return
 	}
-	if !tc.Receives() {
-		return
-	}
+	gameInboundIn(cfg, wait, out)
+}
+
+// mailerIn unwraps what the mailer delivered into IncomingFileDir, reporting
+// whether it gave way to another run holding the transport lock.
+func mailerIn(cfg game.Config, wait bool, out io.Writer) (busy bool) {
 	run := ftn.RunIn
 	if !wait {
 		run = ftn.TryRunIn
@@ -134,12 +139,12 @@ func transportIn(cfg game.Config, wait bool, out io.Writer) {
 	result, err := run(cfg.DataDir)
 	if errors.Is(err, store.ErrBusy) {
 		fmt.Fprintln(out, "FTN unwrap skipped: another run holds the transport lock and is doing it.")
-		return
+		return true
 	}
 	printTransportWarnings(result)
 	if err != nil {
 		transportWarn(fmt.Sprintf("FTN unwrap failed: %v. Applying what is already in %s.", err, cfg.Inbound()))
-		return
+		return false
 	}
 	for _, queued := range result.Queued {
 		fmt.Fprintf(out, "Forwarded %s for %s (%s) as %s\n",
@@ -147,6 +152,31 @@ func transportIn(cfg game.Config, wait bool, out io.Writer) {
 	}
 	if result.Delivered > 0 {
 		fmt.Fprintf(out, "Unwrapped %d packet(s) from the mailer's inbound.\n", result.Delivered)
+	}
+	return false
+}
+
+// gameInboundIn unwraps a bundle that reached the game's inbound without
+// passing through IncomingFileDir: the mailer of a board with no FTN settings
+// delivers there, and a bundle is otherwise unreadable to the planetary step
+// (#230). It needs no FTN settings, and does nothing when no bundle is there.
+func gameInboundIn(cfg game.Config, wait bool, out io.Writer) {
+	run := ftn.UnwrapGameInbound
+	if !wait {
+		run = ftn.TryUnwrapGameInbound
+	}
+	result, err := run(cfg.DataDir)
+	if errors.Is(err, store.ErrBusy) {
+		fmt.Fprintf(out, "Unwrapping the bundles in %s skipped: another run holds the transport lock and is doing it.\n", cfg.Inbound())
+		return
+	}
+	printTransportWarnings(result)
+	if err != nil {
+		transportWarn(fmt.Sprintf("Could not unwrap the transport bundles in %s: %v. They stay there for the next run.", cfg.Inbound(), err))
+		return
+	}
+	if result.Delivered > 0 {
+		fmt.Fprintf(out, "Unwrapped %d packet(s) from transport bundles in %s.\n", result.Delivered, cfg.Inbound())
 	}
 }
 
