@@ -35,8 +35,8 @@ The lines it prints, and what a FAIL on each one means:
 | Roster entries | a line in the roster is malformed; the message names which |
 | Board name | not set, or not the name of any board on the roster |
 | League number | outside the 1-999 the packet filenames can carry |
-| Inbound directory | it does not exist, or cannot be read |
-| Outbound directory | it does not exist, or cannot be written to |
+| GameInbound | it does not exist, or cannot be read |
+| GameOutbound | it does not exist, or cannot be written to |
 | Coordinator key | not recorded, or the file is not a key — league orders will be refused |
 | Board signing key | `board.key` is there but unreadable, so packets go out unsigned |
 

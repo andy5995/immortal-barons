@@ -64,10 +64,11 @@ mailer from reading or deleting the same file at once.
 | `immortal-barons -full` | unwrap | play, write the outbox, handoff |
 | a door session with no `-full` | nothing | nothing |
 
-The unwrap step runs when `IncomingFileDir` is set. The handoff runs when
-`OutgoingNetmailDir` or any `Link` line is set. Both take the transport's own lock
-(`barons-ftn.lock` in the data directory), and neither holds the game's world
-lock while it waits for that one.
+The unwrap step runs when `IncomingFileDir` is set. The handoff runs when any
+`Link` line is set, or when `OutgoingNetmailDir` is set and `Mailer` is not
+`None`. Both take the transport's own lock (`barons-ftn.lock` in the data
+directory), and neither holds the game's world lock while it waits for that
+one.
 
 - **A failed unwrap** is reported as a warning. The run goes on and applies
   whatever is already in `GameInbound`.

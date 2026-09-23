@@ -489,13 +489,14 @@ refused with the lines to paste, #241). BRE's BBS.CFG has no key names, only
 positions; lines 4, 5 and 7 are IB's `IncomingFileDir`, `OutgoingNetmailDir` and
 `Mailer`.
 Private game directories sit behind resumable spools, with attach / obox / BSO
-links per peer. It sends plain packets by default and bundles only when a board
-says `Bundled Yes`, because a board that cannot unwrap a ZIP aborts its whole
-inbound run on the first one it meets. Whether a peer can is a question of
-whether it has an `IncomingFileDir`, not of its release: the transport is
-optional, a board reading `.brp` from its mailer's directory is a supported
-setup, and such a board cannot unwrap a bundle however current its game (#230,
-and the rule above `game.Protocol`). Two ed25519 key pairs guard it: the
+links per peer. The transport sends plain packets by default and bundles only
+when a board says `Bundled Yes`, because a board that cannot unwrap a ZIP aborts
+its whole inbound run on the first one it meets. Whether a peer can is a
+question of whether it has an `IncomingFileDir`, not of its release: the
+transport is optional, a board reading `.brp` from its mailer's directory is a
+supported setup, and such a board cannot unwrap a bundle however current its
+game (#230, and the rule above `game.Protocol`).
+Two ed25519 key pairs guard it: the
 Coordinator's (`coord.key`, recorded once by hand) authorizes league orders, and
 each board's own (`board.key`, published on an optional seventh roster line)
 proves which board a packet came from. A roster entry with no key is applied

@@ -5,11 +5,9 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: Computer barons are removed, including any a board already has
-  * config-during-reset: the four interplanetary allowances per day take the
-    original's defaults
+  * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * -ftn-status lists what the FTN spools hold, for whom, and why
   * config-during-reset: a new Max Local Attacks/Day setting (0, unlimited)
-  * A local attack no longer spends the interplanetary allowance
-  * A local attack cannot be repeated by leaving the game after it
   * Investments are capped by what matures on each date (#284)
   * Terror ops are reported on both recaps and no longer in the news (#285)
   * A Special Operation's news line says how it ended (#288)
