@@ -308,9 +308,8 @@ This is the base for the crown tax (issue #52).
 
 ## Trade offer record (one field mapped)
 
-A pending trade offer is a 0x97-byte record with its own integrity word at
-`+0x93`/`+0x95`, checksummed over the whole 0x97 bytes by the same routine the
-empire records use. Only one field of it has been read so far:
+A pending trade offer is a 0x97-byte record, which BRE also checks for
+tampering. Only one field of it has been read so far:
 
 ```
   +0x60  byte   the SENDER's turns-remaining-today at the moment of sending.
@@ -376,17 +375,13 @@ Runtime helpers worth recognizing when reading this code:
 
 ## Integrity check — direct edits are rejected
 
-Each record ends with an **integrity dword at `+0x429`**, which BRE recomputes
-and compares at load (the verifier sits at BRE.EXE file offsets
-`0x84D5`–`0x87C4`, after the "GAME.DAT <empire> corrupt" string). A record whose
-field is edited without that value being recomputed is silently DISCARDED — the
-caller is prompted to name a new realm, with no "tampered" message. The dword at
-`+0x33b` is a second such guard: it mirrors gold (`+0x66`), and the pair has to
-agree.
+BRE checks every record when it loads the file. A record with a field edited
+by hand is silently DISCARDED — the caller is prompted to name a new realm,
+with no "tampered" message.
 
 **So prefer in-game changes for staging a test** — buying regions over a few
-turns, or cloning a state BRE itself produced (see the snapshot workflow). A
-local, unpublished helper can reseal a record for a scenario that cannot be
+turns, or copying a whole game directory BRE itself produced. A local,
+unpublished helper can reseal a record for a scenario that cannot be
 reached in play; it is deliberately not described here, and nothing about it is
 needed to understand BRE or to build the clone.
 

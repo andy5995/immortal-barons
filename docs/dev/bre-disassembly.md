@@ -455,9 +455,9 @@ territory until it is placed.
 The offers a realm has not answered live in ONE list shared by trade deals and
 diplomatic proposals — the head pointer is a resident global, each node carries a
 record type (1 = trade deal, 2 = treaty proposal) and a pointer to its payload.
-A trade-deal payload is 151 bytes with a CRC over the first 0x93 of them stored
-at `+0x93`, which `process_trade_offer` recomputes before trusting the record and
-which is what its "data tampered with" line reports.
+A trade-deal payload is 151 bytes, which `process_trade_offer` checks before
+trusting the record; a failed check is what its "data tampered with" line
+reports.
 
 Fields read while settling this session's questions:
 

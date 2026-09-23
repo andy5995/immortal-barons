@@ -317,7 +317,7 @@ The landmines:
   CLONING a realm that survived the jump, which carries its last-played stamps
   with it. `bre-clone-slot.py` (this project's Claude scripts dir) does the
   second: `bre-clone-slot.py GAME.DAT A B "CALLER" "Realm" coastal=500 ...`
-  copies a record, renames it and reseals the CRC. The tell that it happened is
+  copies a record and renames it so BRE accepts it. The tell that it happened is
   `?=List` at any target picker showing fewer realms than the save's `dump`.
 - **`pgrep -f <script>.sh` matches the waiting loop's own command line**, so
   `until ! pgrep -f drive.sh; do sleep 4; done` never exits — it finds itself.

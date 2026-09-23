@@ -404,11 +404,13 @@ caller list of the news writer before concluding a mechanic is silent.
 
 ## Staging a scenario in game.dat
 
-A test no longer needs days of in-game build-up. Each empire record carries an
-integrity dword BRE checks at load, so a raw field edit is discarded (see
-`docs/dev/bre-save-format.md`); a local helper outside this repo,
-`scripts/bre-stage.py` in this project's Claude dir, resets a record and reseals
-it — `dump` / `verify` / `set GAME.DAT SLOT FIELD=VALUE...`.
+A test no longer needs days of in-game build-up. BRE checks each empire record
+at load, so a raw field edit is discarded (see `docs/dev/bre-save-format.md`); a
+local helper outside this repo, `scripts/bre-stage.py` in this project's Claude
+dir, resets a record so BRE accepts it — `dump` / `verify` /
+`set GAME.DAT SLOT FIELD=VALUE...`. **How it does that stays out of this repo**:
+it is in that script and in `scripts/BRE-STAGING.md` beside it, never in a
+tracked file.
 
 Two traps, each of which cost a run on 2026-08-30: **clone a realm that has
 survived maintenance** instead of authoring one from scratch — the daily idle
@@ -418,18 +420,11 @@ the roster just shrinks; and **the slot letter is `(fileoffset − 2489) / 1069`
 BRE thinks exists. Proof of the method: `cap/small-vs-large-20260830.cap`, six
 staged battles the binary accepted and fought.
 
-**The HEADER is sealed too, and `bre-stage.py` does not reseal it.** Everything
-before slot A — the 2489 bytes holding the game's own settings — carries its own
-CRC-32 at **offset 2485**, over bytes 0..2489 with those four zeroed, the same
-algorithm as a record's. Patch a setting and BRE refuses the whole game with
-*"Status File has been tampered with!"* until it is resealed:
-
-```python
-struct.pack_into('<I', d, 2485, 0)
-struct.pack_into('<I', d, 2485, zlib.crc32(bytes(d[:2489])) ^ 0xFFFFFFFF)
-```
-
-That is what makes a **config knob** testable, not just a realm's fields. Mapped
+**The HEADER is checked too, and `bre-stage.py` does not handle it.** Patch a
+setting in the 2489 bytes before slot A and BRE refuses the whole game with
+*"Status File has been tampered with!"*; how to make it accept one is in
+`scripts/BRE-STAGING.md` (private). That is what makes a **config knob**
+testable, not just a realm's fields. Mapped
 so far, all confirmed against the Game Setup screen: **+0x00/+0x02/+0x04** the
 game-start date (year, month, day), **+0x36** Turns per day, **+0x38** Turns of
 Protection, **+0x185** Region Cost Change. Changing one and re-reading the
