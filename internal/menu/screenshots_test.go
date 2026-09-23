@@ -186,6 +186,7 @@ func TestScreenshots(t *testing.T) {
 		play               func(s session.Session)
 	}{
 		{"splash", "", "a BBS door game of conquest and empire", func(s session.Session) { Splash(s) }},
+		{"entry", "", "[Entry]", opening},
 		// Play, dismiss the income and upkeep reports, leave the bank.
 		{"spending", "\r  \r", "[Spending]", opening},
 		// The System menu opens from inside a turn, off Spending.

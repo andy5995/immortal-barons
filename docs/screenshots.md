@@ -8,6 +8,12 @@ IBM VGA font.
 
 ![The title screen: the words Immortal Barons in gold block letters over a star field, with an orange planet and a red spaceship on the left and a blue planet on the right.](screenshots/splash.png)
 
+## Entry menu
+
+The first menu you see when you enter the game.
+
+![The Entry menu: two columns of options, including Play, status, scores, news, messages, instructions and preferences.](screenshots/entry.png)
+
 ## Spending menu
 
 Where you buy military units and regions during a turn.
