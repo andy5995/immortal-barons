@@ -88,13 +88,13 @@ ANSI support, so first check that the caller has graphics turned on in their BBS
 profile. To see the plain version yourself, run with `-no-ansi`. Lists that
 normally use a moving highlight are numbered in that mode, so they stay usable.
 
-## AI barons (computer opponents) were removed in v0.1.3
+## AI barons (computer opponents) were removed in v0.2.0
 
 A baron could not answer a treaty offer or read a message, so the strategy
 players know from the original did not work against one.
 
 A board upgrading from any earlier version loses its barons the first time
-v0.1.3 loads the game. The news names each one, and any treaty it held ends
+v0.2.0 loads the game. The news names each one, and any treaty it held ends
 with it. Player realms are untouched.
 
 ## A player changed their name on my BBS. How do I move their realm?

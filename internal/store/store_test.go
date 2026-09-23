@@ -24,7 +24,7 @@ func TestLoadMissingReturnsErrNoWorld(t *testing.T) {
 	}
 }
 
-// Computer barons were retired in v0.1.3: nothing a sysop can set brings one
+// Computer barons were retired in v0.2.0: nothing a sysop can set brings one
 // back, so a fresh game opens on an empty planet.
 func TestNewGameSeedsNoAI(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
@@ -38,7 +38,7 @@ func TestNewGameSeedsNoAI(t *testing.T) {
 // point of queuing an operation for daily maintenance is that the sender hangs
 // up in between, so a queue held only in memory would lose the fee, the agent
 // and the operation together.
-// Loading a world saved before v0.1.3 sweeps its computer barons, and the sweep
+// Loading a world saved before v0.2.0 sweeps its computer barons, and the sweep
 // is recorded so a baron seeded afterwards (IB_ADD_AI) is not swept in turn.
 // Delete with internal/game/retire_ai.go.
 func TestLoadRetiresAIBaronsOnce(t *testing.T) {

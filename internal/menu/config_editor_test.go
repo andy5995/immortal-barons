@@ -71,7 +71,7 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// past the last of the original's own fields. 48 was a league name, removed
 	// once nothing displayed it; its number is retired rather than reused, so an
 	// old note naming 48 cannot land on a different setting. 21 was the AI-baron
-	// count, retired with the barons themselves in v0.1.3, and its number is held
+	// count, retired with the barons themselves in v0.2.0, and its number is held
 	// back the same way. 49 (local attacks per day) is IB's own.
 	const fields = 46
 	for n := 1; n <= 49; n++ {

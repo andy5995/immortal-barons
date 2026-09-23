@@ -11,7 +11,7 @@ import (
 
 // testseed.go — IB_ADD_AI, the development hook that seeds computer barons.
 //
-// Barons were retired as a playable feature in v0.1.3 (see
+// Barons were retired as a playable feature in v0.2.0 (see
 // internal/game/retire_ai.go), so nothing a sysop can reach makes one: there is
 // no flag, no config field and no line in the manual. What they are still good
 // for is testing — a populated planet is what a screen with rivals on it, a

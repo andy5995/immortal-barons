@@ -123,7 +123,7 @@ or override game state.
     This is a balance-checking tool for development, not something a board
     needs to run. It watches computer barons play against each other, to see
     whether they expand sensibly, whether wars happen, and whether the game
-    collapses to one realm too quickly. Computer barons were retired in v0.1.3
+    collapses to one realm too quickly. Computer barons were retired in v0.2.0
     and nothing a sysop can set creates them, so on a board's own game this has
     nothing to watch.
 

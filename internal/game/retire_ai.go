@@ -2,13 +2,13 @@ package game
 
 import "fmt"
 
-// retire_ai.go — TEMPORARY MIGRATION, added in v0.1.3. Delete this whole file,
+// retire_ai.go — TEMPORARY MIGRATION, added in v0.2.0. Delete this whole file,
 // the World.AIRetired field it sets, and the repair() call that drives it once
 // a few releases have passed — v0.1.6 or later, and the line may go v0.1.5 to
 // v0.2.0, so read it as "three or four releases on" rather than as one number.
 // By then every board that had barons has loaded once and been swept.
 //
-// AI barons were removed as a playable feature in v0.1.3: a computer realm
+// AI barons were removed as a playable feature in v0.2.0: a computer realm
 // cannot be negotiated with, so the diplomacy a BRE veteran plays — sounding a
 // rival out, buying a pact, timing an attack with a partner — has nothing to
 // bite on, and no accept-table deep enough to fix that. The sysop settings that

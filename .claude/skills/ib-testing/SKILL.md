@@ -38,7 +38,7 @@ reach this?" — if yes, script the menu.
 **Two facts the engine harness needs, both of which cost an hour when missed:**
 
 - **`NewWorldSeed(DefaultConfig(), seed)` builds a world with NO empires.**
-  Nothing seeds one: computer barons were retired in v0.1.3 and the `AICount`
+  Nothing seeds one: computer barons were retired in v0.2.0 and the `AICount`
   setting went with them. Call `w.AddAIEmpires(n)` or `w.AddHuman(...)` after
   the world exists.
 - **`PlayTurn` does not collect income.** `CollectIncome`, `Manufacture` and
@@ -130,7 +130,7 @@ into the equivalent offset.
 
 ## Seeding computer barons: `IB_ADD_AI`
 
-Barons were retired as a game feature in v0.1.3 — a computer realm cannot answer
+Barons were retired as a game feature in v0.2.0 — a computer realm cannot answer
 a treaty offer or a message, so the diplomacy the game is built on had nothing to
 work against. The code that plays them is kept, because a populated planet is
 what a screen with rivals on it, a multi-day economy run and the score table have
@@ -148,7 +148,7 @@ rather than rounding the value.
 taking a turn every daily maintenance until the game is reset. That is the
 difference from `IB_CLOCK_OFFSET`, which colors one run and is gone.
 
-**Loading a world saved before v0.1.3 removes its barons** and records that it
+**Loading a world saved before v0.2.0 removes its barons** and records that it
 has done so, which is why a baron seeded here survives the next load
 (`internal/game/retire_ai.go`, deleted a few releases on). A rig carried over
 from an older build loses the barons it had; seed them again here.

@@ -3684,7 +3684,7 @@ so nothing here is a second rendering of an existing screen, and each reads the
 world rather than the caller's empire, which is what lets them run before one
 exists.
 
-## Computer barons: retired in v0.1.3
+## Computer barons: retired in v0.2.0
 
 A baron is an empire with an empty `Owner`, played by `aiPlay` at daily
 maintenance. Up to v0.1.2 a sysop seeded them with the `AICount` config field or
@@ -3705,7 +3705,7 @@ What remains, and where:
   in `.claude/skills/ib-testing/`, not in the sysop manual. A populated planet
   is what a screen with rivals on it, a multi-day economy run and the score
   table are checked against.
-- **A world saved before v0.1.3 loses its barons on its next load**, through
+- **A world saved before v0.2.0 loses its barons on its next load**, through
   `dropEmpires`, so their treaties and market escrow go with them. The planet's
   news names each one. The sweep runs once and records itself, so a baron
   seeded afterwards survives (`internal/game/retire_ai.go` — temporary, deleted
@@ -3750,7 +3750,7 @@ IB matches all of it.
   nobody, in silence.
 - **Callers and computer barons share the 25.** They live in one roster and one
   set of pickers, so barons take slots that callers then cannot have. This is
-  history for a shipped game since v0.1.3 (see Computer barons, above), and
+  history for a shipped game since v0.2.0 (see Computer barons, above), and
   still the rule on a test world that has seeded some.
 - **Max Players Per BBS is a cap on CALLERS within that.** A sysop may seat fewer
   than the planet allows; 0 means "as many as the slots left", not "unlimited" —

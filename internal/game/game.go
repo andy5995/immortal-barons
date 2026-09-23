@@ -167,7 +167,7 @@ type World struct {
 
 	// AIRetired records that RetireAIBarons has swept this world. Written even
 	// when false, because absent has to mean "saved before the sweep existed"
-	// rather than inheriting a fresh world's true. TEMPORARY, added in v0.1.3 —
+	// rather than inheriting a fresh world's true. TEMPORARY, added in v0.2.0 —
 	// it goes when internal/game/retire_ai.go does.
 	AIRetired bool
 
@@ -501,7 +501,7 @@ func (w *World) initFreshGame() {
 	w.EnterExitsBuy, w.DepositEndTurn = d.EnterExitsBuy, d.DepositEndTurn
 	w.AutoPayMaint, w.AutoFeed = d.AutoPayMaint, d.AutoFeed
 	// A fresh game has no barons to sweep, and saying so here keeps the
-	// retirement migration off every new world. TEMPORARY (v0.1.3) — goes with
+	// retirement migration off every new world. TEMPORARY (v0.2.0) — goes with
 	// internal/game/retire_ai.go.
 	w.AIRetired = true
 	w.Pirates = nil

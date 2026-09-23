@@ -383,7 +383,7 @@ func TestLeagueBoardGetsNoAIBarons(t *testing.T) {
 
 	// The same config off a league takes them, so the guard is the league flag
 	// and not something else. (Nothing a sysop can reach seeds a baron since
-	// v0.1.3; IB_ADD_AI comes through here.)
+	// v0.2.0; IB_ADD_AI comes through here.)
 	cfg.IBBS = false
 	solo := NewWorldSeed(cfg, 1)
 	if added := solo.AddAIEmpires(5); added != 5 {
