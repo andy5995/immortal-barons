@@ -96,7 +96,7 @@ func runMaint(cfg game.Config, today string) error {
 	if cfg.IBBS {
 		// After the save and outside the world lock: a handoff that fails or
 		// waits must not cost the work above or hold up the callers.
-		run.NewFaults = append(run.NewFaults, handoffFault(transportOut(cfg, true, os.Stdout))...)
+		run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
 	}
 	// The same alarm as -planetary, and it has to be: the planetary step above
 	// has already marked these faults as reported, so a later -planetary would
@@ -141,7 +141,7 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 	if err != nil {
 		return err
 	}
-	run.NewFaults = append(run.NewFaults, handoffFault(transportOut(cfg, true, os.Stdout))...)
+	run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
 	// After the save, so a hook that hangs or a run that ends non-zero cannot
 	// cost the work the run just did — and so the faults reported here are not
 	// reported again by the next run.
@@ -448,8 +448,7 @@ func fullOutbound(cfg game.Config, verbose bool) error {
 	if !cfg.InterBBSEnabled() {
 		return nil
 	}
-	if err := transportOut(cfg, false, os.Stderr); err != nil {
-		faults := handoffFault(err)
+	if faults := handoff(cfg, false, os.Stderr); len(faults) > 0 {
 		fmt.Fprintf(os.Stderr, "immortal-barons -full: %s\n", faults[0])
 		runFaultHook(cfg, faults)
 	}

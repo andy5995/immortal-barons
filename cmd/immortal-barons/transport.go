@@ -97,7 +97,7 @@ func transportOut(cfg game.Config, wait bool, out io.Writer) error {
 	result, err := run(cfg.DataDir)
 	if errors.Is(err, store.ErrBusy) {
 		fmt.Fprintln(out, "FTN handoff skipped: another run holds the transport lock and is doing it.")
-		return nil
+		return errHandoffSkipped
 	}
 	printTransportWarnings(result)
 	for _, queued := range result.Queued {
@@ -117,12 +117,40 @@ func transportOut(cfg game.Config, wait bool, out io.Writer) error {
 	return err
 }
 
-// handoffFault turns a failed handoff into a fault line for reportFaults.
-func handoffFault(err error) []string {
-	if err == nil {
+// errHandoffSkipped is transportOut giving way to another run holding the
+// transport lock. That run's outcome is the one to record, so a skip neither
+// raises nor clears the alarm.
+var errHandoffSkipped = errors.New("handoff skipped")
+
+// handoff runs the handoff and returns the fault line for reportFaults when it
+// failed in a way the sysop has not been alarmed about. A failure that repeats
+// unchanged is still printed on every run, but alarms only once, as the
+// planetary step's faults do (#187); it alarms again when its text changes, or
+// once a run has succeeded in between.
+func handoff(cfg game.Config, wait bool, out io.Writer) []string {
+	err := transportOut(cfg, wait, out)
+	if errors.Is(err, errHandoffSkipped) {
 		return nil
 	}
-	return []string{"FTN handoff failed: " + err.Error()}
+	fault := ""
+	if err != nil {
+		fault = "FTN handoff failed: " + err.Error()
+	}
+	fresh, recErr := ftn.NoteHandoffFault(cfg.DataDir, fault)
+	if recErr != nil {
+		// Unrecorded, it cannot be told apart from a new one: alarm rather
+		// than risk staying silent about it.
+		transportWarn(fmt.Sprintf("could not record the handoff's outcome: %v", recErr))
+		fresh = fault != ""
+	}
+	if fault == "" {
+		return nil
+	}
+	if !fresh {
+		transportWarn(fault + " (unchanged since it was reported)")
+		return nil
+	}
+	return []string{fault}
 }
 
 func transportWarn(msg string) {

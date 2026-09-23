@@ -178,8 +178,8 @@ These options are for games that link several BBSes together (a "league"). See
   and hand them to the mailer. The two mailer steps run only when `bbs.cfg` sets
   up the [FTN transport](ftn-transport.md). It can run as often as you like,
   including from the mailer's post-session event. A run that meets a fault it
-  has not reported before, or whose handoff to the mailer fails, exits non-zero
-  and runs `bbs.cfg`'s `OnFault` command,
+  has not reported before, a failed handoff to the mailer included, exits
+  non-zero and runs `bbs.cfg`'s `OnFault` command,
   so whatever runs this on a timer raises the alarm — see "Being told when the
   league stops moving" in the inter-BBS guide.
 - **`-full`** — Run the full cycle, then exit: read inbound packets, play a

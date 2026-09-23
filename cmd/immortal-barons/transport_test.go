@@ -295,3 +295,74 @@ func TestPacketModesRefuseOldSettings(t *testing.T) {
 		}
 	}
 }
+
+// A handoff that keeps failing the same way raises the alarm once, as the
+// planetary step's faults do: a scheduler that fails every quarter hour for a
+// week is an alarm nobody reads. A different failure, or the same one after a
+// run that succeeded, is new and alarms again.
+func TestARepeatedHandoffFailureAlarmsOnce(t *testing.T) {
+	cfg := ftnBoard(t, "")
+	hookOut := filepath.Join(cfg.DataDir, "hook.out")
+	cfg.OnFault = `printf '%s' "$IB_FAULTS" > "` + hookOut + `"`
+	netmail := filepath.Join(cfg.DataDir, "netmail")
+	bbsPath := filepath.Join(cfg.DataDir, store.BoardConfigFile)
+	original, err := os.ReadFile(bbsPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// run makes one -planetary run and reports whether it raised the alarm:
+	// errFaults, and on Unix the hook having run.
+	run := func(step string) bool {
+		t.Helper()
+		os.Remove(hookOut)
+		err := runPlanetary(cfg, false)
+		if err != nil && !errors.Is(err, errFaults) {
+			t.Fatalf("%s: %v", step, err)
+		}
+		alarmed := errors.Is(err, errFaults)
+		if runtime.GOOS != "windows" {
+			_, statErr := os.Stat(hookOut)
+			if hooked := statErr == nil; hooked != alarmed {
+				t.Errorf("%s: exit said alarm=%v but the hook ran=%v", step, alarmed, hooked)
+			}
+		}
+		return alarmed
+	}
+
+	if err := os.Remove(netmail); err != nil {
+		t.Fatal(err)
+	}
+	if !run("first failure") {
+		t.Error("the first failed handoff raised no alarm")
+	}
+	if run("same failure again") {
+		t.Error("an unchanged failure alarmed a second time")
+	}
+
+	// A different failure is a new fault.
+	moved := strings.Replace(string(original), "NetmailDir netmail", "NetmailDir elsewhere", 1)
+	if err := os.WriteFile(bbsPath, []byte(moved), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if !run("changed failure") {
+		t.Error("a handoff failing a different way raised no alarm")
+	}
+
+	// Cleared, then back: alarms again.
+	if err := os.WriteFile(bbsPath, original, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(netmail, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if run("handoff working again") {
+		t.Error("a successful handoff raised the alarm")
+	}
+	if err := os.RemoveAll(netmail); err != nil {
+		t.Fatal(err)
+	}
+	if !run("the first failure, recurring") {
+		t.Error("a failure that cleared and came back raised no alarm")
+	}
+}

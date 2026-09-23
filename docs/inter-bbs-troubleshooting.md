@@ -316,8 +316,10 @@ you are still working out what is wrong.
   only place the difference shows.
 - `FTN unwrap skipped` or `FTN handoff skipped` under `-full` means another run
   held the transport lock and was doing that half; nothing is lost.
-- A handoff that fails ends the run non-zero and runs `OnFault`, after the
-  world was saved: the packets wait in `GameOutbound` for the next run.
+- A handoff that fails leaves the packets in `GameOutbound` for the next run;
+  the world was already saved. The first run to meet that failure ends non-zero
+  and runs `OnFault`. Later runs print it with `(unchanged since it was
+  reported)` and raise no alarm until it changes or clears and comes back.
 
 A transport error is printed with the setting that fixes it, so the message
 is worth reading in full rather than grepping for the first line — a refused

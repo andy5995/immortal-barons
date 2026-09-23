@@ -71,9 +71,12 @@ lock while it waits for that one.
 
 - **A failed unwrap** is reported as a warning. The run goes on and applies
   whatever is already in `GameInbound`.
-- **A failed handoff** happens after the save, so the run's work is kept. The
-  run ends non-zero and runs the `OnFault` command, which is what a scheduler's
-  alarm is for. The packets stay in `GameOutbound` for the next run.
+- **A failed handoff** happens after the save, so the run's work is kept, and
+  the packets stay in `GameOutbound` for the next run. The first run to meet a
+  failure ends non-zero and runs the `OnFault` command, which is what a
+  scheduler's alarm is for. The same failure on later runs is still printed but
+  does not raise the alarm again, as with the league faults; a different
+  failure does, and so does the same one after a run that succeeded.
 - **Under `-full`** a caller is waiting, so neither half waits for the
   transport lock: if another run holds it, that run is doing the same work, and
   this one says so on stderr and goes on. A failed handoff runs `OnFault` but
@@ -134,7 +137,7 @@ nowhere to print that unless the output is kept.
 defaults to `./data`.
 
 `set -e` stops the script when `-maint` exits non-zero, so the tosser and
-mailer do not run after a failed handoff or a new league fault. That is
+mailer do not run after a new handoff failure or a new league fault. That is
 usually right, but decide it on purpose. Recoverable transport problems are
 reported as warnings and do not change the exit status.
 
