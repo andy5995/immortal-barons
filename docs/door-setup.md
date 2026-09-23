@@ -130,8 +130,8 @@ Add an external program in `scfg` → External Programs → Online Programs, and
 set its **Start-up Directory** to the game's own directory.
 
 Synchronet changes to the **Start-up Directory** before it runs the door, and
-the game looks for `data` beside its own binary, so neither path needs to be
-spelled out:
+the game looks for `data` in the directory it starts in, so neither path needs
+to be spelled out:
 
 ```
 immortal-barons%. -dropfile %f
@@ -181,16 +181,17 @@ works. If you run the game as a Windows door, please still report how it goes.
 ### Character set
 
 The game sends CP437 by default — the character set traditional BBS terminals
-expect. A door does not auto-detect the character set (only `-local` does), so it
-uses that default unless you pass `-utf8` or `-cp437`. Set the option that fits
-your board (non-English languages need `-utf8`).
+expect. A door does not auto-detect the character set (only `-local` does). It
+uses that default unless you pass `-utf8` or `-cp437`, or a BBSDEV.DRP drop file
+names the caller's encoding. Set the option that fits your board. German and
+Dutch work in CP437; Russian and Portuguese need `-utf8`.
 
 If your board serves callers on different character sets, and your BBS software
 can tell a program the caller's character set (for example, by setting a shell
 variable when it invokes a door), you can wrap the door in a small script that
 passes `-utf8` or `-cp437` to match each caller.
 
-See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/)
+See the [Character Set guide](charset.md)
 for the options and how to test each one.
 
 ## Daily maintenance
@@ -199,17 +200,18 @@ Maintenance moves the game forward one day. It refreshes each player's turns,
 pays out investments and loans that have matured, settles the trading market,
 and rolls the news over to a new day.
 
-**You usually do not need to schedule this.** Maintenance runs on its own the
-first time a player logs in on a new day. Days with no play are skipped, and the
-game picks up where it left off.
+**On a board that plays alone, you usually do not need to schedule this.**
+Maintenance runs on its own the first time a player logs in on a new day, and
+catches up any days nobody played.
 
 ```
 immortal-barons -maint -data /path/to/data
 ```
 
 Run that from a nightly event if you want the game to keep moving on quiet days.
-It matters most on a league board, where the pirates and the inter-BBS packets
-should keep to a schedule even when no local player logs in.
+**On a league board it is not optional.** The `-maint` command also runs the
+inter-BBS step, and the maintenance a login starts does not, so a league board
+with callers and no nightly event exchanges no packets at all.
 
 ## Bulletins
 

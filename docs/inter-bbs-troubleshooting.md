@@ -66,12 +66,14 @@ A run that skipped anything names each reason:
 | left in place, too new to trust as complete | the file is under five minutes old and may still be mid-transfer | nothing; the next run picks it up |
 | held for a protocol this build does not read | the two boards are on different releases | see [Held packets](#held-packets) |
 | already seen | a duplicate or a replay of a packet already applied | nothing; this is the replay guard working |
-| for another league | its league number is not yours | nothing, if you share an inbound directory with another league. Otherwise check `LeagueNumber` in `bbs.cfg` on both boards |
+| for another league | its league number is not yours | nothing, if you share an inbound directory with another league. Otherwise, check `LeagueNumber` in `bbs.cfg` on both boards |
 | mesh copy | a copy addressed to somebody else, in a mesh setup | nothing |
 
 Three more lines appear when they apply. **Passed N packets on** is this board
-forwarding for a neighbor, which is routing working. **Released N held
-packets** means an upgrade here freed a backlog. **The League Coordinator's
+forwarding for a neighbor, which is routing working. **Returned N held
+packet(s) to the inbound queue** means held packets were checked again. It does
+not mean any of them applied; the run's held count says whether they were set
+aside again. **The League Coordinator's
 roster replaced this board's copy** means an order arrived and was accepted —
 the one line that tells a member board its Coordinator link is alive.
 
@@ -97,12 +99,12 @@ These are the faults it records:
   Anything addressed there is discarded here.
 - **A packet was refused.** The line says why. A packet that did not match the
   sending board's key, a board running an older release than the league
-  requires, or Coordinator orders that failed one of the six checks — those are
-  the three, and the wording names which one.
+  requires, or Coordinator orders that failed one of the seven checks — those
+  are the three, and the wording names which one.
 - **Another board refused ours**, quoting that board's own reason.
-- **Packets from a board are being held.** See below.
-- **A packet could not be read and was quarantined.** See "Quarantined
-  packets" below.
+- **Packets from a board are being held.** See [Held packets](#held-packets).
+- **A packet could not be read and was quarantined.** See [Quarantined
+  packets](#quarantined-packets).
 - **The order a contested batch applied in**, whenever more than one board's
   packets arrived in the same run. See [When two boards disagree about what
   happened](#when-two-boards-disagree-about-what-happened).
@@ -126,9 +128,8 @@ every league starts with no keys, and a league that never adds them still works.
 set a minimum version, and that board is below it. The fix is an upgrade on the
 sending board.
 
-**Coordinator orders failed their check.** Six situations refuse them, and three
-of the six are fixed on the sending board rather than yours. In the order they
-are tested:
+**Coordinator orders failed their check.** Seven situations refuse them. In the
+order they are tested, with where each one is fixed:
 
 | The reason | Where the fix is |
 |---|---|
@@ -158,14 +159,19 @@ on, and the difference matters:
 - **You are ahead.** You upgraded first, so packets from boards still on the
   old release state a format older than yours. Those are held too, and your
   build will never speak that older format again — so they stay held even after
-  the other boards upgrade. What they contained is not lost from disk, but it
-  will not reach your game on its own.
+  the other boards upgrade, and never reach your game on their own.
 
 The second case is the one to plan around, because the cost falls on whoever
 upgrades first, which is the opposite of what you would expect. When a release
 changes the packet format, the guide for that release says so. Agree a window
 with your Coordinator and upgrade close together, so nothing spends long in
 flight between two boards that disagree.
+
+A packet is also held when it was written under rules the league did not agree —
+see "Boards playing by different rules" under [For the League
+Coordinator](#for-the-league-coordinator). Whatever the reason, **a held packet
+is deleted after 30 days**. That is the timer the rest of this guide means by
+the held-packet timer.
 
 ## Quarantined packets
 
@@ -243,13 +249,13 @@ peer.
 The transport has not stalled and `-in` is running. It reads those files and
 passes over them on every run.
 
-Both `-status` and `-in` now say so. `-status` lists them under **Unclaimed in
+Both `-status` and `-in` say so. `-status` lists them under **Unclaimed in
 the mailer's inbound**, and `-in` prints a warning once a file has waited an
 hour. Anything younger is not reported: a bundle and its envelope can arrive in
 either order, and an exchange runs on a schedule, so a file passed over once is
 normal.
 
-There are two causes, and the report tells you which one you have.
+There are three causes, and the report tells you which one you have.
 
 **The file is in `InboundDir` itself.** Look at it:
 
@@ -390,7 +396,7 @@ without any access to theirs.
 
 - Run `-lastpacket` for when each board was last heard from at all.
 
-Those two answer different questions, and the pair is what localises the fault:
+Those two answer different questions, and the pair is what localizes the fault:
 
 | Heard from | Travel Times | Where the fault is |
 | --- | --- | --- |
@@ -400,7 +406,11 @@ Those two answer different questions, and the pair is what localises the fault:
 Two patterns settle it without waiting for a reply:
 
 - **Several boards going stale on the same day, and recovering together**, is
-  your own outbound. No probe can come home while nothing is going out.
+  your own board. Either your outbound is not moving, or no probe went out:
+  probes are sent once per game day, and the game day only moves when
+  maintenance runs. A board nobody plays, with no `-maint` in its nightly event,
+  stops probing while its transport works
+  ([issue #289](https://github.com/andy5995/immortal-barons/issues/289)).
 - **A board that reads `No Data` and never changes** is not being probed at all.
   Check it is on the roster and routable; an unroutable board is skipped every
   day rather than measured and found slow.
@@ -434,6 +444,10 @@ it the same way the other board's roster does.
 The mark on someone else's screen says your board stopped answering for a while.
 Work down the path a packet takes:
 
+- **Is the game day moving?** Probes go out once per game day, and the day
+  only advances when maintenance runs — on the first login of a new day, or from
+  a scheduled `-maint`. A `-planetary` run alone does not advance it
+  ([issue #289](https://github.com/andy5995/immortal-barons/issues/289)).
 - **Is the planetary run happening?** Check the timestamps in `planetary.log`.
   A run every day leaves a line every day; a gap in the log is a gap in the
   service, and the usual cause is a scheduler that stopped rather than the game.
@@ -447,15 +461,16 @@ Work down the path a packet takes:
 A run that happens but finds nothing to do still answers probes, so a board that
 is quiet on someone's screen while its own log looks healthy points at the
 transport on either side of the game rather than at the game.
+
 ## For the League Coordinator
 
 Everything above applies to the Coordinator's own board too. These are the
 problems that are only yours.
 
 **Your orders are being refused.** The refusing board's log says which of the
-six checks failed, so the first move is to ask for that line rather than to
-guess — three of the six are fixed at your end and three at theirs, and the
-wording tells you which. The common one in a young league is a board that never
+seven checks failed, so the first move is to ask for that line rather than to
+guess; the table under [Refused packets](#refused-packets) says whose fix each
+one is. The common one in a young league is a board that never
 ran `-coord-key`.
 
 **Check the routing before you wonder why nothing arrives.** `-league-routes`

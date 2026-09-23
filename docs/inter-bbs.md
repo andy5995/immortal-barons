@@ -27,8 +27,9 @@ immortal-barons -ibbs-reset -data /path/to/data
 ```
 
 It works like `-reset` — the settings editor, then a fresh world — but the
-editor also asks the league settings, which a stand-alone board is never shown.
-Set these on the **Caps & Node** page:
+editor also shows the league settings, which a stand-alone board is never shown.
+They appear on the **Caps & Node** page, but you set them in `bbs.cfg`,
+described below; the editor only shows them:
 
 - **Board ID** — a short unique name for your board (your "planet").
 - **League Number** — the number your Coordinator picked for this league, 1 to
@@ -116,7 +117,7 @@ choice, not theirs. They add it to the roster and give it a node number.
 of it can come over the league's own link, because that link does not exist yet:
 the mailer details are what build it, and the key is what proves a packet came
 from the Coordinator, so a key that arrived in a packet would prove nothing. It
-is a public key, so there is no harm in it travelling in the clear; it lets your
+is a public key, so there is no harm in it traveling in the clear; it lets your
 board *check* the Coordinator's orders, not issue them.
 
 After that first hand-off the roster keeps itself current: the Coordinator
@@ -153,7 +154,8 @@ The key is a one-time exchange, unless the league changes Coordinator.
 
     The command does not write `bbs.cfg` — it ends by printing the file for you
     to save, filled in from the flags you gave. Add your Coordinator's league
-    number to it if you have one; the command has no flag for it:
+    number to it; the command has no flag for it, and the transport will not run
+    without one:
 
     ```
     LeagueNumber 900
@@ -220,7 +222,7 @@ OnFault       mail -s "IB fault" sysop@example.net <<< "$IB_FAULTS"
 ```
 
 Lines starting with `#` or `;` are comments, and `-ibbs-reset` prints a commented
-copy for you to save. Keywords are matched whatever their capitalisation.
+copy for you to save. Keywords are matched whatever their capitalization.
 
 `Lottery` and `PirateNews` are the odd ones out: they are rules rather than
 addresses, and they are here because the original keeps the same questions in
@@ -271,18 +273,20 @@ room — `bbs.cfg` takes one command:
 OnFault  ntfy publish mybbs "$IB_FAULTS"
 ```
 
-It runs after such a run, once, with the faults in `$IB_FAULTS`, the board's name
-in `$IB_BOARD`, and its data directory in `$IB_DATA`; on a Unix board they are
-also the command's first argument. It is your shell's line, so a pipeline works,
-and anything at all can be on the other end of it — `mail`, `curl` to a webhook,
-`notify-send`, `wall`. It is given 30 seconds and then abandoned, and if it fails
-the run says so and carries on: the hook is the alarm, not the work.
+It runs after such a run, once, with the faults in `$IB_FAULTS`, the board's
+name in `$IB_BOARD`, and its data directory in `$IB_DATA`; on a Unix board the
+faults are also the command's first argument. It is your shell's line, so a
+pipeline works, and anything at all can be on the other end of it — `mail`,
+`curl` to a webhook, `notify-send`, `wall`. It is given 30 seconds and then
+abandoned, and if it fails the run says so and carries on: the hook is the
+alarm, not the work.
 
 These settings sit apart from `config.json` because `config.json` holds the
 league's rules, and those are overwritten when the Coordinator's settings packet
 arrives. The game reads `bbs.cfg` and never writes it, so nothing — not the
 Coordinator, not a reset — changes what you put there. The settings editor shows
-the four above but will not change them, and says so.
+Board ID, League Number and the two directories but will not change them, and
+says so.
 
 A board that forwards packets for its neighbors adds a line per neighbor —
 see "Routing" below.
@@ -343,7 +347,7 @@ already running, one board at a time.
 ```
 2
 Pier 7
-106/477
+1:106/477
 Houston
 TX
 USA
@@ -527,8 +531,8 @@ one neighbor, and the Coordinator is the last to find out, because its own
 view stays complete.
 
 Run it as often as you like. More often means shorter travel times between
-planets. The in-game "Travel Times" screen shows players how recently packets
-have arrived, so they know how fast operations move.
+planets. The in-game "Travel Times" screen shows players the average round trip
+to each planet, so they know how fast operations move.
 
 ### If you are coming from Barren Realms Elite
 
@@ -752,21 +756,21 @@ non-`.brp` temporary name, then atomically renames it to its final `.brp` name.
 The helper therefore needs no game lock and never scans a partial packet.
 Concurrent helpers serialize through their own `barons-ftn.lock`, which the
 game never takes; only the helper that moves a source into the attachment
-directory creates its `.msg` or broadcast set. A malformed packet remains in the outbound directory;
-a message-creation failure is moved back there for a later run. This uses
+directory creates its `.msg` or broadcast set. A malformed packet remains in the
+outbound directory; a message-creation failure is moved back there for a later
+run. This uses
 ordinary rename, exclusive file creation, and real copies—hard-link support is
 not required.
 
 ## League-wide rules (Coordinator only)
 
-The League Coordinator sets the rules that must match across the whole league.
-These are all the fields marked with a star in the Configuration Editor: turns
-per day, protection turns, game length, land market and daily land, interest
-and investment rates, tax and region and player limits, buy-military mode, the
-cost, damage, and reward levels, and the league policies — whether barons on one
-board may attack each other, whether such a battle scores, and whether a caller
-found playing on two boards is locked out. Set them in the Coordinator's own
-`config.json`, then broadcast them to every board:
+The League Coordinator sets the rules that must match across the whole league:
+turns per day, protection turns, game length, land market and daily land,
+interest and investment rates, tax and region and player limits, buy-military
+mode, the cost, damage, and reward levels, and the league policies — whether
+barons on one board may attack each other, whether such a battle scores, and
+whether a caller found playing on two boards is locked out. Set them in the
+Coordinator's own `config.json`, then broadcast them to every board:
 
 ```
 immortal-barons -league-config -data /path/to/data
@@ -840,7 +844,7 @@ The two boards in the example:
 | | first board | second board |
 |---|---|---|
 | Install | `~/a-mystic` | `~/b-mystic` |
-| Board ID (planet) | `AlphaBBS` | `BravoBBS` |
+| Board ID (planet) | `Alpha BBS` | `Bravo BBS` |
 | Node number | 1 (League Coordinator) | 2 |
 | Network address | `99:1/1` | `99:1/2` |
 | binkp port | 24554 | 24555 |
@@ -954,7 +958,7 @@ the port and the password all agree.
 Read the log rather than the last line: "Polled 1 systems" is printed whether
 the session worked or not. A wrong port reports **"Authorization failed"**,
 which sounds like a password problem but is not — nothing answered, so there was
-nothing to authorize. The line above it names the port it dialled, and that is
+nothing to authorize. The line above it names the port it dialed, and that is
 the one to check against the other board's binkp server.
 
 ### Step 6 — create the two games
@@ -966,13 +970,19 @@ settings editor:
 immortal-barons -ibbs-reset -data /path/to/coordinator/data
 ```
 
-On the **Caps & Node** page, set the Board ID to the board's name, and the two
-packet directories:
+The editor shows the Board ID and the two packet directories but does not set
+them, so save a `bbs.cfg` in the Coordinator's data directory first. Give full
+paths: `~` is not expanded in this file.
 
-| | value |
-|---|---|
-| Inbound Dir | your BBS's FTN inbound, e.g. `~/a-mystic/echomail/in` |
-| Outbound Dir | the filebox for the other board, from step 3 |
+```
+BoardID       Alpha BBS
+LeagueNumber  900
+Inbound       /home/you/a-mystic/echomail/in
+Outbound      /home/you/a-mystic/filebox/iblocal_z99n1n2
+```
+
+`Inbound` is your BBS's FTN inbound; `Outbound` is the filebox for the other
+board, from step 3.
 
 The member board takes no editor at all — its rules arrive from the Coordinator:
 
@@ -983,7 +993,9 @@ immortal-barons -ibbs-reset -board-id "Bravo BBS" \
   -data /path/to/member/data
 ```
 
-Quote a board name that has spaces in it.
+Quote a board name that has spaces in it. The command prints a `bbs.cfg` rather
+than writing one: save it in the member's data directory and add the same
+`LeagueNumber 900`.
 
 ### Step 7 — the roster and the key
 
@@ -1039,9 +1051,8 @@ board's inbound, then disappears as the game reads it. The member board's news
 should then say **"The League Coordinator updated the league settings."** If
 instead the member board's `planetary.log` says a packet "claimed to carry
 League Coordinator orders and was refused", the rest of that line names the
-check that failed — six different situations refuse a packet, and three of them
-are on the sending board rather than this one ([Inter-BBS
-Troubleshooting](inter-bbs-troubleshooting.md#refused-packets) has all six and
+check that failed — seven different situations refuse a packet ([Inter-BBS
+Troubleshooting](inter-bbs-troubleshooting.md#refused-packets) has all seven and
 which side fixes each). Run `-league-check` on both boards before changing
 anything.
 
@@ -1068,15 +1079,15 @@ written its outbox sends the packets from the run before.
 
 Run it from your BBS's own event scheduler if it has one. If it has none, use
 whatever schedules jobs on your system: `cron` or a systemd timer on Unix, Task
-Scheduler on Windows. How often is up to you. Every exchange is a round trip, and the Travel Times screen in the game
-reports how long your players actually wait. A league whose boards poll each hour
+Scheduler on Windows. How often is up to you. Every exchange is a round trip,
+and the Travel Times screen in the game reports how long your players actually
+wait. A league whose boards poll each hour
 plays very differently from one that polls at 3am.
 
-**You may already have some of this.** Daily maintenance runs the inter-BBS
-step itself when inter-BBS play is on. Maintenance also runs on its own at the
-first login of a new day, so a board with callers already reads and writes
-packets once a day with nothing scheduled. What the timer adds is doing it more
-often than daily, and the poll — which the game cannot do for you at all.
+**The timer is not optional.** The `-maint` command runs the inter-BBS step as
+well, but the maintenance a caller's login starts does not, so a board with
+callers and nothing scheduled exchanges no packets at all. The poll is yours
+either way: the game cannot do it for you.
 
 ## Example: Synchronet
 
