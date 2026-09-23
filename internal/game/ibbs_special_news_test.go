@@ -428,3 +428,66 @@ func TestFiringPlanetReadsAnOldBombingFailure(t *testing.T) {
 		t.Errorf("legacy failure: firer read %v", got)
 	}
 }
+
+// Every outcome a Special Operation can end in has its own line on BOTH planets:
+// the target's (missileNews, planetOpNews) and the firer's once the answer comes
+// home (missileReturnNews, bombingReturnNews). The two sides are separate
+// switches in separate files, so an outcome handled on one side only would fall
+// through to the other's catch-all line and the planets would disagree. The
+// seeded tests above reach only the outcomes their seeds happen to produce; this
+// one walks every value.
+func TestEveryOutcomeHasANewsLineOnBothPlanets(t *testing.T) {
+	missile := map[specialOutcome]bool{specialHit: true, specialNothing: true,
+		specialMisfire: true, specialIntercepted: true, specialBackfire: true}
+	planet := map[specialOutcome]bool{specialHit: true, specialNothing: true, specialDrivenOff: true}
+	for o := specialOutcome(0); o < specialOutcomeCount; o++ {
+		if !missile[o] && !planet[o] {
+			t.Errorf("outcome %d is in neither family; say which ops can end in it", o)
+		}
+	}
+
+	legacy := AttackResult{Outcome: OutcomeRepelled}
+	for _, op := range []SpecialOp{OpNuclear, OpChemical, OpSabre} {
+		label := SpecialOpLabel(op)
+		there, here := map[string]specialOutcome{}, map[string]specialOutcome{}
+		fallback := missileReturnNews("F", label, "T", legacy)
+		for o := range missile {
+			res := AttackResult{Outcome: missileOutcome(o), Backfired: o == specialBackfire}
+			a, b := missileNews(label, "F", "T", o), missileReturnNews("F", label, "T", res)
+			if a == "" || b == "" {
+				t.Errorf("%s outcome %d: target %q, firer %q", op, o, a, b)
+			}
+			if b == fallback {
+				t.Errorf("%s outcome %d: the firer reads the legacy failure line %q", op, o, b)
+			}
+			if prev, dup := there[a]; dup {
+				t.Errorf("%s outcomes %d and %d share the target's line %q", op, prev, o, a)
+			}
+			if prev, dup := here[b]; dup {
+				t.Errorf("%s outcomes %d and %d share the firer's line %q", op, prev, o, b)
+			}
+			there[a], here[b] = o, o
+		}
+	}
+	for _, op := range []SpecialOp{OpBombFood, OpBombMarket, OpBombRoutes, OpUndermine} {
+		there, here := map[string]specialOutcome{}, map[string]specialOutcome{}
+		fallback := bombingReturnNews("F", op, "B", legacy)
+		for o := range planet {
+			a := planetOpNews(op, "F", o)
+			b := bombingReturnNews("F", op, "B", AttackResult{Outcome: planetOpOutcome(o)})
+			if a == "" || b == "" {
+				t.Errorf("%s outcome %d: target %q, firer %q", op, o, a, b)
+			}
+			if b == fallback {
+				t.Errorf("%s outcome %d: the firer reads the legacy failure line %q", op, o, b)
+			}
+			if prev, dup := there[a]; dup {
+				t.Errorf("%s outcomes %d and %d share the target's line %q", op, prev, o, a)
+			}
+			if prev, dup := here[b]; dup {
+				t.Errorf("%s outcomes %d and %d share the firer's line %q", op, prev, o, b)
+			}
+			there[a], here[b] = o, o
+		}
+	}
+}

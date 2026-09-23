@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
@@ -75,110 +74,6 @@ func (w *World) postNews(line string) {
 	if len(w.NewsToday) > 20 {
 		w.NewsToday = w.NewsToday[len(w.NewsToday)-20:]
 	}
-}
-
-// noteSysop records a transport fault for whoever runs the game. See
-// World.SysopNotices for why these do not go to the planet's news.
-func (w *World) noteSysop(format string, a ...any) {
-	line := fmt.Sprintf(format, a...)
-	// One fault, one line. A run can meet the same fault on several packets —
-	// a board whose traffic is held sends a batch, and every file in it bounces
-	// the same notice back — and repeating it once per file buries whatever else
-	// the run has to say. Seen on the test rig: three identical held-ruleset
-	// notices in one run.
-	for _, have := range w.SysopNotices {
-		if have == line {
-			return
-		}
-	}
-	w.SysopNotices = append(w.SysopNotices, line)
-}
-
-// BeginRun clears the once-per-run bookkeeping the hold notices keep. On a door
-// the world is loaded fresh for every planetary run, so this was implicit and
-// invisible — until two runs shared one World in a test and the second reported
-// nothing, which is also what a caller doing two runs in one process would get.
-// Per-run state that depends on being reloaded is per-process state.
-func (w *World) BeginRun() { w.heldNoted = nil }
-
-// NoteRulesetHold records that a board's packets are being set aside because
-// the rules it says it is playing by are not the league's (#264). Once per
-// board per run, for the reason NoteProtocolHold gives.
-//
-// The notice says which side has to move, because the two cases recover
-// differently. A board sending packets that state rules the league never agreed
-// has THOSE files expire at HeldMaxAge; what unblocks its traffic is that board
-// taking the Coordinator's ruleset, which goes out on every planetary run. The
-// reverse case — this board being the one behind after a ruleset change, so
-// boards that adopted first look divergent — clears itself, because held packets
-// are re-checked on every run.
-// Returns whether this is the first hold from that board this run, which is
-// what decides whether a bounce goes back to it (see World.BounceRuleset).
-func (w *World) NoteRulesetHold(board string) bool {
-	// Keyed by REASON as well as board: heldNoted is shared with
-	// NoteProtocolHold, and a bare board key would have whichever hold fired
-	// first silence the other for the rest of the run.
-	key := "ruleset:" + board
-	if w.heldNoted == nil {
-		w.heldNoted = map[string]bool{}
-	}
-	if w.heldNoted[key] {
-		return false
-	}
-	w.heldNoted[key] = true
-	w.noteSysop("Packets from %s are being held: the rules it is playing by are not the league's. Its traffic flows again once it takes the Coordinator's ruleset, which goes out on every planetary run; the packets already held expire on the ordinary held-packet timer.", board)
-	return true
-}
-
-// NoteProtocolHold records that a board's packets are being set aside because
-// this build cannot read their format, once per board per run rather than once
-// per packet — a mismatch affects every packet that board sends, and repeating
-// it per file buries the one line that matters.
-func (w *World) NoteProtocolHold(board string, protocol int) {
-	// Stamped on every hold, before the notice is deduplicated: this is what
-	// ProtocolHeldBoards measures a hold's currency by.
-	if w.ProtocolHeldAt == nil {
-		w.ProtocolHeldAt = map[string]string{}
-	}
-	w.ProtocolHeldAt[board] = Recorded(time.Now()) // the clock LastPacketFrom is on
-	key := "protocol:" + board                     // see NoteRulesetHold: one keyspace, several reasons
-	if w.heldNoted == nil {
-		w.heldNoted = map[string]bool{}
-	}
-	if w.heldNoted[key] {
-		return
-	}
-	w.heldNoted[key] = true
-	// Which way the mismatch runs decides whether waiting fixes it, and the
-	// sysop's next move differs completely: upgrading this board releases a
-	// newer board's packets, while an older board's are held by a format this
-	// build has already moved past and no upgrade of theirs brings back. Saying
-	// "when both boards run the same release" for both was true only of the
-	// first (#228 review).
-	if protocol > Protocol {
-		w.noteSysop("Packets from %s are being held: they speak protocol %d and this board speaks %d. Upgrading this board applies them.",
-			board, protocol, Protocol)
-		return
-	}
-	w.noteSysop("Packets from %s are being held: they speak protocol %d, which this board (protocol %d) has moved past. They will NOT be applied on their own, even once that board upgrades — ask them to resend anything that mattered.",
-		board, protocol, Protocol)
-}
-
-// ProtocolHoldCurrent reports whether a board with packets in the held
-// directory is still stalled: its latest packet was held rather than applied.
-// A held file outlives the fault that held it — one from a board that has since
-// moved past our protocol, or come level with it, waits out HeldMaxAge beside
-// that board's newer traffic, which applies normally — so the file alone does
-// not say the link is stalled. The same-second case counts as held, since a run
-// that holds one packet and applies another cannot order them by the stamp.
-// A hold with no stamp (held by a build that did not record one) counts too.
-func (w *World) ProtocolHoldCurrent(board string) bool {
-	heldAt, ok := ParseStamp(w.ProtocolHeldAt[board])
-	if !ok {
-		return true
-	}
-	applied, ok := ParseStamp(w.LastPacketFrom[board])
-	return !ok || !heldAt.Before(applied)
 }
 
 // postCombatNews broadcasts the outcome of a regular attack to the planet.

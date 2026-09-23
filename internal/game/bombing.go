@@ -16,7 +16,7 @@ package game
 // bombFoodMarketEffect burns a 20-99% share of the planet's food-market supply,
 // rolled once, and reports the units lost (see BombFoodMarketLossPctMin).
 func (w *World) bombFoodMarketEffect() int {
-	lost := foodMarketLoss(w.FoodMarketSupply, BombFoodMarketLossPctMin+w.rng.Intn(BombFoodMarketLossPctSpread))
+	lost := foodMarketLoss(w.FoodMarketSupply, w.bombFoodMarketLossPct())
 	w.FoodMarketSupply -= lost
 	return lost
 }
@@ -30,6 +30,11 @@ func marketKept(qty, pct int) int { return int(int64(qty) * int64(100-pct) / 100
 // undermineKept is Round(x x (100 - pct) / 100), halves away from zero, what an
 // undermined investment keeps.
 func undermineKept(x int64, pct int) int64 { return (2*x*int64(100-pct) + 100) / 200 }
+
+// bombFoodMarketLossPct is the one 20-99% share a Bomb Food Market run burns.
+func (w *World) bombFoodMarketLossPct() int {
+	return BombFoodMarketLossPctMin + w.rng.Intn(BombFoodMarketLossPctSpread)
+}
 
 // bombMarketLossPct is the one 5-9% share a Bomb Trading Market run takes off
 // every listing it reaches.

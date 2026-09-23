@@ -212,7 +212,7 @@ func TestBombingDamageMatchesTheOriginal(t *testing.T) {
 		draw     func() int
 		min, max int
 	}{
-		{"food", func() int { return BombFoodMarketLossPctMin + w.rng.Intn(BombFoodMarketLossPctSpread) }, 20, 99},
+		{"food", w.bombFoodMarketLossPct, 20, 99},
 		{"market", w.bombMarketLossPct, 5, 9},
 		{"undermine", w.undermineLossPct, 2, 5},
 	} {

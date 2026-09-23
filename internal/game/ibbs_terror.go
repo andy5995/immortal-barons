@@ -412,29 +412,32 @@ func terrorOpDeed(op TerrorOpType, whose string) string {
 // or three times too big, so IB says how many landed on nothing.
 func terrorOpReport(op TerrorOpType, target string, sent, hit, caught int) string {
 	var lines []string
-	switch {
-	case caught == 1 && sent == 1:
-		lines = append(lines, fmt.Sprintf("Your agent was caught by %s's security.", target))
-	case caught == 1:
-		lines = append(lines, fmt.Sprintf("One of your agents was caught by %s's security.", target))
-	case caught > 1:
-		lines = append(lines, fmt.Sprintf("%d of your agents were caught by %s's security.", caught, target))
+	// tally adds the line for the n agents that ended one way: lone when the
+	// whole strike was one agent, one for a single agent of several, many
+	// otherwise, and nothing when none did.
+	tally := func(n int, lone, one, many string) {
+		switch {
+		case n == 1 && sent == 1:
+			lines = append(lines, lone)
+		case n == 1:
+			lines = append(lines, one)
+		case n > 1:
+			lines = append(lines, many)
+		}
 	}
-	switch {
-	case hit == 1 && sent == 1:
-		lines = append(lines, fmt.Sprintf("Your agent %s.", terrorOpDeed(op, "their")))
-	case hit == 1:
-		lines = append(lines, fmt.Sprintf("One of your agents %s.", terrorOpDeed(op, "their")))
-	case hit > 1:
-		lines = append(lines, fmt.Sprintf("Your agents %s %d times.", terrorOpDeed(op, "their"), hit))
-	}
-	switch wasted := sent - hit - caught; {
-	case wasted == 1 && sent == 1:
-		lines = append(lines, "Your agent got through and found nothing left to damage.")
-	case wasted == 1:
-		lines = append(lines, "One of your agents got through and found nothing left to damage.")
-	case wasted > 1:
-		lines = append(lines, fmt.Sprintf("%d of your agents got through and found nothing left to damage.", wasted))
-	}
+	tally(caught,
+		fmt.Sprintf("Your agent was caught by %s's security.", target),
+		fmt.Sprintf("One of your agents was caught by %s's security.", target),
+		fmt.Sprintf("%d of your agents were caught by %s's security.", caught, target))
+	deed := terrorOpDeed(op, "their")
+	tally(hit,
+		fmt.Sprintf("Your agent %s.", deed),
+		fmt.Sprintf("One of your agents %s.", deed),
+		fmt.Sprintf("Your agents %s %d times.", deed, hit))
+	wasted := sent - hit - caught
+	tally(wasted,
+		"Your agent got through and found nothing left to damage.",
+		"One of your agents got through and found nothing left to damage.",
+		fmt.Sprintf("%d of your agents got through and found nothing left to damage.", wasted))
 	return strings.Join(lines, "\n")
 }

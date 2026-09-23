@@ -268,6 +268,10 @@ const (
 	specialIntercepted                       // a missile the target's SDI shot down
 	specialBackfire                          // an S3-Sabre that developed land for its target
 	specialDrivenOff                         // a bombing run that never reached what it was sent at
+
+	// specialOutcomeCount is not an outcome but the number of them, so a test
+	// can hold both boards' news lines to every one.
+	specialOutcomeCount
 )
 
 // resolveRemoteSpecialOp applies an inbound op to this board's target and
@@ -308,14 +312,7 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 		report, outcome := w.applyPlanetOp(op.Op, from)
 		res.Report = report
 		res.Won = outcome == specialHit
-		switch outcome {
-		case specialHit:
-			res.Outcome = OutcomeWon
-		case specialDrivenOff:
-			res.Outcome = OutcomeDrivenOff
-		default:
-			res.Outcome = OutcomeNothing
-		}
+		res.Outcome = planetOpOutcome(outcome)
 		w.postNews(planetOpNews(op.Op, from, outcome))
 		return res
 	}
@@ -358,6 +355,18 @@ func missileOutcome(outcome specialOutcome) AttackOutcome {
 		return OutcomeNegligible
 	}
 	return OutcomeRepelled
+}
+
+// planetOpOutcome is the verdict a bombing run's answer carries home, so the
+// firer's planet can word its line by the same outcome this one did.
+func planetOpOutcome(outcome specialOutcome) AttackOutcome {
+	switch outcome {
+	case specialHit:
+		return OutcomeWon
+	case specialDrivenOff:
+		return OutcomeDrivenOff
+	}
+	return OutcomeNothing
 }
 
 // missileNews is the line this planet reads about a Special Operation aimed at
