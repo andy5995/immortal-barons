@@ -86,8 +86,8 @@ type Config struct {
 	SubjectMode   SubjectMode
 	SubjectPrefix string
 	// IncomingFileDir is the mailer's receive directory. IncomingNetmailDir is
-	// where received stored-message envelopes are found; unset, it is the first
-	// IncomingFileDir.
+	// where received stored-message envelopes are found; unset, every
+	// IncomingFileDir is searched (netmailDirs).
 	//
 	// IncomingFileDirs holds every directory named by an IncomingFileDir line,
 	// in order; IncomingFileDir is the first. A mailer can deliver into more
@@ -296,9 +296,6 @@ func LoadConfig(dataDir string) (Config, error) {
 	}
 	if cfg.IncomingNetmailDir != "" && !filepath.IsAbs(cfg.IncomingNetmailDir) {
 		cfg.IncomingNetmailDir = filepath.Join(dataDir, cfg.IncomingNetmailDir)
-	}
-	if cfg.IncomingNetmailDir == "" {
-		cfg.IncomingNetmailDir = cfg.IncomingFileDir
 	}
 	return cfg, nil
 }

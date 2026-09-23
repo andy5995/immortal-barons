@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/store"
 )
 
 // agedPacket writes a packet-named file. It cannot make one OLD: age is taken
@@ -329,5 +330,57 @@ func TestScanUnclaimedReportsAFileOnce(t *testing.T) {
 	got := scanUnclaimed([]string{parent, child}, nil, time.Now())
 	if len(got) != 1 {
 		t.Errorf("unclaimed = %+v, want the file reported once", got)
+	}
+}
+
+// With no IncomingNetmailDir, envelopes are looked for in EVERY IncomingFileDir,
+// so the order of those lines cannot decide whether an attach is claimed. The
+// loader used to default the setting to the first directory alone.
+func TestAnEnvelopeInTheSecondIncomingFileDirIsFound(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "IncomingFileDir transport-sec\n")
+	cfgPath := filepath.Join(data, store.BoardConfigFile)
+	body, err := os.ReadFile(cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stripped := strings.Replace(string(body), "IncomingNetmailDir transport-in\n", "", 1)
+	if stripped == string(body) {
+		t.Fatal("the fixture no longer sets IncomingNetmailDir; this test needs it unset")
+	}
+	if err := os.WriteFile(cfgPath, []byte(stripped), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	second := filepath.Join(data, "transport-sec")
+	if err := os.Mkdir(second, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	raw, _ := json.Marshal(game.Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", FromNode: 1, ToNode: 2, Seq: 13, League: 100})
+	var packet game.Packet
+	if err := json.Unmarshal(raw, &packet); err != nil {
+		t.Fatal(err)
+	}
+	bundle, _, err := makeBundle(1, "attach", []transportEntry{{Name: "mail.brp", Raw: raw, Packet: packet}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	attachment := filepath.Join(second, "10000002.BRP")
+	if err := os.WriteFile(attachment, bundle, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	envelope, err := createFileAttach(Config{NetmailDir: second, SubjectMode: SubjectBasename}, attachment,
+		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := RunIn(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Delivered != 1 {
+		t.Fatalf("delivered = %d, want the attach whose envelope is in the second directory; warnings=%v",
+			result.Delivered, result.Warnings)
+	}
+	if _, err := os.Stat(envelope); !os.IsNotExist(err) {
+		t.Errorf("the claimed envelope remains: %v", err)
 	}
 }
