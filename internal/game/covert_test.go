@@ -612,7 +612,7 @@ func dealUntouched(deal TradeDeal) bool {
 // interplanetary op calls, skipping the fee and the one-effect-op-per-turn cap so
 // a test can repeat it.
 func bombRoutes(w *World, d *Empire) {
-	if w.bombRoutesLands() {
+	if w.bombingLands() {
 		w.bombRoutesEffect(d)
 	}
 }

@@ -299,7 +299,10 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	// A planet op wrecks what the whole planet shares, so there is no realm to
 	// look up and New Realm Protection does not enter into it — a new realm is
 	// shielded from being singled out, not from the planet's market burning
-	// down around it.
+	// down around it. BINARY-VERIFIED: resolve_received_bombing (BRE.OVR
+	// 0x04a09a) calls no protection test, and its per-realm loops (+0x1d7,
+	// +0x308) skip only an empty slot, so a protected realm's listings and
+	// investments are hit with everyone else's.
 	if op.Op.TargetsPlanet() {
 		report, outcome := w.applyPlanetOp(op.Op, from)
 		res.Report = report
@@ -372,6 +375,9 @@ func missileNews(label, from, target string, outcome specialOutcome) string {
 // landed on nothing, because its receiver applies the percentage whatever is
 // there. IB says so, as its report home does.
 func planetOpNews(op SpecialOp, from string, outcome specialOutcome) string {
+	if outcome == specialDrivenOff {
+		return fmt.Sprintf("Bombers from %s were driven off before they reached %s.", from, planetOpObject(op, "the planet's"))
+	}
 	switch op {
 	case OpBombFood:
 		if outcome == specialHit {
@@ -384,11 +390,8 @@ func planetOpNews(op SpecialOp, from string, outcome specialOutcome) string {
 		}
 		return fmt.Sprintf("Bombers from %s hit the planet's trading market and found nothing listed there.", from)
 	case OpBombRoutes:
-		switch outcome {
-		case specialHit:
+		if outcome == specialHit {
 			return fmt.Sprintf("Bombers from %s hit trade routes across the planet.", from)
-		case specialDrivenOff:
-			return fmt.Sprintf("Bombers from %s were driven off before they reached the planet's trade routes.", from)
 		}
 		return fmt.Sprintf("Bombers from %s found nothing moving on the planet's trade routes.", from)
 	case OpUndermine:
@@ -398,6 +401,22 @@ func planetOpNews(op SpecialOp, from string, outcome specialOutcome) string {
 		return fmt.Sprintf("Agents from %s found nothing invested in the planet's bank to undermine.", from)
 	}
 	return fmt.Sprintf("An operation from %s against this planet came to nothing.", from)
+}
+
+// planetOpObject names what a bombing op was sent at, owned by whose — "the
+// planet's" for this planet's news, "that planet's" for the firer's report.
+func planetOpObject(op SpecialOp, whose string) string {
+	switch op {
+	case OpBombFood:
+		return whose + " food market"
+	case OpBombMarket:
+		return whose + " trading market"
+	case OpBombRoutes:
+		return whose + " trade routes"
+	case OpUndermine:
+		return whose + " bank"
+	}
+	return "the planet"
 }
 
 // applyPlanetOp runs one of the four bombing ops against the whole planet.
@@ -421,6 +440,12 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome
 		for _, e := range living() {
 			e.addEvent(text)
 		}
+	}
+
+	// One landing roll for the whole run, ahead of the op switch, as the
+	// original rolls it; a run that fails it touches nothing on the planet.
+	if !w.bombingLands() {
+		return fmt.Sprintf("Your bombers were driven off before they reached %s.", planetOpObject(op, "that planet's")), specialDrivenOff
 	}
 
 	switch op {
@@ -448,12 +473,7 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome
 		return fmt.Sprintf("You wrecked the planet's trading market: %d goods and %d gold in proceeds.", goods, proceeds), specialHit
 
 	case OpBombRoutes:
-		// nil takes every deal on the planet, and the strike's one landing roll
-		// covers the whole planet rather than being rolled per realm. A failed
-		// roll and an empty set of routes are different outcomes, reported apart.
-		if !w.bombRoutesLands() {
-			return "Your bombers were driven off before they reached that planet's trade routes.", specialDrivenOff
-		}
+		// nil takes every deal on the planet.
 		hit := w.bombRoutesEffect(nil)
 		if hit == 0 {
 			return "Nothing worth hitting was moving on that planet's trade routes.", specialNothing
@@ -502,7 +522,7 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 
 	case OpBombRoutes:
 		hit := 0
-		if w.bombRoutesLands() {
+		if w.bombingLands() {
 			hit = w.bombRoutesEffect(d)
 		}
 		if hit == 0 {

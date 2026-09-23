@@ -88,6 +88,9 @@ func TestSpecialOpsTellTheReceivingPlanet(t *testing.T) {
 			if err := from.SendSpecialOp(attacker, "Bravo BBS", aimed, op, 1); err != nil {
 				t.Fatalf("SendSpecialOp: %v", err)
 			}
+			if !isMissileOp(op) {
+				landNextBombingRun(to) // a run driven off tells nobody but the news
+			}
 			to.ApplyPacket(from.Outbox[0])
 			if len(target.Events) == 0 {
 				t.Errorf("nobody on the receiving planet was told about %s", SpecialOpLabel(op))

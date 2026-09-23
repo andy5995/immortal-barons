@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"math/rand"
+	"testing"
+)
 
 // specialOpWorlds builds two boards, an attacker on one and a target on the
 // other, ready to exchange one Special Operation.
@@ -34,6 +37,19 @@ func specialOpWorlds(t *testing.T) (from, to *World, attacker, target *Empire) {
 	return from, to, attacker, target
 }
 
+// landNextBombingRun reseeds w so the next arriving bombing run passes its
+// landing roll, for a test about what a run does once it lands. Two runs in
+// three are driven off (BombingLandOdds), so without this a fixed seed decides
+// whether such a test reaches the code it covers at all.
+func landNextBombingRun(w *World) {
+	for seed := int64(1); ; seed++ {
+		if rand.New(rand.NewSource(seed)).Intn(BombingLandOdds) == 0 {
+			w.rng = rand.New(rand.NewSource(seed))
+			return
+		}
+	}
+}
+
 // The whole round trip: the op leaves with the gold, lands on the other board's
 // realm, and the answer files a report with the baron who sent it.
 func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
@@ -60,6 +76,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	if !from.Outbox[0].HasPayload() {
 		t.Fatal("a packet carrying only a special op reads as empty, so it would never be written")
 	}
+	landNextBombingRun(to)
 	answer := to.ApplyPacket(from.Outbox[0])
 
 	if to.FoodMarketSupply != 2000 {
@@ -238,6 +255,7 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 	if got := from.Outbox[0].SpecialOps[0].TargetEmpire; got != "" {
 		t.Errorf("the packet names %q; a planet op carries no realm", got)
 	}
+	landNextBombingRun(to)
 	answer := to.ApplyPacket(from.Outbox[0])
 	if to.FoodMarketSupply != 500 {
 		t.Errorf("the planet's food market holds %d, want 500 — protection must not shield the planet",
@@ -245,6 +263,28 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 	}
 	if got := answer.Results[0].outcome(); got != OutcomeWon {
 		t.Errorf("outcome %q, want %q", got, OutcomeWon)
+	}
+}
+
+// New Realm Protection shields a realm from a missile but not from a bombing
+// op: the original's bombing receiver calls no protection test and walks every
+// occupied slot (resolve_received_bombing, BRE.OVR 0x04a09a +0x308). So a
+// sheltered realm's investments are undermined with its neighbors', which the
+// food-market case above cannot show — that market belongs to no realm.
+func TestBombingOpsIgnoreTheTargetsProtection(t *testing.T) {
+	from, to, attacker, target := specialOpWorlds(t)
+	target.Protection = 99
+	target.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: to.GameDay + 5}}
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpUndermine, 0); err != nil {
+		t.Fatalf("SendSpecialOp: %v", err)
+	}
+	landNextBombingRun(to)
+	answer := to.ApplyPacket(from.Outbox[0])
+	if got := answer.Results[0].outcome(); got != OutcomeWon {
+		t.Fatalf("outcome %q, want %q — report %q", got, OutcomeWon, answer.Results[0].Report)
+	}
+	if got := target.Investments[0].Amount; got != 750 {
+		t.Errorf("a protected realm's investment holds %d, want 750: protection must not shield it", got)
 	}
 }
 

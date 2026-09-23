@@ -83,12 +83,14 @@ func TestMissileNewsFollowsTheOutcome(t *testing.T) {
 func TestPlanetOpNewsFollowsTheOutcome(t *testing.T) {
 	w, _ := specialNewsBoard(1)
 	w.FoodMarketSupply = 0
+	landNextBombingRun(w)
 	res, news := resolveOneSpecial(t, w, RemoteSpecialOp{ID: 1, FromBoard: "Home", FromEmpire: "Selby", Op: OpBombFood})
 	if res.Won || news != "Bombers from Selby of Home hit the planet's food market and found it bare." {
 		t.Errorf("bare market: won=%v news %q", res.Won, news)
 	}
 
 	w.FoodMarketSupply = 10_000
+	landNextBombingRun(w)
 	res, news = resolveOneSpecial(t, w, RemoteSpecialOp{ID: 2, FromBoard: "Home", FromEmpire: "Selby", Op: OpBombFood})
 	if !res.Won || news != "Bombers from Selby of Home hit the planet's food market." {
 		t.Errorf("stocked market: won=%v news %q", res.Won, news)
@@ -97,20 +99,22 @@ func TestPlanetOpNewsFollowsTheOutcome(t *testing.T) {
 		t.Errorf("stocked market: supply %d after the hit, want 5000", w.FoodMarketSupply)
 	}
 
+	landNextBombingRun(w)
 	res, news = resolveOneSpecial(t, w, RemoteSpecialOp{ID: 3, FromBoard: "Home", FromEmpire: "Selby", Op: OpBombMarket})
 	if res.Won || news != "Bombers from Selby of Home hit the planet's trading market and found nothing listed there." {
 		t.Errorf("empty trading market: won=%v news %q", res.Won, news)
 	}
 
+	landNextBombingRun(w)
 	res, news = resolveOneSpecial(t, w, RemoteSpecialOp{ID: 4, FromBoard: "Home", FromEmpire: "Selby", Op: OpUndermine})
 	if res.Won || news != "Agents from Selby of Home found nothing invested in the planet's bank to undermine." {
 		t.Errorf("nothing invested: won=%v news %q", res.Won, news)
 	}
 }
 
-// Bomb Trade Routes has two ways to come to nothing, and they are reported
-// apart: the landing roll that turns most runs back, and routes with nothing on
-// them. Both must be reached for the test to mean anything.
+// A bombing run has two ways to come to nothing, and they are reported apart:
+// the landing roll that turns most runs back, and a target with nothing in it.
+// Both must be reached for the test to mean anything.
 func TestTradeRouteBombingNewsSeparatesTheTwoFailures(t *testing.T) {
 	want := map[string]string{
 		"driven off":            "Bombers from Selby of Home were driven off before they reached the planet's trade routes.",
@@ -144,5 +148,49 @@ func TestSpecialOpAgainstNoSuchRealmPostsNothing(t *testing.T) {
 	}
 	if got := w.NewsToday[before:]; len(got) != 0 {
 		t.Errorf("posted %v", got)
+	}
+}
+
+// Every one of the four bombing ops meets the landing roll, not Bomb Trade Routes
+// alone: the original rolls Random(3) ahead of its switch on the op type
+// (resolve_received_bombing, BRE.OVR 0x04a09a +0x11b). A run that fails it
+// leaves the planet exactly as it was and posts the driven-off line, naming the
+// sender. Over many seeds, about two runs in three must fail — a property of
+// the roll, so it holds on any run of seeds, not one trajectory.
+func TestEveryBombingOpMeetsTheLandingRoll(t *testing.T) {
+	const runs = 300
+	for _, tc := range []struct {
+		op     SpecialOp
+		object string
+	}{
+		{OpBombFood, "the planet's food market"},
+		{OpBombMarket, "the planet's trading market"},
+		{OpBombRoutes, "the planet's trade routes"},
+		{OpUndermine, "the planet's bank"},
+	} {
+		drivenOff := 0
+		for seed := int64(1); seed <= runs; seed++ {
+			w, d := specialNewsBoard(seed)
+			w.FoodMarketSupply = 10_000
+			d.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 5}}
+			res, news := resolveOneSpecial(t, w, RemoteSpecialOp{ID: 1, FromBoard: "Home", FromEmpire: "Selby", Op: tc.op})
+			if !strings.Contains(res.Report, "driven off") {
+				continue
+			}
+			drivenOff++
+			if res.Won {
+				t.Errorf("%s seed %d: a run driven off reported a win", tc.op, seed)
+			}
+			if want := "Bombers from Selby of Home were driven off before they reached " + tc.object + "."; news != want {
+				t.Errorf("%s seed %d: news %q, want %q", tc.op, seed, news, want)
+			}
+			if w.FoodMarketSupply != 10_000 || d.Investments[0].Amount != 1000 {
+				t.Errorf("%s seed %d: a run driven off still did damage", tc.op, seed)
+			}
+		}
+		// 2/3 of 300 is 200, with a standard deviation near 8.
+		if drivenOff < 160 || drivenOff > 240 {
+			t.Errorf("%s: %d of %d runs driven off, want about two in three", tc.op, drivenOff, runs)
+		}
 	}
 }

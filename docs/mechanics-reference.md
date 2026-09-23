@@ -2117,14 +2117,15 @@ Game Setup screen shows them as 5 and 15 (`cap/eots-ibbs-02.cap`). IB counted
 every op on the menu against `MaxBombingOps` until 2026-08-31
 (`Empire.MissileUsedToday`, `World.CanSpecialOp`).
 
-The other interplanetary Special Operations, unchanged by this:
+The other interplanetary Special Operations, unchanged by this. Two runs in
+three of the four bombing ops are driven off before they land (`BombingLandOdds`,
+see "What a Special Operation posts" below):
 
 - **Bomb Food Market** — destroy a planet's food-market supply.
 - **Bomb Trading Market** — destroy a share of what is listed on a planet's
   trading market, and the pending proceeds with it.
 - **Bomb Trade Routes** — wreck the goods riding in the planet's pending trade
-  deals: two strikes in three come to nothing, each deal has one chance in three
-  of being hit, and a deal that is hit keeps 5-9% of every good in it. A deal
+  deals: each deal has one chance in three of being hit, and a deal that is hit keeps 5-9% of every good in it. A deal
   whose own two parties hold Protective Trade is spared (see that pact under
   Diplomacy for the BRE rule and its addresses).
 - **Undermine Investments** — trim a quarter off the principal of a planet's
@@ -4694,8 +4695,23 @@ same helpers, so a retune lands on both menus: food halved, a share of the marke
 position and its pending proceeds destroyed, the goods stripped out of the trade
 deals a strike reaches, a quarter off each investment's principal and matching
 return. Every op needs the 500 Bombers the original requires of anything on this
-menu, answers to the sysop's Bombing Ops / Missile Ops switches, counts against
-the daily bombing allowance, and is stopped by New Realm Protection.
+menu, answers to the sysop's Bombing Ops / Missile Ops switches, and counts
+against the daily bombing allowance.
+
+**New Realm Protection shields the target from a missile, never from a bombing
+op — BINARY-VERIFIED.** A baron under protection cannot launch either kind: the
+InterPlanetary menu refuses Special Operations as a whole ("The caller's own
+shield gates this menu too", under Interplanetary operations). On the receiving board the two resolvers differ.
+`resolve_received_sabre_strike` calls `is_under_protection` (`056d:19b5`) at
+`+0x457` and fails the strike on it. `resolve_received_bombing`
+(`BRE.OVR 0x04a09a`) calls no protection test at all: its per-realm loops for
+the trading market (`+0x1d7`) and the investments (`+0x308`) walk slots `A`-`Y`
+and skip only a slot whose record `+0x5d` is not positive — an empty slot — and
+the trade-deal walker it calls for Bomb Trade Routes (`ovr_050dfb +0x1f9`) reads
+no protection field either. So a sheltered newcomer's market listings,
+investments and deals in transit are hit with everyone else's. IB matches
+(`applyPlanetOp` has no protection test). This section said until 2026-09-23
+that protection stopped every op; the code never did.
 
 **The three missiles are NOT the local missiles** — read 2026-09-03, correcting
 this section, which had them sharing the local helpers. The receiving board runs
@@ -4771,9 +4787,8 @@ IB posts one line on the target's planet for every outcome but a missing realm,
 chosen by the outcome and worded as IB's own (`missileNews`, `planetOpNews` in
 `ibbs_special.go`): a hit, a misfire, an SDI interception, an S3-Sabre that broke
 up, a Sabre that reached its target and did negligible damage, a protected realm,
-and for the bombing ops a run that found nothing to wreck and — Bomb Trade Routes
-only, the one op that carries the landing roll here — a run driven off before it
-arrived. Until #288 every outcome past protection posted "X struck Y", so a
+and for the bombing ops a run that found nothing to wreck and a run driven off
+by the landing roll before it arrived. Until #288 every outcome past protection posted "X struck Y", so a
 missile that broke up read as a hit on the target's planet while the firer's
 report said it failed. Two places where IB's line knowingly differs from the
 original's choice:
@@ -4785,10 +4800,15 @@ original's choice:
   that case; IB can, because its effects are the local ops' and report what
   they destroyed.
 
-Not changed here, and different from the original: IB rolls the one-in-three
-landing roll for Bomb Trade Routes only (`bombRoutesLands`), where the receiver
-rolls it ahead of all four; and the firer's board posts a line for a backfire
-alone, where the original posts one for every outcome.
+**The landing roll covers all four bombing ops** (`bombingLands`,
+`BombingLandOdds`), as the receiver's `Random(3)` at `+0x11b` sits ahead of its
+switch on the op type at `+0x12e` and a non-zero roll jumps straight to the news
+and report at `+0x3d5`. IB rolled it for Bomb Trade Routes only until
+2026-09-23. A run that fails it touches nothing, and the planet's line names the
+sending realm, as the original's failure line does.
+
+Not changed here, and different from the original: the firer's board posts a
+line for a backfire alone, where the original posts one for every outcome.
 
 **Interplanetary missile prices — binary-verified AND capture-confirmed.** The
 three missiles are priced off the TARGET's last-known territory, at a rate of
@@ -5523,8 +5543,8 @@ and each carries a gameplay effect (#11 wired the last two):
   `trunc(qty x (random(5)+5) / 100)` — 91-95% — of each of its nine goods
   quantities.
 
-  **IB follows all of it** (`bombRoutesLands`, `bombRoutesEffect`,
-  `bombDealBasket`; the three rolls are `BombRoutesLandOdds`,
+  **IB follows all of it** (`bombingLands`, `bombRoutesEffect`,
+  `bombDealBasket`; the three rolls are `BombingLandOdds`,
   `BombRoutesDealHitOdds` and `BombRoutesKeptPctMin`/`Spread` in `balance*.go`).
   A strike wrecks the goods in pending `TradeDeal`s rather than severing any
   standing agreement, and the guard reads the deal's own two parties, so holding

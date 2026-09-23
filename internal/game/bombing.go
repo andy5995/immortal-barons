@@ -29,12 +29,13 @@ func bombFoodEffect(d *Empire) int {
 	return lost
 }
 
-// bombRoutesLands reports whether a trade-route strike comes to anything at
-// all. BINARY-VERIFIED (BRE.OVR 0x04a09a): the original rolls this once at the
-// top of the routine that resolves a received bombing op, before it looks at a
-// single deal, and two strikes in three end there.
-func (w *World) bombRoutesLands() bool {
-	return w.rng.Intn(BombRoutesLandOdds) == 0
+// bombingLands reports whether an arriving bombing run comes to anything at
+// all. BINARY-VERIFIED (BRE.OVR 0x04a09a, see BombingLandOdds): the original
+// rolls it once at the top of the routine that resolves a received bombing op,
+// ahead of the switch on which of the four ops it is, and two runs in three end
+// there whichever op was sent.
+func (w *World) bombingLands() bool {
+	return w.rng.Intn(BombingLandOdds) == 0
 }
 
 // bombRoutesEffect wrecks the goods riding in pending trade deals and reports

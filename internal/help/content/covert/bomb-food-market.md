@@ -9,4 +9,5 @@ in_game: true
 
 Bomb Food Market is an InterPlanetary operation, on the Special Operations
 menu. It destroys much of another planet's food market supply. A large loss can
-start a food shortage across that whole planet.
+start a food shortage across that whole planet. Most runs are driven off before
+they reach it and do nothing.

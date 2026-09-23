@@ -44,10 +44,10 @@ var terrorOpTopics = []attackTypeTopic{
 // of them "recorded but not yet built", copied from a stale comment in tree.go
 // -- the captures show them landing and reporting.
 var ipSpecialOpTopics = []attackTypeTopic{
-	{name: "Bomb Food Market", body: "Burns half of the target's stored food. Nothing on the market is touched, whatever the name suggests: it is the realm's own stores."},
-	{name: "Bomb Trading Market", body: "Destroys a quarter of what the target has listed on the trading market, and a quarter of the proceeds still owed to it. Worth nothing against a realm selling nothing."},
-	{name: "Bomb Trade Routes", body: "Aimed at deals in transit. Two strikes in three come to nothing at all; one that lands leaves only a twentieth of the goods in each deal it hits."},
-	{name: "Undermine Investments", body: "Destroys a quarter of the principal the target has invested, and the return it was owed with it. A realm holding no investments loses nothing."},
+	{name: "Bomb Food Market", body: "Aimed at the target planet's food market, not at one realm: a run that lands burns half of the supply it holds. Two runs in three of any of the four bombing operations are driven off before they land and do nothing."},
+	{name: "Bomb Trading Market", body: "Destroys a quarter of everything listed on the target planet's trading market, and a quarter of the proceeds still owed to the sellers. Worth nothing against a planet selling nothing, and it can be driven off before it lands."},
+	{name: "Bomb Trade Routes", body: "Aimed at the trade deals in transit across the target planet. A run that is not driven off still misses some deals, and leaves only a twentieth of the goods in each deal it hits."},
+	{name: "Undermine Investments", body: "Destroys a quarter of the principal invested in the target planet's bank, and the return owed with it. It can be driven off before it lands, and a planet holding no investments loses nothing."},
 	{name: "Nuclear Assault", body: "A nuclear missile at a realm on another planet. One of each missile per game day, and the target's SDI may stop it. An arriving strike ruins a wider swathe than a neighbor's does."},
 	{name: "Chemical Bombing", body: "A chemical missile at a realm on another planet. It kills population rather than ruining land."},
 	{name: "S3-Sabre", body: "A variable-return missile: what it destroys depends on a dial. It can backfire, which costs you nothing but opens new land for the realm you aimed at. Whether you are asked for that dial is a setting your sysop chooses."},

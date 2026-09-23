@@ -201,14 +201,20 @@ const (
 // market proceeds destroyed by a successful Bomb Trading Market covert op (#17).
 const BombMarketLossPct = 25
 
+// BombingLandOdds is the landing roll every arriving interplanetary bombing run
+// meets: 1-in-this lands, and the rest come to nothing. BINARY-VERIFIED:
+// `resolve_received_bombing` (BRE.OVR 0x04a09a) calls `Random(3)` at +0x11b and
+// jumps straight to its news and report at +0x3d5 on any non-zero result, before
+// the switch on the op type at +0x12e — so it covers all four bombing ops, not
+// Bomb Trade Routes alone as IB had it until 2026-09-23.
+const BombingLandOdds = 3
+
 // Bomb Trade Routes. BINARY-VERIFIED: BRE.OVR 0x051077, the routine
-// `resolve_received_bombing` (0x04a09a) runs for a received op type 3. Three
-// rolls decide the damage — a `random(3)` at the top of the caller that voids
-// the whole strike two times in three, a `random(3)` per deal that lets one deal
-// in three escape, and `trunc(qty x (random(5)+5) / 100)` on each of the deal's
-// goods quantities, which leaves 5-9% and destroys the rest.
+// `resolve_received_bombing` (0x04a09a) runs for a received op type 3. Behind
+// the landing roll above, two rolls decide the damage — a `random(3)` per deal
+// that lets one deal in three escape, and `trunc(qty x (random(5)+5) / 100)` on
+// each of the deal's goods quantities, which leaves 5-9% and destroys the rest.
 const (
-	BombRoutesLandOdds      = 3 // 1-in-this the strike lands at all
 	BombRoutesDealHitOdds   = 3 // 1-in-this a given deal is hit; the rest escape
 	BombRoutesKeptPctMin    = 5 // a hit deal keeps this percent of each good...
 	BombRoutesKeptPctSpread = 5 // ...plus random(this), so 5-9% survives
