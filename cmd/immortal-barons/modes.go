@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -306,6 +307,22 @@ func skipSummary(run store.PlanetaryRun) string {
 	return fmt.Sprintf("skipped %d: %s", skipped, strings.Join(parts, ", "))
 }
 
+// fullExchangeAllowed reports whether -full may run the league exchange around
+// the caller's turn. Settings under an older release's names stop -planetary
+// and -maint, where the sysop reads the exit code; here they would stop a caller
+// from playing, so the exchange is skipped with the same message and the turn
+// goes ahead. The exchange cannot run correctly until the lines are moved.
+func fullExchangeAllowed(cfg game.Config, w io.Writer) bool {
+	if !cfg.InterBBSEnabled() {
+		return true
+	}
+	if err := checkTransportSettings(cfg); err != nil {
+		fmt.Fprintf(w, "immortal-barons -full: %v\n\nThe league exchange is skipped until then; the caller plays as usual.\n", err)
+		return false
+	}
+	return true
+}
+
 // runFull chains the three steps a sysop's batch file runs: inbound, play,
 // outbound (BRE's "BRE FULL"). It requires either -local with a name or a BBS
 // drop file to identify the caller for the play step.
@@ -316,12 +333,12 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 		if err := store.CheckLeagueNumber(cfg); err != nil {
 			return err
 		}
-		if err := checkTransportSettings(cfg); err != nil {
+	}
+	exchange := fullExchangeAllowed(cfg, os.Stderr)
+	if exchange {
+		if err := fullInbound(cfg, verbose); err != nil {
 			return err
 		}
-	}
-	if err := fullInbound(cfg, verbose); err != nil {
-		return err
 	}
 
 	// Step 2: play a turn. Detect whether we have -local with a name or a drop
@@ -374,6 +391,9 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 		}
 	}
 
+	if !exchange {
+		return nil
+	}
 	return fullOutbound(cfg, verbose)
 }
 

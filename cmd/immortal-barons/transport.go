@@ -240,8 +240,10 @@ func printTransportWarnings(result ftn.Result) {
 // reads and prints; a sysop reaching for it is trying to find out what is
 // happening, which is the worst moment to move anything (#228).
 func runFTNStatus(cfg game.Config) error {
+	// Settings under old names are reported, not refused: an upgrade is when a
+	// sysop most needs to see what the spools are holding.
 	if err := checkTransportSettings(cfg); err != nil {
-		return err
+		fmt.Fprintf(os.Stderr, "immortal-barons -ftn-status: %v\n\n", err)
 	}
 	status, err := ftn.Status(cfg.DataDir)
 	if err != nil {

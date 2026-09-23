@@ -408,7 +408,9 @@ func (w *World) aiInvestIdle(e *Empire) {
 	if e.Gold <= reserve {
 		return
 	}
-	if amt := pctOf(e.Gold-reserve, AIInvestPct); amt > 0 {
+	// Sized to what the maturity date still holds: Invest refuses more than
+	// that rather than trimming it.
+	if amt := min(pctOf(e.Gold-reserve, AIInvestPct), w.MaxInvestPrincipal(e, MinInvestDays)); amt > 0 {
 		w.Invest(e, amt, MinInvestDays)
 	}
 }

@@ -321,7 +321,9 @@ func TestLegacyBoardKeysAreRefusedWithTheirReplacements(t *testing.T) {
 		`Inbound C:\BBS\IB Data\in` + "\n" +
 		`outbound C:\BBS\out` + "\n" +
 		`Link 3 D:\fbox\three` + "\n" +
-		"Link 4 BSO bso Crash\n"
+		"Link 4 BSO bso Crash\n" +
+		"Link 5 obox\n" +
+		"Link 6 Attach\n"
 	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -333,12 +335,15 @@ func TestLegacyBoardKeysAreRefusedWithTheirReplacements(t *testing.T) {
 		`  GameInbound C:\BBS\IB Data\in` + "\n",
 		`  GameOutbound C:\BBS\out` + "\n",
 		`  GameOutbound 3 D:\fbox\three`,
+		// An old per-neighbor directory that happens to be named like a mode:
+		// an Obox link always names a directory after the mode, so this is not one.
+		`  GameOutbound 5 obox`,
 	} {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("the refusal has no line %q:\n%v", want, err)
 		}
 	}
-	if strings.Contains(err.Error(), "Link 4") {
+	if strings.Contains(err.Error(), "Link 4") || strings.Contains(err.Error(), "Link 6") {
 		t.Errorf("the refusal named an FTN Link line:\n%v", err)
 	}
 

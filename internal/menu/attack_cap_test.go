@@ -71,3 +71,53 @@ func TestLocalAttackAllowance(t *testing.T) {
 		t.Errorf("the refusal came after the attack was set up:\n%s", out)
 	}
 }
+
+// midwaySession ends the check-then-write gap on purpose: it runs hook when the
+// key at index at is read, standing in for another node on the same handle
+// spending the day's last attack while this one sits at a prompt.
+type midwaySession struct {
+	fakeSession
+	at   int
+	hook func()
+}
+
+func (m *midwaySession) ReadKey() (rune, error) {
+	if m.pos == m.at && m.hook != nil {
+		m.hook()
+		m.hook = nil
+	}
+	return m.fakeSession.ReadKey()
+}
+
+// The local allowance is checked again inside the save, so an attack spent on
+// another node between the prompts and the write is refused rather than
+// counted past the limit.
+func TestLocalAttackAllowanceIsRecheckedAtTheWrite(t *testing.T) {
+	w := newWorld()
+	w.Config.MaxLocalAttacks = 2
+	w.Player().Protection = 0
+	w.Player().Troopers = 1_000_000
+	w.Player().LocalAttacksToday = 1
+	target := recipients(w)[0]
+	target.Protection = 0
+	before := target.Troopers
+	keys := "A\r\r\r\ry\r\r\r\r\r\r\r\r"
+	f := &midwaySession{
+		fakeSession: fakeSession{keys: []rune(keys)},
+		at:          strings.IndexRune(keys, 'y'),
+		hook:        func() { w.Player().LocalAttacksToday = 2 },
+	}
+
+	regularAttack(f, w)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Send this Attack?") {
+		t.Fatalf("the attack never reached its confirmation:\n%s", out)
+	}
+	if !strings.Contains(out, "You have used all your attacks for today.") {
+		t.Errorf("an attack spent elsewhere mid-prompt was not refused at the write:\n%s", out)
+	}
+	if target.Troopers != before || w.Player().LocalAttacksToday != 2 {
+		t.Errorf("the attack went through: target troopers %d -> %d, count %d", before, target.Troopers, w.Player().LocalAttacksToday)
+	}
+}

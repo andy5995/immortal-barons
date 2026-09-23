@@ -341,6 +341,28 @@ func (w *World) enqueueTradeBid(toBoard string, b IPTradeBid) {
 	p.TradeBids = append(p.TradeBids, b)
 }
 
+// fileReconReports files a packet's scouting answers in the Spy Database and
+// posts a news line for each, except for as many reports on a realm as there are
+// terror results for it: those are a terror op's own report, told to its sender
+// on their recap and to nobody else (#285).
+func (w *World) fileReconReports(p Packet) {
+	byTerror := map[[2]string]int{}
+	for _, res := range p.Results {
+		if res.Kind == "terror" {
+			byTerror[[2]string{res.TargetBoard, res.TargetEmpire}]++
+		}
+	}
+	for _, r := range p.ReconReports {
+		w.SpyDatabase = append(w.SpyDatabase, r)
+		key := [2]string{r.Board, r.Empire}
+		if byTerror[key] > 0 {
+			byTerror[key]--
+			continue
+		}
+		w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
+	}
+}
+
 // ApplyPacket applies an inbound packet to this board and returns a result
 // packet (attack outcomes) addressed back to the origin.
 func (w *World) ApplyPacket(p Packet) Packet {
@@ -467,19 +489,10 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// their recap and to nobody else (#285), and the original's handler for this
 	// intelligence (update_spy_intelligence, BRE.OVR) writes a report entry, not
 	// news. The packet does not mark which reports are by-products, so the
-	// result beside it is what identifies one.
-	terrorOn := map[[2]string]bool{}
-	for _, res := range p.Results {
-		if res.Kind == "terror" {
-			terrorOn[[2]string{res.TargetBoard, res.TargetEmpire}] = true
-		}
-	}
-	for _, r := range p.ReconReports {
-		w.SpyDatabase = append(w.SpyDatabase, r)
-		if !terrorOn[[2]string{r.Board, r.Empire}] {
-			w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
-		}
-	}
+	// results beside them identify them: one terror result accounts for one
+	// report on its realm, and any report past that count (a spy sweep landing in
+	// the same packet) still gets its line.
+	w.fileReconReports(p)
 	for _, m := range p.IPMessages {
 		w.deliverIPMessage(m)
 	}

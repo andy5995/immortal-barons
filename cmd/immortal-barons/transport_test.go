@@ -283,15 +283,26 @@ func TestPacketModesRefuseOldSettings(t *testing.T) {
 			t.Fatal(err)
 		}
 		for mode, run := range map[string]func() error{
-			"-maint":      func() error { return runMaint(cfg, "2026-09-22") },
-			"-planetary":  func() error { return runPlanetary(cfg, false) },
-			"-full":       func() error { return runFull(cfg, "tester", "2026-09-22", 0, true, false) },
-			"-ftn-status": func() error { return runFTNStatus(cfg) },
+			"-maint":     func() error { return runMaint(cfg, "2026-09-22") },
+			"-planetary": func() error { return runPlanetary(cfg, false) },
 		} {
 			err := run()
 			if err == nil || !strings.Contains(err.Error(), "  ") {
 				t.Errorf("%s with an old %s returned %v, want a refusal with lines to paste", mode, name, err)
 			}
+		}
+		// A caller is never refused a turn over the sysop's settings: -full
+		// skips the exchange and says why, with the same lines.
+		var msg strings.Builder
+		if fullExchangeAllowed(cfg, &msg) {
+			t.Errorf("-full with an old %s would run the exchange", name)
+		}
+		if !strings.Contains(msg.String(), "  ") || !strings.Contains(msg.String(), "caller plays as usual") {
+			t.Errorf("-full with an old %s said %q, want the lines to paste and that the caller plays", name, msg.String())
+		}
+		// -ftn-status reports the old settings and still shows the spools.
+		if err := runFTNStatus(cfg); err != nil {
+			t.Errorf("-ftn-status with an old %s returned %v, want the report anyway", name, err)
 		}
 	}
 }

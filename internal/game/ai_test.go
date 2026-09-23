@@ -337,3 +337,44 @@ func TestAIBuysFoodLandAtTheClimbingPrice(t *testing.T) {
 			bought, e.RegionsBoughtThisTurn)
 	}
 }
+
+// Max Local Attacks/Day binds a computer baron as it binds a player, and an
+// attack it makes is counted against it.
+func TestAIObeysMaxLocalAttacks(t *testing.T) {
+	w, agg, vic := warWorld(t)
+	w.Config.MaxLocalAttacks = 1
+	agg.Troopers, agg.Tanks = 5000, 500
+	before := vic.Land
+
+	w.aiWageWar(agg)
+	if vic.Land >= before || agg.LocalAttacksToday != 1 {
+		t.Fatalf("first attack: land %d -> %d, LocalAttacksToday %d; want an attack counted once", before, vic.Land, agg.LocalAttacksToday)
+	}
+	after := vic.Land
+	w.aiWageWar(agg)
+	if vic.Land != after {
+		t.Errorf("a computer baron past its daily limit attacked again: land %d -> %d", after, vic.Land)
+	}
+}
+
+// A computer baron with idle gold invests what the maturity date still holds,
+// rather than nothing, when the date is nearly full.
+func TestAIInvestsWhatTheDateHolds(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("ai", "Aitopia")
+	e.Gold = 900_000_000
+	e.Investments = []Investment{{Amount: 1, Return: MaxReturnsPerDate - 1_000_000, MaturesDay: w.GameDay + MinInvestDays}}
+	room := w.MaxInvestPrincipal(e, MinInvestDays)
+	if room <= 0 {
+		t.Fatalf("test setup: no room left on the date (%d)", room)
+	}
+
+	w.aiInvestIdle(e)
+
+	if len(e.Investments) != 2 {
+		t.Fatalf("no investment was made; the date still held %d", room)
+	}
+	if got := e.Investments[1].Amount; got <= 0 || got > room {
+		t.Errorf("invested %d, want 1..%d", got, room)
+	}
+}

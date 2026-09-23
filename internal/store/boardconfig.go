@@ -216,10 +216,24 @@ func perNodeDir(value string) (int, string, bool) {
 	return n, dir, true
 }
 
-// linkModes are the words that make a Link line the FTN transport's. A Link
-// line without one is the per-neighbor directory as this file spelled it
-// before that became "GameOutbound <node> <dir>".
-var linkModes = []string{"attach", "obox", "bso"}
+// isTransportLink reports whether the fields after "Link" are the FTN
+// transport's (node, mode, ...) rather than the per-neighbor directory this file
+// spelled "Link <node> <dir>" before it became "GameOutbound <node> <dir>". The
+// mode alone cannot tell them apart, since a directory may be named obox: an
+// Attach link names nothing after its mode, and Obox and BSO always name a
+// directory.
+func isTransportLink(fields []string) bool {
+	if len(fields) < 2 {
+		return false
+	}
+	switch strings.ToLower(fields[1]) {
+	case "attach":
+		return len(fields) == 2
+	case "obox", "bso":
+		return len(fields) >= 3
+	}
+	return false
+}
 
 // LegacyBoardRefusal reports bbs.cfg lines written under names this version no
 // longer reads -- Inbound, Outbound, and the two-field "Link <node> <dir>" --
@@ -247,10 +261,7 @@ func LegacyBoardRefusal(dataDir string) error {
 		case strings.EqualFold(key, "Outbound"):
 			old, repl = append(old, line), append(repl, keyOutbound+" "+value)
 		case strings.EqualFold(key, "Link"):
-			fields := strings.Fields(value)
-			if len(fields) < 2 || slices.ContainsFunc(linkModes, func(m string) bool {
-				return strings.EqualFold(m, fields[1])
-			}) {
+			if fields := strings.Fields(value); len(fields) < 2 || isTransportLink(fields) {
 				continue
 			}
 			old, repl = append(old, line), append(repl, keyOutbound+" "+value)

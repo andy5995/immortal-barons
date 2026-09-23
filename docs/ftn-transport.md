@@ -713,12 +713,15 @@ above that the owning mailer is finished with it.
 
 Before this release the transport was a separate program, `barons-ftn`, with
 its own settings file, `ftn.cfg`. Both are gone. On a board that still has
-`ftn.cfg`, every command that moves packets refuses to run and prints that
-file's settings rewritten as `bbs.cfg` lines. Paste those lines into
-`bbs.cfg`, delete `ftn.cfg`, and take `barons-ftn` out of the scheduler and
-the mailer's hooks: `-maint` and `-planetary` now do its work. `bbs.cfg`
-settings spelled the way an older release wrote them are refused the same way,
-with their replacements.
+`ftn.cfg`, `-maint` and `-planetary` refuse to run and print that file's
+settings rewritten as `bbs.cfg` lines. Paste those lines into `bbs.cfg`, delete
+`ftn.cfg`, and take `barons-ftn` out of the scheduler and the mailer's hooks:
+`-maint` and `-planetary` now do its work. `bbs.cfg` settings spelled the way an
+older release wrote them are refused the same way, with their replacements.
+
+A door launched with `-full` never keeps a caller out over this. It prints the
+same lines, skips the league exchange, and lets the caller play. `-ftn-status`
+prints them too, and then its report.
 
 An old `barons-ftn` binary left on disk and still scheduled does no harm once
 `ftn.cfg` is deleted. It cannot find its settings, so it exits with an error on
@@ -726,7 +729,7 @@ every run and moves nothing. The transport lock keeps its old name, so an old
 copy that does still run queues behind the game's own transport instead of
 running beside it.
 
-No packet changes with this release, so boards can upgrade one at a time.
+The packet format does not change in this release, so boards can upgrade one at a time.
 
 ### Turning bundles on
 

@@ -22,6 +22,11 @@ var errRealmChanged = errors.New("The realm has changed — try again.")
 // another node between the target pick and the write.
 var errTargetGone = errors.New("Your target is no longer there.")
 
+// errLocalAttacksExhausted is returned inside an attack's transaction when the
+// day's Max Local Attacks/Day was spent between the check before the prompts and
+// the write (another node on the same handle).
+var errLocalAttacksExhausted = errors.New("You have used all your attacks for today.")
+
 // buyGood is the Spending menu's action for one row of the goods table (#209):
 // the row carries the label, the price and the stock, so the three cannot be
 // paired up wrongly at the call site the way twelve hand-written items could.

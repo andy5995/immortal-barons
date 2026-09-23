@@ -122,6 +122,9 @@ func (w *World) aiWageWar(e *Empire) {
 	if !w.LocalAttacksAllowed() {
 		return // a league that has turned local fighting off binds the AI too
 	}
+	if !w.CanAttackLocally(e) {
+		return // Max Local Attacks/Day binds a computer baron as it binds a player
+	}
 	var target *Empire
 	for _, t := range w.Targets(e) {
 		if target == nil || effectiveDefense(t) < effectiveDefense(target) {
@@ -142,6 +145,7 @@ func (w *World) aiWageWar(e *Empire) {
 		// does at the capture prompt (#58), instead of inheriting whatever mix the
 		// loser happened to hold. Captured land goes into whichever type this realm
 		// is furthest short of, the same judgment it uses when buying.
+		e.LocalAttacksToday++
 		if _, captured := w.Attack(e, target, FullForce(e), false); captured > 0 {
 			w.GrantRegions(e, e.aiNextRegionType(), captured)
 		}
