@@ -79,14 +79,15 @@ func TestStatusReportsAPacketNobodyHasClaimed(t *testing.T) {
 		t.Errorf("age = %v, want a duration since the file arrived", got.Age)
 	}
 	if got.Subdir != "" {
-		t.Errorf("subdir = %q, want empty for a file in InboundDir itself", got.Subdir)
+		t.Errorf("subdir = %q, want empty for a file in IncomingFileDir itself", got.Subdir)
 	}
 }
 
 // The second route to the same silence, found on the four-board rig: a mailer
 // files an unauthenticated session's files into a child directory, and RunIn
-// enumerates only InboundDir itself, so no number of later runs will take them.
-func TestStatusReportsAPacketInAChildOfTheInboundDirectory(t *testing.T) {
+// enumerates only IncomingFileDir itself, so no number of later runs will take
+// them.
+func TestStatusReportsAPacketInAChildOfIncomingFileDir(t *testing.T) {
 	reportEverything(t)
 	data := newBundledSetup(t, "Bravo BBS", "")
 	agedPacket(t, filepath.Join(data, "transport-in", "unsecure"), "quarantined.brp", 3*time.Hour)
@@ -259,7 +260,7 @@ func TestScanUnclaimedAgesFromArrival(t *testing.T) {
 // authenticated session into secInbound and an unauthenticated one into
 // inbound. Naming only the first reads nothing from the second while every
 // report stays healthy, which is how 43 packets collected on the test rig.
-func TestRunInReadsEveryInboundDirectory(t *testing.T) {
+func TestRunInReadsEveryIncomingFileDir(t *testing.T) {
 	data := newBundledSetup(t, "Bravo BBS", "IncomingFileDir transport-sec\n")
 	secure := filepath.Join(data, "transport-sec")
 	if err := os.MkdirAll(secure, 0o755); err != nil {
@@ -284,7 +285,7 @@ func TestRunInReadsEveryInboundDirectory(t *testing.T) {
 
 // The same directories are watched by the report, so a packet stranded in the
 // second one is named rather than silently skipped.
-func TestStatusWatchesEveryInboundDirectory(t *testing.T) {
+func TestStatusWatchesEveryIncomingFileDir(t *testing.T) {
 	reportEverything(t)
 	data := newBundledSetup(t, "Bravo BBS", "IncomingFileDir transport-sec\n")
 	agedPacket(t, filepath.Join(data, "transport-sec"), "stranded.brp", 0)
@@ -301,7 +302,7 @@ func TestStatusWatchesEveryInboundDirectory(t *testing.T) {
 // The envelope names a file, not a directory: an attach bundle filed into the
 // second inbound directory must still be found, or it is skipped by the direct
 // scan (attach is deliberately passed over there) and never ingested at all.
-func TestEnvelopeAttachmentFindsTheFileInAnyInboundDirectory(t *testing.T) {
+func TestEnvelopeAttachmentFindsTheFileInAnyIncomingFileDir(t *testing.T) {
 	first, second := t.TempDir(), t.TempDir()
 	name := "abcd0001.brp"
 	if err := os.WriteFile(filepath.Join(second, name), []byte("x"), 0o644); err != nil {

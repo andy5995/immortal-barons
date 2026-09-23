@@ -119,42 +119,23 @@ func holdPacket(dataDir, path string) error {
 // have on the day the packet arrived. A second, shorter path into the world is
 // how a check gets skipped by accident.
 func releaseHeld(dataDir, inboundDir string) (int, error) {
-	entries, err := os.ReadDir(heldPath(dataDir))
-	if err != nil {
-		if os.IsNotExist(err) {
-			return 0, nil
-		}
-		return 0, err
-	}
 	var moved int
-	for _, e := range entries {
-		if e.IsDir() || !IsPacketFile(e.Name()) {
-			continue
-		}
-		path := filepath.Join(heldPath(dataDir), e.Name())
+	err := eachHeldPacket(dataDir, func(path string, e os.DirEntry, p *game.Packet) {
 		// Age it out first, so a packet that will never verify cannot be
 		// released, re-refused and re-held on every run forever.
 		if info, err := e.Info(); err == nil && time.Since(info.ModTime()) > HeldMaxAge {
 			os.Remove(path)
-			continue
+			return
 		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			continue
-		}
-		var p game.Packet
-		if err := json.Unmarshal(data, &p); err != nil {
-			continue
-		}
-		if !game.SpeaksOurProtocol(p.Protocol) {
-			continue
+		if p == nil || !game.SpeaksOurProtocol(p.Protocol) {
+			return
 		}
 		if err := moveFile(path, filepath.Join(inboundDir, e.Name())); err != nil {
-			continue
+			return
 		}
 		moved++
-	}
-	return moved, nil
+	})
+	return moved, err
 }
 
 // protocolHeldBoards names the boards whose traffic this board is holding for a
@@ -165,30 +146,43 @@ func releaseHeld(dataDir, inboundDir string) (int, error) {
 // a ruleset or signature hold is never released into an answer the timer would
 // be waiting for.
 func protocolHeldBoards(w *game.World) map[string]bool {
-	entries, err := os.ReadDir(heldPath(w.Config.DataDir))
-	if err != nil {
-		return nil
-	}
 	var held map[string]bool
-	for _, e := range entries {
-		if e.IsDir() || !IsPacketFile(e.Name()) {
-			continue
-		}
-		data, err := os.ReadFile(filepath.Join(heldPath(w.Config.DataDir), e.Name()))
-		if err != nil {
-			continue
-		}
-		var p game.Packet
-		if err := json.Unmarshal(data, &p); err != nil {
-			continue
-		}
-		if p.FromBoard == "" || game.SpeaksOurProtocol(p.Protocol) || !w.ProtocolHoldCurrent(p.FromBoard) {
-			continue
+	eachHeldPacket(w.Config.DataDir, func(_ string, _ os.DirEntry, p *game.Packet) {
+		if p == nil || p.FromBoard == "" || game.SpeaksOurProtocol(p.Protocol) || !w.ProtocolHoldCurrent(p.FromBoard) {
+			return
 		}
 		if held == nil {
 			held = map[string]bool{}
 		}
 		held[p.FromBoard] = true
-	}
+	})
 	return held
+}
+
+// eachHeldPacket calls fn for every packet file in the held directory, with the
+// packet it holds, or nil when the file cannot be read or decoded. A missing
+// held directory holds nothing.
+func eachHeldPacket(dataDir string, fn func(path string, e os.DirEntry, p *game.Packet)) error {
+	entries, err := os.ReadDir(heldPath(dataDir))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	for _, e := range entries {
+		if e.IsDir() || !IsPacketFile(e.Name()) {
+			continue
+		}
+		path := filepath.Join(heldPath(dataDir), e.Name())
+		var p *game.Packet
+		if data, err := os.ReadFile(path); err == nil {
+			var decoded game.Packet
+			if json.Unmarshal(data, &decoded) == nil {
+				p = &decoded
+			}
+		}
+		fn(path, e, p)
+	}
+	return nil
 }

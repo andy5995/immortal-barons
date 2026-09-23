@@ -337,9 +337,9 @@ func importBoardConfig(path string, cfg *game.Config) (string, []string, error) 
 		cfg.BoardID = bc.PlanetName
 		took = append(took, fmt.Sprintf("board name %q", bc.PlanetName))
 	}
-	if bc.InboundDir != "" {
-		lines = append(lines, "IncomingFileDir "+bc.InboundDir)
-		took = append(took, "incoming file directory "+bc.InboundDir)
+	if bc.IncomingFileDir != "" {
+		lines = append(lines, "IncomingFileDir "+bc.IncomingFileDir)
+		took = append(took, "incoming file directory "+bc.IncomingFileDir)
 	}
 	if bc.OutgoingNetmailDir != "" {
 		lines = append(lines, "OutgoingNetmailDir "+bc.OutgoingNetmailDir)

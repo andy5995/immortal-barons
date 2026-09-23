@@ -940,7 +940,7 @@ func TestTransportRefusesABoardWithNoLeagueNumber(t *testing.T) {
 	for _, run := range []struct {
 		name string
 		fn   func(string) (Result, error)
-	}{{"-out", RunOut}, {"-in", RunIn}} {
+	}{{"handoff", RunOut}, {"unwrap step", RunIn}} {
 		result, err := run.fn(data)
 		if err == nil {
 			t.Fatalf("%s ran for a board with no league number, queuing %d bundle(s)", run.name, len(result.Queued))

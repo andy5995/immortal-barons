@@ -123,21 +123,22 @@ func parseNodeNumber(line string) (int, []int, error) {
 	return n, hosts, nil
 }
 
-// BoardConfig is a board's inter-BBS configuration (BRE's BBS.CFG): the
-// seven fields identify this board in the league and tell the game where its
-// packet directories are.
+// BoardConfig is an original BRE BBS.CFG, read to import a board's settings
+// (see importBoardConfig). Its seven positional fields identify the board and
+// its mailer: IncomingFileDir and OutgoingNetmailDir are the mailer's
+// directories, not the game's own packet directories.
 type BoardConfig struct {
 	Sysop              string
 	PlanetName         string
 	Address            string
-	InboundDir         string
+	IncomingFileDir    string
 	OutgoingNetmailDir string
 	League             int
 	Mailer             string
 }
 
 // ParseBoardConfig reads a BBS.CFG-style file: seven lines, in order — sysop
-// name, planet name, node address, inbound-file dir, netmail dir, league
+// name, planet name, node address, incoming file dir, netmail dir, league
 // number, mailer. Missing trailing lines are left blank.
 func ParseBoardConfig(path string) (BoardConfig, error) {
 	f, err := os.Open(path)
@@ -168,7 +169,7 @@ func ParseBoardConfig(path string) (BoardConfig, error) {
 		Sysop:              get(0),
 		PlanetName:         get(1),
 		Address:            get(2),
-		InboundDir:         get(3),
+		IncomingFileDir:    get(3),
 		OutgoingNetmailDir: get(4),
 		League:             league,
 		Mailer:             get(6),
