@@ -18,13 +18,14 @@ import (
 // this board resets, and a signed order goes out for every other board to do the
 // same on its next planetary run.
 func runLeagueReset(cfg game.Config, date string) error {
-	if err := checkTransportSettings(cfg); err != nil {
-		return err
-	}
 	// It runs the planetary step, so it is refused on the same terms as
-	// -planetary: with no league number it would take every league's packets.
+	// -planetary: with no league number it would take every league's packets,
+	// and settings under old names are refused only for a league board.
 	if cfg.InterBBSEnabled() {
 		if err := store.CheckLeagueNumber(cfg); err != nil {
+			return err
+		}
+		if err := checkTransportSettings(cfg); err != nil {
 			return err
 		}
 	}

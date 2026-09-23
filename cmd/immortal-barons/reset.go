@@ -218,7 +218,7 @@ func preparePacketDirs(cfg game.Config) {
 	}
 	held := filepath.Join(cfg.DataDir, store.HeldDir)
 	if moved, archive := archiveLeftoverPackets(held); moved > 0 {
-		fmt.Printf("Moved %d held packet(s) from %s to %s: they were waiting for an upgrade and belong to the old season\n",
+		fmt.Printf("Moved %d held packet(s) from %s to %s: they belong to the old season\n",
 			moved, held, archive)
 	}
 }

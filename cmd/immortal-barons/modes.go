@@ -70,7 +70,7 @@ func runMaint(cfg game.Config, today string) error {
 		fmt.Println("Maintenance has already been run today.")
 	}
 	var run store.PlanetaryRun
-	if cfg.IBBS {
+	if cfg.InterBBSEnabled() {
 		run, err = store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
 		if err != nil {
 			lock.Release()
@@ -94,7 +94,7 @@ func runMaint(cfg game.Config, today string) error {
 	if err != nil {
 		return err
 	}
-	if cfg.IBBS {
+	if cfg.InterBBSEnabled() {
 		// After the save and outside the world lock: a handoff that fails or
 		// waits must not cost the work above or hold up the callers.
 		run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
@@ -112,15 +112,18 @@ func runMaint(cfg game.Config, today string) error {
 // launch due group attacks, export scores, write the outbox, and hand it to the
 // mailer. Can run several times a day.
 func runPlanetary(cfg game.Config, verbose bool) error {
+	// The transport runs only for a league board, as in -maint and -full: a
+	// board off the league is never refused over stale transport keys, so it
+	// must not act on them either.
 	if cfg.InterBBSEnabled() {
 		if err := store.CheckLeagueNumber(cfg); err != nil {
 			return err
 		}
+		if err := checkTransportSettings(cfg); err != nil {
+			return err
+		}
+		transportIn(cfg, true, os.Stdout)
 	}
-	if err := checkTransportSettings(cfg); err != nil {
-		return err
-	}
-	transportIn(cfg, true, os.Stdout)
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
@@ -142,7 +145,9 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 	if err != nil {
 		return err
 	}
-	run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
+	if cfg.InterBBSEnabled() {
+		run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
+	}
 	// After the save, so a hook that hangs or a run that ends non-zero cannot
 	// cost the work the run just did — and so the faults reported here are not
 	// reported again by the next run.
