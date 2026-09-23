@@ -2947,7 +2947,9 @@ realm `Wraptest`), and See Scores, the coordinator vote and the interplanetary
 Player Information screen all print +0x1f — as does the recon packet, whose
 `PlanetInfo.Names` `build_recon_record` fills from the same field, so a realm's
 owner never crosses to another planet either. IB's Player List carried an Owner
-column of BBS handles until 2026-08-18; it now names realms only.
+column of BBS handles until 2026-08-18; it now names realms only. IB's own
+`PLAYERLIST.LST` does name callers by handle, but only this board's: remote rows
+keep the realm name, and a shared owner is marked by hash instead (#283).
 
 So the menu **item** is `Modify Diplomacy`; `Diplomacy Modification` is the title
 of the screen it opens.

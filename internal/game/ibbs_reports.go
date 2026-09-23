@@ -164,35 +164,92 @@ func (w *World) leagueRulesetFingerprint() string {
 // empires, the others from the scores each last shared. The original restricts
 // it to the League Coordinator; the caller enforces that, because the report
 // itself is just a read.
+//
+// It exists to find callers playing more than one realm, so it names the caller
+// where this board knows one: a local row shows the BBS handle, as the
+// original's file does. A remote row keeps the realm name, because score
+// packets carry no handles (dupe.go). What they carry instead is the owner
+// hash, and rows sharing one get the same letter in the Owner column, which
+// matches a local caller against a remote realm without either board naming
+// anyone on the wire.
 func (w *World) PlayerListReport() string {
-	var b strings.Builder
-	b.WriteString(w.reportHeader("Players In This League"))
-	fmt.Fprintf(&b, "%-28s %-20s %10s %10s\n", "Planet", "Realm", "Net Worth", "Score")
-	fmt.Fprintf(&b, "%s\n", strings.Repeat("-", 72))
-
+	type row struct {
+		board, player, hash, lockedBy string
+		enforced                      bool
+		netWorth, score               int
+	}
+	var rows []row
 	local := w.Config.BoardID
 	if local == "" {
 		local = "this board"
 	}
-	rows := 0
 	for _, e := range w.Empires {
 		if e.Alive && e.Owner != "" {
-			fmt.Fprintf(&b, "%-28s %-20s %10d %10d\n", FitColumn(local, 27), FitColumn(e.Name, 19), w.NetWorth(e), e.Score)
-			rows++
+			rows = append(rows, row{board: local, player: e.Owner, hash: dupeHash(e.Owner),
+				lockedBy: e.DupeLockedBy, enforced: w.DupeLocked(e), netWorth: w.NetWorth(e), score: e.Score})
 		}
 	}
 	boards := append([]RemoteBoard(nil), w.RemoteBoards...)
 	sort.Slice(boards, func(i, j int) bool { return boards[i].BoardID < boards[j].BoardID })
 	for _, rb := range boards {
 		for _, s := range rb.Scores {
-			fmt.Fprintf(&b, "%-28s %-20s %10d %10d\n", FitColumn(rb.BoardID, 27), FitColumn(s.Empire, 19), s.NetWorth, s.Score)
-			rows++
+			rows = append(rows, row{board: rb.BoardID, player: s.Empire, hash: s.OwnerHash,
+				netWorth: s.NetWorth, score: s.Score})
 		}
 	}
-	if rows == 0 {
+
+	// A letter goes only to an owner seen on two rows or more, in the order the
+	// rows first meet it, so the marks read top to bottom.
+	count := map[string]int{}
+	for _, r := range rows {
+		if r.hash != "" {
+			count[r.hash]++
+		}
+	}
+	group := map[string]string{}
+	for _, r := range rows {
+		if count[r.hash] > 1 && group[r.hash] == "" {
+			group[r.hash] = ownerGroupLabel(len(group))
+		}
+	}
+
+	var b strings.Builder
+	b.WriteString(w.reportHeader("Players In This League"))
+	b.WriteString("Player is the caller's handle for this board's realms and the realm name\n")
+	b.WriteString("for other boards', which send no handles. Rows sharing an Owner letter\n")
+	b.WriteString("belong to the same caller.\n")
+	if !w.dupeCheckingOn() {
+		b.WriteString("Duplicate checking is off, so other boards send no owner to compare and\n")
+		b.WriteString("their rows cannot be marked.\n")
+	}
+	b.WriteString("\n")
+	fmt.Fprintf(&b, "%-22s %-22s %12s %10s  %s\n", "Planet", "Player", "Net Worth", "Score", "Owner")
+	fmt.Fprintf(&b, "%s\n", strings.Repeat("-", 75))
+	for _, r := range rows {
+		line := fmt.Sprintf("%-22s %-22s %12d %10d  %s", FitColumn(r.board, 21), FitColumn(r.player, 21),
+			r.netWorth, r.score, group[r.hash])
+		b.WriteString(strings.TrimRight(line, " ") + "\n")
+		if r.lockedBy != "" {
+			fmt.Fprintf(&b, "  locked out by duplicate checking: %s\n", FitColumn(r.lockedBy, 43))
+			if !r.enforced {
+				b.WriteString("  (not enforced while duplicate checking is off)\n")
+			}
+		}
+	}
+	if len(rows) == 0 {
 		b.WriteString("No realms are known yet.\n")
 	}
 	return b.String()
+}
+
+// ownerGroupLabel names the n-th same-owner group A, B, … Z, AA, AB, …, so a
+// league with more than 26 shared owners still gets a distinct mark for each.
+func ownerGroupLabel(n int) string {
+	label := ""
+	for n++; n > 0; n = (n - 1) / 26 {
+		label = string(rune('A'+(n-1)%26)) + label
+	}
+	return label
 }
 
 // versionAtLeast reports whether have is the same as, or newer than, want.

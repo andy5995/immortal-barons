@@ -1244,6 +1244,13 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   refused at login with the board that reported them; the lock lifts when that
   board stops listing them, or when the Coordinator turns the switch off —
   `World.DupeLocked` reads the switch at the gate rather than clearing state.
+  The League Coordinator's `-playerlist` report (`PLAYERLIST.LST`) is where the
+  results show. BRE's version names every caller in the league by handle, read
+  from its dupe file. IB names this board's callers by handle and other boards'
+  realms by realm name, since no handle crosses the wire. Rows whose owner hash
+  matches share a letter in its Owner column, a local caller included, and a
+  locked realm names the board that locked it. The report says when checking is
+  off, because remote rows then carry no hash and cannot be marked.
 
 All three ride the `LeagueConfig` broadcast, since a league has to agree on them.
 

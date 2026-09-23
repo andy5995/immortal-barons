@@ -35,11 +35,84 @@ func TestLeagueReports(t *testing.T) {
 		t.Errorf("LASTPACKET missing the processed stamp:\n%s", last)
 	}
 
-	// The player list spans every board — this one's realms and the others'.
+	// The player list spans every board — this one's callers and the others'
+	// realms.
 	players := w.PlayerListReport()
-	for _, want := range []string{"Ironhold", "Redlands", "Alpha BBS", "Bravo BBS"} {
+	for _, want := range []string{"Redlands", "Alpha BBS", "Bravo BBS"} {
 		if !strings.Contains(players, want) {
 			t.Errorf("PLAYERLIST missing %q:\n%s", want, players)
+		}
+	}
+}
+
+// #283: the player list exists to find duplicate accounts. A local row names
+// the caller, a remote row keeps the realm name (no handle crosses the wire),
+// the owner hash groups a local caller with their realm on another board, and
+// a lock set by duplicate checking is shown with the board that set it.
+func TestPlayerListNamesCallersAndMarksSharedOwners(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID, cfg.DupeChecking = true, "Alpha BBS", true
+	w := NewWorldSeed(cfg, 1)
+	w.AddHuman("Grimwald", "Ironhold")
+	w.AddHuman("Tessaly", "Marrowmere")
+	w.ImportBoard(RemoteBoard{BoardID: "Bravo BBS", Scores: []RemoteScore{
+		{Empire: "Redlands", NetWorth: 4860, Score: 2130, OwnerHash: dupeHash("grimwald")},
+		{Empire: "Stoneacre", NetWorth: 900, Score: 400, OwnerHash: dupeHash("someone else")},
+	}})
+	w.applyDupeCheck("Bravo BBS", w.RemoteBoards[0].Scores)
+
+	got := w.PlayerListReport()
+	line := func(sub string) string {
+		for _, l := range strings.Split(got, "\n") {
+			if strings.Contains(l, sub) {
+				return l
+			}
+		}
+		t.Fatalf("no row contains %q:\n%s", sub, got)
+		return ""
+	}
+	if strings.Contains(got, "Ironhold") || strings.Contains(got, "Marrowmere") {
+		t.Errorf("a local row shows its realm instead of the caller:\n%s", got)
+	}
+	grim, red := line("grimwald"), line("Redlands")
+	if !strings.HasSuffix(grim, "  A") || !strings.HasSuffix(red, "  A") {
+		t.Errorf("a local caller and their remote realm should share mark A:\n%s", got)
+	}
+	for _, sub := range []string{"tessaly", "Stoneacre"} {
+		if l := line(sub); strings.HasSuffix(l, "  A") || strings.HasSuffix(l, "  B") {
+			t.Errorf("a realm with no second owner row was marked: %q", l)
+		}
+	}
+	if !strings.Contains(got, "locked out by duplicate checking: Bravo BBS") {
+		t.Errorf("the lock and the board that set it are missing:\n%s", got)
+	}
+	if strings.Contains(got, "not enforced") || strings.Contains(got, "Duplicate checking is off") {
+		t.Errorf("checking is on, but the report says otherwise:\n%s", got)
+	}
+	for _, l := range strings.Split(got, "\n") {
+		if n := len([]rune(l)); n > 79 {
+			t.Errorf("line is %d columns: %q", n, l)
+		}
+	}
+
+	// With checking off, other boards send no owner hash, so an unmarked row
+	// is not evidence of no duplicate — the report has to say so, and a lock
+	// still on record is shown as not enforced.
+	w.Config.DupeChecking = false
+	w.ImportBoard(RemoteBoard{BoardID: "Bravo BBS", Scores: []RemoteScore{{Empire: "Redlands", NetWorth: 4860, Score: 2130}}})
+	got = w.PlayerListReport()
+	if !strings.Contains(got, "Duplicate checking is off") {
+		t.Errorf("an LC with checking off is not told the marks cannot appear:\n%s", got)
+	}
+	if !strings.Contains(got, "not enforced while duplicate checking is off") {
+		t.Errorf("a lock recorded but not enforced is not labeled:\n%s", got)
+	}
+}
+
+func TestOwnerGroupLabel(t *testing.T) {
+	for n, want := range map[int]string{0: "A", 25: "Z", 26: "AA", 27: "AB", 51: "AZ", 52: "BA", 701: "ZZ", 702: "AAA"} {
+		if got := ownerGroupLabel(n); got != want {
+			t.Errorf("ownerGroupLabel(%d) = %q, want %q", n, got, want)
 		}
 	}
 }

@@ -342,7 +342,8 @@ has the detail):
 - `-bbsinfo` — the same, plus the release each board runs, marking any below a
   version the Coordinator requires. This is where a version refusal is confirmed
   from your side.
-- `-playerlist` — every realm on every board. Coordinator only.
+- `-playerlist` — every realm on every board, with realms that share a caller
+  marked and any duplicate-checking lock shown. Coordinator only.
 
 A board missing from these entirely was never heard from at all, which points at
 the roster or the routing rather than at that board.

@@ -225,7 +225,13 @@ These options are for games that link several BBSes together (a "league"). See
   mark stops anything: they say what is true, and the fix is the coordinator's
   next broadcast or the sysop's own config.
 - **`-playerlist`** — Write `PLAYERLIST.LST`, then exit: every realm on every
-  board. Only the league coordinator (node #1) may write this one.
+  board. A realm on this board is listed by its caller's BBS handle; a realm on
+  another board by its name, because boards do not send handles to each other.
+  Rows with the same letter in the Owner column belong to one caller, matched
+  through the duplicate-checking owner hash, so the letters appear across boards
+  only while Dupe Checking is on. A realm locked out by duplicate
+  checking says which board locked it. Only the league coordinator (node #1)
+  may write this one.
 
 The three `.LST` reports are written into the data directory, and are built from
 what packets have already told this board — none of them changes the game.
