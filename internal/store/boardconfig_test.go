@@ -349,3 +349,33 @@ func TestLegacyBoardKeysAreRefusedWithTheirReplacements(t *testing.T) {
 		t.Errorf("a current bbs.cfg was refused: %v", err)
 	}
 }
+
+// A sysop lining values up in columns uses tabs or runs of spaces. Either
+// separates a key from its value, and a value keeps the spaces inside it.
+func TestBoardConfigAcceptsTabsAndRunsOfSpaces(t *testing.T) {
+	dir := t.TempDir()
+	body := "BoardID\tThe X-Bit BBS\n" +
+		"LeagueNumber    777\n" +
+		"GameInbound\t \t" + `C:\SBBS\ib in` + "\n" +
+		"GameOutbound 3\t/srv/filebox/node 3\n"
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := game.DefaultConfig()
+	cfg.DataDir = dir
+	if err := LoadBoardConfig(dir, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.BoardID != "The X-Bit BBS" {
+		t.Errorf("BoardID = %q, want %q", cfg.BoardID, "The X-Bit BBS")
+	}
+	if cfg.LeagueNumber != 777 {
+		t.Errorf("LeagueNumber = %d, want 777", cfg.LeagueNumber)
+	}
+	if !strings.HasSuffix(cfg.Inbound(), `C:\SBBS\ib in`) {
+		t.Errorf("GameInbound = %q, want it to end in %q", cfg.Inbound(), `C:\SBBS\ib in`)
+	}
+	if got := cfg.OutboundDirs[3]; got != "/srv/filebox/node 3" {
+		t.Errorf("GameOutbound 3 = %q, want %q", got, "/srv/filebox/node 3")
+	}
+}

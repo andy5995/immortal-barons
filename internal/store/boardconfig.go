@@ -42,6 +42,13 @@ const (
 	keyOnFault  = "OnFault"
 )
 
+// BoardKeys are the bbs.cfg keywords this reader recognizes. The transport's
+// are ftn.Keys; a key in neither list is a line nothing reads.
+func BoardKeys() []string {
+	return []string{keyBoardID, keyBBSName, keyBoardURL, keyBullURL, keyLeague,
+		keyInbound, keyOutbound, keyLottery, keyBulletin, keyPirate, keyOnFault}
+}
+
 // boolWord maps the words a sysop is likely to write to what ParseBool takes.
 // The original's own configuration file spells its booleans "yes" and "no".
 func boolWord(v string) string {
@@ -79,8 +86,7 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";") {
 			continue
 		}
-		key, rest, _ := strings.Cut(line, " ")
-		value := strings.TrimSpace(rest)
+		key, value, _ := SplitKey(line)
 		switch {
 		case strings.EqualFold(key, keyBoardID):
 			cfg.BoardID = value
@@ -183,15 +189,27 @@ func migrateBoardConfig(dataDir string, cfg game.Config) {
 	os.WriteFile(boardConfigPath(dataDir), []byte(BoardConfigText(cfg)), 0o644)
 }
 
+// SplitKey splits a bbs.cfg line into its key and its value at the first space
+// or tab, trimming the value but keeping the spaces inside it (a Windows path
+// may hold some). ok is false when the line holds a key alone. A sysop lining
+// values up in columns reaches for tabs, and a split on spaces alone read such
+// a line as one long unknown key and dropped the setting without a word.
+func SplitKey(line string) (key, value string, ok bool) {
+	i := strings.IndexAny(line, " \t")
+	if i < 0 {
+		return line, "", false
+	}
+	return line[:i], strings.TrimSpace(line[i+1:]), true
+}
+
 // perNodeDir splits "<node> <dir>" when value starts with a node number and has
 // more after it.
 func perNodeDir(value string) (int, string, bool) {
-	node, dir, ok := strings.Cut(value, " ")
+	node, dir, ok := SplitKey(value)
 	if !ok {
 		return 0, "", false
 	}
 	n, err := strconv.Atoi(node)
-	dir = strings.TrimSpace(dir)
 	if err != nil || n < 1 || n > game.MaxNodeNumber || dir == "" {
 		return 0, "", false
 	}
@@ -222,8 +240,7 @@ func LegacyBoardRefusal(dataDir string) error {
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
 		line := strings.TrimSpace(sc.Text())
-		key, rest, _ := strings.Cut(line, " ")
-		value := strings.TrimSpace(rest)
+		key, value, _ := SplitKey(line)
 		switch {
 		case strings.EqualFold(key, "Inbound"):
 			old, repl = append(old, line), append(repl, keyInbound+" "+value)

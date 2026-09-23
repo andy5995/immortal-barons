@@ -21,8 +21,8 @@ const LegacyConfigFile = "ftn.cfg"
 
 // The bbs.cfg keywords this package reads. The game's own reader ignores them,
 // as it ignores every keyword it does not know, so one file serves both.
-// IncomingFileDir, OutgoingNetmailDir and Mailer are the original's BBS.CFG lines 4, 5
-// and 7, named after the labels its manual gives them.
+// IncomingFileDir, OutgoingNetmailDir and Mailer hold what the original's
+// positional BBS.CFG holds on lines 4, 5 and 7.
 const (
 	keyIncomingFileDir    = "IncomingFileDir"
 	keyOutgoingNetmailDir = "OutgoingNetmailDir"
@@ -34,6 +34,13 @@ const (
 	keyOboxMeshFanout     = "OboxMeshFanout"
 	keySubjectPath        = "SubjectPath"
 )
+
+// Keys are the bbs.cfg keywords the transport reads, for a check that names
+// any line neither this reader nor store's recognizes.
+func Keys() []string {
+	return []string{keyIncomingFileDir, keyOutgoingNetmailDir, keyIncomingNetmailDir,
+		keyAttachDir, keyMailer, keyLink, keyBundled, keyOboxMeshFanout, keySubjectPath}
+}
 
 // mailers is the original's list for BBS.CFG line 7, in the casing IB writes
 // it. Only Binkley changes what the game does (the ^ on the attach Subject),
@@ -197,11 +204,10 @@ func LoadConfig(dataDir string) (Config, error) {
 		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";") {
 			continue
 		}
-		key, value, ok := strings.Cut(line, " ")
+		key, value, ok := store.SplitKey(line)
 		if !ok {
 			continue
 		}
-		value = strings.TrimSpace(value)
 		switch {
 		case strings.EqualFold(key, keyOutgoingNetmailDir):
 			cfg.OutgoingNetmailDir = value

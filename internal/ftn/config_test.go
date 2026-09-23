@@ -293,3 +293,26 @@ func TestNoTransportLinesMeansNoTransport(t *testing.T) {
 		t.Fatalf("game lines only: %+v, %v", cfg, err)
 	}
 }
+
+// The transport's lines are read the same way as the board's: a tab or a run of
+// spaces separates key from value.
+func TestConfigAcceptsTabsAndRunsOfSpaces(t *testing.T) {
+	dir := t.TempDir()
+	body := "IncomingFileDir\tmailer in\nOutgoingNetmailDir     netmail\nMailer\t\tBinkley\n"
+	if err := os.WriteFile(filepath.Join(dir, store.BoardConfigFile), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := filepath.Join(dir, "mailer in"); cfg.IncomingFileDir != want {
+		t.Errorf("IncomingFileDir = %q, want %q", cfg.IncomingFileDir, want)
+	}
+	if want := filepath.Join(dir, "netmail"); cfg.OutgoingNetmailDir != want {
+		t.Errorf("OutgoingNetmailDir = %q, want %q", cfg.OutgoingNetmailDir, want)
+	}
+	if !cfg.Binkley {
+		t.Error("Mailer<TAB><TAB>Binkley was not read")
+	}
+}

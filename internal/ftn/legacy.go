@@ -41,8 +41,7 @@ func LegacyRefusal(dataDir string) error {
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
 		line := strings.TrimSpace(sc.Text())
-		key, rest, _ := strings.Cut(line, " ")
-		value := strings.TrimSpace(rest)
+		key, value, _ := store.SplitKey(line)
 		if strings.EqualFold(key, "Binkley") {
 			if on, err := parseYesNo(value); err == nil && on {
 				lines = append(lines, keyMailer+" Binkley")

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -36,10 +38,79 @@ func checkTransportSettings(cfg game.Config) error {
 			msgs = append(msgs, err.Error())
 		}
 	}
-	if len(msgs) == 0 {
+	if len(msgs) > 0 {
+		return errors.New(strings.Join(msgs, "\n\n"))
+	}
+	for _, w := range unknownBoardKeys(cfg.DataDir) {
+		transportWarn(w)
+	}
+	return nil
+}
+
+// unknownBoardKeys names every bbs.cfg line whose key no reader recognizes. Both
+// readers skip unknown keys, since they share the file and each skips the
+// other's, so without this a misspelled key falls back to its default in
+// silence: a misspelled GameInbound leaves the board reading "inbound" and
+// going quiet. It warns rather than refuses, because the board still runs on
+// its defaults. Old spellings are refused before this runs.
+func unknownBoardKeys(dataDir string) []string {
+	f, err := os.Open(filepath.Join(dataDir, store.BoardConfigFile))
+	if err != nil {
 		return nil
 	}
-	return errors.New(strings.Join(msgs, "\n\n"))
+	defer f.Close()
+	known := append(store.BoardKeys(), ftn.Keys()...)
+	var warnings []string
+	sc := bufio.NewScanner(f)
+	for n := 1; sc.Scan(); n++ {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";") {
+			continue
+		}
+		key, _, _ := store.SplitKey(line)
+		if slices.ContainsFunc(known, func(k string) bool { return strings.EqualFold(k, key) }) {
+			continue
+		}
+		w := fmt.Sprintf("%s line %d: unknown setting %q is ignored", store.BoardConfigFile, n, key)
+		if near := nearestKey(key, known); near != "" {
+			w += fmt.Sprintf(" (did you mean %s?)", near)
+		}
+		warnings = append(warnings, w)
+	}
+	return warnings
+}
+
+// nearestKey is the known key closest to key by edit distance, when it is close
+// enough to be a likely misspelling: within a third of the key's length.
+func nearestKey(key string, known []string) string {
+	best, bestD := "", len(key)/3+1
+	for _, k := range known {
+		if d := editDistance(strings.ToLower(key), strings.ToLower(k)); d < bestD {
+			best, bestD = k, d
+		}
+	}
+	return best
+}
+
+// editDistance is the Levenshtein distance between a and b.
+func editDistance(a, b string) int {
+	prev := make([]int, len(b)+1)
+	for j := range prev {
+		prev[j] = j
+	}
+	for i := 1; i <= len(a); i++ {
+		cur := make([]int, len(b)+1)
+		cur[0] = i
+		for j := 1; j <= len(b); j++ {
+			cost := 1
+			if a[i-1] == b[j-1] {
+				cost = 0
+			}
+			cur[j] = min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost)
+		}
+		prev = cur
+	}
+	return prev[len(b)]
 }
 
 // transportIn unwraps what the mailer delivered into the game's inbound. It
