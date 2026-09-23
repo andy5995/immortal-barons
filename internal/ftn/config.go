@@ -4,10 +4,11 @@
 package ftn
 
 import (
-	"bufio"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -35,11 +36,71 @@ const (
 	keySubjectPath        = "SubjectPath"
 )
 
-// Keys are the bbs.cfg keywords the transport reads, for a check that names
-// any line neither this reader nor store's recognizes.
+// Keys are the bbs.cfg keywords the transport reads, sorted, for a check that
+// names any line neither this reader nor store's recognizes. It is derived
+// from settings, so it cannot name a key LoadConfig does not read, or miss one.
 func Keys() []string {
-	return []string{keyIncomingFileDir, keyOutgoingNetmailDir, keyIncomingNetmailDir,
-		keyAttachDir, keyMailer, keyLink, keyBundled, keyOboxMeshFanout, keySubjectPath}
+	return slices.Sorted(maps.Keys(settings))
+}
+
+// settings applies each bbs.cfg keyword the transport reads to a Config. An
+// error is refused by LoadConfig, prefixed with the file's path.
+var settings = map[string]func(cfg *Config, value, dataDir string) error{
+	keyOutgoingNetmailDir: func(cfg *Config, v, _ string) error { cfg.OutgoingNetmailDir = v; return nil },
+	keyAttachDir:          func(cfg *Config, v, _ string) error { cfg.AttachDir = v; return nil },
+	keyIncomingFileDir: func(cfg *Config, v, _ string) error {
+		cfg.IncomingFileDirs = append(cfg.IncomingFileDirs, v)
+		return nil
+	},
+	keyIncomingNetmailDir: func(cfg *Config, v, _ string) error { cfg.IncomingNetmailDir = v; return nil },
+	keyBundled: func(cfg *Config, v, _ string) error {
+		b, err := store.ParseYesNo(v)
+		if err != nil {
+			return fmt.Errorf("%s: %w", keyBundled, err)
+		}
+		cfg.Bundled = b
+		return nil
+	},
+	keyOboxMeshFanout: func(cfg *Config, v, _ string) error {
+		b, err := store.ParseYesNo(v)
+		if err != nil {
+			return fmt.Errorf("%s: %w", keyOboxMeshFanout, err)
+		}
+		cfg.OboxMeshFanout = b
+		return nil
+	},
+	keyLink: func(cfg *Config, v, dataDir string) error {
+		node, link, err := parseLink(v, dataDir)
+		if err != nil {
+			return fmt.Errorf("%s %s: %w", keyLink, v, err)
+		}
+		cfg.Links[node] = link
+		return nil
+	},
+	keySubjectPath: func(cfg *Config, v, _ string) error {
+		switch {
+		case strings.EqualFold(v, "Absolute"):
+			cfg.SubjectMode = SubjectAbsolute
+		case strings.EqualFold(v, "Basename"):
+			cfg.SubjectMode = SubjectBasename
+		default:
+			cfg.SubjectMode = SubjectPrefixed
+			cfg.SubjectPrefix = v
+		}
+		return nil
+	},
+	keyMailer: func(cfg *Config, v, _ string) error {
+		// Refused rather than defaulted: a misspelled None would go on writing
+		// netmail, and a misspelled Binkley would silently drop the ^ its
+		// tosser relies on.
+		m, ok := CanonicalMailer(v)
+		if !ok {
+			return fmt.Errorf("%s %q is not one of %s", keyMailer, v, strings.Join(mailers, ", "))
+		}
+		cfg.Binkley = m == "Binkley"
+		cfg.NoNetmail = m == "None"
+		return nil
+	},
 }
 
 // mailers is the original's list for BBS.CFG line 7, in the casing IB writes
@@ -79,9 +140,8 @@ const (
 // Config contains settings local to the FTN transport.
 type Config struct {
 	OutgoingNetmailDir string
-	// Mailer is the Mailer line, canonical; empty when the line is absent,
-	// which behaves as Other. Binkley and NoNetmail are what it decides.
-	Mailer    string
+	// Binkley and NoNetmail are what the Mailer line decides; with no line,
+	// both are false, which behaves as Other.
 	Binkley   bool
 	NoNetmail bool
 	// AttachDir is where a claimed packet is written for an Attach or BSO
@@ -189,80 +249,22 @@ func joinSubject(prefix, base string) string {
 func LoadConfig(dataDir string) (Config, error) {
 	path := filepath.Join(dataDir, store.BoardConfigFile)
 	cfg := Config{OboxMeshFanout: true, Links: map[int]Link{}}
-	f, err := os.Open(path)
-	if os.IsNotExist(err) {
-		return cfg, nil
-	}
+	lines, err := store.BoardLines(dataDir)
 	if err != nil {
 		return Config{}, err
 	}
-	defer f.Close()
-
-	sc := bufio.NewScanner(f)
-	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
-		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";") {
+	for _, l := range lines {
+		if l.Value == "" {
 			continue
 		}
-		key, value, ok := store.SplitKey(line)
-		if !ok {
-			continue
+		for key, set := range settings {
+			if !strings.EqualFold(key, l.Key) {
+				continue
+			}
+			if err := set(&cfg, l.Value, dataDir); err != nil {
+				return Config{}, fmt.Errorf("%s: %w", path, err)
+			}
 		}
-		switch {
-		case strings.EqualFold(key, keyOutgoingNetmailDir):
-			cfg.OutgoingNetmailDir = value
-		case strings.EqualFold(key, keyAttachDir):
-			cfg.AttachDir = value
-		case strings.EqualFold(key, keyIncomingFileDir):
-			if value != "" {
-				cfg.IncomingFileDirs = append(cfg.IncomingFileDirs, value)
-			}
-		case strings.EqualFold(key, keyIncomingNetmailDir):
-			cfg.IncomingNetmailDir = value
-		case strings.EqualFold(key, keyBundled):
-			b, err := parseYesNo(value)
-			if err != nil {
-				return Config{}, fmt.Errorf("%s: %s: %w", path, keyBundled, err)
-			}
-			cfg.Bundled = b
-		case strings.EqualFold(key, keyOboxMeshFanout):
-			b, err := parseYesNo(value)
-			if err != nil {
-				return Config{}, fmt.Errorf("%s: %s: %w", path, keyOboxMeshFanout, err)
-			}
-			cfg.OboxMeshFanout = b
-		case strings.EqualFold(key, keyLink):
-			node, link, err := parseLink(value, dataDir)
-			if err != nil {
-				return Config{}, fmt.Errorf("%s: %s %s: %w", path, keyLink, value, err)
-			}
-			cfg.Links[node] = link
-		case strings.EqualFold(key, keySubjectPath):
-			switch {
-			case strings.EqualFold(value, "Absolute"):
-				cfg.SubjectMode = SubjectAbsolute
-			case strings.EqualFold(value, "Basename"):
-				cfg.SubjectMode = SubjectBasename
-			default:
-				cfg.SubjectMode = SubjectPrefixed
-				cfg.SubjectPrefix = value
-			}
-		case strings.EqualFold(key, keyMailer):
-			// Refused rather than defaulted: a misspelled None would go on
-			// writing netmail, and a misspelled Binkley would silently drop
-			// the ^ its tosser relies on.
-			m, ok := CanonicalMailer(value)
-			if !ok {
-				return Config{}, fmt.Errorf("%s: %s %q is not one of %s",
-					path, keyMailer, value, strings.Join(mailers, ", "))
-			}
-			cfg.Mailer = m
-			cfg.Binkley = m == "Binkley"
-			cfg.NoNetmail = m == "None"
-		}
-	}
-	if err := sc.Err(); err != nil {
-		return Config{}, err
 	}
 	if cfg.NoNetmail {
 		for node, link := range cfg.Links {
@@ -326,14 +328,18 @@ func (c Config) netmailDirs() []string {
 	return c.IncomingFileDirs
 }
 
-func parseYesNo(value string) (bool, error) {
-	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "yes", "true", "on", "1":
-		return true, nil
-	case "no", "false", "off", "0":
-		return false, nil
+// IsLink reports whether value, the part of a bbs.cfg Link line after the
+// key, is written in the transport's Link grammar rather than as the
+// per-neighbor directory bbs.cfg once spelled "Link <node> <dir>". A malformed
+// Obox or BSO line still counts, so LoadConfig names what is wrong with it;
+// the mode alone cannot, since a directory may be named obox, but those two
+// modes always name a directory after it.
+func IsLink(value string) bool {
+	if _, _, err := parseLink(value, ""); err == nil {
+		return true
 	}
-	return false, fmt.Errorf("want Yes or No, got %q", strings.TrimSpace(value))
+	fields := strings.Fields(value)
+	return len(fields) >= 3 && (strings.EqualFold(fields[1], "obox") || strings.EqualFold(fields[1], "bso"))
 }
 
 func parseLink(value, dataDir string) (int, Link, error) {
@@ -409,10 +415,9 @@ func normalFlavour(s string) string {
 // RequireNetmail reports whether this configuration can publish an attach
 // handoff, and says what is missing when it cannot. It is asked by the handoff
 // at the point of use rather than by LoadConfig, because the unwrap step never
-// writes netmail: a
-// file-box board that only RECEIVES has no netmail directory to name, and
-// refusing to load its config told it to fix the one setting its runs never
-// touch (found on a three-board rig, 2026-08-27).
+// writes netmail: a file-box board that only RECEIVES has no netmail directory
+// to name, and refusing to load its config told it to fix the one setting its
+// runs never touch (found on a three-board rig, 2026-08-27).
 func RequireNetmail(cfg Config, dataDir string) error {
 	need := len(cfg.Links) == 0
 	for _, link := range cfg.Links {

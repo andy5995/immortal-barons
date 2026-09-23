@@ -43,7 +43,7 @@ func LegacyRefusal(dataDir string) error {
 		line := strings.TrimSpace(sc.Text())
 		key, value, _ := store.SplitKey(line)
 		if strings.EqualFold(key, "Binkley") {
-			if on, err := parseYesNo(value); err == nil && on {
+			if on, err := store.ParseYesNo(value); err == nil && on {
 				lines = append(lines, keyMailer+" Binkley")
 			}
 			continue

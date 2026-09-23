@@ -42,23 +42,162 @@ const (
 	keyOnFault  = "OnFault"
 )
 
-// BoardKeys are the bbs.cfg keywords this reader recognizes. The transport's
-// are ftn.Keys; a key in neither list is a line nothing reads.
-func BoardKeys() []string {
-	return []string{keyBoardID, keyBBSName, keyBoardURL, keyBullURL, keyLeague,
-		keyInbound, keyOutbound, keyLottery, keyBulletin, keyPirate, keyOnFault}
+// boardSetters applies each bbs.cfg keyword this reader recognizes to a
+// config. BoardKeys is derived from it, so the list of known keys and the keys
+// actually read cannot drift apart. A setter's error is a value it could not
+// use and left the default in place for; BoardWarnings reports it.
+var boardSetters = map[string]func(cfg *game.Config, value string) error{
+	keyBoardID:  func(cfg *game.Config, v string) error { cfg.BoardID = v; return nil },
+	keyBBSName:  func(cfg *game.Config, v string) error { cfg.BBSName = v; return nil },
+	keyBoardURL: func(cfg *game.Config, v string) error { cfg.BoardURL = v; return nil },
+	keyBullURL:  func(cfg *game.Config, v string) error { cfg.BulletinURL = v; return nil },
+	keyLeague: func(cfg *game.Config, v string) error {
+		// Out of range is left unset (0, "never set") rather than failing the
+		// whole import, the way the roster parser drops one bad node line
+		// instead of the file. game.MaxLeagueNumber was declared for this
+		// bound and nothing had applied it, so any number at all was taken —
+		// and the league number reaches packet filenames.
+		if n, err := strconv.Atoi(v); err == nil && n >= 1 && n <= game.MaxLeagueNumber {
+			cfg.LeagueNumber = n
+		}
+		return nil
+	},
+	keyInbound: func(cfg *game.Config, v string) error { cfg.InboundDir = v; return nil },
+	keyOutbound: func(cfg *game.Config, v string) error {
+		// "GameOutbound <node> <dir>" is one neighbor's own directory (#106);
+		// a bare "GameOutbound <dir>" is everyone else's. A directory whose
+		// name is a number still works on its own, since only a number
+		// followed by more is read as a node.
+		if n, dir, ok := perNodeDir(v); ok {
+			if cfg.OutboundDirs == nil {
+				cfg.OutboundDirs = map[int]string{}
+			}
+			cfg.OutboundDirs[n] = dir
+			return nil
+		}
+		cfg.OutboundDir = v
+		return nil
+	},
+	keyBulletin: func(cfg *game.Config, v string) error { cfg.BulletinDir = v; return nil },
+	keyLottery:  func(cfg *game.Config, v string) error { return setYesNo(&cfg.Lottery, v) },
+	keyOnFault:  func(cfg *game.Config, v string) error { cfg.OnFault = v; return nil },
+	keyPirate:   func(cfg *game.Config, v string) error { return setYesNo(&cfg.PirateNews, v) },
 }
 
-// boolWord maps the words a sysop is likely to write to what ParseBool takes.
-// The original's own configuration file spells its booleans "yes" and "no".
-func boolWord(v string) string {
-	switch strings.ToLower(strings.TrimSpace(v)) {
-	case "yes", "on":
-		return "true"
-	case "no", "off":
-		return "false"
+// BoardKeys are the bbs.cfg keywords this reader recognizes, sorted. The
+// transport's are ftn.Keys; a key in neither list is a line nothing reads.
+func BoardKeys() []string {
+	return slices.Sorted(maps.Keys(boardSetters))
+}
+
+// ParseYesNo reads a bbs.cfg switch. The original's own configuration file
+// spells its booleans "yes" and "no"; the other spellings are the ones a sysop
+// is likely to reach for.
+func ParseYesNo(value string) (bool, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "yes", "true", "on", "1":
+		return true, nil
+	case "no", "false", "off", "0":
+		return false, nil
 	}
-	return v
+	return false, fmt.Errorf("want Yes or No, got %q", strings.TrimSpace(value))
+}
+
+// setYesNo sets *dst from a switch's value. A value that is not a yes or a no
+// is returned as an error and leaves *dst alone; a key with no value at all is
+// not an error, as the transport's reader skips such a line.
+func setYesNo(dst *bool, value string) error {
+	if value == "" {
+		return nil
+	}
+	b, err := ParseYesNo(value)
+	if err != nil {
+		return err
+	}
+	*dst = b
+	return nil
+}
+
+// BoardLine is one setting line of bbs.cfg.
+type BoardLine struct {
+	N     int    // the line number, from 1
+	Key   string // as written; readers match it case-insensitively
+	Value string // see SplitKey
+	Raw   string // the whole line, trimmed
+}
+
+// BoardLines reads <dataDir>/bbs.cfg and returns its setting lines, leaving out
+// blank lines and comments (a line starting with # or ;). Every reader of the
+// file goes through here, so all of them agree on what a line is. A missing
+// file has no lines and is not an error.
+func BoardLines(dataDir string) ([]BoardLine, error) {
+	f, err := os.Open(boardConfigPath(dataDir))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+	var lines []BoardLine
+	sc := bufio.NewScanner(f)
+	for n := 1; sc.Scan(); n++ {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";") {
+			continue
+		}
+		key, value, _ := SplitKey(line)
+		lines = append(lines, BoardLine{N: n, Key: key, Value: value, Raw: line})
+	}
+	return lines, sc.Err()
+}
+
+// boardSetter finds key's setter, ignoring case.
+func boardSetter(key string) func(*game.Config, string) error {
+	for k, set := range boardSetters {
+		if strings.EqualFold(k, key) {
+			return set
+		}
+	}
+	return nil
+}
+
+// BoardWarnings names every bbs.cfg line that is read as nothing: a key that is
+// neither one of BoardKeys nor one of transportKeys (ftn.Keys, which this
+// package cannot import), and a value this reader cannot use.
+//
+// Both readers skip unknown keys, since they share the file and each skips the
+// other's, so without this a misspelled key falls back to its default in
+// silence: a misspelled GameInbound leaves the board reading "inbound" and
+// going quiet. It warns rather than refuses, because the board still runs on
+// its defaults, and a typo in a switch must never stop a caller's session. Old
+// spellings are refused before this runs.
+func BoardWarnings(dataDir string, transportKeys []string) []string {
+	lines, err := BoardLines(dataDir)
+	if err != nil {
+		return nil
+	}
+	known := append(BoardKeys(), transportKeys...)
+	var warnings []string
+	var scratch game.Config
+	for _, l := range lines {
+		if set := boardSetter(l.Key); set != nil {
+			if err := set(&scratch, l.Value); err != nil {
+				warnings = append(warnings, fmt.Sprintf("%s line %d: %s: %v; the default stands",
+					BoardConfigFile, l.N, l.Key, err))
+			}
+			continue
+		}
+		if slices.ContainsFunc(known, func(k string) bool { return strings.EqualFold(k, l.Key) }) {
+			continue
+		}
+		w := fmt.Sprintf("%s line %d: unknown setting %q is ignored", BoardConfigFile, l.N, l.Key)
+		if near, ok := NearestName(l.Key, known); ok {
+			w += fmt.Sprintf(" (did you mean %s?)", near)
+		}
+		warnings = append(warnings, w)
+	}
+	return warnings
 }
 
 func boardConfigPath(dataDir string) string { return filepath.Join(dataDir, BoardConfigFile) }
@@ -67,74 +206,23 @@ func boardConfigPath(dataDir string) string { return filepath.Join(dataDir, Boar
 // alone, which is what makes the migration in LoadConfig work: values read from
 // an older config.json stand until this file is written for the first time.
 //
-// An unknown keyword is ignored rather than refused. This file is hand-edited,
-// often by someone following a newer version's documentation, and a board that
-// will not start is a worse answer than a setting that does nothing.
+// An unknown keyword, or a switch that is neither yes nor no, is ignored rather
+// than refused (BoardWarnings names both). This file is hand-edited, often by
+// someone following a newer version's documentation, and a board that will not
+// start is a worse answer than a setting that does nothing.
 func LoadBoardConfig(dataDir string, cfg *game.Config) error {
-	f, err := os.Open(boardConfigPath(dataDir))
+	lines, err := BoardLines(dataDir)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
 		return err
 	}
-	defer f.Close()
-
-	sc := bufio.NewScanner(f)
-	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
-		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";") {
-			continue
-		}
-		key, value, _ := SplitKey(line)
-		switch {
-		case strings.EqualFold(key, keyBoardID):
-			cfg.BoardID = value
-		case strings.EqualFold(key, keyBBSName):
-			cfg.BBSName = value
-		case strings.EqualFold(key, keyBoardURL):
-			cfg.BoardURL = value
-		case strings.EqualFold(key, keyBullURL):
-			cfg.BulletinURL = value
-		case strings.EqualFold(key, keyLeague):
-			// Out of range is left unset (0, "never set") rather than failing the
-			// whole import, the way the roster parser drops one bad node line
-			// instead of the file. game.MaxLeagueNumber was declared for this
-			// bound and nothing had applied it, so any number at all was taken —
-			// and the league number reaches packet filenames.
-			if n, err := strconv.Atoi(value); err == nil && n >= 1 && n <= game.MaxLeagueNumber {
-				cfg.LeagueNumber = n
-			}
-		case strings.EqualFold(key, keyInbound):
-			cfg.InboundDir = value
-		case strings.EqualFold(key, keyOutbound):
-			// "GameOutbound <node> <dir>" is one neighbor's own directory (#106);
-			// a bare "GameOutbound <dir>" is everyone else's. A directory whose
-			// name is a number still works on its own, since only a number
-			// followed by more is read as a node.
-			if n, dir, ok := perNodeDir(value); ok {
-				if cfg.OutboundDirs == nil {
-					cfg.OutboundDirs = map[int]string{}
-				}
-				cfg.OutboundDirs[n] = dir
-				continue
-			}
-			cfg.OutboundDir = value
-		case strings.EqualFold(key, keyBulletin):
-			cfg.BulletinDir = value
-		case strings.EqualFold(key, keyLottery):
-			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
-				cfg.Lottery = b
-			}
-		case strings.EqualFold(key, keyOnFault):
-			cfg.OnFault = value
-		case strings.EqualFold(key, keyPirate):
-			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
-				cfg.PirateNews = b
-			}
+	for _, l := range lines {
+		if set := boardSetter(l.Key); set != nil {
+			// A value the setter cannot use leaves the default standing, and
+			// BoardWarnings reports it to the modes that print warnings.
+			_ = set(cfg, l.Value)
 		}
 	}
-	return sc.Err()
+	return nil
 }
 
 // BoardConfigText renders bbs.cfg as the game would like to see it: bare
@@ -216,25 +304,6 @@ func perNodeDir(value string) (int, string, bool) {
 	return n, dir, true
 }
 
-// isTransportLink reports whether the fields after "Link" are the FTN
-// transport's (node, mode, ...) rather than the per-neighbor directory this file
-// spelled "Link <node> <dir>" before it became "GameOutbound <node> <dir>". The
-// mode alone cannot tell them apart, since a directory may be named obox: an
-// Attach link names nothing after its mode, and Obox and BSO always name a
-// directory.
-func isTransportLink(fields []string) bool {
-	if len(fields) < 2 {
-		return false
-	}
-	switch strings.ToLower(fields[1]) {
-	case "attach":
-		return len(fields) == 2
-	case "obox", "bso":
-		return len(fields) >= 3
-	}
-	return false
-}
-
 // LegacyBoardRefusal reports bbs.cfg lines written under names this version no
 // longer reads -- Inbound, Outbound, and the two-field "Link <node> <dir>" --
 // with the lines that replace them, ready to paste. Nil when there are none.
@@ -243,33 +312,32 @@ func isTransportLink(fields []string) bool {
 // the board back on the default directory without a word, and accepting the
 // old spelling forever keeps alive the confusion the rename removed (#241).
 // The values are copied byte for byte, so a Windows path keeps its backslashes.
-func LegacyBoardRefusal(dataDir string) error {
-	path := boardConfigPath(dataDir)
-	f, err := os.Open(path)
+//
+// isTransportLink tells the FTN transport's Link lines (ftn.IsLink) from the
+// old per-neighbor directory. It is passed in because that grammar belongs to
+// the transport, which imports this package.
+func LegacyBoardRefusal(dataDir string, isTransportLink func(value string) bool) error {
+	lines, err := BoardLines(dataDir)
 	if err != nil {
 		return nil
 	}
-	defer f.Close()
 	var old, repl []string
-	sc := bufio.NewScanner(f)
-	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
-		key, value, _ := SplitKey(line)
+	for _, l := range lines {
 		switch {
-		case strings.EqualFold(key, "Inbound"):
-			old, repl = append(old, line), append(repl, keyInbound+" "+value)
-		case strings.EqualFold(key, "Outbound"):
-			old, repl = append(old, line), append(repl, keyOutbound+" "+value)
-		case strings.EqualFold(key, "Link"):
-			if fields := strings.Fields(value); len(fields) < 2 || isTransportLink(fields) {
+		case strings.EqualFold(l.Key, "Inbound"):
+			old, repl = append(old, l.Raw), append(repl, keyInbound+" "+l.Value)
+		case strings.EqualFold(l.Key, "Outbound"):
+			old, repl = append(old, l.Raw), append(repl, keyOutbound+" "+l.Value)
+		case strings.EqualFold(l.Key, "Link"):
+			if len(strings.Fields(l.Value)) < 2 || isTransportLink(l.Value) {
 				continue
 			}
-			old, repl = append(old, line), append(repl, keyOutbound+" "+value)
+			old, repl = append(old, l.Raw), append(repl, keyOutbound+" "+l.Value)
 		}
 	}
 	if len(old) == 0 {
 		return nil
 	}
 	return fmt.Errorf("%s uses setting names this version no longer reads. Replace these lines:\n  %s\nwith:\n  %s",
-		path, strings.Join(old, "\n  "), strings.Join(repl, "\n  "))
+		boardConfigPath(dataDir), strings.Join(old, "\n  "), strings.Join(repl, "\n  "))
 }

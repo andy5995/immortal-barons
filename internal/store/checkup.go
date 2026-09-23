@@ -86,7 +86,7 @@ func CheckBoardInRoster(dataDir, boardID string) error {
 		}
 		names = append(names, n.Name)
 	}
-	if near, ok := nearestName(boardID, names); ok {
+	if near, ok := NearestName(boardID, names); ok {
 		return fmt.Errorf("this board %q is not in %s. The closest entry is %q — the two must match exactly, spelling and spacing included",
 			boardID, NodeListFile, near)
 	}
@@ -94,12 +94,13 @@ func CheckBoardInRoster(dataDir, boardID string) error {
 		boardID, NodeListFile, strings.Join(names, ", "))
 }
 
-// nearestName picks the roster entry a misspelled board name most likely meant.
-// Most failures here are a capital or a stray space, so an exact match after
-// folding case and collapsing whitespace wins outright; otherwise a name is
-// only offered when it is closer than a quarter of its own length, which keeps
-// two genuinely different boards from being suggested for each other.
-func nearestName(want string, names []string) (string, bool) {
+// NearestName picks the name in names that a misspelled want most likely meant:
+// a board name on the roster, or a bbs.cfg key. Most misspellings are a capital
+// or a stray space, so an exact match after folding case and collapsing
+// whitespace wins outright; otherwise a name is only offered when it is within
+// a quarter of its own length, which keeps two genuinely different names from
+// being suggested for each other.
+func NearestName(want string, names []string) (string, bool) {
 	folded := foldName(want)
 	for _, name := range names {
 		if foldName(name) == folded {
@@ -124,7 +125,7 @@ func foldName(s string) string {
 	return strings.ToLower(strings.Join(strings.Fields(s), " "))
 }
 
-// editDistance is Levenshtein distance over runes, on two board names — short
+// editDistance is Levenshtein distance over runes, on two short names — short
 // enough that the full matrix is not worth avoiding.
 func editDistance(a, b string) int {
 	ar, br := []rune(a), []rune(b)

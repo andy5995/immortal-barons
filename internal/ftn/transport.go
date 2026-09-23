@@ -569,9 +569,8 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 	// Named before it is reached: creating the netmail with no directory
 	// configured fails as `open : no such file or directory`, an error whose
 	// blank filename says nothing about which setting is missing. The unwrap
-	// step hits
-	// this too when a routing board forwards transit, which is where RunOut's
-	// own check cannot help (three-board rig, 2026-08-27).
+	// step hits this too when a routing board forwards transit, which is where
+	// RunOut's own check cannot help (three-board rig, 2026-08-27).
 	if err := netmailProblem(transport, dataDir, target.Mode == LinkAttach, target.Name); err != nil {
 		return Queued{}, err
 	}

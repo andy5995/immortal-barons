@@ -312,46 +312,62 @@ func TestGameOutboundNamedByANumberIsBoardWide(t *testing.T) {
 	}
 }
 
-// The names an older version wrote are refused with their replacements, byte
-// for byte: a Windows path keeps its backslashes and its spaces (#241). An FTN
-// Link line is the transport's and is left alone.
-func TestLegacyBoardKeysAreRefusedWithTheirReplacements(t *testing.T) {
+// A key no reader knows is named with its line and, when one is close, the key
+// it was probably meant to be; a switch that is neither yes nor no is named with
+// its value. Known keys in any case, comments and the transport's own keys are
+// not flagged.
+func TestBoardWarningsNameUnknownKeysAndBadSwitches(t *testing.T) {
 	dir := t.TempDir()
-	body := "BoardID Alpha BBS\n" +
-		`Inbound C:\BBS\IB Data\in` + "\n" +
-		`outbound C:\BBS\out` + "\n" +
-		`Link 3 D:\fbox\three` + "\n" +
-		"Link 4 BSO bso Crash\n" +
-		"Link 5 obox\n" +
-		"Link 6 Attach\n"
+	body := "# notes\n" +
+		"boardid Alpha\n" +
+		"GameInbond\tin\n" +
+		"; more notes\n" +
+		"IncomingFileDir /mail/in\n" +
+		"Colour blue\n" +
+		"MAILER Binkley\n" +
+		"Lottery maybe\n"
 	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	err := LegacyBoardRefusal(dir)
-	if err == nil {
-		t.Fatal("the old names were accepted")
+	got := BoardWarnings(dir, []string{"IncomingFileDir", "Mailer"})
+	if len(got) != 3 {
+		t.Fatalf("got %d warnings, want 3: %q", len(got), got)
 	}
-	for _, want := range []string{
-		`  GameInbound C:\BBS\IB Data\in` + "\n",
-		`  GameOutbound C:\BBS\out` + "\n",
-		`  GameOutbound 3 D:\fbox\three`,
-		// An old per-neighbor directory that happens to be named like a mode:
-		// an Obox link always names a directory after the mode, so this is not one.
-		`  GameOutbound 5 obox`,
-	} {
-		if !strings.Contains(err.Error(), want) {
-			t.Errorf("the refusal has no line %q:\n%v", want, err)
-		}
+	if !strings.Contains(got[0], "line 3") || !strings.Contains(got[0], `"GameInbond"`) ||
+		!strings.Contains(got[0], "did you mean GameInbound?") {
+		t.Errorf("misspelled key warning = %q", got[0])
 	}
-	if strings.Contains(err.Error(), "Link 4") || strings.Contains(err.Error(), "Link 6") {
-		t.Errorf("the refusal named an FTN Link line:\n%v", err)
+	if !strings.Contains(got[1], "line 6") || !strings.Contains(got[1], `"Colour"`) ||
+		strings.Contains(got[1], "did you mean") {
+		t.Errorf("unrelated key warning = %q; it should name the line and suggest nothing", got[1])
 	}
+	if !strings.Contains(got[2], "line 8") || !strings.Contains(got[2], "Lottery") ||
+		!strings.Contains(got[2], `"maybe"`) || !strings.Contains(got[2], "Yes or No") {
+		t.Errorf("bad switch warning = %q; it should name the line, key, value and what is accepted", got[2])
+	}
+}
 
-	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("GameInbound in\nLink 4 Obox box\n"), 0o644); err != nil {
+// Every key the reader knows, in any case, raises no warning, and each one is
+// read: BoardKeys is derived from the setters, so this holds by construction,
+// and the count pins it against a key being added to the constants alone.
+func TestKnownBoardKeysRaiseNoWarning(t *testing.T) {
+	keys := BoardKeys()
+	if len(keys) != 11 {
+		t.Errorf("BoardKeys has %d keys, want 11: %q", len(keys), keys)
+	}
+	dir := t.TempDir()
+	var body strings.Builder
+	for i, k := range keys {
+		if i%2 == 1 {
+			k = strings.ToLower(k)
+		}
+		body.WriteString(k + " yes\n")
+	}
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body.String()), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := LegacyBoardRefusal(dir); err != nil {
-		t.Errorf("a current bbs.cfg was refused: %v", err)
+	if got := BoardWarnings(dir, nil); len(got) != 0 {
+		t.Errorf("known keys were warned about: %q", got)
 	}
 }
 
