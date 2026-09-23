@@ -34,6 +34,7 @@ them from here should be small.
 Learn more, follow progress, or get involved:
 
 - [Website](https://andy5995.github.io/immortal-barons/)
+- [Screenshots](https://andy5995.github.io/immortal-barons/screenshots/)
 - [Issue tracker](https://github.com/andy5995/immortal-barons/issues)
 - [Discussions](https://github.com/andy5995/immortal-barons/discussions)
 
