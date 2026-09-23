@@ -3,28 +3,26 @@
 Immortal Barons is a turn-based strategy game for the terminal. You rule
 a barony in a ruined, post-apocalyptic world. You buy land, feed your
 people, build an army, and fight rival empires. The goal is to have the
-highest net worth when the turns run out, or to conquer everyone else.
+highest net worth when the game ends, or to conquer everyone else.
 
 The game is written in Go. It is an independent remake, inspired by the
 1990s BBS door game *Barren Realms Elite*. See [Heritage](#heritage) below.
 
 > **Early release.** The game is playable and inter-BBS (IBBS) league play
-> works. A six-board league is running now as a live test, across boards run by
-> several operators. It is a test rather than a real game: everyone taking part
-> knows more live play is wanted before a real one begins.
+> works. A seven-board league is running now as a live test, across boards run
+> by several operators. It is a test rather than a real game: everyone taking
+> part knows more live play is wanted before a real one begins.
 
 ## Status
 
 Immortal Barons is a persistent, multi-user BBS door game: each caller has a
-lasting empire in one shared world; you play your turns, and other barons (and
-any AI) act on their own turns. The game runs locally or as a native BBS door.
+lasting empire in one shared world; you play your turns, and other barons act
+on their own turns. The game runs locally or as a native BBS door.
 
 The core game is playable — economy, military and war, covert operations,
 diplomacy, and messaging all work. Leagues and inter-BBS play are built as well:
 boards trade packets, and barons attack, message, and buy from an ally's market
-across planets. Six boards run by several operators are playing a test league
-now, which is the first time the game has been played across boards belonging to
-different people.
+across planets.
 
 Most of the game's numbers are read from the original's own program rather than
 guessed: region income, the coastal support curve, unit costs and the
@@ -106,7 +104,7 @@ Change the `IdentityFile` line if your key has another name. Then connect with
 
 If you prefer a graphical client, set the host to `85.119.83.118`, the port to
 `2222`, and the user name to the name you want.
-[PuTTY](https://putty.org/index.html) lets you point it at a key file.
+[PuTTY](https://putty.software/) lets you point it at a key file.
 [SyncTERM](https://syncterm.bbsdev.net/) keeps a key of its own and uses it for
 you, so there is no file to choose.
 
@@ -152,25 +150,25 @@ To build from source instead, see below.
 
 ## Build
 
-You need Go 1.26 or newer. The game builds anywhere Go does — Linux, macOS,
+You need Go 1.26.4 or newer. The game builds anywhere Go does — Linux, macOS,
 Windows, and the BSDs.
 
 Install Go from <https://go.dev/doc/install>, which has current instructions for
 every platform. Your package manager may have Go as well, but check the version
-first: some distributions ship one older than 1.26.
+first: some distributions ship one older than 1.26.4.
 
 ```
-go build ./cmd/immortal-barons ./cmd/barons-ftn
+go build -o . ./cmd/immortal-barons ./cmd/barons-ftn
 ```
 
 This produces the `immortal-barons` game and the optional `barons-ftn` inter-BBS
 transport helper. See "Running" above to start the game; the
-[FTN Transport guide](https://andy5995.github.io/immortal-barons/ftn-transport/)
+[FTN Transport guide](docs/ftn-transport.md)
 explains the helper.
 
 ## Character set
 
-See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/)
+See the [Character Set guide](docs/charset.md)
 for how to choose between CP437 and UTF-8.
 
 ## Running as a BBS door
@@ -179,24 +177,24 @@ Immortal Barons can run as a native door under BBS software on any platform Go
 supports. Callers share one persistent world, each empire saved between calls
 and keyed by its BBS handle, and several nodes can play at the same time.
 
-The [Door Setup guide](https://andy5995.github.io/immortal-barons/door-setup/)
+The [Door Setup guide](docs/door-setup.md)
 covers registering the door, the dropfile, daily maintenance
 (`immortal-barons -maint`) and starting a fresh game (`immortal-barons -reset`).
-[Inter-BBS Leagues](https://andy5995.github.io/immortal-barons/inter-bbs/)
+[Inter-BBS Leagues](docs/inter-bbs.md)
 covers linking your board to others.
 
 ## How to play
 
-See the [player's guide](https://andy5995.github.io/immortal-barons/guide/).
+See the [player's guide](docs/playing.md).
 
 ## Heritage
 
 Immortal Barons is a tribute to *Barren Realms Elite*, created by Mehul
 Patel and now owned by [John Dailey Software](https://www.johndaileysoftware.com/).
 This project shares that game's ideas and feel, but it does not use any of its
-code, text, or artwork.
+code or artwork, and its prose is its own.
 Game rules and mechanics are not covered by copyright, so this is a fresh
-implementation of the concept. It is not affiliated with, nor endorsed by, the
+implementation of the concept. It is not affiliated with or endorsed by the
 current or past owner(s) of *Barren Realms Elite*.
 
 ## Tools

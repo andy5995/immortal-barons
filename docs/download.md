@@ -64,5 +64,5 @@ longer. macOS does not block a game installed this way.
 
 ## Build it yourself
 
-You can build the game from source with Go 1.26 or newer. The
+You can build the game from source with Go 1.26.4 or newer. The
 [README](../README.md) explains how.
