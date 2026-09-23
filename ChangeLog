@@ -4,12 +4,12 @@ Immortal Barons ChangeLog
   * BREAKING: barons-ftn is gone; the game moves FTN mail itself (#246)
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
-  * BREAKING: Computer barons are removed, including any a board already has
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
   * -ftn-status lists what the FTN spools hold, for whom, and why
+  * Computer barons and -add-ai are removed, including barons a board has
   * config-during-reset: a new Max Local Attacks/Day setting (0, unlimited)
   * Investments are capped by what matures on each date (#284)
-  * Terror ops are reported on both recaps and no longer in the news (#285)
+  * Terror ops are no longer posted to the news (#285)
   * A Special Operation's news line says how it ended (#288)
   * Every bombing run can be driven off, and its damage follows the original
   * The firing planet's news reports every missile and bombing outcome
@@ -17,11 +17,7 @@ Immortal Barons ChangeLog
   * The advisors' reports are framed, with their advice set apart
   * The Military advisor shortens its counts and includes forces away (#239)
   * A missing -data directory is named instead of an unset drop file format
-  * Received netmail is found in every IncomingFileDir when none is named
   * An unknown bbs.cfg setting is named in a warning, with the likely key
-  * A reset archives held packets too, so none reach the new season
-  * Lost-forces recovery pauses while a board's packets are held (#190)
-  * A repeated FTN handoff failure raises its alarm once
   * Travel Times probes each link on every planetary run, not once a day
   * -maint raises the same fault alarm as -planetary, and needs a league number
   * A realm under New Realm Protection is refused in the original's words
