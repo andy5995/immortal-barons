@@ -178,11 +178,6 @@ func TestSpecialOpsShareTheLocalEffects(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 3)
 	d := w.AddHuman("d", "Target")
 
-	d.Food = 900
-	if lost := bombFoodEffect(d); lost != 450 || d.Food != 450 {
-		t.Errorf("bombFoodEffect lost %d leaving %d, want 450/450", lost, d.Food)
-	}
-
 	d.Investments = []Investment{{Amount: 1000, Return: 1200}}
 	if lost := undermineEffect(d); lost != 250 {
 		t.Errorf("undermineEffect lost %d, want a quarter of 1000", lost)

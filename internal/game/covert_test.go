@@ -347,16 +347,6 @@ func TestSupportDissensionsFailure(t *testing.T) {
 	}
 }
 
-// bombFoodEffect is now reached only from the interplanetary Special Operation;
-// BRE's LOCAL Bomb Enemy Targets is one op with its own six-slot table.
-func TestBombFoodDestroysReserve(t *testing.T) {
-	_, _, d := newAttackerAndTarget(t)
-	d.Food = 1000
-	if lost := bombFoodEffect(d); lost != 500 || d.Food != 500 {
-		t.Errorf("expected 500 lost and 500 left after a 50%% strike, got lost=%d left=%d", lost, d.Food)
-	}
-}
-
 func TestStirRevoltsLowersSupport(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Support = 50, 0, 100

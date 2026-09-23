@@ -509,51 +509,15 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome
 	return "Nothing came of the operation.", specialNothing
 }
 
-// applySpecialOp runs one op's effect against d and reports what it did, what
-// the attacker earned, and whether anything landed.
+// applySpecialOp runs an arriving missile's effect against d and reports what it
+// did, what the attacker earned, and how it ended.
 //
-// Every branch calls the helper the LOCAL op calls, so the two menus cannot
-// drift apart: a change to what bombing a food market does lands on both.
+// Only the three missiles reach it: resolveRemoteSpecialOp sends every op that
+// TargetsPlanet down applyPlanetOp first. The four bombing ops had per-realm
+// branches here, from when they were aimed at one baron, which no packet could
+// reach once they were aimed at the planet; they were removed on 2026-09-23.
 func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report string, score int, outcome specialOutcome) {
 	switch op {
-	case OpBombFood:
-		lost := bombFoodEffect(d)
-		d.addEvent(fmt.Sprintf("Bombers from %s torched your food stores — %d units lost.", from, lost))
-		if lost == 0 {
-			return fmt.Sprintf("%s had no food stores to destroy.", d.Name), 0, specialNothing
-		}
-		return fmt.Sprintf("You destroyed %d units of %s's food.", lost, d.Name), 0, specialHit
-
-	case OpBombMarket:
-		goods, proceeds := w.bombMarketPosition(d, BombMarketLossPct)
-		if goods == 0 && proceeds == 0 {
-			d.addEvent(fmt.Sprintf("Bombers from %s hit your trading market, which stood empty.", from))
-			return fmt.Sprintf("%s had nothing on the market to destroy.", d.Name), 0, specialNothing
-		}
-		d.addEvent(fmt.Sprintf("Bombers from %s wrecked your trading market — %d listed goods and %d gold in proceeds destroyed.", from, goods, proceeds))
-		return fmt.Sprintf("You wrecked %s's trading market: %d goods and %d gold in proceeds.", d.Name, goods, proceeds), 0, specialHit
-
-	case OpBombRoutes:
-		hit := 0
-		if w.bombingLands() {
-			hit = w.bombRoutesEffect(d)
-		}
-		if hit == 0 {
-			d.addEvent(fmt.Sprintf("Bombers from %s struck at your trade routes and found nothing.", from))
-			return fmt.Sprintf("%s had no trade deals in transit worth hitting.", d.Name), 0, specialNothing
-		}
-		d.addEvent(fmt.Sprintf("Bombers from %s hit your trade routes — the goods in %d deals in transit were all but destroyed.", from, hit))
-		return fmt.Sprintf("You wrecked the goods in %d of %s's trade deals in transit.", hit, d.Name), 0, specialHit
-
-	case OpUndermine:
-		lost := undermineEffect(d)
-		if lost == 0 {
-			d.addEvent(fmt.Sprintf("Agents from %s went looking for investments you do not hold.", from))
-			return fmt.Sprintf("%s has no investments to undermine.", d.Name), 0, specialNothing
-		}
-		d.addEvent(fmt.Sprintf("Agents from %s undermined your investments — %d gold in principal lost.", from, lost))
-		return fmt.Sprintf("You undermined %s's investments: %d gold lost.", d.Name, lost), 0, specialHit
-
 	// The three missiles do NOT run the local helpers of the same name (#255).
 	// The receiving board resolves all three in one routine with its own gates
 	// and its own bands (BRE.OVR ovr_0450a9 +0x3c5) — an arriving nuclear strike

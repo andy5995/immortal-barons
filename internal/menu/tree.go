@@ -370,7 +370,7 @@ func BuildMenus() *Menus {
 	// is the InterBBS menu, so the table belongs to THIS menu and to no other.
 	// Labels/order are binary-verified; the Send SpyGuy hotkey wasn't recoverable
 	// from the overlay dispatch, so IB numbers it 8 with the rest. All eight are built: the four bombing ops
-	// resolve in applySpecialOp, the three missiles in the arriving-missile
+	// resolve in applyPlanetOp, the three missiles in the arriving-missile
 	// resolver, and Send SpyGuy in the watcher path. This said only Send SpyGuy
 	// was wired until 2026-09-08, long after the rest landed. ('?'/'0' are IB's menu convention; BRE exits via ESC/Q
 	// with no listed items.) The original numbers them 1-8 with no Help item,

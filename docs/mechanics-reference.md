@@ -1731,7 +1731,7 @@ there:
   *local* S3-Sabre stays anonymous on a hit — BRE resolves a same-planet
   strike through a report template (`GAME\COVERT.DAT`) that is not shipped with
   0.988 and cannot be read, so only the half with evidence attributes the hit.
-- IB's **interplanetary bombing ops** (`applySpecialOp` in `ibbs_special.go`)
+- IB's **interplanetary bombing ops** (`applyPlanetOp` in `ibbs_special.go`)
   name the sending realm and board on success, where BRE names nobody. This is a
   standing IB divergence, not an oversight: everything else that crosses in a
   packet — attacks, nuclear and chemical strikes — is board-attributed, and the

@@ -282,3 +282,24 @@ func TestFiringPlanetReadsProtectionAndOldFailures(t *testing.T) {
 		t.Errorf("legacy failure: firer read %v", got)
 	}
 }
+
+// A bombing op never reaches the per-realm resolver, even from a packet that
+// names a realm: TargetsPlanet routes every op that is not a missile down the
+// planet path first, which is why applySpecialOp no longer carries branches for
+// them. The named realm is protected, so a per-realm path would have answered
+// "protected"; the planet path ignores both the name and the shield.
+func TestBombingOpsNeverReachTheRealmResolver(t *testing.T) {
+	for _, op := range []SpecialOp{OpBombFood, OpBombMarket, OpBombRoutes, OpUndermine} {
+		w, d := specialNewsBoard(1)
+		d.Protection = 99
+		res, news := resolveOneSpecial(t, w, RemoteSpecialOp{
+			ID: 1, FromBoard: "Home", FromEmpire: "Selby", TargetEmpire: d.Name, Op: op,
+		})
+		if res.Outcome == OutcomeProtected || res.Outcome == OutcomeNotFound {
+			t.Errorf("%s answered %q: it went looking for a realm", op, res.Outcome)
+		}
+		if !strings.HasPrefix(news, "Bombers from Selby of Home ") && !strings.HasPrefix(news, "Agents from Selby of Home ") {
+			t.Errorf("%s posted %q, which is not a planet-wide line", op, news)
+		}
+	}
+}

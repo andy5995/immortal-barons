@@ -22,13 +22,6 @@ package game
 // rather than duplicating the arithmetic is what stops the two menus drifting
 // apart when a number is tuned.
 
-// bombFoodEffect burns half of d's food reserve and reports what was lost.
-func bombFoodEffect(d *Empire) int {
-	lost := d.Food / 2
-	d.Food -= lost
-	return lost
-}
-
 // bombingLands reports whether an arriving bombing run comes to anything at
 // all. BINARY-VERIFIED (BRE.OVR 0x04a09a, see BombingLandOdds): the original
 // rolls it once at the top of the routine that resolves a received bombing op,

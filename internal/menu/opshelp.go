@@ -39,7 +39,7 @@ var terrorOpTopics = []attackTypeTopic{
 
 // ipSpecialOpTopics documents the eight InterPlanetary Special Operations. All
 // eight are built and resolve on the receiving board: the four bombing ops in
-// applySpecialOp, the three missiles in the arriving-missile resolver, and
+// applyPlanetOp, the three missiles in the arriving-missile resolver, and
 // Send SpyGuy in the watcher path. An earlier draft of these topics called four
 // of them "recorded but not yet built", copied from a stale comment in tree.go
 // -- the captures show them landing and reporting.
