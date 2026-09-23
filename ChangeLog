@@ -1,9 +1,31 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * BREAKING: barons-ftn is gone; the game moves FTN mail itself (#246)
+  * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
+  * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
+  * BREAKING: Computer barons are removed, including any a board already has
+  * config-during-reset: the four interplanetary allowances per day take the
+    original's defaults
+  * config-during-reset: a new Max Local Attacks/Day setting (0, unlimited)
+  * A local attack no longer spends the interplanetary allowance
+  * A local attack cannot be repeated by leaving the game after it
+  * Investments are capped by what matures on each date (#284)
+  * Terror ops are reported on both recaps and no longer in the news (#285)
+  * A Special Operation's news line says how it ended (#288)
+  * Every bombing run can be driven off, and its damage follows the original
+  * The firing planet's news reports every missile and bombing outcome
+  * The player list names local callers and marks shared owners (#283)
+  * The advisors' reports are framed, with their advice set apart
+  * The Military advisor shortens its counts and includes forces away (#239)
+  * A missing -data directory is named instead of an unset drop file format
+  * Received netmail is found in every IncomingFileDir when none is named
+  * An unknown bbs.cfg setting is named in a warning, with the likely key
+  * A reset archives held packets too, so none reach the new season
+  * Lost-forces recovery pauses while a board's packets are held (#190)
+  * A repeated FTN handoff failure raises its alarm once
   * Travel Times probes each link on every planetary run, not once a day
   * -maint raises the same fault alarm as -planetary, and needs a league number
-  * Computer barons are removed, including any a board already has
   * A realm under New Realm Protection is refused in the original's words
   * A strike aimed at a whole planet is named as such when it reports back
   * An eliminated realm is listed as DEAD where its territory would be
