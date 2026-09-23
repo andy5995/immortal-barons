@@ -151,11 +151,11 @@ Direct (`.dlo`), Normal (`.flo`), and Hold (`.hlo`). A point uses
 Section 5.1 requires a cooperating process to create the destination's `.bsy`
 binary semaphore before touching that node's queue and remove it when finished.
 Failure to create it means another process owns the queue. Checking the age of
-an existing lock is recommended, not permission to delete it. `barons-ftn`
+an existing lock is recommended, not permission to delete it. IB's transport
 therefore treats every pre-existing `.bsy` as busy and removes only one it
 created itself.
 
-That exclusive semaphore also permits `barons-ftn` to rebuild a Barons bundle
+That exclusive semaphore also permits the transport to rebuild a Barons bundle
 already referenced by the selected flow file. The flow pathname does not
 change, the replacement is completed before `.bsy` is released, and inner game
 packet bytes remain unchanged. This optimization is BSO-specific. A generic

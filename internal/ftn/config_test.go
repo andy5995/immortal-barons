@@ -30,7 +30,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Error("Binkley = false, want true")
 	}
 	if cfg.AttachDir != "" || cfg.SubjectMode != SubjectAbsolute {
-		t.Errorf("an ftn.cfg without the new keys changed behavior: AttachDir = %q, SubjectMode = %v",
+		t.Errorf("a bbs.cfg without the attach keys changed behavior: AttachDir = %q, SubjectMode = %v",
 			cfg.AttachDir, cfg.SubjectMode)
 	}
 }
@@ -50,20 +50,25 @@ func TestDocumentedStandaloneConfigsParse(t *testing.T) {
 		}
 		body, tail, ok := strings.Cut(after, "\n```")
 		if !ok {
-			t.Fatal("documented ftn.cfg example has no closing fence")
+			t.Fatal("documented transport example has no closing fence")
 		}
 		data := t.TempDir()
 		if err := os.WriteFile(filepath.Join(data, store.BoardConfigFile), []byte(body+"\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := LoadConfig(data); err != nil {
-			t.Errorf("documented ftn.cfg example %d: %v\n%s", found+1, err, body)
+		cfg, err := LoadConfig(data)
+		if err != nil {
+			t.Errorf("documented example %d: %v\n%s", found+1, err, body)
+		} else if !cfg.Receives() || !cfg.Sends() {
+			// Every example names both halves; one that sets up neither is
+			// written in keys this version no longer reads.
+			t.Errorf("documented example %d configures no transport:\n%s", found+1, body)
 		}
 		found++
 		rest = tail
 	}
 	if found != 4 {
-		t.Fatalf("checked %d documented ftn.cfg examples, want 4", found)
+		t.Fatalf("checked %d documented transport examples, want 4", found)
 	}
 }
 

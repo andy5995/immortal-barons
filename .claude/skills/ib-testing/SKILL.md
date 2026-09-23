@@ -200,7 +200,9 @@ the banner is the only thing between them.
 editing the world's copy achieves nothing.
 
 **It is not the only file, and it does not win.** Per-board settings —
-`BoardID`, `LeagueNumber`, `Inbound`, `Outbound`, `Link` — live in `bbs.cfg`,
+`BoardID`, `LeagueNumber`, `GameInbound`, `GameOutbound`, and the FTN
+transport's lines (`IncomingFileDir`, `NetmailDir`, `Mailer`, `Link`, …) — live
+in `bbs.cfg`,
 and `LoadBoardConfig` runs *after* the JSON (`internal/store/config.go:70`), so
 bbs.cfg overrides it. Editing `LeagueNumber` in `config.json` on a rig that has
 a `bbs.cfg` silently does nothing. Dropfile settings are in `door.json` and
@@ -333,8 +335,8 @@ Check these first when a mechanic appears not to work:
   reaches an IP op without playing a turn, **that is the bug, not the
   baseline** — do not write the permissive behavior into an expectation.
   Issue #162.
-- **A `LeagueNumber` of 0 fails `-league-check` on a league board, and
-  `barons-ftn` refuses to run** (#227). `ReadInbound` skips a packet just when
+- **A `LeagueNumber` of 0 fails `-league-check` on a league board, and the
+  FTN transport refuses to run** (#227). `ReadInbound` skips a packet just when
   reader and packet numbers are both set and differ, so a board left at 0 takes
   every league's packets as its own — which is why a test rig needs a real
   number on every board, not just the ones sharing an inbound directory.
@@ -365,8 +367,8 @@ Check for the directory the transport actually watches before concluding a
 handoff is broken.
 
 A useful pairing is one board of each, but the difference is no longer which
-software runs the helper: since PR #226 every board runs `barons-ftn`. What the
-pairing exercises is the two handoff MODES — the Mystic side takes bundles
+software runs the transport: every board has it built in. What the pairing
+exercises is the two handoff MODES — the Mystic side takes bundles
 through a plain file box (`Link N Obox`), the Synchronet side through
 stored-message attach and SBBSecho — over one binkp link.
 
@@ -447,22 +449,25 @@ stored-message attach and SBBSecho — over one binkp link.
 Each step has its own failure mode, so check them in order rather than guessing
 where a packet stalled:
 
-    barons-ftn -in                     # unwraps what the mailer delivered into the game's Inbound
-    immortal-barons -planetary          # applies it, writes replies into the game's Outbound
-    barons-ftn -out                    # bundles those, writes N.msg (attach) or the peer's obox
+    immortal-barons -planetary          # unwraps what the mailer delivered into GameInbound,
+                                        # applies it, writes replies into GameOutbound, then
+                                        # bundles those: N.msg (attach), the peer's obox, or BSO
     $SBBS/exec/sbbsecho                 # packs the .msg into the BSO .flo, deletes it
     $SBBS/exec/jsexec -c ctrl exec/binkit.js   # OUTBOUND session, actually sends
 
 **Run the whole chain; do not wait to be polled.** binkp is bidirectional and
 an inbound session *does* hand over what the BSO holds
 (`~/src/sbbs/exec/binkit.js:1008`), so the reason is not that BinkIT withholds
-the queue. It is that the first three steps have to run before there is
-anything in the BSO to collect: until `barons-ftn` and `sbbsecho` have run, a
+the queue. It is that the first two steps have to run before there is
+anything in the BSO to collect: until `-planetary` and `sbbsecho` have run, a
 poll from the other board finds an empty outbound and both logs look healthy.
 See the `ftn` skill's Myths table.
 
-**The chain is safe to run with callers online.** `barons-ftn` takes its own
-`barons-ftn.lock` rather than the game lock, so it never blocks a node mid-turn.
+**The chain is safe to run with callers online.** The transport takes its own
+`barons-ftn.lock`, never while holding the world lock, and takes `game.lock`
+only briefly to claim or deliver packets, so it never blocks a node mid-turn.
+`-full` does not even wait for the transport lock: when another run holds it,
+that half is skipped and said so on stderr.
 It reads only complete packets, because `WriteOutbox` publishes each one under a
 temporary name and renames it into place.
 
@@ -471,9 +476,10 @@ it is packed (kill-sent), so seeing `1.msg` again is the previous one having bee
 carried, not the same one stuck.
 
 **On Synchronet, keep the outbound path short.** The Type-2 subject holds 71
-bytes for the whole attachment path, 70 with Binkley's `^`. `ftn.cfg` can spend
-fewer — `SubjectPath Basename` writes the filename alone, a prefix is resolved
-against the mailer's working directory (`internal/ftn/config.go:104-118`) — but
+bytes for the whole attachment path, 70 with `Mailer Binkley`'s `^`. `bbs.cfg`
+can spend fewer — `SubjectPath Basename` writes the filename alone, a prefix is
+resolved against the mailer's working directory (`subjectPath` in
+`internal/ftn/config.go`) — but
 **SBBSecho does not search for a bare name**, so a Synchronet board keeps
 `Absolute` and needs a short data directory (`docs/inter-bbs.md`). `AttachDir`
 moves the file itself off the `fido/` child. The preflight refuses the run and
@@ -485,7 +491,7 @@ fixed width (`internal/store/ibbs.go`), so a path that fits keeps fitting. Issue
 too. What does consume a thin margin is a longer directory or a board joining on
 a longer node number.
 
-`barons-ftn` warns below 8 bytes spare (`internal/ftn/message.go:24`,
+The transport warns below 8 bytes spare (`internal/ftn/message.go:24`,
 `handler.go:75-78`). Treat that warning as real headroom advice, and read a hard
 failure — `attachment subject %q is %d bytes; FTN Type-2 permits at most …`
 (`message.go:95-96`), which names the `SubjectPath` fix — as a path or config
@@ -493,50 +499,51 @@ change, not as drift.
 
 ## Converting a board to the bundled transport
 
-The helper is optional. `-out` sends plain packets unless the board sets
-`Bundled Yes` (or a `Link` line says `Bundled`), so a board that reads `.brp`
-straight out of its mailer's directory keeps working with no `ftn.cfg` and no
-helper at all — which is how several league boards run. PR #226 made `-out`
-always bundle, and a board on the file-drop path then quarantined every bundle
+The transport is optional. The handoff sends plain packets unless the board
+sets `Bundled Yes` (or a `Link` line says `Bundled`), so a board whose
+`GameInbound` reads `.brp` straight out of its mailer's directory keeps working
+with no transport lines at all — which is how several league boards run. PR
+#226 made the handoff always bundle, and a board on the file-drop path then quarantined every bundle
 it received; #230 made plain the default so that upgrading one board cannot
 break another. Converting a board to bundles is still worth doing once the
 whole league can unwrap one, and it taught five things, each of which cost a
 run to find:
 
-- **The game's directories become private, and `ftn.cfg` names the mailer's.**
-  `Inbound`/`Outbound` in `bbs.cfg` move under the data directory;
-  `InboundDir` in `ftn.cfg` points at where binkp actually drops. They must be
-  different directories — set to the same one, the helper has nothing to
+- **The game's directories become private, and `IncomingFileDir` names the
+  mailer's.** `GameInbound`/`GameOutbound` move under the data directory;
+  `IncomingFileDir` points at where binkp actually drops. They must be
+  different directories — set to the same one, the transport has nothing to
   publish into and delivers zero without saying why.
 - **A file-box peer is an `Obox` link.** With no `Link` line the mode defaults
-  to attach, so a routing board's `-in` tries to write netmail on a board that
+  to attach, so a routing board's unwrap step tries to write netmail on a board that
   has no netmail directory. The symptom was `open : no such file or directory`
   with a blank filename, which names neither the setting nor the file.
-- **Fixing `ftn.cfg` does not repair a receipt already in the spool.** A
+- **Fixing `bbs.cfg` does not repair a receipt already in the spool.** A
   journaled receipt replays the targets it was PLANNED with, so it keeps
-  failing in the old mode. Clear `ftn-spool/in/<id>` and let `-in` rebuild
+  failing in the old mode. Clear `ftn-spool/in/<id>` and let the next run rebuild
   from the source bundle, which is still there because cleanup only runs on
   success.
 - **Synchronet needs a short `AttachDir`.** The default attach spool under the
   data directory is long enough to blow the 70-byte Binkley subject budget on a
   board that fitted before the upgrade.
-- **Order the chain `-in`, `-planetary`, `-out`.** Running `-out` first
-  sends the previous cycle's outbox and leaves this cycle's for the next run,
-  which looks like a transport that is one cycle behind rather than a
-  scheduling mistake.
+- **The order is built in now.** `-maint`/`-planetary`/`-full` unwrap before
+  the planetary step and hand off after it; handing off first would send the
+  previous cycle's outbox and look like a transport one cycle behind.
 
-`barons-ftn -status` reads both spools and changes nothing, so it is the first
-thing to reach for when a board goes quiet: it names each unfinished target by
-peer, how long it has waited, and the failure it recorded. It also works while
-the board's config is invalid, which `-in`/`-out` deliberately do not.
+`immortal-barons -ftn-status` reads both spools and changes nothing, so it is
+the first thing to reach for when a board goes quiet: it names each unfinished
+target by peer, how long it has waited, and the failure it recorded. It also
+works while the transport lines are invalid, which the unwrap and handoff
+deliberately do not.
 
 It also lists packets **no run has claimed** — in neither spool, so no other
 count reaches them (#236). Two shapes, and the report tells them apart: a file
-in `InboundDir` itself is usually an attach bundle whose envelope will never
-arrive, and a file in a SUBDIRECTORY of it is one the mailer set aside because
-the session was not authenticated. Mystic uses `unsecure`, and `-in` reads each
-`InboundDir` and nothing below it, so waiting never helps — give that directory
-its own `InboundDir` line and move the waiting files up. Both are reported only
+in an `IncomingFileDir` itself is usually an attach bundle whose envelope will
+never arrive, and a file in a SUBDIRECTORY of it is one the mailer set aside
+because the session was not authenticated. Mystic uses `unsecure`, and the
+unwrap step reads each `IncomingFileDir` and nothing below it, so waiting never
+helps — give that directory its own `IncomingFileDir` line and move the waiting
+files up. Both are reported only
 after an hour, so a file that just landed is never called a fault.
 
 ## Scheduling the exchange
@@ -595,8 +602,7 @@ Shape of the per-board script, which has to branch because the two board
 softwares agree on nothing:
 
     for each game data dir on this board:
-        immortal-barons -planetary -data <dir>
-        barons-ftn -data <dir>            # only where the dir has an ftn.cfg
+        immortal-barons -planetary -data <dir>   # runs the FTN transport too, where bbs.cfg sets it up
     then ONE mailer run for the whole board:
         Mystic:      cd $MYSTIC && ./mis poll <peer node address>
         Synchronet:  cd $SBBS && ./exec/sbbsecho && ./exec/jsexec -c ctrl exec/binkit.js
@@ -624,7 +630,7 @@ binkp both ways, keys, a roster. The care it needs is about not silently breakin
 the parts that already work.
 
 - **Check what a step does to the transport before running it.** If a board's
-  `Outbound` directory IS its mailer's file box, anything that moves packets
+  `GameOutbound` directory IS its mailer's file box, anything that moves packets
   elsewhere — into a `fido/` subdirectory, say — stops delivery with no error.
   The league looks alive and quietly carries nothing.
 - **Deliver before you tidy.** Files waiting in an outbound directory are usually

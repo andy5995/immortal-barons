@@ -12,19 +12,23 @@ The game only reads and writes packet files in two directories, set per board in
 the Configuration Editor and stored in `bbs.cfg` (not `config.json` — see "Board
 config" below):
 
-- `InboundDir` — packets from other boards arrive here.
-- `OutboundDir` — the game writes packets for other boards here.
-- `OutboundDirs` — per-neighbor override of `OutboundDir`, keyed by roster node
-  number (`Config.OutboundLink`). Only a board that HOSTs others needs any.
+- `GameInbound` (`Config.InboundDir`) — packets from other boards wait here to
+  be applied.
+- `GameOutbound` (`Config.OutboundDir`) — the game writes packets for other
+  boards here.
+- `GameOutbound <node> <dir>` (`Config.OutboundDirs`) — per-neighbor override,
+  keyed by roster node number (`Config.OutboundLink`). Only a board that HOSTs
+  others needs any.
 
 Both are resolved against `DataDir` unless absolute (`Config.Inbound()` /
 `Config.Outbound()`) — a door is launched from whatever working directory the
 BBS chooses, so a CWD-relative path lands somewhere different on every call.
 
-Moving files between boards is external to the game. `RunPlanetary`
-(`immortal-barons -planetary`, also folded into `-maint` when IBBS is on) reads
-and applies inbound packets, launches due group attacks, exports this board's
-scores, and writes the outbox.
+Moving files between boards is external to the game, except over FTN, where the
+game's own transport (`internal/ftn`) moves them when `bbs.cfg` configures it.
+`RunPlanetary` (`immortal-barons -planetary`, also folded into `-maint` when
+IBBS is on) reads and applies inbound packets, launches due group attacks,
+exports this board's scores, and writes the outbox.
 
 ### Generic file handoff contract (#191)
 
@@ -32,8 +36,8 @@ The final `.brp` name is the commit marker (the extension is matched without
 regard to case). Its existence means the file is complete, closed, and ready
 for its current owner to consume. A transport must never create a final `.brp`
 and then fill it in place. That rule applies to a plain filebox copier, a sync
-service, `scp`, and a shared or network filesystem just as it does to
-`barons-ftn`.
+service, `scp`, and a shared or network filesystem just as it does to the FTN
+transport.
 
 The ownership states are:
 
@@ -90,15 +94,18 @@ in place and retries it later. That grace period limits damage from a transport
 that writes directly to the final name; it is a heuristic, not an alternative
 readiness signal. An older incomplete file is quarantined to `bad/`.
 
-`barons-ftn` is the optional bidirectional FTN adapter. The game's directories
-remain private. `-out` claims a fixed snapshot under `game.lock`, groups its
-packets by next hop, and publishes one FTN handoff per hop. Attach and obox
-bundles are immutable; BSO bundles may be rebuilt at the same path while the
-peer's `.bsy` is held. `-in`
-validates a received bundle, publishes local packets under the same game lock,
-and immediately re-bundles transit. All helper processes serialize through
-`barons-ftn.lock`; the lock order is always helper then game. Durable journals
-under `ftn-spool` make the handoff resumable.
+The FTN transport (`internal/ftn`) is optional and bidirectional, and runs
+inside `-maint`, `-planetary` and `-full`: its unwrap step before the planetary
+step, its handoff after the world is saved (`cmd/immortal-barons/transport.go`).
+The game's directories remain private. The handoff claims a fixed snapshot
+under `game.lock`, groups its packets by next hop, and publishes one FTN handoff
+per hop. Attach and obox bundles are immutable; BSO bundles may be rebuilt at
+the same path while the peer's `.bsy` is held. The unwrap step validates a
+received bundle, publishes local packets under the same game lock, and
+immediately re-bundles transit. Both serialize through `barons-ftn.lock`; the
+lock order is always transport then game, and no mode takes the transport lock
+while it holds the world lock. `-full` never waits for the transport lock.
+Durable journals under `ftn-spool` make the handoff resumable.
 
 ### FTN transport bundle
 
@@ -163,8 +170,8 @@ remains in the packet.
 A leading JSON object instead of ZIP is accepted as one legacy entry, allowing
 receivers to be upgraded before senders. This is receive-only compatibility,
 not an FTN wire format: new senders always publish ZIP, even for one packet.
-New bundled output requires the receiving `barons-ftn -in`; the game itself
-still reads JSON only.
+New bundled output requires the receiving board's unwrap step (an
+`IncomingFileDir` line); the planetary step itself still reads JSON only.
 
 ## Packet files (`*.brp`)
 
@@ -622,8 +629,9 @@ table, held by the Coordinator, is what remains.
 
 ## Board config: `bbs.cfg`
 
-The per-board settings — `BoardID`, `LeagueNumber`, `InboundDir`, `OutboundDir`,
-`OutboundDirs`, `Lottery`, and `PirateNews` — live here rather than in
+The per-board settings — `BoardID`, `LeagueNumber`, `GameInbound`,
+`GameOutbound`, `Lottery`, `PirateNews`, and the FTN transport's own lines —
+live here rather than in
 `config.json`, and are marked
 `json:"-"` on `game.Config` so they cannot land in both. `config.json` is
 rewritten by a Coordinator's ruleset broadcast, which is no place for settings
@@ -635,9 +643,9 @@ or `;`, keywords matched case-insensitively, unknown keywords ignored:
 ```
 BoardID       Avalon
 LeagueNumber  900
-Inbound       /home/bbs/ftn/in
-Outbound      /home/bbs/filebox/uplink
-Link 3        /home/bbs/filebox/node3
+GameInbound   inbound
+GameOutbound  /home/bbs/filebox/uplink
+GameOutbound 3 /home/bbs/filebox/node3
 Lottery       yes
 PirateNews    yes
 ```
@@ -650,20 +658,26 @@ alone. `PirateNews no` suppresses the news line a pirate raid posts and nothing
 else — the raid, its loot, its losses and the raider's own report are unchanged.
 
 Not BRE's positional seven lines (sysop, planet, address, inbound, netmail dir,
-league, mailer). Positional cannot express `Link` at all, and a blank field
-shifts every field after it — which is what most of BRE's own InterBBS
-troubleshooting section is about. The game stores no mailer name or netmail
-directory here. FTN addresses are already roster data in `ibnodes.dat`; the
-optional `barons-ftn` adapter keeps its netmail directory and Binkley-mode
-switch in the separate `ftn.cfg`.
+league, mailer). Positional cannot express a per-neighbor directory at all, and
+a blank field shifts every field after it — which is what most of BRE's own
+InterBBS troubleshooting section is about. FTN addresses are already roster
+data in `ibnodes.dat`. The FTN transport's lines (`IncomingFileDir`,
+`NetmailDir`, `IncomingNetmailDir`, `Mailer`, `AttachDir`, `SubjectPath`,
+`Link`, `Bundled`, `OboxMeshFanout`) are read by `ftn.LoadConfig` from the same
+file; `store.LoadBoardConfig` ignores them. Three take BRE's line labels: line 4
+is `IncomingFileDir`, line 5 `NetmailDir`, line 7 `Mailer`. Settings under an
+older release's names are refused with their replacements
+(`store.LegacyBoardRefusal`, `ftn.LegacyRefusal`) by the modes that move
+packets.
 
 `store.ParseBoardConfig` reads BRE's own positional format, wired to
 `-ibbs-reset -import-bbs-cfg PATH` for a sysop converting a league they already
-run. It takes the planet name, the incoming-files directory and the league
-number. The sysop name, FTN address, netmail directory, and mailer are not
-imported: the roster and optional `ftn.cfg` own those values, and BRE's netmail
-directory must not become `OutboundDir` — BRE puts `.MSG` files there, while
-IB's outbound holds the packets themselves.
+run. It takes the planet name and the league number into the game's settings,
+and lines 4, 5 and 7 as the transport's `IncomingFileDir`, `NetmailDir` and
+`Mailer`. BRE reads its packets straight out of line 4, but IB unwraps from it
+into `GameInbound`, so that directory never becomes the game's own. The sysop
+name and FTN address are not imported: IB has no use for the first, and the
+roster owns the second.
 
 The path is explicit rather than a scan of the data directory: `BBS.CFG` and
 `bbs.cfg` are the same filename on macOS and Windows, so a scan would find the
@@ -714,13 +728,20 @@ several boards on one machine with no front-end mailer: each board's *inbound*
 directory points directly at the *other* board's `\OUTBOUND`, and a `ROUTE.CFG`
 forms a circle (`ROUTE * 2` on board 1, `ROUTE * 1` on board 2). `BBS.CFG` line
 4 is the inbound-file dir, line 5 the outbound/netmail dir. This works because
-the boards share a disk. The clone's `InboundDir`/`OutboundDir` are the direct
+the boards share a disk. The clone's `GameInbound`/`GameOutbound` are the direct
 analogue.
 
 **Exchange commands.** BRE runs maintenance from the command line:
 `BRE PLANETARY` (read inbound, then write outbound — the equivalent of
 `immortal-barons -planetary`), split into `BRE INBOUND` (read + route) and
-`BRE OUTBOUND` (write). A league-wide reset by the coordinator propagates to
+`BRE OUTBOUND` (write). `BRE FULL` runs INBOUND, a player, then OUTBOUND, which
+is `immortal-barons -full`. The binary confirms the split:
+`run_interbbs_maintenance` (`0x00a035`) takes an inbound and an outbound flag,
+called (1,1), (1,0) and (0,1) for the three commands, and FULL makes the door
+session call it (1,0) before play and (0,1) after. Netmail is written by
+`write_mailer_packet` (`0x0539e1`) from the outbound half and from forwarding
+on the inbound half. A plain door session moves no league mail. IB has no
+separate INBOUND or OUTBOUND command. A league-wide reset by the coordinator propagates to
 members: a member's next `PLANETARY` wipes and rebuilds its world from the
 coordinator's reset packet.
 

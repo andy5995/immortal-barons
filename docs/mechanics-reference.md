@@ -6289,7 +6289,7 @@ Divergences, all forced by the transport rather than chosen:
   roster is IB's single routing table.
 - **A routed broadcast is addressed per planet before it is written**, one file
   each, because the game owns the roster tree. An unrouted league still writes
-  one broadcast. A transport may fan it out directly; `barons-ftn` carries an
+  one broadcast. A transport may fan it out directly; the FTN transport carries an
   actual node route plus the set of sibling recipients already scheduled, so a
   receiver does not reflexively send a copy back along the route or across to a
   sibling that already has one pending.

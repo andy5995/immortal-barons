@@ -44,12 +44,15 @@ described below; the editor only shows them:
   battle fought anywhere in the league, and the league's eight rankings. Three
   more settings go with it — **BBS Name**, **Board URL** and **Bulletin URL** —
   and [Bulletin Files](bulletins.md) covers all four.
-- **Inbound Dir** — the directory where packets from other boards arrive. This
-  is usually your mailer's inbound directory, where it puts every file it
-  receives.
-- **Outbound Dir** — the directory where the game writes packets for other
-  boards. Pick the directory whose **whole contents your mailer sends** to that
-  link. Mailers often call this a *file box*.
+- **GameInbound** — the game's own directory of packets from other boards,
+  waiting to be applied. On a board using the game's [FTN
+  transport](ftn-transport.md) keep it private: the transport unwraps into it
+  from the mailer's directory, which is `IncomingFileDir`. On a board that moves
+  packets some other way, it is where that transport leaves them.
+- **GameOutbound** — the game's own directory of packets written for other
+  boards. On an FTN board keep it private too; the transport hands its contents
+  to the mailer. Otherwise pick the directory whose **whole contents your mailer
+  sends** to that link. Mailers often call this a *file box*.
 
   **It is usually not your mailer's main outbound directory.** That one holds
   the mailer's own queue: it sends the files a control file names, and it never
@@ -140,17 +143,17 @@ The key is a one-time exchange, unless the league changes Coordinator.
 
     ```
     immortal-barons -ibbs-reset -board-id "Your Board" \
-      -inbound inbound \
-      -outbound outbound \
+      -game-inbound inbound \
+      -game-outbound outbound \
       -data /path/to/data
     ```
 
-    Quote the board name if it has spaces. `-inbound` is where your mailer
-    or connector delivers unwrapped game packets; `-outbound` is where the game
-    leaves packets for the connector or another transport. Both may be left
-    out to use `inbound` and `outbound` inside the data directory. With FTN,
-    keep those defaults private and configure the mailer-facing paths in
-    `ftn.cfg` instead.
+    Quote the board name if it has spaces. `-game-inbound` is where packets
+    wait to be applied; `-game-outbound` is where the game leaves packets for
+    the transport. Both may be left out to use `inbound` and `outbound` inside
+    the data directory. With FTN, keep those defaults private and add the
+    mailer-facing lines described in [FTN Transport](ftn-transport.md) to
+    `bbs.cfg` instead.
 
     The command does not write `bbs.cfg` — it ends by printing the file for you
     to save, filled in from the flags you gave. Add your Coordinator's league
@@ -216,8 +219,8 @@ it in anything:
 ```
 BoardID       Avalon
 LeagueNumber  900
-Inbound       inbound
-Outbound      outbound
+GameInbound   inbound
+GameOutbound  outbound
 Lottery       yes
 PirateNews    yes
 OnFault       mail -s "IB fault" sysop@example.net <<< "$IB_FAULTS"
@@ -439,25 +442,28 @@ directory they are written in.
 ### A board that hosts others
 
 A board forwarding for its neighbors has a separate link to each of them, and a
-mailer usually wants each link's files in its own directory. Add a `Link` line
-to `bbs.cfg` for each, giving the neighbor's node number and the directory:
+mailer usually wants each link's files in its own directory. Add a
+`GameOutbound` line to `bbs.cfg` for each, giving the neighbor's node number and
+the directory:
 
 ```
-Link 3  /home/bbs/filebox/league_node3
-Link 5  /home/bbs/filebox/league_node5
+GameOutbound 3  /home/bbs/filebox/league_node3
+GameOutbound 5  /home/bbs/filebox/league_node5
 ```
 
-Anything with no `Link` line of its own goes to **Outbound**, which is what a
-board's link to its own uplink should be. A board that hosts nobody needs none
-of this.
+Anything with no line of its own goes to the plain **GameOutbound**, which is
+what a board's link to its own uplink should be. A board that hosts nobody
+needs none of this. A board using the FTN transport sets its per-neighbor
+handoff with `Link` lines instead; see [Per-peer
+links](ftn-transport.md#per-peer-links).
 
 ## How packets move (you choose the schedule)
 
 The game never moves files between boards. It only reads and writes packet
 files in its inbound and outbound directories. Moving the files between boards
-is your job, and you choose how often it happens. When using `barons-ftn`, these
-are private door-local directories: the helper, not the game, touches the BBS or
-mailer's directories.
+is your job, and you choose how often it happens. With the [FTN
+transport](ftn-transport.md) the game does that part too, but only through the
+mailer's own directories: its packet directories stay private.
 
 The inter-BBS step is:
 
@@ -466,8 +472,9 @@ immortal-barons -planetary -data /path/to/data
 ```
 
 It reads every packet in your inbound directory, applies it, and writes new
-packets to your outbound directory. It also runs automatically inside `-maint`
-when inter-BBS play is on.
+packets to your outbound directory. With the FTN transport set up it also
+unwraps what the mailer brought first and hands the new packets to the mailer
+after. It also runs automatically inside `-maint` when inter-BBS play is on.
 
 A common setup:
 
@@ -476,14 +483,13 @@ A common setup:
    includes this step.
 3. Your transport carries each file from your outbound side to the destination
    (over FidoNet, a sync tool, scp, a shared mount — whatever you use). For FTN,
-   `barons-ftn -out` wraps it and `barons-ftn -in` removes that wrapper before
-   the game sees it.
+   the game's transport wraps it on the way out and unwraps it on the way in.
 4. The next `-planetary` run on that board reads and applies those files.
 
 ### Safe handoff for a plain file transport
 
-If you use `barons-ftn`, it already performs the safe handoff described in its
-own guide. If you write a filebox copier, sync job, or other transport, use the
+The FTN transport already performs the safe handoff described in its own
+guide. If you write a filebox copier, sync job, or other transport, use the
 final `.brp` name as the ready signal:
 
 1. At the receiving board, copy the packet to a non-`.brp` temporary name on
@@ -523,8 +529,8 @@ scores, the roster, a ruleset change, a season reset — needs both:
 - **Something that copies one packet to every board.** A shared directory or
   mount does this by being shared. A mailer queue does not: a binkp file box and
   an FTN file attach are both per-node, so one packet left in the queue reaches
-  one board. `barons-ftn` is the piece that fans it out — see "Optional FTN
-  handoff" below.
+  one board. The game's FTN transport is the piece that fans it out — see
+  "Optional FTN handoff" below.
 - **A link to every board those copies name.** A copy addressed to a board your
   mailer has no session with stays in the queue and is retried until you notice.
 
@@ -541,32 +547,26 @@ to each planet, so they know how fast operations move.
 
 BRE hands each packet to your mailer. It writes the packet to its own
 `\OUTBOUND` directory, then drops a `.msg` wrapper in your netmail directory so
-the mailer knows to attach the file and send it. Four of `BBS.CFG`'s seven lines
-serve that wrapper: the sysop name and node address that go inside it, the
-netmail directory it is written to, and which mailer's flavor to use.
+the mailer knows to attach the file and send it, and it reads what arrives
+straight out of the mailer's incoming files directory.
 
-Immortal Barons normally stops one step earlier. It writes the packet and
-leaves it there, so the game itself has no wrapper, netmail directory, or mailer
-setting, and `bbs.cfg` has no line for any of the four. Watch for `.brp` files
-in your outbound directory; that is the equivalent of seeing the `.msg` appear.
+Immortal Barons does the same when you give it the same three answers: the
+mailer's incoming files directory, the netmail directory, and the mailer. They
+are the `IncomingFileDir`, `NetmailDir` and `Mailer` lines of the [FTN
+transport](ftn-transport.md), and `-maint`, `-planetary` and `-full` then
+unwrap and hand off around the planetary step, as `BRE PLANETARY` and `BRE
+FULL` do. `-ibbs-reset -import-bbs-cfg` fills them in from your old `BBS.CFG`.
 
-If your transport wants the original-style handoff, the separate `barons-ftn`
-helper creates it. See [Optional FTN handoff](#optional-ftn-handoff) below.
-
-The gain is that the game knows nothing about mail, which means:
+Leave them out and the game stops one step earlier: it writes the packet to
+`GameOutbound` and leaves it there. Watch for `.brp` files in that directory;
+that is the equivalent of seeing the `.msg` appear. This means:
 
 - **A league needs no mailer at all.** Two boards on one machine sharing a
   directory is a working league, and so is a pair of boards syncing a folder
   between them.
-- **Any transport works**, including ones written long after BRE was. You are
-  not held to the four mailers BRE knows about, and there is no once-a-day limit
-  for choosing the wrong one.
-- **The wrapper is optional**: boards using another transport keep `.msg` files
-  and mailer-specific settings entirely out of the path.
-
-What changes is that arranging delivery is now yours. Point a transport at the
-outbound directory: a file box entry if you already run a mailer, a timed event
-if you do not. Or run `barons-ftn`, which gives you the original's handoff back.
+- **Any transport works**, including ones written long after BRE was.
+- **FTN is optional**: boards using another transport keep `.msg` files and
+  mailer settings entirely out of the path.
 
 The rest of the mapping:
 
@@ -575,12 +575,13 @@ The rest of the mapping:
 | `BBS.CFG`, seven lines by position | `bbs.cfg`, one keyword per line |
 | Line 1, sysop name | nothing — the wrapper is from `Immortal Barons` |
 | Line 2, BBS name | `BoardID` |
-| Line 3, node address | `ibnodes.dat`, where the helper reads it |
-| Line 4, incoming files | `Inbound` |
-| Line 5, netmail directory | `ftn.cfg`'s `NetmailDir` |
+| Line 3, node address | `ibnodes.dat`, where the transport reads it |
+| Line 4, incoming files | `IncomingFileDir` |
+| Line 5, netmail directory | `NetmailDir` |
 | Line 6, league number | `LeagueNumber` |
-| Line 7, mailer | `ftn.cfg`'s `Binkley`, and only two ways rather than seven |
-| `\OUTBOUND`, fixed | `Outbound`, and you choose the path |
+| Line 7, mailer | `Mailer`, with the same seven names |
+| `\OUTBOUND`, fixed | `GameOutbound`, and you choose the path |
+| (none: BRE reads line 4 directly) | `GameInbound`, the game's own inbound |
 | `ROUTE.CFG` | the roster's `HOST` entries, plus `Link` lines |
 | `BRNODES.DAT` | `ibnodes.dat` |
 | `BRE PLANETARY` | `immortal-barons -planetary` |
@@ -599,40 +600,43 @@ does not.
 
 ## Optional FTN handoff
 
-`barons-ftn` is the bidirectional boundary between the game's private packet
-directories and an FTN mail system. It groups a fixed outbound snapshot into
-one opaque ZIP bundle per next hop and hands each peer off through stored-message
+The game carries its packets over an FTN mail system itself when `bbs.cfg`
+names the mailer's directories. It groups a fixed outbound snapshot into one
+opaque ZIP bundle per next hop and hands each peer off through stored-message
 file attach, direct obox, or BSO/FLO. On receive it validates and removes that
 wrapper, delivers local packets, and routes transit without changing the signed
-game-packet bytes.
+game-packet bytes. This all happens inside `-maint`, `-planetary` and `-full`:
 
 ```
-barons-ftn -in -data /path/to/data
 immortal-barons -maint -data /path/to/data
-barons-ftn -out -data /path/to/data
 ```
 
 It is optional. A board whose mailer or tosser drops `.brp` files straight into
-the game's `Inbound` keeps working without it, and that is a supported way to
-run. The one thing such a board cannot do is receive a ZIP bundle, so no peer
-may enable `Bundled` toward it until it runs the helper — see [Plain packets
-for boards that cannot read a
+`GameInbound` keeps working without it, and that is a supported way to run. The
+one thing such a board cannot do is receive a ZIP bundle, so no peer may enable
+`Bundled` toward it until it sets `IncomingFileDir` — see [Plain packets for
+boards that cannot read a
 bundle](ftn-transport.md#plain-packets-for-boards-that-cannot-read-a-bundle).
 
-The helper and game share a locking contract. Attach and obox bundles are
-immutable; BSO handoffs honor the destination `.bsy` and can safely coalesce
-new snapshots into a compatible advertised bundle while holding it. See
-[FTN Transport with `barons-ftn`](ftn-transport.md) for the complete
-configuration reference, mixed-link examples, event schedules, 8.3 aliases,
-mesh warning, crash recovery, and directory-by-directory troubleshooting.
+A minimal attach setup on Synchronet adds three lines to `bbs.cfg`:
 
-### Before bundled transport
+```
+IncomingFileDir /sbbs/fido/inbound
+NetmailDir      /sbbs/fido/netmail
+Mailer          Binkley
+```
 
-The rest of this subsection records the single-packet `.msg` handoff used by
-older releases. It is retained as migration context, not current setup
-instructions; use the dedicated guide above for a new or upgraded installation.
+- **NetmailDir** is where your tosser picks up Type-2 `.msg` netmail. On
+  Synchronet read it from `scfg` → Networks → FidoNet EchoMail and NetMail →
+  **NetMail Directory**, and check **Allow File Attachments** on that screen
+  too; with it off, the wrapper is written and then ignored. Not every BBS has
+  such a directory: [Mystic](https://www.mysticbbs.com/) keeps its own message
+  bases, so reach a Mystic board with an `Obox` or `BSO` link instead.
+- **Mailer** is `Binkley` for a Binkley-style mailer, including BinkIT, the one
+  shipped with Synchronet. The full list and what each does are in the [FTN
+  Transport](ftn-transport.md#stored-message-attach-settings) guide.
 
-**Writing the netmail is not sending it.** `barons-ftn` leaves a `.msg` in the
+**Writing the netmail is not sending it.** The game leaves a `.msg` in the
 netmail directory and stops. What carries it is whatever already carries your
 netmail. On [Synchronet](https://www.synchro.net/) that is two more steps:
 SBBSecho packs the message and its attachment into the outbound, then the
@@ -648,122 +652,23 @@ BinkIT hands over whatever is queued for an authenticated caller, so the other
 board's poll does carry your packets away. What it cannot do is run the two
 steps above. Until they have run there is nothing in the outbound to collect,
 and both boards' mailer logs look perfectly healthy while the league moves one
-way.
+way. A `.msg` left in the netmail directory means the game did its part and the
+mail system has not run.
 
-Both usually run from your BBS's timed events already, so there is often
-nothing to add. Knowing the shape helps when nothing arrives. A `.msg` left in
-the netmail directory means the game did its part, and the mail system has not
-run. That is a different problem from a `.msg` that never appeared.
-
-Create `ftn.cfg` in that data directory:
-
-```
-NetmailDir /sbbs/fido/netmail
-Binkley    No
-```
-
-- **NetmailDir** is the directory where your BBS or mailer watches for Type-2
-  `.msg` netmail. A relative path is read relative to the game data directory.
-  Not every BBS has one. [Mystic](https://www.mysticbbs.com/) keeps its own
-  message bases and watches no such directory, so the helper has nothing to
-  hand a packet to; use a file box or another transport there. On Synchronet,
-  read the path from `scfg` → Networks → FidoNet EchoMail and NetMail →
-  **NetMail Directory**. Check **Allow File Attachments** on that screen too.
-  With it off, the wrapper is written and then ignored.
-- **Binkley** is `Yes` when the mailer uses Binkley-style file attaches,
-  including BinkIT, the Binkley-style mailer shipped with Synchronet, and `No`
-  for a non-Binkley mailer. Synchronet can be used with several mailers, so the
-  BBS package itself does not decide this switch. Omitting the setting is the
-  same as `No`.
-  Binkley-style handling gets a `^` before the attached path in the subject;
-  non-Binkley handling gets a `FLAGS KFS` control line. Both get the private,
-  local, file-attach, and kill-sent header attributes.
-- **AttachDir** and **SubjectPath** are optional and control the attachment
-  pathname. They are described under [Attachment pathnames](#attachment-pathnames)
-  below. Omitting both keeps the behavior of every earlier release.
-
-The helper gets this board's address and every destination address from
+The transport gets this board's address and every destination address from
 `ibnodes.dat`. Use complete `zone:net/node` addresses there; a point may add
-`.point`. The helper prefers the packet's stable destination node number, uses
-the board name for packets from older versions, and follows the roster's `HOST`
-tree to choose the next hop. For the common arrangement where every member sends
-through node 1, node 1 hosts every other board:
+`.point`. It follows the roster's `HOST` tree to choose the next hop. For the
+common arrangement where every member sends through node 1, node 1 hosts every
+other board:
 
 ```
 1 HOST 2 3 4 5
 ```
 
-With HOST routing in the roster, `-planetary` already writes one signed, addressed
-packet per board. In an unrouted mesh it writes one unaddressed broadcast
-instead; `barons-ftn` gives every other board its own attachment pathname and
-`.msg`. It sends those copies directly to each board. Turning the already-signed
-broadcast into routed, addressed packets here would change its signed bytes.
-
-### Attachment pathnames
-
-Two separate things decide the attachment: where the file is written, and how
-that file is spelled in the `.msg` subject. They are configured separately
-because the spelling is resolved by the mailer, and only the operator knows the
-mailer's working directory and attachment search path.
-
-By default the helper moves a claimed packet into the `fido` child of the
-`Outbound` or `Link` directory it came from, and puts that absolute pathname in
-the subject. Both defaults are what every release before these settings existed
-did, and an `ftn.cfg` with neither key behaves exactly that way.
-
-```
-AttachDir   /sbbs/fido/attach
-SubjectPath Basename
-```
-
-- **AttachDir** puts every claimed packet in one directory instead of the
-  per-outbound `fido` child, whatever outbound or link it came from. A relative
-  path is read relative to the game data directory. Keep it on the same
-  filesystem as the outbound directories: the helper claims a packet by
-  renaming it there.
-- **SubjectPath** chooses the spelling:
-    - `Absolute`, or the key omitted, writes the full pathname. Safe with any
-      mailer, and the most expensive in subject bytes.
-    - `Basename` writes the filename alone, for a mailer configured to search
-      an attachment directory. Point that search at `AttachDir`.
-    - Anything else is a prefix. It is written in front of the filename exactly
-      as configured, and the mailer resolves it against its own working
-      directory — the helper never resolves it and never checks that it exists.
-      A prefix written with backslashes (`C:\sbbs\ibout`) keeps them, for a
-      mailer on a different kind of system.
-
-Whatever the spelling, it must name a file the mailer can find, because the
-mailer deletes the attachment after sending it.
-
-The subject holds 71 bytes, or 70 with the Binkley `^`, for the whole spelling.
-Before moving any packet, the helper checks every subject the whole run would
-create, including broadcast suffixes, and exits without moving anything if one
-will not fit. The error names the setting to change. When fewer than 8 bytes
-are left, it warns on standard error while still queueing the mail.
-
-**Which spelling to choose depends on your mailer.** `Absolute` spends the whole
-directory out of the 71 bytes: `/sbbs/ibout/fido/` is 17, and the longest packet
-name plus a broadcast suffix and Binkley's `^` can take 45 more, leaving 8.
-`Basename` spends nothing on directories, but it needs a mailer that searches an
-attachment directory. **Synchronet is not one** — SBBSecho reads the directory
-out of the subject and reports the file as not found when it is missing — so a
-Synchronet board keeps `Absolute` and a short data directory. A prefix is the
-middle ground where the mailer resolves it against its own working directory.
-
-This budget applies only when `barons-ftn` carries files through Type-2 `.msg`
-netmail. A shared directory, sync tool, `scp`, or another transport that does
-not put the pathname in an FTN subject has no such limit.
-
-The game writes and closes each complete, optionally signed packet under a
-non-`.brp` temporary name, then atomically renames it to its final `.brp` name.
-The helper therefore needs no game lock and never scans a partial packet.
-Concurrent helpers serialize through their own `barons-ftn.lock`, which the
-game never takes; only the helper that moves a source into the attachment
-directory creates its `.msg` or broadcast set. A malformed packet remains in the
-outbound directory; a message-creation failure is moved back there for a later
-run. This uses
-ordinary rename, exclusive file creation, and real copies—hard-link support is
-not required.
+[FTN Transport](ftn-transport.md) is the complete reference: every setting,
+the per-peer `Link` modes, mixed-link examples, event schedules, 8.3 aliases,
+the attach Subject's byte limit, the mesh warning, crash recovery, and
+directory-by-directory troubleshooting.
 
 ## League-wide rules (Coordinator only)
 
@@ -980,19 +885,19 @@ paths: `~` is not expanded in this file.
 ```
 BoardID       Alpha BBS
 LeagueNumber  900
-Inbound       /home/you/a-mystic/echomail/in
-Outbound      /home/you/a-mystic/filebox/iblocal_z99n1n2
+GameInbound   /home/you/a-mystic/echomail/in
+GameOutbound  /home/you/a-mystic/filebox/iblocal_z99n1n2
 ```
 
-`Inbound` is your BBS's FTN inbound; `Outbound` is the filebox for the other
-board, from step 3.
+`GameInbound` is your BBS's FTN inbound, which the game reads directly in this
+file-drop setup; `GameOutbound` is the filebox for the other board, from step 3.
 
 The member board takes no editor at all — its rules arrive from the Coordinator:
 
 ```
 immortal-barons -ibbs-reset -board-id "Bravo BBS" \
-  -inbound ~/b-mystic/echomail/in \
-  -outbound ~/b-mystic/filebox/iblocal_z99n1n1 \
+  -game-inbound ~/b-mystic/echomail/in \
+  -game-outbound ~/b-mystic/filebox/iblocal_z99n1n1 \
   -data /path/to/member/data
 ```
 
@@ -1097,16 +1002,16 @@ either way: the game cannot do it for you.
 The steps under "Joining a league (member boards)" are the game's side. This
 section is Synchronet's side — where each setting lives, and what carries the
 packets. It assumes BinkIT is already running your other mail. The complete
-current configuration, including the other link types, is in [FTN Transport
-with `barons-ftn`](ftn-transport.md).
+current configuration, including the other link types, is in [FTN
+Transport](ftn-transport.md).
 
 This example hands the packets straight to BinkIT's outbound. That is the right
 way on Synchronet: SBBSecho has nothing to add to a bundle, and every step you
 remove is one that cannot break.
 
-Paths below are the Linux defaults. On Windows they are `C:\SBBS\...`, the two
-programs are `immortal-barons.exe` and `barons-ftn.exe`, and the script in the
-last step is a `.bat` file.
+Paths below are the Linux defaults. On Windows they are `C:\SBBS\...`, the
+program is `immortal-barons.exe`, and the script in the last step is a `.bat`
+file.
 
 ### Your league address
 
@@ -1115,7 +1020,8 @@ In `scfg` → Networks → FidoNet EchoMail and NetMail:
 - **System Addresses** — add the address the Coordinator assigned you. Leave
   your existing addresses alone.
 
-Nothing else on that screen matters here. The game writes no netmail.
+Nothing else on that screen matters here. With the BSO link below the game
+writes no netmail.
 
 ### A domain for the league
 
@@ -1130,7 +1036,7 @@ The other three fields can stay empty. The domain keeps the league's zone from
 being read as part of a network you already carry. Any name will do; use the
 same one everywhere below.
 
-**Work out the outbound directory now**, because `ftn.cfg` needs the exact
+**Work out the outbound directory now**, because `bbs.cfg` needs the exact
 path. Synchronet starts from **Outbound Root** on the domain, or from
 SBBSecho's own **Outbound** when that field is empty, and then adds the zone in
 hexadecimal as a suffix on the directory name. Zone 777 is `309`, so an
@@ -1157,51 +1063,49 @@ Check the host it dials and that authentication succeeds.
 Once the game side is set up too, `immortal-barons -league-check` should come
 back with no FAIL lines.
 
-### Point `barons-ftn` at the two directories
+### Point the game at the two directories
 
-In the game's data directory, `ftn.cfg`:
+Add two lines to `bbs.cfg` in the game's data directory:
 
 ```
-InboundDir /sbbs/fido/inbound
-Link 1     BSO /sbbs/fido/outbound.309 Normal
+IncomingFileDir /sbbs/fido/inbound
+Link 1          BSO /sbbs/fido/outbound.309 Normal
 ```
 
-`InboundDir` is where BinkIT drops what it receives. The `Link` line is the
+`IncomingFileDir` is where BinkIT drops what it receives. The `Link` line is the
 outbound directory you worked out above, and node 1 is the Coordinator's
 number on the roster.
 
-`barons-ftn` writes the bundle and a flow file naming its full path, so the
-70-byte subject limit under [Attachment pathnames](#attachment-pathnames) does
-not apply to a Synchronet board and the game's data directory can sit wherever
-you like.
+The game writes the bundle and a flow file naming its full path, so the
+Subject byte limit of an attach (see [Keeping attach subjects
+short](ftn-transport.md#keeping-attach-subjects-short)) does not apply to a
+Synchronet board and the game's data directory can sit wherever you like.
 
-### The four steps, in order
+### The two steps, in order
 
 ```
-barons-ftn -in -data /sbbs/xtrn/imb/data
 immortal-barons -maint -data /sbbs/xtrn/imb/data
-barons-ftn -out -data /sbbs/xtrn/imb/data
 jsexec -c /sbbs/ctrl /sbbs/exec/binkit.js
 ```
 
-The game reads and writes private JSON `.brp` files. Outbound `barons-ftn`
-coalesces them into one 8.3 transport bundle per next hop, puts it in the
-outbound directory, and adds a line for it to the flow file BinkIT reads. BinkIT
-sends the bundle and deletes it. At the far side, inbound `barons-ftn` unwraps
-it. Wherever a file stops is the step that did not run.
+The game unwraps what BinkIT delivered, applies it, writes its own private JSON
+`.brp` files, then coalesces them into one 8.3 transport bundle per next hop,
+puts it in the outbound directory, and adds a line for it to the flow file
+BinkIT reads. BinkIT sends the bundle and deletes it. At the far side, that
+board's game unwraps it. Wherever a file stops is the step that did not run.
 
 Judge a run by whether the outbound emptied, not by BinkIT's last line: a
 session that transferred everything can still end on a complaint about files
 pending acknowledgment.
 
-Put those four lines in a shell script and give it a lock, so the door's
+Put those two lines in a shell script and give it a lock, so the door's
 clean-up and the timed event cannot run it at once:
 
 ```
 #!/bin/sh
 exec 9>/sbbs/xtrn/imb/data/planetary.lock
 flock -n 9 || exit 0
-...the four commands...
+...the two commands...
 ```
 
 Then set it as the door's **Clean-up Command Line** in `scfg` → External

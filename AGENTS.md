@@ -138,10 +138,14 @@ stream). Front-ends attach different streams; the engine is unchanged.
 
 - `cmd/immortal-barons` — the door + local terminal front-end (stdio + dropfile;
   `-local`, `-maint`, `-planetary`, `-league-config`, `-reset`, …)
-- `cmd/barons-ftn` + `internal/ftn` — optional bidirectional FTN transport:
-  groups unchanged `.brp` packets into 8.3-named ZIP handoffs for stored-message
-  attach, obox, or BSO/FLO, safely coalesces advertised BSO bundles while holding
-  the peer `.bsy`, then validates/unwraps and routes them on receive
+- `internal/ftn` — optional bidirectional FTN transport, run by `-maint`,
+  `-planetary` and `-full` around the planetary step (unwrap before, handoff
+  after the save; `cmd/immortal-barons/transport.go`) and configured by its own
+  lines in `bbs.cfg`: groups unchanged `.brp` packets into 8.3-named ZIP
+  handoffs for stored-message attach, obox, or BSO/FLO, safely coalesces
+  advertised BSO bundles while holding the peer `.bsy`, then validates/unwraps
+  and routes them on receive. Its lock is never taken while the world lock is
+  held, and `-full` never waits for it
 - `internal/session` — the `Session` byte-stream abstraction + console/stdio/
   socket implementations, shared `ReadLine`, and the Ctrl-key macro expander
 - `internal/ansi` — ANSI escape helpers (one rendering path for all front-ends)
@@ -475,14 +479,19 @@ Quick=0/Normal=1/Extended=2, say), the reason is that the encoding stays
 checkable against the disassembly, never interoperability. This has been got
 wrong more than once, including in two code comments that shipped.
 
-**Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in Inbound/Outbound
-dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
-group attacks, and exports scores/news. `barons-ftn` is bidirectional since
-#226 (`-in`/`-out`, private game directories behind resumable spools, attach /
-obox / BSO links per peer). It sends plain packets by default and bundles only
-when a board says `Bundled Yes`, because a board that cannot unwrap a ZIP
-aborts its whole inbound run on the first one it meets. Whether a peer can is
-a question of running `barons-ftn -in`, not of its release: the helper is
+**Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in the
+GameInbound/GameOutbound dirs; the sysop's transport moves them; `-planetary`
+processes inbound, launches group attacks, and exports scores/news. The game's
+own FTN transport has run inside `-maint`/`-planetary`/`-full` since #246, as
+the original's PLANETARY and FULL write their own netmail (it was the separate
+`barons-ftn` before; a leftover `ftn.cfg` and the old `bbs.cfg` spellings are
+refused with the lines to paste, #241). Its mailer-facing keys take the
+original's BBS.CFG line labels (`IncomingFileDir`, `NetmailDir`, `Mailer`).
+Private game directories sit behind resumable spools, with attach / obox / BSO
+links per peer. It sends plain packets by default and bundles only when a board
+says `Bundled Yes`, because a board that cannot unwrap a ZIP aborts its whole
+inbound run on the first one it meets. Whether a peer can is a question of
+whether it has an `IncomingFileDir`, not of its release: the transport is
 optional, a board reading `.brp` from its mailer's directory is a supported
 setup, and such a board cannot unwrap a bundle however current its game (#230,
 and the rule above `game.Protocol`). Two ed25519 key pairs guard it: the

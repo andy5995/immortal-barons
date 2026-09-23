@@ -151,13 +151,18 @@ of the netmail directory during `BRE INBOUND` and `BRE PLANETARY` — the
 envelopes other boards' copies of the game left behind, which the manual frames
 as saving the sysop from deleting that mail by hand.
 
-The original therefore wrote file-attach netmail like `barons-ftn` does, and
+The original therefore wrote file-attach netmail as IB's FTN transport does, and
 shipped the receiving board a way to clean up after it. IB has no counterpart,
 which is #223. Line 7 of the original's own `bbs.cfg` carries the other half of
 the same thought: a mailer setting of `NONE` writes no `.MSG` at all, for the
-boards the manual says were running the game with no mail system.
+boards the manual says were running the game with no mail system. IB's `Mailer
+None` does the same.
 
-Both are from `docs/bre.doc`. Neither has been confirmed against the binary.
+Both are from `docs/bre.doc`. The binary agrees on where the sweep runs:
+`run_interbbs_maintenance` (`0x00a035`) takes an inbound and an outbound flag,
+and only its inbound half calls `purge_system_messages` (`0x00b065`), after
+`process_incoming_interbbs_data` and behind a flag at `DS:0x76c2` that is
+probably `PURGENETMAIL`'s value (not traced to the keyword lookup).
 
 ## Every keyword the binary reads
 

@@ -1,8 +1,6 @@
 # Command Reference
 
-This page lists every command-line option for Immortal Barons in one place. It
-covers the game program (`immortal-barons`) and the optional FTN transport
-helper (`barons-ftn`).
+This page lists every command-line option for Immortal Barons in one place.
 
 Run `immortal-barons -help` to see the same options in your terminal. This page
 and the `-help` output use the same groups.
@@ -100,8 +98,9 @@ then exit.
   worth doing on a board with real traffic.
 
     **On a league board it is required.** It also runs the inter-BBS step, which
-    a login does not, and raises the same fault alarm as `-planetary`. Schedule
-    it as often as you want packets to move.
+    a login does not, including the [FTN transport](ftn-transport.md) when
+    `bbs.cfg` sets one up, and raises the same fault alarm as `-planetary`.
+    Schedule it as often as you want packets to move.
 
 ### Testing and balance
 
@@ -158,29 +157,36 @@ These options are for games that link several BBSes together (a "league"). See
   `-reset`, except the settings editor also asks the league settings (board
   name, packet directories, and the interplanetary rules), and it creates the
   packet directories.
-- **`-board-id NAME`**, **`-inbound DIR`**, **`-outbound DIR`** — Settings for
-  `-ibbs-reset`. Giving `-board-id` skips the settings editor, so a member board
+- **`-board-id NAME`**, **`-game-inbound DIR`**, **`-game-outbound DIR`** —
+  Settings for `-ibbs-reset`. Giving `-board-id` skips the settings editor, so a member board
   is set up in one command. Use this when the League Coordinator sets the rules:
   they arrive in the Coordinator's next broadcast and replace whatever this board
-  starts with. `-inbound` and `-outbound` default to `inbound` and `outbound`
-  inside the data directory. The game does not write `bbs.cfg`: the reset ends by
+  starts with. `-game-inbound` and `-game-outbound` default to `inbound` and
+  `outbound` inside the data directory. The game does not write `bbs.cfg`: the reset ends by
   printing that file, filled in from these flags, for you to save yourself. It is
   plain text and yours alone — nothing in the game ever rewrites it.
-- **`-import-bbs-cfg PATH`** — Take this board's name, incoming-files directory
-  and league number from an original Barren Realms Elite `BBS.CFG`, for
-  `-ibbs-reset`. Use it when converting a league you already run, so you do not
-  retype what that file already says. It prints what it read. `-board-id` and
-  `-inbound` override it, and naming the board in the file skips the settings
-  editor just as `-board-id` does. It prints the `bbs.cfg` to save, the same as
+- **`-import-bbs-cfg PATH`** — Take this board's name, league number, mailer,
+  incoming files directory and netmail directory from an original Barren Realms
+  Elite `BBS.CFG`, for `-ibbs-reset`. The last three become the FTN transport's
+  `Mailer`, `IncomingFileDir` and `NetmailDir` lines. Use it when converting a
+  league you already run, so you do not retype what that file already says. It
+  prints what it read. `-board-id` overrides the name, and naming the board in
+  the file skips the settings editor just as `-board-id` does. It prints the `bbs.cfg` to save, the same as
   the flags do.
-- **`-planetary`** — Run the inter-BBS step, then exit: read incoming packets,
-  run the group attacks, and write outgoing packets. A run that meets a fault it
-  has not reported before exits non-zero and runs `bbs.cfg`'s `OnFault` command,
+- **`-planetary`** — Run the inter-BBS step, then exit: take in what the mailer
+  brought, read incoming packets, run the group attacks, write outgoing packets,
+  and hand them to the mailer. The two mailer steps run only when `bbs.cfg` sets
+  up the [FTN transport](ftn-transport.md). It can run as often as you like,
+  including from the mailer's post-session event. A run that meets a fault it
+  has not reported before, or whose handoff to the mailer fails, exits non-zero
+  and runs `bbs.cfg`'s `OnFault` command,
   so whatever runs this on a timer raises the alarm — see "Being told when the
   league stops moving" in the inter-BBS guide.
 - **`-full`** — Run the full cycle, then exit: read inbound packets, play a
   turn, and write outbound packets. This is the same as running `-planetary`,
-  then the door (or `-local`), then `-planetary` again, but in one step. It
+  then the door (or `-local`), then `-planetary` again, but in one step. The
+  FTN transport runs before and after, as in `-planetary`, but never waits for
+  another run that is already moving the mail. It
   requires either `-local` (with `-name` to identify the player) or a BBS drop
   file in the working directory. Use `-detailed` alongside it to see each
   packet as it is read and written.
@@ -199,6 +205,11 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-league-routes`** — Print which board each planet's packets are handed to,
   and the directory they are written in, then exit. Use it to check a roster the
   coordinator has just sent.
+- **`-ftn-status`** — Report what the FTN transport's spools are still holding,
+  for whom, for how long, and why, and change nothing. A file count answers none
+  of those: a snapshot is kept whole until every target in it publishes, so it
+  also holds bundles for peers that already went out. See [FTN
+  Transport](ftn-transport.md).
 - **`-gen-coord-key`** — Create this league's coordinator key, then exit. Only
   the coordinator runs this, once. It prints a line to give every other board.
   The private half is written to `coord.key` in the data folder; keep it secret,
@@ -240,39 +251,3 @@ what packets have already told this board — none of them changes the game.
 
 - **`-version`** — Print the version, then exit.
 - **`-help`** — Print the grouped list of options, then exit.
-
-## The FTN helper: `barons-ftn`
-
-`barons-ftn` moves packets between the game's private directories and an FTN
-mailer. Run inbound after a receive session, planetary processing next, and
-outbound before the tosser/mailer sends:
-
-```
-barons-ftn -in -data /path/to/data
-immortal-barons -planetary -data /path/to/data
-barons-ftn -out -data /path/to/data
-```
-
-It reads `bbs.cfg`, `ibnodes.dat`, and the FTN-only `ftn.cfg`.
-`-out` takes a fixed snapshot and creates one 8.3-named ZIP handoff per next
-hop, using stored-message attach, direct obox, or BSO/FLO as configured. Attach
-and obox handoffs are immutable; while holding the peer's `.bsy`, BSO may merge
-the snapshot into a compatible bundle already advertised in its flow file.
-`-in` validates received bundles and game-owned attach envelopes, publishes
-local packets, and immediately forwards transit packets. Concurrent helpers
-and game processes serialize through their shared locking contract.
-
-- **`-in`** — Receive, unwrap, and route inbound FTN bundles.
-- **`-out`** — Bundle and hand off outbound game packets. This is the
-  default when neither direction is supplied.
-- **`-status`** — Report what each spool is still holding, for
-  whom, for how long, and why, and change nothing. A file count answers none of
-  those: a snapshot is kept whole until every target in it publishes, so it also
-  holds bundles for peers that already went out.
-- **`-data DIR`** — Folder holding the game data and `ftn.cfg`; default
-  `./data`, relative to the scheduler's working directory.
-- **`-version`** — Print the helper and game version, then exit.
-- **`-help`** — Print the options, then exit.
-
-See [FTN Transport with `barons-ftn`](ftn-transport.md) for the complete
-configuration reference, examples, scheduling, recovery, and troubleshooting.

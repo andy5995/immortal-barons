@@ -13,7 +13,8 @@ somewhere else, which is the question worth answering first.
    them?
 3. `planetary.log` — what did earlier runs complain about?
 4. Your mailer or file transport — did anything reach the inbound directory at
-   all? With `barons-ftn`, `-status` answers this without changing anything.
+   all? With the FTN transport, `-ftn-status` answers this without changing
+   anything.
 
 ## Step 1: `-league-check`
 
@@ -44,10 +45,10 @@ and a league where nobody has run `-gen-board-key` works. What is not optional
 is the Coordinator's public key on every member board — without it a board
 cannot check that league orders came from the Coordinator, and refuses them.
 
-When `barons-ftn` is in use, `-league-check` also reports the transport's own
-backlog, because by the time anyone asks why a board went quiet the run that
-failed is long gone. Those lines are the same ones `barons-ftn -status` prints;
-see [Using `barons-ftn`](#using-barons-ftn-to-see-where-a-packet-stopped) below.
+When the FTN transport is in use, `-league-check` also reports its backlog,
+because by the time anyone asks why a board went quiet the run that failed is
+long gone. Those lines are the same ones `-ftn-status` prints; see [Using the
+FTN transport](#using-the-ftn-transport-to-see-where-a-packet-stopped) below.
 
 ## Step 2: read the run report
 
@@ -200,32 +201,34 @@ copies you have already looked at is a sysop task; nothing does it for you.
 Then the packet never reached your inbound directory, and the fault is in the
 half you own. Three things to check:
 
-Your **Inbound Dir** setting has to name the directory your mailer really writes
-to. If it names a different one, the game reads an empty directory and reports
-nothing, because an empty inbound is also what a quiet day looks like.
+The directory your mailer really writes to has to be the one the game reads:
+`IncomingFileDir` when the game's FTN transport unwraps for it, `GameInbound`
+when your transport drops packets straight in. If it names a different one, the
+game reads an empty directory and reports nothing, because an empty inbound is
+also what a quiet day looks like.
 
 Your mailer has to be running and linked. "Step 5 — prove the link" in the
 league guide polls each board from the other and reads the result properly; a
 session that connects and transfers nothing is the answer you want.
 
 If you hand packets to FidoNet, writing the netmail is not sending it. See
-["Writing the netmail is not sending it"](inter-bbs.md#before-bundled-transport)
-— a `.msg` still sitting in your netmail directory means the game did its part.
+[Optional FTN handoff](inter-bbs.md#optional-ftn-handoff) — a `.msg` still
+sitting in your netmail directory means the game did its part.
 
 The in-game **Travel Times** screen is where players see this first. A planet
 whose round trip stops moving is the same fault, seen from the other end.
 
-## Using `barons-ftn` to see where a packet stopped
+## Using the FTN transport to see where a packet stopped
 
-When the transport is `barons-ftn`, it will tell you where in the chain a packet
-is sitting. This matters because the game and the transport keep separate
+When the game's own FTN transport carries the league, it will tell you where in
+the chain a packet is sitting. This matters because the game and the transport keep separate
 directories on purpose: a packet the game has written is not a packet the mailer
 has been given, and neither of those is a packet that has been sent.
 
-### `-status` changes nothing
+### `-ftn-status` changes nothing
 
 ```
-barons-ftn -status -data /path/to/data
+immortal-barons -ftn-status -data /path/to/data
 ```
 
 Reach for this first: it reads the spool journals and prints what is unfinished,
@@ -245,90 +248,84 @@ peer.
 
 ### Bundles collecting in the transport inbound
 
-`.BRP` files pile up in the transport's `InboundDir` and never reach the game.
-The transport has not stalled and `-in` is running. It reads those files and
-passes over them on every run.
+`.BRP` files pile up in an `IncomingFileDir` and never reach the game. The
+transport has not stalled and its unwrap step is running. It reads those files
+and passes over them on every run.
 
-Both `-status` and `-in` say so. `-status` lists them under **Unclaimed in
-the mailer's inbound**, and `-in` prints a warning once a file has waited an
-hour. Anything younger is not reported: a bundle and its envelope can arrive in
+Both `-ftn-status` and the unwrap step say so. `-ftn-status` lists them under
+**Unclaimed in the mailer's inbound**, and every `-planetary` or `-maint` run
+prints a warning once a file has waited an hour. Anything younger is not reported: a bundle and its envelope can arrive in
 either order, and an exchange runs on a schedule, so a file passed over once is
 normal.
 
 There are three causes, and the report tells you which one you have.
 
-**The file is in `InboundDir` itself.** Look at it:
+**The file is in an `IncomingFileDir` itself.** Look at it:
 
 ```
 unzip -p /path/to/inbound/NNNNCCCC.BRP manifest.json
 ```
 
 `"delivery": "attach"` is the case. An attach bundle is claimed only alongside
-the `.msg` envelope that names it, and `-in` waits for that envelope rather
-than opening the bundle on its own. If this board's mail system never leaves a
-`.msg` file where `barons-ftn` reads them — Mystic tosses netmail into its own
+the `.msg` envelope that names it, and the unwrap step waits for that envelope
+rather than opening the bundle on its own. If this board's mail system never
+leaves a `.msg` file where the game reads them — Mystic tosses netmail into its own
 message bases and leaves none — the envelope never appears and the wait never
 ends.
 
 The fix is on the sending board, which has to reach this one by `Obox` or `BSO`
-instead. A peer with no `Link` line of its own sends `Attach`, so an `ftn.cfg`
-with no links at all produces exactly this.
+instead. A peer with no `Link` line of its own sends `Attach`, so a sending
+board with no `Link` lines at all produces exactly this.
 [Per-peer links](ftn-transport.md#per-peer-links) has the modes and what each
 one asks of the receiver.
 
-**The file is in a directory `ftn.cfg` never names.** A mailer that keeps a
+**The file is in a directory `bbs.cfg` never names.** A mailer that keeps a
 separate inbound for authenticated sessions delivers there instead, and a
 board naming only the other one reads nothing from it while both sides report
-a clean session. Give `ftn.cfg` an `InboundDir` line for each — see
+a clean session. Give `bbs.cfg` an `IncomingFileDir` line for each — see
 [Per-peer links](ftn-transport.md#per-peer-links) — and note that adding a
 session password can move deliveries from one to the other.
 
-**The file is in a subdirectory of `InboundDir`.** The report names the
-subdirectory. `-in` reads `InboundDir` and nothing below it, so no later run
-will take the file however long you wait.
+**The file is in a subdirectory of an `IncomingFileDir`.** The report names
+the subdirectory. The unwrap step reads each `IncomingFileDir` and nothing
+below it, so no later run will take the file however long you wait.
 
 A mailer keeps an unauthenticated session's files apart from the rest, and this
 is where they go. Mystic uses `unsecure`. Give that directory its own
-`InboundDir` line so `-in` reads it from now on, and move the waiting files up
+`IncomingFileDir` line so it is read from now on, and move the waiting files up
 so the next run claims them. Checking the session password for that peer on both
 boards stops new deliveries landing there.
 
 ### What a run tells you
 
-`-out` bundles and hands off; `-in` receives, unwraps and routes. Both print
-warnings to standard error and a summary to standard output, and both act, so
-they are not the command to reach for while you are still working out what is
-wrong.
+`-maint`, `-planetary` and `-full` unwrap before the planetary step and hand
+off after it. Both halves print warnings to standard error and a summary to
+standard output, and both act, so a run is not the command to reach for while
+you are still working out what is wrong.
 
+- `Unwrapped N packet(s) from the mailer's inbound.` is the count that should
+  be matched by the same run's **Applied**. If packets are unwrapped and the
+  planetary step applies none, they are in `GameInbound` and were refused, held,
+  or quarantined — read the run report and the log, above.
 - `Queued <packet> for <next hop> (<address>) as <message>` names the file the
   transport handed over and to whom. That is the point where the packet stops
   being the game's problem and starts being your mailer's: if a queue line
   appeared and the far board never heard, the fault is downstream of the game.
-- `N queued; M snapshot(s) still waiting on K peer(s)` on `-out` is the line
-  worth logging. An empty system and a stalled one both queue nothing, and this
-  is the only place the difference shows.
-- `No outbound packets.` means the game wrote nothing to hand over — so the
-  question is whether `-planetary` ran, not whether the transport works.
-- `Delivered N packet(s) to the game.` on `-in` is the count that should be
-  matched by the next run's **Applied**. If `-in` delivers and
-  `-planetary` applies nothing, the packets are in the game's inbound and were
-  refused, held, or quarantined — read the run report and the log, above.
+- `FTN: N queued; M snapshot(s) still waiting on K peer(s)` is the line worth
+  logging. An empty system and a stalled one both queue nothing, and this is the
+  only place the difference shows.
+- `FTN unwrap skipped` or `FTN handoff skipped` under `-full` means another run
+  held the transport lock and was doing that half; nothing is lost.
+- A handoff that fails ends the run non-zero and runs `OnFault`, after the
+  world was saved: the packets wait in `GameOutbound` for the next run.
 
-Run the three in the order the game expects, and the counts line up end to end:
-
-```
-barons-ftn -in -data /path/to/data      # deliver what the mailer brought
-immortal-barons -maint -data /path/to/data
-barons-ftn -out -data /path/to/data     # hand over what the game wrote
-```
-
-A `barons-ftn` error is printed with the setting that fixes it, so the message
+A transport error is printed with the setting that fixes it, so the message
 is worth reading in full rather than grepping for the first line — a refused
 subject length runs past 700 bytes of explanation.
 
-[FTN Transport with `barons-ftn`](ftn-transport.md) has the table of where files
-accumulate and what each location means, which is the next step when `-status`
-says a peer is waiting and you need to know on what.
+[FTN Transport](ftn-transport.md) has the table of where files accumulate and
+what each location means, which is the next step when `-ftn-status` says a peer
+is waiting and you need to know on what.
 
 ## Finding the board that went quiet
 
@@ -450,8 +447,8 @@ Work down the path a packet takes:
   the run is not reaching them, or is failing before it gets that far.
 - **Is anything stuck in the outbound directory?** Packets written and never
   collected mean the game is fine and the mailer is not moving them.
-- **Does the mailer log show the transfers?** With `barons-ftn`, its own run is
-  the next place to look.
+- **Does the mailer log show the transfers?** With the FTN transport, the
+  `Queued` lines in the run's own output are the next place to look.
 
 A run that happens but finds nothing to do still answers probes, so a board that
 is quiet on someone's screen while its own log looks healthy points at the
