@@ -35,8 +35,7 @@
 - View Treaties shows the treaty offers you have sent and nobody has answered
   yet. In BRE you cannot see them at all: a realm you asked for a pact looks the
   same as a realm you never wrote to, so it is easy to send the same request
-  twice, or to wait for a reply to a request you never sent. This tells you only
-  about your own offers, so it does not show you anything about other players.
+  twice, or to wait for a reply to a request you never sent.
 - Send Message can write to all your allies at once — every realm on your board
   that you hold a treaty with, of any kind.
 - In a league, the letters used to pick who on another planet reads your message
@@ -88,7 +87,7 @@ ANSI support, so first check that the caller has graphics turned on in their BBS
 profile. To see the plain version yourself, run with `-no-ansi`. Lists that
 normally use a moving highlight are numbered in that mode, so they stay usable.
 
-## AI barons (computer opponents) were removed in v0.2.0
+## What happened to the computer opponents?
 
 A baron could not answer a treaty offer or read a message, so the strategy
 players know from the original did not work against one.
@@ -123,7 +122,7 @@ shown on other boards, and the same bytes that draw a neat box in CP437 come out
 as mojibake on a board running UTF-8.
 
 (You rarely type another realm's name — the attack, message and diplomacy
-screens all pick by Id letter. The rule is about reading, not typing.)
+screens all pick by Id letter.)
 
 Control characters are refused outright: an escape sequence in a realm name
 would move the cursor or recolor the row on every screen that lists it.

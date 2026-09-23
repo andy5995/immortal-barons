@@ -120,12 +120,9 @@ or override game state.
     immortal-barons -data ./sandbox -spectate 30
     ```
 
-    This is a balance-checking tool for development, not something a board
-    needs to run. It watches computer barons play against each other, to see
-    whether they expand sensibly, whether wars happen, and whether the game
-    collapses to one realm too quickly. Computer barons were retired in v0.2.0
-    and nothing a sysop can set creates them, so on a board's own game this has
-    nothing to watch.
+    This is a development tool: it plays computer barons against each other to
+    check game balance. Nothing a sysop can set creates computer barons, so on
+    a board's own game it has nothing to play.
 
     **It plays real turns and saves the result.** Two things guard against
     running it by mistake: it asks before starting, and the default answer is
@@ -136,17 +133,15 @@ or override game state.
   **for this run only**. Dupe Checking is the league rule that locks a baron out
   here when they are found playing on another board in the league.
 
-    **It changes no setting.** `config.json` is not written, and neither is
-    anything else, so the run cannot leave the league rule altered behind it —
-    the next command sees the saved setting again. This is what makes it a
-    testing switch rather than a way to configure the game; to change the rule
-    for real, use the Configuration Editor.
+    **It changes no setting.** The override is not saved anywhere, so the next
+    command sees the saved setting again. To change the rule for real, use the Configuration
+    Editor.
 
-    It is a modifier, not a mode: it rides whatever else you asked for, so
-    `immortal-barons -local -dupe-check off` plays a local turn with the rule
-    lifted. `off` lets a baron the league had shut out reach the game; `on`
-    applies the rule even on a board whose saved setting has it off. Either way
-    the record of who was locked survives untouched.
+    It combines with any other option: `immortal-barons -local -dupe-check off`
+    plays a local turn with the rule off. `off` lets a baron the league had
+    locked out reach the game; `on` applies the rule even where the saved
+    setting has it off. Either way, the record of who was locked out stays as
+    it is.
 
 ### Inter-BBS
 
@@ -158,38 +153,38 @@ These options are for games that link several BBSes together (a "league"). See
   name, packet directories, and the interplanetary rules), and it creates the
   packet directories.
 - **`-board-id NAME`**, **`-game-inbound DIR`**, **`-game-outbound DIR`** —
-  Settings for `-ibbs-reset`. Giving `-board-id` skips the settings editor, so a member board
-  is set up in one command. Use this when the League Coordinator sets the rules:
-  they arrive in the Coordinator's next broadcast and replace whatever this board
-  starts with. `-game-inbound` and `-game-outbound` default to `inbound` and
-  `outbound` inside the data directory. The game does not write `bbs.cfg`: the reset ends by
-  printing that file, filled in from these flags, for you to save yourself. It is
-  plain text and yours alone — nothing in the game ever rewrites it.
+  Settings for `-ibbs-reset`. Giving `-board-id` skips the settings editor, so a
+  member board is set up in one command. Use this when the League Coordinator
+  sets the rules: they arrive in the Coordinator's next broadcast and replace
+  whatever this board starts with. `-game-inbound` and `-game-outbound` default
+  to `inbound` and `outbound` inside the data directory. The game does not write
+  `bbs.cfg`: the reset ends by printing that file, filled in from these flags,
+  for you to save yourself. It is plain text and yours alone — nothing in the
+  game ever rewrites it.
 - **`-import-bbs-cfg PATH`** — Take this board's name, league number, mailer,
   incoming files directory and netmail directory from an original Barren Realms
   Elite `BBS.CFG`, for `-ibbs-reset`. The last three become the FTN transport's
-  `Mailer`, `IncomingFileDir` and `OutgoingNetmailDir` lines. Use it when converting a
-  league you already run, so you do not retype what that file already says. It
-  prints what it read. `-board-id` overrides the name, and naming the board in
-  the file skips the settings editor just as `-board-id` does. It prints the `bbs.cfg` to save, the same as
-  the flags do.
+  `Mailer`, `IncomingFileDir` and `OutgoingNetmailDir` lines. Use it when
+  converting a league you already run, so you do not retype what that file
+  already says. It prints what it read. `-board-id` overrides the name, and
+  naming the board in the file skips the settings editor just as `-board-id`
+  does. It prints the `bbs.cfg` to save, the same as the flags do.
 - **`-planetary`** — Run the inter-BBS step, then exit: take in what the mailer
   brought, read incoming packets, run the group attacks, write outgoing packets,
   and hand them to the mailer. The two mailer steps run only when `bbs.cfg` sets
   up the [FTN transport](ftn-transport.md). It can run as often as you like,
   including from the mailer's post-session event. A run that meets a fault it
   has not reported before, a failed handoff to the mailer included, exits
-  non-zero and runs `bbs.cfg`'s `OnFault` command,
-  so whatever runs this on a timer raises the alarm — see "Being told when the
-  league stops moving" in the inter-BBS guide.
+  non-zero and runs `bbs.cfg`'s `OnFault` command, so whatever runs this on a
+  timer raises the alarm — see "Being told when the league stops moving" in the
+  inter-BBS guide.
 - **`-full`** — Run the full cycle, then exit: read inbound packets, play a
   turn, and write outbound packets. This is the same as running `-planetary`,
-  then the door (or `-local`), then `-planetary` again, but in one step. The
-  FTN transport runs before and after, as in `-planetary`, but never waits for
-  another run that is already moving the mail. It
-  requires either `-local` (with `-name` to identify the player) or a BBS drop
-  file in the working directory. Use `-detailed` alongside it to see each
-  packet as it is read and written.
+  then the door (or `-local`), then `-planetary` again, but in one step. The FTN
+  transport runs before and after, as in `-planetary`, but never waits for
+  another run that is already moving the mail. It requires either `-local` (with
+  `-name` to identify the player) or a BBS drop file in the working directory.
+  Use `-detailed` alongside it to see each packet as it is read and written.
 - **`-detailed`** — Show each packet as it is read and written. This is a
   modifier, not a mode: it takes effect when used with `-full` or `-planetary`.
   Without one of those, it is ignored.
@@ -206,10 +201,10 @@ These options are for games that link several BBSes together (a "league"). See
   and the directory they are written in, then exit. Use it to check a roster the
   coordinator has just sent.
 - **`-ftn-status`** — Report what the FTN transport's spools are still holding,
-  for whom, for how long, and why, and change nothing. A file count answers none
-  of those: a snapshot is kept whole until every target in it publishes, so it
-  also holds bundles for peers that already went out. See [FTN
-  Transport](ftn-transport.md).
+  for whom, for how long, and why, and change nothing. Counting the files cannot
+  tell you that: the spool keeps a batch until it has been handed to the mailer
+  for every board it is for, so it can still hold files for boards whose copy
+  already went out. See [FTN Transport](ftn-transport.md).
 - **`-gen-coord-key`** — Create this league's coordinator key, then exit. Only
   the coordinator runs this, once. It prints a line to give every other board.
   The private half is written to `coord.key` in the data folder; keep it secret,
@@ -240,9 +235,9 @@ These options are for games that link several BBSes together (a "league"). See
   another board by its name, because boards do not send handles to each other.
   Rows with the same letter in the Owner column belong to one caller, matched
   through the duplicate-checking owner hash, so the letters appear across boards
-  only while Dupe Checking is on. A realm locked out by duplicate
-  checking says which board locked it. Only the league coordinator (node #1)
-  may write this one.
+  only while Dupe Checking is on. A realm locked out by duplicate checking says
+  which board locked it. Only the league coordinator (node #1) may write this
+  one.
 
 The three `.LST` reports are written into the data directory, and are built from
 what packets have already told this board — none of them changes the game.
