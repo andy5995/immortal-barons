@@ -152,7 +152,7 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 	// absence would otherwise surface as "No drop file format is set", which
 	// sends a sysop to fix a setting when the path is what is wrong.
 	if info, err := os.Stat(cfg.DataDir); err != nil || !info.IsDir() {
-		fmt.Fprintf(os.Stderr, "immortal-barons: the data directory %q does not exist. Check the -data path in your door command.\n", cfg.DataDir)
+		fmt.Fprintf(os.Stderr, "immortal-barons: the data directory \"%s\" does not exist. Check the -data path in your door command.\n", cfg.DataDir)
 		os.Exit(1)
 	}
 	doorCfg, err := store.LoadDoorConfig(cfg.DataDir)
