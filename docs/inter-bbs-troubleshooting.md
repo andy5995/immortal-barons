@@ -406,14 +406,12 @@ Those two answer different questions, and the pair is what localizes the fault:
 Two patterns settle it without waiting for a reply:
 
 - **Several boards going stale on the same day, and recovering together**, is
-  your own board. Either your outbound is not moving, or no probe went out:
-  probes are sent once per game day, and the game day only moves when
-  maintenance runs. A board nobody plays, with no `-maint` in its nightly event,
-  stops probing while its transport works
-  ([issue #289](https://github.com/andy5995/immortal-barons/issues/289)).
+  your own board: either its planetary run is not happening or its outbound is
+  not moving. A probe goes out on every run, so none can come home while
+  nothing leaves.
 - **A board that reads `No Data` and never changes** is not being probed at all.
-  Check it is on the roster and routable; an unroutable board is skipped every
-  day rather than measured and found slow.
+  Check it is on the roster and routable; an unroutable board is skipped on
+  every run rather than measured and found slow.
 
 A strike is the same signal on the same link, and it reaches the baron who sent
 it rather than the sysop. One sent to that board and never heard about turns up
@@ -444,10 +442,6 @@ it the same way the other board's roster does.
 The mark on someone else's screen says your board stopped answering for a while.
 Work down the path a packet takes:
 
-- **Is the game day moving?** Probes go out once per game day, and the day
-  only advances when maintenance runs — on the first login of a new day, or from
-  a scheduled `-maint`. A `-planetary` run alone does not advance it
-  ([issue #289](https://github.com/andy5995/immortal-barons/issues/289)).
 - **Is the planetary run happening?** Check the timestamps in `planetary.log`.
   A run every day leaves a line every day; a gap in the log is a gap in the
   service, and the usual cause is a scheduler that stopped rather than the game.

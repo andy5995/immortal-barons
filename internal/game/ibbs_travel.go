@@ -26,39 +26,37 @@ type TimeCheck struct {
 	Sent string
 }
 
-// PingTravelTimes queues a TIME_CHECK to every other known board, once per game
-// day. Without a fresh probe the screen would freeze at whatever the last
-// exchange measured, and a transport that has since slowed down would go
+// PingTravelTimes queues a TIME_CHECK to every other known board on every
+// planetary run. Without a fresh probe the screen would freeze at whatever the
+// last exchange measured, and a transport that has since slowed down would go
 // unnoticed.
 //
-// The once-a-day cadence is the ORIGINAL'S, not a choice made here: BRE sends
-// its probe from daily maintenance, and the call chain has a single caller at
-// each step (write_interbbs_time_check_packet <- ovr_044601_entry_02a8 <-
-// run_daily_maintenance). Verified 2026-09-21, because the header above claims
-// verification for the mechanic, the echo and the averaging weights and said
-// nothing about how often the probe goes out.
+// This cadence is a deliberate divergence (#287). The original probes once per
+// game day, from daily maintenance (write_interbbs_time_check_packet <-
+// ovr_044601_entry_02a8 <- run_daily_maintenance, one caller at each step,
+// verified 2026-09-21), and IB did the same until #287. A daily probe cost too
+// much: a probe lost to a dead link got no replacement until the next game day,
+// so a link that came back stayed marked stale for up to a day, and a board
+// whose game day stopped moving sent no probes at all (#289). Probing on every
+// run makes the screen follow the transport at the rate the transport moves.
+// The price is comparability: a board that runs more often folds more samples
+// into its averages, so its figures react faster than a slower board's.
 //
-// What it costs is real and is #287: a probe lost to a dead link gets no
-// replacement until the next game day, so a link that recovers goes on reading
-// stale until the day after.
+// It adds at most one small packet per board per run, and none for a board
+// that already has something addressed to it in the same run; each probe then
+// draws an echo back. -full is a planetary run too, on every caller's launch, so
+// a board using it probes once per caller. That is kept on purpose: -full can be
+// a board's only transport, and switching probes off there would leave such a
+// board unmeasured. Every run already broadcasts scores, so the extra traffic is
+// small.
 func (w *World) PingTravelTimes() {
 	if w.Config.BoardID == "" {
 		return
 	}
-	// The game clock, or the real date on a board whose first maintenance has
-	// not run yet — an empty date on both sides would match and never probe.
-	today := w.LastMaintDate
-	if today == "" {
-		today = timeNow().Format(time.DateOnly)
-	}
-	if w.LastTravelPing == today {
-		return
-	}
-	w.LastTravelPing = today
 	sent := timeNow().Format(time.RFC3339)
 	for _, board := range w.KnownBoards() {
 		// A board the roster cannot place gets no probe: the packet would only
-		// circle the league and be destroyed, once a day, forever.
+		// circle the league and be destroyed, on every run, forever.
 		if !w.Routable(board) {
 			continue
 		}

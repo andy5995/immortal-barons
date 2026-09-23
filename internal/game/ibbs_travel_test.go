@@ -77,23 +77,18 @@ func TestTravelTimeAverageWeightsNewest(t *testing.T) {
 	}
 }
 
-// TestTravelPingIsOncePerDay checks the probe does not go out again until the
-// game day turns over — a run several times a day would otherwise flood the
-// league with probes.
-func TestTravelPingIsOncePerDay(t *testing.T) {
+// A probe goes out on every planetary run, not once per game day (#287), so a
+// link that comes back is measured on the next run rather than the next day.
+func TestTravelPingGoesOutOnEveryRun(t *testing.T) {
 	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
 	w := travelWorld("Nova Hub")
 	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "The Eclipse"}}
-	w.PingTravelTimes()
-	w.Outbox = nil
-	w.PingTravelTimes()
-	if len(w.Outbox) != 0 {
-		t.Errorf("a second run the same day queued another probe: %+v", w.Outbox)
-	}
-	w.LastMaintDate = "2026-08-07"
-	w.PingTravelTimes()
-	if len(w.Outbox) != 1 {
-		t.Errorf("the next day queued %d packets, want 1", len(w.Outbox))
+	for run := 1; run <= 3; run++ {
+		w.Outbox = nil
+		w.PingTravelTimes()
+		if len(w.Outbox) != 1 || len(w.Outbox[0].TimeChecks) != 1 {
+			t.Fatalf("run %d on one game day queued %+v, want one probe", run, w.Outbox)
+		}
 	}
 }
 
@@ -112,9 +107,9 @@ func TestEchoOnlyPacketHasPayload(t *testing.T) {
 
 // TestTravelProbesOverlapWhenTheRoundTripIsSlow answers the question #169 could
 // not measure on a live rig without waiting real days: what the figure does when
-// a round trip outlasts the once-a-day probe interval.
+// a round trip outlasts the interval between probes.
 //
-// Nothing suppresses the next day's probe while an earlier one is still out, so
+// Nothing suppresses the next probe while an earlier one is still out, so
 // several are in flight at once. Each is measured against its OWN send time when
 // it comes home and folds into the average independently — none is lost, and
 // none is credited with another's elapsed time. A slow transport therefore shows
@@ -125,8 +120,7 @@ func TestTravelProbesOverlapWhenTheRoundTripIsSlow(t *testing.T) {
 	here.LeagueNodes = []LeagueNode{{Number: 2, Name: "The Eclipse"}}
 	there := travelWorld("The Eclipse")
 
-	// Three days of probing with nothing coming back yet. The game day is what
-	// gates a probe, so each day's maintenance date releases one.
+	// Three days of probing, one run a day, with nothing coming back yet.
 	var inFlight []Packet
 	for _, day := range []string{"2026-08-06", "2026-08-07", "2026-08-08"} {
 		here.LastMaintDate = day

@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Travel Times probes each link on every planetary run, not once a day
   * -maint raises the same fault alarm as -planetary, and needs a league number
   * Computer barons are removed, including any a board already has
   * A realm under New Realm Protection is refused in the original's words

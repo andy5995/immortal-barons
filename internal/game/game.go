@@ -230,11 +230,9 @@ type World struct {
 	// by BBSInfoReport.
 	BoardRuleset map[string]string `json:",omitempty"`
 
-	// TravelTimes is the average packet round trip to each other board, in days,
-	// and LastTravelPing the game day the probes for it last went out — see
-	// ibbs_travel.go.
-	TravelTimes    map[string]float64
-	LastTravelPing string
+	// TravelTimes is the average packet round trip to each other board, in days
+	// — see ibbs_travel.go.
+	TravelTimes map[string]float64
 	// TravelSeen is when each board's last probe came home, RFC3339. The average
 	// above carries no age of its own, so a link that stops delivering leaves its
 	// last good figure on the screen forever, reading as a healthy transport —

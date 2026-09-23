@@ -4883,23 +4883,36 @@ display only, and it is a deliberate readability divergence.
 **IB also shows how old each figure is, which neither game's stored average
 carries.** The average is written only when a probe completes the round trip
 home, so a link that stops delivering freezes the screen at its last good
-measurement — indistinguishable from a fast one, and the daily probe does not
-help, since it only queues into an outbox that is not draining. Nothing else
-catches it either: the transport fault counter counts packets that ARRIVED and
-could not be read, so a board receiving nothing at all reports zero faults. A
-board showed `40 minutes` through a three-day outage on that combination.
+measurement — indistinguishable from a fast one, and probing more often does not
+help, since each probe only queues into an outbox that is not draining. Nothing
+else catches it either: the transport fault counter counts packets that ARRIVED
+and could not be read, so a board receiving nothing at all reports zero faults.
+A board showed `40 minutes` through a three-day outage on that combination.
 `World.TravelSeen` stamps each arrival and the screen appends `(N days old)`
-once the newest completed trip is older than `TravelStaleDays` (2 — probes go
-out once per game day, so two days means an exchange was missed entirely). A
-figure carried over from a world saved before the stamp existed is left
-unmarked, rather than being called fresh or stale on no evidence.
+once the newest completed trip is older than `TravelStaleDays` (2 — a probe goes
+out on every planetary run, so even a board that runs the step once a day
+completes a round trip well inside it). A figure carried over from a world saved
+before the stamp existed is left unmarked, rather than being called fresh or
+stale on no evidence.
 
-IB implements the mechanic as described. Constants: `TravelAvgNewWeight`,
-`TravelAvgDenom`, `TravelHoursCutoff` in `balance*.go`. The probes ride along with
-whatever else the inter-BBS run is sending, once per game day
-(`World.PingTravelTimes`); the stamp is RFC3339, so boards in different time
-zones measure the same interval. What BRE keys off a configurable day interval,
-IB fixes at one day.
+IB implements the mechanic as described, except for how often it probes.
+Constants: `TravelAvgNewWeight`, `TravelAvgDenom`, `TravelHoursCutoff` in
+`balance*.go`. The stamp is RFC3339, so boards in different time zones measure
+the same interval.
+
+**IB probes on every planetary run; the original probes once per game day.**
+This is a deliberate divergence (#287). BRE sends its probe from daily
+maintenance, and IB did the same until #287, which cost two things: a probe lost
+to a dead link got no replacement until the next game day, so a link that came
+back stayed marked stale for up to a day; and a board whose game day stopped
+moving (nobody playing, no scheduled `-maint`) sent no probes at all (#289).
+Probing on every run (`World.PingTravelTimes`) makes the screen follow the
+transport at the rate the transport moves. The price is comparability: a board
+that runs more often folds more samples into its averages, so its figures react
+faster than a slower board's. The probes ride along with whatever else the run
+is sending, adding at most one small packet per board per run, plus its echo.
+`-full` is a planetary run too, so a board that uses it probes once per caller;
+that is kept, because `-full` can be a board's only transport.
 
 ### IP Messages
 
