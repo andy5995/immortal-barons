@@ -47,6 +47,8 @@ CALL_PATTERNS = [
     # nobody had ever been shown.
     re.compile(r'\bbuildTradeBasket\(s,\s*[^,]+,\s*' + STR),
     re.compile(r'\bstatusRowPrefix\(s,\s*' + STR),
+    re.compile(r'\brefuseInProtection\(s,\s*[^,]+,\s*' + STR),
+    re.compile(r'\bperDayCap\(\d+,\s*' + STR),  # the config editor's per-day caps
     # The bank's deposit/withdraw prompt: money() hands its first argument
     # straight to promptSuggested, so the caller writes the msgid.
     re.compile(r'\bmoney\(' + STR),

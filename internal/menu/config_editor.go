@@ -179,6 +179,18 @@ func configPages(ibbs bool) []cfgPage {
 			edit:  func(_ session.Session, c *game.Config) { set(c, !get(c)) },
 		}
 	}
+	// perDayCap is one of the per-day allowances, where 0 lifts the cap. The
+	// prompt is the whole msgid and the label is the prompt without its "(0 =
+	// unlimited)", so the translation catalog keeps one literal per field.
+	perDayCap := func(n int, prompt string, get func(*game.Config) int, set func(*game.Config, int)) cfgField {
+		return cfgField{
+			n: n, label: strings.TrimSuffix(prompt, " (0 = unlimited)"),
+			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", get(c)) },
+			edit: func(s session.Session, c *game.Config) {
+				set(c, promptSuggested(s, prompt, get(c), 100))
+			},
+		}
+	}
 	cycle := func(n int, label string, get func(*game.Config) game.Level, set func(*game.Config, game.Level), step func(game.Level) game.Level) cfgField {
 		return cfgField{
 			n: n, label: label,
@@ -270,26 +282,18 @@ func configPages(ibbs bool) []cfgPage {
 			edit: func(_ session.Session, c *game.Config) {
 				c.SabreHandling = cycleSabre(c.SabreHandling)
 			}},
-		{n: 27, label: "Max Individual Attacks/Day",
-			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxIndividualAttacks) },
-			edit: func(s session.Session, c *game.Config) {
-				c.MaxIndividualAttacks = promptSuggested(s, "Max Individual Attacks/Day (0 = unlimited)", c.MaxIndividualAttacks, 100)
-			}},
-		{n: 30, label: "Max Group Attacks/Day",
-			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxGroupAttacks) },
-			edit: func(s session.Session, c *game.Config) {
-				c.MaxGroupAttacks = promptSuggested(s, "Max Group Attacks/Day (0 = unlimited)", c.MaxGroupAttacks, 100)
-			}},
-		{n: 31, label: "Max Terrorist Ops/Day",
-			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxTerrorOps) },
-			edit: func(s session.Session, c *game.Config) {
-				c.MaxTerrorOps = promptSuggested(s, "Max Terrorist Ops/Day (0 = unlimited)", c.MaxTerrorOps, 100)
-			}},
-		{n: 32, label: "Max Bombing Ops/Day",
-			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxBombingOps) },
-			edit: func(s session.Session, c *game.Config) {
-				c.MaxBombingOps = promptSuggested(s, "Max Bombing Ops/Day (0 = unlimited)", c.MaxBombingOps, 100)
-			}},
+		perDayCap(27, "Max Individual Attacks/Day (0 = unlimited)",
+			func(c *game.Config) int { return c.MaxIndividualAttacks },
+			func(c *game.Config, v int) { c.MaxIndividualAttacks = v }),
+		perDayCap(30, "Max Group Attacks/Day (0 = unlimited)",
+			func(c *game.Config) int { return c.MaxGroupAttacks },
+			func(c *game.Config, v int) { c.MaxGroupAttacks = v }),
+		perDayCap(31, "Max Terrorist Ops/Day (0 = unlimited)",
+			func(c *game.Config) int { return c.MaxTerrorOps },
+			func(c *game.Config, v int) { c.MaxTerrorOps = v }),
+		perDayCap(32, "Max Bombing Ops/Day (0 = unlimited)",
+			func(c *game.Config) int { return c.MaxBombingOps },
+			func(c *game.Config, v int) { c.MaxBombingOps = v }),
 		{n: 33, label: "Days before lost forces return",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = never)", c.LostForcesDays) },
 			edit: func(s session.Session, c *game.Config) {
@@ -318,11 +322,9 @@ func configPages(ibbs bool) []cfgPage {
 		num(11, "Max Players Per BBS", "Max Players Per BBS (1-25; 0 = unlimited)",
 			func(c *game.Config) int { return c.MaxPlayers },
 			func(c *game.Config, v int) { c.MaxPlayers = v }, 0, game.MaxPlayersPerBoard),
-		{n: 49, label: "Max Local Attacks/Day",
-			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxLocalAttacks) },
-			edit: func(s session.Session, c *game.Config) {
-				c.MaxLocalAttacks = promptSuggested(s, "Max Local Attacks/Day (0 = unlimited)", c.MaxLocalAttacks, 100)
-			}},
+		perDayCap(49, "Max Local Attacks/Day (0 = unlimited)",
+			func(c *game.Config) int { return c.MaxLocalAttacks },
+			func(c *game.Config, v int) { c.MaxLocalAttacks = v }),
 		boardOwned(23, "Board ID", func(c *game.Config) string { return c.BoardID }),
 		boardOwned(41, "League Number", func(c *game.Config) string {
 			return fmt.Sprintf("%d (0 = not set; a league board needs one)", c.LeagueNumber)

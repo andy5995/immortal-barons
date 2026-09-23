@@ -175,7 +175,7 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 		}
 	})
 	if shielded {
-		ok(s, "That realm is still in protection.")
+		fail(s, game.ErrTheyProtected)
 		return Stay
 	}
 	toName := to.Name
@@ -191,37 +191,7 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if !AskYesNo(s, "Send this trade deal?", true) {
 		return Stay
 	}
-	// BRE: a deal is sent for a span of days at a per-day gold fee and consumes a
-	// carrier. A standing Protective Trade agreement cuts the per-day rate. The
-	// span is how long the offer stands before it lapses, so the ceiling here is
-	// what the sender can pay for — the original has no other limit.
-	perDay := int64(game.TradeDealGoldPerDay)
-	var purse int64
-	w.Read(func() {
-		if p, recip := w.Player(), findRealm(w, toName); p != nil && recip != nil {
-			perDay = w.World.TradeDealGoldPerDayBetween(p, recip)
-			purse = p.Gold
-		}
-	})
-	// What is left after the gold being offered is what can pay for the span.
-	maxDays := game.TradeDealMinDays
-	if left := purse - int64(send.Gold); perDay > 0 && left > 0 {
-		if affordable := int(left / perDay); affordable > maxDays {
-			maxDays = affordable
-		}
-	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "Sending costs %s gold per day; it needs one carrier.")+"%s\n",
-		ansi.Dim, comma(perDay), ansi.Reset)
-	fmt.Fprintf(s, "%s"+tr(s, "The deal stands until the span runs out; unanswered, the goods are lost.")+"%s\n",
-		ansi.Dim, ansi.Reset)
-	suggested := game.TradeDealDefaultDays
-	if suggested > maxDays {
-		suggested = maxDays
-	}
-	days := promptSuggested(s, "How many days to send it for?", suggested, maxDays)
-	if days < game.TradeDealMinDays {
-		days = game.TradeDealMinDays
-	}
+	days, perDay := tradeDealSpan(s, w, toName, send)
 
 	// The gold being offered and the span's fee are both paid on sending, so the
 	// bank is offered against the pair of them.
@@ -249,6 +219,42 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 		ok(s, "It reaches them no sooner than turn %d of their day.", arrives)
 	}
 	return Stay
+}
+
+// tradeDealSpan asks how many days a deal to toName stands and returns the span
+// with its per-day fee. BRE: a deal is sent for a span of days at a per-day gold
+// fee and consumes a carrier. A standing Protective Trade agreement cuts the
+// per-day rate. The span is how long the offer stands before it lapses, so the
+// ceiling here is what the sender can pay for — the original has no other limit.
+func tradeDealSpan(s session.Session, w *ctx, toName string, send game.TradeBasket) (int, int64) {
+	perDay := int64(game.TradeDealGoldPerDay)
+	var purse int64
+	w.Read(func() {
+		if p, recip := w.Player(), findRealm(w, toName); p != nil && recip != nil {
+			perDay = w.World.TradeDealGoldPerDayBetween(p, recip)
+			purse = p.Gold
+		}
+	})
+	// What is left after the gold being offered is what can pay for the span.
+	maxDays := game.TradeDealMinDays
+	if left := purse - int64(send.Gold); perDay > 0 && left > 0 {
+		if affordable := int(left / perDay); affordable > maxDays {
+			maxDays = affordable
+		}
+	}
+	fmt.Fprintf(s, "\n%s"+tr(s, "Sending costs %s gold per day; it needs one carrier.")+"%s\n",
+		ansi.Dim, comma(perDay), ansi.Reset)
+	fmt.Fprintf(s, "%s"+tr(s, "The deal stands until the span runs out; unanswered, the goods are lost.")+"%s\n",
+		ansi.Dim, ansi.Reset)
+	suggested := game.TradeDealDefaultDays
+	if suggested > maxDays {
+		suggested = maxDays
+	}
+	days := promptSuggested(s, "How many days to send it for?", suggested, maxDays)
+	if days < game.TradeDealMinDays {
+		days = game.TradeDealMinDays
+	}
+	return days, perDay
 }
 
 // reviewTradeDeals surfaces each pending trade deal to the player at turn start

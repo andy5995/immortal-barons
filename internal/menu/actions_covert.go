@@ -19,11 +19,7 @@ import (
 // placement, and the refusal is that routine's own. It belongs to the local
 // covert menu only: the InterPlanetary items refuse with blockedByIPProtection.
 func blockedByCovertProtection(s session.Session, w *ctx) bool {
-	if w.Player().Protection > 0 {
-		ok(s, "Our empire is in protection, my lord.")
-		return true
-	}
-	return false
+	return refuseInProtection(s, w, "Our empire is in protection, my lord.")
 }
 
 // covertRow is one operation on the local Covert Operations menu: the typed op
