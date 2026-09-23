@@ -321,7 +321,45 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	e.addEvent(fmt.Sprintf("%s (%s): %s", label, strikeTarget(sent, res), report))
 	if isMissileOp(sent.Op) {
 		w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
+	} else {
+		board := res.TargetBoard
+		if board == "" {
+			board = sent.TargetBoard
+		}
+		w.postNews(bombingReturnNews(e.Name, sent.Op, board, res))
 	}
+}
+
+// bombingReturnNews is the line the FIRER's planet reads when a bombing run's
+// answer comes home, one per outcome the target's planet can read about it
+// (planetOpNews) and agreeing with it. BINARY-VERIFIED that there is one:
+// process_bombing_results (BRE.OVR 0x04a4a6) has a single branch, at +0x501,
+// which only picks the failure or success line, and reaches its news call at
+// +0x0622 either way. The wording is IB's own.
+//
+// A result from a board that predates the narrower verdicts says only
+// "failure", which covers both ways of coming to nothing.
+func bombingReturnNews(firer string, op SpecialOp, board string, res AttackResult) string {
+	whose := board + "'s"
+	switch res.outcome() {
+	case OutcomeWon:
+		switch op {
+		case OpBombFood:
+			return fmt.Sprintf("%s's bombers hit %s food market.", firer, whose)
+		case OpBombMarket:
+			return fmt.Sprintf("%s's bombers wrecked %s trading market.", firer, whose)
+		case OpBombRoutes:
+			return fmt.Sprintf("%s's bombers hit trade routes across %s.", firer, board)
+		case OpUndermine:
+			return fmt.Sprintf("%s's bombers undermined investments across %s.", firer, board)
+		}
+		return fmt.Sprintf("%s's %s against %s landed.", firer, SpecialOpLabel(op), board)
+	case OutcomeDrivenOff:
+		return fmt.Sprintf("%s's bombers were driven off before they reached %s.", firer, planetOpObject(op, whose))
+	case OutcomeNothing:
+		return fmt.Sprintf("%s's bombers found nothing to destroy at %s.", firer, planetOpObject(op, whose))
+	}
+	return fmt.Sprintf("%s's %s against %s came to nothing.", firer, SpecialOpLabel(op), board)
 }
 
 // missileReturnNews is the line the FIRER's planet reads when a missile's answer

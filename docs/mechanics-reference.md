@@ -4837,9 +4837,14 @@ signed bytes are unchanged for a board that predates the values. A `failure`
 from such a board gets a line saying only that the strike failed. IB's firer
 posted for a backfire alone until 2026-09-23.
 
-Not changed here, and different from the original: the firer's board posts
-nothing when a **bombing** op's answer comes home, where `process_bombing_results`
-(`BRE.OVR 0x04a4a6`) reaches its news call at `+0x0622` on every path.
+**The firer's planet reads a line for every bombing outcome** as well
+(`bombingReturnNews`): a run that landed, one driven off by the landing roll,
+and one that landed on nothing. `process_bombing_results` (`BRE.OVR 0x04a4a6`)
+has one branch, at `+0x501`, which only picks the failure or success line, and
+reaches its news call at `+0x0622` either way. The answer carries `drivenoff`
+or `nothing` in `Outcome` where it said `failure`, on the same no-bump terms as
+the missile values; a `failure` from an older board gets a line saying the run
+came to nothing. IB's firer posted nothing for a bombing run until 2026-09-23.
 
 **Interplanetary missile prices — binary-verified AND capture-confirmed.** The
 three missiles are priced off the TARGET's last-known territory, at a rate of

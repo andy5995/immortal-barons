@@ -302,12 +302,13 @@ type AttackResult struct {
 // AttackOutcome is a returning strike's verdict, matching the four BRE prints
 // on its result header.
 //
-// An interplanetary missile narrows "failure" into three more, so the firer's
-// planet can read the same outcome the target's did (#288). They are new VALUES
-// of an existing field, not a new field, which is why they needed no Protocol
-// bump: the bytes an older board signs and re-marshals are the same string
-// either way, and an older firer that meets one falls through to the report it
-// files for any failure. Only a missile result carries them.
+// A Special Operation's answer narrows "failure" further, so the firer's planet
+// can read the same outcome the target's did (#288): a missile into misfire,
+// intercepted or negligible, a bombing run into drivenoff or nothing. They are
+// new VALUES of an existing field, not a new field, which is why they needed no
+// Protocol bump: the bytes an older board signs and re-marshals are the same
+// string either way, and an older firer that meets one falls through to the
+// report it files for any failure.
 type AttackOutcome string
 
 const (
@@ -319,6 +320,8 @@ const (
 	OutcomeMisfire     AttackOutcome = "misfire"     // a missile that failed on its own
 	OutcomeIntercepted AttackOutcome = "intercepted" // a missile the target's SDI shot down
 	OutcomeNegligible  AttackOutcome = "negligible"  // a missile that landed and did negligible damage
+	OutcomeDrivenOff   AttackOutcome = "drivenoff"   // a bombing run that failed its landing roll
+	OutcomeNothing     AttackOutcome = "nothing"     // a bombing run that landed on nothing to destroy
 )
 
 // outcome reads a result's verdict, falling back to Won for a packet written

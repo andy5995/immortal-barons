@@ -331,3 +331,100 @@ func TestBombingNewsNamesOneCarrier(t *testing.T) {
 		t.Errorf("30 seeds reached landed=%v, driven off=%v; both lines must be checked", landed, drivenOff)
 	}
 }
+
+// The firer's planet reads a line for every outcome of a bombing run it sent,
+// agreeing with the target's line (#288): the original's return path reaches
+// its news call on every path (process_bombing_results, BRE.OVR 0x04a4a6
+// +0x0622). Each seed is classified by the TARGET's line, and a stocked and an
+// empty planet between them must reach all three outcomes for every op.
+func TestFiringPlanetReadsEveryBombingOutcome(t *testing.T) {
+	for _, tc := range []struct {
+		op                    SpecialOp
+		hitThere, hitHere     string
+		emptyThere, emptyHere string
+		object                string
+	}{
+		{OpBombFood,
+			"Bombers from Alpha Baron of Alpha BBS hit the planet's food market.", "Alpha Baron's bombers hit Bravo BBS's food market.",
+			"Bombers from Alpha Baron of Alpha BBS hit the planet's food market and found it bare.", "Alpha Baron's bombers found nothing to destroy at Bravo BBS's food market.",
+			"food market"},
+		{OpBombMarket,
+			"Bombers from Alpha Baron of Alpha BBS wrecked the planet's trading market.", "Alpha Baron's bombers wrecked Bravo BBS's trading market.",
+			"Bombers from Alpha Baron of Alpha BBS hit the planet's trading market and found nothing listed there.", "Alpha Baron's bombers found nothing to destroy at Bravo BBS's trading market.",
+			"trading market"},
+		{OpBombRoutes,
+			"Bombers from Alpha Baron of Alpha BBS hit trade routes across the planet.", "Alpha Baron's bombers hit trade routes across Bravo BBS.",
+			"Bombers from Alpha Baron of Alpha BBS found nothing moving on the planet's trade routes.", "Alpha Baron's bombers found nothing to destroy at Bravo BBS's trade routes.",
+			"trade routes"},
+		{OpUndermine,
+			"Bombers from Alpha Baron of Alpha BBS undermined investments across the planet.", "Alpha Baron's bombers undermined investments across Bravo BBS.",
+			"Bombers from Alpha Baron of Alpha BBS found nothing invested in the planet's bank to undermine.", "Alpha Baron's bombers found nothing to destroy at Bravo BBS's bank.",
+			"bank"},
+	} {
+		drivenThere := "Bombers from Alpha Baron of Alpha BBS were driven off before they reached the planet's " + tc.object + "."
+		want := map[string]string{
+			tc.hitThere:   tc.hitHere,
+			tc.emptyThere: tc.emptyHere,
+			drivenThere:   "Alpha Baron's bombers were driven off before they reached Bravo BBS's " + tc.object + ".",
+		}
+		seen := map[string]bool{}
+		for seed := int64(1); seed <= 400 && len(seen) < len(want); seed++ {
+			from, to, attacker, target := specialOpWorlds(t)
+			to.rng = rand.New(rand.NewSource(seed))
+			if seed%2 == 0 { // stocked: something for every op to find
+				to.FoodMarketSupply = 10_000
+				target.Tanks = 100
+				if err := to.SetMarketListing(target, "Tank", 100, 1000); err != nil {
+					t.Fatalf("list: %v", err)
+				}
+				target.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: to.GameDay + 3}}
+				partner := to.AddHuman("p", "Partner")
+				for range 12 {
+					partner.TradeDeals = append(partner.TradeDeals, TradeDeal{From: target.Name, Send: TradeBasket{Troopers: 1000}})
+				}
+			} else {
+				to.FoodMarketSupply = 0
+			}
+			if err := from.SendSpecialOp(attacker, "Bravo BBS", "", tc.op, 0); err != nil {
+				t.Fatalf("SendSpecialOp: %v", err)
+			}
+			answer := to.ApplyPacket(from.Outbox[0])
+			there := to.NewsToday[len(to.NewsToday)-1].Text
+			before := len(from.NewsToday)
+			from.applyAttackResult(answer.Results[0])
+			here := from.NewsToday[before:]
+			line, known := want[there]
+			if !known {
+				t.Fatalf("%s seed %d: unexpected target line %q", tc.op, seed, there)
+			}
+			seen[there] = true
+			if len(here) != 1 || here[0].Text != line {
+				t.Errorf("%s seed %d, target read %q:\n firer read %v\n want %q", tc.op, seed, there, here, line)
+			}
+		}
+		for line := range want {
+			if !seen[line] {
+				t.Errorf("%s: no seed reached %q", tc.op, line)
+			}
+		}
+	}
+}
+
+// A bombing result from a board that predates the narrower verdicts carries a
+// plain "failure", and the firer's line claims no more than that the run came
+// to nothing.
+func TestFiringPlanetReadsAnOldBombingFailure(t *testing.T) {
+	from, _, attacker, _ := specialOpWorlds(t)
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpBombMarket, 0); err != nil {
+		t.Fatalf("SendSpecialOp: %v", err)
+	}
+	before := len(from.NewsToday)
+	from.applyAttackResult(AttackResult{
+		ID: from.InFlight[0].ID, TargetBoard: "Bravo BBS",
+		Kind: string(OpBombMarket), Outcome: OutcomeRepelled, Report: "It failed.",
+	})
+	if got := from.NewsToday[before:]; len(got) != 1 ||
+		got[0].Text != "Alpha Baron's Bomb Trading Market against Bravo BBS came to nothing." {
+		t.Errorf("legacy failure: firer read %v", got)
+	}
+}

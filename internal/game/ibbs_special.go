@@ -308,10 +308,13 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 		report, outcome := w.applyPlanetOp(op.Op, from)
 		res.Report = report
 		res.Won = outcome == specialHit
-		if res.Won {
+		switch outcome {
+		case specialHit:
 			res.Outcome = OutcomeWon
-		} else {
-			res.Outcome = OutcomeRepelled
+		case specialDrivenOff:
+			res.Outcome = OutcomeDrivenOff
+		default:
+			res.Outcome = OutcomeNothing
 		}
 		w.postNews(planetOpNews(op.Op, from, outcome))
 		return res
