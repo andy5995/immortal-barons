@@ -73,18 +73,13 @@ func (w *World) applyAttackResult(res AttackResult) {
 }
 
 // applyTerrorResult is the returning half of a Terrorist Op: the agents are
-// spent either way, so only the report and the news line come home.
+// spent either way, so only the report comes home. It is the sender's alone —
+// the original's returning-report routine (process_terrorist_report, BRE.OVR
+// 0x04b38a) files recap entries and never calls the news writer, and IB posted
+// "Our terror op on …" to the planet until #285.
 func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult) {
 	if e := w.FindByOwner(sent.Owner); e != nil {
 		e.addEvent(terrorReturnReport(sent, res))
-	}
-	switch {
-	case res.Won && res.LandTaken > 0:
-		w.postNews(fmt.Sprintf("Our terror op on %s (%s) destroyed %d troopers!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
-	case res.Won:
-		w.postNews(fmt.Sprintf("Our terror op on %s (%s) got through.", res.TargetEmpire, res.TargetBoard))
-	default:
-		w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))
 	}
 }
 
@@ -104,9 +99,11 @@ func terrorReturnReport(sent InFlightStrike, res AttackResult) string {
 			op, res.TargetEmpire, res.TargetBoard)
 	}
 	if res.Report != "" {
-		// The target board settled what the operation did and wrote the line; only
-		// it knows what was there to damage (#166).
-		return fmt.Sprintf("Your agents reached %s of %s. %s", res.TargetEmpire, res.TargetBoard, res.Report)
+		// The target board settled what the operation did and wrote the lines;
+		// only it knows what was there to damage (#166). The heading names the
+		// operation and the target, which is what the original's report opens
+		// with (process_terrorist_report's `Target:` header).
+		return fmt.Sprintf("%s against %s of %s:\n%s", op, res.TargetEmpire, res.TargetBoard, res.Report)
 	}
 	if res.Won {
 		return fmt.Sprintf("Your %s against %s of %s destroyed %d of its forces.",

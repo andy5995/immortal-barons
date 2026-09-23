@@ -461,9 +461,24 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	// Scouting answers coming home. They land in the planet-wide Spy Database,
 	// so the whole board benefits from one baron's agent (#61).
+	//
+	// A report that is the by-product of one of our terror ops against the same
+	// realm is filed without the news line: a terror op is told to its sender on
+	// their recap and to nobody else (#285), and the original's handler for this
+	// intelligence (update_spy_intelligence, BRE.OVR) writes a report entry, not
+	// news. The packet does not mark which reports are by-products, so the
+	// result beside it is what identifies one.
+	terrorOn := map[[2]string]bool{}
+	for _, res := range p.Results {
+		if res.Kind == "terror" {
+			terrorOn[[2]string{res.TargetBoard, res.TargetEmpire}] = true
+		}
+	}
 	for _, r := range p.ReconReports {
 		w.SpyDatabase = append(w.SpyDatabase, r)
-		w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
+		if !terrorOn[[2]string{r.Board, r.Empire}] {
+			w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
+		}
 	}
 	for _, m := range p.IPMessages {
 		w.deliverIPMessage(m)

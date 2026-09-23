@@ -4499,14 +4499,41 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   that predates the dispatch still gets that blanket effect
   (`TerrorUnitLossDenom`), since it names no operation.
 
+  **A terror op is reported on the two recaps and posts no news — BINARY-VERIFIED
+  (#285).** Neither the received-op resolver (`BRE.OVR` 0x04a96b) nor the
+  returning-report routine (`process_terrorist_report`, 0x04b38a) calls the news
+  writer; both file recap entries for their own realm. The shape of each:
+
+  - **Target:** if any agent was caught, one line counting them and naming the
+    sending realm and planet (singular and plural forms); then, if any got
+    through, one line for the operation — the `SINGLE_TERRORIST_HIT` form when
+    exactly one did, the `MULTI_` form counting them when more did.
+  - **Sender:** a `Date :` / `Target:` header naming the realm and planet, then
+    the same two lines from the other side — the agents caught, counted and
+    naming the realm they were caught in, and the `SINGLE_`/`MULTI_TERRORIST_REPORT`
+    line for the ones that got through. A target not found and a target under
+    protection each have a line of their own.
+
+  The count the original reports is the agents that WON the odds roll
+  (`inc [bp-0x15]` straight after `calculate_combat_odds`), whether or not the
+  operation found anything to damage. IB words every line itself
+  (`terrorOpDeed`, `terrorOpReport`, `agentsCaught`) and opens the sender's entry
+  with the operation and the target rather than a date, since the recap's own
+  rule already carries the time. Until #285 IB also posted a line to the news on
+  BOTH planets. The sender's board still receives the spy report every terror op
+  carries home, and files it in the Spy Database without the "Our agents
+  reported back" line it gives a Coordinator sweep; the original files that
+  intelligence as a report entry too (`update_spy_intelligence`).
+
   **IB's returning report accounts for every agent, which the original's does
   not.** `ipreport.dat`'s templates count successes, so a batch of 25 against a
   headquarters that seven agents flatten reads exactly like a batch of 8: the
   other seventeen land on a field already at zero, achieve nothing, and appear
-  nowhere. IB's line splits the batch three ways — got through, caught,
-  achieved nothing — so the sender can see when a batch was larger than the
-  target could absorb. The target's own event is unchanged and still counts only
-  the hits, because that is all the defender can observe.
+  nowhere. IB splits the batch three ways — caught, did damage, found nothing
+  left to damage — so the sender can see when a batch was larger than the
+  target could absorb. The target's own event counts only the hits, because
+  that is all the defender can observe, and it says terrorists achieved nothing
+  only when an agent actually got past its security.
 - **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
   original's name here, as it does for the Gooie Kablooie and the S3-Sabre
   (#218): players coming from the original look for these by name. Do not
@@ -5706,9 +5733,10 @@ flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
 - **Interplanetary news** (`game/ipnews.dat`) — inter-BBS attacks: individual /
   group-on-single / group-on-whole-BBS, each with a WIN and LOSS variant, plus
   the returning-strike (`IP-RET-*`) versions and `IP-RET-KILL`.
-- **Interplanetary report** (`game/ipreport.dat`) — the *private* per-player
-  result of covert/special IP ops (bombing, terrorist ops, special operations,
-  Sabre), not planet-wide news.
+- **Interplanetary report** (`game/ipreport.dat`) — the templates for covert and
+  special IP ops. The terrorist sections are private recap entries only (#285).
+  The bombing and special-operation sections are NOT all private: the resolvers
+  pass some of their lines to the news writer.
 
 The clone broadcasts most of these to its planetary bulletin (original wording,
 not BRE's verbatim lines): regular-attack wins/losses/conquests (NORMALWIN /
