@@ -115,7 +115,7 @@ func TestRenamedOwnerStillGetsLostForcesBack(t *testing.T) {
 		t.Fatal(err)
 	}
 	before := old.Troopers
-	if n := w.ReturnLostForces(); n != 1 {
+	if n := w.ReturnLostForces(nil); n != 1 {
 		t.Fatalf("ReturnLostForces = %d, want 1", n)
 	}
 	if old.Troopers != before+500 {

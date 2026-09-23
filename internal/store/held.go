@@ -156,3 +156,39 @@ func releaseHeld(dataDir, inboundDir string) (int, error) {
 	}
 	return moved, nil
 }
+
+// protocolHeldBoards names the boards whose traffic this board is holding for a
+// protocol difference right now: a packet from them waits in the held directory
+// for that reason, and nothing applied from them since says the link has moved
+// on (game.World.ProtocolHoldCurrent). The lost-forces timer stops for items
+// aimed at these boards (#190). Packets held for any other reason are left out:
+// a ruleset or signature hold is never released into an answer the timer would
+// be waiting for.
+func protocolHeldBoards(w *game.World) map[string]bool {
+	entries, err := os.ReadDir(heldPath(w.Config.DataDir))
+	if err != nil {
+		return nil
+	}
+	var held map[string]bool
+	for _, e := range entries {
+		if e.IsDir() || !IsPacketFile(e.Name()) {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(heldPath(w.Config.DataDir), e.Name()))
+		if err != nil {
+			continue
+		}
+		var p game.Packet
+		if err := json.Unmarshal(data, &p); err != nil {
+			continue
+		}
+		if p.FromBoard == "" || game.SpeaksOurProtocol(p.Protocol) || !w.ProtocolHoldCurrent(p.FromBoard) {
+			continue
+		}
+		if held == nil {
+			held = map[string]bool{}
+		}
+		held[p.FromBoard] = true
+	}
+	return held
+}

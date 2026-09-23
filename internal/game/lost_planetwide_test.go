@@ -22,7 +22,7 @@ func TestLostPlanetWideStrikeNamesThePlanet(t *testing.T) {
 		Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 300}}},
 	}}
 	w.GameDay += 5
-	if got := w.ReturnLostForces(); got != 1 {
+	if got := w.ReturnLostForces(nil); got != 1 {
 		t.Fatalf("recovered %d strikes, want 1", got)
 	}
 	if len(e.Events) == 0 {

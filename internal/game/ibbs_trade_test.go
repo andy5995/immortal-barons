@@ -153,7 +153,7 @@ func TestInterplanetaryBidRefundedWhenThePacketIsLost(t *testing.T) {
 	}
 
 	bw.GameDay += bw.Config.LostForcesDays // nothing ever came back
-	if n := bw.ReturnLostForces(); n != 1 {
+	if n := bw.ReturnLostForces(nil); n != 1 {
 		t.Fatalf("recovered %d, want the one abandoned bid", n)
 	}
 	if buyer.Gold != goldBefore {

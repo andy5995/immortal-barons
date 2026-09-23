@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -374,6 +375,14 @@ type InFlightStrike struct {
 	// Op is which Special Operation is away (Kind "special"), so a lost-packet
 	// notice can name it.
 	Op SpecialOp `json:",omitempty"`
+	// The lost-forces timer stops while the target board's packets are held
+	// (#190): the link is stalled, not gone, and its answer may be sitting in
+	// the held directory. HeldDays is the game days already spent held in holds
+	// that have cleared; Held and HeldSince mark a hold still in progress, which
+	// began on game day HeldSince. Local state only — never in a packet.
+	HeldDays  int  `json:",omitempty"`
+	Held      bool `json:",omitempty"`
+	HeldSince int  `json:",omitempty"`
 }
 
 // commitForce deducts the detachment f from e's army; ErrCantAfford if e lacks
@@ -1024,14 +1033,6 @@ func (w *World) takeInFlight(id int) (InFlightStrike, bool) {
 	return InFlightStrike{}, false
 }
 
-// ReturnLostForces gives back the forces of any strike still unanswered after
-// Config.LostForcesDays, and reports how many strikes it recovered. This is what
-// stops a lost packet — a board that stops running transfers, a sysop who drops
-// out — from costing a player their army for good (#96). A LostForcesDays of 0
-// or less turns the recovery off, and the forces wait indefinitely.
-//
-// Run from the planetary step, after inbound packets have been applied, so a
-// result that did arrive this run is never overtaken by the timer.
 // strikeAim names what a stalled strike was aimed at, for the recovery notices,
 // which have already named the board and so want the target alone. It is
 // strikeTarget (ibbs_return.go) without a result to read: nothing came back,
@@ -1049,15 +1050,41 @@ func strikeAim(f InFlightStrike) string {
 	return f.TargetEmpire
 }
 
-func (w *World) ReturnLostForces() int {
+// ReturnLostForces gives back the forces of any strike still unanswered after
+// Config.LostForcesDays, and reports how many strikes it recovered. This is what
+// stops a lost packet — a board that stops running transfers, a sysop who drops
+// out — from costing a player their army for good (#96). A LostForcesDays of 0
+// or less turns the recovery off, and the forces wait indefinitely.
+//
+// held names the boards whose packets this board is holding for a protocol
+// difference (the store knows; see store.HeldDir). Days an item spends aimed at
+// one do not count toward the wait (#190): the link is stalled rather than gone,
+// and the answer may be one of the held packets — returning the forces first
+// would have the late answer discarded while the far board keeps what it did.
+// Nothing is given up while its board is held, and a hold in the middle of the
+// window extends it by the held span.
+// LostForcesHeldBackstop still gives an item up while held, counted from launch.
+//
+// Run from the planetary step, after inbound packets have been applied, so a
+// result that did arrive this run is never overtaken by the timer.
+func (w *World) ReturnLostForces(held map[string]bool) int {
 	days := w.Config.LostForcesDays
+	// The pause is tracked even with the recovery off, so a sysop who turns it
+	// on later does not have a hold already under way counted as waiting time.
+	for i := range w.InFlight {
+		w.InFlight[i].trackHold(held[w.InFlight[i].TargetBoard], w.GameDay)
+	}
 	if days <= 0 {
 		return 0
 	}
 	var waiting []InFlightStrike
 	recovered := 0
 	for _, f := range w.InFlight {
-		if w.GameDay-f.LaunchedDay < days {
+		// Nothing is given up in the middle of a hold, even an item whose wait
+		// ran out before the hold was first seen: its packet may have sat in
+		// inbound for a day before this run met it.
+		age := w.GameDay - f.LaunchedDay
+		if (f.Held || age-f.HeldDays < days) && age < days*LostForcesHeldBackstop {
 			waiting = append(waiting, f)
 			continue
 		}
@@ -1105,6 +1132,37 @@ func (w *World) ReturnLostForces() int {
 		w.postNews(fmt.Sprintf("%d interplanetary force(s) gave up waiting and came home.", recovered))
 	}
 	return recovered
+}
+
+// trackHold opens or closes the item's current hold on game day today.
+func (f *InFlightStrike) trackHold(held bool, today int) {
+	switch {
+	case held && !f.Held:
+		f.Held, f.HeldSince = true, today
+	case !held && f.Held:
+		f.HeldDays += today - f.HeldSince
+		f.Held, f.HeldSince = false, 0
+	}
+}
+
+// PausedRecovery lists, sorted, the boards that in-flight items are waiting on
+// with the lost-forces timer stopped because their packets are held — what the
+// planetary run reports, so a sysop sees the recovery paused rather than broken.
+// Current as of the last ReturnLostForces.
+func (w *World) PausedRecovery() []string {
+	if w.Config.LostForcesDays <= 0 {
+		return nil // nothing is counting, so nothing is paused
+	}
+	seen := map[string]bool{}
+	var boards []string
+	for _, f := range w.InFlight {
+		if f.Held && !seen[f.TargetBoard] {
+			seen[f.TargetBoard] = true
+			boards = append(boards, f.TargetBoard)
+		}
+	}
+	sort.Strings(boards)
+	return boards
 }
 
 // raider names the far realm behind an incoming strike, for the defending

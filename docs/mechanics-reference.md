@@ -1542,7 +1542,32 @@ detachment back to its owner when no result has come home in that many days. IB
 implements this (#96): `World.InFlight` records every strike that leaves, a
 returning result clears it, and `ReturnLostForces` — run from the planetary step
 after inbound packets are applied — hands back anything that has waited too long
-and posts news. 0 turns the recovery off.
+and posts news. 0 turns the recovery off. The same timer covers every kind of
+item that waits on another board: attacks and group attacks, terror ops,
+Special Operations and interplanetary trade-bid escrow.
+
+**The timer pauses while the target board's packets are held** for a protocol
+difference (#190, IB's own; BRE has no packet hold). Such a link is stalled, not
+gone, and its answer may be one of the held packets; giving the forces back first
+would have that answer discarded as a late return when it is released, while the
+far board keeps what it did. The store names the held boards to
+`ReturnLostForces` on each run: a board counts while a packet from it waits in
+the `held` folder for its protocol and nothing from it has been applied since
+that hold (`World.ProtocolHeldAt` against `LastPacketFrom`), so a leftover file
+from a board that has since caught up does not keep the pause going. Each
+in-flight item records the game days it spends held (`HeldDays`, plus
+`Held`/`HeldSince` for a hold in progress), and those days do not count toward
+`LostForcesDays`: a hold in the middle of the window extends it by the held
+span, and nothing is given up while its board is held. A strike launched on day
+0 to a board held on days 1–3 comes home on day 6 at the default 3. Holds for
+other reasons (a divergent ruleset, a failed signature) do not pause it, since
+those packets never become an answer.
+
+The pause has a **backstop**: an item is given up while still held once
+`LostForcesHeldBackstop` (5) × `LostForcesDays` days have passed since launch —
+day 15 at the default — so a board that never comes back cannot strand forces for
+good. `LostForcesDays` 0 still means never. The planetary run's report and its
+log name each board the recovery is paused for.
 
 ## Covert operations
 

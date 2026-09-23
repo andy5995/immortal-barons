@@ -93,7 +93,10 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.Bulletins = len(leagueBulletins)
 	// After the inbound packets, so a result that arrived this run is never
 	// overtaken by the recovery timer.
-	w.ReturnLostForces()
+	// A board whose packets are held for a protocol difference is stalled, not
+	// gone, so the timer stops for what is waiting on it (#190).
+	w.ReturnLostForces(protocolHeldBoards(w))
+	run.RecoveryPaused = w.PausedRecovery()
 	w.LaunchDueGroupAttacks()
 	// The weapon goes on the same step, for the same reason a group attack does:
 	// the planetary run happens several times a day, and a launch scheduled to
@@ -140,10 +143,25 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	if inResult.OrderNotice != "" {
 		logNotices = append(append([]string(nil), run.Notices...), inResult.OrderNotice)
 	}
+	// Logged but not counted as a fault: the hold that causes it already was.
+	if len(run.RecoveryPaused) > 0 {
+		logNotices = append(append([]string(nil), logNotices...), RecoveryPausedNotice(w.Config, run.RecoveryPaused))
+	}
 	AppendPlanetaryLog(w.Config.DataDir, logNotices, time.Now())
 	sent, err := WriteOutbox(w, outboundDir, verbose)
 	run.Sent = sent
 	return run, err
+}
+
+// RecoveryPausedNotice words the run report's line for PlanetaryRun.RecoveryPaused,
+// so the console and the planetary log say the same thing.
+func RecoveryPausedNotice(cfg game.Config, boards []string) string {
+	whose := "that board's"
+	if len(boards) > 1 {
+		whose = "those boards'"
+	}
+	return fmt.Sprintf("Lost-forces recovery is paused for what was sent to %s: %s packets are held, so a missing answer may be among them. The wait resumes when the hold clears; anything still out %d days after it left comes home regardless.",
+		strings.Join(boards, ", "), whose, cfg.LostForcesDays*game.LostForcesHeldBackstop)
 }
 
 // PlanetaryRun is what one inter-BBS step did, so the command line can report
@@ -164,7 +182,11 @@ type PlanetaryRun struct {
 	Quarantined   int      // packets that could not be parsed at all and were set aside
 	Deferred      int      // packets left untouched, too young to trust as a complete write
 	Released      int      // held packets this build can now read, returned to inbound
-	Bulletins     int      // league bulletins broadcast (Coordinator's board only)
+	// RecoveryPaused names the boards whose packets are held for a protocol
+	// difference while forces, agents or gold still wait on them; the lost-forces
+	// timer is stopped for those items (#190).
+	RecoveryPaused []string
+	Bulletins      int // league bulletins broadcast (Coordinator's board only)
 	// Notices are transport faults for the sysop -- an undeliverable packet,
 	// orders that failed their check. They are reported here rather than in the
 	// planet's news: no player can act on one, and the news cap would let a

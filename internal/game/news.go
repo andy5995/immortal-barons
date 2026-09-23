@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
@@ -134,7 +135,13 @@ func (w *World) NoteRulesetHold(board string) bool {
 // per packet — a mismatch affects every packet that board sends, and repeating
 // it per file buries the one line that matters.
 func (w *World) NoteProtocolHold(board string, protocol int) {
-	key := "protocol:" + board // see NoteRulesetHold: one keyspace, several reasons
+	// Stamped on every hold, before the notice is deduplicated: this is what
+	// ProtocolHeldBoards measures a hold's currency by.
+	if w.ProtocolHeldAt == nil {
+		w.ProtocolHeldAt = map[string]string{}
+	}
+	w.ProtocolHeldAt[board] = Recorded(time.Now()) // the clock LastPacketFrom is on
+	key := "protocol:" + board                     // see NoteRulesetHold: one keyspace, several reasons
 	if w.heldNoted == nil {
 		w.heldNoted = map[string]bool{}
 	}
@@ -155,6 +162,23 @@ func (w *World) NoteProtocolHold(board string, protocol int) {
 	}
 	w.noteSysop("Packets from %s are being held: they speak protocol %d, which this board (protocol %d) has moved past. They will NOT be applied on their own, even once that board upgrades — ask them to resend anything that mattered.",
 		board, protocol, Protocol)
+}
+
+// ProtocolHoldCurrent reports whether a board with packets in the held
+// directory is still stalled: its latest packet was held rather than applied.
+// A held file outlives the fault that held it — one from a board that has since
+// moved past our protocol, or come level with it, waits out HeldMaxAge beside
+// that board's newer traffic, which applies normally — so the file alone does
+// not say the link is stalled. The same-second case counts as held, since a run
+// that holds one packet and applies another cannot order them by the stamp.
+// A hold with no stamp (held by a build that did not record one) counts too.
+func (w *World) ProtocolHoldCurrent(board string) bool {
+	heldAt, ok := ParseStamp(w.ProtocolHeldAt[board])
+	if !ok {
+		return true
+	}
+	applied, ok := ParseStamp(w.LastPacketFrom[board])
+	return !ok || !heldAt.Before(applied)
 }
 
 // postCombatNews broadcasts the outcome of a regular attack to the planet.

@@ -209,6 +209,11 @@ type World struct {
 	// is too old to read our packets", and nothing else reads them.
 	LastPacketFrom map[string]string `json:",omitempty"`
 	BoardVersion   map[string]string `json:",omitempty"`
+	// ProtocolHeldAt is when a packet from each board was last set aside for a
+	// protocol this build cannot read, on the same wall clock as LastPacketFrom.
+	// A hold newer than the board's last applied packet is a link still stalled;
+	// an older one is a leftover the board has since talked past (#190).
+	ProtocolHeldAt map[string]string `json:",omitempty"`
 
 	// LeagueRuleset is the fingerprint of the rules this board last took to be
 	// the league's, PrevLeagueRuleset the one before it, and PrevRulesetAt a

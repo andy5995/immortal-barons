@@ -184,7 +184,7 @@ func TestLateReturnIsDiscarded(t *testing.T) {
 	}
 	id := w.InFlight[0].ID
 	w.GameDay += 5
-	if got := w.ReturnLostForces(); got != 1 {
+	if got := w.ReturnLostForces(nil); got != 1 {
 		t.Fatalf("recovered %d strikes, want 1", got)
 	}
 	if e.Troopers != 500 {

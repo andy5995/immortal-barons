@@ -165,7 +165,7 @@ func TestLostSpecialOpIsGivenUp(t *testing.T) {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	from.GameDay += 4
-	if n := from.ReturnLostForces(); n != 1 {
+	if n := from.ReturnLostForces(nil); n != 1 {
 		t.Fatalf("swept %d in-flight ops, want 1", n)
 	}
 	if len(from.InFlight) != 0 {

@@ -459,3 +459,10 @@ const (
 	FreeTradeContagionOdds  = 3  // binary: fires on Random(3) == 0
 	FreeTradeContagionDrain = 24 // binary: hours elapsed, one whole game day of them
 )
+
+// LostForcesHeldBackstop bounds how long a held link may pause the lost-forces
+// timer (#190): an in-flight item aimed at a board whose packets are held is
+// given up anyway once this many times Config.LostForcesDays have passed since
+// launch, so a board that never comes back cannot strand forces for good. IB's
+// own; BRE has no packet hold for it to know about.
+const LostForcesHeldBackstop = 5

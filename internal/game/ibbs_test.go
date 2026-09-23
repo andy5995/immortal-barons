@@ -418,7 +418,7 @@ func TestLostForcesComeHome(t *testing.T) {
 
 	// Too soon: the forces are still out there.
 	w.GameDay += 2
-	if got := w.ReturnLostForces(); got != 0 {
+	if got := w.ReturnLostForces(nil); got != 0 {
 		t.Errorf("recovered %d strikes after 2 days, want 0 — the wait is %d", got, cfg.LostForcesDays)
 	}
 	if e.Troopers != 400 {
@@ -427,7 +427,7 @@ func TestLostForcesComeHome(t *testing.T) {
 
 	// The wait is up and nothing came back, so everything returns.
 	w.GameDay++
-	if got := w.ReturnLostForces(); got != 2 {
+	if got := w.ReturnLostForces(nil); got != 2 {
 		t.Errorf("recovered %d strikes, want 2", got)
 	}
 	if e.Troopers != 1000 || e.Tanks != 40 || e.Agents != 20 {
@@ -465,7 +465,7 @@ func TestAnsweredStrikeDoesNotAlsoTimeOut(t *testing.T) {
 		t.Fatalf("survivors returned: troopers=%d, want 400 (200 home, 100 lost)", e.Troopers)
 	}
 	w.GameDay += 5
-	if got := w.ReturnLostForces(); got != 0 {
+	if got := w.ReturnLostForces(nil); got != 0 {
 		t.Errorf("an answered strike timed out anyway (%d recovered)", got)
 	}
 	if e.Troopers != 400 {
