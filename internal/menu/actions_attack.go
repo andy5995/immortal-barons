@@ -237,6 +237,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		// Deferred capture (autoCapture=false): the defender bleeds its regions but
 		// the attacker gains none yet, so the human can pick the types below (#58).
 		outcome = w.World.AttackDetailed(p, d, force, false)
+		chargeAttackStage(p)
 		return nil
 	})
 	if err != nil {
@@ -254,6 +255,12 @@ func regularAttack(s session.Session, w *ctx) Result {
 	// style — the player can't keep attacking until their next turn).
 	return Back
 }
+
+// chargeAttackStage spends the turn's one local attack. It runs inside the
+// transaction that applies the strike, not after the Attack menu returns: the
+// strike is saved before its report's pause, and a session ending there would
+// otherwise resume the turn at the Attack menu with a second attack to make.
+func chargeAttackStage(p *game.Empire) { p.TurnProgress.AttackDone = true }
 
 // warnTrimmedForce tells the player their committed force was clamped because
 // a concurrent node's strike thinned their holdings between the prompt and the
@@ -463,6 +470,9 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 		}
 		var e error
 		report, e = strike(p, d)
+		if e == nil && endsTurn {
+			chargeAttackStage(p)
+		}
 		return e
 	})
 	if err != nil {
@@ -640,6 +650,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		// holdings; RaidFaction clamps to the fresh stock, so say when it did.
 		trimmed = troopers > fp.Troopers || jets > fp.Jets || tanks > fp.Tanks
 		report, captured = w.World.RaidFaction(fp, f-1, troopers, jets, tanks)
+		chargeAttackStage(fp)
 		return nil
 	})
 	if err != nil {

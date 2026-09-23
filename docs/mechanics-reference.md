@@ -654,6 +654,10 @@ touches a turn counter; the original uses `[0x22d8]` around the menu loop and IB
 uses `TurnProgress.AttackDone` around the menu stage. Reading the strike routine
 alone suggests, wrongly, that missiles are unlimited.
 
+In IB an attack cannot be repeated by leaving the session after it: the menu
+action sets `AttackDone` in the same save that applies the strike, so a turn
+resumed after a boot or a dropped connection goes on past the Attack Menu.
+
 - **Regular attack** — direct assault; the winner takes some of the
   loser's regions. Losses are asymmetric, and the asymmetry is an outcome of the
   strength ratio rather than a pair of rates: see "The regular attack's
