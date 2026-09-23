@@ -38,6 +38,7 @@ CFG
   # This board's own identity and directories: bbs.cfg, not config.json.
   cat > "$tmp/$id/bbs.cfg" <<CFG
 BoardID $id
+LeagueNumber 42
 GameInbound $tmp/$id/in
 GameOutbound $tmp/$id/out
 CFG
@@ -48,6 +49,25 @@ CFG
   # existing game; it does not create one.
   "$door" -reset-from-config -data "$tmp/$id" >/dev/null
 done
+
+# onboard creates a human realm on a board through the real drop-file path. A
+# league board takes no computer barons, so without one the planetary step has
+# nothing to report and writes no packet. The keys are paced: the session reads
+# some answers as lines and some as single keys, and a burst that arrives before
+# a prompt is drawn is eaten by the one before it. Space clears the splash, "1"
+# is the Welcome menu's Create Realm, then the name and its confirmation; the
+# Enters step through one turn's screens and "0", "y" quit.
+onboard() {
+  local dir=$1 realm=$2
+  { printf ' '; sleep 1; printf '1'; sleep 1; printf '%s\r' "$realm"; sleep 1
+    printf 'y\r'; sleep 2
+    for _ in $(seq 1 25); do printf '\r'; sleep 0.3; done
+    printf '0\ry\r'; sleep 1; } |
+    timeout 40 "$door" -dropfile "$tmp/door32.sys" -data "$dir" >/dev/null 2>&1 || true
+  # A script that ran dry ends the session cleanly, so check it got there.
+  grep -q "\"$realm\"" "$dir/world.json" ||
+    { echo "FAIL: onboarding did not create $realm on $dir"; exit 1; }
+}
 
 # transport: fan every board's outbound packet out to the other boards' inbound
 # dirs (a broadcast reaches all; the sysop's real script does the same move).
@@ -65,7 +85,7 @@ transport() {
 }
 
 # Onboard a human on AlphaBBS via the real dropfile path, then export its scores.
-printf ' Asgard\r \r \r0\r' | timeout 15 "$door" -dropfile "$tmp/door32.sys" -data "$tmp/AlphaBBS" >/dev/null 2>&1 || true
+onboard "$tmp/AlphaBBS" Asgard
 "$door" -planetary -data "$tmp/AlphaBBS"
 [ -n "$(ls -A "$tmp/AlphaBBS/out")" ] || { echo "FAIL: AlphaBBS wrote no packet"; exit 1; }
 
@@ -143,7 +163,15 @@ CFG
   write_roster "$r/$id/ibnodes.dat"
 done
 
-printf ' Asgard\r \r \r0\r' | timeout 15 "$door" -dropfile "$tmp/door32.sys" -data "$r/AlphaBBS" >/dev/null 2>&1 || true
+# AlphaBBS is node 1, the Coordinator, so its planetary run broadcasts the
+# league's rules; the other boards refuse those unless the Coordinator's key is
+# recorded, as a real league does once at setup.
+coordpub=$("$door" -gen-coord-key -data "$r/AlphaBBS" | awk '/-coord-key/ {print $NF}')
+for id in BravoBBS CharlieBBS; do
+  "$door" -coord-key "$coordpub" -data "$r/$id" >/dev/null
+done
+
+onboard "$r/AlphaBBS" Asgard
 "$door" -planetary -data "$r/AlphaBBS"   # writes into Bravo's inbound
 "$door" -planetary -data "$r/BravoBBS"   # applies its own copy, relays Charlie's
 "$door" -planetary -data "$r/CharlieBBS"
