@@ -160,6 +160,11 @@ every platform. There is nothing to configure.
   socket. A native Synchronet door with I/O interception off is set up this way:
   the connection arrives as a numbered handle (line 2 of `DOOR32.SYS`) and
   standard input is connected to nothing.
+- If the drop file names a socket but gives **no handle** (some BBS software
+  writes `-1` for an SSH caller), the game reads and writes the caller through
+  standard input and output. It prints a warning on the console when it does
+  this: if your BBS does not pass the connection that way, the game cannot
+  reach the caller.
 
 A live standard input wins: a BBS that hands one over means it to be used. The
 drop file alone cannot decide this, because Mystic names a socket **and** gives
