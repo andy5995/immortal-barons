@@ -28,8 +28,8 @@ type Check struct {
 //
 // Whether this board is exchanging league mail at all is the CALLER's to
 // decide, and the two callers know it differently: the setup report asks only
-// after the inter-BBS flag, while barons-ftn asks unconditionally, because
-// running a league transport is that declaration.
+// after the inter-BBS flag, while the FTN transport asks unconditionally,
+// because running a league transport is that declaration.
 func CheckLeagueNumber(cfg game.Config) error {
 	if cfg.LeagueNumber != 0 {
 		return nil
@@ -199,8 +199,8 @@ func Checkup(cfg game.Config) []Check {
 		add("League number", true, fmt.Sprint(cfg.LeagueNumber))
 	}
 
-	add("Inbound directory", dirUsable(cfg.Inbound(), false), cfg.Inbound())
-	add("Outbound directory", dirUsable(cfg.Outbound(), true), cfg.Outbound())
+	add("GameInbound", dirUsable(cfg.Inbound(), false), cfg.Inbound())
+	add("GameOutbound", dirUsable(cfg.Outbound(), true), cfg.Outbound())
 
 	// Test the keys the way loadLeagueKeys does — decode them and check the
 	// length — rather than that a file is present. A coord.pub that does not

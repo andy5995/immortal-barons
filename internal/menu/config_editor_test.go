@@ -129,7 +129,7 @@ func TestConfigEditorLeavesTheBoardsOwnSettingsToBBSCfg(t *testing.T) {
 	w.Config.InboundDir = "ftn/in"
 	w.Config.BoardID = "Alpha BBS"
 
-	// 39 is Inbound Dir. It answers with where the setting lives instead of a
+	// 39 is GameInbound. It answers with where the setting lives instead of a
 	// prompt: this editor saves config.json, and the four settings that name the
 	// board are read from bbs.cfg, which the game never writes (#152).
 	f := &fakeSession{keys: []rune("39\r q\r ")}

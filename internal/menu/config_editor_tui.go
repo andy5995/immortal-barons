@@ -125,8 +125,8 @@ const (
 	helpBoardID            = "The name this board uses in inter-BBS packets. Set in bbs.cfg, which the game reads but never writes; shown here so you can see what it is running on."
 	helpLeagueNumber       = "The number this league runs under, 1-999. A board playing in a league needs one: left at 0 it takes every league's packets as its own, and the transport refuses to run. Set in bbs.cfg."
 	helpMinVersion         = "The game version every board in the league must run (blank for no requirement). A board below it has its packets refused."
-	helpInboundDir         = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path. Set in bbs.cfg."
-	helpOutboundDir        = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path. Set in bbs.cfg."
+	helpInboundDir         = "The game's own directory of packets from the other boards, waiting to be applied. Relative to the data directory unless you give a full path. Set in bbs.cfg."
+	helpOutboundDir        = "The game's own directory of packets written for the other boards. Relative to the data directory unless you give a full path. Set in bbs.cfg."
 	helpIdleTimeout        = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
 	helpIdleWarnings       = "How many idle warnings a session receives before it is disconnected."
 )
@@ -253,8 +253,8 @@ func newConfigTUI(w *game.World) *configTUI {
 			c.MinBoardVersion = strings.TrimPrefix(strings.TrimSpace(v), "v")
 		})
 		t.addStatic(caps, 16, "League Number", helpLeagueNumber, strconv.Itoa(c.LeagueNumber))
-		t.addStatic(caps, 40, "Inbound Dir", helpInboundDir, c.InboundDir)
-		t.addStatic(caps, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir)
+		t.addStatic(caps, 40, "GameInbound", helpInboundDir, c.InboundDir)
+		t.addStatic(caps, 40, "GameOutbound", helpOutboundDir, c.OutboundDir)
 		t.addBool(caps, "Dupe Checking", helpDupeChecking, c.DupeChecking, func(c *game.Config, b bool) { c.DupeChecking = b })
 	}
 	t.addInt(caps, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })

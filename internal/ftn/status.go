@@ -109,19 +109,19 @@ func Status(dataDir string) (SpoolStatus, error) {
 	}
 	sort.Slice(status.Inbound, func(a, b int) bool { return status.Inbound[a].Age > status.Inbound[b].Age })
 
-	// Best-effort, and deliberately after the spools: --status is the one
-	// command that still works while ftn.cfg is invalid, which is exactly when
+	// Best-effort, and deliberately after the spools: -ftn-status is the one
+	// command that still works while the transport settings are invalid, which is exactly when
 	// a sysop is running it, so a config that will not load costs this section
 	// and nothing else.
 	if transport, err := LoadConfig(dataDir); err == nil {
 		// An attach bundle whose envelope is already here is waiting for the
-		// next -in, not abandoned. RunIn marks the same files claimed; a report
-		// that did not would FAIL a healthy board whose -in runs less often
+		// next unwrap, not abandoned. RunIn marks the same files claimed; a report
+		// that did not would FAIL a healthy board whose unwrap runs less often
 		// than the threshold.
 		for path := range envelopeReferenced(transport) {
 			claimed[path] = true
 		}
-		status.Unclaimed = scanUnclaimed(transport.InboundDirs, claimed, now)
+		status.Unclaimed = scanUnclaimed(transport.IncomingFileDirs, claimed, now)
 	}
 
 	bad, err := os.ReadDir(filepath.Join(dataDir, spoolDir, badSpoolDir))

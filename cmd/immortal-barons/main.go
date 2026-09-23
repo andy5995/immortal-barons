@@ -170,6 +170,10 @@ func main() {
 		exitOn("-league-routes", runLeagueRoutes(cfg))
 		return
 	}
+	if *o.ftnStatus {
+		exitOn("-ftn-status", runFTNStatus(cfg))
+		return
+	}
 	// The original's three sysop reports (docs/bre.doc, "Command-Line Options").
 	for _, r := range []struct {
 		on   bool
@@ -208,7 +212,7 @@ func main() {
 
 	if *o.boardID != "" || *o.inboundDir != "" || *o.outboundDir != "" || *o.importBoardCfg != "" {
 		if !*o.ibbsReset {
-			fmt.Fprintln(os.Stderr, "immortal-barons: -board-id, -inbound, -outbound and -import-bbs-cfg are settings for -ibbs-reset")
+			fmt.Fprintln(os.Stderr, "immortal-barons: -board-id, -game-inbound, -game-outbound and -import-bbs-cfg are settings for -ibbs-reset")
 			os.Exit(2)
 		}
 	}

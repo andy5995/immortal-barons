@@ -34,9 +34,8 @@ const (
 	keyBoardURL = "BoardURL"
 	keyBullURL  = "BulletinURL"
 	keyLeague   = "LeagueNumber"
-	keyInbound  = "Inbound"
-	keyOutbound = "Outbound"
-	keyLink     = "Link"
+	keyInbound  = "GameInbound"
+	keyOutbound = "GameOutbound"
 	keyLottery  = "Lottery"
 	keyBulletin = "BulletinDir"
 	keyPirate   = "PirateNews"
@@ -103,6 +102,17 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 		case strings.EqualFold(key, keyInbound):
 			cfg.InboundDir = value
 		case strings.EqualFold(key, keyOutbound):
+			// "GameOutbound <node> <dir>" is one neighbor's own directory (#106);
+			// a bare "GameOutbound <dir>" is everyone else's. A directory whose
+			// name is a number still works on its own, since only a number
+			// followed by more is read as a node.
+			if n, dir, ok := perNodeDir(value); ok {
+				if cfg.OutboundDirs == nil {
+					cfg.OutboundDirs = map[int]string{}
+				}
+				cfg.OutboundDirs[n] = dir
+				continue
+			}
 			cfg.OutboundDir = value
 		case strings.EqualFold(key, keyBulletin):
 			cfg.BulletinDir = value
@@ -116,16 +126,6 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
 				cfg.PirateNews = b
 			}
-		case strings.EqualFold(key, keyLink):
-			node, dir, ok := strings.Cut(value, " ")
-			n, err := strconv.Atoi(strings.TrimSpace(node))
-			if !ok || err != nil {
-				continue
-			}
-			if cfg.OutboundDirs == nil {
-				cfg.OutboundDirs = map[int]string{}
-			}
-			cfg.OutboundDirs[n] = strings.TrimSpace(dir)
 		}
 	}
 	return sc.Err()
@@ -156,7 +156,7 @@ func BoardConfigText(cfg game.Config) string {
 		fmt.Fprintf(&b, "%s %s\n", keyOnFault, cfg.OnFault)
 	}
 	for _, n := range slices.Sorted(maps.Keys(cfg.OutboundDirs)) {
-		fmt.Fprintf(&b, "%s %d %s\n", keyLink, n, cfg.OutboundDirs[n])
+		fmt.Fprintf(&b, "%s %d %s\n", keyOutbound, n, cfg.OutboundDirs[n])
 	}
 	return b.String()
 }
@@ -181,4 +181,67 @@ func migrateBoardConfig(dataDir string, cfg game.Config) {
 		return
 	}
 	os.WriteFile(boardConfigPath(dataDir), []byte(BoardConfigText(cfg)), 0o644)
+}
+
+// perNodeDir splits "<node> <dir>" when value starts with a node number and has
+// more after it.
+func perNodeDir(value string) (int, string, bool) {
+	node, dir, ok := strings.Cut(value, " ")
+	if !ok {
+		return 0, "", false
+	}
+	n, err := strconv.Atoi(node)
+	dir = strings.TrimSpace(dir)
+	if err != nil || n < 1 || n > game.MaxNodeNumber || dir == "" {
+		return 0, "", false
+	}
+	return n, dir, true
+}
+
+// linkModes are the words that make a Link line the FTN transport's. A Link
+// line without one is the per-neighbor directory as this file spelled it
+// before that became "GameOutbound <node> <dir>".
+var linkModes = []string{"attach", "obox", "bso"}
+
+// LegacyBoardRefusal reports bbs.cfg lines written under names this version no
+// longer reads -- Inbound, Outbound, and the two-field "Link <node> <dir>" --
+// with the lines that replace them, ready to paste. Nil when there are none.
+//
+// Refused rather than read under both names: an ignored Inbound line would put
+// the board back on the default directory without a word, and accepting the
+// old spelling forever keeps alive the confusion the rename removed (#241).
+// The values are copied byte for byte, so a Windows path keeps its backslashes.
+func LegacyBoardRefusal(dataDir string) error {
+	path := boardConfigPath(dataDir)
+	f, err := os.Open(path)
+	if err != nil {
+		return nil
+	}
+	defer f.Close()
+	var old, repl []string
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		line := strings.TrimSpace(sc.Text())
+		key, rest, _ := strings.Cut(line, " ")
+		value := strings.TrimSpace(rest)
+		switch {
+		case strings.EqualFold(key, "Inbound"):
+			old, repl = append(old, line), append(repl, keyInbound+" "+value)
+		case strings.EqualFold(key, "Outbound"):
+			old, repl = append(old, line), append(repl, keyOutbound+" "+value)
+		case strings.EqualFold(key, "Link"):
+			fields := strings.Fields(value)
+			if len(fields) < 2 || slices.ContainsFunc(linkModes, func(m string) bool {
+				return strings.EqualFold(m, fields[1])
+			}) {
+				continue
+			}
+			old, repl = append(old, line), append(repl, keyOutbound+" "+value)
+		}
+	}
+	if len(old) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%s uses setting names this version no longer reads. Replace these lines:\n  %s\nwith:\n  %s",
+		path, strings.Join(old, "\n  "), strings.Join(repl, "\n  "))
 }

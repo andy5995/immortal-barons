@@ -45,8 +45,6 @@ for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 dar
 	mkdir -p "$dir"
 	GOOS="$os" GOARCH="$arch" "$gocmd" build -trimpath -ldflags "-s -w" \
 		-o "$dir/immortal-barons${ext}" ./cmd/immortal-barons
-	GOOS="$os" GOARCH="$arch" "$gocmd" build -trimpath -ldflags "-s -w" \
-		-o "$dir/barons-ftn${ext}" ./cmd/barons-ftn
 	cp LICENSE README.md ChangeLog install-xtrn.ini "$dir/"
 	mkdir -p "$dir/docs"
 	cp docs/faq.md docs/playing.md docs/command-reference.md docs/door-setup.md \

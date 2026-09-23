@@ -30,6 +30,7 @@ type opts struct {
 	leagueReset     *string
 	leagueCheck     *bool
 	leagueRoutes    *bool
+	ftnStatus       *bool
 	lastPacket      *bool
 	bbsInfo         *bool
 	playerList      *bool
@@ -67,8 +68,8 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		dropPath:        flag.String("dropfile", "", dropfileUsage(lang, preDoor.DropfileFormat)),
 		setDrop:         flag.Bool("set-dropfile", false, i18n.T(lang, "choose which drop file format your BBS writes, save it, then exit")),
 		dataDir:         flag.String("data", "./data", i18n.T(lang, "folder that holds the game data")),
-		maint:           flag.Bool("maint", false, i18n.T(lang, "run the daily maintenance, then exit")),
-		planetary:       flag.Bool("planetary", false, i18n.T(lang, "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit")),
+		maint:           flag.Bool("maint", false, i18n.T(lang, "run the daily maintenance, then exit. On a league board it also runs the inter-BBS step, as -planetary does")),
+		planetary:       flag.Bool("planetary", false, i18n.T(lang, "run the inter-BBS step: take in what the mailer brought, read incoming packets, run group attacks, write outgoing packets and hand them to the mailer, then exit")),
 		full:            flag.Bool("full", false, i18n.T(lang, "run the full cycle: read inbound packets, play a turn, write outbound packets, then exit")),
 		detailed:        flag.Bool("detailed", false, i18n.T(lang, "show each packet as it is read and written (use with -full or -planetary)")),
 		leagueConfig:    flag.Bool("league-config", false, i18n.T(lang, "send this board's league settings to the whole league (node #1 only), then exit")),
@@ -78,15 +79,16 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		leagueReset:     flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit")),
 		leagueCheck:     flag.Bool("league-check", false, i18n.T(lang, "check this board's league setup — roster, board name, packet directories, keys — and report everything wrong at once, then exit")),
 		leagueRoutes:    flag.Bool("league-routes", false, i18n.T(lang, "print which board each planet's packets are handed to, and the directory they are written in, then exit")),
+		ftnStatus:       flag.Bool("ftn-status", false, i18n.T(lang, "report what the FTN transport's spools are holding and why, changing nothing, then exit")),
 		lastPacket:      flag.Bool("lastpacket", false, i18n.T(lang, "write LASTPACKET.LST — when a packet from each other board was last processed here, then exit")),
 		bbsInfo:         flag.Bool("bbsinfo", false, i18n.T(lang, "write BBSINFO.LST — every board, when it was last heard from, and the version it runs, then exit")),
 		playerList:      flag.Bool("playerlist", false, i18n.T(lang, "write PLAYERLIST.LST — every realm on every board (League Coordinator only), then exit")),
 		players:         flag.Bool("players", false, i18n.T(lang, "list the players and change a caller's name, rename their realm, or remove it, then exit")),
 		reset:           flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)")),
 		boardID:         flag.String("board-id", "", i18n.T(lang, "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator")),
-		inboundDir:      flag.String("inbound", "", i18n.T(lang, "directory where packets from the other boards arrive, for -ibbs-reset (default \"inbound\", under the data directory)")),
-		outboundDir:     flag.String("outbound", "", i18n.T(lang, "directory the game writes packets to for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)")),
-		importBoardCfg:  flag.String("import-bbs-cfg", "", i18n.T(lang, "take this board's name, inbound directory and league number from an original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset")),
+		inboundDir:      flag.String("game-inbound", "", i18n.T(lang, "the game's own directory of packets waiting to be applied, for -ibbs-reset (default \"inbound\", under the data directory)")),
+		outboundDir:     flag.String("game-outbound", "", i18n.T(lang, "the game's own directory of packets written for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)")),
+		importBoardCfg:  flag.String("import-bbs-cfg", "", i18n.T(lang, "take this board's name, league number, mailer and FTN directories from an original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset")),
 		ibbsReset:       flag.Bool("ibbs-reset", false, i18n.T(lang, "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings")),
 		resetFromConfig: flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)")),
 		spectate:        flag.Int("spectate", 0, i18n.T(lang, "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms")),
@@ -107,7 +109,7 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 // not given), so a stray word alongside any of these is a mistake rather than
 // something to ignore.
 func (o *opts) explicitMode() bool {
-	return *o.maint || *o.planetary || *o.full || *o.leagueConfig || *o.leagueRoutes ||
+	return *o.maint || *o.planetary || *o.full || *o.leagueConfig || *o.leagueRoutes || *o.ftnStatus ||
 		*o.leagueCheck || *o.reset || *o.resetFromConfig || *o.ibbsReset ||
 		*o.lastPacket || *o.bbsInfo || *o.playerList || *o.players ||
 		*o.dump || *o.spectate > 0 || *o.local || *o.setDrop

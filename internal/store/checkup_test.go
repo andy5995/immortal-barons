@@ -78,7 +78,7 @@ func TestCheckupReportsEveryProblemAtOnce(t *testing.T) {
 			failed[c.Name] = c.Detail
 		}
 	}
-	for _, want := range []string{"Board name", "Inbound directory", "Outbound directory", "Coordinator key"} {
+	for _, want := range []string{"Board name", "GameInbound", "GameOutbound", "Coordinator key"} {
 		if _, ok := failed[want]; !ok {
 			t.Errorf("%s was not reported as a problem", want)
 		}

@@ -159,13 +159,11 @@ every platform. Your package manager may have Go as well, but check the version
 first: some distributions ship one older than 1.26.4.
 
 ```
-go build -o . ./cmd/immortal-barons ./cmd/barons-ftn
+go build -o . ./cmd/immortal-barons
 ```
 
-This produces the `immortal-barons` game and the optional `barons-ftn` inter-BBS
-transport helper. See "Running" above to start the game; the
-[FTN Transport guide](docs/ftn-transport.md)
-explains the helper.
+This produces the `immortal-barons` program. See "Running" above to start the
+game.
 
 ## Character set
 

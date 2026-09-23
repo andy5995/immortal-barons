@@ -35,8 +35,8 @@ func TestIBBSResetWithBoardIDSkipsTheEditor(t *testing.T) {
 	// The settings that name the board are handed back as bbs.cfg lines: the
 	// game reads that file and never writes it (#152).
 	wantsLine(t, out2, "BoardID BravoBBS")
-	wantsLine(t, out2, "Inbound "+in)
-	wantsLine(t, out2, "Outbound "+out)
+	wantsLine(t, out2, "GameInbound "+in)
+	wantsLine(t, out2, "GameOutbound "+out)
 	// The reset creates them, so the first -planetary run has somewhere to read.
 	for _, d := range []string{in, out} {
 		if fi, err := os.Stat(d); err != nil || !fi.IsDir() {
@@ -62,7 +62,7 @@ func TestLeagueConfigBroadcastIsSigned(t *testing.T) {
 	captureReset(t, cfg, &leagueSetup{BoardID: "Alpha BBS", Outbound: out})
 	// The sysop's half of the setup: the reset prints these, they type them.
 	if err := os.WriteFile(filepath.Join(dir, store.BoardConfigFile),
-		[]byte("BoardID Alpha BBS\nOutbound "+out+"\n"), 0o644); err != nil {
+		[]byte("BoardID Alpha BBS\nGameOutbound "+out+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err = store.LoadConfig(dir)
@@ -123,12 +123,15 @@ func TestIBBSResetImportsABREBoardConfig(t *testing.T) {
 
 	wantsLine(t, out, "BoardID Avalon")
 	wantsLine(t, out, "LeagueNumber 900")
-	wantsLine(t, out, "Inbound "+filepath.Join(dir, "fd-files"))
-	// BRE's netmail directory holds .MSG files; IB's outbound holds the packets
-	// themselves. Reading one as the other would point the board at a directory
-	// its mailer treats as something else entirely.
-	if strings.Contains(out, filepath.Join(dir, "fd-netmail")) {
-		t.Error("the netmail directory was read as the outbound directory")
+	// Lines 4, 5 and 7 are the mailer's, so they become the FTN transport's
+	// settings. The original reads packets straight out of line 4; IB unwraps
+	// from it into its own inbound, so it must not become GameInbound.
+	wantsLine(t, out, "IncomingFileDir "+filepath.Join(dir, "fd-files"))
+	wantsLine(t, out, "NetmailDir "+filepath.Join(dir, "fd-netmail"))
+	wantsLine(t, out, "Mailer FrontDoor")
+	if strings.Contains(out, "GameInbound "+filepath.Join(dir, "fd-files")) ||
+		strings.Contains(out, "GameOutbound "+filepath.Join(dir, "fd-netmail")) {
+		t.Error("a mailer directory was read as one of the game's own")
 	}
 }
 
@@ -192,7 +195,7 @@ func wantsLine(t *testing.T, out, line string) {
 // that file.
 func TestIBBSResetLeavesAnExistingBoardConfigAlone(t *testing.T) {
 	dir := t.TempDir()
-	own := "BoardID Alpha BBS\nLeagueNumber 900\nInbound ftn/in\nOutbound ftn/out\n"
+	own := "BoardID Alpha BBS\nLeagueNumber 900\nGameInbound ftn/in\nGameOutbound ftn/out\n"
 	path := filepath.Join(dir, store.BoardConfigFile)
 	if err := os.WriteFile(path, []byte(own), 0o644); err != nil {
 		t.Fatal(err)

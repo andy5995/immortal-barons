@@ -36,8 +36,8 @@ var unclaimedAfter = time.Hour
 type Unclaimed struct {
 	Path string
 	Age  time.Duration
-	// Subdir is the child of InboundDir the file sits in, empty when it is in
-	// InboundDir itself. Nothing scans a child, so a file there stays where it
+	// Subdir is the child of IncomingFileDir the file sits in, empty when it is
+	// in IncomingFileDir itself. Nothing scans a child, so a file there stays where it
 	// is however many runs go by.
 	Subdir string
 }

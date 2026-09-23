@@ -38,8 +38,8 @@ CFG
   # This board's own identity and directories: bbs.cfg, not config.json.
   cat > "$tmp/$id/bbs.cfg" <<CFG
 BoardID $id
-Inbound $tmp/$id/in
-Outbound $tmp/$id/out
+GameInbound $tmp/$id/in
+GameOutbound $tmp/$id/out
 CFG
   # Which drop file this "BBS" writes. Machine-local, normally set once with
   # -set-dropfile; the door refuses to start without it.
@@ -126,16 +126,16 @@ CFG
   cat > "$r/$id/bbs.cfg" <<CFG
 BoardID $id
 LeagueNumber 42
-Inbound $r/$id/in
+GameInbound $r/$id/in
 CFG
   case "$id" in
     # The leaves send everything to their uplink, whoever it is addressed to.
-    AlphaBBS|CharlieBBS) echo "Outbound $r/BravoBBS/in" >> "$r/$id/bbs.cfg" ;;
+    AlphaBBS|CharlieBBS) echo "GameOutbound $r/BravoBBS/in" >> "$r/$id/bbs.cfg" ;;
     # The hub has one link per neighbor.
     BravoBBS)
-      echo "Outbound $r/BravoBBS/out" >> "$r/$id/bbs.cfg"
-      echo "Link 1 $r/AlphaBBS/in" >> "$r/$id/bbs.cfg"
-      echo "Link 3 $r/CharlieBBS/in" >> "$r/$id/bbs.cfg"
+      echo "GameOutbound $r/BravoBBS/out" >> "$r/$id/bbs.cfg"
+      echo "GameOutbound 1 $r/AlphaBBS/in" >> "$r/$id/bbs.cfg"
+      echo "GameOutbound 3 $r/CharlieBBS/in" >> "$r/$id/bbs.cfg"
       ;;
   esac
   echo '{"DropfileFormat":"door32"}' > "$r/$id/door.json"

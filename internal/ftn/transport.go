@@ -75,8 +75,16 @@ type batchTarget struct {
 // RunOut claims one game-outbound snapshot and hands each next hop one opaque
 // transport bundle. Existing incomplete batches are resumed first. Attach and
 // obox publication is immutable; BSO may merge while it owns the peer's .bsy.
-func RunOut(dataDir string) (Result, error) {
-	board, transport, nodes, world, origin, adapterLock, err := transportContext(dataDir)
+// It waits for another transport run holding the lock to finish.
+func RunOut(dataDir string) (Result, error) { return runOut(dataDir, true) }
+
+// TryRunOut is RunOut for a caller that must not wait: when another transport
+// run holds the lock it returns store.ErrBusy at once, having done nothing.
+// The run holding the lock is doing this same work.
+func TryRunOut(dataDir string) (Result, error) { return runOut(dataDir, false) }
+
+func runOut(dataDir string, wait bool) (Result, error) {
+	board, transport, nodes, world, origin, adapterLock, err := transportContext(dataDir, wait)
 	if err != nil {
 		return Result{}, err
 	}
@@ -155,12 +163,17 @@ func lastAdvanced(plan batchPlan, planPath string) time.Time {
 	return time.Now()
 }
 
-func transportContext(dataDir string) (game.Config, Config, []game.LeagueNode, *game.World, Address, *store.FileLock, error) {
+// lockFile keeps the name it had when the transport was a separate program, so
+// a copy of that program still scheduled after an upgrade queues behind the
+// game's own transport instead of running beside it.
+const lockFile = "barons-ftn.lock"
+
+func transportContext(dataDir string, wait bool) (game.Config, Config, []game.LeagueNode, *game.World, Address, *store.FileLock, error) {
 	board, err := store.LoadConfig(dataDir)
 	if err != nil {
 		return game.Config{}, Config{}, nil, nil, Address{}, nil, err
 	}
-	adapterLock, err := store.LockPath(filepath.Join(board.DataDir, "barons-ftn.lock"), true)
+	adapterLock, err := store.LockPath(filepath.Join(board.DataDir, lockFile), wait)
 	if err != nil {
 		return game.Config{}, Config{}, nil, nil, Address{}, nil, err
 	}
@@ -544,12 +557,12 @@ func checkSubjectMargin(transport Config, attached string, result *Result) error
 func publishTarget(batch, dataDir string, transport Config, origin Address, target batchTarget) (Queued, error) {
 	// Named before it is reached: creating the netmail with no directory
 	// configured fails as `open : no such file or directory`, an error whose
-	// blank filename says nothing about which setting is missing. -in hits
+	// blank filename says nothing about which setting is missing. The unwrap
+	// step hits
 	// this too when a routing board forwards transit, which is where RunOut's
 	// own check cannot help (three-board rig, 2026-08-27).
-	if target.Mode == LinkAttach && transport.NetmailDir == "" {
-		return Queued{}, fmt.Errorf("%s: NetmailDir is not set, and %s takes an attach handoff",
-			filepath.Join(dataDir, ConfigFile), target.Name)
+	if err := netmailProblem(transport, dataDir, target.Mode == LinkAttach, target.Name); err != nil {
+		return Queued{}, err
 	}
 	address, err := ParseAddress(target.Address)
 	if err != nil {

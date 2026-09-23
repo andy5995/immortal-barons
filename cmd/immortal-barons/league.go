@@ -18,6 +18,9 @@ import (
 // this board resets, and a signed order goes out for every other board to do the
 // same on its next planetary run.
 func runLeagueReset(cfg game.Config, date string) error {
+	if err := checkTransportSettings(cfg); err != nil {
+		return err
+	}
 	// It runs the planetary step, so it is refused on the same terms as
 	// -planetary: with no league number it would take every league's packets.
 	if cfg.InterBBSEnabled() {
@@ -82,6 +85,12 @@ func runLeagueReport(cfg game.Config, which string) error {
 // all of them are usable. A sysop joining a league gets a handful of settings
 // exactly right or a transport run fails three steps from the cause (#154).
 func runLeagueCheck(cfg game.Config) bool {
+	// Printed whole rather than as a check line: it carries lines to paste, and
+	// the check column would wrap them.
+	if err := checkTransportSettings(cfg); err != nil {
+		fmt.Println(err)
+		return false
+	}
 	allOK := true
 	for _, c := range store.Checkup(cfg) {
 		mark := "ok  "
@@ -109,9 +118,8 @@ func runLeagueCheck(cfg game.Config) bool {
 const unclaimedChecksShown = 3
 
 // spoolChecks reports the FTN transport's own backlog, when there is one to
-// report. It answers here rather than only in barons-ftn's output because the
-// run that met a failure is long gone by the time a sysop asks why a board has
-// gone quiet, and this is the command they are told to reach for (#228). A
+// report. It answers here because the run that met a failure is long gone by
+// the time a sysop asks why a board has gone quiet, and this is the command they are told to reach for (#228). A
 // board with no transport spool has nothing to say and says nothing.
 func spoolChecks(cfg game.Config) []store.Check {
 	status, err := ftn.Status(cfg.DataDir)
@@ -143,11 +151,11 @@ func spoolChecks(cfg game.Config) []store.Check {
 	// Named individually up to a point, then counted: #236's own report has
 	// thirty bundles collecting, and a line each would bury every other check
 	// on this screen. They are sorted oldest first, so the ones shown are the
-	// ones worth acting on; -status lists the rest.
+	// ones worth acting on; -ftn-status lists the rest.
 	for i, waiting := range status.Unclaimed {
 		if i == unclaimedChecksShown {
 			checks = append(checks, store.Check{Name: "Unclaimed packets", OK: false,
-				Detail: fmt.Sprintf("%d more; barons-ftn -status lists them all",
+				Detail: fmt.Sprintf("%d more; -ftn-status lists them all",
 					len(status.Unclaimed)-unclaimedChecksShown)})
 			break
 		}
@@ -166,6 +174,9 @@ func spoolChecks(cfg game.Config) []store.Check {
 // "BRE TEST", whose whole job is letting a sysop see the routing the roster
 // gives them before they wonder why nothing arrives.
 func runLeagueRoutes(cfg game.Config) error {
+	if err := checkTransportSettings(cfg); err != nil {
+		return err
+	}
 	w, err := store.Load(cfg)
 	if err != nil {
 		return err
@@ -248,6 +259,9 @@ func leagueLabel(n int) string {
 // game length) to the league. Only the League Coordinator (node #1 in the
 // roster) may author it; member boards adopt it on their next PLANETARY run.
 func runLeagueConfig(cfg game.Config) error {
+	if err := checkTransportSettings(cfg); err != nil {
+		return err
+	}
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
@@ -290,6 +304,10 @@ type leagueSetup struct {
 	Inbound    string
 	Outbound   string
 	ImportPath string // an original BRE BBS.CFG to take this board's identity from
+	// FTNLines are the transport's bbs.cfg lines the import produced. They are
+	// not game.Config fields -- the transport reads its own lines -- so they
+	// ride here to be printed with the rest of the file.
+	FTNLines []string
 }
 
 // importBoardConfig takes what an original BRE BBS.CFG can tell us into cfg.
@@ -297,40 +315,58 @@ type leagueSetup struct {
 // already, and the node numbers and directories are exactly what is tedious to
 // re-enter correctly.
 //
-// Three of BRE's seven lines have no counterpart here and are left behind: the
-// sysop's name, the FTN address, and the mailer's name, none of which IB uses
-// because it addresses nothing and writes no netmail. The netmail directory is
-// deliberately NOT read as the outbound directory — BRE puts .MSG files there,
-// while IB's outbound holds the packets themselves, so the two mean different
-// things despite sitting next to each other in the original.
+// Lines 4, 5 and 7 -- the mailer's incoming file directory, the netmail
+// directory and the mailer -- become the FTN transport's IncomingFileDir,
+// NetmailDir and Mailer, returned as bbs.cfg lines because they are the
+// transport's settings rather than the game's. The original reads its packets
+// straight out of line 4, so that directory is NOT the game's own inbound: the
+// transport unwraps from it into GameInbound. Two lines are left behind: the
+// sysop's name, which IB does not use, and the FTN address, which lives in the
+// league roster. Values are copied byte for byte, so a DOS path keeps its
+// backslashes.
+//
 // Returns the board name it read, so the caller can treat an imported name the
 // same as one given with -board-id.
-func importBoardConfig(path string, cfg *game.Config) (string, error) {
+func importBoardConfig(path string, cfg *game.Config) (string, []string, error) {
 	bc, err := store.ParseBoardConfig(path)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	var took []string
+	var took, lines []string
 	if bc.PlanetName != "" {
 		cfg.BoardID = bc.PlanetName
 		took = append(took, fmt.Sprintf("board name %q", bc.PlanetName))
 	}
 	if bc.InboundDir != "" {
-		cfg.InboundDir = bc.InboundDir
-		took = append(took, "inbound directory "+bc.InboundDir)
+		lines = append(lines, "IncomingFileDir "+bc.InboundDir)
+		took = append(took, "incoming file directory "+bc.InboundDir)
+	}
+	if bc.NetmailDir != "" {
+		lines = append(lines, "NetmailDir "+bc.NetmailDir)
+		took = append(took, "netmail directory "+bc.NetmailDir)
+	}
+	if bc.Mailer != "" {
+		// Refused rather than skipped: a mailer this does not know is a line
+		// out of place as often as a real name, and the sysop has to look.
+		m, ok := ftn.CanonicalMailer(bc.Mailer)
+		if !ok {
+			return "", nil, fmt.Errorf("%s: line 7 reads %q, which is not a mailer the original accepts", path, bc.Mailer)
+		}
+		lines = append(lines, "Mailer "+m)
+		took = append(took, "mailer "+m)
 	}
 	if bc.League > 0 {
 		cfg.LeagueNumber = bc.League
 		took = append(took, fmt.Sprintf("league number %d", bc.League))
 	}
 	if len(took) == 0 {
-		return "", fmt.Errorf("%s holds none of the settings this reads", path)
+		return "", nil, fmt.Errorf("%s holds none of the settings this reads", path)
 	}
 	// Printed rather than assumed: the file is positional, so a line out of
 	// place produces a plausible-looking wrong answer, and the sysop is the only
 	// one who can tell.
 	fmt.Printf("From %s: %s\n", path, strings.Join(took, ", "))
-	return bc.PlanetName, nil
+	return bc.PlanetName, lines, nil
 }
 
 // runGenCoordKey creates this league's Coordinator key and prints the line the

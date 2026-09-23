@@ -52,7 +52,7 @@ const Version = "0.1.3"
 // release cycle, not a coordinated afternoon.
 //
 // This number does not cover that, and cannot. It describes the PACKET, and
-// the packet is not the only thing on the wire: barons-ftn wraps packets in a
+// the packet is not the only thing on the wire: the FTN transport wraps packets in a
 // transport bundle of its own, and that envelope changed shape (JSON to ZIP)
 // in #226 without this number moving, correctly, because no packet changed.
 // Nothing guards the envelope. Before changing one, work out what a board

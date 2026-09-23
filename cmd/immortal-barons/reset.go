@@ -73,10 +73,11 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	def.IBBS = league != nil
 	if league != nil {
 		if league.ImportPath != "" {
-			name, err := importBoardConfig(league.ImportPath, &def)
+			name, lines, err := importBoardConfig(league.ImportPath, &def)
 			if err != nil {
 				return err
 			}
+			league.FTNLines = lines
 			// A board named in the imported file has answered what the editor
 			// would ask, exactly as -board-id does; an explicit flag still wins.
 			if league.BoardID == "" {
@@ -113,7 +114,7 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		if backedUp {
 			fmt.Println("The previous world was backed up to world.json.bak.")
 		}
-		printBoardConfig(w.Config)
+		printBoardConfig(w.Config, league.FTNLines)
 		// Naming the board skips the editor, which is the member path; but the
 		// Coordinator's board can be set up this way too, and at reset time
 		// there is often no roster yet to tell which this is.
@@ -164,7 +165,7 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		fmt.Println("The previous world was backed up to world.json.bak.")
 	}
 	if league != nil {
-		printBoardConfig(w.Config)
+		printBoardConfig(w.Config, league.FTNLines)
 	}
 	noteDropfileUnset(cfg.DataDir)
 	preparePacketDirs(w.Config)
@@ -174,16 +175,21 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 // printBoardConfig ends a league reset with the one file the game will not
 // write: the board's own identity. A reset rewrites config.json from defaults,
 // and writing bbs.cfg alongside it used to return a correctly set-up board to
-// "local" and node 0 (#152). The lines are filled in from -board-id, -inbound,
-// -outbound and -import-bbs-cfg, so for a sysop who gave those it is a paste.
-func printBoardConfig(cfg game.Config) {
+// "local" and node 0 (#152). The lines are filled in from -board-id,
+// -game-inbound, -game-outbound and -import-bbs-cfg, so for a sysop who gave
+// those it is a paste. ftnLines are the transport's lines from an import.
+func printBoardConfig(cfg game.Config, ftnLines []string) {
 	path := filepath.Join(cfg.DataDir, store.BoardConfigFile)
 	if _, err := os.Stat(path); err == nil {
 		fmt.Printf("\nThis board's identity is read from %s, which was left exactly as it was.\nCheck that it reads:\n\n", path)
 	} else {
 		fmt.Printf("\nThis board's identity lives in %s, which the game never writes.\nCreate it with:\n\n", path)
 	}
-	fmt.Println(store.BoardConfigText(cfg))
+	fmt.Print(store.BoardConfigText(cfg))
+	for _, line := range ftnLines {
+		fmt.Println(line)
+	}
+	fmt.Println()
 }
 
 // preparePacketDirs creates the inter-BBS packet directories the reset just

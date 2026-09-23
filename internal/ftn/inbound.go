@@ -58,16 +58,21 @@ type inboundFile struct {
 	entry os.DirEntry
 }
 
-// RunIn removes the FTN transport wrapper. It is intended for a mailer's
-// post-session hook: no general FTN inbound locking convention exists.
-func RunIn(dataDir string) (Result, error) {
-	board, transport, nodes, world, origin, adapterLock, err := transportContext(dataDir)
+// RunIn removes the FTN transport wrapper, delivering the packets inside into
+// the game's own inbound. It waits for another transport run holding the lock.
+func RunIn(dataDir string) (Result, error) { return runIn(dataDir, true) }
+
+// TryRunIn is RunIn for a caller that must not wait; see TryRunOut.
+func TryRunIn(dataDir string) (Result, error) { return runIn(dataDir, false) }
+
+func runIn(dataDir string, wait bool) (Result, error) {
+	board, transport, nodes, world, origin, adapterLock, err := transportContext(dataDir, wait)
 	if err != nil {
 		return Result{}, err
 	}
 	defer adapterLock.Release()
-	if len(transport.InboundDirs) == 0 {
-		return Result{}, fmt.Errorf("%s: InboundDir is not set", filepath.Join(dataDir, ConfigFile))
+	if len(transport.IncomingFileDirs) == 0 {
+		return Result{}, fmt.Errorf("%s: %s is not set", filepath.Join(dataDir, store.BoardConfigFile), keyIncomingFileDir)
 	}
 	root := filepath.Join(dataDir, spoolDir, inSpoolDir)
 	if err := os.MkdirAll(root, 0o755); err != nil {
@@ -89,7 +94,7 @@ func RunIn(dataDir string) (Result, error) {
 	// Every directory the mailer delivers into, not just the first: one that is
 	// named but never read looks exactly like a transport that is working.
 	var entries []inboundFile
-	for _, dir := range transport.InboundDirs {
+	for _, dir := range transport.IncomingFileDirs {
 		found, err := os.ReadDir(dir)
 		if os.IsNotExist(err) {
 			continue
@@ -130,13 +135,13 @@ func RunIn(dataDir string) (Result, error) {
 	// Anything still sitting in the mailer's inbound after this run had its
 	// chance. Saying so is the whole of #236: the run above passes over a
 	// bundle it cannot claim in silence, so a board can collect them for days
-	// while every report -- this count, --status, -league-check -- reads
+	// while every report -- this count, -ftn-status, -league-check -- reads
 	// healthy.
 	claimed := claimedSources(dataDir)
 	for path := range referenced {
 		claimed[path] = true
 	}
-	for _, waiting := range scanUnclaimed(transport.InboundDirs, claimed, time.Now()) {
+	for _, waiting := range scanUnclaimed(transport.IncomingFileDirs, claimed, time.Now()) {
 		result.Warnings = append(result.Warnings, unclaimedWarning(waiting))
 	}
 	return result, nil
@@ -151,7 +156,7 @@ func unclaimedWarning(waiting Unclaimed) string {
 	if waiting.Subdir != "" {
 		return fmt.Sprintf("%s has waited %s in the %s subdirectory of the mailer's inbound, which is not scanned; "+
 			"no later run will take it. A mailer files an unauthenticated session's files apart from the rest, "+
-			"so give that directory its own InboundDir line in ftn.cfg, or check the session password for "+
+			"so give that directory its own IncomingFileDir line in bbs.cfg, or check the session password for "+
 			"that peer and move the file up.",
 			filepath.Base(waiting.Path), waiting.Age.Round(time.Minute), waiting.Subdir)
 	}
@@ -165,7 +170,7 @@ func unclaimedWarning(waiting Unclaimed) string {
 }
 
 // envelopeAttachment resolves the one file a stored message attaches, and
-// refuses a name that points outside InboundDir. It is the half of
+// refuses a name that points outside IncomingFileDir. It is the half of
 // parseStoredAttach that does not depend on who the message is addressed to, so
 // a REPORT can ask "does an envelope name this file?" without the roster and
 // board address a claim needs.
@@ -177,7 +182,7 @@ func envelopeAttachment(data []byte, inboundDirs []string) (string, error) {
 	}
 	attachment := parts[0]
 	if len(inboundDirs) == 0 {
-		return "", fmt.Errorf("no InboundDir is set")
+		return "", fmt.Errorf("no %s is set", keyIncomingFileDir)
 	}
 	if !filepath.IsAbs(attachment) {
 		// The envelope names a file, not a directory, and the mailer may have
@@ -210,13 +215,13 @@ func envelopeAttachment(data []byte, inboundDirs []string) (string, error) {
 			return abs, nil
 		}
 	}
-	return "", fmt.Errorf("attachment %s is outside every InboundDir", attachment)
+	return "", fmt.Errorf("attachment %s is outside every %s", attachment, keyIncomingFileDir)
 }
 
 // envelopeReferenced names every inbound file a stored-message envelope points
 // at, without checking who sent it or who it is addressed to. RunIn makes those
 // checks before it will CLAIM a bundle; a report only needs to know that
-// something already points at the file, so that one waiting for the next -in is
+// something already points at the file, so that one waiting for the next unwrap is
 // not called abandoned. An envelope that fails the fuller checks is reported by
 // RunIn's own warning instead, so nothing goes unmentioned by both.
 func envelopeReferenced(transport Config) map[string]bool {
@@ -237,7 +242,7 @@ func envelopeReferenced(transport Config) map[string]bool {
 			if binary.LittleEndian.Uint16(data[186:188])&attributeFileAttach == 0 {
 				continue
 			}
-			if abs, err := envelopeAttachment(data, transport.InboundDirs); err == nil {
+			if abs, err := envelopeAttachment(data, transport.IncomingFileDirs); err == nil {
 				referenced[cleanAbsolute(abs)] = true
 			}
 		}
@@ -245,7 +250,7 @@ func envelopeReferenced(transport Config) map[string]bool {
 	return referenced
 }
 
-// shellQuote makes a path safe to paste. InboundDir comes from ftn.cfg and may
+// shellQuote makes a path safe to paste. IncomingFileDir comes from bbs.cfg and may
 // hold spaces, and a command a sysop cannot paste is not advice.
 func shellQuote(path string) string {
 	if !strings.ContainsAny(path, " \t'\"\\$`&;|<>()*?[]#~") {
@@ -276,7 +281,7 @@ func scanStoredAttaches(transport Config, local Address, nodes []game.LeagueNode
 			continue
 		}
 		path := filepath.Join(found.dir, entry.Name())
-		attach, ok, err := parseStoredAttach(path, transport.InboundDirs, local)
+		attach, ok, err := parseStoredAttach(path, transport.IncomingFileDirs, local)
 		if err != nil {
 			continue // unrelated or incomplete netmail is not ours to disturb
 		}

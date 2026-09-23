@@ -36,7 +36,8 @@ func runDump(cfg game.Config) error {
 }
 
 // runMaint blocks on the lock (waits for any active player) then advances
-// the world.
+// the world. On a league board it also runs the planetary step, with the FTN
+// transport on either side of it (see transport.go).
 func runMaint(cfg game.Config, today string) error {
 	// A league board runs the planetary step below, so it is refused on the same
 	// terms as -planetary: with no league number it would take every league's
@@ -45,14 +46,18 @@ func runMaint(cfg game.Config, today string) error {
 		if err := store.CheckLeagueNumber(cfg); err != nil {
 			return err
 		}
+		if err := checkTransportSettings(cfg); err != nil {
+			return err
+		}
+		transportIn(cfg, true, os.Stdout)
 	}
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
 	}
-	defer lock.Release()
 	w, err := store.Load(cfg)
 	if err != nil {
+		lock.Release()
 		return err
 	}
 	switch r := w.DailyMaintenance(today); {
@@ -67,6 +72,7 @@ func runMaint(cfg game.Config, today string) error {
 	if cfg.IBBS {
 		run, err = store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
 		if err != nil {
+			lock.Release()
 			return err
 		}
 		reportPlanetary(cfg, run)
@@ -74,6 +80,7 @@ func runMaint(cfg game.Config, today string) error {
 		// A league board reconciles its bulletins inside the planetary step
 		// above; a stand-alone one has no such step, so this is where a bulletin
 		// the sysop added reaches the news.
+		lock.Release()
 		return err
 	}
 	// Here as well as in the planetary step: a stand-alone board never runs that
@@ -81,8 +88,15 @@ func runMaint(cfg game.Config, today string) error {
 	// as a league board's. It writes no World Report -- that one is the LEAGUE's
 	// wars, and a board playing alone has no world to report on (#233).
 	writeBulletins(cfg, w)
-	if err := store.Save(w, cfg); err != nil {
+	err = store.Save(w, cfg)
+	lock.Release()
+	if err != nil {
 		return err
+	}
+	if cfg.IBBS {
+		// After the save and outside the world lock: a handoff that fails or
+		// waits must not cost the work above or hold up the callers.
+		run.NewFaults = append(run.NewFaults, handoffFault(transportOut(cfg, true, os.Stdout))...)
 	}
 	// The same alarm as -planetary, and it has to be: the planetary step above
 	// has already marked these faults as reported, so a later -planetary would
@@ -93,32 +107,41 @@ func runMaint(cfg game.Config, today string) error {
 }
 
 // runPlanetary runs the inter-BBS maintenance step on its own (BRE's
-// "BRE PLANETARY"): apply inbound packets, launch due group attacks, export
-// scores, and write the outbox. Can run several times a day.
+// "BRE PLANETARY"): unwrap what the mailer brought, apply inbound packets,
+// launch due group attacks, export scores, write the outbox, and hand it to the
+// mailer. Can run several times a day.
 func runPlanetary(cfg game.Config, verbose bool) error {
 	if cfg.InterBBSEnabled() {
 		if err := store.CheckLeagueNumber(cfg); err != nil {
 			return err
 		}
 	}
+	if err := checkTransportSettings(cfg); err != nil {
+		return err
+	}
+	transportIn(cfg, true, os.Stdout)
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
 	}
-	defer lock.Release()
 	w, err := store.Load(cfg)
 	if err != nil {
+		lock.Release()
 		return err
 	}
 	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
 	if err != nil {
+		lock.Release()
 		return err
 	}
 	reportPlanetary(cfg, run)
 	writeBulletins(cfg, w)
-	if err := store.Save(w, cfg); err != nil {
+	err = store.Save(w, cfg)
+	lock.Release()
+	if err != nil {
 		return err
 	}
+	run.NewFaults = append(run.NewFaults, handoffFault(transportOut(cfg, true, os.Stdout))...)
 	// After the save, so a hook that hangs or a run that ends non-zero cannot
 	// cost the work the run just did — and so the faults reported here are not
 	// reported again by the next run.
@@ -290,32 +313,13 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 		if err := store.CheckLeagueNumber(cfg); err != nil {
 			return err
 		}
+		if err := checkTransportSettings(cfg); err != nil {
+			return err
+		}
 	}
-	// Step 1: read inbound packets.
-	lock, err := store.Lock(cfg, true)
-	if err != nil {
+	if err := fullInbound(cfg, verbose); err != nil {
 		return err
 	}
-	w, err := store.Load(cfg)
-	if err != nil {
-		lock.Release()
-		return err
-	}
-	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
-	if err != nil {
-		lock.Release()
-		return err
-	}
-	if err := store.Save(w, cfg); err != nil {
-		lock.Release()
-		return err
-	}
-	lock.Release()
-	reportPlanetary(cfg, run)
-	// The hook, but not the exit code: this run has a caller waiting behind it,
-	// and a door that exits non-zero on a league fault is a door the BBS reports
-	// as broken to the player who just played it.
-	runFaultHook(cfg, run.NewFaults)
 
 	// Step 2: play a turn. Detect whether we have -local with a name or a drop
 	// file to identify the caller.
@@ -367,22 +371,70 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 		}
 	}
 
-	// Step 3: write outbound packets.
-	lock, err = store.Lock(cfg, true)
+	return fullOutbound(cfg, verbose)
+}
+
+// fullInbound is -full's first step: unwrap what the mailer brought, then read
+// the game's inbound. A caller is waiting behind it, so the transport never
+// waits for its lock -- a run already holding it is doing the same work -- and
+// what the transport says goes to stderr, the sysop's log, rather than onto
+// the caller's screen.
+func fullInbound(cfg game.Config, verbose bool) error {
+	// The transport runs only for a league board, the same condition runFull
+	// checks its settings under: a board off the league is never refused over
+	// stale transport keys, so it must not act on them either.
+	if cfg.InterBBSEnabled() {
+		transportIn(cfg, false, os.Stderr)
+	}
+	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
 	}
-	defer lock.Release()
-	w, err = store.Load(cfg)
+	w, err := store.Load(cfg)
 	if err != nil {
+		lock.Release()
+		return err
+	}
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
+	if err != nil {
+		lock.Release()
+		return err
+	}
+	if err := store.Save(w, cfg); err != nil {
+		lock.Release()
+		return err
+	}
+	lock.Release()
+	reportPlanetary(cfg, run)
+	// The hook, but not the exit code: this run has a caller waiting behind it,
+	// and a door that exits non-zero on a league fault is a door the BBS reports
+	// as broken to the player who just played it.
+	runFaultHook(cfg, run.NewFaults)
+	return nil
+}
+
+// fullOutbound is -full's last step: write the outbox, then hand it to the
+// mailer. A failed handoff raises the hook and nothing else, for the reason
+// fullInbound gives.
+func fullOutbound(cfg game.Config, verbose bool) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	w, err := store.Load(cfg)
+	if err != nil {
+		lock.Release()
 		return err
 	}
 	w.StampOutbox()
 	sent, err := store.WriteOutbox(w, cfg.Outbound(), verbose)
 	if err != nil {
+		lock.Release()
 		return err
 	}
-	if err := store.Save(w, cfg); err != nil {
+	err = store.Save(w, cfg)
+	lock.Release()
+	if err != nil {
 		return err
 	}
 	switch sent {
@@ -392,6 +444,14 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 		fmt.Println("Wrote 1 outbound packet.")
 	default:
 		fmt.Printf("Wrote %d outbound packets.\n", sent)
+	}
+	if !cfg.InterBBSEnabled() {
+		return nil
+	}
+	if err := transportOut(cfg, false, os.Stderr); err != nil {
+		faults := handoffFault(err)
+		fmt.Fprintf(os.Stderr, "immortal-barons -full: %s\n", faults[0])
+		runFaultHook(cfg, faults)
 	}
 	return nil
 }

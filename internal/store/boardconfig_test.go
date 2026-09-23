@@ -17,11 +17,11 @@ func TestBoardConfigSurvivesHandEditing(t *testing.T) {
 	body := "# a comment\n; another\n\n" +
 		"boardid   Eye of the Storm  \n" +
 		"LEAGUENUMBER 42\n" +
-		"Inbound /home/bbs/ftn/in\n" +
-		"outbound  /home/bbs/filebox/uplink\n" +
-		"Link 3 /home/bbs/filebox/node3\n" +
-		"link  5   /home/bbs/filebox/node5\n" +
-		"Mailer BINKLEY\n" // a keyword this version knows nothing about
+		"GameInbound /home/bbs/ftn/in\n" +
+		"gameoutbound  /home/bbs/filebox/uplink\n" +
+		"GameOutbound 3 /home/bbs/filebox/node3\n" +
+		"gameOutbound  5   /home/bbs/filebox/node5\n" +
+		"SomeFutureKey BINKLEY\n" // a keyword this version knows nothing about
 	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
@@ -42,7 +42,7 @@ func TestBoardConfigSurvivesHandEditing(t *testing.T) {
 	}
 	for node, want := range map[int]string{3: "/home/bbs/filebox/node3", 5: "/home/bbs/filebox/node5"} {
 		if got := cfg.OutboundDirs[node]; got != want {
-			t.Errorf("Link %d = %q, want %q", node, got, want)
+			t.Errorf("GameOutbound %d = %q, want %q", node, got, want)
 		}
 	}
 }
@@ -166,7 +166,7 @@ func TestBoardConfigBeatsALeftoverConfigJSONValue(t *testing.T) {
 // touch that file once it exists.
 func TestSavingConfigLeavesBoardConfigAlone(t *testing.T) {
 	dir := t.TempDir()
-	own := "BoardID Alpha BBS\nLeagueNumber 900\nInbound ftn/in\nOutbound ftn/out\n"
+	own := "BoardID Alpha BBS\nLeagueNumber 900\nGameInbound ftn/in\nGameOutbound ftn/out\n"
 	path := filepath.Join(dir, BoardConfigFile)
 	if err := os.WriteFile(path, []byte(own), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
@@ -293,5 +293,59 @@ func TestPirateNewsSwitch(t *testing.T) {
 		if cfg.PirateNews != c.want {
 			t.Errorf("PirateNews %q gave %v, want %v", c.value, cfg.PirateNews, c.want)
 		}
+	}
+}
+
+// A directory named by a bare number is still the board-wide directory; only a
+// number followed by more is one neighbor's.
+func TestGameOutboundNamedByANumberIsBoardWide(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("GameOutbound 7\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := game.DefaultConfig()
+	if err := LoadBoardConfig(dir, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.OutboundDir != "7" || len(cfg.OutboundDirs) != 0 {
+		t.Errorf("GameOutbound 7 read as %q / %v", cfg.OutboundDir, cfg.OutboundDirs)
+	}
+}
+
+// The names an older version wrote are refused with their replacements, byte
+// for byte: a Windows path keeps its backslashes and its spaces (#241). An FTN
+// Link line is the transport's and is left alone.
+func TestLegacyBoardKeysAreRefusedWithTheirReplacements(t *testing.T) {
+	dir := t.TempDir()
+	body := "BoardID Alpha BBS\n" +
+		`Inbound C:\BBS\IB Data\in` + "\n" +
+		`outbound C:\BBS\out` + "\n" +
+		`Link 3 D:\fbox\three` + "\n" +
+		"Link 4 BSO bso Crash\n"
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	err := LegacyBoardRefusal(dir)
+	if err == nil {
+		t.Fatal("the old names were accepted")
+	}
+	for _, want := range []string{
+		`  GameInbound C:\BBS\IB Data\in` + "\n",
+		`  GameOutbound C:\BBS\out` + "\n",
+		`  GameOutbound 3 D:\fbox\three`,
+	} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("the refusal has no line %q:\n%v", want, err)
+		}
+	}
+	if strings.Contains(err.Error(), "Link 4") {
+		t.Errorf("the refusal named an FTN Link line:\n%v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("GameInbound in\nLink 4 Obox box\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := LegacyBoardRefusal(dir); err != nil {
+		t.Errorf("a current bbs.cfg was refused: %v", err)
 	}
 }

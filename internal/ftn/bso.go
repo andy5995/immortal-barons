@@ -19,6 +19,8 @@ import (
 var errPeerBusy = errors.New("peer BSO queue is busy")
 
 const (
+	// bsyOwnerPrefix keeps the separate program's name, so a semaphore that
+	// program left behind is still recognized as this transport's own.
 	bsyOwnerPrefix = "barons-ftn pid="
 	bsyStaleAge    = 5 * time.Minute
 )
@@ -84,7 +86,7 @@ func acquireBSY(path string) (*bsyLock, error) {
 	return nil, errPeerBusy
 }
 
-// recoverOwnBSY removes only an old semaphore which identifies barons-ftn and
+// recoverOwnBSY removes only an old semaphore which identifies this transport and
 // whose ownership lock is no longer held by its creating process. Foreign and
 // legacy empty semaphores remain the mailer's recovery responsibility.
 func recoverOwnBSY(path string) (bool, error) {

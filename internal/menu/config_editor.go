@@ -333,8 +333,8 @@ func configPages(ibbs bool) []cfgPage {
 				v := strings.TrimSpace(prompt(s, "Version every board must run (blank for no requirement, e.g. 0.0.5):"))
 				c.MinBoardVersion = strings.TrimPrefix(v, "v")
 			}},
-		boardOwned(39, "Inbound Dir", func(c *game.Config) string { return c.InboundDir }),
-		boardOwned(40, "Outbound Dir", func(c *game.Config) string { return c.OutboundDir }),
+		boardOwned(39, "GameInbound", func(c *game.Config) string { return c.InboundDir }),
+		boardOwned(40, "GameOutbound", func(c *game.Config) string { return c.OutboundDir }),
 		toggle(44, "Dupe Checking", func(c *game.Config) bool { return c.DupeChecking },
 			func(c *game.Config, v bool) { c.DupeChecking = v }),
 		{n: 24, label: "Idle timeout (sec)",
@@ -372,8 +372,8 @@ func configPages(ibbs bool) []cfgPage {
 var ibbsOnlyFields = map[int]bool{
 	23: true, // Board ID
 	41: true, // League Number
-	39: true, // Inbound Dir
-	40: true, // Outbound Dir
+	39: true, // GameInbound
+	40: true, // GameOutbound
 	30: true, // Max Group Attacks/Day
 	31: true, // Max Terrorist Ops/Day
 	32: true, // Max Bombing Ops/Day

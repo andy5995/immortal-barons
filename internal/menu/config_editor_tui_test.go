@@ -111,7 +111,7 @@ func TestConfigTUIKeepsPacketDirWhenCleared(t *testing.T) {
 	w.Config = distinctConfig()
 	tui := newConfigTUI(w.World)
 
-	setField(t, tui, 3, star+"Inbound Dir", func(f *tview.InputField) { f.SetText("  ") })
+	setField(t, tui, 3, star+"GameInbound", func(f *tview.InputField) { f.SetText("  ") })
 
 	if got := tui.collect(); got.InboundDir != "/srv/in" {
 		t.Errorf("InboundDir = %q, want the opening /srv/in", got.InboundDir)

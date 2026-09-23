@@ -893,14 +893,14 @@ func newBundledSetup(t *testing.T, boardID, extraFTN string) string {
 		}
 	}
 	files := map[string]string{
-		"config.json":         "{}\n",
-		store.BoardConfigFile: "BoardID " + boardID + "\nLeagueNumber 100\nInbound door-in\nOutbound door-out\n",
+		"config.json": "{}\n",
 		// Raw is the shipped default (#230), so this helper states the bundled
 		// posture its name promises. As a posture rather than Link lines,
 		// deliberately: a Link line also marks a peer as a broadcast fanout
 		// target, so declaring links here would quietly change which peers the
 		// broadcast tests expect.
-		ConfigFile: "NetmailDir netmail\nAttachDir attach\nSubjectPath Basename\nInboundDir transport-in\nInboundNetmailDir transport-in\n" +
+		store.BoardConfigFile: "BoardID " + boardID + "\nLeagueNumber 100\nGameInbound door-in\nGameOutbound door-out\n" +
+			"NetmailDir netmail\nAttachDir attach\nSubjectPath Basename\nIncomingFileDir transport-in\nIncomingNetmailDir transport-in\n" +
 			"Bundled Yes\n" + extraFTN,
 		store.NodeListFile: "1 HOST 2 3\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
 			"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +
@@ -930,7 +930,7 @@ func writeNamedPacket(t *testing.T, data, name string, packet game.Packet) {
 // it at all rather than moving it into a league it has not joined.
 func TestTransportRefusesABoardWithNoLeagueNumber(t *testing.T) {
 	data := newBundledSetup(t, "Bravo BBS", "")
-	cfg := "BoardID Bravo BBS\nInbound door-in\nOutbound door-out\n" // no LeagueNumber line
+	cfg := "BoardID Bravo BBS\nGameInbound door-in\nGameOutbound door-out\n" // no LeagueNumber line
 	if err := os.WriteFile(filepath.Join(data, store.BoardConfigFile), []byte(cfg), 0o644); err != nil {
 		t.Fatal(err)
 	}

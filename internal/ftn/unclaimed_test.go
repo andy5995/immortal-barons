@@ -259,7 +259,7 @@ func TestScanUnclaimedAgesFromArrival(t *testing.T) {
 // inbound. Naming only the first reads nothing from the second while every
 // report stays healthy, which is how 43 packets collected on the test rig.
 func TestRunInReadsEveryInboundDirectory(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "InboundDir transport-sec\n")
+	data := newBundledSetup(t, "Bravo BBS", "IncomingFileDir transport-sec\n")
 	secure := filepath.Join(data, "transport-sec")
 	if err := os.MkdirAll(secure, 0o755); err != nil {
 		t.Fatal(err)
@@ -285,7 +285,7 @@ func TestRunInReadsEveryInboundDirectory(t *testing.T) {
 // second one is named rather than silently skipped.
 func TestStatusWatchesEveryInboundDirectory(t *testing.T) {
 	reportEverything(t)
-	data := newBundledSetup(t, "Bravo BBS", "InboundDir transport-sec\n")
+	data := newBundledSetup(t, "Bravo BBS", "IncomingFileDir transport-sec\n")
 	agedPacket(t, filepath.Join(data, "transport-sec"), "stranded.brp", 0)
 
 	status, err := Status(data)

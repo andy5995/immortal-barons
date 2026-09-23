@@ -120,7 +120,7 @@ func subjectAdvice(mode SubjectMode) string {
 			`independently configured to search AttachDir's own directory instead of reading it from the ` +
 			"subject -- not every mailer supports that; SBBSecho, for one, has no such search path at all"
 	}
-	return `Set AttachDir in ftn.cfg to a shorter directory -- with SubjectPath left on its default ` +
+	return `Set AttachDir in bbs.cfg to a shorter directory -- with SubjectPath left on its default ` +
 		`("Absolute"), the subject is AttachDir's own path plus the filename, so this is what actually ` +
 		"shortens it"
 }
@@ -137,9 +137,9 @@ func subjectMarginPointer(mode SubjectMode) string {
 	}
 	const seeDocs = `see "Keeping attach subjects short" in docs/ftn-transport.md`
 	if mode == SubjectPrefixed {
-		return "shorten the SubjectPath prefix in ftn.cfg before it runs out; " + seeDocs
+		return "shorten the SubjectPath prefix in bbs.cfg before it runs out; " + seeDocs
 	}
-	return "shorten AttachDir in ftn.cfg before it runs out; " + seeDocs
+	return "shorten AttachDir in bbs.cfg before it runs out; " + seeDocs
 }
 
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {

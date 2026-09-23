@@ -9,9 +9,9 @@ import (
 // The audience is a sysop at an 80-column console, where the unwrapped warning
 // split "Basename" across the break (#156).
 func TestWrapKeepsWordsWholeInsideTheWidth(t *testing.T) {
-	const prefix = "barons-ftn: warning: "
+	const prefix = "immortal-barons: warning: "
 	const warning = "attachment subjects have 6 byte(s) to spare in the FTN Type-2 field; " +
-		`Set SubjectPath in ftn.cfg: "Basename" writes the filename alone, ` +
+		`Set SubjectPath in bbs.cfg: "Basename" writes the filename alone, ` +
 		"with AttachDir naming the directory the mailer searches"
 
 	indent := strings.Repeat(" ", len(prefix))
