@@ -334,13 +334,26 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	res.Score = score
 	res.Won = outcome == specialHit
 	res.Backfired = outcome == specialBackfire
-	if res.Won {
-		res.Outcome = OutcomeWon
-	} else {
-		res.Outcome = OutcomeRepelled
-	}
+	res.Outcome = missileOutcome(outcome)
 	w.postNews(missileNews(label, from, target.Name, outcome))
 	return res
+}
+
+// missileOutcome is the verdict an arriving missile's answer carries home, so
+// the firer's planet can word its line by the same outcome this one did. A
+// backfire travels as a failure with Backfired set, the shape it had before.
+func missileOutcome(outcome specialOutcome) AttackOutcome {
+	switch outcome {
+	case specialHit:
+		return OutcomeWon
+	case specialMisfire:
+		return OutcomeMisfire
+	case specialIntercepted:
+		return OutcomeIntercepted
+	case specialNothing:
+		return OutcomeNegligible
+	}
+	return OutcomeRepelled
 }
 
 // missileNews is the line this planet reads about a Special Operation aimed at

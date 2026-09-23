@@ -1,6 +1,7 @@
 package game
 
 import (
+	"math/rand"
 	"strings"
 	"testing"
 )
@@ -192,5 +193,92 @@ func TestEveryBombingOpMeetsTheLandingRoll(t *testing.T) {
 		if drivenOff < 160 || drivenOff > 240 {
 			t.Errorf("%s: %d of %d runs driven off, want about two in three", tc.op, drivenOff, runs)
 		}
+	}
+}
+
+// The firer's planet reads a line for every outcome of a missile it sent, and
+// the line agrees with the one the target's planet read (#288). The original's
+// return path posts on both of its branches (process_sabre_return, BRE.OVR
+// 0x046045 +0x1051 and +0x1107); IB posted for a backfire alone. Each seed is
+// classified by the TARGET's line, which the test does not construct, and every
+// outcome must be reached.
+func TestFiringPlanetReadsEveryMissileOutcome(t *testing.T) {
+	for _, tc := range []struct {
+		op   SpecialOp
+		prep func(*Empire)
+		want map[string]string // target planet's line -> firer planet's line
+	}{
+		{OpNuclear, func(d *Empire) { d.SDI = 60 }, map[string]string{
+			"The Nuclear Assault from Alpha Baron of Alpha BBS misfired on its way to Bravo Hold.": "Alpha Baron's Nuclear Assault misfired on its way to Bravo Hold of Bravo BBS.",
+			"Bravo Hold's SDI shot down the Nuclear Assault from Alpha Baron of Alpha BBS.":        "The SDI of Bravo Hold of Bravo BBS shot down Alpha Baron's Nuclear Assault.",
+			"The Nuclear Assault from Alpha Baron of Alpha BBS hit Bravo Hold.":                    "Alpha Baron's Nuclear Assault hit Bravo Hold of Bravo BBS.",
+		}},
+		{OpSabre, func(d *Empire) { d.SDI = 0; d.Troopers = 100 * SabreBackfireScale / 2 }, map[string]string{
+			"The S3-Sabre from Alpha Baron of Alpha BBS broke up over Bravo Hold.":               "Alpha Baron's S3-Sabre broke up over Bravo Hold of Bravo BBS.",
+			"The S3-Sabre from Alpha Baron of Alpha BBS reached Bravo Hold and did little harm.": "Alpha Baron's S3-Sabre reached Bravo Hold of Bravo BBS and did little harm.",
+			"The S3-Sabre from Alpha Baron of Alpha BBS hit Bravo Hold.":                         "Alpha Baron's S3-Sabre hit Bravo Hold of Bravo BBS.",
+		}},
+	} {
+		seen := map[string]bool{}
+		for seed := int64(1); seed <= 300 && len(seen) < len(tc.want); seed++ {
+			from, to, attacker, target := specialOpWorlds(t)
+			to.rng = rand.New(rand.NewSource(seed))
+			tc.prep(target)
+			// Dial 6 aims at the airbases, and a realm with no jets there loses
+			// nothing, so a Sabre that lands and misses reaches negligible damage.
+			if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, tc.op, 6); err != nil {
+				t.Fatalf("SendSpecialOp: %v", err)
+			}
+			answer := to.ApplyPacket(from.Outbox[0])
+			there := to.NewsToday[len(to.NewsToday)-1].Text
+			before := len(from.NewsToday)
+			from.applyAttackResult(answer.Results[0])
+			here := from.NewsToday[before:]
+			want, known := tc.want[there]
+			if !known {
+				continue
+			}
+			seen[there] = true
+			if len(here) != 1 || here[0].Text != want {
+				t.Errorf("%s seed %d, target read %q:\n firer read %v\n want %q", tc.op, seed, there, here, want)
+			}
+		}
+		for line := range tc.want {
+			if !seen[line] {
+				t.Errorf("%s: no seed in 300 produced %q, so the firer's line for it went unchecked", tc.op, line)
+			}
+		}
+	}
+}
+
+// A missile turned aside by New Realm Protection is news on the firer's planet
+// too, and a result from a board that predates the narrower verdicts gets a line
+// that claims no more than "failure".
+func TestFiringPlanetReadsProtectionAndOldFailures(t *testing.T) {
+	from, to, attacker, target := specialOpWorlds(t)
+	target.Protection = 5
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpChemical, 0); err != nil {
+		t.Fatalf("SendSpecialOp: %v", err)
+	}
+	answer := to.ApplyPacket(from.Outbox[0])
+	before := len(from.NewsToday)
+	from.applyAttackResult(answer.Results[0])
+	if got := from.NewsToday[before:]; len(got) != 1 ||
+		got[0].Text != "New Realm Protection turned aside Alpha Baron's Chemical Bombing against Bravo Hold of Bravo BBS." {
+		t.Errorf("protected: firer read %v", got)
+	}
+
+	from, _, attacker, target = specialOpWorlds(t)
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpNuclear, 0); err != nil {
+		t.Fatalf("SendSpecialOp: %v", err)
+	}
+	before = len(from.NewsToday)
+	from.applyAttackResult(AttackResult{
+		ID: from.InFlight[0].ID, TargetBoard: "Bravo BBS", TargetEmpire: target.Name,
+		Kind: string(OpNuclear), Outcome: OutcomeRepelled, Report: "It failed.",
+	})
+	if got := from.NewsToday[before:]; len(got) != 1 ||
+		got[0].Text != "Alpha Baron's Nuclear Assault against Bravo Hold of Bravo BBS failed." {
+		t.Errorf("legacy failure: firer read %v", got)
 	}
 }

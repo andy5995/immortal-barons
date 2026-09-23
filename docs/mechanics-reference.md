@@ -4781,7 +4781,10 @@ by every outcome except a realm that is not there:
   original has no line for a run that found nothing.
 
 The firer's own board posts too (`process_sabre_return`, `process_bombing_results`),
-from `^SPECIAL_RESULTS` and `^BOMBING_RESULTS`.
+from `^SPECIAL_RESULTS` and `^BOMBING_RESULTS`. For a missile that is every
+outcome: `process_sabre_return` (`BRE.OVR 0x046045`) calls the news writer at
+`+0x1051` on the branch taken by a nuclear or chemical strike and by any failed
+strike, and at `+0x1107` on the branch taken by an S3-Sabre that landed.
 
 IB posts one line on the target's planet for every outcome but a missing realm,
 chosen by the outcome and worded as IB's own (`missileNews`, `planetOpNews` in
@@ -4807,8 +4810,19 @@ and report at `+0x3d5`. IB rolled it for Bomb Trade Routes only until
 2026-09-23. A run that fails it touches nothing, and the planet's line names the
 sending realm, as the original's failure line does.
 
-Not changed here, and different from the original: the firer's board posts a
-line for a backfire alone, where the original posts one for every outcome.
+**The firer's planet reads a line for every missile outcome** too
+(`missileReturnNews` in `ibbs_return.go`), agreeing with the target's: a hit, a
+misfire, an SDI interception, New Realm Protection, a backfire, and a Sabre that
+did negligible damage. The answer carries the outcome home as a narrower
+`Outcome` value — `misfire`, `intercepted` or `negligible` where it said
+`failure` — which needed no `game.Protocol` bump, since the field and its
+signed bytes are unchanged for a board that predates the values. A `failure`
+from such a board gets a line saying only that the strike failed. IB's firer
+posted for a backfire alone until 2026-09-23.
+
+Not changed here, and different from the original: the firer's board posts
+nothing when a **bombing** op's answer comes home, where `process_bombing_results`
+(`BRE.OVR 0x04a4a6`) reaches its news call at `+0x0622` on every path.
 
 **Interplanetary missile prices — binary-verified AND capture-confirmed.** The
 three missiles are priced off the TARGET's last-known territory, at a rate of

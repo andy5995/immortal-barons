@@ -517,6 +517,12 @@ AttackResult  { "ID": 1, "TargetBoard": "BravoBBS", "TargetEmpire": "Victim",
                 // "success" / "failure" / "notfound" / "protected". Absent in a
                 // packet written before it existed, which reads as Won deciding
                 // between success and failure — how that packet was resolved.
+                // An interplanetary missile's answer narrows "failure" to
+                // "misfire", "intercepted" or "negligible" (a backfire stays
+                // "failure" with Backfired set), so the firer's planet can word
+                // its news by the outcome (#288). New values in an existing
+                // string, so no Protocol bump: a board that predates them signs
+                // the same bytes and files its generic failure report.
                 // Enemy is what the strike destroyed, by unit type; absent
                 // likewise, and an absent one reports nothing destroyed rather
                 // than guessing.

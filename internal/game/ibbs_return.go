@@ -298,7 +298,7 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 			report = fmt.Sprintf("Your %s backfired and broke up over the realm it was aimed at.", label)
 		}
 		e.addEvent(fmt.Sprintf("%s (%s): %s", label, strikeTarget(sent, res), report))
-		w.postNews(fmt.Sprintf("%s's %s broke up over the realm it was aimed at.", e.Name, label))
+		w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
 		return
 	}
 	switch res.outcome() {
@@ -308,6 +308,7 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	case OutcomeProtected:
 		e.addEvent(fmt.Sprintf("Your %s against %s broke on their New Realm Protection.",
 			label, strikeTarget(sent, res)))
+		w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
 		return
 	}
 	if res.Score > 0 {
@@ -318,4 +319,36 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 		report = fmt.Sprintf("Your %s against %s is over.", label, strikeTarget(sent, res))
 	}
 	e.addEvent(fmt.Sprintf("%s (%s): %s", label, strikeTarget(sent, res), report))
+	if isMissileOp(sent.Op) {
+		w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
+	}
+}
+
+// missileReturnNews is the line the FIRER's planet reads when a missile's answer
+// comes home, one for every outcome the target's planet can read about it
+// (missileNews) and agreeing with it. BINARY-VERIFIED that there is one:
+// process_sabre_return (BRE.OVR 0x046045) calls the news writer on both of its
+// paths — at +0x1051 for a nuclear or chemical strike, and for any failed
+// strike, and at +0x1107 for an S3-Sabre that landed — so the original's firing
+// planet reads a line whatever happened. The wording is IB's own.
+//
+// A result from a board that predates the narrower verdicts says only
+// "failure", and gets a line that claims no more than that.
+func missileReturnNews(firer, label, target string, res AttackResult) string {
+	if res.Backfired {
+		return fmt.Sprintf("%s's %s broke up over %s.", firer, label, target)
+	}
+	switch res.outcome() {
+	case OutcomeWon:
+		return fmt.Sprintf("%s's %s hit %s.", firer, label, target)
+	case OutcomeMisfire:
+		return fmt.Sprintf("%s's %s misfired on its way to %s.", firer, label, target)
+	case OutcomeIntercepted:
+		return fmt.Sprintf("The SDI of %s shot down %s's %s.", target, firer, label)
+	case OutcomeNegligible:
+		return fmt.Sprintf("%s's %s reached %s and did little harm.", firer, label, target)
+	case OutcomeProtected:
+		return fmt.Sprintf("New Realm Protection turned aside %s's %s against %s.", firer, label, target)
+	}
+	return fmt.Sprintf("%s's %s against %s failed.", firer, label, target)
 }
