@@ -193,10 +193,16 @@ func printBoardConfig(cfg game.Config, ftnLines []string) {
 }
 
 // preparePacketDirs creates the inter-BBS packet directories the reset just
-// configured, and warns if either still holds packets. Files left over from the
-// previous season are applied to the fresh world by the next -planetary run —
-// dead realms' attacks landing on a game that has just started — so the warning
-// goes last, where a sysop watching the reset scroll past will see it.
+// configured, and moves aside any packets they still hold. Files left over from
+// the previous season are applied to the fresh world by the next -planetary run —
+// dead realms' attacks landing on a game that has just started — so they go
+// into a dated archive, and the report goes last, where a sysop watching the
+// reset scroll past will see it.
+//
+// The held directory is swept too (#261). A packet held for a newer protocol is
+// moved back into inbound as soon as this board upgrades, and a season boundary
+// is exactly when boards upgrade, so without this last season's packets reached
+// the new world by the one door the inbound sweep did not watch.
 func preparePacketDirs(cfg game.Config) {
 	if !cfg.InterBBSEnabled() {
 		return
@@ -206,39 +212,49 @@ func preparePacketDirs(cfg game.Config) {
 			fmt.Printf("Could not create the packet directory %s: %v\n", dir, err)
 			continue
 		}
-		// Count and move game packets: an inbound directory is usually the BBS's
-		// own FTN inbound, which holds mail bundles and subdirectories that are
-		// none of the game's business.
-		var brps []string
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			continue
-		}
-		for _, e := range entries {
-			if !e.IsDir() && store.IsPacketFile(e.Name()) {
-				brps = append(brps, e.Name())
-			}
-		}
-		if len(brps) == 0 {
-			continue
-		}
-		archive := filepath.Join(dir, fmt.Sprintf("reset-%s", time.Now().Format("2006-01-02")))
-		if err := os.MkdirAll(archive, 0o755); err != nil {
-			fmt.Printf("Could not create the archive directory %s: %v\n", archive, err)
-			continue
-		}
-		moved := 0
-		for _, name := range brps {
-			src := filepath.Join(dir, name)
-			dst := filepath.Join(archive, name)
-			if err := os.Rename(src, dst); err != nil {
-				fmt.Printf("Could not move %s: %v\n", src, err)
-				continue
-			}
-			moved++
-		}
-		if moved > 0 {
+		if moved, archive := archiveLeftoverPackets(dir); moved > 0 {
 			fmt.Printf("Moved %d leftover packet(s) from %s to %s\n", moved, dir, archive)
 		}
 	}
+	held := filepath.Join(cfg.DataDir, store.HeldDir)
+	if moved, archive := archiveLeftoverPackets(held); moved > 0 {
+		fmt.Printf("Moved %d held packet(s) from %s to %s: they were waiting for an upgrade and belong to the old season\n",
+			moved, held, archive)
+	}
+}
+
+// archiveLeftoverPackets moves the game packets in dir into a dated reset-
+// subdirectory of it, and reports how many moved and where. Only packets move:
+// an inbound directory is usually the BBS's own FTN inbound, which holds mail
+// bundles and subdirectories that are none of the game's business. A missing
+// dir moves nothing.
+func archiveLeftoverPackets(dir string) (int, string) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return 0, ""
+	}
+	var brps []string
+	for _, e := range entries {
+		if !e.IsDir() && store.IsPacketFile(e.Name()) {
+			brps = append(brps, e.Name())
+		}
+	}
+	if len(brps) == 0 {
+		return 0, ""
+	}
+	archive := filepath.Join(dir, fmt.Sprintf("reset-%s", time.Now().Format("2006-01-02")))
+	if err := os.MkdirAll(archive, 0o755); err != nil {
+		fmt.Printf("Could not create the archive directory %s: %v\n", archive, err)
+		return 0, ""
+	}
+	moved := 0
+	for _, name := range brps {
+		src := filepath.Join(dir, name)
+		if err := os.Rename(src, filepath.Join(archive, name)); err != nil {
+			fmt.Printf("Could not move %s: %v\n", src, err)
+			continue
+		}
+		moved++
+	}
+	return moved, archive
 }
