@@ -174,7 +174,7 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	case OutcomeNotFound:
 		b.WriteString("Your forces crossed the void and found no such realm waiting.\n")
 	case OutcomeProtected:
-		b.WriteString("Your forces arrived to find the realm still under New Realm Protection, and turned back.\n")
+		b.WriteString("Your forces found their target was in protection.\n")
 	case OutcomeWon:
 		fmt.Fprintf(&b, "Your forces broke the enemy and captured %d regions.\n", res.LandTaken)
 	default:

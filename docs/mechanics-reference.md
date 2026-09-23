@@ -1866,8 +1866,8 @@ Queen's refund cap uses. Digits 1 and 6, the info ops, jump past it (`0x01770B` 
 Enemy Ops, which does not share the target picker — while `covertInfoOp` lets
 Send Spy and Spy on Relations through. The gate sits ahead of the fee, so a
 refused operation costs no gold, no agent and none of the day’s allowance, and it carries
-its own wording: the attack menus refuse because the TARGET is shielded, this
-refuses because the caller is.
+the covert menu's own wording, "Our empire is in protection, my lord." — each
+protection refusal is scoped to its routine (`docs/dev/bre-screens.md`).
 
 An earlier reading of this section claimed IB gated nothing here. That was
 wrong — the six ops routed through `localAttack` were gated all along, with the
@@ -4417,10 +4417,15 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   it on the same predicate the covert menu uses, at `BRE.OVR 0x020F88`, for
   digits 2, 3, 4, 6, 8 and 9 — Terrorist Ops, Send Trade Deal, Create Group
   Attack, Indiv. Attack Force, Special Operations and Gooie Kablooie. Digits 1,
-  5 and 7 (View IPScores, Join Group Attack, Send Message) jump past it. IB gates
-  the same items except Join Group Attack, which it still refuses; whether the
-  original really lets a sheltered realm join someone else's group attack, or
-  refuses it further in, is untested here.
+  5 and 7 (View IPScores, Join Group Attack, Send Message) jump past it. Its
+  refusal is "Sorry....You are under New Realm Protection!", and IB prints it
+  from each of those items. **Join Group Attack is refused further in**: right
+  after its turn-played test, the join path runs the same predicate and prints
+  its own "Sorry... You're under new realm protection." (`BRE.OVR` 0x02d212).
+  IB does the same, in that order. Behind the menu gate, the Gooie Kablooie
+  routine's own refusal ("Sorry, this option is not available in protection.",
+  `fund_gooie_kablooie`) is never reached, since the menu is its only caller;
+  IB prints the menu's.
 - **Five items need a turn played THIS ENTRY, BINARY-VERIFIED (#162).** Send
   Trade Deal, Create Group Attack, Indiv. Attack Force and Special Operations
   (digits 3, 4, 6, 8) call `enforce_interbbs_turn_requirement` (`BRE.OVR`
@@ -5582,7 +5587,11 @@ Market`. Any empire can list goods for other empires to buy:
   moves goods between realms: listing on or buying from the Trading Market
   (`SetMarketListing`, `BuyFromMarket`), trade deals in both directions
   (`SendTradeDeal` checks the sender and the target), and interplanetary bids
-  (`SendTradeBid`). Implemented 2026-08-15; this entry had stated the rule while
+  (`SendTradeBid`). Send Trade Deal refuses where the original's
+  `create_trade_offer` does and in its words: a sheltered sender before the
+  picker ("Your dominion is still under protection."), a sheltered target as
+  soon as it is picked ("That realm is still in protection."), before either
+  basket is built. Implemented 2026-08-15; this entry had stated the rule while
   only attacks were actually gated.
 - **Escrowed goods are safe from attacks, but NOT from pirates.** The community
   guide's "park military to evade pirates" is wrong about pirates, and IB now

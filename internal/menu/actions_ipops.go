@@ -59,7 +59,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	// protection — the InterPlanetary menu tests it when '8' is pressed, with no
 	// exemption for any item inside (`BRE.OVR 0x020F88`). IB gates the items
 	// instead, and this one had been missed.
-	if blockedByCovertProtection(s, w) {
+	if blockedByIPProtection(s, w) {
 		return Stay
 	}
 	var planets []string
@@ -114,7 +114,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 // Terrorist Ops above, and for the same reason.
 func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
-		if blockedByProtection(s, w) {
+		if blockedByIPProtection(s, w) {
 			return Stay
 		}
 		// Checked before a planet is picked so a baron who cannot deliver a
@@ -227,7 +227,7 @@ func terrorOp(op game.TerrorOpType) Action {
 // The strike is queued and resolves on the target board's next packet run; New
 // Realm Protection blocks it.
 func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
-	if blockedByProtection(s, w) {
+	if blockedByIPProtection(s, w) {
 		return Stay
 	}
 	if w.Player().Agents < 1 {

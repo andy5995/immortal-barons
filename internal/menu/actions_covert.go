@@ -16,10 +16,11 @@ import (
 // The original tests this at the menu, immediately before the affordability
 // gate (`BRE.OVR 0x017716`, refusal string loaded at `0x01772E`), so a refused
 // operation costs no gold, no agent and none of the day’s allowance. IB keeps that
-// placement.
+// placement, and the refusal is that routine's own. It belongs to the local
+// covert menu only: the InterPlanetary items refuse with blockedByIPProtection.
 func blockedByCovertProtection(s session.Session, w *ctx) bool {
 	if w.Player().Protection > 0 {
-		ok(s, "Your New Realm Protection shelters you, and while it lasts your agents may not move against another realm.")
+		ok(s, "Our empire is in protection, my lord.")
 		return true
 	}
 	return false

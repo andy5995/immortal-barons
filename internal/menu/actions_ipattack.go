@@ -19,7 +19,7 @@ import (
 // model — real forces, not gold); the pooled troopers become the strike's
 // offense on departure.
 func createGroupAttack(s session.Session, w *ctx) Result {
-	if blockedByProtection(s, w) {
+	if blockedByIPProtection(s, w) {
 		return Stay
 	}
 	p := w.Player()
@@ -115,7 +115,9 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if !turnPlayedThisEntry(s, w) {
 		return Stay
 	}
-	if blockedByProtection(s, w) {
+	// Join is the one item the menu's own protection gate skips, so the refusal
+	// is this routine's, in its words (BRE.OVR 0x02d212).
+	if refuseInProtection(s, w, "Sorry... You're under new realm protection.") {
 		return Stay
 	}
 	// Answered with the Id the table SHOWS, not with a row number: the Id column
@@ -167,7 +169,7 @@ func promptAttackForce(s session.Session, p *game.Empire) game.AttackForce {
 // baron on another planet. It leaves at once rather than assembling like a group
 // attack, and it spends one of the day's individual attacks (#62).
 func indivAttackForce(s session.Session, w *ctx) Result {
-	if blockedByProtection(s, w) {
+	if blockedByIPProtection(s, w) {
 		return Stay
 	}
 	board, target := pickRemoteBaron(s, w)

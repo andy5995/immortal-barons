@@ -104,8 +104,8 @@ func TestBombEnemyTargetsIsNotASubmenu(t *testing.T) {
 	}
 	out := f.out.String()
 	// Proof the key was dispatched to the op rather than swallowed: the action
-	// reaches localAttack, which refuses under New Realm Protection.
-	if !strings.Contains(out, "New Realm Protection") {
+	// reaches the covert menu's own New Realm Protection refusal.
+	if !strings.Contains(out, "Our empire is in protection, my lord.") {
 		t.Fatalf("pressing 7 never reached the Bomb Enemy Targets action; output:\n%s", out)
 	}
 	for _, gone := range []string{

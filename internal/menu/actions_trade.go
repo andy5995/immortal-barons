@@ -155,9 +155,27 @@ func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool
 // build an Offer basket (goods you send) and a Request basket (goods you want
 // back), confirm, and send. The recipient sees it on their turn (reviewTradeDeals)
 // and accepts or declines. The offered goods are escrowed until then.
+//
+// Both New Realm Protection refusals come where the original's create_trade_offer
+// puts them, in its words: the sender's own shield before the picker, the
+// target's straight after it, so neither is found out only after both baskets
+// have been filled.
 func sendTradeDeal(s session.Session, w *ctx) Result {
+	if refuseInProtection(s, w, "Your dominion is still under protection.") {
+		return Stay
+	}
 	to := pickRecipient(s, w, pickOpts{prompt: "Trade with:"})
 	if to == nil {
+		return Stay
+	}
+	var shielded bool
+	w.Read(func() {
+		if r := findRealm(w, to.Name); r != nil {
+			shielded = r.Protection > 0
+		}
+	})
+	if shielded {
+		ok(s, "That realm is still in protection.")
 		return Stay
 	}
 	toName := to.Name

@@ -136,12 +136,30 @@ func (l targetList) find(w *ctx, attacker *game.Empire, name string) *game.Empir
 }
 
 // blockedByProtection reports whether the acting empire is still under new-realm
-// protection and may not attack yet, printing the standard message when it is.
-// The gate belongs on the attack ATTEMPT, so players can still browse the war
-// menus; only launching an attack — including a pirate raid — is refused.
+// protection and may not attack yet, printing the refusal when it is. The gate
+// belongs on the attack ATTEMPT, so players can still browse the war menus; only
+// launching a local attack — including a pirate raid — is refused.
+//
+// The wording is the original's own, from its shared target picker
+// (choose_target_empire), which tests the caller's shield on entry. It is one of
+// several scoped protection refusals (docs/dev/bre-screens.md); the
+// interplanetary items have their own, blockedByIPProtection.
 func blockedByProtection(s session.Session, w *ctx) bool {
+	return refuseInProtection(s, w, "You are in protection.")
+}
+
+// blockedByIPProtection is the caller's own shield on the InterPlanetary menu,
+// in the original's words: run_interbbs_menu tests it when an item that acts on
+// another planet is chosen, before the item runs (docs/mechanics-reference.md).
+func blockedByIPProtection(s session.Session, w *ctx) bool {
+	return refuseInProtection(s, w, "Sorry....You are under New Realm Protection!")
+}
+
+// refuseInProtection prints refusal and reports true while the player's New
+// Realm Protection lasts.
+func refuseInProtection(s session.Session, w *ctx, refusal string) bool {
 	if w.Player().Protection > 0 {
-		ok(s, "You are under New Realm Protection and cannot attack yet.")
+		ok(s, refusal)
 		return true
 	}
 	return false
@@ -696,7 +714,10 @@ func sdiProgram(s session.Session, w *ctx) Result {
 // Ops": start one, put money in, launch it, or scrap it. A planet builds one at
 // a time and the barons fund it between them (#16).
 func gooieKablooie(s session.Session, w *ctx) Result {
-	if blockedByProtection(s, w) {
+	// The InterPlanetary menu's gate, not fund_gooie_kablooie's own "not
+	// available in protection" refusal: the menu tests the same predicate first
+	// and that routine has no other caller, so its string is never shown.
+	if blockedByIPProtection(s, w) {
 		return Stay
 	}
 	var d *game.Annihilator

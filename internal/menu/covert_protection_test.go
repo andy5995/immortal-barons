@@ -39,12 +39,12 @@ func TestCovertEffectOpRefusedUnderProtection(t *testing.T) {
 	}
 	out := f.out.String()
 
-	if !strings.Contains(out, "New Realm Protection shelters you") {
+	if !strings.Contains(out, "Our empire is in protection, my lord.") {
 		t.Fatalf("the Covert menu never refused on the caller's own protection, got:\n%s", out)
 	}
 	// The attack menus refuse for the opposite reason; the two must not be
 	// confused for one another.
-	if strings.Contains(out, "cannot attack") {
+	if strings.Contains(out, "You are in protection.") {
 		t.Errorf("the covert refusal borrowed the attack wording, got:\n%s", out)
 	}
 	if p.Gold != goldBefore {
@@ -76,7 +76,7 @@ func TestExposeEnemyOpsRefusedUnderProtection(t *testing.T) {
 	}
 	out := f.out.String()
 
-	if !strings.Contains(out, "New Realm Protection shelters you") {
+	if !strings.Contains(out, "Our empire is in protection, my lord.") {
 		t.Fatalf("Expose Enemy Ops never refused on the caller's own protection, got:\n%s", out)
 	}
 	if p.Gold != goldBefore {
@@ -111,7 +111,7 @@ func TestCovertInfoOpsRunUnderProtection(t *testing.T) {
 			}
 			out := f.out.String()
 
-			if strings.Contains(out, "New Realm Protection shelters you") {
+			if strings.Contains(out, "Our empire is in protection, my lord.") {
 				t.Fatalf("%s was refused while sheltered, but the original allows it:\n%s", tc.name, out)
 			}
 			// The picker is unique to the op's own screen: reaching it proves the
@@ -144,7 +144,7 @@ func TestSendSpyGuyRefusedUnderProtection(t *testing.T) {
 	}
 	out := f.out.String()
 
-	if !strings.Contains(out, "New Realm Protection shelters you") {
+	if !strings.Contains(out, "Sorry....You are under New Realm Protection!") {
 		t.Fatalf("Send SpyGuy never refused on the caller's own protection, got:\n%s", out)
 	}
 	// Without the gate the op walks straight into its price quote and picker.

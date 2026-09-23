@@ -107,7 +107,7 @@ func TestReturningStrikeVerdicts(t *testing.T) {
 		says    string
 	}{
 		{"missing", func(*World, *Empire) {}, "Nobody", OutcomeNotFound, "no such realm"},
-		{"protected", func(_ *World, v *Empire) { v.Protection = 5 }, "Victim", OutcomeProtected, "New Realm Protection"},
+		{"protected", func(_ *World, v *Empire) { v.Protection = 5 }, "Victim", OutcomeProtected, "Your forces found their target was in protection."},
 		{"repelled", func(_ *World, v *Empire) { v.Turrets = 100_000_000 }, "Victim", OutcomeRepelled, "beaten off"},
 	} {
 		t.Run(c.name, func(t *testing.T) {

@@ -309,11 +309,12 @@ read. **IB does not reproduce the 986**: `absorbMilitary` takes all six unit
 types, so a crushed realm computes 0. IB stopped FORCING the zero in the same
 change, since the forcing rested on a claim this capture disproves.
 
-## New Realm Protection refusals — SIX distinct strings, scoped by situation
+## New Realm Protection refusals — distinct strings, scoped by situation
 
-The original does not have one protection message. It has six, and each belongs
-to the routine that prints it — read out of the binary 2026-09-21, with
-`find-string` naming the referring routine for each:
+The original does not have one protection message. It has several, and each
+belongs to the routine that prints it — read out of the binary 2026-09-21, with
+`find-string` naming the referring routine for each. IB prints each one in its
+own situation (#286):
 
 | String | Routine | When |
 | --- | --- | --- |
@@ -323,6 +324,20 @@ to the routine that prints it — read out of the binary 2026-09-21, with
 | `That realm is still in protection.` | `create_trade_offer` | a trade offer to a shielded realm |
 | `Sorry, this option is not available in protection.` | `fund_gooie_kablooie` | funding the weapon while shielded |
 | `Your forces found their target was in protection.` | `resolve_returning_attack` | an interplanetary strike finds its target shielded on arrival |
+
+A second `find-string` pass (2026-09-23) turned up four more:
+
+| String | Routine | When |
+| --- | --- | --- |
+| `Your dominion is still under protection.` | `create_trade_offer`, `run_trading_market` | YOUR realm is shielded, at a trade offer or the market |
+| `Sorry....You are under New Realm Protection!` | `run_interbbs_menu` | your realm is shielded, at InterPlanetary digits 2, 3, 4, 6, 8, 9 |
+| `Sorry... You're under new realm protection.` | the join path (catalog: `create_individual_attack`, 0x02d212) | Join Group Attack while shielded; the menu gate skips digit 5 |
+| `Your terrorists found that their target was under protection.` | `process_terrorist_report` | a terrorist op finds its target shielded on arrival |
+
+The Gooie string is unreachable in the original: `fund_gooie_kablooie`'s only
+caller is `run_interbbs_menu`, which has already refused digit 9 on the same
+predicate. IB prints the menu's refusal there. IB's terrorist and Special
+Operations return reports still use IB's own wording, which names the operation.
 
 `choose_target_empire` is the SHARED picker, so one string covers the attack and
 covert lists — which is why IB sharing a single `targetList.prompts()` refusal

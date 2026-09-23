@@ -25,7 +25,7 @@ func TestRegularAttackBlockedByProtection(t *testing.T) {
 
 	regularAttack(f, w)
 
-	if !strings.Contains(f.out.String(), "New Realm Protection") {
+	if !strings.Contains(f.out.String(), "You are in protection.") {
 		t.Errorf("expected New Realm Protection notice; got:\n%s", f.out.String())
 	}
 	if target.Land != before {

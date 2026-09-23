@@ -11,7 +11,7 @@ var (
 	// unable to attack, trade, and be attacked". Every path that moves goods
 	// between realms checks this.
 	ErrInProtection  = errors.New("You cannot trade while under new realm protection.")
-	ErrTheyProtected = errors.New("That realm is under new realm protection.")
+	ErrTheyProtected = errors.New("That realm is still in protection.")
 	// BRE refuses a trade deal between realms with no relation at all.
 	ErrNoRelations = errors.New("You need a pact with that realm to send it a trade deal.")
 )

@@ -411,14 +411,14 @@ func TestAttackGatedByProtection(t *testing.T) {
 	if r := regularAttack(f, w); r != Stay {
 		t.Errorf("regular attack under protection: want Stay, got %v", r)
 	}
-	if !strings.Contains(f.out.String(), "New Realm Protection") {
+	if !strings.Contains(f.out.String(), "You are in protection.") {
 		t.Errorf("expected the protection message; got:\n%s", f.out.String())
 	}
 	f2 := &fakeSession{}
 	if r := attackPirates(f2, w); r != Stay {
 		t.Errorf("pirate raid under protection: want Stay, got %v", r)
 	}
-	if !strings.Contains(f2.out.String(), "New Realm Protection") {
+	if !strings.Contains(f2.out.String(), "You are in protection.") {
 		t.Errorf("pirate raid should be gated by protection; got:\n%s", f2.out.String())
 	}
 }

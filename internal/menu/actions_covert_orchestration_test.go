@@ -46,7 +46,7 @@ func TestSpecialAttackBlockedByProtection(t *testing.T) {
 	if called {
 		t.Error("strike ran while under New Realm Protection")
 	}
-	if !strings.Contains(f.out.String(), "New Realm Protection") {
+	if !strings.Contains(f.out.String(), "You are in protection.") {
 		t.Errorf("expected protection notice; got:\n%s", f.out.String())
 	}
 }

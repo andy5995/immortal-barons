@@ -33,6 +33,9 @@ func sendIPTradeDeal(s session.Session, w *ctx) Result {
 		fail(s, game.ErrNotInterBBSGame)
 		return Stay
 	}
+	if blockedByIPProtection(s, w) {
+		return Stay
+	}
 	board, baron := pickIPDealTarget(s, w)
 	if board == "" || baron == "" {
 		return Stay
