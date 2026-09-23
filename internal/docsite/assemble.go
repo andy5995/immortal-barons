@@ -524,6 +524,7 @@ var sitePages = []struct{ src, slug string }{
 	{"docs/faq.md", "faq"},
 	{"docs/translating.md", "translating"},
 	{"docs/manual-vs-code.md", "manual-vs-code"},
+	{"docs/screenshots.md", "screenshots"},
 }
 
 func langFile(enPath, lang string) string {

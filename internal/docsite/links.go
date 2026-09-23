@@ -40,6 +40,7 @@ func newLinker(repoRoot string, enTopics []topic) *linker {
 		"docs/download.md":                  "download/index.md",
 		"docs/faq.md":                       "faq/index.md",
 		"docs/manual-vs-code.md":            "manual-vs-code/index.md",
+		"docs/screenshots.md":               "screenshots/index.md",
 		"docs/translating.md":               "translating/index.md",
 	}
 	for _, t := range enTopics {
@@ -88,7 +89,13 @@ func (lk *linker) rewrite(md, srcRepoRel, siteRel string) string {
 		}
 		// Resolve the link relative to the source file's directory.
 		repoRel := normContent(path.Clean(path.Join(srcDir, link)))
-		if dst, ok := lk.siteMap[repoRel]; ok {
+		dst, ok := lk.siteMap[repoRel]
+		// The Screenshots page's images are rendered into the site by
+		// scripts/render-screenshots.sh; they are never in the repo.
+		if rest, found := strings.CutPrefix(repoRel, "docs/screenshots/"); found {
+			dst, ok = "screenshots/"+rest, true
+		}
+		if ok {
 			rel := relSitePath(siteDir, dst)
 			return "](" + rel + anchor + ")"
 		}

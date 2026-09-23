@@ -33,6 +33,11 @@ jobs:
           go-version-file: go.mod
       - name: Assemble MkDocs source tree
         run: go run ./cmd/barons-docs -out build/docs
+      - name: Render screenshots
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansilove
+          scripts/render-screenshots.sh build/docs/site-src/en/screenshots
       - uses: actions/setup-python@v7
         with:
           python-version: '3.x'

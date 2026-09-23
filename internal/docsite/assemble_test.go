@@ -24,6 +24,7 @@ func writeFixture(t *testing.T, root string) {
 		"docs/translating.md":                         "# Translating\n\nHow to translate.\n",
 		"docs/charset.md":                             "# Character Set\n\nCP437 and UTF-8.\n",
 		"docs/manual-vs-code.md":                      "# Manual vs. Code\n\nWhere the original's docs and its code disagree.\n",
+		"docs/screenshots.md":                         "# Screenshots\n\n![The title screen.](screenshots/splash.png)\n",
 		"docs/dev/packets.md":                         "# Packet Format\n\nDev reference.\n",
 		"internal/help/content/economy/regions.md":    "---\ntitle: Regions\ncategory: economy\norder: 1\nin_game: true\n---\n# Regions\n\nBuy land.\n",
 		"internal/help/content/controls/interface.md": "---\ntitle: Menus\ncategory: controls\norder: 1\nin_game: true\n---\n# Menus\n\nNavigate.\n",
@@ -67,6 +68,7 @@ func TestAssembleLayout(t *testing.T) {
 		"site-src/en/download/index.md",                  // download page
 		"site-src/en/faq/index.md",                       // faq
 		"site-src/en/translating/index.md",               // translating guide
+		"site-src/en/screenshots/index.md",               // screenshots
 		"site-src/en/developers/packets.md",              // dev doc (en only)
 		"site-src/de/guide/economy/regions.md",           // translated topic
 		"mkdocs.yml",
@@ -75,6 +77,15 @@ func TestAssembleLayout(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(out, rel)); err != nil {
 			t.Errorf("expected %s: %v", rel, err)
 		}
+	}
+
+	// The images are rendered beside the page, not fetched from the repo.
+	page, err := os.ReadFile(filepath.Join(out, "site-src/en/screenshots/index.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(page), "](splash.png)") {
+		t.Errorf("screenshot link not rewritten to sit beside the page:\n%s", page)
 	}
 
 	// German has no translated README/playing/sysop, so those files must be
@@ -112,6 +123,7 @@ func TestAssembleNavAndConfig(t *testing.T) {
 		`- "FTN Transport": ftn-transport/index.md`,
 		`- "Command Reference": command-reference/index.md`,
 		`- "Download": download/index.md`,
+		`- "Screenshots": screenshots/index.md`,
 		`- "FAQ": faq/index.md`,
 		`- "Translating": translating/index.md`,
 		`- "Packet Format": developers/packets.md`, // dev nav titled from its H1
