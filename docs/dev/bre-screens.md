@@ -642,6 +642,18 @@ opening line for the other three and no color for advisor prose. IB coins a
 name and a line of character for each of the four, which Andy approved on
 2026-08-15. Do not "correct" this back.
 
+**Deliberate divergence — IB frames each advisor and sorts what it says (Andy,
+2026-09-23).** BRE prints bare prose. IB draws a 76-column box: a `35` magenta
+title rule naming the advisor (`──[Military]──`), the greeting, then the figures,
+then the advice, each part after a blank line, and a `35` closing rule. Each piece
+of advice starts with a `95` bright-magenta `»`, and a wrapped line hangs under
+the start of its sentence, and the figures sit in short groups separated by
+blank lines. The Military advisor's unit counts use Empire Status's own Military
+row (`[count Unit]` cells) rather than BRE's sentence, and IB shows them on every
+board, where BRE shows force figures only on an inter-BBS one. The counts themselves follow BRE: they
+are shortened to `k`/`m` and include forces away on attacks (#239). IB does not
+list the pending interplanetary attacks BRE prints above the totals.
+
 ### (1) Civilian — food outlook
 
 Numbers `97` bright-white; a deficit figure in `93` bright-yellow (warning).

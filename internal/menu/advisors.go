@@ -6,7 +6,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
-	"github.com/andy5995/immortal-barons/internal/help"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -36,6 +36,10 @@ type advisorData struct {
 	income      int // this turn's gold income
 	worldIncome int // Σ income over living empires
 	worldLand   int // Σ Land over living empires
+	// away is this realm's forces committed to group attacks, whether still
+	// waiting to leave or in flight. They have left the army, and the Military
+	// advisor counts them in its totals as the original does (#239).
+	away game.AttackForce
 }
 
 func gatherAdvisorData(w *ctx) advisorData {
@@ -46,6 +50,7 @@ func gatherAdvisorData(w *ctx) advisorData {
 		d.foodEaten = w.FoodDue(&d.p)
 		d.foodAtCap = d.p.FoodUpkeepAtCapacity()
 		d.income = w.IncomeThisTurn(&d.p).Gold()
+		d.away = w.ForcesAway(d.p.Owner)
 		for _, e := range w.Empires {
 			if e.Alive {
 				d.worldIncome += w.IncomeThisTurn(e).Gold()
@@ -90,12 +95,22 @@ type advisorLine struct {
 	// from the report above it: a blank line, a bright-cyan "NOTE:" and a cyan
 	// body indented to hang under the label (docs/dev/bre-screens.md).
 	Note bool
+	// Advice marks a line that suggests something rather than reports it. The
+	// advice is gathered below the figures, each line marked with a », so a
+	// reader can find what to do without reading the report again.
+	Advice bool
+	// Raw is laid out already (the Military advisor's force rows) and is
+	// printed as it stands, never wrapped.
+	Raw bool
+	// Break starts a new group of figures: a blank line goes before it, so a
+	// report reads as a few short blocks rather than one run of lines.
+	Break bool
 }
 
 // hiTerms replaces each {braced} run in s with emph-colored text, returning to
-// base afterward. Runs after word-wrapping (a braced phrase has no spaces, so
-// it can never straddle a wrap) and before hiNumsReset, which passes the escape
-// sequences this inserts through untouched.
+// base afterward. Runs after word-wrapping (wrapTerms keeps a braced phrase on
+// one line) and before hiNumsReset, which passes the escape sequences this
+// inserts through untouched.
 func hiTerms(s, emph, base string) string {
 	if emph == "" || !strings.ContainsRune(s, '{') {
 		return strings.NewReplacer("{", "", "}", "").Replace(s)
@@ -149,12 +164,19 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 	}
 	var out []advisorLine
 	add := func(text string) { out = append(out, advisorLine{Text: text, Hi: fig, Emph: emph}) }
+	// brk is add, starting a new group of figures.
+	brk := func(text string) { out = append(out, advisorLine{Text: text, Hi: fig, Emph: emph, Break: true}) }
+	// warn is a figure line whose figure is flagged bright-yellow.
 	warn := func(text string) { out = append(out, advisorLine{Text: text, Hi: ansi.FgBrightYellow, Emph: emph}) }
+	advise := func(text string) {
+		out = append(out, advisorLine{Text: text, Hi: ansi.FgBrightYellow, Emph: emph, Advice: true})
+	}
 	note := func(text string) { out = append(out, advisorLine{Text: text, Hi: fig, Note: true}) }
 	switch dom {
 	case advisorCivilian:
 		add(fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), count(p.People), p.Support))
-		add(fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), count(d.foodGrown), count(d.foodEaten)))
+		brk(fmt.Sprintf(tr(s, "We grow %s units of food each turn, and our people eat %s."), count(d.foodGrown), count(d.foodEaten)))
+		add(fmt.Sprintf(tr(s, "Our stores hold %s units of food."), count(p.Food)))
 		net := d.foodGrown - d.foodEaten
 		// Food is credited at turn start, so p.Food already includes this turn's
 		// growth. The projections below are written against the pre-growth stock, so
@@ -164,25 +186,25 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		case stock+net < 0:
 			// Even with this turn's growth already in, stores can't cover this turn's
 			// consumption, so the turn ends with negative food (turn.go starvation step).
-			warn(tr(s, "Our food will not last the turn. Buy or grow more."))
+			advise(tr(s, "Our food will not last the turn. Buy or grow more."))
 		case net < 0:
 			warn(fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), count(-net), stock/(-net)))
 		case d.foodAtCap > d.foodGrown:
 			// Fed now, but the populace is still growing toward a support-driven
 			// capacity whose food need outruns production (see issue #35).
-			warn(fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), count(d.foodAtCap)))
+			advise(fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), count(d.foodAtCap)))
 		default:
 			// The food bottom line pops in yellow whether short or in surplus (BRE).
-			warn(fmt.Sprintf(tr(s, "That leaves a surplus of %s. Our stores are secure."), count(net)))
+			warn(fmt.Sprintf(tr(s, "That leaves %s to spare each turn."), count(net)))
 		}
 		if p.Support < 50 {
-			warn(tr(s, "The people grow restless. Lower taxes or spend on their support."))
+			advise(tr(s, "Popular support is low. It cuts our coastal income and the number of people our land can hold. Lower taxes or spend on their support."))
 		}
-		if p.Tax > 20 {
-			warn(tr(s, "Taxes are high enough to risk riots. Consider lowering them."))
+		if pct := game.RiotChancePct(p.Tax); pct > 0 {
+			advise(fmt.Sprintf(tr(s, "At a %d%% tax rate, a riot breaks out in about %d%% of turns. Each riot costs us people and support."), p.Tax, pct))
 		}
 	case advisorEconomic:
-		add(fmt.Sprintf(tr(s, "Our treasury holds %s gold, with %s more in the bank."), num(p.Gold), num(p.Bank)))
+		add(fmt.Sprintf(tr(s, "We have %s gold in hand and %s in the bank."), num(p.Gold), num(p.Bank)))
 		if p.Debt > 0 {
 			add(fmt.Sprintf(tr(s, "We owe %s gold in debt, which grows each turn."), num(p.Debt)))
 		}
@@ -200,40 +222,44 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		}
 		add(fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), count(perRegion), count(avg)))
 		if p.Gold <= 0 && p.Bank <= 0 {
-			add(tr(s, "Our treasury is empty, Sire. We should raise gold soon."))
+			advise(tr(s, "Our treasury is empty, Sire. We should raise gold soon."))
 		}
 	case advisorMilitary:
-		add(fmt.Sprintf(tr(s, "Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s carriers."),
-			count(p.Troopers), count(p.Jets), count(p.Turrets), count(p.Tanks), count(p.Bombers), count(p.Carriers)))
+		for _, row := range forceTable(s, p, d.away) {
+			out = append(out, advisorLine{Text: row, Raw: true})
+		}
+		if away := d.away.Units(); away > 0 {
+			add(fmt.Sprintf(tr(s, "Of these, %s units are away on attacks."), count(away)))
+		}
 		switch {
 		case p.HQ == 0:
 			// The price climbs with every turn played (World.HQPrice), so "soon" is
 			// the actionable half of this advice. The figure itself belongs to the
 			// Spending Menu, which quotes the live price.
-			add(tr(s, "We have no {HeadQuarters}. Building one would strengthen our {tanks}, and it costs more with every turn we wait."))
+			advise(tr(s, "We have no {HeadQuarters}. Building one would strengthen our {tanks}, and it costs more with every turn we wait."))
 		case p.HQ < 100:
-			add(fmt.Sprintf(tr(s, "Our {HeadQuarters} is %d%% built."), p.HQ))
+			brk(fmt.Sprintf(tr(s, "Our {HeadQuarters} is %d%% built."), p.HQ))
 		default:
-			add(tr(s, "Our {HeadQuarters} is fully built."))
+			brk(tr(s, "Our {HeadQuarters} is fully built."))
 		}
-		if p.Carriers*100 < p.Jets {
-			add(tr(s, "We have more {jets} than our {carriers} can carry. Build more {carriers}."))
+		if int64(p.Carriers)*game.JetsPerCarrier*100 < int64(p.Jets)*game.AdvisorCarrierWarnPct {
+			advise(tr(s, "We have more {jets} than our {carriers} can carry. Build more {carriers}."))
 		}
 		mtn := game.MountainIndustryPercent(p.Regions)
 		switch {
 		case p.Regions.Mountain == 0:
-			add(tr(s, "We hold no {mountain} regions. Their ore would speed the foundries; without it our factories build at plain rate."))
+			advise(tr(s, "We hold no {mountain} regions. Their ore would make our factories build units faster."))
 		case mtn >= game.MountainIndustryCapPct:
-			add(fmt.Sprintf(tr(s, "Our {mountain} regions have the foundries at their limit, %d%% of normal unit output."), mtn))
+			brk(fmt.Sprintf(tr(s, "Our {mountain} regions have the foundries at their limit, %d%% of normal unit output."), mtn))
 		default:
-			add(fmt.Sprintf(tr(s, "Our {mountain} regions build our units at %d%% of normal output. It is their share of the realm that sets this, so buying land elsewhere thins the gain."), mtn))
+			brk(fmt.Sprintf(tr(s, "With our {mountain} regions, our factories build units at %d%% of normal. The figure depends on their share of our land, so buying other regions lowers it."), mtn))
 		}
-		add(fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
-		if p.Morale < 50 {
-			warn(tr(s, "Morale is low. Desertion is a real risk before our next battle."))
+		brk(fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
+		if p.Morale < game.MoraleDesertBandTop {
+			advise(tr(s, "Morale is low, so some of our {troopers}, {jets} and {tanks} may desert each turn."))
 		}
 		if p.Agents == 0 {
-			add(tr(s, "We have no {covert agents}. Recruit some for spying and sabotage."))
+			advise(tr(s, "We have no {covert agents}. Recruit some for spying and sabotage."))
 		} else {
 			add(fmt.Sprintf(tr(s, "We keep %s covert agents."), count(p.Agents)))
 		}
@@ -254,7 +280,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		switch {
 		case !researched && p.Regions.Technology == 0:
 			add(tr(s, "We have no Technology regions."))
-			add(tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
+			advise(tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
 		case !researched:
 			add(tr(s, "Our Technology regions are new. Their benefits will build up as we hold them."))
 		default:
@@ -276,43 +302,159 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 	return out
 }
 
-// renderAdvisor prints one advisor's greeting and its report. Split from the
-// menu loop so tests can render an advisor without a pause.
+// advisorWidth is the advisor box: the title and closing rules, and the width
+// every line inside them is wrapped to. BRE draws its advisors as bare prose with
+// no box; IB frames them like its menus so a report reads as one screen.
+const advisorWidth = 76
+
+// advisorTitle is the advisor's label on the Advisors menu, reused as the box
+// title so the two always agree.
+func advisorTitle(d advisorDomain) string {
+	return [...]string{advisorCivilian: "Civilian", advisorEconomic: "Economic",
+		advisorMilitary: "Military", advisorTechnology: "Technology"}[d]
+}
+
+// forceTable lays the Military advisor's unit counts out the way Empire Status
+// does, with its own row code: a Military label, then [count Unit] cells,
+// three to a line. The counts include forces away on attacks and are shortened
+// to k and m, both as the original's report has them (#239).
+func forceTable(s session.Session, p *game.Empire, away game.AttackForce) []string {
+	label, indent := statusRowPrefix(s, "Military")
+	var cells []statusItem
+	for _, g := range []*game.Good{game.Trooper, game.Jet, game.Turret, game.Tank, game.Bomber, game.Carrier} {
+		n := *g.Count(p)
+		if g.Force != nil {
+			n += *g.Force(&away)
+		}
+		if n > 0 {
+			cells = append(cells, statusCell(numfmt.Short(n), tr(s, g.Plural)))
+		}
+	}
+	const lead = "    "
+	if len(cells) == 0 {
+		return []string{lead + label + tr(s, "None")}
+	}
+	return statusRows(lead+label, lead+indent, cells, statusMilitaryPerLine)
+}
+
+// wrapTerms word-wraps an advisor line to width and hangs it: first leads the
+// first line, cont every line after, and paint colors the text between. Only
+// what shows is counted: the {braces} that mark a key term take no column, and a
+// braced term is never split across two lines, since hiTerms can only color a
+// term whose braces share a line.
+func wrapTerms(text string, width int, first, cont string, paint func(string) string) string {
+	var words []string
+	depth := 0
+	start := 0
+	for i, r := range text {
+		switch r {
+		case '{':
+			depth++
+		case '}':
+			depth--
+		case ' ':
+			if depth == 0 {
+				words = append(words, text[start:i])
+				start = i + 1
+			}
+		}
+	}
+	words = append(words, text[start:])
+	shown := func(w string) int { return len([]rune(w)) - strings.Count(w, "{") - strings.Count(w, "}") }
+	var lines []string
+	var cur string
+	n := 0
+	for _, w := range words {
+		if w == "" {
+			continue
+		}
+		if n > 0 && n+1+shown(w) > width {
+			lines = append(lines, cur)
+			cur, n = "", 0
+		}
+		if n > 0 {
+			cur += " "
+			n++
+		}
+		cur += w
+		n += shown(w)
+	}
+	lines = append(lines, cur)
+	for i, l := range lines {
+		lead := cont
+		if i == 0 {
+			lead = first
+		}
+		lines[i] = lead + paint(l)
+	}
+	return strings.Join(lines, "\n")
+}
+
+// renderAdvisor prints one advisor's report in a box: the greeting, the figures,
+// then any advice, each part set apart by a blank line. Split from the menu loop
+// so tests can render an advisor without a pause.
 func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
 	data := gatherAdvisorData(w)
-	fmt.Fprint(s, "\n")
-	// Wrap the greeting too (it now carries a name + a line of character, so it can
-	// run past 80 columns).
-	for _, gl := range strings.Split(help.Wrap(advisorGreeting(s, d), 78), "\n") {
-		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, gl, ansi.Reset)
-	}
+	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgMagenta, tr(s, advisorTitle(d)), advisorWidth))
+	greet := func(t string) string { return ansi.FgBrightCyan + t + ansi.Reset }
+	fmt.Fprintln(s, wrapTerms(advisorGreeting(s, d), advisorWidth-2, "  ", "  ", greet))
 	// Body text is regular/off-white (37); the figures are the only bright things
 	// on the line — bright-white (97) or yellow (93) per the line's Hi — so they
 	// pop, the way BRE's advisors read (docs/dev/bre-screens.md). Without the dim
 	// base, bright-white figures would blend into a terminal's default-white text.
 	base := ansi.FgWhite
-	for _, line := range advisorReport(s, data, d) {
-		// Word-wrap each report line to the screen width (78) less the 2-space
-		// indent (wrap the plain text, then color), so a long sentence breaks at
-		// spaces instead of mid-word at col 80. A figure returns to the off-white
-		// base after its highlight, not the terminal default.
-		if line.Note {
-			// BRE's own shape: a blank line, "NOTE:" in bright cyan, and the body
-			// in cyan hanging under the label at six columns.
-			fmt.Fprint(s, "\n")
-			for i, wl := range strings.Split(help.Wrap(line.Text, 66), "\n") {
-				if i == 0 {
-					fmt.Fprintf(s, "%sNOTE:%s %s%s%s\n", ansi.FgBrightCyan, ansi.Reset, ansi.FgCyan, wl, ansi.Reset)
-					continue
-				}
-				fmt.Fprintf(s, "      %s%s%s\n", ansi.FgCyan, wl, ansi.Reset)
-			}
+	body := func(line advisorLine, text string) string {
+		return base + hiNumsReset(hiTerms(text, line.Emph, base), line.Hi, base) + ansi.Reset
+	}
+	// Every wrapped line hangs its continuation under the text, so a sentence
+	// that runs onto a second line is not read as the next one.
+	hang := func(line advisorLine, first string) {
+		fmt.Fprintln(s, wrapTerms(line.Text, advisorWidth-4, first, "    ", func(t string) string { return body(line, t) }))
+	}
+	lines := advisorReport(s, data, d)
+	fmt.Fprint(s, "\n")
+	firstFact := true
+	for _, line := range lines {
+		if line.Advice || line.Note {
 			continue
 		}
-		for _, wl := range strings.Split(help.Wrap(line.Text, 76), "\n") {
-			fmt.Fprintf(s, "  %s%s%s\n", base, hiNumsReset(hiTerms(wl, line.Emph, base), line.Hi, base), ansi.Reset)
+		if line.Break && !firstFact {
+			fmt.Fprint(s, "\n")
 		}
+		firstFact = false
+		if line.Raw {
+			// Empire Status's own cells, colored as they are there.
+			fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, line.Text, ansi.Reset)
+			continue
+		}
+		hang(line, "    ")
 	}
+	marker := ansi.FgBrightMagenta + "»" + ansi.Reset + " "
+	first := true
+	for _, line := range lines {
+		if !line.Advice {
+			continue
+		}
+		if first {
+			fmt.Fprint(s, "\n")
+			first = false
+		}
+		// "  » " is four columns, the same as the hang, so every line of the
+		// advice starts at one column.
+		hang(line, "  "+marker)
+	}
+	for _, line := range lines {
+		if !line.Note {
+			continue
+		}
+		// BRE's own shape: a blank line, "NOTE:" in bright cyan, and the body
+		// in cyan hanging under the label.
+		fmt.Fprint(s, "\n")
+		label := "  " + ansi.FgBrightCyan + "NOTE:" + ansi.Reset + " "
+		cyan := func(t string) string { return ansi.FgCyan + t + ansi.Reset }
+		fmt.Fprintln(s, wrapTerms(line.Text, advisorWidth-10, label, "        ", cyan))
+	}
+	fmt.Fprintln(s, closingRule(ansi.FgMagenta, advisorWidth))
 }
 
 // advisorsMenu is BRE's four-advisor submenu: pick an advisor to hear that
@@ -330,13 +472,12 @@ func advisorsMenu(s session.Session, w *ctx) {
 		// BRE frames this menu with a magenta bracketed rule ("──[Advisors]──"),
 		// not IB's lightbar (docs/dev/bre-screens.md).
 		fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgMagenta, tr(s, "Advisors"), len([]rune(rule))))
-		item(1, "Civilian")
-		item(2, "Economic")
-		item(3, "Military")
-		item(4, "Technology")
+		for d := advisorCivilian; d <= advisorTechnology; d++ {
+			item(int(d), advisorTitle(d))
+		}
 		item(0, "Quit")
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
-		n := ChoiceQuit(s, 4)
+		n := ChoiceQuit(s, int(advisorTechnology))
 		if n < 1 {
 			return
 		}

@@ -373,6 +373,21 @@ func (w *World) Specialize(e *Empire, g *Good) error {
 	return nil
 }
 
+// riotWeight is how many of RiotChanceDenom's draws raise a riot at this tax
+// rate: tax² above RiotTaxFloor, none at or below it (see processEconomy).
+func riotWeight(tax int) int {
+	if tax <= RiotTaxFloor {
+		return 0
+	}
+	return tax * tax
+}
+
+// RiotChancePct is the chance of a riot each turn at this tax rate, in whole
+// percent, for a screen that quotes it. It is the roll's own weight.
+func RiotChancePct(tax int) int {
+	return min(riotWeight(tax)*100/RiotChanceDenom, 100)
+}
+
 func (w *World) processEconomy(e *Empire) {
 	// Savings interest (BRE-faithful, config-help verified): the Interest Rate knob
 	// is "the interest the bank gives in 10 days", so config/10 is the DAILY rate
@@ -509,7 +524,8 @@ func (w *World) processEconomy(e *Empire) {
 
 	e.LastRiot = false
 	riotPenalty := 0
-	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(RiotChanceDenom) {
+	// The weight is zero at or below the floor, and the draw is skipped there.
+	if rw := riotWeight(e.Tax); rw > 0 && rw >= w.rng.Intn(RiotChanceDenom) {
 		e.LastRiot = true
 		w.postRiotNews(e)
 		riotPenalty = e.Tax / RiotSupportDivisor

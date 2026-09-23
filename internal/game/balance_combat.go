@@ -334,3 +334,10 @@ const (
 	SabreDevelopBasePct = 10 // a backfire develops at least this % of the target's land
 	SabreDevelopSpread  = 10 // random % headroom on top of the base (10-19% total)
 )
+
+// AdvisorCarrierWarnPct is how much of the jet fleet the carriers must be able to
+// lift before the Military advisor stops warning of a carrier shortage: it warns
+// while carriers × JetsPerCarrier is under this percentage of the jets.
+// BINARY-VERIFIED: show_military_advisor_report compares (carriers×100)/jets
+// against the Real48 0.8 (BRE.OVR ovr_031379 +0xd62–0xe10) (#239).
+const AdvisorCarrierWarnPct = 80

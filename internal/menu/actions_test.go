@@ -188,7 +188,7 @@ func TestAdvisorsWarnLowSupport(t *testing.T) {
 	f := &fakeSession{}
 	renderAdvisor(f, w, advisorCivilian)
 	out := f.out.String()
-	if !strings.Contains(out, "The people grow restless") {
+	if !strings.Contains(out, "Popular support is low") {
 		t.Errorf("expected low-support advice; output:\n%s", out)
 	}
 }
@@ -262,7 +262,7 @@ func TestAdvisorsWarnLowMorale(t *testing.T) {
 	f := &fakeSession{}
 	renderAdvisor(f, w, advisorMilitary)
 	out := f.out.String()
-	if !strings.Contains(out, "Desertion is a real risk") {
+	if !strings.Contains(stripANSI(out), "may desert") {
 		t.Errorf("expected low-morale advice; output:\n%s", out)
 	}
 }
@@ -279,8 +279,8 @@ func TestAdvisorsMenuSelectsAdvisor(t *testing.T) {
 	out := f.out.String()
 	for _, want := range []string{
 		"Civilian", "Economic", "Military", "Technology", // the submenu list
-		"Krane, your war advisor",  // the named military advisor's greeting
-		"Desertion is a real risk", // the Military advisor's advice
+		"Krane, your war advisor", // the named military advisor's greeting
+		"may desert each",         // the Military advisor's advice
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected %q in advisor output; got:\n%s", want, out)
@@ -357,7 +357,7 @@ func TestAdvisorsHealthyEmpire(t *testing.T) {
 	out := stripANSI(f.out.String())
 	// The informational report is always present.
 	for _, want := range []string{
-		"Our people number", "We earn about", "Our forces:", "Our gold producing regions are at",
+		"Our people number", "We earn about", "Troopers", "Our gold producing regions are at",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected the report line %q; output:\n%s", want, out)
@@ -365,8 +365,8 @@ func TestAdvisorsHealthyEmpire(t *testing.T) {
 	}
 	// No warning line fires for a healthy empire.
 	for _, warn := range []string{
-		"no HeadQuarters", "more jets than our carriers", "Desertion",
-		"will not last", "grow restless", "risk riots", "treasury is empty",
+		"no HeadQuarters", "more jets than our carriers", "desert",
+		"will not last", "support is low", "riot breaks out", "treasury is empty",
 		"no covert agents",
 	} {
 		if strings.Contains(out, warn) {

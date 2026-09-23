@@ -35,6 +35,9 @@ type Good struct {
 	// one; gold is the exception the trade code handles beside the loop, since
 	// it alone is held in money width.
 	Basket func(b *TradeBasket) *int
+	// Force points at an attack detachment's number of it. Nil for a good an
+	// interplanetary attack cannot carry (turrets, carriers, agents, food).
+	Force func(f *AttackForce) *int
 	// Price is a good whose price follows a rule of its own rather than the
 	// walk — the covert agent's, which climbs with the realm's age. Nil for the
 	// six walk units (see Stored) and for a good the shop does not sell.
@@ -75,6 +78,7 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdTroopers },
 		Made:   func(e *Empire) *int { return &e.MadeTroopers },
 		Basket: func(b *TradeBasket) *int { return &b.Troopers },
+		Force:  func(f *AttackForce) *int { return &f.Troopers },
 		Stored: func(p *Prices) *int { return &p.Trooper },
 		WalkLo: PriceLoTrooper, WalkHi: PriceHiTrooper, WalkStep: PriceStepTrooper, WalkTag: "trooper",
 		Cost: CostTrooper, NetWorth: NetWorthTrooper,
@@ -86,6 +90,7 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdJets },
 		Made:   func(e *Empire) *int { return &e.MadeJets },
 		Basket: func(b *TradeBasket) *int { return &b.Jets },
+		Force:  func(f *AttackForce) *int { return &f.Jets },
 		Stored: func(p *Prices) *int { return &p.Jet },
 		WalkLo: PriceLoJet, WalkHi: PriceHiJet, WalkStep: PriceStepJet, WalkTag: "jet",
 		Cost: CostJet, NetWorth: NetWorthJet,
@@ -108,6 +113,7 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdBombers },
 		Made:   func(e *Empire) *int { return &e.MadeBombers },
 		Basket: func(b *TradeBasket) *int { return &b.Bombers },
+		Force:  func(f *AttackForce) *int { return &f.Bombers },
 		Stored: func(p *Prices) *int { return &p.Bomber },
 		WalkLo: PriceLoBomber, WalkHi: PriceHiBomber, WalkStep: PriceStepBomber, WalkTag: "bomber",
 		Cost: CostBomber, NetWorth: NetWorthBomber,
@@ -119,6 +125,7 @@ var (
 		Prod:   func(e *Empire) *int { return &e.ProdTanks },
 		Made:   func(e *Empire) *int { return &e.MadeTanks },
 		Basket: func(b *TradeBasket) *int { return &b.Tanks },
+		Force:  func(f *AttackForce) *int { return &f.Tanks },
 		Stored: func(p *Prices) *int { return &p.Tank },
 		WalkLo: PriceLoTank, WalkHi: PriceHiTank, WalkStep: PriceStepTank, WalkTag: "tank",
 		Cost: CostTank, NetWorth: NetWorthTank,

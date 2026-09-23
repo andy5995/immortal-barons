@@ -23,10 +23,10 @@ type AttackForce struct {
 }
 
 // Empty reports whether no units were committed.
-func (f AttackForce) Empty() bool { return f.units() == 0 }
+func (f AttackForce) Empty() bool { return f.Units() == 0 }
 
-// units counts the whole detachment, whatever the type.
-func (f AttackForce) units() int { return f.Troopers + f.Jets + f.Tanks + f.Bombers }
+// Units counts the whole detachment, whatever the type.
+func (f AttackForce) Units() int { return f.Troopers + f.Jets + f.Tanks + f.Bombers }
 
 // offense values the detachment by the combat table (trooper 1, jet 2, tank 4).
 //
@@ -152,6 +152,31 @@ func DepartureAfter(now time.Time, hours int) time.Time {
 		hours = GroupAttackHoursMax
 	}
 	return now.Add(time.Duration(hours) * time.Hour)
+}
+
+// ForcesAway is owner's forces committed to group attacks, whether still waiting
+// to leave or in flight. They have left the army but are still the realm's.
+func (w *World) ForcesAway(owner string) AttackForce {
+	var away AttackForce
+	add := func(cs []Contribution) {
+		for _, c := range cs {
+			if c.Owner != owner {
+				continue
+			}
+			for _, g := range MilitaryGoods {
+				if g.Force != nil {
+					*g.Force(&away) += *g.Force(&c.AttackForce)
+				}
+			}
+		}
+	}
+	for _, ga := range w.GroupAttacks {
+		add(ga.Contributors)
+	}
+	for _, f := range w.InFlight {
+		add(f.Contributors)
+	}
+	return away
 }
 
 // Offense is the strike's offensive strength: every contributor's detachment
