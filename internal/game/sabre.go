@@ -139,7 +139,7 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // missile impact rather than an agent op and reports it with the firing realm
 // and its planet, the same as an incoming nuclear or chemical strike. Agent ops
 // stay anonymous unless the agent is caught (see covertFoiled).
-func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, hit, backfired bool) {
+func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, outcome specialOutcome) {
 	// The shared arriving-missile gates: the misfire, then SDI (#255). All three
 	// missiles meet them, because the receiving board resolves all three in one
 	// routine and both rolls sit ahead of its damage switch.
@@ -151,8 +151,8 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, hi
 	// sabre branch (`+0x6b6`) are the dial jitter, which SabreAim already models:
 	// one launch in ten ignores the dial entirely and the rest are nudged by one
 	// either way. Nothing there asks a second time whether the missile works.
-	if stopped := w.arrivingMissileStopped(d, "S3-Sabre"); stopped != "" {
-		return stopped, false, false
+	if stopped, why := w.arrivingMissileStopped(d, "S3-Sabre"); stopped != "" {
+		return stopped, why
 	}
 	if w.sabreBackfires(d) {
 		// A backfire is the original's route to the mapper's last row: it does not
@@ -160,14 +160,14 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, hi
 		// firer is told when the answer gets home; the target sees it now.
 		if got := w.sabreDevelop(d); got > 0 {
 			d.addEvent(fmt.Sprintf("An S3-Sabre from %s broke up over your realm, and the fallout left %d Regions fit to settle.", from, got))
-			return fmt.Sprintf("Your S3-Sabre broke up over %s and opened %d Regions for them to settle.", d.Name, got), false, true
+			return fmt.Sprintf("Your S3-Sabre broke up over %s and opened %d Regions for them to settle.", d.Name, got), specialBackfire
 		}
-		return fmt.Sprintf("Your S3-Sabre broke up over %s with nothing to open for them.", d.Name), false, true
+		return fmt.Sprintf("Your S3-Sabre broke up over %s with nothing to open for them.", d.Name), specialBackfire
 	}
 	lost := w.sabreDamage(d, w.SabreAim(dial))
 	if lost == "" {
-		return fmt.Sprintf("Your S3-Sabre reached %s but did negligible damage.", d.Name), false, false
+		return fmt.Sprintf("Your S3-Sabre reached %s but did negligible damage.", d.Name), specialNothing
 	}
 	d.addEvent(fmt.Sprintf("An S3-Sabre from %s struck your empire — lost %s.", from, lost))
-	return fmt.Sprintf("Your S3-Sabre hit %s: %s destroyed.", d.Name, lost), true, false
+	return fmt.Sprintf("Your S3-Sabre hit %s: %s destroyed.", d.Name, lost), specialHit
 }

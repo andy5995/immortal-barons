@@ -4735,6 +4735,54 @@ for regions**: the original counts population in millions, so the same figure is
 region in both games. IB's event text also still names exact figures in both
 directions where the original tells the victim "several million".
 
+**What a Special Operation posts to the target's planet — BINARY-VERIFIED (#288).**
+Each of the original's two receivers makes ONE call to the news writer, reached
+by every outcome except a realm that is not there:
+
+- **Missiles** (`resolve_received_sabre_strike`, `+0x0d1a`). The line is
+  `^SPECIAL_OPERATIONS` entry `4 × (op − 1) + 1`, the failure form, when the
+  strike failed, and two further on, the success form, when it did not. The
+  failure flag is set by New Realm Protection, the misfire and the SDI roll
+  alike, and by one more roll at `+0x540` — a per-weapon field of the target's
+  record divided by its regions, weighed against `Random(50000)`, then
+  `Random(10) > 2` — that this pass did not identify and IB does not model.
+  When the SDI stopped it, the resolver appends a sentence naming the
+  shield to the same line. A backfired S3-Sabre is NOT a failure there — the
+  backfire is the last row of the Sabre's damage mapper — so the original's
+  target planet reads the success form for it.
+- **Bombing ops** (`resolve_received_bombing`, `+0x0483`). One `Random(3)` roll
+  at the top decides the run: two in three fail, and the planet reads
+  `^BOMBING_HITS` line 1, which names the sending realm; otherwise it reads that
+  operation's own line, which names nobody. The effect is a percentage of
+  whatever is there, applied without checking there is anything, so the
+  original has no line for a run that found nothing.
+
+The firer's own board posts too (`process_sabre_return`, `process_bombing_results`),
+from `^SPECIAL_RESULTS` and `^BOMBING_RESULTS`.
+
+IB posts one line on the target's planet for every outcome but a missing realm,
+chosen by the outcome and worded as IB's own (`missileNews`, `planetOpNews` in
+`ibbs_special.go`): a hit, a misfire, an SDI interception, an S3-Sabre that broke
+up, a Sabre that reached its target and did negligible damage, a protected realm,
+and for the bombing ops a run that found nothing to wreck and — Bomb Trade Routes
+only, the one op that carries the landing roll here — a run driven off before it
+arrived. Until #288 every outcome past protection posted "X struck Y", so a
+missile that broke up read as a hit on the target's planet while the firer's
+report said it failed. Two places where IB's line knowingly differs from the
+original's choice:
+
+- **A backfire is reported as a backfire**, not as the success form. It is what
+  the firer's report and the target's recap both say, and the two planets'
+  lines now agree with them.
+- **A bombing run that landed on nothing says so.** The original cannot reach
+  that case; IB can, because its effects are the local ops' and report what
+  they destroyed.
+
+Not changed here, and different from the original: IB rolls the one-in-three
+landing roll for Bomb Trade Routes only (`bombRoutesLands`), where the receiver
+rolls it ahead of all four; and the firer's board posts a line for a backfire
+alone, where the original posts one for every outcome.
+
 **Interplanetary missile prices — binary-verified AND capture-confirmed.** The
 three missiles are priced off the TARGET's last-known territory, at a rate of
 their own each, and uncapped:

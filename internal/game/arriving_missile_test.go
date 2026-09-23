@@ -64,7 +64,7 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	d.SDI = 100 // a full program: the interception roll is what will fire
 	intercepted := 0
 	for i := 0; i < 400; i++ {
-		if got := w.arrivingMissileStopped(d, "nuclear strike"); got != "" {
+		if got, why := w.arrivingMissileStopped(d, "nuclear strike"); why == specialIntercepted {
 			if got == "Defendia's SDI intercepted your nuclear strike." {
 				intercepted++
 			}
@@ -80,7 +80,7 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	d.SDI = 0
 	misfired := 0
 	for i := 0; i < 400; i++ {
-		if got := w.arrivingMissileStopped(d, "nuclear strike"); got == "The nuclear strike misfired and never reached Defendia." {
+		if got, why := w.arrivingMissileStopped(d, "nuclear strike"); why == specialMisfire && got == "The nuclear strike misfired and never reached Defendia." {
 			misfired++
 		}
 	}

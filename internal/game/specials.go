@@ -379,17 +379,18 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 // ahead of the damage switch, so a nuclear strike is stopped by the same shield
 // an S3-Sabre is.
 //
-// Returns the reason the strike ended, or "" when it gets through. The two
-// reasons are separate lines to the reader in the original, and stay separate
-// here: a shield that worked and a weapon that failed are different news.
-func (w *World) arrivingMissileStopped(d *Empire, label string) string {
+// Returns the sender's line for the reason the strike ended, and which reason
+// it was, or "" and specialHit when it gets through. The two reasons are
+// separate lines to the reader in the original, and stay separate here: a
+// shield that worked and a weapon that failed are different news.
+func (w *World) arrivingMissileStopped(d *Empire, label string) (string, specialOutcome) {
 	if w.rng.Intn(MissileMisfireOdds) == 0 {
-		return fmt.Sprintf("The %s misfired and never reached %s.", label, d.Name)
+		return fmt.Sprintf("The %s misfired and never reached %s.", label, d.Name), specialMisfire
 	}
 	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
-		return fmt.Sprintf("%s's SDI intercepted your %s.", d.Name, label)
+		return fmt.Sprintf("%s's SDI intercepted your %s.", d.Name, label), specialIntercepted
 	}
-	return ""
+	return "", specialHit
 }
 
 // arrivingNuclearEffect and arrivingChemicalEffect are the damage an arriving
