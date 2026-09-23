@@ -198,7 +198,9 @@ The key is a one-time exchange, unless the league changes Coordinator.
     not be alarmed at the first `Game Setup` screen, and do not let players on
     before it.
 
-6. **Put `-planetary` on a schedule**, and let your callers in.
+6. **Put `-maint` on a schedule**, and let your callers in. It runs the
+   inter-BBS step as well as the day's maintenance. Scheduling `-planetary`
+   alone leaves the game day stuck whenever nobody plays.
 
 Step 3 does not need the Coordinator's rules to have arrived, so 2 and 3 can
 happen in either order — the keys are kept in their own files and a reset does
@@ -470,7 +472,8 @@ when inter-BBS play is on.
 A common setup:
 
 1. A caller plays the game.
-2. After the caller exits, or on a schedule you pick, run `-planetary`.
+2. After the caller exits, or on a schedule you pick, run `-maint`, which
+   includes this step.
 3. Your transport carries each file from your outbound side to the destination
    (over FidoNet, a sync tool, scp, a shared mount — whatever you use). For FTN,
    `barons-ftn -out` wraps it and `barons-ftn -in` removes that wrapper before
@@ -605,7 +608,7 @@ game-packet bytes.
 
 ```
 barons-ftn -in -data /path/to/data
-immortal-barons -planetary -data /path/to/data
+immortal-barons -maint -data /path/to/data
 barons-ftn -out -data /path/to/data
 ```
 
@@ -1067,7 +1070,7 @@ You should not have to run this by hand every day. Each board needs one job on
 a timer, doing the two steps in order:
 
 ```
-immortal-barons -planetary -data /path/to/data
+immortal-barons -maint -data /path/to/data
 cd /path/to/bbs
 ./mis poll 99:1/2
 ```
@@ -1176,7 +1179,7 @@ you like.
 
 ```
 barons-ftn -in -data /sbbs/xtrn/imb/data
-immortal-barons -planetary -data /sbbs/xtrn/imb/data
+immortal-barons -maint -data /sbbs/xtrn/imb/data
 barons-ftn -out -data /sbbs/xtrn/imb/data
 jsexec -c /sbbs/ctrl /sbbs/exec/binkit.js
 ```

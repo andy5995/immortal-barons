@@ -93,11 +93,15 @@ then exit.
   renamed their account on the board: the game finds a realm by that name, so
   otherwise the game does not know them at their next login. Each edit takes the
   same lock a caller's turn takes, so it is safe to run while the board is up.
-- **`-maint`** — Run the daily maintenance step, then exit. It is not required:
-  every login runs maintenance too, and catches up any days that passed with
-  nobody playing. Running it once a day from a nightly scheduled task moves that
-  work off the first caller's login, which is worth doing on a board with real
-  traffic.
+- **`-maint`** — Run the daily maintenance step, then exit. On a board that
+  plays alone it is not required: every login runs maintenance too, and catches
+  up any days that passed with nobody playing. Running it once a day from a
+  nightly scheduled task moves that work off the first caller's login, which is
+  worth doing on a board with real traffic.
+
+    **On a league board it is required.** It also runs the inter-BBS step, which
+    a login does not, and raises the same fault alarm as `-planetary`. Schedule
+    it as often as you want packets to move.
 
 ### Testing and balance
 

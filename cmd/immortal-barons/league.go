@@ -18,6 +18,13 @@ import (
 // this board resets, and a signed order goes out for every other board to do the
 // same on its next planetary run.
 func runLeagueReset(cfg game.Config, date string) error {
+	// It runs the planetary step, so it is refused on the same terms as
+	// -planetary: with no league number it would take every league's packets.
+	if cfg.InterBBSEnabled() {
+		if err := store.CheckLeagueNumber(cfg); err != nil {
+			return err
+		}
+	}
 	w, err := store.Load(cfg)
 	if err != nil {
 		return err
@@ -34,7 +41,9 @@ func runLeagueReset(cfg game.Config, date string) error {
 		return err
 	}
 	fmt.Printf("Season %d declared, starting %s. The order is in the outbound folder for the other boards.\n", w.Season, date)
-	return nil
+	// The planetary step above records what it met as reported, so the alarm is
+	// raised here or never: a later -planetary would not raise it again.
+	return reportFaults(cfg, run, "-league-reset")
 }
 
 // runLeagueReport writes one of the original's sysop report files into the data

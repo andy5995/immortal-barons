@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * -maint raises the same fault alarm as -planetary, and needs a league number
   * Computer barons are removed, including any a board already has
   * A realm under New Realm Protection is refused in the original's words
   * A strike aimed at a whole planet is named as such when it reports back

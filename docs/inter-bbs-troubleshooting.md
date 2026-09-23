@@ -310,7 +310,7 @@ wrong.
 - `No outbound packets.` means the game wrote nothing to hand over — so the
   question is whether `-planetary` ran, not whether the transport works.
 - `Delivered N packet(s) to the game.` on `-in` is the count that should be
-  matched by the next `-planetary` run's **Applied**. If `-in` delivers and
+  matched by the next run's **Applied**. If `-in` delivers and
   `-planetary` applies nothing, the packets are in the game's inbound and were
   refused, held, or quarantined — read the run report and the log, above.
 
@@ -318,7 +318,7 @@ Run the three in the order the game expects, and the counts line up end to end:
 
 ```
 barons-ftn -in -data /path/to/data      # deliver what the mailer brought
-immortal-barons -planetary -data /path/to/data
+immortal-barons -maint -data /path/to/data
 barons-ftn -out -data /path/to/data     # hand over what the game wrote
 ```
 

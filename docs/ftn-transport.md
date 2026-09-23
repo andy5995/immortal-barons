@@ -66,8 +66,9 @@ The complete exchange order is:
 
 1. Let the mailer finish its inbound session.
 2. Run `barons-ftn -in` to validate and unwrap received bundles.
-3. Run `immortal-barons -planetary` to apply local game packets and create new
-   replies, scores, and broadcasts.
+3. Run `immortal-barons -maint` to apply local game packets and create new
+   replies, scores, and broadcasts. It runs the planetary step and also keeps
+   the game day moving, which `-planetary` alone does not.
 4. Run `barons-ftn -out` to claim and bundle that fixed outbound snapshot.
 5. Run the tosser when using `.msg` attach links, then let the mailer send its
    obox or BSO queues.
@@ -76,7 +77,7 @@ For an hourly Unix event:
 
 ```sh
 /opt/ib/barons-ftn -in  -data /srv/ib/data
-/opt/ib/immortal-barons -planetary -data /srv/ib/data
+/opt/ib/immortal-barons -maint -data /srv/ib/data
 /opt/ib/barons-ftn -out -data /srv/ib/data
 /opt/bbs/bin/sbbsecho
 /opt/bbs/bin/binkp-poll
@@ -108,7 +109,7 @@ echo "=== $(date --iso-8601=seconds) ==="
 
 cd /sbbs/xtrn/imb
 ./barons-ftn -in
-./immortal-barons -planetary
+./immortal-barons -maint
 ./barons-ftn -out
 /sbbs/exec/sbbsecho /sbbs/ctrl/sbbsecho.ini
 /sbbs/exec/jsexec -c/sbbs/ctrl /sbbs/exec/binkit.js

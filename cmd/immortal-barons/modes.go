@@ -38,6 +38,14 @@ func runDump(cfg game.Config) error {
 // runMaint blocks on the lock (waits for any active player) then advances
 // the world.
 func runMaint(cfg game.Config, today string) error {
+	// A league board runs the planetary step below, so it is refused on the same
+	// terms as -planetary: with no league number it would take every league's
+	// packets as its own.
+	if cfg.InterBBSEnabled() {
+		if err := store.CheckLeagueNumber(cfg); err != nil {
+			return err
+		}
+	}
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
@@ -55,8 +63,9 @@ func runMaint(cfg game.Config, today string) error {
 	default:
 		fmt.Println("Maintenance has already been run today.")
 	}
+	var run store.PlanetaryRun
 	if cfg.IBBS {
-		run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
+		run, err = store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
 		if err != nil {
 			return err
 		}
@@ -72,7 +81,15 @@ func runMaint(cfg game.Config, today string) error {
 	// as a league board's. It writes no World Report -- that one is the LEAGUE's
 	// wars, and a board playing alone has no world to report on (#233).
 	writeBulletins(cfg, w)
-	return store.Save(w, cfg)
+	if err := store.Save(w, cfg); err != nil {
+		return err
+	}
+	// The same alarm as -planetary, and it has to be: the planetary step above
+	// has already marked these faults as reported, so a later -planetary would
+	// not raise them. -maint was silent here until #289, when it became the
+	// command a league board's timer runs. A stand-alone board's run is empty
+	// and raises nothing.
+	return reportFaults(cfg, run, "-maint")
 }
 
 // runPlanetary runs the inter-BBS maintenance step on its own (BRE's
@@ -105,7 +122,7 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 	// After the save, so a hook that hangs or a run that ends non-zero cannot
 	// cost the work the run just did — and so the faults reported here are not
 	// reported again by the next run.
-	return reportFaults(cfg, run)
+	return reportFaults(cfg, run, "-planetary")
 }
 
 // reportFaults raises the alarm for a run that met a fault the sysop has not
@@ -113,13 +130,13 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 // scheduler that started this. Both are deliberately keyed to NEW faults, not to
 // faults outstanding: a board that has been unreachable for a week must not fail
 // its unit every quarter of an hour, or the failure stops meaning anything.
-func reportFaults(cfg game.Config, run store.PlanetaryRun) error {
+func reportFaults(cfg game.Config, run store.PlanetaryRun, mode string) error {
 	if len(run.NewFaults) == 0 {
 		return nil
 	}
 	runFaultHook(cfg, run.NewFaults)
 	// stderr, because that is what a scheduler mails and what a journal marks.
-	fmt.Fprintf(os.Stderr, "immortal-barons -planetary: %s\n", strings.Join(run.NewFaults, " "))
+	fmt.Fprintf(os.Stderr, "immortal-barons %s: %s\n", mode, strings.Join(run.NewFaults, " "))
 	return errFaults
 }
 
@@ -267,6 +284,13 @@ func skipSummary(run store.PlanetaryRun) string {
 // outbound (BRE's "BRE FULL"). It requires either -local with a name or a BBS
 // drop file to identify the caller for the play step.
 func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bool) error {
+	// It runs the planetary step, so it is refused on the same terms as
+	// -planetary: with no league number it would take every league's packets.
+	if cfg.InterBBSEnabled() {
+		if err := store.CheckLeagueNumber(cfg); err != nil {
+			return err
+		}
+	}
 	// Step 1: read inbound packets.
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
