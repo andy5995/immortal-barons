@@ -663,10 +663,11 @@ league, mailer). Positional cannot express a per-neighbor directory at all, and
 a blank field shifts every field after it — which is what most of BRE's own
 InterBBS troubleshooting section is about. FTN addresses are already roster
 data in `ibnodes.dat`. The FTN transport's lines (`IncomingFileDir`,
-`NetmailDir`, `IncomingNetmailDir`, `Mailer`, `AttachDir`, `SubjectPath`,
+`OutgoingNetmailDir`, `IncomingNetmailDir`, `Mailer`, `AttachDir`, `SubjectPath`,
 `Link`, `Bundled`, `OboxMeshFanout`) are read by `ftn.LoadConfig` from the same
-file; `store.LoadBoardConfig` ignores them. Three take BRE's line labels: line 4
-is `IncomingFileDir`, line 5 `NetmailDir`, line 7 `Mailer`. Settings under an
+file; `store.LoadBoardConfig` ignores them. Three hold what BRE's positional
+BBS.CFG holds: line 4 is `IncomingFileDir`, line 5 `OutgoingNetmailDir`, line 7
+`Mailer`. Settings under an
 older release's names are refused with their replacements
 (`store.LegacyBoardRefusal`, `ftn.LegacyRefusal`) by the modes that move
 packets.
@@ -674,7 +675,7 @@ packets.
 `store.ParseBoardConfig` reads BRE's own positional format, wired to
 `-ibbs-reset -import-bbs-cfg PATH` for a sysop converting a league they already
 run. It takes the planet name and the league number into the game's settings,
-and lines 4, 5 and 7 as the transport's `IncomingFileDir`, `NetmailDir` and
+and lines 4, 5 and 7 as the transport's `IncomingFileDir`, `OutgoingNetmailDir` and
 `Mailer`. BRE reads its packets straight out of line 4, but IB unwraps from it
 into `GameInbound`, so that directory never becomes the game's own. The sysop
 name and FTN address are not imported: IB has no use for the first, and the

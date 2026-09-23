@@ -62,7 +62,7 @@ func TestCreateFileAttachClaimsMessageNumber(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "1.msg"), []byte("occupied"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	path, err := createFileAttach(Config{NetmailDir: dir}, "/bbs/out/fido/test.brp",
+	path, err := createFileAttach(Config{OutgoingNetmailDir: dir}, "/bbs/out/fido/test.brp",
 		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
 	if err != nil {
 		t.Fatal(err)
@@ -81,7 +81,7 @@ func TestCreateFileAttachClaimsMessageNumber(t *testing.T) {
 		t.Fatal("message has no KFS flag")
 	}
 
-	binkleyPath, err := createFileAttach(Config{NetmailDir: dir, Binkley: true}, "/bbs/out/fido/next.brp",
+	binkleyPath, err := createFileAttach(Config{OutgoingNetmailDir: dir, Binkley: true}, "/bbs/out/fido/next.brp",
 		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
 	if err != nil {
 		t.Fatal(err)

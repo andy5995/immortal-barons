@@ -582,7 +582,7 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 		if err := writeFileAtomic(final, body, 0o644); err != nil {
 			return Queued{}, err
 		}
-		if existing := messageForAttachment(transport.NetmailDir, final); existing != "" {
+		if existing := messageForAttachment(transport.OutgoingNetmailDir, final); existing != "" {
 			queued.Message = existing
 			return queued, nil
 		}

@@ -15,7 +15,7 @@ import (
 var legacyKeys = map[string]string{
 	"inboundnetmaildir": keyIncomingNetmailDir,
 	"inbounddir":        keyIncomingFileDir,
-	"netmaildir":        keyNetmailDir,
+	"netmaildir":        keyOutgoingNetmailDir,
 	"attachdir":         keyAttachDir,
 	"subjectpath":       keySubjectPath,
 	"link":              keyLink,

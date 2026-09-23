@@ -25,7 +25,7 @@ func ftnBoard(t *testing.T, extra string) game.Config {
 		}
 	}
 	bbs := "BoardID Bravo BBS\nLeagueNumber 900\nGameInbound in\nGameOutbound out\n" +
-		"IncomingFileDir mailer-in\nNetmailDir netmail\nSubjectPath Basename\n" + extra
+		"IncomingFileDir mailer-in\nOutgoingNetmailDir netmail\nSubjectPath Basename\n" + extra
 	if err := os.WriteFile(filepath.Join(dir, store.BoardConfigFile), []byte(bbs), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -341,7 +341,7 @@ func TestARepeatedHandoffFailureAlarmsOnce(t *testing.T) {
 	}
 
 	// A different failure is a new fault.
-	moved := strings.Replace(string(original), "NetmailDir netmail", "NetmailDir elsewhere", 1)
+	moved := strings.Replace(string(original), "OutgoingNetmailDir netmail", "OutgoingNetmailDir elsewhere", 1)
 	if err := os.WriteFile(bbsPath, []byte(moved), 0o644); err != nil {
 		t.Fatal(err)
 	}

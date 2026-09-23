@@ -15,7 +15,7 @@ func TestLoadConfig(t *testing.T) {
 	if err := os.Mkdir(netmail, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	body := "# FTN transport only\nUnknown future-value\nNetmailDir netmail\nMailer Binkley\n"
+	body := "# FTN transport only\nUnknown future-value\nOutgoingNetmailDir netmail\nMailer Binkley\n"
 	if err := os.WriteFile(filepath.Join(data, store.BoardConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -23,8 +23,8 @@ func TestLoadConfig(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.NetmailDir != netmail {
-		t.Errorf("NetmailDir = %q, want %q", cfg.NetmailDir, netmail)
+	if cfg.OutgoingNetmailDir != netmail {
+		t.Errorf("OutgoingNetmailDir = %q, want %q", cfg.OutgoingNetmailDir, netmail)
 	}
 	if !cfg.Binkley {
 		t.Error("Binkley = false, want true")
@@ -77,7 +77,7 @@ func TestLoadConfigAttachmentSettings(t *testing.T) {
 	if err := os.Mkdir(filepath.Join(data, "netmail"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	body := "NetmailDir netmail\nAttachDir attach\nSubjectPath Basename\n"
+	body := "OutgoingNetmailDir netmail\nAttachDir attach\nSubjectPath Basename\n"
 	if err := os.WriteFile(filepath.Join(data, store.BoardConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func TestLoadConfigAttachmentSettings(t *testing.T) {
 		t.Errorf("SubjectMode = %v, want SubjectBasename", cfg.SubjectMode)
 	}
 
-	body = "NetmailDir netmail\nSubjectPath ../fileboxes/ib\n"
+	body = "OutgoingNetmailDir netmail\nSubjectPath ../fileboxes/ib\n"
 	if err := os.WriteFile(filepath.Join(data, store.BoardConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestLoadConfigMixedLinks(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	body := "NetmailDir netmail\nIncomingFileDir in\nOboxMeshFanout No\n" +
+	body := "OutgoingNetmailDir netmail\nIncomingFileDir in\nOboxMeshFanout No\n" +
 		"Link 2 Attach\nLink 3 Obox obox\nLink 4 BSO bso Crash\n"
 	if err := os.WriteFile(filepath.Join(data, store.BoardConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
@@ -148,7 +148,7 @@ func TestConfigLoadsWithoutNetmailDirForAReceiveOnlyBoard(t *testing.T) {
 	// But the board that actually has an attach handoff to make is still told,
 	// at the point where it matters.
 	if err := RequireNetmail(cfg, dir); err == nil {
-		t.Error("an attach handoff with no NetmailDir was accepted")
+		t.Error("an attach handoff with no OutgoingNetmailDir was accepted")
 	} else if !strings.Contains(err.Error(), store.BoardConfigFile) {
 		t.Errorf("the refusal does not name the file to fix: %v", err)
 	}
@@ -166,7 +166,7 @@ func TestRawComposesWithEveryLinkMode(t *testing.T) {
 		}
 	}
 	body := "IncomingFileDir " + filepath.Join(dir, "in") + "\n" +
-		"NetmailDir " + filepath.Join(dir, "netmail") + "\n" +
+		"OutgoingNetmailDir " + filepath.Join(dir, "netmail") + "\n" +
 		"Link 1 Attach Raw\n" +
 		"Link 2 Obox obox raw\n" +
 		"Link 3 BSO bso Crash Raw\n" +
@@ -239,7 +239,7 @@ func TestMailerTakesTheOriginalsList(t *testing.T) {
 		if err := os.Mkdir(filepath.Join(dir, "netmail"), 0o755); err != nil {
 			t.Fatal(err)
 		}
-		body := "NetmailDir netmail\nMailer " + tc.value + "\n"
+		body := "OutgoingNetmailDir netmail\nMailer " + tc.value + "\n"
 		if err := os.WriteFile(filepath.Join(dir, store.BoardConfigFile), []byte(body), 0o644); err != nil {
 			t.Fatal(err)
 		}

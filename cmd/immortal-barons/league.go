@@ -317,7 +317,7 @@ type leagueSetup struct {
 //
 // Lines 4, 5 and 7 -- the mailer's incoming file directory, the netmail
 // directory and the mailer -- become the FTN transport's IncomingFileDir,
-// NetmailDir and Mailer, returned as bbs.cfg lines because they are the
+// OutgoingNetmailDir and Mailer, returned as bbs.cfg lines because they are the
 // transport's settings rather than the game's. The original reads its packets
 // straight out of line 4, so that directory is NOT the game's own inbound: the
 // transport unwraps from it into GameInbound. Two lines are left behind: the
@@ -341,9 +341,9 @@ func importBoardConfig(path string, cfg *game.Config) (string, []string, error) 
 		lines = append(lines, "IncomingFileDir "+bc.InboundDir)
 		took = append(took, "incoming file directory "+bc.InboundDir)
 	}
-	if bc.NetmailDir != "" {
-		lines = append(lines, "NetmailDir "+bc.NetmailDir)
-		took = append(took, "netmail directory "+bc.NetmailDir)
+	if bc.OutgoingNetmailDir != "" {
+		lines = append(lines, "OutgoingNetmailDir "+bc.OutgoingNetmailDir)
+		took = append(took, "netmail directory "+bc.OutgoingNetmailDir)
 	}
 	if bc.Mailer != "" {
 		// Refused rather than skipped: a mailer this does not know is a line

@@ -127,7 +127,7 @@ func TestIBBSResetImportsABREBoardConfig(t *testing.T) {
 	// settings. The original reads packets straight out of line 4; IB unwraps
 	// from it into its own inbound, so it must not become GameInbound.
 	wantsLine(t, out, "IncomingFileDir "+filepath.Join(dir, "fd-files"))
-	wantsLine(t, out, "NetmailDir "+filepath.Join(dir, "fd-netmail"))
+	wantsLine(t, out, "OutgoingNetmailDir "+filepath.Join(dir, "fd-netmail"))
 	wantsLine(t, out, "Mailer FrontDoor")
 	if strings.Contains(out, "GameInbound "+filepath.Join(dir, "fd-files")) ||
 		strings.Contains(out, "GameOutbound "+filepath.Join(dir, "fd-netmail")) {

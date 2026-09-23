@@ -38,7 +38,7 @@ func createFileAttach(transport Config, attached string, origin, destination Add
 	if err != nil {
 		return "", err
 	}
-	netmailDir, binkley := transport.NetmailDir, transport.Binkley
+	netmailDir, binkley := transport.OutgoingNetmailDir, transport.Binkley
 	now := time.Now()
 	id := messageID(now)
 	header := type2Header(subject, origin, destination, now)

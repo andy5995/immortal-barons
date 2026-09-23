@@ -168,7 +168,7 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-import-bbs-cfg PATH`** — Take this board's name, league number, mailer,
   incoming files directory and netmail directory from an original Barren Realms
   Elite `BBS.CFG`, for `-ibbs-reset`. The last three become the FTN transport's
-  `Mailer`, `IncomingFileDir` and `NetmailDir` lines. Use it when converting a
+  `Mailer`, `IncomingFileDir` and `OutgoingNetmailDir` lines. Use it when converting a
   league you already run, so you do not retype what that file already says. It
   prints what it read. `-board-id` overrides the name, and naming the board in
   the file skips the settings editor just as `-board-id` does. It prints the `bbs.cfg` to save, the same as

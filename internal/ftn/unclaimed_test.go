@@ -367,7 +367,7 @@ func TestAnEnvelopeInTheSecondIncomingFileDirIsFound(t *testing.T) {
 	if err := os.WriteFile(attachment, bundle, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	envelope, err := createFileAttach(Config{NetmailDir: second, SubjectMode: SubjectBasename}, attachment,
+	envelope, err := createFileAttach(Config{OutgoingNetmailDir: second, SubjectMode: SubjectBasename}, attachment,
 		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
 	if err != nil {
 		t.Fatal(err)

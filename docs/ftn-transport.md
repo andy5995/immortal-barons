@@ -45,7 +45,7 @@ Keep each owner in its own directory. Every setting below is a `bbs.cfg` line:
 | `GameOutbound` | Immortal Barons | Complete JSON packets waiting for the handoff |
 | `data/ftn-spool` | the transport | Usually empty; journals appear while a handoff is incomplete |
 | `AttachDir` (default `data/att`) | connector/tosser | `NNNNCCCC.BRP` bundles waiting to be sent |
-| `NetmailDir` | scanner/tosser | Outgoing game-owned `.msg` envelopes |
+| `OutgoingNetmailDir` | scanner/tosser | Outgoing game-owned `.msg` envelopes |
 | `IncomingFileDir` | mailer | Newly received bundles waiting for the unwrap step |
 | `IncomingNetmailDir` | tosser | Received `.msg` envelopes naming an attached bundle |
 | an obox | connector/mailer | Bundles queued for the peer owning that outbox |
@@ -65,7 +65,7 @@ mailer from reading or deleting the same file at once.
 | a door session with no `-full` | nothing | nothing |
 
 The unwrap step runs when `IncomingFileDir` is set. The handoff runs when
-`NetmailDir` or any `Link` line is set. Both take the transport's own lock
+`OutgoingNetmailDir` or any `Link` line is set. Both take the transport's own lock
 (`barons-ftn.lock` in the data directory), and neither holds the game's world
 lock while it waits for that one.
 
@@ -145,7 +145,7 @@ reported as warnings and do not change the exit status.
 
 These lines sit in `bbs.cfg` beside the board's other settings. Keywords ignore
 case. Relative filesystem paths are resolved beneath the data directory.
-`IncomingFileDir`, `NetmailDir` and `Mailer` are the original's `BBS.CFG` lines
+`IncomingFileDir`, `OutgoingNetmailDir` and `Mailer` are the original's `BBS.CFG` lines
 4, 5 and 7, named after the labels its manual gives them.
 
 ### Inbound settings
@@ -183,13 +183,13 @@ OboxMeshFanout  Yes
 ### Stored-message attach settings
 
 ```ini
-NetmailDir  /sbbs/fido/netmail
+OutgoingNetmailDir  /sbbs/fido/netmail
 AttachDir   /sbbs/fido/ib-attach
 Mailer      Binkley
 SubjectPath Absolute
 ```
 
-- `NetmailDir` is where the game writes outgoing `.msg` envelopes for the
+- `OutgoingNetmailDir` is where the game writes outgoing `.msg` envelopes for the
   scanner to pack. It is required when any peer uses `Attach`, including the
   default for a peer with no `Link` line.
 - `AttachDir` holds outgoing bundles for Attach and BSO links. If omitted, the
@@ -260,7 +260,7 @@ Link 4 BSO /var/spool/ftn/outbound.309 Hold
 
 The modes are:
 
-- `Attach` creates a game-owned `.msg` in `NetmailDir` addressed to that next
+- `Attach` creates a game-owned `.msg` in `OutgoingNetmailDir` addressed to that next
   hop. It takes no per-link directory. It is the compatibility default, and it
   is the weakest of the three: a tosser stands between the game and the
   mailer, and the Subject limit above is its alone. Prefer `BSO` where the
@@ -304,7 +304,7 @@ transport would invent graph edges and defeat a ring or partial mesh. List every
 direct fanout neighbor, including one that uses `Attach`. A hub may freely mix
 all three modes.
 
-Paths in a `Link` line must not contain spaces. `NetmailDir`, `AttachDir`, and
+Paths in a `Link` line must not contain spaces. `OutgoingNetmailDir`, `AttachDir`, and
 the incoming directory settings consume the rest of their line and may contain
 spaces when the operating system permits them.
 
@@ -402,7 +402,7 @@ The hub can use a different local handoff for every child:
 
 ```ini
 IncomingFileDir /srv/ftn/inbound
-NetmailDir /sbbs/fido/netmail
+OutgoingNetmailDir /sbbs/fido/netmail
 AttachDir /srv/ib/attach
 Mailer Binkley
 
@@ -599,9 +599,9 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 |---|---|---|
 | `GameOutbound` | The handoff did not run, or failed | Run `immortal-barons -planetary`; read its error |
 | `ftn-spool/out` | At least one target is busy or failed | Read the warning; inspect that peer's `.bsy`, path, or netmail directory |
-| `AttachDir` (default `data/att`), envelope still in `NetmailDir` | Normal. The attachment waits for the tosser to pack the `.msg` that names it | Nothing. Run/check the tosser |
-| `AttachDir` (default `data/att`) with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `NetmailDir`, BSO directory, and permissions |
-| `NetmailDir` `.msg` | The tosser has not packed outgoing netmail | Run/check the tosser and allow file attaches |
+| `AttachDir` (default `data/att`), envelope still in `OutgoingNetmailDir` | Normal. The attachment waits for the tosser to pack the `.msg` that names it | Nothing. Run/check the tosser |
+| `AttachDir` (default `data/att`) with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `OutgoingNetmailDir`, BSO directory, and permissions |
+| `OutgoingNetmailDir` `.msg` | The tosser has not packed outgoing netmail | Run/check the tosser and allow file attaches |
 | BSO `.?lo` | The mailer has not successfully sent the referenced bundle | Check peer address, password, route, and `.bsy` |
 | peer obox | The mailer has not sent or acknowledged the file | Check the peer session and outbox mapping |
 | `IncomingFileDir` | The unwrap step did not run, ran before receive completion, or rejected the wrapper | Run `-planetary` after the session and read warnings |
@@ -631,7 +631,7 @@ applies, because they look identical in a file listing:
   somebody.
 - Find the envelope. Each `Queued <packet> for <next hop> as <message>` line
   from the run that created the attachment names the `.msg` that carries it, so
-  the mapping is in the log. An envelope still sitting in `NetmailDir` means
+  the mapping is in the log. An envelope still sitting in `OutgoingNetmailDir` means
   the tosser has not packed it yet and the pair is fine. An envelope that has
   gone while its attachment stayed is the fault worth chasing.
 
@@ -686,7 +686,7 @@ What to read instead:
 - **`AttachDir` (default `data/att`)** should also drain: a bundle sitting
   there with no matching `.msg`/flow entry means the Attach or BSO queue
   publication step failed after the bundle was written — check the same
-  causes as the troubleshooting table above (subject length, `NetmailDir`,
+  causes as the troubleshooting table above (subject length, `OutgoingNetmailDir`,
   BSO directory, permissions). This directory is deliberately not under
   `ftn-spool/` and not shown by `-ftn-status`'s spool report — it is the one
   transport path a mailer's Subject field has to spell out under a byte

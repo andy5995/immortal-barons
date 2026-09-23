@@ -34,7 +34,7 @@ func TestLegacyConfigIsRefusedWithBBSCfgLines(t *testing.T) {
 		`  IncomingFileDir C:\SBBS\fido\inbound` + "\n",
 		`  IncomingFileDir C:\SBBS\fido\inbound\unsecure` + "\n",
 		`  IncomingNetmailDir C:\SBBS\fido\netmail in` + "\n",
-		`  NetmailDir C:\SBBS\fido\netmail` + "\n",
+		`  OutgoingNetmailDir C:\SBBS\fido\netmail` + "\n",
 		"  Mailer Binkley\n",
 		`  Link 2 BSO C:\SBBS\fido\outbound.309 Crash` + "\n",
 		"  Bundled Yes\n", "  OboxMeshFanout No\n", "  SubjectPath Basename\n", "  AttachDir att\n",

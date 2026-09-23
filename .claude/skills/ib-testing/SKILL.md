@@ -201,7 +201,7 @@ editing the world's copy achieves nothing.
 
 **It is not the only file, and it does not win.** Per-board settings —
 `BoardID`, `LeagueNumber`, `GameInbound`, `GameOutbound`, and the FTN
-transport's lines (`IncomingFileDir`, `NetmailDir`, `Mailer`, `Link`, …) — live
+transport's lines (`IncomingFileDir`, `OutgoingNetmailDir`, `Mailer`, `Link`, …) — live
 in `bbs.cfg`,
 and `LoadBoardConfig` runs *after* the JSON (`internal/store/config.go:70`), so
 bbs.cfg overrides it. Editing `LeagueNumber` in `config.json` on a rig that has

@@ -485,8 +485,9 @@ processes inbound, launches group attacks, and exports scores/news. The game's
 own FTN transport has run inside `-maint`/`-planetary`/`-full` since #246, as
 the original's PLANETARY and FULL write their own netmail (it was the separate
 `barons-ftn` before; a leftover `ftn.cfg` and the old `bbs.cfg` spellings are
-refused with the lines to paste, #241). Its mailer-facing keys take the
-original's BBS.CFG line labels (`IncomingFileDir`, `NetmailDir`, `Mailer`).
+refused with the lines to paste, #241). BRE's BBS.CFG has no key names, only
+positions; lines 4, 5 and 7 are IB's `IncomingFileDir`, `OutgoingNetmailDir` and
+`Mailer`.
 Private game directories sit behind resumable spools, with attach / obox / BSO
 links per peer. It sends plain packets by default and bundles only when a board
 says `Bundled Yes`, because a board that cannot unwrap a ZIP aborts its whole

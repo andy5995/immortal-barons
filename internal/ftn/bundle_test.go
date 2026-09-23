@@ -679,7 +679,7 @@ func TestRunInValidatesAndDeletesStoredAttach(t *testing.T) {
 	if err := os.WriteFile(attachment, body, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	messageConfig := Config{NetmailDir: filepath.Join(data, "transport-in"), SubjectMode: SubjectBasename}
+	messageConfig := Config{OutgoingNetmailDir: filepath.Join(data, "transport-in"), SubjectMode: SubjectBasename}
 	message, err := createFileAttach(messageConfig, attachment, Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
 	if err != nil {
 		t.Fatal(err)
@@ -900,7 +900,7 @@ func newBundledSetup(t *testing.T, boardID, extraFTN string) string {
 		// target, so declaring links here would quietly change which peers the
 		// broadcast tests expect.
 		store.BoardConfigFile: "BoardID " + boardID + "\nLeagueNumber 100\nGameInbound door-in\nGameOutbound door-out\n" +
-			"NetmailDir netmail\nAttachDir attach\nSubjectPath Basename\nIncomingFileDir transport-in\nIncomingNetmailDir transport-in\n" +
+			"OutgoingNetmailDir netmail\nAttachDir attach\nSubjectPath Basename\nIncomingFileDir transport-in\nIncomingNetmailDir transport-in\n" +
 			"Bundled Yes\n" + extraFTN,
 		store.NodeListFile: "1 HOST 2 3\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
 			"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +

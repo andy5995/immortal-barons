@@ -21,11 +21,11 @@ const LegacyConfigFile = "ftn.cfg"
 
 // The bbs.cfg keywords this package reads. The game's own reader ignores them,
 // as it ignores every keyword it does not know, so one file serves both.
-// IncomingFileDir, NetmailDir and Mailer are the original's BBS.CFG lines 4, 5
+// IncomingFileDir, OutgoingNetmailDir and Mailer are the original's BBS.CFG lines 4, 5
 // and 7, named after the labels its manual gives them.
 const (
 	keyIncomingFileDir    = "IncomingFileDir"
-	keyNetmailDir         = "NetmailDir"
+	keyOutgoingNetmailDir = "OutgoingNetmailDir"
 	keyIncomingNetmailDir = "IncomingNetmailDir"
 	keyAttachDir          = "AttachDir"
 	keyMailer             = "Mailer"
@@ -71,7 +71,7 @@ const (
 
 // Config contains settings local to the FTN transport.
 type Config struct {
-	NetmailDir string
+	OutgoingNetmailDir string
 	// Mailer is the Mailer line, canonical; empty when the line is absent,
 	// which behaves as Other. Binkley and NoNetmail are what it decides.
 	Mailer    string
@@ -203,8 +203,8 @@ func LoadConfig(dataDir string) (Config, error) {
 		}
 		value = strings.TrimSpace(value)
 		switch {
-		case strings.EqualFold(key, keyNetmailDir):
-			cfg.NetmailDir = value
+		case strings.EqualFold(key, keyOutgoingNetmailDir):
+			cfg.OutgoingNetmailDir = value
 		case strings.EqualFold(key, keyAttachDir):
 			cfg.AttachDir = value
 		case strings.EqualFold(key, keyIncomingFileDir):
@@ -266,8 +266,8 @@ func LoadConfig(dataDir string) (Config, error) {
 			}
 		}
 	}
-	if cfg.NetmailDir != "" && !filepath.IsAbs(cfg.NetmailDir) {
-		cfg.NetmailDir = filepath.Join(dataDir, cfg.NetmailDir)
+	if cfg.OutgoingNetmailDir != "" && !filepath.IsAbs(cfg.OutgoingNetmailDir) {
+		cfg.OutgoingNetmailDir = filepath.Join(dataDir, cfg.OutgoingNetmailDir)
 	}
 	if cfg.AttachDir != "" && !filepath.IsAbs(cfg.AttachDir) {
 		cfg.AttachDir = filepath.Join(dataDir, cfg.AttachDir)
@@ -306,7 +306,7 @@ func (c Config) Receives() bool { return len(c.IncomingFileDirs) > 0 }
 // Sends reports whether this board hands packets to FTN at all: a Link line, or
 // a netmail directory for the attach every unlinked peer gets.
 func (c Config) Sends() bool {
-	return len(c.Links) > 0 || (c.NetmailDir != "" && !c.NoNetmail)
+	return len(c.Links) > 0 || (c.OutgoingNetmailDir != "" && !c.NoNetmail)
 }
 
 // netmailDirs names where received .msg envelopes are looked for: the
@@ -426,18 +426,18 @@ func netmailProblem(cfg Config, dataDir string, attach bool, who string) error {
 		return fmt.Errorf("%s: %s takes an attach handoff, and %s None writes no netmail; give it a %s line with Obox or BSO",
 			path, who, keyMailer, keyLink)
 	}
-	if cfg.NetmailDir == "" {
-		return fmt.Errorf("%s: %s is not set, and %s takes an attach handoff", path, keyNetmailDir, who)
+	if cfg.OutgoingNetmailDir == "" {
+		return fmt.Errorf("%s: %s is not set, and %s takes an attach handoff", path, keyOutgoingNetmailDir, who)
 	}
 	// Checked here, where netmail is written, and not at load: the unwrap step
 	// never writes any, and a netmail directory that has gone missing must not
 	// also stop this board receiving.
-	info, err := os.Stat(cfg.NetmailDir)
+	info, err := os.Stat(cfg.OutgoingNetmailDir)
 	if err != nil {
-		return fmt.Errorf("%s %s: %w", keyNetmailDir, cfg.NetmailDir, err)
+		return fmt.Errorf("%s %s: %w", keyOutgoingNetmailDir, cfg.OutgoingNetmailDir, err)
 	}
 	if !info.IsDir() {
-		return fmt.Errorf("%s %s is not a directory", keyNetmailDir, cfg.NetmailDir)
+		return fmt.Errorf("%s %s is not a directory", keyOutgoingNetmailDir, cfg.OutgoingNetmailDir)
 	}
 	return nil
 }

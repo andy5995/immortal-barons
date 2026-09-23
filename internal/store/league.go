@@ -127,13 +127,13 @@ func parseNodeNumber(line string) (int, []int, error) {
 // seven fields identify this board in the league and tell the game where its
 // packet directories are.
 type BoardConfig struct {
-	Sysop      string
-	PlanetName string
-	Address    string
-	InboundDir string
-	NetmailDir string
-	League     int
-	Mailer     string
+	Sysop              string
+	PlanetName         string
+	Address            string
+	InboundDir         string
+	OutgoingNetmailDir string
+	League             int
+	Mailer             string
 }
 
 // ParseBoardConfig reads a BBS.CFG-style file: seven lines, in order — sysop
@@ -165,13 +165,13 @@ func ParseBoardConfig(path string) (BoardConfig, error) {
 	}
 	league, _ := strconv.Atoi(get(5))
 	return BoardConfig{
-		Sysop:      get(0),
-		PlanetName: get(1),
-		Address:    get(2),
-		InboundDir: get(3),
-		NetmailDir: get(4),
-		League:     league,
-		Mailer:     get(6),
+		Sysop:              get(0),
+		PlanetName:         get(1),
+		Address:            get(2),
+		InboundDir:         get(3),
+		OutgoingNetmailDir: get(4),
+		League:             league,
+		Mailer:             get(6),
 	}, nil
 }
 

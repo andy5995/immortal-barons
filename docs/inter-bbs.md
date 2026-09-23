@@ -552,7 +552,7 @@ straight out of the mailer's incoming files directory.
 
 Immortal Barons does the same when you give it the same three answers: the
 mailer's incoming files directory, the netmail directory, and the mailer. They
-are the `IncomingFileDir`, `NetmailDir` and `Mailer` lines of the [FTN
+are the `IncomingFileDir`, `OutgoingNetmailDir` and `Mailer` lines of the [FTN
 transport](ftn-transport.md), and `-maint`, `-planetary` and `-full` then
 unwrap and hand off around the planetary step, as `BRE PLANETARY` and `BRE
 FULL` do. `-ibbs-reset -import-bbs-cfg` fills them in from your old `BBS.CFG`.
@@ -577,7 +577,7 @@ The rest of the mapping:
 | Line 2, BBS name | `BoardID` |
 | Line 3, node address | `ibnodes.dat`, where the transport reads it |
 | Line 4, incoming files | `IncomingFileDir` |
-| Line 5, netmail directory | `NetmailDir` |
+| Line 5, netmail directory | `OutgoingNetmailDir` |
 | Line 6, league number | `LeagueNumber` |
 | Line 7, mailer | `Mailer`, with the same seven names |
 | `\OUTBOUND`, fixed | `GameOutbound`, and you choose the path |
@@ -622,11 +622,11 @@ A minimal attach setup on Synchronet adds three lines to `bbs.cfg`:
 
 ```
 IncomingFileDir /sbbs/fido/inbound
-NetmailDir      /sbbs/fido/netmail
+OutgoingNetmailDir      /sbbs/fido/netmail
 Mailer          Binkley
 ```
 
-- **NetmailDir** is where your tosser picks up Type-2 `.msg` netmail. On
+- **OutgoingNetmailDir** is where your tosser picks up Type-2 `.msg` netmail. On
   Synchronet read it from `scfg` → Networks → FidoNet EchoMail and NetMail →
   **NetMail Directory**, and check **Allow File Attachments** on that screen
   too; with it off, the wrapper is written and then ignored. Not every BBS has
