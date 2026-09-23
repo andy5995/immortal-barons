@@ -14,8 +14,10 @@ taken by pirates or raids.
 - Withdraw — move gold from the bank back to your treasury.
 - Cash Relief / Loans — borrow gold, or pay back what you already owe.
 
-Deposits and withdrawals have no size limit. One investment locks away at most
-two billion gold, though you may open as many as you like.
+Deposits and withdrawals have no size limit. The investments that pay back on
+any one date may return at most two billion gold between them, so the bank
+offers only what still fits for the date you choose. You may open as many
+investments as you like.
 
 Interest is paid at the end of every turn, on whatever is in the bank at that
 moment. If you have turned on Deposit gold at End of Turn, in Preferences, your

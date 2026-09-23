@@ -1,30 +1,32 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
+// ErrInvestDateFull refuses an investment whose return would push the returns
+// maturing on its date past MaxReturnsPerDate.
+var ErrInvestDateFull = errors.New("That is more than may be invested for that date.")
+
+// clampInvestDays holds a term to [MinInvestDays, MaxInvestDays].
+func clampInvestDays(days int) int { return min(max(days, MinInvestDays), MaxInvestDays) }
+
 // Invest locks `amount` gold for `days` days (clamped to [MinInvestDays,
 // MaxInvestDays]) and records a maturing return at the current InvestRate.
-// Returns the expected return, or an error if the amount is unaffordable.
-//
-// One investment is capped at MaxInvestment however much gold is on hand; the
-// menu offers no more than that, and this is the rule a direct caller meets.
-// There is no limit on how MANY investments a baron opens.
+// Returns the expected return, or an error if the amount is unaffordable or
+// more than MaxInvestPrincipal allows for that date.
 func (w *World) Invest(e *Empire, amount int64, days int) (int64, error) {
-	if days < MinInvestDays {
-		days = MinInvestDays
-	}
-	if days > MaxInvestDays {
-		days = MaxInvestDays
-	}
+	days = clampInvestDays(days)
 	if amount <= 0 {
 		return 0, nil
 	}
-	amount = min(amount, MaxInvestment)
+	if amount > w.MaxInvestPrincipal(e, days) {
+		return 0, ErrInvestDateFull
+	}
 	if e.Gold < amount {
 		return 0, ErrCantAfford
 	}
@@ -34,6 +36,32 @@ func (w *World) Invest(e *Empire, amount int64, days int) (int64, error) {
 	return ret, nil
 }
 
+// MaxInvestPrincipal is the most gold e may invest now for `days` days: the
+// principal whose return fills what is left below MaxReturnsPerDate once the
+// returns already maturing on that date are counted, truncated. A full date
+// gives 0. The ceiling is on the date, not on one investment, as in BRE —
+// matched to the gold against two captured prompts (bank_test.go).
+func (w *World) MaxInvestPrincipal(e *Empire, days int) int64 {
+	days = clampInvestDays(days)
+	due := w.GameDay + days
+	room := MaxReturnsPerDate
+	for _, inv := range e.Investments {
+		if inv.MaturesDay == due {
+			room -= inv.Return
+		}
+	}
+	if room <= 0 {
+		return 0
+	}
+	return int64(float64(room) / investGrowth(w.InvestRate, days))
+}
+
+// investGrowth is what one gold invested for `days` days at `rate` tenths of a
+// percent per day, compounded daily, grows to.
+func investGrowth(rate, days int) float64 {
+	return math.Pow(1+float64(rate)/1000, float64(days))
+}
+
 // ExpectedReturn is the total payout (principal + interest) for investing
 // `amount` for `days` days at `rate` TENTHS of a percent per day, COMPOUNDED
 // daily — matching BRE (live-verified: 1000 for 2 days at 5%/day returns
@@ -41,7 +69,7 @@ func (w *World) Invest(e *Empire, amount int64, days int) (int64, error) {
 // truncates once at the end, so IB does the same (int-iterative truncation would
 // drift low over a long term).
 func ExpectedReturn(amount int64, rate, days int) int64 {
-	v := float64(amount) * math.Pow(1+float64(rate)/1000, float64(days))
+	v := float64(amount) * investGrowth(rate, days)
 	if v > float64(MoneyCapMax) {
 		return MoneyCapMax
 	}

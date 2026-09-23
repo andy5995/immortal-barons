@@ -3053,8 +3053,8 @@ section is a record of what was claimed and how it was settled, so the word
   the whole balance earns, and the money cap is the bank's only ceiling. Do not
   put it back without evidence that is not a guide.
 - **Absolute money cap: 2,000,000,000 — CONFIRMED BY PLAY, and BINARY-VERIFIED.**
-  It binds three things there: gold in hand, gold in savings, and what may be
-  invested in a day. Unlike the interest cap it survives the check that killed
+  It binds three things there: gold in hand, gold in savings, and the
+  investment returns maturing on any one date. Unlike the interest cap it survives the check that killed
   that one, and the literal is in `BRE.OVR` — four sites in `run_bank`
   (0x0389d6), the investment ceiling among them, each loading `0x77359400` as
   `mov ax,0x9400` / `mov dx,0x7735`.
@@ -3064,9 +3064,16 @@ section is a record of what was claimed and how it was settled, so the word
   longint as two 16-bit immediates, so the bytes run `B8 00 94 BA 35 77` and the
   second opcode splits the halves. Search the halves, not the value.
 
-  IB matches the first two and implements the third differently: it caps **one
-  investment** at 2 billion but does not add up a day's investing
-  (`MaxInvestment`). That divergence is deliberate and stays.
+  IB matches all three (#284). The invest prompt sums the returns already
+  maturing on the chosen date and offers the principal that fills the rest of
+  the 2 billion (`World.MaxInvestPrincipal`, `MaxReturnsPerDate`); a full date
+  offers 0, and `Invest` refuses more. The principal is truncated, so a date
+  filled this way lists `$1,999,999,999`, one gold short — reproduced to the
+  gold from two captured prompts at 7.00% (9 days, room 76,445,740: offered
+  41,581,417, returning 76,445,739; 8 days, room 380,002,381: offered
+  221,164,845, returning 380,002,380). The formula is fitted to those two
+  captures, not read from `run_bank`. More than 2 billion may still be invested
+  in a turn by spreading it across dates.
 
   **IB's cap is 2,000,000,000, and no editor offers it (#205).**
   `Config.MoneyCapBillions` is the cap in whole billions, read through
@@ -3093,9 +3100,8 @@ section is a record of what was claimed and how it was settled, so the word
   re-ranged.
 
   Deposits and withdrawals are unbounded up to the cap — nothing gates the bank
-  per turn, so a per-action limit there only cost keystrokes. What IB does keep
-  at 2 billion is **one investment** (`MaxInvestment`); the number of
-  investments is not limited.
+  per turn, so a per-action limit there only cost keystrokes. Investments are
+  bounded by maturity date, as above; the number of them is not limited.
 - **A bank at the money cap pays its interest into gold in hand** rather than
   having it clamped away (`processEconomy`). The cap limits what one purse
   holds; a full purse is no reason to destroy the earnings. Gold in hand carries
@@ -3482,8 +3488,8 @@ Investments / Loans**, and **View Bank Rates**.
   rather than creating a second record. Since a day is several turns, this is
   reachable within a single day — invest on one turn and again on a later turn
   of the same day at the same term, and the two are indistinguishable
-  afterward. It also explains the shape of the money cap above: BRE bounds
-  *what may be invested in a day*, which is the same unit its storage uses.
+  afterward. It also explains the shape of the money cap above: BRE bounds the
+  *returns maturing on one date*, which is the same unit its storage uses.
 
   Only `+0x2f5`/`+0x2f7` (one dword's halves) appear across the bank code, so
   there is no parallel array — whether the stored figure is the principal or the
@@ -3492,9 +3498,8 @@ Investments / Loans**, and **View Bank Rates**.
   **IB diverges — deliberately, and it stays.** `Empire.Investments` is an
   unbounded slice of individual `Investment` records, each with its own amount,
   return and maturity day, so IB keeps them separate where BRE merges them by
-  date, and the count has no ceiling. This is the same divergence as the money
-  cap above (IB caps one investment, not the day's total) seen from the storage
-  side. The slice is self-draining rather than unbounded in practice:
+  date, and the count has no ceiling. The per-date cap is still BRE's: IB sums
+  the records sharing a maturity day. The slice is self-draining rather than unbounded in practice:
   `matureInvestments` (`internal/game/bank.go`) rebuilds it without the matured
   entries each turn, so its size is bounded by how many investments a realm
   makes inside a ten-day window.

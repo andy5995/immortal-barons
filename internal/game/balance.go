@@ -97,10 +97,10 @@ const (
 // hard-coded 2 billion because plain int is 32 bits on a 32-bit build, and every
 // gold credit past it was silently discarded.
 //
-// The 2 billion is CONFIRMED BY PLAY of the original — it holds gold in hand,
-// savings, and what may be invested in a day, all three at that figure. It is
-// not a literal in either binary in 32-bit or Real48 form, which fits: a cap
-// tested against a Turbo Pascal constant needs no constant of its own.
+// The 2 billion is CONFIRMED BY PLAY of the original and BINARY-VERIFIED — it
+// holds gold in hand, savings, and the investment returns maturing on any one
+// date, all three at that figure. BRE.OVR loads it as two 16-bit halves
+// (0x9400, 0x7735), which is why a search for the contiguous dword misses it.
 const (
 	// What a realm may HOLD, on hand or in the bank, is the 2 billion above,
 	// BRE's own figure, read through World.MoneyCap. It is no longer a setting
@@ -124,12 +124,12 @@ const (
 	moneyCapMaxBillions       = 999
 	MoneyCapMax         int64 = moneyCapMaxBillions * GoldPerBillion
 
-	// MaxInvestment is the most gold ONE investment may lock away. Deposits and
-	// withdrawals are deliberately unbounded (up to the money cap) — nothing gates the
-	// bank per turn, so a per-action limit there only cost keystrokes. Locking
-	// gold away is the case worth bounding, and a baron may still open as many
-	// investments as they like.
-	MaxInvestment = 2_000_000_000
+	// MaxReturnsPerDate is the most investment returns that may mature on any
+	// one date (BINARY-VERIFIED: one of the four 0x77359400 loads in run_bank).
+	// The invest prompt offers the principal that fills what is left below it
+	// for the chosen date (World.MaxInvestPrincipal). Deposits and withdrawals
+	// are unbounded up to the money cap.
+	MaxReturnsPerDate int64 = 2_000_000_000
 
 	// MaxCountField is the largest value a figure held in COUNT width (a plain
 	// int, 32 bits on a 32-bit door) may take: a per-unit market price, a

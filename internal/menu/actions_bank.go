@@ -100,7 +100,7 @@ func investFunds(s session.Session, w *ctx) Result {
 	if days < game.MinInvestDays {
 		days = game.MinInvestDays
 	}
-	amount := promptSuggested(s, "How much would you like to invest?", 0, min(p.Gold, game.MaxInvestment))
+	amount := promptSuggested(s, "How much would you like to invest?", 0, min(p.Gold, w.MaxInvestPrincipal(p, days)))
 	if amount <= 0 {
 		return Stay
 	}

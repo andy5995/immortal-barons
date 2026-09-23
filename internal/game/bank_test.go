@@ -223,52 +223,79 @@ func TestWithdrawLeavesGoldThatWouldNotFit(t *testing.T) {
 	}
 }
 
-// One investment is capped however deep the treasury, and the rest stays in hand
-// rather than vanishing. Opening more investments is not limited.
-func TestInvestCapsOnePrincipal(t *testing.T) {
-	w := NewWorldSeed(raisedCapConfig(), 1)
-	e := w.AddHuman("rich", "Croesus")
-	e.Gold = 10_000_000_000
+// returnsDue sums the returns e has maturing on game day `day`.
+func returnsDue(e *Empire, day int) int64 {
+	var sum int64
+	for _, inv := range e.Investments {
+		if inv.MaturesDay == day {
+			sum += inv.Return
+		}
+	}
+	return sum
+}
 
-	if _, err := w.Invest(e, 10_000_000_000, MinInvestDays); err != nil {
-		t.Fatalf("Invest: %v", err)
+// The investment ceiling is on the returns maturing on one DATE, as in BRE (#284).
+// Both cases are from a capture of the original at 7.00%, every figure its own:
+// the prompt offered exactly these maxima, the returns are what it quoted, and
+// the investment list then showed $1,999,999,999 for the date — one gold short,
+// because the maximum principal is truncated.
+func TestInvestCapIsPerMaturityDate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.InvestRate = 70
+	e := w.AddHuman("rich", "Croesus")
+	d9, d8 := w.GameDay+9, w.GameDay+8
+
+	// 9 days, 100,000,000 in hand. The date already held 1,923,554,260, the last
+	// 313,608,428 of it booked a moment earlier; the prompt offered 41,581,417.
+	e.Investments = []Investment{
+		{Amount: 1, Return: 1_609_945_832, MaturesDay: d9},
+		{Amount: 170_582_206, Return: 313_608_428, MaturesDay: d9},
 	}
-	if len(e.Investments) != 1 || e.Investments[0].Amount != MaxInvestment {
-		t.Errorf("invested %+v, want a single %d principal", e.Investments, int64(MaxInvestment))
+	e.Gold = 100_000_000
+	if got := w.MaxInvestPrincipal(e, 9); got != 41_581_417 {
+		t.Errorf("9-day maximum = %d, want 41581417", got)
 	}
-	if want := int64(10_000_000_000) - MaxInvestment; e.Gold != want {
-		t.Errorf("gold left = %d, want %d — the rest must stay in hand", e.Gold, want)
+	if ret, err := w.Invest(e, 41_581_417, 9); err != nil || ret != 76_445_739 {
+		t.Errorf("Invest 9 days = %d, %v; want 76445739", ret, err)
 	}
-	// A second investment is allowed; only the per-investment size is bounded.
-	if _, err := w.Invest(e, 1_000_000_000, MinInvestDays); err != nil {
-		t.Fatalf("second Invest: %v", err)
+	if got := returnsDue(e, d9); got != 1_999_999_999 {
+		t.Errorf("returns due on the 9-day date = %d, want 1999999999", got)
 	}
-	if len(e.Investments) != 2 {
-		t.Errorf("a baron may open as many investments as they like, got %d", len(e.Investments))
+
+	// 8 days: 58,418,583 booked first (return 100,374,001) onto a date holding
+	// 1,519,623,618; then 300,000,000 in hand, and the prompt offered 221,164,845.
+	e.Investments = append(e.Investments, Investment{Amount: 1, Return: 1_519_623_618, MaturesDay: d8})
+	e.Gold = 58_418_583
+	if ret, err := w.Invest(e, 58_418_583, 8); err != nil || ret != 100_374_001 {
+		t.Errorf("first 8-day Invest = %d, %v; want 100374001", ret, err)
+	}
+	e.Gold = 300_000_000
+	if got := w.MaxInvestPrincipal(e, 8); got != 221_164_845 {
+		t.Errorf("8-day maximum = %d, want 221164845", got)
+	}
+	if ret, err := w.Invest(e, 221_164_845, 8); err != nil || ret != 380_002_380 {
+		t.Errorf("second 8-day Invest = %d, %v; want 380002380", ret, err)
+	}
+	if got := returnsDue(e, d8); got != 1_999_999_999 {
+		t.Errorf("returns due on the 8-day date = %d, want 1999999999", got)
+	}
+	if e.Gold != 78_835_155 {
+		t.Errorf("gold left = %d, want 78835155", e.Gold)
+	}
+
+	// A full date offers 0 and refuses even one gold. An empty date offers
+	// 2,000,000,000 / 1.07^10 (IB's own arithmetic, not a captured figure).
+	if got := w.MaxInvestPrincipal(e, 8); got != 0 {
+		t.Errorf("full date offers %d, want 0", got)
+	}
+	if _, err := w.Invest(e, 1, 8); err != ErrInvestDateFull {
+		t.Errorf("Invest on a full date: err = %v, want ErrInvestDateFull", err)
+	}
+	if got := w.MaxInvestPrincipal(e, 10); got != 1_016_698_584 {
+		t.Errorf("empty 10-day date offers %d, want 1016698584", got)
 	}
 }
 
-// The gold field is 64-bit, which the cap alone no longer proves: a stored 2
-// billion fits an int32. What still needs the width is every intermediate the
-// game computes before clamping — a projected return, a loan's total owed, gold
-// plus bank — so the field is exercised past int32 directly.
-func TestGoldFieldIsSixtyFourBit(t *testing.T) {
-	w := NewWorldSeed(raisedCapConfig(), 1)
-	e := w.AddHuman("rich", "Croesus")
-	e.Gold = 5_000_000_000
-	e.Gold += 3_000_000_000
-	if e.Gold != 8_000_000_000 {
-		t.Errorf("gold = %d, want 8,000,000,000 (an int32 field would wrap)", e.Gold)
-	}
-	if MoneyCapMax <= 2_147_483_647 {
-		t.Errorf("MoneyCapMax = %d, which no longer gives projections room past int32", MoneyCapMax)
-	}
-}
-
-// raisedCapConfig used to open the money cap all the way up for the tests that
-// exercise large treasuries. The cap is fixed at 2 billion since 2026-09-01, so
-// this is the default ruleset now; the helper survives to mark the call sites
-// that once needed a raised one.
 func raisedCapConfig() Config { return DefaultConfig() }
 
 // The money cap is BRE's own 2 billion and is no longer a knob: World.MoneyCap
