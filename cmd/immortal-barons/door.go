@@ -147,6 +147,14 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 	// writes (run -set-dropfile once, stored in door.json). Hard-error rather than
 	// guess — a wrong guess silently misreads the caller. -help and every other
 	// mode returned above, so this gates only real door launches.
+	//
+	// A missing data directory is named first: door.json lives in it, so its
+	// absence would otherwise surface as "No drop file format is set", which
+	// sends a sysop to fix a setting when the path is what is wrong.
+	if info, err := os.Stat(cfg.DataDir); err != nil || !info.IsDir() {
+		fmt.Fprintf(os.Stderr, "immortal-barons: the data directory %q does not exist. Check the -data path in your door command.\n", cfg.DataDir)
+		os.Exit(1)
+	}
 	doorCfg, err := store.LoadDoorConfig(cfg.DataDir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "immortal-barons: door.json:", err)
