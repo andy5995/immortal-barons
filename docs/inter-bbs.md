@@ -993,7 +993,13 @@ whatever schedules jobs on your system: `cron` or a systemd timer on Unix, Task
 Scheduler on Windows. How often is up to you. Every exchange is a round trip,
 and the Travel Times screen in the game reports how long your players actually
 wait. A league whose boards poll each hour
-plays very differently from one that polls at 3am.
+plays very differently from one that polls at 3am. Every 15 minutes is a good
+start for a league.
+
+It is safe to run while callers are playing. It waits only for a save that is
+already in progress, never for a caller to leave. Running it often does not add
+game days: the day advances at most once per date, and the other runs only move
+packets.
 
 **The timer is not optional.** The `-maint` command runs the inter-BBS step as
 well, but the maintenance a caller's login starts does not, so a board with

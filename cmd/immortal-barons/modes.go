@@ -36,9 +36,10 @@ func runDump(cfg game.Config) error {
 	return nil
 }
 
-// runMaint blocks on the lock (waits for any active player) then advances
-// the world. On a league board it also runs the planetary step, with the FTN
-// transport on either side of it (see transport.go).
+// runMaint waits for the world lock, which a caller's session holds only for
+// one save at a time, then advances the world. On a league board it also runs
+// the planetary step, with the FTN transport on either side of it (see
+// transport.go).
 func runMaint(cfg game.Config, today string) error {
 	// A league board runs the planetary step below, so it is refused on the same
 	// terms as -planetary: with no league number it would take every league's

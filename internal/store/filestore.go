@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"os"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -82,6 +83,20 @@ func (fs *FileStore) reload() error {
 		return err
 	}
 	copySaved(fs.w, nw)
+	// Today is the session's own date and is not saved, so another process's
+	// maintenance -- a -maint timer, or a caller logging in -- can move the game
+	// past midnight under a session that still holds the day it logged in. It
+	// then stamped a turn played after the rollover with yesterday's date, and
+	// DateForDay put due dates a day early. The game's date moves it forward;
+	// it never moves back, since a board behind the calendar is behind by design.
+	// Only a date maintenance actually reached counts: a league reset sets
+	// LastMaintDate to its start date, which may be in the future and is not
+	// checked for form, and clears LastMaintRun.
+	if d := fs.w.LastMaintDate; fs.w.Today != "" && d > fs.w.Today && d <= fs.w.LastMaintRun {
+		if _, err := time.Parse("2006-01-02", d); err == nil {
+			fs.w.Today = d
+		}
+	}
 	repair(fs.w, fs.cfg)
 	if err := checkClockOffset(fs.w); err != nil {
 		return err

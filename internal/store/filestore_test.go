@@ -161,3 +161,81 @@ func TestReadSeesAnotherNodesCommit(t *testing.T) {
 		t.Error("Read served stale state; it must reload like Transact does")
 	}
 }
+
+// A session open across midnight follows the day that another process's
+// maintenance moved the game to: a turn played after the rollover is dated
+// today, not the day the caller logged in.
+func TestSessionFollowsAnotherProcesssRollover(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
+	seed := game.NewWorldSeed(cfg, 1)
+	seed.LastMaintDate, seed.LastMaintRun = "2026-09-23", "2026-09-23"
+	e := seed.AddHuman("alice", "Alice")
+	e.LastPlayed = "2026-09-23" // a realm that never played is swept by maintenance
+	if err := Save(seed, cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	session, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session.SetStore(NewFileStore(session, cfg))
+	session.With(func() { session.Today = "2026-09-23" })
+
+	// -maint after midnight, as a separate process would run it.
+	maint, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r := maint.DailyMaintenance("2026-09-24"); r.Days != 1 {
+		t.Fatalf("maintenance advanced %d days, want 1", r.Days)
+	}
+	if err := Save(maint, cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	session.With(func() { session.PlayTurn(session.FindByOwner("alice"), session.Today) })
+	if session.Today != "2026-09-24" {
+		t.Errorf("session Today = %s, want 2026-09-24", session.Today)
+	}
+	var played string
+	session.Read(func() { played = session.FindByOwner("alice").LastPlayed })
+	if played != "2026-09-24" {
+		t.Errorf("a turn after the rollover was dated %s, want 2026-09-24", played)
+	}
+	if got := session.DateForDay(session.GameDay); got != "09/24/2026" {
+		t.Errorf("DateForDay(today) = %s, want 09/24/2026", got)
+	}
+}
+
+// A league reset dated in the future moves the game's date, but not the
+// session's: only a date maintenance reached is followed.
+func TestSessionIgnoresAFutureResetDate(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
+	seed := game.NewWorldSeed(cfg, 1)
+	seed.LastMaintDate, seed.LastMaintRun = "2026-09-24", "2026-09-24"
+	if err := Save(seed, cfg); err != nil {
+		t.Fatal(err)
+	}
+	session, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session.SetStore(NewFileStore(session, cfg))
+	session.With(func() { session.Today = "2026-09-24" })
+
+	reset, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reset.LastMaintDate = "2026-10-01" // what ResetForNewSeason writes for a future start
+	if err := Save(reset, cfg); err != nil {
+		t.Fatal(err)
+	}
+	session.Read(func() {})
+	if session.Today != "2026-09-24" {
+		t.Errorf("session Today = %s after a reset dated 2026-10-01, want 2026-09-24", session.Today)
+	}
+}
