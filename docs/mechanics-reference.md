@@ -3197,8 +3197,9 @@ section is a record of what was claimed and how it was settled, so the word
   having it clamped away (`processEconomy`). The cap limits what one purse
   holds; a full purse is no reason to destroy the earnings. Gold in hand carries
   the same cap, so a baron whose hand is also full still loses the overflow.
-  **Unverified against BRE** — IB chooses this because the alternative silently
-  deletes money the player earned.
+  **Binary-verified:** `process_end_of_turn` (BRE.OVR unit 0xbdc6, +0x1722)
+  banks only what fits under 2,000,000,000 and adds the remainder to gold in
+  hand.
 - **Gold destroyed by the cap raises an event**, naming the amount and its
   source ("a matured investment", "this turn's income", "the trading market").
   Every path that pays gold in runs through `World.creditGold`, which is what
@@ -3553,7 +3554,9 @@ Investments / Loans**, and **View Bank Rates**.
   `InterestRate/10` is the **daily** rate (config 50 → **5.0%/day**, shown in View
   Bank Rates), credited "at the end of each turn" — so per turn it is the daily
   rate spread across `TurnsPerDay` turns: `Bank × InterestRate / (1000 ×
-  TurnsPerDay)`. (This replaced IB's old flat ~1%/turn, which compounded to a much
+  TurnsPerDay)`, **rounded** to the nearest gold (binary-verified,
+  `process_end_of_turn` +0x16be: BRE takes `Round()` of that quotient, so 199
+  gold at 5.0% over ten turns earns 1). IB truncated it until 2026-09-24. (This replaced IB's old flat ~1%/turn, which compounded to a much
   higher effective daily rate.) With the **Deposit gold at End of Turn**
   preference on, the deposit is banked *before* that turn's interest is credited,
   so the turn's takings earn on the turn that made them. It still happens after

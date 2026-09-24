@@ -389,15 +389,25 @@ func RiotChancePct(tax int) int {
 	return min(riotWeight(tax)*100/RiotChanceDenom, 100)
 }
 
+// savingsInterest is one turn's interest on a bank balance: bank × rate / 1000 /
+// turnsPerDay, rounded half up. BINARY-VERIFIED (process_end_of_turn, BRE.OVR
+// unit 0xbdc6 +0x16be): BRE takes Round() of that quotient in Turbo Pascal
+// reals, so 199 gold at 5.0% over ten turns earns 1 where truncation gave 0.
+// The integer form matched the Real48 arithmetic on 200,000 sampled balances,
+// rates and turn counts, exact halves included. int64: the product overflows
+// int32 on a 32-bit build.
+func savingsInterest(bank int64, rate int, turnsPerDay int64) int64 {
+	d := 1000 * turnsPerDay
+	return (2*bank*int64(rate) + d) / (2 * d)
+}
+
 func (w *World) processEconomy(e *Empire) {
 	// Savings interest (BRE-faithful, config-help verified): the Interest Rate knob
 	// is "the interest the bank gives in 10 days", so config/10 is the DAILY rate
 	// (shown in View Bank Rates: config 50 → 5.0%/day). BRE credits it "at the end
 	// of each turn", so per turn it is the daily rate spread across the day's turns:
 	// interest = Bank × (InterestRate/10)/100 / TurnsPerDay = Bank × InterestRate /
-	// (1000 × TurnsPerDay). int64 throughout and clamp before storing: on a 32-bit
-	// build the Bank*InterestRate product overflows int32 before the divide.
-	// Storage stays int.
+	// (1000 × TurnsPerDay), ROUNDED to the nearest gold (savingsInterest).
 	//
 	// The whole balance earns. IB used to stop paying interest above 1.6 billion,
 	// a figure that came from a player guide and turned out to be in neither
@@ -416,7 +426,7 @@ func (w *World) processEconomy(e *Empire) {
 	if e.Owner != "" && e.Prefs.DepositEndTurn && e.Gold > 0 {
 		_ = w.Deposit(e, e.Gold)
 	}
-	interest := e.Bank * int64(w.Config.InterestRate) / (1000 * tpd)
+	interest := savingsInterest(e.Bank, w.Config.InterestRate, tpd)
 	e.Bank += interest
 	// Reported at the start of the next turn (#216), so it has to survive the
 	// save between the two door runs.
@@ -425,8 +435,9 @@ func (w *World) processEconomy(e *Empire) {
 	// having it destroyed: the cap limits what one purse holds, and a full purse
 	// is no reason to burn the earnings. Gold has the same cap, so a baron whose
 	// hand is full too still loses the overflow — the clamp at the end of this
-	// function. Whether the original does this is unverified; IB chooses it
-	// because the alternative silently deletes money the player earned.
+	// function. BINARY-VERIFIED: process_end_of_turn +0x1722 banks only what
+	// fits under 2,000,000,000 and adds the rest to gold in hand (+0x66, the
+	// field run_bank prints as "gold in hand").
 	if over := e.Bank - w.MoneyCap(); over > 0 {
 		e.Bank = w.MoneyCap()
 		w.creditGold(e, over, "bank interest")

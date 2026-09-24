@@ -490,3 +490,33 @@ func TestMaintenanceRecordsTheDaysInvestmentReturns(t *testing.T) {
 		t.Errorf("InvestReturnsToday = %d, want 3450 — both matured returns, and not the locked one", e.InvestReturnsToday)
 	}
 }
+
+// Savings interest is ROUNDED to the nearest gold, as BRE rounds it
+// (process_end_of_turn +0x16be). The figures were checked by hand and against
+// the Real48 calculator; truncation gives 0, 12,874 and 2 for the first three.
+func TestSavingsInterestRounds(t *testing.T) {
+	cases := []struct {
+		bank      int64
+		rate      int
+		tpd, want int64
+	}{
+		{199, 50, 10, 1},           // 0.995
+		{1_234_567, 73, 7, 12_875}, // 12,874.77
+		{1_000, 25, 10, 3},         // 2.5 exactly: half rounds up
+		{1_000, 24, 10, 2},         // 2.4
+		{2_000_000_000, 200, 1, 400_000_000},
+	}
+	for _, c := range cases {
+		if got := savingsInterest(c.bank, c.rate, c.tpd); got != c.want {
+			t.Errorf("savingsInterest(%d, %d, %d) = %d, want %d", c.bank, c.rate, c.tpd, got, c.want)
+		}
+	}
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.InterestRate, w.Config.TurnsPerDay = 50, 10
+	e := w.AddHuman("tester", "Testland")
+	e.Food, e.Gold, e.Bank = 1_000_000, 0, 199
+	w.processEconomy(e)
+	if e.Bank != 200 || e.LastInterest != 1 {
+		t.Errorf("199 banked: Bank=%d LastInterest=%d, want 200 and 1", e.Bank, e.LastInterest)
+	}
+}
