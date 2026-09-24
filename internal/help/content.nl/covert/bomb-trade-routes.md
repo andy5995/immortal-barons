@@ -9,10 +9,10 @@ title: 'Handelsroutes bombarderen'
 
 Handelsroutes bombarderen is een interplanetaire operatie, in het menu
 Speciale operaties. Die treft de handelsovereenkomsten die over een andere
-planeet onderweg zijn. De meeste aanvallen halen niets uit en sommige
-overeenkomsten glippen erdoor, maar een overeenkomst die de bommenwerpers
-bereiken komt vrijwel leeg aan - er blijft maar een paar procent van elk
-goed in over. Lopende verdragen worden niet geraakt.
+planeet onderweg zijn. De meeste aanvallen worden verdreven voordat ze hun
+doel bereiken. Een aanval die doorkomt treft ongeveer twee op de drie
+overeenkomsten. Een overeenkomst die de bommenwerpers bereiken komt aan met
+maar een paar procent van elk goed. Lopende verdragen worden niet geraakt.
 
 Een overeenkomst blijft gespaard als de twee handelende rijken onderling
 Beschermde handel hebben. Uw eigen afspraken met het doelwit tellen hier

@@ -44,14 +44,14 @@ um homem enviado tarde não é desperdício.
 
 Cada relatório chega como notícia do planeta, com data, dizendo o que foi
 apontado para você e quanto tempo faltava quando ele escreveu. Essa linha
-nunca muda depois, então horas mais tarde ela já não diz quanto falta.
+nunca muda depois, então horas mais tarde ela já não diz quanto tempo falta.
 
-**Ataques a Caminho**, no menu Interplanetário, são os mesmos avisos mantidos em dia: uma
-linha por ameaça, a mais próxima no topo, com contagem regressiva enquanto você lê — `3h`, depois
-`90m`, depois `fora` quando a força já partiu. Uma arma já em voo aparece
-com os dias que faltam para ela pousar.
+**Ataques a Caminho**, no menu Interplanetário, são os mesmos avisos mantidos
+em dia: uma linha por ameaça, a mais próxima no topo, com contagem regressiva
+enquanto você lê: `3h`, depois `90m`, depois `fora` quando a força já partiu. Uma
+arma já em voo aparece com os dias que faltam para ela pousar.
 
-Uma lista vazia não é prova de paz. Ela quer dizer que nada foi relatado, e
+Uma lista vazia não prova que ninguém está vindo. Fora uma arma já em voo,
 só um observador colocado em outro planeta pode relatar alguma coisa.
 
 ## Por que isso importa
@@ -71,5 +71,7 @@ Coloque-o onde está a ameaça, não onde está a mágoa. O planeta que acabou d
 perder uma batalha para você é o que está montando a resposta, e a diária é
 a mesma tanto para vigiar um rival quanto um vizinho de confiança.
 
-Uma estadia curta renovada vale mais que uma estadia longa comprada cedo: os
-dias correm acontecendo algo ou não.
+Mandar outro SpyGuy a um planeta já vigiado daqui não soma as duas
+estadias. A estadia passa a ser a mais longa das duas, e você ainda paga por
+cada dia que comprou. Isso vale para todo barão do seu planeta, porque eles
+dividem o observador. Mande um novo quando a estadia antiga acabar.

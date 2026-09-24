@@ -13,18 +13,19 @@ Sie das eine versorgen und das andere hungern lassen
 können. Landwirtschaftsgebiete bauen Nahrung an, und weitere können Sie auf
 dem Nahrungsmarkt kaufen.
 
-Der Markt öffnet sich an dieser Stelle Ihres Zuges von selbst, und beide
+Der Nahrungsmarkt öffnet sich nach dem Unterhalt von selbst, und beide
 Rechnungen werden Ihnen vorgelegt, ob Sie genug im Vorrat haben oder
-nicht. Schalten Sie Reich autom. versorgen in den Einstellungen ein, und Sie
-überspringen all das in jedem Zug, in dem Sie die beiden Rechnungen decken
-können; in einem Zug, in dem Sie es nicht können, öffnet der Markt trotzdem.
+nicht. Solange Reich autom. versorgen in den Einstellungen eingeschaltet ist
+(ein neues Reich beginnt damit eingeschaltet), überspringen Sie all das in
+jedem Zug, in dem Sie die beiden Rechnungen decken können. In einem Zug, in
+dem Sie es nicht können, öffnet der Markt trotzdem.
 
 Der Markt verkauft Ihnen Nahrung teurer, als er beim Rückkauf zahlt. Er ist
 also kein Ort, um überschüssige Nahrung zu lagern.
 
-Der Preis ändert sich täglich ein wenig. Er ist an diesem Tag für jeden auf
-dem Planeten gleich, und er bleibt bis zum nächsten Tag gleich. Kaufen Sie
-an einem billigen Tag, wenn Sie können.
+Der Preis ist jeden Tag neu, und der Preis eines Tages kann dreimal so hoch
+sein wie der eines anderen. Er ist an diesem Tag für jeden auf dem Planeten
+gleich. Kaufen Sie an einem billigen Tag, wenn Sie können.
 
 Jeden Zug isst zuerst Ihr Volk, dann Ihr Heer, und dann verdirbt ein Teil
 der Nahrung, die noch im Vorrat liegt. Ein kleiner Vorrat ist sicher: Nichts
@@ -36,9 +37,10 @@ Knappheit wird doppelt berechnet, denn die beiden Bedürfnisse werden
 getrennt gezählt. Was Ihrem Volk fehlt, kostet Rückhalt, und was Ihrem Heer
 fehlt, kostet Kampfmoral. Niemand verlässt Ihr Reich deswegen - aber wenn
 Ihr Volk unter etwa zwei Drittel dessen bekommt, was es braucht, fällt das
-Reich in einen Bürgerkrieg. Ein Bürgerkrieg halbiert Ihren Rückhalt und
-zerstört einen Teil Ihres Landes und jeder Art von Einheit, die Sie
-besitzen, die gelisteten eingeschlossen.
+Reich in einen Bürgerkrieg. Wer weniger als etwa neun Zehntel des Unterhalts
+seiner Regionen zahlt, löst ebenfalls einen Bürgerkrieg aus. Ein Bürgerkrieg
+halbiert Ihren Rückhalt und zerstört einen Teil Ihrer Regionen und jeder Art
+von Einheit, die Sie besitzen, die gelisteten eingeschlossen.
 
 Die Ernte dieses Zuges trifft zu Beginn des Zuges ein, Sie können sie also
 im selben Zug verkaufen. Ihren Überschuss jeden Zug abzuverkaufen, statt ihn

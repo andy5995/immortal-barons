@@ -14,7 +14,7 @@ acertar o povo, os soldados, os próprios agentes, os tanques, os caças ou o
 estoque de comida.
 
 A comida é o grande prêmio. Um ataque que chega aos celeiros queima boa
-parte dela, muito mais do que os poucos por cento que os outros cinco
-perdem, então um reino já com pouca comida pode ser jogado na fome por um
-único golpe de sorte. Só que você não pode mirar nela, então a operação é
-uma aposta, não um plano.
+parte dela, muito mais do que qualquer um dos outros cinco perde, então um
+reino já com pouca comida pode ser jogado na fome por um único ataque de
+sorte. Só que você não pode mirar nela, então a operação é uma aposta, não
+um plano.

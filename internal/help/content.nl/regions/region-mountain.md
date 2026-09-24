@@ -7,6 +7,6 @@ title: Bergen
 
 # Bergregio's
 
-Bergregio's winnen natuurlijke grondstoffen. Hun inkomsten liggen gemiddeld
-lager, maar ze zijn stabiel, omdat weinig zaken er invloed op hebben. Bergen
-verhogen ook de productie van uw industriële regio's.
+Bergregio's verdienen goud met mijnbouw. Hun inkomsten liggen gemiddeld
+lager, maar veranderen weinig van beurt tot beurt. Bergen verhogen ook de
+productie van uw industriële regio's.

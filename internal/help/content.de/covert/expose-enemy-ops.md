@@ -15,7 +15,7 @@ irgendetwas ausrichten.
 Es wirkt gegen EIN Reich - das Reich, in dem der Agent sitzt -, daher listet
 das Menü nur die Reiche auf, die Sie bereits bestochen haben. Bestechung
 kommt zuerst; ohne einen Agenten auf Ihrer Lohnliste gibt es nichts
-aufzudecken. Ein Zehntel der Versuche dieses Reiches kommt weiterhin durch.
+aufzudecken.
 
 Es kostet keinen Agenten und keinen Teil eines Tageskontingents, Sie dürfen
 es also so oft ausführen, wie Sie es bezahlen können. Alles, was der Schild

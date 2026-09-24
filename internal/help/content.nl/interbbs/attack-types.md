@@ -7,33 +7,35 @@ title: Aanvalstypen
 
 # Aanvalstypen
 
-Wanneer u uw eigen strijdmacht op een baron op een andere planeet afstuurt,
-kiest u hoe u de aanval doorzet. Bij groepsaanvallen is die keuze er niet -
-die vechten altijd als een normale aanval.
+Een aanvalstype bepaalt hoe uw eigen strijdmacht vecht tegen een baron op
+een andere planeet.  Bij groepsaanvallen is die keuze er niet: die vechten
+altijd als een gewone aanval.
 
-Alleen gaan levert ook meer op: uw eigen aanval neemt twee keer zoveel land
-als een groepsaanval van hetzelfde gewicht. Wat u opgeeft is het doelwit van
-een hele planeet en de strijdkrachten van alle anderen.
+Alleen gaan levert ook meer op: uw eigen aanval neemt twee keer zo'n groot
+deel van de regio's van de verdediger als een groepsaanval. Wat u opgeeft is
+het doelwit van een hele planeet en de strijdkrachten van alle anderen.
 
 - **Normale aanval** - uw strijdkrachten vechten op volle sterkte. Beide
   partijen breken af zodra ze 15% verliezen hebben geleden, en u neemt het
   standaarddeel van de regio's van de verdediger.
 - **Snelle aanval** - door de verrassing vecht u op 120% van uw normale
   sterkte, maar de slag is kort en rommelig: beide partijen trekken zich
-  terug bij 8% verliezen, en u voert maar de helft van het land af dat een
-  normale aanval zou opleveren.
-- **Uitgebreide slag** - een slijtageslag. Vermoeidheid brengt uw
+  terug bij 8% verliezen, en u voert maar de helft van de regio's af die een
+  gewone aanval zou opleveren.
+- **Langdurige slag** - een slijtageslag. Vermoeidheid brengt uw
   strijdkrachten terug tot 85% sterkte, maar ze zetten door tot beide
-  partijen 20% verliezen hebben geleden en brengen 125% van het land van een
-  normale aanval mee terug.
+  partijen 20% verliezen hebben geleden en brengen 125% van de regio's van
+  een gewone aanval mee terug.
 
-De keuze gaat eigenlijk over waar u gebrek aan heeft. Land is het enige dat
-u niet snel kunt terugkopen, dus de uitgebreide slag is degene die de kaart
-verandert - betaal ervoor wanneer u al manschappen over heeft en u het zich
-kunt veroorloven een dag zwak te staan. Een snelle aanval kost u het minst
-en slaat boven zijn gewicht, wat hem het eerlijke antwoord maakt als u niet
-zeker weet of u kunt winnen: u komt er goedkoop achter, en uw leger staat er
-nog.
+Deze verliezen gelden voor de standaardinstelling van de aanvalsschade. Uw
+sysop kan ze halveren of verdubbelen.
+
+Kies naar wat u kunt missen. Regio's zijn traag terug te winnen, dus een
+langdurige slag levert u het meest op. Stuur die als u troepen over hebt en
+het zich kunt veroorloven een dag zwak te staan. Een snelle aanval kost u
+het minst en vecht harder dan zijn omvang doet vermoeden, dus gebruik hem
+als u niet zeker weet of u kunt winnen. U krijgt het antwoord goedkoop, en
+uw leger overleeft.
 
 Onthoud dat uw sterkte bij aankomst wordt gemeten, niet bij vertrek. Tegen
 een verre planeet heeft de verdediger dagen om geschutstorens te bouwen
@@ -62,11 +64,11 @@ stuurde, wat er thuiskwam, wat het vernietigde, en of het het doelwit
 het nog onder de bescherming voor nieuwe rijken aantrof, wordt dat gemeld in
 plaats van dat het als nederlaag telt.
 
-Land dat u in het buitenland verovert heeft geen type tot u het er een
-geeft, dus het wacht op u en de regiokiezer verschijnt aan het begin van uw
-volgende beurt - dezelfde vraag die een gewone aanval thuis stelt. Bij een
-groepsaanval worden de regio's verdeeld onder de baronnen die ervoor betaald
-hebben, naar rato van wat ieder inbracht.
+Regio's die u in het buitenland verovert hebben geen type tot u ze er een
+geeft, dus ze wachten op u, en de regiokiezer verschijnt aan het begin van
+uw volgende beurt - dezelfde vraag die een gewone aanval thuis stelt. Bij
+een groepsaanval worden de regio's verdeeld onder de baronnen die ervoor
+betaald hebben, naar rato van wat ieder inbracht.
 
 Komt het antwoord nooit aan - een BBS valt stil, een pakket raakt zoek - dan
 komen uw strijdkrachten na het aantal dagen dat uw sysop heeft ingesteld

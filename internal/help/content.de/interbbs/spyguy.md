@@ -49,15 +49,14 @@ Sie gerichtet war und wie viel Zeit ihm blieb, als er schrieb. Diese Zeile
 ändert sich danach nie, Stunden später sagt sie Ihnen also nicht mehr, wie
 viel Zeit noch bleibt.
 
-**Angriffe im Anflug** im InterPlanetary-Menü führt dieselben Warnungen
-aktuell: eine Zeile je Bedrohung, die nächste oben, herunterzählend,
-während Sie lesen - `3h`, dann `90m`, dann `away`, sobald die Truppe fort
-ist. Eine Waffe, die schon fliegt, wird mit den Tagen bis zum Einschlag
-geführt.
+**Angriffe im Anflug** im InterPlanetary-Menü führt dieselben Warnungen aktuell:
+eine Zeile je Bedrohung, die nächste oben, herunterzählend, während Sie lesen -
+`3h`, dann `90m`, dann `away`, sobald die Truppe fort ist. Eine Waffe, die schon
+fliegt, wird mit den Tagen bis zum Einschlag geführt.
 
-Eine leere Liste ist kein Beweis für Frieden. Sie heißt nur, dass nichts
-gemeldet wurde, und melden kann nur ein Beobachter, den Sie auf einem
-anderen Planeten postiert haben.
+Eine leere Liste beweist nicht, dass niemand kommt. Abgesehen von einer
+Waffe, die schon fliegt, kann nur ein Beobachter, den Sie auf einem anderen
+Planeten postiert haben, etwas melden.
 
 ## Warum das zählt
 
@@ -78,5 +77,9 @@ ist. Der Planet, der eben eine Schlacht gegen Sie verloren hat, ist der, der
 die Antwort zusammenstellt, und der Satz ist derselbe, ob Sie einen Rivalen
 beobachten oder einen Nachbarn, dem Sie trauen.
 
-Ein kurzer, erneuerter Aufenthalt ist mehr wert als ein langer, früh
-gekaufter: Die Tage laufen, ob etwas geschieht oder nicht.
+Einen weiteren SpyGuy zu einem Planeten zu senden, der von hier aus schon
+beobachtet wird, addiert die beiden Aufenthalte nicht. Der Aufenthalt wird
+so lang wie der längere der beiden, und Sie zahlen trotzdem für jeden
+gekauften Tag. Das gilt für jeden Baron auf Ihrem Planeten, denn sie teilen
+sich den Beobachter. Senden Sie einen neuen, wenn der alte Aufenthalt
+abläuft.

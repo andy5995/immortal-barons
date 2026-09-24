@@ -10,20 +10,17 @@ title: 'Steuern, Zustimmung und Aufstände'
 Ihr Steuersatz bestimmt, wie viel Gold Sie von Ihrem Volk einnehmen, und
 prägt dessen Stimmung.
 
-Die öffentliche Zustimmung nähert sich jede Runde einem Zielwert, den Ihr
-Steuersatz vorgibt. Ein stetiger, mäßiger Steuersatz hält sie hoch.
+Jeden Zug bewegt Ihr Steuersatz den Rückhalt. Ein niedriger Satz hebt ihn,
+ein hoher Satz senkt ihn, und ein Satz dazwischen lässt ihn, wo er
+ist. Geringer Rückhalt kürzt Ihr Einkommen aus Küstenregionen (Tourismus)
+stark.
 
 Aufstände werden wahrscheinlicher, je weiter Ihr Steuersatz über ein
 sicheres Maß steigt. Ein Aufstand lässt Ihre Zustimmung einbrechen und
 vertreibt einen Teil Ihres Volkes.
 
-Steuern entscheiden auch, wie viele Menschen Ihr Reich fassen kann. Ein
-niedriger Satz lässt es weit mehr fassen, ein hoher weit weniger, und
-jenseits eines strafenden Satzes gehen Menschen noch schneller fort - die
-Schwelle steht im Thema Bevölkerung. Ein Reich, das ohnehin schrumpft,
-verliert umso schneller Menschen, je härter es besteuert. Mit dem Rückhalt
-verhält es sich ebenso: Je höher er steht, desto mehr Menschen fasst Ihr
-Land.
+Steuern und Rückhalt entscheiden auch, wie viele Menschen Ihr Reich fassen
+kann. Siehe Bevölkerung.
 
 ## Die Steuer der Queen Royale
 
@@ -32,9 +29,10 @@ dürfen ihr weniger zahlen, als sie verlangt, aber eine gekürzte Zahlung
 kostet Rückhalt.
 
 Jede Münze, die sie einzieht, geht in ihre Truhe, und einen Teil davon gibt
-sie zurück. Sie zahlt Ihnen beim ersten Spielen jedes Tages: 2% der Truhe,
-oder 7%, sobald darin mehr als 100 Millionen Gold liegen. Ein Reich, das
-noch unter dem Schutz für neue Reiche steht, erhält höchstens 1 Million.
+sie zurück. Sie zahlt Ihnen beim ersten Spielen jedes Tages: einen kleinen
+Anteil der Truhe, und einen größeren Anteil, sobald die Truhe groß geworden
+ist. Ein Reich, das noch unter dem Schutz für neue Reiche steht, erhält
+höchstens 1 Million.
 
 Alle Barone schöpfen aus derselben Truhe, und jede Rückzahlung leert sie ein
 wenig. Wer an einem Tag zuerst spielt, nimmt den größten Anteil; spielen Sie

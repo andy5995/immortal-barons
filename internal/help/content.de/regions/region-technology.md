@@ -9,7 +9,7 @@ title: Technologie
 
 Technologieregionen machen Ihr ganzes Reich leistungsfähiger. Der Bonus
 wirkt nicht sofort: Er wächst langsam, je länger Sie Technologieregionen
-halten, und schneller, wenn sie einen größeren Anteil Ihres Landes
+halten, und schneller, wenn sie einen größeren Anteil Ihrer Regionen
 ausmachen. Größere Reiche brauchen mehr Technologieregionen für dieselbe
 Stufe.
 

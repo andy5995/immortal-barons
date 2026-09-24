@@ -14,13 +14,13 @@ andere planeten. Elke planeet is gemarkeerd als **Vijand**, **Geen**,
 u er een noemt, op de regel die luidt \"Onze huidige betrekkingen met...\".
 
 Alleen de coördinator van uw BBS kan de lijst wijzigen. Dat gaat via het
-coördinatorsmenu, onder Diplomatie wijzigen.
+Coördinatormenu, onder Diplomatie wijzigen.
 
 ## Wat het wel en niet doet
 
 De lijst is een bericht van uw coördinator aan de baronnen op uw eigen
-BBS. Hij vertelt u wat uw BBS van een planeet vindt. Meestal beschrijft hij
-alleen:
+BBS. Hij vertelt u wat uw BBS van een planeet vindt. Hij verandert bijna
+niets in het spel:
 
 - Hij houdt een aanval niet tegen. U kunt nog steeds een planeet aanvallen
   die als bondgenoot staat gemarkeerd, en een planeet die als vijand staat

@@ -14,14 +14,17 @@ pode ser levado por piratas nem por ataques.
 - Sacar — traz ouro do banco de volta para o seu tesouro.
 - Auxílio / Empréstimos — tome ouro emprestado, ou pague o que já deve.
 
-Depósitos e saques não têm limite de tamanho. Um investimento tranca no
-máximo dois bilhões de ouro, mas você pode abrir quantos quiser.
+Um depósito ou saque move só o que cabe no limite abaixo. Os investimentos
+que pagam de volta numa mesma data podem devolver no máximo dois bilhões de
+ouro somados, então o banco oferece só o que ainda cabe para a data que você
+escolher.  Você pode abrir quantos investimentos quiser.
 
 Os juros são pagos no fim de cada turno, sobre o que estiver no banco
-naquele momento. Se você tiver ligado Depositar ouro no fim do turno, nas
-Preferências, seu ouro vai para o banco antes, então o ouro que você ganhou
-neste turno rende juros neste turno. Ele entra depois de os piratas terem
-tido a sua chance, então não protege contra um assalto.
+naquele momento. Enquanto Depositar ouro no fim do turno estiver ligado nas
+Preferências (um reino novo começa com ele ligado), seu ouro vai para o
+banco antes, então o ouro que você ganhou neste turno rende juros neste
+turno. Ele entra depois de os piratas terem tido a sua chance, então não
+protege contra um assalto.
 
 O começo do seu próximo turno diz quanto o banco pagou: os juros, e o que
 qualquer investimento vencido hoje devolveu.

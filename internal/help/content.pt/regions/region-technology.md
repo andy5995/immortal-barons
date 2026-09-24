@@ -9,9 +9,9 @@ title: Tecnologia
 
 Regiões de tecnologia deixam o seu império inteiro mais eficiente. O
 benefício não é imediato: ele cresce devagar quanto mais tempo você mantiver
-as regiões de Tecnologia, e cresce mais rápido quando elas são uma parcela
-maior da sua terra. Impérios maiores precisam de mais regiões de Tecnologia
-para chegar ao mesmo nível.
+regiões de Tecnologia, e cresce mais rápido quando elas são uma parcela
+maior das suas regiões. Impérios maiores precisam de mais regiões de
+Tecnologia para chegar ao mesmo nível.
 
 A tecnologia ajuda de várias formas:
 

@@ -30,17 +30,17 @@ um.
 
 Um acordo comercial cobra uma taxa por cada dia pelo qual você o envia, e
 precisa de porta-aviões para levar as mercadorias. Quantos depende do que
-você está mandando: um porta-aviões leva mil soldados ou torres, cem caças,
-cinco mil tanques ou cem mil de ouro, e comida, bombardeiros, agentes e
-porta-aviões não ocupam espaço nenhum. Um tratado de Comércio Protegido com
-aquele reino deixa a taxa mais barata.
+você está mandando. Como carga, um porta-aviões leva mil soldados ou torres,
+cem caças, cinco mil tanques ou cem mil de ouro. Comida, bombardeiros,
+agentes e porta-aviões não ocupam espaço nenhum. Um tratado de Comércio
+Protegido com aquele reino deixa a taxa mais barata.
 
 Os dias que você paga são por quanto tempo a oferta fica de pé. O que você
-põe no acordo sai do seu reino no instante em que você o envia, e só volta
-se a oferta for aceita: uma recusa, um acordo que ninguém responde antes do
-prazo acabar e um reino que cai antes de responder custam a você as
-mercadorias. Mande para quem está jogando, e dê a essa pessoa dias
-suficientes para chegar até lá.
+põe no acordo sai do seu reino no instante em que você o envia. Se a oferta
+for aceita, o outro reino recebe as mercadorias, e você recebe o que
+pediu. Uma recusa, um acordo que ninguém responde antes do prazo acabar e um
+reino que cai antes de responder custam a você as mercadorias. Mande para
+quem está jogando, e dê a essa pessoa dias suficientes para chegar até lá.
 
 ## Acordos com outro planeta
 
@@ -63,15 +63,15 @@ isso, use o acordo de cima.
 
 O comércio rende mais quando vários reinos trabalham juntos. Algumas ideias:
 
-**Especialize-se e depois abasteça seus parceiros.** Sua indústria pode privilegiar um tipo
-de unidade, o que deixa essa unidade mais barata para você que para qualquer outro. Se você constrói
-tanques e um parceiro constrói torres, cada um pode vender ao outro abaixo do
-preço que ele pagaria para construir sozinho. Os dois reinos saem ganhando.
+**Especialize-se e depois abasteça seus parceiros.** Sua indústria pode se especializar num
+tipo de unidade. Ela passa a construir mais dessa unidade e menos de todas as outras. Se
+você se especializa em tanques e um parceiro em torres, cada um de vocês faz mais do que
+o outro precisa. Troquem o excedente, e os dois reinos saem ganhando.
 
 **Um anúncio barato é levado por quem chegar primeiro.** Qualquer um pode comprá-lo, então
 um preço pensado como presente a um aliado pode acabar armando um rival. Para ter certeza de que as
 mercadorias chegam ao reino que você quer, envie um acordo comercial.
 
 **O comércio é maior entre planetas.** Numa liga, planetas inteiros se especializam, e
-o mercado de um aliado costuma ser o lugar mais barato para comprar. Veja o tópico de
-Comércio Interplanetário.
+o mercado de um aliado costuma ser o lugar mais barato para comprar. Veja o tópico
+Mercados Aliados.

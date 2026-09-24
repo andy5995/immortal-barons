@@ -12,6 +12,6 @@ Ihrer Armee bis zu Raketen und planetenweiten Waffen. Jede Angriffsart hat
 ihr eigenes Thema.
 
 Sie können auch angegriffen werden, während Sie spielen. Geschieht das,
-erscheint beim nächsten Tastendruck ein Hinweis. Ein Befehl, den Sie bereits
-eingegeben haben, wird auf das gekürzt, was Ihnen noch bleibt, und das Spiel
-sagt Ihnen, wenn es das tut.
+erscheint ein Hinweis, wenn Sie Ihre aktuelle Aktion beenden. Ein Befehl,
+den Sie bereits eingegeben haben, wird auf das gekürzt, was Ihnen noch
+bleibt, und das Spiel sagt Ihnen, wenn es das tut.

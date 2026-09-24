@@ -16,8 +16,8 @@ hoeveel van elke eenheid dat percentage bouwt. U kunt het op elk moment
 wijzigen.
 
 De percentages hoeven niet samen 100 te zijn. Elk deel dat u niet toewijst,
-levert in plaats daarvan goud op. De keuze is dus eenheden of goud: als u de
-volle 100% aan eenheden toewijst, verdient uw industrie geen goud.
+levert in plaats daarvan goud op. Als u de volle 100% aan eenheden toewijst,
+verdient uw industrie geen goud.
 
 Specialize markeert één eenheidstype als uw speerpunt. Het vervangt uw
 percentageverdeling niet. Uw industrieën maken meer van de gespecialiseerde

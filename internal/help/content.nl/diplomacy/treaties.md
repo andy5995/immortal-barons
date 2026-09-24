@@ -17,15 +17,13 @@ u uw strijdmacht kiest. Zegt u ja, dan komt uw volk in opstand omdat het
 door een trouweloze baron geregeerd wordt: u verliest een kwart van zowel uw
 steun als het moreel van uw leger, en de slag wordt vervolgens op dat lagere
 moreel uitgevochten. Zegt u nee, dan gaat de aanval niet door. De twee
-rijken blijven zonder overeenkomst achter, en de heerser die u verraden hebt
-zal daar zijn eigen antwoord op hebben. Dezelfde vraag komt voor een
+rijken blijven zonder overeenkomst achter. Dezelfde vraag komt voor een
 nucleaire, chemische of biologische aanval, en voor een geheime operatie die
 een agent stuurt. Spion Sturen en Relaties Bespioneren kijken alleen, dus
 die vragen niets en kosten u niets.
 
-Een Oorlogsverklaring, op het menu Diplomatie, beëindigt een overeenkomst
-tegen dezelfde prijs zonder slag. Het kost niets als u geen overeenkomst had
-om te verbreken.
+Een Oorlogsverklaring, in het menu Diplomatie, beëindigt een overeenkomst
+zonder slag.  Het kost u niets. De twee rijken zijn dan in oorlog.
 
 Verdragen Bekijken toont uw huidige betrekkingen met de andere heersers in
 het spel, en daaronder de aanbiedingen die u hebt verstuurd en die nog

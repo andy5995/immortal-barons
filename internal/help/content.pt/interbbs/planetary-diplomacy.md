@@ -14,12 +14,12 @@ Diplomática**. Você também vê a marca de um planeta sempre que indica um, na
 linha que diz "Nossas relações atuais com...".
 
 Só o Coordenador do seu BBS pode mudar a lista. Ela fica no Menu do
-Coordenador, em Alteração Diplomática.
+Coordenador, em Alterar a Diplomacia.
 
 ## O que ela faz e o que não faz
 
 A lista é um recado do seu Coordenador aos barões do seu próprio BBS. Ela
-diz o que o seu BBS acha de um planeta. Na maior parte, ela só descreve:
+diz o que o seu BBS acha de um planeta. Ela quase não muda nada no jogo:
 
 - Ela não impede um ataque. Você ainda pode atacar um planeta marcado como
   Aliado, e um planeta marcado como Inimigo ainda pode atacar você.
@@ -31,8 +31,8 @@ Duas coisas usam a lista de verdade:
 - **Comércio.** Você só pode comprar no mercado de outro planeta enquanto o
   seu BBS marcar aquele planeta como **Aliado**. Os dois BBSes precisam
   concordar: o seu tem de chamar o deles de Aliado para o seu lance sair, e
-  o deles tem de chamar o seu de Aliado para atendê-lo. Se a aliança acabar
-  enquanto o seu lance está viajando, o seu ouro volta.
+  o deles tem de chamar o seu de Aliado para atendê-lo. Se uma aliança
+  acabar enquanto o seu lance está viajando, o seu ouro volta.
 - **Mensagens.** Escrever para **Planetas Aliados** pelo menu de Mensagens
   IP envia para todo planeta que a lista marcar como Aliado.
 

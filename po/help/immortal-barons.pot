@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-17 05:51-0500\n"
+"POT-Creation-Date: 2026-09-24 00:15-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,7 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Press one key to choose. You do not press Enter to pick a menu item. Each "
-"item shows its key in brackets, like `(1)`. Press that key and it runs at "
+"item shows its key in parentheses, like `(1)`. Press that key and it runs at "
 "once."
 msgstr ""
 
@@ -38,8 +38,8 @@ msgstr ""
 msgid ""
 "Every menu leaves with the `0` key, labeled \"Quit\". On a turn menu "
 "(Spending, Attack, Covert, Trading), Quit moves you to the next step of your "
-"turn; you cannot go back to that menu until your next turn. On a side menu "
-"(like the Bank or the System Menu), Quit takes you back to where you were."
+"turn, and the turn does not come back to that step. On a side menu (like the "
+"Bank or the System Menu), Quit takes you back to where you were."
 msgstr ""
 
 #. type: Plain text
@@ -51,17 +51,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:25
+#: internal/help/content/controls/interface.md:26
 #, markdown-text
 msgid ""
-"Pressing Enter with no other key also chooses Quit — the prompt shows "
-"\"Quit\" so you can see what Enter will do. On a turn menu, this only "
-"happens if you turn on \"Enter exits Buy menu\" in Preferences; on a side "
-"menu, Enter always chooses Quit."
+"Pressing Enter with no other key also chooses Quit. The prompt shows "
+"\"Quit\" so you can see what Enter will do. On the Spending menu this "
+"happens only if you turn on \"Use Enter To Exit BUY Menu\" in "
+"Preferences. On the Entry menu, Enter chooses Play while you have turns "
+"left. On every other menu, Enter always chooses Quit."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:30
+#: internal/help/content/controls/interface.md:31
 #, markdown-text
 msgid ""
 "The help browser and other pick-a-topic lists move a highlight with the "
@@ -72,32 +73,31 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/controls/interface.md:31
+#: internal/help/content/controls/interface.md:32
 #, markdown-text, no-wrap
 msgid "Typing an answer"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:39
+#: internal/help/content/controls/interface.md:40
 #, markdown-text
 msgid ""
 "Where a prompt takes something typed rather than one key — a number of "
 "troopers, a realm name, a line of a message — Backspace erases the last "
 "character and **Ctrl-U erases the whole answer**, leaving you back at the "
 "prompt with nothing typed. It is quicker than holding Backspace down over a "
-"mistyped 1000000000, and it is IB's own addition; the original has no such "
-"key. In the message editor it clears the line you are on, not the message — "
-"`/C` still does that."
+"mistyped 1000000000. In the message editor it clears the line you are on, "
+"not the message — `/C` still does that."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/controls/interface.md:40
+#: internal/help/content/controls/interface.md:41
 #, markdown-text, no-wrap
 msgid "Choosing who an action goes to"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:47
+#: internal/help/content/controls/interface.md:48
 #, markdown-text
 msgid ""
 "Send Message asks `(A-Y,Z=All,?=List) Send to:` and takes a whole list, not "
@@ -108,7 +108,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:50
+#: internal/help/content/controls/interface.md:51
 #, markdown-text, no-wrap
 msgid ""
 "InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for "
@@ -117,18 +117,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:55
+#: internal/help/content/controls/interface.md:57
 #, markdown-text
 msgid ""
 "Every Diplomacy option that names a realm takes the same list: offer a "
 "treaty to several realms at once, or declare war on several. There `?` shows "
-"your relations rather than the scores. Mark one realm only and you get the "
-"full negotiation with it — you can accept its offer or break the pact you "
-"hold."
+"your relations rather than the scores. Mark one realm only, and you "
+"negotiate with it: you propose the pact, or accept it if that realm has "
+"already offered it to you. To end a pact, use Declaration Of War."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:62
+#: internal/help/content/controls/interface.md:64
 #, markdown-text
 msgid ""
 "The letters belong to the realms, not to the rows, so a letter may be "
@@ -141,7 +141,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:66
+#: internal/help/content/controls/interface.md:68
 #, markdown-text
 msgid ""
 "A letter is freed when the realm holding it is swept from the map, and a "
@@ -150,13 +150,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/controls/interface.md:67
+#: internal/help/content/controls/interface.md:69
 #, markdown-text, no-wrap
 msgid "Who else is on"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:74
+#: internal/help/content/controls/interface.md:76
 #, markdown-text
 msgid ""
 "An `O` beside a realm's letter — on See Scores, the attack and message "
@@ -167,9 +167,9 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:75
+#: internal/help/content/controls/interface.md:77
 #, markdown-text
-msgid "Press `?` at a menu to open this help."
+msgid "On a menu that lists Help, press `?` to open this help."
 msgstr ""
 
 #. type: Title #
@@ -183,7 +183,7 @@ msgstr ""
 #: internal/help/content/controls/numbers.md:12
 #, markdown-text
 msgid ""
-"When the game asks for an amount, it shows two numbers in brackets, like "
+"When the game asks for an amount, it shows two numbers in parentheses, like "
 "`How many? (0; 40):`."
 msgstr ""
 
@@ -223,8 +223,8 @@ msgstr ""
 #: internal/help/content/controls/numbers.md:21
 #, markdown-text
 msgid ""
-"If you type a number larger than the maximum, the game lowers it to the "
-"maximum when you press Enter."
+"If you type a number larger than the maximum, the game changes it to the "
+"maximum when you press Enter. Press Enter again to accept it."
 msgstr ""
 
 #. type: Title #
@@ -255,11 +255,11 @@ msgstr ""
 #: internal/help/content/controls/turns.md:21
 #, markdown-text
 msgid ""
-"Every time the game prints says which clock it is on. Times start out in "
-"UTC, which every planet in a league agrees on, and Preferences will show "
-"them on another clock instead: this board's own, or a time zone you pick "
-"from a list.  The countdown to the new day is the same length of time "
-"whichever you choose."
+"Each time shown on screen names its clock. Times start out in UTC, which "
+"every planet in a league agrees on, and Preferences will show them on "
+"another clock instead: this board's own, or a time zone you pick from a "
+"list.  The countdown to the new day is the same length of time whichever you "
+"choose."
 msgstr ""
 
 #. type: Plain text
@@ -303,9 +303,9 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Food is the prize. A strike that reaches the granaries burns a large share "
-"of it, far more than the few percent the other five lose, so a realm already "
-"short of food can be pushed into starvation by a single lucky raid. You "
-"cannot aim for it, though, so the operation is a gamble rather than a plan."
+"of it, far more than any of the other five loses, so a realm already short "
+"of food can be pushed into starvation by a single lucky raid. You cannot aim "
+"for it, though, so the operation is a gamble rather than a plan."
 msgstr ""
 
 #. type: Title #
@@ -316,12 +316,13 @@ msgid "Bomb Food Market"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-food-market.md:12
+#: internal/help/content/covert/bomb-food-market.md:13
 #, markdown-text
 msgid ""
 "Bomb Food Market is an InterPlanetary operation, on the Special Operations "
 "menu. It destroys much of another planet's food market supply. A large loss "
-"can start a food shortage across that whole planet."
+"can start a food shortage across that whole planet. Most runs are driven off "
+"before they reach it and do nothing."
 msgstr ""
 
 #. type: Title #
@@ -332,18 +333,18 @@ msgid "Bomb Trade Routes"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:14
+#: internal/help/content/covert/bomb-trade-routes.md:15
 #, markdown-text
 msgid ""
 "Bomb Trade Routes is an InterPlanetary operation, on the Special Operations "
-"menu. It hits the trade deals in transit across another planet. Most strikes "
-"come to nothing and some deals slip through, but a deal the bombers reach "
-"arrives all but empty — only a few percent of every good in it is "
-"left. Standing treaties are not touched."
+"menu. It hits the trade deals in transit across another planet. Most runs "
+"are driven off before they reach it. A run that gets through hits about two "
+"deals in three. A deal the bombers reach arrives with only a few percent of "
+"each good left. Standing treaties are not touched."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:17
+#: internal/help/content/covert/bomb-trade-routes.md:18
 #, markdown-text
 msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "
@@ -359,12 +360,13 @@ msgid "Bomb Trading Market"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trading-market.md:12
+#: internal/help/content/covert/bomb-trading-market.md:13
 #, markdown-text
 msgid ""
 "Bomb Trading Market is an InterPlanetary operation, on the Special "
-"Operations menu. It destroys a share of everything listed on another "
-"planet's trading market, and the gold sellers there were waiting on."
+"Operations menu. It destroys a small share of everything listed on another "
+"planet's trading market. The gold sellers there are waiting on is not "
+"touched. Most runs are driven off before they reach it and do nothing."
 msgstr ""
 
 #. type: Title #
@@ -379,7 +381,7 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Bribery pays one of the enemy's own agents to work for you. From then on, "
-"every covert operation YOU run against that realm is twice as likely to "
+"every covert operation YOU run against that realm has a better chance to "
 "land. It does nothing to the operations they run against you."
 msgstr ""
 
@@ -398,8 +400,8 @@ msgstr ""
 #: internal/help/content/covert/bribery.md:21
 #, markdown-text
 msgid ""
-"Bribery is the hardest operation on the menu to land, so expect to pay for "
-"several attempts."
+"Bribery is one of the hardest operations on the menu to land, so expect to "
+"pay for several attempts."
 msgstr ""
 
 #. type: Title #
@@ -442,17 +444,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/expose-enemy-ops.md:18
+#: internal/help/content/covert/expose-enemy-ops.md:17
 #, markdown-text
 msgid ""
 "It works against ONE realm — the realm the agent is inside — so the menu "
 "lists only the realms you have already bribed. Bribery comes first; without "
-"an agent on your payroll there is nothing to expose. A tenth of that realm's "
-"attempts still get through."
+"an agent on your payroll there is nothing to expose."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/expose-enemy-ops.md:21
+#: internal/help/content/covert/expose-enemy-ops.md:20
 #, markdown-text
 msgid ""
 "It costs no agent and takes no part of a daily allowance, so you may run it "
@@ -483,11 +484,11 @@ msgid ""
 "What agents do NOT do is change your odds. The chance an operation lands is "
 "set by the operation itself: the simpler ones land just over half the time, "
 "the harder ones less often. Your agents make no difference to it, and "
-"neither do the target's. Three things do change it: a bribed agent inside "
-"the target doubles your chance against that realm, a realm that has exposed "
-"your agent turns nine of your attempts in ten away, and an Intelligence "
-"Alliance or Terrorist Prevention treaty lends an ally's agents to your side "
-"or the target's. See Agents."
+"neither do the target's. Three things do change it. A bribed agent inside "
+"the target improves your chance against that realm. A realm that has exposed "
+"your agent turns away most of your attempts (see Expose Enemy Ops). An "
+"Intelligence Alliance lends your partner's agents to your side. The target's "
+"own treaties play no part. See Covert Agents."
 msgstr ""
 
 #. type: Plain text
@@ -586,12 +587,13 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:72
+#: internal/help/content/covert/overview.md:73
 #, markdown-text
 msgid ""
 "The Covert Operations menu appears during your turn, before the Spending and "
-"Attack menus. If you do not see it, turn on \"Visit Covert Menu\" in the "
-"Preferences menu."
+"Attack menus, when you hold at least one agent and \"Visit Covert Menu\" is "
+"on in the Preferences menu. While you hold an agent, you can also open it "
+"from the System menu."
 msgstr ""
 
 #. type: Title #
@@ -625,28 +627,31 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:28
+#: internal/help/content/covert/s3-sabre.md:29
 #, markdown-text
 msgid ""
 "The aim wanders by one setting either way in flight, and about one launch in "
 "ten ignores the dial altogether and hits whatever it likes. So a setting is "
 "a tendency, not a promise: 4 goes for military bases about half the time, "
-"while 5 goes for airbases about three times in four, because 5 and 6 both "
-"point there.  Aim 5 at a baron you know keeps a large air force."
+"while 5 goes for airbases more than two times in three, because 5 and 6 both "
+"point there. The dial wraps at its ends: 10 can land on 0, and 0 on 10. Aim "
+"5 at a baron you know keeps a large air force."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:33
+#: internal/help/content/covert/s3-sabre.md:36
 #, markdown-text
 msgid ""
-"The missile is still a gamble on top of that. Most launches do nothing: it "
-"misses, it malfunctions, or the enemy's SDI shoots it down. It can also "
-"backfire — if the enemy keeps a very large trooper army, the missile may "
-"turn back and strike your own empire instead."
+"The missile is still a gamble on top of that. About one launch in ten "
+"misfires, and the enemy's SDI may shoot it down. It can also break up over "
+"the target and do no damage. The larger the enemy's trooper army, the more "
+"often this happens.  A breakup does not harm you, but it helps the enemy: "
+"the fallout gives them new regions, 10% to 19% of the regions they already "
+"hold. They choose the types of the new regions on their next turn."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:39
+#: internal/help/content/covert/s3-sabre.md:42
 #, markdown-text
 msgid ""
 "Your sysop decides how the dial is set. Normally you choose it yourself, but "
@@ -657,7 +662,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:44
+#: internal/help/content/covert/s3-sabre.md:47
 #, markdown-text
 msgid ""
 "You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "
@@ -678,22 +683,21 @@ msgstr ""
 #: internal/help/content/covert/send-spy.md:13
 #, markdown-text
 msgid ""
-"Send Spy gathers military intelligence on an enemy. It reveals their land, "
-"troops, defenses, gold, and more, so you can plan an attack. If the mission "
-"fails, your spy is caught and does not return."
+"Send Spy gathers military intelligence on an enemy. It reveals their "
+"regions, troops, defenses, gold, and more, so you can plan an attack. If the "
+"mission fails, your spy is caught and does not return."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/send-spy.md:17
+#: internal/help/content/covert/send-spy.md:16
 #, markdown-text
 msgid ""
-"It succeeds more often than most operations, whoever you send it against — "
-"see the Covert Operations overview for the odds and what does and does not "
-"move them."
+"No operation succeeds more often, whoever you send it against. The Covert "
+"Operations topic explains the odds."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/send-spy.md:19
+#: internal/help/content/covert/send-spy.md:18
 #, markdown-text
 msgid ""
 "Send Spy answers on the spot. It is one of the few operations that does not "
@@ -709,12 +713,14 @@ msgid "Set Up"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/set-up.md:12
+#: internal/help/content/covert/set-up.md:14
 #, markdown-text
 msgid ""
-"Set Up tricks the target and one of its Full Defense Alliance partners into "
-"believing the other declared war. Their alliance is voided. Use it to strip "
-"a defensive pact off an enemy you plan to attack."
+"Set Up tricks the target and one of its treaty partners into believing the "
+"other declared war. Every treaty between the two is voided. If the target "
+"has a Full Defense Alliance, that partner is chosen. Your agent must fool "
+"both realms, so Set Up fails more often than the other simple "
+"operations. Use it to end a defensive pact before you attack an enemy."
 msgstr ""
 
 #. type: Title #
@@ -771,13 +777,14 @@ msgid "Undermine Investments"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/undermine-investments.md:12
+#: internal/help/content/covert/undermine-investments.md:13
 #, markdown-text
 msgid ""
 "Undermine Investments is an InterPlanetary operation, on the Special "
-"Operations menu. It damages the pending bank investments of every realm on "
-"another planet, trimming about a quarter off the money they were due to get "
-"back."
+"Operations menu. It damages the bank investments of every realm on another "
+"planet that are due within a few days, trimming a few percent off the money "
+"they were due to get back. Most runs are driven off before they reach it and "
+"do nothing."
 msgstr ""
 
 #. type: Title #
@@ -796,7 +803,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:22
+#: internal/help/content/diplomacy/treaties.md:21
 #, markdown-text
 msgid ""
 "Aiming an attack at a ruler you hold an agreement with tears the agreement "
@@ -804,23 +811,22 @@ msgid ""
 "yes and your people riot at being ruled by a faithless baron: you lose a "
 "quarter of both your support and your army's morale, and the battle is then "
 "fought at that lower morale. Say no and the attack is called off. The two "
-"realms are left with no agreement between them, and the ruler you betrayed "
-"will have their own answer to that. The same question comes up before a "
-"nuclear, chemical or biological strike, and before a covert operation that "
-"sends an agent. Send Spy and Spy on Relations only look, so they do not ask "
-"and cost you nothing."
+"realms are left with no agreement between them. The same question comes up "
+"before a nuclear, chemical or biological strike, and before a covert "
+"operation that sends an agent. Send Spy and Spy on Relations only look, so "
+"they do not ask and cost you nothing."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:25
+#: internal/help/content/diplomacy/treaties.md:24
 #, markdown-text
 msgid ""
-"A Declaration of War, on the Diplomacy menu, ends an agreement at the same "
-"price without a battle. It costs nothing if you had no agreement to break."
+"A Declaration of War, on the Diplomacy menu, ends an agreement without a "
+"battle.  It costs you nothing. The two realms are then at war."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:28
+#: internal/help/content/diplomacy/treaties.md:27
 #, markdown-text
 msgid ""
 "View Treaties shows your current relations with the other rulers in the "
@@ -828,7 +834,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:31
+#: internal/help/content/diplomacy/treaties.md:30
 #, markdown-text
 msgid ""
 "Once you hold a treaty, Send Message offers to write to all your allies at "
@@ -837,7 +843,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:35
+#: internal/help/content/diplomacy/treaties.md:34
 #, markdown-text
 msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
@@ -846,7 +852,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:38
+#: internal/help/content/diplomacy/treaties.md:37
 #, markdown-text
 msgid ""
 "Choosing the treaty you already hold with a ruler sends nothing. The game "
@@ -877,9 +883,9 @@ msgid ""
 "People mixing across borders spread low morale and low support. Each day the "
 "healthier of the two realms drifts down toward the worse one, as far as its "
 "figure and no further. The drift runs one way only: the worse realm is never "
-"lifted by the contact. Signing with a struggling neighbor buys the income at "
-"the price of your own peace at home, so keep an eye on their figures as well "
-"as your own."
+"lifted by the contact. Signing with an unhappy neighbor gives you the "
+"income, but it can lower your own morale and support. Check their figures as "
+"well as your own."
 msgstr ""
 
 #. type: Title #
@@ -894,8 +900,9 @@ msgstr ""
 #, markdown-text
 msgid ""
 "A Full Defense Alliance is the strongest alliance. You commit a large part "
-"of your troopers and tanks to defend an ally in need. It works only in local "
-"(single-board) games."
+"of your troopers and tanks to defend an ally in need. It works only against "
+"attacks from your own planet. It gives no help against a strike from another "
+"planet."
 msgstr ""
 
 #. type: Plain text
@@ -904,7 +911,7 @@ msgstr ""
 msgid ""
 "Those forces can die in a battle you were not part of. When that happens you "
 "are told what you lost, who you were defending, and who attacked them, so "
-"watch your report after an ally has been raided."
+"watch your report after an ally has been attacked."
 msgstr ""
 
 #. type: Title #
@@ -935,9 +942,9 @@ msgstr ""
 msgid ""
 "Protective Trade places guards along the trade routes between two "
 "realms. Deals in transit between the two of you survive enemy bombing, "
-"whoever fires the strike: the guard is on the route itself, so it holds "
-"against every attacker, not only against your partner. It also cuts the cost "
-"of sending a trade deal to that partner to a third of the usual daily rate."
+"whoever fires the strike. The guard is on the route, so it protects the deal "
+"from every attacker.  It also cuts the cost of sending a trade deal to that "
+"partner to a third of the usual daily rate."
 msgstr ""
 
 #. type: Plain text
@@ -983,14 +990,14 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-technology-agreement.md:17
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:16
 #, markdown-text
 msgid ""
 "The help it gives you is bounded by whichever of you holds fewer Technology "
-"regions, so it speeds up work you are already doing rather than standing in "
-"for it. A realm with no Technology of its own gains nothing from the pact, "
-"however advanced its partner is — buy the regions first, then find an ally "
-"who has done the same."
+"regions. It speeds up research you already do. It does not replace it. A "
+"realm with no Technology of its own gains nothing from the pact, however "
+"advanced its partner is — buy the regions first, then find an ally who has "
+"done the same."
 msgstr ""
 
 #. type: Title #
@@ -1001,11 +1008,21 @@ msgid "Terrorist Prevention"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:11
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:12
 #, markdown-text
 msgid ""
-"Terrorist Prevention links the two realms' intelligence agencies. They help "
-"each other find and stop covert and terrorist attacks."
+"Terrorist Prevention links the two realms' intelligence agencies. Against "
+"terrorist operations from another planet, your partner's agents help defend "
+"you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:15
+#, markdown-text
+msgid ""
+"It does not protect you from covert operations on your own planet. There, "
+"the game counts your partner's agents against your own operations, so they "
+"succeed less often."
 msgstr ""
 
 #. type: Title #
@@ -1042,26 +1059,28 @@ msgid "Cash Relief / Loans — borrow gold, or pay back what you already owe."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:19
+#: internal/help/content/economy/banking.md:21
 #, markdown-text
 msgid ""
-"Deposits and withdrawals have no size limit. One investment locks away at "
-"most two billion gold, though you may open as many as you like."
+"A deposit or withdrawal moves only what fits under the limit below. The "
+"investments that pay back on any one date may return at most two billion "
+"gold between them, so the bank offers only what still fits for the date you "
+"choose.  You may open as many investments as you like."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:25
+#: internal/help/content/economy/banking.md:27
 #, markdown-text
 msgid ""
 "Interest is paid at the end of every turn, on whatever is in the bank at "
-"that moment. If you have turned on Deposit gold at End of Turn, in "
-"Preferences, your gold is put in the bank first, so the gold you earned this "
-"turn earns interest this turn. It goes in after the pirates have had their "
-"chance at it, so it is no protection against a raid."
+"that moment. While Deposit gold at End of Turn is on in Preferences (a new "
+"realm starts with it on), your gold is put in the bank first, so the gold "
+"you earned this turn earns interest this turn. It goes in after the pirates "
+"have had their chance at it, so it is no protection against a raid."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:28
+#: internal/help/content/economy/banking.md:30
 #, markdown-text
 msgid ""
 "The start of your next turn tells you what the bank paid: the interest, and "
@@ -1069,7 +1088,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:31
+#: internal/help/content/economy/banking.md:33
 #, markdown-text
 msgid ""
 "You can hold at most two billion gold, in hand and the same again in the "
@@ -1077,7 +1096,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:34
+#: internal/help/content/economy/banking.md:36
 #, markdown-text
 msgid ""
 "A full bank still pays its interest, into your gold in hand rather than the "
@@ -1085,7 +1104,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:37
+#: internal/help/content/economy/banking.md:39
 #, markdown-text
 msgid ""
 "The game tells you when gold is lost this way. Your event log names the "
@@ -1093,13 +1112,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:38
+#: internal/help/content/economy/banking.md:40
 #, markdown-text, no-wrap
 msgid "Cash Relief / Loans"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:44
+#: internal/help/content/economy/banking.md:46
 #, markdown-text
 msgid ""
 "When you borrow, you first pick how many days you have to pay it back (1 to "
@@ -1110,7 +1129,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:49
+#: internal/help/content/economy/banking.md:51
 #, markdown-text
 msgid ""
 "You must repay the full amount on the due date. The bank takes it from your "
@@ -1120,13 +1139,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:50
+#: internal/help/content/economy/banking.md:52
 #, markdown-text, no-wrap
 msgid "Investments"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:56
+#: internal/help/content/economy/banking.md:58
 #, markdown-text
 msgid ""
 "You can lock gold away as an investment for 2 to 10 days. It pays back your "
@@ -1157,10 +1176,11 @@ msgstr ""
 #: internal/help/content/economy/food.md:19
 #, markdown-text
 msgid ""
-"The market opens by itself at that point in your turn, and both bills are "
-"put to you, whether or not you have enough in store. Turn on Auto-Feed in "
-"Preferences and you skip all of it on any turn you can cover the two bills; "
-"on a turn you cannot, the market opens anyway."
+"The Food Market opens by itself after maintenance, and both bills are put to "
+"you, whether or not you have enough in store. While Auto-Feed Empire is on "
+"in Preferences (a new realm starts with it on), you skip all of it on any "
+"turn you can cover the two bills. On a turn you cannot, the market opens "
+"anyway."
 msgstr ""
 
 #. type: Plain text
@@ -1172,16 +1192,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:26
+#: internal/help/content/economy/food.md:25
 #, markdown-text
 msgid ""
-"The price changes a little each day. It is the same for everyone on the "
-"planet that day, and it stays the same until the next day. Buy on a cheap "
-"day if you can."
+"The price is new each day, and one day's price can be three times "
+"another's. It is the same for everyone on the planet that day. Buy on a "
+"cheap day if you can."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:31
+#: internal/help/content/economy/food.md:30
 #, markdown-text
 msgid ""
 "Each turn your people eat first, then your army, and then part of whatever "
@@ -1198,8 +1218,10 @@ msgid ""
 "apart. Whatever your people go without costs Popular Support, and whatever "
 "your army goes without costs Military Morale. Nobody leaves your realm over "
 "it — but if your people get under about two thirds of what they need, the "
-"realm falls into civil war. A civil war halves your Support and destroys a "
-"share of your land and of every kind of unit you own, listed ones included."
+"realm falls into civil war. Paying less than about nine tenths of your "
+"region upkeep also starts a civil war. A civil war halves your Support and "
+"destroys a share of your regions and of every kind of unit you own, listed "
+"ones included."
 msgstr ""
 
 #. type: Plain text
@@ -1230,46 +1252,47 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:16
+#: internal/help/content/economy/morale-and-support.md:17
 #, markdown-text
 msgid ""
-"Both start at 100 when you found your realm. Nothing ever raises them for "
-"free.  They fall when you go short, and the only way back up is to pay for "
-"it at the maintenance stage each turn."
+"Both start at 100 when you found your realm. Military Morale never rises for "
+"free. It falls when you go short, and the only way back up is to pay for it "
+"at the maintenance stage each turn. Popular Support also rises by itself "
+"each turn while your tax rate is low. See Taxes, Support, and Riots."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:17
+#: internal/help/content/economy/morale-and-support.md:18
 #, markdown-text, no-wrap
 msgid "What they do"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:20
+#: internal/help/content/economy/morale-and-support.md:21
 #, markdown-text
 msgid "Popular Support:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:24
+#: internal/help/content/economy/morale-and-support.md:25
 #, markdown-text
 msgid "sets your Coastal (tourism) income, which collapses when Support is low"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:24
+#: internal/help/content/economy/morale-and-support.md:25
 #, markdown-text
-msgid "sets how many people your land can hold"
+msgid "sets how many people your regions can hold"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:24
+#: internal/help/content/economy/morale-and-support.md:25
 #, markdown-text
 msgid "when it drops under 10, it starts pulling Morale down with it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:32
+#: internal/help/content/economy/morale-and-support.md:33
 #, markdown-text
 msgid ""
 "Military Morale scales how hard your army fights, both attacking and "
@@ -1282,47 +1305,47 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:36
+#: internal/help/content/economy/morale-and-support.md:38
 #, markdown-text
 msgid ""
-"There is one more effect that is easy to miss. Auto-Pay Maintenance only "
-"pays your bills silently while **both** numbers read exactly 100. Let either "
-"slip and you are back to answering the maintenance prompts by hand every "
-"turn."
+"Auto-Pay Maintenance pays your bills without asking only while **both** "
+"numbers read exactly 100, you hold no Waste regions, and you have the gold "
+"to pay in full. If any of these fails, you answer the maintenance prompts by "
+"hand that turn."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:37
+#: internal/help/content/economy/morale-and-support.md:39
 #, markdown-text, no-wrap
 msgid "What lowers them"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:50
+#: internal/help/content/economy/morale-and-support.md:52
 #, markdown-text
 msgid ""
-"Underpaying your armed forces costs Morale. Underpaying your land upkeep, "
+"Underpaying your armed forces costs Morale. Underpaying your region upkeep, "
 "the Queen's tax, or your people's food costs Support. Underfeeding the army "
 "costs Morale."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:50
+#: internal/help/content/economy/morale-and-support.md:52
 #, markdown-text
 msgid "A riot from high taxes costs Support."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:50
+#: internal/help/content/economy/morale-and-support.md:52
 #, markdown-text
 msgid ""
 "Declaring war on a ruler you hold an agreement with costs you "
 "nothing. Attacking that ruler without declaring war first ends the agreement "
-"too, and costs you a quarter of each."
+"too, and costs you support and morale."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:50
+#: internal/help/content/economy/morale-and-support.md:52
 #, markdown-text
 msgid ""
 "A chemical or biological strike on your realm hurts both. The plague is far "
@@ -1330,7 +1353,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:50
+#: internal/help/content/economy/morale-and-support.md:52
 #, markdown-text
 msgid ""
 "Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
@@ -1338,13 +1361,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:51
+#: internal/help/content/economy/morale-and-support.md:53
 #, markdown-text, no-wrap
 msgid "Paying them back"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:57
+#: internal/help/content/economy/morale-and-support.md:59
 #, markdown-text
 msgid ""
 "At the maintenance stage the crown asks for gold to buy back up to fifteen "
@@ -1355,13 +1378,13 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:61
+#: internal/help/content/economy/morale-and-support.md:63
 #, markdown-text
 msgid ""
 "What you pay buys points in proportion, so paying half the request buys "
 "about half the points. You may pay up to half again as much as is asked, and "
-"that really does buy more than fifteen points. Neither number can pass 100, "
-"so overpaying a nearly-content realm wastes the difference."
+"the extra buys more than fifteen points. Neither number can pass 100, so "
+"overpaying a nearly-content realm wastes the difference."
 msgstr ""
 
 #. type: Title #
@@ -1372,19 +1395,20 @@ msgid "Net Worth"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/net-worth.md:11
+#: internal/help/content/economy/net-worth.md:12
 #, markdown-text
-msgid "Net Worth is your overall score. It ranks every empire (see Scores)."
+msgid ""
+"Net Worth is the value of what your realm holds. It is shown beside your "
+"Score on the See Scores screen."
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/economy/net-worth.md:15
 #, markdown-text
 msgid ""
-"It counts mostly your land and your military strength. Gold, food, people, "
-"and debt are not counted at all. So a rich empire with little land or army "
-"still scores low, and a loan does not cost you rank. To climb the ranks, "
-"hold land and a strong army."
+"It counts your regions, your military units and your covert agents. Gold, "
+"food, people and debt are not counted. So a rich empire with few regions or "
+"units still has a low Net Worth, and a loan does not lower your Net Worth."
 msgstr ""
 
 #. type: Title #
@@ -1395,38 +1419,38 @@ msgid "Population"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/population.md:13
+#: internal/help/content/economy/population.md:12
 #, markdown-text
 msgid ""
-"Your people pay your taxes, so how many you hold is one of the things worth "
-"managing directly. Each turn some move in or move out, until the realm "
-"settles at the number it can support."
+"Population is the number of people in your realm. They pay your taxes. Each "
+"turn some move in or out, until the realm settles at the number it can hold."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/population.md:15
+#: internal/help/content/economy/population.md:14
 #, markdown-text
 msgid "Three things set that number:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/population.md:24
+#: internal/help/content/economy/population.md:22
 #, markdown-text
 msgid ""
-"**What your land is.** Urban regions house far more people than any other "
+"**Your region types.** Urban regions house far more people than any other "
 "type — more than ten times what a Coastal or Mountain region holds. Rivers "
-"and Industrial zones come next; Desert holds the fewest. Raw land does "
-"nothing on its own; it is the kind of region that counts."
+"and Industrial zones come next; Desert holds the fewest."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/population.md:24
+#: internal/help/content/economy/population.md:22
 #, markdown-text
-msgid "**Popular Support.** The higher it stands, the more people your land holds."
+msgid ""
+"**Popular Support.** The higher it stands, the more people your regions "
+"hold."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/population.md:24
+#: internal/help/content/economy/population.md:22
 #, markdown-text
 msgid ""
 "**Your tax rate.** A low rate lets your realm hold many more people. A high "
@@ -1435,15 +1459,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/population.md:27
+#: internal/help/content/economy/population.md:25
 #, markdown-text
 msgid ""
 "Support and taxes multiply together, so a realm with poor support and heavy "
-"taxes holds a small fraction of what its land could otherwise carry."
+"taxes holds a small fraction of what its regions could otherwise carry."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/population.md:32
+#: internal/help/content/economy/population.md:30
 #, markdown-text
 msgid ""
 "Movement each turn is a share of the gap, not of your population, so a realm "
@@ -1453,15 +1477,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/population.md:35
+#: internal/help/content/economy/population.md:33
 #, markdown-text
 msgid ""
-"Selling Urban land lowers what your realm can hold, and the people then "
-"drain away over the following turns rather than all at once."
+"Dropping Urban regions lowers what your realm can hold, and the people then "
+"leave over the following turns, not all at once."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/population.md:37
+#: internal/help/content/economy/population.md:35
 #, markdown-text
 msgid ""
 "Tip: population growth outruns food if you buy Urban regions and no "
@@ -1487,9 +1511,9 @@ msgstr ""
 #: internal/help/content/economy/taxes.md:16
 #, markdown-text
 msgid ""
-"Popular Support drifts each turn toward a target set by your tax rate. A "
-"steady, moderate tax rate keeps Support near its highest. High taxes push "
-"Support down.  Low Support badly cuts your Coastal (tourism) income."
+"Each turn your tax rate moves Popular Support. A low rate raises it, a high "
+"rate lowers it, and a rate in between leaves it where it is. Low Support "
+"badly cuts your Coastal (tourism) income."
 msgstr ""
 
 #. type: Plain text
@@ -1502,24 +1526,21 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:25
+#: internal/help/content/economy/taxes.md:22
 #, markdown-text
 msgid ""
-"Taxes also decide how many people your realm can hold. A low rate lets it "
-"hold many more, a high one far fewer, and past a punitive rate people leave "
-"faster still — see Population for the threshold. A realm that is already "
-"shrinking loses people quicker the harder it taxes. Support works the same "
-"way: the higher it stands, the more people your land can hold."
+"Taxes and Popular Support also decide how many people your realm can "
+"hold. See Population."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:26
+#: internal/help/content/economy/taxes.md:23
 #, markdown-text, no-wrap
 msgid "The Queen Royale's tax"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:30
+#: internal/help/content/economy/taxes.md:27
 #, markdown-text
 msgid ""
 "The Queen takes a share of what you earn each turn. You may pay her less "
@@ -1527,17 +1548,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:35
+#: internal/help/content/economy/taxes.md:32
 #, markdown-text
 msgid ""
 "Every coin she collects goes into her purse, and she gives part of that "
-"purse back. She pays you the first time you play each day: 2% of the purse, "
-"or 7% once it holds more than 100 million gold. A realm still under New "
-"Realm Protection gets at most 1 million."
+"purse back. She pays you the first time you play each day: a small share of "
+"the purse, and a larger share once the purse grows large. A realm still "
+"under New Realm Protection gets at most 1 million."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:38
+#: internal/help/content/economy/taxes.md:35
 #, markdown-text
 msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
@@ -1545,13 +1566,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:39
+#: internal/help/content/economy/taxes.md:36
 #, markdown-text, no-wrap
 msgid "The lottery"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:45
+#: internal/help/content/economy/taxes.md:42
 #, markdown-text
 msgid ""
 "Once a day, as she hands back your refund, the Queen offers a lottery "
@@ -1562,7 +1583,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:50
+#: internal/help/content/economy/taxes.md:47
 #, markdown-text
 msgid ""
 "Pick six letters, one keypress each, and press Enter for any you would "
@@ -1572,43 +1593,43 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:57
+#: internal/help/content/economy/taxes.md:54
 #, markdown-text
 msgid "1 letter: 2,500 gold"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:57
+#: internal/help/content/economy/taxes.md:54
 #, markdown-text
 msgid "2 letters: 10,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:57
+#: internal/help/content/economy/taxes.md:54
 #, markdown-text
 msgid "3 letters: 500,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:57
+#: internal/help/content/economy/taxes.md:54
 #, markdown-text
 msgid "4 letters: 1,000,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:57
+#: internal/help/content/economy/taxes.md:54
 #, markdown-text
 msgid "5 letters: 4,000,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:57
+#: internal/help/content/economy/taxes.md:54
 #, markdown-text
 msgid "6 letters: 10,000,000"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:61
+#: internal/help/content/economy/taxes.md:58
 #, markdown-text
 msgid ""
 "Winnings go into your bank. One match still leaves you 2,500 down on the "
@@ -1676,32 +1697,33 @@ msgstr ""
 #, markdown-text
 msgid ""
 "A trade deal costs a fee for each day you send it for, and it needs carriers "
-"to move the goods. How many depends on what you are shipping: one carrier "
-"holds a thousand troopers or turrets, a hundred jets, five thousand tanks, "
-"or a hundred thousand gold, and food, bombers, agents and carriers take no "
-"room at all. A Protective Trade treaty with that realm makes the fee "
+"to move the goods. How many depends on what you are shipping. As cargo, one "
+"carrier holds a thousand troopers or turrets, a hundred jets, five thousand "
+"tanks, or a hundred thousand gold. Food, bombers, agents and carriers take "
+"no room at all. A Protective Trade treaty with that realm makes the fee "
 "cheaper."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:40
+#: internal/help/content/economy/trading.md:41
 #, markdown-text
 msgid ""
 "The days you pay for are how long the offer stands. What you put in the deal "
-"leaves your realm the moment you send it, and it comes back only if the "
-"offer is accepted: a refusal, a deal nobody answers before its days run out, "
-"and a realm that falls before it replies all cost you the goods. Send to "
-"someone who is playing, and give them enough days to get to it."
+"leaves your realm the moment you send it. If the offer is accepted, the "
+"other realm gets it, and you get what you asked for. A refusal, a deal "
+"nobody answers before its days run out, and a realm that falls before it "
+"replies all cost you the goods. Send to someone who is playing, and give "
+"them enough days to get to it."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:41
+#: internal/help/content/economy/trading.md:42
 #, markdown-text, no-wrap
 msgid "Deals to another planet"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:46
+#: internal/help/content/economy/trading.md:47
 #, markdown-text
 msgid ""
 "In a league game the InterPlanetary Operations menu sends a deal to a realm "
@@ -1710,7 +1732,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:50
+#: internal/help/content/economy/trading.md:51
 #, markdown-text
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
@@ -1720,7 +1742,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:55
+#: internal/help/content/economy/trading.md:56
 #, markdown-text
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
@@ -1731,32 +1753,32 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:56
+#: internal/help/content/economy/trading.md:57
 #, markdown-text, no-wrap
 msgid "Getting the most from trade"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:59
+#: internal/help/content/economy/trading.md:60
 #, markdown-text
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:64
+#: internal/help/content/economy/trading.md:65
 #, markdown-text, no-wrap
 msgid ""
-"**Specialize, then supply your partners.** Your industry can favor one "
-"unit\n"
-"type, which makes that unit cheaper for you than for anyone else. If you "
-"build\n"
-"tanks and a partner builds turrets, each of you can sell to the other below "
-"the\n"
-"price they would pay to build it themselves. Both realms come out ahead.\n"
+"**Specialize, then supply your partners.** Your industry can specialize in "
+"one\n"
+"unit type. It then builds more of that unit and fewer of every other. If "
+"you\n"
+"specialize in tanks and a partner in turrets, each of you makes more of "
+"what\n"
+"the other needs. Trade the extra, and both realms come out ahead.\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:68
+#: internal/help/content/economy/trading.md:69
 #, markdown-text, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, "
@@ -1767,14 +1789,14 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:71
+#: internal/help/content/economy/trading.md:72
 #, markdown-text, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, "
 "and\n"
-"an ally's market is often the cheapest place to buy. See the "
-"Interplanetary\n"
-"Trading topic.\n"
+"an ally's market is often the cheapest place to buy. See the Allied "
+"Markets\n"
+"topic.\n"
 msgstr ""
 
 #. type: Title #
@@ -1789,26 +1811,24 @@ msgstr ""
 #, markdown-text
 msgid ""
 "In a league game you can buy from another planet's Trading Market. Open "
-"Trading from the InterPlanetary Operations menu, then Markets, and choose a "
+"Trade from the InterPlanetary Operations menu, then Markets, and choose a "
 "planet."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:15
+#: internal/help/content/interbbs/allied-markets.md:14
 #, markdown-text
-msgid ""
-"Only planets your Coordinator has marked Allied are listed. Buying across "
-"planets is an Immortal Barons feature, and a league may switch it off."
+msgid "Only planets your Coordinator has marked Allied are listed."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/allied-markets.md:16
+#: internal/help/content/interbbs/allied-markets.md:15
 #, markdown-text, no-wrap
 msgid "Your order is a bid, not a purchase"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:22
+#: internal/help/content/interbbs/allied-markets.md:21
 #, markdown-text
 msgid ""
 "What you see is that planet's market **as it was when we last heard from "
@@ -1819,13 +1839,13 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:24
+#: internal/help/content/interbbs/allied-markets.md:23
 #, markdown-text
 msgid "So your order is a bid. When you send it:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/allied-markets.md:31
+#: internal/help/content/interbbs/allied-markets.md:30
 #, markdown-text
 msgid ""
 "Your gold is **held straight away**. It leaves your treasury but is not "
@@ -1833,7 +1853,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/allied-markets.md:31
+#: internal/help/content/interbbs/allied-markets.md:30
 #, markdown-text
 msgid ""
 "When the bid arrives, the other planet sells to you **only if the goods are "
@@ -1841,19 +1861,19 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/allied-markets.md:31
+#: internal/help/content/interbbs/allied-markets.md:30
 #, markdown-text
 msgid "If it sells, the goods come back to you on the next packet."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/allied-markets.md:31
+#: internal/help/content/interbbs/allied-markets.md:30
 #, markdown-text
 msgid "If it does not, your gold comes back instead, and you are told why."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:35
+#: internal/help/content/interbbs/allied-markets.md:34
 #, markdown-text
 msgid ""
 "If the seller still has some but not all of what you asked for, you get what "
@@ -1862,13 +1882,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/allied-markets.md:36
+#: internal/help/content/interbbs/allied-markets.md:35
 #, markdown-text, no-wrap
 msgid "Waiting, and getting your gold back"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:41
+#: internal/help/content/interbbs/allied-markets.md:40
 #, markdown-text, no-wrap
 msgid ""
 "**Bids Out** on the Trading menu lists every bid you have waiting and how "
@@ -1879,7 +1899,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:46
+#: internal/help/content/interbbs/allied-markets.md:45
 #, markdown-text
 msgid ""
 "Nothing is lost if a packet goes missing. A bid that never gets an answer is "
@@ -1889,13 +1909,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/allied-markets.md:47
+#: internal/help/content/interbbs/allied-markets.md:46
 #, markdown-text, no-wrap
 msgid "Two things worth knowing"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:52
+#: internal/help/content/interbbs/allied-markets.md:51
 #, markdown-text
 msgid ""
 "Each planet keeps its own list of who it is allied with. A planet can "
@@ -1904,11 +1924,11 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:54
+#: internal/help/content/interbbs/allied-markets.md:53
 #, markdown-text
 msgid ""
 "Your sysop can turn this feature off for the whole league, in which case "
-"Trading does not appear on the InterPlanetary Operations menu."
+"Trade does not appear on the InterPlanetary Operations menu."
 msgstr ""
 
 #. type: Title #
@@ -1919,25 +1939,25 @@ msgid "Attack Types"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:13
+#: internal/help/content/interbbs/attack-types.md:12
 #, markdown-text
 msgid ""
-"When you send your own strike force at a baron on another planet, you choose "
-"how to press the attack. Group attacks have no such choice — they always "
-"fight as a Normal Attack."
+"An attack type sets how your own strike force fights a baron on another "
+"planet.  Group attacks have no such choice: they always fight as a Normal "
+"Attack."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:17
+#: internal/help/content/interbbs/attack-types.md:16
 #, markdown-text
 msgid ""
-"Going alone also pays better: your own strike takes twice the land a group "
-"attack of the same weight would. What you give up is the whole-planet target "
-"and everyone else's forces."
+"Going alone also pays better: your own strike takes twice the share of the "
+"defender's regions that a group attack takes. What you give up is the "
+"whole-planet target and everyone else's forces."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/attack-types.md:27
+#: internal/help/content/interbbs/attack-types.md:26
 #, markdown-text
 msgid ""
 "**Normal Attack** — your forces fight at full strength. Both sides break off "
@@ -1946,37 +1966,44 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/attack-types.md:27
+#: internal/help/content/interbbs/attack-types.md:26
 #, markdown-text
 msgid ""
 "**Quick Strike** — surprise lets you fight at 120% of your normal strength, "
 "but the battle is short and disorganized: both sides retreat at 8% losses, "
-"and you carry off only half the land a Normal Attack would."
+"and you carry off only half the regions a Normal Attack would."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/attack-types.md:27
+#: internal/help/content/interbbs/attack-types.md:26
 #, markdown-text
 msgid ""
 "**Extended Battle** — a grinding assault. Fatigue drops your forces to 85% "
 "strength, but they press until both sides have taken 20% losses and bring "
-"home 125% of a Normal Attack's land."
+"home 125% of a Normal Attack's regions."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:34
+#: internal/help/content/interbbs/attack-types.md:29
 #, markdown-text
 msgid ""
-"The choice is really about what you are short of. Land is the thing you "
-"cannot buy back quickly, so an Extended Battle is the one that changes the "
-"map — pay for it when you already have the men to spare and can afford to be "
-"weak for a day. A Quick Strike costs you least and hits above its weight, "
-"which makes it the honest answer when you are not sure you can win: you find "
-"out cheaply, and your army is still standing."
+"These losses are for the default Attack Damage setting. Your sysop may halve "
+"or double them."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:39
+#: internal/help/content/interbbs/attack-types.md:35
+#, markdown-text
+msgid ""
+"Choose by what you can spare. Regions are slow to win back, so an Extended "
+"Battle gains you the most. Send it when you have troops to spare and can "
+"afford to be weak for a day. A Quick Strike costs you the least and fights "
+"harder than its size suggests, so use it when you are not sure whether you "
+"can win. You learn the answer cheaply, and your army survives."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:40
 #, markdown-text
 msgid ""
 "Remember that your strength is measured on arrival, not on "
@@ -1986,13 +2013,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/attack-types.md:40
+#: internal/help/content/interbbs/attack-types.md:41
 #, markdown-text, no-wrap
 msgid "While the force is away, and when it comes back"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:46
+#: internal/help/content/interbbs/attack-types.md:47
 #, markdown-text
 msgid ""
 "A group attack does not leave the moment you file it. You set the wait in "
@@ -2002,7 +2029,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:51
+#: internal/help/content/interbbs/attack-types.md:52
 #, markdown-text
 msgid ""
 "Join Group Attack lists every party still forming, with the troopers, jets, "
@@ -2012,7 +2039,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:57
+#: internal/help/content/interbbs/attack-types.md:58
 #, markdown-text
 msgid ""
 "Once a force leaves, it is out of your hands and out of your army until the "
@@ -2024,18 +2051,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:62
+#: internal/help/content/interbbs/attack-types.md:64
 #, markdown-text
 msgid ""
-"Land you capture abroad has no type until you give it one, so it waits for "
-"you and the region picker comes up at the start of your next turn — the same "
-"question a Regular Attack asks at home. On a group attack the regions are "
-"shared between the barons who paid for them, in proportion to what each "
-"committed."
+"Regions you capture abroad have no type until you give them one, so they "
+"wait for you, and the region picker comes up at the start of your next turn "
+"— the same question a Regular Attack asks at home. On a group attack the "
+"regions are shared between the barons who paid for them, in proportion to "
+"what each committed."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:65
+#: internal/help/content/interbbs/attack-types.md:67
 #, markdown-text
 msgid ""
 "If the answer never arrives — a board goes quiet, a packet is lost — your "
@@ -2061,15 +2088,16 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:37
+#: internal/help/content/interbbs/leagues.md:38
 #, markdown-text
 msgid ""
-"Group Attack — several rulers on your board join one strike against a "
-"distant enemy. The gains are shared among those who take part."
+"Create Group Attack / Join Group Attack — several rulers on your board join "
+"one strike against a distant enemy. The gains are shared among those who "
+"take part."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:37
+#: internal/help/content/interbbs/leagues.md:38
 #, markdown-text
 msgid ""
 "Indiv. Attack Force — your own strike against one named baron. You keep the "
@@ -2078,13 +2106,13 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:37
+#: internal/help/content/interbbs/leagues.md:38
 #, markdown-text
-msgid "IP Scores — see how the boards rank against each other."
+msgid "View IPScores — see how the boards rank against each other."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:37
+#: internal/help/content/interbbs/leagues.md:38
 #, markdown-text
 msgid ""
 "Send Message — write to another planet. Name the planet, then pick which "
@@ -2101,7 +2129,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:37
+#: internal/help/content/interbbs/leagues.md:38
 #, markdown-text
 msgid ""
 "Diplomacy List — where your board says it stands with each other planet. It "
@@ -2109,17 +2137,17 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:37
+#: internal/help/content/interbbs/leagues.md:38
 #, markdown-text
 msgid ""
 "Travel Times — how long a message or a strike actually takes to reach each "
 "planet and get an answer back. Boards trade mail on their sysops' schedule, "
-"so check it before you aim anything: against a planet three days away, you "
-"are committing forces you will not hear about until the weekend."
+"so check it before you aim anything: against a planet with a three-day round "
+"trip, you will not hear how your forces did for three days."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:45
+#: internal/help/content/interbbs/leagues.md:46
 #, markdown-text
 msgid ""
 "Five of these items are shut until you have played a turn this visit: Send "
@@ -2132,13 +2160,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/leagues.md:46
+#: internal/help/content/interbbs/leagues.md:47
 #, markdown-text, no-wrap
 msgid "Your BBS Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:54
+#: internal/help/content/interbbs/leagues.md:55
 #, markdown-text
 msgid ""
 "The barons on your own board elect one of their number Coordinator, and the "
@@ -2150,7 +2178,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:58
+#: internal/help/content/interbbs/leagues.md:59
 #, markdown-text
 msgid ""
 "You cannot vote while your realm is still under new-realm protection, and "
@@ -2159,7 +2187,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:61
+#: internal/help/content/interbbs/leagues.md:62
 #, markdown-text
 msgid ""
 "Every turn opens by telling you whether you hold the office or who your vote "
@@ -2167,15 +2195,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:64
+#: internal/help/content/interbbs/leagues.md:65
 #, markdown-text
 msgid ""
-"A league game has a set length. When it ends, the world resets and a new "
-"game begins."
+"Your sysop may give a league game a set length. When it runs out, the world "
+"resets and a new game begins."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:65
+#: internal/help/content/interbbs/leagues.md:66
 #, markdown-text
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
@@ -2205,7 +2233,7 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Only your board's Coordinator can change the list. It is on the Coordinator "
-"Menu, under Diplomacy Modification."
+"Menu, under Modify Diplomacy."
 msgstr ""
 
 #. type: Title ##
@@ -2219,7 +2247,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "The list is a note from your Coordinator to the barons on your own board. It "
-"tells you what your board thinks of a planet. Mostly it only describes:"
+"tells you what your board thinks of a planet. It changes almost nothing in "
+"play:"
 msgstr ""
 
 #. type: Bullet: '- '
@@ -2251,7 +2280,7 @@ msgid ""
 "**Trading.** You may only buy at another planet's market while your board "
 "marks that planet **Allied**. Both boards must agree: yours has to call "
 "theirs Allied for your bid to go, and theirs has to call yours Allied to "
-"fill it. If an alliance ends while your bid is travelling, your gold comes "
+"fill it. If an alliance ends while your bid is traveling, your gold comes "
 "back."
 msgstr ""
 
@@ -2393,29 +2422,30 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Each report arrives as planet news, dated, saying what was aimed at you and "
-"how long it had left when he wrote it. That line never changes afterwards, "
-"so hours later it no longer tells you how long is left."
+"how long it had left when he wrote it. That line never changes afterward, so "
+"hours later it no longer tells you how long is left."
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:52
 #, markdown-text, no-wrap
 msgid ""
-"**Incoming**, on the InterPlanetary menu, is the same warnings kept current: "
-"one\n"
-"row per threat, the soonest at the top, counting down as you read — `3h`, "
-"then\n"
-"`90m`, then `away` once the force has left. A weapon already flying is "
-"listed\n"
-"with the days until it lands.\n"
+"**Incoming Attacks**, on the InterPlanetary menu, is the same warnings "
+"kept\n"
+"current: one row per threat, the soonest at the top, counting down as you "
+"read —\n"
+"`3h`, then `90m`, then `away` once the force has left. A weapon already "
+"flying\n"
+"is listed with the days until it lands.\n"
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/interbbs/spyguy.md:55
 #, markdown-text
 msgid ""
-"An empty list is not proof of peace. It means nothing has been reported, and "
-"only a watcher posted on another planet can report anything."
+"An empty list does not prove that nobody is coming. Apart from a weapon "
+"already in flight, only a watcher posted on another planet can report "
+"anything."
 msgstr ""
 
 #. type: Title ##
@@ -2459,11 +2489,13 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:74
+#: internal/help/content/interbbs/spyguy.md:76
 #, markdown-text
 msgid ""
-"A short stay renewed is worth more than one long stay bought early: the days "
-"run whether anything happens or not."
+"Sending another SpyGuy to a planet already watched from here does not add "
+"the two stays together. The stay becomes whichever is longer, and you still "
+"pay for every day you bought. This holds for every baron on your planet, "
+"because they share the watcher. Send a new one when the old stay runs out."
 msgstr ""
 
 #. type: Title #
@@ -2488,8 +2520,8 @@ msgstr ""
 #: internal/help/content/interbbs/terrorist-ops.md:17
 #, markdown-text
 msgid ""
-"Every operation is answered by New Realm Protection: a sheltered realm takes "
-"nothing at all."
+"New Realm Protection stops every operation: a sheltered realm takes nothing "
+"at all, and you cannot send any while your own realm is still sheltered."
 msgstr ""
 
 #. type: Title ##
@@ -2516,14 +2548,14 @@ msgstr ""
 #: internal/help/content/interbbs/terrorist-ops.md:34
 #, markdown-text
 msgid ""
-"**Bomb Intelligence Agencies** — kills a few percent of their agents, which "
-"is what they defend and attack with."
+"**Bomb Intelligence** — kills a few percent of their agents, which is what "
+"they defend and attack with."
 msgstr ""
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 #, markdown-text
-msgid "**Demoralize Forces** — takes a seventh off military morale."
+msgid "**Demoralize** — takes a seventh off military morale."
 msgstr ""
 
 #. type: Bullet: '- '
@@ -2535,7 +2567,7 @@ msgstr ""
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:34
 #, markdown-text
-msgid "**Bomb Air Bases** — burns a slice of their jets on the ground."
+msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
 msgstr ""
 
 #. type: Bullet: '- '
@@ -2554,7 +2586,7 @@ msgstr ""
 #: internal/help/content/interbbs/terrorist-ops.md:34
 #, markdown-text
 msgid ""
-"**Bomb Food Storages** — the widest swing of the nine: it can take almost a "
+"**Bomb Food Stores** — the widest swing of the nine: it can take almost a "
 "third of what is in store, or almost nothing."
 msgstr ""
 
@@ -2587,25 +2619,24 @@ msgid "Getting through"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:49
 #, markdown-text
 msgid ""
-"Each agent is rolled for on its own, weighing your agents against "
-"theirs. The weighing takes the square root of each side and gives the "
-"defender the better of it, so agents help but with sharply falling returns: "
-"four times as many buys you twice the edge, and two evenly matched realms "
-"see about two agents in five get through. There is a small chance either way "
-"that has nothing to do with either side."
+"Each agent is rolled for on its own, and the target's agents defend against "
+"it.  The more agents your realm holds, the better each one's chance, but "
+"each one you add helps less. When both realms have the same number of "
+"agents, about two agents in five get through. A small chance either way does "
+"not depend on either side."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:54
+#: internal/help/content/interbbs/terrorist-ops.md:53
 #, markdown-text
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "
 "makes one agent likelier to land. A Terrorist Prevention pact adds its "
-"partners' agents to the defense, which is what makes a well-allied realm "
-"expensive to work on."
+"partners' agents to the defense, and an Intelligence Alliance adds your "
+"partners' agents to yours."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -2631,28 +2662,27 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:20
+#: internal/help/content/introduction/overview.md:19
 #, markdown-text
 msgid ""
 "A planet has room for 25 baronies, each holding one of its 25 seats. Your "
 "seat is yours for as long as your realm stands, and its letter is how "
 "everyone else names you. When every seat is taken, a new caller is turned "
-"away until a realm falls; a sysop may also seat fewer than 25 players, and "
-"any computer-run barons take seats of their own."
+"away until a realm falls. A sysop may also seat fewer than 25 players."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:25
+#: internal/help/content/introduction/overview.md:24
 #, markdown-text
 msgid ""
 "You name your realm when you first call, and you may change that name once — "
 "from the Preferences menu, after your New Realm Protection has ended. Only "
-"once: the option disappears afterwards, and the whole planet is told of the "
+"once: the option disappears afterward, and the whole planet is told of the "
 "change."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:30
+#: internal/help/content/introduction/overview.md:29
 #, markdown-text
 msgid ""
 "Many bulletin board systems can link their games together. When they do, "
@@ -2662,13 +2692,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:31
+#: internal/help/content/introduction/overview.md:30
 #, markdown-text, no-wrap
 msgid "Turns"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:36
+#: internal/help/content/introduction/overview.md:35
 #, markdown-text
 msgid ""
 "You get a set number of turns each day. A turn is one round of play: you "
@@ -2677,19 +2707,19 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:37
+#: internal/help/content/introduction/overview.md:36
 #, markdown-text, no-wrap
 msgid "What happens in a turn"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:40
+#: internal/help/content/introduction/overview.md:39
 #, markdown-text
 msgid "A turn moves through these steps in order:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid ""
 "**News and mail.** You see what happened since your last turn, and read any "
@@ -2697,7 +2727,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid ""
 "**Production and income.** Your industry builds military units, and your "
@@ -2705,52 +2735,56 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid "**Reports.** You see an income report and your full Empire Status."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid ""
-"**Upkeep.** You pay to maintain your military and your land, and you feed "
+"**Upkeep.** You pay to maintain your military and your regions, and you feed "
 "your people and your army. Short food or gold causes trouble, so watch "
 "these."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid ""
 "**Covert Operations.** Spying and sabotage. This step appears only if you "
-"keep it turned on and hold at least one covert agent."
+"turn on Visit Covert Menu in Preferences and hold at least one covert agent."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
-msgid "**Spending.** You buy land, military, and other things."
+msgid "**Bank.** The bank opens so you can deposit, withdraw, borrow or invest."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
+#, markdown-text
+msgid "**Spending.** You buy regions, military units, and other things."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:58
+#, markdown-text
+msgid "**Attacks.** You may attack another barony once per turn."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid ""
-"**Attacks.** You may attack another barony, a limited number of times per "
-"day."
+"**Trading.** Trade goods with other baronies. This step appears only if you "
+"turn on Visit Trading Menu in Preferences."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
-#, markdown-text
-msgid ""
-"**Trading.** Trade goods with other baronies, if you keep this step turned "
-"on."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid ""
 "**InterPlanetary Operations.** Actions against other planets, in linked "
@@ -2758,25 +2792,27 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
-msgid "**Messages.** You may send a message to another player."
+msgid ""
+"**Messages.** You may send a message to another player. This step appears "
+"only if you turn on Visit Message Menu in Preferences."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:58
 #, markdown-text
 msgid "**End of turn.** Your economy and population settle, and the turn closes."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:57
+#: internal/help/content/introduction/overview.md:59
 #, markdown-text, no-wrap
 msgid "The System menu"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:63
+#: internal/help/content/introduction/overview.md:65
 #, markdown-text
 msgid ""
 "Some choices are not forced on you every turn. From the **System menu** you "
@@ -2786,22 +2822,22 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:67
+#: internal/help/content/introduction/overview.md:69
 #, markdown-text
 msgid ""
-"In this game, **diplomacy** and **changing production** live on the System "
-"menu.  They are not automatic stops in each turn, so visit them yourself "
-"when you want to change your plans."
+"Diplomacy is also on the Entry menu. Neither diplomacy nor changing "
+"production is an automatic stop in a turn, so visit them when you want to "
+"change your plans."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:68
+#: internal/help/content/introduction/overview.md:70
 #, markdown-text, no-wrap
 msgid "Game Bulletins"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:75
+#: internal/help/content/introduction/overview.md:77
 #, markdown-text
 msgid ""
 "Your sysop can put up notices for players to read. Choose **Game Bulletins** "
@@ -2812,13 +2848,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:76
+#: internal/help/content/introduction/overview.md:78
 #, markdown-text, no-wrap
 msgid "Reading the rest"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:81
+#: internal/help/content/introduction/overview.md:83
 #, markdown-text
 msgid ""
 "The sections that follow explain each part of the game in turn: the "
@@ -2843,24 +2879,23 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:19
+#: internal/help/content/military/agents.md:18
 #, markdown-text
 msgid ""
-"Agents are what you spend, not what you win with. Each operation needs one, "
-"and a failed operation costs you it. On their own, your agents do not change "
-"your chance of success, and neither do the target's — the Covert Operations "
-"topic covers what does. Where the count tells is alongside an Intelligence "
-"Alliance or a Terrorist Prevention treaty, which lend an ally's agents to "
-"one side of the reckoning."
+"You spend agents on operations. Each operation needs one agent, and a failed "
+"operation loses it. On your own planet, the number of agents on either side "
+"does not change your chance of success, unless a treaty adds an ally's "
+"agents. The Covert Operations topic explains what does. Against terrorist "
+"operations between planets, the target's agents do help it defend."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:22
+#: internal/help/content/military/agents.md:20
 #, markdown-text
 msgid ""
-"What a stock of agents buys you is staying power: a run of failures does not "
-"leave you unable to act. Agents do not fight in normal battles. See the "
-"Covert Operations topic for what they can do."
+"A large stock of agents lets you keep working after several failures. Agents "
+"do not fight in normal battles. See the Covert Operations topic for what "
+"they can do."
 msgstr ""
 
 #. type: Title #
@@ -2871,24 +2906,30 @@ msgid "Bombers"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:13
+#: internal/help/content/military/bombers.md:11
 #, markdown-text
-msgid ""
-"Bombers are delivery aircraft. They have no attack or defense strength of "
-"their own — an offense of 0 and a defense of 0 — and their only job is to "
-"carry payloads."
+msgid "Bombers are delivery aircraft. They have an offense of 0 and a defense of 0."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:16
+#: internal/help/content/military/bombers.md:15
 #, markdown-text
 msgid ""
-"Missiles and interplanetary bombings need bombers to deliver them. Without "
-"enough bombers, you cannot launch those attacks."
+"Special Operations aimed at another planet need bombers to deliver their "
+"payloads, and you cannot launch them without enough. The Nuclear, Chemical "
+"and Biological Attacks on your own planet do not need bombers."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:21
+#: internal/help/content/military/bombers.md:18
+#, markdown-text
+msgid ""
+"In a strike on another planet, your bombers fight the defender's jets. A "
+"strike with no bombers destroys none of them."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/bombers.md:23
 #, markdown-text
 msgid ""
 "Bombers do nothing in an attack on your own planet. They add no strength to "
@@ -2898,11 +2939,9 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:23
+#: internal/help/content/military/bombers.md:24
 #, markdown-text
-msgid ""
-"Bombers add a large amount to your net worth, so a fleet of them raises your "
-"score as well as your reach."
+msgid "Bombers add a large amount to your net worth."
 msgstr ""
 
 #. type: Title #
@@ -2969,12 +3008,11 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/headquarters.md:16
+#: internal/help/content/military/headquarters.md:15
 #, markdown-text
 msgid ""
-"Build it early. The price goes up every turn you play, so the longer you "
-"wait, the more it costs. The price does not depend on how large your realm "
-"is — only on how long you have been playing."
+"Build it early. The price goes up every turn you play, up to a ceiling. It "
+"does not depend on how large your realm is."
 msgstr ""
 
 #. type: Plain text
@@ -2982,8 +3020,9 @@ msgstr ""
 #, markdown-text
 msgid ""
 "While it is being built — and more so once it is finished — it raises how "
-"much your tanks add to both attack and defense. Enemies can bomb your "
-"HeadQuarters with covert operations to weaken your tanks."
+"much your tanks add to both attack and defense. You lose some of its "
+"progress when you lose a battle as the defender. Agents from another planet "
+"can also sabotage it, and so can an S3-Sabre hit."
 msgstr ""
 
 #. type: Title #
@@ -3058,9 +3097,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Tanks are the strongest general-purpose unit, powerful on both attack and "
-"defense. A tank is worth three and a half troopers on its own. With a "
-"finished HeadQuarters it is worth four and a half, on both attack and "
-"defense."
+"defense. In a battle on your own planet, a tank is worth three and a half "
+"troopers.  With a finished HeadQuarters it is worth four and a half."
 msgstr ""
 
 #. type: Plain text
@@ -3106,9 +3144,9 @@ msgstr ""
 #: internal/help/content/military/troopers.md:16
 #, markdown-text
 msgid ""
-"They are cheap to buy and cheap to keep. About seven troopers cost as much "
-"as one tank, but a tank is worth several troopers in a fight. Troopers are "
-"the better value early in the game, and tanks become stronger later."
+"They are cheap to buy and cheap to keep. A tank costs several times as much "
+"as a trooper, but it is worth several troopers in a fight. Troopers are the "
+"better value early in the game, and tanks become stronger later."
 msgstr ""
 
 #. type: Plain text
@@ -3117,8 +3155,8 @@ msgstr ""
 msgid ""
 "Every military unit eats, but a trooper eats fifty times as much as any "
 "other: one unit of food feeds 200 troopers, or 10,000 of anything else. So a "
-"large trooper army needs a strong food supply, and a large armored one "
-"barely registers."
+"large trooper army needs a strong food supply. A large army of other units "
+"needs very little."
 msgstr ""
 
 #. type: Plain text
@@ -3154,24 +3192,24 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:17
+#: internal/help/content/military/turrets.md:16
 #, markdown-text
 msgid ""
-"Turrets shoot down attacking jets, destroy attacking tanks, and kill "
-"attacking troops. They do not stop a neighbor's missiles — nothing does, "
-"nuclear, chemical or biological alike."
+"Turrets add to your defense against every kind of attacking unit. They do "
+"not stop a neighbor's missiles — nothing does, nuclear, chemical or "
+"biological alike."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:20
+#: internal/help/content/military/turrets.md:19
 #, markdown-text
 msgid ""
-"Covert operations cannot destroy your turrets, so they form a stable core "
-"for your defense."
+"Covert operations on your own planet cannot destroy your turrets. An "
+"S3-Sabre from another planet can, and so can a pirate raid."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:23
+#: internal/help/content/military/turrets.md:22
 #, markdown-text
 msgid ""
 "Some strategy guides call this unit a \"Missile Base.\" It is the same "
@@ -3179,7 +3217,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:25
+#: internal/help/content/military/turrets.md:24
 #, markdown-text
 msgid ""
 "Build turrets to defend your regions, and pair them with troopers and tanks "
@@ -3222,9 +3260,9 @@ msgstr ""
 #: internal/help/content/regions/region-coastal.md:12
 #, markdown-text
 msgid ""
-"Coastal regions are your best source of tourism income. In good times they "
-"make the most gold. But when public support is low, your people lose "
-"interest and tourism income drops sharply."
+"Coastal regions earn gold from tourism. When Popular Support is high, they "
+"earn more gold on average than any other region type. When Support is low, "
+"their income drops sharply."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -3244,7 +3282,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Desert regions are good for solar power. Their income swings with "
-"conditions, but on average it beats mountains and trails good Coastal land."
+"conditions, but on average it beats mountains and trails Coastal regions "
+"with high Support."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -3281,8 +3320,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "The percentages do not have to add up to 100. Any share you leave unassigned "
-"earns gold instead. So the choice is units or gold: if you assign the full "
-"100% to units, your industry earns no gold."
+"earns gold instead. If you assign the full 100% to units, your industry "
+"earns no gold."
 msgstr ""
 
 #. type: Plain text
@@ -3312,8 +3351,8 @@ msgstr ""
 #: internal/help/content/regions/region-mountain.md:12
 #, markdown-text
 msgid ""
-"Mountain regions mine natural resources. Their income is lower on average, "
-"but steady, because few things change it. Mountains also boost how much your "
+"Mountain regions earn gold from mining. Their income is lower on average, "
+"but it changes little from turn to turn. Mountains also boost how much your "
 "Industrial regions produce."
 msgstr ""
 
@@ -3338,22 +3377,23 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/region-river.md:17
+#: internal/help/content/regions/region-river.md:18
 #, markdown-text
 msgid ""
-"A river pays less gold than a Coastal, Desert or Mountain region, because "
-"part of its output goes to fishing instead. What it gives you in return is "
+"Part of a river's output goes to fishing, so it pays less gold on average "
+"than a Desert region, or a Coastal region while Support is high. It pays "
+"about the same as a Mountain region. What it gives you in return is "
 "steadiness: river gold barely swings from turn to turn, while the others can "
 "have a poor turn."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/region-river.md:20
+#: internal/help/content/regions/region-river.md:21
 #, markdown-text
 msgid ""
-"The food is a bonus, not a food supply. One river grows about a tenth of "
-"what one agricultural region grows. Buy rivers for the gold and the "
-"steadiness; buy agricultural regions when you need to feed people."
+"The food is small: one river grows about a tenth of what one agricultural "
+"region grows. Buy rivers for the gold and the steadiness; buy agricultural "
+"regions when you need to feed people."
 msgstr ""
 
 #. type: Title #
@@ -3364,16 +3404,23 @@ msgid "Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/regions.md:13
+#: internal/help/content/regions/regions.md:14
 #, markdown-text
 msgid ""
-"Land is made of regions. You buy regions from a market, and the price rises "
-"as you buy more. There are eight region types, each with a different "
-"job. Each type has its own topic."
+"Regions are the territory your realm holds. You buy them on the Spending "
+"menu, and the price rises as you buy more. There are eight region types you "
+"can buy, each with a different job, and Waste, which only a strike "
+"creates. Each type has its own topic."
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/regions/regions.md:16
+#, markdown-text
+msgid "The realm that holds the most regions is the Planetary Master."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/regions.md:19
 #, markdown-text
 msgid ""
 "Every region you own costs gold to maintain, every turn. The cost is the "
@@ -3399,8 +3446,8 @@ msgstr ""
 msgid ""
 "Technology regions make your whole empire more efficient. The bonus is not "
 "instant: it builds up slowly the longer you hold Technology regions, and it "
-"builds faster when they are a larger share of your land. Bigger empires need "
-"more Technology regions to reach the same level."
+"builds faster when they are a larger share of your regions. Bigger empires "
+"need more Technology regions to reach the same level."
 msgstr ""
 
 #. type: Plain text
@@ -3475,7 +3522,7 @@ msgid ""
 "An urban region earns no gold by itself, but it still costs the same "
 "maintenance as every other region. Its worth is indirect: more people means "
 "more tax income. More people also eat more food, so grow your Agricultural "
-"land alongside your Urban land."
+"regions alongside your Urban regions."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -3494,8 +3541,8 @@ msgstr ""
 #: internal/help/content/regions/region-waste.md:12
 #, markdown-text
 msgid ""
-"Waste is land a nuclear or chemical strike has ruined. You cannot buy it and "
-"you cannot sell it — an enemy gives it to you."
+"Waste is a region ruined by a nuclear or chemical strike. You cannot buy it "
+"or drop it; an enemy gives it to you."
 msgstr ""
 
 #. type: Plain text
@@ -3504,7 +3551,7 @@ msgstr ""
 msgid ""
 "Waste stays on your books. It counts toward your territory, it costs the "
 "same upkeep as any other region, and it earns you nothing. A realm that "
-"takes several strikes and ignores them ends up paying for land that does no "
+"takes several strikes and ignores them ends up paying for regions that do no "
 "work."
 msgstr ""
 
@@ -3529,34 +3576,31 @@ msgstr ""
 #: internal/help/content/regions/region-waste.md:25
 #, markdown-text
 msgid ""
-"Each cleaned region costs **half the going price of new land**. Agricultural "
-"research cuts that further, down to a quarter."
+"Each cleaned region costs **half the going price of new regions**. A high "
+"technology level cuts that further, down to a quarter."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:28
+#: internal/help/content/regions/region-waste.md:27
 #, markdown-text
-msgid ""
-"Paying part of the bill cleans part of the pile, so a short turn is not a "
-"wasted one."
+msgid "Paying part of the bill cleans part of the waste."
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/regions/region-waste.md:31
 #, markdown-text
 msgid ""
-"Cleaned land has no type until you give it one. You are asked to share it "
-"out across region types, the same way you share out land you have conquered."
+"Cleaned regions have no type until you give them one. You are asked to share "
+"them out across region types, the same way you share out regions you have "
+"conquered."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:34
+#: internal/help/content/regions/region-waste.md:33
 #, markdown-text
 msgid ""
-"Strategy: decontaminate early. The upkeep on ruined land runs every turn, so "
-"a pile you leave alone quietly taxes you for the rest of the game, and the "
-"clean-up rate means you cannot fix it all at once when you finally get round "
-"to it."
+"Strategy: decontaminate early. You pay upkeep on waste every turn, and you "
+"can clean only part of it each turn."
 msgstr ""
 
 #. type: Title #
@@ -3570,10 +3614,11 @@ msgstr ""
 #: internal/help/content/warfare/attack-biological.md:14
 #, markdown-text
 msgid ""
-"A Biological Attack releases a plague. It kills about a tenth of the enemy's "
-"people and a sixth of their troopers, and it halves their military morale "
-"while also knocking their popular support down to two-thirds. It does not "
-"touch their land at all — no regions are ruined and none change hands."
+"A Biological Attack is a missile that spreads a plague. It kills about a "
+"tenth of the enemy's people and a sixth of their troopers, and it halves "
+"their military morale while also knocking their popular support down to "
+"two-thirds. It does not touch their regions at all — no regions are ruined "
+"and none change hands."
 msgstr ""
 
 #. type: Plain text
@@ -3589,8 +3634,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Strategy: this is the anti-army weapon of the three. Halved morale weakens "
-"every tank and trooper the target owns, so a plague the turn before you "
-"march is worth more than the casualties alone suggest."
+"the target's whole army, so a plague the turn before you march is worth more "
+"than the casualties alone suggest."
 msgstr ""
 
 #. type: Title #
@@ -3604,11 +3649,11 @@ msgstr ""
 #: internal/help/content/warfare/attack-chemical.md:14
 #, markdown-text
 msgid ""
-"A Chemical Attack does what a Nuclear Attack does to land, on a smaller "
-"scale, and then gasses the realm underneath it. It ruins about a third as "
-"many regions into waste, kills a fifth of the enemy's people outright, and "
-"knocks down both their military morale and their popular support. It leaves "
-"their troopers alone."
+"A Chemical Attack is a gas missile. It ruins fewer regions than a nuclear "
+"missile, and it also kills people. It ruins about a third as many regions as "
+"a nuclear strike and kills a fifth of the enemy's people outright. It also "
+"lowers both their military morale and their popular support. It leaves their "
+"troopers alone."
 msgstr ""
 
 #. type: Plain text
@@ -3625,8 +3670,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "The arms broker prices the missile off the target's population as well as "
-"its land, so gassing a crowded realm is expensive. Nothing intercepts it — "
-"not SDI, not turrets, not tanks."
+"its regions, so gassing a crowded realm is expensive. Nothing intercepts it "
+"— not SDI, not turrets, not tanks."
 msgstr ""
 
 #. type: Plain text
@@ -3634,8 +3679,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Strategy: this is the weapon to use on a rich, crowded rival you cannot beat "
-"in the field. A Nuclear Attack hurts their land harder, but only a chemical "
-"strike touches the people paying for their army."
+"in the field. A Nuclear Attack hurts their regions harder, but only a "
+"chemical strike touches the people paying for their army."
 msgstr ""
 
 #. type: Title #
@@ -3649,10 +3694,10 @@ msgstr ""
 #: internal/help/content/warfare/attack-nuclear.md:14
 #, markdown-text
 msgid ""
-"A Nuclear Attack ruins a slice of the enemy's regions, turning them to "
-"waste. It takes no land from them and kills nobody: the target keeps every "
-"region, pays upkeep on all of them, and earns nothing from the ruined ones "
-"until they are cleaned up."
+"A Nuclear Attack is a missile that ruins part of an enemy's regions. It "
+"turns them to waste. It takes no regions from them and kills nobody: the "
+"target keeps every region, pays upkeep on all of them, and earns nothing "
+"from the ruined ones until they are cleaned up."
 msgstr ""
 
 #. type: Plain text
@@ -3669,7 +3714,7 @@ msgstr ""
 #: internal/help/content/warfare/attack-nuclear.md:23
 #, markdown-text
 msgid ""
-"About 7% of the target's land is ruined per strike, varying a couple of "
+"About 7% of the target's regions are ruined per strike, varying a couple of "
 "points either way. Nothing shoots the missile down: an SDI program defends "
 "against missiles arriving from another planet, not from a neighbor on your "
 "own."
@@ -3685,10 +3730,10 @@ msgstr ""
 #: internal/help/content/warfare/attack-nuclear.md:29
 #, markdown-text
 msgid ""
-"Strategy: a nuclear strike wears a rival down. It cannot finish one off and "
-"it hands you nothing you can use; it makes an enemy's territory expensive to "
-"hold while you build toward a real attack. Against a small realm the damage "
-"rounds away to almost nothing, so save the gold for a large one."
+"Strategy: a nuclear strike weakens a rival over time. It cannot destroy a "
+"realm, and it gives you nothing. It makes the enemy's regions expensive to "
+"hold while you prepare a real attack. Against a small realm the damage is "
+"almost zero, so save your gold for a large one."
 msgstr ""
 
 #. type: Title #
@@ -3740,17 +3785,17 @@ msgstr ""
 #, markdown-text
 msgid ""
 "If you win, you capture a share of the enemy's regions. You do not take "
-"their gold. A Regular Attack gives you land, not money. A small empire can "
-"lose all of its regions in one attack. A large empire loses only part, so "
-"you must attack it again and again to take it down."
+"their gold. A small empire can lose all of its regions in one attack. A "
+"large empire loses only part, so you must attack it again and again to take "
+"it down."
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/warfare/attack-regular.md:34
 #, markdown-text
 msgid ""
-"How big that share is depends on this board's settings and on how much land "
-"the enemy holds, not on how developed it is."
+"How big that share is depends on this board's settings and on how many "
+"regions the enemy holds, not on how developed it is."
 msgstr ""
 
 #. type: Plain text
@@ -3758,8 +3803,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Strategy hint: a large empire with low net worth is a soft target. It has "
-"much land but little strength to defend it. You win the battle easily and "
-"take a big piece of land. A small, dense empire gives you less land for the "
+"many regions but little strength to defend them. You win the battle easily "
+"and take many regions. A small, dense empire gives you fewer regions for the "
 "same effort."
 msgstr ""
 
@@ -3784,8 +3829,8 @@ msgstr ""
 #, markdown-text
 msgid ""
 "You can also be attacked while you are playing. If that happens, a notice "
-"appears the next time you press a key. An order you already typed is reduced "
-"to what you still hold, and the game tells you when it does that."
+"appears when you finish your current action. An order you already typed is "
+"reduced to what you still hold, and the game tells you when it does that."
 msgstr ""
 
 #. type: Title #
@@ -3799,9 +3844,8 @@ msgstr ""
 #: internal/help/content/warfare/gooie-kablooie.md:12
 #, markdown-text
 msgid ""
-"The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy "
-"planet rather than at one baron, and your planet can only have one at a "
-"time."
+"The Gooie Kablooie is a weapon aimed at a whole enemy planet, not at one "
+"baron.  Your planet can only have one at a time."
 msgstr ""
 
 #. type: Plain text
@@ -3834,11 +3878,10 @@ msgstr ""
 #: internal/help/content/warfare/gooie-kablooie.md:30
 #, markdown-text
 msgid ""
-"A weapon aimed at your planet does not go off and disappear. It arrives, "
-"sits on your planet, and eats it. The day it lands it takes a tenth of every "
-"realm's regions. Every day after that it takes another twentieth, until five "
-"days are up and it burns itself out. Left alone it will cost you better than "
-"a quarter of your land."
+"A weapon that reaches your planet stays there and destroys regions each "
+"day. The day it lands it takes a tenth of every realm's regions. Every day "
+"after that it takes another twentieth, until five days are up and it burns "
+"itself out. Left alone it will cost you more than a quarter of your regions."
 msgstr ""
 
 #. type: Plain text
@@ -3851,18 +3894,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:37
+#: internal/help/content/warfare/gooie-kablooie.md:35
 #, markdown-text
-msgid ""
-"No single wave can finish it, however many jets you send. That is the point: "
-"the weapon is built to need the whole planet's air forces, and a planet that "
-"cannot organize loses the land."
+msgid "No single wave can destroy it. It takes jets from many realms on the planet."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:38
+#: internal/help/content/warfare/gooie-kablooie.md:36
 #, markdown-text
-msgid "An SDI program is no help against it, and neither is anything else you own."
+msgid "An SDI program is no help against it. Only your jets are."
 msgstr ""
 
 #. type: Title #
@@ -3873,29 +3913,28 @@ msgid "Pirates"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:14
+#: internal/help/content/warfare/pirates.md:13
 #, markdown-text
 msgid ""
-"Nine pirate factions live in the world. A faction owns nothing at the start "
-"of a game. Everything it has, it stole, and what it can put in the field is "
-"only what it holds. So the factions are all weak on day one, and the ones "
-"nobody fights are the dangerous ones later."
+"Nine pirate factions live in the world. Each one starts a new game with a "
+"random hoard of gold, regions and units. After that, it grows only by what "
+"it steals, so the factions that nobody fights become the dangerous ones."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:20
+#: internal/help/content/warfare/pirates.md:19
 #, markdown-text
 msgid ""
-"Pirates raid players at random. A raid is not a battle — a faction that owns "
-"nothing can still rob you. Each raid carries off **one** kind of thing: your "
+"Pirates raid players at random. A raid is not a battle, so a weak faction "
+"can still rob you. Each raid carries off **one** kind of thing: your "
 "troopers, jets, turrets, tanks, agents, or gold, about a thirtieth of "
 "it. They never take bombers, carriers, or your regions. The raid also gives "
 "the faction new regions, so a pirate that just robbed someone holds more "
-"land."
+"regions."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:26
+#: internal/help/content/warfare/pirates.md:25
 #, markdown-text
 msgid ""
 "You can attack a faction to take goods back. A win returns a third of its "
@@ -3906,7 +3945,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:29
+#: internal/help/content/warfare/pirates.md:28
 #, markdown-text
 msgid ""
 "Listing military on the Trading Market does not hide it from pirates, but it "
@@ -3914,11 +3953,11 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:31
+#: internal/help/content/warfare/pirates.md:30
 #, markdown-text
 msgid ""
-"Tip: a faction you keep beaten stays harmless, because its army is only what "
-"it has managed to steal. Big realms are raided more often than small ones."
+"Tip: a faction that you keep beaten stays weak, because it gets new units "
+"only by stealing them. Big realms are raided more often than small ones."
 msgstr ""
 
 #. type: Title #
@@ -3956,36 +3995,23 @@ msgid "How strong it is"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:23
-#, markdown-text
-msgid "Strength is the funding spread over your land, not the funding alone:"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/sdi.md:25
-#, markdown-text, no-wrap
-msgid "    strength% = the square root of (funding / (10 x (regions + 1)))\n"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/sdi.md:31
+#: internal/help/content/warfare/sdi.md:26
 #, markdown-text
 msgid ""
-"capped at 100%. Two things follow. Every region you take thins your own "
-"shield, so the same pot that shields a small realm well is nearly useless "
-"over a large one. And each further percent costs more than the last: over "
-"8,000 regions the first 1% wants about 80,000 gold in the pot, while going "
-"from 9% to 10% wants another 1.5 million."
+"Strength depends on the funding and on how many regions you hold. The same "
+"funding gives a large realm a weaker shield than a small one, and each "
+"region you capture makes your own shield thinner. Each further percent of "
+"strength costs more than the one before."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:32
+#: internal/help/content/warfare/sdi.md:27
 #, markdown-text, no-wrap
 msgid "Funding it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:37
+#: internal/help/content/warfare/sdi.md:32
 #, markdown-text
 msgid ""
 "The program is a pot of gold, not something you buy once. Each turn you may "
@@ -3994,7 +4020,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:40
+#: internal/help/content/warfare/sdi.md:35
 #, markdown-text
 msgid ""
 "That amount is your allowance for the whole turn. Leaving the screen and "
@@ -4002,7 +4028,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:43
+#: internal/help/content/warfare/sdi.md:38
 #, markdown-text
 msgid ""
 "So a shield takes many turns to build, however rich you are. You cannot buy "
@@ -4010,13 +4036,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:44
+#: internal/help/content/warfare/sdi.md:39
 #, markdown-text, no-wrap
 msgid "Paying for it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:48
+#: internal/help/content/warfare/sdi.md:43
 #, markdown-text
 msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
@@ -4024,7 +4050,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:51
+#: internal/help/content/warfare/sdi.md:46
 #, markdown-text
 msgid ""
 "Pay it in full. If you pay short, the program shrinks to what you did pay "

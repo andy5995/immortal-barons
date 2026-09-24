@@ -20,5 +20,6 @@ haakjes, zoals `Hoeveel? (0; 40):`.
 - `b` voegt negen nullen toe. Druk op `3` en dan op `b` en u ziet
   `3000000000`.
 
-Typt u een getal dat hoger is dan het maximum, dan verlaagt het spel het tot
-het maximum zodra u op Enter drukt.
+Typt u een getal dat hoger is dan het maximum, dan verandert het spel het in
+het maximum zodra u op Enter drukt. Druk nog eens op Enter om het te
+aanvaarden.

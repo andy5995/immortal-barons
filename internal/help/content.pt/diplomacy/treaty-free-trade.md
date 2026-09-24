@@ -15,6 +15,6 @@ contagem do povo do reino menor.
 Gente circulando pelas fronteiras espalha moral baixa e apoio baixo. Todo
 dia o mais saudável dos dois reinos escorrega na direção do pior, até o
 número dele e não além. O escorregão vai só num sentido: o reino pior nunca
-é puxado para cima pelo contato. Assinar com um vizinho em dificuldades
-compra a renda ao preço da sua própria paz interna, então fique de olho nos
-números dele tanto quanto nos seus.
+é puxado para cima pelo contato. Assinar com um vizinho descontente lhe dá a
+renda, mas pode baixar a sua própria moral e o seu apoio. Confira os números
+dele além dos seus.

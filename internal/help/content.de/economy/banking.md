@@ -15,16 +15,18 @@ kann nicht von Piraten oder Angriffen geraubt werden.
 - Finanzhilfe / Kredite - Gold leihen oder zurückzahlen, was Sie bereits
   schulden.
 
-Einzahlungen und Abhebungen haben keine Betragsgrenze. Eine Anlage bindet
-höchstens zwei Milliarden Gold, Sie dürfen aber so viele eröffnen, wie Sie
-wollen.
+Eine Einzahlung oder Abhebung bewegt nur, was unter die unten genannte
+Grenze passt. Die Investitionen, die an einem einzelnen Datum zurückgezahlt
+werden, dürfen zusammen höchstens zwei Milliarden Gold zurückbringen, daher
+bietet die Bank nur an, was für das gewählte Datum noch passt.  Sie dürfen
+so viele Investitionen eröffnen, wie Sie möchten.
 
 Zinsen werden am Ende jedes Zuges auf das gezahlt, was in diesem Augenblick
-auf der Bank liegt. Wenn Sie Gold am Zugende einzahlen in den Einstellungen
-eingeschaltet haben, wird Ihr Gold zuerst zur Bank gebracht, so dass das in
-diesem Zug verdiente Gold in diesem Zug Zinsen bringt. Es geht erst hinein,
-nachdem die Piraten ihre Gelegenheit daran hatten, es ist also kein Schutz
-vor einem Überfall.
+auf der Bank liegt. Solange Gold am Zugende einzahlen in den Einstellungen
+eingeschaltet ist (ein neues Reich beginnt damit eingeschaltet), wird Ihr
+Gold zuerst zur Bank gebracht, so dass das in diesem Zug verdiente Gold in
+diesem Zug Zinsen bringt. Es geht erst hinein, nachdem die Piraten ihre
+Gelegenheit daran hatten, es ist also kein Schutz vor einem Überfall.
 
 Der Beginn Ihres nächsten Zuges sagt Ihnen, was die Bank gezahlt hat: die
 Zinsen und das, was eine heute fällig gewordene Anlage zurückgezahlt hat.

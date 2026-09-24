@@ -24,14 +24,18 @@ schijf richt het wapen:
 Het richtpunt wijkt in de vlucht een stand naar boven of beneden af, en
 ongeveer een lancering op de tien negeert de schijf helemaal en raakt wat
 haar goeddunkt. Een stand is dus een neiging, geen belofte: 4 mikt ongeveer
-de helft van de tijd op militaire bases, terwijl 5 ongeveer drie keer op de
-vier op vliegbases mikt, omdat 5 en 6 daar allebei naar wijzen.  Richt 5 op
+de helft van de tijd op militaire bases, terwijl 5 meer dan twee keer op de
+drie op vliegbases mikt, omdat 5 en 6 daar allebei naar wijzen. De schijf
+loopt aan de uiteinden rond: 10 kan op 0 uitkomen, en 0 op 10. Richt 5 op
 een baron waarvan u weet dat hij een grote luchtmacht houdt.
 
-De raket blijft daarbovenop een gok. De meeste lanceringen doen niets: hij
-mist, hij hapert, of de SDI van de vijand schiet hem neer. Hij kan ook
-averechts werken - als de vijand een zeer groot soldatenleger heeft, kan de
-raket omkeren en uw eigen rijk treffen.
+Daarbovenop blijft de raket een gok. Ongeveer een lancering op de tien
+mislukt, en de SDI van de vijand kan hem neerschieten. Hij kan ook boven het
+doel uiteenvallen en geen schade doen. Hoe groter het soldatenleger van de
+vijand, hoe vaker dat gebeurt.  Uiteenvallen schaadt u niet, maar het helpt
+de vijand: de neerslag geeft hem nieuwe regio's, 10% tot 19% van de regio's
+die hij al heeft. Hij kiest de types van de nieuwe regio's in zijn volgende
+beurt.
 
 Uw sysop bepaalt hoe de schijf wordt ingesteld. Normaal kiest u hem zelf,
 maar het spel kan zo worden ingesteld dat het er elke keer een voor u loot,

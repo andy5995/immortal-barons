@@ -14,13 +14,13 @@ vermerkt. Öffnen Sie sie aus dem Menü Interplanetare Operationen mit
 Sie einen nennen, auf der Zeile \"Unsere derzeitigen Beziehungen zu...\".
 
 Nur der Koordinator Ihres Boards kann die Liste ändern. Sie liegt im
-Koordinatormenü, unter Diplomatieänderung.
+Koordinatormenü, unter Diplomatie ändern.
 
 ## Was sie bewirkt und was nicht
 
 Die Liste ist eine Notiz Ihres Koordinators an die Barone Ihres eigenen
-Boards. Sie sagt Ihnen, was Ihr Board von einem Planeten hält. Meist
-beschreibt sie nur:
+Boards. Sie sagt Ihnen, was Ihr Board von einem Planeten hält. Am Spiel
+ändert sie fast nichts:
 
 - Sie hält keinen Angriff auf. Sie können einen als Allied vermerkten
   Planeten trotzdem angreifen, und ein als Enemy vermerkter Planet kann Sie

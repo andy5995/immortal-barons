@@ -30,18 +30,19 @@ om er een te sturen.
 
 Een handelsovereenkomst kost een vergoeding voor elke dag dat u hem uitzet,
 en er zijn vliegdekschepen nodig om de goederen te vervoeren. Hoeveel hangt
-af van wat u verscheept: een vliegdekschip draagt duizend soldaten of
-geschutstorens, honderd jagers, vijfduizend tanks of honderdduizend goud, en
-voedsel, bommenwerpers, agenten en vliegdekschepen nemen helemaal geen
-ruimte in. Een beschermend handelsverdrag met dat rijk maakt de vergoeding
-goedkoper.
+af van wat u verscheept. Als lading draagt een vliegdekschip duizend
+soldaten of geschutstorens, honderd jagers, vijfduizend tanks of
+honderdduizend goud. Voedsel, bommenwerpers, agenten en vliegdekschepen
+nemen helemaal geen ruimte in. Een beschermend handelsverdrag met dat rijk
+maakt de vergoeding goedkoper.
 
 De dagen waarvoor u betaalt bepalen hoe lang het aanbod blijft staan. Wat u
-in de overeenkomst legt verlaat uw rijk op het moment dat u hem verstuurt,
-en het komt alleen terug als het aanbod wordt aangenomen: een weigering, een
-overeenkomst die niemand beantwoordt voordat de dagen om zijn, en een rijk
-dat valt voordat het antwoordt kosten u alle drie de goederen. Stuur naar
-iemand die speelt, en geef hem genoeg dagen om eraan toe te komen.
+in de overeenkomst legt verlaat uw rijk op het moment dat u hem
+verstuurt. Wordt het aanbod aangenomen, dan krijgt het andere rijk het, en
+krijgt u wat u vroeg. Een weigering, een overeenkomst die niemand
+beantwoordt voordat de dagen om zijn, en een rijk dat valt voordat het
+antwoordt kosten u in alle drie de gevallen de goederen. Stuur naar iemand
+die speelt, en geef hem genoeg dagen om eraan toe te komen.
 
 ## Overeenkomsten naar een andere planeet
 
@@ -65,10 +66,11 @@ eigen planeet sturen - gebruik daarvoor de overeenkomst hierboven.
 Handel telt het zwaarst wanneer meerdere rijken samenwerken. Een paar
 ideeën:
 
-**Specialiseer u en bevoorraad daarna uw partners.** Uw industrie kan een unittype
-bevoordelen, waardoor die unit voor u goedkoper is dan voor wie ook. Bouwt u tanks
-en uw partner geschutstorens, dan kan ieder aan de ander verkopen onder de prijs
-die hij zou betalen om het zelf te bouwen. Beide rijken varen er wel bij.
+**Specialiseer u en bevoorraad daarna uw partners.** Uw industrie kan zich
+specialiseren in een unittype. Ze bouwt dan meer van die unit en minder van elke
+andere. Specialiseert u zich in tanks en uw partner in geschutstorens, dan maakt
+ieder meer van wat de ander nodig heeft. Verhandel het overschot, en beide rijken
+varen er wel bij.
 
 **Een goedkoop aanbod gaat naar wie er het eerst bij is.** Iedereen kan het kopen,
 dus een prijs die als geschenk aan een bondgenoot bedoeld was kan een rivaal bewapenen.
@@ -76,4 +78,4 @@ Wilt u zeker zijn dat de goederen aankomen, stuur dan een handelsovereenkomst.
 
 **Tussen planeten is handel groter.** In een competitie specialiseren hele
 planeten zich, en de markt van een bondgenoot is vaak de goedkoopste plek om
-te kopen. Zie het onderwerp Interplanetaire handel.
+te kopen. Zie het onderwerp Markten van bondgenoten.

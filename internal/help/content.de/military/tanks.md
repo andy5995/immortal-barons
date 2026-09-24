@@ -8,9 +8,9 @@ title: Panzer
 # Panzer
 
 Panzer sind die stärkste Allzweckeinheit, mächtig im Angriff wie in der
-Verteidigung. Ein Panzer ist für sich dreieinhalb Soldaten wert. Mit einem
-fertigen Hauptquartier ist er viereinhalb wert, im Angriff wie in der
-Verteidigung.
+Verteidigung. In einer Schlacht auf Ihrem eigenen Planeten ist ein Panzer
+dreieinhalb Soldaten wert.  Mit einem fertigen Hauptquartier ist er
+viereinhalb wert.
 
 Sie kosten viel im Kauf, aber wenig im Unterhalt. Eine Panzerarmee ist teuer
 aufzubauen und günstig zu halten, über ein langes Spiel sind Panzer also die

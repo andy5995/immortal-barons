@@ -15,8 +15,8 @@ seine Soldaten, seine eigenen Agenten, seine Panzer, seine Jets oder seinen
 Nahrungsvorrat.
 
 Die Nahrung ist der große Fang. Ein Schlag, der die Kornspeicher erreicht,
-verbrennt einen großen Teil davon, weit mehr als die wenigen Prozent, die
-die anderen fünf verlieren, so dass ein Reich, das ohnehin knapp an Nahrung
-ist, von einem einzigen Glückstreffer in den Hunger getrieben werden
-kann. Zielen können Sie darauf aber nicht, daher ist die Operation ein
-Glücksspiel und kein Plan.
+verbrennt einen großen Teil davon, weit mehr, als eines der anderen fünf
+Ziele verliert, so dass ein Reich, das ohnehin knapp an Nahrung ist, von
+einem einzigen Glückstreffer in den Hunger getrieben werden kann. Zielen
+können Sie darauf aber nicht, daher ist die Operation ein Glücksspiel und
+kein Plan.

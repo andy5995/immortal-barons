@@ -9,7 +9,7 @@ title: Technologie
 
 Technologieregio's maken uw hele rijk efficiënter. De bonus komt niet
 meteen: hij bouwt langzaam op naarmate u technologieregio's langer aanhoudt,
-en hij bouwt sneller op wanneer ze een groter deel van uw land
+en hij bouwt sneller op wanneer ze een groter deel van uw regio's
 uitmaken. Grotere rijken hebben meer technologieregio's nodig om hetzelfde
 niveau te bereiken.
 

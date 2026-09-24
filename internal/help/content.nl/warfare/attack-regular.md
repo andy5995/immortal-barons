@@ -28,14 +28,14 @@ weinig verlies vanaf, en een gelijkwaardige aanvaller betaalt bijna het
 volledige aandeel.
 
 Als u wint, verovert u een deel van de regio's van de vijand. U neemt hun
-goud niet. Een gewone aanval levert u land op, geen geld. Een klein rijk kan
-al zijn regio's verliezen bij één aanval. Een groot rijk verliest maar een
-deel, dus u moet het keer op keer aanvallen om het neer te halen.
+goud niet. Een klein rijk kan al zijn regio's verliezen bij één aanval. Een
+groot rijk verliest maar een deel, dus u moet het keer op keer aanvallen om
+het neer te halen.
 
 Hoe groot dat deel is hangt af van de instellingen op dit BBS en van hoeveel
-land de vijand bezit, niet van hoe ontwikkeld dat rijk is.
+regio's de vijand bezit, niet van hoe ontwikkeld dat rijk is.
 
 Strategietip: een groot rijk met een laag vermogen is een makkelijk
-doelwit. Het heeft veel land maar weinig kracht om het te verdedigen. U wint
-het gevecht gemakkelijk en neemt een groot stuk land mee. Een klein,
-dichtbebouwd rijk levert u minder land op voor dezelfde moeite.
+doelwit. Het heeft veel regio's maar weinig kracht om ze te verdedigen. U
+wint het gevecht gemakkelijk en neemt veel regio's mee. Een klein,
+dichtbebouwd rijk levert u minder regio's op voor dezelfde moeite.

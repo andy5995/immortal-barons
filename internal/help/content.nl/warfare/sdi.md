@@ -22,17 +22,10 @@ gaat er dwars doorheen, zelfs als u een van de genoemde doelwitten bent.
 
 ## Hoe sterk het is
 
-De sterkte is de financiering verdeeld over uw land, niet de financiering
-alleen:
-
-    sterkte% = de wortel uit (financiering / (10 x (regio's + 1)))
-
-met een maximum van 100%. Daaruit volgen twee dingen. Elke regio die u erbij
-neemt verdunt uw eigen schild, dus dezelfde pot die een klein rijk goed
-beschermt is over een groot rijk bijna nutteloos. En elke volgende procent
-kost meer dan de vorige: boven de 8.000 regio's vraagt de eerste 1% ongeveer
-80.000 goud in de pot, terwijl van 9% naar 10% gaan er nog eens 1,5 miljoen
-vraagt.
+De sterkte hangt af van de financiering en van hoeveel regio's u
+bezit. Dezelfde financiering geeft een groot rijk een zwakker schild dan een
+klein rijk, en elke regio die u verovert maakt uw eigen schild dunner. Elke
+volgende procent sterkte kost meer dan de vorige.
 
 ## Het financieren
 

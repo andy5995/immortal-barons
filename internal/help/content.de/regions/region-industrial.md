@@ -16,8 +16,8 @@ Bildschirm zeigt, wie viele Einheiten dieser Anteil baut. Sie können das
 jederzeit ändern.
 
 Die Prozentsätze müssen zusammen keine 100 ergeben. Jeder nicht vergebene
-Anteil bringt stattdessen Gold. Die Wahl lautet also Einheiten oder Gold:
-Vergeben Sie volle 100% an Einheiten, verdient Ihre Industrie kein Gold.
+Anteil bringt stattdessen Gold. Vergeben Sie volle 100% an Einheiten,
+verdient Ihre Industrie kein Gold.
 
 Spezialisieren hebt einen Einheitentyp als Ihren Schwerpunkt hervor. Es
 ersetzt Ihre Aufteilung nicht. Ihre Industrie baut mehr von der

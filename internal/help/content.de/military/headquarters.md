@@ -11,11 +11,11 @@ Ihr Hauptquartier ist die Kommandozentrale Ihrer Armee. Es ist ein
 einmaliges Bauvorhaben, das jeden Zug ein Stück vorankommt, bis es fertig
 ist.
 
-Bauen Sie es früh. Der Preis steigt mit jedem Zug, den Sie spielen, je
-länger Sie warten, desto teurer wird es also. Der Preis hängt nicht von der
-Größe Ihres Reiches ab, nur davon, wie lange Sie schon spielen.
+Bauen Sie es früh. Der Preis steigt mit jedem Zug, den Sie spielen, bis zu
+einer Obergrenze. Er hängt nicht von der Größe Ihres Reiches ab.
 
 Während es gebaut wird - und noch mehr, sobald es fertig ist - erhöht es,
-was Ihre Panzer zu Angriff und Verteidigung beitragen. Feinde können Ihr
-Hauptquartier mit verdeckten Operationen bombardieren, um Ihre Panzer zu
-schwächen.
+was Ihre Panzer zu Angriff und Verteidigung beitragen. Sie verlieren einen
+Teil des Baufortschritts, wenn Sie eine Schlacht als Verteidiger
+verlieren. Agenten von einem anderen Planeten können es ebenfalls
+sabotieren, und ein Treffer der S3-Sabre auch.

@@ -9,9 +9,10 @@ title: 'Aliança de Defesa Total'
 
 A Aliança de Defesa Total é a aliança mais forte. Você compromete boa parte
 dos seus soldados e tanques para defender um aliado em apuros. Ela só
-funciona em jogos locais (de um BBS só).
+funciona contra ataques vindos do seu próprio planeta. Não ajuda em nada
+contra um ataque de outro planeta.
 
-Essas forças podem morrer numa batalha da qual você nem participou. Quando
-isso acontece, dizem a você o que perdeu, quem estava defendendo e quem o
-atacou, então fique de olho no seu relatório depois que um aliado for
-atacado.
+Essas forças podem morrer numa batalha da qual você não participou. Quando
+isso acontece, dizem a você o que perdeu, quem estava defendendo e quem
+atacou essa pessoa, então fique de olho no seu relatório depois que um
+aliado for atacado.

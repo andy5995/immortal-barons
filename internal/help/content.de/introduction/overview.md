@@ -15,8 +15,8 @@ anderen Spieler wollen dasselbe, Sie stehen also in stetem Wettbewerb.
 Ein Planet hat Platz für 25 Baronien, jede auf einem seiner 25 Plätze. Ihr
 Platz gehört Ihnen, solange Ihr Reich besteht, und sein Buchstabe ist es,
 unter dem alle anderen Sie nennen. Sind alle Plätze belegt, wird ein neuer
-Anrufer abgewiesen, bis ein Reich fällt; ein Sysop kann auch weniger als 25
-Spieler zulassen, und computergesteuerte Barone belegen eigene Plätze.
+Anrufer abgewiesen, bis ein Reich fällt. Ein Sysop kann auch weniger als 25
+Spieler zulassen.
 
 Sie benennen Ihr Reich bei Ihrem ersten Anruf und dürfen diesen Namen einmal
 ändern - im Menü Einstellungen, nachdem Ihr Neureich-Schutz abgelaufen
@@ -45,19 +45,23 @@ Ein Zug durchläuft diese Schritte der Reihe nach:
   Ihre Einnahmen für den Zug treffen ein.
 - **Berichte.** Sie sehen einen Einnahmenbericht und Ihren vollständigen
   Reichsstatus.
-- **Unterhalt.** Sie bezahlen den Unterhalt Ihres Militärs und Ihres Landes
-  und ernähren Ihr Volk und Ihre Armee. Zu wenig Nahrung oder Gold bringt
-  Ärger, behalten Sie beides also im Auge.
+- **Unterhalt.** Sie bezahlen den Unterhalt Ihres Militärs und Ihrer
+  Regionen und ernähren Ihr Volk und Ihre Armee. Zu wenig Nahrung oder Gold
+  bringt Ärger, behalten Sie beides also im Auge.
 - **Verdeckte Operationen.** Spionage und Sabotage. Dieser Schritt erscheint
-  nur, wenn Sie ihn eingeschaltet lassen und mindestens einen Agenten haben.
-- **Ausgaben.** Sie kaufen Land, Militär und anderes.
-- **Angriffe.** Sie dürfen eine andere Baronie angreifen, begrenzt oft je
-  Tag.
-- **Handel.** Waren mit anderen Baronien handeln, wenn Sie diesen Schritt
-  eingeschaltet lassen.
+  nur, wenn Sie Geheimdienstmenü in den Einstellungen einschalten und
+  mindestens einen Agenten haben.
+- **Bank.** Die Bank öffnet sich, damit Sie einzahlen, abheben, leihen oder
+  investieren können.
+- **Ausgaben.** Sie kaufen Regionen, militärische Einheiten und anderes.
+- **Angriffe.** Sie dürfen einmal pro Zug eine andere Baronie angreifen.
+- **Handel.** Waren mit anderen Baronien handeln. Dieser Schritt erscheint
+  nur, wenn Sie Handelsmenü in den Einstellungen einschalten.
 - **Interplanetare Operationen.** Aktionen gegen andere Planeten, in
   verbundenen Spielen.
-- **Nachrichten.** Sie dürfen einem anderen Spieler eine Nachricht senden.
+- **Nachrichten.** Sie dürfen einem anderen Spieler eine Nachricht
+  senden. Dieser Schritt erscheint nur, wenn Sie Nachrichtenmenü in den
+  Einstellungen einschalten.
 - **Zugende.** Ihre Wirtschaft und Ihre Bevölkerung setzen sich, und der Zug
   schließt.
 
@@ -68,9 +72,9 @@ Sie Ihren Steuersatz, ändern, was Ihre Industrie baut, öffnen die
 Diplomatie, gehen zur Bank, nutzen den Nahrungsmarkt, setzen Ihre
 Einstellungen und schreiben Makros. Öffnen Sie es, wenn Sie es brauchen.
 
-In diesem Spiel liegen **Diplomatie** und das **Ändern der Produktion** im
-Systemmenü.  Sie sind keine festen Halte in jedem Zug, suchen Sie sie also
-selbst auf, wenn Sie Ihre Pläne ändern wollen.
+Die Diplomatie liegt auch im Startmenü. Weder die Diplomatie noch das Ändern
+der Produktion ist ein fester Halt im Zug, suchen Sie sie also auf, wenn Sie
+Ihre Pläne ändern wollen.
 
 ## Spielaushänge
 

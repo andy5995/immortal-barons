@@ -8,12 +8,11 @@ title: 'Markten van bondgenoten'
 # Markten van bondgenoten
 
 In een competitiespel kunt u op de handelsmarkt van een andere planeet
-kopen. Open Handel vanuit het menu InterPlanetaire Operaties, kies daarna
+kopen. Open Handel vanuit het menu Interplanetaire operaties, kies daarna
 Markten en kies een planeet.
 
-Alleen planeten die uw coördinator als bondgenoot heeft gemarkeerd worden
-getoond. Kopen tussen planeten is een functie van Immortal Barons, en een
-competitie kan hem uitschakelen.
+Alleen planeten die uw coördinator als bondgenoot heeft gemarkeerd, staan in
+de lijst.
 
 ## Uw order is een bod, geen aankoop
 
@@ -56,4 +55,4 @@ planeet kan dus stoppen met aan u verkopen voordat u ervan gehoord heeft, en
 dan komt uw bod geweigerd terug. Dat is geen fout.
 
 Uw sysop kan deze functie voor de hele competitie uitschakelen; in dat geval
-verschijnt Handel niet in het menu InterPlanetaire Operaties.
+verschijnt Handel niet in het menu Interplanetaire operaties.

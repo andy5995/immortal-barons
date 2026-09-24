@@ -7,8 +7,8 @@ title: 'Zahlen eingeben'
 
 # Zahlen eingeben
 
-Wenn das Spiel nach einer Menge fragt, zeigt es zwei Zahlen in Klammern, wie
-`How many? (0; 40):`.
+Wenn das Spiel nach einer Menge fragt, zeigt es zwei Zahlen in runden
+Klammern, wie `How many? (0; 40):`.
 
 - Die linke Zahl ist ein Vorschlagswert. Drücken Sie die Eingabetaste, um
   ihn zu übernehmen.
@@ -22,5 +22,6 @@ Wenn das Spiel nach einer Menge fragt, zeigt es zwei Zahlen in Klammern, wie
 - `b` fügt neun Nullen hinzu. Drücken Sie `3` und dann `b`, und Sie sehen
   `3000000000`.
 
-Wenn Sie eine Zahl eingeben, die größer als das Maximum ist, senkt das Spiel
-sie beim Drücken der Eingabetaste auf das Maximum.
+Wenn Sie eine Zahl eingeben, die größer als das Maximum ist, ändert das
+Spiel sie beim Drücken der Eingabetaste auf das Maximum. Drücken Sie die
+Eingabetaste noch einmal, um sie anzunehmen.

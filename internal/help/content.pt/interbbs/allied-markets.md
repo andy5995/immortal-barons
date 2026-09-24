@@ -11,8 +11,7 @@ Num jogo de liga você pode comprar no Mercado de Trocas de outro
 planeta. Abra Comércio no menu de Operações Interplanetárias, depois
 Mercados, e escolha um planeta.
 
-Só aparecem os planetas que o seu Coordenador marcou como aliados. Comprar
-entre planetas é um recurso do Immortal Barons, e uma liga pode desligá-lo.
+Só aparecem os planetas que o seu Coordenador marcou como Aliados.
 
 ## Seu pedido é um lance, não uma compra
 

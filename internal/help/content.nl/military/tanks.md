@@ -8,9 +8,9 @@ title: Tanks
 # Tanks
 
 Tanks zijn de sterkste eenheid voor algemeen gebruik, krachtig in zowel
-aanval als verdediging. Een tank is op zichzelf drieënhalve soldaat
-waard. Met een voltooid hoofdkwartier is hij viereneenhalve soldaat waard,
-zowel in aanval als in verdediging.
+aanval als verdediging. In een slag op uw eigen planeet is een tank
+drieënhalve soldaat waard.  Met een voltooid hoofdkwartier is hij
+viereneenhalve soldaat waard.
 
 Zij kosten veel in aanschaf maar weinig in onderhoud. Een tankleger is duur
 om op te bouwen en goedkoop te onderhouden, dus over een lang spel zijn

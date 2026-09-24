@@ -16,8 +16,8 @@ quantas unidades de cada tipo aquela porcentagem constrói. Você pode mudar
 isso quando quiser.
 
 As porcentagens não precisam somar 100. Qualquer parcela que você deixar sem
-destino rende ouro no lugar. Então a escolha é unidades ou ouro: se você
-destinar os 100% a unidades, a sua indústria não rende ouro nenhum.
+destino rende ouro no lugar. Se você destinar os 100% a unidades, a sua
+indústria não rende ouro nenhum.
 
 Especializar marca um tipo de unidade como o seu foco. Isso não substitui a
 divisão por porcentagem. Suas indústrias fazem mais da unidade especializada

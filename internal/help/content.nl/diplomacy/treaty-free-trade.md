@@ -15,6 +15,6 @@ aantal inwoners van het kleinste rijk.
 Mensen die zich over de grenzen mengen verspreiden laag moreel en weinig
 steun. Elke dag zakt het gezondere van de twee rijken af naar het slechtere
 toe, tot aan diens cijfer en niet verder. Het zakken gaat maar een kant op:
-het slechtere rijk wordt er nooit door opgetild. Tekenen met een worstelende
-buur koopt het inkomen met de rust in eigen land, dus houd hun cijfers net
-zo goed in de gaten als die van uzelf.
+het slechtere rijk wordt er nooit door opgetild. Tekent u met een ontevreden
+buur, dan krijgt u het inkomen, maar uw eigen moreel en steun kunnen
+dalen. Kijk naar hun cijfers en naar die van uzelf.

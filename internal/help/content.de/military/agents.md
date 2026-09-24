@@ -10,15 +10,14 @@ title: 'Verdeckte Agenten'
 Agenten sind Ihre Spione. Sie führen verdeckte Operationen aus - Spionage,
 Sabotage, Bombardierung feindlicher Ziele, Bestechung und mehr.
 
-Agenten sind das, was Sie ausgeben, nicht das, womit Sie gewinnen. Jede
-Operation braucht einen, und eine gescheiterte Operation kostet ihn. Für
-sich genommen ändert die Zahl Ihrer Agenten Ihre Erfolgsaussicht nicht, und
-die des Ziels ebenso wenig - was sie ändert, steht im Thema Verdeckte
-Operationen. Ins Gewicht fällt die Zahl neben einem Geheimdienstbündnis oder
-einem Abkommen zur Terrorabwehr, die einer Seite der Rechnung die Agenten
-eines Verbündeten leihen.
+Agenten geben Sie für Operationen aus. Jede Operation braucht einen Agenten,
+und eine gescheiterte Operation kostet ihn. Auf Ihrem eigenen Planeten
+ändert die Zahl der Agenten auf keiner der beiden Seiten Ihre
+Erfolgsaussicht, es sei denn, ein Vertrag fügt die Agenten eines Verbündeten
+hinzu. Was sie ändert, erklärt das Thema Verdeckte Operationen. Gegen
+Terroroperationen zwischen Planeten helfen die Agenten des Ziels ihm bei der
+Verteidigung.
 
-Was Ihnen ein Vorrat an Agenten bringt, ist Durchhaltevermögen: Eine Reihe
-von Fehlschlägen lässt Sie nicht handlungsunfähig zurück. Agenten kämpfen
-nicht in gewöhnlichen Schlachten. Was sie können, steht im Thema Verdeckte
-Operationen.
+Ein großer Vorrat an Agenten lässt Sie nach mehreren Fehlschlägen
+weiterarbeiten. Agenten kämpfen nicht in gewöhnlichen Schlachten. Was sie
+können, steht im Thema Verdeckte Operationen.

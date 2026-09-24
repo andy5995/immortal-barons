@@ -7,34 +7,37 @@ title: Angriffsarten
 
 # Angriffsarten
 
-Wenn Sie Ihre eigene Streitmacht gegen einen Baron auf einem anderen
-Planeten führen, wählen Sie selbst, wie hart Sie zuschlagen. Bei einem
-Gruppenangriff gibt es diese Wahl nicht - er kämpft immer als Normaler
-Angriff.
+Eine Angriffsart legt fest, wie Ihre eigene Streitmacht gegen einen Baron
+auf einem anderen Planeten kämpft.  Bei Gruppenangriffen gibt es diese Wahl
+nicht: Sie kämpfen immer als Normaler Angriff.
 
-Allein zu gehen zahlt sich auch besser aus: Ihr eigener Schlag nimmt doppelt
-so viel Land wie ein Gruppenangriff desselben Gewichts. Dafür verzichten Sie
-auf das planetenweite Ziel und auf die Truppen aller anderen.
+Allein zu gehen zahlt sich auch besser aus: Ihr eigener Schlag nimmt einen
+doppelt so großen Anteil der Regionen des Verteidigers wie ein
+Gruppenangriff. Dafür verzichten Sie auf das planetenweite Ziel und auf die
+Truppen aller anderen.
 
 - **Normaler Angriff** - Ihre Truppen kämpfen mit voller Stärke. Beide
   Seiten brechen ab, sobald sie 15% Verluste erlitten haben, und Sie nehmen
   den üblichen Anteil an den Regionen des Verteidigers.
 - **Schneller Schlag** - die Überraschung lässt Sie mit 120% Ihrer normalen
   Stärke kämpfen, doch die Schlacht ist kurz und ungeordnet: Beide Seiten
-  ziehen sich bei 8% Verlusten zurück, und Sie tragen nur halb so viel Land
-  davon wie bei einer Normaler Angriff.
+  ziehen sich bei 8% Verlusten zurück, und Sie erobern nur halb so viele
+  Regionen wie bei einem Normalen Angriff.
 - **Ausgedehnte Schlacht** - ein zermürbender Sturm. Die Erschöpfung drückt
   Ihre Truppen auf 85% Stärke, doch sie halten durch, bis beide Seiten 20%
-  Verluste erlitten haben, und bringen 125% des Landes einer Normaler
-  Angriff heim.
+  Verluste erlitten haben, und bringen 125% der Regionen eines Normalen
+  Angriffs heim.
 
-Die Wahl richtet sich danach, woran es Ihnen fehlt. Land ist das, was Sie
-nicht rasch zurückkaufen können, also ist die Ausgedehnte Schlacht
-diejenige, die die Karte verändert - leisten Sie sie sich, wenn Sie Männer
-übrig haben und es sich erlauben können, einen Tag lang schwach zu sein. Ein
-Schneller Schlag kostet Sie am wenigsten und schlägt über seinem Gewicht,
-was ihn zur ehrlichen Antwort macht, wenn Sie nicht sicher sind, ob Sie
-gewinnen: Sie finden es günstig heraus, und Ihre Armee steht noch.
+Diese Verluste gelten für die Standardeinstellung des Angriffsschadens
+(Attack Damage). Ihr Sysop kann sie halbieren oder verdoppeln.
+
+Wählen Sie danach, was Sie entbehren können. Regionen sind nur langsam
+zurückzugewinnen, daher bringt Ihnen eine Ausgedehnte Schlacht am
+meisten. Schicken Sie sie, wenn Sie Truppen übrig haben und es sich leisten
+können, einen Tag lang schwach zu sein. Ein Schneller Schlag kostet Sie am
+wenigsten und kämpft härter, als seine Größe vermuten lässt; nutzen Sie ihn
+also, wenn Sie nicht sicher sind, ob Sie gewinnen können. Sie erfahren die
+Antwort günstig, und Ihre Armee überlebt.
 
 Denken Sie daran, dass Ihre Stärke bei der Ankunft gemessen wird, nicht beim
 Abmarsch. Gegen einen fernen Planeten hat der Verteidiger Tage Zeit,
@@ -64,9 +67,9 @@ haben, was heimgekommen ist, was es zerstört hat, und ob es das Ziel
 es noch unter Neureich-Schutz antraf, erfährt das, statt als Niederlage zu
 gelten.
 
-Land, das Sie in der Fremde erobern, hat keine Art, bis Sie ihm eine geben;
-es wartet also auf Sie, und zu Beginn Ihres nächsten Zuges erscheint die
-Regionenauswahl - dieselbe Frage, die ein Normaler Angriff daheim
+Regionen, die Sie in der Fremde erobern, haben keine Art, bis Sie ihnen eine
+geben; sie warten also auf Sie, und zu Beginn Ihres nächsten Zuges erscheint
+die Regionenauswahl - dieselbe Frage, die ein Normaler Angriff daheim
 stellt. Bei einem Gruppenangriff werden die Regionen unter den Baronen
 aufgeteilt, die dafür bezahlt haben, im Verhältnis dessen, was jeder
 eingebracht hat.

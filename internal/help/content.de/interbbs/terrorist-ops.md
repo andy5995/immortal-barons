@@ -14,8 +14,9 @@ sie erreichen, und der Schlag wird auf dem Planeten des Ziels ausgewertet,
 sobald das Paket dort ankommt - die Nachricht kommt also einen Tag später
 oder mehr zurück.
 
-Jeder Operation antwortet der Neureich-Schutz: Ein geschütztes Reich nimmt
-überhaupt keinen Schaden.
+Der Neureich-Schutz stoppt jede Operation: Ein geschütztes Reich erleidet
+überhaupt nichts, und Sie können keine senden, solange Ihr eigenes Reich
+noch geschützt ist.
 
 ## Was jede Operation bewirkt
 
@@ -25,14 +26,13 @@ Agent, der durchkommt, nimmt seinen eigenen Bissen:
 - **Spion senden** - bringt Erkenntnisse heim und kostet das Ziel nichts.
 - **Geheimdienst bombardieren** - tötet ein paar Prozent ihrer Agenten, mit
   denen sie verteidigen und angreifen.
-- **Truppen demoralisieren** - nimmt ein Siebtel der Kampfmoral.
+- **Demoralisieren** - nimmt ein Siebtel der Kampfmoral.
 - **Zwietracht säen** - ein paar Prozent ihrer Soldaten laufen davon.
-- **Luftwaffenstützpunkte bombardieren** - verbrennt einen Teil ihrer Jets
-  am Boden.
+- **Luftbasen bombardieren** - verbrennt einen Teil ihrer Jets am Boden.
 - **Auswanderung schüren** - treibt Menschen aus dem Reich.
 - **Propaganda verbreiten** - kostet sie Rückhalt im Volk.
-- **Bomb Food Storages** - der größte Ausschlag der neun: Es kann fast ein
-  Drittel der Vorräte treffen, oder fast nichts.
+- **Nahrungslager bombardieren** - der größte Ausschlag der neun: Es kann
+  fast ein Drittel der Vorräte treffen, oder fast nichts.
 - **HQ sabotieren** - wirft ihr Hauptquartier um einen festen Betrag zurück.
 
 ## Die Wahl treffen
@@ -45,15 +45,13 @@ Wachstum kosten: Nahrung, Menschen, Rückhalt.
 
 ## Durchkommen
 
-Für jeden Agenten wird einzeln gewürfelt, wobei Ihre Agenten gegen ihre
-aufgewogen werden. Die Abwägung zieht aus jeder Seite die Wurzel und gibt
-dem Verteidiger den Vorteil, Agenten helfen also, aber mit stark fallendem
-Ertrag: Die vierfache Zahl bringt Ihnen den doppelten Vorsprung, und bei
-zwei gleich starken Reichen kommen etwa zwei von fünf Agenten durch. In
-beide Richtungen bleibt eine kleine Chance, die mit keiner der beiden Seiten
-zu tun hat.
+Für jeden Agenten wird einzeln gewürfelt, und die Agenten des Ziels
+verteidigen dagegen.  Je mehr Agenten Ihr Reich hat, desto besser die
+Aussicht jedes einzelnen, aber jeder zusätzliche hilft weniger. Haben beide
+Reiche gleich viele Agenten, kommen etwa zwei von fünf Agenten durch. Eine
+kleine Chance in beide Richtungen hängt von keiner der beiden Seiten ab.
 
 Mehr Agenten einzusetzen richtet im Mittel also mehr Schaden an, macht aber
 nie einen einzelnen Agenten wahrscheinlicher erfolgreich. Ein
-Terrorabwehr-Pakt zählt die Agenten der Partner zur Verteidigung hinzu, und
-das macht ein gut verbündetes Reich teuer zu bearbeiten.
+Terrorabwehr-Pakt zählt die Agenten seiner Partner zur Verteidigung hinzu,
+und ein Geheimdienstbündnis zählt die Agenten Ihrer Partner zu Ihren hinzu.

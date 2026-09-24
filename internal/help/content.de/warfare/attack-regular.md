@@ -28,16 +28,15 @@ ist, geht mit sehr wenig Verlust davon, ein gleich starker zahlt fast den
 vollen Anteil.
 
 Gewinnen Sie, erobern Sie einen Teil der Regionen des Feindes. Sein Gold
-nehmen Sie nicht. Ein Normaler Angriff bringt Ihnen Land, kein Geld. Ein
-kleines Reich kann in einem einzigen Angriff alle seine Regionen
-verlieren. Ein großes verliert nur einen Teil, Sie müssen es also wieder und
-wieder angreifen, um es niederzuringen.
+nehmen Sie nicht. Ein kleines Reich kann in einem einzigen Angriff alle
+seine Regionen verlieren. Ein großes verliert nur einen Teil, Sie müssen es
+also wieder und wieder angreifen, um es niederzuringen.
 
 Wie groß dieser Anteil ist, hängt von den Einstellungen dieses Boards ab und
-davon, wie viel Land der Feind hält, nicht davon, wie weit er entwickelt
-ist.
+davon, wie viele Regionen der Feind hält, nicht davon, wie weit er
+entwickelt ist.
 
 Strategiehinweis: Ein großes Reich mit niedrigem Vermögen ist ein weiches
-Ziel. Es hat viel Land, aber wenig Kraft, es zu verteidigen. Sie gewinnen
-die Schlacht leicht und nehmen ein großes Stück Land. Ein kleines, dichtes
-Reich gibt Ihnen für denselben Aufwand weniger Land.
+Ziel. Es hat viele Regionen, aber wenig Kraft, sie zu verteidigen. Sie
+gewinnen die Schlacht leicht und nehmen viele Regionen. Ein kleines, dichtes
+Reich gibt Ihnen für denselben Aufwand weniger Regionen.

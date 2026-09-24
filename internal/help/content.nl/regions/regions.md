@@ -7,9 +7,12 @@ title: "Regio's"
 
 # Regio's
 
-Land bestaat uit regio's. U koopt regio's op een markt, en de prijs stijgt
-naarmate u er meer koopt. Er zijn acht regiotypes, elk met een eigen
-taak. Elk type heeft zijn eigen onderwerp.
+Regio's zijn het grondgebied van uw rijk. U koopt ze in het menu Uitgaven,
+en de prijs stijgt naarmate u er meer koopt. Er zijn acht regiotypes die u
+kunt kopen, elk met een eigen taak, en Verwoest, dat alleen door een aanval
+ontstaat. Elk type heeft zijn eigen onderwerp.
+
+Het rijk met de meeste regio's is de Planetary Master.
 
 Elke regio die u bezit kost elke beurt goud aan onderhoud. De kosten zijn
 voor alle regiotypes gelijk, en ze zijn hoog. Het is vaak de grootste

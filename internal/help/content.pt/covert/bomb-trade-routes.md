@@ -9,10 +9,10 @@ title: 'Bombardear as Rotas Comerciais'
 
 Bombardear as Rotas Comerciais é uma operação interplanetária, no menu de
 Operações Especiais. Ela atinge os acordos comerciais em trânsito por outro
-planeta. A maioria dos ataques não dá em nada e alguns acordos escapam, mas
-um acordo alcançado pelos bombardeiros chega praticamente vazio — sobram
-apenas poucos por cento de cada mercadoria. Tratados em vigor não são
-afetados.
+planeta. A maioria dos ataques é repelida antes de chegar. Um ataque que
+passa atinge cerca de dois acordos em cada três. Um acordo alcançado pelos
+bombardeiros chega com apenas poucos por cento de cada mercadoria. Tratados
+em vigor não são afetados.
 
 Um acordo é poupado quando os dois reinos que o fizeram têm Comércio
 Protegido entre si. Seus próprios acordos com o alvo não valem nada aqui,

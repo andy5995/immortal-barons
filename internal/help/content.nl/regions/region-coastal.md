@@ -7,6 +7,6 @@ title: Kust
 
 # Kustregio's
 
-Kustregio's zijn uw beste bron van toerisme-inkomsten. In goede tijden
-brengen ze het meeste goud op. Maar als de steun van het volk laag is,
-verliest uw bevolking haar interesse en dalen de toerisme-inkomsten sterk.
+Kustregio's verdienen goud met toerisme. Als de steun van het volk hoog is,
+verdienen ze gemiddeld meer goud dan elk ander regiotype. Als de steun laag
+is, dalen hun inkomsten sterk.

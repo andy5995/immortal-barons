@@ -30,18 +30,19 @@ Vertrag mit diesem Reich, um eines zu senden.
 
 Ein Handelsgeschäft kostet eine Gebühr für jeden Tag, für den Sie es senden,
 und es braucht Träger, um die Waren zu bewegen. Wie viele, hängt davon ab,
-was Sie verschiffen: Ein Träger fasst tausend Soldaten oder Geschütztürme,
-hundert Jets, fünftausend Panzer oder hunderttausend Gold, und Nahrung,
-Bomber, Agenten und Träger brauchen überhaupt keinen Platz. Ein Vertrag über
-Geschützten Handel mit diesem Reich macht die Gebühr billiger.
+was Sie verschiffen. Als Fracht fasst ein Träger tausend Soldaten oder
+Geschütztürme, hundert Jets, fünftausend Panzer oder hunderttausend
+Gold. Nahrung, Bomber, Agenten und Träger brauchen überhaupt keinen
+Platz. Ein Vertrag über Geschützten Handel mit diesem Reich macht die Gebühr
+billiger.
 
 Die Tage, für die Sie zahlen, sind die Zeit, die das Angebot steht. Was Sie
 in das Geschäft legen, verlässt Ihr Reich in dem Augenblick, in dem Sie es
-senden, und es kommt nur zurück, wenn das Angebot angenommen wird: eine
-Ablehnung, ein Geschäft, das niemand beantwortet, bevor seine Tage ablaufen,
-und ein Reich, das fällt, bevor es antwortet, kosten Sie allesamt die
-Waren. Senden Sie an jemanden, der spielt, und geben Sie ihm genug Tage, um
-dazu zu kommen.
+senden. Wird das Angebot angenommen, erhält das andere Reich es, und Sie
+erhalten, was Sie verlangt haben. Eine Ablehnung, ein Geschäft, das niemand
+beantwortet, bevor seine Tage ablaufen, und ein Reich, das fällt, bevor es
+antwortet, kosten Sie allesamt die Waren. Senden Sie an jemanden, der
+spielt, und geben Sie ihm genug Tage, um dazu zu kommen.
 
 ## Geschäfte zu einem anderen Planeten
 
@@ -66,10 +67,10 @@ Geschäft von oben.
 Der Handel zählt am meisten, wenn mehrere Reiche zusammenarbeiten. Ein paar
 Ideen:
 
-**Spezialisieren Sie sich und beliefern Sie Ihre Partner.** Ihre Industrie kann
-einen Einheitentyp bevorzugen, was diese Einheit für Sie billiger macht als für
-alle anderen. Wenn Sie Panzer bauen und ein Partner Geschütztürme, kann jeder
-von Ihnen dem anderen unter dem Preis verkaufen, den der andere für den Eigenbau zahlen würde. Beide Reiche kommen besser weg.
+**Spezialisieren Sie sich und beliefern Sie Ihre Partner.** Ihre Industrie kann sich auf
+einen Einheitentyp spezialisieren. Sie baut dann mehr davon und weniger von jedem anderen.
+Spezialisieren Sie sich auf Panzer und ein Partner auf Geschütztürme, stellt jeder mehr
+von dem her, was der andere braucht. Handeln Sie mit dem Überschuss, und beide Reiche gewinnen.
 
 **Ein billiges Angebot nimmt, wer zuerst da ist.** Jeder kann es kaufen, ein
 Preis, der als Geschenk an einen Verbündeten gedacht war, kann also am Ende
@@ -77,4 +78,4 @@ einen Rivalen bewaffnen. Damit die Waren sicher das Reich erreichen, für das Si
 
 **Zwischen Planeten ist der Handel größer.** In einer Liga spezialisieren sich
 ganze Planeten, und der Markt eines Verbündeten ist oft der billigste Ort zum
-Kaufen. Siehe das Thema Interplanetarer Handel.
+Kaufen. Siehe das Thema Märkte der Verbündeten.

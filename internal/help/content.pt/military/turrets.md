@@ -11,12 +11,12 @@ Torres são uma unidade só de defesa — a contraparte defensiva dos
 caças. Elas têm defesa 2 e ofensiva 0, o que é cerca de duas vezes mais
 forte na defesa que um soldado.
 
-Torres derrubam caças atacantes, destroem tanques atacantes e matam tropas
-atacantes. Elas não detêm os mísseis de um vizinho — nada detém, sejam
-nucleares, químicos ou biológicos.
+Torres somam à sua defesa contra todo tipo de unidade atacante. Elas não
+detêm os mísseis de um vizinho; nada detém, sejam nucleares, químicos ou
+biológicos.
 
-Operações secretas não conseguem destruir as suas torres, então elas formam
-um núcleo estável para a sua defesa.
+Operações secretas no seu próprio planeta não conseguem destruir as suas
+torres. Um S3-Sabre de outro planeta consegue, e um ataque pirata também.
 
 Alguns guias de estratégia chamam esta unidade de "Base de Mísseis". É a
 mesma unidade defensiva.

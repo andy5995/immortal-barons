@@ -7,6 +7,6 @@ title: Gebirge
 
 # Gebirgsregionen
 
-Gebirgsregionen bauen Bodenschätze ab. Ihre Einnahmen sind im Mittel
-geringer, dafür stetig, weil wenig sie beeinflusst. Gebirge steigern
-außerdem die Produktion Ihrer Industrieregionen.
+Gebirgsregionen verdienen Gold durch Bergbau. Ihre Einnahmen sind im Mittel
+geringer, ändern sich aber von Zug zu Zug wenig. Gebirge steigern außerdem
+die Produktion Ihrer Industrieregionen.

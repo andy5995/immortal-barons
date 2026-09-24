@@ -19,5 +19,5 @@ como `Quantos? (0; 40):`.
 - `b` acrescenta nove zeros. Pressione `3` e depois `b` e aparece
   `3000000000`.
 
-Se você digitar um número maior que o máximo, o jogo o reduz ao máximo
-quando você pressiona Enter.
+Se você digitar um número maior que o máximo, o jogo o troca pelo máximo
+quando você pressiona Enter. Pressione Enter de novo para aceitá-lo.

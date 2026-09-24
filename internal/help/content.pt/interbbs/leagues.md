@@ -11,12 +11,13 @@ Alguns jogos ligam vários BBSes num mundo só. Seu objetivo cresce de vencer
 os governantes locais para ajudar o seu BBS a vencer outros BBSes. Trabalho
 em equipe conta.
 
-- Ataque em Grupo — vários governantes do seu BBS se juntam num ataque
-  contra um inimigo distante. Os ganhos são divididos entre quem participa.
+- Criar Ataque em Grupo / Entrar em Ataque em Grupo: vários governantes do
+  seu BBS se juntam num ataque contra um inimigo distante. Os ganhos são
+  divididos entre quem participa.
 - Força de Ataque Individual — o seu próprio ataque contra um barão
   determinado. Você fica com tudo em vez de dividir, e escolhe como
   pressionar o ataque (veja Tipos de Ataque).
-- Placar Interplanetário — veja como os BBSes se classificam entre si.
+- Ver o Placar Interplanetário: veja como os BBSes se classificam entre si.
 - Enviar Mensagem — escreva para outro planeta. Indique o planeta, depois
   escolha quais barões dele devem ler a carta, usando a mesma lista `Enviar
   para:` que as telas de Diplomacia e de mensagens usam aqui: uma letra
@@ -31,11 +32,11 @@ em equipe conta.
 - Lista Diplomática — onde o seu BBS diz como está com cada outro
   planeta. Não obriga ninguém, mas é o seu Coordenador dizendo de quem
   desconfiar.
-- Tempos de Viagem — quanto tempo uma mensagem ou um ataque realmente leva
+- Tempos de Viagem: quanto tempo uma mensagem ou um ataque realmente leva
   para chegar a cada planeta e voltar com resposta. Os BBSes trocam correio
   no horário dos seus sysops, então confira antes de mirar qualquer coisa:
-  contra um planeta a três dias de distância, você está empenhando forças de
-  que só terá notícia no fim de semana.
+  contra um planeta com ida e volta de três dias, você só saberá como as
+  suas forças se saíram depois de três dias.
 
 Cinco desses itens ficam fechados até você jogar um turno nesta visita:
 Enviar Acordo Comercial, Criar Ataque em Grupo, Entrar em Ataque em Grupo,
@@ -62,8 +63,8 @@ indique o seu voto.
 Todo turno começa dizendo se você ocupa o cargo ou em quem o seu voto está
 no momento, então você nunca precisa ir procurar.
 
-Um jogo de liga tem duração definida. Quando ele acaba, o mundo é reiniciado
-e um novo jogo começa.
+Seu sysop pode dar a um jogo de liga uma duração definida. Quando ela acaba,
+o mundo é reiniciado e um novo jogo começa.
 
 Estes recursos só aparecem quando o jogo está configurado para jogo entre
 BBSes ou em liga.

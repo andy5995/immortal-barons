@@ -10,13 +10,13 @@ title: 'Ligen und Inter-BBS-Spiel'
 Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
 über die lokalen Herrscher zum Sieg über andere Planeten.
 
-- Gruppenangriff - mehrere Herrscher Ihres Boards schließen sich zu einem
-  Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag
-  geteilt.
+- Gruppenangriff erstellen / Gruppenangriff beitreten - mehrere Herrscher
+  Ihres Boards schließen sich zu einem Schlag gegen einen fernen Feind
+  zusammen. Die Beute wird unter den Beteiligten geteilt.
 - Einzelangriff - Ihr eigener Schlag gegen einen benannten Baron. Sie
   behalten die ganze Beute, statt sie zu teilen, und Sie wählen, wie hart
   Sie zuschlagen (siehe Angriffsarten).
-- IP-Punkte - sehen, wie die Boards zueinander stehen.
+- IP-Punkte ansehen - sehen, wie die Boards zueinander stehen.
 - Nachricht senden - an einen anderen Planeten schreiben. Nennen Sie den
   Planeten und wählen Sie dann, welche Barone dort den Brief lesen sollen,
   über dieselbe `Send to:`-Liste, die auch die Diplomatie- und
@@ -37,8 +37,8 @@ Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
 - Reisezeiten - wie lange eine Nachricht oder ein Schlag wirklich bis zu
   jedem Planeten braucht und wie lange die Antwort zurück. Boards tauschen
   Post nach dem Zeitplan ihrer Sysops aus, sehen Sie also nach, bevor Sie
-  zielen: Gegen einen Planeten, der drei Tage entfernt ist, binden Sie
-  Truppen, von denen Sie erst am Wochenende wieder hören.
+  zielen: Gegen einen Planeten mit drei Tagen Hin- und Rückweg erfahren Sie
+  drei Tage lang nicht, wie Ihre Truppen abgeschnitten haben.
 
 Fünf dieser Punkte bleiben verschlossen, bis Sie bei diesem Besuch einen Zug
 gespielt haben: Handelsangebot senden, Gruppenangriff erstellen,
@@ -67,8 +67,8 @@ Ihre Stimme bereits nennt.
 Jeder Zug beginnt damit, dass Ihnen gesagt wird, ob Sie das Amt innehaben
 oder wem Ihre Stimme derzeit gilt; Sie müssen also nie danach suchen.
 
-Ein Ligaspiel hat eine feste Dauer. Wenn es endet, wird die Welt
-zurückgesetzt und ein neues Spiel beginnt.
+Ihr Sysop kann einem Ligaspiel eine feste Dauer geben. Wenn sie abläuft,
+wird die Welt zurückgesetzt und ein neues Spiel beginnt.
 
 Diese Funktionen erscheinen nur, wenn das Spiel für Inter-BBS- oder
 Ligaspiel eingerichtet ist.

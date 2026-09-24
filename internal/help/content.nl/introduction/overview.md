@@ -15,8 +15,8 @@ krijgt voortdurend concurrentie.
 Een planeet heeft plaats voor 25 baronieën, elk met een van de 25 zetels. Uw
 zetel is van u zolang uw rijk overeind staat, en de letter ervan is hoe alle
 anderen u noemen. Zijn alle zetels bezet, dan wordt een nieuwe beller
-weggestuurd tot er een rijk valt; een sysop kan ook minder dan 25 spelers
-een zetel geven, en computergestuurde barons nemen zelf ook zetels in.
+weggestuurd tot er een rijk valt. Een sysop kan ook minder dan 25 spelers
+een zetel geven.
 
 U geeft uw rijk een naam wanneer u voor het eerst inbelt, en u mag die naam
 één keer wijzigen - via het menu Voorkeuren, nadat uw Bescherming van Nieuwe
@@ -43,19 +43,22 @@ Een beurt doorloopt deze stappen op volgorde:
 - **Productie en inkomsten.** Uw industrie bouwt militaire eenheden, en uw
   inkomsten voor de beurt komen binnen.
 - **Rapporten.** U ziet een inkomstenrapport en uw volledige Rijksstatus.
-- **Onderhoud.** U betaalt het onderhoud van uw leger en uw land, en u voedt
-  uw volk en uw leger. Te weinig voedsel of goud geeft problemen, dus let
-  hierop.
+- **Onderhoud.** U betaalt het onderhoud van uw leger en uw regio's, en u
+  voedt uw volk en uw leger. Te weinig voedsel of goud geeft problemen, dus
+  let hierop.
 - **Geheime Operaties.** Spionage en sabotage. Deze stap verschijnt alleen
-  als u hem aan laat staan en minstens één geheim agent hebt.
-- **Uitgaven.** U koopt land, leger en andere zaken.
-- **Aanvallen.** U mag een andere baronie aanvallen, een beperkt aantal keer
-  per dag.
-- **Handel.** Drijf handel met andere baronieën, als u deze stap aan laat
-  staan.
+  als u Geheim menu tonen aanzet in Voorkeuren en minstens één geheim agent
+  hebt.
+- **Bank.** De bank gaat open, zodat u kunt storten, opnemen, lenen of
+  investeren.
+- **Uitgaven.** U koopt regio's, militaire eenheden en andere zaken.
+- **Aanvallen.** U mag een andere baronie één keer per beurt aanvallen.
+- **Handel.** Drijf handel met andere baronieën. Deze stap verschijnt alleen
+  als u Handelsmenu tonen aanzet in Voorkeuren.
 - **InterPlanetaire Operaties.** Acties tegen andere planeten, in gekoppelde
   spellen.
-- **Berichten.** U mag een bericht aan een andere speler sturen.
+- **Berichten.** U mag een bericht aan een andere speler sturen. Deze stap
+  verschijnt alleen als u Berichtenmenu tonen aanzet in Voorkeuren.
 - **Einde van de beurt.** Uw economie en bevolking komen tot rust, en de
   beurt sluit.
 
@@ -67,9 +70,9 @@ bouwt, opent u diplomatie, bezoekt u de bank, gebruikt u de voedselmarkt,
 stelt u uw voorkeuren in en schrijft u macro's. Open het wanneer u het nodig
 hebt.
 
-In dit spel staan **diplomatie** en **het wijzigen van de productie** op het
-Systeemmenu.  Het zijn geen automatische haltes in elke beurt, dus ga er
-zelf langs wanneer u uw plannen wilt bijstellen.
+Diplomatie staat ook in het menu Start. Diplomatie en het wijzigen van de
+productie zijn geen automatische haltes in een beurt, dus ga er langs
+wanneer u uw plannen wilt bijstellen.
 
 ## Spelmededelingen
 

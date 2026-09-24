@@ -24,14 +24,18 @@ a mira:
 A mira varia um ponto para cada lado durante o voo, e cerca de um lançamento
 em dez ignora o seletor por completo e acerta o que bem entender. Então um
 ajuste é uma tendência, não uma promessa: o 4 vai para bases militares mais
-ou menos metade das vezes, enquanto o 5 vai para bases aéreas umas três
-vezes em quatro, porque 5 e 6 apontam ambos para lá.  Use o 5 contra um
-barão que você sabe que mantém uma grande força aérea.
+ou menos metade das vezes, enquanto o 5 vai para bases aéreas mais de duas
+vezes em três, porque 5 e 6 apontam ambos para lá. O seletor dá a volta nas
+pontas: o 10 pode cair no 0, e o 0 no 10. Use o 5 contra um barão que você
+sabe que mantém uma grande força aérea.
 
-Além disso, o míssil continua sendo uma aposta. A maioria dos lançamentos
-não dá em nada: erra o alvo, falha, ou o SDI do inimigo o derruba. Ele
-também pode sair pela culatra — se o inimigo mantiver um exército de
-soldados muito grande, o míssil pode voltar e atingir o seu próprio império.
+Além disso, o míssil continua sendo uma aposta. Cerca de um lançamento em
+dez falha, e o SDI do inimigo pode derrubá-lo. Ele também pode se desfazer
+sobre o alvo e não causar dano. Quanto maior o exército de soldados do
+inimigo, mais vezes isso acontece.  Um míssil desfeito não prejudica você,
+mas ajuda o inimigo: a precipitação dá a ele regiões novas, de 10% a 19% das
+regiões que ele já tem. Ele escolhe os tipos das regiões novas no próximo
+turno dele.
 
 O seu sysop decide como o seletor é ajustado. Normalmente você escolhe
 sozinho, mas o jogo pode ser configurado para sortear um a cada vez, para

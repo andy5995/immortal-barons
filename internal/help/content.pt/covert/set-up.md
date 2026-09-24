@@ -7,7 +7,9 @@ title: Armar
 
 # Armar
 
-Armar engana o alvo e um dos parceiros de Aliança de Defesa Total dele,
-fazendo cada um acreditar que o outro declarou guerra. A aliança deles é
-anulada. Use isso para arrancar um pacto defensivo de um inimigo que você
-pretende atacar.
+Armar engana o alvo e um dos parceiros de tratado dele, fazendo cada um
+acreditar que o outro declarou guerra. Todos os tratados entre os dois são
+anulados. Se o alvo tiver uma Aliança de Defesa Total, é esse parceiro o
+escolhido. Seu agente precisa enganar os dois reinos, então Armar falha mais
+vezes que as outras operações simples. Use-a para acabar com um pacto
+defensivo antes de atacar um inimigo.

@@ -12,8 +12,7 @@ kaufen. Öffnen Sie Handel im Menü Interplanetare Operationen, dann Märkte,
 und wählen Sie einen Planeten.
 
 Aufgeführt werden nur Planeten, die Ihr Koordinator als verbündet
-gekennzeichnet hat. Der Kauf über Planetengrenzen hinweg ist eine Eigenheit
-von Immortal Barons, und eine Liga kann ihn abschalten.
+gekennzeichnet hat.
 
 ## Ihre Bestellung ist ein Gebot, kein Kauf
 

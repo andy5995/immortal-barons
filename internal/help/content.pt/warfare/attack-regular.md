@@ -27,14 +27,14 @@ luta: um atacante muito superior ao defensor sai tendo perdido pouquíssimo,
 e um equilibrado paga quase a parcela inteira.
 
 Se você vencer, captura uma parcela das regiões do inimigo. Você não leva o
-ouro dele. Um Ataque Comum lhe dá terra, não dinheiro. Um império pequeno
-pode perder todas as suas regiões num ataque. Um império grande perde só uma
-parte, então você precisa atacá-lo repetidas vezes para derrubá-lo.
+ouro dele. Um império pequeno pode perder todas as suas regiões num
+ataque. Um império grande perde só uma parte, então você precisa atacá-lo
+repetidas vezes para derrubá-lo.
 
-O tamanho dessa parcela depende das configurações deste BBS e de quanta
-terra o inimigo tem, não de quão desenvolvido ele é.
+O tamanho dessa parcela depende das configurações deste BBS e de quantas
+regiões o inimigo tem, não de quão desenvolvido ele é.
 
 Dica de estratégia: um império grande com patrimônio baixo é um alvo
-fácil. Ele tem muita terra e pouca força para defendê-la. Você vence a
-batalha com facilidade e leva um belo pedaço de terra. Um império pequeno e
-denso lhe dá menos terra pelo mesmo esforço.
+fácil. Ele tem muitas regiões e pouca força para defendê-las. Você vence a
+batalha com facilidade e leva muitas regiões. Um império pequeno e denso lhe
+dá menos regiões pelo mesmo esforço.

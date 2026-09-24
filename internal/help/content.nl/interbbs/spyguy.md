@@ -42,18 +42,18 @@ uitgezonden man is niet verspild.
 
 ## Lezen wat hij stuurt
 
-Elk bericht komt binnen als planeetnieuws, met datum, en vermeldt waar het
-op u gericht was en hoeveel tijd er restte toen hij het schreef. Die regel
+Elk bericht komt binnen als planeetnieuws, met datum, en vermeldt wat er op
+u gericht was en hoeveel tijd er restte toen hij het schreef. Die regel
 verandert daarna nooit meer, dus uren later zegt hij niet meer hoeveel tijd
 er over is.
 
-**Inkomend**, op het InterPlanetaire menu, is dezelfde waarschuwing bijgehouden:
-een regel per dreiging, de eerstvolgende bovenaan, aftellend terwijl u leest -
-`3h`, dan `90m`, dan `away` zodra de strijdmacht vertrokken is. Een wapen dat
-al onderweg is, staat vermeld met de dagen tot het inslaat.
+**Aanvallen in aantocht**, in het Interplanetaire menu, is dezelfde waarschuwing,
+bijgehouden: een regel per dreiging, de eerstvolgende bovenaan, aftellend terwijl
+u leest - `3h`, dan `90m`, dan `weg` zodra de strijdmacht vertrokken is. Een
+wapen dat al onderweg is, staat vermeld met de dagen tot het inslaat.
 
-Een lege lijst is geen bewijs van vrede. Het betekent dat er niets gemeld
-is, en alleen een waarnemer op een andere planeet kan iets melden.
+Een lege lijst bewijst niet dat er niemand komt. Behalve een wapen dat al
+onderweg is, kan alleen een waarnemer op een andere planeet iets melden.
 
 ## Waarom het uitmaakt
 
@@ -73,5 +73,8 @@ Plaats hem waar de dreiging zit, niet waar de wrok zit. De planeet die net
 een veldslag van u verloor, is degene die het antwoord samenstelt, en het
 tarief is hetzelfde of u nu een rivaal bespiedt of een buur die u vertrouwt.
 
-Een kort verblijf dat u verlengt is meer waard dan een lang verblijf dat u
-vroeg inkoopt: de dagen lopen door, of er nu iets gebeurt of niet.
+Een nieuwe SpyGuy sturen naar een planeet die al van hieruit bewaakt wordt,
+telt de twee verblijven niet bij elkaar op. Het verblijf wordt het langste
+van de twee, en u betaalt nog steeds voor elke dag die u kocht. Dat geldt
+voor elke baron op uw planeet, want zij delen de waarnemer. Stuur een nieuwe
+als het oude verblijf afloopt.

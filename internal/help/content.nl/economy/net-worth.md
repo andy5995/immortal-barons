@@ -7,9 +7,10 @@ title: Vermogen
 
 # Vermogen
 
-Vermogen is uw totaalscore. Het rangschikt elk imperium (zie Scores).
+Vermogen is de waarde van wat uw rijk bezit. Het staat naast uw score op het
+scherm Scores bekijken.
 
-Het telt vooral uw land en uw militaire kracht. Goud, voedsel, mensen en
-schulden tellen helemaal niet mee. Een rijk empire met weinig land of leger
-scoort dus nog steeds laag, en een lening kost u geen plaats op de
-ranglijst. Om te stijgen moet u land bezitten en een sterk leger hebben.
+Het telt uw regio's, uw militaire eenheden en uw geheim agenten. Goud,
+voedsel, mensen en schulden tellen niet mee. Een rijk met veel geld maar
+weinig regio's of eenheden heeft dus nog steeds een laag vermogen, en een
+lening verlaagt uw vermogen niet.

@@ -17,16 +17,14 @@ Streitmacht wählen. Sagen Sie ja, empört sich Ihr Volk darüber, von einem
 treulosen Baron regiert zu werden: Sie verlieren ein Viertel Ihres Rückhalts
 und ein Viertel der Moral Ihres Heeres, und die Schlacht wird dann mit
 dieser geringeren Moral geschlagen. Sagen Sie nein, wird der Angriff
-abgeblasen. Die beiden Reiche bleiben ohne Abkommen zurück, und der
-Herrscher, den Sie verraten haben, wird seine eigene Antwort darauf
-haben. Dieselbe Frage kommt vor einem nuklearen, chemischen oder
-biologischen Schlag und vor einer verdeckten Operation, die einen Agenten
-schickt. Spion senden und Beziehungen ausspähen schauen nur, sie fragen also
-nicht und kosten Sie nichts.
+abgeblasen. Die beiden Reiche bleiben ohne Abkommen zurück. Dieselbe Frage
+kommt vor einem nuklearen, chemischen oder biologischen Schlag und vor einer
+verdeckten Operation, die einen Agenten schickt. Spion senden und
+Beziehungen ausspähen schauen nur, sie fragen also nicht und kosten Sie
+nichts.
 
-Eine Kriegserklärung im Menü Diplomatie beendet ein Abkommen zum selben
-Preis ohne Schlacht. Sie kostet nichts, wenn Sie kein Abkommen zu brechen
-hatten.
+Eine Kriegserklärung im Menü Diplomatie beendet ein Abkommen ohne Schlacht.
+Sie kostet Sie nichts. Die beiden Reiche befinden sich dann im Krieg.
 
 Verträge ansehen zeigt Ihre derzeitigen Beziehungen zu den anderen
 Herrschern im Spiel, und darunter die Angebote, die Sie gesendet haben und

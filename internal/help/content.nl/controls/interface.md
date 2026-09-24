@@ -11,19 +11,20 @@ Druk op één toets om te kiezen. U drukt niet op Enter om een menukeuze te
 maken. Elke keuze toont zijn toets tussen haakjes, zoals `(1)`. Druk op die
 toets en hij wordt meteen uitgevoerd.
 
-Elk menu verlaat u met de toets `0`, met het label "Sluiten". In een
-beurtmenu (Uitgaven, Aanval, Geheime operaties, Handel) brengt Sluiten u
-naar de volgende stap van uw beurt; u kunt pas in uw volgende beurt naar dat
-menu terug. In een zijmenu (zoals de Bank of het Systeemmenu) brengt Sluiten
-u terug waar u was.
+Elk menu verlaat u met de toets `0`, met het label "Stoppen". In een
+beurtmenu (Uitgaven, Aanval, Geheime operaties, Handel) brengt Stoppen u
+naar de volgende stap van uw beurt, en de beurt komt niet naar die stap
+terug. In een zijmenu (zoals de Bank of het Systeemmenu) brengt Stoppen u
+terug waar u was.
 
 Het Systeemmenu opent met de toets `*` vanuit het menu Uitgaven. Het bevat
 extra keuzes zoals Voorkeuren, Belasting instellen en Instructies tonen.
 
-Enter indrukken zonder andere toets kiest ook Sluiten - bij de prompt staat
-"Sluiten", zodat u ziet wat Enter doet. In een beurtmenu gebeurt dat alleen
-als u "Enter sluit het koopmenu" aanzet in Voorkeuren; in een zijmenu kiest
-Enter altijd Sluiten.
+Enter indrukken zonder andere toets kiest ook Stoppen. Bij de prompt staat
+"Stoppen", zodat u ziet wat Enter doet. In het menu Uitgaven gebeurt dat
+alleen als u "Enter om koopmenu te verlaten" aanzet in Voorkeuren. In het
+menu Start kiest Enter Spelen zolang u nog beurten over hebt. In elk ander
+menu kiest Enter altijd Stoppen.
 
 De hulpbrowser en de andere kies-een-onderwerplijsten verplaatsen een
 markering met de pijltjestoetsen: Enter kiest de gemarkeerde regel, een paar
@@ -37,8 +38,7 @@ Waar een prompt iets getypts verwacht in plaats van één toets - een aantal
 soldaten, een rijknaam, een regel van een bericht - wist Backspace het
 laatste teken en **Ctrl-U wist het hele antwoord**, zodat u weer bij de
 prompt staat met niets getypt. Dat gaat sneller dan Backspace ingedrukt
-houden boven een verkeerd getypte 1000000000, en het is een toevoeging van
-IB zelf; het origineel kent die toets niet. In de berichteneditor wist hij
+houden boven een verkeerd getypte 1000000000. In de berichteneditor wist hij
 de regel waarop u staat, niet het bericht - daar is `/C` nog steeds voor.
 
 ## Kiezen naar wie een actie gaat
@@ -56,8 +56,9 @@ baronnen op de planeet die u noemde.
 Elke keuze in Diplomatie die een rijk noemt, neemt dezelfde lijst: bied een
 verdrag aan meerdere rijken tegelijk aan, of verklaar er meerdere de
 oorlog. Daar toont `?` uw relaties in plaats van de scores. Markeer maar één
-rijk en u krijgt de volledige onderhandeling ermee - u kunt hun aanbod
-aanvaarden of het pact verbreken dat u heeft.
+rijk, en u onderhandelt ermee: u stelt het pact voor, of u aanvaardt het als
+dat rijk het u al heeft aangeboden. Om een pact te beëindigen gebruikt u
+Oorlogsverklaring.
 
 De letters horen bij de rijken, niet bij de regels, dus er kan een letter
 ontbreken in de lijst: die is dan van u, of van een rijk dat gevallen
@@ -80,4 +81,4 @@ krijgt hem nooit. Hij verdwijnt als iemand uitlogt, en ook een paar minuten
 na de laatste toetsaanslag, dus wie stil op één scherm zit kan van de lijst
 vallen zonder weg te zijn.
 
-Druk op `?` in een menu om deze hulp te openen.
+In een menu met Help drukt u op `?` om deze hulp te openen.

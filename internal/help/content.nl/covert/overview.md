@@ -15,11 +15,11 @@ Wat agenten NIET doen is uw kansen veranderen. De kans dat een operatie
 slaagt wordt bepaald door de operatie zelf: de eenvoudigste slagen iets meer
 dan de helft van de tijd, de moeilijkere minder vaak. Uw agenten maken
 daarvoor geen verschil, en die van het doelwit evenmin. Drie dingen
-veranderen het wel: een omgekochte agent binnen het doelwit verdubbelt uw
-kans tegen dat rijk, een rijk dat uw agent heeft ontmaskerd keert negen van
-uw tien pogingen af, en een Inlichtingenalliantie of een verdrag voor
-Terrorismepreventie leent de agenten van een bondgenoot uit aan uw kant of
-aan die van het doelwit. Zie Agenten.
+veranderen het wel. Een omgekochte agent binnen het doelwit verbetert uw
+kans tegen dat rijk. Een rijk dat uw agent heeft ontmaskerd, keert de meeste
+van uw pogingen af (zie Vijandelijke Operaties Ontmaskeren). Een
+Inlichtingenalliantie leent de agenten van uw partner aan uw kant uit. De
+verdragen van het doelwit zelf spelen geen rol. Zie Geheim agenten.
 
 Elke operatie kost ook goud. Het menu toont de prijs naast elke operatie, en
 de voettekst toont hoeveel goud en hoeveel agenten u hebt. U betaalt het
@@ -78,5 +78,6 @@ andere planeet gericht zijn en bommenwerpers nodig hebben om hun lading af
 te leveren; dat staat er steeds bij.
 
 Het menu Geheime Operaties verschijnt tijdens uw beurt, voor de menu's
-Uitgaven en Aanval. Ziet u het niet, zet dan \"Geheim menu tonen\" aan in
-het menu Voorkeuren.
+Uitgaven en Aanval, als u minstens één agent hebt en "Geheim menu tonen" aan
+staat in het menu Voorkeuren. Zolang u een agent hebt, kunt u het ook openen
+vanuit het Systeemmenu.

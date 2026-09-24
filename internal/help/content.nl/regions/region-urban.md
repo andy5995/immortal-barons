@@ -13,4 +13,4 @@ regio's u bezit, hoe meer mensen er in uw rijk kunnen wonen.
 Een stedelijke regio verdient zelf geen goud, maar kost wel evenveel
 onderhoud als elke andere regio. De waarde is indirect: meer mensen betekent
 meer belastinginkomsten. Meer mensen eten ook meer voedsel, dus laat uw
-landbouwland meegroeien met uw stedelijke land.
+landbouwregio's meegroeien met uw stedelijke regio's.

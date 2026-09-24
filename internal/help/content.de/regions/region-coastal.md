@@ -7,7 +7,6 @@ title: Küste
 
 # Küstenregionen
 
-Küstenregionen sind Ihre beste Einnahmequelle aus dem Tourismus. In guten
-Zeiten bringen sie das meiste Gold. Ist der Rückhalt in der Bevölkerung aber
-gering, verlieren Ihre Leute das Interesse und die Tourismuseinnahmen
-brechen ein.
+Küstenregionen verdienen Gold durch Tourismus. Ist der Rückhalt hoch,
+verdienen sie im Mittel mehr Gold als jede andere Regionsart. Ist der
+Rückhalt niedrig, sinkt ihr Einkommen stark.

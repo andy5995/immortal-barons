@@ -7,6 +7,6 @@ title: Montanha
 
 # Regiões de Montanha
 
-Regiões de montanha extraem recursos naturais. A renda delas é menor na
-média, mas constante, porque poucas coisas a alteram. As montanhas também
-aumentam o quanto as suas regiões industriais produzem.
+Regiões de montanha rendem ouro com a mineração. A renda delas é menor na
+média, mas muda pouco de um turno para outro. As montanhas também aumentam o
+quanto as suas regiões Industriais produzem.

@@ -21,16 +21,10 @@ um dos alvos indicados.
 
 ## Qual é a força dele
 
-A força é o financiamento espalhado pela sua terra, não o financiamento
-sozinho:
-
-    força% = a raiz quadrada de (financiamento / (10 x (regiões + 1)))
-
-com teto de 100%. Duas coisas decorrem disso. Cada região que você toma
-afina o seu próprio escudo, então o mesmo bolo que protege bem um reino
-pequeno é quase inútil sobre um grande. E cada ponto percentual a mais custa
-mais que o anterior: acima de 8.000 regiões, o primeiro 1% pede cerca de
-80.000 de ouro no bolo, enquanto ir de 9% para 10% pede outros 1,5 milhão.
+A força depende do financiamento e de quantas regiões você tem. O mesmo
+financiamento dá a um reino grande um escudo mais fraco que a um pequeno, e
+cada região que você captura deixa o seu próprio escudo mais fino. Cada
+ponto percentual a mais de força custa mais que o anterior.
 
 ## Financiando o programa
 

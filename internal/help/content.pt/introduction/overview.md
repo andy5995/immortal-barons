@@ -15,12 +15,11 @@ mesma coisa, então a competição é constante.
 Um planeta tem espaço para 25 baronatos, cada um ocupando uma das suas 25
 cadeiras. Sua cadeira é sua enquanto o seu reino estiver de pé, e a letra
 dela é como todo mundo o chama. Quando todas as cadeiras estão ocupadas, um
-novo usuário é recusado até um reino cair; um sysop também pode abrir menos
-de 25 vagas, e os barões controlados pelo computador ocupam cadeiras
-próprias.
+novo usuário é recusado até um reino cair. Um sysop também pode abrir menos
+de 25 vagas.
 
 Você dá nome ao seu reino na primeira vez que entra, e pode mudar esse nome
-uma vez — pelo menu de Preferências, depois que a sua Proteção de Reino Novo
+uma vez, pelo menu de Preferências, depois que a sua Proteção de Reino Novo
 acabar. Só uma vez: a opção some depois disso, e o planeta inteiro fica
 sabendo da mudança.
 
@@ -45,19 +44,22 @@ Um turno passa por estas etapas, nesta ordem:
   do turno chega.
 - **Relatórios.** Você vê um relatório de renda e a Situação completa do
   Império.
-- **Manutenção.** Você paga para manter o seu exército e a sua terra, e
+- **Manutenção.** Você paga para manter o seu exército e as suas regiões, e
   alimenta o seu povo e o seu exército. Faltar comida ou ouro dá problema,
   então fique de olho nisso.
 - **Operações Secretas.** Espionagem e sabotagem. Esta etapa só aparece se
-  você a mantiver ligada e tiver pelo menos um agente secreto.
-- **Gastos.** Você compra terra, militares e outras coisas.
-- **Ataques.** Você pode atacar outro baronato, um número limitado de vezes
-  por dia.
-- **Comércio.** Troque mercadorias com outros baronatos, se mantiver esta
-  etapa ligada.
+  você ligar Abrir o Menu Secreto nas Preferências e tiver pelo menos um
+  agente secreto.
+- **Banco.** O banco abre para você depositar, sacar, pedir empréstimo ou
+  investir.
+- **Gastos.** Você compra regiões, unidades militares e outras coisas.
+- **Ataques.** Você pode atacar outro baronato uma vez por turno.
+- **Comércio.** Troque mercadorias com outros baronatos. Esta etapa só
+  aparece se você ligar Abrir o Menu de Comércio nas Preferências.
 - **Operações Interplanetárias.** Ações contra outros planetas, em jogos
   ligados.
-- **Mensagens.** Você pode enviar uma mensagem a outro jogador.
+- **Mensagens.** Você pode enviar uma mensagem a outro jogador. Esta etapa
+  só aparece se você ligar Abrir o Menu de Mensagens nas Preferências.
 - **Fim do turno.** Sua economia e sua população se acomodam, e o turno se
   encerra.
 
@@ -68,9 +70,9 @@ você pode definir a sua taxa de imposto, mudar o que a sua indústria
 constrói, abrir a diplomacia, visitar o banco, usar o mercado de comida,
 ajustar as suas preferências e escrever macros. Abra-o quando precisar.
 
-Neste jogo, a **diplomacia** e a **mudança de produção** ficam no menu do
-Sistema.  Elas não são paradas automáticas de cada turno, então visite-as
-você mesmo quando quiser mudar os seus planos.
+A Diplomacia também fica no menu de Entrada. Nem a diplomacia nem a mudança
+de produção são paradas automáticas de um turno, então visite-as quando
+quiser mudar os seus planos.
 
 ## Boletins do Jogo
 

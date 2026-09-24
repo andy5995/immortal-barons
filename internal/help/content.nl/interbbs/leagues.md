@@ -11,12 +11,13 @@ Sommige spellen koppelen veel BBS'en samen tot een wereld. Uw doel groeit
 van het verslaan van de plaatselijke heersers naar het helpen van uw BBS om
 andere BBS'en te verslaan. Samenwerking telt.
 
-- Groepsaanval - meerdere heersers op uw BBS bundelen zich tot een aanval op
-  een verre vijand. De opbrengst wordt gedeeld door wie meedoet.
+- Groepsaanval maken / Deelnemen aan groepsaanval - meerdere heersers op uw
+  BBS bundelen zich tot een aanval op een verre vijand. De opbrengst wordt
+  gedeeld door wie meedoet.
 - Indiv. aanvalsmacht - uw eigen aanval op een met naam genoemde baron. U
   houdt de hele buit in plaats van hem te delen, en u kiest hoe u de aanval
   doorzet (zie Aanvalstypen).
-- IP-scores - zie hoe de BBS'en zich tot elkaar verhouden.
+- IP-scores bekijken - zie hoe de BBS'en zich tot elkaar verhouden.
 - Bericht sturen - schrijf naar een andere planeet. Noem de planeet en kies
   daarna welke baronnen daar de brief moeten lezen, met dezelfde `Send
   to:`-lijst die de diplomatie- en berichtenschermen hier gebruiken: een
@@ -35,8 +36,8 @@ andere BBS'en te verslaan. Samenwerking telt.
 - Reistijden - hoe lang een bericht of een aanval er werkelijk over doet om
   elke planeet te bereiken en antwoord terug te krijgen. BBS'en wisselen
   post uit op het schema van hun sysops, dus kijk ernaar voordat u ergens op
-  mikt: tegen een planeet op drie dagen afstand zet u strijdkrachten in
-  waarover u pas in het weekend iets hoort.
+  mikt: tegen een planeet met een retourtijd van drie dagen hoort u pas na
+  drie dagen hoe uw strijdkrachten het deden.
 
 Vijf van deze items zijn gesloten tot u dit bezoek een beurt gespeeld heeft:
 Handelsovereenkomst sturen, Groepsaanval opzetten, Deelnemen aan
@@ -64,8 +65,8 @@ het bericht hieronder dan al uw stem.
 Elke beurt begint ermee u te vertellen of u het ambt bekleedt of op wie uw
 stem op dat moment staat, zodat u er nooit naar hoeft te zoeken.
 
-Een competitiespel heeft een vaste lengte. Als het afloopt, wordt de wereld
-teruggezet en begint er een nieuw spel.
+Uw sysop kan een competitiespel een vaste lengte geven. Als die afloopt,
+wordt de wereld teruggezet en begint er een nieuw spel.
 
 Deze functies verschijnen alleen wanneer het spel is ingesteld voor
 inter-BBS- of competitiespel.

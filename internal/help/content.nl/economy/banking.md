@@ -14,14 +14,17 @@ door piraten of overvallen worden meegenomen.
 - Opnemen - goud van de bank terug naar uw schatkist brengen.
 - Geldnood / Leningen - goud lenen, of terugbetalen wat u al schuldig bent.
 
-Stortingen en opnames kennen geen maximum. Een investering sluit hooguit
-twee miljard goud weg, al mag u er zoveel openen als u wilt.
+Een storting of opname verplaatst alleen wat onder de onderstaande grens
+past. De investeringen die op één datum uitbetalen mogen samen hoogstens
+twee miljard goud teruggeven, dus de bank biedt alleen aan wat nog past voor
+de datum die u kiest.  U mag zoveel investeringen openen als u wilt.
 
 Aan het eind van elke beurt wordt rente uitbetaald over wat er op dat moment
-in de bank staat. Hebt u Goud storten aan einde beurt aangezet, bij
-Voorkeuren, dan gaat uw goud eerst de bank in, zodat het goud dat u deze
-beurt verdiende deze beurt rente oplevert. Het gaat erin nadat de piraten
-hun kans hebben gehad, dus het is geen bescherming tegen een overval.
+in de bank staat. Zolang Goud storten aan einde beurt aan staat in
+Voorkeuren (een nieuw rijk begint ermee aan), gaat uw goud eerst de bank in,
+zodat het goud dat u deze beurt verdiende deze beurt rente oplevert. Het
+gaat erin nadat de piraten hun kans hebben gehad, dus het is geen
+bescherming tegen een overval.
 
 Het begin van uw volgende beurt vertelt u wat de bank heeft uitbetaald: de
 rente, en wat een investering die vandaag afliep heeft opgeleverd.

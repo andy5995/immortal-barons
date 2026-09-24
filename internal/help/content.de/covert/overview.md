@@ -15,11 +15,11 @@ Was Agenten NICHT tun, ist Ihre Aussichten verändern. Wie wahrscheinlich
 eine Operation gelingt, bestimmt die Operation selbst: Die einfacheren
 gelingen etwas mehr als die Hälfte der Male, die schwereren seltener. Ihre
 Agenten ändern daran nichts, und die des Ziels ebenso wenig. Drei Dinge
-ändern es doch: Ein bestochener Agent im Ziel verdoppelt Ihre Aussicht gegen
-dieses Reich, ein Reich, das Ihren Agenten aufgedeckt hat, wehrt neun von
-zehn Ihrer Versuche ab, und ein Geheimdienstbündnis oder ein Abkommen zur
-Terrorabwehr leiht die Agenten eines Verbündeten Ihrer Seite oder der des
-Ziels. Siehe Verdeckte Agenten.
+ändern es doch. Ein bestochener Agent im Ziel verbessert Ihre Aussicht gegen
+dieses Reich. Ein Reich, das Ihren Agenten aufgedeckt hat, wehrt die meisten
+Ihrer Versuche ab (siehe Feindoperationen aufdecken). Ein
+Geheimdienstbündnis leiht Ihrer Seite die Agenten Ihres Partners. Die
+eigenen Verträge des Ziels spielen keine Rolle. Siehe Verdeckte Agenten.
 
 Jede Operation kostet außerdem Gold. Das Menü zeigt den Preis neben jeder,
 und die Fußzeile zeigt, wie viel Gold und wie viele Agenten Sie haben. Sie
@@ -80,5 +80,6 @@ anderen Planeten gerichtet sind und Bomber brauchen, um ihre Fracht
 auszuliefern; jedes sagt das dazu.
 
 Das Menü Geheimoperationen erscheint während Ihres Zuges, vor den Menüs
-Ausgaben und Angriff. Wenn Sie es nicht sehen, schalten Sie
-\"Geheimdienstmenü\" im Menü Einstellungen ein.
+Ausgaben und Angriff, wenn Sie mindestens einen Agenten haben und
+"Geheimdienstmenü" im Menü Einstellungen eingeschaltet ist. Solange Sie
+einen Agenten haben, können Sie es auch aus dem Systemmenü öffnen.

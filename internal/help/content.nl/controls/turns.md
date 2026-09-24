@@ -14,11 +14,11 @@ De dag wisselt om middernacht op de computer waar het spel draait. Dat is
 niet overal middernacht, dus het beginmenu toont de eigen tijd van het spel
 en hoeveel er nog van de dag over is.
 
-Elke tijd die het spel afdrukt zegt erbij op welke klok hij staat. Tijden
-beginnen in UTC, waar elke planeet in een competitie het over eens is, en in
-Voorkeuren kunt u ze op een andere klok laten tonen: die van dit BBS zelf,
-of een tijdzone die u uit een lijst kiest.  Het aftellen naar de nieuwe dag
-duurt even lang, wat u ook kiest.
+Elke tijd op het scherm noemt zijn klok. Tijden beginnen in UTC, waar elke
+planeet in een competitie het over eens is, en in Voorkeuren kunt u ze op
+een andere klok laten tonen: die van dit BBS zelf, of een tijdzone die u uit
+een lijst kiest.  Het aftellen naar de nieuwe dag duurt even lang, wat u ook
+kiest.
 
 Nieuwe spelers krijgen Bescherming voor nieuwe rijken: een aantal beurten
 waarin u niet kunt aanvallen en niet aangevallen kunt worden. Die loopt

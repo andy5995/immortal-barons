@@ -13,8 +13,9 @@ zijn verbruikt zodra u ze uitstuurt, wat ze ook bereiken, en de aanslag
 wordt afgehandeld op de planeet van het doel zodra het pakket daar aankomt -
 het bericht komt dus pas een dag of langer later terug.
 
-Elke operatie stuit op de Bescherming van Nieuwe Rijken: een beschermd rijk
-loopt helemaal geen schade op.
+Bescherming voor nieuwe rijken houdt elke operatie tegen: een beschermd rijk
+krijgt helemaal niets te verduren, en u kunt er zelf geen sturen zolang uw
+eigen rijk nog beschermd is.
 
 ## Wat elke operatie doet
 
@@ -23,16 +24,16 @@ die erdoorheen komt neemt zijn eigen hap:
 
 - **Spion sturen** - brengt inlichtingen mee naar huis en kost het doel
   niets.
-- **Inlichtingendienst bombarderen Agencies** - doodt enkele procenten van
-  hun agenten, waarmee zij verdedigen en aanvallen.
-- **Troepen demoraliseren** - haalt een zevende van het militaire moreel
-  weg.
+- **Inlichtingendienst bombarderen** - doodt enkele procenten van hun
+  agenten, waarmee zij verdedigen en aanvallen.
+- **Demoraliseren** - haalt een zevende van het militaire moreel weg.
 - **Tweedracht zaaien** - enkele procenten van hun soldaten deserteren.
-- **Bomb Air Bases** - verbrandt een deel van hun jagers aan de grond.
+- **Vliegbases bombarderen** - verbrandt een deel van hun jagers aan de
+  grond.
 - **Emigratie aanwakkeren** - drijft mensen het rijk uit.
 - **Propaganda verspreiden** - kost hun steun van het volk.
-- **Bomb Food Storages** - de grilligste van de negen: het kan bijna een
-  derde van de voorraad kosten, of bijna niets.
+- **Voedselvoorraden bombarderen** - de grilligste van de negen: het kan
+  bijna een derde van de voorraad kosten, of bijna niets.
 - **HQ saboteren** - zet hun hoofdkwartier een vast bedrag terug.
 
 ## Er een kiezen
@@ -45,15 +46,13 @@ steun.
 
 ## Erdoorheen komen
 
-Voor elke agent wordt apart gedobbeld, waarbij uw agenten tegen de hunne
-worden afgewogen. De afweging neemt de wortel van elke kant en geeft de
-verdediger het voordeel, dus agenten helpen, maar met sterk afnemend
-rendement: vier keer zoveel koopt u twee keer de voorsprong, en bij twee
-gelijkwaardige rijken komen ongeveer twee op de vijf agenten erdoor. Er is
-naar beide kanten een kleine kans die niets met een van beide zijden te
-maken heeft.
+Voor elke agent wordt apart gedobbeld, en de agenten van het doelwit
+verdedigen ertegen.  Hoe meer agenten uw rijk heeft, hoe beter de kans van
+elk, maar elke agent die u toevoegt helpt minder. Als beide rijken evenveel
+agenten hebben, komen ongeveer twee op de vijf agenten erdoor. Een kleine
+kans naar beide kanten hangt van geen van beide zijden af.
 
 Meer agenten inzetten richt dus gemiddeld meer schade aan, maar het maakt
 één agent nooit kansrijker. Een Terrorismepreventiepact telt de agenten van
-de partners bij de verdediging op, en dat is wat een rijk met goede
-bondgenoten duur maakt om te bewerken.
+de partners bij de verdediging op, en een Inlichtingenalliantie telt de
+agenten van uw partners bij de uwe op.

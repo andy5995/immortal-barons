@@ -16,15 +16,13 @@ o jogo pede que você confirme antes de escolher a sua força. Diga sim e o
 seu povo se revolta por ser governado por um barão sem palavra: você perde
 um quarto do seu apoio e da moral do seu exército, e a batalha é então
 travada com essa moral menor. Diga não e o ataque é cancelado. Os dois
-reinos ficam sem acordo nenhum entre si, e o governante que você traiu terá
-a resposta dele. A mesma pergunta aparece antes de um ataque nuclear,
-químico ou biológico, e antes de uma operação secreta que mande um
-agente. Enviar Espião e Espionar as Relações só olham, então não perguntam e
-não lhe custam nada.
+reinos ficam sem acordo nenhum entre si. A mesma pergunta aparece antes de
+um ataque nuclear, químico ou biológico, e antes de uma operação secreta que
+mande um agente. Enviar Espião e Espionar as Relações só olham, então não
+perguntam e não lhe custam nada.
 
-Uma Declaração de Guerra, no menu de Diplomacia, encerra um acordo pelo
-mesmo preço, sem batalha. Não custa nada se você não tinha acordo nenhum
-para romper.
+Uma Declaração de Guerra, no menu de Diplomacia, encerra um acordo sem
+batalha.  Não custa nada. Os dois reinos ficam então em guerra.
 
 Ver os Tratados mostra as suas relações atuais com os outros governantes do
 jogo e, abaixo disso, as ofertas que você enviou e que ninguém respondeu

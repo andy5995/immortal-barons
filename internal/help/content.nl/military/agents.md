@@ -10,14 +10,13 @@ title: 'Geheim agenten'
 Agenten zijn uw spionnen. Zij voeren geheime operaties uit - spionage,
 sabotage, het bombarderen van vijandelijke doelen, omkoping en meer.
 
-Agenten zijn wat u uitgeeft, niet waarmee u wint. Elke operatie kost er een,
-en een mislukte operatie kost u hem alsnog. Op zichzelf veranderen uw
-agenten uw slaagkans niet, en die van het doel evenmin - het onderwerp
-Geheime Operaties behandelt wat dat wel doet. Waar het aantal telt is naast
-een Inlichtingenverbond of een Terrorismepreventieverdrag, die de agenten
-van een bondgenoot aan één kant van de afweging lenen.
+Agenten geeft u uit aan operaties. Elke operatie kost één agent, en een
+mislukte operatie verliest hem. Op uw eigen planeet verandert het aantal
+agenten aan beide kanten uw slaagkans niet, tenzij een verdrag de agenten
+van een bondgenoot toevoegt. Het onderwerp Geheime Operaties legt uit wat
+dat wel doet. Bij terroristische operaties tussen planeten helpen de agenten
+van het doelwit het wel bij de verdediging.
 
-Wat een voorraad agenten u wel oplevert is uithoudingsvermogen: een reeks
-mislukkingen laat u niet machteloos achter. Agenten vechten niet mee in
-gewone veldslagen. Zie het onderwerp Geheime Operaties voor wat zij wel
-kunnen.
+Met een grote voorraad agenten kunt u na meerdere mislukkingen
+doorgaan. Agenten vechten niet mee in gewone veldslagen. Zie het onderwerp
+Geheime Operaties voor wat zij wel kunnen.

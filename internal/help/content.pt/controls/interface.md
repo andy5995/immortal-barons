@@ -13,18 +13,19 @@ item do menu. Cada item mostra a sua tecla entre parênteses, como
 
 Todo menu é encerrado com a tecla `0`, chamada "Sair". Num menu de turno
 (Gastos, Ataque, Operações Secretas, Comércio), Sair leva você para a
-próxima etapa do turno; você não consegue voltar àquele menu até o seu
-próximo turno. Num menu lateral (como o Banco ou o Menu do Sistema), Sair
-leva você de volta para onde estava.
+próxima etapa do turno, e o turno não volta àquela etapa. Num menu lateral
+(como o Banco ou o Menu do Sistema), Sair leva você de volta para onde
+estava.
 
 O Menu do Sistema abre com a tecla `*` a partir do menu de Gastos. Ele
 guarda opções extras como Preferências, Definir o Imposto e Mostrar as
 Instruções.
 
-Pressionar Enter sem nenhuma outra tecla também escolhe Sair — o prompt
-mostra "Sair" para você ver o que o Enter vai fazer. Num menu de turno, isso
-só acontece se você ligar "Enter sai do menu de compra" nas Preferências;
-num menu lateral, o Enter sempre escolhe Sair.
+Pressionar Enter sem nenhuma outra tecla também escolhe Sair. O prompt
+mostra "Sair" para você ver o que o Enter vai fazer. No menu de Gastos, isso
+só acontece se você ligar "Use Enter para sair do menu de compra" nas
+Preferências. No menu de Entrada, o Enter escolhe Jogar enquanto você ainda
+tem turnos. Em todos os outros menus, o Enter sempre escolhe Sair.
 
 O navegador da ajuda e as outras listas de escolher um tópico movem um
 destaque com as setas: o Enter escolhe a linha marcada, digitar algumas
@@ -34,13 +35,12 @@ o número e pressione Enter.
 
 ## Digitando uma resposta
 
-Onde um prompt espera algo digitado em vez de uma tecla só — um número de
-soldados, o nome de um reino, uma linha de mensagem — o Backspace apaga o
+Onde um prompt espera algo digitado em vez de uma tecla só (um número de
+soldados, o nome de um reino, uma linha de mensagem), o Backspace apaga o
 último caractere e o **Ctrl-U apaga a resposta inteira**, deixando você de
 volta no prompt sem nada digitado. É mais rápido do que segurar o Backspace
-sobre um 1000000000 digitado errado, e é acréscimo do próprio IB; o original
-não tem essa tecla. No editor de mensagens, ele limpa a linha em que você
-está, não a mensagem — para isso o `/C` continua valendo.
+sobre um 1000000000 digitado errado. No editor de mensagens, ele limpa a
+linha em que você está, não a mensagem; para isso o `/C` continua valendo.
 
 ## Escolhendo para quem vai uma ação
 
@@ -56,9 +56,9 @@ barões do planeta que você indicou.
 
 Toda opção de Diplomacia que indica um reino aceita a mesma lista: ofereça
 um tratado a vários reinos de uma vez, ou declare guerra a vários. Ali o `?`
-mostra as suas relações em vez do placar. Marque um único reino e você terá
-a negociação completa com ele — pode aceitar a oferta dele ou romper o pacto
-que vocês têm.
+mostra as suas relações em vez do placar. Marque um único reino e você
+negocia com ele: você propõe o pacto, ou o aceita se aquele reino já o
+ofereceu a você. Para encerrar um pacto, use Declaração de Guerra.
 
 As letras pertencem aos reinos, não às linhas, então pode faltar uma letra
 na lista: ou ela é a sua, ou é de um reino que caiu. Um reino guarda a sua
@@ -81,4 +81,4 @@ essa marca. Ela some quando a pessoa se desconecta, e também alguns minutos
 depois da última tecla dela, então alguém parado numa tela pode sumir da
 lista sem ter saído.
 
-Pressione `?` num menu para abrir esta ajuda.
+Num menu que lista Ajuda, pressione `?` para abrir esta ajuda.

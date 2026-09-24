@@ -10,21 +10,17 @@ title: 'Belastingen, steun en oproer'
 Uw belastingtarief bepaalt hoeveel goud u van uw volk int, en het bepaalt
 hun stemming.
 
-De steun van het volk beweegt elke beurt naar een doel dat door uw
-belastingtarief wordt bepaald. Een gestaag, gematigd tarief houdt de steun
-bijna op zijn hoogst. Hoge belastingen duwen de steun omlaag.  Lage steun
-snijdt fors in uw kustinkomsten (toerisme).
+Elke beurt beïnvloedt uw belastingtarief de steun van het volk. Een laag
+tarief verhoogt die, een hoog tarief verlaagt die, en een tarief daartussen
+laat die gelijk. Weinig steun verlaagt uw inkomsten uit kustregio's
+(toerisme) sterk.
 
 Oproer wordt waarschijnlijker naarmate uw belastingtarief boven een veilig
 niveau klimt. Een oproer laat uw steun instorten en jaagt een deel van uw
 bevolking weg. Verhoog de belasting met beleid.
 
-Belastingen bepalen ook hoeveel mensen uw rijk kan herbergen. Een laag
-tarief laat het er veel meer dragen, een hoog tarief veel minder, en boven
-een straffend tarief vertrekken mensen nog sneller - zie Bevolking voor de
-drempel. Een rijk dat al krimpt, verliest sneller mensen naarmate het
-zwaarder belast. Met steun werkt het net zo: hoe hoger die staat, hoe meer
-mensen uw land kan herbergen.
+Belastingen en steun van het volk bepalen ook hoeveel mensen uw rijk kan
+herbergen. Zie Bevolking.
 
 ## De belasting van de Queen Royale
 
@@ -32,9 +28,10 @@ De koningin neemt elke beurt een deel van wat u verdient. U mag haar minder
 betalen dan zij vraagt, maar een te lage betaling kost u steun van het volk.
 
 Elke munt die zij int gaat in haar schatkist, en een deel daarvan geeft zij
-terug. Zij betaalt u de eerste keer dat u elke dag speelt: 2% van de
-schatkist, of 7% zodra die meer dan 100 miljoen goud bevat. Een rijk dat nog
-onder de bescherming voor nieuwe rijken valt krijgt hoogstens 1 miljoen.
+terug. Zij betaalt u de eerste keer dat u elke dag speelt: een klein deel
+van de schatkist, en een groter deel zodra de schatkist groot wordt. Een
+rijk dat nog onder de bescherming voor nieuwe rijken valt krijgt hoogstens 1
+miljoen.
 
 Alle baronnen putten uit dezelfde schatkist, en elke teruggave maakt hem een
 beetje leger. Wie op een dag als eerste speelt, krijgt het grootste deel,

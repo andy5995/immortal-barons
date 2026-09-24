@@ -7,10 +7,10 @@ title: Patrimônio
 
 # Patrimônio
 
-O Patrimônio é a sua pontuação geral. É por ele que todos os impérios são
-classificados (veja Placar).
+O Patrimônio é o valor do que o seu reino possui. Ele aparece ao lado dos
+seus Pontos na tela Ver o Placar.
 
-Ele conta sobretudo a sua terra e a sua força militar. Ouro, comida, gente e
-dívida não entram na conta. Então um império rico com pouca terra ou pouco
-exército ainda fica mal colocado, e um empréstimo não lhe custa
-posição. Para subir na classificação, tenha terra e um exército forte.
+Ele conta as suas regiões, as suas unidades militares e os seus agentes
+secretos. Ouro, comida, gente e dívida não entram na conta. Então um império
+rico com poucas regiões ou unidades ainda tem Patrimônio baixo, e um
+empréstimo não baixa o seu Patrimônio.

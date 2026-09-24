@@ -24,15 +24,19 @@ von 0 bis 10 ein, und der Regler richtet sie aus:
 Das Ziel wandert im Flug um eine Stufe nach oben oder unten, und etwa jeder
 zehnte Abschuss missachtet den Regler ganz und trifft, was ihm beliebt. Eine
 Einstellung ist also eine Neigung, kein Versprechen: 4 geht etwa in der
-Hälfte der Fälle auf Militärbasen, während 5 etwa in drei von vier Fällen
-auf Luftwaffenbasen geht, weil 5 und 6 beide dorthin weisen.  Richten Sie 5
-auf einen Baron, von dem Sie wissen, dass er eine große Luftwaffe hält.
+Hälfte der Fälle auf Militärbasen, während 5 in mehr als zwei von drei
+Fällen auf Luftwaffenbasen geht, weil 5 und 6 beide dorthin weisen. Der
+Regler läuft an seinen Enden über: 10 kann auf 0 landen und 0 auf
+10. Richten Sie 5 auf einen Baron, von dem Sie wissen, dass er eine große
+Luftwaffe hält.
 
-Darüber hinaus bleibt die Rakete ein Glücksspiel. Die meisten Abschüsse
-bewirken nichts: Sie verfehlt, sie versagt, oder die SDI des Feindes holt
-sie herunter. Sie kann auch nach hinten losgehen - hält der Feind ein sehr
-großes Heer an Soldaten, kann die Rakete umkehren und Ihr eigenes Reich
-treffen.
+Die Rakete bleibt darüber hinaus ein Glücksspiel. Etwa jeder zehnte Abschuss
+versagt, und die SDI des Feindes kann sie abschießen. Sie kann auch über dem
+Ziel zerbrechen und keinen Schaden anrichten. Je größer das Soldatenheer des
+Feindes, desto öfter geschieht das.  Ein Zerbrechen schadet Ihnen nicht,
+hilft aber dem Feind: Der Niederschlag gibt ihm neue Regionen, 10% bis 19%
+der Regionen, die er schon hält. Die Art der neuen Regionen wählt er in
+seinem nächsten Zug.
 
 Ihr Sysop entscheidet, wie der Regler gesetzt wird. Normalerweise wählen Sie
 ihn selbst, aber das Spiel kann so eingerichtet werden, dass es jedes Mal

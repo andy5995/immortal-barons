@@ -8,6 +8,7 @@ title: 'Minar os Investimentos'
 # Minar os Investimentos
 
 Minar os Investimentos é uma operação interplanetária, no menu de Operações
-Especiais. Ela prejudica os investimentos bancários pendentes de todos os
-reinos de outro planeta, cortando cerca de um quarto do dinheiro que eles
-teriam de volta.
+Especiais. Ela prejudica os investimentos bancários de todos os reinos de
+outro planeta que vencem em poucos dias, cortando alguns por cento do
+dinheiro que eles teriam de volta. A maioria dos ataques é repelida antes de
+chegar e não faz nada.

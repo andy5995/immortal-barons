@@ -22,17 +22,11 @@ hindurch, selbst wenn Sie eines seiner benannten Ziele sind.
 
 ## Wie stark er ist
 
-Die Stärke ist die Finanzierung, verteilt über Ihr Land, nicht die
-Finanzierung allein:
-
-    Stärke% = die Wurzel aus (Finanzierung / (10 x (Regionen + 1)))
-
-gedeckelt bei 100%. Zweierlei folgt daraus. Jede Region, die Sie nehmen,
-dünnt Ihren eigenen Schild aus, derselbe Topf, der ein kleines Reich gut
-schützt, ist über einem großen also fast nutzlos. Und jedes weitere Prozent
-kostet mehr als das vorige: Bei über 8.000 Regionen verlangt das erste 1%
-etwa 80.000 Gold im Topf, während der Weg von 9% auf 10% weitere 1,5
-Millionen verlangt.
+Die Stärke hängt von der Finanzierung ab und davon, wie viele Regionen Sie
+halten. Dieselbe Finanzierung gibt einem großen Reich einen schwächeren
+Schild als einem kleinen, und jede Region, die Sie erobern, macht Ihren
+eigenen Schild dünner. Jedes weitere Prozent Stärke kostet mehr als das
+vorige.
 
 ## Die Finanzierung
 

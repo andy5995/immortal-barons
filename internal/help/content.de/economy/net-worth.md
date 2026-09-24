@@ -7,9 +7,10 @@ title: Vermögen
 
 # Vermögen
 
-Vermögen
+Das Vermögen ist der Wert dessen, was Ihr Reich besitzt. Es steht neben
+Ihren Punkten auf dem Bildschirm Punkte ansehen.
 
-Es zählt vor allem Ihr Land und Ihre militärische Stärke. Gold, Nahrung,
-Menschen und Schulden zählen überhaupt nicht. Ein reiches Reich mit wenig
-Land oder Armee steht also trotzdem niedrig, und ein Kredit kostet Sie
-keinen Rang. Um aufzusteigen, halten Sie Land und eine starke Armee.
+Es zählt Ihre Regionen, Ihre militärischen Einheiten und Ihre verdeckten
+Agenten. Gold, Nahrung, Menschen und Schulden werden nicht gezählt. Ein
+reiches Reich mit wenigen Regionen oder Einheiten hat also trotzdem ein
+geringes Vermögen, und ein Kredit senkt Ihr Vermögen nicht.

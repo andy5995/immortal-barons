@@ -10,13 +10,13 @@ title: 'Agentes Secretos'
 Agentes são os seus espiões. Eles executam operações secretas — espionagem,
 sabotagem, bombardeio de alvos inimigos, suborno e mais.
 
-Agentes são o que você gasta, não com o que você vence. Cada operação
-precisa de um, e uma operação que falhe custa esse agente. Sozinhos, os seus
-agentes não mudam a sua chance de sucesso, e os do alvo também não — o
-tópico de Operações Secretas cobre o que muda. Onde a quantidade pesa é ao
-lado de um tratado de Aliança de Inteligência ou de Prevenção ao Terrorismo,
-que emprestam os agentes de um aliado a um dos lados da conta.
+Você gasta agentes em operações. Cada operação precisa de um agente, e uma
+operação que falha o perde. No seu próprio planeta, o número de agentes de
+cada lado não muda a sua chance de sucesso, a não ser que um tratado some os
+agentes de um aliado. O tópico de Operações Secretas explica o que
+muda. Contra operações terroristas entre planetas, os agentes do alvo o
+ajudam a se defender.
 
-O que um estoque de agentes lhe compra é fôlego: uma sequência de fracassos
-não deixa você sem poder agir. Agentes não lutam em batalhas comuns. Veja o
-tópico de Operações Secretas para o que eles podem fazer.
+Um grande estoque de agentes deixa você continuar agindo depois de vários
+fracassos. Agentes não lutam em batalhas comuns. Veja o tópico de Operações
+Secretas para o que eles podem fazer.

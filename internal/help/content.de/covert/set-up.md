@@ -7,7 +7,10 @@ title: Hineinlegen
 
 # Hineinlegen
 
-Hineinlegen bringt das Ziel und einen seiner Partner im Vollen
-Verteidigungsbündnis dazu, zu glauben, der jeweils andere habe den Krieg
-erklärt. Ihr Bündnis wird nichtig. Nutzen Sie es, um einem Feind, den Sie
-angreifen wollen, den Verteidigungspakt abzustreifen.
+Hineinlegen bringt das Ziel und einen seiner Vertragspartner dazu, zu
+glauben, der andere habe den Krieg erklärt. Jeder Vertrag zwischen den
+beiden wird aufgehoben. Hat das Ziel ein volles Verteidigungsbündnis, wird
+dieser Partner gewählt. Ihr Agent muss beide Reiche täuschen, daher
+scheitert Hineinlegen öfter als die anderen einfachen Operationen. Nutzen
+Sie es, um einen Verteidigungspakt zu beenden, bevor Sie einen Feind
+angreifen.

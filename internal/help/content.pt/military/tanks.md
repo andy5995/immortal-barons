@@ -8,8 +8,8 @@ title: Tanques
 # Tanques
 
 Tanques são a unidade de uso geral mais forte, poderosos no ataque e na
-defesa. Um tanque vale três soldados e meio sozinho. Com um Quartel-General
-pronto, vale quatro e meio, tanto no ataque quanto na defesa.
+defesa. Numa batalha no seu próprio planeta, um tanque vale três soldados e
+meio.  Com um Quartel-General pronto, vale quatro e meio.
 
 Eles custam muito para comprar e pouco para manter. Um exército de tanques é
 caro de montar e barato de sustentar, então num jogo longo os tanques são a

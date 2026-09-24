@@ -8,23 +8,25 @@ title: 'Durch die Menüs navigieren'
 # Durch die Menüs navigieren
 
 Drücken Sie eine Taste zur Auswahl. Sie drücken nicht die Eingabetaste, um
-einen Menüpunkt zu wählen. Jeder Punkt zeigt seine Taste in Klammern, wie
-`(1)`. Drücken Sie diese Taste, und er wird sofort ausgeführt.
+einen Menüpunkt zu wählen. Jeder Punkt zeigt seine Taste in runden Klammern,
+wie `(1)`. Drücken Sie diese Taste, und er wird sofort ausgeführt.
 
-Jedes Menü verlassen Sie mit der Taste `0`, beschriftet "Quit". In einem
-Zugmenü (Ausgaben, Angriff, Verdeckt, Handel) bringt Quit Sie zum nächsten
-Schritt Ihres Zuges; Sie können erst in Ihrem nächsten Zug zu diesem Menü
-zurückkehren. In einem Nebenmenü (etwa der Bank oder dem Systemmenü) bringt
-Quit Sie dorthin zurück, wo Sie waren.
+Jedes Menü verlassen Sie mit der Taste `0`, beschriftet "Beenden". In einem
+Zugmenü (Ausgaben, Angriff, Verdeckt, Handel) bringt Beenden Sie zum
+nächsten Schritt Ihres Zuges, und der Zug kehrt nicht zu diesem Schritt
+zurück. In einem Nebenmenü (etwa der Bank oder dem Systemmenü) bringt
+Beenden Sie dorthin zurück, wo Sie waren.
 
 Das Systemmenü öffnet sich mit der Taste `*` im Ausgabenmenü. Es enthält
 zusätzliche Optionen wie Einstellungen, Steuersatz festlegen und Anweisungen
 anzeigen.
 
-Eingabe ohne weitere Taste wählt ebenfalls Beenden - die Eingabezeile zeigt
-\"Beenden\", damit Sie sehen, was Eingabe bewirkt. In einem Zugmenü
-geschieht das nur, wenn Sie \"Mit Enter das Kaufmenü verlassen\" in den
-Einstellungen einschalten; in einem Nebenmenü wählt Eingabe immer Beenden.
+Die Eingabetaste ohne weitere Taste wählt ebenfalls Beenden. Die
+Eingabezeile zeigt "Beenden", damit Sie sehen, was die Eingabetaste
+bewirkt. Im Menü Ausgaben geschieht das nur, wenn Sie "Mit Enter das
+Kaufmenü verlassen" in den Einstellungen einschalten. Im Startmenü wählt die
+Eingabetaste Spielen, solange Sie noch Züge haben. In jedem anderen Menü
+wählt die Eingabetaste immer Beenden.
 
 Der Hilfebrowser und andere Themenlisten bewegen eine Markierung mit den
 Pfeiltasten: Eingabe wählt die markierte Zeile, das Tippen einiger
@@ -40,9 +42,8 @@ eine Zahl von Soldaten, einen Reichsnamen, eine Zeile einer Nachricht -,
 löscht die Rücktaste das letzte Zeichen und **Strg-U löscht die ganze
 Antwort**, so dass Sie ohne Eingetipptes wieder an der Eingabezeile
 stehen. Das geht schneller, als die Rücktaste über einer vertippten
-1000000000 gedrückt zu halten, und es ist eine eigene Ergänzung von IB; das
-Original kennt keine solche Taste. Im Nachrichteneditor löscht sie die
-Zeile, in der Sie stehen, nicht die Nachricht - das tut weiterhin `/C`.
+1000000000 gedrückt zu halten. Im Nachrichteneditor löscht sie die Zeile, in
+der Sie stehen, nicht die Nachricht - das tut weiterhin `/C`.
 
 ## Wählen, an wen eine Aktion geht
 
@@ -60,8 +61,9 @@ Eingabezeile für die Barone auf dem genannten Planeten.
 Jede Diplomatie-Option, die ein Reich benennt, nimmt dieselbe Liste: Bieten
 Sie mehreren Reichen zugleich einen Vertrag an, oder erklären Sie mehreren
 den Krieg. Dort zeigt `?` Ihre Beziehungen statt der Punkte. Markieren Sie
-nur ein Reich, erhalten Sie die volle Verhandlung mit ihm - Sie können sein
-Angebot annehmen oder den Pakt brechen, den Sie halten.
+nur ein Reich, verhandeln Sie mit ihm: Sie schlagen den Pakt vor, oder Sie
+nehmen ihn an, wenn dieses Reich ihn Ihnen schon angeboten hat. Um einen
+Pakt zu beenden, verwenden Sie die Kriegserklärung.
 
 Die Buchstaben gehören den Reichen, nicht den Zeilen, daher kann ein
 Buchstabe in der Liste fehlen: Er ist entweder Ihr eigener oder gehört einem
@@ -85,4 +87,4 @@ trägt es nie. Es verschwindet, wenn er sich abmeldet, und auch einige
 Minuten nach seinem letzten Tastendruck, so dass jemand, der auf einem
 Bildschirm verweilt, von der Liste fallen kann, ohne gegangen zu sein.
 
-Drücken Sie `?` in einem Menü, um diese Hilfe zu öffnen.
+In einem Menü, das Hilfe anbietet, öffnet `?` diese Hilfe.

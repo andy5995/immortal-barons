@@ -14,11 +14,11 @@ custa esse agente.
 O que os agentes NÃO fazem é mudar as suas chances. A chance de uma operação
 dar certo é definida pela própria operação: as mais simples acertam pouco
 mais da metade das vezes, as mais difíceis menos. Seus agentes não mudam
-nada nisso, e os do alvo também não. Três coisas mudam: um agente subornado
-dentro do alvo dobra a sua chance contra aquele reino, um reino que expôs o
-seu agente desvia nove em cada dez tentativas suas, e um tratado de Aliança
-de Inteligência ou de Prevenção ao Terrorismo empresta os agentes de um
-aliado ao seu lado ou ao do alvo. Veja Agentes.
+nada nisso, e os do alvo também não. Três coisas mudam. Um agente subornado
+dentro do alvo melhora a sua chance contra aquele reino. Um reino que expôs
+o seu agente desvia a maioria das suas tentativas (veja Expor as Operações
+Inimigas). Uma Aliança de Inteligência empresta os agentes do seu parceiro
+ao seu lado. Os tratados do próprio alvo não contam. Veja Agentes Secretos.
 
 Cada operação também custa ouro. O menu mostra o preço ao lado de cada uma,
 e o rodapé mostra quanto ouro e quantos agentes você tem. Você paga o ouro
@@ -71,5 +71,6 @@ tratam das Operações Especiais Interplanetárias, que são dirigidas a outro
 planeta e precisam de bombardeiros para levar a carga; cada um deles avisa.
 
 O menu de Operações Secretas aparece durante o seu turno, antes dos menus de
-Gastos e de Ataque. Se você não o vir, ligue "Abrir o Menu Secreto" no menu
-de Preferências.
+Gastos e de Ataque, quando você tem pelo menos um agente e "Abrir o Menu
+Secreto" está ligado no menu de Preferências. Enquanto você tiver um agente,
+também pode abri-lo pelo menu do Sistema.
