@@ -43,7 +43,8 @@ func GameLoop(s session.Session, w *game.World, handle string, t Term) (err erro
 }
 
 // collectTurnIncome runs the turn-start block — industry production, income
-// collection, and the per-turn region-cap reset — guarded so a turn REPLAYED
+// collection, the bank's per-turn payments, and the per-turn region-cap reset —
+// guarded so a turn REPLAYED
 // after an idle-boot does not collect income (or reset the region cap) twice
 // (#10). The mutation and the IncomeCollected flag commit in one transaction, so
 // a boot leaves them consistent. Returns false if the empire vanished mid-turn
