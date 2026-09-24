@@ -45,10 +45,9 @@ type TimeCheck struct {
 // It adds at most one small packet per board per run, and none for a board
 // that already has something addressed to it in the same run; each probe then
 // draws an echo back. -full is a planetary run too, on every caller's launch, so
-// a board using it probes once per caller. That is kept on purpose: -full can be
-// a board's only transport, and switching probes off there would leave such a
-// board unmeasured. Every run already broadcasts scores, so the extra traffic is
-// small.
+// a board using it probes once per caller. That is kept on purpose: -full exists
+// to exchange packets when a caller enters, and a probe is part of that
+// exchange. Every run already broadcasts scores, so the extra traffic is small.
 func (w *World) PingTravelTimes() {
 	if w.Config.BoardID == "" {
 		return
