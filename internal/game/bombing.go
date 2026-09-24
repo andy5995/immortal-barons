@@ -99,7 +99,9 @@ func (w *World) bombRoutesEffect() (hit int) {
 		for i := range to.TradeDeals {
 			deal := &to.TradeDeals[i]
 			from := w.FindByName(deal.From)
-			if w.rng.Intn(BombRoutesDealHitOdds) != 0 {
+			// Random(3) = 0 spares the deal (BRE.OVR ovr_050dfb +0x246..+0x256);
+			// IB had the test inverted until 2026-09-24 and hit one deal in three.
+			if w.rng.Intn(BombRoutesDealEscapeOdds) == 0 {
 				continue
 			}
 			if from != nil && w.HasTreaty(from, to, protectiveTrade) {

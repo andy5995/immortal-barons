@@ -5664,7 +5664,7 @@ and each carries a gameplay effect (#11 wired the last two):
 
   **IB follows all of it** (`bombingLands`, `bombRoutesEffect`,
   `bombDealBasket`; the three rolls are `BombingLandOdds`,
-  `BombRoutesDealHitOdds` and `BombRoutesKeptPctMin`/`Spread` in `balance*.go`).
+  `BombRoutesDealEscapeOdds` and `BombRoutesKeptPctMin`/`Spread` in `balance*.go`).
   A strike wrecks the goods in pending `TradeDeal`s rather than severing any
   standing agreement, and the guard reads the deal's own two parties, so holding
   Protective Trade with the realm you are bombing buys you nothing and a deal

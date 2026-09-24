@@ -713,9 +713,11 @@ func TestBombTradeRoutesVoidsTwoStrikesInThree(t *testing.T) {
 				landed++
 			}
 		}
-		// 1 in 9 of 900 is 100, with a standard deviation of 9.4; 1 in 3 is 300.
-		if landed < 60 || landed > 145 {
-			t.Errorf("seed %d: %d of %d strikes landed, expected about 100 (1 in 9)", seed, landed, trials)
+		// A strike lands 1 in 3 and a landed strike hits a deal 2 in 3, so 2 in 9
+		// of 900 is 200, with a standard deviation of 12.5. IB used to hit only 1
+		// deal in 3 (1 in 9, about 100), which this range rules out.
+		if landed < 150 || landed > 250 {
+			t.Errorf("seed %d: %d of %d strikes landed, expected about 200 (2 in 9)", seed, landed, trials)
 		}
 	}
 }

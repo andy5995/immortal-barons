@@ -240,9 +240,9 @@ const BombingLandOdds = 3
 // that lets one deal in three escape, and `trunc(qty x (random(5)+5) / 100)` on
 // each of the deal's goods quantities, which leaves 5-9% and destroys the rest.
 const (
-	BombRoutesDealHitOdds   = 3 // 1-in-this a given deal is hit; the rest escape
-	BombRoutesKeptPctMin    = 5 // a hit deal keeps this percent of each good...
-	BombRoutesKeptPctSpread = 5 // ...plus random(this), so 5-9% survives
+	BombRoutesDealEscapeOdds = 3 // 1-in-this a given deal escapes; the rest are hit
+	BombRoutesKeptPctMin     = 5 // a hit deal keeps this percent of each good...
+	BombRoutesKeptPctSpread  = 5 // ...plus random(this), so 5-9% survives
 )
 
 // MarketCommissionPct is the cut (percent) the general Trading Market takes from
