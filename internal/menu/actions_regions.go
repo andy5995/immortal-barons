@@ -77,26 +77,28 @@ func printRegionTable(s session.Session, t Term, p *game.Empire, advisors bool) 
 // label (the captured-region picker uses BRE's "[N Regions left] Your choice?",
 // distinct from the plain "Your choice?" of the sell/buy screens).
 func promptRegionType(s session.Session, prompt string) int {
-	return promptRegionChoice(s, prompt, false)
+	return promptRegionChoice(s, prompt, false, "")
 }
 
 // promptRegionChoice is the picker's key loop. extras adds the '*' Advisors key
 // and the '?' redisplay key, for the screens that offer them.
-func promptRegionChoice(s session.Session, prompt string, extras bool) int {
+//
+// hint is for a picker that cannot be left: when set, Enter, '0' and any other
+// key that is not a region letter print it and ask again, instead of returning
+// or being ignored. A player who reads "[12 Regions left]" as asking how many
+// will type a number, and without the hint the prompt only redrew itself: a
+// caller on v0.1.2 was stuck there until the idle timeout dropped them. It is
+// printed once per line typed, so "12" and Enter, which a line-mode client
+// sends in one burst, is answered once rather than three times.
+func promptRegionChoice(s session.Session, prompt string, extras bool, hint string) int {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
+	hinted := false
 	for {
 		r, err := readKey(s)
 		if err != nil {
 			return inputEndedChoice
 		}
-		if r == '\r' || r == '\n' { // Enter leaves, like '0'
-			fmt.Fprint(s, "\n")
-			return -1
-		}
-		if r == '0' {
-			fmt.Fprint(s, "0\n")
-			return -1
-		}
+		enter := r == '\r' || r == '\n'
 		if extras && r == '?' {
 			fmt.Fprint(s, "?\n")
 			return redisplayChoice
@@ -105,15 +107,43 @@ func promptRegionChoice(s session.Session, prompt string, extras bool) int {
 			fmt.Fprint(s, "*\n")
 			return advisorsChoice
 		}
-		u := byte(unicode.ToUpper(r))
-		for i, reg := range game.BuyableRegions {
-			if reg.Key == u {
-				fmt.Fprintf(s, "%c\n", u) // echo the single keypress; no Enter needed
-				return i
+		if i := regionKeyIndex(r); i >= 0 {
+			fmt.Fprintf(s, "%c\n", game.BuyableRegions[i].Key) // echo the single keypress; no Enter needed
+			return i
+		}
+		if hint != "" && (enter || r >= ' ') {
+			if !hinted {
+				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, WrapIndented(hint, "  "), ansi.Reset)
+				fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
 			}
+			hinted = !enter
+			if enter {
+				drainInput(s) // the LF of a CR LF is the same Enter
+			}
+			continue
+		}
+		if enter { // Enter leaves, like '0'
+			fmt.Fprint(s, "\n")
+			return -1
+		}
+		if r == '0' {
+			fmt.Fprint(s, "0\n")
+			return -1
 		}
 		// invalid key — ignore and wait for a valid region letter, Enter, or 0
 	}
+}
+
+// regionKeyIndex is the BuyableRegions index whose key r is, in either case, or
+// -1 when r picks no region.
+func regionKeyIndex(r rune) int {
+	u := byte(unicode.ToUpper(r))
+	for i, reg := range game.BuyableRegions {
+		if reg.Key == u {
+			return i
+		}
+	}
+	return -1
 }
 
 // advisorsChoice is returned by promptBuyRegionType when the player picks
@@ -134,7 +164,7 @@ const (
 // and '?' to redisplay the list, which is drawn on entry and then on demand so
 // repeat purchases do not rescroll it.
 func promptBuyRegionType(s session.Session) int {
-	return promptRegionChoice(s, tr(s, "Your choice?"), true)
+	return promptRegionChoice(s, tr(s, "Your choice?"), true, "")
 }
 
 // buyLand is the Buy Regions action. It loops the region-type picker so a
@@ -257,8 +287,9 @@ func allocateDecontaminated(s session.Session, w *ctx, n int) {
 
 // allocateRegions reuses the Buy Regions table and picker as an allocate-N loop
 // (no gold): the player assigns n untyped regions across types until none
-// remain. There is no quitting it — '0' and Enter re-prompt, because untyped
-// land is not a state the empire can hold. BRE does the same: its picker
+// remain. There is no quitting it — '0', Enter and any other key that is not a
+// region letter print a hint and ask again, because untyped land is not a state
+// the empire can hold. BRE does the same: its picker
 // (select_regions_to_lose, BRE.OVR 0x030ebb) sends CR, '?' and '*' alike to the
 // bottom of the loop at +0x124c, which reloads the remaining count and jumps
 // back to the prompt unless it has reached zero. IB used to treat '0' as quit
@@ -293,7 +324,8 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 		// "How many <Type> regions? (0; N)" — distinct from the buy/sell screens.
 		// The Advisors and redisplay keys are the buy screen's, and BRE offers
 		// them here too: one routine draws both region screens.
-		t := promptRegionChoice(s, fmt.Sprintf(tr(s, "[%d Regions left] Your choice?"), remaining), true)
+		t := promptRegionChoice(s, fmt.Sprintf(tr(s, "[%d Regions left] Your choice?"), remaining), true,
+			fmt.Sprintf(tr(s, "Press the letter of a region type to place the remaining %d."), remaining))
 		if t == advisorsChoice {
 			advisorsMenu(s, w)
 			showTable()
@@ -305,9 +337,6 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 		}
 		if t == inputEndedChoice { // the stream is gone: assign the rest as Coastal
 			break
-		}
-		if t < 0 { // 0/Enter: not an answer while land is still untyped
-			continue
 		}
 		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", game.BuyableRegions[t].Name), remaining, remaining)
 		if got <= 0 {

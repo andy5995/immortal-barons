@@ -495,6 +495,12 @@ Key Name            Owned
 How many Coastal regions? (0; 15)
 ```
 
+**IB diverges here, deliberately.** At `Your choice?` a key that is not a
+region letter — a digit, `0`, Enter — prints `Press the letter of a region
+type to place the remaining N.` and asks again. BRE ignores the key or redraws
+the prompt without a word, and a player who read `[N Regions left]` as asking
+how many was stuck at it on an IB v0.1.2 board until the idle timeout.
+
 ---
 
 ## Attack Pirates

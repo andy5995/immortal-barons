@@ -137,6 +137,26 @@ func TestAllocateCapturedZeroDoesNotQuit(t *testing.T) {
 	}
 }
 
+// A number typed at the captured-region prompt is told what the prompt wants,
+// rather than silently redrawing it: a player read "[N Regions left]" as a
+// question about how many and was stuck until the idle timeout.
+func TestAllocateCapturedExplainsANumber(t *testing.T) {
+	w := newWorld()
+	beforeMtn := w.Player().Regions.Mountain
+	// A typed line, a bare Enter, then the real answer: one hint per line, not
+	// one per key.
+	f := &fakeSession{keys: []rune("12\r\rM10\r")}
+	allocateCaptured(f, w, 10)
+	out := stripANSI(f.out.String())
+	hint := "Press the letter of a region type to place the remaining 10."
+	if n := strings.Count(out, hint); n != 2 {
+		t.Errorf("hint printed %d times, want 2 (once for \"12\", once for the bare Enter):\n%s", n, out)
+	}
+	if got := w.Player().Regions.Mountain; got != beforeMtn+10 {
+		t.Errorf("Mountain = %d, want %d: the picker did not finish after the hint", got, beforeMtn+10)
+	}
+}
+
 // The macro-slot list is framed top and bottom by BRE's inset rule — a
 // double-line (═) segment set into a single-line rule (from a live capture).
 func TestWriteMacrosFramesListWithInsetRule(t *testing.T) {
