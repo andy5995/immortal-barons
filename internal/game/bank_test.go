@@ -74,8 +74,8 @@ func TestInvestmentMaturesInMaintenance(t *testing.T) {
 	if e.Investments[0].MaturesDay != 99 {
 		t.Errorf("remaining investment: want MaturesDay 99, got %d", e.Investments[0].MaturesDay)
 	}
-	if e.Gold < 1150 {
-		t.Errorf("Gold should include matured return of 1150: got %d", e.Gold)
+	if e.InvestDue != 1150 {
+		t.Errorf("maintenance: InvestDue=%d, want 1150 due and not yet paid", e.InvestDue)
 	}
 }
 
@@ -104,7 +104,7 @@ func TestInvestRateDrift(t *testing.T) {
 		w := NewWorldSeed(DefaultConfig(), 1)
 		w.Config.StdInvestRate = 35
 		for _, name := range []string{"a", "b"} {
-			w.AddHuman(name, "Realm "+name).InvestReturnsToday = c.dueEach
+			w.AddHuman(name, "Realm "+name).InvestDue = c.dueEach
 		}
 		w.InvestRate = c.rate
 		w.adjustInvestRate()
@@ -118,11 +118,11 @@ func TestInvestRateDrift(t *testing.T) {
 // one heavy investor among idle realms moves the rate less than alone.
 func TestInvestRateDriftAveragesPerRealm(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
-	w.AddHuman("a", "Heavy").InvestReturnsToday = 300_999_999 // 300
+	w.AddHuman("a", "Heavy").InvestDue = 300_999_999 // 300
 	w.AddHuman("b", "Idle")
 	w.AddHuman("c", "Idle Too")
 	gone := w.AddHuman("d", "Fallen")
-	gone.Alive, gone.InvestReturnsToday = false, 2_000_000_000
+	gone.Alive, gone.InvestDue = false, 2_000_000_000
 	w.InvestRate = 50
 	w.adjustInvestRate() // 300 / 3 = 100 million: +0.1
 	if w.InvestRate != 51 {
@@ -138,18 +138,6 @@ func TestSteadyInvestRate(t *testing.T) {
 	w.adjustInvestRate()
 	if w.InvestRate != 60 {
 		t.Errorf("steady rate %d, want 60", w.InvestRate)
-	}
-}
-
-func TestPendingInvested(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("tester", "Testland")
-	e.Investments = []Investment{
-		{Amount: 100, MaturesDay: 5},
-		{Amount: 250, MaturesDay: 10},
-	}
-	if got := w.PendingInvested(e); got != 350 {
-		t.Errorf("PendingInvested: want 350, got %d", got)
 	}
 }
 
@@ -499,24 +487,57 @@ func TestNoEndOfTurnDepositLeavesGoldInHand(t *testing.T) {
 	}
 }
 
-// Daily maintenance records what the day's matured investments paid, because
-// every turn of that day reports the same figure (cap/eots-ibbs-01.cap).
-func TestMaintenanceRecordsTheDaysInvestmentReturns(t *testing.T) {
+// A day's matured returns are paid a share per turn played, the same share on
+// every turn (cap/eots-ibbs-01.cap: 14,699,020 on all ten turns of one day).
+// BINARY-VERIFIED: run_daily_maintenance sets the share to the day's returns
+// over the turns per day, and process_economic_production pays one per turn.
+func TestInvestmentReturnsPayAShareEachTurn(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.TurnsPerDay = 10
 	w.LastMaintDate = "2026-01-01"
 	e := w.AddHuman("tester", "Testland")
 	e.LastPlayed = "2026-01-01"
 	e.Gold = 0
 	e.Investments = []Investment{
 		{Amount: 1000, Return: 1150, MaturesDay: 1},
-		{Amount: 2000, Return: 2300, MaturesDay: 1},
+		{Amount: 2000, Return: 2305, MaturesDay: 1},
 		{Amount: 500, Return: 550, MaturesDay: 99},
 	}
 
 	w.DailyMaintenance("2026-01-02")
+	if e.InvestDue != 3455 || e.InvestShare != 345 {
+		t.Fatalf("InvestDue=%d InvestShare=%d, want 3455 and 345", e.InvestDue, e.InvestShare)
+	}
+	start := e.Gold // maintenance may pay other things; only the shares count here
+	for turn := 1; turn <= 4; turn++ {
+		w.CollectBankPayments(e)
+		if e.InvestPaid != 345 {
+			t.Errorf("turn %d paid %d, want 345", turn, e.InvestPaid)
+		}
+	}
+	if e.Gold-start != 1380 || e.InvestDue != 2075 {
+		t.Fatalf("after four turns paid=%d InvestDue=%d, want 1380 and 2075", e.Gold-start, e.InvestDue)
+	}
 
-	if e.InvestReturnsToday != 3450 {
-		t.Errorf("InvestReturnsToday = %d, want 3450 — both matured returns, and not the locked one", e.InvestReturnsToday)
+	// Six turns go unplayed. Their 2,075 goes into the hold cut to thousands,
+	// 2,000, and is poured into the next day's payout: 200 a turn.
+	w.DailyMaintenance("2026-01-03")
+	if e.InvestDue != 2000 || e.InvestHeld != 0 || e.InvestShare != 200 {
+		t.Errorf("next day: InvestDue=%d InvestHeld=%d InvestShare=%d, want 2000, 0, 200",
+			e.InvestDue, e.InvestHeld, e.InvestShare)
+	}
+}
+
+// The hold pours into a day only up to the per-date limit; the rest waits.
+func TestInvestmentHoldRespectsTheDateLimit(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	w.GameDay = 5
+	e.InvestHeld = 300_000_000
+	e.Investments = []Investment{{Amount: 1, Return: 1_900_000_000, MaturesDay: 5}}
+	w.matureInvestments(e)
+	if e.InvestDue != 2_000_000_000 || e.InvestHeld != 200_000_000 {
+		t.Errorf("InvestDue=%d InvestHeld=%d, want 2,000,000,000 and 200,000,000", e.InvestDue, e.InvestHeld)
 	}
 }
 

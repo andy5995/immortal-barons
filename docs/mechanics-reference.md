@@ -3574,20 +3574,34 @@ Investments / Loans**, and **View Bank Rates**.
   columns: Date / Investments / Loans Due.
 
   **BRE does not store investments individually at all.** The empire record
-  holds a fixed TEN-SLOT array at `+0x2f5` — ten 32-bit values at stride 4,
-  summed by `run_bank` (`BRE.OVR` 0x0389d6) under a literal bound (`cmp word
-  [bp-0xe],0xa`) to get the total invested. Ten slots against a maximum ten-day
-  term means **a slot is a maturity day, and it holds one accumulated figure**:
-  investing again against a day you already hold adds to that day's figure
-  rather than creating a second record. Since a day is several turns, this is
-  reachable within a single day — invest on one turn and again on a later turn
-  of the same day at the same term, and the two are indistinguishable
-  afterward. It also explains the shape of the money cap above: BRE bounds the
-  *returns maturing on one date*, which is the same unit its storage uses.
+  holds day slots, one 32-bit figure per day from today (slot 0) to ten days
+  out, at `+0x2c1` (eleven slots; read 2026-09-24 from `run_daily_maintenance`,
+  BRE.OVR 0x8c3b-0x8df3, which shifts all eleven down a day). `run_bank` adds
+  an investment's computed **return**, not its principal, to the slot for its
+  maturity day (0x397d6), so investing twice against one day merges the two.
+  That is also why BRE's cap is on the *returns maturing on one date*: it is the
+  unit its storage uses. The **day-slot array at `+0x2f5` is the LOANS**, not
+  the investments (an earlier reading here had it the wrong way round): `run_bank`
+  adds a loan's compounded total to it (0x39084) and sums slots 0-10 of it into
+  the loan ceiling (0x38c44); the daily shift touches a twelfth slot, `+0x321`,
+  that nothing writes.
 
-  Only `+0x2f5`/`+0x2f7` (one dword's halves) appear across the bank code, so
-  there is no parallel array — whether the stored figure is the principal or the
-  computed payout is NOT established here, only that there is one per day.
+  **A day's returns are paid a share per turn**, binary-verified. At daily
+  maintenance whatever the last day's turns did not pay goes into a hold at
+  `+0x2ed`, kept in **thousands** (so up to 999 gold of it is lost); the slots
+  shift, the hold is poured back into the new slot 0 up to the two-billion
+  date limit, and the per-turn share at `+0x2f1` is set to slot 0 over the
+  turns per day, truncated. Each turn played then pays that share into gold in
+  hand after the income lines (`process_economic_production`, BRE.OVR
+  0x34b83), which is why a capture shows the same figure on every turn of a day
+  (`cap/eots-ibbs-01.cap`: 14,699,020 on all ten). A day with turns left
+  unplayed carries their shares into the next day through the hold. The List
+  screen shows today's slot as "Today" and the hold as "In Hold". IB paid the
+  whole day's returns at maintenance until 2026-09-24; it now keeps
+  `InvestDue`, `InvestShare` and `InvestHeld` and pays through `creditGold`.
+  One simplification: where a pour would overflow the date limit, BRE spills the
+  rest into later day slots and IB leaves it in the hold, which reaches the
+  next day's payout either way.
 
   **IB diverges — deliberately, and it stays.** `Empire.Investments` is an
   unbounded slice of individual `Investment` records, each with its own amount,
@@ -3611,7 +3625,7 @@ Investments / Loans**, and **View Bank Rates**.
   sampling "would not fit" — nobody had varied the term:
 
       base    = 10 x min(netWorth, 10,000,000)          { net_worth, 056d:0f43 }
-      base   -= each of the realm's ten outstanding loan slots
+      base   -= each of the realm's eleven loan day slots
       base    = min(base, 2,000,000,000 - outstanding)
       ceiling = trunc( base / (1 + dailyRate)^days )
 

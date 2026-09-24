@@ -207,6 +207,23 @@ empire record (les di,[0x28d8])
                 routine (BRE.EXE 056d:1139) reads it, multiplies by 1000 and
                 divides by 10 x (totalRegions + 1) before the square root; the
                 screen prints it followed by a literal ",000".
+  +0x2c1 .. +0x2ec   eleven int32 INVESTMENT day slots, today (slot 0) to ten
+                     days out. Each holds the RETURNS maturing that day, merged:
+                     run_bank adds the computed return (0x397d6), and
+                     run_daily_maintenance shifts them down a day (0x8c3b).
+  +0x2ed int32  investment HOLD, in thousands: slot 0's unpaid remainder at day
+                end, poured into the next day's slot 0 (0x8c15-0x8df3).
+  +0x2f1 int32  per-turn investment share, slot 0 / turns per day (0x8f44),
+                paid by process_economic_production (0x34b83).
+  +0x2f5 .. +0x324   twelve int32 LOAN day slots; run_bank adds a loan's
+                     compounded total to slot `days` (0x39084) and its ceiling
+                     sums slots 0-10 (0x38c44). Slot 0 is what is being
+                     collected; each day it grows by (max(investRate,
+                     savingsRate) + 60) tenths of a percent before slot 1 is
+                     folded in (0x8e0c). Slot 11 (+0x321) is shifted but never
+                     written.
+  +0x325 int32  per-turn loan installment, max(slot 0 / turns per day, 100)
+                (0x8f8e), taken from gold in hand, capped at it (0x34ca3).
   +0x331 int32  land still available to BUY — the Daily Land Creation allowance.
                 PER-EMPIRE, not a planet-wide pool: 0x12D30 bounds a region
                 purchase against it and 0x12EF9 subtracts the number bought
@@ -214,6 +231,15 @@ empire record (les di,[0x28d8])
                 "No land is available at this time."
 
 config record (les di,[0x28b4])
+  +0x40  int16  Bank (savings) Interest Rate, tenths of a percent per day. Read
+                by the savings step (process_end_of_turn +0x16be) and by the
+                loan rate's max(); run_bank also seeds +0x188 from it if that
+                is zero.
+  +0x44  int16  Standard Investment Rate, tenths of a percent per day
+  +0x188 int16  the floating investment rate, tenths (run_daily_maintenance
+                0x9008-0x92ab moves it; set to +0x44 at reset)
+  +0x3d6 byte   Steady Investment Rate flag: when set the rate is pinned to
+                +0x44 and the daily drift is skipped
   +0x1c  int32  Daily food pool, planet-wide (seeded 0xF4240 = 1,000,000 at
                 game init; buying depletes it, selling replenishes it)
   +0x24  int32  Pool the Queen Royale tax refund is paid out of, planet-wide.

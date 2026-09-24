@@ -40,7 +40,7 @@ func TestIncomeReportShowsBankReturns(t *testing.T) {
 	w := newWorld()
 	p := w.World.FindByOwner("tester")
 	p.LastInterest = 1_234_567
-	p.InvestReturnsToday = 7_654_321
+	p.InvestPaid = 7_654_321
 	p.LoanPaid = 4_321
 
 	s := &fakeSession{keys: []rune("   ")}

@@ -25,8 +25,8 @@ starts with it on), your gold is put in the bank first, so the gold you earned
 this turn earns interest this turn. It goes in after the pirates have had their
 chance at it, so it is no protection against a raid.
 
-The start of your next turn tells you what the bank paid: the interest, and what
-any investment that matured today paid back.
+The start of your next turn tells you what the bank paid: the interest, and your
+share of the investments that matured today.
 
 You can hold at most two billion gold, in hand and the same again in the bank.
 Gold you earn above that is lost. Spend it before you get there.
@@ -56,7 +56,10 @@ a loan comes due, or pay it off early from Cash Relief.
 ## Investments
 
 You can lock gold away as an investment for 2 to 10 days. It pays back your
-gold plus interest when it matures. The interest rate floats — it rises and
+gold plus interest when it matures. The bank pays it out over that day, an equal
+part at the start of each turn you play. If you do not play all your turns, the
+rest is paid on the next day, and anything less than a thousand gold of it is
+lost. The interest rate floats — it rises and
 falls with how much everyone is investing — so check the rate before you commit.
 A common tactic is to keep several investments running at once, each for a
 different length, so one matures every day.

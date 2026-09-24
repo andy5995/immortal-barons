@@ -81,32 +81,45 @@ func ExpectedReturn(amount int64, rate, days int) int64 {
 // in tenths, so they all print through this.
 func PctTenths(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
 
-// PendingInvested is the total principal an empire has locked in investments.
-func (w *World) PendingInvested(e *Empire) int64 {
-	var total int64
-	for _, inv := range e.Investments {
-		total += inv.Amount
-	}
-	return total
-}
-
-// matureInvestments pays out any of e's investments that have reached their
-// maturity day, crediting Return to gold (clamped to MoneyCap) and removing
-// them. Returns the total paid out this call.
-func (w *World) matureInvestments(e *Empire) int64 {
-	var paid int64
+// matureInvestments opens a new day's investment payout for e. BINARY-VERIFIED
+// (run_daily_maintenance, BRE.OVR 0x8bbd-0x8f89): what yesterday's turns left
+// unpaid goes into the hold, cut to whole thousands; the returns maturing
+// today become InvestDue; the hold is poured back into InvestDue up to the
+// per-date limit; and InvestShare, the part each turn pays, is InvestDue over
+// the turns per day. Nothing is paid here — collectInvestShare pays it a turn
+// at a time, so a day's turns left unplayed carry their shares into the hold.
+func (w *World) matureInvestments(e *Empire) {
+	e.InvestHeld += e.InvestDue / 1000 * 1000
+	e.InvestDue = 0
 	var remaining []Investment
 	for _, inv := range e.Investments {
 		if w.GameDay >= inv.MaturesDay {
-			before := e.Gold
-			w.creditGold(e, inv.Return, "a matured investment")
-			paid += e.Gold - before
+			e.InvestDue += inv.Return
 		} else {
 			remaining = append(remaining, inv)
 		}
 	}
 	e.Investments = remaining
-	return paid
+	if room := MaxReturnsPerDate - e.InvestDue; room > 0 && e.InvestHeld > 0 {
+		pour := min(e.InvestHeld, room)
+		e.InvestDue += pour
+		e.InvestHeld -= pour
+	}
+	e.InvestShare = e.InvestDue / int64(max(w.Config.TurnsPerDay, 1))
+}
+
+// collectInvestShare pays one turn's share of the day's matured returns into
+// gold in hand (process_economic_production, BRE.OVR 0x34b83). Returns what
+// reached gold in hand, which the money cap may have trimmed.
+func (w *World) collectInvestShare(e *Empire) int64 {
+	share := min(e.InvestShare, e.InvestDue)
+	if share <= 0 {
+		return 0
+	}
+	e.InvestDue -= share
+	before := e.Gold
+	w.creditGold(e, share, "a matured investment")
+	return e.Gold - before
 }
 
 // steadyInvestRate is the fixed daily rate the league's Standard Investment Rate
@@ -148,7 +161,7 @@ func (w *World) adjustInvestRate() {
 	var millions, realms int64
 	for _, e := range w.Empires {
 		if e.Alive {
-			millions += e.InvestReturnsToday / 1_000_000
+			millions += e.InvestDue / 1_000_000
 			realms++
 		}
 	}
@@ -190,9 +203,10 @@ func (w *World) creditGold(e *Empire, n int64, source string) {
 
 // CollectBankPayments settles the bank's per-turn business at the start of a
 // turn, after the turn's income is in hand, which is where BRE does it
-// (process_economic_production, after the income lines): the day's loan
-// installment is taken from gold. The amount is kept on the empire for the
-// turn's income report.
+// (process_economic_production, after the income lines): a share of the day's
+// matured investments is paid, then the day's loan installment is taken from
+// gold. Both amounts are kept on the empire for the turn's income report.
 func (w *World) CollectBankPayments(e *Empire) {
+	e.InvestPaid = w.collectInvestShare(e)
 	e.LoanPaid = w.collectLoanInstallment(e)
 }

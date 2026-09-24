@@ -106,6 +106,8 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	e.Gold = 4242
 	e.Events = []game.Event{{Text: "hello"}}
 	e.Investments = []game.Investment{{Amount: 1000, Return: 1150, MaturesDay: 5}}
+	e.InvestDue, e.InvestShare, e.InvestHeld = 3455, 345, 2000
+	e.Debt, e.LoanInstallment = 1175, 117
 	w.GameDay = 7
 	w.LastMaintDate = "2026-07-03"
 	w.InvestRate = 42
@@ -134,6 +136,12 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 		inv := ge.Investments[0]
 		if inv.Amount != 1000 || inv.Return != 1150 || inv.MaturesDay != 5 {
 			t.Errorf("Investment fields not preserved: %+v", inv)
+		}
+		// The day's payout and collection run across door sessions.
+		if ge.InvestDue != 3455 || ge.InvestShare != 345 || ge.InvestHeld != 2000 ||
+			ge.Debt != 1175 || ge.LoanInstallment != 117 {
+			t.Errorf("bank day state not preserved: due=%d share=%d held=%d debt=%d installment=%d",
+				ge.InvestDue, ge.InvestShare, ge.InvestHeld, ge.Debt, ge.LoanInstallment)
 		}
 	}
 }

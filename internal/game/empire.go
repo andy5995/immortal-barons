@@ -232,6 +232,14 @@ type Empire struct {
 	TradeDeals     []TradeDeal   // pending barter offers received (respond in the Trading menu)
 
 	Investments []Investment
+	// The day's matured investments, paid out a share per turn
+	// (matureInvestments): InvestDue is what is still to pay today, InvestShare
+	// what one turn pays, and InvestHeld what earlier days left unpaid, kept in
+	// whole thousands and added to the next day's payout. All zero in a save
+	// that predates them, which paid each day's returns in one sum.
+	InvestDue   int64  `json:"investDue,omitempty"`
+	InvestShare int64  `json:"investShare,omitempty"`
+	InvestHeld  int64  `json:"investHeld,omitempty"`
 	Loans       []Loan // active Cash Relief loans (#40), each due on its DueDay
 
 	// Debt is what the bank is collecting now: every loan past its due day, plus
@@ -296,13 +304,12 @@ type Empire struct {
 	// last line of that block, after the food-spoilage line.
 	LastRandomEvent string `json:"lastRandomEvent,omitempty"`
 	// LastInterest is the savings interest credited at the end of the previous
-	// turn and InvestReturnsToday what today's matured investments paid. Both are
-	// reported at the START of a turn, so unlike the transients above they have to
-	// survive the save: the turn that earns them and the turn that shows them are
-	// separate door runs, and the investment payout comes from daily maintenance,
-	// which may be a different process again.
-	LastInterest       int64 `json:"lastInterest,omitempty"`
-	InvestReturnsToday int64 `json:"investReturnsToday,omitempty"`
+	// turn and InvestPaid this turn's share of the day's matured investments.
+	// Both are reported at the START of a turn, so unlike the transients above
+	// they have to survive the save: the turn that earns interest and the turn
+	// that shows it are separate door runs.
+	LastInterest int64 `json:"lastInterest,omitempty"`
+	InvestPaid   int64 `json:"investPaid,omitempty"`
 	// LoanPaid is what this turn's loan installment took from gold in hand, for
 	// the turn's income report (collectLoanInstallment).
 	LoanPaid int64 `json:"loanPaid,omitempty"`

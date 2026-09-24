@@ -285,7 +285,7 @@ func incomeReport(s session.Session, w *ctx) {
 		p.PirateHits = nil
 		p.RaidersThisTurn = raiderSlots(raids)
 		interest = p.LastInterest
-		invested = p.InvestReturnsToday
+		invested = p.InvestPaid
 		loanPaid = p.LoanPaid
 		for i, g := range game.MilitaryGoods {
 			made[i] = *g.Made(p)

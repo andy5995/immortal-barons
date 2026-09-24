@@ -253,10 +253,10 @@ func (w *World) advanceOneDay(today string, rep *MaintReport) {
 		}
 		for _, e := range w.Empires {
 			if e.Alive {
-				// Kept on the empire so every turn of the day reports the same
-				// figure, which is how BRE shows it (cap/eots-ibbs-01.cap: the
-				// one day's 14,699,020 repeats on all ten turns).
-				e.InvestReturnsToday = w.matureInvestments(e)
+				// Paid a share per turn, so every turn of the day reports the
+				// same figure, which is how BRE shows it (cap/eots-ibbs-01.cap:
+				// 14,699,020 on all ten turns of one day).
+				w.matureInvestments(e)
 				w.matureLoans(e)
 			}
 		}

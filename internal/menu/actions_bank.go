@@ -125,11 +125,13 @@ func investFunds(s session.Session, w *ctx) Result {
 // listInvestments shows the player's pending investments and loans in BRE's
 // combined "Date / Investments / Loans Due" table — a row per maturity/due date
 // (sorted), the maturing investment total and the loan total owed on that date.
-// What the bank is collecting now heads the table as BRE's "Today" row.
+// What the bank is paying and collecting today heads the table as BRE's "Today"
+// row, and returns carried over from days with turns left unplayed follow as
+// its "In Hold" row.
 func listInvestments(s session.Session, w *ctx) Result {
 	var invs []game.Investment
 	var loans []game.Loan
-	var debt int64
+	var debt, due, held int64
 	w.Read(func() {
 		p := w.Player()
 		if p == nil {
@@ -137,9 +139,9 @@ func listInvestments(s session.Session, w *ctx) Result {
 		}
 		invs = append([]game.Investment(nil), p.Investments...)
 		loans = append([]game.Loan(nil), p.Loans...)
-		debt = p.Debt
+		debt, due, held = p.Debt, p.InvestDue, p.InvestHeld
 	})
-	if len(invs) == 0 && len(loans) == 0 && debt == 0 {
+	if len(invs) == 0 && len(loans) == 0 && debt == 0 && due == 0 && held == 0 {
 		ok(s, "You have no active investments or loans.")
 		return Stay
 	}
@@ -174,8 +176,11 @@ func listInvestments(s session.Session, w *ctx) Result {
 	line := func(label string, inv, loan int64) {
 		fmt.Fprintf(s, "  %-12s %s%-20s %s%s\n", label, ansi.FgBrightWhite, dollar(inv), dollar(loan), ansi.Reset)
 	}
-	if debt > 0 {
-		line(tr(s, "Today"), 0, debt)
+	if debt > 0 || due > 0 {
+		line(tr(s, "Today"), due, debt)
+	}
+	if held > 0 {
+		line(tr(s, "In Hold"), held, 0)
 	}
 	for _, day := range days {
 		r := byDay[day]
