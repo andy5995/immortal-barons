@@ -346,13 +346,13 @@ func (w *World) enqueueTradeBid(toBoard string, b IPTradeBid) {
 // sender on their recap and to nobody else (#285). spies is spyIntelIndex(p),
 // taken before the results were applied.
 func (w *World) fileReconReports(p Packet, spies []int) {
-	byTerror := map[int]bool{}
+	bySpy := map[int]bool{}
 	for _, i := range spies {
-		byTerror[i] = true
+		bySpy[i] = true
 	}
 	for i, r := range p.ReconReports {
 		w.fileSpyReport(r)
-		if !byTerror[i] {
+		if !bySpy[i] {
 			w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
 		}
 	}
@@ -383,6 +383,11 @@ func (w *World) fileSpyReport(r SpyReport) {
 	w.SpyDatabase = kept
 }
 
+// sendsIntel is whether a terror op that ended this way brings intel home: a
+// Send Spy that got in, and nothing else. The target board decides it when it
+// answers and the origin when it pairs the answer, so both read it here.
+func sendsIntel(op TerrorOpType, won bool) bool { return op == TerrorOpSpy && won }
+
 // spyIntelIndex pairs each result in p with the index in p.ReconReports of the
 // intel that came home with it, or -1 when it brought none. Only a Send Spy
 // that got in brings any, and the result does not say which op it was, so the
@@ -393,15 +398,8 @@ func (w *World) fileSpyReport(r SpyReport) {
 func (w *World) spyIntelIndex(p Packet) []int {
 	type key struct{ board, empire string }
 	carries := func(res AttackResult) bool {
-		if res.Kind != "terror" || !res.Won {
-			return false
-		}
-		for _, f := range w.InFlight {
-			if f.ID == res.ID {
-				return f.TerrorOp == TerrorOpSpy
-			}
-		}
-		return false
+		i := w.findInFlight(res.ID)
+		return res.Kind == "terror" && i >= 0 && sendsIntel(w.InFlight[i].TerrorOp, res.Won)
 	}
 	reports := map[key][]int{}
 	for i, r := range p.ReconReports {
@@ -634,7 +632,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, t := range p.Terrors {
 		res := w.resolveRemoteTerror(t)
 		result.Results = append(result.Results, res)
-		if t.Op == TerrorOpSpy && res.Won {
+		if sendsIntel(t.Op, res.Won) {
 			if e := w.remoteTarget(t.TargetEmpire); e != nil {
 				result.ReconReports = append(result.ReconReports, w.spyReport(e))
 			}

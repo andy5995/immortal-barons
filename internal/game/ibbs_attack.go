@@ -1024,13 +1024,23 @@ func (w *World) planetDefenders() []*Empire {
 // it, because its result has come home. ok is false when nothing was waiting —
 // see applyAttackResult for why that is not the same as "harmless".
 func (w *World) takeInFlight(id int) (InFlightStrike, bool) {
+	i := w.findInFlight(id)
+	if i < 0 {
+		return InFlightStrike{}, false
+	}
+	f := w.InFlight[i]
+	w.InFlight = append(w.InFlight[:i], w.InFlight[i+1:]...)
+	return f, true
+}
+
+// findInFlight is the index in InFlight of the strike with this id, or -1.
+func (w *World) findInFlight(id int) int {
 	for i, f := range w.InFlight {
 		if f.ID == id {
-			w.InFlight = append(w.InFlight[:i], w.InFlight[i+1:]...)
-			return f, true
+			return i
 		}
 	}
-	return InFlightStrike{}, false
+	return -1
 }
 
 // strikeAim names what a stalled strike was aimed at, for the recovery notices,

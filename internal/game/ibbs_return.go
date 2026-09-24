@@ -89,7 +89,7 @@ func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult, spy *Sp
 	report := terrorReturnReport(sent, res)
 	// A spy that got in reads its figures out on the recap, not only into the
 	// Spy Database, so a spy sent after a strike shows what the strike did.
-	if sent.TerrorOp == TerrorOpSpy && res.Won && spy != nil {
+	if spy != nil {
 		report += fmt.Sprintf("\nLand %s  Off %s  Def %s  Gold %s",
 			numfmt.Comma(spy.Land), numfmt.Comma(spy.Offense),
 			numfmt.Comma(spy.Defense), numfmt.Comma(spy.Gold))
