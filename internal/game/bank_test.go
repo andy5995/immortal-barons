@@ -570,3 +570,20 @@ func TestSavingsInterestRounds(t *testing.T) {
 		t.Errorf("199 banked: Bank=%d LastInterest=%d, want 200 and 1", e.Bank, e.LastInterest)
 	}
 }
+
+// The rails read the Standard rate held to its range, as the steady path does.
+// A Standard rate of 0, which a hand-edited config.json or a league packet can
+// carry past the editor's 35 floor, used to fire the downward rail every day
+// and drain the rate to 0, where the load-time repair then scaled it by ten.
+func TestInvestRateRailsUseTheClampedStandardRate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.StdInvestRate = 0
+	w.AddHuman("a", "Realm a").InvestDue = 150_000_000 // 126..200 million: no step
+	w.InvestRate = 50
+	for range 20 {
+		w.adjustInvestRate()
+	}
+	if w.InvestRate != 50 {
+		t.Errorf("rate after 20 days = %d, want 50: a 0 Standard rate is held to 35, whose rails leave 50 alone", w.InvestRate)
+	}
+}

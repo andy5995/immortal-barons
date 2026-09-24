@@ -166,7 +166,7 @@ func (w *World) adjustInvestRate() {
 		}
 	}
 	step := investRateStep(millions / max(realms, 1))
-	std := w.Config.StdInvestRate
+	std := w.steadyInvestRate() // the knob held to its range, as the steady path holds it
 	switch {
 	case std/2 > w.InvestRate:
 		step = InvestRateRailTenths
