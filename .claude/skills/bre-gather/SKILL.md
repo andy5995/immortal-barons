@@ -330,6 +330,13 @@ but returns the cataloged functions and blocks that reference each match. Use
 raw `strings` only to inspect declaration order or text that has no indexed
 code reference.
 
+**An empty `find-string` for text `strings` can see means the string is a
+code-segment constant, not that nothing uses it.** `DATA\SPY.BRU` returned zero
+matches; its routines load it as `mov di,0xe0` / `push cs`, which the index does
+not record. Take the byte offset from `grep -abo`, then
+`bre-disasm.py list | grep <unit>` for the unit that spans it — that found
+`open_spy_data`, `save_spy_data` and `load_spy_data` in one step.
+
 **"Who is allowed to do this?" is usually answered by `bre.doc`'s command-line
 section.** It lists every switch with a one-line restriction, and those lines
 settle permissions questions no screen can: `PLAYERLIST` is "for League
