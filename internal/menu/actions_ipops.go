@@ -198,19 +198,80 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 }
 
 // spyDatabase is the read-only Spy Database viewer (sending is Special
-// Operations → Send SpyGuy, matching BRE).
+// Operations → Send SpyGuy, matching BRE). Reports are grouped by realm, oldest
+// first, and a realm with two or more ends with the change since the one before,
+// which is the before-and-after a spy sent around a strike is for.
 func spyDatabase(s session.Session, w *ctx) Result {
 	if len(w.SpyDatabase) == 0 {
 		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy Database:"), ansi.Reset)
-	for _, r := range w.SpyDatabase {
-		fmt.Fprintf(s, "  "+tr(s, "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s")+"\n",
-			r.Empire, r.Board, r.Date, comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold))
+	rows := recapHeaderRows
+	for _, reports := range spyReportsByRealm(w.SpyDatabase) {
+		// Heading, column labels, a row per report, a change row, a blank line.
+		block := 3 + len(reports)
+		if len(reports) > 1 {
+			block++
+		}
+		if rows+block > recapPageRows {
+			pauseTight(s)
+			rows = 0
+		}
+		rows += block
+		r := reports[0]
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, fmt.Sprintf(tr(s, "%s of %s"), r.Empire, r.Board), ansi.Reset)
+		fmt.Fprintf(s, spyRowFormat, tr(s, "Arrived"), tr(s, "Land"), tr(s, "Offense"), tr(s, "Defense"), tr(s, "Gold"))
+		for _, r := range reports {
+			// Where it is known, when the report arrived: two reports on one realm
+			// often share a game day.
+			when := r.Date
+			if !r.Filed.IsZero() {
+				when = r.Filed.In(sessionZone(s)).Format("01/02 15:04")
+			}
+			fmt.Fprintf(s, spyRowFormat, when, comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold))
+		}
+		if n := len(reports); n > 1 {
+			a, b := reports[n-2], reports[n-1]
+			fmt.Fprintf(s, spyRowFormat, tr(s, "Change"), signed(int64(b.Land-a.Land)),
+				signed(int64(b.Offense-a.Offense)), signed(int64(b.Defense-a.Defense)), signed(b.Gold-a.Gold))
+		}
+		fmt.Fprintln(s)
 	}
 	pause(s)
 	return Stay
+}
+
+// spyRowFormat lays out one Spy Database row; the widths hold a billion-scale
+// figure in each column and keep the row inside 80 columns.
+const spyRowFormat = "  %-11s %9s %14s %14s %15s\n"
+
+// spyReportsByRealm groups the database by realm, keeping each realm's reports
+// in arrival order and the realms in the order they first appear.
+func spyReportsByRealm(db []game.SpyEntry) [][]game.SpyEntry {
+	type key struct{ board, empire string }
+	at := map[key]int{}
+	var out [][]game.SpyEntry
+	for _, r := range db {
+		k := key{r.Board, r.Empire}
+		i, seen := at[k]
+		if !seen {
+			i = len(out)
+			at[k] = i
+			out = append(out, nil)
+		}
+		out[i] = append(out[i], r)
+	}
+	return out
+}
+
+// signed renders a change with its sign, so a rise and a fall read apart without
+// relying on color.
+func signed(n int64) string {
+	if n > 0 {
+		return "+" + comma(n)
+	}
+	return comma(n)
 }
 
 // terrorOp returns a handler that sends agents to perform a specific terror

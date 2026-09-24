@@ -3,6 +3,8 @@ package game
 import (
 	"fmt"
 	"strings"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // The origin board's half of an interplanetary strike: what happens when the
@@ -20,7 +22,9 @@ import (
 
 // applyAttackResult takes one returning result — an attack's or a terror op's —
 // and gives the baron who sent it their forces, their report, and their spoils.
-func (w *World) applyAttackResult(res AttackResult) {
+// spy is the report that came home beside a terror op, or nil; a Send Spy
+// shows its figures to the sender.
+func (w *World) applyAttackResult(res AttackResult, spy *SpyReport) {
 	sent, waiting := w.takeInFlight(res.ID)
 	if !waiting {
 		// Nothing was waiting on this ID, so the force it belongs to has already
@@ -35,7 +39,7 @@ func (w *World) applyAttackResult(res AttackResult) {
 		return
 	}
 	if res.Kind == "terror" {
-		w.applyTerrorResult(sent, res)
+		w.applyTerrorResult(sent, res, spy)
 		return
 	}
 	if sent.Kind == "special" {
@@ -77,10 +81,20 @@ func (w *World) applyAttackResult(res AttackResult) {
 // the original's returning-report routine (process_terrorist_report, BRE.OVR
 // 0x04b38a) files recap entries and never calls the news writer, and IB posted
 // "Our terror op on …" to the planet until #285.
-func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult) {
-	if e := w.FindByOwner(sent.Owner); e != nil {
-		e.addEvent(terrorReturnReport(sent, res))
+func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult, spy *SpyReport) {
+	e := w.FindByOwner(sent.Owner)
+	if e == nil {
+		return
 	}
+	report := terrorReturnReport(sent, res)
+	// A spy that got in reads its figures out on the recap, not only into the
+	// Spy Database, so a spy sent after a strike shows what the strike did.
+	if sent.TerrorOp == TerrorOpSpy && res.Won && spy != nil {
+		report += fmt.Sprintf("\nLand %s  Off %s  Def %s  Gold %s",
+			numfmt.Comma(spy.Land), numfmt.Comma(spy.Offense),
+			numfmt.Comma(spy.Defense), numfmt.Comma(spy.Gold))
+	}
+	e.addEvent(report)
 }
 
 // terrorReturnReport is what the sender reads when a terrorist op comes home.

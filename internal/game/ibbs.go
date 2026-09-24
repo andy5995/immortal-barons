@@ -342,25 +342,81 @@ func (w *World) enqueueTradeBid(toBoard string, b IPTradeBid) {
 }
 
 // fileReconReports files a packet's scouting answers in the Spy Database and
-// posts a news line for each, except for as many reports on a realm as there are
-// terror results for it: those are a terror op's own report, told to its sender
-// on their recap and to nobody else (#285).
+// posts a news line for each, except the ones a terror op brought home: those
+// are the op's own report, told to its sender on their recap and to nobody else
+// (#285).
 func (w *World) fileReconReports(p Packet) {
-	byTerror := map[[2]string]int{}
-	for _, res := range p.Results {
-		if res.Kind == "terror" {
-			byTerror[[2]string{res.TargetBoard, res.TargetEmpire}]++
+	byTerror := map[int]bool{}
+	for _, i := range terrorReportIndex(p) {
+		byTerror[i] = true
+	}
+	for i, r := range p.ReconReports {
+		w.fileSpyReport(r)
+		if !byTerror[i] {
+			w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
 		}
 	}
-	for _, r := range p.ReconReports {
-		w.SpyDatabase = append(w.SpyDatabase, r)
-		key := [2]string{r.Board, r.Empire}
-		if byTerror[key] > 0 {
-			byTerror[key]--
+}
+
+// fileSpyReport adds r to the Spy Database, stamped with its arrival, and lets
+// the oldest entries on the same realm go past SpyReportsPerRealm.
+func (w *World) fileSpyReport(r SpyReport) {
+	w.SpyDatabase = append(w.SpyDatabase, SpyEntry{SpyReport: r, Filed: timeNow()})
+	n := 0
+	for _, e := range w.SpyDatabase {
+		if e.Board == r.Board && e.Empire == r.Empire {
+			n++
+		}
+	}
+	if n <= SpyReportsPerRealm {
+		return
+	}
+	drop := n - SpyReportsPerRealm
+	kept := w.SpyDatabase[:0]
+	for _, e := range w.SpyDatabase {
+		if drop > 0 && e.Board == r.Board && e.Empire == r.Empire {
+			drop--
 			continue
 		}
-		w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
+		kept = append(kept, e)
 	}
+	w.SpyDatabase = kept
+}
+
+// terrorReportIndex pairs each result in p with the index in p.ReconReports of
+// the spy report its target board wrote beside it, or -1 when it is not a
+// terror result or has none. The target answers a terror op with its result
+// and then a report on the same realm, after any sweep answers, so a realm's
+// terror reports are the LAST ones on it, in the order of its results.
+func terrorReportIndex(p Packet) []int {
+	type key struct{ board, empire string }
+	reports := map[key][]int{}
+	for i, r := range p.ReconReports {
+		k := key{r.Board, r.Empire}
+		reports[k] = append(reports[k], i)
+	}
+	terrors := map[key]int{}
+	for _, res := range p.Results {
+		if res.Kind == "terror" {
+			terrors[key{res.TargetBoard, res.TargetEmpire}]++
+		}
+	}
+	out := make([]int, len(p.Results))
+	seen := map[key]int{}
+	for i, res := range p.Results {
+		out[i] = -1
+		if res.Kind != "terror" {
+			continue
+		}
+		k := key{res.TargetBoard, res.TargetEmpire}
+		idx := reports[k]
+		at := len(idx) - terrors[k] + seen[k]
+		seen[k]++
+		if at >= 0 && at < len(idx) {
+			out[i] = idx[at]
+		}
+	}
+	return out
 }
 
 // ApplyPacket applies an inbound packet to this board and returns a result
@@ -475,8 +531,13 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.applyDupeCheck(p.FromBoard, p.Scores)
 	}
 	// Outcomes of our own strikes, returning from the target board.
-	for _, res := range p.Results {
-		w.applyAttackResult(res)
+	spies := terrorReportIndex(p)
+	for i, res := range p.Results {
+		var spy *SpyReport
+		if spies[i] >= 0 {
+			spy = &p.ReconReports[spies[i]]
+		}
+		w.applyAttackResult(res, spy)
 	}
 	if p.Annihilator != nil && p.FromBoard != "" {
 		w.applyAnnihilatorStatus(p.Annihilator)

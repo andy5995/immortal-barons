@@ -91,7 +91,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	}
 
 	// And the answer comes home.
-	from.applyAttackResult(answer.Results[0])
+	from.applyAttackResult(answer.Results[0], nil)
 	if len(from.InFlight) != 0 {
 		t.Errorf("the op is still in flight after its answer arrived: %+v", from.InFlight)
 	}

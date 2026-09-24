@@ -279,7 +279,7 @@ type World struct {
 	// has its forces given back instead (Config.LostForcesDays, #96).
 	InFlight    []InFlightStrike
 	Outbox      []Packet
-	SpyDatabase []SpyReport
+	SpyDatabase []SpyEntry
 	// Annihilator is this planet's own doomsday weapon, one at a time, from the day a
 	// baron starts it until it flies. Incoming is one aimed AT this planet that
 	// another board has told us about — visible while it is being built and while

@@ -1636,6 +1636,14 @@ end of this file for its measurements, colors and the screen that edits it.
 location column (`## Planet Name   Location`); selecting one prints
 `Our current relations with <planet>: <relation>` then any known players.
 
+**IB diverges here, deliberately.** BRE stores one report per realm, and a new
+one overwrites it (see the Send Spy note in `docs/mechanics-reference.md`).
+IB's viewer groups the last five reports on each realm, each stamped with when
+it arrived, under the realm's name with the change between the last two, and a
+Send Spy that gets in also reads its figures out on the sender's own report. A
+spy sent before and after a strike can therefore be compared. No number, cost
+or odds changes.
+
 The planet prompt is shared by every interplanetary screen that asks for one,
 and its colors are (from `cap/eots-ibbs-01.cap`): the label and the trailing
 `: ` white (`0;40;37`), the parens bright black (`1;30`), the `?` bright white

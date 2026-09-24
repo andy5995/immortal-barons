@@ -20,7 +20,11 @@ all, and you cannot send any while your own realm is still sheltered.
 The nine are not interchangeable. Each aims at one thing, and each agent that
 gets through takes its own bite:
 
-- **Send Spy** — brings intelligence home and costs the target nothing.
+- **Send Spy** — costs the target nothing. A spy that gets in brings home
+  their land, offense, defense and gold. They are reported to you when the spy
+  returns, and filed in the Spy Database, which keeps the last five reports on
+  each realm and shows how much the last two differ. A spy sent before and
+  after a strike therefore shows what the strike did.
 - **Bomb Intelligence** — kills a few percent of their agents, which
   is what they defend and attack with.
 - **Demoralize** — takes a seventh off military morale.

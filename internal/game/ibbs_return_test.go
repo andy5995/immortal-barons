@@ -347,7 +347,7 @@ func TestBothPlanetsReportAnInterplanetaryStrike(t *testing.T) {
 		ID: 7, Kind: "attack", TargetBoard: "Bravo", TargetEmpire: "Redlands",
 		Contributors: []Contribution{{Owner: "iron"}},
 	})
-	org.applyAttackResult(res)
+	org.applyAttackResult(res, nil)
 	if home := org.NewsToday.Join("\n"); !strings.Contains(home, "Ironhold") {
 		t.Errorf("our own planet's news should name the realm that struck, got:\n%s", home)
 	}

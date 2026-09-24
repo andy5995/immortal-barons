@@ -1,11 +1,13 @@
 package game
 
+import "time"
+
 // ibbs_spy.go — spy reports on other planets, and the global recon that
 // gathers them.
 
 // SpyReport is intel on a remote empire, stored in the planet-wide Spy
-// Database and readable by every baron here. Populated by interplanetary spy
-// ops (built in a later increment).
+// Database and readable by every baron here. Filled by the reports terror ops
+// bring home and by the Coordinator's Global Recon sweep.
 type SpyReport struct {
 	Board   string
 	Empire  string
@@ -14,6 +16,15 @@ type SpyReport struct {
 	Offense int
 	Defense int
 	Gold    int64
+}
+
+// SpyEntry is a SpyReport as filed here. Filed is when it arrived on this
+// board: two reports on one realm can carry the same game day, and a before and
+// after pair around a strike is only readable if the viewer can tell them
+// apart. It lives outside SpyReport so the wire format does not change.
+type SpyEntry struct {
+	SpyReport
+	Filed time.Time `json:",omitzero"`
 }
 
 // spyReport is what this board tells another about one of its realms: the

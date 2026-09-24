@@ -54,7 +54,7 @@ func TestEverySpecialOpMakesTheRoundTrip(t *testing.T) {
 				t.Fatal("the answer carries no report, so the sender learns nothing")
 			}
 
-			from.applyAttackResult(answer.Results[0])
+			from.applyAttackResult(answer.Results[0], nil)
 			if len(from.InFlight) != 0 {
 				t.Errorf("still in flight after its answer came home: %+v", from.InFlight)
 			}

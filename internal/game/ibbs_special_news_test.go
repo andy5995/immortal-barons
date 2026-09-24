@@ -232,7 +232,7 @@ func TestFiringPlanetReadsEveryMissileOutcome(t *testing.T) {
 			answer := to.ApplyPacket(from.Outbox[0])
 			there := to.NewsToday[len(to.NewsToday)-1].Text
 			before := len(from.NewsToday)
-			from.applyAttackResult(answer.Results[0])
+			from.applyAttackResult(answer.Results[0], nil)
 			here := from.NewsToday[before:]
 			want, known := tc.want[there]
 			if !known {
@@ -262,7 +262,7 @@ func TestFiringPlanetReadsProtectionAndOldFailures(t *testing.T) {
 	}
 	answer := to.ApplyPacket(from.Outbox[0])
 	before := len(from.NewsToday)
-	from.applyAttackResult(answer.Results[0])
+	from.applyAttackResult(answer.Results[0], nil)
 	if got := from.NewsToday[before:]; len(got) != 1 ||
 		got[0].Text != "New Realm Protection turned aside Alpha Baron's Chemical Bombing against Bravo Hold of Bravo BBS." {
 		t.Errorf("protected: firer read %v", got)
@@ -276,7 +276,7 @@ func TestFiringPlanetReadsProtectionAndOldFailures(t *testing.T) {
 	from.applyAttackResult(AttackResult{
 		ID: from.InFlight[0].ID, TargetBoard: "Bravo BBS", TargetEmpire: target.Name,
 		Kind: string(OpNuclear), Outcome: OutcomeRepelled, Report: "It failed.",
-	})
+	}, nil)
 	if got := from.NewsToday[before:]; len(got) != 1 ||
 		got[0].Text != "Alpha Baron's Nuclear Assault against Bravo Hold of Bravo BBS failed." {
 		t.Errorf("legacy failure: firer read %v", got)
@@ -391,7 +391,7 @@ func TestFiringPlanetReadsEveryBombingOutcome(t *testing.T) {
 			answer := to.ApplyPacket(from.Outbox[0])
 			there := to.NewsToday[len(to.NewsToday)-1].Text
 			before := len(from.NewsToday)
-			from.applyAttackResult(answer.Results[0])
+			from.applyAttackResult(answer.Results[0], nil)
 			here := from.NewsToday[before:]
 			line, known := want[there]
 			if !known {
@@ -422,7 +422,7 @@ func TestFiringPlanetReadsAnOldBombingFailure(t *testing.T) {
 	from.applyAttackResult(AttackResult{
 		ID: from.InFlight[0].ID, TargetBoard: "Bravo BBS",
 		Kind: string(OpBombMarket), Outcome: OutcomeRepelled, Report: "It failed.",
-	})
+	}, nil)
 	if got := from.NewsToday[before:]; len(got) != 1 ||
 		got[0].Text != "Alpha Baron's Bomb Trading Market against Bravo BBS came to nothing." {
 		t.Errorf("legacy failure: firer read %v", got)

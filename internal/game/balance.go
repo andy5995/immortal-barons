@@ -490,3 +490,9 @@ const (
 // launch, so a board that never comes back cannot strand forces for good. IB's
 // own; BRE has no packet hold for it to know about.
 const LostForcesHeldBackstop = 5
+
+// SpyReportsPerRealm is how many Spy Database entries are kept on any one
+// realm; the oldest goes when another arrives. Two are enough for a before and
+// after around a strike, and the cap is what stops the list growing for a whole
+// season. IB's own.
+const SpyReportsPerRealm = 5

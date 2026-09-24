@@ -5,6 +5,8 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * A Send Spy report shows the figures; the Spy Database keeps five per realm
+    and shows the change between the last two
   * -ftn-status lists what the FTN spools hold, for whom, and why
   * Computer barons and -add-ai are removed, including barons a board has
   * config-during-reset: a new Max Local Attacks/Day setting (0, unlimited)

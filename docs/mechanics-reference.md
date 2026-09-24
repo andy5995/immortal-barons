@@ -4665,6 +4665,23 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   reported back" line it gives a Coordinator sweep; the original files that
   intelligence as a report entry too (`update_spy_intelligence`).
 
+  **IB's Send Spy report carries the figures; this is IB's own.** When the spy
+  got in, the sender's recap entry ends with the land, offense, defense and gold
+  from the report that came home beside it, so a spy sent after a strike shows
+  its effect in the sender's own report (at the next turn, or at once as a
+  mid-session notice) rather than only in the Spy Database.
+  The database stamps each entry with when it arrived here (two reports on one
+  realm can share a game day) and keeps the newest `SpyReportsPerRealm` (5) on
+  each realm. The viewer groups them by realm and ends each realm's rows with
+  the change between its last two reports, paged for an 80x24 screen. Neither
+  change touches the packet.
+
+  BRE keeps ONE (BINARY-VERIFIED): `DATA\SPY.BRU` is 255 planet blocks of 25
+  31-byte slots, one per realm letter A-Y (`open_spy_data`, BRE.OVR 0x04cd9f),
+  and `save_spy_data` (0x04ce41) seeks to `(node-1)*25 + letter-'A'` and
+  overwrites that slot. A later report replaces the earlier one, which is why a
+  before-and-after pair cannot be read there.
+
   **IB's returning report accounts for every agent, which the original's does
   not.** `ipreport.dat`'s templates count successes, so a batch of 25 against a
   headquarters that seven agents flatten reads exactly like a batch of 8: the
