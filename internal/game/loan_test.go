@@ -114,3 +114,20 @@ func TestLoanCeilingDiscountsByTermAndCapsNetWorth(t *testing.T) {
 		t.Errorf("a realm owing more than its headroom may borrow %d, want 0", got)
 	}
 }
+
+// A debt left unpaid for years stays positive and stops at the money cap. It
+// wrapped negative at turn 363 before the growth was bounded.
+func TestDebtGrowthIsBounded(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Debt = 1_000
+	for turn := 0; turn < 2_000; turn++ {
+		e.Debt = w.growDebt(e.Debt)
+		if e.Debt <= 0 {
+			t.Fatalf("turn %d: debt went non-positive: %d", turn, e.Debt)
+		}
+	}
+	if e.Debt != 2_000_000_000 {
+		t.Errorf("debt settled at %d, want the 2,000,000,000 cap", e.Debt)
+	}
+}

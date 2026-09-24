@@ -130,3 +130,14 @@ func (w *World) matureLoans(e *Empire) {
 	}
 	e.Loans = remaining
 }
+
+// growDebt returns debt grown by DebtGrowthPct, held at the money cap. The
+// product is split around the percent so it cannot overflow int64 however long
+// a debt goes unpaid: unbounded, 1,000 gold passed 2 billion by turn 170 and
+// wrapped negative by turn 363, after which LoanCeiling offered the full cap.
+// BRE has no ceiling to copy here — its Trunc raises a runtime error past
+// 2^31 — so IB holds debt at the money cap, as it holds gold and savings.
+func (w *World) growDebt(debt int64) int64 {
+	grown := debt + debt/100*DebtGrowthPct + debt%100*DebtGrowthPct/100
+	return min(grown, w.MoneyCap())
+}

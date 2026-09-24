@@ -3630,7 +3630,7 @@ Investments / Loans**, and **View Bank Rates**.
   At the due date `matureLoans` deducts the amount
   owed from gold then bank; an unpaid loan **defaults** — the shortfall rolls into
   open-ended **Debt** grown by `LoanDefaultPenaltyPct` (25%) and support drops.
-  Defaulted **Debt** still grows `DebtGrowthPct`/turn and is repaid from the same
+  Defaulted **Debt** still grows `DebtGrowthPct`/turn, held at the money cap, and is repaid from the same
   Cash Relief screen.
 - **The Investment Rate floats** — each daily maintenance updates it:
   - Supply/demand: heavy investing pushes rates **down**; weak investing

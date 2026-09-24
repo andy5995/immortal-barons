@@ -432,7 +432,7 @@ func (w *World) processEconomy(e *Empire) {
 		w.creditGold(e, over, "bank interest")
 	}
 	if e.Debt > 0 {
-		e.Debt += e.Debt * DebtGrowthPct / 100
+		e.Debt = w.growDebt(e.Debt)
 	}
 
 	// Food growth was already credited at turn start (GrowFood); here we only
