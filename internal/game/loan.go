@@ -1,13 +1,11 @@
 package game
 
-import (
-	"fmt"
-	"math"
-)
+import "math"
 
 // Loan is a term-based Cash Relief loan (#40): Principal gold was borrowed and
 // Owed gold (Principal compounded at the term's daily rate) is due on DueDay. It
-// mirrors Investment. Unpaid at DueDay, the remainder rolls into open-ended Debt.
+// mirrors Investment. On DueDay Owed moves into Empire.Debt, which the bank then
+// collects a turn at a time (matureLoans).
 type Loan struct {
 	Principal int64
 	Owed      int64
@@ -101,43 +99,63 @@ func (w *World) TakeLoan(e *Empire, amount int64, days int) (Loan, error) {
 	return l, nil
 }
 
-// matureLoans settles any of e's loans that have reached their due day — the
-// amount owed is taken from gold first, then the bank (mirroring how
-// matureInvestments pays out matured investments). A loan that can't be paid in
-// full DEFAULTS: the unpaid remainder rolls into open-ended Debt grown by the
-// late-payment penalty, popular support takes a hit, and the owner is told.
+// matureLoans moves e's loans that have reached their due day into Debt, the
+// amount the bank is collecting now, after growing whatever was left unpaid
+// from the day before. BINARY-VERIFIED (run_daily_maintenance, BRE.OVR
+// 0x8e0c-0x8fe1): BRE keeps loans in day slots, grows slot 0 — today's unpaid
+// remainder — by loanOverdueTenths, then folds tomorrow's slot into it. There
+// is no default, no penalty and no loss of support: an unpaid loan simply keeps
+// growing and keeps being collected. The installment for the new day is set
+// here as well.
 func (w *World) matureLoans(e *Empire) {
+	if e.Debt > 0 {
+		e.Debt = w.growOverdue(e.Debt)
+	}
 	var remaining []Loan
 	for _, l := range e.Loans {
 		if w.GameDay < l.DueDay {
 			remaining = append(remaining, l)
 			continue
 		}
-		owed := l.Owed
-		if pay := min(owed, e.Gold); pay > 0 {
-			e.Gold -= pay
-			owed -= pay
-		}
-		if pay := min(owed, e.Bank); pay > 0 {
-			e.Bank -= pay
-			owed -= pay
-		}
-		if owed > 0 {
-			e.Debt += owed + owed*LoanDefaultPenaltyPct/100
-			e.adjustSupport(-LoanDefaultSupportDrop)
-			e.addEvent(fmt.Sprintf("A Cash Relief loan came due and you could not repay %d gold — it was added to your debt with a %d%% penalty.", owed, LoanDefaultPenaltyPct))
-		}
+		e.Debt = min(e.Debt+l.Owed, w.MoneyCap())
 	}
 	e.Loans = remaining
+	e.LoanInstallment = max(e.Debt/int64(max(w.Config.TurnsPerDay, 1)), LoanMinInstallment)
 }
 
-// growDebt returns debt grown by DebtGrowthPct, held at the money cap. The
-// product is split around the percent so it cannot overflow int64 however long
-// a debt goes unpaid: unbounded, 1,000 gold passed 2 billion by turn 170 and
-// wrapped negative by turn 363, after which LoanCeiling offered the full cap.
-// BRE has no ceiling to copy here — its Trunc raises a runtime error past
-// 2^31 — so IB holds debt at the money cap, as it holds gold and savings.
-func (w *World) growDebt(debt int64) int64 {
-	grown := debt + debt/100*DebtGrowthPct + debt%100*DebtGrowthPct/100
+// loanOverdueTenths is the daily growth of an unpaid loan, in tenths of a
+// percent: the higher of the investment and savings rates plus
+// LoanOverdueExtraTenths (11.0% a day on a board at 5.0%).
+func (w *World) loanOverdueTenths() int {
+	return max(w.InvestRate, w.Config.InterestRate) + LoanOverdueExtraTenths
+}
+
+// growOverdue returns an unpaid loan balance after one day's growth, held at the
+// money cap. BRE multiplies in Turbo Pascal reals and truncates, so it can land
+// one gold lower than this where the exact product is a whole number (its
+// 1.11 is not exact in binary). The product is split around the thousand so it
+// cannot overflow int64. BRE has no ceiling to copy: its Trunc raises a runtime
+// error past 2^31, so IB holds the balance at the money cap, as it holds gold.
+func (w *World) growOverdue(debt int64) int64 {
+	f := int64(1000 + w.loanOverdueTenths())
+	grown := debt/1000*f + debt%1000*f/1000
 	return min(grown, w.MoneyCap())
+}
+
+// collectLoanInstallment takes one turn's loan payment from gold in hand: the
+// installment set at maintenance, no more than is owed and no more than the
+// realm holds. BINARY-VERIFIED (process_economic_production, BRE.OVR 0x34ca3):
+// the bank never reaches into savings, and a realm with no gold simply pays
+// nothing that turn. Returns the amount paid.
+func (w *World) collectLoanInstallment(e *Empire) int64 {
+	if e.Debt <= 0 || e.LoanInstallment <= 0 {
+		return 0
+	}
+	pay := min(e.Debt, e.LoanInstallment, e.Gold)
+	if pay <= 0 {
+		return 0
+	}
+	e.Gold -= pay
+	e.Debt -= pay
+	return pay
 }

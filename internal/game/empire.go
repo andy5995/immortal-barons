@@ -234,6 +234,13 @@ type Empire struct {
 	Investments []Investment
 	Loans       []Loan // active Cash Relief loans (#40), each due on its DueDay
 
+	// Debt is what the bank is collecting now: every loan past its due day, plus
+	// what went unpaid on earlier days, grown daily (matureLoans).
+	// LoanInstallment is the most one turn's collection takes, set at daily
+	// maintenance. Zero in a save that predates it, which only delays collection
+	// until the next maintenance sets it.
+	LoanInstallment int64 `json:"loanInstallment,omitempty"`
+
 	// Prices is this empire's own current unit buy prices — a persistent per-turn
 	// random walk (#30; BRE gives every empire its own drifting prices). Only the
 	// seven unit fields are used: regions price by holdings and food by the market,
@@ -296,6 +303,9 @@ type Empire struct {
 	// which may be a different process again.
 	LastInterest       int64 `json:"lastInterest,omitempty"`
 	InvestReturnsToday int64 `json:"investReturnsToday,omitempty"`
+	// LoanPaid is what this turn's loan installment took from gold in hand, for
+	// the turn's income report (collectLoanInstallment).
+	LoanPaid int64 `json:"loanPaid,omitempty"`
 	// PendingSupportPenalty and PendingMoralePenalty are stat points owed but not
 	// yet deducted. BRE accumulates shortfall penalties during the maintenance and
 	// food stages in two signed bytes on the empire record (+0x2ba support, +0x2b9

@@ -53,6 +53,16 @@ const (
 	// realm in the game borrows against the same headroom as a merely rich one.
 	LoanCeilingMultiple    = 10         // × net worth, before the term discount
 	LoanCeilingNetWorthCap = 10_000_000 // net worth counts no further than this
-	LoanDefaultPenaltyPct  = 25         // an unpaid loan at its due date rolls into Debt grown by this % (IB's late-payment penalty)
-	LoanDefaultSupportDrop = 10         // popular-support points lost when a loan defaults
+)
+
+// Loan collection (BINARY-VERIFIED, 2026-09-24). A loan that comes due is
+// collected in installments from gold in hand, one per turn played
+// (process_economic_production, BRE.OVR 0x34ca3), each the day's balance
+// divided by the turns per day, but never less than LoanMinInstallment
+// (run_daily_maintenance 0x8f8e). Whatever is still unpaid when the day ends
+// grows by max(investment rate, savings rate) + LoanOverdueExtraTenths
+// (0x8e0c) — 11.0% a day on a board at 5.0%.
+const (
+	LoanMinInstallment     int64 = 100
+	LoanOverdueExtraTenths       = 60
 )

@@ -25,7 +25,6 @@ package game
 
 // --- Other economy tunables ---
 const (
-	DebtGrowthPct = 10 // % a loan's outstanding debt grows each turn
 	// --- Technology (BRE-verified: BRE.OVR 0x33E85-0x34029 and 056d:1a07) ---
 	//
 	// Research is fifteen independent counters, of which only six do anything —

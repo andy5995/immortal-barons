@@ -41,6 +41,7 @@ func TestIncomeReportShowsBankReturns(t *testing.T) {
 	p := w.World.FindByOwner("tester")
 	p.LastInterest = 1_234_567
 	p.InvestReturnsToday = 7_654_321
+	p.LoanPaid = 4_321
 
 	s := &fakeSession{keys: []rune("   ")}
 	showTurnIntro(s, w, false)
@@ -60,6 +61,9 @@ func TestIncomeReportShowsBankReturns(t *testing.T) {
 	if interest > 0 && invested > 0 && interest > invested {
 		t.Error("the interest line belongs above the investment returns line")
 	}
+	if loan := strings.Index(out, "gold was paid to the bank for loans."); loan < invested {
+		t.Error("the loan installment line is missing or above the investment returns line")
+	}
 }
 
 // Nothing earned, nothing said: a realm with no bank balance and no matured
@@ -71,7 +75,7 @@ func TestIncomeReportOmitsBankReturnsWhenZero(t *testing.T) {
 	showTurnIntro(s, w, false)
 	out := s.out.String()
 
-	for _, unwanted := range []string{"bank interest", "investment returns"} {
+	for _, unwanted := range []string{"bank interest", "investment returns", "for loans"} {
 		if strings.Contains(out, unwanted) {
 			t.Errorf("report mentions %q with nothing earned:\n%s", unwanted, out)
 		}

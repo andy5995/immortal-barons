@@ -442,9 +442,6 @@ func (w *World) processEconomy(e *Empire) {
 		e.Bank = w.MoneyCap()
 		w.creditGold(e, over, "bank interest")
 	}
-	if e.Debt > 0 {
-		e.Debt = w.growDebt(e.Debt)
-	}
 
 	// Food growth was already credited at turn start (GrowFood); here we only
 	// consume and then spoil. (Was `Food += FoodGrown - consumed`, which grew the

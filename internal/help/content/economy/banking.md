@@ -12,7 +12,7 @@ taken by pirates or raids.
 
 - Deposit — move gold from your treasury into the bank.
 - Withdraw — move gold from the bank back to your treasury.
-- Cash Relief / Loans — borrow gold, or pay back what you already owe.
+- Cash Relief / Loans — borrow gold, or pay back a loan that is due.
 
 A deposit or withdrawal moves only what fits under the limit below. The
 investments that pay back on any one date may return at most two billion gold
@@ -44,10 +44,14 @@ A longer term has a higher daily interest rate, and the interest builds up each
 day (it compounds), so a long loan costs much more in total. The bank tells you
 the rate and the most it will lend you, then you choose how much to take.
 
-You must repay the full amount on the due date. The bank takes it from your
-gold first, then from your savings. If you cannot pay it all, the rest becomes a
-debt with an extra penalty added, and your people lose some support. Debt keeps
-growing each turn until you repay it, so clear it early.
+From the due date, the bank takes a payment from your gold in hand at the start
+of each turn you play, until the loan is paid. Each payment is a share of what
+you owe, so a full day of turns pays nearly all of it. The bank never takes
+gold from your savings. If you have no gold, you pay nothing that turn.
+
+Whatever is still unpaid at the end of the day grows, by more than the bank's
+interest rates, and the payments go on the next day. So keep gold in hand when
+a loan comes due, or pay it off early from Cash Relief.
 
 ## Investments
 

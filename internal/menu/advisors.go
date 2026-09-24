@@ -206,7 +206,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 	case advisorEconomic:
 		add(fmt.Sprintf(tr(s, "We have %s gold in hand and %s in the bank."), num(p.Gold), num(p.Bank)))
 		if p.Debt > 0 {
-			add(fmt.Sprintf(tr(s, "We owe %s gold in debt, which grows each turn."), num(p.Debt)))
+			add(fmt.Sprintf(tr(s, "We owe %s gold on loans. The bank takes a payment each turn, and what is unpaid at the end of the day grows."), num(p.Debt)))
 		}
 		share := 0
 		if d.worldIncome > 0 {

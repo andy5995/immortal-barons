@@ -39,17 +39,16 @@ func money(prompt string, max func(*game.Empire) int64, apply func(*game.World, 
 	}
 }
 
-// cashRelief runs BRE's Cash Relief / Loans flow: settle any overdue debt, then
-// borrow. A loan picks a repayment term (days), shows the daily rate and the
-// overall interest, offers up to the ceiling, and owes the compounded total on
-// its due date. Defaulting at the due date is handled by matureLoans (the
-// shortfall rolls into Debt with a penalty).
+// cashRelief runs BRE's Cash Relief / Loans flow: offer to pay down what is
+// already due, then borrow. A loan picks a repayment term (days), shows the
+// daily rate and the overall interest, offers up to the ceiling, and owes the
+// compounded total on its due date, after which the bank collects it a turn at
+// a time (matureLoans). Paying early is IB's own: BRE's bank has no repay
+// option and only ever collects.
 func cashRelief(s session.Session, w *ctx) Result {
 	p := w.Player()
-	// Overdue debt (from a defaulted loan) is settled here too — Cash Relief covers
-	// both borrowing and paying down what you already owe.
 	if p.Debt > 0 {
-		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "You owe %s gold in overdue debt (it grows each turn)."), comma(p.Debt))))
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "You owe %s gold on loans that are due. The bank takes a payment from your gold each turn, and what is still unpaid at the end of the day grows."), comma(p.Debt))))
 		if AskYesNo(s, "Repay some now?", false) {
 			if n := promptSuggested(s, "How much to repay?", 0, min(p.Gold, p.Debt)); n > 0 {
 				if err := w.mutatePlayer(func(p *game.Empire) error { return w.World.Repay(p, n) }); err != nil {
@@ -126,7 +125,7 @@ func investFunds(s session.Session, w *ctx) Result {
 // listInvestments shows the player's pending investments and loans in BRE's
 // combined "Date / Investments / Loans Due" table — a row per maturity/due date
 // (sorted), the maturing investment total and the loan total owed on that date.
-// Any defaulted, open-ended debt is shown separately below (it has no due date).
+// What the bank is collecting now heads the table as BRE's "Today" row.
 func listInvestments(s session.Session, w *ctx) Result {
 	var invs []game.Investment
 	var loans []game.Loan
@@ -172,12 +171,15 @@ func listInvestments(s session.Session, w *ctx) Result {
 		}
 		return "$" + comma(n)
 	}
-	for _, day := range days {
-		r := byDay[day]
-		fmt.Fprintf(s, "  %-12s %s%-20s %s%s\n", w.DateForDay(day), ansi.FgBrightWhite, dollar(r.inv), dollar(r.loan), ansi.Reset)
+	line := func(label string, inv, loan int64) {
+		fmt.Fprintf(s, "  %-12s %s%-20s %s%s\n", label, ansi.FgBrightWhite, dollar(inv), dollar(loan), ansi.Reset)
 	}
 	if debt > 0 {
-		fmt.Fprintf(s, "\n  %s\n", hiNums(fmt.Sprintf(tr(s, "Overdue debt: $%s (grows each turn until repaid)"), comma(debt))))
+		line(tr(s, "Today"), 0, debt)
+	}
+	for _, day := range days {
+		r := byDay[day]
+		line(w.DateForDay(day), r.inv, r.loan)
 	}
 	pause(s)
 	return Stay

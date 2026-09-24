@@ -277,7 +277,7 @@ func manufacturedUnits(s session.Session, made []int) {
 func incomeReport(s session.Session, w *ctx) {
 	var b game.IncomeBreakdown
 	var raids []game.PirateHit
-	var interest, invested int64
+	var interest, invested, loanPaid int64
 	made := make([]int, len(game.MilitaryGoods))
 	if !withPlayer(w, func(p *game.Empire) {
 		b = w.IncomeThisTurn(p)
@@ -286,6 +286,7 @@ func incomeReport(s session.Session, w *ctx) {
 		p.RaidersThisTurn = raiderSlots(raids)
 		interest = p.LastInterest
 		invested = p.InvestReturnsToday
+		loanPaid = p.LoanPaid
 		for i, g := range game.MilitaryGoods {
 			made[i] = *g.Made(p)
 		}
@@ -316,7 +317,7 @@ func incomeReport(s session.Session, w *ctx) {
 			}
 		}
 	}
-	for _, n := range []int64{int64(total), interest, invested} {
+	for _, n := range []int64{int64(total), interest, invested, loanPaid} {
 		if w := len(comma(n)); w > width {
 			width = w
 		}
@@ -360,6 +361,10 @@ func incomeReport(s session.Session, w *ctx) {
 		if invested > 0 {
 			amt(ansi.FgBrightCyan, invested, "gold was earned from investment returns.")
 		}
+	}
+	// The loan installment follows the investment line, in red, as BRE prints it.
+	if loanPaid > 0 {
+		amt(ansi.FgBrightRed, loanPaid, "gold was paid to the bank for loans.")
 	}
 	if len(raids) > 0 {
 		// A blank line before the raid notices. BRE runs them straight on from

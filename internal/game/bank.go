@@ -179,3 +179,12 @@ func (w *World) creditGold(e *Empire, n int64, source string) {
 	e.addEvent(fmt.Sprintf("You cannot hold more than %s gold in hand — %s gold from %s was lost.",
 		numfmt.Comma(w.MoneyCap()), numfmt.Comma(over), source))
 }
+
+// CollectBankPayments settles the bank's per-turn business at the start of a
+// turn, after the turn's income is in hand, which is where BRE does it
+// (process_economic_production, after the income lines): the day's loan
+// installment is taken from gold. The amount is kept on the empire for the
+// turn's income report.
+func (w *World) CollectBankPayments(e *Empire) {
+	e.LoanPaid = w.collectLoanInstallment(e)
+}

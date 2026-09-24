@@ -28,7 +28,7 @@ func TestLoanMathMatchesBRE(t *testing.T) {
 	}
 }
 
-func TestTakeLoanAndDefault(t *testing.T) {
+func TestTakeLoanAndCollection(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
 	e.Regions, e.Land = RegionMix{Coastal: 40}, 0
@@ -52,20 +52,66 @@ func TestTakeLoanAndDefault(t *testing.T) {
 		t.Errorf("over-ceiling loan: want ErrCantAfford, got %v", err)
 	}
 
-	// Default: spend the borrowed gold, then let the loan come due with nothing.
-	e.Gold, e.Bank = 0, 0
+	// Due: the loan moves into Debt and the bank sets a per-turn installment of
+	// the balance over the turns per day. Nothing is taken from gold or savings
+	// at maintenance, and support is untouched.
+	e.Gold, e.Bank = 0, 5_000
 	w.GameDay = 7
 	beforeSupport := e.Support
 	w.matureLoans(e)
 	if len(e.Loans) != 0 {
-		t.Errorf("loan should be cleared after maturing, got %d", len(e.Loans))
+		t.Errorf("loan should leave the pending list once due, got %d", len(e.Loans))
 	}
-	wantDebt := int64(1175 + 1175*LoanDefaultPenaltyPct/100)
-	if e.Debt != wantDebt {
-		t.Errorf("defaulted debt: want %d, got %d", wantDebt, e.Debt)
+	if e.Debt != 1175 || e.LoanInstallment != 117 {
+		t.Errorf("due loan: Debt=%d installment=%d, want 1175 and 117", e.Debt, e.LoanInstallment)
 	}
-	if e.Support >= beforeSupport {
-		t.Errorf("support should drop on default: was %d, now %d", beforeSupport, e.Support)
+	if e.Bank != 5_000 || e.Support != beforeSupport {
+		t.Errorf("maturity took savings or support: bank=%d support %d->%d", e.Bank, beforeSupport, e.Support)
+	}
+
+	// No gold, no payment — the bank never touches savings.
+	if paid := w.collectLoanInstallment(e); paid != 0 || e.Bank != 5_000 {
+		t.Errorf("broke realm paid %d (bank %d), want 0 and savings untouched", paid, e.Bank)
+	}
+	// A short purse pays what it holds.
+	e.Gold = 50
+	if paid := w.collectLoanInstallment(e); paid != 50 || e.Gold != 0 || e.Debt != 1125 {
+		t.Errorf("short purse: paid=%d gold=%d debt=%d, want 50, 0, 1125", paid, e.Gold, e.Debt)
+	}
+	// Nine full installments leave 1125 - 9x117 = 72 at the end of the day.
+	e.Gold = 10_000
+	for range 9 {
+		w.collectLoanInstallment(e)
+	}
+	if e.Debt != 72 {
+		t.Fatalf("after nine installments Debt=%d, want 72", e.Debt)
+	}
+	// The unpaid 72 grows by max(5.0, 5.0) + 6.0 = 11.0% overnight, truncated,
+	// and the installment floor of 100 then clears it in one turn.
+	w.GameDay = 8
+	w.matureLoans(e)
+	if e.Debt != 79 || e.LoanInstallment != 100 {
+		t.Errorf("next day: Debt=%d installment=%d, want 79 and 100", e.Debt, e.LoanInstallment)
+	}
+	if paid := w.collectLoanInstallment(e); paid != 79 || e.Debt != 0 {
+		t.Errorf("final turn paid %d leaving %d, want 79 and 0", paid, e.Debt)
+	}
+}
+
+// An unpaid balance grows 11.0% a day on a board at 5.0%, and by the higher of
+// the two bank rates plus 6.0 points in general (run_daily_maintenance 0x8e0c).
+func TestOverdueLoanGrowth(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.InterestRate, w.InvestRate = 50, 50
+	if got := w.growOverdue(1_000); got != 1_110 {
+		t.Errorf("1,000 at 11.0%%: got %d, want 1,110", got)
+	}
+	if got := w.growOverdue(1_175); got != 1_304 {
+		t.Errorf("1,175 at 11.0%%: got %d, want 1,304", got)
+	}
+	w.InvestRate = 72 // the investment rate is higher, so it sets the pace
+	if got := w.growOverdue(1_000); got != 1_132 {
+		t.Errorf("1,000 at 13.2%%: got %d, want 1,132", got)
 	}
 }
 
@@ -115,16 +161,16 @@ func TestLoanCeilingDiscountsByTermAndCapsNetWorth(t *testing.T) {
 	}
 }
 
-// A debt left unpaid for years stays positive and stops at the money cap. It
-// wrapped negative at turn 363 before the growth was bounded.
+// A debt left unpaid for years stays positive and stops at the money cap.
+// Unbounded, growth this steep wraps int64 within a few hundred days.
 func TestDebtGrowthIsBounded(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
 	e.Debt = 1_000
-	for turn := 0; turn < 2_000; turn++ {
-		e.Debt = w.growDebt(e.Debt)
+	for day := 0; day < 2_000; day++ {
+		e.Debt = w.growOverdue(e.Debt)
 		if e.Debt <= 0 {
-			t.Fatalf("turn %d: debt went non-positive: %d", turn, e.Debt)
+			t.Fatalf("day %d: debt went non-positive: %d", day, e.Debt)
 		}
 	}
 	if e.Debt != 2_000_000_000 {

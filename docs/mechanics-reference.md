@@ -3626,15 +3626,36 @@ Investments / Loans**, and **View Bank Rates**.
   `max(investRate, savingsRate) + 30` tenths, plus `2 x days`, reading two config
   words through `max_i32`; IB has a constant `LoanBaseRateTenths = 80`, which is
   that expression on a board sitting at 5.0%. A board whose sysop moved either
-  rate would see a different loan rate than IB gives. Not built yet: the two
-  games hold these rates in different units, so it needs care rather than a
-  constant swap.
+  rate would see a different loan rate than IB gives. Not built yet. Both
+  rates are held in tenths of a percent in IB as in BRE, so it is now a direct
+  swap; the overdue growth below already reads them that way.
 
-  At the due date `matureLoans` deducts the amount
-  owed from gold then bank; an unpaid loan **defaults** — the shortfall rolls into
-  open-ended **Debt** grown by `LoanDefaultPenaltyPct` (25%) and support drops.
-  Defaulted **Debt** still grows `DebtGrowthPct`/turn, held at the money cap, and is repaid from the same
-  Cash Relief screen.
+  **Collection is binary-verified** (2026-09-24). BRE keeps loans in day slots
+  (`run_bank` adds the compounded total to the slot for its due day), and on the
+  due day the slot becomes what the bank is collecting — IB's `Empire.Debt`.
+  Nothing is taken at maintenance. Instead, at the start of each turn played,
+  after the income lines (`process_economic_production`, BRE.OVR 0x34ca3), the
+  bank takes `min(installment, owed, gold in hand)` from **gold in hand only** —
+  never savings — and prints the amount in red. `run_daily_maintenance`
+  (0x8e0c-0x8fe1) then, each day:
+
+      owed        = trunc(owed x (1 + (max(investRate, savingsRate) + 60) / 1000))
+      owed       += every loan falling due today
+      installment = max(owed / turnsPerDay, 100)
+
+  So the unpaid remainder grows 11.0% a day on a board at 5.0%, a full day of
+  turns clears all but the rounding, and the floor of 100 finishes a small
+  remainder in one turn. There is **no default, no penalty and no loss of
+  support** — the "late payments will incur additional penalties" warning is
+  the growth. IB matched none of this until 2026-09-24: it took the whole sum
+  from gold then savings at the due date, added a 25% penalty, cut support by
+  10 and grew what was left 10% per TURN.
+
+  Two IB differences remain. IB grows the balance in integers, where BRE
+  multiplies in reals: BRE can land one gold lower when the exact product is a
+  whole number. BRE's `Trunc` raises a runtime error past 2^31; IB holds the
+  balance at the money cap. And IB lets a baron pay early from Cash Relief,
+  which BRE's bank has no option for.
 - **The Investment Rate floats** — each daily maintenance updates it:
   - Supply/demand: heavy investing pushes rates **down**; weak investing
     pushes them **up**.
