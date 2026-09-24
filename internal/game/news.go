@@ -181,10 +181,16 @@ func (w *World) postStarvationNews(e *Empire) {
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
 
+// investRateNewsTenths is the smallest move in the investment rate that makes
+// the news, in tenths of a percent.
+const investRateNewsTenths = 2
+
 // postInvestRateNews broadcasts a change in the planetary investment rate
-// (BRE's daily bank-rate float). No line posts when the rate did not move.
+// (BRE's daily bank-rate float). As in BRE, a move of less than 0.2% posts
+// nothing (run_daily_maintenance 0x91f7).
 func (w *World) postInvestRateNews(before int) {
 	switch {
+	case w.InvestRate-before < investRateNewsTenths && before-w.InvestRate < investRateNewsTenths:
 	case w.InvestRate > before:
 		w.postNews(fmt.Sprintf("The planetary investment rate rose to %s%%.", PctTenths(w.InvestRate)))
 	case w.InvestRate < before:

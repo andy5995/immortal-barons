@@ -23,6 +23,31 @@ package game
 //   - "reconstructed / tunable" values are IB's own, anchored to the BRE scale.
 //     These are the playtest knobs.
 
+// --- Investment rate drift (BINARY-VERIFIED: run_daily_maintenance, BRE.OVR
+// 0x9008-0x92ab, read 2026-09-24) ---
+//
+// Each day the returns due today are averaged over the living realms, each
+// realm's figure first cut to whole millions, and the average picks the step.
+// Bounds are inclusive. Light investing raises the rate and heavy investing
+// lowers it; 126 to 200 million a realm holds it.
+var InvestRateSteps = []struct {
+	UpToMillions int64
+	Tenths       int
+}{
+	{25, 3},
+	{65, 2},
+	{125, 1},
+	{200, 0},
+	{1200, -1},
+	{1600, -2},
+	{2000, -3},
+}
+
+// InvestRateRailTenths is the half-point step that overrides the one above when
+// the rate strays below half the Standard Investment Rate (up) or above one and
+// a half times it (down).
+const InvestRateRailTenths = 5
+
 // --- Other economy tunables ---
 const (
 	// --- Technology (BRE-verified: BRE.OVR 0x33E85-0x34029 and 056d:1a07) ---

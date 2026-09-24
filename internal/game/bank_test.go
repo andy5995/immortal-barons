@@ -79,37 +79,65 @@ func TestInvestmentMaturesInMaintenance(t *testing.T) {
 	}
 }
 
-func TestAdjustInvestRateClamps(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 42)
-	e := w.AddHuman("tester", "Testland")
-
-	// Drive the rate down with heavy investing.
-	w.InvestRate = MinInvestRate + 1
-	e.Investments = []Investment{{Amount: 10_000_000, MaturesDay: 9999}}
-	for i := 0; i < 50; i++ {
+// The daily step is BRE's, read from run_daily_maintenance (0x9008-0x92ab):
+// golden brackets on the average of the returns due today, in whole millions
+// per living realm, with the Standard rate's rails overriding them.
+func TestInvestRateDrift(t *testing.T) {
+	for _, c := range []struct {
+		dueEach    int64 // returns due today, per realm
+		rate, want int
+	}{
+		{0, 50, 53},             // nothing invested: +0.3
+		{25_999_999, 50, 53},    // 25 million, truncated: still +0.3
+		{26_000_000, 50, 52},    // 26 million: +0.2
+		{65_000_000, 50, 52},    // inclusive upper bound
+		{66_000_000, 50, 51},    // +0.1
+		{150_000_000, 50, 50},   // 126..200 holds
+		{201_000_000, 50, 49},   // -0.1
+		{1_201_000_000, 50, 48}, // -0.2
+		{2_000_000_000, 50, 47}, // -0.3
+		{2_000_000_000, 17, 14}, // 17 is not below 35/2 = 17: no rail
+		{2_000_000_000, 16, 21}, // below half the Standard rate: +0.5
+		{0, 52, 55},             // 52 is not above 1.5 x 35 = 52.5
+		{0, 53, 48},             // above it: -0.5
+	} {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		w.Config.StdInvestRate = 35
+		for _, name := range []string{"a", "b"} {
+			w.AddHuman(name, "Realm "+name).InvestReturnsToday = c.dueEach
+		}
+		w.InvestRate = c.rate
 		w.adjustInvestRate()
-		if w.InvestRate < MinInvestRate || w.InvestRate > MaxInvestRate {
-			t.Fatalf("InvestRate out of bounds: %d", w.InvestRate)
+		if w.InvestRate != c.want {
+			t.Errorf("due %d each at rate %d: got %d, want %d", c.dueEach, c.rate, w.InvestRate, c.want)
 		}
 	}
-	// The endpoint proves the nudge actually moves: with the mechanic a no-op
-	// the rate would still sit at MinInvestRate+1 and the bounds alone would
-	// pass. Deterministic under seed 42.
-	if w.InvestRate != MinInvestRate {
-		t.Errorf("heavy investing should drive the rate to the floor %d, got %d", MinInvestRate, w.InvestRate)
-	}
+}
 
-	// Drive the rate up with no investing.
-	e.Investments = nil
-	w.InvestRate = MaxInvestRate - 1
-	for i := 0; i < 50; i++ {
-		w.adjustInvestRate()
-		if w.InvestRate < MinInvestRate || w.InvestRate > MaxInvestRate {
-			t.Fatalf("InvestRate out of bounds: %d", w.InvestRate)
-		}
+// The average is over every living realm, each cut to whole millions first, so
+// one heavy investor among idle realms moves the rate less than alone.
+func TestInvestRateDriftAveragesPerRealm(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.AddHuman("a", "Heavy").InvestReturnsToday = 300_999_999 // 300
+	w.AddHuman("b", "Idle")
+	w.AddHuman("c", "Idle Too")
+	gone := w.AddHuman("d", "Fallen")
+	gone.Alive, gone.InvestReturnsToday = false, 2_000_000_000
+	w.InvestRate = 50
+	w.adjustInvestRate() // 300 / 3 = 100 million: +0.1
+	if w.InvestRate != 51 {
+		t.Errorf("rate %d, want 51", w.InvestRate)
 	}
-	if w.InvestRate != MaxInvestRate {
-		t.Errorf("no investing should drive the rate to the ceiling %d, got %d", MaxInvestRate, w.InvestRate)
+}
+
+// Steady Investment Rate pins the rate to the Standard rate.
+func TestSteadyInvestRate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.SteadyInvest, w.Config.StdInvestRate = true, 60
+	w.InvestRate = 47
+	w.adjustInvestRate()
+	if w.InvestRate != 60 {
+		t.Errorf("steady rate %d, want 60", w.InvestRate)
 	}
 }
 
@@ -132,11 +160,12 @@ func TestInvestRateMigration(t *testing.T) {
 	// floor and so is recognizable as the older unit.
 	for _, c := range []struct{ stored, want int }{
 		{0, DefaultInvestRate},
-		{5, 50},            // 5%/day, in band once scaled
-		{1, MinInvestRate}, // 1%/day is below BRE's floor
-		{12, MaxInvestRate},
-		{25, MaxInvestRate}, // the old ceiling was 2.5x BRE's
-		{50, 50},            // already tenths: left alone
+		{5, 50}, // 5%/day, in band once scaled
+		{1, 10},
+		{12, 120},
+		{13, 130},
+		{14, 14}, // indistinguishable from a live rate: left alone
+		{50, 50}, // already tenths: left alone
 	} {
 		w := NewWorldSeed(DefaultConfig(), 1)
 		w.InvestRate = c.stored
@@ -157,7 +186,7 @@ func TestInvestReturnUsesTenthsOfAPercent(t *testing.T) {
 	if got := ExpectedReturn(1000, DefaultInvestRate, 2); got != 1071 { // 1000·1.035²
 		t.Errorf("1000 for 2 days at 3.5%%/day: want 1071, got %d", got)
 	}
-	if got := ExpectedReturn(1000, MaxInvestRate, 10); got != 2593 { // 1000·1.10¹⁰
+	if got := ExpectedReturn(1000, 100, 10); got != 2593 { // 1000·1.10¹⁰
 		t.Errorf("the ceiling should pay 2593 over ten days, got %d", got)
 	}
 }

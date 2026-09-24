@@ -431,9 +431,10 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 		t.Errorf("the fixture came back with no prices (%+v); an absent key must inherit the fresh default", got.Prices)
 	}
 	// The fixture's rate, 12, is in the whole percents that release used; loading
-	// converts it to tenths and holds it at the band's 10.0%/day ceiling.
-	if got.GameDay != 7 || got.InvestRate != 100 {
-		t.Errorf("world scalars: day=%d rate=%d, want 7 and 100", got.GameDay, got.InvestRate)
+	// converts it to tenths. There is no band to hold it in since the drift was
+	// read from the binary.
+	if got.GameDay != 7 || got.InvestRate != 120 {
+		t.Errorf("world scalars: day=%d rate=%d, want 7 and 120", got.GameDay, got.InvestRate)
 	}
 	// The fixture carries computer barons, and loading it retires them, which
 	// files a line each — so this checks the legacy line is FIRST, not alone.

@@ -109,30 +109,35 @@ func (w *World) matureInvestments(e *Empire) int64 {
 	return paid
 }
 
-// Investment-rate drift (v1 tunables, in the same tenths-of-a-percent unit as
-// InvestRate). Total gold invested across all empires above the threshold pushes
-// the rate down (heavy demand for the bank's gold); below it, the rate drifts
-// up. The nudge is BRE's stated half point; the small random drift on top is the
-// clone's stand-in for the original's occasional inflation events.
-const (
-	investRateHeavyThreshold = 5_000_000
-	investRateNudgeTenths    = 5
-	investRateDriftTenths    = 2
-)
-
 // steadyInvestRate is the fixed daily rate the league's Standard Investment Rate
-// knob sets, clamped to the engine's [MinInvestRate, MaxInvestRate] band. The
-// knob is already in tenths of a percent per day — BRE words it as the return
-// over ten days, which is the same figure.
+// knob sets, clamped to the knob's own range. The knob is already in tenths of
+// a percent per day — BRE words it as the return over ten days, which is the
+// same figure.
 func (w *World) steadyInvestRate() int {
-	return min(max(w.Config.StdInvestRate, MinInvestRate), MaxInvestRate)
+	return min(max(w.Config.StdInvestRate, MinStdInvestRate), MaxStdInvestRate)
 }
 
-// adjustInvestRate nudges the floating rate: heavy total investing across all
-// empires pushes it down, light investing pushes it up, plus a small random
-// drift; clamped to [MinInvestRate, MaxInvestRate]. With Steady Investment Rate
-// on, the rate is instead pinned to the league's standard rate and never
-// floats.
+// investRateStep is the day's move in the investment rate, in tenths of a
+// percent, for the returns due today averaged over the living realms in whole
+// millions (InvestRateSteps). Past the last bracket it keeps the last step;
+// BRE cannot get there, since no date may carry more than two billion.
+func investRateStep(avgMillions int64) int {
+	for _, s := range InvestRateSteps {
+		if avgMillions <= s.UpToMillions {
+			return s.Tenths
+		}
+	}
+	return InvestRateSteps[len(InvestRateSteps)-1].Tenths
+}
+
+// adjustInvestRate moves the floating rate once a day. BINARY-VERIFIED
+// (run_daily_maintenance, BRE.OVR 0x9008-0x92ab): each living realm's returns
+// due today are cut to whole millions and averaged, the average picks a step
+// (investRateStep), and two rails override it — below half the Standard rate
+// the bank raises the rate InvestRateRailTenths, above one and a half times it
+// the bank lowers it as much. No random step and no hard band: only a rate
+// below zero is held at zero. With Steady Investment Rate on, the rate is
+// pinned to the Standard rate and never floats.
 func (w *World) adjustInvestRate() {
 	before := w.InvestRate
 	if w.Config.SteadyInvest {
@@ -140,19 +145,22 @@ func (w *World) adjustInvestRate() {
 		w.postInvestRateNews(before)
 		return
 	}
-	var total int64
+	var millions, realms int64
 	for _, e := range w.Empires {
 		if e.Alive {
-			total += w.PendingInvested(e)
+			millions += e.InvestReturnsToday / 1_000_000
+			realms++
 		}
 	}
-	if total > investRateHeavyThreshold {
-		w.InvestRate -= investRateNudgeTenths
-	} else {
-		w.InvestRate += investRateNudgeTenths
+	step := investRateStep(millions / max(realms, 1))
+	std := w.Config.StdInvestRate
+	switch {
+	case std/2 > w.InvestRate:
+		step = InvestRateRailTenths
+	case 2*w.InvestRate > 3*std: // rate > 1.5 x std, exact
+		step = -InvestRateRailTenths
 	}
-	w.InvestRate += w.rng.Intn(2*investRateDriftTenths+1) - investRateDriftTenths
-	w.InvestRate = min(max(w.InvestRate, MinInvestRate), MaxInvestRate)
+	w.InvestRate = max(w.InvestRate+step, 0)
 	w.postInvestRateNews(before)
 }
 

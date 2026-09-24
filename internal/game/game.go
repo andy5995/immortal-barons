@@ -40,12 +40,15 @@ const (
 	// none of that, and its band ran to 25%/day — two and a half times BRE's
 	// ceiling, which a ten-day term compounds into a ninefold return.
 	//
-	// The floating rate is bounded by the same range BRE allows the knob,
-	// (35; 100): a live game whose knob sat at the default 35 was observed at
-	// 5.0%/day, so the rate drifts well above its setting but not without limit.
-	DefaultInvestRate = 35  // 3.5%/day, matching Config.StdInvestRate's default
-	MinInvestRate     = 35  // 3.5%/day
-	MaxInvestRate     = 100 // 10.0%/day
+	// The floating rate has no band: it drifts with how much is invested, and
+	// the bank's rails pull it back toward the Standard rate (adjustInvestRate).
+	DefaultInvestRate = 35 // 3.5%/day, matching Config.StdInvestRate's default
+
+	// legacyPercentRateMax is the highest rate that loads as a whole-percent
+	// figure from a save written before v0.0.4. The rails keep a live rate
+	// above 14 (half the lowest Standard rate, less one day's largest fall), so
+	// 13 and below can only be the old unit.
+	legacyPercentRateMax = 13
 )
 
 // RemoteScore is one empire's score as reported by another board's
@@ -515,18 +518,16 @@ func (w *World) initFreshGame() {
 
 // EnsureInvestRate repairs InvestRate after loading a save that predates
 // investments (InvestRate zero), and converts one written while the rate was a
-// whole percent. The two units cannot be confused: the old band was 1..25 and
-// the new one starts at 35, so anything below the floor is a percent figure
-// that wants scaling by ten.
+// whole percent (legacyPercentRateMax). A legacy 14 to 25 cannot be told from
+// a live rate and loads as it stands; the rails lift it within days.
 func (w *World) EnsureInvestRate() {
 	if w.InvestRate == 0 {
 		w.InvestRate = DefaultInvestRate
 		return
 	}
-	if w.InvestRate < MinInvestRate {
+	if w.InvestRate <= legacyPercentRateMax {
 		w.InvestRate *= 10
 	}
-	w.InvestRate = min(max(w.InvestRate, MinInvestRate), MaxInvestRate)
 }
 
 // EnsureNews migrates a save that predates the Today/Yesterday news split.

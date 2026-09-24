@@ -3656,27 +3656,38 @@ Investments / Loans**, and **View Bank Rates**.
   whole number. BRE's `Trunc` raises a runtime error past 2^31; IB holds the
   balance at the money cap. And IB lets a baron pay early from Cash Relief,
   which BRE's bank has no option for.
-- **The Investment Rate floats** — each daily maintenance updates it:
-  - Supply/demand: heavy investing pushes rates **down**; weak investing
-    pushes them **up**.
-  - The bank nudges rates by 0.5% to stop them collapsing or skyrocketing.
-  - Random events: the Queen occasionally raises/lowers investment rates by
-    ~1% (inflation flavor).
-  - The sysop configures a **Standard** and a **Steady** investment rate.
+- **The Investment Rate floats** — each daily maintenance updates it.
+  **Binary-verified** (`run_daily_maintenance`, BRE.OVR 0x9008-0x92ab, read
+  2026-09-24):
+  - Each living realm's returns due today are cut to whole millions, summed and
+    divided by the number of realms. The average picks the day's step, bounds
+    inclusive: 0-25 million **+0.3**, 26-65 **+0.2**, 66-125 **+0.1**, 126-200
+    hold, 201-1,200 **-0.1**, 1,201-1,600 **-0.2**, 1,601-2,000 **-0.3**
+    (`InvestRateSteps`). Light investing raises the rate; heavy investing lowers
+    it.
+  - Two rails override that step: below **half** the Standard Investment Rate
+    (integer half) the bank raises the rate **0.5**, and above **one and a half
+    times** it the bank lowers it 0.5 ("In order to control collapsing /
+    skyrocketing …"). There is no random step and no hard band; only a rate
+    below zero would be held at zero.
+  - A move of 0.2 or more makes the news; 0.1 moves post nothing.
+  - With **Steady** on, the rate is pinned to the Standard rate and none of the
+    above runs.
+  - Separately, the Queen occasionally raises or lowers the rate by 1% as a
+    random event (BRE.OVR 0x4f282). **IB does not have this event.**
 
   **IB holds the rate in tenths of a percent per day** (`World.InvestRate`),
   which is the unit BRE works in throughout: the Standard Investment Rate knob
   states the return over ten days, so its default 35 is 3.5%/day; the
   Investments screen quotes two decimals ("5.00%") and View Bank Rates one
-  ("5.0%"); and the half-point nudge above cannot be expressed in whole
-  percents. The floating rate is bounded by the same range BRE allows the knob,
-  **3.5% to 10.0% per day** (`MinInvestRate`/`MaxInvestRate`) — a live game whose
-  knob sat at the default was observed at 5.0%/day, so the rate drifts well above
-  its setting but not without limit. IB held it as a whole percent until
-  v0.0.4, in a 1–25%/day band whose ceiling compounded a ten-day term into a
-  ninefold return; a save from before the change is converted on load
-  (`EnsureInvestRate` — the old band tops out below the new floor, so the two
-  units cannot be confused) and clamped into the band.
+  ("5.0%"). IB used its own rule until 2026-09-24 — a 0.5 nudge on a flat
+  5-million total plus a random step, clamped to 3.5%-10.0% a day — and none of
+  that was in the binary. The rails keep a live rate at or above 14 tenths
+  (1.4%) on a board whose Standard rate is 35, and no more than 0.3 above one
+  and a half times the Standard rate. IB held the rate as a whole percent until
+  v0.0.4; a save from before then is converted on load when its rate is 13 or
+  less (`EnsureInvestRate`). An old rate of 14 to 25 cannot be told from a live
+  one and loads as it stands, and the rails lift it within days.
 - **Loans**: you borrow gold at a stated loan interest rate ("The loan rate
   will be N% interest overall"); loans appear in the list with a due date.
 - **Undermine Investments** is a covert op that damages a rival's pending
