@@ -5215,8 +5215,10 @@ transport at the rate the transport moves. The price is comparability: a board
 that runs more often folds more samples into its averages, so its figures react
 faster than a slower board's. The probes ride along with whatever else the run
 is sending, adding at most one small packet per board per run, plus its echo.
-`-full` is a planetary run too, so a board that uses it probes once per caller;
-that is kept, because `-full` can be a board's only transport.
+`-full` is a planetary run too, so a board that uses it also probes once per
+caller. That is kept: `-full` exists to move packets at the moment a caller
+enters, and a probe is part of that. It never replaces the scheduled `-maint`
+a league board needs.
 
 ### IP Messages
 

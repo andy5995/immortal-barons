@@ -188,9 +188,10 @@ These options are for games that link several BBSes together (a "league"). See
   directory. Use `-detailed` alongside it to see each packet as it is read and
   written.
 
-    A board that schedules `-maint` does not need `-full` on its door command.
-    The timer already moves the packets, and `-full` makes each caller wait for
-    an exchange before the game starts.
+    `-full` is optional, and it never replaces the scheduled `-maint` a league
+    board needs. What it adds is an exchange at the moment a caller enters, so
+    news from other boards is as fresh as possible. The cost is a wait before
+    the game starts. With a timer every 15 minutes, a board can leave it off.
 - **`-detailed`** — Show each packet as it is read and written. This is a
   modifier, not a mode: it takes effect when used with `-full` or `-planetary`.
   Without one of those, it is ignored.
