@@ -114,7 +114,7 @@ func openSession(caller *door.Caller) (session.Session, func(), error) {
 
 // runLocal plays Immortal Barons locally in the caller's terminal against the
 // shared persistent world, for someone testing or playing outside a BBS.
-func runLocal(cfg game.Config, name, today string, cs charset, noANSI bool) {
+func runLocal(cfg game.Config, name, today string, cs charset, noANSI bool) error {
 	// -name "" would build a realm with no owner handle, which is the marker for a
 	// computer baron — the same fallback the door path applies to a dropfile with
 	// no alias.
@@ -133,10 +133,10 @@ func runLocal(cfg game.Config, name, today string, cs charset, noANSI bool) {
 	// cs was resolved from the flags and the locale by wantCharset.
 	s := encodeFor(session.Session(c), cs)
 	if _, err := play.Run(s, play.Identity{Handle: name}, cfg, today); err != nil {
-		fmt.Fprintln(os.Stderr, "immortal-barons -local:", err)
-		return // no sign-off after a startup failure (e.g. no game — run -reset)
+		return err // no sign-off after a startup failure (e.g. no game — run -reset)
 	}
 	fmt.Fprint(s, "\nUntil next turn, Baron.\n")
+	return nil
 }
 
 // runDoor is the default front-end: the BBS launched us with a drop file.

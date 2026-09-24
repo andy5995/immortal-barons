@@ -7,13 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/menu"
-	"github.com/andy5995/immortal-barons/internal/play"
-	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
 	"github.com/andy5995/immortal-barons/internal/textwrap"
 )
@@ -333,9 +329,13 @@ func fullExchangeAllowed(cfg game.Config, w io.Writer) bool {
 }
 
 // runFull chains the three steps a sysop's batch file runs: inbound, play,
-// outbound (BRE's "BRE FULL"). It requires either -local with a name or a BBS
-// drop file to identify the caller for the play step.
-func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bool) error {
+// outbound (BRE's "BRE FULL"). The play step is exactly what the same command
+// line without -full runs: -local plays in the terminal, anything else is the
+// door, drop file and all. It used to decide by whether a player name was set,
+// but -name defaults to the OS user, so every door launch played on the BBS
+// machine's console instead of the caller's connection.
+func runFull(cfg game.Config, o *opts, today string, cs charset) error {
+	verbose := *o.detailed
 	// It runs the planetary step, so it is refused on the same terms as
 	// -planetary: with no league number it would take every league's packets.
 	if cfg.InterBBSEnabled() {
@@ -350,54 +350,14 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 		}
 	}
 
-	// Step 2: play a turn. Detect whether we have -local with a name or a drop
-	// file to identify the caller.
-	if strings.TrimSpace(name) != "" {
-		// -local path: play locally.
-		c := session.NewConsole()
-		defer c.Close()
-		if noANSI {
-			c.SetPlain()
-		}
-		s := encodeFor(session.Session(c), cs)
-		if _, err := play.Run(s, play.Identity{Handle: name}, cfg, today); err != nil {
+	if *o.local {
+		// A play step that failed skips the outbound half, as a door that
+		// fails does by exiting.
+		if err := runLocal(cfg, *o.name, today, cs, *o.noANSI); err != nil {
 			return err
 		}
-		fmt.Fprint(s, "\nUntil next turn, Baron.\n")
 	} else {
-		// Door path: try to find a drop file.
-		doorCfg, derr := store.LoadDoorConfig(cfg.DataDir)
-		if derr != nil {
-			return fmt.Errorf("could not read door config: %w", derr)
-		}
-		if doorCfg.DropfileFormat == "" {
-			return fmt.Errorf("requires -local or a BBS drop file (run -set-dropfile first)")
-		}
-		path := findDropfile(doorCfg.DropfileFormat)
-		if path == "" {
-			return fmt.Errorf("requires -local or a BBS drop file (no %s found in the working directory)", doorCfg.DropfileFormat)
-		}
-		caller, cerr := door.ParseDropfileAs(path, doorCfg.DropfileFormat)
-		if cerr != nil {
-			return fmt.Errorf("drop file: %w", cerr)
-		}
-		s, closeSession, serr := openSession(caller)
-		if serr != nil {
-			return serr
-		}
-		defer closeSession()
-		s = encodeFor(s, wantCharset(false, false, false, false))
-		if !caller.ANSI || noANSI {
-			s = session.NewPlain(s)
-		}
-		handle := caller.Handle
-		if handle == "" {
-			handle = fmt.Sprintf("node%d", caller.Node)
-		}
-		id := play.Identity{Handle: handle, TimeLeft: time.Duration(caller.SecondsLeft) * time.Second}
-		if _, err := play.Run(s, id, cfg, today); err != nil {
-			return err
-		}
+		runDoor(cfg, o, today, cs)
 	}
 
 	if !exchange {

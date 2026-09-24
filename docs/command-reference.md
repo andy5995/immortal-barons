@@ -182,9 +182,15 @@ These options are for games that link several BBSes together (a "league"). See
   turn, and write outbound packets. This is the same as running `-planetary`,
   then the door (or `-local`), then `-planetary` again, but in one step. The FTN
   transport runs before and after, as in `-planetary`, but never waits for
-  another run that is already moving the mail. It requires either `-local` (with
-  `-name` to identify the player) or a BBS drop file in the working directory.
-  Use `-detailed` alongside it to see each packet as it is read and written.
+  another run that is already moving the mail. The play step is the one the
+  same command runs without `-full`: `-local` plays in your terminal, and
+  otherwise the door reads the drop file, from `-dropfile` or the working
+  directory. Use `-detailed` alongside it to see each packet as it is read and
+  written.
+
+    A board that schedules `-maint` does not need `-full` on its door command.
+    The timer already moves the packets, and `-full` makes each caller wait for
+    an exchange before the game starts.
 - **`-detailed`** — Show each packet as it is read and written. This is a
   modifier, not a mode: it takes effect when used with `-full` or `-planetary`.
   Without one of those, it is ignored.

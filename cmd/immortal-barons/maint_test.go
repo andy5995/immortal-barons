@@ -47,6 +47,15 @@ func leagueBoard(t *testing.T) game.Config {
 	return cfg
 }
 
+// localOpts is the flag set of "-local -name NAME -no-ansi", for calling a mode
+// function directly with the flags it reads.
+func localOpts(name string) *opts {
+	local, noANSI, off := true, true, false
+	empty := ""
+	return &opts{local: &local, name: &name, noANSI: &noANSI, detailed: &off, dropPath: &empty,
+		utf8: &off, cp437: &off, asciiOut: &off}
+}
+
 // captureStdout runs fn with stdout redirected and returns what it printed,
 // for the modes whose printout is the only place their answer lands.
 func captureStdout(t *testing.T, fn func()) string {
@@ -106,7 +115,7 @@ func TestModesThatRunThePlanetaryStepRefuseANoLeagueNumberBoard(t *testing.T) {
 	cfg.LeagueNumber = 0
 	for mode, run := range map[string]func() error{
 		"-maint":        func() error { return runMaint(cfg, "2026-09-22") },
-		"-full":         func() error { return runFull(cfg, "tester", "2026-09-22", 0, true, false) },
+		"-full":         func() error { return runFull(cfg, localOpts("tester"), "2026-09-22", 0) },
 		"-league-reset": func() error { return runLeagueReset(cfg, "2026-10-01") },
 	} {
 		if err := run(); err == nil || !strings.Contains(err.Error(), "no league number") {

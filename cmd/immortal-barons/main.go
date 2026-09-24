@@ -152,7 +152,7 @@ func main() {
 	}
 
 	if *o.full {
-		exitOn("-full", runFull(cfg, *o.name, today, localCS, *o.noANSI, *o.detailed))
+		exitOn("-full", runFull(cfg, o, today, localCS))
 		return
 	}
 
@@ -251,7 +251,9 @@ func main() {
 	}
 
 	if *o.local {
-		runLocal(cfg, *o.name, today, localCS, *o.noANSI)
+		if err := runLocal(cfg, *o.name, today, localCS, *o.noANSI); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -local:", err)
+		}
 		return
 	}
 
