@@ -174,7 +174,7 @@ type World struct {
 	Alliances     []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
 	Treaties      []Treaty
 	LastMaster    string // crowned at league end (endGame); shown as "Last Planetary Master"
-	CurrentMaster string // daily net-worth leader, tracked by postMasterNews
+	CurrentMaster string // daily region-count leader (planetMaster), tracked by postMasterNews
 	RemoteBoards  []RemoteBoard
 	// SysopNotices are transport faults for the person running the game, not
 	// for its players: a packet that could not be delivered, orders that failed

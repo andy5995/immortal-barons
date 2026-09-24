@@ -391,17 +391,25 @@ flow runs in this order:
    step):
 
    ```
-   master  = the living realm with the highest net worth
+   master  = the living realm with the most regions (total_regions,
+             056d:0ec6); a tie stays with the earlier letter
    payout  = purse / 100
    purse  -= payout
    ```
 
    Settling the title and paying for it are one routine. It scans the realm
-   letters, takes the highest net worth among those still living, files the news
+   letters, takes the most regions among those still living, files the news
    line, writes the winner's letter to the config record `+0x49`, then credits
    that realm's gold (`+0x66`) and takes the same amount back out of the purse.
    The award is **uncapped and ungated** — the New Realm Protection cap belongs
    to the refund above and is not tested here.
+
+   The comparison is a region count, not net worth: the call at `+0x5c` is
+   `056d:0ec6`, the same `total_regions` the region-price surcharge reads. This
+   section and IB said net worth until 2026-09-24, when a board crowned a realm
+   holding fewer regions; do not "correct" it back. IB crowns a season's
+   `LastMaster` by the same rule (`planetMaster`); the original's end-of-season
+   crowning has not been read.
 
    Three news phrasings, chosen by what changed: the holder *keeps* the title,
    *takes* it from a named predecessor, or *claims* it where there was no holder.

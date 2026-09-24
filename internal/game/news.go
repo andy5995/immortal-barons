@@ -192,22 +192,31 @@ func (w *World) postInvestRateNews(before int) {
 	}
 }
 
-// postMasterNews broadcasts the planet's political standing: the empire
-// with the highest net worth among the living either keeps or claims the
-// title of Planetary Master, and CurrentMaster is kept in sync with it. This
-// runs every maintenance day (matching BRE, which shows the title daily),
-// separate from endGame's one-time crowning of LastMaster at a league's end.
-func (w *World) postMasterNews() {
+// planetMaster is the living realm holding the most regions, the Planetary
+// Master. BINARY-VERIFIED (BRE.OVR 0x007aeb, update_planet_title): the scan
+// over letters A..Y compares total_regions (056d:0ec6), not net worth, and
+// replaces the leader only on a strictly larger count, so a tie stays with the
+// earlier letter. IB read it as net worth until 2026-09-24.
+func (w *World) planetMaster() *Empire {
 	var master *Empire
-	bestNW := 0
 	for _, e := range w.Empires {
-		if e.Alive {
-			if nw := w.NetWorth(e); master == nil || nw > bestNW {
-				bestNW = nw
-				master = e
-			}
+		if !e.Alive {
+			continue
+		}
+		if master == nil || e.Land > master.Land || (e.Land == master.Land && e.Slot < master.Slot) {
+			master = e
 		}
 	}
+	return master
+}
+
+// postMasterNews broadcasts the planet's political standing: the realm with
+// the most regions (planetMaster) either keeps or claims the title of
+// Planetary Master, and CurrentMaster is kept in sync with it. This runs every
+// maintenance day (matching BRE, which shows the title daily), separate from
+// endGame's one-time crowning of LastMaster at a league's end.
+func (w *World) postMasterNews() {
+	master := w.planetMaster()
 	if master == nil {
 		return
 	}

@@ -808,3 +808,12 @@ Output pane keeps scrolling while nothing you type is echoed.
 on a change. Pick a byte certain to differ — a high byte of a large value — or
 zero the region first and watch any of it. A watchpoint on a byte that happens
 to be rewritten with the same value is indistinguishable from no write at all.
+
+### A far call's target is a catalog id: `seg*16 + off`
+
+`disasm` prints resident calls raw (`call word 0x56d:word 0xec6`). The linear
+address is `0x56d0 + 0x0ec6 = 0x6596`, and that is the catalog's
+`bre0988:exe:procedure:06596` (`total_regions`), which `lookup` names at once.
+Do this for every call in a routine you are about to summarize. The Planetary
+Master was recorded as "highest net worth" for weeks; the routine's comparison
+called `total_regions`, which one addition would have shown (2026-09-24).

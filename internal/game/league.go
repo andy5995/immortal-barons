@@ -7,21 +7,13 @@ package game
 // persist across the reset.
 func (w *World) Reset() { w.initFreshGame() }
 
-// endGame ends a timed league: crown the highest-net-worth living empire as
-// Planetary Master, then reset for a fresh game. Called when GameLength is
+// endGame ends a timed league: crown the Planetary Master (planetMaster, the
+// living realm with the most regions), then reset for a fresh game. Called when GameLength is
 // reached (see turn.go). The sysop -reset command uses Reset (no crowning).
 func (w *World) endGame() {
 	best := ""
-	bestNW := 0
-	found := false
-	for _, e := range w.Empires {
-		if e.Alive {
-			if nw := w.NetWorth(e); !found || nw > bestNW {
-				bestNW = nw
-				best = e.Name
-				found = true
-			}
-		}
+	if m := w.planetMaster(); m != nil {
+		best = m.Name
 	}
 	w.initFreshGame()
 	if found {

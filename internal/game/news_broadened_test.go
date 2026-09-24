@@ -144,3 +144,34 @@ func TestMasterIsPaidFromTheQueensPurse(t *testing.T) {
 		t.Errorf("empty purse still paid: gold %d, events %v", leader.Gold, leader.Events)
 	}
 }
+
+// The Planetary Master is the living realm with the most regions, whatever its
+// net worth: update_planet_title (BRE.OVR 0x007aeb) compares total_regions.
+// Reported from play: a realm with 13,168 regions and less net worth was
+// passed over for one with 10,020. A tie stays with the earlier letter.
+func TestPlanetaryMasterGoesToTheMostRegions(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	rich := w.AddHuman("rich", "Richland")
+	wide := w.AddHuman("wide", "Wideland")
+	rich.Regions = RegionMix{}
+	rich.Regions.Coastal = 10_020
+	rich.syncLand()
+	rich.Tanks = 5_000_000
+	wide.Regions = RegionMix{}
+	wide.Regions.Coastal = 13_168
+	wide.syncLand()
+	if w.NetWorth(rich) <= w.NetWorth(wide) {
+		t.Fatalf("fixture: want the smaller realm richer, got %d vs %d", w.NetWorth(rich), w.NetWorth(wide))
+	}
+	w.postMasterNews()
+	if w.CurrentMaster != wide.Name {
+		t.Errorf("CurrentMaster = %q, want %q (more regions, less net worth)", w.CurrentMaster, wide.Name)
+	}
+
+	wide.Regions.Coastal = 10_020
+	wide.syncLand()
+	if got := w.planetMaster(); got != rich {
+		t.Errorf("tie on regions went to %s, want the earlier letter %s", w.EmpireLetter(got), w.EmpireLetter(rich))
+	}
+}
