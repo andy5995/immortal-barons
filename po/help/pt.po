@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-24 00:14-0500\n"
+"POT-Creation-Date: 2026-09-24 00:44-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1297,8 +1297,10 @@ msgstr "Sacar — traz ouro do banco de volta para o seu tesouro."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:16
-msgid "Cash Relief / Loans — borrow gold, or pay back what you already owe."
-msgstr "Auxílio / Empréstimos — tome ouro emprestado, ou pague o que já deve."
+msgid "Cash Relief / Loans — borrow gold, or pay back a loan that is due."
+msgstr ""
+"Auxílio / Empréstimos - tome ouro emprestado, ou pague um empréstimo que "
+"venceu."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:21
@@ -1333,10 +1335,10 @@ msgstr ""
 #: internal/help/content/economy/banking.md:30
 msgid ""
 "The start of your next turn tells you what the bank paid: the interest, and "
-"what any investment that matured today paid back."
+"your share of the investments that matured today."
 msgstr ""
-"O começo do seu próximo turno diz quanto o banco pagou: os juros, e o que "
-"qualquer investimento vencido hoje devolveu."
+"O começo do seu próximo turno diz quanto o banco pagou: os juros, e a sua "
+"parte dos investimentos que venceram hoje."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:33
@@ -1389,36 +1391,55 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/economy/banking.md:51
 msgid ""
-"You must repay the full amount on the due date. The bank takes it from your "
-"gold first, then from your savings. If you cannot pay it all, the rest "
-"becomes a debt with an extra penalty added, and your people lose some "
-"support. Debt keeps growing each turn until you repay it, so clear it early."
+"From the due date, the bank takes a payment from your gold in hand at the "
+"start of each turn you play, until the loan is paid. Each payment is a share "
+"of what you owe, so a full day of turns pays nearly all of it. The bank "
+"never takes gold from your savings. If you have no gold, you pay nothing "
+"that turn."
 msgstr ""
-"Você precisa devolver o valor inteiro na data do vencimento. O banco tira "
-"primeiro do seu ouro em mãos, depois da sua poupança. Se não der para pagar "
-"tudo, o resto vira dívida com uma multa por cima, e o seu povo perde um "
-"pouco de apoio. A dívida cresce a cada turno até ser paga, então quite logo."
+"A partir do vencimento, o banco cobra uma parcela do seu ouro em mãos no "
+"começo de cada turno que você joga, até o empréstimo ser quitado. Cada "
+"parcela é uma parte do que você deve, então um dia inteiro de turnos paga "
+"quase tudo. O banco nunca tira ouro da sua poupança. Se você não tiver ouro, "
+"não paga nada naquele turno."
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:55
+msgid ""
+"Whatever is still unpaid at the end of the day grows, by more than the "
+"bank's interest rates, and the payments go on the next day. So keep gold in "
+"hand when a loan comes due, or pay it off early from Cash Relief."
+msgstr ""
+"O que ainda estiver em aberto no fim do dia cresce, mais do que as taxas de "
+"juros do banco, e as parcelas continuam no dia seguinte. Então mantenha ouro "
+"em mãos quando um empréstimo vencer, ou quite-o antes pelo Auxílio."
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:52
+#: internal/help/content/economy/banking.md:56
 #, no-wrap
 msgid "Investments"
 msgstr "Investimentos"
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:58
+#: internal/help/content/economy/banking.md:65
 msgid ""
 "You can lock gold away as an investment for 2 to 10 days. It pays back your "
-"gold plus interest when it matures. The interest rate floats — it rises and "
-"falls with how much everyone is investing — so check the rate before you "
-"commit.  A common tactic is to keep several investments running at once, "
-"each for a different length, so one matures every day."
+"gold plus interest when it matures. The bank pays it out over that day, an "
+"equal part at the start of each turn you play. If you do not play all your "
+"turns, the rest is paid on the next day, rounded down to a whole thousand "
+"gold. The interest rate floats — it rises and falls with how much everyone "
+"is investing — so check the rate before you commit.  A common tactic is to "
+"keep several investments running at once, each for a different length, so "
+"one matures every day."
 msgstr ""
 "Você pode trancar ouro num investimento de 2 a 10 dias. Ele devolve o seu "
-"ouro mais juros quando vence. A taxa flutua — sobe e desce conforme o quanto "
-"todo mundo está investindo — então confira a taxa antes de aplicar.  Uma "
-"tática comum é manter vários investimentos ao mesmo tempo, cada um com um "
-"prazo, para que um vença todo dia."
+"ouro mais juros quando vence. O banco paga ao longo desse dia, uma parte "
+"igual no começo de cada turno que você joga. Se você não jogar todos os seus "
+"turnos, o resto é pago no dia seguinte, arredondado para baixo ao milhar de "
+"ouro. A taxa flutua, sobe e desce conforme o quanto todo mundo está "
+"investindo, então confira a taxa antes de aplicar.  Uma tática comum é "
+"manter vários investimentos ao mesmo tempo, cada um com um prazo diferente, "
+"para que um vença todo dia."
 
 #. type: Title #
 #: internal/help/content/economy/food.md:1
@@ -4823,6 +4844,19 @@ msgstr ""
 "Pague integralmente. Se pagar a menos, o programa encolhe para o que você "
 "pagou, e o escudo enfraquece junto. Um bolo grande é uma conta grande todo "
 "turno, então faça-o crescer num ritmo que a sua renda aguente."
+
+#~ msgid ""
+#~ "You must repay the full amount on the due date. The bank takes it from "
+#~ "your gold first, then from your savings. If you cannot pay it all, the "
+#~ "rest becomes a debt with an extra penalty added, and your people lose "
+#~ "some support. Debt keeps growing each turn until you repay it, so clear "
+#~ "it early."
+#~ msgstr ""
+#~ "Você precisa devolver o valor inteiro na data do vencimento. O banco tira "
+#~ "primeiro do seu ouro em mãos, depois da sua poupança. Se não der para "
+#~ "pagar tudo, o resto vira dívida com uma multa por cima, e o seu povo "
+#~ "perde um pouco de apoio. A dívida cresce a cada turno até ser paga, então "
+#~ "quite logo."
 
 #~ msgid "Press `?` at a menu to open this help."
 #~ msgstr "Pressione `?` num menu para abrir esta ajuda."

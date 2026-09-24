@@ -180,7 +180,7 @@ msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr "%s Gold entseuchen %s deiner %s Ödland-Regionen."
 
-#: internal/menu/turnrecap.go:414
+#: internal/menu/turnrecap.go:419
 msgid "%s have captured %s %s"
 msgstr "%s haben %s %s erobert"
 
@@ -431,7 +431,7 @@ msgstr "Über"
 msgid "Accept this treaty?"
 msgstr "Diesen Vertrag annehmen?"
 
-#: internal/menu/actions_bank.go:109
+#: internal/menu/actions_bank.go:108
 msgid "Accept?"
 msgstr "Annehmen?"
 
@@ -808,33 +808,33 @@ msgstr "Zone wählen..."
 msgid "Chopper's Fair Market"
 msgstr "Choppers Fairer Markt"
 
-#: internal/menu/turnrecap.go:510
+#: internal/menu/turnrecap.go:515
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Die Rebellion kostet Sie %d%% Ihres Reiches und seiner Truppen."
 
-#: internal/menu/turnrecap.go:506
+#: internal/menu/turnrecap.go:511
 msgid ""
 "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Vereinzelte Aufstände kosten Sie %d%% Ihres Reiches und seiner "
 "Truppen."
 
-#: internal/menu/turnrecap.go:508
+#: internal/menu/turnrecap.go:513
 msgid ""
 "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Der Aufstand breitet sich aus und nimmt %d%% Ihres Reiches und "
 "seiner Truppen."
 
-#: internal/menu/turnrecap.go:512
+#: internal/menu/turnrecap.go:517
 msgid ""
 "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Ganze Provinzen erheben sich und nehmen %d%% Ihres Reiches und "
 "seiner Truppen."
 
-#: internal/menu/turnrecap.go:514
+#: internal/menu/turnrecap.go:519
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Bürgerkrieg! Ihr Reich zerfällt beinahe - %d%% davon sind verloren."
 
@@ -870,7 +870,7 @@ msgstr "Konfiguration gespeichert."
 msgid "Confirm?"
 msgstr "Bestätigen?"
 
-#: internal/menu/gameflow.go:348
+#: internal/menu/gameflow.go:349
 msgid "Continue to your next turn?"
 msgstr "Weiter zum nächsten Zug?"
 
@@ -943,7 +943,7 @@ msgstr "TOT"
 msgid "Daily Bulletin"
 msgstr "Täglicher Aushang"
 
-#: internal/menu/actions_bank.go:168
+#: internal/menu/actions_bank.go:169
 msgid "Date"
 msgstr "Datum"
 
@@ -1131,7 +1131,7 @@ msgstr "Imperiumsstatus"
 msgid "End Protection"
 msgstr "Schutz beenden"
 
-#: internal/menu/turnrecap.go:457
+#: internal/menu/turnrecap.go:462
 msgid "End of Turn Statistics:"
 msgstr "Statistik am Zugende:"
 
@@ -1229,7 +1229,7 @@ msgstr "Globale Aufklärung"
 msgid "Gold"
 msgstr "Gold"
 
-#: internal/menu/actions_bank.go:275
+#: internal/menu/actions_bank.go:282
 msgid "Gold Needed"
 msgstr "Gold benötigt"
 
@@ -1293,7 +1293,7 @@ msgstr "Für wie viele Tage senden?"
 msgid "How many days would you like him to remain?"
 msgstr "Wie viele Tage soll er bleiben?"
 
-#: internal/menu/actions_bank.go:99
+#: internal/menu/actions_bank.go:98
 msgid "How many days would you like to invest for?"
 msgstr "Für wie viele Tage möchten Sie anlegen?"
 
@@ -1301,7 +1301,7 @@ msgstr "Für wie viele Tage möchten Sie anlegen?"
 msgid "How many million gold do you wish to put in?"
 msgstr "Wie viele Millionen Gold möchten Sie beisteuern?"
 
-#: internal/menu/actions_bank.go:69
+#: internal/menu/actions_bank.go:68
 msgid "How many would you like to borrow?"
 msgstr "Wie viel möchten Sie leihen?"
 
@@ -1313,7 +1313,7 @@ msgstr "Wie viel Nahrung kaufen?"
 msgid "How much food to sell?"
 msgstr "Wie viel Nahrung verkaufen?"
 
-#: internal/menu/actions_bank.go:54
+#: internal/menu/actions_bank.go:53
 msgid "How much to repay?"
 msgstr "Wie viel zurückzahlen?"
 
@@ -1321,7 +1321,7 @@ msgstr "Wie viel zurückzahlen?"
 msgid "How much will you give?"
 msgstr "Wie viel geben Sie?"
 
-#: internal/menu/actions_bank.go:103
+#: internal/menu/actions_bank.go:102
 msgid "How much would you like to invest?"
 msgstr "Wie viel möchten Sie anlegen?"
 
@@ -1356,6 +1356,10 @@ msgstr "Immortal Barons"
 #: internal/menu/actions_trade.go:78
 msgid "In Deal"
 msgstr "Im Geschäft"
+
+#: internal/menu/actions_bank.go:183
+msgid "In Hold"
+msgstr "Einbehalten"
 
 # Menu titles
 #: cmd/immortal-barons/league.go:142
@@ -1402,15 +1406,15 @@ msgstr ""
 "Ungültig: Ein Reichsname braucht mindestens 3 Buchstaben oder Ziffern. "
 "Verzierungen darum herum sind erlaubt und zählen nicht mit."
 
-#: internal/menu/actions_bank.go:191
+#: internal/menu/actions_bank.go:198
 msgid "Investing Interest Rate:"
 msgstr "Anlagezins:"
 
-#: internal/menu/actions_bank.go:122
+#: internal/menu/actions_bank.go:121
 msgid "Investment will be returned on %s."
 msgstr "Die Anlage wird am %s zurückgezahlt."
 
-#: internal/menu/actions_bank.go:168
+#: internal/menu/actions_bank.go:169
 msgid "Investments"
 msgstr "Anlagen"
 
@@ -1506,7 +1510,7 @@ msgstr "Anlagen / Kredite anzeigen"
 msgid "List of Planets"
 msgstr "Liste der Planeten"
 
-#: internal/menu/actions_bank.go:168
+#: internal/menu/actions_bank.go:169
 msgid "Loans Due"
 msgstr "Fällige Kredite"
 
@@ -1735,7 +1739,7 @@ msgstr "Unbekannt - noch keine Liste"
 msgid "Not set"
 msgstr "Nicht gesetzt"
 
-#: internal/menu/actions_bank.go:84
+#: internal/menu/actions_bank.go:83
 msgid "Note that late payments will incur additional penalties."
 msgstr ""
 "Beachten Sie, dass verspätete Zahlungen zusätzliche Strafen nach sich "
@@ -1903,10 +1907,6 @@ msgstr "Ausgang wartend"
 msgid "Outcome"
 msgstr "Ergebnis"
 
-#: internal/menu/actions_bank.go:180
-msgid "Overdue debt: $%s (grows each turn until repaid)"
-msgstr "Überfällige Schuld: %s (wächst jeden Zug bis zur Tilgung)"
-
 #: internal/menu/actions_regions.go:50
 msgid "Owned"
 msgstr "Besitz"
@@ -2064,7 +2064,7 @@ msgstr "Beziehungen"
 msgid "Remove a realm unplayed for how many days (0 = never)"
 msgstr "Reich nach wie vielen Tagen ohne Spiel entfernen (0 = nie)"
 
-#: internal/menu/actions_bank.go:53
+#: internal/menu/actions_bank.go:52
 msgid "Repay some now?"
 msgstr "Jetzt etwas zurückzahlen?"
 
@@ -2076,11 +2076,11 @@ msgstr "Antworten,"
 msgid "Request — goods you want back:"
 msgstr "Forderung - Waren, die Sie zurück wollen:"
 
-#: internal/menu/actions_bank.go:108
+#: internal/menu/actions_bank.go:107
 msgid "Returns expected to be approximately %s gold."
 msgstr "Der Ertrag wird etwa %s Gold betragen."
 
-#: internal/menu/turnrecap.go:473
+#: internal/menu/turnrecap.go:478
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Aufstände sind wegen hoher Steuern ausgebrochen!"
 
@@ -2125,7 +2125,7 @@ msgstr "Speichern"
 msgid "Saving..."
 msgstr "Speichern..."
 
-#: internal/menu/actions_bank.go:190
+#: internal/menu/actions_bank.go:197
 msgid "Savings Interest Rate:"
 msgstr "Sparzins:"
 
@@ -2173,7 +2173,7 @@ msgstr "SpyGuy senden"
 msgid "Send Trade Deal"
 msgstr "Handelsangebot senden"
 
-#: internal/menu/gameflow.go:304
+#: internal/menu/gameflow.go:305
 msgid "Send a message?"
 msgstr "Eine Nachricht senden?"
 
@@ -2269,7 +2269,7 @@ msgstr "Einzelner Planet"
 msgid "Sold %d. Gold: %d"
 msgstr "%d verkauft. Gold: %d"
 
-#: internal/menu/gameflow.go:141
+#: internal/menu/gameflow.go:142
 msgid "Sorry, you have used all of your turns today."
 msgstr "Sie haben heute alle Ihre Züge verbraucht."
 
@@ -2403,7 +2403,7 @@ msgstr "Gebiet"
 msgid "Terrorist Ops"
 msgstr "Terroroperationen"
 
-#: internal/menu/actions_bank.go:209
+#: internal/menu/actions_bank.go:216
 msgid "That costs %s gold more than you have in hand."
 msgstr "Das kostet %s Gold mehr, als Sie zur Hand haben."
 
@@ -2497,7 +2497,7 @@ msgstr "Der S3-Sabre ist abgeschaltet."
 msgid "The current BBS Coordinator is %s."
 msgstr "Der derzeitige BBS-Koordinator ist %s."
 
-#: internal/menu/actions_bank.go:97
+#: internal/menu/actions_bank.go:96
 msgid "The current interest returns on investments are %s%%."
 msgstr "Der derzeitige Ertrag auf Anlagen beträgt %s%%."
 
@@ -2536,7 +2536,7 @@ msgstr ""
 "Die Waren sind ein Geschenk: Das andere Reich kann sie nicht ablehnen und "
 "sendet nichts zurück."
 
-#: internal/menu/actions_bank.go:65
+#: internal/menu/actions_bank.go:64
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "Der Kreditzins beträgt %s%% je Tag, insgesamt also %s%% Zinsen."
 
@@ -2573,7 +2573,7 @@ msgstr ""
 msgid "There are only %d to choose from."
 msgstr "Es stehen nur %d zur Auswahl."
 
-#: internal/menu/actions_bank.go:98
+#: internal/menu/actions_bank.go:97
 msgid "There is a %d-day minimum on investments."
 msgstr "Für Anlagen gilt eine Mindestdauer von %d Tagen."
 
@@ -2648,6 +2648,10 @@ msgstr "Die Uhrzeit lautet nun %s."
 #: internal/menu/actions_ipmessages.go:550
 msgid "To end selection, hit enter at the prompt."
 msgstr "Zum Beenden der Auswahl an der Eingabe die Eingabetaste drücken."
+
+#: internal/menu/actions_bank.go:180
+msgid "Today"
+msgstr "Heute"
 
 #: internal/menu/bulletinfiles.go:71
 msgid "Today's News"
@@ -2860,7 +2864,7 @@ msgstr "Nachrichtenmenü"
 msgid "Visit Trading Menu"
 msgstr "Handelsmenü"
 
-#: internal/menu/actions_bank.go:244
+#: internal/menu/actions_bank.go:251
 msgid "Visit the bank"
 msgstr "Bank besuchen"
 
@@ -2947,15 +2951,19 @@ msgid "We keep %s covert agents."
 msgstr "Wir unterhalten %s Agenten."
 
 #: internal/menu/advisors.go:209
-msgid "We owe %s gold in debt, which grows each turn."
-msgstr "Wir schulden %s Gold, und die Schuld wächst jeden Zug."
+msgid ""
+"We owe %s gold on loans. The bank takes a payment each turn, and what is "
+"unpaid at the end of the day grows."
+msgstr ""
+"Wir schulden %s Gold an Krediten. Die Bank nimmt jeden Zug eine Zahlung, und "
+"was am Ende des Tages offen ist, wächst."
 
 #: internal/menu/advisors.go:191
 msgid "We run a shortfall of %s; our stores will run out in about %d turns."
 msgstr ""
 "Wir haben ein Defizit von %s; unsere Vorräte reichen noch etwa %d Züge."
 
-#: internal/menu/actions_bank.go:68
+#: internal/menu/actions_bank.go:67
 msgid "We will provide up to %s gold."
 msgstr "Wir stellen bis zu %s Gold bereit."
 
@@ -2967,7 +2975,7 @@ msgstr "Willkommen"
 msgid "When"
 msgstr "Wann"
 
-#: internal/menu/actions_bank.go:61
+#: internal/menu/actions_bank.go:60
 msgid "When do you wish to pay your loan back [# of Days]?"
 msgstr "Wann möchten Sie den Kredit zurückzahlen [Anzahl Tage]?"
 
@@ -3002,7 +3010,7 @@ msgstr ""
 "normalen Leistung. Der Wert hängt von ihrem Anteil an unserem Land ab, daher "
 "senkt der Kauf anderer Regionen ihn."
 
-#: internal/menu/actions_bank.go:230
+#: internal/menu/actions_bank.go:237
 msgid "Withdraw %s gold"
 msgstr "%s Gold abheben"
 
@@ -3192,7 +3200,7 @@ msgstr "Sie haben heute bereits alle Ihre %d Angriffe durchgeführt."
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "Sie haben heute bereits alle Ihre %d Angriffstruppen ausgesandt."
 
-#: internal/menu/actions_bank.go:144
+#: internal/menu/actions_bank.go:145
 msgid "You have no active investments or loans."
 msgstr "Sie haben keine laufenden Anlagen oder Kredite."
 
@@ -3274,13 +3282,17 @@ msgstr ""
 msgid "You offer %s to %s"
 msgstr "Sie bieten %s an %s"
 
-#: internal/menu/actions_bank.go:83
+#: internal/menu/actions_bank.go:82
 msgid "You owe %s gold in %d Days."
 msgstr "Sie schulden %s Gold in %d Tagen."
 
-#: internal/menu/actions_bank.go:52
-msgid "You owe %s gold in overdue debt (it grows each turn)."
-msgstr "Sie haben %s Gold überfällige Schuld (sie wächst jeden Zug)."
+#: internal/menu/actions_bank.go:51
+msgid ""
+"You owe %s gold on loans that are due. The bank takes a payment from your "
+"gold each turn, and what is still unpaid at the end of the day grows."
+msgstr ""
+"Sie schulden %s Gold an fälligen Krediten. Die Bank nimmt jeden Zug eine "
+"Zahlung aus Ihrem Gold, und was am Ende des Tages noch offen ist, wächst."
 
 #: internal/menu/actions_attack.go:797
 msgid "You put in %d million gold."
@@ -3381,7 +3393,7 @@ msgstr "Deine Verluste: %s."
 msgid "Your choice?"
 msgstr "Ihre Wahl?"
 
-#: internal/menu/turnrecap.go:467
+#: internal/menu/turnrecap.go:472
 msgid "Your dominion gained %s%s%s people."
 msgstr "Ihr Herrschaftsgebiet gewann %s%s%s Menschen."
 
@@ -3389,7 +3401,7 @@ msgstr "Ihr Herrschaftsgebiet gewann %s%s%s Menschen."
 msgid "Your dominion is still under protection."
 msgstr "Ihr Reich steht noch unter Schutz."
 
-#: internal/menu/turnrecap.go:469
+#: internal/menu/turnrecap.go:474
 msgid "Your dominion lost %s%s%s people."
 msgstr "Ihr Herrschaftsgebiet verlor %s%s%s Menschen."
 
@@ -3490,7 +3502,7 @@ msgstr ""
 "Dein Reich wurde bereits einmal umbenannt. Der Name, den es jetzt trägt, "
 "bleibt."
 
-#: internal/menu/gameflow.go:126
+#: internal/menu/gameflow.go:127
 msgid "Your realm is no longer active."
 msgstr "Ihr Reich ist nicht mehr aktiv."
 
@@ -3860,15 +3872,15 @@ msgstr "dieser Planet"
 msgid "took %d"
 msgstr "nahm %d"
 
-#: internal/menu/turnrecap.go:478
+#: internal/menu/turnrecap.go:483
 msgid "troops deserted due to low morale."
 msgstr "Truppen desertierten wegen niedriger Moral."
 
-#: internal/menu/gameflow.go:212
+#: internal/menu/gameflow.go:213
 msgid "units of Food consumed."
 msgstr "Einheiten Nahrung verbraucht."
 
-#: internal/menu/turnrecap.go:471
+#: internal/menu/turnrecap.go:476
 msgid "units of food spoiled."
 msgstr "Nahrungseinheiten sind verdorben."
 
@@ -3919,6 +3931,15 @@ msgstr "─»>Eingabe zum Fortfahren, Q zum Beenden<«─"
 #: internal/menu/input.go:472
 msgid "─»>Paused<«─"
 msgstr "─»>Pause<«─"
+
+#~ msgid "Overdue debt: $%s (grows each turn until repaid)"
+#~ msgstr "Überfällige Schuld: %s (wächst jeden Zug bis zur Tilgung)"
+
+#~ msgid "We owe %s gold in debt, which grows each turn."
+#~ msgstr "Wir schulden %s Gold, und die Schuld wächst jeden Zug."
+
+#~ msgid "You owe %s gold in overdue debt (it grows each turn)."
+#~ msgstr "Sie haben %s Gold überfällige Schuld (sie wächst jeden Zug)."
 
 #~ msgid "(dead)"
 #~ msgstr "(tot)"
@@ -4105,9 +4126,6 @@ msgstr "─»>Pause<«─"
 
 #~ msgid "1 day ago"
 #~ msgstr "vor 1 Tag"
-
-#~ msgid "today"
-#~ msgstr "heute"
 
 #~ msgid "(none)"
 #~ msgstr "(keine)"

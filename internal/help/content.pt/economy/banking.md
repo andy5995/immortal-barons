@@ -12,7 +12,8 @@ pode ser levado por piratas nem por ataques.
 
 - Depositar — leva ouro do seu tesouro para o banco.
 - Sacar — traz ouro do banco de volta para o seu tesouro.
-- Auxílio / Empréstimos — tome ouro emprestado, ou pague o que já deve.
+- Auxílio / Empréstimos - tome ouro emprestado, ou pague um empréstimo que
+  venceu.
 
 Um depósito ou saque move só o que cabe no limite abaixo. Os investimentos
 que pagam de volta numa mesma data podem devolver no máximo dois bilhões de
@@ -26,8 +27,8 @@ banco antes, então o ouro que você ganhou neste turno rende juros neste
 turno. Ele entra depois de os piratas terem tido a sua chance, então não
 protege contra um assalto.
 
-O começo do seu próximo turno diz quanto o banco pagou: os juros, e o que
-qualquer investimento vencido hoje devolveu.
+O começo do seu próximo turno diz quanto o banco pagou: os juros, e a sua
+parte dos investimentos que venceram hoje.
 
 Você pode ter no máximo dois bilhões de ouro em mãos, e outro tanto no
 banco.  O ouro que ganhar acima disso se perde. Gaste antes de chegar lá.
@@ -46,15 +47,23 @@ acumulam a cada dia (são compostos), então um empréstimo longo custa muito
 mais no total. O banco informa a taxa e o máximo que vai lhe emprestar, e
 então você escolhe quanto pegar.
 
-Você precisa devolver o valor inteiro na data do vencimento. O banco tira
-primeiro do seu ouro em mãos, depois da sua poupança. Se não der para pagar
-tudo, o resto vira dívida com uma multa por cima, e o seu povo perde um
-pouco de apoio. A dívida cresce a cada turno até ser paga, então quite logo.
+A partir do vencimento, o banco cobra uma parcela do seu ouro em mãos no
+começo de cada turno que você joga, até o empréstimo ser quitado. Cada
+parcela é uma parte do que você deve, então um dia inteiro de turnos paga
+quase tudo. O banco nunca tira ouro da sua poupança. Se você não tiver ouro,
+não paga nada naquele turno.
+
+O que ainda estiver em aberto no fim do dia cresce, mais do que as taxas de
+juros do banco, e as parcelas continuam no dia seguinte. Então mantenha ouro
+em mãos quando um empréstimo vencer, ou quite-o antes pelo Auxílio.
 
 ## Investimentos
 
 Você pode trancar ouro num investimento de 2 a 10 dias. Ele devolve o seu
-ouro mais juros quando vence. A taxa flutua — sobe e desce conforme o quanto
-todo mundo está investindo — então confira a taxa antes de aplicar.  Uma
-tática comum é manter vários investimentos ao mesmo tempo, cada um com um
-prazo, para que um vença todo dia.
+ouro mais juros quando vence. O banco paga ao longo desse dia, uma parte
+igual no começo de cada turno que você joga. Se você não jogar todos os seus
+turnos, o resto é pago no dia seguinte, arredondado para baixo ao milhar de
+ouro. A taxa flutua, sobe e desce conforme o quanto todo mundo está
+investindo, então confira a taxa antes de aplicar.  Uma tática comum é
+manter vários investimentos ao mesmo tempo, cada um com um prazo diferente,
+para que um vença todo dia.

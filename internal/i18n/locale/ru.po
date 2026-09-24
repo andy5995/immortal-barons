@@ -180,7 +180,7 @@ msgstr "%s золота требуется на содержание ваших 
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr "%s золота очистит %s из ваших %s заражённых регионов."
 
-#: internal/menu/turnrecap.go:414
+#: internal/menu/turnrecap.go:419
 msgid "%s have captured %s %s"
 msgstr "%s захватили %s %s"
 
@@ -424,7 +424,7 @@ msgstr "Об игре"
 msgid "Accept this treaty?"
 msgstr "Принять договор?"
 
-#: internal/menu/actions_bank.go:109
+#: internal/menu/actions_bank.go:108
 msgid "Accept?"
 msgstr "Принять?"
 
@@ -798,29 +798,29 @@ msgstr "Выберите зону…"
 msgid "Chopper's Fair Market"
 msgstr "Ярмарка Чоппера"
 
-#: internal/menu/turnrecap.go:510
+#: internal/menu/turnrecap.go:515
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr "Гражданская война! Мятеж стоит вам %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:506
+#: internal/menu/turnrecap.go:511
 msgid ""
 "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Разрозненные бунты стоят вам %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:508
+#: internal/menu/turnrecap.go:513
 msgid ""
 "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Восстание ширится и отнимает %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:512
+#: internal/menu/turnrecap.go:517
 msgid ""
 "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Восстают целые провинции, отнимая %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:514
+#: internal/menu/turnrecap.go:519
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Гражданская война! Держава почти распалась - потеряно %d%%."
 
@@ -856,7 +856,7 @@ msgstr "Настройки сохранены."
 msgid "Confirm?"
 msgstr "Подтвердить?"
 
-#: internal/menu/gameflow.go:348
+#: internal/menu/gameflow.go:349
 msgid "Continue to your next turn?"
 msgstr "Перейти к следующему ходу?"
 
@@ -928,7 +928,7 @@ msgstr "ПОГИБ"
 msgid "Daily Bulletin"
 msgstr "Ежедневный бюллетень"
 
-#: internal/menu/actions_bank.go:168
+#: internal/menu/actions_bank.go:169
 msgid "Date"
 msgstr "Дата"
 
@@ -1113,7 +1113,7 @@ msgstr "Статус империи"
 msgid "End Protection"
 msgstr "Снять защиту"
 
-#: internal/menu/turnrecap.go:457
+#: internal/menu/turnrecap.go:462
 msgid "End of Turn Statistics:"
 msgstr "Статистика конца хода:"
 
@@ -1209,7 +1209,7 @@ msgstr "Общий запрос разведки"
 msgid "Gold"
 msgstr "Золото"
 
-#: internal/menu/actions_bank.go:275
+#: internal/menu/actions_bank.go:282
 msgid "Gold Needed"
 msgstr "Нужно золото"
 
@@ -1273,7 +1273,7 @@ msgstr "На сколько дней отправить?"
 msgid "How many days would you like him to remain?"
 msgstr "На сколько дней его оставить?"
 
-#: internal/menu/actions_bank.go:99
+#: internal/menu/actions_bank.go:98
 msgid "How many days would you like to invest for?"
 msgstr "На сколько дней вложить?"
 
@@ -1281,7 +1281,7 @@ msgstr "На сколько дней вложить?"
 msgid "How many million gold do you wish to put in?"
 msgstr "Сколько миллионов золота вложить?"
 
-#: internal/menu/actions_bank.go:69
+#: internal/menu/actions_bank.go:68
 msgid "How many would you like to borrow?"
 msgstr "Сколько хотите занять?"
 
@@ -1293,7 +1293,7 @@ msgstr "Сколько еды купить?"
 msgid "How much food to sell?"
 msgstr "Сколько еды продать?"
 
-#: internal/menu/actions_bank.go:54
+#: internal/menu/actions_bank.go:53
 msgid "How much to repay?"
 msgstr "Сколько вернуть?"
 
@@ -1301,7 +1301,7 @@ msgstr "Сколько вернуть?"
 msgid "How much will you give?"
 msgstr "Сколько вы дадите?"
 
-#: internal/menu/actions_bank.go:103
+#: internal/menu/actions_bank.go:102
 msgid "How much would you like to invest?"
 msgstr "Сколько хотите вложить?"
 
@@ -1336,6 +1336,10 @@ msgstr "Immortal Barons"
 #: internal/menu/actions_trade.go:78
 msgid "In Deal"
 msgstr "В сделке"
+
+#: internal/menu/actions_bank.go:183
+msgid "In Hold"
+msgstr "Отложено"
 
 # Menu titles
 #: cmd/immortal-barons/league.go:142
@@ -1382,15 +1386,15 @@ msgstr ""
 "Недопустимо: в названии державы нужно минимум 3 буквы или цифры. Украшения "
 "вокруг них допустимы и не считаются."
 
-#: internal/menu/actions_bank.go:191
+#: internal/menu/actions_bank.go:198
 msgid "Investing Interest Rate:"
 msgstr "Доход по вкладам:"
 
-#: internal/menu/actions_bank.go:122
+#: internal/menu/actions_bank.go:121
 msgid "Investment will be returned on %s."
 msgstr "Вклад вернётся %s."
 
-#: internal/menu/actions_bank.go:168
+#: internal/menu/actions_bank.go:169
 msgid "Investments"
 msgstr "Вклады"
 
@@ -1484,7 +1488,7 @@ msgstr "Показать вклады и займы"
 msgid "List of Planets"
 msgstr "Список планет"
 
-#: internal/menu/actions_bank.go:168
+#: internal/menu/actions_bank.go:169
 msgid "Loans Due"
 msgstr "Займы к возврату"
 
@@ -1708,7 +1712,7 @@ msgstr "Неизвестно - списка ещё нет"
 msgid "Not set"
 msgstr "Не задано"
 
-#: internal/menu/actions_bank.go:84
+#: internal/menu/actions_bank.go:83
 msgid "Note that late payments will incur additional penalties."
 msgstr "Учтите: просрочка повлечёт дополнительные штрафы."
 
@@ -1869,10 +1873,6 @@ msgstr "Ожидает отправки"
 msgid "Outcome"
 msgstr "Итог"
 
-#: internal/menu/actions_bank.go:180
-msgid "Overdue debt: $%s (grows each turn until repaid)"
-msgstr "Просроченный долг: %s (растёт каждый ход, пока не погашен)"
-
 #: internal/menu/actions_regions.go:50
 msgid "Owned"
 msgstr "Есть"
@@ -2029,7 +2029,7 @@ msgstr "Отношения"
 msgid "Remove a realm unplayed for how many days (0 = never)"
 msgstr "Удалять державу без игры через сколько дней (0 = никогда)"
 
-#: internal/menu/actions_bank.go:53
+#: internal/menu/actions_bank.go:52
 msgid "Repay some now?"
 msgstr "Погасить часть сейчас?"
 
@@ -2041,11 +2041,11 @@ msgstr "Ответить,"
 msgid "Request — goods you want back:"
 msgstr "Запрос — товары, которые вы хотите взамен:"
 
-#: internal/menu/actions_bank.go:108
+#: internal/menu/actions_bank.go:107
 msgid "Returns expected to be approximately %s gold."
 msgstr "Ожидаемый доход — около %s золота."
 
-#: internal/menu/turnrecap.go:473
+#: internal/menu/turnrecap.go:478
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Из-за высоких налогов начались бунты!"
 
@@ -2089,7 +2089,7 @@ msgstr "Сохранить"
 msgid "Saving..."
 msgstr "Сохранение..."
 
-#: internal/menu/actions_bank.go:190
+#: internal/menu/actions_bank.go:197
 msgid "Savings Interest Rate:"
 msgstr "Процент по сбережениям:"
 
@@ -2137,7 +2137,7 @@ msgstr "Отправить SpyGuy"
 msgid "Send Trade Deal"
 msgstr "Отправить сделку"
 
-#: internal/menu/gameflow.go:304
+#: internal/menu/gameflow.go:305
 msgid "Send a message?"
 msgstr "Отправить сообщение?"
 
@@ -2233,7 +2233,7 @@ msgstr "Одна планета"
 msgid "Sold %d. Gold: %d"
 msgstr "Продано: %d. Золото: %d"
 
-#: internal/menu/gameflow.go:141
+#: internal/menu/gameflow.go:142
 msgid "Sorry, you have used all of your turns today."
 msgstr "Увы, все ходы на сегодня израсходованы."
 
@@ -2366,7 +2366,7 @@ msgstr "Земли"
 msgid "Terrorist Ops"
 msgstr "Террористические операции"
 
-#: internal/menu/actions_bank.go:209
+#: internal/menu/actions_bank.go:216
 msgid "That costs %s gold more than you have in hand."
 msgstr "Это на %s золота больше, чем у вас на руках."
 
@@ -2458,7 +2458,7 @@ msgstr "S3-Sabre отключён."
 msgid "The current BBS Coordinator is %s."
 msgstr "Нынешний координатор BBS - %s."
 
-#: internal/menu/actions_bank.go:97
+#: internal/menu/actions_bank.go:96
 msgid "The current interest returns on investments are %s%%."
 msgstr "Текущая доходность вкладов — %s%%."
 
@@ -2494,7 +2494,7 @@ msgid ""
 msgstr ""
 "Товар идёт даром: другая держава не может отказаться и ничего не шлёт взамен."
 
-#: internal/menu/actions_bank.go:65
+#: internal/menu/actions_bank.go:64
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "Ставка по займу — %s%% в день, всего %s%% процентов."
 
@@ -2527,7 +2527,7 @@ msgstr "Соперников для нападения не осталось."
 msgid "There are only %d to choose from."
 msgstr "Доступно всего %d."
 
-#: internal/menu/actions_bank.go:98
+#: internal/menu/actions_bank.go:97
 msgid "There is a %d-day minimum on investments."
 msgstr "Минимальный срок вклада — %d дн."
 
@@ -2602,6 +2602,10 @@ msgstr "Время теперь %s."
 #: internal/menu/actions_ipmessages.go:550
 msgid "To end selection, hit enter at the prompt."
 msgstr "Чтобы закончить выбор, нажмите ВВОД в ответ на запрос."
+
+#: internal/menu/actions_bank.go:180
+msgid "Today"
+msgstr "Сегодня"
 
 #: internal/menu/bulletinfiles.go:71
 msgid "Today's News"
@@ -2813,7 +2817,7 @@ msgstr "Меню сообщений"
 msgid "Visit Trading Menu"
 msgstr "Меню торговли"
 
-#: internal/menu/actions_bank.go:244
+#: internal/menu/actions_bank.go:251
 msgid "Visit the bank"
 msgstr "Посетить банк"
 
@@ -2898,14 +2902,18 @@ msgid "We keep %s covert agents."
 msgstr "У нас %s агентов."
 
 #: internal/menu/advisors.go:209
-msgid "We owe %s gold in debt, which grows each turn."
-msgstr "На нас долг в %s золота, и он растёт каждый ход."
+msgid ""
+"We owe %s gold on loans. The bank takes a payment each turn, and what is "
+"unpaid at the end of the day grows."
+msgstr ""
+"Мы должны %s золота по займам. Банк берёт платёж каждый ход, а то, что не "
+"выплачено к концу дня, растёт."
 
 #: internal/menu/advisors.go:191
 msgid "We run a shortfall of %s; our stores will run out in about %d turns."
 msgstr "У нас нехватка в %s; запасы кончатся примерно через %d ходов."
 
-#: internal/menu/actions_bank.go:68
+#: internal/menu/actions_bank.go:67
 msgid "We will provide up to %s gold."
 msgstr "Мы предоставим до %s золота."
 
@@ -2917,7 +2925,7 @@ msgstr "Добро пожаловать"
 msgid "When"
 msgstr "Когда"
 
-#: internal/menu/actions_bank.go:61
+#: internal/menu/actions_bank.go:60
 msgid "When do you wish to pay your loan back [# of Days]?"
 msgstr "Когда вы вернёте заём [число дней]?"
 
@@ -2950,7 +2958,7 @@ msgstr ""
 "С нашими регионами {mountain} заводы строят войска на %d%% от обычного. Это "
 "зависит от их доли в нашей земле, так что покупка других регионов её снижает."
 
-#: internal/menu/actions_bank.go:230
+#: internal/menu/actions_bank.go:237
 msgid "Withdraw %s gold"
 msgstr "Снять %s золота"
 
@@ -3138,7 +3146,7 @@ msgstr "Вы уже провели все %d своих атак на сегод
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "Вы уже отправили все %d своих отрядов на сегодня."
 
-#: internal/menu/actions_bank.go:144
+#: internal/menu/actions_bank.go:145
 msgid "You have no active investments or loans."
 msgstr "У вас нет действующих вкладов и займов."
 
@@ -3215,13 +3223,18 @@ msgstr "Чтобы отправить сделку этой державе, ну
 msgid "You offer %s to %s"
 msgstr "Вы предлагаете %s планете %s"
 
-#: internal/menu/actions_bank.go:83
+#: internal/menu/actions_bank.go:82
 msgid "You owe %s gold in %d Days."
 msgstr "Вы должны %s золота через %d дн."
 
-#: internal/menu/actions_bank.go:52
-msgid "You owe %s gold in overdue debt (it grows each turn)."
-msgstr "За вами %s золота просроченного долга (он растёт каждый ход)."
+#: internal/menu/actions_bank.go:51
+msgid ""
+"You owe %s gold on loans that are due. The bank takes a payment from your "
+"gold each turn, and what is still unpaid at the end of the day grows."
+msgstr ""
+"Вы должны %s золота по займам, срок которых наступил. Банк каждый ход берёт "
+"платёж из вашего золота, а то, что к концу дня осталось невыплаченным, "
+"растёт."
 
 #: internal/menu/actions_attack.go:797
 msgid "You put in %d million gold."
@@ -3319,7 +3332,7 @@ msgstr "Ваши потери: %s."
 msgid "Your choice?"
 msgstr "Ваш выбор?"
 
-#: internal/menu/turnrecap.go:467
+#: internal/menu/turnrecap.go:472
 msgid "Your dominion gained %s%s%s people."
 msgstr "Ваши владения приросли на %s%s%s человек."
 
@@ -3327,7 +3340,7 @@ msgstr "Ваши владения приросли на %s%s%s человек."
 msgid "Your dominion is still under protection."
 msgstr "Ваша держава ещё под защитой."
 
-#: internal/menu/turnrecap.go:469
+#: internal/menu/turnrecap.go:474
 msgid "Your dominion lost %s%s%s people."
 msgstr "Ваши владения потеряли %s%s%s человек."
 
@@ -3424,7 +3437,7 @@ msgid ""
 msgstr ""
 "Ваша держава уже переименована один раз. Нынешнее имя останется навсегда."
 
-#: internal/menu/gameflow.go:126
+#: internal/menu/gameflow.go:127
 msgid "Your realm is no longer active."
 msgstr "Ваша держава больше не активна."
 
@@ -3784,15 +3797,15 @@ msgstr "эта планета"
 msgid "took %d"
 msgstr "взято %d"
 
-#: internal/menu/turnrecap.go:478
+#: internal/menu/turnrecap.go:483
 msgid "troops deserted due to low morale."
 msgstr "войска дезертировали из-за низкого боевого духа."
 
-#: internal/menu/gameflow.go:212
+#: internal/menu/gameflow.go:213
 msgid "units of Food consumed."
 msgstr "единиц еды съедено."
 
-#: internal/menu/turnrecap.go:471
+#: internal/menu/turnrecap.go:476
 msgid "units of food spoiled."
 msgstr "единиц еды испортилось."
 
@@ -3843,6 +3856,15 @@ msgstr "─»>Enter - продолжить, Q - выход<«─"
 #: internal/menu/input.go:472
 msgid "─»>Paused<«─"
 msgstr "─»>Пауза<«─"
+
+#~ msgid "Overdue debt: $%s (grows each turn until repaid)"
+#~ msgstr "Просроченный долг: %s (растёт каждый ход, пока не погашен)"
+
+#~ msgid "We owe %s gold in debt, which grows each turn."
+#~ msgstr "На нас долг в %s золота, и он растёт каждый ход."
+
+#~ msgid "You owe %s gold in overdue debt (it grows each turn)."
+#~ msgstr "За вами %s золота просроченного долга (он растёт каждый ход)."
 
 #~ msgid "(dead)"
 #~ msgstr "(мёртв)"
@@ -4019,9 +4041,6 @@ msgstr "─»>Пауза<«─"
 
 #~ msgid "1 day ago"
 #~ msgstr "1 день назад"
-
-#~ msgid "today"
-#~ msgstr "сегодня"
 
 #~ msgid "(none)"
 #~ msgstr "(нет)"

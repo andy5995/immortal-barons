@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-24 00:14-0500\n"
+"POT-Creation-Date: 2026-09-24 00:44-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1286,8 +1286,10 @@ msgstr "Снять — вернуть золото из банка в казну
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:16
-msgid "Cash Relief / Loans — borrow gold, or pay back what you already owe."
-msgstr "Денежная помощь / Кредиты - занять золото или вернуть уже взятое."
+msgid "Cash Relief / Loans — borrow gold, or pay back a loan that is due."
+msgstr ""
+"Денежная помощь / Займы - занять золото или вернуть заём, срок которого "
+"наступил."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:21
@@ -1322,10 +1324,10 @@ msgstr ""
 #: internal/help/content/economy/banking.md:30
 msgid ""
 "The start of your next turn tells you what the bank paid: the interest, and "
-"what any investment that matured today paid back."
+"your share of the investments that matured today."
 msgstr ""
-"В начале следующего хода вам сообщают, что заплатил банк: проценты и то, что "
-"вернул созревший сегодня вклад."
+"В начале следующего хода вам сообщают, что заплатил банк: проценты и вашу "
+"долю вкладов, срок которых истёк сегодня."
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:33
@@ -1378,37 +1380,56 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/economy/banking.md:51
 msgid ""
-"You must repay the full amount on the due date. The bank takes it from your "
-"gold first, then from your savings. If you cannot pay it all, the rest "
-"becomes a debt with an extra penalty added, and your people lose some "
-"support. Debt keeps growing each turn until you repay it, so clear it early."
+"From the due date, the bank takes a payment from your gold in hand at the "
+"start of each turn you play, until the loan is paid. Each payment is a share "
+"of what you owe, so a full day of turns pays nearly all of it. The bank "
+"never takes gold from your savings. If you have no gold, you pay nothing "
+"that turn."
 msgstr ""
-"Вернуть нужно всю сумму в назначенный день. Банк берёт её сначала из золота "
-"на руках, потом из сбережений. Если заплатить всё не вышло, остаток "
-"становится долгом с добавленным штрафом, а ваш народ теряет часть поддержки. "
-"Долг растёт с каждым ходом, пока вы его не погасите, так что закрывайте его "
-"пораньше."
+"С даты возврата банк в начале каждого сыгранного вами хода берёт платёж из "
+"золота на руках, пока заём не погашен. Каждый платёж - доля того, что вы "
+"должны, так что за полный день ходов выплачивается почти весь долг. Из ваших "
+"сбережений банк золото никогда не берёт. Если золота нет, в этот ход вы "
+"ничего не платите."
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:55
+msgid ""
+"Whatever is still unpaid at the end of the day grows, by more than the "
+"bank's interest rates, and the payments go on the next day. So keep gold in "
+"hand when a loan comes due, or pay it off early from Cash Relief."
+msgstr ""
+"Всё, что к концу дня осталось невыплаченным, растёт быстрее банковских "
+"процентных ставок, а платежи продолжаются на следующий день. Поэтому держите "
+"золото на руках, когда наступает срок займа, или погасите его заранее через "
+"Денежную помощь."
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:52
+#: internal/help/content/economy/banking.md:56
 #, no-wrap
 msgid "Investments"
 msgstr "Инвестиции"
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:58
+#: internal/help/content/economy/banking.md:65
 msgid ""
 "You can lock gold away as an investment for 2 to 10 days. It pays back your "
-"gold plus interest when it matures. The interest rate floats — it rises and "
-"falls with how much everyone is investing — so check the rate before you "
-"commit.  A common tactic is to keep several investments running at once, "
-"each for a different length, so one matures every day."
+"gold plus interest when it matures. The bank pays it out over that day, an "
+"equal part at the start of each turn you play. If you do not play all your "
+"turns, the rest is paid on the next day, rounded down to a whole thousand "
+"gold. The interest rate floats — it rises and falls with how much everyone "
+"is investing — so check the rate before you commit.  A common tactic is to "
+"keep several investments running at once, each for a different length, so "
+"one matures every day."
 msgstr ""
 "Вы можете вложить золото на срок от 2 до 10 дней. По окончании срока оно "
-"возвращается с процентами. Процентная ставка плавает - она растёт и падает "
-"вместе с тем, сколько вкладывают все, - поэтому проверьте её, прежде чем "
-"вкладывать.  Распространённая тактика: держать несколько вкладов сразу, "
-"каждый на свой срок, чтобы один созревал каждый день."
+"возвращается с процентами. Банк выплачивает его в течение этого дня, равными "
+"частями в начале каждого сыгранного вами хода. Если вы сыграете не все свои "
+"ходы, остаток выплачивается на следующий день, округлённый вниз до целой "
+"тысячи золота. Процентная ставка плавает - она растёт и падает вместе с тем, "
+"сколько вкладывают все, - поэтому проверьте её, прежде чем вкладывать.  "
+"Распространённая тактика: держать несколько вкладов сразу, каждый на свой "
+"срок, чтобы один созревал каждый день."
 
 #. type: Title #
 #: internal/help/content/economy/food.md:1
@@ -4789,6 +4810,19 @@ msgstr ""
 "а вместе с ней ослабнет и щит. Большая копилка — большой счёт каждый ход, "
 "так что растите её в темпе, который тянет ваш доход."
 
+#~ msgid ""
+#~ "You must repay the full amount on the due date. The bank takes it from "
+#~ "your gold first, then from your savings. If you cannot pay it all, the "
+#~ "rest becomes a debt with an extra penalty added, and your people lose "
+#~ "some support. Debt keeps growing each turn until you repay it, so clear "
+#~ "it early."
+#~ msgstr ""
+#~ "Вернуть нужно всю сумму в назначенный день. Банк берёт её сначала из "
+#~ "золота на руках, потом из сбережений. Если заплатить всё не вышло, "
+#~ "остаток становится долгом с добавленным штрафом, а ваш народ теряет часть "
+#~ "поддержки. Долг растёт с каждым ходом, пока вы его не погасите, так что "
+#~ "закрывайте его пораньше."
+
 #~ msgid "Press `?` at a menu to open this help."
 #~ msgstr "Нажмите `?` в любом меню, чтобы открыть эту справку."
 
@@ -4934,11 +4968,6 @@ msgstr ""
 #~ "самолёты на земле, что ослабляет следующий удар противника."
 
 #, fuzzy
-#~| msgid ""
-#~| "Covert operations are secret missions run by your agents. Success "
-#~| "depends on how many agents you have compared to the target. More agents "
-#~| "means a better chance.  Keeping many agents also defends you against "
-#~| "enemy covert operations."
 #~ msgid ""
 #~ "Covert operations are secret missions run by your agents. Your chance of "
 #~ "success depends on how many agents you have compared to the target. More "
@@ -4959,16 +4988,12 @@ msgstr ""
 #~ "торговый подарок, без условий."
 
 #, fuzzy
-#~| msgid "Harms the enemy's people and troopers, but not their land."
 #~ msgid ""
 #~ "A Biological Attack harms the enemy's people and troopers, but not their "
 #~ "land."
 #~ msgstr "Наносит вред людям и пехоте врага, но не его земле."
 
 #, fuzzy
-#~| msgid ""
-#~| "Kills many of the enemy's people and troopers, but harms fewer regions. "
-#~| "Enemy tanks help defend against it."
 #~ msgid ""
 #~ "A Chemical Attack kills many of the enemy's people and troopers, but "
 #~ "harms fewer regions. Enemy tanks help defend against it."
@@ -4977,10 +5002,6 @@ msgstr ""
 #~ "Танки врага помогают защищаться от неё."
 
 #, fuzzy
-#~| msgid ""
-#~| "A shield you fund. When it is complete, it destroys about half of the "
-#~| "missiles fired at you and cuts attacking jets' strength by about a "
-#~| "quarter. Technology regions lower its upkeep."
 #~ msgid ""
 #~ "The SDI Program is a shield you fund. When it is complete, it destroys "
 #~ "about half of the missiles fired at you and cuts attacking jets' strength "
@@ -4991,10 +5012,6 @@ msgstr ""
 #~ "бомбардировщики."
 
 #, fuzzy
-#~| msgid ""
-#~| "Turns some of the enemy's regions into waste. It costs a lot, and the "
-#~| "cost grows with the size of the target. Large numbers of enemy turrets "
-#~| "can shoot down some of the missiles."
 #~ msgid ""
 #~ "A Nuclear Attack turns some of the enemy's regions into waste. It costs a "
 #~ "lot, and the cost grows with the size of the target. Large numbers of "
@@ -5035,11 +5052,6 @@ msgstr ""
 #~ "набегов."
 
 #, fuzzy
-#~| msgid ""
-#~| "The ultimate weapon, aimed at a whole enemy planet rather than one "
-#~| "empire. The whole board funds it, and only one can exist at a time. It "
-#~| "takes a few days to build, then strikes every empire on the target "
-#~| "planet. Defenders can send jets to shoot it down before it finishes."
 #~ msgid ""
 #~ "The Doomer Kaboomer is the ultimate weapon, aimed at a whole enemy planet "
 #~ "rather than one empire. The whole board funds it, and only one can exist "
@@ -5051,9 +5063,6 @@ msgstr ""
 #~ "империю. Его финансирует вся планета, а урон огромен."
 
 #, fuzzy
-#~| msgid ""
-#~| "A HeadQuarters coordinates your army. A strong HQ makes your tanks much "
-#~| "more effective. Enemies can bomb your HQ to weaken your tanks."
 #~ msgid ""
 #~ "A strong HeadQuarters and high military morale make your tanks even more "
 #~ "effective, so keep both high. Enemies will bomb your HeadQuarters to "
@@ -5082,10 +5091,6 @@ msgstr ""
 #~ "Очки превращаются в юниты."
 
 #, fuzzy
-#~| msgid ""
-#~| "Use Set Industries to split your production across unit types by "
-#~| "percentage. Or use Specialize to send all of your production into one "
-#~| "unit type. Specializing cannot be undone, so choose with care."
 #~ msgid ""
 #~ "Use Set Industries to split your production across unit types by "
 #~ "percentage. You can change the split at any time."
@@ -5241,10 +5246,6 @@ msgstr ""
 #~ "в меню хода выберет за вас «Quit»."
 
 #, fuzzy
-#~| msgid ""
-#~| "The game is one program: `barons-door`. It runs as a native door under "
-#~| "modern BBS software such as Synchronet or Mystic. You do not need DOSBox "
-#~| "or DOSEMU."
 #~ msgid ""
 #~ "Immortal Barons can run as a native door under modern BBS software such "
 #~ "as Synchronet or Mystic. Build the door front-end:"
@@ -5254,12 +5255,10 @@ msgstr ""
 #~ "не нужны."
 
 #, fuzzy, no-wrap
-#~| msgid "Sysop Guide — Running Immortal Barons"
 #~ msgid "Playing Immortal Barons"
 #~ msgstr "Руководство сисопа — запуск Immortal Barons"
 
 #, fuzzy
-#~| msgid "Treaties and Alliances"
 #~ msgid "**Diplomacy** — treaties and alliances"
 #~ msgstr "Договоры и союзы"
 

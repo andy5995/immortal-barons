@@ -12,8 +12,7 @@ kann nicht von Piraten oder Angriffen geraubt werden.
 
 - Einzahlen - Gold aus Ihrer Schatzkammer auf die Bank überweisen.
 - Abheben - Gold von der Bank zurück in Ihre Schatzkammer holen.
-- Finanzhilfe / Kredite - Gold leihen oder zurückzahlen, was Sie bereits
-  schulden.
+- Beihilfe / Kredite - Gold leihen oder einen fälligen Kredit zurückzahlen.
 
 Eine Einzahlung oder Abhebung bewegt nur, was unter die unten genannte
 Grenze passt. Die Investitionen, die an einem einzelnen Datum zurückgezahlt
@@ -29,7 +28,7 @@ diesem Zug Zinsen bringt. Es geht erst hinein, nachdem die Piraten ihre
 Gelegenheit daran hatten, es ist also kein Schutz vor einem Überfall.
 
 Der Beginn Ihres nächsten Zuges sagt Ihnen, was die Bank gezahlt hat: die
-Zinsen und das, was eine heute fällig gewordene Anlage zurückgezahlt hat.
+Zinsen und Ihren Anteil an den heute fällig gewordenen Investitionen.
 
 Sie können höchstens zwei Milliarden Gold halten, in der Hand, und noch
 einmal so viel auf der Bank.  Gold, das Sie darüber hinaus verdienen, ist
@@ -50,17 +49,24 @@ Kredit kostet insgesamt also viel mehr. Die Bank nennt Ihnen den Satz und
 den Höchstbetrag, den sie Ihnen leiht, und dann wählen Sie, wie viel Sie
 nehmen.
 
-Sie müssen den vollen Betrag am Fälligkeitstag zurückzahlen. Die Bank nimmt
-ihn zuerst aus Ihrem Gold, dann aus Ihren Ersparnissen. Können Sie nicht
-alles zahlen, wird der Rest zu einer Schuld, auf die ein Strafaufschlag
-kommt, und Ihr Volk verliert etwas Rückhalt. Schulden wachsen jeden Zug
-weiter, bis Sie sie tilgen; räumen Sie sie also früh aus.
+Ab dem Fälligkeitstag nimmt die Bank zu Beginn jedes Zuges, den Sie spielen,
+eine Zahlung aus Ihrem Gold in der Hand, bis der Kredit getilgt ist. Jede
+Zahlung ist ein Teil dessen, was Sie schulden, so dass ein voller Tag an
+Zügen fast alles tilgt. Die Bank nimmt nie Gold aus Ihren
+Ersparnissen. Haben Sie kein Gold, zahlen Sie in diesem Zug nichts.
+
+Was am Ende des Tages noch offen ist, wächst, und zwar stärker als die
+Zinssätze der Bank, und die Zahlungen gehen am nächsten Tag weiter. Halten
+Sie also Gold in der Hand, wenn ein Kredit fällig wird, oder zahlen Sie ihn
+vorher über Beihilfe zurück.
 
 ## Investitionen
 
 Sie können Gold für 2 bis 10 Tage als Investition anlegen. Es zahlt Ihr Gold
-plus Zinsen zurück, wenn die Laufzeit endet. Der Zinssatz schwankt - er
-steigt und fällt damit, wie viel alle investieren -, prüfen Sie ihn also,
-bevor Sie sich festlegen.  Eine verbreitete Taktik ist, mehrere
-Investitionen zugleich laufen zu lassen, jede mit anderer Laufzeit, sodass
-täglich eine fällig wird.
+plus Zinsen zurück, wenn die Laufzeit endet. Die Bank zahlt es über diesen
+Tag aus, zu gleichen Teilen zu Beginn jedes Zuges, den Sie spielen. Spielen
+Sie nicht alle Ihre Züge, wird der Rest am nächsten Tag gezahlt, auf volle
+tausend Gold abgerundet. Der Zinssatz schwankt - er steigt und fällt damit,
+wie viel alle investieren -, prüfen Sie ihn also, bevor Sie sich festlegen.
+Eine verbreitete Taktik ist, mehrere Investitionen zugleich laufen zu
+lassen, jede mit anderer Laufzeit, sodass täglich eine fällig wird.
