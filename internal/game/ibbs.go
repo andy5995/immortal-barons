@@ -341,13 +341,13 @@ func (w *World) enqueueTradeBid(toBoard string, b IPTradeBid) {
 	p.TradeBids = append(p.TradeBids, b)
 }
 
-// fileReconReports files a packet's scouting answers in the Spy Database and
-// posts a news line for each, except the ones a terror op brought home: those
-// are the op's own report, told to its sender on their recap and to nobody else
-// (#285).
-func (w *World) fileReconReports(p Packet) {
+// fileReconReports files a packet's intel in the Spy Database and posts a news
+// line for each, except the intel a Send Spy brought home: that is told to its
+// sender on their recap and to nobody else (#285). spies is spyIntelIndex(p),
+// taken before the results were applied.
+func (w *World) fileReconReports(p Packet, spies []int) {
 	byTerror := map[int]bool{}
-	for _, i := range terrorReportIndex(p) {
+	for _, i := range spies {
 		byTerror[i] = true
 	}
 	for i, r := range p.ReconReports {
@@ -383,34 +383,47 @@ func (w *World) fileSpyReport(r SpyReport) {
 	w.SpyDatabase = kept
 }
 
-// terrorReportIndex pairs each result in p with the index in p.ReconReports of
-// the spy report its target board wrote beside it, or -1 when it is not a
-// terror result or has none. The target answers a terror op with its result
-// and then a report on the same realm, after any sweep answers, so a realm's
-// terror reports are the LAST ones on it, in the order of its results.
-func terrorReportIndex(p Packet) []int {
+// spyIntelIndex pairs each result in p with the index in p.ReconReports of the
+// intel that came home with it, or -1 when it brought none. Only a Send Spy
+// that got in brings any, and the result does not say which op it was, so the
+// op is read from InFlight: this must run BEFORE the results are applied,
+// which removes their entries. The target answers such a spy with its result
+// and then the intel, after any sweep answers, so a realm's spy intel is the
+// LAST on it, in the order of its results.
+func (w *World) spyIntelIndex(p Packet) []int {
 	type key struct{ board, empire string }
+	carries := func(res AttackResult) bool {
+		if res.Kind != "terror" || !res.Won {
+			return false
+		}
+		for _, f := range w.InFlight {
+			if f.ID == res.ID {
+				return f.TerrorOp == TerrorOpSpy
+			}
+		}
+		return false
+	}
 	reports := map[key][]int{}
 	for i, r := range p.ReconReports {
 		k := key{r.Board, r.Empire}
 		reports[k] = append(reports[k], i)
 	}
-	terrors := map[key]int{}
+	spies := map[key]int{}
 	for _, res := range p.Results {
-		if res.Kind == "terror" {
-			terrors[key{res.TargetBoard, res.TargetEmpire}]++
+		if carries(res) {
+			spies[key{res.TargetBoard, res.TargetEmpire}]++
 		}
 	}
 	out := make([]int, len(p.Results))
 	seen := map[key]int{}
 	for i, res := range p.Results {
 		out[i] = -1
-		if res.Kind != "terror" {
+		if !carries(res) {
 			continue
 		}
 		k := key{res.TargetBoard, res.TargetEmpire}
 		idx := reports[k]
-		at := len(idx) - terrors[k] + seen[k]
+		at := len(idx) - spies[k] + seen[k]
 		seen[k]++
 		if at >= 0 && at < len(idx) {
 			out[i] = idx[at]
@@ -531,7 +544,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.applyDupeCheck(p.FromBoard, p.Scores)
 	}
 	// Outcomes of our own strikes, returning from the target board.
-	spies := terrorReportIndex(p)
+	spies := w.spyIntelIndex(p)
 	for i, res := range p.Results {
 		var spy *SpyReport
 		if spies[i] >= 0 {
@@ -545,15 +558,13 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// Scouting answers coming home. They land in the planet-wide Spy Database,
 	// so the whole board benefits from one baron's agent (#61).
 	//
-	// A report that is the by-product of one of our terror ops against the same
-	// realm is filed without the news line: a terror op is told to its sender on
-	// their recap and to nobody else (#285), and the original's handler for this
-	// intelligence (update_spy_intelligence, BRE.OVR) writes a report entry, not
-	// news. The packet does not mark which reports are by-products, so the
-	// results beside them identify them: one terror result accounts for one
-	// report on its realm, and any report past that count (a spy sweep landing in
-	// the same packet) still gets its line.
-	w.fileReconReports(p)
+	// Intel a Send Spy brought home is filed without the news line: a terror op
+	// is told to its sender on their recap and to nobody else (#285), and the
+	// original's handler for this intelligence (update_spy_intelligence,
+	// BRE.OVR) files an event, not news. The packet does not mark which
+	// intel came from a spy, so spyIntelIndex works it out from the results;
+	// anything past that (a sweep landing in the same packet) keeps its line.
+	w.fileReconReports(p, spies)
 	for _, m := range p.IPMessages {
 		w.deliverIPMessage(m)
 	}
@@ -614,15 +625,19 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, atk := range p.Attacks {
 		result.Results = append(result.Results, w.resolveRemoteAttack(atk))
 	}
-	// A covert operation landing here reports the state it found its target in,
-	// and that is what fills the sender's Spy Database — the original's own
-	// arrangement, where resolve_received_covert_operation calls write_spy_report
-	// and the answer reaches the sender as "Information added to Global Spy Data
-	// Bank". Intelligence is a by-product of acting, not an errand of its own.
+	// A Send Spy that got in carries home the state it found its target in, and
+	// that is what fills the sender's Spy Database. BINARY-VERIFIED: the
+	// original's resolve_received_covert_operation (BRE.OVR 0x04a96b) calls
+	// write_spy_report only in its Send Spy branch, which runs after an agent
+	// wins the odds roll, and never reaches it for a protected target. No other
+	// operation, and no caught spy, brings back intel.
 	for _, t := range p.Terrors {
-		result.Results = append(result.Results, w.resolveRemoteTerror(t))
-		if e := w.remoteTarget(t.TargetEmpire); e != nil {
-			result.ReconReports = append(result.ReconReports, w.spyReport(e))
+		res := w.resolveRemoteTerror(t)
+		result.Results = append(result.Results, res)
+		if t.Op == TerrorOpSpy && res.Won {
+			if e := w.remoteTarget(t.TargetEmpire); e != nil {
+				result.ReconReports = append(result.ReconReports, w.spyReport(e))
+			}
 		}
 	}
 	for _, op := range p.SpecialOps {

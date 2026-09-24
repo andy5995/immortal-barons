@@ -4642,7 +4642,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   **A terror op is reported on the two recaps and posts no news — BINARY-VERIFIED
   (#285).** Neither the received-op resolver (`BRE.OVR` 0x04a96b) nor the
   returning-report routine (`process_terrorist_report`, 0x04b38a) calls the news
-  writer; both file recap entries for their own realm. The shape of each:
+  writer; both file events for their own realm. The shape of each:
 
   - **Target:** if any agent was caught, one line counting them and naming the
     sending realm and planet (singular and plural forms); then, if any got
@@ -4660,21 +4660,28 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   (`terrorOpDeed`, `terrorOpReport`, `agentsCaught`) and opens the sender's entry
   with the operation and the target rather than a date, since the recap's own
   rule already carries the time. Until #285 IB also posted a line to the news on
-  BOTH planets. The sender's board still receives the spy report every terror op
-  carries home, and files it in the Spy Database without the "Our agents
-  reported back" line it gives a Coordinator sweep; the original files that
-  intelligence as a report entry too (`update_spy_intelligence`).
+  BOTH planets.
 
-  **IB's Send Spy report carries the figures; this is IB's own.** When the spy
-  got in, the sender's recap entry ends with the land, offense, defense and gold
-  from the report that came home beside it, so a spy sent after a strike shows
-  its effect in the sender's own report (at the next turn, or at once as a
-  mid-session notice) rather than only in the Spy Database.
-  The database stamps each entry with when it arrived here (two reports on one
-  realm can share a game day) and keeps the newest `SpyReportsPerRealm` (5) on
-  each realm. The viewer groups them by realm and ends each realm's rows with
-  the change between its last two reports, paged for an 80x24 screen. Neither
-  change touches the packet.
+  **Only a Send Spy that got in brings intel home (BINARY-VERIFIED).** The
+  original's resolver calls `write_spy_report` from one site, `0x04abe9`,
+  inside its Send Spy branch, which runs only after an agent wins the odds
+  roll; the protection test at the top of the routine jumps past it altogether.
+  A caught spy, a protected target and the other eight operations therefore
+  send back no intel. IB sent intel for every terror op that found its target
+  until 2026-09-24. The sender files the intel in the Spy Database without the
+  "Our agents reported back" line it gives a Coordinator sweep; the original
+  files it as an event too (`update_spy_intelligence`).
+
+  **IB's Send Spy event carries the figures; this is IB's own.** When the spy
+  got in, the sender's event ends with the land, offense, defense and gold from
+  the intel that came home beside it, so a spy sent after a strike shows its
+  effect in the sender's own event (at the next turn, or at once as a
+  mid-session notice) rather than only in the Spy Database. The database stamps
+  each entry with when it arrived here (two reports on one realm can share a
+  game day) and keeps the newest `SpyReportsPerRealm` (5) on each realm. The
+  viewer groups them by realm and ends each realm's rows with the change
+  between its last two reports, paged for an 80x24 screen. Neither change
+  touches the packet.
 
   BRE keeps ONE (BINARY-VERIFIED): `DATA\SPY.BRU` is 255 planet blocks of 25
   31-byte slots, one per realm letter A-Y (`open_spy_data`, BRE.OVR 0x04cd9f),
@@ -4744,9 +4751,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   IB implements all of it. **What IB had before was its own invention** — a
   per-baron Send Recon that spent an agent, warned the target, and filed figures
   in the Spy Database. That errand is gone; the Spy Database is now filled the
-  way the original fills it, by covert operations reporting the state they found
-  their target in (`resolve_received_covert_operation` → `write_spy_report` →
-  "Information added to Global Spy Data Bank").
+  way the original fills it, by a Send Spy that got in carrying home the state
+  it found its target in (`resolve_received_covert_operation` →
+  `write_spy_report` → "Information added to Global Spy Data Bank").
 - **Send Trade Deal** — a ONE-WAY shipment of goods to a named realm on another
   planet, BINARY-VERIFIED and built for #195. Its own routine in the original
   (`send_trade_offer`, BRE.OVR 0x024212, sole caller the InterBBS menu), NOT the
@@ -5994,7 +6001,7 @@ flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
   group-on-single / group-on-whole-BBS, each with a WIN and LOSS variant, plus
   the returning-strike (`IP-RET-*`) versions and `IP-RET-KILL`.
 - **Interplanetary report** (`game/ipreport.dat`) — the templates for covert and
-  special IP ops. The terrorist sections are private recap entries only (#285).
+  special IP ops. The terrorist sections are private events only (#285).
   The bombing and special-operation sections are NOT all private: the resolvers
   pass some of their lines to the news writer.
 

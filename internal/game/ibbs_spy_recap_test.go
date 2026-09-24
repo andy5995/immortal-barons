@@ -108,3 +108,40 @@ func TestSpyDatabaseKeepsTheNewestPerRealm(t *testing.T) {
 		t.Errorf("kept Ruritania %v and %d of Other, want [3 4 5 6 7] and 1", lands, others)
 	}
 }
+
+// Only a Send Spy that got in brings intel home, as in the original: a caught
+// spy, a protected target and every other operation send back none.
+func TestOnlyASpyThatGotInSendsIntel(t *testing.T) {
+	intel := func(seed int64, agents int, protected bool, op TerrorOpType) (Packet, bool) {
+		wA, wB, sender, target := spyBoards(seed, agents)
+		if protected {
+			target.Protection = 5
+		}
+		sender.Agents = 50
+		if err := wA.SendTerror(sender, "boardB", "Victim", 1, op); err != nil {
+			t.Fatalf("SendTerror: %v", err)
+		}
+		reply := wB.ApplyPacket(wA.Outbox[0])
+		return reply, reply.Results[0].Won
+	}
+	if reply, won := intel(1, 0, false, TerrorOpSpy); !won || len(reply.ReconReports) != 1 {
+		t.Errorf("a spy that got in sent %d intel records (won=%v), want 1", len(reply.ReconReports), won)
+	}
+	if reply, _ := intel(1, 0, true, TerrorOpSpy); len(reply.ReconReports) != 0 {
+		t.Errorf("a protected target sent %d intel records, want 0", len(reply.ReconReports))
+	}
+	if reply, won := intel(1, 0, false, TerrorOpDemoralize); !won || len(reply.ReconReports) != 0 {
+		t.Errorf("a Demoralize that got in sent %d intel records (won=%v), want 0", len(reply.ReconReports), won)
+	}
+	for seed := int64(1); seed <= 12; seed++ {
+		reply, won := intel(seed, 1_000_000, false, TerrorOpSpy)
+		if won {
+			continue // the automatic success let this one through
+		}
+		if len(reply.ReconReports) != 0 {
+			t.Errorf("seed %d: a caught spy sent %d intel records, want 0", seed, len(reply.ReconReports))
+		}
+		return
+	}
+	t.Fatal("no seed produced a caught spy; the test proves nothing")
+}
