@@ -9,9 +9,11 @@ The game is written in Go. It is an independent remake, inspired by the
 1990s BBS door game *Barren Realms Elite*. See [Heritage](#heritage) below.
 
 > **Early release.** The game is playable and inter-BBS (IBBS) league play
-> works. A seven-board league is running now as a live test, across boards run
-> by several operators. It is a test rather than a real game: everyone taking
-> part knows more live play is wanted before a real one begins.
+> works. A [seven-board
+> league](https://github.com/andy5995/immortal-barons/discussions/265) is
+> running now as a live test, across boards run by several operators. It is a
+> test rather than a real game: everyone taking part knows more live play is
+> wanted before a real one begins.
 
 ## Status
 
