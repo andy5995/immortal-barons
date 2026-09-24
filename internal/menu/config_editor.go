@@ -282,6 +282,9 @@ func configPages(ibbs bool) []cfgPage {
 			edit: func(_ session.Session, c *game.Config) {
 				c.SabreHandling = cycleSabre(c.SabreHandling)
 			}},
+		num(50, "S3-Sabre Constant Dial", "S3-Sabre Constant Dial (0-10)",
+			func(c *game.Config) int { return c.SabreConstantDial },
+			func(c *game.Config, v int) { c.SabreConstantDial = v }, game.SabreDialMin, game.SabreDialMax),
 		perDayCap(27, "Max Individual Attacks/Day (0 = unlimited)",
 			func(c *game.Config) int { return c.MaxIndividualAttacks },
 			func(c *game.Config, v int) { c.MaxIndividualAttacks = v }),
@@ -294,11 +297,6 @@ func configPages(ibbs bool) []cfgPage {
 		perDayCap(32, "Max Bombing Ops/Day (0 = unlimited)",
 			func(c *game.Config) int { return c.MaxBombingOps },
 			func(c *game.Config, v int) { c.MaxBombingOps = v }),
-		{n: 33, label: "Days before lost forces return",
-			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = never)", c.LostForcesDays) },
-			edit: func(s session.Session, c *game.Config) {
-				c.LostForcesDays = promptSuggested(s, "Days before lost forces return (0 = never)", c.LostForcesDays, game.MaxLostForcesDays)
-			}},
 		cycle(34, "Attack Costs", func(c *game.Config) game.Level { return c.AttackCosts },
 			func(c *game.Config, v game.Level) { c.AttackCosts = v }, cycleCost),
 		cycle(35, "Terrorism Costs", func(c *game.Config) game.Level { return c.TerrorCosts },
@@ -339,6 +337,11 @@ func configPages(ibbs bool) []cfgPage {
 			edit: func(s session.Session, c *game.Config) {
 				v := strings.TrimSpace(prompt(s, "Version every board must run (blank for no requirement, e.g. 0.0.5):"))
 				c.MinBoardVersion = strings.TrimPrefix(v, "v")
+			}},
+		{n: 33, label: "Days before lost forces return",
+			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = never)", c.LostForcesDays) },
+			edit: func(s session.Session, c *game.Config) {
+				c.LostForcesDays = promptSuggested(s, "Days before lost forces return (0 = never)", c.LostForcesDays, game.MaxLostForcesDays)
 			}},
 		boardOwned(39, "GameInbound", func(c *game.Config) string { return c.InboundDir }),
 		boardOwned(40, "GameOutbound", func(c *game.Config) string { return c.OutboundDir }),
@@ -387,6 +390,11 @@ var ibbsOnlyFields = map[int]bool{
 	32: true, // Max Bombing Ops/Day
 	33: true, // Days before lost forces return
 	35: true, // Terrorism Costs
+	34: true, // Attack Costs — only a strike sent to another board is charged
+	18: true, // S3-Sabre Handling — the Sabre flies only between planets
+	50: true, // S3-Sabre Constant Dial
+	36: true, // Bombing Ops — gates only the InterPlanetary Special Operations
+	37: true, // Missile Ops — likewise; local strikes are not gated by it
 	38: true, // Gooie Kablooie
 	42: true, // Local Attacks
 	43: true, // Local Attack Scoring

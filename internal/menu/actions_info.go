@@ -182,8 +182,10 @@ func gameSetup(s session.Session, w *ctx) Result {
 	group("Money")
 	pair("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate),
 		"Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
+	var investRate int
+	w.Read(func() { investRate = w.World.InvestRate })
 	pair("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate),
-		"Investment rate", investRateStr(s, c))
+		"Investment rate", investRateStr(s, c, investRate))
 	row("Food market", foodMarketStr(s, c))
 	// The money cap had a row here until 2026-09-01. It stopped earning one when
 	// the setting stopped being editable (#205): every new game gets the same 2
@@ -201,12 +203,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	group("Attacking")
 	pair("Attack damage", tr(s, c.AttackDamage.String()),
 		"Attack rewards", tr(s, c.AttackRewards.String()))
-	pair("Attack costs", tr(s, c.AttackCosts.String()),
-		"S3-Sabre", tr(s, c.SabreHandling.String()))
 	pair("Attacks per turn", "1", "Attacks per day", countOr(c.MaxLocalAttacks, "Unlimited"))
-	if !c.MissileOps || !c.BombingOps {
-		pair("Missile ops", onOffStr(c.MissileOps), "Bombing ops", onOffStr(c.BombingOps))
-	}
 
 	group("This board")
 	pair("Players per board", countOr(c.MaxPlayers, "Unlimited"),
@@ -219,6 +216,11 @@ func gameSetup(s session.Session, w *ctx) Result {
 		// The interplanetary rules only mean anything once this board is in a
 		// league, so they stay hidden on a stand-alone board.
 		group("Interplanetary")
+		pair("Attack costs", tr(s, c.AttackCosts.String()),
+			"S3-Sabre", tr(s, c.SabreHandling.String()))
+		if !c.MissileOps || !c.BombingOps {
+			pair("Missile ops", onOffStr(c.MissileOps), "Bombing ops", onOffStr(c.BombingOps))
+		}
 		pair("Individual attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"),
 			"Group attacks per day", countOr(c.MaxGroupAttacks, "Unlimited"))
 		pair("Terrorist ops per day", countOr(c.MaxTerrorOps, "Unlimited"),
@@ -252,13 +254,14 @@ func lostForcesStr(s session.Session, c game.Config) string {
 	return fmt.Sprintf(tr(s, "%d days"), c.LostForcesDays)
 }
 
-// investRateStr names the investment rate and whether it is pinned there.
-func investRateStr(s session.Session, c game.Config) string {
-	rate := fmt.Sprintf(tr(s, "%d%% over 10 days"), c.StdInvestRate)
+// investRateStr names the investment rate and whether it is pinned there. A
+// floating rate shows today's figure: the Standard rate is read only when the
+// rate is steady, so printing it beside "(floating)" named a number in no use.
+func investRateStr(s session.Session, c game.Config, today int) string {
 	if c.SteadyInvest {
-		return rate + tr(s, " (steady)")
+		return fmt.Sprintf(tr(s, "%d%% over 10 days"), c.StdInvestRate) + tr(s, " (steady)")
 	}
-	return rate + tr(s, " (floating)")
+	return fmt.Sprintf(tr(s, "%d%% over 10 days"), today) + tr(s, " (floating)")
 }
 
 // foodMarketStr says whether the market's daily supply runs out.

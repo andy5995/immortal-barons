@@ -223,23 +223,22 @@ func newConfigTUI(w *game.World) *configTUI {
 	addChoice(t, mil, "Region Costs", helpRegionCosts, costOpts, costVals, c.RegionCosts, func(c *game.Config, v game.Level) { c.RegionCosts = v })
 	addChoice(t, mil, "Attack Damage", helpAttackDamage, dmgOpts, dmgVals, c.AttackDamage, func(c *game.Config, v game.Level) { c.AttackDamage = v })
 	addChoice(t, mil, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
-	addChoice(t, mil, "S3-Sabre Handling", helpSabre, sabreOpts, sabreVals, c.SabreHandling, func(c *game.Config, v game.SabreMode) { c.SabreHandling = v })
-	t.addInt(mil, "S3-Sabre Constant Dial", helpSabreDial, c.SabreConstantDial, game.SabreDialMin, game.SabreDialMax, func(c *game.Config, n int) { c.SabreConstantDial = n })
 	if ibbs {
+		addChoice(t, mil, "S3-Sabre Handling", helpSabre, sabreOpts, sabreVals, c.SabreHandling, func(c *game.Config, v game.SabreMode) { c.SabreHandling = v })
+		t.addInt(mil, "S3-Sabre Constant Dial", helpSabreDial, c.SabreConstantDial, game.SabreDialMin, game.SabreDialMax, func(c *game.Config, n int) { c.SabreConstantDial = n })
 		t.addInt(mil, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
 		t.addInt(mil, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
 		t.addInt(mil, "Max Terrorist Ops/Day (0=unlimited)", helpMaxTerrorOps, c.MaxTerrorOps, 0, 100, func(c *game.Config, n int) { c.MaxTerrorOps = n })
 		t.addInt(mil, "Max Bombing Ops/Day (0=unlimited)", helpMaxBombingOps, c.MaxBombingOps, 0, 100, func(c *game.Config, n int) { c.MaxBombingOps = n })
-		t.addInt(mil, "Days before lost forces return (0=never)", helpLostForcesDays, c.LostForcesDays, 0, game.MaxLostForcesDays, func(c *game.Config, n int) { c.LostForcesDays = n })
 	}
-	addChoice(t, mil, "Attack Costs", helpAttackCosts, costOpts, costVals, c.AttackCosts, func(c *game.Config, v game.Level) { c.AttackCosts = v })
 	if ibbs {
+		addChoice(t, mil, "Attack Costs", helpAttackCosts, costOpts, costVals, c.AttackCosts, func(c *game.Config, v game.Level) { c.AttackCosts = v })
 		addChoice(t, mil, "Terrorism Costs", helpTerrorCosts, costOpts, costVals, c.TerrorCosts, func(c *game.Config, v game.Level) { c.TerrorCosts = v })
 	}
 	t.addInt(mil, "Max Local Attacks/Day (0=unlimited)", helpMaxLocalAttacks, c.MaxLocalAttacks, 0, 100, func(c *game.Config, n int) { c.MaxLocalAttacks = n })
-	t.addBool(mil, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
-	t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 	if ibbs {
+		t.addBool(mil, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
+		t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 		t.addBool(mil, "Gooie Kablooies", helpGooieKablooie, c.GooieKablooie, func(c *game.Config, b bool) { c.GooieKablooie = b })
 		t.addBool(mil, "Local Attacks", helpLocalAttacks, c.LocalAttacks, func(c *game.Config, b bool) { c.LocalAttacks = b })
 		t.addBool(mil, "Local Attack Scoring", helpLocalAttackScoring, c.LocalAttackScoring, func(c *game.Config, b bool) { c.LocalAttackScoring = b })
@@ -258,6 +257,7 @@ func newConfigTUI(w *game.World) *configTUI {
 		t.addStatic(caps, 40, "GameInbound", helpInboundDir, c.InboundDir)
 		t.addStatic(caps, 40, "GameOutbound", helpOutboundDir, c.OutboundDir)
 		t.addBool(caps, "Dupe Checking", helpDupeChecking, c.DupeChecking, func(c *game.Config, b bool) { c.DupeChecking = b })
+		t.addInt(caps, "Days before lost forces return (0=never)", helpLostForcesDays, c.LostForcesDays, 0, game.MaxLostForcesDays, func(c *game.Config, n int) { c.LostForcesDays = n })
 	}
 	t.addInt(caps, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })
 	t.addInt(caps, "Idle warnings before boot", helpIdleWarnings, c.MaxIdleWarnings, 1, 100, func(c *game.Config, n int) { c.MaxIdleWarnings = n })

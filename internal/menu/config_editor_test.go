@@ -72,9 +72,10 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// once nothing displayed it; its number is retired rather than reused, so an
 	// old note naming 48 cannot land on a different setting. 21 was the AI-baron
 	// count, retired with the barons themselves in v0.2.0, and its number is held
-	// back the same way. 49 (local attacks per day) is IB's own.
-	const fields = 46
-	for n := 1; n <= 49; n++ {
+	// back the same way. 49 (local attacks per day) and 50 (the S3-Sabre Constant
+	// Dial) are IB's own.
+	const fields = 47
+	for n := 1; n <= 50; n++ {
 		if n == 21 || n == 22 || n == 48 {
 			continue
 		}
@@ -179,7 +180,7 @@ func TestGameSetupHidesLeagueRulesOffLeague(t *testing.T) {
 		"Group attacks per day", "Terrorist ops per day", "Bombing ops per day",
 		"Terrorism costs", "Lost forces return", "Gooie Kablooie", "This planet",
 		"League number", "League Coordinator",
-		"Local attacks", "Local attack scoring",
+		"Local attacks", "Local attack scoring", "Attack costs", "S3-Sabre",
 	} {
 		if strings.Contains(off, label) {
 			t.Errorf("Game Setup shows %q on a stand-alone board", label)
