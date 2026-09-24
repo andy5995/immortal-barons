@@ -47,6 +47,27 @@ func leagueBoard(t *testing.T) game.Config {
 	return cfg
 }
 
+// captureStdout runs fn with stdout redirected and returns what it printed,
+// for the modes whose printout is the only place their answer lands.
+func captureStdout(t *testing.T, fn func()) string {
+	t.Helper()
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	saved := os.Stdout
+	os.Stdout = w
+	fn()
+	os.Stdout = saved
+	w.Close()
+	out, err := io.ReadAll(r)
+	r.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(out)
+}
+
 // A league board's timer runs -maint (#289), which runs the planetary step. The
 // step marks what it met as reported, so -maint has to raise the alarm itself or
 // a fault first met here is never raised at all.

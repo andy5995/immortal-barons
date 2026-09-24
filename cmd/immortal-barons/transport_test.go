@@ -377,3 +377,38 @@ func TestARepeatedHandoffFailureAlarmsOnce(t *testing.T) {
 		t.Error("a failure that cleared and came back raised no alarm")
 	}
 }
+
+// -ftn-status on a board with no transport lines says so, rather than reporting
+// an empty spool that reads like a healthy transport: a Coordinator that
+// deleted ftn.cfg without adding its lines saw only "nothing waiting".
+func TestFTNStatusSaysWhenNoTransportIsSetUp(t *testing.T) {
+	cfg := leagueBoard(t)
+	var runErr error
+	out := captureStdout(t, func() { runErr = runFTNStatus(cfg) })
+	if runErr != nil {
+		t.Fatal(runErr)
+	}
+	for _, want := range []string{"Sending: no OutgoingNetmailDir or Link line", "Receiving: no IncomingFileDir line"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("-ftn-status output is missing %q:\n%s", want, out)
+		}
+	}
+}
+
+// With Mailer None the netmail directory is set but not used, so -ftn-status
+// says that rather than telling the sysop the line is missing.
+func TestFTNStatusNamesMailerNone(t *testing.T) {
+	cfg := leagueBoard(t)
+	body := "OutgoingNetmailDir " + filepath.Join(cfg.DataDir, "netmail") + "\nMailer None\n"
+	if err := os.WriteFile(filepath.Join(cfg.DataDir, "bbs.cfg"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var runErr error
+	out := captureStdout(t, func() { runErr = runFTNStatus(cfg) })
+	if runErr != nil {
+		t.Fatal(runErr)
+	}
+	if !strings.Contains(out, "Sending: Mailer None turns off the netmail") {
+		t.Errorf("-ftn-status output does not name Mailer None:\n%s", out)
+	}
+}

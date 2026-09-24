@@ -5,6 +5,7 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * -ftn-status says when bbs.cfg has no lines for sending or receiving
   * A session open past midnight dates its turns by the new game day
   * Only a Send Spy that gets in brings back intel on its target
   * The captured-region picker says to press a letter when a number is typed

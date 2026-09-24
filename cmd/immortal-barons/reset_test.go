@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -159,24 +158,12 @@ func TestBoardIDFlagBeatsTheImportedName(t *testing.T) {
 // written (#152) — the printout is the only place they land.
 func captureReset(t *testing.T, cfg game.Config, league *leagueSetup) string {
 	t.Helper()
-	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatal(err)
-	}
-	saved := os.Stdout
-	os.Stdout = w
-	runErr := runReset(cfg, false, league, charsetUTF8, true)
-	os.Stdout = saved
-	w.Close()
-	out, err := io.ReadAll(r)
-	r.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
+	var runErr error
+	out := captureStdout(t, func() { runErr = runReset(cfg, false, league, charsetUTF8, true) })
 	if runErr != nil {
 		t.Fatalf("runReset: %v (output: %s)", runErr, out)
 	}
-	return string(out)
+	return out
 }
 
 // wantsLine fails unless the printed bbs.cfg carries this exact setting line.

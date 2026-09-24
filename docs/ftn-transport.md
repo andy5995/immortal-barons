@@ -732,6 +732,11 @@ A door launched with `-full` never keeps a caller out over this. It prints the
 same lines, skips the league exchange, and lets the caller play. `-ftn-status`
 prints them too, and then its report.
 
+To check the move, run `-ftn-status` once `ftn.cfg` is gone. It names each
+half of the transport that has no lines in `bbs.cfg` ("Sending: no
+OutgoingNetmailDir or Link line…"). A board that ran `barons-ftn` should see
+neither line.
+
 An old `barons-ftn` binary left on disk and still scheduled does no harm once
 `ftn.cfg` is deleted. It cannot find its settings, so it exits with an error on
 every run and moves nothing. The transport lock keeps its old name, so an old

@@ -207,6 +207,24 @@ func runFTNStatus(cfg game.Config) error {
 	if err := checkTransportSettings(cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "immortal-barons -ftn-status: %v\n\n", err)
 	}
+	// A board with no transport lines is a valid setup -- its mailer collects
+	// from GameOutbound itself -- but it is also what a half-finished upgrade
+	// looks like, and without this line the report below reads as a healthy
+	// transport with nothing to do.
+	// Nothing below loads the transport settings, so a bad line is reported
+	// here or nowhere.
+	if tc, err := ftn.LoadConfig(cfg.DataDir); err != nil {
+		fmt.Fprintf(os.Stderr, "immortal-barons -ftn-status: transport settings: %v\n\n", err)
+	} else {
+		if !tc.Sends() && tc.OutgoingNetmailDir != "" {
+			fmt.Printf("Sending: Mailer None turns off the netmail in OutgoingNetmailDir and there is no Link line, so packets are left in %s.\n", cfg.Outbound())
+		} else if !tc.Sends() {
+			fmt.Printf("Sending: no OutgoingNetmailDir or Link line in bbs.cfg, so packets are left in %s.\n", cfg.Outbound())
+		}
+		if !tc.Receives() {
+			fmt.Printf("Receiving: no IncomingFileDir line in bbs.cfg, so only %s is read.\n", cfg.Inbound())
+		}
+	}
 	status, err := ftn.Status(cfg.DataDir)
 	if err != nil {
 		return err
