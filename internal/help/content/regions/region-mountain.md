@@ -7,6 +7,6 @@ in_game: true
 
 # Mountain Regions
 
-Mountain regions mine natural resources. Their income is lower on average, but
-steady, because few things change it. Mountains also boost how much your
+Mountain regions earn gold from mining. Their income is lower on average, but it
+changes little from turn to turn. Mountains also boost how much your
 Industrial regions produce.

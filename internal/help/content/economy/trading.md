@@ -27,15 +27,16 @@ ask for goods and gold in return. The other realm reads the offer and accepts or
 refuses it. You need a treaty with that realm to send one.
 
 A trade deal costs a fee for each day you send it for, and it needs carriers to
-move the goods. How many depends on what you are shipping: one carrier holds a
-thousand troopers or turrets, a hundred jets, five thousand tanks, or a hundred
-thousand gold, and food, bombers, agents and carriers take no room at all. A
+move the goods. How many depends on what you are shipping. As cargo, one carrier
+holds a thousand troopers or turrets, a hundred jets, five thousand tanks, or a
+hundred thousand gold. Food, bombers, agents and carriers take no room at all. A
 Protective Trade treaty with that realm makes the fee cheaper.
 
 The days you pay for are how long the offer stands. What you put in the deal
-leaves your realm the moment you send it, and it comes back only if the offer is
-accepted: a refusal, a deal nobody answers before its days run out, and a realm
-that falls before it replies all cost you the goods. Send to someone who is
+leaves your realm the moment you send it. If the offer is accepted, the other
+realm gets it, and you get what you asked for. A refusal, a deal nobody answers
+before its days run out, and a realm that falls before it replies all cost you
+the goods. Send to someone who is
 playing, and give them enough days to get to it.
 
 ## Deals to another planet
@@ -57,15 +58,15 @@ send to your own planet — for that, use the deal above.
 
 Trade matters most when several realms work together. A few ideas:
 
-**Specialize, then supply your partners.** Your industry can favor one unit
-type, which makes that unit cheaper for you than for anyone else. If you build
-tanks and a partner builds turrets, each of you can sell to the other below the
-price they would pay to build it themselves. Both realms come out ahead.
+**Specialize, then supply your partners.** Your industry can specialize in one
+unit type. It then builds more of that unit and fewer of every other. If you
+specialize in tanks and a partner in turrets, each of you makes more of what
+the other needs. Trade the extra, and both realms come out ahead.
 
 **A cheap listing is taken by whoever gets there first.** Anyone can buy it, so
 a price meant as a gift to an ally may end up arming a rival. To be sure the
 goods reach the realm you mean them for, send a trade deal instead.
 
 **Trade is bigger between planets.** In a league, whole planets specialize, and
-an ally's market is often the cheapest place to buy. See the Interplanetary
-Trading topic.
+an ally's market is often the cheapest place to buy. See the Allied Markets
+topic.

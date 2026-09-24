@@ -274,8 +274,7 @@ func BuildMenus() *Menus {
 	// Send Message reuses the Messages menu's action; Special Operations opens
 	// the separate
 	// interplanetary Special Operations menu (BRE's cross-planet covert set, not
-	// the local Covert menu). Indiv. Attack Force ('6') has no interplanetary
-	// individual-attack mechanic behind it yet — see indivAttackForce's doc.
+	// the local Covert menu).
 	//
 	// Send Trade Deal is the INTERPLANETARY deal, a separate mechanic from the
 	// Trading menu's (#195); it ran the local action, against a realm on the

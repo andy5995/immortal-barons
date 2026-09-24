@@ -204,7 +204,7 @@ type BuyMode int
 const (
 	BuyYes     BuyMode = iota // unlimited purchasing (zero value / BRE default)
 	BuyNo                     // no purchasing; players must build via industry
-	BuyLimited                // a limited amount is on the market each day
+	BuyLimited                // BRE's daily market pool; not built, so it works like BuyYes
 )
 
 func (b BuyMode) String() string {
@@ -334,7 +334,7 @@ type Config struct {
 	// a Coordinator's broadcast must never be able to set it.
 	OnFault string `json:"-"`
 
-	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
+	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never)
 	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 
 	// League ruleset (BRE Configuration Editor fields).
@@ -353,7 +353,7 @@ type Config struct {
 	FoodUnlimited        bool   // food market has no daily supply limit (BRE "Food Unlimited"; default false = limited)
 	MaxTaxRate           int    // highest tax rate a player may set (IB divergence: BRE caps nothing)
 	PlanetaryTaxRate     int    // crown tax on each turn's gold income, as a whole percent (5 = 5%)
-	MaxRegions           int    // most regions a player may own
+	MaxRegions           int    // most regions a player may buy in one turn; 0 = no limit (owning is uncapped)
 	MaxLocalAttacks      int    // most attacks a player may make on this board per day, on top of one per turn; 0 = unlimited (IB's own: BRE paces a local attack by the turn alone)
 	MaxIndividualAttacks int    // most Individual Attack Forces a player may send to other boards per day; 0 = unlimited (BRE "InterBBS: Max Individual Attacks")
 	MaxGroupAttacks      int    // most group (interplanetary) attacks a player may join or lead per day; 0 = unlimited
@@ -396,8 +396,8 @@ type Config struct {
 	// option, so it carries no star and a stand-alone board is asked it too.
 	Pirates bool // the pirate factions exist, raid, and can be raided
 
-	BombingOps bool // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)
-	MissileOps bool // nuclear/chemical/biological strikes are offered (Attack, Bomb Enemy Targets, Special Operations)
+	BombingOps bool // the four bombing ops are offered on InterPlanetary Special Operations
+	MissileOps bool // nuclear, chemical and S3-Sabre are offered on InterPlanetary Special Operations; local strikes are not gated
 	// The JSON key keeps the name IB shipped this under so an existing
 	// config.json and an in-flight league packet still carry the setting.
 	GooieKablooie bool    `json:"ClingyAnnihilator"` // the doomsday weapon is offered

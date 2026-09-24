@@ -726,7 +726,9 @@ and sends a signed order that each member carries out on its next `-planetary`
 run. Every board keeps what identifies it in the league — its roster, its keys
 and its packet history — and starts a fresh world, so nobody re-does the setup.
 
-Nothing schedules this. Run it when you decide the season is over.
+Nothing schedules this. Run it when you decide the season is over. A Game
+Length setting ends each board's game on that board's own count of days, so
+boards can end on different days.
 
 ### League reports
 

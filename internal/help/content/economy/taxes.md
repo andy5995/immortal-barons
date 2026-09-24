@@ -10,18 +10,15 @@ in_game: true
 Your tax rate sets how much gold you collect from your people, and it shapes
 their mood.
 
-Popular Support drifts each turn toward a target set by your tax rate. A steady,
-moderate tax rate keeps Support near its highest. High taxes push Support down.
-Low Support badly cuts your Coastal (tourism) income.
+Each turn your tax rate moves Popular Support. A low rate raises it, a high rate
+lowers it, and a rate in between leaves it where it is. Low Support badly cuts
+your Coastal (tourism) income.
 
 Riots grow more likely as your tax rate climbs past a safe level. A riot crashes
 your Support and drives off part of your population. Raise taxes with care.
 
-Taxes also decide how many people your realm can hold. A low rate lets it hold
-many more, a high one far fewer, and past a punitive rate people leave faster
-still — see Population for the threshold. A realm that is already shrinking
-loses people quicker the harder it taxes. Support works the same way: the
-higher it stands, the more people your land can hold.
+Taxes and Popular Support also decide how many people your realm can hold. See
+Population.
 
 ## The Queen Royale's tax
 
@@ -29,8 +26,8 @@ The Queen takes a share of what you earn each turn. You may pay her less than
 she asks, but a short payment costs Popular Support.
 
 Every coin she collects goes into her purse, and she gives part of that purse
-back. She pays you the first time you play each day: 2% of the purse, or 7%
-once it holds more than 100 million gold. A realm still under New Realm
+back. She pays you the first time you play each day: a small share of the purse,
+and a larger share once the purse grows large. A realm still under New Realm
 Protection gets at most 1 million.
 
 All barons draw on the same purse, and each refund empties it a little. The

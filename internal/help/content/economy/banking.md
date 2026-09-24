@@ -14,16 +14,16 @@ taken by pirates or raids.
 - Withdraw — move gold from the bank back to your treasury.
 - Cash Relief / Loans — borrow gold, or pay back what you already owe.
 
-Deposits and withdrawals have no size limit. The investments that pay back on
-any one date may return at most two billion gold between them, so the bank
-offers only what still fits for the date you choose. You may open as many
-investments as you like.
+A deposit or withdrawal moves only what fits under the limit below. The
+investments that pay back on any one date may return at most two billion gold
+between them, so the bank offers only what still fits for the date you choose.
+You may open as many investments as you like.
 
 Interest is paid at the end of every turn, on whatever is in the bank at that
-moment. If you have turned on Deposit gold at End of Turn, in Preferences, your
-gold is put in the bank first, so the gold you earned this turn earns interest
-this turn. It goes in after the pirates have had their chance at it, so it is no
-protection against a raid.
+moment. While Deposit gold at End of Turn is on in Preferences (a new realm
+starts with it on), your gold is put in the bank first, so the gold you earned
+this turn earns interest this turn. It goes in after the pirates have had their
+chance at it, so it is no protection against a raid.
 
 The start of your next turn tells you what the bank paid: the interest, and what
 any investment that matured today paid back.

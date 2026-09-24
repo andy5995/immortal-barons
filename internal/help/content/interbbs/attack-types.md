@@ -7,30 +7,31 @@ in_game: true
 
 # Attack Types
 
-When you send your own strike force at a baron on another planet, you choose how
-to press the attack. Group attacks have no such choice — they always fight as a
-Normal Attack.
+An attack type sets how your own strike force fights a baron on another planet.
+Group attacks have no such choice: they always fight as a Normal Attack.
 
-Going alone also pays better: your own strike takes twice the land a group
-attack of the same weight would. What you give up is the whole-planet target and
-everyone else's forces.
+Going alone also pays better: your own strike takes twice the share of the
+defender's regions that a group attack takes. What you give up is the
+whole-planet target and everyone else's forces.
 
 - **Normal Attack** — your forces fight at full strength. Both sides break off
   once they have taken 15% losses, and you take the standard share of the
   defender's regions.
 - **Quick Strike** — surprise lets you fight at 120% of your normal strength,
   but the battle is short and disorganized: both sides retreat at 8% losses, and
-  you carry off only half the land a Normal Attack would.
+  you carry off only half the regions a Normal Attack would.
 - **Extended Battle** — a grinding assault. Fatigue drops your forces to 85%
   strength, but they press until both sides have taken 20% losses and bring home
-  125% of a Normal Attack's land.
+  125% of a Normal Attack's regions.
 
-The choice is really about what you are short of. Land is the thing you cannot
-buy back quickly, so an Extended Battle is the one that changes the map — pay
-for it when you already have the men to spare and can afford to be weak for a
-day. A Quick Strike costs you least and hits above its weight, which makes it
-the honest answer when you are not sure you can win: you find out cheaply, and
-your army is still standing.
+These losses are for the default Attack Damage setting. Your sysop may halve or
+double them.
+
+Choose by what you can spare. Regions are slow to win back, so an Extended
+Battle gains you the most. Send it when you have troops to spare and can afford
+to be weak for a day. A Quick Strike costs you the least and fights harder than
+its size suggests, so use it when you are not sure whether you can win. You
+learn the answer cheaply, and your army survives.
 
 Remember that your strength is measured on arrival, not on departure. Against a
 distant planet the defender has days to build turrets before your force lands,
@@ -55,10 +56,11 @@ get a private report: what you sent, what came home, what it destroyed, and
 whether it found the target at all. A force that found no such realm, or found
 it still under New Realm Protection, is told so rather than counted as a defeat.
 
-Land you capture abroad has no type until you give it one, so it waits for you
-and the region picker comes up at the start of your next turn — the same
-question a Regular Attack asks at home. On a group attack the regions are shared
-between the barons who paid for them, in proportion to what each committed.
+Regions you capture abroad have no type until you give them one, so they wait
+for you, and the region picker comes up at the start of your next turn — the
+same question a Regular Attack asks at home. On a group attack the regions are
+shared between the barons who paid for them, in proportion to what each
+committed.
 
 If the answer never arrives — a board goes quiet, a packet is lost — your forces
 come home by themselves after the number of days your sysop has set, and a

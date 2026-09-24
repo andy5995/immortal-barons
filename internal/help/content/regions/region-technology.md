@@ -9,7 +9,7 @@ in_game: true
 
 Technology regions make your whole empire more efficient. The bonus is not
 instant: it builds up slowly the longer you hold Technology regions, and it
-builds faster when they are a larger share of your land. Bigger empires need
+builds faster when they are a larger share of your regions. Bigger empires need
 more Technology regions to reach the same level.
 
 Technology helps in several ways:

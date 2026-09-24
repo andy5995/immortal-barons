@@ -500,7 +500,7 @@ func (w *World) resolveBribery(a, d *Empire) string {
 		a.Bribed = append(a.Bribed, d.Name)
 	}
 	d.addEvent("A rival power bribed one of your agents.")
-	return fmt.Sprintf("You bribed an agent in %s. Your operations against them are twice as likely to land.", d.Name)
+	return fmt.Sprintf("You bribed an agent in %s. Your operations against them now have a better chance to land.", d.Name)
 }
 
 // StirRevolts spreads propaganda that lowers d's popular support (rioting and

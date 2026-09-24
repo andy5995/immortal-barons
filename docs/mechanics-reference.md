@@ -6121,9 +6121,10 @@ Now matching this reference (as of v0.0.4):
 
 Still missing against the reference:
 
-- A league season that ends on a schedule. A Planetary Master is crowned each
-  day and the Coordinator can start a new season with `-league-reset`, but
-  nothing times one.
+- A league season that ends on a schedule across the league. Each board ends
+  its own game once `GameLength` game days have passed, crowning a Planetary
+  Master and starting afresh, but on its own count of days, so boards need not
+  end together. Only the Coordinator's `-league-reset` resets them all.
 - BRE's finer interplanetary news subtypes
 
 A few Diplomacy and Covert menu items are recorded but inert, pending fuller

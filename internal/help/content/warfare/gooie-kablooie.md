@@ -7,8 +7,8 @@ in_game: true
 
 # Gooie Kablooie
 
-The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy planet
-rather than at one baron, and your planet can only have one at a time.
+The Gooie Kablooie is a weapon aimed at a whole enemy planet, not at one baron.
+Your planet can only have one at a time.
 
 Nobody buys the weapon alone. One baron starts the work and names the target
 planet. After that, any baron here can put money in, a million gold at a time.
@@ -22,17 +22,15 @@ either way.
 
 ## Being on the receiving end
 
-A weapon aimed at your planet does not go off and disappear. It arrives, sits on
-your planet, and eats it. The day it lands it takes a tenth of every realm's
+A weapon that reaches your planet stays there and destroys regions each day. The
+day it lands it takes a tenth of every realm's
 regions. Every day after that it takes another twentieth, until five days are up
-and it burns itself out. Left alone it will cost you better than a quarter of
-your land.
+and it burns itself out. Left alone it will cost you more than a quarter of
+your regions.
 
 Only jets can reach it. Your realm is asked at the start of your turn whether you
 want to attack it. About a third of the jets you send do not come home.
 
-No single wave can finish it, however many jets you send. That is the point: the
-weapon is built to need the whole planet's air forces, and a planet that cannot
-organize loses the land.
+No single wave can destroy it. It takes jets from many realms on the planet.
 
-An SDI program is no help against it, and neither is anything else you own.
+An SDI program is no help against it. Only your jets are.

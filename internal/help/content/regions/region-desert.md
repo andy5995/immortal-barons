@@ -7,5 +7,5 @@ in_game: true
 
 # Desert Regions
 
-Desert regions are good for solar power. Their income swings with conditions, but
-on average it beats mountains and trails good Coastal land.
+Desert regions are good for solar power. Their income swings with conditions,
+but on average it beats mountains and trails Coastal regions with high Support.

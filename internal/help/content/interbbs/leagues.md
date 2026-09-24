@@ -11,12 +11,13 @@ Some games link many boards together into one world. Your goal grows from
 beating the local rulers to helping your board beat other boards. Teamwork
 matters.
 
-- Group Attack — several rulers on your board join one strike against a distant
-  enemy. The gains are shared among those who take part.
+- Create Group Attack / Join Group Attack — several rulers on your board join
+  one strike against a distant enemy. The gains are shared among those who take
+  part.
 - Indiv. Attack Force — your own strike against one named baron. You keep the
   whole take rather than sharing it, and you choose how to press the attack (see
   Attack Types).
-- IP Scores — see how the boards rank against each other.
+- View IPScores — see how the boards rank against each other.
 - Send Message — write to another planet. Name the planet, then pick which
   barons on it should read the letter, using the same `Send to:` list the
   Diplomacy and message screens use here: a letter marks a baron, the same letter
@@ -32,8 +33,8 @@ matters.
   binds nobody, but it is your Coordinator telling you who to watch.
 - Travel Times — how long a message or a strike actually takes to reach each
   planet and get an answer back. Boards trade mail on their sysops' schedule, so
-  check it before you aim anything: against a planet three days away, you are
-  committing forces you will not hear about until the weekend.
+  check it before you aim anything: against a planet with a three-day round
+  trip, you will not hear how your forces did for three days.
 
 Five of these items are shut until you have played a turn this visit: Send Trade
 Deal, Create Group Attack, Join Group Attack, Indiv. Attack Force and Special
@@ -59,7 +60,7 @@ be naming your vote.
 Every turn opens by telling you whether you hold the office or who your vote is
 currently for, so you never have to go looking.
 
-A league game has a set length. When it ends, the world resets and a new game
-begins.
+Your sysop may give a league game a set length. When it runs out, the world
+resets and a new game begins.
 
 These features appear only when the game is set up for inter-BBS or league play.

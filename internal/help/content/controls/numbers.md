@@ -7,7 +7,7 @@ in_game: true
 
 # Entering Numbers
 
-When the game asks for an amount, it shows two numbers in brackets, like
+When the game asks for an amount, it shows two numbers in parentheses, like
 `How many? (0; 40):`.
 
 - The left number is a suggested value. Press Enter to accept it.
@@ -17,5 +17,5 @@ When the game asks for an amount, it shows two numbers in brackets, like
 - `m` adds six zeros. Press `2` then `m` and you see `2000000`.
 - `b` adds nine zeros. Press `3` then `b` and you see `3000000000`.
 
-If you type a number larger than the maximum, the game lowers it to the maximum
-when you press Enter.
+If you type a number larger than the maximum, the game changes it to the maximum
+when you press Enter. Press Enter again to accept it.

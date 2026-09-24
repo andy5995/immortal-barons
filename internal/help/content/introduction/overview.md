@@ -15,8 +15,7 @@ face steady competition.
 A planet has room for 25 baronies, each holding one of its 25 seats. Your seat
 is yours for as long as your realm stands, and its letter is how everyone else
 names you. When every seat is taken, a new caller is turned away until a realm
-falls; a sysop may also seat fewer than 25 players, and any computer-run barons
-take seats of their own.
+falls. A sysop may also seat fewer than 25 players.
 
 You name your realm when you first call, and you may change that name once —
 from the Preferences menu, after your New Realm Protection has ended. Only
@@ -43,15 +42,18 @@ A turn moves through these steps in order:
 - **Production and income.** Your industry builds military units, and your
   income for the turn arrives.
 - **Reports.** You see an income report and your full Empire Status.
-- **Upkeep.** You pay to maintain your military and your land, and you feed your
-  people and your army. Short food or gold causes trouble, so watch these.
-- **Covert Operations.** Spying and sabotage. This step appears only if you keep
-  it turned on and hold at least one covert agent.
-- **Spending.** You buy land, military, and other things.
+- **Upkeep.** You pay to maintain your military and your regions, and you feed
+  your people and your army. Short food or gold causes trouble, so watch these.
+- **Covert Operations.** Spying and sabotage. This step appears only if you turn
+  on Visit Covert Menu in Preferences and hold at least one covert agent.
+- **Bank.** The bank opens so you can deposit, withdraw, borrow or invest.
+- **Spending.** You buy regions, military units, and other things.
 - **Attacks.** You may attack another barony once per turn.
-- **Trading.** Trade goods with other baronies, if you keep this step turned on.
+- **Trading.** Trade goods with other baronies. This step appears only if you
+  turn on Visit Trading Menu in Preferences.
 - **InterPlanetary Operations.** Actions against other planets, in linked games.
-- **Messages.** You may send a message to another player.
+- **Messages.** You may send a message to another player. This step appears
+  only if you turn on Visit Message Menu in Preferences.
 - **End of turn.** Your economy and population settle, and the turn closes.
 
 ## The System menu
@@ -61,9 +63,9 @@ set your tax rate, change what your industry builds, open diplomacy, visit the
 bank, use the food market, set your preferences, and write macros. Open it when
 you need it.
 
-In this game, **diplomacy** and **changing production** live on the System menu.
-They are not automatic stops in each turn, so visit them yourself when you want
-to change your plans.
+Diplomacy is also on the Entry menu. Neither diplomacy nor changing production
+is an automatic stop in a turn, so visit them when you want to change your
+plans.
 
 ## Game Bulletins
 

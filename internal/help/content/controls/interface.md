@@ -8,19 +8,20 @@ in_game: true
 # Moving Through the Menus
 
 Press one key to choose. You do not press Enter to pick a menu item. Each item
-shows its key in brackets, like `(1)`. Press that key and it runs at once.
+shows its key in parentheses, like `(1)`. Press that key and it runs at once.
 
 Every menu leaves with the `0` key, labeled "Quit". On a turn menu (Spending,
-Attack, Covert, Trading), Quit moves you to the next step of your turn; you
-cannot go back to that menu until your next turn. On a side menu (like the
-Bank or the System Menu), Quit takes you back to where you were.
+Attack, Covert, Trading), Quit moves you to the next step of your turn, and the
+turn does not come back to that step. On a side menu (like the Bank or the
+System Menu), Quit takes you back to where you were.
 
 The System Menu opens with the `*` key from the Spending menu. It holds extra
 options like Preferences, Set Tax Rate, and Show Instructions.
 
-Pressing Enter with no other key also chooses Quit — the prompt shows "Quit"
-so you can see what Enter will do. On a turn menu, this only happens if you
-turn on "Enter exits Buy menu" in Preferences; on a side menu, Enter always
+Pressing Enter with no other key also chooses Quit. The prompt shows "Quit" so
+you can see what Enter will do. On the Spending menu this happens only if you
+turn on "Use Enter To Exit BUY Menu" in Preferences. On the Entry menu, Enter
+chooses Play while you have turns left. On every other menu, Enter always
 chooses Quit.
 
 The help browser and other pick-a-topic lists move a highlight with the arrow
@@ -33,9 +34,9 @@ control, those lists are numbered instead — type the number and press Enter.
 Where a prompt takes something typed rather than one key — a number of troopers,
 a realm name, a line of a message — Backspace erases the last character and
 **Ctrl-U erases the whole answer**, leaving you back at the prompt with nothing
-typed. It is quicker than holding Backspace down over a mistyped 1000000000, and
-it is IB's own addition; the original has no such key. In the message editor it
-clears the line you are on, not the message — `/C` still does that.
+typed. It is quicker than holding Backspace down over a mistyped 1000000000. In
+the message editor it clears the line you are on, not the message — `/C` still
+does that.
 
 ## Choosing who an action goes to
 
@@ -50,8 +51,9 @@ barons on the planet you named.
 
 Every Diplomacy option that names a realm takes the same list: offer a treaty to
 several realms at once, or declare war on several. There `?` shows your
-relations rather than the scores. Mark one realm only and you get the full
-negotiation with it — you can accept its offer or break the pact you hold.
+relations rather than the scores. Mark one realm only, and you negotiate with
+it: you propose the pact, or accept it if that realm has already offered it to
+you. To end a pact, use Declaration Of War.
 
 The letters belong to the realms, not to the rows, so a letter may be missing
 from the list: it is either yours or a realm that has fallen. A realm keeps its
@@ -72,4 +74,4 @@ never carries it. It clears when they log off, and also a few minutes after
 their last keypress, so someone sitting on one screen can drop off the list
 without having left.
 
-Press `?` at a menu to open this help.
+On a menu that lists Help, press `?` to open this help.

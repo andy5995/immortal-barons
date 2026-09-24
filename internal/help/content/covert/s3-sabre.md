@@ -22,14 +22,17 @@ fire, you set a dial from 0 to 10, and the dial aims it:
 
 The aim wanders by one setting either way in flight, and about one launch in ten
 ignores the dial altogether and hits whatever it likes. So a setting is a
-tendency, not a promise: 4 goes for military bases about half the time, while 5
-goes for airbases about three times in four, because 5 and 6 both point there.
-Aim 5 at a baron you know keeps a large air force.
+tendency, not a promise: 4 goes for military bases about half the time, while
+5 goes for airbases more than two times in three, because 5 and 6 both point
+there. The dial wraps at its ends: 10 can land on 0, and 0 on 10. Aim 5 at a
+baron you know keeps a large air force.
 
-The missile is still a gamble on top of that. Most launches do nothing: it
-misses, it malfunctions, or the enemy's SDI shoots it down. It can also
-backfire — if the enemy keeps a very large trooper army, the missile may turn
-back and strike your own empire instead.
+The missile is still a gamble on top of that. About one launch in ten misfires,
+and the enemy's SDI may shoot it down. It can also break up over the target and
+do no damage. The larger the enemy's trooper army, the more often this happens.
+A breakup does not harm you, but it helps the enemy: the fallout gives them new
+regions, 10% to 19% of the regions they already hold. They choose the types of
+the new regions on their next turn.
 
 Your sysop decides how the dial is set. Normally you choose it yourself, but the
 game can be set up to roll one for you each time, to fix it at a dial the sysop

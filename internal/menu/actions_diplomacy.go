@@ -306,7 +306,7 @@ func declareWar(s session.Session, w *ctx) Result {
 			names = append(names, e.Name)
 		}
 	})
-	if !AskYesNo(s, "Declare war? Breaking an agreement costs a quarter of your support and morale.", false) {
+	if !AskYesNo(s, "Declare war?", false) {
 		return Stay
 	}
 	for _, name := range names {
@@ -320,8 +320,8 @@ func declareWar(s session.Session, w *ctx) Result {
 				return
 			}
 			// One relation per pair (#88), so this ends whatever stood and leaves
-			// the two realms hostile. Ending a real pact this way costs support and
-			// morale; declaring on a realm you held no agreement with is free.
+			// the two realms hostile. It is free either way (#242): the support and
+			// morale charge belongs to attacking a partner (BreachTreaty).
 			broke = w.World.TreatiesBetween(p, target)
 			w.World.DeclareWar(p, target)
 		})

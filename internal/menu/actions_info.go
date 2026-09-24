@@ -175,7 +175,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	pair("Game length", daysOr(c.GameLength, "Endless"),
 		"Removed if unplayed", daysOr(c.IdleDaysRemove, "Never"))
 	group("Land")
-	pair("Maximum regions", countOr(c.MaxRegions, "Unlimited"),
+	pair("Regions bought per turn", countOr(c.MaxRegions, "Unlimited"),
 		"Land at game start", comma(c.InitialMarketLand))
 	pair("New land per realm/day", comma(c.LandPerDay),
 		"Region costs", tr(s, c.RegionCosts.String()))

@@ -45,13 +45,13 @@ Each report arrives as planet news, dated, saying what was aimed at you and how
 long it had left when he wrote it. That line never changes afterward, so hours
 later it no longer tells you how long is left.
 
-**Incoming**, on the InterPlanetary menu, is the same warnings kept current: one
-row per threat, the soonest at the top, counting down as you read — `3h`, then
-`90m`, then `away` once the force has left. A weapon already flying is listed
-with the days until it lands.
+**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept
+current: one row per threat, the soonest at the top, counting down as you read —
+`3h`, then `90m`, then `away` once the force has left. A weapon already flying
+is listed with the days until it lands.
 
-An empty list is not proof of peace. It means nothing has been reported, and
-only a watcher posted on another planet can report anything.
+An empty list does not prove that nobody is coming. Apart from a weapon already
+in flight, only a watcher posted on another planet can report anything.
 
 ## Why it matters
 
@@ -70,5 +70,7 @@ Post him where the threat is, not where the grudge is. The planet that just
 lost a battle to you is the one assembling the answer, and the rate is the same
 whether you watch a rival or a neighbor you trust.
 
-A short stay renewed is worth more than one long stay bought early: the days
-run whether anything happens or not.
+Sending another SpyGuy to a planet already watched from here does not add the
+two stays together. The stay becomes whichever is longer, and you still pay for
+every day you bought. This holds for every baron on your planet, because they
+share the watcher. Send a new one when the old stay runs out.

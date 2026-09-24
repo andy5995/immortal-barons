@@ -15,13 +15,12 @@ and the game asks you to confirm it before you choose your force. Say yes and
 your people riot at being ruled by a faithless baron: you lose a quarter of both
 your support and your army's morale, and the battle is then fought at that lower
 morale. Say no and the attack is called off. The two realms are left with no
-agreement between them, and the ruler you betrayed will have their own answer to
-that. The same question comes up before a nuclear, chemical or biological strike,
+agreement between them. The same question comes up before a nuclear, chemical or biological strike,
 and before a covert operation that sends an agent. Send Spy and Spy on Relations
 only look, so they do not ask and cost you nothing.
 
-A Declaration of War, on the Diplomacy menu, ends an agreement at the same price
-without a battle. It costs nothing if you had no agreement to break.
+A Declaration of War, on the Diplomacy menu, ends an agreement without a battle.
+It costs you nothing. The two realms are then at war.
 
 View Treaties shows your current relations with the other rulers in the game,
 and below that, the offers you have sent that nobody has answered yet.

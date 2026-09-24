@@ -7,11 +7,10 @@ in_game: true
 
 # Allied Markets
 
-In a league game you can buy from another planet's Trading Market. Open Trading
+In a league game you can buy from another planet's Trading Market. Open Trade
 from the InterPlanetary Operations menu, then Markets, and choose a planet.
 
-Only planets your Coordinator has marked Allied are listed. Buying across
-planets is an Immortal Barons feature, and a league may switch it off.
+Only planets your Coordinator has marked Allied are listed.
 
 ## Your order is a bid, not a purchase
 
@@ -50,5 +49,5 @@ Each planet keeps its own list of who it is allied with. A planet can therefore
 stop selling to you before you have heard about it, and your bid will come back
 refused. That is not a fault.
 
-Your sysop can turn this feature off for the whole league, in which case Trading
+Your sysop can turn this feature off for the whole league, in which case Trade
 does not appear on the InterPlanetary Operations menu.

@@ -478,10 +478,10 @@ original, so it needs new evidence, not taste. The rest (prices, `LandPriceStep`
 AI behavior, IB's own additions) are the playtest knobs. Keep both matching
 `docs/mechanics-reference.md`.
 
-Stubbed / not built: a TIMED league auto-reset (a daily Planetary Master leader
-is tracked, `CurrentMaster`, and `endGame` crowns `LastMaster`; the Coordinator
-can start a new season on demand with `-league-reset`, but nothing schedules
-one) and BRE's finer interplanetary news subtypes. A few covert/diplomacy items are recorded-but-inert pending
+Stubbed / not built: a TIMED league-wide reset (each board runs `endGame` on its
+own once `GameLength` game days pass, crowning `LastMaster`, and the Coordinator
+can reset every board on demand with `-league-reset`, but nothing schedules a
+reset across the league) and BRE's finer interplanetary news subtypes. A few covert/diplomacy items are recorded-but-inert pending
 fuller subsystems (flagged in `docs/mechanics-reference.md`).
 
 ## Primary goal: run as a BBS door

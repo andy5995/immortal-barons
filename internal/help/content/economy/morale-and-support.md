@@ -10,16 +10,17 @@ in_game: true
 Your realm has two moods, each a number from 0 to 100. Popular Support is what
 your people think of you. Military Morale is what your army thinks of you.
 
-Both start at 100 when you found your realm. Nothing ever raises them for free.
-They fall when you go short, and the only way back up is to pay for it at the
-maintenance stage each turn.
+Both start at 100 when you found your realm. Military Morale never rises for
+free. It falls when you go short, and the only way back up is to pay for it at
+the maintenance stage each turn. Popular Support also rises by itself each turn
+while your tax rate is low. See Taxes, Support, and Riots.
 
 ## What they do
 
 Popular Support:
 
 - sets your Coastal (tourism) income, which collapses when Support is low
-- sets how many people your land can hold
+- sets how many people your regions can hold
 - when it drops under 10, it starts pulling Morale down with it
 
 Military Morale scales how hard your army fights, both attacking and defending.
@@ -30,19 +31,20 @@ turrets never desert over Morale — but underpaying your armed forces' upkeep
 deserts turrets too, along with troopers, jets and tanks, whatever Morale
 reads.
 
-There is one more effect that is easy to miss. Auto-Pay Maintenance only pays
-your bills silently while **both** numbers read exactly 100. Let either slip and
-you are back to answering the maintenance prompts by hand every turn.
+Auto-Pay Maintenance pays your bills without asking only while **both** numbers
+read exactly 100, you hold no Waste regions, and you have the gold to pay in
+full. If any of these fails, you answer the maintenance prompts by hand that
+turn.
 
 ## What lowers them
 
-- Underpaying your armed forces costs Morale. Underpaying your land upkeep, the
-  Queen's tax, or your people's food costs Support. Underfeeding the army costs
-  Morale.
+- Underpaying your armed forces costs Morale. Underpaying your region upkeep,
+  the Queen's tax, or your people's food costs Support. Underfeeding the army
+  costs Morale.
 - A riot from high taxes costs Support.
 - Declaring war on a ruler you hold an agreement with costs you nothing. Attacking
-  that ruler without declaring war first ends the agreement too, and costs you a
-  quarter of each.
+  that ruler without declaring war first ends the agreement too, and costs you
+  support and morale.
 - A chemical or biological strike on your realm hurts both. The plague is far
   worse for your army than the gas is.
 - Enemy agents can lower either one directly. See Stir Revolts and Demoralize
@@ -56,6 +58,6 @@ size of your army — troopers, turrets and tanks cost most, jets least, bombers
 and carriers nothing. Units you have listed on the Trading Market still count.
 
 What you pay buys points in proportion, so paying half the request buys about
-half the points. You may pay up to half again as much as is asked, and that
-really does buy more than fifteen points. Neither number can pass 100, so
+half the points. You may pay up to half again as much as is asked, and the
+extra buys more than fifteen points. Neither number can pass 100, so
 overpaying a nearly-content realm wastes the difference.

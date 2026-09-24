@@ -19,15 +19,10 @@ attack goes through it even when you are one of its named targets.
 
 ## How strong it is
 
-Strength is the funding spread over your land, not the funding alone:
-
-    strength% = the square root of (funding / (10 x (regions + 1)))
-
-capped at 100%. Two things follow. Every region you take thins your own shield,
-so the same pot that shields a small realm well is nearly useless over a large
-one. And each further percent costs more than the last: over 8,000 regions the
-first 1% wants about 80,000 gold in the pot, while going from 9% to 10% wants
-another 1.5 million.
+Strength depends on the funding and on how many regions you hold. The same
+funding gives a large realm a weaker shield than a small one, and each region you
+capture makes your own shield thinner. Each further percent of strength costs
+more than the one before.
 
 ## Funding it
 

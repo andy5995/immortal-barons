@@ -13,8 +13,7 @@ caught before they do anything.
 
 It works against ONE realm — the realm the agent is inside — so the menu lists
 only the realms you have already bribed. Bribery comes first; without an agent
-on your payroll there is nothing to expose. A tenth of that realm's attempts
-still get through.
+on your payroll there is nothing to expose.
 
 It costs no agent and takes no part of a daily allowance, so you may run it as
 often as you can pay for it. Anything the shield turns aside counts as a caught

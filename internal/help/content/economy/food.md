@@ -12,17 +12,16 @@ separately, and you are asked about each in turn, so it is possible to feed one
 and not the other. Agricultural regions grow food, and you can buy more at the
 Food Market.
 
-The market opens by itself at that point in your turn, and both bills are put to
-you, whether or not you have enough in store. Turn on Auto-Feed in Preferences
-and you skip all of it on any turn you can cover the two bills; on a turn you
-cannot, the market opens anyway.
+The Food Market opens by itself after maintenance, and both bills are put to
+you, whether or not you have enough in store. While Auto-Feed Empire is on in
+Preferences (a new realm starts with it on), you skip all of it on any turn you
+can cover the two bills. On a turn you cannot, the market opens anyway.
 
 The market sells food to you for more than it pays to buy it back. So it is not
 a place to store extra food for profit.
 
-The price changes a little each day. It is the same for everyone on the planet
-that day, and it stays the same until the next day. Buy on a cheap day if you
-can.
+The price is new each day, and one day's price can be three times another's. It
+is the same for everyone on the planet that day. Buy on a cheap day if you can.
 
 Each turn your people eat first, then your army, and then part of whatever food
 is still in store spoils. A small store is safe: nothing rots until you are
@@ -33,8 +32,9 @@ Going short is billed twice, because the two needs are counted apart. Whatever
 your people go without costs Popular Support, and whatever your army goes
 without costs Military Morale. Nobody leaves your realm over it — but if your
 people get under about two thirds of what they need, the realm falls into civil
-war. A civil war halves your Support and destroys a share of your land and of
-every kind of unit you own, listed ones included.
+war. Paying less than about nine tenths of your region upkeep also starts a
+civil war. A civil war halves your Support and destroys a share of your regions
+and of every kind of unit you own, listed ones included.
 
 This turn's harvest arrives at the start of the turn, so you can sell it the
 same turn. Selling your surplus down each turn, instead of hoarding it, is how

@@ -218,7 +218,7 @@ func buyLand(s session.Session, w *ctx) Result {
 	}
 }
 
-// regionCapReached reports whether the day's region allowance is spent, which
+// regionCapReached reports whether this turn's region allowance is spent, which
 // zeroes the affordable count for a reason gold has nothing to do with.
 func regionCapReached(w *ctx, p *game.Empire) bool {
 	return w.Config.MaxRegions > 0 && p.RegionsBoughtThisTurn >= w.Config.MaxRegions

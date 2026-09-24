@@ -12,5 +12,5 @@ people can live in your empire.
 
 An urban region earns no gold by itself, but it still costs the same
 maintenance as every other region. Its worth is indirect: more people means
-more tax income. More people also eat more food, so grow your Agricultural land
-alongside your Urban land.
+more tax income. More people also eat more food, so grow your Agricultural
+regions alongside your Urban regions.

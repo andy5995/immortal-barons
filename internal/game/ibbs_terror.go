@@ -160,10 +160,9 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	// the packet names (#166). BRE dispatches the same way, on the operation byte
 	// it carried across (resolve_received_covert_operation, BRE.OVR 0x04a96b);
 	// IB used to ignore it and destroy random units whichever of the nine was
-	// sent, so eight menu items were priced and named for nothing.
-	//
-	// NOT modelled: the original rolls each agent against the covert odds and
-	// only a winning agent lands. IB lands them all, as it always has here.
+	// sent, so eight menu items were priced and named for nothing. Each agent
+	// is rolled against the target's covert strength, and only a winning one
+	// lands (terrorAgentLands).
 	hit, caught := 0, 0
 	for i := 0; i < t.Agents; i++ {
 		// A packet with no strength recorded is from a board that predates the

@@ -14,6 +14,6 @@ people, their troopers, their own agents, their tanks, their jets, or their food
 store.
 
 Food is the prize. A strike that reaches the granaries burns a large share of it,
-far more than the few percent the other five lose, so a realm already short of
+far more than any of the other five loses, so a realm already short of
 food can be pushed into starvation by a single lucky raid. You cannot aim for it,
 though, so the operation is a gamble rather than a plan.

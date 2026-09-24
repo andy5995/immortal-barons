@@ -7,6 +7,6 @@ in_game: true
 
 # Coastal Regions
 
-Coastal regions are your best source of tourism income. In good times they make
-the most gold. But when public support is low, your people lose interest and
-tourism income drops sharply.
+Coastal regions earn gold from tourism. When Popular Support is high, they earn
+more gold on average than any other region type. When Support is low, their
+income drops sharply.

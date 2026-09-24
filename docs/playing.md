@@ -6,17 +6,19 @@ number of turns each day.
 
 ## The player guide is the in-game help
 
-The guide lives inside the game as **categorized help**. Open it from the Game
-Menu (Help Database), or press `?` at a menu. It is organized by category:
+The whole guide is inside the game. On the Entry menu, **(A) Instructions**
+shows every topic in order, a screen at a time. **(?) Help** lets you choose one
+category and one topic; most menus have it too. The topics are grouped like
+this:
 
+- **Introduction** — how to play
 - **Controls** — moving through the menus, entering numbers
 - **Military** — units and their roles
 - **Economy** — food, banking, taxes, trading
 - **Regions** — the region types and what each one produces
-- **Warfare** — attacks, covert operations, pirates
+- **Warfare** — attacks, missiles, pirates
+- **Covert Operations** — spies, agents and sabotage
 - **Diplomacy** — treaties and alliances
-- **Inter-BBS** — leagues and group attacks
+- **Inter-BBS** — leagues, and dealing with other planets
 
-The same content is the single source for a web guide too. It lives as Markdown
-under `internal/help/content/<category>/`, and is translated with po4a. Edit the
-topic files there; the in-game help and the web guide both come from them.
+The same topics are on this website, under **Game Instructions**.

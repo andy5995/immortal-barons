@@ -14,12 +14,12 @@ mark for a planet whenever you name one, on the line that reads "Our current
 relations with...".
 
 Only your board's Coordinator can change the list. It is on the Coordinator
-Menu, under Diplomacy Modification.
+Menu, under Modify Diplomacy.
 
 ## What it does and does not do
 
 The list is a note from your Coordinator to the barons on your own board. It
-tells you what your board thinks of a planet. Mostly it only describes:
+tells you what your board thinks of a planet. It changes almost nothing in play:
 
 - It does not stop an attack. You can still attack a planet marked Allied, and
   a planet marked Enemy can still attack you.
@@ -31,7 +31,7 @@ Two things do use it:
 - **Trading.** You may only buy at another planet's market while your board
   marks that planet **Allied**. Both boards must agree: yours has to call theirs
   Allied for your bid to go, and theirs has to call yours Allied to fill it. If
-  an alliance ends while your bid is travelling, your gold comes back.
+  an alliance ends while your bid is traveling, your gold comes back.
 - **Messages.** Writing to **Allied Planets** from the IP Messages menu sends to
   every planet the list marks Allied.
 

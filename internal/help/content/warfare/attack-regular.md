@@ -25,13 +25,13 @@ badly outmatches the defender walks away having lost very little, and an evenly
 matched one pays nearly the full share.
 
 If you win, you capture a share of the enemy's regions. You do not take their
-gold. A Regular Attack gives you land, not money. A small empire can lose all
+gold. A small empire can lose all
 of its regions in one attack. A large empire loses only part, so you must
 attack it again and again to take it down.
 
-How big that share is depends on this board's settings and on how much land the
+How big that share is depends on this board's settings and on how many regions the
 enemy holds, not on how developed it is.
 
-Strategy hint: a large empire with low net worth is a soft target. It has much
-land but little strength to defend it. You win the battle easily and take a big
-piece of land. A small, dense empire gives you less land for the same effort.
+Strategy hint: a large empire with low net worth is a soft target. It has many
+regions but little strength to defend them. You win the battle easily and take
+many regions. A small, dense empire gives you fewer regions for the same effort.
