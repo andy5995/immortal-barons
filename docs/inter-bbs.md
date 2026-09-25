@@ -1113,9 +1113,12 @@ clean-up and the timed event cannot run it at once:
 ```
 #!/bin/sh
 exec 9>/sbbs/xtrn/imb/data/planetary.lock
-flock -n 9 || exit 0
+flock -n 9 || { echo "planetary: skipped, an earlier run still holds the lock" >&2; exit 0; }
 ...the two commands...
 ```
+
+The script reports a skip. A run that hangs keeps the lock, so every later run
+is skipped, and without that line nothing shows that the step has stopped.
 
 Then set it as the door's **Clean-up Command Line** in `scfg` → External
 Programs → Online Programs, and add a timed event that runs it every 15

@@ -111,14 +111,14 @@ board running the transport in a league:
 #!/bin/bash
 set -euo pipefail
 
+# Keep the output. Stall reports are written for a run nobody watched.
+exec >>/sbbs/xtrn/imb/data/planetary-run.log 2>&1
+echo "=== $(date --iso-8601=seconds) ==="
+
 # One run at a time. A second invocation while this one is working exits
 # rather than queueing, since there is no FTN-wide inbound semaphore.
 exec 9>/sbbs/xtrn/imb/data/planetary-run.lock
-flock -n 9 || exit 0
-
-# Keep the output. Stall reports are written for a run nobody watched.
-exec >>/sbbs/xtrn/imb/data/planetary.log 2>&1
-echo "=== $(date --iso-8601=seconds) ==="
+flock -n 9 || { echo "skipped: an earlier run still holds the lock"; exit 0; }
 
 cd /sbbs/xtrn/imb
 ./immortal-barons -maint
@@ -130,9 +130,20 @@ cd /sbbs/xtrn/imb
 hourly will one day fire while a slow run is still going, and the lock turns
 that collision into a clean exit.
 
+The log is opened before the lock so that a skipped run is written down. A run
+that hangs keeps the lock, and every later run is then skipped. Without the
+"skipped" line, the log just stops, and the game day, the league's mail and
+Travel Times all stop with it.
+
 The log matters more than it looks. The handoff names the peers a snapshot is
 still waiting on and how long they have been behind, and a scheduled run has
-nowhere to print that unless the output is kept.
+nowhere to print that unless the output is kept. It is also the only record of
+every run: the game's own `planetary.log` gets a line only when a run has
+something to report.
+
+Keep it in a file of its own. The game writes `planetary.log` itself and trims
+it to its last 500 lines, so the script's output there would push the game's
+fault history out within hours.
 
 `cd` into the installation directory. `-data` can then be left off, since it
 defaults to `./data`.

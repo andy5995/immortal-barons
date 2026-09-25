@@ -471,9 +471,12 @@ it the same way the other board's roster does.
 The mark on someone else's screen says your board stopped answering for a while.
 Work down the path a packet takes:
 
-- **Is the planetary run happening?** Check the timestamps in `planetary.log`.
-  A run every day leaves a line every day; a gap in the log is a gap in the
-  service, and the usual cause is a scheduler that stopped rather than the game.
+- **Is the planetary run happening?** `planetary.log` cannot tell you: the game
+  writes it only when a run has something to report, so a healthy board's runs
+  leave nothing there. Check the scheduled script's own log instead (see
+  [Scheduling it safely](ftn-transport.md#scheduling-it-safely)). A run leaves a line each
+  time; a gap in that log is a gap in the service, and the usual cause is a
+  scheduler that stopped rather than the game.
 - **Is anything waiting in the inbound directory?** Packets sitting unread mean
   the run is not reaching them, or is failing before it gets that far.
 - **Is anything stuck in the outbound directory?** Packets written and never
