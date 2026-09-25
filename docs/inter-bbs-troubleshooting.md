@@ -325,6 +325,23 @@ is where they go. Mystic uses `unsecure`. Give that directory its own
 so the next run claims them. Checking the session password for that peer on both
 boards stops new deliveries landing there.
 
+### Netmail collecting in the outbound
+
+`.msg` files pile up in `OutgoingNetmailDir` and the mailer never sends them.
+Open one in a text editor and read the attachment path near the start of the
+file. It must be a full path, such as `d:\sbbs\xtrn\ib\data\att\7PRK0001.BRP`.
+
+A path such as `data\att\7PRK0001.BRP` is the cause. The mailer looks for that
+file from its own directory, does not find it, and sends nothing. Older builds
+wrote such paths when the game ran with the default `-data`; v0.2.0 and later
+always write the full path. On an older build, an `AttachDir` line naming the
+full path of the same directory fixes new messages.
+
+Messages already queued keep their old path and are never sent. Remove them,
+together with the `.BRP` files they name. They carry scores, rosters and
+Travel Times probes that the next run sends again, but also any messages and
+attacks queued at the time, which are lost.
+
 ### What a run tells you
 
 `-maint`, `-planetary` and `-full` unwrap before the planetary step and hand

@@ -241,7 +241,9 @@ SubjectPath Absolute
 This writes a Subject such as
 `/var/spool/ib-attach/7PRK0001.BRP`; the installation path is not included.
 A relative `AttachDir` is resolved beneath the data directory and therefore
-does not provide this workaround. Create the attachment directory with
+does not provide this workaround. The data directory is always spelled in full,
+even when `-data` is relative, so the default `data/att` puts the whole
+installation path into the Subject. Create the attachment directory with
 ownership and permissions that allow both the game and the mailer to use it.
 
 Do not use `/tmp` or another automatically cleaned directory for this purpose.
