@@ -2618,6 +2618,11 @@ last one because opening a reply and backing out is still a decision not to deal
 with the message now. `[Q]uit` marks nothing: the messages behind it were never
 shown, so the next turn's stop still has them.
 
+**Deliberate divergence: a sent reply asks
+`[D] Delete or [K] Keep original message?`** about the message just answered,
+keys drawn like the reader's own. BRE has no such question. Enter keeps the
+message, and a kept message counts as passed over, like `[I]gnore`.
+
 `Message To` is a run of letters, not a name — the reader loops `A`..`Y` over the
 message's own recipient table and prints every letter that is in it, so a message
 sent to several realms shows them all, in letter order, and every copy carries

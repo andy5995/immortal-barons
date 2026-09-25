@@ -64,11 +64,11 @@ msgstr "%.2f часов"
 msgid "%d %s bought."
 msgstr "Куплено: %d %s."
 
-#: internal/menu/actions_regions.go:373
+#: internal/menu/actions_regions.go:402
 msgid "%d %s regions dropped. You now hold %d land."
 msgstr "Сброшено регионов: %d, тип %s. Теперь у вас %d земли."
 
-#: internal/menu/actions_regions.go:207
+#: internal/menu/actions_regions.go:237
 msgid "%d %s regions purchased. Gold: %d"
 msgstr "Куплено регионов: %d, тип %s. Золото: %d"
 
@@ -96,7 +96,7 @@ msgstr "На боевой дух войск запрошено %d золота."
 msgid "%d matched! You win %s gold, paid straight into your bank."
 msgstr "Совпадений: %d! Выигрыш %s золота зачислен прямо в банк."
 
-#: internal/menu/actions_regions.go:255
+#: internal/menu/actions_regions.go:285
 msgid "%d regions are clean again — choose which types to hold them as."
 msgstr "%d регионов снова чисты - выберите их типы."
 
@@ -128,13 +128,9 @@ msgstr "%d%% за 10 дней"
 msgid "%s %s purchased."
 msgstr "Куплено: %s %s."
 
-#: internal/menu/actions_ipops.go:280
+#: internal/menu/actions_ipops.go:341
 msgid "%s %s sent out."
 msgstr "Отправлено: %s %s."
-
-#: internal/menu/actions_ipops.go:209
-msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
-msgstr "%s @ %s (%s): Земля %s  Атк %s  Защ %s  Золото %s"
 
 #: internal/menu/actions_attack.go:738
 msgid "%s Gold added."
@@ -202,15 +198,20 @@ msgstr "%s задаётся в %s; игра только читает этот �
 msgid "%s jets were destroyed in the attack!"
 msgstr "В атаке уничтожено самолётов: %s!"
 
+#: internal/menu/actions_ipops.go:223
+#, fuzzy
+msgid "%s of %s"
+msgstr "%s на %s"
+
 #: internal/menu/actions_diplomacy.go:237
 msgid "%s offers you a %s."
 msgstr "%s предлагает вам %s."
 
-#: internal/menu/actions_trade.go:281
+#: internal/menu/actions_trade.go:280
 msgid "%s offers you a trade deal."
 msgstr "%s предлагает вам торговую сделку."
 
-#: internal/menu/mailreader.go:258
+#: internal/menu/mailreader.go:269
 msgid "%s on %s"
 msgstr "%s на %s"
 
@@ -259,7 +260,7 @@ msgstr "(%s назад)"
 msgid "(%s per year)"
 msgstr "(%s в год)"
 
-#: internal/menu/actions_trade.go:108
+#: internal/menu/actions_trade.go:107
 msgid "(not enough carriers)"
 msgstr "(не хватает авианосцев)"
 
@@ -271,11 +272,11 @@ msgstr "(ваш текущий голос)"
 msgid ", "
 msgstr ", "
 
-#: internal/menu/actions_regions.go:353
+#: internal/menu/actions_regions.go:382
 msgid "-* Drop Regions *-"
 msgstr "-* Сброс регионов *-"
 
-#: internal/menu/actions_message.go:456
+#: internal/menu/actions_message.go:455
 msgid "/-Command?"
 msgstr "/-Команда?"
 
@@ -307,15 +308,15 @@ msgstr ": файл новостей"
 msgid "<game name>: <view name>"
 msgstr "<название игры>: <название экрана>"
 
-#: internal/menu/actions_message.go:185
+#: internal/menu/actions_message.go:184
 msgid "=All"
 msgstr "=Все"
 
-#: internal/menu/actions_message.go:190
+#: internal/menu/actions_message.go:189
 msgid "=All Allies"
 msgstr "=Все союзники"
 
-#: internal/menu/actions_message.go:194
+#: internal/menu/actions_message.go:193
 msgid "=List"
 msgstr "=Список"
 
@@ -399,7 +400,7 @@ msgstr ""
 msgid "A zone name, as in America/New_York or Europe/Berlin."
 msgstr "Имя зоны, например America/New_York или Europe/Berlin."
 
-#: internal/menu/actions_ipattack.go:425
+#: internal/menu/incoming.go:147
 msgid "ALL"
 msgstr "ВСЕ"
 
@@ -412,7 +413,7 @@ msgstr "Отречься"
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr "Отречение навсегда удалит %s. Отменить это нельзя."
 
-#: internal/menu/actions_message.go:488
+#: internal/menu/actions_message.go:487
 msgid "Abort"
 msgstr "Отмена"
 
@@ -424,11 +425,11 @@ msgstr "Об игре"
 msgid "Accept this treaty?"
 msgstr "Принять договор?"
 
-#: internal/menu/actions_bank.go:108
+#: internal/menu/actions_diplomacy.go:56
 msgid "Accept?"
 msgstr "Принять?"
 
-#: internal/menu/actions_trade.go:285
+#: internal/menu/actions_trade.go:284
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr "Принять? [Y] да, [N] нет, [I] пока пропустить"
 
@@ -436,7 +437,7 @@ msgstr "Принять? [Y] да, [N] нет, [I] пока пропустить"
 msgid "Add how much gold for funding?"
 msgstr "Сколько золота внести на постройку?"
 
-#: internal/menu/actions_regions.go:70
+#: internal/menu/advisors.go:474
 msgid "Advisors"
 msgstr "Советники"
 
@@ -530,6 +531,10 @@ msgstr "У этого пользователя уже есть держава."
 msgid "Are you POSITIVE you wish to erase your empire?"
 msgstr "Вы ТОЧНО хотите стереть свою империю?"
 
+#: internal/menu/actions_ipops.go:224
+msgid "Arrived"
+msgstr ""
+
 #: internal/menu/actions_iptrade.go:70
 msgid "As we last heard, %s."
 msgstr "По последним сведениям: %s."
@@ -550,11 +555,11 @@ msgstr "Приложить сообщение?"
 msgid "Attack"
 msgstr "Атака"
 
-#: internal/menu/actions_attack.go:637
+#: internal/menu/tree.go:255
 msgid "Attack Pirates"
 msgstr "Напасть на пиратов"
 
-#: internal/menu/actions_ipattack.go:243
+#: internal/menu/actions_ipattack.go:242
 msgid "Attack Type"
 msgstr "Тип атаки"
 
@@ -630,7 +635,7 @@ msgstr "Биологическая атака"
 msgid "Board"
 msgstr "Доска"
 
-#: internal/menu/opshelp.go:33
+#: internal/menu/tree.go:415
 msgid "Bomb AirBases"
 msgstr "Бомбить авиабазы"
 
@@ -638,23 +643,23 @@ msgstr "Бомбить авиабазы"
 msgid "Bomb Enemy Targets"
 msgstr "Бомбить цели врага"
 
-#: internal/menu/opshelp.go:47
+#: internal/menu/tree.go:384
 msgid "Bomb Food Market"
 msgstr "Бомбить рынок еды"
 
-#: internal/menu/opshelp.go:36
+#: internal/menu/tree.go:418
 msgid "Bomb Food Stores"
 msgstr "Бомбить склады еды"
 
-#: internal/menu/opshelp.go:30
+#: internal/menu/tree.go:412
 msgid "Bomb Intelligence"
 msgstr "Бомбить разведку"
 
-#: internal/menu/opshelp.go:49
+#: internal/menu/tree.go:386
 msgid "Bomb Trade Routes"
 msgstr "Бомбить торговые пути"
 
-#: internal/menu/opshelp.go:48
+#: internal/menu/tree.go:385
 msgid "Bomb Trading Market"
 msgstr "Бомбить торговый рынок"
 
@@ -694,7 +699,7 @@ msgstr "Купить"
 msgid "Buy Food"
 msgstr "Купить еду"
 
-#: internal/menu/actions_regions.go:147
+#: internal/menu/actions_regions.go:177
 msgid "Buy Regions — %d gold each."
 msgstr "Покупка регионов - %d золота за каждый."
 
@@ -742,7 +747,7 @@ msgstr "Авианосцы"
 msgid "Cash Relief / Loans"
 msgstr "Помощь / Займы"
 
-#: internal/menu/opshelp.go:32
+#: internal/menu/tree.go:414
 msgid "Cause Dissensions"
 msgstr "Сеять раздор"
 
@@ -770,11 +775,11 @@ msgstr "Изменить настройки или"
 msgid "Chemical Attack"
 msgstr "Химическая атака"
 
-#: internal/menu/opshelp.go:52
+#: internal/menu/tree.go:389
 msgid "Chemical Bombing"
 msgstr "Химическая бомбардировка"
 
-#: internal/menu/actions_trade.go:114
+#: internal/menu/actions_trade.go:113
 msgid "Choice?"
 msgstr "Выбор?"
 
@@ -786,7 +791,7 @@ msgstr "Выберите (0 — оставить текущий)?"
 msgid "Choose a Target (0 to cancel)?"
 msgstr "Выберите цель (0 - отмена)?"
 
-#: internal/menu/actions_attack.go:449
+#: internal/menu/actions_covert.go:112
 msgid "Choose a target (letter, RETURN to abort)"
 msgstr "Выберите цель (буква, ВВОД — отмена)"
 
@@ -824,7 +829,7 @@ msgstr ""
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Гражданская война! Держава почти распалась - потеряно %d%%."
 
-#: internal/menu/actions_message.go:494
+#: internal/menu/actions_message.go:493
 msgid "Clear"
 msgstr "Очистить"
 
@@ -852,11 +857,11 @@ msgstr "Готово"
 msgid "Configuration saved."
 msgstr "Настройки сохранены."
 
-#: internal/menu/input.go:190
+#: internal/menu/input.go:191
 msgid "Confirm?"
 msgstr "Подтвердить?"
 
-#: internal/menu/gameflow.go:349
+#: internal/menu/gameflow.go:350
 msgid "Continue to your next turn?"
 msgstr "Перейти к следующему ходу?"
 
@@ -956,15 +961,24 @@ msgstr "Поражение! Ваши войска выбиты с поля бо�
 msgid "Defender"
 msgstr "Защитник"
 
-#: internal/menu/mailreader.go:223
+#: internal/menu/actions_ipops.go:224
+#, fuzzy
+msgid "Defense"
+msgstr "Защитник"
+
+#: internal/menu/mailreader.go:213
 msgid "Delete"
 msgstr "Удалить"
 
-#: internal/menu/mailreader.go:277
+#: internal/menu/mailreader.go:232
+msgid "Delete or"
+msgstr "Удалить или"
+
+#: internal/menu/mailreader.go:213
 msgid "Delete,"
 msgstr "Удалить,"
 
-#: internal/menu/opshelp.go:31
+#: internal/menu/tree.go:413
 msgid "Demoralize"
 msgstr "Деморализовать"
 
@@ -1052,7 +1066,7 @@ msgstr "Демонтаж не возвращает ничего - золото �
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Атаковать Gooie Kablooie?"
 
-#: internal/menu/actions_message.go:619
+#: internal/menu/actions_message.go:618
 msgid "Do you wish to send another message?"
 msgstr "Хотите отправить ещё одно сообщение?"
 
@@ -1064,7 +1078,7 @@ msgstr "Цель: (O) одно владение или (A) все?"
 msgid "Do you wish to visit the bank?"
 msgstr "Хотите зайти в банк?"
 
-#: internal/menu/actions_trade.go:113
+#: internal/menu/actions_trade.go:112
 msgid "Done"
 msgstr "Готово"
 
@@ -1080,7 +1094,7 @@ msgstr ""
 "Изгоняет от 4 до 10 процентов населения цели - её налоговую базу и едоков "
 "разом."
 
-#: internal/menu/actions_regions.go:348
+#: internal/menu/actions_regions.go:377
 msgid "Drop regions?"
 msgstr "Отказаться от регионов?"
 
@@ -1101,7 +1115,7 @@ msgstr "Правка макроса Ctrl-%c    Ctrl-%c завершает пра
 msgid "Empire"
 msgstr "Империя"
 
-#: internal/menu/actions_iptrade.go:73
+#: internal/menu/scoretable.go:216
 msgid "Empire Name"
 msgstr "Название державы"
 
@@ -1157,7 +1171,7 @@ msgstr "Затяжной бой"
 msgid "FTN spool"
 msgstr "Очередь FTN"
 
-#: internal/menu/mailreader.go:180
+#: internal/menu/mailreader.go:182
 msgid "First Line to Quote"
 msgstr "Первая строка цитаты"
 
@@ -1169,7 +1183,7 @@ msgstr "Еда"
 msgid "Food Market"
 msgstr "Рынок еды"
 
-#: internal/menu/actions_iptrade.go:73
+#: internal/menu/actions_market.go:88
 msgid "For Sale"
 msgstr "В продаже"
 
@@ -1181,7 +1195,7 @@ msgstr "Свободное ПО под лицензией MIT."
 msgid "From"
 msgstr "От"
 
-#: internal/menu/bulletins.go:60
+#: internal/menu/tree.go:599
 msgid "Game Bulletins"
 msgstr "Бюллетени"
 
@@ -1221,7 +1235,7 @@ msgstr "золота уплачено."
 msgid "Goldie Luck's Bank"
 msgstr "Банк Голди Лак"
 
-#: internal/menu/actions_trade.go:78
+#: internal/menu/actions_trade.go:77
 msgid "Good"
 msgstr "Товар"
 
@@ -1237,7 +1251,7 @@ msgstr "Gooie Kablooie"
 msgid "Gooie Kablooie Ops"
 msgstr "Операции Gooie Kablooie"
 
-#: internal/menu/actions_attack.go:763
+#: internal/menu/actions_interbbs.go:250
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "Операции Gooie Kablooie в этой игре отключены."
 
@@ -1253,7 +1267,7 @@ msgstr "Штаб"
 msgid "Headquarters"
 msgstr "Штаб"
 
-#: internal/menu/actions_ipattack.go:250
+#: internal/menu/welcome.go:35
 msgid "Help"
 msgstr "Помощь"
 
@@ -1261,11 +1275,11 @@ msgstr "Помощь"
 msgid "Help — choose a category:"
 msgstr "Помощь - выберите раздел:"
 
-#: internal/menu/actions_trade.go:138
+#: internal/menu/actions_trade.go:137
 msgid "How many %s?"
 msgstr "Сколько %s?"
 
-#: internal/menu/actions_trade.go:253
+#: internal/menu/actions_trade.go:252
 msgid "How many days to send it for?"
 msgstr "На сколько дней отправить?"
 
@@ -1321,19 +1335,19 @@ msgstr "Таймаут простоя в секундах (0 = никогда)"
 msgid "Idle warnings before boot"
 msgstr "Предупреждений о простое до отключения"
 
-#: internal/menu/mailreader.go:226
+#: internal/menu/mailreader.go:214
 msgid "Ignore"
 msgstr "Пропустить"
 
-#: internal/menu/mailreader.go:278
+#: internal/menu/mailreader.go:214
 msgid "Ignore, or"
 msgstr "Пропустить или"
 
-#: internal/menu/actions_ipscores.go:296
+#: internal/menu/scoretable.go:63
 msgid "Immortal Barons"
 msgstr "Immortal Barons"
 
-#: internal/menu/actions_trade.go:78
+#: internal/menu/actions_trade.go:77
 msgid "In Deal"
 msgstr "В сделке"
 
@@ -1346,7 +1360,7 @@ msgstr "Отложено"
 msgid "Inbound pending"
 msgstr "Входящие в очереди"
 
-#: internal/menu/incoming.go:57
+#: internal/menu/tree.go:310
 msgid "Incoming Attacks"
 msgstr "Атаки на подходе"
 
@@ -1366,7 +1380,7 @@ msgstr "Промышленное производство"
 msgid "Instructions"
 msgstr "Инструкции"
 
-#: internal/menu/actions_ipscores.go:86
+#: internal/menu/welcome.go:34
 msgid "InterBBS Scores"
 msgstr "Очки InterBBS"
 
@@ -1378,7 +1392,7 @@ msgstr "Межпланетные операции"
 msgid "InterPlanetary Ops"
 msgstr "Межпланетные операции"
 
-#: internal/menu/input.go:175
+#: internal/menu/input.go:176
 msgid ""
 "Invalid: a realm name needs at least 3 letters or digits. Decoration around "
 "them is fine and does not count."
@@ -1394,11 +1408,11 @@ msgstr "Доход по вкладам:"
 msgid "Investment will be returned on %s."
 msgstr "Вклад вернётся %s."
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/tree.go:221
 msgid "Investments"
 msgstr "Вклады"
 
-#: internal/menu/actions_trade.go:219
+#: internal/menu/actions_trade.go:218
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "К ним это попадёт не раньше хода %d их дня."
 
@@ -1426,11 +1440,15 @@ msgstr "Присоединиться к атаке"
 msgid "Join which group?"
 msgstr "К какой группе присоединиться?"
 
+#: internal/menu/mailreader.go:233
+msgid "Keep"
+msgstr "Оставить"
+
 #: internal/menu/timezone.go:31
 msgid "Keep current"
 msgstr "Оставить как есть"
 
-#: internal/menu/actions_iptrade.go:73
+#: internal/menu/menu.go:936
 msgid "Key"
 msgstr "Кл."
 
@@ -1464,7 +1482,7 @@ msgstr "Язык установлен на %s."
 msgid "Language:"
 msgstr "Язык:"
 
-#: internal/menu/mailreader.go:181
+#: internal/menu/mailreader.go:183
 msgid "Last Line to Quote"
 msgstr "Последняя строка цитаты"
 
@@ -1476,7 +1494,7 @@ msgstr "Последний Мастер Планеты: %s"
 msgid "Limited daily supply"
 msgstr "Ограниченный дневной запас"
 
-#: internal/menu/actions_message.go:222
+#: internal/menu/actions_message.go:221
 msgid "List"
 msgstr "Список"
 
@@ -1540,11 +1558,11 @@ msgstr "Макс. терактов в день (0 = без лимита)"
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr "Наибольшая полезная трата в этом году: %s золота."
 
-#: internal/menu/mailreader.go:261
+#: internal/menu/mailreader.go:272
 msgid "Message From: "
 msgstr "От кого: "
 
-#: internal/menu/mailreader.go:263
+#: internal/menu/mailreader.go:274
 msgid "Message To  : "
 msgstr "Кому   : "
 
@@ -1592,11 +1610,11 @@ msgstr "Горы"
 msgid "NONE"
 msgstr "НЕТ"
 
-#: internal/menu/actions_regions.go:347
+#: internal/menu/actions_regions.go:376
 msgid "NOTE: Regions may not be sold, only dropped..."
 msgstr "ЗАМЕЧАНИЕ: регионы нельзя продать, только сбросить..."
 
-#: internal/menu/actions_ipscores.go:309
+#: internal/menu/actions_market.go:87
 msgid "Name"
 msgstr "Название"
 
@@ -1604,11 +1622,11 @@ msgstr "Название"
 msgid "Name the planet to watch."
 msgstr "Назовите планету для наблюдения."
 
-#: internal/menu/input.go:154
+#: internal/menu/input.go:155
 msgid "Name your Realm:"
 msgstr "Назовите свою державу:"
 
-#: internal/menu/actions_ipscores.go:181
+#: internal/menu/scoretable.go:217
 msgid "Net Worth"
 msgstr "Состояние"
 
@@ -1636,7 +1654,7 @@ msgstr "Нет"
 msgid "No Data"
 msgstr "Нет данных"
 
-#: internal/menu/actions_ipattack.go:369
+#: internal/menu/actions_ipattack.go:368
 msgid "No barons are known on that planet yet."
 msgstr "На этой планете пока нет известных баронов."
 
@@ -1644,7 +1662,7 @@ msgstr "На этой планете пока нет известных баро
 msgid "No battles have been fought yet."
 msgstr "Битв ещё не было."
 
-#: internal/menu/actions_ipattack.go:105
+#: internal/menu/actions_ipattack.go:104
 msgid "No group attacks are forming right now."
 msgstr "Групповые атаки сейчас не собираются."
 
@@ -1660,7 +1678,7 @@ msgstr "Совпадений нет. Королева благодарит ва�
 msgid "No news."
 msgstr "Новостей нет."
 
-#: internal/menu/actions_ipops.go:300
+#: internal/menu/actions_ipops.go:361
 msgid "No other planets are known yet, so there is nobody to scout."
 msgstr "Других планет пока не известно, разведывать некого."
 
@@ -1688,7 +1706,7 @@ msgstr ""
 "От этой державы к нам не пришли очки, поэтому торговец оружием не может "
 "назначить цену ракеты для неё."
 
-#: internal/menu/actions_ipmessages.go:159
+#: internal/menu/empire_status_screen.go:128
 msgid "None"
 msgstr "Нет"
 
@@ -1716,7 +1734,7 @@ msgstr "Не задано"
 msgid "Note that late payments will incur additional penalties."
 msgstr "Учтите: просрочка повлечёт дополнительные штрафы."
 
-#: internal/menu/actions_regions.go:148
+#: internal/menu/actions_regions.go:178
 msgid ""
 "Note: Region prices rise as you expand, so the price shown is only\n"
 "      the cost of the first region you buy."
@@ -1742,7 +1760,7 @@ msgstr "От %s ничего нет уже %d дней; отправленное
 msgid "Nothing is aimed at this planet."
 msgstr "Ничто не нацелено на эту планету."
 
-#: internal/menu/opshelp.go:51
+#: internal/menu/tree.go:388
 msgid "Nuclear Assault"
 msgstr "Ядерный штурм"
 
@@ -1762,7 +1780,11 @@ msgstr ""
 msgid "Of these, %s units are away on attacks."
 msgstr "Из них %s единиц ушли в атаки."
 
-#: internal/menu/actions_trade.go:183
+#: internal/menu/actions_ipops.go:224
+msgid "Offense"
+msgstr "Атака"
+
+#: internal/menu/actions_trade.go:182
 msgid "Offer — goods you send:"
 msgstr "Предложение — товары, которые вы шлёте:"
 
@@ -1873,7 +1895,7 @@ msgstr "Ожидает отправки"
 msgid "Outcome"
 msgstr "Итог"
 
-#: internal/menu/actions_regions.go:50
+#: internal/menu/actions_trade.go:77
 msgid "Owned"
 msgstr "Есть"
 
@@ -1881,7 +1903,7 @@ msgstr "Есть"
 msgid "Pick your six letters:"
 msgstr "Выберите шесть букв:"
 
-#: internal/menu/actions_ipscores.go:311
+#: internal/menu/incoming.go:80
 msgid "Planet"
 msgstr "Планета"
 
@@ -1893,7 +1915,7 @@ msgstr "Координатор планеты"
 msgid "Planet Name"
 msgstr "Название планеты"
 
-#: internal/menu/actions_message.go:30
+#: internal/menu/actions_message.go:29
 msgid "Planetary Bulletin:"
 msgstr "Планетарный бюллетень:"
 
@@ -1918,7 +1940,7 @@ msgstr "Планетарное время: %s   Новый день через %
 msgid "Play"
 msgstr "Играть"
 
-#: internal/menu/actions_info.go:308
+#: internal/menu/tree.go:512
 msgid "Player List"
 msgstr "Список игроков"
 
@@ -1961,7 +1983,11 @@ msgstr ""
 msgid "Preferences"
 msgstr "Настройки"
 
-#: internal/menu/actions_iptrade.go:73
+#: internal/menu/actions_regions.go:328
+msgid "Press the letter of a region type to place the remaining %d."
+msgstr ""
+
+#: internal/menu/menu.go:944
 msgid "Price"
 msgstr "Цена"
 
@@ -1969,7 +1995,7 @@ msgstr "Цена"
 msgid "Proposed a %s to %s."
 msgstr "Предложен %s державе %s."
 
-#: internal/menu/mailreader.go:73
+#: internal/menu/mailreader.go:71
 msgid "Public Reply?"
 msgstr "Ответить открыто?"
 
@@ -1981,7 +2007,7 @@ msgstr "Отправка..."
 msgid "Quick Strike"
 msgstr "Быстрый удар"
 
-#: internal/menu/actions_ipscores.go:107
+#: internal/menu/welcome.go:36
 msgid "Quit"
 msgstr "Выход"
 
@@ -1989,7 +2015,7 @@ msgstr "Выход"
 msgid "Quit?"
 msgstr "Выход?"
 
-#: internal/menu/mailreader.go:168
+#: internal/menu/mailreader.go:170
 msgid "Quote Message?"
 msgstr "Процитировать сообщение?"
 
@@ -1997,7 +2023,7 @@ msgstr "Процитировать сообщение?"
 msgid "Read Messages"
 msgstr "Читать сообщения"
 
-#: internal/menu/actions_ipops.go:303
+#: internal/menu/actions_ipops.go:364
 msgid ""
 "Recon requests created to all %d planets. The reports will reach the Spy "
 "Database."
@@ -2005,11 +2031,11 @@ msgstr ""
 "Запросы на разведку созданы для всех %d планет. Отчёты придут в шпионскую "
 "базу данных."
 
-#: internal/menu/empire_status_screen.go:156
+#: internal/menu/tree.go:181
 msgid "Regions"
 msgstr "Регионы"
 
-#: internal/menu/actions_regions.go:336
+#: internal/menu/actions_regions.go:365
 msgid "Regions added to your empire. You now hold %d land."
 msgstr "Регионы добавлены к вашей империи. Теперь у вас %d земли."
 
@@ -2033,11 +2059,11 @@ msgstr "Удалять державу без игры через сколько 
 msgid "Repay some now?"
 msgstr "Погасить часть сейчас?"
 
-#: internal/menu/mailreader.go:276
+#: internal/menu/mailreader.go:212
 msgid "Reply,"
 msgstr "Ответить,"
 
-#: internal/menu/actions_trade.go:184
+#: internal/menu/actions_trade.go:183
 msgid "Request — goods you want back:"
 msgstr "Запрос — товары, которые вы хотите взамен:"
 
@@ -2057,7 +2083,7 @@ msgstr "Река"
 msgid "Run 'immortal-barons -help' for the full list of options."
 msgstr "Полный список опций: 'immortal-barons -help'."
 
-#: internal/menu/opshelp.go:53
+#: internal/menu/tree.go:390
 msgid "S3-Sabre"
 msgstr "S3-Sabre"
 
@@ -2077,15 +2103,15 @@ msgstr ""
 "Сэйбл, ваш советник по технологиям, сир. Я ведаю лабораториями и малыми "
 "чудесами, что из них просачиваются."
 
-#: internal/menu/opshelp.go:37
+#: internal/menu/tree.go:419
 msgid "Sabotage HQ"
 msgstr "Диверсия в штабе"
 
-#: internal/menu/actions_message.go:491
+#: internal/menu/actions_message.go:490
 msgid "Save"
 msgstr "Сохранить"
 
-#: internal/menu/actions_ipmessages.go:532
+#: internal/menu/actions_message.go:582
 msgid "Saving..."
 msgstr "Сохранение..."
 
@@ -2093,7 +2119,7 @@ msgstr "Сохранение..."
 msgid "Savings Interest Rate:"
 msgstr "Процент по сбережениям:"
 
-#: internal/menu/actions_ipscores.go:171
+#: internal/menu/scoretable.go:217
 msgid "Score"
 msgstr "Очки"
 
@@ -2125,11 +2151,11 @@ msgstr "Продать еду"
 msgid "Send Message"
 msgstr "Отправить сообщение"
 
-#: internal/menu/opshelp.go:29
+#: internal/menu/tree.go:411
 msgid "Send Spy"
 msgstr "Отправить шпиона"
 
-#: internal/menu/opshelp.go:54
+#: internal/menu/tree.go:391
 msgid "Send SpyGuy"
 msgstr "Отправить SpyGuy"
 
@@ -2137,23 +2163,23 @@ msgstr "Отправить SpyGuy"
 msgid "Send Trade Deal"
 msgstr "Отправить сделку"
 
-#: internal/menu/gameflow.go:305
+#: internal/menu/gameflow.go:306
 msgid "Send a message?"
 msgstr "Отправить сообщение?"
 
-#: internal/menu/actions_attack.go:202
+#: internal/menu/actions_ipattack.go:163
 msgid "Send how many Bombers?"
 msgstr "Сколько бомбардировщиков отправить?"
 
-#: internal/menu/actions_attack.go:200
+#: internal/menu/actions_ipattack.go:161
 msgid "Send how many Jets?"
 msgstr "Сколько самолётов отправить?"
 
-#: internal/menu/actions_attack.go:201
+#: internal/menu/actions_ipattack.go:162
 msgid "Send how many Tanks?"
 msgstr "Сколько танков отправить?"
 
-#: internal/menu/actions_attack.go:199
+#: internal/menu/actions_ipattack.go:160
 msgid "Send how many Troopers?"
 msgstr "Сколько солдат отправить?"
 
@@ -2161,7 +2187,7 @@ msgstr "Сколько солдат отправить?"
 msgid "Send how many jets?"
 msgstr "Сколько самолётов отправить?"
 
-#: internal/menu/actions_covert.go:147
+#: internal/menu/actions_ipops.go:318
 msgid "Send how many?"
 msgstr "Сколько отправить?"
 
@@ -2169,7 +2195,7 @@ msgstr "Сколько отправить?"
 msgid "Send the bid?"
 msgstr "Отправить ставку?"
 
-#: internal/menu/actions_attack.go:214
+#: internal/menu/actions_ipattack.go:76
 msgid "Send this Attack?"
 msgstr "Отправить эту атаку?"
 
@@ -2177,7 +2203,7 @@ msgstr "Отправить эту атаку?"
 msgid "Send this Operation?"
 msgstr "Отправить эту операцию?"
 
-#: internal/menu/actions_trade.go:191
+#: internal/menu/actions_trade.go:190
 msgid "Send this trade deal?"
 msgstr "Отправить эту сделку?"
 
@@ -2185,7 +2211,7 @@ msgstr "Отправить эту сделку?"
 msgid "Sending costs %s gold and %d carriers; you own %d."
 msgstr "Отправка стоит %s золота и %d авианосцев; у вас %d."
 
-#: internal/menu/actions_trade.go:245
+#: internal/menu/actions_trade.go:244
 msgid "Sending costs %s gold per day; it needs one carrier."
 msgstr "Отправка стоит %s золота в день и требует один авианосец."
 
@@ -2233,11 +2259,11 @@ msgstr "Одна планета"
 msgid "Sold %d. Gold: %d"
 msgstr "Продано: %d. Золото: %d"
 
-#: internal/menu/gameflow.go:142
+#: internal/menu/gameflow.go:143
 msgid "Sorry, you have used all of your turns today."
 msgstr "Увы, все ходы на сегодня израсходованы."
 
-#: internal/menu/actions_ipattack.go:120
+#: internal/menu/actions_ipattack.go:119
 msgid "Sorry... You're under new realm protection."
 msgstr "Увы... Вы под защитой новой державы."
 
@@ -2262,7 +2288,7 @@ msgstr "Специализация"
 msgid "Spending"
 msgstr "Расходы"
 
-#: internal/menu/opshelp.go:35
+#: internal/menu/tree.go:417
 msgid "Spread Propaganda"
 msgstr "Распространять пропаганду"
 
@@ -2270,7 +2296,7 @@ msgstr "Распространять пропаганду"
 msgid "Spy Database"
 msgstr "База разведки"
 
-#: internal/menu/actions_ipops.go:207
+#: internal/menu/actions_ipops.go:209
 msgid "Spy Database:"
 msgstr "База разведки:"
 
@@ -2282,7 +2308,7 @@ msgstr "Разведать отношения"
 msgid "Stand it down?"
 msgstr "Демонтировать?"
 
-#: internal/menu/opshelp.go:34
+#: internal/menu/tree.go:416
 msgid "Stir Emigrations"
 msgstr "Разжигать эмиграцию"
 
@@ -2316,7 +2342,7 @@ msgstr "Система"
 msgid "System Menu"
 msgstr "Системное меню"
 
-#: internal/menu/input.go:180
+#: internal/menu/input.go:181
 msgid "Taken: another realm already answers to that name."
 msgstr "Занято: другая держава уже носит это имя."
 
@@ -2324,15 +2350,15 @@ msgstr "Занято: другая держава уже носит это им�
 msgid "Tank"
 msgstr "Танк"
 
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/tree.go:184
 msgid "Tanks"
 msgstr "Танки"
 
-#: internal/menu/actions_ipattack.go:57
+#: internal/menu/actions_ipattack.go:56
 msgid "Target which baron?"
 msgstr "Какого барона выбрать целью?"
 
-#: internal/menu/actions_attack.go:816
+#: internal/menu/actions_ipattack.go:41
 msgid "Target which planet?"
 msgstr "Какую планету взять на прицел?"
 
@@ -2462,7 +2488,7 @@ msgstr "Нынешний координатор BBS - %s."
 msgid "The current interest returns on investments are %s%%."
 msgstr "Текущая доходность вкладов — %s%%."
 
-#: internal/menu/actions_trade.go:247
+#: internal/menu/actions_trade.go:246
 msgid ""
 "The deal stands until the span runs out; unanswered, the goods are lost."
 msgstr "Сделка в силе, пока не истечёт срок; без ответа товар пропадает."
@@ -2502,7 +2528,7 @@ msgstr "Ставка по займу — %s%% в день, всего %s%% пр�
 msgid "The remaining %d%% is turned into gold."
 msgstr "Остальные %d%% обращаются в золото."
 
-#: internal/menu/actions_ipops.go:204
+#: internal/menu/actions_ipops.go:206
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 "База разведки пуста. Шпионьте за империями других планет, чтобы её наполнить."
@@ -2519,7 +2545,7 @@ msgstr "Пока нет баронов, за которых можно голо�
 msgid "There are no bulletins to read."
 msgstr "Бюллетеней для чтения нет."
 
-#: internal/menu/actions_attack.go:174
+#: internal/menu/actions_covert.go:108
 msgid "There are no rival empires left to attack."
 msgstr "Соперников для нападения не осталось."
 
@@ -2535,7 +2561,7 @@ msgstr "Минимальный срок вклада — %d дн."
 msgid "There is no one left to offer that to."
 msgstr "Больше некому это предложить."
 
-#: internal/menu/actions_message.go:210
+#: internal/menu/actions_message.go:209
 msgid "There is no one to reach."
 msgstr "Связаться не с кем."
 
@@ -2543,7 +2569,7 @@ msgstr "Связаться не с кем."
 msgid "There is no unclaimed land left on the planet today."
 msgstr "Свободных земель на планете сегодня не осталось."
 
-#: internal/menu/actions_ipattack.go:76
+#: internal/menu/actions_ipattack.go:75
 msgid "This attack will cost %s gold."
 msgstr "Атака обойдётся в %s золота."
 
@@ -2559,7 +2585,7 @@ msgstr "Часы этой станции (%s)"
 msgid "This choice is permanent and cannot be undone."
 msgstr "Выбор окончателен и отмене не подлежит."
 
-#: internal/menu/actions_trade.go:110
+#: internal/menu/actions_trade.go:109
 msgid "This deal needs %d carrier(s); you have %d free."
 msgstr "Для сделки нужно авианосцев: %d; свободно у вас: %d."
 
@@ -2583,7 +2609,7 @@ msgstr "Планета уже строит Gooie Kablooie."
 msgid "This planet is not building a Gooie Kablooie."
 msgstr "Планета не строит Gooie Kablooie."
 
-#: internal/menu/actions_ipops.go:265
+#: internal/menu/actions_ipops.go:326
 msgid "This will cost you %s gold.  Accept?"
 msgstr "Это будет стоить %s золота.  Согласны?"
 
@@ -2607,11 +2633,11 @@ msgstr "Чтобы закончить выбор, нажмите ВВОД в о�
 msgid "Today"
 msgstr "Сегодня"
 
-#: internal/menu/bulletinfiles.go:71
+#: internal/menu/tree.go:596
 msgid "Today's News"
 msgstr "Новости сегодня"
 
-#: internal/menu/input.go:178
+#: internal/menu/input.go:179
 msgid "Too long: a realm name may be at most %d characters."
 msgstr "Слишком длинно: название державы — не более %d символов."
 
@@ -2659,11 +2685,11 @@ msgstr "Всего сил"
 msgid "Trade"
 msgstr "Торговля"
 
-#: internal/menu/actions_trade.go:298
+#: internal/menu/actions_trade.go:297
 msgid "Trade deal accepted."
 msgstr "Сделка принята."
 
-#: internal/menu/actions_trade.go:216
+#: internal/menu/actions_trade.go:215
 msgid "Trade deal sent to %s for %d days (%s gold)."
 msgstr "Сделка отправлена на %s на %d дн. (%s золота)."
 
@@ -2671,7 +2697,7 @@ msgstr "Сделка отправлена на %s на %d дн. (%s золота
 msgid "Trading"
 msgstr "Торговля"
 
-#: internal/menu/actions_market.go:85
+#: internal/menu/tree.go:427
 msgid "Trading Market"
 msgstr "Торговый рынок"
 
@@ -2703,7 +2729,7 @@ msgid "Trooper"
 msgstr "Солдат"
 
 # Buy / sell items
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/tree.go:172
 msgid "Troopers"
 msgstr "Солдаты"
 
@@ -2740,7 +2766,7 @@ msgstr "Невостребованный пакет"
 msgid "Unclaimed packets"
 msgstr "Невостребованные пакеты"
 
-#: internal/menu/opshelp.go:50
+#: internal/menu/tree.go:387
 msgid "Undermine Investments"
 msgstr "Подорвать вклады"
 
@@ -2825,7 +2851,7 @@ msgstr "Посетить банк"
 msgid "Vote for (0 to cancel)?"
 msgstr "Голос за (0 - отмена)?"
 
-#: internal/menu/actions_ipattack.go:67
+#: internal/menu/actions_ipattack.go:66
 msgid "Wait how many Hours (%d-%d)?"
 msgstr "Ждать сколько часов (%d-%d)?"
 
@@ -2933,7 +2959,7 @@ msgstr "Когда вы вернёте заём [число дней]?"
 msgid "Which part of the world?"
 msgstr "Какая часть света?"
 
-#: internal/menu/actions_regions.go:355
+#: internal/menu/actions_regions.go:384
 msgid "Which regions will you give up?"
 msgstr "Какие регионы отдадите?"
 
@@ -2995,7 +3021,7 @@ msgstr "Кому пишем:"
 msgid "Yes"
 msgstr "Да"
 
-#: internal/menu/bulletinfiles.go:72
+#: internal/menu/tree.go:597
 msgid "Yesterday's News"
 msgstr "Новости вчера"
 
@@ -3007,7 +3033,7 @@ msgstr "Вы приняли %s с %s."
 msgid "You are in protection."
 msgstr "Вы под защитой."
 
-#: internal/menu/actions_regions.go:149
+#: internal/menu/actions_regions.go:179
 msgid "You can afford %s%d%s regions."
 msgstr "Вам по карману %s%d%s регионов."
 
@@ -3015,7 +3041,7 @@ msgstr "Вам по карману %s%d%s регионов."
 msgid "You can change it from the System menu."
 msgstr "Это можно изменить в меню Система."
 
-#: internal/menu/actions_regions.go:167
+#: internal/menu/actions_regions.go:197
 msgid "You cannot afford another region."
 msgstr "На ещё один регион у вас не хватает золота."
 
@@ -3041,7 +3067,7 @@ msgstr "Вы не можете покрыть всё содержание в э�
 msgid "You cannot trade while under new realm protection."
 msgstr "Под защитой новой державы торговать нельзя."
 
-#: internal/menu/actions_regions.go:232
+#: internal/menu/actions_regions.go:262
 msgid "You captured %d regions — choose which types to hold them as."
 msgstr "Вы захватили %d регионов - выберите, какими типами их удержать."
 
@@ -3077,11 +3103,11 @@ msgstr "У вас нет столько в банке."
 msgid "You do not owe that much."
 msgstr "Вы должны не так много."
 
-#: internal/menu/actions_trade.go:283
+#: internal/menu/actions_trade.go:282
 msgid "You give:    %s"
 msgstr "Вы даёте:    %s"
 
-#: internal/menu/actions_message.go:418
+#: internal/menu/actions_message.go:417
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr "У вас %d строк для сообщения.  /S=сохранить /A=отмена /C=очистить"
 
@@ -3142,7 +3168,7 @@ msgstr "Эта ракета сегодня уже запущена."
 msgid "You have already made all %d of your attacks for today."
 msgstr "Вы уже провели все %d своих атак на сегодня."
 
-#: internal/menu/actions_ipattack.go:183
+#: internal/menu/actions_ipattack.go:182
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "Вы уже отправили все %d своих отрядов на сегодня."
 
@@ -3162,7 +3188,7 @@ msgstr "Открытых ставок у вас нет."
 msgid "You have no defense allies."
 msgstr "У вас нет союзников по обороне."
 
-#: internal/menu/actions_message.go:39
+#: internal/menu/turnrecap.go:222
 msgid "You have no messages."
 msgstr "У вас нет сообщений."
 
@@ -3178,7 +3204,7 @@ msgstr "Сегодня вы провели эту тайную операцию 
 msgid "You have started work on your HeadQuarters."
 msgstr "Вы начали строительство штаба."
 
-#: internal/menu/actions_message.go:557
+#: internal/menu/actions_message.go:556
 msgid "You have used all %d lines."
 msgstr "Вы использовали все %d строк."
 
@@ -3194,7 +3220,7 @@ msgstr "У вас нет подкупленных агентов, через к�
 msgid "You hold the office of %s."
 msgstr "Вы занимаете пост: %s."
 
-#: internal/menu/actions_ipattack.go:150
+#: internal/menu/actions_ipattack.go:149
 msgid "You joined group attack #%d."
 msgstr "Вы присоединились к групповой атаке #%d."
 
@@ -3219,7 +3245,7 @@ msgstr ""
 msgid "You need a pact with that realm to send it a trade deal."
 msgstr "Чтобы отправить сделку этой державе, нужен пакт с ней."
 
-#: internal/menu/actions_trade.go:189
+#: internal/menu/actions_trade.go:188
 msgid "You offer %s to %s"
 msgstr "Вы предлагаете %s планете %s"
 
@@ -3240,7 +3266,7 @@ msgstr ""
 msgid "You put in %d million gold."
 msgstr "Вы вложили %d млн золота."
 
-#: internal/menu/actions_trade.go:282
+#: internal/menu/actions_trade.go:281
 msgid "You receive: %s"
 msgstr "Вы получаете: %s"
 
@@ -3257,7 +3283,7 @@ msgid "Your %s Jets need %s more Carriers before they can all fly."
 msgstr ""
 "Вашим самолётам (%s) не хватает ещё %s авианосцев, чтобы взлететь всем."
 
-#: internal/menu/actions_ipattack.go:219
+#: internal/menu/actions_ipattack.go:218
 msgid "Your %s force is on its way to %s on %s."
 msgstr "Ваш отряд %s идёт к %s на %s."
 
@@ -3328,7 +3354,7 @@ msgstr ""
 msgid "Your casualties: %s."
 msgstr "Ваши потери: %s."
 
-#: internal/menu/actions_regions.go:137
+#: internal/menu/actions_regions.go:167
 msgid "Your choice?"
 msgstr "Ваш выбор?"
 
@@ -3336,7 +3362,7 @@ msgstr "Ваш выбор?"
 msgid "Your dominion gained %s%s%s people."
 msgstr "Ваши владения приросли на %s%s%s человек."
 
-#: internal/menu/actions_trade.go:164
+#: internal/menu/actions_trade.go:163
 msgid "Your dominion is still under protection."
 msgstr "Ваша держава ещё под защитой."
 
@@ -3358,7 +3384,7 @@ msgstr ""
 "Вашей империи больше нет. Вернитесь в другой день, чтобы построить новую "
 "державу."
 
-#: internal/menu/actions_regions.go:243
+#: internal/menu/actions_regions.go:273
 msgid ""
 "Your forces brought home %d regions — choose which types to hold them as."
 msgstr ""
@@ -3437,7 +3463,7 @@ msgid ""
 msgstr ""
 "Ваша держава уже переименована один раз. Нынешнее имя останется навсегда."
 
-#: internal/menu/gameflow.go:127
+#: internal/menu/gameflow.go:128
 msgid "Your realm is no longer active."
 msgstr "Ваша держава больше не активна."
 
@@ -3445,7 +3471,7 @@ msgstr "Ваша держава больше не активна."
 msgid "Your realm is not under new-realm protection."
 msgstr "Ваша держава не под защитой новой державы."
 
-#: internal/menu/input.go:189
+#: internal/menu/input.go:190
 msgid "Your realm will be named %s."
 msgstr "Ваша держава будет называться %s."
 
@@ -3469,15 +3495,15 @@ msgstr "Голос учтён. Его можно сменить в любое в
 msgid "Zone?"
 msgstr "Пояс?"
 
-#: internal/menu/actions_regions.go:296
+#: internal/menu/actions_regions.go:327
 msgid "[%d Regions left] Your choice?"
 msgstr "[Осталось регионов: %d] Ваш выбор?"
 
-#: internal/menu/actions_ipops.go:328
+#: internal/menu/actions_ipops.go:389
 msgid "agent"
 msgstr "агент"
 
-#: internal/menu/actions_ipops.go:330
+#: internal/menu/actions_ipops.go:391
 msgid "agents"
 msgstr "агенты"
 
@@ -3517,7 +3543,7 @@ msgstr ""
 msgid "folder that holds the game data"
 msgstr "каталог с данными игры"
 
-#: internal/menu/actions_ipmessages.go:129
+#: internal/menu/attacktypehelp.go:132
 msgid "for list"
 msgstr "список"
 
@@ -3565,7 +3591,7 @@ msgstr "здесь"
 msgid "immortal-barons — a Barren Realms Elite clone. Options:"
 msgstr "immortal-barons - клон Barren Realms Elite. Опции:"
 
-#: internal/menu/actions_trade.go:190
+#: internal/menu/actions_trade.go:189
 msgid "in return for %s."
 msgstr "в обмен на %s."
 
@@ -3593,7 +3619,7 @@ msgstr "никто"
 msgid "no such group attack"
 msgstr "нет такой групповой атаки"
 
-#: internal/menu/actions_trade.go:55
+#: internal/menu/actions_trade.go:54
 msgid "nothing"
 msgstr "ничего"
 
@@ -3773,7 +3799,7 @@ msgstr ""
 "собственный каталог игры для пакетов, записанных для других станций, для "
 "-ibbs-reset (по умолчанию \"outbound\" в каталоге данных)"
 
-#: internal/menu/actions_ipattack.go:54
+#: internal/menu/actions_ipattack.go:53
 msgid "the whole planet"
 msgstr "вся планета"
 
@@ -3801,7 +3827,7 @@ msgstr "взято %d"
 msgid "troops deserted due to low morale."
 msgstr "войска дезертировали из-за низкого боевого духа."
 
-#: internal/menu/gameflow.go:213
+#: internal/menu/gameflow.go:214
 msgid "units of Food consumed."
 msgstr "единиц еды съедено."
 
@@ -3853,9 +3879,12 @@ msgstr "{Food decay} составляет %d%% от обычного уровн�
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr "─»>Enter - продолжить, Q - выход<«─"
 
-#: internal/menu/input.go:472
+#: internal/menu/input.go:473
 msgid "─»>Paused<«─"
 msgstr "─»>Пауза<«─"
+
+#~ msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
+#~ msgstr "%s @ %s (%s): Земля %s  Атк %s  Защ %s  Золото %s"
 
 #~ msgid "Overdue debt: $%s (grows each turn until repaid)"
 #~ msgstr "Просроченный долг: %s (растёт каждый ход, пока не погашен)"
@@ -4080,9 +4109,6 @@ msgstr "─»>Пауза<«─"
 
 #~ msgid "Invest"
 #~ msgstr "Инвестировать"
-
-#~ msgid "Offense"
-#~ msgstr "Атака"
 
 # Scores
 #~ msgid "Rank"

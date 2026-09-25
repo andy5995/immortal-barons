@@ -54,6 +54,7 @@ CALL_PATTERNS = [
     re.compile(r'\bmoney\(' + STR),
     re.compile(r'\btitled\(' + STR),  # bulletin page headings not drawn from a table
     re.compile(r'\b(?:Label|Title):\s*' + STR),
+    re.compile(r'\bEcho:\s*' + STR),  # the word a bracketed-key prompt echoes (keyOpt)
     # Preferences toggle labels. They live in the toggleRow table rather than in
     # the onOff() call, because the value column is sized from the whole group
     # and onOff is handed the group plus a field off the row -- so no literal

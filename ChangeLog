@@ -6,6 +6,7 @@ Immortal Barons ChangeLog
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
   * Local mail shows its time on the reader's clock, with the zone
+  * After a reply is sent, the answered message can be deleted or kept
   * -full on a door command plays as the drop file's caller and reads -dropfile
   * -ftn-status says when bbs.cfg has no lines for sending or receiving
   * Only a Send Spy that gets in brings back intel on its target

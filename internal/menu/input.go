@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -571,4 +572,57 @@ func fail(s session.Session, err error) {
 	// ok() prints the same shape without it.
 	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightRed, wrapHanging(i18n.T(sessionLang(s), err.Error()), "  ! ", "    "), ansi.Reset)
 	pause(s)
+}
+
+// keyOpt is one answer to a bracketed-key prompt such as the mail reader's
+// "[R] Reply, [D] Delete, [I] Ignore, or [Q] Quit>". Label is drawn after the
+// key, punctuation included, and Echo is printed once it is chosen ("" prints
+// nothing).
+type keyOpt struct {
+	Key   rune // upper case
+	Label string
+	Echo  string
+}
+
+// drawKeys prints a bracketed-key prompt in the mail reader's colors. It ends
+// in ">" unless the last label is already a question.
+func drawKeys(s session.Session, opts []keyOpt) {
+	var last string
+	for i, o := range opts {
+		if i > 0 {
+			fmt.Fprint(s, " ")
+		}
+		last = tr(s, o.Label)
+		fmt.Fprintf(s, "%s %s%s", mailKey(string(o.Key)), ansi.FgWhite, last)
+	}
+	if strings.HasSuffix(last, "?") {
+		fmt.Fprintf(s, " %s", ansi.Reset)
+		return
+	}
+	fmt.Fprintf(s, "%s> %s", ansi.FgCyan, ansi.Reset)
+}
+
+// readKeys waits for one of opts' keys, in either case, echoes it and returns
+// it. enter is the key Enter stands for, or 0 to ignore Enter like any other
+// unlisted key; ended is returned once input has ended.
+func readKeys(s session.Session, opts []keyOpt, enter, ended rune) rune {
+	for {
+		r, err := readKey(s)
+		if err != nil {
+			return ended
+		}
+		drainInput(s)
+		r = unicode.ToUpper(r)
+		if r == '\r' || r == '\n' {
+			r = enter
+		}
+		for _, o := range opts {
+			if r != 0 && o.Key == r {
+				if o.Echo != "" {
+					fmt.Fprintf(s, "%s\n", tr(s, o.Echo))
+				}
+				return r
+			}
+		}
+	}
 }

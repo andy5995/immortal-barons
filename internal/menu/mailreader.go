@@ -3,7 +3,6 @@ package menu
 import (
 	"fmt"
 	"strings"
-	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -73,10 +72,14 @@ func mailReader(s session.Session, w *ctx, skipIgnored bool) {
 			body, send := composeMessageFrom(s, askQuote(s, m))
 			if send && strings.TrimSpace(body) != "" {
 				replies = append(replies, mailReply{toName: m.From, board: m.FromBoard, public: public, body: body})
-				// A message replied to is done with, like a Delete (#122) — but only
-				// once the reply actually went out; aborting the editor leaves the
-				// message in the inbox.
-				deleted = append(deleted, m)
+				// Only once the reply actually went out is the original offered for
+				// deletion (#122); aborting the editor leaves it in the inbox. Kept, it
+				// counts as passed over, like Ignore.
+				if deleteAfterReply(s) {
+					deleted = append(deleted, m)
+				} else {
+					w.ignoreMail(m)
+				}
 				break
 			}
 			// The editor was abandoned. The message stays — nothing was sent — but
@@ -204,31 +207,40 @@ func quoteLines(m game.Message, first, last int) []string {
 	return out
 }
 
+// mailOpts are the message reader's four actions.
+var mailOpts = []keyOpt{
+	{Key: 'R', Label: "Reply,"},
+	{Key: 'D', Label: "Delete,", Echo: "Delete"},
+	{Key: 'I', Label: "Ignore, or", Echo: "Ignore"},
+	{Key: 'Q', Label: "Quit", Echo: "Quit"},
+}
+
 // mailChoice reads a single-key command at the message prompt. Unlike every
 // other prompt in the game, Enter does NOTHING here: a message is read once and
 // then gone, and a player holding Enter through the pre-turn stops would skip
 // past it before it registered. Unrecognized keys are ignored until a valid one
 // arrives; a dead session quits.
-func mailChoice(s session.Session) rune {
-	for {
-		r, err := readKey(s)
-		if err != nil {
-			return 'Q'
-		}
-		switch unicode.ToUpper(r) {
-		case 'R':
-			return 'R'
-		case 'D':
-			fmt.Fprintf(s, "%s\n", tr(s, "Delete"))
-			return 'D'
-		case 'I':
-			fmt.Fprintf(s, "%s\n", tr(s, "Ignore"))
-			return 'I'
-		case 'Q':
-			fmt.Fprintf(s, "%s\n", tr(s, "Quit"))
-			return 'Q'
-		}
-	}
+func mailChoice(s session.Session) rune { return readKeys(s, mailOpts, 0, 'Q') }
+
+// mailKey draws one of the reader's action keys: bright cyan in blue brackets.
+func mailKey(k string) string {
+	return fmt.Sprintf("%s[%s%s%s]%s", ansi.FgBlue, ansi.FgBrightCyan, k, ansi.FgBlue, ansi.Reset)
+}
+
+// keepOpts answer what happens to a message once it has been replied to.
+var keepOpts = []keyOpt{
+	{Key: 'D', Label: "Delete or", Echo: "Delete"},
+	{Key: 'K', Label: "Keep original message?", Echo: "Keep"},
+}
+
+// deleteAfterReply asks whether the message just replied to goes or stays.
+// Enter keeps it, and so does input that has ended, so a dropped caller loses
+// nothing.
+func deleteAfterReply(s session.Session) bool {
+	drainInput(s) // the editor's closing Enter must not answer this
+	fmt.Fprint(s, "\n")
+	drawKeys(s, keepOpts)
+	return readKeys(s, keepOpts, 'K', 'K') == 'D'
 }
 
 // renderMessage draws one message in BRE's boxed layout and colors (cyan frame,
@@ -268,12 +280,5 @@ func renderMessage(s session.Session, m game.Message) {
 		}
 		fmt.Fprintf(s, "%s│ %s%s%s\n", ansi.FgCyan, body, line, ansi.Reset)
 	}
-	item := func(k string) string {
-		return fmt.Sprintf("%s[%s%s%s]%s", ansi.FgBlue, ansi.FgBrightCyan, k, ansi.FgBlue, ansi.Reset)
-	}
-	fmt.Fprintf(s, "%s %s%s %s %s%s %s %s%s %s %s%s%s> %s",
-		item("R"), ansi.FgWhite, tr(s, "Reply,"),
-		item("D"), ansi.FgWhite, tr(s, "Delete,"),
-		item("I"), ansi.FgWhite, tr(s, "Ignore, or"),
-		item("Q"), ansi.FgWhite, tr(s, "Quit"), ansi.FgCyan, ansi.Reset)
+	drawKeys(s, mailOpts)
 }

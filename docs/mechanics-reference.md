@@ -4020,6 +4020,10 @@ original message's recipient list except the reader; `S` opens the same
 multi-select picker as Send Message. IB replies to the author alone, and asks its
 two-way `Public Reply?` only for interplanetary mail.
 
+**After a reply is sent, IB asks `[D] Delete or [K] Keep original message?`**
+about the message answered; Enter keeps it. BRE asks nothing. A reply abandoned
+in the editor asks nothing either, and the message stays.
+
 ### The game clock, and days nobody played
 
 The world keeps two dates. `LastMaintDate` is the **game clock** — the day the

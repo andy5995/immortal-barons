@@ -47,9 +47,9 @@ func TestMailReaderQuitKeepsRemaining(t *testing.T) {
 }
 
 func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
-	// r, Enter (Quote Message? = Yes), the reply text, /s. The message is one
-	// line, so no line range is asked for (#244).
-	f := &fakeSession{keys: []rune("r\rthanks\r/s")}
+	// r, Enter (Quote Message? = Yes), the reply text, /s, then d to delete the
+	// original. The message is one line, so no line range is asked for (#244).
+	f := &fakeSession{keys: []rune("r\rthanks\r/sd")}
 	w := newWorld()
 	// A real recipient empire is the sender, so the reply can find them.
 	var sender *game.Empire
@@ -79,9 +79,35 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 	if _, ok := game.ParseStamp(got.When); !ok {
 		t.Errorf("reply stamp %q carries no zone", got.When)
 	}
-	// A sent reply removes the original, like Delete (#122).
+	// Answering Delete after a sent reply removes the original (#122).
 	if got := len(w.Player().Mail); got != 0 {
-		t.Errorf("a sent reply should remove the original; player Mail len = %d, want 0", got)
+		t.Errorf("Delete after a reply should remove the original; player Mail len = %d, want 0", got)
+	}
+}
+
+// TestMailReaderReplyEnterKeepsOriginal: Enter at the Delete-or-Keep question
+// after a sent reply keeps the message, and the reply still goes out.
+func TestMailReaderReplyEnterKeepsOriginal(t *testing.T) {
+	f := &fakeSession{keys: []rune("r\rthanks\r/s\r")}
+	w := newWorld()
+	var sender *game.Empire
+	w.With(func() { sender = recipients(w)[0] })
+	seedMail(w, game.Message{From: sender.Name, To: "A", When: "07/24/2026", Body: "nice one"})
+
+	mailReader(f, w, false)
+
+	if !strings.Contains(f.out.String(), "Keep original message") {
+		t.Fatalf("never reached the Delete-or-Keep question:\n%s", f.out.String())
+	}
+	// A prompt that is already a question takes no ">" after it.
+	if plain := stripANSI(f.out.String()); !strings.Contains(plain, "Keep original message? Keep") {
+		t.Errorf("want the question closed by ? alone, got:\n%s", plain)
+	}
+	if len(sender.Mail) != 1 {
+		t.Fatalf("the reply should still be sent; sender Mail len = %d, want 1", len(sender.Mail))
+	}
+	if got := len(w.Player().Mail); got != 1 {
+		t.Errorf("Enter should keep the original; player Mail len = %d, want 1", got)
 	}
 }
 
