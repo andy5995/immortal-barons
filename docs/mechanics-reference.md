@@ -121,18 +121,22 @@ HQ is an `int32` at empire record `+0x26b`, holding percent complete.
 - **It advances +5 at end of turn while it sits in 1…99, then clamps to [0,100]**
   (`0xD010`). The buying turn's own end-of-turn advance counts, so it finishes
   19 turns after the purchase.
-- **A tank's strength is `1.5 + HQ/100`** where a trooper is `0.5` and a
-  jet/turret is `1.0` (`0x40241`, `0x4043D` — the float constants decode exactly
-  to 1.5, 100.0, 0.5, 175.0, 2.0). In whole troopers that is **3 at HQ 0, 4 at
-  50, 5 at 100**. `breins.txt` calls a tank "about the equivalent of four
-  Troopers" — the HQ-50 value, which is how the manual and the binary reconcile.
-  IB used 4 rising to 8 until 2026-07-30.
-- The same expression scales the whole sum by `0.5 + morale/175` and divides by
-  2 — that is the **interplanetary invasion** resolver (`0x402D6`,`0x404D2`),
-  and it is a *different* morale curve from the one a same-planet attack uses
-  (`morale × 0.6 + 50`, `0x0F37B`). IB implements the same-planet curve
-  (`moraleFactor`) on both paths; the two differ by at most 3% at full morale and
-  cancel between attacker and defender.
+- **A tank's strength depends on which resolver is fighting**, where a trooper
+  is `0.5` and a jet/turret is `1.0`:
+  - the **interplanetary invasion** resolver uses `1.5 + HQ/100` (`0x40241`,
+    `0x4043D` — the float constants decode exactly to 1.5, 100.0, 0.5, 175.0,
+    2.0): in whole troopers **3 at HQ 0, 4 at 50, 5 at 100**
+    (`remoteTankStrength`);
+  - the **same-planet** regular attack uses `1.75 + HQ/200` (`resolve_regular_attack
+    +0xadb`..`+0xaff` and `+0xbea`..`+0xc0e`: HQ ÷ Real48 200, + Real48 1.75):
+    **3.5 at HQ 0, 4.5 at 100** (`tankStrength`).
+
+  `breins.txt` calls a tank "about the equivalent of four Troopers", which both
+  curves pass through. IB used 4 rising to 8 until 2026-07-30.
+- The invasion expression scales the whole sum by `0.5 + morale/175` and
+  divides by 2 (`0x402D6`,`0x404D2`); a same-planet attack uses
+  `morale × 0.6 + 50` (`0x0F37B`). IB implements each on its own path —
+  `remoteMoraleFactor` for an arriving strike, `moraleFactor` locally.
 - Bombers are excluded from the sum and accumulated separately, matching
   `breins.txt` ("no offensive or defensive strength").
 - **The price rises with the empire's lifetime turn count.** The military units
