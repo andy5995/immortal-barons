@@ -377,6 +377,14 @@ var MoraleDesertBands = [MoraleDesertBandTop / MoraleDesertBandWidth]struct{ Bas
 // A var rather than a const only because Go has no constant arrays.
 var CivilWarReportBands = [4]int{10, 25, 40, 60}
 
+// SupportMoodBands are the popular-support ceilings the End of Turn Statistics
+// mood line is chosen by: 0-10, 11-17, 18-23, 24-30, 31-38, 39-47, 48-65,
+// 66-80, 81-88, 89-96, and 97-100 above the last. ELEVEN bands, unevenly
+// spaced. BINARY-VERIFIED (process_end_of_turn, the `cmp ax,imm16` pairs from
+// BRE.OVR 0xD5D8), tested on the support the end-of-turn update leaves. The
+// lines themselves are IB's own.
+var SupportMoodBands = [10]int{10, 17, 23, 30, 38, 47, 65, 80, 88, 96}
+
 // Interplanetary Special Operations prices (#49).
 //
 // The four bombing ops carry the figures the original prints in that menu's own

@@ -434,28 +434,31 @@ func pirateHitLine(s session.Session, h game.PirateHit) {
 	fmt.Fprintf(s, "  %s\n", fmt.Sprintf(tr(s, "%s have captured %s %s"), faction, amount, tr(s, unit)))
 }
 
-// peopleMood returns an end-of-turn flavor line keyed to popular support, in
-// the spirit of BRE's tiered "how your people feel" message (original wording).
+// peopleMood returns an end-of-turn flavor line keyed to popular support, on
+// the original's eleven bands (game.SupportMoodBands) in IB's own wording.
 func peopleMood(support int) string {
+	b := game.SupportMoodBands
 	switch {
-	case support < 10:
+	case support <= b[0]:
 		return "The mob is at your gates — your people would be rid of you by any means."
-	case support < 20:
+	case support <= b[1]:
 		return "Your people seethe with open hatred for your rule."
-	case support < 30:
+	case support <= b[2]:
 		return "Riots flare through the streets almost daily."
-	case support < 40:
+	case support <= b[3]:
 		return "Unrest simmers; angry crowds gather against your decrees."
-	case support < 50:
+	case support <= b[4]:
 		return "Discontent runs deep — your people grumble at every order."
-	case support < 60:
+	case support <= b[5]:
 		return "Your people endure your rule, but take little joy in it."
-	case support < 70:
+	case support <= b[6]:
 		return "Your people go about their business, content enough."
-	case support < 80:
+	case support <= b[7]:
 		return "Your people are glad to live under your banner."
-	case support < 90:
+	case support <= b[8]:
 		return "Your people admire your leadership and prosper gladly."
+	case support <= b[9]:
+		return "Your people praise your name in every market square."
 	default:
 		return "Your people revere you — faith in your rule has never been higher."
 	}
@@ -518,7 +521,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 //
 // Each branch translates its own literal so the string extractor sees it; a
 // helper that returns an untranslated literal for the caller to tr() is how
-// peopleMood's five lines have stayed out of the catalogs.
+// peopleMood's lines have stayed out of the catalogs.
 func civilWarLine(s session.Session, sev int) string {
 	b := game.CivilWarReportBands
 	switch {

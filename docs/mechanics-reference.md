@@ -2977,6 +2977,10 @@ search for direct displacements does not match.
   (`0xD5A3`), whether or not the realm also rioted. That test is the ONLY caller
   of BRE's riot news (`write_riot_news`); IB also posts a riot line for the tax
   riot, and so skips a second post in a turn that already made one.
+- The End of Turn Statistics open with a line on how the people feel, chosen on
+  the support the update leaves by **eleven uneven bands** — 0–10, 11–17, 18–23,
+  24–30, 31–38, 39–47, 48–65, 66–80, 81–88, 89–96, 97–100 (`BRE.OVR 0xD5D8`,
+  `SupportMoodBands`). The bands are BRE's; the wording is IB's own.
 - Military morale scales **combat effectiveness** (`morale × 0.6 + 50`, so a
   full-morale army fights at 110%) and drives **desertion**, below.
 - Both are shown on the status screen (`BRE.OVR 0x1969A`, `0x19B11`) and ride the
