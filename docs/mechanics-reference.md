@@ -2169,19 +2169,42 @@ HQ field. IB applies it with integer percent (`SabreIntelKeepBasePct`,
 `SabreIntelKeepSpread`), which differs from the Real48 result by one agent on a
 few exact multiples.
 
-The other five damage rows are also in the switch, and IB does not yet apply
-them: it still removes a random 5-30 % (`SabreBaseDamagePct` +
-`rng.Intn(SabreDamageSpread)`) of what the effect names. Read 2026-09-25, not
-yet applied: residential zones keep `trunc(people × (0.6 + Random(40)/100))`
-(`+0x863`); military bases keep `trunc(n × (Random(20)+80)/100)` of each of the
-four counts, one roll each (`+0x8e6`); airbases keep
-`trunc(jets × (Random(40)+50)/100)` (`+0xacd`); regions lose
-`trunc((Random(5)+5)/100 × total_regions)` (`+0xb4c`); and the food supply
-keeps `trunc(Random(30) × food / 100)`, a loss of 71-100 % (`+0xbb2`).
+**The other five damage rows are BINARY-VERIFIED and applied (2026-09-25).**
+Each is one case of the same switch (`ovr_0450a9`, file offset `0x04508C` +
+the code offset): a `Random(n)`, a Real48 share, and a truncated write back.
+
+| Row | Code | What survives | Loss |
+| --- | --- | --- | --- |
+| residential zones | `+0x863` | `trunc(people × (0.6 + Random(40)/100))` | 1-40 % |
+| military bases | `+0x8e6` | `trunc(n × (Random(20)+80)/100)` for each of the four counts, one roll each | 1-20 % each |
+| airbases | `+0xacd` | `trunc(jets × (Random(40)+50)/100)` | 11-50 % |
+| regions | `+0xb4c` | loses `trunc((Random(5)+5)/100 × total_regions)` | 5-9 % |
+| food supply | `+0xbb2` | `trunc(Random(30) × (food/100))` | 71-100 % |
+
+The regions row passes its count to the resident helper at `056d:11f1`, the same
+proportional remover the nuclear strike's region-to-waste routine (`056d:18f0`)
+calls first, but the sabre calls it directly and adds nothing back to Waste: the
+land is destroyed, not ruined. Waste is one of the nine types the remover draws
+on. IB applies it through `RegionMix.remove`, whose split among the types is
+IB's own — the helper rounds each type's share (`Round(type × n / total)`) and
+fills any shortfall one region at a time from `Random(9)`-chosen types, so its
+total can overshoot `n` by a few, where IB floors each share and fills from the
+largest type. That difference belongs to every caller of the remover and is not
+the sabre's alone.
+
+The food row has no base: it leaves at most 29 % of the supply, and one hit in
+thirty clears it entirely. It is the harshest row by far; IB's 5-30 % took a
+fraction of that before 2026-09-25.
+
+IB applies all six rows as integer percent (`Sabre*Keep*`,
+`SabreRegionLoss*`). That reproduces the Real48 result exactly for the people,
+military base and region rows, checked at every count to 5,000 and sampled to
+two billion; the agents, airbase and food rows differ by one unit on a few exact
+multiples, where the Real48 share sits just under its decimal value.
 
 Backfire is a continuous probability scaled by the target's troopers
-(`d.Troopers / SabreBackfireScale`), IB's own. That and the unapplied rows are
-playtest knobs; the table above is the fidelity contract.
+(`d.Troopers / SabreBackfireScale`), IB's own and a playtest knob; the tables
+above are the fidelity contract.
 
 **Sabre Handling has four modes, and only one of them prompts.** BINARY-VERIFIED:
 the setting is one byte at `cfg+0x3d9`, and the Configuration Editor's own labels

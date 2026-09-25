@@ -123,6 +123,103 @@ func TestSabreIntelligenceHitKillsAgents(t *testing.T) {
 	}
 }
 
+// sabreKeepBand hits one field of a fresh 1000 many times through row eff and
+// returns the lowest and highest count left, failing on any report that does not
+// name exactly what went.
+func sabreKeepBand(t *testing.T, eff SabreEffect, name string, field func(*Empire) *int) (lo, hi int) {
+	t.Helper()
+	w := testWorld()
+	d := w.AddHuman("victim", "Victim")
+	lo, hi = 1<<30, -1
+	for i := 0; i < 600; i++ {
+		*field(d) = 1000
+		got := w.sabreDamage(d, eff)
+		left := *field(d)
+		if want := fmt.Sprintf("%d %s", 1000-left, name); left < 1000 && !strings.Contains(got, want) {
+			t.Fatalf("report %q does not name %q", got, want)
+		}
+		lo, hi = min(lo, left), max(hi, left)
+	}
+	return lo, hi
+}
+
+// Each damage row keeps the original's share of what it hits. Golden bands from
+// 1000 of the thing, read from resolve_received_sabre_strike: people keep
+// 60-99%, each military count 80-99%, jets on the airbase row 50-89%, food
+// 0-29%. Enough rolls that both ends of every band are seen.
+func TestSabreDamageRowsKeepTheOriginalsShare(t *testing.T) {
+	for _, c := range []struct {
+		eff    SabreEffect
+		name   string
+		field  func(*Empire) *int
+		lo, hi int
+	}{
+		{SabreHitPeople, "People", func(e *Empire) *int { return &e.People }, 600, 990},
+		{SabreHitMilitaryBases, "Troopers", func(e *Empire) *int { return &e.Troopers }, 800, 990},
+		{SabreHitMilitaryBases, "Jets", func(e *Empire) *int { return &e.Jets }, 800, 990},
+		{SabreHitMilitaryBases, "Turrets", func(e *Empire) *int { return &e.Turrets }, 800, 990},
+		{SabreHitMilitaryBases, "Tanks", func(e *Empire) *int { return &e.Tanks }, 800, 990},
+		{SabreHitAirbases, "Jets", func(e *Empire) *int { return &e.Jets }, 500, 890},
+		{SabreHitFood, "Food", func(e *Empire) *int { return &e.Food }, 0, 290},
+	} {
+		if lo, hi := sabreKeepBand(t, c.eff, c.name, c.field); lo != c.lo || hi != c.hi {
+			t.Errorf("effect %d on %s kept %d..%d of 1000, want exactly %d..%d", c.eff, c.name, lo, hi, c.lo, c.hi)
+		}
+	}
+}
+
+// The military bases row rolls once per count, not once for all four, and the
+// airbase row touches jets and nothing else.
+func TestSabreBaseRowsTouchTheirOwnCounts(t *testing.T) {
+	w := testWorld()
+	d := w.AddHuman("victim", "Victim")
+	differed := false
+	for i := 0; i < 50; i++ {
+		d.Troopers, d.Jets, d.Turrets, d.Tanks = 1000, 1000, 1000, 1000
+		w.sabreDamage(d, SabreHitMilitaryBases)
+		if d.Troopers != d.Jets || d.Jets != d.Turrets || d.Turrets != d.Tanks {
+			differed = true
+		}
+	}
+	if !differed {
+		t.Error("the four military counts always lost the same share: one roll, not four")
+	}
+	d.Troopers, d.Jets, d.Turrets, d.Tanks, d.Carriers = 1000, 1000, 1000, 1000, 1000
+	w.sabreDamage(d, SabreHitAirbases)
+	if d.Troopers != 1000 || d.Turrets != 1000 || d.Tanks != 1000 || d.Carriers != 1000 || d.Jets == 1000 {
+		t.Errorf("airbase hit left troopers %d, jets %d, turrets %d, tanks %d, carriers %d",
+			d.Troopers, d.Jets, d.Turrets, d.Tanks, d.Carriers)
+	}
+}
+
+// The regions row destroys 5-9% of the realm's regions: trunc((Random(5)+5)/100
+// x total). The land is gone, not turned to waste — the original calls the
+// region-removal helper directly, not the nuclear strike's to-waste wrapper.
+func TestSabreRegionHitDestroysLand(t *testing.T) {
+	w := testWorld()
+	d := w.AddHuman("victim", "Victim")
+	lo, hi := 1<<30, -1
+	for i := 0; i < 300; i++ {
+		d.Regions = defaultRegionMix(1000)
+		d.syncLand()
+		got := w.sabreDamage(d, SabreHitRegions)
+		lost := 1000 - d.Land
+		if d.Regions.Waste != 0 {
+			t.Fatalf("a region hit made %d waste", d.Regions.Waste)
+		}
+		if d.Land != d.Regions.Total() {
+			t.Fatalf("Land %d out of step with the mix %d", d.Land, d.Regions.Total())
+		}
+		if want := fmt.Sprintf("%d Regions", lost); got != want {
+			t.Fatalf("report %q, want %q", got, want)
+		}
+		lo, hi = min(lo, lost), max(hi, lost)
+	}
+	if lo != 50 || hi != 90 {
+		t.Errorf("lost %d..%d of 1000 regions, want exactly 50..90", lo, hi)
+	}
+}
+
 // A backfiring S3-Sabre develops land for the realm it was AIMED at, and the
 // share is the original's: 10-19% of that realm's regions, handed over untyped
 // (#266). Golden literals rather than the constants, because these two are

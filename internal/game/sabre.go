@@ -52,49 +52,44 @@ func (w *World) SabreAim(dial int) SabreEffect {
 
 // sabreDamage applies a landed S3-Sabre hit to e and returns a human-readable
 // list of what was destroyed (empty if the roll removed nothing). The effect
-// decides WHAT is hit — the original's own mapping, read from the fields each
-// branch of its effect switch writes back. How much is binary-verified for the
-// Intelligence Headquarters row (SabreIntelKeep*); the other rows still use
-// IB's own 5-30%.
+// decides WHAT is hit and the row's own formula how much — both the original's,
+// read from its effect switch (the Sabre*Keep* and SabreRegionLoss* constants
+// carry the addresses).
 //
 // The field each branch touches, own-record: covert agents at +0x26f for the
 // Intelligence Headquarters (it never touches the HeadQuarters at +0x26b),
 // population at +0x62, food at +0x6e, jets alone at +0x7e for airbases, and all
-// four of troopers, jets, turrets and tanks for military bases. Regions go
-// through the RegionMix, whose Total must always equal e.Land.
+// four of troopers, jets, turrets and tanks for military bases, each with its
+// own roll. Regions go through the RegionMix, whose Total must always equal
+// e.Land; they are destroyed, not turned to waste.
 func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
-	pct := func() int { return SabreBaseDamagePct + w.rng.Intn(SabreDamageSpread) }
 	var parts []string
-	take := func(name string, n *int) {
-		lost := pctOf(*n, pct())
-		if lost <= 0 {
-			return
+	// keep leaves *n at base+Random(spread) percent of itself, truncated, and
+	// records what went.
+	keep := func(name string, n *int, base, spread int) {
+		left := int(int64(*n) * int64(base+w.rng.Intn(spread)) / 100)
+		if lost := *n - left; lost > 0 {
+			*n = left
+			parts = append(parts, fmt.Sprintf("%d %s", lost, name))
 		}
-		*n -= lost
-		parts = append(parts, fmt.Sprintf("%d %s", lost, name))
 	}
 	switch eff {
 	case SabreHitIntelligence:
-		keep := e.Agents * (SabreIntelKeepBasePct + w.rng.Intn(SabreIntelKeepSpread)) / 100
-		if lost := e.Agents - keep; lost > 0 {
-			e.Agents = keep
-			parts = append(parts, fmt.Sprintf("%d Agents", lost))
-		}
+		keep("Agents", &e.Agents, SabreIntelKeepBasePct, SabreIntelKeepSpread)
 	case SabreHitPeople:
-		take("People", &e.People)
+		keep("People", &e.People, SabrePeopleKeepBasePct, SabrePeopleKeepSpread)
 	case SabreHitMilitaryBases:
-		take(Trooper.Plural, Trooper.Count(e))
-		take(Jet.Plural, Jet.Count(e))
-		take(Turret.Plural, Turret.Count(e))
-		take(Tank.Plural, Tank.Count(e))
+		for _, g := range []*Good{Trooper, Jet, Turret, Tank} {
+			keep(g.Plural, g.Count(e), SabreBasesKeepBasePct, SabreBasesKeepSpread)
+		}
 	case SabreHitAirbases:
-		take(Jet.Plural, Jet.Count(e))
+		keep(Jet.Plural, Jet.Count(e), SabreAirbaseKeepBasePct, SabreAirbaseKeepSpread)
 	case SabreHitFood:
-		take("Food", &e.Food)
+		keep("Food", &e.Food, 0, SabreFoodKeepSpread)
 	case SabreHitRegions:
-		lost := e.Land * pct() / 100
+		lost := int(int64(e.Land) * int64(SabreRegionLossBasePct+w.rng.Intn(SabreRegionLossSpread)) / 100)
 		if lost > 0 {
-			e.Regions.remove(lost)
+			lost = e.Regions.remove(lost).Total()
 			e.syncLand()
 			parts = append(parts, fmt.Sprintf("%d Regions", lost))
 		}

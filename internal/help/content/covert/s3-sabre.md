@@ -17,8 +17,13 @@ fire, you set a dial from 0 to 10, and the dial aims it:
 | 2, 3 | residential zones, killing people |
 | 4 | military bases — troops, jets, turrets and tanks together |
 | 5, 6 | airbases, and nothing but jets |
-| 7, 8 | regions, burning them to waste |
+| 7, 8 | regions, destroying them outright |
 | 9, 10 | the food supply |
+
+A hit kills up to 30% of the agents, or up to 40% of the people. On military
+bases it destroys up to 20% of each of the four forces, and on airbases 11% to
+50% of the jets. It destroys 5% to 9% of the regions. The food supply suffers
+most: a hit destroys 71% to 100% of it.
 
 The aim wanders by one setting either way in flight, and about one launch in ten
 ignores the dial altogether and hits whatever it likes. So a setting is a

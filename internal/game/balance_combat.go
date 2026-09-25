@@ -327,26 +327,59 @@ const (
 
 // S3-Sabre tuning. What the dial selects, and the two rolls that blur it, are
 // binary-verified and live in balance_costs.go beside the mapper's table, as is
-// whether a launch arrives at all (MissileMisfireOdds and SDI). SabreBase/Spread
-// and the backfire scale are IB's own playtest knobs. The original's per-row
-// damage figures are in its switch too; only the Intelligence Headquarters row
-// is applied so far (see docs/mechanics-reference.md for the rest).
+// whether a launch arrives at all (MissileMisfireOdds and SDI). What each row
+// destroys is binary-verified below; the backfire scale is IB's own playtest
+// knob.
+//
+// Every damage row is one case of the arriving resolver's effect switch
+// (resolve_received_sabre_strike, BRE.OVR unit ovr_0450a9, code offsets below;
+// file offset = 0x04508C + offset). Each rolls Random(n), builds a Real48 share
+// and truncates share x count back into the record. IB applies them as integer
+// percent, which reproduces the Real48 result exactly for the people, military
+// base and region rows at every count; the rows that differ are noted.
 const (
-	// The Intelligence Headquarters row is the exception, and binary: it keeps
-	// trunc(agents x (0.70 + Random(30)/100)) of the target's covert agents
-	// (resolve_received_sabre_strike +0x7e3..+0x85c, BRE.OVR 0x04586F-0x0458FE,
-	// record +0x26f), so a hit costs 1-30%. The integer form here differs from
-	// the original's Real48 by one agent on a few exact multiples, where its
-	// 0.7 sits just under 0.7.
+	// Intelligence Headquarters (+0x7e3..+0x85c, record +0x26f): agents keep
+	// trunc(agents x (0.70 + Random(30)/100)), a loss of 1-30%. The integer
+	// form differs from the Real48 by one agent on a few exact multiples, where
+	// the original's 0.7 sits just under 0.7.
 	SabreIntelKeepBasePct = 70 // binary: Real48 0.7
 	SabreIntelKeepSpread  = 30 // binary: Random(30)/100
 
-	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
-	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
+	// Residential zones (+0x863..+0x8dc, record +0x62): people keep
+	// trunc(people x (0.6 + Random(40)/100)), a loss of 1-40%.
+	SabrePeopleKeepBasePct = 60 // binary: Real48 0.6
+	SabrePeopleKeepSpread  = 40 // binary: Random(40)/100
+
+	// Military bases (+0x8e6..+0xac6): troopers, jets, turrets and tanks
+	// (+0x76, +0x7e, +0x82, +0x86) each keep trunc(n x (Random(20) + 80) / 100),
+	// with a roll of their own, so each loses 1-20%.
+	SabreBasesKeepBasePct = 80 // binary: Real48 80
+	SabreBasesKeepSpread  = 20 // binary: Random(20)
+
+	// Airbases (+0xacd..+0xb45, record +0x7e): jets alone keep
+	// trunc(jets x (Random(40) + 50) / 100), a loss of 11-50%. The integer form
+	// differs from the Real48 by one jet on a few exact multiples.
+	SabreAirbaseKeepBasePct = 50 // binary: Real48 50
+	SabreAirbaseKeepSpread  = 40 // binary: Random(40)
+
+	// Regions (+0xb4c..+0xbab): trunc((Random(5) + 5) / 100 x total regions) are
+	// destroyed through the resident helper at 056d:11f1, which spreads the loss
+	// over all nine region types, waste included. It is the same helper the
+	// nuclear strike's region-to-waste routine (056d:18f0) calls, but the sabre
+	// calls it directly and adds nothing back as waste: the land is gone.
+	SabreRegionLossBasePct = 5 // binary: Random(5) + 5
+	SabreRegionLossSpread  = 5 // binary: Random(5)
+
+	// Food (+0xbb2..+0xc1d, record +0x6e): the supply keeps
+	// trunc(Random(30) x food / 100), so a hit destroys 71-100% of it, all of it
+	// one time in thirty. The integer form differs from the Real48 by one unit
+	// of food on a few exact multiples.
+	SabreFoodKeepSpread = 30 // binary: Random(30), with no base
+
 	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)
 
 	// What a backfire develops for the TARGET, and these two ARE binary-verified
-	// despite sitting beside the knobs above: the original computes
+	// despite sitting beside the knob above: the original computes
 	// trunc((Random(10) + 10) / 100 x the target's total regions) and adds it to
 	// the untyped-region slot (BRE.OVR, resolve_received_sabre_strike effect 7 at
 	// +0x0C23, the only branch calling the region helper at 0xc03:0xf10). Changing
