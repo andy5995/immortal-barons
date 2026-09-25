@@ -25,14 +25,23 @@ keyword as a Pascal `ShortString` loaded immediately before the call:
 
 So the complete set is the set of call sites. The catalog
 (`docs/dev/bre-v0988-disassembly.json`) lists every caller of the three, which
-is what makes the sweep exhaustive rather than a grep: `load_display_name_settings`
-(39 sites), `exe_025d_proc_0080` (8), `parse_doorfile` (4), `configure_local_game`
-(4), `load_pirate_settings` (2), `initialize_fossil_port` (2),
-`exe_09bd_proc_0808` (2), `initialize_game_runtime` (1), `ovr_00ad05_proc_0004`
-(1), `exe_0a42_proc_002d` (1) and `select_bios_console_io` (1, reaching the
-boolean reader directly rather than through the resident stub). Each routine's
-keywords then come from `find-string --function <name> ""`. No segment base is
-guessed anywhere in this.
+is what makes the sweep exhaustive rather than a grep:
+
+- `load_display_name_settings` (39 sites)
+- `exe_025d_proc_0080` (8)
+- `parse_doorfile` (4)
+- `configure_local_game` (4)
+- `load_pirate_settings` (2)
+- `initialize_fossil_port` (2)
+- `exe_09bd_proc_0808` (2)
+- `initialize_game_runtime` (1)
+- `ovr_00ad05_proc_0004` (1)
+- `exe_0a42_proc_002d` (1)
+- `select_bios_console_io` (1, reaching the boolean reader directly rather than
+  through the resident stub)
+
+Each routine's keywords then come from `find-string --function <name> ""`. No
+segment base is guessed anywhere in this.
 
 Two call sites resist it: the number and the boolean read in
 `exe_09bd_proc_0808` reference no identifier-shaped string in their own unit, so
@@ -181,11 +190,15 @@ shown.
 `PlayerLand`, `PlayerWorthLand`, `ANSIExtension`, `ASCIIExtension`,
 `TopScoresAmt`*.
 
-**Elsewhere:** `GAMENAME`, `VGA`, `STATUS.BACKGROUND`, `STATUS.TITLE`,
-`STATUS.TOPINFO`, `STATUS.BOTTOMINFO`, `STATUS.LINE`, `STATUS.EXTRA`
-(`exe_025d_proc_0080`); `MULTITASKER` (`exe_0a42_proc_002d`); `FOSSIL`, `Com`
-(`initialize_fossil_port`); `LOCAL`, `LOCKEDBAUD` (`configure_local_game`);
-`LOCKBAUDRATE`* (`parse_doorfile`); `PIRATENAME`*, `PIRATECOLOR`*
-(`load_pirate_settings`); `BIOS` (`select_bios_console_io`).
+**Elsewhere:**
+
+- `GAMENAME`, `VGA`, `STATUS.BACKGROUND`, `STATUS.TITLE`, `STATUS.TOPINFO`,
+  `STATUS.BOTTOMINFO`, `STATUS.LINE`, `STATUS.EXTRA` (`exe_025d_proc_0080`)
+- `MULTITASKER` (`exe_0a42_proc_002d`)
+- `FOSSIL`, `Com` (`initialize_fossil_port`)
+- `LOCAL`, `LOCKEDBAUD` (`configure_local_game`)
+- `LOCKBAUDRATE`* (`parse_doorfile`)
+- `PIRATENAME`*, `PIRATECOLOR`* (`load_pirate_settings`)
+- `BIOS` (`select_bios_console_io`)
 
 Twenty-one marked, 56 in all, plus the two unresolved sites named above.

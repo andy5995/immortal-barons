@@ -274,14 +274,21 @@ target discovery reaches a fixed point with 13 closed calculated-transfer
 groups, 23 indirect call sites, 29 group-to-target memberships, zero unresolved
 transfers, and zero decode-boundary conflicts.
 
-`check-catalog` independently verifies that named block spans exactly cover all
-reachable bytes, named chunks exactly cover all remaining bytes, together they
-cover each overlay code area and the complete resident load module, every
-procedure has a same-name entry block, names are unique, and the recorded
-summary counts agree. It also verifies that every durable ID matches its file
-address and that every indexed string use resolves to known block and procedure
-IDs. Known call edges must appear identically in the caller and callee directions,
+`check-catalog` independently verifies that:
+
+- named block spans exactly cover all reachable bytes;
+- named chunks exactly cover all remaining bytes;
+- together they cover each overlay code area and the complete resident load
+  module;
+- every procedure has a same-name entry block;
+- names are unique;
+- the recorded summary counts agree;
+- every durable ID matches its file address;
+- every indexed string use resolves to known block and procedure IDs.
+
+Known call edges must appear identically in the caller and callee directions,
 and call-site IDs are recomputed from their containing binary addresses.
+
 `list --kind procedure|block|data|fixup|dispatch|all` emits TSV, Markdown, or JSON,
 and `--status identified|contextual|structural|unclassified` selects a naming
 state. `lookup NAME_OR_ID` returns the matching records, evidence, call graph,
@@ -307,18 +314,25 @@ renders bounded instruction windows at the recorded site IDs; `--context` and
 `calculated_transfers` records why every reachable indirect call is finite.
 Each durable dispatch record contains its exact instruction `site_ids`, source
 model, complete procedure target list, and concise assignment-tracing evidence.
-The models found in this linked release are far procedure parameters, fixed
-global procedure slots, a heap-linked callback list with a sole constructor,
-Turbo Pascal `TextRec` method fields, and a near scanner callback passed in AX.
+The models found in this linked release are:
+
+- far procedure parameters
+- fixed global procedure slots
+- a heap-linked callback list with a sole constructor
+- Turbo Pascal `TextRec` method fields
+- a near scanner callback passed in AX
+
 There are no reachable indirect jumps and no open-ended indirect calls.
 
 Target discovery is recursive. The original 22 indirect sites supplied roots
 for callback-only code; decoding those roots exposed one further indirect call
 inside the text driver. Resolving that site exposed no more, establishing the
-23-site fixed point. `check-catalog` requires every calculated target to be a
-procedure root, every dispatch to appear in the bidirectional call graph, every
-site to belong to exactly one group, and both unresolved-transfer lists to be
-empty.
+23-site fixed point. `check-catalog` requires:
+
+- every calculated target to be a procedure root;
+- every dispatch to appear in the bidirectional call graph;
+- every site to belong to exactly one group;
+- both unresolved-transfer lists to be empty.
 
 `find-string SUBSTRING` is the bridge from private binary text to the static
 map. It loads the committed table first, verifies the exact BRE 0.988 binaries,
@@ -331,11 +345,14 @@ matching private text and instruction sites. Repeat `--function NAME_OR_ID` to
 restrict uses to one or more exact procedures after resolving their durable
 IDs. Detailed output contains original program text and must not be committed.
 
-`disasm` accepts three boundary-safe selectors. `--procedure` prints the exact
-catalogd body ranges for an overlay or resident procedure. `--unit` prints an
-overlay unit and optionally accepts a half-open, unit-relative `--start/--end`
-range. `--around` accepts a canonical OVR file offset, resident logical
-`SEGMENT:OFFSET`, durable site ID, or exact procedure selector.
+`disasm` accepts three boundary-safe selectors:
+
+- `--procedure` prints the exact catalogd body ranges for an overlay or
+  resident procedure.
+- `--unit` prints an overlay unit and optionally accepts a half-open,
+  unit-relative `--start/--end` range.
+- `--around` accepts a canonical OVR file offset, resident logical
+  `SEGMENT:OFFSET`, durable site ID, or exact procedure selector.
 
 An `--around` address is never assumed to be an instruction boundary. The tool
 finds the containing catalogd code block, supplies all catalogd roots to
@@ -472,11 +489,14 @@ Fields read while settling this session's questions:
   new realm does not inherit the offer.
 
 Four routines in the trade unit were named from this pass:
-`calculate_trade_offer_cost` (the weighted sum of the nine goods that gives the
-per-day figure), `empire_trade_good_pointer` (slot + good index -> the count to
-adjust, used by both the escrow loop and every accept-branch transfer),
-`store_trade_offer_record`, and `pack_trade_offer_packets` (the daily-maintenance
-step that exports deals to other boards).
+
+- `calculate_trade_offer_cost` (the weighted sum of the nine goods that gives
+  the per-day figure)
+- `empire_trade_good_pointer` (slot + good index -> the count to adjust, used
+  by both the escrow loop and every accept-branch transfer)
+- `store_trade_offer_record`
+- `pack_trade_offer_packets` (the daily-maintenance step that exports deals to
+  other boards)
 
 ### Two catalog names to read with care
 

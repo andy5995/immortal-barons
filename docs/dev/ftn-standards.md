@@ -142,11 +142,23 @@ Revision 003 defines the filesystem queue commonly called BSO or FLO:
 <http://ftsc.org/docs/fts-5005.003>.
 
 A flow file is `<net><node>.?lo`, with one pathname per line. Its leading
-directive controls the attachment after a successful send: `^` deletes it,
-`#` truncates it, `~` skips the line, and no prefix leaves it in place. The five
-flavors are Immediate (`.ilo`), Continuous (`.clo`, commonly called crash),
-Direct (`.dlo`), Normal (`.flo`), and Hold (`.hlo`). A point uses
-`<net><node>.pnt/<point>.?lo`, with hexadecimal fixed-width components.
+directive controls the attachment after a successful send:
+
+- `^` deletes it
+- `#` truncates it
+- `~` skips the line
+- no prefix leaves it in place
+
+The five flavors are:
+
+- Immediate (`.ilo`)
+- Continuous (`.clo`, commonly called crash)
+- Direct (`.dlo`)
+- Normal (`.flo`)
+- Hold (`.hlo`)
+
+A point uses `<net><node>.pnt/<point>.?lo`, with hexadecimal fixed-width
+components.
 
 Section 5.1 requires a cooperating process to create the destination's `.bsy`
 binary semaphore before touching that node's queue and remove it when finished.

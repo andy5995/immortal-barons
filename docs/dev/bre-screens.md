@@ -564,12 +564,16 @@ holding that column blank so the names lined up. On the common screen — nothin
 raided you — the whole list read as indented for no reason, which is how it was
 reported (#197).
 
-**IB status (2026-08-09):** matched, with three recorded divergences. IB prints
-the gold figure in full where BRE abbreviates it (`78k Gold`), so a full tally
-can pass 80 columns and is wrapped at display; IB adds an `Agents` field, which
-BRE's raid has no counterpart for; and IB omits the `You lost` line on a win,
-because a winning raid costs the attacker nothing here — BRE charges one, and
-setting a rate needs evidence rather than a guess. The headline is one of five
+**IB status (2026-08-09):** matched, with three recorded divergences:
+
+- IB prints the gold figure in full where BRE abbreviates it (`78k Gold`), so a
+  full tally can pass 80 columns and is wrapped at display.
+- IB adds an `Agents` field, which BRE's raid has no counterpart for.
+- IB omits the `You lost` line on a win, because a winning raid costs the
+  attacker nothing here — BRE charges one, and setting a rate needs evidence
+  rather than a guess.
+
+The headline is one of five
 picked at random (`raidWinLines` / `raidFailLines` in `internal/game/pirates.go`),
 BRE's own wording first and four of IB's after it — a deliberate divergence, so
 a player raiding the same faction repeatedly is not read the same sentence.
@@ -793,12 +797,25 @@ the host clock as Synchronet's own `dropfiles.c` takes it.
 **Box widths vary per screen** — BRE sizes each box to its content rather than
 to one house width. Re-measured 2026-08-16 across every capture on disk
 (`cap/`, plus the two older color captures), counting the title line and the
-closing rule of each box: 14/16 (Specialization), 17 (Attack Pirates), 16
-(Advisors), 20 (Trading), 23 (Attack Menu, Terrorist Ops), 26 (Coordinator
-Ops), 28 (Diplomacy), 36 (Preferences), 37 (Special Operations), 38 (InterBBS
-Scores), 44 (Spending, Sell), 46 (Industrial Production), 52 (opening), 60
-(Crazy Gold Bank), 58/62/64/68 (InterPlanetary Ops), 64 (Food Unlimited), 69/75
-(System Menu).
+closing rule of each box:
+
+- 14/16 (Specialization)
+- 17 (Attack Pirates)
+- 16 (Advisors)
+- 20 (Trading)
+- 23 (Attack Menu, Terrorist Ops)
+- 26 (Coordinator Ops)
+- 28 (Diplomacy)
+- 36 (Preferences)
+- 37 (Special Operations)
+- 38 (InterBBS Scores)
+- 44 (Spending, Sell)
+- 46 (Industrial Production)
+- 52 (opening)
+- 60 (Crazy Gold Bank)
+- 58/62/64/68 (InterPlanetary Ops)
+- 64 (Food Unlimited)
+- 69/75 (System Menu)
 
 **The closing rule is exactly the box width.** True of 18 of the 19 box titles
 found across the five captures; Specialization is the one exception, and only
@@ -865,11 +882,21 @@ Captured live in `cap/treaty-order-20260817.cap`. The header carries a `93`
 bright-yellow `■` marker and `37` white text; each task is its own line
 indented 5 columns, printed as it is carried out and scrolled up a line at a
 time; the closing line is `97` bright-white. The tasks BRE names in order:
-checking for dead empires, the news bulletin, covert operations, investment and
-loan information, packing trade deals / covert operations / treaties, awarding
-the Planetary Master, depositing trading market money, duplicate scanning
-files, inbound and outbound doomsday attacks, old recons, transfer times,
-duplicate users, SpyGuys, packing data packets.
+
+1. checking for dead empires
+2. the news bulletin
+3. covert operations
+4. investment and loan information
+5. packing trade deals / covert operations / treaties
+6. awarding the Planetary Master
+7. depositing trading market money
+8. duplicate scanning files
+9. inbound and outbound doomsday attacks
+10. old recons
+11. transfer times
+12. duplicate users
+13. SpyGuys
+14. packing data packets
 
 ```
 ■  Running Daily Maintenance
@@ -1628,11 +1655,16 @@ three halves of one activity, and IB had them on two unrelated-looking items —
 all three; `Send Trade Deal` keeps its turn gate inside it (#162).
 
 **Special Operations** (8) is numbered **1-8** with no Help item, and prices its
-first four entries: Bomb Food Market 10,000,000; Bomb Trading Market 25,000,000;
-Bomb Trade Routes 25,000,000; Undermine Investments 75,000,000. Nuclear Assault,
-Chemical Bombing, S3-Sabre and Send SpyGuy show no price on the menu — Send
-SpyGuy quotes its own ("A SpyGuy will cost 10,810,500 gold per day") after the
-target is named.
+first four entries:
+
+- Bomb Food Market 10,000,000
+- Bomb Trading Market 25,000,000
+- Bomb Trade Routes 25,000,000
+- Undermine Investments 75,000,000
+
+Nuclear Assault, Chemical Bombing, S3-Sabre and Send SpyGuy show no price on
+the menu — Send SpyGuy quotes its own ("A SpyGuy will cost 10,810,500 gold per
+day") after the target is named.
 
 **Diplomacy List** (D): the `Planetary Treaties` chart — see the section at the
 end of this file for its measurements, colors and the screen that edits it.
@@ -1972,9 +2004,13 @@ Gooie Kablooies: Enabled     Bombing Ops: Enabled     Missile Ops: Enabled
 
 ## Configuration Editor (`BRE RESET`, captured live 2026-08-11)
 
-Reached by `BRE RESET` from the DOS prompt: `Are you sure you wish to reset the
-Game? (Y/n)` → the editor → `[ESC]` to save → `Would you like this to be a
-league-wide reset? (Y/n)` → `Your BRE game has been reset...Thank you!`
+Reached by `BRE RESET` from the DOS prompt:
+
+1. `Are you sure you wish to reset the Game? (Y/n)`
+2. the editor
+3. `[ESC]` to save
+4. `Would you like this to be a league-wide reset? (Y/n)`
+5. `Your BRE game has been reset...Thank you!`
 
 **That league-wide prompt only appears on a board BRE recognizes as a league
 member** (its `bbs.cfg` FTN address matching an entry in `BRNODES.DAT`). A
@@ -2373,10 +2409,19 @@ S3-Sabre keep the original's names (#218); the pirate factions carry IB's own.
 ## Full Defense Alliance — Diplomacy, Alliance Strength, battle (captured live 2026-07-27)
 
 ### Diplomacy Menu (opens every turn before income, and via System Menu -> D)
-Items: (1) Tariff Trade Agreement, (2) Protective Trade, (3) Free Trade Agreement,
-(4) Terrorist Prevention, (5) Intelligence Alliance, (6) Technology Agreement,
-(7) Full Defense Alliance, (8) Declaration Of War, (9) View Treaties, (?) Help,
-(0) Quit.
+Items:
+
+- (1) Tariff Trade Agreement
+- (2) Protective Trade
+- (3) Free Trade Agreement
+- (4) Terrorist Prevention
+- (5) Intelligence Alliance
+- (6) Technology Agreement
+- (7) Full Defense Alliance
+- (8) Declaration Of War
+- (9) View Treaties
+- (?) Help
+- (0) Quit
 
 ### Proposing (7) Full Defense Alliance
 Shows the treaty blurb then `(A-Y,Z=All,?=List) Send to:` -> pick target letter
@@ -2504,11 +2549,15 @@ blue. Both are recorded here so the capture stays accurate. Andy has parked
 them — leave them alone unless he brings them up.
 
 ### Regular Attack flow + battle report (attacker's view)
-Attack Menu -> (R) -> `Choose a Target [A-Y,?=List RETURN to Abort]` -> letter ->
-`You have N Troopers, N usable Jets, N Tanks, and N Bombers` ->
-`Send how many Troopers? (def; max)` / `How many Jets?` / `How many Tanks?` /
-`How many Bombers?` (`>`=max; all-zero aborts). A losing attack against an allied
-defender:
+
+1. Attack Menu -> (R)
+2. `Choose a Target [A-Y,?=List RETURN to Abort]`
+3. letter
+4. `You have N Troopers, N usable Jets, N Tanks, and N Bombers`
+5. `Send how many Troopers? (def; max)` / `How many Jets?` / `How many Tanks?` /
+   `How many Bombers?` (`>`=max; all-zero aborts)
+
+A losing attack against an allied defender:
 ```
 The empire's allies send 29 Troopers and 3271 Tanks.
 And the battle begins.......
@@ -2630,11 +2679,15 @@ turns is not shown the same box ten times. Read Messages and the next Play Game
 never skip it. (This note used to say BRE re-shows an ignored message at every
 turn; the disassembly above says it does not.)
 
-What counts as passing a message over, all deliberate: `[I]gnore`, an
-unrecognized key at the prompt, and a `[R]eply` abandoned in the editor — that
-last one because opening a reply and backing out is still a decision not to deal
-with the message now. `[Q]uit` marks nothing: the messages behind it were never
-shown, so the next turn's stop still has them.
+What counts as passing a message over, all deliberate:
+
+- `[I]gnore`
+- an unrecognized key at the prompt
+- a `[R]eply` abandoned in the editor, because opening a reply and backing out
+  is still a decision not to deal with the message now
+
+`[Q]uit` marks nothing: the messages behind it were never shown, so the next
+turn's stop still has them.
 
 **Deliberate divergence: a sent reply asks
 `[D] Delete or [K] Keep original message?`** about the message just answered,
@@ -2705,12 +2758,15 @@ RETURN.
 
 The interplanetary twin of the picker above, captured live in
 `cap/eots-ibbs-01.cap` (a four-planet league, 2026-08) and read out of
-`send_interbbs_message` (`BRE.OVR` 0x1f335). The flow is: the IP Messages box
-(Single Planet / Select Planets / All Planets / Allied Planets / Planet
-Coordinator / Quit), the shared `Enter Planet Name or Number (? for list):`
-prompt, the "Our current relations with" line, and THEN
-`(A-Y,Z=All,?=List) Send to:` over the barons on the chosen planet. The editor
-comes after that, not straight after the planet.
+`send_interbbs_message` (`BRE.OVR` 0x1f335). The flow is:
+
+1. the IP Messages box (Single Planet / Select Planets / All Planets / Allied
+   Planets / Planet Coordinator / Quit)
+2. the shared `Enter Planet Name or Number (? for list):` prompt
+3. the "Our current relations with" line
+4. and THEN `(A-Y,Z=All,?=List) Send to:` over the barons on the chosen planet
+
+The editor comes after that, not straight after the planet.
 
 The roster `?` draws is headed `-*Players at <planet>*-` in bright white on
 blue-rules, over the same `Id   Empire Name   Territory   Score   Networth`
@@ -3529,10 +3585,12 @@ shape with different figures — `Maximum Terrorist Ops Per Day: 15`,
 **The panel does not report Sabre Handling**, which is why a capture cannot say
 what a board's S3-Sabre setting is; that lives only in the Configuration Editor.
 
-Note the three label widths in use: 21 for the paired rows, 36 for the
-"Maximum ... Per Day" block, and a three-up line for the switches whose labels
-carry their own leading spaces (`'Gooie Kablooies: '`, `'     Bombing Ops: '`,
-`'     Missile Ops: '`).
+Note the three label widths in use:
+
+- 21 for the paired rows
+- 36 for the "Maximum ... Per Day" block
+- a three-up line for the switches whose labels carry their own leading spaces
+  (`'Gooie Kablooies: '`, `'     Bombing Ops: '`, `'     Missile Ops: '`)
 
 **BRE names no league anywhere on this screen — neither a number nor a name.**
 The board count is the whole of it (`show_game_settings`, BRE.OVR 0x13c44:
@@ -3806,11 +3864,15 @@ still 2,000.
 
 **Nothing ever dumps waste automatically.** Every writer of `+0xb6` was
 enumerated across both binaries and all four addressing idioms (`add di,0xb6`,
-`[di+0xb6]` and their `es:`-prefixed forms): the ruin helper adds to it,
-`allocate_turn_budget` subtracts what was decontaminated, `confirm_end_game`
-clears it, and `process_end_of_turn` (`+0xd470`) zeroes it along with all eight
-other region counts — that last one guarded by **population**, not waste
-(`+0x62` falling below 1 wipes the realm's whole region block). So a nuked realm
-carries its waste, paying maintenance on it, until the owner either pays to
-decontaminate or drops the regions from the Sell menu (`run_drop_regions_menu`,
-whose only caller is `sell_empire_assets`).
+`[di+0xb6]` and their `es:`-prefixed forms):
+
+- the ruin helper adds to it
+- `allocate_turn_budget` subtracts what was decontaminated
+- `confirm_end_game` clears it
+- `process_end_of_turn` (`+0xd470`) zeroes it along with all eight other region
+  counts — guarded by **population**, not waste (`+0x62` falling below 1 wipes
+  the realm's whole region block)
+
+So a nuked realm carries its waste, paying maintenance on it, until the owner
+either pays to decontaminate or drops the regions from the Sell menu
+(`run_drop_regions_menu`, whose only caller is `sell_empire_assets`).

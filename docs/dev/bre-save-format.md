@@ -357,18 +357,28 @@ has exactly two callers — the sysop's Delete Empire in `manage_players`, and t
 daily-maintenance purge at `BRE.OVR 0x007ed2` — which is why a crushed or
 abdicated realm is still there for the rest of the game day and gone the next.
 The purge loops the 25 slots, skips any whose `+0x5d` is not > 0, and marks a
-slot for deletion when it has no regions (`total_regions` < 1), no population
-(`+0x62` < 1), has gone unplayed past DeletionDays, or was never played and the
-game has been running more than three days. The slot currently in play is exempt.
+slot for deletion when it:
 
-The routine itself clears the player's messages, trade offers and reports by
-`+0x5d`; calls `BRE.OVR 0x050d74`, which loops the slots and zeroes the relation
-at `+0x130` in BOTH directions (the deleted realm's row toward each rival and
-each rival's row toward it); and finishes with `056d:0d21`, which `FillChar`s the
-whole 1069-byte record to zero and seeds the new-realm defaults — `+0x5d` = -1,
-`+0x62` = 100 population, `+0x76` = 100 troopers, `+0x8e`/`+0x92` = 100 morale
-and support. The attack resolver never deletes anything: a realm crushed at
-`BRE.OVR 0xef90` just hands over its land and surviving units.
+- has no regions (`total_regions` < 1),
+- has no population (`+0x62` < 1),
+- has gone unplayed past DeletionDays, or
+- was never played and the game has been running more than three days.
+
+The slot currently in play is exempt.
+
+The routine itself:
+
+1. clears the player's messages, trade offers and reports by `+0x5d`;
+2. calls `BRE.OVR 0x050d74`, which loops the slots and zeroes the relation at
+   `+0x130` in BOTH directions (the deleted realm's row toward each rival and
+   each rival's row toward it);
+3. finishes with `056d:0d21`, which `FillChar`s the whole 1069-byte record to
+   zero and seeds the new-realm defaults — `+0x5d` = -1, `+0x62` = 100
+   population, `+0x76` = 100 troopers, `+0x8e`/`+0x92` = 100 morale and
+   support.
+
+The attack resolver never deletes anything: a realm crushed at `BRE.OVR 0xef90`
+just hands over its land and surviving units.
 
 `0x050d74`'s other caller is `confirm_end_game`, which wipes the whole relation
 table at the end of a season.

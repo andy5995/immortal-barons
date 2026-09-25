@@ -134,25 +134,34 @@ The version-1 manifest is:
 }
 ```
 
-Every ZIP member CRC must pass before any entry is published. Readers reject
-duplicate members, a packet/routing-entry count mismatch, unsafe paths,
-unsupported versions, more than 10,000 entries, and more than 256 MiB expanded
-data. Each manifest entry supplies transport state for the packet member at the
+Every ZIP member CRC must pass before any entry is published. Readers reject:
+
+- duplicate members
+- a packet/routing-entry count mismatch
+- unsafe paths
+- unsupported versions
+- more than 10,000 entries
+- more than 256 MiB expanded data
+
+Each manifest entry supplies transport state for the packet member at the
 same ZIP order position; it does not repeat the member name. A member is decoded as
 `game.Packet` to validate its shape, derive its canonical filename, and choose a
 route. Its raw bytes are copied unchanged when delivered or forwarded.
 
-`delivery` records only the distinction the receiver needs. An `attach` bundle
-waits for a matching validated `.msg`; a `direct` obox or BSO bundle is processed
-without one. It does not redundantly record which direct queue carried it.
-`route` is the actual node trace: its last node is the
-transmitting hop, and its length supplies the hop count. `covered` is present on
-an unaddressed broadcast and contains every node for which a branch has already
-been durably scheduled. A receiver fans out only to nodes in neither set. For a
-legacy raw packet, the unchanged inner packet's existing `Hops` value is added
-to the route length; it is not duplicated in the manifest. These fields are
-loop controls, not authentication; the game still verifies the inner packet
-against the league roster.
+- `delivery` records only the distinction the receiver needs. An `attach`
+  bundle waits for a matching validated `.msg`; a `direct` obox or BSO bundle is
+  processed without one. It does not redundantly record which direct queue
+  carried it.
+- `route` is the actual node trace: its last node is the transmitting hop, and
+  its length supplies the hop count.
+- `covered` is present on an unaddressed broadcast and contains every node for
+  which a branch has already been durably scheduled.
+
+A receiver fans out only to nodes in neither set. For a legacy raw packet, the
+unchanged inner packet's existing `Hops` value is added to the route length; it
+is not duplicated in the manifest. These fields are loop controls, not
+authentication; the game still verifies the inner packet against the league
+roster.
 
 Coverage prevents ordinary sibling copies from cross-sending, but it is not a
 distributed exactly-once protocol. Independently scheduled branches in a simple
@@ -710,9 +719,17 @@ The original has one channel for "put this line in that planet's news", and it
 is a packet type of its own. `append_news_record` (BRE.OVR 0x048a79) builds a
 258-byte record — our board number, the destination board number, and a
 255-byte line — looks up the `NEWS_DATA` type code and writes it out. Seven
-routines use it: `create_group_attack`, `fund_gooie_kablooie`,
-`launch_gooie_kablooie`, `dismantle_gooie_kablooie`, `estimate_attack_arrival`,
-`show_gooie_arrival_time` and `report_suspected_cheating`. So every SpyGuy
+routines use it:
+
+- `create_group_attack`
+- `fund_gooie_kablooie`
+- `launch_gooie_kablooie`
+- `dismantle_gooie_kablooie`
+- `estimate_attack_arrival`
+- `show_gooie_arrival_time`
+- `report_suspected_cheating`
+
+So every SpyGuy
 report, and the warning that a weapon is on its way, reaches the far planet as
 **planet news**, not as mail and not as a private notice.
 
@@ -769,17 +786,35 @@ compressed binary data packet named `<league>b<from><to>.<seq>` (BRE's own
 IB uses plain JSON `.brp` instead — an intentional clean-room simplification.
 The transport differs; the *contents* are what fidelity is judged on.
 
-**Packet contents (BRE's PLANETARY stages).** Local recon info; global recon
-requests; routing data; node list; group attacks; individual IP-attack info;
-Gooie Kablooie status; scores/news; coordinator config + reset. IB currently carries scores, group attacks, terror ops, results, and the
+**Packet contents (BRE's PLANETARY stages).**
+
+- local recon info
+- global recon requests
+- routing data
+- node list
+- group attacks
+- individual IP-attack info
+- Gooie Kablooie status
+- scores/news
+- coordinator config + reset
+
+IB currently carries scores, group attacks, terror ops, results, and the
 `LeagueConfig` ruleset broadcast; the recon exchange, individual interplanetary
 attacks, cross-board Gooie Kablooie status, node-list broadcast, and
 league-wide reset are the open gaps under #60.
 
 **Config field set.** BRE's coordinator config editor (the `LeagueConfig`
-analogue) marks league-wide fields with `*` = "InterBBS Setting Only": Attack /
-Terrorist Costs, Individual / Group / Terrorist Attacks per day, Bombings per
-day, Days for Lost Attacks, Gooie Kablooies, Bombing / Missile Operations, Local
-Attacks, Local Attack Scoring, Dupe Checking — alongside the non-`*` general
-settings (turns/day, protection, land, interest, tax, region caps, maintenance /
+analogue) marks league-wide fields with `*` = "InterBBS Setting Only":
+
+- Attack / Terrorist Costs
+- Individual / Group / Terrorist Attacks per day
+- Bombings per day
+- Days for Lost Attacks
+- Gooie Kablooies
+- Bombing / Missile Operations
+- Local Attacks
+- Local Attack Scoring
+- Dupe Checking
+
+These sit alongside the non-`*` general settings (turns/day, protection, land, interest, tax, region caps, maintenance /
 trade-deal / region costs, attack damage / rewards).

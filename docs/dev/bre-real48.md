@@ -20,14 +20,17 @@ that runtime:
 | standard functions | `sqrt`, `sin`, `cos`, `ln`, `exp`, `atan` methods | same names |
 | TP random outputs | `TurboPascalRandom` | `random-int`, `random-real` |
 
-The corresponding resident entry points are `RAdd` `0fd0:1768`, `RSub`
-`0fd0:176e`, `RSqr` `0fd0:1774`, `RMul` `0fd0:177a`, `RDiv` `0fd0:1780`,
-`RCmp` `0fd0:178a`, `RFloat` `0fd0:178e`, `RTrunc` `0fd0:1792`, and
-`RRound` `0fd0:179a`. The real-valued integral/fractional helpers begin at
-`0fd0:17dc` and `0fd0:182d`; the standard-function bodies are `RSqrt`
-`0fd0:1841`, the shared sine/cosine reduction and polynomial at
-`0fd0:18a0..1913`, `RLn` `0fd0:193e`, `RExp` `0fd0:19e7`, and `RArcTan`
-`0fd0:1a8a`. `RandInt` and `RandReal` are `0fd0:1c27` and `0fd0:1c44`.
+The corresponding resident entry points are:
+
+- `RAdd` `0fd0:1768`, `RSub` `0fd0:176e`, `RSqr` `0fd0:1774`, `RMul`
+  `0fd0:177a`, `RDiv` `0fd0:1780`, `RCmp` `0fd0:178a`, `RFloat` `0fd0:178e`,
+  `RTrunc` `0fd0:1792`, and `RRound` `0fd0:179a`.
+- The real-valued integral/fractional helpers begin at `0fd0:17dc` and
+  `0fd0:182d`.
+- The standard-function bodies are `RSqrt` `0fd0:1841`, the shared
+  sine/cosine reduction and polynomial at `0fd0:18a0..1913`, `RLn`
+  `0fd0:193e`, `RExp` `0fd0:19e7`, and `RArcTan` `0fd0:1a8a`.
+- `RandInt` and `RandReal` are `0fd0:1c27` and `0fd0:1c44`.
 
 ## Representation and rounding
 
