@@ -14,6 +14,7 @@ func writeFixture(t *testing.T, root string) {
 		"README.md":                                   "# Immortal Barons\n\nOverview. See [door setup](docs/door-setup.md).\n",
 		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
 		"docs/door-setup.md":                          "# Door Setup\n\nSetup. See [leagues](docs/inter-bbs.md).\n",
+		"docs/bbs-cfg.md":                             "# bbs.cfg Reference\n\nEvery setting.\n",
 		"docs/bulletins.md":                           "# Bulletin Files\n\nWhat the game writes for your BBS menu and your website.\n",
 		"docs/inter-bbs.md":                           "# Inter-BBS Leagues\n\nLeague play.\n",
 		"docs/inter-bbs-troubleshooting.md":           "# Inter-BBS Troubleshooting\n\nWhen packets stop arriving.\n",
@@ -61,6 +62,7 @@ func TestAssembleLayout(t *testing.T) {
 		"site-src/en/guide/economy/regions.md",           // help topic
 		"site-src/en/guide/controls/interface.md",        // help topic
 		"site-src/en/door-setup/index.md",                // door setup (was sysop guide)
+		"site-src/en/bbs-cfg/index.md",                   // bbs.cfg reference
 		"site-src/en/inter-bbs/index.md",                 // inter-BBS leagues, split out of door setup
 		"site-src/en/inter-bbs-troubleshooting/index.md", // its troubleshooting half, split out again
 		"site-src/en/ftn-transport/index.md",             // detailed FTN transport guide
@@ -120,6 +122,7 @@ func TestAssembleNavAndConfig(t *testing.T) {
 		`- "Regions": guide/economy/regions.md`,
 		`- "Game Instructions":`, // the one collapsible nav section; matches the in-game label
 		`- "Door Setup": door-setup/index.md`,
+		`- "bbs.cfg Reference": bbs-cfg/index.md`,
 		`- "FTN Transport": ftn-transport/index.md`,
 		`- "Command Reference": command-reference/index.md`,
 		`- "Download": download/index.md`,

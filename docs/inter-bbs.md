@@ -156,9 +156,9 @@ The key is a one-time exchange, unless the league changes Coordinator.
     `bbs.cfg` instead.
 
     The command does not write `bbs.cfg` — it ends by printing the file for you
-    to save, filled in from the flags you gave. Add your Coordinator's league
-    number to it; the command has no flag for it, and the transport will not run
-    without one:
+    to save, filled in from the flags you gave. Add your Coordinator's
+    [league number](bbs-cfg.md#leaguenumber) to it; the command has no flag for
+    it, and the transport will not run without one:
 
     ```
     LeagueNumber 900
@@ -226,15 +226,15 @@ PirateNews    yes
 OnFault       mail -s "IB fault" sysop@example.net <<< "$IB_FAULTS"
 ```
 
-Lines starting with `#` or `;` are comments, and `-ibbs-reset` prints a commented
-copy for you to save. Keywords are matched whatever their capitalization.
+Every setting, with the values it takes and its default, is in the [bbs.cfg
+Reference](bbs-cfg.md).
 
-`Lottery` and `PirateNews` are the odd ones out: they are rules rather than
-addresses, and they are here because the original keeps the same questions in
-each installation's own file. Set `Lottery` to `no` and this board never offers
-the Queen's lottery; set `PirateNews` to `no` and pirate raids stop being written
-up in the planet news, though they go on happening and the raider is still told
-how theirs went. Boards in one league may answer these differently, so a league
+[`Lottery`](bbs-cfg.md#lottery) and [`PirateNews`](bbs-cfg.md#piratenews) are
+the odd ones out: they are rules rather than addresses, and they are here
+because the original keeps the same questions in each installation's own file.
+Set `Lottery` to `no` and this board never offers the Queen's lottery; set
+`PirateNews` to `no` and pirate raids stop being written up in the planet news,
+though they go on happening and the raider is still told how theirs went. Boards in one league may answer these differently, so a league
 that wants everyone on the same footing has to agree them between themselves.
 
 ## Being told when the league stops moving
@@ -272,7 +272,7 @@ the board's health in general, and nothing goes into the news: one fault must no
 become a line in every player's recap for as long as it lasts.
 
 For anything the scheduler cannot do — a push to your phone, a message in a chat
-room — `bbs.cfg` takes one command:
+room — `bbs.cfg` takes one command, [`OnFault`](bbs-cfg.md#onfault):
 
 ```
 OnFault  ntfy publish mybbs "$IB_FAULTS"
@@ -443,8 +443,8 @@ directory they are written in.
 
 A board forwarding for its neighbors has a separate link to each of them, and a
 mailer usually wants each link's files in its own directory. Add a
-`GameOutbound` line to `bbs.cfg` for each, giving the neighbor's node number and
-the directory:
+[`GameOutbound`](bbs-cfg.md#gameoutbound) line to `bbs.cfg` for each, giving
+the neighbor's node number and the directory:
 
 ```
 GameOutbound 3  /home/bbs/filebox/league_node3
@@ -574,15 +574,15 @@ The rest of the mapping:
 |---|---|
 | `BBS.CFG`, seven lines by position | `bbs.cfg`, one keyword per line |
 | Line 1, sysop name | nothing — the wrapper is from `Immortal Barons` |
-| Line 2, BBS name | `BoardID` |
+| Line 2, BBS name | [`BoardID`](bbs-cfg.md#boardid) |
 | Line 3, node address | `ibnodes.dat`, where the transport reads it |
-| Line 4, incoming files | `IncomingFileDir` |
-| Line 5, netmail directory | `OutgoingNetmailDir` |
-| Line 6, league number | `LeagueNumber` |
-| Line 7, mailer | `Mailer`, with the same seven names |
-| `\OUTBOUND`, fixed | `GameOutbound`, and you choose the path |
-| (none: BRE reads line 4 directly) | `GameInbound`, the game's own inbound |
-| `ROUTE.CFG` | the roster's `HOST` entries, plus `Link` lines |
+| Line 4, incoming files | [`IncomingFileDir`](bbs-cfg.md#incomingfiledir) |
+| Line 5, netmail directory | [`OutgoingNetmailDir`](bbs-cfg.md#outgoingnetmaildir) |
+| Line 6, league number | [`LeagueNumber`](bbs-cfg.md#leaguenumber) |
+| Line 7, mailer | [`Mailer`](bbs-cfg.md#mailer), with the same seven names |
+| `\OUTBOUND`, fixed | [`GameOutbound`](bbs-cfg.md#gameoutbound), and you choose the path |
+| (none: BRE reads line 4 directly) | [`GameInbound`](bbs-cfg.md#gameinbound), the game's own inbound |
+| `ROUTE.CFG` | the roster's `HOST` entries, plus [`Link`](bbs-cfg.md#link) lines |
 | `BRNODES.DAT` | `ibnodes.dat` |
 | `BRE PLANETARY` | `immortal-barons -planetary` |
 
@@ -634,8 +634,8 @@ Mailer          Binkley
   such a directory: [Mystic](https://www.mysticbbs.com/) keeps its own message
   bases, so reach a Mystic board with an `Obox` or `BSO` link instead.
 - **Mailer** is `Binkley` for a Binkley-style mailer, including BinkIT, the one
-  shipped with Synchronet. The full list and what each does are in [Choosing
-  `Mailer`](ftn-transport.md#choosing-mailer).
+  shipped with Synchronet. The full list and what each does are in the
+  [bbs.cfg Reference](bbs-cfg.md#mailer).
 
 **Writing the netmail is not sending it.** The game leaves a `.msg` in the
 netmail directory and stops. What carries it is whatever already carries your

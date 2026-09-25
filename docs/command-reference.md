@@ -158,13 +158,14 @@ These options are for games that link several BBSes together (a "league"). See
   sets the rules: they arrive in the Coordinator's next broadcast and replace
   whatever this board starts with. `-game-inbound` and `-game-outbound` default
   to `inbound` and `outbound` inside the data directory. The game does not write
-  `bbs.cfg`: the reset ends by printing that file, filled in from these flags,
-  for you to save yourself. It is plain text and yours alone — nothing in the
-  game ever rewrites it.
+  [`bbs.cfg`](bbs-cfg.md): the reset ends by printing that file, filled in from
+  these flags, for you to save yourself. It is plain text and yours alone —
+  nothing in the game ever rewrites it.
 - **`-import-bbs-cfg PATH`** — Take this board's name, league number, mailer,
   incoming files directory and netmail directory from an original Barren Realms
   Elite `BBS.CFG`, for `-ibbs-reset`. The last three become the FTN transport's
-  `Mailer`, `IncomingFileDir` and `OutgoingNetmailDir` lines. Use it when
+  [`Mailer`](bbs-cfg.md#mailer), [`IncomingFileDir`](bbs-cfg.md#incomingfiledir)
+  and [`OutgoingNetmailDir`](bbs-cfg.md#outgoingnetmaildir) lines. Use it when
   converting a league you already run, so you do not retype what that file
   already says. It prints what it read. `-board-id` overrides the name, and
   naming the board in the file skips the settings editor just as `-board-id`
@@ -175,9 +176,9 @@ These options are for games that link several BBSes together (a "league"). See
   up the [FTN transport](ftn-transport.md). It can run as often as you like,
   including from the mailer's post-session event. A run that meets a fault it
   has not reported before, a failed handoff to the mailer included, exits
-  non-zero and runs `bbs.cfg`'s `OnFault` command, so whatever runs this on a
-  timer raises the alarm — see "Being told when the league stops moving" in the
-  inter-BBS guide.
+  non-zero and runs `bbs.cfg`'s [`OnFault`](bbs-cfg.md#onfault) command, so
+  whatever runs this on a timer raises the alarm — see "Being told when the
+  league stops moving" in the inter-BBS guide.
 - **`-full`** — Run the full cycle, then exit: read inbound packets, play a
   turn, and write outbound packets. This is the same as running `-planetary`,
   then the door (or `-local`), then `-planetary` again, but in one step. The FTN

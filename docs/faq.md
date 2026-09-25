@@ -163,9 +163,10 @@ alphabet is not shorter than the same name in another.
 - A fault that persists keeps being reported in the run's output and in
   `planetary.log`, but only its first run exits non-zero. A board unreachable for
   a week must not fail its timer every fifteen minutes.
-- For a push the scheduler cannot send, put one command in `bbs.cfg`:
-  `OnFault  ntfy publish mybbs "$IB_FAULTS"`. It runs after such a run with the
-  faults in `$IB_FAULTS` and your board's name in `$IB_BOARD`, and it is your own
-  shell line — mail, a chat webhook, `wall`, anything.
+- For a push the scheduler cannot send, put one command in `bbs.cfg`, as
+  [`OnFault`](bbs-cfg.md#onfault): `OnFault  ntfy publish mybbs "$IB_FAULTS"`.
+  It runs after such a run with the faults in `$IB_FAULTS` and your board's name
+  in `$IB_BOARD`, and it is your own shell line — mail, a chat webhook, `wall`,
+  anything.
 - The inter-BBS guide has the details, under "Being told when the league stops
   moving".

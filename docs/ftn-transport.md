@@ -155,10 +155,10 @@ reported as warnings and do not change the exit status.
 
 ## Transport settings in `bbs.cfg`
 
-These lines sit in `bbs.cfg` beside the board's other settings. Keywords ignore
-case. Relative filesystem paths are resolved beneath the data directory.
-`IncomingFileDir`, `OutgoingNetmailDir` and `Mailer` are the original's `BBS.CFG` lines
-4, 5 and 7, named after the labels its manual gives them.
+These lines sit in `bbs.cfg` beside the board's other settings. The [bbs.cfg
+Reference](bbs-cfg.md) lists each one's values and default. `IncomingFileDir`,
+`OutgoingNetmailDir` and `Mailer` are the original's `BBS.CFG` lines 4, 5 and
+7, named after the labels its manual gives them.
 
 ### Inbound settings
 
@@ -167,8 +167,8 @@ IncomingFileDir /var/spool/binkp/inbound
 OboxMeshFanout  Yes
 ```
 
-- `IncomingFileDir` is the directory the mailer delivers received files into:
-  attachments and raw obox/BSO bundles. Only a directory named here is
+- [`IncomingFileDir`](bbs-cfg.md#incomingfiledir) is the directory the
+  mailer delivers received files into: attachments and raw obox/BSO bundles. Only a directory named here is
   unwrapped, apart from `GameInbound`, which always is. **Give it once per
   directory the mailer delivers into.**
   Several mailers use more than one: a session that authenticates with a
@@ -186,12 +186,12 @@ OboxMeshFanout  Yes
   directory and does not descend into it. `-ftn-status` names any packet left
   unread in a directory it can see, including such a child, so the report tells
   you a line is missing.
-- `IncomingNetmailDir` is where the tosser leaves received `.msg` envelopes.
-  Left unset it means every `IncomingFileDir`, so the order of those lines
+- [`IncomingNetmailDir`](bbs-cfg.md#incomingnetmaildir) is where the tosser
+  leaves received `.msg` envelopes. Left unset it means every `IncomingFileDir`, so the order of those lines
   cannot decide whether an envelope is seen. Set it only to look somewhere else
   entirely.
-- `OboxMeshFanout` defaults to `Yes`. It controls only an unaddressed broadcast
-  received without an attach envelope. See [Mesh warning](#mesh-warning).
+- [`OboxMeshFanout`](bbs-cfg.md#oboxmeshfanout) defaults to `Yes`. It
+  controls only an unaddressed broadcast received without an attach envelope. See [Mesh warning](#mesh-warning).
 
 ### Stored-message attach settings
 
@@ -202,19 +202,19 @@ Mailer      Binkley
 SubjectPath Absolute
 ```
 
-- `OutgoingNetmailDir` is where the game writes outgoing `.msg` envelopes for the
-  scanner to pack. It is required when any peer uses `Attach`, including the
+- [`OutgoingNetmailDir`](bbs-cfg.md#outgoingnetmaildir) is where the game
+  writes outgoing `.msg` envelopes for the scanner to pack. It is required when any peer uses `Attach`, including the
   default for a peer with no `Link` line.
-- `AttachDir` holds outgoing bundles for Attach and BSO links. If omitted, the
-  transport uses `data/att` (#231: deliberately not nested under its
+- [`AttachDir`](bbs-cfg.md#attachdir) holds outgoing bundles for Attach and
+  BSO links. If omitted, the transport uses `data/att` (#231: deliberately not nested under its
   other spool directories, since this is the one path a mailer's Subject
   field has to spell out under a hard byte limit — see [Keeping attach
   subjects short](#keeping-attach-subjects-short)).
-- `Mailer` says how the netmail asks for the attachment to be deleted once
-  sent, or turns netmail off. See [Choosing `Mailer`](#choosing-mailer).
-- `SubjectPath Absolute` writes the full attachment path. `Basename` writes
-  only `NNNNCCCC.BRP`. Any other value is used as a literal path prefix.
-  The stored-message Subject has 71 usable bytes, or 70 with the `^` prefix.
+- [`Mailer`](bbs-cfg.md#mailer) says how the netmail asks for the attachment
+  to be deleted once sent, or turns netmail off.
+- [`SubjectPath`](bbs-cfg.md#subjectpath) says how the attachment path is
+  spelled in the Subject. The stored-message Subject has 71 usable bytes, or
+  70 with the `^` prefix.
 
 On the receiving side, the tosser normally leaves both the bundle and its
 stored-message envelope in the configured inbound. The unwrap step verifies
@@ -222,22 +222,6 @@ that the message has the file-attach attribute, identifies Immortal Barons,
 names exactly one attachment inside an `IncomingFileDir`, comes from a roster address,
 and is addressed to this board. Only after all packets are delivered or
 forwarded does it delete both files. Other netmail is never removed.
-
-#### Choosing `Mailer`
-
-`Mailer` takes the original's seven names, in any case. Only two of them change
-what the game writes:
-
-| Value | What the game writes | Use it for |
-| --- | --- | --- |
-| `Binkley` | the attachment path starts with `^` | BinkIT (Synchronet's mailer) and other Binkley-style setups |
-| `FrontDoor`, `DBridge`, `InterMail`, `DBridgeOld`, `Other` | a `FLAGS KFS` line in the message | any other mailer; all five do the same thing |
-| `None` | no netmail at all, as in the original | a board with no netmail directory; every peer then needs an `Obox` or `BSO` link |
-
-- Both kinds of netmail ask the mailer to delete the attachment after a
-  successful send.
-- Left out, `Mailer` behaves as `Other`.
-- Any other value is refused, so a typo cannot quietly stop the netmail.
 
 #### Keeping attach subjects short
 
@@ -276,7 +260,7 @@ oboxes do not use a Type-2 Subject, so the 71-byte limit applies only to
 
 ### Per-peer links
 
-Each `Link` identifies a directly connected IBBS roster node:
+Each [`Link`](bbs-cfg.md#link) identifies a directly connected IBBS roster node:
 
 ```ini
 Link 2 Attach
@@ -318,9 +302,8 @@ of its own uses `Attach`, a `bbs.cfg` carrying no links at all cannot reach a
 Mystic board — which is how this was found on a three-board test rig, after 30
 bundles had collected.
 
-BSO flavors are `Immediate`, `Continuous` (also accepted as `Crash`),
-`Direct`, `Normal`, and `Hold`; `Normal` is the default. A point address uses
-the standard `<net><node>.pnt/<point>.?lo` layout automatically.
+A `BSO` link takes an optional [flavor](bbs-cfg.md#link). A point address
+uses the standard `<net><node>.pnt/<point>.?lo` layout automatically.
 
 If a destination has no `Link`, it uses `Attach`, so a board with no `Link`
 lines sends every next hop through the `.msg` chain. This fallback applies to
@@ -329,10 +312,6 @@ unaddressed mesh fanout uses only the explicitly listed peers; otherwise the
 transport would invent graph edges and defeat a ring or partial mesh. List every
 direct fanout neighbor, including one that uses `Attach`. A hub may freely mix
 all three modes.
-
-Paths in a `Link` line must not contain spaces. `OutgoingNetmailDir`, `AttachDir`, and
-the incoming directory settings consume the rest of their line and may contain
-spaces when the operating system permits them.
 
 ### Plain packets for boards that cannot read a bundle
 
@@ -358,7 +337,8 @@ had it arrived unbundled; nothing is forwarded over FTN from there. A file that
 starts like a bundle but cannot be read is set aside in `ftn-spool/bad` once it
 is five minutes old.
 
-Turn bundling on for the whole board once every peer runs v0.2.0 or later:
+Turn bundling on for the whole board with [`Bundled`](bbs-cfg.md#bundled) once
+every peer runs v0.2.0 or later:
 
 ```ini
 Bundled Yes

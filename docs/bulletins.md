@@ -10,7 +10,7 @@ terminal, so what a reader sees is what a player sees.
 
 ## Turning them on
 
-Set `BulletinDir` in `bbs.cfg` to a directory:
+Set [`BulletinDir`](bbs-cfg.md#bulletindir) in `bbs.cfg` to a directory:
 
 ```
 BulletinDir   /home/bbs/xtrn/imb/bull
@@ -166,17 +166,17 @@ BoardURL      https://doghouse.example/
 BulletinURL   https://doghouse.example/bulletins/
 ```
 
-- **`BulletinDir`** — where the files are written.
-- **`BBSName`** — what your board is called on the web pages. Write it however
-  you want it read. It is separate from `BoardID` because `BoardID` has to match
-  the league roster character for character, and a name written for a reader
-  should not be pinned to that. Left blank, the pages use `BoardID`.
-- **`BoardURL`** — your board's own website. The header links your board's name
-  back to it.
-- **`BulletinURL`** — the address the bulletin directory is served from. The
-  game knows where it writes the files and nothing about how your web server
-  reaches them, so this is the one thing it cannot work out for itself. It is
-  what makes `{{pageurl}}` work.
+- **[`BulletinDir`](bbs-cfg.md#bulletindir)** — where the files are written.
+- **[`BBSName`](bbs-cfg.md#bbsname)** — what your board is called on the web
+  pages. Write it however you want it read. It is separate from `BoardID`
+  because `BoardID` has to match the league roster character for character, and
+  a name written for a reader should not be pinned to that. Left blank, the
+  pages use `BoardID`.
+- **[`BoardURL`](bbs-cfg.md#boardurl)** — your board's own website. The header
+  links your board's name back to it.
+- **[`BulletinURL`](bbs-cfg.md#bulletinurl)** — the address the bulletin
+  directory is served from. The game knows where it writes the files and nothing
+  about how your web server reaches them, so this is the one thing it cannot
+  work out for itself. It is what makes `{{pageurl}}` work.
 
-See [Your board's own settings](inter-bbs.md#your-boards-own-settings-bbscfg)
-for the rest of the file.
+The [bbs.cfg Reference](bbs-cfg.md) covers the rest of the file.

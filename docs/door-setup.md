@@ -271,19 +271,20 @@ settings there. To carry your settings to a new install or a fresh game, copy yo
 saved `config.json` into the data directory, then run `-reset-from-config`.
 
 It holds the rules only. Anything naming this particular board — its name in a
-league, its packet directories — is in `bbs.cfg`, so a config copied to another
-machine does not drag the old board's directories along with it. That file also
-carries the two rules the league does not set for you. `Lottery yes` or
-`Lottery no` decides whether this board offers the Queen's lottery, and
-`PirateNews no` keeps pirate raids out of the planet news — the raids still
-happen, and the raider still gets their report. Both default to yes.
+league, its packet directories — is in [`bbs.cfg`](bbs-cfg.md), so a config
+copied to another machine does not drag the old board's directories along with
+it. That file also carries the two rules the league does not set for you.
+[`Lottery`](bbs-cfg.md#lottery) decides whether this board offers the Queen's
+lottery, and [`PirateNews no`](bbs-cfg.md#piratenews) keeps pirate raids out of
+the planet news — the raids still happen, and the raider still gets their
+report. Both default to yes.
 
 ## Bulletin files for your BBS
 
-Set `BulletinDir` in `bbs.cfg` to a directory and the game writes its scoreboard,
-its news and its league rankings there: twelve bulletins, each as a colored
-`.ans`, a plain `.txt`, and two HTML files for your website. Leave the setting
-blank and none are written.
+Set [`BulletinDir`](bbs-cfg.md#bulletindir) in `bbs.cfg` to a directory and the
+game writes its scoreboard, its news and its league rankings there: twelve
+bulletins, each as a colored `.ans`, a plain `.txt`, and two HTML files for
+your website. Leave the setting blank and none are written.
 
 [Bulletin Files](bulletins.md) covers all of it — every file, the `bbs.cfg`
 lines, and the header, footer and stylesheet you can edit.
