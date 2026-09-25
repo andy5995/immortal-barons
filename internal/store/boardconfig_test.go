@@ -400,3 +400,22 @@ func TestBoardConfigAcceptsTabsAndRunsOfSpaces(t *testing.T) {
 		t.Errorf("GameOutbound 3 = %q, want %q", got, "/srv/filebox/node 3")
 	}
 }
+
+// A key with no value is skipped, as the transport's reader skips one. Applied,
+// a bare GameInbound pointed the board at the data directory itself and a bare
+// BoardID gave it an empty name.
+func TestBoardKeyWithNoValueKeepsTheDefault(t *testing.T) {
+	dir := t.TempDir()
+	body := "BoardID\nGameInbound\nGameOutbound   \nLottery\n"
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	cfg := game.DefaultConfig()
+	if err := LoadBoardConfig(dir, &cfg); err != nil {
+		t.Fatalf("LoadBoardConfig: %v", err)
+	}
+	if cfg.BoardID != "local" || cfg.InboundDir != "inbound" || cfg.OutboundDir != "outbound" || !cfg.Lottery {
+		t.Errorf("BoardID %q, GameInbound %q, GameOutbound %q, Lottery %v; want the defaults",
+			cfg.BoardID, cfg.InboundDir, cfg.OutboundDir, cfg.Lottery)
+	}
+}

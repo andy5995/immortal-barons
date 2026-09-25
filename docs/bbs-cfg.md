@@ -19,6 +19,7 @@ The rules for a line:
   value. The value is the rest of the line, so it may contain spaces, as a
   Windows path or a board name can.
 - Keywords ignore case.
+- A keyword with no value is ignored, and the default stays in place.
 - Blank lines are skipped. A line that starts with `#` or `;` is a comment. A
   comment must be on its own line: text after a value is part of the value.
 - A path that is not absolute is read as a path inside the data directory, not

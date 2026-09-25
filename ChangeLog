@@ -5,6 +5,7 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * A bbs.cfg setting with no value keeps its default
   * A sysop notice names a board that stops answering probes but still sends
   * Netmail attachments name their full path, so the mailer can find them
   * S3-Sabre hits take the original's shares; a food hit destroys 71-100%

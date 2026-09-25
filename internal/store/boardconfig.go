@@ -216,6 +216,12 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 		return err
 	}
 	for _, l := range lines {
+		// A key with no value is skipped, as the transport's reader skips one:
+		// applied, a bare GameInbound pointed the board at the data directory
+		// itself and a bare BoardID gave it an empty name.
+		if l.Value == "" {
+			continue
+		}
 		if set := boardSetter(l.Key); set != nil {
 			// A value the setter cannot use leaves the default standing, and
 			// BoardWarnings reports it to the modes that print warnings.
