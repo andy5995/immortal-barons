@@ -2557,6 +2557,14 @@ DTF accepted your Full Defense Alliance proposal.
 48. Times are stored in UTC and drawn on whichever clock the reader picked in
 Preferences, because a league's boards are not on one.
 
+**Deliberate divergence: IB merges repeated entries.** BRE gives every event its
+own numbered rule, so thirteen caught spies from one realm fill thirteen entries
+(`cap/kd3-01.cap`, its last recap: `Beavis's Couch was found spying on you.` 13
+times). IB shows each distinct text once, in the order it first appeared, with
+that first entry's stamp and `(13 times)` on the end (`countRepeats`,
+`internal/menu/turnrecap.go`). The repeats need not be adjacent, so interleaved
+successes and failures collapse to one line each.
+
 Measured: 5 `─`, `(N)`, **40** `─`, the 20-column stamp, 8 `─` — **76 columns**,
 with the stamp starting at column 48. This block showed 48 fill columns, which
 would run the line to 84 and wrap; 13 rules across two captures all measure 76.
