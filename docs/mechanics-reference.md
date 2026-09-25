@@ -4346,6 +4346,14 @@ channel that is supposed to mean something broke, and a board polling every few
 days is a setup rather than a fault. A board never heard from is not reported
 either way — that is every league before its first exchange.
 
+**A board whose own sending has stopped is another** (`NoteUnansweredProbes`).
+Packets from a peer keep arriving, so nothing is silent, but no probe sent to it
+has come back for more than `RoundTripAlarmDays` (3). The peer's mail arriving
+shows it runs its planetary step, and every build echoes a probe, so what fails
+is this board's outbound or the route out. A board with no completed round trip
+on record is not reported. Added 2026-09-25, after a board whose netmail named
+files its mailer could not find sent nothing for days while receiving normally.
+
 The player's half is about THEIR action, never the board's health. Picking a
 planet nothing has come back from in more than `LinkSilentMax` days prints a
 warning at the prompt, before the turn is spent. Deliberately not a refusal —

@@ -339,3 +339,38 @@ func TestTheSysopAlarmIsSlowerThanThePlayerWarning(t *testing.T) {
 		t.Errorf("the sysop was alarmed at %d days:\n%s", quiet, strings.Join(w.SysopNotices, "\n"))
 	}
 }
+
+// A board whose packets still arrive while no probe to it comes back points at
+// this board's own outbound, which NoteSilentLinks cannot see. A board past the
+// threshold is reported; one answering recently, one never measured, and one
+// that is silent altogether (NoteSilentLinks' case) are not.
+func TestUnansweredProbesReachTheSysop(t *testing.T) {
+	now := time.Date(2026, 9, 25, 12, 0, 0, 0, time.UTC)
+	w := routingWorld(1)
+	recent := Recorded(now.Add(-time.Hour))
+	w.LastPacketFrom = map[string]string{
+		planetName(2): recent,
+		planetName(3): recent,
+		planetName(4): recent,
+		planetName(5): Recorded(now.Add(-(LinkSilentAlarmDays + 2) * 24 * time.Hour)),
+	}
+	old := now.Add(-4 * 24 * time.Hour).Format(time.RFC3339)
+	w.TravelSeen = map[string]string{
+		planetName(2): old,
+		planetName(3): now.Add(-time.Hour).Format(time.RFC3339),
+		// planetName(4) has never completed a round trip.
+		planetName(5): old,
+	}
+
+	w.NoteUnansweredProbes(now)
+
+	joined := strings.Join(w.SysopNotices, "\n")
+	if !strings.Contains(joined, planetName(2)) || !strings.Contains(joined, "4 days") {
+		t.Errorf("a board answering none of our probes for 4 days was not reported:\n%s", joined)
+	}
+	for _, p := range []int{3, 4, 5} {
+		if strings.Contains(joined, planetName(p)) {
+			t.Errorf("%s should not be reported:\n%s", planetName(p), joined)
+		}
+	}
+}

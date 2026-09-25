@@ -323,6 +323,11 @@ const (
 	// two days means round trips have stopped completing. IB's own: the original shows the average with no age at all, and
 	// a frozen figure reads exactly like a fast one.
 	TravelStaleDays = 2
+	// RoundTripAlarmDays is how long round trips to a board may stop completing,
+	// while its own packets still arrive, before the SYSOP is told. One day
+	// longer than the screen's note, as the sysop channel should only speak when
+	// something is broken. IB's own.
+	RoundTripAlarmDays = 3
 )
 
 // MaxCatchUpDays bounds how many missed game days one DailyMaintenance call

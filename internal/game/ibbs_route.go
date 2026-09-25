@@ -270,6 +270,35 @@ func (w *World) NoteSilentLinks(now time.Time) {
 	}
 }
 
+// NoteUnansweredProbes tells the sysop about a board whose packets still arrive
+// while no probe sent to it has come back for RoundTripAlarmDays. Its mail
+// reaching us shows it runs its planetary step, and every build echoes a probe,
+// so the break is in what THIS board sends: its mailer or the route out. That
+// is the fault NoteSilentLinks cannot see, because the board is not silent.
+// A board whose outbound netmail named files its mailer could not find sent
+// nothing for days while receiving normally, and nothing said so.
+//
+// A board with no completed round trip on record is not reported, as in
+// NoteSilentLinks: that is every link before its first exchange.
+func (w *World) NoteUnansweredProbes(now time.Time) {
+	for _, board := range w.knownPeers() {
+		if !w.Routable(board) {
+			continue
+		}
+		heard := w.LinkSilentDays(board, now)
+		if heard < 0 || heard > RoundTripAlarmDays {
+			continue // silent, which NoteSilentLinks reports
+		}
+		seen, err := time.Parse(time.RFC3339, w.TravelSeen[board])
+		if err != nil {
+			continue
+		}
+		if days := int(now.Sub(seen) / (24 * time.Hour)); days > RoundTripAlarmDays {
+			w.noteSysop("Packets from %s arrive, but no probe sent to it has come back in %d days. What this board sends may not be reaching it: check this board's mailer and outbound first.", board, days)
+		}
+	}
+}
+
 // LinkQuiet reports that a planet this board HAS heard from has since gone
 // quiet for longer than LinkSilentMax. A planet never heard from is not quiet,
 // it is new: every league starts that way, and warning about it would make the

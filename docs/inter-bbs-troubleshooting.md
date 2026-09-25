@@ -417,10 +417,12 @@ number. The mark is what tells them apart. Only a probe coming home clears it,
 so a mark that appears, goes away for a day, then comes back means that board
 answered once and went quiet again.
 
-**Game Setup does not report this.** Its Transport faults row counts notices,
-and a board has to be silent for seven days before one is written. A link that
-recovers every two or three days never reaches that. The row also gives one
-count for the whole board and never names a link.
+**Game Setup reports only part of this.** Its Transport faults row counts
+notices. A board silent for seven days writes one. So does a board whose packets
+still arrive while no probe sent to it has come back for three days, which
+points at your own outbound. A link that recovers every two or three days
+reaches neither. The row gives one count for the whole board; the notice itself,
+in the run report and `planetary.log`, names the link.
 
 The probe is a round trip. Your board sends a record, the far board sends it
 straight back untouched, and your board times the journey. Four things have to
