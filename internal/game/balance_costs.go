@@ -40,7 +40,7 @@ const (
 	//	penalty  = trunc((1 − r) × StarvationPenaltyScale)
 	//
 	// The people's shortfall is charged to popular support and the army's to
-	// military morale, each filed as a pending penalty and applied at rollover.
+	// military morale, each filed as a pending penalty and applied later that turn.
 	// A people's ratio under CivilWarThresholdPct additionally lights the civil
 	// war (see CivilWarSeverityScale).
 	//

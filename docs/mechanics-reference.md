@@ -274,8 +274,8 @@ flow runs in this order:
    sale is a spending-menu transaction, not income. At a 10% rate that is a 10%
    edge to produce-and-sell before any other consideration.
 
-   **Underpaying is allowed** and costs **popular support**, applied at day
-   rollover, by
+   **Underpaying is allowed** and costs **popular support**, applied at the end
+   of the same turn (see "The pending penalties" below), by
    `trunc((1 − (paid+1)/(required+1)) × 15)` — a ceiling of 15 that the +1s stop
    it from ever reaching (paying nothing costs 14). No land loss, no unit loss,
    and the debt is not carried forward.
@@ -299,9 +299,25 @@ flow runs in this order:
    The armed-forces branch touches morale **only** — not support — and the region
    branch support only. Two of them additionally file a **civil war** (below).
 
-   **IB implements this**, including the deferral: the penalty accumulates during
-   maintenance and lands at turn rollover, so the drop surfaces on the next turn's
-   display as it does in the original. One deliberate divergence — the rate is
+   **IB implements this**, including the deferral. **The pending penalties —
+   binary-verified.** BRE files every one of the five into two signed bytes on
+   the empire record, `+0x2b9` morale and `+0x2ba` support, and never writes the
+   stat at the prompt. Both bytes are cleared at the start of each turn
+   (`BRE.EXE 0x397E`, `0x398C`, with the civil-war byte `+0x2bb` beside them), so
+   nothing carries into the next turn. They land at two different points of the
+   SAME turn:
+
+   - **Morale** lands in `resolve_civil_unrest` (`BRE.OVR 0xC172`, the byte
+     cleared at `0xC1EB`), stage 6 of `run_player_turn` (`BRE.EXE 0x3d40`):
+     straight after food, **before** the Covert, Bank, Spending and Attack
+     menus. Desertion and a filed civil war follow in the same routine, so the
+     attacks a baron makes this turn fight at the morale this turn's shortfalls
+     left. IB: `World.ResolveCivilUnrest`, its own turn stage.
+   - **Support** lands at the end of the turn, in the one update that also takes
+     the riot and the tax drift (see "Riots and emigration").
+
+   IB applied both at the rollover until 2026-09-25, a turn late for morale and
+   after the drift for support. One deliberate divergence — the rate is
    stored as a whole percent (default 5, maximum 20) rather than BRE's tenths, so
    the config editor and the stored value use one unit rather than two.
 
@@ -2897,7 +2913,13 @@ interest-earning savings and loans; investment rates move over time.
 **Popular support and military morale** are 0–100 stats, held as `int32`s on the
 empire record at `+0x92` and `+0x8e`. Each turn's payment stage prompts for both
 when they are below 100 ("N gold is requested to boost popular support / improve
-military morale").
+military morale"). **A paid boost does not raise the stat on the spot:**
+`allocate_turn_budget` subtracts the points bought from the turn's pending
+penalty (support `BRE.OVR 0x2F65E`, morale `0x2F987`, both committed to the
+bytes at `0x2FBD1` / `0x2FBEB`), so they net against whatever the turn's
+shortfalls cost and land with them, clamped once — morale before the menus,
+support at the end of the turn. BRE prints nothing when the boost is paid; IB
+printed "rose N points" until 2026-09-25 and no longer does.
 
 **Both must sit at exactly 100 for the silent Auto-Pay Maintenance branch to
 run** (`BRE.EXE` flat `0x3b12`–`0x3b6d`, alongside "gold ≥ due" and "no waste").
@@ -2914,7 +2936,7 @@ access list** for the two fields: 62 sites in `BRE.OVR` and 4 in `BRE.EXE`.
 | Input | Effect | Address |
 |---|---|---|
 | Founding a realm | both set to 100 | `BRE.EXE 0x8D99` / `0x8DA7` |
-| Paying the boost | see the formulas below | `BRE.OVR 0x2F740` / `0x2F91E` |
+| Paying the boost | see the formulas below; nets against the pending penalty | `BRE.OVR 0x2F740` / `0x2F91E` |
 | Tax under 10% while support < 85 | support `+ (10 − tax)` | `BRE.OVR 0xCE97` |
 | Tax under 30% | support `− (tax−30)/10`, i.e. a gain | `BRE.OVR 0xCE97` |
 
@@ -2951,7 +2973,10 @@ search for direct displacements does not match.
   no floor), **Coastal income** (`0.1 + 0.9 × support/100`) and **population
   capacity** (`× support/90`), and below **35** it puts a riot line
   in the planet news at 1-in-20 a turn (`BRE.OVR 0xD5AD`) — cosmetic, unlike the
-  tax riot.
+  tax riot. It is tested on the support the end-of-turn update leaves
+  (`0xD5A3`), whether or not the realm also rioted. That test is the ONLY caller
+  of BRE's riot news (`write_riot_news`); IB also posts a riot line for the tax
+  riot, and so skips a second post in a turn that already made one.
 - Military morale scales **combat effectiveness** (`morale × 0.6 + 50`, so a
   full-morale army fights at 110%) and drives **desertion**, below.
 - Both are shown on the status screen (`BRE.OVR 0x1969A`, `0x19B11`) and ride the
@@ -3038,10 +3063,20 @@ IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
 - **Support drifts with the tax rate every turn, riot or not:**
 
   ```
-  Support = clamp(Support - riotPenalty - (tax - 30) / 10, 0, 100)
+  pending += riotPenalty                     # tax div 3, only on a riot
+  Support = clamp(Support - pending - (tax - 30) / 10, 0, 100)
   if Support < 10:              Morale -= (10 - Support)
   if tax < 10 and Support < 85: Support += (10 - tax)
   ```
+
+  `pending` is the turn's support byte (`+0x2ba`): the region, crown-tax and
+  people's-food shortfalls less any support boost paid, plus the riot. It is ONE
+  update (`process_end_of_turn`, `BRE.OVR 0xCF41`–`0xCF88`), and the two
+  follow-on rules test its RESULT (`0xCFA7`, `0xCFD6`–`0xD000`). This block
+  opens BRE's end-of-turn routine, ahead of migration, so a riot's people are
+  gone before migration measures the realm and the capacity reads the updated
+  support. IB (`World.endOfTurnSupport`) matches all of this since 2026-09-25;
+  before then it applied the pending penalty after the drain and the bonus.
 
   Integer division truncates toward zero, so a rate **below 30 recovers support
   for free** (+1/turn at tax 12–29) and one above 40 bleeds it. This is why a
@@ -3126,7 +3161,8 @@ does in the original.
 
 BRE keeps a **civil-war severity percentage** on the empire record at `+0x2bb`,
 files into it during the turn, and spends it in the civil-unrest routine
-(`BRE.OVR 0xC59A`). It is not a separate subsystem so much as the severe end of
+(`BRE.OVR 0xC59A`), which runs after the food stage and before the turn's menus
+(see "The pending penalties"); IB spends it at the same point. It is not a separate subsystem so much as the severe end of
 the two shortfalls that can light it:
 
 - **Famine** — the people got under **65%** of their food need:
@@ -3455,7 +3491,10 @@ section is a record of what was claimed and how it was settled, so the word
   counterpart. Going underfed hurts, and **BRE's own penalties are read, and IB
   implements them.**
   The allocation routine files three byte-sized penalties on the empire record,
-  all applied and cleared during the end-of-turn step. With `r` the fraction of
+  applied later in the SAME turn — the morale and civil-war bytes in the
+  civil-unrest step before the menus, the support byte at the end of the turn —
+  and all three cleared again at the next turn's start (see "The pending
+  penalties"). With `r` the fraction of
   an obligation that was actually given (BRE computes it as `(given+1)/(need+1)`):
 
   | shortfall | penalty | applied at |
@@ -4004,6 +4043,11 @@ turns at the start (config: 15). A turn walks through a sequence of menus:
 
 1. Status screen
 2. Payment / food market
+   - then, with no screen of its own, the civil-unrest step: the turn's morale
+     penalty lands, low morale deserts, a filed civil war is spent
+     (`resolve_civil_unrest`, `BRE.EXE 0x3d40`; IB `World.ResolveCivilUnrest`).
+     BRE prints the desertion and civil-war lines from that routine; IB still
+     reports them in End of Turn Statistics.
 3. Covert operations (shown only when the step is enabled in Preferences and
    the player holds at least one covert agent — a fresh realm starts with none)
 4. Bank — opened automatically, with no yes/no prompt in front of it

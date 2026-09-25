@@ -58,6 +58,7 @@ func collectTurnIncome(w *ctx) bool {
 		w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
 		w.World.CollectBankPayments(p)
 		w.World.GrowFood(p) // credit this turn's food at turn start too, so it can be sold this turn (matches BRE)
+		p.ClearTurnPenalties()
 		p.RegionsBoughtThisTurn = 0
 		p.TurnProgress.IncomeCollected = true
 	})
@@ -215,6 +216,24 @@ func runTurn(s session.Session, w *ctx) Result {
 			}
 			statLine(s, foodUpkeep, "units of Food consumed.")
 			pause(s)
+		}
+
+		// The civil-unrest step: the morale this turn's maintenance and food left
+		// lands, the army deserts on it, and a filed civil war is spent — all
+		// before any menu, so this turn's attacks fight at that morale. BRE calls
+		// resolve_civil_unrest straight after allocate_food (BRE.EXE 0x3d40).
+		if err := runStageOnce(w,
+			func(tp game.TurnProgress) bool { return tp.UnrestResolved },
+			func(tp *game.TurnProgress) { tp.UnrestResolved = true },
+			func() error {
+				withPlayer(w, func(p *game.Empire) {
+					if !p.TurnProgress.UnrestResolved {
+						w.World.ResolveCivilUnrest(p)
+					}
+				})
+				return nil
+			}); err != nil {
+			return Stay
 		}
 
 		// Covert Operations runs right after maintenance and before Spending, per

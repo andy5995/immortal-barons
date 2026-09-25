@@ -89,7 +89,8 @@ func (w *World) FeedGiven(e *Empire, toPeople, toArmy int) {
 // applyFeeding draws the two helpings out of the granary and files what either
 // shortfall costs: popular support for the people's, military morale for the
 // army's, and a civil war when the people got under FoodCivilWarThresholdPct of
-// their need. Both penalties are pending until rollover, as BRE files them.
+// their need. Both penalties are pending, as BRE files them: morale lands in
+// ResolveCivilUnrest, support at the end of the turn.
 func (w *World) applyFeeding(e *Empire, peopleNeed, toPeople, armyNeed, toArmy int) {
 	toPeople = clampHelping(toPeople, peopleNeed, e.Food)
 	toArmy = clampHelping(toArmy, armyNeed, e.Food-toPeople)
@@ -108,6 +109,34 @@ func (w *World) applyFeeding(e *Empire, peopleNeed, toPeople, armyNeed, toArmy i
 // engine may not take a front-end's word for what is in it.
 func clampHelping(give, need, have int) int {
 	return max(0, min(give, min(need, have)))
+}
+
+// ClearTurnPenalties empties the pending morale and support penalties and the
+// pending civil war at the start of a turn, as BRE's turn start does (BRE.EXE
+// 0x397E-0x3996, three byte stores). Everything a turn files is spent within
+// that turn, so this only matters for a turn abandoned part way, whose
+// penalties the original drops rather than carries into the next one.
+func (e *Empire) ClearTurnPenalties() {
+	e.PendingSupportPenalty = 0
+	e.PendingMoralePenalty = 0
+	e.CivilWarSeverity = 0
+}
+
+// ResolveCivilUnrest is BRE's civil-unrest step (resolve_civil_unrest, BRE.OVR
+// 0xC172), stage 6 of its turn: after maintenance and food, BEFORE the turn's
+// menus. The pending morale penalty lands (clamped once, to 0-100, BRE.OVR
+// 0xC1EB clearing the byte), the army deserts at a rate drawn from the morale it
+// lands on, and a filed civil war is spent. So the attacks a baron makes this
+// turn fight at the morale this turn's shortfalls left.
+//
+// The human turn runs it as its own stage; PlayTurn runs it for a turn that
+// never reached the stage (the AI, whose turn is one straight call).
+func (w *World) ResolveCivilUnrest(e *Empire) {
+	e.adjustMorale(-e.PendingMoralePenalty)
+	e.PendingMoralePenalty = 0
+	w.moraleDesertion(e)
+	w.resolveCivilWar(e)
+	e.TurnProgress.UnrestResolved = true
 }
 
 // resolveCivilWar spends a pending civil war: popular support is halved, and the

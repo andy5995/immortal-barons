@@ -318,15 +318,19 @@ type Empire struct {
 	// the turn's income report (collectLoanInstallment).
 	LoanPaid int64 `json:"loanPaid,omitempty"`
 	// PendingSupportPenalty and PendingMoralePenalty are stat points owed but not
-	// yet deducted. BRE accumulates shortfall penalties during the maintenance and
-	// food stages in two signed bytes on the empire record (+0x2ba support, +0x2b9
-	// morale) and applies them at turn rollover, not on the spot, so the drop
-	// surfaces on the next turn's display. Persisted so they survive a mid-turn
-	// save.
+	// yet applied. BRE accumulates the maintenance and food shortfall penalties in
+	// two signed bytes on the empire record (+0x2ba support, +0x2b9 morale), less
+	// whatever the baron paid to boost each, and clears both at the start of every
+	// turn (BRE.EXE 0x397E, 0x398C). The morale byte lands in the civil-unrest
+	// step, before that turn's menus (ResolveCivilUnrest); the support byte lands
+	// at the end of the turn, in one update with the tax drift (endOfTurnSupport).
+	// A boost can leave either negative, which raises the stat when it lands.
+	// Persisted so they survive a mid-turn save.
 	PendingSupportPenalty int `json:"pendingSupportPenalty,omitempty"`
 	PendingMoralePenalty  int `json:"pendingMoralePenalty,omitempty"`
 	// CivilWarSeverity is the percentage a pending civil war will destroy, filed
-	// by a severe food shortfall (BRE empire record +0x2bb) and spent at rollover.
+	// by a severe food or region-upkeep shortfall (BRE empire record +0x2bb) and
+	// spent in the civil-unrest step (ResolveCivilUnrest).
 	CivilWarSeverity    int  `json:"civilWarSeverity,omitempty"`
 	LastCivilWar        int  `json:"lastCivilWar,omitempty"` // severity of the civil war that fired this turn, 0 if none
 	LastRiot            bool `json:"lastRiot,omitempty"`
@@ -349,6 +353,7 @@ type TurnProgress struct {
 	MaintPaid          bool  // paymentStage done (set with the forces/regions charge)
 	SDIFunded          int64 // gold put into the SDI program this turn, against its allowance
 	Fed                bool  // feedStage done
+	UnrestResolved     bool  // ResolveCivilUnrest done: morale penalty, desertion, civil war
 	CovertDone         bool
 	BankDone           bool
 	SpendingDone       bool

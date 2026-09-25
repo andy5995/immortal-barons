@@ -62,3 +62,8 @@ What you pay buys points in proportion, so paying half the request buys about
 half the points. You may pay up to half again as much as is asked, and the
 extra buys more than fifteen points. Neither number can pass 100, so
 overpaying a nearly-content realm wastes the difference.
+
+Nothing changes the moment you pay. The points you buy reduce what this turn's
+unpaid costs take away. Morale changes right after your food is paid out,
+before any of your menus open. Support changes at the end of the turn. So
+Morale bought this turn is the Morale your army fights with this turn.

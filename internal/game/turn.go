@@ -23,12 +23,6 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	w.maybePirateRaid(e) // ~1-in-5-turns pirate raid; notice surfaces next turn's income (#21)
 	w.advanceTech(e)     // Technology bonus builds up a little each turn (not instant)
 	w.processEconomy(e)
-	// Maintenance shortfalls charged during this turn land now, at rollover, so
-	// the drop shows on the next turn's display — BRE's own ordering.
-	if e.PendingSupportPenalty > 0 {
-		e.adjustSupport(-e.PendingSupportPenalty)
-		e.PendingSupportPenalty = 0
-	}
 	if e.Score < 0 {
 		e.Score = 0
 	}
@@ -449,12 +443,16 @@ func (w *World) processEconomy(e *Empire) {
 	// Feeding the realm, and what going short costs (see morale.go): popular
 	// support for the people's shortfall, military morale for the army's, and a
 	// civil war when the people got under two thirds of their need. Both penalties
-	// are filed and applied at rollover, as BRE files them.
+	// are pending, as BRE files them (see PendingSupportPenalty).
 	// Only when the food stage did not already settle it. A baron answers the two
 	// prompts and the food leaves the granary there (FeedGiven), as it does in the
 	// original; the AI and a turn that never reached the stage are fed here.
 	if !e.TurnProgress.Fed {
 		w.feed(e)
+	}
+	// Likewise the civil-unrest step, which the human turn runs before its menus.
+	if !e.TurnProgress.UnrestResolved {
+		w.ResolveCivilUnrest(e)
 	}
 
 	// Food spoilage (BRE-verified by driving the original, 2026-07-16): FoodSpoilPct
@@ -477,6 +475,11 @@ func (w *World) processEconomy(e *Empire) {
 	} else {
 		e.LastSpoiled = 0
 	}
+
+	// Riots and popular support come first, as they open BRE's end-of-turn
+	// routine: a riot's people are gone before migration measures the realm, and
+	// migration's capacity reads the support this update leaves.
+	w.endOfTurnSupport(e)
 
 	// Migration: the population moves a slice of the way toward its carrying
 	// capacity each turn. BINARY-VERIFIED shape (BRE.OVR 0xD219-0xD3CC); see
@@ -514,43 +517,12 @@ func (w *World) processEconomy(e *Empire) {
 		e.LastPopGrowth = growth
 	}
 
-	// Taxes, riots and popular support, verified against a BRE.OVR disassembly
-	// (end-of-turn routine at 0xCE97) and reproduced exactly by a live capture.
-	// A riot fires iff tax > RiotTaxFloor AND tax² >= Random(10000) — quadratic,
-	// so 1.4% a turn at 12% tax but 15% at 39% — and costs both people and
-	// support. On top of any riot, support always drifts by -(tax-30)/10, which
-	// is a free gain below SupportTaxNeutral and a bleed above it.
-	//
-	// The civil-unrest step runs first, as it does in the original: the pending
-	// morale penalty lands, then the army deserts at a rate drawn from the morale
-	// it lands on, then a famine's civil war (if any) is spent.
-	if e.PendingMoralePenalty != 0 {
-		e.adjustMorale(-e.PendingMoralePenalty)
-		e.PendingMoralePenalty = 0
-	}
-	w.moraleDesertion(e)
-	w.resolveCivilWar(e)
-
-	e.LastRiot = false
-	riotPenalty := 0
-	// The weight is zero at or below the floor, and the draw is skipped there.
-	if rw := riotWeight(e.Tax); rw > 0 && rw >= w.rng.Intn(RiotChanceDenom) {
-		e.LastRiot = true
+	// An unpopular realm makes the planet news whether or not it rioted this
+	// turn, tested on the support the update above left (BRE.OVR 0xD5A3). It
+	// costs nothing beyond the embarrassment. The draw is BRE's; IB skips a second
+	// post when the tax riot has already put this realm in the news this turn.
+	if e.Support < LowSupportNewsCeil && w.rng.Intn(LowSupportNewsOdds) == 0 && !e.LastRiot {
 		w.postRiotNews(e)
-		riotPenalty = e.Tax / RiotSupportDivisor
-		e.People -= e.People / RiotPeopleDivisor
-	} else if e.Support < LowSupportNewsCeil && w.rng.Intn(LowSupportNewsOdds) == 0 {
-		// An unpopular realm makes the planet news even in a turn with no tax
-		// riot, and this one costs nothing beyond the embarrassment.
-		w.postRiotNews(e)
-	}
-	e.adjustSupport(-riotPenalty - (e.Tax-SupportTaxNeutral)/SupportTaxDivisor)
-	if e.Support < MoraleDrainSupport {
-		e.adjustMorale(-(MoraleDrainSupport - e.Support))
-	}
-	// Taxing very lightly buys back support, but only while the realm is unhappy.
-	if e.Tax < LowTaxBonusBelow && e.Support < LowTaxSupportCeil {
-		e.adjustSupport(LowTaxBonusBelow - e.Tax)
 	}
 
 	if e.Gold > w.MoneyCap() {
@@ -558,5 +530,42 @@ func (w *World) processEconomy(e *Empire) {
 	}
 	if e.Bank > w.MoneyCap() {
 		e.Bank = w.MoneyCap()
+	}
+}
+
+// endOfTurnSupport is the head of BRE's end-of-turn routine (process_end_of_turn,
+// BRE.OVR 0xCE97-0xCFFF), verified against the disassembly and reproduced
+// exactly by a live capture. A riot fires iff tax > RiotTaxFloor AND
+// tax² >= Random(10000) — quadratic, so 1.4% a turn at 12% tax but 15% at 39% —
+// and costs People/15 people and Tax/3 support, which BRE adds to the pending
+// support penalty rather than applying. Then ONE update:
+//
+//	Support = clamp(Support − pending − (Tax−30)/10, 0, 100)
+//
+// where pending is everything the turn filed — the maintenance, crown-tax and
+// food shortfalls less any support the baron paid for, plus the riot. Only
+// after it do the two follow-on rules test the result: support under
+// MoraleDrainSupport drains morale by the shortfall, and a rate under
+// LowTaxBonusBelow buys back (LowTaxBonusBelow − Tax) while support is under
+// LowTaxSupportCeil. IB applied the pending penalty after both until
+// 2026-09-25, which let a paid-down penalty dodge the drain and the bonus test
+// the wrong figure.
+func (w *World) endOfTurnSupport(e *Empire) {
+	e.LastRiot = false
+	// The weight is zero at or below the floor, and the draw is skipped there.
+	if rw := riotWeight(e.Tax); rw > 0 && rw >= w.rng.Intn(RiotChanceDenom) {
+		e.LastRiot = true
+		w.postRiotNews(e)
+		e.PendingSupportPenalty += e.Tax / RiotSupportDivisor
+		e.People -= e.People / RiotPeopleDivisor
+	}
+	e.adjustSupport(-e.PendingSupportPenalty - (e.Tax-SupportTaxNeutral)/SupportTaxDivisor)
+	e.PendingSupportPenalty = 0
+	if e.Support < MoraleDrainSupport {
+		e.adjustMorale(-(MoraleDrainSupport - e.Support))
+	}
+	// Taxing very lightly buys back support, but only while the realm is unhappy.
+	if e.Tax < LowTaxBonusBelow && e.Support < LowTaxSupportCeil {
+		e.adjustSupport(LowTaxBonusBelow - e.Tax)
 	}
 }

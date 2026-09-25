@@ -165,14 +165,16 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarized bool) {
 
 	// One transaction: the whole budget lands together, as it does in the
 	// original, so a session that drops mid-sequence has spent nothing.
-	var forcesLost, regionsLost, cleaned, supportPts, moralePts int
+	var forcesLost, regionsLost, cleaned int
 	if !withPlayer(w, func(p *game.Empire) {
 		forcesLost = w.World.PayForces(p, forcesGold)
 		regionsLost = w.World.PayRegions(p, regionsGold)
 		w.World.PaySDI(p, sdiGold)
 		cleaned = w.World.Decontaminate(p, deconGold)
-		supportPts = w.World.BoostSupport(p, supportGold)
-		moralePts = w.World.BoostMorale(p, moraleGold)
+		// Both boosts are points bought against the turn's pending penalties,
+		// not a raise on the spot; the original prints nothing for either.
+		w.World.BoostSupport(p, supportGold)
+		w.World.BoostMorale(p, moraleGold)
 		w.World.PayCrownTax(p, crownGold)
 		p.TurnProgress.MaintPaid = true // required charge committed; a later boot must not replay it (#10)
 	}) {
@@ -187,12 +189,6 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarized bool) {
 	// Cleaned land has no type of its own until its owner names one.
 	if cleaned > 0 {
 		allocateDecontaminated(s, w, cleaned)
-	}
-	if supportPts > 0 {
-		fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Popular support rose %d points."), supportPts)))
-	}
-	if moralePts > 0 {
-		fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Military morale rose %d points."), moralePts)))
 	}
 	// Paid by hand: every figure was read as its prompt was answered, so there is
 	// no summary and the food stage that follows does not pause.

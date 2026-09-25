@@ -237,7 +237,7 @@ func (w *World) PayCrownTax(e *Empire, given int64) {
 	if req <= 0 || given >= req {
 		return
 	}
-	// Deferred to turn rollover (see PendingSupportPenalty), matching BRE.
+	// Pending, as BRE files it (see PendingSupportPenalty).
 	e.PendingSupportPenalty += shortfallPenalty(req, given, CrownTaxSupportPenalty)
 }
 
@@ -293,9 +293,9 @@ func (w *World) PayForces(e *Empire, given int64) int {
 	desert(&e.Jets)
 	desert(&e.Turrets)
 	desert(&e.Tanks)
-	// Deferred to turn rollover, as BRE defers every payment-stage penalty: the
-	// whole stage accumulates into two signed bytes on the empire record (+0x2b9
-	// morale, +0x2ba support) which the end-of-turn routines then apply.
+	// Pending, as BRE files every payment-stage penalty: the whole stage
+	// accumulates into two signed bytes on the empire record (+0x2b9 morale,
+	// +0x2ba support), applied later in the turn (see PendingMoralePenalty).
 	e.PendingMoralePenalty += shortfallPenalty(req, given, ForcesShortfallMoraleScale)
 	return lost
 }
@@ -354,10 +354,15 @@ func (e *Empire) SupportBoostMax() int64 {
 // BoostSupport spends gold to raise popular support (the optional "requested"
 // obligation). Paying the full request buys the whole deficit; paying part of it
 // buys proportionally less. One turn's boost is capped, so a badly unpopular
-// realm takes several turns to recover. Returns the support points gained.
+// realm takes several turns to recover. Returns the support points bought.
 //
 // Binary-verified, including the +1 on each side of the ratio (BRE.OVR 0x2F740),
 // which is the same shape the crown-tax penalty uses.
+//
+// The points are NOT added to Support here. BRE subtracts them from the turn's
+// pending support penalty (allocate_turn_budget, BRE.OVR 0x2F65E, then into
+// +0x2ba at 0x2FBD1), so they net against whatever the turn's shortfalls cost
+// and land, clamped once, in the end-of-turn update (endOfTurnSupport).
 func (w *World) BoostSupport(e *Empire, given int64) int {
 	cost := e.SupportBoostCost()
 	given = e.clampGive(given)
@@ -365,9 +370,8 @@ func (w *World) BoostSupport(e *Empire, given int64) int {
 		return 0
 	}
 	pts := int(int64(e.supportBoostDeficit()) * (given + 1) / (cost + 1))
-	before := e.Support
-	e.adjustSupport(pts)
-	return e.Support - before
+	e.PendingSupportPenalty -= pts
+	return pts
 }
 
 // moraleBoostDeficit is the number of morale points this turn's boost is priced
@@ -406,7 +410,9 @@ func (w *World) MoraleBoostMax(e *Empire) int64 {
 }
 
 // BoostMorale spends gold to raise military morale, on the same ratio
-// BoostSupport uses. Returns the morale points gained.
+// BoostSupport uses. Returns the morale points bought, which net against the
+// turn's pending morale penalty as BoostSupport's do (BRE.OVR 0x2F987, then into
+// +0x2b9 at 0x2FBEB) and land in ResolveCivilUnrest, before the turn's menus.
 func (w *World) BoostMorale(e *Empire, given int64) int {
 	cost := w.MoraleBoostCost(e)
 	given = e.clampGive(given)
@@ -414,9 +420,8 @@ func (w *World) BoostMorale(e *Empire, given int64) int {
 		return 0
 	}
 	pts := int(int64(e.moraleBoostDeficit()) * (given + 1) / (cost + 1))
-	before := e.Morale
-	e.adjustMorale(pts)
-	return e.Morale - before
+	e.PendingMoralePenalty -= pts
+	return pts
 }
 
 // adjustSupport moves support by delta, clamped to [0, 100].

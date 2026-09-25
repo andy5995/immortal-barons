@@ -79,7 +79,7 @@ func TestPayForcesShortfallDeserts(t *testing.T) {
 		t.Errorf("troopers: want %d, got %d", wantTroopers, e.Troopers)
 	}
 	// The penalty is filed, not applied on the spot — BRE accumulates the whole
-	// payment stage and spends it at rollover — and it lands on MORALE alone.
+	// payment stage and spends it later that turn — and it lands on MORALE alone.
 	// Golden literal from BRE.OVR 0x2F077: trunc((1 - 1/(due+1)) x 40) = 39 for
 	// any due above 39.
 	if e.PendingMoralePenalty != 39 {
@@ -111,15 +111,42 @@ func TestPayRegionsShortfallRevolts(t *testing.T) {
 func TestBoostSupportCapsAt100(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
-	e.Support = 95
+	e.Support, e.Tax = 95, 10 // tax 10: no riot, and a +2 drift
 	e.Gold = 1_000_000
 
-	pts := w.BoostSupport(e, e.SupportBoostMax()) // overpay the request by half
-	if e.Support != 100 {
-		t.Errorf("support should cap at 100, got %d", e.Support)
+	// Overpaying by half buys 5 x 1.5 = 7 points (truncated), and they go against
+	// the pending penalty rather than onto Support: BRE's boost never writes the
+	// field (allocate_turn_budget subtracts from +0x2ba).
+	pts := w.BoostSupport(e, e.SupportBoostMax())
+	if pts != 7 || e.Support != 95 || e.PendingSupportPenalty != -7 {
+		t.Errorf("boost: pts %d support %d pending %d, want 7, 95 (unchanged), -7",
+			pts, e.Support, e.PendingSupportPenalty)
 	}
-	if pts != 5 {
-		t.Errorf("boost from 95 should report the 5 points actually gained, got %d", pts)
+	// The end of the turn applies it, clamped once: 95 + 7 + 2 caps at 100.
+	w.endOfTurnSupport(e)
+	if e.Support != 100 || e.PendingSupportPenalty != 0 {
+		t.Errorf("after the turn support %d pending %d, want 100, 0", e.Support, e.PendingSupportPenalty)
+	}
+}
+
+// A paid boost nets against the turn's shortfall penalties before anything is
+// clamped, so a baron who underpays the crown and buys the points back ends the
+// turn where he started. Applied in the other order the clamp at 100 would eat
+// the boost first and the penalty would land in full.
+func TestBoostNetsAgainstPendingPenalty(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Support, e.Tax = 97, 10 // tax 10: no riot, and a +2 drift
+	e.People = 23874 * PopBREUnitScale
+	e.Gold = 10_000_000
+	e.PendingSupportPenalty = 5           // e.g. an unpaid region bill
+	pts := w.BoostSupport(e, 216_366*3/2) // overpay: 3 x 1.5 = 4 points
+	if pts != 4 || e.PendingSupportPenalty != 1 {
+		t.Fatalf("pts %d pending %d, want 4 and 1", pts, e.PendingSupportPenalty)
+	}
+	w.endOfTurnSupport(e)
+	if e.Support != 98 { // 97 - 1 + 2
+		t.Errorf("support %d, want 98", e.Support)
 	}
 }
 
@@ -137,8 +164,8 @@ func TestSupportBoostCostAndAward(t *testing.T) {
 	}
 	full := *e
 	full.Gold = 1_000_000
-	if pts := w.BoostSupport(&full, full.SupportBoostCost()); pts != 3 || full.Support != 100 {
-		t.Errorf("full payment should buy all 3 points, got %d (support %d)", pts, full.Support)
+	if pts := w.BoostSupport(&full, full.SupportBoostCost()); pts != 3 || full.PendingSupportPenalty != -3 {
+		t.Errorf("full payment should buy all 3 points, got %d (pending %d)", pts, full.PendingSupportPenalty)
 	}
 	half := *e
 	half.Gold = 1_000_000

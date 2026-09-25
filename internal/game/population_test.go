@@ -57,11 +57,17 @@ func TestPopulationMovesTowardCapacity(t *testing.T) {
 // gate through the rewrite, so a realm that had fed its people in full at the
 // maintenance prompts, spending the granary down to zero, silently lost its
 // whole turn's growth.
+//
+// That is the case this pins: a realm FED in full whose granary is then empty.
+// A realm that went unfed does lose people, but through the support penalty,
+// which lands in the end-of-turn update ahead of migration and shrinks the
+// capacity migration moves toward.
 func TestAnEmptyGranaryDoesNotStopGrowth(t *testing.T) {
 	for seed := int64(1); seed <= 8; seed++ {
 		cfg := DefaultConfig()
 		w := NewWorldSeed(cfg, seed)
 		e := w.AddHuman("tester", "Testland")
+		w.FeedGiven(e, e.PeopleFoodUpkeep(), e.ForcesFoodUpkeep())
 		e.Food = 0
 		w.PlayTurn(e, "2026-08-14")
 		if e.LastPopGrowth <= 0 {

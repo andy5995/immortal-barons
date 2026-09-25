@@ -67,8 +67,8 @@ func TestMoraleBoostOfAnEmptyArmy(t *testing.T) {
 }
 
 // Underpaying the forces FILES a morale penalty rather than applying it: BRE
-// accumulates the whole payment stage on the empire record and spends it at
-// rollover, so the drop surfaces on the next turn's display.
+// accumulates the whole payment stage on the empire record and spends it in the
+// civil-unrest step that follows the food stage.
 func TestPayForcesShortfallFilesMoralePenalty(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
@@ -88,7 +88,7 @@ func TestPayForcesShortfallFilesMoralePenalty(t *testing.T) {
 	w.GrowFood(e)
 	w.PlayTurn(e, "2026-07-03")
 	if e.Morale >= 100 {
-		t.Errorf("the filed penalty should land at rollover, got morale %d", e.Morale)
+		t.Errorf("the filed penalty should land by the end of the turn, got morale %d", e.Morale)
 	}
 }
 
@@ -151,5 +151,114 @@ func TestLowMoraleDesertsTheRightUnits(t *testing.T) {
 			t.Fatalf("seed %d: nobody deserts at %d morale, got %d troopers",
 				seed, MoraleDesertBandTop, e.Troopers)
 		}
+	}
+}
+
+// A morale boost nets against the pending penalty and lands with it, clamped
+// once, in the civil-unrest step (BRE.OVR 0x2F987 subtracts the bought points
+// from the local that becomes +0x2b9; resolve_civil_unrest applies it). The
+// step runs once a turn: PlayTurn must not apply it a second time.
+func TestMoraleBoostNetsAndLandsInCivilUnrest(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Morale = 40
+	e.Troopers, e.Jets, e.Turrets, e.Tanks = 1000, 1000, 1000, 1000
+	e.Gold = 10_000_000
+	e.PendingMoralePenalty = 10 // say, an unpaid army
+
+	if got := w.BoostMorale(e, 6500); got != 15 || e.Morale != 40 || e.PendingMoralePenalty != -5 {
+		t.Fatalf("boost: pts %d morale %d pending %d, want 15, 40 (unchanged), -5",
+			got, e.Morale, e.PendingMoralePenalty)
+	}
+	w.ResolveCivilUnrest(e)
+	if e.Morale != 45 || e.PendingMoralePenalty != 0 || !e.TurnProgress.UnrestResolved {
+		t.Fatalf("after the step: morale %d pending %d resolved %v, want 45, 0, true",
+			e.Morale, e.PendingMoralePenalty, e.TurnProgress.UnrestResolved)
+	}
+	e.PendingMoralePenalty = 99 // planted: nothing may apply a penalty twice in one turn
+	e.Tax = 10
+	w.PlayTurn(e, "2026-07-03")
+	if e.Morale != 45 {
+		t.Errorf("PlayTurn re-ran the civil-unrest step: morale %d, want 45", e.Morale)
+	}
+}
+
+// Desertion reads the morale the pending penalty leaves, not the figure before
+// it: a realm at 100 morale with 70 points pending deserts in the 30-39 band the
+// same step. Property over seeds — that band's rate is 5 + Random(2) -
+// Random(5), which is positive only some of the time.
+func TestDesertionReadsThePenalizedMorale(t *testing.T) {
+	deserted := 0
+	for seed := int64(1); seed <= 20; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		e := w.AddHuman("me", "Mine")
+		e.Morale, e.PendingMoralePenalty = 100, 70
+		e.Troopers, e.Jets, e.Tanks = 1000, 1000, 1000
+		w.ResolveCivilUnrest(e)
+		if e.Morale != 30 {
+			t.Fatalf("seed %d: morale %d, want 30", seed, e.Morale)
+		}
+		deserted += e.LastMoraleDesertion
+	}
+	if deserted == 0 {
+		t.Error("no seed deserted anyone at 30 morale; the step read the morale before the penalty")
+	}
+}
+
+// The end-of-turn support update is ONE step, and the two follow-on rules test
+// its RESULT (process_end_of_turn, BRE.OVR 0xCF41-0xD000). Tax 10 is below the
+// riot floor, so nothing here is random.
+func TestEndOfTurnSupportOrder(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+
+	// 15 - 8 - (10-30)/10 = 9: under 10, so morale loses the 1-point shortfall.
+	// Applying the penalty after the drain (IB's old order) left morale at 100.
+	e.Support, e.Morale, e.Tax, e.PendingSupportPenalty = 15, 100, 10, 8
+	w.endOfTurnSupport(e)
+	if e.Support != 9 || e.Morale != 99 || e.PendingSupportPenalty != 0 {
+		t.Errorf("drain: support %d morale %d pending %d, want 9, 99, 0", e.Support, e.Morale, e.PendingSupportPenalty)
+	}
+
+	// 90 - 10 + 2 = 82, under 85, so tax 5 buys back 5 more: 87. The old order
+	// tested 92, gave no bonus, and ended at 82.
+	e.Support, e.Morale, e.Tax, e.PendingSupportPenalty = 90, 100, 5, 10
+	w.endOfTurnSupport(e)
+	if e.Support != 87 {
+		t.Errorf("low-tax bonus: support %d, want 87", e.Support)
+	}
+
+	// A certain riot (tax 100) adds Tax/3 to the pending figure: 100 - 33 - 7 = 60.
+	e.Support, e.Tax, e.PendingSupportPenalty, e.People = 100, 100, 0, 1500
+	w.endOfTurnSupport(e)
+	if !e.LastRiot || e.Support != 60 || e.People != 1400 {
+		t.Errorf("riot: riot %v support %d people %d, want true, 60, 1400", e.LastRiot, e.Support, e.People)
+	}
+}
+
+// The low-support news line tests the support the end-of-turn update leaves
+// (BRE.OVR 0xD5A3): a realm that falls from 40 to 32 this turn is eligible at
+// its 1-in-20 odds, and one that stays at 42 never is. Property over seeds.
+func TestLowSupportNewsTestsTheUpdatedFigure(t *testing.T) {
+	posted := func(support, pending int) int {
+		n := 0
+		for seed := int64(1); seed <= 200; seed++ {
+			w := NewWorldSeed(DefaultConfig(), seed)
+			e := w.AddHuman("me", "Mine")
+			e.Support, e.PendingSupportPenalty, e.Tax = support, pending, 10
+			e.TurnProgress.Fed = true
+			before := len(w.NewsToday)
+			w.processEconomy(e)
+			if len(w.NewsToday) > before {
+				n++
+			}
+		}
+		return n
+	}
+	if n := posted(40, 10); n == 0 {
+		t.Error("a realm left at 32 support never made the news in 200 turns")
+	}
+	if n := posted(40, 0); n != 0 {
+		t.Errorf("a realm at 42 support made the news %d times", n)
 	}
 }

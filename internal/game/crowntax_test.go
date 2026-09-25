@@ -79,7 +79,7 @@ func TestCrownTaxShortfallCostsSupport(t *testing.T) {
 	w.PayCrownTax(e, 0)
 	// Not applied yet — that is the point of deferring it.
 	if e.Support != 100 {
-		t.Errorf("penalty must not land until rollover, support already %d", e.Support)
+		t.Errorf("penalty must not land at the prompt, support already %d", e.Support)
 	}
 	want := int(req * CrownTaxSupportPenalty / (req + 1))
 	if e.PendingSupportPenalty != want {
@@ -91,12 +91,16 @@ func TestCrownTaxShortfallCostsSupport(t *testing.T) {
 		t.Errorf("penalty %d should stay under the %d cap", want, CrownTaxSupportPenalty)
 	}
 
-	w.PlayTurn(e, "2026-07-29") // rollover applies and clears it
-	if e.Support != 100-want {
-		t.Errorf("after rollover support %d, want %d", e.Support, 100-want)
+	// It lands at the end of the turn in ONE update with the tax drift, as BRE's
+	// process_end_of_turn does it: clamp(100 - 14 - (15-30)/10) = 87. IB used to
+	// apply the drift first, where the +1 was lost to the clamp at 100, and read 86.
+	e.Tax = 15
+	w.PlayTurn(e, "2026-07-29")
+	if want != 14 || e.Support != 87 {
+		t.Errorf("after the turn support %d (penalty %d), want 87 (penalty 14)", e.Support, want)
 	}
 	if e.PendingSupportPenalty != 0 {
-		t.Errorf("rollover should clear the pending penalty, got %d", e.PendingSupportPenalty)
+		t.Errorf("the end of the turn should clear the pending penalty, got %d", e.PendingSupportPenalty)
 	}
 
 	w, e = newE()
