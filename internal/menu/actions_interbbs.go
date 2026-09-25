@@ -216,7 +216,7 @@ func disbandGroupAttack(s session.Session, w *ctx) Result {
 	// Re-checked inside the transaction: a vote on another node can unseat the
 	// caller, and the party can depart, between the gate above and here.
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		return w.World.DisbandGroupAttackByCoordinator(p, id, time.Now())
+		return w.World.DisbandGroupAttackByCoordinator(p, id, game.Now())
 	})
 	if err != nil {
 		fail(s, err)

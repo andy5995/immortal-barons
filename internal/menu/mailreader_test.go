@@ -74,6 +74,11 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 	if !strings.Contains(got.Body, "thanks") {
 		t.Errorf("reply should carry the new text; body = %q", got.Body)
 	}
+	// Stamped on the game's clock with its zone, so each reader sees it on their
+	// own clock (#267).
+	if _, ok := game.ParseStamp(got.When); !ok {
+		t.Errorf("reply stamp %q carries no zone", got.When)
+	}
 	// A sent reply removes the original, like Delete (#122).
 	if got := len(w.Player().Mail); got != 0 {
 		t.Errorf("a sent reply should remove the original; player Mail len = %d, want 0", got)

@@ -774,7 +774,7 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 		// Nobody presses a button here: the weapon launches itself once
 		// construction has run, and only the Coordinator can stand it down (#114).
 		var left time.Duration
-		w.Read(func() { left = d.LaunchIn(time.Now(), w.GameDay) })
+		w.Read(func() { left = d.LaunchIn(game.Now(), w.GameDay) })
 		if left <= 0 {
 			// Its hour has come and it goes on the next run. "in 0 hours" was what
 			// this said for the whole of launch day, which is what sent us looking.

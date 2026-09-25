@@ -3,7 +3,6 @@ package menu
 import (
 	"fmt"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -581,7 +580,7 @@ func sendMessage(s session.Session, w *ctx) Result {
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
-			when := time.Now().Format(game.StampFormat)
+			when := game.StoredStamp(game.Now())
 			// Re-resolve sender and recipients by handle/name against the freshly
 			// reloaded world, so a concurrent send to the same inbox appends (both
 			// messages land) and a vanished recipient drops out.

@@ -37,3 +37,7 @@ func ClockOffset() time.Duration { return clockOffset }
 // date string and the instants can never disagree about what day it is. That is
 // why the offset is a duration rather than a date: one source, two views.
 func Today() string { return timeNow().Format("2006-01-02") }
+
+// Now is the game's clock for callers outside this package, so an instant they
+// save is on the same clock as the game's own.
+func Now() time.Time { return timeNow() }

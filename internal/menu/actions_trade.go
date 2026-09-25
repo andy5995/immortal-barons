@@ -3,7 +3,6 @@ package menu
 import (
 	"fmt"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -266,7 +265,7 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		// Deals lapse here rather than in daily maintenance, which is where the
 		// original sweeps them too: whoever takes the next turn clears the stale
 		// ones (see World.ExpireTradeDeals).
-		w.World.ExpireTradeDeals(time.Now())
+		w.World.ExpireTradeDeals(game.Now())
 		// A deal still in transit is skipped, not removed: it will be waiting
 		// on the turn it was sent for, today and on any later day it survives
 		// to (see TradeDeal.ArrivesOnTurn). ExpireTradeDeals stays the only

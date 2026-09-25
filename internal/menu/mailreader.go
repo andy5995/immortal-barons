@@ -3,7 +3,6 @@ package menu
 import (
 	"fmt"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -124,7 +123,7 @@ func applyMailActions(w *ctx, deleted []game.Message, replies []mailReply) {
 	if len(deleted) == 0 && len(replies) == 0 {
 		return
 	}
-	when := time.Now().Format(game.StampFormat)
+	when := game.StoredStamp(game.Now())
 	w.mutatePlayer(func(p *game.Empire) error {
 		for _, d := range deleted {
 			for i, m := range p.Mail {

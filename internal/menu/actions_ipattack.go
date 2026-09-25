@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -408,7 +407,7 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 // (#270), which lists the same parties before asking which one to disband.
 func formingGroupRows(s session.Session, w *ctx) []gaRow {
 	var rows []gaRow
-	now := time.Now()
+	now := game.Now()
 	w.Read(func() {
 		if w.Player() == nil {
 			return

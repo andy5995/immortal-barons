@@ -105,7 +105,7 @@ func showIncoming(s session.Session, w *ctx) Result {
 // is measured from one moment.
 func incomingRows(s session.Session, w *ctx) []inRow {
 	var rows []inRow
-	now := time.Now()
+	now := game.Now()
 	w.Read(func() {
 		// A weapon already in the air is not a report from anybody: the board that
 		// launched it says so openly, and the whole flight is visible (#63). Its

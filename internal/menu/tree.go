@@ -725,7 +725,7 @@ func gameMenuStatus(w *ctx) string {
 		lines = append(lines, fmt.Sprintf(i18n.T(lang, "Game started on %s"), w.StartedDate))
 		// Its own line: one row would run past 80 columns in German or Russian,
 		// and the header is not wrapped.
-		if clock := planetaryClock(time.Now(), w.Today, lang); clock != "" {
+		if clock := planetaryClock(game.Now(), w.Today, lang); clock != "" {
 			lines = append(lines, clock)
 		}
 	}
