@@ -137,8 +137,8 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 	// attacker, matching BRE's "the empire's allies send N Troopers and M Tanks".
 	allyTroopers, allyTanks := 0, 0
 	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
-		allyTroopers += ally.Troopers * AllyDefenseContribPct / 100
-		allyTanks += ally.Tanks * AllyDefenseContribPct / 100
+		allyTroopers += allySent(ally.Troopers)
+		allyTanks += allySent(ally.Tanks)
 	}
 	// GroupLong, not bare and not Format: the original groups THIS line past four
 	// digits while leaving the casualty lines on the same screen bare at any size

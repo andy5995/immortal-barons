@@ -675,6 +675,15 @@ const (
 	// memory. The sent detachment adds to the defender's battle power and takes the
 	// same casualty rate as the defender.
 	AllyDefenseContribPct = 30
+	// What the sent detachment is worth in the battle. BINARY-VERIFIED
+	// (resolve_regular_attack__add_allied_defenders, BRE.OVR 0xF57C-0xF72B):
+	// troopers x 0.5 + tanks x 2 in the original's units, i.e. 1 and 4 at IB's
+	// (a trooper is 1 here, 0.5 there), times (allyMorale div 2 + 25) where the
+	// defender's own builder uses morale x 0.6 + 50. No HeadQuarters term on the
+	// tanks and no technology factor: an ally's tanks count flat.
+	AllyDefenseTankWeight     = 4  // binary: Real48 2 at a 0.5 trooper
+	AllyDefenseMoraleDivisor  = 2  // binary: morale div 2, integer
+	AllyDefenseMoraleFloorPct = 25 // binary: + 25
 	// A won pirate raid pays Random(PirateScoreRoll) + PirateScoreBase Score.
 	// BINARY-VERIFIED (`launch_pirate_raid`, BRE.OVR 0x037004): the one Score site
 	// in the routine, so a failed raid costs nothing. This is the only rolled

@@ -2671,8 +2671,13 @@ bombers and carriers (`0x101E4`-`0x10294`) — which is what "you also get all t
 remains of your opponent's military" means literally.
 
 **Allied defenders contribute at their own morale**, on a different curve from
-the main one: `allyMorale/2 + 25`, so 25% at broken morale and 75% at full
-(`0xF5D7`).
+the main one: `allyMorale div 2 + 25`, so 25% at broken morale and 75% at full
+(`0xF5D7`). The detachment is valued on its own terms as well
+(`resolve_regular_attack__add_allied_defenders`, `0xF57C`-`0xF72B`): each
+ally's 30% of troopers counts `0.5` and its 30% of tanks a flat `2` in the
+original's units — 1 and 4 at IB's — with no HeadQuarters term on the tanks and
+no technology factor. IB valued it as the ally's own defense (morale
+`× 0.6 + 50`, tanks by the ally's HQ, tech-raised) until 2026-09-25.
 
 **The regular attack's casualties and capture — BINARY-VERIFIED.** Both were
 reconstructed from play until 2026-08-14; they are now read out of the driver
@@ -5726,9 +5731,11 @@ and each carries a gameplay effect (#11 wired the last two):
   only in Local Games." **IB implements this** (`allyDefenseBoost` / `AllyDefenders`
   in `internal/game/diplomacy.go`, `AllyDefenseContribPct = 30` in `balance*.go`):
   when a realm is attacked, each Full Defense Alliance partner adds 30% of its
-  troopers + tanks to the defender's battle power (valued as the ally's own
-  `Defense()` weighs them — tanks 3.5–4.5 troopers by HQ, morale- and tech-scaled; turrets
-  stay home, agents are covert); the attacker's battle report notes the
+  troopers + tanks, each rounded (`allySent`; the 3,271 above is a rounding of
+  3,270.9), to the defender's battle power (valued the original's way, not as
+  the ally's own `Defense()` — tanks a flat 4 troopers, scaled by
+  `allyMorale div 2 + 25` percent, no tech; see the regular attack section;
+  turrets stay home, agents are covert); the attacker's battle report notes the
   reinforcements, and the committed detachment bleeds at the defender's casualty
   rate (`bleedAllies`), which also **tells each partner what it lost and in whose
   defense** — BRE files that line in the same loop iteration as the deduction

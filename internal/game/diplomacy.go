@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -295,8 +296,8 @@ func (w *World) AllyDefenders(e *Empire) []AllyContribution {
 	for _, ally := range w.alliesOf(e, fullDefenseAlliance) {
 		out = append(out, AllyContribution{
 			Name:     ally.Name,
-			Troopers: ally.Troopers * AllyDefenseContribPct / 100,
-			Tanks:    ally.Tanks * AllyDefenseContribPct / 100,
+			Troopers: allySent(ally.Troopers),
+			Tanks:    allySent(ally.Tanks),
 		})
 	}
 	for _, ally := range w.alliesOf(e, terroristPrevention) {
@@ -308,18 +309,29 @@ func (w *World) AllyDefenders(e *Empire) []AllyContribution {
 	return out
 }
 
+// allySent is the share of one unit count a Full Defense Alliance partner
+// sends, ROUNDED: the original takes Round(n x 30 / 100) (BRE.OVR 0xF5C0), and a
+// live Alliance Strength screen showed 10,903 tanks sending 3,271, where
+// truncating gives 3,270.
+func allySent(n int) int {
+	return int((int64(n)*AllyDefenseContribPct + 50) / 100)
+}
+
 // allyDefenseBoost is the extra battle power d's Full Defense Alliance partners
 // add when d is attacked: each sends 30% of its troopers + tanks (agents are
-// covert, turrets stay home), valued exactly as the ally's own Defense() weighs
-// those units (tanks 3–5 troopers by HQ, then morale- and tech-scaled).
+// covert, turrets stay home). The detachment is valued the original's way, not
+// as the ally's own Defense() would weigh it: tanks count a flat
+// AllyDefenseTankWeight troopers with no HeadQuarters term, there is no
+// technology factor, and morale scales it by allyMorale/2 + 25 percent — 25% at
+// broken morale, 75% at full — where a defender's own army uses moraleFactor.
 func (w *World) allyDefenseBoost(d *Empire) int {
 	sum := 0
 	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
-		troopers := ally.Troopers * AllyDefenseContribPct / 100
-		tanks := ally.Tanks * AllyDefenseContribPct / 100
-		base := troopers + tankStrength(tanks, ally.HQ)
-		v := base * moraleFactor(ally.Morale) / 100
-		sum += techRaise(v, ally.TechMilitaryFactor())
+		troopers := allySent(ally.Troopers)
+		tanks := allySent(ally.Tanks)
+		base := int64(troopers) + int64(tanks)*AllyDefenseTankWeight
+		morale := int64(ally.Morale/AllyDefenseMoraleDivisor + AllyDefenseMoraleFloorPct)
+		sum += int(min(base*morale/100, math.MaxInt32))
 	}
 	return sum
 }
@@ -366,8 +378,8 @@ func (w *World) bleedAllies(a, d *Empire, frac float64) {
 	for _, ally := range w.battleNotified(d) {
 		var troopers, tanks int
 		if w.HasTreaty(d, ally, fullDefenseAlliance) {
-			troopers = shareOf(ally.Troopers*AllyDefenseContribPct/100, frac)
-			tanks = shareOf(ally.Tanks*AllyDefenseContribPct/100, frac)
+			troopers = shareOf(allySent(ally.Troopers), frac)
+			tanks = shareOf(allySent(ally.Tanks), frac)
 			ally.Troopers -= troopers
 			ally.Tanks -= tanks
 		}

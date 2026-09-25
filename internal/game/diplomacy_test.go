@@ -647,3 +647,41 @@ func TestDeclaringWarIsFreeAndStillEndsThePact(t *testing.T) {
 		t.Errorf("relation = %q, want %q", w.Relation(a, b), RelationEnemy)
 	}
 }
+
+// An ally's detachment is valued the original's way (BRE.OVR 0xF57C): troopers
+// 1, tanks a flat 4 with no HeadQuarters term and no technology, times
+// allyMorale div 2 + 25 percent. Golden literals: 300 troopers + 150 tanks sent
+// is 900, and 75% / 50% / 25% of it at morale 100 / 51 / 0.
+func TestAllyDefenseBoostUsesTheOriginalsValuation(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	b.Troopers, b.Tanks, b.HQ = 1000, 500, 100
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	for _, tc := range []struct{ morale, want int }{{100, 675}, {51, 450}, {0, 225}} {
+		b.Morale = tc.morale
+		if got := w.allyDefenseBoost(a); got != tc.want {
+			t.Errorf("ally at morale %d adds %d, want %d", tc.morale, got, tc.want)
+		}
+	}
+	b.Morale, b.HQ = 100, 0
+	if got := w.allyDefenseBoost(a); got != 675 {
+		t.Errorf("the ally's HeadQuarters changed its tanks' worth: %d, want 675", got)
+	}
+}
+
+// The share an ally sends is rounded, not truncated: a live Alliance Strength
+// screen showed an ally holding 10,903 tanks and 97 troopers send 3,271 and 29.
+func TestAllySendsARoundedShare(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	b.Troopers, b.Tanks = 97, 10_903
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	d := w.AllyDefenders(a)
+	if len(d) != 1 || d[0].Troopers != 29 || d[0].Tanks != 3271 {
+		t.Fatalf("want 29 troopers / 3271 tanks sent, got %+v", d)
+	}
+}
