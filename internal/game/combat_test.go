@@ -388,6 +388,64 @@ func TestRepelledAttackLeavesHQAlone(t *testing.T) {
 	}
 }
 
+// A lost regular attack costs the attacker 5-9 morale points (Random(5)+5,
+// resolve_regular_attack +0x1ca5), floored at zero; the defender's morale is
+// untouched. Golden band over several seeds.
+func TestLostAttackCostsAttackerMorale(t *testing.T) {
+	lost := 0
+	for seed := int64(1); seed <= 8; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		a := w.AddHuman("me", "Mine")
+		d := w.AddHuman("you", "Yours")
+		for _, e := range []*Empire{a, d} {
+			e.Protection, e.Morale = 0, 80
+		}
+		a.Troopers = 10
+		d.Troopers, d.Turrets, d.Land = 5_000_000, 500_000, 100
+
+		report, _ := w.Attack(a, d, AttackForce{Troopers: 10}, true)
+		if !strings.Contains(report, "Defeat!") {
+			continue
+		}
+		lost++
+		if drop := 80 - a.Morale; drop < 5 || drop > 9 {
+			t.Errorf("seed %d: a lost attack cost %d morale, want 5..9", seed, drop)
+		}
+		if d.Morale != 80 {
+			t.Errorf("seed %d: defender morale = %d, want 80 untouched", seed, d.Morale)
+		}
+
+		a.Morale, a.Troopers = 3, 10
+		w.Attack(a, d, AttackForce{Troopers: 10}, true)
+		if a.Morale != 0 {
+			t.Errorf("seed %d: morale 3 after a second loss = %d, want the floor 0", seed, a.Morale)
+		}
+	}
+	if lost == 0 {
+		t.Fatal("no attack was lost; the test never reached the branch it covers")
+	}
+}
+
+// A winning attacker's morale is left alone: the original's win path has no
+// morale write.
+func TestWonAttackLeavesAttackerMorale(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 3)
+	a := w.AddHuman("me", "Mine")
+	d := w.AddHuman("you", "Yours")
+	for _, e := range []*Empire{a, d} {
+		e.Protection, e.Morale = 0, 80
+	}
+	a.Troopers, a.Tanks = 5_000_000, 500_000
+	d.Troopers, d.Land = 10, 100
+	report, _ := w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000}, true)
+	if !strings.Contains(report, "Victory!") {
+		t.Fatalf("expected a win:\n%s", report)
+	}
+	if a.Morale != 80 {
+		t.Errorf("attacker morale after a win = %d, want 80", a.Morale)
+	}
+}
+
 // TestCapturedJetsVersusTurrets reproduces a live BRE v0.988 game, captured
 // 2026-08-24: a realm with 3 jets and nothing else attacked one holding 112
 // turrets, 15 regions and no other units, at full morale and Attack Damage

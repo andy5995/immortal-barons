@@ -270,6 +270,12 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
 		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCas(dloss))
 		fmt.Fprint(&b, tr("Defeat! Your forces were beaten off the field.")+"\n")
+		// A beaten attacker's army loses heart (LostAttackMoraleMin). Silent, as
+		// in the original: the loss report says nothing about morale.
+		a.Morale -= LostAttackMoraleMin + w.rng.Intn(LostAttackMoraleJitter)
+		if a.Morale < 0 {
+			a.Morale = 0
+		}
 		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you and was repelled. You lost %s."),
 			a.Name, defenderCasIn(d.Language, dloss)))
 		w.postCombatNews(a, d, false, false)

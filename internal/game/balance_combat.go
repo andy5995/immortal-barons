@@ -186,6 +186,16 @@ const (
 	BattleUpsetPct      = 5 // binary: Real48 0.05, the consolation roll
 )
 
+// A lost regular attack costs the ATTACKER morale: Random(5)+5 points, floored
+// at zero. BINARY-VERIFIED: resolve_regular_attack +0x1ca5 (BRE.OVR 0x104ae), on
+// the "You lost the battle!" path, subtracts Random(5)+5 from the acting
+// realm's +0x8e through the clamped sub32 helper 0c03:0fe3. The winning path
+// has no morale write, and the defender's morale is not touched either way.
+const (
+	LostAttackMoraleMin    = 5 // binary
+	LostAttackMoraleJitter = 5 // binary: Random(5) added to the minimum
+)
+
 // The interplanetary battle runs the same attrition, with two differences read
 // from its own resolver (BRE.OVR 0x03f4a0 +0x0647, reached from
 // resolve_received_invasion at 0x040012).

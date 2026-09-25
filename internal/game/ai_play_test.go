@@ -232,6 +232,10 @@ func TestAttackingAPartnerBreachesAndCostsSupportAndMorale(t *testing.T) {
 	w.ProposeTreaty(a, b, "Tariff Trade Agreement")
 	w.AcceptTreaty(b, a.Name, "Tariff Trade Agreement")
 	a.Support, a.Morale, a.Protection, b.Protection = 90, 80, 0, 0
+	// An overwhelming attacker, so the battle is won: a LOST attack costs morale
+	// of its own (LostAttackMorale*), which is not what this test measures.
+	a.Troopers = 50_000_000
+	b.Troopers, b.Turrets, b.Tanks, b.Jets = 10, 0, 0, 0
 
 	w.Attack(a, b, FullForce(a), true)
 
@@ -247,6 +251,7 @@ func TestAttackingAPartnerBreachesAndCostsSupportAndMorale(t *testing.T) {
 	// Attacking a realm you had no pact with is not a breach.
 	c := w.AddHuman("c", "Gamma")
 	c.Protection = 0
+	c.Troopers, c.Turrets, c.Tanks, c.Jets = 10, 0, 0, 0
 	a.Support, a.Morale = 90, 80
 	w.Attack(a, c, FullForce(a), true)
 	if a.Support != 90 || a.Morale != 80 {

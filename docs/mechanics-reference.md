@@ -2642,6 +2642,12 @@ at zero (`0xFFA2`, subtracted via `0c03:0fe3`). So a HeadQuarters is not
 permanent — a realm under repeated attack loses the tank bonus it spent 20 turns
 building. IB had no HQ damage at all.
 
+**A lost attack costs the attacker morale**: `Random(5)+5` points off the
+attacker's own `+0x8e`, floored at zero, with no line on the report
+(`resolve_regular_attack +0x1ca5`, `BRE.OVR 0x104AE`, the "You lost the battle!"
+path). The winning path writes no morale, and the defender's is never touched.
+IB applies it in `AttackDetailed`'s loss branch (`LostAttackMoraleMin/Jitter`).
+
 **A total victory takes the loser's whole military.** The "crushed the enemy
 completely" path transfers all six unit types — troopers, jets, turrets, tanks,
 bombers and carriers (`0x101E4`-`0x10294`) — which is what "you also get all the
@@ -2884,6 +2890,7 @@ access list** for the two fields: 62 sites in `BRE.OVR` and 4 in `BRE.EXE`.
 | Support under 10 | morale `− (10 − support)` | `BRE.OVR 0xCF9C` |
 | Civil war | support halved | `BRE.OVR 0xC5C8` |
 | Breaking a treaty by attacking | both `× 3/4` (integer) | `BRE.OVR 0x1A881` |
+| Losing a regular attack you launched | attacker's morale `− (Random(5)+5)`, floor 0, no message | `BRE.OVR 0x104AE` |
 | Chemical strike on you | morale `× 3/4` rounded, support `× 2/3` rounded | `BRE.OVR 0x110AE`, `0x11109` |
 | Biological strike on you | morale halved, support `× 2/3` rounded | `BRE.OVR 0x115FE`, `0x11645` |
 | Demoralize Forces against you (local) | morale `− (Random(5)+5)`, floor 5 | `BRE.OVR 0x4C2BD` |
@@ -2895,8 +2902,11 @@ access list** for the two fields: 62 sites in `BRE.OVR` and 4 in `BRE.EXE`.
 Both are clamped to `[0, 100]` where they are applied. **Every** covert op — not
 only an AI's — floors its victim at **5** of either stat (`BRE.OVR 0x4C02F`,
 `0x4C2E0`, both inside the resolver that runs every player's queued op). The two
-packet-path rows are recorded for completeness: IB has no received-covert-op path
-yet, so nothing reads those two ratios today.
+packet-path rows are IB's received-terror path (`ibbs_terror.go`,
+`applyTerrorOp`), which applies both ratios. The lost-attack row was added
+2026-09-25, after the 62-site list: that site reaches the field through a
+pointer (`add di,0x8e` into the clamped sub32 helper `0c03:0fe3`), which a
+search for direct displacements does not match.
 
 **What they do**
 
