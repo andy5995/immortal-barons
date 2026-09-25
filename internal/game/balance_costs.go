@@ -734,7 +734,7 @@ const (
 type SabreEffect int
 
 const (
-	SabreHitHQ SabreEffect = iota + 1
+	SabreHitIntelligence SabreEffect = iota + 1
 	SabreHitPeople
 	SabreHitMilitaryBases
 	SabreHitAirbases
@@ -749,7 +749,7 @@ const (
 // handled in sabreDamage and is not meant to be: a backfire applies it directly
 // (sabreEffect -> sabreDevelop, #266), which is the only route to it.
 var sabreDialTable = [12]SabreEffect{
-	SabreHitHQ, SabreHitHQ,
+	SabreHitIntelligence, SabreHitIntelligence,
 	SabreHitPeople, SabreHitPeople,
 	SabreHitMilitaryBases,
 	SabreHitAirbases, SabreHitAirbases,

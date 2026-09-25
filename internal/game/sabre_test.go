@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -66,27 +67,59 @@ func TestSabreAimCoversEveryDial(t *testing.T) {
 		}
 	}
 	// Every row but the last, which no dial can reach (the input is taken mod 11).
-	for eff := SabreHitHQ; eff < SabreDevelopRegions; eff++ {
+	for eff := SabreHitIntelligence; eff < SabreDevelopRegions; eff++ {
 		if !seen[eff] {
 			t.Errorf("effect %d is unreachable from any dial", eff)
 		}
 	}
 }
 
-// Gold is NOT one of the S3-Sabre's targets, and neither are agents, bombers or
-// carriers. IB used to roll a target across every good it held, which is what
-// the dial mapping replaced: the original's effect switch writes back exactly
-// the HQ, population, food, jets, and the four military counts, and nothing else.
+// Gold is NOT one of the S3-Sabre's targets, and neither are the HeadQuarters,
+// bombers or carriers. IB used to roll a target across every good it held, which
+// is what the dial mapping replaced: the original's effect switch writes back
+// exactly the covert agents, population, food, jets, and the four military
+// counts, and nothing else. The HeadQuarters (+0x26b) is named because IB hit it
+// until 2026-09-25, reading the Intelligence Headquarters row's +0x26f as it.
 func TestSabreLeavesGoldAlone(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
-	d.Gold, d.Bombers, d.Carriers = 1_000_000, 1000, 1000
+	d.Gold, d.Bombers, d.Carriers, d.HQ = 1_000_000, 1000, 1000, 100
 	for i := 0; i < 300; i++ {
 		w.sabreEffect(d, a.Name, w.rng.Intn(SabreDialMax+1))
 	}
-	if d.Gold != 1_000_000 || d.Bombers != 1000 || d.Carriers != 1000 {
-		t.Errorf("the missile reached an asset no effect names: gold %d, bombers %d, carriers %d",
-			d.Gold, d.Bombers, d.Carriers)
+	if d.Gold != 1_000_000 || d.Bombers != 1000 || d.Carriers != 1000 || d.HQ != 100 {
+		t.Errorf("the missile reached an asset no effect names: gold %d, bombers %d, carriers %d, HQ %d",
+			d.Gold, d.Bombers, d.Carriers, d.HQ)
+	}
+}
+
+// The Intelligence Headquarters row costs the target 1-30% of its covert agents:
+// it keeps trunc(agents x (0.70 + Random(30)/100)). Golden band from 1000
+// agents: 700..990 kept. Many rolls, so both ends of the band are seen.
+func TestSabreIntelligenceHitKillsAgents(t *testing.T) {
+	w := testWorld()
+	d := w.AddHuman("victim", "Victim")
+	lo, hi := 1000, 0
+	for i := 0; i < 400; i++ {
+		d.Agents, d.HQ = 1000, 100
+		got := w.sabreDamage(d, SabreHitIntelligence)
+		if d.Agents < 700 || d.Agents > 990 {
+			t.Fatalf("1000 agents became %d, want 700..990", d.Agents)
+		}
+		if want := fmt.Sprintf("%d Agents", 1000-d.Agents); got != want {
+			t.Fatalf("report %q, want %q", got, want)
+		}
+		if d.HQ != 100 {
+			t.Fatalf("the Intelligence Headquarters hit the HeadQuarters: %d", d.HQ)
+		}
+		lo, hi = min(lo, d.Agents), max(hi, d.Agents)
+	}
+	if lo != 700 || hi != 990 {
+		t.Errorf("kept range %d..%d over 400 rolls, want exactly 700..990", lo, hi)
+	}
+	d.Agents = 0
+	if got := w.sabreDamage(d, SabreHitIntelligence); got != "" {
+		t.Errorf("a realm with no agents reported %q", got)
 	}
 }
 

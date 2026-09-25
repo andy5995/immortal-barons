@@ -13,7 +13,7 @@ fire, you set a dial from 0 to 10, and the dial aims it:
 
 | Dial | What it goes for |
 | --- | --- |
-| 0, 1 | the enemy's Intelligence HeadQuarters |
+| 0, 1 | the enemy's Intelligence Headquarters, killing covert agents |
 | 2, 3 | residential zones, killing people |
 | 4 | military bases — troops, jets, turrets and tanks together |
 | 5, 6 | airbases, and nothing but jets |

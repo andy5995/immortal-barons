@@ -327,10 +327,20 @@ const (
 
 // S3-Sabre tuning. What the dial selects, and the two rolls that blur it, are
 // binary-verified and live in balance_costs.go beside the mapper's table, as is
-// whether a launch arrives at all (MissileMisfireOdds and SDI). The figures here
-// are the ones the original does NOT state: how hard a landed hit bites, and the
-// backfire chance. They are playtest knobs, not fidelity contract.
+// whether a launch arrives at all (MissileMisfireOdds and SDI). SabreBase/Spread
+// and the backfire scale are IB's own playtest knobs. The original's per-row
+// damage figures are in its switch too; only the Intelligence Headquarters row
+// is applied so far (see docs/mechanics-reference.md for the rest).
 const (
+	// The Intelligence Headquarters row is the exception, and binary: it keeps
+	// trunc(agents x (0.70 + Random(30)/100)) of the target's covert agents
+	// (resolve_received_sabre_strike +0x7e3..+0x85c, BRE.OVR 0x04586F-0x0458FE,
+	// record +0x26f), so a hit costs 1-30%. The integer form here differs from
+	// the original's Real48 by one agent on a few exact multiples, where its
+	// 0.7 sits just under 0.7.
+	SabreIntelKeepBasePct = 70 // binary: Real48 0.7
+	SabreIntelKeepSpread  = 30 // binary: Random(30)/100
+
 	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
 	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
 	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)

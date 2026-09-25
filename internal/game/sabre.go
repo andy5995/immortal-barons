@@ -53,13 +53,15 @@ func (w *World) SabreAim(dial int) SabreEffect {
 // sabreDamage applies a landed S3-Sabre hit to e and returns a human-readable
 // list of what was destroyed (empty if the roll removed nothing). The effect
 // decides WHAT is hit — the original's own mapping, read from the fields each
-// branch of its effect switch writes back — and IB's own 5-30% decides how much,
-// since the original states no figure.
+// branch of its effect switch writes back. How much is binary-verified for the
+// Intelligence Headquarters row (SabreIntelKeep*); the other rows still use
+// IB's own 5-30%.
 //
-// The field each branch touches, anchored on -0xeeb being Turrets (own +0x82):
-// the HQ at +0x26f, population at +0x62, food at +0x6e, jets alone at +0x7e for
-// airbases, and all four of troopers, jets, turrets and tanks for military
-// bases. Regions go through the RegionMix, whose Total must always equal e.Land.
+// The field each branch touches, own-record: covert agents at +0x26f for the
+// Intelligence Headquarters (it never touches the HeadQuarters at +0x26b),
+// population at +0x62, food at +0x6e, jets alone at +0x7e for airbases, and all
+// four of troopers, jets, turrets and tanks for military bases. Regions go
+// through the RegionMix, whose Total must always equal e.Land.
 func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
 	pct := func() int { return SabreBaseDamagePct + w.rng.Intn(SabreDamageSpread) }
 	var parts []string
@@ -72,11 +74,11 @@ func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
 		parts = append(parts, fmt.Sprintf("%d %s", lost, name))
 	}
 	switch eff {
-	case SabreHitHQ:
-		if e.HQ > 0 {
-			lost := max(1, e.HQ*pct()/100)
-			e.HQ = max(0, e.HQ-lost)
-			parts = append(parts, "part of the HeadQuarters")
+	case SabreHitIntelligence:
+		keep := e.Agents * (SabreIntelKeepBasePct + w.rng.Intn(SabreIntelKeepSpread)) / 100
+		if lost := e.Agents - keep; lost > 0 {
+			e.Agents = keep
+			parts = append(parts, fmt.Sprintf("%d Agents", lost))
 		}
 	case SabreHitPeople:
 		take("People", &e.People)

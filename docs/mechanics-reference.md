@@ -2053,7 +2053,7 @@ mapper at `ovr_0450a9 +0xf9` whose entire body is a table onto the seven
 
 | Dial | Effect | What the original's switch writes back |
 | --- | --- | --- |
-| 0, 1 | Intelligence Headquarters | the HQ field, `+0x26f` |
+| 0, 1 | Intelligence Headquarters | covert agents, `+0x26f` — not the HeadQuarters, which is `+0x26b` |
 | 2, 3 | residential zones | population, `+0x62` |
 | 4 | military bases | troopers, jets, turrets and tanks (`+0x76`, `+0x7e`, `+0x82`, `+0x86`) |
 | 5, 6 | airbases | jets alone, `+0x7e` |
@@ -2140,11 +2140,28 @@ branch asks a second time. IB had an invented 3-in-10 delivery roll here until
 gate that turned out to exist; removing it takes the sabre from about 3 launches
 in 10 landing to about 9.
 
-The remaining figures ARE IB's, because the original states none: a landed hit
-removes a random 5-30 % (`SabreBaseDamagePct` + `rng.Intn(SabreDamageSpread)`) of
-what the effect names, and backfire is a continuous probability scaled by the
-target's troopers (`d.Troopers / SabreBackfireScale`). Those are playtest knobs;
-the table above is fidelity contract.
+**The Intelligence Headquarters row kills covert agents. BINARY-VERIFIED
+2026-09-25.** Effect 1 (`+0x7e3`..`+0x85c`, `BRE.OVR 0x04586F`-`0x0458FE`) reads
+and writes `+0x26f` only: `agents := trunc(agents × (0.70 + Random(30)/100))`, a
+loss of 1-30 %. Nothing in the unit touches the HeadQuarters at `+0x26b`. IB hit
+the HeadQuarters on this row until then, having read the table's `+0x26f` as the
+HQ field. IB applies it with integer percent (`SabreIntelKeepBasePct`,
+`SabreIntelKeepSpread`), which differs from the Real48 result by one agent on a
+few exact multiples.
+
+The other five damage rows are also in the switch, and IB does not yet apply
+them: it still removes a random 5-30 % (`SabreBaseDamagePct` +
+`rng.Intn(SabreDamageSpread)`) of what the effect names. Read 2026-09-25, not
+yet applied: residential zones keep `trunc(people × (0.6 + Random(40)/100))`
+(`+0x863`); military bases keep `trunc(n × (Random(20)+80)/100)` of each of the
+four counts, one roll each (`+0x8e6`); airbases keep
+`trunc(jets × (Random(40)+50)/100)` (`+0xacd`); regions lose
+`trunc((Random(5)+5)/100 × total_regions)` (`+0xb4c`); and the food supply
+keeps `trunc(Random(30) × food / 100)`, a loss of 71-100 % (`+0xbb2`).
+
+Backfire is a continuous probability scaled by the target's troopers
+(`d.Troopers / SabreBackfireScale`), IB's own. That and the unapplied rows are
+playtest knobs; the table above is the fidelity contract.
 
 **Sabre Handling has four modes, and only one of them prompts.** BINARY-VERIFIED:
 the setting is one byte at `cfg+0x3d9`, and the Configuration Editor's own labels
