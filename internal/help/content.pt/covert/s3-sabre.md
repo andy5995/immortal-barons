@@ -18,8 +18,13 @@ a mira:
 | 2, 3 | zonas residenciais, matando pessoas |
 | 4 | bases militares — soldados, caças, torres e tanques juntos |
 | 5, 6 | bases aéreas, e nada além de caças |
-| 7, 8 | regiões, queimando-as até virarem devastadas |
+| 7, 8 | regiões, destruindo-as por completo |
 | 9, 10 | o estoque de comida |
+
+Um acerto mata até 30% dos agentes, ou até 40% da população. Em bases
+militares, destrói até 20% de cada uma das quatro forças, e em bases aéreas
+de 11% a 50% dos caças. Destrói de 5% a 9% das regiões. O estoque de comida
+é o que mais sofre: um acerto destrói de 71% a 100% dele.
 
 A mira varia um ponto para cada lado durante o voo, e cerca de um lançamento
 em dez ignora o seletor por completo e acerta o que bem entender. Então um

@@ -18,8 +18,14 @@ von 0 bis 10 ein, und der Regler richtet sie aus:
 | 2, 3 | Wohngebiete, wobei Menschen sterben |
 | 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |
 | 5, 6 | Luftwaffenbasen, und nichts als Jets |
-| 7, 8 | Regionen, die zu Ödland verbrennen |
+| 7, 8 | Regionen, die vollständig zerstört werden |
 | 9, 10 | den Nahrungsvorrat |
+
+Ein Treffer tötet bis zu 30% der Agenten oder bis zu 40% der
+Bevölkerung. Auf Militärbasen zerstört er bis zu 20% jeder der vier
+Truppenarten, auf Luftwaffenbasen 11% bis 50% der Jets. Er zerstört 5% bis
+9% der Regionen. Der Nahrungsvorrat leidet am meisten: Ein Treffer
+vernichtet 71% bis 100% davon.
 
 Das Ziel wandert im Flug um eine Stufe nach oben oder unten, und etwa jeder
 zehnte Abschuss missachtet den Regler ganz und trifft, was ihm beliebt. Eine

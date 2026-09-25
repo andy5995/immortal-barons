@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 07:55-0500\n"
+"POT-Creation-Date: 2026-09-25 08:07-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -759,20 +759,21 @@ msgid ""
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
-"| 7, 8 | regions, burning them to waste |\n"
+"| 7, 8 | regions, destroying them outright |\n"
 "| 9, 10 | the food supply |\n"
-msgstr ""
-"| Шкала | Куда бьёт |\n"
-"| --- | --- |\n"
-"| 0, 1 | вражеский Штаб разведки, убивая агентов |\n"
-"| 2, 3 | жилые кварталы, убивая людей |\n"
-"| 4 | военные базы — войска, самолёты, турели и танки разом |\n"
-"| 5, 6 | авиабазы, и только самолёты |\n"
-"| 7, 8 | регионы, выжигая их в пустошь |\n"
-"| 9, 10 | запасы еды |\n"
+msgstr "| Шкала | Куда бьёт |\n| --- | --- |\n| 0, 1 | вражеский Штаб разведки, убивая агентов |\n| 2, 3 | жилые кварталы, убивая людей |\n| 4 | военные базы — войска, самолёты, турели и танки разом |\n| 5, 6 | авиабазы, и только самолёты |\n| 7, 8 | регионы, уничтожая их полностью |\n| 9, 10 | запасы еды |\n"
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:29
+#: internal/help/content/covert/s3-sabre.md:27
+msgid ""
+"A hit kills up to 30% of the agents, or up to 40% of the people. On military "
+"bases it destroys up to 20% of each of the four forces, and on airbases 11% "
+"to 50% of the jets. It destroys 5% to 9% of the regions. The food supply "
+"suffers most: a hit destroys 71% to 100% of it."
+msgstr "Попадание убивает до 30% агентов или до 40% населения. На военных базах оно уничтожает до 20% каждого из четырёх родов войск, на авиабазах — от 11% до 50% самолётов. Оно уничтожает от 5% до 9% регионов. Сильнее всего страдают запасы еды: попадание уничтожает от 71% до 100% их."
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:34
 msgid ""
 "The aim wanders by one setting either way in flight, and about one launch in "
 "ten ignores the dial altogether and hits whatever it likes. So a setting is "
@@ -790,7 +791,7 @@ msgstr ""
 "держит большой воздушный флот."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:36
+#: internal/help/content/covert/s3-sabre.md:41
 msgid ""
 "The missile is still a gamble on top of that. About one launch in ten "
 "misfires, and the enemy's SDI may shoot it down. It can also break up over "
@@ -807,7 +808,7 @@ msgstr ""
 "регионов он выбирает в свой следующий ход."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:42
+#: internal/help/content/covert/s3-sabre.md:47
 msgid ""
 "Your sysop decides how the dial is set. Normally you choose it yourself, but "
 "the game can be set up to roll one for you each time, to fix it at a dial "
@@ -822,7 +823,7 @@ msgstr ""
 "не спросят — это работа настройки, а не неисправность."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:47
+#: internal/help/content/covert/s3-sabre.md:52
 msgid ""
 "You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "
 "— once a day. A missile you have already used today is not listed on the "
@@ -1580,7 +1581,8 @@ msgstr "Поддержка народа:"
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:26
 msgid "sets how much tax you collect (see Taxes, Support, and Riots)"
-msgstr "определяет, сколько налогов вы собираете (см. «Налоги, поддержка и бунты»)"
+msgstr ""
+"определяет, сколько налогов вы собираете (см. «Налоги, поддержка и бунты»)"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:26
@@ -1724,7 +1726,12 @@ msgid ""
 "turn's unpaid costs take away. Morale changes right after your food is paid "
 "out, before any of your menus open. Support changes at the end of the turn. "
 "So Morale bought this turn is the Morale your army fights with this turn."
-msgstr "В момент оплаты ничего не меняется. Купленные очки уменьшают потери от неоплаченных расходов этого хода. Боевой дух меняется сразу после выдачи еды, до того как откроются ваши меню. Поддержка меняется в конце хода. Поэтому боевой дух, купленный в этом ходу, — это боевой дух, с которым ваша армия сражается в этом ходу."
+msgstr ""
+"В момент оплаты ничего не меняется. Купленные очки уменьшают потери от "
+"неоплаченных расходов этого хода. Боевой дух меняется сразу после выдачи "
+"еды, до того как откроются ваши меню. Поддержка меняется в конце хода. "
+"Поэтому боевой дух, купленный в этом ходу, — это боевой дух, с которым ваша "
+"армия сражается в этом ходу."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -1869,7 +1876,10 @@ msgid ""
 "What you collect also depends on Popular Support: a realm at half Support "
 "collects half the tax. So a high tax rate that lowers Support can earn less "
 "than a moderate one."
-msgstr "Сбор налогов зависит и от Поддержки народа: держава с половиной поддержки собирает половину налога. Поэтому высокая ставка, снижающая Поддержку, может приносить меньше умеренной."
+msgstr ""
+"Сбор налогов зависит и от Поддержки народа: держава с половиной поддержки "
+"собирает половину налога. Поэтому высокая ставка, снижающая Поддержку, может "
+"приносить меньше умеренной."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:20
@@ -1877,7 +1887,10 @@ msgid ""
 "Each turn your tax rate moves Popular Support. A low rate raises it, a high "
 "rate lowers it, and a rate in between leaves it where it is. Low Support "
 "also badly cuts your Coastal (tourism) income."
-msgstr "Каждый ход налоговая ставка сдвигает Поддержку народа. Низкая ставка её поднимает, высокая — снижает, а средняя оставляет на месте. Низкая Поддержка также сильно урезает доход от Побережья (туризма)."
+msgstr ""
+"Каждый ход налоговая ставка сдвигает Поддержку народа. Низкая ставка её "
+"поднимает, высокая — снижает, а средняя оставляет на месте. Низкая Поддержка "
+"также сильно урезает доход от Побережья (туризма)."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:23

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 07:55-0500\n"
+"POT-Creation-Date: 2026-09-25 08:07-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -793,20 +793,21 @@ msgid ""
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
-"| 7, 8 | regions, burning them to waste |\n"
+"| 7, 8 | regions, destroying them outright |\n"
 "| 9, 10 | the food supply |\n"
-msgstr ""
-"| Regler | Worauf sie zielt |\n"
-"| --- | --- |\n"
-"| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes, wobei Agenten sterben |\n"
-"| 2, 3 | Wohngebiete, wobei Menschen sterben |\n"
-"| 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |\n"
-"| 5, 6 | Luftwaffenbasen, und nichts als Jets |\n"
-"| 7, 8 | Regionen, die zu Ödland verbrennen |\n"
-"| 9, 10 | den Nahrungsvorrat |\n"
+msgstr "| Regler | Worauf sie zielt |\n| --- | --- |\n| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes, wobei Agenten sterben |\n| 2, 3 | Wohngebiete, wobei Menschen sterben |\n| 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |\n| 5, 6 | Luftwaffenbasen, und nichts als Jets |\n| 7, 8 | Regionen, die vollständig zerstört werden |\n| 9, 10 | den Nahrungsvorrat |\n"
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:29
+#: internal/help/content/covert/s3-sabre.md:27
+msgid ""
+"A hit kills up to 30% of the agents, or up to 40% of the people. On military "
+"bases it destroys up to 20% of each of the four forces, and on airbases 11% "
+"to 50% of the jets. It destroys 5% to 9% of the regions. The food supply "
+"suffers most: a hit destroys 71% to 100% of it."
+msgstr "Ein Treffer tötet bis zu 30% der Agenten oder bis zu 40% der Bevölkerung. Auf Militärbasen zerstört er bis zu 20% jeder der vier Truppenarten, auf Luftwaffenbasen 11% bis 50% der Jets. Er zerstört 5% bis 9% der Regionen. Der Nahrungsvorrat leidet am meisten: Ein Treffer vernichtet 71% bis 100% davon."
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:34
 msgid ""
 "The aim wanders by one setting either way in flight, and about one launch in "
 "ten ignores the dial altogether and hits whatever it likes. So a setting is "
@@ -825,7 +826,7 @@ msgstr ""
 "Luftwaffe hält."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:36
+#: internal/help/content/covert/s3-sabre.md:41
 msgid ""
 "The missile is still a gamble on top of that. About one launch in ten "
 "misfires, and the enemy's SDI may shoot it down. It can also break up over "
@@ -843,7 +844,7 @@ msgstr ""
 "seinem nächsten Zug."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:42
+#: internal/help/content/covert/s3-sabre.md:47
 msgid ""
 "Your sysop decides how the dial is set. Normally you choose it yourself, but "
 "the game can be set up to roll one for you each time, to fix it at a dial "
@@ -859,7 +860,7 @@ msgstr ""
 "die Einstellung bei der Arbeit, kein Fehler."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:47
+#: internal/help/content/covert/s3-sabre.md:52
 msgid ""
 "You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "
 "— once a day. A missile you have already used today is not listed on the "
@@ -1634,7 +1635,9 @@ msgstr "Rückhalt:"
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:26
 msgid "sets how much tax you collect (see Taxes, Support, and Riots)"
-msgstr "bestimmt, wie viel Steuern Sie einnehmen (siehe Steuern, Zustimmung und Aufstände)"
+msgstr ""
+"bestimmt, wie viel Steuern Sie einnehmen (siehe Steuern, Zustimmung und "
+"Aufstände)"
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/morale-and-support.md:26
@@ -1780,7 +1783,12 @@ msgid ""
 "turn's unpaid costs take away. Morale changes right after your food is paid "
 "out, before any of your menus open. Support changes at the end of the turn. "
 "So Morale bought this turn is the Morale your army fights with this turn."
-msgstr "Sobald Sie zahlen, ändert sich noch nichts. Die gekauften Punkte verringern, was die unbezahlten Kosten dieses Zuges wegnehmen. Die Moral ändert sich direkt nach der Ausgabe Ihrer Nahrung, bevor sich Ihre Menüs öffnen. Der Rückhalt ändert sich am Ende des Zuges. Moral, die Sie in diesem Zug kaufen, ist also die Moral, mit der Ihre Armee in diesem Zug kämpft."
+msgstr ""
+"Sobald Sie zahlen, ändert sich noch nichts. Die gekauften Punkte verringern, "
+"was die unbezahlten Kosten dieses Zuges wegnehmen. Die Moral ändert sich "
+"direkt nach der Ausgabe Ihrer Nahrung, bevor sich Ihre Menüs öffnen. Der "
+"Rückhalt ändert sich am Ende des Zuges. Moral, die Sie in diesem Zug kaufen, "
+"ist also die Moral, mit der Ihre Armee in diesem Zug kämpft."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -1926,7 +1934,10 @@ msgid ""
 "What you collect also depends on Popular Support: a realm at half Support "
 "collects half the tax. So a high tax rate that lowers Support can earn less "
 "than a moderate one."
-msgstr "Was Sie einnehmen, hängt auch vom Rückhalt ab: Ein Reich mit halbem Rückhalt nimmt die halbe Steuer ein. Ein hoher Steuersatz, der den Rückhalt senkt, kann daher weniger einbringen als ein mäßiger."
+msgstr ""
+"Was Sie einnehmen, hängt auch vom Rückhalt ab: Ein Reich mit halbem Rückhalt "
+"nimmt die halbe Steuer ein. Ein hoher Steuersatz, der den Rückhalt senkt, "
+"kann daher weniger einbringen als ein mäßiger."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:20
@@ -1934,7 +1945,11 @@ msgid ""
 "Each turn your tax rate moves Popular Support. A low rate raises it, a high "
 "rate lowers it, and a rate in between leaves it where it is. Low Support "
 "also badly cuts your Coastal (tourism) income."
-msgstr "Jeden Zug bewegt Ihr Steuersatz den Rückhalt. Ein niedriger Satz hebt ihn, ein hoher Satz senkt ihn, und ein Satz dazwischen lässt ihn, wo er ist. Geringer Rückhalt kürzt außerdem Ihr Einkommen aus Küstenregionen (Tourismus) stark."
+msgstr ""
+"Jeden Zug bewegt Ihr Steuersatz den Rückhalt. Ein niedriger Satz hebt ihn, "
+"ein hoher Satz senkt ihn, und ein Satz dazwischen lässt ihn, wo er ist. "
+"Geringer Rückhalt kürzt außerdem Ihr Einkommen aus Küstenregionen "
+"(Tourismus) stark."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:23

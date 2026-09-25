@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 07:55-0500\n"
+"POT-Creation-Date: 2026-09-25 08:07-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -766,20 +766,21 @@ msgid ""
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
-"| 7, 8 | regions, burning them to waste |\n"
+"| 7, 8 | regions, destroying them outright |\n"
 "| 9, 10 | the food supply |\n"
-msgstr ""
-"| Seletor | Para o que ele vai |\n"
-"| --- | --- |\n"
-"| 0, 1 | o Quartel-General de Inteligência do inimigo, matando agentes |\n"
-"| 2, 3 | zonas residenciais, matando pessoas |\n"
-"| 4 | bases militares — soldados, caças, torres e tanques juntos |\n"
-"| 5, 6 | bases aéreas, e nada além de caças |\n"
-"| 7, 8 | regiões, queimando-as até virarem devastadas |\n"
-"| 9, 10 | o estoque de comida |\n"
+msgstr "| Seletor | Para o que ele vai |\n| --- | --- |\n| 0, 1 | o Quartel-General de Inteligência do inimigo, matando agentes |\n| 2, 3 | zonas residenciais, matando pessoas |\n| 4 | bases militares — soldados, caças, torres e tanques juntos |\n| 5, 6 | bases aéreas, e nada além de caças |\n| 7, 8 | regiões, destruindo-as por completo |\n| 9, 10 | o estoque de comida |\n"
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:29
+#: internal/help/content/covert/s3-sabre.md:27
+msgid ""
+"A hit kills up to 30% of the agents, or up to 40% of the people. On military "
+"bases it destroys up to 20% of each of the four forces, and on airbases 11% "
+"to 50% of the jets. It destroys 5% to 9% of the regions. The food supply "
+"suffers most: a hit destroys 71% to 100% of it."
+msgstr "Um acerto mata até 30% dos agentes, ou até 40% da população. Em bases militares, destrói até 20% de cada uma das quatro forças, e em bases aéreas de 11% a 50% dos caças. Destrói de 5% a 9% das regiões. O estoque de comida é o que mais sofre: um acerto destrói de 71% a 100% dele."
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:34
 msgid ""
 "The aim wanders by one setting either way in flight, and about one launch in "
 "ten ignores the dial altogether and hits whatever it likes. So a setting is "
@@ -797,7 +798,7 @@ msgstr ""
 "sabe que mantém uma grande força aérea."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:36
+#: internal/help/content/covert/s3-sabre.md:41
 msgid ""
 "The missile is still a gamble on top of that. About one launch in ten "
 "misfires, and the enemy's SDI may shoot it down. It can also break up over "
@@ -815,7 +816,7 @@ msgstr ""
 "turno dele."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:42
+#: internal/help/content/covert/s3-sabre.md:47
 msgid ""
 "Your sysop decides how the dial is set. Normally you choose it yourself, but "
 "the game can be set up to roll one for you each time, to fix it at a dial "
@@ -831,7 +832,7 @@ msgstr ""
 "trabalho, não um defeito."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:47
+#: internal/help/content/covert/s3-sabre.md:52
 msgid ""
 "You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "
 "— once a day. A missile you have already used today is not listed on the "
@@ -1737,7 +1738,12 @@ msgid ""
 "turn's unpaid costs take away. Morale changes right after your food is paid "
 "out, before any of your menus open. Support changes at the end of the turn. "
 "So Morale bought this turn is the Morale your army fights with this turn."
-msgstr "Nada muda no momento em que você paga. Os pontos que você compra reduzem o que os custos não pagos deste turno tiram. A Moral muda logo depois que sua comida é distribuída, antes de qualquer menu abrir. O Apoio muda no fim do turno. Assim, a Moral comprada neste turno é a Moral com que seu exército luta neste turno."
+msgstr ""
+"Nada muda no momento em que você paga. Os pontos que você compra reduzem o "
+"que os custos não pagos deste turno tiram. A Moral muda logo depois que sua "
+"comida é distribuída, antes de qualquer menu abrir. O Apoio muda no fim do "
+"turno. Assim, a Moral comprada neste turno é a Moral com que seu exército "
+"luta neste turno."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -1883,7 +1889,10 @@ msgid ""
 "What you collect also depends on Popular Support: a realm at half Support "
 "collects half the tax. So a high tax rate that lowers Support can earn less "
 "than a moderate one."
-msgstr "O que você arrecada também depende do Apoio Popular: um reino com metade do Apoio arrecada metade do imposto. Assim, impostos altos que baixam o Apoio podem render menos que impostos moderados."
+msgstr ""
+"O que você arrecada também depende do Apoio Popular: um reino com metade do "
+"Apoio arrecada metade do imposto. Assim, impostos altos que baixam o Apoio "
+"podem render menos que impostos moderados."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:20
@@ -1891,7 +1900,10 @@ msgid ""
 "Each turn your tax rate moves Popular Support. A low rate raises it, a high "
 "rate lowers it, and a rate in between leaves it where it is. Low Support "
 "also badly cuts your Coastal (tourism) income."
-msgstr "A cada turno, os seus impostos mexem no Apoio Popular. Impostos baixos o elevam, impostos altos o baixam, e um valor intermediário o deixa onde está. Apoio baixo também corta muito a sua renda Litorânea (turismo)."
+msgstr ""
+"A cada turno, os seus impostos mexem no Apoio Popular. Impostos baixos o "
+"elevam, impostos altos o baixam, e um valor intermediário o deixa onde está. "
+"Apoio baixo também corta muito a sua renda Litorânea (turismo)."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:23

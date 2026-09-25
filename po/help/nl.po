@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 07:55-0500\n"
+"POT-Creation-Date: 2026-09-25 08:07-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -779,20 +779,21 @@ msgid ""
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
-"| 7, 8 | regions, burning them to waste |\n"
+"| 7, 8 | regions, destroying them outright |\n"
 "| 9, 10 | the food supply |\n"
-msgstr ""
-"| Schijf | Waar het op mikt |\n"
-"| --- | --- |\n"
-"| 0, 1 | het inlichtingenhoofdkwartier van de vijand, waarbij agenten omkomen |\n"
-"| 2, 3 | woonwijken, waarbij mensen omkomen |\n"
-"| 4 | militaire bases - troepen, jagers, geschutstorens en tanks tegelijk |\n"
-"| 5, 6 | vliegbases, en niets dan jagers |\n"
-"| 7, 8 | regio's, die verwoest worden |\n"
-"| 9, 10 | de voedselvoorraad |\n"
+msgstr "| Schijf | Waar het op mikt |\n| --- | --- |\n| 0, 1 | het inlichtingenhoofdkwartier van de vijand, waarbij agenten omkomen |\n| 2, 3 | woonwijken, waarbij mensen omkomen |\n| 4 | militaire bases - troepen, jagers, geschutstorens en tanks tegelijk |\n| 5, 6 | vliegbases, en niets dan jagers |\n| 7, 8 | regio's, die volledig vernietigd worden |\n| 9, 10 | de voedselvoorraad |\n"
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:29
+#: internal/help/content/covert/s3-sabre.md:27
+msgid ""
+"A hit kills up to 30% of the agents, or up to 40% of the people. On military "
+"bases it destroys up to 20% of each of the four forces, and on airbases 11% "
+"to 50% of the jets. It destroys 5% to 9% of the regions. The food supply "
+"suffers most: a hit destroys 71% to 100% of it."
+msgstr "Een treffer doodt tot 30% van de agenten, of tot 40% van de bevolking. Op militaire bases vernietigt hij tot 20% van elk van de vier strijdkrachten, en op vliegbases 11% tot 50% van de jagers. Hij vernietigt 5% tot 9% van de regio's. De voedselvoorraad lijdt het meest: een treffer vernietigt 71% tot 100% ervan."
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:34
 msgid ""
 "The aim wanders by one setting either way in flight, and about one launch in "
 "ten ignores the dial altogether and hits whatever it likes. So a setting is "
@@ -810,7 +811,7 @@ msgstr ""
 "een baron waarvan u weet dat hij een grote luchtmacht houdt."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:36
+#: internal/help/content/covert/s3-sabre.md:41
 msgid ""
 "The missile is still a gamble on top of that. About one launch in ten "
 "misfires, and the enemy's SDI may shoot it down. It can also break up over "
@@ -828,7 +829,7 @@ msgstr ""
 "beurt."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:42
+#: internal/help/content/covert/s3-sabre.md:47
 msgid ""
 "Your sysop decides how the dial is set. Normally you choose it yourself, but "
 "the game can be set up to roll one for you each time, to fix it at a dial "
@@ -844,7 +845,7 @@ msgstr ""
 "geen fout."
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:47
+#: internal/help/content/covert/s3-sabre.md:52
 msgid ""
 "You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "
 "— once a day. A missile you have already used today is not listed on the "
@@ -1755,7 +1756,12 @@ msgid ""
 "turn's unpaid costs take away. Morale changes right after your food is paid "
 "out, before any of your menus open. Support changes at the end of the turn. "
 "So Morale bought this turn is the Morale your army fights with this turn."
-msgstr "Op het moment dat u betaalt, verandert er nog niets. De punten die u koopt, verminderen wat de onbetaalde kosten van deze beurt wegnemen. Het moreel verandert direct nadat uw voedsel is uitgedeeld, voordat uw menu's opengaan. De steun verandert aan het einde van de beurt. Moreel dat u deze beurt koopt, is dus het moreel waarmee uw leger deze beurt vecht."
+msgstr ""
+"Op het moment dat u betaalt, verandert er nog niets. De punten die u koopt, "
+"verminderen wat de onbetaalde kosten van deze beurt wegnemen. Het moreel "
+"verandert direct nadat uw voedsel is uitgedeeld, voordat uw menu's opengaan. "
+"De steun verandert aan het einde van de beurt. Moreel dat u deze beurt "
+"koopt, is dus het moreel waarmee uw leger deze beurt vecht."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -1902,7 +1908,10 @@ msgid ""
 "What you collect also depends on Popular Support: a realm at half Support "
 "collects half the tax. So a high tax rate that lowers Support can earn less "
 "than a moderate one."
-msgstr "Wat u int, hangt ook af van de steun van het volk: een rijk met de helft aan steun int de helft van de belasting. Een hoog belastingtarief dat de steun verlaagt, kan dus minder opleveren dan een gematigd tarief."
+msgstr ""
+"Wat u int, hangt ook af van de steun van het volk: een rijk met de helft aan "
+"steun int de helft van de belasting. Een hoog belastingtarief dat de steun "
+"verlaagt, kan dus minder opleveren dan een gematigd tarief."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:20
@@ -1910,7 +1919,11 @@ msgid ""
 "Each turn your tax rate moves Popular Support. A low rate raises it, a high "
 "rate lowers it, and a rate in between leaves it where it is. Low Support "
 "also badly cuts your Coastal (tourism) income."
-msgstr "Elke beurt beïnvloedt uw belastingtarief de steun van het volk. Een laag tarief verhoogt die, een hoog tarief verlaagt die, en een tarief daartussen laat die gelijk. Weinig steun verlaagt ook uw inkomsten uit kustregio's (toerisme) sterk."
+msgstr ""
+"Elke beurt beïnvloedt uw belastingtarief de steun van het volk. Een laag "
+"tarief verhoogt die, een hoog tarief verlaagt die, en een tarief daartussen "
+"laat die gelijk. Weinig steun verlaagt ook uw inkomsten uit kustregio's "
+"(toerisme) sterk."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:23

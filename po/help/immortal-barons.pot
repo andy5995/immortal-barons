@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-25 07:56-0500\n"
+"POT-Creation-Date: 2026-09-25 08:08-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -622,12 +622,22 @@ msgid ""
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
-"| 7, 8 | regions, burning them to waste |\n"
+"| 7, 8 | regions, destroying them outright |\n"
 "| 9, 10 | the food supply |\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:29
+#: internal/help/content/covert/s3-sabre.md:27
+#, markdown-text
+msgid ""
+"A hit kills up to 30% of the agents, or up to 40% of the people. On military "
+"bases it destroys up to 20% of each of the four forces, and on airbases 11% "
+"to 50% of the jets. It destroys 5% to 9% of the regions. The food supply "
+"suffers most: a hit destroys 71% to 100% of it."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/s3-sabre.md:34
 #, markdown-text
 msgid ""
 "The aim wanders by one setting either way in flight, and about one launch in "
@@ -639,7 +649,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:36
+#: internal/help/content/covert/s3-sabre.md:41
 #, markdown-text
 msgid ""
 "The missile is still a gamble on top of that. About one launch in ten "
@@ -651,7 +661,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:42
+#: internal/help/content/covert/s3-sabre.md:47
 #, markdown-text
 msgid ""
 "Your sysop decides how the dial is set. Normally you choose it yourself, but "
@@ -662,7 +672,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:47
+#: internal/help/content/covert/s3-sabre.md:52
 #, markdown-text
 msgid ""
 "You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "

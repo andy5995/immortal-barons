@@ -18,8 +18,14 @@ schijf richt het wapen:
 | 2, 3 | woonwijken, waarbij mensen omkomen |
 | 4 | militaire bases - troepen, jagers, geschutstorens en tanks tegelijk |
 | 5, 6 | vliegbases, en niets dan jagers |
-| 7, 8 | regio's, die verwoest worden |
+| 7, 8 | regio's, die volledig vernietigd worden |
 | 9, 10 | de voedselvoorraad |
+
+Een treffer doodt tot 30% van de agenten, of tot 40% van de bevolking. Op
+militaire bases vernietigt hij tot 20% van elk van de vier strijdkrachten,
+en op vliegbases 11% tot 50% van de jagers. Hij vernietigt 5% tot 9% van de
+regio's. De voedselvoorraad lijdt het meest: een treffer vernietigt 71% tot
+100% ervan.
 
 Het richtpunt wijkt in de vlucht een stand naar boven of beneden af, en
 ongeveer een lancering op de tien negeert de schijf helemaal en raakt wat
