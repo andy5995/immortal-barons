@@ -4749,7 +4749,6 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   and one for a loss and none for either of them. IB announced both as failures
   until #201, because the line was picked from `AttackResult.Won` rather than
   from the resolved outcome.
-  ones held at zero, each defaulting to 0.
 - **The player never sees an attack's wire id** (#254). `World.NextAttackID` is
   one counter shared by every interplanetary action — both attack kinds, special
   ops, trade deals, spy recon and terror ops — and never reused, so it is a
