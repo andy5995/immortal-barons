@@ -511,11 +511,17 @@ after the region maintenance and before the decontamination offer (live
 capture).
 
 **Auto-Pay Maintenance bypasses itself, per turn, on more than affordability
-— BINARY-VERIFIED.** The silent one-line total only fires when Auto-Pay is on
-*and* gold covers the bill *and* popular support is at its 100 cap *and*
-military morale is at its 100 cap *and* the realm holds no Waste regions. Any
-one of those failing falls through to the full manual sequence above for that
-turn — including the optional support/morale boost prompts and the
+— BINARY-VERIFIED.** The silent one-line total only fires when all of these
+hold:
+
+- Auto-Pay is on
+- gold covers the bill
+- popular support is at its 100 cap
+- military morale is at its 100 cap
+- the realm holds no Waste regions
+
+Any one of those failing falls through to the full manual sequence above for
+that turn — including the optional support/morale boost prompts and the
 waste-decontamination offer — even though the Auto-Pay *preference* itself is
 never touched. It is a per-turn bypass, re-checked fresh every turn, not a
 timed or persistent switch-off: once support and morale are back at 100 and
@@ -1042,9 +1048,17 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
 
   Hard caps on what a faction can hold, read from the clamp sites themselves
   (`BRE.OVR` `0x3629c` and `0x36a59`, each a min against a literal, applied at
-  the end of every raid and again after a player beats the faction): troopers
-  **300,000**, jets **400,000**, turrets **400,000**, tanks **200,000**, agents
-  **200,000**, regions **300**, gold **600,000,000**. A raid also grants the
+  the end of every raid and again after a player beats the faction):
+
+  - troopers **300,000**
+  - jets **400,000**
+  - turrets **400,000**
+  - tanks **200,000**
+  - agents **200,000**
+  - regions **300**
+  - gold **600,000,000**
+
+  A raid also grants the
   faction `Random(25)` regions. This supersedes the earlier reading of the
   BRE.EXE table at `0x14ede` — that table is some other set of limits.
   Military parked in the Trading Market is safe from pirate raids.
@@ -1676,9 +1690,13 @@ What that means in play:
   against the clock is the shield's expiry, and the bribe flag is read further
   down as a doubling of `A`. See the two entries below.
 
-**The per-op difficulty divisor** (`kind`) is 1 for Send Spy, Spy on Relations,
-Stir Revolts, Set Up and Support Dissensions; 2 for Demoralize Forces and Bomb
-Enemy Targets; 3 for Bribery. Read from the seven resolver call sites at
+**The per-op difficulty divisor** (`kind`) is:
+
+- 1 for Send Spy, Spy on Relations, Stir Revolts, Set Up and Support Dissensions
+- 2 for Demoralize Forces and Bomb Enemy Targets
+- 3 for Bribery
+
+Read from the seven resolver call sites at
 `BRE.OVR 0x04BFD4`, `0x04C0A2`, `0x04C0CA`, `0x04C16E`, `0x04C277`, `0x04C353`
 and `0x04C6F5`, plus `report_spy_result` at `0x016D8A`. With no treaties in play
 that gives 55% / 40% / 32.5%. IB's `CovertDifficulty*` constants carry them.
@@ -2395,8 +2413,14 @@ The draw is over every integer in the range, not a coarse percentage: one live
 ore turn came out at Base + **279**, which is not a multiple of Rate/100.
 
 Live-verified across four region types in two separate games, expressed as a
-share of Rate: desert 2.6–99.8%, tourism 0.4–99.8%, ore 0.5–99.8%, hydro
-2.0–99.0%. Two earlier readings were wrong and are recorded here so they are not
+share of Rate:
+
+- desert 2.6–99.8%
+- tourism 0.4–99.8%
+- ore 0.5–99.8%
+- hydro 2.0–99.0%
+
+Two earlier readings were wrong and are recorded here so they are not
 re-derived: a reconstructed 1.0–1.5 multiplier ran high, and a later 0.30–0.80
 band came from 12 turns — the sample size at which any uniform looks narrow.
 
@@ -2495,19 +2519,25 @@ Worth stating because it has been doubted. `technology_factor` (`056d:1a07` ->
 `056d:1a42`) is one routine taking the realm, the slot and the cap as a Real48
 argument, and every effect calls it; the growth and decay sites differ only in
 what they do with the answer. Re-read 2026-08-23:
-`calculate_agricultural_food_yield` passes slot 0 / cap 2.0 and multiplies,
-`calculate_military_maintenance` and `calculate_region_maintenance` pass slot 3
-/ cap 1.4 and divide, `calculate_sdi_maintenance` passes slot 1 / cap 2.0 and
-divides, and `process_end_of_turn` passes slot 4 / cap 5.0 for food decay.
+
+- `calculate_agricultural_food_yield` passes slot 0 / cap 2.0 and multiplies
+- `calculate_military_maintenance` and `calculate_region_maintenance` pass
+  slot 3 / cap 1.4 and divide
+- `calculate_sdi_maintenance` passes slot 1 / cap 2.0 and divides
+- `process_end_of_turn` passes slot 4 / cap 5.0 for food decay
+
 `level / (totalRegions + 1)` is negated before `exp` and clamped at -50.
 
 Every cap and slot in the table above has now been read from its own call site,
-not carried forward from this document: gold 1.5 at three sites in
-`process_economic_production`, population tax 1.5 at a fourth (slot 2), unit
-production 1.35 (`ovr_034f48`), military strength 1.4 at slot 5 in
-`resolve_regular_attack` and `configure_attack_forces`, and waste
-decontamination on slot 0 / cap 2.0 — the same pair food production uses, which
-is why IB reads it through `TechFoodFactor`.
+not carried forward from this document:
+
+- gold 1.5 at three sites in `process_economic_production`
+- population tax 1.5 at a fourth (slot 2)
+- unit production 1.35 (`ovr_034f48`)
+- military strength 1.4 at slot 5 in `resolve_regular_attack` and
+  `configure_attack_forces`
+- waste decontamination on slot 0 / cap 2.0 — the same pair food production
+  uses, which is why IB reads it through `TechFoodFactor`
 
 The two do trace different CURVES — `1/f` is not the mirror of `f` — which is
 probably how the belief in a separate decay formula arises. But the curve is a
@@ -2826,8 +2856,19 @@ Carrying capacity:
 capacity = Σ(regions × weight) × support/90 × 10/max(3, tax) + 50
 ```
 
-with per-region weights **Coastal 7 · River 10 · Agricultural 8 · Desert 4 ·
-Industrial 9 · Urban 102 · Mountain 8 · Technology 7 · Waste 0**. Raw land does
+with these per-region weights:
+
+- **Coastal 7**
+- **River 10**
+- **Agricultural 8**
+- **Desert 4**
+- **Industrial 9**
+- **Urban 102**
+- **Mountain 8**
+- **Technology 7**
+- **Waste 0**
+
+Raw land does
 not house anyone — the *mix* does, and **Urban outweighs every other type by more
 than ten to one**, so a realm that wants people buys Urban. Support and tax are
 **multiplicative**, not additive: 90% support is neutral and a 10% tax rate is
@@ -2922,15 +2963,26 @@ A common money tip: set industry to 100% carriers and *sell* the carriers
 industrial output (see the region table for the formula) and are the most
 war-stable.
 
-Guide region mixes for orientation: early game leans money regions
-(coastal + river, ~1:1, plus ~5–10% agricultural); a war build leans
-industrial + mountain (~40/40); a mature economy runs roughly a 4:3:3
-agricultural : urban : technology ratio. Protection at game start is long
+Guide region mixes for orientation:
+
+- early game leans money regions (coastal + river, ~1:1, plus ~5–10%
+  agricultural)
+- a war build leans industrial + mountain (~40/40)
+- a mature economy runs roughly a 4:3:3 agricultural : urban : technology ratio
+
+Protection at game start is long
 (about 20–70 turns), and a "day" is about 10–15 turns.
 
-Other economy pieces: military maintenance, food consumption, land
-maintenance, tax payments, spending on public support/morale, and the food
-market (limited supply — relying on it is risky). Banking offers
+Other economy pieces:
+
+- military maintenance
+- food consumption
+- land maintenance
+- tax payments
+- spending on public support/morale
+- the food market (limited supply — relying on it is risky)
+
+Banking offers
 interest-earning savings and loans; investment rates move over time.
 
 **Popular support and military morale** are 0–100 stats, held as `int32`s on the
@@ -3178,9 +3230,16 @@ IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
   **Not built:** IB has no sysop-editable events file. A sysop who wants their
   own events has nowhere to put them.
 
-The clone implements all of the above (`internal/game/turn.go`): the trigger and
-chance, the `People div 15` loss, the `tax div 3` support hit, the per-turn tax
-drift, the low-support morale drain, and the low-tax buy-back. IB's earlier
+The clone implements all of the above (`internal/game/turn.go`):
+
+- the trigger and chance
+- the `People div 15` loss
+- the `tax div 3` support hit
+- the per-turn tax drift
+- the low-support morale drain
+- the low-tax buy-back
+
+IB's earlier
 invented model — a drift toward `100 − (tax−15)×3` plus a free 5-point boost for
 a "well-run realm" — has been removed; the tax drift covers free recovery, as it
 does in the original.
@@ -3660,9 +3719,14 @@ section is a record of what was claimed and how it was settled, so the word
 
 ### Banking and investments (from the binary strings)
 
-The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"): **Cash Relief /
-Loans**, **Deposit Funds**, **Withdraw Funds**, **Investments**, **List
-Investments / Loans**, and **View Bank Rates**.
+The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"):
+
+- **Cash Relief / Loans**
+- **Deposit Funds**
+- **Withdraw Funds**
+- **Investments**
+- **List Investments / Loans**
+- **View Bank Rates**
 
 - **Savings** earn the *Bank Interest Rate* on gold in the bank. BRE-faithful
   (config-help verified): the knob is "interest the bank gives in **10 days**", so
@@ -3992,10 +4056,19 @@ spent. `Empire.FormerName` holds the previous name and is what makes it
 once-only. The planet is told in the news.
 
 The realm name is an identity key as well as a label, so `World.RenameEmpire`
-rewrites every reference in the same transaction: treaties (re-sorted, since
-the pair is held in canonical order), the covert queue, market listings and
-market proceeds, treaty offers, barter offers, local mail senders, bribed-agent
-lists, `ExposedFrom`, and the Planetary Master fields. Prose already written —
+rewrites every reference in the same transaction:
+
+- treaties (re-sorted, since the pair is held in canonical order)
+- the covert queue
+- market listings and market proceeds
+- treaty offers
+- barter offers
+- local mail senders
+- bribed-agent lists
+- `ExposedFrom`
+- the Planetary Master fields
+
+Prose already written —
 events and past news — is left alone: it records what was said at the time.
 
 What cannot be rewritten is what has already left the board, and two things
@@ -4281,11 +4354,16 @@ attack.** Read from a disassembly of the original: the attack resolver
 military to the winner and files the news; it leaves the loser's record in place,
 holding zero regions. The record is collected by the daily-maintenance sweep
 (`BRE.OVR 0x007ed2`), which walks every slot and deletes it when **any** of these
-holds: it has no regions left; it has no population left; nobody has played it
-for the configured idle limit (`DeletionDays`, default 7, per `docs/bre.doc`); or
-it was created and never played and the game is more than three days old. The
-slot in play is exempt. Two things follow. A crushed realm stays visible for the
-rest of the game day, which is why the loser's neighbors can still see what
+holds:
+
+- it has no regions left
+- it has no population left
+- nobody has played it for the configured idle limit (`DeletionDays`, default
+  7, per `docs/bre.doc`)
+- it was created and never played and the game is more than three days old
+
+The slot in play is exempt. Two things follow. A crushed realm stays visible for
+the rest of the game day, which is why the loser's neighbors can still see what
 happened — IB's one-day husk (`removeDeadHusks`) is the same window. And
 abdication has to reach the player "the next day" because it also goes through
 this sweep: the deletion routine has exactly two callers, that sweep and the
@@ -5133,10 +5211,18 @@ strike, and at `+0x1107` on the branch taken by an S3-Sabre that landed.
 
 IB posts one line on the target's planet for every outcome but a missing realm,
 chosen by the outcome and worded as IB's own (`missileNews`, `planetOpNews` in
-`ibbs_special.go`): a hit, a misfire, an SDI interception, an S3-Sabre that broke
-up, a Sabre that reached its target and did negligible damage, a protected realm,
-and for the bombing ops a run that found nothing to wreck and a run driven off
-by the landing roll before it arrived. Until #288 every outcome past protection posted "X struck Y", so a
+`ibbs_special.go`):
+
+- a hit
+- a misfire
+- an SDI interception
+- an S3-Sabre that broke up
+- a Sabre that reached its target and did negligible damage
+- a protected realm
+- for the bombing ops, a run that found nothing to wreck
+- for the bombing ops, a run driven off by the landing roll before it arrived
+
+Until #288 every outcome past protection posted "X struck Y", so a
 missile that broke up read as a hit on the target's planet while the firer's
 report said it failed. Two places where IB's line knowingly differs from the
 original's choice:
@@ -5156,9 +5242,16 @@ and report at `+0x3d5`. IB rolled it for Bomb Trade Routes only until
 sending realm, as the original's failure line does.
 
 **The firer's planet reads a line for every missile outcome** too
-(`missileReturnNews` in `ibbs_return.go`), agreeing with the target's: a hit, a
-misfire, an SDI interception, New Realm Protection, a backfire, and a Sabre that
-did negligible damage. The answer carries the outcome home as a narrower
+(`missileReturnNews` in `ibbs_return.go`), agreeing with the target's:
+
+- a hit
+- a misfire
+- an SDI interception
+- New Realm Protection
+- a backfire
+- a Sabre that did negligible damage
+
+The answer carries the outcome home as a narrower
 `Outcome` value — `misfire`, `intercepted` or `negligible` where it said
 `failure` — which needed no `game.Protocol` bump, since the field and its
 signed bytes are unchanged for a board that predates the values. A `failure`
@@ -5191,13 +5284,16 @@ quotes three costs against `Pirates Ahoy!`, whose IPScores row reads **8,112**
 Territory, and 20,758,608 / 21,853,728 / 36,122,736 divide by it exactly; a
 fourth quote of 15,340,585 is 4,453 × 3,445 against another target.
 
-Three things follow, all of them differences from the local path. The rates are
-NOT the local ones (a local nuke is 3,543 a region against 2,559 here), so the
-two paths being priced differently is the original's design. There is **no
-`StrikeCostCap`** — the 50,000,000 literal is in all three local routines and in
-none of these branches. And the price is quoted as `Cost: N Gold` AFTER the
-target is chosen, which is why the menu's price column is blank for these three:
-the column was never where it lived.
+Three things follow, all of them differences from the local path:
+
+- The rates are NOT the local ones (a local nuke is 3,543 a region against
+  2,559 here), so the two paths being priced differently is the original's
+  design.
+- There is **no `StrikeCostCap`** — the 50,000,000 literal is in all three local
+  routines and in none of these branches.
+- The price is quoted as `Cost: N Gold` AFTER the target is chosen, which is why
+  the menu's price column is blank for these three: the column was never where
+  it lived.
 
 IB priced them off the LAUNCHER until 2026-09-18, reasoning that a board cannot
 know how big a realm on another planet is. It can — the scores it imports carry
@@ -5323,9 +5419,15 @@ BRE's BRNODES.DAT), so a planet keeps the same number on every screen; a board
 heard from over a packet but absent from the roster is numbered on after it.
 The list includes the board you are calling from.
 
-IB routes every planet pick through it (`pickPlanetNamed`): Create Group Attack,
-Indiv. Attack Force, the spy and terrorist targeting, the Gooie Kablooie, and
-IP Messages. A name must be typed in full (case-insensitively) — whether BRE
+IB routes every planet pick through it (`pickPlanetNamed`):
+
+- Create Group Attack
+- Indiv. Attack Force
+- the spy and terrorist targeting
+- the Gooie Kablooie
+- IP Messages
+
+A name must be typed in full (case-insensitively) — whether BRE
 accepts an abbreviation was never observed, and guessing would risk sending to
 the wrong planet. An IB divergence: a message addressed to your OWN board is
 delivered locally rather than queued as a packet, which would otherwise leave
@@ -5936,12 +6038,17 @@ and each carries a gameplay effect (#11 wired the last two):
   `create_trade_offer`, BRE.OVR 0x024961+0x1e97), and relations are mutual, so
   reading one row settles both. The attacker's own relations are never read.
 
-  Three further facts about that routine. The check runs at RESOLUTION on the
-  receiving board, after the attacker has paid and the packet has flown, so
-  nothing is refused, nothing is refunded, and no per-deal message exists. A
-  separate `random(3)` per deal lets one deal in three escape whatever the
-  relation. And another `random(3)` at the top of `resolve_received_bombing`
-  voids the whole strike two times in three. A deal that is not spared loses
+  Three further facts about that routine:
+
+  - The check runs at RESOLUTION on the receiving board, after the attacker has
+    paid and the packet has flown, so nothing is refused, nothing is refunded,
+    and no per-deal message exists.
+  - A separate `random(3)` per deal lets one deal in three escape whatever the
+    relation.
+  - Another `random(3)` at the top of `resolve_received_bombing` voids the whole
+    strike two times in three.
+
+  A deal that is not spared loses
   `trunc(qty x (random(5)+5) / 100)` — 91-95% — of each of its nine goods
   quantities.
 
@@ -6222,11 +6329,13 @@ flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
   pass some of their lines to the news writer.
 
 The clone broadcasts most of these to its planetary bulletin (original wording,
-not BRE's verbatim lines): regular-attack wins/losses/conquests (NORMALWIN /
-NORMALLOSS / TOTALWIN), nuclear/chemical/biological strikes (NUKE / CHEM / BIO),
-pirate-raid outcomes (PIRATEWIN / PIRATELOSS), unrest in an unpopular realm
-(RIOTS), and civil-war
-collapse (CIVILWAR — `postCivilWarNews`).
+not BRE's verbatim lines):
+
+- regular-attack wins/losses/conquests (NORMALWIN / NORMALLOSS / TOTALWIN)
+- nuclear/chemical/biological strikes (NUKE / CHEM / BIO)
+- pirate-raid outcomes (PIRATEWIN / PIRATELOSS)
+- unrest in an unpopular realm (RIOTS)
+- civil-war collapse (CIVILWAR — `postCivilWarNews`)
 
 The pirate lines are the one part of the feed a sysop can switch off:
 `PirateNews no` in `bbs.cfg` suppresses them. It is display only — the raids
@@ -6332,12 +6441,13 @@ own turns-per-day or attack limits would otherwise feed that into every other
 board's game. The fingerprint describes the packet, not the board, so a packet
 written while a board was out of step never applies however quickly its sysop
 puts the config back — it is re-checked on each later run and expires on the
-held-packet timer. Three cases are deliberately not divergent: a packet from the
-Coordinator, whose ruleset is the league's and whose packets carry the change
-that heals a board; a packet stating no fingerprint, from a board older than the
-field; and every packet at all on a board that does not yet know what the
-league's rules are, which on a member is until the Coordinator has been heard
-from.
+held-packet timer. Three cases are deliberately not divergent:
+
+- a packet from the Coordinator, whose ruleset is the league's and whose packets
+  carry the change that heals a board
+- a packet stating no fingerprint, from a board older than the field
+- every packet at all on a board that does not yet know what the league's rules
+  are, which on a member is until the Coordinator has been heard from
 
 A rules change is not divergence, and neither direction of one loses traffic. A
 board that has adopted the change looks divergent to one that has not, and those

@@ -27,9 +27,16 @@ boards trade packets, and barons attack, message, and buy from an ally's market
 across planets.
 
 Most of the game's numbers are read from the original's own program rather than
-guessed: region income, the coastal support curve, unit costs and the
-specialization modifiers, industrial output and the unit pool, the crown tax,
-and the whole technology system. Those are fixed — changing one would mean the
+guessed:
+
+- region income
+- the coastal support curve
+- unit costs and the specialization modifiers
+- industrial output and the unit pool
+- the crown tax
+- the whole technology system
+
+Those are fixed — changing one would mean the
 game stops matching the original. The rest are tuning values, and changes to
 them from here should be small.
 

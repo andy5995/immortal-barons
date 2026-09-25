@@ -218,10 +218,16 @@ SubjectPath Absolute
 
 On the receiving side, the tosser normally leaves both the bundle and its
 stored-message envelope in the configured inbound. The unwrap step verifies
-that the message has the file-attach attribute, identifies Immortal Barons,
-names exactly one attachment inside an `IncomingFileDir`, comes from a roster address,
-and is addressed to this board. Only after all packets are delivered or
-forwarded does it delete both files. Other netmail is never removed.
+that the message:
+
+- has the file-attach attribute
+- identifies Immortal Barons
+- names exactly one attachment inside an `IncomingFileDir`
+- comes from a roster address
+- is addressed to this board
+
+Only after all packets are delivered or forwarded does it delete both files.
+Other netmail is never removed.
 
 #### Keeping attach subjects short
 
@@ -522,9 +528,13 @@ FTS-5005 permits a `.bsy` to contain one line of PID information. A semaphore
 created here contains `barons-ftn pid=<number>`, and the process also locks its
 first-byte range on Windows, or takes a whole-file `flock` on Unix, for the
 complete BSO update. A later run removes that semaphore as stale only when
-all three checks agree: the marker is exactly ours, the ownership lock can be
-acquired non-blockingly, and the file is at least five minutes old. It then
-retries the standard exclusive `.bsy` creation. Thus a live run remains
+all three checks agree:
+
+- the marker is exactly ours
+- the ownership lock can be acquired non-blockingly
+- the file is at least five minutes old
+
+It then retries the standard exclusive `.bsy` creation. Thus a live run remains
 protected even if its semaphore's timestamp is old, while a crash becomes
 recoverable without guessing from age alone.
 

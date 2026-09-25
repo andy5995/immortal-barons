@@ -247,10 +247,13 @@ that is where the alarm belongs.
 
 **A planetary run exits non-zero when it meets a fault it has not reported
 before** — a packet refused, quarantined, or held, whether for a format this
-build cannot read or for a ruleset that is not the league's. `cron` mails the
-output of a job that fails, `systemd` marks the unit failed and will run an
-`OnFailure=` unit, and Windows Task Scheduler records the result. Nothing new has
-to be installed for any of that.
+build cannot read or for a ruleset that is not the league's.
+
+- `cron` mails the output of a job that fails.
+- `systemd` marks the unit failed and will run an `OnFailure=` unit.
+- Windows Task Scheduler records the result.
+
+Nothing new has to be installed for any of that.
 
 Only a **new** fault ends the run non-zero. A fault that persists is still
 reported on every run, in the run's own output and in `planetary.log`, but a
@@ -278,9 +281,14 @@ room — `bbs.cfg` takes one command, [`OnFault`](bbs-cfg.md#onfault):
 OnFault  ntfy publish mybbs "$IB_FAULTS"
 ```
 
-It runs after such a run, once, with the faults in `$IB_FAULTS`, the board's
-name in `$IB_BOARD`, and its data directory in `$IB_DATA`; on a Unix board the
-faults are also the command's first argument. It is your shell's line, so a
+It runs after such a run, once, with:
+
+- the faults in `$IB_FAULTS`; on a Unix board the faults are also the command's
+  first argument
+- the board's name in `$IB_BOARD`
+- its data directory in `$IB_DATA`
+
+It is your shell's line, so a
 pipeline works, and anything at all can be on the other end of it — `mail`,
 `curl` to a webhook, `notify-send`, `wall`. It is given 30 seconds and then
 abandoned, and if it fails the run says so and carries on: the hook is the
@@ -312,8 +320,15 @@ drawn, where it cannot affect delivery.
 
 Keep names under about 27 characters if you want them to sit whole everywhere.
 A longer one is shown cut with an ellipsis on each screen that has a column for
-it — the planet list, Travel Times, InterBBS Scores, Game Setup, the Daily
-Bulletin masthead, an allied market's title, and the score and peer reports.
+it:
+
+- the planet list
+- Travel Times
+- InterBBS Scores
+- Game Setup
+- the Daily Bulletin masthead
+- an allied market's title
+- the score and peer reports
 
 ```
 1
@@ -331,8 +346,16 @@ TX
 USA
 ```
 
-The six lines are: node number, board (planet) name, network address, city,
-state or province, and country. Board number 1 is the League Coordinator.
+The six lines are:
+
+1. node number
+2. board (planet) name
+3. network address
+4. city
+5. state or province
+6. country
+
+Board number 1 is the League Coordinator.
 
 **A node number is 1 to 999**, the same range as the league number. The number
 goes into the name of every packet file that board sends, and those names have
@@ -593,10 +616,12 @@ setting.
 ## When packets stop arriving
 
 [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md) is the guide for a
-league that has stopped moving: what each counter in a `-planetary` run report
-means, what the game's log records, what to do about held, quarantined and
-refused packets, and the checks a League Coordinator has that a member board
-does not.
+league that has stopped moving:
+
+- what each counter in a `-planetary` run report means
+- what the game's log records
+- what to do about held, quarantined and refused packets
+- the checks a League Coordinator has that a member board does not
 
 ## Optional FTN handoff
 
@@ -666,20 +691,36 @@ other board:
 1 HOST 2 3 4 5
 ```
 
-[FTN Transport](ftn-transport.md) is the complete reference: every setting,
-the per-peer `Link` modes, mixed-link examples, event schedules, 8.3 aliases,
-the attach Subject's byte limit, the mesh warning, crash recovery, and
-directory-by-directory troubleshooting.
+[FTN Transport](ftn-transport.md) is the complete reference:
+
+- every setting
+- the per-peer `Link` modes
+- mixed-link examples
+- event schedules
+- 8.3 aliases
+- the attach Subject's byte limit
+- the mesh warning
+- crash recovery
+- directory-by-directory troubleshooting
 
 ## League-wide rules (Coordinator only)
 
 The League Coordinator sets the rules that must match across the whole league:
-turns per day, protection turns, game length, land market and daily land,
-interest and investment rates, tax and region and player limits, buy-military
-mode, the cost, damage, and reward levels, and the league policies — whether
-barons on one board may attack each other, whether such a battle scores, and
-whether a caller found playing on two boards is locked out. Set them in the
-Coordinator's own `config.json`, then broadcast them to every board:
+
+- turns per day
+- protection turns
+- game length
+- land market and daily land
+- interest and investment rates
+- tax and region and player limits
+- buy-military mode
+- the cost, damage, and reward levels
+- the league policies — whether barons on one board may attack each other,
+  whether such a battle scores, and whether a caller found playing on two
+  boards is locked out
+
+Set them in the Coordinator's own `config.json`, then broadcast them to every
+board:
 
 ```
 immortal-barons -league-config -data /path/to/data

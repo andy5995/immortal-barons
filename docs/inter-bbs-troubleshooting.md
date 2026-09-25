@@ -92,13 +92,16 @@ A run that skipped anything names each reason:
 | mesh copy | a copy addressed to somebody else, in a mesh setup | nothing |
 | transport bundle(s) left for the next unwrap | a bundle in `GameInbound` that this run did not unwrap: another run held the transport lock, or the unwrap failed | nothing, if the next run unwraps it. If it stays, read the unwrap warning the run printed |
 
-Three more lines appear when they apply. **Passed N packets on** is this board
-forwarding for a neighbor, which is routing working. **Returned N held
-packet(s) to the inbound queue** means held packets were checked again. It does
-not mean any of them applied; the run's held count says whether they were set
-aside again. **The League Coordinator's
-roster replaced this board's copy** means an order arrived and was accepted —
-the one line that tells a member board its Coordinator link is alive.
+Three more lines appear when they apply:
+
+- **Passed N packets on** is this board forwarding for a neighbor, which is
+  routing working.
+- **Returned N held packet(s) to the inbound queue** means held packets were
+  checked again. It does not mean any of them applied; the run's held count
+  says whether they were set aside again.
+- **The League Coordinator's roster replaced this board's copy** means an order
+  arrived and was accepted — the one line that tells a member board its
+  Coordinator link is alive.
 
 `-detailed` alongside `-planetary` shows each packet as it is read and written,
 when a counter alone is not enough.
@@ -230,19 +233,17 @@ copies you have already looked at is a sysop task; nothing does it for you.
 Then the packet never reached your inbound directory, and the fault is in the
 half you own. Three things to check:
 
-The directory your mailer really writes to has to be the one the game reads:
-`IncomingFileDir` when the game's FTN transport unwraps for it, `GameInbound`
-when your transport drops packets straight in. If it names a different one, the
-game reads an empty directory and reports nothing, because an empty inbound is
-also what a quiet day looks like.
-
-Your mailer has to be running and linked. "Step 5 — prove the link" in the
-league guide polls each board from the other and reads the result properly; a
-session that connects and transfers nothing is the answer you want.
-
-If you hand packets to FidoNet, writing the netmail is not sending it. See
-[Optional FTN handoff](inter-bbs.md#optional-ftn-handoff) — a `.msg` still
-sitting in your netmail directory means the game did its part.
+- The directory your mailer really writes to has to be the one the game reads:
+  `IncomingFileDir` when the game's FTN transport unwraps for it, `GameInbound`
+  when your transport drops packets straight in. If it names a different one,
+  the game reads an empty directory and reports nothing, because an empty
+  inbound is also what a quiet day looks like.
+- Your mailer has to be running and linked. "Step 5 — prove the link" in the
+  league guide polls each board from the other and reads the result properly;
+  a session that connects and transfers nothing is the answer you want.
+- If you hand packets to FidoNet, writing the netmail is not sending it. See
+  [Optional FTN handoff](inter-bbs.md#optional-ftn-handoff) — a `.msg` still
+  sitting in your netmail directory means the game did its part.
 
 The in-game **Travel Times** screen is where players see this first. A planet
 whose round trip stops moving is the same fault, seen from the other end.
