@@ -75,6 +75,13 @@ const (
 	// bonus it spent 20 turns building, and a HeadQuarters is not permanent.
 	HQBattleLossMin    = 5 // binary
 	HQBattleLossJitter = 3 // binary: Random(3) added to the minimum
+
+	// A winning interplanetary strike takes a fifth of the HeadQuarters of every
+	// realm it takes regions from: HQ −= HQ div 5 (integer).
+	// BINARY-VERIFIED: resolve_received_invasion +0x18f2..+0x191f (BRE.OVR
+	// 0x40D92), inside the per-realm block that takes that realm's regions, after
+	// the battle's won/lost test. Silent, as in the original.
+	InvasionHQLossDivisor = 5 // binary
 )
 
 // The HeadQuarters price rises with the empire's lifetime turn count — unlike

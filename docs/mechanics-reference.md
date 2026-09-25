@@ -4366,6 +4366,14 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   IB took a share of the MARGIN and quartered it until 2026-08-24. That was its
   own and had no support.
 
+  **A winning strike also takes a fifth of the HeadQuarters.** The same
+  per-realm block, right after the regions are taken (`+0x18f2`-`+0x191f`,
+  `BRE.OVR 0x40D92`), does `HQ −= HQ div 5` on that realm's `+0x26b` through the
+  clamped sub32 helper, with no line on any report. It runs for every realm the
+  block takes regions from, so a planet-wide win knocks back every standing
+  realm's HeadQuarters. A repelled strike skips the block and costs none. IB
+  had no invasion HQ loss until 2026-09-25 (`InvasionHQLossDivisor`).
+
   **A strike aimed at the PLANET fights every realm at once.** The target is
   carried as a letter, and `Z` means all — the same "Z=All" convention BRE's own
   multi-select picker uses. On seeing it (`+0x0d3d`) the resolver loops `A`..`Y`
