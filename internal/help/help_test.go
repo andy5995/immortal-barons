@@ -60,13 +60,16 @@ func TestUnknownLanguageFallsBackToEnglish(t *testing.T) {
 	}
 }
 
-func TestControlsCategoryLoads(t *testing.T) {
+func TestGettingStartedCategoryLoads(t *testing.T) {
 	if Categories()[0] != "controls" {
 		t.Errorf("controls should sort first, got %v", Categories())
 	}
 	topics := Topics("controls", "")
 	if len(topics) < 2 {
 		t.Fatalf("expected the migrated controls topics, got %d", len(topics))
+	}
+	if topics[0].Title != "How to Play" {
+		t.Errorf("Getting Started should open with How to Play, got %q", topics[0].Title)
 	}
 	if topics[0].Order > topics[1].Order {
 		t.Error("topics should be sorted by order")
@@ -78,9 +81,18 @@ func TestInstructionsAssembly(t *testing.T) {
 	if len(seq) == 0 {
 		t.Fatal("Instructions returned nothing")
 	}
-	// The overview leads the read-through.
-	if seq[0].Category != "introduction" {
-		t.Errorf("first item should be the introduction overview, got category %q", seq[0].Category)
+	// The overview leads the read-through, and only once.
+	if seq[0].Title != "How to Play" {
+		t.Errorf("first item should be the How to Play overview, got %q", seq[0].Title)
+	}
+	n := 0
+	for _, top := range seq {
+		if top.Title == "How to Play" {
+			n++
+		}
+	}
+	if n != 1 {
+		t.Errorf("How to Play appears %d times in the read-through, want 1", n)
 	}
 	// It stitches in real help topics from more than one category, so it is the
 	// whole manual, not just the intro.
@@ -90,12 +102,6 @@ func TestInstructionsAssembly(t *testing.T) {
 	}
 	if !cats["military"] || !cats["economy"] {
 		t.Errorf("expected topics from multiple categories, got %v", cats)
-	}
-	// The docs-only overview must never leak into the ? browser's category list.
-	for _, c := range Categories() {
-		if c == "introduction" {
-			t.Error("introduction is docs-only and must not be a browsable category")
-		}
 	}
 }
 

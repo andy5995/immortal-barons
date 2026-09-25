@@ -1,6 +1,6 @@
 ---
-category: introduction
-in_game: false
+category: controls
+in_game: true
 order: 0
 title: 'Как играть'
 ---

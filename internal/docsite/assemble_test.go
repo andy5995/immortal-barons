@@ -133,8 +133,8 @@ func TestAssembleNavAndConfig(t *testing.T) {
 		}
 	}
 
-	// Controls (order 1 in CategoryOrder) must appear before Economy in the nav.
-	if strings.Index(s, `"Controls"`) > strings.Index(s, `"Economy"`) {
-		t.Error("categories out of order: Controls should precede Economy")
+	// Getting Started (first in CategoryOrder) must appear before Economy in the nav.
+	if strings.Index(s, `"Getting Started"`) > strings.Index(s, `"Economy"`) {
+		t.Error("categories out of order: Getting Started should precede Economy")
 	}
 }

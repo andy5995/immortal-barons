@@ -11,8 +11,8 @@ shows every topic in order, a screen at a time. **(?) Help** lets you choose one
 category and one topic; most menus have it too. The topics are grouped like
 this:
 
-- **Introduction** — how to play
-- **Controls** — moving through the menus, entering numbers
+- **Getting Started** — how to play, turns and protection, moving through the
+  menus, entering numbers
 - **Military** — units and their roles
 - **Economy** — food, banking, taxes, trading
 - **Regions** — the region types and what each one produces

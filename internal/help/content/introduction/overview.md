@@ -1,8 +1,8 @@
 ---
 title: How to Play
-category: introduction
+category: controls
 order: 0
-in_game: false
+in_game: true
 ---
 
 # Immortal Barons — How to Play

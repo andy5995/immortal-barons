@@ -624,15 +624,16 @@ func TestTurnaroundLabelUnits(t *testing.T) {
 	}
 }
 
-func TestHelpBrowseShowsControls(t *testing.T) {
-	// lightbar: type 'c' (jumps to Controls) -> Enter -> Enter (first topic) ->
-	// dismiss pause (z) -> q (back to categories) -> q (leave help)
-	f := &fakeSession{keys: []rune("c\r\rzqq")}
+func TestHelpBrowseShowsGettingStarted(t *testing.T) {
+	// lightbar: type 'g' (jumps to Getting Started) -> Enter -> down, Enter
+	// (the second topic, after How to Play) -> dismiss pause (z) -> q (back to
+	// categories) -> q (leave help)
+	f := &fakeSession{keys: []rune("g\r\x1b[B\rzqq")}
 	w := newWorld()
 	helpBrowse(f, w)
 	out := f.out.String()
-	if !strings.Contains(out, "Controls") {
-		t.Error("help browser should list the Controls category")
+	if !strings.Contains(out, "Getting Started") {
+		t.Error("help browser should list the Getting Started category")
 	}
 	// A BODY phrase, not a topic title: titles are printed by the topic
 	// lightbar before RenderANSI runs, so a title match passes with the render

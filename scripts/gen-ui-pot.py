@@ -123,6 +123,20 @@ def extract():
             for m in PLURAL_PATTERN.finditer(line):
                 add(m.group(1), f"{rel}:{n}")
                 add(m.group(2), f"{rel}:{n}")
+    # The help browser's category names: it translates them through
+    # tr(s, help.CategoryName(c)), which reads the map, so the map's own values
+    # are the msgids. All reached the browser untranslated until this was added.
+    help_go = os.path.join(ROOT, "internal", "help", "help.go")
+    inside = False
+    for n, line in enumerate(open(help_go, encoding="utf-8"), 1):
+        if line.startswith("var categoryNames"):
+            inside = True
+        elif inside and line.startswith("}"):
+            inside = False
+        elif inside:
+            m = re.search(r':\s*' + STR, line)
+            if m:
+                add(m.group(1), f"internal/help/help.go:{n}")
     for path in go_files("internal/game"):
         rel = os.path.relpath(path, ROOT)
         for n, line in enumerate(open(path, encoding="utf-8"), 1):

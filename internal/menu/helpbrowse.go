@@ -148,7 +148,7 @@ func helpBrowse(s session.Session, w *ctx) Result {
 		// lightbar the arrows/type-ahead reach it, so it needs no dedicated key.
 		items := make([]string, 0, len(cats)+1)
 		for _, c := range cats {
-			items = append(items, help.CategoryName(c))
+			items = append(items, tr(s, help.CategoryName(c)))
 		}
 		items = append(items, tr(s, "About"))
 		i := chooseFromList(s, w.Plain, tr(s, "Help — choose a category:"), items, tr(s, "Quit"))
@@ -197,10 +197,9 @@ func showInstructions(s session.Session, w *ctx) Result {
 
 	lastCat := ""
 	for _, t := range help.Instructions(lang) {
-		// The overview carries its own title heading, so it needs no section bar;
-		// the real categories get one, mirroring BRE's section dividers.
-		if t.Category != lastCat && t.Category != "introduction" {
-			if !emit("") || !emit(fmt.Sprintf("%s── %s ──%s", ansi.FgBrightCyan, help.CategoryName(t.Category), ansi.Reset)) {
+		// Each category gets a section bar, mirroring BRE's section dividers.
+		if t.Category != lastCat {
+			if !emit("") || !emit(fmt.Sprintf("%s── %s ──%s", ansi.FgBrightCyan, tr(s, help.CategoryName(t.Category)), ansi.Reset)) {
 				return Stay
 			}
 		}
@@ -287,7 +286,7 @@ func browseCategory(s session.Session, plain bool, cat, lang string) {
 		for i, t := range topics {
 			titles[i] = t.Title
 		}
-		i := chooseFromList(s, plain, help.CategoryName(cat)+tr(s, " — choose a topic:"), titles, tr(s, "Back"))
+		i := chooseFromList(s, plain, tr(s, help.CategoryName(cat))+tr(s, " — choose a topic:"), titles, tr(s, "Back"))
 		if i < 0 {
 			return
 		}
