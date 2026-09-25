@@ -5079,7 +5079,14 @@ million gold (`docs/dev/bre-screens.md`):
   calls it yearly.
 - **Spending allowance** = 20% of total funding, never less than 250,000, and
   refilled every turn. Gold goes in only in whole thousands, which the screen
-  says outright.
+  says outright. BINARY-VERIFIED further (`BRE.EXE` 0x6305-0x6386): the
+  allowance is set **once a turn**, from the funding at that moment, capped at
+  **250,000,000**, and each deposit is subtracted from it. It does not grow
+  with the deposits made during the turn; IB let it, until #290.
+
+  **Deliberate divergence:** the original takes the whole amount typed and
+  credits only the whole thousands in it, so 800 gold buys nothing and 1,500
+  buys 1,000. IB takes only what it credits and says when nothing went in.
 
 **Strength is BINARY-VERIFIED** (`BRE.EXE` resident `056d:1139`, the routine every
 reader of the percentage calls):

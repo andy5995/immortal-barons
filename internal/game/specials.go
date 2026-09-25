@@ -30,10 +30,13 @@ func (w *World) SDIFundingPerRegion(e *Empire) int64 {
 }
 
 // SDISpendAllowance is the most gold e may still put into the program this turn:
-// a share of what is already in it, never less than the floor, less whatever has
-// gone in already this turn.
+// a share of what was in it when the turn began, capped and never less than the
+// floor, less whatever has gone in since. Reckoned from the turn's opening total
+// rather than the running one, as the original sets it once a turn: a share of
+// the running total let each deposit raise the allowance for the next (#290).
 func (w *World) SDISpendAllowance(e *Empire) int64 {
-	allowed := pctOf(e.SDIFunding, SDISpendPct)
+	atTurnStart := max(0, e.SDIFunding-e.TurnProgress.SDIFunded)
+	allowed := min(pctOf(atTurnStart, SDISpendPct), SDIMaxSpend)
 	if allowed < SDIMinSpend {
 		allowed = SDIMinSpend
 	}

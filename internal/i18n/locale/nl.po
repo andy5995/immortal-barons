@@ -28,7 +28,7 @@ msgstr " (vast)"
 msgid " — choose a topic:"
 msgstr " - kies een onderwerp:"
 
-#: internal/menu/actions_attack.go:896
+#: internal/menu/actions_attack.go:904
 msgid "#"
 msgstr "#"
 
@@ -120,7 +120,7 @@ msgstr "%d soldaten, %d geschutstorens, %d tanks, %d jagers"
 msgid "%d units deserted for lack of pay."
 msgstr "%d eenheden deserteerden omdat de soldij uitbleef."
 
-#: internal/menu/actions_attack.go:947
+#: internal/menu/actions_attack.go:955
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr "%d%% van de Gooie Kablooie vernietigd!"
 
@@ -136,7 +136,7 @@ msgstr "%s %s gekocht."
 msgid "%s %s sent out."
 msgstr "%s %s uitgestuurd."
 
-#: internal/menu/actions_attack.go:738
+#: internal/menu/actions_attack.go:746
 msgid "%s Gold added."
 msgstr "%s goud toegevoegd."
 
@@ -200,7 +200,7 @@ msgstr ""
 "%s staat in %s, dat het spel wel leest maar nooit schrijft. Pas dat bestand "
 "aan."
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:950
 msgid "%s jets were destroyed in the attack!"
 msgstr "%s straaljagers gingen verloren bij de aanval!"
 
@@ -936,7 +936,7 @@ msgstr "Groepsaanval maken"
 msgid "Create Realm"
 msgstr "Rijk stichten"
 
-#: internal/menu/actions_attack.go:739
+#: internal/menu/actions_attack.go:747
 msgid "Current SDI Strength: %s%%"
 msgstr "Huidige SDI-sterkte: %s%%"
 
@@ -972,7 +972,7 @@ msgstr "Dagbulletin"
 msgid "Date"
 msgstr "Datum"
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "Days Until Self-Destruct"
 msgstr "Dagen tot zelfvernietiging"
 
@@ -1102,7 +1102,7 @@ msgstr "Gooie ontmantelen"
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr "Ontmantelen levert niets terug - het goud is uitgegeven."
 
-#: internal/menu/actions_attack.go:883
+#: internal/menu/actions_attack.go:891
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Wilt u een Gooie Kablooie aanvallen?"
 
@@ -1176,7 +1176,7 @@ msgstr "Bescherming beëindigen"
 msgid "End of Turn Statistics:"
 msgstr "Statistieken aan het eind van de beurt:"
 
-#: internal/menu/actions_attack.go:913
+#: internal/menu/actions_attack.go:921
 msgid "Enter Gooie Number (0 to cancel)?"
 msgstr "Voer het Gooie-nummer in (0 om te annuleren)?"
 
@@ -1245,7 +1245,7 @@ msgstr "Te koop"
 msgid "Free software under the MIT License."
 msgstr "Vrije software onder de MIT-licentie."
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "From"
 msgstr "Van"
 
@@ -1309,7 +1309,7 @@ msgstr "Gooie Kablooie"
 msgid "Gooie Kablooie Ops"
 msgstr "Gooie Kablooie-ops"
 
-#: internal/menu/actions_attack.go:763
+#: internal/menu/actions_attack.go:771
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "Gooie Kablooie-operaties staan uit in dit spel."
 
@@ -1349,7 +1349,7 @@ msgstr "Hoeveel dagen wilt u dat hij blijft?"
 msgid "How many days would you like to invest for?"
 msgstr "Voor hoeveel dagen wilt u beleggen?"
 
-#: internal/menu/actions_attack.go:786
+#: internal/menu/actions_attack.go:794
 msgid "How many million gold do you wish to put in?"
 msgstr "Hoeveel miljoen goud wilt u inleggen?"
 
@@ -1477,7 +1477,7 @@ msgstr "Beleggingen"
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "Het bereikt hen niet eerder dan beurt %d van hun dag."
 
-#: internal/menu/actions_attack.go:823
+#: internal/menu/actions_attack.go:831
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "De financiering kost uw planeet %s miljoen goud. Akkoord?"
 
@@ -1824,6 +1824,10 @@ msgstr ""
 msgid "Note: You should only fund the SDI in increments of %d Gold."
 msgstr "Let op: financier de SDI alleen in stappen van %d goud."
 
+#: internal/menu/actions_attack.go:743
+msgid "Nothing added: the SDI is funded in whole thousands of Gold."
+msgstr "Niets toegevoegd: het SDI wordt alleen in hele duizenden goud gefinancierd."
+
 #: internal/menu/actions_iptrade.go:50
 msgid "Nothing has been offered on %s, or no news has reached us yet."
 msgstr "Op %s is niets aangeboden, of er heeft ons nog geen bericht bereikt."
@@ -1872,7 +1876,7 @@ msgstr "Aanbod - waren die u stuurt:"
 msgid "One Dominion"
 msgstr "Eén rijk"
 
-#: internal/menu/actions_attack.go:887
+#: internal/menu/actions_attack.go:895
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr ""
 "Alleen straaljagers kunnen een Gooie Kablooie aanvallen, en u hebt er geen."
@@ -2274,7 +2278,7 @@ msgstr "Hoeveel tanks sturen?"
 msgid "Send how many Troopers?"
 msgstr "Hoeveel soldaten sturen?"
 
-#: internal/menu/actions_attack.go:926
+#: internal/menu/actions_attack.go:934
 msgid "Send how many jets?"
 msgstr "Hoeveel straaljagers sturen?"
 
@@ -2406,7 +2410,7 @@ msgstr "Emigratie aanwakkeren"
 msgid "Stir Revolts"
 msgstr "Opstanden stoken"
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "Strength"
 msgstr "Sterkte"
 
@@ -2449,7 +2453,7 @@ msgstr "Tanks"
 msgid "Target which baron?"
 msgstr "Welke baron als doelwit?"
 
-#: internal/menu/actions_attack.go:816
+#: internal/menu/actions_attack.go:824
 msgid "Target which planet?"
 msgstr "Welke planeet als doel?"
 
@@ -2543,19 +2547,19 @@ msgstr "De Gooie Kablooie is gericht op %s."
 msgid "The Gooie Kablooie is already paid for."
 msgstr "De Gooie Kablooie is al betaald."
 
-#: internal/menu/actions_attack.go:781
+#: internal/menu/actions_attack.go:789
 msgid "The Gooie Kablooie is complete and launches at %s on the next run."
 msgstr "De Gooie Kablooie is klaar en vertrekt bij de volgende ronde naar %s."
 
-#: internal/menu/actions_attack.go:784
+#: internal/menu/actions_attack.go:792
 msgid "The Gooie Kablooie is complete. It launches at %s in %s."
 msgstr "De Gooie Kablooie is klaar. Hij vertrekt over %s naar %s."
 
-#: internal/menu/actions_attack.go:772
+#: internal/menu/actions_attack.go:780
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr "De Gooie Kablooie is onderweg. Er valt niets meer aan te doen."
 
-#: internal/menu/actions_attack.go:944
+#: internal/menu/actions_attack.go:952
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "De Gooie Kablooie is VERNIETIGD!"
 
@@ -2668,7 +2672,7 @@ msgstr "Er zijn geen richtlijnen van de BBS-coördinator."
 msgid "There are no rival empires left to attack."
 msgstr "Er zijn geen rivaliserende rijken meer om aan te vallen."
 
-#: internal/menu/actions_attack.go:924
+#: internal/menu/actions_attack.go:932
 msgid "There are only %d to choose from."
 msgstr "Er zijn er maar %d om uit te kiezen."
 
@@ -2716,7 +2720,7 @@ msgstr "Dit is jaar %s van uw bewind."
 msgid "This operation will cost %s gold."
 msgstr "Deze operatie kost %s goud."
 
-#: internal/menu/actions_attack.go:807
+#: internal/menu/actions_attack.go:815
 msgid "This planet has no Gooie Kablooie."
 msgstr "Deze planeet heeft geen Gooie Kablooie."
 
@@ -3128,7 +3132,7 @@ msgstr "Hoeveel goud opnemen?"
 msgid "World Report"
 msgstr "Wereldrapport"
 
-#: internal/menu/actions_attack.go:808
+#: internal/menu/actions_attack.go:816
 msgid "Would you like to begin construction?"
 msgstr "Wilt u met de bouw beginnen?"
 
@@ -3416,7 +3420,7 @@ msgstr ""
 "betaling van uw goud, en wat aan het einde van de dag nog onbetaald is, "
 "groeit."
 
-#: internal/menu/actions_attack.go:797
+#: internal/menu/actions_attack.go:805
 msgid "You put in %d million gold."
 msgstr "U hebt %d miljoen goud ingelegd."
 

@@ -519,6 +519,13 @@ const (
 	SDISpendPct  = 20      // per-turn funding allowance, as a percent of total funding
 	SDIMinSpend  = 250_000 // floor under that allowance, so a new program can start
 	SDIIncrement = 1_000   // funding is accepted only in whole thousands
+	// The allowance is set ONCE a turn and then drawn down by each deposit, and
+	// it has a ceiling. BINARY-VERIFIED (BRE.EXE 0x6305-0x6386, the per-turn
+	// routine that also adds the score's 213): max(250,000, min(250,000,000,
+	// funding x 0.2)) is stored at +0x32d, and the SDI screen (BRE.OVR
+	// run_interbbs_menu +0x0b56) subtracts each deposit from it. The Real48
+	// constants there decode to 0.2, 1,000 and 250,000,000.
+	SDIMaxSpend = 250_000_000
 	// How funding converts to strength, BINARY-VERIFIED (BRE.EXE resident
 	// 056d:1139, the routine every reader of the percentage calls):
 	//

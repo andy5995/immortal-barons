@@ -385,3 +385,28 @@ func TestAttackRewardsReachInterplanetaryStrikes(t *testing.T) {
 		t.Errorf("an individual Normal strike at Medium took %d of 40,000 regions, want %d", med, want)
 	}
 }
+
+// The allowance is set from the program as it stood when the turn began, so a
+// deposit does not raise it for the next one, and it has the original's
+// ceiling. BINARY-VERIFIED (BRE.EXE 0x6305-0x6386); #290 was the compounding.
+func TestSDIAllowanceIsSetOnceATurn(t *testing.T) {
+	w, a, _ := newAttackerAndTarget(t)
+	a.Gold = 1_000_000_000
+	a.SDIFunding = 2_000_000
+	a.TurnProgress.SDIFunded = 0
+	if got := w.SDISpendAllowance(a); got != 400_000 {
+		t.Fatalf("allowance = %d, want 400000", got)
+	}
+	if _, err := w.FundSDI(a, 400_000); err != nil {
+		t.Fatal(err)
+	}
+	if got := w.SDISpendAllowance(a); got != 0 {
+		t.Errorf("after spending the whole allowance, %d is left; want 0 (no compounding)", got)
+	}
+
+	a.SDIFunding = 5_000_000_000
+	a.TurnProgress.SDIFunded = 0
+	if got := w.SDISpendAllowance(a); got != 250_000_000 {
+		t.Errorf("allowance on 5 billion = %d, want the 250,000,000 ceiling", got)
+	}
+}

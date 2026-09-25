@@ -24,7 +24,7 @@ msgstr " (фиксированная)"
 msgid " — choose a topic:"
 msgstr " - выберите тему:"
 
-#: internal/menu/actions_attack.go:896
+#: internal/menu/actions_attack.go:904
 msgid "#"
 msgstr "#"
 
@@ -116,7 +116,7 @@ msgstr "%d солдат, %d турелей, %d танков, %d самолёто
 msgid "%d units deserted for lack of pay."
 msgstr "%d единиц дезертировало из-за отсутствия жалованья."
 
-#: internal/menu/actions_attack.go:947
+#: internal/menu/actions_attack.go:955
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr "Уничтожено %d%% Gooie Kablooie!"
 
@@ -132,7 +132,7 @@ msgstr "Куплено: %s %s."
 msgid "%s %s sent out."
 msgstr "Отправлено: %s %s."
 
-#: internal/menu/actions_attack.go:738
+#: internal/menu/actions_attack.go:746
 msgid "%s Gold added."
 msgstr "Добавлено золота: %s."
 
@@ -194,7 +194,7 @@ msgid ""
 "instead."
 msgstr "%s задаётся в %s; игра только читает этот файл. Правьте его напрямую."
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:950
 msgid "%s jets were destroyed in the attack!"
 msgstr "В атаке уничтожено самолётов: %s!"
 
@@ -921,7 +921,7 @@ msgstr "Создать групповую атаку"
 msgid "Create Realm"
 msgstr "Создать державу"
 
-#: internal/menu/actions_attack.go:739
+#: internal/menu/actions_attack.go:747
 msgid "Current SDI Strength: %s%%"
 msgstr "Текущая сила СОИ: %s%%"
 
@@ -957,7 +957,7 @@ msgstr "Ежедневный бюллетень"
 msgid "Date"
 msgstr "Дата"
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "Days Until Self-Destruct"
 msgstr "Дней до самоуничтожения"
 
@@ -1086,7 +1086,7 @@ msgstr "Демонтировать Gooie"
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr "Демонтаж не возвращает ничего - золото потрачено."
 
-#: internal/menu/actions_attack.go:883
+#: internal/menu/actions_attack.go:891
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Атаковать Gooie Kablooie?"
 
@@ -1159,7 +1159,7 @@ msgstr "Снять защиту"
 msgid "End of Turn Statistics:"
 msgstr "Статистика конца хода:"
 
-#: internal/menu/actions_attack.go:913
+#: internal/menu/actions_attack.go:921
 msgid "Enter Gooie Number (0 to cancel)?"
 msgstr "Введите номер Gooie (0 — отмена)?"
 
@@ -1227,7 +1227,7 @@ msgstr "В продаже"
 msgid "Free software under the MIT License."
 msgstr "Свободное ПО под лицензией MIT."
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "From"
 msgstr "От"
 
@@ -1291,7 +1291,7 @@ msgstr "Gooie Kablooie"
 msgid "Gooie Kablooie Ops"
 msgstr "Операции Gooie Kablooie"
 
-#: internal/menu/actions_attack.go:763
+#: internal/menu/actions_attack.go:771
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "Операции Gooie Kablooie в этой игре отключены."
 
@@ -1331,7 +1331,7 @@ msgstr "На сколько дней его оставить?"
 msgid "How many days would you like to invest for?"
 msgstr "На сколько дней вложить?"
 
-#: internal/menu/actions_attack.go:786
+#: internal/menu/actions_attack.go:794
 msgid "How many million gold do you wish to put in?"
 msgstr "Сколько миллионов золота вложить?"
 
@@ -1460,7 +1460,7 @@ msgstr "Вклады"
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "К ним это попадёт не раньше хода %d их дня."
 
-#: internal/menu/actions_attack.go:823
+#: internal/menu/actions_attack.go:831
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Постройка обойдётся планете в %s млн золота. Принять?"
 
@@ -1806,6 +1806,10 @@ msgstr ""
 msgid "Note: You should only fund the SDI in increments of %d Gold."
 msgstr "Замечание: вкладывайте в СОИ только по %d золота."
 
+#: internal/menu/actions_attack.go:743
+msgid "Nothing added: the SDI is funded in whole thousands of Gold."
+msgstr "Ничего не добавлено: СОИ финансируется только целыми тысячами золота."
+
 #: internal/menu/actions_iptrade.go:50
 msgid "Nothing has been offered on %s, or no news has reached us yet."
 msgstr "На %s ничего не выставлено, либо вести до нас ещё не дошли."
@@ -1852,7 +1856,7 @@ msgstr "Предложение — товары, которые вы шлёте:
 msgid "One Dominion"
 msgstr "Одно владение"
 
-#: internal/menu/actions_attack.go:887
+#: internal/menu/actions_attack.go:895
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr "Атаковать Gooie Kablooie могут только самолёты, а их у вас нет."
 
@@ -2251,7 +2255,7 @@ msgstr "Сколько танков отправить?"
 msgid "Send how many Troopers?"
 msgstr "Сколько солдат отправить?"
 
-#: internal/menu/actions_attack.go:926
+#: internal/menu/actions_attack.go:934
 msgid "Send how many jets?"
 msgstr "Сколько самолётов отправить?"
 
@@ -2384,7 +2388,7 @@ msgstr "Разжигать эмиграцию"
 msgid "Stir Revolts"
 msgstr "Разжечь мятежи"
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "Strength"
 msgstr "Сила"
 
@@ -2426,7 +2430,7 @@ msgstr "Танки"
 msgid "Target which baron?"
 msgstr "Какого барона выбрать целью?"
 
-#: internal/menu/actions_attack.go:816
+#: internal/menu/actions_attack.go:824
 msgid "Target which planet?"
 msgstr "Какую планету взять на прицел?"
 
@@ -2520,19 +2524,19 @@ msgstr "Gooie Kablooie нацелен на %s."
 msgid "The Gooie Kablooie is already paid for."
 msgstr "Gooie Kablooie уже оплачен."
 
-#: internal/menu/actions_attack.go:781
+#: internal/menu/actions_attack.go:789
 msgid "The Gooie Kablooie is complete and launches at %s on the next run."
 msgstr "Gooie Kablooie готов и стартует по %s на следующем запуске."
 
-#: internal/menu/actions_attack.go:784
+#: internal/menu/actions_attack.go:792
 msgid "The Gooie Kablooie is complete. It launches at %s in %s."
 msgstr "Gooie Kablooie готов. Старт по %s через %s."
 
-#: internal/menu/actions_attack.go:772
+#: internal/menu/actions_attack.go:780
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr "Gooie Kablooie уже в пути. Сделать с ним больше нечего."
 
-#: internal/menu/actions_attack.go:944
+#: internal/menu/actions_attack.go:952
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "Gooie Kablooie УНИЧТОЖЕН!"
 
@@ -2640,7 +2644,7 @@ msgstr "Директив от координатора станции нет."
 msgid "There are no rival empires left to attack."
 msgstr "Соперников для нападения не осталось."
 
-#: internal/menu/actions_attack.go:924
+#: internal/menu/actions_attack.go:932
 msgid "There are only %d to choose from."
 msgstr "Доступно всего %d."
 
@@ -2688,7 +2692,7 @@ msgstr "Идёт %s год вашего правления."
 msgid "This operation will cost %s gold."
 msgstr "Операция обойдётся в %s золота."
 
-#: internal/menu/actions_attack.go:807
+#: internal/menu/actions_attack.go:815
 msgid "This planet has no Gooie Kablooie."
 msgstr "На этой планете нет Gooie Kablooie."
 
@@ -3100,7 +3104,7 @@ msgstr "Сколько золота снять?"
 msgid "World Report"
 msgstr "Мировая сводка"
 
-#: internal/menu/actions_attack.go:808
+#: internal/menu/actions_attack.go:816
 msgid "Would you like to begin construction?"
 msgstr "Начать строительство?"
 
@@ -3381,7 +3385,7 @@ msgstr ""
 "платёж из вашего золота, а то, что к концу дня осталось невыплаченным, "
 "растёт."
 
-#: internal/menu/actions_attack.go:797
+#: internal/menu/actions_attack.go:805
 msgid "You put in %d million gold."
 msgstr "Вы вложили %d млн золота."
 

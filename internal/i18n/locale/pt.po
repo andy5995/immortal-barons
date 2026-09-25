@@ -28,7 +28,7 @@ msgstr " (fixa)"
 msgid " — choose a topic:"
 msgstr " — escolha um tópico:"
 
-#: internal/menu/actions_attack.go:896
+#: internal/menu/actions_attack.go:904
 msgid "#"
 msgstr "#"
 
@@ -120,7 +120,7 @@ msgstr "%d soldados, %d torres, %d tanques, %d caças"
 msgid "%d units deserted for lack of pay."
 msgstr "%d unidades desertaram por falta de pagamento."
 
-#: internal/menu/actions_attack.go:947
+#: internal/menu/actions_attack.go:955
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr "%d%% do Gooie Kablooie destruído!"
 
@@ -136,7 +136,7 @@ msgstr "%s %s comprados."
 msgid "%s %s sent out."
 msgstr "%s %s enviados."
 
-#: internal/menu/actions_attack.go:738
+#: internal/menu/actions_attack.go:746
 msgid "%s Gold added."
 msgstr "%s de ouro adicionados."
 
@@ -199,7 +199,7 @@ msgid ""
 msgstr ""
 "%s está definido em %s, que o jogo lê mas nunca escreve. Edite esse arquivo."
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:950
 msgid "%s jets were destroyed in the attack!"
 msgstr "%s caças foram destruídos no ataque!"
 
@@ -933,7 +933,7 @@ msgstr "Criar Ataque em Grupo"
 msgid "Create Realm"
 msgstr "Criar Reino"
 
-#: internal/menu/actions_attack.go:739
+#: internal/menu/actions_attack.go:747
 msgid "Current SDI Strength: %s%%"
 msgstr "Força atual do SDI: %s%%"
 
@@ -969,7 +969,7 @@ msgstr "Boletim Diário"
 msgid "Date"
 msgstr "Data"
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "Days Until Self-Destruct"
 msgstr "Dias até a Autodestruição"
 
@@ -1098,7 +1098,7 @@ msgstr "Desmontar o Gooie"
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr "Desmontá-lo não devolve nada — o ouro já foi gasto."
 
-#: internal/menu/actions_attack.go:883
+#: internal/menu/actions_attack.go:891
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Você quer atacar um Gooie Kablooie?"
 
@@ -1172,7 +1172,7 @@ msgstr "Encerrar a Proteção"
 msgid "End of Turn Statistics:"
 msgstr "Estatísticas do Fim do Turno:"
 
-#: internal/menu/actions_attack.go:913
+#: internal/menu/actions_attack.go:921
 msgid "Enter Gooie Number (0 to cancel)?"
 msgstr "Informe o número do Gooie (0 para cancelar)?"
 
@@ -1241,7 +1241,7 @@ msgstr "À Venda"
 msgid "Free software under the MIT License."
 msgstr "Software livre sob a Licença MIT."
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "From"
 msgstr "De"
 
@@ -1305,7 +1305,7 @@ msgstr "Gooie Kablooie"
 msgid "Gooie Kablooie Ops"
 msgstr "Operações do Gooie Kablooie"
 
-#: internal/menu/actions_attack.go:763
+#: internal/menu/actions_attack.go:771
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "As operações do Gooie Kablooie estão desligadas neste jogo."
 
@@ -1345,7 +1345,7 @@ msgstr "Por quantos dias você quer que ele fique?"
 msgid "How many days would you like to invest for?"
 msgstr "Por quantos dias você quer investir?"
 
-#: internal/menu/actions_attack.go:786
+#: internal/menu/actions_attack.go:794
 msgid "How many million gold do you wish to put in?"
 msgstr "Quantos milhões de ouro você quer aplicar?"
 
@@ -1473,7 +1473,7 @@ msgstr "Investimentos"
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "Chega a eles no turno %d do dia deles, não antes."
 
-#: internal/menu/actions_attack.go:823
+#: internal/menu/actions_attack.go:831
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Vai custar %s milhões de ouro ao seu planeta para financiar. Aceita?"
 
@@ -1824,6 +1824,10 @@ msgstr ""
 msgid "Note: You should only fund the SDI in increments of %d Gold."
 msgstr "Nota: financie o SDI apenas em múltiplos de %d de ouro."
 
+#: internal/menu/actions_attack.go:743
+msgid "Nothing added: the SDI is funded in whole thousands of Gold."
+msgstr "Nada adicionado: o SDI só é financiado em milhares inteiros de Ouro."
+
 #: internal/menu/actions_iptrade.go:50
 msgid "Nothing has been offered on %s, or no news has reached us yet."
 msgstr "Nada foi oferecido em %s, ou nenhuma notícia chegou até nós ainda."
@@ -1870,7 +1874,7 @@ msgstr "Oferta — mercadorias que você envia:"
 msgid "One Dominion"
 msgstr "Um Domínio"
 
-#: internal/menu/actions_attack.go:887
+#: internal/menu/actions_attack.go:895
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr "Só caças podem atacar um Gooie Kablooie, e você não tem nenhum."
 
@@ -2268,7 +2272,7 @@ msgstr "Enviar quantos tanques?"
 msgid "Send how many Troopers?"
 msgstr "Enviar quantos soldados?"
 
-#: internal/menu/actions_attack.go:926
+#: internal/menu/actions_attack.go:934
 msgid "Send how many jets?"
 msgstr "Enviar quantos caças?"
 
@@ -2400,7 +2404,7 @@ msgstr "Incitar a Emigração"
 msgid "Stir Revolts"
 msgstr "Incitar Revoltas"
 
-#: internal/menu/actions_attack.go:897
+#: internal/menu/actions_attack.go:905
 msgid "Strength"
 msgstr "Força"
 
@@ -2442,7 +2446,7 @@ msgstr "Tanques"
 msgid "Target which baron?"
 msgstr "Mirar qual barão?"
 
-#: internal/menu/actions_attack.go:816
+#: internal/menu/actions_attack.go:824
 msgid "Target which planet?"
 msgstr "Mirar qual planeta?"
 
@@ -2536,20 +2540,20 @@ msgstr "O Gooie Kablooie está mirando %s."
 msgid "The Gooie Kablooie is already paid for."
 msgstr "O Gooie Kablooie já está pago."
 
-#: internal/menu/actions_attack.go:781
+#: internal/menu/actions_attack.go:789
 msgid "The Gooie Kablooie is complete and launches at %s on the next run."
 msgstr ""
 "O Gooie Kablooie está pronto e será lançado contra %s na próxima rodada."
 
-#: internal/menu/actions_attack.go:784
+#: internal/menu/actions_attack.go:792
 msgid "The Gooie Kablooie is complete. It launches at %s in %s."
 msgstr "O Gooie Kablooie está pronto. Ele será lançado contra %s em %s."
 
-#: internal/menu/actions_attack.go:772
+#: internal/menu/actions_attack.go:780
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr "O Gooie Kablooie está a caminho. Não há mais nada a fazer com ele."
 
-#: internal/menu/actions_attack.go:944
+#: internal/menu/actions_attack.go:952
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "O Gooie Kablooie foi DESTRUÍDO!"
 
@@ -2662,7 +2666,7 @@ msgstr "Não há diretivas do Coordenador do BBS."
 msgid "There are no rival empires left to attack."
 msgstr "Não sobrou nenhum império rival para atacar."
 
-#: internal/menu/actions_attack.go:924
+#: internal/menu/actions_attack.go:932
 msgid "There are only %d to choose from."
 msgstr "Só há %d para escolher."
 
@@ -2710,7 +2714,7 @@ msgstr "Este é o ano %s do seu reinado."
 msgid "This operation will cost %s gold."
 msgstr "Esta operação vai custar %s de ouro."
 
-#: internal/menu/actions_attack.go:807
+#: internal/menu/actions_attack.go:815
 msgid "This planet has no Gooie Kablooie."
 msgstr "Este planeta não tem Gooie Kablooie."
 
@@ -3122,7 +3126,7 @@ msgstr "Sacar quanto ouro?"
 msgid "World Report"
 msgstr "Relatório Mundial"
 
-#: internal/menu/actions_attack.go:808
+#: internal/menu/actions_attack.go:816
 msgid "Would you like to begin construction?"
 msgstr "Você quer começar a construção?"
 
@@ -3409,7 +3413,7 @@ msgstr ""
 "Você deve %s de ouro em empréstimos vencidos. O banco cobra uma parcela do "
 "seu ouro a cada turno, e o que ainda estiver em aberto no fim do dia cresce."
 
-#: internal/menu/actions_attack.go:797
+#: internal/menu/actions_attack.go:805
 msgid "You put in %d million gold."
 msgstr "Você aplicou %d milhões de ouro."
 

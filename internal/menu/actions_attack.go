@@ -723,19 +723,27 @@ func sdiProgram(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var level int
+	var added int64
 	// Re-resolve inside the transaction: FundSDI re-checks gold and the SDIMax cap
 	// against fresh state, so a concurrent node can't let two sessions spend the
-	// same gold or push past the cap.
+	// same gold or push past the cap. What it took is read off the total, since
+	// it keeps only whole thousands of what was asked for (#290).
 	err := w.mutatePlayer(func(fp *game.Empire) error {
+		before := fp.SDIFunding
 		var e error
 		level, e = w.World.FundSDI(fp, gold)
+		added = fp.SDIFunding - before
 		return e
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s Gold added."), comma(gold))))
+	if added <= 0 {
+		ok(s, "Nothing added: the SDI is funded in whole thousands of Gold.")
+		return Stay
+	}
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s Gold added."), comma(added))))
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Current SDI Strength: %s%%"), strconv.Itoa(level))))
 	return Stay
 }

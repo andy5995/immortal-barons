@@ -5,6 +5,7 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * SDI allowance is set once a turn and reports the gold added (#290)
   * Messaging system improvements
   * Help opens with Getting Started, which now includes How to Play
   * Menu error messages are translated
