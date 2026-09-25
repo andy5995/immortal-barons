@@ -397,3 +397,19 @@ func TestPlayGameShowsTheWholeInbox(t *testing.T) {
 		})
 	}
 }
+
+// Read Messages is mail only: the day's news has its own Entry-menu items and
+// never follows the mail here.
+func TestReadMessagesShowsNoNews(t *testing.T) {
+	w := newWorld()
+	w.NewsToday = append(w.NewsToday, game.NewsLine{Text: "Inspiron has seized the title of Planetary Master!"})
+	f := &fakeSession{keys: []rune(" ")}
+	readMessages(f, w)
+	out := f.out.String()
+	if !strings.Contains(out, "You have no messages.") {
+		t.Fatalf("an empty inbox should say so:\n%s", out)
+	}
+	if strings.Contains(out, "Planetary Master") || strings.Contains(out, "Bulletin") {
+		t.Errorf("Read Messages printed the news:\n%s", out)
+	}
+}

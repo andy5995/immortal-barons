@@ -269,7 +269,7 @@ msgstr ""
 msgid "-* Drop Regions *-"
 msgstr ""
 
-#: internal/menu/actions_message.go:468
+#: internal/menu/actions_message.go:458
 msgid "/-Command?"
 msgstr ""
 
@@ -301,15 +301,15 @@ msgstr ""
 msgid "<game name>: <view name>"
 msgstr ""
 
-#: internal/menu/actions_message.go:197
+#: internal/menu/actions_message.go:187
 msgid "=All"
 msgstr ""
 
-#: internal/menu/actions_message.go:202
+#: internal/menu/actions_message.go:192
 msgid "=All Allies"
 msgstr ""
 
-#: internal/menu/actions_message.go:206
+#: internal/menu/actions_message.go:196
 msgid "=List"
 msgstr ""
 
@@ -381,7 +381,7 @@ msgstr ""
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr ""
 
-#: internal/menu/actions_message.go:500
+#: internal/menu/actions_message.go:490
 msgid "Abort"
 msgstr ""
 
@@ -777,7 +777,7 @@ msgstr ""
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr ""
 
-#: internal/menu/actions_message.go:506
+#: internal/menu/actions_message.go:496
 msgid "Clear"
 msgstr ""
 
@@ -985,7 +985,7 @@ msgstr ""
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr ""
 
-#: internal/menu/actions_message.go:633
+#: internal/menu/actions_message.go:623
 msgid "Do you wish to send another message?"
 msgstr ""
 
@@ -1421,7 +1421,7 @@ msgstr ""
 msgid "Limited daily supply"
 msgstr ""
 
-#: internal/menu/actions_message.go:234
+#: internal/menu/actions_message.go:224
 msgid "List"
 msgstr ""
 
@@ -1825,10 +1825,6 @@ msgstr ""
 msgid "Planet Name"
 msgstr ""
 
-#: internal/menu/actions_message.go:42
-msgid "Planetary Bulletin:"
-msgstr ""
-
 #: internal/menu/actions_ipscores.go:301
 msgid "Planetary Post"
 msgstr ""
@@ -2005,7 +2001,7 @@ msgstr ""
 msgid "Sabotage HQ"
 msgstr ""
 
-#: internal/menu/actions_message.go:503
+#: internal/menu/actions_message.go:493
 msgid "Save"
 msgstr ""
 
@@ -2465,7 +2461,7 @@ msgstr ""
 msgid "There is no one left to offer that to."
 msgstr ""
 
-#: internal/menu/actions_message.go:222
+#: internal/menu/actions_message.go:212
 msgid "There is no one to reach."
 msgstr ""
 
@@ -2981,7 +2977,7 @@ msgstr ""
 msgid "You give:    %s"
 msgstr ""
 
-#: internal/menu/actions_message.go:430
+#: internal/menu/actions_message.go:420
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
@@ -3061,7 +3057,7 @@ msgstr ""
 msgid "You have no defense allies."
 msgstr ""
 
-#: internal/menu/actions_message.go:51
+#: internal/menu/actions_message.go:41
 msgid "You have no messages."
 msgstr ""
 
@@ -3081,7 +3077,7 @@ msgstr ""
 msgid "You have started work on your HeadQuarters."
 msgstr ""
 
-#: internal/menu/actions_message.go:569
+#: internal/menu/actions_message.go:559
 msgid "You have used all %d lines."
 msgstr ""
 

@@ -276,7 +276,7 @@ msgstr ", "
 msgid "-* Drop Regions *-"
 msgstr "-* Сброс регионов *-"
 
-#: internal/menu/actions_message.go:468
+#: internal/menu/actions_message.go:458
 msgid "/-Command?"
 msgstr "/-Команда?"
 
@@ -308,15 +308,15 @@ msgstr ": файл новостей"
 msgid "<game name>: <view name>"
 msgstr "<название игры>: <название экрана>"
 
-#: internal/menu/actions_message.go:197
+#: internal/menu/actions_message.go:187
 msgid "=All"
 msgstr "=Все"
 
-#: internal/menu/actions_message.go:202
+#: internal/menu/actions_message.go:192
 msgid "=All Allies"
 msgstr "=Все союзники"
 
-#: internal/menu/actions_message.go:206
+#: internal/menu/actions_message.go:196
 msgid "=List"
 msgstr "=Список"
 
@@ -413,7 +413,7 @@ msgstr "Отречься"
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr "Отречение навсегда удалит %s. Отменить это нельзя."
 
-#: internal/menu/actions_message.go:500
+#: internal/menu/actions_message.go:490
 msgid "Abort"
 msgstr "Отмена"
 
@@ -849,7 +849,7 @@ msgstr ""
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Гражданская война! Держава почти распалась - потеряно %d%%."
 
-#: internal/menu/actions_message.go:506
+#: internal/menu/actions_message.go:496
 msgid "Clear"
 msgstr "Очистить"
 
@@ -1090,7 +1090,7 @@ msgstr "Демонтаж не возвращает ничего - золото �
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Атаковать Gooie Kablooie?"
 
-#: internal/menu/actions_message.go:633
+#: internal/menu/actions_message.go:623
 msgid "Do you wish to send another message?"
 msgstr "Хотите отправить ещё одно сообщение?"
 
@@ -1542,7 +1542,7 @@ msgstr "Последний Мастер Планеты: %s"
 msgid "Limited daily supply"
 msgstr "Ограниченный дневной запас"
 
-#: internal/menu/actions_message.go:234
+#: internal/menu/actions_message.go:224
 msgid "List"
 msgstr "Список"
 
@@ -1979,10 +1979,6 @@ msgstr "Координатор планеты"
 msgid "Planet Name"
 msgstr "Название планеты"
 
-#: internal/menu/actions_message.go:42
-msgid "Planetary Bulletin:"
-msgstr "Планетарный бюллетень:"
-
 #: internal/menu/actions_ipscores.go:301
 msgid "Planetary Post"
 msgstr "Планетарная почта"
@@ -2179,7 +2175,7 @@ msgstr ""
 msgid "Sabotage HQ"
 msgstr "Диверсия в штабе"
 
-#: internal/menu/actions_message.go:503
+#: internal/menu/actions_message.go:493
 msgid "Save"
 msgstr "Сохранить"
 
@@ -2660,7 +2656,7 @@ msgstr "Минимальный срок вклада — %d дн."
 msgid "There is no one left to offer that to."
 msgstr "Больше некому это предложить."
 
-#: internal/menu/actions_message.go:222
+#: internal/menu/actions_message.go:212
 msgid "There is no one to reach."
 msgstr "Связаться не с кем."
 
@@ -3222,7 +3218,7 @@ msgstr "Вы должны не так много."
 msgid "You give:    %s"
 msgstr "Вы даёте:    %s"
 
-#: internal/menu/actions_message.go:430
+#: internal/menu/actions_message.go:420
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr "У вас %d строк для сообщения.  /S=сохранить /A=отмена /C=очистить"
 
@@ -3303,7 +3299,7 @@ msgstr "Открытых ставок у вас нет."
 msgid "You have no defense allies."
 msgstr "У вас нет союзников по обороне."
 
-#: internal/menu/actions_message.go:51
+#: internal/menu/actions_message.go:41
 msgid "You have no messages."
 msgstr "У вас нет сообщений."
 
@@ -3323,7 +3319,7 @@ msgstr "Сегодня вы провели эту тайную операцию 
 msgid "You have started work on your HeadQuarters."
 msgstr "Вы начали строительство штаба."
 
-#: internal/menu/actions_message.go:569
+#: internal/menu/actions_message.go:559
 msgid "You have used all %d lines."
 msgstr "Вы использовали все %d строк."
 
@@ -4017,6 +4013,9 @@ msgstr "─»>Enter - продолжить, Q - выход<«─"
 #: internal/menu/input.go:473
 msgid "─»>Paused<«─"
 msgstr "─»>Пауза<«─"
+
+#~ msgid "Planetary Bulletin:"
+#~ msgstr "Планетарный бюллетень:"
 
 #~ msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 #~ msgstr "%s @ %s (%s): Земля %s  Атк %s  Защ %s  Золото %s"

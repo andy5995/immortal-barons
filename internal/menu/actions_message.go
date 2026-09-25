@@ -24,9 +24,7 @@ func viewSentMessages(s session.Session, w *ctx) Result {
 
 func readMessages(s session.Session, w *ctx) Result {
 	var hadMail bool
-	var news game.NewsFeed
 	w.Read(func() {
-		news = append(game.NewsFeed(nil), w.NewsToday...)
 		if p := w.Player(); p != nil {
 			for _, m := range p.Mail {
 				hadMail = hadMail || !m.Sent
@@ -36,18 +34,10 @@ func readMessages(s session.Session, w *ctx) Result {
 	// Per-message BRE reader (Reply/Delete/Ignore/Quit). The mailbox is no longer
 	// cleared on read: Ignore keeps a message for next time, only Delete removes.
 	// Asking to read messages asks for all of them, so this one does not skip
-	// what the turn-start stop has been told to pass over.
+	// what the turn-start stop has been told to pass over. Mail only: the news
+	// has its own items on the Entry menu, as in the original.
 	mailReader(s, w, false, false)
-	if len(news) > 0 {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
-		for _, b := range news {
-			// Wrapped, not left to the terminal: a news line already runs past 80
-			// columns with an ordinary board name in it, and a translated one is
-			// longer still.
-			fmt.Fprintf(s, "%s\n", WrapIndented(newsStamped(s, b), "  "))
-		}
-	}
-	if !hadMail && len(news) == 0 {
+	if !hadMail {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no messages."))
 	}
 	pause(s)

@@ -281,7 +281,7 @@ msgstr ", "
 msgid "-* Drop Regions *-"
 msgstr "-* Abandonar Regiões *-"
 
-#: internal/menu/actions_message.go:468
+#: internal/menu/actions_message.go:458
 msgid "/-Command?"
 msgstr "/-Comando?"
 
@@ -313,15 +313,15 @@ msgstr ": Boletim de Notícias"
 msgid "<game name>: <view name>"
 msgstr "<nome do jogo>: <nome da tela>"
 
-#: internal/menu/actions_message.go:197
+#: internal/menu/actions_message.go:187
 msgid "=All"
 msgstr "=Todos"
 
-#: internal/menu/actions_message.go:202
+#: internal/menu/actions_message.go:192
 msgid "=All Allies"
 msgstr "=Todos os Aliados"
 
-#: internal/menu/actions_message.go:206
+#: internal/menu/actions_message.go:196
 msgid "=List"
 msgstr "=Lista"
 
@@ -419,7 +419,7 @@ msgstr "Abdicar"
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr "Abdicar apaga %s para sempre. Isso não pode ser desfeito."
 
-#: internal/menu/actions_message.go:500
+#: internal/menu/actions_message.go:490
 msgid "Abort"
 msgstr "Cancelar"
 
@@ -860,7 +860,7 @@ msgstr ""
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Guerra civil! Seu reino quase se desfaz — %d%% dele se foi."
 
-#: internal/menu/actions_message.go:506
+#: internal/menu/actions_message.go:496
 msgid "Clear"
 msgstr "Limpar"
 
@@ -1102,7 +1102,7 @@ msgstr "Desmontá-lo não devolve nada — o ouro já foi gasto."
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Você quer atacar um Gooie Kablooie?"
 
-#: internal/menu/actions_message.go:633
+#: internal/menu/actions_message.go:623
 msgid "Do you wish to send another message?"
 msgstr "Você quer enviar outra mensagem?"
 
@@ -1556,7 +1556,7 @@ msgstr "Último Mestre Planetário: %s"
 msgid "Limited daily supply"
 msgstr "Oferta diária limitada"
 
-#: internal/menu/actions_message.go:234
+#: internal/menu/actions_message.go:224
 msgid "List"
 msgstr "Listar"
 
@@ -1997,10 +1997,6 @@ msgstr "Coordenador do Planeta"
 msgid "Planet Name"
 msgstr "Nome do Planeta"
 
-#: internal/menu/actions_message.go:42
-msgid "Planetary Bulletin:"
-msgstr "Boletim Planetário:"
-
 #: internal/menu/actions_ipscores.go:301
 msgid "Planetary Post"
 msgstr "Correio Planetário"
@@ -2196,7 +2192,7 @@ msgstr ""
 msgid "Sabotage HQ"
 msgstr "Sabotar o QG"
 
-#: internal/menu/actions_message.go:503
+#: internal/menu/actions_message.go:493
 msgid "Save"
 msgstr "Salvar"
 
@@ -2350,7 +2346,8 @@ msgstr "%d vendidos. Ouro: %d"
 
 #: internal/menu/actions_trade.go:261
 msgid "Sorry, trade deals must be sent for at least %d days."
-msgstr "Desculpe, acordos comerciais devem ser enviados por pelo menos %d dias."
+msgstr ""
+"Desculpe, acordos comerciais devem ser enviados por pelo menos %d dias."
 
 #: internal/menu/gameflow.go:144
 msgid "Sorry, you have used all of your turns today."
@@ -2682,7 +2679,7 @@ msgstr "Há um mínimo de %d dias para investimentos."
 msgid "There is no one left to offer that to."
 msgstr "Não sobrou ninguém a quem oferecer isso."
 
-#: internal/menu/actions_message.go:222
+#: internal/menu/actions_message.go:212
 msgid "There is no one to reach."
 msgstr "Não há ninguém a alcançar."
 
@@ -3245,7 +3242,7 @@ msgstr "Você não deve tudo isso."
 msgid "You give:    %s"
 msgstr "Você dá:     %s"
 
-#: internal/menu/actions_message.go:430
+#: internal/menu/actions_message.go:420
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 "Você tem %d linhas para a sua mensagem.  /S=salvar /A=cancelar /C=limpar"
@@ -3327,7 +3324,7 @@ msgstr "Você não tem lances pendentes."
 msgid "You have no defense allies."
 msgstr "Você não tem aliados de defesa."
 
-#: internal/menu/actions_message.go:51
+#: internal/menu/actions_message.go:41
 msgid "You have no messages."
 msgstr "Você não tem mensagens."
 
@@ -3347,7 +3344,7 @@ msgstr "Você já fez essa operação secreta o máximo de vezes permitido hoje.
 msgid "You have started work on your HeadQuarters."
 msgstr "Você começou a obra do seu Quartel-General."
 
-#: internal/menu/actions_message.go:569
+#: internal/menu/actions_message.go:559
 msgid "You have used all %d lines."
 msgstr "Você usou todas as %d linhas."
 
@@ -4041,6 +4038,9 @@ msgstr "─»>Enter para seguir, Q para sair<«─"
 #: internal/menu/input.go:473
 msgid "─»>Paused<«─"
 msgstr "─»>Pausado<«─"
+
+#~ msgid "Planetary Bulletin:"
+#~ msgstr "Boletim Planetário:"
 
 #~ msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 #~ msgstr "%s @ %s (%s): Terra %s  Atq %s  Def %s  Ouro %s"

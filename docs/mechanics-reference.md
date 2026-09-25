@@ -6233,8 +6233,8 @@ Now matching this reference (as of v0.0.4):
 - Player mail — a BRE-style per-message reader (Reply / Delete / Ignore /
   Quit), where Ignore keeps a message for next time (it can be ignored
   indefinitely) and only Delete removes it; Reply quotes a chosen line range of
-  the original — plus a
-  planetary bulletin. Choosing Play Game shows the whole inbox after the recap,
+  the original. Read Messages shows mail only; the news has its own Entry-menu
+  items. Choosing Play Game shows the whole inbox after the recap,
   one message at a time with the prompt after each, ignored messages included:
   BRE reads mail there once, before its turn loop (`run_player_turn` calls
   `read_local_messages` at BRE.EXE 0x3869; the loop head is 0x38D7).
