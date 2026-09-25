@@ -121,3 +121,14 @@ func TestRenderANSIWrapsToWidth(t *testing.T) {
 		}
 	}
 }
+
+// A bullet wrapped across source lines is one item: the in-game view printed
+// its second line as a paragraph of its own at column 0, while the website
+// joined it, for as long as help has had bullets.
+func TestRenderANSIJoinsAWrappedBullet(t *testing.T) {
+	top := Topic{Body: "- one two\n  three four\n- five\n\nAfter."}
+	want := "  • one two three four\n  • five\n\nAfter."
+	if got := top.RenderANSI(80); got != want {
+		t.Errorf("RenderANSI =\n%q\nwant\n%q", got, want)
+	}
+}

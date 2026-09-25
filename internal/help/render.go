@@ -27,9 +27,15 @@ func (t Topic) RenderANSI(width int) string {
 	}
 	var b strings.Builder
 	var para []string // words buffered for the current paragraph
+	var item []string // lines buffered for the current bullet, when in one
 
-	// flush emits the buffered paragraph, wrapped, then clears the buffer.
+	// flush emits the buffered paragraph or bullet, wrapped, then clears it.
 	flush := func() {
+		if item != nil {
+			b.WriteString(bullet(strings.Join(item, " "), width))
+			b.WriteByte('\n')
+			item = nil
+		}
 		if len(para) == 0 {
 			return
 		}
@@ -55,8 +61,11 @@ func (t Topic) RenderANSI(width int) string {
 			b.WriteString(ansi.FgBrightWhite + inline(trimmed[2:]) + ansi.Reset + "\n")
 		case strings.HasPrefix(trimmed, "- "), strings.HasPrefix(trimmed, "* "):
 			flush()
-			b.WriteString(bullet(inline(strings.TrimSpace(trimmed[2:])), width))
-			b.WriteByte('\n')
+			item = []string{inline(strings.TrimSpace(trimmed[2:]))}
+		case item != nil:
+			// A bullet wrapped across source lines, as Markdown allows: the
+			// next line continues it rather than starting a paragraph.
+			item = append(item, inline(trimmed))
 		default:
 			para = append(para, inline(trimmed))
 		}
