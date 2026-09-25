@@ -67,6 +67,11 @@ Ihre Stimme bereits nennt.
 Jeder Zug beginnt damit, dass Ihnen gesagt wird, ob Sie das Amt innehaben
 oder wem Ihre Stimme derzeit gilt; Sie müssen also nie danach suchen.
 
+Der Koordinator kann Direktiven an das ganze Board richten, im Menü
+Nachrichten unter Direktiven des CO. Sie werden jedes Mal angezeigt, wenn
+Sie Spielen wählen, und Sie können sie über denselben Menüpunkt erneut
+lesen. Dort schreibt, ergänzt oder entfernt der Koordinator sie.
+
 Ihr Sysop kann einem Ligaspiel eine feste Dauer geben. Wenn sie abläuft,
 wird die Welt zurückgesetzt und ein neues Spiel beginnt.
 

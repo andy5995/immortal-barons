@@ -184,6 +184,9 @@ func (w *World) rewriteRealmName(old, name string) {
 	}
 	swap(&w.CurrentMaster)
 	swap(&w.LastMaster)
+	if w.Directives != nil {
+		swap(&w.Directives.From)
+	}
 	for _, e := range w.Empires {
 		for i := range e.TreatyOffers {
 			swap(&e.TreatyOffers[i].From)

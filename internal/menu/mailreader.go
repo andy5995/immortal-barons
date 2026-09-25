@@ -247,6 +247,13 @@ func deleteAfterReply(s session.Session) bool {
 // white labels/body, bright-cyan sender, bright-green recipients, bright-blue
 // quotes, bright-white date), then the [R]/[D]/[I]/[Q] prompt.
 func renderMessage(s session.Session, m game.Message) {
+	messageBox(s, m)
+	drawKeys(s, mailOpts)
+}
+
+// messageBox draws the message itself, without the reader's prompt, so the
+// Coordinator's directives are shown in the same box as mail.
+func messageBox(s session.Session, m game.Message) {
 	// The stamp was stored in UTC by whoever sent it; the reader sees it on their
 	// own clock (#267).
 	when := game.StampIn(m.When, sessionZone(s))
@@ -280,5 +287,4 @@ func renderMessage(s session.Session, m game.Message) {
 		}
 		fmt.Fprintf(s, "%s│ %s%s%s\n", ansi.FgCyan, body, line, ansi.Reset)
 	}
-	drawKeys(s, mailOpts)
 }

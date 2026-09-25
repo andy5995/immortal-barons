@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-24 00:44-0500\n"
+"POT-Creation-Date: 2026-09-25 01:59-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2717,7 +2717,16 @@ msgstr ""
 "stem op dat moment staat, zodat u er nooit naar hoeft te zoeken."
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:65
+#: internal/help/content/interbbs/leagues.md:67
+msgid ""
+"The Coordinator can post directives to the whole board, from the Messages "
+"menu under Directives from CO. They are shown each time you choose Play, and "
+"you can read them again from the same menu item. The Coordinator writes, "
+"adds to or erases them there."
+msgstr "De coördinator kan richtlijnen aan het hele board geven, via het menu Berichten onder Richtlijnen van de CO. Ze worden getoond telkens als u Spelen kiest, en u kunt ze via hetzelfde menu-item opnieuw lezen. Daar schrijft, vult aan of verwijdert de coördinator ze."
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:70
 msgid ""
 "Your sysop may give a league game a set length. When it runs out, the world "
 "resets and a new game begins."
@@ -2726,7 +2735,7 @@ msgstr ""
 "wordt de wereld teruggezet en begint er een nieuw spel."
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:66
+#: internal/help/content/interbbs/leagues.md:71
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
 "play."
@@ -3121,13 +3130,17 @@ msgstr ""
 "die erdoorheen komt neemt zijn eigen hap:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
-msgid "**Send Spy** — brings intelligence home and costs the target nothing."
-msgstr ""
-"**Spion sturen** - brengt inlichtingen mee naar huis en kost het doel niets."
+#: internal/help/content/interbbs/terrorist-ops.md:38
+msgid ""
+"**Send Spy** — costs the target nothing. A spy that gets in brings home "
+"their land, offense, defense and gold. They are reported to you when the spy "
+"returns, and filed in the Spy Database, which keeps the last five reports on "
+"each realm and shows how much the last two differ. A spy sent before and "
+"after a strike therefore shows what the strike did."
+msgstr "**Spion sturen** - kost het doel niets. Een spion die binnenkomt, brengt hun land, aanval, verdediging en goud mee naar huis. Dat wordt u gemeld wanneer de spion terugkeert, en opgeslagen in de Spionagedatabase, die de laatste vijf rapporten per rijk bewaart en laat zien hoeveel de laatste twee verschillen. Een spion voor en na een aanval laat dus zien wat de aanval heeft gedaan."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid ""
 "**Bomb Intelligence** — kills a few percent of their agents, which is what "
 "they defend and attack with."
@@ -3136,33 +3149,33 @@ msgstr ""
 "waarmee zij verdedigen en aanvallen."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid "**Demoralize** — takes a seventh off military morale."
 msgstr "**Demoraliseren** - haalt een zevende van het militaire moreel weg."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid "**Cause Dissensions** — a few percent of their troopers desert."
 msgstr "**Tweedracht zaaien** - enkele procenten van hun soldaten deserteren."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
 msgstr ""
 "**Vliegbases bombarderen** - verbrandt een deel van hun jagers aan de grond."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid "**Stir Emigrations** — drives people out of the realm."
 msgstr "**Emigratie aanwakkeren** - drijft mensen het rijk uit."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid "**Spread Propaganda** — costs them popular support."
 msgstr "**Propaganda verspreiden** - kost hun steun van het volk."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid ""
 "**Bomb Food Stores** — the widest swing of the nine: it can take almost a "
 "third of what is in store, or almost nothing."
@@ -3171,18 +3184,18 @@ msgstr ""
 "een derde van de voorraad kosten, of bijna niets."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
 msgstr "**HQ saboteren** - zet hun hoofdkwartier een vast bedrag terug."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:35
+#: internal/help/content/interbbs/terrorist-ops.md:39
 #, no-wrap
 msgid "Picking one"
 msgstr "Er een kiezen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:41
+#: internal/help/content/interbbs/terrorist-ops.md:45
 msgid ""
 "Match the operation to what you plan next. Softening a realm before an "
 "interplanetary attack argues for the ones that thin what fights back — "
@@ -3196,13 +3209,13 @@ msgstr ""
 "steun."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:42
+#: internal/help/content/interbbs/terrorist-ops.md:46
 #, no-wrap
 msgid "Getting through"
 msgstr "Erdoorheen komen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:49
+#: internal/help/content/interbbs/terrorist-ops.md:53
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
 "it.  The more agents your realm holds, the better each one's chance, but "
@@ -3217,7 +3230,7 @@ msgstr ""
 "kans naar beide kanten hangt van geen van beide zijden af."
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:53
+#: internal/help/content/interbbs/terrorist-ops.md:57
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "
 "makes one agent likelier to land. A Terrorist Prevention pact adds its "
@@ -4910,6 +4923,12 @@ msgstr ""
 "u wel voor hebt betaald, en verzwakt het schild mee. Een grote pot is elke "
 "beurt een grote rekening, dus laat hem groeien in een tempo dat uw inkomsten "
 "aankunnen."
+
+#~ msgid ""
+#~ "**Send Spy** — brings intelligence home and costs the target nothing."
+#~ msgstr ""
+#~ "**Spion sturen** - brengt inlichtingen mee naar huis en kost het doel "
+#~ "niets."
 
 #~ msgid ""
 #~ "You must repay the full amount on the due date. The bank takes it from "

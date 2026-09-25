@@ -23,7 +23,12 @@ noch geschützt ist.
 Die neun sind nicht austauschbar. Jede zielt auf eine Sache, und jeder
 Agent, der durchkommt, nimmt seinen eigenen Bissen:
 
-- **Spion senden** - bringt Erkenntnisse heim und kostet das Ziel nichts.
+- **Spion senden** - kostet das Ziel nichts. Ein Spion, der durchkommt,
+  bringt Land, Angriff, Verteidigung und Gold des Ziels heim. Das wird Ihnen
+  gemeldet, wenn der Spion zurückkehrt, und in der Spionagedatenbank
+  abgelegt, die die letzten fünf Berichte zu jedem Reich aufbewahrt und
+  zeigt, wie weit die letzten beiden auseinanderliegen. Ein Spion vor und
+  einer nach einem Schlag zeigt also, was der Schlag angerichtet hat.
 - **Geheimdienst bombardieren** - tötet ein paar Prozent ihrer Agenten, mit
   denen sie verteidigen und angreifen.
 - **Demoralisieren** - nimmt ein Siebtel der Kampfmoral.

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-24 00:45-0500\n"
+"POT-Creation-Date: 2026-09-25 02:00-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2208,7 +2208,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:65
+#: internal/help/content/interbbs/leagues.md:67
+#, markdown-text
+msgid ""
+"The Coordinator can post directives to the whole board, from the Messages "
+"menu under Directives from CO. They are shown each time you choose Play, and "
+"you can read them again from the same menu item. The Coordinator writes, "
+"adds to or erases them there."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:70
 #, markdown-text
 msgid ""
 "Your sysop may give a league game a set length. When it runs out, the world "
@@ -2216,7 +2226,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:66
+#: internal/help/content/interbbs/leagues.md:71
 #, markdown-text
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
@@ -2552,13 +2562,18 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
-msgid "**Send Spy** — brings intelligence home and costs the target nothing."
+msgid ""
+"**Send Spy** — costs the target nothing. A spy that gets in brings home "
+"their land, offense, defense and gold. They are reported to you when the spy "
+"returns, and filed in the Spy Database, which keeps the last five reports on "
+"each realm and shows how much the last two differ. A spy sent before and "
+"after a strike therefore shows what the strike did."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid ""
 "**Bomb Intelligence** — kills a few percent of their agents, which is what "
@@ -2566,37 +2581,37 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid "**Demoralize** — takes a seventh off military morale."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid "**Cause Dissensions** — a few percent of their troopers desert."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid "**Stir Emigrations** — drives people out of the realm."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid "**Spread Propaganda** — costs them popular support."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid ""
 "**Bomb Food Stores** — the widest swing of the nine: it can take almost a "
@@ -2604,19 +2619,19 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:34
+#: internal/help/content/interbbs/terrorist-ops.md:38
 #, markdown-text
 msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:35
+#: internal/help/content/interbbs/terrorist-ops.md:39
 #, markdown-text, no-wrap
 msgid "Picking one"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:41
+#: internal/help/content/interbbs/terrorist-ops.md:45
 #, markdown-text
 msgid ""
 "Match the operation to what you plan next. Softening a realm before an "
@@ -2626,13 +2641,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:42
+#: internal/help/content/interbbs/terrorist-ops.md:46
 #, markdown-text, no-wrap
 msgid "Getting through"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:49
+#: internal/help/content/interbbs/terrorist-ops.md:53
 #, markdown-text
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
@@ -2643,7 +2658,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:53
+#: internal/help/content/interbbs/terrorist-ops.md:57
 #, markdown-text
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "

@@ -5425,6 +5425,27 @@ IB infers bright red). The hotkey is settled — BRE's Coordinator Ops menu has
 record came from the same misread string that section corrects. A new season clears the chart, since the
 Coordinator who filed it is cleared with every other empire.
 
+### Directives from CO — IB's own
+
+The original has no such feature. In an InterBBS game the Messages menu carries
+**Directives from CO** (`D`): the BBS Coordinator's standing notice to the
+planet, drawn in the mail reader's box with `Message To  : All` and the stamp it
+was posted at.
+
+- A player who is not the Coordinator is shown the directives straight away.
+- The Coordinator is asked **`[R] Read, [W] Write, [A] Append, or [E] Erase>`**,
+  and Enter reads. Write opens the message editor and replaces what is posted.
+  Append opens it with the current lines already in it, as a reply opens with
+  its quote, so the directives stay within the editor's 20 lines; on a full set
+  it says so instead of opening the editor. Saving an empty editor erases them.
+  Erase asks `Erase the current directives?` (default No). The office is
+  checked again when the change is saved.
+- **Every choice of Play shows them**, to the Coordinator as well, right after
+  the Coordinator notice, and also when no turns are left.
+- They stay up when the office changes hands, until the new Coordinator writes
+  or erases them. A realm rename carries over to their sender line. A new game
+  clears them. They are never sent to another board.
+
 ### Quoting a reply
 
 Both of BRE's readers offer the same quote, and IB's one reader does it for

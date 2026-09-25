@@ -22,8 +22,12 @@ eigen rijk nog beschermd is.
 De negen zijn niet uitwisselbaar. Elk richt zich op één ding, en elke agent
 die erdoorheen komt neemt zijn eigen hap:
 
-- **Spion sturen** - brengt inlichtingen mee naar huis en kost het doel
-  niets.
+- **Spion sturen** - kost het doel niets. Een spion die binnenkomt, brengt
+  hun land, aanval, verdediging en goud mee naar huis. Dat wordt u gemeld
+  wanneer de spion terugkeert, en opgeslagen in de Spionagedatabase, die de
+  laatste vijf rapporten per rijk bewaart en laat zien hoeveel de laatste
+  twee verschillen. Een spion voor en na een aanval laat dus zien wat de
+  aanval heeft gedaan.
 - **Inlichtingendienst bombarderen** - doodt enkele procenten van hun
   agenten, waarmee zij verdedigen en aanvallen.
 - **Demoraliseren** - haalt een zevende van het militaire moreel weg.

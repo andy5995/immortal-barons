@@ -65,6 +65,11 @@ het bericht hieronder dan al uw stem.
 Elke beurt begint ermee u te vertellen of u het ambt bekleedt of op wie uw
 stem op dat moment staat, zodat u er nooit naar hoeft te zoeken.
 
+De coördinator kan richtlijnen aan het hele board geven, via het menu
+Berichten onder Richtlijnen van de CO. Ze worden getoond telkens als u
+Spelen kiest, en u kunt ze via hetzelfde menu-item opnieuw lezen. Daar
+schrijft, vult aan of verwijdert de coördinator ze.
+
 Uw sysop kan een competitiespel een vaste lengte geven. Als die afloopt,
 wordt de wereld teruggezet en begint er een nieuw spel.
 

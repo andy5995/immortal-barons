@@ -63,6 +63,11 @@ indique o seu voto.
 Todo turno começa dizendo se você ocupa o cargo ou em quem o seu voto está
 no momento, então você nunca precisa ir procurar.
 
+O Coordenador pode publicar diretivas para todo o BBS, no menu Mensagens em
+Diretivas do CO. Elas são exibidas sempre que você escolhe Jogar, e você
+pode lê-las de novo pelo mesmo item do menu. É lá que o Coordenador as
+escreve, acrescenta ou remove.
+
 Seu sysop pode dar a um jogo de liga uma duração definida. Quando ela acaba,
 o mundo é reiniciado e um novo jogo começa.
 

@@ -216,7 +216,7 @@ msgstr "%s oferece a você um %s."
 msgid "%s offers you a trade deal."
 msgstr "%s oferece a você um acordo comercial."
 
-#: internal/menu/mailreader.go:269
+#: internal/menu/mailreader.go:276
 msgid "%s on %s"
 msgstr "%s em %s"
 
@@ -236,7 +236,7 @@ msgstr "%s está entre você e %s."
 msgid "%s turns"
 msgstr "%s turnos"
 
-#: internal/menu/tree.go:689
+#: internal/menu/tree.go:691
 msgid "%s units of food available today."
 msgstr "%s unidades de comida disponíveis hoje."
 
@@ -411,7 +411,7 @@ msgstr "Um nome de fuso, como America/Sao_Paulo ou Europe/Berlin."
 msgid "ALL"
 msgstr "TODOS"
 
-#: internal/menu/tree.go:539
+#: internal/menu/tree.go:541
 msgid "Abdicate"
 msgstr "Abdicar"
 
@@ -493,6 +493,10 @@ msgstr ""
 "ainda erra alguns acordos, e deixa apenas um vigésimo das mercadorias em "
 "cada acordo que atinge."
 
+#: internal/menu/directives.go:149
+msgid "All"
+msgstr "Todos"
+
 #: internal/menu/tree.go:327
 msgid "All Planets"
 msgstr "Todos os Planetas"
@@ -534,6 +538,14 @@ msgstr "Outro reino já atende por esse nome."
 #: internal/game/sysop.go:20
 msgid "Another realm already belongs to that caller."
 msgstr "Outro reino já pertence a esse usuário."
+
+#: internal/menu/directives.go:46
+msgid "Append"
+msgstr "Acrescentar"
+
+#: internal/menu/directives.go:46
+msgid "Append, or"
+msgstr "Acrescentar, ou"
 
 #: internal/menu/actions_realm.go:34
 msgid "Are you POSITIVE you wish to erase your empire?"
@@ -587,11 +599,11 @@ msgstr "Atacante"
 msgid "Attacking %s..."
 msgstr "Atacando %s..."
 
-#: internal/menu/tree.go:472
+#: internal/menu/tree.go:474
 msgid "Auto-Feed Empire"
 msgstr "Alimentar o Império Automaticamente"
 
-#: internal/menu/tree.go:471
+#: internal/menu/tree.go:473
 msgid "Auto-Pay Maintenance"
 msgstr "Pagar a Manutenção Automaticamente"
 
@@ -704,7 +716,7 @@ msgstr ""
 msgid "Buy"
 msgstr "Comprar"
 
-#: internal/menu/tree.go:526
+#: internal/menu/tree.go:528
 msgid "Buy Food"
 msgstr "Comprar Comida"
 
@@ -728,7 +740,7 @@ msgstr "Comprar?"
 msgid "CRUSHED"
 msgstr "ESMAGADO"
 
-#: internal/menu/tree.go:514
+#: internal/menu/tree.go:516
 msgid "Call Off Attack Party"
 msgstr "Desfazer o Grupo de Ataque"
 
@@ -768,7 +780,7 @@ msgstr "Alterar"
 msgid "Change Production?"
 msgstr "Alterar a produção?"
 
-#: internal/menu/tree.go:487
+#: internal/menu/tree.go:489
 msgid "Change Realm Name"
 msgstr "Mudar o Nome do Reino"
 
@@ -872,7 +884,7 @@ msgstr "Configuração salva."
 msgid "Confirm?"
 msgstr "Confirma?"
 
-#: internal/menu/gameflow.go:350
+#: internal/menu/gameflow.go:352
 msgid "Continue to your next turn?"
 msgstr "Seguir para o próximo turno?"
 
@@ -880,11 +892,11 @@ msgstr "Seguir para o próximo turno?"
 msgid "Coordinator"
 msgstr "Coordenador"
 
-#: internal/menu/tree.go:585
+#: internal/menu/tree.go:587
 msgid "Coordinator Menu"
 msgstr "Menu do Coordenador"
 
-#: internal/menu/tree.go:583
+#: internal/menu/tree.go:585
 msgid "Coordinator Vote"
 msgstr "Voto para Coordenador"
 
@@ -1002,7 +1014,7 @@ msgstr "Desmoralizar as Forças"
 msgid "Deposit Funds"
 msgstr "Depositar Fundos"
 
-#: internal/menu/tree.go:470
+#: internal/menu/tree.go:472
 msgid "Deposit gold at End of Turn"
 msgstr "Depositar ouro no fim do turno"
 
@@ -1066,7 +1078,11 @@ msgstr "Lista Diplomática"
 msgid "Diplomacy Modification"
 msgstr "Alteração Diplomática"
 
-#: internal/menu/tree.go:507
+#: internal/menu/directives.go:148
+msgid "Directives from CO"
+msgstr "Diretivas do CO"
+
+#: internal/menu/tree.go:509
 msgid "Dismantle Gooie"
 msgstr "Desmontar o Gooie"
 
@@ -1132,11 +1148,11 @@ msgstr "Império"
 msgid "Empire Name"
 msgstr "Nome do Império"
 
-#: internal/menu/tree.go:552
+#: internal/menu/tree.go:554
 msgid "Empire Status"
 msgstr "Situação do Império"
 
-#: internal/menu/tree.go:540
+#: internal/menu/tree.go:542
 msgid "End Protection"
 msgstr "Encerrar a Proteção"
 
@@ -1164,9 +1180,17 @@ msgstr "Informe por quantas unidades dar lance."
 msgid "Entire Planet"
 msgstr "Planeta Inteiro"
 
-#: internal/menu/tree.go:591
+#: internal/menu/tree.go:593
 msgid "Entry"
 msgstr "Entrada"
+
+#: internal/menu/directives.go:47
+msgid "Erase"
+msgstr "Remover"
+
+#: internal/menu/directives.go:66
+msgid "Erase the current directives?"
+msgstr "Remover as diretivas atuais?"
 
 #: internal/menu/actions_interbbs.go:212
 msgid "Every contributor gets their forces back. The gold they spent is gone."
@@ -1193,7 +1217,7 @@ msgstr "Primeira linha a citar"
 msgid "Food"
 msgstr "Comida"
 
-#: internal/menu/tree.go:553
+#: internal/menu/tree.go:555
 msgid "Food Market"
 msgstr "Mercado de Comida"
 
@@ -1209,7 +1233,7 @@ msgstr "Software livre sob a Licença MIT."
 msgid "From"
 msgstr "De"
 
-#: internal/menu/tree.go:599
+#: internal/menu/tree.go:601
 msgid "Game Bulletins"
 msgstr "Boletins do Jogo"
 
@@ -1221,7 +1245,7 @@ msgstr "Configuração do Jogo"
 msgid "Game length in days (0 = endless)"
 msgstr "Duração do jogo em dias (0 = sem fim)"
 
-#: internal/menu/tree.go:725
+#: internal/menu/tree.go:727
 msgid "Game started on %s"
 msgstr "O jogo começou em %s"
 
@@ -1229,7 +1253,7 @@ msgstr "O jogo começou em %s"
 msgid "Glad you changed your mind!"
 msgstr "Que bom que você mudou de ideia!"
 
-#: internal/menu/tree.go:510
+#: internal/menu/tree.go:512
 msgid "Global Recon Request"
 msgstr "Pedido de Reconhecimento Global"
 
@@ -1401,7 +1425,7 @@ msgstr "Placar entre BBSes"
 msgid "InterPlanetary Operations"
 msgstr "Operações Interplanetárias"
 
-#: internal/menu/tree.go:600
+#: internal/menu/tree.go:602
 msgid "InterPlanetary Ops"
 msgstr "Operações Interplanetárias"
 
@@ -1484,7 +1508,7 @@ msgstr ""
 msgid "Land"
 msgstr "Terra"
 
-#: internal/menu/tree.go:478
+#: internal/menu/tree.go:480
 msgid "Language"
 msgstr "Idioma"
 
@@ -1572,11 +1596,11 @@ msgstr "Máx. de operações terroristas por dia (0 = sem limite)"
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr "O gasto produtivo máximo deste ano é: %s de ouro."
 
-#: internal/menu/mailreader.go:272
+#: internal/menu/mailreader.go:279
 msgid "Message From: "
 msgstr "Mensagem de: "
 
-#: internal/menu/mailreader.go:274
+#: internal/menu/mailreader.go:281
 msgid "Message To  : "
 msgstr "Mensagem para: "
 
@@ -1600,7 +1624,7 @@ msgstr "A moral militar subiu %d pontos."
 msgid "Missile operations are not part of this game."
 msgstr "Operações com mísseis não fazem parte deste jogo."
 
-#: internal/menu/tree.go:509
+#: internal/menu/tree.go:511
 msgid "Modify Diplomacy"
 msgstr "Alterar a Diplomacia"
 
@@ -1949,15 +1973,15 @@ msgstr "Imposto Planetário (%)"
 msgid "Planetary Treaties"
 msgstr "Tratados Planetários"
 
-#: internal/menu/tree.go:754
+#: internal/menu/tree.go:756
 msgid "Planetary time: %s   New day in %s"
 msgstr "Hora planetária: %s   Novo dia em %s"
 
-#: internal/menu/tree.go:593
+#: internal/menu/tree.go:595
 msgid "Play"
 msgstr "Jogar"
 
-#: internal/menu/tree.go:512
+#: internal/menu/tree.go:514
 msgid "Player List"
 msgstr "Lista de Jogadores"
 
@@ -2036,9 +2060,17 @@ msgstr "Sair?"
 msgid "Quote Message?"
 msgstr "Citar a mensagem?"
 
+#: internal/menu/directives.go:44
+msgid "Read"
+msgstr "Ler"
+
 #: internal/menu/tree.go:456
 msgid "Read Messages"
 msgstr "Ler Mensagens"
+
+#: internal/menu/directives.go:44
+msgid "Read,"
+msgstr "Ler,"
 
 #: internal/menu/actions_ipops.go:364
 msgid ""
@@ -2148,7 +2180,7 @@ msgstr "Placar"
 msgid "See Scores"
 msgstr "Ver o Placar"
 
-#: internal/menu/tree.go:594
+#: internal/menu/tree.go:596
 msgid "See Status"
 msgstr "Ver a Situação"
 
@@ -2160,7 +2192,7 @@ msgstr "Escolher Planetas"
 msgid "Sell"
 msgstr "Vender"
 
-#: internal/menu/tree.go:528
+#: internal/menu/tree.go:530
 msgid "Sell Food"
 msgstr "Vender Comida"
 
@@ -2180,7 +2212,7 @@ msgstr "Enviar SpyGuy"
 msgid "Send Trade Deal"
 msgstr "Enviar Acordo Comercial"
 
-#: internal/menu/gameflow.go:306
+#: internal/menu/gameflow.go:308
 msgid "Send a message?"
 msgstr "Enviar uma mensagem?"
 
@@ -2236,11 +2268,11 @@ msgstr "O envio custa %s de ouro por dia; precisa de um porta-aviões."
 msgid "Set %s price"
 msgstr "Definir o preço de %s"
 
-#: internal/menu/tree.go:565
+#: internal/menu/tree.go:567
 msgid "Set Industries"
 msgstr "Definir as Indústrias"
 
-#: internal/menu/tree.go:560
+#: internal/menu/tree.go:562
 msgid "Set Tax Rate"
 msgstr "Definir o Imposto"
 
@@ -2256,7 +2288,7 @@ msgstr "Ajustar o seletor do S3-Sabre (0-10)"
 msgid "Set-aside packets"
 msgstr "Pacotes separados"
 
-#: internal/menu/tree.go:566
+#: internal/menu/tree.go:568
 msgid "Show Instructions"
 msgstr "Mostrar as Instruções"
 
@@ -2276,7 +2308,7 @@ msgstr "Um Planeta"
 msgid "Sold %d. Gold: %d"
 msgstr "%d vendidos. Ouro: %d"
 
-#: internal/menu/gameflow.go:143
+#: internal/menu/gameflow.go:144
 msgid "Sorry, you have used all of your turns today."
 msgstr "Desculpe, você já usou todos os seus turnos de hoje."
 
@@ -2296,7 +2328,7 @@ msgstr "Operações Especiais"
 msgid "Specialization"
 msgstr "Especialização"
 
-#: internal/menu/tree.go:567
+#: internal/menu/tree.go:569
 msgid "Specialize Industry"
 msgstr "Especializar a Indústria"
 
@@ -2511,6 +2543,19 @@ msgid ""
 msgstr ""
 "O acordo vale até o prazo acabar; sem resposta, as mercadorias se perdem."
 
+#: internal/menu/directives.go:91
+msgid ""
+"The directives already fill all %d lines. Write or erase them to make room."
+msgstr "As diretivas já ocupam todas as %d linhas. Reescreva-as ou remova-as para abrir espaço."
+
+#: internal/menu/directives.go:73
+msgid "The directives have been erased."
+msgstr "As diretivas foram removidas."
+
+#: internal/menu/directives.go:106
+msgid "The directives have been posted."
+msgstr "As diretivas foram publicadas."
+
 #: internal/game/trade_deal.go:11
 msgid "The empire that sent this deal is gone."
 msgstr "O império que mandou este acordo não existe mais."
@@ -2523,7 +2568,7 @@ msgstr "O inimigo perdeu: %s."
 msgid "The food market is out of food for today."
 msgstr "O mercado de comida ficou sem comida por hoje."
 
-#: internal/menu/tree.go:721
+#: internal/menu/tree.go:723
 msgid "The game begins %s."
 msgstr "O jogo começa em %s."
 
@@ -2566,6 +2611,10 @@ msgstr "Ainda não há barões em quem votar."
 #: internal/menu/bulletins.go:43
 msgid "There are no bulletins to read."
 msgstr "Não há boletins para ler."
+
+#: internal/menu/directives.go:36
+msgid "There are no directives from the BBS Coordinator."
+msgstr "Não há diretivas do Coordenador do BBS."
 
 #: internal/menu/actions_covert.go:108
 msgid "There are no rival empires left to attack."
@@ -2639,7 +2688,7 @@ msgstr "Isso vai lhe custar %s de ouro.  Aceita?"
 msgid "Threat"
 msgstr "Ameaça"
 
-#: internal/menu/tree.go:485
+#: internal/menu/tree.go:487
 msgid "Time Zone"
 msgstr "Fuso Horário"
 
@@ -2655,7 +2704,7 @@ msgstr "Para encerrar a seleção, pressione Enter."
 msgid "Today"
 msgstr "Hoje"
 
-#: internal/menu/tree.go:596
+#: internal/menu/tree.go:598
 msgid "Today's News"
 msgstr "Notícias de Hoje"
 
@@ -2793,7 +2842,7 @@ msgstr "Minar os Investimentos"
 msgid "Unlimited"
 msgstr "Sem limite"
 
-#: internal/menu/tree.go:687
+#: internal/menu/tree.go:689
 msgid "Unlimited supply today."
 msgstr "Oferta ilimitada hoje."
 
@@ -2805,7 +2854,7 @@ msgstr "Registro ilegível"
 msgid "Urban"
 msgstr "Urbana"
 
-#: internal/menu/tree.go:469
+#: internal/menu/tree.go:471
 msgid "Use Enter To Exit BUY Menu"
 msgstr "Use Enter para sair do menu de compra"
 
@@ -2830,7 +2879,7 @@ msgstr "Vitória! Você capturou %d regiões."
 msgid "View Bank Rates"
 msgstr "Ver as Taxas do Banco"
 
-#: internal/menu/tree.go:511
+#: internal/menu/tree.go:513
 msgid "View Diplomacy"
 msgstr "Ver a Diplomacia"
 
@@ -2842,7 +2891,7 @@ msgstr "Ver o Placar Interplanetário"
 msgid "View Treaties"
 msgstr "Ver os Tratados"
 
-#: internal/menu/tree.go:530
+#: internal/menu/tree.go:532
 msgid "Visit Advisors"
 msgstr "Visitar os Conselheiros"
 
@@ -2850,15 +2899,15 @@ msgstr "Visitar os Conselheiros"
 msgid "Visit Bank"
 msgstr "Visitar o Banco"
 
-#: internal/menu/tree.go:466
+#: internal/menu/tree.go:468
 msgid "Visit Covert Menu"
 msgstr "Abrir o Menu Secreto"
 
-#: internal/menu/tree.go:468
+#: internal/menu/tree.go:470
 msgid "Visit Message Menu"
 msgstr "Abrir o Menu de Mensagens"
 
-#: internal/menu/tree.go:467
+#: internal/menu/tree.go:469
 msgid "Visit Trading Menu"
 msgstr "Abrir o Menu de Comércio"
 
@@ -3031,9 +3080,17 @@ msgstr "Você quer começar a construção?"
 msgid "Would you like to reconsider?"
 msgstr "Você quer repensar?"
 
-#: internal/menu/tree.go:564
+#: internal/menu/directives.go:45
+msgid "Write"
+msgstr "Escrever"
+
+#: internal/menu/tree.go:566
 msgid "Write Macros"
 msgstr "Escrever Macros"
+
+#: internal/menu/directives.go:45
+msgid "Write,"
+msgstr "Escrever,"
 
 #: internal/menu/actions_ipmessages.go:588
 msgid "Writing to:"
@@ -3043,7 +3100,7 @@ msgstr "Escrevendo para:"
 msgid "Yes"
 msgstr "Sim"
 
-#: internal/menu/tree.go:597
+#: internal/menu/tree.go:599
 msgid "Yesterday's News"
 msgstr "Notícias de Ontem"
 
@@ -3140,19 +3197,19 @@ msgid "You have %s Troopers, %s usable Jets, %s Tanks, and %s Bombers."
 msgstr ""
 "Você tem %s soldados, %s caças utilizáveis, %s tanques e %s bombardeiros."
 
-#: internal/menu/tree.go:676
+#: internal/menu/tree.go:678
 msgid "You have %s gold and %d agents."
 msgstr "Você tem %s de ouro e %d agentes."
 
-#: internal/menu/tree.go:662
+#: internal/menu/tree.go:664
 msgid "You have %s gold and %d turns."
 msgstr "Você tem %s de ouro e %d turnos."
 
-#: internal/menu/tree.go:698
+#: internal/menu/tree.go:700
 msgid "You have %s gold and %s units of food."
 msgstr "Você tem %s de ouro e %s unidades de comida."
 
-#: internal/menu/tree.go:660
+#: internal/menu/tree.go:662
 msgid "You have %s gold and 1 turn."
 msgstr "Você tem %s de ouro e 1 turno."
 
@@ -3160,7 +3217,7 @@ msgstr "Você tem %s de ouro e 1 turno."
 msgid "You have %s gold in hand and %s gold in the bank."
 msgstr "Você tem %s de ouro em mãos e %s de ouro no banco."
 
-#: internal/menu/tree.go:671
+#: internal/menu/tree.go:673
 msgid "You have %s gold."
 msgstr "Você tem %s de ouro."
 
@@ -3851,7 +3908,7 @@ msgstr "levou %d"
 msgid "troops deserted due to low morale."
 msgstr "soldados desertaram por causa da moral baixa."
 
-#: internal/menu/gameflow.go:214
+#: internal/menu/gameflow.go:216
 msgid "units of Food consumed."
 msgstr "unidades de comida consumidas."
 

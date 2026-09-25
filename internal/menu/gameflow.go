@@ -138,6 +138,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		// on turns remaining (BRE.EXE 0x3842) but runs write_data_report and
 		// read_local_messages either way (0x385F), reaching "Sorry, you have used
 		// all of your turns today." only afterward (0x38D7 -> 0x3F8D).
+		showDirectives(s, w)
 		showTurnEvents(s, w)
 		readTurnMail(s, w, true)
 		ok(s, "Sorry, you have used all of your turns today.")
@@ -146,6 +147,7 @@ func runTurn(s session.Session, w *ctx) Result {
 	}
 
 	showCoordinatorNotice(s, w)
+	showDirectives(s, w)
 	openTurnRecap(s, w)
 
 	firstTurn := true

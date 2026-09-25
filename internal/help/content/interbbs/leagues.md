@@ -60,6 +60,11 @@ be naming your vote.
 Every turn opens by telling you whether you hold the office or who your vote is
 currently for, so you never have to go looking.
 
+The Coordinator can post directives to the whole board, from the Messages menu
+under Directives from CO. They are shown each time you choose Play, and you can
+read them again from the same menu item. The Coordinator writes, adds to or
+erases them there.
+
 Your sysop may give a league game a set length. When it runs out, the world
 resets and a new game begins.
 

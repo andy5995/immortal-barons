@@ -178,7 +178,12 @@ type World struct {
 	Treaties      []Treaty
 	LastMaster    string // crowned at league end (endGame); shown as "Last Planetary Master"
 	CurrentMaster string // daily region-count leader (planetMaster), tracked by postMasterNews
-	RemoteBoards  []RemoteBoard
+	// Directives is the BBS Coordinator's standing notice to the planet, shown
+	// to every player each time they choose Play. IB's own; the original has
+	// none. It outlives the office: a new Coordinator replaces or clears it.
+	// Planet-local, never sent to another board.
+	Directives   *Message `json:",omitempty"`
+	RemoteBoards []RemoteBoard
 	// SysopNotices are transport faults for the person running the game, not
 	// for its players: a packet that could not be delivered, orders that failed
 	// their check. They are NOT persisted (json:"-") and are drained by the
@@ -480,6 +485,7 @@ func (w *World) initFreshGame() {
 	w.Treaties = nil
 	w.LastMaster = ""
 	w.CurrentMaster = ""
+	w.Directives = nil
 	w.RemoteBoards = nil
 	w.Pirates = nil
 	w.Market = nil
