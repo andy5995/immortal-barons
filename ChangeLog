@@ -5,13 +5,10 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * Messaging system improvements
   * Help opens with Getting Started, which now includes How to Play
   * Menu error messages are translated
   * Help category names are translated
-  * Play Game shows every message, ignored ones too, as the original does
-  * Local mail shows its time on the reader's clock, with the zone
-  * The BBS Coordinator can post directives, shown to the planet at every Play
-  * After a reply is sent, the answered message can be deleted or kept
   * -full on a door command plays as the drop file's caller and reads -dropfile
   * -ftn-status says when bbs.cfg has no lines for sending or receiving
   * Only a Send Spy that gets in brings back intel on its target

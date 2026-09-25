@@ -91,9 +91,11 @@ func openTurnRecap(s session.Session, w *ctx) {
 func showTurnEvents(s session.Session, w *ctx) {
 	var events []game.Event
 	var realmNames []string
+	var lost *game.MailLoss
 	withPlayer(w, func(p *game.Empire) {
 		events = p.Events
 		p.Events = nil
+		lost, p.MailLost = p.MailLost, nil
 		// The recap consumed everything; re-baseline the mid-session notice so an
 		// event appended right after this clear still shows (takeSessionNews's
 		// shrink-reset alone couldn't tell it from part of the cleared backlog).
@@ -104,6 +106,16 @@ func showTurnEvents(s session.Session, w *ctx) {
 			}
 		}
 	})
+	if lost != nil {
+		// Worded here rather than filed as an event, so the date reads on this
+		// reader's clock and in their language (game.MailLoss).
+		when := game.StampIn(lost.Oldest, sessionZone(s))
+		text := fmt.Sprintf(tr(s, "Mailbox full, deleting message from %s."), when)
+		if lost.Count > 1 {
+			text = fmt.Sprintf(tr(s, "Mailbox full, deleted %d messages, the oldest from %s."), lost.Count, when)
+		}
+		events = append(events, game.Event{When: lost.At, Text: text})
+	}
 	if len(events) == 0 {
 		return
 	}
@@ -220,13 +232,13 @@ func eventRule(n int, when time.Time, loc *time.Location) string {
 // than repeating itself up to ten times a day.
 func readTurnMail(s session.Session, w *ctx, atEntry bool) {
 	skipIgnored := !atEntry
-	if len(unreadMail(w, skipIgnored)) == 0 {
+	if len(unreadMail(w, skipIgnored, false)) == 0 {
 		if atEntry {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "You have no messages."), ansi.Reset)
 		}
 		return
 	}
-	mailReader(s, w, skipIgnored)
+	mailReader(s, w, skipIgnored, false)
 }
 
 // manufacturedUnits lists what the Industrial Zones built this turn, as the

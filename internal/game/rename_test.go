@@ -26,6 +26,7 @@ func renameWorld(t *testing.T) (*World, *Empire, *Empire) {
 	other.Bribed = []string{"Old"}
 	other.ExposedFrom = map[string]int{"Old": 4}
 	w.Directives = &Message{From: "Old", Body: "Hold the line."}
+	old.Mail = []Message{{From: "Old", FromBoard: "Home", To: "CO @ Mars", Body: "sent", Sent: true}}
 	return w, old, other
 }
 
@@ -55,6 +56,9 @@ func TestRenameEmpireRewritesReferences(t *testing.T) {
 	}
 	if w.CurrentMaster != "New" || w.LastMaster != "New" {
 		t.Errorf("masters = %q/%q, want New/New", w.CurrentMaster, w.LastMaster)
+	}
+	if old.Mail[0].From != "New" {
+		t.Errorf("own interplanetary copy from = %q, want New", old.Mail[0].From)
 	}
 	if w.Directives.From != "New" {
 		t.Errorf("directives from = %q, want New", w.Directives.From)

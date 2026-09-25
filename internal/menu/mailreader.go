@@ -3,9 +3,11 @@ package menu
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -18,7 +20,10 @@ const (
 )
 
 type mailReply struct {
-	toName string
+	// toNames are the local realms a reply goes to: the author of the message
+	// answered, or whoever the player picked when answering their own copy.
+	// On an interplanetary reply the one name is the author there.
+	toNames []string
 	// board names the planet an interplanetary reply goes back to, and is empty
 	// for local mail. The author of an IP message is not a realm anyone here can
 	// look up, so without it the reply would quietly go nowhere.
@@ -39,9 +44,10 @@ type mailReply struct {
 // skipIgnored is true for the stop at the head of a later turn, which passes
 // over what this session has already ignored, and false for Read Messages and
 // the stop made on choosing Play Game, which show the whole inbox (see
-// ctx.ignoredMail).
-func mailReader(s session.Session, w *ctx, skipIgnored bool) {
-	mail := unreadMail(w, skipIgnored)
+// ctx.ignoredMail). sent picks the player's own copies of what they sent, read
+// from View Sent Messages, instead of the mail they received.
+func mailReader(s session.Session, w *ctx, skipIgnored, sent bool) {
+	mail := unreadMail(w, skipIgnored, sent)
 	if len(mail) == 0 {
 		return
 	}
@@ -57,22 +63,35 @@ func mailReader(s session.Session, w *ctx, skipIgnored bool) {
 		case 'D':
 			deleted = append(deleted, m)
 		case 'R':
-			if m.FromBoard != "" && m.From == "" {
-				// A notice from the planet itself (deliverIPMessage's bounce for a
-				// message that could not be delivered), not from a baron — there is
-				// no author to answer, and an empty ToEmpire would otherwise read as
-				// a planet-wide reply and broadcast it. Treat it like any other
-				// unhandled key.
+			if (m.Sent && m.FromBoard != "") || (m.FromBoard != "" && m.From == "") {
+				// Nobody to answer here. A copy of the player's own interplanetary
+				// message would need the planet picker to readdress. A notice from
+				// the planet itself (deliverIPMessage's bounce for a message that
+				// could not be delivered) is from no baron, and an empty ToEmpire
+				// would otherwise read as a planet-wide reply and broadcast it.
+				// Treat either like any other unhandled key.
 				w.ignoreMail(m)
 				break
 			}
 			// Both questions come before the editor opens, as the original asks
 			// them: who the reply is addressed to, then how much of the message it
-			// carries over.
-			public := m.FromBoard != "" && AskYesNo(s, "Public Reply?", false)
+			// carries over. Answering the player's own copy asks who to send it to,
+			// as Send Message does; the picker never offers the player themselves.
+			to := []string{m.From}
+			public := false
+			switch {
+			case m.Sent:
+				to = pickedNames(w, pickRecipients(s, w, pickOpts{prompt: "Send to:", allowAll: true}))
+				if len(to) == 0 {
+					w.ignoreMail(m)
+					continue
+				}
+			case m.FromBoard != "":
+				public = AskYesNo(s, "Public Reply?", false)
+			}
 			body, send := composeMessageFrom(s, askQuote(s, m))
 			if send && strings.TrimSpace(body) != "" {
-				replies = append(replies, mailReply{toName: m.From, board: m.FromBoard, public: public, body: body})
+				replies = append(replies, mailReply{toNames: to, board: m.FromBoard, public: public, body: body})
 				// Only once the reply actually went out is the original offered for
 				// deletion (#122); aborting the editor leaves it in the inbox. Kept, it
 				// counts as passed over, like Ignore.
@@ -97,6 +116,18 @@ func mailReader(s session.Session, w *ctx, skipIgnored bool) {
 	applyMailActions(w, deleted, replies)
 }
 
+// pickedNames is the names of the realms the picker returned, read under the
+// lock since the rows are live world pointers.
+func pickedNames(w *ctx, picked []*game.Empire) []string {
+	var names []string
+	w.Read(func() {
+		for _, e := range picked {
+			names = append(names, e.Name)
+		}
+	})
+	return names
+}
+
 // ignoreMail marks m passed over for the rest of this session.
 func (w *ctx) ignoreMail(m game.Message) {
 	if w.ignoredMail == nil {
@@ -105,13 +136,14 @@ func (w *ctx) ignoreMail(m game.Message) {
 	w.ignoredMail[m] = true
 }
 
-// unreadMail copies the player's inbox, less what this session has ignored when
-// the caller asked to skip those.
-func unreadMail(w *ctx, skipIgnored bool) []game.Message {
+// unreadMail copies the player's received mail, or with sent their own sent
+// copies, less what this session has ignored when the caller asked to skip
+// those.
+func unreadMail(w *ctx, skipIgnored, sent bool) []game.Message {
 	var mail []game.Message
 	withPlayer(w, func(p *game.Empire) {
 		for _, m := range p.Mail {
-			if skipIgnored && w.ignoredMail[m] {
+			if m.Sent != sent || (skipIgnored && w.ignoredMail[m]) {
 				continue
 			}
 			mail = append(mail, m)
@@ -139,18 +171,11 @@ func applyMailActions(w *ctx, deleted []game.Message, replies []mailReply) {
 		}
 		for _, r := range replies {
 			if r.board != "" {
-				w.World.ReplyIPMessage(p, r.board, r.toName, r.body, r.public)
+				w.World.ReplyIPMessage(p, r.board, r.toNames[0], r.body, r.public)
 				continue
 			}
-			recip := findRealm(w, r.toName)
-			if recip == nil || recip == p {
-				continue
-			}
-			w.World.SendMail(p, recip, game.Message{
-				To:   w.EmpireLetter(recip),
-				When: when,
-				Body: r.body,
-			})
+			// A recipient who has gone since is dropped, as Send Message drops one.
+			_ = mailRealms(w, p, r.toNames, when, r.body)
 		}
 		return nil
 	})
@@ -278,8 +303,16 @@ func messageBox(s session.Session, m game.Message) {
 	}
 	fmt.Fprintf(s, "%s│ %s%s%s%s%s\n",
 		ansi.FgCyan, ansi.FgWhite, tr(s, "Message From: "), ansi.FgBrightCyan, from, ansi.Reset)
-	fmt.Fprintf(s, "%s│ %s%s%s%s%s\n",
-		ansi.FgCyan, ansi.FgWhite, tr(s, "Message To  : "), ansi.FgBrightGreen, m.To, ansi.Reset)
+	// Wrapped inside the box: a sent copy's address can be a list of planets,
+	// which runs past the edge where a run of realm letters never did.
+	label := tr(s, "Message To  : ")
+	pad := strings.Repeat(" ", utf8.RuneCountInString(label))
+	for i, line := range strings.Split(help.Wrap(m.To, mailBoxWidth-2-utf8.RuneCountInString(label)), "\n") {
+		if i > 0 {
+			label = pad
+		}
+		fmt.Fprintf(s, "%s│ %s%s%s%s%s\n", ansi.FgCyan, ansi.FgWhite, label, ansi.FgBrightGreen, line, ansi.Reset)
+	}
 	fmt.Fprintf(s, "%s├%s%s\n", ansi.FgCyan, insetRule(mailSepWidth-1, 8), ansi.Reset)
 	for _, line := range strings.Split(m.Body, "\n") {
 		body := ansi.FgWhite

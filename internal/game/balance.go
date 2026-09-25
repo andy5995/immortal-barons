@@ -344,8 +344,9 @@ const MaxCatchUpDays = 0
 // present baron as absent costs nothing.
 const OnlineWindowSecs = 300
 
-// Mailbox cap — an inbox holds at most this many messages; the oldest is
-// discarded when a newer one arrives. IB's own: BRE's fixed-size record bounds
+// Mailbox cap — an inbox holds at most this many messages, sent copies included;
+// a full one gives up its oldest sent copy first, then its oldest message
+// received (Empire.deliver). IB's own: BRE's fixed-size record bounds
 // mail by construction, IB's JSON list does not, and a mail-bomb would otherwise
 // grow the world file without limit.
 const MailboxMax = 50

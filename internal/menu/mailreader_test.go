@@ -17,7 +17,7 @@ func TestMailReaderIgnoreKeepsMessage(t *testing.T) {
 	f := &fakeSession{keys: []rune("i")}
 	w := newWorld()
 	seedMail(w, game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "hi"})
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 	if got := len(w.Player().Mail); got != 1 {
 		t.Fatalf("Ignore should keep the message; Mail len = %d, want 1", got)
 	}
@@ -27,7 +27,7 @@ func TestMailReaderDeleteRemovesMessage(t *testing.T) {
 	f := &fakeSession{keys: []rune("d")}
 	w := newWorld()
 	seedMail(w, game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "hi"})
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 	if got := len(w.Player().Mail); got != 0 {
 		t.Fatalf("Delete should remove the message; Mail len = %d, want 0", got)
 	}
@@ -40,7 +40,7 @@ func TestMailReaderQuitKeepsRemaining(t *testing.T) {
 		game.Message{From: "Ashland", Body: "one"},
 		game.Message{From: "Ashland", Body: "two"},
 	)
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 	if got := len(w.Player().Mail); got != 2 {
 		t.Fatalf("Quit should keep unread messages; Mail len = %d, want 2", got)
 	}
@@ -56,7 +56,7 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", When: "07/24/2026", Body: "nice one"})
 
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 
 	if len(sender.Mail) != 1 {
 		t.Fatalf("Reply should mail the sender; sender Mail len = %d, want 1", len(sender.Mail))
@@ -79,9 +79,11 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 	if _, ok := game.ParseStamp(got.When); !ok {
 		t.Errorf("reply stamp %q carries no zone", got.When)
 	}
-	// Answering Delete after a sent reply removes the original (#122).
-	if got := len(w.Player().Mail); got != 0 {
-		t.Errorf("Delete after a reply should remove the original; player Mail len = %d, want 0", got)
+	// Answering Delete after a sent reply removes the original (#122), and what
+	// is left is the replier's own copy of the reply.
+	mail := w.Player().Mail
+	if len(mail) != 1 || !mail[0].Sent || mail[0].Body != got.Body || mail[0].To != got.To {
+		t.Errorf("player's inbox = %+v, want only their copy of the reply", mail)
 	}
 }
 
@@ -94,7 +96,7 @@ func TestMailReaderReplyEnterKeepsOriginal(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", When: "07/24/2026", Body: "nice one"})
 
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 
 	if !strings.Contains(f.out.String(), "Keep original message") {
 		t.Fatalf("never reached the Delete-or-Keep question:\n%s", f.out.String())
@@ -106,8 +108,9 @@ func TestMailReaderReplyEnterKeepsOriginal(t *testing.T) {
 	if len(sender.Mail) != 1 {
 		t.Fatalf("the reply should still be sent; sender Mail len = %d, want 1", len(sender.Mail))
 	}
-	if got := len(w.Player().Mail); got != 1 {
-		t.Errorf("Enter should keep the original; player Mail len = %d, want 1", got)
+	// The original and the replier's copy of the reply.
+	if mail := w.Player().Mail; len(mail) != 2 || mail[0].Sent || !mail[1].Sent {
+		t.Errorf("Enter should keep the original beside the copy; player Mail = %+v", mail)
 	}
 }
 
@@ -122,7 +125,7 @@ func TestMailReaderReplyToSystemNoticeIsANoOp(t *testing.T) {
 	f := &fakeSession{keys: []rune("r")}
 	w := newWorld()
 	seedMail(w, game.Message{FromBoard: "The Eclipse", To: "A", When: "07/24/2026", Body: "no such realm there"})
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 	if got := len(w.Player().Mail); got != 1 {
 		t.Fatalf("a system notice has no author to reply to; Mail len = %d, want 1 (kept)", got)
 	}
@@ -139,7 +142,7 @@ func TestMailReaderAbortedReplyKeepsMessage(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", When: "07/24/2026", Body: "nice one"})
 
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 
 	if !strings.Contains(f.out.String(), "You have") {
 		t.Fatalf("never reached the message editor:\n%s", f.out.String())
@@ -164,7 +167,7 @@ func TestMailReaderQuoteRange(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "one\ntwo\nthree\nfour"})
 
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 
 	if !strings.Contains(f.out.String(), "Quote Message?") {
 		t.Fatalf("never reached the quote prompt:\n%s", f.out.String())
@@ -194,7 +197,7 @@ func TestMailReaderQuoteDeclined(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "nice one"})
 
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 
 	if len(sender.Mail) != 1 {
 		t.Fatalf("Reply should mail the sender; got %d messages", len(sender.Mail))
@@ -218,7 +221,7 @@ func TestMailReaderQuoteClampsRangeAtThePrompt(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "one\ntwo\nthree"})
 
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 
 	if !strings.Contains(f.out.String(), "Last Line to Quote") {
 		t.Fatalf("never reached the range prompt:\n%s", f.out.String())
@@ -253,7 +256,7 @@ func TestIgnoredMailIsNotRepeatedEveryTurn(t *testing.T) {
 	seedMail(w, m)
 
 	f := &fakeSession{keys: []rune("i")}
-	mailReader(f, w, true)
+	mailReader(f, w, true, false)
 	if !strings.Contains(stripANSI(f.out.String()), "sekret plans") {
 		t.Fatalf("the message was never shown:\n%s", f.out.String())
 	}
@@ -275,13 +278,13 @@ func TestIgnoredMailIsNotRepeatedEveryTurn(t *testing.T) {
 
 	// Asking to read messages asks for all of them.
 	f = &fakeSession{keys: []rune("i")}
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 	if !strings.Contains(stripANSI(f.out.String()), "sekret plans") {
 		t.Errorf("Read Messages should still show an ignored message:\n%s", f.out.String())
 	}
 
 	// A fresh session (a new ctx over the same world) has ignored nothing.
-	if got := len(unreadMail(&ctx{World: w.World, handle: w.handle}, true)); got != 1 {
+	if got := len(unreadMail(&ctx{World: w.World, handle: w.handle}, true, false)); got != 1 {
 		t.Errorf("a new session sees %d messages, want the ignored one back", got)
 	}
 	if got := len(w.Player().Mail); got != 1 {
@@ -302,7 +305,7 @@ func TestAnAbandonedReplyCountsAsIgnored(t *testing.T) {
 	// r, Enter (Quote Message? = Yes), then abandon the editor; q at the second
 	// message. Both are one line, so no line range is asked for (#244).
 	f := &fakeSession{keys: []rune("r\r/Aq")}
-	mailReader(f, w, true)
+	mailReader(f, w, true, false)
 	if got := len(w.Player().Mail); got != 2 {
 		t.Fatalf("nothing was sent, so nothing should be removed; Mail len = %d, want 2", got)
 	}
@@ -329,7 +332,7 @@ func TestMailReaderOneLineMessageSkipsTheRangePrompts(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "just the one line"})
 
-	mailReader(f, w, false)
+	mailReader(f, w, false, false)
 
 	out := f.out.String()
 	if !strings.Contains(out, "Quote Message?") {
@@ -375,7 +378,7 @@ func TestPlayGameShowsTheWholeInbox(t *testing.T) {
 				game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "second thoughts"},
 			)
 			// Both ignored earlier this session, from Read Messages.
-			mailReader(&fakeSession{keys: []rune("ii")}, w, false)
+			mailReader(&fakeSession{keys: []rune("ii")}, w, false, false)
 
 			f := &fakeSession{keys: []rune(tc.keys)}
 			runTurn(f, w)

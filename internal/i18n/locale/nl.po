@@ -180,7 +180,7 @@ msgstr "Er is %s goud nodig om uw regio's te onderhouden."
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr "%s goud saneert %s van uw %s verwoeste regio's."
 
-#: internal/menu/turnrecap.go:422
+#: internal/menu/turnrecap.go:434
 msgid "%s have captured %s %s"
 msgstr "%s heeft %s %s buitgemaakt"
 
@@ -217,7 +217,7 @@ msgstr "%s biedt u een %s aan."
 msgid "%s offers you a trade deal."
 msgstr "%s biedt u een handelsovereenkomst aan."
 
-#: internal/menu/mailreader.go:277
+#: internal/menu/mailreader.go:302
 msgid "%s on %s"
 msgstr "%s op %s"
 
@@ -237,7 +237,7 @@ msgstr "%s staat tussen u en %s in."
 msgid "%s turns"
 msgstr "%s beurten"
 
-#: internal/menu/tree.go:691
+#: internal/menu/tree.go:693
 msgid "%s units of food available today."
 msgstr "%s eenheden voedsel vandaag beschikbaar."
 
@@ -255,7 +255,7 @@ msgstr ""
 "De bondgenoten van %s sturen %s soldaten en %s tanks om de verdediging te "
 "helpen."
 
-#: internal/menu/turnrecap.go:118
+#: internal/menu/turnrecap.go:130
 msgid "(%d times)"
 msgstr "(%d keer)"
 
@@ -283,7 +283,7 @@ msgstr ", "
 msgid "-* Drop Regions *-"
 msgstr "-* Regio's opgeven *-"
 
-#: internal/menu/actions_message.go:455
+#: internal/menu/actions_message.go:468
 msgid "/-Command?"
 msgstr "/-opdracht?"
 
@@ -315,15 +315,15 @@ msgstr ": Nieuwsbericht"
 msgid "<game name>: <view name>"
 msgstr "<naam van het spel>: <naam van het scherm>"
 
-#: internal/menu/actions_message.go:184
+#: internal/menu/actions_message.go:197
 msgid "=All"
 msgstr "=Alle"
 
-#: internal/menu/actions_message.go:189
+#: internal/menu/actions_message.go:202
 msgid "=All Allies"
 msgstr "=Alle bondgenoten"
 
-#: internal/menu/actions_message.go:193
+#: internal/menu/actions_message.go:206
 msgid "=List"
 msgstr "=Lijst"
 
@@ -414,7 +414,7 @@ msgstr "Een zonenaam, zoals America/New_York of Europe/Amsterdam."
 msgid "ALL"
 msgstr "ALLE"
 
-#: internal/menu/tree.go:541
+#: internal/menu/tree.go:543
 msgid "Abdicate"
 msgstr "Aftreden"
 
@@ -422,7 +422,7 @@ msgstr "Aftreden"
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr "Afstand doen wist %s voorgoed. Dit kan niet ongedaan gemaakt worden."
 
-#: internal/menu/actions_message.go:487
+#: internal/menu/actions_message.go:500
 msgid "Abort"
 msgstr "Afbreken"
 
@@ -607,11 +607,11 @@ msgstr "Aanvaller"
 msgid "Attacking %s..."
 msgstr "%s wordt aangevallen..."
 
-#: internal/menu/tree.go:474
+#: internal/menu/tree.go:476
 msgid "Auto-Feed Empire"
 msgstr "Rijk automatisch voeden"
 
-#: internal/menu/tree.go:473
+#: internal/menu/tree.go:475
 msgid "Auto-Pay Maintenance"
 msgstr "Onderhoud automatisch betalen"
 
@@ -723,7 +723,7 @@ msgstr ""
 msgid "Buy"
 msgstr "Kopen"
 
-#: internal/menu/tree.go:528
+#: internal/menu/tree.go:530
 msgid "Buy Food"
 msgstr "Voedsel kopen"
 
@@ -751,7 +751,7 @@ msgstr "Militaire eenheden kopen staat uit in deze competitie."
 msgid "CRUSHED"
 msgstr "VERPLETTERD"
 
-#: internal/menu/tree.go:516
+#: internal/menu/tree.go:518
 msgid "Call Off Attack Party"
 msgstr "Aanvalsgroep afblazen"
 
@@ -791,7 +791,7 @@ msgstr "Wijzigen"
 msgid "Change Production?"
 msgstr "Productie wijzigen?"
 
-#: internal/menu/tree.go:489
+#: internal/menu/tree.go:491
 msgid "Change Realm Name"
 msgstr "Rijk hernoemen"
 
@@ -835,35 +835,35 @@ msgstr "Kies een tijdzone..."
 msgid "Chopper's Fair Market"
 msgstr "Choppers Eerlijke Markt"
 
-#: internal/menu/turnrecap.go:518
+#: internal/menu/turnrecap.go:530
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr "Burgeroorlog! De opstand kost u %d%% van uw rijk en uw troepen."
 
-#: internal/menu/turnrecap.go:514
+#: internal/menu/turnrecap.go:526
 msgid ""
 "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 "Burgeroorlog! Verspreide opstanden kosten u %d%% van uw rijk en uw troepen."
 
-#: internal/menu/turnrecap.go:516
+#: internal/menu/turnrecap.go:528
 msgid ""
 "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 "Burgeroorlog! De opstand breidt zich uit en neemt %d%% van uw rijk en uw "
 "troepen."
 
-#: internal/menu/turnrecap.go:520
+#: internal/menu/turnrecap.go:532
 msgid ""
 "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 "Burgeroorlog! Hele provincies komen in opstand en nemen %d%% van uw rijk en "
 "uw troepen."
 
-#: internal/menu/turnrecap.go:522
+#: internal/menu/turnrecap.go:534
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Burgeroorlog! Uw rijk valt bijna uiteen - %d%% ervan is weg."
 
-#: internal/menu/actions_message.go:493
+#: internal/menu/actions_message.go:506
 msgid "Clear"
 msgstr "Wissen"
 
@@ -903,11 +903,11 @@ msgstr "Door naar uw volgende beurt?"
 msgid "Coordinator"
 msgstr "Coördinator"
 
-#: internal/menu/tree.go:587
+#: internal/menu/tree.go:589
 msgid "Coordinator Menu"
 msgstr "Coördinatormenu"
 
-#: internal/menu/tree.go:585
+#: internal/menu/tree.go:587
 msgid "Coordinator Vote"
 msgstr "Coördinatorstemming"
 
@@ -1001,15 +1001,15 @@ msgstr "Verdediger"
 msgid "Defense"
 msgstr "Verdediger"
 
-#: internal/menu/mailreader.go:214
+#: internal/menu/mailreader.go:239
 msgid "Delete"
 msgstr "Wissen"
 
-#: internal/menu/mailreader.go:233
+#: internal/menu/mailreader.go:258
 msgid "Delete or"
 msgstr "Wissen of"
 
-#: internal/menu/mailreader.go:214
+#: internal/menu/mailreader.go:239
 msgid "Delete,"
 msgstr "Wissen,"
 
@@ -1025,7 +1025,7 @@ msgstr "Troepen demoraliseren"
 msgid "Deposit Funds"
 msgstr "Geld storten"
 
-#: internal/menu/tree.go:472
+#: internal/menu/tree.go:474
 msgid "Deposit gold at End of Turn"
 msgstr "Goud storten aan einde beurt"
 
@@ -1094,7 +1094,7 @@ msgstr "Diplomatie wijzigen"
 msgid "Directives from CO"
 msgstr "Richtlijnen van de CO"
 
-#: internal/menu/tree.go:509
+#: internal/menu/tree.go:511
 msgid "Dismantle Gooie"
 msgstr "Gooie ontmantelen"
 
@@ -1106,7 +1106,7 @@ msgstr "Ontmantelen levert niets terug - het goud is uitgegeven."
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Wilt u een Gooie Kablooie aanvallen?"
 
-#: internal/menu/actions_message.go:618
+#: internal/menu/actions_message.go:633
 msgid "Do you wish to send another message?"
 msgstr "Wilt u nog een bericht sturen?"
 
@@ -1164,15 +1164,15 @@ msgstr "Rijk"
 msgid "Empire Name"
 msgstr "Naam van het rijk"
 
-#: internal/menu/tree.go:554
+#: internal/menu/tree.go:556
 msgid "Empire Status"
 msgstr "Rijksstatus"
 
-#: internal/menu/tree.go:542
+#: internal/menu/tree.go:544
 msgid "End Protection"
 msgstr "Bescherming beëindigen"
 
-#: internal/menu/turnrecap.go:465
+#: internal/menu/turnrecap.go:477
 msgid "End of Turn Statistics:"
 msgstr "Statistieken aan het eind van de beurt:"
 
@@ -1196,7 +1196,7 @@ msgstr "Geef aan op hoeveel eenheden u biedt."
 msgid "Entire Planet"
 msgstr "Hele planeet"
 
-#: internal/menu/tree.go:593
+#: internal/menu/tree.go:595
 msgid "Entry"
 msgstr "Start"
 
@@ -1225,7 +1225,7 @@ msgstr "Langdurige slag"
 msgid "FTN spool"
 msgstr "FTN-wachtrij"
 
-#: internal/menu/mailreader.go:183
+#: internal/menu/mailreader.go:208
 msgid "First Line to Quote"
 msgstr "Eerste regel om te citeren"
 
@@ -1233,7 +1233,7 @@ msgstr "Eerste regel om te citeren"
 msgid "Food"
 msgstr "Voedsel"
 
-#: internal/menu/tree.go:555
+#: internal/menu/tree.go:557
 msgid "Food Market"
 msgstr "Voedselmarkt"
 
@@ -1261,7 +1261,7 @@ msgstr "Spelinstellingen"
 msgid "Game length in days (0 = endless)"
 msgstr "Speelduur in dagen (0 = eindeloos)"
 
-#: internal/menu/tree.go:727
+#: internal/menu/tree.go:729
 msgid "Game started on %s"
 msgstr "Spel begonnen op %s"
 
@@ -1273,7 +1273,7 @@ msgstr "Aan de slag"
 msgid "Glad you changed your mind!"
 msgstr "Fijn dat u zich bedacht heeft!"
 
-#: internal/menu/tree.go:512
+#: internal/menu/tree.go:514
 msgid "Global Recon Request"
 msgstr "Wereldwijde verkenning"
 
@@ -1393,11 +1393,11 @@ msgstr "Tijd zonder activiteit tot afbreken, in seconden (0 = nooit)"
 msgid "Idle warnings before boot"
 msgstr "Waarschuwingen bij stilzitten voor het afbreken"
 
-#: internal/menu/mailreader.go:215
+#: internal/menu/mailreader.go:240
 msgid "Ignore"
 msgstr "Negeren"
 
-#: internal/menu/mailreader.go:215
+#: internal/menu/mailreader.go:240
 msgid "Ignore, or"
 msgstr "Negeren, of"
 
@@ -1449,7 +1449,7 @@ msgstr "InterBBS-scores"
 msgid "InterPlanetary Operations"
 msgstr "Interplanetaire operaties"
 
-#: internal/menu/tree.go:602
+#: internal/menu/tree.go:604
 msgid "InterPlanetary Ops"
 msgstr "Interplanetaire operaties"
 
@@ -1501,7 +1501,7 @@ msgstr "Deelnemen aan groepsaanval"
 msgid "Join which group?"
 msgstr "Bij welke groep aansluiten?"
 
-#: internal/menu/mailreader.go:234
+#: internal/menu/mailreader.go:259
 msgid "Keep"
 msgstr "Bewaren"
 
@@ -1509,7 +1509,7 @@ msgstr "Bewaren"
 msgid "Keep current"
 msgstr "Huidige behouden"
 
-#: internal/menu/mailreader.go:234
+#: internal/menu/mailreader.go:259
 msgid "Keep original message?"
 msgstr "Oorspronkelijk bericht bewaren?"
 
@@ -1534,7 +1534,7 @@ msgstr ""
 msgid "Land"
 msgstr "Land"
 
-#: internal/menu/tree.go:480
+#: internal/menu/tree.go:482
 msgid "Language"
 msgstr "Taal"
 
@@ -1546,7 +1546,7 @@ msgstr "Taal ingesteld op %s."
 msgid "Language:"
 msgstr "Taal:"
 
-#: internal/menu/mailreader.go:184
+#: internal/menu/mailreader.go:209
 msgid "Last Line to Quote"
 msgstr "Laatste regel om te citeren"
 
@@ -1558,7 +1558,7 @@ msgstr "Laatste Meester van de Planeet: %s"
 msgid "Limited daily supply"
 msgstr "Beperkte dagvoorraad"
 
-#: internal/menu/actions_message.go:221
+#: internal/menu/actions_message.go:234
 msgid "List"
 msgstr "Lijst"
 
@@ -1589,6 +1589,14 @@ msgstr "Macro Ctrl-%c opgeslagen."
 #: internal/menu/actions.go:294
 msgid "Macro Editor"
 msgstr "Macro-editor"
+
+#: internal/menu/turnrecap.go:115
+msgid "Mailbox full, deleted %d messages, the oldest from %s."
+msgstr "Postbus vol, %d berichten gewist, het oudste van %s."
+
+#: internal/menu/turnrecap.go:113
+msgid "Mailbox full, deleting message from %s."
+msgstr "Postbus vol, bericht van %s wordt gewist."
 
 #: internal/menu/turnstages.go:89
 msgid "Maintenance:"
@@ -1622,11 +1630,11 @@ msgstr "Max. terreuroperaties per dag (0 = onbeperkt)"
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr "Maximaal zinvolle uitgave dit jaar: %s goud."
 
-#: internal/menu/mailreader.go:280
+#: internal/menu/mailreader.go:305
 msgid "Message From: "
 msgstr "Bericht van: "
 
-#: internal/menu/mailreader.go:282
+#: internal/menu/mailreader.go:308
 msgid "Message To  : "
 msgstr "Bericht aan: "
 
@@ -1650,7 +1658,7 @@ msgstr "Het moreel van het leger steeg %d punten."
 msgid "Missile operations are not part of this game."
 msgstr "Raketoperaties horen niet bij dit spel."
 
-#: internal/menu/tree.go:511
+#: internal/menu/tree.go:513
 msgid "Modify Diplomacy"
 msgstr "Diplomatie wijzigen"
 
@@ -1991,7 +1999,7 @@ msgstr "Planeetcoördinator"
 msgid "Planet Name"
 msgstr "Planeetnaam"
 
-#: internal/menu/actions_message.go:29
+#: internal/menu/actions_message.go:42
 msgid "Planetary Bulletin:"
 msgstr "Planetair bulletin:"
 
@@ -2007,11 +2015,11 @@ msgstr "Planetaire belasting (%)"
 msgid "Planetary Treaties"
 msgstr "Planetaire verdragen"
 
-#: internal/menu/tree.go:756
+#: internal/menu/tree.go:758
 msgid "Planetary time: %s   New day in %s"
 msgstr "Planeettijd: %s   Nieuwe dag over %s"
 
-#: internal/menu/tree.go:595
+#: internal/menu/tree.go:597
 msgid "Play"
 msgstr "Spelen"
 
@@ -2070,7 +2078,7 @@ msgstr "Prijs"
 msgid "Proposed a %s to %s."
 msgstr "%s voorgesteld aan %s."
 
-#: internal/menu/mailreader.go:72
+#: internal/menu/mailreader.go:90
 msgid "Public Reply?"
 msgstr "Openbaar antwoorden?"
 
@@ -2090,7 +2098,7 @@ msgstr "Stoppen"
 msgid "Quit?"
 msgstr "Stoppen?"
 
-#: internal/menu/mailreader.go:171
+#: internal/menu/mailreader.go:196
 msgid "Quote Message?"
 msgstr "Bericht citeren?"
 
@@ -2142,7 +2150,7 @@ msgstr "Een rijk verwijderen na hoeveel dagen zonder spelen (0 = nooit)"
 msgid "Repay some now?"
 msgstr "Nu iets aflossen?"
 
-#: internal/menu/mailreader.go:213
+#: internal/menu/mailreader.go:238
 msgid "Reply,"
 msgstr "Antwoorden,"
 
@@ -2154,7 +2162,7 @@ msgstr "Verzoek - waren die u terug wilt:"
 msgid "Returns expected to be approximately %s gold."
 msgstr "De opbrengst wordt ongeveer %s goud."
 
-#: internal/menu/turnrecap.go:481
+#: internal/menu/turnrecap.go:493
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Er zijn rellen uitgebroken door de hoge belastingen!"
 
@@ -2190,7 +2198,7 @@ msgstr ""
 msgid "Sabotage HQ"
 msgstr "HQ saboteren"
 
-#: internal/menu/actions_message.go:490
+#: internal/menu/actions_message.go:503
 msgid "Save"
 msgstr "Opslaan"
 
@@ -2214,7 +2222,7 @@ msgstr "Scorebord"
 msgid "See Scores"
 msgstr "Scores bekijken"
 
-#: internal/menu/tree.go:596
+#: internal/menu/tree.go:598
 msgid "See Status"
 msgstr "Status bekijken"
 
@@ -2226,7 +2234,7 @@ msgstr "Planeten kiezen"
 msgid "Sell"
 msgstr "Verkopen"
 
-#: internal/menu/tree.go:530
+#: internal/menu/tree.go:532
 msgid "Sell Food"
 msgstr "Voedsel verkopen"
 
@@ -2302,11 +2310,11 @@ msgstr "Verzenden kost %s goud per dag en vergt één vliegdekschip."
 msgid "Set %s price"
 msgstr "Prijs van %s instellen"
 
-#: internal/menu/tree.go:567
+#: internal/menu/tree.go:569
 msgid "Set Industries"
 msgstr "Industrieën instellen"
 
-#: internal/menu/tree.go:562
+#: internal/menu/tree.go:564
 msgid "Set Tax Rate"
 msgstr "Belastingtarief instellen"
 
@@ -2322,7 +2330,7 @@ msgstr "Zet de instelknop van de S3-Sabre (0-10)"
 msgid "Set-aside packets"
 msgstr "Apart gezette pakketten"
 
-#: internal/menu/tree.go:568
+#: internal/menu/tree.go:570
 msgid "Show Instructions"
 msgstr "Instructies tonen"
 
@@ -2330,7 +2338,7 @@ msgstr "Instructies tonen"
 msgid "Show times in:"
 msgstr "Tijden tonen in:"
 
-#: internal/menu/turnrecap.go:113
+#: internal/menu/turnrecap.go:125
 msgid "Since your last play, this has happened:"
 msgstr "Sinds uw vorige beurt is dit gebeurd:"
 
@@ -2362,7 +2370,7 @@ msgstr "Speciale operaties"
 msgid "Specialization"
 msgstr "Specialisatie"
 
-#: internal/menu/tree.go:569
+#: internal/menu/tree.go:571
 msgid "Specialize Industry"
 msgstr "Industrie specialiseren"
 
@@ -2605,7 +2613,7 @@ msgstr "De vijand verloor: %s."
 msgid "The food market is out of food for today."
 msgstr "De voedselmarkt is door haar voorraad heen voor vandaag."
 
-#: internal/menu/tree.go:723
+#: internal/menu/tree.go:725
 msgid "The game begins %s."
 msgstr "Het spel begint %s."
 
@@ -2672,7 +2680,7 @@ msgstr "Voor beleggingen geldt een minimum van %d dagen."
 msgid "There is no one left to offer that to."
 msgstr "Er is niemand meer om dat aan te bieden."
 
-#: internal/menu/actions_message.go:209
+#: internal/menu/actions_message.go:222
 msgid "There is no one to reach."
 msgstr "Er is niemand te bereiken."
 
@@ -2728,7 +2736,7 @@ msgstr "Dit kost u %s goud.  Akkoord?"
 msgid "Threat"
 msgstr "Dreiging"
 
-#: internal/menu/tree.go:487
+#: internal/menu/tree.go:489
 msgid "Time Zone"
 msgstr "Tijdzone"
 
@@ -2883,7 +2891,7 @@ msgstr "Investeringen ondermijnen"
 msgid "Unlimited"
 msgstr "Onbeperkt"
 
-#: internal/menu/tree.go:689
+#: internal/menu/tree.go:691
 msgid "Unlimited supply today."
 msgstr "Vandaag onbeperkte voorraad."
 
@@ -2895,7 +2903,7 @@ msgstr "Onleesbaar journaal"
 msgid "Urban"
 msgstr "Stad"
 
-#: internal/menu/tree.go:471
+#: internal/menu/tree.go:473
 msgid "Use Enter To Exit BUY Menu"
 msgstr "Enter om koopmenu te verlaten"
 
@@ -2919,7 +2927,7 @@ msgstr "Overwinning! U veroverde %d regio's."
 msgid "View Bank Rates"
 msgstr "Banktarieven bekijken"
 
-#: internal/menu/tree.go:513
+#: internal/menu/tree.go:515
 msgid "View Diplomacy"
 msgstr "Diplomatie bekijken"
 
@@ -2927,11 +2935,15 @@ msgstr "Diplomatie bekijken"
 msgid "View IPScores"
 msgstr "IP-scores bekijken"
 
+#: internal/menu/tree.go:459
+msgid "View Sent Messages"
+msgstr "Verzonden berichten bekijken"
+
 #: internal/menu/tree.go:449
 msgid "View Treaties"
 msgstr "Verdragen bekijken"
 
-#: internal/menu/tree.go:532
+#: internal/menu/tree.go:534
 msgid "Visit Advisors"
 msgstr "Adviseurs raadplegen"
 
@@ -2939,15 +2951,15 @@ msgstr "Adviseurs raadplegen"
 msgid "Visit Bank"
 msgstr "Bank bezoeken"
 
-#: internal/menu/tree.go:468
+#: internal/menu/tree.go:470
 msgid "Visit Covert Menu"
 msgstr "Geheim menu tonen"
 
-#: internal/menu/tree.go:470
+#: internal/menu/tree.go:472
 msgid "Visit Message Menu"
 msgstr "Berichtenmenu tonen"
 
-#: internal/menu/tree.go:469
+#: internal/menu/tree.go:471
 msgid "Visit Trading Menu"
 msgstr "Handelsmenu tonen"
 
@@ -3128,7 +3140,7 @@ msgstr "Wilt u zich bedenken?"
 msgid "Write"
 msgstr "Schrijven"
 
-#: internal/menu/tree.go:566
+#: internal/menu/tree.go:568
 msgid "Write Macros"
 msgstr "Macro's schrijven"
 
@@ -3231,7 +3243,7 @@ msgstr "Zoveel bent u niet schuldig."
 msgid "You give:    %s"
 msgstr "U geeft:     %s"
 
-#: internal/menu/actions_message.go:417
+#: internal/menu/actions_message.go:430
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr "U hebt %d regels voor uw bericht.  /S=opslaan /A=afbreken /C=wissen"
 
@@ -3240,19 +3252,19 @@ msgid "You have %s Troopers, %s usable Jets, %s Tanks, and %s Bombers."
 msgstr ""
 "U hebt %s soldaten, %s bruikbare straaljagers, %s tanks en %s bommenwerpers."
 
-#: internal/menu/tree.go:678
+#: internal/menu/tree.go:680
 msgid "You have %s gold and %d agents."
 msgstr "U hebt %s goud en %d agenten."
 
-#: internal/menu/tree.go:664
+#: internal/menu/tree.go:666
 msgid "You have %s gold and %d turns."
 msgstr "U heeft %s goud en %d beurten."
 
-#: internal/menu/tree.go:700
+#: internal/menu/tree.go:702
 msgid "You have %s gold and %s units of food."
 msgstr "U heeft %s goud en %s eenheden voedsel."
 
-#: internal/menu/tree.go:662
+#: internal/menu/tree.go:664
 msgid "You have %s gold and 1 turn."
 msgstr "U heeft %s goud en 1 beurt."
 
@@ -3260,7 +3272,7 @@ msgstr "U heeft %s goud en 1 beurt."
 msgid "You have %s gold in hand and %s gold in the bank."
 msgstr "U hebt %s goud bij de hand en %s goud op de bank."
 
-#: internal/menu/tree.go:673
+#: internal/menu/tree.go:675
 msgid "You have %s gold."
 msgstr "U hebt %s goud."
 
@@ -3312,9 +3324,13 @@ msgstr "U hebt geen lopende biedingen."
 msgid "You have no defense allies."
 msgstr "U heeft geen verdedigingsbondgenoten."
 
-#: internal/menu/actions_message.go:38
+#: internal/menu/actions_message.go:51
 msgid "You have no messages."
 msgstr "U hebt geen berichten."
+
+#: internal/menu/actions_message.go:18
+msgid "You have no sent messages."
+msgstr "U hebt geen verzonden berichten."
 
 #: internal/game/economy.go:17
 msgid "You have reached your region purchase limit for this turn."
@@ -3329,7 +3345,7 @@ msgstr ""
 msgid "You have started work on your HeadQuarters."
 msgstr "U bent begonnen met de bouw van uw hoofdkwartier."
 
-#: internal/menu/actions_message.go:556
+#: internal/menu/actions_message.go:569
 msgid "You have used all %d lines."
 msgstr "U hebt alle %d regels gebruikt."
 
@@ -3450,7 +3466,7 @@ msgstr "Uw keuze?"
 msgid "Your HeadQuarters is already under construction or built."
 msgstr "Uw hoofdkwartier is al in aanbouw of af."
 
-#: internal/menu/turnrecap.go:267
+#: internal/menu/turnrecap.go:279
 msgid "Your Industrial Zones built:"
 msgstr "Uw industriegebieden bouwden:"
 
@@ -3498,7 +3514,7 @@ msgstr "Uw verliezen: %s."
 msgid "Your choice?"
 msgstr "Uw keuze?"
 
-#: internal/menu/turnrecap.go:475
+#: internal/menu/turnrecap.go:487
 msgid "Your dominion gained %s%s%s people."
 msgstr "Uw rijk kreeg er %s%s%s inwoners bij."
 
@@ -3506,7 +3522,7 @@ msgstr "Uw rijk kreeg er %s%s%s inwoners bij."
 msgid "Your dominion is still under protection."
 msgstr "Uw rijk staat nog onder bescherming."
 
-#: internal/menu/turnrecap.go:477
+#: internal/menu/turnrecap.go:489
 msgid "Your dominion lost %s%s%s people."
 msgstr "Uw rijk verloor %s%s%s inwoners."
 
@@ -3977,7 +3993,7 @@ msgstr "deze planeet"
 msgid "took %d"
 msgstr "nam %d"
 
-#: internal/menu/turnrecap.go:486
+#: internal/menu/turnrecap.go:498
 msgid "troops deserted due to low morale."
 msgstr "soldaten deserteerden door het lage moreel."
 
@@ -3985,7 +4001,7 @@ msgstr "soldaten deserteerden door het lage moreel."
 msgid "units of Food consumed."
 msgstr "eenheden voedsel verbruikt."
 
-#: internal/menu/turnrecap.go:479
+#: internal/menu/turnrecap.go:491
 msgid "units of food spoiled."
 msgstr "eenheden voedsel bedorven."
 

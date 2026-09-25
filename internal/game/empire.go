@@ -195,6 +195,10 @@ type Empire struct {
 	LastActive int64 `json:"lastActive,omitempty"`
 	Events     []Event
 	Mail       []Message
+	// MailLost counts what a full inbox has deleted since the recap last showed
+	// it. A tally rather than one recap event per message, so a flood of mail at
+	// an absent player costs these few fields and not an event list without end.
+	MailLost   *MailLoss   `json:",omitempty"`
 	PirateHits []PirateHit // raids suffered since last play; shown in the income report
 	// RaidersThisTurn is the pirate-faction slots (PirateHit.Slot) that raided
 	// since last play. Set alongside PirateHits at the same recap that drains

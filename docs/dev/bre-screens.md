@@ -2633,6 +2633,11 @@ shown, so the next turn's stop still has them.
 keys drawn like the reader's own. BRE has no such question. Enter keeps the
 message, and a kept message counts as passed over, like `[I]gnore`.
 
+**Deliberate divergence: the player's own sent mail can be read back.** BRE
+keeps nothing a player sends. IB keeps a copy of each message and shows it from
+the Messages menu's View Sent Messages item, in the same box: `Message From:` is
+the player, `Message To  :` the address (see `docs/mechanics-reference.md`).
+
 `Message To` is a run of letters, not a name — the reader loops `A`..`Y` over the
 message's own recipient table and prints every letter that is in it, so a message
 sent to several realms shows them all, in letter order, and every copy carries

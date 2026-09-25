@@ -3985,8 +3985,15 @@ gate — IB had both and dropped them. Two deliberate differences remain:
   treats Enter as the default, which here would skip an unread message for a
   player holding Enter through the pre-turn stops. Only R/D/I/Q act.
 - **An inbox holds at most `MailboxMax` (50) messages**, local and
-  interplanetary together; the oldest goes when a newer one arrives. IB's own
-  bound, so a mail-bomb cannot grow the world file.
+  interplanetary together, the owner's sent copies included. When a new one
+  arrives in a full inbox, the oldest sent copy goes first, and only when there
+  is none the oldest message received. The losses are tallied and reported as
+  ONE recap line, `Mailbox full, deleting message from <date>.` or `Mailbox
+  full, deleted N messages, the oldest from <date>.`, with the date on the
+  reader's clock: a line per message would let a flood of mail at an absent
+  player grow the world file after all. A copy sent into an inbox full of mail
+  received is simply not kept, with no notice. IB's own bound, so a mail-bomb
+  cannot grow the world file.
 
 Box geometry, measured from a live capture: a 76-column top rule carrying the
 date and time, and a short 41-column rule under the From/To headers (it does not
@@ -4023,6 +4030,18 @@ two-way `Public Reply?` only for interplanetary mail.
 **After a reply is sent, IB asks `[D] Delete or [K] Keep original message?`**
 about the message answered; Enter keeps it. BRE asks nothing. A reply abandoned
 in the editor asks nothing either, and the message stays.
+
+**The sender keeps a copy of everything they send (IB's own; BRE keeps
+nothing).** Send Message, a reply, and every interplanetary message file one
+copy, read from the Messages menu's **View Sent Messages** (`V`) and nowhere
+else: Read Messages, the stop on choosing Play Game and the stop at a later turn
+show received mail only. Copies share the inbox's 50-message limit, and a full
+inbox gives them up before any mail received (above). `Message To  :` shows the letters of a local address, or the names of an
+interplanetary one: the planets, `CO @ <planet>` for a Coordinator, or
+`<realms> @ <planet>`. Replying to a local copy asks who to send it to, as Send
+Message does; replying to an interplanetary copy does nothing. A planet-wide
+message to the sender's own planet reaches them as received mail as well. Copies
+stay on the board and are never sent in a packet.
 
 ### The game clock, and days nobody played
 

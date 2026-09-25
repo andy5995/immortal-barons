@@ -195,9 +195,10 @@ func (w *World) rewriteRealmName(old, name string) {
 			swap(&e.TradeDeals[i].From)
 		}
 		for i := range e.Mail {
-			// Local mail only: a message from another planet names a realm there,
-			// which may well be spelled the same as one here.
-			if e.Mail[i].FromBoard == "" {
+			// Local mail and the realm's own copies of what it sent: a message
+			// from another planet names a realm there, which may well be spelled
+			// the same as one here.
+			if e.Mail[i].FromBoard == "" || e.Mail[i].Sent {
 				swap(&e.Mail[i].From)
 			}
 		}

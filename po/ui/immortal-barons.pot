@@ -173,7 +173,7 @@ msgstr ""
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr ""
 
-#: internal/menu/turnrecap.go:422
+#: internal/menu/turnrecap.go:434
 msgid "%s have captured %s %s"
 msgstr ""
 
@@ -205,7 +205,7 @@ msgstr ""
 msgid "%s offers you a trade deal."
 msgstr ""
 
-#: internal/menu/mailreader.go:277
+#: internal/menu/mailreader.go:302
 msgid "%s on %s"
 msgstr ""
 
@@ -225,7 +225,7 @@ msgstr ""
 msgid "%s turns"
 msgstr ""
 
-#: internal/menu/tree.go:691
+#: internal/menu/tree.go:693
 msgid "%s units of food available today."
 msgstr ""
 
@@ -241,7 +241,7 @@ msgstr ""
 msgid "%s's allies send %s troopers and %s tanks to aid the defense."
 msgstr ""
 
-#: internal/menu/turnrecap.go:118
+#: internal/menu/turnrecap.go:130
 msgid "(%d times)"
 msgstr ""
 
@@ -269,7 +269,7 @@ msgstr ""
 msgid "-* Drop Regions *-"
 msgstr ""
 
-#: internal/menu/actions_message.go:455
+#: internal/menu/actions_message.go:468
 msgid "/-Command?"
 msgstr ""
 
@@ -301,15 +301,15 @@ msgstr ""
 msgid "<game name>: <view name>"
 msgstr ""
 
-#: internal/menu/actions_message.go:184
+#: internal/menu/actions_message.go:197
 msgid "=All"
 msgstr ""
 
-#: internal/menu/actions_message.go:189
+#: internal/menu/actions_message.go:202
 msgid "=All Allies"
 msgstr ""
 
-#: internal/menu/actions_message.go:193
+#: internal/menu/actions_message.go:206
 msgid "=List"
 msgstr ""
 
@@ -373,7 +373,7 @@ msgstr ""
 msgid "ALL"
 msgstr ""
 
-#: internal/menu/tree.go:541
+#: internal/menu/tree.go:543
 msgid "Abdicate"
 msgstr ""
 
@@ -381,7 +381,7 @@ msgstr ""
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr ""
 
-#: internal/menu/actions_message.go:487
+#: internal/menu/actions_message.go:500
 msgid "Abort"
 msgstr ""
 
@@ -533,11 +533,11 @@ msgstr ""
 msgid "Attacking %s..."
 msgstr ""
 
-#: internal/menu/tree.go:474
+#: internal/menu/tree.go:476
 msgid "Auto-Feed Empire"
 msgstr ""
 
-#: internal/menu/tree.go:473
+#: internal/menu/tree.go:475
 msgid "Auto-Pay Maintenance"
 msgstr ""
 
@@ -645,7 +645,7 @@ msgstr ""
 msgid "Buy"
 msgstr ""
 
-#: internal/menu/tree.go:528
+#: internal/menu/tree.go:530
 msgid "Buy Food"
 msgstr ""
 
@@ -673,7 +673,7 @@ msgstr ""
 msgid "CRUSHED"
 msgstr ""
 
-#: internal/menu/tree.go:516
+#: internal/menu/tree.go:518
 msgid "Call Off Attack Party"
 msgstr ""
 
@@ -713,7 +713,7 @@ msgstr ""
 msgid "Change Production?"
 msgstr ""
 
-#: internal/menu/tree.go:489
+#: internal/menu/tree.go:491
 msgid "Change Realm Name"
 msgstr ""
 
@@ -757,27 +757,27 @@ msgstr ""
 msgid "Chopper's Fair Market"
 msgstr ""
 
-#: internal/menu/turnrecap.go:518
+#: internal/menu/turnrecap.go:530
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:514
+#: internal/menu/turnrecap.go:526
 msgid "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:516
+#: internal/menu/turnrecap.go:528
 msgid "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:520
+#: internal/menu/turnrecap.go:532
 msgid "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:522
+#: internal/menu/turnrecap.go:534
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr ""
 
-#: internal/menu/actions_message.go:493
+#: internal/menu/actions_message.go:506
 msgid "Clear"
 msgstr ""
 
@@ -817,11 +817,11 @@ msgstr ""
 msgid "Coordinator"
 msgstr ""
 
-#: internal/menu/tree.go:587
+#: internal/menu/tree.go:589
 msgid "Coordinator Menu"
 msgstr ""
 
-#: internal/menu/tree.go:585
+#: internal/menu/tree.go:587
 msgid "Coordinator Vote"
 msgstr ""
 
@@ -901,15 +901,15 @@ msgstr ""
 msgid "Defense"
 msgstr ""
 
-#: internal/menu/mailreader.go:214
+#: internal/menu/mailreader.go:239
 msgid "Delete"
 msgstr ""
 
-#: internal/menu/mailreader.go:233
+#: internal/menu/mailreader.go:258
 msgid "Delete or"
 msgstr ""
 
-#: internal/menu/mailreader.go:214
+#: internal/menu/mailreader.go:239
 msgid "Delete,"
 msgstr ""
 
@@ -925,7 +925,7 @@ msgstr ""
 msgid "Deposit Funds"
 msgstr ""
 
-#: internal/menu/tree.go:472
+#: internal/menu/tree.go:474
 msgid "Deposit gold at End of Turn"
 msgstr ""
 
@@ -973,7 +973,7 @@ msgstr ""
 msgid "Directives from CO"
 msgstr ""
 
-#: internal/menu/tree.go:509
+#: internal/menu/tree.go:511
 msgid "Dismantle Gooie"
 msgstr ""
 
@@ -985,7 +985,7 @@ msgstr ""
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr ""
 
-#: internal/menu/actions_message.go:618
+#: internal/menu/actions_message.go:633
 msgid "Do you wish to send another message?"
 msgstr ""
 
@@ -1037,15 +1037,15 @@ msgstr ""
 msgid "Empire Name"
 msgstr ""
 
-#: internal/menu/tree.go:554
+#: internal/menu/tree.go:556
 msgid "Empire Status"
 msgstr ""
 
-#: internal/menu/tree.go:542
+#: internal/menu/tree.go:544
 msgid "End Protection"
 msgstr ""
 
-#: internal/menu/turnrecap.go:465
+#: internal/menu/turnrecap.go:477
 msgid "End of Turn Statistics:"
 msgstr ""
 
@@ -1069,7 +1069,7 @@ msgstr ""
 msgid "Entire Planet"
 msgstr ""
 
-#: internal/menu/tree.go:593
+#: internal/menu/tree.go:595
 msgid "Entry"
 msgstr ""
 
@@ -1097,7 +1097,7 @@ msgstr ""
 msgid "FTN spool"
 msgstr ""
 
-#: internal/menu/mailreader.go:183
+#: internal/menu/mailreader.go:208
 msgid "First Line to Quote"
 msgstr ""
 
@@ -1105,7 +1105,7 @@ msgstr ""
 msgid "Food"
 msgstr ""
 
-#: internal/menu/tree.go:555
+#: internal/menu/tree.go:557
 msgid "Food Market"
 msgstr ""
 
@@ -1133,7 +1133,7 @@ msgstr ""
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
-#: internal/menu/tree.go:727
+#: internal/menu/tree.go:729
 msgid "Game started on %s"
 msgstr ""
 
@@ -1145,7 +1145,7 @@ msgstr ""
 msgid "Glad you changed your mind!"
 msgstr ""
 
-#: internal/menu/tree.go:512
+#: internal/menu/tree.go:514
 msgid "Global Recon Request"
 msgstr ""
 
@@ -1265,11 +1265,11 @@ msgstr ""
 msgid "Idle warnings before boot"
 msgstr ""
 
-#: internal/menu/mailreader.go:215
+#: internal/menu/mailreader.go:240
 msgid "Ignore"
 msgstr ""
 
-#: internal/menu/mailreader.go:215
+#: internal/menu/mailreader.go:240
 msgid "Ignore, or"
 msgstr ""
 
@@ -1321,7 +1321,7 @@ msgstr ""
 msgid "InterPlanetary Operations"
 msgstr ""
 
-#: internal/menu/tree.go:602
+#: internal/menu/tree.go:604
 msgid "InterPlanetary Ops"
 msgstr ""
 
@@ -1369,7 +1369,7 @@ msgstr ""
 msgid "Join which group?"
 msgstr ""
 
-#: internal/menu/mailreader.go:234
+#: internal/menu/mailreader.go:259
 msgid "Keep"
 msgstr ""
 
@@ -1377,7 +1377,7 @@ msgstr ""
 msgid "Keep current"
 msgstr ""
 
-#: internal/menu/mailreader.go:234
+#: internal/menu/mailreader.go:259
 msgid "Keep original message?"
 msgstr ""
 
@@ -1397,7 +1397,7 @@ msgstr ""
 msgid "Land"
 msgstr ""
 
-#: internal/menu/tree.go:480
+#: internal/menu/tree.go:482
 msgid "Language"
 msgstr ""
 
@@ -1409,7 +1409,7 @@ msgstr ""
 msgid "Language:"
 msgstr ""
 
-#: internal/menu/mailreader.go:184
+#: internal/menu/mailreader.go:209
 msgid "Last Line to Quote"
 msgstr ""
 
@@ -1421,7 +1421,7 @@ msgstr ""
 msgid "Limited daily supply"
 msgstr ""
 
-#: internal/menu/actions_message.go:221
+#: internal/menu/actions_message.go:234
 msgid "List"
 msgstr ""
 
@@ -1451,6 +1451,14 @@ msgstr ""
 
 #: internal/menu/actions.go:294
 msgid "Macro Editor"
+msgstr ""
+
+#: internal/menu/turnrecap.go:115
+msgid "Mailbox full, deleted %d messages, the oldest from %s."
+msgstr ""
+
+#: internal/menu/turnrecap.go:113
+msgid "Mailbox full, deleting message from %s."
 msgstr ""
 
 #: internal/menu/turnstages.go:89
@@ -1485,11 +1493,11 @@ msgstr ""
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr ""
 
-#: internal/menu/mailreader.go:280
+#: internal/menu/mailreader.go:305
 msgid "Message From: "
 msgstr ""
 
-#: internal/menu/mailreader.go:282
+#: internal/menu/mailreader.go:308
 msgid "Message To  : "
 msgstr ""
 
@@ -1513,7 +1521,7 @@ msgstr ""
 msgid "Missile operations are not part of this game."
 msgstr ""
 
-#: internal/menu/tree.go:511
+#: internal/menu/tree.go:513
 msgid "Modify Diplomacy"
 msgstr ""
 
@@ -1813,7 +1821,7 @@ msgstr ""
 msgid "Planet Name"
 msgstr ""
 
-#: internal/menu/actions_message.go:29
+#: internal/menu/actions_message.go:42
 msgid "Planetary Bulletin:"
 msgstr ""
 
@@ -1829,11 +1837,11 @@ msgstr ""
 msgid "Planetary Treaties"
 msgstr ""
 
-#: internal/menu/tree.go:756
+#: internal/menu/tree.go:758
 msgid "Planetary time: %s   New day in %s"
 msgstr ""
 
-#: internal/menu/tree.go:595
+#: internal/menu/tree.go:597
 msgid "Play"
 msgstr ""
 
@@ -1881,7 +1889,7 @@ msgstr ""
 msgid "Proposed a %s to %s."
 msgstr ""
 
-#: internal/menu/mailreader.go:72
+#: internal/menu/mailreader.go:90
 msgid "Public Reply?"
 msgstr ""
 
@@ -1901,7 +1909,7 @@ msgstr ""
 msgid "Quit?"
 msgstr ""
 
-#: internal/menu/mailreader.go:171
+#: internal/menu/mailreader.go:196
 msgid "Quote Message?"
 msgstr ""
 
@@ -1949,7 +1957,7 @@ msgstr ""
 msgid "Repay some now?"
 msgstr ""
 
-#: internal/menu/mailreader.go:213
+#: internal/menu/mailreader.go:238
 msgid "Reply,"
 msgstr ""
 
@@ -1961,7 +1969,7 @@ msgstr ""
 msgid "Returns expected to be approximately %s gold."
 msgstr ""
 
-#: internal/menu/turnrecap.go:481
+#: internal/menu/turnrecap.go:493
 msgid "Riots have broken out due to high tax rates!"
 msgstr ""
 
@@ -1993,7 +2001,7 @@ msgstr ""
 msgid "Sabotage HQ"
 msgstr ""
 
-#: internal/menu/actions_message.go:490
+#: internal/menu/actions_message.go:503
 msgid "Save"
 msgstr ""
 
@@ -2017,7 +2025,7 @@ msgstr ""
 msgid "See Scores"
 msgstr ""
 
-#: internal/menu/tree.go:596
+#: internal/menu/tree.go:598
 msgid "See Status"
 msgstr ""
 
@@ -2029,7 +2037,7 @@ msgstr ""
 msgid "Sell"
 msgstr ""
 
-#: internal/menu/tree.go:530
+#: internal/menu/tree.go:532
 msgid "Sell Food"
 msgstr ""
 
@@ -2105,11 +2113,11 @@ msgstr ""
 msgid "Set %s price"
 msgstr ""
 
-#: internal/menu/tree.go:567
+#: internal/menu/tree.go:569
 msgid "Set Industries"
 msgstr ""
 
-#: internal/menu/tree.go:562
+#: internal/menu/tree.go:564
 msgid "Set Tax Rate"
 msgstr ""
 
@@ -2125,7 +2133,7 @@ msgstr ""
 msgid "Set-aside packets"
 msgstr ""
 
-#: internal/menu/tree.go:568
+#: internal/menu/tree.go:570
 msgid "Show Instructions"
 msgstr ""
 
@@ -2133,7 +2141,7 @@ msgstr ""
 msgid "Show times in:"
 msgstr ""
 
-#: internal/menu/turnrecap.go:113
+#: internal/menu/turnrecap.go:125
 msgid "Since your last play, this has happened:"
 msgstr ""
 
@@ -2165,7 +2173,7 @@ msgstr ""
 msgid "Specialization"
 msgstr ""
 
-#: internal/menu/tree.go:569
+#: internal/menu/tree.go:571
 msgid "Specialize Industry"
 msgstr ""
 
@@ -2389,7 +2397,7 @@ msgstr ""
 msgid "The food market is out of food for today."
 msgstr ""
 
-#: internal/menu/tree.go:723
+#: internal/menu/tree.go:725
 msgid "The game begins %s."
 msgstr ""
 
@@ -2449,7 +2457,7 @@ msgstr ""
 msgid "There is no one left to offer that to."
 msgstr ""
 
-#: internal/menu/actions_message.go:209
+#: internal/menu/actions_message.go:222
 msgid "There is no one to reach."
 msgstr ""
 
@@ -2505,7 +2513,7 @@ msgstr ""
 msgid "Threat"
 msgstr ""
 
-#: internal/menu/tree.go:487
+#: internal/menu/tree.go:489
 msgid "Time Zone"
 msgstr ""
 
@@ -2653,7 +2661,7 @@ msgstr ""
 msgid "Unlimited"
 msgstr ""
 
-#: internal/menu/tree.go:689
+#: internal/menu/tree.go:691
 msgid "Unlimited supply today."
 msgstr ""
 
@@ -2665,7 +2673,7 @@ msgstr ""
 msgid "Urban"
 msgstr ""
 
-#: internal/menu/tree.go:471
+#: internal/menu/tree.go:473
 msgid "Use Enter To Exit BUY Menu"
 msgstr ""
 
@@ -2685,7 +2693,7 @@ msgstr ""
 msgid "View Bank Rates"
 msgstr ""
 
-#: internal/menu/tree.go:513
+#: internal/menu/tree.go:515
 msgid "View Diplomacy"
 msgstr ""
 
@@ -2693,11 +2701,15 @@ msgstr ""
 msgid "View IPScores"
 msgstr ""
 
+#: internal/menu/tree.go:459
+msgid "View Sent Messages"
+msgstr ""
+
 #: internal/menu/tree.go:449
 msgid "View Treaties"
 msgstr ""
 
-#: internal/menu/tree.go:532
+#: internal/menu/tree.go:534
 msgid "Visit Advisors"
 msgstr ""
 
@@ -2705,15 +2717,15 @@ msgstr ""
 msgid "Visit Bank"
 msgstr ""
 
-#: internal/menu/tree.go:468
+#: internal/menu/tree.go:470
 msgid "Visit Covert Menu"
 msgstr ""
 
-#: internal/menu/tree.go:470
+#: internal/menu/tree.go:472
 msgid "Visit Message Menu"
 msgstr ""
 
-#: internal/menu/tree.go:469
+#: internal/menu/tree.go:471
 msgid "Visit Trading Menu"
 msgstr ""
 
@@ -2861,7 +2873,7 @@ msgstr ""
 msgid "Write"
 msgstr ""
 
-#: internal/menu/tree.go:566
+#: internal/menu/tree.go:568
 msgid "Write Macros"
 msgstr ""
 
@@ -2961,7 +2973,7 @@ msgstr ""
 msgid "You give:    %s"
 msgstr ""
 
-#: internal/menu/actions_message.go:417
+#: internal/menu/actions_message.go:430
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
@@ -2969,19 +2981,19 @@ msgstr ""
 msgid "You have %s Troopers, %s usable Jets, %s Tanks, and %s Bombers."
 msgstr ""
 
-#: internal/menu/tree.go:678
+#: internal/menu/tree.go:680
 msgid "You have %s gold and %d agents."
 msgstr ""
 
-#: internal/menu/tree.go:664
+#: internal/menu/tree.go:666
 msgid "You have %s gold and %d turns."
 msgstr ""
 
-#: internal/menu/tree.go:700
+#: internal/menu/tree.go:702
 msgid "You have %s gold and %s units of food."
 msgstr ""
 
-#: internal/menu/tree.go:662
+#: internal/menu/tree.go:664
 msgid "You have %s gold and 1 turn."
 msgstr ""
 
@@ -2989,7 +3001,7 @@ msgstr ""
 msgid "You have %s gold in hand and %s gold in the bank."
 msgstr ""
 
-#: internal/menu/tree.go:673
+#: internal/menu/tree.go:675
 msgid "You have %s gold."
 msgstr ""
 
@@ -3041,8 +3053,12 @@ msgstr ""
 msgid "You have no defense allies."
 msgstr ""
 
-#: internal/menu/actions_message.go:38
+#: internal/menu/actions_message.go:51
 msgid "You have no messages."
+msgstr ""
+
+#: internal/menu/actions_message.go:18
+msgid "You have no sent messages."
 msgstr ""
 
 #: internal/game/economy.go:17
@@ -3057,7 +3073,7 @@ msgstr ""
 msgid "You have started work on your HeadQuarters."
 msgstr ""
 
-#: internal/menu/actions_message.go:556
+#: internal/menu/actions_message.go:569
 msgid "You have used all %d lines."
 msgstr ""
 
@@ -3157,7 +3173,7 @@ msgstr ""
 msgid "Your HeadQuarters is already under construction or built."
 msgstr ""
 
-#: internal/menu/turnrecap.go:267
+#: internal/menu/turnrecap.go:279
 msgid "Your Industrial Zones built:"
 msgstr ""
 
@@ -3201,7 +3217,7 @@ msgstr ""
 msgid "Your choice?"
 msgstr ""
 
-#: internal/menu/turnrecap.go:475
+#: internal/menu/turnrecap.go:487
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
@@ -3209,7 +3225,7 @@ msgstr ""
 msgid "Your dominion is still under protection."
 msgstr ""
 
-#: internal/menu/turnrecap.go:477
+#: internal/menu/turnrecap.go:489
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
@@ -3545,7 +3561,7 @@ msgstr ""
 msgid "took %d"
 msgstr ""
 
-#: internal/menu/turnrecap.go:486
+#: internal/menu/turnrecap.go:498
 msgid "troops deserted due to low morale."
 msgstr ""
 
@@ -3553,7 +3569,7 @@ msgstr ""
 msgid "units of Food consumed."
 msgstr ""
 
-#: internal/menu/turnrecap.go:479
+#: internal/menu/turnrecap.go:491
 msgid "units of food spoiled."
 msgstr ""
 

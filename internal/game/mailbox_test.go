@@ -39,3 +39,62 @@ func TestIPMailboxIsCapped(t *testing.T) {
 		}
 	}
 }
+
+// A full inbox gives up the owner's own sent copies before any mail they
+// received, and files a recap line naming the date of each message it drops.
+func TestFullInboxDropsSentCopiesFirst(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Bravo")
+	KeepSentCopy(a, "", "B", "01/02/2026  03:04:05 UTC", "my own")
+	for i := 0; i < MailboxMax; i++ {
+		w.SendMail(b, a, Message{To: "A", When: fmt.Sprintf("02/%02d/2026  00:00:00 UTC", i%28+1), Body: fmt.Sprint(i)})
+	}
+	if len(a.Mail) != MailboxMax {
+		t.Fatalf("inbox holds %d, want %d", len(a.Mail), MailboxMax)
+	}
+	for _, m := range a.Mail {
+		if m.Sent {
+			t.Fatal("the sent copy should have gone before any received mail")
+		}
+	}
+	if a.Mail[0].Body != "0" {
+		t.Errorf("oldest received = %q, want 0 kept", a.Mail[0].Body)
+	}
+	if l := a.MailLost; l == nil || l.Count != 1 || l.Oldest != "01/02/2026  03:04:05 UTC" {
+		t.Errorf("tally = %+v, want one loss dated as the dropped copy", l)
+	}
+
+	// With no copies left, the oldest received message goes next, and the
+	// tally grows while keeping the oldest date.
+	w.SendMail(b, a, Message{To: "A", When: "03/01/2026  00:00:00 UTC", Body: "late"})
+	if a.Mail[0].Body != "1" || a.MailLost.Count != 2 || a.MailLost.Oldest != "01/02/2026  03:04:05 UTC" {
+		t.Errorf("oldest now %q, tally %+v; want 1 and two losses from the first date", a.Mail[0].Body, a.MailLost)
+	}
+	if len(a.Events) != 0 {
+		t.Errorf("a full inbox filed %d events; the tally replaces them", len(a.Events))
+	}
+}
+
+// An inbox full of mail received keeps no copy of what its owner sends, and
+// says nothing about the copy it never kept.
+func TestFullInboxOfReceivedKeepsNoCopySilently(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Bravo")
+	for i := 0; i < MailboxMax; i++ {
+		w.SendMail(b, a, Message{To: "A", Body: fmt.Sprint(i)})
+	}
+	KeepSentCopy(a, "", "B", "01/02/2026  03:04:05 UTC", "my own")
+	if len(a.Mail) != MailboxMax || a.Mail[0].Body != "0" {
+		t.Errorf("inbox = %d messages from %q, want the %d received untouched", len(a.Mail), a.Mail[0].Body, MailboxMax)
+	}
+	for _, m := range a.Mail {
+		if m.Sent {
+			t.Error("the copy should not have been kept")
+		}
+	}
+	if a.MailLost != nil {
+		t.Errorf("tally = %+v, want none", a.MailLost)
+	}
+}

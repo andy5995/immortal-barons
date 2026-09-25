@@ -11,20 +11,33 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// viewSentMessages reads the player's own copies of what they sent, in the same
+// reader as received mail. IB's own; BRE keeps nothing a player sends.
+func viewSentMessages(s session.Session, w *ctx) Result {
+	if len(unreadMail(w, false, true)) == 0 {
+		ok(s, "You have no sent messages.")
+		return Stay
+	}
+	mailReader(s, w, false, true)
+	return Stay
+}
+
 func readMessages(s session.Session, w *ctx) Result {
 	var hadMail bool
 	var news game.NewsFeed
 	w.Read(func() {
 		news = append(game.NewsFeed(nil), w.NewsToday...)
 		if p := w.Player(); p != nil {
-			hadMail = len(p.Mail) > 0
+			for _, m := range p.Mail {
+				hadMail = hadMail || !m.Sent
+			}
 		}
 	})
 	// Per-message BRE reader (Reply/Delete/Ignore/Quit). The mailbox is no longer
 	// cleared on read: Ignore keeps a message for next time, only Delete removes.
 	// Asking to read messages asks for all of them, so this one does not skip
 	// what the turn-start stop has been told to pass over.
-	mailReader(s, w, false)
+	mailReader(s, w, false, false)
 	if len(news) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
 		for _, b := range news {
@@ -565,51 +578,53 @@ func trimTrailingBlank(lines []string) string {
 	return strings.Join(lines, "\n")
 }
 
+// mailRealms sends text from p to the realms named, as one message addressed to
+// the whole list, and files p's own copy. It runs inside the caller's world
+// transaction: sender and recipients are resolved by name against the freshly
+// reloaded world, so a concurrent send to the same inbox appends (both messages
+// land) and a vanished recipient drops out. p itself is never a recipient.
+func mailRealms(w *ctx, p *game.Empire, names []string, when, text string) error {
+	var recips []*game.Empire
+	for _, name := range names {
+		if e := findRealm(w, name); e != nil && e != p {
+			recips = append(recips, e)
+		}
+	}
+	if len(recips) == 0 {
+		return errTargetGone
+	}
+	// Every copy carries the same "Message To  :" letters, in letter order as
+	// BRE prints them.
+	var letters strings.Builder
+	for _, e := range w.Empires {
+		for _, r := range recips {
+			if r == e {
+				letters.WriteString(w.EmpireLetter(e))
+				break
+			}
+		}
+	}
+	addressed := letters.String()
+	for _, e := range recips {
+		w.World.SendMail(p, e, game.Message{To: addressed, When: when, Body: text})
+	}
+	game.KeepSentCopy(p, "", addressed, when, text)
+	return nil
+}
+
 func sendMessage(s session.Session, w *ctx) Result {
 	for {
 		to := pickRecipients(s, w, pickOpts{prompt: "Send to:", allowAll: true})
 		if len(to) == 0 {
 			return Stay
 		}
-		names := make([]string, 0, len(to))
-		w.Read(func() {
-			for _, e := range to {
-				names = append(names, e.Name)
-			}
-		})
+		names := pickedNames(w, to)
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
 			when := game.StoredStamp(game.Now())
-			// Re-resolve sender and recipients by handle/name against the freshly
-			// reloaded world, so a concurrent send to the same inbox appends (both
-			// messages land) and a vanished recipient drops out.
 			err := w.mutatePlayer(func(p *game.Empire) error {
-				var recips []*game.Empire
-				for _, name := range names {
-					if e := findRealm(w, name); e != nil && e != p {
-						recips = append(recips, e)
-					}
-				}
-				if len(recips) == 0 {
-					return errTargetGone
-				}
-				// One message, addressed to the whole list: every copy carries the
-				// same "Message To  :" letters, in letter order as BRE prints them.
-				var letters strings.Builder
-				for _, e := range w.Empires {
-					for _, r := range recips {
-						if r == e {
-							letters.WriteString(w.EmpireLetter(e))
-							break
-						}
-					}
-				}
-				addressed := letters.String()
-				for _, e := range recips {
-					w.World.SendMail(p, e, game.Message{To: addressed, When: when, Body: text})
-				}
-				return nil
+				return mailRealms(w, p, names, when, text)
 			})
 			if err != nil {
 				fail(s, err)

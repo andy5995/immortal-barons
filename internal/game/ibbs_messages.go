@@ -48,6 +48,27 @@ type IPMessage struct {
 // empty board list sends nothing.
 func (w *World) SendIPMessage(from *Empire, boards []string, toCoordinator bool, body string) {
 	w.sendIP(from, boards, IPMessage{ToCoordinator: toCoordinator, Body: body})
+	to := strings.Join(boards, ", ")
+	if toCoordinator {
+		to = ipAddress([]string{"CO"}, boards...)
+	}
+	w.keepIPCopy(from, boards, to, body)
+}
+
+// ipAddress renders an interplanetary address for a sender's copy: the names,
+// then "@" and the planets. Names and planets only, so nothing in it needs
+// translating.
+func ipAddress(names []string, boards ...string) string {
+	return strings.Join(names, ", ") + " @ " + strings.Join(boards, ", ")
+}
+
+// keepIPCopy files the sender's copy of an interplanetary message, once however
+// many boards or realms it went to, and only when sendIP actually sent it.
+func (w *World) keepIPCopy(from *Empire, boards []string, to, body string) {
+	if from == nil || body == "" || len(boards) == 0 {
+		return
+	}
+	KeepSentCopy(from, w.Config.BoardID, to, StoredStamp(timeNow()), body)
 }
 
 // SendIPMessageToBarons queues body for named realms on one board, one message
@@ -66,6 +87,9 @@ func (w *World) SendIPMessageToBarons(from *Empire, board string, toEmpires []st
 	}
 	for _, name := range addressed {
 		w.sendIP(from, []string{board}, IPMessage{ToEmpire: name, ToEmpires: addressed, Body: body})
+	}
+	if len(addressed) > 0 {
+		w.keepIPCopy(from, []string{board}, ipAddress(addressed, board), body)
 	}
 }
 
@@ -223,8 +247,11 @@ func (w *World) bounceIPMessage(m IPMessage, reason string) {
 // which is the choice BRE's "Public Reply?" offers.
 func (w *World) ReplyIPMessage(from *Empire, board, author, body string, public bool) {
 	m := IPMessage{Body: body}
+	to := board
 	if !public {
 		m.ToEmpire = author
+		to = ipAddress([]string{author}, board)
 	}
 	w.sendIP(from, []string{board}, m)
+	w.keepIPCopy(from, []string{board}, to, body)
 }

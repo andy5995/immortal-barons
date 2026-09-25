@@ -127,6 +127,45 @@ func TestIPReplyToAuthorReachesOnlyThem(t *testing.T) {
 	}
 }
 
+// received is e's inbox less the copies of what e sent.
+func received(e *Empire) []Message {
+	var out []Message
+	for _, m := range e.Mail {
+		if !m.Sent {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+// The sender keeps one copy of an interplanetary message however many planets
+// or realms it went to, marked as sent from home and addressed by name.
+func TestIPMessageKeepsOneSenderCopy(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	w := ipWorld("Nova Hub")
+	from := w.Empires[0]
+	cases := []struct {
+		send func()
+		to   string
+	}{
+		{func() { w.SendIPMessage(from, []string{"The Eclipse", "Mars"}, false, "one") }, "The Eclipse, Mars"},
+		{func() { w.SendIPMessage(from, []string{"Mars"}, true, "two") }, "CO @ Mars"},
+		{func() { w.SendIPMessageToBarons(from, "Mars", []string{"Red", "Dust"}, "three") }, "Red, Dust @ Mars"},
+		{func() { w.ReplyIPMessage(from, "Mars", "Red", "four", false) }, "Red @ Mars"},
+		{func() { w.ReplyIPMessage(from, "Mars", "Red", "five", true) }, "Mars"},
+	}
+	for i, c := range cases {
+		c.send()
+		if len(from.Mail) != i+1 {
+			t.Fatalf("case %d: sender has %d messages, want %d", i, len(from.Mail), i+1)
+		}
+		m := from.Mail[i]
+		if !m.Sent || m.From != from.Name || m.FromBoard != "Nova Hub" || m.To != c.to {
+			t.Errorf("case %d: copy = %+v, want sent from Nova Hub to %q", i, m, c.to)
+		}
+	}
+}
+
 // TestIPMessageToOwnPlanetIsDeliveredLocally guards the one address that has no
 // packet to ride: BRE's planet list includes the board you are calling from, and
 // a message queued for it would leave on a transport with nowhere to take it.
@@ -138,9 +177,14 @@ func TestIPMessageToOwnPlanetIsDeliveredLocally(t *testing.T) {
 		t.Errorf("a message home was queued for the transport: %+v", w.Outbox)
 	}
 	for _, e := range w.Empires {
-		if len(e.Mail) != 1 {
-			t.Errorf("%s has %d messages, want 1", e.Name, len(e.Mail))
+		if len(received(e)) != 1 {
+			t.Errorf("%s received %d messages, want 1", e.Name, len(received(e)))
 		}
+	}
+	// The sender is on the planet too, so they receive it; their copy of what
+	// they sent is kept apart from that, as for any message.
+	if n := len(w.Empires[0].Mail); n != 2 {
+		t.Errorf("sender has %d messages, want the one received and the copy", n)
 	}
 }
 
@@ -322,10 +366,10 @@ func TestIPMessageToUnknownRealmBouncesBack(t *testing.T) {
 
 	here.ApplyPacket(there.Outbox[0])
 	sender := here.Empires[0]
-	if len(sender.Mail) != 1 {
-		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(sender.Mail))
+	if len(received(sender)) != 1 {
+		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(received(sender)))
 	}
-	got := sender.Mail[0]
+	got := received(sender)[0]
 	if got.From != "" || got.FromBoard != "The Eclipse" {
 		t.Errorf("bounce mail From=%q FromBoard=%q, want empty From and the target board", got.From, got.FromBoard)
 	}
@@ -357,11 +401,11 @@ func TestIPMessageToUnelectedCoordinatorBouncesBack(t *testing.T) {
 
 	here.ApplyPacket(there.Outbox[0])
 	sender := here.Empires[0]
-	if len(sender.Mail) != 1 {
-		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(sender.Mail))
+	if len(received(sender)) != 1 {
+		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(received(sender)))
 	}
-	if !strings.Contains(sender.Mail[0].Body, "No Coordinator has been elected") {
-		t.Errorf("bounce body should say why: %q", sender.Mail[0].Body)
+	if !strings.Contains(received(sender)[0].Body, "No Coordinator has been elected") {
+		t.Errorf("bounce body should say why: %q", received(sender)[0].Body)
 	}
 }
 
@@ -403,10 +447,10 @@ func TestIPMessageToOwnUnknownRealmBouncesBackLocally(t *testing.T) {
 	here.SendIPMessageToBarons(here.Empires[0], "Nova Hub", []string{"Ghost Realm"}, "hello?")
 
 	sender := here.Empires[0]
-	if len(sender.Mail) != 1 {
-		t.Fatalf("a message to your own unreachable planet should bounce back at once; Mail len = %d, want 1", len(sender.Mail))
+	if len(received(sender)) != 1 {
+		t.Fatalf("a message to your own unreachable planet should bounce back at once; Mail len = %d, want 1", len(received(sender)))
 	}
-	if !strings.Contains(sender.Mail[0].Body, "Ghost Realm") {
-		t.Errorf("bounce body should name the realm: %q", sender.Mail[0].Body)
+	if !strings.Contains(received(sender)[0].Body, "Ghost Realm") {
+		t.Errorf("bounce body should name the realm: %q", received(sender)[0].Body)
 	}
 }

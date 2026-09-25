@@ -455,6 +455,8 @@ func BuildMenus() *Menus {
 	messages.Items = []Item{
 		{Key: 'R', Label: "Read Messages", Do: readMessages},
 		{Key: 'S', Label: "Send Message", Do: sendMessage},
+		// IB's own: the player's copies of what they sent.
+		{Key: 'V', Label: "View Sent Messages", Do: viewSentMessages},
 		// IB's own: the BBS Coordinator's standing notice to the planet.
 		{Key: 'D', Label: "Directives from CO", Do: directivesMenu, Hidden: ibbsHidden},
 		{Key: '0', Label: "Quit", Do: back},
