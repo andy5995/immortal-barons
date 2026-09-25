@@ -2605,12 +2605,22 @@ Colors: frame cyan `36`; timestamp bright-white `1;37`; the `Message From:` /
 bright-green `1;32`; body white, quoted lines bright-blue `1;34`; the action keys
 bright-cyan `1;36` inside blue `34` brackets.
 
-**Deliberate divergence: what [I]gnore means for the rest of the session.** In
-the original an ignored message comes back at the head of every turn, so a
-barons playing out a day's ten turns reads it ten times. IB keeps the message —
-only Delete removes it — but the turn-start stop passes over anything ignored
-earlier in the same session. It is back on the next visit to the game, and Read
-Messages never skips it.
+**When the reader runs.** BRE reads mail once per Play Game, not once per turn:
+`run_player_turn` calls `read_local_messages` at `BRE.EXE 0x3869`, before the
+turn loop whose head is `0x38D7`, and nothing in the loop calls it again (the
+loop's `0x43a` call at `0x3E4A` is Send Message). The routine takes no argument
+and is also key 6 of the main menu (`0x24DE`), so the Play Game stop and Read
+Messages show the same thing: every message still in the file, an ignored one
+included. `cap/kd3-01.cap` agrees — each `Play Game` shows the recap and the
+reader once, and a day's turns follow with no further mail prompt. IB matches
+this at the Play Game stop.
+
+**IB addition: a mail stop at the head of each later turn.** It exists so mail
+from another node is seen mid-session (#3), and it passes over anything the
+player ignored earlier in the same session, so a baron playing out a day's ten
+turns is not shown the same box ten times. Read Messages and the next Play Game
+never skip it. (This note used to say BRE re-shows an ignored message at every
+turn; the disassembly above says it does not.)
 
 What counts as passing a message over, all deliberate: `[I]gnore`, an
 unrecognized key at the prompt, and a `[R]eply` abandoned in the editor — that

@@ -243,9 +243,10 @@ func TestQuoteLinesNamesThePlanet(t *testing.T) {
 	}
 }
 
-// Ignore means "not now", not "ask me again next turn". The turn-start mail stop
-// passes over what this session has ignored; Read Messages still shows it, and a
-// new session starts with an empty ignore set.
+// Ignore means "not now", not "ask me again next turn". The mail stop at the head
+// of a later turn passes over what this session has ignored; Read Messages and
+// choosing Play Game again still show it, and a new session starts with an empty
+// ignore set.
 func TestIgnoredMailIsNotRepeatedEveryTurn(t *testing.T) {
 	w := newWorld()
 	m := game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "sekret plans"}
@@ -260,9 +261,16 @@ func TestIgnoredMailIsNotRepeatedEveryTurn(t *testing.T) {
 	// The next turn's stop: nothing to show, and the "no messages" line does not
 	// fire either, since the inbox is not empty.
 	f = &fakeSession{keys: []rune("i")}
-	readTurnMail(f, w, true)
+	readTurnMail(f, w, false)
 	if out := stripANSI(f.out.String()); strings.Contains(out, "sekret plans") {
 		t.Errorf("an ignored message came back at the next turn:\n%s", out)
+	}
+
+	// Choosing Play Game again shows the whole inbox, as BRE's reader does.
+	f = &fakeSession{keys: []rune("i")}
+	readTurnMail(f, w, true)
+	if !strings.Contains(stripANSI(f.out.String()), "sekret plans") {
+		t.Errorf("Play Game should show an ignored message again:\n%s", f.out.String())
 	}
 
 	// Asking to read messages asks for all of them.
@@ -338,5 +346,51 @@ func TestMailReaderOneLineMessageSkipsTheRangePrompts(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("reply body missing %q:\n%s", want, body)
 		}
+	}
+}
+
+// Choosing Play Game shows every message in the inbox, one at a time with the
+// reader's prompt after each, including those ignored earlier in the session:
+// BRE's run_player_turn calls read_local_messages, which takes no argument and
+// so cannot tell this stop from Read Messages (BRE.EXE 0x3869). Both of runTurn's
+// entry paths are covered, since they reach the stop separately.
+func TestPlayGameShowsTheWholeInbox(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		turnsLeft int
+		keys      string
+	}{
+		// Out of turns: the recap has nothing to pause on, then the reader.
+		{"out of turns", 0, "dd"},
+		// A turn to play: the recap pause, then the reader, then filler for the
+		// rest of the turn.
+		{"with turns", 3, " dd   0000nn"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			w := newWorld()
+			w.Player().Prefs.AutoPayMaint = true
+			w.Player().TurnsLeft = tc.turnsLeft
+			seedMail(w,
+				game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "sekret plans"},
+				game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "second thoughts"},
+			)
+			// Both ignored earlier this session, from Read Messages.
+			mailReader(&fakeSession{keys: []rune("ii")}, w, false)
+
+			f := &fakeSession{keys: []rune(tc.keys)}
+			runTurn(f, w)
+			out := stripANSI(f.out.String())
+			for _, body := range []string{"sekret plans", "second thoughts"} {
+				if !strings.Contains(out, body) {
+					t.Errorf("Play Game should show %q:\n%s", body, out)
+				}
+			}
+			if n := strings.Count(out, "[Q] Quit>"); n < 2 {
+				t.Errorf("want the reader's prompt after each message, saw it %d times:\n%s", n, out)
+			}
+			if got := len(w.Player().Mail); got != 0 {
+				t.Errorf("both messages were deleted at the prompt; Mail len = %d", got)
+			}
+		})
 	}
 }

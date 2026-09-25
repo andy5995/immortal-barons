@@ -5,6 +5,7 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * Play Game shows every message, ignored ones too, as the original does
   * Local mail shows its time on the reader's clock, with the zone
   * The BBS Coordinator can post directives, shown to the planet at every Play
   * After a reply is sent, the answered message can be deleted or kept

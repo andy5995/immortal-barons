@@ -210,20 +210,23 @@ func eventRule(n int, when time.Time, loc *time.Location) string {
 // says so. IB used to state a count and gate the reader behind "Read them now?
 // (Y/n)", which is not what the original does.
 //
-// announceEmpty is true only for the first turn of a session — the spot BRE
-// prints "You have no messages." A later turn re-checks so mail arriving from
-// another node mid-session is seen (#3), but stays quiet when there is none
-// rather than repeating the line up to ten times a day.
-func readTurnMail(s session.Session, w *ctx, announceEmpty bool) {
-	// Messages this session has already ignored do not count: the stop is for
-	// mail the player has not passed over yet (see ctx.ignoredMail).
-	if len(unreadMail(w, true)) == 0 {
-		if announceEmpty {
+// atEntry is true for the stop made when Play Game is chosen, the only place BRE
+// reads mail: run_player_turn calls read_local_messages once, before its turn
+// loop (BRE.EXE 0x3869, loop head 0x38D7). There the whole inbox is shown, as
+// BRE's does, including anything ignored earlier in the session, and an empty
+// one says "You have no messages." A later turn re-checks so mail arriving from
+// another node mid-session is seen (#3) — IB's own stop — but passes over what
+// the player has already ignored and stays quiet when there is nothing, rather
+// than repeating itself up to ten times a day.
+func readTurnMail(s session.Session, w *ctx, atEntry bool) {
+	skipIgnored := !atEntry
+	if len(unreadMail(w, skipIgnored)) == 0 {
+		if atEntry {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "You have no messages."), ansi.Reset)
 		}
 		return
 	}
-	mailReader(s, w, true)
+	mailReader(s, w, skipIgnored)
 }
 
 // manufacturedUnits lists what the Industrial Zones built this turn, as the

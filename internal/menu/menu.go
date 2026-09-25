@@ -61,9 +61,8 @@ type ctx struct {
 	// ignoredMail holds the messages this session has pressed [I]gnore on, so the
 	// mail stop at the head of each later turn passes over them. Ignore means
 	// "not now", and a barons plays up to ten turns a sitting; re-reading the same
-	// box every one of them is what made [I] useless. Read Messages still shows
-	// everything, and the set dies with the session, so an ignored message is back
-	// the next time the player enters the game. Messages are comparable values,
+	// box every one of them is what made [I] useless. Read Messages and the stop
+	// made on choosing Play Game still show everything, as BRE's reader does. Messages are comparable values,
 	// and applyMailActions already matches them that way.
 	ignoredMail map[game.Message]bool
 	// turnPlayed records that this session has begun a turn, which is what the

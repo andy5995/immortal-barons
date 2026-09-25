@@ -36,9 +36,10 @@ type mailReply struct {
 // collected during the read and applied under the world lock afterward, so the
 // lock is never held while waiting on the player and a message that arrives
 // mid-read survives (issues #2, #5).
-// skipIgnored is true for the turn-start stop, which passes over what this
-// session has already ignored, and false for Read Messages, which shows the
-// whole inbox (see ctx.ignoredMail).
+// skipIgnored is true for the stop at the head of a later turn, which passes
+// over what this session has already ignored, and false for Read Messages and
+// the stop made on choosing Play Game, which show the whole inbox (see
+// ctx.ignoredMail).
 func mailReader(s session.Session, w *ctx, skipIgnored bool) {
 	mail := unreadMail(w, skipIgnored)
 	if len(mail) == 0 {
