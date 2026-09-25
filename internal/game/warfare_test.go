@@ -324,7 +324,6 @@ func TestInvasionUsesItsOwnDefenceArithmetic(t *testing.T) {
 	// And the two reach the field differently: Defense() leaves morale to its
 	// caller, remoteDefense() folds it in.
 	e := &Empire{Troopers: 1_000, Turrets: 1_000, Tanks: 1_000, HQ: 0, Morale: 100}
-	e.EnsureMorale()
 	if got, want := e.Defense(), 1_000+2_000+tankStrength(1_000, 0); got != want {
 		t.Errorf("local defense = %d, want %d", got, want)
 	}

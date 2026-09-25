@@ -5,6 +5,7 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * A realm at 0 morale or 0 support no longer bounces back to 100 on reload
   * A 0-day loan or a trade deal under 2 days is refused, as in the original
   * An investment term under 2 days cancels, as the original does (#291)
   * SDI allowance is set once a turn and reports the gold added (#290)

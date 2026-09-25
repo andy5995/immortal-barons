@@ -379,23 +379,6 @@ func (e *Empire) EnsureRegions() {
 	e.syncLand() // Land now equals the rebuilt total (defaultRegionMix sums to Land, so Land is unchanged)
 }
 
-// EnsureSupport repairs Support after loading a save that predates the
-// Support field (Support zero). v1 choice: a legitimately-0-support empire
-// is effectively collapsing anyway, so treating 0 as "unset" is safe.
-func (e *Empire) EnsureSupport() {
-	if e.Support == 0 {
-		e.Support = 100
-	}
-}
-
-// EnsureMorale repairs Morale after loading a save that predates the Morale
-// field (Morale zero), the same way EnsureSupport does.
-func (e *Empire) EnsureMorale() {
-	if e.Morale == 0 {
-		e.Morale = 100
-	}
-}
-
 // moraleFactor maps military morale (0-100) to a combat-effectiveness percent.
 // Full morale fights at 100%; empty morale still fights at MoraleCombatFloor
 // (units don't become useless, just weaker). Placeholder curve — tunable.

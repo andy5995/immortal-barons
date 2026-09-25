@@ -216,8 +216,6 @@ func repair(w *game.World, cfg game.Config) {
 		// funding, and EnsureRegions recomputes the percentage from the pool.
 		e.EnsureSDIFunding()
 		e.EnsureRegions()
-		e.EnsureSupport()
-		e.EnsureMorale()
 		e.EnsureProduction()
 	}
 	w.EnsureInvestRate()

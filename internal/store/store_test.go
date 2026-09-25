@@ -171,11 +171,15 @@ func TestLoadMigratesPreRegionTypesSave(t *testing.T) {
 	}
 }
 
-func TestSupportMigration(t *testing.T) {
+// A realm driven to 0 popular support or 0 morale stays there across a save
+// and reload. A load-time repair used to read 0 as "saved before the field
+// existed" and restore 100 on every reload, undoing the loss almost at once;
+// both fields predate the first release, so no save needs that repair.
+func TestZeroSupportAndMoraleSurviveReload(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorldSeed(cfg, 1)
 	e := w.AddHuman("khan", "Khan's Realm")
-	e.Support = 0 // simulate a save written before Support existed
+	e.Support, e.Morale = 0, 0
 
 	if err := Save(w, cfg); err != nil {
 		t.Fatal(err)
@@ -188,8 +192,8 @@ func TestSupportMigration(t *testing.T) {
 	if ge == nil {
 		t.Fatal("empire not found after load")
 	}
-	if ge.Support != 100 {
-		t.Errorf("Support=%d, want migrated default 100", ge.Support)
+	if ge.Support != 0 || ge.Morale != 0 {
+		t.Errorf("after reload support %d, morale %d; want both still 0", ge.Support, ge.Morale)
 	}
 }
 
@@ -463,8 +467,8 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	if !e.Events[0].When.IsZero() {
 		t.Errorf("legacy events carry no stamp, got %v", e.Events[0].When)
 	}
-	if e.Support != 100 {
-		t.Errorf("Support=0 in an old save must migrate to 100, got %d", e.Support)
+	if e.Support != 0 {
+		t.Errorf("the save's Support 0 must load as 0, got %d", e.Support)
 	}
 	// The fixture predates permanent slots (#144). Every realm must come back
 	// with a distinct one in 1..25, in the saved order — that order is the one
