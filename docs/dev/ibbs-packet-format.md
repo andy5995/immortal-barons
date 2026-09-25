@@ -660,19 +660,31 @@ yes/no, on/off or true/false, and an unreadable value leaves the default (on)
 alone. `PirateNews no` suppresses the news line a pirate raid posts and nothing
 else — the raid, its loot, its losses and the raider's own report are unchanged.
 
-Not BRE's positional seven lines (sysop, planet, address, inbound, netmail dir,
-league, mailer). Positional cannot express a per-neighbor directory at all, and
-a blank field shifts every field after it — which is what most of BRE's own
-InterBBS troubleshooting section is about. FTN addresses are already roster
-data in `ibnodes.dat`. The FTN transport's lines (`IncomingFileDir`,
-`OutgoingNetmailDir`, `IncomingNetmailDir`, `Mailer`, `AttachDir`, `SubjectPath`,
-`Link`, `Bundled`, `OboxMeshFanout`) are read by `ftn.LoadConfig` from the same
-file; `store.LoadBoardConfig` ignores them. Three hold what BRE's positional
-BBS.CFG holds: line 4 is `IncomingFileDir`, line 5 `OutgoingNetmailDir`, line 7
-`Mailer`. Settings under an
-older release's names are refused with their replacements
-(`store.LegacyBoardRefusal`, `ftn.LegacyRefusal`) by the modes that move
-packets.
+Not BRE's seven positional lines (sysop, planet, address, inbound, netmail dir,
+league, mailer), because:
+
+- a positional line cannot express a per-neighbor directory at all;
+- a blank field shifts every field after it, which is what most of BRE's own
+  InterBBS troubleshooting section is about;
+- FTN addresses are already roster data in `ibnodes.dat`.
+
+The FTN transport's lines are read by `ftn.LoadConfig` from the same file, and
+`store.LoadBoardConfig` ignores them. Three hold what BRE's positional BBS.CFG
+holds, noted beside them:
+
+- `IncomingFileDir` (BRE line 4)
+- `OutgoingNetmailDir` (BRE line 5)
+- `IncomingNetmailDir`
+- `Mailer` (BRE line 7)
+- `AttachDir`
+- `SubjectPath`
+- `Link`
+- `Bundled`
+- `OboxMeshFanout`
+
+Settings under an older release's names are refused, naming their replacements,
+by the modes that move packets (`store.LegacyBoardRefusal`,
+`ftn.LegacyRefusal`).
 
 `store.ParseBoardConfig` reads BRE's own positional format, wired to
 `-ibbs-reset -import-bbs-cfg PATH` for a sysop converting a league they already

@@ -210,13 +210,8 @@ SubjectPath Absolute
   other spool directories, since this is the one path a mailer's Subject
   field has to spell out under a hard byte limit — see [Keeping attach
   subjects short](#keeping-attach-subjects-short)).
-- `Mailer` takes the original's list: `FrontDoor`, `Binkley`, `DBridge`,
-  `InterMail`, `DBridgeOld`, `Other` or `None`, in any case. `Binkley` prefixes
-  an attach subject with `^`; every other mailer gets `FLAGS KFS` instead. Both
-  ask for the attachment to be deleted after a successful send. `None` writes
-  no netmail at all, as in the original, so every peer needs an `Obox` or `BSO`
-  link. Left out, it behaves as `Other`. Any other value is refused, so a typo
-  cannot quietly stop the netmail.
+- `Mailer` says how the netmail asks for the attachment to be deleted once
+  sent, or turns netmail off. See [Choosing `Mailer`](#choosing-mailer).
 - `SubjectPath Absolute` writes the full attachment path. `Basename` writes
   only `NNNNCCCC.BRP`. Any other value is used as a literal path prefix.
   The stored-message Subject has 71 usable bytes, or 70 with the `^` prefix.
@@ -227,6 +222,22 @@ that the message has the file-attach attribute, identifies Immortal Barons,
 names exactly one attachment inside an `IncomingFileDir`, comes from a roster address,
 and is addressed to this board. Only after all packets are delivered or
 forwarded does it delete both files. Other netmail is never removed.
+
+#### Choosing `Mailer`
+
+`Mailer` takes the original's seven names, in any case. Only two of them change
+what the game writes:
+
+| Value | What the game writes | Use it for |
+| --- | --- | --- |
+| `Binkley` | the attachment path starts with `^` | BinkIT (Synchronet's mailer) and other Binkley-style setups |
+| `FrontDoor`, `DBridge`, `InterMail`, `DBridgeOld`, `Other` | a `FLAGS KFS` line in the message | any other mailer; all five do the same thing |
+| `None` | no netmail at all, as in the original | a board with no netmail directory; every peer then needs an `Obox` or `BSO` link |
+
+- Both kinds of netmail ask the mailer to delete the attachment after a
+  successful send.
+- Left out, `Mailer` behaves as `Other`.
+- Any other value is refused, so a typo cannot quietly stop the netmail.
 
 #### Keeping attach subjects short
 

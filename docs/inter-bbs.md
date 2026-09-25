@@ -634,8 +634,8 @@ Mailer          Binkley
   such a directory: [Mystic](https://www.mysticbbs.com/) keeps its own message
   bases, so reach a Mystic board with an `Obox` or `BSO` link instead.
 - **Mailer** is `Binkley` for a Binkley-style mailer, including BinkIT, the one
-  shipped with Synchronet. The full list and what each does are in the [FTN
-  Transport](ftn-transport.md#stored-message-attach-settings) guide.
+  shipped with Synchronet. The full list and what each does are in [Choosing
+  `Mailer`](ftn-transport.md#choosing-mailer).
 
 **Writing the netmail is not sending it.** The game leaves a `.msg` in the
 netmail directory and stops. What carries it is whatever already carries your
