@@ -83,7 +83,26 @@ func RunOut(dataDir string) (Result, error) { return runOut(dataDir, true) }
 // The run holding the lock is doing this same work.
 func TryRunOut(dataDir string) (Result, error) { return runOut(dataDir, false) }
 
+// absoluteDataDir anchors the data directory before any path is built from it.
+// Paths made from it reach the mailer (a file-attach subject, a flow-file
+// entry), and the mailer resolves them from ITS working directory, not the
+// game's: with the default relative ./data, a subject read "data\att\X.BRP",
+// named no file where the mailer looked, and nothing was ever sent. A
+// directory that cannot be anchored fails the run rather than falling back to
+// the relative path, which would stall the league the same way, silently.
+func absoluteDataDir(dataDir string) (string, error) {
+	abs, err := filepath.Abs(dataDir)
+	if err != nil {
+		return "", fmt.Errorf("cannot resolve the data directory %q: %w", dataDir, err)
+	}
+	return abs, nil
+}
+
 func runOut(dataDir string, wait bool) (Result, error) {
+	dataDir, err := absoluteDataDir(dataDir)
+	if err != nil {
+		return Result{}, err
+	}
 	board, transport, nodes, world, origin, adapterLock, err := transportContext(dataDir, wait)
 	if err != nil {
 		return Result{}, err
@@ -582,7 +601,16 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 	if err != nil {
 		return Queued{}, err
 	}
-	final := filepath.Join(target.Directory, target.Alias)
+	// A batch planned by an older build may carry a relative directory; that
+	// build resolved it from the working directory, so the same resolution
+	// finds the same place, now spelled in full for the mailer.
+	directory := target.Directory
+	if !filepath.IsAbs(directory) {
+		if directory, err = filepath.Abs(directory); err != nil {
+			return Queued{}, err
+		}
+	}
+	final := filepath.Join(directory, target.Alias)
 	queued := Queued{PacketPath: final, NextHop: target.Name, Address: address}
 	switch target.Mode {
 	case LinkAttach:
@@ -592,7 +620,7 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 		if err := writeFileAtomic(final, body, 0o644); err != nil {
 			return Queued{}, err
 		}
-		if existing := messageForAttachment(transport.OutgoingNetmailDir, final); existing != "" {
+		if existing := messageForAttachment(transport, final); existing != "" {
 			queued.Message = existing
 			return queued, nil
 		}
@@ -650,7 +678,12 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 	return queued, nil
 }
 
-func messageForAttachment(dir, attachment string) string {
+// messageForAttachment finds the netmail already queued for attachment, so a
+// resumed batch does not queue it twice. Under the default absolute subjects
+// only an exact match counts: an older build wrote relative subjects the mailer
+// could not resolve, and reusing one would keep that file stuck.
+func messageForAttachment(transport Config, attachment string) string {
+	dir := transport.OutgoingNetmailDir
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return ""
@@ -659,6 +692,7 @@ func messageForAttachment(dir, attachment string) string {
 	if err != nil {
 		want = attachment
 	}
+	exact := transport.SubjectMode == SubjectAbsolute
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".msg") {
 			continue
@@ -666,7 +700,8 @@ func messageForAttachment(dir, attachment string) string {
 		data, err := os.ReadFile(filepath.Join(dir, entry.Name()))
 		if err == nil && len(data) >= type2HeaderSize {
 			subject := cStringField(data[72:144])
-			if strings.TrimPrefix(subject, "^") == strings.TrimPrefix(want, "^") || filepath.Base(subject) == filepath.Base(attachment) {
+			if strings.TrimPrefix(subject, "^") == strings.TrimPrefix(want, "^") ||
+				(!exact && filepath.Base(subject) == filepath.Base(attachment)) {
 				return filepath.Join(dir, entry.Name())
 			}
 		}

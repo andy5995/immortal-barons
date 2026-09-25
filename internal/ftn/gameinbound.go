@@ -35,6 +35,10 @@ func UnwrapGameInbound(dataDir string) (Result, error) { return unwrapGameInboun
 func TryUnwrapGameInbound(dataDir string) (Result, error) { return unwrapGameInbound(dataDir, false) }
 
 func unwrapGameInbound(dataDir string, wait bool) (Result, error) {
+	dataDir, err := absoluteDataDir(dataDir)
+	if err != nil {
+		return Result{}, err
+	}
 	board, err := store.LoadConfig(dataDir)
 	if err != nil {
 		return Result{}, err

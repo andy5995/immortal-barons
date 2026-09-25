@@ -66,6 +66,10 @@ func RunIn(dataDir string) (Result, error) { return runIn(dataDir, true) }
 func TryRunIn(dataDir string) (Result, error) { return runIn(dataDir, false) }
 
 func runIn(dataDir string, wait bool) (Result, error) {
+	dataDir, err := absoluteDataDir(dataDir)
+	if err != nil {
+		return Result{}, err
+	}
 	board, transport, nodes, world, origin, adapterLock, err := transportContext(dataDir, wait)
 	if err != nil {
 		return Result{}, err
