@@ -619,6 +619,8 @@ const (
 	TerrorOddsCeiling        = 30_000
 	// Sabotage HQ takes a flat fifteen points off the target's HeadQuarters
 	// progress per landed agent — the one operation with no roll in it (0x87C).
+	// Floored at zero: the subtract goes through the clamped sub32 helper
+	// 0c03:0fe3, so the field never goes negative in the original either.
 	TerrorHQSabotagePoints = 15
 	// ScorePerTurn is the Score a played turn earns. BINARY-VERIFIED as a flat
 	// literal: `run_player_turn` (BRE.EXE 0x03a4f) does

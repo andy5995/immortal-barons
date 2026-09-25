@@ -4653,12 +4653,18 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   | 6 | Stir Emigrations | population `+0x62` | −(4 + `Random(7)`)% | 0x73A |
   | 7 | Spread Propaganda | support `+0x92` | × 11/13 | 0x7B9 |
   | 8 | Bomb Food Storages | food `+0x6E` | −`Random(30)`% | 0x80C |
-  | 9 | Sabotage HQ | HeadQuarters `+0x26B` | −15 points, flat | 0x87C |
+  | 9 | Sabotage HQ | HeadQuarters `+0x26B` | −15 points, flat, floored at 0 | 0x87C |
 
   Turbo Pascal's `Random(n)` returns 0..n-1, so Bomb Intelligence takes 2, 3 or
   4 percent and Bomb Food Storages can take nothing at all. The percentage bands
   are `Random(n)/100 + base` computed in Real48 and multiplied by the field; the
-  two ratio operations and the flat HQ hit have no roll in them. The operation
+  two ratio operations and the flat HQ hit have no roll in them. The HQ
+  hit, like the percentage rows checked beside it (2 and 8), subtracts through
+  the clamped sub32 helper `0c03:0fe3`
+  (`sub_i32_indirect`, which adds the negation through `add_i32_indirect` and
+  stores 0 for a result below zero), so the HeadQuarters never goes negative.
+  There is no guard in front of it, and none is needed. Re-read 2026-09-25 after an
+  audit took the helper for an unclamped subtract. The operation
   names come from the report templates in `game/ipreport.dat`, whose eight
   damaging entries are in this order.
 
