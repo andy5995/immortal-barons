@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-25 02:07-0500\n"
+"POT-Creation-Date: 2026-09-25 07:53-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -618,7 +618,7 @@ msgstr ""
 msgid ""
 "| Dial | What it goes for |\n"
 "| --- | --- |\n"
-"| 0, 1 | the enemy's Intelligence HeadQuarters |\n"
+"| 0, 1 | the enemy's Intelligence Headquarters, killing covert agents |\n"
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
@@ -3044,13 +3044,14 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/headquarters.md:19
+#: internal/help/content/military/headquarters.md:20
 #, markdown-text
 msgid ""
 "While it is being built — and more so once it is finished — it raises how "
-"much your tanks add to both attack and defense. You lose some of its "
-"progress when you lose a battle as the defender. Agents from another planet "
-"can also sabotage it, and so can an S3-Sabre hit."
+"much your tanks add to both attack and defense. When you lose a battle as "
+"the defender, some of its progress is lost. When an invasion from another "
+"planet beats you, a fifth of it is lost. Agents from another planet can also "
+"sabotage it."
 msgstr ""
 
 #. type: Title #

@@ -14,7 +14,7 @@ von 0 bis 10 ein, und der Regler richtet sie aus:
 
 | Regler | Worauf sie zielt |
 | --- | --- |
-| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes |
+| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes, wobei Agenten sterben |
 | 2, 3 | Wohngebiete, wobei Menschen sterben |
 | 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |
 | 5, 6 | Luftwaffenbasen, und nichts als Jets |

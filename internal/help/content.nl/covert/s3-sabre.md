@@ -14,7 +14,7 @@ schijf richt het wapen:
 
 | Schijf | Waar het op mikt |
 | --- | --- |
-| 0, 1 | het inlichtingenhoofdkwartier van de vijand |
+| 0, 1 | het inlichtingenhoofdkwartier van de vijand, waarbij agenten omkomen |
 | 2, 3 | woonwijken, waarbij mensen omkomen |
 | 4 | militaire bases - troepen, jagers, geschutstorens en tanks tegelijk |
 | 5, 6 | vliegbases, en niets dan jagers |

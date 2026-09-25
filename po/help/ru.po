@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 01:59-0500\n"
+"POT-Creation-Date: 2026-09-25 07:51-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -755,21 +755,13 @@ msgstr ""
 msgid ""
 "| Dial | What it goes for |\n"
 "| --- | --- |\n"
-"| 0, 1 | the enemy's Intelligence HeadQuarters |\n"
+"| 0, 1 | the enemy's Intelligence Headquarters, killing covert agents |\n"
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
 "| 7, 8 | regions, burning them to waste |\n"
 "| 9, 10 | the food supply |\n"
-msgstr ""
-"| Шкала | Куда бьёт |\n"
-"| --- | --- |\n"
-"| 0, 1 | вражеский Штаб разведки |\n"
-"| 2, 3 | жилые кварталы, убивая людей |\n"
-"| 4 | военные базы — войска, самолёты, турели и танки разом |\n"
-"| 5, 6 | авиабазы, и только самолёты |\n"
-"| 7, 8 | регионы, выжигая их в пустошь |\n"
-"| 9, 10 | запасы еды |\n"
+msgstr "| Шкала | Куда бьёт |\n| --- | --- |\n| 0, 1 | вражеский Штаб разведки, убивая агентов |\n| 2, 3 | жилые кварталы, убивая людей |\n| 4 | военные базы — войска, самолёты, турели и танки разом |\n| 5, 6 | авиабазы, и только самолёты |\n| 7, 8 | регионы, выжигая их в пустошь |\n| 9, 10 | запасы еды |\n"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:29
@@ -2669,7 +2661,11 @@ msgid ""
 "menu under Directives from CO. They are shown each time you choose Play, and "
 "you can read them again from the same menu item. The Coordinator writes, "
 "adds to or erases them there."
-msgstr "Координатор может публиковать директивы для всей станции: меню «Сообщения», пункт «Директивы координатора». Они показываются каждый раз, когда вы выбираете «Играть», и их можно перечитать через тот же пункт меню. Там же координатор их пишет, дополняет или стирает."
+msgstr ""
+"Координатор может публиковать директивы для всей станции: меню «Сообщения», "
+"пункт «Директивы координатора». Они показываются каждый раз, когда вы "
+"выбираете «Играть», и их можно перечитать через тот же пункт меню. Там же "
+"координатор их пишет, дополняет или стирает."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:70
@@ -3075,7 +3071,13 @@ msgid ""
 "returns, and filed in the Spy Database, which keeps the last five reports on "
 "each realm and shows how much the last two differ. A spy sent before and "
 "after a strike therefore shows what the strike did."
-msgstr "**Отправить шпиона** — не стоит цели ничего. Шпион, который проник, приносит домой сведения о её землях, нападении, обороне и золоте. Вам сообщают об этом, когда шпион возвращается, и сведения попадают в Базу разведки, которая хранит пять последних отчётов по каждому государству и показывает, насколько различаются два последних. Поэтому шпион, отправленный до и после удара, показывает, что удар сделал."
+msgstr ""
+"**Отправить шпиона** — не стоит цели ничего. Шпион, который проник, приносит "
+"домой сведения о её землях, нападении, обороне и золоте. Вам сообщают об "
+"этом, когда шпион возвращается, и сведения попадают в Базу разведки, которая "
+"хранит пять последних отчётов по каждому государству и показывает, насколько "
+"различаются два последних. Поэтому шпион, отправленный до и после удара, "
+"показывает, что удар сделал."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:38
@@ -3608,17 +3610,14 @@ msgstr ""
 "потолка. От размера державы она не зависит."
 
 #. type: Plain text
-#: internal/help/content/military/headquarters.md:19
+#: internal/help/content/military/headquarters.md:20
 msgid ""
 "While it is being built — and more so once it is finished — it raises how "
-"much your tanks add to both attack and defense. You lose some of its "
-"progress when you lose a battle as the defender. Agents from another planet "
-"can also sabotage it, and so can an S3-Sabre hit."
-msgstr ""
-"Пока он строится — и тем более когда достроен — он увеличивает вклад ваших "
-"танков и в атаку, и в защиту. Проиграв бой в обороне, вы теряете часть его "
-"готовности. Кроме того, его могут повредить агенты с другой планеты и "
-"попадание S3-Sabre."
+"much your tanks add to both attack and defense. When you lose a battle as "
+"the defender, some of its progress is lost. When an invasion from another "
+"planet beats you, a fifth of it is lost. Agents from another planet can also "
+"sabotage it."
+msgstr "Пока он строится — и тем более когда достроен — он увеличивает вклад ваших танков и в атаку, и в защиту. Проиграв бой в обороне, вы теряете часть его готовности. Если вас побеждает вторжение с другой планеты, вы теряете пятую часть. Кроме того, его могут повредить агенты с другой планеты."
 
 #. type: Title #
 #: internal/help/content/military/jets.md:1

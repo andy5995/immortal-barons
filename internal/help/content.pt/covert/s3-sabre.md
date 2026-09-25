@@ -14,7 +14,7 @@ a mira:
 
 | Seletor | Para o que ele vai |
 | --- | --- |
-| 0, 1 | o Quartel-General de Inteligência do inimigo |
+| 0, 1 | o Quartel-General de Inteligência do inimigo, matando agentes |
 | 2, 3 | zonas residenciais, matando pessoas |
 | 4 | bases militares — soldados, caças, torres e tanques juntos |
 | 5, 6 | bases aéreas, e nada além de caças |

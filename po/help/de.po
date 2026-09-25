@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 01:59-0500\n"
+"POT-Creation-Date: 2026-09-25 07:51-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -789,21 +789,13 @@ msgstr ""
 msgid ""
 "| Dial | What it goes for |\n"
 "| --- | --- |\n"
-"| 0, 1 | the enemy's Intelligence HeadQuarters |\n"
+"| 0, 1 | the enemy's Intelligence Headquarters, killing covert agents |\n"
 "| 2, 3 | residential zones, killing people |\n"
 "| 4 | military bases — troops, jets, turrets and tanks together |\n"
 "| 5, 6 | airbases, and nothing but jets |\n"
 "| 7, 8 | regions, burning them to waste |\n"
 "| 9, 10 | the food supply |\n"
-msgstr ""
-"| Regler | Worauf sie zielt |\n"
-"| --- | --- |\n"
-"| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes |\n"
-"| 2, 3 | Wohngebiete, wobei Menschen sterben |\n"
-"| 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |\n"
-"| 5, 6 | Luftwaffenbasen, und nichts als Jets |\n"
-"| 7, 8 | Regionen, die zu Ödland verbrennen |\n"
-"| 9, 10 | den Nahrungsvorrat |\n"
+msgstr "| Regler | Worauf sie zielt |\n| --- | --- |\n| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes, wobei Agenten sterben |\n| 2, 3 | Wohngebiete, wobei Menschen sterben |\n| 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |\n| 5, 6 | Luftwaffenbasen, und nichts als Jets |\n| 7, 8 | Regionen, die zu Ödland verbrennen |\n| 9, 10 | den Nahrungsvorrat |\n"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:29
@@ -2756,7 +2748,11 @@ msgid ""
 "menu under Directives from CO. They are shown each time you choose Play, and "
 "you can read them again from the same menu item. The Coordinator writes, "
 "adds to or erases them there."
-msgstr "Der Koordinator kann Direktiven an das ganze Board richten, im Menü Nachrichten unter Direktiven des CO. Sie werden jedes Mal angezeigt, wenn Sie Spielen wählen, und Sie können sie über denselben Menüpunkt erneut lesen. Dort schreibt, ergänzt oder entfernt der Koordinator sie."
+msgstr ""
+"Der Koordinator kann Direktiven an das ganze Board richten, im Menü "
+"Nachrichten unter Direktiven des CO. Sie werden jedes Mal angezeigt, wenn "
+"Sie Spielen wählen, und Sie können sie über denselben Menüpunkt erneut "
+"lesen. Dort schreibt, ergänzt oder entfernt der Koordinator sie."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:70
@@ -3177,7 +3173,13 @@ msgid ""
 "returns, and filed in the Spy Database, which keeps the last five reports on "
 "each realm and shows how much the last two differ. A spy sent before and "
 "after a strike therefore shows what the strike did."
-msgstr "**Spion senden** - kostet das Ziel nichts. Ein Spion, der durchkommt, bringt Land, Angriff, Verteidigung und Gold des Ziels heim. Das wird Ihnen gemeldet, wenn der Spion zurückkehrt, und in der Spionagedatenbank abgelegt, die die letzten fünf Berichte zu jedem Reich aufbewahrt und zeigt, wie weit die letzten beiden auseinanderliegen. Ein Spion vor und einer nach einem Schlag zeigt also, was der Schlag angerichtet hat."
+msgstr ""
+"**Spion senden** - kostet das Ziel nichts. Ein Spion, der durchkommt, bringt "
+"Land, Angriff, Verteidigung und Gold des Ziels heim. Das wird Ihnen "
+"gemeldet, wenn der Spion zurückkehrt, und in der Spionagedatenbank abgelegt, "
+"die die letzten fünf Berichte zu jedem Reich aufbewahrt und zeigt, wie weit "
+"die letzten beiden auseinanderliegen. Ein Spion vor und einer nach einem "
+"Schlag zeigt also, was der Schlag angerichtet hat."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/terrorist-ops.md:38
@@ -3725,18 +3727,14 @@ msgstr ""
 "einer Obergrenze. Er hängt nicht von der Größe Ihres Reiches ab."
 
 #. type: Plain text
-#: internal/help/content/military/headquarters.md:19
+#: internal/help/content/military/headquarters.md:20
 msgid ""
 "While it is being built — and more so once it is finished — it raises how "
-"much your tanks add to both attack and defense. You lose some of its "
-"progress when you lose a battle as the defender. Agents from another planet "
-"can also sabotage it, and so can an S3-Sabre hit."
-msgstr ""
-"Während es gebaut wird - und noch mehr, sobald es fertig ist - erhöht es, "
-"was Ihre Panzer zu Angriff und Verteidigung beitragen. Sie verlieren einen "
-"Teil des Baufortschritts, wenn Sie eine Schlacht als Verteidiger verlieren. "
-"Agenten von einem anderen Planeten können es ebenfalls sabotieren, und ein "
-"Treffer der S3-Sabre auch."
+"much your tanks add to both attack and defense. When you lose a battle as "
+"the defender, some of its progress is lost. When an invasion from another "
+"planet beats you, a fifth of it is lost. Agents from another planet can also "
+"sabotage it."
+msgstr "Während es gebaut wird - und noch mehr, sobald es fertig ist - erhöht es, was Ihre Panzer zu Angriff und Verteidigung beitragen. Wenn Sie eine Schlacht als Verteidiger verlieren, geht ein Teil des Baufortschritts verloren. Wenn Sie eine Invasion von einem anderen Planeten verlieren, geht ein Fünftel davon verloren. Agenten von einem anderen Planeten können es ebenfalls sabotieren."
 
 #. type: Title #
 #: internal/help/content/military/jets.md:1

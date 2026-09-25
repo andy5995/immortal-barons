@@ -14,7 +14,7 @@ Bouw het vroeg. De prijs stijgt elke beurt die u speelt, tot een
 plafond. Hij hangt niet af van de omvang van uw rijk.
 
 Terwijl het gebouwd wordt - en nog meer zodra het af is - verhoogt het wat
-uw tanks bijdragen aan zowel aanval als verdediging. U verliest een deel van
-de voortgang wanneer u als verdediger een slag verliest. Agenten van een
-andere planeet kunnen het ook saboteren, en een treffer van een S3-Sabre
-ook.
+uw tanks bijdragen aan zowel aanval als verdediging. Als u als verdediger
+een slag verliest, gaat een deel van de voortgang verloren. Als een invasie
+van een andere planeet u verslaat, gaat een vijfde ervan verloren. Agenten
+van een andere planeet kunnen het ook saboteren.
