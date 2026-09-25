@@ -19,6 +19,7 @@ while your tax rate is low. See Taxes, Support, and Riots.
 
 Popular Support:
 
+- sets how much tax you collect (see Taxes, Support, and Riots)
 - sets your Coastal (tourism) income, which collapses when Support is low
 - sets how many people your regions can hold
 - when it drops under 10, it starts pulling Morale down with it

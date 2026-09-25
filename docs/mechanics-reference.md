@@ -2542,8 +2542,8 @@ region above). Food output is covered under the food
 section: an Agricultural draw raised by the Technology factor (#20), plus a
 share of every river's yield. These income numbers, the caps (2B money / 1.599B
 interest) and the pirate caps table are BRE-scale, and the net-worth weights are
-binary-verified; **the tax per-capita coefficient and the yield band are IB's own
-reconstructions** anchored to this scale. All tunables live in `internal/game/balance*.go`.
+binary-verified, and so is the population tax (below); **the yield band is IB's
+own reconstruction** anchored to this scale. All tunables live in `internal/game/balance*.go`.
 
 **Per-turn price walk (#30), binary-verified.** Every empire stores its own price
 for each of the six military units (`Empire.Prices`) and steps it once per turn
@@ -2620,10 +2620,22 @@ a flat 100** (`SellAgentPrice`, the literal at `BRE.OVR 0x16AEB`), not buy/3.
 **Regions do not walk either** — their price rises purely with holdings
 (`917 + owned×33`), which BRE held exact every turn.
 
-**Population and tax** are a major income engine. The per-capita coefficient
-(`TaxGoldPerCapita`) is calibrated so a new realm's first-turn taxes (~5,100)
-match BRE's income report (~5,183) — a minor share of income, with region
-income dominating, as in BRE. A *low* tax rate (2–3%)
+**Population and tax** are a major income engine. The population tax is
+BINARY-VERIFIED (`process_economic_production`, `BRE.OVR 0x3406B`–`0x340E6`),
+one real truncated once:
+
+```
+taxes = trunc(population x 311 x 0.01 / 90 x tax x support x techTaxFactor)
+```
+
+with population in BRE's unit of a million (IB divides its own count by
+`PopBREUnitScale` inside the same fraction), tax the rate in percent and support
+the popular support figure — so **popular support scales the tax take in
+full**: a realm at 50 support collects half what it would at 100. BRE's new
+realm (100 million, 15%, 100 support) earns exactly 5,183, the figure on its
+first-turn income report, and IB's matches it. Constants: `TaxGold*` in
+`balance_ai.go`. That is a minor share of income, with region income
+dominating, as in BRE. A *low* tax rate (2–3%)
 drives fast population growth; late game, tax on a huge population becomes
 the main income. Set tax to 0% for a few turns to spike growth, then buy
 **urban** regions so people don't leave when you raise tax back to ~7–9%.
@@ -2840,9 +2852,8 @@ The factor is pinned by the two games starting the same realm. BRE's new realm �
 2 Agricultural, 5 Desert, 5 Mountain, 3 Coastal, 100 troopers, 1000 food, 100%
 support, 15% tax, which is IB's starting mix exactly — reads "Population: 100
 Million" against a capacity of 121, so it opens just *under* capacity and grows.
-IB starts that realm at 2000 people. `TaxGoldPerCapita` already carries the same
-factor: BRE's new realm earns 5183 gold at 15% tax, about 345 per BRE unit,
-which is IB's 17 × 20.
+IB starts that realm at 2000 people. The population tax converts through the
+same factor, so that realm collects BRE's 5183 gold at 15% tax in both games.
 
 Leaving the conversion out was a real defect, not a theoretical one: it put the
 starting realm sixteen times over its own capacity, and a new baron who changed
@@ -2936,8 +2947,9 @@ search for direct displacements does not match.
 
 **What they do**
 
-- Low popular support cuts **Coastal income** (`0.1 + 0.9 × support/100`) and
-  **population capacity** (`× support/90`), and below **35** it puts a riot line
+- Low popular support cuts the **population tax** in proportion (`× support`,
+  no floor), **Coastal income** (`0.1 + 0.9 × support/100`) and **population
+  capacity** (`× support/90`), and below **35** it puts a riot line
   in the planet news at 1-in-20 a turn (`BRE.OVR 0xD5AD`) — cosmetic, unlike the
   tax riot.
 - Military morale scales **combat effectiveness** (`morale × 0.6 + 50`, so a

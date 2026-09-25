@@ -2,18 +2,28 @@ package game
 
 import "testing"
 
-// TestTaxIncomeExact pins the tax coefficient: with tf=0 (no Technology),
-// Taxes = People * Tax/100 * TaxGoldPerCapita.
+// TestTaxIncomeExact pins the population tax to BRE's formula, including its
+// scaling by popular support (BRE.OVR 0x3406B). The first case is BRE's own new
+// realm — 100 million people (2000 of IB's), 15% tax, full support — whose
+// first-turn income report reads 5183.
 func TestTaxIncomeExact(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("h", "Realm")
-	e.Regions = RegionMix{}
-	e.Land = 0 // tf = 0
-	e.People = 2000
-	e.Tax = 7
-	want := 2000 * 7 / 100 * TaxGoldPerCapita
-	if got := w.IncomeThisTurn(e).Taxes; got != want {
-		t.Errorf("Taxes = %d, want %d", got, want)
+	cases := []struct{ people, tax, support, want int }{
+		{2000, 15, 100, 5183}, // BRE's first-turn figure
+		{2000, 7, 100, 2418},
+		{2000, 15, 50, 2591}, // half the support, half the tax (truncated)
+		{2000, 15, 0, 0},
+		{2000, 0, 100, 0},
+		{50_000_000, 30, 90, 233_250_000}, // a large realm stays exact
+	}
+	for _, c := range cases {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		e := w.AddHuman("h", "Realm")
+		e.Regions = RegionMix{}
+		e.syncLand()
+		e.People, e.Tax, e.Support = c.people, c.tax, c.support
+		if got := w.IncomeThisTurn(e).Taxes; got != c.want {
+			t.Errorf("people %d tax %d support %d: Taxes = %d, want %d", c.people, c.tax, c.support, got, c.want)
+		}
 	}
 }
 

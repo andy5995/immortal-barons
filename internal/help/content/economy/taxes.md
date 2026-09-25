@@ -10,9 +10,13 @@ in_game: true
 Your tax rate sets how much gold you collect from your people, and it shapes
 their mood.
 
+What you collect also depends on Popular Support: a realm at half Support
+collects half the tax. So a high tax rate that lowers Support can earn less
+than a moderate one.
+
 Each turn your tax rate moves Popular Support. A low rate raises it, a high rate
-lowers it, and a rate in between leaves it where it is. Low Support badly cuts
-your Coastal (tourism) income.
+lowers it, and a rate in between leaves it where it is. Low Support also badly
+cuts your Coastal (tourism) income.
 
 Riots grow more likely as your tax rate climbs past a safe level. A riot crashes
 your Support and drives off part of your population. Raise taxes with care.

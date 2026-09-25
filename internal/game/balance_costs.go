@@ -120,10 +120,9 @@ const (
 	// Leaving it out is what made a fresh realm bleed people from its first turn:
 	// the raw weights put its capacity at 121 against a population of 2000, so
 	// migration read a realm sixteen times over-full and drained ~300 a turn,
-	// while the same realm in BRE sits just under capacity and grows. The same
-	// factor is already baked into TaxGoldPerCapita — BRE's new realm earns 5183
-	// gold at 15%, about 345 per BRE unit, which is IB's 17 x 20 — so the two
-	// stay consistent only while both carry it.
+	// while the same realm in BRE sits just under capacity and grows. The
+	// population tax converts through the same factor (see TaxGoldNumerator), so
+	// that realm collects BRE's 5183 gold at 15% in both games.
 	PopBREUnitScale = 20
 
 	// Per-turn movement toward the capacity: Random(5)+5 percent of the gap.

@@ -257,10 +257,20 @@ const (
 	FreeTradeProtectedPartnerCut   = 5 // binary
 )
 
-// Tax coefficient (reconstructed / tunable). BRE stores population/tax income
-// as an inline "6 − f(tax)" × Population shape that was only partially
-// recovered. Calibrated to BRE's first-turn income report: a new realm
-// (People 2000, Tax 15%) earns 2000·0.15·17 = 5100 gold in taxes, matching BRE's
-// ~5183 — so taxes are a minor part of income (region income dominates, as in
-// BRE), not the runaway 360k the old 1200 produced. Top playtest knob.
-const TaxGoldPerCapita = 17
+// Population tax. BINARY-VERIFIED from process_economic_production (BRE.OVR
+// 0x3406B-0x340E6), which computes one real and truncates it once:
+//
+//	taxes = trunc(population x 3.11 / 90 x tax x support x techTaxFactor)
+//
+// with population in BRE's unit of a million (record +0x62), tax the rate in
+// percent (+0x61) and support the popular support figure (+0x92), so popular
+// support scales the take directly: a realm at half support collects half the
+// tax. The 3.11 is the product of two literals, 311 and 0.01. BRE's new realm
+// (100 million people, 15% tax, 100 support, no technology) earns exactly 5183,
+// the first-turn income report's figure. IB applies it to its own People count
+// through PopBREUnitScale (see taxIncome).
+const (
+	TaxGoldNumerator = 311 // binary: the 311 literal
+	TaxGoldPercent   = 100 // binary: the 0.01 literal it is multiplied by
+	TaxGoldDivisor   = 90  // binary: the 90 it is then divided by
+)

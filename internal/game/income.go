@@ -114,23 +114,22 @@ func (w *World) riverGold(e *Empire) int {
 // IncomeThisTurn itemizes e's income for the current turn. Each region's gold
 // is BRE's perRegion = Base + [0, Rate) times its region count; Coastal is
 // additionally scaled by a support floor (0.10 + 0.90·support, so tourism never
-// zeroes out). The gold technology factor scales each REGION gold source, as it
+// zeroes out); the population tax is scaled by support in full, with no floor.
+// The gold technology factor scales each REGION gold source, as it
 // does in the original; industrial gold and the trade bonus are untouched by it.
 // Products are widened to int64 so they stay correct on 32-bit builds even at
 // money-cap scale.
 func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
-	// Region income and population tax draw on DIFFERENT research slots in BRE,
-	// so they scale independently.
+	// Region income draws on a different research slot from the population tax
+	// (see taxIncome), so the two scale independently.
 	gold := int64(e.TechGoldFactor())
 	scale := func(n int64) int { return int(n * gold / TechFactorUnit) }
-	tax := int64(e.TechTaxFactor())
-	scaleTax := func(n int64) int { return int(n * tax / TechFactorUnit) }
 	perRegion := func(salt, rate, base int) int { return w.regionDraw(e, salt, rate) + base }
 
 	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
 	riverGold := w.riverGold(e)
 	return IncomeBreakdown{
-		Taxes:   scaleTax(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
+		Taxes:   e.taxIncome(),
 		Ore:     scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
 		Tourism: scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
 		Solar:   scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
@@ -143,6 +142,25 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 		Food:       w.FoodProduced(e),
 		RiverFood:  w.riverFood(e),
 	}
+}
+
+// taxIncome is this turn's population tax (see TaxGoldNumerator):
+//
+//	trunc(people/PopBREUnitScale x 311 x 0.01 / 90 x tax x support x techTaxFactor)
+//
+// BRE truncates once, at the end, so this does too: the whole product is one
+// exact fraction, split into quotient and remainder only so it cannot overflow
+// int64 once the technology factor multiplies in. IB's People go in whole rather
+// than being cut to BRE's unit first, which is what keeps IB's finer population
+// count from being rounded away.
+func (e *Empire) taxIncome() int {
+	if e.People <= 0 || e.Tax <= 0 || e.Support <= 0 {
+		return 0
+	}
+	const den = TaxGoldPercent * TaxGoldDivisor * PopBREUnitScale
+	n := int64(e.People) * TaxGoldNumerator * int64(e.Tax) * int64(e.Support)
+	tech := int64(e.TechTaxFactor())
+	return int((n/den*tech + n%den*tech/den) / TechFactorUnit)
 }
 
 // riverFood is the food e's rivers fish this turn. Unlike BRE, where a river
