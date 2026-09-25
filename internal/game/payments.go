@@ -1,32 +1,5 @@
 package game
 
-// Per-turn maintenance obligations. In BRE these are prompted at the start
-// of each turn ("Your Armed Forces Require N / How much will you give?",
-// "N gold is required to maintain your regions", "N gold is requested to
-// boost popular support"). The prompt labels and non-payment consequences
-// (desertion, revolt) come from the original's strings; the exact numeric
-// rates live in compiled code, so the constants below are reconstructed and
-// tunable.
-const (
-	ArmyDesertRate   = 25 // % of the army that deserts at full non-payment
-	RegionRevoltRate = 15 // % of land that revolts at full non-payment
-
-	// Combat effectiveness is MoraleCombatFloor + morale x MoraleCombatSlope/100
-	// percent. BINARY-VERIFIED (BRE.OVR 0xF37B): morale x 0.6 + 50, so a fully
-	// motivated army fights at 110%, not merely at par — IB previously derived
-	// the slope from the floor (100-floor = 50) and capped effectiveness at 100.
-	MoraleCombatFloor = 50 // binary: effectiveness % at zero morale
-	MoraleCombatSlope = 60 // binary
-
-	// The invasion resolver has its OWN slope: it divides morale by Real48 175
-	// and adds 0.5 (BRE.OVR resolve_received_invasion +0x1040), where the local
-	// resolver multiplies by 0.6 and adds 50 (+0x0b72). Same floor, gentler
-	// slope, so a defender at full morale holds at 107% against an invasion and
-	// 110% against a neighbor. Binary-verified; see remoteMoraleFactor.
-	RemoteMoraleSlopeNum = 100
-	RemoteMoraleSlopeDen = 175
-)
-
 // ForcesUpkeep is the gold the armed forces require this turn. Technology
 // regions lower it (same factor income uses); this is the formula the old
 // auto-deducted maintenance used.

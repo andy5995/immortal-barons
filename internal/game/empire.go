@@ -384,9 +384,9 @@ func (e *Empire) EnsureRegions() {
 	e.syncLand() // Land now equals the rebuilt total (defaultRegionMix sums to Land, so Land is unchanged)
 }
 
-// moraleFactor maps military morale (0-100) to a combat-effectiveness percent.
-// Full morale fights at 100%; empty morale still fights at MoraleCombatFloor
-// (units don't become useless, just weaker). Placeholder curve — tunable.
+// moraleFactor maps military morale (0-100) to a same-planet
+// combat-effectiveness percent: morale x 0.6 + 50, so empty morale still fights
+// at 50% and full morale at 110%. Binary-verified (see MoraleCombatSlope).
 func moraleFactor(morale int) int {
 	return MoraleCombatFloor + MoraleCombatSlope*morale/100
 }

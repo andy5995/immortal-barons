@@ -771,3 +771,14 @@ var sabreDialTable = [12]SabreEffect{
 // does not say what "constant" fires. The middle of the range keeps the mode
 // from being strictly better or worse than dialling by hand.
 const SabreConstantDial = 5
+
+// Non-payment penalties for the per-turn maintenance obligations. In BRE these
+// are prompted at the start of each turn ("Your Armed Forces Require N / How
+// much will you give?", "N gold is required to maintain your regions", "N gold
+// is requested to boost popular support"). The prompt labels and non-payment
+// consequences (desertion, revolt) come from the original's strings; these two
+// rates are reconstructed and tunable.
+const (
+	ArmyDesertRate   = 25 // % of the army that deserts at full non-payment
+	RegionRevoltRate = 15 // % of land that revolts at full non-payment
+)

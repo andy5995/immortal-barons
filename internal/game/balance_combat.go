@@ -394,3 +394,20 @@ const (
 // BINARY-VERIFIED: show_military_advisor_report compares (carriers×100)/jets
 // against the Real48 0.8 (BRE.OVR ovr_031379 +0xd62–0xe10) (#239).
 const AdvisorCarrierWarnPct = 80
+
+// Combat effectiveness is MoraleCombatFloor + morale x MoraleCombatSlope/100
+// percent. BINARY-VERIFIED (BRE.OVR 0xF37B): morale x 0.6 + 50, so a fully
+// motivated army fights at 110%, not merely at par — IB previously derived the
+// slope from the floor (100-floor = 50) and capped effectiveness at 100.
+//
+// The invasion resolver has its OWN slope: it divides morale by Real48 175 and
+// adds 0.5 (BRE.OVR resolve_received_invasion +0x1040), where the local
+// resolver multiplies by 0.6 and adds 50 (+0x0b72). Same floor, gentler slope,
+// so a defender at full morale holds at 107% against an invasion and 110%
+// against a neighbor. Binary-verified; see remoteMoraleFactor.
+const (
+	MoraleCombatFloor    = 50 // binary: effectiveness % at zero morale
+	MoraleCombatSlope    = 60 // binary
+	RemoteMoraleSlopeNum = 100
+	RemoteMoraleSlopeDen = 175
+)
