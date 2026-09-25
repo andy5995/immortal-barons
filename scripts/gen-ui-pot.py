@@ -11,7 +11,8 @@ their string-literal arguments:
   - prompt / promptInt / promptSuggested(Tight) / AskYesNo / askYesNoHere
   - i18n.T(lang, "...")               explicit lookups (menu draw)
   - menu item Label:/Title: literals  menu chrome
-  - errors.New("...") in internal/game  (surfaced to the player via fail())
+  - errors.New("...") in internal/game, internal/menu and internal/play
+    (surfaced to the player via fail())
   - typed op constants in internal/game whose value IS a menu label
 
 This is a translation-time helper only — not part of the build. Run it after
@@ -54,7 +55,9 @@ CALL_PATTERNS = [
     re.compile(r'\bmoney\(' + STR),
     re.compile(r'\btitled\(' + STR),  # bulletin page headings not drawn from a table
     re.compile(r'\b(?:Label|Title):\s*' + STR),
-    re.compile(r'\bEcho:\s*' + STR),  # the word a bracketed-key prompt echoes (keyOpt)
+    re.compile(r'\bEcho:\s*' + STR),
+    # A literal error handed straight to fail(): fail translates err.Error().
+    re.compile(r'\bfail(?:NoPause)?\(s,\s*fmt\.Errorf\(' + STR),  # the word a bracketed-key prompt echoes (keyOpt)
     # Preferences toggle labels. They live in the toggleRow table rather than in
     # the onOff() call, because the value column is sized from the whole group
     # and onOff is handed the group plus a field off the row -- so no literal
@@ -123,6 +126,11 @@ def extract():
             for m in PLURAL_PATTERN.finditer(line):
                 add(m.group(1), f"{rel}:{n}")
                 add(m.group(2), f"{rel}:{n}")
+            # The menu's own sentinel errors reach the player through fail(),
+            # as internal/game's do. cmd's are for the sysop and stay English.
+            if not rel.startswith("cmd"):
+                for m in ERR_PATTERN.finditer(line):
+                    add(m.group(1), f"{rel}:{n}")
     # The help browser's category names: it translates them through
     # tr(s, help.CategoryName(c)), which reads the map, so the map's own values
     # are the msgids. All reached the browser untranslated until this was added.

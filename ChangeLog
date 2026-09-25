@@ -6,6 +6,7 @@ Immortal Barons ChangeLog
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
   * Help opens with Getting Started, which now includes How to Play
+  * Menu error messages are translated
   * Help category names are translated
   * Play Game shows every message, ignored ones too, as the original does
   * Local mail shows its time on the reader's clock, with the zone

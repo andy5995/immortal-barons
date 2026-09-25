@@ -25,7 +25,7 @@ msgstr ""
 msgid "#"
 msgstr ""
 
-#: internal/menu/menu.go:943
+#: internal/menu/menu.go:944
 msgid "# Owned"
 msgstr ""
 
@@ -513,6 +513,10 @@ msgstr ""
 msgid "Attack Type"
 msgstr ""
 
+#: internal/menu/actions_ipattack.go:223
+msgid "Attack aborted."
+msgstr ""
+
 #: internal/menu/actions_interbbs.go:225
 msgid "Attack party #%d has been called off and its forces sent home."
 msgstr ""
@@ -659,6 +663,10 @@ msgstr ""
 
 #: internal/menu/actions_attack.go:467
 msgid "Buy it?"
+msgstr ""
+
+#: internal/menu/actions.go:121
+msgid "Buying military units is disabled in this league."
 msgstr ""
 
 #: internal/menu/bulletinfiles.go:275
@@ -1341,7 +1349,7 @@ msgstr ""
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr ""
 
-#: internal/menu/menu.go:942
+#: internal/menu/menu.go:943
 msgid "Item"
 msgstr ""
 
@@ -1367,6 +1375,10 @@ msgstr ""
 
 #: internal/menu/timezone.go:31
 msgid "Keep current"
+msgstr ""
+
+#: internal/menu/mailreader.go:234
+msgid "Keep original message?"
 msgstr ""
 
 #: internal/menu/actions_iptrade.go:73
@@ -1557,7 +1569,7 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/menu.go:1181
+#: internal/menu/menu.go:1182
 msgid "No"
 msgstr ""
 
@@ -1611,6 +1623,10 @@ msgstr ""
 
 #: internal/game/ibbs.go:34
 msgid "No scores have reached us from that realm, so the arms dealer cannot price a missile for it."
+msgstr ""
+
+#: internal/menu/actions_market.go:149
+msgid "Nobody is selling %s right now."
 msgstr ""
 
 #: internal/menu/actions_ipmessages.go:159
@@ -2389,6 +2405,10 @@ msgstr ""
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr ""
 
+#: internal/menu/actions.go:17
+msgid "The realm has changed — try again."
+msgstr ""
+
 #: internal/menu/actions_industry.go:90
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
@@ -2797,7 +2817,7 @@ msgstr ""
 msgid "Which regions will you give up?"
 msgstr ""
 
-#: internal/menu/menu.go:670
+#: internal/menu/menu.go:671
 msgid "While you were at the menus, this has happened:"
 msgstr ""
 
@@ -2853,7 +2873,7 @@ msgstr ""
 msgid "Writing to:"
 msgstr ""
 
-#: internal/menu/menu.go:1180
+#: internal/menu/menu.go:1181
 msgid "Yes"
 msgstr ""
 
@@ -3041,6 +3061,10 @@ msgstr ""
 msgid "You have used all %d lines."
 msgstr ""
 
+#: internal/menu/actions.go:28
+msgid "You have used all your attacks for today."
+msgstr ""
+
 #: internal/game/covert.go:367
 msgid "You hold no bribed agent inside that realm."
 msgstr ""
@@ -3071,6 +3095,10 @@ msgstr ""
 
 #: internal/game/market.go:16
 msgid "You need a pact with that realm to send it a trade deal."
+msgstr ""
+
+#: internal/menu/directives.go:13
+msgid "You no longer hold the office of BBS Coordinator."
 msgstr ""
 
 #: internal/menu/actions_trade.go:188
@@ -3185,7 +3213,7 @@ msgstr ""
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
-#: internal/menu/menu.go:681
+#: internal/menu/menu.go:682
 msgid "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."
 msgstr ""
 
@@ -3275,6 +3303,10 @@ msgstr ""
 
 #: internal/menu/actions_iptradedeal.go:82
 msgid "Your shipment is on its way to %s of %s."
+msgstr ""
+
+#: internal/menu/actions.go:23
+msgid "Your target is no longer there."
 msgstr ""
 
 #: internal/menu/turnstages.go:471
@@ -3379,6 +3411,10 @@ msgstr ""
 
 #: internal/game/ibbs.go:16
 msgid "no such group attack"
+msgstr ""
+
+#: internal/menu/config_editor.go:447
+msgid "not a valid date (use YYYY-MM-DD)"
 msgstr ""
 
 #: internal/menu/actions_trade.go:54

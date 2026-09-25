@@ -28,7 +28,7 @@ msgstr " - выберите тему:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:943
+#: internal/menu/menu.go:944
 msgid "# Owned"
 msgstr "# Есть"
 
@@ -575,6 +575,10 @@ msgstr "Напасть на пиратов"
 msgid "Attack Type"
 msgstr "Тип атаки"
 
+#: internal/menu/actions_ipattack.go:223
+msgid "Attack aborted."
+msgstr "Атака отменена."
+
 #: internal/menu/actions_interbbs.go:225
 msgid "Attack party #%d has been called off and its forces sent home."
 msgstr "Отряд №%d распущен, его войска отправлены домой."
@@ -726,6 +730,10 @@ msgstr "Сколько купить: %s"
 #: internal/menu/actions_attack.go:467
 msgid "Buy it?"
 msgstr "Купить?"
+
+#: internal/menu/actions.go:121
+msgid "Buying military units is disabled in this league."
+msgstr "Покупка военных единиц в этой лиге отключена."
 
 #: internal/menu/bulletinfiles.go:275
 msgid "CRUSHED"
@@ -1456,7 +1464,7 @@ msgstr "К ним это попадёт не раньше хода %d их дн�
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Постройка обойдётся планете в %s млн золота. Принять?"
 
-#: internal/menu/menu.go:942
+#: internal/menu/menu.go:943
 msgid "Item"
 msgstr "Позиция"
 
@@ -1483,6 +1491,10 @@ msgstr "Оставить"
 #: internal/menu/timezone.go:31
 msgid "Keep current"
 msgstr "Оставить как есть"
+
+#: internal/menu/mailreader.go:234
+msgid "Keep original message?"
+msgstr "Оставить исходное сообщение?"
 
 #: internal/menu/actions_iptrade.go:73
 msgid "Key"
@@ -1682,7 +1694,7 @@ msgstr "Новое количество %s на продажу"
 msgid "New tax rate?"
 msgstr "Новая ставка налога?"
 
-#: internal/menu/menu.go:1181
+#: internal/menu/menu.go:1182
 msgid "No"
 msgstr "Нет"
 
@@ -1741,6 +1753,10 @@ msgid ""
 msgstr ""
 "От этой державы к нам не пришли очки, поэтому торговец оружием не может "
 "назначить цену ракеты для неё."
+
+#: internal/menu/actions_market.go:149
+msgid "Nobody is selling %s right now."
+msgstr "Сейчас никто не продаёт: %s."
 
 #: internal/menu/actions_ipmessages.go:159
 msgid "None"
@@ -2583,6 +2599,10 @@ msgstr ""
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "Ставка по займу — %s%% в день, всего %s%% процентов."
 
+#: internal/menu/actions.go:17
+msgid "The realm has changed — try again."
+msgstr "Держава изменилась — попробуйте снова."
+
 #: internal/menu/actions_industry.go:90
 msgid "The remaining %d%% is turned into gold."
 msgstr "Остальные %d%% обращаются в золото."
@@ -3030,7 +3050,7 @@ msgstr "Какая часть света?"
 msgid "Which regions will you give up?"
 msgstr "Какие регионы отдадите?"
 
-#: internal/menu/menu.go:670
+#: internal/menu/menu.go:671
 msgid "While you were at the menus, this has happened:"
 msgstr "Пока вы были в меню, произошло следующее:"
 
@@ -3092,7 +3112,7 @@ msgstr "Написать,"
 msgid "Writing to:"
 msgstr "Кому пишем:"
 
-#: internal/menu/menu.go:1180
+#: internal/menu/menu.go:1181
 msgid "Yes"
 msgstr "Да"
 
@@ -3283,6 +3303,10 @@ msgstr "Вы начали строительство штаба."
 msgid "You have used all %d lines."
 msgstr "Вы использовали все %d строк."
 
+#: internal/menu/actions.go:28
+msgid "You have used all your attacks for today."
+msgstr "Все атаки на сегодня уже использованы."
+
 #: internal/game/covert.go:367
 msgid "You hold no bribed agent inside that realm."
 msgstr "У вас нет подкупленного агента в этой державе."
@@ -3319,6 +3343,10 @@ msgstr ""
 #: internal/game/market.go:16
 msgid "You need a pact with that realm to send it a trade deal."
 msgstr "Чтобы отправить сделку этой державе, нужен пакт с ней."
+
+#: internal/menu/directives.go:13
+msgid "You no longer hold the office of BBS Coordinator."
+msgstr "Вы больше не занимаете пост координатора станции."
 
 #: internal/menu/actions_trade.go:188
 msgid "You offer %s to %s"
@@ -3445,7 +3473,7 @@ msgstr "Ваша держава ещё под защитой."
 msgid "Your dominion lost %s%s%s people."
 msgstr "Ваши владения потеряли %s%s%s человек."
 
-#: internal/menu/menu.go:681
+#: internal/menu/menu.go:682
 msgid ""
 "Your empire has collapsed — you have been eliminated. Return on a later day "
 "to build a new realm."
@@ -3557,6 +3585,10 @@ msgstr "Ваши очки выросли на %d."
 #: internal/menu/actions_iptradedeal.go:82
 msgid "Your shipment is on its way to %s of %s."
 msgstr "Ваш груз отправлен барону %s с %s."
+
+#: internal/menu/actions.go:23
+msgid "Your target is no longer there."
+msgstr "Вашей цели больше нет."
 
 #: internal/menu/turnstages.go:471
 msgid "Your vote for BBS Coordinator is %s."
@@ -3693,6 +3725,10 @@ msgstr "никто"
 #: internal/game/ibbs.go:16
 msgid "no such group attack"
 msgstr "нет такой групповой атаки"
+
+#: internal/menu/config_editor.go:447
+msgid "not a valid date (use YYYY-MM-DD)"
+msgstr "неверная дата (формат ГГГГ-ММ-ДД)"
 
 #: internal/menu/actions_trade.go:54
 msgid "nothing"

@@ -32,7 +32,7 @@ msgstr " — escolha um tópico:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:943
+#: internal/menu/menu.go:944
 msgid "# Owned"
 msgstr "Qtd."
 
@@ -583,6 +583,10 @@ msgstr "Atacar Piratas"
 msgid "Attack Type"
 msgstr "Tipo de Ataque"
 
+#: internal/menu/actions_ipattack.go:223
+msgid "Attack aborted."
+msgstr "Ataque cancelado."
+
 #: internal/menu/actions_interbbs.go:225
 msgid "Attack party #%d has been called off and its forces sent home."
 msgstr "O grupo de ataque #%d foi desfeito e suas forças voltaram para casa."
@@ -735,6 +739,10 @@ msgstr "Comprar quantos %s"
 #: internal/menu/actions_attack.go:467
 msgid "Buy it?"
 msgstr "Comprar?"
+
+#: internal/menu/actions.go:121
+msgid "Buying military units is disabled in this league."
+msgstr "A compra de unidades militares está desligada nesta liga."
 
 #: internal/menu/bulletinfiles.go:275
 msgid "CRUSHED"
@@ -1469,7 +1477,7 @@ msgstr "Chega a eles no turno %d do dia deles, não antes."
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Vai custar %s milhões de ouro ao seu planeta para financiar. Aceita?"
 
-#: internal/menu/menu.go:942
+#: internal/menu/menu.go:943
 msgid "Item"
 msgstr "Item"
 
@@ -1496,6 +1504,10 @@ msgstr "Manter"
 #: internal/menu/timezone.go:31
 msgid "Keep current"
 msgstr "Manter o atual"
+
+#: internal/menu/mailreader.go:234
+msgid "Keep original message?"
+msgstr "Manter a mensagem original?"
 
 #: internal/menu/actions_iptrade.go:73
 msgid "Key"
@@ -1696,7 +1708,7 @@ msgstr "Nova quantidade de %s à venda"
 msgid "New tax rate?"
 msgstr "Novo imposto?"
 
-#: internal/menu/menu.go:1181
+#: internal/menu/menu.go:1182
 msgid "No"
 msgstr "Não"
 
@@ -1759,6 +1771,10 @@ msgid ""
 msgstr ""
 "Nenhuma pontuação desse reino chegou até nós, então o comerciante de armas "
 "não consegue dar preço a um míssil contra ele."
+
+#: internal/menu/actions_market.go:149
+msgid "Nobody is selling %s right now."
+msgstr "Ninguém está vendendo %s agora."
 
 #: internal/menu/actions_ipmessages.go:159
 msgid "None"
@@ -2603,6 +2619,10 @@ msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr ""
 "A taxa do empréstimo será de %s%% ao dia, somando %s%% de juros no total."
 
+#: internal/menu/actions.go:17
+msgid "The realm has changed — try again."
+msgstr "O reino mudou — tente de novo."
+
 #: internal/menu/actions_industry.go:90
 msgid "The remaining %d%% is turned into gold."
 msgstr "Os %d%% restantes viram ouro."
@@ -3051,7 +3071,7 @@ msgstr "Qual parte do mundo?"
 msgid "Which regions will you give up?"
 msgstr "Quais regiões você vai abrir mão?"
 
-#: internal/menu/menu.go:670
+#: internal/menu/menu.go:671
 msgid "While you were at the menus, this has happened:"
 msgstr "Enquanto você estava nos menus, aconteceu o seguinte:"
 
@@ -3114,7 +3134,7 @@ msgstr "Escrever,"
 msgid "Writing to:"
 msgstr "Escrevendo para:"
 
-#: internal/menu/menu.go:1180
+#: internal/menu/menu.go:1181
 msgid "Yes"
 msgstr "Sim"
 
@@ -3307,6 +3327,10 @@ msgstr "Você começou a obra do seu Quartel-General."
 msgid "You have used all %d lines."
 msgstr "Você usou todas as %d linhas."
 
+#: internal/menu/actions.go:28
+msgid "You have used all your attacks for today."
+msgstr "Você já usou todos os seus ataques de hoje."
+
 #: internal/game/covert.go:367
 msgid "You hold no bribed agent inside that realm."
 msgstr "Você não tem nenhum agente subornado dentro daquele reino."
@@ -3348,6 +3372,10 @@ msgid "You need a pact with that realm to send it a trade deal."
 msgstr ""
 "Você precisa de um pacto com aquele reino para lhe enviar um acordo "
 "comercial."
+
+#: internal/menu/directives.go:13
+msgid "You no longer hold the office of BBS Coordinator."
+msgstr "Você não ocupa mais o cargo de Coordenador do BBS."
 
 #: internal/menu/actions_trade.go:188
 msgid "You offer %s to %s"
@@ -3471,7 +3499,7 @@ msgstr "Seu domínio ainda está sob proteção."
 msgid "Your dominion lost %s%s%s people."
 msgstr "Seu domínio perdeu %s%s%s pessoas."
 
-#: internal/menu/menu.go:681
+#: internal/menu/menu.go:682
 msgid ""
 "Your empire has collapsed — you have been eliminated. Return on a later day "
 "to build a new realm."
@@ -3581,6 +3609,10 @@ msgstr "Seus pontos subiram %d."
 #: internal/menu/actions_iptradedeal.go:82
 msgid "Your shipment is on its way to %s of %s."
 msgstr "Sua remessa está a caminho de %s de %s."
+
+#: internal/menu/actions.go:23
+msgid "Your target is no longer there."
+msgstr "Seu alvo não está mais lá."
 
 #: internal/menu/turnstages.go:471
 msgid "Your vote for BBS Coordinator is %s."
@@ -3716,6 +3748,10 @@ msgstr "ninguém"
 #: internal/game/ibbs.go:16
 msgid "no such group attack"
 msgstr "não existe esse ataque em grupo"
+
+#: internal/menu/config_editor.go:447
+msgid "not a valid date (use YYYY-MM-DD)"
+msgstr "data inválida (use AAAA-MM-DD)"
 
 #: internal/menu/actions_trade.go:54
 msgid "nothing"

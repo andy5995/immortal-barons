@@ -32,7 +32,7 @@ msgstr " - kies een onderwerp:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:943
+#: internal/menu/menu.go:944
 msgid "# Owned"
 msgstr "Aantal"
 
@@ -587,6 +587,10 @@ msgstr "Piraten aanvallen"
 msgid "Attack Type"
 msgstr "Soort aanval"
 
+#: internal/menu/actions_ipattack.go:223
+msgid "Attack aborted."
+msgstr "Aanval afgebroken."
+
 #: internal/menu/actions_interbbs.go:225
 msgid "Attack party #%d has been called off and its forces sent home."
 msgstr "Aanvalsgroep #%d is afgeblazen en de troepen zijn naar huis gestuurd."
@@ -738,6 +742,10 @@ msgstr "Hoeveel %s kopen"
 #: internal/menu/actions_attack.go:467
 msgid "Buy it?"
 msgstr "Kopen?"
+
+#: internal/menu/actions.go:121
+msgid "Buying military units is disabled in this league."
+msgstr "Militaire eenheden kopen staat uit in deze competitie."
 
 #: internal/menu/bulletinfiles.go:275
 msgid "CRUSHED"
@@ -1473,7 +1481,7 @@ msgstr "Het bereikt hen niet eerder dan beurt %d van hun dag."
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "De financiering kost uw planeet %s miljoen goud. Akkoord?"
 
-#: internal/menu/menu.go:942
+#: internal/menu/menu.go:943
 msgid "Item"
 msgstr "Item"
 
@@ -1500,6 +1508,10 @@ msgstr "Bewaren"
 #: internal/menu/timezone.go:31
 msgid "Keep current"
 msgstr "Huidige behouden"
+
+#: internal/menu/mailreader.go:234
+msgid "Keep original message?"
+msgstr "Oorspronkelijk bericht bewaren?"
 
 #: internal/menu/actions_iptrade.go:73
 msgid "Key"
@@ -1698,7 +1710,7 @@ msgstr "Nieuw aantal %s te koop"
 msgid "New tax rate?"
 msgstr "Nieuw belastingtarief?"
 
-#: internal/menu/menu.go:1181
+#: internal/menu/menu.go:1182
 msgid "No"
 msgstr "Nee"
 
@@ -1759,6 +1771,10 @@ msgid ""
 msgstr ""
 "Er zijn geen scores van dat rijk bij ons aangekomen, dus de wapenhandelaar "
 "kan er geen prijs voor een raket voor bepalen."
+
+#: internal/menu/actions_market.go:149
+msgid "Nobody is selling %s right now."
+msgstr "Niemand verkoopt op dit moment %s."
 
 #: internal/menu/actions_ipmessages.go:159
 msgid "None"
@@ -2609,6 +2625,10 @@ msgstr ""
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "De leenrente is %s%% per dag, in totaal %s%% rente."
 
+#: internal/menu/actions.go:17
+msgid "The realm has changed — try again."
+msgstr "Het rijk is gewijzigd - probeer het opnieuw."
+
 #: internal/menu/actions_industry.go:90
 msgid "The remaining %d%% is turned into gold."
 msgstr "De overige %d%% wordt omgezet in goud."
@@ -3057,7 +3077,7 @@ msgstr "Welk deel van de wereld?"
 msgid "Which regions will you give up?"
 msgstr "Welke regio's geeft u op?"
 
-#: internal/menu/menu.go:670
+#: internal/menu/menu.go:671
 msgid "While you were at the menus, this has happened:"
 msgstr "Terwijl u in de menu's was, is dit gebeurd:"
 
@@ -3120,7 +3140,7 @@ msgstr "Schrijven,"
 msgid "Writing to:"
 msgstr "Schrijven aan:"
 
-#: internal/menu/menu.go:1180
+#: internal/menu/menu.go:1181
 msgid "Yes"
 msgstr "Ja"
 
@@ -3313,6 +3333,10 @@ msgstr "U bent begonnen met de bouw van uw hoofdkwartier."
 msgid "You have used all %d lines."
 msgstr "U hebt alle %d regels gebruikt."
 
+#: internal/menu/actions.go:28
+msgid "You have used all your attacks for today."
+msgstr "U hebt al uw aanvallen voor vandaag gebruikt."
+
 #: internal/game/covert.go:367
 msgid "You hold no bribed agent inside that realm."
 msgstr "U hebt geen omgekochte agent binnen dat rijk."
@@ -3354,6 +3378,10 @@ msgid "You need a pact with that realm to send it a trade deal."
 msgstr ""
 "U heeft een pact met dat rijk nodig om er een handelsovereenkomst heen te "
 "sturen."
+
+#: internal/menu/directives.go:13
+msgid "You no longer hold the office of BBS Coordinator."
+msgstr "U bekleedt het ambt van BBS-coördinator niet meer."
 
 #: internal/menu/actions_trade.go:188
 msgid "You offer %s to %s"
@@ -3482,7 +3510,7 @@ msgstr "Uw rijk staat nog onder bescherming."
 msgid "Your dominion lost %s%s%s people."
 msgstr "Uw rijk verloor %s%s%s inwoners."
 
-#: internal/menu/menu.go:681
+#: internal/menu/menu.go:682
 msgid ""
 "Your empire has collapsed — you have been eliminated. Return on a later day "
 "to build a new realm."
@@ -3595,6 +3623,10 @@ msgstr "Uw score steeg met %d."
 #: internal/menu/actions_iptradedeal.go:82
 msgid "Your shipment is on its way to %s of %s."
 msgstr "Uw zending is onderweg naar %s van %s."
+
+#: internal/menu/actions.go:23
+msgid "Your target is no longer there."
+msgstr "Uw doelwit is er niet meer."
 
 #: internal/menu/turnstages.go:471
 msgid "Your vote for BBS Coordinator is %s."
@@ -3732,6 +3764,10 @@ msgstr "niemand"
 #: internal/game/ibbs.go:16
 msgid "no such group attack"
 msgstr "die groepsaanval bestaat niet"
+
+#: internal/menu/config_editor.go:447
+msgid "not a valid date (use YYYY-MM-DD)"
+msgstr "geen geldige datum (gebruik JJJJ-MM-DD)"
 
 #: internal/menu/actions_trade.go:54
 msgid "nothing"

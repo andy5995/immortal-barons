@@ -146,7 +146,7 @@ func marketBuy(s session.Session, w *ctx, good string) {
 	p := w.Player()
 	sellers := w.MarketSellers(good, p.Name)
 	if len(sellers) == 0 {
-		fail(s, fmt.Errorf("Nobody is selling %s right now.", tr(s, good)))
+		fail(s, fmt.Errorf(tr(s, "Nobody is selling %s right now."), tr(s, good)))
 		return
 	}
 	fmt.Fprintf(s, "\n%s%-4s%-16s%12s %10s%s\n", ansi.FgBrightWhite,

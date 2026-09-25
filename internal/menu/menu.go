@@ -62,8 +62,9 @@ type ctx struct {
 	// mail stop at the head of each later turn passes over them. Ignore means
 	// "not now", and a barons plays up to ten turns a sitting; re-reading the same
 	// box every one of them is what made [I] useless. Read Messages and the stop
-	// made on choosing Play Game still show everything, as BRE's reader does. Messages are comparable values,
-	// and applyMailActions already matches them that way.
+	// made on choosing Play Game still show everything, as BRE's reader does.
+	// Messages are comparable values, and applyMailActions already matches them
+	// that way.
 	ignoredMail map[game.Message]bool
 	// turnPlayed records that this session has begun a turn, which is what the
 	// InterPlanetary menu's turn gate tests (#162). The original keeps the same
