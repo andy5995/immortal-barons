@@ -84,15 +84,15 @@ msgstr "%d Tage"
 msgid "%d faults"
 msgstr "%d Fehler"
 
-#: internal/menu/turnstages.go:240
+#: internal/menu/turnstages.go:236
 msgid "%d gold is requested to boost popular support."
 msgstr "%d Gold werden erbeten, um den Rückhalt zu stärken."
 
-#: internal/menu/turnstages.go:255
+#: internal/menu/turnstages.go:251
 msgid "%d gold is requested to improve military morale."
 msgstr "%d Gold werden erbeten, um die Moral der Truppen zu heben."
 
-#: internal/menu/turnstages.go:539
+#: internal/menu/turnstages.go:535
 msgid "%d matched! You win %s gold, paid straight into your bank."
 msgstr "%d Treffer! Sie gewinnen %s Gold, direkt auf Ihr Bankkonto."
 
@@ -100,7 +100,7 @@ msgstr "%d Treffer! Sie gewinnen %s Gold, direkt auf Ihr Bankkonto."
 msgid "%d regions are clean again — choose which types to hold them as."
 msgstr "%d Regionen sind wieder sauber - wählen Sie ihre Typen."
 
-#: internal/menu/turnstages.go:185
+#: internal/menu/turnstages.go:187
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d Regionen rebellierten mangels Unterhalt."
 
@@ -108,11 +108,11 @@ msgstr "%d Regionen rebellierten mangels Unterhalt."
 msgid "%d troopers, %d jets, %d tanks, %d bombers"
 msgstr "%d Soldaten, %d Jets, %d Panzer, %d Bomber"
 
-#: internal/game/combat.go:290
+#: internal/game/combat.go:296
 msgid "%d troopers, %d turrets, %d tanks, %d jets"
 msgstr "%d Soldaten, %d Geschütztürme, %d Panzer, %d Jets"
 
-#: internal/menu/turnstages.go:182
+#: internal/menu/turnstages.go:184
 msgid "%d units deserted for lack of pay."
 msgstr "%d Einheiten desertierten mangels Sold."
 
@@ -156,7 +156,7 @@ msgstr "%s gegen welchen Planeten?"
 msgid "%s attacked you and took %d regions. You lost %s."
 msgstr "%s griff Sie an und nahm %d Regionen. Sie verloren %s."
 
-#: internal/game/combat.go:273
+#: internal/game/combat.go:279
 msgid "%s attacked you and was repelled. You lost %s."
 msgstr "%s griff Sie an und wurde abgewehrt. Sie verloren %s."
 
@@ -172,7 +172,7 @@ msgstr "%s Gold ist für diese Gebote zurückgelegt."
 msgid "%s gold is required to maintain your regions."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
-#: internal/menu/turnstages.go:219
+#: internal/menu/turnstages.go:215
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr "%s Gold entseuchen %s deiner %s Ödland-Regionen."
 
@@ -621,7 +621,7 @@ msgstr "Mittlere Laufzeiten zu allen Boards"
 msgid "Awaiting a reply:"
 msgstr "Warten auf Antwort:"
 
-#: internal/menu/turnstages.go:464
+#: internal/menu/turnstages.go:460
 msgid "BBS Coordinator"
 msgstr "BBS-Koordinator"
 
@@ -761,7 +761,7 @@ msgstr "Absagen?"
 msgid "Canceled — no changes were saved."
 msgstr "Abgebrochen - nichts wurde gespeichert."
 
-#: internal/menu/turnstages.go:503
+#: internal/menu/turnstages.go:499
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr "Möchten Sie Ihr Glück in der Lotterie der Königin versuchen?"
 
@@ -833,33 +833,33 @@ msgstr "Zone wählen..."
 msgid "Chopper's Fair Market"
 msgstr "Choppers Fairer Markt"
 
-#: internal/menu/turnrecap.go:530
+#: internal/menu/turnrecap.go:533
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Die Rebellion kostet Sie %d%% Ihres Reiches und seiner Truppen."
 
-#: internal/menu/turnrecap.go:526
+#: internal/menu/turnrecap.go:529
 msgid ""
 "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Vereinzelte Aufstände kosten Sie %d%% Ihres Reiches und seiner "
 "Truppen."
 
-#: internal/menu/turnrecap.go:528
+#: internal/menu/turnrecap.go:531
 msgid ""
 "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Der Aufstand breitet sich aus und nimmt %d%% Ihres Reiches und "
 "seiner Truppen."
 
-#: internal/menu/turnrecap.go:532
+#: internal/menu/turnrecap.go:535
 msgid ""
 "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 "Bürgerkrieg! Ganze Provinzen erheben sich und nehmen %d%% Ihres Reiches und "
 "seiner Truppen."
 
-#: internal/menu/turnrecap.go:534
+#: internal/menu/turnrecap.go:537
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Bürgerkrieg! Ihr Reich zerfällt beinahe - %d%% davon sind verloren."
 
@@ -895,7 +895,7 @@ msgstr "Konfiguration gespeichert."
 msgid "Confirm?"
 msgstr "Bestätigen?"
 
-#: internal/menu/gameflow.go:352
+#: internal/menu/gameflow.go:371
 msgid "Continue to your next turn?"
 msgstr "Weiter zum nächsten Zug?"
 
@@ -1123,7 +1123,7 @@ msgstr "Möchtest du die Bank aufsuchen?"
 msgid "Done"
 msgstr "Fertig"
 
-#: internal/menu/turnstages.go:522
+#: internal/menu/turnstages.go:518
 msgid "Drawn:"
 msgstr "Gezogen:"
 
@@ -1173,7 +1173,7 @@ msgstr "Imperiumsstatus"
 msgid "End Protection"
 msgstr "Schutz beenden"
 
-#: internal/menu/turnrecap.go:477
+#: internal/menu/turnrecap.go:480
 msgid "End of Turn Statistics:"
 msgstr "Statistik am Zugende:"
 
@@ -1656,10 +1656,6 @@ msgstr "Nachrichten"
 msgid "Military"
 msgstr "Militär"
 
-#: internal/menu/turnstages.go:195
-msgid "Military morale rose %d points."
-msgstr "Die Moral stieg um %d Punkte."
-
 #: internal/game/ibbs.go:30
 msgid "Missile operations are not part of this game."
 msgstr "Raketenangriffe sind in diesem Spiel nicht vorgesehen."
@@ -1748,7 +1744,7 @@ msgstr "Zurzeit formiert sich kein Gruppenangriff."
 msgid "No inter-BBS scores have been imported yet."
 msgstr "Es wurden noch keine Inter-BBS-Wertungen importiert."
 
-#: internal/menu/turnstages.go:536
+#: internal/menu/turnstages.go:532
 msgid "No matches. The Queen thanks you for your contribution."
 msgstr "Keine Treffer. Die Königin dankt für Ihren Beitrag."
 
@@ -1998,7 +1994,7 @@ msgstr "Ergebnis"
 msgid "Owned"
 msgstr "Besitz"
 
-#: internal/menu/turnstages.go:557
+#: internal/menu/turnstages.go:553
 msgid "Pick your six letters:"
 msgstr "Wählen Sie Ihre sechs Buchstaben:"
 
@@ -2055,10 +2051,6 @@ msgstr ""
 "Der Rückhalt im Volk ist gering. Er senkt unser Einkommen an der Küste und "
 "die Zahl der Menschen, die unser Land aufnehmen kann. Senken Sie die Steuern "
 "oder geben Sie Gold für den Rückhalt aus."
-
-#: internal/menu/turnstages.go:192
-msgid "Popular support rose %d points."
-msgstr "Der Rückhalt stieg um %d Punkte."
 
 #: internal/menu/empire_status_screen.go:100
 msgid "Population"
@@ -2175,7 +2167,7 @@ msgstr "Forderung - Waren, die Sie zurück wollen:"
 msgid "Returns expected to be approximately %s gold."
 msgstr "Der Ertrag wird etwa %s Gold betragen."
 
-#: internal/menu/turnrecap.go:493
+#: internal/menu/turnrecap.go:496
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Aufstände sind wegen hoher Steuern ausgebrochen!"
 
@@ -2268,7 +2260,7 @@ msgstr "SpyGuy senden"
 msgid "Send Trade Deal"
 msgstr "Handelsangebot senden"
 
-#: internal/menu/gameflow.go:308
+#: internal/menu/gameflow.go:327
 msgid "Send a message?"
 msgstr "Eine Nachricht senden?"
 
@@ -2368,7 +2360,7 @@ msgstr "%d verkauft. Gold: %d"
 msgid "Sorry, trade deals must be sent for at least %d days."
 msgstr "Leider müssen Handelsangebote für mindestens %d Tage gesendet werden."
 
-#: internal/menu/gameflow.go:144
+#: internal/menu/gameflow.go:145
 msgid "Sorry, you have used all of your turns today."
 msgstr "Sie haben heute alle Ihre Züge verbraucht."
 
@@ -2580,7 +2572,7 @@ msgstr "Der Gooie Kablooie ist unterwegs. Mehr lässt sich nicht mehr tun."
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "Der Gooie Kablooie wurde ZERSTÖRT!"
 
-#: internal/menu/turnstages.go:416
+#: internal/menu/turnstages.go:412
 msgid "The Queen Royale opens her coffers and refunds you %s gold!"
 msgstr "Die Queen Royale öffnet ihre Truhen und erstattet Ihnen %s Gold!"
 
@@ -3201,7 +3193,7 @@ msgstr "Sie stehen unter Schutz."
 msgid "You can afford %s%d%s regions."
 msgstr "Du kannst dir %s%d%s Regionen leisten."
 
-#: internal/menu/turnstages.go:480
+#: internal/menu/turnstages.go:476
 msgid "You can change it from the System menu."
 msgstr "Sie können es im Systemmenü ändern."
 
@@ -3217,7 +3209,7 @@ msgstr "Sie können sich zu diesem Preis nicht eine Einheit leisten."
 msgid "You cannot buy from your own listing."
 msgstr "Sie können nicht von Ihrem eigenen Angebot kaufen."
 
-#: internal/menu/turnstages.go:477
+#: internal/menu/turnstages.go:473
 msgid ""
 "You cannot change it until your new-realm protection ends, %d turns from now."
 msgstr ""
@@ -3391,7 +3383,7 @@ msgstr "Sie haben keinen bestochenen Agenten in diesem Reich."
 msgid "You hold no bribed agents to work through."
 msgstr "Sie haben keine bestochenen Agenten, durch die Sie wirken könnten."
 
-#: internal/menu/turnstages.go:465
+#: internal/menu/turnstages.go:461
 msgid "You hold the office of %s."
 msgstr "Sie bekleiden das Amt des %s."
 
@@ -3523,7 +3515,7 @@ msgid "Your armed forces require %s gold."
 msgstr "Deine Streitkräfte benötigen %s Gold."
 
 # Turn pipeline — maintenance
-#: internal/menu/turnstages.go:365
+#: internal/menu/turnstages.go:361
 msgid "Your armed forces require %s units of food."
 msgstr "Deine Streitkräfte benötigen %s Einheiten Nahrung."
 
@@ -3543,7 +3535,7 @@ msgstr "Deine Verluste: %s."
 msgid "Your choice?"
 msgstr "Ihre Wahl?"
 
-#: internal/menu/turnrecap.go:487
+#: internal/menu/turnrecap.go:490
 msgid "Your dominion gained %s%s%s people."
 msgstr "Ihr Herrschaftsgebiet gewann %s%s%s Menschen."
 
@@ -3551,7 +3543,7 @@ msgstr "Ihr Herrschaftsgebiet gewann %s%s%s Menschen."
 msgid "Your dominion is still under protection."
 msgstr "Ihr Reich steht noch unter Schutz."
 
-#: internal/menu/turnrecap.go:489
+#: internal/menu/turnrecap.go:492
 msgid "Your dominion lost %s%s%s people."
 msgstr "Ihr Herrschaftsgebiet verlor %s%s%s Menschen."
 
@@ -3632,7 +3624,7 @@ msgstr "Ihre Nachricht ist unterwegs zu %d Planeten."
 msgid "Your new-realm protection will end when this turn does."
 msgstr "Ihr Neureich-Schutz endet mit diesem Zug."
 
-#: internal/menu/turnstages.go:364
+#: internal/menu/turnstages.go:360
 msgid "Your people need %s units of food."
 msgstr "Ihr Volk braucht %s Einheiten Nahrung."
 
@@ -3652,7 +3644,7 @@ msgstr ""
 "Dein Reich wurde bereits einmal umbenannt. Der Name, den es jetzt trägt, "
 "bleibt."
 
-#: internal/menu/gameflow.go:128
+#: internal/menu/gameflow.go:129
 msgid "Your realm is no longer active."
 msgstr "Ihr Reich ist nicht mehr aktiv."
 
@@ -3676,7 +3668,7 @@ msgstr "Ihre Lieferung ist unterwegs zu %s von %s."
 msgid "Your target is no longer there."
 msgstr "Ihr Ziel ist nicht mehr da."
 
-#: internal/menu/turnstages.go:471
+#: internal/menu/turnstages.go:467
 msgid "Your vote for BBS Coordinator is %s."
 msgstr "Ihre Stimme für den BBS-Koordinator ist %s."
 
@@ -3806,7 +3798,7 @@ msgstr "kein Boardschlüssel geladen"
 msgid "no coordinator key is loaded"
 msgstr "kein Koordinatorschlüssel geladen"
 
-#: internal/menu/turnstages.go:469
+#: internal/menu/turnstages.go:465
 msgid "no one"
 msgstr "niemand"
 
@@ -4030,15 +4022,15 @@ msgstr "dieser Planet"
 msgid "took %d"
 msgstr "nahm %d"
 
-#: internal/menu/turnrecap.go:498
+#: internal/menu/turnrecap.go:501
 msgid "troops deserted due to low morale."
 msgstr "Truppen desertierten wegen niedriger Moral."
 
-#: internal/menu/gameflow.go:216
+#: internal/menu/gameflow.go:217
 msgid "units of Food consumed."
 msgstr "Einheiten Nahrung verbraucht."
 
-#: internal/menu/turnrecap.go:491
+#: internal/menu/turnrecap.go:494
 msgid "units of food spoiled."
 msgstr "Nahrungseinheiten sind verdorben."
 
@@ -4089,6 +4081,12 @@ msgstr "─»>Eingabe zum Fortfahren, Q zum Beenden<«─"
 #: internal/menu/input.go:473
 msgid "─»>Paused<«─"
 msgstr "─»>Pause<«─"
+
+#~ msgid "Military morale rose %d points."
+#~ msgstr "Die Moral stieg um %d Punkte."
+
+#~ msgid "Popular support rose %d points."
+#~ msgstr "Der Rückhalt stieg um %d Punkte."
 
 #~ msgid "Planetary Bulletin:"
 #~ msgstr "Planetenaushang:"

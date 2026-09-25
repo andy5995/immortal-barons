@@ -10,9 +10,13 @@ title: 'Belastingen, steun en oproer'
 Uw belastingtarief bepaalt hoeveel goud u van uw volk int, en het bepaalt
 hun stemming.
 
+Wat u int, hangt ook af van de steun van het volk: een rijk met de helft aan
+steun int de helft van de belasting. Een hoog belastingtarief dat de steun
+verlaagt, kan dus minder opleveren dan een gematigd tarief.
+
 Elke beurt beïnvloedt uw belastingtarief de steun van het volk. Een laag
 tarief verhoogt die, een hoog tarief verlaagt die, en een tarief daartussen
-laat die gelijk. Weinig steun verlaagt uw inkomsten uit kustregio's
+laat die gelijk. Weinig steun verlaagt ook uw inkomsten uit kustregio's
 (toerisme) sterk.
 
 Oproer wordt waarschijnlijker naarmate uw belastingtarief boven een veilig

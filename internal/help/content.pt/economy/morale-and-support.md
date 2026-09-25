@@ -21,6 +21,7 @@ baixos. Veja Impostos, Apoio e Tumultos.
 
 Apoio Popular:
 
+- define quanto imposto você arrecada (veja Impostos, Apoio e Tumultos)
 - define a sua renda litorânea (turismo), que despenca quando o Apoio está
   baixo
 - define quanta gente as suas regiões conseguem abrigar
@@ -67,3 +68,9 @@ pedido compra cerca de metade dos pontos. Você pode pagar até uma vez e meia
 o pedido, e o extra compra mais de quinze pontos. Nenhum dos dois números
 passa de 100, então pagar demais num reino quase satisfeito desperdiça a
 diferença.
+
+Nada muda no momento em que você paga. Os pontos que você compra reduzem o
+que os custos não pagos deste turno tiram. A Moral muda logo depois que sua
+comida é distribuída, antes de qualquer menu abrir. O Apoio muda no fim do
+turno. Assim, a Moral comprada neste turno é a Moral com que seu exército
+luta neste turno.

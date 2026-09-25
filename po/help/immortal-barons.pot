@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-25 07:53-0500\n"
+"POT-Creation-Date: 2026-09-25 07:56-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1287,25 +1287,31 @@ msgid "Popular Support:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:25
+#: internal/help/content/economy/morale-and-support.md:26
+#, markdown-text
+msgid "sets how much tax you collect (see Taxes, Support, and Riots)"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:26
 #, markdown-text
 msgid "sets your Coastal (tourism) income, which collapses when Support is low"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:25
+#: internal/help/content/economy/morale-and-support.md:26
 #, markdown-text
 msgid "sets how many people your regions can hold"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:25
+#: internal/help/content/economy/morale-and-support.md:26
 #, markdown-text
 msgid "when it drops under 10, it starts pulling Morale down with it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:33
+#: internal/help/content/economy/morale-and-support.md:34
 #, markdown-text
 msgid ""
 "Military Morale scales how hard your army fights, both attacking and "
@@ -1318,7 +1324,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:38
+#: internal/help/content/economy/morale-and-support.md:39
 #, markdown-text
 msgid ""
 "Auto-Pay Maintenance pays your bills without asking only while **both** "
@@ -1328,13 +1334,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:39
+#: internal/help/content/economy/morale-and-support.md:40
 #, markdown-text, no-wrap
 msgid "What lowers them"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 #, markdown-text
 msgid ""
 "Underpaying your armed forces costs Morale. Underpaying your region upkeep, "
@@ -1343,13 +1349,13 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 #, markdown-text
 msgid "A riot from high taxes costs Support."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 #, markdown-text
 msgid ""
 "Declaring war on a ruler you hold an agreement with costs you "
@@ -1358,7 +1364,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 #, markdown-text
 msgid ""
 "A chemical or biological strike on your realm hurts both. The plague is far "
@@ -1366,7 +1372,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 #, markdown-text
 msgid ""
 "Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
@@ -1374,13 +1380,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:53
+#: internal/help/content/economy/morale-and-support.md:54
 #, markdown-text, no-wrap
 msgid "Paying them back"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:59
+#: internal/help/content/economy/morale-and-support.md:60
 #, markdown-text
 msgid ""
 "At the maintenance stage the crown asks for gold to buy back up to fifteen "
@@ -1391,13 +1397,24 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:63
+#: internal/help/content/economy/morale-and-support.md:65
 #, markdown-text
 msgid ""
 "What you pay buys points in proportion, so paying half the request buys "
 "about half the points. You may pay up to half again as much as is asked, and "
 "the extra buys more than fifteen points. Neither number can pass 100, so "
 "overpaying a nearly-content realm wastes the difference."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:69
+#, markdown-text
+msgid ""
+"Nothing changes the moment you pay. The points you buy reduce what this "
+"turn's unpaid costs take away. Morale changes right after your food is paid "
+"out, before any of your menus open. Support changes at the end of the "
+"turn. So Morale bought this turn is the Morale your army fights with this "
+"turn."
 msgstr ""
 
 #. type: Title #
@@ -1524,13 +1541,22 @@ msgstr ""
 #: internal/help/content/economy/taxes.md:16
 #, markdown-text
 msgid ""
-"Each turn your tax rate moves Popular Support. A low rate raises it, a high "
-"rate lowers it, and a rate in between leaves it where it is. Low Support "
-"badly cuts your Coastal (tourism) income."
+"What you collect also depends on Popular Support: a realm at half Support "
+"collects half the tax. So a high tax rate that lowers Support can earn less "
+"than a moderate one."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:19
+#: internal/help/content/economy/taxes.md:20
+#, markdown-text
+msgid ""
+"Each turn your tax rate moves Popular Support. A low rate raises it, a high "
+"rate lowers it, and a rate in between leaves it where it is. Low Support "
+"also badly cuts your Coastal (tourism) income."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:23
 #, markdown-text
 msgid ""
 "Riots grow more likely as your tax rate climbs past a safe level. A riot "
@@ -1539,7 +1565,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:22
+#: internal/help/content/economy/taxes.md:26
 #, markdown-text
 msgid ""
 "Taxes and Popular Support also decide how many people your realm can "
@@ -1547,13 +1573,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:23
+#: internal/help/content/economy/taxes.md:27
 #, markdown-text, no-wrap
 msgid "The Queen Royale's tax"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:27
+#: internal/help/content/economy/taxes.md:31
 #, markdown-text
 msgid ""
 "The Queen takes a share of what you earn each turn. You may pay her less "
@@ -1561,7 +1587,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:32
+#: internal/help/content/economy/taxes.md:36
 #, markdown-text
 msgid ""
 "Every coin she collects goes into her purse, and she gives part of that "
@@ -1571,7 +1597,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:35
+#: internal/help/content/economy/taxes.md:39
 #, markdown-text
 msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
@@ -1579,13 +1605,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:36
+#: internal/help/content/economy/taxes.md:40
 #, markdown-text, no-wrap
 msgid "The lottery"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:42
+#: internal/help/content/economy/taxes.md:46
 #, markdown-text
 msgid ""
 "Once a day, as she hands back your refund, the Queen offers a lottery "
@@ -1596,7 +1622,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:47
+#: internal/help/content/economy/taxes.md:51
 #, markdown-text
 msgid ""
 "Pick six letters, one keypress each, and press Enter for any you would "
@@ -1606,43 +1632,43 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 #, markdown-text
 msgid "1 letter: 2,500 gold"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 #, markdown-text
 msgid "2 letters: 10,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 #, markdown-text
 msgid "3 letters: 500,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 #, markdown-text
 msgid "4 letters: 1,000,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 #, markdown-text
 msgid "5 letters: 4,000,000"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 #, markdown-text
 msgid "6 letters: 10,000,000"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:58
+#: internal/help/content/economy/taxes.md:62
 #, markdown-text
 msgid ""
 "Winnings go into your bank. One match still leaves you 2,500 down on the "

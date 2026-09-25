@@ -21,6 +21,7 @@ en oproer.
 
 Steun van het volk:
 
+- bepaalt hoeveel belasting u int (zie Belastingen, steun en oproer)
 - bepaalt uw inkomen uit de kust (toerisme), dat instort wanneer de steun
   laag is
 - bepaalt hoeveel mensen uw regio's kunnen herbergen
@@ -68,3 +69,9 @@ betalen koopt ongeveer de helft van de punten. U mag tot anderhalf maal het
 gevraagde betalen, en het extra bedrag koopt meer dan vijftien punten. Geen
 van beide getallen kan boven de 100 komen, dus bij een vrijwel tevreden rijk
 is te veel betalen weggegooid geld.
+
+Op het moment dat u betaalt, verandert er nog niets. De punten die u koopt,
+verminderen wat de onbetaalde kosten van deze beurt wegnemen. Het moreel
+verandert direct nadat uw voedsel is uitgedeeld, voordat uw menu's
+opengaan. De steun verandert aan het einde van de beurt. Moreel dat u deze
+beurt koopt, is dus het moreel waarmee uw leger deze beurt vecht.

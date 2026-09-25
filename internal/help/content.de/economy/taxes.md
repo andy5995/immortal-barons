@@ -10,10 +10,14 @@ title: 'Steuern, Zustimmung und Aufstände'
 Ihr Steuersatz bestimmt, wie viel Gold Sie von Ihrem Volk einnehmen, und
 prägt dessen Stimmung.
 
+Was Sie einnehmen, hängt auch vom Rückhalt ab: Ein Reich mit halbem Rückhalt
+nimmt die halbe Steuer ein. Ein hoher Steuersatz, der den Rückhalt senkt,
+kann daher weniger einbringen als ein mäßiger.
+
 Jeden Zug bewegt Ihr Steuersatz den Rückhalt. Ein niedriger Satz hebt ihn,
 ein hoher Satz senkt ihn, und ein Satz dazwischen lässt ihn, wo er
-ist. Geringer Rückhalt kürzt Ihr Einkommen aus Küstenregionen (Tourismus)
-stark.
+ist. Geringer Rückhalt kürzt außerdem Ihr Einkommen aus Küstenregionen
+(Tourismus) stark.
 
 Aufstände werden wahrscheinlicher, je weiter Ihr Steuersatz über ein
 sicheres Maß steigt. Ein Aufstand lässt Ihre Zustimmung einbrechen und

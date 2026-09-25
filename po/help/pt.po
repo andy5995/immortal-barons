@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 07:51-0500\n"
+"POT-Creation-Date: 2026-09-25 07:55-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -768,7 +768,15 @@ msgid ""
 "| 5, 6 | airbases, and nothing but jets |\n"
 "| 7, 8 | regions, burning them to waste |\n"
 "| 9, 10 | the food supply |\n"
-msgstr "| Seletor | Para o que ele vai |\n| --- | --- |\n| 0, 1 | o Quartel-General de Inteligência do inimigo, matando agentes |\n| 2, 3 | zonas residenciais, matando pessoas |\n| 4 | bases militares — soldados, caças, torres e tanques juntos |\n| 5, 6 | bases aéreas, e nada além de caças |\n| 7, 8 | regiões, queimando-as até virarem devastadas |\n| 9, 10 | o estoque de comida |\n"
+msgstr ""
+"| Seletor | Para o que ele vai |\n"
+"| --- | --- |\n"
+"| 0, 1 | o Quartel-General de Inteligência do inimigo, matando agentes |\n"
+"| 2, 3 | zonas residenciais, matando pessoas |\n"
+"| 4 | bases militares — soldados, caças, torres e tanques juntos |\n"
+"| 5, 6 | bases aéreas, e nada além de caças |\n"
+"| 7, 8 | regiões, queimando-as até virarem devastadas |\n"
+"| 9, 10 | o estoque de comida |\n"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:29
@@ -1582,24 +1590,29 @@ msgid "Popular Support:"
 msgstr "Apoio Popular:"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:25
+#: internal/help/content/economy/morale-and-support.md:26
+msgid "sets how much tax you collect (see Taxes, Support, and Riots)"
+msgstr "define quanto imposto você arrecada (veja Impostos, Apoio e Tumultos)"
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:26
 msgid "sets your Coastal (tourism) income, which collapses when Support is low"
 msgstr ""
 "define a sua renda litorânea (turismo), que despenca quando o Apoio está "
 "baixo"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:25
+#: internal/help/content/economy/morale-and-support.md:26
 msgid "sets how many people your regions can hold"
 msgstr "define quanta gente as suas regiões conseguem abrigar"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:25
+#: internal/help/content/economy/morale-and-support.md:26
 msgid "when it drops under 10, it starts pulling Morale down with it"
 msgstr "quando cai abaixo de 10, começa a puxar a Moral junto"
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:33
+#: internal/help/content/economy/morale-and-support.md:34
 msgid ""
 "Military Morale scales how hard your army fights, both attacking and "
 "defending.  A full-morale army fights above its paper strength. A broken one "
@@ -1619,7 +1632,7 @@ msgstr ""
 "for a Moral."
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:38
+#: internal/help/content/economy/morale-and-support.md:39
 msgid ""
 "Auto-Pay Maintenance pays your bills without asking only while **both** "
 "numbers read exactly 100, you hold no Waste regions, and you have the gold "
@@ -1632,13 +1645,13 @@ msgstr ""
 "você responde os avisos de manutenção na mão naquele turno."
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:39
+#: internal/help/content/economy/morale-and-support.md:40
 #, no-wrap
 msgid "What lowers them"
 msgstr "O que os derruba"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 msgid ""
 "Underpaying your armed forces costs Morale. Underpaying your region upkeep, "
 "the Queen's tax, or your people's food costs Support. Underfeeding the army "
@@ -1649,12 +1662,12 @@ msgstr ""
 "custa Apoio. Deixar o exército sem comer custa Moral."
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 msgid "A riot from high taxes costs Support."
 msgstr "Um tumulto por causa de imposto alto custa Apoio."
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 msgid ""
 "Declaring war on a ruler you hold an agreement with costs you nothing. "
 "Attacking that ruler without declaring war first ends the agreement too, and "
@@ -1665,7 +1678,7 @@ msgstr ""
 "custa a você apoio e moral."
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 msgid ""
 "A chemical or biological strike on your realm hurts both. The plague is far "
 "worse for your army than the gas is."
@@ -1674,7 +1687,7 @@ msgstr ""
 "muito pior para o seu exército do que o gás."
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:52
+#: internal/help/content/economy/morale-and-support.md:53
 msgid ""
 "Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
 "Forces."
@@ -1683,13 +1696,13 @@ msgstr ""
 "Revoltas e Desmoralizar as Forças."
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:53
+#: internal/help/content/economy/morale-and-support.md:54
 #, no-wrap
 msgid "Paying them back"
 msgstr "Recuperando os dois"
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:59
+#: internal/help/content/economy/morale-and-support.md:60
 msgid ""
 "At the maintenance stage the crown asks for gold to buy back up to fifteen "
 "points of each. Support is priced by the size of your population, Morale by "
@@ -1704,7 +1717,7 @@ msgstr ""
 "Trocas continuam contando."
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:63
+#: internal/help/content/economy/morale-and-support.md:65
 msgid ""
 "What you pay buys points in proportion, so paying half the request buys "
 "about half the points. You may pay up to half again as much as is asked, and "
@@ -1716,6 +1729,15 @@ msgstr ""
 "o pedido, e o extra compra mais de quinze pontos. Nenhum dos dois números "
 "passa de 100, então pagar demais num reino quase satisfeito desperdiça a "
 "diferença."
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:69
+msgid ""
+"Nothing changes the moment you pay. The points you buy reduce what this "
+"turn's unpaid costs take away. Morale changes right after your food is paid "
+"out, before any of your menus open. Support changes at the end of the turn. "
+"So Morale bought this turn is the Morale your army fights with this turn."
+msgstr "Nada muda no momento em que você paga. Os pontos que você compra reduzem o que os custos não pagos deste turno tiram. A Moral muda logo depois que sua comida é distribuída, antes de qualquer menu abrir. O Apoio muda no fim do turno. Assim, a Moral comprada neste turno é a Moral com que seu exército luta neste turno."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -1858,16 +1880,21 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:16
 msgid ""
-"Each turn your tax rate moves Popular Support. A low rate raises it, a high "
-"rate lowers it, and a rate in between leaves it where it is. Low Support "
-"badly cuts your Coastal (tourism) income."
-msgstr ""
-"A cada turno, os seus impostos mexem no Apoio Popular. Impostos baixos o "
-"elevam, impostos altos o baixam, e um valor intermediário o deixa onde está. "
-"Apoio baixo corta muito a sua renda Litorânea (turismo)."
+"What you collect also depends on Popular Support: a realm at half Support "
+"collects half the tax. So a high tax rate that lowers Support can earn less "
+"than a moderate one."
+msgstr "O que você arrecada também depende do Apoio Popular: um reino com metade do Apoio arrecada metade do imposto. Assim, impostos altos que baixam o Apoio podem render menos que impostos moderados."
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:19
+#: internal/help/content/economy/taxes.md:20
+msgid ""
+"Each turn your tax rate moves Popular Support. A low rate raises it, a high "
+"rate lowers it, and a rate in between leaves it where it is. Low Support "
+"also badly cuts your Coastal (tourism) income."
+msgstr "A cada turno, os seus impostos mexem no Apoio Popular. Impostos baixos o elevam, impostos altos o baixam, e um valor intermediário o deixa onde está. Apoio baixo também corta muito a sua renda Litorânea (turismo)."
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:23
 msgid ""
 "Riots grow more likely as your tax rate climbs past a safe level. A riot "
 "crashes your Support and drives off part of your population. Raise taxes "
@@ -1878,7 +1905,7 @@ msgstr ""
 "Aumente os impostos com cuidado."
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:22
+#: internal/help/content/economy/taxes.md:26
 msgid ""
 "Taxes and Popular Support also decide how many people your realm can hold. "
 "See Population."
@@ -1887,13 +1914,13 @@ msgstr ""
 "consegue abrigar. Veja População."
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:23
+#: internal/help/content/economy/taxes.md:27
 #, no-wrap
 msgid "The Queen Royale's tax"
 msgstr "O imposto da Rainha"
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:27
+#: internal/help/content/economy/taxes.md:31
 msgid ""
 "The Queen takes a share of what you earn each turn. You may pay her less "
 "than she asks, but a short payment costs Popular Support."
@@ -1902,7 +1929,7 @@ msgstr ""
 "menos do que ela pede, mas um pagamento a menos custa Apoio Popular."
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:32
+#: internal/help/content/economy/taxes.md:36
 msgid ""
 "Every coin she collects goes into her purse, and she gives part of that "
 "purse back. She pays you the first time you play each day: a small share of "
@@ -1915,7 +1942,7 @@ msgstr ""
 "sob Proteção de Reino Novo recebe no máximo 1 milhão."
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:35
+#: internal/help/content/economy/taxes.md:39
 msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
 "first to play on a given day takes the largest share, so play early."
@@ -1924,13 +1951,13 @@ msgstr ""
 "Quem joga primeiro num dia leva a maior parte, então jogue cedo."
 
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:36
+#: internal/help/content/economy/taxes.md:40
 #, no-wrap
 msgid "The lottery"
 msgstr "A loteria"
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:42
+#: internal/help/content/economy/taxes.md:46
 msgid ""
 "Once a day, as she hands back your refund, the Queen offers a lottery "
 "ticket.  It costs 5,000 gold, taken as soon as you say yes — she does not "
@@ -1945,7 +1972,7 @@ msgstr ""
 "pedir de novo mais tarde."
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:47
+#: internal/help/content/economy/taxes.md:51
 msgid ""
 "Pick six letters, one keypress each, and press Enter for any you would "
 "rather leave to chance. Six letters are then drawn. What counts is how many "
@@ -1958,37 +1985,37 @@ msgstr ""
 "cada letra do bilhete só pode ser usada uma vez."
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 msgid "1 letter: 2,500 gold"
 msgstr "1 letra: 2.500 de ouro"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 msgid "2 letters: 10,000"
 msgstr "2 letras: 10.000"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 msgid "3 letters: 500,000"
 msgstr "3 letras: 500.000"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 msgid "4 letters: 1,000,000"
 msgstr "4 letras: 1.000.000"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 msgid "5 letters: 4,000,000"
 msgstr "5 letras: 4.000.000"
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/taxes.md:54
+#: internal/help/content/economy/taxes.md:58
 msgid "6 letters: 10,000,000"
 msgstr "6 letras: 10.000.000"
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:58
+#: internal/help/content/economy/taxes.md:62
 msgid ""
 "Winnings go into your bank. One match still leaves you 2,500 down on the "
 "ticket, and most tickets match nothing — the Queen did not build her purse "
@@ -3643,7 +3670,12 @@ msgid ""
 "the defender, some of its progress is lost. When an invasion from another "
 "planet beats you, a fifth of it is lost. Agents from another planet can also "
 "sabotage it."
-msgstr "Enquanto está sendo construído, e mais ainda depois de pronto, ele aumenta o quanto os seus tanques somam no ataque e na defesa. Quando você perde uma batalha como defensor, parte do progresso é perdida. Quando uma invasão de outro planeta vence você, um quinto dele é perdido. Agentes de outro planeta também podem sabotá-lo."
+msgstr ""
+"Enquanto está sendo construído, e mais ainda depois de pronto, ele aumenta o "
+"quanto os seus tanques somam no ataque e na defesa. Quando você perde uma "
+"batalha como defensor, parte do progresso é perdida. Quando uma invasão de "
+"outro planeta vence você, um quinto dele é perdido. Agentes de outro planeta "
+"também podem sabotá-lo."
 
 #. type: Title #
 #: internal/help/content/military/jets.md:1

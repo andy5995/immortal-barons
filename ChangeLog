@@ -5,6 +5,10 @@ Immortal Barons ChangeLog
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
+  * Popular support scales the tax collected, as in the original
+  * Morale penalties and desertion take effect before the turn's menus
+  * Paid morale and support boosts offset that turn's penalties
+  * The End of Turn Statistics mood line uses the original's support bands
   * A lost attack costs the attacker some military morale
   * A winning invasion takes a fifth of each defender's HeadQuarters
   * An S3-Sabre hit on Intelligence Headquarters kills agents, not HeadQuarters

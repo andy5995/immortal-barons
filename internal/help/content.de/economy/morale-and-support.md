@@ -20,6 +20,8 @@ Steuersatz niedrig ist. Siehe Steuern, Zustimmung und Aufstände.
 
 Rückhalt:
 
+- bestimmt, wie viel Steuern Sie einnehmen (siehe Steuern, Zustimmung und
+  Aufstände)
 - bestimmt Ihr Küsteneinkommen (Tourismus), das bei niedrigem Rückhalt
   zusammenbricht
 - bestimmt, wie viele Menschen Ihre Regionen fassen können
@@ -69,3 +71,9 @@ zahlen kauft also etwa die Hälfte der Punkte. Sie dürfen bis zum
 Anderthalbfachen des Geforderten zahlen, und der Aufschlag kauft mehr als
 fünfzehn Punkte. Keine der beiden Zahlen kann 100 überschreiten, ein nahezu
 zufriedenes Reich zu überzahlen verschwendet also die Differenz.
+
+Sobald Sie zahlen, ändert sich noch nichts. Die gekauften Punkte verringern,
+was die unbezahlten Kosten dieses Zuges wegnehmen. Die Moral ändert sich
+direkt nach der Ausgabe Ihrer Nahrung, bevor sich Ihre Menüs öffnen. Der
+Rückhalt ändert sich am Ende des Zuges. Moral, die Sie in diesem Zug kaufen,
+ist also die Moral, mit der Ihre Armee in diesem Zug kämpft.

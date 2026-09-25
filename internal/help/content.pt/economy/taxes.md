@@ -10,9 +10,13 @@ title: 'Impostos, Apoio e Tumultos'
 Sua taxa de imposto define quanto ouro você recolhe do seu povo, e molda o
 humor dele.
 
+O que você arrecada também depende do Apoio Popular: um reino com metade do
+Apoio arrecada metade do imposto. Assim, impostos altos que baixam o Apoio
+podem render menos que impostos moderados.
+
 A cada turno, os seus impostos mexem no Apoio Popular. Impostos baixos o
 elevam, impostos altos o baixam, e um valor intermediário o deixa onde
-está. Apoio baixo corta muito a sua renda Litorânea (turismo).
+está. Apoio baixo também corta muito a sua renda Litorânea (turismo).
 
 Os tumultos ficam mais prováveis conforme a sua taxa passa de um nível
 seguro. Um tumulto derruba o seu Apoio e expulsa parte da sua

@@ -84,15 +84,15 @@ msgstr "%d дн."
 msgid "%d faults"
 msgstr "%d сбоев"
 
-#: internal/menu/turnstages.go:240
+#: internal/menu/turnstages.go:236
 msgid "%d gold is requested to boost popular support."
 msgstr "На поддержку народа запрошено %d золота."
 
-#: internal/menu/turnstages.go:255
+#: internal/menu/turnstages.go:251
 msgid "%d gold is requested to improve military morale."
 msgstr "На боевой дух войск запрошено %d золота."
 
-#: internal/menu/turnstages.go:539
+#: internal/menu/turnstages.go:535
 msgid "%d matched! You win %s gold, paid straight into your bank."
 msgstr "Совпадений: %d! Выигрыш %s золота зачислен прямо в банк."
 
@@ -100,7 +100,7 @@ msgstr "Совпадений: %d! Выигрыш %s золота зачисле�
 msgid "%d regions are clean again — choose which types to hold them as."
 msgstr "%d регионов снова чисты - выберите их типы."
 
-#: internal/menu/turnstages.go:185
+#: internal/menu/turnstages.go:187
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d регионов взбунтовалось из-за нехватки содержания."
 
@@ -108,11 +108,11 @@ msgstr "%d регионов взбунтовалось из-за нехватк�
 msgid "%d troopers, %d jets, %d tanks, %d bombers"
 msgstr "%d солдат, %d самолётов, %d танков, %d бомбардировщиков"
 
-#: internal/game/combat.go:290
+#: internal/game/combat.go:296
 msgid "%d troopers, %d turrets, %d tanks, %d jets"
 msgstr "%d солдат, %d турелей, %d танков, %d самолётов"
 
-#: internal/menu/turnstages.go:182
+#: internal/menu/turnstages.go:184
 msgid "%d units deserted for lack of pay."
 msgstr "%d единиц дезертировало из-за отсутствия жалованья."
 
@@ -156,7 +156,7 @@ msgstr "%s против какой планеты?"
 msgid "%s attacked you and took %d regions. You lost %s."
 msgstr "%s напал на вас и захватил %d регионов. Вы потеряли %s."
 
-#: internal/game/combat.go:273
+#: internal/game/combat.go:279
 msgid "%s attacked you and was repelled. You lost %s."
 msgstr "%s напал на вас и был отбит. Вы потеряли %s."
 
@@ -172,7 +172,7 @@ msgstr "Под эти ставки отложено %s золота."
 msgid "%s gold is required to maintain your regions."
 msgstr "%s золота требуется на содержание ваших регионов."
 
-#: internal/menu/turnstages.go:219
+#: internal/menu/turnstages.go:215
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr "%s золота очистит %s из ваших %s заражённых регионов."
 
@@ -611,7 +611,7 @@ msgstr "Среднее время оборота до всех BBS"
 msgid "Awaiting a reply:"
 msgstr "Ожидают ответа:"
 
-#: internal/menu/turnstages.go:464
+#: internal/menu/turnstages.go:460
 msgid "BBS Coordinator"
 msgstr "Координатор станции"
 
@@ -751,7 +751,7 @@ msgstr "Распустить?"
 msgid "Canceled — no changes were saved."
 msgstr "Отменено - изменения не сохранены."
 
-#: internal/menu/turnstages.go:503
+#: internal/menu/turnstages.go:499
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr "Испытать удачу в королевской лотерее?"
 
@@ -823,29 +823,29 @@ msgstr "Выберите зону…"
 msgid "Chopper's Fair Market"
 msgstr "Ярмарка Чоппера"
 
-#: internal/menu/turnrecap.go:530
+#: internal/menu/turnrecap.go:533
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr "Гражданская война! Мятеж стоит вам %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:526
+#: internal/menu/turnrecap.go:529
 msgid ""
 "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Разрозненные бунты стоят вам %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:528
+#: internal/menu/turnrecap.go:531
 msgid ""
 "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Восстание ширится и отнимает %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:532
+#: internal/menu/turnrecap.go:535
 msgid ""
 "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Восстают целые провинции, отнимая %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:534
+#: internal/menu/turnrecap.go:537
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Гражданская война! Держава почти распалась - потеряно %d%%."
 
@@ -881,7 +881,7 @@ msgstr "Настройки сохранены."
 msgid "Confirm?"
 msgstr "Подтвердить?"
 
-#: internal/menu/gameflow.go:352
+#: internal/menu/gameflow.go:371
 msgid "Continue to your next turn?"
 msgstr "Перейти к следующему ходу?"
 
@@ -1106,7 +1106,7 @@ msgstr "Хотите зайти в банк?"
 msgid "Done"
 msgstr "Готово"
 
-#: internal/menu/turnstages.go:522
+#: internal/menu/turnstages.go:518
 msgid "Drawn:"
 msgstr "Выпало:"
 
@@ -1155,7 +1155,7 @@ msgstr "Статус империи"
 msgid "End Protection"
 msgstr "Снять защиту"
 
-#: internal/menu/turnrecap.go:477
+#: internal/menu/turnrecap.go:480
 msgid "End of Turn Statistics:"
 msgstr "Статистика конца хода:"
 
@@ -1634,10 +1634,6 @@ msgstr "Сообщения"
 msgid "Military"
 msgstr "Военные"
 
-#: internal/menu/turnstages.go:195
-msgid "Military morale rose %d points."
-msgstr "Боевой дух вырос на %d пунктов."
-
 #: internal/game/ibbs.go:30
 msgid "Missile operations are not part of this game."
 msgstr "Ракетные удары в этой игре не предусмотрены."
@@ -1726,7 +1722,7 @@ msgstr "Групповые атаки сейчас не собираются."
 msgid "No inter-BBS scores have been imported yet."
 msgstr "Очки inter-BBS пока не импортированы."
 
-#: internal/menu/turnstages.go:536
+#: internal/menu/turnstages.go:532
 msgid "No matches. The Queen thanks you for your contribution."
 msgstr "Совпадений нет. Королева благодарит вас за вклад."
 
@@ -1963,7 +1959,7 @@ msgstr "Итог"
 msgid "Owned"
 msgstr "Есть"
 
-#: internal/menu/turnstages.go:557
+#: internal/menu/turnstages.go:553
 msgid "Pick your six letters:"
 msgstr "Выберите шесть букв:"
 
@@ -2020,10 +2016,6 @@ msgstr ""
 "Поддержка народа низка. Она уменьшает доход с побережья и число людей, "
 "которых может прокормить наша земля. Снизьте налоги или потратьтесь на "
 "поддержку народа."
-
-#: internal/menu/turnstages.go:192
-msgid "Popular support rose %d points."
-msgstr "Поддержка народа выросла на %d пунктов."
 
 #: internal/menu/empire_status_screen.go:100
 msgid "Population"
@@ -2139,7 +2131,7 @@ msgstr "Запрос — товары, которые вы хотите взам
 msgid "Returns expected to be approximately %s gold."
 msgstr "Ожидаемый доход — около %s золота."
 
-#: internal/menu/turnrecap.go:493
+#: internal/menu/turnrecap.go:496
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Из-за высоких налогов начались бунты!"
 
@@ -2231,7 +2223,7 @@ msgstr "Отправить SpyGuy"
 msgid "Send Trade Deal"
 msgstr "Отправить сделку"
 
-#: internal/menu/gameflow.go:308
+#: internal/menu/gameflow.go:327
 msgid "Send a message?"
 msgstr "Отправить сообщение?"
 
@@ -2331,7 +2323,7 @@ msgstr "Продано: %d. Золото: %d"
 msgid "Sorry, trade deals must be sent for at least %d days."
 msgstr "Увы, сделку нельзя отправить на срок меньше %d дн."
 
-#: internal/menu/gameflow.go:144
+#: internal/menu/gameflow.go:145
 msgid "Sorry, you have used all of your turns today."
 msgstr "Увы, все ходы на сегодня израсходованы."
 
@@ -2540,7 +2532,7 @@ msgstr "Gooie Kablooie уже в пути. Сделать с ним больше
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "Gooie Kablooie УНИЧТОЖЕН!"
 
-#: internal/menu/turnstages.go:416
+#: internal/menu/turnstages.go:412
 msgid "The Queen Royale opens her coffers and refunds you %s gold!"
 msgstr "Королева открывает казну и возвращает вам %s золота!"
 
@@ -3148,7 +3140,7 @@ msgstr "Вы под защитой."
 msgid "You can afford %s%d%s regions."
 msgstr "Вам по карману %s%d%s регионов."
 
-#: internal/menu/turnstages.go:480
+#: internal/menu/turnstages.go:476
 msgid "You can change it from the System menu."
 msgstr "Это можно изменить в меню Система."
 
@@ -3164,7 +3156,7 @@ msgstr "По такой цене вам не хватит даже на одну
 msgid "You cannot buy from your own listing."
 msgstr "Нельзя купить по собственному объявлению."
 
-#: internal/menu/turnstages.go:477
+#: internal/menu/turnstages.go:473
 msgid ""
 "You cannot change it until your new-realm protection ends, %d turns from now."
 msgstr ""
@@ -3335,7 +3327,7 @@ msgstr "У вас нет подкупленного агента в этой д�
 msgid "You hold no bribed agents to work through."
 msgstr "У вас нет подкупленных агентов, через которых можно действовать."
 
-#: internal/menu/turnstages.go:465
+#: internal/menu/turnstages.go:461
 msgid "You hold the office of %s."
 msgstr "Вы занимаете пост: %s."
 
@@ -3462,7 +3454,7 @@ msgid "Your armed forces require %s gold."
 msgstr "Вашим вооружённым силам требуется %s золота."
 
 # Turn pipeline — maintenance
-#: internal/menu/turnstages.go:365
+#: internal/menu/turnstages.go:361
 msgid "Your armed forces require %s units of food."
 msgstr "Вашим вооружённым силам требуется %s единиц еды."
 
@@ -3481,7 +3473,7 @@ msgstr "Ваши потери: %s."
 msgid "Your choice?"
 msgstr "Ваш выбор?"
 
-#: internal/menu/turnrecap.go:487
+#: internal/menu/turnrecap.go:490
 msgid "Your dominion gained %s%s%s people."
 msgstr "Ваши владения приросли на %s%s%s человек."
 
@@ -3489,7 +3481,7 @@ msgstr "Ваши владения приросли на %s%s%s человек."
 msgid "Your dominion is still under protection."
 msgstr "Ваша держава ещё под защитой."
 
-#: internal/menu/turnrecap.go:489
+#: internal/menu/turnrecap.go:492
 msgid "Your dominion lost %s%s%s people."
 msgstr "Ваши владения потеряли %s%s%s человек."
 
@@ -3567,7 +3559,7 @@ msgstr "Ваше сообщение отправлено на %d планет."
 msgid "Your new-realm protection will end when this turn does."
 msgstr "Защита новой державы кончится вместе с этим ходом."
 
-#: internal/menu/turnstages.go:364
+#: internal/menu/turnstages.go:360
 msgid "Your people need %s units of food."
 msgstr "Народу нужно %s единиц еды."
 
@@ -3586,7 +3578,7 @@ msgid ""
 msgstr ""
 "Ваша держава уже переименована один раз. Нынешнее имя останется навсегда."
 
-#: internal/menu/gameflow.go:128
+#: internal/menu/gameflow.go:129
 msgid "Your realm is no longer active."
 msgstr "Ваша держава больше не активна."
 
@@ -3610,7 +3602,7 @@ msgstr "Ваш груз отправлен барону %s с %s."
 msgid "Your target is no longer there."
 msgstr "Вашей цели больше нет."
 
-#: internal/menu/turnstages.go:471
+#: internal/menu/turnstages.go:467
 msgid "Your vote for BBS Coordinator is %s."
 msgstr "Ваш голос за координатора BBS: %s."
 
@@ -3738,7 +3730,7 @@ msgstr "ключ станции не загружен"
 msgid "no coordinator key is loaded"
 msgstr "ключ координатора не загружен"
 
-#: internal/menu/turnstages.go:469
+#: internal/menu/turnstages.go:465
 msgid "no one"
 msgstr "никто"
 
@@ -3954,15 +3946,15 @@ msgstr "эта планета"
 msgid "took %d"
 msgstr "взято %d"
 
-#: internal/menu/turnrecap.go:498
+#: internal/menu/turnrecap.go:501
 msgid "troops deserted due to low morale."
 msgstr "войска дезертировали из-за низкого боевого духа."
 
-#: internal/menu/gameflow.go:216
+#: internal/menu/gameflow.go:217
 msgid "units of Food consumed."
 msgstr "единиц еды съедено."
 
-#: internal/menu/turnrecap.go:491
+#: internal/menu/turnrecap.go:494
 msgid "units of food spoiled."
 msgstr "единиц еды испортилось."
 
@@ -4013,6 +4005,12 @@ msgstr "─»>Enter - продолжить, Q - выход<«─"
 #: internal/menu/input.go:473
 msgid "─»>Paused<«─"
 msgstr "─»>Пауза<«─"
+
+#~ msgid "Military morale rose %d points."
+#~ msgstr "Боевой дух вырос на %d пунктов."
+
+#~ msgid "Popular support rose %d points."
+#~ msgstr "Поддержка народа выросла на %d пунктов."
 
 #~ msgid "Planetary Bulletin:"
 #~ msgstr "Планетарный бюллетень:"
