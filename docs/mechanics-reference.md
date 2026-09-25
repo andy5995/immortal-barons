@@ -5826,7 +5826,13 @@ and each carries a gameplay effect (#11 wired the last two):
   `allyMorale div 2 + 25` percent, no tech; see the regular attack section;
   turrets stay home, agents are covert); the attacker's battle report notes the
   reinforcements, and the committed detachment bleeds at the defender's casualty
-  rate (`bleedAllies`), which also **tells each partner what it lost and in whose
+  rate (`bleedAllies`). **The bleed truncates where the battle rounds**
+  (BINARY-VERIFIED 2026-09-25): the deduction recomputes the detachment with
+  integer arithmetic, `troopers × 30 div 100` (`mul_i32`/`div_i32` at
+  `BRE.OVR 0x1076A`/`0x10774`; tanks at `0x107DB`/`0x107E5`), and takes
+  `trunc(detachment × the defender's loss fraction)` from the ally — so 10,903
+  tanks send 3,271 into the battle but bleed from 3,270 (`allyBled`). The bleed
+  also **tells each partner what it lost and in whose
   defense** — BRE files that line in the same loop iteration as the deduction
   (`BRE.OVR 0x00ef90`, the aid loop in `resolve_regular_attack`), and without it
   a player's units disappear from a battle they were never told about.

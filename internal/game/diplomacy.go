@@ -317,6 +317,19 @@ func allySent(n int) int {
 	return int((int64(n)*AllyDefenseContribPct + 50) / 100)
 }
 
+// allyBled is what one of a Full Defense Alliance partner's counts loses when
+// its detachment bleeds at the defender's casualty rate frac:
+// trunc(trunc(n x 30 / 100) x frac). BINARY-VERIFIED (resolve_regular_attack's
+// report loop): the deduction recomputes the detachment in integer arithmetic,
+// mul_i32 then div_i32 by 100 (BRE.OVR 0x1076A/0x10774 for troopers,
+// 0x107DB/0x107E5 for tanks), so it TRUNCATES where the battle value and the
+// attacker's line round (allySent). The product with the defender's Real48
+// loss fraction is then truncated as well. The partner's notice (0x105A7) is
+// computed the same way, so what it reads is what was taken.
+func allyBled(n int, frac float64) int {
+	return shareOf(int(int64(n)*AllyDefenseContribPct/100), frac)
+}
+
 // allyDefenseBoost is the extra battle power d's Full Defense Alliance partners
 // add when d is attacked: each sends 30% of its troopers + tanks (agents are
 // covert, turrets stay home). The detachment is valued the original's way, not
@@ -337,9 +350,10 @@ func (w *World) allyDefenseBoost(d *Empire) int {
 }
 
 // bleedAllies applies the given casualty fraction to each Full Defense Alliance
-// partner's committed detachment (its sent 30% of troopers + tanks) after a
-// battle in which d was defended — the reinforcements bleed at the same rate as
-// the defender — and tells each partner what it lost and where.
+// partner's committed detachment (its 30% of troopers + tanks, truncated here
+// where the battle rounds it — see allyBled) after a battle in which d was
+// defended — the reinforcements bleed at the same rate as the defender — and
+// tells each partner what it lost and where.
 //
 // The notice is not optional bookkeeping. Without it a player's troopers and
 // tanks vanish in a battle they were never told about: the loss has no visible
@@ -378,8 +392,8 @@ func (w *World) bleedAllies(a, d *Empire, frac float64) {
 	for _, ally := range w.battleNotified(d) {
 		var troopers, tanks int
 		if w.HasTreaty(d, ally, fullDefenseAlliance) {
-			troopers = shareOf(allySent(ally.Troopers), frac)
-			tanks = shareOf(allySent(ally.Tanks), frac)
+			troopers = allyBled(ally.Troopers, frac)
+			tanks = allyBled(ally.Tanks, frac)
 			ally.Troopers -= troopers
 			ally.Tanks -= tanks
 		}

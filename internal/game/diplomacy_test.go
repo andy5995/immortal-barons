@@ -426,6 +426,34 @@ func TestBleedAlliesTellsThePartner(t *testing.T) {
 	}
 }
 
+// The bleed truncates the detachment where the battle rounds it: BRE's
+// deduction recomputes 30% with integer division, then truncates the product
+// with the loss fraction. 1009 troopers send 303 to the battle (302.7 rounded)
+// but bleed from 302: 302 x 0.34 = 102.68, so 102 lost, where the rounded
+// detachment would lose 103. 10903 tanks (the live screen's 3,271 sent) bleed
+// from 3270: 1111 lost, not 1112. Golden figures, not the constant.
+func TestBleedAlliesTruncatesTheDetachment(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	raider := w.AddHuman("r", "Raider")
+	b.Troopers, b.Tanks = 1009, 10903
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	b.Events = nil
+
+	if got := w.AllyDefenders(a); len(got) != 1 || got[0].Troopers != 303 || got[0].Tanks != 3271 {
+		t.Fatalf("want the battle to see 303 troopers / 3271 tanks, got %+v", got)
+	}
+	w.bleedAllies(raider, a, 0.34)
+	if b.Troopers != 1009-102 || b.Tanks != 10903-1111 {
+		t.Errorf("want Beta to lose 102 troopers / 1111 tanks, lost %d / %d", 1009-b.Troopers, 10903-b.Tanks)
+	}
+	if len(b.Events) != 1 || !strings.Contains(b.Events[0].Text, "102 troopers") || !strings.Contains(b.Events[0].Text, "1111 tanks") {
+		t.Errorf("the notice must read what was taken: %v", b.Events)
+	}
+}
+
 // A partner with nothing to send is not sent a line of zeroes.
 // A partner that sent nothing is still told, with a line reading zero and zero.
 // BRE has no suppression anywhere on that path: no branch between the loop
