@@ -201,7 +201,7 @@ msgstr ""
 msgid "%s offers you a %s."
 msgstr ""
 
-#: internal/menu/actions_trade.go:280
+#: internal/menu/actions_trade.go:288
 msgid "%s offers you a trade deal."
 msgstr ""
 
@@ -393,11 +393,11 @@ msgstr ""
 msgid "Accept this treaty?"
 msgstr ""
 
-#: internal/menu/actions_bank.go:108
+#: internal/menu/actions_bank.go:115
 msgid "Accept?"
 msgstr ""
 
-#: internal/menu/actions_trade.go:284
+#: internal/menu/actions_trade.go:292
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr ""
 
@@ -869,7 +869,7 @@ msgstr ""
 msgid "Daily Bulletin"
 msgstr ""
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Date"
 msgstr ""
 
@@ -1153,7 +1153,7 @@ msgstr ""
 msgid "Gold"
 msgstr ""
 
-#: internal/menu/actions_bank.go:282
+#: internal/menu/actions_bank.go:289
 msgid "Gold Needed"
 msgstr ""
 
@@ -1209,7 +1209,7 @@ msgstr ""
 msgid "How many %s?"
 msgstr ""
 
-#: internal/menu/actions_trade.go:252
+#: internal/menu/actions_trade.go:256
 msgid "How many days to send it for?"
 msgstr ""
 
@@ -1217,7 +1217,7 @@ msgstr ""
 msgid "How many days would you like him to remain?"
 msgstr ""
 
-#: internal/menu/actions_bank.go:98
+#: internal/menu/actions_bank.go:101
 msgid "How many days would you like to invest for?"
 msgstr ""
 
@@ -1225,7 +1225,7 @@ msgstr ""
 msgid "How many million gold do you wish to put in?"
 msgstr ""
 
-#: internal/menu/actions_bank.go:68
+#: internal/menu/actions_bank.go:71
 msgid "How many would you like to borrow?"
 msgstr ""
 
@@ -1245,7 +1245,7 @@ msgstr ""
 msgid "How much will you give?"
 msgstr ""
 
-#: internal/menu/actions_bank.go:102
+#: internal/menu/actions_bank.go:109
 msgid "How much would you like to invest?"
 msgstr ""
 
@@ -1281,7 +1281,7 @@ msgstr ""
 msgid "In Deal"
 msgstr ""
 
-#: internal/menu/actions_bank.go:183
+#: internal/menu/actions_bank.go:190
 msgid "In Hold"
 msgstr ""
 
@@ -1329,19 +1329,19 @@ msgstr ""
 msgid "Invalid: a realm name needs at least 3 letters or digits. Decoration around them is fine and does not count."
 msgstr ""
 
-#: internal/menu/actions_bank.go:198
+#: internal/menu/actions_bank.go:205
 msgid "Investing Interest Rate:"
 msgstr ""
 
-#: internal/menu/actions_bank.go:121
+#: internal/menu/actions_bank.go:128
 msgid "Investment will be returned on %s."
 msgstr ""
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Investments"
 msgstr ""
 
-#: internal/menu/actions_trade.go:218
+#: internal/menu/actions_trade.go:221
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr ""
 
@@ -1433,7 +1433,7 @@ msgstr ""
 msgid "List of Planets"
 msgstr ""
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Loans Due"
 msgstr ""
 
@@ -1657,7 +1657,7 @@ msgstr ""
 msgid "Not set"
 msgstr ""
 
-#: internal/menu/actions_bank.go:83
+#: internal/menu/actions_bank.go:86
 msgid "Note that late payments will incur additional penalties."
 msgstr ""
 
@@ -1969,7 +1969,7 @@ msgstr ""
 msgid "Request — goods you want back:"
 msgstr ""
 
-#: internal/menu/actions_bank.go:107
+#: internal/menu/actions_bank.go:114
 msgid "Returns expected to be approximately %s gold."
 msgstr ""
 
@@ -2013,7 +2013,7 @@ msgstr ""
 msgid "Saving..."
 msgstr ""
 
-#: internal/menu/actions_bank.go:197
+#: internal/menu/actions_bank.go:204
 msgid "Savings Interest Rate:"
 msgstr ""
 
@@ -2109,7 +2109,7 @@ msgstr ""
 msgid "Sending costs %s gold and %d carriers; you own %d."
 msgstr ""
 
-#: internal/menu/actions_trade.go:244
+#: internal/menu/actions_trade.go:248
 msgid "Sending costs %s gold per day; it needs one carrier."
 msgstr ""
 
@@ -2155,6 +2155,10 @@ msgstr ""
 
 #: internal/menu/actions.go:247
 msgid "Sold %d. Gold: %d"
+msgstr ""
+
+#: internal/menu/actions_trade.go:261
+msgid "Sorry, trade deals must be sent for at least %d days."
 msgstr ""
 
 #: internal/menu/gameflow.go:144
@@ -2277,7 +2281,7 @@ msgstr ""
 msgid "Terrorist Ops"
 msgstr ""
 
-#: internal/menu/actions_bank.go:216
+#: internal/menu/actions_bank.go:223
 msgid "That costs %s gold more than you have in hand."
 msgstr ""
 
@@ -2369,11 +2373,11 @@ msgstr ""
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
-#: internal/menu/actions_bank.go:96
+#: internal/menu/actions_bank.go:99
 msgid "The current interest returns on investments are %s%%."
 msgstr ""
 
-#: internal/menu/actions_trade.go:246
+#: internal/menu/actions_trade.go:250
 msgid "The deal stands until the span runs out; unanswered, the goods are lost."
 msgstr ""
 
@@ -2413,7 +2417,7 @@ msgstr ""
 msgid "The goods are a gift: the other realm cannot refuse them and sends nothing back."
 msgstr ""
 
-#: internal/menu/actions_bank.go:64
+#: internal/menu/actions_bank.go:67
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr ""
 
@@ -2453,7 +2457,7 @@ msgstr ""
 msgid "There are only %d to choose from."
 msgstr ""
 
-#: internal/menu/actions_bank.go:97
+#: internal/menu/actions_bank.go:100
 msgid "There is a %d-day minimum on investments."
 msgstr ""
 
@@ -2529,7 +2533,7 @@ msgstr ""
 msgid "To end selection, hit enter at the prompt."
 msgstr ""
 
-#: internal/menu/actions_bank.go:180
+#: internal/menu/actions_bank.go:187
 msgid "Today"
 msgstr ""
 
@@ -2585,11 +2589,11 @@ msgstr ""
 msgid "Trade"
 msgstr ""
 
-#: internal/menu/actions_trade.go:297
+#: internal/menu/actions_trade.go:305
 msgid "Trade deal accepted."
 msgstr ""
 
-#: internal/menu/actions_trade.go:215
+#: internal/menu/actions_trade.go:218
 msgid "Trade deal sent to %s for %d days (%s gold)."
 msgstr ""
 
@@ -2733,7 +2737,7 @@ msgstr ""
 msgid "Visit Trading Menu"
 msgstr ""
 
-#: internal/menu/actions_bank.go:251
+#: internal/menu/actions_bank.go:258
 msgid "Visit the bank"
 msgstr ""
 
@@ -2809,7 +2813,7 @@ msgstr ""
 msgid "We run a shortfall of %s; our stores will run out in about %d turns."
 msgstr ""
 
-#: internal/menu/actions_bank.go:67
+#: internal/menu/actions_bank.go:70
 msgid "We will provide up to %s gold."
 msgstr ""
 
@@ -2849,7 +2853,7 @@ msgstr ""
 msgid "With our {mountain} regions, our factories build units at %d%% of normal. The figure depends on their share of our land, so buying other regions lowers it."
 msgstr ""
 
-#: internal/menu/actions_bank.go:237
+#: internal/menu/actions_bank.go:244
 msgid "Withdraw %s gold"
 msgstr ""
 
@@ -2973,7 +2977,7 @@ msgstr ""
 msgid "You do not owe that much."
 msgstr ""
 
-#: internal/menu/actions_trade.go:282
+#: internal/menu/actions_trade.go:290
 msgid "You give:    %s"
 msgstr ""
 
@@ -3041,7 +3045,7 @@ msgstr ""
 msgid "You have already sent all %d of your attack forces for today."
 msgstr ""
 
-#: internal/menu/actions_bank.go:145
+#: internal/menu/actions_bank.go:152
 msgid "You have no active investments or loans."
 msgstr ""
 
@@ -3125,7 +3129,7 @@ msgstr ""
 msgid "You offer %s to %s"
 msgstr ""
 
-#: internal/menu/actions_bank.go:82
+#: internal/menu/actions_bank.go:85
 msgid "You owe %s gold in %d Days."
 msgstr ""
 
@@ -3137,7 +3141,7 @@ msgstr ""
 msgid "You put in %d million gold."
 msgstr ""
 
-#: internal/menu/actions_trade.go:281
+#: internal/menu/actions_trade.go:289
 msgid "You receive: %s"
 msgstr ""
 

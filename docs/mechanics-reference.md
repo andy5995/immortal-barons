@@ -3565,7 +3565,11 @@ Investments / Loans**, and **View Bank Rates**.
 - **Investments** are term deposits (like bonds): you choose an **amount**
   and a **number of days** — **2 to 10 days** (`MinInvestDays`=2, `MaxInvestDays`=10,
   live-BRE-verified: the bank prints "There is now a 2 day minimum on
-  investments." and prompts "…invest for? (2; 10)") — the gold is **locked**, and
+  investments." and prompts "…invest for? (2; 10)"). A term over 10 is
+  corrected to 10 on screen and a second Enter commits it, BRE's input helper's
+  clamp-and-confirm; a term under 2 (0 or 1) **cancels** back to the bank menu
+  with nothing invested (`run_bank`, BRE.OVR 0x394eb). IB matches both; it used
+  to raise 1 to 2 silently (#291). The gold is **locked**, and
   it **matures on a future date**, returning principal plus interest at the
   current **Investment Rate**, **compounded daily** (live-verified: 1000 for 2
   days at 5%/day returns 1102 = 1000·1.05²). Before confirming, the bank shows
@@ -3612,8 +3616,10 @@ Investments / Loans**, and **View Bank Rates**.
   entries each turn, so its size is bounded by how many investments a realm
   makes inside a ten-day window.
 - **Cash Relief / Loans** (#40) — term-based borrowing (`internal/game/loan.go`).
-  You choose a **repayment term** of **1–10 days** (`LoanMinDays`/`LoanMaxDays`),
-  the bank shows the **rate** ("The loan rate will be X% per day, totalling Y%
+  You choose a **repayment term** of **1–10 days** (`LoanMinDays`/`LoanMaxDays`);
+  a term of 0 **cancels** back to the bank menu with nothing borrowed, as BRE's
+  `run_bank` does (BRE.OVR +0x0778), where IB used to raise it to 1 silently.
+  Otherwise the bank shows the **rate** ("The loan rate will be X% per day, totalling Y%
   overall") and a **ceiling** ("We will provide up to N gold"), then you borrow
   up to it and **owe the compounded total on the due date** ("You owe N gold in D
   Days."). Loan math is **live-BRE-verified**: daily rate = `8.0 + 0.2·days` %
@@ -5958,6 +5964,11 @@ what is offered, consumes a transport carrier and charges the per-day transit
 fee (#17). Interplanetary trading is built too, as its own type (`IPTradeBid`,
 a buy order that travels to another planet and is filled there); carrier-moved
 goods remain future work.
+
+**A deal is sent for at least 2 days (`TradeDealMinDays`) — BINARY-VERIFIED.**
+`create_trade_offer` (`BRE.OVR` +0x21bb) answers a shorter span with "Sorry,
+trade deals must be sent for at least 2 days." and returns, so nothing is sent,
+escrowed or charged. IB matches it; it used to raise the span to 2 silently.
 
 **A deal cannot reach anyone earlier in their day than it left yours —
 BINARY-VERIFIED.** `create_trade_offer` stamps the offer record with the

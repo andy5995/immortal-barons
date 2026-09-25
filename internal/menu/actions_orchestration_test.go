@@ -317,3 +317,26 @@ func worldWithPact(t *testing.T) (*ctx, *game.Empire) {
 	}
 	return w, target
 }
+
+// A span under the 2-day minimum is refused in BRE's words and nothing is sent:
+// no fee, no escrow, the carrier kept.
+func TestSendTradeDealSpanUnderMinimumIsRefused(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Gold, p.Carriers = 300_000, 1
+	to := recipients(w)[0]
+	p.Protection, to.Protection = 0, 0
+	w.World.ProposeTreaty(p, to, "Full Defense Alliance")
+	w.World.AcceptTreaty(to, p.Name, "Full Defense Alliance")
+	// Pick (A), offer 100 gold (6), done (0), no request (0), confirm (y), 1 day.
+	f := &fakeSession{keys: []rune("A6100\r00y1\r ")}
+
+	sendTradeDeal(f, w)
+
+	if out := stripANSI(f.out.String()); !strings.Contains(out, "Sorry, trade deals must be sent for at least 2 days.") {
+		t.Fatalf("a 1-day span should be refused in BRE's words:\n%s", out)
+	}
+	if p.Gold != 300_000 || p.Carriers != 1 || len(to.TradeDeals) != 0 {
+		t.Errorf("nothing should be sent: gold %d, carriers %d, deals %+v", p.Gold, p.Carriers, to.TradeDeals)
+	}
+}

@@ -58,8 +58,11 @@ func cashRelief(s session.Session, w *ctx) Result {
 		}
 	}
 	days := promptSuggested(s, "When do you wish to pay your loan back [# of Days]?", game.LoanMinDays, game.LoanMaxDays)
+	// A term below the minimum cancels, as BRE's does (run_bank, BRE.OVR
+	// +0x0778: a result of 0 or less leaves for the bank menu), and as the
+	// investment term does. It used to be raised to the minimum out of sight.
 	if days < game.LoanMinDays {
-		days = game.LoanMinDays
+		return Stay
 	}
 	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The loan rate will be %s%% per day, totalling %s%% interest overall."),
 		game.PctTenths(game.LoanRateTenths(days)), game.PctTenths(game.LoanOverallTenths(days)))))
@@ -96,8 +99,12 @@ func investFunds(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The current interest returns on investments are %s%%."), pctHundredths(w.InvestRate))))
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "There is a %d-day minimum on investments."), game.MinInvestDays)))
 	days := promptSuggested(s, "How many days would you like to invest for?", game.MinInvestDays, game.MaxInvestDays)
+	// A term below the minimum cancels, as BRE's does (run_bank, BRE.OVR 0x394eb:
+	// a result under 2 leaves for the bank menu). It used to be raised to the
+	// minimum out of sight, so a player who typed 1 invested for 2 (#291). The
+	// ceiling needs nothing here: editAmount clamp-and-confirms it.
 	if days < game.MinInvestDays {
-		days = game.MinInvestDays
+		return Stay
 	}
 	amount := promptSuggested(s, "How much would you like to invest?", 0, min(p.Gold, w.MaxInvestPrincipal(p, days)))
 	if amount <= 0 {

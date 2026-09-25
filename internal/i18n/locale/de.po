@@ -209,7 +209,7 @@ msgstr "%s auf %s"
 msgid "%s offers you a %s."
 msgstr "%s bietet Ihnen einen %s an."
 
-#: internal/menu/actions_trade.go:280
+#: internal/menu/actions_trade.go:288
 msgid "%s offers you a trade deal."
 msgstr "%s bietet Ihnen ein Handelsgeschäft an."
 
@@ -432,11 +432,11 @@ msgstr "Über"
 msgid "Accept this treaty?"
 msgstr "Diesen Vertrag annehmen?"
 
-#: internal/menu/actions_bank.go:108
+#: internal/menu/actions_bank.go:115
 msgid "Accept?"
 msgstr "Annehmen?"
 
-#: internal/menu/actions_trade.go:284
+#: internal/menu/actions_trade.go:292
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr "Annehmen? [J]a, [N]ein, [I]gnorieren"
 
@@ -968,7 +968,7 @@ msgstr "TOT"
 msgid "Daily Bulletin"
 msgstr "Täglicher Aushang"
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Date"
 msgstr "Datum"
 
@@ -1283,7 +1283,7 @@ msgstr "Globale Aufklärung"
 msgid "Gold"
 msgstr "Gold"
 
-#: internal/menu/actions_bank.go:282
+#: internal/menu/actions_bank.go:289
 msgid "Gold Needed"
 msgstr "Gold benötigt"
 
@@ -1339,7 +1339,7 @@ msgstr "Hilfe - Kategorie wählen:"
 msgid "How many %s?"
 msgstr "Wie viele %s?"
 
-#: internal/menu/actions_trade.go:252
+#: internal/menu/actions_trade.go:256
 msgid "How many days to send it for?"
 msgstr "Für wie viele Tage senden?"
 
@@ -1347,7 +1347,7 @@ msgstr "Für wie viele Tage senden?"
 msgid "How many days would you like him to remain?"
 msgstr "Wie viele Tage soll er bleiben?"
 
-#: internal/menu/actions_bank.go:98
+#: internal/menu/actions_bank.go:101
 msgid "How many days would you like to invest for?"
 msgstr "Für wie viele Tage möchten Sie anlegen?"
 
@@ -1355,7 +1355,7 @@ msgstr "Für wie viele Tage möchten Sie anlegen?"
 msgid "How many million gold do you wish to put in?"
 msgstr "Wie viele Millionen Gold möchten Sie beisteuern?"
 
-#: internal/menu/actions_bank.go:68
+#: internal/menu/actions_bank.go:71
 msgid "How many would you like to borrow?"
 msgstr "Wie viel möchten Sie leihen?"
 
@@ -1375,7 +1375,7 @@ msgstr "Wie viel zurückzahlen?"
 msgid "How much will you give?"
 msgstr "Wie viel geben Sie?"
 
-#: internal/menu/actions_bank.go:102
+#: internal/menu/actions_bank.go:109
 msgid "How much would you like to invest?"
 msgstr "Wie viel möchten Sie anlegen?"
 
@@ -1411,7 +1411,7 @@ msgstr "Immortal Barons"
 msgid "In Deal"
 msgstr "Im Geschäft"
 
-#: internal/menu/actions_bank.go:183
+#: internal/menu/actions_bank.go:190
 msgid "In Hold"
 msgstr "Einbehalten"
 
@@ -1464,19 +1464,19 @@ msgstr ""
 "Ungültig: Ein Reichsname braucht mindestens 3 Buchstaben oder Ziffern. "
 "Verzierungen darum herum sind erlaubt und zählen nicht mit."
 
-#: internal/menu/actions_bank.go:198
+#: internal/menu/actions_bank.go:205
 msgid "Investing Interest Rate:"
 msgstr "Anlagezins:"
 
-#: internal/menu/actions_bank.go:121
+#: internal/menu/actions_bank.go:128
 msgid "Investment will be returned on %s."
 msgstr "Die Anlage wird am %s zurückgezahlt."
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Investments"
 msgstr "Anlagen"
 
-#: internal/menu/actions_trade.go:218
+#: internal/menu/actions_trade.go:221
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "Es erreicht sie frühestens in Zug %d ihres Tages."
 
@@ -1576,7 +1576,7 @@ msgstr "Anlagen / Kredite anzeigen"
 msgid "List of Planets"
 msgstr "Liste der Planeten"
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Loans Due"
 msgstr "Fällige Kredite"
 
@@ -1817,7 +1817,7 @@ msgstr "Unbekannt - noch keine Liste"
 msgid "Not set"
 msgstr "Nicht gesetzt"
 
-#: internal/menu/actions_bank.go:83
+#: internal/menu/actions_bank.go:86
 msgid "Note that late payments will incur additional penalties."
 msgstr ""
 "Beachten Sie, dass verspätete Zahlungen zusätzliche Strafen nach sich "
@@ -1838,7 +1838,8 @@ msgstr "Hinweis: Finanzieren Sie die SDI nur in Schritten von %d Gold."
 
 #: internal/menu/actions_attack.go:743
 msgid "Nothing added: the SDI is funded in whole thousands of Gold."
-msgstr "Nichts hinzugefügt: Das SDI wird nur in vollen Tausend Gold finanziert."
+msgstr ""
+"Nichts hinzugefügt: Das SDI wird nur in vollen Tausend Gold finanziert."
 
 #: internal/menu/actions_iptrade.go:50
 msgid "Nothing has been offered on %s, or no news has reached us yet."
@@ -2174,7 +2175,7 @@ msgstr "Antworten,"
 msgid "Request — goods you want back:"
 msgstr "Forderung - Waren, die Sie zurück wollen:"
 
-#: internal/menu/actions_bank.go:107
+#: internal/menu/actions_bank.go:114
 msgid "Returns expected to be approximately %s gold."
 msgstr "Der Ertrag wird etwa %s Gold betragen."
 
@@ -2223,7 +2224,7 @@ msgstr "Speichern"
 msgid "Saving..."
 msgstr "Speichern..."
 
-#: internal/menu/actions_bank.go:197
+#: internal/menu/actions_bank.go:204
 msgid "Savings Interest Rate:"
 msgstr "Sparzins:"
 
@@ -2319,7 +2320,7 @@ msgstr "Dieses Handelsgeschäft senden?"
 msgid "Sending costs %s gold and %d carriers; you own %d."
 msgstr "Das Senden kostet %s Gold und %d Träger; Sie besitzen %d."
 
-#: internal/menu/actions_trade.go:244
+#: internal/menu/actions_trade.go:248
 msgid "Sending costs %s gold per day; it needs one carrier."
 msgstr "Das Senden kostet %s Gold je Tag und braucht einen Träger."
 
@@ -2366,6 +2367,10 @@ msgstr "Einzelner Planet"
 #: internal/menu/actions.go:247
 msgid "Sold %d. Gold: %d"
 msgstr "%d verkauft. Gold: %d"
+
+#: internal/menu/actions_trade.go:261
+msgid "Sorry, trade deals must be sent for at least %d days."
+msgstr "Leider müssen Handelsangebote für mindestens %d Tage gesendet werden."
 
 #: internal/menu/gameflow.go:144
 msgid "Sorry, you have used all of your turns today."
@@ -2501,7 +2506,7 @@ msgstr "Gebiet"
 msgid "Terrorist Ops"
 msgstr "Terroroperationen"
 
-#: internal/menu/actions_bank.go:216
+#: internal/menu/actions_bank.go:223
 msgid "That costs %s gold more than you have in hand."
 msgstr "Das kostet %s Gold mehr, als Sie zur Hand haben."
 
@@ -2595,11 +2600,11 @@ msgstr "Der S3-Sabre ist abgeschaltet."
 msgid "The current BBS Coordinator is %s."
 msgstr "Der derzeitige BBS-Koordinator ist %s."
 
-#: internal/menu/actions_bank.go:96
+#: internal/menu/actions_bank.go:99
 msgid "The current interest returns on investments are %s%%."
 msgstr "Der derzeitige Ertrag auf Anlagen beträgt %s%%."
 
-#: internal/menu/actions_trade.go:246
+#: internal/menu/actions_trade.go:250
 msgid ""
 "The deal stands until the span runs out; unanswered, the goods are lost."
 msgstr ""
@@ -2649,7 +2654,7 @@ msgstr ""
 "Die Waren sind ein Geschenk: Das andere Reich kann sie nicht ablehnen und "
 "sendet nichts zurück."
 
-#: internal/menu/actions_bank.go:64
+#: internal/menu/actions_bank.go:67
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "Der Kreditzins beträgt %s%% je Tag, insgesamt also %s%% Zinsen."
 
@@ -2694,7 +2699,7 @@ msgstr ""
 msgid "There are only %d to choose from."
 msgstr "Es stehen nur %d zur Auswahl."
 
-#: internal/menu/actions_bank.go:97
+#: internal/menu/actions_bank.go:100
 msgid "There is a %d-day minimum on investments."
 msgstr "Für Anlagen gilt eine Mindestdauer von %d Tagen."
 
@@ -2770,7 +2775,7 @@ msgstr "Die Uhrzeit lautet nun %s."
 msgid "To end selection, hit enter at the prompt."
 msgstr "Zum Beenden der Auswahl an der Eingabe die Eingabetaste drücken."
 
-#: internal/menu/actions_bank.go:180
+#: internal/menu/actions_bank.go:187
 msgid "Today"
 msgstr "Heute"
 
@@ -2826,11 +2831,11 @@ msgstr "Gesamte Streitkräfte"
 msgid "Trade"
 msgstr "Handel"
 
-#: internal/menu/actions_trade.go:297
+#: internal/menu/actions_trade.go:305
 msgid "Trade deal accepted."
 msgstr "Handelsgeschäft angenommen."
 
-#: internal/menu/actions_trade.go:215
+#: internal/menu/actions_trade.go:218
 msgid "Trade deal sent to %s for %d days (%s gold)."
 msgstr "Handelsgeschäft an %s für %d Tage gesandt (%s Gold)."
 
@@ -2989,7 +2994,7 @@ msgstr "Nachrichtenmenü"
 msgid "Visit Trading Menu"
 msgstr "Handelsmenü"
 
-#: internal/menu/actions_bank.go:251
+#: internal/menu/actions_bank.go:258
 msgid "Visit the bank"
 msgstr "Bank besuchen"
 
@@ -3092,7 +3097,7 @@ msgid "We run a shortfall of %s; our stores will run out in about %d turns."
 msgstr ""
 "Wir haben ein Defizit von %s; unsere Vorräte reichen noch etwa %d Züge."
 
-#: internal/menu/actions_bank.go:67
+#: internal/menu/actions_bank.go:70
 msgid "We will provide up to %s gold."
 msgstr "Wir stellen bis zu %s Gold bereit."
 
@@ -3139,7 +3144,7 @@ msgstr ""
 "normalen Leistung. Der Wert hängt von ihrem Anteil an unserem Land ab, daher "
 "senkt der Kauf anderer Regionen ihn."
 
-#: internal/menu/actions_bank.go:237
+#: internal/menu/actions_bank.go:244
 msgid "Withdraw %s gold"
 msgstr "%s Gold abheben"
 
@@ -3268,7 +3273,7 @@ msgstr "So viel hast du nicht auf der Bank."
 msgid "You do not owe that much."
 msgstr "So viel schuldest du nicht."
 
-#: internal/menu/actions_trade.go:282
+#: internal/menu/actions_trade.go:290
 msgid "You give:    %s"
 msgstr "Sie geben:   %s"
 
@@ -3337,7 +3342,7 @@ msgstr "Sie haben heute bereits alle Ihre %d Angriffe durchgeführt."
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "Sie haben heute bereits alle Ihre %d Angriffstruppen ausgesandt."
 
-#: internal/menu/actions_bank.go:145
+#: internal/menu/actions_bank.go:152
 msgid "You have no active investments or loans."
 msgstr "Sie haben keine laufenden Anlagen oder Kredite."
 
@@ -3431,7 +3436,7 @@ msgstr "Sie bekleiden das Amt des BBS-Koordinators nicht mehr."
 msgid "You offer %s to %s"
 msgstr "Sie bieten %s an %s"
 
-#: internal/menu/actions_bank.go:82
+#: internal/menu/actions_bank.go:85
 msgid "You owe %s gold in %d Days."
 msgstr "Sie schulden %s Gold in %d Tagen."
 
@@ -3447,7 +3452,7 @@ msgstr ""
 msgid "You put in %d million gold."
 msgstr "Sie haben %d Millionen Gold beigesteuert."
 
-#: internal/menu/actions_trade.go:281
+#: internal/menu/actions_trade.go:289
 msgid "You receive: %s"
 msgstr "Sie erhalten: %s"
 

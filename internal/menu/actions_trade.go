@@ -191,6 +191,9 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	days, perDay := tradeDealSpan(s, w, toName, send)
+	if days == 0 {
+		return Stay
+	}
 
 	// The gold being offered and the span's fee are both paid on sending, so the
 	// bank is offered against the pair of them.
@@ -221,7 +224,8 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 }
 
 // tradeDealSpan asks how many days a deal to toName stands and returns the span
-// with its per-day fee. BRE: a deal is sent for a span of days at a per-day gold
+// with its per-day fee, or a span of 0 when the player gave one too short to
+// send. BRE: a deal is sent for a span of days at a per-day gold
 // fee and consumes a carrier. A standing Protective Trade agreement cuts the
 // per-day rate. The span is how long the offer stands before it lapses, so the
 // ceiling here is what the sender can pay for — the original has no other limit.
@@ -250,8 +254,12 @@ func tradeDealSpan(s session.Session, w *ctx, toName string, send game.TradeBask
 		suggested = maxDays
 	}
 	days := promptSuggested(s, "How many days to send it for?", suggested, maxDays)
+	// A span below the minimum is refused and the deal is not sent, as BRE's
+	// create_trade_offer does (BRE.OVR +0x21bb: under 2, its refusal, then
+	// return). It used to be raised to the minimum out of sight.
 	if days < game.TradeDealMinDays {
-		days = game.TradeDealMinDays
+		fail(s, fmt.Errorf(tr(s, "Sorry, trade deals must be sent for at least %d days."), game.TradeDealMinDays))
+		return 0, perDay
 	}
 	return days, perDay
 }

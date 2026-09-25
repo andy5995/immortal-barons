@@ -207,7 +207,7 @@ msgstr "%s на %s"
 msgid "%s offers you a %s."
 msgstr "%s предлагает вам %s."
 
-#: internal/menu/actions_trade.go:280
+#: internal/menu/actions_trade.go:288
 msgid "%s offers you a trade deal."
 msgstr "%s предлагает вам торговую сделку."
 
@@ -425,11 +425,11 @@ msgstr "Об игре"
 msgid "Accept this treaty?"
 msgstr "Принять договор?"
 
-#: internal/menu/actions_bank.go:108
+#: internal/menu/actions_bank.go:115
 msgid "Accept?"
 msgstr "Принять?"
 
-#: internal/menu/actions_trade.go:284
+#: internal/menu/actions_trade.go:292
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr "Принять? [Y] да, [N] нет, [I] пока пропустить"
 
@@ -953,7 +953,7 @@ msgstr "ПОГИБ"
 msgid "Daily Bulletin"
 msgstr "Ежедневный бюллетень"
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Date"
 msgstr "Дата"
 
@@ -1263,7 +1263,7 @@ msgstr "Общий запрос разведки"
 msgid "Gold"
 msgstr "Золото"
 
-#: internal/menu/actions_bank.go:282
+#: internal/menu/actions_bank.go:289
 msgid "Gold Needed"
 msgstr "Нужно золото"
 
@@ -1319,7 +1319,7 @@ msgstr "Помощь - выберите раздел:"
 msgid "How many %s?"
 msgstr "Сколько %s?"
 
-#: internal/menu/actions_trade.go:252
+#: internal/menu/actions_trade.go:256
 msgid "How many days to send it for?"
 msgstr "На сколько дней отправить?"
 
@@ -1327,7 +1327,7 @@ msgstr "На сколько дней отправить?"
 msgid "How many days would you like him to remain?"
 msgstr "На сколько дней его оставить?"
 
-#: internal/menu/actions_bank.go:98
+#: internal/menu/actions_bank.go:101
 msgid "How many days would you like to invest for?"
 msgstr "На сколько дней вложить?"
 
@@ -1335,7 +1335,7 @@ msgstr "На сколько дней вложить?"
 msgid "How many million gold do you wish to put in?"
 msgstr "Сколько миллионов золота вложить?"
 
-#: internal/menu/actions_bank.go:68
+#: internal/menu/actions_bank.go:71
 msgid "How many would you like to borrow?"
 msgstr "Сколько хотите занять?"
 
@@ -1355,7 +1355,7 @@ msgstr "Сколько вернуть?"
 msgid "How much will you give?"
 msgstr "Сколько вы дадите?"
 
-#: internal/menu/actions_bank.go:102
+#: internal/menu/actions_bank.go:109
 msgid "How much would you like to invest?"
 msgstr "Сколько хотите вложить?"
 
@@ -1391,7 +1391,7 @@ msgstr "Immortal Barons"
 msgid "In Deal"
 msgstr "В сделке"
 
-#: internal/menu/actions_bank.go:183
+#: internal/menu/actions_bank.go:190
 msgid "In Hold"
 msgstr "Отложено"
 
@@ -1444,19 +1444,19 @@ msgstr ""
 "Недопустимо: в названии державы нужно минимум 3 буквы или цифры. Украшения "
 "вокруг них допустимы и не считаются."
 
-#: internal/menu/actions_bank.go:198
+#: internal/menu/actions_bank.go:205
 msgid "Investing Interest Rate:"
 msgstr "Доход по вкладам:"
 
-#: internal/menu/actions_bank.go:121
+#: internal/menu/actions_bank.go:128
 msgid "Investment will be returned on %s."
 msgstr "Вклад вернётся %s."
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Investments"
 msgstr "Вклады"
 
-#: internal/menu/actions_trade.go:218
+#: internal/menu/actions_trade.go:221
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "К ним это попадёт не раньше хода %d их дня."
 
@@ -1554,7 +1554,7 @@ msgstr "Показать вклады и займы"
 msgid "List of Planets"
 msgstr "Список планет"
 
-#: internal/menu/actions_bank.go:169
+#: internal/menu/actions_bank.go:176
 msgid "Loans Due"
 msgstr "Займы к возврату"
 
@@ -1790,7 +1790,7 @@ msgstr "Неизвестно - списка ещё нет"
 msgid "Not set"
 msgstr "Не задано"
 
-#: internal/menu/actions_bank.go:83
+#: internal/menu/actions_bank.go:86
 msgid "Note that late payments will incur additional penalties."
 msgstr "Учтите: просрочка повлечёт дополнительные штрафы."
 
@@ -2139,7 +2139,7 @@ msgstr "Ответить,"
 msgid "Request — goods you want back:"
 msgstr "Запрос — товары, которые вы хотите взамен:"
 
-#: internal/menu/actions_bank.go:107
+#: internal/menu/actions_bank.go:114
 msgid "Returns expected to be approximately %s gold."
 msgstr "Ожидаемый доход — около %s золота."
 
@@ -2187,7 +2187,7 @@ msgstr "Сохранить"
 msgid "Saving..."
 msgstr "Сохранение..."
 
-#: internal/menu/actions_bank.go:197
+#: internal/menu/actions_bank.go:204
 msgid "Savings Interest Rate:"
 msgstr "Процент по сбережениям:"
 
@@ -2283,7 +2283,7 @@ msgstr "Отправить эту сделку?"
 msgid "Sending costs %s gold and %d carriers; you own %d."
 msgstr "Отправка стоит %s золота и %d авианосцев; у вас %d."
 
-#: internal/menu/actions_trade.go:244
+#: internal/menu/actions_trade.go:248
 msgid "Sending costs %s gold per day; it needs one carrier."
 msgstr "Отправка стоит %s золота в день и требует один авианосец."
 
@@ -2330,6 +2330,10 @@ msgstr "Одна планета"
 #: internal/menu/actions.go:247
 msgid "Sold %d. Gold: %d"
 msgstr "Продано: %d. Золото: %d"
+
+#: internal/menu/actions_trade.go:261
+msgid "Sorry, trade deals must be sent for at least %d days."
+msgstr "Увы, сделку нельзя отправить на срок меньше %d дн."
 
 #: internal/menu/gameflow.go:144
 msgid "Sorry, you have used all of your turns today."
@@ -2464,7 +2468,7 @@ msgstr "Земли"
 msgid "Terrorist Ops"
 msgstr "Террористические операции"
 
-#: internal/menu/actions_bank.go:216
+#: internal/menu/actions_bank.go:223
 msgid "That costs %s gold more than you have in hand."
 msgstr "Это на %s золота больше, чем у вас на руках."
 
@@ -2556,11 +2560,11 @@ msgstr "S3-Sabre отключён."
 msgid "The current BBS Coordinator is %s."
 msgstr "Нынешний координатор BBS - %s."
 
-#: internal/menu/actions_bank.go:96
+#: internal/menu/actions_bank.go:99
 msgid "The current interest returns on investments are %s%%."
 msgstr "Текущая доходность вкладов — %s%%."
 
-#: internal/menu/actions_trade.go:246
+#: internal/menu/actions_trade.go:250
 msgid ""
 "The deal stands until the span runs out; unanswered, the goods are lost."
 msgstr "Сделка в силе, пока не истечёт срок; без ответа товар пропадает."
@@ -2607,7 +2611,7 @@ msgid ""
 msgstr ""
 "Товар идёт даром: другая держава не может отказаться и ничего не шлёт взамен."
 
-#: internal/menu/actions_bank.go:64
+#: internal/menu/actions_bank.go:67
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "Ставка по займу — %s%% в день, всего %s%% процентов."
 
@@ -2648,7 +2652,7 @@ msgstr "Соперников для нападения не осталось."
 msgid "There are only %d to choose from."
 msgstr "Доступно всего %d."
 
-#: internal/menu/actions_bank.go:97
+#: internal/menu/actions_bank.go:100
 msgid "There is a %d-day minimum on investments."
 msgstr "Минимальный срок вклада — %d дн."
 
@@ -2724,7 +2728,7 @@ msgstr "Время теперь %s."
 msgid "To end selection, hit enter at the prompt."
 msgstr "Чтобы закончить выбор, нажмите ВВОД в ответ на запрос."
 
-#: internal/menu/actions_bank.go:180
+#: internal/menu/actions_bank.go:187
 msgid "Today"
 msgstr "Сегодня"
 
@@ -2780,11 +2784,11 @@ msgstr "Всего сил"
 msgid "Trade"
 msgstr "Торговля"
 
-#: internal/menu/actions_trade.go:297
+#: internal/menu/actions_trade.go:305
 msgid "Trade deal accepted."
 msgstr "Сделка принята."
 
-#: internal/menu/actions_trade.go:215
+#: internal/menu/actions_trade.go:218
 msgid "Trade deal sent to %s for %d days (%s gold)."
 msgstr "Сделка отправлена на %s на %d дн. (%s золота)."
 
@@ -2942,7 +2946,7 @@ msgstr "Меню сообщений"
 msgid "Visit Trading Menu"
 msgstr "Меню торговли"
 
-#: internal/menu/actions_bank.go:251
+#: internal/menu/actions_bank.go:258
 msgid "Visit the bank"
 msgstr "Посетить банк"
 
@@ -3042,7 +3046,7 @@ msgstr ""
 msgid "We run a shortfall of %s; our stores will run out in about %d turns."
 msgstr "У нас нехватка в %s; запасы кончатся примерно через %d ходов."
 
-#: internal/menu/actions_bank.go:67
+#: internal/menu/actions_bank.go:70
 msgid "We will provide up to %s gold."
 msgstr "Мы предоставим до %s золота."
 
@@ -3087,7 +3091,7 @@ msgstr ""
 "С нашими регионами {mountain} заводы строят войска на %d%% от обычного. Это "
 "зависит от их доли в нашей земле, так что покупка других регионов её снижает."
 
-#: internal/menu/actions_bank.go:237
+#: internal/menu/actions_bank.go:244
 msgid "Withdraw %s gold"
 msgstr "Снять %s золота"
 
@@ -3214,7 +3218,7 @@ msgstr "У вас нет столько в банке."
 msgid "You do not owe that much."
 msgstr "Вы должны не так много."
 
-#: internal/menu/actions_trade.go:282
+#: internal/menu/actions_trade.go:290
 msgid "You give:    %s"
 msgstr "Вы даёте:    %s"
 
@@ -3283,7 +3287,7 @@ msgstr "Вы уже провели все %d своих атак на сегод
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "Вы уже отправили все %d своих отрядов на сегодня."
 
-#: internal/menu/actions_bank.go:145
+#: internal/menu/actions_bank.go:152
 msgid "You have no active investments or loans."
 msgstr "У вас нет действующих вкладов и займов."
 
@@ -3372,7 +3376,7 @@ msgstr "Вы больше не занимаете пост координато�
 msgid "You offer %s to %s"
 msgstr "Вы предлагаете %s планете %s"
 
-#: internal/menu/actions_bank.go:82
+#: internal/menu/actions_bank.go:85
 msgid "You owe %s gold in %d Days."
 msgstr "Вы должны %s золота через %d дн."
 
@@ -3389,7 +3393,7 @@ msgstr ""
 msgid "You put in %d million gold."
 msgstr "Вы вложили %d млн золота."
 
-#: internal/menu/actions_trade.go:281
+#: internal/menu/actions_trade.go:289
 msgid "You receive: %s"
 msgstr "Вы получаете: %s"
 
