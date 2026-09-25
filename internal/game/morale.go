@@ -99,9 +99,9 @@ func (w *World) applyFeeding(e *Empire, peopleNeed, toPeople, armyNeed, toArmy i
 	e.PendingSupportPenalty += shortfallPenalty(int64(peopleNeed), int64(toPeople), StarvationPenaltyScale)
 	e.PendingMoralePenalty += shortfallPenalty(int64(armyNeed), int64(toArmy), StarvationPenaltyScale)
 	e.CivilWarSeverity += civilWarSeverity(int64(peopleNeed), int64(toPeople), FoodCivilWarThresholdPct)
-	if toPeople < peopleNeed || toArmy < armyNeed {
-		w.postStarvationNews(e)
-	}
+	// A shortfall makes no planet news: the original's news file has no section
+	// for it (game/news.dat), and its only famine text is a private line to a
+	// biological strike's victim.
 }
 
 // clampHelping holds one helping to what was owed and to what is on the shelf.

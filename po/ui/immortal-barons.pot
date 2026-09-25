@@ -757,23 +757,23 @@ msgstr ""
 msgid "Chopper's Fair Market"
 msgstr ""
 
-#: internal/menu/turnrecap.go:533
+#: internal/menu/turnrecap.go:545
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:529
+#: internal/menu/turnrecap.go:541
 msgid "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:531
+#: internal/menu/turnrecap.go:543
 msgid "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:535
+#: internal/menu/turnrecap.go:547
 msgid "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 
-#: internal/menu/turnrecap.go:537
+#: internal/menu/turnrecap.go:549
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr ""
 
@@ -809,7 +809,7 @@ msgstr ""
 msgid "Confirm?"
 msgstr ""
 
-#: internal/menu/gameflow.go:371
+#: internal/menu/gameflow.go:376
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -973,6 +973,10 @@ msgstr ""
 msgid "Directives from CO"
 msgstr ""
 
+#: internal/menu/turnrecap.go:453
+msgid "Discontent runs deep — your people grumble at every order."
+msgstr ""
+
 #: internal/menu/tree.go:511
 msgid "Dismantle Gooie"
 msgstr ""
@@ -1045,7 +1049,7 @@ msgstr ""
 msgid "End Protection"
 msgstr ""
 
-#: internal/menu/turnrecap.go:480
+#: internal/menu/turnrecap.go:482
 msgid "End of Turn Statistics:"
 msgstr ""
 
@@ -1961,7 +1965,11 @@ msgstr ""
 msgid "Returns expected to be approximately %s gold."
 msgstr ""
 
-#: internal/menu/turnrecap.go:496
+#: internal/menu/turnrecap.go:449
+msgid "Riots flare through the streets almost daily."
+msgstr ""
+
+#: internal/menu/turnrecap.go:498
 msgid "Riots have broken out due to high tax rates!"
 msgstr ""
 
@@ -2049,7 +2057,7 @@ msgstr ""
 msgid "Send Trade Deal"
 msgstr ""
 
-#: internal/menu/gameflow.go:327
+#: internal/menu/gameflow.go:332
 msgid "Send a message?"
 msgstr ""
 
@@ -2409,6 +2417,10 @@ msgstr ""
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr ""
 
+#: internal/menu/turnrecap.go:445
+msgid "The mob is at your gates — your people would be rid of you by any means."
+msgstr ""
+
 #: internal/menu/actions.go:17
 msgid "The realm has changed — try again."
 msgstr ""
@@ -2663,6 +2675,10 @@ msgstr ""
 
 #: cmd/immortal-barons/league.go:146
 msgid "Unreadable journal"
+msgstr ""
+
+#: internal/menu/turnrecap.go:451
+msgid "Unrest simmers; angry crowds gather against your decrees."
 msgstr ""
 
 #: internal/game/regions.go:161
@@ -3213,7 +3229,7 @@ msgstr ""
 msgid "Your choice?"
 msgstr ""
 
-#: internal/menu/turnrecap.go:490
+#: internal/menu/turnrecap.go:492
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
@@ -3221,7 +3237,7 @@ msgstr ""
 msgid "Your dominion is still under protection."
 msgstr ""
 
-#: internal/menu/turnrecap.go:492
+#: internal/menu/turnrecap.go:494
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
@@ -3281,8 +3297,36 @@ msgstr ""
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
+#: internal/menu/turnrecap.go:461
+msgid "Your people admire your leadership and prosper gladly."
+msgstr ""
+
+#: internal/menu/turnrecap.go:459
+msgid "Your people are glad to live under your banner."
+msgstr ""
+
+#: internal/menu/turnrecap.go:455
+msgid "Your people endure your rule, but take little joy in it."
+msgstr ""
+
+#: internal/menu/turnrecap.go:457
+msgid "Your people go about their business, content enough."
+msgstr ""
+
 #: internal/menu/turnstages.go:360
 msgid "Your people need %s units of food."
+msgstr ""
+
+#: internal/menu/turnrecap.go:463
+msgid "Your people praise your name in every market square."
+msgstr ""
+
+#: internal/menu/turnrecap.go:465
+msgid "Your people revere you — faith in your rule has never been higher."
+msgstr ""
+
+#: internal/menu/turnrecap.go:447
+msgid "Your people seethe with open hatred for your rule."
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:193
@@ -3557,7 +3601,7 @@ msgstr ""
 msgid "took %d"
 msgstr ""
 
-#: internal/menu/turnrecap.go:501
+#: internal/menu/turnrecap.go:521
 msgid "troops deserted due to low morale."
 msgstr ""
 
@@ -3565,7 +3609,7 @@ msgstr ""
 msgid "units of Food consumed."
 msgstr ""
 
-#: internal/menu/turnrecap.go:494
+#: internal/menu/turnrecap.go:496
 msgid "units of food spoiled."
 msgstr ""
 

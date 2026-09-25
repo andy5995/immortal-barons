@@ -2975,8 +2975,9 @@ search for direct displacements does not match.
   in the planet news at 1-in-20 a turn (`BRE.OVR 0xD5AD`) — cosmetic, unlike the
   tax riot. It is tested on the support the end-of-turn update leaves
   (`0xD5A3`), whether or not the realm also rioted. That test is the ONLY caller
-  of BRE's riot news (`write_riot_news`); IB also posts a riot line for the tax
-  riot, and so skips a second post in a turn that already made one.
+  of BRE's riot news (`write_riot_news`), so a tax riot itself makes no news.
+  IB matches this; until 2026-09-25 it also posted a riot line for every tax
+  riot.
 - The End of Turn Statistics open with a line on how the people feel, chosen on
   the support the update leaves by **eleven uneven bands** — 0–10, 11–17, 18–23,
   24–30, 31–38, 39–47, 48–65, 66–80, 81–88, 89–96, 97–100 (`BRE.OVR 0xD5D8`,
@@ -4050,8 +4051,9 @@ turns at the start (config: 15). A turn walks through a sequence of menus:
    - then, with no screen of its own, the civil-unrest step: the turn's morale
      penalty lands, low morale deserts, a filed civil war is spent
      (`resolve_civil_unrest`, `BRE.EXE 0x3d40`; IB `World.ResolveCivilUnrest`).
-     BRE prints the desertion and civil-war lines from that routine; IB still
-     reports them in End of Turn Statistics.
+     BRE prints the civil-war and desertion lines from that routine, and IB
+     prints its own there too, pausing once when there is anything to report.
+     Until 2026-09-25 IB held them for End of Turn Statistics.
 3. Covert operations (shown only when the step is enabled in Preferences and
    the player holds at least one covert agent — a fresh realm starts with none)
 4. Bank — opened automatically, with no yes/no prompt in front of it
@@ -6172,7 +6174,8 @@ flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
   by everyone on the planet. Categories: `NORMALWIN` / `NORMALLOSS` (regular
   attacks), `TOTALWIN` (an empire is destroyed), `NUKE` / `CHEM` / `BIO`
   (WMD strikes), `PIRATEWIN` / `PIRATELOSS` (pirate raids), `CIVILWAR`
-  (collapse from poor leadership), `RIOTS` (high-tax unrest).
+  (collapse from poor leadership), `RIOTS` (an unpopular realm; written only by
+  the low-support test, never by the tax riot itself).
 - **Interplanetary news** (`game/ipnews.dat`) — inter-BBS attacks: individual /
   group-on-single / group-on-whole-BBS, each with a WIN and LOSS variant, plus
   the returning-strike (`IP-RET-*`) versions and `IP-RET-KILL`.
@@ -6184,7 +6187,8 @@ flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
 The clone broadcasts most of these to its planetary bulletin (original wording,
 not BRE's verbatim lines): regular-attack wins/losses/conquests (NORMALWIN /
 NORMALLOSS / TOTALWIN), nuclear/chemical/biological strikes (NUKE / CHEM / BIO),
-pirate-raid outcomes (PIRATEWIN / PIRATELOSS), tax riots (RIOTS), and civil-war
+pirate-raid outcomes (PIRATEWIN / PIRATELOSS), unrest in an unpopular realm
+(RIOTS), and civil-war
 collapse (CIVILWAR — `postCivilWarNews`).
 
 The pirate lines are the one part of the feed a sysop can switch off:

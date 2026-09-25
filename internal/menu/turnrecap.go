@@ -435,32 +435,34 @@ func pirateHitLine(s session.Session, h game.PirateHit) {
 }
 
 // peopleMood returns an end-of-turn flavor line keyed to popular support, on
-// the original's eleven bands (game.SupportMoodBands) in IB's own wording.
-func peopleMood(support int) string {
+// the original's eleven bands (game.SupportMoodBands) in IB's own wording,
+// translated. Each line goes through tr() where it is written, so the string
+// extractor sees it.
+func peopleMood(s session.Session, support int) string {
 	b := game.SupportMoodBands
 	switch {
 	case support <= b[0]:
-		return "The mob is at your gates — your people would be rid of you by any means."
+		return tr(s, "The mob is at your gates — your people would be rid of you by any means.")
 	case support <= b[1]:
-		return "Your people seethe with open hatred for your rule."
+		return tr(s, "Your people seethe with open hatred for your rule.")
 	case support <= b[2]:
-		return "Riots flare through the streets almost daily."
+		return tr(s, "Riots flare through the streets almost daily.")
 	case support <= b[3]:
-		return "Unrest simmers; angry crowds gather against your decrees."
+		return tr(s, "Unrest simmers; angry crowds gather against your decrees.")
 	case support <= b[4]:
-		return "Discontent runs deep — your people grumble at every order."
+		return tr(s, "Discontent runs deep — your people grumble at every order.")
 	case support <= b[5]:
-		return "Your people endure your rule, but take little joy in it."
+		return tr(s, "Your people endure your rule, but take little joy in it.")
 	case support <= b[6]:
-		return "Your people go about their business, content enough."
+		return tr(s, "Your people go about their business, content enough.")
 	case support <= b[7]:
-		return "Your people are glad to live under your banner."
+		return tr(s, "Your people are glad to live under your banner.")
 	case support <= b[8]:
-		return "Your people admire your leadership and prosper gladly."
+		return tr(s, "Your people admire your leadership and prosper gladly.")
 	case support <= b[9]:
-		return "Your people praise your name in every market square."
+		return tr(s, "Your people praise your name in every market square.")
 	default:
-		return "Your people revere you — faith in your rule has never been higher."
+		return tr(s, "Your people revere you — faith in your rule has never been higher.")
 	}
 }
 
@@ -481,7 +483,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
 	// BRE sets the mood line off with a blank line, and sets the random event
 	// off with another below (cap/kd3-01.cap, raw \r\n).
-	fmt.Fprintf(s, "  %s\n\n", tr(s, peopleMood(p.Support)))
+	fmt.Fprintf(s, "  %s\n\n", peopleMood(s, p.Support))
 	// A flat turn prints "gained 0" rather than nothing: BRE does (cap/kd3-01.cap,
 	// twice, both on riot turns), and IB used to skip the line entirely, so a
 	// realm whose growth was suppressed — most often by an empty granary — was
@@ -495,10 +497,6 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	if p.LastRiot {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
 	}
-	if p.LastCivilWar > 0 {
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(civilWarLine(s, p.LastCivilWar), p.LastCivilWar)), ansi.Reset)
-	}
-	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
 	// The random event closes the block, which is where the original prints it:
 	// three instances across cap/kd3-01.cap and cap/eots-ibbs-01.cap all sit as
 	// the last line before the closing rule ("54 troopers are killed in a riot at
@@ -508,6 +506,20 @@ func endOfTurnStats(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "\n%s\n", hiNums(WrapIndented(tr(s, p.LastRandomEvent), "  ")))
 	}
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
+}
+
+// reportCivilUnrest prints what the civil-unrest step did, where the original's
+// resolve_civil_unrest prints it: before any menu of the turn. Nothing prints,
+// and there is no pause, on a turn with neither a civil war nor desertions.
+func reportCivilUnrest(s session.Session, civilWar, deserted int) {
+	if civilWar <= 0 && deserted <= 0 {
+		return
+	}
+	if civilWar > 0 {
+		fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(civilWarLine(s, civilWar), civilWar)), ansi.Reset)
+	}
+	statLine(s, deserted, "troops deserted due to low morale.")
+	pause(s)
 }
 
 // civilWarLine words a civil war by how much it destroyed, as the original does
@@ -520,8 +532,8 @@ func endOfTurnStats(s session.Session, w *ctx) {
 // surplus that its granary had emptied.
 //
 // Each branch translates its own literal so the string extractor sees it; a
-// helper that returns an untranslated literal for the caller to tr() is how
-// peopleMood's lines have stayed out of the catalogs.
+// helper that returns an untranslated literal for the caller to tr() is what
+// kept peopleMood's lines out of the catalogs until 2026-09-25.
 func civilWarLine(s session.Session, sev int) string {
 	b := game.CivilWarReportBands
 	switch {

@@ -234,6 +234,11 @@ func TestEndOfTurnSupportOrder(t *testing.T) {
 	if !e.LastRiot || e.Support != 60 || e.People != 1400 {
 		t.Errorf("riot: riot %v support %d people %d, want true, 60, 1400", e.LastRiot, e.Support, e.People)
 	}
+	// The tax riot makes no news: the original's riot news is written only by
+	// the low-support test, which runs later in the turn.
+	if len(w.NewsToday) != 0 {
+		t.Errorf("a tax riot posted news: %v", w.NewsToday)
+	}
 }
 
 // The low-support news line tests the support the end-of-turn update leaves

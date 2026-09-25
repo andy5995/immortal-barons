@@ -519,9 +519,9 @@ func (w *World) processEconomy(e *Empire) {
 
 	// An unpopular realm makes the planet news whether or not it rioted this
 	// turn, tested on the support the update above left (BRE.OVR 0xD5A3). It
-	// costs nothing beyond the embarrassment. The draw is BRE's; IB skips a second
-	// post when the tax riot has already put this realm in the news this turn.
-	if e.Support < LowSupportNewsCeil && w.rng.Intn(LowSupportNewsOdds) == 0 && !e.LastRiot {
+	// costs nothing beyond the embarrassment. This is the only riot news there
+	// is: write_riot_news has no other caller, so a tax riot itself makes none.
+	if e.Support < LowSupportNewsCeil && w.rng.Intn(LowSupportNewsOdds) == 0 {
 		w.postRiotNews(e)
 	}
 
@@ -555,7 +555,6 @@ func (w *World) endOfTurnSupport(e *Empire) {
 	// The weight is zero at or below the floor, and the draw is skipped there.
 	if rw := riotWeight(e.Tax); rw > 0 && rw >= w.rng.Intn(RiotChanceDenom) {
 		e.LastRiot = true
-		w.postRiotNews(e)
 		e.PendingSupportPenalty += e.Tax / RiotSupportDivisor
 		e.People -= e.People / RiotPeopleDivisor
 	}

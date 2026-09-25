@@ -152,11 +152,15 @@ func (w *World) postPirateNews(a *Empire, faction string, won bool) {
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
 
-// postRiotNews broadcasts tax riots in an empire (BRE RIOTS).
+// postRiotNews broadcasts unrest in an unpopular realm (BRE RIOTS). Only the
+// low-support test calls it, as only it calls BRE's write_riot_news; a tax riot
+// itself makes no news.
 func (w *World) postRiotNews(e *Empire) {
 	lines := []string{
-		fmt.Sprintf("Riots erupt in %s over crushing taxes!", e.Name),
-		fmt.Sprintf("The people of %s take to the streets against high taxes.", e.Name),
+		// No cause is named: low support comes from taxes, hunger, strikes and
+		// covert work alike.
+		fmt.Sprintf("Riots erupt in %s!", e.Name),
+		fmt.Sprintf("The people of %s take to the streets against their ruler.", e.Name),
 	}
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
@@ -168,15 +172,6 @@ func (w *World) postCivilWarNews(e *Empire) {
 	lines := []string{
 		fmt.Sprintf("Civil war breaks out in %s as the people turn on the crown.", e.Name),
 		fmt.Sprintf("The realm of %s tears itself apart.", e.Name),
-	}
-	w.postNews(lines[w.rng.Intn(len(lines))])
-}
-
-// postStarvationNews broadcasts an empire's food shortfall.
-func (w *World) postStarvationNews(e *Empire) {
-	lines := []string{
-		fmt.Sprintf("Famine grips %s as food stocks run out.", e.Name),
-		fmt.Sprintf("Reports of starvation reach the planet from %s.", e.Name),
 	}
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }

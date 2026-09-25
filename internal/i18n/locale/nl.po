@@ -835,31 +835,31 @@ msgstr "Kies een tijdzone..."
 msgid "Chopper's Fair Market"
 msgstr "Choppers Eerlijke Markt"
 
-#: internal/menu/turnrecap.go:533
+#: internal/menu/turnrecap.go:545
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr "Burgeroorlog! De opstand kost u %d%% van uw rijk en uw troepen."
 
-#: internal/menu/turnrecap.go:529
+#: internal/menu/turnrecap.go:541
 msgid ""
 "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 "Burgeroorlog! Verspreide opstanden kosten u %d%% van uw rijk en uw troepen."
 
-#: internal/menu/turnrecap.go:531
+#: internal/menu/turnrecap.go:543
 msgid ""
 "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 "Burgeroorlog! De opstand breidt zich uit en neemt %d%% van uw rijk en uw "
 "troepen."
 
-#: internal/menu/turnrecap.go:535
+#: internal/menu/turnrecap.go:547
 msgid ""
 "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 "Burgeroorlog! Hele provincies komen in opstand en nemen %d%% van uw rijk en "
 "uw troepen."
 
-#: internal/menu/turnrecap.go:537
+#: internal/menu/turnrecap.go:549
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Burgeroorlog! Uw rijk valt bijna uiteen - %d%% ervan is weg."
 
@@ -895,7 +895,7 @@ msgstr "Instellingen opgeslagen."
 msgid "Confirm?"
 msgstr "Bevestigen?"
 
-#: internal/menu/gameflow.go:371
+#: internal/menu/gameflow.go:376
 msgid "Continue to your next turn?"
 msgstr "Door naar uw volgende beurt?"
 
@@ -1094,6 +1094,10 @@ msgstr "Diplomatie wijzigen"
 msgid "Directives from CO"
 msgstr "Richtlijnen van de CO"
 
+#: internal/menu/turnrecap.go:453
+msgid "Discontent runs deep — your people grumble at every order."
+msgstr "De ontevredenheid zit diep - uw volk moppert bij elk bevel."
+
 #: internal/menu/tree.go:511
 msgid "Dismantle Gooie"
 msgstr "Gooie ontmantelen"
@@ -1172,7 +1176,7 @@ msgstr "Rijksstatus"
 msgid "End Protection"
 msgstr "Bescherming beëindigen"
 
-#: internal/menu/turnrecap.go:480
+#: internal/menu/turnrecap.go:482
 msgid "End of Turn Statistics:"
 msgstr "Statistieken aan het eind van de beurt:"
 
@@ -2155,7 +2159,11 @@ msgstr "Verzoek - waren die u terug wilt:"
 msgid "Returns expected to be approximately %s gold."
 msgstr "De opbrengst wordt ongeveer %s goud."
 
-#: internal/menu/turnrecap.go:496
+#: internal/menu/turnrecap.go:449
+msgid "Riots flare through the streets almost daily."
+msgstr "Bijna dagelijks laaien rellen op in de straten."
+
+#: internal/menu/turnrecap.go:498
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Er zijn rellen uitgebroken door de hoge belastingen!"
 
@@ -2247,7 +2255,7 @@ msgstr "SpyGuy sturen"
 msgid "Send Trade Deal"
 msgstr "Handelsaanbod sturen"
 
-#: internal/menu/gameflow.go:327
+#: internal/menu/gameflow.go:332
 msgid "Send a message?"
 msgstr "Een bericht versturen?"
 
@@ -2631,6 +2639,11 @@ msgstr ""
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "De leenrente is %s%% per dag, in totaal %s%% rente."
 
+#: internal/menu/turnrecap.go:445
+msgid ""
+"The mob is at your gates — your people would be rid of you by any means."
+msgstr "Het gepeupel staat aan uw poorten - uw volk wil op elke manier van u af."
+
 #: internal/menu/actions.go:17
 msgid "The realm has changed — try again."
 msgstr "Het rijk is gewijzigd - probeer het opnieuw."
@@ -2896,6 +2909,10 @@ msgstr "Vandaag onbeperkte voorraad."
 #: cmd/immortal-barons/league.go:146
 msgid "Unreadable journal"
 msgstr "Onleesbaar journaal"
+
+#: internal/menu/turnrecap.go:451
+msgid "Unrest simmers; angry crowds gather against your decrees."
+msgstr "De onrust sluimert; boze menigten verzamelen zich tegen uw decreten."
 
 #: internal/game/regions.go:161
 msgid "Urban"
@@ -3512,7 +3529,7 @@ msgstr "Uw verliezen: %s."
 msgid "Your choice?"
 msgstr "Uw keuze?"
 
-#: internal/menu/turnrecap.go:490
+#: internal/menu/turnrecap.go:492
 msgid "Your dominion gained %s%s%s people."
 msgstr "Uw rijk kreeg er %s%s%s inwoners bij."
 
@@ -3520,7 +3537,7 @@ msgstr "Uw rijk kreeg er %s%s%s inwoners bij."
 msgid "Your dominion is still under protection."
 msgstr "Uw rijk staat nog onder bescherming."
 
-#: internal/menu/turnrecap.go:492
+#: internal/menu/turnrecap.go:494
 msgid "Your dominion lost %s%s%s people."
 msgstr "Uw rijk verloor %s%s%s inwoners."
 
@@ -3600,9 +3617,37 @@ msgstr "Uw bericht is onderweg naar %d planeten."
 msgid "Your new-realm protection will end when this turn does."
 msgstr "Uw bescherming voor nieuwe rijken eindigt met deze beurt."
 
+#: internal/menu/turnrecap.go:461
+msgid "Your people admire your leadership and prosper gladly."
+msgstr "Uw volk bewondert uw leiderschap en bloeit graag op."
+
+#: internal/menu/turnrecap.go:459
+msgid "Your people are glad to live under your banner."
+msgstr "Uw volk leeft graag onder uw banier."
+
+#: internal/menu/turnrecap.go:455
+msgid "Your people endure your rule, but take little joy in it."
+msgstr "Uw volk verdraagt uw bewind, maar beleeft er weinig vreugde aan."
+
+#: internal/menu/turnrecap.go:457
+msgid "Your people go about their business, content enough."
+msgstr "Uw volk gaat zijn gang en is tevreden genoeg."
+
 #: internal/menu/turnstages.go:360
 msgid "Your people need %s units of food."
 msgstr "Uw volk heeft %s eenheden voedsel nodig."
+
+#: internal/menu/turnrecap.go:463
+msgid "Your people praise your name in every market square."
+msgstr "Uw volk prijst uw naam op elk marktplein."
+
+#: internal/menu/turnrecap.go:465
+msgid "Your people revere you — faith in your rule has never been higher."
+msgstr "Uw volk vereert u - het vertrouwen in uw bewind was nooit groter."
+
+#: internal/menu/turnrecap.go:447
+msgid "Your people seethe with open hatred for your rule."
+msgstr "Uw volk kookt van openlijke haat tegen uw bewind."
 
 #: internal/menu/actions_diplomacy.go:193
 msgid "Your proposal went to %d realms."
@@ -3991,7 +4036,7 @@ msgstr "deze planeet"
 msgid "took %d"
 msgstr "nam %d"
 
-#: internal/menu/turnrecap.go:501
+#: internal/menu/turnrecap.go:521
 msgid "troops deserted due to low morale."
 msgstr "soldaten deserteerden door het lage moreel."
 
@@ -3999,7 +4044,7 @@ msgstr "soldaten deserteerden door het lage moreel."
 msgid "units of Food consumed."
 msgstr "eenheden voedsel verbruikt."
 
-#: internal/menu/turnrecap.go:494
+#: internal/menu/turnrecap.go:496
 msgid "units of food spoiled."
 msgstr "eenheden voedsel bedorven."
 

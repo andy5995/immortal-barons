@@ -221,7 +221,10 @@ func runTurn(s session.Session, w *ctx) Result {
 		// The civil-unrest step: the morale this turn's maintenance and food left
 		// lands, the army deserts on it, and a filed civil war is spent — all
 		// before any menu, so this turn's attacks fight at that morale. BRE calls
-		// resolve_civil_unrest straight after allocate_food (BRE.EXE 0x3d40).
+		// resolve_civil_unrest straight after allocate_food (BRE.EXE 0x3d40), and
+		// that routine prints the civil war and the desertions itself, so they are
+		// reported here rather than at the end of the turn.
+		var civilWar, deserted int
 		if err := runStageOnce(w,
 			func(tp game.TurnProgress) bool { return tp.UnrestResolved },
 			func(tp *game.TurnProgress) { tp.UnrestResolved = true },
@@ -229,12 +232,14 @@ func runTurn(s session.Session, w *ctx) Result {
 				withPlayer(w, func(p *game.Empire) {
 					if !p.TurnProgress.UnrestResolved {
 						w.World.ResolveCivilUnrest(p)
+						civilWar, deserted = p.LastCivilWar, p.LastMoraleDesertion
 					}
 				})
 				return nil
 			}); err != nil {
 			return Stay
 		}
+		reportCivilUnrest(s, civilWar, deserted)
 
 		// Covert Operations runs right after maintenance and before Spending, per
 		// BRE's turn order (Payment/Food Market -> Covert -> Spending). Shown only

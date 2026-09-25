@@ -40,3 +40,33 @@ func TestCivilUnrestLandsBeforeTheMenus(t *testing.T) {
 			p.Morale, p.PendingMoralePenalty, p.TurnProgress.UnrestResolved)
 	}
 }
+
+// A civil war is reported by the civil-unrest step itself, before the turn's
+// first menu, as the original's resolve_civil_unrest prints it, and it pauses
+// there once.
+func TestCivilWarIsReportedBeforeTheMenus(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Agents = 0 // no covert stage
+	p.TurnsLeft = 3
+	p.TurnProgress.IncomeCollected = true
+	p.TurnProgress.MaintPaid = true
+	p.TurnProgress.Fed = true
+	p.CivilWarSeverity = 10
+
+	f := &fakeSession{keys: []rune("  ")} // the unrest pause, the status pause, then dry at the Bank
+	runTurn(f, w)
+
+	out := stripANSI(f.out.String())
+	bank := strings.Index(out, "Goldie Luck's Bank]")
+	if bank < 0 {
+		t.Fatalf("the script never reached the Bank menu:\n%s", out)
+	}
+	war := strings.Index(out, "Civil war!")
+	if war < 0 || war > bank {
+		t.Errorf("the civil war should be reported before the Bank menu (at %d, bank at %d):\n%s", war, bank, out)
+	}
+	if p.LastCivilWar != 10 {
+		t.Errorf("LastCivilWar = %d, want 10", p.LastCivilWar)
+	}
+}

@@ -73,9 +73,10 @@ func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 	}
 }
 
-// TestStarvationPostsCivilNews confirms an empire that runs out of food
-// posts one planet-news line, and a well-fed empire posts none.
-func TestStarvationPostsCivilNews(t *testing.T) {
+// TestStarvationMakesNoNewsButCivilWarDoes: running out of food posts no
+// planet news of its own (the original's news file has no section for it), but
+// the civil war it lights does. A well-fed empire posts nothing.
+func TestStarvationMakesNoNewsButCivilWarDoes(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
 
@@ -86,10 +87,10 @@ func TestStarvationPostsCivilNews(t *testing.T) {
 	starving.Alive = true
 
 	w.processEconomy(starving)
-	// Two lines: the famine itself, then the civil war it lights (BRE files a
-	// civil war whenever the people got under 65% of their food).
-	if len(w.NewsToday) != 2 {
-		t.Fatalf("expected a starvation and a civil-war news line, got %v", w.NewsToday)
+	// One line: the civil war the shortfall lights (BRE files a civil war
+	// whenever the people got under 65% of their food); none for the famine.
+	if len(w.NewsToday) != 1 || !strings.Contains(w.NewsToday[0].Text, "Famineburg") {
+		t.Fatalf("expected only the civil-war news line, got %v", w.NewsToday)
 	}
 
 	w.NewsToday = nil
@@ -100,7 +101,7 @@ func TestStarvationPostsCivilNews(t *testing.T) {
 
 	w.processEconomy(fed)
 	if len(w.NewsToday) != 0 {
-		t.Errorf("expected no starvation news for a well-fed empire, got %v", w.NewsToday)
+		t.Errorf("expected no news for a well-fed empire, got %v", w.NewsToday)
 	}
 }
 

@@ -823,29 +823,29 @@ msgstr "Выберите зону…"
 msgid "Chopper's Fair Market"
 msgstr "Ярмарка Чоппера"
 
-#: internal/menu/turnrecap.go:533
+#: internal/menu/turnrecap.go:545
 msgid "Civil war! Rebellion costs you %d%% of your realm and its forces."
 msgstr "Гражданская война! Мятеж стоит вам %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:529
+#: internal/menu/turnrecap.go:541
 msgid ""
 "Civil war! Scattered revolts cost you %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Разрозненные бунты стоят вам %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:531
+#: internal/menu/turnrecap.go:543
 msgid ""
 "Civil war! The revolt spreads, taking %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Восстание ширится и отнимает %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:535
+#: internal/menu/turnrecap.go:547
 msgid ""
 "Civil war! Whole provinces revolt, taking %d%% of your realm and its forces."
 msgstr ""
 "Гражданская война! Восстают целые провинции, отнимая %d%% державы и её войск."
 
-#: internal/menu/turnrecap.go:537
+#: internal/menu/turnrecap.go:549
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr "Гражданская война! Держава почти распалась - потеряно %d%%."
 
@@ -881,7 +881,7 @@ msgstr "Настройки сохранены."
 msgid "Confirm?"
 msgstr "Подтвердить?"
 
-#: internal/menu/gameflow.go:371
+#: internal/menu/gameflow.go:376
 msgid "Continue to your next turn?"
 msgstr "Перейти к следующему ходу?"
 
@@ -1078,6 +1078,10 @@ msgstr "Изменение дипломатии"
 msgid "Directives from CO"
 msgstr "Директивы координатора"
 
+#: internal/menu/turnrecap.go:453
+msgid "Discontent runs deep — your people grumble at every order."
+msgstr "Недовольство глубоко — народ ропщет на каждый приказ."
+
 #: internal/menu/tree.go:511
 msgid "Dismantle Gooie"
 msgstr "Демонтировать Gooie"
@@ -1155,7 +1159,7 @@ msgstr "Статус империи"
 msgid "End Protection"
 msgstr "Снять защиту"
 
-#: internal/menu/turnrecap.go:480
+#: internal/menu/turnrecap.go:482
 msgid "End of Turn Statistics:"
 msgstr "Статистика конца хода:"
 
@@ -2131,7 +2135,11 @@ msgstr "Запрос — товары, которые вы хотите взам
 msgid "Returns expected to be approximately %s gold."
 msgstr "Ожидаемый доход — около %s золота."
 
-#: internal/menu/turnrecap.go:496
+#: internal/menu/turnrecap.go:449
+msgid "Riots flare through the streets almost daily."
+msgstr "Бунты вспыхивают на улицах почти каждый день."
+
+#: internal/menu/turnrecap.go:498
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Из-за высоких налогов начались бунты!"
 
@@ -2223,7 +2231,7 @@ msgstr "Отправить SpyGuy"
 msgid "Send Trade Deal"
 msgstr "Отправить сделку"
 
-#: internal/menu/gameflow.go:327
+#: internal/menu/gameflow.go:332
 msgid "Send a message?"
 msgstr "Отправить сообщение?"
 
@@ -2603,6 +2611,11 @@ msgstr ""
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr "Ставка по займу — %s%% в день, всего %s%% процентов."
 
+#: internal/menu/turnrecap.go:445
+msgid ""
+"The mob is at your gates — your people would be rid of you by any means."
+msgstr "Толпа у ваших ворот — народ готов избавиться от вас любой ценой."
+
 #: internal/menu/actions.go:17
 msgid "The realm has changed — try again."
 msgstr "Держава изменилась — попробуйте снова."
@@ -2868,6 +2881,10 @@ msgstr "Сегодня запас неограничен."
 #: cmd/immortal-barons/league.go:146
 msgid "Unreadable journal"
 msgstr "Нечитаемый журнал"
+
+#: internal/menu/turnrecap.go:451
+msgid "Unrest simmers; angry crowds gather against your decrees."
+msgstr "Недовольство тлеет; разгневанные толпы собираются против ваших указов."
 
 #: internal/game/regions.go:161
 msgid "Urban"
@@ -3473,7 +3490,7 @@ msgstr "Ваши потери: %s."
 msgid "Your choice?"
 msgstr "Ваш выбор?"
 
-#: internal/menu/turnrecap.go:490
+#: internal/menu/turnrecap.go:492
 msgid "Your dominion gained %s%s%s people."
 msgstr "Ваши владения приросли на %s%s%s человек."
 
@@ -3481,7 +3498,7 @@ msgstr "Ваши владения приросли на %s%s%s человек."
 msgid "Your dominion is still under protection."
 msgstr "Ваша держава ещё под защитой."
 
-#: internal/menu/turnrecap.go:492
+#: internal/menu/turnrecap.go:494
 msgid "Your dominion lost %s%s%s people."
 msgstr "Ваши владения потеряли %s%s%s человек."
 
@@ -3559,9 +3576,37 @@ msgstr "Ваше сообщение отправлено на %d планет."
 msgid "Your new-realm protection will end when this turn does."
 msgstr "Защита новой державы кончится вместе с этим ходом."
 
+#: internal/menu/turnrecap.go:461
+msgid "Your people admire your leadership and prosper gladly."
+msgstr "Народ восхищается вашим правлением и охотно процветает."
+
+#: internal/menu/turnrecap.go:459
+msgid "Your people are glad to live under your banner."
+msgstr "Народ рад жить под вашим знаменем."
+
+#: internal/menu/turnrecap.go:455
+msgid "Your people endure your rule, but take little joy in it."
+msgstr "Народ терпит ваше правление, но без особой радости."
+
+#: internal/menu/turnrecap.go:457
+msgid "Your people go about their business, content enough."
+msgstr "Народ занят своими делами и вполне доволен."
+
 #: internal/menu/turnstages.go:360
 msgid "Your people need %s units of food."
 msgstr "Народу нужно %s единиц еды."
+
+#: internal/menu/turnrecap.go:463
+msgid "Your people praise your name in every market square."
+msgstr "Народ славит ваше имя на каждой рыночной площади."
+
+#: internal/menu/turnrecap.go:465
+msgid "Your people revere you — faith in your rule has never been higher."
+msgstr "Народ почитает вас — вера в ваше правление ещё никогда не была так сильна."
+
+#: internal/menu/turnrecap.go:447
+msgid "Your people seethe with open hatred for your rule."
+msgstr "Ваш народ кипит открытой ненавистью к вашему правлению."
 
 #: internal/menu/actions_diplomacy.go:193
 msgid "Your proposal went to %d realms."
@@ -3946,7 +3991,7 @@ msgstr "эта планета"
 msgid "took %d"
 msgstr "взято %d"
 
-#: internal/menu/turnrecap.go:501
+#: internal/menu/turnrecap.go:521
 msgid "troops deserted due to low morale."
 msgstr "войска дезертировали из-за низкого боевого духа."
 
@@ -3954,7 +3999,7 @@ msgstr "войска дезертировали из-за низкого бое�
 msgid "units of Food consumed."
 msgstr "единиц еды съедено."
 
-#: internal/menu/turnrecap.go:494
+#: internal/menu/turnrecap.go:496
 msgid "units of food spoiled."
 msgstr "единиц еды испортилось."
 
