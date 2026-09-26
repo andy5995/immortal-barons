@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 08:07-0500\n"
+"POT-Creation-Date: 2026-09-26 05:13-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -795,7 +795,15 @@ msgid ""
 "| 5, 6 | airbases, and nothing but jets |\n"
 "| 7, 8 | regions, destroying them outright |\n"
 "| 9, 10 | the food supply |\n"
-msgstr "| Regler | Worauf sie zielt |\n| --- | --- |\n| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes, wobei Agenten sterben |\n| 2, 3 | Wohngebiete, wobei Menschen sterben |\n| 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |\n| 5, 6 | Luftwaffenbasen, und nichts als Jets |\n| 7, 8 | Regionen, die vollständig zerstört werden |\n| 9, 10 | den Nahrungsvorrat |\n"
+msgstr ""
+"| Regler | Worauf sie zielt |\n"
+"| --- | --- |\n"
+"| 0, 1 | das Hauptquartier des feindlichen Geheimdienstes, wobei Agenten sterben |\n"
+"| 2, 3 | Wohngebiete, wobei Menschen sterben |\n"
+"| 4 | Militärbasen - Soldaten, Jets, Geschütztürme und Panzer zugleich |\n"
+"| 5, 6 | Luftwaffenbasen, und nichts als Jets |\n"
+"| 7, 8 | Regionen, die vollständig zerstört werden |\n"
+"| 9, 10 | den Nahrungsvorrat |\n"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:27
@@ -804,7 +812,12 @@ msgid ""
 "bases it destroys up to 20% of each of the four forces, and on airbases 11% "
 "to 50% of the jets. It destroys 5% to 9% of the regions. The food supply "
 "suffers most: a hit destroys 71% to 100% of it."
-msgstr "Ein Treffer tötet bis zu 30% der Agenten oder bis zu 40% der Bevölkerung. Auf Militärbasen zerstört er bis zu 20% jeder der vier Truppenarten, auf Luftwaffenbasen 11% bis 50% der Jets. Er zerstört 5% bis 9% der Regionen. Der Nahrungsvorrat leidet am meisten: Ein Treffer vernichtet 71% bis 100% davon."
+msgstr ""
+"Ein Treffer tötet bis zu 30% der Agenten oder bis zu 40% der Bevölkerung. "
+"Auf Militärbasen zerstört er bis zu 20% jeder der vier Truppenarten, auf "
+"Luftwaffenbasen 11% bis 50% der Jets. Er zerstört 5% bis 9% der Regionen. "
+"Der Nahrungsvorrat leidet am meisten: Ein Treffer vernichtet 71% bis 100% "
+"davon."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:34
@@ -3208,23 +3221,19 @@ msgstr ""
 "Agent, der durchkommt, nimmt seinen eigenen Bissen:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid ""
 "**Send Spy** — costs the target nothing. A spy that gets in brings home "
-"their land, offense, defense and gold. They are reported to you when the spy "
+"their land, offense, defense and gold, and the troopers, jets, turrets, "
+"tanks and military morale behind them. They are reported to you when the spy "
 "returns, and filed in the Spy Database, which keeps the last five reports on "
 "each realm and shows how much the last two differ. A spy sent before and "
-"after a strike therefore shows what the strike did."
-msgstr ""
-"**Spion senden** - kostet das Ziel nichts. Ein Spion, der durchkommt, bringt "
-"Land, Angriff, Verteidigung und Gold des Ziels heim. Das wird Ihnen "
-"gemeldet, wenn der Spion zurückkehrt, und in der Spionagedatenbank abgelegt, "
-"die die letzten fünf Berichte zu jedem Reich aufbewahrt und zeigt, wie weit "
-"die letzten beiden auseinanderliegen. Ein Spion vor und einer nach einem "
-"Schlag zeigt also, was der Schlag angerichtet hat."
+"after a strike therefore shows what the strike did. When you aim a strike at "
+"a realm you have a report on, its latest report is shown once you pick it."
+msgstr "**Spion senden** - kostet das Ziel nichts. Ein Spion, der durchkommt, bringt Land, Angriff, Verteidigung und Gold des Ziels heim, dazu die Soldaten, Jets, Geschütztürme, Panzer und die Kampfmoral dahinter. Das wird Ihnen gemeldet, wenn der Spion zurückkehrt, und in der Spionagedatenbank abgelegt, die die letzten fünf Berichte zu jedem Reich aufbewahrt und zeigt, wie weit die letzten beiden auseinanderliegen. Ein Spion vor und einer nach einem Schlag zeigt also, was der Schlag angerichtet hat. Wenn Sie einen Schlag auf ein Reich richten, über das Sie einen Bericht haben, wird dessen neuester Bericht angezeigt, sobald Sie es wählen."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid ""
 "**Bomb Intelligence** — kills a few percent of their agents, which is what "
 "they defend and attack with."
@@ -3233,32 +3242,32 @@ msgstr ""
 "denen sie verteidigen und angreifen."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Demoralize** — takes a seventh off military morale."
 msgstr "**Demoralisieren** - nimmt ein Siebtel der Kampfmoral."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Cause Dissensions** — a few percent of their troopers desert."
 msgstr "**Zwietracht säen** - ein paar Prozent ihrer Soldaten laufen davon."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
 msgstr "**Luftbasen bombardieren** - verbrennt einen Teil ihrer Jets am Boden."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Stir Emigrations** — drives people out of the realm."
 msgstr "**Auswanderung schüren** - treibt Menschen aus dem Reich."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Spread Propaganda** — costs them popular support."
 msgstr "**Propaganda verbreiten** - kostet sie Rückhalt im Volk."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid ""
 "**Bomb Food Stores** — the widest swing of the nine: it can take almost a "
 "third of what is in store, or almost nothing."
@@ -3267,19 +3276,19 @@ msgstr ""
 "ein Drittel der Vorräte treffen, oder fast nichts."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
 msgstr ""
 "**HQ sabotieren** - wirft ihr Hauptquartier um einen festen Betrag zurück."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:39
+#: internal/help/content/interbbs/terrorist-ops.md:41
 #, no-wrap
 msgid "Picking one"
 msgstr "Die Wahl treffen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:45
+#: internal/help/content/interbbs/terrorist-ops.md:47
 msgid ""
 "Match the operation to what you plan next. Softening a realm before an "
 "interplanetary attack argues for the ones that thin what fights back — "
@@ -3293,13 +3302,13 @@ msgstr ""
 "Wachstum kosten: Nahrung, Menschen, Rückhalt."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:46
+#: internal/help/content/interbbs/terrorist-ops.md:48
 #, no-wrap
 msgid "Getting through"
 msgstr "Durchkommen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:53
+#: internal/help/content/interbbs/terrorist-ops.md:55
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
 "it.  The more agents your realm holds, the better each one's chance, but "
@@ -3314,7 +3323,7 @@ msgstr ""
 "kleine Chance in beide Richtungen hängt von keiner der beiden Seiten ab."
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:57
+#: internal/help/content/interbbs/terrorist-ops.md:59
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "
 "makes one agent likelier to land. A Terrorist Prevention pact adds its "

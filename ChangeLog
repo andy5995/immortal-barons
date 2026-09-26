@@ -1,70 +1,62 @@
 Immortal Barons ChangeLog
 
-(in-progress:)
+2026-09-26 (v0.2.0)
+  * Updating from v0.1.0 or later needs no game reset
+  * BREAKING: packet protocol 3; every board in a league must update together
   * BREAKING: barons-ftn is gone; the game moves FTN mail itself (#246)
   * BREAKING: ftn.cfg is no longer read; its settings go in bbs.cfg (#241)
   * BREAKING: bbs.cfg Inbound and Outbound are now GameInbound and GameOutbound
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
-  * BREAKING: the inter-BBS packet protocol moves to 3; boards must update
-    together
-  * -league-freeze and -league-thaw let the Coordinator pause the league
-    while its boards update
-  * A strike shows its target's latest spy report, as in the original
-  * A hub passes on packet fields its own release does not know
-  * A help list item that runs over two lines no longer breaks in two
-  * A bbs.cfg setting with no value keeps its default
-  * A sysop notice names a board that stops answering probes but still sends
-  * Netmail attachments name their full path, so the mailer can find them
-  * S3-Sabre hits take the original's shares; a food hit destroys 71-100%
-  * Tax riots and famines no longer make the planet news, as in the original
-  * Civil wars and desertions are reported before the turn's menus
-  * The End of Turn Statistics mood line is translated
-  * Popular support scales the tax collected, as in the original
-  * Morale penalties and desertion take effect before the turn's menus
+  * Computer barons and -add-ai are removed
+  * Messaging system improvements
+  * A strike shows its target's latest spy report
+  * Only a Send Spy that gets in brings back intel, and its report shows it
+  * The Spy Database keeps five reports per realm and shows the latest change
+  * Popular support scales the tax collected
+  * Morale penalties, desertion and civil wars land before the turn's menus
   * Paid morale and support boosts offset that turn's penalties
-  * The End of Turn Statistics mood line uses the original's support bands
   * A lost attack costs the attacker some military morale
   * A winning invasion takes a fifth of each defender's HeadQuarters
-  * An S3-Sabre hit on Intelligence Headquarters kills agents, not HeadQuarters
-  * Allied defenders are counted the way the original counts them
+  * Allied defenders are counted as the original counts them
   * A realm at 0 morale or 0 support no longer bounces back to 100 on reload
-  * A 0-day loan or a trade deal under 2 days is refused, as in the original
-  * An investment term under 2 days cancels, as the original does (#291)
-  * SDI allowance is set once a turn and reports the gold added (#290)
-  * Messaging system improvements
-  * Help opens with Getting Started, which now includes How to Play
-  * Menu error messages are translated
-  * Help category names are translated
-  * -full on a door command plays as the drop file's caller and reads -dropfile
-  * -ftn-status says when bbs.cfg has no lines for sending or receiving
-  * Only a Send Spy that gets in brings back intel on its target
-  * The captured-region picker says to press a letter when a number is typed
-  * A Send Spy report shows the figures; the Spy Database keeps five per realm
-    and shows the change between the last two
-  * -ftn-status lists what the FTN spools hold, for whom, and why
-  * Computer barons and -add-ai are removed, including barons a board has
-  * config-during-reset: a new Max Local Attacks/Day setting (0, unlimited)
-  * Investments are capped by what matures on each date (#284)
-  * Terror ops are no longer posted to the news (#285)
-  * A Special Operation's news line says how it ended (#288)
+  * S3-Sabre hits take the original's shares; one on Intelligence kills agents
   * Every bombing run can be driven off, and its damage follows the original
-  * The firing planet's news reports every missile and bombing outcome
-  * The player list names local callers and marks shared owners (#283)
+  * An interplanetary missile costs what the target's size sets, not yours
+  * An attack is confirmed before it is sent
+  * Loans, investments and trade deals refuse a term under the minimum (#291)
+  * Investments are capped by what matures on each date (#284)
+  * SDI allowance is set once a turn and reports the gold added (#290)
+  * Tax riots, famines and terror ops no longer make the planet news (#285)
+  * The firing planet's news reports how every missile and bombing ended (#288)
+  * A strike aimed at a whole planet is named as such when it reports back
+  * A random event is reported with the turn that caused it
+  * An eliminated realm is listed as DEAD where its territory would be
+  * View Treaties no longer lists the viewer's own realm
+  * A realm under New Realm Protection is refused in the original's words
+  * The End of Turn Statistics use the original's support bands and spacing
   * The advisors' reports are framed, with their advice set apart
   * The Military advisor shortens its counts and includes forces away (#239)
-  * A missing -data directory is named instead of an unset drop file format
-  * An unknown bbs.cfg setting is named in a warning, with the likely key
+  * The captured-region picker says to press a letter when a number is typed
+  * Help opens with Getting Started, which now includes How to Play
+  * A help list item that runs over two lines no longer breaks in two
+  * Menu errors, help categories and the mood line are translated
+  * -league-freeze and -league-thaw pause the league while its boards update
+  * A hub passes on packet fields its own release does not know
   * Travel Times probes each link on every planetary run, not once a day
+  * A sysop notice names a board that stops answering probes but still sends
+  * Netmail attachments name their full path, so the mailer can find them
   * -maint raises the same fault alarm as -planetary, and needs a league number
-  * A realm under New Realm Protection is refused in the original's words
-  * A strike aimed at a whole planet is named as such when it reports back
-  * An eliminated realm is listed as DEAD where its territory would be
+  * -ftn-status lists what the FTN spools hold and says when bbs.cfg has none
+  * An unknown bbs.cfg setting is named in a warning, with the likely key
+  * A bbs.cfg setting with no value keeps its default
+  * -full on a door command plays as the drop file's caller and reads -dropfile
   * A drop file naming a socket but no handle is taken as stdio, not refused
   * A drop file that will not load is checked against its name for the reason
-  * The end-of-turn statistics are spaced as the original spaces them
-  * An attack is confirmed before it is sent
-  * An interplanetary missile costs what the target's size sets, not yours
-  * A random event is reported with the turn that caused it
+  * A missing -data directory is named instead of an unset drop file format
+  * The player list names local callers and marks shared owners (#283)
+  * -help names the value each option takes, such as <dir> or <file>
+  * League and key commands refuse a stray word instead of ignoring it
+  * config-during-reset: a new Max Local Attacks/Day setting (0, unlimited)
 
 2026-09-17 (v0.1.2)
   * Food is taken when you feed your realm, so the rest is safe to sell

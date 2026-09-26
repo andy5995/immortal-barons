@@ -23,11 +23,14 @@ As nove não são intercambiáveis. Cada uma mira uma coisa, e cada agente que
 passa arranca o seu pedaço:
 
 - **Enviar Espião** — não custa nada ao alvo. Um espião que consegue entrar
-  traz para casa as terras, o ataque, a defesa e o ouro do alvo. Isso é
+  traz para casa as terras, o ataque, a defesa e o ouro do alvo, e as
+  tropas, jatos, torres, tanques e o moral militar por trás deles. Isso é
   informado a você quando o espião volta, e guardado no Banco de Espionagem,
   que mantém os cinco últimos relatórios de cada reino e mostra quanto os
   dois últimos diferem. Um espião enviado antes e outro depois de um ataque
-  mostram, portanto, o que o ataque causou.
+  mostram, portanto, o que o ataque causou. Quando você mira um ataque em um
+  reino sobre o qual tem um relatório, o relatório mais recente é mostrado
+  assim que você o escolhe.
 - **Bombardear a Inteligência**: mata alguns por cento dos agentes deles,
   que é com o que eles se defendem e atacam.
 - **Desmoralizar**: tira um sétimo da moral militar.

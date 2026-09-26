@@ -616,7 +616,7 @@ msgstr "Unterhalt automatisch zahlen"
 msgid "Average Turn Around Times to All BBSes"
 msgstr "Mittlere Laufzeiten zu allen Boards"
 
-#: internal/menu/actions_diplomacy.go:423
+#: internal/menu/actions_diplomacy.go:429
 msgid "Awaiting a reply:"
 msgstr "Warten auf Antwort:"
 
@@ -1233,7 +1233,7 @@ msgstr "Feindoperationen aufdecken"
 msgid "Extended Battle"
 msgstr "Ausgedehnte Schlacht"
 
-#: cmd/immortal-barons/league.go:213
+#: cmd/immortal-barons/league.go:201
 msgid "FTN spool"
 msgstr "FTN-Spool"
 
@@ -1426,7 +1426,7 @@ msgid "In Hold"
 msgstr "Einbehalten"
 
 # Menu titles
-#: cmd/immortal-barons/league.go:227
+#: cmd/immortal-barons/league.go:215
 msgid "Inbound pending"
 msgstr "Eingang ausstehend"
 
@@ -1570,7 +1570,7 @@ msgstr "Letzte zu zitierende Zeile"
 msgid "Last Planetary Master: %s"
 msgstr "Letzter Planetenmeister: %s"
 
-#: cmd/immortal-barons/league.go:188
+#: cmd/immortal-barons/league.go:176
 msgid "League frozen"
 msgstr "Liga eingefroren"
 
@@ -1996,7 +1996,7 @@ msgstr ""
 "Unsere {Bergregionen} halten die Gießereien am Limit, %d%% der normalen "
 "Einheitenproduktion."
 
-#: cmd/immortal-barons/league.go:224
+#: cmd/immortal-barons/league.go:212
 msgid "Outbound waiting"
 msgstr "Ausgang wartend"
 
@@ -2118,7 +2118,7 @@ msgstr "Vorstoß..."
 msgid "Quick Strike"
 msgstr "Schneller Schlag"
 
-#: cmd/immortal-barons/league.go:198
+#: cmd/immortal-barons/league.go:186
 msgid "Quiet report"
 msgstr "Ruhemeldung"
 
@@ -2174,7 +2174,7 @@ msgstr "Regionen: %s │ Vermögen: %s │ Punkte: %s"
 msgid "Regular Attack"
 msgstr "Normaler Angriff"
 
-#: internal/menu/actions_diplomacy.go:459
+#: internal/menu/actions_diplomacy.go:465
 msgid "Relations"
 msgstr "Beziehungen"
 
@@ -2367,7 +2367,7 @@ msgstr "Hineinlegen"
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr "S3-Sabre-Regler einstellen (0-10)"
 
-#: cmd/immortal-barons/league.go:253
+#: cmd/immortal-barons/league.go:241
 msgid "Set-aside packets"
 msgstr "Zurückgelegte Pakete"
 
@@ -2942,11 +2942,11 @@ msgstr "Zonennamen eingeben"
 msgid "UTC — one clock for the whole league (%s)"
 msgstr "UTC - eine Uhr für die ganze Liga (%s)"
 
-#: cmd/immortal-barons/league.go:248
+#: cmd/immortal-barons/league.go:236
 msgid "Unclaimed packet"
 msgstr "Nicht zugeordnetes Paket"
 
-#: cmd/immortal-barons/league.go:243
+#: cmd/immortal-barons/league.go:231
 msgid "Unclaimed packets"
 msgstr "Nicht abgeholte Pakete"
 
@@ -2962,7 +2962,7 @@ msgstr "Unbegrenzt"
 msgid "Unlimited supply today."
 msgstr "Heute unbegrenzter Vorrat."
 
-#: cmd/immortal-barons/league.go:231
+#: cmd/immortal-barons/league.go:219
 msgid "Unreadable journal"
 msgstr "Unlesbares Journal"
 
@@ -3885,7 +3885,7 @@ msgstr ""
 "die Spieler auflisten und den Namen eines Anrufers ändern, sein Reich "
 "umbenennen oder entfernen, dann beenden"
 
-#: internal/game/ibbs_auth.go:391
+#: internal/game/ibbs_auth.go:398
 msgid "no board key is loaded"
 msgstr "kein Boardschlüssel geladen"
 
@@ -3930,7 +3930,11 @@ msgid ""
 "play the game forward `<n>` days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
 "the game, so it asks first and refuses on a game that has human realms"
-msgstr "das Spiel `<n>` Tage mit Zügen der Computer-Barone vorspielen, eine Tagesübersicht und die Endstände ausgeben, dann beenden (eine Balance-Probe). SPIELT UND SPEICHERT das Spiel, fragt daher vorher nach und verweigert ein Spiel mit menschlichen Reichen"
+msgstr ""
+"das Spiel `<n>` Tage mit Zügen der Computer-Barone vorspielen, eine "
+"Tagesübersicht und die Endstände ausgeben, dann beenden (eine Balance-"
+"Probe). SPIELT UND SPEICHERT das Spiel, fragt daher vorher nach und "
+"verweigert ein Spiel mit menschlichen Reichen"
 
 #: cmd/immortal-barons/flags.go:106
 msgid "print every option, grouped by who needs it, then exit"
@@ -3961,7 +3965,9 @@ msgstr ""
 msgid ""
 "record the league Coordinator's public key `<key>` (the value -gen-coord-key "
 "printed), then exit"
-msgstr "den öffentlichen Schlüssel `<key>` des Liga-Koordinators eintragen (den Wert, den -gen-coord-key ausgab), dann beenden"
+msgstr ""
+"den öffentlichen Schlüssel `<key>` des Liga-Koordinators eintragen (den "
+"Wert, den -gen-coord-key ausgab), dann beenden"
 
 #: cmd/immortal-barons/flags.go:86
 msgid ""
@@ -4053,13 +4059,18 @@ msgstr ""
 msgid ""
 "start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), "
 "then exit"
-msgstr "eine neue Saison für die ganze Liga am `<YYYY-MM-DD>` starten (nur Knoten #1), dann beenden"
+msgstr ""
+"eine neue Saison für die ganze Liga am `<YYYY-MM-DD>` starten (nur Knoten "
+"#1), dann beenden"
 
 #: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
 "original Barren Realms Elite BBS.CFG `<file>`, for -ibbs-reset"
-msgstr "den Namen dieses Boards, die Liganummer, den Mailer und die FTN-Verzeichnisse aus einer originalen Barren Realms Elite BBS.CFG `<file>` übernehmen, für -ibbs-reset"
+msgstr ""
+"den Namen dieses Boards, die Liganummer, den Mailer und die FTN-"
+"Verzeichnisse aus einer originalen Barren Realms Elite BBS.CFG `<file>` "
+"übernehmen, für -ibbs-reset"
 
 #: internal/game/ibbs.go:17
 msgid "that attack force has already left"
@@ -4077,17 +4088,26 @@ msgstr "der Ordner `<dir>` mit den Spieldaten"
 msgid ""
 "the game's own directory `<dir>` of packets waiting to be applied, for -ibbs-"
 "reset (default \"inbound\", under the data directory)"
-msgstr "das eigene Verzeichnis `<dir>` des Spiels für Pakete, die auf ihre Anwendung warten, für -ibbs-reset (Standard \"inbound\", unter dem Datenverzeichnis)"
+msgstr ""
+"das eigene Verzeichnis `<dir>` des Spiels für Pakete, die auf ihre Anwendung "
+"warten, für -ibbs-reset (Standard \"inbound\", unter dem Datenverzeichnis)"
 
 #: cmd/immortal-barons/flags.go:94
 msgid ""
 "the game's own directory `<dir>` of packets written for the other boards, "
 "for -ibbs-reset (default \"outbound\", under the data directory)"
-msgstr "das eigene Verzeichnis `<dir>` des Spiels für Pakete, die für die anderen Boards geschrieben wurden, für -ibbs-reset (Standard \"outbound\", unter dem Datenverzeichnis)"
+msgstr ""
+"das eigene Verzeichnis `<dir>` des Spiels für Pakete, die für die anderen "
+"Boards geschrieben wurden, für -ibbs-reset (Standard \"outbound\", unter dem "
+"Datenverzeichnis)"
 
 #: internal/game/ibbs_freeze.go:52
 msgid "the league is already frozen"
 msgstr "die Liga ist bereits eingefroren"
+
+#: internal/game/ibbs_freeze.go:236
+msgid "the league is frozen; thaw it before starting a new season"
+msgstr "die Liga ist eingefroren; tauen Sie sie auf, bevor Sie eine neue Saison starten"
 
 #: internal/game/ibbs_freeze.go:53
 msgid "the league is not frozen"
@@ -4106,7 +4126,10 @@ msgid ""
 "this board's name in the league, `\"<name>\"`, for -ibbs-reset. Giving it "
 "skips the settings editor, for a member board that takes its rules from the "
 "Coordinator"
-msgstr "der Name dieses Boards in der Liga, `\"<name>\"`, für -ibbs-reset. Wird er angegeben, entfällt der Einstellungseditor, für ein Mitgliedsboard, das seine Regeln vom Koordinator übernimmt"
+msgstr ""
+"der Name dieses Boards in der Liga, `\"<name>\"`, für -ibbs-reset. Wird er "
+"angegeben, entfällt der Einstellungseditor, für ein Mitgliedsboard, das "
+"seine Regeln vom Koordinator übernimmt"
 
 #: internal/menu/incoming.go:124
 msgid "this planet"

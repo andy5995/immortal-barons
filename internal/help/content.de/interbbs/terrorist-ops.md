@@ -24,11 +24,15 @@ Die neun sind nicht austauschbar. Jede zielt auf eine Sache, und jeder
 Agent, der durchkommt, nimmt seinen eigenen Bissen:
 
 - **Spion senden** - kostet das Ziel nichts. Ein Spion, der durchkommt,
-  bringt Land, Angriff, Verteidigung und Gold des Ziels heim. Das wird Ihnen
-  gemeldet, wenn der Spion zurückkehrt, und in der Spionagedatenbank
-  abgelegt, die die letzten fünf Berichte zu jedem Reich aufbewahrt und
-  zeigt, wie weit die letzten beiden auseinanderliegen. Ein Spion vor und
-  einer nach einem Schlag zeigt also, was der Schlag angerichtet hat.
+  bringt Land, Angriff, Verteidigung und Gold des Ziels heim, dazu die
+  Soldaten, Jets, Geschütztürme, Panzer und die Kampfmoral dahinter. Das
+  wird Ihnen gemeldet, wenn der Spion zurückkehrt, und in der
+  Spionagedatenbank abgelegt, die die letzten fünf Berichte zu jedem Reich
+  aufbewahrt und zeigt, wie weit die letzten beiden auseinanderliegen. Ein
+  Spion vor und einer nach einem Schlag zeigt also, was der Schlag
+  angerichtet hat. Wenn Sie einen Schlag auf ein Reich richten, über das Sie
+  einen Bericht haben, wird dessen neuester Bericht angezeigt, sobald Sie es
+  wählen.
 - **Geheimdienst bombardieren** - tötet ein paar Prozent ihrer Agenten, mit
   denen sie verteidigen und angreifen.
 - **Demoralisieren** - nimmt ein Siebtel der Kampfmoral.

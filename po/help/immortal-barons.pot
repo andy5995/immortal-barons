@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-25 08:08-0500\n"
+"POT-Creation-Date: 2026-09-26 05:14-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2598,18 +2598,20 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid ""
 "**Send Spy** — costs the target nothing. A spy that gets in brings home "
-"their land, offense, defense and gold. They are reported to you when the spy "
+"their land, offense, defense and gold, and the troopers, jets, turrets, "
+"tanks and military morale behind them. They are reported to you when the spy "
 "returns, and filed in the Spy Database, which keeps the last five reports on "
 "each realm and shows how much the last two differ. A spy sent before and "
-"after a strike therefore shows what the strike did."
+"after a strike therefore shows what the strike did. When you aim a strike at "
+"a realm you have a report on, its latest report is shown once you pick it."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid ""
 "**Bomb Intelligence** — kills a few percent of their agents, which is what "
@@ -2617,37 +2619,37 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid "**Demoralize** — takes a seventh off military morale."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid "**Cause Dissensions** — a few percent of their troopers desert."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid "**Stir Emigrations** — drives people out of the realm."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid "**Spread Propaganda** — costs them popular support."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid ""
 "**Bomb Food Stores** — the widest swing of the nine: it can take almost a "
@@ -2655,19 +2657,19 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 #, markdown-text
 msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:39
+#: internal/help/content/interbbs/terrorist-ops.md:41
 #, markdown-text, no-wrap
 msgid "Picking one"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:45
+#: internal/help/content/interbbs/terrorist-ops.md:47
 #, markdown-text
 msgid ""
 "Match the operation to what you plan next. Softening a realm before an "
@@ -2677,13 +2679,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:46
+#: internal/help/content/interbbs/terrorist-ops.md:48
 #, markdown-text, no-wrap
 msgid "Getting through"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:53
+#: internal/help/content/interbbs/terrorist-ops.md:55
 #, markdown-text
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
@@ -2694,7 +2696,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:57
+#: internal/help/content/interbbs/terrorist-ops.md:59
 #, markdown-text
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "

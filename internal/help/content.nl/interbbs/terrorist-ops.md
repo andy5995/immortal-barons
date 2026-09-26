@@ -23,11 +23,13 @@ De negen zijn niet uitwisselbaar. Elk richt zich op één ding, en elke agent
 die erdoorheen komt neemt zijn eigen hap:
 
 - **Spion sturen** - kost het doel niets. Een spion die binnenkomt, brengt
-  hun land, aanval, verdediging en goud mee naar huis. Dat wordt u gemeld
-  wanneer de spion terugkeert, en opgeslagen in de Spionagedatabase, die de
-  laatste vijf rapporten per rijk bewaart en laat zien hoeveel de laatste
-  twee verschillen. Een spion voor en na een aanval laat dus zien wat de
-  aanval heeft gedaan.
+  hun land, aanval, verdediging en goud mee naar huis, en de troepen, jets,
+  geschutstorens, tanks en het militaire moreel daarachter. Dat wordt u
+  gemeld wanneer de spion terugkeert, en opgeslagen in de Spionagedatabase,
+  die de laatste vijf rapporten per rijk bewaart en laat zien hoeveel de
+  laatste twee verschillen. Een spion voor en na een aanval laat dus zien
+  wat de aanval heeft gedaan. Als u een aanval richt op een rijk waarover u
+  een rapport hebt, wordt het nieuwste rapport getoond zodra u het kiest.
 - **Inlichtingendienst bombarderen** - doodt enkele procenten van hun
   agenten, waarmee zij verdedigen en aanvallen.
 - **Demoraliseren** - haalt een zevende van het militaire moreel weg.

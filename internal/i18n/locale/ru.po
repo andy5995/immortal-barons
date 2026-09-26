@@ -606,7 +606,7 @@ msgstr "Автооплата содержания"
 msgid "Average Turn Around Times to All BBSes"
 msgstr "Среднее время оборота до всех BBS"
 
-#: internal/menu/actions_diplomacy.go:423
+#: internal/menu/actions_diplomacy.go:429
 msgid "Awaiting a reply:"
 msgstr "Ожидают ответа:"
 
@@ -1213,7 +1213,7 @@ msgstr "Раскрыть операции врага"
 msgid "Extended Battle"
 msgstr "Затяжной бой"
 
-#: cmd/immortal-barons/league.go:213
+#: cmd/immortal-barons/league.go:201
 msgid "FTN spool"
 msgstr "Очередь FTN"
 
@@ -1406,7 +1406,7 @@ msgid "In Hold"
 msgstr "Отложено"
 
 # Menu titles
-#: cmd/immortal-barons/league.go:227
+#: cmd/immortal-barons/league.go:215
 msgid "Inbound pending"
 msgstr "Входящие в очереди"
 
@@ -1548,7 +1548,7 @@ msgstr "Последняя строка цитаты"
 msgid "Last Planetary Master: %s"
 msgstr "Последний Мастер Планеты: %s"
 
-#: cmd/immortal-barons/league.go:188
+#: cmd/immortal-barons/league.go:176
 msgid "League frozen"
 msgstr "Лига заморожена"
 
@@ -1961,7 +1961,7 @@ msgstr ""
 "Наши {горные} регионы держат заводы на пределе: %d%% от обычного выпуска "
 "войск."
 
-#: cmd/immortal-barons/league.go:224
+#: cmd/immortal-barons/league.go:212
 msgid "Outbound waiting"
 msgstr "Ожидает отправки"
 
@@ -2081,7 +2081,7 @@ msgstr "Отправка..."
 msgid "Quick Strike"
 msgstr "Быстрый удар"
 
-#: cmd/immortal-barons/league.go:198
+#: cmd/immortal-barons/league.go:186
 msgid "Quiet report"
 msgstr "Отчёт о тишине"
 
@@ -2137,7 +2137,7 @@ msgstr "Регионы: %s │ Состояние: %s │ Очки: %s"
 msgid "Regular Attack"
 msgstr "Обычная атака"
 
-#: internal/menu/actions_diplomacy.go:459
+#: internal/menu/actions_diplomacy.go:465
 msgid "Relations"
 msgstr "Отношения"
 
@@ -2329,7 +2329,7 @@ msgstr "Подставить"
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr "Задать уровень S3-Sabre (0-10)"
 
-#: cmd/immortal-barons/league.go:253
+#: cmd/immortal-barons/league.go:241
 msgid "Set-aside packets"
 msgstr "Отложенные пакеты"
 
@@ -2889,11 +2889,11 @@ msgstr "Ввести название пояса"
 msgid "UTC — one clock for the whole league (%s)"
 msgstr "UTC - одни часы на всю лигу (%s)"
 
-#: cmd/immortal-barons/league.go:248
+#: cmd/immortal-barons/league.go:236
 msgid "Unclaimed packet"
 msgstr "Невостребованный пакет"
 
-#: cmd/immortal-barons/league.go:243
+#: cmd/immortal-barons/league.go:231
 msgid "Unclaimed packets"
 msgstr "Невостребованные пакеты"
 
@@ -2909,7 +2909,7 @@ msgstr "Без предела"
 msgid "Unlimited supply today."
 msgstr "Сегодня запас неограничен."
 
-#: cmd/immortal-barons/league.go:231
+#: cmd/immortal-barons/league.go:219
 msgid "Unreadable journal"
 msgstr "Нечитаемый журнал"
 
@@ -3810,7 +3810,7 @@ msgstr ""
 "показать игроков и сменить имя звонящего, переименовать его державу или "
 "удалить её, затем выйти"
 
-#: internal/game/ibbs_auth.go:391
+#: internal/game/ibbs_auth.go:398
 msgid "no board key is loaded"
 msgstr "ключ станции не загружен"
 
@@ -3855,7 +3855,11 @@ msgid ""
 "play the game forward `<n>` days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
 "the game, so it asks first and refuses on a game that has human realms"
-msgstr "прокрутить игру на `<n>` дней ходов компьютерных баронов, выводя сводку за каждый день и итоговую таблицу, и выйти (проверка баланса). ПРОДВИГАЕТ И СОХРАНЯЕТ игру, поэтому сначала спрашивает и отказывается работать с игрой, где есть человеческие державы"
+msgstr ""
+"прокрутить игру на `<n>` дней ходов компьютерных баронов, выводя сводку за "
+"каждый день и итоговую таблицу, и выйти (проверка баланса). ПРОДВИГАЕТ И "
+"СОХРАНЯЕТ игру, поэтому сначала спрашивает и отказывается работать с игрой, "
+"где есть человеческие державы"
 
 #: cmd/immortal-barons/flags.go:106
 msgid "print every option, grouped by who needs it, then exit"
@@ -3886,7 +3890,9 @@ msgstr ""
 msgid ""
 "record the league Coordinator's public key `<key>` (the value -gen-coord-key "
 "printed), then exit"
-msgstr "записать открытый ключ `<key>` координатора лиги (значение, выведенное -gen-coord-key), и выйти"
+msgstr ""
+"записать открытый ключ `<key>` координатора лиги (значение, выведенное -gen-"
+"coord-key), и выйти"
 
 #: cmd/immortal-barons/flags.go:86
 msgid ""
@@ -3975,13 +3981,17 @@ msgstr ""
 msgid ""
 "start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), "
 "then exit"
-msgstr "начать новый сезон во всей лиге с даты `<YYYY-MM-DD>` (только узел #1), и выйти"
+msgstr ""
+"начать новый сезон во всей лиге с даты `<YYYY-MM-DD>` (только узел #1), и "
+"выйти"
 
 #: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
 "original Barren Realms Elite BBS.CFG `<file>`, for -ibbs-reset"
-msgstr "взять имя этой BBS, номер лиги, мейлер и каталоги FTN из оригинального файла BBS.CFG Barren Realms Elite `<file>`, для -ibbs-reset"
+msgstr ""
+"взять имя этой BBS, номер лиги, мейлер и каталоги FTN из оригинального файла "
+"BBS.CFG Barren Realms Elite `<file>`, для -ibbs-reset"
 
 #: internal/game/ibbs.go:17
 msgid "that attack force has already left"
@@ -3999,17 +4009,25 @@ msgstr "папка `<dir>` с данными игры"
 msgid ""
 "the game's own directory `<dir>` of packets waiting to be applied, for -ibbs-"
 "reset (default \"inbound\", under the data directory)"
-msgstr "собственный каталог игры `<dir>` для пакетов, ожидающих применения, для -ibbs-reset (по умолчанию \"inbound\", внутри каталога данных)"
+msgstr ""
+"собственный каталог игры `<dir>` для пакетов, ожидающих применения, для "
+"-ibbs-reset (по умолчанию \"inbound\", внутри каталога данных)"
 
 #: cmd/immortal-barons/flags.go:94
 msgid ""
 "the game's own directory `<dir>` of packets written for the other boards, "
 "for -ibbs-reset (default \"outbound\", under the data directory)"
-msgstr "собственный каталог игры `<dir>` для пакетов, записанных для других BBS, для -ibbs-reset (по умолчанию \"outbound\", внутри каталога данных)"
+msgstr ""
+"собственный каталог игры `<dir>` для пакетов, записанных для других BBS, для "
+"-ibbs-reset (по умолчанию \"outbound\", внутри каталога данных)"
 
 #: internal/game/ibbs_freeze.go:52
 msgid "the league is already frozen"
 msgstr "лига уже заморожена"
+
+#: internal/game/ibbs_freeze.go:236
+msgid "the league is frozen; thaw it before starting a new season"
+msgstr "лига заморожена; разморозьте её, прежде чем начинать новый сезон"
 
 #: internal/game/ibbs_freeze.go:53
 msgid "the league is not frozen"
@@ -4028,7 +4046,10 @@ msgid ""
 "this board's name in the league, `\"<name>\"`, for -ibbs-reset. Giving it "
 "skips the settings editor, for a member board that takes its rules from the "
 "Coordinator"
-msgstr "имя этой BBS в лиге, `\"<name>\"`, для -ibbs-reset. Если оно указано, редактор настроек пропускается — для BBS-участника, получающей правила от координатора"
+msgstr ""
+"имя этой BBS в лиге, `\"<name>\"`, для -ibbs-reset. Если оно указано, "
+"редактор настроек пропускается — для BBS-участника, получающей правила от "
+"координатора"
 
 #: internal/menu/incoming.go:124
 msgid "this planet"

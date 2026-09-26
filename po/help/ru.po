@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-09-25 08:07-0500\n"
+"POT-Creation-Date: 2026-09-26 05:13-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -761,7 +761,15 @@ msgid ""
 "| 5, 6 | airbases, and nothing but jets |\n"
 "| 7, 8 | regions, destroying them outright |\n"
 "| 9, 10 | the food supply |\n"
-msgstr "| Шкала | Куда бьёт |\n| --- | --- |\n| 0, 1 | вражеский Штаб разведки, убивая агентов |\n| 2, 3 | жилые кварталы, убивая людей |\n| 4 | военные базы — войска, самолёты, турели и танки разом |\n| 5, 6 | авиабазы, и только самолёты |\n| 7, 8 | регионы, уничтожая их полностью |\n| 9, 10 | запасы еды |\n"
+msgstr ""
+"| Шкала | Куда бьёт |\n"
+"| --- | --- |\n"
+"| 0, 1 | вражеский Штаб разведки, убивая агентов |\n"
+"| 2, 3 | жилые кварталы, убивая людей |\n"
+"| 4 | военные базы — войска, самолёты, турели и танки разом |\n"
+"| 5, 6 | авиабазы, и только самолёты |\n"
+"| 7, 8 | регионы, уничтожая их полностью |\n"
+"| 9, 10 | запасы еды |\n"
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:27
@@ -770,7 +778,11 @@ msgid ""
 "bases it destroys up to 20% of each of the four forces, and on airbases 11% "
 "to 50% of the jets. It destroys 5% to 9% of the regions. The food supply "
 "suffers most: a hit destroys 71% to 100% of it."
-msgstr "Попадание убивает до 30% агентов или до 40% населения. На военных базах оно уничтожает до 20% каждого из четырёх родов войск, на авиабазах — от 11% до 50% самолётов. Оно уничтожает от 5% до 9% регионов. Сильнее всего страдают запасы еды: попадание уничтожает от 71% до 100% их."
+msgstr ""
+"Попадание убивает до 30% агентов или до 40% населения. На военных базах оно "
+"уничтожает до 20% каждого из четырёх родов войск, на авиабазах — от 11% до "
+"50% самолётов. Оно уничтожает от 5% до 9% регионов. Сильнее всего страдают "
+"запасы еды: попадание уничтожает от 71% до 100% их."
 
 #. type: Plain text
 #: internal/help/content/covert/s3-sabre.md:34
@@ -3104,23 +3116,19 @@ msgstr ""
 "прошедший агент откусывает свой кусок:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid ""
 "**Send Spy** — costs the target nothing. A spy that gets in brings home "
-"their land, offense, defense and gold. They are reported to you when the spy "
+"their land, offense, defense and gold, and the troopers, jets, turrets, "
+"tanks and military morale behind them. They are reported to you when the spy "
 "returns, and filed in the Spy Database, which keeps the last five reports on "
 "each realm and shows how much the last two differ. A spy sent before and "
-"after a strike therefore shows what the strike did."
-msgstr ""
-"**Отправить шпиона** — не стоит цели ничего. Шпион, который проник, приносит "
-"домой сведения о её землях, нападении, обороне и золоте. Вам сообщают об "
-"этом, когда шпион возвращается, и сведения попадают в Базу разведки, которая "
-"хранит пять последних отчётов по каждому государству и показывает, насколько "
-"различаются два последних. Поэтому шпион, отправленный до и после удара, "
-"показывает, что удар сделал."
+"after a strike therefore shows what the strike did. When you aim a strike at "
+"a realm you have a report on, its latest report is shown once you pick it."
+msgstr "**Отправить шпиона** — не стоит цели ничего. Шпион, который проник, приносит домой сведения о её землях, нападении, обороне и золоте, а также о солдатах, истребителях, турелях, танках и боевом духе за ними. Вам сообщают об этом, когда шпион возвращается, и сведения попадают в Базу разведки, которая хранит пять последних отчётов по каждому государству и показывает, насколько различаются два последних. Поэтому шпион, отправленный до и после удара, показывает, что удар сделал. Когда вы наносите удар по государству, о котором у вас есть отчёт, его последний отчёт показывается, как только вы его выберете."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid ""
 "**Bomb Intelligence** — kills a few percent of their agents, which is what "
 "they defend and attack with."
@@ -3129,32 +3137,32 @@ msgstr ""
 "защищаются, и нападают."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Demoralize** — takes a seventh off military morale."
 msgstr "**Деморализовать** — отнимает седьмую часть боевого духа армии."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Cause Dissensions** — a few percent of their troopers desert."
 msgstr "**Сеять раздор** — несколько процентов их солдат дезертируют."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
 msgstr "**Бомбить авиабазы** — сжигает часть их самолётов на земле."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Stir Emigrations** — drives people out of the realm."
 msgstr "**Разжигать эмиграцию** — гонит людей прочь из державы."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Spread Propaganda** — costs them popular support."
 msgstr "**Распространять пропаганду** — стоит им поддержки народа."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid ""
 "**Bomb Food Stores** — the widest swing of the nine: it can take almost a "
 "third of what is in store, or almost nothing."
@@ -3163,19 +3171,19 @@ msgstr ""
 "почти треть запасов, а может почти ничего."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:38
+#: internal/help/content/interbbs/terrorist-ops.md:40
 msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
 msgstr ""
 "**Диверсия в штабе** — отбрасывает их штаб назад на постоянную величину."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:39
+#: internal/help/content/interbbs/terrorist-ops.md:41
 #, no-wrap
 msgid "Picking one"
 msgstr "Как выбрать"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:45
+#: internal/help/content/interbbs/terrorist-ops.md:47
 msgid ""
 "Match the operation to what you plan next. Softening a realm before an "
 "interplanetary attack argues for the ones that thin what fights back — "
@@ -3188,13 +3196,13 @@ msgstr ""
 "не дотянуться, берите те, что стоят ей роста: еда, люди, поддержка."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:46
+#: internal/help/content/interbbs/terrorist-ops.md:48
 #, no-wrap
 msgid "Getting through"
 msgstr "Как агенты прорываются"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:53
+#: internal/help/content/interbbs/terrorist-ops.md:55
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
 "it.  The more agents your realm holds, the better each one's chance, but "
@@ -3209,7 +3217,7 @@ msgstr ""
 "случайность в обе стороны, не зависящая ни от одной из сторон."
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:57
+#: internal/help/content/interbbs/terrorist-ops.md:59
 msgid ""
 "Committing more agents therefore does more damage on average, but it never "
 "makes one agent likelier to land. A Terrorist Prevention pact adds its "
