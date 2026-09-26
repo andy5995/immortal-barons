@@ -232,7 +232,7 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-league-reset <YYYY-MM-DD>`** — Start a new season across the whole league
   on that date, then exit. Only the coordinator uses this. It resets this board
   and sends a signed order for the other boards to reset on their next
-  `-planetary` run.
+  `-planetary` run. It is refused while the league is frozen.
 - **`-league-freeze "<string>"`** — Freeze the whole league for an update,
   then exit. Only the coordinator uses this. Callers see the string instead of
   the game, the game day stops, and each board sends nothing of its own until

@@ -565,6 +565,9 @@ func (w *World) DeclareLeagueReset(onDate, announcement string) error {
 	if len(w.CoordKey) == 0 {
 		return ErrNoCoordKey
 	}
+	if w.Frozen {
+		return ErrLeagueFrozen
+	}
 	w.Season++
 	r := &LeagueReset{Season: w.Season, OnDate: onDate, Announced: announcement}
 	p := Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Seq: w.NextSeq(), Reset: r}

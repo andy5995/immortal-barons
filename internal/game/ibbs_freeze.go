@@ -97,8 +97,11 @@ func (w *World) applyLeagueFreeze(f *LeagueFreeze) {
 	case f.Frozen:
 		// Still frozen from an earlier freeze whose thaw never arrived here —
 		// lost, or delivered after this order. It must stay frozen, not thaw;
-		// only the message the Coordinator gave this time applies.
+		// only the message the Coordinator gave this time applies. Its quiet
+		// report answered the old serial, which the Coordinator no longer
+		// files, so it reports again under this one.
 		w.FreezeMessage = f.Message
+		w.QuietSent = time.Time{}
 	case w.Frozen:
 		w.shiftDeadlines(now.Sub(w.FrozenAt))
 		w.skipFrozenDays(w.FrozenAt, now)
@@ -221,5 +224,13 @@ func (w *World) fileQuietReport(board string, r QuietReport) {
 }
 
 // FrozenSendable reports whether a frozen board may still write p: the
-// Coordinator's freeze orders and a quiet report. Everything else waits.
-func FrozenSendable(p Packet) bool { return p.Freeze != nil || p.Quiet != nil }
+// Coordinator's orders — the freeze itself, and a ruleset, roster or bulletins
+// it sends while frozen — and a quiet report. Everything else waits.
+func FrozenSendable(p Packet) bool {
+	return p.Freeze != nil || p.Quiet != nil || CarriesCoordinatorOrders(p)
+}
+
+// ErrLeagueFrozen refuses a new season while the league is frozen: the order
+// would land on boards mid-upgrade, and a board wiped then plays nothing until
+// the thaw anyway.
+var ErrLeagueFrozen = errors.New("the league is frozen; thaw it before starting a new season")

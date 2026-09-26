@@ -467,6 +467,10 @@ func (w *World) ResetForNewSeason(startDate string) {
 	nodes, key, pub := w.LeagueNodes, w.CoordKey, w.CoordPub
 	season, outSeq, high, seen := w.Season, w.OutSeq, w.HighSeq, w.SeenPackets
 	outbox, transit := w.Outbox, w.Transit
+	// A season reset is not a thaw: a reset order that reaches a frozen board
+	// leaves it frozen (ibbs_freeze.go).
+	freezeSerial, frozen, freezeMsg, frozenAt := w.FreezeSerial, w.Frozen, w.FreezeMessage, w.FrozenAt
+	quietSince, quietSent, quietBoards, thawedAt := w.QuietSince, w.QuietSent, w.QuietBoards, w.ThawedAt
 	// The bulletins on disk survive a season, so their fingerprints have to as
 	// well: forgetting them would file every one of them as newly posted.
 	digest, known := w.BulletinDigest, w.BulletinsKnown
@@ -475,6 +479,8 @@ func (w *World) ResetForNewSeason(startDate string) {
 	w.LeagueNodes, w.CoordKey, w.CoordPub = nodes, key, pub
 	w.Season, w.OutSeq, w.HighSeq, w.SeenPackets = season, outSeq, high, seen
 	w.Outbox, w.Transit = outbox, transit // mail for the other boards must still go out
+	w.FreezeSerial, w.Frozen, w.FreezeMessage, w.FrozenAt = freezeSerial, frozen, freezeMsg, frozenAt
+	w.QuietSince, w.QuietSent, w.QuietBoards, w.ThawedAt = quietSince, quietSent, quietBoards, thawedAt
 	w.StartedDate = startDate
 	w.LastMaintDate = startDate
 }

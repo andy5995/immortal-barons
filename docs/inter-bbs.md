@@ -790,7 +790,9 @@ Each board freezes on its next `-planetary` run. While the league is frozen:
   (group attacks, a Gooie Kablooie, a trade deal's expiry) is moved on by the
   length of the freeze when it ends;
 - each board applies what reaches it and passes on what it relays, but sends
-  nothing of its own. What its game produces waits until the thaw.
+  nothing of its own. What its game produces waits until the thaw. The
+  Coordinator can still send league settings and roster changes; a new season
+  is refused until the thaw.
 
 Keep `-maint` or `-planetary` running on its schedule on every board: the runs
 are what deliver the last packets, and what later carry the thaw.

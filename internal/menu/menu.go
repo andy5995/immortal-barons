@@ -180,9 +180,6 @@ var asciiSafeLangs = func() map[string]bool {
 	return m
 }()
 
-// langFits reports whether lang's catalog can be shown on this session's
-// charset — every language on a UTF-8 session, and only what survives the
-// transcoding on a CP437 or ASCII one.
 // FittingLang is lang if t can render its catalog, otherwise "" (English): the
 // guard playerLang applies, for a caller the menu engine does not have yet.
 func FittingLang(t Term, lang string) string {
@@ -192,6 +189,9 @@ func FittingLang(t Term, lang string) string {
 	return ""
 }
 
+// langFits reports whether lang's catalog can be shown on this session's
+// charset — every language on a UTF-8 session, and only what survives the
+// transcoding on a CP437 or ASCII one.
 func langFits(t Term, lang string) bool {
 	switch {
 	case t.UTF8:

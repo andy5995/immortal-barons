@@ -209,6 +209,9 @@ func TestFrozenSendable(t *testing.T) {
 	if !FrozenSendable(Packet{Quiet: &QuietReport{}}) || !FrozenSendable(Packet{Freeze: &LeagueFreeze{}}) {
 		t.Error("the freeze order and the quiet report must still go out")
 	}
+	if !FrozenSendable(Packet{LeagueConfig: &LeagueConfig{}}) {
+		t.Error("a ruleset the Coordinator sends while frozen must go out, not wait for the thaw")
+	}
 }
 
 // The Coordinator's signature covers the freeze order, so one attached to a
@@ -264,12 +267,37 @@ func TestHeldPacketsAreNotDroppedAsReplaysAfterTheThaw(t *testing.T) {
 func TestAFreezeOverAFreezeStaysFrozen(t *testing.T) {
 	_, m := freezePair(t)
 	m.applyLeagueFreeze(&LeagueFreeze{Serial: 1, Frozen: true, Message: "first"})
+	m.ReportQuiet()
+	m.Outbox = nil
 	m.applyLeagueFreeze(&LeagueFreeze{Serial: 3, Frozen: true, Message: "second"})
 	if !m.Frozen || m.FreezeMessage != "second" {
 		t.Errorf("frozen=%v message=%q, want still frozen with the new message", m.Frozen, m.FreezeMessage)
 	}
+	// Its report answered serial 1, which the Coordinator no longer files, so it
+	// has to report again under 3.
+	m.ReportQuiet()
+	if len(m.Outbox) != 1 || m.Outbox[0].Quiet == nil || m.Outbox[0].Quiet.Serial != 3 {
+		t.Errorf("no fresh quiet report under the new freeze: %+v", m.Outbox)
+	}
 	m.applyLeagueFreeze(&LeagueFreeze{Serial: 2})
 	if !m.Frozen {
 		t.Error("the late thaw from before the second freeze opened the board")
+	}
+}
+
+// A new season is refused while frozen, and a reset order that reaches a board
+// already frozen (sent before the freeze, delivered after) leaves it frozen.
+func TestAResetDoesNotThawTheLeague(t *testing.T) {
+	lc, m := freezePair(t)
+	if err := lc.DeclareLeagueFreeze(true, ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := lc.DeclareLeagueReset("2026-10-01", ""); err != ErrLeagueFrozen {
+		t.Errorf("a new season was declared on a frozen league: %v", err)
+	}
+	m.applyLeagueFreeze(&LeagueFreeze{Serial: 1, Frozen: true, Message: "hold"})
+	m.applyLeagueReset(&LeagueReset{Season: m.Season + 1, OnDate: "2026-10-01"})
+	if !m.Frozen || m.FreezeSerial != 1 || m.FreezeMessage != "hold" {
+		t.Errorf("the reset lost the freeze: frozen=%v serial=%d message=%q", m.Frozen, m.FreezeSerial, m.FreezeMessage)
 	}
 }
