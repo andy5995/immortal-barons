@@ -66,6 +66,7 @@ func (w *World) PlayTurn(e *Empire, today string) {
 type MaintReport struct {
 	Days       int
 	NotStarted bool
+	Frozen     bool // the league is frozen; no day was run (ibbs_freeze.go)
 	// Steps names each stage the run actually performed, in the order it ran
 	// them, for the front-end to print one per line — the way the original
 	// reports its own daily maintenance. A stage that had nothing to do adds no
@@ -126,6 +127,11 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 	if !w.Config.GameStarted(today) {
 		w.LastMaintDate = today
 		return MaintReport{NotStarted: true}
+	}
+	// A frozen league runs no day. The thaw moves the clock on by the frozen
+	// days, so they are skipped rather than caught up (ibbs_freeze.go).
+	if w.Frozen {
+		return MaintReport{Frozen: true}
 	}
 	// The first maintenance that runs with the game underway is the day it began.
 	if w.StartedDate == "" {

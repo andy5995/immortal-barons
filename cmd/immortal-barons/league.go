@@ -18,9 +18,26 @@ import (
 // this board resets, and a signed order goes out for every other board to do the
 // same on its next planetary run.
 func runLeagueReset(cfg game.Config, date string) error {
-	// It runs the planetary step, so it is refused on the same terms as
-	// -planetary: with no league number it would take every league's packets,
-	// and settings under old names are refused only for a league board.
+	return runCoordinatorOrder(cfg, "-league-reset",
+		func(w *game.World) error { return w.DeclareLeagueReset(date, "") },
+		func(w *game.World) {
+			fmt.Printf("Season %d declared, starting %s, and the order is on its way to the other boards.\n", w.Season, date)
+		})
+}
+
+// runCoordinatorOrder carries out one of the Coordinator's league orders on
+// this board and sends it: order changes the world and queues the signed
+// packet, the planetary step writes it, and the mailer is handed it at once so
+// it does not wait for the next scheduled run. done reports what was ordered.
+//
+// It runs the planetary step, so it is refused on the same terms as -planetary:
+// with no league number it would take every league's packets, and settings
+// under old names are refused only for a league board. And it holds the world
+// lock from the load to the save, as -maint does: a door node saving in between
+// would put back the world the order replaced, after the signed order had gone
+// out, and the next order would then reuse its serial and be dropped
+// everywhere as a replay.
+func runCoordinatorOrder(cfg game.Config, name string, order func(*game.World) error, done func(*game.World)) error {
 	if cfg.InterBBSEnabled() {
 		if err := store.CheckLeagueNumber(cfg); err != nil {
 			return err
@@ -29,25 +46,57 @@ func runLeagueReset(cfg game.Config, date string) error {
 			return err
 		}
 	}
-	w, err := store.Load(cfg)
+	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
 	}
-	if err := w.DeclareLeagueReset(date, ""); err != nil {
+	w, err := store.Load(cfg)
+	if err != nil {
+		lock.Release()
+		return err
+	}
+	if err := order(w); err != nil {
+		lock.Release()
 		return err
 	}
 	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
 	if err != nil {
+		lock.Release()
 		return err
 	}
 	reportPlanetary(cfg, run)
-	if err := store.Save(w, cfg); err != nil {
+	err = store.Save(w, cfg)
+	lock.Release()
+	if err != nil {
 		return err
 	}
-	fmt.Printf("Season %d declared, starting %s. The order is in the outbound folder for the other boards.\n", w.Season, date)
+	if cfg.InterBBSEnabled() {
+		run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
+	}
+	done(w)
 	// The planetary step above records what it met as reported, so the alarm is
 	// raised here or never: a later -planetary would not raise it again.
-	return reportFaults(cfg, run, "-league-reset")
+	return reportFaults(cfg, run, name)
+}
+
+// runLeagueFreeze is the Coordinator freezing the league for an update, or
+// thawing it: this board changes at once, and a signed order goes out for every
+// other board to do the same on its next planetary run.
+func runLeagueFreeze(cfg game.Config, frozen bool, message string) error {
+	name := "-league-thaw"
+	if frozen {
+		name = "-league-freeze"
+	}
+	return runCoordinatorOrder(cfg, name,
+		func(w *game.World) error { return w.DeclareLeagueFreeze(frozen, message) },
+		func(*game.World) {
+			if frozen {
+				fmt.Println("League frozen, and the order is on its way to the other boards.")
+				fmt.Println("-league-check lists each board's quiet report as it arrives.")
+			} else {
+				fmt.Println("League thawed, and the order is on its way to the other boards.")
+			}
+		})
 }
 
 // runLeagueReport writes one of the original's sysop report files into the data
@@ -101,7 +150,7 @@ func runLeagueCheck(cfg game.Config) bool {
 		prefix := fmt.Sprintf("%s  %-20s", mark, c.Name)
 		fmt.Println(prefix + textwrap.Wrap(c.Detail, textwrap.Console, strings.Repeat(" ", len(prefix))))
 	}
-	for _, c := range spoolChecks(cfg) {
+	for _, c := range append(spoolChecks(cfg), freezeChecks(cfg)...) {
 		mark := "ok  "
 		if !c.OK {
 			mark, allOK = "FAIL", false
@@ -113,6 +162,30 @@ func runLeagueCheck(cfg game.Config) bool {
 		fmt.Println("\nFix the FAIL lines above; see the Door Setup guide for what each one wants.")
 	}
 	return allOK
+}
+
+// freezeChecks reports a league freeze: that this board is frozen, and on the
+// Coordinator's board each board's quiet report, so the Coordinator can see
+// when the league has drained and the upgrade can be announced. Waiting is not
+// a fault, so none of these fails.
+func freezeChecks(cfg game.Config) []store.Check {
+	w, err := store.Load(cfg)
+	if err != nil || !w.Frozen {
+		return nil
+	}
+	checks := []store.Check{{Name: "League frozen", OK: true,
+		Detail: "since " + game.Recorded(w.FrozenAt) + "; callers are shown: " + w.FreezeMessage}}
+	if !w.IsLeagueCoordinator() {
+		return checks
+	}
+	for _, p := range w.LeaguePlanets() {
+		detail := p.Name + ": no report yet"
+		if stamp, ok := w.QuietBoards[p.Name]; ok {
+			detail = p.Name + ": quiet since " + stamp
+		}
+		checks = append(checks, store.Check{Name: "Quiet report", OK: true, Detail: detail})
+	}
+	return checks
 }
 
 // unclaimedChecksShown caps how many unclaimed packets are named one by one.

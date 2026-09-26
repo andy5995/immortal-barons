@@ -209,6 +209,14 @@ func main() {
 		exitOn("-league-reset", runLeagueReset(cfg, *o.leagueReset))
 		return
 	}
+	if *o.leagueFreeze != "" {
+		exitOn("-league-freeze", runLeagueFreeze(cfg, true, *o.leagueFreeze))
+		return
+	}
+	if *o.leagueThaw {
+		exitOn("-league-thaw", runLeagueFreeze(cfg, false, ""))
+		return
+	}
 
 	if *o.boardID != "" || *o.inboundDir != "" || *o.outboundDir != "" || *o.importBoardCfg != "" {
 		if !*o.ibbsReset {

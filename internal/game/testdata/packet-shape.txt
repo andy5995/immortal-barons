@@ -29,6 +29,8 @@ Packet:
   BoardSig
   Bulletins `json:",omitempty"`
   Reset
+  Freeze `json:",omitempty"`
+  Quiet `json:",omitempty"`
   League
   Hops
   Protocol `json:",omitempty"`
@@ -242,6 +244,13 @@ LeagueReset:
   Season
   OnDate
   Announced
+LeagueFreeze:
+  Serial
+  Frozen
+  Message `json:",omitempty"`
+QuietReport:
+  Serial
+  QuietSince
 BattleLogEntry:
   Date
   Planet

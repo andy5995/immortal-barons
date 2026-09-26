@@ -299,10 +299,25 @@ const LinkSilentAlarmDays = 7
 // teach the sysop to ignore this one.
 func (w *World) NoteSilentLinks(now time.Time) {
 	for _, board := range w.knownPeers() {
-		if days := w.LinkSilentDays(board, now); days > LinkSilentAlarmDays {
+		if days := w.quietDays(board, now); days > LinkSilentAlarmDays {
 			w.noteSysop("No packet has been processed from %s in %d days. Its mailer, or ours, may not be moving files.", board, days)
 		}
 	}
+}
+
+// quietDays is LinkSilentDays counted from no earlier than the last thaw: a
+// frozen league carries no traffic, so the freeze is not silence. The sysop's
+// alarm and the player's warning both read it; LinkSilentDays itself stays the
+// plain record the league reports print.
+func (w *World) quietDays(board string, now time.Time) int {
+	d := w.LinkSilentDays(board, now)
+	if d < 0 || w.ThawedAt.IsZero() {
+		return d
+	}
+	if t := int(now.Sub(w.ThawedAt) / (24 * time.Hour)); t < d {
+		return t
+	}
+	return d
 }
 
 // NoteUnansweredProbes tells the sysop about a board whose packets still arrive
@@ -328,6 +343,9 @@ func (w *World) NoteUnansweredProbes(now time.Time) {
 		if err != nil {
 			continue
 		}
+		if seen.Before(w.ThawedAt) {
+			seen = w.ThawedAt // nothing could come back while the league was frozen
+		}
 		if days := int(now.Sub(seen) / (24 * time.Hour)); days > RoundTripAlarmDays {
 			w.noteSysop("Packets from %s arrive, but no probe sent to it has come back in %d days. What this board sends may not be reaching it: check this board's mailer and outbound first.", board, days)
 		}
@@ -339,6 +357,5 @@ func (w *World) NoteUnansweredProbes(now time.Time) {
 // it is new: every league starts that way, and warning about it would make the
 // warning meaningless on the day a board joins.
 func (w *World) LinkQuiet(board string, now time.Time) bool {
-	d := w.LinkSilentDays(board, now)
-	return d > LinkSilentMax
+	return w.quietDays(board, now) > LinkSilentMax
 }

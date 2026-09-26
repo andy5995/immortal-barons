@@ -246,6 +246,10 @@ map of it, not a second definition.
   "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
   "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
   "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
+  "Freeze": LeagueFreeze,           // coordinator's freeze or thaw order (signed):
+                                     // { "Serial": 3, "Frozen": true, "Message": "..." }
+  "Quiet": QuietReport,             // a frozen board's report to the coordinator:
+                                     // { "Serial": 3, "QuietSince": "stamp" }
   "Seq": 7,                         // per-sender sequence, for replay detection (#53)
   "Signature": "base64",            // ed25519 over the coordinator-authored parts
   "BoardSig": "base64",             // ed25519 by the SENDING board over the whole packet, so
@@ -324,8 +328,8 @@ one-time window before any roster exists and closes for good once one
 does.)
 
 Only the packets in that group that actually carry something only the
-Coordinator may send (`LeagueConfig`, `LeagueNodes`, `Reset`, or
-`Bulletins` — the same `CarriesCoordinatorOrders` check
+Coordinator may send (`LeagueConfig`, `LeagueNodes`, `Reset`, `Bulletins`,
+or `Freeze` — the same `CarriesCoordinatorOrders` check
 `SignAsCoordinator`/`VerifyCoordinatorOrders` use, so there is one
 definition of "league-wide state" instead of two) *and verify* against
 this board's Coordinator public key are applied ahead of the rest of the
@@ -396,8 +400,8 @@ misinterpreting it, and its barons simply never see the Trading menu.
 ### The Coordinator payload: accepted shapes
 
 The Coordinator's `Signature` covers a payload of its own, not the whole packet:
-`FromBoard`, `Seq`, `LeagueConfig`, `LeagueNodes`, `Reset`, `Bulletins`, in that
-order. `omitempty` cannot do for it what it does for the packet — the payload is
+`FromBoard`, `Seq`, `LeagueConfig`, `LeagueNodes`, `Reset`, `Bulletins`,
+`Freeze`, in that order. `omitempty` cannot do for it what it does for the packet — the payload is
 assembled from named fields, so adding one changes the bytes of every packet, and
 a field left nil marshals as `null` rather than vanishing. Adding `Bulletins` did
 exactly that: a Coordinator on the older build signed five fields while every
@@ -405,7 +409,8 @@ board built since verified six, and each refused the other's league orders
 silently.
 
 A receiver therefore verifies against every payload shape a released build signed,
-newest first — today the six fields above, then the five without `Bulletins`. A
+newest first — today the seven fields above, then the six without `Freeze`, then
+the five without `Bulletins`. A
 shorter shape is accepted only when the packet leaves every field beyond it empty:
 a signature taken before `Bulletins` existed cannot have covered a bulletin set,
 so accepting one for a packet that carries bulletins would apply content nothing
@@ -440,6 +445,13 @@ switches to the new release together. A held packet is released only when the
 READER comes to speak the number the packet already carries, so at a staggered
 upgrade the board that moves first holds everything from the boards still
 behind it and nothing ever releases it.
+
+From v0.2.0 the closing is an order: `-league-freeze` sends a signed `Freeze`,
+each frozen board writes only relays, freeze orders and its `Quiet` report, and
+the Coordinator reads the reports in `-league-check` to see when the league has
+drained (`internal/game/ibbs_freeze.go`). A board frozen by a build that knows
+the order holds its own traffic in the Outbox until the thaw, so it goes out
+stamped by the release running then.
 
 ### The Coordinator's version requirement
 

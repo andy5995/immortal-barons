@@ -28,6 +28,8 @@ type opts struct {
 	coordPub        *string
 	genBoardKey     *bool
 	leagueReset     *string
+	leagueFreeze    *string
+	leagueThaw      *bool
 	leagueCheck     *bool
 	leagueRoutes    *bool
 	ftnStatus       *bool
@@ -77,6 +79,8 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		coordPub:        flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit")),
 		genBoardKey:     flag.Bool("gen-board-key", false, i18n.T(lang, "create this board's packet-signing key, print the public half to send to the League Coordinator, then exit")),
 		leagueReset:     flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit")),
+		leagueFreeze:    flag.String("league-freeze", "", i18n.T(lang, "freeze the whole league for an update so every board's packets can drain; callers are shown `\"<string>\"` (node #1 only), then exit")),
+		leagueThaw:      flag.Bool("league-thaw", false, i18n.T(lang, "end a league freeze and let play resume on every board (node #1 only), then exit")),
 		leagueCheck:     flag.Bool("league-check", false, i18n.T(lang, "check this board's league setup — roster, board name, packet directories, keys — and report everything wrong at once, then exit")),
 		leagueRoutes:    flag.Bool("league-routes", false, i18n.T(lang, "print which board each planet's packets are handed to, and the directory they are written in, then exit")),
 		ftnStatus:       flag.Bool("ftn-status", false, i18n.T(lang, "report what the FTN transport's spools are holding and why, changing nothing, then exit")),
@@ -112,5 +116,7 @@ func (o *opts) explicitMode() bool {
 	return *o.maint || *o.planetary || *o.full || *o.leagueConfig || *o.leagueRoutes || *o.ftnStatus ||
 		*o.leagueCheck || *o.reset || *o.resetFromConfig || *o.ibbsReset ||
 		*o.lastPacket || *o.bbsInfo || *o.playerList || *o.players ||
-		*o.dump || *o.spectate > 0 || *o.local || *o.setDrop
+		*o.dump || *o.spectate > 0 || *o.local || *o.setDrop ||
+		*o.leagueReset != "" || *o.leagueFreeze != "" || *o.leagueThaw ||
+		*o.genCoordKey || *o.genBoardKey || *o.coordPub != ""
 }

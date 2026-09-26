@@ -32,7 +32,7 @@ msgstr " — escolha um tópico:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:944
+#: internal/menu/menu.go:953
 msgid "# Owned"
 msgstr "Qtd."
 
@@ -406,7 +406,7 @@ msgstr ""
 msgid "A zone name, as in America/New_York or Europe/Berlin."
 msgstr "Um nome de fuso, como America/Sao_Paulo ou Europe/Berlin."
 
-#: internal/menu/actions_ipattack.go:439
+#: internal/menu/actions_ipattack.go:450
 msgid "ALL"
 msgstr "TODOS"
 
@@ -622,7 +622,7 @@ msgstr "Aguardando resposta:"
 msgid "BBS Coordinator"
 msgstr "Coordenador do BBS"
 
-#: internal/menu/spycard.go:56
+#: internal/menu/spycard.go:59
 msgid "BBS Name: "
 msgstr "Nome do BBS: "
 
@@ -972,7 +972,7 @@ msgstr "Boletim Diário"
 msgid "Date"
 msgstr "Data"
 
-#: internal/menu/spycard.go:57
+#: internal/menu/spycard.go:60
 msgid "Date: "
 msgstr "Data: "
 
@@ -1227,7 +1227,7 @@ msgstr "Expor as Operações Inimigas"
 msgid "Extended Battle"
 msgstr "Batalha Prolongada"
 
-#: cmd/immortal-barons/league.go:128
+#: cmd/immortal-barons/league.go:213
 msgid "FTN spool"
 msgstr "fila FTN"
 
@@ -1419,7 +1419,7 @@ msgstr "No Acordo"
 msgid "In Hold"
 msgstr "Retido"
 
-#: cmd/immortal-barons/league.go:142
+#: cmd/immortal-barons/league.go:227
 msgid "Inbound pending"
 msgstr "Entrada pendente"
 
@@ -1487,7 +1487,7 @@ msgstr "Chega a eles no turno %d do dia deles, não antes."
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr "Vai custar %s milhões de ouro ao seu planeta para financiar. Aceita?"
 
-#: internal/menu/menu.go:943
+#: internal/menu/menu.go:952
 msgid "Item"
 msgstr "Item"
 
@@ -1495,7 +1495,7 @@ msgstr "Item"
 msgid "Jet"
 msgstr "Caça"
 
-#: internal/menu/spycard.go:66
+#: internal/menu/spycard.go:69
 msgid "Jets"
 msgstr "Caças"
 
@@ -1561,6 +1561,10 @@ msgstr "Última linha a citar"
 #: internal/menu/scoretable.go:84
 msgid "Last Planetary Master: %s"
 msgstr "Último Mestre Planetário: %s"
+
+#: cmd/immortal-barons/league.go:188
+msgid "League frozen"
+msgstr "Liga congelada"
 
 #: internal/menu/actions_info.go:272
 msgid "Limited daily supply"
@@ -1666,7 +1670,7 @@ msgstr "Operações com mísseis não fazem parte deste jogo."
 msgid "Modify Diplomacy"
 msgstr "Alterar a Diplomacia"
 
-#: internal/menu/spycard.go:64
+#: internal/menu/spycard.go:67
 msgid "Morale"
 msgstr "Moral"
 
@@ -1722,7 +1726,7 @@ msgstr "Nova quantidade de %s à venda"
 msgid "New tax rate?"
 msgstr "Novo imposto?"
 
-#: internal/menu/menu.go:1182
+#: internal/menu/menu.go:1191
 msgid "No"
 msgstr "Não"
 
@@ -1730,7 +1734,7 @@ msgstr "Não"
 msgid "No Data"
 msgstr "Sem dados"
 
-#: internal/menu/actions_ipattack.go:383
+#: internal/menu/actions_ipattack.go:394
 msgid "No barons are known on that planet yet."
 msgstr "Ainda não conhecemos nenhum barão naquele planeta."
 
@@ -1975,7 +1979,7 @@ msgstr ""
 "Nossas regiões de {montanha} estão com as fundições no limite, %d%% da "
 "produção normal de unidades."
 
-#: cmd/immortal-barons/league.go:139
+#: cmd/immortal-barons/league.go:224
 msgid "Outbound waiting"
 msgstr "Saída aguardando"
 
@@ -2023,7 +2027,7 @@ msgstr "Hora planetária: %s   Novo dia em %s"
 msgid "Play"
 msgstr "Jogar"
 
-#: internal/menu/spycard.go:59
+#: internal/menu/spycard.go:62
 msgid "Player Letter: "
 msgstr "Letra do jogador: "
 
@@ -2031,7 +2035,7 @@ msgstr "Letra do jogador: "
 msgid "Player List"
 msgstr "Lista de Jogadores"
 
-#: internal/menu/spycard.go:58
+#: internal/menu/spycard.go:61
 msgid "Player Name: "
 msgstr "Nome do jogador: "
 
@@ -2094,11 +2098,15 @@ msgstr "Enviando..."
 msgid "Quick Strike"
 msgstr "Ataque Rápido"
 
+#: cmd/immortal-barons/league.go:198
+msgid "Quiet report"
+msgstr "Relatório de silêncio"
+
 #: internal/menu/actions_ipscores.go:107
 msgid "Quit"
 msgstr "Sair"
 
-#: internal/play/play.go:447
+#: internal/play/play.go:463
 msgid "Quit?"
 msgstr "Sair?"
 
@@ -2134,7 +2142,7 @@ msgstr "Regiões"
 msgid "Regions added to your empire. You now hold %d land."
 msgstr "Regiões acrescentadas ao seu império. Você agora tem %d de terra."
 
-#: internal/menu/spycard.go:61
+#: internal/menu/spycard.go:64
 msgid "Regions:"
 msgstr "Regiões:"
 
@@ -2338,7 +2346,7 @@ msgstr "Armar"
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr "Ajustar o seletor do S3-Sabre (0-10)"
 
-#: cmd/immortal-barons/league.go:168
+#: cmd/immortal-barons/league.go:253
 msgid "Set-aside packets"
 msgstr "Pacotes separados"
 
@@ -2457,7 +2465,7 @@ msgstr "Em uso: outro reino já atende por esse nome."
 msgid "Tank"
 msgstr "Tanque"
 
-#: internal/menu/spycard.go:68
+#: internal/menu/spycard.go:71
 msgid "Tanks"
 msgstr "Tanques"
 
@@ -2644,6 +2652,12 @@ msgid ""
 msgstr ""
 "As mercadorias são um presente: o outro reino não pode recusá-las e não "
 "manda nada de volta."
+
+#: internal/menu/splash.go:70
+msgid ""
+"The league is paused while its boards are updated. Please check back later."
+msgstr ""
+"A liga está pausada enquanto seus boards são atualizados. Volte mais tarde."
 
 #: internal/menu/actions_bank.go:67
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
@@ -2870,7 +2884,7 @@ msgstr "A moral da tropa está em %d%%."
 msgid "Trooper"
 msgstr "Soldado"
 
-#: internal/menu/spycard.go:63
+#: internal/menu/spycard.go:66
 msgid "Troopers"
 msgstr "Soldados"
 
@@ -2886,7 +2900,7 @@ msgstr "Turnos por dia"
 msgid "Turret"
 msgstr "Torre"
 
-#: internal/menu/spycard.go:67
+#: internal/menu/spycard.go:70
 msgid "Turrets"
 msgstr "Torres"
 
@@ -2898,11 +2912,11 @@ msgstr "Digite o nome de um fuso"
 msgid "UTC — one clock for the whole league (%s)"
 msgstr "UTC — um relógio só para a liga inteira (%s)"
 
-#: cmd/immortal-barons/league.go:163
+#: cmd/immortal-barons/league.go:248
 msgid "Unclaimed packet"
 msgstr "Pacote sem dono"
 
-#: cmd/immortal-barons/league.go:158
+#: cmd/immortal-barons/league.go:243
 msgid "Unclaimed packets"
 msgstr "Pacotes sem dono"
 
@@ -2918,7 +2932,7 @@ msgstr "Sem limite"
 msgid "Unlimited supply today."
 msgstr "Oferta ilimitada hoje."
 
-#: cmd/immortal-barons/league.go:146
+#: cmd/immortal-barons/league.go:231
 msgid "Unreadable journal"
 msgstr "Registro ilegível"
 
@@ -3118,7 +3132,7 @@ msgstr "Qual parte do mundo?"
 msgid "Which regions will you give up?"
 msgstr "Quais regiões você vai abrir mão?"
 
-#: internal/menu/menu.go:671
+#: internal/menu/menu.go:680
 msgid "While you were at the menus, this has happened:"
 msgstr "Enquanto você estava nos menus, aconteceu o seguinte:"
 
@@ -3181,7 +3195,7 @@ msgstr "Escrever,"
 msgid "Writing to:"
 msgstr "Escrevendo para:"
 
-#: internal/menu/menu.go:1181
+#: internal/menu/menu.go:1190
 msgid "Yes"
 msgstr "Sim"
 
@@ -3550,7 +3564,7 @@ msgstr "Seu domínio ainda está sob proteção."
 msgid "Your dominion lost %s%s%s people."
 msgstr "Seu domínio perdeu %s%s%s pessoas."
 
-#: internal/menu/menu.go:682
+#: internal/menu/menu.go:691
 msgid ""
 "Your empire has collapsed — you have been eliminated. Return on a later day "
 "to build a new realm."
@@ -3721,7 +3735,7 @@ msgstr "agentes"
 msgid "away"
 msgstr "fora"
 
-#: cmd/immortal-barons/flags.go:80
+#: cmd/immortal-barons/flags.go:84
 msgid ""
 "check this board's league setup — roster, board name, packet directories, "
 "keys — and report everything wrong at once, then exit"
@@ -3729,11 +3743,11 @@ msgstr ""
 "verifica a configuração de liga deste BBS — lista, nome do BBS, diretórios "
 "de pacotes, chaves — e relata tudo o que está errado de uma vez, depois sai"
 
-#: cmd/immortal-barons/flags.go:69
+#: cmd/immortal-barons/flags.go:71
 msgid "choose which drop file format your BBS writes, save it, then exit"
 msgstr "escolhe qual formato de drop file o seu BBS escreve, salva e sai"
 
-#: cmd/immortal-barons/flags.go:78
+#: cmd/immortal-barons/flags.go:80
 msgid ""
 "create this board's packet-signing key, print the public half to send to the "
 "League Coordinator, then exit"
@@ -3741,7 +3755,7 @@ msgstr ""
 "cria a chave de assinatura de pacotes deste BBS, imprime a metade pública "
 "para mandar ao Coordenador da Liga e sai"
 
-#: cmd/immortal-barons/flags.go:76
+#: cmd/immortal-barons/flags.go:78
 msgid ""
 "create this league's Coordinator key, print the public half to give the "
 "other boards, then exit (node #1 only)"
@@ -3749,7 +3763,15 @@ msgstr ""
 "cria a chave de Coordenador desta liga, imprime a metade pública para dar "
 "aos outros BBSes e sai (só no nó #1)"
 
-#: cmd/immortal-barons/flags.go:70
+#: cmd/immortal-barons/flags.go:83
+msgid ""
+"end a league freeze and let play resume on every board (node #1 only), then "
+"exit"
+msgstr ""
+"encerrar o congelamento da liga e retomar o jogo em todos os boards (apenas "
+"nó #1), e sair"
+
+#: cmd/immortal-barons/flags.go:72
 msgid "folder that holds the game data"
 msgstr "pasta que guarda os dados do jogo"
 
@@ -3757,14 +3779,14 @@ msgstr "pasta que guarda os dados do jogo"
 msgid "for list"
 msgstr "para listar"
 
-#: cmd/immortal-barons/flags.go:98
+#: cmd/immortal-barons/flags.go:102
 msgid ""
 "force CP437 output (the door default; overrides the -local locale detection)"
 msgstr ""
 "força a saída em CP437 (o padrão do door; ignora a detecção de locale do "
 "-local)"
 
-#: cmd/immortal-barons/flags.go:96
+#: cmd/immortal-barons/flags.go:100
 msgid ""
 "force Dupe Checking `on|off` for this run only, for testing a league "
 "lockout. Nothing is saved: the sysop's setting is left as it is"
@@ -3772,7 +3794,7 @@ msgstr ""
 "força a checagem de duplicatas `on|off` só nesta execução, para testar o "
 "bloqueio de liga. Nada é salvo: a opção do sysop fica como está"
 
-#: cmd/immortal-barons/flags.go:97
+#: cmd/immortal-barons/flags.go:101
 msgid ""
 "force UTF-8 output (needed for non-English languages; -local detects this "
 "from your locale)"
@@ -3780,13 +3802,19 @@ msgstr ""
 "força a saída em UTF-8 (necessária para idiomas que não o inglês; o -local "
 "detecta isso pelo seu locale)"
 
-#: cmd/immortal-barons/flags.go:99
+#: cmd/immortal-barons/flags.go:103
 msgid ""
 "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor "
 "UTF-8 (box rules and accents degrade to ASCII look-alikes)"
 msgstr ""
 "força a saída em ASCII puro de 7 bits, para um terminal que não é CP437 nem "
 "UTF-8 (as bordas e os acentos viram equivalentes em ASCII)"
+
+#: cmd/immortal-barons/flags.go:82
+msgid ""
+"freeze the whole league for an update so every board's packets can drain; "
+"callers are shown `\"<string>\"` (node #1 only), then exit"
+msgstr "congelar a liga inteira para uma atualização, para que os pacotes de cada board possam chegar; os usuários veem `\"<string>\"` (apenas nó #1), e sair"
 
 #: internal/menu/bulletinfiles.go:281
 msgid "held"
@@ -3804,7 +3832,7 @@ msgstr "immortal-barons — um clone de Barren Realms Elite. Opções:"
 msgid "in return for %s."
 msgstr "em troca de %s."
 
-#: cmd/immortal-barons/flags.go:86
+#: cmd/immortal-barons/flags.go:90
 msgid ""
 "list the players and change a caller's name, rename their realm, or remove "
 "it, then exit"
@@ -3812,7 +3840,7 @@ msgstr ""
 "lista os jogadores e permite mudar o nome de um usuário, renomear o reino "
 "dele ou removê-lo, depois sai"
 
-#: internal/game/ibbs_auth.go:386
+#: internal/game/ibbs_auth.go:391
 msgid "no board key is loaded"
 msgstr "nenhuma chave de BBS está carregada"
 
@@ -3848,11 +3876,11 @@ msgstr "ou "
 msgid "path to the BBS drop file"
 msgstr "caminho do drop file do BBS"
 
-#: cmd/immortal-barons/flags.go:66
+#: cmd/immortal-barons/flags.go:68
 msgid "play in your own terminal, not as a BBS door"
 msgstr "joga no seu próprio terminal, não como door de BBS"
 
-#: cmd/immortal-barons/flags.go:94
+#: cmd/immortal-barons/flags.go:98
 msgid ""
 "play the game forward N days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
@@ -3863,11 +3891,11 @@ msgstr ""
 "balanceamento). AVANÇA E SALVA o jogo, por isso pergunta antes e recusa num "
 "jogo que tenha reinos humanos"
 
-#: cmd/immortal-barons/flags.go:102
+#: cmd/immortal-barons/flags.go:106
 msgid "print every option, grouped by who needs it, then exit"
 msgstr "imprime todas as opções, agrupadas por quem precisa delas, e sai"
 
-#: cmd/immortal-barons/flags.go:95
+#: cmd/immortal-barons/flags.go:99
 msgid ""
 "print the normalized game world as JSON, then exit (after load-time "
 "migration; for scripts and balance checks)"
@@ -3875,11 +3903,11 @@ msgstr ""
 "imprime o mundo do jogo normalizado em JSON e sai (após a migração de carga; "
 "para scripts e conferência de balanceamento)"
 
-#: cmd/immortal-barons/flags.go:101
+#: cmd/immortal-barons/flags.go:105
 msgid "print the version, then exit"
 msgstr "imprime a versão e sai"
 
-#: cmd/immortal-barons/flags.go:81
+#: cmd/immortal-barons/flags.go:85
 msgid ""
 "print which board each planet's packets are handed to, and the directory "
 "they are written in, then exit"
@@ -3887,7 +3915,7 @@ msgstr ""
 "imprime para qual BBS os pacotes de cada planeta são entregues, e em que "
 "diretório são escritos, depois sai"
 
-#: cmd/immortal-barons/flags.go:77
+#: cmd/immortal-barons/flags.go:79
 msgid ""
 "record the league Coordinator's public key (the value -gen-coord-key "
 "printed), then exit"
@@ -3895,7 +3923,7 @@ msgstr ""
 "registra a chave pública do Coordenador da liga (o valor que o -gen-coord-"
 "key imprimiu) e sai"
 
-#: cmd/immortal-barons/flags.go:82
+#: cmd/immortal-barons/flags.go:86
 msgid ""
 "report what the FTN transport's spools are holding and why, changing "
 "nothing, then exit"
@@ -3907,7 +3935,7 @@ msgstr ""
 msgid "run -set-dropfile first"
 msgstr "execute -set-dropfile primeiro"
 
-#: cmd/immortal-barons/flags.go:71
+#: cmd/immortal-barons/flags.go:73
 msgid ""
 "run the daily maintenance, then exit. On a league board it also runs the "
 "inter-BBS step, as -planetary does"
@@ -3915,7 +3943,7 @@ msgstr ""
 "executa a manutenção diária e sai. Num BBS de liga, também executa a etapa "
 "entre BBSes, como o -planetary faz"
 
-#: cmd/immortal-barons/flags.go:73
+#: cmd/immortal-barons/flags.go:75
 msgid ""
 "run the full cycle: read inbound packets, play a turn, write outbound "
 "packets, then exit"
@@ -3923,7 +3951,7 @@ msgstr ""
 "executa o ciclo completo: lê os pacotes de entrada, joga um turno, escreve "
 "os pacotes de saída e sai"
 
-#: cmd/immortal-barons/flags.go:72
+#: cmd/immortal-barons/flags.go:74
 msgid ""
 "run the inter-BBS step: take in what the mailer brought, read incoming "
 "packets, run group attacks, write outgoing packets and hand them to the "
@@ -3933,7 +3961,7 @@ msgstr ""
 "chegaram, resolve os ataques em grupo, escreve os pacotes de saída e os "
 "entrega ao mailer, e sai"
 
-#: cmd/immortal-barons/flags.go:100
+#: cmd/immortal-barons/flags.go:104
 msgid ""
 "send plain text with no ANSI escapes, as a terminal that cannot render them "
 "gets (for testing that path on a terminal that can)"
@@ -3941,7 +3969,7 @@ msgstr ""
 "envia texto puro sem códigos ANSI, como recebe um terminal que não sabe "
 "exibi-los (para testar esse caminho num terminal que sabe)"
 
-#: cmd/immortal-barons/flags.go:75
+#: cmd/immortal-barons/flags.go:77
 msgid ""
 "send this board's league settings to the whole league (node #1 only), then "
 "exit"
@@ -3949,13 +3977,13 @@ msgstr ""
 "envia as configurações de liga deste BBS para a liga inteira (só no nó #1) e "
 "sai"
 
-#: cmd/immortal-barons/flags.go:74
+#: cmd/immortal-barons/flags.go:76
 msgid ""
 "show each packet as it is read and written (use with -full or -planetary)"
 msgstr ""
 "mostra cada pacote conforme é lido e escrito (use com -full ou -planetary)"
 
-#: cmd/immortal-barons/flags.go:92
+#: cmd/immortal-barons/flags.go:96
 msgid ""
 "start a new game as a board in an inter-BBS league: like -reset, but the "
 "settings editor also asks the league settings"
@@ -3963,7 +3991,7 @@ msgstr ""
 "começa um novo jogo como BBS de uma liga entre BBSes: como o -reset, mas o "
 "editor também pergunta as configurações da liga"
 
-#: cmd/immortal-barons/flags.go:93
+#: cmd/immortal-barons/flags.go:97
 msgid ""
 "start a new game from the current config.json without the editor: clear all "
 "empires and rebuild the world (the old world is saved first)"
@@ -3971,7 +3999,7 @@ msgstr ""
 "começa um novo jogo a partir do config.json atual, sem o editor: apaga todos "
 "os impérios e reconstrói o mundo (o mundo antigo é salvo antes)"
 
-#: cmd/immortal-barons/flags.go:87
+#: cmd/immortal-barons/flags.go:91
 msgid ""
 "start a new game: change the settings, then clear all empires and rebuild "
 "the world (the old world is saved first)"
@@ -3979,13 +4007,13 @@ msgstr ""
 "começa um novo jogo: altera as configurações, depois apaga todos os impérios "
 "e reconstrói o mundo (o mundo antigo é salvo antes)"
 
-#: cmd/immortal-barons/flags.go:79
+#: cmd/immortal-barons/flags.go:81
 msgid ""
 "start a new season across the whole league on DATE (node #1 only), then exit"
 msgstr ""
 "começa uma nova temporada em toda a liga na DATA indicada (só no nó #1) e sai"
 
-#: cmd/immortal-barons/flags.go:91
+#: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
 "original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset"
@@ -3997,7 +4025,7 @@ msgstr ""
 msgid "that attack force has already left"
 msgstr "essa força de ataque já partiu"
 
-#: cmd/immortal-barons/flags.go:89
+#: cmd/immortal-barons/flags.go:93
 msgid ""
 "the game's own directory of packets waiting to be applied, for -ibbs-reset "
 "(default \"inbound\", under the data directory)"
@@ -4005,13 +4033,21 @@ msgstr ""
 "diretório do próprio jogo com os pacotes que esperam para ser aplicados, "
 "para o -ibbs-reset (padrão \"inbound\", dentro do diretório de dados)"
 
-#: cmd/immortal-barons/flags.go:90
+#: cmd/immortal-barons/flags.go:94
 msgid ""
 "the game's own directory of packets written for the other boards, for -ibbs-"
 "reset (default \"outbound\", under the data directory)"
 msgstr ""
 "diretório do próprio jogo com os pacotes escritos para os outros BBSes, para "
 "o -ibbs-reset (padrão \"outbound\", dentro do diretório de dados)"
+
+#: internal/game/ibbs_freeze.go:52
+msgid "the league is already frozen"
+msgstr "a liga já está congelada"
+
+#: internal/game/ibbs_freeze.go:53
+msgid "the league is not frozen"
+msgstr "a liga não está congelada"
 
 #: internal/menu/actions_ipattack.go:53
 msgid "the whole planet"
@@ -4021,7 +4057,7 @@ msgstr "o planeta inteiro"
 msgid "this board is not the League Coordinator"
 msgstr "este BBS não é o Coordenador da Liga"
 
-#: cmd/immortal-barons/flags.go:88
+#: cmd/immortal-barons/flags.go:92
 msgid ""
 "this board's name in the league, for -ibbs-reset. Giving it skips the "
 "settings editor, for a member board that takes its rules from the Coordinator"
@@ -4057,7 +4093,7 @@ msgstr "uso: immortal-barons [opções]"
 msgid "won"
 msgstr "venceu"
 
-#: cmd/immortal-barons/flags.go:84
+#: cmd/immortal-barons/flags.go:88
 msgid ""
 "write BBSINFO.LST — every board, when it was last heard from, and the "
 "version it runs, then exit"
@@ -4065,7 +4101,7 @@ msgstr ""
 "escreve BBSINFO.LST — cada BBS, quando foi visto pela última vez e a versão "
 "que roda — e sai"
 
-#: cmd/immortal-barons/flags.go:83
+#: cmd/immortal-barons/flags.go:87
 msgid ""
 "write LASTPACKET.LST — when a packet from each other board was last "
 "processed here, then exit"
@@ -4073,7 +4109,7 @@ msgstr ""
 "escreve LASTPACKET.LST — quando um pacote de cada outro BBS foi processado "
 "aqui pela última vez — e sai"
 
-#: cmd/immortal-barons/flags.go:85
+#: cmd/immortal-barons/flags.go:89
 msgid ""
 "write PLAYERLIST.LST — every realm on every board (League Coordinator only), "
 "then exit"
@@ -4081,7 +4117,7 @@ msgstr ""
 "escreve PLAYERLIST.LST — cada reino de cada BBS (só para o Coordenador da "
 "Liga) — e sai"
 
-#: cmd/immortal-barons/flags.go:67
+#: cmd/immortal-barons/flags.go:69
 msgid "your player name (only used with -local)"
 msgstr "seu nome de jogador (usado apenas com -local)"
 

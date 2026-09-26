@@ -61,6 +61,8 @@ func runMaint(cfg game.Config, today string) error {
 	switch r := w.DailyMaintenance(today); {
 	case r.NotStarted:
 		fmt.Println("The game has not started yet; maintenance did not advance the world.")
+	case r.Frozen:
+		fmt.Println("The league is frozen; maintenance did not advance the world.")
 	case r.Days > 0:
 		fmt.Printf("Daily maintenance ran: advanced %d day(s) to game day %d.\n", r.Days, w.GameDay)
 	default:
@@ -241,6 +243,9 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 	}
 	if len(run.Notices) > 0 {
 		fmt.Printf("  (also recorded in %s)\n", filepath.Join(cfg.DataDir, store.PlanetaryLogFile))
+	}
+	if run.Frozen {
+		fmt.Println("The league is frozen: this board sent nothing of its own.")
 	}
 	if run.Bulletins == 1 {
 		fmt.Println("Broadcast 1 league bulletin to the league.")

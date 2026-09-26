@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -93,5 +94,28 @@ func TestSkipSummaryCountsOnce(t *testing.T) {
 		if got := skipSummary(tc.run); got != tc.want {
 			t.Errorf("skipSummary = %q, want %q", got, tc.want)
 		}
+	}
+}
+
+// An unquoted message is refused, not cut to its first word. The flag package
+// stops at the first stray word, so everything after it — -data included — was
+// ignored, and the Coordinator's board froze the league with a one-word message
+// from whatever ./data happened to be.
+func TestLeagueFreezeRefusesAnUnquotedMessage(t *testing.T) {
+	if os.Getenv("IB_FREEZE_ARGS_CHILD") == "1" {
+		os.Args = []string{"immortal-barons", "-league-freeze", "Updating", "please", "-data", os.Getenv("IB_FREEZE_DATADIR")}
+		main()
+		return
+	}
+	cwd := t.TempDir()
+	cmd := exec.Command(os.Args[0], "-test.run=^TestLeagueFreezeRefusesAnUnquotedMessage$")
+	cmd.Dir = cwd
+	cmd.Env = append(os.Environ(), "IB_FREEZE_ARGS_CHILD=1", "IB_FREEZE_DATADIR="+t.TempDir())
+	out, err := cmd.CombinedOutput()
+	if err == nil || !strings.Contains(string(out), `unknown argument "please"`) {
+		t.Errorf("an unquoted freeze message was not refused (err %v):\n%s", err, out)
+	}
+	if _, err := os.Stat(filepath.Join(cwd, "data")); err == nil {
+		t.Error("the refused command still created ./data")
 	}
 }

@@ -57,6 +57,7 @@ func signedFields(p Packet) []signedField {
 		{"LeagueNodes", p.LeagueNodes, len(p.LeagueNodes) > 0},
 		{"Reset", p.Reset, p.Reset != nil},
 		{"Bulletins", p.Bulletins, p.Bulletins != nil},
+		{"Freeze", p.Freeze, p.Freeze != nil},
 	}
 }
 
@@ -76,13 +77,16 @@ func signedFields(p Packet) []signedField {
 // verifying each other. Signing always uses the newest shape.
 const (
 	// shapeCurrent is the whole of signedFields.
-	shapeCurrent = 6
+	shapeCurrent = 7
+	// shapePreFreeze is what builds before the league freeze signed (v0.1.2
+	// and earlier): the same fields without Freeze.
+	shapePreFreeze = 6
 	// shapePreBulletins is what builds before 1da5698 signed: the same fields
 	// without Bulletins.
 	shapePreBulletins = 5
 )
 
-var payloadShapes = []int{shapeCurrent, shapePreBulletins}
+var payloadShapes = []int{shapeCurrent, shapePreFreeze, shapePreBulletins}
 
 // shapeCovers reports whether a signature of the given shape could legitimately
 // have covered p. This is the whole security argument for the fallback: an older
@@ -133,7 +137,8 @@ func signingBytes(p Packet, shape int) ([]byte, error) {
 // CarriesCoordinatorOrders reports whether a packet contains anything only the
 // Coordinator may send. Those parts are the ones that need a signature.
 func CarriesCoordinatorOrders(p Packet) bool {
-	return p.LeagueConfig != nil || len(p.LeagueNodes) > 0 || p.Reset != nil || p.Bulletins != nil
+	return p.LeagueConfig != nil || len(p.LeagueNodes) > 0 || p.Reset != nil || p.Bulletins != nil ||
+		p.Freeze != nil
 }
 
 // SignAsCoordinator signs a packet's coordinator-authored parts. A no-op for a
@@ -284,6 +289,13 @@ func packetKey(p Packet) string {
 func (w *World) StampOutbox() {
 	w.Outbox = w.addressBroadcasts(w.Outbox)
 	for i := range w.Outbox {
+		// A packet a frozen board is holding is numbered when it is finally
+		// sent, not now. Numbered now, it would sit below the quiet report that
+		// goes out ahead of it, and the far side drops a sequence number that
+		// has gone backwards as a replay (SeenPacket).
+		if w.Frozen && !FrozenSendable(w.Outbox[i]) {
+			continue
+		}
 		w.Outbox[i].League = w.Config.LeagueNumber
 		// EVERY packet says what this board runs, not just the ones whose
 		// builders remembered to. A board's version is a property of the board,

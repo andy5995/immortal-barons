@@ -93,7 +93,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 // immediately.
 func maintNotice(s session.Session, r game.MaintReport) {
 	switch {
-	case r.NotStarted:
+	case r.NotStarted, r.Frozen:
 		// Nothing ran — the game hasn't started yet; the opening menu shows the
 		// start date, so no notice is needed here.
 	case r.Days > 0:
@@ -164,6 +164,22 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	}()
 
 	menu.Splash(s)
+	// A frozen league lets nobody in: the Coordinator has stopped it so its
+	// packets can drain before an upgrade (game/ibbs_freeze.go). Asked before
+	// the maintenance notice, which has nothing to report while frozen.
+	var frozen bool
+	var freezeMsg string
+	lang := id.Language
+	w.Read(func() {
+		frozen, freezeMsg = w.Frozen, w.FreezeMessage
+		if e := w.FindByOwner(id.Handle); e != nil && e.Language != "" {
+			lang = e.Language
+		}
+	})
+	if frozen {
+		menu.ShowLeagueFrozen(s, menu.FittingLang(term, lang), freezeMsg)
+		return "frozen", save()
+	}
 	maintNotice(s, maint)
 
 	var joinOpen bool

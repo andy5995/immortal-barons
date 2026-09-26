@@ -191,7 +191,9 @@ The second case is the one to plan around, because the cost falls on whoever
 upgrades first, which is the opposite of what you would expect. When a release
 changes the packet format, the guide for that release says so. Agree a window
 with your Coordinator and upgrade close together, so nothing spends long in
-flight between two boards that disagree.
+flight between two boards that disagree. A Coordinator can
+[freeze the league](inter-bbs.md#freezing-the-league-for-an-update) first, so
+that nothing is in flight at all.
 
 While a board's packets are held for their format, forces, agents and bid gold
 sent to it are not given back by the lost-forces timer: its answer may be among

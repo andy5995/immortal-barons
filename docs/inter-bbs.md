@@ -771,6 +771,40 @@ Nothing schedules this. Run it when you decide the season is over. A Game
 Length setting ends each board's game on that board's own count of days, so
 boards can end on different days.
 
+### Freezing the league for an update
+
+Some releases change the packet format, and every board has to switch to them
+together: a packet still on its way when its reader upgrades is held and never
+read. So the Coordinator freezes the league **before anyone installs the new
+release**, the Coordinator included, and everything in flight can arrive:
+
+```
+immortal-barons -league-freeze "Updating. Please check back in 2-48 hours." -data /path/to/data
+```
+
+Each board freezes on its next `-planetary` run. While the league is frozen:
+
+- callers see the splash screen, a line saying the league is paused, and your
+  message, and nobody can play;
+- the game day does not advance, and every deadline counted in real time
+  (group attacks, a Gooie Kablooie, a trade deal's expiry) is moved on by the
+  length of the freeze when it ends;
+- each board applies what reaches it and passes on what it relays, but sends
+  nothing of its own. What its game produces waits until the thaw.
+
+Keep `-maint` or `-planetary` running on its schedule on every board: the runs
+are what deliver the last packets, and what later carry the thaw.
+
+A frozen board tells the Coordinator when it last received anything. On the
+Coordinator's board, `-league-check` lists every board with the time it went
+quiet, or "no report yet". When every board has been quiet for a full exchange
+round, nothing is left in flight. Now every board installs the new release,
+the Coordinator's included. Then the Coordinator ends the freeze:
+
+```
+immortal-barons -league-thaw -data /path/to/data
+```
+
 ### League reports
 
 `-lastpacket`, `-bbsinfo` and `-playerlist` each write a `.LST` report into the

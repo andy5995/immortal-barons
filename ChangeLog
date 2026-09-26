@@ -7,6 +7,8 @@ Immortal Barons ChangeLog
   * BREAKING: -inbound and -outbound are now -game-inbound and -game-outbound
   * BREAKING: the inter-BBS packet protocol moves to 3; boards must update
     together
+  * -league-freeze and -league-thaw let the Coordinator pause the league
+    while its boards update
   * A strike shows its target's latest spy report, as in the original
   * A hub passes on packet fields its own release does not know
   * A help list item that runs over two lines no longer breaks in two

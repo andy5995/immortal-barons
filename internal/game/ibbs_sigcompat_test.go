@@ -18,6 +18,16 @@ type legacyPayload struct {
 	Reset        *LeagueReset
 }
 
+// preFreezePayload is the shape signed from 1da5698 until the league freeze.
+type preFreezePayload struct {
+	FromBoard    string
+	Seq          uint64
+	LeagueConfig *LeagueConfig
+	LeagueNodes  []LeagueNode
+	Reset        *LeagueReset
+	Bulletins    *BulletinSet
+}
+
 // currentPayload is the same fixture for the shape signed today.
 type currentPayload struct {
 	FromBoard    string
@@ -26,6 +36,7 @@ type currentPayload struct {
 	LeagueNodes  []LeagueNode
 	Reset        *LeagueReset
 	Bulletins    *BulletinSet
+	Freeze       *LeagueFreeze
 }
 
 // signLegacy signs p the way a Coordinator running a pre-bulletins build did.
@@ -63,6 +74,7 @@ func TestSignedPayloadBytesMatchTheStructFormTheyReplaced(t *testing.T) {
 		LeagueConfig: &LeagueConfig{GameLength: 42, TurnsPerDay: 15},
 		LeagueNodes:  []LeagueNode{{Number: 1, Name: "AlphaBBS"}},
 		Bulletins:    &BulletinSet{Files: []BulletinFile{{Name: "rules.txt", Title: "House rules", Data: []byte("play nice")}}},
+		Freeze:       &LeagueFreeze{Serial: 2, Frozen: true, Message: "back soon"},
 	}
 
 	want, err := json.Marshal(currentPayload{
@@ -72,6 +84,7 @@ func TestSignedPayloadBytesMatchTheStructFormTheyReplaced(t *testing.T) {
 		LeagueNodes:  p.LeagueNodes,
 		Reset:        p.Reset,
 		Bulletins:    p.Bulletins,
+		Freeze:       p.Freeze,
 	})
 	if err != nil {
 		t.Fatalf("marshalling the fixture: %v", err)
@@ -82,6 +95,26 @@ func TestSignedPayloadBytesMatchTheStructFormTheyReplaced(t *testing.T) {
 	}
 	if string(got) != string(want) {
 		t.Errorf("current shape renders\n %s\nwant\n %s", got, want)
+	}
+
+	p.Freeze = nil
+	want, err = json.Marshal(preFreezePayload{
+		FromBoard:    p.FromBoard,
+		Seq:          p.Seq,
+		LeagueConfig: p.LeagueConfig,
+		LeagueNodes:  p.LeagueNodes,
+		Reset:        p.Reset,
+		Bulletins:    p.Bulletins,
+	})
+	if err != nil {
+		t.Fatalf("marshalling the fixture: %v", err)
+	}
+	got, err = signingBytes(p, shapePreFreeze)
+	if err != nil {
+		t.Fatalf("signingBytes: %v", err)
+	}
+	if string(got) != string(want) {
+		t.Errorf("pre-freeze shape renders\n %s\nwant\n %s", got, want)
 	}
 
 	p.Bulletins = nil

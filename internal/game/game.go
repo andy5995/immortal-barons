@@ -375,6 +375,21 @@ type World struct {
 	// else's packet for good. A save that held them as Packets reads back as the
 	// same JSON objects.
 	Transit []json.RawMessage
+	// The league freeze (ibbs_freeze.go). FreezeSerial is the last order applied;
+	// FrozenAt is when this board froze, which the thaw moves every deadline on
+	// by. QuietSince is when this board last applied real traffic while frozen,
+	// and QuietSent the value it last reported. QuietBoards is the Coordinator's
+	// record of every board's report.
+	FreezeSerial  int               `json:",omitempty"`
+	Frozen        bool              `json:",omitempty"`
+	FreezeMessage string            `json:",omitempty"`
+	FrozenAt      time.Time         `json:",omitzero"`
+	QuietSince    time.Time         `json:",omitzero"`
+	QuietSent     time.Time         `json:",omitzero"`
+	QuietBoards   map[string]string `json:",omitempty"` // board -> StoredStamp
+	// ThawedAt is when the last freeze ended. Link alarms count a board's
+	// silence from no earlier than this, since nothing moved while frozen.
+	ThawedAt time.Time `json:",omitzero"`
 	// PlanetDiplomacy is this board's own chart of where it stands with each
 	// other planet — an annotation the BBS Coordinator keeps for their players,
 	// binding nothing and never sent anywhere. See ibbs_diplomacy.go.

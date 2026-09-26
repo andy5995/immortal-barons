@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/screen"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
@@ -58,4 +59,17 @@ func Splash(s session.Session) {
 	// otherwise wrap the cursor on top of the row's own CR/LF. See ansi.WrapOff.
 	fmt.Fprint(s, ansi.WrapOff, screen.FromCP437(splashANS), ansi.WrapOn)
 	pauseTight(s) // the art ends on its own line; BRE's prompt sits right under it
+}
+
+// ShowLeagueFrozen tells a caller the league is frozen for an update, with the
+// League Coordinator's own message beneath, and waits for a key. It runs before
+// the menu engine knows the caller's language, so lang is passed in, as
+// AskRealmName's is.
+func ShowLeagueFrozen(s session.Session, lang, message string) {
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightYellow,
+		WrapIndented(i18n.T(lang, "The league is paused while its boards are updated. Please check back later."), ""), ansi.Reset)
+	if message != "" {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, WrapIndented(message, ""), ansi.Reset)
+	}
+	pause(s)
 }

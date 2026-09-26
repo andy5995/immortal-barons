@@ -229,6 +229,14 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-league-reset DATE`** — Start a new season across the whole league on DATE,
   then exit. Only the coordinator uses this. It resets this board and sends a
   signed order for the other boards to reset on their next `-planetary` run.
+- **`-league-freeze "<string>"`** — Freeze the whole league for an update,
+  then exit. Only the coordinator uses this. Callers see the string instead of
+  the game, the game day stops, and each board sends nothing of its own until
+  the thaw, so every packet in flight can arrive. `-league-check` on the
+  coordinator's board shows when each board went quiet. See
+  [Freezing the league](inter-bbs.md#freezing-the-league-for-an-update).
+- **`-league-thaw`** — End a league freeze, then exit. Only the coordinator
+  uses this, once its own board runs the new release.
 - **`-lastpacket`** — Write `LASTPACKET.LST`, then exit: when a packet from each
   other board was last processed here. Use it to find a board that has gone
   quiet.

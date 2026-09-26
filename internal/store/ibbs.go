@@ -114,30 +114,40 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 		return run, err
 	}
 	run.Bulletins = len(leagueBulletins)
-	// After the inbound packets, so a result that arrived this run is never
-	// overtaken by the recovery timer.
-	// A board whose packets are held for a protocol difference is stalled, not
-	// gone, so the timer stops for what is waiting on it (#190).
-	w.ReturnLostForces(protocolHeldBoards(w))
-	run.RecoveryPaused = w.PausedRecovery()
-	w.LaunchDueGroupAttacks()
-	// The weapon goes on the same step, for the same reason a group attack does:
-	// the planetary run happens several times a day, and a launch scheduled to
-	// the hour is a lie if only daily maintenance can fire it (#114 built it on
-	// maintenance alone). Maintenance still calls it, for a board that runs no
-	// planetary step at all.
-	w.LaunchDueAnnihilator()
-	w.ArriveAnnihilator() // a weapon whose flight is over lands before anything else moves
-	w.ExportScores()
-	w.ExportNodeList()
-	w.ExportLeagueConfig()
-	w.ExportBulletins(leagueBulletins)
-	w.PingTravelTimes()
-	// After the inbound packets, so a board that answered on this very run is
-	// never reported as quiet.
-	w.NoteSilentLinks(time.Now())
-	w.NoteUnansweredProbes(time.Now())
-	w.ExportAnnihilatorStatus()
+	// A frozen league applies what arrives and relays what passes through, and
+	// starts nothing: no timers, launches, scores, probes or broadcasts, and no
+	// alarms about boards that are quiet because they are frozen too. The one
+	// thing it adds is its quiet report (game/ibbs_freeze.go).
+	if w.Frozen {
+		w.ReportQuiet()
+		run.Frozen = true
+		run.Bulletins = 0 // synced to disk, but nothing is broadcast while frozen
+	} else {
+		// After the inbound packets, so a result that arrived this run is never
+		// overtaken by the recovery timer.
+		// A board whose packets are held for a protocol difference is stalled, not
+		// gone, so the timer stops for what is waiting on it (#190).
+		w.ReturnLostForces(protocolHeldBoards(w))
+		run.RecoveryPaused = w.PausedRecovery()
+		w.LaunchDueGroupAttacks()
+		// The weapon goes on the same step, for the same reason a group attack does:
+		// the planetary run happens several times a day, and a launch scheduled to
+		// the hour is a lie if only daily maintenance can fire it (#114 built it on
+		// maintenance alone). Maintenance still calls it, for a board that runs no
+		// planetary step at all.
+		w.LaunchDueAnnihilator()
+		w.ArriveAnnihilator() // a weapon whose flight is over lands before anything else moves
+		w.ExportScores()
+		w.ExportNodeList()
+		w.ExportLeagueConfig()
+		w.ExportBulletins(leagueBulletins)
+		w.PingTravelTimes()
+		// After the inbound packets, so a board that answered on this very run is
+		// never reported as quiet.
+		w.NoteSilentLinks(time.Now())
+		w.NoteUnansweredProbes(time.Now())
+		w.ExportAnnihilatorStatus()
+	}
 	w.StampOutbox()
 	run.Forwarded = len(w.Transit)
 	// Drained, not copied: they belong to this run, and leaving them on the
@@ -193,6 +203,7 @@ func RecoveryPausedNotice(cfg game.Config, boards []string) string {
 // its directories.
 type PlanetaryRun struct {
 	Applied       int      // packets read from the inbound directory and applied here
+	Frozen        bool     // the league is frozen: nothing of this board's own went out
 	Forwarded     int      // packets that arrived for another board and were passed on
 	Sent          int      // packet files written, forwarded ones included
 	RosterUpdated bool     // the Coordinator's roster replaced this board's copy
@@ -234,7 +245,14 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 		data []byte
 	}
 	var packets []outgoing
+	// A frozen board writes only the freeze orders and its quiet report; the
+	// rest of its Outbox waits for the thaw (game/ibbs_freeze.go).
+	var waiting []game.Packet
 	for _, p := range w.Outbox {
+		if w.Frozen && !game.FrozenSendable(p) {
+			waiting = append(waiting, p)
+			continue
+		}
 		// Backstop the protocol stamp. StampOutbox sets it on everything this
 		// board authored, and every production path calls it — but this is the
 		// last point before bytes reach disk, and a packet that goes out stating
@@ -292,7 +310,7 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 			fmt.Printf("  Wrote packet to %s (%s, dated %s)\n", board, p.PacketType(), p.Date)
 		}
 	}
-	w.Outbox, w.Transit = nil, nil
+	w.Outbox, w.Transit = waiting, nil
 	return len(packets), nil
 }
 

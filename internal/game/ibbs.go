@@ -119,6 +119,10 @@ type Packet struct {
 	// bytes for every packet that does not carry one.
 	Bulletins *BulletinSet `json:",omitempty"`
 	Reset     *LeagueReset // Coordinator's order to start a new season (#65)
+	// Freeze is the Coordinator's order to freeze or thaw the league, and Quiet
+	// a frozen board's report back to it (ibbs_freeze.go).
+	Freeze *LeagueFreeze `json:",omitempty"`
+	Quiet  *QuietReport  `json:",omitempty"`
 	// League is the Coordinator's league number, so a board playing in two
 	// leagues that share one inbound directory can tell the traffic apart.
 	League int
@@ -228,7 +232,8 @@ func (p Packet) HasPayload() bool {
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
 		len(p.SpyGuys) > 0 || len(p.News) > 0 || len(p.Threats) > 0 ||
 		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || len(p.TradeDeals) > 0 || p.Notice != "" ||
-		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil
+		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil ||
+		p.Freeze != nil || p.Quiet != nil
 }
 
 // LeagueReset is the Coordinator's order for every board to wipe and start a new
@@ -527,6 +532,13 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if p.Reset != nil && orders {
 		w.applyLeagueReset(p.Reset)
 	}
+	if p.Freeze != nil && orders {
+		w.applyLeagueFreeze(p.Freeze)
+	}
+	if p.Quiet != nil && w.IsLeagueCoordinator() {
+		w.fileQuietReport(p.FromBoard, *p.Quiet)
+	}
+	w.noteFrozenTraffic(p)
 	// The league's bulletins travel with the ruleset and the roster, under the
 	// same guard: the Coordinator sends the whole set every run, and this board
 	// files news only for what actually changed here (see bulletin.go).
