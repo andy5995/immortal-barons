@@ -1,11 +1,13 @@
 package menu
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/help"
 )
 
 // TestShowInstructions pages through the whole linear manual: the overview leads
@@ -460,5 +462,30 @@ func TestRegularAttackAdvancesTurn(t *testing.T) {
 	f := &fakeSession{keys: []rune("A\r\r\r\r ")} // target A, full-force defaults, then a key to clear the report pause
 	if r := regularAttack(f, w); r != Back {
 		t.Errorf("completed attack should advance the turn (Back), got %v", r)
+	}
+}
+
+// A help topic longer than a screen is shown a screen at a time, as the
+// Instructions reader is, and Q leaves it for the topic list. It was printed
+// whole, so all but its last screen scrolled away before the pause.
+func TestHelpTopicIsPaged(t *testing.T) {
+	var n int
+	for i, tp := range help.Topics("controls", "") {
+		if tp.Title == "How to Play" {
+			n = i + 1
+		}
+	}
+	if n == 0 {
+		t.Fatal("no How to Play topic to page through")
+	}
+	f := &fakeSession{keys: []rune(fmt.Sprintf("%d\rQ0\r", n))}
+	browseCategory(f, true, "controls", "")
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "How to Play") || !strings.Contains(out, "Enter to continue, Q to quit") {
+		t.Fatalf("the long topic was not paged:\n%s", out)
+	}
+	last := strings.Split(strings.TrimSpace(stripANSI(help.Topics("controls", "")[n-1].RenderANSI(78))), "\n")
+	if tail := strings.TrimSpace(last[len(last)-1]); strings.Contains(out, tail) {
+		t.Errorf("Q on the first page still printed the topic's last line %q", tail)
 	}
 }

@@ -21,9 +21,6 @@ import (
 // league's bulletins have to travel between boards as files anyway, and .ans
 // artwork does not survive being pasted into a list file.
 
-// bulletinLines is how many lines of a bulletin are shown before pausing.
-const bulletinLines = 20
-
 // gameBulletins lists the bulletins and shows whichever one is chosen.
 func gameBulletins(s session.Session, w *ctx) Result {
 	dataDir := w.Config.DataDir
@@ -122,23 +119,11 @@ func showBulletinFile(s session.Session, b bulletin.Bulletin) {
 	}
 	fmt.Fprint(s, "\n", ansi.WrapOff)
 	defer fmt.Fprint(s, ansi.WrapOn, ansi.Reset)
-	shown := 0
+	page := &linePager{s: s, perPage: pageLines}
 	for _, line := range strings.Split(strings.ReplaceAll(bulletin.Text(data), "\r\n", "\n"), "\n") {
-		fmt.Fprintf(s, "%s\n", line)
-		shown++
-		if shown < bulletinLines {
-			continue
-		}
-		shown = 0
-		fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, tr(s, "─»>Enter to continue, Q to quit<«─"), ansi.Reset)
-		k, err := readKey(s)
-		drainInput(s)
-		fmt.Fprint(s, "\n")
-		if err != nil || k == 'q' || k == 'Q' {
+		if !page.line(line) {
 			return
 		}
 	}
-	if shown > 0 { // lines remain since the last page break
-		pause(s)
-	}
+	page.finish()
 }

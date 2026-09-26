@@ -174,26 +174,9 @@ func helpBrowse(s session.Session, w *ctx) Result {
 // stays complete as the help content grows — no parallel document to maintain.
 func showInstructions(s session.Session, w *ctx) Result {
 	lang := playerLang(w)
-	// Page the whole manual a screen at a time: emit one line, and after every
-	// instructionsPerPage lines pause for Enter (continue) or Q (quit), so a long
-	// topic can't scroll off before it's read. count carries across topics.
-	const instructionsPerPage = 20
-	count := 0
-	emit := func(line string) bool {
-		fmt.Fprintf(s, "%s\n", line)
-		count++
-		if count < instructionsPerPage {
-			return true
-		}
-		count = 0
-		fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, tr(s, "─»>Enter to continue, Q to quit<«─"), ansi.Reset)
-		k, err := readKey(s)
-		if err != nil || k == 'q' || k == 'Q' {
-			return false
-		}
-		fmt.Fprint(s, "\n")
-		return true
-	}
+	// The whole manual is paged as one text, so the count carries across topics.
+	page := &linePager{s: s, perPage: pageLines}
+	emit := page.line
 
 	lastCat := ""
 	for _, t := range help.Instructions(lang) {
@@ -213,9 +196,7 @@ func showInstructions(s session.Session, w *ctx) Result {
 			}
 		}
 	}
-	if count > 0 { // un-paged lines remain since the last break: final "press a key"
-		pause(s)
-	}
+	page.finish()
 	return Stay
 }
 
@@ -277,8 +258,9 @@ func pickLanguage(s session.Session, w *ctx) Result {
 }
 
 // browseCategory lists a category's topics as a lightbar and renders the chosen
-// one, paged. The lightbar reaches any number of topics (covert has 15), so no
-// single-key-vs-Enter compromise is needed.
+// one a screen at a time; Q leaves the topic for the list. The lightbar reaches
+// any number of topics (covert has 15), so no single-key-vs-Enter compromise is
+// needed.
 func browseCategory(s session.Session, plain bool, cat, lang string) {
 	for {
 		topics := help.Topics(cat, lang)
@@ -290,7 +272,14 @@ func browseCategory(s session.Session, plain bool, cat, lang string) {
 		if i < 0 {
 			return
 		}
-		fmt.Fprintf(s, "\n%s\n", topics[i].RenderANSI(78))
-		pause(s)
+		page := &linePager{s: s, perPage: pageLines}
+		if page.line("") {
+			for _, line := range strings.Split(topics[i].RenderANSI(78), "\n") {
+				if !page.line(line) {
+					break
+				}
+			}
+			page.finish()
+		}
 	}
 }
