@@ -402,10 +402,16 @@ const relationsNameWidth = 40
 // else. It sits below the table rather than in the Relations column because a
 // pact plus a pending type would overflow 80 columns.
 func viewDiplomacy(s session.Session, w *ctx) Result {
-	p := w.Player()
 	var rows []relationsRow
 	var pending []game.PendingProposal
 	w.Read(func() {
+		// Resolved inside the Read, after its reload: a pointer taken before it
+		// names the record the reload replaced, so e == p never held and the
+		// caller's own realm was listed.
+		p := w.Player()
+		if p == nil {
+			return
+		}
 		pending = w.ProposalsFrom(p)
 		for _, e := range w.Empires {
 			if e == p || !e.Alive {

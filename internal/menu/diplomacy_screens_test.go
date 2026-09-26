@@ -185,3 +185,20 @@ func TestCapturedRulesMatchBRE(t *testing.T) {
 		t.Errorf("region rule:\n got %q\nwant %q", got, want)
 	}
 }
+
+// On a door every Read reloads the world, so the viewer has to be resolved
+// inside it. Resolved before, the pointer named the record the reload replaced,
+// "is this me?" never matched, and View Treaties listed the caller's own realm.
+func TestViewTreatiesLeavesOutTheViewerOnADoor(t *testing.T) {
+	a, _, _ := twoNodeWorld(t, "khan", "Khanate", nil, nil)
+	a.With(func() { a.World.AddHuman("bob", "Bobland") })
+	f := &fakeSession{}
+	viewDiplomacy(f, a)
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Bobland") {
+		t.Fatalf("the Relations table was not drawn:\n%s", out)
+	}
+	if strings.Contains(out, "Khanate") {
+		t.Errorf("the viewer's own realm is listed:\n%s", out)
+	}
+}
