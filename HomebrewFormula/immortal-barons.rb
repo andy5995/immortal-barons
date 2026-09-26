@@ -11,8 +11,8 @@ class ImmortalBarons < Formula
   # This is the vendored-source tarball the release workflow publishes, not the
   # auto-generated tag archive: the repo does not commit vendor/, so only this
   # asset lets the build skip a module download.
-  url "https://github.com/andy5995/immortal-barons/releases/download/v0.1.2/immortal-barons-v0.1.2-vendored-source.tar.gz"
-  sha256 "f97921c19580e5cf5d6ba5e306637fccdc778e72d43485d22ab2e962fc74f5e1"
+  url "https://github.com/andy5995/immortal-barons/releases/download/v0.2.0/immortal-barons-v0.2.0-vendored-source.tar.gz"
+  sha256 "86913a15a73c5c9922ebcf05dcc9ba0dcd1265aaf5d7b4994c183fb4402d0544"
   license "MIT"
   head "https://github.com/andy5995/immortal-barons.git", branch: "trunk"
 
@@ -29,7 +29,7 @@ class ImmortalBarons < Formula
                 "docs/command-reference.md", "docs/door-setup.md",
                 "docs/charset.md", "docs/download.md", "docs/translating.md",
                 "docs/inter-bbs.md", "docs/inter-bbs-troubleshooting.md",
-                "docs/ftn-transport.md", "docs/bulletins.md"
+                "docs/ftn-transport.md", "docs/bulletins.md", "docs/bbs-cfg.md"
   end
 
   def caveats
