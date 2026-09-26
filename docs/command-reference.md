@@ -24,15 +24,15 @@ These options are for playing the game.
 
 - **`-local`** — Play in your own terminal instead of as a BBS door. Good for
   testing or for a single player on the same machine.
-- **`-name NAME`** — Set your player name. Only used with `-local`. Without it,
-  the game uses your system login name.
-- **`-dropfile PATH`** — Path to the BBS drop file. Your BBS software writes this
-  file and tells the door where it is. The format is the one you set with
+- **`-name <name>`** — Set your player name. Only used with `-local`. Without
+  it, the game uses your system login name.
+- **`-dropfile <file>`** — Path to the BBS drop file. Your BBS software writes
+  this file and tells the door where it is. The format is the one you set with
   `-set-dropfile` (see the door setup guide for the supported formats).
-- **`-data DIR`** — The folder that holds the game data. The default is `./data`,
-  which is **relative to the directory you run the command from**, not to where
-  the program file is. Run the game from a different folder and it looks for
-  `data` there. To avoid surprises, give a full path (for example
+- **`-data <dir>`** — The folder that holds the game data. The default is
+  `./data`, which is **relative to the directory you run the command from**, not
+  to where the program file is. Run the game from a different folder and it
+  looks for `data` there. To avoid surprises, give a full path (for example
   `-data /home/bbs/immortal-barons/data`). All modes use this option to find the
   shared world.
 
@@ -111,9 +111,10 @@ or override game state.
   *after* the game loads it (old saves are migrated and missing fields filled
   in), so it can differ from the raw `world.json` file. Useful for scripts and
   for checking game balance.
-- **`-spectate N`** — Play the game forward N days with no human players, then
-  exit, printing a summary of each day and a final table of every realm. It does
-  not reset the game first, so pair it with `-reset-from-config` for a clean run:
+- **`-spectate <n>`** — Play the game forward `<n>` days with no human players,
+  then exit, printing a summary of each day and a final table of every realm. It
+  does not reset the game first, so pair it with `-reset-from-config` for a
+  clean run:
 
     ```
     immortal-barons -data ./sandbox -reset-from-config
@@ -152,16 +153,17 @@ These options are for games that link several BBSes together (a "league"). See
   `-reset`, except the settings editor also asks the league settings (board
   name, packet directories, and the interplanetary rules), and it creates the
   packet directories.
-- **`-board-id NAME`**, **`-game-inbound DIR`**, **`-game-outbound DIR`** —
-  Settings for `-ibbs-reset`. Giving `-board-id` skips the settings editor, so a
-  member board is set up in one command. Use this when the League Coordinator
-  sets the rules: they arrive in the Coordinator's next broadcast and replace
-  whatever this board starts with. `-game-inbound` and `-game-outbound` default
-  to `inbound` and `outbound` inside the data directory. The game does not write
-  [`bbs.cfg`](bbs-cfg.md): the reset ends by printing that file, filled in from
-  these flags, for you to save yourself. It is plain text and yours alone —
-  nothing in the game ever rewrites it.
-- **`-import-bbs-cfg PATH`** — Take this board's name, league number, mailer,
+- **`-board-id "<name>"`**, **`-game-inbound <dir>`**,
+  **`-game-outbound <dir>`** — Settings for `-ibbs-reset`. Giving `-board-id`
+  skips the settings editor, so a member board is set up in one command. Use
+  this when the League Coordinator sets the rules: they arrive in the
+  Coordinator's next broadcast and replace whatever this board starts with.
+  `-game-inbound` and `-game-outbound` default to `inbound` and `outbound`
+  inside the data directory. The game does not write [`bbs.cfg`](bbs-cfg.md):
+  the reset ends by printing that file, filled in from these flags, for you to
+  save yourself. It is plain text and yours alone — nothing in the game ever
+  rewrites it.
+- **`-import-bbs-cfg <file>`** — Take this board's name, league number, mailer,
   incoming files directory and netmail directory from an original Barren Realms
   Elite `BBS.CFG`, for `-ibbs-reset`. The last three become the FTN transport's
   [`Mailer`](bbs-cfg.md#mailer), [`IncomingFileDir`](bbs-cfg.md#incomingfiledir)
@@ -217,18 +219,20 @@ These options are for games that link several BBSes together (a "league"). See
   the coordinator runs this, once. It prints a line to give every other board.
   The private half is written to `coord.key` in the data folder; keep it secret,
   and copy it if you ever hand coordinatorship to another sysop.
-- **`-coord-key KEY`** — Record the coordinator's public key on this board, then
-  exit. Every board in the league needs this. Without it, a board cannot check
-  that league orders really came from the coordinator, and will refuse them.
+- **`-coord-key <key>`** — Record the coordinator's public key on this board,
+  then exit. Every board in the league needs this. Without it, a board cannot
+  check that league orders really came from the coordinator, and will refuse
+  them.
 - **`-gen-board-key`** — Create this board's packet-signing key, then exit.
   Every board in the league runs this once. It prints a line to send to the
   league coordinator, who puts it in the roster; once it is there, other boards
   can tell a packet from this board apart from one that only claims to be. The
   private half is written to `board.key` in the data folder — anyone holding it
   can send packets as this board.
-- **`-league-reset DATE`** — Start a new season across the whole league on DATE,
-  then exit. Only the coordinator uses this. It resets this board and sends a
-  signed order for the other boards to reset on their next `-planetary` run.
+- **`-league-reset <YYYY-MM-DD>`** — Start a new season across the whole league
+  on that date, then exit. Only the coordinator uses this. It resets this board
+  and sends a signed order for the other boards to reset on their next
+  `-planetary` run.
 - **`-league-freeze "<string>"`** — Freeze the whole league for an update,
   then exit. Only the coordinator uses this. Callers see the string instead of
   the game, the game day stops, and each board sends nothing of its own until

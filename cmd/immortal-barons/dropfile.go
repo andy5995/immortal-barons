@@ -75,7 +75,7 @@ func peekDataDir() string {
 // dropfileUsage builds the -dropfile help text: it names the configured format,
 // or points an unconfigured sysop at -set-dropfile.
 func dropfileUsage(lang, format string) string {
-	base := i18n.T(lang, "path to the BBS drop file")
+	base := i18n.T(lang, "the BBS drop file `<file>`")
 	if f, ok := door.FormatByID(format); ok {
 		return base + " (" + f.Name + ")"
 	}

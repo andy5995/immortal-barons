@@ -540,7 +540,7 @@ accepted your key never accepted your roster either, so it is still routing by
 whatever it had — which is a slow, quiet failure rather than an error anyone
 sees.
 
-**A new season.** `-league-reset DATE` resets your board and sends a signed
+**A new season.** `-league-reset <YYYY-MM-DD>` resets your board and sends a signed
 order for the others to reset on their next `-planetary` run. A board that
 refuses your orders will not reset, and will then be a board playing a different
 season from everyone else. Confirm with `-bbsinfo` that every board is being

@@ -3786,10 +3786,6 @@ msgstr ""
 "de bevriezing van de competitie opheffen en het spel op elk board hervatten "
 "(alleen node #1), en dan stoppen"
 
-#: cmd/immortal-barons/flags.go:72
-msgid "folder that holds the game data"
-msgstr "map met de spelgegevens"
-
 #: internal/menu/actions_ipmessages.go:129
 msgid "for list"
 msgstr "voor lijst"
@@ -3830,7 +3826,10 @@ msgstr ""
 msgid ""
 "freeze the whole league for an update so every board's packets can drain; "
 "callers are shown `\"<string>\"` (node #1 only), then exit"
-msgstr "de hele competitie bevriezen voor een update, zodat de pakketten van elk board kunnen aankomen; bellers zien `\"<string>\"` (alleen node #1), en dan stoppen"
+msgstr ""
+"de hele competitie bevriezen voor een update, zodat de pakketten van elk "
+"board kunnen aankomen; bellers zien `\"<string>\"` (alleen node #1), en dan "
+"stoppen"
 
 #: internal/menu/bulletinfiles.go:281
 msgid "held"
@@ -3888,9 +3887,9 @@ msgstr "nu"
 msgid "or "
 msgstr "of "
 
-#: cmd/immortal-barons/dropfile.go:78
-msgid "path to the BBS drop file"
-msgstr "pad naar het drop file van het BBS"
+#: cmd/immortal-barons/flags.go:69
+msgid "play as `<name>` (only used with -local)"
+msgstr "spelen als `<name>` (alleen met -local)"
 
 #: cmd/immortal-barons/flags.go:68
 msgid "play in your own terminal, not as a BBS door"
@@ -3898,14 +3897,10 @@ msgstr "speel in je eigen terminal, niet als BBS-door"
 
 #: cmd/immortal-barons/flags.go:98
 msgid ""
-"play the game forward N days of computer-baron turns, printing a per-day "
+"play the game forward `<n>` days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
 "the game, so it asks first and refuses on a game that has human realms"
-msgstr ""
-"speelt het spel N dagen aan computerbaronbeurten vooruit, toont een "
-"samenvatting per dag en de eindstand, en sluit af (een balanstest). Het spel "
-"GAAT VOORUIT EN WORDT OPGESLAGEN, dus er wordt eerst gevraagd en het weigert "
-"bij een spel met menselijke rijken"
+msgstr "het spel `<n>` dagen vooruitspelen met beurten van computerbaronnen, met een overzicht per dag en de eindstand, en dan stoppen (een balanstest). SPEELT EN BEWAART het spel, dus vraagt eerst en weigert een spel met menselijke rijken"
 
 #: cmd/immortal-barons/flags.go:106
 msgid "print every option, grouped by who needs it, then exit"
@@ -3933,11 +3928,9 @@ msgstr ""
 
 #: cmd/immortal-barons/flags.go:79
 msgid ""
-"record the league Coordinator's public key (the value -gen-coord-key "
+"record the league Coordinator's public key `<key>` (the value -gen-coord-key "
 "printed), then exit"
-msgstr ""
-"legt de openbare sleutel van de competitiecoördinator vast (de waarde die "
-"-gen-coord-key toonde) en sluit af"
+msgstr "de publieke sleutel `<key>` van de competitiecoördinator vastleggen (de waarde die -gen-coord-key toonde), en dan stoppen"
 
 #: cmd/immortal-barons/flags.go:86
 msgid ""
@@ -4026,38 +4019,39 @@ msgstr ""
 
 #: cmd/immortal-barons/flags.go:81
 msgid ""
-"start a new season across the whole league on DATE (node #1 only), then exit"
-msgstr ""
-"start op DATUM een nieuw seizoen in de hele competitie (alleen knooppunt #1) "
-"en sluit af"
+"start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), "
+"then exit"
+msgstr "een nieuw seizoen voor de hele competitie beginnen op `<YYYY-MM-DD>` (alleen node #1), en dan stoppen"
 
 #: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
-"original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset"
-msgstr ""
-"haalt de naam van dit BBS, het competitienummer, de mailer en de FTN-mappen "
-"uit een origineel BBS.CFG van Barren Realms Elite op PAD, voor -ibbs-reset"
+"original Barren Realms Elite BBS.CFG `<file>`, for -ibbs-reset"
+msgstr "de naam van dit board, het competitienummer, de mailer en de FTN-mappen overnemen uit een originele Barren Realms Elite BBS.CFG `<file>`, voor -ibbs-reset"
 
 #: internal/game/ibbs.go:17
 msgid "that attack force has already left"
 msgstr "die aanvalsmacht is al vertrokken"
 
+#: cmd/immortal-barons/dropfile.go:78
+msgid "the BBS drop file `<file>`"
+msgstr "het BBS-dropbestand `<file>`"
+
+#: cmd/immortal-barons/flags.go:72
+msgid "the folder `<dir>` that holds the game data"
+msgstr "de map `<dir>` met de spelgegevens"
+
 #: cmd/immortal-barons/flags.go:93
 msgid ""
-"the game's own directory of packets waiting to be applied, for -ibbs-reset "
-"(default \"inbound\", under the data directory)"
-msgstr ""
-"de eigen map van het spel met pakketten die nog verwerkt moeten worden, voor "
-"-ibbs-reset (standaard \"inbound\", onder de gegevensmap)"
+"the game's own directory `<dir>` of packets waiting to be applied, for -ibbs-"
+"reset (default \"inbound\", under the data directory)"
+msgstr "de eigen map `<dir>` van het spel voor pakketten die wachten om toegepast te worden, voor -ibbs-reset (standaard \"inbound\", onder de gegevensmap)"
 
 #: cmd/immortal-barons/flags.go:94
 msgid ""
-"the game's own directory of packets written for the other boards, for -ibbs-"
-"reset (default \"outbound\", under the data directory)"
-msgstr ""
-"de eigen map van het spel met pakketten die voor de andere BBSen zijn "
-"geschreven, voor -ibbs-reset (standaard \"outbound\", onder de gegevensmap)"
+"the game's own directory `<dir>` of packets written for the other boards, "
+"for -ibbs-reset (default \"outbound\", under the data directory)"
+msgstr "de eigen map `<dir>` van het spel voor pakketten die voor de andere boards geschreven zijn, voor -ibbs-reset (standaard \"outbound\", onder de gegevensmap)"
 
 #: internal/game/ibbs_freeze.go:52
 msgid "the league is already frozen"
@@ -4077,12 +4071,10 @@ msgstr "dit BBS is niet de competitiecoördinator"
 
 #: cmd/immortal-barons/flags.go:92
 msgid ""
-"this board's name in the league, for -ibbs-reset. Giving it skips the "
-"settings editor, for a member board that takes its rules from the Coordinator"
-msgstr ""
-"de naam van dit BBS in de competitie, voor -ibbs-reset. Dit opgeven slaat de "
-"instellingeneditor over, voor een deelnemend BBS dat zijn regels van de "
-"coördinator krijgt"
+"this board's name in the league, `\"<name>\"`, for -ibbs-reset. Giving it "
+"skips the settings editor, for a member board that takes its rules from the "
+"Coordinator"
+msgstr "de naam van dit board in de competitie, `\"<name>\"`, voor -ibbs-reset. Als je die opgeeft, wordt de instellingeneditor overgeslagen, voor een lidboard dat zijn regels van de coördinator krijgt"
 
 #: internal/menu/incoming.go:124
 msgid "this planet"
@@ -4135,10 +4127,6 @@ msgid ""
 msgstr ""
 "schrijft PLAYERLIST.LST - elk rijk op elk BBS (alleen voor de "
 "competitiecoördinator) - en sluit af"
-
-#: cmd/immortal-barons/flags.go:69
-msgid "your player name (only used with -local)"
-msgstr "je spelersnaam (alleen gebruikt met -local)"
 
 #: internal/menu/advisors.go:293
 msgid "{Food decay} is at %d%% of standard levels."

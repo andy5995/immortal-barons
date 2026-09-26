@@ -3742,10 +3742,6 @@ msgid ""
 msgstr ""
 "снять заморозку лиги и возобновить игру на всех BBS (только узел #1), и выйти"
 
-#: cmd/immortal-barons/flags.go:72
-msgid "folder that holds the game data"
-msgstr "каталог с данными игры"
-
 #: internal/menu/actions_ipmessages.go:129
 msgid "for list"
 msgstr "список"
@@ -3786,7 +3782,9 @@ msgstr ""
 msgid ""
 "freeze the whole league for an update so every board's packets can drain; "
 "callers are shown `\"<string>\"` (node #1 only), then exit"
-msgstr "заморозить всю лигу для обновления, чтобы пакеты всех BBS успели дойти; игроки видят `\"<string>\"` (только узел #1), и выйти"
+msgstr ""
+"заморозить всю лигу для обновления, чтобы пакеты всех BBS успели дойти; "
+"игроки видят `\"<string>\"` (только узел #1), и выйти"
 
 #: internal/menu/bulletinfiles.go:281
 msgid "held"
@@ -3844,9 +3842,9 @@ msgstr "сейчас"
 msgid "or "
 msgstr "или "
 
-#: cmd/immortal-barons/dropfile.go:78
-msgid "path to the BBS drop file"
-msgstr "путь к drop-файлу BBS"
+#: cmd/immortal-barons/flags.go:69
+msgid "play as `<name>` (only used with -local)"
+msgstr "играть под именем `<name>` (только с -local)"
 
 #: cmd/immortal-barons/flags.go:68
 msgid "play in your own terminal, not as a BBS door"
@@ -3854,14 +3852,10 @@ msgstr "играть в своём терминале, а не как door BBS"
 
 #: cmd/immortal-barons/flags.go:98
 msgid ""
-"play the game forward N days of computer-baron turns, printing a per-day "
+"play the game forward `<n>` days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
 "the game, so it asks first and refuses on a game that has human realms"
-msgstr ""
-"прокрутить игру вперёд на N дней ходов компьютерных баронов, печатая сводку "
-"по дням и итоговую таблицу, затем выйти (проверка баланса). ПРОДВИГАЕТ И "
-"СОХРАНЯЕТ игру, поэтому сначала спрашивает и отказывается, если в игре есть "
-"державы людей"
+msgstr "прокрутить игру на `<n>` дней ходов компьютерных баронов, выводя сводку за каждый день и итоговую таблицу, и выйти (проверка баланса). ПРОДВИГАЕТ И СОХРАНЯЕТ игру, поэтому сначала спрашивает и отказывается работать с игрой, где есть человеческие державы"
 
 #: cmd/immortal-barons/flags.go:106
 msgid "print every option, grouped by who needs it, then exit"
@@ -3890,11 +3884,9 @@ msgstr ""
 
 #: cmd/immortal-barons/flags.go:79
 msgid ""
-"record the league Coordinator's public key (the value -gen-coord-key "
+"record the league Coordinator's public key `<key>` (the value -gen-coord-key "
 "printed), then exit"
-msgstr ""
-"записать открытый ключ координатора лиги (значение, напечатанное -gen-coord-"
-"key), затем выйти"
+msgstr "записать открытый ключ `<key>` координатора лиги (значение, выведенное -gen-coord-key), и выйти"
 
 #: cmd/immortal-barons/flags.go:86
 msgid ""
@@ -3981,36 +3973,39 @@ msgstr ""
 
 #: cmd/immortal-barons/flags.go:81
 msgid ""
-"start a new season across the whole league on DATE (node #1 only), then exit"
-msgstr "начать новый сезон во всей лиге с ДАТЫ (только узел #1), затем выйти"
+"start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), "
+"then exit"
+msgstr "начать новый сезон во всей лиге с даты `<YYYY-MM-DD>` (только узел #1), и выйти"
 
 #: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
-"original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset"
-msgstr ""
-"взять имя станции, номер лиги, мейлер и каталоги FTN из оригинального "
-"BBS.CFG Barren Realms Elite по ПУТИ, для -ibbs-reset"
+"original Barren Realms Elite BBS.CFG `<file>`, for -ibbs-reset"
+msgstr "взять имя этой BBS, номер лиги, мейлер и каталоги FTN из оригинального файла BBS.CFG Barren Realms Elite `<file>`, для -ibbs-reset"
 
 #: internal/game/ibbs.go:17
 msgid "that attack force has already left"
 msgstr "этот отряд уже выступил"
 
+#: cmd/immortal-barons/dropfile.go:78
+msgid "the BBS drop file `<file>`"
+msgstr "файл дропа BBS `<file>`"
+
+#: cmd/immortal-barons/flags.go:72
+msgid "the folder `<dir>` that holds the game data"
+msgstr "папка `<dir>` с данными игры"
+
 #: cmd/immortal-barons/flags.go:93
 msgid ""
-"the game's own directory of packets waiting to be applied, for -ibbs-reset "
-"(default \"inbound\", under the data directory)"
-msgstr ""
-"собственный каталог игры для пакетов, ждущих применения, для -ibbs-reset (по "
-"умолчанию \"inbound\" в каталоге данных)"
+"the game's own directory `<dir>` of packets waiting to be applied, for -ibbs-"
+"reset (default \"inbound\", under the data directory)"
+msgstr "собственный каталог игры `<dir>` для пакетов, ожидающих применения, для -ibbs-reset (по умолчанию \"inbound\", внутри каталога данных)"
 
 #: cmd/immortal-barons/flags.go:94
 msgid ""
-"the game's own directory of packets written for the other boards, for -ibbs-"
-"reset (default \"outbound\", under the data directory)"
-msgstr ""
-"собственный каталог игры для пакетов, записанных для других станций, для "
-"-ibbs-reset (по умолчанию \"outbound\" в каталоге данных)"
+"the game's own directory `<dir>` of packets written for the other boards, "
+"for -ibbs-reset (default \"outbound\", under the data directory)"
+msgstr "собственный каталог игры `<dir>` для пакетов, записанных для других BBS, для -ibbs-reset (по умолчанию \"outbound\", внутри каталога данных)"
 
 #: internal/game/ibbs_freeze.go:52
 msgid "the league is already frozen"
@@ -4030,11 +4025,10 @@ msgstr "эта станция не координатор лиги"
 
 #: cmd/immortal-barons/flags.go:92
 msgid ""
-"this board's name in the league, for -ibbs-reset. Giving it skips the "
-"settings editor, for a member board that takes its rules from the Coordinator"
-msgstr ""
-"имя этой станции в лиге, для -ibbs-reset. С ним редактор настроек "
-"пропускается - для станции-участницы, берущей правила у координатора"
+"this board's name in the league, `\"<name>\"`, for -ibbs-reset. Giving it "
+"skips the settings editor, for a member board that takes its rules from the "
+"Coordinator"
+msgstr "имя этой BBS в лиге, `\"<name>\"`, для -ibbs-reset. Если оно указано, редактор настроек пропускается — для BBS-участника, получающей правила от координатора"
 
 #: internal/menu/incoming.go:124
 msgid "this planet"
@@ -4087,10 +4081,6 @@ msgid ""
 msgstr ""
 "записать PLAYERLIST.LST - все державы на всех станциях (только координатор "
 "лиги), затем выйти"
-
-#: cmd/immortal-barons/flags.go:69
-msgid "your player name (only used with -local)"
-msgstr "ваше имя игрока (используется только с -local)"
 
 #: internal/menu/advisors.go:293
 msgid "{Food decay} is at %d%% of standard levels."

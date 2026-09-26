@@ -3445,10 +3445,6 @@ msgstr ""
 msgid "end a league freeze and let play resume on every board (node #1 only), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/flags.go:72
-msgid "folder that holds the game data"
-msgstr ""
-
 #: internal/menu/actions_ipmessages.go:129
 msgid "for list"
 msgstr ""
@@ -3525,8 +3521,8 @@ msgstr ""
 msgid "or "
 msgstr ""
 
-#: cmd/immortal-barons/dropfile.go:78
-msgid "path to the BBS drop file"
+#: cmd/immortal-barons/flags.go:69
+msgid "play as `<name>` (only used with -local)"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:68
@@ -3534,7 +3530,7 @@ msgid "play in your own terminal, not as a BBS door"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:98
-msgid "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms"
+msgid "play the game forward `<n>` days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:106
@@ -3554,7 +3550,7 @@ msgid "print which board each planet's packets are handed to, and the directory 
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:79
-msgid "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"
+msgid "record the league Coordinator's public key `<key>` (the value -gen-coord-key printed), then exit"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:86
@@ -3602,23 +3598,31 @@ msgid "start a new game: change the settings, then clear all empires and rebuild
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:81
-msgid "start a new season across the whole league on DATE (node #1 only), then exit"
+msgid "start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), then exit"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:95
-msgid "take this board's name, league number, mailer and FTN directories from an original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset"
+msgid "take this board's name, league number, mailer and FTN directories from an original Barren Realms Elite BBS.CFG `<file>`, for -ibbs-reset"
 msgstr ""
 
 #: internal/game/ibbs.go:17
 msgid "that attack force has already left"
 msgstr ""
 
+#: cmd/immortal-barons/dropfile.go:78
+msgid "the BBS drop file `<file>`"
+msgstr ""
+
+#: cmd/immortal-barons/flags.go:72
+msgid "the folder `<dir>` that holds the game data"
+msgstr ""
+
 #: cmd/immortal-barons/flags.go:93
-msgid "the game's own directory of packets waiting to be applied, for -ibbs-reset (default \"inbound\", under the data directory)"
+msgid "the game's own directory `<dir>` of packets waiting to be applied, for -ibbs-reset (default \"inbound\", under the data directory)"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:94
-msgid "the game's own directory of packets written for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)"
+msgid "the game's own directory `<dir>` of packets written for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)"
 msgstr ""
 
 #: internal/game/ibbs_freeze.go:52
@@ -3638,7 +3642,7 @@ msgid "this board is not the League Coordinator"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:92
-msgid "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"
+msgid "this board's name in the league, `\"<name>\"`, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
 #: internal/menu/incoming.go:124
@@ -3679,10 +3683,6 @@ msgstr ""
 
 #: cmd/immortal-barons/flags.go:89
 msgid "write PLAYERLIST.LST — every realm on every board (League Coordinator only), then exit"
-msgstr ""
-
-#: cmd/immortal-barons/flags.go:69
-msgid "your player name (only used with -local)"
 msgstr ""
 
 #: internal/menu/advisors.go:293
