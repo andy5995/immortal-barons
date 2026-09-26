@@ -1,6 +1,7 @@
 package store
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -237,6 +238,11 @@ func TestSaveIsAtomic(t *testing.T) {
 // value, so the round-trip test below can detect a field silently dropped from
 // serialization — it would come back as its zero value.
 func fillValue(v reflect.Value) {
+	// Raw JSON has to stay JSON: a byte slice of 7s is not, and the save fails.
+	if v.Type() == reflect.TypeOf(json.RawMessage(nil)) {
+		v.SetBytes([]byte(`{"x":7}`))
+		return
+	}
 	switch v.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		v.SetInt(7)

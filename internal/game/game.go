@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"math/rand"
 	"sync"
 	"time"
@@ -367,10 +368,13 @@ type World struct {
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
 	// Transit holds packets that arrived here addressed to another board and are
 	// waiting to be handed on. Kept apart from the Outbox because they must go
-	// out exactly as they came in — see ForwardPacket. Saved with the world, as
-	// the Outbox is: the inbound file is gone by now, so a run that dies before
-	// writing would otherwise lose someone else's packet for good.
-	Transit []Packet
+	// out exactly as they came in — see ForwardPacket — so each is the packet's
+	// own JSON rather than a Packet, which would drop the fields this build does
+	// not know. Saved with the world, as the Outbox is: the inbound file is gone
+	// by now, so a run that dies before writing would otherwise lose someone
+	// else's packet for good. A save that held them as Packets reads back as the
+	// same JSON objects.
+	Transit []json.RawMessage
 	// PlanetDiplomacy is this board's own chart of where it stands with each
 	// other planet — an annotation the BBS Coordinator keeps for their players,
 	// binding nothing and never sent anywhere. See ibbs_diplomacy.go.

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -112,7 +113,7 @@ func TestNextHopSurvivesACircularRoster(t *testing.T) {
 func TestForwardPacketStopsAtTheHopLimit(t *testing.T) {
 	w := &World{}
 	for i := range MaxPacketHops + 5 {
-		w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Hops: i})
+		w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Hops: i}, nil)
 	}
 	if len(w.Transit) != MaxPacketHops {
 		t.Errorf("queued %d packets, want %d", len(w.Transit), MaxPacketHops)
@@ -128,7 +129,7 @@ func TestForwardPacketStopsAtTheHopLimit(t *testing.T) {
 // exchange would delete the day's real events instead.
 func TestADestroyedPacketIsReported(t *testing.T) {
 	w := &World{}
-	w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Charlie BBS", Hops: MaxPacketHops})
+	w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Charlie BBS", Hops: MaxPacketHops}, nil)
 
 	if len(w.Transit) != 0 {
 		t.Errorf("queued %d packets, want 0", len(w.Transit))
@@ -155,10 +156,13 @@ func TestForwardPacketDoesNotRestampTheOriginal(t *testing.T) {
 	w.Config.BoardID = "Hub BBS"
 	w.Config.LeagueNumber = 7
 	sig := []byte{1, 2, 3}
-	w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Seq: 42, Signature: sig, League: 7})
+	w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Seq: 42, Signature: sig, League: 7}, nil)
 	w.StampOutbox() // stamps the Outbox only
 
-	got := w.Transit[0]
+	var got Packet
+	if err := json.Unmarshal(w.Transit[0], &got); err != nil {
+		t.Fatal(err)
+	}
 	if got.Seq != 42 {
 		t.Errorf("Seq = %d, want 42", got.Seq)
 	}
@@ -216,7 +220,7 @@ func TestAnUnroutablePacketIsDroppedAtOnce(t *testing.T) {
 	w.Config.BoardID = "The X-Bit BBS"
 	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "The X-Bit BBS", Hosts: []int{2}}, {Number: 2, Name: "Nite Eyes BBS"}}
 
-	w.ForwardPacket(Packet{FromBoard: "Nite Eyes BBS", ToBoard: "local"})
+	w.ForwardPacket(Packet{FromBoard: "Nite Eyes BBS", ToBoard: "local"}, nil)
 
 	if len(w.Transit) != 0 {
 		t.Errorf("queued %d packets, want 0", len(w.Transit))
@@ -371,6 +375,30 @@ func TestUnansweredProbesReachTheSysop(t *testing.T) {
 	for _, p := range []int{3, 4, 5} {
 		if strings.Contains(joined, planetName(p)) {
 			t.Errorf("%s should not be reported:\n%s", planetName(p), joined)
+		}
+	}
+}
+
+// A hub relays what it received, not what it understood. A packet from a newer
+// board carries fields this build does not know, and the origin signature
+// covers them; a hub that re-encoded its own Packet dropped them, and the
+// destination refused the packet as forged. The hop count is the one change.
+func TestForwardPacketKeepsFieldsThisBuildDoesNotKnow(t *testing.T) {
+	w := &World{}
+	raw := []byte(`{"FromBoard":"Alpha BBS","ToBoard":"Bravo BBS","Hops":2,"Seq":9,` +
+		`"ReconReports":[{"Board":"Alpha BBS","Empire":"Rome","FutureField":7}],"NewTopLevel":{"x":1}}`)
+	var p Packet
+	if err := json.Unmarshal(raw, &p); err != nil {
+		t.Fatal(err)
+	}
+	w.ForwardPacket(p, raw)
+	if len(w.Transit) != 1 {
+		t.Fatalf("queued %d packets, want 1", len(w.Transit))
+	}
+	out := string(w.Transit[0])
+	for _, want := range []string{`"FutureField":7`, `"NewTopLevel":{"x":1}`, `"Hops":3`, `"Seq":9`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("relayed packet lost %s:\n%s", want, out)
 		}
 	}
 }

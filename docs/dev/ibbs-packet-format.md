@@ -586,9 +586,12 @@ A packet addressed to a *different* board depends on the league's shape:
 - **Routed** (`World.Routed` — the roster carries HOST lines, or this board has
   route rules): the packet is taken from the inbound directory and queued on
   `World.Transit`, to be written out again on the link for its next hop (#106).
-  It is forwarded byte for byte apart from `Hops`, because its `Seq` and
+  It is forwarded unchanged apart from `Hops`, because its `Seq` and
   `Signature` belong to the board that wrote it — a hub that re-stamped one
-  would be vouching for another board's orders.
+  would be vouching for another board's orders. The hub keeps the packet's own
+  JSON rather than re-encoding what it decoded, so a field its build does not
+  know survives the hop; before v0.2.0 it was dropped, and the destination
+  refused the packet because the origin signature covered it.
 - **Unrouted:** the packet is left alone. The transport there copies every
   packet to every board, so the addressee already has it.
 

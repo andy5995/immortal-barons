@@ -229,26 +229,45 @@ type PlanetaryRun struct {
 // one directory its uplink collects from (#106). dir is that directory; a board
 // that hosts others configures a separate one per neighbor.
 func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
-	packets := append(append([]game.Packet(nil), w.Outbox...), w.Transit...)
-	// Backstop the protocol stamp. StampOutbox sets it on everything this board
-	// authored, and every production path calls it — but this is the last point
-	// before bytes reach disk, and a packet that goes out stating no protocol is
-	// held by every board that receives it, for a reason nobody can see from the
-	// packet. Transit packets keep the stamp of the board that wrote them: a
-	// forwarded packet is relayed byte for byte and is not ours to re-label.
-	for i := range packets[:len(w.Outbox)] {
-		if packets[i].Protocol == 0 {
-			packets[i].Protocol = game.Protocol
+	type outgoing struct {
+		p    game.Packet
+		data []byte
+	}
+	var packets []outgoing
+	for _, p := range w.Outbox {
+		// Backstop the protocol stamp. StampOutbox sets it on everything this
+		// board authored, and every production path calls it — but this is the
+		// last point before bytes reach disk, and a packet that goes out stating
+		// no protocol is held by every board that receives it, for a reason
+		// nobody can see from the packet.
+		if p.Protocol == 0 {
+			p.Protocol = game.Protocol
 		}
-	}
-	if len(packets) == 0 {
-		return 0, nil
-	}
-	for _, p := range packets {
 		data, err := json.MarshalIndent(p, "", "  ")
 		if err != nil {
 			return 0, err
 		}
+		packets = append(packets, outgoing{p, data})
+	}
+	// Transit goes out as the bytes it arrived as (see ForwardPacket), keeping
+	// the stamp of the board that wrote it and every field this build does not
+	// know. It is decoded only to learn where it is going.
+	for _, raw := range w.Transit {
+		var p game.Packet
+		if err := json.Unmarshal(raw, &p); err != nil {
+			return 0, err
+		}
+		var data bytes.Buffer
+		if err := json.Indent(&data, raw, "", "  "); err != nil {
+			return 0, err
+		}
+		packets = append(packets, outgoing{p, data.Bytes()})
+	}
+	if len(packets) == 0 {
+		return 0, nil
+	}
+	for _, o := range packets {
+		p, data := o.p, o.data
 		target := dir
 		// A broadcast that got this far has no roster to address it from, so
 		// there is no next hop to compute: it goes out on the default link for
@@ -417,6 +436,7 @@ type InboundResult struct {
 type stagedPacket struct {
 	path   string
 	packet game.Packet
+	raw    []byte // the file as it arrived, which a relay passes on
 }
 
 // originKey identifies a packet's sender for grouping. It keys on FromBoard
@@ -601,7 +621,7 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		if _, seen := groups[key]; !seen {
 			groupOrder = append(groupOrder, key)
 		}
-		groups[key] = append(groups[key], stagedPacket{path, p})
+		groups[key] = append(groups[key], stagedPacket{path, p, data})
 	}
 
 	for _, g := range groups {
@@ -692,7 +712,7 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 	}
 	haveCoordGroup := len(appliedFirst) > 0
 	for _, sp := range appliedFirst {
-		if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
+		if err := applyStagedPacket(w, &result, sp.path, sp.packet, sp.raw, verbose); err != nil {
 			return result, err
 		}
 	}
@@ -735,7 +755,7 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 	}
 	for _, key := range rest {
 		for _, sp := range groups[key] {
-			if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
+			if err := applyStagedPacket(w, &result, sp.path, sp.packet, sp.raw, verbose); err != nil {
 				return result, err
 			}
 		}
@@ -789,7 +809,7 @@ func deferOrQuarantine(w *game.World, result *InboundResult, path string, e os.D
 // ApplyPacket itself. Factored out of ReadInbound so staging and ordering
 // packets ahead of applying them did not have to change what happens to any
 // one packet, only when.
-func applyStagedPacket(w *game.World, result *InboundResult, path string, p game.Packet, verbose bool) error {
+func applyStagedPacket(w *game.World, result *InboundResult, path string, p game.Packet, raw []byte, verbose bool) error {
 	if w.Config.LeagueNumber != 0 && p.League != 0 && p.League != w.Config.LeagueNumber {
 		result.OtherLeague++
 		if verbose {
@@ -807,7 +827,7 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		}
 		// In transit. The file goes either way, so a packet that has run out
 		// of hops is not re-read on every later run.
-		w.ForwardPacket(p)
+		w.ForwardPacket(p, raw)
 		if verbose {
 			fmt.Printf("  Forwarded packet from %s to %s (%s, dated %s)\n",
 				p.FromBoard, p.ToBoard, p.PacketType(), p.Date)

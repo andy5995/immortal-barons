@@ -6773,8 +6773,9 @@ BRE guarded its league traffic with CRCs, duplicate detection and a binary
 the threats ("Invalid CRC in incoming Gooie Kablooie from BBS #", "Duplicate or
 Late Attack Return Recieved - Packet Deleted", "Illegal Route Found from BBS #").
 IB implements the two that still bite. Both hold across a relay: a forwarded
-packet is passed on byte for byte, so the Coordinator's signature and the
-origin's sequence number are still the ones the destination checks.
+packet is passed on unchanged apart from its hop count, so the Coordinator's
+signature and the origin's sequence number are still the ones the destination
+checks.
 
 - **Coordinator authentication.** The Coordinator's board holds an ed25519
   private key (`coord.key`, created with `-gen-coord-key`); every board holds the

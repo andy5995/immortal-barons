@@ -1,6 +1,9 @@
 package game
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // Packet routing. Where the Coordinator has arranged the league as a tree, the
 // HOST lines in the roster (BRE's BRNODES.DAT) say which neighbor each board
@@ -149,16 +152,23 @@ func (w *World) routedHop(me, to int) int {
 }
 
 // ForwardPacket queues a packet that arrived here but is addressed elsewhere.
-// It is passed on byte for byte: the sequence number and the Coordinator's
+// It is passed on as it came: the sequence number and the Coordinator's
 // signature belong to the board that wrote it, so a hub that re-stamped a
 // packet in transit would be vouching for someone else's orders.
+//
+// raw is the packet as it arrived, and it is what goes out again, with only its
+// Hops changed. Re-encoding p instead dropped every field this build does not
+// know, which a newer board's packet carries, and the signature the board that
+// wrote it made over them then failed at the destination: the hub was never
+// told, and the destination could only refuse it. nil re-encodes p, for a
+// packet that has no arriving bytes.
 //
 // A packet that has been forwarded too many times is destroyed instead, and the
 // news says so. Saying so is the point: a cycle in the roster is one sysop's
 // typo that every board in the league obeys, and a hop count that quietly ate
 // the traffic would leave nobody anything to go on. BRE reported the same thing
 // as "Illegal Route Found from BBS #".
-func (w *World) ForwardPacket(p Packet) {
+func (w *World) ForwardPacket(p Packet, raw []byte) {
 	// An unroutable destination is hopeless on the first hop, not the
 	// twenty-fifth: no board on the way can place it either. Saying which board
 	// is missing from the roster beats reporting a circle, which describes what
@@ -174,7 +184,32 @@ func (w *World) ForwardPacket(p Packet) {
 		return
 	}
 	p.Hops++
-	w.Transit = append(w.Transit, p)
+	out, err := relayBytes(p, raw)
+	if err != nil {
+		w.noteSysop("A packet from %s for %s was destroyed: it could not be re-encoded to pass on (%v).",
+			p.FromBoard, p.ToBoard, err)
+		return
+	}
+	w.Transit = append(w.Transit, out)
+}
+
+// relayBytes is raw with its Hops set to p.Hops, every other field kept
+// exactly, known to this build or not. The keys come back sorted, which is
+// harmless: a receiver verifies what it decodes, never the bytes as sent.
+func relayBytes(p Packet, raw []byte) (json.RawMessage, error) {
+	if raw == nil {
+		return json.Marshal(p)
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return nil, err
+	}
+	hops, err := json.Marshal(p.Hops)
+	if err != nil {
+		return nil, err
+	}
+	fields["Hops"] = hops
+	return json.Marshal(fields)
 }
 
 // addressBroadcasts turns each broadcast into one packet per planet on the
