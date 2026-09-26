@@ -369,7 +369,7 @@ msgstr ""
 msgid "A zone name, as in America/New_York or Europe/Berlin."
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:424
+#: internal/menu/actions_ipattack.go:439
 msgid "ALL"
 msgstr ""
 
@@ -509,11 +509,11 @@ msgstr ""
 msgid "Attack Pirates"
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:242
+#: internal/menu/actions_ipattack.go:257
 msgid "Attack Type"
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:223
+#: internal/menu/actions_ipattack.go:238
 msgid "Attack aborted."
 msgstr ""
 
@@ -551,6 +551,10 @@ msgstr ""
 
 #: internal/menu/turnstages.go:460
 msgid "BBS Coordinator"
+msgstr ""
+
+#: internal/menu/spycard.go:56
+msgid "BBS Name: "
 msgstr ""
 
 #: internal/menu/timezone.go:52
@@ -871,6 +875,10 @@ msgstr ""
 
 #: internal/menu/actions_bank.go:176
 msgid "Date"
+msgstr ""
+
+#: internal/menu/spycard.go:57
+msgid "Date: "
 msgstr ""
 
 #: internal/menu/actions_attack.go:905
@@ -1201,7 +1209,7 @@ msgstr ""
 msgid "Headquarters"
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:249
+#: internal/menu/actions_ipattack.go:264
 msgid "Help"
 msgstr ""
 
@@ -1361,7 +1369,7 @@ msgstr ""
 msgid "Jet"
 msgstr ""
 
-#: internal/menu/tree.go:174
+#: internal/menu/spycard.go:66
 msgid "Jets"
 msgstr ""
 
@@ -1525,7 +1533,7 @@ msgstr ""
 msgid "Modify Diplomacy"
 msgstr ""
 
-#: internal/menu/empire_status_screen.go:136
+#: internal/menu/spycard.go:64
 msgid "Morale"
 msgstr ""
 
@@ -1585,7 +1593,7 @@ msgstr ""
 msgid "No Data"
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:368
+#: internal/menu/actions_ipattack.go:383
 msgid "No barons are known on that planet yet."
 msgstr ""
 
@@ -1593,7 +1601,7 @@ msgstr ""
 msgid "No battles have been fought yet."
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:104
+#: internal/menu/actions_ipattack.go:105
 msgid "No group attacks are forming right now."
 msgstr ""
 
@@ -1845,8 +1853,16 @@ msgstr ""
 msgid "Play"
 msgstr ""
 
+#: internal/menu/spycard.go:59
+msgid "Player Letter: "
+msgstr ""
+
 #: internal/menu/actions_info.go:308
 msgid "Player List"
+msgstr ""
+
+#: internal/menu/spycard.go:58
+msgid "Player Name: "
 msgstr ""
 
 #: internal/menu/actions_ipmessages.go:471
@@ -1931,6 +1947,10 @@ msgstr ""
 
 #: internal/menu/actions_regions.go:365
 msgid "Regions added to your empire. You now hold %d land."
+msgstr ""
+
+#: internal/menu/spycard.go:61
+msgid "Regions:"
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:54
@@ -2161,7 +2181,7 @@ msgstr ""
 msgid "Sorry, you have used all of your turns today."
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:119
+#: internal/menu/actions_ipattack.go:120
 msgid "Sorry... You're under new realm protection."
 msgstr ""
 
@@ -2241,7 +2261,7 @@ msgstr ""
 msgid "Tank"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/spycard.go:68
 msgid "Tanks"
 msgstr ""
 
@@ -2473,7 +2493,7 @@ msgstr ""
 msgid "There is no unclaimed land left on the planet today."
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:75
+#: internal/menu/actions_ipattack.go:76
 msgid "This attack will cost %s gold."
 msgstr ""
 
@@ -2625,7 +2645,7 @@ msgstr ""
 msgid "Trooper"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/spycard.go:63
 msgid "Troopers"
 msgstr ""
 
@@ -2641,7 +2661,7 @@ msgstr ""
 msgid "Turret"
 msgstr ""
 
-#: internal/menu/tree.go:176
+#: internal/menu/spycard.go:67
 msgid "Turrets"
 msgstr ""
 
@@ -2749,7 +2769,7 @@ msgstr ""
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:66
+#: internal/menu/actions_ipattack.go:67
 msgid "Wait how many Hours (%d-%d)?"
 msgstr ""
 
@@ -3045,7 +3065,7 @@ msgstr ""
 msgid "You have already made all %d of your attacks for today."
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:182
+#: internal/menu/actions_ipattack.go:196
 msgid "You have already sent all %d of your attack forces for today."
 msgstr ""
 
@@ -3105,7 +3125,7 @@ msgstr ""
 msgid "You hold the office of %s."
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:149
+#: internal/menu/actions_ipattack.go:163
 msgid "You joined group attack #%d."
 msgstr ""
 
@@ -3161,7 +3181,7 @@ msgstr ""
 msgid "Your %s Jets need %s more Carriers before they can all fly."
 msgstr ""
 
-#: internal/menu/actions_ipattack.go:218
+#: internal/menu/actions_ipattack.go:233
 msgid "Your %s force is on its way to %s on %s."
 msgstr ""
 

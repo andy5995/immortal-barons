@@ -3188,6 +3188,34 @@ local `Choose a Target [A-Y,?=List RETURN to Abort]` uses `31` red brackets and
 `93` bright-yellow keys. Another case of the color belonging to the screen
 rather than to the kind of thing.
 
+**Target card** (`cap/eots-ibbs-02.cap`, `cap/eots-ibbs-03.cap`, and the Lazarus
+capture). Once a target letter is chosen, and before the Attack Type menu, BRE
+prints its spy record on that realm. Create Group Attack prints it at the same
+point when one realm is targeted, before `Wait how many Hours`, and Join Group
+Attack prints the party's target after `Join which group?`, before the force
+prompts. With no record on the realm nothing is printed, which is why the
+capture above goes straight from the roster to the menu.
+
+```
+BBS Name: The Eclipse                        Date: 09/01/2026  14:39:55
+Player Name: Pirates Ahoy!                   Player Letter: C
+─────═══════════════──────────────────────────────────────────────────────────
+Regions:      5630
+[Troopers=1584]    [Morale=52%]
+[Jets=3409063]  [Turrets=1069712]  [Tanks=8712570]
+─────═══════════════──────────────────────────────────────────────────────────
+```
+
+The figures are the record's, not the realm's now: the roster two lines up had
+the same realm at 3,445 regions. Labels and brackets are white (`0;40;37`), the
+planet and realm names bright white (`1;37`), the date, the letter and every
+figure bright yellow (`1;33`), and both 78-column rules bright black (`1;30`).
+The names sit in 33- and 30-column fields, so `Date:` and `Player Letter:` both
+start at column 46.
+
+IB prints the same card on all three paths as of v0.2.0, with its figures
+comma-grouped as everywhere else, and the date as when the report arrived here.
+
 **Attack Type menu.** A 21-column box, sized to its own content as BRE always
 does. Note the `(?) Help` item and that **Enter takes Quit**, not the first item.
 (Not re-reached on 2026-08-16 — the menu needs a live two-board league with recon

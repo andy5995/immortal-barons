@@ -21,10 +21,12 @@ The nine are not interchangeable. Each aims at one thing, and each agent that
 gets through takes its own bite:
 
 - **Send Spy** — costs the target nothing. A spy that gets in brings home
-  their land, offense, defense and gold. They are reported to you when the spy
+  their land, offense, defense and gold, and the troopers, jets, turrets, tanks
+  and military morale behind them. They are reported to you when the spy
   returns, and filed in the Spy Database, which keeps the last five reports on
   each realm and shows how much the last two differ. A spy sent before and
-  after a strike therefore shows what the strike did.
+  after a strike therefore shows what the strike did. When you aim a strike at
+  a realm you have a report on, its latest report is shown once you pick it.
 - **Bomb Intelligence** — kills a few percent of their agents, which
   is what they defend and attack with.
 - **Demoralize** — takes a seventh off military morale.

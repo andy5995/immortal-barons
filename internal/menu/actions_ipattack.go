@@ -57,6 +57,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 			return Stay
 		}
 		target = pick
+		showPlayerIntelligence(s, w, board, target)
 	}
 	// BRE asks for the wait in HOURS, floor 12 and ceiling 120, before the force
 	// prompts (docs/dev/bre-screens.md, "Create Group Attack"). The window is what
@@ -125,6 +126,19 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if id == 0 {
 		return Stay
 	}
+	// A party aimed at one realm shows that realm's record, as the original does
+	// once the party is picked; a planet-wide one names nobody to show.
+	var tBoard, tEmpire string
+	w.Read(func() {
+		for _, ga := range w.GroupAttacks {
+			if ga.ID == id {
+				tBoard, tEmpire = ga.TargetBoard, ga.TargetEmpire
+			}
+		}
+	})
+	if tEmpire != "" {
+		showPlayerIntelligence(s, w, tBoard, tEmpire)
+	}
 	force := promptAttackForce(s, w.Player())
 	if force.Empty() {
 		return Stay
@@ -186,6 +200,7 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 	if board == "" || target == "" {
 		return Stay
 	}
+	showPlayerIntelligence(s, w, board, target)
 	kind, chose := promptAttackKind(s, w)
 	if !chose {
 		fail(s, errAttackAborted)
@@ -295,6 +310,16 @@ func remoteBarons(scores []game.RemoteScore) []remoteBaron {
 	return rows
 }
 
+// remoteLetter is the letter the i-th baron in a planet's scores packet is
+// picked by, and false past the last one a planet has. The roster and the spy
+// card both letter a planet's barons this way, so they always agree.
+func remoteLetter(i int) (string, bool) {
+	if i < 0 || i >= game.PlanetSlots {
+		return "", false
+	}
+	return string(rune('A' + i)), true
+}
+
 // pickRemoteBaronFrom draws a planet's barons as the same lettered score table
 // the local screens use and reads the choice, refusing a realm the last scores
 // packet had under New Realm Protection.
@@ -317,11 +342,12 @@ func remoteBarons(scores []game.RemoteScore) []remoteBaron {
 func pickRemoteBaronFrom(s session.Session, t Term, rows []remoteBaron, ask, refusal string) string {
 	targets := make([]targetRow, 0, len(rows))
 	for i, r := range rows {
-		if i >= game.PlanetSlots {
+		letter, ok := remoteLetter(i)
+		if !ok {
 			break // no letter left to give it
 		}
 		targets = append(targets, targetRow{
-			name: r.name, letter: string(rune('A' + i)),
+			name: r.name, letter: letter,
 			land: r.land, score: r.score, netWorth: r.nw,
 			attackable: !r.protected, protected: r.protected,
 		})

@@ -160,6 +160,11 @@ SpyReport:
   Offense
   Defense
   Gold
+  Troopers
+  Jets
+  Turrets
+  Tanks
+  Morale
 AnnihilatorStatus:
   FromBoard
   Funded

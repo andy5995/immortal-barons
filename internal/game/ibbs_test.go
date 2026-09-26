@@ -585,12 +585,19 @@ func TestACovertOpBringsBackIntelligence(t *testing.T) {
 	rome := far.AddHuman("bob", "Rome")
 	rome.Protection = 0
 	rome.Land, rome.Gold, rome.Troopers = 4321, 99000, 5000
+	rome.Jets, rome.Turrets, rome.Tanks, rome.Morale = 600, 700, 800, 64
 	reply := far.ApplyPacket(asker.Outbox[0])
 	if len(reply.ReconReports) != 1 {
 		t.Fatalf("the far board sent %d reports, want 1", len(reply.ReconReports))
 	}
 	if got := reply.ReconReports[0]; got.Land != 4321 || got.Gold != 99000 || got.Offense == 0 {
 		t.Errorf("report does not carry the target's real figures: %+v", got)
+	}
+	// The military status the original's record holds, for the card a strike
+	// prints before it sets out.
+	if got := reply.ReconReports[0]; got.Troopers != 5000 || got.Jets != 600 || got.Turrets != 700 ||
+		got.Tanks != 800 || got.Morale != 64 {
+		t.Errorf("report does not carry the target's military status: %+v", got)
 	}
 
 	// And the answer files itself on the sending board.

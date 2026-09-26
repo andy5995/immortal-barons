@@ -201,7 +201,6 @@ msgid "%s jets were destroyed in the attack!"
 msgstr "%s Jets wurden beim Angriff zerstört!"
 
 #: internal/menu/actions_ipops.go:223
-#, fuzzy
 msgid "%s of %s"
 msgstr "%s auf %s"
 
@@ -406,7 +405,7 @@ msgstr ""
 msgid "A zone name, as in America/New_York or Europe/Berlin."
 msgstr "Ein Zonenname, etwa America/New_York oder Europe/Berlin."
 
-#: internal/menu/actions_ipattack.go:424
+#: internal/menu/actions_ipattack.go:439
 msgid "ALL"
 msgstr "ALLE"
 
@@ -555,7 +554,7 @@ msgstr "Sind Sie WIRKLICH sicher, dass Sie Ihr Reich löschen wollen?"
 
 #: internal/menu/actions_ipops.go:224
 msgid "Arrived"
-msgstr ""
+msgstr "Eingetroffen"
 
 #: internal/menu/actions_iptrade.go:70
 msgid "As we last heard, %s."
@@ -581,11 +580,11 @@ msgstr "Angriff"
 msgid "Attack Pirates"
 msgstr "Piraten angreifen"
 
-#: internal/menu/actions_ipattack.go:242
+#: internal/menu/actions_ipattack.go:257
 msgid "Attack Type"
 msgstr "Angriffsart"
 
-#: internal/menu/actions_ipattack.go:223
+#: internal/menu/actions_ipattack.go:238
 msgid "Attack aborted."
 msgstr "Angriff abgebrochen."
 
@@ -624,6 +623,10 @@ msgstr "Warten auf Antwort:"
 #: internal/menu/turnstages.go:460
 msgid "BBS Coordinator"
 msgstr "BBS-Koordinator"
+
+#: internal/menu/spycard.go:56
+msgid "BBS Name: "
+msgstr "BBS-Name: "
 
 #: internal/menu/timezone.go:52
 msgid "Back"
@@ -972,6 +975,10 @@ msgstr "Täglicher Aushang"
 msgid "Date"
 msgstr "Datum"
 
+#: internal/menu/spycard.go:57
+msgid "Date: "
+msgstr "Datum: "
+
 #: internal/menu/actions_attack.go:905
 msgid "Days Until Self-Destruct"
 msgstr "Tage bis zur Selbstzerstörung"
@@ -997,9 +1004,8 @@ msgid "Defender"
 msgstr "Verteidiger"
 
 #: internal/menu/actions_ipops.go:224
-#, fuzzy
 msgid "Defense"
-msgstr "Verteidiger"
+msgstr "Verteidigung"
 
 #: internal/menu/mailreader.go:239
 msgid "Delete"
@@ -1331,7 +1337,7 @@ msgstr "Hauptquartier"
 msgid "Headquarters"
 msgstr "Hauptquartier"
 
-#: internal/menu/actions_ipattack.go:249
+#: internal/menu/actions_ipattack.go:264
 msgid "Help"
 msgstr "Hilfe"
 
@@ -1496,7 +1502,7 @@ msgstr "Posten"
 msgid "Jet"
 msgstr "Jet"
 
-#: internal/menu/tree.go:174
+#: internal/menu/spycard.go:66
 msgid "Jets"
 msgstr "Jets"
 
@@ -1668,7 +1674,7 @@ msgstr "Raketenangriffe sind in diesem Spiel nicht vorgesehen."
 msgid "Modify Diplomacy"
 msgstr "Diplomatie ändern"
 
-#: internal/menu/empire_status_screen.go:136
+#: internal/menu/spycard.go:64
 msgid "Morale"
 msgstr "Moral"
 
@@ -1732,7 +1738,7 @@ msgstr "Nein"
 msgid "No Data"
 msgstr "Keine Daten"
 
-#: internal/menu/actions_ipattack.go:368
+#: internal/menu/actions_ipattack.go:383
 msgid "No barons are known on that planet yet."
 msgstr "Auf diesem Planeten sind noch keine Barone bekannt."
 
@@ -1740,7 +1746,7 @@ msgstr "Auf diesem Planeten sind noch keine Barone bekannt."
 msgid "No battles have been fought yet."
 msgstr "Es wurden noch keine Schlachten geschlagen."
 
-#: internal/menu/actions_ipattack.go:104
+#: internal/menu/actions_ipattack.go:105
 msgid "No group attacks are forming right now."
 msgstr "Zurzeit formiert sich kein Gruppenangriff."
 
@@ -2035,9 +2041,17 @@ msgstr "Planetenzeit: %s   Neuer Tag in %s"
 msgid "Play"
 msgstr "Spielen"
 
+#: internal/menu/spycard.go:59
+msgid "Player Letter: "
+msgstr "Spielerbuchstabe: "
+
 #: internal/menu/actions_info.go:308
 msgid "Player List"
 msgstr "Spielerliste"
+
+#: internal/menu/spycard.go:58
+msgid "Player Name: "
+msgstr "Spielername: "
 
 #: internal/menu/actions_ipmessages.go:471
 msgid "Players at %s"
@@ -2077,7 +2091,7 @@ msgstr "Einstellungen"
 
 #: internal/menu/actions_regions.go:328
 msgid "Press the letter of a region type to place the remaining %d."
-msgstr ""
+msgstr "Drücke den Buchstaben eines Regionstyps, um die restlichen %d zu platzieren."
 
 #: internal/menu/actions_iptrade.go:73
 msgid "Price"
@@ -2138,6 +2152,10 @@ msgstr "Regionen"
 #: internal/menu/actions_regions.go:365
 msgid "Regions added to your empire. You now hold %d land."
 msgstr "Regionen Ihrem Reich hinzugefügt. Sie halten nun %d Land."
+
+#: internal/menu/spycard.go:61
+msgid "Regions:"
+msgstr "Regionen:"
 
 #: internal/menu/actions_diplomacy.go:54
 msgid "Regions: %s │ Net Worth: %s │ Score: %s"
@@ -2372,7 +2390,7 @@ msgstr "Leider müssen Handelsangebote für mindestens %d Tage gesendet werden."
 msgid "Sorry, you have used all of your turns today."
 msgstr "Sie haben heute alle Ihre Züge verbraucht."
 
-#: internal/menu/actions_ipattack.go:119
+#: internal/menu/actions_ipattack.go:120
 msgid "Sorry... You're under new realm protection."
 msgstr "Tut mir leid... Sie stehen unter Neureich-Schutz."
 
@@ -2460,7 +2478,7 @@ msgstr "Vergeben: Ein anderes Reich trägt diesen Namen bereits."
 msgid "Tank"
 msgstr "Panzer"
 
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/spycard.go:68
 msgid "Tanks"
 msgstr "Panzer"
 
@@ -2657,7 +2675,9 @@ msgstr "Der Kreditzins beträgt %s%% je Tag, insgesamt also %s%% Zinsen."
 #: internal/menu/turnrecap.go:445
 msgid ""
 "The mob is at your gates — your people would be rid of you by any means."
-msgstr "Der Mob steht vor Ihren Toren - Ihr Volk will Sie mit allen Mitteln loswerden."
+msgstr ""
+"Der Mob steht vor Ihren Toren - Ihr Volk will Sie mit allen Mitteln "
+"loswerden."
 
 #: internal/menu/actions.go:17
 msgid "The realm has changed — try again."
@@ -2716,7 +2736,7 @@ msgstr "Es ist niemand zu erreichen."
 msgid "There is no unclaimed land left on the planet today."
 msgstr "Heute ist auf dem Planeten kein freies Land mehr übrig."
 
-#: internal/menu/actions_ipattack.go:75
+#: internal/menu/actions_ipattack.go:76
 msgid "This attack will cost %s gold."
 msgstr "Dieser Angriff kostet %s Gold."
 
@@ -2877,7 +2897,7 @@ msgid "Trooper"
 msgstr "Soldat"
 
 # Buy / sell items
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/spycard.go:63
 msgid "Troopers"
 msgstr "Soldaten"
 
@@ -2894,7 +2914,7 @@ msgstr "Züge pro Tag"
 msgid "Turret"
 msgstr "Turm"
 
-#: internal/menu/tree.go:176
+#: internal/menu/spycard.go:67
 msgid "Turrets"
 msgstr "Türme"
 
@@ -2932,7 +2952,8 @@ msgstr "Unlesbares Journal"
 
 #: internal/menu/turnrecap.go:451
 msgid "Unrest simmers; angry crowds gather against your decrees."
-msgstr "Die Unruhe gärt; wütende Menschenmengen sammeln sich gegen Ihre Erlasse."
+msgstr ""
+"Die Unruhe gärt; wütende Menschenmengen sammeln sich gegen Ihre Erlasse."
 
 #: internal/game/regions.go:161
 msgid "Urban"
@@ -3007,7 +3028,7 @@ msgstr "Bank besuchen"
 msgid "Vote for (0 to cancel)?"
 msgstr "Stimme für (0 bricht ab)?"
 
-#: internal/menu/actions_ipattack.go:66
+#: internal/menu/actions_ipattack.go:67
 msgid "Wait how many Hours (%d-%d)?"
 msgstr "Wie viele Stunden warten (%d-%d)?"
 
@@ -3343,7 +3364,7 @@ msgstr "Sie haben diese Rakete heute bereits gestartet."
 msgid "You have already made all %d of your attacks for today."
 msgstr "Sie haben heute bereits alle Ihre %d Angriffe durchgeführt."
 
-#: internal/menu/actions_ipattack.go:182
+#: internal/menu/actions_ipattack.go:196
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "Sie haben heute bereits alle Ihre %d Angriffstruppen ausgesandt."
 
@@ -3404,7 +3425,7 @@ msgstr "Sie haben keine bestochenen Agenten, durch die Sie wirken könnten."
 msgid "You hold the office of %s."
 msgstr "Sie bekleiden das Amt des %s."
 
-#: internal/menu/actions_ipattack.go:149
+#: internal/menu/actions_ipattack.go:163
 msgid "You joined group attack #%d."
 msgstr "Sie sind dem Gruppenangriff #%d beigetreten."
 
@@ -3473,7 +3494,7 @@ msgstr "Am Ende dieses Zuges endet Ihr Schutz. Sind Sie sicher?"
 msgid "Your %s Jets need %s more Carriers before they can all fly."
 msgstr "Ihre %s Jets brauchen %s weitere Träger, damit alle fliegen können."
 
-#: internal/menu/actions_ipattack.go:218
+#: internal/menu/actions_ipattack.go:233
 msgid "Your %s force is on its way to %s on %s."
 msgstr "Ihr %s-Verband ist unterwegs nach %s auf %s."
 
@@ -3667,7 +3688,8 @@ msgstr "Ihr Volk preist Ihren Namen auf jedem Marktplatz."
 
 #: internal/menu/turnrecap.go:465
 msgid "Your people revere you — faith in your rule has never been higher."
-msgstr "Ihr Volk verehrt Sie - das Vertrauen in Ihre Herrschaft war nie größer."
+msgstr ""
+"Ihr Volk verehrt Sie - das Vertrauen in Ihre Herrschaft war nie größer."
 
 #: internal/menu/turnrecap.go:447
 msgid "Your people seethe with open hatred for your rule."

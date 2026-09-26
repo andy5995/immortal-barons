@@ -205,7 +205,6 @@ msgid "%s jets were destroyed in the attack!"
 msgstr "%s straaljagers gingen verloren bij de aanval!"
 
 #: internal/menu/actions_ipops.go:223
-#, fuzzy
 msgid "%s of %s"
 msgstr "%s op %s"
 
@@ -410,7 +409,7 @@ msgstr ""
 msgid "A zone name, as in America/New_York or Europe/Berlin."
 msgstr "Een zonenaam, zoals America/New_York of Europe/Amsterdam."
 
-#: internal/menu/actions_ipattack.go:424
+#: internal/menu/actions_ipattack.go:439
 msgid "ALL"
 msgstr "ALLE"
 
@@ -557,7 +556,7 @@ msgstr "Weet u HEEL ZEKER dat u uw rijk wilt wissen?"
 
 #: internal/menu/actions_ipops.go:224
 msgid "Arrived"
-msgstr ""
+msgstr "Aangekomen"
 
 #: internal/menu/actions_iptrade.go:70
 msgid "As we last heard, %s."
@@ -583,11 +582,11 @@ msgstr "Aanval"
 msgid "Attack Pirates"
 msgstr "Piraten aanvallen"
 
-#: internal/menu/actions_ipattack.go:242
+#: internal/menu/actions_ipattack.go:257
 msgid "Attack Type"
 msgstr "Soort aanval"
 
-#: internal/menu/actions_ipattack.go:223
+#: internal/menu/actions_ipattack.go:238
 msgid "Attack aborted."
 msgstr "Aanval afgebroken."
 
@@ -626,6 +625,10 @@ msgstr "In afwachting van antwoord:"
 #: internal/menu/turnstages.go:460
 msgid "BBS Coordinator"
 msgstr "BBS-coördinator"
+
+#: internal/menu/spycard.go:56
+msgid "BBS Name: "
+msgstr "BBS-naam: "
 
 #: internal/menu/timezone.go:52
 msgid "Back"
@@ -972,6 +975,10 @@ msgstr "Dagbulletin"
 msgid "Date"
 msgstr "Datum"
 
+#: internal/menu/spycard.go:57
+msgid "Date: "
+msgstr "Datum: "
+
 #: internal/menu/actions_attack.go:905
 msgid "Days Until Self-Destruct"
 msgstr "Dagen tot zelfvernietiging"
@@ -997,9 +1004,8 @@ msgid "Defender"
 msgstr "Verdediger"
 
 #: internal/menu/actions_ipops.go:224
-#, fuzzy
 msgid "Defense"
-msgstr "Verdediger"
+msgstr "Verdediging"
 
 #: internal/menu/mailreader.go:239
 msgid "Delete"
@@ -1329,7 +1335,7 @@ msgstr "Hoofdkwartier"
 msgid "Headquarters"
 msgstr "Hoofdkwartier"
 
-#: internal/menu/actions_ipattack.go:249
+#: internal/menu/actions_ipattack.go:264
 msgid "Help"
 msgstr "Help"
 
@@ -1493,7 +1499,7 @@ msgstr "Item"
 msgid "Jet"
 msgstr "Straaljager"
 
-#: internal/menu/tree.go:174
+#: internal/menu/spycard.go:66
 msgid "Jets"
 msgstr "Straaljagers"
 
@@ -1662,7 +1668,7 @@ msgstr "Raketoperaties horen niet bij dit spel."
 msgid "Modify Diplomacy"
 msgstr "Diplomatie wijzigen"
 
-#: internal/menu/empire_status_screen.go:136
+#: internal/menu/spycard.go:64
 msgid "Morale"
 msgstr "Moreel"
 
@@ -1726,7 +1732,7 @@ msgstr "Nee"
 msgid "No Data"
 msgstr "Geen gegevens"
 
-#: internal/menu/actions_ipattack.go:368
+#: internal/menu/actions_ipattack.go:383
 msgid "No barons are known on that planet yet."
 msgstr "Op die planeet zijn nog geen baronnen bekend."
 
@@ -1734,7 +1740,7 @@ msgstr "Op die planeet zijn nog geen baronnen bekend."
 msgid "No battles have been fought yet."
 msgstr "Er zijn nog geen slagen geleverd."
 
-#: internal/menu/actions_ipattack.go:104
+#: internal/menu/actions_ipattack.go:105
 msgid "No group attacks are forming right now."
 msgstr "Er wordt op dit moment geen groepsaanval gevormd."
 
@@ -1867,7 +1873,7 @@ msgstr "Daarvan zijn %s eenheden weg op aanvallen."
 
 #: internal/menu/actions_ipops.go:224
 msgid "Offense"
-msgstr ""
+msgstr "Aanval"
 
 #: internal/menu/actions_trade.go:182
 msgid "Offer — goods you send:"
@@ -2024,9 +2030,17 @@ msgstr "Planeettijd: %s   Nieuwe dag over %s"
 msgid "Play"
 msgstr "Spelen"
 
+#: internal/menu/spycard.go:59
+msgid "Player Letter: "
+msgstr "Spelerletter: "
+
 #: internal/menu/actions_info.go:308
 msgid "Player List"
 msgstr "Spelerslijst"
+
+#: internal/menu/spycard.go:58
+msgid "Player Name: "
+msgstr "Spelernaam: "
 
 #: internal/menu/actions_ipmessages.go:471
 msgid "Players at %s"
@@ -2065,7 +2079,7 @@ msgstr "Voorkeuren"
 
 #: internal/menu/actions_regions.go:328
 msgid "Press the letter of a region type to place the remaining %d."
-msgstr ""
+msgstr "Druk op de letter van een regiotype om de resterende %d te plaatsen."
 
 #: internal/menu/actions_iptrade.go:73
 msgid "Price"
@@ -2126,6 +2140,10 @@ msgstr "Regio's"
 #: internal/menu/actions_regions.go:365
 msgid "Regions added to your empire. You now hold %d land."
 msgstr "Regio's aan uw rijk toegevoegd. U bezit nu %d land."
+
+#: internal/menu/spycard.go:61
+msgid "Regions:"
+msgstr "Regio's:"
 
 #: internal/menu/actions_diplomacy.go:54
 msgid "Regions: %s │ Net Worth: %s │ Score: %s"
@@ -2360,7 +2378,7 @@ msgstr ""
 msgid "Sorry, you have used all of your turns today."
 msgstr "Sorry, u hebt vandaag al uw beurten gebruikt."
 
-#: internal/menu/actions_ipattack.go:119
+#: internal/menu/actions_ipattack.go:120
 msgid "Sorry... You're under new realm protection."
 msgstr "Sorry... U staat onder bescherming voor nieuwe rijken."
 
@@ -2447,7 +2465,7 @@ msgstr "Bezet: een ander rijk luistert al naar die naam."
 msgid "Tank"
 msgstr "Tank"
 
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/spycard.go:68
 msgid "Tanks"
 msgstr "Tanks"
 
@@ -2642,7 +2660,8 @@ msgstr "De leenrente is %s%% per dag, in totaal %s%% rente."
 #: internal/menu/turnrecap.go:445
 msgid ""
 "The mob is at your gates — your people would be rid of you by any means."
-msgstr "Het gepeupel staat aan uw poorten - uw volk wil op elke manier van u af."
+msgstr ""
+"Het gepeupel staat aan uw poorten - uw volk wil op elke manier van u af."
 
 #: internal/menu/actions.go:17
 msgid "The realm has changed — try again."
@@ -2699,7 +2718,7 @@ msgstr "Er is niemand te bereiken."
 msgid "There is no unclaimed land left on the planet today."
 msgstr "Er is vandaag geen vrij land meer op de planeet."
 
-#: internal/menu/actions_ipattack.go:75
+#: internal/menu/actions_ipattack.go:76
 msgid "This attack will cost %s gold."
 msgstr "Deze aanval kost %s goud."
 
@@ -2858,7 +2877,7 @@ msgstr "Het moreel van de troepen staat op %d%%."
 msgid "Trooper"
 msgstr "Soldaat"
 
-#: internal/menu/actions_diplomacy.go:98
+#: internal/menu/spycard.go:63
 msgid "Troopers"
 msgstr "Soldaten"
 
@@ -2874,7 +2893,7 @@ msgstr "Beurten per dag"
 msgid "Turret"
 msgstr "Geschutstoren"
 
-#: internal/menu/tree.go:176
+#: internal/menu/spycard.go:67
 msgid "Turrets"
 msgstr "Geschutstorens"
 
@@ -2986,7 +3005,7 @@ msgstr "Bank bezoeken"
 msgid "Vote for (0 to cancel)?"
 msgstr "Stemmen op (0 om te annuleren)?"
 
-#: internal/menu/actions_ipattack.go:66
+#: internal/menu/actions_ipattack.go:67
 msgid "Wait how many Hours (%d-%d)?"
 msgstr "Hoeveel uur wachten (%d-%d)?"
 
@@ -3319,7 +3338,7 @@ msgstr "U heeft die raket vandaag al afgevuurd."
 msgid "You have already made all %d of your attacks for today."
 msgstr "U hebt vandaag al alle %d aanvallen uitgevoerd."
 
-#: internal/menu/actions_ipattack.go:182
+#: internal/menu/actions_ipattack.go:196
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "U hebt vandaag al alle %d aanvalsmachten uitgestuurd."
 
@@ -3380,7 +3399,7 @@ msgstr "U hebt geen omgekochte agenten om via te werken."
 msgid "You hold the office of %s."
 msgstr "U bekleedt het ambt van %s."
 
-#: internal/menu/actions_ipattack.go:149
+#: internal/menu/actions_ipattack.go:163
 msgid "You joined group attack #%d."
 msgstr "U sloot zich aan bij groepsaanval #%d."
 
@@ -3453,7 +3472,7 @@ msgstr ""
 "Uw %s straaljagers hebben %s vliegdekschepen meer nodig om allemaal te "
 "kunnen vliegen."
 
-#: internal/menu/actions_ipattack.go:218
+#: internal/menu/actions_ipattack.go:233
 msgid "Your %s force is on its way to %s on %s."
 msgstr "Uw %s-troepen zijn onderweg naar %s op %s."
 

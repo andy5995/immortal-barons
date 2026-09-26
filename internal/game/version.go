@@ -78,7 +78,11 @@ const Version = "0.2.0"
 //
 // A bump is therefore a coordinated event, not a rolling one; say so in the
 // release notes whenever this number moves.
-const Protocol = 2
+//
+// Moved to 3 in v0.2.0 for the unit counts and morale on SpyReport, which the
+// target card before an attack prints. Every report carries them, so omitempty
+// could not keep a report byte-identical for an older board.
+const Protocol = 3
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
 // apply. A packet that states no protocol is NOT one of them — see Protocol.

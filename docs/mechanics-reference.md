@@ -4938,6 +4938,25 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   overwrites that slot. A later report replaces the earlier one, which is why a
   before-and-after pair cannot be read there.
 
+  **What a report holds (BINARY-VERIFIED, from the readers of the slot).** A
+  slot is an identity dword, then troopers, jets, turrets and tanks, then
+  regions, a one-byte military morale and a Real48 timestamp:
+  `update_spy_intelligence` (0x04d0c2) prints the four unit counts and morale
+  when the intel is filed, and `show_player_intelligence` (0x02dbb0) prints all
+  of it. IB's report carried only land, offense, defense and gold until v0.2.0,
+  a shape set before any of this was read; it now carries the unit counts and
+  morale as well (Protocol 3), and keeps its own four beside them.
+
+  **The target card before a strike (BINARY-VERIFIED).** `show_player_intelligence`
+  is called by `create_individual_attack`, `create_group_attack` and the Join
+  Group Attack path of `run_interbbs_attack_menu`, once the target is named. It
+  prints the slot only when its identity matches the realm now in that letter,
+  and otherwise returns having printed nothing, so a strike on an unspied realm
+  goes straight on; the 2026-08-11 capture is consistent with that. IB prints
+  the newest report on the realm at the same three points, matched by board and
+  name, and skips a report filed before Protocol 3, whose military figures are
+  all zero. Its date is when the report arrived here.
+
   **IB's returning report accounts for every agent, which the original's does
   not.** `ipreport.dat`'s templates count successes, so a batch of 25 against a
   headquarters that seven agents flatten reads exactly like a batch of 8: the

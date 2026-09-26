@@ -16,6 +16,14 @@ type SpyReport struct {
 	Offense int
 	Defense int
 	Gold    int64
+	// The military status the original's spy record holds (DATA\SPY.BRU, one
+	// 31-byte slot per realm), which its target card prints before an attack.
+	// Morale is military morale, 0-100.
+	Troopers int
+	Jets     int
+	Turrets  int
+	Tanks    int
+	Morale   int
 }
 
 // SpyEntry is a SpyReport as filed here. Filed is when it arrived on this
@@ -39,6 +47,12 @@ func (w *World) spyReport(e *Empire) SpyReport {
 		Offense: e.Offense(),
 		Defense: e.Defense(),
 		Gold:    e.Gold,
+
+		Troopers: e.Troopers,
+		Jets:     e.Jets,
+		Turrets:  e.Turrets,
+		Tanks:    e.Tanks,
+		Morale:   e.Morale,
 	}
 }
 
