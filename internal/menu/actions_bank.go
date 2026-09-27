@@ -129,70 +129,125 @@ func investFunds(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// listInvestments shows the player's pending investments and loans in BRE's
-// combined "Date / Investments / Loans Due" table — a row per maturity/due date
-// (sorted), the maturing investment total and the loan total owed on that date.
-// What the bank is paying and collecting today heads the table as BRE's "Today"
-// row, and returns carried over from days with turns left unplayed follow as
-// its "In Hold" row.
+// listRuleWidth/Double are the rule above and below List Investments / Loans:
+// 5 `─`, 9 `═`, 31 `─` in gray (cap/eots-ibbs-01.cap).
+const (
+	listRuleWidth  = 45
+	listRuleDouble = 9
+)
+
+// listInvestments is BRE's List Investments / Loans, drawn as run_bank draws it
+// (BRE.OVR 0x39A0C-0x39EA0; cap/eots-ibbs-01.cap): a bright-white header over
+// a 45-column gray inset rule, a row for each day with anything on it — "Today"
+// first, then the dates, then "In Hold" last — and the same rule under them.
+// A row's label is bright green, each figure a gray "   $" and a bright-white
+// number right-aligned to the widest in its column, and an empty investment
+// cell is blank so the loan column stays put. The hold is kept in thousands,
+// so BRE sizes its column by the thousands and prints them with ",000" after.
+// With nothing to list the original still draws the header and both rules.
 func listInvestments(s session.Session, w *ctx) Result {
-	var invs []game.Investment
-	var loans []game.Loan
-	var debt, due, held int64
+	type row struct {
+		label     string
+		inv, loan int64
+	}
+	var rows []row
+	var held int64
 	w.Read(func() {
 		p := w.Player()
 		if p == nil {
 			return
 		}
-		invs = append([]game.Investment(nil), p.Investments...)
-		loans = append([]game.Loan(nil), p.Loans...)
-		debt, due, held = p.Debt, p.InvestDue, p.InvestHeld
+		today := row{label: tr(s, "Today"), inv: p.InvestDue, loan: p.Debt}
+		byDay := map[int]*row{}
+		var days []int
+		at := func(day int) *row {
+			if day <= w.World.GameDay {
+				return &today
+			}
+			r, ok := byDay[day]
+			if !ok {
+				r = &row{label: w.DateForDay(day)}
+				byDay[day] = r
+				days = append(days, day)
+			}
+			return r
+		}
+		for _, inv := range p.Investments {
+			at(inv.MaturesDay).inv += inv.Return
+		}
+		for _, l := range p.Loans {
+			at(l.DueDay).loan += l.Owed
+		}
+		sort.Ints(days)
+		rows = append(rows, today)
+		for _, day := range days {
+			rows = append(rows, *byDay[day])
+		}
+		held = p.InvestHeld
 	})
-	if len(invs) == 0 && len(loans) == 0 && debt == 0 && due == 0 && held == 0 {
-		ok(s, "You have no active investments or loans.")
-		return Stay
-	}
-	// Aggregate by day: maturing investment returns and loan amounts due.
-	type row struct{ inv, loan int64 }
-	byDay := map[int]*row{}
-	var days []int
-	at := func(day int) *row {
-		r, ok := byDay[day]
-		if !ok {
-			r = &row{}
-			byDay[day] = r
-			days = append(days, day)
-		}
-		return r
-	}
-	for _, inv := range invs {
-		at(inv.MaturesDay).inv += inv.Return
-	}
-	for _, l := range loans {
-		at(l.DueDay).loan += l.Owed
-	}
-	sort.Ints(days)
 
-	fmt.Fprintf(s, "\n  %s%-12s %-20s %s%s\n", ansi.FgBrightCyan, tr(s, "Date"), tr(s, "Investments"), tr(s, "Loans Due"), ansi.Reset)
-	dollar := func(n int64) string {
-		if n <= 0 {
-			return ""
-		}
-		return "$" + comma(n)
-	}
-	line := func(label string, inv, loan int64) {
-		fmt.Fprintf(s, "  %-12s %s%-20s %s%s\n", label, ansi.FgBrightWhite, dollar(inv), dollar(loan), ansi.Reset)
-	}
-	if debt > 0 || due > 0 {
-		line(tr(s, "Today"), due, debt)
+	// BRE starts both maxima at 5, so a column is never narrower than one digit.
+	invW, loanW := 1, 1
+	for _, r := range rows {
+		invW = max(invW, len(comma(r.inv)))
+		loanW = max(loanW, len(comma(r.loan)))
 	}
 	if held > 0 {
-		line(tr(s, "In Hold"), held, 0)
+		invW = max(invW, len(comma(held/1000)))
 	}
-	for _, day := range days {
-		r := byDay[day]
-		line(w.DateForDay(day), r.inv, r.loan)
+	// Padded by runes, not bytes: a translated label may be Cyrillic.
+	pad := func(str string, width int) string {
+		return str + strings.Repeat(" ", max(width-utf8.RuneCountInString(str), 0))
 	}
+	// BRE's labels are all ten wide; a longer translation widens the column for
+	// every row rather than pushing its own row's figures out of line.
+	labelW := 10
+	for _, r := range rows {
+		labelW = max(labelW, utf8.RuneCountInString(r.label))
+	}
+	if held > 0 {
+		labelW = max(labelW, utf8.RuneCountInString(tr(s, "In Hold")))
+	}
+	listRule := func() {
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, insetRule(listRuleWidth, listRuleDouble), ansi.Reset)
+	}
+	// Pascal's write ignores a width shorter than the string; Go's %*s would
+	// left-justify on a negative one, so the width is held at zero.
+	cell := func(n string, width int) string {
+		return fmt.Sprintf("%s   $%s%*s", ansi.FgWhite, ansi.FgBrightWhite, max(width, 0), n)
+	}
+	// The investment column is twenty wide: "   $" and sixteen more. A figure
+	// wider than that pushes the loans along, as it does in BRE.
+	const invColW = 20
+	line := func(label string, inv string, loan int64) {
+		fmt.Fprintf(s, "%s%s", ansi.FgBrightGreen, pad(label, labelW))
+		if inv != "" {
+			fmt.Fprintf(s, "%s%*s", inv, max(invColW-4-invW, 0), "")
+		} else {
+			fmt.Fprintf(s, "%*s", invColW, "")
+		}
+		if loan > 0 {
+			fmt.Fprint(s, cell(comma(loan), loanW))
+		}
+		fmt.Fprintf(s, "%s\n", ansi.Reset)
+	}
+
+	fmt.Fprintf(s, "\n%s%s%s%s%s\n", ansi.FgBrightWhite, pad(tr(s, "Date"), labelW+3), pad(tr(s, "Investments"), invColW), tr(s, "Loans Due"), ansi.Reset)
+	listRule()
+	for _, r := range rows {
+		if r.inv <= 0 && r.loan <= 0 {
+			continue
+		}
+		inv := ""
+		if r.inv > 0 {
+			inv = cell(comma(r.inv), invW)
+		}
+		line(r.label, inv, r.loan)
+	}
+	if held > 0 {
+		line(tr(s, "In Hold"), cell(comma(held/1000), invW-4)+",000", 0)
+	}
+	listRule()
 	pause(s)
 	return Stay
 }

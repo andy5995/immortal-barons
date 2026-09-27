@@ -1269,6 +1269,41 @@ block drew 61/62 until 2026-08-16.
 Deposit / Withdraw prompt form: `Withdraw how many gold? (0; 7,255,312)` — the
 parenthetical is `(minimum; maximum)`.
 
+### List Investments / Loans — captured in `cap/eots-ibbs-01.cap`, read from the binary
+
+`run_bank`, key `L` (BRE.OVR 0x39A0C-0x39EA0). A blank line after the choice
+echo, a header in `15` bright-white, a 45-column inset rule in `1;30` gray
+(5 `─`, 9 `═`, 31 `─`), one row per day slot that holds anything, then the same
+rule again. There is no "nothing to list" line: an empty list is the header and
+the two rules. The capture has no loans or hold; those parts are from the
+binary alone.
+
+```
+Date         Investments         Loans Due
+─────═════════───────────────────────────────
+Today        $ 88,194,129
+08/16/2026   $259,433,437
+08/17/2026   $732,227,077
+08/18/2026   $335,569,488
+08/24/2026   $193,182,690
+─────═════════───────────────────────────────
+```
+
+- Rows run over the twelve slots in order: slot 0 is `Today     `, slots 1-10
+  are the date that many days ahead (the date string cut to ten characters),
+  slot 11 is `In Hold   `. Labels are `10` bright-green.
+- Each figure is `07` `   $` then the number in `15`, comma-grouped and
+  right-aligned to the widest figure in its column. Both widths start from the
+  value 5, so neither is under one digit.
+- After an investment figure come `16 - width` spaces; a row with no investment
+  writes twenty spaces there, so the loan column does not move.
+- The hold is stored in thousands. Its column width is sized from the thousands,
+  and the row prints them right-aligned to `width - 4` with `,000` after.
+
+IB builds the rows from its own records rather than slots: its Today row is the
+day's unpaid returns and the realm's `Debt`, and a loan or investment due today
+or earlier joins it.
+
 ### Spending Menu
 
 Red accent. Decoration line is **44 columns wide** (14 fill + `[Spending Menu]` +

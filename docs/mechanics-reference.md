@@ -3754,7 +3754,8 @@ The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"):
   days at 5%/day returns 1102 = 1000·1.05²). Before confirming, the bank shows
   "Returns expected to be approximately N gold. Accept? (Y/n)"; on accept it
   reports "Investment will be returned on MM/DD/YYYY." The list view shows
-  columns: Date / Investments / Loans Due.
+  columns: Date / Investments / Loans Due; its layout is in
+  `docs/dev/bre-screens.md`.
 
   **BRE does not store investments individually at all.** The empire record
   holds day slots, one 32-bit figure per day from today (slot 0) to ten days

@@ -817,3 +817,22 @@ address is `0x56d0 + 0x0ec6 = 0x6596`, and that is the catalog's
 Do this for every call in a routine you are about to summarize. The Planetary
 Master was recorded as "highest net worth" for weeks; the routine's comparison
 called `total_regions`, which one addition would have shown (2026-09-24).
+
+### Porting a screen: Pascal's `write(x:w)` is not Go's `%*s`
+
+A screen routine writes each field through `text_write_shortstring`
+(`0fd0:0964`), and the word pushed just before that call is the field width;
+`xor ax,ax / push ax` means no width. Turbo Pascal prints a string UNPADDED when
+the width is shorter than it — zero or negative included. Go's `fmt` reads a
+negative `%*s` width as the `-` flag and left-justifies, so the padding lands on
+the wrong side. List Investments / Loans writes the hold as
+`write(thousands : invW-4)` then `",000"`; with small figures the width went
+negative and the port printed `$5  ,000` where BRE prints `$5,000` (2026-09-27).
+**Clamp every width taken from the disassembly with `max(w, 0)`**, above all
+one built by subtraction (`maxW - 4`, `16 - maxW`).
+
+Two more from the same screen. `draw_horizontal_rule` (`0851:00bf`) takes
+`(width, color)` and draws BRE's inset rule (5 `─`, then `═`, then `─`), not a
+plain line — IB's `insetRule` is its port. And count its calls: the one right
+after the header's `text_write_line` is a SECOND rule, which a first reading
+missed until the capture showed two.
