@@ -190,6 +190,22 @@ func (g GroupAttack) Offense() int {
 	return total
 }
 
+// SharePct is owner's percentage of the strike's offense, every detachment they
+// have committed to it counted together. BINARY-VERIFIED: create_individual_attack
+// prints it after a join (BRE.OVR ovr_02b783 +0x1be7) as the joiner's slot over
+// the whole force, both valued by calculate_attack_force_offense, with 0.01 added
+// to the divisor so an empty force cannot divide by zero. IB's offense is twice
+// the original's units, so the guard is 0.02 here.
+func (g GroupAttack) SharePct(owner string) float64 {
+	mine := 0
+	for _, c := range g.Contributors {
+		if c.Owner == owner {
+			mine += c.offense()
+		}
+	}
+	return float64(mine) / (float64(g.Offense()) + GroupShareDivisorGuard) * 100
+}
+
 // AttackKind is how an individual interplanetary strike is pressed. The values
 // are BRE's own: its IBBS attack record stores Quick=0, Normal=1, Extended=2.
 // NOT for wire compatibility — IB defines its own JSON packets

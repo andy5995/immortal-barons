@@ -187,6 +187,10 @@ func TestJoinGroupAttackDrawsTheTableAndJoins(t *testing.T) {
 	if !strings.Contains(out, "Mars") {
 		t.Errorf("the target planet is missing from the columns:\n%s", out)
 	}
+	// 500 troopers against 118,000 troopers and 4,500 jets: 500 / 127,500.
+	if !strings.Contains(out, "Your share of this attack is now 0.39%.") {
+		t.Errorf("the joiner's share is missing:\n%s", out)
+	}
 
 	w := committedWorld(t, cfg)
 	if n := len(w.GroupAttacks[0].Contributors); n != 2 {

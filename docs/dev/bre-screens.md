@@ -3468,6 +3468,21 @@ abbreviates — `118k`, `4500k`, and `18m` on a later row in the same capture.
 centerd in its 19-column field; `Leave` runs to three digits (`95h`, `50h`,
 `23h`).
 
+**After the join, the joiner's share** (`cap/eots-ibbs-03.cap`, 2026-09-05):
+
+```
+Send this Attack? (Y/n) Yes
+You now have a 6.06% share in this attack.
+```
+
+The figure is `1;33` bright yellow, the rest `0;40;37`. It is the joiner's whole
+slot, every detachment they have put in, over the group's offense plus 0.01,
+times 100, to two decimals (`create_individual_attack`, BRE.OVR ovr_02b783
++0x1be7; the offense is `calculate_attack_force_offense`). A first join into a
+one-trooper party read `100.00`. IB words the line its own way
+(`Your share of this attack is now 6.06%.`), with the same colors, and prints
+nothing else after a join, where it used to say `You joined group attack #N.`
+
 ```
 Id│By│    Planet    │ Individual Target │Troopers│ Jets │ Tanks │Bombers│ Leave
 ──┼──┼──────────────┼───────────────────┼────────┼──────┼───────┼───────┼──────

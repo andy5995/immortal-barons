@@ -3,6 +3,7 @@ Immortal Barons ChangeLog
 (in-progress:)
   * A trade deal's daily fee follows its cargo; it is sent for 2 to 10 days
   * List Investments / Loans is laid out as in the original
+  * Joining a group attack shows your share of it
 
 2026-09-26 (v0.2.0)
   * Updating from v0.1.0 or later needs no game reset

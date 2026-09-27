@@ -122,7 +122,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	}
 	// Answered with the Id the table SHOWS, not with a row number: the Id column
 	// is the attack's own id and it is what the player is reading off the screen.
-	id, slot := promptGroupChoice(s, rows)
+	id, _ := promptGroupChoice(s, rows)
 	if id == 0 {
 		return Stay
 	}
@@ -160,7 +160,19 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "You joined group attack #%d.", slot)
+	// The original reports the joiner's share of the whole force, counting every
+	// detachment they have put in, with the figure in bright yellow
+	// (cap/eots-ibbs-03.cap).
+	var share float64
+	w.Read(func() {
+		for _, ga := range w.GroupAttacks {
+			if ga.ID == id {
+				share = ga.SharePct(w.Player().Owner)
+			}
+		}
+	})
+	fmt.Fprintf(s, "%s"+tr(s, "Your share of this attack is now %s%%.")+"%s\n",
+		ansi.FgWhite, ansi.FgBrightYellow+fmt.Sprintf("%.2f", share)+ansi.FgWhite, ansi.Reset)
 	return Stay
 }
 

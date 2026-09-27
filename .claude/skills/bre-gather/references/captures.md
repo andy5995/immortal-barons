@@ -66,6 +66,12 @@ ad-hoc greps. Its `--shapes` mode censuses every distinct message form in a file
   undercounted a realm's strikes by a third, on a count the whole finding rested
   on. Read the category out of `game/news.dat` first, then count its shapes.
 
+- **A capture starts mid-game; state from before it still counts.** A group
+  join reported a 6.06% share that no weighting of the visible figures could
+  produce, because the share covers everything the baron had committed, and some
+  jets had gone in before the capture began. When a figure will not reconcile,
+  ask what happened off the record before doubting the formula.
+
 - **An echoed menu selection is not a completed action.** These captures echo the
   chosen item beside the prompt (`Choice> Quit    Undermine Investments`), and
   that records the keypress only — the op may have been abandoned at the next

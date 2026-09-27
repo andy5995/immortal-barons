@@ -411,3 +411,9 @@ const (
 	RemoteMoraleSlopeNum = 100
 	RemoteMoraleSlopeDen = 175
 )
+
+// GroupShareDivisorGuard is added to a group attack's offense before a baron's
+// share of it is taken, so an empty force cannot divide by zero. BINARY-VERIFIED
+// as 0.01 in the original's units (BRE.OVR ovr_02b783 +0x1c2f, Real48
+// 7a713d0ad723); IB's offense counts twice those units, so it doubles.
+const GroupShareDivisorGuard = 0.02
