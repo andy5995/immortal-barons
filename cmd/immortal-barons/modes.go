@@ -36,7 +36,7 @@ func runDump(cfg game.Config) error {
 // one save at a time, then advances the world. On a league board it also runs
 // the planetary step, with the FTN transport on either side of it (see
 // transport.go).
-func runMaint(cfg game.Config, today string) error {
+func runMaint(cfg game.Config, today string, verbose bool) error {
 	// A league board runs the planetary step below, so it is refused on the same
 	// terms as -planetary: with no league number it would take every league's
 	// packets as its own.
@@ -74,7 +74,7 @@ func runMaint(cfg game.Config, today string) error {
 	}
 	var run store.PlanetaryRun
 	if cfg.InterBBSEnabled() {
-		run, err = store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
+		run, err = store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
 		if err != nil {
 			lock.Release()
 			return err

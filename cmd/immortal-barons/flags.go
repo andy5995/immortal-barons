@@ -73,7 +73,7 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		maint:           flag.Bool("maint", false, i18n.T(lang, "run the daily maintenance, then exit. On a league board it also runs the inter-BBS step, as -planetary does")),
 		planetary:       flag.Bool("planetary", false, i18n.T(lang, "run the inter-BBS step: take in what the mailer brought, read incoming packets, run group attacks, write outgoing packets and hand them to the mailer, then exit")),
 		full:            flag.Bool("full", false, i18n.T(lang, "run the full cycle: read inbound packets, play a turn, write outbound packets, then exit")),
-		detailed:        flag.Bool("detailed", false, i18n.T(lang, "show each packet as it is read and written (use with -full or -planetary)")),
+		detailed:        flag.Bool("detailed", false, i18n.T(lang, "show each packet as it is read and written (use with -maint, -full or -planetary)")),
 		leagueConfig:    flag.Bool("league-config", false, i18n.T(lang, "send this board's league settings to the whole league (node #1 only), then exit")),
 		genCoordKey:     flag.Bool("gen-coord-key", false, i18n.T(lang, "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)")),
 		coordPub:        flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key `<key>` (the value -gen-coord-key printed), then exit")),

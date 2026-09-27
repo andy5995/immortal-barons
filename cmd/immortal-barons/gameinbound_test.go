@@ -141,7 +141,7 @@ func transportBundle(t *testing.T, packets []game.Packet, raws [][]byte) []byte 
 
 var planetaryModes = map[string]func(game.Config) error{
 	"-planetary": func(cfg game.Config) error { return runPlanetary(cfg, false) },
-	"-maint":     func(cfg game.Config) error { return runMaint(cfg, "2026-09-22") },
+	"-maint":     func(cfg game.Config) error { return runMaint(cfg, "2026-09-22", false) },
 	"-full": func(cfg game.Config) error {
 		if err := fullInbound(cfg, false); err != nil {
 			return err

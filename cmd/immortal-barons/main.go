@@ -142,7 +142,7 @@ func main() {
 	}
 
 	if *o.maint {
-		exitOn("-maint", runMaint(cfg, today))
+		exitOn("-maint", runMaint(cfg, today, *o.detailed))
 		return
 	}
 
