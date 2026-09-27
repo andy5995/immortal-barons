@@ -100,7 +100,10 @@ then exit.
     **On a league board it is required.** It also runs the inter-BBS step, which
     a login does not, including the [FTN transport](ftn-transport.md) when
     `bbs.cfg` sets one up, and raises the same fault alarm as `-planetary`.
-    Schedule it as often as you want packets to move.
+    Only the first run of a day advances the game day; every later run does
+    the inter-BBS step alone, so running it often does not add game days.
+    Every 15 minutes is a good start (see
+    [how packets move](inter-bbs.md#how-packets-move-you-choose-the-schedule)).
 
 ### Testing and balance
 
@@ -135,8 +138,8 @@ or override game state.
   here when they are found playing on another board in the league.
 
     **It changes no setting.** The override is not saved anywhere, so the next
-    command sees the saved setting again. To change the rule for real, use the Configuration
-    Editor.
+    command sees the saved setting again. To change the rule for real, use the
+    Configuration Editor.
 
     It combines with any other option: `immortal-barons -local -dupe-check off`
     plays a local turn with the rule off. `off` lets a baron the league had

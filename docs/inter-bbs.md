@@ -488,16 +488,18 @@ is your job, and you choose how often it happens. With the [FTN
 transport](ftn-transport.md) the game does that part too, but only through the
 mailer's own directories: its packet directories stay private.
 
-The inter-BBS step is:
+On a league board, the command to put on a timer is:
 
 ```
-immortal-barons -planetary -data /path/to/data
+immortal-barons -maint -data /path/to/data
 ```
 
-It reads every packet in your inbound directory, applies it, and writes new
-packets to your outbound directory. With the FTN transport set up it also
-unwraps what the mailer brought first and hands the new packets to the mailer
-after. It also runs automatically inside `-maint` when inter-BBS play is on.
+Besides the daily maintenance, every run does the inter-BBS step: it applies
+each packet in your inbound directory and writes new packets to your outbound
+directory. With the FTN transport set up it also unwraps what the mailer brought
+first and hands the new packets to the mailer after. Only the first run of a day
+advances the game day, so running it often does not add game days. `-planetary`
+runs the inter-BBS step alone, without the daily maintenance.
 
 A common setup:
 
@@ -507,7 +509,7 @@ A common setup:
 3. Your transport carries each file from your outbound side to the destination
    (over FidoNet, a sync tool, scp, a shared mount — whatever you use). For FTN,
    the game's transport wraps it on the way out and unwraps it on the way in.
-4. The next `-planetary` run on that board reads and applies those files.
+4. The next `-maint` run on that board reads and applies those files.
 
 ### Safe handoff for a plain file transport
 
