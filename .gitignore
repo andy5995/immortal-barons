@@ -2,6 +2,9 @@
 # a bare `go build ./...`)
 /immortal-barons
 /barons-docs
+# The sysop panel is its own module, built from its own directory.
+/cmd/ib-sysop/ib-sysop
+/cmd/ib-sysop/ib-sysop.exe
 
 # Go test and profiling output
 *.test

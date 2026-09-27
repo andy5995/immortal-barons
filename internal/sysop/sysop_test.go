@@ -110,6 +110,21 @@ func TestOpenRefusesAndCreatesNothing(t *testing.T) {
 	}
 }
 
+// A door's folder opens its data directory.
+func TestOpenFindsTheDataDirectoryUnderADoorFolder(t *testing.T) {
+	door := t.TempDir()
+	data := filepath.Join(door, "data")
+	if err := os.MkdirAll(data, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(data, "world.json"), []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := Open(door); err != nil || got != data {
+		t.Errorf("Open(door) = %q, %v; want %q", got, err, data)
+	}
+}
+
 func TestBoardStatusIsWords(t *testing.T) {
 	b := Board{BBSInfoRow: game.BBSInfoRow{BelowMin: true, OtherRules: true}, Held: true}
 	if got := b.Status(); got != "never heard, below min, other rules, held" {

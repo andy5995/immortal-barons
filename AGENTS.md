@@ -104,7 +104,8 @@ Point a test run at a temporary directory rather than that one; the
 
 Go 1.26. Prefer the standard library, but a dependency is fine when it clearly
 earns its place (current deps: `golang.org/x/term`, `golang.org/x/text`,
-`golang.org/x/sys`, and `tcell/v2` + `tview` for the config-editor TUI).
+`golang.org/x/sys`, and `tcell/v2` + `tview` for the config-editor TUI; Gio
+for the sysop panel, in that command's own module only).
 Keep the set small and justified. Commit `go.mod`/`go.sum`; do NOT commit
 `vendor/` (distros build against their own packaged deps or fetch at build); a
 release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
@@ -147,6 +148,14 @@ stream). Front-ends attach different streams; the engine is unchanged.
   advertised BSO bundles while holding the peer `.bsy`, then validates/unwraps
   and routes them on receive. Its lock is never taken while the world lock is
   held, and `-full` never waits for it
+- `cmd/ib-sysop` — the sysop panel, a Gio desktop window showing each open
+  board's league state and running the game's commands as child processes. It
+  is its OWN module (`cmd/ib-sysop/go.mod`, replacing the game module with
+  `../..`), so Gio never enters the game's `go.mod`, `./...` never reaches it,
+  and CI builds it in its own `sysop-panel` job. It never writes a world
+- `internal/sysop` — what the panel reads and runs, kept in the game module so
+  it is tested with the rest of the tree: a read-only snapshot through the
+  world lock, and the command list
 - `internal/session` — the `Session` byte-stream abstraction + console/stdio/
   socket implementations, shared `ReadLine`, and the Ctrl-key macro expander
 - `internal/ansi` — ANSI escape helpers (one rendering path for all front-ends)

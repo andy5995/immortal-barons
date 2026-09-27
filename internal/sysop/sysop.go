@@ -101,20 +101,25 @@ type InFlight struct {
 }
 
 // Open checks that dir is a game data directory and returns it cleaned and
-// absolute, the form the panel keys its tabs by. It creates nothing: taking the
-// lock on a mistyped path would make the directory.
+// absolute, the form the panel keys its tabs by. A door's own folder, whose
+// data directory is the default "data" under it, is taken to mean that one,
+// since it is the folder a sysop thinks of as the game. It creates nothing:
+// taking the lock on a mistyped path would make the directory.
 func Open(dir string) (string, error) {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
 		return "", err
 	}
-	if _, err := os.Stat(filepath.Join(abs, "world.json")); err != nil {
-		if os.IsNotExist(err) {
-			return "", ErrNoWorld
+	for _, d := range []string{abs, filepath.Join(abs, "data")} {
+		_, err := os.Stat(filepath.Join(d, "world.json"))
+		if err == nil {
+			return d, nil
 		}
-		return "", err
+		if !os.IsNotExist(err) {
+			return "", err
+		}
 	}
-	return abs, nil
+	return "", ErrNoWorld
 }
 
 // Read takes one snapshot of the board in dir. The world lock is exclusive and
@@ -180,7 +185,10 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 			TargetBoard: f.TargetBoard, TargetRealm: f.TargetEmpire,
 			LaunchedDay: f.LaunchedDay, Waiting: w.GameDay - f.LaunchedDay,
 			HeldDays: f.HeldDays, Held: f.Held}
-		if f.Whole || row.TargetRealm == "" {
+		switch {
+		case f.Kind == "trade":
+			row.TargetRealm = "-" // a bid goes to the planet's market, not a realm
+		case f.Whole || row.TargetRealm == "":
 			row.TargetRealm = "(whole planet)"
 		}
 		row.DaysLeft, row.Recovers = w.LostForcesDaysLeft(f)
@@ -210,8 +218,16 @@ func what(f game.InFlightStrike) string {
 	if f.Group {
 		kind = "group attack"
 	}
-	return fmt.Sprintf("%s: %d troopers, %d jets, %d tanks, %d bombers",
-		kind, t.Troopers, t.Jets, t.Tanks, t.Bombers)
+	var parts []string
+	for _, u := range []struct {
+		n    int
+		name string
+	}{{t.Troopers, "troopers"}, {t.Jets, "jets"}, {t.Tanks, "tanks"}, {t.Bombers, "bombers"}} {
+		if u.n > 0 {
+			parts = append(parts, fmt.Sprintf("%d %s", u.n, u.name))
+		}
+	}
+	return kind + ": " + strings.Join(parts, ", ")
 }
 
 // owners names who sent an item by realm, falling back to the handle when the

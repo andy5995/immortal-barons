@@ -105,6 +105,13 @@ type Run struct {
 // install keeps the binary and runs it from, and hands each line of stdout and
 // stderr to line as it arrives. line is called from another goroutine.
 func Start(program, dataDir string, args []string, line func(string)) (*Run, error) {
+	// exec resolves a relative path against cmd.Dir, not the directory the
+	// sysop typed it from.
+	if strings.ContainsRune(program, filepath.Separator) || strings.ContainsRune(program, '/') {
+		if abs, err := filepath.Abs(program); err == nil {
+			program = abs
+		}
+	}
 	cmd := exec.Command(program, args...)
 	cmd.Dir = filepath.Dir(dataDir)
 	pr, pw := io.Pipe()
