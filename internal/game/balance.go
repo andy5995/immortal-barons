@@ -258,6 +258,15 @@ const (
 	AnnihilatorSurchargeHugePct  = 200     // more than four times our size
 	AnnihilatorMillion           = 1_000_000
 
+	// When construction starts, the Queen Royale puts in the lesser of a fifth of
+	// the cost and one million for every two million in the planet's refund pool,
+	// which she pays out of that pool. BINARY-VERIFIED (fund_gooie_kablooie,
+	// BRE.OVR 0x027bc5-0x027c93: cost div 5, pool div 2,000,000, the min, then
+	// both decremented). Two captures in a Lazarus game show her putting in 5 and
+	// then 0 million.
+	AnnihilatorQueenCostDivisor = 5
+	AnnihilatorQueenPoolPerMil  = 2_000_000
+
 	// Construction runs for AnnihilatorBuildDays after the last gold is in, and
 	// then the weapon launches itself: the funding routine sets its launch date
 	// to now + 3.0 days (BRE.OVR 0x27e47-0x27ac9, a Real48 3.0) and announces the

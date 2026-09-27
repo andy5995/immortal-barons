@@ -11,7 +11,8 @@ The Gooie Kablooie is a weapon aimed at a whole enemy planet, not at one baron.
 Your planet can only have one at a time.
 
 Nobody buys the weapon alone. One baron starts the work and names the target
-planet. After that, any baron here can put money in, a million gold at a time.
+planet. The Queen Royale may pay part of it from her own purse. After that, any
+baron here can put money in, a million gold at a time.
 The price depends on the size of the target planet: aiming at a planet much
 larger than yours costs more.
 

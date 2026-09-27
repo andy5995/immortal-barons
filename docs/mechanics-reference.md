@@ -1072,6 +1072,17 @@ construction against a named planet → any baron funds it a million gold at a t
 → a five-day siege. It can be dismantled before it flies and the gold is not
 refunded.
 
+**The Queen Royale puts in her share when construction starts — BINARY-VERIFIED**
+(`fund_gooie_kablooie`, BRE.OVR 0x027bc5-0x027c93): the lesser of a fifth of the
+cost and one million for every two million in the planet's refund pool
+(`World.RefundPool`, the purse her tax refund is paid from), taken out of that
+pool (`AnnihilatorQueenCostDivisor`, `AnnihilatorQueenPoolPerMil`). A Lazarus
+capture shows 5 million against a 371 million cost, leaving 366, and 0 on a
+later weapon when the pool was low. A fresh game's pool is too small for her to
+give anything. Barons' payments are capped by the gold they hold, in whole
+millions, and IB no longer files a news line for each one; the original's news
+covers only the start and the completion.
+
 **Who may call it off is the elected BBS Coordinator**, from item 1 of the
 Coordinator menu — the original's *Dismantle Gooie*. Standing a strike down is a
 diplomatic lever rather than a change of mind: the planet makes peace and calls

@@ -791,22 +791,48 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 		}
 		ok(s, "The Gooie Kablooie is complete. It launches at %s in %s.", d.TargetBoard, shortDuration(left))
 	default:
-		millions := promptSuggested(s, "How many million gold do you wish to put in?", 0, d.CostMillion-d.PaidMillion)
-		if millions > 0 {
-			var put int
-			err := w.mutatePlayer(func(p *game.Empire) error {
-				var e error
-				put, e = w.World.FundAnnihilator(p, millions)
-				return e
-			})
-			if err != nil {
-				fail(s, err)
-			} else {
-				ok(s, "You put in %d million gold.", put)
-			}
-		}
+		fundAnnihilatorPrompt(s, w, d)
 	}
 	return Stay
+}
+
+// fundAnnihilatorPrompt asks how many million to put in, offering at most what
+// the weapon still needs and what the baron's gold in hand covers — the
+// original's "(0; 105)" beside a 327 million shortfall was the baron's 105
+// million (cap/eots-ibbs-03.cap). A partial payment prints nothing, as it does in
+// the original; only the payment that completes the weapon is reported.
+func fundAnnihilatorPrompt(s session.Session, w *ctx, d *game.Annihilator) {
+	var gold int64
+	w.Read(func() {
+		if p := w.Player(); p != nil {
+			gold = p.Gold
+		}
+	})
+	most := min(d.CostMillion-d.PaidMillion, int(gold/game.AnnihilatorMillion))
+	millions := promptSuggested(s, "How many Million Gold do you wish to put in?", 0, most)
+	if millions <= 0 {
+		return
+	}
+	var done *game.Annihilator
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		if _, e := w.World.FundAnnihilator(p, millions); e != nil {
+			return e
+		}
+		if a := w.World.Annihilator; a != nil && a.Funded {
+			c := *a
+			done = &c
+		}
+		return nil
+	})
+	if err != nil {
+		fail(s, err)
+		return
+	}
+	if done != nil {
+		var left time.Duration
+		w.Read(func() { left = done.LaunchIn(game.Now(), w.GameDay) })
+		ok(s, "The Gooie Kablooie is complete. It launches at %s in %s.", done.TargetBoard, shortDuration(left))
+	}
 }
 
 // startAnnihilator offers to begin construction, quoting what the planet will have to
@@ -828,30 +854,51 @@ func startAnnihilator(s session.Session, w *ctx) Result {
 	}
 	var quote int
 	w.Read(func() { quote = w.AnnihilatorQuote(board) })
-	if !AskYesNo(s, fmt.Sprintf(tr(s, "It will cost your planet %s million gold to fund. Accept?"), comma(quote)), false) {
+	// The original's question, and its default: Yes.
+	if !AskYesNo(s, fmt.Sprintf(tr(s, "It will cost your planet %s Million Gold to fund.  Accept?"), comma(quote)), true) {
 		return Stay
 	}
-	runAnnihilator(s, w, func(p *game.Empire) error { return w.World.StartAnnihilator(p, board) }, "Construction started.")
+	var d *game.Annihilator
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		if e := w.World.StartAnnihilator(p, board); e != nil {
+			return e
+		}
+		c := *w.World.Annihilator
+		d = &c
+		return nil
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	// The Queen Royale's share is all that is paid on a weapon just begun, and
+	// the original reports it even when it is nothing; then it goes straight on
+	// to the status board and the funding prompt.
+	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The Queen Royale puts %d million gold toward the Gooie Kablooie."), d.PaidMillion)))
+	showAnnihilator(s, w, d)
+	fundAnnihilatorPrompt(s, w, d)
 	return Stay
 }
 
-// showAnnihilator prints the weapon's status board, matching the original's
-// Target / Total Cost / Cost Left / Creator lines.
+// showAnnihilator prints the weapon's status board as the original draws it
+// (cap/eots-ibbs-03.cap, cap/20240527-134Pho_Lazarus_Public.cap): a blank line
+// before each of Target / Total Cost / Creator, the target and both figures in
+// bright yellow, the creator in bright white, and fifteen spaces before
+// "Cost Left:" (fund_gooie_kablooie's own string). The creator is shown by
+// realm name, as the original shows it; the record keeps the builder's handle,
+// which is how this board identifies them, so it is looked up here.
 func showAnnihilator(s session.Session, w *ctx, d *game.Annihilator) {
-	fmt.Fprintf(s, "\n%sTarget:     %s%s\n", ansi.FgWhite, ansi.FgBrightWhite, d.TargetBoard)
-	fmt.Fprintf(s, "%sTotal Cost: %s%s mil gold%s   Cost Left: %s%s mil gold%s\n",
-		ansi.FgWhite, ansi.FgBrightWhite, comma(d.CostMillion), ansi.FgWhite,
-		ansi.FgBrightWhite, comma(d.CostMillion-d.PaidMillion), ansi.Reset)
-	fmt.Fprintf(s, "%sCreator:    %s%s%s\n", ansi.FgWhite, ansi.FgBrightWhite, d.Creator, ansi.Reset)
-}
-
-// runAnnihilator applies one weapon action under the player lock and reports it.
-func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, done string) {
-	if err := w.mutatePlayer(act); err != nil {
-		fail(s, err)
-		return
-	}
-	ok(s, done)
+	creator := d.Creator
+	w.Read(func() {
+		if e := w.World.FindByOwner(d.Creator); e != nil {
+			creator = e.Name
+		}
+	})
+	fmt.Fprintf(s, "\n%sTarget:     %s%s%s\n", ansi.FgWhite, ansi.FgBrightYellow, d.TargetBoard, ansi.Reset)
+	fmt.Fprintf(s, "\n%sTotal Cost: %s%s%s mil gold               Cost Left: %s%s%s mil gold%s\n",
+		ansi.FgWhite, ansi.FgBrightYellow, comma(d.CostMillion), ansi.FgWhite,
+		ansi.FgBrightYellow, comma(d.CostMillion-d.PaidMillion), ansi.FgWhite, ansi.Reset)
+	fmt.Fprintf(s, "\n%sCreator:    %s%s%s\n", ansi.FgWhite, ansi.FgBrightWhite, creator, ansi.Reset)
 }
 
 // annihilatorDefense is the planet's answer to a Gooie Kablooie squatting on

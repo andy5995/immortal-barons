@@ -3483,6 +3483,41 @@ one-trooper party read `100.00`. IB words the line its own way
 (`Your share of this attack is now 6.06%.`), with the same colors, and prints
 nothing else after a join, where it used to say `You joined group attack #N.`
 
+## Gooie Kablooie Ops (captured in `cap/eots-ibbs-03.cap` and `cap/20240527-134Pho_Lazarus_Public.cap`)
+
+`fund_gooie_kablooie`. Starting one:
+
+```
+It will cost your planet 371 Million Gold to fund.  Accept? (Y/n) Yes
+
+The Queen Royale agrees to put in 5 million gold to the Gooie.
+
+Target:     The Undermine
+
+Total Cost: 371 mil gold               Cost Left: 366 mil gold
+
+Creator:    Lazarus
+
+How many Million Gold do you wish to put in? (0; 366) 366
+
+Gooie Kablooie Complete.
+```
+
+Opening an existing one skips to `Target:`. The target and both figures are
+`1;33` bright yellow and the creator `1;37` bright white; the fifteen spaces
+before `Cost Left:` are part of the original's string. **The prompt's maximum is
+the lesser of the cost left and the gold in hand, in millions**: `(0; 105)`
+against 327 million left and 105,576,974 gold. **A partial payment prints
+nothing**; only the payment that completes the weapon is answered. The Queen
+Royale's share is the mechanic in `docs/mechanics-reference.md`, "Gooie
+Kablooie".
+
+IB matches the layout, the colors, the prompt and its cap, the Yes default on
+the cost question, and the silence after a partial payment. It says the Queen's
+line and the completion in its own words (`The Queen Royale puts N million gold
+toward the Gooie Kablooie.`, `The Gooie Kablooie is complete. It launches at X
+in 72h.`).
+
 ```
 Id│By│    Planet    │ Individual Target │Troopers│ Jets │ Tanks │Bombers│ Leave
 ──┼──┼──────────────┼───────────────────┼────────┼──────┼───────┼───────┼──────

@@ -82,3 +82,41 @@ func TestLegacyAnnihilatorStillLaunches(t *testing.T) {
 		t.Fatal("a legacy weapon never launched")
 	}
 }
+
+// The Queen Royale puts in the lesser of a fifth of the cost and a million per
+// two million in the refund pool, out of that pool, when construction starts
+// (fund_gooie_kablooie, BRE.OVR 0x027bc5). A Lazarus capture shows 5 million
+// against a 371 million cost, and 0 when the pool was low.
+func TestAnnihilatorQueenPutsInHerShare(t *testing.T) {
+	for _, c := range []struct {
+		name       string
+		pool       int64
+		wantQueen  int
+		wantPoolAt int64
+	}{
+		{"pool-limited", 11_500_000, 5, 6_500_000},
+		{"cost-limited", 10_000_000_000, 0, 0}, // filled in below from the cost
+		{"empty pool", 1_999_999, 0, 1_999_999},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			cfg := DefaultConfig()
+			cfg.IBBS, cfg.BoardID = true, "boardA"
+			w := NewWorldSeed(cfg, 1)
+			builder := w.AddHuman("b", "Builder")
+			builder.Regions = RegionMix{Desert: 5000}
+			w.RefundPool = c.pool
+			if err := w.StartAnnihilator(builder, "boardB"); err != nil {
+				t.Fatalf("start: %v", err)
+			}
+			d := w.Annihilator
+			want, wantPool := c.wantQueen, c.wantPoolAt
+			if c.name == "cost-limited" {
+				want = d.CostMillion / 5
+				wantPool = c.pool - int64(want)*1_000_000
+			}
+			if d.PaidMillion != want || w.RefundPool != wantPool {
+				t.Errorf("queen put in %d (pool %d), want %d (pool %d)", d.PaidMillion, w.RefundPool, want, wantPool)
+			}
+		})
+	}
+}

@@ -146,7 +146,9 @@ func (w *World) AnnihilatorQuote(board string) int {
 }
 
 // StartAnnihilator begins construction of the planet's one Gooie Kablooie, aimed at
-// board. It raises no money by itself — the barons fund it afterward.
+// board. The Queen Royale puts in her share from the refund pool on the spot
+// (AnnihilatorQueenCostDivisor), so a new weapon's PaidMillion is hers; the
+// barons fund the rest afterward.
 func (w *World) StartAnnihilator(e *Empire, board string) error {
 	if !w.Config.GooieKablooie {
 		return ErrAnnihilatorDisabled
@@ -163,6 +165,12 @@ func (w *World) StartAnnihilator(e *Empire, board string) error {
 		CostMillion: w.AnnihilatorQuote(board),
 		StartedDay:  w.GameDay,
 		Intact:      100,
+	}
+	d := w.Annihilator
+	queen := min(int64(d.CostMillion/AnnihilatorQueenCostDivisor), w.RefundPool/AnnihilatorQueenPoolPerMil)
+	if queen > 0 {
+		d.PaidMillion = int(queen)
+		w.RefundPool -= queen * AnnihilatorMillion
 	}
 	w.postNews(fmt.Sprintf("Construction of a Gooie Kablooie aimed at %s has begun.", board))
 	w.reportAnnihilator(board, w.Annihilator)
@@ -192,7 +200,6 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 	}
 	e.Gold -= gold
 	d.PaidMillion += millions
-	w.postNews(fmt.Sprintf("%s agrees to put in %d million gold to the Gooie Kablooie.", e.Name, millions))
 	if d.PaidMillion >= d.CostMillion {
 		d.Funded = true
 		d.FundedDay = w.GameDay
