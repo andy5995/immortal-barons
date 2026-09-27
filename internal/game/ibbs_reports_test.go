@@ -21,7 +21,7 @@ func TestLeagueReports(t *testing.T) {
 	w.BoardVersion = map[string]string{"Bravo BBS": "0.0.5"}
 
 	info := w.BBSInfoReport()
-	for _, want := range []string{"### BBS Name", "Last Recon", "BRE Version", " 2) Bravo BBS", "08/15/2026 09:34:36", "v0.0.5"} {
+	for _, want := range []string{"### BBS Name", "Last Recon", "Version", " 2) Bravo BBS", "08/15/2026 09:34:36", "v0.0.5"} {
 		if !strings.Contains(info, want) {
 			t.Errorf("BBSINFO missing %q:\n%s", want, info)
 		}

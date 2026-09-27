@@ -98,7 +98,7 @@ func (w *World) LastPacketReport() string {
 // carrying them (docs/dev/ibbs-packet-format.md).
 func (w *World) BBSInfoReport() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "%3s %-28s %-24s %s\n", "###", "BBS Name", "Last Recon", "BRE Version")
+	fmt.Fprintf(&b, "%3s %-28s %-24s %s\n", "###", "BBS Name", "Last Recon", "Version")
 	peers := w.knownPeers()
 	if len(peers) == 0 {
 		b.WriteString("No other boards are known yet.\n")
