@@ -138,3 +138,37 @@ strings -n 3 "$BRE/BRE.EXE" "$BRE/BRE.OVR" | grep -iE "maximum|default|per day|r
 
 Cross-check against `internal/game/config.go` constants and
 `docs/mechanics-reference.md`.
+
+## 8. News and report templates
+
+**BRE's `game/*.dat` template files enumerate a feature's full category set for
+free.** `ipnews.dat` and `ipreport.dat` are plain-text news/report templates
+split by `^CATEGORY` headers, and the header names alone answer "how many
+distinct cases does this mechanic have" — the interplanetary attack turned out
+to have six news classes (individual / group-on-one-realm / group-on-whole-planet,
+each way, on both the arrival and the return side) plus a total-conquest one.
+`grep -a '^\^' "$BRE/game/"*.dat` lists every category in the game in one go.
+Cheaper than any other source and no disassembly can give it to you as fast.
+
+**A missing category is real evidence, but only half of it.** No `.dat` carries
+a spy category, which is most of the case for "the SpyGuy makes no news" — the
+other half is that BRE also builds news lines in code, through
+`append_news_record`, without a template. So pair the template census with the
+caller list of the news writer before concluding a mechanic is silent.
+
+## 9. A number in a string may belong to the wrong variant
+
+**The variant-string trap (a number in a string may be the WRONG variant's
+number).** A literal value baked into a string is only authoritative for *that
+call site*, and BRE often has several near-identical strings for variants of one
+feature. `strings` flattens them with no context, so grabbing the first match
+can hand you a number that belongs to a different mode. Real example: searching
+the message editor turned up `You have 3 lines for your message.  /S=save
+/A=abort /C=clear` — but a live screenshot showed the standalone message editor
+allows **20** lines. The "3" was the *short attach-a-note-to-a-trade-deal*
+editor; the "20" was the *Send Message* editor — two variants with almost
+identical banners. Lesson: when a string carries a feature's number, don't
+assume it's the mode you care about. Grep for sibling copies of the same banner
+(`grep -a "lines for your message"` finds both), and confirm the number against
+a live screenshot of the *specific* feature before treating it as fact — the
+same source-1-beats-strings rule that already applies to colors.

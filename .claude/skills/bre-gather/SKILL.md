@@ -11,1168 +11,333 @@ description: >-
 
 # Gathering ground truth from Barren Realms Elite
 
-**Companion skill: `play-bre` (user-scoped, `~/.claude/skills/play-bre/`).** This
-skill covers *reading* ground truth from a local BRE binary under dosemu, where a
-wrecked game costs nothing. When the session is instead a **live game on a real
-BBS over syncterm** — Andy attached to a shared tmux session, real opponents,
-every keypress permanent — use `play-bre` instead. It carries the syncterm/tmux
-harness, the take-over protocol, the traps specific to a live board (the Enter
-cascade, Alt combos being swallowed in curses mode, no scrollback), and the
-in-game strategy math. The turn flow is the one part the two share.
+Immortal Barons is a faithful clone. When a task is "make this match BRE", the
+answer is in BRE's own files, not in memory: check the source, cite which one,
+and state the confidence. A guess drifts the clone and costs a round-trip when
+review catches it.
 
-Immortal Barons is a faithful clone. When a task is "make this match BRE" —
-a menu's items/order, a mechanic's numbers, a screen's layout or colors — the
-authoritative answer is in BRE's own files, not memory. Check the source, cite
-which source, state the confidence. Guessing drifts the clone away from the
-original and costs a round-trip when it's caught in review.
+This guide covers *reading* ground truth from a local BRE under dosemu, where a
+wrecked game costs nothing. For a **live game on a real BBS over syncterm**,
+where every keypress is permanent, use the user-scoped `play-bre` skill
+(`~/.claude/skills/play-bre/`) instead.
 
-**This skill self-updates — that is part of using it, not an optional extra.**
-Every gathering run that teaches you something about *how to gather* ends with an
-edit to this file, in the same pass, without being asked. The full rule is in
-"Keep this skill current" at the bottom; it is repeated here because it was
-buried at the end and got skipped twice — once for the HQ price hunt, once for
-the reference-list lesson, both of which had to be prompted for. If you finish a
-run and this file is unchanged, that is a decision you should be able to justify,
-not a default.
+**This guide updates itself.** A run that teaches you something about *how to
+gather* ends with an edit here, in the same pass (see "Keep this skill current"
+at the end). If a run leaves the guide unchanged, be able to say why.
 
 ## Getting the original BRE
 
-You need your own copy of the **original BRE distribution** (the DOS door
-release archive) — this skill never ships or bundles it (see the license
-section). If you don't already have it, use the repository's explicit fetcher;
-it downloads the official 0.988 archive, verifies pinned hashes, and extracts
-`BRE.EXE` and `BRE.OVR`. It never executes the archive or the DOS programs:
+You need your own copy of the original BRE distribution; this project never
+ships it (see the license section). The repository's fetcher downloads the
+official 0.988 archive, verifies pinned hashes, and extracts `BRE.EXE` and
+`BRE.OVR` without running anything:
 
 ```
 python3 scripts/bre-disasm.py fetch ~/path/to/private/bre-dos
+python3 scripts/bre-disasm.py verify --directory ~/path/to/private/bre-dos
 ```
 
-Add `--include-docs` when the bundled help, instructions, samples, artwork, and
-template data are useful. The host extractor unpacks the nested `BREDATA.EXE`
-payload into `~/path/to/private/bre-dos/reference`; it does not run that DOS
-self-extractor.
-
-An existing copy can be checked with `python3 scripts/bre-disasm.py verify
---directory ~/path/to/private/bre-dos`. Do not commit the downloaded files.
-Point a shell variable at that directory; every command in this skill uses it:
+`--include-docs` also unpacks the bundled help, docs, samples and art from
+`BREDATA.EXE`, which is an ARJ self-extractor of 19 reference files, not game
+code: never disassemble it. Do not commit anything downloaded. Every command in
+this guide uses:
 
 ```
-BRE=~/path/to/bre-dos     # wherever you unpacked it, e.g. a DOSEMU drive_c/games/bre-dos
+BRE=~/path/to/bre-dos     # e.g. a DOSEMU drive_c/games/bre-dos
 ```
 
-Key files inside:
+- **`BRE.OVR`**: the overlay, holding most menu strings, prompts and news text.
+- **`BRE.EXE`**: the main executable, its resident Turbo Pascal runtime, and the
+  initialized data segment.
+- **`docs/bre.doc`, `game/breins.txt`, `game/attack.hlp`, `game/reset.hlp`,
+  `docs/whatsnew.doc`**: the prose. There are only TWO `.hlp` files, so do not
+  hunt for per-screen help. **`reset.hlp` documents every config setting**, and
+  settings are where BRE states mechanics outright.
+- `game/*.dat`: news and report templates. `data/game.dat`, `data/planet.bre`:
+  save data.
 
-- **`BRE.OVR`** — the overlay; holds the bulk of menu strings, prompts, news
-  text. First place to look for labels and menu order.
-- **`BRE.EXE`** — the main executable and its resident Turbo Pascal runtime;
-  holds some strings and configuration code.
-- **`game/*.hlp`, `game/breins.txt`, `game/bre.txt`, `docs/`** — help/prose.
-- `data/planet.bre`, `data/game.dat` — runtime save data (not menu/mechanic
-  definitions).
+## Source priority (most authoritative first)
 
-The distribution's **`BREDATA.EXE` is not a BRE runtime program**. It is an ARJ
-self-extracting installer payload (`BREDATA.ARJ`) containing 19 documentation,
-sample-configuration, help, ANSI-art, and initial/template data files. The
-stock `UNPACK.BAT` merely runs `BREDATA -Y` to extract them. Do not disassemble
-it as game code or look there for overlays, mechanics, or an FP library. This
-is why ordinary fetches extract only `BRE.EXE` and `BRE.OVR`; use the explicit
-`--include-docs` option when its non-runtime reference material is needed.
+1. **A rendered screen from a live BRE session** — the only authority on
+   **colors**, exact **hotkeys** and on-screen order. `cap/` holds many; you can
+   also drive BRE headlessly (below), or ask someone who runs it.
+2. **A disassembly of the original binary** — authoritative for exact constants
+   and formulas.
+3. **`BRE.OVR` / `BRE.EXE` strings** — authoritative for labels and declaration
+   order.
+4. **The shipped prose** — help text, the manual, tutorial wording.
 
-## A raw constant carries BRE's unit, not IB's — and the string beside it says which
+**Grep the shipped prose FIRST anyway.** It is last in authority but first in
+cost, and BRE documents far more of its mechanics, with numbers, than you would
+expect. After a long failed emulator session, one `grep -i 'quick strike'`
+turned up `game/attack.hlp` stating all nine attack-variant figures. Three
+sweeps to start any hunt:
 
-BRE counts **population in millions**; IB counts people, twenty to BRE's one
-(`PopBREUnitScale`). So a per-head price or weight lifted straight out of the
-binary is per MILLION and has to be converted before IB applies it. Percentages
-are unit-free and need no conversion — only absolute rates do. This has been got
-wrong three times, most recently on the chemical missile's price.
+```
+grep -rain '<mechanic>' "$BRE/game/" "$BRE/docs/" | head -40
+python3 scripts/bre-disasm.py find-string --directory "$BRE" '<mechanic>'
+strings -a -t x "$BRE/BRE.OVR" | grep -i '<mechanic>'
+```
 
-**The cheapest way to settle a field's unit is the string printed beside it.**
-The chemical and biological strikes subtract a share of record `+0x62` and then
-print it with `" million civilians were killed!"`, which names the unit outright
-in the same routine. Before scaling anything, find where the field reaches the
-screen and read the label — one `find-string` — rather than inferring the unit
-from the magnitude.
+**But a shipped doc is a hypothesis: confirm every figure you implement.**
+Nothing marks the wrong line. On one day (2026-08-14):
+- `attack.hlp` puts the quick strike at 110 %; the resolver loads **1.2**, while
+  the same paragraph's three loss figures are right.
+- `bre.doc` says a Declaration of War breaks a pact "without causing internal
+  troubles"; `break_diplomatic_treaty` takes a quarter of support and morale.
+- `bre.doc` says Protective Trade makes deals cheaper "to send and maintain";
+  there is no recurring cost at all.
+- `whatsnew.doc` says tanks defend against chemical missiles; no WMD routine
+  reads tanks. It is a changelog, and may describe a different build.
 
-## Technology silently scales almost every number you capture
+When prose and code disagree, the code wins, and the disagreement goes in the
+constant's comment, or the next reader "fixes" it back.
 
-**Before deriving ANY constant from a capture, establish the realm's technology
-factors.** Technology multiplies most of what a session shows — military
-strength up to 1.4x, unit production 1.35x, gold income and population tax 1.5x,
-food production 2.0x, maintenance down to 1/1.4, food decay down to 1/5. A
-combat or economy figure read off a capture from a teched realm is inflated by
-an unknown amount, and nothing on the status screen says so.
+**Open the screen that quotes a price before opening a disassembler.** The
+Covert Operations menu prints all nine fees; issue #143 stood open on the theory
+that they were an unreadable runtime table. Use the disassembly for what the
+screen cannot say, such as whether the number is scaled.
 
-**Zero Technology regions does NOT mean the factors are 1.0.** The research level
-**never decays and freezes permanently** when the regions are sold, so a realm
-that once held Technology carries the boost for the rest of the game with no
-Technology regions on screen. Region counts cannot tell you.
+**"Who may do this?" is answered by `bre.doc`'s command-line section**, one line
+per switch: `PLAYERLIST` is "for League Coordinators only", `UPDATE` "Only can be
+done by BBS #1". Grep it before reasoning from which menu a thing appears on.
 
-**Ask for the Technology advisor screen with every capture.** It is the one
-place BRE states the factors outright, as percentages (BRE.OVR 0x32ac2 —
-"Because of technology... military forces are functioning at N% strength", plus
-lines for production, food, industry, expenses and decay). With that screen a
-capture is correctable: divide the observed figure by its factor. Without it,
-data from an unknown realm can only give ratios, never absolute constants.
+**"IB's own" and "reconstructed" in our notes are DATED, not decided.** The same
+label covers a deliberate divergence and a gap nobody could close at the time
+(the Gooie Kablooie's siege was "not read from the binary", then read in twenty
+minutes once the catalog existed). Re-read such a figure before building on it,
+and when you write a marker, say which kind: "IB chooses this because …", or
+"not read yet; <routine> is where it lives".
 
-The factor itself, for cross-checking:
+## Calibrate a capture before trusting its numbers
+
+**Technology scales almost everything a session shows**: military strength up
+to 1.4x, production 1.35x, gold and tax 1.5x, food 2.0x, maintenance down to
+1/1.4, decay down to 1/5. A figure from a teched realm is inflated by an unknown
+amount, and nothing on the status screen says so. **Zero Technology regions does
+not mean factor 1.0**: research never decays and freezes when the regions are
+sold. **Ask for the Technology advisor screen with every capture** (BRE.OVR
+0x32ac2, "…functioning at N% strength"): it states the factors, and divides them
+back out. For cross-checking:
 
 ```
 factor = 1 + (cap - 1) x (1 - exp( -level / (totalRegions + 1) ))
 ```
 
-so a LARGE realm dilutes its own technology — two realms at the same research
-level do not share a factor. See docs/mechanics-reference.md, "Technology".
+so a large realm dilutes its own technology. When gathering fresh data, prefer a
+realm that never bought Technology, and record which realm a figure came from.
 
-**When gathering fresh data, prefer a realm that has never bought Technology**,
-and say in the notes which realm a figure came from and what its factors were.
-Historical note: most of this project's early testing ran with no Technology
-regions, so those constants are probably clean — but "probably" is doing work
-there, and any figure that disagrees with a later capture should have technology
-ruled out first.
+**Read the same session's Game Setup screen before fitting a formula.** A per-game
+setting can disable the mechanic you are fitting: a league running
+`Protection Turns: 130` kept realms shielded, BRE waives the region surcharge
+under protection, and 65 purchase screens "proved" the surcharge did not exist.
+When a fit disagrees with the code, suspect the setting before the code.
 
-### Local InterBBS: the documented ring, and the case-collision that breaks it
+**Before explaining a per-unit figure, check whether its denominator changed that
+turn.** Purchases land between the report and the Regions display.
 
-`docs/bre.doc` has a **"Local InterBBS Setup"** section for exactly the
-several-games-on-one-machine case. Read it before improvising a transport:
+## What the strings give you — and what they don't
 
-- Each game's **inbound files directory** (bbs.cfg **line 4**, "Front End
-  Incoming FILE Directory") points at the **previous game's OUTBOUND** — a ring.
-  For two boards: A reads B's OUTBOUND, B reads A's OUTBOUND.
-- BRE always **writes** to `<its own dir>\OUTBOUND\`; line 4 only says where to
-  READ. Line 5 is the **netmail** dir, where the Binkley `.MSG` wrappers land —
-  seeing outgoing `.msg` files there is line 5 working, NOT the dirs being
-  swapped.
-- `ROUTE.CFG`: game 1 `ROUTE * 2`, game 2 `ROUTE * 1` (last routes back to #1).
-- **No file transfer step exists or is needed.** Run `BRE PLANETARY` on each
-  board in order; the docs say running the cycle **twice** gives immediate
-  results. `BRE INBOUND` runs only the inbound half, which is the fast way to
-  test ingestion.
+Menu items are length-prefixed ShortStrings stored consecutively in declaration
+order, which is usually the rendered order.
 
-**The landmine that cost a whole session (2026-08-11):** the boards had BOTH an
-`OUTBOUND` and an empty lowercase `outbound` directory. dosemu's case-insensitive
-lookup resolved the DOS path `C:\GAMES\BRE-B\OUTBOUND` to the **empty
-lowercase one**, so BRE scanned a directory that never held a packet and
-reported nothing at all — no error, no "Unknown Node", just a silent no-op,
-while `DIR` from the DOS prompt happily showed the file in the *other* directory.
+- **Labels and order: yes.**
+- **Colors and hotkeys: no.** The draw code sets them; get them from a capture
+  or the disassembly.
+- **Menu hierarchy and reachability: no.** `breins.txt`'s table of contents lists
+  the menus. In the clone, reachability is runtime code (a turn-flow stage, a
+  preference such as `VisitCovert`, an IBBS gate), so read the code path. Covert
+  ops were twice judged InterPlanetary-only from the menu tree, when `runTurn`
+  offers them every turn.
+- **Rates, probabilities and formulas: no.** Strings give the trigger and the
+  direction; the number is in the disassembly. With no disassembly value, say the
+  rate is unverified and make it a tunable constant.
 
-**Never diagnose a "BRE ignores my file" problem by guessing at filename masks.
-Watch what it actually opens:**
+**The byte before a string is its length.** `0d "View IPScores"` is 13 characters.
+It also makes a string look LONGER than it is: the Diplomacy Modification key set
+was recorded as `WNPAU` for months, but the length byte is `0x04` and the `U` is
+the next routine's `push bp`. Check a short quoted string against its length
+byte the first time you rely on it.
 
-```
-inotifywait -m -r -e open,access,create,delete <bre-dirs> > /tmp/io.log &
-# ...run BRE INBOUND...
-grep -i outbound /tmp/io.log
-```
-
-That named the wrong directory in one run, after several dead-end hours spent
-base-solving the overlay to find the search mask. Reach for inotify the moment
-BRE appears to ignore a file. Success looks like:
+**Any claim about what a SCREEN shows or omits is checked against `cap/` first.**
+It costs one command:
 
 ```
-    Processing Incoming Data from Node 2
-     Compressed: 334       Decompressed: 2488      %: 86.6%
-```
-
-and on the sending side:
-
-```
-     Outbound mail for Test Planet Two - Node 2 created.
-```
-
-**Also gating IP play:** five InterPlanetary Ops items refuse until the caller
-has played a turn this entry, and every one of them SAYS so — *"You must play at
-least one turn per entry in the game to access this option."* This paragraph
-said the refusal was usually silent until the dispatch was read for #162; it is
-not, and "the item did nothing and said nothing" is therefore evidence AGAINST
-this gate, not for it. Which five, and where each is tested, is in
-`docs/mechanics-reference.md`.
-
-### Disassembly: use the static map; never guess segment bases
-
-`BRE.OVR` is a Turbo Pascal **overlay** file, so a unit's string constants are
-addressed relative to a code-segment base that is not in the file. The habit of
-*solving* for that base — scoring candidate offsets by how many `mov di,imm16`
-land on plausible ShortString length bytes — works sometimes and fails silently
-otherwise. On 2026-08-11 it found the attack unit (0x2b783, 36 hits) but dead-
-ended completely on the IBBS inbound scanner and on the result-header strings,
-burning hours for nothing.
-
-The repository now does that mapping directly. `scripts/bre-disasm.py` parses
-the overlay descriptors and relocation streams, follows typed 8086 control
-flow, and ties each patched `INT 3Fh` stub back to its canonical `BRE.OVR`
-offset. Start with its `list`, `lookup`, `map`, and `disasm` commands; they do
-not need the unit's transient runtime segment and do not rely on a plausibility
-score. The detailed workflow and proof are in "Reading the disassembly" below
-and `docs/dev/bre-disassembly.md`. This map covers `BRE.EXE`, `BRE.OVR`, and the
-resident runtime linked into that executable. It does not need to cover
-`BREDATA.EXE`, which is only the installation self-extractor described above.
-
-The pinned v0.988 catalog reaches a fixed point for calculated control flow:
-all 23 reachable indirect-call sites belong to 13 proven closed target sets,
-with no reachable indirect jumps, unresolved transfers, or decode-boundary
-conflicts. When a call edge has `kind: calculated_call`, follow its
-`dispatch_id`; the dispatch record is the complete target set. Do not guess a
-target or launch an emulator merely because the source instruction is indirect.
-
-Use the repository's **Xvfb-backed DOSBox debugger** only when the overlay
-loader/materialized bytes need independent validation or new evidence falls
-outside the pinned catalog. `python3 scripts/bre-disasm.py debugger --directory
-"$BRE" --run` launches the debugger correctly under a private Xvfb. Memory
-dumps and traces contain original program material; keep them private and out
-of the repository.
-
-This does **not** replace dosemu2 for everything — dosemu2 is still the only way
-to scrape screens as text (see above), and that is most of what this skill does.
-The two are complementary: **dosemu2 for behavior and screens, the static map
-for normal structure and constants, and a DOSBox debugger for dynamic
-validation.** Static catalog lookup is the normal path; the debugger is an
-exceptional validation tool, not a prerequisite for following overlays.
-
-## Source priority (most authoritative first)
-
-1. **A rendered screenshot from a live BRE session.** The ONLY authoritative
-   source for **colors** and for the exact **hotkey characters + on-screen
-   order**. Anyone with BRE running can grab one — select the menu/screen and
-   paste it. Prefer this whenever colors or exact keys matter; if you can't run
-   BRE, ask a maintainer or contributor who can. For **text content and layout**
-   (not colors), you can also drive BRE yourself headlessly — see "Running BRE
-   headless" below.
-2. **A disassembly of the original binary** — authoritative for exact numeric
-   constants. Disassembled values override a reconstruction or a guess when
-   they conflict.
-3. **`BRE.OVR` / `BRE.EXE` strings** — authoritative for menu **labels** and
-   **declaration order** (which equals menu order). See the extraction cookbook.
-4. **`game/*.hlp`, `docs/`, `breins.txt`** — prose, help text, tutorial wording.
-
-**"IB's own" and "reconstructed" in our own notes are DATED, not decided.** Two
-very different things wear the same label: a deliberate divergence (IB
-comma-groups figures BRE prints bare) and a gap nobody could close at the time
-(the Gooie Kablooie's whole siege was marked "not read from the binary" and
-then read in twenty minutes once the static catalog existed). The tooling has
-improved faster than the notes were revisited, so a "reconstructed" marker older
-than the disassembly catalog is a TODO rather than a decision.
-
-So when a task touches a figure our own docs call reconstructed or unverified,
-**re-read it before building on it**, and when you write such a marker, say
-which kind it is and why — "IB chooses this because …" for a decision, "not read
-yet; <routine> is where it lives" for a gap. A marker that does not say which
-costs its next reader the whole investigation again.
-
-**Grep the shipped help and docs FIRST, before driving the emulator or
-disassembling.** They are last in *authority* but first in *cost*, and BRE
-documents far more of its own mechanics than "prose" suggests — with numbers.
-The individual-attack variants (2026-08-11) are the case that earned this note:
-after a long stretch of failed emulator driving and a base-solving hunt through
-`BRE.OVR`, one `grep -i 'quick strike' -r .` turned up `game/attack.hlp` stating
-all nine figures outright (110%/50%/8%, 100%/100%/15%, 85%/125%/20%), and
-`docs/bre.doc` + `breins.txt` supplied the individual-vs-group returns ratio.
-The disassembly was still worth having — it gave the menu's item order, the
-Normal-Attack-on-Enter default, and the wire codes the help does not mention —
-but it should have been the *second* step, confirming and extending a cheap
-answer rather than substituting for one.
-
-**But a shipped doc is a HYPOTHESIS, not an answer — confirm every figure you
-intend to implement.** The prose is cheap and usually right, which is what makes
-the exceptions dangerous: nothing in the text marks the wrong line. Four cases
-found on 2026-08-14 alone:
-
-- `attack.hlp` puts the quick strike at **110%**; the resolver loads **1.2**
-  (BRE.OVR 0x4055a). The same switch's retreat constants — 0.92/0.85/0.80, i.e.
-  8/15/20% losses — match the help exactly, so the help is right about three
-  numbers in that paragraph and wrong about the fourth.
-- `bre.doc` says a Declaration Of War breaks a pact "without causing internal
-  troubles" and is "not officially broken until the other realm is notified".
-  `break_diplomatic_treaty` (0x01a838) takes a quarter of BOTH support and
-  morale and clears both relation rows on the spot.
-- `bre.doc` says Protective Trade makes deals cheaper "to send and maintain".
-  The send discount is real (cost/3); there is no recurring cost in the binary
-  at all, so the second half describes nothing.
-- `whatsnew.doc` claims tanks defend against chemical missiles. No WMD routine
-  reads tanks, turrets or SDI. Note `whatsnew.doc` is a CHANGELOG — it may
-  faithfully describe a build that is not the one you have, which is a different
-  failure from the manual being wrong about its own release.
-
-So: sweep the prose first to learn **what to look for and roughly where**, then
-read the code for the number you will actually type into `balance.go`. When the
-two disagree, the code wins and the disagreement goes in the constant's comment
-— otherwise the next reader "fixes" the constant back to the doc's value.
-
-**A price question is usually answered by the screen that quotes the price.**
-BRE prints its own costs — the Covert Operations menu carries a price column for
-all nine ops, the InterPlanetary menu prices Terrorist Ops, Special Operations
-prices four of its eight. Issue #143 had stood open on the theory that the covert
-fees were a runtime table nothing could read; the whole ladder was on the menu,
-and one operation confirmed the charge against gold in hand. **Open the screen
-before you open a disassembler.** Then use the disassembly to answer the question
-the screen cannot — here, whether the number is a constant or a scaled one.
-
-**"Not a literal in the binary" means you searched BOTH binaries, in the right
-encoding.** The same covert fees had been written up as a runtime table on the
-strength of a byte search that found nothing — the search had covered `BRE.OVR`
-only. The nine dwords are initialized data in `BRE.EXE` at `0x14EDE`, and
-`BRE.EXE` is where BRE keeps its initialized DGROUP (the goods table at
-`0x157b7` is the other case this bit). A `DS:` displacement is an offset into
-that data, so before concluding a value is assembled at run time, solve for the
-DGROUP base and look. Confirm the base against a known landmark, not
-plausibility: the ShortString `"Covert Operations"` sits right after the fee
-table at `DS:0x662`, and the menu's own `mov di,0x662` pins it.
-
-Three cheap sweeps to run at the start of any mechanic hunt:
-
-```
-grep -rain '<mechanic name>' "$BRE/game/" "$BRE/docs/" | head -40
-python3 scripts/bre-disasm.py find-string --directory "$BRE" '<mechanic name>'
-strings -a -t x "$BRE/BRE.OVR" | grep -i '<mechanic name>'
-```
-
-Prefer `find-string` for code discovery: it searches the private binary text
-but returns the cataloged functions and blocks that reference each match. Use
-raw `strings` only to inspect declaration order or text that has no indexed
-code reference.
-
-**An empty `find-string` for text `strings` can see means the string is a
-code-segment constant, not that nothing uses it.** `DATA\SPY.BRU` returned zero
-matches; its routines load it as `mov di,0xe0` / `push cs`, which the index does
-not record. Take the byte offset from `grep -abo`, then
-`bre-disasm.py list | grep <unit>` for the unit that spans it — that found
-`open_spy_data`, `save_spy_data` and `load_spy_data` in one step.
-
-**"Who is allowed to do this?" is usually answered by `bre.doc`'s command-line
-section.** It lists every switch with a one-line restriction, and those lines
-settle permissions questions no screen can: `PLAYERLIST` is "for League
-Coordinators only", `UPDATE` is "Only can be done by BBS #1", `EDITOR` is
-League-Coordinator-only in an InterBBS game. That is where it was established
-that BRE hands a player list to the coordinating BOARD's operator and never to
-the elected in-game Coordinator, which is a different office held by an ordinary
-player. Grep that section before reasoning from which menu a thing appears on.
-
-**A setting missing from `bre.doc` may still exist: read RESOURCE.DAT's keyword
-table out of the binary.** The full sweep is already done and written up in
-`docs/dev/bre-resource-dat.md` — read that before repeating it. The manual documents only some of the per-install
-settings, and the undocumented ones are where a whole mechanic can hide. The
-loader stores its keywords as consecutive ShortStrings, so finding one finds them
-all — `LOTTERY` sits between `LEADER` and `EXTERNALSCORESANSI` at `BRE.OVR`
-`0x56919`, and it is the switch that decides whether the lottery runs at all.
-Working backwards is just as cheap: a global tested by a mechanic
-(`cmp byte [0x76c0],0x0` at the head of `run_lottery`) has exactly one other
-reader and one writer, and the writer is the settings loader loading that
-keyword's label right before it. **This also answers "who sets it"** — a
-RESOURCE.DAT keyword is the local sysop's, per installation, never the League
-Coordinator's or the game data's.
-
-**Per-character color in a capture is DATA, not decoration.** `cat -v` a `.cap`
-and read where the escape sequences fall between characters: BRE colors each
-letter of a lottery draw as it prints it, so one captured line
-(`ESC[0;40;31m D ESC[31m K … ESC[1;33m I …` against the ticket `AGNTYI`) proves
-the scoring rule — the yellow letter is at a different position in the draw than
-on the ticket, so matching cannot be positional. A whole disassembly session was
-about to be spent on that question. Look for the color capture before deciding a
-rule needs code: ANSI-stripped skimming throws exactly this away.
-
-**Know where the prose actually is: BRE ships only TWO `.hlp` files** —
-`game/attack.hlp` and `game/reset.hlp`. There is no per-screen help, so do not
-hunt for a `market.hlp`; the bulk of the prose is `docs/bre.doc` and
-`game/breins.txt`, with `docs/whatsnew.doc` carrying the version-by-version
-changes. **`reset.hlp` is the sleeper**: it documents every *config setting*,
-and settings are where BRE states mechanics outright. "Turns Of Protection" is
-defined there as the turns a new empire "is unable to attack, trade, and be
-attacked" — one grep, and it settled a question that had been about to be
-argued from code, with `whatsnew.doc` corroborating on the trade half.
-
-**`find-string` with an EMPTY query and a `--function` filter dumps every string
-one routine touches** — which reconstructs a screen's whole structure in one
-command, without disassembling anything:
-
-```
-python3 scripts/bre-disasm.py find-string --directory "$BRE" \
-  --function resolve_returning_attack --details "" | jq -r '.matches[].text'
-```
-
-That is how the interplanetary returning-attack report was recovered (header,
-four verdict words, per-unit lost/returned lines, enemy-destroyed line) in a
-single call. Do this BEFORE reading any code: the string list tells you what the
-routine's branches must be, so the disassembly is then confirming a shape rather
-than discovering one. `--details` output is proprietary — never commit it.
-
-**BRE's `game/*.dat` template files enumerate a feature's full category set for
-free.** `ipnews.dat` and `ipreport.dat` are plain-text news/report templates
-split by `^CATEGORY` headers, and the header names alone answer "how many
-distinct cases does this mechanic have" — the interplanetary attack turned out
-to have six news classes (individual / group-on-one-realm / group-on-whole-planet,
-each way, on both the arrival and the return side) plus a total-conquest one.
-`grep -a '^\^' "$BRE/game/"*.dat` lists every category in the game in one go.
-Cheaper than any other source and no disassembly can give it to you as fast.
-
-**A missing category is real evidence, but only half of it.** No `.dat` carries
-a spy category, which is most of the case for "the SpyGuy makes no news" — the
-other half is that BRE also builds news lines in code, through
-`append_news_record`, without a template. So pair the template census with the
-caller list of the news writer before concluding a mechanic is silent.
-
-## Staging a scenario in game.dat
-
-A test no longer needs days of in-game build-up. BRE checks each empire record
-at load, so a raw field edit is discarded (see `docs/dev/bre-save-format.md`); a
-local helper outside this repo, `scripts/bre-stage.py` in this project's Claude
-dir, resets a record so BRE accepts it — `dump` / `verify` /
-`set GAME.DAT SLOT FIELD=VALUE...`. **How it does that stays out of this repo**:
-it is in that script and in `scripts/BRE-STAGING.md` beside it, never in a
-tracked file.
-
-Two traps, each of which cost a run on 2026-08-30: **clone a realm that has
-survived maintenance** instead of authoring one from scratch — the daily idle
-purge eats a staged realm whose last-played stamps look stale, silently, and
-the roster just shrinks; and **the slot letter is `(fileoffset − 2489) / 1069`**
-— the roster's `?=List` at any target picker is the cheap way to confirm who
-BRE thinks exists. Proof of the method: `cap/small-vs-large-20260830.cap`, six
-staged battles the binary accepted and fought.
-
-**The HEADER is checked too, and `bre-stage.py` does not handle it.** Patch a
-setting in the 2489 bytes before slot A and BRE refuses the whole game with
-*"Status File has been tampered with!"*; how to make it accept one is in
-`scripts/BRE-STAGING.md` (private). That is what makes a **config knob**
-testable, not just a realm's fields. Mapped
-so far, all confirmed against the Game Setup screen: **+0x00/+0x02/+0x04** the
-game-start date (year, month, day), **+0x36** Turns per day, **+0x38** Turns of
-Protection, **+0x185** Region Cost Change. Changing one and re-reading the
-screen is the cheapest way to prove what a byte means.
-
-**"Computer Clock has been tampered with" means the DOS date is BEHIND the date
-the game last ran at, not that anything is broken.** An install driven with
-synthetic dates sits in the future, so `DATE` must be set forward past it —
-bisect a few years, it costs one launch each (this install needed 06-30-2027).
-Do NOT go hunting for a corrupted file; the message names the clock and means
-it.
-
-**Read a price off the screen that quotes it, not out of arithmetic.** The
-**Spending Menu prints the region price directly** in its Price column beside
-`# Owned`, so one staged realm gives the formula at that size with no algebra.
-The purchase screen's *"You can afford N regions"* looks equivalent and is not:
-it is `min(affordable, Max Purchasable Regions)`, so a run of identical N across
-wildly different gold is the CAP, not a price — 750 in one captured game, and
-mistaking it for affordability produced a wrong price model here on 2026-09-08.
-
-**A per-game SETTING can silently disable the mechanic you are fitting.** Fitting
-a formula across captures is worthless until the **System Menu > (G) Game Setup**
-screen from the SAME session is read: it prints every knob at once. A league
-game running `Protection Turns: 130` keeps realms shielded past 800 regions, and
-BRE waives the region-cost surcharge entirely while a realm is protected — so 65
-purchase screens fitted a climb of 33 and "proved" the surcharge did not exist.
-Two live runs on one staged realm, changing only that setting, gave 33,917 and
-68,934 and settled it in minutes. **When a fit disagrees with the code, suspect
-the setting before the code.**
-
-## Running BRE headless (tmux + dosemu2 harness)
-
-BRE can be driven scriptably and its screens scraped as plain text
-(`tmux capture-pane -p`) or WITH ANSI color (`-ep | cat -v`, or wrapping dosemu in
-`script`). **The full harness — prerequisites, the launch recipe, and the dozen
-landmines that each cost a session — is in `references/harness.md`, together with
-the turn-by-turn flow for driving a game. Read it BEFORE driving the emulator;
-skimming it afterward is how the landmines get rediscovered.**
-
-Three things belong here rather than in the reference, because they decide
-whether you should open it at all:
-
-- **dosemu2, not DOSBox.** The whole approach depends on dosemu2 rendering DOS
-  text-mode video to a real terminal, so screens scrape as characters. DOSBox is
-  graphical and would force screenshot + OCR. (DOSBox-X's text-scrapability is
-  UNVERIFIED — say so rather than asserting it fails.)
-- **Never run two drivers against one tmux session**, and never `tmux
-  kill-session` while BRE is running — quit through the menu so `inuse.flg`
-  clears and the turn is flushed.
-- **Playing creates real state** in the sysop's actual game data. Never drive a
-  game Andy cares about; say what you enrolled so he can reset.
-
-**Record captured screens in `docs/dev/bre-screens.md`, not in this skill** — that
-doc is the durable catalog of BRE's exact output, wording, layout and ANSI color.
-
-**KEEP THE RAW CAPTURE. Write the `script` log straight into `cap/`, and never
-into a scratch directory you intend to delete.** `cap/` is gitignored — as
-verbatim BRE output it must not be committed — but it persists, and every claim
-in `bre-screens.md` has to stay re-readable by whoever doubts it later. A
-finding whose evidence is gone is a finding nobody can check, which is the exact
-condition the doc's corrections exist to remove.
-
-This has already gone wrong once. On 2026-08-16 a re-capture pass drove BRE in a
-throwaway `bre-cap` directory, corrected a dozen screens, and removed the
-directory when it finished; the `script` logs had gone to temp and vanished with
-it. The doc now carries claims stamped "re-captured" that nothing on disk
-supports, and two follow-up fixes stalled because the evidence for them could
-not be re-read. Copying the game elsewhere to protect the sysop's save was
-right; putting the capture there too was not.
-
-So: game state may live in a scratch copy, **captures may not**. Name the file
-for the session (`cap/<topic>-YYYYMMDD.cap`), and cite that filename in
-`bre-screens.md` beside what it proves.
-
-## What the strings give you — and what they DON'T
-
-BRE is Turbo Pascal. Menu items are **length-prefixed ShortStrings stored
-consecutively in declaration order**, and that order is the rendered menu
-order.
-
-- **Labels + order → YES**, straight from the string table.
-- **Colors + hotkey characters → NO.** They are set by the draw code (immediate
-  operands in the code segment), not stored next to the string. Get them from a
-  screenshot (source 1) or the disassembly (source 2).
-- **Menu HIERARCHY / reachability → NO.** The string table gives one menu's
-  item labels in declaration order — it does NOT tell you how menus nest, which
-  item opens which sub-menu, or *when a menu is shown*. Do not infer "feature X
-  lives only under menu Y" from string proximity or from finding a single entry
-  point. For the structure, `breins.txt`'s **table of contents lists the menus**
-  (a top-level menu there is a top-level menu, e.g. Covert Operations is its own
-  menu, separate from Interplanetary Operations). For the clone, **reachability
-  is runtime code** — a turn-flow sequence, a preference gate (e.g.
-  `VisitCovert`), an IBBS gate — so read the actual code path, not just a
-  `gotoMenu` grep. (Real miss: twice concluded covert was InterPlanetary-only
-  from the menu tree, when `runTurn` presents it every turn behind a default-on
-  preference.)
-- **Rates, probabilities, thresholds, and formulas → NO.** The strings and help
-  text give you the *trigger* and the qualitative behavior ("Riots have broken
-  out due to high tax rates!"), never the numbers behind them (the riot chance %,
-  emigration rate, growth formula, damage math). `breins.txt` even says outright
-  that "much information has been left out of the documentation." Those live in
-  the **disassembly** (source 2). So when the task needs an exact rate/formula:
-  extract the *trigger and direction* from strings/help, then get the number from
-  the disassembly — and if no disassembly value is available, **say the rate is
-  unverified and reconstruct it as a tunable constant** (as IB does for
-  morale/support), rather than presenting a guess as fact. State the confidence.
-
-**The length-prefix trap:** the byte immediately *before* each string is its
-**length**, not a color or a hotkey. Example: `0d "View IPScores"` — `0x0d`=13 =
-`len("View IPScores")`. It bites in the other direction too, by making a string
-look LONGER than it is: `docs/dev/bre-screens.md` recorded the Diplomacy
-Modification key set as `WNPAU` for months, but the length byte ahead of it is
-`0x04` and the `U` is the `0x55 push bp` of the next routine. **A key set, a
-version, or any short string quoted in our own docs is worth re-checking against
-its length byte the first time you rely on it** — the trailing junk is real code
-and reads as a plausible extra key. A run of 16-bit little-endian values before a menu
-cluster is usually a Pascal case/jump table, not data you want.
-
-**Never claim BRE LACKS a feature from the screen you happened to look at.**
-Saying "the original has no X" is a claim about the WHOLE binary, and it needs a
-search of the whole binary — one `strings | grep -i` for the feature's verb costs
-one command. Real miss (2026-08-06, caught by Andy): I built interplanetary
-messages, saw no reply path in the IP Messages *sending* menu, and wrote into a
-commit message and the spec that "BRE gives no way to answer one". One
-`strings BRE.OVR | grep -i repl` found `Reply, / Delete, / Ignore, / Quit`
-**twice** — because BRE has TWO message readers, and the second is the
-interplanetary one. It even has a prompt the local reader does not:
-
-- **local reader** — `DATA\MSGS.DAT` (BRE.OVR ~0x1DC0E): `Message From: ` /
-  `Message To  : `, R/D/I/Q, then `Public Reply, ` / `Author only, or ` /
-  `Select Destinations? `.
-- **interplanetary reader** — `DATA\MSG.BRF` (~0x1F94C): `Message From: ` +
-  ` on ` + `Unknown on ` (realm ON planet), `Message To  : ` + `Coordinator`,
-  R/D/I/Q, then a two-way **`Public Reply?`** — the answer goes to the whole
-  planet or to the author alone — plus `Quote Message?` with first/last line.
-
-**Any claim about what a SCREEN shows or omits is checked against `cap/` FIRST.**
-A rendered capture is source 1 and the authority on screen content; a string
-table and a disassembly are not. The check costs one command:
-
-```
-LC_ALL=C grep -ao "<a distinctive line from that screen>" cap/*.cap | sort | uniq -c
+LC_ALL=C grep -ao "<a distinctive line>" cap/*.cap | sort | uniq -c
 LC_ALL=C tr '\r' '\n' < cap/<file>.cap | grep -a -B4 -A12 "<that line>" | sed 's/\x1b\[[0-9;]*m//g'
 ```
 
-Real miss (2026-08-21): the treaty-proposal screen was reported as having no
-covering-message field, and IB's inline display was removed to match. One grep
-for `proposes a` in `cap/` shows a boxed `Message attached:` block sitting
-between the proposal line and the figures — and the very next proposal in the
-same capture, which carries no message, going straight to its figures. The
-capture proved both the feature and its conditionality in one screen.
+The treaty-proposal screen was reported as having no message field and IB's was
+removed to match; one grep showed a boxed `Message attached:` block, and the next
+proposal in the same capture showed it appears only when a message is attached.
+Before reporting a screen as uncaptured, say which files and pattern you
+searched, and search for a menu item with its value rather than a status line.
+Traps in both directions are in `references/captures.md`.
 
-**`find-string --function X` lists ONE routine's strings, and a screen is drawn
-by several.** Absence there is not absence from the screen. In the same miss,
-`"Message attached:"` belongs to `attach_message_to_diplomatic_proposal`
-(`BRE.OVR` 0x1CCD9) while the offer screen's own strings live in
-`process_diplomatic_proposal` (0x1CF73) — adjacent, obviously named, and
-invisible to a `--function` query scoped to the second. Before concluding a
-field is absent, search the string GLOBALLY for the feature's own words, and
-read the `callees[]` of the routine you looked at.
+**Never claim BRE LACKS a feature from the screen you looked at.** "The original
+has no X" is a claim about the whole binary. "BRE gives no way to answer" an
+interplanetary message went into a commit and the spec; one
+`strings BRE.OVR | grep -i repl` found `Reply` twice, because **BRE duplicates
+whole subsystems**: the local and interplanetary readers are separate routines,
+and the one you skipped is usually the interplanetary twin. **`find-string
+--function X` lists one routine's strings**, and a screen is drawn by several:
+`Message attached:` belongs to `attach_message_to_diplomatic_proposal`, next to
+the offer screen's routine. Search the feature's own words globally, and write
+"not found in the sending menu; not searched further" if that is all you did.
 
-Two lessons, both cheap to apply. **BRE duplicates whole subsystems rather than
-parameterising them**, so the local and interplanetary versions of a feature sit
-in different overlay units with near-identical strings; finding one tells you
-nothing about the other, and the interplanetary twin is usually the one you
-skipped. And **absence of evidence in one menu is not evidence of absence** —
-before writing "BRE does not do X" into a commit, a doc, or the spec, grep for
-X's own words, and say "not found in the sending menu; not searched further" if
-that is all you did.
+**A negative strong enough to build a divergence on needs three independent
+places to agree.** Requiring a treaty on the Trading Market rested on BRE having
+no such rule: the prose describes "a general market" with no buyer rule,
+`run_trading_market` references no relation string, and the one relation refusal
+belongs to `create_trade_offer`. One of the three alone is a hunch.
 
-**A negative is only strong enough to build a DIVERGENCE on when three
-independent places agree.** Deciding IB should require a treaty to buy on the
-Trading Market rested on BRE having no such rule, so the claim had to hold up:
-the manual and `breins.txt` both describe "a general market at any price you
-choose" with no mention of who may buy; `run_trading_market` references no
-relation string; and the one relation refusal in the binary belongs to a
-different routine (`create_trade_offer`). Prose, the routine's own strings, and
-the whereabouts of the nearest contradicting string — when all three line up,
-write the negative down and name them. One of the three alone is a hunch.
+**A player's account of the original is evidence.** Players said Sabre dial 4
+hits military bases and 5 airbases while the spec said the dial did nothing; they
+were right, and named the exact rows of the table. A report cannot settle a
+constant, but it can reopen one: re-read the code before defending the note.
 
-**The field NEXT to the one you want disassembles just as plausibly.** A packet
-or record field is reached as `[bp-0x4]`, `[bp-0x3]` and so on, and the wrong one
-produces a switch that looks like a finding. The S3-Sabre's dial is `[bp-0x3]`;
-`[bp-0x4]` beside it is switched on 1/2/3 and picks turrets, tanks or troopers,
-which reads exactly like "only three dial settings do anything" — and that went
-into the spec, and into IB, for months. The dial's real handler was a mapper one
-call away covering the whole 0-10 range.
+## Cross-reference the docs, the overlay and the disassembly
 
-Two habits stop it. **Count the branches against the data**: seven `^SABREHIT`
-lines and a switch with three cases is a mismatch that should be chased, not
-explained away. And **find where the value is CONSUMED, not just where it is
-compared** — following `[bp-0x5c9]` back to the routine that writes it was what
-produced the table.
+A mechanic's full scope is usually described in ONE place in the prose, while the
+strings and the code show it piecemeal. Read the prose entry first for the
+complete list of effects, then confirm each in the binary. The Technology
+mechanic took two wrong answers before `breins.txt`'s entry settled what it
+touches. One word can head two entries (`Technology` is a region type AND a
+treaty), so read each entry to its `^END`.
 
-**A player's account of the original is evidence — weigh it, do not wave it
-away.** Experienced players said dial 4 hits military bases and 5 hits airbases.
-The spec said the dial did nothing. The players were right, and their account
-named the exact rows of the mapper's table. A play report cannot settle a
-constant, but it is strong enough to *reopen* one: when it contradicts a written
-finding, re-read the code before defending the note. Say in the write-up that a
-report prompted the re-read — it is how the next reader learns the note was
-tested rather than merely repeated.
-
-**A prompt's TEXT is not its behavior — read the caller.** `find-string` on a
-prompt lands you in the routine that *prints* it, and that routine usually does
-nothing else. The input loop, the key table and the semantics are one level up,
-in `callers[]`. `(A-Y,Z=All,?=List) Send to:` had been cloned as a single
-keypress for a year on the strength of how it reads; its caller
-(`BRE.OVR` 0x1b65e) is a toggling multi-select closed by RETURN, and `Z` marks
-every letter rather than sending. Always `lookup` the printer, then `lookup` its
-caller, before describing what a prompt does.
-
-**A catalog NAME can be wrong about a routine's direction — the callers settle
-it.** `launch_gooie_kablooie` sounds like the attacker firing the weapon. Its
-strings are `Sorry!  Only Jets can attack Gooie Kablooies`, `Send how many Jets?`
-and `Days Until Self-Destruct`: it is the DEFENDER's jet attack, and its single
-caller is `run_player_turn`, which also proves the prompt is offered every turn
-rather than hidden behind a menu item. Dump the strings and read `callers[]`
-before trusting a name; the catalog's names are evidence, not gospel.
-
-**A Real48 immediate arrives in registers, and `bre-real48.py decode` reads it.**
-Turbo Pascal passes a 6-byte real as `cx`/`si`/`di` (or a run of `mov word
-[bp-N]`), packed low byte first: `cx` low = exponent, `cx` high = mantissa byte
-1, `si` = bytes 2-3, `di` = bytes 4-5. So `mov cx,0x8a / xor si,si / mov
-di,0x3b80` is `mem:8a000000803b`, which decodes to 750. That one command turns a
-wall of `call 0xfd0:0x17xx` into arithmetic, once the resident helpers are named
-(`bre-disasm.py list | grep real_` gives add/subtract/multiply/divide/compare and
-the int conversions). Operand order is `ax:bx:dx` OP `cx:si:di`.
-
-**An unnamed routine can be identified by the company its CALLERS keep.** The
-catalog leaves many routines unclassified, and the instinct is to disassemble
-one until its purpose emerges. Reading its `callers[]` is usually faster and
-gives a stronger answer, because a routine's job is defined by who needs it.
-Real case (2026-08-16): proving BRE tells a Full Defense Alliance partner that
-its troops died defending someone else turned on whether `04ef:002f` wrote to
-the screen or to a stored recap. The routine itself was nameless. Its caller
-list — WMD launches, `report_spy_result`, `break_diplomatic_treaty`,
-`process_diplomatic_proposal`, `process_trade_offer`,
-`resolve_received_covert_operation`, `write_economic_policy_news` — has one
-thing in common: every one of them happens while the recipient is NOT logged
-in. That makes it the asynchronous "since your last play" filer, and settles the
-question without decoding a single instruction of its body.
-
-The general form: list the callers, then ask what they share that the
-alternatives would not. Screen-printers are called from menu handlers; recap
-filers are called from resolvers that run in someone else's turn; disk writers
-are called from the maintenance and packet paths.
-
-**Which ARGUMENT slot receives the record proves it reached the right realm.**
-Having identified a filer, the remaining question is who it filed against, and
-the answer is the recipient argument at each call site. In the same case the
-defender's notice passed `[bp-0x3]` and the ally's, 100 bytes later, passed
-`[bp-0x1]` — the loop letter. Two call sites into one filer with different
-recipient slots is what separates "the attacker was told about the ally" from
-"the ally was told", which is the whole finding. Quote the slot when recording a
-result like this; without it the claim is an inference about plausible
-behavior, not a reading.
-
-**A refusal string's OWNER is not its condition — disassemble the compare.**
-`find-string` tells you which routine can print a refusal. It does not tell you
-what triggers it, and a routine usually holds several refusals whose branches
-sit next to each other. Real case (2026-08-15): "You do not have relations with
-that realm." belongs to `create_trade_offer`, which is enough to say trade deals
-involve relations — but the branch immediately below it calls `056d:19b5`, the
-**protection** predicate, so reading the neighborhood would have attributed the
-wrong rule. Disassembling the guard itself gave both the rule and its threshold:
-
-```
-17E5  cmp word [es:di+0xae],0x1   ; the pair's relation
-17EB  jnl 0x1817                  ; >= 1 proceeds
-17ED  <the "no relations" refusal block>
-```
-
-read against BRE's relation enum (-1 Enemy, 0 None, 1..7 the seven pacts, 8
-War), that is "any pact at all" rather than a specific one — a distinction the
-string alone cannot carry, and exactly the kind of constant the spec should
-record with its instructions.
-
-**The chain is `find-string` -> `lookup` -> `disasm`, and the compare sits
-BEFORE the refusal block.** Aim `--around` a few dozen bytes earlier than the
-block `find-string` reports, or the window opens after the test you want and
-shows only the message being built. Two practical notes on the tools, both of
-which cost invocations here: `lookup` takes **no** `--directory` (unlike
-`find-string`, `disasm` and `verify`) and returns a JSON **list**, not an
-object; a **bare address is not a selector** for it — `lookup 0x04dc1d` exits
-non-zero with `no catalog name or alias matches`, so feed it the durable id a
-`callees[]` entry already gave you (`bre0988:ovr:procedure:04dc1d`); and
-`--around` accepts an OVR offset, so convert from the block address
-`find-string` prints rather than guessing a unit-relative one.
-
-**An empty BYTE-PATTERN scan is not evidence of absence either — the compiler
-has more than one way to reach a field.** Proving BRE never decays a Technology
-research counter meant showing nothing writes to the array. A scan for the
-disp16 baked into the modrm (`26 8B 85 51 F1` and friends) found the one read
-and nothing else, which reads exactly like "no writer exists". It was wrong: the
-writer reaches the caller's own record with a separate `add di,0xbe` and then a
-plain `[es:di]`, so no displacement appears in the access at all. Two idioms,
-two patterns, and only the pair is a proof.
-
-The general rule: before concluding a field is never touched, work out how the
-SAME field is addressed from each of its bases — the caller's own record
-(`[0x28d8]`, small positive offsets) and another realm's (`[0x28b0] +
-letter*0x42d`, large negative displacements) are different code shapes for one
-field. Then say which idioms you searched. A bulk `rep stos` over a whole record
-matches neither, so a clear-on-create is invisible to any such sweep and has to
-be reasoned about separately.
-
-**A 32-bit constant is loaded as two 16-bit immediates, so its bytes are NOT
-contiguous — a scan for the dword cannot find it.** Turbo Pascal loads a longint
-into `dx:ax` as a `mov ax,imm16` / `mov dx,imm16` pair, and the second
-instruction's opcode byte sits *between* the two halves. 2,000,000,000 in
-`run_bank` is `B8 00 94  BA 35 77` (`mov ax,0x9400` / `mov dx,0x7735` =
-0x77359400), so the obvious search for `00 94 35 77` matches nothing while the
-value is right there at four sites. `docs/mechanics-reference.md` recorded "the
-absence of a literal in either binary is consistent rather than damning" on the
-strength of exactly that search; the literal exists.
-
-Search for the **halves** instead — `grep -abo` for `\xb8\x00\x94` and
-`\xba\x35\x77`, or compute the pair for any constant with
-`python3 -c "v=2000000000; print(hex(v&0xffff), hex(v>>16))"` — and only then
-say a value is assembled at run time. The same applies in reverse when reading a
-listing: a bare `mov ax,0x9400` means nothing until you read the next
-instruction.
-
-**A disassembler that prints nothing has not told you the region is empty.**
-`disasm` once produced no output and exited **0**, which reads as "no code
-there" and is the most expensive kind of wrong answer. The cause was ndisasm
-3.02's `-k` skip flag, which stops disassembly outright rather than skipping a
-span; the fix was to compute the code regions and run one ndisasm per region
-with `-o <start>` (`code_regions`, fixed in the script). Do not reintroduce
-`-k`. More generally, when a disassembly step returns empty, verify against a
-second window that you know has code before concluding anything about the
-bytes.
-
-**In a capture, count the characters echoed after a prompt.** One echoed key
-means a single-key prompt; a run of them (`Send to: EFHIJKMNOP`) means
-multi-select, and a run with embedded `\b`/space/`\b` means the keys *toggle*.
-This is visible in a plain `cat -v` of the capture and it settles the question
-before any disassembly — but only if the capture is read as bytes rather than
-skimmed after ANSI stripping, which turns the erase sequences into
-innocuous-looking spaces.
-
-**A letter in a picker is usually an ARRAY INDEX, not a row number.** BRE
-multiplies the ASCII letter straight into its empire-record stride, so the
-letters carry gaps for dead realms and for the caller — never renumber a list to
-close them, and check that every screen naming a realm by letter (roster,
-relations, `Message To  :`) is using the same basis.
-
-**The variant-string trap (a number in a string may be the WRONG variant's
-number).** A literal value baked into a string is only authoritative for *that
-call site*, and BRE often has several near-identical strings for variants of one
-feature. `strings` flattens them with no context, so grabbing the first match
-can hand you a number that belongs to a different mode. Real example: searching
-the message editor turned up `You have 3 lines for your message.  /S=save
-/A=abort /C=clear` — but a live screenshot showed the standalone message editor
-allows **20** lines. The "3" was the *short attach-a-note-to-a-trade-deal*
-editor; the "20" was the *Send Message* editor — two variants with almost
-identical banners. Lesson: when a string carries a feature's number, don't
-assume it's the mode you care about. Grep for sibling copies of the same banner
-(`grep -a "lines for your message"` finds both), and confirm the number against
-a live screenshot of the *specific* feature before treating it as fact — the
-same source-1-beats-strings rule that already applies to colors.
-
-See `references/extraction.md` for the catalog-first string-reference workflow
-and the raw `strings` / `grep -abo` / `dd|xxd` fallback commands.
-
-## Cross-reference the docs, the overlay, AND a disassembly — never one alone
-
-A mechanic's full intended scope is usually described in ONE place in the help
-docs (`game/breins.txt`, `game/*.hlp`), while the overlay strings and the
-disassembly show it piecemeal — a display routine here, a constant there. So for
-any mechanic: read the docs' entry FIRST for the complete list of effects, then
-confirm the specifics in `BRE.OVR`/`BRE.EXE`, and (when a number is needed) the
-disassembly — and reconcile all three before concluding. Reconstructing from only
-the overlay + code, skipping the docs, is how a "finding" gets revised two or
-three times.
-
-Real miss (the Technology-region mechanic): `breins.txt`'s Technology entry lists
-*every* effect (military efficiency, region output, maintenance on regions +
-military + SDI, food spoilage, tax income). Skipping it and rebuilding the list
-from the overlay "Because of technology…" report strings + the code produced two
-wrong answers before the docs settled it.
-
-**Plain grep silently misses these files — use `grep -a`, `strings`, or `ack`.**
-`breins.txt` / `*.hlp` contain non-text bytes (ISO-8859/CP437 high bytes plus
-color control codes like 0x04/0x07 in the `^\0BTechnology^\07 … ^END` entry
-wrappers). GNU grep classifies such a file as *binary* and, by default, reports
-NO match for text that is plainly there — no line, no "Binary file matches"
-message, just exit 1. This is grep's binary classification of the file, **not**
-the locale: reproduced here in BOTH a UTF-8 and a C locale, and `LC_ALL=C` does
-not fix it. What works: `grep -a` (`--binary-files=text`), `strings <file> |
-grep`, or **`ack`** (which treats these as text by default). **Never trust a
-*silent* empty grep on a BRE file — confirm with `strings`/`ack` before
-concluding the text isn't there.** (Reproduced: `grep 'longterm enhancements'
-breins.txt` → exit 1; `grep -a` and `ack -i tech` → match.)
-
-**One word heads several unrelated entries.** `Technology` is both the region-type
-mechanic AND the "Technology Agreement" diplomacy treaty. Read the whole entry
-(to its `^END`) and don't conflate two entries that share a keyword.
+**Plain `grep` reports nothing on these files.** `breins.txt`, the `.hlp` files
+and the `.cap` captures contain CP437 and control bytes, so GNU grep classifies
+them as binary and exits 1 with no output, in any locale. Use `grep -a` (with
+`LC_ALL=C` on captures), `strings`, or `ack`. A silent empty grep on a BRE file is
+not evidence of absence.
 
 ## Reading the disassembly — reach for it early
 
-Several mechanics that resisted inference from play were read straight out of the
-binary in minutes: the coastal support curve, industrial gold, unit production,
-the crown tax, the technology system, the terrorist-op price. **Prefer reading the
-code to fitting a curve** — a fit needs dozens of samples and can still be wrong,
-and two BRE constants were mis-set that way before the disassembly corrected them.
+The coastal support curve, industrial gold, unit production, the crown tax, the
+technology system and the terrorist-op price were each read straight out of the
+binary in minutes. **Prefer reading the code to fitting a curve**: a fit needs
+dozens of samples and can still be wrong, and two constants were mis-set that way.
 
-**The method, the command cookbook, and the traps are in
-`references/disassembly.md`.** Load it when a constant, formula or gate is
-actually wanted.
+Use the static catalog (`scripts/bre-disasm.py`); never guess a segment base.
+The method, the command cookbook and the traps are in
+`references/disassembly.md`. Before you open it:
 
-What must be in front of you BEFORE you open it:
+- **Read `docs/dev/bre-save-format.md`'s entry for the mechanic**, every time,
+  even when the task arrives as fresh evidence. A whole session went into
+  recovering the Queen Royale refund formula already written down there.
+- **Grep the shipped prose** (above).
+- **A reading is not a finding until it reproduces captured figures.**
 
-- **Read `docs/dev/bre-save-format.md`'s entry for the mechanic first**, every
-  time, even when the task arrives as fresh evidence to analyze. A whole session
-  went into recovering the Queen Royale refund formula that was already written
-  down there. Grep the file for the mechanic's noun; it costs one command.
-- **Grep the shipped help and docs before either** (`game/*.hlp`, `docs/bre.doc`,
-  `breins.txt`) — they are last in authority but first in cost, and BRE documents
-  far more of its own mechanics, with numbers, than "prose" suggests. Use
-  `grep -a`; plain grep silently reports nothing on these files.
-- **Never guess a segment base.** Use the static catalog (`scripts/bre-disasm.py`
-  `list` / `lookup` / `find-string` / `map` / `disasm`), which needs no transient
-  runtime segment. Base-solving by plausibility score dead-ends silently.
-- **A candidate reading is not a finding until it reproduces captured figures.**
+## Driving BRE and keeping captures
 
-## Deciding a screen is NOT in the captures — the two ways that goes wrong
+BRE can be driven from a script under **dosemu2** (not DOSBox, which is
+graphical) and its screens scraped as text or with color. The harness, the
+launch recipe, its landmines and the turn-by-turn flow are in
+`references/harness.md`; read it BEFORE driving. Three rules decide whether to
+start at all:
 
-Concluding "no capture covers this" is a claim, and a wrong one sends people off
-to re-drive BRE for something already on disk. Both failures below happened on
-2026-08-17, on the same screen, within an hour.
+- **Never run two drivers against one tmux session**, and never kill it while BRE
+  runs; quit through the menu so `inuse.flg` clears.
+- **Playing creates real state.** Never drive a game Andy cares about; say what
+  you enrolled.
+- **Keep the raw capture in `cap/`** as `cap/<topic>-YYYYMMDD.cap`, never in a
+  scratch directory you will delete. `cap/` is gitignored (it is verbatim BRE
+  output) but it persists, and every claim in `docs/dev/bre-screens.md` must stay
+  re-readable. On 2026-08-16 a pass corrected a dozen screens from captures that
+  were then deleted with their directory, and two follow-up fixes stalled.
 
-- **Search for a menu ITEM plus its value, not for the status line.** The Covert
-  Operations menu was declared missing because the grep was keyed on its footer,
-  `You have N gold and N agents.`, and the pattern did not match the real
-  spacing. A screen's most greppable feature is a distinctive label next to a
-  number — `'Stir Revolts'` with `25,000` — not its prose furniture.
-- **BRE's help-topic INDEX lists every menu item, so it looks exactly like the
-  menu.** The follow-up search found the nine covert operation names, read the
-  screen they sat on, saw a plain list of all of them, and concluded the hits
-  were only the topic index. They were — at that offset. The real menu was
-  elsewhere in the same file. **A hit inside the topic index does not rule out a
-  hit on the menu; keep walking the matches.** The index has no prices and no
-  `(n)` keys; the menu has both.
+Record captured screens in `docs/dev/bre-screens.md`, citing the capture file.
+Parsing captures, and the traps that produced wrong findings, is in
+`references/captures.md`. Staging a realm or a setting in `game.dat` instead of
+building one up in play is in `references/staging.md`; two-board league runs are
+in `references/interbbs.md`.
 
-**Before reporting a screen as uncaptured, say which files you searched and with
-what pattern.** And check the file's mtime: a capture Andy took minutes ago is
-new data, and an earlier "not present" was true when it was made.
+## License boundaries — BRE is proprietary
 
-## Parsing a `.cap` capture — four traps that produced wrong findings
+Barren Realms Elite is copyrighted (owned by John Dailey Software; designed by
+Mehul Patel). Immortal Barons reimplements its *rules*. Reading the binary is
+fine; what crosses into the repo is limited.
 
-The economy parser is `scripts/bre-econ.py` in this project's Claude dir (per-turn
-income, region counts, purchase markers, back-computed yields). Prefer it to
-ad-hoc greps. Its `--shapes` mode censuses every distinct message form in a file
-— **run that first**, so no relevant line escapes notice.
+**Fair to replicate (facts and function):**
+- Mechanics, rules and formulas.
+- Numeric constants (unit stats, prices, caps, rates), recorded in
+  `docs/mechanics-reference.md`.
+- Menu structure, item order and hotkey layout.
 
-- **Count with `grep -oc`, never `grep -c`.** These captures are `\r`-separated,
-  so a whole screen can be one "line": `grep -c` reported 1 fishing turn in a
-  capture that contained 6.
-- **Never pipe a survey through `head`.** A truncated survey once "proved" that
-  rivers never produce food, when the line was simply below the cut.
-- **The Regions display WRAPS onto a second line.** Parsing only the first loses
-  Mountains, Coastal and Technology — that mistake hid 18 tourism samples.
+**Never copy into the repo:**
+- BRE's code, or code reconstructed or decompiled from the binary. Learn the
+  constant or formula, then write our own implementation.
+- **Display prose**: news lines, help text, result reports, flavor. The
+  functional furniture of a screen (a question prompt, a field label, a menu
+  item, a short refusal) MAY match word for word. AGENTS.md carries the rule and
+  its test: is the game asking a question, or telling a story?
+- **ANSI art, logos, splash and end screens.**
+- **Distinctive flavor names** are Andy's call, one at a time (#218). Ask rather
+  than renaming or reverting one.
+- **BRE's files themselves**: never commit or bundle `BRE.EXE`, `BRE.OVR`, its
+  data, or anything extracted from them. `--details` output and debugger dumps
+  count.
 
-- **Record how a figure is SPELLED before reading it as a value.** Converting
-  on sight destroys the evidence. On 2026-08-30 a grep for battle casualties
-  returned `You lost 116k Tanks!` and `You destroyed 1111 Troopers, 115k
-  Turrets, and 105k Tanks!`; both were read for magnitude, `115k` became
-  115,000, and the fact that BRE ABBREVIATES went unnoticed until Andy said so.
-  It was on screen twice. When a task touches how a figure is displayed, run the
-  census first — it is one command and it answers the whole question:
+**The trap is SCREEN TITLES.** A captured screen is copied for layout and colors,
+and the product name in its header looks like part of the design. It is
+branding: replace it. IB's InterBBS Scores shipped as `Barren Realms Elite: Top
+Planets by Score` for months. Naming the original in prose (the About screen,
+the README's Heritage, a divergence note) is fine; the line is identity, not
+mention.
 
-      grep -aoE "[0-9]+[km]\b.{0,40}" cap/*.cap | sed -E 's/[0-9]+/N/g' \
-        | sort | uniq -c | sort -rn | head -40
-
-  That sweep also turns up formats you were not looking for: it found a fourth
-  number style in the Daily Bulletin (`12,468k` — divided once, suffixed, THEN
-  grouped, never reaching `m`) that no other screen uses.
-
-- **Count news events against `news.dat`'s templates, never with an ad-hoc
-  grep.** Each category holds a handful of one-line variants with `%F`/`%T`
-  placeholders (`^NUKE` has four), and BRE draws ONE per event — so counting the
-  four exact template shapes both proves the one-line-per-event mapping and
-  gives an exact total. An improvised pattern gets it wrong in both directions:
-  excluding lines that name two realms (to separate attacker from target) threw
-  away `EXTRA!  EXTRA!  %T was hit by Nuclear Missiles launched by %F!` and
-  undercounted a realm's strikes by a third, on a count the whole finding rested
-  on. Read the category out of `game/news.dat` first, then count its shapes.
-
-- **An echoed menu selection is not a completed action.** These captures echo the
-  chosen item beside the prompt (`Choice> Quit    Undermine Investments`), and
-  that records the keypress only — the op may have been abandoned at the next
-  prompt. Reading a run of echoes as a run of actions produced a wrong claim
-  about which per-day allowance covers what, caught only because the sysop
-  remembered not going through with it. The tells for a completed action are a
-  state change on the next screen (a menu row gone, gold moved), not the echo.
-
-**And before explaining any per-unit figure, check whether the count you divided
-by changed that turn.** Purchases land between the report and the Regions
-display, so a total can print next to a STALE count. Twice in one session a
-changed denominator was mistaken for a changed mechanic.
-
-### Past sessions are a capture archive — grep them before asking for a new run
-
-Every screen ever scraped in this project sits in the session transcripts at
-`~/.claude/projects/-home-andy-src-andy5995-immortal-barons/*.jsonl`. They are
-JSON-escaped (`\\u001b`, `\\r\\n`) but a small Python pass unescapes and strips
-ANSI, and they hold the *surrounding* screens that a summarized table in
-`docs/dev/` dropped. That is what settled the SDI curve: the write-up recorded
-funding and strength but not the realm's region count, and the count was sitting
-in a menu two screens away in the transcript.
-
-**A price can stand in for a figure the capture never printed.** Reverse an
-already-verified formula: Terrorist Ops is `total regions x 64`, so a menu
-showing `532,544` pins the realm at 8,321 regions without a Regions display. The
-region-maintenance and nuclear-price formulas work the same way.
-
-### First ask whether the capture EXERCISED the feature at all
-
-A capture that mentions a feature thousands of times may never have used it
-once. BRE presents the Attack Menu and the InterPlanetary Ops menu **every
-turn, automatically**, so their item labels accumulate once per turn whether or
-not the player pressed anything. A 27 MB capture matched "Group Attack" 5,385
-times and looked like a goldmine; it contained no interplanetary attack at all.
-
-**The tell is equal counts across sibling items.** Count several items from the
-same menu at once — when `Regular Attack`, `Nuclear Attack`, `Attack Pirates`
-and `Alliance Strength` all land on 2,498, that is the menu being redrawn 2,498
-times, not four features being used. A number that *breaks* from the cluster is
-the one worth chasing (`Spy Database` at 13,155 against a 2,534 menu count is
-real use; the 317 non-menu `Group Attack` hits were `BRE PLANETARY` step lines).
-
-**Prove absence with the binary's own result strings, not with guessed wording.**
-Harvest the Pascal ShortStrings from `BRE.OVR`, filter to the mechanic's
-vocabulary, and test each against the capture — that answers "is this flow here"
-without depending on how you remember the prompt being worded:
-
-```
-python3 - "$BRE/BRE.OVR" plain.txt <<'EOF'
-import re,sys
-ovr=open(sys.argv[1],'rb').read(); cap=open(sys.argv[2],'rb').read()
-c=[m.group(2)[:m.group(1)[0]] for m in re.finditer(rb'([\x08-\x3c])([ -~]{8,60})',ovr)
-   if len(m.group(2)[:m.group(1)[0]])==m.group(1)[0]]
-kw=(b'attack',b'strike',b'battle')          # the mechanic's vocabulary
-for s in sorted({x for x in c if any(k in x.lower() for k in kw)} , key=lambda x:-cap.count(x)):
-    if cap.count(s): print(f"{cap.count(s):>6}  {s.decode('latin-1')}")
-EOF
-```
-
-Run this **before** planning a mining session. It takes one command and it is
-the difference between an afternoon of analysis and knowing in a minute that the
-data is not there.
-
-**`grep` calls these captures binary and silently reports nothing.** CP437 high
-bytes in a UTF-8 locale make GNU grep exit 1 with no output and no "Binary file
-matches" — the same trap the `breins.txt` section describes, in a new place. Use
-`LC_ALL=C` **and** `grep -a`; a bare grep returning zero on a capture is not
-evidence of absence until both are set.
-
-### Auto-Pay turns are a stronger probe than the itemised prompts
-
-With **Auto-Pay Maintenance ON**, BRE collapses the whole maintenance sequence
-into a single `N Gold paid.` line. That is *more* informative than the separate
-prompts, not less, because every component has to reconcile against one number at
-once:
-
-```
-Gold paid = regionUpkeepPerRegion × regions      (constant for a given realm)
-          + perUnitMaint × units held
-          + trunc(turn income × PlanetaryTaxRate / 1000)
-```
-
-Guess one unknown, solve for another, then check whether the answer stays
-constant across turns where the *first* quantity moved. **A constant that
-survives a changing denominator is the signal; a "constant" that drifts with
-income is a wrong assumption.** This settled whether industrial gold is inside
-the crown-tax base in ten turns of already-captured data: assuming it is taxed
-leaves region maintenance at exactly 913.000/region across three different region
-counts, assuming it is not leaves a figure wandering 974–992.
-
-It also yields per-unit maintenance for free — on turns holding manufactured
-units the per-region figure sits slightly above the constant, and the gap is
-`units × perUnitMaint`.
-
-So when a capture is needed to settle an arithmetic question, **ask for Auto-Pay
-ON**, not off. Auto-Pay OFF is for learning the prompt *sequence*, wording, and
-colors (see the maintenance-flow section of `docs/mechanics-reference.md`).
-
-## License boundaries — BRE is proprietary, not open source
-
-Barren Realms Elite is copyrighted (John Dailey Software; original design by
-Mehul Patel). Immortal Barons is a clean-room reimplementation of its *rules*.
-Gathering from the binary is fine — but what crosses back into the repo is
-strictly limited. The idea/expression line:
-
-**Fair to replicate (facts / functional — not protected by copyright):**
-- Game mechanics, rules, and formulas.
-- Numeric balance constants — unit stats, prices, caps, rates. These are facts;
-  verify against a disassembly and record them in `docs/mechanics-reference.md`.
-- Menu structure, item order, and hotkey layout (functional organization).
-
-**NEVER copy into the repo (copyrightable expression):**
-- BRE's source code, or code reconstructed/**decompiled** from the binary.
-  Read a disassembly to learn a *constant or formula*, then
-  write our own implementation — transcribing its code is a derivative work and
-  is infringing.
-- **Display PROSE verbatim**: menu descriptions, news/bulletin lines, help text,
-  tutorial prose, end-of-turn messages, result reports. Reconstruct in our own
-  words. The line moved on 2026-09-11 and now runs between prose and the
-  functional furniture of a screen: a question prompt, a field label, a menu
-  item or a short refusal MAY match the original word for word, because those
-  are dictated by what is being asked rather than by how anyone chose to say it.
-  AGENTS.md carries the rule and the test to apply — is the game asking a
-  question, or telling a story? The covert and terror operation menus are the
-  worked example.
-- **ANSI art, logos, splash/end screens** (`game/bre.ans`, `breend.ans`, etc.).
-- **Distinctive flavor names** are Andy's call, one at a time. The nine pirate
-  factions carry IB's own names; the Gooie Kablooie, the S3-Sabre and SpyGuy keep
-  the original's (#218). Ask rather than renaming or reverting one yourself.
-
-**Trademark / branding:** do not present the project as "Barren Realms Elite" or
-use its name/logo as our branding.
-
-**The trap is SCREEN TITLES.** A captured screen is copied for its layout and
-colors, and the original's product name sits right there in the header looking
-like part of the design. It is not — it is the branding, and it is the one
-element of a captured screen that must be substituted rather than reproduced. IB
-shipped `Barren Realms Elite: Top Planets by Score` as its own InterBBS Scores
-title for months for exactly this reason. When cloning a screen, ask what in it
-is the original's NAME and replace that; keep everything else.
-
-Naming the original in *prose* is fine and often required — the About screen's
-attribution and disclaimer, the README's Heritage section, a doc explaining a
-divergence. The line is identity, not mention: describing IB as a clone OF the
-original is fine, heading IB's own screen WITH the original's name is not. IB is an independent tribute, "not affiliated
-with, or endorsed by" the original authors (README "Heritage").
-
-**Never ship BRE's files:** do not distribute, commit, or bundle `BRE.EXE` /
-`BRE.OVR`, its data files, or any asset extracted from them. They stay in your
-own local reference copy only.
-
-**What BRE's own license says (scanned 2026-07, `docs/bre.doc` — the license
-lives only there; `register.doc`/`whatsnew.doc`/`*.hlp`/`breins.txt` add no
-terms).** The BRE "SOFTWARE LICENSE AGREEMENT" has **no anti-disassembly or
-anti-reverse-engineering clause** — reading/disassembling the binary for study
-is not addressed. What it *does* forbid: "You may not **alter** the
-machine-readable object files or program documentation files" (esp. to defeat
-the registration key or modify the copyright/text), removing/modifying the
-copyright notice, and selling or bundling-for-fee. So disassembling BRE to learn
-a constant/formula for OUR own implementation is not prohibited by its license;
-altering `BRE.EXE`/`BRE.OVR` is. (Editing a local *save* file — `game.dat` — for
-study is a different thing from altering the object files, but revert it and
-never redistribute.) Not legal advice; absence of a clause ≠ affirmative
-permission, and jurisdictions differ — the clean-room "no copying expression"
-posture above is the safe line regardless.
-
-**BRE is shareware** (60-day evaluation + registration key), and under US law
-disassembling software to reach its *unprotected functional elements* (ideas,
-mechanics, constants) is settled **fair use** — *Sega v. Accolade*, 977 F.2d
-1510 (9th Cir. 1992) and *Sony v. Connectix*, 203 F.3d 596 (9th Cir. 2000): the
-"intermediate copying" that disassembly requires is fair use when it's the only
-way to get at the functional ideas and the result is an independent
-implementation (exactly the clean-room clone here). The one live caveat is DMCA
-§1201 anti-circumvention — but that bites only if you defeat the registration
-"key system," which we never do (we read game math, not the key). Interpol is
-irrelevant (a police-coordination body, not a lawmaker); cross-border norms come
-from treaties (Berne/TRIPS) and the EU Software Directive 2009/24/EC, which
-*expressly* permits decompilation for interoperability. Verified current 2026-07;
-no ruling has disturbed Sega/Sony. Sources: EFF Coders' Rights Reverse
-Engineering FAQ (`eff.org/issues/coders/reverse-engineering-faq`), *Sega v.
-Accolade* (Wikipedia / BitLaw), *Sony v. Connectix* (digital-law-online.info).
-
-Not legal advice. The idea/expression line above reflects general copyright
-principles, not a ruling on any specific case. When unsure whether something has
-crossed from *mechanic* into *expression*, ask a project maintainer or check the
-copyright law that applies in your jurisdiction rather than assume — and when in
-doubt, don't copy.
+BRE's own license and the case law behind reading a binary for its functional
+elements are in `references/license.md`. When unsure whether something has
+crossed from mechanic into expression, ask, and do not copy.
 
 ## Other guardrails
 
 - **No third-party private contact info** (John Dailey's or anyone's) in any
-  repo artifact — commits, comments, docs, anywhere.
-- **CP437 vs UTF-8.** BRE strings are CP437; high bytes mojibake in a UTF-8
-  terminal. Our clone emits UTF-8 — never paste raw CP437 bytes; map to the
-  Unicode glyph.
+  repo artifact.
+- **CP437 vs UTF-8.** BRE strings are CP437; IB emits UTF-8. Map a high byte to
+  its Unicode glyph, never paste it raw.
 
 ## After gathering
 
 State the source and confidence in the reply, e.g. "from BRE.OVR string table
-(labels/order authoritative; colors unknown — need a screenshot)". Update
-`docs/mechanics-reference.md` when a verified value changes, and record durable
-findings in the relevant memory (`bre-binary-verified-math`,
-`check-bre-strings-when-unsure`).
+(labels and order authoritative; colors unknown, need a capture)". Update
+`docs/mechanics-reference.md` when a verified value changes.
 
-**Name every routine you identify, in the same pass.** If you worked out what an
-`ovr_*`/`exe_*` address-derived routine does, write it into
-`scripts/bre-semantic-names.json` before you finish — name, `confidence`, and an
-`evidence` list. Reading against a frozen name set is how the next run gets
-confused, and it is the failure the catalog's author warned about (#126).
-
-Three things this gets wrong if rushed:
-
-- **Let the CALLERS pick the name's shape.** A routine reached from one parent
-  takes a `parent__child` name; one shared by several does NOT — it gets a plain
-  descriptive name. `calculate_attack_force_offense` was nearly filed under the
-  invasion resolver until its caller list showed `create_individual_attack` and
-  `resolve_returning_attack` use it too.
-- **Match the file's own formatting.** Its `evidence` arrays sit on ONE line. A
-  `json.dump(..., indent=2)` rewrite turns three added entries into a 1,800-line
-  diff. Insert the text; do not round-trip the file.
-- **The generated catalog is derived, and hand-patching it does not work.**
-  `docs/dev/bre-v0988-disassembly.json` carries names, call-graph edge labels,
-  coverage counts AND a validation record; patching the first three leaves the
-  fourth stale and `check-catalog` says so. Only
+**Name every routine you identify, in the same pass**, in
+`scripts/bre-semantic-names.json`: name, `confidence`, and an `evidence` list.
+- **The callers pick the name's shape**: a routine with one parent takes
+  `parent__child`; one shared by several takes a plain descriptive name.
+- **Match the file's formatting**: `evidence` arrays sit on one line. Insert the
+  text; a `json.dump(indent=2)` round-trip turns three entries into a 1,800-line
+  diff.
+- **The generated catalog is derived; do not hand-patch it.** Nothing
+  regenerates it automatically. Rebuild it with
   `bre-disasm.py analyze --directory "$BRE" -o docs/dev/bre-v0988-disassembly.json`
-  rebuilds it, and that needs Capstone installed. Update the authored name map,
-  run `check-catalog`, and say the derived catalog still needs regenerating.
+  (needs Capstone), in the same commit as the names, and run `check-catalog`. If
+  you cannot rebuild it, say so.
 
-**Keep this skill current.** When you discover something new about *how to gather
-from BRE* — a driving/scraping technique, a harness landmine and its fix, a
-menu-input quirk, a build-up/strategy method for staging a scenario, a source
-that turned out authoritative (or not) — fold it back into this skill so the next
-run starts from it instead of re-learning. (Verified mechanic *values* still go
-to `docs/mechanics-reference.md`; play/build-up technique goes to
-`docs/dev/bre-buildup-strategy.md`; this skill captures the *gathering method*.)
-Update the skill in the same pass that produced the discovery, not "later."
+## Keep this skill current
 
-**Put it in the right file.** This SKILL.md is loaded on EVERY session that
-touches BRE, so it earns its size only by holding what changes whether you start
-correctly: the source ladder, the license line, the "check the notes and the
-shipped docs first" rules, and the calibration lessons. Detail that matters only
-once you are already doing the work belongs in `references/`:
+When you learn something new about *how to gather from BRE* (a technique, a
+harness landmine and its fix, a source that proved authoritative or not), fold
+it in during the same pass. Verified mechanic *values* go to
+`docs/mechanics-reference.md`, build-up technique to
+`docs/dev/bre-buildup-strategy.md`; this guide holds the *method*.
+
+**Put it in the right file, and merge rather than append.** This core loads on
+every session that touches BRE, so it holds only what decides whether you start
+correctly: the source ladder, the calibration rules, the license line. Detail you
+need once the work is under way goes in `references/`, into the section of that
+file it belongs to, merged with any entry already saying the same thing:
 
 | File | What lives there |
 | --- | --- |
-| `references/harness.md` | tmux/dosemu2 driving, the launch recipe, its landmines, the turn-by-turn game flow |
-| `references/disassembly.md` | the disassembly method, command cookbook, field/constant-hunting recipes |
-| `references/extraction.md` | string extraction and the catalog-first reference workflow |
-| `references/interbbs.md` | two-board league runs |
+| `references/disassembly.md` | the catalog, finding constants and fields, names and callers, control flow, Real48, porting a screen, the debugger |
+| `references/captures.md` | parsing `.cap` files, deciding a screen is uncaptured, census and probe techniques |
+| `references/harness.md` | driving BRE under tmux/dosemu2, its landmines, the turn-by-turn flow |
+| `references/staging.md` | editing `game.dat` to stage a realm or a setting |
+| `references/extraction.md` | string extraction, news templates, variant strings |
+| `references/interbbs.md` | two-board league runs and the local InterBBS ring |
+| `references/license.md` | BRE's license text and the case law behind the clean-room line |
 
-It was split for exactly this reason: the core had grown to 1,452 lines
-(~21,500 tokens) of which two sections were over half. Add to a reference and
-leave a one-line hook here; do not re-grow the core.
+The core was split once at 1,452 lines and had grown back to 1,178 by
+2026-09-27, mostly by appending. Add a one-line hook here at most.
