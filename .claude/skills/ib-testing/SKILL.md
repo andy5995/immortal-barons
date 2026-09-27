@@ -560,14 +560,13 @@ dead: packets keep arriving at the polling board, its journal keeps reporting
 bound. Confirm both directions by looking at BOTH boards' inbound, never one.
 
 **`-planetary` does not run daily maintenance, and some mechanics are keyed to
-the GAME day rather than the wall clock.** Travel-time probes are the case that
-bites: `PingTravelTimes` fires once per `LastMaintDate`, maintenance advances
-that at most one day per REAL day (`internal/game/turn.go`), and nothing in an
-exchange script runs `-maint`. A rig with no callers therefore exchanges packets
-every fifteen minutes for days while queueing no probes at all — the boards here
-had gone 7 and 12 days between pings with all three timers healthy. Before
-concluding an inter-BBS mechanic is broken, check whether maintenance has run
-today; if it has not, run `-maint` on each board and try again.
+the GAME day rather than the wall clock.** Maintenance advances the game day at
+most once per REAL day (`internal/game/turn.go`), and an exchange script that
+runs only `-planetary` never advances it. Before concluding an inter-BBS
+mechanic is broken, check whether maintenance has run today; if it has not, run
+`-maint` on each board and try again. (Travel-time probes used to be the case
+that bit: they fired once per game day, and a rig went 7 and 12 days between
+pings with healthy timers. Since `e69a33a0` they go out on every planetary run.)
 
 **A deficit is permanent, and that is the design, not a fault to repair.**
 `DailyMaintenance` refuses a second advance on the same real date (`if
