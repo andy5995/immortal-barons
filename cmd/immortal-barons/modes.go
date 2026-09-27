@@ -65,8 +65,12 @@ func runMaint(cfg game.Config, today string) error {
 		fmt.Println("The league is frozen; maintenance did not advance the world.")
 	case r.Days > 0:
 		fmt.Printf("Daily maintenance ran: advanced %d day(s) to game day %d.\n", r.Days, w.GameDay)
+	case cfg.InterBBSEnabled():
+		// The packet step below still runs, and it is why a league board runs
+		// -maint every few minutes; saying only "already run" read as nothing to do.
+		fmt.Println("Daily maintenance already ran today; running the inter-BBS step.")
 	default:
-		fmt.Println("Maintenance has already been run today.")
+		fmt.Println("Daily maintenance already ran today.")
 	}
 	var run store.PlanetaryRun
 	if cfg.InterBBSEnabled() {
