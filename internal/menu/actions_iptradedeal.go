@@ -49,7 +49,7 @@ func sendIPTradeDeal(s session.Session, w *ctx) Result {
 	var cost int64
 	var carriers, held int
 	w.Read(func() {
-		cost = w.World.IPTradeDealCost(goods)
+		cost = w.World.TradeOfferCost(goods)
 		carriers = game.TradeDealCarriers(goods)
 		if p := w.Player(); p != nil {
 			held = p.Carriers

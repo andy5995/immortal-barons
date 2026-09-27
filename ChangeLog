@@ -1,5 +1,8 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * A trade deal's daily fee follows its cargo; it is sent for 2 to 10 days
+
 2026-09-26 (v0.2.0)
   * Updating from v0.1.0 or later needs no game reset
   * BREAKING: packet protocol 3; every board in a league must update together

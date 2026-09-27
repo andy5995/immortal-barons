@@ -187,7 +187,8 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 
 	fmt.Fprintf(s, "\n%s"+tr(s, "You offer %s to %s")+"%s\n", ansi.FgBrightCyan, basketSummary(s, send), toName, ansi.Reset)
 	fmt.Fprintf(s, "%s"+tr(s, "in return for %s.")+"%s\n", ansi.FgBrightCyan, basketSummary(s, demand), ansi.Reset)
-	if !AskYesNo(s, "Send this trade deal?", true) {
+	fmt.Fprintf(s, "\n"+tr(s, "Trade Deal requires %d Carriers.")+"\n", game.TradeDealCarriers(send))
+	if !askYesNoHere(s, "Send Trade Deal?", true) {
 		return Stay
 	}
 	days, perDay := tradeDealSpan(s, w, toName, send)
@@ -224,39 +225,38 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 }
 
 // tradeDealSpan asks how many days a deal to toName stands and returns the span
-// with its per-day fee, or a span of 0 when the player gave one too short to
-// send. BRE: a deal is sent for a span of days at a per-day gold
-// fee and consumes a carrier. A standing Protective Trade agreement cuts the
-// per-day rate. The span is how long the offer stands before it lapses, so the
-// ceiling here is what the sender can pay for — the original has no other limit.
+// with its per-day fee, or a span of 0 when none can be sent. The span is also
+// the offer's lifetime. BRE's create_trade_offer (BRE.OVR 0x268a1-0x26b4a):
+// the per-day fee is the cargo-weighted cost of what is sent, cut by a
+// Protective Trade agreement; the span runs from TradeDealMinDays to
+// TradeDealMaxDays, or to the days the gold left after the offered gold can pay
+// for, and too few for the minimum refuses the deal. A basket that sends nothing
+// costs nothing and skips the fee lines. BRE counts gold in hand only; IB adds
+// the bank, so affordOrBank's withdrawal offer can still cover the fee.
 func tradeDealSpan(s session.Session, w *ctx, toName string, send game.TradeBasket) (int, int64) {
-	perDay := int64(game.TradeDealGoldPerDay)
-	var purse int64
+	var perDay, purse int64
 	w.Read(func() {
 		if p, recip := w.Player(), findRealm(w, toName); p != nil && recip != nil {
-			perDay = w.World.TradeDealGoldPerDayBetween(p, recip)
-			purse = p.Gold
+			perDay = w.World.TradeDealGoldPerDayBetween(p, recip, send)
+			purse = p.Gold + p.Bank
 		}
 	})
-	// What is left after the gold being offered is what can pay for the span.
-	maxDays := game.TradeDealMinDays
-	if left := purse - int64(send.Gold); perDay > 0 && left > 0 {
-		if affordable := int(left / perDay); affordable > maxDays {
-			maxDays = affordable
+	maxDays := game.TradeDealMaxDays
+	if perDay > 0 {
+		fmt.Fprintf(s, "\n"+tr(s, "This trade deal will cost %s gold per day to send.")+"\n", comma(perDay))
+		fmt.Fprintf(s, tr(s, "Trade deals must be sent for a minimum of %d days.")+"\n", game.TradeDealMinDays)
+		if affordable := (purse - int64(send.Gold)) / perDay; affordable < int64(maxDays) {
+			maxDays = int(max(affordable, 0))
+		}
+		if maxDays < game.TradeDealMinDays {
+			fail(s, game.ErrCantAfford)
+			return 0, perDay
 		}
 	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "Sending costs %s gold per day; it needs one carrier.")+"%s\n",
-		ansi.Dim, comma(perDay), ansi.Reset)
-	fmt.Fprintf(s, "%s"+tr(s, "The deal stands until the span runs out; unanswered, the goods are lost.")+"%s\n",
-		ansi.Dim, ansi.Reset)
-	suggested := game.TradeDealDefaultDays
-	if suggested > maxDays {
-		suggested = maxDays
-	}
-	days := promptSuggested(s, "How many days to send it for?", suggested, maxDays)
+	days := promptSuggested(s, "How many days would you like to send this deal for?", game.TradeDealMinDays, maxDays)
 	// A span below the minimum is refused and the deal is not sent, as BRE's
 	// create_trade_offer does (BRE.OVR +0x21bb: under 2, its refusal, then
-	// return). It used to be raised to the minimum out of sight.
+	// return).
 	if days < game.TradeDealMinDays {
 		fail(s, fmt.Errorf(tr(s, "Sorry, trade deals must be sent for at least %d days."), game.TradeDealMinDays))
 		return 0, perDay

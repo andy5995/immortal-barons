@@ -21,7 +21,8 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 
 	send := TradeBasket{Tanks: 100}
 	demand := TradeBasket{Gold: 5_000}
-	fee := TradeDealCost(TradeDealMinDays) // 2 * 100,000
+	// 100 tanks weigh 100 x 1.00, over five, plus the 100,000 base, per day.
+	fee := int64(2 * 100_020)
 	if err := w.SendTradeDeal(from, to, send, demand, TradeDealMinDays); err != nil {
 		t.Fatalf("send: %v", err)
 	}
@@ -167,8 +168,8 @@ func TestAcceptTradeDealClampsGoldToMoneyCap(t *testing.T) {
 }
 
 // A Protective Trade agreement puts guards on the route and makes the deal
-// cheaper to send: BRE divides the PER-DAY rate by three, so a two-day deal
-// costs 2 x 33,333 rather than 2 x 100,000. Golden literals — these are the
+// cheaper to send: BRE divides the PER-DAY rate by three, so a two-day deal of
+// 100 tanks costs 2 x 33,340 rather than 2 x 100,020. Golden literals — these are the
 // binary's figures, not a playtest knob (see ProtectiveTradeCostDivisor).
 func TestProtectiveTradeMakesDealsCheaper(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
@@ -176,25 +177,26 @@ func TestProtectiveTradeMakesDealsCheaper(t *testing.T) {
 	to := w.AddHuman("t", "Toland")
 	pastProtection(w)
 	pactAll(w, fullDefenseAlliance)
-	from.Carriers, from.Gold = 2, 1_000_000
+	from.Tanks, from.Carriers, from.Gold = 100, 2, 1_000_000
+	send := TradeBasket{Tanks: 100}
 
-	if got := w.TradeDealCostBetween(from, to, 2); got != 200_000 {
-		t.Fatalf("undiscounted 2-day cost = %d, want 200000", got)
+	if got := w.TradeDealCostBetween(from, to, send, 2); got != 200_040 {
+		t.Fatalf("undiscounted 2-day cost = %d, want 200040", got)
 	}
 	w.setRelation(from.Name, to.Name, protectiveTrade)
-	if got := w.TradeDealGoldPerDayBetween(from, to); got != 33_333 {
-		t.Errorf("guarded per-day rate = %d, want 33333", got)
+	if got := w.TradeDealGoldPerDayBetween(from, to, send); got != 33_340 {
+		t.Errorf("guarded per-day rate = %d, want 33340", got)
 	}
-	if got := w.TradeDealCostBetween(from, to, 2); got != 66_666 {
-		t.Errorf("guarded 2-day cost = %d, want 66666", got)
+	if got := w.TradeDealCostBetween(from, to, send, 2); got != 66_680 {
+		t.Errorf("guarded 2-day cost = %d, want 66680", got)
 	}
 
 	before := from.Gold
-	if err := w.SendTradeDeal(from, to, TradeBasket{}, TradeBasket{Food: 1}, 2); err != nil {
+	if err := w.SendTradeDeal(from, to, send, TradeBasket{Food: 1}, 2); err != nil {
 		t.Fatalf("send: %v", err)
 	}
-	if before-from.Gold != 66_666 {
-		t.Errorf("send charged %d, want the guarded 66666", before-from.Gold)
+	if before-from.Gold != 66_680 {
+		t.Errorf("send charged %d, want the guarded 66680", before-from.Gold)
 	}
 }
 
@@ -207,20 +209,19 @@ func TestTradeDealCostFollowsTheCostSetting(t *testing.T) {
 		cfg.TradeCosts = l
 		w := NewWorldSeed(cfg, 1)
 		a, b := w.AddHuman("a", "Alpha"), w.AddHuman("b", "Bravo")
-		return w.TradeDealGoldPerDayBetween(a, b)
+		return w.TradeDealGoldPerDayBetween(a, b, TradeBasket{Tanks: 100})
 	}
-	med := rate(Medium)
-	if med != TradeDealGoldPerDay {
-		t.Fatalf("Medium should be the unscaled rate: got %d, want %d", med, TradeDealGoldPerDay)
+	if got := rate(Medium); got != 100_020 {
+		t.Fatalf("Medium should be the unscaled rate: got %d, want 100,020", got)
 	}
 	// Golden literals, not the constants: this ladder is the original's own and
 	// differs from BOTH the others — Low divides by six where the attack knobs
 	// divide by five, and the generic presets halve.
-	if got := rate(Low); got != 16_666 {
-		t.Errorf("Low = %d, want 100,000/6 = 16,666", got)
+	if got := rate(Low); got != 16_670 {
+		t.Errorf("Low = %d, want 100,020/6 = 16,670", got)
 	}
-	if got := rate(High); got != 300_000 {
-		t.Errorf("High = %d, want 100,000x3 = 300,000", got)
+	if got := rate(High); got != 300_060 {
+		t.Errorf("High = %d, want 100,020x3 = 300,060", got)
 	}
 	if got := rate(None); got != 0 {
 		t.Errorf("None = %d, want a free deal", got)
@@ -234,8 +235,8 @@ func TestProtectiveTradeDiscountsTheScaledRate(t *testing.T) {
 		level Level
 		want  int64
 	}{
-		{Medium, TradeDealGoldPerDay / ProtectiveTradeCostDivisor},
-		{High, TradeDealGoldPerDay * TradeCostHighMultiple / ProtectiveTradeCostDivisor},
+		{Medium, 33_340},
+		{High, 100_020},
 		{None, 0},
 	} {
 		cfg := DefaultConfig()
@@ -243,7 +244,7 @@ func TestProtectiveTradeDiscountsTheScaledRate(t *testing.T) {
 		w := NewWorldSeed(cfg, 1)
 		a, b := w.AddHuman("a", "Alpha"), w.AddHuman("b", "Bravo")
 		w.setRelation(a.Name, b.Name, protectiveTrade)
-		if got := w.TradeDealGoldPerDayBetween(a, b); got != c.want {
+		if got := w.TradeDealGoldPerDayBetween(a, b, TradeBasket{Tanks: 100}); got != c.want {
 			t.Errorf("%v with Protective Trade: got %d, want %d", c.level, got, c.want)
 		}
 	}
@@ -426,5 +427,22 @@ func TestTradeDealSavedWithoutAnArrivalTurnLandsAtOnce(t *testing.T) {
 	to.TurnsLeft = cfg.TurnsPerDay // their very first turn of the day
 	if !w.TradeDealArrived(d, to) {
 		t.Error("an unstamped deal should arrive immediately, not be held")
+	}
+}
+
+// The per-day rate is the cargo's weighted cost, not a flat fee, and the span is
+// held to 2..10 days (create_trade_offer, BRE.OVR 0x268a1 and 0x268de). A deal
+// that sends nothing only asks, and costs nothing to send.
+func TestTradeDealRateFollowsTheCargo(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	from, to := w.AddHuman("f", "Fromland"), w.AddHuman("t", "Toland")
+	if got := w.TradeDealGoldPerDayBetween(from, to, TradeBasket{Gold: 50_000_000}); got != 200_000 {
+		t.Errorf("50M gold: %d a day, want 50,000,000 x 0.01 / 5 + 100,000 = 200,000", got)
+	}
+	if got := w.TradeDealCostBetween(from, to, TradeBasket{Tanks: 100}, 50); got != 10*100_020 {
+		t.Errorf("a 50-day span cost %d, want the 10-day ceiling's 1,000,200", got)
+	}
+	if got := w.TradeDealCostBetween(from, to, TradeBasket{}, 10); got != 0 {
+		t.Errorf("an empty Send basket cost %d, want 0", got)
 	}
 }

@@ -2166,6 +2166,14 @@ is the sender's own turn of the day; the mechanic behind it is in
 `docs/mechanics-reference.md`. **Deliberate divergence:** IB says the same thing
 in its own words rather than reproducing BRE's sentence.
 
+**IB matches the rest of this screen, from the carriers line to the days
+prompt** (2026-09-27). The `(2; 10)` is min and max, not a default: the ceiling
+is 10 or the days the gold in hand can pay for, whichever is lower (0x26A39).
+IB counts the bank as well, so its withdrawal offer can still pay the fee.
+IB keeps its own `You offer … in return for …` summary above the carriers line,
+its `:` after the hint, and its one short-of-gold refusal in place of BRE's
+`Sorry, you cannot afford to send this deal.`
+
 The market itself lists the eight tradeable goods — note keys 1-5 and 7-9, with
 **no key 6**. Key 6 is **Gold** (`empire_trade_good_pointer`, BRE.OVR 0x051133,
 record `+0x66`, and the good-name table at `DS:0xb11` agrees). It is missing from

@@ -161,20 +161,16 @@ const (
 	MaxCountField = 2_000_000_000
 )
 
-// Trade-deal sending (BRE-verified live, 2026-07-21): sending a trade deal
-// consumes one carrier to transport the goods and costs TradeDealGoldPerDay per
-// day for a chosen span of TradeDealMinDays..TradeDealMaxDays days; the offered
-// goods are escrowed and arrive on the recipient's next turn. (BRE adds a
-// cargo-weighted component on top of the 100,000/day base that IB does not
-// model — BRE.OVR 0x0513e7 sums the nine goods against fixed weights, divides by
-// 5, and adds the base at 0x05154e.)
+// Trade-deal sending: a deal consumes the carriers its cargo needs
+// (TradeDealCarriers) and costs its cargo-weighted TradeOfferCost per day for a
+// chosen span of TradeDealMinDays..TradeDealMaxDays days; the offered goods are
+// escrowed until the recipient answers.
 const (
-	TradeDealGoldPerDay = 100_000 // binary: the flat part of the per-day transit cost
 	// TradeDealGoldBase and TradeDealCostDivisor are the two halves of the
 	// original's cost formula: the nine goods are summed against the per-good
 	// ShipWeight figures in units.go, divided by five, and this base is added
 	// (BRE.OVR 0x0513e7, constants decoded at unit offsets 0x0746 and 0x0753).
-	// BINARY-VERIFIED. The base is the same 100,000 the per-day rate uses.
+	// BINARY-VERIFIED.
 	TradeDealGoldBase    = 100_000
 	TradeDealCostDivisor = 5
 	// carrierScale is the fixed-point unit the carrier requirement is summed in
@@ -209,13 +205,13 @@ const (
 	// The span a deal is sent for is also its LIFETIME: BRE stores now + days as
 	// the deal's expiry and drops it unanswered past that (create_trade_offer
 	// 0x2256 adds the day count to the clock global; process_trade_offer 0x24E5
-	// compares the stored stamp against it). BINARY-VERIFIED: the prompt refuses
-	// anything under two days (0x21B2) and offers ten as its default (0x1F7D).
-	// There is no upper bound in the original — what the sender can pay for is
-	// the only limit — so IB has none either, where it used to cap the span at
-	// five days.
-	TradeDealMinDays     = 2  // shortest a deal may be sent for
-	TradeDealDefaultDays = 10 // what the prompt offers
+	// compares the stored stamp against it). BINARY-VERIFIED: the days prompt is
+	// bounded to 2..10 (BRE.OVR 0x268de sets the ceiling to 10, 0x26a39 lowers it
+	// to the days the sender's gold in hand can pay for, and 0x26ac2 passes both
+	// bounds to the hint and the input), and fewer than 2 affordable days refuses
+	// the deal outright.
+	TradeDealMinDays = 2  // shortest a deal may be sent for
+	TradeDealMaxDays = 10 // longest, before the sender's purse lowers it
 
 	// ProtectiveTradeCostDivisor is what a Protective Trade agreement takes off
 	// the transit cost — the manual's "making trade deals cheaper to send and

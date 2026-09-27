@@ -147,37 +147,21 @@ func (w *World) TradeDealArrived(d TradeDeal, to *Empire) bool {
 	return d.ArrivesOnTurn == 0 || w.TurnOfDay(to) >= d.ArrivesOnTurn
 }
 
-// clampTradeDealDays holds a requested span to the two-day minimum. There is no
-// maximum: BRE checks only the floor, and the per-day cost is what bounds a long
-// deal (see TradeDealMinDays).
+// clampTradeDealDays holds a requested span to TradeDealMinDays..TradeDealMaxDays,
+// the bounds create_trade_offer's days prompt accepts.
 func clampTradeDealDays(days int) int {
-	if days < TradeDealMinDays {
-		return TradeDealMinDays
-	}
-	return days
+	return min(max(days, TradeDealMinDays), TradeDealMaxDays)
 }
 
-// TradeDealCost is the undiscounted gold cost to send a deal for the given
-// number of days, clamped to the allowed span (BRE: TradeDealGoldPerDay per day,
-// 2-5 days). Use TradeDealCostBetween for the price a specific pair pays.
-func TradeDealCost(days int) int64 {
-	return int64(clampTradeDealDays(days)) * TradeDealGoldPerDay
-}
-
-// TradeDealGoldPerDayBetween is the per-day transit cost `from` pays to send a
-// deal to `to`. The sysop's Trade Deal Costs setting scales the rate, and a
-// standing Protective Trade agreement then puts guards on the route and cuts
-// what is left to a third (ProtectiveTradeCostDivisor).
-//
-// The setting is one of the original's own five cost knobs ("Trade Deal Costs",
-// alongside Maintenance Costs, Region Cost Change, Attack Costs and Terrorism
-// Costs) and IB has always stored and broadcast it — it just reached nothing,
-// which is what #56 is about. Its ladder is its own, read from the binary; see
-// Level.TradeCostScaled. The discount divides the SCALED rate, so at Trade Deal
-// Costs = None a Protective Trade pact discounts nothing, there being nothing
-// to discount.
-func (w *World) TradeDealGoldPerDayBetween(from, to *Empire) int64 {
-	rate := w.Config.TradeCosts.TradeCostScaled(TradeDealGoldPerDay)
+// TradeDealGoldPerDayBetween is the per-day transit cost `from` pays to send
+// `send` to `to`: the cargo-weighted TradeOfferCost of the basket, which already
+// carries the sysop's Trade Deal Costs ladder, cut to a third by a standing
+// Protective Trade agreement (ProtectiveTradeCostDivisor). BINARY-VERIFIED:
+// create_trade_offer calls calculate_trade_offer_cost (BRE.OVR 0x268a1) and
+// divides its result when the pact is in force, before the days prompt. At
+// Trade Deal Costs = None there is nothing for the pact to discount.
+func (w *World) TradeDealGoldPerDayBetween(from, to *Empire, send TradeBasket) int64 {
+	rate := w.TradeOfferCost(send)
 	if w.HasTreaty(from, to, protectiveTrade) {
 		return rate / ProtectiveTradeCostDivisor
 	}
@@ -187,16 +171,16 @@ func (w *World) TradeDealGoldPerDayBetween(from, to *Empire) int64 {
 // TradeDealCostBetween is what `from` actually pays to send `to` a deal over the
 // given span. BRE discounts the PER-DAY rate and then multiplies by the days, so
 // the truncation lands on the rate, not on the total.
-func (w *World) TradeDealCostBetween(from, to *Empire, days int) int64 {
-	return int64(clampTradeDealDays(days)) * w.TradeDealGoldPerDayBetween(from, to)
+func (w *World) TradeDealCostBetween(from, to *Empire, send TradeBasket, days int) int64 {
+	return int64(clampTradeDealDays(days)) * w.TradeDealGoldPerDayBetween(from, to, send)
 }
 
 // SendTradeDeal sends a trade deal from `from` to `to` over `days` days: it
-// consumes one carrier to transport it, charges the per-day gold fee, escrows the
-// Send goods, and records a pending deal on `to`, stamped with the turn of the
+// consumes the carriers its cargo needs, charges the per-day gold fee, escrows
+// the Send goods, and records a pending deal on `to`, stamped with the turn of the
 // day it left (see TradeDeal.ArrivesOnTurn). Fails if both baskets are empty,
-// `from` lacks the offered goods, lacks a transport carrier, or can't afford the
-// fee.
+// `from` lacks the offered goods, lacks the transport carriers, or can't afford
+// the fee.
 func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days int) error {
 	if from.Protection > 0 {
 		return ErrInProtection
@@ -210,7 +194,7 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	if send.IsEmpty() && demand.IsEmpty() {
 		return fmt.Errorf("A trade deal must offer or request something.")
 	}
-	cost := w.TradeDealCostBetween(from, to, days)
+	cost := w.TradeDealCostBetween(from, to, send, days)
 	if !empireHasBasket(from, send) {
 		return ErrCantAfford
 	}

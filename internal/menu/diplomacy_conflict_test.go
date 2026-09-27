@@ -35,7 +35,7 @@ func TestSendTradeDealVanishedRecipientConflict(t *testing.T) {
 		// Alethia holds (A) — offer 1000 gold (6), done (0), no request (0),
 		// confirm (y), 2 days (Enter)
 		fakeSession: fakeSession{keys: []rune("B61000\r00y\r")},
-		marker:      "Send this trade deal",
+		marker:      "Send Trade Deal?",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("victim")) })
 		},

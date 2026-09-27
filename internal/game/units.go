@@ -61,7 +61,7 @@ type Good struct {
 	// holds. Both are BINARY-VERIFIED; a CarrierPer of 0 means the good needs no
 	// carrier space at all, which is true of food, bombers and agents — and of
 	// carriers themselves, which carry each other. See TradeDealCarriers and
-	// IPTradeDealCost.
+	// TradeOfferCost.
 	ShipWeight int
 	CarrierPer int
 	// Military marks a fighting unit — the six Industrial regions build — as

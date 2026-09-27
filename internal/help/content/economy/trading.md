@@ -26,10 +26,11 @@ A trade deal is an offer to one realm. You put goods and gold in it, and you may
 ask for goods and gold in return. The other realm reads the offer and accepts or
 refuses it. You need a treaty with that realm to send one.
 
-A trade deal costs a fee for each day you send it for, and it needs carriers to
-move the goods. How many depends on what you are shipping. As cargo, one carrier
-holds a thousand troopers or turrets, a hundred jets, five thousand tanks, or a
-hundred thousand gold. Food, bombers, agents and carriers take no room at all. A
+A trade deal costs a fee for each day you send it for, from 2 to 10 days. The
+more you ship, the higher the fee. A deal also needs carriers to move the goods.
+How many depends on what you are shipping. As cargo, one carrier holds a
+thousand troopers or turrets, a hundred jets, five thousand tanks, or a hundred
+thousand gold. Food, bombers, agents and carriers take no room at all. A
 Protective Trade treaty with that realm makes the fee cheaper.
 
 The days you pay for are how long the offer stands. What you put in the deal

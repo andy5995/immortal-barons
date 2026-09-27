@@ -43,39 +43,39 @@ func TestTradeDealCarriersMatchesTheOriginalsCapacities(t *testing.T) {
 
 // The fee is the weighted sum over five plus a flat base (BRE.OVR 0x0513e7),
 // then the sysop's Trade Deal Costs ladder. Golden literals again.
-func TestIPTradeDealCostMatchesTheOriginalsFormula(t *testing.T) {
+func TestTradeOfferCostMatchesTheOriginalsFormula(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	// An empty basket is free: the original tests the weighted sum for zero
 	// BEFORE adding its base, so nothing shipped costs nothing rather than the
 	// base on its own.
-	if got := w.IPTradeDealCost(TradeBasket{}); got != 0 {
+	if got := w.TradeOfferCost(TradeBasket{}); got != 0 {
 		t.Errorf("an empty basket cost %d, want 0", got)
 	}
 	// 5,000 troopers weigh 1 each: 5000/5 = 1,000, plus the 100,000 base.
-	if got := w.IPTradeDealCost(TradeBasket{Troopers: 5_000}); got != 101_000 {
+	if got := w.TradeOfferCost(TradeBasket{Troopers: 5_000}); got != 101_000 {
 		t.Errorf("5,000 troopers cost %d, want 101,000", got)
 	}
 	// A bomber weighs 3, so 5,000 of them weigh 15,000: 15000/5 = 3,000.
-	if got := w.IPTradeDealCost(TradeBasket{Bombers: 5_000}); got != 103_000 {
+	if got := w.TradeOfferCost(TradeBasket{Bombers: 5_000}); got != 103_000 {
 		t.Errorf("5,000 bombers cost %d, want 103,000", got)
 	}
 	// Food weighs 0.05 and gold 0.01 — the two fractional weights, and the ones
 	// IB holds as exact integers where the original holds Real48 approximations.
-	if got := w.IPTradeDealCost(TradeBasket{Food: 100_000}); got != 101_000 {
+	if got := w.TradeOfferCost(TradeBasket{Food: 100_000}); got != 101_000 {
 		t.Errorf("100,000 food cost %d, want 101,000", got)
 	}
-	if got := w.IPTradeDealCost(TradeBasket{Gold: 1_000_000}); got != 102_000 {
+	if got := w.TradeOfferCost(TradeBasket{Gold: 1_000_000}); got != 102_000 {
 		t.Errorf("1,000,000 gold cost %d, want 102,000", got)
 	}
 	// An agent weighs 0.5.
-	if got := w.IPTradeDealCost(TradeBasket{Agents: 10_000}); got != 101_000 {
+	if got := w.TradeOfferCost(TradeBasket{Agents: 10_000}); got != 101_000 {
 		t.Errorf("10,000 agents cost %d, want 101,000", got)
 	}
 }
 
 // The Trade Deal Costs ladder scales the WHOLE fee, base included — its own
 // spread, a sixth at Low and triple at High (BRE.OVR 0x5158F).
-func TestIPTradeDealCostFollowsTheSysopsLadder(t *testing.T) {
+func TestTradeOfferCostFollowsTheSysopsLadder(t *testing.T) {
 	basket := TradeBasket{Troopers: 5_000} // 101,000 at the default
 	for _, c := range []struct {
 		level Level
@@ -89,7 +89,7 @@ func TestIPTradeDealCostFollowsTheSysopsLadder(t *testing.T) {
 		cfg := DefaultConfig()
 		cfg.TradeCosts = c.level
 		w := NewWorldSeed(cfg, 1)
-		if got := w.IPTradeDealCost(basket); got != c.want {
+		if got := w.TradeOfferCost(basket); got != c.want {
 			t.Errorf("at %v the fee was %d, want %d", c.level, got, c.want)
 		}
 	}
@@ -107,7 +107,7 @@ func TestIPTradeDealShipsGoodsAndChargesTheSender(t *testing.T) {
 	from.Troopers, from.Carriers, from.Gold = 10_000, 50, 5_000_000
 
 	goods := TradeBasket{Troopers: 5_000}
-	cost := w.IPTradeDealCost(goods)
+	cost := w.TradeOfferCost(goods)
 	need := TradeDealCarriers(goods)
 	if need == 0 {
 		t.Fatal("this shipment should need carriers, or the test proves nothing about them")

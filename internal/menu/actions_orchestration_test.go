@@ -340,3 +340,67 @@ func TestSendTradeDealSpanUnderMinimumIsRefused(t *testing.T) {
 		t.Errorf("nothing should be sent: gold %d, carriers %d, deals %+v", p.Gold, p.Carriers, to.TradeDeals)
 	}
 }
+
+// The days screen is create_trade_offer's: a per-day rate weighted by the cargo,
+// the minimum, and a "(2; N)" hint whose ceiling is 10 or the days the gold
+// left after the offer can pay for, whichever is lower. Fewer than two is a
+// refusal before the prompt. IB counts the bank too, where BRE counts gold in
+// hand only, so a banked purse still reaches the prompt and the bank offer that
+// follows it. Golden figures: 50,000,000 gold weighs 0.01 each,
+// over five, plus the 100,000 base — 200,000 a day.
+func TestSendTradeDealSpanFollowsTheCargoAndThePurse(t *testing.T) {
+	for _, c := range []struct {
+		name  string
+		purse int64
+		bank  int64
+		want  string // "" for a refusal
+	}{
+		{"rich", 100_000_000, 0, "(2; 10)"},
+		{"four days", 50_900_000, 0, "(2; 4)"},
+		{"under two", 50_300_000, 0, ""},
+		{"banked", 50_300_000, 10_000_000, "(2; 10)"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			w := newWorld()
+			p := w.Player()
+			p.Gold, p.Bank, p.Carriers = c.purse, c.bank, 500
+			to := recipients(w)[0]
+			p.Protection, to.Protection = 0, 0
+			w.World.ProposeTreaty(p, to, "Full Defense Alliance")
+			w.World.AcceptTreaty(to, p.Name, "Full Defense Alliance")
+			// Pick (A), offer 50M gold (6), done, no request, confirm, 2 days (Enter).
+			f := &fakeSession{keys: []rune("A650000000\r00y\r ")}
+
+			sendTradeDeal(f, w)
+
+			out := stripANSI(f.out.String())
+			for _, line := range []string{
+				"Trade Deal requires 500 Carriers.\nSend Trade Deal? (Y/n)",
+				"This trade deal will cost 200,000 gold per day to send.",
+				"Trade deals must be sent for a minimum of 2 days.",
+			} {
+				if !strings.Contains(out, line) {
+					t.Fatalf("missing %q:\n%s", line, out)
+				}
+			}
+			if c.want == "" {
+				if !strings.Contains(out, game.ErrCantAfford.Error()) || strings.Contains(out, "How many days") {
+					t.Fatalf("under two affordable days should be refused before the prompt:\n%s", out)
+				}
+				if p.Gold != c.purse || len(to.TradeDeals) != 0 {
+					t.Errorf("nothing should be sent: gold %d, deals %+v", p.Gold, to.TradeDeals)
+				}
+				return
+			}
+			if !strings.Contains(out, "How many days would you like to send this deal for? "+c.want) {
+				t.Fatalf("want the %s hint:\n%s", c.want, out)
+			}
+			if c.bank > 0 {
+				return // the fee needs a withdrawal; the bank offer has its own tests
+			}
+			if got := c.purse - p.Gold; got != 50_000_000+2*200_000 || len(to.TradeDeals) != 1 {
+				t.Errorf("Enter should send for 2 days: charged %d, deals %d", got, len(to.TradeDeals))
+			}
+		})
+	}
+}

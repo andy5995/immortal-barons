@@ -6104,7 +6104,7 @@ and each carries a gameplay effect (#11 wired the last two):
 
   Protective Trade also makes trade deals **cheaper to send**: the per-day transit rate is
   divided by `ProtectiveTradeCostDivisor` (3) before the span is chosen, so a
-  guarded deal costs 33,333 a day instead of 100,000
+  guarded deal costs a third of its cargo-weighted rate a day
   (`TradeDealGoldPerDayBetween`). BINARY-VERIFIED — BRE.OVR 0x0268bc compares the
   recipient's relation against 2 (Protective Trade) and divides the per-day cost
   by three; the manual's "and maintain" has no separate charge behind it, because
@@ -6236,10 +6236,18 @@ Market`. Any empire can list goods for other empires to buy:
 
 Negotiated empire-to-empire trade deals carrying goods with demands (BRE's other
 trading half) are built: `SendTradeDeal` takes a full basket each way, escrows
-what is offered, consumes a transport carrier and charges the per-day transit
-fee (#17). Interplanetary trading is built too, as its own type (`IPTradeBid`,
+what is offered, consumes the carriers the cargo needs and charges the per-day
+transit fee (#17). Interplanetary trading is built too, as its own type (`IPTradeBid`,
 a buy order that travels to another planet and is filled there); carrier-moved
 goods remain future work.
+
+**The per-day fee is the cargo's weighted cost — BINARY-VERIFIED.**
+`create_trade_offer` calls `calculate_trade_offer_cost` (BRE.OVR 0x268A1), the
+routine that prices an interplanetary deal outright, and uses its result as the
+rate per day, divided by three under Protective Trade. So 50,000,000 gold costs
+200,000 a day to send, and a deal that sends nothing and only asks is free. IB
+charged a flat 100,000 a day until 2026-09-27; the capture's `120,000 gold per
+day` for a 20-carrier basket was the sign it was wrong.
 
 **A deal is sent for at least 2 days (`TradeDealMinDays`) — BINARY-VERIFIED.**
 `create_trade_offer` (`BRE.OVR` +0x21bb) answers a shorter span with "Sorry,
@@ -6290,9 +6298,10 @@ adds the day count to the clock and stores the result on the offer record
 (`create_trade_offer` 0x2256), and the turn-start sweep compares that stamp
 against the clock, deleting the record and telling the sender its trade fleet
 got no response (`process_trade_offer` 0x24E5). The prompt refuses fewer than
-two days (0x21B2), offers ten as its default (0x1F7D), and has no ceiling —
-what the sender can pay for is the only limit, where IB used to cap the span at
-five days.
+two days (0x21B2) and is bounded to 2..10: 0x1F7D sets the ceiling to ten,
+and 0x26A39 lowers it to the days the sender's gold in hand, less any gold being
+offered, can pay for. Under two affordable days the deal is refused before the
+prompt. The hint prints both bounds, `(2; 10)`; IB's Enter default is the 2.
 
 Nothing gives the escrow back. The rejection branch files the notice and zeroes
 the 151-byte record (0xDC4) with no goods moving, the lapse branch does the same

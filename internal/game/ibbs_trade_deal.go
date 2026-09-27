@@ -90,7 +90,8 @@ func carrierRoundUp(units int64) int64 {
 	return (units + carrierScale - carrierScale/10_000) / carrierScale
 }
 
-// IPTradeDealCost is the flat gold fee to send a basket to another planet.
+// TradeOfferCost is what shipping a basket costs: the whole fee for a deal to
+// another planet, and the per-day rate of a local one (TradeDealGoldPerDayBetween).
 // BINARY-VERIFIED (BRE.OVR 0x0513e7, calculate_trade_offer_cost): the nine goods
 // are summed against fixed weights, divided by five, and a flat base is added;
 // the sysop's Trade Deal Costs ladder then scales the whole figure, and it is
@@ -102,10 +103,10 @@ func carrierRoundUp(units int64) int64 {
 // (0.01 and 0.05 have no binary form), so on a very large basket the two can
 // part company by a gold or two. Integers are the right answer for a treasury.
 //
-// A Protective Trade agreement does NOT discount this. The original applies that
-// divisor in the local routine only (create_trade_offer 0x1f5b), which follows:
-// the pact is between two realms on one planet, and this deal crosses planets.
-func (w *World) IPTradeDealCost(b TradeBasket) int64 {
+// A Protective Trade agreement is not applied here. The original divides by it
+// in the local routine only (create_trade_offer 0x1f5b), which follows: the
+// pact is between two realms on one planet, and a planet-crossing deal is not.
+func (w *World) TradeOfferCost(b TradeBasket) int64 {
 	var weighted int64
 	for _, g := range MarketGoods {
 		weighted += int64(*g.Basket(&b)) * int64(g.ShipWeight)
@@ -151,7 +152,7 @@ func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods Tr
 		return fmt.Errorf("This shipment needs %d carriers to transport and you have %d free.",
 			need, max(from.Carriers-goods.Carriers, 0))
 	}
-	cost := w.IPTradeDealCost(goods)
+	cost := w.TradeOfferCost(goods)
 	// The fee is paid out of gold in hand AFTER the basket's own gold is set
 	// aside, so a deal cannot be funded with the gold it is shipping.
 	if from.Gold-int64(goods.Gold) < cost {
