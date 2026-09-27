@@ -99,53 +99,89 @@ func (w *World) LastPacketReport() string {
 func (w *World) BBSInfoReport() string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "%3s %-28s %-24s %s\n", "###", "BBS Name", "Last Recon", "Version")
-	peers := w.knownPeers()
-	if len(peers) == 0 {
+	rows := w.BBSInfoRows()
+	if len(rows) == 0 {
 		b.WriteString("No other boards are known yet.\n")
 		return b.String()
 	}
-	node := map[string]int{}
-	for _, n := range w.LeagueNodes {
-		node[n.Name] = n.Number
-	}
-	league := w.leagueRulesetFingerprint()
-	for i, name := range peers {
-		num := i + 1
-		if n, ok := node[name]; ok {
-			num = n
-		}
-		when := w.LastPacketFrom[name]
+	for _, r := range rows {
+		when := r.LastRecon
 		if when == "" {
 			when = "never"
 		}
-		raw := w.BoardVersion[name]
 		ver := "unknown"
-		if raw != "" {
-			ver = "v" + raw
+		if r.Version != "" {
+			ver = "v" + r.Version
 		}
 		// The report is where a Coordinator looks to find out WHO is holding the
 		// league up, so a board failing the requirement says so on its own row
 		// rather than only in the news when a packet bounces.
-		if !w.BoardMeetsMinVersion(raw) {
+		if r.BelowMin {
 			ver += fmt.Sprintf("  (below v%s)", w.Config.MinBoardVersion)
 		}
-		// The rules a board PLAYS BY are a different question from the version it
-		// runs, and until #264 nothing anywhere asked it: a board that missed a
-		// ruleset broadcast, or whose sysop edited config.json after adopting one,
-		// played its own numbers all season with every screen silent about it.
-		if fp := w.BoardRuleset[name]; fp != "" && league != "" && fp != league {
+		if r.OtherRules {
 			ver += "  (other rules)"
 		}
-		fmt.Fprintf(&b, "%2d) %-28s %-24s %s\n", num, name, when, ver)
+		fmt.Fprintf(&b, "%2d) %-28s %-24s %s\n", r.Number, r.Name, when, ver)
 	}
 	// The local board is not a row in its own report, so its own divergence has
 	// to be said outright — and it is the case the Coordinator's re-broadcast
 	// cannot heal on its own, because a sysop can edit the config back again
 	// between any two runs.
-	if league != "" && w.Config.RulesetFingerprint() != league {
+	if w.OwnRulesDiffer() {
 		fmt.Fprintf(&b, "\nThis board is playing rules the League Coordinator has not sent.\n")
 	}
 	return b.String()
+}
+
+// BBSInfoRow is one board's line of BBSINFO, as data. The report and the sysop
+// panel both read these, so the two cannot disagree about which board is behind.
+type BBSInfoRow struct {
+	Number    int
+	Name      string
+	LastRecon string // when a packet from it was last processed here; "" if never
+	Version   string // the version it last said it runs, without the "v"; "" if unknown
+	BelowMin  bool   // under the league's MinBoardVersion
+	// OtherRules is a board playing rules other than the Coordinator's. The
+	// rules a board PLAYS BY are a different question from the version it runs,
+	// and until #264 nothing anywhere asked it: a board that missed a ruleset
+	// broadcast, or whose sysop edited config.json after adopting one, played
+	// its own numbers all season with every screen silent about it.
+	OtherRules bool
+}
+
+// BBSInfoRows is every other known board, in BBSINFO order.
+func (w *World) BBSInfoRows() []BBSInfoRow {
+	node := map[string]int{}
+	for _, n := range w.LeagueNodes {
+		node[n.Name] = n.Number
+	}
+	league := w.leagueRulesetFingerprint()
+	var rows []BBSInfoRow
+	for i, name := range w.knownPeers() {
+		num := i + 1
+		if n, ok := node[name]; ok {
+			num = n
+		}
+		raw := w.BoardVersion[name]
+		fp := w.BoardRuleset[name]
+		rows = append(rows, BBSInfoRow{
+			Number:     num,
+			Name:       name,
+			LastRecon:  w.LastPacketFrom[name],
+			Version:    raw,
+			BelowMin:   !w.BoardMeetsMinVersion(raw),
+			OtherRules: fp != "" && league != "" && fp != league,
+		})
+	}
+	return rows
+}
+
+// OwnRulesDiffer reports that this board is playing rules the League
+// Coordinator has not sent.
+func (w *World) OwnRulesDiffer() bool {
+	league := w.leagueRulesetFingerprint()
+	return league != "" && w.Config.RulesetFingerprint() != league
 }
 
 // leagueRulesetFingerprint is the fingerprint of the rules the league is
