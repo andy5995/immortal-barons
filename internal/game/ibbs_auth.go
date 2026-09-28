@@ -227,7 +227,7 @@ func (w *World) NextSeq() uint64 {
 // afterward and needs the side effects to fire exactly once.
 func (w *World) IsPacketSeen(p Packet) bool {
 	key := packetKey(p)
-	if w.SeenPackets != nil && w.SeenPackets[key] {
+	if w.SeenPackets[key] { // reading a nil map is safe
 		return true
 	}
 	if p.Seq > 0 && p.FromBoard != "" && w.HighSeq != nil && p.Seq <= w.HighSeq[p.FromBoard] {
@@ -270,11 +270,12 @@ func (w *World) SeenPacket(p Packet) bool {
 	return false
 }
 
-// PruneSeenPackets drops the SeenPackets entries HighSeq makes redundant, which
-// every save before SeenPacket stopped storing them carries: a numbered key
-// from a named board at or below that board's HighSeq. Content fingerprints,
-// numbered keys with no board, and anything above HighSeq are kept, as is any
-// key that does not parse as packetKey writes it. It reports how many went.
+// PruneSeenPackets removes the SeenPackets entries HighSeq makes redundant. A
+// save written before SeenPacket stopped storing them holds one per numbered
+// packet it applied: a key from a named board at or below that board's
+// HighSeq. Content fingerprints, numbered keys with no board, and anything
+// above HighSeq are kept, as is any key that does not parse as packetKey
+// writes it. It reports how many went.
 func (w *World) PruneSeenPackets() int {
 	n := 0
 	for key := range w.SeenPackets {
