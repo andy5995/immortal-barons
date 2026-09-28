@@ -2,7 +2,6 @@ package main
 
 import (
 	"image"
-	"image/color"
 
 	"gioui.org/layout"
 	"gioui.org/op/clip"
@@ -12,12 +11,6 @@ import (
 	"gioui.org/widget/material"
 )
 
-var (
-	errorColor = color.NRGBA{R: 0xb0, G: 0x10, B: 0x10, A: 0xff}
-	dimColor   = color.NRGBA{R: 0x60, G: 0x60, B: 0x60, A: 0xff}
-	ruleColor  = color.NRGBA{R: 0xc8, G: 0xc8, B: 0xc8, A: 0xff}
-)
-
 // tabButton is a tab: filled when selected, flat when not. The selected tab is
 // also the only one drawn in bold, so the choice never rests on color alone.
 func tabButton(th *material.Theme, c *widget.Clickable, label string, selected bool) layout.Widget {
@@ -25,7 +18,7 @@ func tabButton(th *material.Theme, c *widget.Clickable, label string, selected b
 		b := material.Button(th, c, label)
 		b.Inset = layout.Inset{Top: unit.Dp(6), Bottom: unit.Dp(6), Left: unit.Dp(12), Right: unit.Dp(12)}
 		if !selected {
-			b.Background = color.NRGBA{R: 0xe8, G: 0xe8, B: 0xe8, A: 0xff}
+			b.Background = pal.tabBg
 			b.Color = th.Fg
 		} else {
 			b.Font.Weight = 700
@@ -40,7 +33,7 @@ func rule(th *material.Theme) layout.Widget {
 		return layout.Inset{Top: unit.Dp(6), Bottom: unit.Dp(6)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 			size := image.Pt(gtx.Constraints.Max.X, gtx.Dp(unit.Dp(1)))
 			defer clip.Rect{Max: size}.Push(gtx.Ops).Pop()
-			paint.ColorOp{Color: ruleColor}.Add(gtx.Ops)
+			paint.ColorOp{Color: pal.rule}.Add(gtx.Ops)
 			paint.PaintOp{}.Add(gtx.Ops)
 			return layout.Dimensions{Size: size}
 		})

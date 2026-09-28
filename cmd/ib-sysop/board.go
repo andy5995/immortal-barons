@@ -192,7 +192,7 @@ func (t *boardTab) summary(gtx layout.Context) layout.Dimensions {
 	if t.readErr != nil {
 		children = append(children, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			l := material.Body2(th, "Read failed: "+t.readErr.Error())
-			l.Color = errorColor
+			l.Color = pal.err
 			return l.Layout(gtx)
 		}))
 	}

@@ -33,6 +33,7 @@ import (
 	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -64,7 +65,7 @@ func main() {
 	go func() {
 		w := new(app.Window)
 		w.Option(app.Title("Immortal Barons Sysop Panel"), app.Size(unit.Dp(1100), unit.Dp(720)))
-		u := newUI(w, dirs, saved.Zoom)
+		u := newUI(w, dirs, saved.Zoom, parseThemeMode(saved.Theme))
 		if err := u.loop(); err != nil {
 			log.Fatal(err)
 		}
@@ -94,12 +95,18 @@ type ui struct {
 	// until one opens again or Forget is clicked.
 	missing   []string
 	forgetBtn widget.Clickable
+	// theme is the Light / Dark / System choice; desktopDark is what the
+	// desktop last said, which System follows.
+	theme       themeMode
+	desktopDark bool
+	themeBtns   [len(themeModes)]widget.Clickable
 }
 
-func newUI(w *app.Window, dirs []string, zoom float32) *ui {
+func newUI(w *app.Window, dirs []string, zoom float32, theme themeMode) *ui {
 	th := material.NewTheme()
 	th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
-	u := &ui{win: w, th: th, browser: newBrowser(), zoom: nearestZoom(zoom)}
+	u := &ui{win: w, th: th, browser: newBrowser(), zoom: nearestZoom(zoom), theme: theme}
+	u.applyTheme()
 	// Each open clears the notice on success, so collect the failures and show
 	// them together once every saved directory has been tried.
 	var failed []string
@@ -117,14 +124,25 @@ func newUI(w *app.Window, dirs []string, zoom float32) *ui {
 		u.browsing = true
 	}
 	go u.tick()
+	if u.theme == themeSystem {
+		go u.detectDesktopTheme()
+	}
 	return u
 }
 
 // tick wakes the window now and then so auto-refresh can come due without the
-// mouse moving.
+// mouse moving, and asks the desktop's theme again once a minute while System
+// is chosen.
 func (u *ui) tick() {
-	for range time.Tick(5 * time.Second) {
+	for n := 1; ; n++ {
+		time.Sleep(5 * time.Second)
 		u.win.Invalidate()
+		u.mu.Lock()
+		system := u.theme == themeSystem
+		u.mu.Unlock()
+		if system && n%12 == 0 {
+			u.detectDesktopTheme()
+		}
 	}
 }
 
@@ -197,6 +215,12 @@ func (u *ui) layout(gtx layout.Context) layout.Dimensions {
 	}
 	gtx.Metric.PxPerDp *= u.zoom
 	gtx.Metric.PxPerSp *= u.zoom
+	for i := range u.themeBtns {
+		if u.themeBtns[i].Clicked(gtx) {
+			u.setTheme(themeModes[i].mode)
+		}
+	}
+	paint.Fill(gtx.Ops, pal.bg)
 
 	if u.openBtn.Clicked(gtx) {
 		u.browsing = !u.browsing
@@ -226,7 +250,7 @@ func (u *ui) layout(gtx layout.Context) layout.Dimensions {
 					return layout.Dimensions{}
 				}
 				l := material.Body2(u.th, u.notice)
-				l.Color = errorColor
+				l.Color = pal.err
 				if len(u.missing) == 0 {
 					return layout.Inset{Top: unit.Dp(4)}.Layout(gtx, l.Layout)
 				}
@@ -293,7 +317,13 @@ func (u *ui) tabBar(gtx layout.Context) layout.Dimensions {
 			}
 			return material.Button(u.th, &u.zoomIn, "A+").Layout(gtx)
 		}),
+		layout.Rigid(layout.Spacer{Width: unit.Dp(12)}.Layout),
 	)
+	for i, t := range themeModes {
+		items = append(items, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return layout.Inset{Left: unit.Dp(2)}.Layout(gtx, tabButton(u.th, &u.themeBtns[i], t.label, u.theme == t.mode))
+		}))
+	}
 	return layout.Flex{Alignment: layout.Middle}.Layout(gtx, items...)
 }
 
@@ -384,8 +414,9 @@ func (u *ui) zoomKeys(gtx layout.Context) {
 
 // session is what the panel remembers between runs.
 type session struct {
-	Dirs []string `json:"dirs"`
-	Zoom float32  `json:"zoom,omitempty"`
+	Dirs  []string `json:"dirs"`
+	Zoom  float32  `json:"zoom,omitempty"`
+	Theme string   `json:"theme,omitempty"` // light, dark or system; empty is system
 }
 
 func loadSession() session {
@@ -404,7 +435,7 @@ func (u *ui) saveSession() {
 	if p == "" {
 		return
 	}
-	s := session{Dirs: make([]string, 0, len(u.tabs)), Zoom: u.zoom}
+	s := session{Dirs: make([]string, 0, len(u.tabs)), Zoom: u.zoom, Theme: string(u.theme)}
 	for _, t := range u.tabs {
 		s.Dirs = append(s.Dirs, t.dir)
 	}

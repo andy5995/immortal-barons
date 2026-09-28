@@ -114,7 +114,7 @@ func (c *cfgView) layout(gtx layout.Context) layout.Dimensions {
 				button(th, &c.editBtn, "Edit in default editor"),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					l := material.Body2(th, c.path())
-					l.Color, l.MaxLines = dimColor, 1
+					l.Color, l.MaxLines = pal.dim, 1
 					return l.Layout(gtx)
 				}),
 			)
@@ -125,7 +125,7 @@ func (c *cfgView) layout(gtx layout.Context) layout.Dimensions {
 			}
 			l := material.Body2(th, c.status)
 			if c.statusErr {
-				l.Color = errorColor
+				l.Color = pal.err
 			}
 			return layout.Inset{Top: unit.Dp(6)}.Layout(gtx, l.Layout)
 		}),
@@ -135,7 +135,7 @@ func (c *cfgView) layout(gtx layout.Context) layout.Dimensions {
 			switch {
 			case c.readErr != nil:
 				l := material.Body2(th, "Could not read bbs.cfg: "+c.readErr.Error())
-				l.Color = errorColor
+				l.Color = pal.err
 				return l.Layout(gtx)
 			case !c.exists:
 				return material.Body2(th, "This board has no bbs.cfg. Edit writes one from the settings it is running with.").Layout(gtx)

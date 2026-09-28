@@ -49,6 +49,11 @@ stays on the list for the next start. **Forget** removes it.
 Ctrl+minus, Ctrl+plus and Ctrl+0 do the same (Cmd on macOS). Ctrl+0 goes back to
 the default size, 125%.
 
+**Light**, **Dark** and **System** at the top right choose the colors. System
+follows your desktop's light or dark setting, and checks it again every minute.
+When the desktop does not say, System is light. The panel remembers your
+choice.
+
 ## The views
 
 Each tab has five views. Click a column heading to sort by it. Click it again

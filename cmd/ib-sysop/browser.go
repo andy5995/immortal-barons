@@ -98,7 +98,7 @@ func (b *browser) layout(gtx layout.Context, u *ui) layout.Dimensions {
 			return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
 				button(th, &b.up, "Up"),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-					return widget.Border{Color: ruleColor, Width: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return widget.Border{Color: pal.border, Width: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 						return layout.UniformInset(unit.Dp(6)).Layout(gtx, material.Editor(th, &b.path, "path").Layout)
 					})
 				}),

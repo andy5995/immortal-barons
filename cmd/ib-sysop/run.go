@@ -174,7 +174,7 @@ func (r *runView) layout(gtx layout.Context) layout.Dimensions {
 				layout.Rigid(material.RadioButton(th, &r.choice, c.Flag, label).Layout),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					l := material.Caption(th, c.Help)
-					l.Color = dimColor
+					l.Color = pal.dim
 					return layout.Inset{Left: unit.Dp(32), Bottom: unit.Dp(4)}.Layout(gtx, l.Layout)
 				}),
 			)
@@ -208,7 +208,7 @@ func (r *runView) layout(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						l := material.Body1(th, r.confirming.Confirm+" Run "+r.confirming.Flag+"?")
-						l.Color = errorColor
+						l.Color = pal.err
 						return l.Layout(gtx)
 					}),
 					layout.Rigid(func(gtx layout.Context) layout.Dimensions {
@@ -240,7 +240,7 @@ func (r *runView) layout(gtx layout.Context) layout.Dimensions {
 				l := material.Body2(th, r.log[i])
 				l.Font.Typeface = mono
 				if strings.HasPrefix(r.log[i], "! ") {
-					l.Color = errorColor
+					l.Color = pal.err
 				}
 				return l.Layout(gtx)
 			})
@@ -259,7 +259,7 @@ func (r *runView) layout(gtx layout.Context) layout.Dimensions {
 func boxed(th *material.Theme, e *widget.Editor, hint string) layout.Widget {
 	return func(gtx layout.Context) layout.Dimensions {
 		return layout.Inset{Top: unit.Dp(2), Bottom: unit.Dp(2)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return widget.Border{Color: ruleColor, Width: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return widget.Border{Color: pal.border, Width: unit.Dp(1)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				return layout.UniformInset(unit.Dp(6)).Layout(gtx, material.Editor(th, e, hint).Layout)
 			})
 		})
