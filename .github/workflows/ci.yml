@@ -119,3 +119,44 @@ jobs:
             go vet ./...
             go build ./...
             go test ./...
+
+  # The sysop panel is its own module (cmd/ib-sysop/go.mod), so `./...` above
+  # never reaches it and the door never builds against its GUI toolkit. This
+  # builds it on every desktop OS it targets. Gio needs cgo and the X11/Wayland
+  # and EGL headers on Linux; Windows builds in pure Go, and macOS uses the
+  # runner's Xcode. Windows/386 is cross-built because 32-bit Windows is a
+  # target a sysop may still run it on.
+  sysop-panel:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: cmd/ib-sysop
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: cmd/ib-sysop/go.mod
+          cache-dependency-path: cmd/ib-sysop/go.sum
+      - name: Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwayland-dev libx11-dev libx11-xcb-dev \
+            libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libffi-dev libxcursor-dev libvulkan-dev libxfixes-dev
+      - name: go vet
+        run: go vet ./...
+      - name: go build
+        run: go build ./...
+      - name: go test
+        run: go test ./...
+      - name: go build (windows/386)
+        if: runner.os == 'Linux'
+        env:
+          GOOS: windows
+          GOARCH: "386"
+        run: go build -o /dev/null .

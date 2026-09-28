@@ -1112,8 +1112,7 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 		// Nothing is given up in the middle of a hold, even an item whose wait
 		// ran out before the hold was first seen: its packet may have sat in
 		// inbound for a day before this run met it.
-		age := w.GameDay - f.LaunchedDay
-		if (f.Held || age-f.HeldDays < days) && age < days*LostForcesHeldBackstop {
+		if f.lostForcesDaysLeft(w.GameDay, days) > 0 {
 			waiting = append(waiting, f)
 			continue
 		}
@@ -1161,6 +1160,31 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 		w.postNews(fmt.Sprintf("%d interplanetary force(s) gave up waiting and came home.", recovered))
 	}
 	return recovered
+}
+
+// LostForcesDaysLeft is how many more game days f waits for an answer before
+// the planetary step gives it up and returns what it committed; 0 or less means
+// the next run does. ok is false when the league has lost-forces recovery off,
+// and f then waits for good. While f's board is held the countdown is the
+// backstop alone, since the ordinary wait is paused.
+func (w *World) LostForcesDaysLeft(f InFlightStrike) (left int, ok bool) {
+	days := w.Config.LostForcesDays
+	if days <= 0 {
+		return 0, false
+	}
+	return f.lostForcesDaysLeft(w.GameDay, days), true
+}
+
+// lostForcesDaysLeft is the rule ReturnLostForces applies: an item waits while
+// its board is held or its unheld wait is under days, and never past the
+// backstop counted from launch.
+func (f InFlightStrike) lostForcesDaysLeft(today, days int) int {
+	age := today - f.LaunchedDay
+	left := days*LostForcesHeldBackstop - age
+	if !f.Held {
+		left = min(left, days-(age-f.HeldDays))
+	}
+	return left
 }
 
 // trackHold opens or closes the item's current hold on game day today.

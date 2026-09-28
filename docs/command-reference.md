@@ -199,8 +199,9 @@ These options are for games that link several BBSes together (a "league"). See
     news from other boards is as fresh as possible. The cost is a wait before
     the game starts. With a timer every 15 minutes, a board can leave it off.
 - **`-detailed`** — Show each packet as it is read and written. This is a
-  modifier, not a mode: it takes effect when used with `-full` or `-planetary`.
-  Without one of those, it is ignored.
+  modifier, not a mode: it takes effect when used with `-maint`, `-full` or
+  `-planetary`. With `-maint` it shows packets only on a league board, since a
+  board that plays alone has none. Without one of those modes, it is ignored.
 - **`-league-config`** — Send this board's league settings to the whole league,
   then exit. Only the league coordinator (node #1) uses this. A `-planetary` run
   on the coordinator's board sends them too, so a member that missed one

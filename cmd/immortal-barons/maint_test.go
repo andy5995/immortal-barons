@@ -87,7 +87,7 @@ func TestMaintRaisesTheAlarmOnANewFault(t *testing.T) {
 
 	plantBadPacket(t, cfg)
 
-	if err := runMaint(cfg, "2026-09-22"); !errors.Is(err, errFaults) {
+	if err := runMaint(cfg, "2026-09-22", false); !errors.Is(err, errFaults) {
 		t.Fatalf("-maint that met a new fault returned %v, want errFaults so the scheduler sees it", err)
 	}
 	// The hook command is a sh one-liner; the Windows branch runs cmd /c instead.
@@ -102,7 +102,7 @@ func TestMaintRaisesTheAlarmOnANewFault(t *testing.T) {
 	}
 
 	// Nothing new on the next run, so no alarm.
-	if err := runMaint(cfg, "2026-09-22"); err != nil {
+	if err := runMaint(cfg, "2026-09-22", false); err != nil {
 		t.Errorf("a -maint run with nothing new returned %v", err)
 	}
 }
@@ -114,7 +114,7 @@ func TestModesThatRunThePlanetaryStepRefuseANoLeagueNumberBoard(t *testing.T) {
 	cfg := leagueBoard(t)
 	cfg.LeagueNumber = 0
 	for mode, run := range map[string]func() error{
-		"-maint":        func() error { return runMaint(cfg, "2026-09-22") },
+		"-maint":        func() error { return runMaint(cfg, "2026-09-22", false) },
 		"-full":         func() error { return runFull(cfg, localOpts("tester"), "2026-09-22", 0) },
 		"-league-reset": func() error { return runLeagueReset(cfg, "2026-10-01") },
 	} {
@@ -163,5 +163,27 @@ func TestTheAlarmNamesTheMode(t *testing.T) {
 	}
 	if !strings.HasPrefix(string(out), "immortal-barons -maint: ") {
 		t.Errorf("the alarm reads %q, want it to name -maint", out)
+	}
+}
+
+// -detailed reaches the planetary step -maint runs, as it does -planetary's: a
+// league board's timer runs -maint, so that is the run a sysop reruns by hand
+// to watch the packets go by.
+func TestMaintDetailedShowsEachPacket(t *testing.T) {
+	cfg := leagueBoard(t)
+	plantBadPacket(t, cfg)
+	var err error
+	out := captureStdout(t, func() { err = runMaint(cfg, "2026-09-22", true) })
+	if !errors.Is(err, errFaults) {
+		t.Fatalf("-maint -detailed returned %v, want errFaults for the planted packet", err)
+	}
+	if !strings.Contains(out, "Quarantined packet L900-0001.brp") {
+		t.Errorf("-maint -detailed did not show the packet it read:\n%s", out)
+	}
+
+	plantBadPacket(t, cfg)
+	out = captureStdout(t, func() { _ = runMaint(cfg, "2026-09-22", false) })
+	if strings.Contains(out, "Quarantined packet") {
+		t.Errorf("-maint without -detailed showed a packet line:\n%s", out)
 	}
 }

@@ -186,3 +186,61 @@ func eachHeldPacket(dataDir string, fn func(path string, e os.DirEntry, p *game.
 	}
 	return nil
 }
+
+// HeldPacket is one file in the held directory, as the sysop panel lists it.
+type HeldPacket struct {
+	File      string
+	FromBoard string // "" when the file cannot be read
+	Type      string // game.Packet.PacketType; "" when the file cannot be read
+	Reason    HeldReason
+	Since     time.Time // when this board set it aside
+	Expires   time.Time // when HeldMaxAge deletes it
+	// PausesLostForces is a protocol hold that is stopping the lost-forces
+	// timer for strikes sent to FromBoard (#190).
+	PausesLostForces bool
+}
+
+// HeldReason is why a packet is waiting in the held directory.
+type HeldReason string
+
+const (
+	HeldUnreadable HeldReason = "unreadable"
+	HeldProtocol   HeldReason = "protocol"
+	HeldSignature  HeldReason = "signature"
+	HeldRules      HeldReason = "rules"
+	// HeldClear is a packet no check would hold today: the next planetary run
+	// releases a protocol hold on its own, and a signature or rules hold clears
+	// once the file goes back through inbound.
+	HeldClear HeldReason = "clear"
+)
+
+// HeldPackets lists the held directory. Nothing records why a packet was held,
+// so the reason is worked out again with the same checks, in the same order, as
+// applyStagedPacket uses to hold one; it changes nothing in w or on disk.
+func HeldPackets(w *game.World) ([]HeldPacket, error) {
+	var out []HeldPacket
+	paused := protocolHeldBoards(w)
+	err := eachHeldPacket(w.Config.DataDir, func(_ string, e os.DirEntry, p *game.Packet) {
+		h := HeldPacket{File: e.Name(), Reason: HeldUnreadable}
+		if info, err := e.Info(); err == nil {
+			h.Since = info.ModTime()
+			h.Expires = h.Since.Add(HeldMaxAge)
+		}
+		if p != nil {
+			h.FromBoard, h.Type = p.FromBoard, p.PacketType()
+			switch {
+			case !game.SpeaksOurProtocol(p.Protocol):
+				h.Reason = HeldProtocol
+				h.PausesLostForces = paused[p.FromBoard]
+			case w.OriginRefused(*p):
+				h.Reason = HeldSignature
+			case w.RulesetDivergent(*p):
+				h.Reason = HeldRules
+			default:
+				h.Reason = HeldClear
+			}
+		}
+		out = append(out, h)
+	})
+	return out, err
+}
