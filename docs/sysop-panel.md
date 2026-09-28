@@ -13,7 +13,7 @@ The release archives do not include the panel yet. Build it from the source,
 in the top folder of the repository:
 
 ```
-go build -C cmd/ib-sysop -buildmode=pie -o ../.. .
+go build -C cmd/ib-sysop -buildmode=pie -o ../..
 ```
 
 This puts `ib-sysop` next to `immortal-barons`, which the panel runs for every

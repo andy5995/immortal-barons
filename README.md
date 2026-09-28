@@ -169,7 +169,7 @@ every platform. Your package manager may have Go as well, but check the version
 first: some distributions ship one older than 1.26.4.
 
 ```
-go build -o . ./cmd/immortal-barons
+go build ./cmd/immortal-barons
 ```
 
 This produces the `immortal-barons` program. See "Running" above to start the
@@ -179,7 +179,7 @@ The [Sysop Panel](docs/sysop-panel.md), `ib-sysop`, is built with its own
 command. On Linux and macOS it needs extra packages, which that page lists.
 
 ```
-go build -C cmd/ib-sysop -buildmode=pie -o ../.. .
+go build -C cmd/ib-sysop -buildmode=pie -o ../..
 ```
 
 ## Character set
