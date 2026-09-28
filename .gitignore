@@ -2,7 +2,10 @@
 # a bare `go build ./...`)
 /immortal-barons
 /barons-docs
-# The sysop panel is its own module, built from its own directory.
+# The sysop panel is its own module; `go build -C cmd/ib-sysop` puts it in the
+# repo root or in its own directory, depending on -o.
+/ib-sysop
+/ib-sysop.exe
 /cmd/ib-sysop/ib-sysop
 /cmd/ib-sysop/ib-sysop.exe
 

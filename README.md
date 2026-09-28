@@ -175,6 +175,13 @@ go build -o . ./cmd/immortal-barons
 This produces the `immortal-barons` program. See "Running" above to start the
 game.
 
+The [Sysop Panel](docs/sysop-panel.md), `ib-sysop`, is built with its own
+command. On Linux and macOS it needs extra packages, which that page lists.
+
+```
+go build -C cmd/ib-sysop -buildmode=pie -o ../.. .
+```
+
 ## Character set
 
 See the [Character Set guide](docs/charset.md)
