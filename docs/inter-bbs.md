@@ -525,6 +525,10 @@ final `.brp` name as the ready signal:
 4. Rename the temporary file atomically to the final `.brp` name. After that
    rename, the game owns the file and the transport must not alter or delete it.
 
+Match the extension in any case. The game reads `.brp` and `.BRP` alike, and a
+ZIP bundle from a peer with [`Bundled`](bbs-cfg.md#bundled) on arrives as
+`.BRP`, so a script that matches only `*.brp` on Linux never passes it on.
+
 Do not run `cp`, `scp`, FTP, or a sync tool directly against the final `.brp`
 name: `-planetary` could otherwise open it while it is only partly written. For
 example, upload with a `.tmp` suffix and perform the final rename on the
