@@ -19,6 +19,7 @@ func writeFixture(t *testing.T, root string) {
 		"docs/inter-bbs.md":                           "# Inter-BBS Leagues\n\nLeague play.\n",
 		"docs/inter-bbs-troubleshooting.md":           "# Inter-BBS Troubleshooting\n\nWhen packets stop arriving.\n",
 		"docs/ftn-transport.md":                       "# FTN Transport\n\nTransport setup.\n",
+		"docs/sysop-panel.md":                         "# Sysop Panel\n\nA desktop window for sysops.\n",
 		"docs/command-reference.md":                   "# Command Reference\n\nAll options.\n",
 		"docs/download.md":                            "# Download\n\nReleases and snapshots.\n",
 		"docs/faq.md":                                 "# FAQ\n\nQuestions.\n",

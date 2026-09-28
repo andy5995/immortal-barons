@@ -36,6 +36,7 @@ func newLinker(repoRoot string, enTopics []topic) *linker {
 		"docs/inter-bbs.md":                 "inter-bbs/index.md",
 		"docs/inter-bbs-troubleshooting.md": "inter-bbs-troubleshooting/index.md",
 		"docs/ftn-transport.md":             "ftn-transport/index.md",
+		"docs/sysop-panel.md":               "sysop-panel/index.md",
 		"docs/charset.md":                   "charset/index.md",
 		"docs/command-reference.md":         "command-reference/index.md",
 		"docs/download.md":                  "download/index.md",

@@ -822,6 +822,10 @@ them changes the game. They are what you reach for when a board goes quiet —
 says which answers what, and [Command Reference](command-reference.md) has the
 detail.
 
+The [Sysop Panel](sysop-panel.md) shows the `-bbsinfo` list, the strikes still
+waiting on an answer and the held packets in one window, and runs these
+commands for you.
+
 ## Example: a two-board league, step by step
 
 This is a worked example of setting up a league from nothing. It uses two

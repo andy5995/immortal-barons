@@ -51,6 +51,7 @@ for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 dar
 		docs/bbs-cfg.md \
 		docs/bulletins.md docs/inter-bbs.md docs/charset.md docs/download.md \
 		docs/translating.md docs/ftn-transport.md docs/inter-bbs-troubleshooting.md \
+		docs/sysop-panel.md \
 		"$dir/docs/"
 	if [ "$os" = windows ]; then
 		zip -qr "dist/${name}.zip" "$dir"
