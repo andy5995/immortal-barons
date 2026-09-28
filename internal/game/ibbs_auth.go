@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -238,12 +239,16 @@ func (w *World) IsPacketSeen(p Packet) bool {
 // SeenPacket reports whether a packet has already been applied here, and records
 // it if not. A packet with no sequence number is fingerprinted by its contents
 // instead, so an older board that sends none is still protected.
+//
+// A numbered packet from a named board is recorded in HighSeq alone. Its
+// SeenPackets key could never refuse anything: the key is stored only once
+// HighSeq has been raised to its number, HighSeq only ever rises, and every
+// number at or below it is refused anyway. Storing it is what made
+// SeenPackets most of a league board's world.json, growing by one entry per
+// packet for the life of the league.
 func (w *World) SeenPacket(p Packet) bool {
 	key := packetKey(p)
-	if w.SeenPackets == nil {
-		w.SeenPackets = map[string]bool{}
-	}
-	if w.SeenPackets[key] {
+	if w.SeenPackets[key] { // reading a nil map is safe
 		return true
 	}
 	// A sequence number that has gone backwards is a replay of something already
@@ -256,9 +261,46 @@ func (w *World) SeenPacket(p Packet) bool {
 			return true
 		}
 		w.HighSeq[p.FromBoard] = p.Seq
+		return false
+	}
+	if w.SeenPackets == nil {
+		w.SeenPackets = map[string]bool{}
 	}
 	w.SeenPackets[key] = true
 	return false
+}
+
+// PruneSeenPackets drops the SeenPackets entries HighSeq makes redundant, which
+// every save before SeenPacket stopped storing them carries: a numbered key
+// from a named board at or below that board's HighSeq. Content fingerprints,
+// numbered keys with no board, and anything above HighSeq are kept, as is any
+// key that does not parse as packetKey writes it. It reports how many went.
+func (w *World) PruneSeenPackets() int {
+	n := 0
+	for key := range w.SeenPackets {
+		board, seq, ok := sequencedKey(key)
+		if ok && board != "" && seq <= w.HighSeq[board] {
+			delete(w.SeenPackets, key)
+			n++
+		}
+	}
+	return n
+}
+
+// sequencedKey reads a packetKey written for a numbered packet: the board, then
+// "#", then the number as 16 hex digits. The board is split off at the LAST
+// "#", since a board name may contain one. ok is false for a content
+// fingerprint (64 hex digits) or anything else.
+func sequencedKey(key string) (board string, seq uint64, ok bool) {
+	i := strings.LastIndexByte(key, '#')
+	if i < 0 || len(key)-i-1 != 16 {
+		return "", 0, false
+	}
+	seq, err := strconv.ParseUint(key[i+1:], 16, 64)
+	if err != nil {
+		return "", 0, false
+	}
+	return key[:i], seq, true
 }
 
 // packetKey identifies a packet for replay detection: its sender and sequence
