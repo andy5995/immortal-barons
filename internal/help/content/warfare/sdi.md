@@ -24,6 +24,10 @@ funding gives a large realm a weaker shield than a small one, and each region yo
 capture makes your own shield thinner. Each further percent of strength costs
 more than the one before.
 
+Strength stops at 100%, but the program still takes gold past that point. The
+extra keeps the shield at 100% while you take more land. It also adds to the
+upkeep.
+
 ## Funding it
 
 The program is a pot of gold, not something you buy once. Each turn you may add
