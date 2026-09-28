@@ -236,6 +236,9 @@ func repair(w *game.World, cfg game.Config) {
 	// have only just moved out of their legacy fields. TEMPORARY (v0.2.0) — goes
 	// with internal/game/retire_ai.go.
 	w.RetireAIBarons()
+	// Saves from before SeenPacket stopped recording numbered packets carry
+	// one entry per packet ever applied, which HighSeq already covers.
+	w.PruneSeenPackets()
 	loadLeagueNodes(w, cfg)
 	loadLeagueKeys(w, cfg)
 }

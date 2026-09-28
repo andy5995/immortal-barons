@@ -6806,8 +6806,11 @@ checks.
   rather than trusting it. A shared secret could not do this job: every member
   would hold it and could sign with it.
 - **Anti-replay.** Each outbound packet carries a sequence number. A board tracks
-  the highest it has seen from each sender and a set of packets already applied,
-  and drops anything it has processed before or that arrives with a stale number.
+  the highest it has applied from each sender and refuses anything at or below
+  it, which covers both a packet processed before and one arriving with a stale
+  number. A packet with no number, or no sender name, is fingerprinted by its
+  contents instead, and only those fingerprints are kept, so the record does not
+  grow with every packet a league exchanges.
   Without it a saved packet could be dropped back in to pay a strike's results
   out twice, or re-run a reset.
 

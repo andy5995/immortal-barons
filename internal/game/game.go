@@ -357,7 +357,10 @@ type World struct {
 	// from board.key at startup like the two above, never serialized.
 	BoardKey []byte `json:"-"`
 	// OutSeq numbers this board's outbound packets. HighSeq and SeenPackets are
-	// what an inbound packet is checked against, so nothing is applied twice.
+	// what an inbound packet is checked against, so nothing is applied twice:
+	// HighSeq holds the highest number applied from each board, and SeenPackets
+	// only what HighSeq cannot cover, a packet with no number or no board name
+	// (see SeenPacket).
 	OutSeq      uint64
 	HighSeq     map[string]uint64
 	SeenPackets map[string]bool
