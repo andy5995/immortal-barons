@@ -193,8 +193,11 @@ type HeldPacket struct {
 	FromBoard string // "" when the file cannot be read
 	Type      string // game.Packet.PacketType; "" when the file cannot be read
 	Reason    HeldReason
-	Since     time.Time // when this board set it aside
-	Expires   time.Time // when HeldMaxAge deletes it
+	// Arrived is the file's modification time: when it was written or reached
+	// this board. Holding moves the file without touching it, and HeldMaxAge
+	// counts from it, so a packet released and held again keeps its first one.
+	Arrived time.Time
+	Expires time.Time // when HeldMaxAge deletes it
 	// PausesLostForces is a protocol hold that is stopping the lost-forces
 	// timer for strikes sent to FromBoard (#190).
 	PausesLostForces bool
@@ -223,8 +226,8 @@ func HeldPackets(w *game.World) ([]HeldPacket, error) {
 	err := eachHeldPacket(w.Config.DataDir, func(_ string, e os.DirEntry, p *game.Packet) {
 		h := HeldPacket{File: e.Name(), Reason: HeldUnreadable}
 		if info, err := e.Info(); err == nil {
-			h.Since = info.ModTime()
-			h.Expires = h.Since.Add(HeldMaxAge)
+			h.Arrived = info.ModTime()
+			h.Expires = h.Arrived.Add(HeldMaxAge)
 		}
 		if p != nil {
 			h.FromBoard, h.Type = p.FromBoard, p.PacketType()

@@ -52,8 +52,8 @@ type boardTab struct {
 func newBoardTab(u *ui, dir string) *boardTab {
 	t := &boardTab{u: u, dir: dir,
 		boards:   newTable("#", "BBS Name", "Last heard", "Silent", "Version", "Round trip", "Probe back", "Status"),
-		inFlight: newTable("ID", "Kind", "What", "Owner", "Target board", "Target realm", "Launched", "Waiting", "Held days", "Lost-forces return"),
-		held:     newTable("File", "From board", "Type", "Reason", "Held since", "Expires", "Pauses lost forces"),
+		inFlight: newTable("ID", "Kind", "What", "Owner", "Target board", "Target realm", "Launch day", "Waiting", "Held days", "Lost-forces return"),
+		held:     newTable("File", "From board", "Type", "Reason", "Arrived", "Expires", "Pauses lost forces"),
 	}
 	t.run.init(t)
 	t.cfg.init(t)
@@ -256,7 +256,7 @@ func (t *boardTab) inFlightRows() [][]string {
 			}
 		}
 		rows = append(rows, []string{strconv.Itoa(f.ID), f.Kind, f.What, f.Owner, f.TargetBoard, f.TargetRealm,
-			"day " + strconv.Itoa(f.LaunchedDay), days(f.Waiting), strconv.Itoa(f.HeldDays), ret})
+			strconv.Itoa(f.LaunchedDay), days(f.Waiting), strconv.Itoa(f.HeldDays), ret})
 	}
 	return rows
 }
@@ -275,7 +275,7 @@ func (t *boardTab) heldRows() [][]string {
 		if h.PausesLostForces {
 			pauses = "yes"
 		}
-		rows = append(rows, []string{h.File, from, typ, string(h.Reason), stamp(h.Since), stamp(h.Expires), pauses})
+		rows = append(rows, []string{h.File, from, typ, string(h.Reason), stamp(h.Arrived), stamp(h.Expires), pauses})
 	}
 	return rows
 }

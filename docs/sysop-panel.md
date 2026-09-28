@@ -42,6 +42,9 @@ With no arguments, the panel opens the tabs that were open when it last closed,
 at the same size. It keeps this in your user config directory
 (`immortal-barons/ib-sysop.json`), never in a data directory.
 
+A saved folder that does not open, such as a drive that is not mounted yet,
+stays on the list for the next start. **Forget** removes it.
+
 **A−** and **A+** at the top right make the text and spacing smaller or larger.
 Ctrl+minus, Ctrl+plus and Ctrl+0 do the same (Cmd on macOS). Ctrl+0 goes back to
 the default size, 125%.

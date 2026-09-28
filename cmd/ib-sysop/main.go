@@ -22,6 +22,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -87,14 +89,29 @@ type ui struct {
 	browser         *browser
 	browsing        bool
 	notice          string // a message shown above the tabs, e.g. an Open refusal
+	// missing is the saved directories that would not open at startup. They
+	// stay in the session, since the usual cause is a drive not mounted yet,
+	// until one opens again or Forget is clicked.
+	missing   []string
+	forgetBtn widget.Clickable
 }
 
 func newUI(w *app.Window, dirs []string, zoom float32) *ui {
 	th := material.NewTheme()
 	th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
 	u := &ui{win: w, th: th, browser: newBrowser(), zoom: nearestZoom(zoom)}
+	// Each open clears the notice on success, so collect the failures and show
+	// them together once every saved directory has been tried.
+	var failed []string
 	for _, d := range dirs {
-		u.open(d)
+		if !u.open(d) {
+			failed = append(failed, u.notice)
+			u.missing = append(u.missing, d)
+		}
+	}
+	u.notice = strings.Join(failed, "; ")
+	if len(u.missing) > 0 {
+		u.notice += " (kept for next time)"
 	}
 	if len(u.tabs) == 0 {
 		u.browsing = true
@@ -119,6 +136,7 @@ func (u *ui) open(dir string) bool {
 		return false
 	}
 	u.notice = ""
+	u.missing = slices.DeleteFunc(u.missing, func(m string) bool { return m == dir || m == abs })
 	for i, t := range u.tabs {
 		if t.dir == abs {
 			u.active = i
@@ -140,6 +158,9 @@ func (u *ui) close(i int) {
 		return
 	}
 	u.tabs = append(u.tabs[:i], u.tabs[i+1:]...)
+	if i < u.active {
+		u.active-- // keep showing the same board, now one place to the left
+	}
 	if u.active >= len(u.tabs) {
 		u.active = len(u.tabs) - 1
 	}
@@ -192,6 +213,10 @@ func (u *ui) layout(gtx layout.Context) layout.Dimensions {
 	for _, t := range u.tabs {
 		t.maybeAutoRefresh()
 	}
+	if u.forgetBtn.Clicked(gtx) {
+		u.missing, u.notice = nil, ""
+		u.saveSession()
+	}
 
 	return layout.UniformInset(unit.Dp(8)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -202,7 +227,15 @@ func (u *ui) layout(gtx layout.Context) layout.Dimensions {
 				}
 				l := material.Body2(u.th, u.notice)
 				l.Color = errorColor
-				return layout.Inset{Top: unit.Dp(4)}.Layout(gtx, l.Layout)
+				if len(u.missing) == 0 {
+					return layout.Inset{Top: unit.Dp(4)}.Layout(gtx, l.Layout)
+				}
+				return layout.Inset{Top: unit.Dp(4)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+					return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
+						layout.Flexed(1, l.Layout),
+						button(u.th, &u.forgetBtn, "Forget"),
+					)
+				})
 			}),
 			layout.Rigid(rule(u.th)),
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
@@ -375,6 +408,7 @@ func (u *ui) saveSession() {
 	for _, t := range u.tabs {
 		s.Dirs = append(s.Dirs, t.dir)
 	}
+	s.Dirs = append(s.Dirs, u.missing...)
 	data, _ := json.Marshal(s)
 	if os.MkdirAll(filepath.Dir(p), 0o755) == nil {
 		os.WriteFile(p, data, 0o644)
