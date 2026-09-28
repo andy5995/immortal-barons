@@ -10,8 +10,12 @@ ib-sysop [DATADIR ...]
 Each game data directory opens in its own tab; **Open…** adds another, and
 accepts either the data directory itself or the door folder that holds it as
 `data/`. With no arguments the panel reopens the tabs that were open when it
-last closed. That list is kept in the user's config directory
-(`immortal-barons/ib-sysop.json`), never in a data directory.
+last closed, at the size it was left at. Both are kept in the user's config
+directory (`immortal-barons/ib-sysop.json`), never in a data directory.
+
+**A−** and **A+** at the top right make everything smaller or larger, text
+and spacing together; so do Ctrl+minus and Ctrl+plus (Cmd on macOS), and
+Ctrl+0 goes back to the default of 125%.
 
 Each tab has four views:
 

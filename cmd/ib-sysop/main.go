@@ -8,12 +8,16 @@
 //	ib-sysop [DATADIR ...]
 //
 // With no arguments it reopens the directories that were open last time.
+//
+// Ctrl+plus and Ctrl+minus (Cmd on macOS) make everything larger or smaller,
+// as the A+ and A− buttons do, and Ctrl+0 goes back to the default size.
 package main
 
 import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"image"
 	"image/color"
 	"log"
 	"os"
@@ -24,6 +28,7 @@ import (
 	"gioui.org/app"
 	"gioui.org/font"
 	"gioui.org/font/gofont"
+	"gioui.org/io/key"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/text"
@@ -49,14 +54,15 @@ func main() {
 			"commands. With no directory, reopens the ones open last time.\n")
 	}
 	flag.Parse()
+	saved := loadSession()
 	dirs := flag.Args()
 	if len(dirs) == 0 {
-		dirs = loadSession()
+		dirs = saved.Dirs
 	}
 	go func() {
 		w := new(app.Window)
 		w.Option(app.Title("Immortal Barons Sysop Panel"), app.Size(unit.Dp(1100), unit.Dp(720)))
-		u := newUI(w, dirs)
+		u := newUI(w, dirs, saved.Zoom)
 		if err := u.loop(); err != nil {
 			log.Fatal(err)
 		}
@@ -73,16 +79,20 @@ type ui struct {
 	tabs   []*boardTab
 	active int
 
-	openBtn  widget.Clickable
-	browser  *browser
-	browsing bool
-	notice   string // a message shown above the tabs, e.g. an Open refusal
+	openBtn widget.Clickable
+	// zoom scales the whole panel, text and spacing alike, so a larger size
+	// never crowds a button's label against its edge.
+	zoom            float32
+	zoomIn, zoomOut widget.Clickable
+	browser         *browser
+	browsing        bool
+	notice          string // a message shown above the tabs, e.g. an Open refusal
 }
 
-func newUI(w *app.Window, dirs []string) *ui {
+func newUI(w *app.Window, dirs []string, zoom float32) *ui {
 	th := material.NewTheme()
 	th.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
-	u := &ui{win: w, th: th, browser: newBrowser()}
+	u := &ui{win: w, th: th, browser: newBrowser(), zoom: nearestZoom(zoom)}
 	for _, d := range dirs {
 		u.open(d)
 	}
@@ -157,6 +167,16 @@ func (u *ui) layout(gtx layout.Context) layout.Dimensions {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 
+	u.zoomKeys(gtx)
+	if u.zoomIn.Clicked(gtx) {
+		u.setZoom(+1)
+	}
+	if u.zoomOut.Clicked(gtx) {
+		u.setZoom(-1)
+	}
+	gtx.Metric.PxPerDp *= u.zoom
+	gtx.Metric.PxPerSp *= u.zoom
+
 	if u.openBtn.Clicked(gtx) {
 		u.browsing = !u.browsing
 	}
@@ -220,11 +240,32 @@ func (u *ui) tabBar(gtx layout.Context) layout.Dimensions {
 	items = append(items, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 		return tabButton(u.th, &u.openBtn, "Open…", u.browsing || len(u.tabs) == 0)(gtx)
 	}))
+	items = append(items,
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+			return layout.Dimensions{Size: image.Pt(gtx.Constraints.Min.X, 0)}
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			if u.zoom <= zoomSteps[0] {
+				gtx = gtx.Disabled()
+			}
+			return layout.Inset{Right: unit.Dp(4)}.Layout(gtx, material.Button(u.th, &u.zoomOut, "A−").Layout)
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			l := material.Body2(u.th, fmt.Sprintf("%d%%", int(u.zoom*100+0.5)))
+			return layout.Inset{Left: unit.Dp(4), Right: unit.Dp(8)}.Layout(gtx, l.Layout)
+		}),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			if u.zoom >= zoomSteps[len(zoomSteps)-1] {
+				gtx = gtx.Disabled()
+			}
+			return material.Button(u.th, &u.zoomIn, "A+").Layout(gtx)
+		}),
+	)
 	return layout.Flex{Alignment: layout.Middle}.Layout(gtx, items...)
 }
 
-// sessionFile remembers which directories were open, so the panel comes back
-// as it was left. It lives in the user's config directory, never a data
+// sessionFile remembers which directories were open, and the size, so the
+// panel comes back as it was left. It lives in the user's config directory, never a data
 // directory.
 func sessionFile() string {
 	dir, err := os.UserConfigDir()
@@ -234,14 +275,94 @@ func sessionFile() string {
 	return filepath.Join(dir, "immortal-barons", "ib-sysop.json")
 }
 
-func loadSession() []string {
-	var dirs []string
-	if p := sessionFile(); p != "" {
-		if data, err := os.ReadFile(p); err == nil {
-			json.Unmarshal(data, &dirs)
+// zoomSteps are the sizes A+ and A− step through. defaultZoom is larger than
+// Gio's own size, which reads small on a desktop monitor.
+var zoomSteps = []float32{0.75, 0.9, 1, 1.1, 1.25, 1.4, 1.6, 1.8, 2, 2.5, 3}
+
+const defaultZoom = 1.25
+
+// nearestZoom is the step closest to z, and the default for an unset z.
+func nearestZoom(z float32) float32 {
+	if z <= 0 {
+		return defaultZoom
+	}
+	best := zoomSteps[0]
+	for _, s := range zoomSteps {
+		if abs(s-z) < abs(best-z) {
+			best = s
 		}
 	}
-	return dirs
+	return best
+}
+
+func abs(f float32) float32 {
+	if f < 0 {
+		return -f
+	}
+	return f
+}
+
+// setZoom moves one step larger (+1) or smaller (-1); 0 goes back to the
+// default. Called with ui.mu held.
+func (u *ui) setZoom(dir int) {
+	z := u.zoom
+	if dir == 0 {
+		z = defaultZoom
+	} else {
+		for i, s := range zoomSteps {
+			if s == u.zoom {
+				z = zoomSteps[min(max(i+dir, 0), len(zoomSteps)-1)]
+			}
+		}
+	}
+	if z != u.zoom {
+		u.zoom = z
+		u.saveSession()
+	}
+}
+
+// zoomKeys takes the shortcut keys wherever the focus is. Plus is matched
+// with and without Shift, since on most layouts it shares a key with "=".
+func (u *ui) zoomKeys(gtx layout.Context) {
+	for {
+		ev, ok := gtx.Event(
+			key.Filter{Required: key.ModShortcut, Optional: key.ModShift, Name: "+"},
+			key.Filter{Required: key.ModShortcut, Optional: key.ModShift, Name: "="},
+			key.Filter{Required: key.ModShortcut, Optional: key.ModShift, Name: "-"},
+			key.Filter{Required: key.ModShortcut, Name: "0"},
+		)
+		if !ok {
+			return
+		}
+		e, ok := ev.(key.Event)
+		if !ok || e.State != key.Press {
+			continue
+		}
+		switch e.Name {
+		case "+", "=":
+			u.setZoom(+1)
+		case "-":
+			u.setZoom(-1)
+		case "0":
+			u.setZoom(0)
+		}
+	}
+}
+
+// session is what the panel remembers between runs.
+type session struct {
+	Dirs []string `json:"dirs"`
+	Zoom float32  `json:"zoom,omitempty"`
+}
+
+func loadSession() session {
+	var s session
+	if p := sessionFile(); p != "" {
+		if data, err := os.ReadFile(p); err == nil {
+			json.Unmarshal(data, &s)
+		}
+	}
+	return s
 }
 
 // saveSession is best effort: losing it costs reopening a tab by hand.
@@ -250,11 +371,11 @@ func (u *ui) saveSession() {
 	if p == "" {
 		return
 	}
-	dirs := make([]string, 0, len(u.tabs))
+	s := session{Dirs: make([]string, 0, len(u.tabs)), Zoom: u.zoom}
 	for _, t := range u.tabs {
-		dirs = append(dirs, t.dir)
+		s.Dirs = append(s.Dirs, t.dir)
 	}
-	data, _ := json.Marshal(dirs)
+	data, _ := json.Marshal(s)
 	if os.MkdirAll(filepath.Dir(p), 0o755) == nil {
 		os.WriteFile(p, data, 0o644)
 	}
