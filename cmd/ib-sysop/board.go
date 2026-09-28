@@ -20,9 +20,10 @@ const (
 	viewInFlight
 	viewHeld
 	viewRun
+	viewConfig
 )
 
-var viewNames = []string{"Boards", "In flight", "Held packets", "Run"}
+var viewNames = []string{"Boards", "In flight", "Held packets", "Run", "bbs.cfg"}
 
 // boardTab is one open data directory. Everything a background read or a
 // running command writes into it is guarded by ui.mu, which the frame holds.
@@ -40,11 +41,12 @@ type boardTab struct {
 	refreshBtn widget.Clickable
 	auto       widget.Bool
 	view       int
-	viewBtns   [4]widget.Clickable
+	viewBtns   [5]widget.Clickable
 
 	boards, inFlight, held *table
 
 	run runView
+	cfg cfgView
 }
 
 func newBoardTab(u *ui, dir string) *boardTab {
@@ -54,6 +56,7 @@ func newBoardTab(u *ui, dir string) *boardTab {
 		held:     newTable("File", "From board", "Type", "Reason", "Held since", "Expires", "Pauses lost forces"),
 	}
 	t.run.init(t)
+	t.cfg.init(t)
 	return t
 }
 
@@ -142,6 +145,8 @@ func (t *boardTab) layout(gtx layout.Context) layout.Dimensions {
 				return t.inFlight.layout(gtx, th, t.inFlightRows(), t.emptyText("Nothing is in flight from this board."))
 			case viewHeld:
 				return t.held.layout(gtx, th, t.heldRows(), t.emptyText("No packets are held."))
+			case viewConfig:
+				return t.cfg.layout(gtx)
 			default:
 				return t.run.layout(gtx)
 			}

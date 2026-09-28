@@ -17,7 +17,7 @@ directory (`immortal-barons/ib-sysop.json`), never in a data directory.
 and spacing together; so do Ctrl+minus and Ctrl+plus (Cmd on macOS), and
 Ctrl+0 goes back to the default of 125%.
 
-Each tab has four views:
+Each tab has five views:
 
 - **Boards**: every other board in the league, as BBSINFO lists it, plus how
   long each has been silent, its average packet round trip and when a probe
@@ -31,6 +31,15 @@ Each tab has four views:
 - **Run**: runs one `immortal-barons` command and shows its output. The
   League Coordinator's commands appear only on node #1, and the two that act on
   every board (`-league-freeze`, `-league-reset`) ask first.
+- **bbs.cfg**: the board's `bbs.cfg`, with **Edit in default editor**. That
+  is the desktop's default application for the file: `xdg-open` on Linux and
+  the BSDs, the default text editor (`open -t`) on macOS, and the file's edit
+  association on Windows, falling back to Notepad when `.cfg` has none. When
+  no editor can be found the panel says so and names the file to open by hand.
+  `$EDITOR` is not used, because it usually names a terminal editor and the
+  panel has no terminal. A board with no `bbs.cfg` gets one written from the
+  settings it is running with before the editor opens. The view reads the
+  file again whenever it changes on disk, and re-reads the board with it.
 
 Click a column heading to sort by it; click it again to reverse.
 
@@ -40,6 +49,10 @@ It never writes the world. A refresh takes the world lock, reads, and lets go,
 exactly as a door node's read does; the lock is exclusive, so a refresh waits
 for a running `-maint` to finish and door nodes wait for a refresh. That is why
 auto-refresh is off by default and runs once a minute at most.
+
+The one file it may write in a data directory is `bbs.cfg`, and only when the
+board has none and **Edit** is clicked. An existing `bbs.cfg` is changed only
+by the editor it opens.
 
 Every command is the `immortal-barons` program run as a separate process, from
 the data directory's parent folder, with `-data` naming the directory. The
