@@ -46,6 +46,7 @@ Learn more, follow progress, or get involved:
 - [Screenshots](https://andy5995.github.io/immortal-barons/screenshots/)
 - [Issue tracker](https://github.com/andy5995/immortal-barons/issues)
 - [Discussions](https://github.com/andy5995/immortal-barons/discussions)
+- [Discord channel on the Lazarus Project server](https://discord.gg/weAEgZ2re6)
 
 We strongly recommend reading the [FAQ](docs/faq.md) first.
 
@@ -225,7 +226,6 @@ Free software under the [MIT License](LICENSE).
 ## Related Realms
 
 * [Medusa's Barren Realms Elite (BRE) Discord](https://discord.gg/5wTZpstcjM)
-* [Immortal Barons Discord channel on Lazarus Project server](https://discord.gg/weAEgZ2re6)
 * [Shurato's Heavenly Sphere BBS](https://shsbbs.net/ad.html)
 * [X-Bit BBS](https://x-bit.org/info/)
 * [LibreGaming](https://libregaming.org/)
