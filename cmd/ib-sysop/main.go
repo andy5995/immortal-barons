@@ -45,8 +45,8 @@ import (
 const mono = font.Typeface("Go Mono")
 
 // autoRefreshEvery is how often a tab with auto-refresh on re-reads its world.
-// Every read takes the exclusive world lock the door nodes queue on, so this is
-// deliberately slow.
+// A read holds the world lock for a few milliseconds (sysop.Read), so callers
+// do not notice it.
 const autoRefreshEvery = 60 * time.Second
 
 func main() {

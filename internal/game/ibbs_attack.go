@@ -858,20 +858,33 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) stri
 	} else {
 		b.WriteString("Your forces held the field.\n")
 	}
-	var sent AttackForce
-	for _, c := range atk.Contributors {
-		sent.Troopers += c.Troopers
-		sent.Jets += c.Jets
-		sent.Tanks += c.Tanks
-		sent.Bombers += c.Bombers
-	}
-	writeUnitLines(&b, "%s attacked.", attackUnits(sent))
+	writeUnitLines(&b, "%s attacked.", attackUnits(forceOf(atk.Contributors)))
 	if won {
 		fmt.Fprintf(&b, "You lost %d regions.\n", regions)
 	}
 	writeUnitLines(&b, "You lost %s!", defenseUnits(lost))
 	return strings.TrimRight(b.String(), "\n")
 }
+
+// forceOf is every unit a strike's contributors committed, taken together.
+func forceOf(cs []Contribution) AttackForce {
+	var f AttackForce
+	for _, c := range cs {
+		f.Troopers += c.Troopers
+		f.Jets += c.Jets
+		f.Tanks += c.Tanks
+		f.Bombers += c.Bombers
+	}
+	return f
+}
+
+// Committed is every unit f took with it, all contributors together.
+func (f InFlightStrike) Committed() AttackForce { return forceOf(f.Contributors) }
+
+// Summary lists the units in f in a returning report's order and shape, but
+// with exact counts ("31,204 Troopers and 66,110 Bombers"), for the sysop
+// panel; the reports themselves shorten them. "" for an empty force.
+func (f AttackForce) Summary() string { return unitPhrase(attackUnits(f), numfmt.Comma[int]) }
 
 // unitCount is one line of a battle report: how many of one unit type.
 type unitCount struct {
@@ -917,16 +930,24 @@ func defenseUnits(u UnitLoss) []unitCount {
 // (a staged local battle printed "10469 Troopers", and resolve_regular_attack is
 // absent from the helper's caller list). Do not make the two agree.
 func writeUnitLines(b *strings.Builder, format string, units []unitCount) {
+	if s := unitPhrase(units, numfmt.Short[int]); s != "" {
+		fmt.Fprintf(b, format+"\n", s)
+	}
+}
+
+// unitPhrase is the list writeUnitLines prints, each count written by count;
+// "" when every count is zero.
+func unitPhrase(units []unitCount, count func(int) string) string {
 	parts := make([]string, 0, len(units))
 	for _, u := range units {
 		if u.n > 0 {
-			parts = append(parts, numfmt.Short(u.n)+" "+u.name)
+			parts = append(parts, count(u.n)+" "+u.name)
 		}
 	}
 	if len(parts) == 0 {
-		return
+		return "" // joinAnd needs at least one item
 	}
-	fmt.Fprintf(b, format+"\n", joinAnd(parts))
+	return joinAnd(parts)
 }
 
 // joinAnd renders a list as the original writes one: "a", "a and b",

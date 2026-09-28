@@ -23,7 +23,7 @@ const (
 	viewConfig
 )
 
-var viewNames = []string{"Boards", "In flight", "Held packets", "Run", "bbs.cfg"}
+var viewNames = [...]string{"Boards", "In flight", "Held packets", "Run", "bbs.cfg"}
 
 // boardTab is one open data directory. Everything a background read or a
 // running command writes into it is guarded by ui.mu, which the frame holds.
@@ -41,7 +41,7 @@ type boardTab struct {
 	refreshBtn widget.Clickable
 	auto       widget.Bool
 	view       int
-	viewBtns   [5]widget.Clickable
+	viewBtns   [len(viewNames)]widget.Clickable
 
 	boards, inFlight, held *table
 
@@ -121,7 +121,7 @@ func (t *boardTab) layout(gtx layout.Context) layout.Dimensions {
 					return l.Layout(gtx)
 				}),
 				button(th, &t.refreshBtn, "Refresh"),
-				layout.Rigid(material.CheckBox(th, &t.auto, "Auto-refresh every 60 s").Layout),
+				layout.Rigid(material.CheckBox(th, &t.auto, fmt.Sprintf("Auto-refresh every %d s", int(autoRefreshEvery.Seconds()))).Layout),
 			)
 		}),
 		layout.Rigid(t.summary),

@@ -217,9 +217,27 @@ const (
 	HeldClear HeldReason = "clear"
 )
 
+// holdReason is why applyStagedPacket holds p, or HeldClear when it would apply
+// it. It is the one copy of that decision: applyStagedPacket acts on it, and
+// HeldPackets reports it, so a new hold cannot be listed as clear. It reads w
+// and changes nothing.
+func holdReason(w *game.World, p game.Packet) HeldReason {
+	switch {
+	case !game.SpeaksOurProtocol(p.Protocol):
+		return HeldProtocol
+	// Asked BEFORE the rules, so the fingerprint has been through the sending
+	// board's own signature wherever the roster carries a key for it.
+	case w.OriginRefused(p):
+		return HeldSignature
+	case w.RulesetDivergent(p):
+		return HeldRules
+	}
+	return HeldClear
+}
+
 // HeldPackets lists the held directory. Nothing records why a packet was held,
-// so the reason is worked out again with the same checks, in the same order, as
-// applyStagedPacket uses to hold one; it changes nothing in w or on disk.
+// so the reason is asked again of holdReason; it changes nothing in w or on
+// disk.
 func HeldPackets(w *game.World) ([]HeldPacket, error) {
 	var out []HeldPacket
 	paused := protocolHeldBoards(w)
@@ -231,17 +249,8 @@ func HeldPackets(w *game.World) ([]HeldPacket, error) {
 		}
 		if p != nil {
 			h.FromBoard, h.Type = p.FromBoard, p.PacketType()
-			switch {
-			case !game.SpeaksOurProtocol(p.Protocol):
-				h.Reason = HeldProtocol
-				h.PausesLostForces = paused[p.FromBoard]
-			case w.OriginRefused(*p):
-				h.Reason = HeldSignature
-			case w.RulesetDivergent(*p):
-				h.Reason = HeldRules
-			default:
-				h.Reason = HeldClear
-			}
+			h.Reason = holdReason(w, *p)
+			h.PausesLostForces = h.Reason == HeldProtocol && paused[p.FromBoard]
 		}
 		out = append(out, h)
 	})

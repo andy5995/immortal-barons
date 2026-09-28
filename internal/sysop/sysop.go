@@ -123,8 +123,9 @@ func Open(dir string) (string, error) {
 }
 
 // Read takes one snapshot of the board in dir. The world lock is exclusive and
-// blocking, the same one a save takes, so this waits for a running -maint and
-// door nodes wait for it: call it off the UI thread, and not often.
+// blocking, the same one a save takes, so this waits for a running -maint: call
+// it off the UI thread. Door nodes wait for it too, but only for the few
+// milliseconds a load takes.
 func Read(dir string, now time.Time) (Snapshot, error) {
 	dir, err := Open(dir)
 	if err != nil {
@@ -207,27 +208,11 @@ func what(f game.InFlightStrike) string {
 	case "trade":
 		return fmt.Sprintf("bid: %d %s at %d", f.Qty, f.Good, f.Price)
 	}
-	var t game.AttackForce
-	for _, c := range f.Contributors {
-		t.Troopers += c.Troopers
-		t.Jets += c.Jets
-		t.Tanks += c.Tanks
-		t.Bombers += c.Bombers
-	}
 	kind := "attack"
 	if f.Group {
 		kind = "group attack"
 	}
-	var parts []string
-	for _, u := range []struct {
-		n    int
-		name string
-	}{{t.Troopers, "troopers"}, {t.Jets, "jets"}, {t.Tanks, "tanks"}, {t.Bombers, "bombers"}} {
-		if u.n > 0 {
-			parts = append(parts, fmt.Sprintf("%d %s", u.n, u.name))
-		}
-	}
-	return kind + ": " + strings.Join(parts, ", ")
+	return kind + ": " + f.Committed().Summary()
 }
 
 // owners names who sent an item by realm, falling back to the handle when the

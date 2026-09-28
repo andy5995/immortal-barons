@@ -856,7 +856,8 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	// Checked only for a packet addressed HERE — a hub passes on bytes it
 	// never interprets, and holding one in transit would stall delivery to a
 	// board that reads it perfectly well.
-	if !game.SpeaksOurProtocol(p.Protocol) {
+	reason := holdReason(w, p)
+	if reason == HeldProtocol {
 		result.Held++
 		w.NoteProtocolHold(p.FromBoard, p.Protocol)
 		return holdPacket(w.Config.DataDir, path)
@@ -872,20 +873,18 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	// Asked BEFORE ApplyPacket, which posts the refusal to the planet's
 	// news and then returns the same empty packet it returns for a
 	// replay or for anything with no reply to send.
-	refused := w.OriginRefused(p)
+	refused := reason == HeldSignature
 	// Held for the same reason and by the same means as a protocol mismatch: a
 	// board playing by rules the Coordinator never sent is playing a different
 	// game, and its scores, strikes and trades would carry that into every other
-	// board's. Checked AFTER the origin check, so the fingerprint has been
-	// through the sending board's own signature wherever the roster carries a
-	// key for it.
+	// board's. holdReason asks it AFTER the origin check.
 	//
 	// The test is on the fingerprint the PACKET carries — the rules it was
 	// written under — so a packet produced under rules the league never agreed is
 	// never applied, whatever its board does afterward: it is held, re-checked
 	// on every later run, and expires at HeldMaxAge. Packets in flight across a
 	// legitimate rules change are the case RulesetGraceDays covers.
-	if !refused && w.RulesetDivergent(p) {
+	if reason == HeldRules {
 		result.HeldRules++
 		// Recorded here as well as on an applied packet: a board that has never
 		// played the league's rules has no applied packet to learn it from, and
