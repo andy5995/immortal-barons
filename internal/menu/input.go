@@ -36,6 +36,12 @@ func readKey(s session.Session) (rune, error) {
 			consumeEscape(s) // and read the next real key, so its bytes don't leak
 			continue         // into a menu selection or a numeric/y-n prompt
 		}
+		// NUL is never a key. Telnet sends Enter as CR NUL, and a BBS that
+		// passes the socket on without removing the NUL leaves it as the first
+		// byte a door reads, where it answered the splash's pause by itself.
+		if r == 0 {
+			continue
+		}
 		return r, nil
 	}
 }

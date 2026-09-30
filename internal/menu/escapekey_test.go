@@ -3,7 +3,8 @@ package menu
 import "testing"
 
 // readKey must swallow terminal escape sequences (arrow keys, PgUp/PgDn, Home/
-// End, function keys) so their bytes never leak into a menu selection or prompt.
+// End, function keys) and a stray NUL, so their bytes never leak into a menu
+// selection or prompt.
 func TestReadKeySwallowsEscapeSequences(t *testing.T) {
 	cases := []struct {
 		name string
@@ -17,6 +18,7 @@ func TestReadKeySwallowsEscapeSequences(t *testing.T) {
 		{"home", "\x1b[H4", '4'},      // final byte 'H'
 		{"ss3-arrow", "\x1bOA6", '6'}, // SS3 application-mode arrow
 		{"plain-key", "q", 'q'},
+		{"telnet-nul", "\x00q", 'q'}, // the NUL of a CR NUL a BBS left behind
 	}
 	for _, c := range cases {
 		f := &fakeSession{keys: []rune(c.in)}
