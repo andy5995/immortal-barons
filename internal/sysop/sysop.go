@@ -202,7 +202,11 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 func what(f game.InFlightStrike) string {
 	switch f.Kind {
 	case "terror":
-		return fmt.Sprintf("%s (%d agents)", f.TerrorOp, f.Agents)
+		word := "agents"
+		if f.Agents == 1 {
+			word = "agent"
+		}
+		return fmt.Sprintf("%s (%d %s)", f.TerrorOp, f.Agents, word)
 	case "special":
 		return game.SpecialOpLabel(f.Op)
 	case "trade":

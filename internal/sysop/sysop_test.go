@@ -194,3 +194,11 @@ func TestStartStreamsOutputAndStatus(t *testing.T) {
 		t.Errorf("output not delivered:\n%s", out)
 	}
 }
+
+// One agent reads as one agent, not "1 agents".
+func TestInFlightTerrorNamesOneAgent(t *testing.T) {
+	f := game.InFlightStrike{Kind: "terror", TerrorOp: game.TerrorOpSpy, Agents: 1}
+	if got, want := what(f), "Send Spy (1 agent)"; got != want {
+		t.Errorf("what = %q, want %q", got, want)
+	}
+}
