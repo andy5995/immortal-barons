@@ -35,13 +35,19 @@ jobs:
       # tree (git archive, so it excludes dist/ and untracked cruft) plus the
       # vendored module deps, which Go uses automatically when vendor/ is
       # present. Run after the binary build so it doesn't mark that tree dirty.
+      # The sysop panel is its own module, so it gets its own vendor/ under
+      # cmd/ib-sysop. That tree includes a COPY of the game's own packages (its
+      # replace of ../.. is vendored like any other module), and the panel
+      # builds from the copy: a packager patching internal/ must patch both.
       - name: Bundle vendored source tarball
         run: |
           name="immortal-barons-${GITHUB_REF_NAME}"
           go mod vendor
+          go mod vendor -C cmd/ib-sysop
           mkdir -p "$RUNNER_TEMP/$name"
           git archive --format=tar HEAD | tar -x -C "$RUNNER_TEMP/$name"
           cp -r vendor "$RUNNER_TEMP/$name/"
+          cp -r cmd/ib-sysop/vendor "$RUNNER_TEMP/$name/cmd/ib-sysop/"
           tar -czf "dist/${name}-vendored-source.tar.gz" -C "$RUNNER_TEMP" "$name"
           # Regenerate checksums so they cover the source tarball too.
           ( cd dist && sha256sum immortal-barons-* > SHA256SUMS )

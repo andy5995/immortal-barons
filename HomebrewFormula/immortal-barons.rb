@@ -33,9 +33,10 @@ class ImmortalBarons < Formula
 
   def install
     system "go", "build", *std_go_args, "./cmd/immortal-barons"
-    # The panel is its own Go module, so it builds from its own directory. The
-    # tarball vendors only the game's dependencies, so this fetches Gio. It
-    # goes in bin/ beside immortal-barons, which it runs for every command.
+    # The panel is its own Go module, so it builds from its own directory.
+    # Tarballs from v0.2.2 on vendor its dependencies too; v0.2.1's does not,
+    # so building that one fetches Gio. It goes in bin/ beside
+    # immortal-barons, which it runs for every command.
     # PIE on Linux, as docs/sysop-panel.md builds it: without it the linker
     # leaves text relocations in the cgo binary.
     cd "cmd/ib-sysop" do
