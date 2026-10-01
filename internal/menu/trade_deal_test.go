@@ -178,3 +178,24 @@ func TestHeldTradeDealIsOfferedOnTheTurnItLands(t *testing.T) {
 		t.Errorf("played %d turns, want at least 2 (the script ran dry):\n%s", played, out)
 	}
 }
+
+// Only the keys the prompt offers answer a deal. A player holding 0 down to
+// race through their turns used to answer it with Ignore without ever seeing
+// it; now the 0s and the Enter are passed over and the Y after them accepts.
+func TestTradeDealPromptTakesOnlyOfferedKeys(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	from := recipients(w)[0]
+	p.Tanks = 0
+	p.TradeDeals = []game.TradeDeal{{From: from.Name, Send: game.TradeBasket{Tanks: 100}}}
+
+	f := &fakeSession{keys: []rune("000\r0y")}
+	reviewTradeDeals(f, w)
+
+	if !strings.Contains(f.out.String(), "offers you a trade deal") {
+		t.Fatalf("the deal should be put to the player, got:\n%s", f.out.String())
+	}
+	if p.Tanks != 100 || len(p.TradeDeals) != 0 {
+		t.Errorf("Y after the stray keys should accept: tanks %d, pending %d", p.Tanks, len(p.TradeDeals))
+	}
+}

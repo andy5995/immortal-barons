@@ -294,12 +294,14 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "  "+tr(s, "You give:    %s")+"\n", basketSummary(s, d.Demand))
 		// BRE's three-way: Yes accepts, No declines, Ignore leaves it pending.
 		fmt.Fprintf(s, "  %s%s%s ", ansi.FgBrightWhite, tr(s, "Accept? [Y]es, [N]o, [I]gnore for now"), ansi.Reset)
-		r, err := readKey(s)
-		if err != nil {
+		// Only the three offered keys answer: a player holding a key down to
+		// race through their turns must not answer a deal with it.
+		r := readKeys(s, tradeDealOpts, 0, 0)
+		if r == 0 {
 			return
 		}
 		fmt.Fprint(s, "\n")
-		switch unicode.ToUpper(r) {
+		switch r {
 		case 'Y':
 			var aerr error
 			withPlayer(w, func(p *game.Empire) { aerr = w.World.AcceptTradeDeal(p, d.From) })
@@ -315,3 +317,7 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		}
 	}
 }
+
+// tradeDealOpts are the keys the trade-deal prompt accepts. The prompt is drawn
+// by hand, so only Key is set.
+var tradeDealOpts = []keyOpt{{Key: 'Y'}, {Key: 'N'}, {Key: 'I'}}
