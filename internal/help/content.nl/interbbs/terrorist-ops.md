@@ -7,58 +7,63 @@ title: 'Terroristische Operaties'
 
 # Terroristische Operaties
 
-Terroristische Operaties sturen agenten tegen een rijk op een andere
-planeet. U kiest de operatie en daarna hoeveel agenten u inzet. De agenten
-zijn verbruikt zodra u ze uitstuurt, wat ze ook bereiken, en de aanslag
-wordt afgehandeld op de planeet van het doel zodra het pakket daar aankomt -
-het bericht komt dus pas een dag of langer later terug.
+Terrorist Ops send agents against a realm on another planet. First you
+choose the planet and the realm. Then the Terrorist Ops menu opens, and you
+can send one operation after another against that realm. Each send asks how
+many agents to commit, up to 255. If you send two or more, you see the price
+and accept it first. When you leave the menu, you can choose another realm
+on the same planet.
 
-Bescherming voor nieuwe rijken houdt elke operatie tegen: een beschermd rijk
-krijgt helemaal niets te verduren, en u kunt er zelf geen sturen zolang uw
-eigen rijk nog beschermd is.
+Each agent is one operation: it pays its own share of the price and uses one
+of the operations your sysop allows each day. The price of one agent is
+shown beside Terrorist Ops on the InterPlanetary menu. It goes up as your
+realm grows and with each operation you send that day.
+
+Agents are spent when you send them, whatever they achieve. The operation
+takes place on the target's planet when the packet arrives there, so the
+result comes back a day or more later.
+
+New Realm Protection stops every operation. A protected realm loses nothing
+and is not told. You cannot send operations while your own realm is
+protected.
 
 ## Wat elke operatie doet
 
-De negen zijn niet uitwisselbaar. Elk richt zich op één ding, en elke agent
-die erdoorheen komt neemt zijn eigen hap:
+Each operation aims at one thing, and each agent that gets through does its
+own damage:
 
-- **Spion sturen** - kost het doel niets. Een spion die binnenkomt, brengt
-  hun land, aanval, verdediging en goud mee naar huis, en de troepen, jets,
-  geschutstorens, tanks en het militaire moreel daarachter. Dat wordt u
-  gemeld wanneer de spion terugkeert, en opgeslagen in de Spionagedatabase,
-  die de laatste vijf rapporten per rijk bewaart en laat zien hoeveel de
-  laatste twee verschillen. Een spion voor en na een aanval laat dus zien
-  wat de aanval heeft gedaan. Als u een aanval richt op een rijk waarover u
-  een rapport hebt, wordt het nieuwste rapport getoond zodra u het kiest.
-- **Inlichtingendienst bombarderen** - doodt enkele procenten van hun
-  agenten, waarmee zij verdedigen en aanvallen.
-- **Demoraliseren** - haalt een zevende van het militaire moreel weg.
-- **Tweedracht zaaien** - enkele procenten van hun soldaten deserteren.
-- **Vliegbases bombarderen** - verbrandt een deel van hun jagers aan de
-  grond.
-- **Emigratie aanwakkeren** - drijft mensen het rijk uit.
-- **Propaganda verspreiden** - kost hun steun van het volk.
-- **Voedselvoorraden bombarderen** - de grilligste van de negen: het kan
-  bijna een derde van de voorraad kosten, of bijna niets.
-- **HQ saboteren** - zet hun hoofdkwartier een vast bedrag terug.
+- **Send Spy** — brings home the target's land, offense, defense and gold,
+  and its troopers, jets, turrets, tanks and military morale. You see the
+  report when the spy returns, and it goes into the Spy Database. The Spy
+  Database keeps the last five reports on each realm and shows how the last
+  two differ, so a spy sent before and after a strike shows what the strike
+  did.  When you aim a strike at a realm you have a report on, its latest
+  report is shown once you pick it.
+- **Bomb Intelligence** — destroys some of their agents.
+- **Demoralize** — lowers their military morale.
+- **Cause Dissensions** — some of their troopers desert.
+- **Bomb AirBases** — destroys some of their jets.
+- **Stir Emigrations** — drives some of their people away.
+- **Spread Propaganda** — lowers their popular support.
+- **Bomb Food Stores** — destroys some of their food. The amount varies more
+  than for any other operation, from nothing to a large share.
+- **Sabotage HQ** — sets back their HeadQuarters.
 
 ## Er een kiezen
 
-Stem de operatie af op wat u hierna van plan bent. Een rijk zacht maken voor
-een interplanetaire aanval pleit voor de operaties die uitdunnen wat
-terugvecht - soldaten, jagers, moreel. Een rijk uitputten dat u nog niet
-kunt bereiken pleit voor de operaties die het groei kosten: voedsel, mensen,
-steun.
+Choose the operation for what you plan to do next. Before an interplanetary
+attack, weaken what will fight back: troopers, jets, morale. Against a realm
+you cannot attack yet, slow its growth: food, people, support.
 
 ## Erdoorheen komen
 
-Voor elke agent wordt apart gedobbeld, en de agenten van het doelwit
-verdedigen ertegen.  Hoe meer agenten uw rijk heeft, hoe beter de kans van
-elk, maar elke agent die u toevoegt helpt minder. Als beide rijken evenveel
-agenten hebben, komen ongeveer twee op de vijf agenten erdoor. Een kleine
-kans naar beide kanten hangt van geen van beide zijden af.
+Each agent is rolled for on its own, and the target's agents defend against
+it.  The more agents your realm holds, the better each one's chance, but
+each extra agent helps less than the one before. When both realms have the
+same number of agents, about two agents in five get through. A small chance
+either way does not depend on either side.
 
-Meer agenten inzetten richt dus gemiddeld meer schade aan, maar het maakt
-één agent nooit kansrijker. Een Terrorismepreventiepact telt de agenten van
-de partners bij de verdediging op, en een Inlichtingenalliantie telt de
-agenten van uw partners bij de uwe op.
+So sending more agents does more damage on average, but it never makes one
+agent more likely to get through. A Terrorist Prevention pact adds part of
+the target's partners' agents to its defense, and an Intelligence Alliance
+adds part of your partners' agents to yours.

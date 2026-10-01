@@ -21,10 +21,11 @@ anderen. Eine große Soldatenarmee braucht also eine starke
 Nahrungsversorgung. Eine große Armee aus anderen Einheiten braucht sehr
 wenig.
 
-Eine große Soldatenarmee schreckt zudem feindliche S3-Sabre-Schläge ab. Je
-mehr Soldaten Sie halten, desto eher schlägt diese Rakete auf das Reich
-zurück, das sie abgefeuert hat. Soldaten sind ein häufiges Ziel feindlicher
-verdeckter Operationen, die sie zur Fahnenflucht bringen können.
+A large trooper army also makes enemy S3-Sabre strikes less reliable (see
+S3-Sabre).
+
+Troopers are a common target of enemy covert operations, which can make them
+desert.
 
 Kaufen Sie früh Soldaten, um zu überleben, und bauen Sie mehr Panzer,
 während Ihre Wirtschaft wächst.

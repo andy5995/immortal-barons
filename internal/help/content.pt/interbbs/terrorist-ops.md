@@ -7,57 +7,63 @@ title: 'Operações Terroristas'
 
 # Operações Terroristas
 
-As Operações Terroristas mandam agentes contra um reino de outro
-planeta. Você escolhe a operação e depois quantos agentes empenhar. Os
-agentes são gastos no envio, consigam eles o que for, e o golpe é resolvido
-no planeta do alvo quando o pacote chegar lá — então a notícia volta um dia
-ou mais depois.
+Terrorist Ops send agents against a realm on another planet. First you
+choose the planet and the realm. Then the Terrorist Ops menu opens, and you
+can send one operation after another against that realm. Each send asks how
+many agents to commit, up to 255. If you send two or more, you see the price
+and accept it first. When you leave the menu, you can choose another realm
+on the same planet.
 
-A Proteção de Reino Novo barra todas as operações: um reino protegido não
-sofre nada, e você não pode mandar nenhuma enquanto o seu próprio reino
-ainda estiver protegido.
+Each agent is one operation: it pays its own share of the price and uses one
+of the operations your sysop allows each day. The price of one agent is
+shown beside Terrorist Ops on the InterPlanetary menu. It goes up as your
+realm grows and with each operation you send that day.
+
+Agents are spent when you send them, whatever they achieve. The operation
+takes place on the target's planet when the packet arrives there, so the
+result comes back a day or more later.
+
+New Realm Protection stops every operation. A protected realm loses nothing
+and is not told. You cannot send operations while your own realm is
+protected.
 
 ## O que cada operação faz
 
-As nove não são intercambiáveis. Cada uma mira uma coisa, e cada agente que
-passa arranca o seu pedaço:
+Each operation aims at one thing, and each agent that gets through does its
+own damage:
 
-- **Enviar Espião** — não custa nada ao alvo. Um espião que consegue entrar
-  traz para casa as terras, o ataque, a defesa e o ouro do alvo, e as
-  tropas, jatos, torres, tanques e o moral militar por trás deles. Isso é
-  informado a você quando o espião volta, e guardado no Banco de Espionagem,
-  que mantém os cinco últimos relatórios de cada reino e mostra quanto os
-  dois últimos diferem. Um espião enviado antes e outro depois de um ataque
-  mostram, portanto, o que o ataque causou. Quando você mira um ataque em um
-  reino sobre o qual tem um relatório, o relatório mais recente é mostrado
-  assim que você o escolhe.
-- **Bombardear a Inteligência**: mata alguns por cento dos agentes deles,
-  que é com o que eles se defendem e atacam.
-- **Desmoralizar**: tira um sétimo da moral militar.
-- **Provocar Dissidências** — alguns por cento dos soldados deles desertam.
-- **Bombardear Bases Aéreas**: queima uma fatia dos caças deles no solo.
-- **Incitar a Emigração** — expulsa gente do reino.
-- **Espalhar Propaganda** — custa apoio popular a eles.
-- **Bombardear os Estoques de Comida**: a maior variação das nove: pode
-  levar quase um terço do que está estocado, ou quase nada.
-- **Sabotar o QG** — atrasa o Quartel-General deles em um valor fixo.
+- **Send Spy** — brings home the target's land, offense, defense and gold,
+  and its troopers, jets, turrets, tanks and military morale. You see the
+  report when the spy returns, and it goes into the Spy Database. The Spy
+  Database keeps the last five reports on each realm and shows how the last
+  two differ, so a spy sent before and after a strike shows what the strike
+  did.  When you aim a strike at a realm you have a report on, its latest
+  report is shown once you pick it.
+- **Bomb Intelligence** — destroys some of their agents.
+- **Demoralize** — lowers their military morale.
+- **Cause Dissensions** — some of their troopers desert.
+- **Bomb AirBases** — destroys some of their jets.
+- **Stir Emigrations** — drives some of their people away.
+- **Spread Propaganda** — lowers their popular support.
+- **Bomb Food Stores** — destroys some of their food. The amount varies more
+  than for any other operation, from nothing to a large share.
+- **Sabotage HQ** — sets back their HeadQuarters.
 
 ## Escolhendo uma
 
-Case a operação com o que você pretende fazer em seguida. Amolecer um reino
-antes de um ataque interplanetário pede as que reduzem o que revida —
-soldados, caças, moral. Desgastar um reino que você ainda não alcança pede
-as que lhe custam crescimento: comida, gente, apoio.
+Choose the operation for what you plan to do next. Before an interplanetary
+attack, weaken what will fight back: troopers, jets, morale. Against a realm
+you cannot attack yet, slow its growth: food, people, support.
 
 ## Conseguindo passar
 
-Cada agente é sorteado por conta própria, e os agentes do alvo se defendem
-contra ele.  Quanto mais agentes o seu reino tiver, melhor a chance de cada
-um, mas cada um que você acrescenta ajuda menos. Quando os dois reinos têm o
-mesmo número de agentes, cerca de dois agentes em cinco passam. Uma pequena
-chance, para os dois lados, não depende de nenhum deles.
+Each agent is rolled for on its own, and the target's agents defend against
+it.  The more agents your realm holds, the better each one's chance, but
+each extra agent helps less than the one before. When both realms have the
+same number of agents, about two agents in five get through. A small chance
+either way does not depend on either side.
 
-Empenhar mais agentes portanto causa mais estrago em média, mas nunca torna
-um agente mais provável de passar. Um pacto de Prevenção ao Terrorismo soma
-os agentes dos parceiros à defesa, e uma Aliança de Inteligência soma os
-agentes dos seus parceiros aos seus.
+So sending more agents does more damage on average, but it never makes one
+agent more likely to get through. A Terrorist Prevention pact adds part of
+the target's partners' agents to its defense, and an Intelligence Alliance
+adds part of your partners' agents to yours.

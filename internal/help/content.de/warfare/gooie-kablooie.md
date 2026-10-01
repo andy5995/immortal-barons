@@ -11,10 +11,11 @@ Der Gooie Kablooie ist eine Waffe, die auf einen ganzen feindlichen Planeten
 zielt, nicht auf einen einzelnen Baron.  Ihr Planet kann immer nur einen
 haben.
 
-Niemand kauft die Waffe allein. Ein Baron beginnt die Arbeit und nennt den
-Zielplaneten. Danach kann jeder Baron hier Geld hineinlegen, je eine Million
-Gold.  Der Preis hängt von der Größe des Zielplaneten ab: Auf einen Planeten
-zu zielen, der viel größer ist als Ihrer, kostet mehr.
+Nobody buys the weapon alone. One baron starts the work and names the target
+planet. The Queen Royale may pay part of it from her own purse. After that,
+any baron here can put money in, a million gold at a time.  The price
+depends on the size of the target planet: aiming at a planet much larger
+than yours costs more.
 
 Ist das letzte Geld beisammen, baut die Waffe noch drei Tage und startet
 dann von selbst. Niemand entscheidet das. Der Einzige, der sie abblasen

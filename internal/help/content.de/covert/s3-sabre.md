@@ -36,20 +36,19 @@ Regler läuft an seinen Enden über: 10 kann auf 0 landen und 0 auf
 10. Richten Sie 5 auf einen Baron, von dem Sie wissen, dass er eine große
 Luftwaffe hält.
 
-Die Rakete bleibt darüber hinaus ein Glücksspiel. Etwa jeder zehnte Abschuss
-versagt, und die SDI des Feindes kann sie abschießen. Sie kann auch über dem
-Ziel zerbrechen und keinen Schaden anrichten. Je größer das Soldatenheer des
-Feindes, desto öfter geschieht das.  Ein Zerbrechen schadet Ihnen nicht,
-hilft aber dem Feind: Der Niederschlag gibt ihm neue Regionen, 10% bis 19%
-der Regionen, die er schon hält. Die Art der neuen Regionen wählt er in
-seinem nächsten Zug.
+The missile is still a gamble on top of that. About one launch in ten
+misfires, and the enemy's SDI may shoot it down. The enemy's troopers work
+against it twice: the more they hold for each region, the more often a Sabre
+fails before it reaches them, and the larger their army, the more often one
+that gets through breaks up over the target and does no damage. A breakup
+does not harm you, but it helps the enemy: the fallout gives them new
+regions, 10% to 19% of the regions they already hold. They choose the types
+of the new regions on their next turn.
 
-Ihr Sysop entscheidet, wie der Regler gesetzt wird. Normalerweise wählen Sie
-ihn selbst, aber das Spiel kann so eingerichtet werden, dass es jedes Mal
-einen für Sie auswürfelt, ihn auf einen vom Sysop gewählten Wert festlegt
-oder die Waffe ganz abschaltet. Auf einem Board, das anders als auf \"user
-select\" eingestellt ist, werden Sie nie nach einer Zahl gefragt - das ist
-die Einstellung bei der Arbeit, kein Fehler.
+Your sysop decides how the dial is set. Normally you choose it yourself, but
+the game can be set up to roll one for you each time, to fix it at a dial
+the sysop chooses, or to switch the weapon off entirely. On a board set any
+way but "user select", you are never asked for a number.
 
 Sie dürfen jede der drei Raketen - die nukleare, die chemische und die
 S3-Sabre - einmal am Tag abfeuern. Eine Rakete, die Sie heute schon genutzt

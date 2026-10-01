@@ -10,10 +10,10 @@ title: Bommenwerpers
 Bommenwerpers zijn transporttoestellen. Zij hebben een offensief van 0 en
 een defensief van 0.
 
-Speciale operaties gericht op een andere planeet hebben bommenwerpers nodig
-om hun lading af te leveren, en zonder genoeg bommenwerpers kunt u ze niet
-lanceren. De nucleaire, chemische en biologische aanvallen op uw eigen
-planeet hebben geen bommenwerpers nodig.
+Every Special Operation except Send SpyGuy needs bombers to deliver its
+payload. You must hold at least 500 bombers to launch one, and each launch
+uses up 500 of them, whether the operation succeeds or not. The Nuclear,
+Chemical and Biological Attacks on your own planet do not need bombers.
 
 Bij een aanval op een andere planeet vechten uw bommenwerpers tegen de
 jagers van de verdediger. Een aanval zonder bommenwerpers vernietigt er geen

@@ -33,18 +33,19 @@ S3-Sabre — ненадёжное оружие массового поражен
 попасть на 0, а 0 — на 10. Ставьте 5 на барона, о котором знаете, что он
 держит большой воздушный флот.
 
-Кроме того, ракета всё равно остаётся лотереей. Примерно один пуск из десяти
-даёт осечку, а СОИ противника может её сбить. Она может и развалиться над
-целью, не причинив вреда. Чем больше у противника солдат, тем чаще это
-бывает.  Развал не вредит вам, но помогает противнику: из-за осадков у него
-появляются новые регионы, от 10% до 19% тех, что у него уже есть. Типы новых
-регионов он выбирает в свой следующий ход.
+The missile is still a gamble on top of that. About one launch in ten
+misfires, and the enemy's SDI may shoot it down. The enemy's troopers work
+against it twice: the more they hold for each region, the more often a Sabre
+fails before it reaches them, and the larger their army, the more often one
+that gets through breaks up over the target and does no damage. A breakup
+does not harm you, but it helps the enemy: the fallout gives them new
+regions, 10% to 19% of the regions they already hold. They choose the types
+of the new regions on their next turn.
 
-Как выставляется шкала, решает ваш сисоп. Обычно вы выбираете её сами, но
-игру можно настроить так, чтобы значение каждый раз бросалось случайно, было
-закреплено на выбранном сисопом делении или чтобы оружие было отключено
-вовсе. На доске с любой настройкой, кроме \"user select\", номер у вас не
-спросят — это работа настройки, а не неисправность.
+Your sysop decides how the dial is set. Normally you choose it yourself, but
+the game can be set up to roll one for you each time, to fix it at a dial
+the sysop chooses, or to switch the weapon off entirely. On a board set any
+way but "user select", you are never asked for a number.
 
 Каждую из трёх ракет — ядерную, химическую и S3-Sabre — можно пустить раз в
 день. Ракета, уже потраченная сегодня, вовсе не показывается в меню

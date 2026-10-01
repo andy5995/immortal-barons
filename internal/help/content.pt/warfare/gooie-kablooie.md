@@ -10,10 +10,11 @@ title: 'Gooie Kablooie'
 O Gooie Kablooie é uma arma apontada para um planeta inimigo inteiro, não
 para um barão.  O seu planeta só pode ter um de cada vez.
 
-Ninguém compra a arma sozinho. Um barão começa a obra e indica o planeta
-alvo. Depois disso, qualquer barão daqui pode pôr dinheiro, um milhão de
-ouro por vez.  O preço depende do tamanho do planeta alvo: mirar um planeta
-bem maior que o seu custa mais.
+Nobody buys the weapon alone. One baron starts the work and names the target
+planet. The Queen Royale may pay part of it from her own purse. After that,
+any baron here can put money in, a million gold at a time.  The price
+depends on the size of the target planet: aiming at a planet much larger
+than yours costs more.
 
 Quando o último tostão entra, a arma leva mais três dias em construção e
 então se lança sozinha. Ninguém decide isso. A única pessoa que pode

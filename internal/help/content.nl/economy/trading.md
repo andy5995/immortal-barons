@@ -28,13 +28,13 @@ en goud in, en u mag goederen en goud terugvragen. Het andere rijk leest het
 aanbod en accepteert of weigert het. U heeft een verdrag met dat rijk nodig
 om er een te sturen.
 
-Een handelsovereenkomst kost een vergoeding voor elke dag dat u hem uitzet,
-en er zijn vliegdekschepen nodig om de goederen te vervoeren. Hoeveel hangt
-af van wat u verscheept. Als lading draagt een vliegdekschip duizend
-soldaten of geschutstorens, honderd jagers, vijfduizend tanks of
-honderdduizend goud. Voedsel, bommenwerpers, agenten en vliegdekschepen
-nemen helemaal geen ruimte in. Een beschermend handelsverdrag met dat rijk
-maakt de vergoeding goedkoper.
+A trade deal costs a fee for each day you send it for, from 2 to 10
+days. The more you ship, the higher the fee. A deal also needs carriers to
+move the goods.  How many depends on what you are shipping. As cargo, one
+carrier holds a thousand troopers or turrets, a hundred jets, five thousand
+tanks, or a hundred thousand gold. Food, bombers, agents and carriers take
+no room at all. A Protective Trade treaty with that realm makes the fee
+cheaper.
 
 De dagen waarvoor u betaalt bepalen hoe lang het aanbod blijft staan. Wat u
 in de overeenkomst legt verlaat uw rijk op het moment dat u hem

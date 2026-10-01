@@ -28,12 +28,13 @@ title: Торговля
 предложение и принимает его или отказывается. Чтобы отправить сделку, нужен
 договор с этой державой.
 
-Торговая сделка стоит платы за каждый день, на который вы её отправляете, и
-требует авианосцев для перевозки товаров. Сколько именно — зависит от
-груза. Как груз один авианосец берёт тысячу солдат или турелей, сотню
-самолётов, пять тысяч танков или сто тысяч золота. Еда, бомбардировщики,
-агенты и авианосцы места не занимают вовсе. Защищённая торговля с этой
-державой делает плату дешевле.
+A trade deal costs a fee for each day you send it for, from 2 to 10
+days. The more you ship, the higher the fee. A deal also needs carriers to
+move the goods.  How many depends on what you are shipping. As cargo, one
+carrier holds a thousand troopers or turrets, a hundred jets, five thousand
+tanks, or a hundred thousand gold. Food, bombers, agents and carriers take
+no room at all. A Protective Trade treaty with that realm makes the fee
+cheaper.
 
 Оплаченные дни — это срок, в течение которого держится
 предложение. Вложенное в сделку покидает вашу державу в момент

@@ -10,10 +10,11 @@ title: 'Gooie Kablooie'
 De Gooie Kablooie is een wapen dat op een hele vijandelijke planeet is
 gericht, niet op één baron.  Uw planeet kan er maar één tegelijk hebben.
 
-Niemand koopt het wapen alleen. Eén baron begint het werk en noemt de
-doelplaneet. Daarna kan elke baron hier geld inleggen, een miljoen goud per
-keer.  De prijs hangt af van de omvang van de doelplaneet: mikken op een
-planeet die veel groter is dan de uwe kost meer.
+Nobody buys the weapon alone. One baron starts the work and names the target
+planet. The Queen Royale may pay part of it from her own purse. After that,
+any baron here can put money in, a million gold at a time.  The price
+depends on the size of the target planet: aiming at a planet much larger
+than yours costs more.
 
 Wanneer het laatste geld binnen is, wordt er nog drie dagen aan het wapen
 gebouwd en daarna lanceert het zichzelf. Niemand beslist daarover. De enige

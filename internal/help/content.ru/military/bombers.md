@@ -9,9 +9,10 @@ title: Бомбардировщики
 
 Бомбардировщики — транспортная авиация. У них атака 0 и защита 0.
 
-Спецоперациям против другой планеты нужны бомбардировщики, чтобы доставить
-груз, и без достаточного их числа операцию не запустить. Ядерной, Химической
-и Биологической атакам на вашей же планете бомбардировщики не нужны.
+Every Special Operation except Send SpyGuy needs bombers to deliver its
+payload. You must hold at least 500 bombers to launch one, and each launch
+uses up 500 of them, whether the operation succeeds or not. The Nuclear,
+Chemical and Biological Attacks on your own planet do not need bombers.
 
 При ударе по другой планете ваши бомбардировщики сражаются с самолётами
 защитника. Удар без бомбардировщиков не уничтожает ни одного из них.

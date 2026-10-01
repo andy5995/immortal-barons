@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-26 05:14-0500\n"
+"POT-Creation-Date: 2026-10-01 12:37-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -333,18 +333,19 @@ msgid "Bomb Trade Routes"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:15
+#: internal/help/content/covert/bomb-trade-routes.md:16
 #, markdown-text
 msgid ""
-"Bomb Trade Routes is an InterPlanetary operation, on the Special Operations "
-"menu. It hits the trade deals in transit across another planet. Most runs "
-"are driven off before they reach it. A run that gets through hits about two "
-"deals in three. A deal the bombers reach arrives with only a few percent of "
-"each good left. Standing treaties are not touched."
+"Bomb Trade Routes is an InterPlanetary operation on the Special Operations "
+"menu. It hits the trade deals in transit on another planet. Most runs are "
+"driven off before they reach that planet. A run that gets through hits about "
+"two deals in three. A deal the bombers reach loses a few percent of every "
+"good it is sending, gold included. What the deal asks for in return is not "
+"touched, and neither are standing treaties."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:18
+#: internal/help/content/covert/bomb-trade-routes.md:19
 #, markdown-text
 msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "
@@ -649,30 +650,31 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:41
+#: internal/help/content/covert/s3-sabre.md:43
 #, markdown-text
 msgid ""
 "The missile is still a gamble on top of that. About one launch in ten "
-"misfires, and the enemy's SDI may shoot it down. It can also break up over "
-"the target and do no damage. The larger the enemy's trooper army, the more "
-"often this happens.  A breakup does not harm you, but it helps the enemy: "
-"the fallout gives them new regions, 10% to 19% of the regions they already "
-"hold. They choose the types of the new regions on their next turn."
+"misfires, and the enemy's SDI may shoot it down. The enemy's troopers work "
+"against it twice: the more they hold for each region, the more often a Sabre "
+"fails before it reaches them, and the larger their army, the more often one "
+"that gets through breaks up over the target and does no damage. A breakup "
+"does not harm you, but it helps the enemy: the fallout gives them new "
+"regions, 10% to 19% of the regions they already hold. They choose the types "
+"of the new regions on their next turn."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:47
+#: internal/help/content/covert/s3-sabre.md:48
 #, markdown-text
 msgid ""
 "Your sysop decides how the dial is set. Normally you choose it yourself, but "
 "the game can be set up to roll one for you each time, to fix it at a dial "
 "the sysop chooses, or to switch the weapon off entirely. On a board set any "
-"way but \"user select\" you are never asked for a number — that is the "
-"setting doing its job, not a fault."
+"way but \"user select\", you are never asked for a number."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/s3-sabre.md:52
+#: internal/help/content/covert/s3-sabre.md:53
 #, markdown-text
 msgid ""
 "You may fire each of the three missiles — nuclear, chemical and the S3-Sabre "
@@ -1742,11 +1744,12 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:34
+#: internal/help/content/economy/trading.md:35
 #, markdown-text
 msgid ""
-"A trade deal costs a fee for each day you send it for, and it needs carriers "
-"to move the goods. How many depends on what you are shipping. As cargo, one "
+"A trade deal costs a fee for each day you send it for, from 2 to 10 "
+"days. The more you ship, the higher the fee. A deal also needs carriers to "
+"move the goods.  How many depends on what you are shipping. As cargo, one "
 "carrier holds a thousand troopers or turrets, a hundred jets, five thousand "
 "tanks, or a hundred thousand gold. Food, bombers, agents and carriers take "
 "no room at all. A Protective Trade treaty with that realm makes the fee "
@@ -1754,7 +1757,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:41
+#: internal/help/content/economy/trading.md:42
 #, markdown-text
 msgid ""
 "The days you pay for are how long the offer stands. What you put in the deal "
@@ -1766,13 +1769,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:42
+#: internal/help/content/economy/trading.md:43
 #, markdown-text, no-wrap
 msgid "Deals to another planet"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:47
+#: internal/help/content/economy/trading.md:48
 #, markdown-text
 msgid ""
 "In a league game the InterPlanetary Operations menu sends a deal to a realm "
@@ -1781,7 +1784,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:51
+#: internal/help/content/economy/trading.md:52
 #, markdown-text
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
@@ -1791,7 +1794,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:56
+#: internal/help/content/economy/trading.md:57
 #, markdown-text
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
@@ -1802,19 +1805,19 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:57
+#: internal/help/content/economy/trading.md:58
 #, markdown-text, no-wrap
 msgid "Getting the most from trade"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:60
+#: internal/help/content/economy/trading.md:61
 #, markdown-text
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:65
+#: internal/help/content/economy/trading.md:66
 #, markdown-text, no-wrap
 msgid ""
 "**Specialize, then supply your partners.** Your industry can specialize in "
@@ -1827,7 +1830,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:69
+#: internal/help/content/economy/trading.md:70
 #, markdown-text, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, "
@@ -1838,7 +1841,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:72
+#: internal/help/content/economy/trading.md:73
 #, markdown-text, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, "
@@ -2565,144 +2568,162 @@ msgid "Terrorist Ops"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:14
+#: internal/help/content/interbbs/terrorist-ops.md:16
 #, markdown-text
 msgid ""
-"Terrorist Ops send agents against a realm on another planet. You choose the "
-"operation, then how many agents to commit. The agents are spent when you "
-"send them, whatever they achieve, and the strike resolves on the target's "
-"planet once the packet reaches it — so the word comes back a day or more "
-"later."
+"Terrorist Ops send agents against a realm on another planet. First you "
+"choose the planet and the realm. Then the Terrorist Ops menu opens, and you "
+"can send one operation after another against that realm. Each send asks how "
+"many agents to commit, up to 255. If you send two or more, you see the price "
+"and accept it first. When you leave the menu, you can choose another realm "
+"on the same planet."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:17
+#: internal/help/content/interbbs/terrorist-ops.md:21
 #, markdown-text
 msgid ""
-"New Realm Protection stops every operation: a sheltered realm takes nothing "
-"at all, and you cannot send any while your own realm is still sheltered."
+"Each agent is one operation: it pays its own share of the price and uses one "
+"of the operations your sysop allows each day. The price of one agent is "
+"shown beside Terrorist Ops on the InterPlanetary menu. It goes up as your "
+"realm grows and with each operation you send that day."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:25
+#, markdown-text
+msgid ""
+"Agents are spent when you send them, whatever they achieve. The operation "
+"takes place on the target's planet when the packet arrives there, so the "
+"result comes back a day or more later."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:28
+#, markdown-text
+msgid ""
+"New Realm Protection stops every operation. A protected realm loses nothing "
+"and is not told. You cannot send operations while your own realm is "
+"protected."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:18
+#: internal/help/content/interbbs/terrorist-ops.md:29
 #, markdown-text, no-wrap
 msgid "What each operation does"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:22
+#: internal/help/content/interbbs/terrorist-ops.md:33
 #, markdown-text
 msgid ""
-"The nine are not interchangeable. Each aims at one thing, and each agent "
-"that gets through takes its own bite:"
+"Each operation aims at one thing, and each agent that gets through does its "
+"own damage:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
+#: internal/help/content/interbbs/terrorist-ops.md:50
 #, markdown-text
 msgid ""
-"**Send Spy** — costs the target nothing. A spy that gets in brings home "
-"their land, offense, defense and gold, and the troopers, jets, turrets, "
-"tanks and military morale behind them. They are reported to you when the spy "
-"returns, and filed in the Spy Database, which keeps the last five reports on "
-"each realm and shows how much the last two differ. A spy sent before and "
-"after a strike therefore shows what the strike did. When you aim a strike at "
-"a realm you have a report on, its latest report is shown once you pick it."
+"**Send Spy** — brings home the target's land, offense, defense and gold, and "
+"its troopers, jets, turrets, tanks and military morale. You see the report "
+"when the spy returns, and it goes into the Spy Database. The Spy Database "
+"keeps the last five reports on each realm and shows how the last two differ, "
+"so a spy sent before and after a strike shows what the strike did.  When you "
+"aim a strike at a realm you have a report on, its latest report is shown "
+"once you pick it."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
+#: internal/help/content/interbbs/terrorist-ops.md:50
+#, markdown-text
+msgid "**Bomb Intelligence** — destroys some of their agents."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:50
+#, markdown-text
+msgid "**Demoralize** — lowers their military morale."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:50
+#, markdown-text
+msgid "**Cause Dissensions** — some of their troopers desert."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:50
+#, markdown-text
+msgid "**Bomb AirBases** — destroys some of their jets."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:50
+#, markdown-text
+msgid "**Stir Emigrations** — drives some of their people away."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:50
+#, markdown-text
+msgid "**Spread Propaganda** — lowers their popular support."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:50
 #, markdown-text
 msgid ""
-"**Bomb Intelligence** — kills a few percent of their agents, which is what "
-"they defend and attack with."
+"**Bomb Food Stores** — destroys some of their food. The amount varies more "
+"than for any other operation, from nothing to a large share."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
+#: internal/help/content/interbbs/terrorist-ops.md:50
 #, markdown-text
-msgid "**Demoralize** — takes a seventh off military morale."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
-#, markdown-text
-msgid "**Cause Dissensions** — a few percent of their troopers desert."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
-#, markdown-text
-msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
-#, markdown-text
-msgid "**Stir Emigrations** — drives people out of the realm."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
-#, markdown-text
-msgid "**Spread Propaganda** — costs them popular support."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
-#, markdown-text
-msgid ""
-"**Bomb Food Stores** — the widest swing of the nine: it can take almost a "
-"third of what is in store, or almost nothing."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:40
-#, markdown-text
-msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
+msgid "**Sabotage HQ** — sets back their HeadQuarters."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:41
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text, no-wrap
 msgid "Picking one"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:47
+#: internal/help/content/interbbs/terrorist-ops.md:56
 #, markdown-text
 msgid ""
-"Match the operation to what you plan next. Softening a realm before an "
-"interplanetary attack argues for the ones that thin what fights back — "
-"troopers, jets, morale. Grinding down a realm you cannot reach yet argues "
-"for the ones that cost it growth: food, people, support."
+"Choose the operation for what you plan to do next. Before an interplanetary "
+"attack, weaken what will fight back: troopers, jets, morale. Against a realm "
+"you cannot attack yet, slow its growth: food, people, support."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:48
+#: internal/help/content/interbbs/terrorist-ops.md:57
 #, markdown-text, no-wrap
 msgid "Getting through"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:55
+#: internal/help/content/interbbs/terrorist-ops.md:64
 #, markdown-text
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
 "it.  The more agents your realm holds, the better each one's chance, but "
-"each one you add helps less. When both realms have the same number of "
-"agents, about two agents in five get through. A small chance either way does "
-"not depend on either side."
+"each extra agent helps less than the one before. When both realms have the "
+"same number of agents, about two agents in five get through. A small chance "
+"either way does not depend on either side."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:59
+#: internal/help/content/interbbs/terrorist-ops.md:68
 #, markdown-text
 msgid ""
-"Committing more agents therefore does more damage on average, but it never "
-"makes one agent likelier to land. A Terrorist Prevention pact adds its "
-"partners' agents to the defense, and an Intelligence Alliance adds your "
-"partners' agents to yours."
+"So sending more agents does more damage on average, but it never makes one "
+"agent more likely to get through. A Terrorist Prevention pact adds part of "
+"the target's partners' agents to its defense, and an Intelligence Alliance "
+"adds part of your partners' agents to yours."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -2978,16 +2999,17 @@ msgid "Bombers are delivery aircraft. They have an offense of 0 and a defense of
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:15
+#: internal/help/content/military/bombers.md:16
 #, markdown-text
 msgid ""
-"Special Operations aimed at another planet need bombers to deliver their "
-"payloads, and you cannot launch them without enough. The Nuclear, Chemical "
-"and Biological Attacks on your own planet do not need bombers."
+"Every Special Operation except Send SpyGuy needs bombers to deliver its "
+"payload. You must hold at least 500 bombers to launch one, and each launch "
+"uses up 500 of them, whether the operation succeeds or not. The Nuclear, "
+"Chemical and Biological Attacks on your own planet do not need bombers."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:18
+#: internal/help/content/military/bombers.md:19
 #, markdown-text
 msgid ""
 "In a strike on another planet, your bombers fight the defender's jets. A "
@@ -2995,7 +3017,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:23
+#: internal/help/content/military/bombers.md:24
 #, markdown-text
 msgid ""
 "Bombers do nothing in an attack on your own planet. They add no strength to "
@@ -3005,7 +3027,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:24
+#: internal/help/content/military/bombers.md:25
 #, markdown-text
 msgid "Bombers add a large amount to your net worth."
 msgstr ""
@@ -3180,11 +3202,20 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/military/tanks.md:18
 #, markdown-text
-msgid "High military morale also makes your tanks more effective, so keep it up."
+msgid "High military morale makes your tanks more effective, so keep it up."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/tanks.md:20
+#: internal/help/content/military/tanks.md:21
+#, markdown-text
+msgid ""
+"A large tank force can bring down a chemical missile fired from another "
+"planet.  The more tanks you hold for each region, the more often such a "
+"missile fails."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:23
 #, markdown-text
 msgid ""
 "Grow your economy first, and then turn your gold into tanks for a force that "
@@ -3227,17 +3258,23 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/troopers.md:26
+#: internal/help/content/military/troopers.md:24
 #, markdown-text
 msgid ""
-"A large trooper army also discourages enemy S3-Sabre strikes. The more "
-"troopers you hold, the more likely that missile is to backfire onto the "
-"empire that fired it. Troopers are a common target of enemy covert "
-"operations, which can make them desert."
+"A large trooper army also makes enemy S3-Sabre strikes less reliable (see "
+"S3-Sabre)."
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/military/troopers.md:27
+#, markdown-text
+msgid ""
+"Troopers are a common target of enemy covert operations, which can make them "
+"desert."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:28
 #, markdown-text
 msgid "Buy troopers early to survive, and build more tanks as your economy grows."
 msgstr ""
@@ -3259,16 +3296,25 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:16
+#: internal/help/content/military/turrets.md:17
 #, markdown-text
 msgid ""
-"Turrets add to your defense against every kind of attacking unit. They do "
-"not stop a neighbor's missiles — nothing does, nuclear, chemical or "
-"biological alike."
+"Turrets add to your defense against every kind of attacking unit. Nothing "
+"stops a missile fired by a baron on your own planet, whether it is nuclear, "
+"chemical or biological."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:19
+#: internal/help/content/military/turrets.md:21
+#, markdown-text
+msgid ""
+"A nuclear missile from another planet is different: a large turret force can "
+"bring it down. The more turrets you hold for each region, the more often "
+"such a missile fails."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:24
 #, markdown-text
 msgid ""
 "Covert operations on your own planet cannot destroy your turrets. An "
@@ -3276,7 +3322,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:22
+#: internal/help/content/military/turrets.md:27
 #, markdown-text
 msgid ""
 "Some strategy guides call this unit a \"Missile Base.\" It is the same "
@@ -3284,7 +3330,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:24
+#: internal/help/content/military/turrets.md:29
 #, markdown-text
 msgid ""
 "Build turrets to defend your regions, and pair them with troopers and tanks "
@@ -3916,17 +3962,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:17
+#: internal/help/content/warfare/gooie-kablooie.md:18
 #, markdown-text
 msgid ""
 "Nobody buys the weapon alone. One baron starts the work and names the target "
-"planet. After that, any baron here can put money in, a million gold at a "
-"time.  The price depends on the size of the target planet: aiming at a "
-"planet much larger than yours costs more."
+"planet. The Queen Royale may pay part of it from her own purse. After that, "
+"any baron here can put money in, a million gold at a time.  The price "
+"depends on the size of the target planet: aiming at a planet much larger "
+"than yours costs more."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:22
+#: internal/help/content/warfare/gooie-kablooie.md:23
 #, markdown-text
 msgid ""
 "When the last of the money is in, the weapon builds for three more days and "
@@ -3936,13 +3983,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/gooie-kablooie.md:23
+#: internal/help/content/warfare/gooie-kablooie.md:24
 #, markdown-text, no-wrap
 msgid "Being on the receiving end"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:30
+#: internal/help/content/warfare/gooie-kablooie.md:31
 #, markdown-text
 msgid ""
 "A weapon that reaches your planet stays there and destroys regions each "
@@ -3952,7 +3999,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:33
+#: internal/help/content/warfare/gooie-kablooie.md:34
 #, markdown-text
 msgid ""
 "Only jets can reach it. Your realm is asked at the start of your turn "
@@ -3961,13 +4008,13 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:35
+#: internal/help/content/warfare/gooie-kablooie.md:36
 #, markdown-text
 msgid "No single wave can destroy it. It takes jets from many realms on the planet."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:36
+#: internal/help/content/warfare/gooie-kablooie.md:37
 #, markdown-text
 msgid "An SDI program is no help against it. Only your jets are."
 msgstr ""
@@ -4071,14 +4118,23 @@ msgid ""
 "strength costs more than the one before."
 msgstr ""
 
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:30
+#, markdown-text
+msgid ""
+"Strength stops at 100%, but the program still takes gold past that "
+"point. The extra keeps the shield at 100% while you take more land. It also "
+"adds to the upkeep."
+msgstr ""
+
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:27
+#: internal/help/content/warfare/sdi.md:31
 #, markdown-text, no-wrap
 msgid "Funding it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:32
+#: internal/help/content/warfare/sdi.md:36
 #, markdown-text
 msgid ""
 "The program is a pot of gold, not something you buy once. Each turn you may "
@@ -4087,7 +4143,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:35
+#: internal/help/content/warfare/sdi.md:39
 #, markdown-text
 msgid ""
 "That amount is your allowance for the whole turn. Leaving the screen and "
@@ -4095,7 +4151,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:38
+#: internal/help/content/warfare/sdi.md:42
 #, markdown-text
 msgid ""
 "So a shield takes many turns to build, however rich you are. You cannot buy "
@@ -4103,13 +4159,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:39
+#: internal/help/content/warfare/sdi.md:43
 #, markdown-text, no-wrap
 msgid "Paying for it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:43
+#: internal/help/content/warfare/sdi.md:47
 #, markdown-text
 msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
@@ -4117,7 +4173,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:46
+#: internal/help/content/warfare/sdi.md:50
 #, markdown-text
 msgid ""
 "Pay it in full. If you pay short, the program shrinks to what you did pay "

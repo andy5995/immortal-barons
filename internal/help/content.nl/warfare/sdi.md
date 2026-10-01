@@ -27,6 +27,10 @@ bezit. Dezelfde financiering geeft een groot rijk een zwakker schild dan een
 klein rijk, en elke regio die u verovert maakt uw eigen schild dunner. Elke
 volgende procent sterkte kost meer dan de vorige.
 
+Strength stops at 100%, but the program still takes gold past that
+point. The extra keeps the shield at 100% while you take more land. It also
+adds to the upkeep.
+
 ## Het financieren
 
 Het programma is een pot goud, geen eenmalige aankoop. Elke beurt mag u er

@@ -28,13 +28,13 @@ und Gold hinein und dürfen Waren und Gold dafür verlangen. Das andere Reich
 liest das Angebot und nimmt es an oder lehnt es ab. Sie brauchen einen
 Vertrag mit diesem Reich, um eines zu senden.
 
-Ein Handelsgeschäft kostet eine Gebühr für jeden Tag, für den Sie es senden,
-und es braucht Träger, um die Waren zu bewegen. Wie viele, hängt davon ab,
-was Sie verschiffen. Als Fracht fasst ein Träger tausend Soldaten oder
-Geschütztürme, hundert Jets, fünftausend Panzer oder hunderttausend
-Gold. Nahrung, Bomber, Agenten und Träger brauchen überhaupt keinen
-Platz. Ein Vertrag über Geschützten Handel mit diesem Reich macht die Gebühr
-billiger.
+A trade deal costs a fee for each day you send it for, from 2 to 10
+days. The more you ship, the higher the fee. A deal also needs carriers to
+move the goods.  How many depends on what you are shipping. As cargo, one
+carrier holds a thousand troopers or turrets, a hundred jets, five thousand
+tanks, or a hundred thousand gold. Food, bombers, agents and carriers take
+no room at all. A Protective Trade treaty with that realm makes the fee
+cheaper.
 
 Die Tage, für die Sie zahlen, sind die Zeit, die das Angebot steht. Was Sie
 in das Geschäft legen, verlässt Ihr Reich in dem Augenblick, in dem Sie es

@@ -14,8 +14,11 @@ title: Танки
 Они дороги при покупке и дёшевы в содержании. Танковую армию дорого собрать
 и дёшево держать, поэтому за долгую игру танки — самая выгодная сила.
 
-Высокий боевой дух делает ваши танки ещё действеннее, так что поддерживайте
-его.
+High military morale makes your tanks more effective, so keep it up.
+
+A large tank force can bring down a chemical missile fired from another
+planet.  The more tanks you hold for each region, the more often such a
+missile fails.
 
 Сначала поднимите экономику, а затем обратите золото в танки — в силу,
 которая выигрывает и атаки, и обороны.

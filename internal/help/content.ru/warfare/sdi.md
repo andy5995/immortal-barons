@@ -26,6 +26,10 @@ title: 'Программа СОИ'
 захваченный регион делает ваш щит тоньше. Каждый следующий процент силы
 стоит дороже предыдущего.
 
+Strength stops at 100%, but the program still takes gold past that
+point. The extra keeps the shield at 100% while you take more land. It also
+adds to the upkeep.
+
 ## Как её финансировать
 
 Программа — это копилка золота, а не разовая покупка. Каждый ход вы можете

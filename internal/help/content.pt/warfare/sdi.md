@@ -26,6 +26,10 @@ financiamento dá a um reino grande um escudo mais fraco que a um pequeno, e
 cada região que você captura deixa o seu próprio escudo mais fino. Cada
 ponto percentual a mais de força custa mais que o anterior.
 
+Strength stops at 100%, but the program still takes gold past that
+point. The extra keeps the shield at 100% while you take more land. It also
+adds to the upkeep.
+
 ## Financiando o programa
 
 O programa é um bolo de ouro, não algo que se compra uma vez. A cada turno

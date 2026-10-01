@@ -28,12 +28,13 @@ nele, e pode pedir mercadorias e ouro em troca. O outro reino lê a oferta e
 aceita ou recusa. Você precisa de um tratado com aquele reino para enviar
 um.
 
-Um acordo comercial cobra uma taxa por cada dia pelo qual você o envia, e
-precisa de porta-aviões para levar as mercadorias. Quantos depende do que
-você está mandando. Como carga, um porta-aviões leva mil soldados ou torres,
-cem caças, cinco mil tanques ou cem mil de ouro. Comida, bombardeiros,
-agentes e porta-aviões não ocupam espaço nenhum. Um tratado de Comércio
-Protegido com aquele reino deixa a taxa mais barata.
+A trade deal costs a fee for each day you send it for, from 2 to 10
+days. The more you ship, the higher the fee. A deal also needs carriers to
+move the goods.  How many depends on what you are shipping. As cargo, one
+carrier holds a thousand troopers or turrets, a hundred jets, five thousand
+tanks, or a hundred thousand gold. Food, bombers, agents and carriers take
+no room at all. A Protective Trade treaty with that realm makes the fee
+cheaper.
 
 Os dias que você paga são por quanto tempo a oferta fica de pé. O que você
 põe no acordo sai do seu reino no instante em que você o envia. Se a oferta

@@ -20,10 +20,11 @@ qualquer outra coisa. Então um grande exército de soldados precisa de um bom
 abastecimento de comida. Um grande exército de outras unidades precisa de
 muito pouco.
 
-Um grande exército de soldados também desestimula ataques inimigos de
-S3-Sabre. Quanto mais soldados você tiver, maior a chance de o míssil sair
-pela culatra e acertar o império que o disparou. Soldados são alvo comum de
-operações secretas inimigas, que podem fazê-los desertar.
+A large trooper army also makes enemy S3-Sabre strikes less reliable (see
+S3-Sabre).
+
+Troopers are a common target of enemy covert operations, which can make them
+desert.
 
 Compre soldados cedo para sobreviver, e construa mais tanques conforme a sua
 economia crescer.

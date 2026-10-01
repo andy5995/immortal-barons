@@ -9,10 +9,10 @@ title: Bombardeiros
 
 Bombardeiros são aeronaves de entrega. Eles têm ataque 0 e defesa 0.
 
-As Operações Especiais contra outro planeta precisam de bombardeiros para
-levar as suas cargas, e você não pode lançá-las sem bombardeiros
-suficientes. Os Ataques Nuclear, Químico e Biológico no seu próprio planeta
-não precisam de bombardeiros.
+Every Special Operation except Send SpyGuy needs bombers to deliver its
+payload. You must hold at least 500 bombers to launch one, and each launch
+uses up 500 of them, whether the operation succeeds or not. The Nuclear,
+Chemical and Biological Attacks on your own planet do not need bombers.
 
 Num ataque a outro planeta, os seus bombardeiros lutam contra os caças do
 defensor. Um ataque sem bombardeiros não destrói nenhum deles.

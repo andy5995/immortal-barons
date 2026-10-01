@@ -28,6 +28,10 @@ Schild als einem kleinen, und jede Region, die Sie erobern, macht Ihren
 eigenen Schild dünner. Jedes weitere Prozent Stärke kostet mehr als das
 vorige.
 
+Strength stops at 100%, but the program still takes gold past that
+point. The extra keeps the shield at 100% while you take more land. It also
+adds to the upkeep.
+
 ## Die Finanzierung
 
 Das Programm ist ein Topf voll Gold, nichts, was man einmal kauft. In jedem

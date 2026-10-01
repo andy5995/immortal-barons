@@ -9,10 +9,10 @@ title: Bomber
 
 Bomber sind Trägerflugzeuge. Sie haben Angriff 0 und Verteidigung 0.
 
-Spezialoperationen gegen einen anderen Planeten brauchen Bomber, um ihre
-Nutzlasten zu tragen, und ohne genug Bomber können Sie sie nicht
-starten. Atomangriff, Chemischer Angriff und Biologischer Angriff auf Ihrem
-eigenen Planeten brauchen keine Bomber.
+Every Special Operation except Send SpyGuy needs bombers to deliver its
+payload. You must hold at least 500 bombers to launch one, and each launch
+uses up 500 of them, whether the operation succeeds or not. The Nuclear,
+Chemical and Biological Attacks on your own planet do not need bombers.
 
 Bei einem Schlag gegen einen anderen Planeten kämpfen Ihre Bomber gegen die
 Jets des Verteidigers. Ein Schlag ohne Bomber zerstört keinen davon.

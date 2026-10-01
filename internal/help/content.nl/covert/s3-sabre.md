@@ -35,20 +35,19 @@ drie op vliegbases mikt, omdat 5 en 6 daar allebei naar wijzen. De schijf
 loopt aan de uiteinden rond: 10 kan op 0 uitkomen, en 0 op 10. Richt 5 op
 een baron waarvan u weet dat hij een grote luchtmacht houdt.
 
-Daarbovenop blijft de raket een gok. Ongeveer een lancering op de tien
-mislukt, en de SDI van de vijand kan hem neerschieten. Hij kan ook boven het
-doel uiteenvallen en geen schade doen. Hoe groter het soldatenleger van de
-vijand, hoe vaker dat gebeurt.  Uiteenvallen schaadt u niet, maar het helpt
-de vijand: de neerslag geeft hem nieuwe regio's, 10% tot 19% van de regio's
-die hij al heeft. Hij kiest de types van de nieuwe regio's in zijn volgende
-beurt.
+The missile is still a gamble on top of that. About one launch in ten
+misfires, and the enemy's SDI may shoot it down. The enemy's troopers work
+against it twice: the more they hold for each region, the more often a Sabre
+fails before it reaches them, and the larger their army, the more often one
+that gets through breaks up over the target and does no damage. A breakup
+does not harm you, but it helps the enemy: the fallout gives them new
+regions, 10% to 19% of the regions they already hold. They choose the types
+of the new regions on their next turn.
 
-Uw sysop bepaalt hoe de schijf wordt ingesteld. Normaal kiest u hem zelf,
-maar het spel kan zo worden ingesteld dat het er elke keer een voor u loot,
-dat hij vaststaat op een stand die de sysop kiest, of dat het wapen helemaal
-uit staat. Op een BBS die anders is ingesteld dan \"user select\" wordt u
-nooit om een getal gevraagd - dat is de instelling die haar werk doet, geen
-fout.
+Your sysop decides how the dial is set. Normally you choose it yourself, but
+the game can be set up to roll one for you each time, to fix it at a dial
+the sysop chooses, or to switch the weapon off entirely. On a board set any
+way but "user select", you are never asked for a number.
 
 U mag elk van de drie raketten - nucleair, chemisch en de S3-Sabre - een
 keer per dag afvuren. Een raket die u vandaag al hebt gebruikt staat

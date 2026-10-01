@@ -21,10 +21,11 @@ alle andere: één eenheid voedsel voedt 200 soldaten, of 10.000 van al het
 andere. Een groot soldatenleger heeft dus een sterke voedselvoorziening
 nodig. Een groot leger van andere eenheden heeft heel weinig nodig.
 
-Een groot soldatenleger ontmoedigt ook vijandelijke S3-Sabre-aanvallen. Hoe
-meer soldaten u hebt, hoe groter de kans dat die raket terugslaat op het
-rijk dat hem afvuurde. Soldaten zijn een veelvoorkomend doelwit van
-vijandelijke geheime operaties, die hen kunnen laten deserteren.
+A large trooper army also makes enemy S3-Sabre strikes less reliable (see
+S3-Sabre).
+
+Troopers are a common target of enemy covert operations, which can make them
+desert.
 
 Koop vroeg soldaten om te overleven, en bouw meer tanks naarmate uw economie
 groeit.

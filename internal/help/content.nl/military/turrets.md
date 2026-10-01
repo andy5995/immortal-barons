@@ -11,9 +11,13 @@ Geschutstorens zijn een eenheid die alleen verdedigt - de verdedigende
 tegenhanger van jagers. Zij hebben een defensief van 2 en een offensief van
 0, wat in verdediging ongeveer twee keer zo sterk is als een soldaat.
 
-Geschutstorens versterken uw verdediging tegen elk soort aanvallende
-eenheid. Zij houden de raketten van een buur niet tegen - niets doet dat, of
-ze nu nucleair, chemisch of biologisch zijn.
+Turrets add to your defense against every kind of attacking unit. Nothing
+stops a missile fired by a baron on your own planet, whether it is nuclear,
+chemical or biological.
+
+A nuclear missile from another planet is different: a large turret force can
+bring it down. The more turrets you hold for each region, the more often
+such a missile fails.
 
 Geheime operaties op uw eigen planeet kunnen uw geschutstorens niet
 vernietigen. Een S3-Sabre van een andere planeet kan dat wel, en een

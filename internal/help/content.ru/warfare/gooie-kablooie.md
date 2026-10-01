@@ -10,10 +10,11 @@ title: 'Gooie Kablooie'
 Gooie Kablooie — оружие, нацеленное на целую вражескую планету, а не на
 одного барона.  У вашей планеты может быть только одно такое зараз.
 
-В одиночку его никто не покупает. Один барон начинает работы и называет
-планету-цель. Дальше деньги может вкладывать любой барон отсюда, по миллиону
-золота за раз.  Цена зависит от размера планеты-цели: целиться в планету
-намного крупнее вашей дороже.
+Nobody buys the weapon alone. One baron starts the work and names the target
+planet. The Queen Royale may pay part of it from her own purse. After that,
+any baron here can put money in, a million gold at a time.  The price
+depends on the size of the target planet: aiming at a planet much larger
+than yours costs more.
 
 Когда внесена последняя часть денег, оружие строится ещё три дня, а затем
 запускается само. Этого никто не решает. Отменить запуск может только ваш

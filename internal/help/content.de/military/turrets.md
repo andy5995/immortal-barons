@@ -11,9 +11,13 @@ Türme sind eine reine Verteidigungseinheit - das defensive Gegenstück zu
 Jets. Sie haben Verteidigung 2 und Angriff 0, sind in der Verteidigung also
 etwa doppelt so stark wie ein Soldat.
 
-Geschütztürme verstärken Ihre Verteidigung gegen jede Art angreifender
-Einheit. Die Raketen eines Nachbarn halten sie nicht auf - das tut nichts,
-weder bei nuklearen noch bei chemischen oder biologischen.
+Turrets add to your defense against every kind of attacking unit. Nothing
+stops a missile fired by a baron on your own planet, whether it is nuclear,
+chemical or biological.
+
+A nuclear missile from another planet is different: a large turret force can
+bring it down. The more turrets you hold for each region, the more often
+such a missile fails.
 
 Verdeckte Operationen auf Ihrem eigenen Planeten können Ihre Geschütztürme
 nicht zerstören. Eine S3-Sabre von einem anderen Planeten kann es, und ein

@@ -1,17 +1,15 @@
 Immortal Barons ChangeLog
 
-(in-progress:)
-  * A realm can be played in one session at a time; a second login is refused
-  * The splash screen no longer double-spaces in mTelnet, NetRunner and RGTerm,
-    or smears its colors in NetRunner
+2026-10-01 (v0.2.1)
+  * A trade deal's daily fee follows its cargo; it is sent for 2 to 10 days
   * A trade deal sent on a later turn is offered on that turn, not next entry
+  * The Queen Royale pays part of a new Gooie Kablooie
+  * Joining a group attack shows your share of it
+  * The Gooie Kablooie desk is laid out as in the original
+  * List Investments / Loans is laid out as in the original
+  * The splash screen renders correctly in mTelnet, NetRunner and RGTerm
   * New ib-sysop desktop panel: a board's league state, and its commands
   * -maint honors -detailed
-  * A trade deal's daily fee follows its cargo; it is sent for 2 to 10 days
-  * List Investments / Loans is laid out as in the original
-  * Joining a group attack shows your share of it
-  * The Queen Royale pays part of a new Gooie Kablooie
-  * The Gooie Kablooie desk is laid out as in the original
 
 2026-09-26 (v0.2.0)
   * Updating from v0.1.0 or later needs no game reset
