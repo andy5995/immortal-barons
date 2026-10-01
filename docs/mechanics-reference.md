@@ -6280,6 +6280,16 @@ sender's third turn of the day is waiting from the recipient's third turn
 onward, that day and every later day it survives to. A byte of `0xFF` is a
 sentinel for no gate at all; which path writes it is NOT established.
 
+A held deal is put to the recipient in the SAME sitting, on the turn it lands.
+`process_trade_offer` clears a 32-byte set (`DS:0x2692`) on entry and adds each
+held deal's `+0x60` stamp to it (unit offset 0x0E35); stage 1 of
+`run_player_turn` calls it again when the turns-remaining of the turn now
+starting is in that set (`BRE.EXE` 0x3902-0x3936). Only the deals known at the
+last review are watched: one sent mid-sitting waits for the next entry. IB keeps
+the set as `ctx.dealTurns`; before 2026-10-01 it reviewed only at entry, so a
+baron who played the whole day in one sitting never met a deal sent after the
+sender's first turn, and it expired unseen.
+
 IB mirrors this with `TradeDeal.ArrivesOnTurn`, holding the sender's turn of
 the day counted from 1 — the figure BRE prints — so that turns-per-day cancels
 out of the comparison and an unstamped deal from an older save keeps arriving

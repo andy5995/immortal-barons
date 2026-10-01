@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A trade deal sent on a later turn is offered on that turn, not next entry
   * New ib-sysop desktop panel: a board's league state, and its commands
   * -maint honors -detailed
   * A trade deal's daily fee follows its cargo; it is sent for 2 to 10 days

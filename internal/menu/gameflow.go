@@ -168,6 +168,14 @@ func runTurn(s session.Session, w *ctx) Result {
 		// the one refused — only a visit made from the opening menu is (#162).
 		w.turnPlayed = true
 
+		// A deal held back at the opening review is put to the player at the
+		// head of the turn it lands on, not left for the next sitting.
+		var turnOfDay int
+		withPlayer(w, func(p *game.Empire) { turnOfDay = w.World.TurnOfDay(p) })
+		if w.dealTurns[turnOfDay] {
+			reviewTradeDeals(s, w)
+		}
+
 		// New mail may arrive between turns (from another node), so check each
 		// turn, not just once in the pre-turn flow (#3).
 		readTurnMail(s, w, firstTurn)

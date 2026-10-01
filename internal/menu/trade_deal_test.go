@@ -145,3 +145,36 @@ func TestReviewTradeDealsSkipsOnesStillInTransit(t *testing.T) {
 		t.Errorf("the deal in transit should still be pending, got %+v", p.TradeDeals)
 	}
 }
+
+// A deal held back at the opening review because it was sent on a later turn
+// of the day is put to the player at the head of that turn, in the same
+// sitting. It used to wait for the next entry, which for a baron who plays the
+// whole day at once is a new day back on turn 1 — so it was never offered and
+// expired unseen. BRE re-runs process_trade_offer at stage 1 of the turn the
+// deal lands on (BRE.EXE 0x3936).
+func TestHeldTradeDealIsOfferedOnTheTurnItLands(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	from := recipients(w)[0]
+	p.Prefs.AutoPayMaint = true
+	p.Tanks = 0
+	p.TurnsLeft = w.Config.TurnsPerDay // turn 1 of the day
+	p.TradeDeals = []game.TradeDeal{
+		{From: from.Name, Send: game.TradeBasket{Tanks: 100}, ArrivesOnTurn: 2},
+	}
+
+	const turn = "    000\r"
+	f := &fakeSession{keys: []rune(turn + "y " + turn + "n")}
+	runTurn(f, w)
+
+	out := stripANSI(f.out.String())
+	if n := strings.Count(out, "offers you a trade deal"); n != 1 {
+		t.Errorf("the deal was offered %d times, want once on turn 2:\n%s", n, out)
+	}
+	if p.Tanks != 100 || len(p.TradeDeals) != 0 {
+		t.Errorf("the deal should be accepted on turn 2: tanks %d, pending %d", p.Tanks, len(p.TradeDeals))
+	}
+	if played := w.Config.TurnsPerDay - p.TurnsLeft; played < 2 {
+		t.Errorf("played %d turns, want at least 2 (the script ran dry):\n%s", played, out)
+	}
+}

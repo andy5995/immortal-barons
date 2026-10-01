@@ -73,6 +73,12 @@ type ctx struct {
 	// machine reaches stage 2) — so it means THIS entry, never today, and
 	// nothing about it is persisted. A session field is the same lifetime.
 	turnPlayed bool
+	// dealTurns holds the turns of the day on which a deal skipped by the last
+	// trade-deal review lands, so the head of that turn reviews again. BRE keeps
+	// the same set (DS:0x2692): process_trade_offer clears it on entry and adds
+	// each in-transit deal's turn, and run_player_turn's stage 1 calls it again
+	// when the turn now starting is in the set (BRE.EXE 0x3902-0x3936).
+	dealTurns map[int]bool
 	// noRealmPrefs backs ctx.prefs() when there is no active realm; see there.
 	noRealmPrefs *game.Prefs
 	// day is the date a bulletin file is written FOR. World.Today is

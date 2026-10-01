@@ -277,11 +277,15 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		// A deal still in transit is skipped, not removed: it will be waiting
 		// on the turn it was sent for, today and on any later day it survives
 		// to (see TradeDeal.ArrivesOnTurn). ExpireTradeDeals stays the only
-		// thing that ever takes one off the list.
+		// thing that ever takes one off the list. dealTurns brings the review back
+		// at the head of the turn it lands on (runTurn).
+		w.dealTurns = map[int]bool{}
 		for _, d := range p.TradeDeals {
 			if w.World.TradeDealArrived(d, p) {
 				deals = append(deals, d)
+				continue
 			}
+			w.dealTurns[d.ArrivesOnTurn] = true
 		}
 	})
 	for _, d := range deals {
