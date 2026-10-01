@@ -213,9 +213,14 @@ const (
 //     +0x2c1 + 4 x days, +0x121a, and daily maintenance shifts the array down a
 //     day, +0x12e3) become Round(value / 100 x (100 - pct)).
 //
-// IB computes these in integers. The original's Real48 `pct / 100` (food) and
+// The original computes these in Real48. Its `pct / 100` (food) and
 // `value / 100` (investments) are inexact, so a product that lands exactly on a
-// whole number can come out one lower there; the market form is exact.
+// whole number (or, for the rounded investment, a half) can come out one lower;
+// IB follows it through real48.go (foodMarketLoss, undermineKept). The market
+// form multiplies before it divides and is exact, so it stays in integers. Bomb
+// Trade Routes (below) divides first like food, but at its 5-9% the Real48
+// result equals integer math for every quantity to 2^31 - 1, so it stays in
+// integers too.
 const (
 	BombFoodMarketLossPctMin    = 20
 	BombFoodMarketLossPctSpread = 80 // Random(80)+20: 20-99%

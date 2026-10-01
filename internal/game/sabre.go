@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math/big"
 	"strings"
 )
 
@@ -63,38 +64,104 @@ func (w *World) SabreAim(dial int) SabreEffect {
 // own roll. Regions go through the RegionMix, whose Total must always equal
 // e.Land; they are destroyed, not turned to waste.
 func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
-	var parts []string
-	// keep leaves *n at base+Random(spread) percent of itself, truncated, and
-	// records what went.
-	keep := func(name string, n *int, base, spread int) {
-		left := int(int64(*n) * int64(base+w.rng.Intn(spread)) / 100)
-		if lost := *n - left; lost > 0 {
-			*n = left
-			parts = append(parts, fmt.Sprintf("%d %s", lost, name))
-		}
+	row, ok := sabreRows[eff]
+	if !ok {
+		return ""
 	}
-	switch eff {
-	case SabreHitIntelligence:
-		keep("Agents", &e.Agents, SabreIntelKeepBasePct, SabreIntelKeepSpread)
-	case SabreHitPeople:
-		keep("People", &e.People, SabrePeopleKeepBasePct, SabrePeopleKeepSpread)
-	case SabreHitMilitaryBases:
+	s := &sabreStrike{w: w, e: e}
+	row.hit(s)
+	return strings.Join(s.parts, ", ")
+}
+
+// sabreRow is one of the six damage rows: what it goes for, as the target's
+// event names it when a hit takes nothing, and what it does.
+type sabreRow struct {
+	aim string
+	hit func(s *sabreStrike)
+}
+
+// sabreRows is the one table of the dial's damage rows. SabreDevelopRegions is
+// not in it: a backfire applies that row directly (sabreDevelop).
+var sabreRows = map[SabreEffect]sabreRow{
+	SabreHitIntelligence: {"Intelligence Headquarters", func(s *sabreStrike) {
+		s.keep("Agents", &s.e.Agents, SabreIntelKeepSpread, sabreIntelKept)
+	}},
+	SabreHitPeople: {"residential zones", func(s *sabreStrike) {
+		s.keep("People", &s.e.People, SabrePeopleKeepSpread, func(n, roll int) int {
+			return pctOf(n, SabrePeopleKeepBasePct+roll)
+		})
+	}},
+	SabreHitMilitaryBases: {"military bases", func(s *sabreStrike) {
 		for _, g := range []*Good{Trooper, Jet, Turret, Tank} {
-			keep(g.Plural, g.Count(e), SabreBasesKeepBasePct, SabreBasesKeepSpread)
+			s.keep(g.Plural, g.Count(s.e), SabreBasesKeepSpread, func(n, roll int) int {
+				return pctOf(n, SabreBasesKeepBasePct+roll)
+			})
 		}
-	case SabreHitAirbases:
-		keep(Jet.Plural, Jet.Count(e), SabreAirbaseKeepBasePct, SabreAirbaseKeepSpread)
-	case SabreHitFood:
-		keep("Food", &e.Food, 0, SabreFoodKeepSpread)
-	case SabreHitRegions:
-		lost := int(int64(e.Land) * int64(SabreRegionLossBasePct+w.rng.Intn(SabreRegionLossSpread)) / 100)
+	}},
+	SabreHitAirbases: {"airbases", func(s *sabreStrike) {
+		s.keep(Jet.Plural, Jet.Count(s.e), SabreAirbaseKeepSpread, sabreAirbaseKept)
+	}},
+	SabreHitRegions: {"regions", func(s *sabreStrike) {
+		e := s.e
+		lost := pctOf(e.Land, SabreRegionLossBasePct+s.w.rng.Intn(SabreRegionLossSpread))
 		if lost > 0 {
 			lost = e.Regions.remove(lost).Total()
 			e.syncLand()
-			parts = append(parts, fmt.Sprintf("%d Regions", lost))
+			s.parts = append(s.parts, fmt.Sprintf("%d Regions", lost))
 		}
+	}},
+	SabreHitFood: {"food supply", func(s *sabreStrike) {
+		s.keep("Food", &s.e.Food, SabreFoodKeepSpread, sabreFoodKept)
+	}},
+}
+
+// sabreStrike is one landed hit in progress: the realm it struck and the list
+// of what it destroyed.
+type sabreStrike struct {
+	w     *World
+	e     *Empire
+	parts []string
+}
+
+// keep leaves *n at kept(*n, Random(spread)) and records what went.
+func (s *sabreStrike) keep(name string, n *int, spread int, kept func(n, roll int) int) {
+	left := kept(*n, s.w.rng.Intn(spread))
+	if lost := *n - left; lost > 0 {
+		*n = left
+		s.parts = append(s.parts, fmt.Sprintf("%d %s", lost, name))
 	}
-	return strings.Join(parts, ", ")
+}
+
+// The three rows below are the ones whose Real48 share is not the integer
+// percent it stands for: each comes out one lower than integer math wherever
+// count x share should land exactly on a whole number and the rounded share
+// sits just under it. The people and military base rows never do (checked
+// against every count to 2^31 - 1), so they stay pctOf.
+
+// sabreIntelKept is Trunc(agents x (Random(30) / 100 + 0.7)) in the original's
+// Real48 (resolve_received_sabre_strike +0x7e3..+0x839: RFloat(roll) / 100.0,
+// RAdd 0.7, times RFloat(agents), RTrunc). 300 agents on a roll of 3 keep 218,
+// not 219.
+func sabreIntelKept(n, roll int) int {
+	share := r48Add(r48Div(r48Int(int64(roll)), r48Int(100)), r48(big.NewRat(SabreIntelKeepBasePct, 100)))
+	return int(r48Trunc(r48Mul(r48Int(int64(n)), share)))
+}
+
+// sabreAirbaseKept is Trunc(jets x ((Random(40) + 50) / 100)) in the original's
+// Real48 (+0xacd..+0xb22: RFloat(roll) + 50.0, / 100.0, times RFloat(jets),
+// RTrunc). The add is exact; the divide is not. 100 jets on a roll of 11 keep
+// 60, not 61.
+func sabreAirbaseKept(n, roll int) int {
+	share := r48Div(r48Int(int64(SabreAirbaseKeepBasePct+roll)), r48Int(100))
+	return int(r48Trunc(r48Mul(r48Int(int64(n)), share)))
+}
+
+// sabreFoodKept is Trunc(Random(30) x (food / 100)) in the original's Real48
+// (+0xbb2..+0xbfa: RFloat(food) / 100.0, times RFloat(roll), RTrunc). 244 food
+// on a roll of 25 keeps 60, not 61.
+func sabreFoodKept(n, roll int) int {
+	x := r48Div(r48Int(int64(n)), r48Int(100))
+	return int(r48Trunc(r48Mul(r48Int(int64(roll)), x)))
 }
 
 // sabreDevelop is the mapper's last row: the backfire hands the TARGET
@@ -107,7 +174,7 @@ func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
 // land arrives without a type and the owner chooses at the start of their next
 // turn (#107, #266).
 func (w *World) sabreDevelop(d *Empire) int {
-	got := d.Land * (SabreDevelopBasePct + w.rng.Intn(SabreDevelopSpread)) / 100
+	got := pctOf(d.Land, SabreDevelopBasePct+w.rng.Intn(SabreDevelopSpread))
 	if got <= 0 {
 		return 0
 	}
@@ -152,14 +219,8 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, ou
 	// The third gate is the original's garrison roll, which for the Sabre reads
 	// the target's troopers (record +0x76). It sits ahead of the damage switch,
 	// so a Sabre it stops neither damages nor backfires.
-	//
-	// A stopped Sabre is told to the target in person unless the SDI stopped it
-	// (resolve_received_sabre_strike skips its event writer on the SDI flag,
-	// +0x0d2c); its planet's news carries every outcome.
-	if stopped, why := w.arrivingMissileStopped(d, "S3-Sabre", d.Troopers); stopped != "" {
-		if why != specialIntercepted {
-			d.addEvent(fmt.Sprintf("An S3-Sabre from %s came down short of your realm.", from))
-		}
+	notice := fmt.Sprintf("An S3-Sabre from %s came down short of your realm.", from)
+	if stopped, why := w.stopArrivingMissile(d, "S3-Sabre", d.Troopers, notice); stopped != "" {
 		return stopped, why
 	}
 	if w.sabreBackfires(d) {
@@ -187,19 +248,8 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, ou
 // sabreEffectAim names what a dial row goes for, for the target's event when a
 // hit takes nothing.
 func sabreEffectAim(eff SabreEffect) string {
-	switch eff {
-	case SabreHitIntelligence:
-		return "Intelligence Headquarters"
-	case SabreHitPeople:
-		return "residential zones"
-	case SabreHitMilitaryBases:
-		return "military bases"
-	case SabreHitAirbases:
-		return "airbases"
-	case SabreHitRegions:
-		return "regions"
-	case SabreHitFood:
-		return "food supply"
+	if row, ok := sabreRows[eff]; ok {
+		return row.aim
 	}
 	return "realm"
 }

@@ -61,7 +61,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpBombFood, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
-	cost := from.SpecialOpGoldCost(attacker, OpBombFood, 0) // planet-wide: no target size
+	cost := SpecialOpGoldCost(OpBombFood, 0) // planet-wide: no target size
 	if attacker.Gold != goldBefore-cost {
 		t.Errorf("gold %d, want %d", attacker.Gold, goldBefore-cost)
 	}
@@ -167,11 +167,9 @@ func TestSpecialOpSpendsFiveHundredBombers(t *testing.T) {
 
 // A missile's price is the target's land times its rate, held between a million
 // and a billion (prepare_bombing_attack +0x58b: max_i32 then min_i32). The
-// bombing ops are the flat table, and the Terror Costs level touches none of
-// them. Golden literals throughout.
+// bombing ops are the flat table; the Terror Costs level cannot reach either,
+// since the price reads no world. Golden literals throughout.
 func TestSpecialOpPricesMatchTheOriginal(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("a", "Alpha")
 	for _, c := range []struct {
 		op   SpecialOp
 		land int
@@ -186,19 +184,16 @@ func TestSpecialOpPricesMatchTheOriginal(t *testing.T) {
 		{OpNuclear, 390_778, 1_000_000_000}, // just over it, held there
 		{OpSabre, 10_000_000, 1_000_000_000},
 	} {
-		if got := w.SpecialOpGoldCost(e, c.op, c.land); got != c.want {
+		if got := SpecialOpGoldCost(c.op, c.land); got != c.want {
 			t.Errorf("%s at %d regions: %d, want %d", c.op, c.land, got, c.want)
 		}
 	}
-	for _, level := range []Level{None, Low, Medium, High} {
-		w.Config.TerrorCosts = level
-		for op, want := range map[SpecialOp]int64{
-			OpBombFood: 10_000_000, OpBombMarket: 25_000_000,
-			OpBombRoutes: 25_000_000, OpUndermine: 75_000_000,
-		} {
-			if got := w.SpecialOpGoldCost(e, op, 0); got != want {
-				t.Errorf("%s at Terror Costs %v: %d, want %d", op, level, got, want)
-			}
+	for op, want := range map[SpecialOp]int64{
+		OpBombFood: 10_000_000, OpBombMarket: 25_000_000,
+		OpBombRoutes: 25_000_000, OpUndermine: 75_000_000,
+	} {
+		if got := SpecialOpGoldCost(op, 0); got != want {
+			t.Errorf("%s: %d, want %d", op, got, want)
 		}
 	}
 }
@@ -275,6 +270,30 @@ func TestBombingDamageMatchesTheOriginal(t *testing.T) {
 	} {
 		if got := undermineKept(c.value, c.pct); got != c.want {
 			t.Errorf("investment %d at %d%%: kept %d, want %d", c.value, c.pct, got, c.want)
+		}
+	}
+
+	// Where the original's Real48 and integer math part ways: the inexact
+	// pct / 100 and value / 100 put a whole product, or an exact half, one
+	// under. Each figure is the port's (scripts/bre_real48.py); integer math
+	// gives one more in every row.
+	for _, c := range []struct{ supply, pct, want int }{
+		{5500, 73, 4014}, {3300, 61, 2012}, {43_449_600, 65, 28_242_239},
+		{2_017_263_500, 53, 1_069_149_654},
+	} {
+		if got := foodMarketLoss(c.supply, c.pct); got != c.want {
+			t.Errorf("food market %d at %d%% (Real48): lost %d, want %d", c.supply, c.pct, got, c.want)
+		}
+	}
+	for _, c := range []struct {
+		value int64
+		pct   int
+		want  int64
+	}{
+		{2130, 5, 2023}, {266_490, 5, 253_165}, {1_116_655_290, 5, 1_060_822_525},
+	} {
+		if got := undermineKept(c.value, c.pct); got != c.want {
+			t.Errorf("investment %d at %d%% (Real48): kept %d, want %d", c.value, c.pct, got, c.want)
 		}
 	}
 
@@ -426,8 +445,6 @@ func TestBombingOpsIgnoreTheTargetsProtection(t *testing.T) {
 // Asserting the constant instead would follow a retune silently, which is the
 // opposite of what a fidelity figure is for.
 func TestInterplanetaryMissilePricesMatchTheCapture(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("a", "Alpha")
 	for _, c := range []struct {
 		op   SpecialOp
 		want int64
@@ -436,24 +453,13 @@ func TestInterplanetaryMissilePricesMatchTheCapture(t *testing.T) {
 		{OpChemical, 21_853_728},
 		{OpSabre, 36_122_736},
 	} {
-		if got := w.SpecialOpGoldCost(e, c.op, 8112); got != c.want {
+		if got := SpecialOpGoldCost(c.op, 8112); got != c.want {
 			t.Errorf("%s against 8,112 regions = %d, want %d", c.op, got, c.want)
 		}
 	}
 	// Uncapped: StrikeCostCap is the LOCAL path's ceiling and appears in none of
 	// the three interplanetary branches.
-	if got := w.SpecialOpGoldCost(e, OpNuclear, 100_000); got <= StrikeCostCap {
+	if got := SpecialOpGoldCost(OpNuclear, 100_000); got <= StrikeCostCap {
 		t.Errorf("the interplanetary price is capped at %d: got %d", StrikeCostCap, got)
-	}
-	// The launcher's own size does not enter into it.
-	e.Regions = RegionMix{Desert: 9000}
-	e.syncLand()
-	if got := w.SpecialOpGoldCost(e, OpNuclear, 8112); got != 20_758_608 {
-		t.Errorf("price moved with the launcher's land: %d", got)
-	}
-	// The sysop's Terror Costs dial scales the bombing ops, not the missiles.
-	w.Config.TerrorCosts = Level(2)
-	if got := w.SpecialOpGoldCost(e, OpNuclear, 8112); got != 20_758_608 {
-		t.Errorf("Terror Costs moved a missile price: %d", got)
 	}
 }

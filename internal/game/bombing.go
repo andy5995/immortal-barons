@@ -23,15 +23,29 @@ func (w *World) bombFoodMarketEffect() (lost, pct int) {
 	return lost, pct
 }
 
-// foodMarketLoss is Trunc(supply x pct / 100), the food a run destroys.
-func foodMarketLoss(supply, pct int) int { return int(int64(supply) * int64(pct) / 100) }
+// foodMarketLoss is Trunc(supply x (pct / 100)) in the original's Real48, the
+// food a run destroys. BINARY-VERIFIED (resolve_received_bombing +0x152..+0x187:
+// RFloat(pct) / 100.0, times RFloat(supply), RTrunc). The rounded pct / 100 can
+// put a product that should land on a whole number just under it, so this is
+// one lower than integer math there (5,500 at 73% loses 4,014, not 4,015).
+func foodMarketLoss(supply, pct int) int {
+	x := r48Div(r48Int(int64(pct)), r48Int(100))
+	return int(r48Trunc(r48Mul(r48Int(int64(supply)), x)))
+}
 
 // marketKept is Trunc(qty x (100 - pct) / 100), what a bombed listing keeps.
-func marketKept(qty, pct int) int { return int(int64(qty) * int64(100-pct) / 100) }
+func marketKept(qty, pct int) int { return pctOf(qty, 100-pct) }
 
-// undermineKept is Round(x x (100 - pct) / 100), halves away from zero, what an
-// undermined investment keeps.
-func undermineKept(x int64, pct int) int64 { return (2*x*int64(100-pct) + 100) / 200 }
+// undermineKept is Round((x / 100) x (100 - pct)) in the original's Real48,
+// halves away from zero, what an undermined investment keeps. BINARY-VERIFIED
+// (resolve_received_bombing +0x33a..+0x391: RFloat(value) / 100.0, times
+// RFloat(100 - pct), RRound). The rounded x / 100 can put an exact half just
+// under it, so this is one lower than integer math there (2,130 at 5% keeps
+// 2,023, not 2,024).
+func undermineKept(x int64, pct int) int64 {
+	v := r48Mul(r48Div(r48Int(x), r48Int(100)), r48Int(int64(100-pct)))
+	return r48Round(v)
+}
 
 // bombFoodMarketLossPct is the one 20-99% share a Bomb Food Market run burns.
 func (w *World) bombFoodMarketLossPct() int {
@@ -51,8 +65,9 @@ func (w *World) undermineLossPct() int {
 }
 
 // undermineEffect cuts each of d's investments that is at most
-// UndermineReachDays from maturity to Round(x x (100 - pct) / 100), principal and
-// return alike, and reports the principal lost. The original keeps one figure
+// UndermineReachDays from maturity to undermineKept, Round((x / 100) x
+// (100 - pct)) in Real48, principal and return alike, and reports the principal
+// lost. The original keeps one figure
 // per day left to maturity and cuts the first four; IB keeps each investment
 // apart, so it cuts every one in that window.
 func (w *World) undermineEffect(d *Empire, pct int) int64 {
@@ -120,7 +135,13 @@ func (w *World) bombRoutesEffect() (hit int) {
 }
 
 // bombDealBasket takes pct percent off every good in b, gold included:
-// each loses Trunc(qty x pct / 100), as the original subtracts it.
+// each loses Trunc(pct x (qty / 100)), as the original subtracts it.
+//
+// The original computes that in Real48 (ovr_050dfb +0x2a8..+0x2e2: RFloat(qty)
+// / 100.0, times RFloat(pct), RTrunc), the same inexact divide the food market
+// takes. Here it never changes the answer: at pct 5-9, integer math matches
+// the Real48 port for every quantity to 2^31 - 1, the original's ceiling, so
+// this stays pctOf.
 func bombDealBasket(b *TradeBasket, pct int) {
 	for _, p := range basketPtrs(b) {
 		*p -= pctOf(*p, pct)

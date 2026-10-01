@@ -438,6 +438,14 @@ const (
 	IPSabreGoldPerRegion int64 = 4_453
 )
 
+// BombingBombersRequired is the Bombers an empire must hold to run an
+// interplanetary Special Operation (BRE.OVR: "All missiles and bombs require
+// 500 Bombers to deliver their payloads"). The gate — and the 500 Bombers each
+// launch consumes — belong to `run_bombing_operations_menu` (BRE.OVR 0x02AEBE
+// onward), which only the InterPlanetary menu reaches. The LOCAL covert op has
+// no bomber requirement at all.
+const BombingBombersRequired = 500
+
 // IPMissileCostMin and IPMissileCostMax bound a missile's price once it is
 // multiplied out. BINARY-VERIFIED: prepare_bombing_attack (BRE.OVR ovr_029088
 // +0x58b) passes the product through max_i32 against 1,000,000 and then min_i32

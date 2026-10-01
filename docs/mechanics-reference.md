@@ -2282,11 +2282,12 @@ The food row has no base: it leaves at most 29 % of the supply, and one hit in
 thirty clears it entirely. It is the harshest row by far; IB's 5-30 % took a
 fraction of that before 2026-09-25.
 
-IB applies all six rows as integer percent (`Sabre*Keep*`,
-`SabreRegionLoss*`). That reproduces the Real48 result exactly for the people,
-military base and region rows, checked at every count to 5,000 and sampled to
-two billion; the agents, airbase and food rows differ by one unit on a few exact
-multiples, where the Real48 share sits just under its decimal value.
+IB applies the people, military base and region rows as integer percent
+(`Sabre*Keep*`, `SabreRegionLoss*`), which reproduces the Real48 result exactly
+at every count to 2^31 − 1. The agents, airbase and food rows are computed in
+Real48, as the original does: there integer math would come out one unit high on
+some exact multiples, where the Real48 share sits just under its decimal value
+(300 agents on a roll of 3 keep 218, not 219).
 
 Backfire is a continuous probability scaled by the target's troopers
 (`d.Troopers / SabreBackfireScale`), IB's own and a playtest knob; the tables
@@ -5229,9 +5230,12 @@ two-day minimum), and daily maintenance moves every slot down a day
 cuts each of its individual investments in that window. Neither the market nor
 the investment branch touches any gold: IB destroyed a quarter of the pending
 sale proceeds and of every investment, and burned half the food market, until
-2026-09-23; those figures were IB's own. The constants are in `balance_prices.go`; IB computes in integers,
-where the original's inexact Real48 `pct / 100` and `value / 100` can land one
-lower on a product that comes out whole.
+2026-09-23; those figures were IB's own. The constants are in
+`balance_prices.go`. IB computes the food and investment figures in Real48 as
+the original does (`real48.go`): its inexact `pct / 100` and `value / 100` land
+one lower on a product that should come out whole, or on an exact half for the
+rounded investment. IB computed them in integers until 2026-10-01. The market
+form is exact, so it stays in integers.
 
 Every op needs the 500 Bombers the original requires of anything on this
 menu, and spends them when it is sent, whatever happens to it at the far end:

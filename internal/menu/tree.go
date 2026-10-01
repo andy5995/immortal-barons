@@ -400,8 +400,8 @@ func BuildMenus() *Menus {
 	// The four bombing ops carry their price on the menu, as the original prints
 	// it (docs/dev/bre-screens.md) — a flat figure, so it can be quoted before a
 	// target is named. The three missiles and Send SpyGuy show none and cannot:
-	// a missile is priced off the launcher's own land and the SpyGuy off the
-	// planet's, both of which the op quotes for itself once asked.
+	// a missile is priced off the target's last-known land and the SpyGuy off
+	// the planet's, both of which the op quotes for itself once asked.
 	ipSpecial.Items = []Item{
 		{Key: '1', Label: "Bomb Food Market", Price: opPrice(game.OpBombFood), Do: ipSpecialOp(game.OpBombFood), Hidden: bombingOpsSpent},
 		{Key: '2', Label: "Bomb Trading Market", Price: opPrice(game.OpBombMarket), Do: ipSpecialOp(game.OpBombMarket), Hidden: bombingOpsSpent},

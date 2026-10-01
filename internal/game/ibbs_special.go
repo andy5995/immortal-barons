@@ -15,9 +15,10 @@ import "fmt"
 // applies it and answers, and the lost-forces timer hands the op back if the
 // answer never arrives.
 //
-// The bombing EFFECTS live in bombing.go and the missiles' in specials.go and
-// sabre.go. Neither is the local menu's: the original resolves an arriving op in
-// receivers of its own, with their own rolls and bands, and IB follows those.
+// The bombing EFFECTS live in bombing.go, the S3-Sabre's in sabre.go, and the
+// nuclear and chemical strikes' at the end of this file. None is the local
+// menu's: the original resolves an arriving op in receivers of its own, with
+// their own rolls and bands, and IB follows those.
 // The attacker is not present on the board that resolves it, so its score is
 // awarded when the answer comes home rather than on the spot.
 
@@ -156,7 +157,7 @@ func (w *World) RemoteLand(board, empire string) int {
 // either binary writes that table, so the Terror Costs level the terrorist
 // ops answer to never reaches it. IB scaled the bombing ops by it until
 // 2026-10-01.
-func (w *World) SpecialOpGoldCost(e *Empire, op SpecialOp, targetLand int) int64 {
+func SpecialOpGoldCost(op SpecialOp, targetLand int) int64 {
 	var rate int64
 	switch op {
 	case OpBombFood:
@@ -218,7 +219,7 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 		// call the menu would not have made.
 		return ErrNoTargetSize
 	}
-	cost := w.SpecialOpGoldCost(e, op, targetLand)
+	cost := SpecialOpGoldCost(op, targetLand)
 	if e.Gold < cost {
 		return ErrCantAfford
 	}
@@ -536,11 +537,6 @@ func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutco
 // branches here, from when they were aimed at one baron, which no packet could
 // reach once they were aimed at the planet; they were removed on 2026-09-23.
 func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report string, score int, outcome specialOutcome) {
-	// A missile the target's SDI shot down is told to its planet in the news
-	// and to nobody in person. BINARY-VERIFIED: resolve_received_sabre_strike
-	// skips its event-writer call at +0x0d8a when the SDI flag is set (+0x0d2c),
-	// and makes it for every other failure (+0x0d25..+0x0d31). IB told the
-	// target of an interception too until 2026-10-01.
 	switch op {
 	// The three missiles do NOT run the local helpers of the same name (#255).
 	// The receiving board resolves all three in one routine with its own gates
@@ -548,10 +544,8 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 	// ruins a wider swath than a neighbor's, and an arriving chemical strike is
 	// a population weapon that touches no land at all.
 	case OpNuclear:
-		if stopped, why := w.arrivingMissileStopped(d, "nuclear strike", d.Turrets); stopped != "" {
-			if why != specialIntercepted {
-				d.addEvent(fmt.Sprintf("A nuclear strike from %s never reached your empire.", from))
-			}
+		notice := fmt.Sprintf("A nuclear strike from %s never reached your empire.", from)
+		if stopped, why := w.stopArrivingMissile(d, "nuclear strike", d.Turrets, notice); stopped != "" {
 			return stopped, 0, why
 		}
 		regions := w.arrivingNuclearEffect(d)
@@ -560,10 +554,8 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 		return fmt.Sprintf("Nuclear strike! %d regions of %s are now waste.", regions, d.Name), score, specialHit
 
 	case OpChemical:
-		if stopped, why := w.arrivingMissileStopped(d, "chemical strike", d.Tanks); stopped != "" {
-			if why != specialIntercepted {
-				d.addEvent(fmt.Sprintf("A chemical strike from %s never reached your empire.", from))
-			}
+		notice := fmt.Sprintf("A chemical strike from %s never reached your empire.", from)
+		if stopped, why := w.stopArrivingMissile(d, "chemical strike", d.Tanks, notice); stopped != "" {
 			return stopped, 0, why
 		}
 		people := w.arrivingChemicalEffect(d)
@@ -576,4 +568,77 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 		return report, 0, outcome
 	}
 	return fmt.Sprintf("Nothing came of the operation against %s.", d.Name), 0, specialNothing
+}
+
+// arrivingMissileStopped runs the three rolls the receiving board makes for ANY
+// arriving missile, after the realm has been found and its New Realm Protection
+// checked: the misfire, then SDI, then the target's garrison. BINARY-VERIFIED —
+// the original resolves all three missiles in one routine (`BRE.OVR ovr_0450a9
+// +0x3c5`) and all three rolls sit ahead of the damage switch, so a nuclear
+// strike is stopped by the same shield an S3-Sabre is.
+//
+// guard is the target's count of the unit that stands against this missile —
+// turrets for a nuclear strike, tanks for a chemical one, troopers for an
+// S3-Sabre (`+0x4c7..+0x53c` pick record +0x82, +0x86 or +0x76 by op type).
+// The resolver divides it by the target's regions plus one and fails the
+// missile when Random(MissileDefenseRoll) falls under that and a second die
+// rolls above MissileDefenseThrough (`+0x540..+0x5b6`). It sets the same
+// failure flag the misfire does and not the SDI one, so the reader's line is
+// the plain failure form; IB words it as the garrison it was.
+//
+// Returns the sender's line for the reason the strike ended, and which reason
+// it was, or "" and specialHit when it gets through. The reasons are separate
+// lines to the reader in the original, and stay separate here: a shield that
+// worked and a weapon that failed are different news.
+func (w *World) arrivingMissileStopped(d *Empire, label string, guard int) (string, specialOutcome) {
+	if w.rng.Intn(MissileMisfireOdds) == 0 {
+		return fmt.Sprintf("The %s misfired and never reached %s.", label, d.Name), specialMisfire
+	}
+	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
+		return fmt.Sprintf("%s's SDI intercepted your %s.", d.Name, label), specialIntercepted
+	}
+	if missileGuarded(guard, d.Land, w.rng.Intn(MissileDefenseRoll), w.rng.Intn) {
+		return fmt.Sprintf("%s's defenses brought down your %s.", d.Name, label), specialGuarded
+	}
+	return "", specialHit
+}
+
+// stopArrivingMissile runs arrivingMissileStopped and, when the strike was
+// stopped, files notice — the target's own line — unless SDI was what stopped
+// it. An interception reaches the target only through its planet's news.
+// BINARY-VERIFIED: the resolver (resolve_received_sabre_strike, ovr_0450a9
+// +0x0d1f..+0x0d33) skips its event-writer call when the SDI flag is set and
+// makes it for every other failure. IB told the target of an interception too
+// until 2026-10-01.
+func (w *World) stopArrivingMissile(d *Empire, label string, guard int, notice string) (string, specialOutcome) {
+	stopped, why := w.arrivingMissileStopped(d, label, guard)
+	if stopped != "" && why != specialIntercepted {
+		d.addEvent(notice)
+	}
+	return stopped, why
+}
+
+// missileGuarded is the garrison roll: roll is the Random(MissileDefenseRoll)
+// draw, and the second die is drawn only when the first comes in under the
+// garrison per region, as the original draws it.
+func missileGuarded(guard, regions, roll int, intn func(int) int) bool {
+	perRegion := int64(guard) / (int64(regions) + 1)
+	return int64(roll) < perRegion && intn(MissileDefenseSides) > MissileDefenseThrough
+}
+
+// arrivingNuclearEffect and arrivingChemicalEffect are the damage an arriving
+// missile does, which is NOT what the local missile of the same name does. The
+// bands are the receiving resolver's own (see balance_costs.go), and the
+// chemical one touches nothing but the population — no land, no morale, no
+// support, where the local strike takes all three.
+func (w *World) arrivingNuclearEffect(d *Empire) int {
+	pct := IPNukeWastePctBase + w.rng.Intn(IPNukeWastePctRoll)
+	return ruinToWasteCapped(d, pct, IPMissileRegionCap)
+}
+
+func (w *World) arrivingChemicalEffect(d *Empire) int {
+	pct := IPChemKillPctBase + w.rng.Intn(IPChemKillPctRoll)
+	dead := min(pctOf(d.People, pct), IPMissilePeopleCap)
+	d.People -= dead
+	return dead
 }

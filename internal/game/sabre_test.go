@@ -168,6 +168,38 @@ func TestSabreDamageRowsKeepTheOriginalsShare(t *testing.T) {
 	}
 }
 
+// The agents, airbase and food rows keep what the original's Real48 keeps,
+// which on some exact multiples is one under integer math. Golden literals from
+// scripts/bre_real48.py running each row's operation sequence; the first cases
+// of each row are ones where integer math is one high.
+func TestSabreRealRowsMatchThePort(t *testing.T) {
+	for _, c := range []struct {
+		name            string
+		kept            func(n, roll int) int
+		n, roll, wanted int
+	}{
+		{"agents", sabreIntelKept, 300, 3, 218},
+		{"agents", sabreIntelKept, 600, 3, 437},
+		{"agents", sabreIntelKept, 1000, 7, 769},
+		{"agents", sabreIntelKept, 1000, 0, 700},
+		{"agents", sabreIntelKept, 1000, 29, 990},
+		{"agents", sabreIntelKept, 0, 5, 0},
+		{"airbase", sabreAirbaseKept, 100, 11, 60},
+		{"airbase", sabreAirbaseKept, 1900, 3, 1006},
+		{"airbase", sabreAirbaseKept, 1000, 0, 500},
+		{"airbase", sabreAirbaseKept, 1000, 39, 890},
+		{"food", sabreFoodKept, 244, 25, 60},
+		{"food", sabreFoodKept, 420, 15, 62},
+		{"food", sabreFoodKept, 1000, 29, 290},
+		{"food", sabreFoodKept, 1000, 0, 0},
+		{"food", sabreFoodKept, 5000, 1, 50},
+	} {
+		if got := c.kept(c.n, c.roll); got != c.wanted {
+			t.Errorf("%s row: %d on a roll of %d kept %d, want %d", c.name, c.n, c.roll, got, c.wanted)
+		}
+	}
+}
+
 // The military bases row rolls once per count, not once for all four, and the
 // airbase row touches jets and nothing else.
 func TestSabreBaseRowsTouchTheirOwnCounts(t *testing.T) {

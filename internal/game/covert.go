@@ -526,14 +526,6 @@ func (w *World) resolveStirRevolts(a, d *Empire) string {
 	return fmt.Sprintf("You stirred revolts in %s, lowering its popular support.", d.Name)
 }
 
-// BombingBombersRequired is the Bombers an empire must hold to run an
-// interplanetary Special Operation (BRE.OVR: "All missiles and bombs require
-// 500 Bombers to deliver their payloads"). The gate — and the 500 Bombers each
-// launch consumes — belong to `run_bombing_operations_menu` (BRE.OVR 0x02AEBE
-// onward), which only the InterPlanetary menu reaches. The LOCAL covert op has
-// no bomber requirement at all.
-const BombingBombersRequired = 500
-
 // bombTarget is one holding a Bomb Enemy Targets strike can find, with the
 // percentage band that holding loses.
 type bombTarget struct {

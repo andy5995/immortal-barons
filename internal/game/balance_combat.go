@@ -336,14 +336,16 @@ const (
 // Every damage row is one case of the arriving resolver's effect switch
 // (resolve_received_sabre_strike, BRE.OVR unit ovr_0450a9, code offsets below;
 // file offset = 0x04508C + offset). Each rolls Random(n), builds a Real48 share
-// and truncates share x count back into the record. IB applies them as integer
-// percent, which reproduces the Real48 result exactly for the people, military
-// base and region rows at every count; the rows that differ are noted.
+// and truncates share x count back into the record. Integer percent
+// reproduces the Real48 result exactly for the people, military base and region
+// rows at every count to 2^31 - 1, so IB applies those as integer percent; the
+// agents, airbase and food rows do not, and IB computes them in Real48
+// (sabre.go, real48.go).
 const (
 	// Intelligence Headquarters (+0x7e3..+0x85c, record +0x26f): agents keep
-	// trunc(agents x (0.70 + Random(30)/100)), a loss of 1-30%. The integer
-	// form differs from the Real48 by one agent on a few exact multiples, where
-	// the original's 0.7 sits just under 0.7.
+	// trunc(agents x (0.70 + Random(30)/100)), a loss of 1-30%. IB matches the
+	// Real48 (sabreIntelKept), which is one agent under integer math on some
+	// exact multiples, where the original's 0.7 sits just under 0.7.
 	SabreIntelKeepBasePct = 70 // binary: Real48 0.7
 	SabreIntelKeepSpread  = 30 // binary: Random(30)/100
 
@@ -359,8 +361,9 @@ const (
 	SabreBasesKeepSpread  = 20 // binary: Random(20)
 
 	// Airbases (+0xacd..+0xb45, record +0x7e): jets alone keep
-	// trunc(jets x (Random(40) + 50) / 100), a loss of 11-50%. The integer form
-	// differs from the Real48 by one jet on a few exact multiples.
+	// trunc(jets x (Random(40) + 50) / 100), a loss of 11-50%. IB matches the
+	// Real48 (sabreAirbaseKept), which is one jet under integer math on some
+	// exact multiples.
 	SabreAirbaseKeepBasePct = 50 // binary: Real48 50
 	SabreAirbaseKeepSpread  = 40 // binary: Random(40)
 
@@ -374,8 +377,8 @@ const (
 
 	// Food (+0xbb2..+0xc1d, record +0x6e): the supply keeps
 	// trunc(Random(30) x food / 100), so a hit destroys 71-100% of it, all of it
-	// one time in thirty. The integer form differs from the Real48 by one unit
-	// of food on a few exact multiples.
+	// one time in thirty. IB matches the Real48 (sabreFoodKept), which is one
+	// unit of food under integer math on some exact multiples.
 	SabreFoodKeepSpread = 30 // binary: Random(30), with no base
 
 	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)

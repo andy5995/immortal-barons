@@ -8,8 +8,8 @@ in_game: true
 # S3-Sabre
 
 The S3-Sabre is an unreliable weapon of mass destruction, fired from the
-InterPlanetary menu's Special Operations at a baron on another planet. Before you
-fire, you set a dial from 0 to 10, and the dial aims it:
+InterPlanetary menu's Special Operations at a baron on another planet. Before
+you fire, you set a dial from 0 to 10, and the dial aims it:
 
 | Dial | What it goes for |
 | --- | --- |
@@ -33,12 +33,13 @@ there. The dial wraps at its ends: 10 can land on 0, and 0 on 10. Aim 5 at a
 baron you know keeps a large air force.
 
 The missile is still a gamble on top of that. About one launch in ten misfires,
-and the enemy's SDI may shoot it down. A large trooper army can bring it down
-too (see Troopers). If it gets through, it can still break up over the target
-and do no damage. The larger the enemy's trooper army, the more often this
-happens. A breakup does not harm you, but it helps the enemy: the fallout gives them new
-regions, 10% to 19% of the regions they already hold. They choose the types of
-the new regions on their next turn.
+and the enemy's SDI may shoot it down. The enemy's troopers work against it
+twice: the more they hold for each region, the more often a Sabre fails before
+it reaches them, and the larger their army, the more often one that gets through
+breaks up over the target and does no damage. A breakup does not harm you, but
+it helps the enemy: the fallout gives them new regions, 10% to 19% of the
+regions they already hold. They choose the types of the new regions on their
+next turn.
 
 Your sysop decides how the dial is set. Normally you choose it yourself, but the
 game can be set up to roll one for you each time, to fix it at a dial the sysop
