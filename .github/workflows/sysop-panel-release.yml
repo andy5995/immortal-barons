@@ -1,7 +1,9 @@
 name: Sysop panel release
 
-# Builds the ib-sysop desktop panel for a published release and attaches it as
-# extra assets. It is separate from release.yml because the panel cannot be
+# Builds the ib-sysop desktop panel and attaches it to a release as extra
+# assets: to the published release on a publish, and to the rolling "snapshot"
+# prerelease on every push to trunk, beside snapshot.yml's game archives. It is
+# separate from release.yml and snapshot.yml because the panel cannot be
 # cross-compiled: Gio needs cgo on Linux and macOS, so each of those targets
 # builds on its own native runner, while the Windows targets are pure Go and
 # cross-build on Linux.
@@ -10,8 +12,10 @@ name: Sysop panel release
 # left exactly as published; the panel archives get their own checksum file.
 #
 # Each archive wraps the same folder name as the game archive for its platform
-# (immortal-barons-<tag>-<os>-<arch>), so unpacking both in one place puts
-# ib-sysop beside immortal-barons, which the panel runs for every command.
+# (immortal-barons-<version>-<os>-<arch>), so unpacking both in one place puts
+# ib-sysop beside immortal-barons, which the panel runs for every command. On a
+# snapshot the archive filename says "snapshot", so each push clobbers the last
+# in place, and the folder carries the short sha, as the game's does.
 #
 # Run by hand for a release published before this workflow existed:
 #   gh workflow run sysop-panel-release.yml -f tag=v0.2.1
@@ -19,23 +23,28 @@ name: Sysop panel release
 on:
   release:
     types: [published]
+  push:
+    branches: [trunk]
   workflow_dispatch:
     inputs:
       tag:
         description: Release tag to build the panel for and attach it to
         required: true
 
-# Publishes to one release per tag; a second run for the same tag waits rather
-# than racing the first one's uploads.
+# One group per target release. A newer trunk push supersedes a snapshot build,
+# as in snapshot.yml; a second run for the same tag waits rather than racing the
+# first one's uploads.
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.tag || github.event.release.tag_name }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && 'snapshot' || inputs.tag || github.event.release.tag_name }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 permissions:
   contents: read
 
 env:
-  TAG: ${{ inputs.tag || github.event.release.tag_name }}
+  # The release the assets go to, which also goes in the archive filename.
+  RELEASE: ${{ github.event_name == 'push' && 'snapshot' || inputs.tag || github.event.release.tag_name }}
+  REF: ${{ github.event_name == 'push' && github.sha || inputs.tag || github.event.release.tag_name }}
 
 jobs:
   build:
@@ -54,7 +63,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ env.TAG }}
+          ref: ${{ env.REF }}
       - uses: actions/setup-go@v7
         with:
           go-version-file: cmd/ib-sysop/go.mod
@@ -73,8 +82,9 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           set -eu
-          dir="immortal-barons-${TAG}-${GOOS}-${GOARCH}"
-          name="ib-sysop-${TAG}-${GOOS}-${GOARCH}"
+          ver="$RELEASE"; [ "$RELEASE" = snapshot ] && ver="${GITHUB_SHA:0:7}"
+          dir="immortal-barons-${ver}-${GOOS}-${GOARCH}"
+          name="ib-sysop-${RELEASE}-${GOOS}-${GOARCH}"
           ext=""; [ "$GOOS" = windows ] && ext=".exe"
           # PIE on Linux, as docs/sysop-panel.md builds it: without it the
           # linker leaves text relocations in the cgo binary.
@@ -116,4 +126,4 @@ jobs:
           [ "${#files[@]}" -eq 6 ] || { echo "expected 6 archives, got ${#files[@]}: ${files[*]}" >&2; exit 1; }
           sha256sum "${files[@]}" > SHA256SUMS-ib-sysop
           ls -l
-          gh release upload "$TAG" "${files[@]}" SHA256SUMS-ib-sysop --clobber
+          gh release upload "$RELEASE" "${files[@]}" SHA256SUMS-ib-sysop --clobber

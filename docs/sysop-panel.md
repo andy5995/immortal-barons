@@ -10,7 +10,8 @@ on a server you reach only over SSH.
 ## Getting it
 
 Each release from v0.2.1 on has an `ib-sysop` archive for every platform,
-beside the game's own archives. Unpack it in the same place as the game
+beside the game's own archives, and so does the
+[development snapshot](download.md#development-snapshots). Unpack it in the same place as the game
 archive: both unpack into the same folder, so `ib-sysop` ends up next to
 `immortal-barons`. The Homebrew formula installs both programs.
 
