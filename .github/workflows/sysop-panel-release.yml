@@ -1,0 +1,119 @@
+name: Sysop panel release
+
+# Builds the ib-sysop desktop panel for a published release and attaches it as
+# extra assets. It is separate from release.yml because the panel cannot be
+# cross-compiled: Gio needs cgo on Linux and macOS, so each of those targets
+# builds on its own native runner, while the Windows targets are pure Go and
+# cross-build on Linux.
+#
+# It only ADDS files to the release. The game archives and their SHA256SUMS are
+# left exactly as published; the panel archives get their own checksum file.
+#
+# Each archive wraps the same folder name as the game archive for its platform
+# (immortal-barons-<tag>-<os>-<arch>), so unpacking both in one place puts
+# ib-sysop beside immortal-barons, which the panel runs for every command.
+#
+# Run by hand for a release published before this workflow existed:
+#   gh workflow run sysop-panel-release.yml -f tag=v0.2.1
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build the panel for and attach it to
+        required: true
+
+# Publishes to one release per tag; a second run for the same tag waits rather
+# than racing the first one's uploads.
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.tag || github.event.release.tag_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ inputs.tag || github.event.release.tag_name }}
+
+jobs:
+  build:
+    name: ${{ matrix.goos }}-${{ matrix.goarch }}-sysop-panel
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { goos: linux, goarch: amd64, runner: ubuntu-24.04 }
+          - { goos: linux, goarch: arm64, runner: ubuntu-24.04-arm }
+          - { goos: darwin, goarch: arm64, runner: macos-26 }
+          - { goos: darwin, goarch: amd64, runner: macos-26-intel }
+          - { goos: windows, goarch: amd64, runner: ubuntu-24.04 }
+          - { goos: windows, goarch: "386", runner: ubuntu-24.04 }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: cmd/ib-sysop/go.mod
+          cache-dependency-path: cmd/ib-sysop/go.sum
+      - name: Linux build dependencies
+        if: matrix.goos == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwayland-dev libx11-dev libx11-xcb-dev \
+            libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev \
+            libffi-dev libxcursor-dev libvulkan-dev libxfixes-dev
+      - name: Build and archive
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          set -eu
+          dir="immortal-barons-${TAG}-${GOOS}-${GOARCH}"
+          name="ib-sysop-${TAG}-${GOOS}-${GOARCH}"
+          ext=""; [ "$GOOS" = windows ] && ext=".exe"
+          # PIE on Linux, as docs/sysop-panel.md builds it: without it the
+          # linker leaves text relocations in the cgo binary.
+          mode=""; [ "$GOOS" = linux ] && mode="-buildmode=pie"
+          mkdir -p "$dir" dist
+          go build -C cmd/ib-sysop $mode -trimpath -ldflags "-s -w" \
+            -o "$PWD/$dir/ib-sysop${ext}"
+          if [ "$GOOS" = windows ]; then
+            zip -qr "dist/${name}.zip" "$dir"
+          else
+            tar -czf "dist/${name}.tar.gz" "$dir"
+          fi
+          ls -l dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ib-sysop-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+          if-no-files-found: error
+
+  attach:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: ib-sysop-*
+          path: assets
+          merge-multiple: true
+      - name: Checksum and attach
+        run: |
+          set -eu
+          cd assets
+          mapfile -t files < <(find . -maxdepth 1 -type f -name 'ib-sysop-*' -printf '%f\n' | sort)
+          [ "${#files[@]}" -eq 6 ] || { echo "expected 6 archives, got ${#files[@]}: ${files[*]}" >&2; exit 1; }
+          sha256sum "${files[@]}" > SHA256SUMS-ib-sysop
+          ls -l
+          gh release upload "$TAG" "${files[@]}" SHA256SUMS-ib-sysop --clobber

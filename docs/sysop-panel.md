@@ -9,8 +9,19 @@ on a server you reach only over SSH.
 
 ## Getting it
 
-The release archives do not include the panel yet. Build it from the source,
-in the top folder of the repository:
+Each release from v0.2.1 on has an `ib-sysop` archive for every platform,
+beside the game's own archives. Unpack it in the same place as the game
+archive: both unpack into the same folder, so `ib-sysop` ends up next to
+`immortal-barons`. The Homebrew formula installs both programs.
+
+On macOS, a downloaded binary is blocked until you remove the quarantine flag:
+
+```
+xattr -d com.apple.quarantine ib-sysop
+```
+
+To build it from the source instead, run this in the top folder of the
+repository:
 
 ```
 go build -C cmd/ib-sysop -buildmode=pie -o ../..
