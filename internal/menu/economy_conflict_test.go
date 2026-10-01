@@ -106,7 +106,8 @@ func addDecoy(t *testing.T, cfg game.Config, gold, bank int64) int {
 
 // TestBuyRegionsVanishedEmpireConflict proves Buy Regions re-resolves the active
 // empire inside its transaction. Node B gathers its realm, another node then
-// removes it (abdication/elimination) leaving only a decoy realm, and node B
+// removes it (a maintenance sweep or a sysop delete) leaving only a decoy realm,
+// and node B
 // commits its purchase. The reused pointer slot now holds the decoy's data, so
 // mutating the pre-gathered pointer would buy regions with the decoy's gold; the
 // re-resolve instead finds no realm and aborts with "the realm has changed".

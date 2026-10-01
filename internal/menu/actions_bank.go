@@ -25,8 +25,9 @@ func money(prompt string, max func(*game.Empire) int64, apply func(*game.World, 
 			return Stay
 		}
 		// apply (Deposit/Withdraw/Loan/Repay) re-checks the balance/debt and the
-		// MoneyCap against the reloaded empire, so a concurrent node can't let two
-		// sessions withdraw the same funds or overdraw.
+		// MoneyCap against the reloaded empire: gold in hand can rise while the
+		// prompt is open (a market sale, an arriving trade deal), and the cap must
+		// hold against what is there now.
 		err := w.mutatePlayer(func(p *game.Empire) error {
 			return apply(w.World, p, n)
 		})

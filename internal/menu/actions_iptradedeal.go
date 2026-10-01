@@ -70,8 +70,8 @@ func sendIPTradeDeal(s session.Session, w *ctx) Result {
 	if !AskYesNo(s, "Send this trade deal?", true) {
 		return Stay
 	}
-	// Re-resolved under the lock: the basket was priced from a snapshot, and
-	// another node may have spent the gold or the carriers since.
+	// Re-resolved under the lock: the basket was priced from a snapshot, and a
+	// rival's strike may have destroyed carriers or goods since.
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.SendIPTradeDeal(p, board, baron, goods)
 	})

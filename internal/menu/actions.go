@@ -11,9 +11,11 @@ import (
 )
 
 // errRealmChanged is the abort-on-conflict notice: a mutating action re-resolves
-// the active empire inside its transaction and, if it has vanished (abdicated by
-// another node between the prompt and the write), aborts cleanly with this rather
-// than dereferencing a nil empire.
+// the active empire inside its transaction and, if it has been removed between
+// the prompt and the write, aborts cleanly with this rather than dereferencing a
+// nil empire. Elimination does not remove a realm (its husk stays until a
+// sweep); what does is a maintenance sweep of dead or unplayed realms, a sysop
+// delete or rename, or a reset.
 var errRealmChanged = errors.New("The realm has changed — try again.")
 
 // errTargetGone aborts a targeted action (attack, strike, covert op) when the
@@ -21,11 +23,6 @@ var errRealmChanged = errors.New("The realm has changed — try again.")
 // world reloads inside the transaction — eliminated, abdicated, or shielded by
 // another node between the target pick and the write.
 var errTargetGone = errors.New("Your target is no longer there.")
-
-// errLocalAttacksExhausted is returned inside an attack's transaction when the
-// day's Max Local Attacks/Day was spent between the check before the prompts and
-// the write (another node on the same handle).
-var errLocalAttacksExhausted = errors.New("You have used all your attacks for today.")
 
 // buyGood is the Spending menu's action for one row of the goods table (#209):
 // the row carries the label, the price and the stock, so the three cannot be
@@ -200,9 +197,8 @@ func askCarriersIncluded(s session.Session, w *ctx, n int) bool {
 
 // applyBuy is the shared "charge it, then say so" tail of the buy actions.
 func applyBuy(s session.Session, w *ctx, label string, n int, apply func(*game.World, *game.Empire, int) error) Result {
-	// Re-resolve the empire against the freshly-reloaded world and let apply
-	// re-check gold atomically — the price gathered before the prompt may be
-	// stale after a concurrent node's transaction.
+	// Re-resolve the empire against the freshly reloaded world and let apply
+	// check gold there, in the same transaction that charges it.
 	if err := w.mutatePlayer(func(p *game.Empire) error {
 		return apply(w.World, p, n)
 	}); err != nil {

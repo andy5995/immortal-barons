@@ -53,11 +53,12 @@ func TestSendTradeDealVanishedRecipientConflict(t *testing.T) {
 	}
 }
 
-// TestAcceptTreatyDoubleAcceptIdempotent proves that two concurrent accepts of
-// the same pending offer produce a single treaty, not a duplicate. Bob has
-// offered Alice a Free Trade Agreement. Node B (Alice) reaches the accept
-// confirmation; while B is at the prompt another node accepts the same offer
-// (forming the treaty and consuming the offer). B then commits its own accept:
+// TestAcceptTreatyDoubleAcceptIdempotent proves that accepting an offer that
+// has already been consumed forms no second treaty. Bob has offered Alice a Free
+// Trade Agreement. Node B (Alice) reaches the accept confirmation, and the test
+// then commits an accept straight to the file. One session per realm means that
+// second accept cannot really come from Alice; the test holds AcceptTreaty
+// idempotent as a game-layer invariant. B then commits its own accept:
 // re-resolving inside the transaction, AcceptTreaty finds the offer already
 // consumed and forms no second treaty.
 func TestAcceptTreatyDoubleAcceptIdempotent(t *testing.T) {
@@ -71,7 +72,7 @@ func TestAcceptTreatyDoubleAcceptIdempotent(t *testing.T) {
 	fb := &hookSession{
 		fakeSession: fakeSession{keys: []rune("y")}, // confirm the accept
 		marker:      "Accept this treaty",
-		hook: func() { // another node accepts the same offer first
+		hook: func() { // the offer is consumed first
 			commitOnFile(t, cfg, func(w *game.World) {
 				w.AcceptTreaty(w.FindByOwner("alice"), "Bobbington", fta)
 			})

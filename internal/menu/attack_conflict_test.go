@@ -71,7 +71,8 @@ func TestRegularAttackShapeShiftConflict(t *testing.T) {
 
 // TestPirateRaidVanishedRaiderConflict proves Attack Pirates re-resolves the
 // raider inside its transaction. Node B commits its raid; while B is entering
-// the committed force another node abdicates B's own realm, leaving only a
+// the committed force B's realm is removed (a sysop delete or a maintenance
+// sweep run by another login), leaving only a
 // decoy whose slot B's reload rebinds the raider pointer onto. Spending the
 // stale pointer would hand the pirate loot to the decoy; re-resolving by handle
 // finds no realm and aborts, leaving the decoy untouched.

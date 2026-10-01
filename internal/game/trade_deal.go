@@ -7,7 +7,8 @@ import (
 )
 
 // ErrTradeSenderGone is returned when a trade deal's proposer no longer exists
-// by the time the recipient accepts (eliminated by another node mid-turn).
+// by the time the recipient accepts: removed by a maintenance sweep, a sysop or
+// a reset.
 var ErrTradeSenderGone = errors.New("The empire that sent this deal is gone.")
 
 // ErrTradeNeedsCarrier is returned when the sender lacks the carriers to

@@ -32,9 +32,10 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	initialGold := int64(unitPrice * iterations) // enough to fund every buy
 	p.Gold = initialGold
 
-	// Two SESSIONS over one world: each goroutine drives its own ctx (the active
-	// empire is per-session cached state), the realistic shape of this project's
-	// concurrency. Both resolve the same shared empire p through w.
+	// Two ctxs over one world on one handle: each goroutine drives its own ctx
+	// (the active empire is per-session cached state). Play never does this, since
+	// a realm has one session at a time (play.lockRealm), but it is the hardest
+	// test of the locking: both resolve the same shared empire p through w.
 	cW := &ctx{World: w, handle: p.Owner}
 	cR := &ctx{World: w, handle: p.Owner}
 	price := func(_ *ctx) int { return unitPrice }

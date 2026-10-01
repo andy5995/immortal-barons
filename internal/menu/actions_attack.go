@@ -222,9 +222,6 @@ func regularAttack(s session.Session, w *ctx) Result {
 		if d == nil {
 			return errTargetGone
 		}
-		if !w.CanAttackLocally(p) {
-			return errLocalAttacksExhausted
-		}
 		// The committed force was typed against the pre-prompt holdings; if a
 		// concurrent node's strike thinned them meanwhile, clampTo in Attack sends
 		// only what remains — note it so the player learns the numbers moved.
@@ -481,9 +478,6 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 		if d == nil {
 			return errTargetGone
 		}
-		if endsTurn && !w.CanAttackLocally(p) {
-			return errLocalAttacksExhausted
-		}
 		var e error
 		report, e = strike(p, d)
 		if e == nil && endsTurn {
@@ -664,9 +658,6 @@ func attackPirates(s session.Session, w *ctx) Result {
 	err := w.mutatePlayer(func(fp *game.Empire) error {
 		// Like regularAttack: the committed force was typed against pre-prompt
 		// holdings; RaidFaction clamps to the fresh stock, so say when it did.
-		if !w.CanAttackLocally(fp) {
-			return errLocalAttacksExhausted
-		}
 		trimmed = troopers > fp.Troopers || jets > fp.Jets || tanks > fp.Tanks
 		report, captured = w.World.RaidFaction(fp, f-1, troopers, jets, tanks)
 		chargeAttackStage(fp)
@@ -724,10 +715,9 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	}
 	var level int
 	var added int64
-	// Re-resolve inside the transaction: FundSDI re-checks gold and the SDIMax cap
-	// against fresh state, so a concurrent node can't let two sessions spend the
-	// same gold or push past the cap. What it took is read off the total, since
-	// it keeps only whole thousands of what was asked for (#290).
+	// Re-resolve inside the transaction: FundSDI checks gold and the SDIMax cap
+	// against the reloaded empire. What it took is read off the total, since it
+	// keeps only whole thousands of what was asked for (#290).
 	err := w.mutatePlayer(func(fp *game.Empire) error {
 		before := fp.SDIFunding
 		var e error

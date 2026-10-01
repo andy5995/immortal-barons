@@ -143,10 +143,11 @@ func (c *ctx) Player() *game.Empire {
 }
 
 // mutatePlayer runs fn inside a world transaction with the re-resolved active
-// player, returning errRealmChanged if the realm has vanished (abdicated by
-// another node between the prompt and the write). It centralizes the
-// re-resolve-then-nil-check that every mutating menu action shares; callers
-// capture any extra values (gold, land, a report) through the closure.
+// player, returning errRealmChanged if the realm has been removed between the
+// prompt and the write (see errRealmChanged for what removes one). It
+// centralizes the re-resolve-then-nil-check that every mutating menu action
+// shares; callers capture any extra values (gold, land, a report) through the
+// closure.
 func (c *ctx) mutatePlayer(fn func(p *game.Empire) error) error {
 	var err error
 	c.With(func() {

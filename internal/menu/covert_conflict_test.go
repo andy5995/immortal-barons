@@ -51,8 +51,9 @@ func TestNuclearStrikeShapeShiftConflict(t *testing.T) {
 }
 
 // TestFundSDIVanishedFunderConflict proves Fund SDI re-resolves the funder
-// inside its transaction. Node B opens Fund SDI; while B enters the amount
-// another node abdicates B's own realm, leaving only a decoy whose slot B's
+// inside its transaction. Node B opens Fund SDI; while B enters the amount B's
+// realm is removed (a sysop delete or a maintenance sweep run by another login),
+// leaving only a decoy whose slot B's
 // reload rebinds the funder pointer onto. Spending through the stale pointer
 // would raise the decoy's SDI with the decoy's gold; re-resolving by handle
 // finds no realm and aborts, leaving the decoy untouched.

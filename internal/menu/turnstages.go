@@ -41,8 +41,8 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarized bool) {
 	}
 
 	// Every transaction below re-resolves the active empire via withPlayer; if it
-	// has vanished (eliminated by another node mid-turn) the stage aborts cleanly
-	// rather than paying maintenance for a rival's realm.
+	// has been removed mid-turn (see errRealmChanged) the stage aborts cleanly
+	// rather than paying maintenance for a realm that is gone.
 	var forces, regions, sdi, crown, gold int64
 	var autoPay bool
 	// due is game's own total, not these four added up here: a charge added to

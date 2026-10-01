@@ -47,8 +47,8 @@ func GameLoop(s session.Session, w *game.World, handle string, t Term) (err erro
 // guarded so a turn REPLAYED
 // after an idle-boot does not collect income (or reset the region cap) twice
 // (#10). The mutation and the IncomeCollected flag commit in one transaction, so
-// a boot leaves them consistent. Returns false if the empire vanished mid-turn
-// (eliminated by another node), like every withPlayer transaction here.
+// a boot leaves them consistent. Returns false if the empire was removed
+// mid-turn (see errRealmChanged), like every withPlayer transaction here.
 func collectTurnIncome(w *ctx) bool {
 	return withPlayer(w, func(p *game.Empire) {
 		if p.TurnProgress.IncomeCollected {
