@@ -245,8 +245,11 @@ func TestBoardHeldFollowsTheCurrentHold(t *testing.T) {
 
 	// The last packet from Far BBS applied 49 hours ago (leagueBoard).
 	setHeldAt("")
-	if b := board(); !b.Held || !b.HeldSince.IsZero() || b.Status() != "held" {
-		t.Errorf("unstamped hold: held %v since %v (%q), want held, never recorded", b.Held, b.HeldSince, b.Status())
+	// Unstamped, the file (written just now) arrived after that packet: held,
+	// dated by its arrival.
+	if b := board(); !b.Held || b.HeldSince.IsZero() || !b.HeldByArrival || b.Status() != "held" {
+		t.Errorf("unstamped hold: held %v since %v by arrival %v (%q), want held, dated by arrival",
+			b.Held, b.HeldSince, b.HeldByArrival, b.Status())
 	}
 	setHeldAt(game.StoredStamp(time.Now().Add(-72 * time.Hour)))
 	if b := board(); b.Held || b.Status() != "ok" {

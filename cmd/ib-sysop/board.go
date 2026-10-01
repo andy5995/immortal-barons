@@ -233,9 +233,13 @@ func (t *boardTab) boardRows() [][]string {
 		}
 		held := "-"
 		if b.Held {
-			held = "never recorded" // an unstamped hold
-			if !b.HeldSince.IsZero() {
+			switch {
+			case b.HeldByArrival:
+				held = "arrived " + stamp(b.HeldSince) // no recorded time
+			case !b.HeldSince.IsZero():
 				held = stamp(b.HeldSince)
+			default:
+				held = "never recorded"
 			}
 		}
 		rows = append(rows, []string{strconv.Itoa(b.Number), b.Name, stamp(b.LastHeard), silent, ver,

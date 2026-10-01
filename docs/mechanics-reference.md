@@ -1656,7 +1656,11 @@ far board keeps what it did. The store names the held boards to
 `ReturnLostForces` on each run: a board counts while a packet from it waits in
 the `held` folder for its protocol and nothing from it has been applied since
 that hold (`World.ProtocolHeldAt` against `LastPacketFrom`), so a leftover file
-from a board that has since caught up does not keep the pause going. Each
+from a board that has since caught up does not keep the pause going. A hold with
+no recorded time (kept by an older build, or a stamp without a zone) is judged by
+the held file's arrival time instead; before 2026-10-01 it counted as current
+until the file expired, which paused every strike at a board that had already
+updated. Each
 in-flight item records the game days it spends held (`HeldDays`, plus
 `Held`/`HeldSince` for a hold in progress), and those days do not count toward
 `LostForcesDays`: a hold in the middle of the window extends it by the held

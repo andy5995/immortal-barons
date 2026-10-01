@@ -147,8 +147,15 @@ func releaseHeld(dataDir, inboundDir string) (int, error) {
 // be waiting for.
 func protocolHeldBoards(w *game.World) map[string]bool {
 	var held map[string]bool
-	eachHeldPacket(w.Config.DataDir, func(_ string, _ os.DirEntry, p *game.Packet) {
-		if p == nil || p.FromBoard == "" || game.SpeaksOurProtocol(p.Protocol) || !w.ProtocolHoldCurrent(p.FromBoard) {
+	eachHeldPacket(w.Config.DataDir, func(_ string, e os.DirEntry, p *game.Packet) {
+		if p == nil || p.FromBoard == "" || game.SpeaksOurProtocol(p.Protocol) {
+			return
+		}
+		var arrived time.Time
+		if info, err := e.Info(); err == nil {
+			arrived = info.ModTime()
+		}
+		if !w.ProtocolHoldCurrent(p.FromBoard, arrived) {
 			return
 		}
 		if held == nil {

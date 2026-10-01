@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A board that has updated no longer pauses lost forces over an old held packet
 
 2026-10-01 (v0.2.1)
   * Updating from v0.1.0 or later needs no game reset

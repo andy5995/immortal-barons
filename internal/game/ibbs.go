@@ -798,11 +798,26 @@ func (w *World) NoteProtocolHold(board string, protocol int) {
 // that board's newer traffic, which applies normally — so the file alone does
 // not say the link is stalled. The same-second case counts as held, since a run
 // that holds one packet and applies another cannot order them by the stamp.
-// A hold with no stamp (held by a build that did not record one) counts too.
-func (w *World) ProtocolHoldCurrent(board string) bool {
+//
+// arrived is when the held file reached this board (its modification time). It
+// stands in for the hold's stamp when there is none: a hold kept by a build that
+// did not record one, or a stamp written before stamps carried a zone. Without
+// it such a hold counted as current until the file expired, so a board that had
+// upgraded and was sending normally still paused the lost-forces timer for the
+// strikes sent to it, for up to HeldMaxAge. A zero arrived, with no stamp either,
+// still counts as held.
+//
+// The modification time is only an approximation of arrival: FTN delivery can
+// keep the SENDER's time, so a file can read as older than it is and a hold be
+// judged over too soon. Only holds left by builds before v0.2.0 lack a stamp,
+// and the lost-forces backstop still bounds what that costs.
+func (w *World) ProtocolHoldCurrent(board string, arrived time.Time) bool {
 	heldAt, ok := ParseStamp(w.ProtocolHeldAt[board])
 	if !ok {
-		return true
+		if arrived.IsZero() {
+			return true
+		}
+		heldAt = arrived
 	}
 	applied, ok := ParseStamp(w.LastPacketFrom[board])
 	return !ok || !heldAt.Before(applied)

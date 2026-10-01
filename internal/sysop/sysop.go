@@ -61,9 +61,11 @@ type Board struct {
 	// pauses the lost-forces timer. A held file left over from before the board
 	// upgraded does not count.
 	Held bool
-	// HeldSince is when the current hold was recorded; zero, with Held set, means
-	// the hold carries no time (held by a build that did not record one).
-	HeldSince time.Time
+	// HeldSince is when the current hold was recorded. A hold that carries no
+	// time (kept by a build that did not record one) gives its held file's
+	// arrival instead, the time the game judges it by, and sets HeldByArrival.
+	HeldSince     time.Time
+	HeldByArrival bool
 }
 
 // Status is the board's condition in words. A table must never say it in color
@@ -174,16 +176,24 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 	// A board is held when one of its held packets pauses the lost-forces
 	// timer: the store's own rule, so this tab and In flight cannot disagree.
 	heldFrom := map[string]bool{}
+	firstArrived := map[string]time.Time{} // earliest pausing file per board
 	for _, h := range held {
 		if h.PausesLostForces {
 			heldFrom[h.FromBoard] = true
+			if t, ok := firstArrived[h.FromBoard]; !ok || h.Arrived.Before(t) {
+				firstArrived[h.FromBoard] = h.Arrived
+			}
 		}
 	}
 	for _, r := range w.BBSInfoRows() {
 		b := Board{BBSInfoRow: r, SilentDays: w.LinkSilentDays(r.Name, now),
 			RoundTrip: w.TravelTimes[r.Name], Held: heldFrom[r.Name]}
-		if t, ok := game.ParseStamp(w.ProtocolHeldAt[r.Name]); ok && b.Held {
-			b.HeldSince = t
+		if b.Held {
+			if t, ok := game.ParseStamp(w.ProtocolHeldAt[r.Name]); ok {
+				b.HeldSince = t
+			} else if t := firstArrived[r.Name]; !t.IsZero() {
+				b.HeldSince, b.HeldByArrival = t, true
+			}
 		}
 		if t, ok := game.ParseStamp(r.LastRecon); ok {
 			b.LastHeard = t

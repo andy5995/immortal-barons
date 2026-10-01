@@ -76,8 +76,8 @@ to reverse the order.
   `never heard`, `below min`, `other rules`, `held`), not only a color.
   `held` means the board's latest packet was held rather than applied; an old
   held file from before the board upgraded does not count. "Held since" says
-  when that hold began, or "never recorded" for a hold kept by an older
-  version.
+  when that hold began. A hold kept by an older version has no recorded time,
+  so it shows when its file arrived instead ("arrived …").
 - **In flight:** every strike, terrorist operation, special operation and trade
   bid that left this board and has no answer yet. Each row shows when the
   lost-forces timer will give it up. An item stays here for the whole round

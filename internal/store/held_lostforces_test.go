@@ -83,3 +83,41 @@ func TestPlanetaryRunPausesLostForcesForAHeldBoard(t *testing.T) {
 			len(w.InFlight), e.Agents, agents+5, run.RecoveryPaused)
 	}
 }
+
+// A hold kept by a build that recorded no time is judged by when its file
+// arrived. One that arrived before the board's last applied packet is a
+// leftover from before the board upgraded and pauses nothing; one that arrived
+// after it still does. It used to pause until the file expired, which held up
+// every strike at a board that had long since updated.
+func TestAnUnstampedHoldIsJudgedByWhenItArrived(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.IBBS = true
+	cfg.BoardID = "Receiver BBS"
+	cfg.DataDir = t.TempDir()
+	w := game.NewWorldSeed(cfg, 1)
+	w.ProtocolHeldAt = map[string]string{} // no stamp for Far BBS
+	w.LastPacketFrom = map[string]string{"Far BBS": game.Recorded(time.Now().Add(-time.Hour))}
+
+	held := filepath.Join(cfg.DataDir, HeldDir)
+	if err := os.MkdirAll(held, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	path := writeHeldTestPacket(t, held, "old"+PacketExt,
+		game.Packet{FromBoard: "Far BBS", Protocol: game.Protocol - 1})
+
+	old := time.Now().Add(-25 * 24 * time.Hour)
+	if err := os.Chtimes(path, old, old); err != nil {
+		t.Fatal(err)
+	}
+	if protocolHeldBoards(w)["Far BBS"] {
+		t.Error("a file that arrived before the board's last applied packet still pauses it")
+	}
+
+	recent := time.Now().Add(-time.Minute)
+	if err := os.Chtimes(path, recent, recent); err != nil {
+		t.Fatal(err)
+	}
+	if !protocolHeldBoards(w)["Far BBS"] {
+		t.Error("a file that arrived after the board's last applied packet no longer pauses it")
+	}
+}
