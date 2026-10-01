@@ -11,12 +11,20 @@ import (
 	"gioui.org/widget/material"
 )
 
+// newButton is a material button with half of Gio's default padding, which
+// left the toolbar and the tab row taller than their labels need.
+func newButton(th *material.Theme, c *widget.Clickable, label string) material.ButtonStyle {
+	b := material.Button(th, c, label)
+	b.Inset = layout.Inset{Top: unit.Dp(5), Bottom: unit.Dp(5), Left: unit.Dp(6), Right: unit.Dp(6)}
+	return b
+}
+
 // tabButton is a tab: filled when selected, flat when not. The selected tab is
 // also the only one drawn in bold, so the choice never rests on color alone.
 func tabButton(th *material.Theme, c *widget.Clickable, label string, selected bool) layout.Widget {
 	return func(gtx layout.Context) layout.Dimensions {
-		b := material.Button(th, c, label)
-		b.Inset = layout.Inset{Top: unit.Dp(6), Bottom: unit.Dp(6), Left: unit.Dp(12), Right: unit.Dp(12)}
+		b := newButton(th, c, label)
+		b.Inset.Top, b.Inset.Bottom = unit.Dp(3), unit.Dp(3) // a tab sits lower than a button
 		if !selected {
 			b.Background = pal.tabBg
 			b.Color = th.Fg
@@ -40,10 +48,10 @@ func rule(th *material.Theme) layout.Widget {
 	}
 }
 
-// button is a plain material button with a little space after it.
+// button is a newButton with a little space after it.
 func button(th *material.Theme, c *widget.Clickable, label string) layout.FlexChild {
 	return layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-		return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, material.Button(th, c, label).Layout)
+		return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, newButton(th, c, label).Layout)
 	})
 }
 

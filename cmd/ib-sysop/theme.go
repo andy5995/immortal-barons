@@ -29,8 +29,8 @@ var themeModes = [...]struct {
 //	dim       6.3     7.0
 //	border    3.5     3.9   input boxes (3:1 for a UI component)
 //	fg/tabBg 17.1    10.1   an unselected tab's label on its fill
-//	contrast  6.9     8.5   contrastFg on contrastBg: the selected tab, buttons
-//	                         contrastBg on bg: 6.9 / 6.7, the checkbox mark
+//	contrast  6.6    15.0   contrastFg on contrastBg: the selected tab, buttons
+//	                         contrastBg on bg: 6.6 / 12.0, the checkbox mark
 //
 // rule is a decorative separator and is left faint on purpose.
 type palette struct {
@@ -45,13 +45,13 @@ func rgb(v uint32) color.NRGBA {
 var (
 	lightPalette = palette{
 		bg: rgb(0xffffff), fg: rgb(0x000000),
-		contrastBg: rgb(0x3f51b5), contrastFg: rgb(0xffffff),
+		contrastBg: rgb(0xb71c1c), contrastFg: rgb(0xffffff),
 		err: rgb(0xb01010), dim: rgb(0x606060), rule: rgb(0xc8c8c8),
 		border: rgb(0x8a8a8a), tabBg: rgb(0xe8e8e8),
 	}
 	darkPalette = palette{
 		bg: rgb(0x1e1e1e), fg: rgb(0xe6e6e6),
-		contrastBg: rgb(0x8c9eff), contrastFg: rgb(0x000000),
+		contrastBg: rgb(0xfdd835), contrastFg: rgb(0x000000),
 		err: rgb(0xff7b7b), dim: rgb(0xa8a8a8), rule: rgb(0x4a4a4a),
 		border: rgb(0x7a7a7a), tabBg: rgb(0x333333),
 	}

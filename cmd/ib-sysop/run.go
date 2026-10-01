@@ -222,13 +222,13 @@ func (r *runView) layout(gtx layout.Context) layout.Dimensions {
 					if busy {
 						gtx = gtx.Disabled()
 					}
-					return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, material.Button(th, &r.runBtn, "Run "+sel.Flag).Layout)
+					return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, newButton(th, &r.runBtn, "Run "+sel.Flag).Layout)
 				}),
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if !busy {
 						gtx = gtx.Disabled()
 					}
-					return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, material.Button(th, &r.stopBtn, "Stop").Layout)
+					return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, newButton(th, &r.stopBtn, "Stop").Layout)
 				}),
 				button(th, &r.copyBtn, "Copy log"),
 				button(th, &r.clearBtn, "Clear log"),

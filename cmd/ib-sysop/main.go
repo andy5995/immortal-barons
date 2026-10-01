@@ -287,7 +287,7 @@ func (u *ui) tabBar(gtx layout.Context) layout.Dimensions {
 						b := material.Button(u.th, &t.closeBtn, "×")
 						b.Background = color.NRGBA{A: 0}
 						b.Color = u.th.Fg
-						b.Inset = layout.UniformInset(unit.Dp(6))
+						b.Inset = layout.UniformInset(unit.Dp(3))
 						return b.Layout(gtx)
 					}),
 				)
@@ -305,7 +305,7 @@ func (u *ui) tabBar(gtx layout.Context) layout.Dimensions {
 			if u.zoom <= zoomSteps[0] {
 				gtx = gtx.Disabled()
 			}
-			return layout.Inset{Right: unit.Dp(4)}.Layout(gtx, material.Button(u.th, &u.zoomOut, "A−").Layout)
+			return layout.Inset{Right: unit.Dp(4)}.Layout(gtx, newButton(u.th, &u.zoomOut, "A−").Layout)
 		}),
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			l := material.Body2(u.th, fmt.Sprintf("%d%%", int(u.zoom*100+0.5)))
@@ -315,7 +315,7 @@ func (u *ui) tabBar(gtx layout.Context) layout.Dimensions {
 			if u.zoom >= zoomSteps[len(zoomSteps)-1] {
 				gtx = gtx.Disabled()
 			}
-			return material.Button(u.th, &u.zoomIn, "A+").Layout(gtx)
+			return newButton(u.th, &u.zoomIn, "A+").Layout(gtx)
 		}),
 		layout.Rigid(layout.Spacer{Width: unit.Dp(12)}.Layout),
 	)
