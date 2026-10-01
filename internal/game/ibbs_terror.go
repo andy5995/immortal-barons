@@ -12,9 +12,8 @@ import (
 // damage each type does when its agents get through.
 
 // TerrorOpType identifies which sub-operation was launched from the Terrorist
-// Ops submenu. All nine types have the same mechanical effect (each agent
-// destroys 1/TerrorUnitLossDenom of one random unit type), but BRE carries the
-// type in the packet so the result report can name it.
+// Ops submenu. The packet carries it and the target board dispatches on it:
+// each op lands on its own holding (applyTerrorOp).
 type TerrorOpType int
 
 const (
@@ -84,27 +83,30 @@ type RemoteTerror struct {
 // agents (deducted now). op is the sub-operation type from the Terrorist Ops
 // submenu, and it decides what lands: the target board dispatches on it as the
 // original does. It resolves on the target board's next packet run.
-func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int, op TerrorOpType) error {
+//
+// A request larger than TerrorAgentsSendable is clamped to it, and the count
+// actually sent is returned. The menu never asks for more than that, but agents
+// can still fall while the prompt is open: an arriving Bomb Intelligence is
+// resolved whenever packets are processed. Only a send of nothing is refused.
+func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int, op TerrorOpType) (int, error) {
 	// EACH AGENT IS ONE OPERATION. It pays its own share of the fee and takes its
 	// own slot out of the day's allowance, which is what the original's prompt
 	// counts down: `Send how many? (1; 15)` becomes `(1; 7)` after eight go out.
 	// IB charged one fee for any number of agents and counted the send as a
 	// single op until 2026-09-05.
 	if agents < 1 {
-		return ErrNoAgents
+		return 0, ErrNoAgents
 	}
-	if !w.CanTerrorOp(e) {
-		return ErrTerrorOpsExhausted
+	switch {
+	case w.Config.MaxTerrorOps > 0 && w.TerrorOpsLeft(e) < 1:
+		return 0, ErrTerrorOpsExhausted
+	case e.Agents < 1:
+		return 0, ErrNoAgents
 	}
-	if left := w.TerrorOpsLeft(e); left > 0 && agents > left {
-		return ErrTerrorOpsExhausted
-	}
-	if e.Agents < agents {
-		return ErrNoAgents
-	}
+	agents = min(agents, w.TerrorAgentsSendable(e))
 	cost := w.TerrorOpGoldCost(e, agents)
 	if e.Gold < cost {
-		return ErrCantAfford
+		return 0, ErrCantAfford
 	}
 	e.Gold -= cost
 	e.Agents -= agents
@@ -131,12 +133,13 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 	})
 	p := w.outboxFor(targetBoard)
 	p.Terrors = append(p.Terrors, t)
-	return nil
+	return agents, nil
 }
 
-// resolveRemoteTerror applies a terror op on this board: a protected target is
-// untouched (the op fails); otherwise it destroys TerrorTrooperKill troopers per
-// committed agent, capped at the target's troopers.
+// resolveRemoteTerror applies a terror op on this board. A protected target is
+// untouched and told nothing; otherwise each committed agent is rolled against
+// the target's covert strength and, if it gets through, does what its
+// operation does (applyTerrorOp).
 func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	res := AttackResult{ID: t.ID, TargetBoard: w.Config.BoardID, TargetEmpire: t.TargetEmpire, Kind: "terror"}
 	target := w.remoteTarget(t.TargetEmpire)
@@ -147,8 +150,10 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 		return res
 	}
 	res.TargetEmpire = target.Name
+	// BINARY-VERIFIED: the original tests protection (BRE.OVR 0x04a96b +0x373)
+	// and jumps straight to writing the sender's result, filing nothing for the
+	// target. IB told the target which board had tried until 2026-10-01.
 	if target.Protection > 0 {
-		target.addEvent(fmt.Sprintf("Terrorists from %s were stopped by your New Realm Protection.", t.FromBoard))
 		res.Outcome = OutcomeProtected
 		return res
 	}
@@ -173,6 +178,17 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 		}
 		if w.applyTerrorOp(t.Op, target) {
 			hit++
+		}
+		// The first spy that gets in ends the mission. BINARY-VERIFIED: the
+		// resolver writes the spy report and returns at once (BRE.OVR 0x04a96b
+		// +0x560), so the agents after it are never rolled, and the lines
+		// below — the caught count and the per-operation line — are never
+		// filed. The target of a spy that got in is told nothing at all.
+		if t.Op == TerrorOpSpy {
+			res.Report = terrorOpReport(t.Op, target.Name, t.Agents, hit, caught)
+			res.Won = true
+			res.Outcome = OutcomeWon
+			return res
 		}
 	}
 	// A terror op is reported on the two recaps and nowhere else: the original's
@@ -293,7 +309,7 @@ func (w *World) resolveLegacyTerror(t RemoteTerror, target *Empire, res AttackRe
 
 // applyTerrorOp lands one agent's operation on target and reports whether it
 // changed anything. Send Spy costs the target nothing, so it always "lands":
-// what it takes is intelligence, carried home in the result's report.
+// what it takes is intelligence, carried home beside the result.
 func (w *World) applyTerrorOp(op TerrorOpType, target *Empire) bool {
 	if band, ok := TerrorOpLosses[op]; ok {
 		field := terrorOpField(op, target)
@@ -433,7 +449,11 @@ func terrorOpReport(op TerrorOpType, target string, sent, hit, caught int) strin
 		fmt.Sprintf("Your agent %s.", deed),
 		fmt.Sprintf("One of your agents %s.", deed),
 		fmt.Sprintf("Your agents %s %d times.", deed, hit))
+	// A spy batch stops at the first agent in, so the rest never went anywhere.
 	wasted := sent - hit - caught
+	if op == TerrorOpSpy {
+		wasted = 0
+	}
 	tally(wasted,
 		"Your agent got through and found nothing left to damage.",
 		"One of your agents got through and found nothing left to damage.",

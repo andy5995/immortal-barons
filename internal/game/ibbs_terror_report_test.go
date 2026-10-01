@@ -53,7 +53,7 @@ func TestTerrorOpPostsNoNewsOnEitherBoard(t *testing.T) {
 		target := wB.AddHuman("victim", "Victim")
 		target.Protection, target.Morale, target.Agents = 0, 100, 1_000
 
-		if err := wA.SendTerror(sender, "boardB", "Victim", 6, TerrorOpDemoralize); err != nil {
+		if _, err := wA.SendTerror(sender, "boardB", "Victim", 6, TerrorOpDemoralize); err != nil {
 			t.Fatalf("SendTerror: %v", err)
 		}
 		newsA, newsB := len(wA.NewsToday), len(wB.NewsToday)
@@ -113,4 +113,63 @@ func TestTerrorCaughtBatchIsNotAlsoTheAchievedNothingLine(t *testing.T) {
 		return
 	}
 	t.Fatal("no seed produced an all-caught batch; the test proves nothing")
+}
+
+// A realm under New Realm Protection is told nothing about a terror op aimed at
+// it: the original jumps from the protection test straight to the sender's
+// result (BRE.OVR 0x04a96b +0x37c). IB named the sending board until 2026-10-01.
+func TestProtectedTerrorTargetIsToldNothing(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.BoardID = "boardB"
+	w := NewWorldSeed(cfg, 1)
+	target := w.AddHuman("victim", "Victim")
+	target.Protection = 3
+	before := len(target.Events)
+	res := w.resolveRemoteTerror(RemoteTerror{
+		ID: 1, FromBoard: "boardA", FromEmpire: "Selby", TargetEmpire: "Victim",
+		Agents: 4, Op: TerrorOpDemoralize, Strength: 1_000_000,
+	})
+	if res.Outcome != OutcomeProtected {
+		t.Fatalf("outcome = %v, want protected", res.Outcome)
+	}
+	if got := target.Events[before:]; len(got) != 0 {
+		t.Errorf("the protected target was told: %v", got)
+	}
+}
+
+// The first spy that gets in ends the mission, and the realm it got into is
+// told nothing — not the spy, and not the agents caught before it. The
+// original writes the spy report and returns (BRE.OVR 0x04a96b +0x560),
+// before the caught count and the per-operation line are filed. Seed
+// independent: every seed that lands a spy must show it.
+func TestASpyThatGetsInEndsTheBatchUnseen(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.BoardID = "boardB"
+	landed := 0
+	for seed := int64(1); seed <= 8; seed++ {
+		w := NewWorldSeed(cfg, seed)
+		target := w.AddHuman("victim", "Victim")
+		target.Protection, target.Agents = 0, 0
+		before := len(target.Events)
+		res := w.resolveRemoteTerror(RemoteTerror{
+			ID: 1, FromBoard: "boardA", FromEmpire: "Selby", TargetEmpire: "Victim",
+			Agents: 5, Op: TerrorOpSpy, Strength: 1_000_000,
+		})
+		if !res.Won {
+			continue
+		}
+		landed++
+		if got := target.Events[before:]; len(got) != 0 {
+			t.Errorf("seed %d: the target of a spy that got in was told: %v", seed, got)
+		}
+		if strings.Contains(res.Report, "nothing left to damage") || strings.Contains(res.Report, "times") {
+			t.Errorf("seed %d: the report counts agents that never went in: %q", seed, res.Report)
+		}
+		if !strings.Contains(res.Report, "One of your agents went through their files.") {
+			t.Errorf("seed %d: report = %q, want one spy in", seed, res.Report)
+		}
+	}
+	if landed == 0 {
+		t.Fatal("no seed landed a spy; the test proves nothing")
+	}
 }

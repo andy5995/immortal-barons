@@ -46,24 +46,22 @@ func (w *World) AttackGoldCost(e *Empire, f AttackForce) int64 {
 	return cost
 }
 
-// TerrorOpGoldRate is what ONE agent on a terrorist op costs e, before the
-// count: BRE prices it off the launcher's own realm, scaled by the league's
-// Terrorism Costs level. The rate climbs as a realm buys land (stopping large
-// empires from spamming ops for free) and as more ops go out that day.
+// TerrorOpGoldRate is what ONE agent on a terrorist op costs e, the figure the
+// InterPlanetary menu prints beside the item. It climbs as a realm buys land
+// (stopping large empires from spamming ops for free) and as more ops go out
+// that day.
 //
-// BINARY-VERIFIED formula (ovr_02aca8_entry_0000, BRE.OVR):
+// DELIBERATE DIVERGENCE: it is the one-agent charge, so the menu and the bill
+// always agree. The original quotes from a separate routine
+// (ovr_02aca8_entry_0000, BRE.OVR) in integer arithmetic, clamping the day's
+// count to 1..100 first:
 //
-//	capped := clamp(terrorOpsToday, 1, 100)
-//	rate   := (capped + 63) * totalRegions * configMult
+//	quote := (clamp(opsToday, 1, 100) + 63) × totalRegions, then ×1 / ×0 / ÷5 / ×3
 //
-// Each op raises the per-region rate by 1, up to 163 at the cap of 100. This is
-// the figure the InterPlanetary menu quotes beside the item.
-//
-// DELIBERATE DIVERGENCE, and a one-line one: the original clamps `opsToday` up
-// to 1 HERE and not in the charge, so on the day's first operation it quotes 64
-// a region and then takes 63. IB drops the clamp so the two agree. It is visible
-// once a day per player, nobody pays differently, and the screen stops
-// contradicting the receipt. The upper clamp is the original's and stays.
+// while the charge (below) clamps nothing. So the original advertises the
+// day's first op at 64 a region and bills 63, stops advertising a rise past
+// the hundredth op while the bill keeps climbing, and on Low or High can quote
+// a gold piece off the Real48 bill. IB quotes the bill.
 //
 // No ceiling: BRE clamps the attack price at AttackCostCap, and nothing in
 // the terrorist pricing routine does the same.
@@ -71,30 +69,42 @@ func (w *World) TerrorOpGoldRate(e *Empire) int64 {
 	return w.TerrorOpGoldCost(e, 1)
 }
 
-// TerrorOpGoldCost is what sending agents costs: the rate times the count. Each
-// agent is one operation — it pays its own way and takes its own slot out of the
-// day's allowance — which is why the original's prompt counts DOWN the allowance
-// rather than the agents held.
+// TerrorOpGoldCost is what sending agents costs. Each agent is one operation —
+// it pays its own way and takes its own slot out of the day's allowance —
+// which is why the original's prompt counts DOWN the allowance rather than the
+// agents held.
 //
-// CAPTURE-VERIFIED against `cap/eots-ibbs-02.cap`, four sends whose charges the
-// formula reproduces to the gold:
+// BINARY-VERIFIED (ovr_02aca8_proc_00e5, BRE.OVR 0x2ad8d, called by
+// launch_terrorist_operation with the day's count, 0 and the agents sent):
+//
+//	charge := trunc(totalRegions / 100 × (opsToday + 63) × agents × levelPct)
+//
+// in Real48, left to right, each step rounded to the runtime's 40 bits; the
+// routine computes the same product for 0 agents and subtracts it, which adds
+// nothing. opsToday is NOT clamped here, at either end. The level is a percent
+// (CostLevel*Pct). Because the regions are divided before anything is
+// multiplied, the bill can differ by a gold piece from the exact product:
+// 8,957 regions at High is 1,692,872 for one agent, where the arithmetic says
+// 1,692,873. IB floored a per-agent rate and multiplied it by the count until
+// 2026-10-01, which on Low under-billed a large send by up to a gold piece per
+// agent.
+//
+// CAPTURE-VERIFIED against `cap/eots-ibbs-02.cap`, four sends whose charges
+// this reproduces to the gold:
 //
 //	8 agents, 0 ops used, 8,957 regions -> 4,514,328
 //	7 agents, 8 ops used, 8,957 regions -> 4,451,629
 //	7 agents, 0 ops used, 6,835 regions -> 3,014,235
 //	8 agents, 7 ops used, 6,835 regions -> 3,827,600
-//
-// Note the first send of a day: the QUOTED rate clamps opsToday up to 1 and so
-// shows 64 per region, while the charge uses the unclamped 63. The two agree
-// from the second op onward. IB follows the capture — the charge is what a
-// player can check — and quotes the clamped rate on the menu as the original
-// does.
 func (w *World) TerrorOpGoldCost(e *Empire, agents int) int64 {
-	ops := int64(e.TerrorOpsToday)
-	if ops > 100 {
-		ops = 100
+	pct := int64(w.Config.TerrorCosts.CostPercent())
+	if pct == 0 || agents <= 0 || e.Land <= 0 {
+		return 0
 	}
-	rate := (ops + TerrorOpGoldPerRegion - 1) * int64(e.Land)
-	rate = rate * int64(w.Config.TerrorCosts.CostPercent()) / 100
-	return rate * int64(agents)
+	perRegion := int64(e.TerrorOpsToday) + TerrorOpGoldPerRegion
+	x := r48Div(r48Int(int64(e.Land)), r48Int(100))
+	x = r48Mul(x, r48Int(perRegion))
+	x = r48Mul(x, r48Int(int64(agents)))
+	x = r48Mul(x, r48Int(pct))
+	return r48Trunc(x)
 }

@@ -68,15 +68,27 @@ func (w *World) CanTerrorOp(e *Empire) bool {
 }
 
 // TerrorOpsLeft is how many agents may still go out on terrorist operations
-// today, since each agent is one operation. It is what the original's prompt
-// offers as its maximum — `Send how many? (1; 15)`, then `(1; 7)` once eight
-// have gone. Zero or less from the config means no cap, and reports 0 for "no
+// today, since each agent is one operation: fifteen, then seven once eight have
+// gone. It is one of the bounds TerrorAgentsSendable folds into the prompt's
+// maximum. Zero or less from the config means no cap, and reports 0 for "no
 // limit to show"; callers test the cap with CanTerrorOp first.
 func (w *World) TerrorOpsLeft(e *Empire) int {
 	if w.Config.MaxTerrorOps <= 0 {
 		return 0
 	}
 	return max(w.Config.MaxTerrorOps-e.TerrorOpsToday, 0)
+}
+
+// TerrorAgentsSendable is the most agents one Terrorist Ops send may commit
+// now: the agents held, the day's remaining allowance where there is a cap,
+// and TerrorAgentsPerSendMax. Gold is left out on purpose: a baron short of it
+// is offered the bank after choosing the count, as everywhere else in IB.
+func (w *World) TerrorAgentsSendable(e *Empire) int {
+	n := min(e.Agents, TerrorAgentsPerSendMax)
+	if w.Config.MaxTerrorOps > 0 {
+		n = min(n, w.TerrorOpsLeft(e))
+	}
+	return max(n, 0)
 }
 
 func (w *World) CanBombingOp(e *Empire) bool {

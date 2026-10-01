@@ -1452,10 +1452,12 @@ one term still unpinned are in `docs/mechanics-reference.md`.
 
 **The 64 is the Medium figure — the sysop's `Terrorist Costs` knob scales it.**
 Set to **High**, a 15-region realm was quoted **2,880**, which is
-`15 × 64 × 3`. So the multiplier is a preset factor and 64 is its Medium value;
-`×3` for High is one sample and the Low / None factors were not measured, so
-**UNVERIFIED** beyond that. This is the opposite of the local covert fees, which
-the same experiment proved do not move at all (see Covert Operations).
+`15 × 64 × 3`. So the multiplier is a preset factor and 64 is its Medium value.
+The full spread is binary-verified: `launch_terrorist_operation__charge`
+(`BRE.OVR` `0x2ad8d`, the pricing at `0x2ad9f`) states it as literal percents,
+100 / 0 / 20 / 300 for Medium / None / Low / High (`CostLevel*Pct`). This is the
+opposite of the local covert fees, which the same experiment proved do not move
+at all (see Covert Operations).
 
 Colors, from `cap/eots-ibbs-01.cap`: the rule is `33` yellow with the brackets
 `1;33` bright yellow and the title `1;37` bright white; each item is a `33`
@@ -1625,6 +1627,16 @@ Self-Destruct, as the original leaves them to.
 numbered operations and a Quit, in this order, and **no price column** — the cost
 is quoted once on the parent menu beside the item, not per operation, which is
 where it differs from Special Operations below.
+
+It is drawn AFTER the target is chosen (`cap/eots-ibbs-02.cap`, ~line 5895):
+`Enter Planet Name or Number`, the baron list, then this menu, which comes back
+after each send against the same baron — `Send how many? (1; 15)`, `This will
+cost you N gold.  Accept? (Y/n)`, `N agents sent out.`, menu, `(1; 7)` — and
+closes once the day's fifteen are gone. IB matches the order (see the spec's
+terrorist-op price section for the routine and the one gold divergence). It
+diverges at the baron prompt on purpose: a baron the last scores had under
+protection is refused there, which the original never does (see the spec's
+"Protection crosses the league").
 
 ```
 ────[Terrorist Ops]────

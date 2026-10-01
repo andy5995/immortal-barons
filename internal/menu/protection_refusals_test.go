@@ -91,7 +91,7 @@ func TestInterPlanetaryItemsRefuseAShieldedCaller(t *testing.T) {
 		{"Create Group Attack", createGroupAttack, "planet"},
 		{"Indiv. Attack Force", indivAttackForce, "planet"},
 		{"Send SpyGuy", sendSpyGuy, "gold per day"},
-		{"Terrorist Ops", terrorOp(game.TerrorOpSpy), "agents"},
+		{"Terrorist Ops", terroristOps(BuildMenus().TerrorOps), "Terrorize which planet?"},
 		{"Special Operations", ipSpecialOp(game.OpBombFood), "Bombers"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

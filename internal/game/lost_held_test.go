@@ -112,7 +112,7 @@ func TestLostTerrorOpPausesWhileHeld(t *testing.T) {
 	w := NewWorldSeed(cfg, 1)
 	e := w.AddHuman("alice", "Alethia")
 	e.Agents = 20
-	if err := w.SendTerror(e, "faraway", "Rome", 5, TerrorOpDemoralize); err != nil {
+	if _, err := w.SendTerror(e, "faraway", "Rome", 5, TerrorOpDemoralize); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	if got := recoveryDay(t, w, "faraway", 0, 4, 40); got != 7 {

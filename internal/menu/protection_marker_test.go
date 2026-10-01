@@ -111,7 +111,7 @@ func TestProtectedRemoteBaronIsListedAndRefused(t *testing.T) {
 	// "?4\r" names The Eclipse by its roster number, then "B" picks the protected
 	// baron off the lettered baron list.
 	f := &fakeSession{keys: []rune("?4\rB")}
-	doTerrorOp(f, w, game.TerrorOpSpy)
+	runTerrorOps(f, w)
 	plain := stripANSI(f.out.String())
 
 	if !strings.Contains(plain, "Terrorize which baron?") {
@@ -178,7 +178,7 @@ func TestInterplanetarySpyingIsRefusedOnAProtectedBaron(t *testing.T) {
 		}})
 	})
 	f := &fakeSession{keys: []rune("1\r" + "A" + " ")}
-	doTerrorOp(f, w, game.TerrorOpSpy)
+	runTerrorOps(f, w)
 	out := stripANSI(f.out.String())
 
 	if !strings.Contains(out, "Fresh Realm") {

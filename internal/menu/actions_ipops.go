@@ -111,7 +111,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 //
 // The strike itself happens on the target's board when the packet lands, so the
 // screen promises a report rather than printing an outcome — the same shape as
-// Terrorist Ops above, and for the same reason.
+// Terrorist Ops below, and for the same reason.
 func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
 		if blockedByIPProtection(s, w) {
@@ -271,71 +271,111 @@ func signed(n int64) string {
 	return comma(n)
 }
 
-// terrorOp returns a handler that sends agents to perform a specific terror
-// sub-operation on an enemy baron on another planet. All nine sub-ops share the
-// same mechanical effect (each agent destroys 1/7 of a random unit type) but BRE
-// carries the op type in the packet so the result report can name it.
-func terrorOp(op game.TerrorOpType) Action {
+// terrorTarget is the realm the Terrorist Ops menu is aimed at.
+type terrorTarget struct{ board, baron string }
+
+// terroristOps is InterPlanetary item 2. It follows the original's order
+// (launch_terrorist_operation, BRE.OVR 0x2afbf; captured in
+// cap/eots-ibbs-02.cap): the refusals that need no target, then the planet,
+// then the baron, and only then the ops menu, which runs against that one
+// baron until the agents or the day's allowance are gone. Leaving the ops menu
+// goes back to the baron prompt on the same planet, and Enter there leaves.
+//
+// Gold is not among the up-front refusals, though the original's is: IB
+// offers the bank once the count is chosen, as it does everywhere else.
+func terroristOps(ops *Menu) Action {
 	return func(s session.Session, w *ctx) Result {
-		return doTerrorOp(s, w, op)
+		if blockedByIPProtection(s, w) {
+			return Stay
+		}
+		if w.Player().Agents < 1 {
+			fail(s, game.ErrNoAgents)
+			return Stay
+		}
+		var spent bool
+		w.Read(func() { spent = !w.CanTerrorOp(w.Player()) })
+		if spent {
+			fail(s, game.ErrTerrorOpsExhausted)
+			return Stay
+		}
+		board, barons := pickRemotePlanet(s, w, "Terrorize which planet?")
+		if board == "" {
+			return Stay
+		}
+		for terrorAgentsLeft(w) > 0 {
+			baron := pickRemoteBaronFrom(s, w.Term, barons, tr(s, "Terrorize which baron?"), protectedNoStrike)
+			if baron == "" {
+				return Stay
+			}
+			w.terror = terrorTarget{board: board, baron: baron}
+			err := Run(s, w, ops)
+			w.terror = terrorTarget{}
+			if err != nil {
+				session.End(err)
+			}
+		}
+		return Stay
 	}
 }
 
-// doTerrorOp is the shared implementation behind the Terrorist Ops submenu.
-// The strike is queued and resolves on the target board's next packet run; New
-// Realm Protection blocks it.
-func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
-	if blockedByIPProtection(s, w) {
-		return Stay
+// terrorAgentsLeft is what the Terrorist Ops menu can still send; it closes
+// the menu at zero, as the original's loop does (BRE.OVR 0x2afbf, the test
+// after each send).
+func terrorAgentsLeft(w *ctx) int {
+	p := w.Player()
+	if p == nil {
+		return 0
 	}
-	if w.Player().Agents < 1 {
-		fail(s, game.ErrNoAgents)
-		return Stay
+	return w.TerrorAgentsSendable(p)
+}
+
+// terrorOp is one item of the Terrorist Ops menu: send agents on op against
+// the baron terroristOps chose.
+func terrorOp(op game.TerrorOpType) Action {
+	return func(s session.Session, w *ctx) Result {
+		return sendTerrorOp(s, w, w.terror, op)
 	}
-	board, baron, _, found := pickRemoteTarget(s, w, "Terrorize which planet?", "Terrorize which baron?")
-	if !found {
-		return Stay
-	}
-	// Each agent is one operation, so the maximum the prompt offers is the day's
-	// remaining ALLOWANCE, not the agents held — the original counts it down,
-	// `(1; 15)` then `(1; 7)` after eight have gone. Whichever of the two runs
-	// out first bounds it.
-	most := w.Player().Agents
-	if left := w.TerrorOpsLeft(w.Player()); left > 0 && left < most {
-		most = left
-	}
+}
+
+// sendTerrorOp asks how many agents, confirms the price, and sends them. The
+// strike resolves on the target board's next packet run.
+func sendTerrorOp(s session.Session, w *ctx, t terrorTarget, op game.TerrorOpType) Result {
+	most := terrorAgentsLeft(w)
 	if most < 1 {
-		fail(s, game.ErrTerrorOpsExhausted)
-		return Stay
+		return Back
 	}
 	// The original's own wording for the three lines of a dispatch — the count,
 	// the price, and what went. They are prompts and labels rather than prose:
 	// short, functional, and dictated by what is being asked (see AGENTS.md on
-	// where that line falls).
-	agents := promptSuggested(s, "Send how many?", most, most)
+	// where that line falls). The suggested count is 1, as the original's
+	// number reader returns its lower bound on Enter (056d:01bf → 0851:0bd9).
+	agents := promptSuggested(s, "Send how many?", 1, most)
 	if agents <= 0 {
 		return Stay
 	}
-	// BRE prices the op on the menu itself and quotes the whole charge here too,
-	// since it climbs with the launcher's own region count and with the ops
-	// already sent today, and is easy to be surprised by.
+	// The whole charge is quoted only for two or more agents: the original
+	// sends a lone agent without asking (BRE.OVR 0x2afbf, unit ovr_02aca8
+	// +0x79f), its price being the one already on the InterPlanetary menu.
 	cost := w.TerrorOpGoldCost(w.Player(), agents)
-	if !askYesNoHere(s, fmt.Sprintf(tr(s, "This will cost you %s gold.  Accept?"), comma(cost)), true) {
+	if agents > 1 && !askYesNoHere(s, fmt.Sprintf(tr(s, "This will cost you %s gold.  Accept?"), comma(cost)), true) {
 		return Stay
 	}
-	// Accepted but short: the bank is opened here rather than the send simply
-	// being refused, and the refusal follows only if they come back no richer.
+	// Short: the bank is opened here rather than the send simply being
+	// refused, and the refusal follows only if they come back no richer.
 	if !affordOrBank(s, w, cost, game.ErrCantAfford) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		return w.World.SendTerror(p, board, baron, agents, op)
+		var err error
+		agents, err = w.World.SendTerror(p, t.board, t.baron, agents, op)
+		return err
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "%s %s sent out.", comma(agents), agentWord(s, agents))
+	// No pause: the original goes straight back to the ops menu (capture).
+	okNoPause(s, "%s %s sent out.", comma(agents), agentWord(s, agents))
 	return Stay
 }
 

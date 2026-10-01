@@ -30,7 +30,7 @@ func spyBoards(seed int64, targetAgents int) (wA, wB *World, sender, target *Emp
 // earlier, rides home in the same packet.
 func TestSendSpyRecapCarriesTheFigures(t *testing.T) {
 	wA, wB, sender, target := spyBoards(1, 0)
-	if err := wA.SendTerror(sender, "boardB", "Victim", 1, TerrorOpSpy); err != nil {
+	if _, err := wA.SendTerror(sender, "boardB", "Victim", 1, TerrorOpSpy); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	reply := wB.ApplyPacket(wA.Outbox[0])
@@ -60,7 +60,7 @@ func TestSendSpyRecapCarriesTheFigures(t *testing.T) {
 func TestCaughtSpyRecapHasNoFigures(t *testing.T) {
 	for seed := int64(1); seed <= 12; seed++ {
 		wA, wB, sender, _ := spyBoards(seed, 1_000_000)
-		if err := wA.SendTerror(sender, "boardB", "Victim", 1, TerrorOpSpy); err != nil {
+		if _, err := wA.SendTerror(sender, "boardB", "Victim", 1, TerrorOpSpy); err != nil {
 			t.Fatalf("SendTerror: %v", err)
 		}
 		reply := wB.ApplyPacket(wA.Outbox[0])
@@ -118,7 +118,7 @@ func TestOnlyASpyThatGotInSendsIntel(t *testing.T) {
 			target.Protection = 5
 		}
 		sender.Agents = 50
-		if err := wA.SendTerror(sender, "boardB", "Victim", 1, op); err != nil {
+		if _, err := wA.SendTerror(sender, "boardB", "Victim", 1, op); err != nil {
 			t.Fatalf("SendTerror: %v", err)
 		}
 		reply := wB.ApplyPacket(wA.Outbox[0])

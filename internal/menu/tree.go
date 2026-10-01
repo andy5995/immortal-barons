@@ -137,10 +137,8 @@ func BuildMenus() *Menus {
 	// file's rule constant rather than a house width.
 	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightRed, ExitOnEnter: true, Width: 38}
 	// BRE's Terrorist Ops submenu (IP Operations item '2') shows 9 named
-	// operations; all share the same mechanical effect (each agent destroys
-	// 1/7 of a random unit type) but BRE carries the op type in the packet
-	// so the result report can name it. Order, labels and hotkeys match the
-	// binary-verified string table.
+	// operations, each landing on its own holding (applyTerrorOp). Order,
+	// labels and hotkeys match the binary-verified string table.
 	// Width 23 from the capture (docs/dev/bre-screens.md): four rules, the title,
 	// four more. Sized to its own content, as the original sizes every box — the
 	// 62-column default is not a house width, it is this file's rule constant.
@@ -316,7 +314,7 @@ func BuildMenus() *Menus {
 				return w.TerrorOpGoldRate(p)
 			}
 			return 0
-		}), Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
+		}), Label: "Terrorist Ops", Do: terroristOps(terrorOps)},
 		{Key: '3', Label: "Trade", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: '4', Label: "Create Group Attack", Do: needsTurnPlayed(createGroupAttack)},
 		// Not wrapped in needsTurnPlayed: the table of forming parties is drawn
@@ -445,6 +443,9 @@ func BuildMenus() *Menus {
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	terrorOps.DefaultOnEnter = quitOnEnter(terrorOps)
+	// The menu is opened by terroristOps against one chosen baron, and closes
+	// on the send that leaves nothing to send, as the original's loop does.
+	terrorOps.ExitWhen = func(w *ctx) bool { return terrorAgentsLeft(w) < 1 }
 
 	trading.Items = []Item{
 		{Key: '1', Label: "Send Trade Deal", Do: sendTradeDeal},

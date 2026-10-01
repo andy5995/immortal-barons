@@ -509,6 +509,16 @@
       "confidence": "high",
       "evidence": ["binary_strings: missile, chemical, bomber, payload, target, and defense topics", "call_graph: Inter-BBS menu operation dispatching bombing helpers"]
     },
+    "0x02aca8": {
+      "name": "terrorist_operation_rate",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: clamps its int32 argument with max_i32(..,1) then min_i32(..,100), adds 63, multiplies by total_regions with mul_i32, then scales by Terrorism Costs (config +0x184): unchanged, zero, div_i32 by 5, or times 3", "call_graph: called by run_interbbs_menu for the price beside Terrorist Ops and by launch_terrorist_operation to refuse a launcher who cannot pay for one agent", "repository_docs: reproduces the four captured menu prices in docs/mechanics-reference.md"]
+    },
+    "0x02ad8d": {
+      "name": "launch_terrorist_operation__charge",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: in Real48, total_regions / 100 times (count + 63) times a quantity times the level percent (100, 0, 20 or 300 from config +0x184), computed for two quantities and the first subtracted from the second, then truncated", "call_graph: sole caller launch_terrorist_operation passes the day's count, 0 and the agents sent, both to quote the price and to deduct it from gold", "repository_docs: reproduces the four captured charges in cap/eots-ibbs-02.cap"]
+    },
     "0x02afbf": {
       "name": "launch_terrorist_operation",
       "confidence": "high",
@@ -1664,6 +1674,16 @@
       "name": "min_i32",
       "confidence": "high",
       "evidence": ["instruction_behavior: signed-compares two DX:AX arguments and returns the lesser int32", "call_graph: used for maintenance, economy, combat, trade, and spoil caps"]
+    },
+    "056d:01bf": {
+      "name": "read_bounded_number",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: wraps the digit-entry routine at 0851:0bd9 with a lower and an upper int32 bound; Enter on an empty field prints and returns the lower bound, '>' fills in the upper bound", "call_graph: every numeric prompt that shows a (low; high) hint, including Send how many? in launch_terrorist_operation and the attack force counts in configure_attack_forces", "repository_docs: the (0; MAX) and (1; 15) prompt hints in docs/dev/bre-screens.md"]
+    },
+    "0c03:1034": {
+      "name": "read_report_template",
+      "confidence": "medium",
+      "evidence": ["instruction_behavior: takes a file name, a section name and an index; opens the file, scans lines for the section header, then reads that section's lines into a buffer and returns the one the index selects", "call_graph: called by resolve_received_covert_operation with op-1 and the SINGLE_ or MULTI_ section of ipreport.dat, and by the news and report writers for attacks, bombings, the S3-Sabre, riots and civil war"]
     }
   },
   "blocks": {

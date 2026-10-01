@@ -385,6 +385,22 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 // trade deal (#195) — so the words are the parameters and the walk is not
 // written twice. Empty strings mean the player backed out.
 func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, refusal string) (board, baron string) {
+	board, barons := pickRemotePlanet(s, w, planetPrompt)
+	if board == "" {
+		return "", ""
+	}
+	baron = pickRemoteBaronFrom(s, w.Term, barons, tr(s, baronPrompt), refusal)
+	if baron == "" {
+		return "", ""
+	}
+	return board, baron
+}
+
+// pickRemotePlanet is the first half of that walk: the planet, and the barons
+// last reported on it. Terrorist Ops asks for the baron on its own again each
+// time its ops menu is left, as the original does, so it needs the halves
+// apart. An empty board means the player backed out or nobody is known there.
+func pickRemotePlanet(s session.Session, w *ctx, planetPrompt string) (board string, barons []remoteBaron) {
 	var boards []string
 	var scores map[string][]remoteBaron
 	w.Read(func() {
@@ -395,22 +411,18 @@ func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, ref
 		}
 	})
 	if noScoredPlanets(s, len(boards)) {
-		return "", ""
+		return "", nil
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, planetPrompt), ansi.Reset)
 	board = pickAddressee(s, w, boards)
 	if board == "" {
-		return "", ""
+		return "", nil
 	}
 	if len(scores[board]) == 0 {
 		ok(s, "No barons are known on that planet yet.")
-		return "", ""
+		return "", nil
 	}
-	baron = pickRemoteBaronFrom(s, w.Term, scores[board], tr(s, baronPrompt), refusal)
-	if baron == "" {
-		return "", ""
-	}
-	return board, baron
+	return board, scores[board]
 }
 
 // pickRemoteTarget is pickRemoteBaronOn plus the chosen baron's imported score,

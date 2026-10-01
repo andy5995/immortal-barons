@@ -1382,7 +1382,8 @@ cost column, and the price scales with the launcher's **region count** and
 **daily op count**, rising as a realm buys land or launches more ops. The four
 menu readings below were all taken at opsToday ≤ 1, where the original's quote
 clamps the counter up to 1 and shows 64 per region; each additional op adds 1 per
-region, up to 163 at the cap of 100. Terrorism Costs scales the result:
+region, and the QUOTE stops at 163 at the cap of 100 (the charge does not stop;
+see below). Terrorism Costs scales the result:
 
 | Regions | × 64 | Price on the menu |
 | --- | --- | --- |
@@ -1410,6 +1411,7 @@ by `total_regions`:
 
 For opsToday ≤ 1 the per-region cost is 64 (matching the four captures above);
 each subsequent op raises it by 1, up to 163 at the cap of 100. BINARY-VERIFIED.
+That is the QUOTE. The charge is a different routine, below.
 
 **That figure is the rate for ONE AGENT, and each agent is one operation.** The
 send is charged `agents × rate` and spends `agents` out of the day's allowance,
@@ -1428,9 +1430,29 @@ Note the first send of a day: the QUOTED rate clamps `opsToday` up to 1 and show
 64 a region, while the charge uses the unclamped 63 (8 × 63 × 8,957 = 4,514,328,
 where 8 × 64 × 8,957 would be 4,585,984). The two agree from the second op on.
 
-IB charges it: `World.TerrorOpGoldRate` is the quoted rate, `TerrorOpGoldCost`
-multiplies it by the count, and `SendTerror` takes that and adds the count to
-`TerrorOpsToday`. Until 2026-09-05 IB charged ONE rate for any number of agents
+**The charge is worked in Real48 and clamps nothing — BINARY-VERIFIED.**
+`ovr_02aca8_proc_00e5` (`BRE.OVR 0x2ad8d`), called by the launcher with the
+day's count, 0 and the agents sent, computes
+
+	charge := trunc(totalRegions / 100 × (opsToday + 63) × agents × levelPct)
+
+left to right, each step rounded to the runtime's 40-bit significand, with the
+level as a percent (100 / 0 / 20 / 300); it subtracts the same product for 0
+agents, which adds nothing. `opsToday` is not clamped at either end, so past the
+hundredth op of a day the bill keeps climbing while the quote holds at 163. The
+early divide by 100 is why the bill can miss exact arithmetic by a gold piece:
+8,957 regions at High is billed 1,692,872 for one agent where the product is
+1,692,873. Of 4,000 random cases checked against `scripts/bre_real48.py`, 449
+differ from exact integer arithmetic. IB ports the rounding
+(`internal/game/real48.go`) and agrees with the Python port on all 4,000. The
+original truncates through a signed longint and would stop with a runtime error
+on a bill past 2,147,483,647; IB's money is 64-bit and bills it.
+
+IB charges it: `World.TerrorOpGoldCost` is the bill, `World.TerrorOpGoldRate`
+is the bill for one agent, and `SendTerror` takes the bill and adds the count
+to `TerrorOpsToday`. Until 2026-10-01 IB floored a per-agent rate and
+multiplied it by the count, clamping the count at 100 as the quote does; on Low
+that under-billed a large send by up to a gold piece per agent. Until 2026-09-05 IB charged ONE rate for any number of agents
 and counted a send as a single op, so fifteen agents cost what one did and the
 day's allowance was fifteen SENDS rather than fifteen agents.
 
@@ -1439,13 +1461,35 @@ against the cell's edge, `(2) Terrorist Ops       570,304`, the only item on tha
 menu carrying a figure. IB's cell sits two columns right of the original's, which
 is the engine's standing indent rather than anything about this item.
 
-**DELIBERATE DIVERGENCE on the day's first operation.** The original clamps
-`opsToday` up to 1 when it QUOTES and not when it charges, so the first op of a
-day is advertised at 64 a region and billed at 63. IB drops that clamp from the
-quote, so the menu shows 63 and the two agree. Nobody pays differently — the
-charge is untouched and is the capture-verified side — and the mismatch is
-visible once a day per player. The upper clamp at 100 is the original's and
-stays.
+**DELIBERATE DIVERGENCE: the menu quotes the one-agent bill.** The original
+quotes from its own integer routine, clamping `opsToday` to 1..100, and bills
+from the Real48 one, which clamps nothing. So the first op of a day is
+advertised at 64 a region and billed at 63, the advertised rate stops rising
+after the hundredth op while the bill does not, and on Low or High the two can
+differ by a rounding. IB quotes the bill, so the menu and the receipt always
+agree. Nobody pays differently — the charge is the capture-verified side. The
+upper clamp used to stay in IB's quote; it went on 2026-10-01, when the charge
+stopped clamping, since keeping it would have made the menu disagree with the
+bill on exactly the days it matters (100+ ops, reachable only with no daily
+cap).
+
+**The screen flow follows the original's — BINARY-VERIFIED and
+CAPTURE-VERIFIED** (`launch_terrorist_operation`, `BRE.OVR 0x2afbf`;
+`cap/eots-ibbs-02.cap`). Before any target is asked for, the launcher refuses
+when the day's allowance is used up (unit `ovr_02aca8` +0x372) and when one
+agent's price is more than the gold in hand (+0x336). It then asks for the
+planet, then the baron, and only then draws the Terrorist Ops menu, which it
+runs against that one baron send after send. `Send how many?` is bounded by
+`min(allowance left, agents, gold-affordable, 255)` (+0x3d1, +0x4c7, +0x725),
+the count being one byte of the 18-byte record; Enter answers 1, the number
+reader's lower bound (`056d:01bf`). The price is confirmed only for two or more
+agents (+0x79f); one agent goes at once. The menu closes when nothing is left
+to send, and Quit goes back to the baron prompt on the same planet, where Enter
+leaves. IB does all of this (`terroristOps`, `internal/menu/actions_ipops.go`)
+with one difference: gold is not an up-front refusal or part of the bound, and
+a baron short of it is offered the bank after choosing the count, as everywhere
+else in IB. IB asked for the operation first and the target per send until
+2026-10-01, always confirmed the price, and suggested the maximum.
 
 The four Special Operations entries price themselves on their own menu — see
 "Interplanetary Special Operations" below.
@@ -4836,6 +4880,13 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   spied on any more than it can be struck, so every target list flags it and
   refuses the pick, whatever the list is for. This paragraph claimed the
   opposite until 2026-08-26; no code ever did.
+
+  For terrorist ops this refusal is a **DELIBERATE DIVERGENCE** (Andy,
+  2026-10-01). The original's launcher (`launch_terrorist_operation`,
+  `BRE.OVR 0x02afbf`) and its target picker (`select_player`, `0x22a0c`) test
+  no protection, so a protected baron can be picked and sent at, and the
+  shield is found only when the agents arrive (`process_terrorist_report`).
+  IB refuses at the baron prompt, as its other strike lists do.
 - **The caller's own shield gates this menu too.** The InterPlanetary menu tests
   it on the same predicate the covert menu uses, at `BRE.OVR 0x020F88`, for
   digits 2, 3, 4, 6, 8 and 9 — Terrorist Ops, Send Trade Deal, Create Group
@@ -4936,7 +4987,14 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   - **Target:** if any agent was caught, one line counting them and naming the
     sending realm and planet (singular and plural forms); then, if any got
     through, one line for the operation — the `SINGLE_TERRORIST_HIT` form when
-    exactly one did, the `MULTI_` form counting them when more did.
+    exactly one did, the `MULTI_` form counting them when more did. Two cases
+    file nothing at all. A target under protection: the protection test
+    (+0x37c) jumps straight to the sender's result. And a Send Spy that got
+    in: the Send Spy branch writes the spy report and returns (+0x560), so the
+    first spy in ends the batch, the agents after it are never rolled, and
+    neither the caught line nor an operation line is filed. Until 2026-10-01
+    IB told a protected target which board had tried, and told a spied-on
+    realm that terrorists went through its files, and rolled every spy.
   - **Sender:** a `Date :` / `Target:` header naming the realm and planet, then
     the same two lines from the other side — the agents caught, counted and
     naming the realm they were caught in, and the `SINGLE_`/`MULTI_TERRORIST_REPORT`
@@ -6745,11 +6803,18 @@ checking IB against a capture:
   `(group attack)`; `AttackKind`'s zero value is `QuickStrike`, so the group
   case is tested first (`invasionReport`).
 - **The Terrorist Ops rate on the InterPlanetary menu matches what is charged.**
-  The original quotes the day's FIRST operation at 64 a region and then bills 63,
-  because it clamps its ops-today counter up to 1 when quoting and not when
-  charging. IB quotes 63. Nobody pays differently and every later op is identical;
-  see "A terrorist op costs `(opsToday + 63) × total regions` gold" for the
-  formula and the captures behind it.
+  The original quotes from an integer routine that clamps its ops-today counter
+  to 1..100 and bills from a Real48 one that clamps nothing, so it advertises
+  the day's FIRST operation at 64 a region and bills 63, stops advertising the
+  rise after the hundredth op, and can differ by a rounding on Low or High. IB
+  quotes the one-agent bill. Nobody pays differently; see "A terrorist op costs
+  `(opsToday + 63) × total regions` gold" for the formula and the captures
+  behind it.
+- **Terrorist Ops does not refuse or cap on gold before the count.** The
+  original refuses before asking for a target when one agent is unaffordable,
+  and bounds `Send how many?` by what the gold covers. IB bounds it by the
+  agents, the allowance and 255 only, and offers the bank after the count when
+  the gold falls short, as every other priced action in IB does.
 - **A one-line message is quoted without asking for a line range** (#244). The
   original asks `Quote Message?`, `First Line to Quote` and `Last Line to Quote`
   whatever the message's length; with one line the last two have one possible

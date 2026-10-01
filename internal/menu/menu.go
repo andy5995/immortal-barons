@@ -79,6 +79,11 @@ type ctx struct {
 	// each in-transit deal's turn, and run_player_turn's stage 1 calls it again
 	// when the turn now starting is in the set (BRE.EXE 0x3902-0x3936).
 	dealTurns map[int]bool
+	// terror is the realm the Terrorist Ops menu is aimed at while it is open.
+	// The original picks the planet and baron first and then runs its ops
+	// menu against them until the agents or the allowance run out, so the
+	// nine items share one target; terroristOps sets it and clears it.
+	terror terrorTarget
 	// noRealmPrefs backs ctx.prefs() when there is no active realm; see there.
 	noRealmPrefs *game.Prefs
 	// day is the date a bulletin file is written FOR. World.Today is

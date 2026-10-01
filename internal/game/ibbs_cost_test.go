@@ -82,8 +82,10 @@ func TestTerrorOpGoldCostByLevel(t *testing.T) {
 	}
 }
 
-// BINARY-VERIFIED: the QUOTED rate rises with each op launched that day.
-// capped = clamp(opsToday, 1, 100); rate = (capped + 63) * regions * configMult.
+// BINARY-VERIFIED: the rate rises by a gold piece a region with each op
+// launched that day, and nothing clamps the count — the charge routine adds 63
+// to it as it stands. (The original's QUOTE clamps it to 1..100; IB quotes the
+// charge, a recorded divergence.)
 func TestTerrorOpGoldCostByCounter(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.TerrorCosts = Medium
@@ -98,8 +100,8 @@ func TestTerrorOpGoldCostByCounter(t *testing.T) {
 		{0, 63_000},    // (0+63) * 1000 — the original quotes 64 here and charges 63
 		{1, 64_000},    // (1+63) * 1000
 		{2, 65_000},    // (2+63) * 1000
-		{100, 163_000}, // cap: (100+63) * 1000
-		{200, 163_000}, // clamped at 100
+		{100, 163_000}, // (100+63) * 1000
+		{200, 263_000}, // (200+63) * 1000: the charge has no ceiling
 	} {
 		e.TerrorOpsToday = tc.opsToday
 		if got := w.TerrorOpGoldRate(e); got != tc.want {
@@ -120,7 +122,7 @@ func TestSendTerrorChargesTheOp(t *testing.T) {
 
 	// Four agents at the first-op rate of 63 a region, Medium.
 	want := int64(4 * 1000 * 63)
-	if err := w.SendTerror(e, "faraway", "Rome", 4, TerrorOpSpy); err != nil {
+	if _, err := w.SendTerror(e, "faraway", "Rome", 4, TerrorOpSpy); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	if e.Gold != 1_000_000-want {
@@ -128,7 +130,7 @@ func TestSendTerrorChargesTheOp(t *testing.T) {
 	}
 
 	e.Gold = want - 1
-	if err := w.SendTerror(e, "faraway", "Rome", 4, TerrorOpSpy); err != ErrCantAfford {
+	if _, err := w.SendTerror(e, "faraway", "Rome", 4, TerrorOpSpy); err != ErrCantAfford {
 		t.Fatalf("a broke launcher: err = %v, want ErrCantAfford", err)
 	}
 	if e.Agents != 6 {
@@ -210,6 +212,36 @@ func TestTerrorOpChargesPerAgent(t *testing.T) {
 	}
 }
 
+// The charge is worked in the original's six-byte Real, regions divided by 100
+// first, and truncated. BINARY-VERIFIED (BRE.OVR 0x2ad8d); the expected figures
+// come from scripts/bre_real48.py, the port of BRE's own runtime, and are
+// golden literals. Two of them are not what exact arithmetic gives: High on
+// 8,957 regions loses a gold piece to rounding (exact: 1,692,873), and Low on
+// 7 regions keeps the fraction a per-agent floor would drop (IB billed 704).
+func TestTerrorOpChargeRoundsAsTheOriginal(t *testing.T) {
+	for _, tc := range []struct {
+		level                     Level
+		agents, opsToday, regions int
+		want                      int64
+	}{
+		{High, 1, 0, 8957, 1_692_872},
+		{Low, 8, 0, 7, 705},
+		{Low, 8, 0, 8957, 902_865},
+		{Low, 8, 7, 6835, 765_520},
+		{None, 8, 0, 8957, 0},
+	} {
+		cfg := DefaultConfig()
+		cfg.TerrorCosts = tc.level
+		w := NewWorldSeed(cfg, 1)
+		e := w.AddHuman("alice", "Alethia")
+		e.Land, e.TerrorOpsToday = tc.regions, tc.opsToday
+		if got := w.TerrorOpGoldCost(e, tc.agents); got != tc.want {
+			t.Errorf("%s, %d agents, %d ops used, %d regions: cost = %d, want %d",
+				tc.level, tc.agents, tc.opsToday, tc.regions, got, tc.want)
+		}
+	}
+}
+
 // And the allowance is counted in AGENTS, so eight sent out of fifteen leaves
 // seven — the number the original's next prompt offers.
 func TestTerrorOpAllowanceCountsAgents(t *testing.T) {
@@ -220,7 +252,7 @@ func TestTerrorOpAllowanceCountsAgents(t *testing.T) {
 	e.Land, e.Agents, e.Gold, e.Protection = 1000, 100, 100_000_000_000, 0
 	w.RemoteBoards = []RemoteBoard{{BoardID: "boardB"}}
 
-	if err := w.SendTerror(e, "boardB", "Victim", 8, TerrorOpDemoralize); err != nil {
+	if _, err := w.SendTerror(e, "boardB", "Victim", 8, TerrorOpDemoralize); err != nil {
 		t.Fatalf("send 8: %v", err)
 	}
 	if e.TerrorOpsToday != 8 {
@@ -229,13 +261,44 @@ func TestTerrorOpAllowanceCountsAgents(t *testing.T) {
 	if got := w.TerrorOpsLeft(e); got != 7 {
 		t.Errorf("allowance left = %d, want 7", got)
 	}
-	if err := w.SendTerror(e, "boardB", "Victim", 8, TerrorOpDemoralize); err != ErrTerrorOpsExhausted {
-		t.Errorf("eight more than the seven left: %v, want ErrTerrorOpsExhausted", err)
+	// Eight asked with seven left sends the seven.
+	if n, err := w.SendTerror(e, "boardB", "Victim", 8, TerrorOpDemoralize); err != nil || n != 7 {
+		t.Fatalf("eight asked with seven left: sent %d, %v; want 7 sent", n, err)
 	}
-	if err := w.SendTerror(e, "boardB", "Victim", 7, TerrorOpDemoralize); err != nil {
-		t.Fatalf("send the last 7: %v", err)
+	if _, err := w.SendTerror(e, "boardB", "Victim", 1, TerrorOpDemoralize); err != ErrTerrorOpsExhausted {
+		t.Errorf("a send with none left: %v, want ErrTerrorOpsExhausted", err)
 	}
 	if w.CanTerrorOp(e) {
 		t.Error("the day's allowance is spent; CanTerrorOp should be false")
+	}
+}
+
+// The engine clamps a send to what can go: at most TerrorAgentsPerSendMax at
+// once, and no more agents than are held, which can fall while the prompt is
+// open when an arriving Bomb Intelligence is processed.
+func TestSendTerrorClampsToWhatCanGo(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID, cfg.MaxTerrorOps = true, "boardA", 0
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alethia")
+	e.Land, e.Agents, e.Gold, e.Protection = 1000, 1000, 100_000_000_000, 0
+	w.RemoteBoards = []RemoteBoard{{BoardID: "boardB"}}
+
+	if n, err := w.SendTerror(e, "boardB", "Victim", 256, TerrorOpDemoralize); err != nil || n != 255 {
+		t.Errorf("256 asked: sent %d, %v; want 255", n, err)
+	}
+	if e.Agents != 1000-255 || e.TerrorOpsToday != 255 {
+		t.Errorf("after the capped send: agents %d, ops %d", e.Agents, e.TerrorOpsToday)
+	}
+	e.Agents = 3
+	gold, cost3 := e.Gold, w.TerrorOpGoldCost(e, 3)
+	if n, err := w.SendTerror(e, "boardB", "Victim", 5, TerrorOpDemoralize); err != nil || n != 3 {
+		t.Errorf("five asked with three held: sent %d, %v; want 3", n, err)
+	}
+	if e.Gold != gold-cost3 {
+		t.Errorf("charged %d, want the price of three agents, %d", gold-e.Gold, cost3)
+	}
+	if _, err := w.SendTerror(e, "boardB", "Victim", 1, TerrorOpDemoralize); err != ErrNoAgents {
+		t.Errorf("a send with no agents: %v, want ErrNoAgents", err)
 	}
 }

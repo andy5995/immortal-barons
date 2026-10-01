@@ -26,15 +26,15 @@ import "github.com/andy5995/immortal-barons/internal/session"
 // bands in game.TerrorOpLosses, written as the reader sees them rather than as
 // Base/Spread.
 var terrorOpTopics = []attackTypeTopic{
-	{name: "Send Spy", body: "Costs the target nothing and takes nothing from it. What it brings home is intelligence: the realm's forces and standing, filed in your Spy Database."},
-	{name: "Bomb Intelligence", body: "Destroys 2 to 4 percent of the target's covert agents, which is what it can send against you in return."},
-	{name: "Demoralize", body: "Cuts the target's military morale by a fixed fraction. Morale scales everything its army does, in attack and in defense."},
+	{name: "Send Spy", body: "Brings home a report on the target's land, gold, forces and morale, and files it in your Spy Database. The target loses nothing and is not told. The first spy who gets in ends the mission, so extra spies only raise the chance that one gets in."},
+	{name: "Bomb Intelligence", body: "Destroys 2 to 4 percent of the target's agents. Its agents defend it against your operations and carry out its own."},
+	{name: "Demoralize", body: "Lowers the target's military morale by one seventh. Morale affects how well its army attacks and defends."},
 	{name: "Cause Dissensions", body: "Destroys 2 to 4 percent of the target's troopers."},
-	{name: "Bomb AirBases", body: "Destroys 3 to 7 percent of the target's jets. The widest band of the unit strikes, and jets are the most expensive thing it can take."},
-	{name: "Stir Emigrations", body: "Drives off 4 to 10 percent of the target's population, which is its tax base and its food bill at once."},
-	{name: "Spread Propaganda", body: "Cuts the target's popular support by a fixed fraction. Low support costs it income and invites unrest."},
-	{name: "Bomb Food Stores", body: "Destroys anything from nothing at all to 29 percent of the target's food. The wildest of the operations: it can be wasted entirely or gut a season's stores."},
-	{name: "Sabotage HQ", body: "Knocks the target's HeadQuarters back. HQ is what makes its tanks worth more than three troopers each, so this weakens every tank it owns."},
+	{name: "Bomb AirBases", body: "Destroys 3 to 7 percent of the target's jets."},
+	{name: "Stir Emigrations", body: "Drives out 4 to 10 percent of the target's people. Its people pay its taxes and eat its food."},
+	{name: "Spread Propaganda", body: "Lowers the target's popular support by two parts in thirteen, about 15 percent."},
+	{name: "Bomb Food Stores", body: "Destroys from 0 to 29 percent of the target's food. No other operation varies as much: one agent can take nothing and the next almost a third."},
+	{name: "Sabotage HQ", body: "Sets the target's HeadQuarters back by 15 points of its 100. The HeadQuarters makes its tanks stronger, so this weakens every tank it has."},
 }
 
 // ipSpecialOpTopics documents the eight InterPlanetary Special Operations. All
