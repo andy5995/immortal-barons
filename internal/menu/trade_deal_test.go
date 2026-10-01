@@ -199,3 +199,32 @@ func TestTradeDealPromptTakesOnlyOfferedKeys(t *testing.T) {
 		t.Errorf("Y after the stray keys should accept: tanks %d, pending %d", p.Tanks, len(p.TradeDeals))
 	}
 }
+
+// Answering a deal answers the one on screen. With two deals pending from one
+// sender, the first by name can be one still in transit; accepting the deal
+// shown used to apply that one instead, which the player had never seen.
+func TestAcceptingAppliesTheDealShownNotTheSendersFirst(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	from := recipients(w)[0]
+	p.Tanks, p.Jets = 0, 0
+	p.TurnsLeft = w.Config.TurnsPerDay - 1 // turn 2 of the day
+	inTransit := game.TradeDeal{From: from.Name, Send: game.TradeBasket{Jets: 50}, ArrivesOnTurn: 5}
+	p.TradeDeals = []game.TradeDeal{
+		inTransit,
+		{From: from.Name, Send: game.TradeBasket{Tanks: 100}, ArrivesOnTurn: 1},
+	}
+
+	f := &fakeSession{keys: []rune("y ")}
+	reviewTradeDeals(f, w)
+
+	if !strings.Contains(f.out.String(), "Tanks") {
+		t.Fatalf("the landed deal should be put to the player, got:\n%s", f.out.String())
+	}
+	if p.Tanks != 100 || p.Jets != 0 {
+		t.Errorf("accepting should apply the deal shown: tanks %d (want 100), jets %d (want 0)", p.Tanks, p.Jets)
+	}
+	if len(p.TradeDeals) != 1 || p.TradeDeals[0] != inTransit {
+		t.Errorf("the deal in transit should still be pending, got %+v", p.TradeDeals)
+	}
+}

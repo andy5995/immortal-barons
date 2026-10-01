@@ -266,7 +266,7 @@ func tradeDealSpan(s session.Session, w *ctx, toName string, send game.TradeBask
 
 // reviewTradeDeals surfaces each pending trade deal to the player at turn start
 // (mirroring reviewTreatyOffers): what they'd receive vs give, with an Accept?
-// prompt. Accepting completes the barter; declining returns the sender's escrow.
+// prompt. Accepting completes the barter; declining forfeits the sender's escrow.
 func reviewTradeDeals(s session.Session, w *ctx) {
 	var deals []game.TradeDeal
 	withPlayer(w, func(p *game.Empire) {
@@ -304,14 +304,14 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		switch r {
 		case 'Y':
 			var aerr error
-			withPlayer(w, func(p *game.Empire) { aerr = w.World.AcceptTradeDeal(p, d.From) })
+			withPlayer(w, func(p *game.Empire) { aerr = w.World.AcceptTradeDeal(p, d) })
 			if aerr != nil {
 				fail(s, aerr)
 			} else {
 				ok(s, "Trade deal accepted.")
 			}
 		case 'N':
-			withPlayer(w, func(p *game.Empire) { w.World.DeclineTradeDeal(p, d.From) })
+			withPlayer(w, func(p *game.Empire) { w.World.DeclineTradeDeal(p, d) })
 		default:
 			// Ignore for now: leave the deal pending for a later turn.
 		}

@@ -39,7 +39,7 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 		t.Fatalf("recipient should have 1 pending deal, got %d", len(to.TradeDeals))
 	}
 
-	if err := w.AcceptTradeDeal(to, "Fromland"); err != nil {
+	if err := w.AcceptTradeDeal(to, to.TradeDeals[0]); err != nil {
 		t.Fatalf("accept: %v", err)
 	}
 	if to.Tanks != 100 || to.Gold != 95_000 {
@@ -96,7 +96,7 @@ func TestDeclineTradeDealForfeitsEscrow(t *testing.T) {
 	toGoldBefore := to.Gold
 
 	w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{Gold: 5_000}, TradeDealMinDays)
-	if !w.DeclineTradeDeal(to, "Fromland") {
+	if !w.DeclineTradeDeal(to, to.TradeDeals[0]) {
 		t.Fatal("decline should find and drop the deal")
 	}
 	if from.Tanks != 400 {
@@ -127,7 +127,7 @@ func TestAcceptTradeDealFailsWhenRecipientCantPay(t *testing.T) {
 	to.Gold = 100 // can't cover a 5,000 demand
 
 	w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{Gold: 5_000}, TradeDealMinDays)
-	if err := w.AcceptTradeDeal(to, "Fromland"); err != ErrCantAfford {
+	if err := w.AcceptTradeDeal(to, to.TradeDeals[0]); err != ErrCantAfford {
 		t.Fatalf("accept with too little gold should return ErrCantAfford, got %v", err)
 	}
 	if len(to.TradeDeals) != 1 || to.Tanks != 0 {
@@ -159,7 +159,7 @@ func TestAcceptTradeDealClampsGoldToMoneyCap(t *testing.T) {
 	to.Gold = w.MoneyCap() - 50
 
 	w.SendTradeDeal(from, to, TradeBasket{Gold: 1_000}, TradeBasket{}, TradeDealMinDays)
-	if err := w.AcceptTradeDeal(to, "Fromland"); err != nil {
+	if err := w.AcceptTradeDeal(to, to.TradeDeals[0]); err != nil {
 		t.Fatalf("accept: %v", err)
 	}
 	if to.Gold != w.MoneyCap() {
@@ -258,8 +258,8 @@ func TestTradeDealAnswersAreFiledOnTheProposersRecap(t *testing.T) {
 		answer func(w *World, to *Empire)
 		want   string
 	}{
-		{"accept", func(w *World, to *Empire) { w.AcceptTradeDeal(to, "Fromland") }, "Toland accepted your trade deal."},
-		{"decline", func(w *World, to *Empire) { w.DeclineTradeDeal(to, "Fromland") }, "Toland rejected your trade deal."},
+		{"accept", func(w *World, to *Empire) { w.AcceptTradeDeal(to, to.TradeDeals[0]) }, "Toland accepted your trade deal."},
+		{"decline", func(w *World, to *Empire) { w.DeclineTradeDeal(to, to.TradeDeals[0]) }, "Toland rejected your trade deal."},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			w := NewWorldSeed(DefaultConfig(), 1)

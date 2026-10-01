@@ -224,10 +224,14 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	return nil
 }
 
-// findDeal returns the index of the first pending deal on `to` from fromName, or -1.
-func findDeal(to *Empire, fromName string) int {
+// findDeal returns the index of the pending deal on `to` that is `want`, or -1.
+// The sender's name alone is not enough: one sender may have several deals
+// pending with the same realm, and the first by name can be one still in
+// transit that the player was never shown.
+func findDeal(to *Empire, want TradeDeal) int {
 	for i, d := range to.TradeDeals {
-		if d.From == fromName {
+		if d.From == want.From && d.Send == want.Send && d.Demand == want.Demand &&
+			d.Expires.Equal(want.Expires) && d.ArrivesOnTurn == want.ArrivesOnTurn {
 			return i
 		}
 	}
@@ -239,13 +243,13 @@ func (to *Empire) removeDeal(i int) {
 	to.TradeDeals = append(to.TradeDeals[:i], to.TradeDeals[i+1:]...)
 }
 
-// AcceptTradeDeal completes a pending deal from fromName: the recipient `to`
+// AcceptTradeDeal completes the pending deal `want`: the recipient `to`
 // receives the escrowed Send goods and pays the Demand goods to the (re-resolved)
 // sender. Fails if `to` can't cover the Demand, or the sender has vanished (its
 // escrow is then forfeit — the deal is dropped by the caller path). No-op-safe:
 // returns an error if there is no such pending deal.
-func (w *World) AcceptTradeDeal(to *Empire, fromName string) error {
-	i := findDeal(to, fromName)
+func (w *World) AcceptTradeDeal(to *Empire, want TradeDeal) error {
+	i := findDeal(to, want)
 	if i < 0 {
 		return fmt.Errorf("That trade deal is no longer available.")
 	}
@@ -253,7 +257,7 @@ func (w *World) AcceptTradeDeal(to *Empire, fromName string) error {
 	if !empireHasBasket(to, d.Demand) {
 		return ErrCantAfford
 	}
-	from := w.FindByName(fromName)
+	from := w.FindByName(d.From)
 	if from == nil {
 		// Sender gone: drop the deal; the escrow is forfeit.
 		to.removeDeal(i)
@@ -282,12 +286,12 @@ func notifyTrader(from, to *Empire, verb string) {
 // 0x97-byte record (`clear_trade_offer_record` at 0xDC4), and the whole of its
 // goods-moving code sits in the accept branch — nothing credits the sender back.
 // Sending is therefore a real bet on the answer, and IB used to return the goods.
-func (w *World) DeclineTradeDeal(to *Empire, fromName string) bool {
-	i := findDeal(to, fromName)
+func (w *World) DeclineTradeDeal(to *Empire, want TradeDeal) bool {
+	i := findDeal(to, want)
 	if i < 0 {
 		return false
 	}
-	if from := w.FindByName(fromName); from != nil {
+	if from := w.FindByName(want.From); from != nil {
 		notifyTrader(from, to, "rejected")
 	}
 	to.removeDeal(i)
