@@ -310,8 +310,9 @@ func TestSabreBackfireCostsTheFirerNothing(t *testing.T) {
 	sent := InFlightStrike{Kind: "special", Op: OpSabre, Owner: "firer",
 		TargetBoard: "Far", TargetEmpire: "Victim"}
 	// Report is what the TARGET's board composed and sent home, which is what the
-	// firer is shown; a result without one is the fallback case, below.
-	told := "Your S3-Sabre broke up over Victim and opened 3 Regions for them to settle."
+	// firer is shown as it stands; a result without one is the fallback case,
+	// below.
+	told := "Your S3-Sabre backfired on Victim of Far, expanding their territory by 3 regions."
 	w.applySpecialOpResult(sent, AttackResult{TargetBoard: "Far", TargetEmpire: "Victim",
 		Backfired: true, Report: told})
 
@@ -351,7 +352,7 @@ func TestSabreGarrisonStopsBeforeDamageOrBackfire(t *testing.T) {
 		d.SDI, d.Turrets, d.Tanks = 0, 0, 0
 		d.Troopers = 10 * 50_000 // 50,000 a region: every first roll is under
 		before := *d
-		_, outcome := w.sabreEffect(d, "Selby of Home", 5)
+		_, outcome, _ := w.sabreEffect(d, "Selby of Home", 5)
 		if outcome != specialGuarded {
 			continue
 		}
@@ -372,7 +373,7 @@ func TestSabreGarrisonStopsBeforeDamageOrBackfire(t *testing.T) {
 		w := NewWorldSeed(DefaultConfig(), seed)
 		d := w.AddHuman("victim", "Victim")
 		d.SDI, d.Troopers, d.Turrets, d.Tanks = 0, 0, 1_000_000_000, 1_000_000_000
-		if _, outcome := w.sabreEffect(d, "Selby of Home", 5); outcome == specialGuarded {
+		if _, outcome, _ := w.sabreEffect(d, "Selby of Home", 5); outcome == specialGuarded {
 			t.Fatalf("seed %d: turrets or tanks stopped an S3-Sabre", seed)
 		}
 	}

@@ -302,7 +302,7 @@ const (
 // make one call to the news writer, reached by every outcome past the realm
 // lookup, and pick a failure or a success line from ipreport.dat's
 // SPECIAL_OPERATIONS and BOMBING_HITS sections. IB posted "X struck Y" for
-// every outcome until #288, so a missile that broke up read as a hit here while
+// every outcome until #288, so a missile that backfired read as a hit here while
 // the firer's own report said it failed.
 func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	res := AttackResult{
@@ -311,7 +311,6 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 		TargetEmpire: op.TargetEmpire,
 		Kind:         string(op.Op),
 	}
-	label := SpecialOpLabel(op.Op)
 	from := fmt.Sprintf("%s of %s", op.FromEmpire, op.FromBoard)
 
 	// A planet op wrecks what the whole planet shares, so there is no realm to
@@ -326,7 +325,7 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 		res.Report = report
 		res.Won = outcome == specialHit
 		res.Outcome = planetOpOutcome(outcome)
-		w.postNews(planetOpNews(op.Op, from, outcome))
+		w.postNews(planetOpNews(op.Op, from, outcome, w.pickBomberDrivenOff))
 		return res
 	}
 
@@ -338,18 +337,22 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	res.TargetEmpire = target.Name
 	if target.Protection > 0 {
 		res.Outcome = OutcomeProtected
-		target.addEvent(fmt.Sprintf("A %s from %s broke on your New Realm Protection.", label, from))
-		w.postNews(fmt.Sprintf("%s's New Realm Protection turned aside a %s from %s.",
-			target.Name, label, op.FromBoard))
+		missile := missileNoun(op.Op)
+		target.addEvent(fmt.Sprintf("Your New Realm Protection turned aside a %s from %s.", missile, from))
+		w.postNews(fmt.Sprintf("%s's New Realm Protection turned aside the %s from %s.",
+			target.Name, missile, from))
 		return res
 	}
-	report, score, outcome := w.applySpecialOp(op.Op, target, from, op.Dial)
+	report, score, outcome, gained := w.applySpecialOp(op.Op, target, from, op.Dial)
 	res.Report = report
 	res.Score = score
 	res.Won = outcome == specialHit
 	res.Backfired = outcome == specialBackfire
 	res.Outcome = missileOutcome(outcome)
-	w.postNews(missileNews(label, from, target.Name, outcome))
+	// A misfire is the target's personal event alone; the planet hears nothing.
+	if line := missileNews(op.Op, from, target.Name, outcome, gained); line != "" {
+		w.postNews(line)
+	}
 	return res
 }
 
@@ -388,27 +391,46 @@ func planetOpOutcome(outcome specialOutcome) AttackOutcome {
 // one of its realms, worded by how it ended. The original has a failure and a
 // success form per missile, and appends a sentence naming the SDI to the
 // failure form when the shield was what stopped it; IB has one line per
-// outcome, and its own words.
+// outcome, and its own words. A misfire has none: the target reads it as a
+// personal event (stopArrivingMissile), and "" is returned.
 //
 // A backfire is the one place IB's line departs from the original's choice
 // rather than its wording: the original's receiver takes the success form for
 // it (the backfire is a row of the damage mapper, not a failure), so its planet
 // reads that the S3-Sabre struck. IB says what happened, which is what the
-// firer's report and the target's own recap already say.
-func missileNews(label, from, target string, outcome specialOutcome) string {
+// firer's report and the target's own recap already say. gained is the land a
+// backfire opened.
+func missileNews(op SpecialOp, from, target string, outcome specialOutcome, gained int) string {
+	missile := missileNoun(op)
 	switch outcome {
 	case specialMisfire:
-		return fmt.Sprintf("The %s from %s misfired on its way to %s.", label, from, target)
+		return ""
 	case specialIntercepted:
-		return fmt.Sprintf("%s's SDI shot down the %s from %s.", target, label, from)
+		return fmt.Sprintf("%s's SDI shot down the %s from %s.", target, missile, from)
 	case specialBackfire:
-		return fmt.Sprintf("The %s from %s broke up over %s.", label, from, target)
+		if gained <= 0 {
+			return fmt.Sprintf("The %s from %s backfired over %s.", missile, from, target)
+		}
+		return fmt.Sprintf("The %s from %s backfired, expanding %s's territory by %s.", missile, from, target, regionCount(gained))
 	case specialGuarded:
-		return fmt.Sprintf("The %s from %s was brought down over %s.", label, from, target)
+		return fmt.Sprintf("%s's defenses brought down the %s from %s.", target, missile, from)
 	case specialNothing:
-		return fmt.Sprintf("The %s from %s reached %s and did little harm.", label, from, target)
+		return fmt.Sprintf("The %s from %s barely scratched %s.", missile, from, target)
 	}
-	return fmt.Sprintf("The %s from %s hit %s.", label, from, target)
+	return fmt.Sprintf("The %s from %s hit %s.", missile, from, target)
+}
+
+// missileNoun is what the reports call a missile in flight. The menu labels
+// (Nuclear Assault, Chemical Bombing) name the operation, not the thing that
+// can misfire or be shot down.
+func missileNoun(op SpecialOp) string {
+	switch op {
+	case OpNuclear:
+		return "nuclear missile"
+	case OpChemical:
+		return "chemical missile"
+	}
+	return SpecialOpLabel(op)
 }
 
 // planetOpNews is the line this planet reads about a bombing op aimed at the
@@ -416,50 +438,41 @@ func missileNews(label, from, target string, outcome specialOutcome) string {
 // run that fails its landing roll names the realm that sent it, and each
 // operation has a success line of its own — but has no form for a run that
 // landed on nothing, because its receiver applies the percentage whatever is
-// there. IB says so, as its report home does.
-func planetOpNews(op SpecialOp, from string, outcome specialOutcome) string {
-	if outcome == specialDrivenOff {
-		return fmt.Sprintf("Bombers from %s were driven off before they reached %s.", from, planetOpObject(op, "the planet's"))
+// there. IB says so. A driven-off run reads a line picked from the bomber pool
+// by pick, which is drawn only for that outcome.
+func planetOpNews(op SpecialOp, from string, outcome specialOutcome, pick func() string) string {
+	switch outcome {
+	case specialDrivenOff:
+		return fill(pick(), "from", from, "target", planetOpObject(op))
+	case specialNothing:
+		return fmt.Sprintf("Bombers from %s found nothing to destroy on the planet.", from)
 	}
 	switch op {
 	case OpBombFood:
-		if outcome == specialHit {
-			return fmt.Sprintf("Bombers from %s hit the planet's food market.", from)
-		}
-		return fmt.Sprintf("Bombers from %s hit the planet's food market and found it bare.", from)
+		return fmt.Sprintf("Bombers from %s burned the planet's food market.", from)
 	case OpBombMarket:
-		if outcome == specialHit {
-			return fmt.Sprintf("Bombers from %s wrecked the planet's trading market.", from)
-		}
-		return fmt.Sprintf("Bombers from %s hit the planet's trading market and found nothing listed there.", from)
+		return fmt.Sprintf("Bombers from %s wrecked the planet's trading market.", from)
 	case OpBombRoutes:
-		if outcome == specialHit {
-			return fmt.Sprintf("Bombers from %s hit trade routes across the planet.", from)
-		}
-		return fmt.Sprintf("Bombers from %s found nothing moving on the planet's trade routes.", from)
+		return fmt.Sprintf("Bombers from %s hit trade routes across the planet.", from)
 	case OpUndermine:
-		if outcome == specialHit {
-			return fmt.Sprintf("Bombers from %s undermined investments across the planet.", from)
-		}
-		return fmt.Sprintf("Bombers from %s found nothing invested in the planet's bank to undermine.", from)
+		return fmt.Sprintf("Bombers from %s undermined the planet's bank.", from)
 	}
 	return fmt.Sprintf("An operation from %s against this planet came to nothing.", from)
 }
 
-// planetOpObject names what a bombing op was sent at, owned by whose — "the
-// planet's" for this planet's news, "that planet's" for the firer's report.
-func planetOpObject(op SpecialOp, whose string) string {
+// planetOpObject names what a bombing op was sent at.
+func planetOpObject(op SpecialOp) string {
 	switch op {
 	case OpBombFood:
-		return whose + " food market"
+		return "food market"
 	case OpBombMarket:
-		return whose + " trading market"
+		return "trading market"
 	case OpBombRoutes:
-		return whose + " trade routes"
+		return "trade routes"
 	case OpUndermine:
-		return whose + " bank"
+		return "bank"
 	}
-	return "the planet"
+	return "planet"
 }
 
 // applyPlanetOp runs one of the four bombing ops against the whole planet.
@@ -475,11 +488,12 @@ func planetOpObject(op SpecialOp, whose string) string {
 // told separately what it lost. IB filed an event with every living realm
 // until 2026-10-01.
 //
-// The report is what rides home for the firer's planet news, which names the
-// share destroyed as the original's success line does (process_bombing_results
-// prints it for the food market, the trading market and the investments, and
-// no figure for the trade routes). It is a sentence about the target planet,
-// not to the firer, and is empty when there is no figure to give.
+// The report rides home in the answer. For a run that landed it is the share
+// destroyed, a third-person sentence the firer's planet news appends, as the
+// original's success line names it (process_bombing_results prints it for the
+// food market, the trading market and the investments, and no figure for the
+// trade routes, which report ""). A run that failed reports "": the firer is
+// told through its planet news alone, which words it from the outcome.
 func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutcome) {
 	// One landing roll for the whole run, ahead of the op switch, as the
 	// original rolls it; a run that fails it touches nothing on the planet.
@@ -493,7 +507,7 @@ func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutco
 		if lost <= 0 {
 			return "", specialNothing
 		}
-		return fmt.Sprintf("%d%% of its supply was destroyed.", pct), specialHit
+		return fmt.Sprintf("%d%% of the supply burned.", pct), specialHit
 
 	case OpBombMarket:
 		goods, pct := 0, w.bombMarketLossPct()
@@ -536,7 +550,8 @@ func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutco
 // TargetsPlanet down applyPlanetOp first. The four bombing ops had per-realm
 // branches here, from when they were aimed at one baron, which no packet could
 // reach once they were aimed at the planet; they were removed on 2026-09-23.
-func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report string, score int, outcome specialOutcome) {
+func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report string, score int, outcome specialOutcome, gained int) {
+	board := w.Config.BoardID
 	switch op {
 	// The three missiles do NOT run the local helpers of the same name (#255).
 	// The receiving board resolves all three in one routine with its own gates
@@ -544,30 +559,28 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 	// ruins a wider swath than a neighbor's, and an arriving chemical strike is
 	// a population weapon that touches no land at all.
 	case OpNuclear:
-		notice := fmt.Sprintf("A nuclear strike from %s never reached your empire.", from)
-		if stopped, why := w.stopArrivingMissile(d, "nuclear strike", d.Turrets, notice); stopped != "" {
-			return stopped, 0, why
+		if stopped, why := w.stopArrivingMissile(d, op, from); stopped != "" {
+			return stopped, 0, why, 0
 		}
 		regions := w.arrivingNuclearEffect(d)
 		score = w.rng.Intn(NukeScoreRoll)
-		d.addEvent(fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", from, regions))
-		return fmt.Sprintf("Nuclear strike! %d regions of %s are now waste.", regions, d.Name), score, specialHit
+		d.addEvent(fmt.Sprintf("%s's nuclear strike turned %d of your regions into waste.", from, regions))
+		return fmt.Sprintf("Your nuclear strike turned %d of %s's regions on %s into waste.", regions, d.Name, board), score, specialHit, 0
 
 	case OpChemical:
-		notice := fmt.Sprintf("A chemical strike from %s never reached your empire.", from)
-		if stopped, why := w.stopArrivingMissile(d, "chemical strike", d.Tanks, notice); stopped != "" {
-			return stopped, 0, why
+		if stopped, why := w.stopArrivingMissile(d, op, from); stopped != "" {
+			return stopped, 0, why, 0
 		}
 		people := w.arrivingChemicalEffect(d)
 		score = w.rng.Intn(ChemScoreRoll)
-		d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d of your people are dead.", from, people))
-		return fmt.Sprintf("Chemical strike! %d of %s's people are dead.", people, d.Name), score, specialHit
+		d.addEvent(fmt.Sprintf("%s's chemical strike killed %d of your people.", from, people))
+		return fmt.Sprintf("Your chemical strike killed %d of %s's people on %s.", people, d.Name, board), score, specialHit, 0
 
 	case OpSabre:
-		report, outcome = w.sabreEffect(d, from, dial)
-		return report, 0, outcome
+		report, outcome, gained = w.sabreEffect(d, from, dial)
+		return report, 0, outcome, gained
 	}
-	return fmt.Sprintf("Nothing came of the operation against %s.", d.Name), 0, specialNothing
+	return fmt.Sprintf("Nothing came of the operation against %s.", d.Name), 0, specialNothing, 0
 }
 
 // arrivingMissileStopped runs the three rolls the receiving board makes for ANY
@@ -586,36 +599,58 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 // failure flag the misfire does and not the SDI one, so the reader's line is
 // the plain failure form; IB words it as the garrison it was.
 //
-// Returns the sender's line for the reason the strike ended, and which reason
-// it was, or "" and specialHit when it gets through. The reasons are separate
-// lines to the reader in the original, and stay separate here: a shield that
-// worked and a weapon that failed are different news.
-func (w *World) arrivingMissileStopped(d *Empire, label string, guard int) (string, specialOutcome) {
+// Returns which reason stopped the strike, or specialHit when it gets through.
+// The reasons are separate lines to the reader in the original, and stay
+// separate here: a shield that worked and a weapon that failed are different
+// news.
+func (w *World) arrivingMissileStopped(d *Empire, guard int) specialOutcome {
 	if w.rng.Intn(MissileMisfireOdds) == 0 {
-		return fmt.Sprintf("The %s misfired and never reached %s.", label, d.Name), specialMisfire
+		return specialMisfire
 	}
 	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
-		return fmt.Sprintf("%s's SDI intercepted your %s.", d.Name, label), specialIntercepted
+		return specialIntercepted
 	}
 	if missileGuarded(guard, d.Land, w.rng.Intn(MissileDefenseRoll), w.rng.Intn) {
-		return fmt.Sprintf("%s's defenses brought down your %s.", d.Name, label), specialGuarded
+		return specialGuarded
 	}
-	return "", specialHit
+	return specialHit
 }
 
 // stopArrivingMissile runs arrivingMissileStopped and, when the strike was
-// stopped, files notice — the target's own line — unless SDI was what stopped
-// it. An interception reaches the target only through its planet's news.
-// BINARY-VERIFIED: the resolver (resolve_received_sabre_strike, ovr_0450a9
-// +0x0d1f..+0x0d33) skips its event-writer call when the SDI flag is set and
-// makes it for every other failure. IB told the target of an interception too
-// until 2026-10-01.
-func (w *World) stopArrivingMissile(d *Empire, label string, guard int, notice string) (string, specialOutcome) {
-	stopped, why := w.arrivingMissileStopped(d, label, guard)
-	if stopped != "" && why != specialIntercepted {
-		d.addEvent(notice)
+// stopped, returns the firer's report and files the target's own line, unless
+// SDI was what stopped it. An interception reaches the target only through its
+// planet's news. BINARY-VERIFIED: the resolver (resolve_received_sabre_strike,
+// ovr_0450a9 +0x0d1f..+0x0d33) skips its event-writer call when the SDI flag is
+// set and makes it for every other failure. IB told the target of an
+// interception too until 2026-10-01.
+//
+// The garrison is the target's unit that stands against op: turrets for a
+// nuclear missile, tanks for a chemical one, troopers for an S3-Sabre (see
+// arrivingMissileStopped). A misfire picks one entry of the misfire pool and
+// uses both halves. Returns "" and specialHit when the missile gets through.
+func (w *World) stopArrivingMissile(d *Empire, op SpecialOp, from string) (string, specialOutcome) {
+	guard, unit := d.Troopers, "troopers"
+	switch op {
+	case OpNuclear:
+		guard, unit = d.Turrets, "turrets"
+	case OpChemical:
+		guard, unit = d.Tanks, "tanks"
 	}
-	return stopped, why
+	why := w.arrivingMissileStopped(d, guard)
+	missile := missileNoun(op)
+	board := w.Config.BoardID
+	switch why {
+	case specialMisfire:
+		fate := w.pickMissileMisfire()
+		d.addEvent(fill(fate.Theirs, "missile", missile, "from", from))
+		return fill(fate.Yours, "missile", missile, "target", d.Name, "board", board), why
+	case specialIntercepted:
+		return fmt.Sprintf("%s's SDI shot down your %s over %s.", d.Name, missile, board), why
+	case specialGuarded:
+		d.addEvent(fmt.Sprintf("Your %s brought down a %s from %s.", unit, missile, from))
+		return fmt.Sprintf("%s's %s on %s brought down your %s.", d.Name, unit, board, missile), why
+	}
+	return "", specialHit
 }
 
 // missileGuarded is the garrison roll: roll is the Random(MissileDefenseRoll)

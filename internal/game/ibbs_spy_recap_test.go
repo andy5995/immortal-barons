@@ -50,7 +50,7 @@ func TestSendSpyRecapCarriesTheFigures(t *testing.T) {
 	want := fmt.Sprintf("Land %s  Off %s  Def %s  Gold %s",
 		numfmt.Comma(target.Land), numfmt.Comma(target.Offense()),
 		numfmt.Comma(target.Defense()), numfmt.Comma(target.Gold))
-	if !strings.HasPrefix(got, "Send Spy against Victim of boardB:\n") || !strings.HasSuffix(got, "\n"+want) {
+	if !strings.HasPrefix(got, "Your spy slipped into Victim's files on boardB and came home with a full report.\n") || !strings.HasSuffix(got, "\n"+want) {
 		t.Errorf("sender's report = %q, want it to end with %q", got, want)
 	}
 }
@@ -69,7 +69,7 @@ func TestCaughtSpyRecapHasNoFigures(t *testing.T) {
 		}
 		wA.ApplyPacket(reply)
 		got := sender.Events[len(sender.Events)-1].Text
-		if got != "Send Spy against Victim of boardB:\nYour agent was caught by Victim's security." {
+		if got != "Victim's security on boardB caught your agent." {
 			t.Errorf("seed %d: a caught spy's report = %q, want the caught line and no figures", seed, got)
 		}
 		return

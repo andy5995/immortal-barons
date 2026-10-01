@@ -311,8 +311,8 @@ type AttackResult struct {
 	Report string `json:",omitempty"`
 	Score  int    `json:",omitempty"`
 	// Backfired says an S3-Sabre turned on the realm that fired it. The
-	// damage cannot be applied where it was rolled — that realm is on the board
-	// that sent the missile — so it is applied when this answer gets home.
+	// target's board has already opened the land for the target; the firer's
+	// board only reads the report.
 	Backfired bool `json:",omitempty"`
 }
 

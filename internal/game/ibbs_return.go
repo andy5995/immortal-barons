@@ -100,24 +100,22 @@ func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult, spy *Sp
 // terrorReturnReport is what the sender reads when a terrorist op comes home.
 // It names the operation and says WHY nothing happened, where the three silent
 // outcomes — repelled, sheltered, no such realm — used to arrive as one
-// sentence the sender could not tell apart (#165). The Special Ops path already
-// worked this way; this is the terror path catching up.
+// sentence the sender could not tell apart (#165).
 func terrorReturnReport(sent InFlightStrike, res AttackResult) string {
 	op := sent.TerrorOp.String()
 	switch res.outcome() {
 	case OutcomeNotFound:
-		return fmt.Sprintf("Your agents reached %s and found no realm called %s; the %s was abandoned.",
-			res.TargetBoard, res.TargetEmpire, op)
+		return fmt.Sprintf("Your agents reached %s and found no realm called %s, so they came home.",
+			res.TargetBoard, res.TargetEmpire)
 	case OutcomeProtected:
-		return fmt.Sprintf("Your %s against %s of %s broke on their New Realm Protection.",
+		return fmt.Sprintf("Your %s bounced off %s's New Realm Protection on %s.",
 			op, res.TargetEmpire, res.TargetBoard)
 	}
 	if res.Report != "" {
-		// The target board settled what the operation did and wrote the lines;
-		// only it knows what was there to damage (#166). The heading names the
-		// operation and the target, which is what the original's report opens
-		// with (process_terrorist_report's `Target:` header).
-		return fmt.Sprintf("%s against %s of %s:\n%s", op, res.TargetEmpire, res.TargetBoard, res.Report)
+		// The target board settled what the operation did and wrote the whole
+		// sentence, naming the target and its own board; only it knows what was
+		// there to damage (#166).
+		return res.Report
 	}
 	if res.Won {
 		return fmt.Sprintf("Your %s against %s of %s destroyed %d of its forces.",
@@ -286,15 +284,26 @@ func strikeSender(w *World, sent InFlightStrike) string {
 }
 
 // applySpecialOpResult files the answer to an interplanetary Special Operation
-// with the baron who sent it: what it did, what it earned, and — for an
-// S3-Sabre that turned on its owner — the damage that could only be
-// rolled where the target lives but has to land here.
+// with the baron who sent it: what it did and what it earned.
+//
+// The target's board wrote the report as one sentence naming the target and its
+// own board, and it is printed as it stands.
 func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	e := w.FindByOwner(sent.Owner)
 	if e == nil {
 		return
 	}
 	label := SpecialOpLabel(sent.Op)
+	missile := missileNoun(sent.Op)
+	board := res.TargetBoard
+	if board == "" {
+		board = sent.TargetBoard
+	}
+	target := res.TargetEmpire
+	if target == "" {
+		target = sent.TargetEmpire
+	}
+	news := func() { w.postNews(missileReturnNews(e.Name, missile, target, board, res)) }
 	if res.Backfired {
 		// A backfire costs the firer NOTHING. The original's return path composes a
 		// report and writes no field of the firer's record at all
@@ -303,28 +312,20 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 		// which the target's own board applied when it resolved the strike
 		// (sabreDevelop). IB damaged the firer here until 2026-09-14; that was
 		// invented before the return path was read (#266).
-		// The target's board composed the report, land opened and all, so use it
-		// rather than restating the outcome here: IB said "broke up over their
-		// land instead of yours" until this was fixed, which named a thing that
-		// cannot happen and read as a lucky escape rather than a loss.
-		report := res.Report
-		if report == "" {
-			report = fmt.Sprintf("Your %s backfired and broke up over the realm it was aimed at.", label)
+		report := fmt.Sprintf("Your %s backfired on %s of %s.", missile, target, board)
+		if res.Report != "" {
+			report = res.Report
 		}
-		e.addEvent(fmt.Sprintf("%s (%s): %s", label, strikeTarget(sent, res), report))
-		w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
+		e.addEvent(report)
+		news()
 		return
 	}
 	// A bombing run's firer learns of it through the planet news alone.
 	// BINARY-VERIFIED: process_bombing_results (BRE.OVR 0x04a4a6) calls the
-	// news writer at +0x0622 and never the per-realm event writer; its success
-	// line names the share destroyed, which the target board's report carries
-	// here. IB filed an event with the firer as well until 2026-10-01.
+	// news writer at +0x0622 and never the per-realm event writer. IB filed an
+	// event with the firer as well until 2026-10-01. A landed run's report is the
+	// share destroyed, which the news line names as the original's does.
 	if !isMissileOp(sent.Op) {
-		board := res.TargetBoard
-		if board == "" {
-			board = sent.TargetBoard
-		}
 		w.postNews(bombingReturnNews(e.Name, sent.Op, board, res))
 		return
 	}
@@ -335,28 +336,27 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	// Protection fails a strike the same way on the target's board, so it is
 	// covered too. IB told the firer in person until 2026-10-01.
 	if sent.Op == OpSabre && sabreReturnFailed(res) {
-		w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
+		news()
 		return
 	}
 	switch res.outcome() {
 	case OutcomeNotFound:
-		e.addEvent(fmt.Sprintf("Your %s found no realm named %s on %s.", label, sent.TargetEmpire, sent.TargetBoard))
+		e.addEvent(fmt.Sprintf("Your %s reached %s and found no realm called %s.", missile, sent.TargetBoard, sent.TargetEmpire))
 		return
 	case OutcomeProtected:
-		e.addEvent(fmt.Sprintf("Your %s against %s broke on their New Realm Protection.",
-			label, strikeTarget(sent, res)))
-		w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
+		e.addEvent(fmt.Sprintf("Your %s bounced off %s's New Realm Protection on %s.", missile, target, board))
+		news()
 		return
 	}
 	if res.Score > 0 {
 		addScore(e, res.Score)
 	}
-	report := res.Report
-	if report == "" {
-		report = fmt.Sprintf("Your %s against %s is over.", label, strikeTarget(sent, res))
+	report := fmt.Sprintf("Your %s against %s is over.", label, strikeTarget(sent, res))
+	if res.Report != "" {
+		report = res.Report
 	}
-	e.addEvent(fmt.Sprintf("%s (%s): %s", label, strikeTarget(sent, res), report))
-	w.postNews(missileReturnNews(e.Name, label, strikeTarget(sent, res), res))
+	e.addEvent(report)
+	news()
 }
 
 // sabreReturnFailed reports whether an S3-Sabre's answer is one of the
@@ -376,24 +376,24 @@ func sabreReturnFailed(res AttackResult) bool {
 // (planetOpNews) and agreeing with it. BINARY-VERIFIED that there is one:
 // process_bombing_results (BRE.OVR 0x04a4a6) has a single branch, at +0x501,
 // which only picks the failure or success line, and reaches its news call at
-// +0x0622 either way. The wording is IB's own.
+// +0x0622 either way. The wording is IB's own. A run driven off reads one plain
+// line here: the pool entry picked on the target's board does not travel.
 //
 // A result from a board that predates the narrower verdicts says only
 // "failure", which covers both ways of coming to nothing.
 func bombingReturnNews(firer string, op SpecialOp, board string, res AttackResult) string {
-	whose := board + "'s"
 	switch res.outcome() {
 	case OutcomeWon:
 		line := fmt.Sprintf("%s's %s against %s landed.", firer, SpecialOpLabel(op), board)
 		switch op {
 		case OpBombFood:
-			line = fmt.Sprintf("%s's bombers hit %s food market.", firer, whose)
+			line = fmt.Sprintf("%s's bombers burned %s's food market.", firer, board)
 		case OpBombMarket:
-			line = fmt.Sprintf("%s's bombers wrecked %s trading market.", firer, whose)
+			line = fmt.Sprintf("%s's bombers wrecked %s's trading market.", firer, board)
 		case OpBombRoutes:
 			line = fmt.Sprintf("%s's bombers hit trade routes across %s.", firer, board)
 		case OpUndermine:
-			line = fmt.Sprintf("%s's bombers undermined investments across %s.", firer, board)
+			line = fmt.Sprintf("%s's bombers undermined %s's bank.", firer, board)
 		}
 		// The share destroyed, as the target board reported it.
 		if res.Report != "" {
@@ -401,9 +401,9 @@ func bombingReturnNews(firer string, op SpecialOp, board string, res AttackResul
 		}
 		return line
 	case OutcomeDrivenOff:
-		return fmt.Sprintf("%s's bombers were driven off before they reached %s.", firer, planetOpObject(op, whose))
+		return fmt.Sprintf("%s's bombers were turned back before they reached %s.", firer, board)
 	case OutcomeNothing:
-		return fmt.Sprintf("%s's bombers found nothing to destroy at %s.", firer, planetOpObject(op, whose))
+		return fmt.Sprintf("%s's bombers found nothing to destroy on %s.", firer, board)
 	}
 	return fmt.Sprintf("%s's %s against %s came to nothing.", firer, SpecialOpLabel(op), board)
 }
@@ -414,27 +414,31 @@ func bombingReturnNews(firer string, op SpecialOp, board string, res AttackResul
 // process_sabre_return (BRE.OVR 0x046045) calls the news writer on both of its
 // paths — at +0x1051 for a nuclear or chemical strike, and for any failed
 // strike, and at +0x1107 for an S3-Sabre that landed — so the original's firing
-// planet reads a line whatever happened. The wording is IB's own.
+// planet reads a line whatever happened. The wording is IB's own. A misfire
+// reads one plain line here: the pool entry picked on the target's board does
+// not travel.
 //
 // A result from a board that predates the narrower verdicts says only
-// "failure", and gets a line that claims no more than that.
-func missileReturnNews(firer, label, target string, res AttackResult) string {
+// "failure", and gets a line that claims no more than that. A backfire's line
+// gives no count: the land it opened is settled on the target's board and does
+// not travel.
+func missileReturnNews(firer, missile, target, board string, res AttackResult) string {
 	if res.Backfired {
-		return fmt.Sprintf("%s's %s broke up over %s.", firer, label, target)
+		return fmt.Sprintf("%s's %s backfired on %s of %s.", firer, missile, target, board)
 	}
 	switch res.outcome() {
 	case OutcomeWon:
-		return fmt.Sprintf("%s's %s hit %s.", firer, label, target)
+		return fmt.Sprintf("%s's %s hit %s of %s.", firer, missile, target, board)
 	case OutcomeMisfire:
-		return fmt.Sprintf("%s's %s misfired on its way to %s.", firer, label, target)
+		return fmt.Sprintf("%s's %s vanished on the way to %s.", firer, missile, board)
 	case OutcomeIntercepted:
-		return fmt.Sprintf("The SDI of %s shot down %s's %s.", target, firer, label)
+		return fmt.Sprintf("%s's SDI shot down %s's %s.", target, firer, missile)
 	case OutcomeGuarded:
-		return fmt.Sprintf("%s's %s was brought down over %s.", firer, label, target)
+		return fmt.Sprintf("%s's defenses brought down %s's %s.", target, firer, missile)
 	case OutcomeNegligible:
-		return fmt.Sprintf("%s's %s reached %s and did little harm.", firer, label, target)
+		return fmt.Sprintf("%s's %s barely scratched %s of %s.", firer, missile, target, board)
 	case OutcomeProtected:
-		return fmt.Sprintf("New Realm Protection turned aside %s's %s against %s.", firer, label, target)
+		return fmt.Sprintf("New Realm Protection turned aside %s's %s.", firer, missile)
 	}
-	return fmt.Sprintf("%s's %s against %s failed.", firer, label, target)
+	return fmt.Sprintf("%s's %s against %s of %s failed.", firer, missile, target, board)
 }

@@ -239,10 +239,10 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 	// that ruined nothing still scores.
 	addScore(a, w.rng.Intn(NukeScoreRoll))
 
-	d.addEvent(fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", a.Name, regions))
+	d.addEvent(fmt.Sprintf("%s's nuclear strike turned %d of your regions into waste.", a.Name, regions))
 
 	w.postStrikeNews(a, d, "nuclear")
-	return fmt.Sprintf("Nuclear strike! %d regions of %s are now waste.", regions, d.Name), nil
+	return fmt.Sprintf("Your nuclear strike turned %d of %s's regions into waste.", regions, d.Name), nil
 }
 
 // DecontaminateAllowance is the most waste regions e may clean this turn: a
@@ -328,10 +328,10 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 
 	addScore(a, w.rng.Intn(ChemScoreRoll))
 
-	d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d regions reduced to waste and %d dead. Famine follows.", a.Name, regions, people))
+	d.addEvent(fmt.Sprintf("%s's chemical strike laid waste to %d of your regions and killed %d of your people; famine follows.", a.Name, regions, people))
 
 	w.postStrikeNews(a, d, "chemical")
-	return fmt.Sprintf("Chemical strike! %d regions of %s are now waste.\nThe gas killed %d of its people, and its morale and support are broken.", regions, d.Name, people), nil
+	return fmt.Sprintf("Your gas laid waste to %d of %s's regions and killed %d of their people; their morale and support are broken.", regions, d.Name, people), nil
 }
 
 // BiologicalStrike kills people and troopers and halves military morale. It
@@ -363,10 +363,10 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	d.Morale /= BioMoraleDivisor
 	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
 
-	d.addEvent(fmt.Sprintf("%s hit you with a biological strike: %d troopers and %d civilians dead. Famine follows.", a.Name, troops, people))
+	d.addEvent(fmt.Sprintf("%s's plague killed %d of your troopers and %d of your people; famine follows.", a.Name, troops, people))
 
 	w.postStrikeNews(a, d, "biological")
-	return fmt.Sprintf("Biological strike! The plague killed %d troopers of %s.\nIt also carried off %d civilians, and half the realm's morale with them.", troops, d.Name, people), nil
+	return fmt.Sprintf("Your plague killed %d of %s's troopers and %d civilians, and took half their morale with it.", troops, d.Name, people), nil
 }
 
 // nuclearEffect ruins a share of d's land into waste and reports the regions.

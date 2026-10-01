@@ -84,11 +84,11 @@ func runCovertUntil(t *testing.T, w *World, a *Empire, run func() (string, error
 	return ""
 }
 
-// caught reports whether a covert report is one of the two the attacker gets
-// when the agent is taken: the effect ops say the operation failed, the two info
-// ops say the spy was caught.
+// caught reports whether a covert report is the one the attacker gets when the
+// agent is taken: "Your agent <line>.", the line one of the caught-agent pool's.
 func caught(report string) bool {
-	return strings.Contains(report, "failed") || strings.Contains(report, "caught")
+	i, ok := agentEntryFor(report)
+	return ok && report == "Your agent "+agentCaughtPool[i].Singular+"."
 }
 
 // TestCovertRollIgnoresTheTargetAndScalesWithDifficulty pins the two things
@@ -304,7 +304,7 @@ func TestSendSpyFailure(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if !strings.Contains(report, "caught") {
+		if !caught(report) {
 			continue // got through; try again
 		}
 		if a.Agents != before-1 {

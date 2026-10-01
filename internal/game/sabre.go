@@ -107,7 +107,11 @@ var sabreRows = map[SabreEffect]sabreRow{
 		if lost > 0 {
 			lost = e.Regions.remove(lost).Total()
 			e.syncLand()
-			s.parts = append(s.parts, fmt.Sprintf("%d Regions", lost))
+			noun := "Regions"
+			if lost == 1 {
+				noun = "Region"
+			}
+			s.parts = append(s.parts, fmt.Sprintf("%d %s", lost, noun))
 		}
 	}},
 	SabreHitFood: {"food supply", func(s *sabreStrike) {
@@ -203,7 +207,9 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // missile impact rather than an agent op and reports it with the firing realm
 // and its planet, the same as an incoming nuclear or chemical strike. Agent ops
 // stay anonymous unless the agent is caught (see covertFoiled).
-func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, outcome specialOutcome) {
+//
+// gained is the land a backfire opened for the target, zero otherwise.
+func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, outcome specialOutcome, gained int) {
 	// The shared arriving-missile gates: the misfire, SDI and the garrison
 	// (#255). All three missiles meet them, because the receiving board resolves
 	// all three in one routine and the rolls sit ahead of its damage switch.
@@ -219,34 +225,41 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, ou
 	// The third gate is the original's garrison roll, which for the Sabre reads
 	// the target's troopers (record +0x76). It sits ahead of the damage switch,
 	// so a Sabre it stops neither damages nor backfires.
-	notice := fmt.Sprintf("An S3-Sabre from %s came down short of your realm.", from)
-	if stopped, why := w.stopArrivingMissile(d, "S3-Sabre", d.Troopers, notice); stopped != "" {
-		return stopped, why
+	if stopped, why := w.stopArrivingMissile(d, OpSabre, from); stopped != "" {
+		return stopped, why, 0
 	}
+	board := w.Config.BoardID
 	if w.sabreBackfires(d) {
 		// A backfire is the original's route to the mapper's last row: it does not
 		// hurt the firer, it DEVELOPS land for the realm they aimed at (#266). The
 		// firer is told when the answer gets home; the target sees it now.
 		if got := w.sabreDevelop(d); got > 0 {
-			d.addEvent(fmt.Sprintf("An S3-Sabre from %s broke up over your realm, and the fallout left %d Regions fit to settle.", from, got))
-			return fmt.Sprintf("Your S3-Sabre broke up over %s and opened %d Regions for them to settle.", d.Name, got), specialBackfire
+			d.addEvent(fmt.Sprintf("%s's S3-Sabre backfired, expanding your territory by %s.", from, regionCount(got)))
+			return fmt.Sprintf("Your S3-Sabre backfired on %s of %s, expanding their territory by %s.", d.Name, board, regionCount(got)), specialBackfire, got
 		}
-		return fmt.Sprintf("Your S3-Sabre broke up over %s with nothing to open for them.", d.Name), specialBackfire
+		return fmt.Sprintf("Your S3-Sabre backfired on %s of %s, but they had too little land for it to give them any.", d.Name, board), specialBackfire, 0
 	}
 	eff := w.SabreAim(dial)
 	lost := w.sabreDamage(d, eff)
 	if lost == "" {
 		// The original tells the target which row hit even when it took
 		// nothing: the event writer at +0x07d6 runs before the damage switch.
-		d.addEvent(fmt.Sprintf("An S3-Sabre from %s struck your %s and did little harm.", from, sabreEffectAim(eff)))
-		return fmt.Sprintf("Your S3-Sabre reached %s but did negligible damage.", d.Name), specialNothing
+		d.addEvent(fmt.Sprintf("%s's S3-Sabre hit your %s and did little harm.", from, sabreEffectAim(eff)))
+		return fmt.Sprintf("Your S3-Sabre reached %s of %s and barely scratched the paint.", d.Name, board), specialNothing, 0
 	}
-	d.addEvent(fmt.Sprintf("An S3-Sabre from %s struck your empire — lost %s.", from, lost))
-	return fmt.Sprintf("Your S3-Sabre hit %s: %s destroyed.", d.Name, lost), specialHit
+	d.addEvent(fmt.Sprintf("%s's S3-Sabre hit your %s, destroying %s.", from, sabreEffectAim(eff), lost))
+	return fmt.Sprintf("Your S3-Sabre hit %s of %s, destroying %s.", d.Name, board, lost), specialHit, 0
 }
 
-// sabreEffectAim names what a dial row goes for, for the target's event when a
-// hit takes nothing.
+// regionCount is "1 region" or "N regions".
+func regionCount(n int) string {
+	if n == 1 {
+		return "1 region"
+	}
+	return fmt.Sprintf("%d regions", n)
+}
+
+// sabreEffectAim names what a dial row goes for, for the target's event.
 func sabreEffectAim(eff SabreEffect) string {
 	if row, ok := sabreRows[eff]; ok {
 		return row.aim

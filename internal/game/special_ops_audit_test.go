@@ -76,8 +76,12 @@ func TestEverySpecialOpMakesTheRoundTrip(t *testing.T) {
 				t.Fatal("the sender was told nothing")
 			}
 			last := attacker.Events[len(attacker.Events)-1].Text
-			if !contains(last, SpecialOpLabel(op)) {
-				t.Errorf("the report does not name the operation: %q", last)
+			weapon := map[SpecialOp]string{OpNuclear: "nuclear strike", OpChemical: "chemical strike", OpSabre: "S3-Sabre"}[op]
+			if !contains(last, weapon) {
+				t.Errorf("the report does not name the weapon: %q", last)
+			}
+			if !contains(last, target.Name) || !contains(last, "Bravo BBS") {
+				t.Errorf("the report does not name the target and its board: %q", last)
 			}
 		})
 	}

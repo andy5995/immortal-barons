@@ -145,7 +145,7 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	target := w.remoteTarget(t.TargetEmpire)
 	if target == nil {
 		// Nobody of that name here: the sender is owed that answer rather than the
-		// same "achieved nothing" a repelled op gets (#165).
+		// same "got nowhere" a repelled op gets (#165).
 		res.Outcome = OutcomeNotFound
 		return res
 	}
@@ -185,7 +185,11 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 		// below — the caught count and the per-operation line — are never
 		// filed. The target of a spy that got in is told nothing at all.
 		if t.Op == TerrorOpSpy {
-			res.Report = terrorOpReport(t.Op, target.Name, t.Agents, hit, caught)
+			var fate agentCaught
+			if caught > 0 {
+				fate = w.pickAgentCaught()
+			}
+			res.Report = terrorOpReport(t.Op, target.Name, w.Config.BoardID, t.Agents, hit, caught, fate)
 			res.Won = true
 			res.Outcome = OutcomeWon
 			return res
@@ -199,21 +203,28 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	//
 	// The agents that did NOT get through are the only thing that gives the
 	// sender away, and they give it away whatever the rest of the batch did.
-	agentsCaught(target, t, caught)
-	res.Report = terrorOpReport(t.Op, target.Name, t.Agents, hit, caught)
+	//
+	// One caught-agent line is picked for both sides, so the target's event and
+	// the sender's report tell the same story.
+	var fate agentCaught
+	if caught > 0 {
+		fate = w.pickAgentCaught()
+	}
+	agentsCaught(target, t, caught, fate)
+	res.Report = terrorOpReport(t.Op, target.Name, w.Config.BoardID, t.Agents, hit, caught, fate)
 	if hit == 0 {
 		res.Outcome = OutcomeRepelled
 		// Only an agent that got past security struck at anything; a batch that
 		// was caught to the last agent is told by the line above alone.
 		if caught < t.Agents {
-			target.addEvent(fmt.Sprintf("Terrorists struck at your %s and achieved nothing.", terrorOpTargetName(t.Op)))
+			target.addEvent(fmt.Sprintf("Terrorists went after your %s and got nowhere.", terrorOpTargetName(t.Op)))
 		}
 		return res
 	}
 	if hit == 1 {
-		target.addEvent(fmt.Sprintf("Terrorists %s.", terrorOpDeed(t.Op, "your")))
+		target.addEvent(fmt.Sprintf("Terrorists %s.", terrorOpDeed(t.Op)))
 	} else {
-		target.addEvent(fmt.Sprintf("Terrorists %s %d times.", terrorOpDeed(t.Op, "your"), hit))
+		target.addEvent(fmt.Sprintf("Terrorists %s %d times.", terrorOpDeed(t.Op), hit))
 	}
 	res.Won = true
 	res.Outcome = OutcomeWon
@@ -232,20 +243,18 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 // it name nobody. See covertFoiled for the local sibling of the same rule.
 //
 // A packet with no realm recorded names the board alone rather than dropping
-// the line: the board is the part IB has always carried.
-func agentsCaught(target *Empire, t RemoteTerror, caught int) {
+// the line: the board is the part IB has always carried. fate is the entry of
+// the caught-agent pool picked for this strike, whose other half the sender
+// reads.
+func agentsCaught(target *Empire, t RemoteTerror, caught int, fate agentCaught) {
 	if caught <= 0 {
 		return
 	}
-	who := t.FromBoard
+	from := t.FromBoard
 	if t.FromEmpire != "" {
-		who = fmt.Sprintf("%s of %s", t.FromEmpire, t.FromBoard)
+		from = fmt.Sprintf("%s of %s", t.FromEmpire, t.FromBoard)
 	}
-	agents := "agents"
-	if caught == 1 {
-		agents = "agent"
-	}
-	target.addEvent(fmt.Sprintf("Your security caught %d %s from %s.", caught, agents, who))
+	target.addEvent(fill(fate.Theirs, "who", agentCount(caught)+" sent by "+from))
 }
 
 // terrorAgentLands is whether one committed agent gets through, weighing the
@@ -384,79 +393,126 @@ func terrorOpTargetName(op TerrorOpType) string {
 	return "realm"
 }
 
-// terrorOpDeed is what one operation does, with the possessive left open so
-// the same phrase serves both recaps: "your" for the realm it landed on,
-// "their" for the one that sent it. BRE reports a batch the same way on both
-// sides — `ipreport.dat` holds a SINGLE_ and a MULTI_ template for each of the
-// eight damaging operations, the multi form counting the agents that got
-// through ("... %N times!") rather than repeating the line, and the single
-// form used when exactly one did (resolve_received_covert_operation and
-// process_terrorist_report both branch on that count being 1). The phrases are
-// IB's own.
-func terrorOpDeed(op TerrorOpType, whose string) string {
+// terrorOpDeed is what one operation does, as the realm it landed on reads
+// it. BRE reports a batch the same way on both sides — `ipreport.dat` holds a
+// SINGLE_ and a MULTI_ template for each of the eight damaging operations, the
+// multi form counting the agents that got through ("... %N times!") rather
+// than repeating the line, and the single form used when exactly one did
+// (resolve_received_covert_operation and process_terrorist_report both branch
+// on that count being 1). The phrases are IB's own.
+func terrorOpDeed(op TerrorOpType) string {
 	switch op {
-	case TerrorOpSpy:
-		return fmt.Sprintf("went through %s files", whose)
 	case TerrorOpBombIntel:
-		return fmt.Sprintf("bombed %s intelligence agencies", whose)
+		return "bombed your intelligence agencies"
 	case TerrorOpDemoralize:
-		return fmt.Sprintf("demoralized %s forces", whose)
+		return "demoralized your forces"
 	case TerrorOpDissensions:
-		return fmt.Sprintf("stirred dissent in %s ranks", whose)
+		return "stirred dissent in your ranks"
 	case TerrorOpBombAirBases:
-		return fmt.Sprintf("bombed %s air bases", whose)
+		return "bombed your air bases"
 	case TerrorOpEmigrations:
-		return fmt.Sprintf("drove %s people into exile", whose)
+		return "drove your people into exile"
 	case TerrorOpPropaganda:
-		return fmt.Sprintf("spread false rumors through %s realm", whose)
+		return "spread false rumors through your realm"
 	case TerrorOpBombFood:
-		return fmt.Sprintf("bombed %s food stores", whose)
+		return "bombed your food stores"
 	case TerrorOpSabotageHQ:
-		return fmt.Sprintf("sabotaged %s headquarters", whose)
+		return "sabotaged your headquarters"
 	}
-	return fmt.Sprintf("struck %s realm", whose)
+	return "struck your realm"
 }
 
-// terrorOpReport is what the launching realm reads when the strike comes home,
-// one line per way an agent can end. The first two are the original's shape
-// (process_terrorist_report, BRE.OVR 0x04b38a): the agents caught, counted and
-// naming the realm they were caught in, then what the rest did, bare for one
-// agent and counted for more. The third is IB's own. An agent that got through
-// to a target already at zero costs the same gold as one that did damage, and
-// counting successes alone reads the same whether the batch was the right size
-// or three times too big, so IB says how many landed on nothing.
-func terrorOpReport(op TerrorOpType, target string, sent, hit, caught int) string {
-	var lines []string
-	// tally adds the line for the n agents that ended one way: lone when the
-	// whole strike was one agent, one for a single agent of several, many
-	// otherwise, and nothing when none did.
-	tally := func(n int, lone, one, many string) {
-		switch {
-		case n == 1 && sent == 1:
-			lines = append(lines, lone)
-		case n == 1:
-			lines = append(lines, one)
-		case n > 1:
-			lines = append(lines, many)
-		}
+// terrorOpStrike is what one operation does to target on board, for the
+// sender's report: "bombed Victim's air bases on boardB". It is separate from
+// terrorOpDeed on purpose: the wording differs by side.
+func terrorOpStrike(op TerrorOpType, target, board string) string {
+	var f string
+	switch op {
+	case TerrorOpBombIntel:
+		f = "bombed %s's intelligence agencies on %s"
+	case TerrorOpDemoralize:
+		f = "sank %s's morale on %s"
+	case TerrorOpDissensions:
+		f = "stirred up dissent in %s's ranks on %s"
+	case TerrorOpBombAirBases:
+		f = "bombed %s's air bases on %s"
+	case TerrorOpEmigrations:
+		f = "drove %s's people into exile on %s"
+	case TerrorOpPropaganda:
+		f = "spread rumors through %s's realm on %s"
+	case TerrorOpBombFood:
+		f = "bombed %s's food stores on %s"
+	case TerrorOpSabotageHQ:
+		f = "sabotaged %s's headquarters on %s"
+	default:
+		f = "struck %s's realm on %s"
 	}
-	tally(caught,
-		fmt.Sprintf("Your agent was caught by %s's security.", target),
-		fmt.Sprintf("One of your agents was caught by %s's security.", target),
-		fmt.Sprintf("%d of your agents were caught by %s's security.", caught, target))
-	deed := terrorOpDeed(op, "their")
-	tally(hit,
-		fmt.Sprintf("Your agent %s.", deed),
-		fmt.Sprintf("One of your agents %s.", deed),
-		fmt.Sprintf("Your agents %s %d times.", deed, hit))
+	return fmt.Sprintf(f, target, board)
+}
+
+// terrorOpReport is what the launching realm reads when the strike comes home:
+// one sentence, written here on the target's board because only it knows the
+// target and the board both, and printed by the sender as it stands. It
+// accounts for every agent — what the ones that got through did, then, when it
+// applies, the ones caught (fate, the pool entry whose other half the target
+// read) and the ones that got through to nothing left to damage. An agent that
+// got through to a target already at zero costs the same gold as one that did
+// damage, so IB says how many landed on nothing. The original's report has the
+// same parts (process_terrorist_report, BRE.OVR 0x04b38a); the words are IB's.
+func terrorOpReport(op TerrorOpType, target, board string, sent, hit, caught int, fate agentCaught) string {
+	if caught >= sent {
+		if sent == 1 {
+			return fmt.Sprintf("%s's security on %s caught your agent.", target, board)
+		}
+		return fmt.Sprintf("%s's security on %s caught every one of your %d agents.", target, board, sent)
+	}
+	agents := "Your agents"
+	if sent == 1 {
+		agents = "Your agent"
+	}
 	// A spy batch stops at the first agent in, so the rest never went anywhere.
 	wasted := sent - hit - caught
-	if op == TerrorOpSpy {
+	var b strings.Builder
+	switch {
+	case op == TerrorOpSpy:
+		wasted = 0
+		fmt.Fprintf(&b, "Your spy slipped into %s's files on %s and came home with a full report", target, board)
+	case hit > 0:
+		fmt.Fprintf(&b, "%s %s %s", agents, terrorOpStrike(op, target, board), times(hit))
+	default:
+		fmt.Fprintf(&b, "%s reached %s's %s on %s and found nothing left to damage",
+			agents, target, terrorOpTargetName(op), board)
 		wasted = 0
 	}
-	tally(wasted,
-		"Your agent got through and found nothing left to damage.",
-		"One of your agents got through and found nothing left to damage.",
-		fmt.Sprintf("%d of your agents got through and found nothing left to damage.", wasted))
-	return strings.Join(lines, "\n")
+	them := "of them"
+	if op == TerrorOpSpy {
+		them = "of your other agents"
+	}
+	switch {
+	case caught == 1:
+		fmt.Fprintf(&b, "; one %s %s", them, fate.Singular)
+	case caught > 1:
+		fmt.Fprintf(&b, "; %d %s %s", caught, them, fate.Plural)
+	}
+	if wasted > 0 {
+		fmt.Fprintf(&b, "; %d more found nothing left to damage", wasted)
+	}
+	b.WriteString(".")
+	return b.String()
+}
+
+// times is "once" for one and "N times" otherwise.
+// agentCount is n agents, in the singular for one.
+func agentCount(n int) string {
+	if n == 1 {
+		return "1 agent"
+	}
+	return fmt.Sprintf("%d agents", n)
+}
+
+func times(n int) string {
+	if n == 1 {
+		return "once"
+	}
+	return fmt.Sprintf("%d times", n)
 }

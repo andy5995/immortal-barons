@@ -226,7 +226,7 @@ func TestExposeEnemyOpsListsOnlyBribedRealms(t *testing.T) {
 		t.Fatalf("exposeEnemyOps = %v, want Stay", res)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "expose their operations") {
+	if !strings.Contains(out, "report on their") {
 		t.Fatalf("the action never reached its report screen, got:\n%s", out)
 	}
 	if !strings.Contains(out, target.Name) {

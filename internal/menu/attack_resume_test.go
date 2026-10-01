@@ -35,9 +35,9 @@ func TestAttackCannotBeRepeatedByLeavingAfterIt(t *testing.T) {
 		{"regular loss", 0, "RA\r\r\r\r\r", "Defeat!", "Paused<«─"},
 		// a win ends at the captured-region picker instead of the pause
 		{"regular win", 100_000, "RA\r\r\r\r\r", "You captured", "Regions left] Your choice?"},
-		{"nuclear", 0, "NAy", "Nuclear strike!", "Paused<«─"}, // target A, buy the missile
-		{"chemical", 0, "CAy", "Chemical strike!", "Paused<«─"},
-		{"biological", 0, "BAy", "Biological strike!", "Paused<«─"},
+		{"nuclear", 0, "NAy", "Your nuclear strike turned", "Paused<«─"}, // target A, buy the missile
+		{"chemical", 0, "CAy", "Your gas laid waste", "Paused<«─"},
+		{"biological", 0, "BAy", "Your plague killed", "Paused<«─"},
 		// faction 1, 100 troopers, no jets or tanks
 		{"pirates", 0, "P1100\r\r\r", "Your raid on the Humans", "Paused<«─"},
 	}

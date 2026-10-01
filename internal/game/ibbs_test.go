@@ -1273,8 +1273,9 @@ func TestTerrorAgentOddsFavourTheStrongerCovertPool(t *testing.T) {
 }
 
 // A terror op that finds no such realm, or one under protection, comes home
-// saying so and naming the operation (#165) — not as the "achieved nothing" a
-// repelled one gets.
+// saying so (#165) — not as the "got nowhere" a repelled one gets. Each
+// line names the target and the board; protection and a refusal name the
+// operation too.
 func TestTerrorReturnReportSaysWhyNothingHappened(t *testing.T) {
 	sent := InFlightStrike{Kind: "terror", TargetBoard: "boardB", TargetEmpire: "Victim", TerrorOp: TerrorOpBombAirBases}
 	cases := []struct {
@@ -1290,7 +1291,10 @@ func TestTerrorReturnReportSaysWhyNothingHappened(t *testing.T) {
 		if !strings.Contains(got, c.want) {
 			t.Errorf("%s report = %q, want it to mention %q", c.outcome, got, c.want)
 		}
-		if !strings.Contains(got, TerrorOpBombAirBases.String()) {
+		if !strings.Contains(got, "Victim") || !strings.Contains(got, "boardB") {
+			t.Errorf("%s report should name the target and its board: %q", c.outcome, got)
+		}
+		if c.outcome != OutcomeNotFound && !strings.Contains(got, TerrorOpBombAirBases.String()) {
 			t.Errorf("%s report should name the operation: %q", c.outcome, got)
 		}
 	}

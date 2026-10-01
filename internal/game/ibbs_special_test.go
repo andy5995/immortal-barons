@@ -98,7 +98,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 		t.Errorf("the op is still in flight after its answer arrived: %+v", from.InFlight)
 	}
 	got := from.NewsToday[newsBefore:]
-	if len(got) != 1 || !contains(got[0].Text, "Alpha Baron's bombers hit Bravo BBS's food market.") {
+	if len(got) != 1 || !contains(got[0].Text, "Alpha Baron's bombers burned Bravo BBS's food market.") {
 		t.Fatalf("the sending planet read %v", got)
 	}
 }

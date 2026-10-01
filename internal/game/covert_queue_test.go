@@ -82,7 +82,7 @@ func TestDrainingTheQueueResolvesAndReports(t *testing.T) {
 		// The agent comes back only if the operation landed; either way exactly
 		// one of the two outcomes is on the recap.
 		text := a.Events[0].Text
-		if strings.Contains(text, "failed") {
+		if caught(text) {
 			if a.Agents != 499 {
 				t.Errorf("%s: a failed operation keeps the spent agent, got %d", tc.op, a.Agents)
 			}

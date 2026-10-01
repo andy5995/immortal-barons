@@ -7,27 +7,29 @@ import (
 
 // The sender's report must account for every agent it paid for: a batch bigger
 // than the target can absorb otherwise reads exactly like a batch that was the
-// right size. The caught line and the success line are the original's shape —
-// bare for one agent, counted for more (process_terrorist_report).
+// right size. It is one sentence naming the target and its board, since the
+// sender prints it with no heading. The caught-agent clause is the pool entry
+// handed in, fixed here so the wording is exact.
 func TestTerrorOpReportAccountsForEveryAgent(t *testing.T) {
+	fate := agentCaughtPool[0]
 	for _, tc := range []struct {
 		name              string
 		sent, hit, caught int
 		want              string
 	}{
-		{"batch outruns the target", 25, 7, 1, "One of your agents was caught by Victim's security.\n" +
-			"Your agents sabotaged their headquarters 7 times.\n" +
-			"17 of your agents got through and found nothing left to damage."},
-		{"clean sweep", 4, 4, 0, "Your agents sabotaged their headquarters 4 times."},
-		{"all stopped", 3, 0, 3, "3 of your agents were caught by Victim's security."},
-		{"one of several lands", 3, 1, 2, "2 of your agents were caught by Victim's security.\n" +
-			"One of your agents sabotaged their headquarters."},
-		{"lone agent lands", 1, 1, 0, "Your agent sabotaged their headquarters."},
-		{"lone agent caught", 1, 0, 1, "Your agent was caught by Victim's security."},
-		{"lone agent wasted", 1, 0, 0, "Your agent got through and found nothing left to damage."},
+		{"batch outruns the target", 25, 7, 1, "Your agents sabotaged Victim's headquarters on boardB 7 times; " +
+			"one of them didn't make it home; 17 more found nothing left to damage."},
+		{"clean sweep", 4, 4, 0, "Your agents sabotaged Victim's headquarters on boardB 4 times."},
+		{"all stopped", 3, 0, 3, "Victim's security on boardB caught every one of your 3 agents."},
+		{"one of several lands", 3, 1, 2, "Your agents sabotaged Victim's headquarters on boardB once; 2 of them didn't make it home."},
+		{"none land, some caught", 3, 0, 1, "Your agents reached Victim's headquarters on boardB and found nothing left to damage; " +
+			"one of them didn't make it home."},
+		{"lone agent lands", 1, 1, 0, "Your agent sabotaged Victim's headquarters on boardB once."},
+		{"lone agent caught", 1, 0, 1, "Victim's security on boardB caught your agent."},
+		{"lone agent wasted", 1, 0, 0, "Your agent reached Victim's headquarters on boardB and found nothing left to damage."},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got := terrorOpReport(TerrorOpSabotageHQ, "Victim", tc.sent, tc.hit, tc.caught)
+			got := terrorOpReport(TerrorOpSabotageHQ, "Victim", "boardB", tc.sent, tc.hit, tc.caught, fate)
 			if got != tc.want {
 				t.Errorf("terrorOpReport(%d, %d, %d):\n got %q\nwant %q", tc.sent, tc.hit, tc.caught, got, tc.want)
 			}
@@ -77,16 +79,19 @@ func TestTerrorOpPostsNoNewsOnEitherBoard(t *testing.T) {
 		if len(sender.Events) != senderEvents+1 {
 			t.Fatalf("seed %d: the sender's recap gained %d entries, want 1", seed, len(sender.Events)-senderEvents)
 		}
-		if got := sender.Events[len(sender.Events)-1].Text; !strings.HasPrefix(got, "Demoralize against Victim of boardB:\n") {
+		// One sentence from the target's board, naming the target and the board,
+		// printed with no heading.
+		if got := sender.Events[len(sender.Events)-1].Text; strings.Contains(got, "\n") ||
+			!strings.Contains(got, "Victim") || !strings.Contains(got, "boardB") {
 			t.Errorf("seed %d: sender's report = %q", seed, got)
 		}
 	}
 }
 
 // A batch caught to the last agent struck at nothing, so the target is told
-// about the agents it caught and not that terrorists "achieved nothing" — a
+// about the agents it caught and not that terrorists "got nowhere" — a
 // line that says they reached the realm.
-func TestTerrorCaughtBatchIsNotAlsoTheAchievedNothingLine(t *testing.T) {
+func TestTerrorCaughtBatchIsNotAlsoTheGotNowhereLine(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.BoardID = "boardB"
 	for seed := int64(1); seed <= 6; seed++ {
@@ -97,7 +102,7 @@ func TestTerrorCaughtBatchIsNotAlsoTheAchievedNothingLine(t *testing.T) {
 			ID: 1, FromBoard: "boardA", FromEmpire: "Selby", TargetEmpire: "Victim",
 			Agents: 3, Op: TerrorOpDemoralize, Strength: 1,
 		})
-		if !strings.HasPrefix(res.Report, "3 of your agents were caught") {
+		if res.Report != "Victim's security on boardB caught every one of your 3 agents." {
 			// The one-in-a-hundred automatic success let one through; this seed
 			// does not exercise the all-caught path.
 			continue
@@ -107,7 +112,11 @@ func TestTerrorCaughtBatchIsNotAlsoTheAchievedNothingLine(t *testing.T) {
 			text = append(text, ev.Text)
 		}
 		all := strings.Join(text, "\n")
-		if all != "Your security caught 3 agents from Selby of boardA." {
+		found := false
+		for i := range agentCaughtPool {
+			found = found || all == caughtEvent(i, 3, "Selby of boardA")
+		}
+		if !found {
 			t.Errorf("seed %d: target recap = %q", seed, all)
 		}
 		return
@@ -165,7 +174,7 @@ func TestASpyThatGetsInEndsTheBatchUnseen(t *testing.T) {
 		if strings.Contains(res.Report, "nothing left to damage") || strings.Contains(res.Report, "times") {
 			t.Errorf("seed %d: the report counts agents that never went in: %q", seed, res.Report)
 		}
-		if !strings.Contains(res.Report, "One of your agents went through their files.") {
+		if !strings.HasPrefix(res.Report, "Your spy slipped into Victim's files on boardB and came home with a full report") {
 			t.Errorf("seed %d: report = %q, want one spy in", seed, res.Report)
 		}
 	}

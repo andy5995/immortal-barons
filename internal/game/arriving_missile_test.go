@@ -64,8 +64,8 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	d.SDI = 100 // a full program: the interception roll is what will fire
 	intercepted := 0
 	for i := 0; i < 400; i++ {
-		if got, why := w.arrivingMissileStopped(d, "nuclear strike", 0); why == specialIntercepted {
-			if got == "Defendia's SDI intercepted your nuclear strike." {
+		if got, why := w.stopArrivingMissile(d, OpNuclear, "Selby of Home"); why == specialIntercepted {
+			if got == "Defendia's SDI shot down your nuclear missile over "+w.Config.BoardID+"." {
 				intercepted++
 			}
 		}
@@ -80,7 +80,10 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	d.SDI = 0
 	misfired := 0
 	for i := 0; i < 400; i++ {
-		if got, why := w.arrivingMissileStopped(d, "nuclear strike", 0); why == specialMisfire && got == "The nuclear strike misfired and never reached Defendia." {
+		if got, why := w.stopArrivingMissile(d, OpNuclear, "Selby of Home"); why == specialMisfire {
+			if _, ok := misfireEntryFor(got, "nuclear missile", "Defendia", w.Config.BoardID); !ok {
+				t.Fatalf("a misfire reported %q, which is not from the misfire pool", got)
+			}
 			misfired++
 		}
 	}
@@ -100,7 +103,7 @@ func TestEachMissileMeetsItsOwnGarrison(t *testing.T) {
 			w := NewWorldSeed(DefaultConfig(), seed)
 			d := w.AddHuman("d", "Defendia")
 			d.SDI, d.Turrets, d.Tanks, d.Troopers = 0, turrets, tanks, 0
-			if _, _, why := w.applySpecialOp(op, d, "Selby of Home", 0); why == specialGuarded {
+			if _, _, why, _ := w.applySpecialOp(op, d, "Selby of Home", 0); why == specialGuarded {
 				n++
 			}
 		}

@@ -5066,9 +5066,13 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   other seventeen land on a field already at zero, achieve nothing, and appear
   nowhere. IB splits the batch three ways — caught, did damage, found nothing
   left to damage — so the sender can see when a batch was larger than the
-  target could absorb. The target's own event counts only the hits, because
-  that is all the defender can observe, and it says terrorists achieved nothing
-  only when an agent actually got past its security.
+  target could absorb. The report is one sentence written on the target's
+  board, which knows both the target and its own name ("Your agents sank
+  Mango Salsa's morale on ConstructiveChaos BBS 9 times; one of them didn't
+  make it home."), and the sender prints it with no heading. The target's own
+  event counts only the hits, because that is all the defender can observe,
+  and it says terrorists got nowhere only when an agent actually got past its
+  security. The caught-agent clause comes from the agent pool (below).
 - **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
   original's name here, as it does for the Gooie Kablooie and the S3-Sabre
   (#218): players coming from the original look for these by name. Do not
@@ -5344,19 +5348,22 @@ outcome: `process_sabre_return` (`BRE.OVR 0x046045`) calls the news writer at
 `+0x1051` on the branch taken by a nuclear or chemical strike and by any failed
 strike, and at `+0x1107` on the branch taken by an S3-Sabre that landed.
 
-IB posts one line on the target's planet for every outcome but a missing realm,
+IB posts one line on the target's planet for every outcome but a missing realm
+or a misfire,
 chosen by the outcome and worded as IB's own (`missileNews`, `planetOpNews` in
 `ibbs_special.go`):
 
 - a hit
-- a misfire
 - an SDI interception
 - a missile the target's garrison brought down
-- an S3-Sabre that broke up
+- an S3-Sabre that backfired
 - a Sabre that reached its target and did negligible damage
 - a protected realm
 - for the bombing ops, a run that found nothing to wreck
 - for the bombing ops, a run driven off by the landing roll before it arrived
+
+A misfire is the one missile outcome with no line on the target's planet: the
+target reads it as a personal event instead, from the missile pool (below).
 
 **Who is told in person — BINARY-VERIFIED, and IB matches since
 2026-10-01.** The news is the only channel the original never skips; the
@@ -5376,14 +5383,16 @@ selectively:
 - **Bombing ops, both boards.** News only. `resolve_received_bombing` and
   `process_bombing_results` each call the news writer once and the event
   writer never. IB filed an event with every realm on the target planet and
-  with the firer; the firer's planet news now names the share destroyed, as
-  the original's success line does (food, trading market, investments; no
-  figure for the trade routes). The captures agree: `cap/eots-ibbs-02.cap` and
+  with the firer; the firer's planet news names the share destroyed, as the
+  original's success line does (food, trading market, investments; no figure
+  for the trade routes). The target's board writes the share as a sentence in
+  the report that rides home ("37% of the supply burned."), and the firer's
+  line appends it. The captures agree: `cap/eots-ibbs-02.cap` and
   `-03.cap` show bombing outcomes on both planets' news screens and in no
   realm's turn report, and missile hits in both.
 
 Until #288 every outcome past protection posted "X struck Y", so a
-missile that broke up read as a hit on the target's planet while the firer's
+missile that backfired read as a hit on the target's planet while the firer's
 report said it failed. Two places where IB's line knowingly differs from the
 original's choice:
 
@@ -5393,6 +5402,24 @@ original's choice:
 - **A bombing run that landed on nothing says so.** The original cannot reach
   that case; IB can, because its effects are the local ops' and report what
   they destroyed.
+
+**Failure pools — IB's own.** Three kinds of failure read one line picked at
+random from a pool (`internal/game/flavor.go`): a missile that misfired, a
+bombing run driven off, and a caught agent (interplanetary Terrorist Ops and
+the local covert ops alike). The missile and agent entries are pairs: the
+board where the strike lands picks one entry and uses both halves, the target's
+event and the report the firer reads, so the two sides tell the same story. The
+bomber pool holds the target planet's news line alone, because a bombing run
+has no firer event: the firer is told through its planet's news only, and a
+run that fails sends home an empty report. The firer's own planet news cannot
+follow any pick, since it is written from the returned outcome alone and
+carrying the pick would be a new packet field, so it keeps one plain line per
+outcome. The pick is a draw on the world's RNG and changes no outcome of this
+strike, though it does shift the random draws that follow.
+
+A Sabre backfire's count of new regions appears in the target's event and the
+target planet's news. The firer's planet line gives no count, since the land is
+settled on the target's board and does not travel.
 
 **The landing roll covers all four bombing ops** (`bombingLands`,
 `BombingLandOdds`), as the receiver's `Random(3)` at `+0x11b` sits ahead of its

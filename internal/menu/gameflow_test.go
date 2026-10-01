@@ -1459,18 +1459,18 @@ func TestTurnRecapCountsRepeatedEntries(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	p.Events = []game.Event{
-		{Text: "You demoralized Redmark's forces."},
-		{Text: "You demoralized Redmark's forces."},
-		{Text: "The operation failed and your agent was lost."},
-		{Text: "You demoralized Redmark's forces."},
-		{Text: "The operation failed and your agent was lost."},
+		{Text: "Redmark holds no treaty for you to unravel."},
+		{Text: "Redmark holds no treaty for you to unravel."},
+		{Text: "Your agent didn't make it home."},
+		{Text: "Redmark holds no treaty for you to unravel."},
+		{Text: "Your agent didn't make it home."},
 	}
 
 	f := &fakeSession{keys: []rune(" ")}
 	showTurnEvents(f, w)
 
 	out := stripANSI(f.out.String())
-	if got := strings.Count(out, "You demoralized"); got != 1 {
+	if got := strings.Count(out, "holds no treaty"); got != 1 {
 		t.Errorf("the repeated line should be drawn once, got %d:\n%s", got, out)
 	}
 	if !strings.Contains(out, "(3 times)") || !strings.Contains(out, "(2 times)") {
