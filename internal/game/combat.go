@@ -95,10 +95,6 @@ func (w *World) CanBombingOp(e *Empire) bool {
 	return underDailyCap(e.BombingOpsToday, w.Config.MaxBombingOps)
 }
 
-// Attack resolves a battle between attacker a and defender d, mutating
-// both empires, and returns a battle report. The attacker commits its
-// offense; the defender fights with its defense plus a home bonus from its
-// land. Both sides apply a random factor.
 // Attack resolves a regular attack. On a win the loser bleeds its regions as a
 // proportional mix; the winner captures the same count. autoCapture governs how
 // the winner GAINS that land: true (AI, group attacks) adds it as the same mix;
