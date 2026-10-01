@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"strings"
 )
 
 // Duplicate-user checking, BRE's "Dupe Checking": a league setting that finds
@@ -25,7 +24,7 @@ const DupeHashLen = 16
 // dupeHash identifies a caller across the league. It hashes the same normalized
 // handle FindByOwner matches on, so the two agree about who a baron is.
 func dupeHash(handle string) string {
-	h := strings.ToLower(strings.TrimSpace(handle))
+	h := OwnerKey(handle)
 	if h == "" {
 		return "" // an AI baron belongs to nobody and can't be a duplicate
 	}

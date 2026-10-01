@@ -150,6 +150,10 @@ alphabet is not shorter than the same name in another.
   on a local disk.** The lock works inside one computer only. On a network
   share, or with nodes running on two computers, two of them can save over each
   other. You would see no error; a turn would just be gone.
+- One realm can be played in only one session at a time. A second login with
+  the same BBS name is told the realm is already being played, and can enter
+  once the first session ends. If a door process hangs after the caller has
+  gone, stopping that process frees the realm.
 - If your empire is attacked while you are at the menus, a notice appears the
   next time you press a key. Orders you already typed are adjusted to what you
   still hold, and the game tells you when that happens.

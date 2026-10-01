@@ -173,7 +173,7 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 	if slot == 0 {
 		return nil
 	}
-	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config, w.GameDay)
+	e := newEmpire(realm, OwnerKey(handle), w.Config, w.GameDay)
 	e.Slot = slot
 	w.Empires = append(w.Empires, e)
 	return e
@@ -358,6 +358,13 @@ func (w *World) removeIdleEmpires(today string) {
 	})
 }
 
+// OwnerKey is a BBS handle as realms are keyed by it: trimmed and lowercased,
+// so "Khan" and " KHAN " are the same caller. Everything that matches, stores or
+// locks on a handle goes through it, so they cannot drift apart.
+func OwnerKey(handle string) string {
+	return strings.ToLower(strings.TrimSpace(handle))
+}
+
 // FindByOwner returns the realm belonging to a caller's BBS handle, or nil.
 //
 // An empty handle matches NOBODY, though every computer baron stores one: the
@@ -366,7 +373,7 @@ func (w *World) removeIdleEmpires(today string) {
 // handle straight from outside — a dropfile alias, an inter-BBS packet, a
 // market key — get nil instead of a stranger's empire.
 func (w *World) FindByOwner(handle string) *Empire {
-	h := strings.ToLower(strings.TrimSpace(handle))
+	h := OwnerKey(handle)
 	if h == "" {
 		return nil
 	}

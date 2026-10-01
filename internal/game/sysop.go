@@ -2,7 +2,6 @@ package game
 
 import (
 	"errors"
-	"strings"
 )
 
 // Sysop edits to a player's record (#161). BRE's VIEW command lists the players
@@ -42,7 +41,7 @@ var (
 // the LOCAL record it belongs to (by strike or bid id) and the handle is read
 // off that record, never off the packet.
 func (w *World) RenameOwner(e *Empire, newHandle string) error {
-	h := strings.ToLower(strings.TrimSpace(newHandle))
+	h := OwnerKey(newHandle)
 	switch {
 	case e.Owner == "":
 		return ErrOwnerIsAI

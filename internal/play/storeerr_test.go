@@ -2,6 +2,7 @@ package play
 
 import (
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -33,6 +34,11 @@ func TestRunReportsASessionWhoseSavesFailed(t *testing.T) {
 	cfg := cfgIn(dir)
 	if err := store.Save(game.NewWorld(cfg), cfg); err != nil {
 		t.Fatalf("seed world: %v", err)
+	}
+	// The session lock lives in its own folder, which stays writable: this test is
+	// about the world's saves failing, not the login.
+	if err := os.Mkdir(filepath.Join(dir, "sessions"), 0o755); err != nil {
+		t.Fatalf("sessions dir: %v", err)
 	}
 	if err := os.Chmod(dir, 0o555); err != nil {
 		t.Fatalf("chmod: %v", err)

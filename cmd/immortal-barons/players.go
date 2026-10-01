@@ -148,7 +148,7 @@ func editPlayer(cfg game.Config, r *bufio.Reader, out io.Writer, row playerRow) 
 				fmt.Fprintln(out, err)
 				continue
 			}
-			row.handle = strings.ToLower(strings.TrimSpace(name))
+			row.handle = game.OwnerKey(name)
 			fmt.Fprintf(out, "%s now belongs to %s.\n\n", row.realm, row.handle)
 		case "R":
 			name, eof := ask(r, out, "Change realm name to? ")

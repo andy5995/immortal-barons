@@ -6,6 +6,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
+	"github.com/andy5995/immortal-barons/internal/store"
 )
 
 func TestSessionOnboardsAndSaves(t *testing.T) {
@@ -73,4 +74,50 @@ func TestOpeningMenuNamesTheBuild(t *testing.T) {
 	if n := strings.Count(out, game.NameVersion()); n != strings.Count(out, "Game started on") {
 		t.Errorf("version appears %d times, the header %d", n, strings.Count(out, "Game started on"))
 	}
+}
+
+// A realm is played by one session at a time: a second login on the same
+// handle, however it is cased or spaced, is turned away before anything loads,
+// and the realm opens again once the first session ends.
+func TestSecondSessionOnARealmIsRefused(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	held, err := lockRealm(cfg, "Khan")
+	if err != nil {
+		t.Fatalf("lock: %v", err)
+	}
+	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	reason, err := Run(f, Identity{Handle: " KHAN "}, cfg, "2026-07-03")
+	if err != nil || reason != "busy" {
+		t.Fatalf("second session: reason %q, err %v; want busy", reason, err)
+	}
+	if !strings.Contains(f.out.String(), "already being played elsewhere") {
+		t.Errorf("no refusal shown:\n%s", f.out.String())
+	}
+	if strings.Contains(f.out.String(), "Khanate") {
+		t.Error("the refused session went on to onboard")
+	}
+
+	held.Release()
+	f2 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	if reason, err := Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil || reason == "busy" {
+		t.Fatalf("after release: reason %q, err %v", reason, err)
+	}
+	w, err := store.Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if w.FindByOwner("khan") == nil {
+		t.Error("the session after release did not create the realm")
+	}
+}
+
+// The lock file is named by a fixed-length hash, so a handle far past any file
+// name limit still logs in.
+func TestLongHandleStillLocks(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	held, err := lockRealm(cfg, strings.Repeat("x", 400))
+	if err != nil {
+		t.Fatalf("lock for a 400-byte handle: %v", err)
+	}
+	held.Release()
 }

@@ -4,9 +4,12 @@
 package play
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -30,9 +33,27 @@ type Identity struct {
 }
 
 // Run plays one session for the given caller. The returned reason describes how
-// the session ended — "quit", "idle", "time", "disconnect", or "closed" — for
-// the front-end's logs.
+// the session ended — "quit", "idle", "time", "disconnect", "closed", or "busy"
+// when the realm is already being played — for the front-end's logs.
 func Run(s session.Session, id Identity, cfg game.Config, today string) (reason string, err error) {
+	// One session per realm. A BBS usually keeps a user to one node, but not
+	// always, and two -local terminals can name the same handle; without this the
+	// same realm could spend its daily allowances in two places at once. The lock
+	// is held for the whole session and the OS drops it if the process dies.
+	held, err := lockRealm(cfg, id.Handle)
+	if errors.Is(err, store.ErrBusy) {
+		term := menu.Term{UTF8: session.IsUTF8(s), ASCII: session.IsASCII(s), Plain: !session.HasANSI(s)}
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(
+			i18n.T(menu.FittingLang(term, id.Language), "Your realm is already being played elsewhere."), ""), ansi.Reset)
+		return "busy", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	if held != nil {
+		defer held.Release()
+	}
+
 	w, err := store.Load(cfg)
 	if err != nil {
 		return "", err
@@ -85,6 +106,20 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// Each action already persisted via its Transact; the session-end save is a
 	// no-op here (saving w's in-memory state would overwrite concurrent nodes).
 	return Session(s, id, w, cfg, rebornFrom, maint, func() error { return nil })
+}
+
+// lockRealm takes the session lock for handle, without waiting: a second login
+// gets store.ErrBusy. The file is named by a hash of game.OwnerKey(handle), so
+// it matches FindByOwner's notion of a caller, and any handle, however long,
+// makes a valid file name. An empty handle owns no realm and takes no lock
+// (nil, nil).
+func lockRealm(cfg game.Config, handle string) (*store.FileLock, error) {
+	key := game.OwnerKey(handle)
+	if key == "" {
+		return nil, nil
+	}
+	sum := sha256.Sum256([]byte(key))
+	return store.LockPath(filepath.Join(cfg.DataDir, "sessions", hex.EncodeToString(sum[:])+".lock"), false)
 }
 
 // maintNotice tells the caller what the login's daily maintenance did — that the
