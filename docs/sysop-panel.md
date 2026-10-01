@@ -74,6 +74,10 @@ to reverse the order.
   it. It also shows how long each board has been silent, its average packet
   round trip, and when a probe last came back. The status is a word (`ok`,
   `never heard`, `below min`, `other rules`, `held`), not only a color.
+  `held` means the board's latest packet was held rather than applied; an old
+  held file from before the board upgraded does not count. "Held since" says
+  when that hold began, or "never recorded" for a hold kept by an older
+  version.
 - **In flight:** every strike, terrorist operation, special operation and trade
   bid that left this board and has no answer yet. Each row shows when the
   lost-forces timer will give it up. An item stays here for the whole round

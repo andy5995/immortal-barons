@@ -56,7 +56,14 @@ type Board struct {
 	RoundTrip float64
 	// ProbeBack is when a probe sent to it last came home; zero if never.
 	ProbeBack time.Time
-	Held      bool // packets from it are held for a protocol difference
+	// Held is a protocol hold that is still current: its latest packet was held
+	// rather than applied (game.World.ProtocolHoldCurrent), the same rule that
+	// pauses the lost-forces timer. A held file left over from before the board
+	// upgraded does not count.
+	Held bool
+	// HeldSince is when the current hold was recorded; zero, with Held set, means
+	// the hold carries no time (held by a build that did not record one).
+	HeldSince time.Time
 }
 
 // Status is the board's condition in words. A table must never say it in color
@@ -172,7 +179,10 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 	}
 	for _, r := range w.BBSInfoRows() {
 		b := Board{BBSInfoRow: r, SilentDays: w.LinkSilentDays(r.Name, now),
-			RoundTrip: w.TravelTimes[r.Name], Held: heldFrom[r.Name]}
+			RoundTrip: w.TravelTimes[r.Name], Held: heldFrom[r.Name] && w.ProtocolHoldCurrent(r.Name)}
+		if t, ok := game.ParseStamp(w.ProtocolHeldAt[r.Name]); ok && b.Held {
+			b.HeldSince = t
+		}
 		if t, ok := game.ParseStamp(r.LastRecon); ok {
 			b.LastHeard = t
 		}

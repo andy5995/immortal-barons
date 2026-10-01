@@ -1,6 +1,7 @@
 package sysop
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -200,5 +201,59 @@ func TestInFlightTerrorNamesOneAgent(t *testing.T) {
 	f := game.InFlightStrike{Kind: "terror", TerrorOp: game.TerrorOpSpy, Agents: 1}
 	if got, want := what(f), "Send Spy (1 agent)"; got != want {
 		t.Errorf("what = %q, want %q", got, want)
+	}
+}
+
+// A board counts as held only while its latest packet was held rather than
+// applied — the rule that pauses the lost-forces timer — and the row says when
+// the hold began, or that it was never recorded.
+func TestBoardHeldFollowsTheCurrentHold(t *testing.T) {
+	cfg := leagueBoard(t)
+	pkt, err := json.Marshal(game.Packet{FromBoard: "Far BBS", Protocol: game.Protocol - 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := filepath.Join(cfg.DataDir, store.HeldDir)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "old"+store.PacketExt), pkt, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	setHeldAt := func(at string) {
+		t.Helper()
+		w, err := store.Load(cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.ProtocolHeldAt = map[string]string{}
+		if at != "" {
+			w.ProtocolHeldAt["Far BBS"] = at
+		}
+		if err := store.Save(w, cfg); err != nil {
+			t.Fatal(err)
+		}
+	}
+	board := func() Board {
+		t.Helper()
+		s, err := Read(cfg.DataDir, time.Now())
+		if err != nil || len(s.Boards) != 1 {
+			t.Fatalf("Read: %v, %+v", err, s.Boards)
+		}
+		return s.Boards[0]
+	}
+
+	// The last packet from Far BBS applied 49 hours ago (leagueBoard).
+	setHeldAt("")
+	if b := board(); !b.Held || !b.HeldSince.IsZero() || b.Status() != "held" {
+		t.Errorf("unstamped hold: held %v since %v (%q), want held, never recorded", b.Held, b.HeldSince, b.Status())
+	}
+	setHeldAt(game.StoredStamp(time.Now().Add(-72 * time.Hour)))
+	if b := board(); b.Held || b.Status() != "ok" {
+		t.Errorf("hold older than the last applied packet: held %v (%q), want not held", b.Held, b.Status())
+	}
+	setHeldAt(game.StoredStamp(time.Now().Add(-1 * time.Hour)))
+	if b := board(); !b.Held || b.HeldSince.IsZero() {
+		t.Errorf("current hold: held %v since %v, want held with a time", b.Held, b.HeldSince)
 	}
 }

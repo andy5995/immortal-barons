@@ -51,7 +51,7 @@ type boardTab struct {
 
 func newBoardTab(u *ui, dir string) *boardTab {
 	t := &boardTab{u: u, dir: dir,
-		boards:   newTable("#", "BBS Name", "Last heard", "Silent", "Version", "Round trip", "Probe back", "Status"),
+		boards:   newTable("#", "BBS Name", "Last heard", "Silent", "Version", "Round trip", "Probe back", "Held since", "Status"),
 		inFlight: newTable("ID", "Kind", "What", "Owner", "Target board", "Target realm", "Launch day", "Waiting", "Held days", "Lost-forces return"),
 		held:     newTable("File", "From board", "Type", "Reason", "Arrived", "Expires", "Pauses lost forces"),
 	}
@@ -231,8 +231,15 @@ func (t *boardTab) boardRows() [][]string {
 		if b.RoundTrip > 0 {
 			trip = fmt.Sprintf("%.1f days", b.RoundTrip)
 		}
+		held := "-"
+		if b.Held {
+			held = "never recorded" // an unstamped hold
+			if !b.HeldSince.IsZero() {
+				held = stamp(b.HeldSince)
+			}
+		}
 		rows = append(rows, []string{strconv.Itoa(b.Number), b.Name, stamp(b.LastHeard), silent, ver,
-			trip, stamp(b.ProbeBack), b.Status()})
+			trip, stamp(b.ProbeBack), held, b.Status()})
 	}
 	return rows
 }
