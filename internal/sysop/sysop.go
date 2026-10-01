@@ -171,15 +171,17 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 		return s, err
 	}
 	s.Held = held
+	// A board is held when one of its held packets pauses the lost-forces
+	// timer: the store's own rule, so this tab and In flight cannot disagree.
 	heldFrom := map[string]bool{}
 	for _, h := range held {
-		if h.Reason == store.HeldProtocol {
+		if h.PausesLostForces {
 			heldFrom[h.FromBoard] = true
 		}
 	}
 	for _, r := range w.BBSInfoRows() {
 		b := Board{BBSInfoRow: r, SilentDays: w.LinkSilentDays(r.Name, now),
-			RoundTrip: w.TravelTimes[r.Name], Held: heldFrom[r.Name] && w.ProtocolHoldCurrent(r.Name)}
+			RoundTrip: w.TravelTimes[r.Name], Held: heldFrom[r.Name]}
 		if t, ok := game.ParseStamp(w.ProtocolHeldAt[r.Name]); ok && b.Held {
 			b.HeldSince = t
 		}

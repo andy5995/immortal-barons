@@ -2,7 +2,10 @@ package main
 
 import (
 	"image"
+	"io"
+	"strings"
 
+	"gioui.org/io/clipboard"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -58,4 +61,9 @@ func button(th *material.Theme, c *widget.Clickable, label string) layout.FlexCh
 // label is a body label as a flex child.
 func label(th *material.Theme, s string) layout.FlexChild {
 	return layout.Rigid(material.Body2(th, s).Layout)
+}
+
+// copyText puts s on the system clipboard.
+func copyText(gtx layout.Context, s string) {
+	gtx.Execute(clipboard.WriteCmd{Type: "application/text", Data: io.NopCloser(strings.NewReader(s))})
 }

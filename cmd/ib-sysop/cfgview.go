@@ -20,6 +20,7 @@ type cfgView struct {
 	t *boardTab
 
 	editBtn widget.Clickable
+	copyBtn widget.Clickable
 	list    widget.List
 
 	loaded  bool
@@ -107,11 +108,23 @@ func (c *cfgView) layout(gtx layout.Context) layout.Dimensions {
 		c.edit()
 	}
 	c.check()
+	// Copy only what was actually read: a missing or unreadable file has no
+	// text, and copying nothing would still wipe the clipboard.
+	canCopy := c.exists && c.readErr == nil
+	if c.copyBtn.Clicked(gtx) && canCopy {
+		copyText(gtx, strings.Join(c.lines, "\n")+"\n")
+	}
 
 	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{Alignment: layout.Middle}.Layout(gtx,
 				button(th, &c.editBtn, "Edit in default editor"),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if !canCopy {
+						gtx = gtx.Disabled()
+					}
+					return layout.Inset{Right: unit.Dp(8)}.Layout(gtx, newButton(th, &c.copyBtn, "Copy").Layout)
+				}),
 				layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 					l := material.Body2(th, c.path())
 					l.Color, l.MaxLines = pal.dim, 1

@@ -14,12 +14,13 @@ import (
 // table is a sortable, fixed-width text table. Clicking a heading sorts by that
 // column; clicking it again reverses the order.
 type table struct {
-	heads []string
-	click []widget.Clickable
-	sort  int
-	desc  bool
-	list  widget.List
-	wide  widget.List // scrolls a table wider than the window sideways
+	heads   []string
+	click   []widget.Clickable
+	copyBtn widget.Clickable
+	sort    int
+	desc    bool
+	list    widget.List
+	wide    widget.List // scrolls a table wider than the window sideways
 }
 
 func newTable(heads ...string) *table {
@@ -65,6 +66,12 @@ func (t *table) layout(gtx layout.Context, th *material.Theme, rows [][]string, 
 		})
 	}
 
+	// Copy takes the rows as shown, sorted the same way, as tab-separated text
+	// with the headings first: it pastes into a message or a spreadsheet.
+	if t.copyBtn.Clicked(gtx) {
+		copyText(gtx, tsv(t.heads, rows))
+	}
+
 	// Each column is as wide as its longest cell, in characters of the mono face.
 	widths := make([]int, len(t.heads))
 	for i, h := range t.heads {
@@ -104,9 +111,31 @@ func (t *table) layout(gtx layout.Context, th *material.Theme, rows [][]string, 
 	body := func(gtx layout.Context) layout.Dimensions {
 		return t.body(gtx, th, head, rows, widths, pad, empty)
 	}
-	return material.List(th, &t.wide).Layout(gtx, 1, func(gtx layout.Context, _ int) layout.Dimensions {
-		return body(gtx)
-	})
+	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			if len(rows) == 0 {
+				gtx = gtx.Disabled()
+			}
+			return layout.Inset{Bottom: unit.Dp(6)}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				return layout.Flex{}.Layout(gtx, button(th, &t.copyBtn, "Copy"))
+			})
+		}),
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+			return material.List(th, &t.wide).Layout(gtx, 1, func(gtx layout.Context, _ int) layout.Dimensions {
+				return body(gtx)
+			})
+		}),
+	)
+}
+
+// tsv is a table as tab-separated text, the headings as the first line.
+func tsv(heads []string, rows [][]string) string {
+	var b strings.Builder
+	b.WriteString(strings.Join(heads, "\t") + "\n")
+	for _, r := range rows {
+		b.WriteString(strings.Join(r, "\t") + "\n")
+	}
+	return b.String()
 }
 
 func (t *table) body(gtx layout.Context, th *material.Theme, head layout.Widget, rows [][]string, widths []int,

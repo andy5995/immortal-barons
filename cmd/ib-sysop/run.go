@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
-	"gioui.org/io/clipboard"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -156,8 +154,7 @@ func (r *runView) layout(gtx layout.Context) layout.Dimensions {
 		r.log = nil
 	}
 	if r.copyBtn.Clicked(gtx) {
-		gtx.Execute(clipboard.WriteCmd{Type: "application/text",
-			Data: io.NopCloser(strings.NewReader(strings.Join(r.log, "\n") + "\n"))})
+		copyText(gtx, strings.Join(r.log, "\n")+"\n")
 	}
 
 	cmds := r.offered()

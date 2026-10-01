@@ -84,6 +84,7 @@ to reverse the order.
   trip, which is usually hours.
 - **Held packets:** the files in the held directory, why each one is held, when
   it expires, and whether it pauses the lost-forces timer.
+
 - **Run:** runs one `immortal-barons` command and shows its output as it runs.
   **Detailed** adds `-detailed`, and is grayed out for commands that ignore it.
   The League Coordinator's commands appear only on node #1. The two that act on
@@ -93,6 +94,11 @@ to reverse the order.
   names the file. A board with no `bbs.cfg` gets one written from its current
   settings before the editor opens. The view reads the file again when it
   changes.
+
+Each table has a **Copy** button that puts it on the clipboard as
+tab-separated text, sorted as shown, with the headings first. It pastes into a
+message or a spreadsheet. The Run tab's **Copy log** and the bbs.cfg tab's
+**Copy** do the same for their text.
 
 ## What it changes
 

@@ -21,3 +21,12 @@ func TestLess(t *testing.T) {
 		}
 	}
 }
+
+// Copy's text is the headings then each row, tab-separated, one per line.
+func TestTSV(t *testing.T) {
+	got := tsv([]string{"ID", "What"}, [][]string{{"29", "Send Spy (1 agent)"}, {"30", "Nuclear Assault"}})
+	want := "ID\tWhat\n29\tSend Spy (1 agent)\n30\tNuclear Assault\n"
+	if got != want {
+		t.Errorf("tsv = %q, want %q", got, want)
+	}
+}
