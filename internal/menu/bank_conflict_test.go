@@ -52,7 +52,7 @@ func TestInvestVanishedEmpireConflict(t *testing.T) {
 	_ = b.Player()
 	commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
 
-	fb := &fakeSession{keys: []rune("5\r1000\r ")}
+	fb := &fakeSession{keys: []rune("5\r1000\ry")}
 	investFunds(fb, b)
 
 	if d := committedEmpire(t, cfg, "decoy"); len(d.Investments) != 0 || d.Gold != 1_000_000 {

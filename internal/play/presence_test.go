@@ -41,8 +41,9 @@ func (f *peekSession) Write(p []byte) (int, error) { return f.out.Write(p) }
 // stamp nobody else can see.
 func TestCallerIsOnlineAtTheOpeningMenu(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	// splash dismiss, Enter (English), realm name, then Quit at the opening menu.
-	keys := " \r1Khanate\r0"
+	// splash dismiss, Enter (English), realm name, confirm; input then ends on
+	// the opening menu's read.
+	keys := " \r1Khanate\ry"
 	online := map[int]bool{}
 	f := &peekSession{
 		keys: []rune(keys),
@@ -78,7 +79,7 @@ func TestCallerIsOnlineAtTheOpeningMenu(t *testing.T) {
 // the roster at once instead of leaving them there for the window.
 func TestSessionEndClearsPresence(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f := &fakeSession{keys: []rune(" \r1Khanate\r0")}
+	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}

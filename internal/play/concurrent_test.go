@@ -58,7 +58,7 @@ func TestConcurrentSessionsShareWorld(t *testing.T) {
 		go func(i int) {
 			defer sessions.Done()
 			// splash dismiss, realm name, then quit.
-			f := &fakeSession{keys: []rune(fmt.Sprintf(" \r1Realm%d\r0", i))}
+			f := &fakeSession{keys: []rune(fmt.Sprintf(" \r1Realm%d\ry0", i))}
 			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", game.MaintReport{}, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}
@@ -133,7 +133,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 		sessions.Add(1)
 		go func(i int) {
 			defer sessions.Done()
-			f := &fakeSession{keys: []rune(fmt.Sprintf(" \r1Realm%d\r0", i))}
+			f := &fakeSession{keys: []rune(fmt.Sprintf(" \r1Realm%d\ry0", i))}
 			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", game.MaintReport{}, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}

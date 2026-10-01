@@ -26,6 +26,10 @@ func TestAskYesNo(t *testing.T) {
 		{"\r", false, false},
 		{"n", false, false},
 		{"N", false, false},
+		// Keys the prompt does not offer are passed over, so a held-down 0 or a
+		// stray space cannot answer it with the default.
+		{"0 0n", true, false},
+		{" 0y", false, true},
 	}
 	for _, c := range cases {
 		f := &fakeSession{keys: []rune(c.keys)}

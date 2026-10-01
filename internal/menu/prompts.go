@@ -14,7 +14,9 @@ import (
 
 // AskYesNo prompts msg with a "(Y/n)" or "(y/N)" hint (whichever matches
 // defYes) and reads a single keypress — no Enter required. 'y'/'Y' returns
-// true, 'n'/'N' returns false; Enter or any other key returns defYes.
+// true, 'n'/'N' returns false and Enter returns defYes. Any other key is passed
+// over, so a player holding a key down to race through their turns cannot
+// answer a question with it.
 func AskYesNo(s session.Session, msg string, defYes bool) bool {
 	fmt.Fprint(s, "\n")
 	return askYesNoHere(s, msg, defYes)
@@ -44,7 +46,7 @@ func askYesNoHere(s session.Session, msg string, defYes bool) bool {
 		case 'n', 'N':
 			fmt.Fprint(s, "n\n")
 			return false
-		default:
+		case '\r', '\n':
 			if defYes {
 				fmt.Fprint(s, "y\n")
 			} else {

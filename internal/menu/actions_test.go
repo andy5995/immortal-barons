@@ -459,7 +459,7 @@ func TestRegularAttackAdvancesTurn(t *testing.T) {
 		e.Protection = 0
 	}
 
-	f := &fakeSession{keys: []rune("A\r\r\r\r ")} // target A, full-force defaults, then a key to clear the report pause
+	f := &fakeSession{keys: []rune("A\r\r\r\r\r ")} // target A, full-force defaults, Enter to send, then a key to clear the report pause
 	if r := regularAttack(f, w); r != Back {
 		t.Errorf("completed attack should advance the turn (Back), got %v", r)
 	}

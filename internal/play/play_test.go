@@ -101,7 +101,7 @@ func TestOnboardsThenPersists(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// splash dismiss, Enter for the language prompt (English), realm name
 	// "Khanate", then Quit
-	f := &fakeSession{keys: []rune(" \r1Khanate\r0")}
+	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := &fakeSession{keys: []rune(" \r1Surplusia\r0")}
+	f := &fakeSession{keys: []rune(" \r1Surplusia\ry0")}
 	reason, err := Run(f, Identity{Handle: "Surplus"}, cfg, "2026-07-03")
 	if err != nil {
 		t.Fatal(err)
@@ -165,7 +165,7 @@ func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
 
 func TestReturningPlayerResumes(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\r0")}
+	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
 	Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	f2 := &fakeSession{keys: []rune(" 0")} // no naming or language prompt second time
 	Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03")
@@ -181,7 +181,7 @@ func TestFirstRunLanguageSelection(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// splash dismiss, "2" (Deutsch) at the language prompt, (1) Create Realm at
 	// the Welcome menu, realm name, Quit
-	f := &fakeSession{keys: []rune(" 2\r1Khanate\r0")}
+	f := &fakeSession{keys: []rune(" 2\r1Khanate\ry0")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -202,7 +202,7 @@ func TestFirstRunLanguageSelection(t *testing.T) {
 func TestDropfileLanguageSkipsThePicker(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// splash dismiss, (1) Create Realm, realm name, Quit — no language keypress
-	f := &fakeSession{keys: []rune(" 1Khanate\r0")}
+	f := &fakeSession{keys: []rune(" 1Khanate\ry0")}
 	if _, err := Run(f, Identity{Handle: "Khan", Language: "de"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -226,7 +226,7 @@ func TestDropfileLanguageSkipsThePicker(t *testing.T) {
 // in place rather than silently choosing for the caller.
 func TestUnshippedDropfileLanguageStillPrompts(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f := &fakeSession{keys: []rune(" 2\r1Khanate\r0")}
+	f := &fakeSession{keys: []rune(" 2\r1Khanate\ry0")}
 	if _, err := Run(f, Identity{Handle: "Khan", Language: ""}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -354,7 +354,7 @@ func stripANSI(s string) string { return ansiEsc.ReplaceAllString(s, "") }
 // it, not merely that some output appeared.
 func TestWelcomeMenuComesBeforeNaming(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f := &fakeSession{keys: []rune(" \r1Khanate\r0")} // splash, English, (1) Create Realm, name, Quit
+	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")} // splash, English, (1) Create Realm, name, confirm, Quit
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}

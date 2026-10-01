@@ -12,7 +12,7 @@ func TestSessionOnboardsAndSaves(t *testing.T) {
 	cfg := cfgIn(t.TempDir()) // reuse the helper from play_test.go
 	w := game.NewWorldSeed(cfg, 1)
 	saved := false
-	f := &fakeSession{keys: []rune(" \r1Khanate\r0")} // splash, language (English), realm name, quit
+	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")} // splash, language (English), realm name, confirm, quit
 	if _, err := Session(f, Identity{Handle: "Khan"}, w, cfg, "", game.MaintReport{}, func() error { saved = true; return nil }); err != nil {
 		t.Fatal(err)
 	}

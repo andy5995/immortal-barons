@@ -13,10 +13,10 @@ import (
 // other test of this screen calls annihilatorDefense directly, so nothing would
 // notice it being hoisted back out — this one drives two whole turns and counts
 // the offers.
-// turnKeys is one whole turn with nothing done in it: the pauses, Quit at the
-// Bank, Spending and Attack menus, "no" to the Gooie, then Enter to take the
-// continue prompt's default and start the next turn.
-const turnKeys = "    000n\r"
+// turnKeys is one whole turn with nothing done in it: the two pauses, Quit at
+// the Bank, Spending and Attack menus, "no" to the Gooie, then Quit at the
+// InterPlanetary menu.
+const turnKeys = "  000n0"
 
 func TestGooieDefenseIsOfferedOnEveryTurn(t *testing.T) {
 	w := newWorld()
@@ -29,10 +29,9 @@ func TestGooieDefenseIsOfferedOnEveryTurn(t *testing.T) {
 		ArrivesDay: w.World.GameDay, DaysLeft: game.AnnihilatorSiegeDays,
 	})
 
-	// Turn 1: four pauses, Quit Bank, Quit Spending, Quit Attack, decline the
-	// Gooie, accept "Continue to your next turn?". Turn 2 repeats without the
-	// first-turn screens and declines the continue prompt to stop.
-	f := &fakeSession{keys: []rune(strings.Repeat(turnKeys, 3) + " ")}
+	// Turn 1, then Enter to accept "Continue to your next turn?", then turn 2,
+	// after which no turns are left and the session stops on its own.
+	f := &fakeSession{keys: []rune(turnKeys + "\r" + turnKeys)}
 	runTurn(f, w)
 
 	out := stripANSI(f.out.String())

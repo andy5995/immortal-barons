@@ -11,7 +11,7 @@ import (
 // and goes no further: no maintenance notice, no onboarding, no menu.
 func TestAFrozenLeagueLetsNobodyIn(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\r0")}
+	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestAFrozenLeagueLetsNobodyIn(t *testing.T) {
 // comes before the menu engine that normally supplies it.
 func TestAFrozenLeagueSpeaksTheCallersLanguage(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\r0")}
+	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
