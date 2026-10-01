@@ -43,8 +43,9 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	held, err := lockRealm(cfg, id.Handle)
 	if errors.Is(err, store.ErrBusy) {
 		term := menu.Term{UTF8: session.IsUTF8(s), ASCII: session.IsASCII(s), Plain: !session.HasANSI(s)}
+		lang := menu.FittingLang(term, id.Language)
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(
-			i18n.T(menu.FittingLang(term, id.Language), "Your realm is already being played elsewhere."), ""), ansi.Reset)
+			i18n.T(lang, "Your realm is already being played elsewhere."), ""), ansi.Reset)
 		return "busy", nil
 	}
 	if err != nil {
