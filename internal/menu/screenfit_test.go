@@ -26,19 +26,38 @@ func screenRows(out string) int {
 // prompt appears, which is what happened to the splash (25 rows of art on a
 // 24-row terminal) and to the unpaged Configuration Editor.
 func TestSplashFitsTheScreen(t *testing.T) {
+	rows := splashRows()
+	// The pause prompt sits on the row after the art and is part of the screen.
+	if n := len(rows) + 1; n > ansi.ScreenRows {
+		t.Errorf("the splash and its prompt need %d rows, more than the %d assumed (trim rows from screens/splash.ans)",
+			n, ansi.ScreenRows)
+	}
+	// Width matters as much as height: one column over and the terminal wraps
+	// every art row, which shifts everything below it.
+	for i, l := range rows {
+		if n := len([]rune(anyEscape.ReplaceAllString(l, ""))); n > ansi.ScreenCols {
+			t.Errorf("splash row %d is %d columns, more than the %d assumed", i+1, n, ansi.ScreenCols)
+		}
+	}
+}
+
+// Every art row is placed by position, never reached by a line break: a
+// terminal that wraps at column 80 regardless of DECAWM (mTelnet, NetRunner,
+// RGTerm) turns a CR/LF after a full row into a blank line, which
+// double-spaced the splash.
+func TestSplashPlacesEveryRowByPosition(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")}
 	Splash(f)
-	// The pause prompt sits on the row after the art and is part of the screen.
-	if rows := screenRows(f.out.String()); rows > ansi.ScreenRows {
-		t.Errorf("the splash and its prompt need %d rows, more than the %d assumed (trim rows from screens/splash.ans)",
-			rows, ansi.ScreenRows)
-	}
-	// Width matters as much as height and was never checked: one column over
-	// and the terminal wraps every art row, which shifts everything below it.
-	for i, l := range strings.Split(anyEscape.ReplaceAllString(f.out.String(), ""), "\n") {
-		if n := len([]rune(strings.TrimRight(l, "\r"))); n > ansi.ScreenCols {
-			t.Errorf("splash line %d is %d columns, more than the %d assumed", i+1, n, ansi.ScreenCols)
+	out := f.out.String()
+	rows := splashRows()
+	for i := range rows {
+		if !strings.Contains(out, ansi.MoveTo(i+1, 1)+splashBlack) {
+			t.Errorf("row %d is not positioned on black", i+1)
 		}
+	}
+	art := out[:strings.Index(out, ansi.MoveTo(len(rows)+1, 1))]
+	if strings.ContainsAny(art, "\r\n") {
+		t.Error("the art carries a line break; a full-width row followed by one double-spaces on some terminals")
 	}
 }
 
@@ -88,5 +107,14 @@ func TestGameMenusFitTheScreen(t *testing.T) {
 		if rows := screenRows(f.out.String()) + 1; rows > ansi.ScreenRows {
 			t.Errorf("menu %q needs %d rows, more than the %d assumed", m.Title, rows, ansi.ScreenRows)
 		}
+	}
+}
+
+// The splash paints its empty sky with an explicit black, never the default
+// background: NetRunner does not clear a 256-color background on ESC[49m or
+// ESC[0m, and the next 256-color foreground paints it again.
+func TestSplashNeverUsesTheDefaultBackground(t *testing.T) {
+	if strings.Contains(string(splashANS), "\x1b[49m") {
+		t.Error("screens/splash.ans uses ESC[49m; paint black as ESC[48;5;16m instead")
 	}
 }

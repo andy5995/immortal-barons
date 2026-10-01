@@ -336,7 +336,9 @@ func TestOnboardingOutputFitsTheScreen(t *testing.T) {
 	if !strings.Contains(out, "Ungültig") {
 		t.Fatalf("the German invalid-name message was never shown:\n%s", out)
 	}
-	for _, line := range strings.Split(stripANSI(out), "\n") {
+	// A cursor move starts a new line as surely as a newline does: the splash
+	// places each of its rows that way.
+	for _, line := range strings.Split(stripANSI(cursorMove.ReplaceAllString(out, "\n")), "\n") {
 		line = strings.TrimRight(line, "\r")
 		if n := utf8.RuneCountInString(line); n > ansi.ScreenCols {
 			t.Errorf("line of %d columns (max %d): %q", n, ansi.ScreenCols, line)
@@ -345,6 +347,8 @@ func TestOnboardingOutputFitsTheScreen(t *testing.T) {
 }
 
 var ansiEsc = regexp.MustCompile(`\x1b\[[0-9;?]*[a-zA-Z]`)
+
+var cursorMove = regexp.MustCompile(`\x1b\[[0-9;]*H`)
 
 func stripANSI(s string) string { return ansiEsc.ReplaceAllString(s, "") }
 

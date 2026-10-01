@@ -107,10 +107,12 @@ func chooseBulletin(s session.Session, max int) int {
 	}
 }
 
-// showBulletinFile prints one bulletin a screen at a time. Autowrap is off for
-// the same reason the splash turns it off: ANSI artwork fills all 80 columns,
-// and column 80 would otherwise wrap the cursor on top of the row's own CR/LF
-// (see ansi.WrapOff).
+// showBulletinFile prints one bulletin a screen at a time. Autowrap is off
+// because ANSI artwork fills all 80 columns, and column 80 would otherwise wrap
+// the cursor on top of the row's own CR/LF (see ansi.WrapOff). Clients that
+// ignore the toggle (mTelnet, NetRunner, RGTerm) still double-space full-width
+// rows here; the splash avoids that by positioning each row, which a paged,
+// scrolling bulletin cannot do as simply.
 func showBulletinFile(s session.Session, b bulletin.Bulletin) {
 	data, err := os.ReadFile(b.Path)
 	if err != nil {

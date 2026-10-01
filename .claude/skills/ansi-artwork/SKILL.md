@@ -332,6 +332,16 @@ glyph when the background is already the default (968 bytes, 7.5%, on the file
 measured above); emit `ESC[<n>C` instead of a run of spaces once the run is
 longer than the escape; and only then consider passes.
 
+## NetRunner's sticky 256-color background
+
+NetRunner (2.0 beta) keeps the last `48;5;N` background in a register that
+neither `ESC[0m` nor `ESC[49m` clears; the *visible* background resets, but the
+next `38;5;N` foreground repaints the stored one. A 16-color foreground
+(`ESC[1;33m`) does not. Measured with a probe screen on 2026-10-01. So in any
+256-color piece, paint black as `ESC[48;5;16m`, never as `49`, and set
+`48;5;16` again before leaving the piece. Symptom: stars or dots on the "empty"
+sky come out on wide bars of whatever background color was used last.
+
 ## Full-width art: the column-80 autowrap trap (the #2 gotcha)
 
 **Symptom:** the piece renders perfectly in your local terminal and comes out of
@@ -365,16 +375,22 @@ Three ways to author full-width art. Pick one and be deliberate:
 1. **Turn autowrap off around the piece** — `ESC[?7l` before, `ESC[?7h` after
    (DECAWM). Column 80 then leaves the cursor where it is and CR/LF does the
    line break, so it behaves identically on deferred-wrap and immediate-wrap
-   terminals and at any width. **Verified working on SyncTERM.** This is the
-   fix to reach for when the art is already authored as rows plus newlines.
+   terminals and at any width. **Verified working on SyncTERM — but mTelnet,
+   NetRunner and RGTerm ignore it** and still wrap at column 80, so this repo's
+   splash came out double-spaced in all three after the toggle had fixed
+   SyncTERM (reported and reproduced 2026-10-01). Use technique 3 for anything
+   a BBS client will show.
 2. **Emit no line breaks at all** and let the wrap create every row — the file is
    one continuous stream of exactly `width × rows` cells. Small classic pieces do
    this. It needs the terminal to be exactly the art's width; wider and the rows
    run together.
 3. **Position every row explicitly** with `ESC[<row>;<col>H`, never relying on
    wrap or newlines. This is what large scene pieces do — `DEBBIEDO.ANS` from
-   TradeWars carries 575 cursor moves beside its 268 CR/LF pairs, `STARTREK.ANS`
-   223 beside 80. Most robust, most bytes, and what art editors emit.
+   TradeWars carries 575 cursor moves beside its 268 CR/LF pairs,
+   `STARTREK.ANS` 223 beside 80. Most robust, most bytes, and what art editors
+   emit. This repo's splash does it at print time instead (`splashRows` in
+   `internal/menu/splash.go`): clear the screen, then `ESC[i;1H` before row i,
+   so the `.ans` file keeps its CR/LFs and stays editable in art tools.
 
 Beware generalising from a sample: the *small* files in that same collection have
 zero newlines (technique 2) while the big ones are cursor-positioned (technique

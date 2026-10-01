@@ -3,6 +3,7 @@ package menu
 import (
 	_ "embed"
 	"fmt"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/i18n"
@@ -40,13 +41,22 @@ import (
 // applied as the same kind of alpha. The generator carries the reasoning and
 // the two approaches that were tried first and did not work.
 //
-// The art fills all 80 columns, which is only safe because Splash turns AUTOWRAP
-// OFF around it (ansi.WrapOff). Painting column 80 otherwise wraps the cursor by
-// itself and the row's own CR/LF advances a second time, leaving a blank line
-// between every row — which is how this art once reached SyncTERM as alternating
-// picture and black bands while looking perfect locally. Terminals disagree on
+// The art fills all 80 columns, so Splash never lets a row's CR/LF move the
+// cursor: it clears the screen and puts every row at its own position. Painting
+// column 80 can wrap the cursor by itself, and a CR/LF after that advances a
+// second time, leaving a blank line between every row. Terminals disagree on
 // when that wrap fires (xfce defers it, SyncTERM does not), so a local check
-// cannot catch it. Leave the wrap toggle in place if the art stays full-width.
+// cannot catch it. Turning autowrap off (ansi.WrapOff) fixed SyncTERM, but
+// mTelnet, NetRunner and RGTerm ignore it; a position per row works on all of
+// them, and makes the wrap setting irrelevant.
+//
+// Empty sky is painted black as 48;5;16, never as the default background (49).
+// NetRunner keeps the last 256-color background in a register that neither
+// ESC[0m nor ESC[49m clears, and every 256-color foreground paints it again —
+// so with 49 each star came out on whatever background was set last. Splash
+// sets black at the start of every row, since a row that sets only a
+// foreground (the tagline) would otherwise inherit the row above's last
+// background, and leaves the register black for whatever is drawn next.
 //
 //go:embed screens/splash.ans
 var splashANS []byte
@@ -55,10 +65,24 @@ var splashANS []byte
 // FromCP437 decodes the .ans to the engine's internal UTF-8; the session's wire
 // encoder re-encodes to CP437 for a CP437 door.
 func Splash(s session.Session) {
-	// Autowrap off for the art: it fills all 80 columns, and column 80 would
-	// otherwise wrap the cursor on top of the row's own CR/LF. See ansi.WrapOff.
-	fmt.Fprint(s, ansi.WrapOff, screen.FromCP437(splashANS), ansi.WrapOn)
-	pauseTight(s) // the art ends on its own line; BRE's prompt sits right under it
+	rows := splashRows()
+	fmt.Fprint(s, ansi.Clear)
+	for i, row := range rows {
+		fmt.Fprint(s, ansi.MoveTo(i+1, 1), splashBlack, row)
+	}
+	// BRE's prompt sits on the row right under the art.
+	fmt.Fprint(s, splashBlack, ansi.Reset, ansi.MoveTo(len(rows)+1, 1))
+	pauseTight(s)
+}
+
+// splashBlack is black as a 256-color background; see the note on splashANS.
+const splashBlack = "\x1b[48;5;16m"
+
+// splashRows is the art one screen row per entry, decoded to UTF-8, with the
+// CR/LF that ended each row removed.
+func splashRows() []string {
+	art := strings.TrimRight(screen.FromCP437(splashANS), "\r\n")
+	return strings.Split(strings.ReplaceAll(art, "\r\n", "\n"), "\n")
 }
 
 // ShowLeagueFrozen tells a caller the league is frozen for an update, with the

@@ -3,7 +3,14 @@
 // the player is on (local console now; BBS socket / websocket later).
 package ansi
 
+import "strconv"
+
 const esc = "\x1b["
+
+// MoveTo puts the cursor at row, col, both counted from 1.
+func MoveTo(row, col int) string {
+	return esc + strconv.Itoa(row) + ";" + strconv.Itoa(col) + "H"
+}
 
 const (
 	Reset     = esc + "0m"
@@ -20,8 +27,9 @@ const (
 	// blank line between every row. Terminals differ on when that fires — xfce
 	// defers the wrap until the next character, SyncTERM takes it immediately — so
 	// art that looks right locally can come out banded over a BBS. With wrap off,
-	// column 80 simply leaves the cursor where it is and CR/LF does the line break,
-	// which behaves the same either way and at any width.
+	// column 80 leaves the cursor where it is and CR/LF does the line break. Not
+	// every client honors it: mTelnet, NetRunner and RGTerm wrap anyway, so art
+	// that must survive them places each row with MoveTo instead.
 	WrapOff = esc + "?7l"
 	WrapOn  = esc + "?7h"
 
