@@ -18,8 +18,31 @@ class ImmortalBarons < Formula
 
   depends_on "go" => :build
 
+  # The sysop panel (cmd/ib-sysop) draws with Gio, which needs cgo and the
+  # windowing libraries on Linux; macOS uses the system frameworks.
+  on_linux do
+    depends_on "pkgconf" => :build
+    depends_on "vulkan-headers" => :build
+    depends_on "libx11"
+    depends_on "libxcursor"
+    depends_on "libxfixes"
+    depends_on "libxkbcommon"
+    depends_on "mesa"
+    depends_on "wayland"
+  end
+
   def install
     system "go", "build", *std_go_args, "./cmd/immortal-barons"
+    # The panel is its own Go module, so it builds from its own directory. The
+    # tarball vendors only the game's dependencies, so this fetches Gio. It
+    # goes in bin/ beside immortal-barons, which it runs for every command.
+    # PIE on Linux, as docs/sysop-panel.md builds it: without it the linker
+    # leaves text relocations in the cgo binary.
+    cd "cmd/ib-sysop" do
+      args = std_go_args(output: bin/"ib-sysop")
+      args << "-buildmode=pie" if OS.linux?
+      system "go", "build", *args
+    end
     # Every path here must exist in the tarball this formula pins, NOT
     # in the current tree -- trunk drifts as docs are added, and naming a file
     # no release has shipped fails the install with ENOENT. The vendored
@@ -38,6 +61,9 @@ class ImmortalBarons < Formula
       callers. To play solo in your own terminal instead:
 
         immortal-barons -local
+
+      ib-sysop is the sysop panel, a desktop window for a board's league state
+      and the game's commands.
     EOS
   end
 
@@ -47,5 +73,9 @@ class ImmortalBarons < Formula
     output = shell_output("#{bin}/immortal-barons -version")
     assert_match "immortal-barons", output
     assert_match version.to_s, output unless build.head?
+
+    # The panel opens a window, which a headless test cannot; check that it
+    # was built and installed beside the game.
+    assert_predicate bin/"ib-sysop", :executable?
   end
 end

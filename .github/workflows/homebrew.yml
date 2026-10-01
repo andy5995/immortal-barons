@@ -62,11 +62,19 @@ jobs:
         fi
 
   formula:
-    name: audit and install
-    # A publish changes no files, so the macOS build has nothing new to test --
+    name: ${{ matrix.label }}-formula
+    # A publish changes no files, so the builds have nothing new to test --
     # the pin job is the whole point of running on that event.
     if: github.event_name != 'release'
-    runs-on: macos-latest
+    # Linux as well as macOS: the formula has Linux-only dependencies (the sysop
+    # panel's windowing libraries) that only a Linux install exercises.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { label: macos, runner: macos-latest }
+          - { label: linux, runner: ubuntu-24.04 }
+    runs-on: ${{ matrix.runner }}
     env:
       # A plain "brew install --dry-run" will otherwise auto-update Homebrew
       # itself before doing anything.
@@ -74,6 +82,13 @@ jobs:
       HOMEBREW_NO_INSTALL_CLEANUP: 1
     steps:
     - uses: actions/checkout@v7
+
+    # The Ubuntu image ships Homebrew but leaves it off PATH.
+    - name: Put Homebrew on PATH (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        echo /home/linuxbrew/.linuxbrew/bin >> "$GITHUB_PATH"
+        echo /home/linuxbrew/.linuxbrew/sbin >> "$GITHUB_PATH"
 
     # Homebrew refuses a formula that is not in a tap: install by path and by
     # URL are both rejected, and audit by path is disabled. Dropping the file
