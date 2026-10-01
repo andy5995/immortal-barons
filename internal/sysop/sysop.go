@@ -99,7 +99,7 @@ type InFlight struct {
 	TargetRealm string
 	LaunchedDay int
 	Waiting     int  // game days since it left
-	HeldDays    int  // game days spent in holds that have cleared
+	HeldDays    int  // game days spent held, the hold in progress included
 	Held        bool // its board's packets are held right now
 	// DaysLeft is the game days until the lost-forces timer returns it; 0 or
 	// less means the next planetary run. Meaningless when !Recovers.
@@ -196,6 +196,11 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 			TargetBoard: f.TargetBoard, TargetRealm: f.TargetEmpire,
 			LaunchedDay: f.LaunchedDay, Waiting: w.GameDay - f.LaunchedDay,
 			HeldDays: f.HeldDays, Held: f.Held}
+		if f.Held {
+			// f.HeldDays counts only holds that have ended; add the open one,
+			// or a strike paused since launch reads 0 days held.
+			row.HeldDays += w.GameDay - f.HeldSince
+		}
 		switch {
 		case f.Kind == "trade":
 			row.TargetRealm = "-" // a bid goes to the planet's market, not a realm

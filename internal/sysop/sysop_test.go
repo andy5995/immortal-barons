@@ -257,3 +257,25 @@ func TestBoardHeldFollowsTheCurrentHold(t *testing.T) {
 		t.Errorf("current hold: held %v since %v, want held with a time", b.Held, b.HeldSince)
 	}
 }
+
+// Held days include a hold still in progress: a strike paused since launch
+// shows the days it has been held, not 0.
+func TestInFlightHeldDaysCountTheOpenHold(t *testing.T) {
+	cfg := leagueBoard(t)
+	w, err := store.Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Launched day 9, held from day 9 after an earlier 2-day hold; today is 10.
+	w.InFlight[0].Held, w.InFlight[0].HeldSince, w.InFlight[0].HeldDays = true, 9, 2
+	if err := store.Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	s, err := Read(cfg.DataDir, time.Now())
+	if err != nil || len(s.InFlight) != 1 {
+		t.Fatalf("Read: %v, %+v", err, s.InFlight)
+	}
+	if f := s.InFlight[0]; !f.Held || f.HeldDays != 3 {
+		t.Errorf("held %v for %d days, want held for 3 (2 ended + 1 open)", f.Held, f.HeldDays)
+	}
+}
