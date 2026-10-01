@@ -48,6 +48,20 @@ type Menus struct {
 func noBombingOps(w *ctx) bool { return !w.Config.BombingOps }
 func noMissileOps(w *ctx) bool { return !w.Config.MissileOps }
 
+// bombingOpsSpent hides the four bombing ops once the day's allowance is used,
+// as well as when the sysop has turned them off. BINARY-VERIFIED: the Special
+// Operations menu draws items 1-4 only while the realm's count (+0x27c) is
+// below Maximum Bombing Operations Per Day (cfg+0x68), BRE.OVR ovr_029088
+// +0xe3f..+0xe50, so a spent allowance leaves the menu rather than refusing on
+// selection. IB keeps its own reading of a 0 limit as "no cap" (combat.go).
+func bombingOpsSpent(w *ctx) bool {
+	if noBombingOps(w) {
+		return true
+	}
+	p := w.Player()
+	return p != nil && !w.World.CanBombingOp(p)
+}
+
 // missileSpent hides a missile whose once-a-day launch has been used. The
 // original drops the item from the menu rather than refusing it on selection
 // (BRE.OVR 0x29f9c/0x29fd0/0x2a004 test the three flags while drawing), so a
@@ -63,6 +77,16 @@ func missileSpent(op game.SpecialOp) func(*ctx) bool {
 		p := w.Player()
 		return p != nil && !w.World.CanSpecialOp(p, op)
 	}
+}
+
+// sabreUnavailable hides the S3-Sabre when its launch is spent, as
+// missileSpent does, and also when the sysop's Sabre Handling is None.
+// BINARY-VERIFIED: the menu draws item 7 only when the realm's Sabre flag
+// (+0x280) is clear AND the handling byte (cfg+0x3d9) is non-zero, BRE.OVR
+// ovr_029088 +0xf78..+0xf8e. IB drew it and refused on selection until
+// 2026-10-01.
+func sabreUnavailable(w *ctx) bool {
+	return missileSpent(game.OpSabre)(w) || w.Config.SabreHandling == game.SabreNone
 }
 func noAnnihilator(w *ctx) bool { return !w.Config.GooieKablooie }
 
@@ -367,8 +391,8 @@ func BuildMenus() *Menus {
 	// op targets an empire on another planet. The 8-item table at BRE.OVR 170011
 	// is read by `run_bombing_operations_menu` (0x029EA9) alone, whose only caller
 	// is the InterBBS menu, so the table belongs to THIS menu and to no other.
-	// Labels/order are binary-verified; the Send SpyGuy hotkey wasn't recoverable
-	// from the overlay dispatch, so IB numbers it 8 with the rest. All eight are built: the four bombing ops
+	// Labels, order and hotkeys are binary-verified: the menu draws Send SpyGuy
+	// with key '8' (ovr_029088 +0xfb8). All eight are built: the four bombing ops
 	// resolve in applyPlanetOp, the three missiles in the arriving-missile
 	// resolver, and Send SpyGuy in the watcher path. This said only Send SpyGuy
 	// was wired until 2026-09-08, long after the rest landed. ('?'/'0' are IB's menu convention; BRE exits via ESC/Q
@@ -381,13 +405,13 @@ func BuildMenus() *Menus {
 	// a missile is priced off the launcher's own land and the SpyGuy off the
 	// planet's, both of which the op quotes for itself once asked.
 	ipSpecial.Items = []Item{
-		{Key: '1', Label: "Bomb Food Market", Price: opPrice(game.OpBombFood), Do: ipSpecialOp(game.OpBombFood), Hidden: noBombingOps},
-		{Key: '2', Label: "Bomb Trading Market", Price: opPrice(game.OpBombMarket), Do: ipSpecialOp(game.OpBombMarket), Hidden: noBombingOps},
-		{Key: '3', Label: "Bomb Trade Routes", Price: opPrice(game.OpBombRoutes), Do: ipSpecialOp(game.OpBombRoutes), Hidden: noBombingOps},
-		{Key: '4', Label: "Undermine Investments", Price: opPrice(game.OpUndermine), Do: ipSpecialOp(game.OpUndermine), Hidden: noBombingOps},
+		{Key: '1', Label: "Bomb Food Market", Price: opPrice(game.OpBombFood), Do: ipSpecialOp(game.OpBombFood), Hidden: bombingOpsSpent},
+		{Key: '2', Label: "Bomb Trading Market", Price: opPrice(game.OpBombMarket), Do: ipSpecialOp(game.OpBombMarket), Hidden: bombingOpsSpent},
+		{Key: '3', Label: "Bomb Trade Routes", Price: opPrice(game.OpBombRoutes), Do: ipSpecialOp(game.OpBombRoutes), Hidden: bombingOpsSpent},
+		{Key: '4', Label: "Undermine Investments", Price: opPrice(game.OpUndermine), Do: ipSpecialOp(game.OpUndermine), Hidden: bombingOpsSpent},
 		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialOp(game.OpNuclear), Hidden: missileSpent(game.OpNuclear)},
 		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: missileSpent(game.OpChemical)},
-		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: missileSpent(game.OpSabre)},
+		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: sabreUnavailable},
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '?', Label: "Help", Do: showIPSpecialOpHelp},
 		{Key: '0', Label: "Quit", Do: back},

@@ -87,7 +87,7 @@ Nothing marks the wrong line. On one day (2026-08-14):
   troubles"; `break_diplomatic_treaty` takes a quarter of support and morale.
 - `bre.doc` says Protective Trade makes deals cheaper "to send and maintain";
   there is no recurring cost at all.
-- `whatsnew.doc` says tanks defend against chemical missiles; no WMD routine
+- `whatsnew.doc` says tanks defend against chemical missiles; no LOCAL WMD routine
   reads tanks. It is a changelog, and may describe a different build.
 
 When prose and code disagree, the code wins, and the disagreement goes in the

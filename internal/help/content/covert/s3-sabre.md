@@ -33,17 +33,17 @@ there. The dial wraps at its ends: 10 can land on 0, and 0 on 10. Aim 5 at a
 baron you know keeps a large air force.
 
 The missile is still a gamble on top of that. About one launch in ten misfires,
-and the enemy's SDI may shoot it down. It can also break up over the target and
-do no damage. The larger the enemy's trooper army, the more often this happens.
-A breakup does not harm you, but it helps the enemy: the fallout gives them new
+and the enemy's SDI may shoot it down. A large trooper army can bring it down
+too (see Troopers). If it gets through, it can still break up over the target
+and do no damage. The larger the enemy's trooper army, the more often this
+happens. A breakup does not harm you, but it helps the enemy: the fallout gives them new
 regions, 10% to 19% of the regions they already hold. They choose the types of
 the new regions on their next turn.
 
 Your sysop decides how the dial is set. Normally you choose it yourself, but the
 game can be set up to roll one for you each time, to fix it at a dial the sysop
 chooses, or to switch the weapon off entirely. On a board set any way but
-"user select" you are never asked for a number — that is the setting doing its
-job, not a fault.
+"user select", you are never asked for a number.
 
 You may fire each of the three missiles — nuclear, chemical and the S3-Sabre —
 once a day. A missile you have already used today is not listed on the Special

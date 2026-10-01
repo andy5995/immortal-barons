@@ -30,6 +30,26 @@ func TestSpecialOpSwitchesHideTheirOperations(t *testing.T) {
 			func(m *Menus) *Menu { return m.Attack }, 'N', "Nuclear Attack", false},
 		{"bombing off hides Bomb Food Market", func(w *ctx) { w.Config.BombingOps = false },
 			func(m *Menus) *Menu { return m.IPSpecial }, '1', "Bomb Food Market", true},
+		// A spent daily allowance takes the four bombing ops off the menu
+		// (BRE.OVR ovr_029088 +0xe3f..+0xe50), and the missiles stay.
+		{"a spent bombing allowance hides Bomb Trade Routes", func(w *ctx) {
+			w.Config.MaxBombingOps = 2
+			w.Player().BombingOpsToday = 2
+		}, func(m *Menus) *Menu { return m.IPSpecial }, '3', "Bomb Trade Routes", true},
+		{"a spent bombing allowance leaves Chemical Bombing", func(w *ctx) {
+			w.Config.MaxBombingOps = 2
+			w.Player().BombingOpsToday = 2
+		}, func(m *Menus) *Menu { return m.IPSpecial }, '6', "Chemical Bombing", false},
+		{"a bombing op left keeps Undermine Investments", func(w *ctx) {
+			w.Config.MaxBombingOps = 2
+			w.Player().BombingOpsToday = 1
+		}, func(m *Menus) *Menu { return m.IPSpecial }, '4', "Undermine Investments", false},
+		// The S3-Sabre is drawn only while Sabre Handling is not None
+		// (ovr_029088 +0xf84..+0xf8e).
+		{"Sabre Handling None hides the S3-Sabre", func(w *ctx) { w.Config.SabreHandling = game.SabreNone },
+			func(m *Menus) *Menu { return m.IPSpecial }, '7', "S3-Sabre", true},
+		{"Sabre Handling Random keeps the S3-Sabre", func(w *ctx) { w.Config.SabreHandling = game.SabreRandom },
+			func(m *Menus) *Menu { return m.IPSpecial }, '7', "S3-Sabre", false},
 		{"annihilator off hides its entry", func(w *ctx) { w.Config.GooieKablooie = false },
 			func(m *Menus) *Menu { return m.InterPlanetary }, '9', "Gooie Kablooie Ops", true},
 		{"annihilator on keeps its entry", func(w *ctx) { w.Config.GooieKablooie = true },
@@ -68,25 +88,6 @@ func TestBombEnemyTargetsIsNotGatedByBombingOps(t *testing.T) {
 		if covert.byKey('7', w) == nil {
 			t.Errorf("Bomb Enemy Targets vanished with Bombing Ops = %v", on)
 		}
-	}
-}
-
-// The S3-Sabre's handling mode gates the only menu that fires one. It
-// moved with the missile when the local Bomb Enemy Targets submenu collapsed to
-// BRE's single terror-bombing op, and a mode the editor stores but nothing reads
-// is the failure this guards.
-func TestSabreHandlingGatesTheInterplanetaryOp(t *testing.T) {
-	w := newWorld()
-	w.Player().Protection = 0
-	w.Player().Bombers = game.BombingBombersRequired
-	w.Config.SabreHandling = game.SabreNone
-
-	f := &fakeSession{}
-	if got := ipSpecialOp(game.OpSabre)(f, w); got != Stay {
-		t.Fatalf("ipSpecialOp returned %v, want Stay", got)
-	}
-	if !strings.Contains(f.out.String(), "disabled") {
-		t.Errorf("S3-Sabre Handling = None did not stop the op; output:\n%s", f.out.String())
 	}
 }
 

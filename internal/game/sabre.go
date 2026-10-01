@@ -20,8 +20,8 @@ import (
 
 // sabreDialFor settles the dial the launch actually carries. Only User Select
 // handling uses the number the player typed; Random rolls one per launch and
-// Constant fires the same setting every time. The sysop's None mode is refused
-// in the menu, before a target is picked.
+// Constant fires the same setting every time. Under the sysop's None mode the
+// menu does not offer the missile at all.
 func (w *World) sabreDialFor(dial int) int {
 	clamp := func(n int) int { return min(max(n, SabreDialMin), SabreDialMax) }
 	switch w.Config.SabreHandling {
@@ -122,8 +122,8 @@ func (w *World) sabreBackfires(d *Empire) bool {
 }
 
 // sabreEffect is the target-side half of the missile, for a strike that
-// arrived from another planet (#49). It runs the same shield, fizzle and
-// backfire rolls the local strike runs, in the same order.
+// arrived from another planet (#49). It runs the gates every arriving missile
+// meets, then IB's backfire roll (#266), then the dial.
 //
 // A backfire is applied HERE, to the realm that was aimed at: it costs the
 // board that fired nothing and develops land for the target (#266, and
@@ -137,9 +137,9 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // and its planet, the same as an incoming nuclear or chemical strike. Agent ops
 // stay anonymous unless the agent is caught (see covertFoiled).
 func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, outcome specialOutcome) {
-	// The shared arriving-missile gates: the misfire, then SDI (#255). All three
-	// missiles meet them, because the receiving board resolves all three in one
-	// routine and both rolls sit ahead of its damage switch.
+	// The shared arriving-missile gates: the misfire, SDI and the garrison
+	// (#255). All three missiles meet them, because the receiving board resolves
+	// all three in one routine and the rolls sit ahead of its damage switch.
 	//
 	// IB used to fizzle 7 launches in 10 here instead. That roll was invented for
 	// a gap that the resolver turned out to fill — read on 2026-09-03, after the
@@ -148,7 +148,18 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, ou
 	// sabre branch (`+0x6b6`) are the dial jitter, which SabreAim already models:
 	// one launch in ten ignores the dial entirely and the rest are nudged by one
 	// either way. Nothing there asks a second time whether the missile works.
-	if stopped, why := w.arrivingMissileStopped(d, "S3-Sabre"); stopped != "" {
+	//
+	// The third gate is the original's garrison roll, which for the Sabre reads
+	// the target's troopers (record +0x76). It sits ahead of the damage switch,
+	// so a Sabre it stops neither damages nor backfires.
+	//
+	// A stopped Sabre is told to the target in person unless the SDI stopped it
+	// (resolve_received_sabre_strike skips its event writer on the SDI flag,
+	// +0x0d2c); its planet's news carries every outcome.
+	if stopped, why := w.arrivingMissileStopped(d, "S3-Sabre", d.Troopers); stopped != "" {
+		if why != specialIntercepted {
+			d.addEvent(fmt.Sprintf("An S3-Sabre from %s came down short of your realm.", from))
+		}
 		return stopped, why
 	}
 	if w.sabreBackfires(d) {
@@ -161,10 +172,34 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, ou
 		}
 		return fmt.Sprintf("Your S3-Sabre broke up over %s with nothing to open for them.", d.Name), specialBackfire
 	}
-	lost := w.sabreDamage(d, w.SabreAim(dial))
+	eff := w.SabreAim(dial)
+	lost := w.sabreDamage(d, eff)
 	if lost == "" {
+		// The original tells the target which row hit even when it took
+		// nothing: the event writer at +0x07d6 runs before the damage switch.
+		d.addEvent(fmt.Sprintf("An S3-Sabre from %s struck your %s and did little harm.", from, sabreEffectAim(eff)))
 		return fmt.Sprintf("Your S3-Sabre reached %s but did negligible damage.", d.Name), specialNothing
 	}
 	d.addEvent(fmt.Sprintf("An S3-Sabre from %s struck your empire — lost %s.", from, lost))
 	return fmt.Sprintf("Your S3-Sabre hit %s: %s destroyed.", d.Name, lost), specialHit
+}
+
+// sabreEffectAim names what a dial row goes for, for the target's event when a
+// hit takes nothing.
+func sabreEffectAim(eff SabreEffect) string {
+	switch eff {
+	case SabreHitIntelligence:
+		return "Intelligence Headquarters"
+	case SabreHitPeople:
+		return "residential zones"
+	case SabreHitMilitaryBases:
+		return "military bases"
+	case SabreHitAirbases:
+		return "airbases"
+	case SabreHitRegions:
+		return "regions"
+	case SabreHitFood:
+		return "food supply"
+	}
+	return "realm"
 }

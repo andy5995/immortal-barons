@@ -10,7 +10,7 @@ func TestEachMissileIsOncePerDay(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.Config.IBBS, w.Config.MaxBombingOps = true, 5
 	e := w.AddHuman("a", "Alpha")
-	e.Protection, e.Bombers, e.Gold = 0, BombingBombersRequired, 1<<40
+	e.Protection, e.Bombers, e.Gold = 0, 10*BombingBombersRequired, 1<<40
 	// With a score for the target: a missile is priced off the target's
 	// last-known land, and the engine refuses one it cannot price.
 	w.RemoteBoards = []RemoteBoard{{
@@ -47,7 +47,7 @@ func TestBombingOpsShareTheCountedAllowance(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.Config.IBBS, w.Config.MaxBombingOps = true, 2
 	e := w.AddHuman("a", "Alpha")
-	e.Protection, e.Bombers, e.Gold = 0, BombingBombersRequired, 1<<40
+	e.Protection, e.Bombers, e.Gold = 0, 10*BombingBombersRequired, 1<<40
 	w.RemoteBoards = []RemoteBoard{{BoardID: "Bravo BBS"}}
 
 	for i, op := range []SpecialOp{OpBombFood, OpBombMarket} {

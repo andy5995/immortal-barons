@@ -125,16 +125,13 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		}
 		// The S3-Sabre's handling mode is the sysop's, and this is the only
 		// menu that fires one: in BRE the missile is an interplanetary Special
-		// Operation, so the local Covert menu never had it.
+		// Operation, so the local Covert menu never had it. Under None the item
+		// is not on the menu at all (sabreUnavailable).
 		dial := 0
 		if op == game.OpSabre {
 			var mode game.SabreMode
 			w.Read(func() { mode = w.Config.SabreHandling })
-			switch mode {
-			case game.SabreNone:
-				ok(s, "The S3-Sabre is disabled.")
-				return Stay
-			case game.SabreUserSelect:
+			if mode == game.SabreUserSelect {
 				// The dial aims the missile: it picks which of the target's assets
 				// the payload goes for. It is nudged by one either way in flight,
 				// so a setting is a tendency rather than a promise.
@@ -366,7 +363,8 @@ func globalReconRequest(s session.Session, w *ctx) Result {
 }
 
 // opPrice is a special operation's menu price: what this board would charge the
-// caller today, sysop cost dial included, so the column and the bill agree.
+// caller, from the same function the bill uses, so the column and the bill
+// agree.
 //
 // Only the four bombing ops carry one. A missile's price depends on the target,
 // which nobody has picked yet at the time the menu is drawn — which is exactly

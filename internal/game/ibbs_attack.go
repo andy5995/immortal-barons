@@ -321,11 +321,12 @@ type AttackResult struct {
 //
 // A Special Operation's answer narrows "failure" further, so the firer's planet
 // can read the same outcome the target's did (#288): a missile into misfire,
-// intercepted or negligible, a bombing run into drivenoff or nothing. They are
-// new VALUES of an existing field, not a new field, which is why they needed no
-// Protocol bump: the bytes an older board signs and re-marshals are the same
-// string either way, and an older firer that meets one falls through to the
-// report it files for any failure.
+// intercepted, guarded or negligible, a bombing run into drivenoff or nothing.
+// They are new VALUES of an existing field, not a new field, which is why they
+// needed no Protocol bump: the bytes an older board signs and re-marshals are
+// the same string either way (TestPacketWireShapeIsFrozen does not move), and
+// an older firer that meets one falls through to the report it files for any
+// failure.
 type AttackOutcome string
 
 const (
@@ -336,6 +337,7 @@ const (
 
 	OutcomeMisfire     AttackOutcome = "misfire"     // a missile that failed on its own
 	OutcomeIntercepted AttackOutcome = "intercepted" // a missile the target's SDI shot down
+	OutcomeGuarded     AttackOutcome = "guarded"     // a missile the target's garrison brought down
 	OutcomeNegligible  AttackOutcome = "negligible"  // a missile that landed and did negligible damage
 	OutcomeDrivenOff   AttackOutcome = "drivenoff"   // a bombing run that failed its landing roll
 	OutcomeNothing     AttackOutcome = "nothing"     // a bombing run that landed on nothing to destroy
@@ -1153,8 +1155,9 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 			}
 			continue
 		}
-		// A Special Operation commits no forces and no agents — only the gold,
-		// which was spent on launching it. There is nothing to hand back, so the
+		// A Special Operation commits no agents, and what it does spend — the
+		// gold and the 500 Bombers that carry the payload — went with the launch,
+		// as the original spends them. There is nothing to hand back, so the
 		// baron is told the strike was never heard of again rather than left
 		// waiting on a report that is not coming.
 		if f.Kind == "special" {

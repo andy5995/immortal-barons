@@ -561,12 +561,23 @@ const (
 	// The arriving-missile resolver's own numbers, BINARY-VERIFIED
 	// (`BRE.OVR ovr_0450a9 +0x3c5`, the one routine the receiving board runs for
 	// all three missiles). These are NOT the local missiles' bands — an arriving
-	// nuclear strike ruins a wider swathe than a neighbor's, and an arriving
+	// nuclear strike ruins a wider swath than a neighbor's, and an arriving
 	// chemical strike is a population weapon alone.
 	//
 	// MissileMisfireOdds is the gate ahead of SDI: one launch in this many is
 	// lost whatever the target does (`+0x467`).
 	MissileMisfireOdds = 10
+	// The last gate, after SDI (`+0x4c7..+0x5b6`): the target's garrison against
+	// the weapon. The resolver divides one unit count by the target's total
+	// regions plus one — turrets (+0x82) against a nuclear strike, tanks (+0x86)
+	// against a chemical one, troopers (+0x76) against an S3-Sabre — and the
+	// missile fails when Random(MissileDefenseRoll) comes in under that figure
+	// AND Random(MissileDefenseSides) rolls above MissileDefenseThrough. So a
+	// realm holding 50,000 of the unit per region or more stops seven missiles in
+	// ten, and one holding 5,000 per region about one in fourteen.
+	MissileDefenseRoll    = 50000
+	MissileDefenseSides   = 10
+	MissileDefenseThrough = 2 // a second die of 0-2 lets the missile through
 	// IPNukeWastePctBase + Random(IPNukeWastePctRoll) percent of the target's
 	// regions become waste (`+0x5c0`), so 10-14%.
 	IPNukeWastePctBase = 10

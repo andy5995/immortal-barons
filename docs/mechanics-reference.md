@@ -74,6 +74,7 @@ realm's at `-0xeeb`). The result:
 | An arriving interplanetary invasion | `resolve_received_invasion` | **defense** — one term in the pool |
 | Civil unrest | `resolve_civil_unrest` | destroyed (read, then written back) |
 | An S3-Sabre missile | `resolve_received_sabre_strike` | destroyed (read, then written back) |
+| An arriving nuclear strike | `resolve_received_sabre_strike` `+0x4de` | the **garrison** that can bring it down (see "The three missiles are NOT the local missiles") |
 | A covert operation | `resolve_received_covert_operation` | read |
 | Total defeat | `resolve_regular_attack__transfer_defeated_military` | handed to the winner |
 | Food, maintenance, status, advisor, budget, trading | six routines | bookkeeping and display |
@@ -88,9 +89,13 @@ Two consequences, both contradicting the guide-sourced table below:
 - **Turrets do not shoot down jets.** No defense term reads the attacker's jets,
   and a live capture settles it from the other side: 112 turrets destroyed none
   of 3 attacking jets.
-- **Turrets do not intercept nuclear, chemical or biological missiles.** No WMD
-  routine appears in the 46 sites at all. This matches the existing finding that
-  no WMD routine reads tanks, turrets or SDI either.
+- **Turrets do not intercept a neighbor's nuclear, chemical or biological
+  missiles.** No local WMD routine appears in the 46 sites at all. This matches
+  the existing finding that no local WMD routine reads tanks, turrets or SDI
+  either. A missile from ANOTHER planet is different: the arriving resolver's
+  read of turrets at `+0x4de`, filed above as Sabre damage until 2026-10-01, is
+  the garrison roll an arriving nuclear strike meets (tanks for a chemical one,
+  troopers for a Sabre).
 
 One limit worth stating: the scan sees the two displacement idioms, not the
 `add di,<n>` then bare `[es:di]` form, which no scan of this shape can rule out.
@@ -99,10 +104,10 @@ One limit worth stating: the scan sees the two displacement idioms, not the
 
 | Unit | Offense | Defense | Notes |
 |------|---------|---------|-------|
-| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy S3-Sabre likelier to backfire. |
+| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. The garrison an arriving S3-Sabre must get past, and a large one also makes it likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
-| Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. **What it defends against is exactly two things — see "What a turret actually does" below.** |
-| Tank | **3.5–4.5** | **3.5–4.5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (`TankStrengthPctBase`/`PerHQ`, `balance_hq.go`: 3.5 at 0%, 4 at 50%, 4.5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value; its own "3-5" range is wider than what IB implements — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
+| Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. **What it defends against is exactly two things — see "What a turret actually does" below** — plus an arriving nuclear strike's garrison roll. |
+| Tank | **3.5–4.5** | **3.5–4.5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (`TankStrengthPctBase`/`PerHQ`, `balance_hq.go`: 3.5 at 0%, 4 at 50%, 4.5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value; its own "3-5" range is wider than what IB implements — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles. The LOCAL chemical routine never reads the tank count; an ARRIVING chemical strike does, as its garrison roll — see "The three missiles are NOT the local missiles".) |
 | Bomber | 0 | 0 | Carries bombs and special ops, which need 500 of them. Adds NOTHING to a local attack: it is outside the offense sum and bleeds with the rest of the committed force, so sending one is a pure loss. The grounded-jet strike this row described until 2026-09-13 was IB's own and went under #200. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
 | HeadQuarters | — | — | Raises tank effectiveness; enemies bomb it to weaken your tanks. |
@@ -2081,7 +2086,9 @@ and Send SpyGuy belong to the InterPlanetary **Special Operations** menu and to
 no other. The 500-Bomber requirement is that menu's too: the gate and the 500
 Bombers each launch consumes are both inside it (`+0x1015`, `+0x1146`), and the
 local Covert menu tests no bomber count anywhere. BRE's own manual agrees on the
-local op — "your intelligence agency will randomly bomb targets".
+local op — "your intelligence agency will randomly bomb targets". IB spends the
+500 Bombers on every launch since 2026-10-01; it checked for them and never
+took them before.
 
 IB offered a seven-item lettered submenu here (`B/M/R/U/N/C/S`) and charged
 100,000 per variant. That was IB's own construction, built by reading the shared
@@ -2183,8 +2190,14 @@ already feeds (#107). IB damaged the FIRER on a backfire until 2026-09-14; that
 was invented before the return path was read, and it is gone.
 
 Whether a launch arrives is the original's, not IB's: the shared arriving-missile
-gates — the `Random(10)` misfire and then SDI — and nothing in the sabre's own
-branch asks a second time. IB had an invented 3-in-10 delivery roll here until
+gates — the `Random(10)` misfire, SDI, and the garrison roll (see "The three
+missiles are NOT the local missiles") — and nothing in the sabre's own branch
+asks a second time. Since 2026-10-01 the Sabre makes the original's garrison roll against the
+target's TROOPERS, ahead of everything else in its branch, so a Sabre the
+garrison stops neither damages nor backfires. The #266 backfire is unchanged
+and comes after it; its own trigger (`SabreBackfireScale`) also reads the
+troopers, so a large army both stops more Sabres and turns more of the rest
+into backfires. Andy chose to keep both (2026-10-01). IB had an invented 3-in-10 delivery roll here until
 2026-09-05, written before the resolver was read and three times harsher than the
 gate that turned out to exist; removing it takes the sabre from about 3 launches
 in 10 landing to about 9.
@@ -2235,6 +2248,11 @@ Backfire is a continuous probability scaled by the target's troopers
 (`d.Troopers / SabreBackfireScale`), IB's own and a playtest knob; the tables
 above are the fidelity contract.
 
+**Under None the S3-Sabre is not on the menu at all.** The Special Operations
+menu draws item 7 only when the Sabre flag (`+0x280`) is clear AND the handling
+byte (`cfg+0x3d9`) is non-zero (`ovr_029088 +0xf78..+0xf8e`). IB listed it and
+refused on selection until 2026-10-01.
+
 **Sabre Handling has four modes, and only one of them prompts.** BINARY-VERIFIED:
 the setting is one byte at `cfg+0x3d9`, and the Configuration Editor's own labels
 (`format_configuration_choice`, `BRE.OVR 0x5f1c`) name the four — None/Disabled,
@@ -2284,7 +2302,13 @@ cleared together at daily maintenance (`0x08669`). They are booleans, not a
 counted allowance.
 
 `Maximum Bombing Operations Per Day` governs the four bombing ops and nothing
-else, and `Maximum Terrorist Ops Per Day` is a third allowance again — a live
+else. Once it is spent the four leave the menu, as a spent missile does: the
+menu draws items 1-4 only while the realm's count (`+0x27c`) is below the limit
+(`cfg+0x68`, `ovr_029088 +0xe3f..+0xe50`), and IB hides them the same way since
+2026-10-01. One difference stands: the original reads a limit of 0 as "none
+allowed", and IB reads it as "no limit", which its config editor and Game
+Setup screen both say. `Maximum Terrorist Ops Per Day` is a third allowance
+again — a live
 Game Setup screen shows them as 5 and 15 (`cap/eots-ibbs-02.cap`). IB counted
 every op on the menu against `MaxBombingOps` until 2026-08-31
 (`Empire.MissileUsedToday`, `World.CanSpecialOp`).
@@ -2296,10 +2320,14 @@ see "What a Special Operation posts" below):
 - **Bomb Food Market** — burn 20-99% of a planet's food-market supply.
 - **Bomb Trading Market** — destroy 5-9% of everything listed on a planet's
   trading market. Pending sale gold is untouched.
-- **Bomb Trade Routes** — wreck the goods riding in the planet's pending trade
-  deals: each deal has one chance in three of being hit, and a deal that is hit keeps 5-9% of every good in it. A deal
-  whose own two parties hold Protective Trade is spared (see that pact under
-  Diplomacy for the BRE rule and its addresses).
+- **Bomb Trade Routes** — damage the goods riding in the planet's pending trade
+  deals: each deal has two chances in three of being hit, and a deal that is
+  hit loses 5-9% of each of the nine goods it is sending, gold included. One
+  percentage is drawn for the whole run. What the deal demands back is not in
+  transit and is not touched. A deal whose own two parties hold Protective
+  Trade is spared (see that pact under Diplomacy for the BRE rule and its
+  addresses). IB kept 5-9% and destroyed the rest, rolled per good and applied
+  to both baskets, until 2026-10-01.
 - **Undermine Investments** — trim 2-5% off every investment on the planet
   that is at most three days from maturity, principal and return alike.
 - **Nuclear Assault** / **Chemical Bombing** — the WAR menu's strikes, aimed
@@ -5148,8 +5176,13 @@ where the original's inexact Real48 `pct / 100` and `value / 100` can land one
 lower on a product that comes out whole.
 
 Every op needs the 500 Bombers the original requires of anything on this
-menu, answers to the sysop's Bombing Ops / Missile Ops switches, and counts
-against the daily bombing allowance.
+menu, and spends them when it is sent, whatever happens to it at the far end:
+the bombing handler subtracts 500 from record `+0x7a` beside the gold, after the
+confirmation and before anything is rolled (`ovr_029088 +0x3d0..+0x3e1`), and
+each missile branch does the same once `prepare_bombing_attack` has charged it
+(`+0x1146`, `+0x1233`, `+0x1689`). The four bombing ops answer to the sysop's
+Bombing Ops switch and count against the daily bombing allowance; the three
+missiles answer to Missile Ops and have their own once-a-day flags.
 
 **New Realm Protection shields the target from a missile, never from a bombing
 op — BINARY-VERIFIED.** A baron under protection cannot launch either kind: the
@@ -5179,6 +5212,7 @@ own damage bands:
 | New Realm Protection | `is_under_protection` → the strike fails | `+0x457` |
 | misfire | `Random(10) == 0` → the strike fails | `+0x467` |
 | SDI | `Random(100)` against the strength percentage → intercepted, and reported with its own line | `+0x481` |
+| garrison | the target's turrets (nuclear), tanks (chemical) or troopers (Sabre), divided by its total regions + 1; the strike fails when `Random(50000)` is under that AND `Random(10) > 2` | `+0x4c7..+0x5b6` |
 | nuclear damage | `10 + Random(5)` percent of the target's regions to waste, capped at 32,000 | `+0x5c0` |
 | chemical damage | `15 + Random(15)` percent of the target's PEOPLE, and nothing else — no land, no morale, no support | `+0x636` |
 
@@ -5198,9 +5232,15 @@ both.
 
 **IB matches the gates and the bands** (#255, 2026-09-05). An arriving nuclear or
 chemical strike runs `arrivingNuclearEffect` / `arrivingChemicalEffect` against
-the bands above, behind `arrivingMissileStopped` — the misfire then SDI, after
+the bands above, behind `arrivingMissileStopped` — the misfire, SDI, then the
+garrison roll (`MissileDefenseRoll`, `missileGuarded`, since 2026-10-01), after
 the realm-found and New-Realm-Protection gates the resolver already applied to
-every special op. The chemical strike touches nothing but the population.
+every special op. The chemical strike touches nothing but the population. The
+garrison sets the same failure flag the misfire does, not the SDI one; IB
+reports it as its own outcome (`guarded`) so both planets can say what stopped
+the missile. A realm with 50,000 or more of the unit per region stops seven
+missiles in ten; one with 5,000 per region, about one in fourteen. The S3-Sabre
+takes it too, against troopers, ahead of IB's backfire.
 
 All three missiles meet the gates, the S3-Sabre included: its invented 3-in-10
 delivery roll is gone, replaced by the misfire the resolver actually carries.
@@ -5219,9 +5259,8 @@ by every outcome except a realm that is not there:
   `^SPECIAL_OPERATIONS` entry `4 × (op − 1) + 1`, the failure form, when the
   strike failed, and two further on, the success form, when it did not. The
   failure flag is set by New Realm Protection, the misfire and the SDI roll
-  alike, and by one more roll at `+0x540` — a per-weapon field of the target's
-  record divided by its regions, weighed against `Random(50000)`, then
-  `Random(10) > 2` — that this pass did not identify and IB does not model.
+  alike, and by the garrison roll at `+0x540` (turrets, tanks or troopers per
+  region against `Random(50000)`, then `Random(10) > 2`; see the table above).
   When the SDI stopped it, the resolver appends a sentence naming the
   shield to the same line. A backfired S3-Sabre is NOT a failure there — the
   backfire is the last row of the Sabre's damage mapper — so the original's
@@ -5246,11 +5285,36 @@ chosen by the outcome and worded as IB's own (`missileNews`, `planetOpNews` in
 - a hit
 - a misfire
 - an SDI interception
+- a missile the target's garrison brought down
 - an S3-Sabre that broke up
 - a Sabre that reached its target and did negligible damage
 - a protected realm
 - for the bombing ops, a run that found nothing to wreck
 - for the bombing ops, a run driven off by the landing roll before it arrived
+
+**Who is told in person — BINARY-VERIFIED, and IB matches since
+2026-10-01.** The news is the only channel the original never skips; the
+per-realm event (the report a baron reads on their next turn) is written
+selectively:
+
+- **Missile, target's board.** The realm is told in person of every outcome
+  but an SDI interception: the event writer at `+0x0d8a` is skipped when the
+  SDI flag is set (`+0x0d2c`). A Sabre that landed is told by its own row at
+  `+0x07d6`, which runs before the damage switch, so even a hit that took
+  nothing is reported. IB told the target of an interception, and nothing of a
+  failed or negligible Sabre, until then.
+- **Missile, firer's board.** `process_sabre_return` posts the news line for
+  every outcome; a nuclear or chemical strike is then told to the firer in
+  person (`+0x10b1`), a Sabre that landed too (`+0x116b`), but a failed Sabre
+  is NOT (`+0x1056` skips it). IB told the firer of every outcome.
+- **Bombing ops, both boards.** News only. `resolve_received_bombing` and
+  `process_bombing_results` each call the news writer once and the event
+  writer never. IB filed an event with every realm on the target planet and
+  with the firer; the firer's planet news now names the share destroyed, as
+  the original's success line does (food, trading market, investments; no
+  figure for the trade routes). The captures agree: `cap/eots-ibbs-02.cap` and
+  `-03.cap` show bombing outcomes on both planets' news screens and in no
+  realm's turn report, and missile hits in both.
 
 Until #288 every outcome past protection posted "X struck Y", so a
 missile that broke up read as a hit on the target's planet while the firer's
@@ -5277,6 +5341,7 @@ sending realm, as the original's failure line does.
 - a hit
 - a misfire
 - an SDI interception
+- the garrison
 - New Realm Protection
 - a backfire
 - a Sabre that did negligible damage
@@ -5299,7 +5364,7 @@ came to nothing. IB's firer posted nothing for a bombing run until 2026-09-23.
 
 **Interplanetary missile prices — binary-verified AND capture-confirmed.** The
 three missiles are priced off the TARGET's last-known territory, at a rate of
-their own each, and uncapped:
+their own each, and the product is held between 1,000,000 and 1,000,000,000:
 
 | Missile | gold per region of the target |
 | --- | --- |
@@ -5320,7 +5385,11 @@ Three things follow, all of them differences from the local path:
   2,559 here), so the two paths being priced differently is the original's
   design.
 - There is **no `StrikeCostCap`** — the 50,000,000 literal is in all three local
-  routines and in none of these branches.
+  routines and in none of these branches. The clamp is a different one: the
+  product goes through `max_i32` against 1,000,000 and then `min_i32` against
+  1,000,000,000 (`+0x58b`), so a strike at a small realm still costs a million
+  and none costs more than a billion (`IPMissileCostMin`/`Max`; IB had no clamp
+  until 2026-10-01).
 - The price is quoted as `Cost: N Gold` AFTER the target is chosen, which is why
   the menu's price column is blank for these three: the column was never where
   it lived.
@@ -5331,14 +5400,18 @@ know how big a realm on another planet is. It can — the scores it imports carr
 and `World.RemoteLand` is that lookup. A realm this board holds no scores for
 cannot be priced, and the engine refuses the launch rather than sending a free
 missile (`ErrNoTargetSize`); the menu only offers scored barons, so that guard is
-the engine refusing a call the menu would not make. The sysop's Terror Costs dial
-scales the four bombing ops only, as the original applies no such knob here.
+the engine refusing a call the menu would not make. **No sysop dial scales any
+of the seven.** The bombing handler charges the price table at `DS:0x7c2 + 4 ×
+key` as it stands, and nothing in either binary writes that table, so the
+Terror Costs level never reaches it. IB scaled the four bombing ops by it until
+2026-10-01.
 
 **One IB decision**, not established from the original:
 
-- **A lost packet returns nothing**, because a Special Operation commits no
-  forces and no agents — only gold, already spent on launching it. The sender is
-  told the strike was never heard of again rather than left waiting.
+- **A lost packet returns nothing.** A Special Operation commits no agents,
+  and its gold and 500 Bombers were spent on launching it, as the original
+  spends them. The sender is told the strike was never heard of again rather
+  than left waiting.
 
 ### The SDI program
 
@@ -6078,14 +6151,17 @@ and each carries a gameplay effect (#11 wired the last two):
   - Another `random(3)` at the top of `resolve_received_bombing` voids the whole
     strike two times in three.
 
-  A deal that is not spared loses
-  `trunc(qty x (random(5)+5) / 100)` — 91-95% — of each of its nine goods
-  quantities.
+  A deal that is not spared loses `trunc(qty / 100 x pct)` of each of the nine
+  goods in its send basket (`+0x0a..+0x2d`, gold included), where `pct` is ONE
+  `random(5)+5` drawn for the whole run by `resolve_received_bombing` at
+  `+0x2bd`. So it loses 5-9% and keeps 91-95%. The demand basket (`+0x2e`) is
+  not touched. IB had this inverted — keeping 5-9%, rolled per good, on both
+  baskets — until 2026-10-01.
 
   **IB follows all of it** (`bombingLands`, `bombRoutesEffect`,
   `bombDealBasket`; the three rolls are `BombingLandOdds`,
-  `BombRoutesDealEscapeOdds` and `BombRoutesKeptPctMin`/`Spread` in `balance*.go`).
-  A strike wrecks the goods in pending `TradeDeal`s rather than severing any
+  `BombRoutesDealEscapeOdds` and `BombRoutesLossPctMin`/`Spread` in `balance*.go`).
+  A strike damages the goods in pending `TradeDeal`s rather than severing any
   standing agreement, and the guard reads the deal's own two parties, so holding
   Protective Trade with the realm you are bombing buys you nothing and a deal
   between a guarded pair survives whoever fires. Since only one relation can

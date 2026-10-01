@@ -14,11 +14,13 @@ package game
 // resolve_received_bombing (BRE.OVR 0x04a09a); see balance_prices.go.
 
 // bombFoodMarketEffect burns a 20-99% share of the planet's food-market supply,
-// rolled once, and reports the units lost (see BombFoodMarketLossPctMin).
-func (w *World) bombFoodMarketEffect() int {
-	lost := foodMarketLoss(w.FoodMarketSupply, w.bombFoodMarketLossPct())
+// rolled once, and reports the units lost and the share rolled (see
+// BombFoodMarketLossPctMin).
+func (w *World) bombFoodMarketEffect() (lost, pct int) {
+	pct = w.bombFoodMarketLossPct()
+	lost = foodMarketLoss(w.FoodMarketSupply, pct)
 	w.FoodMarketSupply -= lost
-	return lost
+	return lost, pct
 }
 
 // foodMarketLoss is Trunc(supply x pct / 100), the food a run destroys.
@@ -77,14 +79,16 @@ func (w *World) bombingLands() bool {
 	return w.rng.Intn(BombingLandOdds) == 0
 }
 
-// bombRoutesEffect wrecks the goods riding in the planet's pending trade deals
+// bombRoutesEffect damages the goods riding in the planet's pending trade deals
 // and reports how many deals it hit.
 //
 // BINARY-VERIFIED against BRE.OVR 0x051077, which walks the pending deals and,
 // for each, rolls a `random(3)` that lets one deal in three escape, skips a deal
-// whose own two parties hold Protective Trade, and otherwise cuts every one of
-// its goods quantities to bombRoutesKeptPct. Nothing is refunded and no
-// per-deal message is filed.
+// whose own two parties hold Protective Trade, and otherwise takes the run's
+// one percentage off each of the nine goods in the deal's SEND basket. The
+// percentage is drawn once by the caller (resolve_received_bombing +0x2bd) and
+// shared by every deal. What the deal demands back is not in transit and is
+// not touched. Nothing is refunded and no per-deal message is filed.
 //
 // The Protective Trade guard is a property of the DEAL, not of the attacker: it
 // reads the relation between the deal's sender and recipient (record fields +8
@@ -92,6 +96,7 @@ func (w *World) bombingLands() bool {
 // pact survives a strike from anyone, and holding it with the victim buys the
 // attacker nothing.
 func (w *World) bombRoutesEffect() (hit int) {
+	pct := BombRoutesLossPctMin + w.rng.Intn(BombRoutesLossPctSpread)
 	for _, to := range w.Empires {
 		if !to.Alive {
 			continue
@@ -107,25 +112,18 @@ func (w *World) bombRoutesEffect() (hit int) {
 			if from != nil && w.HasTreaty(from, to, protectiveTrade) {
 				continue
 			}
-			w.bombDealBasket(&deal.Send)
-			w.bombDealBasket(&deal.Demand)
+			bombDealBasket(&deal.Send, pct)
 			hit++
 		}
 	}
 	return hit
 }
 
-// bombDealBasket cuts every good in b to the sliver a bombed deal keeps. The
-// share is rolled per good, as the original rolls it inside its own loop over
-// the deal's quantities.
-func (w *World) bombDealBasket(b *TradeBasket) {
+// bombDealBasket takes pct percent off every good in b, gold included:
+// each loses Trunc(qty x pct / 100), as the original subtracts it.
+func bombDealBasket(b *TradeBasket, pct int) {
 	for _, p := range basketPtrs(b) {
-		*p = pctOf(*p, w.bombRoutesKeptPct())
+		*p -= pctOf(*p, pct)
 	}
-	b.Gold = pctOf(b.Gold, w.bombRoutesKeptPct())
-}
-
-// bombRoutesKeptPct is the percentage of one good a bombed deal keeps: 5-9%.
-func (w *World) bombRoutesKeptPct() int {
-	return BombRoutesKeptPctMin + w.rng.Intn(BombRoutesKeptPctSpread)
+	b.Gold -= pctOf(b.Gold, pct)
 }

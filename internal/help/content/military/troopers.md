@@ -19,9 +19,12 @@ one unit of food feeds 200 troopers, or 10,000 of anything else. So a large
 trooper army needs a strong food supply. A large army of other units needs very
 little.
 
-A large trooper army also discourages enemy S3-Sabre strikes. The more
-troopers you hold, the more likely that missile is to backfire onto the empire
-that fired it. Troopers are a common target of enemy covert operations, which
-can make them desert.
+A large trooper army also stands against enemy S3-Sabre strikes. The more
+troopers you hold for each region, the more often a Sabre fails before it
+reaches you. A Sabre that does get through is more likely to break up over a
+large trooper army, and a breakup gives you new land (see S3-Sabre).
+
+Troopers are a common target of enemy covert operations, which can make them
+desert.
 
 Buy troopers early to survive, and build more tanks as your economy grows.

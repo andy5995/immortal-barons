@@ -11,8 +11,13 @@ Turrets are a defense-only unit — the defensive counterpart to jets. They have
 defense of 2 and an offense of 0, which is about twice as strong on defense as a
 trooper.
 
-Turrets add to your defense against every kind of attacking unit. They do not stop a neighbor's missiles — nothing does, nuclear,
-chemical or biological alike.
+Turrets add to your defense against every kind of attacking unit. Nothing
+stops a missile fired by a baron on your own planet, whether it is nuclear,
+chemical or biological.
+
+A nuclear missile from another planet is different: a large turret force can
+bring it down. The more turrets you hold for each region, the more often such a
+missile fails.
 
 Covert operations on your own planet cannot destroy your turrets. An S3-Sabre
 from another planet can, and so can a pirate raid.

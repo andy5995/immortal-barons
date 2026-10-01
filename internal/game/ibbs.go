@@ -28,6 +28,7 @@ var (
 	ErrMissileSpentToday   = errors.New("You have already launched that missile today.")
 	ErrBombingOpsDisabled  = errors.New("Bombing operations are not part of this game.")
 	ErrMissileOpsDisabled  = errors.New("Missile operations are not part of this game.")
+	ErrSabreDisabled       = errors.New("The S3-Sabre is not part of this game.")
 	ErrNeedBombers         = fmt.Errorf("You need at least %d Bombers to deliver a payload.", BombingBombersRequired)
 	// A missile is priced off the target's last-known size, so a realm this
 	// board holds no scores for cannot be quoted — and must not be free.

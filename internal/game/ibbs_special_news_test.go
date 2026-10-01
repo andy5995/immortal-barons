@@ -2,6 +2,7 @@ package game
 
 import (
 	"math/rand"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -53,6 +54,10 @@ func TestMissileNewsFollowsTheOutcome(t *testing.T) {
 			"broke up over":              "The S3-Sabre from Selby of Home broke up over Victim.",
 			"Your S3-Sabre hit":          "The S3-Sabre from Selby of Home hit Victim.",
 		}, func(d *Empire) { d.SDI = 0; d.Troopers = 100 * SabreBackfireScale / 2 }},
+		{OpChemical, "Chemical Bombing", map[string]string{
+			"defenses brought down": "The Chemical Bombing from Selby of Home was brought down over Victim.",
+			"Chemical strike!":      "The Chemical Bombing from Selby of Home hit Victim.",
+		}, func(d *Empire) { d.SDI = 0; d.Tanks = (d.Land + 1) * 25_000 }},
 	} {
 		seen := map[string]bool{}
 		for seed := int64(1); seed <= 200 && len(seen) < len(tc.want); seed++ {
@@ -117,20 +122,18 @@ func TestPlanetOpNewsFollowsTheOutcome(t *testing.T) {
 // the landing roll that turns most runs back, and a target with nothing in it.
 // Both must be reached for the test to mean anything.
 func TestTradeRouteBombingNewsSeparatesTheTwoFailures(t *testing.T) {
-	want := map[string]string{
-		"driven off":            "Bombers from Selby of Home were driven off before they reached the planet's trade routes.",
-		"Nothing worth hitting": "Bombers from Selby of Home found nothing moving on the planet's trade routes.",
+	want := map[AttackOutcome]string{
+		OutcomeDrivenOff: "Bombers from Selby of Home were driven off before they reached the planet's trade routes.",
+		OutcomeNothing:   "Bombers from Selby of Home found nothing moving on the planet's trade routes.",
 	}
-	seen := map[string]bool{}
+	seen := map[AttackOutcome]bool{}
 	for seed := int64(1); seed <= 50 && len(seen) < len(want); seed++ {
 		w, _ := specialNewsBoard(seed)
 		res, news := resolveOneSpecial(t, w, RemoteSpecialOp{ID: 1, FromBoard: "Home", FromEmpire: "Selby", Op: OpBombRoutes})
-		for marker, line := range want {
-			if strings.Contains(res.Report, marker) {
-				seen[marker] = true
-				if news != line {
-					t.Errorf("seed %d, report %q: news %q, want %q", seed, res.Report, news, line)
-				}
+		if line, ok := want[res.Outcome]; ok {
+			seen[res.Outcome] = true
+			if news != line {
+				t.Errorf("seed %d, outcome %q: news %q, want %q", seed, res.Outcome, news, line)
 			}
 		}
 	}
@@ -175,7 +178,7 @@ func TestEveryBombingOpMeetsTheLandingRoll(t *testing.T) {
 			w.FoodMarketSupply = 10_000
 			d.Investments = []Investment{{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 3}}
 			res, news := resolveOneSpecial(t, w, RemoteSpecialOp{ID: 1, FromBoard: "Home", FromEmpire: "Selby", Op: tc.op})
-			if !strings.Contains(res.Report, "driven off") {
+			if res.Outcome != OutcomeDrivenOff {
 				continue
 			}
 			drivenOff++
@@ -212,6 +215,9 @@ func TestFiringPlanetReadsEveryMissileOutcome(t *testing.T) {
 			"The Nuclear Assault from Alpha Baron of Alpha BBS misfired on its way to Bravo Hold.": "Alpha Baron's Nuclear Assault misfired on its way to Bravo Hold of Bravo BBS.",
 			"Bravo Hold's SDI shot down the Nuclear Assault from Alpha Baron of Alpha BBS.":        "The SDI of Bravo Hold of Bravo BBS shot down Alpha Baron's Nuclear Assault.",
 			"The Nuclear Assault from Alpha Baron of Alpha BBS hit Bravo Hold.":                    "Alpha Baron's Nuclear Assault hit Bravo Hold of Bravo BBS.",
+		}},
+		{OpNuclear, func(d *Empire) { d.SDI = 0; d.Turrets = (d.Land + 1) * 25_000 }, map[string]string{
+			"The Nuclear Assault from Alpha Baron of Alpha BBS was brought down over Bravo Hold.": "Alpha Baron's Nuclear Assault was brought down over Bravo Hold of Bravo BBS.",
 		}},
 		{OpSabre, func(d *Empire) { d.SDI = 0; d.Troopers = 100 * SabreBackfireScale / 2 }, map[string]string{
 			"The S3-Sabre from Alpha Baron of Alpha BBS broke up over Bravo Hold.":               "Alpha Baron's S3-Sabre broke up over Bravo Hold of Bravo BBS.",
@@ -317,14 +323,14 @@ func TestBombingNewsNamesOneCarrier(t *testing.T) {
 		before := len(d.Events)
 		res, news := resolveOneSpecial(t, w, RemoteSpecialOp{ID: 1, FromBoard: "Home", FromEmpire: "Selby", Op: OpUndermine})
 		landed = landed || res.Won
-		drivenOff = drivenOff || strings.Contains(res.Report, "driven off")
+		drivenOff = drivenOff || res.Outcome == OutcomeDrivenOff
 		if !strings.HasPrefix(news, "Bombers from Selby of Home ") {
 			t.Errorf("seed %d: news %q", seed, news)
 		}
-		for _, ev := range d.Events[before:] {
-			if !strings.HasPrefix(ev.Text, "Bombers from Selby of Home ") {
-				t.Errorf("seed %d: event %q", seed, ev.Text)
-			}
+		// The planet reads it in the news and nowhere else: the original's
+		// receiver never calls the per-realm event writer.
+		if got := d.Events[before:]; len(got) != 0 {
+			t.Errorf("seed %d: a realm was told in person: %v", seed, got)
 		}
 	}
 	if !landed || !drivenOff {
@@ -338,6 +344,7 @@ func TestBombingNewsNamesOneCarrier(t *testing.T) {
 // +0x0622). Each seed is classified by the TARGET's line, and a stocked and an
 // empty planet between them must reach all three outcomes for every op.
 func TestFiringPlanetReadsEveryBombingOutcome(t *testing.T) {
+	shareSuffix := regexp.MustCompile(`^ \d+% of (its supply was destroyed|every listing was destroyed|the investments coming due was lost)\.$`)
 	for _, tc := range []struct {
 		op                    SpecialOp
 		hitThere, hitHere     string
@@ -398,6 +405,14 @@ func TestFiringPlanetReadsEveryBombingOutcome(t *testing.T) {
 				t.Fatalf("%s seed %d: unexpected target line %q", tc.op, seed, there)
 			}
 			seen[there] = true
+			// A landed run's line carries the share the target reported, as the
+			// original's success line names it; the trade routes name none.
+			if there == tc.hitThere && len(here) == 1 && tc.op != OpBombRoutes {
+				if !shareSuffix.MatchString(strings.TrimPrefix(here[0].Text, line)) {
+					t.Errorf("%s seed %d: firer read %q, want %q and the share", tc.op, seed, here[0].Text, line)
+				}
+				continue
+			}
 			if len(here) != 1 || here[0].Text != line {
 				t.Errorf("%s seed %d, target read %q:\n firer read %v\n want %q", tc.op, seed, there, here, line)
 			}
@@ -438,7 +453,7 @@ func TestFiringPlanetReadsAnOldBombingFailure(t *testing.T) {
 // one walks every value.
 func TestEveryOutcomeHasANewsLineOnBothPlanets(t *testing.T) {
 	missile := map[specialOutcome]bool{specialHit: true, specialNothing: true,
-		specialMisfire: true, specialIntercepted: true, specialBackfire: true}
+		specialMisfire: true, specialIntercepted: true, specialBackfire: true, specialGuarded: true}
 	planet := map[specialOutcome]bool{specialHit: true, specialNothing: true, specialDrivenOff: true}
 	for o := specialOutcome(0); o < specialOutcomeCount; o++ {
 		if !missile[o] && !planet[o] {
@@ -488,6 +503,72 @@ func TestEveryOutcomeHasANewsLineOnBothPlanets(t *testing.T) {
 				t.Errorf("%s outcomes %d and %d share the firer's line %q", op, prev, o, b)
 			}
 			there[a], here[b] = o, o
+		}
+	}
+}
+
+// Who hears of a missile in person, outcome by outcome, as the original's two
+// routines decide it. On the target's board (resolve_received_sabre_strike
+// +0x0d1f..+0x0d8a) every outcome reaches the news, and the realm is told in
+// person of everything but an SDI interception. On the firer's board
+// (process_sabre_return +0x1056) a failed S3-Sabre is news alone, while a
+// nuclear or chemical strike, or a Sabre that landed, is told in person too.
+// Seeds are classified by outcome and every outcome must be reached.
+func TestMissileOutcomesReachTheOriginalsChannels(t *testing.T) {
+	for _, op := range []SpecialOp{OpNuclear, OpSabre} {
+		seen := map[AttackOutcome]bool{}
+		for seed := int64(1); seed <= 2000 && len(seen) < 4; seed++ {
+			from, to, attacker, target := specialOpWorlds(t)
+			to.rng = rand.New(rand.NewSource(seed))
+			target.SDI = 60
+			target.Turrets = (target.Land + 1) * 25_000
+			if op == OpSabre {
+				// Troopers are both the Sabre's garrison and IB's backfire
+				// trigger, so a garrison big enough to stop it would make every
+				// launch that gets past it backfire. A small realm with a
+				// modest army reaches both.
+				target.Regions = RegionMix{Desert: 9}
+				target.syncLand()
+				target.Troopers = 19_000
+			}
+			if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, op, 6); err != nil {
+				t.Fatalf("SendSpecialOp: %v", err)
+			}
+			targetEvents, newsThere := len(target.Events), len(to.NewsToday)
+			answer := to.ApplyPacket(from.Outbox[0])
+			res := answer.Results[0]
+			o := res.outcome()
+			if res.Backfired {
+				continue
+			}
+			switch o {
+			case OutcomeWon, OutcomeNegligible, OutcomeMisfire, OutcomeIntercepted, OutcomeGuarded:
+			default:
+				continue
+			}
+			if o == OutcomeWon || o == OutcomeNegligible {
+				o = OutcomeWon // the two landed outcomes share their channels
+			}
+			seen[o] = true
+			if len(to.NewsToday) != newsThere+1 {
+				t.Errorf("%s %s: the target's planet read %d lines, want 1", op, o, len(to.NewsToday)-newsThere)
+			}
+			told := len(target.Events) > targetEvents
+			if want := o != OutcomeIntercepted; told != want {
+				t.Errorf("%s %s: target told in person = %v, want %v", op, o, told, want)
+			}
+			newsHere := len(from.NewsToday)
+			from.applyAttackResult(res, nil)
+			if len(from.NewsToday) != newsHere+1 {
+				t.Errorf("%s %s: the firer's planet read %d lines, want 1", op, o, len(from.NewsToday)-newsHere)
+			}
+			told = len(attacker.Events) > 0
+			if want := op != OpSabre || o == OutcomeWon; told != want {
+				t.Errorf("%s %s: firer told in person = %v, want %v", op, o, told, want)
+			}
+		}
+		if len(seen) < 4 {
+			t.Errorf("%s: reached only %v", op, seen)
 		}
 	}
 }

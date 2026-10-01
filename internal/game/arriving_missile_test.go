@@ -64,7 +64,7 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	d.SDI = 100 // a full program: the interception roll is what will fire
 	intercepted := 0
 	for i := 0; i < 400; i++ {
-		if got, why := w.arrivingMissileStopped(d, "nuclear strike"); why == specialIntercepted {
+		if got, why := w.arrivingMissileStopped(d, "nuclear strike", 0); why == specialIntercepted {
 			if got == "Defendia's SDI intercepted your nuclear strike." {
 				intercepted++
 			}
@@ -80,11 +80,78 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	d.SDI = 0
 	misfired := 0
 	for i := 0; i < 400; i++ {
-		if got, why := w.arrivingMissileStopped(d, "nuclear strike"); why == specialMisfire && got == "The nuclear strike misfired and never reached Defendia." {
+		if got, why := w.arrivingMissileStopped(d, "nuclear strike", 0); why == specialMisfire && got == "The nuclear strike misfired and never reached Defendia." {
 			misfired++
 		}
 	}
 	if misfired == 0 {
 		t.Error("no launch ever misfired across 400 tries of a 1-in-10 roll")
+	}
+}
+
+// Each missile meets its own garrison: turrets against a nuclear strike, tanks
+// against a chemical one (resolve_received_sabre_strike +0x4c7..+0x53c reads
+// record +0x82 or +0x86 by op type). A realm deep in turrets and holding no
+// tanks stops nuclear strikes and never a chemical one, and the reverse.
+func TestEachMissileMeetsItsOwnGarrison(t *testing.T) {
+	guarded := func(op SpecialOp, turrets, tanks int) int {
+		n := 0
+		for seed := int64(1); seed <= 200; seed++ {
+			w := NewWorldSeed(DefaultConfig(), seed)
+			d := w.AddHuman("d", "Defendia")
+			d.SDI, d.Turrets, d.Tanks, d.Troopers = 0, turrets, tanks, 0
+			if _, _, why := w.applySpecialOp(op, d, "Selby of Home", 0); why == specialGuarded {
+				n++
+			}
+		}
+		return n
+	}
+	deep := 1_000_000_000
+	if guarded(OpNuclear, deep, 0) == 0 || guarded(OpChemical, 0, deep) == 0 {
+		t.Error("a deep garrison of the missile's own unit never stopped it")
+	}
+	if n := guarded(OpNuclear, 0, deep); n != 0 {
+		t.Errorf("tanks stopped %d nuclear strikes; the garrison is turrets", n)
+	}
+	if n := guarded(OpChemical, deep, 0); n != 0 {
+		t.Errorf("turrets stopped %d chemical strikes; the garrison is tanks", n)
+	}
+}
+
+// The garrison roll is the original's (resolve_received_sabre_strike
+// +0x540..+0x5b6): the unit count over regions plus one, against
+// Random(50000), and then a second die above 2. Golden literals rather than
+// the constants. The second die is drawn only when the first roll comes in
+// under the garrison, as the original draws it.
+func TestMissileGuardedIsTheOriginalsRoll(t *testing.T) {
+	never := func(int) int { t.Fatal("the second die was drawn after a roll the garrison did not meet"); return 0 }
+	die := func(v int) func(int) int {
+		return func(n int) int {
+			if n != 10 {
+				t.Fatalf("second die is Random(%d), want Random(10)", n)
+			}
+			return v
+		}
+	}
+	for _, c := range []struct {
+		guard, regions, roll, second int
+		draws, want                  bool
+	}{
+		// 999 regions + 1 = 1,000: 5,000,000 turrets is 5,000 a region.
+		{5_000_000, 999, 4_999, 3, true, true},
+		{5_000_000, 999, 4_999, 2, true, false},
+		{5_000_000, 999, 4_999, 9, true, true},
+		{5_000_000, 999, 5_000, 0, false, false}, // not under: no second die
+		{4_999, 0, 4_998, 3, true, true},         // a realm with no land divides by 1
+		{0, 100, 0, 0, false, false},             // no garrison never stops one
+	} {
+		intn := never
+		if c.draws {
+			intn = die(c.second)
+		}
+		if got := missileGuarded(c.guard, c.regions, c.roll, intn); got != c.want {
+			t.Errorf("guard %d over %d regions, roll %d, die %d: got %v, want %v",
+				c.guard, c.regions, c.roll, c.second, got, c.want)
+		}
 	}
 }

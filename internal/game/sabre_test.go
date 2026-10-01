@@ -303,3 +303,45 @@ func TestSabreBackfireCostsTheFirerNothing(t *testing.T) {
 		t.Errorf("reportless backfire event = %q, want it to say the strike backfired", last)
 	}
 }
+
+// The S3-Sabre meets the original's garrison roll against the target's
+// TROOPERS (resolve_received_sabre_strike +0x51e reads record +0x76), ahead of
+// the damage switch, so a Sabre it stops neither damages the target nor
+// backfires (#266's backfire comes after it). A property, checked on every
+// seed: whatever the dice, a guarded strike changes nothing.
+func TestSabreGarrisonStopsBeforeDamageOrBackfire(t *testing.T) {
+	guarded := 0
+	for seed := int64(1); seed <= 300; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		d := w.AddHuman("victim", "Victim")
+		d.Regions = RegionMix{Agricultural: 9}
+		d.syncLand()
+		d.SDI, d.Turrets, d.Tanks = 0, 0, 0
+		d.Troopers = 10 * 50_000 // 50,000 a region: every first roll is under
+		before := *d
+		_, outcome := w.sabreEffect(d, "Selby of Home", 5)
+		if outcome != specialGuarded {
+			continue
+		}
+		guarded++
+		if d.Land != before.Land || d.PendingRegions != before.PendingRegions ||
+			d.Troopers != before.Troopers || d.People != before.People ||
+			d.Food != before.Food || d.Jets != before.Jets || d.Agents != before.Agents {
+			t.Fatalf("seed %d: a guarded Sabre changed the target", seed)
+		}
+	}
+	// 0.9 x 0.99 x 0.7 of 300 is about 187.
+	if guarded < 120 || guarded > 250 {
+		t.Errorf("the garrison stopped %d of 300, want about 187", guarded)
+	}
+
+	// Turrets and tanks are the other two missiles' garrisons, not the Sabre's.
+	for seed := int64(1); seed <= 100; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		d := w.AddHuman("victim", "Victim")
+		d.SDI, d.Troopers, d.Turrets, d.Tanks = 0, 0, 1_000_000_000, 1_000_000_000
+		if _, outcome := w.sabreEffect(d, "Selby of Home", 5); outcome == specialGuarded {
+			t.Fatalf("seed %d: turrets or tanks stopped an S3-Sabre", seed)
+		}
+	}
+}

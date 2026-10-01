@@ -571,7 +571,7 @@ func pact(t *testing.T, w *World, from, to *Empire, ttype string) {
 }
 
 // bombDealQty is the round quantity every good in a test deal carries, so the
-// 5-9% a bombed deal keeps is the golden 50-90.
+// 91-95% a bombed deal keeps is the golden 910-950.
 const bombDealQty = 1000
 
 // bombRoutesTrials is how many strikes a test throws at a standing deal. Each
@@ -662,10 +662,14 @@ func TestBombTradeRoutesIgnoresTheAttackersOwnPact(t *testing.T) {
 	}
 }
 
-// A bombed deal keeps 5-9% of every good and loses the rest (BRE.OVR 0x051077,
-// trunc(qty x (random(5)+5) / 100)). The band is asserted as the golden 50-90 out
-// of 1,000 rather than through the constants, so a retune fails here.
-func TestBombTradeRoutesLeavesFiveToNinePercent(t *testing.T) {
+// A bombed deal loses 5-9% of every good it is sending, gold included, and
+// keeps the rest; what it demands back is not in transit and is untouched
+// (BRE.OVR 0x051077 subtracts trunc(qty / 100 x pct) from the send basket at
+// +0x0a only). The band is asserted as the golden 910-950 out of 1,000 rather
+// than through the constants, so a retune fails here. One percentage serves
+// the whole run (drawn at resolve_received_bombing +0x2bd), so every good in
+// the deal is left with the same figure.
+func TestBombTradeRoutesTakesFiveToNinePercent(t *testing.T) {
 	for seed := int64(1); seed <= 5; seed++ {
 		w, _, d, partner, _ := bombRoutesFixture(t, seed)
 		landed := 0
@@ -678,20 +682,31 @@ func TestBombTradeRoutesLeavesFiveToNinePercent(t *testing.T) {
 				continue
 			}
 			landed++
-			for name, got := range map[string]int{
-				"Troopers": deal.Send.Troopers,
-				"Food":     deal.Send.Food,
-				"Gold":     deal.Send.Gold,
-				"Tanks":    deal.Demand.Tanks,
-			} {
-				if got < 50 || got > 90 {
-					t.Fatalf("seed %d: %s: expected 50-90 of %d left after a strike, got %d", seed, name, bombDealQty, got)
-				}
+			if deal.Demand != (TradeBasket{Tanks: bombDealQty}) {
+				t.Fatalf("seed %d: the demand basket was bombed: %+v", seed, deal.Demand)
+			}
+			left := deal.Send.Troopers
+			if left < 910 || left > 950 {
+				t.Fatalf("seed %d: expected 910-950 of %d left after a strike, got %d", seed, bombDealQty, left)
+			}
+			if deal.Send.Food != left || deal.Send.Gold != left {
+				t.Fatalf("seed %d: one strike left different shares: %+v", seed, deal.Send)
 			}
 		}
 		if landed == 0 {
 			t.Errorf("seed %d: %d strikes landed on nothing", seed, bombRoutesTrials)
 		}
+	}
+}
+
+// The share is subtracted, Trunc(qty x pct / 100), so the loss rounds down and
+// what is kept rounds up. Golden figures, not the constants.
+func TestBombDealBasketSubtractsTheShare(t *testing.T) {
+	b := TradeBasket{Troopers: 999, Jets: 19, Gold: 1_000_000, Carriers: 1}
+	bombDealBasket(&b, 9)
+	want := TradeBasket{Troopers: 999 - 89, Jets: 19 - 1, Gold: 910_000, Carriers: 1}
+	if b != want {
+		t.Errorf("after a 9%% strike: got %+v, want %+v", b, want)
 	}
 }
 

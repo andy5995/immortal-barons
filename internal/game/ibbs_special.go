@@ -1,10 +1,6 @@
 package game
 
-import (
-	"fmt"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
-)
+import "fmt"
 
 // Interplanetary Special Operations (#49) — the InterPlanetary Ops menu's
 // Special Operations submenu, where every op is aimed at another planet: the
@@ -150,38 +146,40 @@ func (w *World) RemoteLand(board, empire string) int {
 //
 // The three missiles are priced off the TARGET's last-known territory, at a rate
 // of their own per missile (IPNukeGoldPerRegion and friends, binary-verified and
-// capture-confirmed; see balance.go). Uncapped: StrikeCostCap is the local
-// path's ceiling and does not appear on this one.
+// capture-confirmed; see balance.go), then held between IPMissileCostMin and
+// IPMissileCostMax. StrikeCostCap is the local path's ceiling and does not
+// appear on this one.
 //
-// The sysop's Terror Costs dial scales the bombing ops only. The original
-// applies no such knob to the missiles, and leaving it on them would have moved
-// a price this now matches exactly.
+// No sysop dial scales either. BINARY-VERIFIED: the bombing handler
+// (run_bombing_operations_menu's shared routine, BRE.OVR ovr_029088 +0x10b)
+// charges the price table at DS:0x7c2 + 4 x key as it stands, and nothing in
+// either binary writes that table, so the Terror Costs level the terrorist
+// ops answer to never reaches it. IB scaled the bombing ops by it until
+// 2026-10-01.
 func (w *World) SpecialOpGoldCost(e *Empire, op SpecialOp, targetLand int) int64 {
-	switch op {
-	case OpNuclear:
-		return int64(targetLand) * IPNukeGoldPerRegion
-	case OpChemical:
-		return int64(targetLand) * IPChemGoldPerRegion
-	case OpSabre:
-		return int64(targetLand) * IPSabreGoldPerRegion
-	}
-	var cost int64
+	var rate int64
 	switch op {
 	case OpBombFood:
-		cost = IPBombFoodCost
+		return IPBombFoodCost
 	case OpBombMarket:
-		cost = IPBombMarketCost
+		return IPBombMarketCost
 	case OpBombRoutes:
-		cost = IPBombRoutesCost
+		return IPBombRoutesCost
 	case OpUndermine:
-		cost = IPUndermineCost
+		return IPUndermineCost
+	case OpNuclear:
+		rate = IPNukeGoldPerRegion
+	case OpChemical:
+		rate = IPChemGoldPerRegion
+	case OpSabre:
+		rate = IPSabreGoldPerRegion
 	}
-	return cost * int64(w.Config.TerrorCosts.CostPercent()) / 100
+	return min(max(int64(targetLand)*rate, IPMissileCostMin), IPMissileCostMax)
 }
 
-// SendSpecialOp queues an op against targetEmpire on targetBoard. The gold goes
-// now and the op is booked in flight, so a packet that never comes back is
-// swept by the same lost-forces timer that returns an attack.
+// SendSpecialOp queues an op against targetEmpire on targetBoard. The gold and
+// the 500 Bombers go now and the op is booked in flight, so a packet that never
+// comes back is swept by the same lost-forces timer that returns an attack.
 func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op SpecialOp, dial int) error {
 	if isMissileOp(op) {
 		if !w.Config.MissileOps {
@@ -189,6 +187,11 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 		}
 	} else if !w.Config.BombingOps {
 		return ErrBombingOpsDisabled
+	}
+	// Sabre Handling None takes the item off the menu (sabreUnavailable); the
+	// engine refuses too, so no other caller can fire it.
+	if op == OpSabre && w.Config.SabreHandling == SabreNone {
+		return ErrSabreDisabled
 	}
 	if isMissileOp(op) {
 		// Each missile is its own once-a-day gate, not a share of the bombing
@@ -226,6 +229,14 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 		dial = w.sabreDialFor(dial)
 	}
 	e.Gold -= cost
+	// The bombers that carry the payload are spent with the launch, whatever
+	// happens to it. BINARY-VERIFIED: the bombing handler subtracts 500 from
+	// record +0x7a beside the gold, after the confirmation and before any
+	// landing roll, which is the target board's (ovr_029088 +0x3d0..+0x3e1),
+	// and each missile branch does the same once prepare_bombing_attack has
+	// charged it (+0x1146, +0x1233, +0x1689). IB checked for the 500 and never
+	// took them until 2026-10-01.
+	e.Bombers -= BombingBombersRequired
 	if isMissileOp(op) {
 		if e.MissileUsedToday == nil {
 			e.MissileUsedToday = map[SpecialOp]bool{}
@@ -267,6 +278,7 @@ const (
 	specialMisfire                           // a missile that failed on its own
 	specialIntercepted                       // a missile the target's SDI shot down
 	specialBackfire                          // an S3-Sabre that developed land for its target
+	specialGuarded                           // a missile the target's garrison brought down
 	specialDrivenOff                         // a bombing run that never reached what it was sent at
 
 	// specialOutcomeCount is not an outcome but the number of them, so a test
@@ -309,7 +321,7 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	// +0x308) skip only an empty slot, so a protected realm's listings and
 	// investments are hit with everyone else's.
 	if op.Op.TargetsPlanet() {
-		report, outcome := w.applyPlanetOp(op.Op, from)
+		report, outcome := w.applyPlanetOp(op.Op)
 		res.Report = report
 		res.Won = outcome == specialHit
 		res.Outcome = planetOpOutcome(outcome)
@@ -351,6 +363,8 @@ func missileOutcome(outcome specialOutcome) AttackOutcome {
 		return OutcomeMisfire
 	case specialIntercepted:
 		return OutcomeIntercepted
+	case specialGuarded:
+		return OutcomeGuarded
 	case specialNothing:
 		return OutcomeNegligible
 	}
@@ -388,6 +402,8 @@ func missileNews(label, from, target string, outcome specialOutcome) string {
 		return fmt.Sprintf("%s's SDI shot down the %s from %s.", target, label, from)
 	case specialBackfire:
 		return fmt.Sprintf("The %s from %s broke up over %s.", label, from, target)
+	case specialGuarded:
+		return fmt.Sprintf("The %s from %s was brought down over %s.", label, from, target)
 	case specialNothing:
 		return fmt.Sprintf("The %s from %s reached %s and did little harm.", label, from, target)
 	}
@@ -451,72 +467,65 @@ func planetOpObject(op SpecialOp, whose string) string {
 // food market's supply, every listing on the Trading Market, every pending
 // trade deal, every realm's investments near maturity. The landing roll comes
 // first and covers all four.
-func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome specialOutcome) {
-	living := func() []*Empire {
-		var out []*Empire
-		for _, e := range w.Empires {
-			if e.Alive {
-				out = append(out, e)
-			}
-		}
-		return out
-	}
-	tell := func(text string) {
-		for _, e := range living() {
-			e.addEvent(text)
-		}
-	}
-
+//
+// The planet learns of a run through its news alone. BINARY-VERIFIED:
+// resolve_received_bombing (BRE.OVR 0x04a09a) makes one call to the news
+// writer and none to the per-realm event writer, so no realm on the planet is
+// told separately what it lost. IB filed an event with every living realm
+// until 2026-10-01.
+//
+// The report is what rides home for the firer's planet news, which names the
+// share destroyed as the original's success line does (process_bombing_results
+// prints it for the food market, the trading market and the investments, and
+// no figure for the trade routes). It is a sentence about the target planet,
+// not to the firer, and is empty when there is no figure to give.
+func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutcome) {
 	// One landing roll for the whole run, ahead of the op switch, as the
 	// original rolls it; a run that fails it touches nothing on the planet.
 	if !w.bombingLands() {
-		return fmt.Sprintf("Your bombers were driven off before they reached %s.", planetOpObject(op, "that planet's")), specialDrivenOff
+		return "", specialDrivenOff
 	}
 
 	switch op {
 	case OpBombFood:
-		lost := w.bombFoodMarketEffect()
+		lost, pct := w.bombFoodMarketEffect()
 		if lost <= 0 {
-			return "The food market on that planet was already bare.", specialNothing
+			return "", specialNothing
 		}
-		tell(fmt.Sprintf("Bombers from %s hit the planet's food market — %s units of supply destroyed.",
-			from, numfmt.Comma(int64(lost))))
-		return fmt.Sprintf("You destroyed %d units of the planet's food supply.", lost), specialHit
+		return fmt.Sprintf("%d%% of its supply was destroyed.", pct), specialHit
 
 	case OpBombMarket:
 		goods, pct := 0, w.bombMarketLossPct()
-		for _, e := range living() {
-			goods += w.bombMarketPosition(e, pct)
+		for _, e := range w.Empires {
+			if e.Alive {
+				goods += w.bombMarketPosition(e, pct)
+			}
 		}
 		if goods == 0 {
-			return "Nothing was listed on that planet's trading market.", specialNothing
+			return "", specialNothing
 		}
-		tell(fmt.Sprintf("Bombers from %s wrecked the planet's trading market — %s listed goods destroyed.",
-			from, numfmt.Comma(int64(goods))))
-		return fmt.Sprintf("You wrecked the planet's trading market: %d listed goods destroyed.", goods), specialHit
+		return fmt.Sprintf("%d%% of every listing was destroyed.", pct), specialHit
 
 	case OpBombRoutes:
-		hit := w.bombRoutesEffect()
-		if hit == 0 {
-			return "Nothing worth hitting was moving on that planet's trade routes.", specialNothing
+		if w.bombRoutesEffect() == 0 {
+			return "", specialNothing
 		}
-		tell(fmt.Sprintf("Bombers from %s hit trade routes across the planet — the goods in %d deals in transit were all but destroyed.", from, hit))
-		return fmt.Sprintf("You wrecked the goods in %d trade deals on that planet.", hit), specialHit
+		return "", specialHit
 
 	case OpUndermine:
 		var lost int64
 		pct := w.undermineLossPct()
-		for _, e := range living() {
-			lost += w.undermineEffect(e, pct)
+		for _, e := range w.Empires {
+			if e.Alive {
+				lost += w.undermineEffect(e, pct)
+			}
 		}
 		if lost == 0 {
-			return "Nothing was invested on that planet to undermine.", specialNothing
+			return "", specialNothing
 		}
-		tell(fmt.Sprintf("Bombers from %s undermined the planet's bank — %s gold in principal lost.",
-			from, numfmt.Comma(lost)))
-		return fmt.Sprintf("You undermined the planet's investments: %d gold lost.", lost), specialHit
+		return fmt.Sprintf("%d%% of the investments coming due was lost.", pct), specialHit
 	}
-	return "Nothing came of the operation.", specialNothing
+	return "", specialNothing
 }
 
 // applySpecialOp runs an arriving missile's effect against d and reports what it
@@ -527,15 +536,22 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, outcome
 // branches here, from when they were aimed at one baron, which no packet could
 // reach once they were aimed at the planet; they were removed on 2026-09-23.
 func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report string, score int, outcome specialOutcome) {
+	// A missile the target's SDI shot down is told to its planet in the news
+	// and to nobody in person. BINARY-VERIFIED: resolve_received_sabre_strike
+	// skips its event-writer call at +0x0d8a when the SDI flag is set (+0x0d2c),
+	// and makes it for every other failure (+0x0d25..+0x0d31). IB told the
+	// target of an interception too until 2026-10-01.
 	switch op {
 	// The three missiles do NOT run the local helpers of the same name (#255).
 	// The receiving board resolves all three in one routine with its own gates
 	// and its own bands (BRE.OVR ovr_0450a9 +0x3c5) — an arriving nuclear strike
-	// ruins a wider swathe than a neighbor's, and an arriving chemical strike is
+	// ruins a wider swath than a neighbor's, and an arriving chemical strike is
 	// a population weapon that touches no land at all.
 	case OpNuclear:
-		if stopped, why := w.arrivingMissileStopped(d, "nuclear strike"); stopped != "" {
-			d.addEvent(fmt.Sprintf("A nuclear strike from %s never reached your empire.", from))
+		if stopped, why := w.arrivingMissileStopped(d, "nuclear strike", d.Turrets); stopped != "" {
+			if why != specialIntercepted {
+				d.addEvent(fmt.Sprintf("A nuclear strike from %s never reached your empire.", from))
+			}
 			return stopped, 0, why
 		}
 		regions := w.arrivingNuclearEffect(d)
@@ -544,8 +560,10 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 		return fmt.Sprintf("Nuclear strike! %d regions of %s are now waste.", regions, d.Name), score, specialHit
 
 	case OpChemical:
-		if stopped, why := w.arrivingMissileStopped(d, "chemical strike"); stopped != "" {
-			d.addEvent(fmt.Sprintf("A chemical strike from %s never reached your empire.", from))
+		if stopped, why := w.arrivingMissileStopped(d, "chemical strike", d.Tanks); stopped != "" {
+			if why != specialIntercepted {
+				d.addEvent(fmt.Sprintf("A chemical strike from %s never reached your empire.", from))
+			}
 			return stopped, 0, why
 		}
 		people := w.arrivingChemicalEffect(d)

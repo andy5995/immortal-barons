@@ -90,17 +90,16 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 		t.Error("the answer carries no report, so the sender learns nothing")
 	}
 
-	// And the answer comes home.
+	// And the answer comes home, to the sending planet's news: the original's
+	// return path for a bombing run writes no event to the baron.
+	newsBefore := len(from.NewsToday)
 	from.applyAttackResult(answer.Results[0], nil)
 	if len(from.InFlight) != 0 {
 		t.Errorf("the op is still in flight after its answer arrived: %+v", from.InFlight)
 	}
-	if len(attacker.Events) == 0 {
-		t.Fatal("the sender was told nothing")
-	}
-	last := attacker.Events[len(attacker.Events)-1]
-	if !contains(last.Text, "Bomb Food Market") {
-		t.Errorf("the report does not name the operation: %q", last.Text)
+	got := from.NewsToday[newsBefore:]
+	if len(got) != 1 || !contains(got[0].Text, "Alpha Baron's bombers hit Bravo BBS's food market.") {
+		t.Fatalf("the sending planet read %v", got)
 	}
 }
 
@@ -142,6 +141,68 @@ func TestSpecialOpNeedsBombers(t *testing.T) {
 	}
 }
 
+// Every launch spends 500 Bombers, bombing op and missile alike, at the moment
+// it is sent (BRE.OVR ovr_029088 +0x3d0..+0x3e1 for keys 1-4, +0x1146, +0x1233
+// and +0x1689 for the missiles). Golden 500, not the constant.
+func TestSpecialOpSpendsFiveHundredBombers(t *testing.T) {
+	from, _, attacker, target := specialOpWorlds(t)
+	attacker.Bombers = 1_234
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpBombFood, 0); err != nil {
+		t.Fatalf("bombing op: %v", err)
+	}
+	if attacker.Bombers != 734 {
+		t.Errorf("after a bombing op: %d bombers, want 734", attacker.Bombers)
+	}
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpNuclear, 0); err != nil {
+		t.Fatalf("missile: %v", err)
+	}
+	if attacker.Bombers != 234 {
+		t.Errorf("after a missile: %d bombers, want 234", attacker.Bombers)
+	}
+	// 234 left is short of the next payload, so the menu's floor now refuses.
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpChemical, 0); err != ErrNeedBombers {
+		t.Errorf("third op with 234 bombers: %v, want ErrNeedBombers", err)
+	}
+}
+
+// A missile's price is the target's land times its rate, held between a million
+// and a billion (prepare_bombing_attack +0x58b: max_i32 then min_i32). The
+// bombing ops are the flat table, and the Terror Costs level touches none of
+// them. Golden literals throughout.
+func TestSpecialOpPricesMatchTheOriginal(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("a", "Alpha")
+	for _, c := range []struct {
+		op   SpecialOp
+		land int
+		want int64
+	}{
+		{OpNuclear, 8_112, 20_758_608},      // the capture's own quote
+		{OpChemical, 8_112, 21_853_728},     // ditto
+		{OpSabre, 8_112, 36_122_736},        // ditto
+		{OpNuclear, 100, 1_000_000},         // 255,900 raised to the floor
+		{OpSabre, 1, 1_000_000},             // 4,453 raised to the floor
+		{OpNuclear, 390_777, 999_998_343},   // just under the ceiling
+		{OpNuclear, 390_778, 1_000_000_000}, // just over it, held there
+		{OpSabre, 10_000_000, 1_000_000_000},
+	} {
+		if got := w.SpecialOpGoldCost(e, c.op, c.land); got != c.want {
+			t.Errorf("%s at %d regions: %d, want %d", c.op, c.land, got, c.want)
+		}
+	}
+	for _, level := range []Level{None, Low, Medium, High} {
+		w.Config.TerrorCosts = level
+		for op, want := range map[SpecialOp]int64{
+			OpBombFood: 10_000_000, OpBombMarket: 25_000_000,
+			OpBombRoutes: 25_000_000, OpUndermine: 75_000_000,
+		} {
+			if got := w.SpecialOpGoldCost(e, op, 0); got != want {
+				t.Errorf("%s at Terror Costs %v: %d, want %d", op, level, got, want)
+			}
+		}
+	}
+}
+
 // The sysop's two switches govern this menu the same way they govern the local
 // one: neither can be disabled on one menu and left live on the other.
 func TestSpecialOpHonoursTheSysopSwitches(t *testing.T) {
@@ -154,6 +215,19 @@ func TestSpecialOpHonoursTheSysopSwitches(t *testing.T) {
 	from.Config.MissileOps = false
 	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Anyone", OpNuclear, 0); err != ErrMissileOpsDisabled {
 		t.Errorf("missile op with Missile Ops off: %v", err)
+	}
+	// Sabre Handling None refuses the Sabre alone, and spends nothing.
+	from.Config.MissileOps = true
+	from.Config.SabreHandling = SabreNone
+	gold, bombers := attacker.Gold, attacker.Bombers
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Bravo Hold", OpSabre, 0); err != ErrSabreDisabled {
+		t.Errorf("S3-Sabre under Sabre Handling None: %v, want ErrSabreDisabled", err)
+	}
+	if attacker.Gold != gold || attacker.Bombers != bombers || len(from.Outbox) != 0 {
+		t.Error("a refused S3-Sabre spent something or queued a packet")
+	}
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "Bravo Hold", OpNuclear, 0); err != nil {
+		t.Errorf("Sabre Handling None refused a nuclear strike: %v", err)
 	}
 }
 

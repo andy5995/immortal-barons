@@ -236,13 +236,18 @@ const BombingLandOdds = 3
 
 // Bomb Trade Routes. BINARY-VERIFIED: BRE.OVR 0x051077, the routine
 // `resolve_received_bombing` (0x04a09a) runs for a received op type 3. Behind
-// the landing roll above, two rolls decide the damage — a `random(3)` per deal
-// that lets one deal in three escape, and `trunc(qty x (random(5)+5) / 100)` on
-// each of the deal's goods quantities, which leaves 5-9% and destroys the rest.
+// the landing roll above, two rolls decide the damage. `resolve_received_bombing`
+// draws ONE `Random(5)+5` for the whole run at +0x2bd and passes it in; the
+// walker (ovr_050dfb +0x1f9) rolls a `random(3)` per deal that lets one deal in
+// three escape, and SUBTRACTS `trunc(qty / 100 x pct)` from each of the nine
+// goods in the deal's send basket (+0x0a..+0x2d, gold included) through
+// sub_i32_indirect. So a hit deal loses 5-9% and keeps 91-95%. IB had it the
+// other way round, keeping 5-9% and rolling the share per good, until
+// 2026-10-01.
 const (
 	BombRoutesDealEscapeOdds = 3 // 1-in-this a given deal escapes; the rest are hit
-	BombRoutesKeptPctMin     = 5 // a hit deal keeps this percent of each good...
-	BombRoutesKeptPctSpread  = 5 // ...plus random(this), so 5-9% survives
+	BombRoutesLossPctMin     = 5 // a hit deal loses this percent of each good...
+	BombRoutesLossPctSpread  = 5 // ...plus random(this), so 5-9% goes
 )
 
 // MarketCommissionPct is the cut (percent) the general Trading Market takes from

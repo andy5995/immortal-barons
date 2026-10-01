@@ -375,25 +375,45 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 // and the news line all belong to the side that fired, which cross-planet is a
 // different board entirely.
 
-// arrivingMissileStopped runs the two rolls the receiving board makes for ANY
+// arrivingMissileStopped runs the three rolls the receiving board makes for ANY
 // arriving missile, after the realm has been found and its New Realm Protection
-// checked: the misfire, then SDI. BINARY-VERIFIED — the original resolves all
-// three missiles in one routine (`BRE.OVR ovr_0450a9 +0x3c5`) and both rolls sit
-// ahead of the damage switch, so a nuclear strike is stopped by the same shield
-// an S3-Sabre is.
+// checked: the misfire, then SDI, then the target's garrison. BINARY-VERIFIED —
+// the original resolves all three missiles in one routine (`BRE.OVR ovr_0450a9
+// +0x3c5`) and all three rolls sit ahead of the damage switch, so a nuclear
+// strike is stopped by the same shield an S3-Sabre is.
+//
+// guard is the target's count of the unit that stands against this missile —
+// turrets for a nuclear strike, tanks for a chemical one, troopers for an
+// S3-Sabre (`+0x4c7..+0x53c` pick record +0x82, +0x86 or +0x76 by op type).
+// The resolver divides it by the target's regions plus one and fails the
+// missile when Random(MissileDefenseRoll) falls under that and a second die
+// rolls above MissileDefenseThrough (`+0x540..+0x5b6`). It sets the same
+// failure flag the misfire does and not the SDI one, so the reader's line is
+// the plain failure form; IB words it as the garrison it was.
 //
 // Returns the sender's line for the reason the strike ended, and which reason
-// it was, or "" and specialHit when it gets through. The two reasons are
-// separate lines to the reader in the original, and stay separate here: a
-// shield that worked and a weapon that failed are different news.
-func (w *World) arrivingMissileStopped(d *Empire, label string) (string, specialOutcome) {
+// it was, or "" and specialHit when it gets through. The reasons are separate
+// lines to the reader in the original, and stay separate here: a shield that
+// worked and a weapon that failed are different news.
+func (w *World) arrivingMissileStopped(d *Empire, label string, guard int) (string, specialOutcome) {
 	if w.rng.Intn(MissileMisfireOdds) == 0 {
 		return fmt.Sprintf("The %s misfired and never reached %s.", label, d.Name), specialMisfire
 	}
 	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
 		return fmt.Sprintf("%s's SDI intercepted your %s.", d.Name, label), specialIntercepted
 	}
+	if missileGuarded(guard, d.Land, w.rng.Intn(MissileDefenseRoll), w.rng.Intn) {
+		return fmt.Sprintf("%s's defenses brought down your %s.", d.Name, label), specialGuarded
+	}
 	return "", specialHit
+}
+
+// missileGuarded is the garrison roll: roll is the Random(MissileDefenseRoll)
+// draw, and the second die is drawn only when the first comes in under the
+// garrison per region, as the original draws it.
+func missileGuarded(guard, regions, roll int, intn func(int) int) bool {
+	perRegion := int64(guard) / (int64(regions) + 1)
+	return int64(roll) < perRegion && intn(MissileDefenseSides) > MissileDefenseThrough
 }
 
 // arrivingNuclearEffect and arrivingChemicalEffect are the damage an arriving

@@ -46,7 +46,7 @@ func TestPlanetWideSpecialOpResultNamesThePlanet(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	w := NewWorldSeed(cfg, 1)
-	e := w.AddHuman("alice", "Alethia")
+	w.AddHuman("alice", "Alethia")
 
 	sent := InFlightStrike{
 		ID: 7, Kind: "special", Owner: "alice", Op: OpBombRoutes,
@@ -55,14 +55,15 @@ func TestPlanetWideSpecialOpResultNamesThePlanet(t *testing.T) {
 	w.applySpecialOpResult(sent, AttackResult{
 		ID: 7, TargetBoard: "faraway", TargetEmpire: "", Outcome: OutcomeWon,
 	})
-	if len(e.Events) == 0 {
-		t.Fatal("the baron was told nothing")
+	// A bombing run's firer is told through the planet news alone.
+	if len(w.NewsToday) == 0 {
+		t.Fatal("the planet was told nothing")
 	}
-	got := e.Events[len(e.Events)-1].Text
+	got := w.NewsToday[len(w.NewsToday)-1].Text
 	if strings.Contains(got, "( of ") || strings.Contains(got, "against  ") {
 		t.Errorf("the notice has a hole where the target goes: %q", got)
 	}
-	if !strings.Contains(got, "the whole of faraway") {
+	if got != "Alethia's bombers hit trade routes across faraway." {
 		t.Errorf("the notice does not name the planet: %q", got)
 	}
 }

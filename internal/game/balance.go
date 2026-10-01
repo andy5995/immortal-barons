@@ -420,7 +420,8 @@ var SupportMoodBands = [10]int{10, 17, 23, 30, 38, 47, 65, 80, 88, 96}
 // These are NOT the local rates — a local nuke is 3,543 a region against 2,559
 // here — so the two paths being priced differently is the original's design.
 // There is also no StrikeCostCap on this path: the 50,000,000 literal appears in
-// all three local routines and in none of these three branches.
+// all three local routines and in none of these three branches. The path has a
+// clamp of its own instead, IPMissileCostMin/Max below.
 //
 // IB priced these off the LAUNCHER until 2026-09-18, on the reasoning that a
 // board cannot know how big a realm on another planet is. It can: the scores it
@@ -435,6 +436,20 @@ const (
 	IPNukeGoldPerRegion  int64 = 2_559
 	IPChemGoldPerRegion  int64 = 2_694
 	IPSabreGoldPerRegion int64 = 4_453
+)
+
+// IPMissileCostMin and IPMissileCostMax bound a missile's price once it is
+// multiplied out. BINARY-VERIFIED: prepare_bombing_attack (BRE.OVR ovr_029088
+// +0x58b) passes the product through max_i32 against 1,000,000 and then min_i32
+// against 1,000,000,000, for all three missiles alike. So a strike at a realm
+// of a few hundred regions still costs a million, and none costs more than a
+// billion however large the target.
+//
+// The four bombing ops never reach it: their handler (+0x10b) charges the flat
+// table above directly.
+const (
+	IPMissileCostMin int64 = 1_000_000
+	IPMissileCostMax int64 = 1_000_000_000
 )
 
 // TerrorPctLoss is the band one landed terror agent takes off the field its
