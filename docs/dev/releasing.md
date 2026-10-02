@@ -74,6 +74,7 @@ League Coordinator's minimum-version gate.
 
 7. **Remove the `-dev` suffix** from `Version` in `internal/game/version.go`,
    so the release calls itself `X.Y.Z`, then **commit** as `release: vX.Y.Z`.
+   The Release workflow refuses a tag that does not match `Version`.
 
 ## Tagging
 

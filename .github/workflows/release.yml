@@ -20,6 +20,18 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # The release commit drops the "-dev" suffix from game.Version
+      # (docs/dev/releasing.md, step 7). A release that still carries it
+      # reports a development version, ranks below its own number and fails a
+      # Coordinator's minimum set at it, so stop before building anything.
+      - name: Check game.Version matches the tag
+        run: |
+          v=$(sed -nE 's/^const Version = "(.*)"$/\1/p' internal/game/version.go)
+          if [ "v$v" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::game.Version is \"$v\" but the tag is $GITHUB_REF_NAME. Set Version to ${GITHUB_REF_NAME#v} in internal/game/version.go."
+            exit 1
+          fi
+
       # windows/386 needs a Windows 7-capable Go (see the script and #181); the
       # other targets use the setup-go toolchain above.
       - name: Fetch the Windows 7 Go toolchain
