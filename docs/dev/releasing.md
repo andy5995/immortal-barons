@@ -72,7 +72,8 @@ League Coordinator's minimum-version gate.
    download. Left alone the release still builds, on the older Go — which is the
    failure worth catching here, since nothing else reports it.
 
-7. **Commit** as `release: vX.Y.Z`.
+7. **Remove the `-dev` suffix** from `Version` in `internal/game/version.go`,
+   so the release calls itself `X.Y.Z`, then **commit** as `release: vX.Y.Z`.
 
 ## Tagging
 
@@ -85,15 +86,16 @@ Watch it: a release with no assets is a release nobody can use.
 
 ## After publishing
 
-8. **Bump `Version` in `internal/game/version.go`** to the next patch. This is the
-   step that gets forgotten, because the release feels finished once the assets
-   are up.
+8. **Bump `Version` in `internal/game/version.go`** to the next patch with the
+   suffix back on, `X.Y.Z-dev`. This is the step that gets forgotten, because
+   the release feels finished once the assets are up.
 
    It is not cosmetic. The constant is the in-development version, so leaving it
    at the released number means every later build identifies itself as that
    release — in `-version`, in the About screen, in the door log, and in the
    version stamped on every inter-BBS packet, where a Coordinator's minimum
-   version is tested against it.
+   version is tested against it. The gate ranks `X.Y.Z-dev` below `X.Y.Z`, so a
+   snapshot built before a release cannot pass a minimum set at that release.
 
 9. **Decide whether `game.Protocol` needs bumping**, and settle it now rather
    than when the next format change is half-written.

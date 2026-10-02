@@ -152,7 +152,9 @@ every league starts with no keys, and a league that never adds them still works.
 
 **The board runs a release older than the league requires.** The Coordinator has
 set a minimum version, and that board is below it. The fix is an upgrade on the
-sending board.
+sending board. A snapshot calls itself the coming release with `-dev` on the
+end (`0.2.2-dev`) and counts as below that release, so a snapshot board fails a
+minimum of `0.2.2` and passes one of `0.2.1`.
 
 **Coordinator orders failed their check.** Seven situations refuse them. In the
 order they are tested, with where each one is fixed:

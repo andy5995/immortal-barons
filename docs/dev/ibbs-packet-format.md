@@ -461,6 +461,10 @@ whole, with a news line naming the board and the version it runs; `BBSINFO.LST`
 marks the same board `(below vX.Y.Z)` so a Coordinator can see who is holding
 the league up without waiting for a bounce.
 
+A development build states the coming release with `-dev` on the end
+(`0.2.2-dev`) and ranks below that release, as semver orders them, so a
+snapshot taken before a release cannot pass a requirement set at it.
+
 A board that states NO version fails a set requirement. That is deliberate: it
 predates boards saying so at all, which puts it below any version worth
 requiring, and a board that cannot state its version cannot prove it meets the

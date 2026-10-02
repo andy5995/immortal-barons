@@ -200,6 +200,9 @@ func TestVersionAtLeast(t *testing.T) {
 		{"0.0.5", "0.0.5", true}, {"0.0.6", "0.0.5", true}, {"0.1.0", "0.0.9", true},
 		{"1.0.0", "0.9.9", true}, {"0.0.4", "0.0.5", false}, {"0.1", "0.1.0", true},
 		{"0.1", "0.1.1", false}, {"", "0.0.1", false}, {"garbage", "0.0.1", false},
+		{"0.2.2-dev", "0.2.2", false}, {"0.2.2-dev", "0.2.1", true},
+		{"0.2.2", "0.2.2-dev", true}, {"0.2.2-dev", "0.2.2-dev", true},
+		{"0.2.3-dev", "0.2.2", true},
 	} {
 		if got := versionAtLeast(c.have, c.want); got != c.ok {
 			t.Errorf("versionAtLeast(%q, %q) = %v, want %v", c.have, c.want, got, c.ok)
