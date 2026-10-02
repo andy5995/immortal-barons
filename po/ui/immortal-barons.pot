@@ -25,7 +25,7 @@ msgstr ""
 msgid "#"
 msgstr ""
 
-#: internal/menu/menu.go:965
+#: internal/menu/menu.go:967
 msgid "# Owned"
 msgstr ""
 
@@ -1369,7 +1369,7 @@ msgstr ""
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr ""
 
-#: internal/menu/menu.go:964
+#: internal/menu/menu.go:966
 msgid "Item"
 msgstr ""
 
@@ -1601,7 +1601,7 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/menu.go:1203
+#: internal/menu/menu.go:1205
 msgid "No"
 msgstr ""
 
@@ -2961,7 +2961,7 @@ msgstr ""
 msgid "Writing to:"
 msgstr ""
 
-#: internal/menu/menu.go:1202
+#: internal/menu/menu.go:1204
 msgid "Yes"
 msgstr ""
 
@@ -3137,7 +3137,7 @@ msgstr ""
 msgid "You have reached your region purchase limit for this turn."
 msgstr ""
 
-#: internal/game/covert.go:168
+#: internal/game/covert.go:173
 msgid "You have run that covert operation as often as you may today."
 msgstr ""
 

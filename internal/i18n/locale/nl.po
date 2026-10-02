@@ -32,7 +32,7 @@ msgstr " - kies een onderwerp:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:965
+#: internal/menu/menu.go:967
 msgid "# Owned"
 msgstr "Aantal"
 
@@ -459,7 +459,7 @@ msgstr "Akkoord?"
 
 #: internal/menu/actions_trade.go:296
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
-msgstr "Akkoord? [J]a, [N]ee, [I]negeren"
+msgstr "Akkoord? [Y] Ja, [N] Nee, [I] Negeren"
 
 #: internal/menu/actions_attack.go:712
 msgid "Add how much gold for funding?"
@@ -1124,7 +1124,7 @@ msgstr "Wilt u nog een bericht sturen?"
 
 #: internal/menu/actions_ipscores.go:355
 msgid "Do you wish to target (O)ne Dominion or (A)ll?"
-msgstr "Wilt u (E)én rijk of (A)lle rijken als doelwit?"
+msgstr "Wilt u (O) één rijk of (A) alle rijken als doelwit?"
 
 #: internal/menu/turnstages.go:112
 msgid "Do you wish to visit the bank?"
@@ -1497,7 +1497,7 @@ msgstr "Het bereikt hen niet eerder dan beurt %d van hun dag."
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr "De financiering kost uw planeet %s miljoen goud. Akkoord?"
 
-#: internal/menu/menu.go:964
+#: internal/menu/menu.go:966
 msgid "Item"
 msgstr "Item"
 
@@ -1741,7 +1741,7 @@ msgstr "Nieuw aantal %s te koop"
 msgid "New tax rate?"
 msgstr "Nieuw belastingtarief?"
 
-#: internal/menu/menu.go:1203
+#: internal/menu/menu.go:1205
 msgid "No"
 msgstr "Nee"
 
@@ -3244,7 +3244,7 @@ msgstr "Schrijven,"
 msgid "Writing to:"
 msgstr "Schrijven aan:"
 
-#: internal/menu/menu.go:1202
+#: internal/menu/menu.go:1204
 msgid "Yes"
 msgstr "Ja"
 
@@ -3424,7 +3424,7 @@ msgstr "U hebt geen verzonden berichten."
 msgid "You have reached your region purchase limit for this turn."
 msgstr "U heeft uw limiet voor regio-aankopen deze beurt bereikt."
 
-#: internal/game/covert.go:168
+#: internal/game/covert.go:173
 msgid "You have run that covert operation as often as you may today."
 msgstr ""
 "U hebt die geheime operatie vandaag zo vaak uitgevoerd als is toegestaan."

@@ -2,6 +2,7 @@ package i18n
 
 import (
 	"io/fs"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -153,6 +154,38 @@ func TestCatalogFormatVerbsMatch(t *testing.T) {
 					t.Errorf("[%s] verb %d differs (%s vs %s)\n  id:  %q\n  str: %q", lang, k, iv[k], sv[k], id, str)
 					break
 				}
+			}
+		}
+	}
+}
+
+// keyMarks finds the keys a prompt names inside its own text: "[Y]es" or
+// "(O)ne". The code reads those exact keys, so a translation must show the same
+// letters, in the same order, whatever words it wraps around them.
+var keyMarks = regexp.MustCompile(`\[([A-Za-z0-9])\]|\(([A-Z0-9])\)`)
+
+func marks(s string) []string {
+	var out []string
+	for _, m := range keyMarks.FindAllStringSubmatch(s, -1) {
+		out = append(out, m[1]+m[2])
+	}
+	return out
+}
+
+// A translated prompt that names a key the code does not read leaves the player
+// pressing a key that does nothing. German, Dutch and Portuguese all did this
+// until 2026-10-02 ("[J]a" on a prompt that answers only Y, N and I). Menu
+// hotkeys are not at risk — the engine draws those apart from the label — so
+// this covers only keys written into translatable text.
+func TestCatalogKeyLettersMatch(t *testing.T) {
+	for lang, cat := range catalogs {
+		for id, str := range cat {
+			want := marks(id)
+			if len(want) == 0 {
+				continue
+			}
+			if got := marks(str); strings.Join(got, ",") != strings.Join(want, ",") {
+				t.Errorf("[%s] keys %v shown as %v\n  id:  %q\n  str: %q", lang, want, got, id, str)
 			}
 		}
 	}

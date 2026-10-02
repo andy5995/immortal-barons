@@ -39,7 +39,7 @@ The missile is still a gamble on top of that. About one launch in ten
 misfires, and the enemy's SDI may shoot it down. The enemy's troopers work
 against it twice: the more they hold for each region, the more often a Sabre
 fails before it reaches them, and the larger their army, the more often one
-that gets through breaks up over the target and does no damage. A breakup
+that gets through backfires on the target and does no damage. A backfire
 does not harm you, but it helps the enemy: the fallout gives them new
 regions, 10% to 19% of the regions they already hold. They choose the types
 of the new regions on their next turn.

@@ -28,7 +28,7 @@ msgstr " - выберите тему:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:965
+#: internal/menu/menu.go:967
 msgid "# Owned"
 msgstr "# Есть"
 
@@ -1481,7 +1481,7 @@ msgstr "К ним это попадёт не раньше хода %d их дн�
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr "Постройка обойдётся планете в %s млн золота. Принять?"
 
-#: internal/menu/menu.go:964
+#: internal/menu/menu.go:966
 msgid "Item"
 msgstr "Позиция"
 
@@ -1726,7 +1726,7 @@ msgstr "Новое количество %s на продажу"
 msgid "New tax rate?"
 msgstr "Новая ставка налога?"
 
-#: internal/menu/menu.go:1203
+#: internal/menu/menu.go:1205
 msgid "No"
 msgstr "Нет"
 
@@ -3213,7 +3213,7 @@ msgstr "Написать,"
 msgid "Writing to:"
 msgstr "Кому пишем:"
 
-#: internal/menu/menu.go:1202
+#: internal/menu/menu.go:1204
 msgid "Yes"
 msgstr "Да"
 
@@ -3392,7 +3392,7 @@ msgstr "У вас нет отправленных сообщений."
 msgid "You have reached your region purchase limit for this turn."
 msgstr "Предел покупки регионов на этот ход исчерпан."
 
-#: internal/game/covert.go:168
+#: internal/game/covert.go:173
 msgid "You have run that covert operation as often as you may today."
 msgstr "Сегодня вы провели эту тайную операцию столько раз, сколько разрешено."
 

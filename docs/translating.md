@@ -56,6 +56,10 @@ msgstr "Regionen kaufen"
 - Keep every placeholder — `%d`, `%s`, and so on — exactly as it appears in the
   `msgid`, in the same order. A wrong placeholder can break the display. A test
   checks this.
+- Keep every key a prompt names in its own text, such as `[Y]es` or `(O)ne`.
+  The game reads that exact key, so write `[Y] Ja`, not `[J]a`: a translated
+  letter shows the player a key that does nothing. A test checks this too.
+  Menu keys are not affected, because the game draws them apart from the label.
 - Do not create two entries with the same `msgid`.
 
 ## Improve an existing translation

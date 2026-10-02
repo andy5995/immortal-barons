@@ -28,7 +28,7 @@ msgstr " - Thema wählen:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:965
+#: internal/menu/menu.go:967
 msgid "# Owned"
 msgstr "# Besitz"
 
@@ -457,7 +457,7 @@ msgstr "Annehmen?"
 
 #: internal/menu/actions_trade.go:296
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
-msgstr "Annehmen? [J]a, [N]ein, [I]gnorieren"
+msgstr "Annehmen? [Y] Ja, [N] Nein, [I] Ignorieren"
 
 #: internal/menu/actions_attack.go:712
 msgid "Add how much gold for funding?"
@@ -1500,7 +1500,7 @@ msgstr "Es erreicht sie frühestens in Zug %d ihres Tages."
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr "Die Finanzierung kostet Ihren Planeten %s Millionen Gold. Annehmen?"
 
-#: internal/menu/menu.go:964
+#: internal/menu/menu.go:966
 msgid "Item"
 msgstr "Posten"
 
@@ -1746,7 +1746,7 @@ msgstr "Neue Menge %s zum Verkauf"
 msgid "New tax rate?"
 msgstr "Neuer Steuersatz?"
 
-#: internal/menu/menu.go:1203
+#: internal/menu/menu.go:1205
 msgid "No"
 msgstr "Nein"
 
@@ -3269,7 +3269,7 @@ msgstr "Schreiben,"
 msgid "Writing to:"
 msgstr "Schreiben an:"
 
-#: internal/menu/menu.go:1202
+#: internal/menu/menu.go:1204
 msgid "Yes"
 msgstr "Ja"
 
@@ -3450,7 +3450,7 @@ msgstr "Sie haben keine gesendeten Nachrichten."
 msgid "You have reached your region purchase limit for this turn."
 msgstr "Sie haben Ihr Kauflimit für Regionen in diesem Zug erreicht."
 
-#: internal/game/covert.go:168
+#: internal/game/covert.go:173
 msgid "You have run that covert operation as often as you may today."
 msgstr ""
 "Sie haben diese verdeckte Operation heute so oft ausgeführt, wie Sie dürfen."

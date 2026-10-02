@@ -32,7 +32,7 @@ msgstr " — escolha um tópico:"
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:965
+#: internal/menu/menu.go:967
 msgid "# Owned"
 msgstr "Qtd."
 
@@ -456,7 +456,7 @@ msgstr "Aceita?"
 
 #: internal/menu/actions_trade.go:296
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
-msgstr "Aceita? [S]im, [N]ão, [I]gnorar por ora"
+msgstr "Aceita? [Y] Sim, [N] Não, [I] Ignorar por ora"
 
 #: internal/menu/actions_attack.go:712
 msgid "Add how much gold for funding?"
@@ -1120,7 +1120,7 @@ msgstr "Você quer enviar outra mensagem?"
 
 #: internal/menu/actions_ipscores.go:355
 msgid "Do you wish to target (O)ne Dominion or (A)ll?"
-msgstr "Você quer mirar (U)m domínio ou (T)odos?"
+msgstr "Você quer mirar (O) um domínio ou (A) todos?"
 
 #: internal/menu/turnstages.go:112
 msgid "Do you wish to visit the bank?"
@@ -1493,7 +1493,7 @@ msgstr "Chega a eles no turno %d do dia deles, não antes."
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr "Vai custar %s milhões de ouro ao seu planeta para financiar. Aceita?"
 
-#: internal/menu/menu.go:964
+#: internal/menu/menu.go:966
 msgid "Item"
 msgstr "Item"
 
@@ -1738,7 +1738,7 @@ msgstr "Nova quantidade de %s à venda"
 msgid "New tax rate?"
 msgstr "Novo imposto?"
 
-#: internal/menu/menu.go:1203
+#: internal/menu/menu.go:1205
 msgid "No"
 msgstr "Não"
 
@@ -3239,7 +3239,7 @@ msgstr "Escrever,"
 msgid "Writing to:"
 msgstr "Escrevendo para:"
 
-#: internal/menu/menu.go:1202
+#: internal/menu/menu.go:1204
 msgid "Yes"
 msgstr "Sim"
 
@@ -3420,7 +3420,7 @@ msgstr "Você não tem mensagens enviadas."
 msgid "You have reached your region purchase limit for this turn."
 msgstr "Você atingiu o limite de compra de regiões deste turno."
 
-#: internal/game/covert.go:168
+#: internal/game/covert.go:173
 msgid "You have run that covert operation as often as you may today."
 msgstr "Você já fez essa operação secreta o máximo de vezes permitido hoje."
 
