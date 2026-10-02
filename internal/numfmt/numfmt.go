@@ -34,7 +34,7 @@ type Number interface{ ~int | ~int64 }
 // groupSep maps a UI language to its thousands separator. All of them are
 // ASCII, so they are CP437-safe (and CP437 mode forces English anyway). Unknown
 // languages fall back to the comma.
-var groupSep = map[string]byte{"": ',', "en": ',', "de": '.', "ru": ' ', "pt": '.', "nl": '.'}
+var groupSep = map[string]byte{"": ',', "en": ',', "de": '.', "ru": ' ', "pt": '.', "nl": '.', "sv": ' '}
 
 // Format renders n for display with lang's thousands separator: en 1,847,392 /
 // de 1.847.392 / ru "1 847 392".

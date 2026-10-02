@@ -91,6 +91,7 @@ func TestGroupSeparatorPerLanguage(t *testing.T) {
 		{"nl", "1.847.392"},
 		{"pt", "1.847.392"},
 		{"ru", "1 847 392"},
+		{"sv", "1 847 392"},
 		{"xx", "1,847,392"}, // a language the game does not ship reads as English
 	} {
 		if got := Format(1847392, c.lang); got != c.want {

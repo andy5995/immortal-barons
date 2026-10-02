@@ -150,7 +150,7 @@ until 2026-09-17; it was not.
    `//go:embed` line and the `translated` map:
 
    ```go
-   //go:embed content content.de content.nl content.pt content.ru
+   //go:embed content content.de content.nl content.pt content.ru content.sv
    ```
 
    ```go
@@ -162,7 +162,7 @@ until 2026-09-17; it was not.
 
 5. If the language groups thousands with something other than a comma, add it to
    `groupSep` in `internal/numfmt/numfmt.go` (German and Brazilian Portuguese use
-   `.`, Russian a space). Leaving it out is not a failure — the language just
+   `.`, Russian and Swedish a space). Leaving it out is not a failure — the language just
    shows comma-grouped figures.
 
 Then translate the two new `.po` files as described above.
@@ -171,8 +171,8 @@ Then translate the two new `.po` files as described above.
 
 Nothing needs doing for this, but it is worth knowing which side of the line you
 are on: a catalog that uses any character outside CP437 is not offered to callers
-on a CP437 terminal at all. German and Dutch fit; Portuguese does not, because
-`ã` and `õ` are not in the code page, and neither is Cyrillic.
+on a CP437 terminal at all. German, Dutch and Swedish fit; Portuguese does not,
+because `ã` and `õ` are not in the code page, and neither is Cyrillic.
 
 The characters that cost a Latin-script language its place are usually not
 letters — an em dash (`—`), an ellipsis (`…`) or a curly quote will do it on

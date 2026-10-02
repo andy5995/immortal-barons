@@ -30,7 +30,7 @@ import (
 // reach, so neither is optional. docs/translating.md said the only wiring was
 // languages.go until 2026-09-17; it was not.
 //
-//go:embed content content.de content.nl content.pt content.ru
+//go:embed content content.de content.nl content.pt content.ru content.sv
 var content embed.FS
 
 // Topic is one help article, parsed from a content/<category>/<file>.md file.
@@ -79,6 +79,7 @@ var (
 		"nl": indexByPath(loadDir("content.nl")),
 		"pt": indexByPath(loadDir("content.pt")),
 		"ru": indexByPath(loadDir("content.ru")),
+		"sv": indexByPath(loadDir("content.sv")),
 	}
 )
 

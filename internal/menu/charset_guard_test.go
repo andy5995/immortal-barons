@@ -21,6 +21,13 @@ func TestPlayerLangCP437Fallback(t *testing.T) {
 		t.Errorf("CP437 session, German (CP437-safe): playerLang = %q, want %q", got, "de")
 	}
 
+	// Swedish fits CP437 (å, ä, ö) and must stay that way: one em dash or
+	// curly quote in its catalog would cost it every door caller.
+	w.Player().Language = "sv"
+	if got := playerLang(w); got != "sv" {
+		t.Errorf("CP437 session, Swedish (CP437-safe): playerLang = %q, want %q", got, "sv")
+	}
+
 	w.Player().Language = "ru" // Cyrillic: not representable in CP437
 	if got := playerLang(w); got != "" {
 		t.Errorf("CP437 session, Russian: playerLang = %q, want English (\"\")", got)
@@ -28,7 +35,8 @@ func TestPlayerLangCP437Fallback(t *testing.T) {
 }
 
 // In a CP437 session the language picker offers only CP437-representable
-// languages (English, German) — not Cyrillic — and selecting one still works.
+// languages (English and the Latin-script catalogs that fit) — not Cyrillic —
+// and selecting one still works.
 func TestPickLanguageCP437Subset(t *testing.T) {
 	w := newWorld()
 	w.UTF8 = false

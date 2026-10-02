@@ -188,8 +188,8 @@ works. If you run the game as a Windows door, please still report how it goes.
 The game sends CP437 by default — the character set traditional BBS terminals
 expect. A door does not auto-detect the character set (only `-local` does). It
 uses that default unless you pass `-utf8` or `-cp437`, or a BBSDEV.DRP drop file
-names the caller's encoding. Set the option that fits your board. German and
-Dutch work in CP437; Russian and Portuguese need `-utf8`.
+names the caller's encoding. Set the option that fits your board. German, Dutch
+and Swedish work in CP437; Russian and Portuguese need `-utf8`.
 
 If your board serves callers on different character sets, and your BBS software
 can tell a program the caller's character set (for example, by setting a shell

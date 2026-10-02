@@ -167,7 +167,7 @@ stream). Front-ends attach different streams; the engine is unchanged.
 - `internal/play` — session bootstrap (load world → onboard/find empire → run)
 - `internal/door` — dropfile parsing (`DOOR32.SYS`/`DOOR.SYS`)
 - `internal/help` — embedded categorized Markdown help + Markdown→ANSI renderer,
-  per-language content (`content/`, then `content.de/`, `.nl/`, `.pt/`, `.ru/`)
+  per-language content (`content/`, then `content.de/`, `.nl/`, `.pt/`, `.ru/`, `.sv/`)
 - `internal/docsite` + `cmd/barons-docs` — assembles the documentation website
   from the committed Markdown, so the site and the in-game help share one
   source. `go run ./cmd/barons-docs -out build/docs` writes `site-src/` and a
@@ -448,12 +448,12 @@ Quick=0/Normal=1/Extended=2, say), the reason is that the encoding stays
 checkable against the disassembly, never interoperability. This has been got
 wrong more than once, including in two code comments that shipped.
 
-**Translations.** All four catalogs (de, nl, pt, ru) are machine translation,
+**Translations.** All five catalogs (de, nl, pt, ru, sv) are machine translation,
 unreviewed by a native speaker, and are expected to be corrected by a PR rather
 than defended. Two traps, both of which have already cost this project something:
 
 A catalog using any character outside CP437 is not offered to a CP437 caller at
-all — de and nl fit, pt and ru do not — so a stray em dash in a Latin-script
+all — de, nl and sv fit, pt and ru do not — so a stray em dash in a Latin-script
 catalog silently costs that language its door audience. Dutch was excluded for
 months over three of them.
 
