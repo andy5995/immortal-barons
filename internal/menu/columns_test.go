@@ -164,3 +164,26 @@ func TestWideFiguresKeepTheTableColumnsAligned(t *testing.T) {
 		}
 	}
 }
+
+// A count that fills the # Owned column exactly ("1,296,718", nine characters)
+// must still be set apart from the price beside it, not printed flush against
+// it as though the two were one figure.
+func TestFullWidthFigureKeepsAGap(t *testing.T) {
+	menus := BuildMenus()
+	f := &fakeSession{}
+	w := newWorld()
+	w.Player().Tanks = 1_296_718
+
+	draw(f, w, menus.Spending)
+
+	for _, ln := range strings.Split(stripANSI(f.out.String()), "\n") {
+		if !strings.Contains(ln, "1,296,718") {
+			continue
+		}
+		if !strings.Contains(ln, "  1,296,718") {
+			t.Errorf("the tank count sits flush against the price:\n%s", ln)
+		}
+		return
+	}
+	t.Fatalf("no row showed the tank count:\n%s", f.out.String())
+}

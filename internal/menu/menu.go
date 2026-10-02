@@ -844,7 +844,9 @@ func (m *Menu) labelWidth(g *ctx, lang string) int {
 
 // columnCells renders the Price and # Owned cell of every visible item once,
 // and returns the width to draw each column at: BRE's 8 and 9, widened to fit
-// the longest value on the menu. The widths cannot be constants for the same
+// the longest value on the menu with a column to spare, so a value that fills
+// its column is never set flush against the one beside it (a 9-character tank
+// count read as part of the price). The widths cannot be constants for the same
 // reason labelWidth's cannot — a value that outgrows its column pushes its own
 // row one place right of every other row's, and unit counts and prices both
 // reach eight and nine digits in a long game. The cells come back rendered
@@ -860,14 +862,14 @@ func (m *Menu) columnCells(g *ctx, lang string) (price, owned []string, pw, ow i
 		}
 		if it.Price != nil {
 			price[i] = formatGold(it.Price(g), lang)
-			if n := utf8.RuneCountInString(price[i]); n > pw {
-				pw = n
+			if n := utf8.RuneCountInString(price[i]); n >= pw {
+				pw = n + 1
 			}
 		}
 		if it.Owned != nil {
 			owned[i] = formatGold(it.Owned(g), lang)
-			if n := utf8.RuneCountInString(owned[i]); n > ow {
-				ow = n
+			if n := utf8.RuneCountInString(owned[i]); n >= ow {
+				ow = n + 1
 			}
 		}
 	}
