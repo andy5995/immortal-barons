@@ -155,8 +155,8 @@ func DepartureAfter(now time.Time, hours int) time.Time {
 	return now.Add(time.Duration(hours) * time.Hour)
 }
 
-// ForcesAway is owner's forces committed to group attacks, whether still waiting
-// to leave or in flight. They have left the army but are still the realm's.
+// ForcesAway is owner's forces committed to interplanetary attacks, whether
+// waiting with a group party or in flight. They have left the army but are still the realm's.
 func (w *World) ForcesAway(owner string) AttackForce {
 	var away AttackForce
 	add := func(cs []Contribution) {

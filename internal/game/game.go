@@ -721,10 +721,17 @@ func (w *World) ImportBoard(b RemoteBoard) {
 // (tenths rounded Trooper/Jet/Turret/Tank down).
 //
 // Debt is NOT deducted: BRE's own function adds the weighted assets and stops
-// there (BRE.EXE 0x8F53, read 2026-08-01). BRE also folds in a second per-unit
-// count for forces that are away from home, so a realm with a strike in flight
-// does not look poorer for it. IB's inter-BBS detachments are simply subtracted
-// until they come back, so net worth dips for the round trip (#96).
+// there (BRE.EXE 0x8F53, read 2026-08-01).
+//
+// Units out of the realm's hands still count, at the same weights. Goods listed
+// on the Trading Market are escrowed out of inventory, and BRE's function adds
+// each type's escrow (record +0x211) to its home count. Goods offered in a
+// trade deal are escrowed until it is answered, and BRE adds their value to
+// record +0x125 when the offer is made (create_trade_offer). Units committed to an
+// interplanetary attack count while they wait with a group party or are in
+// flight: BRE keeps their value in record +0x125, added when the strike is sent
+// (configure_attack_forces) and read only here. IB counts the detachments
+// themselves, so the value leaves with them when they come home or are lost.
 func (w *World) NetWorth(e *Empire) int {
 	// int64 intermediate: e.Land*12500 (and the unit terms) overflow int32 on a
 	// 32-bit build for a large realm. Weights are BRE-exact and unchanged; only
@@ -732,6 +739,24 @@ func (w *World) NetWorth(e *Empire) int {
 	thou := int64(e.Land) * NetWorthLand
 	for _, g := range AllGoods {
 		thou += int64(*g.Count(e)) * g.NetWorth
+	}
+	for _, g := range MarketGoods {
+		thou += int64(w.MarketForSale(e.Name, g.Singular)) * g.NetWorth
+	}
+	for _, o := range w.Empires {
+		for _, d := range o.TradeDeals {
+			if d.From == e.Name {
+				for _, g := range MarketGoods {
+					thou += int64(*g.Basket(&d.Send)) * g.NetWorth
+				}
+			}
+		}
+	}
+	away := w.ForcesAway(e.Owner)
+	for _, g := range MilitaryGoods {
+		if g.Force != nil {
+			thou += int64(*g.Force(&away)) * g.NetWorth
+		}
 	}
 	return int(thou / 1000)
 }

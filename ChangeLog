@@ -3,6 +3,7 @@ Immortal Barons ChangeLog
 (in-progress:)
   * Strike and covert results read as one sentence, with varied failure lines
   * A board that has updated no longer pauses lost forces over an old held packet
+  * Net worth counts units away on attacks, up for sale, or in a trade deal
 
 2026-10-01 (v0.2.1)
   * Updating from v0.1.0 or later needs no game reset

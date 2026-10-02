@@ -225,20 +225,33 @@ Bombers and carriers are integer multiplies (3 and 1); the rest are Turbo Pascal
 - **There is no debt subtraction.** IB subtracted `Debt/100` until 2026-08-01 and
   no longer does. This slightly raises the loan ceiling, which is built from net
   worth (below the ten-million cap it stops counting at).
-- **Units away from home still count.** Each unit term adds a second count from a
-  parallel array at record `+0x211` (troopers, jets, turrets, bombers, …, agents,
-  tanks, carriers, 4 bytes apart) before applying the weight, so a realm with a
-  strike in flight does not look poorer for it. **Not implemented in IB** (#96):
-  an inter-BBS detachment is subtracted outright by `commitForce` and restored
-  when the result packet returns, so net worth dips for the round trip. What
-  fills BRE's array is **not read** — only the routine that scales it down with
-  losses (`BRE.OVR 0xC358`) and this one, which reads it.
+- **Units out of the realm's hands still count.** Each unit term adds a second
+  count from a parallel array at record `+0x211` before applying the weight;
+  that array is the Trading Market escrow (measured, see
+  `docs/dev/bre-save-format.md`), so listing goods for sale does not lower net
+  worth. Units committed to an interplanetary attack count too: the send
+  routine (`configure_attack_forces`, `BRE.OVR 0x02b83c`) subtracts them from
+  the home counts and adds their weighted value, truncated to a whole number,
+  into record `+0x125`, which this function adds at the end. Creating a trade
+  offer adds to `+0x125` the same way (`create_trade_offer`, `BRE.OVR
+  0x026d11`). IB counts the market escrow, goods offered in a pending trade
+  deal, and every detachment that is waiting with a group party or in flight,
+  at the same weights (fixed 2026-10-02; until then net worth dropped for a
+  strike's whole round trip).
+
+  **Deliberate divergence:** no code in either binary was found that subtracts
+  from `+0x125` (a byte search for every way of addressing it found the two
+  writes above and the read here), so in BRE a strike's value apparently stays
+  in net worth after its survivors come home and are counted again, and an
+  offer's after its goods are delivered or lost. IB counts the detachment and
+  the escrowed goods themselves, so the value leaves when they do: survivors
+  rejoin the army, an accepted deal's goods go to the recipient, and an expired
+  or declined deal's are destroyed.
 - **A dead realm is worth 0** rather than a computed figure. IB does this on the
   scores screen rather than inside `NetWorth`, so that a zero there is a display
   and nothing that reads `NetWorth` for a mechanic sees a dead realm as free.
 
-A vestigial `+0x125` is added at the end. It is read here and **nowhere else in
-either binary, and never written**, so it is always zero.
+`+0x125`, added at the end, is the value of forces sent away (above).
 
 *Unreconciled:* pairing the See Scores figure 4,526,733 in
 `cap/eots-covert-agents.cap` with the unit counts on screen around it gives about
