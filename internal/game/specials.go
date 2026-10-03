@@ -201,7 +201,7 @@ func ruinToWaste(d *Empire, pct int) int { return ruinToWasteCapped(d, pct, 0) }
 // zero or less means none. The arriving missiles carry the original's own cap,
 // the local ones have no such clamp.
 func ruinToWasteCapped(d *Empire, pct, cap int) int {
-	want := d.Land * pct / 100
+	want := pctOf(d.Land, pct)
 	if cap > 0 && want > cap {
 		want = cap
 	}
@@ -356,7 +356,7 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	d.People -= people
 
 	troopPct := BioTroopKillPct + w.rng.Intn(BioTroopKillJitterUp) - w.rng.Intn(BioTroopKillJitterDn)
-	troops := d.Troopers * troopPct / 100
+	troops := pctOf(d.Troopers, troopPct)
 	d.Troopers -= troops
 	// A plague is worse for the army than gas and the same for the public: morale
 	// halved, support cut by a third (BRE.OVR 0x115FE / 0x11645). The halving is

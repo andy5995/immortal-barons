@@ -258,7 +258,7 @@ func (w *World) PayForces(e *Empire, given int64) int {
 	desertPct := fracPct * ArmyDesertRate / 100
 	lost := 0
 	desert := func(n *int) {
-		d := *n * desertPct / 100
+		d := pctOf(*n, desertPct)
 		*n -= d
 		lost += d
 	}
@@ -290,7 +290,7 @@ func (w *World) PayRegions(e *Empire, given int64) int {
 		return 0
 	}
 	fracPct := int((req - given) * 100 / req) // req > 0 here (else given >= req)
-	lost := e.Land * fracPct / 100 * RegionRevoltRate / 100
+	lost := pctOf(pctOf(e.Land, fracPct), RegionRevoltRate)
 	if lost > 0 {
 		e.Regions.remove(lost)
 		e.syncLand()

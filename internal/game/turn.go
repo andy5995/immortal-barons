@@ -495,7 +495,7 @@ func (w *World) processEconomy(e *Empire) {
 	capacity := e.popCapacity()
 	// A percentage of the HEADROOM, not of the population, so a realm far below
 	// capacity fills fast and one near it barely moves.
-	growth := (capacity - e.People) * (w.rng.Intn(PopMoveJitter) + PopMoveMinPct) / 100
+	growth := pctOf(capacity-e.People, w.rng.Intn(PopMoveJitter)+PopMoveMinPct)
 	if growth < 0 {
 		// Leaving is faster than arriving, and taxes drive it: a shrinking realm
 		// loses people in proportion to the root of its tax rate.
@@ -506,7 +506,7 @@ func (w *World) processEconomy(e *Empire) {
 	if e.Tax > PopPunitiveTaxRate {
 		// Above a punitive rate people leave on top of everything else, whether
 		// the realm was growing or shrinking.
-		cut := growth * PopPunitiveTaxPct / 100
+		cut := pctOf(growth, PopPunitiveTaxPct)
 		if cut < 0 {
 			cut = -cut
 		}

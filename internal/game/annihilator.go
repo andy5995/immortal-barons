@@ -369,7 +369,7 @@ func (w *World) InterceptAnnihilator(e *Empire, board string, jets int) (int, in
 	}
 	// 33% of the wing does not come home, give or take five points either way.
 	lossPct := AnnihilatorJetLossPct + w.rng.Intn(AnnihilatorJetLossSpread) - w.rng.Intn(AnnihilatorJetLossSpread)
-	lost := jets * lossPct / 100
+	lost := pctOf(jets, lossPct)
 	if lost > e.Jets {
 		lost = e.Jets
 	}
@@ -425,7 +425,7 @@ func (w *World) tickOneAnnihilator(d *Annihilator) {
 		if !e.Alive || e.Protection > 0 {
 			continue
 		}
-		lost := e.Land * pct / 100
+		lost := pctOf(e.Land, pct)
 		if lost < 1 {
 			continue
 		}

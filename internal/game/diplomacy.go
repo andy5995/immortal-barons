@@ -302,7 +302,7 @@ func (w *World) AllyDefenders(e *Empire) []AllyContribution {
 	for _, ally := range w.alliesOf(e, terroristPrevention) {
 		out = append(out, AllyContribution{
 			Name:   ally.Name,
-			Agents: ally.Agents * CovertAllyDefensePct / 100,
+			Agents: pctOf(ally.Agents, CovertAllyDefensePct),
 		})
 	}
 	return out

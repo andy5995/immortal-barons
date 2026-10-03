@@ -260,7 +260,7 @@ func (w *World) resolveSupportDissensions(a, d *Empire) Msg {
 		return w.covertFoiled(a, d, say("a sabotage attempt"))
 	}
 	covertReturned(a)
-	lost := d.Troopers * w.dissensionsPct() / 100
+	lost := pctOf(d.Troopers, w.dissensionsPct())
 	d.Troopers -= lost
 	d.addEvent(say("Agitators stirred dissent in your army, and {n} troopers deserted.", "n", lost))
 	return say("Your agents stirred dissent in {who}'s army, and {n} troopers deserted.", "who", d.Name, "n", lost)
@@ -594,10 +594,10 @@ func (w *World) resolveBombEnemyTargets(a, d *Empire) Msg {
 	t := bombTargets()[w.rng.Intn(BombTargetPickCount)]
 	pct := t.base + w.rng.Intn(t.spread)
 	held := t.get(d)
-	lost := held * pct / 100
+	lost := pctOf(held, pct)
 	// Food is the one slot BRE rounds rather than truncates (BRE.OVR 0x04C6C6
 	// calls the rounding helper where the other five call Trunc).
-	if t.roundsUp && held*pct%100 >= 50 {
+	if t.roundsUp && int64(held)*int64(pct)%100 >= 50 {
 		lost++
 	}
 	if lost <= 0 {

@@ -488,7 +488,7 @@ func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire stri
 		ID:           id,
 		FromBoard:    w.Config.BoardID,
 		TargetEmpire: targetEmpire,
-		Offense:      contributors[0].offense() * kind.strengthPct() / 100,
+		Offense:      pctOf(contributors[0].offense(), kind.strengthPct()),
 		Contributors: contributors,
 		Kind:         kind,
 		FromEmpire:   e.Name,

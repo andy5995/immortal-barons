@@ -316,7 +316,7 @@ func (w *World) resolveLegacyTerror(t RemoteTerror, target *Empire, res AttackRe
 func (w *World) applyTerrorOp(op TerrorOpType, target *Empire) bool {
 	if band, ok := TerrorOpLosses[op]; ok {
 		field := terrorOpField(op, target)
-		loss := *field * (band.Base + w.rng.Intn(band.Spread)) / 100
+		loss := pctOf(*field, band.Base+w.rng.Intn(band.Spread))
 		*field -= loss
 		return loss > 0
 	}

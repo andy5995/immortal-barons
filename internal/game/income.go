@@ -170,7 +170,7 @@ func (e *Empire) taxIncome() int {
 // tech-raised base plus one draw per turn.
 func (w *World) riverFood(e *Empire) int {
 	perRegion := techRaise(RiverFishFood, e.TechFoodFactor()) + w.regionDraw(e, 7, RiverFishRate)
-	return e.Regions.River * perRegion * RiverFishShare / 100
+	return pctOf(e.Regions.River*perRegion, RiverFishShare)
 }
 
 // FoodGrown is the empire's total food production this turn: its tech-boosted

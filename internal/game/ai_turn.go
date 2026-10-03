@@ -306,7 +306,7 @@ func (w *World) aiListSurplus(e *Empire) {
 		if w.MarketForSale(e.Name, good) > 0 {
 			return
 		}
-		if qty := surplus * AIMarketListPct / 100; qty > 0 {
+		if qty := pctOf(surplus, AIMarketListPct); qty > 0 {
 			w.SetMarketListing(e, good, qty, shop*(100-AIMarketUndercutPct)/100)
 		}
 	}
