@@ -523,16 +523,22 @@ func WrapIndented(text, indent string) string { return wrapHanging(text, indent,
 // combat or raid report through it would run every line into one paragraph —
 // each line has to be wrapped on its own.
 //
+// A line that already fits is left exactly as it is: its spacing is part of the
+// report's layout, the indented tallies and the "Date: ...    Result: ..." gap
+// alike, and help.Wrap would squeeze every run of spaces to one. A line that
+// has to wrap keeps its leading indent on every line it becomes.
+//
 // Wrap BEFORE coloring. hiNums and friends insert escape sequences that no
 // terminal displays but every length count sees, so a report wrapped afterward
 // breaks far short of the margin.
 func wrapReport(text string) string {
 	lines := strings.Split(text, "\n")
 	for i, l := range lines {
-		if strings.TrimSpace(l) == "" {
-			continue // a blank line is the report's own spacing
+		if strings.TrimSpace(l) == "" || utf8.RuneCountInString(l) < ansi.ScreenCols {
+			continue // a blank line is the report's own spacing; a short one fits
 		}
-		lines[i] = help.Wrap(l, ansi.ScreenCols-1)
+		lead := l[:len(l)-len(strings.TrimLeft(l, " "))]
+		lines[i] = wrapHanging(l[len(lead):], lead, lead)
 	}
 	return strings.Join(lines, "\n")
 }

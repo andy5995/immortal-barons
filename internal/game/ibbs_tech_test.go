@@ -111,12 +111,12 @@ func TestInvasionReportNamesEveryUnitLost(t *testing.T) {
 	}
 	ev := victim.Events[len(victim.Events)-1].Text
 	for _, want := range []string{
-		"held the field",
+		"won the battle!",
 		// One line naming only the types that were sent, joined the way the
 		// original joins them, and with counts shortened — 40,000 troopers read
 		// "40k" (numfmt.Short). Tanks and bombers were not sent, so they are
-		// absent rather than printed as zeros (see writeUnitLines).
-		"40k Troopers and 300 Jets attacked.",
+		// absent rather than printed as zeros (see unitLine).
+		"40k Troopers and 300 Jets attacked!",
 		// The defender lost no jets, so Jets is absent from its own line too —
 		// which is the zero-suppression this test exists to pin, on both lines.
 		"You lost " + numfmt.Short(res.Enemy.Troopers) + " Troopers, " +
@@ -176,7 +176,7 @@ func TestEachDefenderOnAPlanetWideStrikeReadsItsOwnLosses(t *testing.T) {
 
 // The returning report puts what came home, what was lost and what was destroyed
 // each on ONE line, naming only the types that have a count — the original's
-// shape in two captures (see writeUnitLines). This test asserted the opposite
+// shape in two captures (see unitLine). This test asserted the opposite
 // until 2026-09-01, on a misreading of a one-item line.
 func TestReturningReportListsUnitsOnOneLine(t *testing.T) {
 	wA, wB, attacker, _ := twoBoardsSeed(t, 1)

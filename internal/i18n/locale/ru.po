@@ -30,7 +30,7 @@ msgstr " (фиксированная)"
 msgid " — choose a topic:"
 msgstr " - выберите тему:"
 
-#: internal/menu/actions_attack.go:941
+#: internal/menu/actions_attack.go:942
 msgid "#"
 msgstr "#"
 
@@ -125,7 +125,7 @@ msgstr "%d регионов снова чисты - выберите их тип
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d регионов взбунтовалось из-за нехватки содержания."
 
-#: internal/game/combat.go:194
+#: internal/game/combat.go:176
 msgid "%d troopers, %d jets, %d tanks, %d bombers"
 msgstr "%d солдат, %d самолётов, %d танков, %d бомбардировщиков"
 
@@ -133,7 +133,7 @@ msgstr "%d солдат, %d самолётов, %d танков, %d бомбар
 msgid "%d units deserted for lack of pay."
 msgstr "%d единиц дезертировало из-за отсутствия жалованья."
 
-#: internal/menu/actions_attack.go:992
+#: internal/menu/actions_attack.go:993
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr "Уничтожено %d%% Gooie Kablooie!"
 
@@ -149,7 +149,7 @@ msgstr "Куплено: %s %s."
 msgid "%s %s sent out."
 msgstr "Отправлено: %s %s."
 
-#: internal/menu/actions_attack.go:736
+#: internal/menu/actions_attack.go:737
 msgid "%s Gold added."
 msgstr "Добавлено золота: %s."
 
@@ -203,7 +203,7 @@ msgid ""
 "instead."
 msgstr "%s задаётся в %s; игра только читает этот файл. Правьте его напрямую."
 
-#: internal/menu/actions_attack.go:987
+#: internal/menu/actions_attack.go:988
 msgid "%s jets were destroyed in the attack!"
 msgstr "В атаке уничтожено самолётов: %s!"
 
@@ -231,7 +231,7 @@ msgstr "%s предлагает %s."
 msgid "%s since %s — see planetary.log"
 msgstr "%s с %s - см. planetary.log"
 
-#: internal/menu/actions_attack.go:409
+#: internal/menu/actions_attack.go:410
 msgid "%s stands between you and %s."
 msgstr "%s стоит между вами и %s."
 
@@ -244,7 +244,7 @@ msgstr "%s ходов"
 msgid "%s units of food available today."
 msgstr "Сегодня доступно %s единиц еды."
 
-#: internal/menu/actions_attack.go:460
+#: internal/menu/actions_attack.go:461
 msgid "%s — an arms broker wants %s gold for the missile."
 msgstr "%s — торговец оружием просит за ракету %s золота."
 
@@ -252,7 +252,7 @@ msgstr "%s — торговец оружием просит за ракету %s
 msgid "%s — see planetary.log"
 msgstr "%s - см. planetary.log"
 
-#: internal/game/combat.go:157
+#: internal/game/combat.go:139
 msgid "%s's allies send %s troopers and %s tanks to aid the defense."
 msgstr "Союзники %s шлют на подмогу %s солдат и %s танков."
 
@@ -464,7 +464,7 @@ msgstr "Принять?"
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr "Принять? [Y] да, [N] нет, [I] пока пропустить"
 
-#: internal/menu/actions_attack.go:712
+#: internal/menu/actions_attack.go:713
 msgid "Add how much gold for funding?"
 msgstr "Сколько золота внести на постройку?"
 
@@ -476,7 +476,7 @@ msgstr "Наступление..."
 msgid "Advisors"
 msgstr "Советники"
 
-#: internal/game/units.go:150
+#: internal/game/units.go:151
 msgid "Agent"
 msgstr "Агент"
 
@@ -496,7 +496,7 @@ msgstr "Подстрекатели посеяли раздор в вашей а�
 msgid "Agitators stirred revolts in your realm, and your popular support fell."
 msgstr "Подстрекатели подняли бунты в вашей державе, и поддержка народа упала."
 
-#: internal/menu/actions_attack.go:425
+#: internal/menu/actions_attack.go:426
 msgid ""
 "Agreement broken! Revolts spread through your realm — your people will not "
 "be ruled by an oath-breaker, and the army's morale goes with them."
@@ -570,7 +570,7 @@ msgstr ""
 msgid "An individual attack must name a baron to strike."
 msgstr "Для одиночной атаки нужно указать барона."
 
-#: internal/game/ibbs_attack.go:727
+#: internal/game/ibbs_attack.go:744
 msgid ""
 "An interplanetary strike from {board} was stopped by your New Realm "
 "Protection."
@@ -620,7 +620,7 @@ msgstr "Приложить сообщение?"
 msgid "Attack"
 msgstr "Атака"
 
-#: internal/menu/actions_attack.go:631
+#: internal/menu/actions_attack.go:632
 msgid "Attack Pirates"
 msgstr "Напасть на пиратов"
 
@@ -736,7 +736,7 @@ msgstr "Бомбить торговые пути"
 msgid "Bomb Trading Market"
 msgstr "Бомбить торговый рынок"
 
-#: internal/game/units.go:115
+#: internal/game/units.go:116
 msgid "Bomber"
 msgstr "Бомбардировщик"
 
@@ -748,7 +748,7 @@ msgstr "Бомбардировщики"
 msgid "Bombing operations are not part of this game."
 msgstr "Бомбардировки в этой игре не предусмотрены."
 
-#: internal/menu/actions_attack.go:411
+#: internal/menu/actions_attack.go:412
 msgid "Break the agreement?"
 msgstr "Разорвать договор?"
 
@@ -796,7 +796,7 @@ msgstr "Купить на рынке:"
 msgid "Buy how many %s"
 msgstr "Сколько купить: %s"
 
-#: internal/menu/actions_attack.go:464
+#: internal/menu/actions_attack.go:465
 msgid "Buy it?"
 msgstr "Купить?"
 
@@ -824,7 +824,7 @@ msgstr "Отменено - изменения не сохранены."
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr "Испытать удачу в королевской лотерее?"
 
-#: internal/game/units.go:139
+#: internal/game/units.go:140
 msgid "Carrier"
 msgstr "Авианосец"
 
@@ -880,7 +880,7 @@ msgstr "Выберите (0 — оставить текущий)?"
 msgid "Choose a Target (0 to cancel)?"
 msgstr "Выберите цель (0 - отмена)?"
 
-#: internal/menu/actions_attack.go:446
+#: internal/menu/actions_attack.go:447
 msgid "Choose a target (letter, RETURN to abort)"
 msgstr "Выберите цель (буква, ВВОД — отмена)"
 
@@ -926,15 +926,15 @@ msgstr "Очистить"
 msgid "Coastal"
 msgstr "Побережье"
 
-#: internal/menu/actions_attack.go:647
+#: internal/menu/actions_attack.go:648
 msgid "Commit how many Jets?"
 msgstr "Сколько самолётов ввести в бой?"
 
-#: internal/menu/actions_attack.go:648
+#: internal/menu/actions_attack.go:649
 msgid "Commit how many Tanks?"
 msgstr "Сколько танков ввести в бой?"
 
-#: internal/menu/actions_attack.go:646
+#: internal/menu/actions_attack.go:647
 msgid "Commit how many Troopers?"
 msgstr "Сколько солдат ввести в бой?"
 
@@ -986,7 +986,7 @@ msgstr "Создать групповую атаку"
 msgid "Create Realm"
 msgstr "Создать державу"
 
-#: internal/menu/actions_attack.go:737
+#: internal/menu/actions_attack.go:738
 msgid "Current SDI Strength: %s%%"
 msgstr "Текущая сила СОИ: %s%%"
 
@@ -1010,7 +1010,11 @@ msgstr "Дата"
 msgid "Date: "
 msgstr "Дата: "
 
-#: internal/menu/actions_attack.go:942
+#: internal/game/ibbs_return.go:187
+msgid "Date: {when}    Result: {result}"
+msgstr "Дата: {when}    Итог: {result}"
+
+#: internal/menu/actions_attack.go:943
 msgid "Days Until Self-Destruct"
 msgstr "Дней до самоуничтожения"
 
@@ -1026,7 +1030,7 @@ msgstr "Объявление войны"
 msgid "Declare war?"
 msgstr "Объявить войну?"
 
-#: internal/game/combat.go:280
+#: internal/game/combat.go:262
 msgid "Defeat! Your forces were beaten off the field."
 msgstr "Поражение! Ваши войска выбиты с поля боя."
 
@@ -1137,7 +1141,7 @@ msgstr "Демонтировать Gooie"
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr "Демонтаж не возвращает ничего - золото потрачено."
 
-#: internal/menu/actions_attack.go:928
+#: internal/menu/actions_attack.go:929
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Атаковать Gooie Kablooie?"
 
@@ -1210,7 +1214,7 @@ msgstr "Снять защиту"
 msgid "End of Turn Statistics:"
 msgstr "Статистика конца хода:"
 
-#: internal/menu/actions_attack.go:958
+#: internal/menu/actions_attack.go:959
 msgid "Enter Gooie Number (0 to cancel)?"
 msgstr "Введите номер Gooie (0 — отмена)?"
 
@@ -1254,6 +1258,10 @@ msgstr "Раскрыть операции врага"
 msgid "Extended Battle"
 msgstr "Затяжной бой"
 
+#: internal/game/ibbs_return.go:229
+msgid "FAILURE"
+msgstr "ПРОВАЛ"
+
 #: cmd/immortal-barons/league.go:201
 msgid "FTN spool"
 msgstr "Очередь FTN"
@@ -1294,7 +1302,7 @@ msgstr "Соглашение о свободной торговле"
 msgid "Free software under the MIT License."
 msgstr "Свободное ПО под лицензией MIT."
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:943
 msgid "From"
 msgstr "От"
 
@@ -1325,6 +1333,10 @@ msgstr "С чего начать"
 #: internal/menu/actions_realm.go:35
 msgid "Glad you changed your mind!"
 msgstr "Рад, что вы передумали!"
+
+#: internal/game/ibbs_attack.go:881
+msgid "Global Invasion From {from} ({kind})"
+msgstr "Глобальное вторжение: {from} ({kind})"
 
 #: internal/menu/tree.go:539
 msgid "Global Recon Request"
@@ -1362,11 +1374,11 @@ msgstr "Gooie Kablooie"
 msgid "Gooie Kablooie Ops"
 msgstr "Операции Gooie Kablooie"
 
-#: internal/menu/actions_attack.go:761
+#: internal/menu/actions_attack.go:762
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "Операции Gooie Kablooie в этой игре отключены."
 
-#: internal/game/ibbs_attack.go:675
+#: internal/game/ibbs_attack.go:692
 msgid "Group Attack"
 msgstr "Групповая атака"
 
@@ -1394,7 +1406,7 @@ msgstr "Помощь - выберите раздел:"
 msgid "How many %s?"
 msgstr "Сколько %s?"
 
-#: internal/menu/actions_attack.go:802
+#: internal/menu/actions_attack.go:803
 msgid "How many Million Gold do you wish to put in?"
 msgstr "Сколько миллионов золота вложить?"
 
@@ -1531,13 +1543,9 @@ msgstr ""
 "Недопустимо: в названии державы нужно минимум 3 буквы или цифры. Украшения "
 "вокруг них допустимы и не считаются."
 
-#: internal/game/ibbs_attack.go:855
-msgid "Invasion from {who} (group attack)."
-msgstr "Вторжение: {who} (групповая атака)."
-
-#: internal/game/ibbs_attack.go:857
-msgid "Invasion from {who} ({kind})."
-msgstr "Вторжение: {who} ({kind})."
+#: internal/game/ibbs_attack.go:879
+msgid "Invasion From {from} ({kind})"
+msgstr "Вторжение: {from} ({kind})"
 
 #: internal/menu/actions_bank.go:261
 msgid "Investing Interest Rate:"
@@ -1555,7 +1563,7 @@ msgstr "Вклады"
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "К ним это попадёт не раньше хода %d их дня."
 
-#: internal/menu/actions_attack.go:848
+#: internal/menu/actions_attack.go:849
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr "Это обойдётся планете в %s млн золота.  Принять?"
 
@@ -1563,7 +1571,7 @@ msgstr "Это обойдётся планете в %s млн золота.  П�
 msgid "Item"
 msgstr "Позиция"
 
-#: internal/game/units.go:92
+#: internal/game/units.go:93
 msgid "Jet"
 msgstr "Самолёт"
 
@@ -1720,7 +1728,7 @@ msgstr "Макс. местных атак в день (0 = без лимита)"
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr "Макс. терактов в день (0 = без лимита)"
 
-#: internal/menu/actions_attack.go:707
+#: internal/menu/actions_attack.go:708
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr "Наибольшая полезная трата в этом году: %s золота."
 
@@ -1771,6 +1779,10 @@ msgstr "Горы"
 #: internal/menu/actions_diplomacy.go:126
 msgid "NONE"
 msgstr "НЕТ"
+
+#: internal/game/ibbs_return.go:225
+msgid "NOT FOUND"
+msgstr "НЕ НАЙДЕН"
 
 #: internal/menu/actions_regions.go:376
 msgid "NOTE: Regions may not be sold, only dropped..."
@@ -1868,14 +1880,14 @@ msgstr ""
 "От этой державы к нам не пришли очки, поэтому торговец оружием не может "
 "назначить цену ракеты для неё."
 
-#: internal/game/ibbs_attack.go:1137
+#: internal/game/ibbs_attack.go:1167
 msgid ""
 "No word came back from {board}. Your bid for {n} {good} was abandoned and "
 "the gold returned."
 msgstr ""
 "С {board} нет вестей. Ваша заявка ({good}: {n}) отменена, золото возвращено."
 
-#: internal/game/ibbs_attack.go:1172
+#: internal/game/ibbs_attack.go:1202
 msgid ""
 "No word came back from {board}. Your force sent against {target} has "
 "returned home."
@@ -1883,7 +1895,7 @@ msgstr ""
 "С {board} нет вестей. Ваши войска, посланные против {target}, вернулись "
 "домой."
 
-#: internal/game/ibbs_attack.go:1145
+#: internal/game/ibbs_attack.go:1175
 msgid "No word came back from {board}. Your {n} agent has returned home."
 msgid_plural ""
 "No word came back from {board}. Your {n} agents have returned home."
@@ -1891,7 +1903,7 @@ msgstr[0] "С {board} нет вестей. Ваш {n} агент вернулс�
 msgstr[1] "С {board} нет вестей. Ваши {n} агента вернулись домой."
 msgstr[2] "С {board} нет вестей. Ваши {n} агентов вернулись домой."
 
-#: internal/game/ibbs_attack.go:1158
+#: internal/game/ibbs_attack.go:1188
 msgid ""
 "No word came back from {board}. Your {op} against {target} is presumed lost."
 msgstr ""
@@ -1937,11 +1949,11 @@ msgstr ""
 "Замечание: цены на регионы растут по мере расширения, поэтому указана\n"
 "      лишь цена первого купленного региона."
 
-#: internal/menu/actions_attack.go:711
+#: internal/menu/actions_attack.go:712
 msgid "Note: You should only fund the SDI in increments of %d Gold."
 msgstr "Замечание: вкладывайте в СОИ только по %d золота."
 
-#: internal/menu/actions_attack.go:733
+#: internal/menu/actions_attack.go:734
 msgid "Nothing added: the SDI is funded in whole thousands of Gold."
 msgstr "Ничего не добавлено: СОИ финансируется только целыми тысячами золота."
 
@@ -2064,7 +2076,7 @@ msgstr[0] "Ещё {n} вашего агента выдали местные жи
 msgstr[1] "Ещё {n} ваших агента выдали местные жители."
 msgstr[2] "Ещё {n} ваших агентов выдали местные жители."
 
-#: internal/menu/actions_attack.go:932
+#: internal/menu/actions_attack.go:933
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr "Атаковать Gooie Kablooie могут только самолёты, а их у вас нет."
 
@@ -2174,6 +2186,10 @@ msgstr "Итог"
 #: internal/menu/actions_regions.go:50
 msgid "Owned"
 msgstr "Есть"
+
+#: internal/game/ibbs_return.go:227
+msgid "PROTECTED"
+msgstr "ПОД ЗАЩИТОЙ"
 
 #: internal/menu/turnstages.go:553
 msgid "Pick your six letters:"
@@ -2363,6 +2379,10 @@ msgstr "Ответить,"
 msgid "Request — goods you want back:"
 msgstr "Запрос — товары, которые вы хотите взамен:"
 
+#: internal/game/ibbs_return.go:185
+msgid "Result: {result}"
+msgstr "Итог: {result}"
+
 #: internal/menu/actions_bank.go:115
 msgid "Returns expected to be approximately %s gold."
 msgstr "Ожидаемый доход — около %s золота."
@@ -2394,6 +2414,10 @@ msgstr "Программа СОИ"
 #: internal/menu/empire_status_screen.go:139
 msgid "SDI Strength"
 msgstr "Сила СОИ"
+
+#: internal/game/ibbs_return.go:223
+msgid "SUCCESS"
+msgstr "УСПЕХ"
 
 #: internal/menu/advisors.go:76
 msgid ""
@@ -2487,7 +2511,7 @@ msgstr "Сколько танков отправить?"
 msgid "Send how many Troopers?"
 msgstr "Сколько солдат отправить?"
 
-#: internal/menu/actions_attack.go:971
+#: internal/menu/actions_attack.go:972
 msgid "Send how many jets?"
 msgstr "Сколько самолётов отправить?"
 
@@ -2636,7 +2660,7 @@ msgstr "Разжигать эмиграцию"
 msgid "Stir Revolts"
 msgstr "Разжечь мятежи"
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:943
 msgid "Strength"
 msgstr "Сила"
 
@@ -2666,7 +2690,7 @@ msgstr "Системное меню"
 msgid "Taken: another realm already answers to that name."
 msgstr "Занято: другая держава уже носит это имя."
 
-#: internal/game/units.go:127
+#: internal/game/units.go:128
 msgid "Tank"
 msgstr "Танк"
 
@@ -2678,7 +2702,7 @@ msgstr "Танки"
 msgid "Target which baron?"
 msgstr "Какого барона выбрать целью?"
 
-#: internal/menu/actions_attack.go:840
+#: internal/menu/actions_attack.go:841
 msgid "Target which planet?"
 msgstr "Какую планету взять на прицел?"
 
@@ -2899,7 +2923,7 @@ msgstr "Цена этой позиции недействительна."
 msgid "That realm is still in protection."
 msgstr "Эта держава ещё под защитой."
 
-#: internal/game/ibbs_attack.go:575
+#: internal/game/ibbs_attack.go:591
 msgid ""
 "The BBS Coordinator called off the attack party aimed at {board}. Your "
 "forces have returned home."
@@ -2933,19 +2957,19 @@ msgstr "Gooie Kablooie нацелен на %s."
 msgid "The Gooie Kablooie is already paid for."
 msgstr "Gooie Kablooie уже оплачен."
 
-#: internal/menu/actions_attack.go:779
+#: internal/menu/actions_attack.go:780
 msgid "The Gooie Kablooie is complete and launches at %s on the next run."
 msgstr "Gooie Kablooie готов и стартует по %s на следующем запуске."
 
-#: internal/menu/actions_attack.go:782
+#: internal/menu/actions_attack.go:783
 msgid "The Gooie Kablooie is complete. It launches at %s in %s."
 msgstr "Gooie Kablooie готов. Старт по %s через %s."
 
-#: internal/menu/actions_attack.go:770
+#: internal/menu/actions_attack.go:771
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr "Gooie Kablooie уже в пути. Сделать с ним больше нечего."
 
-#: internal/menu/actions_attack.go:989
+#: internal/menu/actions_attack.go:990
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "Gooie Kablooie УНИЧТОЖЕН!"
 
@@ -2953,7 +2977,7 @@ msgstr "Gooie Kablooie УНИЧТОЖЕН!"
 msgid "The Queen Royale opens her coffers and refunds you %s gold!"
 msgstr "Королева открывает казну и возвращает вам %s золота!"
 
-#: internal/menu/actions_attack.go:867
+#: internal/menu/actions_attack.go:868
 msgid "The Queen Royale puts %d million gold toward the Gooie Kablooie."
 msgstr "Королева вкладывает в Gooie Kablooie %d млн золота."
 
@@ -3008,7 +3032,7 @@ msgstr "Директивы опубликованы."
 msgid "The empire that sent this deal is gone."
 msgstr "Державы, приславшей эту сделку, больше нет."
 
-#: internal/game/combat.go:256
+#: internal/game/combat.go:238
 msgid "The enemy lost: %s."
 msgstr "Потери врага: %s."
 
@@ -3094,7 +3118,7 @@ msgstr "Пиратов с таким именем нет."
 msgid "There are no rival empires left to attack."
 msgstr "Соперников для нападения не осталось."
 
-#: internal/menu/actions_attack.go:969
+#: internal/menu/actions_attack.go:970
 msgid "There are only %d to choose from."
 msgstr "Доступно всего %d."
 
@@ -3142,7 +3166,7 @@ msgstr "Идёт %s год вашего правления."
 msgid "This operation will cost %s gold."
 msgstr "Операция обойдётся в %s золота."
 
-#: internal/menu/actions_attack.go:831
+#: internal/menu/actions_attack.go:832
 msgid "This planet has no Gooie Kablooie."
 msgstr "На этой планете нет Gooie Kablooie."
 
@@ -3285,7 +3309,7 @@ msgid "Troop morale stands at %d%%."
 msgstr "Боевой дух войск — %d%%."
 
 # Buy / sell items
-#: internal/game/units.go:80
+#: internal/game/units.go:81
 msgid "Trooper"
 msgstr "Солдат"
 
@@ -3303,7 +3327,7 @@ msgstr "Ходы"
 msgid "Turns per day"
 msgstr "Ходов в день"
 
-#: internal/game/units.go:104
+#: internal/game/units.go:105
 msgid "Turret"
 msgstr "Турель"
 
@@ -3368,7 +3392,7 @@ msgid "Version every board must run (blank for no requirement, e.g. 0.0.5):"
 msgstr ""
 "Версия, обязательная для всех станций (пусто - без требования, напр. 0.0.5):"
 
-#: internal/game/combat.go:257
+#: internal/game/combat.go:239
 msgid "Victory! You captured %d regions."
 msgstr "Победа! Захвачено регионов: %d."
 
@@ -3574,7 +3598,7 @@ msgstr "Сколько золота снять?"
 msgid "World Report"
 msgstr "Мировая сводка"
 
-#: internal/menu/actions_attack.go:832
+#: internal/menu/actions_attack.go:833
 msgid "Would you like to begin construction?"
 msgstr "Начать строительство?"
 
@@ -3609,6 +3633,13 @@ msgstr "Новости вчера"
 #: internal/menu/actions_diplomacy.go:255
 msgid "You accepted the %s with %s."
 msgstr "Вы приняли %s с %s."
+
+#: internal/game/ibbs_attack.go:887
+msgid "You also lost {n} region!"
+msgid_plural "You also lost {n} regions!"
+msgstr[0] "Вы также потеряли регионов: {n}!"
+msgstr[1] "Вы также потеряли регионов: {n}!"
+msgstr[2] "Вы также потеряли регионов: {n}!"
 
 #: internal/menu/actions_attack.go:148
 msgid "You are in protection."
@@ -3676,7 +3707,7 @@ msgstr "Вы не ввели войск, атака отменена."
 msgid "You could not successfully raid {who}."
 msgstr "Налёт на {who} не удался."
 
-#: internal/game/combat.go:267
+#: internal/game/combat.go:249
 msgid "You crushed %s completely and seized the remains of its military!"
 msgstr "Вы наголову разбили %s и забрали остатки её войск!"
 
@@ -3688,7 +3719,7 @@ msgstr "Вы объявили войну %s."
 msgid "You declared war on %s. Agreement ended: %s"
 msgstr "Вы объявили войну %s. Договор расторгнут: %s"
 
-#: internal/game/ibbs_return.go:200
+#: internal/game/ibbs_return.go:210
 msgid "You destroyed {units}!"
 msgstr "Уничтожено: {units}!"
 
@@ -3769,7 +3800,7 @@ msgstr "Все террористические операции на сегод
 msgid "You have already launched that missile today."
 msgstr "Эта ракета сегодня уже запущена."
 
-#: internal/menu/actions_attack.go:271
+#: internal/menu/actions_attack.go:272
 msgid "You have already made all %d of your attacks for today."
 msgstr "Вы уже провели все %d своих атак на сегодня."
 
@@ -3825,18 +3856,15 @@ msgstr "У вас нет подкупленных агентов, через к�
 msgid "You hold the office of %s."
 msgstr "Вы занимаете пост: %s."
 
+#: internal/game/ibbs_attack.go:891
+msgid "You lost nothing!"
+msgstr "Вы ничего не потеряли!"
+
 #: internal/game/pirates.go:381
 msgid "You lost {l}."
 msgstr "Потери: {l}."
 
-#: internal/game/ibbs_attack.go:862
-msgid "You lost {n} region."
-msgid_plural "You lost {n} regions."
-msgstr[0] "Вы потеряли {n} регион."
-msgstr[1] "Вы потеряли {n} региона."
-msgstr[2] "Вы потеряли {n} регионов."
-
-#: internal/game/ibbs_attack.go:867
+#: internal/game/ibbs_attack.go:889
 msgid "You lost {units}!"
 msgstr "Потери: {units}!"
 
@@ -3964,7 +3992,7 @@ msgstr "Защита новой державы отвела {missile} от {from
 msgid "Your Prices"
 msgstr "Ваши цены"
 
-#: internal/game/sabre.go:253
+#: internal/game/sabre.go:252
 msgid ""
 "Your S3-Sabre backfired on {who} of {board}, but they had too little land "
 "for it to give them any."
@@ -3972,7 +4000,7 @@ msgstr ""
 "Ваш S3-Sabre дал осечку по {who} с {board}, но у них слишком мало земли, "
 "чтобы она прибавилась."
 
-#: internal/game/sabre.go:249
+#: internal/game/sabre.go:248
 msgid ""
 "Your S3-Sabre backfired on {who} of {board}, expanding their territory by "
 "{n} region."
@@ -3989,11 +4017,11 @@ msgstr[2] ""
 "Ваш S3-Sabre дал осечку по {who} с {board}: их территория выросла на {n} "
 "регионов."
 
-#: internal/game/sabre.go:266
+#: internal/game/sabre.go:265
 msgid "Your S3-Sabre hit {who} of {board}, destroying {lost}."
 msgstr "Ваш S3-Sabre поразил {who} с {board}. Уничтожено: {lost}."
 
-#: internal/game/sabre.go:263
+#: internal/game/sabre.go:262
 msgid "Your S3-Sabre reached {who} of {board} and barely scratched the paint."
 msgstr "Ваш S3-Sabre долетел до {who} с {board} и едва поцарапал краску."
 
@@ -4415,7 +4443,7 @@ msgstr "Ваша заявка на {board} выполнена: {good}: {n}."
 msgid "Your bid on {board} was not filled; the gold is back in your treasury."
 msgstr "Ваша заявка на {board} не выполнена; золото вернулось в казну."
 
-#: internal/game/combat.go:255
+#: internal/game/combat.go:237
 msgid "Your casualties: %s."
 msgstr "Ваши потери: %s."
 
@@ -4457,7 +4485,7 @@ msgstr ""
 "Вашей империи больше нет. Вернитесь в другой день, чтобы построить новую "
 "державу."
 
-#: internal/game/ibbs_return.go:186
+#: internal/game/ibbs_return.go:196
 msgid "Your forces broke the enemy and captured {n} regions."
 msgstr "Ваши войска разбили врага и захватили регионов: {n}."
 
@@ -4471,7 +4499,7 @@ msgid ""
 msgstr ""
 "Ваши войска принесли %d регионов - выберите, какими типами их удержать."
 
-#: internal/menu/actions_attack.go:283
+#: internal/menu/actions_attack.go:284
 msgid ""
 "Your forces changed while you prepared the attack — only units still under "
 "your command were sent."
@@ -4479,7 +4507,7 @@ msgstr ""
 "Ваши войска изменились, пока вы готовили атаку - отправлены лишь те части, "
 "что остались под вашим началом."
 
-#: internal/game/ibbs_return.go:182
+#: internal/game/ibbs_return.go:192
 msgid "Your forces crossed the void and found no such realm waiting."
 msgstr "Ваши войска пересекли пустоту, но такой державы там не оказалось."
 
@@ -4492,21 +4520,21 @@ msgstr ""
 "Ваши войска бьются в полную силу. Обе стороны отходят при 15 процентах "
 "потерь, и вы берёте обычную долю регионов обороняющегося."
 
-#: internal/game/ibbs_return.go:184
+#: internal/game/ibbs_return.go:194
 msgid "Your forces found their target was in protection."
 msgstr "Ваши войска обнаружили, что цель под защитой."
 
-#: internal/game/ibbs_attack.go:859
-msgid "Your forces held the field."
-msgstr "Ваши войска удержали поле боя."
+#: internal/game/ibbs_attack.go:886
+msgid "Your forces lost the battle!"
+msgstr "Ваши силы проиграли битву!"
 
-#: internal/game/ibbs_attack.go:861
-msgid "Your forces lost the field."
-msgstr "Ваши войска проиграли сражение."
-
-#: internal/game/ibbs_return.go:188
+#: internal/game/ibbs_return.go:198
 msgid "Your forces were beaten off the field."
 msgstr "Ваши войска выбиты с поля боя."
+
+#: internal/game/ibbs_attack.go:883
+msgid "Your forces won the battle!"
+msgstr "Ваши силы выиграли битву!"
 
 #: internal/game/covert.go:334
 msgid ""
@@ -4631,7 +4659,7 @@ msgstr "Ваша держава не под защитой новой держа
 msgid "Your realm will be named %s."
 msgstr "Ваша держава будет называться %s."
 
-#: internal/game/combat.go:259
+#: internal/game/combat.go:241
 msgid "Your score rose by %d."
 msgstr "Ваши очки выросли на %d."
 
@@ -4709,11 +4737,11 @@ msgstr "Голос учтён. Его можно сменить в любое в
 msgid "Your well-paid and loyal peasants turned in {who}."
 msgstr "Ваши сытые и верные крестьяне выдали вражескую агентуру: {who}."
 
-#: internal/game/ibbs_return.go:313
+#: internal/game/ibbs_return.go:361
 msgid "Your {missile} backfired on {who} of {board}."
 msgstr "Ваш {missile} дал осечку по {who} с {board}."
 
-#: internal/game/ibbs_return.go:346
+#: internal/game/ibbs_return.go:394
 msgid "Your {missile} bounced off {who}'s New Realm Protection on {board}."
 msgstr "Ваш {missile} отскочил от защиты новой державы {who} на {board}."
 
@@ -4731,7 +4759,7 @@ msgid ""
 msgstr ""
 "Ваш {missile} врезался в шальной астероид по пути к {target} с {board}."
 
-#: internal/game/ibbs_return.go:342
+#: internal/game/ibbs_return.go:390
 msgid "Your {missile} reached {board} and found no realm called {who}."
 msgstr "Ваш {missile} долетел до {board}, но державы {who} там нет."
 
@@ -4751,7 +4779,7 @@ msgstr ""
 "Боеголовка вашего снаряда ({missile}) не взвелась, и он безвредно пролетел "
 "мимо {target} с {board}."
 
-#: internal/game/ibbs_return.go:354
+#: internal/game/ibbs_return.go:402
 msgid "Your {op} against {target} is over."
 msgstr "Операция «{op}» завершена. Цель: {target}."
 
@@ -4775,7 +4803,7 @@ msgstr "Пояс?"
 msgid "[%d Regions left] Your choice?"
 msgstr "[Осталось регионов: %d] Ваш выбор?"
 
-#: internal/game/ibbs_attack.go:1136
+#: internal/game/ibbs_attack.go:1166
 msgid "a bid that never came home"
 msgstr "заявка, которая так и не вернулась"
 
@@ -4949,6 +4977,10 @@ msgid ""
 msgstr ""
 "заморозить всю лигу для обновления, чтобы пакеты всех BBS успели дойти; "
 "игроки видят `\"<string>\"` (только узел #1), и выйти"
+
+#: internal/game/ibbs_attack.go:869
+msgid "group attack"
+msgstr "групповая атака"
 
 #: internal/menu/bulletinfiles.go:281
 msgid "held"
@@ -5223,7 +5255,7 @@ msgstr "лига не заморожена"
 msgid "the trading market"
 msgstr "торговый рынок"
 
-#: internal/game/ibbs_return.go:219
+#: internal/game/ibbs_return.go:255
 msgid "the whole of {board}"
 msgstr "вся планета {board}"
 
@@ -5305,7 +5337,7 @@ msgstr ""
 msgid "{Food decay} is at %d%% of standard levels."
 msgstr "{Food decay} составляет %d%% от обычного уровня."
 
-#: internal/game/msg.go:260
+#: internal/game/msg.go:296
 msgid "{a} and {b}"
 msgstr "{a} и {b}"
 
@@ -5317,6 +5349,14 @@ msgstr ""
 "{a} атаковал {d}: при обороне вы потеряли солдат: {troopers}, танков: "
 "{tanks}."
 
+#: internal/game/ibbs_attack.go:875
+msgid "{board}"
+msgstr "{board}"
+
+#: internal/game/ibbs_attack.go:877
+msgid "{board} by {who}"
+msgstr "{board}, атакует {who}"
+
 #: internal/game/dupe.go:95
 msgid "{board} no longer lists your handle; this realm is unlocked."
 msgstr "На {board} вашего псевдонима больше нет; держава разблокирована."
@@ -5325,7 +5365,7 @@ msgstr "На {board} вашего псевдонима больше нет; де
 msgid "{board} no longer trades with other planets."
 msgstr "{board} больше не торгует с другими планетами."
 
-#: internal/game/sabre.go:247
+#: internal/game/sabre.go:246
 msgid "{from}'s S3-Sabre backfired, expanding your territory by {n} region."
 msgid_plural ""
 "{from}'s S3-Sabre backfired, expanding your territory by {n} regions."
@@ -5414,36 +5454,36 @@ msgid ""
 msgstr ""
 "Чума от {from} убила солдат ({troopers}) и жителей ({people}); грядёт голод."
 
-#: internal/game/ibbs_return.go:178
-msgid "{kind} results — {target}."
-msgstr "Итоги: {kind} — {target}."
+#: internal/game/ibbs_return.go:183
+msgid "{kind} Results.  Target: {target}"
+msgstr "Итоги: {kind}.  Цель: {target}"
 
-#: internal/game/msg.go:264
+#: internal/game/msg.go:300
 msgid "{list}, and {last}"
 msgstr "{list} и {last}"
 
-#: internal/game/units.go:150
-msgid "{n} Agents"
+#: internal/game/units.go:151
+msgid "{n} Agent"
 msgid_plural "{n} Agents"
 msgstr[0] "{n} агент"
 msgstr[1] "{n} агента"
 msgstr[2] "{n} агентов"
 
-#: internal/game/units.go:115
-msgid "{n} Bombers"
+#: internal/game/units.go:116
+msgid "{n} Bomber"
 msgid_plural "{n} Bombers"
 msgstr[0] "{n} бомбардировщик"
 msgstr[1] "{n} бомбардировщика"
 msgstr[2] "{n} бомбардировщиков"
 
-#: internal/game/units.go:139
-msgid "{n} Carriers"
+#: internal/game/units.go:140
+msgid "{n} Carrier"
 msgid_plural "{n} Carriers"
 msgstr[0] "{n} авианосец"
 msgstr[1] "{n} авианосца"
 msgstr[2] "{n} авианосцев"
 
-#: internal/game/units.go:158
+#: internal/game/units.go:159
 msgid "{n} Food"
 msgid_plural "{n} Food"
 msgstr[0] "{n} ед. еды"
@@ -5454,15 +5494,15 @@ msgstr[2] "{n} ед. еды"
 msgid "{n} Gold"
 msgstr "{n} золота"
 
-#: internal/game/units.go:92
-msgid "{n} Jets"
+#: internal/game/units.go:93
+msgid "{n} Jet"
 msgid_plural "{n} Jets"
 msgstr[0] "{n} самолёт"
 msgstr[1] "{n} самолёта"
 msgstr[2] "{n} самолётов"
 
 #: internal/game/sabre.go:94
-msgid "{n} People"
+msgid "{n} Person"
 msgid_plural "{n} People"
 msgstr[0] "{n} человек"
 msgstr[1] "{n} человека"
@@ -5475,30 +5515,23 @@ msgstr[0] "{n} регион"
 msgstr[1] "{n} региона"
 msgstr[2] "{n} регионов"
 
-#: internal/game/pirates.go:341
-msgid "{n} Regions"
-msgid_plural "{n} Regions"
-msgstr[0] "{n} регион"
-msgstr[1] "{n} региона"
-msgstr[2] "{n} регионов"
-
-#: internal/game/units.go:127
-msgid "{n} Tanks"
+#: internal/game/units.go:128
+msgid "{n} Tank"
 msgid_plural "{n} Tanks"
 msgstr[0] "{n} танк"
 msgstr[1] "{n} танка"
 msgstr[2] "{n} танков"
 
 # Buy / sell items
-#: internal/game/units.go:80
-msgid "{n} Troopers"
+#: internal/game/units.go:81
+msgid "{n} Trooper"
 msgid_plural "{n} Troopers"
 msgstr[0] "{n} солдат"
 msgstr[1] "{n} солдата"
 msgstr[2] "{n} солдат"
 
-#: internal/game/units.go:104
-msgid "{n} Turrets"
+#: internal/game/units.go:105
+msgid "{n} Turret"
 msgid_plural "{n} Turrets"
 msgstr[0] "{n} турель"
 msgstr[1] "{n} турели"
@@ -5538,21 +5571,25 @@ msgstr "Охрана державы {target} на {board} поймала все�
 msgid "{target}'s security on {board} caught your agent."
 msgstr "Охрана державы {target} на {board} поймала вашего агента."
 
-#: internal/game/combat.go:304
+#: internal/game/combat.go:281
 msgid "{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets"
 msgstr "{troopers} солдат, {turrets} турелей, {tanks} танков, {jets} самолётов"
 
-#: internal/game/ibbs_attack.go:865
-msgid "{units} attacked."
-msgstr "В атаке: {units}."
+#: internal/game/ibbs_attack.go:894
+msgid "{units} attacked!"
+msgstr "Атаковали: {units}!"
 
-#: internal/game/ibbs_return.go:202
+#: internal/game/ibbs_return.go:213
 msgid "{units} returned."
 msgstr "Вернулись: {units}."
 
-#: internal/game/ibbs_attack.go:1093
+#: internal/game/ibbs_attack.go:1123
 msgid "{who}"
 msgstr "{who}"
+
+#: internal/game/ibbs_return.go:241
+msgid "{who} ({board})"
+msgstr "{who} ({board})"
 
 #: internal/game/trade_deal.go:285
 msgid "{who} accepted your trade deal."
@@ -5562,11 +5599,11 @@ msgstr "{who} принимает вашу торговую сделку."
 msgid "{who} accepted your {treaty} proposal."
 msgstr "{who} принимает ваше предложение: «{treaty}»."
 
-#: internal/game/combat.go:269
+#: internal/game/combat.go:251
 msgid "{who} attacked you and took {n} regions. You lost {lost}."
 msgstr "{who} напал на вас и захватил {n} регионов. Вы потеряли {lost}."
 
-#: internal/game/combat.go:287
+#: internal/game/combat.go:269
 msgid "{who} attacked you and was repelled. You lost {lost}."
 msgstr "{who} напал на вас и был отбит. Вы потеряли {lost}."
 
@@ -5602,7 +5639,7 @@ msgstr ""
 msgid "{who} no longer offers {good}."
 msgstr "{who} больше не продаёт: {good}."
 
-#: internal/game/ibbs_return.go:221
+#: internal/game/ibbs_return.go:257
 msgid "{who} of {board}"
 msgstr "{who} с {board}"
 
@@ -5655,6 +5692,12 @@ msgstr ""
 #: internal/menu/input.go:479
 msgid "─»>Paused<«─"
 msgstr "─»>Пауза<«─"
+
+#~ msgid "Invasion from {who} (group attack)."
+#~ msgstr "Вторжение: {who} (групповая атака)."
+
+#~ msgid "Your forces held the field."
+#~ msgstr "Ваши войска удержали поле боя."
 
 #~ msgid "Their losses so far: %d troopers, %d turrets, %d tanks, %d jets"
 #~ msgstr "Их потери: %d солдат, %d турелей, %d танков, %d самолётов"

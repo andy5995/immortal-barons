@@ -4801,7 +4801,20 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
      **private event report** — the attack type, the target realm and planet,
      the verdict, what was lost and what came home by unit type, and what it
      destroyed. That is BRE's own report structure, read off its returning-
-     attack routine (BRE.OVR 0x04136c); IB's wording is its own.
+     attack routine (BRE.OVR 0x04136c), and IB lays it out the same way: the
+     header line, a `Date:` line with the verdict, the outcome sentence, then
+     the three tallies indented two spaces in BRE's order. The outcome
+     sentences are IB's own words.
+
+     **The `Date:` is when the strike LEFT its board,** not when the result
+     arrived (that is the recap rule's own stamp). BINARY-READ: the attack
+     record carries it at `+0x35b`; `validate_outbound_attack_file` packs a
+     strike only once that time has passed, `reconcile_missing_attack` counts
+     the lost-forces wait from it, and the target sends the record back with it
+     unchanged for `resolve_returning_attack` to print. IB stores it as
+     `InFlightStrike.Launched` (a group party's scheduled departure) and shows
+     it in the reader's own time zone; a strike saved before it was recorded
+     prints the verdict alone.
 
      **Each of those three is ONE line, naming only the unit types with a
      count.** Two captures pin it. `cap/eots-ibbs-02.cap`:

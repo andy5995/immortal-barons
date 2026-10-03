@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/numfmt"
@@ -39,9 +40,12 @@ type Msg struct {
 	// R is a message made of lines, one under another: a battle report, a
 	// list of treaties. T is empty then.
 	R []Msg `json:"r,omitempty"`
+	// I indents every line of the message by that many spaces, so a layout's
+	// indent never sits inside a template for a translator to lose.
+	I int `json:"i,omitempty"`
 }
 
-// Arg is one value in a Msg. Exactly one of S, N, M or L is set.
+// Arg is one value in a Msg. Exactly one of S, N, W, M or L is set.
 type Arg struct {
 	// S is shown as written: a realm, a board, a handle. Never translated.
 	S string `json:"s,omitempty"`
@@ -54,6 +58,8 @@ type Arg struct {
 	M *Msg `json:"m,omitempty"`
 	// L is a list of phrases, joined in the reader's language ("a, b, and c").
 	L []Msg `json:"l,omitempty"`
+	// W is a moment, as Unix seconds, shown as a stamp in the reader's zone.
+	W *int64 `json:"w,omitempty"`
 	// Empty marks an L that is present but holds nothing, which renders as the
 	// word for nothing rather than as a blank.
 	Empty bool `json:"e,omitempty"`
@@ -128,6 +134,21 @@ func comma[T numfmt.Number](n T) Arg {
 	return Arg{N: &v, F: "comma"}
 }
 
+// moment is a time, shown as a stamp (Stamp) in the reader's own zone.
+func moment(t time.Time) Arg {
+	v := t.Unix()
+	return Arg{W: &v}
+}
+
+// indent is m with every line indented by n spaces.
+func indent(m Msg, n int) Msg {
+	if m.IsZero() {
+		return m
+	}
+	m.I = n
+	return m
+}
+
 // percent is a percentage, printed with its sign. The sign travels with the
 // figure rather than in the template, so no template carries a bare "%" for
 // printf-minded tools to read as a verb.
@@ -187,13 +208,26 @@ func (m Msg) English() string { return m.In("") }
 // String is English, so a Msg prints readably in a log or a test failure.
 func (m Msg) String() string { return m.English() }
 
-// In renders the message in lang ("" for English).
-func (m Msg) In(lang string) string {
+// In renders the message in lang ("" for English), with any time in UTC.
+func (m Msg) In(lang string) string { return m.Render(lang, nil) }
+
+// Render renders the message in lang, with any time (an Arg made by moment) in
+// loc, the reader's zone; nil is UTC.
+func (m Msg) Render(lang string, loc *time.Location) string {
+	out := m.render(lang, loc)
+	if m.I > 0 {
+		pad := strings.Repeat(" ", m.I)
+		out = pad + strings.ReplaceAll(out, "\n", "\n"+pad)
+	}
+	return out
+}
+
+func (m Msg) render(lang string, loc *time.Location) string {
 	if len(m.J) > 0 {
-		return joinIn(lang, m.J, " ")
+		return joinIn(lang, loc, m.J, " ")
 	}
 	if len(m.R) > 0 {
-		return joinIn(lang, m.R, "\n")
+		return joinIn(lang, loc, m.R, "\n")
 	}
 	t := i18n.T(lang, m.T)
 	if m.P != "" {
@@ -208,21 +242,23 @@ func (m Msg) In(lang string) string {
 	}
 	pairs := make([]string, 0, 2*len(m.A))
 	for k, a := range m.A {
-		pairs = append(pairs, "{"+k+"}", a.in(lang))
+		pairs = append(pairs, "{"+k+"}", a.in(lang, loc))
 	}
 	return strings.NewReplacer(pairs...).Replace(t)
 }
 
-func joinIn(lang string, ms []Msg, sep string) string {
+func joinIn(lang string, loc *time.Location, ms []Msg, sep string) string {
 	parts := make([]string, len(ms))
 	for i, p := range ms {
-		parts[i] = p.In(lang)
+		parts[i] = p.Render(lang, loc)
 	}
 	return strings.Join(parts, sep)
 }
 
-func (a Arg) in(lang string) string {
+func (a Arg) in(lang string, loc *time.Location) string {
 	switch {
+	case a.W != nil:
+		return Stamp(time.Unix(*a.W, 0), loc)
 	case a.N != nil:
 		switch a.F {
 		case "comma":
@@ -234,9 +270,9 @@ func (a Arg) in(lang string) string {
 		}
 		return strconv.FormatInt(*a.N, 10)
 	case a.M != nil:
-		return a.M.In(lang)
+		return a.M.Render(lang, loc)
 	case len(a.L) > 0 || a.Empty:
-		return listIn(lang, a.L)
+		return listIn(lang, loc, a.L)
 	}
 	return a.S
 }
@@ -244,16 +280,16 @@ func (a Arg) in(lang string) string {
 // listIn joins phrases the way the original's tallies read in English — "a and
 // b", "a, b, and c", "nothing" for none — with each joint a template of its
 // own, so a language can join them its own way.
-func listIn(lang string, l []Msg) string {
+func listIn(lang string, loc *time.Location, l []Msg) string {
 	switch len(l) {
 	case 0:
 		return i18n.T(lang, msgid("nothing"))
 	case 1:
-		return l[0].In(lang)
+		return l[0].Render(lang, loc)
 	}
 	parts := make([]string, len(l))
 	for i, m := range l {
-		parts[i] = m.In(lang)
+		parts[i] = m.Render(lang, loc)
 	}
 	if len(parts) == 2 {
 		return strings.NewReplacer("{a}", parts[0], "{b}", parts[1]).

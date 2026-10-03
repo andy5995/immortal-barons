@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 )
 
 // text is an optional report in English, "" when there is none.
@@ -19,7 +20,7 @@ func list(l []Msg) string {
 	if len(l) == 0 {
 		return ""
 	}
-	return listIn("", l)
+	return listIn("", nil, l)
 }
 
 func TestMsgFillsNamedPlaceholders(t *testing.T) {
@@ -124,15 +125,15 @@ func TestEventRendersMsgOrLegacyText(t *testing.T) {
 	e := &Empire{}
 	e.addEvent(say("{n} {unit}", "n", 3, "unit", say("Troopers")))
 	ev := e.Events[0]
-	if ev.Text != "3 Troopers" || ev.In("de") != "3 Soldaten" {
-		t.Errorf("event Text %q, de %q", ev.Text, ev.In("de"))
+	if ev.Text != "3 Troopers" || ev.Render("de", nil) != "3 Soldaten" {
+		t.Errorf("event Text %q, de %q", ev.Text, ev.Render("de", nil))
 	}
 	var old Event
 	if err := json.Unmarshal([]byte(`{"When":"2026-01-02T03:04:05Z","Text":"An old line."}`), &old); err != nil {
 		t.Fatal(err)
 	}
-	if old.In("de") != "An old line." {
-		t.Errorf("a legacy event should render its Text, got %q", old.In("de"))
+	if old.Render("de", nil) != "An old line." {
+		t.Errorf("a legacy event should render its Text, got %q", old.Render("de", nil))
 	}
 }
 
@@ -177,4 +178,62 @@ func TestAttackResultReportTravelsAsAMsg(t *testing.T) {
 func raidText(w *World, a *Empire, faction, troopers, jets, tanks int) (string, int) {
 	m, land := w.RaidFaction(a, faction, troopers, jets, tanks)
 	return m.English(), land
+}
+
+// A strike's returning report is laid out as the original's: header with the
+// target and its planet, a Date line with the verdict, the outcome, and the
+// three tallies indented under it in BRE's order. The date is the departure,
+// shown in the reader's zone.
+func TestStrikeReportWearsBREsLayout(t *testing.T) {
+	launched := time.Date(2026, 9, 1, 20, 35, 16, 0, time.UTC)
+	sent := InFlightStrike{TargetBoard: "The Eclipse", TargetEmpire: "Jason Bourne", Launched: launched}
+	res := AttackResult{Kind: "Extended Battle", TargetBoard: "The Eclipse", TargetEmpire: "Jason Bourne",
+		Outcome: OutcomeWon, Won: true, LandTaken: 1637,
+		Enemy: UnitLoss{Troopers: 53_000, Jets: 19_000, Turrets: 515_000, Tanks: 2102}}
+	committed := AttackForce{Troopers: 20_638, Jets: 14_433_000, Tanks: 1_551_000, Bombers: 50_500}
+	back := AttackForce{Troopers: 20_000, Jets: 14_000_000, Tanks: 1_505_000, Bombers: 49_000}
+	want := "Extended Battle Results.  Target: Jason Bourne (The Eclipse)\n" +
+		"Date: 09/01/2026  20:35:16 UTC    Result: SUCCESS\n" +
+		"Your forces broke the enemy and captured 1637 regions.\n" +
+		"  20k Troopers, 14m Jets, 1505k Tanks, and 49k Bombers returned.\n" +
+		"  You lost 638 Troopers, 433k Jets, 46k Tanks, and 1500 Bombers!\n" +
+		"  You destroyed 53k Troopers, 19k Jets, 515k Turrets, and 2102 Tanks!"
+	if got := strikeReport(sent, res, committed, back).English(); got != want {
+		t.Errorf("report:\n%s\nwant:\n%s", got, want)
+	}
+	east := time.FixedZone("EST", -5*3600)
+	if got := strikeReport(sent, res, committed, back).Render("", east); !strings.Contains(got, "Date: 09/01/2026  15:35:16 EST") {
+		t.Errorf("the date should be in the reader's zone:\n%s", got)
+	}
+	sent.Launched = time.Time{}
+	if got := strikeReport(sent, res, committed, back).English(); !strings.Contains(got, "\nResult: SUCCESS\n") {
+		t.Errorf("a strike saved without a departure time should still give its verdict:\n%s", got)
+	}
+}
+
+// The defender's report is laid out as the original's (eots-ibbs-03.cap): the
+// planet and realm the strike came from, then indented the force, the verdict,
+// the losses and the land. IB adds the strike's kind to the header.
+func TestInvasionReportWearsBREsLayout(t *testing.T) {
+	atk := RemoteAttack{FromBoard: "The Eclipse", FromEmpire: "Pirates Ahoy!", TargetEmpire: "Victim",
+		Kind: NormalAttack, Contributors: []Contribution{{AttackForce: AttackForce{Troopers: 75_000, Jets: 3_338_000, Tanks: 5_727_000}}}}
+	got := invasionReport(atk, true, UnitLoss{Troopers: 8075, Turrets: 1_125_000, Tanks: 23_000}, 1013).English()
+	want := "Invasion From The Eclipse by Pirates Ahoy! (Normal Attack)\n" +
+		"  75k Troopers, 3338k Jets, and 5727k Tanks attacked!\n" +
+		"  Your forces lost the battle!\n" +
+		"  You lost 8075 Troopers, 1125k Turrets, and 23k Tanks!\n" +
+		"  You also lost 1013 regions!"
+	if got != want {
+		t.Errorf("report:\n%s\nwant:\n%s", got, want)
+	}
+	whole := RemoteAttack{FromBoard: "Starship Junkyard", Group: true,
+		Contributors: []Contribution{{AttackForce: AttackForce{Troopers: 1}}}}
+	got = invasionReport(whole, false, UnitLoss{}, 0).English()
+	want = "Global Invasion From Starship Junkyard (group attack)\n" +
+		"  1 Trooper attacked!\n" +
+		"  Your forces won the battle!\n" +
+		"  You lost nothing!"
+	if got != want {
+		t.Errorf("planet-wide report:\n%s\nwant:\n%s", got, want)
+	}
 }

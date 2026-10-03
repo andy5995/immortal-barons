@@ -105,6 +105,7 @@ Msg:
   A `json:"a,omitempty"`
   J `json:"j,omitempty"`
   R `json:"r,omitempty"`
+  I `json:"i,omitempty"`
 LeagueConfig:
   GameStartDate
   JoinDate

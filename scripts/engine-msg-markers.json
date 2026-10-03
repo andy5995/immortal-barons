@@ -1,6 +1,11 @@
 {
   "comment": "The calls that mark an engine message template (internal/game/msg.go, #297). Read by scripts/gen-ui-pot.py, which extracts them for the catalogs, and by TestCatalogsKeepEnginePlaceholders, which checks the catalogs against them. A new marker goes here and nowhere else.",
-  "single": ["say", "msgid"],
-  "pair": ["sayN", "msgidN"],
-  "counted_field": "Counted"
+  "single": [
+    "say",
+    "msgid"
+  ],
+  "pair": [
+    "sayN",
+    "msgidN"
+  ]
 }

@@ -46,9 +46,6 @@ func engineTemplates(t *testing.T) (singles []string, pairs [][2]string) {
 			pairs = append(pairs, [2]string{m[1], m[2]})
 		}
 	}
-	for _, g := range AllGoods {
-		pairs = append(pairs, [2]string{g.Counted, g.Counted})
-	}
 	if len(singles) < 100 || len(pairs) < 20 {
 		t.Fatalf("found %d templates and %d pairs; the scan is not reading the source", len(singles), len(pairs))
 	}

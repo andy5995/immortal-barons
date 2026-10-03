@@ -86,12 +86,12 @@ var sabreRows = map[SabreEffect]sabreRow{
 	SabreHitIntelligence: {msgid("{from}'s S3-Sabre hit your Intelligence Headquarters and did little harm."),
 		msgid("{from}'s S3-Sabre hit your Intelligence Headquarters, destroying {lost}."),
 		func(s *sabreStrike) {
-			s.keep(Agent.counted(), Agent.Count(s.e), SabreIntelKeepSpread, sabreIntelKept)
+			s.keep(Agent.Counted, Agent.Count(s.e), SabreIntelKeepSpread, sabreIntelKept)
 		}},
 	SabreHitPeople: {msgid("{from}'s S3-Sabre hit your residential zones and did little harm."),
 		msgid("{from}'s S3-Sabre hit your residential zones, destroying {lost}."),
 		func(s *sabreStrike) {
-			s.keep(msgidN("{n} People", "{n} People"), &s.e.People, SabrePeopleKeepSpread, func(n, roll int) int {
+			s.keep(msgidN("{n} Person", "{n} People"), &s.e.People, SabrePeopleKeepSpread, func(n, roll int) int {
 				return pctOf(n, SabrePeopleKeepBasePct+roll)
 			})
 		}},
@@ -99,7 +99,7 @@ var sabreRows = map[SabreEffect]sabreRow{
 		msgid("{from}'s S3-Sabre hit your military bases, destroying {lost}."),
 		func(s *sabreStrike) {
 			for _, g := range []*Good{Trooper, Jet, Turret, Tank} {
-				s.keep(g.counted(), g.Count(s.e), SabreBasesKeepSpread, func(n, roll int) int {
+				s.keep(g.Counted, g.Count(s.e), SabreBasesKeepSpread, func(n, roll int) int {
 					return pctOf(n, SabreBasesKeepBasePct+roll)
 				})
 			}
@@ -107,7 +107,7 @@ var sabreRows = map[SabreEffect]sabreRow{
 	SabreHitAirbases: {msgid("{from}'s S3-Sabre hit your airbases and did little harm."),
 		msgid("{from}'s S3-Sabre hit your airbases, destroying {lost}."),
 		func(s *sabreStrike) {
-			s.keep(Jet.counted(), Jet.Count(s.e), SabreAirbaseKeepSpread, sabreAirbaseKept)
+			s.keep(Jet.Counted, Jet.Count(s.e), SabreAirbaseKeepSpread, sabreAirbaseKept)
 		}},
 	SabreHitRegions: {msgid("{from}'s S3-Sabre hit your regions and did little harm."),
 		msgid("{from}'s S3-Sabre hit your regions, destroying {lost}."),
@@ -123,7 +123,7 @@ var sabreRows = map[SabreEffect]sabreRow{
 	SabreHitFood: {msgid("{from}'s S3-Sabre hit your food supply and did little harm."),
 		msgid("{from}'s S3-Sabre hit your food supply, destroying {lost}."),
 		func(s *sabreStrike) {
-			s.keep(Food.counted(), Food.Count(s.e), SabreFoodKeepSpread, sabreFoodKept)
+			s.keep(Food.Counted, Food.Count(s.e), SabreFoodKeepSpread, sabreFoodKept)
 		}},
 }
 
@@ -136,8 +136,7 @@ type sabreStrike struct {
 }
 
 // keep leaves *n at kept(*n, Random(spread)) and records what went; what names
-// the count, {n}. Its English is plural at one as well, as the original's
-// reports print it; a catalog gives each count its own form.
+// the count, {n}, in the singular and the plural.
 func (s *sabreStrike) keep(what forms, n *int, spread int, kept func(n, roll int) int) {
 	left := kept(*n, s.w.rng.Intn(spread))
 	if lost := *n - left; lost > 0 {

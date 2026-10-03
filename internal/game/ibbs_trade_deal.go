@@ -257,9 +257,5 @@ func describeBasket(b TradeBasket) []Msg {
 
 // counted is g.Counted for a count already shaped as a figure (short, comma).
 func counted(g *Good, n Arg) Msg {
-	return Msg{T: g.Counted, P: g.Counted, N: "n", A: map[string]Arg{"n": n}}
+	return Msg{T: g.Counted.one, P: g.Counted.many, N: "n", A: map[string]Arg{"n": n}}
 }
-
-// counted is Counted as a counted pair: one English form, as the reports print
-// it, which a catalog splits into its own.
-func (g *Good) counted() forms { return msgidN(g.Counted, g.Counted) }

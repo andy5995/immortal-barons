@@ -398,14 +398,14 @@ func TestArrivingStrikeIsWordedForTheSideThatWon(t *testing.T) {
 			name:  "attacker wins",
 			force: AttackForce{Troopers: 500_000, Tanks: 5000},
 			want:  OutcomeWon,
-			event: "lost the field", news: "of its regions", notNews: "held the field",
+			event: "lost the battle", news: "of its regions", notNews: "won the battle",
 		},
 		{
 			name:    "defender wins",
 			prepare: func(v *Empire) { v.Troopers, v.Turrets, v.Tanks, v.Jets = 20_000, 20_000, 20_000, 20_000 },
 			force:   AttackForce{Troopers: 40_000},
 			want:    OutcomeRepelled,
-			event:   "held the field", news: "of its own forces", notNews: "overran",
+			event:   "won the battle", news: "of its own forces", notNews: "overran",
 		},
 	} {
 		t.Run(c.name, func(t *testing.T) {

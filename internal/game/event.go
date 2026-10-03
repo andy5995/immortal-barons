@@ -18,11 +18,12 @@ type Event struct {
 	Msg  *Msg `json:",omitempty"`
 }
 
-// In is the event in lang: its Msg rendered there, or the English Text of an
-// event filed before events carried one.
-func (ev Event) In(lang string) string {
+// Render is the event in lang, with any time in it shown in loc, the reader's
+// zone: its Msg rendered there, or the English Text of an event filed before
+// events carried one.
+func (ev Event) Render(lang string, loc *time.Location) string {
 	if ev.Msg != nil {
-		return ev.Msg.In(lang)
+		return ev.Msg.Render(lang, loc)
 	}
 	return ev.Text
 }

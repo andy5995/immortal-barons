@@ -378,3 +378,19 @@ func TestSabreGarrisonStopsBeforeDamageOrBackfire(t *testing.T) {
 		}
 	}
 }
+
+// The mapper's last row (develop regions) is reached by a backfire only, never
+// by aim: sabreRows has no entry for it, so an aim that landed there would file
+// an empty event on the target. Every dial, wild rolls included, stays off it.
+func TestSabreAimNeverLandsOnTheDevelopRow(t *testing.T) {
+	w := testWorld()
+	for dial := SabreDialMin; dial <= SabreDialMax; dial++ {
+		for i := 0; i < 2000; i++ {
+			if eff := w.SabreAim(dial); eff == SabreDevelopRegions {
+				t.Fatalf("dial %d aimed at the develop row", dial)
+			} else if _, ok := sabreRows[eff]; !ok {
+				t.Fatalf("dial %d aimed at effect %d, which has no damage row", dial, eff)
+			}
+		}
+	}
+}

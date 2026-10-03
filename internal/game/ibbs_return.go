@@ -174,8 +174,18 @@ func splitSpoils(cs []Contribution, land int) []LandShare {
 
 // strikeReport is the private report one baron reads when their force comes
 // home: what it was, where it went, how it went, and what it cost them.
+//
+// The layout is the original's, from its captures (docs/mechanics-reference.md):
+// a header naming the strike and its target, a Date line with the verdict, the
+// outcome, then the three tallies indented under it — what came back, what was
+// lost, what was destroyed, in that order.
 func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackForce) Msg {
-	head := say("{kind} results — {target}.", "kind", say(res.Kind), "target", strikeTarget(sent, res))
+	head := say("{kind} Results.  Target: {target}", "kind", say(res.Kind), "target", strikeHeadTarget(sent, res))
+	verdict := say(strikeVerdict(res.outcome()))
+	date := say("Result: {result}", "result", verdict)
+	if !sent.Launched.IsZero() {
+		date = say("Date: {when}    Result: {result}", "when", moment(sent.Launched), "result", verdict)
+	}
 	var how Msg
 	switch res.outcome() {
 	case OutcomeNotFound:
@@ -199,7 +209,36 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	case OutcomeWon, OutcomeRepelled:
 		destroyed = unitLine(msgid("You destroyed {units}!"), defenseUnits(res.Enemy))
 	}
-	return lines(head, how, lost, destroyed, unitLine(msgid("{units} returned."), attackUnits(back)))
+	return lines(head, date, how,
+		indent(unitLine(msgid("{units} returned."), attackUnits(back)), 2),
+		indent(lost, 2),
+		indent(destroyed, 2))
+}
+
+// strikeVerdict is the word the report's Date line gives the outcome: BRE's
+// four, from its returning-attack routine (BRE.OVR 0x04123c-0x041256).
+func strikeVerdict(o AttackOutcome) string {
+	switch o {
+	case OutcomeWon:
+		return msgid("SUCCESS")
+	case OutcomeNotFound:
+		return msgid("NOT FOUND")
+	case OutcomeProtected:
+		return msgid("PROTECTED")
+	}
+	return msgid("FAILURE")
+}
+
+// strikeHeadTarget is the report header's Target: the realm with its planet in
+// parentheses, or the planet alone for a strike on the whole of it, as the
+// original's header reads ("Target: Jason Bourne (The Eclipse)", "Target: The
+// Undermine").
+func strikeHeadTarget(sent InFlightStrike, res AttackResult) Msg {
+	name, whole := strikeRealm(sent, res)
+	if whole {
+		return say("{board}", "board", res.TargetBoard)
+	}
+	return say("{who} ({board})", "who", name, "board", res.TargetBoard)
 }
 
 // strikeTarget names what the strike was aimed at AND the board it went to,
@@ -211,14 +250,23 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 // there against "the whole of <board>" here. The wordings differ because the
 // sentences do; the whole-planet test is the part that must not.
 func strikeTarget(sent InFlightStrike, res AttackResult) Msg {
-	name := res.TargetEmpire
-	if name == "" {
-		name = sent.TargetEmpire
-	}
-	if sent.Whole || name == "" {
+	name, whole := strikeRealm(sent, res)
+	if whole {
 		return say("the whole of {board}", "board", res.TargetBoard)
 	}
 	return say("{who} of {board}", "who", name, "board", res.TargetBoard)
+}
+
+// strikeRealm is the realm a strike was aimed at, as the answer names it or as
+// it left here, and whether it was aimed at the whole planet instead: a
+// whole-planet strike has no named realm on the way out, and one that found
+// nothing has none on the way back either.
+func strikeRealm(sent InFlightStrike, res AttackResult) (name string, whole bool) {
+	name = res.TargetEmpire
+	if name == "" {
+		name = sent.TargetEmpire
+	}
+	return name, sent.Whole || name == ""
 }
 
 // forceLosses is what a detachment lost, by unit type.

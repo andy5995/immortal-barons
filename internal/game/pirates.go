@@ -338,7 +338,7 @@ func (w *World) pirateRaidVictim(slot int, v *Empire) {
 func raidLoot(gold int64, regions, troopers, jets, turrets, tanks, agents int) []Msg {
 	parts := []Msg{say("{n} Gold", "n", short(gold))}
 	if regions > 0 {
-		parts = append(parts, sayN("{n} Regions", "{n} Regions", "n", "n", short(regions)))
+		parts = append(parts, sayN("{n} Region", "{n} Regions", "n", "n", short(regions)))
 	}
 	parts = append(parts,
 		counted(Trooper, short(troopers)),

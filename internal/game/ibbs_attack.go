@@ -140,6 +140,15 @@ func (g GroupAttack) Due(now time.Time, gameDay int) bool {
 	return !now.Before(g.DepartAt)
 }
 
+// departure is when the party left: its scheduled time, or now for one
+// scheduled by game day before departures were timed.
+func (g GroupAttack) departure(now time.Time) time.Time {
+	if g.DepartAt.IsZero() {
+		return now
+	}
+	return g.DepartAt
+}
+
 // DepartureAfter is the instant a group attack filed now leaves, given a delay
 // in hours. It clamps to BRE's own window rather than trusting the caller: a
 // packet-driven or scripted launch must not slip past the bounds the prompt
@@ -368,6 +377,12 @@ type InFlightStrike struct {
 	TargetBoard  string
 	TargetEmpire string
 	LaunchedDay  int
+	// Launched is when the strike left this board. The returning report prints
+	// it as its Date, in the reader's zone: BRE's attack record carries the
+	// departure time at +0x35b, which validate_outbound_attack_file waits on
+	// before packing it and resolve_returning_attack prints. Zero for a strike
+	// saved before it was recorded, whose report leaves the date out.
+	Launched     time.Time      `json:",omitempty"`
 	Contributors []Contribution // an attack's detachments, by owner
 	Owner        string         // a terror op's sender
 	Agents       int            // a terror op's committed agents
@@ -495,6 +510,7 @@ func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire stri
 	})
 	w.InFlight = append(w.InFlight, InFlightStrike{
 		ID:           id,
+		Launched:     timeNow(),
 		Kind:         "attack",
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
@@ -614,6 +630,7 @@ func (w *World) LaunchDueGroupAttacksAt(now time.Time) {
 		})
 		w.InFlight = append(w.InFlight, InFlightStrike{
 			ID:           ga.ID,
+			Launched:     ga.departure(now),
 			Slot:         ga.Slot,
 			Kind:         "attack",
 			TargetBoard:  ga.TargetBoard,
@@ -834,15 +851,13 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 }
 
 // invasionReport is the private report a realm reads after an interplanetary
-// strike landed on it. The SHAPE is the original's (resolve_received_invasion,
-// BRE.OVR 0x040012, its strings read 2026-08-26): the verdict first, then the
-// attacking force by unit type, then what THIS realm lost by unit type, each on
-// a line of its own — and a zero is printed rather than skipped, because the
-// original's lines are unrolled one per unit with no test on the count. The
-// words are IB's. IB used to print a single total ("lost N units"), which
-// answered nothing a player wants to know after a battle.
+// strike landed on it, laid out as the original's (resolve_received_invasion,
+// BRE.OVR 0x040012; captured in eots-ibbs-03.cap): the header naming where the
+// strike came from, then indented under it the attacking force by unit type,
+// the verdict, what THIS realm lost by unit type, and the regions lost. A type
+// that lost nothing is left out of its line, and a defense that lost nothing
+// says so. The words are IB's, beside the original's line shapes.
 func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) Msg {
-	var head, field, took Msg
 	// DELIBERATE DIVERGENCE: the defender is told HOW the strike was pressed.
 	// BRE names the type to the attacker ("Extended Battle Results.") and never
 	// to the defender, whose recap says only that a force "attacked!". That gap
@@ -851,20 +866,35 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) Msg 
 	// was — so a defender cannot tell a cheap probe from a committed assault
 	// even after the fact. Group attacks get no choice of type in the original,
 	// and Kind's zero value is QuickStrike, so Group MUST be tested first.
-	if atk.Group {
-		head = say("Invasion from {who} (group attack).", "who", raider(atk))
-	} else {
-		head = say("Invasion from {who} ({kind}).", "who", raider(atk), "kind", say(atk.Kind.String()))
+	kind := say("group attack")
+	if !atk.Group {
+		kind = say(atk.Kind.String())
 	}
-	field = say("Your forces held the field.")
+	// The header is the original's: the planet, then the realm when one is
+	// named, and "Global" for a strike on the whole planet (eots-ibbs-03.cap).
+	from := say("{board}", "board", atk.FromBoard)
+	if atk.FromEmpire != "" {
+		from = say("{board} by {who}", "board", atk.FromBoard, "who", atk.FromEmpire)
+	}
+	head := say("Invasion From {from} ({kind})", "from", from, "kind", kind)
+	if atk.TargetEmpire == "" {
+		head = say("Global Invasion From {from} ({kind})", "from", from, "kind", kind)
+	}
+	verdict := say("Your forces won the battle!")
+	var took Msg
 	if won {
-		field = say("Your forces lost the field.")
-		took = sayN("You lost {n} region.", "You lost {n} regions.", "n", "n", regions)
+		verdict = say("Your forces lost the battle!")
+		took = sayN("You also lost {n} region!", "You also lost {n} regions!", "n", "n", regions)
 	}
-	return lines(head, field,
-		unitLine(msgid("{units} attacked."), attackUnits(forceOf(atk.Contributors))),
-		took,
-		unitLine(msgid("You lost {units}!"), defenseUnits(lost)))
+	lostLine := unitLine(msgid("You lost {units}!"), defenseUnits(lost))
+	if lostLine.IsZero() {
+		lostLine = say("You lost nothing!")
+	}
+	return lines(head,
+		indent(unitLine(msgid("{units} attacked!"), attackUnits(forceOf(atk.Contributors))), 2),
+		indent(verdict, 2),
+		indent(lostLine, 2),
+		indent(took, 2))
 }
 
 // forceOf is every unit a strike's contributors committed, taken together.
@@ -890,7 +920,7 @@ func (f AttackForce) Summary() string {
 	if len(l) == 0 {
 		return ""
 	}
-	return listIn("", l)
+	return listIn("", nil, l)
 }
 
 // unitCount is one entry of a battle report: how many of one unit type.

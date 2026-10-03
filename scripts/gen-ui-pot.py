@@ -99,8 +99,7 @@ GAME_PATTERNS = [
 
 # The engine's own messages (#297): events and interplanetary reports are a
 # template plus values, put into words when shown. say("...") and msgid("...")
-# carry a template; sayN and msgidN carry a counted pair, and a good's Counted
-# template is a pair with one English form. These are matched over the whole
+# carry a template; sayN and msgidN carry a counted pair. These are matched over the whole
 # file, since a pair's two halves often sit on separate lines.
 # The marker names live in engine-msg-markers.json, which the Go catalog test
 # reads too, so the two cannot disagree about what a template is.
@@ -113,7 +112,6 @@ GAME_MSG_PATTERNS = [
 GAME_MSG_PAIRS = [
     re.compile(r'\b(?:' + "|".join(_MARKERS["pair"]) + r')\(\s*' + STR + r',\s*' + STR, re.S),
 ]
-COUNTED_PATTERN = re.compile(r'\b' + _MARKERS["counted_field"] + r':\s*' + STR)
 
 # plural(s, n, "one", "many") carries BOTH wordings, and the count argument may
 # itself contain commas (math.Max(1, ...)), so match the last two literals in
@@ -181,8 +179,6 @@ def extract():
         for pat in GAME_MSG_PAIRS:
             for m in pat.finditer(src):
                 add_plural(m.group(1), m.group(2), loc(m))
-        for m in COUNTED_PATTERN.finditer(src):
-            add_plural(m.group(1), m.group(1), loc(m))
         for pat in GAME_MSG_PATTERNS:
             for m in pat.finditer(src):
                 if m.group(1) not in plurals:
