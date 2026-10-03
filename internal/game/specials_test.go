@@ -259,7 +259,7 @@ func TestRaidFactionWinLose(t *testing.T) {
 	w.Pirates[0].Land = 400 // ensure the faction holds land to capture
 	beforeLand := a.Land
 
-	report, captured := w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	report, captured := raidText(w, a, 0, 1_000_000, 0, 0)
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}
@@ -280,7 +280,7 @@ func TestRaidFactionWinLose(t *testing.T) {
 	beforeTroopers := a.Troopers
 
 	w.Pirates[8].LootTanks = 1 << 20 // far beyond what is sent, so the loss is certain
-	report, _ = w.RaidFaction(a, 8, 10_000, 0, 0)
+	report, _ = raidText(w, a, 8, 10_000, 0, 0)
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}

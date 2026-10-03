@@ -193,7 +193,7 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 	attackerCas := func(u UnitLoss) string {
 		return fmt.Sprintf(tr("%d troopers, %d jets, %d tanks, %d bombers"), u.Troopers, u.Jets, u.Tanks, u.Bombers)
 	}
-	defenderCas := func(u UnitLoss) string { return defenderCasIn(a.Language, u) }
+	defenderCasIn := func(u UnitLoss) string { return defenderCas(u).In(a.Language) }
 
 	if attackerWins {
 		// BRE's Normal Attack yields LAND ONLY — "a successful assault brings you
@@ -253,7 +253,7 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 
 		fmt.Fprint(&b, tr(returningForces)+"\n")
 		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
-		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCas(dloss))
+		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCasIn(dloss))
 		fmt.Fprintf(&b, tr("Victory! You captured %d regions.")+"\n", taken)
 		if gain > 0 {
 			fmt.Fprintf(&b, tr("Your score rose by %d.")+"\n", gain)
@@ -266,8 +266,8 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 			w.Kill(d)
 			fmt.Fprintf(&b, "\n"+tr("You crushed %s completely and seized the remains of its military!")+"\n", d.Name)
 		}
-		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you and took %d regions. You lost %s."),
-			a.Name, taken, defenderCasIn(d.Language, dloss)))
+		d.addEvent(say("{who} attacked you and took {n} regions. You lost {lost}.",
+			"who", a.Name, "n", taken, "lost", defenderCas(dloss)))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		// A repelled attack scores nothing for either side. The original's only two
@@ -276,7 +276,7 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 
 		fmt.Fprint(&b, tr(returningForces)+"\n")
 		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
-		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCas(dloss))
+		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCasIn(dloss))
 		fmt.Fprint(&b, tr("Defeat! Your forces were beaten off the field.")+"\n")
 		// A beaten attacker's army loses heart (LostAttackMoraleMin). Silent, as
 		// in the original: the loss report says nothing about morale.
@@ -284,8 +284,8 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 		if a.Morale < 0 {
 			a.Morale = 0
 		}
-		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you and was repelled. You lost %s."),
-			a.Name, defenderCasIn(d.Language, dloss)))
+		d.addEvent(say("{who} attacked you and was repelled. You lost {lost}.",
+			"who", a.Name, "lost", defenderCas(dloss)))
 		w.postCombatNews(a, d, false, false)
 	}
 	return BattleOutcome{
@@ -296,12 +296,13 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 	}
 }
 
-// defenderCasIn lists a defender's losses by unit type in lang — the attacker's
-// report and the defender's own event both read it, in their own languages. A
+// defenderCas lists a defender's losses by unit type — the attacker's report
+// and the defender's own event both read it, each in its reader's language. A
 // total on its own ("lost N units") is what the defender's event used to get,
 // and it is not what a player wants to know after a battle.
-func defenderCasIn(lang string, u UnitLoss) string {
-	return fmt.Sprintf(i18n.T(lang, "%d troopers, %d turrets, %d tanks, %d jets"), u.Troopers, u.Turrets, u.Tanks, u.Jets)
+func defenderCas(u UnitLoss) Msg {
+	return say("{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets",
+		"troopers", u.Troopers, "turrets", u.Turrets, "tanks", u.Tanks, "jets", u.Jets)
 }
 
 // absorbMilitary transfers a conquered empire's surviving military to the

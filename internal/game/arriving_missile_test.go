@@ -65,7 +65,7 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	intercepted := 0
 	for i := 0; i < 400; i++ {
 		if got, why := w.stopArrivingMissile(d, OpNuclear, "Selby of Home"); why == specialIntercepted {
-			if got == "Defendia's SDI shot down your nuclear missile over "+w.Config.BoardID+"." {
+			if got.English() == "Defendia's SDI shot down your nuclear missile over "+w.Config.BoardID+"." {
 				intercepted++
 			}
 		}
@@ -81,7 +81,7 @@ func TestArrivingMissileGatesReportSeparately(t *testing.T) {
 	misfired := 0
 	for i := 0; i < 400; i++ {
 		if got, why := w.stopArrivingMissile(d, OpNuclear, "Selby of Home"); why == specialMisfire {
-			if _, ok := misfireEntryFor(got, "nuclear missile", "Defendia", w.Config.BoardID); !ok {
+			if _, ok := misfireEntryFor(got.English(), "nuclear missile", "Defendia", w.Config.BoardID); !ok {
 				t.Fatalf("a misfire reported %q, which is not from the misfire pool", got)
 			}
 			misfired++

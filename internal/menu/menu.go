@@ -634,7 +634,7 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 // the opening menu, so a caller who never acts is still on the roster. Being
 // the only per-action transaction, this refresh costs nothing beyond the write
 // already happening here.
-func postActionCheck(g *ctx) (news []string, dead bool) {
+func postActionCheck(g *ctx) (news []game.Event, dead bool) {
 	// The Welcome menu runs before there is an empire at all, so the nil below
 	// means "not created yet" rather than "killed while you sat here". Without
 	// this a newcomer reading the rules was told their empire had collapsed and
@@ -660,7 +660,7 @@ func postActionCheck(g *ctx) (news []string, dead bool) {
 // them. Must run under the world lock, with p freshly resolved. The first call
 // only baselines: the backlog that existed before the session's first action
 // belongs to the "since your last play" recap, not to a mid-session notice.
-func (c *ctx) takeSessionNews(p *game.Empire) []string {
+func (c *ctx) takeSessionNews(p *game.Empire) []game.Event {
 	if !c.seenEventsSet {
 		c.seenEvents, c.seenEventsSet = len(p.Events), true
 		return nil
@@ -672,9 +672,9 @@ func (c *ctx) takeSessionNews(p *game.Empire) []string {
 	if len(p.Events) == c.seenEvents {
 		return nil
 	}
-	var news []string
+	var news []game.Event
 	for _, ev := range p.Events[c.seenEvents:] {
-		news = append(news, ev.Text)
+		news = append(news, ev)
 	}
 	p.Events = p.Events[:c.seenEvents]
 	return news
@@ -684,14 +684,14 @@ func (c *ctx) takeSessionNews(p *game.Empire) []string {
 // empire while its player sat at a menu or prompt. Printed after the action, so
 // it lands above the next redraw (menus don't clear the screen) — the player
 // sees it before they act again.
-func printSessionNews(s session.Session, news []string) {
+func printSessionNews(s session.Session, news []game.Event) {
 	if len(news) == 0 {
 		return
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
 		tr(s, "While you were at the menus, this has happened:"), ansi.Reset)
 	for _, ev := range news {
-		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(ev, "  ")))
+		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(ev.In(sessionLang(s)), "  ")))
 	}
 }
 

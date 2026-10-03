@@ -3,7 +3,6 @@ package game
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
@@ -229,9 +228,9 @@ var attackKindRates = map[AttackKind]struct {
 	name                    string
 	strength, capture, loss int
 }{
-	QuickStrike:    {"Quick Strike", QuickStrikeStrengthPct, QuickStrikeCapturePct, QuickStrikeLossPct},
-	NormalAttack:   {"Normal Attack", NormalAttackStrengthPct, NormalAttackCapturePct, NormalAttackLossPct},
-	ExtendedBattle: {"Extended Battle", ExtendedBattleStrengthPct, ExtendedBattleCapturePct, ExtendedBattleLossPct},
+	QuickStrike:    {msgid("Quick Strike"), QuickStrikeStrengthPct, QuickStrikeCapturePct, QuickStrikeLossPct},
+	NormalAttack:   {msgid("Normal Attack"), NormalAttackStrengthPct, NormalAttackCapturePct, NormalAttackLossPct},
+	ExtendedBattle: {msgid("Extended Battle"), ExtendedBattleStrengthPct, ExtendedBattleCapturePct, ExtendedBattleLossPct},
 }
 
 // rates returns k's row, falling back to the normal attack for a value that is
@@ -305,11 +304,14 @@ type AttackResult struct {
 	// returning report itemises it beside the attacker's own casualties; without
 	// it the origin board can only say whether the strike won.
 	Enemy UnitLoss `json:",omitempty"`
-	// Report is the sentence the target board wrote for what a Special Operation
-	// did (#49), and Score what the strike earned its sender. Both are settled
-	// where the target lives, so neither can be worked out back home.
-	Report string `json:",omitempty"`
-	Score  int    `json:",omitempty"`
+	// Report is what the target board wrote for what a Special Operation or a
+	// terror op did (#49), and Score what the strike earned its sender. Both are
+	// settled where the target lives, so neither can be worked out back home.
+	// Report travels as a Msg, so the sender's board puts it into words in its
+	// reader's language (#297); it was English text, under the key "Report",
+	// until Protocol 4.
+	Report *Msg `json:"ReportMsg,omitempty"`
+	Score  int  `json:",omitempty"`
 	// Backfired says an S3-Sabre turned on the realm that fired it. The
 	// target's board has already opened the land for the target; the firer's
 	// board only reads the report.
@@ -570,9 +572,8 @@ func (w *World) DisbandGroupAttackByCoordinator(e *Empire, id int, now time.Time
 			// Told, rather than left to find the forces back with no explanation:
 			// this is a planet-politics act by somebody else, the same as the
 			// Gooie being stood down over its builder's head.
-			owner.addEvent(fmt.Sprintf(
-				"The BBS Coordinator called off the attack party aimed at %s. Your forces have returned home.",
-				g.TargetBoard))
+			owner.addEvent(say("The BBS Coordinator called off the attack party aimed at {board}. Your forces have returned home.",
+				"board", g.TargetBoard))
 		}
 		w.postNews(fmt.Sprintf("The BBS Coordinator called off the attack party aimed at %s.", g.TargetBoard))
 		// The watcher who reported the party assembling reports it called off, so
@@ -671,7 +672,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	returnsPct := 100
 	if atk.Group {
 		kind = NormalAttack
-		res.Kind = "Group Attack"
+		res.Kind = msgid("Group Attack")
 	} else {
 		res.Kind = kind.String()
 		returnsPct = IndividualAttackReturnsPct
@@ -723,7 +724,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// planetDefenders has already left protected realms out of the pool.
 	if !planetWide && target.Protection > 0 {
 		res.Outcome = OutcomeProtected
-		target.addEvent(fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
+		target.addEvent(say("An interplanetary strike from {board} was stopped by your New Realm Protection.", "board", atk.FromBoard))
 		w.postNews(fmt.Sprintf("A strike by %s broke on %s's New Realm Protection.", raider(atk), target.Name))
 		return res
 	}
@@ -840,8 +841,8 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 // original's lines are unrolled one per unit with no test on the count. The
 // words are IB's. IB used to print a single total ("lost N units"), which
 // answered nothing a player wants to know after a battle.
-func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) string {
-	var b strings.Builder
+func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) Msg {
+	var head, field, took Msg
 	// DELIBERATE DIVERGENCE: the defender is told HOW the strike was pressed.
 	// BRE names the type to the attacker ("Extended Battle Results.") and never
 	// to the defender, whose recap says only that a force "attacked!". That gap
@@ -851,21 +852,19 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) stri
 	// even after the fact. Group attacks get no choice of type in the original,
 	// and Kind's zero value is QuickStrike, so Group MUST be tested first.
 	if atk.Group {
-		fmt.Fprintf(&b, "Invasion from %s (group attack).\n", raider(atk))
+		head = say("Invasion from {who} (group attack).", "who", raider(atk))
 	} else {
-		fmt.Fprintf(&b, "Invasion from %s (%s).\n", raider(atk), atk.Kind)
+		head = say("Invasion from {who} ({kind}).", "who", raider(atk), "kind", say(atk.Kind.String()))
 	}
+	field = say("Your forces held the field.")
 	if won {
-		b.WriteString("Your forces lost the field.\n")
-	} else {
-		b.WriteString("Your forces held the field.\n")
+		field = say("Your forces lost the field.")
+		took = sayN("You lost {n} region.", "You lost {n} regions.", "n", "n", regions)
 	}
-	writeUnitLines(&b, "%s attacked.", attackUnits(forceOf(atk.Contributors)))
-	if won {
-		fmt.Fprintf(&b, "You lost %d regions.\n", regions)
-	}
-	writeUnitLines(&b, "You lost %s!", defenseUnits(lost))
-	return strings.TrimRight(b.String(), "\n")
+	return lines(head, field,
+		unitLine(msgid("{units} attacked."), attackUnits(forceOf(atk.Contributors))),
+		took,
+		unitLine(msgid("You lost {units}!"), defenseUnits(lost)))
 }
 
 // forceOf is every unit a strike's contributors committed, taken together.
@@ -886,19 +885,25 @@ func (f InFlightStrike) Committed() AttackForce { return forceOf(f.Contributors)
 // Summary lists the units in f in a returning report's order and shape, but
 // with exact counts ("31,204 Troopers and 66,110 Bombers"), for the sysop
 // panel; the reports themselves shorten them. "" for an empty force.
-func (f AttackForce) Summary() string { return unitPhrase(attackUnits(f), numfmt.Comma[int]) }
+func (f AttackForce) Summary() string {
+	l := unitList(attackUnits(f), comma[int])
+	if len(l) == 0 {
+		return ""
+	}
+	return listIn("", l)
+}
 
-// unitCount is one line of a battle report: how many of one unit type.
+// unitCount is one entry of a battle report: how many of one unit type.
 type unitCount struct {
 	n    int
-	name string
+	unit *Good
 }
 
 // attackUnits and defenseUnits are the two sides' unit lists in the order the
 // original's reports print them — an attacker fields troopers, jets, tanks and
 // bombers; a defender loses troopers, jets, tanks and turrets.
 func attackUnits(f AttackForce) []unitCount {
-	return []unitCount{{f.Troopers, "Troopers"}, {f.Jets, "Jets"}, {f.Tanks, "Tanks"}, {f.Bombers, "Bombers"}}
+	return []unitCount{{f.Troopers, Trooper}, {f.Jets, Jet}, {f.Tanks, Tank}, {f.Bombers, Bomber}}
 }
 
 // The order is the original's own: Troopers, Jets, Turrets, Tanks. Two captures
@@ -906,10 +911,10 @@ func attackUnits(f AttackForce) []unitCount {
 // "1111 Troopers, 115k Turrets, and 105k Tanks" (turrets BEFORE tanks) and
 // cap/eots-ibbs-02.cap has "86k Jets and 1009k Tanks" (jets before tanks).
 func defenseUnits(u UnitLoss) []unitCount {
-	return []unitCount{{u.Troopers, "Troopers"}, {u.Jets, "Jets"}, {u.Turrets, "Turrets"}, {u.Tanks, "Tanks"}}
+	return []unitCount{{u.Troopers, Trooper}, {u.Jets, Jet}, {u.Turrets, Turret}, {u.Tanks, Tank}}
 }
 
-// writeUnitLines writes ONE line naming every unit type that took a loss, joined
+// unitLine is ONE line naming every unit type that took a loss, joined
 // with commas and an "and" before the last, and SKIPS a type that lost nothing.
 //
 // This corrects a reading that stood until 2026-09-01. The comment here used to
@@ -926,42 +931,28 @@ func defenseUnits(u UnitLoss) []unitCount {
 //
 // The destroyed line naming two of four types is what settles the zero question.
 //
-// The count is SHORTENED (numfmt.Short), so the format's verb is %s. That half of
-// the old comment stands: BRE's interplanetary reports run counts through the
+// The count is SHORTENED (numfmt.Short). That half of the old comment stands: BRE's interplanetary reports run counts through the
 // same helper its score table uses, while its LOCAL resolver prints them whole
 // (a staged local battle printed "10469 Troopers", and resolve_regular_attack is
 // absent from the helper's caller list). Do not make the two agree.
-func writeUnitLines(b *strings.Builder, format string, units []unitCount) {
-	if s := unitPhrase(units, numfmt.Short[int]); s != "" {
-		fmt.Fprintf(b, format+"\n", s)
+func unitLine(t string, units []unitCount) Msg {
+	l := unitList(units, short[int])
+	if len(l) == 0 {
+		return Msg{}
 	}
+	return say(t, "units", l)
 }
 
-// unitPhrase is the list writeUnitLines prints, each count written by count;
-// "" when every count is zero.
-func unitPhrase(units []unitCount, count func(int) string) string {
-	parts := make([]string, 0, len(units))
+// unitList is the list unitLine prints, each count written by count; empty
+// when every count is zero.
+func unitList(units []unitCount, count func(int) Arg) []Msg {
+	var l []Msg
 	for _, u := range units {
 		if u.n > 0 {
-			parts = append(parts, count(u.n)+" "+u.name)
+			l = append(l, counted(u.unit, count(u.n)))
 		}
 	}
-	if len(parts) == 0 {
-		return "" // joinAnd needs at least one item
-	}
-	return joinAnd(parts)
-}
-
-// joinAnd renders a list as the original writes one: "a", "a and b",
-// "a, b, and c" — the comma before "and" is in every captured line.
-func joinAnd(parts []string) string {
-	switch len(parts) {
-	case 1:
-		return parts[0]
-	case 2:
-		return parts[0] + " and " + parts[1]
-	}
-	return strings.Join(parts[:len(parts)-1], ", ") + ", and " + parts[len(parts)-1]
+	return l
 }
 
 // survivorsOfFrac returns each contributor's detachment reduced by the fraction
@@ -1095,11 +1086,11 @@ func (w *World) findInFlight(id int) int {
 //
 // Without it a timed-out planet-wide strike read "your force sent against  has
 // returned home", with a hole where the name goes (league recap, 2026-09-19).
-func strikeAim(f InFlightStrike) string {
+func strikeAim(f InFlightStrike) Msg {
 	if f.Whole || f.TargetEmpire == "" {
-		return "the whole planet"
+		return say("the whole planet")
 	}
-	return f.TargetEmpire
+	return say("{who}", "who", f.TargetEmpire)
 }
 
 // ReturnLostForces gives back the forces of any strike still unanswered after
@@ -1142,16 +1133,18 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 		recovered++
 		if f.Kind == "trade" {
 			if e := w.FindByOwner(f.Owner); e != nil {
-				w.creditGold(e, f.Gold, "a bid that never came home")
-				e.addEvent(fmt.Sprintf("No word came back from %s. Your bid for %d %s was abandoned and the gold returned.",
-					f.TargetBoard, f.Qty, f.Good))
+				w.creditGold(e, f.Gold, say("a bid that never came home"))
+				e.addEvent(say("No word came back from {board}. Your bid for {n} {good} was abandoned and the gold returned.",
+					"board", f.TargetBoard, "n", f.Qty, "good", say(f.Good)))
 			}
 			continue
 		}
 		if f.Kind == "terror" {
 			if e := w.FindByOwner(f.Owner); e != nil {
 				e.Agents += f.Agents
-				e.addEvent(fmt.Sprintf("No word came back from %s. Your %d agents have returned home.", f.TargetBoard, f.Agents))
+				e.addEvent(sayN("No word came back from {board}. Your {n} agent has returned home.",
+					"No word came back from {board}. Your {n} agents have returned home.", "n",
+					"board", f.TargetBoard, "n", f.Agents))
 			}
 			continue
 		}
@@ -1162,8 +1155,8 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 		// waiting on a report that is not coming.
 		if f.Kind == "special" {
 			if e := w.FindByOwner(f.Owner); e != nil {
-				e.addEvent(fmt.Sprintf("No word came back from %s. Your %s against %s is presumed lost.",
-					f.TargetBoard, SpecialOpLabel(f.Op), strikeAim(f)))
+				e.addEvent(say("No word came back from {board}. Your {op} against {target} is presumed lost.",
+					"board", f.TargetBoard, "op", say(SpecialOpLabel(f.Op)), "target", strikeAim(f)))
 			}
 			continue
 		}
@@ -1176,7 +1169,8 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 			e.Jets += c.Jets
 			e.Tanks += c.Tanks
 			e.Bombers += c.Bombers
-			e.addEvent(fmt.Sprintf("No word came back from %s. Your force sent against %s has returned home.", f.TargetBoard, strikeAim(f)))
+			e.addEvent(say("No word came back from {board}. Your force sent against {target} has returned home.",
+				"board", f.TargetBoard, "target", strikeAim(f)))
 		}
 	}
 	w.InFlight = waiting

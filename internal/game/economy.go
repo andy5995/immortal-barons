@@ -273,7 +273,7 @@ func (w *World) SellFood(e *Empire, n int) error {
 		n = e.Food
 	}
 	e.Food -= n
-	w.creditGold(e, goldCost(n, w.FoodSellPrice()), "a food sale")
+	w.creditGold(e, goldCost(n, w.FoodSellPrice()), say("a food sale"))
 	if !w.Config.FoodUnlimited {
 		w.FoodMarketSupply += n
 	}
@@ -447,7 +447,7 @@ func (w *World) sellUnit(stock *int, n, price int, e *Empire) error {
 	//
 	// IB divided the whole sale instead until 2026-09-11, which paid a shade
 	// MORE than the menu quoted and by more as the quantity grew.
-	w.creditGold(e, goldCost(n, UnitSellPrice(price)), "a unit sale")
+	w.creditGold(e, goldCost(n, UnitSellPrice(price)), say("a unit sale"))
 	return nil
 }
 
@@ -465,7 +465,7 @@ func (w *World) SellAgents(e *Empire, n int) error {
 		n = e.Agents
 	}
 	e.Agents -= n
-	w.creditGold(e, goldCost(n, SellAgentPrice), "an agent sale")
+	w.creditGold(e, goldCost(n, SellAgentPrice), say("an agent sale"))
 	return nil
 }
 
@@ -481,7 +481,7 @@ func (w *World) SellRegions(e *Empire, field *int, n int) error {
 	for i := 0; i < n; i++ {
 		*field--
 		e.syncLand()
-		w.creditGold(e, int64(w.LandPrice(e)/2), "a region sale")
+		w.creditGold(e, int64(w.LandPrice(e)/2), say("a region sale"))
 	}
 	return nil
 }

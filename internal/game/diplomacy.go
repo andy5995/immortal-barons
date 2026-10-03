@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math"
 	"strings"
 )
@@ -397,8 +396,8 @@ func (w *World) bleedAllies(a, d *Empire, frac float64) {
 			ally.Troopers -= troopers
 			ally.Tanks -= tanks
 		}
-		ally.addEvent(fmt.Sprintf("%s attacked %s: you lost %d troopers and %d tanks in the defense.",
-			a.Name, d.Name, troopers, tanks))
+		ally.addEvent(say("{a} attacked {d}: you lost {troopers} troopers and {tanks} tanks in the defense.",
+			"a", a.Name, "d", d.Name, "troopers", troopers, "tanks", tanks))
 	}
 }
 
@@ -503,7 +502,7 @@ func (w *World) AcceptTreaty(me *Empire, fromName, ttype string) bool {
 	// A pair holds one relation, so accepting REPLACES whatever stood before —
 	// taking a trade pact with an ally gives up the defense alliance.
 	w.setRelation(me.Name, fromName, ttype)
-	w.notifyProposer(me, fromName, "accepted", ttype)
+	w.notifyProposer(me, fromName, msgid("{who} accepted your {treaty} proposal."), ttype)
 	return true
 }
 
@@ -522,7 +521,7 @@ func (w *World) DeclineTreaty(me *Empire, fromName, ttype string) bool {
 	}
 	me.TreatyOffers = kept
 	if found {
-		w.notifyProposer(me, fromName, "rejected", ttype)
+		w.notifyProposer(me, fromName, msgid("{who} rejected your {treaty} proposal."), ttype)
 	}
 	return found
 }
@@ -531,12 +530,12 @@ func (w *World) DeclineTreaty(me *Empire, fromName, ttype string) bool {
 // files this on the proposer's "since your last play" log — one line per reply,
 // arriving whenever the other realm got around to playing — so a proposal is
 // never met with silence. Wording is BRE's, driven live on a league game.
-func (w *World) notifyProposer(me *Empire, fromName, verb, ttype string) {
+func (w *World) notifyProposer(me *Empire, fromName, answer, ttype string) {
 	from := w.FindByName(fromName)
 	if from == nil {
 		return
 	}
-	from.addEvent(fmt.Sprintf("%s %s your %s proposal.", me.Name, verb, ttype))
+	from.addEvent(say(answer, "who", me.Name, "treaty", say(ttype)))
 }
 
 // BreakTreaty ends a treaty of ttype between a and b, leaving them with no
@@ -578,7 +577,7 @@ func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 // waiting on the message being read. There is no delayed-break window to model.
 func (w *World) DeclareWar(a, b *Empire) {
 	if rel := w.Relation(a, b); rel != "" && rel != RelationEnemy {
-		a.addEvent(fmt.Sprintf("You tore up the %s with %s by declaring war.", rel, b.Name))
+		a.addEvent(say("You tore up the {treaty} with {who} by declaring war.", "treaty", say(rel), "who", b.Name))
 	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
 	w.SendMail(a, b, Message{
@@ -611,8 +610,9 @@ func (w *World) BreachTreaty(a, b *Empire) string {
 	a.Support = a.Support / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
 	a.Morale = a.Morale / TreatyBreakKeepDenominator * TreatyBreakKeepNumerator
 	w.setRelation(a.Name, b.Name, "")
-	a.addEvent(fmt.Sprintf("You tore up the %s with %s to attack it. Revolts broke out at home; support and morale fell sharply.", rel, b.Name))
-	b.addEvent(fmt.Sprintf("%s tore up the %s between your realms to attack you.", a.Name, rel))
+	a.addEvent(say("You tore up the {treaty} with {who} to attack it. Revolts broke out at home; support and morale fell sharply.",
+		"treaty", say(rel), "who", b.Name))
+	b.addEvent(say("{who} tore up the {treaty} between your realms to attack you.", "who", a.Name, "treaty", say(rel)))
 	return rel
 }
 

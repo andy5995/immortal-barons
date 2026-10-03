@@ -200,7 +200,7 @@ func (w *World) GrowFood(e *Empire) {
 // behind. manufacture is likewise called at turn start, alongside this, so
 // freshly-produced units are on hand the same turn (#71).
 func (w *World) CollectIncome(e *Empire) {
-	w.creditGold(e, int64(w.IncomeThisTurn(e).Gold()), "this turn's income")
+	w.creditGold(e, int64(w.IncomeThisTurn(e).Gold()), say("this turn's income"))
 }
 
 // Industrial production tuning (v1, tunable — see docs/mechanics-reference.md).

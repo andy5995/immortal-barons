@@ -2,9 +2,6 @@ package game
 
 import (
 	"fmt"
-	"strings"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // The origin board's half of an interplanetary strike: what happens when the
@@ -90,9 +87,9 @@ func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult, spy *Sp
 	// A spy that got in reads its figures out on the recap, not only into the
 	// Spy Database, so a spy sent after a strike shows what the strike did.
 	if spy != nil {
-		report += fmt.Sprintf("\nLand %s  Off %s  Def %s  Gold %s",
-			numfmt.Comma(spy.Land), numfmt.Comma(spy.Offense),
-			numfmt.Comma(spy.Defense), numfmt.Comma(spy.Gold))
+		report = lines(report, say("Land {land}  Off {off}  Def {def}  Gold {gold}",
+			"land", comma(spy.Land), "off", comma(spy.Offense),
+			"def", comma(spy.Defense), "gold", comma(spy.Gold)))
 	}
 	e.addEvent(report)
 }
@@ -101,27 +98,28 @@ func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult, spy *Sp
 // It names the operation and says WHY nothing happened, where the three silent
 // outcomes — repelled, sheltered, no such realm — used to arrive as one
 // sentence the sender could not tell apart (#165).
-func terrorReturnReport(sent InFlightStrike, res AttackResult) string {
-	op := sent.TerrorOp.String()
+func terrorReturnReport(sent InFlightStrike, res AttackResult) Msg {
+	op := say(sent.TerrorOp.String())
 	switch res.outcome() {
 	case OutcomeNotFound:
-		return fmt.Sprintf("Your agents reached %s and found no realm called %s, so they came home.",
-			res.TargetBoard, res.TargetEmpire)
+		return say("Your agents reached {board} and found no realm called {who}, so they came home.",
+			"board", res.TargetBoard, "who", res.TargetEmpire)
 	case OutcomeProtected:
-		return fmt.Sprintf("Your %s bounced off %s's New Realm Protection on %s.",
-			op, res.TargetEmpire, res.TargetBoard)
+		return say("Your {op} bounced off {who}'s New Realm Protection on {board}.",
+			"op", op, "who", res.TargetEmpire, "board", res.TargetBoard)
 	}
-	if res.Report != "" {
+	if res.Report != nil {
 		// The target board settled what the operation did and wrote the whole
-		// sentence, naming the target and its own board; only it knows what was
-		// there to damage (#166).
-		return res.Report
+		// report, naming the target and its own board; only it knows what was
+		// there to damage (#166). It comes as a Msg, so it is put into words
+		// here, in the sender's language (#297).
+		return *res.Report
 	}
 	if res.Won {
-		return fmt.Sprintf("Your %s against %s of %s destroyed %d of its forces.",
-			op, res.TargetEmpire, res.TargetBoard, res.LandTaken)
+		return say("Your {op} against {who} of {board} destroyed {n} of its forces.",
+			"op", op, "who", res.TargetEmpire, "board", res.TargetBoard, "n", res.LandTaken)
 	}
-	return fmt.Sprintf("Your %s against %s of %s was turned away.", op, res.TargetEmpire, res.TargetBoard)
+	return say("Your {op} against {who} of {board} was turned away.", "op", op, "who", res.TargetEmpire, "board", res.TargetBoard)
 }
 
 // survivorFor picks one owner's returning detachment out of the result. An owner
@@ -176,32 +174,32 @@ func splitSpoils(cs []Contribution, land int) []LandShare {
 
 // strikeReport is the private report one baron reads when their force comes
 // home: what it was, where it went, how it went, and what it cost them.
-func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackForce) string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "%s results — %s.\n", res.Kind, strikeTarget(sent, res))
+func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackForce) Msg {
+	head := say("{kind} results — {target}.", "kind", say(res.Kind), "target", strikeTarget(sent, res))
+	var how Msg
 	switch res.outcome() {
 	case OutcomeNotFound:
-		b.WriteString("Your forces crossed the void and found no such realm waiting.\n")
+		how = say("Your forces crossed the void and found no such realm waiting.")
 	case OutcomeProtected:
-		b.WriteString("Your forces found their target was in protection.\n")
+		how = say("Your forces found their target was in protection.")
 	case OutcomeWon:
-		fmt.Fprintf(&b, "Your forces broke the enemy and captured %d regions.\n", res.LandTaken)
+		how = say("Your forces broke the enemy and captured {n} regions.", "n", res.LandTaken)
 	default:
-		b.WriteString("Your forces were beaten off the field.\n")
+		how = say("Your forces were beaten off the field.")
 	}
 	// One line each from here, naming only the types that took a loss, which is
 	// the shape of the original's returning report (resolve_returning_attack,
-	// BRE.OVR 0x04136c) in two captures. See writeUnitLines.
-	writeUnitLines(&b, "You lost %s!", attackUnits(forceLosses(committed, back)))
+	// BRE.OVR 0x04136c) in two captures. See unitLine.
+	lost := unitLine(msgid("You lost {units}!"), attackUnits(forceLosses(committed, back)))
 	// What the strike destroyed is only known where a battle was fought; a force
 	// that found no realm, or found it shielded, destroyed nothing and says so by
 	// omitting the line.
+	var destroyed Msg
 	switch res.outcome() {
 	case OutcomeWon, OutcomeRepelled:
-		writeUnitLines(&b, "You destroyed %s!", defenseUnits(res.Enemy))
+		destroyed = unitLine(msgid("You destroyed {units}!"), defenseUnits(res.Enemy))
 	}
-	writeUnitLines(&b, "%s returned.", attackUnits(back))
-	return strings.TrimRight(b.String(), "\n")
+	return lines(head, how, lost, destroyed, unitLine(msgid("{units} returned."), attackUnits(back)))
 }
 
 // strikeTarget names what the strike was aimed at AND the board it went to,
@@ -212,15 +210,15 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 // named the board and so wants the target alone — hence "the whole planet"
 // there against "the whole of <board>" here. The wordings differ because the
 // sentences do; the whole-planet test is the part that must not.
-func strikeTarget(sent InFlightStrike, res AttackResult) string {
+func strikeTarget(sent InFlightStrike, res AttackResult) Msg {
 	name := res.TargetEmpire
 	if name == "" {
 		name = sent.TargetEmpire
 	}
 	if sent.Whole || name == "" {
-		return fmt.Sprintf("the whole of %s", res.TargetBoard)
+		return say("the whole of {board}", "board", res.TargetBoard)
 	}
-	return fmt.Sprintf("%s of %s", name, res.TargetBoard)
+	return say("{who} of {board}", "who", name, "board", res.TargetBoard)
 }
 
 // forceLosses is what a detachment lost, by unit type.
@@ -239,7 +237,7 @@ func forceLosses(committed, back AttackForce) AttackForce {
 // baron is named, a group strike is the planet's doing, and a whole-planet raid
 // names no enemy realm at all. Each line is a whole translatable sentence.
 func (w *World) returnNews(sent InFlightStrike, res AttackResult) string {
-	realm := strikeTarget(sent, res)
+	realm := strikeTarget(sent, res).English()
 	// Won alone cannot pick the line: it is false for a strike that found no such
 	// realm and for one turned away by New Realm Protection, and both were being
 	// announced as a defeat in battle (#201). The original has no news category
@@ -312,9 +310,9 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 		// which the target's own board applied when it resolved the strike
 		// (sabreDevelop). IB damaged the firer here until 2026-09-14; that was
 		// invented before the return path was read (#266).
-		report := fmt.Sprintf("Your %s backfired on %s of %s.", missile, target, board)
-		if res.Report != "" {
-			report = res.Report
+		report := say("Your {missile} backfired on {who} of {board}.", "missile", say(missile), "who", target, "board", board)
+		if res.Report != nil {
+			report = *res.Report
 		}
 		e.addEvent(report)
 		news()
@@ -341,19 +339,21 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	}
 	switch res.outcome() {
 	case OutcomeNotFound:
-		e.addEvent(fmt.Sprintf("Your %s reached %s and found no realm called %s.", missile, sent.TargetBoard, sent.TargetEmpire))
+		e.addEvent(say("Your {missile} reached {board} and found no realm called {who}.",
+			"missile", say(missile), "board", sent.TargetBoard, "who", sent.TargetEmpire))
 		return
 	case OutcomeProtected:
-		e.addEvent(fmt.Sprintf("Your %s bounced off %s's New Realm Protection on %s.", missile, target, board))
+		e.addEvent(say("Your {missile} bounced off {who}'s New Realm Protection on {board}.",
+			"missile", say(missile), "who", target, "board", board))
 		news()
 		return
 	}
 	if res.Score > 0 {
 		addScore(e, res.Score)
 	}
-	report := fmt.Sprintf("Your %s against %s is over.", label, strikeTarget(sent, res))
-	if res.Report != "" {
-		report = res.Report
+	report := say("Your {op} against {target} is over.", "op", say(label), "target", strikeTarget(sent, res))
+	if res.Report != nil {
+		report = *res.Report
 	}
 	e.addEvent(report)
 	news()
@@ -396,8 +396,8 @@ func bombingReturnNews(firer string, op SpecialOp, board string, res AttackResul
 			line = fmt.Sprintf("%s's bombers undermined %s's bank.", firer, board)
 		}
 		// The share destroyed, as the target board reported it.
-		if res.Report != "" {
-			line += " " + res.Report
+		if res.Report != nil {
+			line += " " + res.Report.English()
 		}
 		return line
 	case OutcomeDrivenOff:

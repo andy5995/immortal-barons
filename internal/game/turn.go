@@ -440,7 +440,7 @@ func (w *World) processEconomy(e *Empire) {
 	// field run_bank prints as "gold in hand").
 	if over := e.Bank - w.MoneyCap(); over > 0 {
 		e.Bank = w.MoneyCap()
-		w.creditGold(e, over, "bank interest")
+		w.creditGold(e, over, say("bank interest"))
 	}
 
 	// Food growth was already credited at turn start (GrowFood); here we only

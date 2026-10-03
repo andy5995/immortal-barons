@@ -2,9 +2,6 @@ package game
 
 import (
 	"errors"
-	"fmt"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // Interplanetary trading — IB's own, not the original's. BRE never let a baron
@@ -57,14 +54,16 @@ type IPTradeBid struct {
 
 // IPTradeFill is a bid's answer coming home: the goods if it filled, the gold
 // back if it did not. Reason carries the seller-side wording so the buyer is
-// told WHY rather than just handed their money back.
+// told WHY rather than just handed their money back. It travels as a Msg, put
+// into words on the buyer's board (#297); it was English text, under the key
+// "Reason", until Protocol 4.
 type IPTradeFill struct {
 	ID     int
 	Filled bool
 	Good   string
 	Qty    int
-	Gold   int64  // the refund when Filled is false
-	Reason string `json:",omitempty"`
+	Gold   int64 // the refund when Filled is false
+	Reason *Msg  `json:"ReasonMsg,omitempty"`
 }
 
 // TradeBidCost is what a bid escrows: the quoted price for every unit asked for.
@@ -136,17 +135,17 @@ func (w *World) resolveRemoteTradeBid(b IPTradeBid) IPTradeFill {
 	// rather than at launch — a packet crossing takes days, and what a board owes
 	// a stranger is decided by where things stand when the order lands.
 	case !w.Config.IPTrading:
-		fill.Reason = fmt.Sprintf("%s no longer trades with other planets.", w.Config.BoardID)
+		fill.Reason = optMsg(say("{board} no longer trades with other planets.", "board", w.Config.BoardID))
 	case w.PlanetRelationWith(b.FromBoard) != PlanetAllied:
-		fill.Reason = fmt.Sprintf("Our alliance with %s has ended; the market is closed to you.", b.FromBoard)
+		fill.Reason = optMsg(say("Our alliance with {board} has ended; the market is closed to you.", "board", b.FromBoard))
 	case seller == nil || !seller.Alive:
-		fill.Reason = fmt.Sprintf("%s is no longer on our planet.", b.Seller)
+		fill.Reason = optMsg(say("{who} is no longer on our planet.", "who", b.Seller))
 	case have <= 0:
-		fill.Reason = fmt.Sprintf("%s no longer offers %s.", b.Seller, b.Good)
+		fill.Reason = optMsg(say("{who} no longer offers {good}.", "who", b.Seller, "good", say(b.Good)))
 	case w.MarketPrice(realm, b.Good) != b.Price:
-		fill.Reason = fmt.Sprintf("%s has repriced its %s since you were quoted.", b.Seller, b.Good)
+		fill.Reason = optMsg(say("{who} has repriced its {good} since you were quoted.", "who", b.Seller, "good", say(b.Good)))
 	}
-	if fill.Reason != "" {
+	if fill.Reason != nil {
 		fill.Gold = TradeBidCost(b.Qty, b.Price)
 		return fill
 	}
@@ -162,13 +161,13 @@ func (w *World) resolveRemoteTradeBid(b IPTradeBid) IPTradeFill {
 	// business between two realms, and putting every one on the news both fills
 	// the paper on a trading planet and tells every rival what a realm is
 	// stocking up on.
-	seller.addEvent(fmt.Sprintf("%s of %s bought %s %s from your market for %s gold.",
-		b.FromEmpire, b.FromBoard, numfmt.Comma(int64(qty)), b.Good, numfmt.Comma(paid)))
+	seller.addEvent(say("{who} of {board} bought {n} {good} from your market for {gold} gold.",
+		"who", b.FromEmpire, "board", b.FromBoard, "n", comma(qty), "good", say(b.Good), "gold", comma(paid)))
 	fill.Filled = true
 	fill.Good, fill.Qty = b.Good, qty
 	fill.Gold = TradeBidCost(b.Qty-qty, b.Price) // the unfilled remainder
 	if qty < b.Qty {
-		fill.Reason = fmt.Sprintf("%s had only %s left.", b.Seller, numfmt.Comma(int64(qty)))
+		fill.Reason = optMsg(say("{who} had only {n} left.", "who", b.Seller, "n", comma(qty)))
 	}
 	return fill
 }
@@ -188,17 +187,17 @@ func (w *World) applyTradeFill(f IPTradeFill) {
 	}
 	if f.Filled && f.Qty > 0 {
 		w.giveGood(e, f.Good, f.Qty)
-		e.addEvent(fmt.Sprintf("Your bid on %s came home with %s %s.",
-			sent.TargetBoard, numfmt.Comma(int64(f.Qty)), f.Good))
+		e.addEvent(say("Your bid on {board} came home with {n} {good}.",
+			"board", sent.TargetBoard, "n", comma(f.Qty), "good", say(f.Good)))
 	}
 	if f.Gold > 0 {
-		w.creditGold(e, f.Gold, "an unfilled interplanetary bid")
+		w.creditGold(e, f.Gold, say("an unfilled interplanetary bid"))
 	}
-	if f.Reason != "" {
-		e.addEvent(f.Reason)
+	if f.Reason != nil {
+		e.addEvent(*f.Reason)
 	}
 	if !f.Filled {
-		e.addEvent(fmt.Sprintf("Your bid on %s was not filled; the gold is back in your treasury.", sent.TargetBoard))
+		e.addEvent(say("Your bid on {board} was not filled; the gold is back in your treasury.", "board", sent.TargetBoard))
 	}
 }
 

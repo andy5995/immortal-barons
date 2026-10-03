@@ -56,6 +56,28 @@ msgstr "Regionen kaufen"
 - Keep every placeholder — `%d`, `%s`, and so on — exactly as it appears in the
   `msgid`, in the same order. A wrong placeholder can break the display. A test
   checks this.
+- **Engine messages** — the events in the turn recap and the reports that come
+  home from other planets — use **named** placeholders instead: `{who}`,
+  `{board}`, `{n}`. Keep each one, but put it wherever your sentence needs it;
+  the game fills them in after it translates. A test checks that none is lost
+  or added. (The advisor screens also put words in braces, such as `{jets}`, to
+  mark words they highlight. Those are not placeholders: translate the word
+  inside them as you would any other.)
+- **Counted messages** have two English forms and as many translated forms as
+  your language has, set by the `Plural-Forms` line in the catalog header:
+
+  ```
+  msgid "{n} of them didn't make it home."
+  msgid_plural "{n} of them didn't make it home."
+  msgstr[0] "..."
+  msgstr[1] "..."
+  ```
+
+  Russian has three (`msgstr[0]` for 1 and 21, `[1]` for 2–4, `[2]` for 5–20).
+  A form your language uses for more than one count needs the count
+  placeholder, even when the English singular leaves it out. Some entries have
+  the same English twice, because the original game's reports print "1
+  Troopers"; give each form the grammar your language needs.
 - Keep every key a prompt names in its own text, such as `[Y]es` or `(O)ne`.
   The game reads that exact key, so write `[Y] Ja`, not `[J]a`: a translated
   letter shows the player a key that does nothing. A test checks this too.
@@ -113,9 +135,9 @@ translated Markdown. Changed English is marked for review.
 Create and translate the two catalogs, and register the language in the places
 listed below. Use the two-letter language code (for example `es` for Spanish).
 
-Steps 1 and 2 are all an **interface-only** language needs — the in-game menu,
-the website and the refresh scripts read the language set from that list and
-from the catalog files on disk. A language that also translates the **help
+Steps 1, 2 and 5 are all an **interface-only** language needs — the in-game
+menu, the website and the refresh scripts read the language set from that list
+and from the catalog files on disk. A language that also translates the **help
 pages** needs steps 3 and 4 as well; `//go:embed` takes no variables, so the
 Go side cannot discover a new content tree on its own, and the game panics at
 startup if the tree is missing. This page claimed step 1 was the only wiring
@@ -160,7 +182,11 @@ until 2026-09-17; it was not.
    Run `go test ./internal/help/` afterward: a tree that is embedded but not
    mapped is silently unused, and one that is mapped but not embedded panics.
 
-5. If the language groups thousands with something other than a comma, add it to
+5. Add the language's plural rule to `pluralRules` in `internal/i18n/i18n.go`,
+   and the matching `Plural-Forms` line to the catalog header (`msginit` writes
+   one for most languages). A test fails until the two agree.
+
+6. If the language groups thousands with something other than a comma, add it to
    `groupSep` in `internal/numfmt/numfmt.go` (German and Brazilian Portuguese use
    `.`, Russian and Swedish a space). Leaving it out is not a failure — the language just
    shows comma-grouped figures.

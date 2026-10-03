@@ -239,7 +239,7 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 	// that ruined nothing still scores.
 	addScore(a, w.rng.Intn(NukeScoreRoll))
 
-	d.addEvent(fmt.Sprintf("%s's nuclear strike turned %d of your regions into waste.", a.Name, regions))
+	d.addEvent(say("{from}'s nuclear strike turned {n} of your regions into waste.", "from", a.Name, "n", regions))
 
 	w.postStrikeNews(a, d, "nuclear")
 	return fmt.Sprintf("Your nuclear strike turned %d of %s's regions into waste.", regions, d.Name), nil
@@ -328,7 +328,8 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 
 	addScore(a, w.rng.Intn(ChemScoreRoll))
 
-	d.addEvent(fmt.Sprintf("%s's chemical strike laid waste to %d of your regions and killed %d of your people; famine follows.", a.Name, regions, people))
+	d.addEvent(say("{from}'s chemical strike laid waste to {n} of your regions and killed {people} of your people; famine follows.",
+		"from", a.Name, "n", regions, "people", people))
 
 	w.postStrikeNews(a, d, "chemical")
 	return fmt.Sprintf("Your gas laid waste to %d of %s's regions and killed %d of their people; their morale and support are broken.", regions, d.Name, people), nil
@@ -363,7 +364,8 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	d.Morale /= BioMoraleDivisor
 	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
 
-	d.addEvent(fmt.Sprintf("%s's plague killed %d of your troopers and %d of your people; famine follows.", a.Name, troops, people))
+	d.addEvent(say("{from}'s plague killed {troopers} of your troopers and {people} of your people; famine follows.",
+		"from", a.Name, "troopers", troops, "people", people))
 
 	w.postStrikeNews(a, d, "biological")
 	return fmt.Sprintf("Your plague killed %d of %s's troopers and %d civilians, and took half their morale with it.", troops, d.Name, people), nil

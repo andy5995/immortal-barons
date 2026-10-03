@@ -1,11 +1,6 @@
 package game
 
-import (
-	"fmt"
-	"strings"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
-)
+import ()
 
 // PirateFactions are the nine raidable pirate factions. Their strength is
 // randomized per game (NOT an easiest-to-hardest ladder), so any faction can
@@ -326,24 +321,6 @@ func (w *World) pirateRaidVictim(slot int, v *Empire) {
 	}
 }
 
-// breTally renders a raid tally the way BRE writes one: capitalised unit names
-// in a fixed order, comma separated, with "and" before the last. Zero entries
-// are kept, so the same fields appear every time and a missing one means the
-// unit does not take part rather than that none were lost.
-//
-//	You took 78k Gold, 8 Regions, 525 Troopers, 481 Jets, 606 Turrets, and 175 Tanks.
-func breTally(parts []string) string {
-	switch len(parts) {
-	case 0:
-		return "nothing"
-	case 1:
-		return parts[0]
-	case 2:
-		return parts[0] + " and " + parts[1]
-	}
-	return strings.Join(parts[:len(parts)-1], ", ") + ", and " + parts[len(parts)-1]
-}
-
 // raidLoot is the "You took" tally. The order is BRE's, from the captured
 // screen in docs/dev/bre-screens.md. Regions are omitted when the faction holds
 // no land, which that capture records as BRE's own behavior; Agents have no
@@ -354,20 +331,24 @@ func breTally(parts []string) string {
 // 13k Turrets", shortening each one past 10,000 and leaving the rest bare.
 // Its launch_pirate_raid reaches the same helper the score table's Score and
 // Net Worth columns use.
-func raidLoot(gold int64, regions, troopers, jets, turrets, tanks, agents int) string {
-	parts := []string{numfmt.Short(gold) + " Gold"}
+//
+// Zero entries are kept, as BRE keeps them, so the same fields appear every time
+// and a missing one means the unit does not take part rather than that none
+// were lost. The list is joined in the reader's language (listIn).
+func raidLoot(gold int64, regions, troopers, jets, turrets, tanks, agents int) []Msg {
+	parts := []Msg{say("{n} Gold", "n", short(gold))}
 	if regions > 0 {
-		parts = append(parts, numfmt.Short(regions)+" Regions")
+		parts = append(parts, sayN("{n} Regions", "{n} Regions", "n", "n", short(regions)))
 	}
 	parts = append(parts,
-		numfmt.Short(troopers)+" Troopers",
-		numfmt.Short(jets)+" Jets",
-		numfmt.Short(turrets)+" Turrets",
-		numfmt.Short(tanks)+" Tanks")
+		counted(Trooper, short(troopers)),
+		counted(Jet, short(jets)),
+		counted(Turret, short(turrets)),
+		counted(Tank, short(tanks)))
 	if agents > 0 {
-		parts = append(parts, numfmt.Short(agents)+" Agents")
+		parts = append(parts, counted(Agent, short(agents)))
 	}
-	return breTally(parts)
+	return parts
 }
 
 // raidWinLines and raidFailLines are the headlines a raid may draw, picked at
@@ -376,39 +357,35 @@ func raidLoot(gold int64, regions, troopers, jets, turrets, tanks, agents int) s
 // the rest are IB's, kept to its register and near enough its length that no one
 // line stands out as the "real" one — and short enough not to force a wrap.
 var raidWinLines = []string{
-	"Your efforts against %s have brought you success!",
-	"Your forces broke the %s and came home loaded.",
-	"The %s scattered before your assault.",
-	"You overran the %s and took back what you could.",
-	"The %s could not hold what they had taken.",
+	msgid("Your efforts against {who} have brought you success!"),
+	msgid("Your forces broke the {who} and came home loaded."),
+	msgid("The {who} scattered before your assault."),
+	msgid("You overran the {who} and took back what you could."),
+	msgid("The {who} could not hold what they had taken."),
 }
 
 var raidFailLines = []string{
-	"You could not successfully raid %s.",
-	"Your raid on the %s came to nothing.",
-	"The %s drove your forces back.",
-	"Your attack on the %s was beaten off.",
-	"The %s held against everything you sent.",
+	msgid("You could not successfully raid {who}."),
+	msgid("Your raid on the {who} came to nothing."),
+	msgid("The {who} drove your forces back."),
+	msgid("Your attack on the {who} was beaten off."),
+	msgid("The {who} held against everything you sent."),
 }
 
 // raidWin renders a winning raid under an already-chosen headline (the caller
 // owns the RNG). The losses line appears only when the raid actually cost
 // something; see the note at the call site.
-func raidWin(headline, loot string, troopers, jets, tanks int) string {
-	report := fmt.Sprintf("%s\nYou took %s.", headline, loot)
+func raidWin(headline Msg, loot []Msg, troopers, jets, tanks int) Msg {
+	var lost Msg
 	if troopers > 0 || jets > 0 || tanks > 0 {
-		report += fmt.Sprintf("\nYou lost %s.", raidLosses(troopers, jets, tanks))
+		lost = say("You lost {l}.", "l", raidLosses(troopers, jets, tanks))
 	}
-	return report
+	return lines(headline, say("You took {l}.", "l", loot), lost)
 }
 
 // raidLosses is the "You lost" tally — the three types a raid may commit.
-func raidLosses(troopers, jets, tanks int) string {
-	return breTally([]string{
-		numfmt.Short(troopers) + " Troopers",
-		numfmt.Short(jets) + " Jets",
-		numfmt.Short(tanks) + " Tanks",
-	})
+func raidLosses(troopers, jets, tanks int) []Msg {
+	return []Msg{counted(Trooper, short(troopers)), counted(Jet, short(jets)), counted(Tank, short(tanks))}
 }
 
 // RaidFaction resolves a player's attack on a pirate faction. The attacker
@@ -423,9 +400,9 @@ func raidLosses(troopers, jets, tanks int) string {
 // loss or against a landless faction), which the caller lets the player allocate
 // by type through the same picker a Regular Attack uses (#21). Reclaimed gold and
 // military land in the attacker at once; only the land is deferred.
-func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (report string, capturedLand int) {
+func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (report Msg, capturedLand int) {
 	if faction < 0 || faction >= len(w.Pirates) {
-		return "There are no pirates by that name.", 0
+		return say("There are no pirates by that name."), 0
 	}
 	p := &w.Pirates[faction]
 
@@ -477,7 +454,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		a.Turrets += gotU
 		a.Tanks += gotK
 		a.Agents += gotA
-		w.creditGold(a, gotG, "reclaimed pirate loot")
+		w.creditGold(a, gotG, say("reclaimed pirate loot"))
 		// The captured land is DEFERRED, not auto-added: the caller opens the
 		// region-type picker so the player chooses the composition (#21). Reclaimed
 		// gold/military above land immediately; only the regions wait.
@@ -492,14 +469,13 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		//
 		// The third line is the attacker's own casualties, which BRE prints on a
 		// win too — a winning raid is not free there (#119).
-		headline := fmt.Sprintf(raidWinLines[w.rng.Intn(len(raidWinLines))], p.Name)
+		headline := say(raidWinLines[w.rng.Intn(len(raidWinLines))], "who", p.Name)
 		return raidWin(headline, raidLoot(gotG, gotLand, gotT, gotJ, gotU, gotK, gotA), tLost, jLost, kLost), capturedLand
 	}
 
 	// A failed raid costs no Score: launch_pirate_raid has ONE Score site and it
 	// is the award. The penalty here was IB's own.
 	w.postPirateNews(a, p.Name, false)
-	return fmt.Sprintf("%s\nYou lost %s.",
-		fmt.Sprintf(raidFailLines[w.rng.Intn(len(raidFailLines))], p.Name),
-		raidLosses(tLost, jLost, kLost)), 0
+	return lines(say(raidFailLines[w.rng.Intn(len(raidFailLines))], "who", p.Name),
+		say("You lost {l}.", "l", raidLosses(tLost, jLost, kLost))), 0
 }

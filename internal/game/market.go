@@ -284,7 +284,7 @@ func (w *World) settleMarketProceeds() {
 		if e == nil {
 			continue
 		}
-		w.creditGold(e, pctOf(gross, 100-MarketCommissionPct), "the trading market")
+		w.creditGold(e, pctOf(gross, 100-MarketCommissionPct), say("the trading market"))
 	}
 	w.MarketProceeds = nil
 }

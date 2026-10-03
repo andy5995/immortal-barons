@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // Planet-wide news, in the spirit of BRE's news.dat feed (see
@@ -248,12 +246,11 @@ func (w *World) payMaster(e *Empire) {
 		return
 	}
 	w.RefundPool -= pay
-	w.creditGold(e, pay, "the Planetary Master's share")
+	w.creditGold(e, pay, say("the Planetary Master's share"))
 	// A computer baron takes the gold but gets no notice: the daily sweep in
 	// DailyMaintenance clears its recap anyway, and this runs after that sweep.
 	if e.Owner != "" {
-		e.addEvent(fmt.Sprintf("The Queen Royale sends you %s gold for holding the title of Planetary Master.",
-			numfmt.Comma(pay)))
+		e.addEvent(say("The Queen Royale sends you {gold} gold for holding the title of Planetary Master.", "gold", comma(pay)))
 	}
 }
 

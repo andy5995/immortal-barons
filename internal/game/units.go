@@ -24,6 +24,10 @@ type Good struct {
 	// see the package comment above.
 	Singular string
 	Plural   string
+	// Counted names a number of it in a report, {n} the count: "{n} Troopers".
+	// The English is plural at one as well, as the original's reports print it;
+	// a catalog gives each count its own form (#297).
+	Counted string
 	// Count points at e's holding of it. Every good has one.
 	Count func(e *Empire) *int
 	// Prod and Made are the production percentage the player sets and the tally
@@ -73,7 +77,7 @@ type Good struct {
 // drift out of step with the field it labels.
 var (
 	Trooper = &Good{
-		Singular: "Trooper", Plural: "Troopers", Military: true,
+		Singular: "Trooper", Plural: "Troopers", Counted: "{n} Troopers", Military: true,
 		Count:  func(e *Empire) *int { return &e.Troopers },
 		Prod:   func(e *Empire) *int { return &e.ProdTroopers },
 		Made:   func(e *Empire) *int { return &e.MadeTroopers },
@@ -85,7 +89,7 @@ var (
 		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Jet = &Good{
-		Singular: "Jet", Plural: "Jets", Military: true,
+		Singular: "Jet", Plural: "Jets", Counted: "{n} Jets", Military: true,
 		Count:  func(e *Empire) *int { return &e.Jets },
 		Prod:   func(e *Empire) *int { return &e.ProdJets },
 		Made:   func(e *Empire) *int { return &e.MadeJets },
@@ -97,7 +101,7 @@ var (
 		ShipWeight: 100, CarrierPer: 100,
 	}
 	Turret = &Good{
-		Singular: "Turret", Plural: "Turrets", Military: true,
+		Singular: "Turret", Plural: "Turrets", Counted: "{n} Turrets", Military: true,
 		Count:  func(e *Empire) *int { return &e.Turrets },
 		Prod:   func(e *Empire) *int { return &e.ProdTurrets },
 		Made:   func(e *Empire) *int { return &e.MadeTurrets },
@@ -108,7 +112,7 @@ var (
 		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Bomber = &Good{
-		Singular: "Bomber", Plural: "Bombers", Military: true,
+		Singular: "Bomber", Plural: "Bombers", Counted: "{n} Bombers", Military: true,
 		Count:  func(e *Empire) *int { return &e.Bombers },
 		Prod:   func(e *Empire) *int { return &e.ProdBombers },
 		Made:   func(e *Empire) *int { return &e.MadeBombers },
@@ -120,7 +124,7 @@ var (
 		ShipWeight: 300, CarrierPer: 0,
 	}
 	Tank = &Good{
-		Singular: "Tank", Plural: "Tanks", Military: true,
+		Singular: "Tank", Plural: "Tanks", Counted: "{n} Tanks", Military: true,
 		Count:  func(e *Empire) *int { return &e.Tanks },
 		Prod:   func(e *Empire) *int { return &e.ProdTanks },
 		Made:   func(e *Empire) *int { return &e.MadeTanks },
@@ -132,7 +136,7 @@ var (
 		ShipWeight: 100, CarrierPer: 5000,
 	}
 	Carrier = &Good{
-		Singular: "Carrier", Plural: "Carriers", Military: true,
+		Singular: "Carrier", Plural: "Carriers", Counted: "{n} Carriers", Military: true,
 		Count:  func(e *Empire) *int { return &e.Carriers },
 		Prod:   func(e *Empire) *int { return &e.ProdCarriers },
 		Made:   func(e *Empire) *int { return &e.MadeCarriers },
@@ -143,7 +147,7 @@ var (
 		ShipWeight: 100, CarrierPer: 0,
 	}
 	Agent = &Good{
-		Singular: "Agent", Plural: "Agents",
+		Singular: "Agent", Plural: "Agents", Counted: "{n} Agents",
 		Count:      func(e *Empire) *int { return &e.Agents },
 		Basket:     func(b *TradeBasket) *int { return &b.Agents },
 		Price:      func(w *World, e *Empire) int { return w.AgentPrice(e) },
@@ -151,7 +155,7 @@ var (
 		ShipWeight: 50, CarrierPer: 0,
 	}
 	Food = &Good{
-		Singular: "Food", Plural: "Food",
+		Singular: "Food", Plural: "Food", Counted: "{n} Food",
 		Count:      func(e *Empire) *int { return &e.Food },
 		Basket:     func(b *TradeBasket) *int { return &b.Food },
 		Price:      func(w *World, e *Empire) int { return w.FoodBuyPrice() },

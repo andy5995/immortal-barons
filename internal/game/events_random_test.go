@@ -104,12 +104,12 @@ func TestDailyMaintenancePersistsHumanEventsButClearsAIEvents(t *testing.T) {
 
 	human := w.AddHuman("h", "Realm")
 	human.Protection = 0
-	human.addEvent("Mallory attacked you and took 3 regions.")
+	human.addEvent(say("Mallory attacked you and took 3 regions."))
 
 	ai := w.AddHuman("", "AIRealm")
 	ai.Owner = ""
 	ai.Protection = 0
-	ai.addEvent("Mallory attacked you and took 3 regions.")
+	ai.addEvent(say("Mallory attacked you and took 3 regions."))
 
 	w.LastMaintDate = "2026-07-01"
 	w.DailyMaintenance("2026-07-02")

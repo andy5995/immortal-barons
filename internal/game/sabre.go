@@ -3,7 +3,6 @@ package game
 import (
 	"fmt"
 	"math/big"
-	"strings"
 )
 
 // sabre.go — the S3-Sabre missile: the dial the launch carries, the mapper from
@@ -63,60 +62,69 @@ func (w *World) SabreAim(dial int) SabreEffect {
 // four of troopers, jets, turrets and tanks for military bases, each with its
 // own roll. Regions go through the RegionMix, whose Total must always equal
 // e.Land; they are destroyed, not turned to waste.
-func (w *World) sabreDamage(e *Empire, eff SabreEffect) string {
+func (w *World) sabreDamage(e *Empire, eff SabreEffect) []Msg {
 	row, ok := sabreRows[eff]
 	if !ok {
-		return ""
+		return nil
 	}
 	s := &sabreStrike{w: w, e: e}
 	row.hit(s)
-	return strings.Join(s.parts, ", ")
+	return s.parts
 }
 
-// sabreRow is one of the six damage rows: what it goes for, as the target's
-// event names it when a hit takes nothing, and what it does.
+// sabreRow is one of the six damage rows: the target's event when a hit takes
+// nothing ({from}) and when it does ({from}, {lost}), and what it does.
 type sabreRow struct {
-	aim string
-	hit func(s *sabreStrike)
+	harmless string
+	hurt     string
+	hit      func(s *sabreStrike)
 }
 
 // sabreRows is the one table of the dial's damage rows. SabreDevelopRegions is
 // not in it: a backfire applies that row directly (sabreDevelop).
 var sabreRows = map[SabreEffect]sabreRow{
-	SabreHitIntelligence: {"Intelligence Headquarters", func(s *sabreStrike) {
-		s.keep("Agents", &s.e.Agents, SabreIntelKeepSpread, sabreIntelKept)
-	}},
-	SabreHitPeople: {"residential zones", func(s *sabreStrike) {
-		s.keep("People", &s.e.People, SabrePeopleKeepSpread, func(n, roll int) int {
-			return pctOf(n, SabrePeopleKeepBasePct+roll)
-		})
-	}},
-	SabreHitMilitaryBases: {"military bases", func(s *sabreStrike) {
-		for _, g := range []*Good{Trooper, Jet, Turret, Tank} {
-			s.keep(g.Plural, g.Count(s.e), SabreBasesKeepSpread, func(n, roll int) int {
-				return pctOf(n, SabreBasesKeepBasePct+roll)
+	SabreHitIntelligence: {msgid("{from}'s S3-Sabre hit your Intelligence Headquarters and did little harm."),
+		msgid("{from}'s S3-Sabre hit your Intelligence Headquarters, destroying {lost}."),
+		func(s *sabreStrike) {
+			s.keep(Agent.counted(), Agent.Count(s.e), SabreIntelKeepSpread, sabreIntelKept)
+		}},
+	SabreHitPeople: {msgid("{from}'s S3-Sabre hit your residential zones and did little harm."),
+		msgid("{from}'s S3-Sabre hit your residential zones, destroying {lost}."),
+		func(s *sabreStrike) {
+			s.keep(msgidN("{n} People", "{n} People"), &s.e.People, SabrePeopleKeepSpread, func(n, roll int) int {
+				return pctOf(n, SabrePeopleKeepBasePct+roll)
 			})
-		}
-	}},
-	SabreHitAirbases: {"airbases", func(s *sabreStrike) {
-		s.keep(Jet.Plural, Jet.Count(s.e), SabreAirbaseKeepSpread, sabreAirbaseKept)
-	}},
-	SabreHitRegions: {"regions", func(s *sabreStrike) {
-		e := s.e
-		lost := pctOf(e.Land, SabreRegionLossBasePct+s.w.rng.Intn(SabreRegionLossSpread))
-		if lost > 0 {
-			lost = e.Regions.remove(lost).Total()
-			e.syncLand()
-			noun := "Regions"
-			if lost == 1 {
-				noun = "Region"
+		}},
+	SabreHitMilitaryBases: {msgid("{from}'s S3-Sabre hit your military bases and did little harm."),
+		msgid("{from}'s S3-Sabre hit your military bases, destroying {lost}."),
+		func(s *sabreStrike) {
+			for _, g := range []*Good{Trooper, Jet, Turret, Tank} {
+				s.keep(g.counted(), g.Count(s.e), SabreBasesKeepSpread, func(n, roll int) int {
+					return pctOf(n, SabreBasesKeepBasePct+roll)
+				})
 			}
-			s.parts = append(s.parts, fmt.Sprintf("%d %s", lost, noun))
-		}
-	}},
-	SabreHitFood: {"food supply", func(s *sabreStrike) {
-		s.keep("Food", &s.e.Food, SabreFoodKeepSpread, sabreFoodKept)
-	}},
+		}},
+	SabreHitAirbases: {msgid("{from}'s S3-Sabre hit your airbases and did little harm."),
+		msgid("{from}'s S3-Sabre hit your airbases, destroying {lost}."),
+		func(s *sabreStrike) {
+			s.keep(Jet.counted(), Jet.Count(s.e), SabreAirbaseKeepSpread, sabreAirbaseKept)
+		}},
+	SabreHitRegions: {msgid("{from}'s S3-Sabre hit your regions and did little harm."),
+		msgid("{from}'s S3-Sabre hit your regions, destroying {lost}."),
+		func(s *sabreStrike) {
+			e := s.e
+			lost := pctOf(e.Land, SabreRegionLossBasePct+s.w.rng.Intn(SabreRegionLossSpread))
+			if lost > 0 {
+				lost = e.Regions.remove(lost).Total()
+				e.syncLand()
+				s.parts = append(s.parts, sayN("{n} Region", "{n} Regions", "n", "n", lost))
+			}
+		}},
+	SabreHitFood: {msgid("{from}'s S3-Sabre hit your food supply and did little harm."),
+		msgid("{from}'s S3-Sabre hit your food supply, destroying {lost}."),
+		func(s *sabreStrike) {
+			s.keep(Food.counted(), Food.Count(s.e), SabreFoodKeepSpread, sabreFoodKept)
+		}},
 }
 
 // sabreStrike is one landed hit in progress: the realm it struck and the list
@@ -124,15 +132,17 @@ var sabreRows = map[SabreEffect]sabreRow{
 type sabreStrike struct {
 	w     *World
 	e     *Empire
-	parts []string
+	parts []Msg
 }
 
-// keep leaves *n at kept(*n, Random(spread)) and records what went.
-func (s *sabreStrike) keep(name string, n *int, spread int, kept func(n, roll int) int) {
+// keep leaves *n at kept(*n, Random(spread)) and records what went; what names
+// the count, {n}. Its English is plural at one as well, as the original's
+// reports print it; a catalog gives each count its own form.
+func (s *sabreStrike) keep(what forms, n *int, spread int, kept func(n, roll int) int) {
 	left := kept(*n, s.w.rng.Intn(spread))
 	if lost := *n - left; lost > 0 {
 		*n = left
-		s.parts = append(s.parts, fmt.Sprintf("%d %s", lost, name))
+		s.parts = append(s.parts, sayIn(what, "n", "n", lost))
 	}
 }
 
@@ -209,7 +219,7 @@ func (w *World) sabreBackfires(d *Empire) bool {
 // stay anonymous unless the agent is caught (see covertFoiled).
 //
 // gained is the land a backfire opened for the target, zero otherwise.
-func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, outcome specialOutcome, gained int) {
+func (w *World) sabreEffect(d *Empire, from string, dial int) (report Msg, outcome specialOutcome, gained int) {
 	// The shared arriving-missile gates: the misfire, SDI and the garrison
 	// (#255). All three missiles meet them, because the receiving board resolves
 	// all three in one routine and the rolls sit ahead of its damage switch.
@@ -225,7 +235,7 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, ou
 	// The third gate is the original's garrison roll, which for the Sabre reads
 	// the target's troopers (record +0x76). It sits ahead of the damage switch,
 	// so a Sabre it stops neither damages nor backfires.
-	if stopped, why := w.stopArrivingMissile(d, OpSabre, from); stopped != "" {
+	if stopped, why := w.stopArrivingMissile(d, OpSabre, from); why != specialHit {
 		return stopped, why, 0
 	}
 	board := w.Config.BoardID
@@ -234,35 +244,32 @@ func (w *World) sabreEffect(d *Empire, from string, dial int) (report string, ou
 		// hurt the firer, it DEVELOPS land for the realm they aimed at (#266). The
 		// firer is told when the answer gets home; the target sees it now.
 		if got := w.sabreDevelop(d); got > 0 {
-			d.addEvent(fmt.Sprintf("%s's S3-Sabre backfired, expanding your territory by %s.", from, regionCount(got)))
-			return fmt.Sprintf("Your S3-Sabre backfired on %s of %s, expanding their territory by %s.", d.Name, board, regionCount(got)), specialBackfire, got
+			d.addEvent(sayN("{from}'s S3-Sabre backfired, expanding your territory by {n} region.",
+				"{from}'s S3-Sabre backfired, expanding your territory by {n} regions.", "n", "from", from, "n", got))
+			return sayN("Your S3-Sabre backfired on {who} of {board}, expanding their territory by {n} region.",
+				"Your S3-Sabre backfired on {who} of {board}, expanding their territory by {n} regions.", "n",
+				"who", d.Name, "board", board, "n", got), specialBackfire, got
 		}
-		return fmt.Sprintf("Your S3-Sabre backfired on %s of %s, but they had too little land for it to give them any.", d.Name, board), specialBackfire, 0
+		return say("Your S3-Sabre backfired on {who} of {board}, but they had too little land for it to give them any.",
+			"who", d.Name, "board", board), specialBackfire, 0
 	}
 	eff := w.SabreAim(dial)
+	row := sabreRows[eff]
 	lost := w.sabreDamage(d, eff)
-	if lost == "" {
+	if len(lost) == 0 {
 		// The original tells the target which row hit even when it took
 		// nothing: the event writer at +0x07d6 runs before the damage switch.
-		d.addEvent(fmt.Sprintf("%s's S3-Sabre hit your %s and did little harm.", from, sabreEffectAim(eff)))
-		return fmt.Sprintf("Your S3-Sabre reached %s of %s and barely scratched the paint.", d.Name, board), specialNothing, 0
+		d.addEvent(say(row.harmless, "from", from))
+		return say("Your S3-Sabre reached {who} of {board} and barely scratched the paint.", "who", d.Name, "board", board), specialNothing, 0
 	}
-	d.addEvent(fmt.Sprintf("%s's S3-Sabre hit your %s, destroying %s.", from, sabreEffectAim(eff), lost))
-	return fmt.Sprintf("Your S3-Sabre hit %s of %s, destroying %s.", d.Name, board, lost), specialHit, 0
+	d.addEvent(say(row.hurt, "from", from, "lost", lost))
+	return say("Your S3-Sabre hit {who} of {board}, destroying {lost}.", "who", d.Name, "board", board, "lost", lost), specialHit, 0
 }
 
-// regionCount is "1 region" or "N regions".
+// regionCount is "1 region" or "N regions", for the English news.
 func regionCount(n int) string {
 	if n == 1 {
 		return "1 region"
 	}
 	return fmt.Sprintf("%d regions", n)
-}
-
-// sabreEffectAim names what a dial row goes for, for the target's event.
-func sabreEffectAim(eff SabreEffect) string {
-	if row, ok := sabreRows[eff]; ok {
-		return row.aim
-	}
-	return "realm"
 }

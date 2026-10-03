@@ -2,6 +2,8 @@ package game
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -17,16 +19,15 @@ func misfireEntryFor(report, missile, target, board string) (int, bool) {
 	return 0, false
 }
 
-// agentEntryFor is the index of the agent-pool entry whose sender half ends
-// report: "Your agent <Singular>." locally, "; one of them <Singular>." or
-// "; N of them <Plural>." on a Terrorist Ops report.
+// agentEntryFor is the index of the agent-pool entry whose sender half is in
+// report: its Yours line locally, or one of its counted sentences on a
+// Terrorist Ops report.
 func agentEntryFor(report string) (int, bool) {
 	for i, a := range agentCaughtPool {
-		if strings.HasSuffix(report, " "+a.Singular+".") ||
-			strings.HasSuffix(report, " "+a.Plural+".") ||
-			strings.Contains(report, " "+a.Plural+";") ||
-			strings.Contains(report, " "+a.Singular+";") {
-			return i, true
+		for _, line := range []string{a.Yours, a.Caught.one, a.Caught.many, a.Other.one, a.Other.many} {
+			if strings.Contains(report, strings.TrimPrefix(line, "{n}")) {
+				return i, true
+			}
 		}
 	}
 	return 0, false
@@ -46,9 +47,9 @@ func TestMissileMisfirePairsBothHalves(t *testing.T) {
 		if res.Outcome != OutcomeMisfire {
 			continue
 		}
-		i, ok := misfireEntryFor(res.Report, "nuclear missile", "Victim", "Far")
+		i, ok := misfireEntryFor(text(res.Report), "nuclear missile", "Victim", "Far")
 		if !ok {
-			t.Fatalf("seed %d: misfire report %q is not from the pool", seed, res.Report)
+			t.Fatalf("seed %d: misfire report %q is not from the pool", seed, text(res.Report))
 		}
 		want := fill(missileMisfirePool[i].Theirs, "missile", "nuclear missile", "from", "Selby of Home")
 		if got := d.Events[len(d.Events)-1].Text; got != want {
@@ -77,8 +78,8 @@ func TestBomberDrivenOffNewsComesFromThePool(t *testing.T) {
 		if !drivenOffNews(news, "Selby of Home", "food market") {
 			t.Fatalf("seed %d: driven-off news %q is not from the pool", seed, news)
 		}
-		if res.Report != "" {
-			t.Errorf("seed %d: a driven-off run reported %q, want nothing", seed, res.Report)
+		if res.Report != nil {
+			t.Errorf("seed %d: a driven-off run reported %q, want nothing", seed, text(res.Report))
 		}
 		picked[news] = true
 	}
@@ -102,11 +103,11 @@ func TestAgentCaughtPairsBothHalves(t *testing.T) {
 		for _, e := range d.Events {
 			if strings.Contains(e.Text, "sent by Selby of Home") {
 				caught++
-				n := caughtInReport(res.Report, 6)
+				n := caughtInReport(text(res.Report), 6)
 				// A batch caught to the last agent gets the plain all-caught
 				// sentence, with no pool clause to pair; the target's line is
 				// still one of the pool's, with the same count.
-				if strings.HasPrefix(res.Report, "Victim's security on Far caught") {
+				if strings.HasPrefix(text(res.Report), "Victim's security on Far caught") {
 					found := false
 					for i := range agentCaughtPool {
 						found = found || e.Text == caughtEvent(i, n, "Selby of Home")
@@ -116,13 +117,13 @@ func TestAgentCaughtPairsBothHalves(t *testing.T) {
 					}
 					continue
 				}
-				i, ok := agentEntryFor(res.Report)
+				i, ok := agentEntryFor(text(res.Report))
 				if !ok {
-					t.Fatalf("seed %d: report %q carries no caught-agent line", seed, res.Report)
+					t.Fatalf("seed %d: report %q carries no caught-agent line", seed, text(res.Report))
 				}
 				picked[i] = true
 				if want := caughtEvent(i, n, "Selby of Home"); e.Text != want {
-					t.Errorf("seed %d: target read %q, want the half paired with report %q: %q", seed, e.Text, res.Report, want)
+					t.Errorf("seed %d: target read %q, want the half paired with report %q: %q", seed, e.Text, text(res.Report), want)
 				}
 			}
 		}
@@ -137,10 +138,10 @@ func TestAgentCaughtPairsBothHalves(t *testing.T) {
 		d := w.AddHuman("d", "Defendia")
 		a.Agents, d.Agents = 1, 1_000_000
 		got := w.resolveStirRevolts(a, d)
-		if !strings.HasPrefix(got, "Your agent ") {
+		if !strings.HasPrefix(got.English(), "Your agent ") {
 			continue
 		}
-		i, ok := agentEntryFor(got)
+		i, ok := agentEntryFor(got.English())
 		if !ok {
 			t.Fatalf("seed %d: local report %q is not from the pool", seed, got)
 		}
@@ -169,7 +170,11 @@ func drivenOffNews(news, from, object string) bool {
 // caughtEvent is the target's line from agent-pool entry i for n agents sent
 // by from.
 func caughtEvent(i, n int, from string) string {
-	return fill(agentCaughtPool[i].Theirs, "who", agentCount(n)+" sent by "+from)
+	who := fmt.Sprintf("%d agents sent by %s", n, from)
+	if n == 1 {
+		who = "1 agent sent by " + from
+	}
+	return fill(agentCaughtPool[i].Theirs, "who", who)
 }
 
 // caughtInReport is the number of agents a Terrorist Ops report says were
@@ -178,12 +183,13 @@ func caughtInReport(report string, sent int) int {
 	switch {
 	case strings.Contains(report, "caught every one of your"):
 		return sent
-	case strings.Contains(report, "caught your agent"), strings.Contains(report, "; one of them "):
+	case strings.Contains(report, "caught your agent"), strings.Contains(report, "One of them "),
+		strings.Contains(report, "One of your other agents "):
 		return 1
 	}
-	var n int
-	if i := strings.Index(report, "; "); i >= 0 {
-		fmt.Sscanf(report[i+2:], "%d of them", &n)
+	if m := regexp.MustCompile(`(\d+) of (them|your other agents) `).FindStringSubmatch(report); m != nil {
+		n, _ := strconv.Atoi(m[1])
+		return n
 	}
-	return n
+	return 0
 }

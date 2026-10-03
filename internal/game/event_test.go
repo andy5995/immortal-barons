@@ -25,7 +25,7 @@ func TestEventDecodesLegacyStringForm(t *testing.T) {
 
 func TestAddEventStampsNow(t *testing.T) {
 	e := &Empire{}
-	e.addEvent("A dragon attacked your regions.")
+	e.addEvent(say("A dragon attacked your regions."))
 	if len(e.Events) != 1 || e.Events[0].Text != "A dragon attacked your regions." {
 		t.Fatalf("events = %+v", e.Events)
 	}

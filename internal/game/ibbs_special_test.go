@@ -86,7 +86,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	if len(answer.Results) != 1 {
 		t.Fatalf("target board sent no answer: %+v", answer.Results)
 	}
-	if got := answer.Results[0].Report; got == "" {
+	if got := answer.Results[0].Report; got == nil {
 		t.Error("the answer carries no report, so the sender learns nothing")
 	}
 

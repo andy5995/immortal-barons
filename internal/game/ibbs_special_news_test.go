@@ -304,7 +304,7 @@ func TestFiringPlanetReadsProtectionAndOldFailures(t *testing.T) {
 	before = len(from.NewsToday)
 	from.applyAttackResult(AttackResult{
 		ID: from.InFlight[0].ID, TargetBoard: "Bravo BBS", TargetEmpire: target.Name,
-		Kind: string(OpNuclear), Outcome: OutcomeRepelled, Report: "It failed.",
+		Kind: string(OpNuclear), Outcome: OutcomeRepelled, Report: &Msg{T: "It failed."},
 	}, nil)
 	if got := from.NewsToday[before:]; len(got) != 1 ||
 		got[0].Text != "Alpha Baron's nuclear missile against Bravo Hold of Bravo BBS failed." {
@@ -463,7 +463,7 @@ func TestFiringPlanetReadsAnOldBombingFailure(t *testing.T) {
 	before := len(from.NewsToday)
 	from.applyAttackResult(AttackResult{
 		ID: from.InFlight[0].ID, TargetBoard: "Bravo BBS",
-		Kind: string(OpBombMarket), Outcome: OutcomeRepelled, Report: "It failed.",
+		Kind: string(OpBombMarket), Outcome: OutcomeRepelled, Report: &Msg{T: "It failed."},
 	}, nil)
 	if got := from.NewsToday[before:]; len(got) != 1 ||
 		got[0].Text != "Alpha Baron's Bomb Trading Market against Bravo BBS came to nothing." {

@@ -95,7 +95,7 @@ func (w *World) addBasket(e *Empire, b TradeBasket) {
 	for i := range ptrs {
 		*ptrs[i] += vals[i]
 	}
-	w.creditGold(e, int64(b.Gold), "a trade deal")
+	w.creditGold(e, int64(b.Gold), say("a trade deal"))
 }
 
 func subBasket(e *Empire, b TradeBasket) {
@@ -268,7 +268,7 @@ func (w *World) AcceptTradeDeal(to *Empire, want TradeDeal) error {
 	subBasket(to, d.Demand)     // recipient pays the demand
 	w.addBasket(from, d.Demand) // sender receives the demand
 	to.removeDeal(i)
-	notifyTrader(from, to, "accepted")
+	notifyTrader(from, to, msgid("{who} accepted your trade deal."))
 	return nil
 }
 
@@ -277,8 +277,8 @@ func (w *World) AcceptTradeDeal(to *Empire, want TradeDeal) error {
 // (process_trade_offer, BRE.OVR 0x24D6B), each written to the other realm's
 // record rather than mailed, so the answer reaches them whenever they next play.
 // Same shape as notifyProposer for treaties.
-func notifyTrader(from, to *Empire, verb string) {
-	from.addEvent(fmt.Sprintf("%s %s your trade deal.", to.Name, verb))
+func notifyTrader(from, to *Empire, answer string) {
+	from.addEvent(say(answer, "who", to.Name))
 }
 
 // DeclineTradeDeal drops a pending deal. The escrow is NOT returned: acceptance
@@ -293,7 +293,7 @@ func (w *World) DeclineTradeDeal(to *Empire, want TradeDeal) bool {
 		return false
 	}
 	if from := w.FindByName(want.From); from != nil {
-		notifyTrader(from, to, "rejected")
+		notifyTrader(from, to, msgid("{who} rejected your trade deal."))
 	}
 	to.removeDeal(i)
 	return true
@@ -312,7 +312,7 @@ func (w *World) ExpireTradeDeals(now time.Time) {
 		for _, d := range e.TradeDeals {
 			if !d.Expires.IsZero() && now.After(d.Expires) {
 				if from := w.FindByName(d.From); from != nil {
-					from.addEvent(fmt.Sprintf("%s never answered your trade deal, and the goods you sent it with are lost.", e.Name))
+					from.addEvent(say("{who} never answered your trade deal, and the goods you sent it with are lost.", "who", e.Name))
 				}
 				continue
 			}
@@ -343,7 +343,7 @@ func (w *World) returnPendingDeals(e *Empire) {
 	for _, d := range e.TradeDeals {
 		if from := w.FindByName(d.From); from != nil && from != e {
 			w.addBasket(from, d.Send)
-			from.addEvent(fmt.Sprintf("Your trade fleet could not find %s, and has brought the goods home.", e.Name))
+			from.addEvent(say("Your trade fleet could not find {who}, and has brought the goods home.", "who", e.Name))
 		}
 	}
 	e.TradeDeals = nil

@@ -88,11 +88,11 @@ func (w *World) applyDupeCheck(fromBoard string, scores []RemoteScore) {
 		case remote[dupeHash(e.Owner)]:
 			if e.DupeLockedBy != fromBoard {
 				e.DupeLockedBy = fromBoard
-				e.addEvent(fmt.Sprintf("Your handle is also playing on %s. This realm is locked until one of them goes.", fromBoard))
+				e.addEvent(say("Your handle is also playing on {board}. This realm is locked until one of them goes.", "board", fromBoard))
 			}
 		case e.DupeLockedBy == fromBoard:
 			e.DupeLockedBy = ""
-			e.addEvent(fmt.Sprintf("%s no longer lists your handle; this realm is unlocked.", fromBoard))
+			e.addEvent(say("{board} no longer lists your handle; this realm is unlocked.", "board", fromBoard))
 		}
 	}
 }

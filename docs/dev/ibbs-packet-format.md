@@ -493,11 +493,13 @@ IPTradeBid    { "ID": 12, "FromBoard": "AlphaBBS", "FromOwner": "khan",
                 // and the gold goes home, the same arrival-time rule an incoming
                 // strike's New Realm Protection check follows.
 IPTradeFill   { "ID": 12, "Filled": true, "Good": "Tank", "Qty": 40,
-                "Gold": 0, "Reason": "" }
+                "Gold": 0, "ReasonMsg": Msg }
                 // The answer. Gold is the refund for whatever did not fill (the
                 // whole bid when Filled is false, the remainder on a partial
-                // fill). Reason is the seller-side wording, so the buyer is told
-                // why rather than just handed their money back.
+                // fill). ReasonMsg is the seller-side wording, so the buyer is
+                // told why rather than just handed their money back; absent
+                // when there is none. English text under "Reason" until
+                // Protocol 4.
 RemoteListing { "Realm": "Redlands", "Good": "Tank", "Qty": 100, "Price": 500 }
                 // One row of the sender's market. A SNAPSHOT: by the time a bid
                 // against it lands, a packet round trip has passed and the
@@ -563,6 +565,28 @@ AttackResult  { "ID": 1, "TargetBoard": "BravoBBS", "TargetEmpire": "Victim",
                 // Enemy is what the strike destroyed, by unit type; absent
                 // likewise, and an absent one reports nothing destroyed rather
                 // than guessing.
+                // "ReportMsg" (absent above) is what the target board wrote
+                // for a terror op or Special Operation, as a Msg (below). It
+                // was English text under "Report" until Protocol 4; a board
+                // now ignores that key.
+
+Msg           { "t": "Your {op} hit {who} of {board}.",
+                "a": { "op": { "m": { "t": "S3-Sabre" } }, "who": { "s": "Victim" },
+                       "board": { "s": "BravoBBS" } } }
+                // A sentence for a player, sent as its English template and the
+                // values that fill it, so the READER's board puts it into words
+                // in the reader's language (#297). The template is a gettext
+                // msgid; one the reader's catalogs do not know renders in
+                // English from the template it carries. A value is "s" (shown
+                // as written: a realm, a board), "n" (a figure, printed as "f"
+                // says: absent = plain digits, "comma" = grouped in the
+                // reader's locale, "short" = 1000k), "m" (a phrase translated
+                // in its own right) or "l" (a list of phrases, joined in the
+                // reader's language; "e": true marks an empty one). "p" and
+                // "n" at the top give a plural template and the key of the
+                // figure that picks between the two; "j" is whole sentences
+                // shown one after another and "r" lines one under another,
+                // with no "t". The type is game.Msg (internal/game/msg.go).
 
 TimeCheck     { "From": "AlphaBBS", "To": "BravoBBS",
                 "Sent": "2026-07-04T18:02:11+10:00" }

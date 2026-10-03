@@ -145,7 +145,7 @@ func TestTerrorOpDestroysForces(t *testing.T) {
 
 	result := wB.ApplyPacket(wA.Outbox[0])
 	res := result.Results[0]
-	if !res.Won || res.Kind != "terror" || res.Report == "" {
+	if !res.Won || res.Kind != "terror" || res.Report == nil {
 		t.Errorf("expected a won terror result carrying its own report, got %+v", res)
 	}
 	totalAfter := target.Troopers + target.Jets + target.Turrets + target.Tanks + target.Bombers + target.Carriers
@@ -1239,7 +1239,7 @@ func TestTerrorSpyTakesNothing(t *testing.T) {
 	if target.Troopers != 5_000 || target.Agents != 500 || target.Morale != 100 {
 		t.Errorf("a spy should cost the target nothing, got %+v", target)
 	}
-	if !res.Won || res.Report == "" {
+	if !res.Won || res.Report == nil {
 		t.Errorf("the spy should come home with something to say, got %+v", res)
 	}
 }
@@ -1287,7 +1287,7 @@ func TestTerrorReturnReportSaysWhyNothingHappened(t *testing.T) {
 		{OutcomeRepelled, "turned away"},
 	}
 	for _, c := range cases {
-		got := terrorReturnReport(sent, AttackResult{TargetBoard: "boardB", TargetEmpire: "Victim", Outcome: c.outcome})
+		got := terrorReturnReport(sent, AttackResult{TargetBoard: "boardB", TargetEmpire: "Victim", Outcome: c.outcome}).English()
 		if !strings.Contains(got, c.want) {
 			t.Errorf("%s report = %q, want it to mention %q", c.outcome, got, c.want)
 		}

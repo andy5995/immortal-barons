@@ -20,7 +20,7 @@ func TestSendSpySuccess(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if !strings.Contains(report, d.Name) {
+		if !strings.Contains(report.English(), d.Name) {
 			continue // caught; try again
 		}
 		if a.Agents != before {
@@ -50,14 +50,14 @@ const covertTestAgents = 10_000
 // menu, so theirs is the value returned there. Which of the two happened is read
 // off the queue rather than from a list of op names, so an op that changes side
 // is followed rather than silently mis-read.
-func runCovert(t *testing.T, w *World, a *Empire, run func() (string, error)) string {
+func runCovert(t *testing.T, w *World, a *Empire, run func() (Msg, error)) string {
 	t.Helper()
 	report, err := run()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(w.CovertQueue) == 0 {
-		return report
+		return report.English()
 	}
 	before := len(a.Events)
 	w.resolveCovertQueue()
@@ -70,7 +70,7 @@ func runCovert(t *testing.T, w *World, a *Empire, run func() (string, error)) st
 // runCovertUntil repeats run until want accepts its report and returns that
 // report, clearing the attacker's per-turn slots and restocking its purse and
 // agents between attempts so only the roll varies.
-func runCovertUntil(t *testing.T, w *World, a *Empire, run func() (string, error), want func(report string) bool) string {
+func runCovertUntil(t *testing.T, w *World, a *Empire, run func() (Msg, error), want func(report string) bool) string {
 	t.Helper()
 	for i := 0; i < covertTries; i++ {
 		a.TurnProgress = TurnProgress{}
@@ -85,10 +85,10 @@ func runCovertUntil(t *testing.T, w *World, a *Empire, run func() (string, error
 }
 
 // caught reports whether a covert report is the one the attacker gets when the
-// agent is taken: "Your agent <line>.", the line one of the caught-agent pool's.
+// agent is taken: one of the caught-agent pool's Yours lines.
 func caught(report string) bool {
 	i, ok := agentEntryFor(report)
-	return ok && report == "Your agent "+agentCaughtPool[i].Singular+"."
+	return ok && report == agentCaughtPool[i].Yours
 }
 
 // TestCovertRollIgnoresTheTargetAndScalesWithDifficulty pins the two things
@@ -263,7 +263,7 @@ func TestSupportDissensionsSuccess(t *testing.T) {
 
 	// A foiled attempt files a victim event of its own, so the count is taken
 	// afresh for the attempt that lands.
-	report := runCovertUntil(t, w, a, func() (string, error) {
+	report := runCovertUntil(t, w, a, func() (Msg, error) {
 		beforeEvents = len(d.Events)
 		return w.SupportDissensions(a, d)
 	}, func(r string) bool { return !caught(r) })
@@ -304,7 +304,7 @@ func TestSendSpyFailure(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if !caught(report) {
+		if !caught(report.English()) {
 			continue // got through; try again
 		}
 		if a.Agents != before-1 {
@@ -328,7 +328,7 @@ func TestSupportDissensionsFailure(t *testing.T) {
 	d.Troopers = 1000
 
 	agentsBefore, eventsBefore := 0, 0
-	runCovertUntil(t, w, a, func() (string, error) {
+	runCovertUntil(t, w, a, func() (Msg, error) {
 		// An attempt that LANDS takes troopers, so the victim is restocked
 		// before each one and the assertions below read the foiled attempt.
 		d.Troopers = 1000
@@ -350,7 +350,7 @@ func TestSupportDissensionsFailure(t *testing.T) {
 func TestStirRevoltsLowersSupport(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Support = 50, 0, 100
-	runCovertUntil(t, w, a, func() (string, error) { return w.StirRevolts(a, d) },
+	runCovertUntil(t, w, a, func() (Msg, error) { return w.StirRevolts(a, d) },
 		func(r string) bool { return !caught(r) })
 	// Golden band from the LOCAL resolver (BRE.OVR 0x04C00C): support loses
 	// Random(4)+5 POINTS, so 92-95 of 100. The x11/13 scaling asserted here
@@ -371,7 +371,7 @@ func TestCovertOpNeedsAnAgent(t *testing.T) {
 func TestDemoralizeForcesLowersMorale(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Morale = 50, 0, 100
-	runCovertUntil(t, w, a, func() (string, error) { return w.DemoralizeForces(a, d) },
+	runCovertUntil(t, w, a, func() (Msg, error) { return w.DemoralizeForces(a, d) },
 		func(r string) bool { return !caught(r) })
 	// Golden band from the LOCAL resolver (BRE.OVR 0x04C2BD): morale loses
 	// Random(5)+5 POINTS, so 91-95 of 100. The x6/7 scaling asserted here before
@@ -476,7 +476,7 @@ func TestSetUpVoidsAlliance(t *testing.T) {
 	w.AcceptTreaty(partner, d.Name, "Full Defense Alliance")
 
 	// Set Up rolls once against each court, so it lands about 30% of the time.
-	report := runCovertUntil(t, w, a, func() (string, error) { return w.SetUp(a, d) },
+	report := runCovertUntil(t, w, a, func() (Msg, error) { return w.SetUp(a, d) },
 		func(r string) bool { return !caught(r) })
 	if !strings.Contains(report, partner.Name) {
 		t.Errorf("expected report to name the tricked ally %q, got %q", partner.Name, report)
@@ -774,7 +774,7 @@ func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
 func TestFoiledCovertOpsNameTheAttacker(t *testing.T) {
 	ops := []struct {
 		name string
-		run  func(*World, *Empire, *Empire) (string, error)
+		run  func(*World, *Empire, *Empire) (Msg, error)
 	}{
 		{"SendSpy", (*World).SendSpy},
 		{"SupportDissensions", (*World).SupportDissensions},
@@ -793,7 +793,7 @@ func TestFoiledCovertOpsNameTheAttacker(t *testing.T) {
 		d.ExposedFrom = map[string]int{a.Name: w.GameDay + ExposeOpsShieldDays}
 		before := 0
 
-		runCovertUntil(t, w, a, func() (string, error) {
+		runCovertUntil(t, w, a, func() (Msg, error) {
 			// A Bribery that lands would refuse the next attempt outright, and
 			// would double a's odds from then on.
 			a.Bribed = nil
@@ -819,7 +819,7 @@ func TestSuccessfulCovertOpsStayAnonymous(t *testing.T) {
 	d.Agents = 0
 	before := 0
 
-	runCovertUntil(t, w, a, func() (string, error) {
+	runCovertUntil(t, w, a, func() (Msg, error) {
 		d.Troopers, before = 10_000, len(d.Events)
 		return w.SupportDissensions(a, d)
 	}, func(r string) bool { return !caught(r) })

@@ -634,7 +634,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		}
 		if e := w.remoteTarget(req.TargetEmpire); e != nil {
 			result.ReconReports = append(result.ReconReports, w.spyReport(e))
-			e.addEvent("Foreign agents were seen taking an interest in your realm.")
+			e.addEvent(say("Foreign agents were seen taking an interest in your realm."))
 		}
 	}
 	for _, atk := range p.Attacks {

@@ -652,7 +652,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 	// faction" instead of a stale read. Re-resolve the raider inside the
 	// transaction: the p gathered above (before the commit prompts) is stale
 	// after a concurrent node's reload, and clamps against the fresh stock.
-	var report string
+	var report game.Msg
 	var captured int
 	var trimmed bool
 	err := w.mutatePlayer(func(fp *game.Empire) error {
@@ -668,7 +668,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	warnTrimmedForce(s, trimmed)
-	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report.In(sessionLang(s)))))
 	// A pirate win with land opens the same type picker a Regular Attack uses; a
 	// landless faction wins gold/military only, so no picker appears (#21, BRE).
 	if captured > 0 {

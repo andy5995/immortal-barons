@@ -3,8 +3,6 @@ package game
 import (
 	"errors"
 	"fmt"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // The interplanetary trade deal (#195). The original keeps this in a routine of
@@ -176,8 +174,8 @@ func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods Tr
 		Goods:      goods,
 		When:       StoredStamp(timeNow()),
 	})
-	from.addEvent(fmt.Sprintf("You shipped a trade deal to %s of %s, at a cost of %s gold and %d carriers.",
-		toEmpire, toBoard, numfmt.Comma(cost), need))
+	from.addEvent(say("You shipped a trade deal to {who} of {board}, at a cost of {gold} gold and {carriers} carriers.",
+		"who", toEmpire, "board", toBoard, "gold", comma(cost), "carriers", need))
 	return nil
 }
 
@@ -199,8 +197,8 @@ func (w *World) deliverIPTradeDeal(d IPTradeDeal) IPTradeReceipt {
 		return r
 	}
 	w.addBasket(to, d.Goods)
-	to.addEvent(fmt.Sprintf("%s of %s shipped you a trade deal: %s.",
-		d.FromEmpire, d.FromBoard, describeBasket(d.Goods)))
+	to.addEvent(say("{who} of {board} shipped you a trade deal: {goods}.",
+		"who", d.FromEmpire, "board", d.FromBoard, "goods", describeBasket(d.Goods)))
 	r.Delivered = true
 	return r
 }
@@ -227,16 +225,16 @@ func (w *World) applyTradeReceipt(board string, r IPTradeReceipt) {
 		return
 	}
 	if r.Delivered {
-		from.addEvent(fmt.Sprintf("Your trade deal reached %s of %s: %s.",
-			r.ToEmpire, board, describeBasket(r.Goods)))
+		from.addEvent(say("Your trade deal reached {who} of {board}: {goods}.",
+			"who", r.ToEmpire, "board", board, "goods", describeBasket(r.Goods)))
 		return
 	}
-	from.addEvent(fmt.Sprintf("Your trade deal to %s of %s was lost: no such realm is left there to take it.",
-		r.ToEmpire, board))
+	from.addEvent(say("Your trade deal to {who} of {board} was lost: no such realm is left there to take it.",
+		"who", r.ToEmpire, "board", board))
 }
 
 // describeBasket lists a basket's contents for an event line, in the canonical
-// good order and in the original's own tally shape (breTally), so a shipment
+// good order and in the original's own tally shape (listIn), so a shipment
 // reads the way the raid and battle reports read.
 // Figures are SHORTENED, gold included: the original's arriving-deal line runs
 // "They shipped 1000k Turrets and 188m Gold."
@@ -244,15 +242,24 @@ func (w *World) applyTradeReceipt(board string, r IPTradeReceipt) {
 // resolve_received_trade_offer reaches the same helper the score table uses.
 // This is a shipment report, not one of the money screens that print a figure
 // in full — BRE spells gold both ways and which applies is per screen.
-func describeBasket(b TradeBasket) string {
-	var parts []string
+func describeBasket(b TradeBasket) []Msg {
+	parts := []Msg{}
 	if b.Gold > 0 {
-		parts = append(parts, fmt.Sprintf("%s Gold", numfmt.Short(int64(b.Gold))))
+		parts = append(parts, say("{n} Gold", "n", short(b.Gold)))
 	}
 	for _, g := range MarketGoods {
 		if n := *g.Basket(&b); n > 0 {
-			parts = append(parts, fmt.Sprintf("%s %s", numfmt.Short(int64(n)), g.Plural))
+			parts = append(parts, counted(g, short(n)))
 		}
 	}
-	return breTally(parts)
+	return parts
 }
+
+// counted is g.Counted for a count already shaped as a figure (short, comma).
+func counted(g *Good, n Arg) Msg {
+	return Msg{T: g.Counted, P: g.Counted, N: "n", A: map[string]Arg{"n": n}}
+}
+
+// counted is Counted as a counted pair: one English form, as the reports print
+// it, which a catalog splits into its own.
+func (g *Good) counted() forms { return msgidN(g.Counted, g.Counted) }

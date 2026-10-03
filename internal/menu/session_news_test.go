@@ -291,7 +291,7 @@ func TestRolloverEventsSkipTheMidSessionNotice(t *testing.T) {
 	// channel is not simply switched off.
 	p.Events = append(p.Events, game.Event{Text: "Mallory attacked you and took 3 regions."})
 	news := w.takeSessionNews(p)
-	if len(news) != 1 || !strings.Contains(news[0], "Mallory") {
+	if len(news) != 1 || !strings.Contains(news[0].Text, "Mallory") {
 		t.Errorf("an event from another node should still show, got %q", news)
 	}
 }

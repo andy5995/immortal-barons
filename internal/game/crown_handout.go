@@ -66,9 +66,8 @@ func (w *World) crownGoldHandout() {
 		if w.RefundPool < 0 {
 			w.RefundPool = 0
 		}
-		w.creditGold(e, share, "the Queen's bounty")
-		e.addEvent(fmt.Sprintf("The Queen opens her purse to the whole planet: %s gold is yours.",
-			numfmt.Comma(share)))
+		w.creditGold(e, share, say("the Queen's bounty"))
+		e.addEvent(say("The Queen opens her purse to the whole planet: {gold} gold is yours.", "gold", comma(share)))
 	}
 	if len(living) > 0 {
 		w.postNews(fmt.Sprintf("The Queen empties part of her purse over the planet — %s gold to every realm.",
@@ -101,8 +100,7 @@ func (w *World) crownTrooperHandout() {
 	w.RefundPool -= cost
 	for _, e := range living {
 		e.Troopers += share
-		e.addEvent(fmt.Sprintf("The Queen's recruiters hand you %s troopers, paid for out of the crown purse.",
-			numfmt.Comma(int64(share))))
+		e.addEvent(say("The Queen's recruiters hand you {n} troopers, paid for out of the crown purse.", "n", comma(share)))
 	}
 	w.postNews(fmt.Sprintf("The crown buys %s troopers for every realm on the planet.",
 		numfmt.Comma(int64(share))))

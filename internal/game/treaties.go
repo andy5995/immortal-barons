@@ -23,19 +23,19 @@ type Pact struct {
 // The seven pacts. Each is a pointer so a screen can hold the row and compare
 // identity, as the goods table does.
 var (
-	FullDefenseAlliance = &Pact{"Full Defense Alliance",
+	FullDefenseAlliance = &Pact{msgid("Full Defense Alliance"),
 		"Neither realm may attack the other. If either is attacked, the ally sends 30% of its troopers and tanks to reinforce the defense."}
-	TariffTradeAgreement = &Pact{"Tariff Trade Agreement",
+	TariffTradeAgreement = &Pact{msgid("Tariff Trade Agreement"),
 		"Opens a taxed trade route. Both realms earn a modest income each turn, scaled to population."}
-	FreeTradeAgreement = &Pact{"Free Trade Agreement",
+	FreeTradeAgreement = &Pact{msgid("Free Trade Agreement"),
 		"Opens an open trade route. Both realms earn a larger income each turn — about double a tariff — scaled to population."}
-	ProtectiveTrade = &Pact{"Protective Trade",
+	ProtectiveTrade = &Pact{msgid("Protective Trade"),
 		"Guards the trade route between the two realms: deals in transit between you survive covert bombing, whoever fires. Markets are not covered."}
-	TerroristPrevention = &Pact{"Terrorist Prevention",
+	TerroristPrevention = &Pact{msgid("Terrorist Prevention"),
 		"Pools covert agents for defense, making both realms harder to spy on and sabotage."}
-	IntelligenceAlliance = &Pact{"Intelligence Alliance",
+	IntelligenceAlliance = &Pact{msgid("Intelligence Alliance"),
 		"Shares intelligence — partner agents strengthen your covert operations, both attacking and defending."}
-	TechnologyAgreement = &Pact{"Technology Agreement",
+	TechnologyAgreement = &Pact{msgid("Technology Agreement"),
 		"Shares technology — the partner with less advanced tech is pulled up toward the more advanced one."}
 )
 

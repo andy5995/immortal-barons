@@ -11,7 +11,7 @@ import (
 // dispatched before the queue is reached.
 var effectOps = []struct {
 	op  CovertOp
-	run func(*World, *Empire, *Empire) (string, error)
+	run func(*World, *Empire, *Empire) (Msg, error)
 }{
 	{OpStirRevolts, (*World).StirRevolts},
 	{OpSetUp, (*World).SetUp},
@@ -39,7 +39,7 @@ func TestEffectOpsOnlyQueueAtTheMenu(t *testing.T) {
 		// The acknowledgment is the original's: the agent left, and that is all
 		// it says. It named the target until 2026-09-11. The QUEUE below is what
 		// proves the op went against the realm chosen.
-		if !strings.Contains(report, "Sent out") {
+		if !strings.Contains(report.English(), "Sent out") {
 			t.Errorf("%s: the acknowledgment should say the agent went: %q", tc.op, report)
 		}
 		if len(w.CovertQueue) != 1 || w.CovertQueue[0].Op != tc.op || w.CovertQueue[0].Target != d.Name {
@@ -158,10 +158,10 @@ func TestInfoOpsAndExposeAreNotQueued(t *testing.T) {
 	a.Gold, a.Agents = 1_000_000_000, 500
 	a.Bribed = []string{d.Name}
 
-	for _, run := range []func() (string, error){
-		func() (string, error) { return w.SendSpy(a, d) },
-		func() (string, error) { return w.SpyOnRelations(a, d) },
-		func() (string, error) { return w.ExposeEnemyOps(a, d) },
+	for _, run := range []func() (Msg, error){
+		func() (Msg, error) { return w.SendSpy(a, d) },
+		func() (Msg, error) { return w.SpyOnRelations(a, d) },
+		func() (Msg, error) { return w.ExposeEnemyOps(a, d) },
 	} {
 		if _, err := run(); err != nil {
 			t.Fatal(err)

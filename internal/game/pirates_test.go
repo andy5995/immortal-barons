@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -252,7 +251,7 @@ func TestRaidFactionWinReclaimsPortion(t *testing.T) {
 	p.Land = 400
 
 	before := a.Agents
-	w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	raidText(w, a, 0, 1_000_000, 0, 0)
 
 	// A third of agents and of land, per BRE.
 	if want := 400 - 400/PirateReclaimDivMain; p.LootAgents != want {
@@ -273,7 +272,7 @@ func TestRaidFactionWinStillCostsTheAttacker(t *testing.T) {
 	a.Troopers = 1_000_000
 	sent := 1_000_000
 
-	report, _ := w.RaidFaction(a, 0, sent, 0, 0)
+	report, _ := raidText(w, a, 0, sent, 0, 0)
 
 	lost := 1_000_000 - a.Troopers
 	lo := sent * PirateAttackerLossMin / 100
@@ -297,7 +296,7 @@ func TestRaidFactionLandlessCapturesNoRegions(t *testing.T) {
 	p.Gold = 50_000
 
 	beforeLand := a.Land
-	_, captured := w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	_, captured := raidText(w, a, 0, 1_000_000, 0, 0)
 	if captured != 0 {
 		t.Errorf("landless faction should capture no regions, got %d", captured)
 	}
@@ -373,7 +372,7 @@ func TestRaidFactionScoreIsRolledAndLossFree(t *testing.T) {
 	a.Troopers = 1_000_000 // overwhelming, deterministic win
 	w.Pirates[0].LootTanks = 100
 
-	w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	raidText(w, a, 0, 1_000_000, 0, 0)
 	// Golden bounds, not the constants: 100 <= award <= 399.
 	if a.Score < 100 || a.Score > 399 {
 		t.Errorf("pirate-win Score = %d, want 100..399", a.Score)
@@ -384,7 +383,7 @@ func TestRaidFactionScoreIsRolledAndLossFree(t *testing.T) {
 	b.Troopers = 10
 	b.Score = 1000
 	w.Pirates[1].LootTanks = 1000
-	w.RaidFaction(b, 1, 10, 0, 0)
+	raidText(w, b, 1, 10, 0, 0)
 	if b.Score != 1000 {
 		t.Errorf("pirate-loss Score = %d, want it untouched at 1000", b.Score)
 	}
@@ -398,13 +397,13 @@ func TestRaidFactionDrainsOverSeveralHits(t *testing.T) {
 	p.LootTroopers = 1000
 
 	// One hit must not clear it; many hits should drain most of it.
-	w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	raidText(w, a, 0, 1_000_000, 0, 0)
 	if p.LootTroopers == 0 {
 		t.Error("a single hit should not fully drain a faction")
 	}
 	for i := 0; i < 12; i++ {
 		p.Forces = 100 // keep it beatable each hit
-		w.RaidFaction(a, 0, 1_000_000, 0, 0)
+		raidText(w, a, 0, 1_000_000, 0, 0)
 	}
 	if p.LootTroopers > 200 {
 		t.Errorf("after many hits most loot should be reclaimed, %d left", p.LootTroopers)
@@ -467,7 +466,7 @@ func TestPirateHoldingClampsToCap(t *testing.T) {
 // with capitalised units and "and" before the last, and short lines that never
 // need wrapping. Wording is verbatim from BRE.OVR.
 func TestRaidReportMatchesBREsShape(t *testing.T) {
-	got := raidWin(fmt.Sprintf(raidWinLines[0], "Dunkleoids"), raidLoot(4999, 6, 104, 62, 116, 19, 4), 0, 0, 0)
+	got := raidWin(say(raidWinLines[0], "who", "Dunkleoids"), raidLoot(4999, 6, 104, 62, 116, 19, 4), 0, 0, 0).English()
 	want := "Your efforts against Dunkleoids have brought you success!\n" +
 		"You took 4999 Gold, 6 Regions, 104 Troopers, 62 Jets, 116 Turrets, 19 Tanks, and 4 Agents."
 	if got != want {
@@ -481,8 +480,8 @@ func TestRaidReportMatchesBREsShape(t *testing.T) {
 // Regions drop out when the faction holds no land — recorded from BRE's own
 // screen — while the unit fields stay put so the tally reads the same every time.
 func TestRaidLootOmitsRegionsWhenTheFactionHoldsNoLand(t *testing.T) {
-	with := raidLoot(500, 8, 1, 2, 3, 4, 0)
-	without := raidLoot(500, 0, 1, 2, 3, 4, 0)
+	with := list(raidLoot(500, 8, 1, 2, 3, 4, 0))
+	without := list(raidLoot(500, 0, 1, 2, 3, 4, 0))
 	if !strings.Contains(with, "8 Regions") {
 		t.Errorf("regions missing when the faction holds land: %q", with)
 	}
@@ -505,11 +504,11 @@ func TestRaidHeadlinesNameTheFactionAndFit(t *testing.T) {
 	}
 	for _, pool := range [][]string{raidWinLines, raidFailLines} {
 		for _, f := range pool {
-			if !strings.Contains(f, "%s") {
+			if !strings.Contains(f, "{who}") {
 				t.Errorf("headline %q never names the faction", f)
 				continue
 			}
-			if n := len(fmt.Sprintf(f, longest)); n >= 80 {
+			if n := len(say(f, "who", longest).English()); n >= 80 {
 				t.Errorf("headline %q is %d columns with the longest faction name", f, n)
 			}
 		}
@@ -523,7 +522,7 @@ func TestRaidLossReport(t *testing.T) {
 	a.Troopers, a.Jets, a.Tanks = 10, 10, 10
 	w.Pirates[0].LootTanks = 1 << 20 // unbeatable, so the loss branch is certain
 
-	report, land := w.RaidFaction(a, 0, 10, 10, 10)
+	report, land := raidText(w, a, 0, 10, 10, 10)
 	if land != 0 {
 		t.Errorf("a lost raid captured %d regions", land)
 	}
@@ -533,7 +532,7 @@ func TestRaidLossReport(t *testing.T) {
 	}
 	found := false
 	for _, f := range raidFailLines {
-		if headline == fmt.Sprintf(f, w.Pirates[0].Name) {
+		if headline == say(f, "who", w.Pirates[0].Name).English() {
 			found = true
 		}
 	}
@@ -590,7 +589,7 @@ func TestPirateNewsSwitchSilencesTheNewsOnly(t *testing.T) {
 		a := w.AddHuman("me", "Mine")
 		a.Troopers, a.Jets, a.Tanks = 10_000, 10_000, 10_000
 		w.NewsToday = nil
-		report, _ = w.RaidFaction(a, 0, 5_000, 5_000, 5_000)
+		report, _ = raidText(w, a, 0, 5_000, 5_000, 5_000)
 		return len(w.NewsToday), report
 	}
 

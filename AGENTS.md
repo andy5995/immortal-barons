@@ -325,6 +325,17 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   terminal redrew its editor 300,616 times in five seconds before this was
   fixed. `session.End` on any read error, as `prompt`, `promptInt` and
   `AskRealmName` all now do.
+- **Text the engine writes for a player goes through `say`, never `fmt.Sprintf`**
+  (#297). An event, an interplanetary report or a covert result is a `game.Msg`
+  — English template plus values — put into words when shown, in the reader's
+  language; finished English text cannot be translated later, and the far board
+  that writes a report does not know who reads it. Templates use named
+  placeholders (`{who}`), whole sentences (join them with `sentences`, never
+  glue clauses), and `sayN` for counts. A template held in a table is wrapped in
+  `msgid`/`msgidN` so `scripts/gen-ui-pot.py` finds it. The marker names live
+  in `scripts/engine-msg-markers.json`, which that script and
+  `TestCatalogsKeepEnginePlaceholders` both read. Planet news is
+  still English text.
 - **Player-visible prose is wrapped at render time, never left to the terminal.**
   Print it through `ok`/`okNoPause`/`fail` or `menu.WrapIndented` (exported for
   `internal/play`, whose onboarding runs before the menu engine); a bare

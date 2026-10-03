@@ -46,19 +46,19 @@ const (
 func SpecialOpLabel(op SpecialOp) string {
 	switch op {
 	case OpBombFood:
-		return "Bomb Food Market"
+		return msgid("Bomb Food Market")
 	case OpBombMarket:
-		return "Bomb Trading Market"
+		return msgid("Bomb Trading Market")
 	case OpBombRoutes:
-		return "Bomb Trade Routes"
+		return msgid("Bomb Trade Routes")
 	case OpUndermine:
-		return "Undermine Investments"
+		return msgid("Undermine Investments")
 	case OpNuclear:
-		return "Nuclear Assault"
+		return msgid("Nuclear Assault")
 	case OpChemical:
-		return "Chemical Bombing"
+		return msgid("Chemical Bombing")
 	case OpSabre:
-		return "S3-Sabre"
+		return msgid("S3-Sabre")
 	}
 	return string(op)
 }
@@ -322,7 +322,7 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	// investments are hit with everyone else's.
 	if op.Op.TargetsPlanet() {
 		report, outcome := w.applyPlanetOp(op.Op)
-		res.Report = report
+		res.Report = optMsg(report)
 		res.Won = outcome == specialHit
 		res.Outcome = planetOpOutcome(outcome)
 		w.postNews(planetOpNews(op.Op, from, outcome, w.pickBomberDrivenOff))
@@ -338,13 +338,13 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	if target.Protection > 0 {
 		res.Outcome = OutcomeProtected
 		missile := missileNoun(op.Op)
-		target.addEvent(fmt.Sprintf("Your New Realm Protection turned aside a %s from %s.", missile, from))
+		target.addEvent(say("Your New Realm Protection turned aside a {missile} from {from}.", "missile", say(missile), "from", from))
 		w.postNews(fmt.Sprintf("%s's New Realm Protection turned aside the %s from %s.",
 			target.Name, missile, from))
 		return res
 	}
 	report, score, outcome, gained := w.applySpecialOp(op.Op, target, from, op.Dial)
-	res.Report = report
+	res.Report = optMsg(report)
 	res.Score = score
 	res.Won = outcome == specialHit
 	res.Backfired = outcome == specialBackfire
@@ -426,9 +426,9 @@ func missileNews(op SpecialOp, from, target string, outcome specialOutcome, gain
 func missileNoun(op SpecialOp) string {
 	switch op {
 	case OpNuclear:
-		return "nuclear missile"
+		return msgid("nuclear missile")
 	case OpChemical:
-		return "chemical missile"
+		return msgid("chemical missile")
 	}
 	return SpecialOpLabel(op)
 }
@@ -494,20 +494,20 @@ func planetOpObject(op SpecialOp) string {
 // food market, the trading market and the investments, and no figure for the
 // trade routes, which report ""). A run that failed reports "": the firer is
 // told through its planet news alone, which words it from the outcome.
-func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutcome) {
+func (w *World) applyPlanetOp(op SpecialOp) (report Msg, outcome specialOutcome) {
 	// One landing roll for the whole run, ahead of the op switch, as the
 	// original rolls it; a run that fails it touches nothing on the planet.
 	if !w.bombingLands() {
-		return "", specialDrivenOff
+		return Msg{}, specialDrivenOff
 	}
 
 	switch op {
 	case OpBombFood:
 		lost, pct := w.bombFoodMarketEffect()
 		if lost <= 0 {
-			return "", specialNothing
+			return Msg{}, specialNothing
 		}
-		return fmt.Sprintf("%d%% of the supply burned.", pct), specialHit
+		return say("{pct} of the supply burned.", "pct", percent(pct)), specialHit
 
 	case OpBombMarket:
 		goods, pct := 0, w.bombMarketLossPct()
@@ -517,15 +517,15 @@ func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutco
 			}
 		}
 		if goods == 0 {
-			return "", specialNothing
+			return Msg{}, specialNothing
 		}
-		return fmt.Sprintf("%d%% of every listing was destroyed.", pct), specialHit
+		return say("{pct} of every listing was destroyed.", "pct", percent(pct)), specialHit
 
 	case OpBombRoutes:
 		if w.bombRoutesEffect() == 0 {
-			return "", specialNothing
+			return Msg{}, specialNothing
 		}
-		return "", specialHit
+		return Msg{}, specialHit
 
 	case OpUndermine:
 		var lost int64
@@ -536,11 +536,11 @@ func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutco
 			}
 		}
 		if lost == 0 {
-			return "", specialNothing
+			return Msg{}, specialNothing
 		}
-		return fmt.Sprintf("%d%% of the investments coming due was lost.", pct), specialHit
+		return say("{pct} of the investments coming due was lost.", "pct", percent(pct)), specialHit
 	}
-	return "", specialNothing
+	return Msg{}, specialNothing
 }
 
 // applySpecialOp runs an arriving missile's effect against d and reports what it
@@ -550,7 +550,7 @@ func (w *World) applyPlanetOp(op SpecialOp) (report string, outcome specialOutco
 // TargetsPlanet down applyPlanetOp first. The four bombing ops had per-realm
 // branches here, from when they were aimed at one baron, which no packet could
 // reach once they were aimed at the planet; they were removed on 2026-09-23.
-func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report string, score int, outcome specialOutcome, gained int) {
+func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report Msg, score int, outcome specialOutcome, gained int) {
 	board := w.Config.BoardID
 	switch op {
 	// The three missiles do NOT run the local helpers of the same name (#255).
@@ -559,28 +559,30 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 	// ruins a wider swath than a neighbor's, and an arriving chemical strike is
 	// a population weapon that touches no land at all.
 	case OpNuclear:
-		if stopped, why := w.stopArrivingMissile(d, op, from); stopped != "" {
+		if stopped, why := w.stopArrivingMissile(d, op, from); why != specialHit {
 			return stopped, 0, why, 0
 		}
 		regions := w.arrivingNuclearEffect(d)
 		score = w.rng.Intn(NukeScoreRoll)
-		d.addEvent(fmt.Sprintf("%s's nuclear strike turned %d of your regions into waste.", from, regions))
-		return fmt.Sprintf("Your nuclear strike turned %d of %s's regions on %s into waste.", regions, d.Name, board), score, specialHit, 0
+		d.addEvent(say("{from}'s nuclear strike turned {n} of your regions into waste.", "from", from, "n", regions))
+		return say("Your nuclear strike turned {n} of {who}'s regions on {board} into waste.",
+			"n", regions, "who", d.Name, "board", board), score, specialHit, 0
 
 	case OpChemical:
-		if stopped, why := w.stopArrivingMissile(d, op, from); stopped != "" {
+		if stopped, why := w.stopArrivingMissile(d, op, from); why != specialHit {
 			return stopped, 0, why, 0
 		}
 		people := w.arrivingChemicalEffect(d)
 		score = w.rng.Intn(ChemScoreRoll)
-		d.addEvent(fmt.Sprintf("%s's chemical strike killed %d of your people.", from, people))
-		return fmt.Sprintf("Your chemical strike killed %d of %s's people on %s.", people, d.Name, board), score, specialHit, 0
+		d.addEvent(say("{from}'s chemical strike killed {n} of your people.", "from", from, "n", people))
+		return say("Your chemical strike killed {n} of {who}'s people on {board}.",
+			"n", people, "who", d.Name, "board", board), score, specialHit, 0
 
 	case OpSabre:
 		report, outcome, gained = w.sabreEffect(d, from, dial)
 		return report, 0, outcome, gained
 	}
-	return fmt.Sprintf("Nothing came of the operation against %s.", d.Name), 0, specialNothing, 0
+	return say("Nothing came of the operation against {who}.", "who", d.Name), 0, specialNothing, 0
 }
 
 // arrivingMissileStopped runs the three rolls the receiving board makes for ANY
@@ -628,29 +630,36 @@ func (w *World) arrivingMissileStopped(d *Empire, guard int) specialOutcome {
 // nuclear missile, tanks for a chemical one, troopers for an S3-Sabre (see
 // arrivingMissileStopped). A misfire picks one entry of the misfire pool and
 // uses both halves. Returns "" and specialHit when the missile gets through.
-func (w *World) stopArrivingMissile(d *Empire, op SpecialOp, from string) (string, specialOutcome) {
-	guard, unit := d.Troopers, "troopers"
+func (w *World) stopArrivingMissile(d *Empire, op SpecialOp, from string) (Msg, specialOutcome) {
+	// The garrison's two lines, the target's and the firer's, by which unit it is.
+	guard := d.Troopers
+	theirs := msgid("Your troopers brought down a {missile} from {from}.")
+	yours := msgid("{who}'s troopers on {board} brought down your {missile}.")
 	switch op {
 	case OpNuclear:
-		guard, unit = d.Turrets, "turrets"
+		guard = d.Turrets
+		theirs = msgid("Your turrets brought down a {missile} from {from}.")
+		yours = msgid("{who}'s turrets on {board} brought down your {missile}.")
 	case OpChemical:
-		guard, unit = d.Tanks, "tanks"
+		guard = d.Tanks
+		theirs = msgid("Your tanks brought down a {missile} from {from}.")
+		yours = msgid("{who}'s tanks on {board} brought down your {missile}.")
 	}
 	why := w.arrivingMissileStopped(d, guard)
-	missile := missileNoun(op)
+	missile := say(missileNoun(op))
 	board := w.Config.BoardID
 	switch why {
 	case specialMisfire:
 		fate := w.pickMissileMisfire()
-		d.addEvent(fill(fate.Theirs, "missile", missile, "from", from))
-		return fill(fate.Yours, "missile", missile, "target", d.Name, "board", board), why
+		d.addEvent(say(fate.Theirs, "missile", missile, "from", from))
+		return say(fate.Yours, "missile", missile, "target", d.Name, "board", board), why
 	case specialIntercepted:
-		return fmt.Sprintf("%s's SDI shot down your %s over %s.", d.Name, missile, board), why
+		return say("{who}'s SDI shot down your {missile} over {board}.", "who", d.Name, "missile", missile, "board", board), why
 	case specialGuarded:
-		d.addEvent(fmt.Sprintf("Your %s brought down a %s from %s.", unit, missile, from))
-		return fmt.Sprintf("%s's %s on %s brought down your %s.", d.Name, unit, board, missile), why
+		d.addEvent(say(theirs, "missile", missile, "from", from))
+		return say(yours, "who", d.Name, "board", board, "missile", missile), why
 	}
-	return "", specialHit
+	return Msg{}, specialHit
 }
 
 // missileGuarded is the garrison roll: roll is the Random(MissileDefenseRoll)

@@ -408,7 +408,7 @@ func TestGoldLostToTheCapRaisesAnEvent(t *testing.T) {
 	e.Gold = w.MoneyCap() - 1_000
 	before := len(e.Events)
 
-	w.creditGold(e, 5_000, "a matured investment")
+	w.creditGold(e, 5_000, say("a matured investment"))
 
 	if e.Gold != w.MoneyCap() {
 		t.Errorf("gold = %d, want it held at the %d cap", e.Gold, w.MoneyCap())
@@ -432,7 +432,7 @@ func TestCreditThatFitsIsSilent(t *testing.T) {
 	e.Gold = 1_000
 	before := len(e.Events)
 
-	w.creditGold(e, 5_000, "a matured investment")
+	w.creditGold(e, 5_000, say("a matured investment"))
 
 	if e.Gold != 6_000 {
 		t.Errorf("gold = %d, want 6,000", e.Gold)

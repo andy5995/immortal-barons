@@ -265,12 +265,12 @@ func (w *World) scrapAnnihilator(orderedBy *Empire) error {
 	// scrap it, so the people who paid for it must not have to notice a news
 	// line to find out — and a weapon that simply stops being mentioned reads
 	// exactly like one that went missing in transit.
-	who := fmt.Sprintf("%s, the BBS Coordinator,", orderedBy.Name)
 	for _, e := range w.Empires {
 		if !e.Alive {
 			continue
 		}
-		e.addEvent(fmt.Sprintf("%s dismantled the Gooie Kablooie aimed at %s. Nothing was refunded.", who, board))
+		e.addEvent(say("{who}, the BBS Coordinator, dismantled the Gooie Kablooie aimed at {board}. Nothing was refunded.",
+			"who", orderedBy.Name, "board", board))
 	}
 	w.reportToSpy(board, fmt.Sprintf("Our agent on %s reports their Gooie Kablooie has been dismantled.", w.Config.BoardID))
 	w.reportThreatGone(board, ThreatGooie, 0)
@@ -439,9 +439,9 @@ func (w *World) tickOneAnnihilator(d *Annihilator) {
 		}
 		total += lost
 		if first {
-			e.addEvent(fmt.Sprintf("A Gooie Kablooie landed on the planet — you lost %d regions.", lost))
+			e.addEvent(say("A Gooie Kablooie landed on the planet — you lost {n} regions.", "n", lost))
 		} else {
-			e.addEvent(fmt.Sprintf("The Gooie Kablooie destroyed %d more regions.", lost))
+			e.addEvent(say("The Gooie Kablooie destroyed {n} more regions.", "n", lost))
 		}
 	}
 	if first {

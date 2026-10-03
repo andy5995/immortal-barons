@@ -94,7 +94,7 @@ func (w *World) TakeLoan(e *Empire, amount int64, days int) (Loan, error) {
 		return Loan{}, ErrCantAfford
 	}
 	l := Loan{Principal: amount, Owed: LoanTotalOwed(amount, days), DueDay: w.GameDay + days}
-	w.creditGold(e, amount, "a loan")
+	w.creditGold(e, amount, say("a loan"))
 	e.Loans = append(e.Loans, l)
 	return l, nil
 }

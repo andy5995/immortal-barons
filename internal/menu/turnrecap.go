@@ -125,7 +125,7 @@ func showTurnEvents(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "\n%s%s%s\n\n", ansi.FgWhite, tr(s, "Since your last play, this has happened:"), ansi.Reset)
 	rows := recapHeaderRows
 	for i, ev := range countRepeats(events) {
-		text := ev.Text
+		text := ev.In(sessionLang(s))
 		if ev.Count > 1 {
 			text = fmt.Sprintf("%s %s", text, fmt.Sprintf(tr(s, "(%d times)"), ev.Count))
 		}

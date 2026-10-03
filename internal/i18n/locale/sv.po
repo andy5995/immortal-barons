@@ -123,8 +123,8 @@ msgid "%d troopers, %d jets, %d tanks, %d bombers"
 msgstr "%d soldater, %d jetplan, %d stridsvagnar, %d bombplan"
 
 #: internal/game/combat.go:304
-msgid "%d troopers, %d turrets, %d tanks, %d jets"
-msgstr "%d soldater, %d kanontorn, %d stridsvagnar, %d jetplan"
+msgid "{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets"
+msgstr "{troopers} soldater, {turrets} kanontorn, {tanks} stridsvagnar, {jets} jetplan"
 
 #: internal/menu/turnstages.go:184
 msgid "%d units deserted for lack of pay."
@@ -167,12 +167,12 @@ msgid "%s against which planet?"
 msgstr "%s mot vilken planet?"
 
 #: internal/game/combat.go:269
-msgid "%s attacked you and took %d regions. You lost %s."
-msgstr "%s anföll dig och tog %d regioner. Du förlorade %s."
+msgid "{who} attacked you and took {n} regions. You lost {lost}."
+msgstr "{who} anföll dig och tog {n} regioner. Du förlorade {lost}."
 
 #: internal/game/combat.go:287
-msgid "%s attacked you and was repelled. You lost %s."
-msgstr "%s anföll dig och slogs tillbaka. Du förlorade %s."
+msgid "{who} attacked you and was repelled. You lost {lost}."
+msgstr "{who} anföll dig och slogs tillbaka. Du förlorade {lost}."
 
 #: internal/menu/actions_info.go:102
 msgid "%s days"

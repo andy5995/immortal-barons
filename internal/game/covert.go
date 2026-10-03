@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 )
 
 // CovertOp names one item on the local Covert Operations menu. BRE keys BOTH the
@@ -139,10 +138,10 @@ func (w *World) covertStrength(e *Empire, offense bool) int {
 //
 // The line is one entry of the caught-agent pool, picked here and used on both
 // sides: the target's event, and the returned report the caller reads.
-func (w *World) covertFoiled(a, d *Empire, attempt string) string {
+func (w *World) covertFoiled(a, d *Empire, attempt Msg) Msg {
 	fate := w.pickAgentCaught()
-	d.addEvent(fill(fate.Theirs, "who", fmt.Sprintf("an agent behind %s, in %s's pay", attempt, a.Name)))
-	return fmt.Sprintf("Your agent %s.", fate.Singular)
+	d.addEvent(say(fate.Theirs, "who", say("an agent behind {attempt}, in {who}'s pay", "attempt", attempt, "who", a.Name)))
+	return say(fate.Yours)
 }
 
 // covertStatLoss docks points off a morale or support figure and holds the
@@ -229,23 +228,24 @@ func (w *World) covertCost(a *Empire, op CovertOp, cost int64, capped bool) erro
 
 // SendSpy gathers military intel on d. Needs at least one agent. On failure
 // the agent is caught (lost) and the victim is alerted.
-func (w *World) SendSpy(a, d *Empire) (string, error) {
+func (w *World) SendSpy(a, d *Empire) (Msg, error) {
 	if err := w.covertCost(a, OpSendSpy, CostSendSpy, false); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	if w.covertRoll(a, d, OpSendSpy) {
-		return fmt.Sprintf("Intel on %s — Land %d, Troops %d, Turrets %d, Tanks %d, Offense %d, Defense %d, Gold %d, Agents %d",
-			d.Name, d.Land, d.Troopers, d.Turrets, d.Tanks, d.Offense(), d.Defense(), d.Gold, d.Agents), nil
+		return say("Intel on {who} — Land {land}, Troops {troops}, Turrets {turrets}, Tanks {tanks}, Offense {offense}, Defense {defense}, Gold {gold}, Agents {agents}",
+			"who", d.Name, "land", d.Land, "troops", d.Troopers, "turrets", d.Turrets, "tanks", d.Tanks,
+			"offense", d.Offense(), "defense", d.Defense(), "gold", d.Gold, "agents", d.Agents), nil
 	}
 	a.Agents--
-	return w.covertFoiled(a, d, "a spying attempt"), nil
+	return w.covertFoiled(a, d, say("a spying attempt")), nil
 }
 
 // SupportDissensions agitates d's own troopers into fleeing. Queued; see
 // resolveSupportDissensions for what happens when the agent gets there.
-func (w *World) SupportDissensions(a, d *Empire) (string, error) {
+func (w *World) SupportDissensions(a, d *Empire) (Msg, error) {
 	if err := w.covertCost(a, OpSupportDissensions, CostSupportDissensions, true); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	w.queueCovertOp(a, d, OpSupportDissensions, "")
 	return covertSent(d), nil
@@ -255,24 +255,24 @@ func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 // anonymous; a caught agent gives the attacker away (see covertFoiled). The
 // share that flees is BRE's own two-roll spread (dissensionsPct), which averages
 // a tenth but ranges from a scratch to a fifth.
-func (w *World) resolveSupportDissensions(a, d *Empire) string {
+func (w *World) resolveSupportDissensions(a, d *Empire) Msg {
 	if !w.covertRoll(a, d, OpSupportDissensions) {
-		return w.covertFoiled(a, d, "a sabotage attempt")
+		return w.covertFoiled(a, d, say("a sabotage attempt"))
 	}
 	covertReturned(a)
 	lost := d.Troopers * w.dissensionsPct() / 100
 	d.Troopers -= lost
-	d.addEvent(fmt.Sprintf("Agitators stirred dissent in your army, and %d troopers deserted.", lost))
-	return fmt.Sprintf("Your agents stirred dissent in %s's army, and %d troopers deserted.", d.Name, lost)
+	d.addEvent(say("Agitators stirred dissent in your army, and {n} troopers deserted.", "n", lost))
+	return say("Your agents stirred dissent in {who}'s army, and {n} troopers deserted.", "who", d.Name, "n", lost)
 }
 
 // DemoralizeForces lowers d's military morale on success, weakening combat and
 // risking desertion (see moraleFactor and moraleDesertion). Queued, which is
 // what stops it being a pre-battle move: the agent lands at maintenance, so the
 // attack it softens is the one you make the day after.
-func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
+func (w *World) DemoralizeForces(a, d *Empire) (Msg, error) {
 	if err := w.covertCost(a, OpDemoralizeForces, CostDemoralizeForces, true); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	w.queueCovertOp(a, d, OpDemoralizeForces, "")
 	return covertSent(d), nil
@@ -282,14 +282,14 @@ func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
 // docks a few POINTS and holds the stat at CovertStatFloor; the x6/7 scaling IB
 // used before is the inter-BBS packet resolver's figure, read against the wrong
 // op enumeration.
-func (w *World) resolveDemoralizeForces(a, d *Empire) string {
+func (w *World) resolveDemoralizeForces(a, d *Empire) Msg {
 	if !w.covertRoll(a, d, OpDemoralizeForces) {
-		return w.covertFoiled(a, d, "an attempt to demoralize your forces")
+		return w.covertFoiled(a, d, say("an attempt to demoralize your forces"))
 	}
 	covertReturned(a)
 	d.Morale = covertStatLoss(d.Morale, DemoralizeLossBase+w.rng.Intn(DemoralizeLossSpread))
-	d.addEvent("Agents found your forces' weaknesses, and their self-esteem dropped.")
-	return fmt.Sprintf("Your agents found weaknesses and caused %s's self-esteem to drop.", d.Name)
+	d.addEvent(say("Agents found your forces' weaknesses, and their self-esteem dropped."))
+	return say("Your agents found weaknesses and caused {who}'s self-esteem to drop.", "who", d.Name)
 }
 
 // SetUp tricks d and one of its treaty partners into believing the other
@@ -298,9 +298,9 @@ func (w *World) resolveDemoralizeForces(a, d *Empire) string {
 // chosen here and travels in the record, as BRE's menu picks it before it hands
 // the record over (the digit-'3' branch at BRE.OVR 0x0175C2 fills that byte
 // beside the target's).
-func (w *World) SetUp(a, d *Empire) (string, error) {
+func (w *World) SetUp(a, d *Empire) (Msg, error) {
 	if err := w.covertCost(a, OpSetUp, CostSetUp, true); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	partner := ""
 	if p := w.setUpPartner(a, d); p != nil {
@@ -314,13 +314,13 @@ func (w *World) SetUp(a, d *Empire) (string, error) {
 // courts, so it rolls once against each; either miss loses it. A partner that
 // died between the queue and here leaves nothing to unravel, and the operation
 // is rolled against the target alone for the agent's sake.
-func (w *World) resolveSetUp(a, d, partner *Empire) string {
+func (w *World) resolveSetUp(a, d, partner *Empire) Msg {
 	if partner == nil || !partner.Alive {
 		if !w.covertRoll(a, d, OpSetUp) {
-			return w.covertFoiled(a, d, "an attempt to set you up")
+			return w.covertFoiled(a, d, say("an attempt to set you up"))
 		}
 		covertReturned(a)
-		return fmt.Sprintf("%s holds no treaty for you to unravel.", d.Name)
+		return say("{who} holds no treaty for you to unravel.", "who", d.Name)
 	}
 	if w.covertRoll(a, d, OpSetUp) && w.covertRoll(a, partner, OpSetUp) {
 		covertReturned(a)
@@ -328,12 +328,13 @@ func (w *World) resolveSetUp(a, d, partner *Empire) string {
 		for _, tt := range voided {
 			w.BreakTreaty(d, partner, tt)
 		}
-		const forged = "Forged papers convinced you and %s that war had been declared; every treaty between you is void."
-		d.addEvent(fmt.Sprintf(forged, partner.Name))
-		partner.addEvent(fmt.Sprintf(forged, d.Name))
-		return fmt.Sprintf("Your forged declaration of war fooled %s and %s into tearing up %d treaties.", d.Name, partner.Name, len(voided))
+		forged := msgid("Forged papers convinced you and {who} that war had been declared; every treaty between you is void.")
+		d.addEvent(say(forged, "who", partner.Name))
+		partner.addEvent(say(forged, "who", d.Name))
+		return say("Your forged declaration of war fooled {a} and {b} into tearing up {n} treaties.",
+			"a", d.Name, "b", partner.Name, "n", len(voided))
 	}
-	return w.covertFoiled(a, d, "an attempt to set you up")
+	return w.covertFoiled(a, d, say("an attempt to set you up"))
 }
 
 // setUpPartner picks the realm to turn against d: the one whose pact with d
@@ -394,9 +395,9 @@ var ErrNoBribedAgents = errors.New("You hold no bribed agents to work through.")
 // OUTCOME instead — charge the fee, shield nobody — would strand the verified
 // half of the routine, since nothing else writes ExposedFrom. The reasoning is
 // laid out in docs/mechanics-reference.md; IB shields the realm you picked.
-func (w *World) ExposeEnemyOps(a, d *Empire) (string, error) {
+func (w *World) ExposeEnemyOps(a, d *Empire) (Msg, error) {
 	if !a.hasBribed(d.Name) {
-		return "", ErrNoBribedAgent
+		return Msg{}, ErrNoBribedAgent
 	}
 	// No agent is spent and no turn slot is taken; the fee is the whole cost.
 	// BRE checks it too, in the menu rather than in this routine: the fee for
@@ -404,14 +405,14 @@ func (w *World) ExposeEnemyOps(a, d *Empire) (string, error) {
 	// ("Sorry!  You cannot afford that!") and digit 9 is dispatched after that
 	// gate, so gold never goes negative there either.
 	if a.Gold < CostExposeEnemyOps {
-		return "", ErrCantAfford
+		return Msg{}, ErrCantAfford
 	}
 	a.Gold -= CostExposeEnemyOps
 	if a.ExposedFrom == nil {
 		a.ExposedFrom = make(map[string]int, 1)
 	}
 	a.ExposedFrom[d.Name] = w.GameDay + ExposeOpsShieldDays
-	return fmt.Sprintf("Your agent inside %s will report on their operations against you for the next day.", d.Name), nil
+	return say("Your agent inside {who} will report on their operations against you for the next day.", "who", d.Name), nil
 }
 
 // hasBribed reports whether e holds a bribed agent inside the named realm.
@@ -440,27 +441,27 @@ func (w *World) BribedRealms(e *Empire) []*Empire {
 // report_spy_result serves both info ops and subtracts the slot-'1' Send Spy fee
 // whichever one called it (BRE.OVR 0x016E73). IB charges the advertised price on
 // purpose; do not "correct" this to the Send Spy fee.
-func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
+func (w *World) SpyOnRelations(a, d *Empire) (Msg, error) {
 	if err := w.covertCost(a, OpSpyOnRelations, CostSpyOnRelations, false); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	if w.covertRoll(a, d, OpSpyOnRelations) {
-		var lines []string
+		rows := []Msg{say("Treaties of {who}:", "who", d.Name)}
 		for _, other := range w.Empires {
 			if other == d || !other.Alive {
 				continue
 			}
 			for _, tt := range w.TreatiesBetween(d, other) {
-				lines = append(lines, fmt.Sprintf("  %s with %s: %s", d.Name, other.Name, tt))
+				rows = append(rows, say("  {who} with {other}: {treaty}", "who", d.Name, "other", other.Name, "treaty", say(tt)))
 			}
 		}
-		if len(lines) == 0 {
-			return fmt.Sprintf("%s holds no treaties.", d.Name), nil
+		if len(rows) == 1 {
+			return say("{who} holds no treaties.", "who", d.Name), nil
 		}
-		return fmt.Sprintf("Treaties of %s:\n%s", d.Name, strings.Join(lines, "\n")), nil
+		return Msg{R: rows}, nil
 	}
 	a.Agents--
-	return w.covertFoiled(a, d, "an attempt to spy on your relations"), nil
+	return w.covertFoiled(a, d, say("an attempt to spy on your relations")), nil
 }
 
 // Bribery buys an agent inside d over to your side. The bought agent is an
@@ -472,15 +473,15 @@ func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
 // ATTACKER's record indexed by the target, and doubles the attacker's numerator.
 // IB read the same flag backwards until this was checked, as a shield that made
 // the bribed realm's ops against YOU fail — which is not a thing BRE does.
-func (w *World) Bribery(a, d *Empire) (string, error) {
+func (w *World) Bribery(a, d *Empire) (Msg, error) {
 	// BRE refuses the op at the menu when a bribed agent is already in place,
 	// before it charges the fee or spends the try (BRE.OVR 0x01790A), so a
 	// second attempt costs nothing.
 	if a.hasBribed(d.Name) {
-		return "", fmt.Errorf("You already hold a bribed agent inside %s.", d.Name)
+		return Msg{}, fmt.Errorf("You already hold a bribed agent inside %s.", d.Name)
 	}
 	if err := w.covertCost(a, OpBribery, CostBribery, true); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	w.queueCovertOp(a, d, OpBribery, "")
 	return covertSent(d), nil
@@ -489,23 +490,23 @@ func (w *World) Bribery(a, d *Empire) (string, error) {
 // resolveBribery is the queued operation arriving. Because the bribe only lands
 // at maintenance, Expose Enemy Ops — which needs the agent already in place —
 // cannot be run against that realm until the day after the bribe was paid for.
-func (w *World) resolveBribery(a, d *Empire) string {
+func (w *World) resolveBribery(a, d *Empire) Msg {
 	if !w.covertRoll(a, d, OpBribery) {
-		return w.covertFoiled(a, d, "a bribery attempt")
+		return w.covertFoiled(a, d, say("a bribery attempt"))
 	}
 	covertReturned(a)
 	if !a.hasBribed(d.Name) {
 		a.Bribed = append(a.Bribed, d.Name)
 	}
-	d.addEvent("One of your agents took a rival's bribe.")
-	return fmt.Sprintf("You bribed one of %s's agents, so your operations against them now land more often.", d.Name)
+	d.addEvent(say("One of your agents took a rival's bribe."))
+	return say("You bribed one of {who}'s agents, so your operations against them now land more often.", "who", d.Name)
 }
 
 // StirRevolts spreads propaganda that lowers d's popular support (rioting and
 // revolt), weakening its economy and its troopers. Queued.
-func (w *World) StirRevolts(a, d *Empire) (string, error) {
+func (w *World) StirRevolts(a, d *Empire) (Msg, error) {
 	if err := w.covertCost(a, OpStirRevolts, CostStirRevolts, true); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	w.queueCovertOp(a, d, OpStirRevolts, "")
 	return covertSent(d), nil
@@ -513,20 +514,24 @@ func (w *World) StirRevolts(a, d *Empire) (string, error) {
 
 // resolveStirRevolts is the queued operation arriving. Support is docked in
 // points and floored, as Demoralize Forces is.
-func (w *World) resolveStirRevolts(a, d *Empire) string {
+func (w *World) resolveStirRevolts(a, d *Empire) Msg {
 	if !w.covertRoll(a, d, OpStirRevolts) {
-		return w.covertFoiled(a, d, "an agitation attempt")
+		return w.covertFoiled(a, d, say("an agitation attempt"))
 	}
 	covertReturned(a)
 	d.Support = covertStatLoss(d.Support, StirRevoltsLossBase+w.rng.Intn(StirRevoltsLossSpread))
-	d.addEvent("Agitators stirred revolts in your realm, and your popular support fell.")
-	return fmt.Sprintf("Your agitators stirred revolts in %s, and their popular support fell.", d.Name)
+	d.addEvent(say("Agitators stirred revolts in your realm, and your popular support fell."))
+	return say("Your agitators stirred revolts in {who}, and their popular support fell.", "who", d.Name)
 }
 
 // bombTarget is one holding a Bomb Enemy Targets strike can find, with the
 // percentage band that holding loses.
+//
+// theirs and yours are the two sides' lines when it is hit, {n} the count lost
+// and {who} the target.
 type bombTarget struct {
-	name     string
+	theirs   string
+	yours    string
 	base     int
 	spread   int
 	get      func(*Empire) int
@@ -536,8 +541,8 @@ type bombTarget struct {
 
 // bombGood is a target that is one of the canonical goods (#134), so its name
 // and its accessor come from the table rather than being spelled out again.
-func bombGood(g *Good, base, spread int, roundsUp bool) bombTarget {
-	return bombTarget{g.Plural, base, spread,
+func bombGood(g *Good, theirs, yours string, base, spread int, roundsUp bool) bombTarget {
+	return bombTarget{theirs, yours, base, spread,
 		func(e *Empire) int { return *g.Count(e) },
 		func(e *Empire, v int) { *g.Count(e) = v }, roundsUp}
 }
@@ -546,13 +551,25 @@ func bombGood(g *Good, base, spread int, roundsUp bool) bombTarget {
 // straight into it. The player picks nothing.
 func bombTargets() []bombTarget {
 	return []bombTarget{
-		{"People", BombTargetPeoplePctBase, BombTargetPeoplePctSpread,
+		{msgid("Terrorists bombed your people and destroyed {n} of them."),
+			msgid("Your agents bombed {who}'s people, destroying {n} of them."),
+			BombTargetPeoplePctBase, BombTargetPeoplePctSpread,
 			func(e *Empire) int { return e.People }, func(e *Empire, v int) { e.People = v }, false},
-		bombGood(Trooper, BombTargetTrooperPctBase, BombTargetTrooperPctSpread, false),
-		bombGood(Agent, BombTargetAgentPctBase, BombTargetAgentPctSpread, false),
-		bombGood(Tank, BombTargetTankPctBase, BombTargetTankPctSpread, false),
-		bombGood(Jet, BombTargetJetPctBase, BombTargetJetPctSpread, false),
-		bombGood(Food, BombTargetFoodPctBase, BombTargetFoodPctSpread, true),
+		bombGood(Trooper, msgid("Terrorists bombed your troopers and destroyed {n} of them."),
+			msgid("Your agents bombed {who}'s troopers, destroying {n} of them."),
+			BombTargetTrooperPctBase, BombTargetTrooperPctSpread, false),
+		bombGood(Agent, msgid("Terrorists bombed your agents and destroyed {n} of them."),
+			msgid("Your agents bombed {who}'s agents, destroying {n} of them."),
+			BombTargetAgentPctBase, BombTargetAgentPctSpread, false),
+		bombGood(Tank, msgid("Terrorists bombed your tanks and destroyed {n} of them."),
+			msgid("Your agents bombed {who}'s tanks, destroying {n} of them."),
+			BombTargetTankPctBase, BombTargetTankPctSpread, false),
+		bombGood(Jet, msgid("Terrorists bombed your jets and destroyed {n} of them."),
+			msgid("Your agents bombed {who}'s jets, destroying {n} of them."),
+			BombTargetJetPctBase, BombTargetJetPctSpread, false),
+		bombGood(Food, msgid("Terrorists bombed your food and destroyed {n} of them."),
+			msgid("Your agents bombed {who}'s food, destroying {n} of them."),
+			BombTargetFoodPctBase, BombTargetFoodPctSpread, true),
 	}
 }
 
@@ -560,18 +577,18 @@ func bombTargets() []bombTarget {
 // picks ONE of six holdings at random and destroys a slice of it. Neither side
 // chooses the target, which is what the original's "randomly bomb targets"
 // means. Queued.
-func (w *World) BombEnemyTargets(a, d *Empire) (string, error) {
+func (w *World) BombEnemyTargets(a, d *Empire) (Msg, error) {
 	if err := w.covertCost(a, OpBombEnemyTargets, CostBombEnemyTargets, true); err != nil {
-		return "", err
+		return Msg{}, err
 	}
 	w.queueCovertOp(a, d, OpBombEnemyTargets, "")
 	return covertSent(d), nil
 }
 
 // resolveBombEnemyTargets is the queued operation arriving.
-func (w *World) resolveBombEnemyTargets(a, d *Empire) string {
+func (w *World) resolveBombEnemyTargets(a, d *Empire) Msg {
 	if !w.covertRoll(a, d, OpBombEnemyTargets) {
-		return w.covertFoiled(a, d, "a terror bombing")
+		return w.covertFoiled(a, d, say("a terror bombing"))
 	}
 	covertReturned(a)
 	t := bombTargets()[w.rng.Intn(BombTargetPickCount)]
@@ -584,10 +601,9 @@ func (w *World) resolveBombEnemyTargets(a, d *Empire) string {
 		lost++
 	}
 	if lost <= 0 {
-		return fmt.Sprintf("Your agents found nothing worth bombing in %s.", d.Name)
+		return say("Your agents found nothing worth bombing in {who}.", "who", d.Name)
 	}
 	t.set(d, held-lost)
-	thing := strings.ToLower(t.name)
-	d.addEvent(fmt.Sprintf("Terrorists bombed your %s and destroyed %d of them.", thing, lost))
-	return fmt.Sprintf("Your agents bombed %s's %s, destroying %d of them.", d.Name, thing, lost)
+	d.addEvent(say(t.theirs, "n", lost))
+	return say(t.yours, "who", d.Name, "n", lost)
 }

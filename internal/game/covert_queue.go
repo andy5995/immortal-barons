@@ -1,7 +1,5 @@
 package game
 
-import "fmt"
-
 // QueuedCovertOp is one covert agent in the field: an operation the menu has
 // accepted and paid for, waiting on the next daily maintenance to resolve.
 //
@@ -48,8 +46,8 @@ func (w *World) queueCovertOp(a, d *Empire, op CovertOp, partner string) {
 // agent has gone, and the outcome arrives on the recap after maintenance. The
 // original's own wording, which names no target — the agent leaving is the whole
 // of what it reports.
-func covertSent(d *Empire) string {
-	return "Covert Agent Sent out"
+func covertSent(d *Empire) Msg {
+	return say("Covert Agent Sent out")
 }
 
 // resolveCovertQueue drains every agent in the field, as BRE's daily maintenance
@@ -73,7 +71,8 @@ func (w *World) resolveCovertQueue() {
 		}
 		d := w.FindByName(rec.Target)
 		if d == nil || !d.Alive {
-			a.addEvent(fmt.Sprintf("Your agent reached %s to find the realm gone; the %s was abandoned.", rec.Target, rec.Op))
+			a.addEvent(say("Your agent reached {who} to find the realm gone; the {op} was abandoned.",
+				"who", rec.Target, "op", say(string(rec.Op))))
 			continue
 		}
 		a.addEvent(w.resolveCovertOp(a, d, rec))
@@ -83,7 +82,7 @@ func (w *World) resolveCovertQueue() {
 // resolveCovertOp runs one queued operation and returns the attacker's report.
 // The dispatch is on the operation, as BRE's resolver dispatches on the menu
 // digit it stored (BRE.OVR 0x04BFD4 onward).
-func (w *World) resolveCovertOp(a, d *Empire, rec QueuedCovertOp) string {
+func (w *World) resolveCovertOp(a, d *Empire, rec QueuedCovertOp) Msg {
 	switch rec.Op {
 	case OpStirRevolts:
 		return w.resolveStirRevolts(a, d)
@@ -101,7 +100,7 @@ func (w *World) resolveCovertOp(a, d *Empire, rec QueuedCovertOp) string {
 	// An op this build does not know — a queue record written by a version that
 	// spelled it differently. The agent is still gone, so the fee is still spent,
 	// and a blank line on the recap would leave that unexplained.
-	return fmt.Sprintf("Your agent's orders against %s could not be carried out.", d.Name)
+	return say("Your agent's orders against {who} could not be carried out.", "who", d.Name)
 }
 
 // covertReturned hands the attacker its agent back, which is what every

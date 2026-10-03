@@ -85,7 +85,7 @@ func (w *World) PayLotteryPrize(e *Empire, n int) int64 {
 	}
 	e.Bank += banked
 	if over := prize - banked; over > 0 {
-		w.creditGold(e, over, "a lottery win")
+		w.creditGold(e, over, say("a lottery win"))
 	}
 	return prize
 }

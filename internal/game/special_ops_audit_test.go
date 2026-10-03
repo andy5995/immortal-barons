@@ -53,7 +53,7 @@ func TestEverySpecialOpMakesTheRoundTrip(t *testing.T) {
 				t.Fatalf("the receiving board answered nothing: %+v", answer.Results)
 			}
 			res := answer.Results[0]
-			if isMissileOp(op) && res.Report == "" {
+			if isMissileOp(op) && res.Report == nil {
 				t.Fatal("the answer carries no report, so the sender learns nothing")
 			}
 

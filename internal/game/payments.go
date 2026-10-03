@@ -240,7 +240,7 @@ func (w *World) QueenRefund(e *Empire) int64 {
 		return 0
 	}
 	w.RefundPool -= pay
-	w.creditGold(e, pay, "the Queen's refund")
+	w.creditGold(e, pay, say("the Queen's refund"))
 	return pay
 }
 

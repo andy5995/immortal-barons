@@ -11,8 +11,9 @@ import "strings"
 // pick (it is written from the returned outcome alone), so it keeps one plain
 // line per outcome.
 //
-// The placeholders are filled by fill: {missile}, {target}, {board}, {from},
-// {who}.
+// The placeholders are named: {missile}, {target}, {board}, {from}, {who}. The
+// lines a realm reads go through say, so they translate at display (#297); the
+// bombing pool is planet news and is still filled to English text by fill.
 
 // missileMisfire is one way an interplanetary missile fails on its own.
 type missileMisfire struct {
@@ -21,14 +22,14 @@ type missileMisfire struct {
 }
 
 var missileMisfirePool = []missileMisfire{
-	{"Your {missile} lost its guidance and drifted into a black hole on the way to {target} of {board}.",
-		"A {missile} from {from} lost its guidance and drifted into a black hole before it reached you."},
-	{"Your {missile} was hijacked by space pirates, rewired, and redirected to a player in League 8472.",
-		"Space pirates hijacked a {missile} from {from} and sent it off to League 8472. Lucky you."},
-	{"Your {missile} ran into a stray asteroid on the way to {target} of {board}.",
-		"A {missile} from {from} ran into a stray asteroid on its way to you."},
-	{"Your {missile}'s warhead failed to arm, and it sailed harmlessly past {target} of {board}.",
-		"A {missile} from {from} sailed harmlessly past; its warhead never armed."},
+	{msgid("Your {missile} lost its guidance and drifted into a black hole on the way to {target} of {board}."),
+		msgid("A {missile} from {from} lost its guidance and drifted into a black hole before it reached you.")},
+	{msgid("Your {missile} was hijacked by space pirates, rewired, and redirected to a player in League 8472."),
+		msgid("Space pirates hijacked a {missile} from {from} and sent it off to League 8472. Lucky you.")},
+	{msgid("Your {missile} ran into a stray asteroid on the way to {target} of {board}."),
+		msgid("A {missile} from {from} ran into a stray asteroid on its way to you.")},
+	{msgid("Your {missile}'s warhead failed to arm, and it sailed harmlessly past {target} of {board}."),
+		msgid("A {missile} from {from} sailed harmlessly past; its warhead never armed.")},
 }
 
 // bomberDrivenOffPool is the target planet's news line for a bombing run that
@@ -40,24 +41,36 @@ var bomberDrivenOffPool = []string{
 }
 
 // agentCaught is one way an agent is caught, shared by interplanetary Terrorist
-// Ops and the local covert ops.
+// Ops and the local covert ops. Every line is a whole sentence, so each
+// translates on its own (#297); the sender's report places it after the
+// sentence saying what the rest of the batch did.
 type agentCaught struct {
-	Singular string // "Your agent <Singular>." / "; one of them <Singular>."
-	Plural   string // "; 3 of them <Plural>."
+	Yours string // a local covert op's report
+	// Caught follows a Terrorist Ops report, {n} the count caught; Other
+	// follows a spy's, whose batch stopped at the first agent in.
+	Caught, Other forms
 	// Theirs is the target's event. {who} is "3 agents sent by X of B" for
 	// Terrorist Ops, "an agent behind <op>, in X's pay" for a local covert op.
 	Theirs string
 }
 
 var agentCaughtPool = []agentCaught{
-	{"didn't make it home", "didn't make it home",
-		"Your security caught {who}."},
-	{"was turned in by the locals", "were turned in by the locals",
-		"Your well-paid and loyal peasants turned in {who}."},
-	{"was caught and quietly disappeared", "were caught and quietly disappeared",
-		"Your security quietly made {who} disappear."},
-	{"walked into a bar and was never heard from again", "walked into a bar and were never heard from again",
-		"Your security lured {who} into a bar with some attractive patrons."},
+	{msgid("Your agent didn't make it home."),
+		msgidN("One of them didn't make it home.", "{n} of them didn't make it home."),
+		msgidN("One of your other agents didn't make it home.", "{n} of your other agents didn't make it home."),
+		msgid("Your security caught {who}.")},
+	{msgid("Your agent was turned in by the locals."),
+		msgidN("One of them was turned in by the locals.", "{n} of them were turned in by the locals."),
+		msgidN("One of your other agents was turned in by the locals.", "{n} of your other agents were turned in by the locals."),
+		msgid("Your well-paid and loyal peasants turned in {who}.")},
+	{msgid("Your agent was caught and quietly disappeared."),
+		msgidN("One of them was caught and quietly disappeared.", "{n} of them were caught and quietly disappeared."),
+		msgidN("One of your other agents was caught and quietly disappeared.", "{n} of your other agents were caught and quietly disappeared."),
+		msgid("Your security quietly made {who} disappear.")},
+	{msgid("Your agent walked into a bar and was never heard from again."),
+		msgidN("One of them walked into a bar and was never heard from again.", "{n} of them walked into a bar and were never heard from again."),
+		msgidN("One of your other agents walked into a bar and was never heard from again.", "{n} of your other agents walked into a bar and were never heard from again."),
+		msgid("Your security lured {who} into a bar with some attractive patrons.")},
 }
 
 func (w *World) pickMissileMisfire() missileMisfire {

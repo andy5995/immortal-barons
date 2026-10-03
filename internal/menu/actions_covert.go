@@ -37,7 +37,7 @@ type covertRow struct {
 	// digits 1 and 6, which the original jumps its protection test over, so a
 	// sheltered realm can still look before it can touch.
 	Info   bool
-	Strike func(w *ctx, a, d *game.Empire) (string, error)
+	Strike func(w *ctx, a, d *game.Empire) (game.Msg, error)
 }
 
 // covertRows are the eight operations, in BRE's menu order. Expose Enemy Ops is
@@ -45,21 +45,21 @@ type covertRow struct {
 // own list of bribed realms, and is wired by hand in tree.go.
 var covertRows = []covertRow{
 	{Op: game.OpSendSpy, Key: '1', Cost: game.CostSendSpy, Info: true,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SendSpy(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.SendSpy(a, d) }},
 	{Op: game.OpStirRevolts, Key: '2', Cost: game.CostStirRevolts,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.StirRevolts(a, d) }},
 	{Op: game.OpSetUp, Key: '3', Cost: game.CostSetUp,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SetUp(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.SetUp(a, d) }},
 	{Op: game.OpSupportDissensions, Key: '4', Cost: game.CostSupportDissensions,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.SupportDissensions(a, d) }},
 	{Op: game.OpDemoralizeForces, Key: '5', Cost: game.CostDemoralizeForces,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.DemoralizeForces(a, d) }},
 	{Op: game.OpSpyOnRelations, Key: '6', Cost: game.CostSpyOnRelations, Info: true,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.SpyOnRelations(a, d) }},
 	{Op: game.OpBombEnemyTargets, Key: '7', Cost: game.CostBombEnemyTargets,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.BombEnemyTargets(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.BombEnemyTargets(a, d) }},
 	{Op: game.OpBribery, Key: '8', Cost: game.CostBribery,
-		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.Bribery(a, d) }},
+		Strike: func(w *ctx, a, d *game.Empire) (game.Msg, error) { return w.Bribery(a, d) }},
 }
 
 // action is the menu Action for this operation: the caller's own New Realm
@@ -77,7 +77,10 @@ func (row covertRow) action() Action {
 	return func(s session.Session, w *ctx) Result {
 		if row.Info {
 			return pickAndStrike(s, w, string(row.Op), nil, false, false,
-				func(a, d *game.Empire) (string, error) { return row.Strike(w, a, d) })
+				func(a, d *game.Empire) (string, error) {
+					m, err := row.Strike(w, a, d)
+					return m.In(sessionLang(s)), err
+				})
 		}
 		if blockedByCovertProtection(s, w) {
 			return Stay
@@ -149,7 +152,7 @@ func sendAgents(s session.Session, w *ctx, row covertRow) Result {
 		return Stay
 	}
 
-	var report string
+	var report game.Msg
 	var sent int
 	var err error
 	for ; sent < n; sent++ {
@@ -174,10 +177,11 @@ func sendAgents(s session.Session, w *ctx, row covertRow) Result {
 		fail(s, err)
 		return Stay
 	}
+	text := report.In(sessionLang(s))
 	if sent > 1 {
-		report = fmt.Sprintf(tr(s, "%d agents sent out."), sent)
+		text = fmt.Sprintf(tr(s, "%d agents sent out."), sent)
 	}
-	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(text)))
 	if err != nil {
 		fail(s, err)
 	}
@@ -215,7 +219,7 @@ func exposeEnemyOps(s session.Session, w *ctx) Result {
 	if !chosen {
 		return Stay
 	}
-	var report string
+	var report game.Msg
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		d := w.FindByName(name)
 		if d == nil || !d.Alive {
@@ -229,7 +233,7 @@ func exposeEnemyOps(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report.In(sessionLang(s)))))
 	pause(s)
 	return Stay
 }

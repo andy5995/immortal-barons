@@ -236,8 +236,12 @@ func TestSaveIsAtomic(t *testing.T) {
 
 // fillValue sets every exported field of a struct (recursively) to a non-zero
 // value, so the round-trip test below can detect a field silently dropped from
-// serialization — it would come back as its zero value.
-func fillValue(v reflect.Value) {
+// serialization — it would come back as its zero value. A type that contains
+// itself (game.Msg) is filled one level deep, or the walk would never end.
+func fillValue(v reflect.Value) { fillOnPath(v, map[reflect.Type]bool{}) }
+
+func fillOnPath(v reflect.Value, path map[reflect.Type]bool) {
+	fillValue := func(v reflect.Value) { fillOnPath(v, path) }
 	// Raw JSON has to stay JSON: a byte slice of 7s is not, and the save fails.
 	if v.Type() == reflect.TypeOf(json.RawMessage(nil)) {
 		v.SetBytes([]byte(`{"x":7}`))
@@ -282,6 +286,11 @@ func fillValue(v reflect.Value) {
 			fillValue(v.Index(i))
 		}
 	case reflect.Struct:
+		if path[v.Type()] {
+			return
+		}
+		path[v.Type()] = true
+		defer delete(path, v.Type())
 		for i := 0; i < v.NumField(); i++ {
 			if v.Type().Field(i).IsExported() {
 				fillValue(v.Field(i))

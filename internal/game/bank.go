@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // ErrInvestDateFull refuses an investment whose return would push the returns
@@ -118,7 +116,7 @@ func (w *World) collectInvestShare(e *Empire) int64 {
 	}
 	e.InvestDue -= share
 	before := e.Gold
-	w.creditGold(e, share, "a matured investment")
+	w.creditGold(e, share, say("a matured investment"))
 	return e.Gold - before
 }
 
@@ -187,7 +185,7 @@ func (w *World) adjustInvestRate() {
 // baron watched the number stop growing with nothing on screen to explain it.
 // Withdraw is the deliberate exception — it draws only what fits and leaves the
 // remainder safely in the bank, so nothing is ever lost there to report.
-func (w *World) creditGold(e *Empire, n int64, source string) {
+func (w *World) creditGold(e *Empire, n int64, source Msg) {
 	if n <= 0 {
 		return
 	}
@@ -197,8 +195,8 @@ func (w *World) creditGold(e *Empire, n int64, source string) {
 		return
 	}
 	e.Gold = w.MoneyCap()
-	e.addEvent(fmt.Sprintf("You cannot hold more than %s gold in hand — %s gold from %s was lost.",
-		numfmt.Comma(w.MoneyCap()), numfmt.Comma(over), source))
+	e.addEvent(say("You cannot hold more than {cap} gold in hand — {over} gold from {source} was lost.",
+		"cap", comma(w.MoneyCap()), "over", comma(over), "source", source))
 }
 
 // CollectBankPayments settles the bank's per-turn business at the start of a

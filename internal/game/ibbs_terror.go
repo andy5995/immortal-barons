@@ -1,11 +1,7 @@
 package game
 
 import (
-	"fmt"
 	"math"
-	"strings"
-
-	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // ibbs_terror.go — terrorist operations sent against another planet, and the
@@ -32,25 +28,25 @@ const (
 func (t TerrorOpType) String() string {
 	switch t {
 	case TerrorOpSpy:
-		return "Send Spy"
+		return msgid("Send Spy")
 	case TerrorOpBombIntel:
-		return "Bomb Intelligence"
+		return msgid("Bomb Intelligence")
 	case TerrorOpDemoralize:
-		return "Demoralize"
+		return msgid("Demoralize")
 	case TerrorOpDissensions:
-		return "Cause Dissensions"
+		return msgid("Cause Dissensions")
 	case TerrorOpBombAirBases:
-		return "Bomb AirBases"
+		return msgid("Bomb AirBases")
 	case TerrorOpEmigrations:
-		return "Stir Emigrations"
+		return msgid("Stir Emigrations")
 	case TerrorOpPropaganda:
-		return "Spread Propaganda"
+		return msgid("Spread Propaganda")
 	case TerrorOpBombFood:
-		return "Bomb Food Stores"
+		return msgid("Bomb Food Stores")
 	case TerrorOpSabotageHQ:
-		return "Sabotage HQ"
+		return msgid("Sabotage HQ")
 	default:
-		return "Terrorist Ops"
+		return msgid("Terrorist Ops")
 	}
 }
 
@@ -189,7 +185,7 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 			if caught > 0 {
 				fate = w.pickAgentCaught()
 			}
-			res.Report = terrorOpReport(t.Op, target.Name, w.Config.BoardID, t.Agents, hit, caught, fate)
+			res.Report = optMsg(terrorOpReport(t.Op, target.Name, w.Config.BoardID, t.Agents, hit, caught, fate))
 			res.Won = true
 			res.Outcome = OutcomeWon
 			return res
@@ -211,21 +207,18 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 		fate = w.pickAgentCaught()
 	}
 	agentsCaught(target, t, caught, fate)
-	res.Report = terrorOpReport(t.Op, target.Name, w.Config.BoardID, t.Agents, hit, caught, fate)
+	res.Report = optMsg(terrorOpReport(t.Op, target.Name, w.Config.BoardID, t.Agents, hit, caught, fate))
 	if hit == 0 {
 		res.Outcome = OutcomeRepelled
 		// Only an agent that got past security struck at anything; a batch that
 		// was caught to the last agent is told by the line above alone.
 		if caught < t.Agents {
-			target.addEvent(fmt.Sprintf("Terrorists went after your %s and got nowhere.", terrorOpTargetName(t.Op)))
+			target.addEvent(say(terrorTextFor(t.Op).nowhere))
 		}
 		return res
 	}
-	if hit == 1 {
-		target.addEvent(fmt.Sprintf("Terrorists %s.", terrorOpDeed(t.Op)))
-	} else {
-		target.addEvent(fmt.Sprintf("Terrorists %s %d times.", terrorOpDeed(t.Op), hit))
-	}
+	text := terrorTextFor(t.Op)
+	target.addEvent(sayIn(text.deed, "n", "n", hit))
 	res.Won = true
 	res.Outcome = OutcomeWon
 	return res
@@ -250,11 +243,12 @@ func agentsCaught(target *Empire, t RemoteTerror, caught int, fate agentCaught) 
 	if caught <= 0 {
 		return
 	}
-	from := t.FromBoard
+	who := sayN("{n} agent sent by {board}", "{n} agents sent by {board}", "n", "n", caught, "board", t.FromBoard)
 	if t.FromEmpire != "" {
-		from = fmt.Sprintf("%s of %s", t.FromEmpire, t.FromBoard)
+		who = sayN("{n} agent sent by {who} of {board}", "{n} agents sent by {who} of {board}", "n",
+			"n", caught, "who", t.FromEmpire, "board", t.FromBoard)
 	}
-	target.addEvent(fill(fate.Theirs, "who", agentCount(caught)+" sent by "+from))
+	target.addEvent(say(fate.Theirs, "who", who))
 }
 
 // terrorAgentLands is whether one committed agent gets through, weighing the
@@ -307,10 +301,10 @@ func (w *World) resolveLegacyTerror(t RemoteTerror, target *Empire, res AttackRe
 		destroyed += loss
 	}
 	if destroyed == 0 {
-		target.addEvent("Terrorists struck but destroyed nothing.")
+		target.addEvent(say("Terrorists struck but destroyed nothing."))
 		return res
 	}
-	target.addEvent(fmt.Sprintf("Terrorists destroyed %s of your forces!", numfmt.Comma(int64(destroyed))))
+	target.addEvent(say("Terrorists destroyed {n} of your forces!", "n", comma(destroyed)))
 	res.LandTaken = destroyed
 	res.Won = true
 	return res
@@ -367,152 +361,175 @@ func terrorOpField(op TerrorOpType, e *Empire) *int {
 	return new(int) // unreachable for anything in TerrorOpLosses
 }
 
-// terrorOpTargetName is what an operation aims at, for the line the target
-// reads when agents got through and found nothing there to damage.
-func terrorOpTargetName(op TerrorOpType) string {
-	switch op {
-	case TerrorOpSpy:
-		return "secrets"
-	case TerrorOpBombIntel:
-		return "intelligence agencies"
-	case TerrorOpDemoralize:
-		return "forces"
-	case TerrorOpDissensions:
-		return "ranks"
-	case TerrorOpBombAirBases:
-		return "air bases"
-	case TerrorOpEmigrations:
-		return "people"
-	case TerrorOpPropaganda:
-		return "streets"
-	case TerrorOpBombFood:
-		return "food stores"
-	case TerrorOpSabotageHQ:
-		return "headquarters"
-	}
-	return "realm"
+// terrorText is every sentence one operation is reported with, each whole so
+// it translates on its own (#297). BRE reports a batch the same way on both
+// sides — `ipreport.dat` holds a SINGLE_ and a MULTI_ template for each of the
+// eight damaging operations, the multi form counting the agents that got
+// through ("... %N times!") rather than repeating the line, and the single
+// form used when exactly one did (resolve_received_covert_operation and
+// process_terrorist_report both branch on that count being 1). The words are
+// IB's own.
+type terrorText struct {
+	// The target's lines: the agents that got through ({n}), or some got past
+	// security and found nothing to damage.
+	deed    forms
+	nowhere string
+	// The sender's: a lone agent's strike, a batch's ({n} the agents that got
+	// through), and a lone agent or a batch that got through to nothing left
+	// to damage. {target} and {board} name the realm hit.
+	lone             string
+	batch            forms
+	emptyLone, empty string
 }
 
-// terrorOpDeed is what one operation does, as the realm it landed on reads
-// it. BRE reports a batch the same way on both sides — `ipreport.dat` holds a
-// SINGLE_ and a MULTI_ template for each of the eight damaging operations, the
-// multi form counting the agents that got through ("... %N times!") rather
-// than repeating the line, and the single form used when exactly one did
-// (resolve_received_covert_operation and process_terrorist_report both branch
-// on that count being 1). The phrases are IB's own.
-func terrorOpDeed(op TerrorOpType) string {
-	switch op {
-	case TerrorOpBombIntel:
-		return "bombed your intelligence agencies"
-	case TerrorOpDemoralize:
-		return "demoralized your forces"
-	case TerrorOpDissensions:
-		return "stirred dissent in your ranks"
-	case TerrorOpBombAirBases:
-		return "bombed your air bases"
-	case TerrorOpEmigrations:
-		return "drove your people into exile"
-	case TerrorOpPropaganda:
-		return "spread false rumors through your realm"
-	case TerrorOpBombFood:
-		return "bombed your food stores"
-	case TerrorOpSabotageHQ:
-		return "sabotaged your headquarters"
-	}
-	return "struck your realm"
+var terrorTexts = map[TerrorOpType]terrorText{
+	TerrorOpSpy: {
+		nowhere:   msgid("Terrorists went after your secrets and got nowhere."),
+		emptyLone: msgid("Your agent reached {target}'s secrets on {board} and found nothing left to damage."),
+		empty:     msgid("Your agents reached {target}'s secrets on {board} and found nothing left to damage."),
+	},
+	TerrorOpBombIntel: {
+		msgidN("Terrorists bombed your intelligence agencies.", "Terrorists bombed your intelligence agencies {n} times."),
+		msgid("Terrorists went after your intelligence agencies and got nowhere."),
+		msgid("Your agent bombed {target}'s intelligence agencies on {board} once."),
+		msgidN("Your agents bombed {target}'s intelligence agencies on {board} once.",
+			"Your agents bombed {target}'s intelligence agencies on {board} {n} times."),
+		msgid("Your agent reached {target}'s intelligence agencies on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s intelligence agencies on {board} and found nothing left to damage."),
+	},
+	TerrorOpDemoralize: {
+		msgidN("Terrorists demoralized your forces.", "Terrorists demoralized your forces {n} times."),
+		msgid("Terrorists went after your forces and got nowhere."),
+		msgid("Your agent sank {target}'s morale on {board} once."),
+		msgidN("Your agents sank {target}'s morale on {board} once.",
+			"Your agents sank {target}'s morale on {board} {n} times."),
+		msgid("Your agent reached {target}'s forces on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s forces on {board} and found nothing left to damage."),
+	},
+	TerrorOpDissensions: {
+		msgidN("Terrorists stirred dissent in your ranks.", "Terrorists stirred dissent in your ranks {n} times."),
+		msgid("Terrorists went after your ranks and got nowhere."),
+		msgid("Your agent stirred up dissent in {target}'s ranks on {board} once."),
+		msgidN("Your agents stirred up dissent in {target}'s ranks on {board} once.",
+			"Your agents stirred up dissent in {target}'s ranks on {board} {n} times."),
+		msgid("Your agent reached {target}'s ranks on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s ranks on {board} and found nothing left to damage."),
+	},
+	TerrorOpBombAirBases: {
+		msgidN("Terrorists bombed your air bases.", "Terrorists bombed your air bases {n} times."),
+		msgid("Terrorists went after your air bases and got nowhere."),
+		msgid("Your agent bombed {target}'s air bases on {board} once."),
+		msgidN("Your agents bombed {target}'s air bases on {board} once.",
+			"Your agents bombed {target}'s air bases on {board} {n} times."),
+		msgid("Your agent reached {target}'s air bases on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s air bases on {board} and found nothing left to damage."),
+	},
+	TerrorOpEmigrations: {
+		msgidN("Terrorists drove your people into exile.", "Terrorists drove your people into exile {n} times."),
+		msgid("Terrorists went after your people and got nowhere."),
+		msgid("Your agent drove {target}'s people into exile on {board} once."),
+		msgidN("Your agents drove {target}'s people into exile on {board} once.",
+			"Your agents drove {target}'s people into exile on {board} {n} times."),
+		msgid("Your agent reached {target}'s people on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s people on {board} and found nothing left to damage."),
+	},
+	TerrorOpPropaganda: {
+		msgidN("Terrorists spread false rumors through your realm.", "Terrorists spread false rumors through your realm {n} times."),
+		msgid("Terrorists went after your streets and got nowhere."),
+		msgid("Your agent spread rumors through {target}'s realm on {board} once."),
+		msgidN("Your agents spread rumors through {target}'s realm on {board} once.",
+			"Your agents spread rumors through {target}'s realm on {board} {n} times."),
+		msgid("Your agent reached {target}'s streets on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s streets on {board} and found nothing left to damage."),
+	},
+	TerrorOpBombFood: {
+		msgidN("Terrorists bombed your food stores.", "Terrorists bombed your food stores {n} times."),
+		msgid("Terrorists went after your food stores and got nowhere."),
+		msgid("Your agent bombed {target}'s food stores on {board} once."),
+		msgidN("Your agents bombed {target}'s food stores on {board} once.",
+			"Your agents bombed {target}'s food stores on {board} {n} times."),
+		msgid("Your agent reached {target}'s food stores on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s food stores on {board} and found nothing left to damage."),
+	},
+	TerrorOpSabotageHQ: {
+		msgidN("Terrorists sabotaged your headquarters.", "Terrorists sabotaged your headquarters {n} times."),
+		msgid("Terrorists went after your headquarters and got nowhere."),
+		msgid("Your agent sabotaged {target}'s headquarters on {board} once."),
+		msgidN("Your agents sabotaged {target}'s headquarters on {board} once.",
+			"Your agents sabotaged {target}'s headquarters on {board} {n} times."),
+		msgid("Your agent reached {target}'s headquarters on {board} and found nothing left to damage."),
+		msgid("Your agents reached {target}'s headquarters on {board} and found nothing left to damage."),
+	},
 }
 
-// terrorOpStrike is what one operation does to target on board, for the
-// sender's report: "bombed Victim's air bases on boardB". It is separate from
-// terrorOpDeed on purpose: the wording differs by side.
-func terrorOpStrike(op TerrorOpType, target, board string) string {
-	var f string
-	switch op {
-	case TerrorOpBombIntel:
-		f = "bombed %s's intelligence agencies on %s"
-	case TerrorOpDemoralize:
-		f = "sank %s's morale on %s"
-	case TerrorOpDissensions:
-		f = "stirred up dissent in %s's ranks on %s"
-	case TerrorOpBombAirBases:
-		f = "bombed %s's air bases on %s"
-	case TerrorOpEmigrations:
-		f = "drove %s's people into exile on %s"
-	case TerrorOpPropaganda:
-		f = "spread rumors through %s's realm on %s"
-	case TerrorOpBombFood:
-		f = "bombed %s's food stores on %s"
-	case TerrorOpSabotageHQ:
-		f = "sabotaged %s's headquarters on %s"
-	default:
-		f = "struck %s's realm on %s"
-	}
-	return fmt.Sprintf(f, target, board)
+// unknownTerrorText reports an operation this build does not know, from a
+// newer board.
+var unknownTerrorText = terrorText{
+	msgidN("Terrorists struck your realm.", "Terrorists struck your realm {n} times."),
+	msgid("Terrorists went after your realm and got nowhere."),
+	msgid("Your agent struck {target}'s realm on {board} once."),
+	msgidN("Your agents struck {target}'s realm on {board} once.",
+		"Your agents struck {target}'s realm on {board} {n} times."),
+	msgid("Your agent reached {target}'s realm on {board} and found nothing left to damage."),
+	msgid("Your agents reached {target}'s realm on {board} and found nothing left to damage."),
 }
 
-// terrorOpReport is what the launching realm reads when the strike comes home:
-// one sentence, written here on the target's board because only it knows the
-// target and the board both, and printed by the sender as it stands. It
-// accounts for every agent — what the ones that got through did, then, when it
-// applies, the ones caught (fate, the pool entry whose other half the target
-// read) and the ones that got through to nothing left to damage. An agent that
-// got through to a target already at zero costs the same gold as one that did
-// damage, so IB says how many landed on nothing. The original's report has the
-// same parts (process_terrorist_report, BRE.OVR 0x04b38a); the words are IB's.
-func terrorOpReport(op TerrorOpType, target, board string, sent, hit, caught int, fate agentCaught) string {
+func terrorTextFor(op TerrorOpType) terrorText {
+	if t, ok := terrorTexts[op]; ok {
+		return t
+	}
+	return unknownTerrorText
+}
+
+// terrorOpReport is what the launching realm reads when the strike comes home,
+// written here on the target's board because only it knows the target and the
+// board both, and put into words by the sender's board. It accounts for every
+// agent — what the ones that got through did, then, when it applies, the ones
+// caught (fate, the pool entry whose other half the target read) and the ones
+// that got through to nothing left to damage, each in a sentence of its own. An
+// agent that got through to a target already at zero costs the same gold as one
+// that did damage, so IB says how many landed on nothing. The original's report
+// has the same parts (process_terrorist_report, BRE.OVR 0x04b38a); the words
+// are IB's.
+func terrorOpReport(op TerrorOpType, target, board string, sent, hit, caught int, fate agentCaught) Msg {
 	if caught >= sent {
 		if sent == 1 {
-			return fmt.Sprintf("%s's security on %s caught your agent.", target, board)
+			return say("{target}'s security on {board} caught your agent.", "target", target, "board", board)
 		}
-		return fmt.Sprintf("%s's security on %s caught every one of your %d agents.", target, board, sent)
+		return say("{target}'s security on {board} caught every one of your {n} agents.",
+			"target", target, "board", board, "n", sent)
 	}
-	agents := "Your agents"
-	if sent == 1 {
-		agents = "Your agent"
-	}
+	text := terrorTextFor(op)
+	where := []any{"target", target, "board", board}
 	// A spy batch stops at the first agent in, so the rest never went anywhere.
 	wasted := sent - hit - caught
-	var b strings.Builder
+	var did Msg
 	switch {
 	case op == TerrorOpSpy:
 		wasted = 0
-		fmt.Fprintf(&b, "Your spy slipped into %s's files on %s and came home with a full report", target, board)
+		did = say("Your spy slipped into {target}'s files on {board} and came home with a full report.", where...)
+	case hit > 0 && sent == 1:
+		did = say(text.lone, where...)
 	case hit > 0:
-		fmt.Fprintf(&b, "%s %s %s", agents, terrorOpStrike(op, target, board), times(hit))
+		did = sayIn(text.batch, "n", append(where, "n", hit)...)
+	case sent == 1:
+		did = say(text.emptyLone, where...)
+		wasted = 0
 	default:
-		fmt.Fprintf(&b, "%s reached %s's %s on %s and found nothing left to damage",
-			agents, target, terrorOpTargetName(op), board)
+		did = say(text.empty, where...)
 		wasted = 0
 	}
-	them := "of them"
-	if op == TerrorOpSpy {
-		them = "of your other agents"
+	var lost Msg
+	if caught > 0 {
+		f := fate.Caught
+		if op == TerrorOpSpy {
+			f = fate.Other
+		}
+		lost = sayIn(f, "n", "n", caught)
 	}
-	switch {
-	case caught == 1:
-		fmt.Fprintf(&b, "; one %s %s", them, fate.Singular)
-	case caught > 1:
-		fmt.Fprintf(&b, "; %d %s %s", caught, them, fate.Plural)
-	}
+	var idle Msg
 	if wasted > 0 {
-		fmt.Fprintf(&b, "; %d more found nothing left to damage", wasted)
+		idle = sayN("One more found nothing left to damage.", "{n} more found nothing left to damage.", "n", "n", wasted)
 	}
-	b.WriteString(".")
-	return b.String()
-}
-
-// times is "once" for one and "N times" otherwise.
-// agentCount is n agents, in the singular for one.
-func agentCount(n int) string {
-	if n == 1 {
-		return "1 agent"
-	}
-	return fmt.Sprintf("%d agents", n)
-}
-
-func times(n int) string {
-	if n == 1 {
-		return "once"
-	}
-	return fmt.Sprintf("%d times", n)
+	return sentences(did, lost, idle)
 }

@@ -102,7 +102,7 @@ func TestSabreIntelligenceHitKillsAgents(t *testing.T) {
 	lo, hi := 1000, 0
 	for i := 0; i < 400; i++ {
 		d.Agents, d.HQ = 1000, 100
-		got := w.sabreDamage(d, SabreHitIntelligence)
+		got := list(w.sabreDamage(d, SabreHitIntelligence))
 		if d.Agents < 700 || d.Agents > 990 {
 			t.Fatalf("1000 agents became %d, want 700..990", d.Agents)
 		}
@@ -118,7 +118,7 @@ func TestSabreIntelligenceHitKillsAgents(t *testing.T) {
 		t.Errorf("kept range %d..%d over 400 rolls, want exactly 700..990", lo, hi)
 	}
 	d.Agents = 0
-	if got := w.sabreDamage(d, SabreHitIntelligence); got != "" {
+	if got := list(w.sabreDamage(d, SabreHitIntelligence)); got != "" {
 		t.Errorf("a realm with no agents reported %q", got)
 	}
 }
@@ -133,7 +133,7 @@ func sabreKeepBand(t *testing.T, eff SabreEffect, name string, field func(*Empir
 	lo, hi = 1<<30, -1
 	for i := 0; i < 600; i++ {
 		*field(d) = 1000
-		got := w.sabreDamage(d, eff)
+		got := list(w.sabreDamage(d, eff))
 		left := *field(d)
 		if want := fmt.Sprintf("%d %s", 1000-left, name); left < 1000 && !strings.Contains(got, want) {
 			t.Fatalf("report %q does not name %q", got, want)
@@ -234,7 +234,7 @@ func TestSabreRegionHitDestroysLand(t *testing.T) {
 	for i := 0; i < 300; i++ {
 		d.Regions = defaultRegionMix(1000)
 		d.syncLand()
-		got := w.sabreDamage(d, SabreHitRegions)
+		got := list(w.sabreDamage(d, SabreHitRegions))
 		lost := 1000 - d.Land
 		if d.Regions.Waste != 0 {
 			t.Fatalf("a region hit made %d waste", d.Regions.Waste)
@@ -312,7 +312,7 @@ func TestSabreBackfireCostsTheFirerNothing(t *testing.T) {
 	// Report is what the TARGET's board composed and sent home, which is what the
 	// firer is shown as it stands; a result without one is the fallback case,
 	// below.
-	told := "Your S3-Sabre backfired on Victim of Far, expanding their territory by 3 regions."
+	told := &Msg{T: "Your S3-Sabre backfired on Victim of Far, expanding their territory by 3 regions."}
 	w.applySpecialOpResult(sent, AttackResult{TargetBoard: "Far", TargetEmpire: "Victim",
 		Backfired: true, Report: told})
 
@@ -325,7 +325,7 @@ func TestSabreBackfireCostsTheFirerNothing(t *testing.T) {
 		t.Fatal("the firer was told nothing about the backfire")
 	}
 	last := e.Events[len(e.Events)-1].Text
-	if !strings.Contains(last, told) {
+	if !strings.Contains(last, told.English()) {
 		t.Errorf("backfire event = %q, want it to carry the target board's report %q", last, told)
 	}
 

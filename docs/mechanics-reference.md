@@ -5079,13 +5079,15 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   other seventeen land on a field already at zero, achieve nothing, and appear
   nowhere. IB splits the batch three ways — caught, did damage, found nothing
   left to damage — so the sender can see when a batch was larger than the
-  target could absorb. The report is one sentence written on the target's
-  board, which knows both the target and its own name ("Your agents sank
-  Mango Salsa's morale on ConstructiveChaos BBS 9 times; one of them didn't
-  make it home."), and the sender prints it with no heading. The target's own
+  target could absorb. The report is written on the target's board, which
+  knows both the target and its own name, and the sender prints it with no
+  heading: "Your agents sank Mango Salsa's morale on ConstructiveChaos BBS 9
+  times. One of them didn't make it home." Each part is a sentence of its own,
+  so each translates on its own (#297); it travels as a message and is put into
+  words on the sender's board, in the sender's language. The target's own
   event counts only the hits, because that is all the defender can observe,
   and it says terrorists got nowhere only when an agent actually got past its
-  security. The caught-agent clause comes from the agent pool (below).
+  security. The caught-agent sentence comes from the agent pool (below).
 - **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
   original's name here, as it does for the Gooie Kablooie and the S3-Sabre
   (#218): players coming from the original look for these by name. Do not

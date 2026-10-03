@@ -89,7 +89,7 @@ AttackResult:
   Kind
   Outcome `json:",omitempty"`
   Enemy `json:",omitempty"`
-  Report `json:",omitempty"`
+  Report `json:"ReportMsg,omitempty"`
   Score `json:",omitempty"`
   Backfired `json:",omitempty"`
 UnitLoss:
@@ -98,6 +98,13 @@ UnitLoss:
   Turrets
   Tanks
   Bombers
+Msg:
+  T `json:"t,omitempty"`
+  P `json:"p,omitempty"`
+  N `json:"n,omitempty"`
+  A `json:"a,omitempty"`
+  J `json:"j,omitempty"`
+  R `json:"r,omitempty"`
 LeagueConfig:
   GameStartDate
   JoinDate
@@ -213,7 +220,7 @@ IPTradeFill:
   Good
   Qty
   Gold
-  Reason `json:",omitempty"`
+  Reason `json:"ReasonMsg,omitempty"`
 RemoteListing:
   Realm
   Good
