@@ -88,7 +88,7 @@ func inline(s string) string {
 // only at spaces so words are never split mid-token. Shared with the menu package
 // for wrapping advisor/report prose to the screen width.
 func Wrap(text string, width int) string {
-	words := strings.Fields(text)
+	words := wrapWords(text)
 	if len(words) == 0 {
 		return ""
 	}
@@ -109,6 +109,34 @@ func Wrap(text string, width int) string {
 		lineLen += wl
 	}
 	return b.String()
+}
+
+// wrapWords splits text into the units Wrap may break between. A space inside
+// a grouped figure is not a break: Russian and Swedish group thousands with a
+// space (numfmt and the help pages both write "10 000 000"), and breaking there
+// leaves what reads as two numbers on two lines.
+func wrapWords(text string) []string {
+	var out []string
+	for _, w := range strings.Fields(text) {
+		if n := len(out); n > 0 && continuesFigure(out[n-1], w) {
+			out[n-1] += " " + w
+			continue
+		}
+		out = append(out, w)
+	}
+	return out
+}
+
+// continuesFigure reports whether next is the next thousands group of a figure
+// prev ends with: prev ends in a run of one to three digits, and next opens with
+// exactly three.
+func continuesFigure(prev, next string) bool {
+	run := len(prev) - len(strings.TrimRight(prev, "0123456789"))
+	if run < 1 || run > 3 || len(next) < 3 {
+		return false
+	}
+	lead := len(next) - len(strings.TrimLeft(next, "0123456789"))
+	return lead == 3
 }
 
 // bullet renders "  • item" with a hanging indent, so wrapped continuation

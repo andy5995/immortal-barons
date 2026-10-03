@@ -132,3 +132,20 @@ func TestRenderANSIJoinsAWrappedBullet(t *testing.T) {
 		t.Errorf("RenderANSI =\n%q\nwant\n%q", got, want)
 	}
 }
+
+// Russian and Swedish group thousands with a space, so a figure near the margin
+// was split into what read as two numbers on two lines.
+func TestWrapKeepsASpaceGroupedFigureWhole(t *testing.T) {
+	cases := []struct{ in, want string }{
+		{"Du har 10 000 000 kronor", "Du har\n10 000 000\nkronor"},
+		{"Kostar 2 500.", "Kostar\n2 500."},
+		// Not a thousands group: four digits, or a word between.
+		{"år 2026 1000 st", "år 2026\n1000 st"},
+		{"tur 5 av 100", "tur 5 av\n100"},
+	}
+	for _, c := range cases {
+		if got := Wrap(c.in, 10); got != c.want {
+			t.Errorf("Wrap(%q, 10) =\n%q\nwant\n%q", c.in, got, c.want)
+		}
+	}
+}

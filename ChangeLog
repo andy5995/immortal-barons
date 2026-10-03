@@ -8,6 +8,7 @@ Immortal Barons ChangeLog
   * Builds between releases report a -dev version, ranked below that release
   * German, Dutch and Portuguese prompts show the keys they accept
   * Swedish translation of the interface and help
+  * A Russian or Swedish figure is no longer split across two lines
 
 2026-10-01 (v0.2.1)
   * Updating from v0.1.0 or later needs no game reset

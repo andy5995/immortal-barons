@@ -32,8 +32,9 @@ type Number interface{ ~int | ~int64 }
 // Do not generalise any of the four past the screens it belongs to.
 
 // groupSep maps a UI language to its thousands separator. All of them are
-// ASCII, so they are CP437-safe (and CP437 mode forces English anyway). Unknown
-// languages fall back to the comma.
+// ASCII, so they are CP437-safe. Unknown
+// languages fall back to the comma. A space separator is safe to wrap only
+// because help.Wrap will not break inside a grouped figure.
 var groupSep = map[string]byte{"": ',', "en": ',', "de": '.', "ru": ' ', "pt": '.', "nl": '.', "sv": ' '}
 
 // Format renders n for display with lang's thousands separator: en 1,847,392 /
