@@ -57,18 +57,51 @@ func TestHeldPacketsAgeOut(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	old := time.Now().Add(-HeldMaxAge - time.Hour)
+	maxAge := game.DefaultConfig().HeldMaxAge()
+	old := time.Now().Add(-maxAge - time.Hour)
 	if err := os.Chtimes(stale, old, old); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := releaseHeld(dir, inbound); err != nil {
+	if _, err := releaseHeld(dir, inbound, maxAge); err != nil {
 		t.Fatalf("releaseHeld: %v", err)
 	}
 	if _, err := os.Stat(stale); !os.IsNotExist(err) {
-		t.Error("a packet past HeldMaxAge was kept")
+		t.Error("a packet past its age was kept")
 	}
 	if _, err := os.Stat(filepath.Join(inbound, "fresh.brp")); err != nil {
-		t.Errorf("a packet within HeldMaxAge was not released: %v", err)
+		t.Errorf("a packet within its age was not released: %v", err)
+	}
+}
+
+// HeldPacketDays in bbs.cfg sets how long a held packet waits (default 14); a value
+// that is not a positive number of days leaves the default and is warned about.
+func TestHeldPacketDaysComesFromBBSCfg(t *testing.T) {
+	if got := game.DefaultConfig().HeldMaxAge(); got != 14*24*time.Hour {
+		t.Errorf("default held age = %v, want 14 days", got)
+	}
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("HeldPacketDays 3\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := game.DefaultConfig()
+	if err := LoadBoardConfig(dir, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.HeldMaxAge() != 3*24*time.Hour {
+		t.Errorf("HeldPacketDays 3 gave %v", cfg.HeldMaxAge())
+	}
+	for _, bad := range []string{"0", "-2", "soon"} {
+		if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("HeldPacketDays "+bad+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		cfg := game.DefaultConfig()
+		LoadBoardConfig(dir, &cfg)
+		if cfg.HeldMaxAge() != 14*24*time.Hour {
+			t.Errorf("HeldPacketDays %s gave %v, want the default", bad, cfg.HeldMaxAge())
+		}
+		if len(BoardWarnings(dir, nil)) != 1 {
+			t.Errorf("HeldPacketDays %s raised no warning", bad)
+		}
 	}
 }

@@ -76,6 +76,7 @@ func TestBoardConfigRoundTrip(t *testing.T) {
 	cfg.BBSName = "The Dog House BBS" // the web pages' own name for this board (#245)
 	cfg.BoardURL = "https://doghouse.example/"
 	cfg.BulletinURL = "https://doghouse.example/bulletins"
+	cfg.HeldPacketDays = 30
 
 	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(BoardConfigText(cfg)), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
@@ -87,7 +88,8 @@ func TestBoardConfigRoundTrip(t *testing.T) {
 	if got.BoardID != cfg.BoardID || got.LeagueNumber != cfg.LeagueNumber ||
 		got.InboundDir != cfg.InboundDir || got.OutboundDir != cfg.OutboundDir ||
 		got.BulletinDir != cfg.BulletinDir || got.BBSName != cfg.BBSName ||
-		got.BoardURL != cfg.BoardURL || got.BulletinURL != cfg.BulletinURL {
+		got.BoardURL != cfg.BoardURL || got.BulletinURL != cfg.BulletinURL ||
+		got.HeldPacketDays != cfg.HeldPacketDays {
 		t.Errorf("round trip = %+v", got)
 	}
 	if len(got.OutboundDirs) != 2 || got.OutboundDirs[3] != "box/three" || got.OutboundDirs[5] != "box/five" {
@@ -352,8 +354,8 @@ func TestBoardWarningsNameUnknownKeysAndBadSwitches(t *testing.T) {
 // and the count pins it against a key being added to the constants alone.
 func TestKnownBoardKeysRaiseNoWarning(t *testing.T) {
 	keys := BoardKeys()
-	if len(keys) != 11 {
-		t.Errorf("BoardKeys has %d keys, want 11: %q", len(keys), keys)
+	if len(keys) != 12 {
+		t.Errorf("BoardKeys has %d keys, want 12: %q", len(keys), keys)
 	}
 	dir := t.TempDir()
 	var body strings.Builder
@@ -361,7 +363,7 @@ func TestKnownBoardKeysRaiseNoWarning(t *testing.T) {
 		if i%2 == 1 {
 			k = strings.ToLower(k)
 		}
-		body.WriteString(k + " yes\n")
+		body.WriteString(k + " 1\n") // a yes, a number and a path alike
 	}
 	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body.String()), 0o644); err != nil {
 		t.Fatal(err)

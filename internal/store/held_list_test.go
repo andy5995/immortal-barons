@@ -41,7 +41,7 @@ func TestHeldPacketsSaysWhy(t *testing.T) {
 		t.Fatalf("HeldPackets listed %d files, want 2: %+v", len(list), list)
 	}
 	p, ok := got[HeldProtocol]
-	if !ok || p.FromBoard != "Far BBS" || !p.PausesLostForces || p.Expires.Sub(p.Arrived) != HeldMaxAge {
+	if !ok || p.FromBoard != "Far BBS" || !p.PausesLostForces || p.Expires.Sub(p.Arrived) != game.DefaultConfig().HeldMaxAge() {
 		t.Errorf("protocol hold listed as %+v", p)
 	}
 	if u, ok := got[HeldUnreadable]; !ok || u.FromBoard != "" {

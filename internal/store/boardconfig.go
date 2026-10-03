@@ -29,17 +29,18 @@ const BoardConfigFile = "bbs.cfg"
 // BRE's own troubleshooting section is about. Matched case-insensitively;
 // written in this casing.
 const (
-	keyBoardID  = "BoardID"
-	keyBBSName  = "BBSName"
-	keyBoardURL = "BoardURL"
-	keyBullURL  = "BulletinURL"
-	keyLeague   = "LeagueNumber"
-	keyInbound  = "GameInbound"
-	keyOutbound = "GameOutbound"
-	keyLottery  = "Lottery"
-	keyBulletin = "BulletinDir"
-	keyPirate   = "PirateNews"
-	keyOnFault  = "OnFault"
+	keyBoardID        = "BoardID"
+	keyBBSName        = "BBSName"
+	keyBoardURL       = "BoardURL"
+	keyBullURL        = "BulletinURL"
+	keyLeague         = "LeagueNumber"
+	keyInbound        = "GameInbound"
+	keyOutbound       = "GameOutbound"
+	keyLottery        = "Lottery"
+	keyBulletin       = "BulletinDir"
+	keyPirate         = "PirateNews"
+	keyOnFault        = "OnFault"
+	keyHeldPacketDays = "HeldPacketDays"
 )
 
 // boardSetters applies each bbs.cfg keyword this reader recognizes to a
@@ -82,6 +83,14 @@ var boardSetters = map[string]func(cfg *game.Config, value string) error{
 	keyLottery:  func(cfg *game.Config, v string) error { return setYesNo(&cfg.Lottery, v) },
 	keyOnFault:  func(cfg *game.Config, v string) error { cfg.OnFault = v; return nil },
 	keyPirate:   func(cfg *game.Config, v string) error { return setYesNo(&cfg.PirateNews, v) },
+	keyHeldPacketDays: func(cfg *game.Config, v string) error {
+		n, err := strconv.Atoi(v)
+		if err != nil || n < 1 {
+			return fmt.Errorf("want a number of days, 1 or more, got %q", v)
+		}
+		cfg.HeldPacketDays = n
+		return nil
+	},
 }
 
 // BoardKeys are the bbs.cfg keywords this reader recognizes, sorted. The
@@ -254,6 +263,9 @@ func BoardConfigText(cfg game.Config) string {
 	fmt.Fprintf(&b, "%s %s\n", keyPirate, yesNo(cfg.PirateNews))
 	if cfg.OnFault != "" {
 		fmt.Fprintf(&b, "%s %s\n", keyOnFault, cfg.OnFault)
+	}
+	if cfg.HeldPacketDays > 0 && cfg.HeldPacketDays != game.DefaultHeldPacketDays {
+		fmt.Fprintf(&b, "%s %d\n", keyHeldPacketDays, cfg.HeldPacketDays)
 	}
 	for _, n := range slices.Sorted(maps.Keys(cfg.OutboundDirs)) {
 		fmt.Fprintf(&b, "%s %d %s\n", keyOutbound, n, cfg.OutboundDirs[n])

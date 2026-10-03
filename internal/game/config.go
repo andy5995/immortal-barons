@@ -1,6 +1,9 @@
 package game
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"time"
+)
 
 // Level is a cost/damage/reward preset, as BRE's Configuration Editor uses
 // ([H,M,L,N]). Medium is the baseline, and each knob applies its own spread
@@ -334,6 +337,13 @@ type Config struct {
 	// a Coordinator's broadcast must never be able to set it.
 	OnFault string `json:"-"`
 
+	// HeldPacketDays is how long a packet this board has set aside — one it cannot
+	// read yet, or one that failed its signature check — waits before it is
+	// deleted. Per-board, in bbs.cfg: it is a decision about this board's own
+	// disk and its patience with a link, not a league rule. HeldMaxAge applies
+	// DefaultHeldPacketDays when it is unset.
+	HeldPacketDays int `json:"-"`
+
 	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never)
 	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 
@@ -539,6 +549,20 @@ func (c Config) GameStarted(today string) bool {
 	return c.GameStartDate == "" || today >= c.GameStartDate
 }
 
+// DefaultHeldPacketDays is HeldPacketDays when bbs.cfg does not set it. Long enough for a
+// Coordinator to notice a board with no key and publish one, which rescues the
+// backlog; past that a held packet is from a board that will not recover.
+const DefaultHeldPacketDays = 14
+
+// HeldMaxAge is how long a held packet is kept, from when it was set aside.
+func (c Config) HeldMaxAge() time.Duration {
+	days := c.HeldPacketDays
+	if days <= 0 {
+		days = DefaultHeldPacketDays
+	}
+	return time.Duration(days) * 24 * time.Hour
+}
+
 // JoinOpen reports whether a new player may still join as of ISO date `today`.
 // An empty JoinDate means joining is always open.
 func (c Config) JoinOpen(today string) bool {
@@ -551,6 +575,7 @@ func DefaultConfig() Config {
 		BoardID:         "local",
 		Lottery:         true,
 		PirateNews:      true,
+		HeldPacketDays:  DefaultHeldPacketDays,
 		InboundDir:      "inbound",
 		OutboundDir:     "outbound",
 		IdleTimeoutSecs: 300,

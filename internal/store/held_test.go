@@ -43,7 +43,7 @@ func TestAPacketForAnotherProtocolIsHeldAndLaterReleased(t *testing.T) {
 	}
 
 	// Still unreadable: it stays put rather than being applied.
-	moved, err := releaseHeld(data, inbound)
+	moved, err := releaseHeld(data, inbound, game.DefaultConfig().HeldMaxAge())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestAPacketForAnotherProtocolIsHeldAndLaterReleased(t *testing.T) {
 	// Rewrite it as something this build speaks -- standing in for the upgrade.
 	writeHeldTestPacket(t, filepath.Join(data, HeldDir), "future"+PacketExt,
 		game.Packet{FromBoard: "Alpha BBS", Protocol: game.Protocol})
-	moved, err = releaseHeld(data, inbound)
+	moved, err = releaseHeld(data, inbound, game.DefaultConfig().HeldMaxAge())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,13 +77,13 @@ func TestAPacketWithNoProtocolIsHeld(t *testing.T) {
 	if game.SpeaksOurProtocol(0) {
 		t.Fatal("a packet stating no protocol must not be readable")
 	}
-	if moved, _ := releaseHeld(data, inbound); moved != 0 {
+	if moved, _ := releaseHeld(data, inbound, game.DefaultConfig().HeldMaxAge()); moved != 0 {
 		t.Errorf("releaseHeld touched %d files with no held directory", moved)
 	}
 }
 
 func TestReleaseHeldIsQuietWithNoHeldDirectory(t *testing.T) {
-	moved, err := releaseHeld(t.TempDir(), t.TempDir())
+	moved, err := releaseHeld(t.TempDir(), t.TempDir(), game.DefaultConfig().HeldMaxAge())
 	if err != nil || moved != 0 {
 		t.Errorf("got (%d, %v), want (0, nil)", moved, err)
 	}
@@ -112,7 +112,7 @@ func TestOnlyANewerBoardsBacklogIsEverReleased(t *testing.T) {
 			}
 			writeHeldTestPacket(t, filepath.Join(data, HeldDir), "p"+PacketExt,
 				game.Packet{FromBoard: "Alpha BBS", Protocol: tc.protocol})
-			moved, err := releaseHeld(data, inbound)
+			moved, err := releaseHeld(data, inbound, game.DefaultConfig().HeldMaxAge())
 			if err != nil {
 				t.Fatal(err)
 			}

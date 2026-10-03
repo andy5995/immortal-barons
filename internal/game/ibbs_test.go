@@ -1070,8 +1070,9 @@ var perBoardConfigFields = map[string]string{
 	// Display, not a rule: it decides whether a raid is written up in the news,
 	// never whether it happens or what it takes. The original keeps its
 	// LOCALPIRATENEWS switch in RESOURCE.DAT for the same reason.
-	"PirateNews": "whether pirate raids reach this board's news feed",
-	"OnFault":    "a command on THIS machine, run when a planetary run meets a new transport fault (#187)",
+	"PirateNews":     "whether pirate raids reach this board's news feed",
+	"OnFault":        "a command on THIS machine, run when a planetary run meets a new transport fault (#187)",
+	"HeldPacketDays": "how long THIS board keeps packets it set aside; its own disk and its own patience with a link",
 }
 
 // TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config

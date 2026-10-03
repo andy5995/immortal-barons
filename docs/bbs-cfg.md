@@ -216,6 +216,22 @@ and goes on.
 More: [Being told when the league stops
 moving](inter-bbs.md#being-told-when-the-league-stops-moving).
 
+## Held packets
+
+### `HeldPacketDays`
+
+How many days a held packet is kept before the game deletes it. A packet is
+held when this board cannot apply it yet: it comes from a different release, it
+failed its signature check, or it was written under rules the league did not
+agree. The days count from when the packet was set aside.
+
+**Values:** a whole number of days, 1 or more. Any other value is ignored with
+a warning, and the default is used.
+
+**Default:** 14.
+
+More: [Held packets](inter-bbs-troubleshooting.md#held-packets).
+
 ## FTN transport: receiving
 
 The FTN transport settings are read only on a league board. A board whose

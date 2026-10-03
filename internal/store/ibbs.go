@@ -74,7 +74,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	// now, and what it took them to be before that (#264).
 	w.BeginRun()
 	w.NoteLeagueRuleset()
-	released, err := releaseHeld(w.Config.DataDir, inboundDir)
+	released, err := releaseHeld(w.Config.DataDir, inboundDir, w.Config.HeldMaxAge())
 	if err != nil {
 		return run, err
 	}
@@ -882,7 +882,7 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	// The test is on the fingerprint the PACKET carries — the rules it was
 	// written under — so a packet produced under rules the league never agreed is
 	// never applied, whatever its board does afterward: it is held, re-checked
-	// on every later run, and expires at HeldMaxAge. Packets in flight across a
+	// on every later run, and expires at Config.HeldMaxAge. Packets in flight across a
 	// legitimate rules change are the case RulesetGraceDays covers.
 	if reason == HeldRules {
 		result.HeldRules++
@@ -919,7 +919,7 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		// re-sends its roster and bulletins on every planetary run, but
 		// -league-config is a manual command, so a ruleset refused once used to
 		// be gone for good and a re-send would then be discarded as a
-		// duplicate. HeldMaxAge bounds the wait for a board that is simply
+		// duplicate. Config.HeldMaxAge bounds the wait for a board that is simply
 		// forging.
 		return holdPacket(w.Config.DataDir, path)
 	}

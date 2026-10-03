@@ -207,8 +207,9 @@ left (15 days at the default) comes home regardless.
 A packet is also held when it was written under rules the league did not agree —
 see "Boards playing by different rules" under [For the League
 Coordinator](#for-the-league-coordinator). Whatever the reason, **a held packet
-is deleted after 30 days**. That is the timer the rest of this guide means by
-the held-packet timer.
+is deleted after 14 days**, or after the number of days set by
+[`HeldPacketDays`](bbs-cfg.md#heldpacketdays). That is the timer the rest of
+this guide means by the held-packet timer.
 
 ## Quarantined packets
 

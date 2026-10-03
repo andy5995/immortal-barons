@@ -738,7 +738,7 @@ func (w *World) BeginRun() { w.heldNoted = nil }
 //
 // The notice says which side has to move, because the two cases recover
 // differently. A board sending packets that state rules the league never agreed
-// has THOSE files expire at HeldMaxAge; what unblocks its traffic is that board
+// has THOSE files expire at Config.HeldMaxAge; what unblocks its traffic is that board
 // taking the Coordinator's ruleset, which goes out on every planetary run. The
 // reverse case — this board being the one behind after a ruleset change, so
 // boards that adopted first look divergent — clears itself, because held packets
@@ -798,7 +798,7 @@ func (w *World) NoteProtocolHold(board string, protocol int) {
 // ProtocolHoldCurrent reports whether a board with packets in the held
 // directory is still stalled: its latest packet was held rather than applied.
 // A held file outlives the fault that held it — one from a board that has since
-// moved past our protocol, or come level with it, waits out HeldMaxAge beside
+// moved past our protocol, or come level with it, waits out Config.HeldMaxAge beside
 // that board's newer traffic, which applies normally — so the file alone does
 // not say the link is stalled. The same-second case counts as held, since a run
 // that holds one packet and applies another cannot order them by the stamp.
@@ -808,7 +808,7 @@ func (w *World) NoteProtocolHold(board string, protocol int) {
 // did not record one, or a stamp written before stamps carried a zone. Without
 // it such a hold counted as current until the file expired, so a board that had
 // upgraded and was sending normally still paused the lost-forces timer for the
-// strikes sent to it, for up to HeldMaxAge. A zero arrived, with no stamp either,
+// strikes sent to it, for up to Config.HeldMaxAge. A zero arrived, with no stamp either,
 // still counts as held.
 //
 // The modification time is only an approximation of arrival: FTN delivery can

@@ -19,15 +19,14 @@ import (
 // upgrades applies its backlog on the next run with nobody doing anything.
 const HeldDir = "held"
 
-// HeldMaxAge bounds the wait. A packet held because it failed its signature
-// check may be a board that has not been given a key yet — which recovers — or
-// a board forging packets, which never will, and whose files would otherwise
-// pile up in the held directory for the life of the league. Both look the same
-// on arrival, so the only safe distinction is time: keep them long enough that
-// a Coordinator noticing and publishing a key rescues the backlog, and no
-// longer. Measured from the file's modification time, which is when this board
-// set it aside.
-const HeldMaxAge = 30 * 24 * time.Hour
+// Config.HeldMaxAge bounds the wait (HeldPacketDays in bbs.cfg). A packet held
+// because it failed its signature check may be a board that has not been given
+// a key yet — which recovers — or a board forging packets, which never will, and
+// whose files would otherwise pile up in the held directory for the life of the
+// league. Both look the same on arrival, so the only safe distinction is time:
+// keep them long enough that a Coordinator noticing and publishing a key
+// rescues the backlog, and no longer. Measured from the file's modification
+// time, which is when this board set it aside.
 
 // heldPath is the data directory's held-packet folder.
 func heldPath(dataDir string) string { return filepath.Join(dataDir, HeldDir) }
@@ -81,7 +80,7 @@ func copyThenRemove(src, dst string) error {
 		os.Remove(tmp)
 		return err
 	}
-	// The copy carries the source's modification time with it. HeldMaxAge is
+	// The copy carries the source's modification time with it. Config.HeldMaxAge is
 	// measured from that stamp, and a ruleset-held packet is released to inbound
 	// and held again on every run (#264) — so a fresh mtime per copy would restart
 	// its clock every time and it would never age out. os.Rename keeps the stamp;
@@ -118,12 +117,12 @@ func holdPacket(dataDir, path string) error {
 // the addressing check and both signature checks all apply exactly as they would
 // have on the day the packet arrived. A second, shorter path into the world is
 // how a check gets skipped by accident.
-func releaseHeld(dataDir, inboundDir string) (int, error) {
+func releaseHeld(dataDir, inboundDir string, maxAge time.Duration) (int, error) {
 	var moved int
 	err := eachHeldPacket(dataDir, func(path string, e os.DirEntry, p *game.Packet) {
 		// Age it out first, so a packet that will never verify cannot be
 		// released, re-refused and re-held on every run forever.
-		if info, err := e.Info(); err == nil && time.Since(info.ModTime()) > HeldMaxAge {
+		if info, err := e.Info(); err == nil && time.Since(info.ModTime()) > maxAge {
 			os.Remove(path)
 			return
 		}
@@ -201,10 +200,10 @@ type HeldPacket struct {
 	Type      string // game.Packet.PacketType; "" when the file cannot be read
 	Reason    HeldReason
 	// Arrived is the file's modification time: when it was written or reached
-	// this board. Holding moves the file without touching it, and HeldMaxAge
+	// this board. Holding moves the file without touching it, and Config.HeldMaxAge
 	// counts from it, so a packet released and held again keeps its first one.
 	Arrived time.Time
-	Expires time.Time // when HeldMaxAge deletes it
+	Expires time.Time // when Config.HeldMaxAge deletes it
 	// PausesLostForces is a protocol hold that is stopping the lost-forces
 	// timer for strikes sent to FromBoard (#190).
 	PausesLostForces bool
@@ -252,7 +251,7 @@ func HeldPackets(w *game.World) ([]HeldPacket, error) {
 		h := HeldPacket{File: e.Name(), Reason: HeldUnreadable}
 		if info, err := e.Info(); err == nil {
 			h.Arrived = info.ModTime()
-			h.Expires = h.Arrived.Add(HeldMaxAge)
+			h.Expires = h.Arrived.Add(w.Config.HeldMaxAge())
 		}
 		if p != nil {
 			h.FromBoard, h.Type = p.FromBoard, p.PacketType()
