@@ -128,11 +128,31 @@ func (w *World) bombRoutesEffect() (hit int) {
 			if from != nil && w.HasTreaty(from, to, protectiveTrade) {
 				continue
 			}
+			before := deal.Send
 			bombDealBasket(&deal.Send, pct)
 			hit++
+			if deal.Send != before {
+				tellDealBombed(from, deal.From, to, pct)
+			}
 		}
 	}
 	return hit
+}
+
+// tellDealBombed files an event with both parties to a trade deal a strike
+// cut into. BRE says nothing to either: the strike reaches only the planet
+// news, which names no deal. IB tells them because the recipient otherwise
+// receives less than it was offered with nothing to say why, which reads as
+// the sender short-changing it. A dead party has no recap to read it in.
+func tellDealBombed(from *Empire, fromName string, to *Empire, pct int) {
+	if from != nil && from.Alive {
+		from.addEvent(say("A strike from another planet hit your trade deal to {who}: up to {pct} of what it carries was destroyed.",
+			"who", to.Name, "pct", percent(pct)))
+	}
+	if to.Alive {
+		to.addEvent(say("A strike from another planet hit {who}'s trade deal to you: up to {pct} of what it carries was destroyed.",
+			"who", fromName, "pct", percent(pct)))
+	}
 }
 
 // bombDealBasket takes pct percent off every good in b, gold included:

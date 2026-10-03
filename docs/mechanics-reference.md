@@ -2389,7 +2389,9 @@ see "What a Special Operation posts" below):
   transit and is not touched. A deal whose own two parties hold Protective
   Trade is spared (see that pact under Diplomacy for the BRE rule and its
   addresses). IB kept 5-9% and destroyed the rest, rolled per good and applied
-  to both baskets, until 2026-10-01.
+  to both baskets, until 2026-10-01. IB tells both parties to a deal the strike
+  cut into, in their events, naming the other and the share lost; BRE tells
+  neither (see "Screen output that deliberately diverges").
 - **Undermine Investments** — trim 2-5% off every investment on the planet
   that is at most three days from maturity, principal and return alike.
 - **Nuclear Assault** / **Chemical Bombing** — the WAR menu's strikes, aimed
@@ -5421,7 +5423,9 @@ selectively:
   the report that rides home ("37% of the supply burned."), and the firer's
   line appends it. The captures agree: `cap/eots-ibbs-02.cap` and
   `-03.cap` show bombing outcomes on both planets' news screens and in no
-  realm's turn report, and missile hits in both.
+  realm's turn report, and missile hits in both. One deliberate exception: a
+  trade deal Bomb Trade Routes cut into is reported to its two parties as an
+  event (see "Screen output that deliberately diverges").
 
 Until #288 every outcome past protection posted "X struck Y", so a
 missile that backfired read as a hit on the target's planet while the firer's
@@ -6814,6 +6818,14 @@ checking IB against a capture:
   2026-09-13 the screen recomputed Totals live EVERY day, forever, while Change
   stayed the frozen delta and the written bulletin file used neither override —
   so the screen, the file, and BRE's own model all disagreed with each other.
+- **A trade deal cut by Bomb Trade Routes is reported to both of its parties.**
+  BRE writes the strike to each planet's news only, and its success line gives
+  no figure for the trade routes, so the sender and recipient of a damaged deal
+  learn nothing. The recipient then receives less than it was offered with no
+  reason given, which reads as the sender short-changing it. IB files an event
+  with each living party naming the other and the share destroyed
+  (`tellDealBombed`); a deal the strike spared, or one that lost nothing after
+  rounding, tells nobody.
 - **The Terrorist Ops and Special Operations menus carry a (?) Help browser.**
   The original lists the ops and nothing else — nine numbered items and a Quit
   on Terrorist Ops, eight and a Quit on Special Operations, confirmed across the

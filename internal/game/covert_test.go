@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -851,5 +852,40 @@ func TestSuccessfulCovertOpsStayAnonymous(t *testing.T) {
 	}
 	if text := d.Events[before].Text; strings.Contains(text, a.Name) {
 		t.Errorf("a successful covert op named the attacker: %q", text)
+	}
+}
+
+// A strike that cuts into a trade deal tells both of its parties, naming the
+// other and the share lost (an IB addition; BRE writes only the planet news).
+// A deal the strike spared tells nobody. Several seeds, since which deals are
+// hit is rolled.
+func TestBombTradeRoutesTellsBothPartiesToADealItHit(t *testing.T) {
+	for seed := int64(1); seed <= 5; seed++ {
+		w, _, d, partner, guarded := bombRoutesFixture(t, seed)
+		pact(t, w, d, guarded, "Protective Trade")
+		pendingDeal(guarded, d) // spared every time: its parties hold the pact
+		pendingDeal(partner, d)
+		for _, e := range []*Empire{d, partner, guarded} {
+			e.Events = nil
+		}
+		for i := 0; i < bombRoutesTrials && dealUntouched(d.TradeDeals[1]); i++ {
+			w.bombRoutesEffect()
+		}
+		if dealUntouched(d.TradeDeals[1]) {
+			t.Fatalf("seed %d: no strike reached the unguarded deal", seed)
+		}
+		lost := 100 - 100*d.TradeDeals[1].Send.Gold/bombDealQty
+		want := fmt.Sprintf("%d%%", lost)
+		if n := len(partner.Events); n != 1 || !strings.Contains(partner.Events[0].Text, "your trade deal to Delta") ||
+			!strings.Contains(partner.Events[0].Text, want) {
+			t.Errorf("seed %d: sender's events %+v, want one naming Delta and %s", seed, partner.Events, want)
+		}
+		if n := len(d.Events); n != 1 || !strings.Contains(d.Events[0].Text, "PartnerLand's trade deal to you") ||
+			!strings.Contains(d.Events[0].Text, want) {
+			t.Errorf("seed %d: recipient's events %+v, want one naming PartnerLand and %s", seed, d.Events, want)
+		}
+		if len(guarded.Events) != 0 {
+			t.Errorf("seed %d: the spared deal's sender was told: %+v", seed, guarded.Events)
+		}
 	}
 }
