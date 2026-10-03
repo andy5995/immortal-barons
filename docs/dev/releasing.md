@@ -120,6 +120,11 @@ Watch it: a release with no assets is a release nobody can use.
    this — it gates on the game version, which does move for a formula change.
    Set it when a release changes gameplay a league would notice.
 
+   **The ChangeLog says so the moment it moves, not here.** The commit that
+   bumps `Protocol` adds `BREAKING: packet protocol N; every board in a league
+   must update together` as the first line of the in-progress block, so anyone
+   building from trunk in between sees it. This step only checks it is there.
+
    **If it did move, the release notes must say the upgrade is coordinated.** A
    league does not roll a protocol change through board by board: it closes the
    game, drains every board's outbound queue, and switches together (decided
