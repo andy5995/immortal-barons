@@ -112,10 +112,11 @@ func (w *World) bombingLands() bool {
 // attacker nothing.
 func (w *World) bombRoutesEffect() (hit int) {
 	pct := BombRoutesLossPctMin + w.rng.Intn(BombRoutesLossPctSpread)
+	// Every realm still on the roster, dead ones too: the walker reads every
+	// trade-offer record with no alive test (ovr_050dfb +0x214..+0x32f), and a
+	// dead realm's pending deals go home to their senders when its husk is
+	// removed (returnPendingDeals), so what a strike takes off them is real.
 	for _, to := range w.Empires {
-		if !to.Alive {
-			continue
-		}
 		for i := range to.TradeDeals {
 			deal := &to.TradeDeals[i]
 			from := w.FindByName(deal.From)

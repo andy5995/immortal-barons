@@ -5,6 +5,7 @@ Immortal Barons ChangeLog
   * An interplanetary trade deal's sender is told it arrived, or was lost
   * Recap events and interplanetary reports can be translated, with plural forms
   * Percentage losses of holdings over 21 million no longer wrap on 32-bit builds
+  * Bomb Trade Routes reaches deals still waiting on a realm that has died
   * Strike and covert results read as one sentence, with varied failure lines
   * A board that has updated no longer pauses lost forces over an old held packet
   * Net worth counts units away on attacks, up for sale, or in a trade deal

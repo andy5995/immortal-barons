@@ -635,6 +635,25 @@ func TestBombTradeRoutesSparesTheDealsOwnProtectivePartners(t *testing.T) {
 	}
 }
 
+// A deal waiting on a realm that has since died is still in transit: the
+// original's walker reads every record with no alive test, and the goods go
+// home to the sender when the husk is removed, so a strike still reaches them.
+func TestBombTradeRoutesReachesADeadRealmsPendingDeals(t *testing.T) {
+	for seed := int64(1); seed <= 5; seed++ {
+		w, _, d, partner, _ := bombRoutesFixture(t, seed)
+		pendingDeal(partner, d)
+		w.Kill(d)
+		wrecked := false
+		for i := 0; i < bombRoutesTrials && !wrecked; i++ {
+			bombRoutes(w, d)
+			wrecked = !dealUntouched(d.TradeDeals[0])
+		}
+		if !wrecked {
+			t.Errorf("seed %d: %d strikes never touched a deal waiting on a dead realm", seed, bombRoutesTrials)
+		}
+	}
+}
+
 // The attacker's own relations are never read. A realm holding Protective Trade
 // with the VICTIM still wrecks a deal whose own two parties hold nothing, and the
 // strike is neither refused nor refunded. Standing treaties are no longer touched

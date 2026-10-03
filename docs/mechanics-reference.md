@@ -6294,13 +6294,20 @@ and each carries a gameplay effect (#11 wired the last two):
   relation — which is what IB's local item 7 now is. Only the interplanetary
   menu offers the trade-route strike.
 
-  **What deals a strike reaches is IB's own call.** BRE's op is planet-wide, so
-  it never had to say which deals a strike aimed at ONE realm covers. IB takes
-  every deal that realm is a party to, on either side of it — a realm's trade
-  routes run both ways, and counting only the deals sent TO it would let a realm
-  dodge the op by never accepting one. The interplanetary planet-wide variant
-  keeps BRE's scope: every deal on the planet, with one landing roll for the
-  whole strike rather than one per realm.
+  **What a strike reaches is BRE's scope: every pending local deal on the
+  planet**, with one landing roll for the whole strike. That includes a deal
+  waiting on a realm that has since died — the walker has no alive test, and
+  those goods go home to the sender when the husk is removed. Two things are
+  outside it. An **interplanetary trade deal** is never pending on either planet,
+  in BRE or IB. BINARY-VERIFIED: `send_trade_offer` (BRE.OVR 0x024212) takes
+  the goods and writes the packet record (`write_trade_offer_packet`,
+  0x043cf9) without ever adding the deal to the offer list, whose only
+  type-1 writer is the local `create_trade_offer`; and
+  `resolve_received_trade_offer` credits the goods directly. The walker has no
+  local-or-remote test because nothing remote is ever in its list. And IB's **interplanetary market bids** (#47, IB's own) are
+  not trade routes; they buy against the market's listings, which Bomb Trading
+  Market already damages, so they are reached through that op and need no rule
+  of their own here.
 
   Protective Trade also makes trade deals **cheaper to send**: the per-day transit rate is
   divided by `ProtectiveTradeCostDivisor` (3) before the span is chosen, so a
