@@ -276,7 +276,7 @@ msgstr "(не хватает авианосцев)"
 msgid "(your current vote)"
 msgstr "(ваш текущий голос)"
 
-#: cmd/ib-sysop/main.go:392
+#: cmd/ib-sysop/main.go:393
 msgid "+"
 msgstr "+"
 
@@ -284,7 +284,7 @@ msgstr "+"
 msgid ", "
 msgstr ", "
 
-#: cmd/ib-sysop/main.go:394
+#: cmd/ib-sysop/main.go:395
 msgid "-"
 msgstr "-"
 
@@ -296,7 +296,7 @@ msgstr "-* Сброс регионов *-"
 msgid "/-Command?"
 msgstr "/-Команда?"
 
-#: cmd/ib-sysop/main.go:395
+#: cmd/ib-sysop/main.go:396
 msgid "0"
 msgstr "0"
 
@@ -308,7 +308,7 @@ msgstr ": файл новостей"
 msgid "<game name>: <view name>"
 msgstr "<название игры>: <название экрана>"
 
-#: cmd/ib-sysop/main.go:393
+#: cmd/ib-sysop/main.go:394
 msgid "="
 msgstr "="
 
@@ -383,6 +383,18 @@ msgstr "Название державы — не более 30 символов.
 #: internal/game/rename.go:34
 msgid "A realm name needs at least three letters or digits."
 msgstr "В названии державы нужно хотя бы три буквы или цифры."
+
+#: internal/game/bombing.go:149
+msgid ""
+"A strike from another planet hit your trade deal to {who}: up to {pct} of "
+"what it carries was destroyed."
+msgstr "Удар с другой планеты поразил вашу торговую сделку с {who}: уничтожено до {pct} груза."
+
+#: internal/game/bombing.go:153
+msgid ""
+"A strike from another planet hit {who}'s trade deal to you: up to {pct} of "
+"what it carries was destroyed."
+msgstr "Удар с другой планеты поразил торговую сделку {who} с вами: уничтожено до {pct} груза."
 
 #: internal/game/ibbs_trade_deal.go:42
 msgid "A trade deal must name the realm it is for."
@@ -1282,7 +1294,7 @@ msgstr "Рынок еды"
 msgid "For Sale"
 msgstr "В продаже"
 
-#: internal/game/ibbs.go:637
+#: internal/game/ibbs.go:641
 msgid "Foreign agents were seen taking an interest in your realm."
 msgstr "Замечены чужие агенты, проявляющие интерес к вашей державе."
 
@@ -5006,11 +5018,11 @@ msgstr ""
 "показать игроков и сменить имя звонящего, переименовать его державу или "
 "удалить её, затем выйти"
 
-#: internal/game/ibbs_auth.go:441
+#: internal/game/ibbs_auth.go:379
 msgid "no board key is loaded"
 msgstr "ключ станции не загружен"
 
-#: internal/game/ibbs_auth.go:36
+#: internal/game/ibbs_auth.go:34
 msgid "no coordinator key is loaded"
 msgstr "ключ координатора не загружен"
 
@@ -5106,6 +5118,12 @@ msgstr ""
 "сообщить, что лежит в очередях транспорта FTN и почему, ничего не меняя, "
 "затем выйти"
 
+#: cmd/immortal-barons/flags.go:81
+msgid ""
+"reset every board in the league, starting a new game on `<YYYY-MM-DD>` (node "
+"#1 only), then exit"
+msgstr "сбросить все BBS лиги и начать новую игру `<YYYY-MM-DD>` (только узел #1), затем выйти"
+
 #: cmd/immortal-barons/dropfile.go:82
 msgid "run -set-dropfile first"
 msgstr "сначала запустите -set-dropfile"
@@ -5183,14 +5201,6 @@ msgstr ""
 "начать новую игру: изменить настройки, затем убрать все империи и отстроить "
 "мир заново (старый мир сохраняется)"
 
-#: cmd/immortal-barons/flags.go:81
-msgid ""
-"start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), "
-"then exit"
-msgstr ""
-"начать новый сезон во всей лиге с даты `<YYYY-MM-DD>` (только узел #1), и "
-"выйти"
-
 #: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
@@ -5243,9 +5253,9 @@ msgstr ""
 msgid "the league is already frozen"
 msgstr "лига уже заморожена"
 
-#: internal/game/ibbs_freeze.go:236
-msgid "the league is frozen; thaw it before starting a new season"
-msgstr "лига заморожена; разморозьте её, прежде чем начинать новый сезон"
+#: internal/game/ibbs_freeze.go:237
+msgid "the league is frozen; thaw it before resetting the league"
+msgstr "лига заморожена; разморозьте её перед сбросом лиги"
 
 #: internal/game/ibbs_freeze.go:53
 msgid "the league is not frozen"
@@ -5263,7 +5273,7 @@ msgstr "вся планета {board}"
 msgid "the whole planet"
 msgstr "вся планета"
 
-#: internal/game/ibbs_auth.go:35
+#: internal/game/ibbs_auth.go:33
 msgid "this board is not the League Coordinator"
 msgstr "эта станция не координатор лиги"
 

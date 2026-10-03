@@ -263,7 +263,7 @@ msgstr ""
 msgid "(your current vote)"
 msgstr ""
 
-#: cmd/ib-sysop/main.go:392
+#: cmd/ib-sysop/main.go:393
 msgid "+"
 msgstr ""
 
@@ -271,7 +271,7 @@ msgstr ""
 msgid ", "
 msgstr ""
 
-#: cmd/ib-sysop/main.go:394
+#: cmd/ib-sysop/main.go:395
 msgid "-"
 msgstr ""
 
@@ -283,7 +283,7 @@ msgstr ""
 msgid "/-Command?"
 msgstr ""
 
-#: cmd/ib-sysop/main.go:395
+#: cmd/ib-sysop/main.go:396
 msgid "0"
 msgstr ""
 
@@ -295,7 +295,7 @@ msgstr ""
 msgid "<game name>: <view name>"
 msgstr ""
 
-#: cmd/ib-sysop/main.go:393
+#: cmd/ib-sysop/main.go:394
 msgid "="
 msgstr ""
 
@@ -353,6 +353,14 @@ msgstr ""
 
 #: internal/game/rename.go:34
 msgid "A realm name needs at least three letters or digits."
+msgstr ""
+
+#: internal/game/bombing.go:149
+msgid "A strike from another planet hit your trade deal to {who}: up to {pct} of what it carries was destroyed."
+msgstr ""
+
+#: internal/game/bombing.go:153
+msgid "A strike from another planet hit {who}'s trade deal to you: up to {pct} of what it carries was destroyed."
 msgstr ""
 
 #: internal/game/ibbs_trade_deal.go:42
@@ -1167,7 +1175,7 @@ msgstr ""
 msgid "For Sale"
 msgstr ""
 
-#: internal/game/ibbs.go:637
+#: internal/game/ibbs.go:641
 msgid "Foreign agents were seen taking an interest in your realm."
 msgstr ""
 
@@ -4427,11 +4435,11 @@ msgstr ""
 msgid "list the players and change a caller's name, rename their realm, or remove it, then exit"
 msgstr ""
 
-#: internal/game/ibbs_auth.go:441
+#: internal/game/ibbs_auth.go:379
 msgid "no board key is loaded"
 msgstr ""
 
-#: internal/game/ibbs_auth.go:36
+#: internal/game/ibbs_auth.go:34
 msgid "no coordinator key is loaded"
 msgstr ""
 
@@ -4503,6 +4511,10 @@ msgstr ""
 msgid "report what the FTN transport's spools are holding and why, changing nothing, then exit"
 msgstr ""
 
+#: cmd/immortal-barons/flags.go:81
+msgid "reset every board in the league, starting a new game on `<YYYY-MM-DD>` (node #1 only), then exit"
+msgstr ""
+
 #: cmd/immortal-barons/dropfile.go:82
 msgid "run -set-dropfile first"
 msgstr ""
@@ -4541,10 +4553,6 @@ msgstr ""
 
 #: cmd/immortal-barons/flags.go:91
 msgid "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"
-msgstr ""
-
-#: cmd/immortal-barons/flags.go:81
-msgid "start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), then exit"
 msgstr ""
 
 #: cmd/immortal-barons/flags.go:95
@@ -4587,8 +4595,8 @@ msgstr ""
 msgid "the league is already frozen"
 msgstr ""
 
-#: internal/game/ibbs_freeze.go:236
-msgid "the league is frozen; thaw it before starting a new season"
+#: internal/game/ibbs_freeze.go:237
+msgid "the league is frozen; thaw it before resetting the league"
 msgstr ""
 
 #: internal/game/ibbs_freeze.go:53
@@ -4607,7 +4615,7 @@ msgstr ""
 msgid "the whole planet"
 msgstr ""
 
-#: internal/game/ibbs_auth.go:35
+#: internal/game/ibbs_auth.go:33
 msgid "this board is not the League Coordinator"
 msgstr ""
 

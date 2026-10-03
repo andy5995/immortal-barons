@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-03 14:30-0500\n"
+"POT-Creation-Date: 2026-10-03 17:45-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -403,32 +403,19 @@ msgid "Bomb Trade Routes"
 msgstr "Bombardear as Rotas Comerciais"
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:16
-#, fuzzy
-#| msgid ""
-#| "Bomb Trade Routes is an InterPlanetary operation, on the Special "
-#| "Operations menu. It hits the trade deals in transit across another "
-#| "planet. Most runs are driven off before they reach it. A run that gets "
-#| "through hits about two deals in three. A deal the bombers reach arrives "
-#| "with only a few percent of each good left. Standing treaties are not "
-#| "touched."
+#: internal/help/content/covert/bomb-trade-routes.md:17
 msgid ""
 "Bomb Trade Routes is an InterPlanetary operation on the Special Operations "
 "menu. It hits the trade deals in transit on another planet. Most runs are "
 "driven off before they reach that planet. A run that gets through hits about "
 "two deals in three. A deal the bombers reach loses a few percent of every "
 "good it is sending, gold included. What the deal asks for in return is not "
-"touched, and neither are standing treaties."
-msgstr ""
-"Bombardear as Rotas Comerciais é uma operação interplanetária, no menu de "
-"Operações Especiais. Ela atinge os acordos comerciais em trânsito por outro "
-"planeta. A maioria dos ataques é repelida antes de chegar. Um ataque que "
-"passa atinge cerca de dois acordos em cada três. Um acordo alcançado pelos "
-"bombardeiros chega com apenas poucos por cento de cada mercadoria. Tratados "
-"em vigor não são afetados."
+"touched, and neither are standing treaties. Both realms trading a deal that "
+"was hit are told how much it lost."
+msgstr "Bombardear as Rotas Comerciais é uma operação interplanetária no menu de Operações Especiais. Ela atinge os acordos comerciais em trânsito em outro planeta. A maioria dos ataques é repelida antes de chegar a esse planeta. Um ataque que passa atinge cerca de dois acordos em cada três. Um acordo alcançado pelos bombardeiros perde alguns por cento de cada mercadoria que envia, ouro incluído. O que o acordo pede em troca não é afetado, nem os tratados em vigor. Os dois reinos de um acordo atingido são informados de quanto ele perdeu."
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:19
+#: internal/help/content/covert/bomb-trade-routes.md:20
 msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "
 "each other. Your own agreements with the target count for nothing here, so a "

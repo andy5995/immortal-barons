@@ -7,12 +7,14 @@ title: 'Bombardear as Rotas Comerciais'
 
 # Bombardear as Rotas Comerciais
 
-Bomb Trade Routes is an InterPlanetary operation on the Special Operations
-menu. It hits the trade deals in transit on another planet. Most runs are
-driven off before they reach that planet. A run that gets through hits about
-two deals in three. A deal the bombers reach loses a few percent of every
-good it is sending, gold included. What the deal asks for in return is not
-touched, and neither are standing treaties.
+Bombardear as Rotas Comerciais é uma operação interplanetária no menu de
+Operações Especiais. Ela atinge os acordos comerciais em trânsito em outro
+planeta. A maioria dos ataques é repelida antes de chegar a esse planeta. Um
+ataque que passa atinge cerca de dois acordos em cada três. Um acordo
+alcançado pelos bombardeiros perde alguns por cento de cada mercadoria que
+envia, ouro incluído. O que o acordo pede em troca não é afetado, nem os
+tratados em vigor. Os dois reinos de um acordo atingido são informados de
+quanto ele perdeu.
 
 Um acordo é poupado quando os dois reinos que o fizeram têm Comércio
 Protegido entre si. Seus próprios acordos com o alvo não valem nada aqui,

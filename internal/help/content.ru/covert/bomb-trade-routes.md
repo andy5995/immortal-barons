@@ -7,12 +7,14 @@ title: 'Бомбить торговые пути'
 
 # Бомбить торговые пути
 
-Bomb Trade Routes is an InterPlanetary operation on the Special Operations
-menu. It hits the trade deals in transit on another planet. Most runs are
-driven off before they reach that planet. A run that gets through hits about
-two deals in three. A deal the bombers reach loses a few percent of every
-good it is sending, gold included. What the deal asks for in return is not
-touched, and neither are standing treaties.
+Бомбардировка торговых путей — межпланетная операция в меню специальных
+операций. Она поражает торговые сделки, находящиеся в пути на другой
+планете. Большинство налётов отбивают, прежде чем они достигают этой
+планеты. Налёт, который прорывается, поражает примерно две сделки из
+трёх. Сделка, до которой добрались бомбардировщики, теряет несколько
+процентов каждого отправляемого товара, включая золото. То, что сделка
+требует взамен, не затрагивается, как и действующие договоры. Обе стороны
+поражённой сделки узнают, сколько она потеряла.
 
 Сделка уцелеет, если обе торгующие державы связаны между собой Защищённой
 торговлей. Ваши собственные соглашения с целью здесь не значат ничего, так

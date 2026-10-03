@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-10-03 14:37-0500\n"
+"POT-Creation-Date: 2026-10-03 17:46-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -333,7 +333,7 @@ msgid "Bomb Trade Routes"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:16
+#: internal/help/content/covert/bomb-trade-routes.md:17
 #, markdown-text
 msgid ""
 "Bomb Trade Routes is an InterPlanetary operation on the Special Operations "
@@ -341,11 +341,12 @@ msgid ""
 "driven off before they reach that planet. A run that gets through hits about "
 "two deals in three. A deal the bombers reach loses a few percent of every "
 "good it is sending, gold included. What the deal asks for in return is not "
-"touched, and neither are standing treaties."
+"touched, and neither are standing treaties. Both realms trading a deal that "
+"was hit are told how much it lost."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:19
+#: internal/help/content/covert/bomb-trade-routes.md:20
 #, markdown-text
 msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "

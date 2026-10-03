@@ -276,7 +276,7 @@ msgstr "(te weinig vliegdekschepen)"
 msgid "(your current vote)"
 msgstr "(uw huidige stem)"
 
-#: cmd/ib-sysop/main.go:392
+#: cmd/ib-sysop/main.go:393
 msgid "+"
 msgstr "+"
 
@@ -284,7 +284,7 @@ msgstr "+"
 msgid ", "
 msgstr ", "
 
-#: cmd/ib-sysop/main.go:394
+#: cmd/ib-sysop/main.go:395
 msgid "-"
 msgstr "-"
 
@@ -296,7 +296,7 @@ msgstr "-* Regio's opgeven *-"
 msgid "/-Command?"
 msgstr "/-opdracht?"
 
-#: cmd/ib-sysop/main.go:395
+#: cmd/ib-sysop/main.go:396
 msgid "0"
 msgstr "0"
 
@@ -308,7 +308,7 @@ msgstr ": Nieuwsbericht"
 msgid "<game name>: <view name>"
 msgstr "<naam van het spel>: <naam van het scherm>"
 
-#: cmd/ib-sysop/main.go:393
+#: cmd/ib-sysop/main.go:394
 msgid "="
 msgstr "="
 
@@ -385,6 +385,18 @@ msgstr "Een rijknaam mag hoogstens 30 tekens lang zijn."
 #: internal/game/rename.go:34
 msgid "A realm name needs at least three letters or digits."
 msgstr "Een rijknaam heeft minstens drie letters of cijfers nodig."
+
+#: internal/game/bombing.go:149
+msgid ""
+"A strike from another planet hit your trade deal to {who}: up to {pct} of "
+"what it carries was destroyed."
+msgstr "Een aanval vanaf een andere planeet trof uw handelsakkoord met {who}: tot {pct} van de lading werd vernietigd."
+
+#: internal/game/bombing.go:153
+msgid ""
+"A strike from another planet hit {who}'s trade deal to you: up to {pct} of "
+"what it carries was destroyed."
+msgstr "Een aanval vanaf een andere planeet trof het handelsakkoord van {who} aan u: tot {pct} van de lading werd vernietigd."
 
 #: internal/game/ibbs_trade_deal.go:42
 msgid "A trade deal must name the realm it is for."
@@ -1302,7 +1314,7 @@ msgstr "Voedselmarkt"
 msgid "For Sale"
 msgstr "Te koop"
 
-#: internal/game/ibbs.go:637
+#: internal/game/ibbs.go:641
 msgid "Foreign agents were seen taking an interest in your realm."
 msgstr ""
 "Buitenlandse agenten werden gezien terwijl ze belangstelling toonden voor uw "
@@ -5056,11 +5068,11 @@ msgstr ""
 "toont de spelers en laat u de naam van een gebruiker wijzigen, zijn rijk "
 "hernoemen of verwijderen, daarna afsluiten"
 
-#: internal/game/ibbs_auth.go:441
+#: internal/game/ibbs_auth.go:379
 msgid "no board key is loaded"
 msgstr "er is geen BBS-sleutel geladen"
 
-#: internal/game/ibbs_auth.go:36
+#: internal/game/ibbs_auth.go:34
 msgid "no coordinator key is loaded"
 msgstr "er is geen coördinatorsleutel geladen"
 
@@ -5155,6 +5167,12 @@ msgstr ""
 "toont wat de wachtrijen van het FTN-transport vasthouden en waarom, zonder "
 "iets te wijzigen, en sluit af"
 
+#: cmd/immortal-barons/flags.go:81
+msgid ""
+"reset every board in the league, starting a new game on `<YYYY-MM-DD>` (node "
+"#1 only), then exit"
+msgstr "elk board in de liga resetten en op `<YYYY-MM-DD>` een nieuw spel beginnen (alleen knooppunt #1), dan afsluiten"
+
 #: cmd/immortal-barons/dropfile.go:82
 msgid "run -set-dropfile first"
 msgstr "voer eerst -set-dropfile uit"
@@ -5233,14 +5251,6 @@ msgstr ""
 "start een nieuw spel: wijzig de instellingen, wis daarna alle rijken en bouw "
 "de wereld opnieuw op (de oude wereld wordt eerst opgeslagen)"
 
-#: cmd/immortal-barons/flags.go:81
-msgid ""
-"start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), "
-"then exit"
-msgstr ""
-"een nieuw seizoen voor de hele competitie beginnen op `<YYYY-MM-DD>` (alleen "
-"node #1), en dan stoppen"
-
 #: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
@@ -5295,11 +5305,9 @@ msgstr ""
 msgid "the league is already frozen"
 msgstr "de competitie is al bevroren"
 
-#: internal/game/ibbs_freeze.go:236
-msgid "the league is frozen; thaw it before starting a new season"
-msgstr ""
-"de competitie is bevroren; hef de bevriezing op voordat u een nieuw seizoen "
-"begint"
+#: internal/game/ibbs_freeze.go:237
+msgid "the league is frozen; thaw it before resetting the league"
+msgstr "de liga is bevroren; ontdooi haar voordat u de liga reset"
 
 #: internal/game/ibbs_freeze.go:53
 msgid "the league is not frozen"
@@ -5317,7 +5325,7 @@ msgstr "heel {board}"
 msgid "the whole planet"
 msgstr "de hele planeet"
 
-#: internal/game/ibbs_auth.go:35
+#: internal/game/ibbs_auth.go:33
 msgid "this board is not the League Coordinator"
 msgstr "dit BBS is niet de competitiecoördinator"
 

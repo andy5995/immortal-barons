@@ -7,12 +7,14 @@ title: 'Handelswege bombardieren'
 
 # Handelswege bombardieren
 
-Bomb Trade Routes is an InterPlanetary operation on the Special Operations
-menu. It hits the trade deals in transit on another planet. Most runs are
-driven off before they reach that planet. A run that gets through hits about
-two deals in three. A deal the bombers reach loses a few percent of every
-good it is sending, gold included. What the deal asks for in return is not
-touched, and neither are standing treaties.
+Handelswege bombardieren ist eine interplanetare Operation im Menü
+Spezialoperationen. Sie trifft die Handelsgeschäfte, die auf einem anderen
+Planeten unterwegs sind. Die meisten Angriffe werden abgewehrt, bevor sie
+diesen Planeten erreichen. Ein Angriff, der durchkommt, trifft etwa zwei von
+drei Geschäften. Ein Geschäft, das die Bomber erreichen, verliert einige
+Prozent jeder Ware, die es sendet, Gold eingeschlossen. Was das Geschäft im
+Gegenzug verlangt, bleibt unberührt, ebenso bestehende Verträge. Beide
+Reiche eines getroffenen Geschäfts erfahren, wie viel es verloren hat.
 
 Ein Geschäft bleibt verschont, wenn die beiden handelnden Reiche
 untereinander Geschützten Handel halten. Ihre eigenen Abkommen mit dem Ziel

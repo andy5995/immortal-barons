@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-03 14:30-0500\n"
+"POT-Creation-Date: 2026-10-03 17:45-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -407,32 +407,19 @@ msgid "Bomb Trade Routes"
 msgstr "Handelsroutes bombarderen"
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:16
-#, fuzzy
-#| msgid ""
-#| "Bomb Trade Routes is an InterPlanetary operation, on the Special "
-#| "Operations menu. It hits the trade deals in transit across another "
-#| "planet. Most runs are driven off before they reach it. A run that gets "
-#| "through hits about two deals in three. A deal the bombers reach arrives "
-#| "with only a few percent of each good left. Standing treaties are not "
-#| "touched."
+#: internal/help/content/covert/bomb-trade-routes.md:17
 msgid ""
 "Bomb Trade Routes is an InterPlanetary operation on the Special Operations "
 "menu. It hits the trade deals in transit on another planet. Most runs are "
 "driven off before they reach that planet. A run that gets through hits about "
 "two deals in three. A deal the bombers reach loses a few percent of every "
 "good it is sending, gold included. What the deal asks for in return is not "
-"touched, and neither are standing treaties."
-msgstr ""
-"Handelsroutes bombarderen is een interplanetaire operatie, in het menu "
-"Speciale operaties. Die treft de handelsovereenkomsten die over een andere "
-"planeet onderweg zijn. De meeste aanvallen worden verdreven voordat ze hun "
-"doel bereiken. Een aanval die doorkomt treft ongeveer twee op de drie "
-"overeenkomsten. Een overeenkomst die de bommenwerpers bereiken komt aan met "
-"maar een paar procent van elk goed. Lopende verdragen worden niet geraakt."
+"touched, and neither are standing treaties. Both realms trading a deal that "
+"was hit are told how much it lost."
+msgstr "Handelsroutes bombarderen is een interplanetaire operatie in het menu Speciale operaties. Die treft de handelsovereenkomsten die op een andere planeet onderweg zijn. De meeste aanvallen worden verdreven voordat ze die planeet bereiken. Een aanval die doorkomt treft ongeveer twee op de drie overeenkomsten. Een overeenkomst die de bommenwerpers bereiken verliest een paar procent van elk goed dat ze verstuurt, goud inbegrepen. Wat de overeenkomst in ruil vraagt wordt niet geraakt, en lopende verdragen ook niet. Beide rijken van een getroffen overeenkomst krijgen te horen hoeveel ze verloor."
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:19
+#: internal/help/content/covert/bomb-trade-routes.md:20
 msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "
 "each other. Your own agreements with the target count for nothing here, so a "

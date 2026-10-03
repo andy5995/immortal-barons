@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-03 14:30-0500\n"
+"POT-Creation-Date: 2026-10-03 17:45-0500\n"
 "PO-Revision-Date: 2026-10-02 16:05-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -399,24 +399,19 @@ msgid "Bomb Trade Routes"
 msgstr "Bomba handelsvägar"
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:16
+#: internal/help/content/covert/bomb-trade-routes.md:17
 msgid ""
 "Bomb Trade Routes is an InterPlanetary operation on the Special Operations "
 "menu. It hits the trade deals in transit on another planet. Most runs are "
 "driven off before they reach that planet. A run that gets through hits about "
 "two deals in three. A deal the bombers reach loses a few percent of every "
 "good it is sending, gold included. What the deal asks for in return is not "
-"touched, and neither are standing treaties."
-msgstr ""
-"Bomba handelsvägar är en interplanetär operation i Specialoperationer-menyn. "
-"Den träffar handelsavtal på väg till en annan planet. De flesta försök drivs "
-"bort innan de når den planeten. Ett försök som kommer igenom träffar ungefär "
-"två avtal av tre. Ett avtal som bombplanen når förlorar några procent av "
-"varje vara det skickar, guld inräknat. Vad avtalet begär i utbyte rörs inte, "
-"och inte heller gällande fördrag."
+"touched, and neither are standing treaties. Both realms trading a deal that "
+"was hit are told how much it lost."
+msgstr "Bomba handelsvägar är en interplanetär operation i menyn Specialoperationer. Den träffar handelsavtalen som är på väg på en annan planet. De flesta anfall drivs bort innan de når den planeten. Ett anfall som tar sig igenom träffar ungefär två avtal av tre. Ett avtal som bombplanen når förlorar några procent av varje vara det skickar, guld inräknat. Det avtalet begär i gengäld påverkas inte, och inte heller gällande fördrag. Båda rikena i ett avtal som träffades får veta hur mycket det förlorade."
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:19
+#: internal/help/content/covert/bomb-trade-routes.md:20
 msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "
 "each other. Your own agreements with the target count for nothing here, so a "

@@ -276,7 +276,7 @@ msgstr "(inte nog med hangarfartyg)"
 msgid "(your current vote)"
 msgstr "(din nuvarande röst)"
 
-#: cmd/ib-sysop/main.go:392
+#: cmd/ib-sysop/main.go:393
 msgid "+"
 msgstr "+"
 
@@ -284,7 +284,7 @@ msgstr "+"
 msgid ", "
 msgstr ", "
 
-#: cmd/ib-sysop/main.go:394
+#: cmd/ib-sysop/main.go:395
 msgid "-"
 msgstr "-"
 
@@ -296,7 +296,7 @@ msgstr "-* Släpp regioner *-"
 msgid "/-Command?"
 msgstr "/-Kommando?"
 
-#: cmd/ib-sysop/main.go:395
+#: cmd/ib-sysop/main.go:396
 msgid "0"
 msgstr "0"
 
@@ -308,7 +308,7 @@ msgstr ": Nyhetsfil"
 msgid "<game name>: <view name>"
 msgstr "<spelnamn>: <vynamn>"
 
-#: cmd/ib-sysop/main.go:393
+#: cmd/ib-sysop/main.go:394
 msgid "="
 msgstr "="
 
@@ -384,6 +384,18 @@ msgstr "Ett rikesnamn får vara högst 30 tecken."
 #: internal/game/rename.go:34
 msgid "A realm name needs at least three letters or digits."
 msgstr "Ett rikesnamn behöver minst tre bokstäver eller siffror."
+
+#: internal/game/bombing.go:149
+msgid ""
+"A strike from another planet hit your trade deal to {who}: up to {pct} of "
+"what it carries was destroyed."
+msgstr "Ett anfall från en annan planet träffade ditt handelsavtal med {who}: upp till {pct} av lasten förstördes."
+
+#: internal/game/bombing.go:153
+msgid ""
+"A strike from another planet hit {who}'s trade deal to you: up to {pct} of "
+"what it carries was destroyed."
+msgstr "Ett anfall från en annan planet träffade {who}s handelsavtal till dig: upp till {pct} av lasten förstördes."
 
 #: internal/game/ibbs_trade_deal.go:42
 msgid "A trade deal must name the realm it is for."
@@ -1293,7 +1305,7 @@ msgstr "Matmarknad"
 msgid "For Sale"
 msgstr "Till försäljning"
 
-#: internal/game/ibbs.go:637
+#: internal/game/ibbs.go:641
 msgid "Foreign agents were seen taking an interest in your realm."
 msgstr "Utländska agenter sågs visa intresse för ditt rike."
 
@@ -4965,11 +4977,11 @@ msgstr ""
 "lista spelarna och ändra en uppringares namn, byt namn på deras rike, eller "
 "ta bort det, och avsluta sedan"
 
-#: internal/game/ibbs_auth.go:441
+#: internal/game/ibbs_auth.go:379
 msgid "no board key is loaded"
 msgstr "ingen BBS-nyckel är inladdad"
 
-#: internal/game/ibbs_auth.go:36
+#: internal/game/ibbs_auth.go:34
 msgid "no coordinator key is loaded"
 msgstr "ingen koordinatornyckel är inladdad"
 
@@ -5066,6 +5078,12 @@ msgstr ""
 "rapportera vad FTN-transportens köer innehåller och varför, utan att ändra "
 "något, och avsluta sedan"
 
+#: cmd/immortal-barons/flags.go:81
+msgid ""
+"reset every board in the league, starting a new game on `<YYYY-MM-DD>` (node "
+"#1 only), then exit"
+msgstr "återställ varje board i ligan och starta ett nytt spel den `<YYYY-MM-DD>` (endast nod #1), avsluta sedan"
+
 #: cmd/immortal-barons/dropfile.go:82
 msgid "run -set-dropfile first"
 msgstr "kör -set-dropfile först"
@@ -5144,14 +5162,6 @@ msgstr ""
 "starta ett nytt spel: ändra inställningarna, och rensa sedan alla riken och "
 "bygg om världen (den gamla världen sparas först)"
 
-#: cmd/immortal-barons/flags.go:81
-msgid ""
-"start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), "
-"then exit"
-msgstr ""
-"starta en ny säsong över hela ligan den `<YYYY-MM-DD>` (endast nod 1), och "
-"avsluta sedan"
-
 #: cmd/immortal-barons/flags.go:95
 msgid ""
 "take this board's name, league number, mailer and FTN directories from an "
@@ -5204,9 +5214,9 @@ msgstr ""
 msgid "the league is already frozen"
 msgstr "ligan är redan frusen"
 
-#: internal/game/ibbs_freeze.go:236
-msgid "the league is frozen; thaw it before starting a new season"
-msgstr "ligan är frusen; tina den innan du startar en ny säsong"
+#: internal/game/ibbs_freeze.go:237
+msgid "the league is frozen; thaw it before resetting the league"
+msgstr "ligan är frusen; tina upp den innan du återställer ligan"
 
 #: internal/game/ibbs_freeze.go:53
 msgid "the league is not frozen"
@@ -5224,7 +5234,7 @@ msgstr "hela {board}"
 msgid "the whole planet"
 msgstr "hela planeten"
 
-#: internal/game/ibbs_auth.go:35
+#: internal/game/ibbs_auth.go:33
 msgid "this board is not the League Coordinator"
 msgstr "den här BBS:en är inte ligakoordinatorn"
 

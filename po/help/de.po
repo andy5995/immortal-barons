@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-03 14:30-0500\n"
+"POT-Creation-Date: 2026-10-03 17:45-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -417,32 +417,19 @@ msgid "Bomb Trade Routes"
 msgstr "Handelswege bombardieren"
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:16
-#, fuzzy
-#| msgid ""
-#| "Bomb Trade Routes is an InterPlanetary operation, on the Special "
-#| "Operations menu. It hits the trade deals in transit across another "
-#| "planet. Most runs are driven off before they reach it. A run that gets "
-#| "through hits about two deals in three. A deal the bombers reach arrives "
-#| "with only a few percent of each good left. Standing treaties are not "
-#| "touched."
+#: internal/help/content/covert/bomb-trade-routes.md:17
 msgid ""
 "Bomb Trade Routes is an InterPlanetary operation on the Special Operations "
 "menu. It hits the trade deals in transit on another planet. Most runs are "
 "driven off before they reach that planet. A run that gets through hits about "
 "two deals in three. A deal the bombers reach loses a few percent of every "
 "good it is sending, gold included. What the deal asks for in return is not "
-"touched, and neither are standing treaties."
-msgstr ""
-"Handelswege bombardieren ist eine interplanetare Operation im Menü "
-"Spezialoperationen. Sie trifft die Handelsgeschäfte, die über einen anderen "
-"Planeten unterwegs sind. Die meisten Angriffe werden abgewehrt, bevor sie "
-"ihn erreichen. Ein Angriff, der durchkommt, trifft etwa zwei von drei "
-"Geschäften. Ein Geschäft, das die Bomber erreichen, kommt nur mit wenigen "
-"Prozent jeder Ware an. Bestehende Verträge werden nicht berührt."
+"touched, and neither are standing treaties. Both realms trading a deal that "
+"was hit are told how much it lost."
+msgstr "Handelswege bombardieren ist eine interplanetare Operation im Menü Spezialoperationen. Sie trifft die Handelsgeschäfte, die auf einem anderen Planeten unterwegs sind. Die meisten Angriffe werden abgewehrt, bevor sie diesen Planeten erreichen. Ein Angriff, der durchkommt, trifft etwa zwei von drei Geschäften. Ein Geschäft, das die Bomber erreichen, verliert einige Prozent jeder Ware, die es sendet, Gold eingeschlossen. Was das Geschäft im Gegenzug verlangt, bleibt unberührt, ebenso bestehende Verträge. Beide Reiche eines getroffenen Geschäfts erfahren, wie viel es verloren hat."
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:19
+#: internal/help/content/covert/bomb-trade-routes.md:20
 msgid ""
 "A deal is spared when the two realms trading it hold Protective Trade with "
 "each other. Your own agreements with the target count for nothing here, so a "
