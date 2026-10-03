@@ -31,19 +31,20 @@ const HeldDir = "held"
 // heldPath is the data directory's held-packet folder.
 func heldPath(dataDir string) string { return filepath.Join(dataDir, HeldDir) }
 
-// moveFile moves a file, falling back to copy-and-delete when the two paths are
-// on different filesystems. os.Rename alone is not enough here: an inbound
-// directory is usually the MAILER's, which is routinely a different mount from
-// the game's data directory, and rename across one fails with EXDEV. That would
-// fail the whole planetary run rather than hold one packet.
-func moveFile(src, dst string) error {
+// MoveFile moves a file, falling back to copy-and-delete when the two paths are
+// on different filesystems. os.Rename alone is not enough: an inbound or
+// outbound directory is often the MAILER's, a different mount from the game's
+// data directory — on Windows a different drive letter, which rename refuses
+// outright ("cannot move the file to a different disk drive"). The FTN
+// transport moves its packets with it for that reason.
+func MoveFile(src, dst string) error {
 	if err := os.Rename(src, dst); err == nil {
 		return nil
 	}
 	return copyThenRemove(src, dst)
 }
 
-// copyThenRemove is moveFile's cross-filesystem half, split out so a test can
+// copyThenRemove is MoveFile's cross-filesystem half, split out so a test can
 // reach it without staging two mounts.
 func copyThenRemove(src, dst string) error {
 	in, err := os.Open(src)
@@ -105,7 +106,7 @@ func holdPacket(dataDir, path string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
-	return moveFile(path, filepath.Join(dir, filepath.Base(path)))
+	return MoveFile(path, filepath.Join(dir, filepath.Base(path)))
 }
 
 // releaseHeld moves every held packet this build can now read back into the
@@ -129,7 +130,7 @@ func releaseHeld(dataDir, inboundDir string, maxAge time.Duration) (int, error) 
 		if p == nil || !game.SpeaksOurProtocol(p.Protocol) {
 			return
 		}
-		if err := moveFile(path, filepath.Join(inboundDir, e.Name())); err != nil {
+		if err := MoveFile(path, filepath.Join(inboundDir, e.Name())); err != nil {
 			return
 		}
 		moved++

@@ -59,7 +59,7 @@ func quarantinePacket(dataDir, path string) error {
 	if err != nil {
 		return err
 	}
-	return moveFile(path, dst)
+	return MoveFile(path, dst)
 }
 
 // uniqueName returns base if nothing is there yet, otherwise base with a

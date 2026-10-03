@@ -254,6 +254,9 @@ func processPendingBatches(root, dataDir string, transport Config, world *game.W
 	return nil
 }
 
+// moveFile is store.MoveFile, held in a variable so a test can make a move fail.
+var moveFile = store.MoveFile
+
 func claimOutboundBatch(root string, board game.Config) (string, error) {
 	id, err := randomBundleID()
 	if err != nil {
@@ -284,8 +287,13 @@ func claimOutboundBatch(root string, board game.Config) (string, error) {
 			}
 			source := filepath.Join(dir, entry.Name())
 			destination := filepath.Join(batch, fmt.Sprintf("packet-%06d%s", claimed, store.PacketExt))
-			if err := os.Rename(source, destination); err != nil {
+			// GameOutbound is often on another drive than the data directory
+			// the spool lives in, which a plain rename refuses.
+			if err := moveFile(source, destination); err != nil {
 				gameLock.Release()
+				if claimed == 0 {
+					os.Remove(batch) // nothing in it; a later run would find it empty
+				}
 				return "", fmt.Errorf("claim %s: %w", source, err)
 			}
 			claimed++
@@ -722,7 +730,7 @@ func quarantineTransport(dataDir, source string) error {
 		}
 		target := filepath.Join(dir, name)
 		if _, err := os.Lstat(target); os.IsNotExist(err) {
-			return os.Rename(source, target)
+			return moveFile(source, target)
 		} else if err != nil {
 			return err
 		}

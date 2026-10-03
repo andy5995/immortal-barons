@@ -2,6 +2,7 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * BREAKING: packet protocol 4; every board in a league must update together
+  * FTN: GameOutbound may be on a different drive from the data directory
   * An interplanetary trade deal's sender is told it arrived, or was lost
   * Recap events and interplanetary reports can be translated
   * Losses from holdings over 21 million no longer wrap on 32-bit builds
