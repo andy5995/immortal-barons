@@ -52,7 +52,8 @@ innan du använder det.
 Du kan inte be om något tillbaka. Varorna är en gåva, och riket du skickar
 dem till har ingen talan: de anländer och läggs till det riket har. Det
 finns inget erbjudande att acceptera eller avslå, så inget returneras
-någonsin till dig.
+någonsin till dig. Du får veta när avtalet anländer, eller att det gick
+förlorat för att riket inte längre finns.
 
 Du betalar en gång, inte per dag, och du behöver inget fördrag med riket
 eller dess planet.  Avgiften beror på vad som finns i avtalet, och den visas

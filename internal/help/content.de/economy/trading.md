@@ -53,7 +53,9 @@ beschriebene, lesen Sie dies also, bevor Sie es nutzen.
 Sie können nichts dafür verlangen. Die Waren sind ein Geschenk, und das
 Reich, dem Sie sie senden, hat kein Mitspracherecht: Sie treffen ein und
 werden dem hinzugefügt, was dieses Reich hält. Es gibt kein Angebot zum
-Annehmen oder Ablehnen, daher wird Ihnen nie etwas zurückgegeben.
+Annehmen oder Ablehnen, daher wird Ihnen nie etwas zurückgegeben. Sie
+erfahren, wenn das Geschäft ankommt oder wenn es verloren ging, weil das
+Reich nicht mehr existiert.
 
 Sie zahlen einmal, nicht je Tag, und Sie brauchen weder einen Vertrag mit
 dem Reich noch mit seinem Planeten.  Die Gebühr hängt davon ab, was in dem

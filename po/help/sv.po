@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-02 16:25-0500\n"
+"POT-Creation-Date: 2026-10-03 14:30-0500\n"
 "PO-Revision-Date: 2026-10-02 16:05-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -674,8 +674,9 @@ msgid ""
 msgstr ""
 "Varje hemlig operation kan köras en gång för varje drag under dagen, och du "
 "kan spendera den tilldelningen när du vill - allt på ett drag, eller en i "
-"taget. Att köra Uppmana till uppror förbrukar en Uppmana till uppror och lämnar alla andra "
-"operationer orörda. Tilldelningen fylls på igen i början av varje ny dag."
+"taget. Att köra Uppmana till uppror förbrukar en Uppmana till uppror och "
+"lämnar alla andra operationer orörda. Tilldelningen fylls på igen i början "
+"av varje ny dag."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:59
@@ -949,8 +950,8 @@ msgid ""
 "Stir Revolts spreads propaganda that lowers the target's public support. Low "
 "support weakens their troopers and their economy."
 msgstr ""
-"Uppmana till uppror sprider propaganda som sänker målets folkliga stöd. Lågt stöd "
-"försvagar deras soldater och deras ekonomi."
+"Uppmana till uppror sprider propaganda som sänker målets folkliga stöd. Lågt "
+"stöd försvagar deras soldater och deras ekonomi."
 
 #. type: Title #
 #: internal/help/content/covert/support-dissensions.md:1
@@ -1422,8 +1423,8 @@ msgid ""
 msgstr ""
 "Vad som fortfarande är obetalt vid dagens slut växer, med mer än bankens "
 "räntesatser, och betalningarna fortsätter nästa dag. Håll därför guld i "
-"handen när ett lån förfaller, eller betala av det i förtid via Kontanthjälp / "
-"lån."
+"handen när ett lån förfaller, eller betala av det i förtid via "
+"Kontanthjälp / lån."
 
 #. type: Title ##
 #: internal/help/content/economy/banking.md:56
@@ -2159,19 +2160,22 @@ msgstr ""
 "innan du använder det."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:52
+#: internal/help/content/economy/trading.md:53
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
 "send them to has no say: they arrive and are added to what that realm holds. "
-"There is no offer to accept or refuse, so nothing is ever returned to you."
+"There is no offer to accept or refuse, so nothing is ever returned to you. "
+"You are told when the deal arrives, or that it was lost because the realm is "
+"gone."
 msgstr ""
 "Du kan inte be om något tillbaka. Varorna är en gåva, och riket du skickar "
 "dem till har ingen talan: de anländer och läggs till det riket har. Det "
 "finns inget erbjudande att acceptera eller avslå, så inget returneras "
-"någonsin till dig."
+"någonsin till dig. Du får veta när avtalet anländer, eller att det gick "
+"förlorat för att riket inte längre finns."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:57
+#: internal/help/content/economy/trading.md:58
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
 "planet.  The fee depends on what is in the deal, and it is shown before you "
@@ -2186,18 +2190,18 @@ msgstr ""
 "använd avtalet ovan."
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:58
+#: internal/help/content/economy/trading.md:59
 #, no-wrap
 msgid "Getting the most from trade"
 msgstr "Få ut mest av handel"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:61
+#: internal/help/content/economy/trading.md:62
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr "Handel betyder mest när flera riken samarbetar. Några idéer:"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:66
+#: internal/help/content/economy/trading.md:67
 #, no-wrap
 msgid ""
 "**Specialize, then supply your partners.** Your industry can specialize in one\n"
@@ -2211,7 +2215,7 @@ msgstr ""
 "gör ni båda mer av det den andra behöver. Handla med överskottet, så vinner båda riken på det.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:70
+#: internal/help/content/economy/trading.md:71
 #, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so\n"
@@ -2223,7 +2227,7 @@ msgstr ""
 "beväpna en rival istället. Vill du vara säker på att varorna når det rike du menar dem för, skicka ett handelsavtal istället.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:73
+#: internal/help/content/economy/trading.md:74
 #, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, and\n"
@@ -3315,9 +3319,9 @@ msgid ""
 "change."
 msgstr ""
 "Du namnger ditt rike första gången du ringer upp, och du kan ändra det "
-"namnet en gång - från menyn Inställningar, efter att Nytt rikes skydd "
-"har upphört. Bara en gång: alternativet försvinner efteråt, och hela "
-"planeten får veta om ändringen."
+"namnet en gång - från menyn Inställningar, efter att Nytt rikes skydd har "
+"upphört. Bara en gång: alternativet försvinner efteråt, och hela planeten "
+"får veta om ändringen."
 
 #. type: Plain text
 #: internal/help/content/introduction/overview.md:29

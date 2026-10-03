@@ -53,7 +53,9 @@ hierboven, dus lees dit voordat u het gebruikt.
 U kunt niets terugvragen. De goederen zijn een geschenk, en het rijk waar u
 ze naartoe stuurt heeft er niets over te zeggen: ze komen aan en worden
 toegevoegd aan wat dat rijk bezit. Er is geen aanbod om aan te nemen of te
-weigeren, dus er komt nooit iets bij u terug.
+weigeren, dus er komt nooit iets bij u terug. U hoort wanneer de
+overeenkomst aankomt, of dat ze verloren ging omdat het rijk er niet meer
+is.
 
 U betaalt eenmalig, niet per dag, en u heeft geen verdrag nodig met het rijk
 of zijn planeet.  De vergoeding hangt af van wat er in de overeenkomst zit,

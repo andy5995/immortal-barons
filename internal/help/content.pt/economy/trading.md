@@ -52,7 +52,8 @@ antes de usá-lo.
 Você não pode pedir nada em troca. As mercadorias são um presente, e o reino
 para quem você as manda não opina: elas chegam e são somadas ao que aquele
 reino tem. Não há oferta a aceitar ou recusar, então nada nunca volta para
-você.
+você. Você é avisado quando o acordo chega, ou de que ele se perdeu porque o
+reino não existe mais.
 
 Você paga uma vez só, não por dia, e não precisa de tratado com o reino nem
 com o planeta dele.  A taxa depende do que está no acordo, e é mostrada

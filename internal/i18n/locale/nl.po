@@ -16,6 +16,10 @@ msgstr ""
 msgid "  Include carriers?"
 msgstr "  Vliegdekschepen meenemen?"
 
+#: internal/game/covert.go:455
+msgid "  {who} with {other}: {treaty}"
+msgstr "  {who} met {other}: {treaty}"
+
 #: internal/menu/actions_info.go:264
 msgid " (floating)"
 msgstr " (zwevend)"
@@ -40,35 +44,41 @@ msgstr "Aantal"
 msgid "##"
 msgstr "##"
 
-#: internal/menu/actions_interbbs.go
+#: internal/menu/actions_interbbs.go:88
 msgid "%.0f day"
 msgid_plural "%.0f days"
 msgstr[0] "%.0f dag"
 msgstr[1] "%.0f dagen"
 
-#: internal/menu/actions_interbbs.go
+#: internal/menu/actions_info.go:345
+msgid "%.0f fault"
+msgid_plural "%.0f faults"
+msgstr[0] "%.0f fout"
+msgstr[1] "%.0f fouten"
+
+#: internal/menu/actions_interbbs.go:90
 msgid "%.0f hour"
 msgid_plural "%.0f hours"
 msgstr[0] "%.0f uur"
 msgstr[1] "%.0f uur"
 
-#: internal/menu/actions_interbbs.go
+#: internal/menu/actions_interbbs.go:114
 msgid "%.0f minute"
 msgid_plural "%.0f minutes"
 msgstr[0] "%.0f minuut"
 msgstr[1] "%.0f minuten"
 
-#: internal/menu/actions_interbbs.go
+#: internal/menu/actions_interbbs.go:112
 msgid "%.0f second"
 msgid_plural "%.0f seconds"
 msgstr[0] "%.0f seconde"
 msgstr[1] "%.0f seconden"
 
-#: internal/menu/actions_interbbs.go:117
+#: internal/menu/actions_interbbs.go:118
 msgid "%.2f days"
 msgstr "%.2f dagen"
 
-#: internal/menu/actions_interbbs.go:115
+#: internal/menu/actions_interbbs.go:116
 msgid "%.2f hours"
 msgstr "%.2f uur"
 
@@ -84,19 +94,13 @@ msgstr "%d %s-regio's opgegeven. U bezit nu %d land."
 msgid "%d %s regions purchased. Gold: %d"
 msgstr "%d %s-regio's gekocht. Goud: %d"
 
-#: internal/menu/actions_covert.go:178
+#: internal/menu/actions_covert.go:182
 msgid "%d agents sent out."
 msgstr "%d agenten uitgestuurd."
 
 #: internal/menu/actions_info.go:254
 msgid "%d days"
 msgstr "%d dagen"
-
-#: internal/menu/actions_info.go
-msgid "%.0f fault"
-msgid_plural "%.0f faults"
-msgstr[0] "%.0f fout"
-msgstr[1] "%.0f fouten"
 
 #: internal/menu/turnstages.go:236
 msgid "%d gold is requested to boost popular support."
@@ -121,10 +125,6 @@ msgstr "%d regio's kwamen in opstand door achterstallig onderhoud."
 #: internal/game/combat.go:194
 msgid "%d troopers, %d jets, %d tanks, %d bombers"
 msgstr "%d soldaten, %d jagers, %d tanks, %d bommenwerpers"
-
-#: internal/game/combat.go:304
-msgid "{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets"
-msgstr "{troopers} soldaten, {turrets} geschutstorens, {tanks} tanks, {jets} jagers"
 
 #: internal/menu/turnstages.go:184
 msgid "%d units deserted for lack of pay."
@@ -165,14 +165,6 @@ msgstr "%s tegen welke baron?"
 #: internal/menu/actions_ipops.go:155
 msgid "%s against which planet?"
 msgstr "%s tegen welke planeet?"
-
-#: internal/game/combat.go:269
-msgid "{who} attacked you and took {n} regions. You lost {lost}."
-msgstr "{who} viel u aan en nam {n} regio's. U verloor {lost}."
-
-#: internal/game/combat.go:287
-msgid "{who} attacked you and was repelled. You lost {lost}."
-msgstr "{who} viel u aan en werd afgeslagen. U verloor {lost}."
 
 #: internal/menu/actions_info.go:102
 msgid "%s days"
@@ -268,7 +260,7 @@ msgstr ""
 msgid "(%d times)"
 msgstr "(%d keer)"
 
-#: internal/menu/actions_interbbs.go:78
+#: internal/menu/actions_interbbs.go:79
 msgid "(%s old)"
 msgstr "(%s oud)"
 
@@ -280,13 +272,13 @@ msgstr "(%s per jaar)"
 msgid "(not enough carriers)"
 msgstr "(te weinig vliegdekschepen)"
 
-#: internal/menu/actions_interbbs.go:158
+#: internal/menu/actions_interbbs.go:155
 msgid "(your current vote)"
 msgstr "(uw huidige stem)"
 
 #: cmd/ib-sysop/main.go:392
 msgid "+"
-msgstr ""
+msgstr "+"
 
 #: internal/menu/actions_ipdiplomacy.go:134
 msgid ", "
@@ -294,7 +286,7 @@ msgstr ", "
 
 #: cmd/ib-sysop/main.go:394
 msgid "-"
-msgstr ""
+msgstr "-"
 
 #: internal/menu/actions_regions.go:382
 msgid "-* Drop Regions *-"
@@ -306,7 +298,7 @@ msgstr "/-opdracht?"
 
 #: cmd/ib-sysop/main.go:395
 msgid "0"
-msgstr ""
+msgstr "0"
 
 #: internal/menu/news.go:130
 msgid ": News File"
@@ -318,7 +310,7 @@ msgstr "<naam van het spel>: <naam van het scherm>"
 
 #: cmd/ib-sysop/main.go:393
 msgid "="
-msgstr ""
+msgstr "="
 
 #: internal/menu/actions_message.go:187
 msgid "=All"
@@ -336,6 +328,10 @@ msgstr "=Lijst"
 msgid ">"
 msgstr ">"
 
+#: internal/game/annihilator.go:442
+msgid "A Gooie Kablooie landed on the planet — you lost {n} regions."
+msgstr "Een Gooie Kablooie trof de planeet - u verloor {n} regio's."
+
 #: internal/menu/actions_ipops.go:76
 msgid "A SpyGuy costs %s%s%s gold per day."
 msgstr "Een SpyGuy kost %s%s%s goud per dag."
@@ -345,13 +341,13 @@ msgid "A caller name cannot be blank."
 msgstr "Een gebruikersnaam mag niet leeg zijn."
 
 #: internal/menu/opshelp.go:52
-#, fuzzy
 msgid ""
 "A chemical missile at a realm on another planet. It kills population rather "
 "than ruining land. A large tank force may bring it down."
 msgstr ""
 "Een chemische raket op een rijk op een andere planeet. Die doodt de "
-"bevolking in plaats van het land te verwoesten."
+"bevolking in plaats van het land te verwoesten. Een grote tankmacht kan hem "
+"neerhalen."
 
 #: internal/game/sysop.go:22
 msgid "A computer baron has no caller to rename."
@@ -368,15 +364,15 @@ msgstr ""
 "geleden, en ze brengen 125 procent mee van het land van een gewone aanval."
 
 #: internal/menu/opshelp.go:51
-#, fuzzy
 msgid ""
 "A nuclear missile at a realm on another planet. One of each missile per game "
 "day. The target's SDI may stop it, and so may a large turret force. An "
 "arriving strike ruins a wider swath than a neighbor's does."
 msgstr ""
-"Een kernraket op een rijk op een andere planeet. Eén van elke raket per "
-"speeldag, en het SDI van het doelwit kan hem tegenhouden. Een aanval van ver "
-"verwoest een bredere strook dan die van een buur."
+"Een kernraket op een rijk op een andere planeet. Een van elke raket per "
+"speeldag. Het SDI van het doelwit kan hem tegenhouden, net als een grote "
+"macht geschutstorens. Een aanval van ver verwoest een bredere strook dan die "
+"van een buur."
 
 #: internal/menu/actions_realm.go:96
 msgid "A realm may be renamed once and never again."
@@ -390,11 +386,15 @@ msgstr "Een rijknaam mag hoogstens 30 tekens lang zijn."
 msgid "A realm name needs at least three letters or digits."
 msgstr "Een rijknaam heeft minstens drie letters of cijfers nodig."
 
-#: internal/game/ibbs_trade_deal.go:47
+#: internal/game/ibbs_trade_deal.go:42
+msgid "A trade deal must name the realm it is for."
+msgstr "Een handelsovereenkomst moet het rijk noemen waarvoor ze is."
+
+#: internal/game/ibbs_trade_deal.go:50
 msgid "A trade deal must ship something."
 msgstr "Een handelsovereenkomst moet iets vervoeren."
 
-#: internal/game/ibbs_trade_deal.go:39
+#: internal/game/ibbs_trade_deal.go:38
 msgid ""
 "A trade deal to your own planet is a local deal; send it from the Trading "
 "menu."
@@ -403,7 +403,6 @@ msgstr ""
 "stuur die vanuit het handelsmenu."
 
 #: internal/menu/opshelp.go:53
-#, fuzzy
 msgid ""
 "A variable-return missile: what it destroys depends on a dial. A large "
 "trooper army may bring it down. It can backfire, which costs you nothing but "
@@ -411,13 +410,33 @@ msgid ""
 "dial is a setting your sysop chooses."
 msgstr ""
 "Een raket met wisselend resultaat: wat hij vernietigt hangt af van een "
-"instelknop. Hij kan mislukken. Dat kost u niets, maar het rijk waarop u "
-"mikte krijgt er nieuw land bij. Of u naar die knop wordt gevraagd, is een "
-"instelling van uw sysop."
+"instelknop. Een groot leger soldaten kan hem neerhalen. Hij kan mislukken. "
+"Dat kost u niets, maar het rijk waarop u mikte krijgt er nieuw land bij. Of "
+"u naar die knop wordt gevraagd, is een instelling van uw sysop."
 
 #: internal/menu/timezone.go:81
 msgid "A zone name, as in America/New_York or Europe/Berlin."
 msgstr "Een zonenaam, zoals America/New_York of Europe/Amsterdam."
+
+#: internal/game/flavor.go:26
+msgid ""
+"A {missile} from {from} lost its guidance and drifted into a black hole "
+"before it reached you."
+msgstr ""
+"Een {missile} van {from} verloor zijn besturing en dreef een zwart gat in "
+"voordat hij u bereikte."
+
+#: internal/game/flavor.go:30
+msgid "A {missile} from {from} ran into a stray asteroid on its way to you."
+msgstr ""
+"Een {missile} van {from} botste onderweg naar u op een verdwaalde asteroide."
+
+#: internal/game/flavor.go:32
+msgid ""
+"A {missile} from {from} sailed harmlessly past; its warhead never armed."
+msgstr ""
+"Een {missile} van {from} vloog onschuldig voorbij; de kernkop werd nooit "
+"scherp."
 
 #: internal/menu/actions_ipattack.go:474
 msgid "ALL"
@@ -455,17 +474,36 @@ msgstr "Akkoord? [Y] Ja, [N] Nee, [I] Negeren"
 msgid "Add how much gold for funding?"
 msgstr "Hoeveel goud bijdragen aan de financiering?"
 
+#: internal/menu/battlestage.go:41
+msgid "Advancing..."
+msgstr "Oprukken..."
+
 #: internal/menu/actions_regions.go:70
 msgid "Advisors"
 msgstr "Adviseurs"
 
-#: internal/game/units.go:146
+#: internal/game/units.go:150
 msgid "Agent"
 msgstr "Geheim agent"
 
 #: internal/menu/empire_status_screen.go:107
 msgid "Agents"
 msgstr "Agenten"
+
+#: internal/game/covert.go:291
+msgid "Agents found your forces' weaknesses, and their self-esteem dropped."
+msgstr ""
+"Agenten vonden de zwakke plekken van uw troepen, en hun zelfvertrouwen "
+"daalde."
+
+#: internal/game/covert.go:265
+msgid "Agitators stirred dissent in your army, and {n} troopers deserted."
+msgstr "Opruiers zaaiden onvrede in uw leger, en {n} soldaten deserteerden."
+
+#: internal/game/covert.go:523
+msgid "Agitators stirred revolts in your realm, and your popular support fell."
+msgstr ""
+"Opruiers wakkerden opstanden aan in uw rijk, en de steun van het volk daalde."
 
 #: internal/menu/actions_attack.go:425
 msgid ""
@@ -497,15 +535,15 @@ msgstr ""
 "verdreven voordat ze doorkomen en doen niets."
 
 #: internal/menu/opshelp.go:49
-#, fuzzy
 msgid ""
 "Aimed at the trade deals in transit across the target planet. A run that is "
 "not driven off still misses some deals, and takes a few percent of the "
 "goods, gold included, from each deal it hits."
 msgstr ""
 "Gericht op de handelsovereenkomsten die onderweg zijn op de doelplaneet. Een "
-"aanval die niet wordt verdreven mist toch nog enkele overeenkomsten, en laat "
-"maar een twintigste van de goederen over in elke overeenkomst die hij treft."
+"aanval die niet wordt verdreven mist toch enkele overeenkomsten, en neemt "
+"een paar procent van de goederen, goud inbegrepen, uit elke overeenkomst die "
+"hij treft."
 
 #: internal/menu/directives.go:149
 msgid "All"
@@ -544,6 +582,14 @@ msgstr ""
 #: internal/game/ibbs.go:23
 msgid "An individual attack must name a baron to strike."
 msgstr "Een individuele aanval moet een baron als doelwit noemen."
+
+#: internal/game/ibbs_attack.go:727
+msgid ""
+"An interplanetary strike from {board} was stopped by your New Realm "
+"Protection."
+msgstr ""
+"Een interplanetaire aanval van {board} werd tegengehouden door uw "
+"bescherming voor nieuwe rijken."
 
 #: internal/game/rename.go:39
 msgid "Another realm already answers to that name."
@@ -601,7 +647,7 @@ msgstr "Soort aanval"
 msgid "Attack aborted."
 msgstr "Aanval afgebroken."
 
-#: internal/menu/actions_interbbs.go:225
+#: internal/menu/actions_interbbs.go:222
 msgid "Attack party #%d has been called off and its forces sent home."
 msgstr "Aanvalsgroep #%d is afgeblazen en de troepen zijn naar huis gestuurd."
 
@@ -625,7 +671,7 @@ msgstr "Rijk automatisch voeden"
 msgid "Auto-Pay Maintenance"
 msgstr "Onderhoud automatisch betalen"
 
-#: internal/menu/actions_interbbs.go:49
+#: internal/menu/actions_interbbs.go:50
 msgid "Average Turn Around Times to All BBSes"
 msgstr "Gemiddelde omlooptijd naar alle BBSen"
 
@@ -681,7 +727,7 @@ msgstr "BBS"
 msgid "Bomb AirBases"
 msgstr "Vliegbases bombarderen"
 
-#: internal/game/covert.go:23
+#: internal/game/covert.go:22
 msgid "Bomb Enemy Targets"
 msgstr "Vijandelijke doelen bombarderen"
 
@@ -705,7 +751,7 @@ msgstr "Handelsroutes bombarderen"
 msgid "Bomb Trading Market"
 msgstr "Handelsmarkt bombarderen"
 
-#: internal/game/units.go:111
+#: internal/game/units.go:115
 msgid "Bomber"
 msgstr "Bommenwerper"
 
@@ -721,7 +767,7 @@ msgstr "Bombardementen horen niet bij dit spel."
 msgid "Break the agreement?"
 msgstr "Het verdrag breken?"
 
-#: internal/game/covert.go:24
+#: internal/game/covert.go:23
 msgid "Bribery"
 msgstr "Omkoping"
 
@@ -732,6 +778,10 @@ msgid ""
 "first spy who gets in ends the mission, so extra spies only raise the chance "
 "that one gets in."
 msgstr ""
+"Brengt een verslag mee over het land, goud, de troepen en het moreel van het "
+"doelwit, en bewaart het in uw spionagedatabase. Het doelwit verliest niets "
+"en hoort er niets van. De eerste spion die binnenkomt beeindigt de missie, "
+"dus extra spionnen vergroten alleen de kans dat er een binnenkomt."
 
 #: internal/menu/advisors.go:283
 msgid ""
@@ -777,7 +827,7 @@ msgstr "VERPLETTERD"
 msgid "Call Off Attack Party"
 msgstr "Aanvalsgroep afblazen"
 
-#: internal/menu/actions_interbbs.go:213
+#: internal/menu/actions_interbbs.go:210
 msgid "Call it off?"
 msgstr "Afblazen?"
 
@@ -789,7 +839,7 @@ msgstr "Geannuleerd - er is niets opgeslagen."
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr "Wilt u uw geluk beproeven in de loterij van de Koningin?"
 
-#: internal/game/units.go:135
+#: internal/game/units.go:139
 msgid "Carrier"
 msgstr "Vliegdekschip"
 
@@ -933,6 +983,10 @@ msgstr "Coördinatormenu"
 msgid "Coordinator Vote"
 msgstr "Coördinatorstemming"
 
+#: internal/game/covert_queue.go:50
+msgid "Covert Agent Sent out"
+msgstr "Geheim agent uitgestuurd"
+
 #: internal/menu/tree.go:204
 msgid "Covert Agents"
 msgstr "Geheim agenten"
@@ -1017,7 +1071,7 @@ msgstr "Wissen,"
 msgid "Demoralize"
 msgstr "Demoraliseren"
 
-#: internal/game/covert.go:21
+#: internal/game/covert.go:20
 msgid "Demoralize Forces"
 msgstr "Troepen demoraliseren"
 
@@ -1038,22 +1092,20 @@ msgid "Desert"
 msgstr "Woestijn"
 
 #: internal/menu/opshelp.go:30
-#, fuzzy
 msgid ""
 "Destroys 2 to 4 percent of the target's agents. Its agents defend it against "
 "your operations and carry out its own."
 msgstr ""
-"Vernietigt 2 tot 4 procent van de geheim agenten van het doelwit, precies "
-"wat het terug tegen u kan sturen."
+"Vernietigt 2 tot 4 procent van de agenten van het doelwit. Zijn agenten "
+"verdedigen het tegen uw operaties en voeren zijn eigen operaties uit."
 
 #: internal/menu/opshelp.go:32
 msgid "Destroys 2 to 4 percent of the target's troopers."
 msgstr "Vernietigt 2 tot 4 procent van de soldaten van het doelwit."
 
 #: internal/menu/opshelp.go:33
-#, fuzzy
 msgid "Destroys 3 to 7 percent of the target's jets."
-msgstr "Vernietigt 2 tot 4 procent van de soldaten van het doelwit."
+msgstr "Vernietigt 3 tot 7 procent van de straaljagers van het doelwit."
 
 #: internal/menu/opshelp.go:48
 msgid ""
@@ -1067,14 +1119,13 @@ msgstr ""
 "aanval kan worden verdreven voordat hij doorkomt."
 
 #: internal/menu/opshelp.go:36
-#, fuzzy
 msgid ""
 "Destroys from 0 to 29 percent of the target's food. No other operation "
 "varies as much: one agent can take nothing and the next almost a third."
 msgstr ""
-"Vernietigt van helemaal niets tot 29 procent van het voedsel van het "
-"doelwit. De grilligste van de operaties: hij kan volledig verspild zijn of "
-"de voorraad van een heel seizoen wegvagen."
+"Vernietigt 0 tot 29 procent van het voedsel van het doelwit. Geen andere "
+"operatie wisselt zo sterk: de ene agent pakt niets, de volgende bijna een "
+"derde."
 
 #: internal/menu/tree.go:156
 msgid "Diplomacy"
@@ -1100,7 +1151,7 @@ msgstr "De ontevredenheid zit diep - uw volk moppert bij elk bevel."
 msgid "Dismantle Gooie"
 msgstr "Gooie ontmantelen"
 
-#: internal/menu/actions_interbbs.go:262
+#: internal/menu/actions_interbbs.go:259
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr "Ontmantelen levert niets terug - het goud is uitgegeven."
 
@@ -1129,13 +1180,12 @@ msgid "Drawn:"
 msgstr "Getrokken:"
 
 #: internal/menu/opshelp.go:34
-#, fuzzy
 msgid ""
 "Drives out 4 to 10 percent of the target's people. Its people pay its taxes "
 "and eat its food."
 msgstr ""
-"Verdrijft 4 tot 10 procent van de bevolking van het doelwit, wat tegelijk "
-"zijn belastinggrondslag en zijn voedselrekening is."
+"Verdrijft 4 tot 10 procent van de bevolking van het doelwit. Zijn bevolking "
+"betaalt zijn belasting en eet zijn voedsel."
 
 #: internal/menu/actions_regions.go:377
 msgid "Drop regions?"
@@ -1191,7 +1241,7 @@ msgstr "Voer planeetnaam of nummer in"
 msgid "Enter Topic"
 msgstr "Voer het onderwerp in"
 
-#: internal/game/ibbs_trade.go:29
+#: internal/game/ibbs_trade.go:26
 msgid "Enter how many units to bid for."
 msgstr "Geef aan op hoeveel eenheden u biedt."
 
@@ -1211,7 +1261,7 @@ msgstr "Verwijderen"
 msgid "Erase the current directives?"
 msgstr "De huidige richtlijnen verwijderen?"
 
-#: internal/menu/actions_interbbs.go:212
+#: internal/menu/actions_interbbs.go:209
 msgid "Every contributor gets their forces back. The gold they spent is gone."
 msgstr ""
 "Iedere deelnemer krijgt zijn troepen terug. Het goud dat ze uitgaven is weg."
@@ -1244,6 +1294,24 @@ msgstr "Voedselmarkt"
 msgid "For Sale"
 msgstr "Te koop"
 
+#: internal/game/ibbs.go:637
+msgid "Foreign agents were seen taking an interest in your realm."
+msgstr ""
+"Buitenlandse agenten werden gezien terwijl ze belangstelling toonden voor uw "
+"rijk."
+
+#: internal/game/covert.go:331
+msgid ""
+"Forged papers convinced you and {who} that war had been declared; every "
+"treaty between you is void."
+msgstr ""
+"Vervalste papieren overtuigden u en {who} dat er oorlog was verklaard; elk "
+"verdrag tussen u is vervallen."
+
+#: internal/game/treaties.go:30
+msgid "Free Trade Agreement"
+msgstr "Vrijhandelsverdrag"
+
 #: internal/menu/actions_info.go:36
 msgid "Free software under the MIT License."
 msgstr "Vrije software onder de MIT-licentie."
@@ -1251,6 +1319,10 @@ msgstr "Vrije software onder de MIT-licentie."
 #: internal/menu/actions_attack.go:942
 msgid "From"
 msgstr "Van"
+
+#: internal/game/treaties.go:26
+msgid "Full Defense Alliance"
+msgstr "Volledig defensiebondgenootschap"
 
 #: internal/menu/bulletins.go:57
 msgid "Game Bulletins"
@@ -1316,6 +1388,10 @@ msgstr "Gooie Kablooie-ops"
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "Gooie Kablooie-operaties staan uit in dit spel."
 
+#: internal/game/ibbs_attack.go:675
+msgid "Group Attack"
+msgstr "Groepsaanval"
+
 #: internal/menu/incoming.go:142
 msgid "Group attack"
 msgstr "Groepsaanval"
@@ -1341,7 +1417,6 @@ msgid "How many %s?"
 msgstr "Hoeveel %s?"
 
 #: internal/menu/actions_attack.go:802
-#, fuzzy
 msgid "How many Million Gold do you wish to put in?"
 msgstr "Hoeveel miljoen goud wilt u inleggen?"
 
@@ -1354,9 +1429,8 @@ msgid "How many days would you like to invest for?"
 msgstr "Voor hoeveel dagen wilt u beleggen?"
 
 #: internal/menu/actions_trade.go:256
-#, fuzzy
 msgid "How many days would you like to send this deal for?"
-msgstr "Voor hoeveel dagen wilt u beleggen?"
+msgstr "Voor hoeveel dagen wilt u deze overeenkomst versturen?"
 
 #: internal/menu/actions_bank.go:72
 msgid "How many would you like to borrow?"
@@ -1442,6 +1516,19 @@ msgstr "Industriële productie"
 msgid "Instructions"
 msgstr "Instructies"
 
+#: internal/game/covert.go:236
+msgid ""
+"Intel on {who} — Land {land}, Troops {troops}, Turrets {turrets}, Tanks "
+"{tanks}, Offense {offense}, Defense {defense}, Gold {gold}, Agents {agents}"
+msgstr ""
+"Info over {who} - Land {land}, Troepen {troops}, Geschutstorens {turrets}, "
+"Tanks {tanks}, Aanval {offense}, Verdediging {defense}, Goud {gold}, Agenten "
+"{agents}"
+
+#: internal/game/treaties.go:36
+msgid "Intelligence Alliance"
+msgstr "Inlichtingenbondgenootschap"
+
 #: internal/help/help.go:68
 msgid "Inter-BBS"
 msgstr "Inter-BBS"
@@ -1466,6 +1553,14 @@ msgstr ""
 "Ongeldig: een rijknaam heeft minstens 3 letters of cijfers nodig. Versiering "
 "eromheen mag, maar telt niet mee."
 
+#: internal/game/ibbs_attack.go:855
+msgid "Invasion from {who} (group attack)."
+msgstr "Invasie door {who} (groepsaanval)."
+
+#: internal/game/ibbs_attack.go:857
+msgid "Invasion from {who} ({kind})."
+msgstr "Invasie door {who} ({kind})."
+
 #: internal/menu/actions_bank.go:261
 msgid "Investing Interest Rate:"
 msgstr "Beleggingsrente:"
@@ -1483,15 +1578,14 @@ msgid "It reaches them no sooner than turn %d of their day."
 msgstr "Het bereikt hen niet eerder dan beurt %d van hun dag."
 
 #: internal/menu/actions_attack.go:848
-#, fuzzy
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
-msgstr "De financiering kost uw planeet %s miljoen goud. Akkoord?"
+msgstr "De financiering kost uw planeet %s miljoen goud.  Akkoord?"
 
 #: internal/menu/menu.go:966
 msgid "Item"
 msgstr "Item"
 
-#: internal/game/units.go:88
+#: internal/game/units.go:92
 msgid "Jet"
 msgstr "Straaljager"
 
@@ -1531,6 +1625,10 @@ msgstr ""
 #: internal/menu/actions_ipscores.go:189
 msgid "Land"
 msgstr "Land"
+
+#: internal/game/ibbs_return.go:90
+msgid "Land {land}  Off {off}  Def {def}  Gold {gold}"
+msgstr "Land {land}  Aanv {off}  Verd {def}  Goud {gold}"
 
 #: internal/menu/tree.go:507
 msgid "Language"
@@ -1581,19 +1679,20 @@ msgid "Location"
 msgstr "Locatie"
 
 #: internal/menu/opshelp.go:31
-#, fuzzy
 msgid ""
 "Lowers the target's military morale by one seventh. Morale affects how well "
 "its army attacks and defends."
 msgstr ""
-"Verlaagt het moreel van het leger van het doelwit met een vast deel. Het "
-"moreel bepaalt alles wat het leger doet, in de aanval en in de verdediging."
+"Verlaagt het moreel van het leger van het doelwit met een zevende. Het "
+"moreel bepaalt hoe goed zijn leger aanvalt en verdedigt."
 
 #: internal/menu/opshelp.go:35
 msgid ""
 "Lowers the target's popular support by two parts in thirteen, about 15 "
 "percent."
 msgstr ""
+"Verlaagt de steun van het volk voor het doelwit met twee dertiende, ongeveer "
+"15 procent."
 
 #: internal/menu/actions.go:366
 msgid "Macro Ctrl-%c cleared."
@@ -1735,7 +1834,7 @@ msgstr "Nieuw belastingtarief?"
 msgid "No"
 msgstr "Nee"
 
-#: internal/menu/actions_interbbs.go:109
+#: internal/menu/actions_interbbs.go:110
 msgid "No Data"
 msgstr "Geen gegevens"
 
@@ -1793,6 +1892,38 @@ msgstr ""
 "Er zijn geen scores van dat rijk bij ons aangekomen, dus de wapenhandelaar "
 "kan er geen prijs voor een raket voor bepalen."
 
+#: internal/game/ibbs_attack.go:1137
+msgid ""
+"No word came back from {board}. Your bid for {n} {good} was abandoned and "
+"the gold returned."
+msgstr ""
+"Er kwam geen bericht terug van {board}. Uw bod op {n} {good} is opgegeven en "
+"het goud teruggegeven."
+
+#: internal/game/ibbs_attack.go:1172
+msgid ""
+"No word came back from {board}. Your force sent against {target} has "
+"returned home."
+msgstr ""
+"Er kwam geen bericht terug van {board}. Uw troepen tegen {target} zijn "
+"teruggekeerd."
+
+#: internal/game/ibbs_attack.go:1145
+msgid "No word came back from {board}. Your {n} agent has returned home."
+msgid_plural ""
+"No word came back from {board}. Your {n} agents have returned home."
+msgstr[0] ""
+"Er kwam geen bericht terug van {board}. Uw {n} agent is teruggekeerd."
+msgstr[1] ""
+"Er kwam geen bericht terug van {board}. Uw {n} agenten zijn teruggekeerd."
+
+#: internal/game/ibbs_attack.go:1158
+msgid ""
+"No word came back from {board}. Your {op} against {target} is presumed lost."
+msgstr ""
+"Er kwam geen bericht terug van {board}. Uw {op} tegen {target} wordt "
+"verloren geacht."
+
 #: internal/menu/actions_market.go:149
 msgid "Nobody is selling %s right now."
 msgstr "Niemand verkoopt op dit moment %s."
@@ -1842,6 +1973,10 @@ msgid "Nothing added: the SDI is funded in whole thousands of Gold."
 msgstr ""
 "Niets toegevoegd: het SDI wordt alleen in hele duizenden goud gefinancierd."
 
+#: internal/game/ibbs_special.go:585
+msgid "Nothing came of the operation against {who}."
+msgstr "De operatie tegen {who} leverde niets op."
+
 #: internal/menu/actions_iptrade.go:50
 msgid "Nothing has been offered on %s, or no news has reached us yet."
 msgstr "Op %s is niets aangeboden, of er heeft ons nog geen bericht bereikt."
@@ -1890,12 +2025,75 @@ msgstr "Aanbod - waren die u stuurt:"
 msgid "One Dominion"
 msgstr "Eén rijk"
 
+#: internal/game/ibbs_terror.go:532
+msgid "One more found nothing left to damage."
+msgid_plural "{n} more found nothing left to damage."
+msgstr[0] "Nog een vond niets meer om te beschadigen."
+msgstr[1] "Nog {n} vonden niets meer om te beschadigen."
+
+#: internal/game/flavor.go:59
+msgid "One of them didn't make it home."
+msgid_plural "{n} of them didn't make it home."
+msgstr[0] "Een van hen kwam niet thuis."
+msgstr[1] "{n} van hen kwamen niet thuis."
+
+#: internal/game/flavor.go:71
+msgid "One of them walked into a bar and was never heard from again."
+msgid_plural "{n} of them walked into a bar and were never heard from again."
+msgstr[0] "Een van hen liep een kroeg binnen en werd nooit meer gezien."
+msgstr[1] "{n} van hen liepen een kroeg binnen en werden nooit meer gezien."
+
+#: internal/game/flavor.go:67
+msgid "One of them was caught and quietly disappeared."
+msgid_plural "{n} of them were caught and quietly disappeared."
+msgstr[0] "Een van hen werd gepakt en verdween stilletjes."
+msgstr[1] "{n} van hen werden gepakt en verdwenen stilletjes."
+
+#: internal/game/flavor.go:63
+msgid "One of them was turned in by the locals."
+msgid_plural "{n} of them were turned in by the locals."
+msgstr[0] "Een van hen werd door de bevolking aangegeven."
+msgstr[1] "{n} van hen werden door de bevolking aangegeven."
+
+#: internal/game/covert.go:501
+msgid "One of your agents took a rival's bribe."
+msgstr "Een van uw agenten nam steekpenningen aan van een rivaal."
+
+#: internal/game/flavor.go:60
+msgid "One of your other agents didn't make it home."
+msgid_plural "{n} of your other agents didn't make it home."
+msgstr[0] "Een van uw andere agenten kwam niet thuis."
+msgstr[1] "{n} van uw andere agenten kwamen niet thuis."
+
+#: internal/game/flavor.go:72
+msgid ""
+"One of your other agents walked into a bar and was never heard from again."
+msgid_plural ""
+"{n} of your other agents walked into a bar and were never heard from again."
+msgstr[0] ""
+"Een van uw andere agenten liep een kroeg binnen en werd nooit meer gezien."
+msgstr[1] ""
+"{n} van uw andere agenten liepen een kroeg binnen en werden nooit meer "
+"gezien."
+
+#: internal/game/flavor.go:68
+msgid "One of your other agents was caught and quietly disappeared."
+msgid_plural "{n} of your other agents were caught and quietly disappeared."
+msgstr[0] "Een van uw andere agenten werd gepakt en verdween stilletjes."
+msgstr[1] "{n} van uw andere agenten werden gepakt en verdwenen stilletjes."
+
+#: internal/game/flavor.go:64
+msgid "One of your other agents was turned in by the locals."
+msgid_plural "{n} of your other agents were turned in by the locals."
+msgstr[0] "Een van uw andere agenten werd door de bevolking aangegeven."
+msgstr[1] "{n} van uw andere agenten werden door de bevolking aangegeven."
+
 #: internal/menu/actions_attack.go:932
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr ""
 "Alleen straaljagers kunnen een Gooie Kablooie aanvallen, en u hebt er geen."
 
-#: internal/menu/actions_interbbs.go:246
+#: internal/menu/actions_interbbs.go:243
 msgid "Only the BBS Coordinator may stand the weapon down."
 msgstr "Alleen de BBS-coördinator mag het wapen buiten werking stellen."
 
@@ -1919,6 +2117,11 @@ msgid ""
 "Our Technology regions are new. Their benefits will build up as we hold them."
 msgstr ""
 "Onze technologieregio's zijn nieuw. Het voordeel groeit zolang we ze houden."
+
+#: internal/game/ibbs_trade.go:140
+msgid "Our alliance with {board} has ended; the market is closed to you."
+msgstr ""
+"Ons bondgenootschap met {board} is voorbij; de markt is voor u gesloten."
 
 #: internal/menu/actions_ipmessages.go:408
 msgid "Our current relations with"
@@ -2096,13 +2299,17 @@ msgstr "Prijs"
 msgid "Proposed a %s to %s."
 msgstr "%s voorgesteld aan %s."
 
+#: internal/game/treaties.go:32
+msgid "Protective Trade"
+msgstr "Beschermde handel"
+
 #: internal/menu/mailreader.go:90
 msgid "Public Reply?"
 msgstr "Openbaar antwoorden?"
 
-#: internal/menu/battlestage.go:43
+#: internal/menu/battlestage.go:42
 msgid "Pushing..."
-msgstr "Bezig met verzenden..."
+msgstr "Doorstoten..."
 
 #: internal/menu/attacktypehelp.go:51
 msgid "Quick Strike"
@@ -2285,9 +2492,8 @@ msgid "Send Trade Deal"
 msgstr "Handelsaanbod sturen"
 
 #: internal/menu/actions_trade.go:191
-#, fuzzy
 msgid "Send Trade Deal?"
-msgstr "Handelsaanbod sturen"
+msgstr "Handelsovereenkomst versturen?"
 
 #: internal/menu/gameflow.go:340
 msgid "Send a message?"
@@ -2313,7 +2519,7 @@ msgstr "Hoeveel soldaten sturen?"
 msgid "Send how many jets?"
 msgstr "Hoeveel straaljagers sturen?"
 
-#: internal/menu/actions_covert.go:147
+#: internal/menu/actions_covert.go:150
 msgid "Send how many?"
 msgstr "Hoeveel sturen?"
 
@@ -2349,7 +2555,7 @@ msgstr "Industrieën instellen"
 msgid "Set Tax Rate"
 msgstr "Belastingtarief instellen"
 
-#: internal/game/covert.go:19
+#: internal/game/covert.go:18
 msgid "Set Up"
 msgstr "Erin luizen"
 
@@ -2362,13 +2568,13 @@ msgid "Set-aside packets"
 msgstr "Apart gezette pakketten"
 
 #: internal/menu/opshelp.go:37
-#, fuzzy
 msgid ""
 "Sets the target's HeadQuarters back by 15 points of its 100. The "
 "HeadQuarters makes its tanks stronger, so this weakens every tank it has."
 msgstr ""
-"Zet het hoofdkwartier van het doelwit terug. Het HK maakt zijn tanks meer "
-"waard dan drie soldaten per stuk, dus dit verzwakt elke tank die het bezit."
+"Zet het hoofdkwartier van het doelwit 15 van zijn 100 punten terug. Het "
+"hoofdkwartier maakt zijn tanks sterker, dus dit verzwakt elke tank die het "
+"bezit."
 
 #: internal/menu/tree.go:595
 msgid "Show Instructions"
@@ -2407,6 +2613,14 @@ msgstr "Sorry... U staat onder bescherming voor nieuwe rijken."
 msgid "Sorry....You are under New Realm Protection!"
 msgstr "Sorry....U staat onder bescherming voor nieuwe rijken!"
 
+#: internal/game/flavor.go:28
+msgid ""
+"Space pirates hijacked a {missile} from {from} and sent it off to League "
+"8472. Lucky you."
+msgstr ""
+"Ruimtepiraten kaapten een {missile} van {from} en stuurden hem naar League "
+"8472. Boffen."
+
 #: internal/menu/tree.go:138
 msgid "Special Operations"
 msgstr "Speciale operaties"
@@ -2435,11 +2649,11 @@ msgstr "Spionagedatabase"
 msgid "Spy Database:"
 msgstr "Spionagebestand:"
 
-#: internal/game/covert.go:22
+#: internal/game/covert.go:21
 msgid "Spy on Relations"
 msgstr "Betrekkingen bespioneren"
 
-#: internal/menu/actions_interbbs.go:263
+#: internal/menu/actions_interbbs.go:260
 msgid "Stand it down?"
 msgstr "Buiten werking stellen?"
 
@@ -2447,7 +2661,7 @@ msgstr "Buiten werking stellen?"
 msgid "Stir Emigrations"
 msgstr "Emigratie aanwakkeren"
 
-#: internal/game/covert.go:18
+#: internal/game/covert.go:17
 msgid "Stir Revolts"
 msgstr "Opstanden stoken"
 
@@ -2455,7 +2669,7 @@ msgstr "Opstanden stoken"
 msgid "Strength"
 msgstr "Sterkte"
 
-#: internal/game/covert.go:20
+#: internal/game/covert.go:19
 msgid "Support Dissensions"
 msgstr "Tweedracht steunen"
 
@@ -2482,7 +2696,7 @@ msgstr "Systeemmenu"
 msgid "Taken: another realm already answers to that name."
 msgstr "Bezet: een ander rijk luistert al naar die naam."
 
-#: internal/game/units.go:123
+#: internal/game/units.go:127
 msgid "Tank"
 msgstr "Tank"
 
@@ -2498,6 +2712,10 @@ msgstr "Welke baron als doelwit?"
 msgid "Target which planet?"
 msgstr "Welke planeet als doel?"
 
+#: internal/game/treaties.go:28
+msgid "Tariff Trade Agreement"
+msgstr "Tariefhandelsverdrag"
+
 #: internal/menu/empire_status_screen.go:101
 msgid "Tax Rate"
 msgstr "Belasting"
@@ -2509,6 +2727,10 @@ msgstr "Belastingtarief ingesteld op %d%%."
 #: internal/game/regions.go:163
 msgid "Technology"
 msgstr "Technologie"
+
+#: internal/game/treaties.go:38
+msgid "Technology Agreement"
+msgstr "Technologieverdrag"
 
 #: internal/menu/advisors.go:299
 msgid ""
@@ -2528,10 +2750,141 @@ msgstr "Gebied"
 msgid "Terrorist Ops"
 msgstr "Terreuroperaties"
 
+#: internal/game/treaties.go:34
+msgid "Terrorist Prevention"
+msgstr "Terreurpreventie"
+
+#: internal/game/covert.go:561
+msgid "Terrorists bombed your agents and destroyed {n} of them."
+msgstr "Terroristen bombardeerden uw agenten en vernietigden er {n}."
+
+#: internal/game/ibbs_terror.go:419
+msgid "Terrorists bombed your air bases."
+msgid_plural "Terrorists bombed your air bases {n} times."
+msgstr[0] "Terroristen bombardeerden uw vliegbases."
+msgstr[1] "Terroristen bombardeerden uw vliegbases {n} keer."
+
+#: internal/game/covert.go:570
+msgid "Terrorists bombed your food and destroyed {n} of them."
+msgstr "Terroristen bombardeerden uw voedsel en vernietigden er {n} van."
+
+#: internal/game/ibbs_terror.go:446
+msgid "Terrorists bombed your food stores."
+msgid_plural "Terrorists bombed your food stores {n} times."
+msgstr[0] "Terroristen bombardeerden uw voedselvoorraden."
+msgstr[1] "Terroristen bombardeerden uw voedselvoorraden {n} keer."
+
+#: internal/game/ibbs_terror.go:392
+msgid "Terrorists bombed your intelligence agencies."
+msgid_plural "Terrorists bombed your intelligence agencies {n} times."
+msgstr[0] "Terroristen bombardeerden uw inlichtingendiensten."
+msgstr[1] "Terroristen bombardeerden uw inlichtingendiensten {n} keer."
+
+#: internal/game/covert.go:567
+msgid "Terrorists bombed your jets and destroyed {n} of them."
+msgstr "Terroristen bombardeerden uw straaljagers en vernietigden er {n}."
+
+#: internal/game/covert.go:554
+msgid "Terrorists bombed your people and destroyed {n} of them."
+msgstr "Terroristen bombardeerden uw bevolking en doodden er {n}."
+
+#: internal/game/covert.go:564
+msgid "Terrorists bombed your tanks and destroyed {n} of them."
+msgstr "Terroristen bombardeerden uw tanks en vernietigden er {n}."
+
+#: internal/game/covert.go:558
+msgid "Terrorists bombed your troopers and destroyed {n} of them."
+msgstr "Terroristen bombardeerden uw soldaten en doodden er {n}."
+
+#: internal/game/ibbs_terror.go:401
+msgid "Terrorists demoralized your forces."
+msgid_plural "Terrorists demoralized your forces {n} times."
+msgstr[0] "Terroristen ondermijnden het moreel van uw troepen."
+msgstr[1] "Terroristen ondermijnden het moreel van uw troepen {n} keer."
+
+#: internal/game/ibbs_terror.go:307
+msgid "Terrorists destroyed {n} of your forces!"
+msgstr "Terroristen vernietigden {n} van uw troepen!"
+
+#: internal/game/ibbs_terror.go:428
+msgid "Terrorists drove your people into exile."
+msgid_plural "Terrorists drove your people into exile {n} times."
+msgstr[0] "Terroristen dreven uw bevolking in ballingschap."
+msgstr[1] "Terroristen dreven uw bevolking {n} keer in ballingschap."
+
+#: internal/game/ibbs_terror.go:455
+msgid "Terrorists sabotaged your headquarters."
+msgid_plural "Terrorists sabotaged your headquarters {n} times."
+msgstr[0] "Terroristen saboteerden uw hoofdkwartier."
+msgstr[1] "Terroristen saboteerden uw hoofdkwartier {n} keer."
+
+#: internal/game/ibbs_terror.go:437
+msgid "Terrorists spread false rumors through your realm."
+msgid_plural "Terrorists spread false rumors through your realm {n} times."
+msgstr[0] "Terroristen verspreidden valse geruchten in uw rijk."
+msgstr[1] "Terroristen verspreidden {n} keer valse geruchten in uw rijk."
+
+#: internal/game/ibbs_terror.go:410
+msgid "Terrorists stirred dissent in your ranks."
+msgid_plural "Terrorists stirred dissent in your ranks {n} times."
+msgstr[0] "Terroristen zaaiden onvrede in uw gelederen."
+msgstr[1] "Terroristen zaaiden {n} keer onvrede in uw gelederen."
+
+#: internal/game/ibbs_terror.go:304
+msgid "Terrorists struck but destroyed nothing."
+msgstr "Terroristen sloegen toe maar vernietigden niets."
+
+#: internal/game/ibbs_terror.go:468
+msgid "Terrorists struck your realm."
+msgid_plural "Terrorists struck your realm {n} times."
+msgstr[0] "Terroristen sloegen toe in uw rijk."
+msgstr[1] "Terroristen sloegen {n} keer toe in uw rijk."
+
+#: internal/game/ibbs_terror.go:420
+msgid "Terrorists went after your air bases and got nowhere."
+msgstr "Terroristen hadden het op uw vliegbases gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:447
+msgid "Terrorists went after your food stores and got nowhere."
+msgstr ""
+"Terroristen hadden het op uw voedselvoorraden gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:402
+msgid "Terrorists went after your forces and got nowhere."
+msgstr "Terroristen hadden het op uw troepen gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:456
+msgid "Terrorists went after your headquarters and got nowhere."
+msgstr "Terroristen hadden het op uw hoofdkwartier gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:393
+msgid "Terrorists went after your intelligence agencies and got nowhere."
+msgstr ""
+"Terroristen hadden het op uw inlichtingendiensten gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:429
+msgid "Terrorists went after your people and got nowhere."
+msgstr "Terroristen hadden het op uw bevolking gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:411
+msgid "Terrorists went after your ranks and got nowhere."
+msgstr "Terroristen hadden het op uw gelederen gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:469
+msgid "Terrorists went after your realm and got nowhere."
+msgstr "Terroristen hadden het op uw rijk gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:387
+msgid "Terrorists went after your secrets and got nowhere."
+msgstr "Terroristen hadden het op uw geheimen gemunt en bereikten niets."
+
+#: internal/game/ibbs_terror.go:438
+msgid "Terrorists went after your streets and got nowhere."
+msgstr "Terroristen hadden het op uw straten gemunt en bereikten niets."
+
 #: internal/menu/actions_ipops.go:306
-#, fuzzy
 msgid "Terrorize which baron?"
-msgstr "Welke baron als doelwit?"
+msgstr "Welke baron terroriseren?"
 
 #: internal/menu/actions_bank.go:279
 msgid "That costs %s gold more than you have in hand."
@@ -2545,7 +2898,7 @@ msgstr "Dat rijk heeft daar niets van te koop."
 msgid "That is %s gold per region; the world average is %s."
 msgstr "Dat is %s goud per regio; het wereldgemiddelde is %s."
 
-#: internal/game/bank.go:13
+#: internal/game/bank.go:11
 msgid "That is more than may be invested for that date."
 msgstr "Dat is meer dan er voor die datum mag worden belegd."
 
@@ -2553,7 +2906,7 @@ msgstr "Dat is meer dan er voor die datum mag worden belegd."
 msgid "That is not traded on the market."
 msgstr "Dat wordt niet op de markt verhandeld."
 
-#: internal/game/ibbs_trade.go:28
+#: internal/game/ibbs_trade.go:25
 msgid "That is your own planet's market."
 msgstr "Dat is de markt van uw eigen planeet."
 
@@ -2561,7 +2914,7 @@ msgstr "Dat is de markt van uw eigen planeet."
 msgid "That leaves %s to spare each turn."
 msgstr "Dat laat elke beurt een overschot van %s."
 
-#: internal/game/ibbs_trade.go:30
+#: internal/game/ibbs_trade.go:27
 msgid "That listing's price is not valid."
 msgstr "De prijs van die aanbieding is ongeldig."
 
@@ -2569,15 +2922,27 @@ msgstr "De prijs van die aanbieding is ongeldig."
 msgid "That realm is still in protection."
 msgstr "Dat rijk staat nog onder bescherming."
 
+#: internal/game/ibbs_attack.go:575
+msgid ""
+"The BBS Coordinator called off the attack party aimed at {board}. Your "
+"forces have returned home."
+msgstr ""
+"De BBS-coördinator blies de aanvalsgroep tegen {board} af. Uw troepen zijn "
+"teruggekeerd."
+
+#: internal/game/annihilator.go:444
+msgid "The Gooie Kablooie destroyed {n} more regions."
+msgstr "De Gooie Kablooie vernietigde nog {n} regio's."
+
 #: internal/game/annihilator.go:83
 msgid "The Gooie Kablooie has already launched."
 msgstr "De Gooie Kablooie is al gelanceerd."
 
-#: internal/menu/actions_interbbs.go:258
+#: internal/menu/actions_interbbs.go:255
 msgid "The Gooie Kablooie has already launched. Nothing can call it back."
 msgstr "De Gooie Kablooie is al gelanceerd. Niets kan hem terugroepen."
 
-#: internal/menu/actions_interbbs.go:275
+#: internal/menu/actions_interbbs.go:272
 msgid "The Gooie Kablooie has been dismantled."
 msgstr "De Gooie Kablooie is ontmanteld."
 
@@ -2585,7 +2950,7 @@ msgstr "De Gooie Kablooie is ontmanteld."
 msgid "The Gooie Kablooie has not landed yet. Nothing can reach it up there."
 msgstr "De Gooie Kablooie is nog niet geland. Daarboven is hij onbereikbaar."
 
-#: internal/menu/actions_interbbs.go:261
+#: internal/menu/actions_interbbs.go:258
 msgid "The Gooie Kablooie is aimed at %s."
 msgstr "De Gooie Kablooie is gericht op %s."
 
@@ -2614,20 +2979,38 @@ msgid "The Queen Royale opens her coffers and refunds you %s gold!"
 msgstr "De Koningin opent haar schatkist en geeft u %s goud terug!"
 
 #: internal/menu/actions_attack.go:867
-#, fuzzy
 msgid "The Queen Royale puts %d million gold toward the Gooie Kablooie."
-msgstr "De Koningin eist %s goud aan belasting."
+msgstr "De Koningin draagt %d miljoen goud bij aan de Gooie Kablooie."
 
 #: internal/menu/turnstages.go:145
 msgid "The Queen Royale requires %s gold for Taxes."
 msgstr "De Koningin eist %s goud aan belasting."
 
-#: internal/game/ibbs.go:31
-#, fuzzy
-msgid "The S3-Sabre is not part of this game."
-msgstr "Bombardementen horen niet bij dit spel."
+#: internal/game/news.go:253
+msgid ""
+"The Queen Royale sends you {gold} gold for holding the title of Planetary "
+"Master."
+msgstr ""
+"De Koningin stuurt u {gold} goud omdat u de titel Meester van de Planeet "
+"draagt."
 
-#: internal/menu/actions_interbbs.go:171
+#: internal/game/crown_handout.go:70
+msgid "The Queen opens her purse to the whole planet: {gold} gold is yours."
+msgstr ""
+"De Koningin opent haar beurs voor de hele planeet: {gold} goud is voor u."
+
+#: internal/game/crown_handout.go:103
+msgid ""
+"The Queen's recruiters hand you {n} troopers, paid for out of the crown "
+"purse."
+msgstr ""
+"De ronselaars van de Koningin geven u {n} soldaten, betaald uit de kroonkas."
+
+#: internal/game/ibbs.go:31
+msgid "The S3-Sabre is not part of this game."
+msgstr "De S3-Sabre hoort niet bij dit spel."
+
+#: internal/menu/actions_interbbs.go:168
 msgid "The current BBS Coordinator is %s."
 msgstr "De huidige BBS-coördinator is %s."
 
@@ -2709,12 +3092,23 @@ msgstr ""
 "Het spionagebestand is leeg. Bespioneer rijken op andere planeten om het te "
 "vullen."
 
-#: internal/menu/battlestage.go:59
-msgid "Their losses so far: %d troopers, %d turrets, %d tanks, %d jets"
-msgstr ""
-"Hun verliezen tot nu toe: %d soldaten, %d geschutstorens, %d tanks, %d jagers"
+#: internal/game/pirates.go:364
+msgid "The {who} could not hold what they had taken."
+msgstr "De {who} konden niet vasthouden wat ze hadden genomen."
 
-#: internal/menu/actions_interbbs.go:167
+#: internal/game/pirates.go:370
+msgid "The {who} drove your forces back."
+msgstr "De {who} dreven uw troepen terug."
+
+#: internal/game/pirates.go:372
+msgid "The {who} held against everything you sent."
+msgstr "De {who} hielden stand tegen alles wat u stuurde."
+
+#: internal/game/pirates.go:362
+msgid "The {who} scattered before your assault."
+msgstr "De {who} stoven uiteen voor uw aanval."
+
+#: internal/menu/actions_interbbs.go:164
 msgid "There are no barons to vote for yet."
 msgstr "Er zijn nog geen baronnen om op te stemmen."
 
@@ -2725,6 +3119,10 @@ msgstr "Er zijn geen bulletins om te lezen."
 #: internal/menu/directives.go:36
 msgid "There are no directives from the BBS Coordinator."
 msgstr "Er zijn geen richtlijnen van de BBS-coördinator."
+
+#: internal/game/pirates.go:405
+msgid "There are no pirates by that name."
+msgstr "Er zijn geen piraten met die naam."
 
 #: internal/menu/actions_attack.go:174
 msgid "There are no rival empires left to attack."
@@ -2754,7 +3152,7 @@ msgstr "Er is vandaag geen vrij land meer op de planeet."
 msgid "This attack will cost %s gold."
 msgstr "Deze aanval kost %s goud."
 
-#: internal/game/ibbs_trade_deal.go:43
+#: internal/game/ibbs_trade_deal.go:46
 msgid "This board is not part of an inter-BBS league."
 msgstr "Dit board maakt geen deel uit van een InterBBS-competitie."
 
@@ -2786,14 +3184,13 @@ msgstr "Deze planeet heeft geen Gooie Kablooie."
 msgid "This planet is already building a Gooie Kablooie."
 msgstr "Deze planeet bouwt al een Gooie Kablooie."
 
-#: internal/menu/actions_interbbs.go:254
+#: internal/menu/actions_interbbs.go:251
 msgid "This planet is not building a Gooie Kablooie."
 msgstr "Deze planeet bouwt geen Gooie Kablooie."
 
 #: internal/menu/actions_trade.go:246
-#, fuzzy
 msgid "This trade deal will cost %s gold per day to send."
-msgstr "Deze aanval kost %s goud."
+msgstr "Deze handelsovereenkomst kost %s goud per dag om te versturen."
 
 #: internal/menu/actions_ipops.go:360
 msgid "This will cost you %s gold.  Accept?"
@@ -2872,9 +3269,8 @@ msgid "Trade"
 msgstr "Handel"
 
 #: internal/menu/actions_trade.go:190
-#, fuzzy
 msgid "Trade Deal requires %d Carriers."
-msgstr "De Koningin eist %s goud aan belasting."
+msgstr "Een handelsovereenkomst vereist %d vliegdekschepen."
 
 #: internal/menu/actions_trade.go:311
 msgid "Trade deal accepted."
@@ -2885,10 +3281,8 @@ msgid "Trade deal sent to %s for %d days (%s gold)."
 msgstr "Handelsovereenkomst naar %s gestuurd voor %d dagen (%s goud)."
 
 #: internal/menu/actions_trade.go:247
-#, fuzzy
 msgid "Trade deals must be sent for a minimum of %d days."
-msgstr ""
-"Helaas, een handelsaanbod moet voor minstens %d dagen worden verstuurd."
+msgstr "Een handelsovereenkomst moet voor minstens %d dagen worden verstuurd."
 
 #: internal/menu/tree.go:154
 msgid "Trading"
@@ -2898,13 +3292,17 @@ msgstr "Handel"
 msgid "Trading Market"
 msgstr "Handelsmarkt"
 
-#: internal/game/ibbs_trade.go:26
+#: internal/game/ibbs_trade.go:23
 msgid "Trading with other planets is turned off in this league."
 msgstr "Handel met andere planeten staat uit in deze competitie."
 
 #: internal/menu/tree.go:336
 msgid "Travel Times"
 msgstr "Reistijden"
+
+#: internal/game/covert.go:449
+msgid "Treaties of {who}:"
+msgstr "Verdragen van {who}:"
 
 #: internal/menu/opshelp.go:50
 msgid ""
@@ -2921,7 +3319,7 @@ msgstr ""
 msgid "Troop morale stands at %d%%."
 msgstr "Het moreel van de troepen staat op %d%%."
 
-#: internal/game/units.go:76
+#: internal/game/units.go:80
 msgid "Trooper"
 msgstr "Soldaat"
 
@@ -2937,7 +3335,7 @@ msgstr "Beurten"
 msgid "Turns per day"
 msgstr "Beurten per dag"
 
-#: internal/game/units.go:100
+#: internal/game/units.go:104
 msgid "Turret"
 msgstr "Geschutstoren"
 
@@ -3049,7 +3447,7 @@ msgstr "Handelsmenu tonen"
 msgid "Visit the bank"
 msgstr "Bank bezoeken"
 
-#: internal/menu/actions_interbbs.go:177
+#: internal/menu/actions_interbbs.go:174
 msgid "Vote for (0 to cancel)?"
 msgstr "Stemmen op (0 om te annuleren)?"
 
@@ -3175,11 +3573,11 @@ msgstr "Welke regio's geeft u op?"
 msgid "While you were at the menus, this has happened:"
 msgstr "Terwijl u in de menu's was, is dit gebeurd:"
 
-#: internal/menu/actions_interbbs.go:173
+#: internal/menu/actions_interbbs.go:170
 msgid "Who should be the BBS Coordinator?"
 msgstr "Wie moet BBS-coördinator worden?"
 
-#: internal/menu/actions_covert.go:214
+#: internal/menu/actions_covert.go:218
 msgid "Whose operations should your agent expose (letter, RETURN to abort)"
 msgstr ""
 "Wiens operaties moet uw agent blootleggen (letter, ENTER om af te breken)"
@@ -3250,6 +3648,14 @@ msgstr "U aanvaardde het %s met %s."
 msgid "You are in protection."
 msgstr "U staat onder bescherming."
 
+#: internal/game/covert.go:502
+msgid ""
+"You bribed one of {who}'s agents, so your operations against them now land "
+"more often."
+msgstr ""
+"U hebt een agent van {who} omgekocht, dus uw operaties tegen hen slagen nu "
+"vaker."
+
 #: internal/menu/actions_regions.go:179
 msgid "You can afford %s%d%s regions."
 msgstr "U kunt %s%d%s regio's betalen."
@@ -3281,6 +3687,14 @@ msgstr ""
 msgid "You cannot cover all your maintenance this turn."
 msgstr "U kunt deze beurt niet al uw onderhoud betalen."
 
+#: internal/game/bank.go:198
+msgid ""
+"You cannot hold more than {cap} gold in hand — {over} gold from {source} was "
+"lost."
+msgstr ""
+"U kunt niet meer dan {cap} goud in handen hebben - {over} goud uit {source} "
+"ging verloren."
+
 #: internal/game/market.go:13
 msgid "You cannot trade while under new realm protection."
 msgstr "U kunt niet handelen zolang u bescherming voor nieuwe rijken heeft."
@@ -3293,6 +3707,10 @@ msgstr "U veroverde %d regio's - kies als welke soorten u ze houdt."
 msgid "You committed no forces; the attack is called off."
 msgstr "U hebt geen troepen ingezet; de aanval gaat niet door."
 
+#: internal/game/pirates.go:368
+msgid "You could not successfully raid {who}."
+msgstr "Uw overval op {who} is niet gelukt."
+
 #: internal/game/combat.go:267
 msgid "You crushed %s completely and seized the remains of its military!"
 msgstr "U verpletterde %s volledig en nam wat er van zijn leger over was!"
@@ -3304,6 +3722,10 @@ msgstr "U verklaarde %s de oorlog."
 #: internal/menu/actions_diplomacy.go:334
 msgid "You declared war on %s. Agreement ended: %s"
 msgstr "U verklaarde %s de oorlog. Overeenkomst beëindigd: %s"
+
+#: internal/game/ibbs_return.go:200
+msgid "You destroyed {units}!"
+msgstr "U vernietigde {units}!"
 
 #: internal/game/trade_deal.go:17
 msgid "You do not have enough carriers to send this deal."
@@ -3414,7 +3836,7 @@ msgstr "U hebt geen verzonden berichten."
 msgid "You have reached your region purchase limit for this turn."
 msgstr "U heeft uw limiet voor regio-aankopen deze beurt bereikt."
 
-#: internal/game/covert.go:173
+#: internal/game/covert.go:172
 msgid "You have run that covert operation as often as you may today."
 msgstr ""
 "U hebt die geheime operatie vandaag zo vaak uitgevoerd als is toegestaan."
@@ -3427,11 +3849,11 @@ msgstr "U bent begonnen met de bouw van uw hoofdkwartier."
 msgid "You have used all %d lines."
 msgstr "U hebt alle %d regels gebruikt."
 
-#: internal/game/covert.go:367
+#: internal/game/covert.go:368
 msgid "You hold no bribed agent inside that realm."
 msgstr "U hebt geen omgekochte agent binnen dat rijk."
 
-#: internal/game/covert.go:371
+#: internal/game/covert.go:372
 msgid "You hold no bribed agents to work through."
 msgstr "U hebt geen omgekochte agenten om via te werken."
 
@@ -3439,13 +3861,27 @@ msgstr "U hebt geen omgekochte agenten om via te werken."
 msgid "You hold the office of %s."
 msgstr "U bekleedt het ambt van %s."
 
+#: internal/game/pirates.go:381
+msgid "You lost {l}."
+msgstr "U verloor {l}."
+
+#: internal/game/ibbs_attack.go:862
+msgid "You lost {n} region."
+msgid_plural "You lost {n} regions."
+msgstr[0] "U verloor {n} regio."
+msgstr[1] "U verloor {n} regio's."
+
+#: internal/game/ibbs_attack.go:867
+msgid "You lost {units}!"
+msgstr "U verloor {units}!"
+
 #: internal/game/rename.go:32
 msgid "You may not rename your realm while it is under New Realm Protection."
 msgstr ""
 "Je kunt je rijk niet hernoemen zolang het onder bescherming van een nieuw "
 "rijk staat."
 
-#: internal/game/ibbs_trade.go:27
+#: internal/game/ibbs_trade.go:24
 msgid "You may only trade with a planet your Coordinator has marked Allied."
 msgstr ""
 "U mag alleen handelen met een planeet die uw coördinator als bondgenoot "
@@ -3473,6 +3909,10 @@ msgstr "U bekleedt het ambt van BBS-coördinator niet meer."
 msgid "You offer %s to %s"
 msgstr "U biedt %s aan %s"
 
+#: internal/game/pirates.go:363
+msgid "You overran the {who} and took back what you could."
+msgstr "U overrompelde de {who} en nam terug wat u kon."
+
 #: internal/menu/actions_bank.go:86
 msgid "You owe %s gold in %d Days."
 msgstr "U bent %s goud verschuldigd over %d dagen."
@@ -3493,6 +3933,30 @@ msgstr "U ontvangt: %s"
 #: internal/menu/actions_iptradedeal.go:58
 msgid "You ship %s to %s of %s."
 msgstr "U verzendt %s naar %s van %s."
+
+#: internal/game/ibbs_trade_deal.go:177
+msgid ""
+"You shipped a trade deal to {who} of {board}, at a cost of {gold} gold and "
+"{carriers} carriers."
+msgstr ""
+"U verstuurde een handelsovereenkomst naar {who} van {board}, voor {gold} "
+"goud en {carriers} vliegdekschepen."
+
+#: internal/game/pirates.go:383
+msgid "You took {l}."
+msgstr "U nam {l}."
+
+#: internal/game/diplomacy.go:580
+msgid "You tore up the {treaty} with {who} by declaring war."
+msgstr "U verscheurde uw {treaty} met {who} door de oorlog te verklaren."
+
+#: internal/game/diplomacy.go:613
+msgid ""
+"You tore up the {treaty} with {who} to attack it. Revolts broke out at home; "
+"support and morale fell sharply."
+msgstr ""
+"U verscheurde uw {treaty} met {who} om aan te vallen. Thuis braken opstanden "
+"uit; steun en moreel daalden sterk."
 
 #: internal/menu/actions_realm.go:72
 msgid "You will be out of protection at the end of this turn. Are you sure?"
@@ -3536,9 +4000,43 @@ msgstr "Uw hoofdkwartier is al in aanbouw of af."
 msgid "Your Industrial Zones built:"
 msgstr "Uw industriegebieden bouwden:"
 
+#: internal/game/ibbs_special.go:341
+msgid "Your New Realm Protection turned aside a {missile} from {from}."
+msgstr "Uw bescherming voor nieuwe rijken weerde een {missile} van {from} af."
+
 #: internal/menu/actions_market.go:87
 msgid "Your Prices"
 msgstr "Uw prijzen"
+
+#: internal/game/sabre.go:253
+msgid ""
+"Your S3-Sabre backfired on {who} of {board}, but they had too little land "
+"for it to give them any."
+msgstr ""
+"Uw S3-Sabre mislukte tegen {who} van {board}, maar dat had te weinig land om "
+"er iets bij te krijgen."
+
+#: internal/game/sabre.go:249
+msgid ""
+"Your S3-Sabre backfired on {who} of {board}, expanding their territory by "
+"{n} region."
+msgid_plural ""
+"Your S3-Sabre backfired on {who} of {board}, expanding their territory by "
+"{n} regions."
+msgstr[0] ""
+"Uw S3-Sabre mislukte tegen {who} van {board} en vergrootte hun gebied met "
+"{n} regio."
+msgstr[1] ""
+"Uw S3-Sabre mislukte tegen {who} van {board} en vergrootte hun gebied met "
+"{n} regio's."
+
+#: internal/game/sabre.go:266
+msgid "Your S3-Sabre hit {who} of {board}, destroying {lost}."
+msgstr "Uw S3-Sabre trof {who} van {board} en vernietigde {lost}."
+
+#: internal/game/sabre.go:263
+msgid "Your S3-Sabre reached {who} of {board} and barely scratched the paint."
+msgstr "Uw S3-Sabre bereikte {who} van {board} en maakte nauwelijks een kras."
 
 #: internal/menu/turnstages.go:128
 msgid "Your SDI Program requires %s gold."
@@ -3552,6 +4050,383 @@ msgstr "Uw SpyGuy vertrekt naar %s, en houdt die %d dagen in de gaten."
 msgid "Your actions may lead to disastrous results."
 msgstr "Uw keuzes kunnen tot rampzalige gevolgen leiden."
 
+#: internal/game/ibbs_terror.go:421
+msgid "Your agent bombed {target}'s air bases on {board} once."
+msgstr "Uw agent bombardeerde de vliegbases van {target} op {board} een keer."
+
+#: internal/game/ibbs_terror.go:448
+msgid "Your agent bombed {target}'s food stores on {board} once."
+msgstr ""
+"Uw agent bombardeerde de voedselvoorraden van {target} op {board} een keer."
+
+#: internal/game/ibbs_terror.go:394
+msgid "Your agent bombed {target}'s intelligence agencies on {board} once."
+msgstr ""
+"Uw agent bombardeerde de inlichtingendiensten van {target} op {board} een "
+"keer."
+
+#: internal/game/flavor.go:58
+msgid "Your agent didn't make it home."
+msgstr "Uw agent kwam niet thuis."
+
+#: internal/game/ibbs_terror.go:430
+msgid "Your agent drove {target}'s people into exile on {board} once."
+msgstr ""
+"Uw agent dreef de bevolking van {target} op {board} een keer in ballingschap."
+
+#: internal/game/covert.go:415
+msgid ""
+"Your agent inside {who} will report on their operations against you for the "
+"next day."
+msgstr "Uw agent binnen {who} meldt de komende dag hun operaties tegen u."
+
+#: internal/game/ibbs_terror.go:424
+msgid ""
+"Your agent reached {target}'s air bases on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agent bereikte de vliegbases van {target} op {board} en vond niets meer "
+"om te beschadigen."
+
+#: internal/game/ibbs_terror.go:451
+msgid ""
+"Your agent reached {target}'s food stores on {board} and found nothing left "
+"to damage."
+msgstr ""
+"Uw agent bereikte de voedselvoorraden van {target} op {board} en vond niets "
+"meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:406
+msgid ""
+"Your agent reached {target}'s forces on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agent bereikte de troepen van {target} op {board} en vond niets meer om "
+"te beschadigen."
+
+#: internal/game/ibbs_terror.go:460
+msgid ""
+"Your agent reached {target}'s headquarters on {board} and found nothing left "
+"to damage."
+msgstr ""
+"Uw agent bereikte het hoofdkwartier van {target} op {board} en vond niets "
+"meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:397
+msgid ""
+"Your agent reached {target}'s intelligence agencies on {board} and found "
+"nothing left to damage."
+msgstr ""
+"Uw agent bereikte de inlichtingendiensten van {target} op {board} en vond "
+"niets meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:433
+msgid ""
+"Your agent reached {target}'s people on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agent bereikte de bevolking van {target} op {board} en vond niets meer om "
+"te beschadigen."
+
+#: internal/game/ibbs_terror.go:415
+msgid ""
+"Your agent reached {target}'s ranks on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agent bereikte de gelederen van {target} op {board} en vond niets meer om "
+"te beschadigen."
+
+#: internal/game/ibbs_terror.go:473
+msgid ""
+"Your agent reached {target}'s realm on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agent bereikte het rijk van {target} op {board} en vond niets meer om te "
+"beschadigen."
+
+#: internal/game/ibbs_terror.go:388
+msgid ""
+"Your agent reached {target}'s secrets on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agent bereikte de geheimen van {target} op {board} en vond niets meer om "
+"te beschadigen."
+
+#: internal/game/ibbs_terror.go:442
+msgid ""
+"Your agent reached {target}'s streets on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agent bereikte de straten van {target} op {board} en vond niets meer om "
+"te beschadigen."
+
+#: internal/game/covert_queue.go:74
+msgid ""
+"Your agent reached {who} to find the realm gone; the {op} was abandoned."
+msgstr ""
+"Uw agent bereikte {who} en vond het rijk verdwenen; de {op} is opgegeven."
+
+#: internal/game/ibbs_terror.go:457
+msgid "Your agent sabotaged {target}'s headquarters on {board} once."
+msgstr ""
+"Uw agent saboteerde het hoofdkwartier van {target} op {board} een keer."
+
+#: internal/game/ibbs_terror.go:403
+msgid "Your agent sank {target}'s morale on {board} once."
+msgstr "Uw agent ondermijnde het moreel van {target} op {board} een keer."
+
+#: internal/game/ibbs_terror.go:439
+msgid "Your agent spread rumors through {target}'s realm on {board} once."
+msgstr ""
+"Uw agent verspreidde een keer geruchten in het rijk van {target} op {board}."
+
+#: internal/game/ibbs_terror.go:412
+msgid "Your agent stirred up dissent in {target}'s ranks on {board} once."
+msgstr ""
+"Uw agent zaaide een keer onvrede in de gelederen van {target} op {board}."
+
+#: internal/game/ibbs_terror.go:470
+msgid "Your agent struck {target}'s realm on {board} once."
+msgstr "Uw agent sloeg een keer toe in het rijk van {target} op {board}."
+
+#: internal/game/flavor.go:70
+msgid "Your agent walked into a bar and was never heard from again."
+msgstr "Uw agent liep een kroeg binnen en werd nooit meer gezien."
+
+#: internal/game/flavor.go:66
+msgid "Your agent was caught and quietly disappeared."
+msgstr "Uw agent werd gepakt en verdween stilletjes."
+
+#: internal/game/flavor.go:62
+msgid "Your agent was turned in by the locals."
+msgstr "Uw agent werd door de bevolking aangegeven."
+
+#: internal/game/covert_queue.go:103
+msgid "Your agent's orders against {who} could not be carried out."
+msgstr "De opdracht van uw agent tegen {who} kon niet worden uitgevoerd."
+
+#: internal/game/ibbs_terror.go:422
+msgid "Your agents bombed {target}'s air bases on {board} once."
+msgid_plural "Your agents bombed {target}'s air bases on {board} {n} times."
+msgstr[0] ""
+"Uw agenten bombardeerden de vliegbases van {target} op {board} een keer."
+msgstr[1] ""
+"Uw agenten bombardeerden de vliegbases van {target} op {board} {n} keer."
+
+#: internal/game/ibbs_terror.go:449
+msgid "Your agents bombed {target}'s food stores on {board} once."
+msgid_plural "Your agents bombed {target}'s food stores on {board} {n} times."
+msgstr[0] ""
+"Uw agenten bombardeerden de voedselvoorraden van {target} op {board} een "
+"keer."
+msgstr[1] ""
+"Uw agenten bombardeerden de voedselvoorraden van {target} op {board} {n} "
+"keer."
+
+#: internal/game/ibbs_terror.go:395
+msgid "Your agents bombed {target}'s intelligence agencies on {board} once."
+msgid_plural ""
+"Your agents bombed {target}'s intelligence agencies on {board} {n} times."
+msgstr[0] ""
+"Uw agenten bombardeerden de inlichtingendiensten van {target} op {board} een "
+"keer."
+msgstr[1] ""
+"Uw agenten bombardeerden de inlichtingendiensten van {target} op {board} {n} "
+"keer."
+
+#: internal/game/covert.go:562
+msgid "Your agents bombed {who}'s agents, destroying {n} of them."
+msgstr "Uw agenten bombardeerden de agenten van {who} en vernietigden er {n}."
+
+#: internal/game/covert.go:571
+msgid "Your agents bombed {who}'s food, destroying {n} of them."
+msgstr ""
+"Uw agenten bombardeerden het voedsel van {who} en vernietigden er {n} van."
+
+#: internal/game/covert.go:568
+msgid "Your agents bombed {who}'s jets, destroying {n} of them."
+msgstr ""
+"Uw agenten bombardeerden de straaljagers van {who} en vernietigden er {n}."
+
+#: internal/game/covert.go:555
+msgid "Your agents bombed {who}'s people, destroying {n} of them."
+msgstr "Uw agenten bombardeerden de bevolking van {who} en doodden er {n}."
+
+#: internal/game/covert.go:565
+msgid "Your agents bombed {who}'s tanks, destroying {n} of them."
+msgstr "Uw agenten bombardeerden de tanks van {who} en vernietigden er {n}."
+
+#: internal/game/covert.go:559
+msgid "Your agents bombed {who}'s troopers, destroying {n} of them."
+msgstr "Uw agenten bombardeerden de soldaten van {who} en doodden er {n}."
+
+#: internal/game/ibbs_terror.go:431
+msgid "Your agents drove {target}'s people into exile on {board} once."
+msgid_plural ""
+"Your agents drove {target}'s people into exile on {board} {n} times."
+msgstr[0] ""
+"Uw agenten dreven de bevolking van {target} op {board} een keer in "
+"ballingschap."
+msgstr[1] ""
+"Uw agenten dreven de bevolking van {target} op {board} {n} keer in "
+"ballingschap."
+
+#: internal/game/covert.go:604
+msgid "Your agents found nothing worth bombing in {who}."
+msgstr "Uw agenten vonden niets in {who} dat het bombarderen waard was."
+
+#: internal/game/covert.go:292
+msgid "Your agents found weaknesses and caused {who}'s self-esteem to drop."
+msgstr ""
+"Uw agenten vonden zwakke plekken en lieten het zelfvertrouwen van {who} "
+"dalen."
+
+#: internal/game/ibbs_return.go:105
+msgid ""
+"Your agents reached {board} and found no realm called {who}, so they came "
+"home."
+msgstr ""
+"Uw agenten bereikten {board} en vonden geen rijk met de naam {who}, dus "
+"keerden ze terug."
+
+#: internal/game/ibbs_terror.go:425
+msgid ""
+"Your agents reached {target}'s air bases on {board} and found nothing left "
+"to damage."
+msgstr ""
+"Uw agenten bereikten de vliegbases van {target} op {board} en vonden niets "
+"meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:452
+msgid ""
+"Your agents reached {target}'s food stores on {board} and found nothing left "
+"to damage."
+msgstr ""
+"Uw agenten bereikten de voedselvoorraden van {target} op {board} en vonden "
+"niets meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:407
+msgid ""
+"Your agents reached {target}'s forces on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agenten bereikten de troepen van {target} op {board} en vonden niets meer "
+"om te beschadigen."
+
+#: internal/game/ibbs_terror.go:461
+msgid ""
+"Your agents reached {target}'s headquarters on {board} and found nothing "
+"left to damage."
+msgstr ""
+"Uw agenten bereikten het hoofdkwartier van {target} op {board} en vonden "
+"niets meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:398
+msgid ""
+"Your agents reached {target}'s intelligence agencies on {board} and found "
+"nothing left to damage."
+msgstr ""
+"Uw agenten bereikten de inlichtingendiensten van {target} op {board} en "
+"vonden niets meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:434
+msgid ""
+"Your agents reached {target}'s people on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agenten bereikten de bevolking van {target} op {board} en vonden niets "
+"meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:416
+msgid ""
+"Your agents reached {target}'s ranks on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agenten bereikten de gelederen van {target} op {board} en vonden niets "
+"meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:474
+msgid ""
+"Your agents reached {target}'s realm on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agenten bereikten het rijk van {target} op {board} en vonden niets meer "
+"om te beschadigen."
+
+#: internal/game/ibbs_terror.go:389
+msgid ""
+"Your agents reached {target}'s secrets on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agenten bereikten de geheimen van {target} op {board} en vonden niets "
+"meer om te beschadigen."
+
+#: internal/game/ibbs_terror.go:443
+msgid ""
+"Your agents reached {target}'s streets on {board} and found nothing left to "
+"damage."
+msgstr ""
+"Uw agenten bereikten de straten van {target} op {board} en vonden niets meer "
+"om te beschadigen."
+
+#: internal/game/ibbs_terror.go:458
+msgid "Your agents sabotaged {target}'s headquarters on {board} once."
+msgid_plural ""
+"Your agents sabotaged {target}'s headquarters on {board} {n} times."
+msgstr[0] ""
+"Uw agenten saboteerden het hoofdkwartier van {target} op {board} een keer."
+msgstr[1] ""
+"Uw agenten saboteerden het hoofdkwartier van {target} op {board} {n} keer."
+
+#: internal/game/ibbs_terror.go:404
+msgid "Your agents sank {target}'s morale on {board} once."
+msgid_plural "Your agents sank {target}'s morale on {board} {n} times."
+msgstr[0] ""
+"Uw agenten ondermijnden het moreel van {target} op {board} een keer."
+msgstr[1] ""
+"Uw agenten ondermijnden het moreel van {target} op {board} {n} keer."
+
+#: internal/game/ibbs_terror.go:440
+msgid "Your agents spread rumors through {target}'s realm on {board} once."
+msgid_plural ""
+"Your agents spread rumors through {target}'s realm on {board} {n} times."
+msgstr[0] ""
+"Uw agenten verspreidden een keer geruchten in het rijk van {target} op "
+"{board}."
+msgstr[1] ""
+"Uw agenten verspreidden {n} keer geruchten in het rijk van {target} op "
+"{board}."
+
+#: internal/game/covert.go:266
+msgid "Your agents stirred dissent in {who}'s army, and {n} troopers deserted."
+msgstr ""
+"Uw agenten zaaiden onvrede in het leger van {who}, en {n} soldaten "
+"deserteerden."
+
+#: internal/game/ibbs_terror.go:413
+msgid "Your agents stirred up dissent in {target}'s ranks on {board} once."
+msgid_plural ""
+"Your agents stirred up dissent in {target}'s ranks on {board} {n} times."
+msgstr[0] ""
+"Uw agenten zaaiden een keer onvrede in de gelederen van {target} op {board}."
+msgstr[1] ""
+"Uw agenten zaaiden {n} keer onvrede in de gelederen van {target} op {board}."
+
+#: internal/game/ibbs_terror.go:471
+msgid "Your agents struck {target}'s realm on {board} once."
+msgid_plural "Your agents struck {target}'s realm on {board} {n} times."
+msgstr[0] ""
+"Uw agenten sloegen een keer toe in het rijk van {target} op {board}."
+msgstr[1] ""
+"Uw agenten sloegen {n} keer toe in het rijk van {target} op {board}."
+
+#: internal/game/covert.go:524
+msgid ""
+"Your agitators stirred revolts in {who}, and their popular support fell."
+msgstr ""
+"Uw opruiers wakkerden opstanden aan in {who}, en de steun van het volk "
+"daalde."
+
 #: internal/menu/actions_diplomacy.go:91
 msgid "Your allies will send the following to aid you in defense:"
 msgstr "Uw bondgenoten sturen het volgende om u te helpen verdedigen:"
@@ -3564,6 +4439,10 @@ msgstr "Uw krijgsmacht heeft %s goud nodig."
 msgid "Your armed forces require %s units of food."
 msgstr "Uw krijgsmacht heeft %s eenheden voedsel nodig."
 
+#: internal/game/pirates.go:371
+msgid "Your attack on the {who} was beaten off."
+msgstr "Uw aanval op de {who} werd afgeslagen."
+
 #: internal/menu/actions_iptrade.go:123
 msgid ""
 "Your bid is away. If %s no longer offers it at that price, your gold comes "
@@ -3572,9 +4451,22 @@ msgstr ""
 "Uw bod is verstuurd. Biedt %s het niet meer voor die prijs aan, dan komt uw "
 "goud terug."
 
+#: internal/game/ibbs_trade.go:190
+msgid "Your bid on {board} came home with {n} {good}."
+msgstr "Uw bod op {board} leverde {n} {good} op."
+
+#: internal/game/ibbs_trade.go:200
+msgid "Your bid on {board} was not filled; the gold is back in your treasury."
+msgstr ""
+"Uw bod op {board} is niet uitgevoerd; het goud is terug in uw schatkist."
+
 #: internal/game/combat.go:255
 msgid "Your casualties: %s."
 msgstr "Uw verliezen: %s."
+
+#: internal/game/ibbs_special.go:578
+msgid "Your chemical strike killed {n} of {who}'s people on {board}."
+msgstr "Uw chemische aanval doodde {n} inwoners van {who} op {board}."
 
 #: internal/menu/actions_regions.go:167
 msgid "Your choice?"
@@ -3592,6 +4484,10 @@ msgstr "Uw rijk staat nog onder bescherming."
 msgid "Your dominion lost %s%s%s people."
 msgstr "Uw rijk verloor %s%s%s inwoners."
 
+#: internal/game/pirates.go:360
+msgid "Your efforts against {who} have brought you success!"
+msgstr "Uw inspanningen tegen {who} zijn geslaagd!"
+
 #: internal/menu/menu.go:703
 msgid ""
 "Your empire has collapsed — you have been eliminated. Return on a later day "
@@ -3605,6 +4501,14 @@ msgid "Your empire is no more. Return on a later day to build a new realm."
 msgstr ""
 "Uw rijk bestaat niet meer. Kom een andere dag terug om een nieuw rijk te "
 "bouwen."
+
+#: internal/game/ibbs_return.go:186
+msgid "Your forces broke the enemy and captured {n} regions."
+msgstr "Uw troepen versloegen de vijand en veroverden {n} regio's."
+
+#: internal/game/pirates.go:361
+msgid "Your forces broke the {who} and came home loaded."
+msgstr "Uw troepen versloegen de {who} en kwamen beladen thuis."
 
 #: internal/menu/actions_regions.go:273
 msgid ""
@@ -3620,6 +4524,10 @@ msgstr ""
 "Uw troepen veranderden terwijl u de aanval voorbereidde - alleen eenheden "
 "die nog onder uw bevel stonden zijn gestuurd."
 
+#: internal/game/ibbs_return.go:182
+msgid "Your forces crossed the void and found no such realm waiting."
+msgstr "Uw troepen staken de leegte over en vonden zo'n rijk niet."
+
 #: internal/menu/attacktypehelp.go:50
 msgid ""
 "Your forces fight at full strength. Both sides break off once they have "
@@ -3630,6 +4538,38 @@ msgstr ""
 "procent verliezen hebben geleden, en u neemt het gebruikelijke deel van de "
 "regio's van de verdediger."
 
+#: internal/game/ibbs_return.go:184
+msgid "Your forces found their target was in protection."
+msgstr "Uw troepen ontdekten dat hun doelwit onder bescherming stond."
+
+#: internal/game/ibbs_attack.go:859
+msgid "Your forces held the field."
+msgstr "Uw troepen hielden stand."
+
+#: internal/game/ibbs_attack.go:861
+msgid "Your forces lost the field."
+msgstr "Uw troepen verloren het veld."
+
+#: internal/game/ibbs_return.go:188
+msgid "Your forces were beaten off the field."
+msgstr "Uw troepen werden van het veld geslagen."
+
+#: internal/game/covert.go:334
+msgid ""
+"Your forged declaration of war fooled {a} and {b} into tearing up {n} "
+"treaties."
+msgstr ""
+"Uw vervalste oorlogsverklaring bracht {a} en {b} ertoe {n} verdragen te "
+"verscheuren."
+
+#: internal/game/dupe.go:91
+msgid ""
+"Your handle is also playing on {board}. This realm is locked until one of "
+"them goes."
+msgstr ""
+"Uw gebruikersnaam speelt ook op {board}. Dit rijk is geblokkeerd tot een van "
+"beide verdwijnt."
+
 #: internal/menu/actions.go:246
 msgid "Your holdings changed while you decided — only what remained was sold."
 msgstr ""
@@ -3639,7 +4579,7 @@ msgstr ""
 msgid "Your industry is already specialized in %s."
 msgstr "Uw industrie is al gespecialiseerd in %s."
 
-#: internal/game/turn.go:366
+#: internal/game/turn.go:367
 msgid "Your industry is already specialized."
 msgstr "Uw industrie is al gespecialiseerd."
 
@@ -3650,11 +4590,6 @@ msgstr "Uw industrie is nu blijvend gespecialiseerd in %s."
 #: internal/menu/actions_industry.go:184
 msgid "Your industry was left unspecialized."
 msgstr "Uw industrie bleef ongespecialiseerd."
-
-#: internal/menu/battlestage.go:56
-msgid "Your losses so far: %d troopers, %d jets, %d tanks, %d bombers"
-msgstr ""
-"Uw verliezen tot nu toe: %d soldaten, %d jagers, %d tanks, %d bommenwerpers"
 
 #: internal/menu/actions_ipmessages.go:541
 msgid "Your message is on its way to %d baron(s) on %s."
@@ -3667,6 +4602,11 @@ msgstr "Uw bericht is onderweg naar %d planeten."
 #: internal/menu/actions_realm.go:80
 msgid "Your new-realm protection will end when this turn does."
 msgstr "Uw bescherming voor nieuwe rijken eindigt met deze beurt."
+
+#: internal/game/ibbs_special.go:568
+msgid ""
+"Your nuclear strike turned {n} of {who}'s regions on {board} into waste."
+msgstr "Uw kernaanval verwoestte {n} regio's van {who} op {board}."
 
 #: internal/menu/turnrecap.go:461
 msgid "Your people admire your leadership and prosper gladly."
@@ -3704,6 +4644,10 @@ msgstr "Uw volk kookt van openlijke haat tegen uw bewind."
 msgid "Your proposal went to %d realms."
 msgstr "Uw voorstel ging naar %d rijken."
 
+#: internal/game/pirates.go:369
+msgid "Your raid on the {who} came to nothing."
+msgstr "Uw overval op de {who} leverde niets op."
+
 #: internal/menu/actions_realm.go:70
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr "Uw rijk heeft nog %d beurten bescherming voor nieuwe rijken."
@@ -3715,9 +4659,8 @@ msgid ""
 msgstr "Je rijk is al een keer hernoemd. De naam die het nu draagt, blijft."
 
 #: internal/play/play.go:48
-#, fuzzy
 msgid "Your realm is already being played elsewhere."
-msgstr "Je rijk krijgt de naam %s."
+msgstr "Uw rijk wordt al ergens anders gespeeld."
 
 #: internal/menu/gameflow.go:129
 msgid "Your realm is no longer active."
@@ -3735,26 +4678,141 @@ msgstr "Je rijk krijgt de naam %s."
 msgid "Your score rose by %d."
 msgstr "Uw score steeg met %d."
 
+#: internal/game/flavor.go:61
+msgid "Your security caught {who}."
+msgstr "Uw beveiliging betrapte {who}."
+
+#: internal/game/flavor.go:73
+msgid "Your security lured {who} into a bar with some attractive patrons."
+msgstr ""
+"Uw beveiliging lokte {who} een kroeg in met wat aantrekkelijk gezelschap."
+
+#: internal/game/flavor.go:69
+msgid "Your security quietly made {who} disappear."
+msgstr "Uw beveiliging liet {who} stilletjes verdwijnen."
+
 #: internal/menu/actions_ipattack.go:174
-#, fuzzy
 msgid "Your share of this attack is now %s%%."
-msgstr "Uw zending is onderweg naar %s van %s."
+msgstr "Uw aandeel in deze aanval is nu %s%%."
 
 #: internal/menu/actions_iptradedeal.go:82
 msgid "Your shipment is on its way to %s of %s."
 msgstr "Uw zending is onderweg naar %s van %s."
 
+#: internal/game/ibbs_terror.go:510
+msgid ""
+"Your spy slipped into {target}'s files on {board} and came home with a full "
+"report."
+msgstr ""
+"Uw spion glipte de archieven van {target} op {board} binnen en kwam terug "
+"met een volledig verslag."
+
+#: internal/game/ibbs_special.go:645
+msgid "Your tanks brought down a {missile} from {from}."
+msgstr "Uw tanks haalden een {missile} van {from} neer."
+
 #: internal/menu/actions.go:25
 msgid "Your target is no longer there."
 msgstr "Uw doelwit is er niet meer."
+
+#: internal/game/ibbs_trade_deal.go:228
+msgid "Your trade deal reached {who} of {board}: {goods}."
+msgstr "Uw handelsovereenkomst bereikte {who} van {board}: {goods}."
+
+#: internal/game/ibbs_trade_deal.go:232
+msgid ""
+"Your trade deal to {who} of {board} was lost: no such realm is left there to "
+"take it."
+msgstr ""
+"Uw handelsovereenkomst naar {who} van {board} ging verloren: dat rijk "
+"bestaat daar niet meer."
+
+#: internal/game/trade_deal.go:360
+msgid "Your trade fleet could not find {who}, and has brought the goods home."
+msgstr ""
+"Uw handelsvloot kon {who} niet vinden en heeft de goederen teruggebracht."
+
+#: internal/game/ibbs_special.go:636
+msgid "Your troopers brought down a {missile} from {from}."
+msgstr "Uw soldaten haalden een {missile} van {from} neer."
+
+#: internal/game/ibbs_special.go:641
+msgid "Your turrets brought down a {missile} from {from}."
+msgstr "Uw geschutstorens haalden een {missile} van {from} neer."
 
 #: internal/menu/turnstages.go:467
 msgid "Your vote for BBS Coordinator is %s."
 msgstr "Uw stem voor BBS-coördinator is %s."
 
-#: internal/menu/actions_interbbs.go:189
+#: internal/menu/actions_interbbs.go:186
 msgid "Your vote is recorded. You may change it any time."
 msgstr "Uw stem is genoteerd. U kunt hem altijd wijzigen."
+
+#: internal/game/flavor.go:65
+msgid "Your well-paid and loyal peasants turned in {who}."
+msgstr "Uw goedbetaalde en trouwe boeren gaven {who} aan."
+
+#: internal/game/ibbs_return.go:313
+msgid "Your {missile} backfired on {who} of {board}."
+msgstr "Uw {missile} mislukte tegen {who} van {board}."
+
+#: internal/game/ibbs_return.go:346
+msgid "Your {missile} bounced off {who}'s New Realm Protection on {board}."
+msgstr ""
+"Uw {missile} stuitte af op de bescherming voor nieuwe rijken van {who} op "
+"{board}."
+
+#: internal/game/flavor.go:25
+msgid ""
+"Your {missile} lost its guidance and drifted into a black hole on the way to "
+"{target} of {board}."
+msgstr ""
+"Uw {missile} verloor zijn besturing en dreef een zwart gat in op weg naar "
+"{target} van {board}."
+
+#: internal/game/flavor.go:29
+msgid ""
+"Your {missile} ran into a stray asteroid on the way to {target} of {board}."
+msgstr ""
+"Uw {missile} botste op een verdwaalde asteroide op weg naar {target} van "
+"{board}."
+
+#: internal/game/ibbs_return.go:342
+msgid "Your {missile} reached {board} and found no realm called {who}."
+msgstr "Uw {missile} bereikte {board} en vond geen rijk met de naam {who}."
+
+#: internal/game/flavor.go:27
+msgid ""
+"Your {missile} was hijacked by space pirates, rewired, and redirected to a "
+"player in League 8472."
+msgstr ""
+"Uw {missile} werd gekaapt door ruimtepiraten, omgebouwd en doorgestuurd naar "
+"een speler in League 8472."
+
+#: internal/game/flavor.go:31
+msgid ""
+"Your {missile}'s warhead failed to arm, and it sailed harmlessly past "
+"{target} of {board}."
+msgstr ""
+"De kernkop van uw {missile} werd niet scherp, en hij vloog onschuldig langs "
+"{target} van {board}."
+
+#: internal/game/ibbs_return.go:354
+msgid "Your {op} against {target} is over."
+msgstr "Uw {op} tegen {target} is voorbij."
+
+#: internal/game/ibbs_return.go:119
+msgid "Your {op} against {who} of {board} destroyed {n} of its forces."
+msgstr "Uw {op} tegen {who} van {board} vernietigde {n} van zijn troepen."
+
+#: internal/game/ibbs_return.go:122
+msgid "Your {op} against {who} of {board} was turned away."
+msgstr "Uw {op} tegen {who} van {board} werd afgeslagen."
+
+#: internal/game/ibbs_return.go:108
+msgid "Your {op} bounced off {who}'s New Realm Protection on {board}."
+msgstr ""
+"Uw {op} stuitte af op de bescherming voor nieuwe rijken van {who} op {board}."
 
 #: internal/menu/timezone.go:82
 msgid "Zone?"
@@ -3764,6 +4822,54 @@ msgstr "Zone?"
 msgid "[%d Regions left] Your choice?"
 msgstr "[nog %d regio's] Uw keuze?"
 
+#: internal/game/ibbs_attack.go:1136
+msgid "a bid that never came home"
+msgstr "een bod dat nooit terugkwam"
+
+#: internal/game/covert.go:495
+msgid "a bribery attempt"
+msgstr "een omkooppoging"
+
+#: internal/game/economy.go:276
+msgid "a food sale"
+msgstr "een voedselverkoop"
+
+#: internal/game/loan.go:97
+msgid "a loan"
+msgstr "een lening"
+
+#: internal/game/lottery.go:88
+msgid "a lottery win"
+msgstr "een loterijprijs"
+
+#: internal/game/bank.go:119
+msgid "a matured investment"
+msgstr "een vervallen belegging"
+
+#: internal/game/economy.go:484
+msgid "a region sale"
+msgstr "een regioverkoop"
+
+#: internal/game/covert.go:260
+msgid "a sabotage attempt"
+msgstr "een sabotagepoging"
+
+#: internal/game/covert.go:241
+msgid "a spying attempt"
+msgstr "een spionagepoging"
+
+#: internal/game/covert.go:591
+msgid "a terror bombing"
+msgstr "een terreuraanslag"
+
+#: internal/game/trade_deal.go:98
+msgid "a trade deal"
+msgstr "een handelsovereenkomst"
+
+#: internal/game/economy.go:450
+msgid "a unit sale"
+msgstr "een verkoop van eenheden"
+
 #: internal/menu/actions_ipops.go:420
 msgid "agent"
 msgstr "agent"
@@ -3772,9 +4878,41 @@ msgstr "agent"
 msgid "agents"
 msgstr "agenten"
 
+#: internal/game/covert.go:143
+msgid "an agent behind {attempt}, in {who}'s pay"
+msgstr "een agent achter {attempt}, in dienst van {who}"
+
+#: internal/game/economy.go:468
+msgid "an agent sale"
+msgstr "een verkoop van agenten"
+
+#: internal/game/covert.go:519
+msgid "an agitation attempt"
+msgstr "een poging tot opruiing"
+
+#: internal/game/covert.go:287
+msgid "an attempt to demoralize your forces"
+msgstr "een poging om het moreel van uw troepen te breken"
+
+#: internal/game/covert.go:320
+msgid "an attempt to set you up"
+msgstr "een poging u erin te luizen"
+
+#: internal/game/covert.go:464
+msgid "an attempt to spy on your relations"
+msgstr "een poging uw betrekkingen te bespioneren"
+
+#: internal/game/ibbs_trade.go:194
+msgid "an unfilled interplanetary bid"
+msgstr "een niet uitgevoerd interplanetair bod"
+
 #: internal/menu/incoming.go:174
 msgid "away"
 msgstr "weg"
+
+#: internal/game/turn.go:444
+msgid "bank interest"
+msgstr "bankrente"
 
 #: cmd/immortal-barons/flags.go:84
 msgid ""
@@ -3784,6 +4922,10 @@ msgstr ""
 "controleert de competitie-instellingen van dit BBS - lijst, BBS-naam, "
 "pakketmappen, sleutels - en meldt alles wat mis is in één keer, daarna "
 "afsluiten"
+
+#: internal/game/ibbs_special.go:431
+msgid "chemical missile"
+msgstr "chemische raket"
 
 #: cmd/immortal-barons/flags.go:71
 msgid "choose which drop file format your BBS writes, save it, then exit"
@@ -3910,6 +5052,10 @@ msgstr "niets"
 msgid "now"
 msgstr "nu"
 
+#: internal/game/ibbs_special.go:429
+msgid "nuclear missile"
+msgstr "kernraket"
+
 #: internal/menu/actions_ipdiplomacy.go:137
 msgid "or "
 msgstr "of "
@@ -3956,6 +5102,10 @@ msgid ""
 msgstr ""
 "toont aan welk BBS de pakketten van elke planeet worden doorgegeven, en in "
 "welke map ze geschreven worden, daarna afsluiten"
+
+#: internal/game/pirates.go:457
+msgid "reclaimed pirate loot"
+msgstr "teruggewonnen piratenbuit"
 
 #: cmd/immortal-barons/flags.go:79
 msgid ""
@@ -4020,13 +5170,12 @@ msgstr ""
 "en sluit af"
 
 #: cmd/immortal-barons/flags.go:76
-#, fuzzy
 msgid ""
 "show each packet as it is read and written (use with -maint, -full or "
 "-planetary)"
 msgstr ""
-"toont elk pakket terwijl het gelezen en geschreven wordt (gebruik met -full "
-"of -planetary)"
+"toont elk pakket terwijl het gelezen en geschreven wordt (gebruik met "
+"-maint, -full of -planetary)"
 
 #: cmd/immortal-barons/flags.go:96
 msgid ""
@@ -4077,6 +5226,18 @@ msgstr "die aanvalsmacht is al vertrokken"
 msgid "the BBS drop file `<file>`"
 msgstr "het BBS-dropbestand `<file>`"
 
+#: internal/game/news.go:249
+msgid "the Planetary Master's share"
+msgstr "het aandeel van de Meester van de Planeet"
+
+#: internal/game/crown_handout.go:69
+msgid "the Queen's bounty"
+msgstr "de gulheid van de Koningin"
+
+#: internal/game/payments.go:243
+msgid "the Queen's refund"
+msgstr "de terugbetaling van de Koningin"
+
 #: cmd/immortal-barons/flags.go:72
 msgid "the folder `<dir>` that holds the game data"
 msgstr "de map `<dir>` met de spelgegevens"
@@ -4112,6 +5273,14 @@ msgstr ""
 msgid "the league is not frozen"
 msgstr "de competitie is niet bevroren"
 
+#: internal/game/market.go:287
+msgid "the trading market"
+msgstr "de handelsmarkt"
+
+#: internal/game/ibbs_return.go:219
+msgid "the whole of {board}"
+msgstr "heel {board}"
+
 #: internal/menu/actions_ipattack.go:53
 msgid "the whole planet"
 msgstr "de hele planeet"
@@ -4133,6 +5302,10 @@ msgstr ""
 #: internal/menu/incoming.go:124
 msgid "this planet"
 msgstr "deze planeet"
+
+#: internal/game/income.go:203
+msgid "this turn's income"
+msgstr "de inkomsten van deze beurt"
 
 #: internal/menu/bulletinfiles.go:277
 msgid "took %d"
@@ -4186,9 +5359,354 @@ msgstr ""
 msgid "{Food decay} is at %d%% of standard levels."
 msgstr "Het {bederf van voedsel} zit op %d%% van het normale niveau."
 
+#: internal/game/msg.go:260
+msgid "{a} and {b}"
+msgstr "{a} en {b}"
+
+#: internal/game/diplomacy.go:399
+msgid ""
+"{a} attacked {d}: you lost {troopers} troopers and {tanks} tanks in the "
+"defense."
+msgstr ""
+"{a} viel {d} aan: u verloor {troopers} soldaten en {tanks} tanks bij de "
+"verdediging."
+
+#: internal/game/dupe.go:95
+msgid "{board} no longer lists your handle; this realm is unlocked."
+msgstr "{board} vermeldt uw gebruikersnaam niet meer; dit rijk is vrijgegeven."
+
+#: internal/game/ibbs_trade.go:138
+msgid "{board} no longer trades with other planets."
+msgstr "{board} handelt niet meer met andere planeten."
+
+#: internal/game/sabre.go:247
+msgid "{from}'s S3-Sabre backfired, expanding your territory by {n} region."
+msgid_plural ""
+"{from}'s S3-Sabre backfired, expanding your territory by {n} regions."
+msgstr[0] ""
+"De S3-Sabre van {from} mislukte en vergrootte uw gebied met {n} regio."
+msgstr[1] ""
+"De S3-Sabre van {from} mislukte en vergrootte uw gebied met {n} regio's."
+
+#: internal/game/sabre.go:86
+msgid ""
+"{from}'s S3-Sabre hit your Intelligence Headquarters and did little harm."
+msgstr ""
+"De S3-Sabre van {from} trof uw inlichtingenhoofdkwartier en richtte weinig "
+"schade aan."
+
+#: internal/game/sabre.go:87
+msgid ""
+"{from}'s S3-Sabre hit your Intelligence Headquarters, destroying {lost}."
+msgstr ""
+"De S3-Sabre van {from} trof uw inlichtingenhoofdkwartier en vernietigde "
+"{lost}."
+
+#: internal/game/sabre.go:107
+msgid "{from}'s S3-Sabre hit your airbases and did little harm."
+msgstr ""
+"De S3-Sabre van {from} trof uw vliegbases en richtte weinig schade aan."
+
+#: internal/game/sabre.go:108
+msgid "{from}'s S3-Sabre hit your airbases, destroying {lost}."
+msgstr "De S3-Sabre van {from} trof uw vliegbases en vernietigde {lost}."
+
+#: internal/game/sabre.go:123
+msgid "{from}'s S3-Sabre hit your food supply and did little harm."
+msgstr ""
+"De S3-Sabre van {from} trof uw voedselvoorraad en richtte weinig schade aan."
+
+#: internal/game/sabre.go:124
+msgid "{from}'s S3-Sabre hit your food supply, destroying {lost}."
+msgstr "De S3-Sabre van {from} trof uw voedselvoorraad en vernietigde {lost}."
+
+#: internal/game/sabre.go:98
+msgid "{from}'s S3-Sabre hit your military bases and did little harm."
+msgstr ""
+"De S3-Sabre van {from} trof uw legerbases en richtte weinig schade aan."
+
+#: internal/game/sabre.go:99
+msgid "{from}'s S3-Sabre hit your military bases, destroying {lost}."
+msgstr "De S3-Sabre van {from} trof uw legerbases en vernietigde {lost}."
+
+#: internal/game/sabre.go:112
+msgid "{from}'s S3-Sabre hit your regions and did little harm."
+msgstr "De S3-Sabre van {from} trof uw regio's en richtte weinig schade aan."
+
+#: internal/game/sabre.go:113
+msgid "{from}'s S3-Sabre hit your regions, destroying {lost}."
+msgstr "De S3-Sabre van {from} trof uw regio's en vernietigde {lost}."
+
+#: internal/game/sabre.go:91
+msgid "{from}'s S3-Sabre hit your residential zones and did little harm."
+msgstr ""
+"De S3-Sabre van {from} trof uw woonwijken en richtte weinig schade aan."
+
+#: internal/game/sabre.go:92
+msgid "{from}'s S3-Sabre hit your residential zones, destroying {lost}."
+msgstr "De S3-Sabre van {from} trof uw woonwijken en vernietigde {lost}."
+
+#: internal/game/ibbs_special.go:577
+msgid "{from}'s chemical strike killed {n} of your people."
+msgstr "De chemische aanval van {from} doodde {n} van uw inwoners."
+
+#: internal/game/specials.go:331
+msgid ""
+"{from}'s chemical strike laid waste to {n} of your regions and killed "
+"{people} of your people; famine follows."
+msgstr ""
+"De chemische aanval van {from} verwoestte {n} van uw regio's en doodde "
+"{people} van uw inwoners; hongersnood volgt."
+
+#: internal/game/specials.go:242
+msgid "{from}'s nuclear strike turned {n} of your regions into waste."
+msgstr "De kernaanval van {from} verwoestte {n} van uw regio's."
+
+#: internal/game/specials.go:367
+msgid ""
+"{from}'s plague killed {troopers} of your troopers and {people} of your "
+"people; famine follows."
+msgstr ""
+"De plaag van {from} doodde {troopers} van uw soldaten en {people} van uw "
+"inwoners; hongersnood volgt."
+
+#: internal/game/ibbs_return.go:178
+msgid "{kind} results — {target}."
+msgstr "Resultaat {kind} - {target}."
+
+#: internal/game/msg.go:264
+msgid "{list}, and {last}"
+msgstr "{list} en {last}"
+
+#: internal/game/units.go:150
+msgid "{n} Agents"
+msgid_plural "{n} Agents"
+msgstr[0] "{n} Agent"
+msgstr[1] "{n} Agenten"
+
+#: internal/game/units.go:115
+msgid "{n} Bombers"
+msgid_plural "{n} Bombers"
+msgstr[0] "{n} Bommenwerper"
+msgstr[1] "{n} Bommenwerpers"
+
+#: internal/game/units.go:139
+msgid "{n} Carriers"
+msgid_plural "{n} Carriers"
+msgstr[0] "{n} Vliegdekschip"
+msgstr[1] "{n} Vliegdekschepen"
+
+#: internal/game/units.go:158
+msgid "{n} Food"
+msgid_plural "{n} Food"
+msgstr[0] "{n} Voedsel"
+msgstr[1] "{n} Voedsel"
+
+#: internal/game/ibbs_trade_deal.go:248
+msgid "{n} Gold"
+msgstr "{n} Goud"
+
+#: internal/game/units.go:92
+msgid "{n} Jets"
+msgid_plural "{n} Jets"
+msgstr[0] "{n} Straaljager"
+msgstr[1] "{n} Straaljagers"
+
+#: internal/game/sabre.go:94
+msgid "{n} People"
+msgid_plural "{n} People"
+msgstr[0] "{n} Inwoner"
+msgstr[1] "{n} Inwoners"
+
+#: internal/game/sabre.go:120
+msgid "{n} Region"
+msgid_plural "{n} Regions"
+msgstr[0] "{n} Regio"
+msgstr[1] "{n} Regio's"
+
+#: internal/game/pirates.go:341
+msgid "{n} Regions"
+msgid_plural "{n} Regions"
+msgstr[0] "{n} Regio"
+msgstr[1] "{n} Regio's"
+
+#: internal/game/units.go:127
+msgid "{n} Tanks"
+msgid_plural "{n} Tanks"
+msgstr[0] "{n} Tank"
+msgstr[1] "{n} Tanks"
+
+#: internal/game/units.go:80
+msgid "{n} Troopers"
+msgid_plural "{n} Troopers"
+msgstr[0] "{n} Soldaat"
+msgstr[1] "{n} Soldaten"
+
+#: internal/game/units.go:104
+msgid "{n} Turrets"
+msgid_plural "{n} Turrets"
+msgstr[0] "{n} Geschutstoren"
+msgstr[1] "{n} Geschutstorens"
+
+#: internal/game/ibbs_terror.go:246
+msgid "{n} agent sent by {board}"
+msgid_plural "{n} agents sent by {board}"
+msgstr[0] "{n} agent gestuurd door {board}"
+msgstr[1] "{n} agenten gestuurd door {board}"
+
+#: internal/game/ibbs_terror.go:248
+msgid "{n} agent sent by {who} of {board}"
+msgid_plural "{n} agents sent by {who} of {board}"
+msgstr[0] "{n} agent gestuurd door {who} van {board}"
+msgstr[1] "{n} agenten gestuurd door {who} van {board}"
+
+#: internal/game/ibbs_special.go:522
+msgid "{pct} of every listing was destroyed."
+msgstr "{pct} van elk aanbod werd vernietigd."
+
+#: internal/game/ibbs_special.go:541
+msgid "{pct} of the investments coming due was lost."
+msgstr "{pct} van de aflopende beleggingen ging verloren."
+
+#: internal/game/ibbs_special.go:510
+msgid "{pct} of the supply burned."
+msgstr "{pct} van de voorraad verbrandde."
+
+#: internal/game/ibbs_terror.go:499
+msgid "{target}'s security on {board} caught every one of your {n} agents."
+msgstr "De beveiliging van {target} op {board} betrapte al uw {n} agenten."
+
+#: internal/game/ibbs_terror.go:497
+msgid "{target}'s security on {board} caught your agent."
+msgstr "De beveiliging van {target} op {board} betrapte uw agent."
+
+#: internal/game/combat.go:304
+msgid "{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets"
+msgstr ""
+"{troopers} soldaten, {turrets} geschutstorens, {tanks} tanks, {jets} jagers"
+
+#: internal/game/ibbs_attack.go:865
+msgid "{units} attacked."
+msgstr "{units} vielen aan."
+
+#: internal/game/ibbs_return.go:202
+msgid "{units} returned."
+msgstr "{units} keerden terug."
+
+#: internal/game/ibbs_attack.go:1093
+msgid "{who}"
+msgstr "{who}"
+
+#: internal/game/trade_deal.go:285
+msgid "{who} accepted your trade deal."
+msgstr "{who} aanvaardde uw handelsovereenkomst."
+
+#: internal/game/diplomacy.go:505
+msgid "{who} accepted your {treaty} proposal."
+msgstr "{who} aanvaardde uw voorstel voor {treaty}."
+
+#: internal/game/combat.go:269
+msgid "{who} attacked you and took {n} regions. You lost {lost}."
+msgstr "{who} viel u aan en nam {n} regio's. U verloor {lost}."
+
+#: internal/game/combat.go:287
+msgid "{who} attacked you and was repelled. You lost {lost}."
+msgstr "{who} viel u aan en werd afgeslagen. U verloor {lost}."
+
+#: internal/game/ibbs_trade.go:170
+msgid "{who} had only {n} left."
+msgstr "{who} had er nog maar {n}."
+
+#: internal/game/ibbs_trade.go:146
+msgid "{who} has repriced its {good} since you were quoted."
+msgstr "{who} heeft de prijs van zijn {good} gewijzigd sinds uw offerte."
+
+#: internal/game/covert.go:459
+msgid "{who} holds no treaties."
+msgstr "{who} heeft geen verdragen."
+
+#: internal/game/covert.go:323
+msgid "{who} holds no treaty for you to unravel."
+msgstr "{who} heeft geen verdrag dat u kunt ontrafelen."
+
+#: internal/game/ibbs_trade.go:142
+msgid "{who} is no longer on our planet."
+msgstr "{who} is niet meer op onze planeet."
+
+#: internal/game/trade_deal.go:329
+msgid ""
+"{who} never answered your trade deal, and the goods you sent it with are "
+"lost."
+msgstr ""
+"{who} reageerde nooit op uw handelsovereenkomst, en de meegestuurde goederen "
+"zijn verloren."
+
+#: internal/game/ibbs_trade.go:144
+msgid "{who} no longer offers {good}."
+msgstr "{who} biedt geen {good} meer aan."
+
+#: internal/game/ibbs_return.go:221
+msgid "{who} of {board}"
+msgstr "{who} van {board}"
+
+#: internal/game/ibbs_trade.go:164
+msgid "{who} of {board} bought {n} {good} from your market for {gold} gold."
+msgstr "{who} van {board} kocht {n} {good} op uw markt voor {gold} goud."
+
+#: internal/game/ibbs_trade_deal.go:200
+msgid "{who} of {board} shipped you a trade deal: {goods}."
+msgstr "{who} van {board} stuurde u een handelsovereenkomst: {goods}."
+
+#: internal/game/trade_deal.go:310
+msgid "{who} rejected your trade deal."
+msgstr "{who} wees uw handelsovereenkomst af."
+
+#: internal/game/diplomacy.go:524
+msgid "{who} rejected your {treaty} proposal."
+msgstr "{who} wees uw voorstel voor {treaty} af."
+
+#: internal/game/diplomacy.go:615
+msgid "{who} tore up the {treaty} between your realms to attack you."
+msgstr ""
+"{who} verscheurde het verdrag {treaty} tussen uw rijken om u aan te vallen."
+
+#: internal/game/ibbs_special.go:657
+msgid "{who}'s SDI shot down your {missile} over {board}."
+msgstr "Het SDI van {who} schoot uw {missile} neer boven {board}."
+
+#: internal/game/ibbs_special.go:646
+msgid "{who}'s tanks on {board} brought down your {missile}."
+msgstr "De tanks van {who} op {board} haalden uw {missile} neer."
+
+#: internal/game/ibbs_special.go:637
+msgid "{who}'s troopers on {board} brought down your {missile}."
+msgstr "De soldaten van {who} op {board} haalden uw {missile} neer."
+
+#: internal/game/ibbs_special.go:642
+msgid "{who}'s turrets on {board} brought down your {missile}."
+msgstr "De geschutstorens van {who} op {board} haalden uw {missile} neer."
+
+#: internal/game/annihilator.go:272
+msgid ""
+"{who}, the BBS Coordinator, dismantled the Gooie Kablooie aimed at {board}. "
+"Nothing was refunded."
+msgstr ""
+"{who}, de BBS-coördinator, ontmantelde de Gooie Kablooie gericht op {board}. "
+"Er werd niets terugbetaald."
+
 #: internal/menu/input.go:479
 msgid "─»>Paused<«─"
 msgstr "─»>Gepauzeerd<«─"
+
+#~ msgid "Their losses so far: %d troopers, %d turrets, %d tanks, %d jets"
+#~ msgstr ""
+#~ "Hun verliezen tot nu toe: %d soldaten, %d geschutstorens, %d tanks, %d "
+#~ "jagers"
+
+#~ msgid "Your losses so far: %d troopers, %d jets, %d tanks, %d bombers"
+#~ msgstr ""
+#~ "Uw verliezen tot nu toe: %d soldaten, %d jagers, %d tanks, %d "
+#~ "bommenwerpers"
 
 #~ msgid ""
 #~ "Costs the target nothing and takes nothing from it. What it brings home "
@@ -4347,24 +5865,6 @@ msgstr "─»>Gepauzeerd<«─"
 #, fuzzy
 #~ msgid "It would take %s jets to destroy one outright."
 #~ msgstr "Er zijn %s straaljagers nodig om hem in één keer te vernietigen."
-
-#~ msgid "Free Trade Agreement"
-#~ msgstr "Vrijhandelsverdrag"
-
-#~ msgid "Full Defense Alliance"
-#~ msgstr "Volledig defensiebondgenootschap"
-
-#~ msgid "Intelligence Alliance"
-#~ msgstr "Inlichtingenbondgenootschap"
-
-#~ msgid "Protective Trade"
-#~ msgstr "Beschermde handel"
-
-#~ msgid "Tariff Trade Agreement"
-#~ msgstr "Tariefhandelsverdrag"
-
-#~ msgid "Terrorist Prevention"
-#~ msgstr "Terreurpreventie"
 
 #, fuzzy
 #~ msgid ""

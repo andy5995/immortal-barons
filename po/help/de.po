@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-02 16:05-0500\n"
+"POT-Creation-Date: 2026-10-03 14:30-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2252,19 +2252,23 @@ msgstr ""
 "beschriebene, lesen Sie dies also, bevor Sie es nutzen."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:52
+#: internal/help/content/economy/trading.md:53
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
 "send them to has no say: they arrive and are added to what that realm holds. "
-"There is no offer to accept or refuse, so nothing is ever returned to you."
+"There is no offer to accept or refuse, so nothing is ever returned to you. "
+"You are told when the deal arrives, or that it was lost because the realm is "
+"gone."
 msgstr ""
 "Sie können nichts dafür verlangen. Die Waren sind ein Geschenk, und das "
 "Reich, dem Sie sie senden, hat kein Mitspracherecht: Sie treffen ein und "
 "werden dem hinzugefügt, was dieses Reich hält. Es gibt kein Angebot zum "
-"Annehmen oder Ablehnen, daher wird Ihnen nie etwas zurückgegeben."
+"Annehmen oder Ablehnen, daher wird Ihnen nie etwas zurückgegeben. Sie "
+"erfahren, wenn das Geschäft ankommt oder wenn es verloren ging, weil das "
+"Reich nicht mehr existiert."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:57
+#: internal/help/content/economy/trading.md:58
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
 "planet.  The fee depends on what is in the deal, and it is shown before you "
@@ -2280,20 +2284,20 @@ msgstr ""
 "Geschäft von oben."
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:58
+#: internal/help/content/economy/trading.md:59
 #, no-wrap
 msgid "Getting the most from trade"
 msgstr "Das Beste aus dem Handel herausholen"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:61
+#: internal/help/content/economy/trading.md:62
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 "Der Handel zählt am meisten, wenn mehrere Reiche zusammenarbeiten. Ein paar "
 "Ideen:"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:66
+#: internal/help/content/economy/trading.md:67
 #, no-wrap
 msgid ""
 "**Specialize, then supply your partners.** Your industry can specialize in one\n"
@@ -2307,7 +2311,7 @@ msgstr ""
 "von dem her, was der andere braucht. Handeln Sie mit dem Überschuss, und beide Reiche gewinnen.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:70
+#: internal/help/content/economy/trading.md:71
 #, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so\n"
@@ -2319,7 +2323,7 @@ msgstr ""
 "einen Rivalen bewaffnen. Damit die Waren sicher das Reich erreichen, für das Sie sie bestimmt haben, senden Sie stattdessen ein Handelsgeschäft.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:73
+#: internal/help/content/economy/trading.md:74
 #, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, and\n"

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-02 16:05-0500\n"
+"POT-Creation-Date: 2026-10-03 14:30-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2187,19 +2187,22 @@ msgstr ""
 "это, прежде чем ею пользоваться."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:52
+#: internal/help/content/economy/trading.md:53
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
 "send them to has no say: they arrive and are added to what that realm holds. "
-"There is no offer to accept or refuse, so nothing is ever returned to you."
+"There is no offer to accept or refuse, so nothing is ever returned to you. "
+"You are told when the deal arrives, or that it was lost because the realm is "
+"gone."
 msgstr ""
 "Попросить что-либо взамен нельзя. Товары — это подарок, и у державы, которой "
 "вы их шлёте, нет выбора: они приходят и добавляются к тому, чем она владеет. "
 "Никакого предложения принять или отклонить нет, поэтому вам ничего и никогда "
-"не возвращается."
+"не возвращается. Вам сообщат, когда сделка дойдёт, или что она пропала, "
+"потому что державы больше нет."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:57
+#: internal/help/content/economy/trading.md:58
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
 "planet.  The fee depends on what is in the deal, and it is shown before you "
@@ -2214,20 +2217,20 @@ msgstr ""
 "описанная выше."
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:58
+#: internal/help/content/economy/trading.md:59
 #, no-wrap
 msgid "Getting the most from trade"
 msgstr "Как выжать из торговли больше"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:61
+#: internal/help/content/economy/trading.md:62
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 "Торговля важнее всего там, где несколько держав работают сообща. Несколько "
 "мыслей:"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:66
+#: internal/help/content/economy/trading.md:67
 #, no-wrap
 msgid ""
 "**Specialize, then supply your partners.** Your industry can specialize in one\n"
@@ -2241,7 +2244,7 @@ msgstr ""
 "больше того, что нужно другому. Обменивайтесь излишками, и выиграют обе державы.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:70
+#: internal/help/content/economy/trading.md:71
 #, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so\n"
@@ -2253,7 +2256,7 @@ msgstr ""
 "товары наверняка дошли до нужной державы, отправьте вместо этого торговую сделку.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:73
+#: internal/help/content/economy/trading.md:74
 #, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, and\n"

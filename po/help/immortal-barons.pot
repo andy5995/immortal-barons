@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-10-02 16:27-0500\n"
+"POT-Creation-Date: 2026-10-03 14:37-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1784,17 +1784,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:52
+#: internal/help/content/economy/trading.md:53
 #, markdown-text
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
 "send them to has no say: they arrive and are added to what that realm "
 "holds. There is no offer to accept or refuse, so nothing is ever returned to "
-"you."
+"you. You are told when the deal arrives, or that it was lost because the "
+"realm is gone."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:57
+#: internal/help/content/economy/trading.md:58
 #, markdown-text
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
@@ -1805,19 +1806,19 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:58
+#: internal/help/content/economy/trading.md:59
 #, markdown-text, no-wrap
 msgid "Getting the most from trade"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:61
+#: internal/help/content/economy/trading.md:62
 #, markdown-text
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:66
+#: internal/help/content/economy/trading.md:67
 #, markdown-text, no-wrap
 msgid ""
 "**Specialize, then supply your partners.** Your industry can specialize in "
@@ -1830,7 +1831,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:70
+#: internal/help/content/economy/trading.md:71
 #, markdown-text, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, "
@@ -1841,7 +1842,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:73
+#: internal/help/content/economy/trading.md:74
 #, markdown-text, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, "
