@@ -100,7 +100,7 @@ func TestRefusalNoticeCarriesTheReason(t *testing.T) {
 	cfg.BoardID = "BravoBBS"
 	w := NewWorldSeed(cfg, 1)
 	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "AlphaBBS"}, {Number: 2, Name: "BravoBBS"}}
-	w.ApplyPacket(Packet{FromBoard: "AlphaBBS", FromNode: 1, LeagueNodes: w.LeagueNodes})
+	w.receive(Packet{FromBoard: "AlphaBBS", FromNode: 1, LeagueNodes: w.LeagueNodes})
 
 	var line string
 	for _, n := range w.SysopNotices {

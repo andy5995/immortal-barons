@@ -46,7 +46,7 @@ func fileDropBoard(t *testing.T) game.Config {
 		t.Fatal(err)
 	}
 	cfg.IBBS = true
-	w := store.NewGame(cfg)
+	w, _ := store.NewGame(cfg)
 	w.LeagueNodes = fileDropRoster
 	if err := store.Save(w, cfg); err != nil {
 		t.Fatal(err)

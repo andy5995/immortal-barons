@@ -28,7 +28,7 @@ func TestIPMessageReachesEveryBaron(t *testing.T) {
 	if len(here.Outbox) != 1 || len(here.Outbox[0].IPMessages) != 1 {
 		t.Fatalf("message not queued: %+v", here.Outbox)
 	}
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 	for _, e := range there.Empires {
 		if len(e.Mail) != 1 {
 			t.Fatalf("%s has %d messages, want 1", e.Name, len(e.Mail))
@@ -60,7 +60,7 @@ func TestIPMessageToCoordinatorIsPrivate(t *testing.T) {
 	there.VoteCoordinator(co, co.Owner)
 
 	here.SendIPMessage(here.Empires[0], []string{"The Eclipse"}, true, "A word between coordinators.")
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 	if len(co.Mail) != 1 {
 		t.Fatalf("the Coordinator has %d messages, want 1", len(co.Mail))
 	}
@@ -118,7 +118,7 @@ func TestIPReplyToAuthorReachesOnlyThem(t *testing.T) {
 	there := ipWorld("Nova Hub")
 	author := there.Empires[0]
 	here.ReplyIPMessage(here.Empires[0], "Nova Hub", author.Name, "Between us.", false)
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 	if len(author.Mail) != 1 {
 		t.Fatalf("the author has %d messages, want 1", len(author.Mail))
 	}
@@ -198,7 +198,7 @@ func TestArrivingIPMessagesStayOutOfTheNews(t *testing.T) {
 
 	here.SendIPMessage(here.Empires[0], []string{"The Eclipse"}, false, "Stand down.")
 	before := len(there.NewsToday)
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 
 	if len(there.Empires[0].Mail) != 1 {
 		t.Fatalf("the message should still be delivered, got %d", len(there.Empires[0].Mail))
@@ -236,7 +236,7 @@ func TestIPMessageToNamedBaronsReachesOnlyThem(t *testing.T) {
 		t.Fatalf("ToEmpire = %v, want the two named realms — an unaddressed message goes planet-wide", to)
 	}
 
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 	for _, e := range there.Empires {
 		want := 0
 		if e.Name == "Iron Dominion" || e.Name == "Gap Origix" {
@@ -351,7 +351,7 @@ func TestIPMessageToUnknownRealmBouncesBack(t *testing.T) {
 	if len(here.Outbox) != 1 || len(here.Outbox[0].IPMessages) != 1 {
 		t.Fatalf("message not queued: %+v", here.Outbox)
 	}
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 
 	if len(there.Outbox) != 1 || len(there.Outbox[0].IPMessages) != 1 {
 		t.Fatalf("no bounce was queued: %+v", there.Outbox)
@@ -364,7 +364,7 @@ func TestIPMessageToUnknownRealmBouncesBack(t *testing.T) {
 		t.Errorf("bounce ToEmpire = %q, want the original sender", bounce.ToEmpire)
 	}
 
-	here.ApplyPacket(there.Outbox[0])
+	here.receive(there.Outbox[0])
 	sender := here.Empires[0]
 	if len(received(sender)) != 1 {
 		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(received(sender)))
@@ -394,12 +394,12 @@ func TestIPMessageToUnelectedCoordinatorBouncesBack(t *testing.T) {
 	there := ipWorld("The Eclipse") // nobody has voted, so there is no Coordinator
 
 	here.SendIPMessage(here.Empires[0], []string{"The Eclipse"}, true, "Coordinator, respond.")
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 	if len(there.Outbox) != 1 || len(there.Outbox[0].IPMessages) != 1 {
 		t.Fatalf("no bounce was queued: %+v", there.Outbox)
 	}
 
-	here.ApplyPacket(there.Outbox[0])
+	here.receive(there.Outbox[0])
 	sender := here.Empires[0]
 	if len(received(sender)) != 1 {
 		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(received(sender)))
@@ -419,7 +419,7 @@ func TestIPMessageBounceDoesNotLoopWhenSenderIsAlsoGone(t *testing.T) {
 	there := ipWorld("The Eclipse")
 
 	here.SendIPMessageToBarons(here.Empires[0], "The Eclipse", []string{"Ghost Realm"}, "Where are you?")
-	there.ApplyPacket(here.Outbox[0])
+	there.receive(here.Outbox[0])
 	if len(there.Outbox) != 1 {
 		t.Fatalf("no bounce was queued: %+v", there.Outbox)
 	}
@@ -431,7 +431,7 @@ func TestIPMessageBounceDoesNotLoopWhenSenderIsAlsoGone(t *testing.T) {
 	here.Empires[0].Alive = false
 	beforePackets, beforeMsgs := len(here.Outbox), len(here.Outbox[0].IPMessages)
 
-	here.ApplyPacket(there.Outbox[0])
+	here.receive(there.Outbox[0])
 	if len(here.Outbox) != beforePackets || len(here.Outbox[0].IPMessages) != beforeMsgs {
 		t.Fatalf("a bounce that cannot itself be delivered must die quietly, not bounce again: %+v", here.Outbox)
 	}

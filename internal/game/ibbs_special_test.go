@@ -77,7 +77,7 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 		t.Fatal("a packet carrying only a special op reads as empty, so it would never be written")
 	}
 	landNextBombingRun(to)
-	answer := to.ApplyPacket(from.Outbox[0])
+	answer := to.receive(from.Outbox[0])
 
 	// A landed run burns 20-99% of the supply (TestBombingDamageMatchesTheOriginal).
 	if to.FoodMarketSupply < 40 || to.FoodMarketSupply > 3200 {
@@ -117,7 +117,7 @@ func TestSpecialOpBreaksOnNewRealmProtection(t *testing.T) {
 	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpNuclear, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
-	answer := to.ApplyPacket(from.Outbox[0])
+	answer := to.receive(from.Outbox[0])
 	if target.Land != 500 {
 		t.Errorf("a protected realm lost land: %d", target.Land)
 	}
@@ -370,7 +370,7 @@ func TestGlobalReconRequestAsksEveryBoardAboutEveryone(t *testing.T) {
 	if attacker.Agents != agents-1 {
 		t.Errorf("agents %d, want %d", attacker.Agents, agents-1)
 	}
-	answer := to.ApplyPacket(from.Outbox[0])
+	answer := to.receive(from.Outbox[0])
 	if len(answer.ReconReports) != 2 {
 		t.Fatalf("got %d reports, want one per living realm on the far board", len(answer.ReconReports))
 	}
@@ -404,7 +404,7 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 		t.Errorf("the packet names %q; a planet op carries no realm", got)
 	}
 	landNextBombingRun(to)
-	answer := to.ApplyPacket(from.Outbox[0])
+	answer := to.receive(from.Outbox[0])
 	if to.FoodMarketSupply >= 1000 {
 		t.Errorf("the planet's food market holds %d, want less than 1000 — protection must not shield the planet",
 			to.FoodMarketSupply)
@@ -427,7 +427,7 @@ func TestBombingOpsIgnoreTheTargetsProtection(t *testing.T) {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	landNextBombingRun(to)
-	answer := to.ApplyPacket(from.Outbox[0])
+	answer := to.receive(from.Outbox[0])
 	if got := answer.Results[0].outcome(); got != OutcomeWon {
 		t.Fatalf("outcome %q, want %q — report %q", got, OutcomeWon, answer.Results[0].Report)
 	}

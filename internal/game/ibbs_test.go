@@ -104,7 +104,7 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 		t.Errorf("departed attack should be removed from the pending list")
 	}
 
-	result := wB.ApplyPacket(wA.Outbox[0])
+	result := wB.receive(wA.Outbox[0])
 	if target.Land >= 100 {
 		t.Errorf("target should have lost land, still has %d", target.Land)
 	}
@@ -143,7 +143,7 @@ func TestTerrorOpDestroysForces(t *testing.T) {
 		t.Fatalf("expected one outbound terror op, got %+v", wA.Outbox)
 	}
 
-	result := wB.ApplyPacket(wA.Outbox[0])
+	result := wB.receive(wA.Outbox[0])
 	res := result.Results[0]
 	if !res.Won || res.Kind != "terror" || res.Report == nil {
 		t.Errorf("expected a won terror result carrying its own report, got %+v", res)
@@ -171,7 +171,7 @@ func TestTerrorOpBlockedByProtection(t *testing.T) {
 	if _, err := wA.SendTerror(attacker, "boardB", "Victim", 4, TerrorOpBombIntel); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
-	result := wB.ApplyPacket(wA.Outbox[0])
+	result := wB.receive(wA.Outbox[0])
 	if target.Troopers != 5000 {
 		t.Errorf("protected target should keep all troopers, got %d", target.Troopers)
 	}
@@ -193,7 +193,7 @@ func TestRemoteAttackBlockedByProtection(t *testing.T) {
 	pkt := Packet{FromBoard: "boardA", ToBoard: "boardB", Attacks: []RemoteAttack{{
 		ID: 1, FromBoard: "boardA", TargetEmpire: "Victim", Offense: 1_000_000,
 	}}}
-	result := wB.ApplyPacket(pkt)
+	result := wB.receive(pkt)
 
 	if target.Land != landBefore {
 		t.Errorf("protected target should lose no land, %d -> %d", landBefore, target.Land)
@@ -246,8 +246,8 @@ func TestGroupAttackReturnsSurvivors(t *testing.T) {
 	}
 
 	wA.LaunchDueGroupAttacksAt(afterDeparture())
-	result := wB.ApplyPacket(wA.Outbox[0]) // B resolves, returns survivors to A
-	wA.ApplyPacket(result)                 // A restores survivors
+	result := wB.receive(wA.Outbox[0]) // B resolves, returns survivors to A
+	wA.receive(result)                 // A restores survivors
 
 	// The target is defenseless, so there is no battle to bleed in and the whole
 	// detachment comes home. A flat retreat share used to take 15% from a force
@@ -302,7 +302,7 @@ func TestLeagueConfigOnlyFromCoordinator(t *testing.T) {
 	wB := NewWorldSeed(cfgB, 1)
 	wB.LeagueNodes = roster
 	wB.CoordPub = pub
-	wB.ApplyPacket(pkt)
+	wB.receive(pkt)
 	if wB.Config.GameLength != 42 || wB.Config.TurnsPerDay != 15 {
 		t.Errorf("member should adopt LC config, got length=%d turns=%d", wB.Config.GameLength, wB.Config.TurnsPerDay)
 	}
@@ -312,7 +312,7 @@ func TestLeagueConfigOnlyFromCoordinator(t *testing.T) {
 	cfgC.BoardID, cfgC.GameLength = "CharlieBBS", 5
 	wC := NewWorldSeed(cfgC, 1)
 	wC.LeagueNodes = roster
-	wC.ApplyPacket(Packet{FromBoard: "BravoBBS", LeagueConfig: &LeagueConfig{GameLength: 999}})
+	wC.receive(Packet{FromBoard: "BravoBBS", LeagueConfig: &LeagueConfig{GameLength: 999}})
 	if wC.Config.GameLength != 5 {
 		t.Errorf("config from a non-coordinator board must be ignored, got %d", wC.Config.GameLength)
 	}
@@ -454,7 +454,7 @@ func TestAnsweredStrikeDoesNotAlsoTimeOut(t *testing.T) {
 	w.LaunchDueGroupAttacksAt(afterDeparture())
 	id := w.InFlight[0].ID
 
-	w.ApplyPacket(Packet{
+	w.receive(Packet{
 		FromBoard: "faraway",
 		Results: []AttackResult{{
 			ID: id, TargetBoard: "faraway", TargetEmpire: "Rome",
@@ -499,7 +499,7 @@ func TestCoordinatorBroadcastsTheRoster(t *testing.T) {
 	member := NewWorldSeed(memberCfg, 1)
 	member.LeagueNodes = roster // knows the roster well enough to name the LC
 	member.CoordPub = pub
-	member.ApplyPacket(lc.Outbox[0])
+	member.receive(lc.Outbox[0])
 	if len(member.LeagueNodes) != 2 || member.LeagueNodes[1].Name != "Wildside" {
 		t.Errorf("member did not adopt the roster: %+v", member.LeagueNodes)
 	}
@@ -513,7 +513,7 @@ func TestCoordinatorBroadcastsTheRoster(t *testing.T) {
 
 	// Nor may a roster from anyone but the Coordinator be adopted.
 	before := len(member.LeagueNodes)
-	member.ApplyPacket(Packet{FromBoard: "Impostor", LeagueNodes: []LeagueNode{{Number: 9, Name: "Bogus"}}})
+	member.receive(Packet{FromBoard: "Impostor", LeagueNodes: []LeagueNode{{Number: 9, Name: "Bogus"}}})
 	if len(member.LeagueNodes) != before {
 		t.Errorf("member adopted a roster from a non-coordinator board: %+v", member.LeagueNodes)
 	}
@@ -586,7 +586,7 @@ func TestACovertOpBringsBackIntelligence(t *testing.T) {
 	rome.Protection = 0
 	rome.Land, rome.Gold, rome.Troopers = 4321, 99000, 5000
 	rome.Jets, rome.Turrets, rome.Tanks, rome.Morale = 600, 700, 800, 64
-	reply := far.ApplyPacket(asker.Outbox[0])
+	reply := far.receive(asker.Outbox[0])
 	if len(reply.ReconReports) != 1 {
 		t.Fatalf("the far board sent %d reports, want 1", len(reply.ReconReports))
 	}
@@ -601,7 +601,7 @@ func TestACovertOpBringsBackIntelligence(t *testing.T) {
 	}
 
 	// And the answer files itself on the sending board.
-	asker.ApplyPacket(reply)
+	asker.receive(reply)
 	if len(asker.SpyDatabase) != 1 || asker.SpyDatabase[0].Land != 4321 {
 		t.Errorf("Spy Database did not receive the report: %+v", asker.SpyDatabase)
 	}
@@ -706,7 +706,7 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	defender.Jets = 400_000
 
 	// Under construction: a warning, and nothing to shoot at yet.
-	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{FromBoard: "Wildside"}})
+	target.receive(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{FromBoard: "Wildside"}})
 	if len(target.Incoming) == 0 {
 		t.Fatal("target was not told about the weapon being built")
 	}
@@ -715,7 +715,7 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	}
 
 	// Launched: in the air, and out of reach until it lands.
-	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
+	target.receive(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
 		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay + 2, Intact: 100,
 	}})
 	if !target.Incoming[0].Launched {
@@ -769,7 +769,7 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	}
 
 	// The builder announcing it once more must not raise a second siege.
-	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
+	target.receive(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
 		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay - 1, Intact: 100,
 	}})
 	if len(target.Incoming) > 0 {
@@ -857,7 +857,7 @@ func TestLeagueOrdersNeedTheCoordinatorsSignature(t *testing.T) {
 
 	// Unsigned, but claiming to be the Coordinator.
 	m := newMember()
-	m.ApplyPacket(Packet{FromBoard: "AlphaBBS", Seq: 1, LeagueConfig: &LeagueConfig{GameLength: 99}})
+	m.receive(Packet{FromBoard: "AlphaBBS", Seq: 1, LeagueConfig: &LeagueConfig{GameLength: 99}})
 	if m.Config.GameLength != 7 {
 		t.Errorf("an unsigned order was obeyed: game length %d", m.Config.GameLength)
 	}
@@ -869,7 +869,7 @@ func TestLeagueOrdersNeedTheCoordinatorsSignature(t *testing.T) {
 	forgedWorld.CoordKey = other
 	_ = forgedWorld.SignAsCoordinator(&forged)
 	m = newMember()
-	m.ApplyPacket(forged)
+	m.receive(forged)
 	if m.Config.GameLength != 7 {
 		t.Errorf("an order signed with the wrong key was obeyed: game length %d", m.Config.GameLength)
 	}
@@ -882,31 +882,31 @@ func TestLeagueOrdersNeedTheCoordinatorsSignature(t *testing.T) {
 		t.Fatalf("signing: %v", err)
 	}
 	m = newMember()
-	m.ApplyPacket(genuine)
+	m.receive(genuine)
 	if m.Config.GameLength != 42 {
 		t.Fatalf("a genuine order was refused: game length %d", m.Config.GameLength)
 	}
 
 	// The same packet a second time changes nothing.
 	m.Config.GameLength = 7
-	m.ApplyPacket(genuine)
+	m.receive(genuine)
 	if m.Config.GameLength != 7 {
 		t.Errorf("a replayed order was obeyed a second time: game length %d", m.Config.GameLength)
 	}
 
 	// An older sequence number from the same board is a replay too.
 	m2 := newMember()
-	m2.ApplyPacket(genuine)
+	m2.receive(genuine)
 	stale := Packet{FromBoard: "AlphaBBS", Seq: 2, LeagueConfig: &LeagueConfig{GameLength: 5}}
 	signer.Outbox = nil
 	_ = signer.SignAsCoordinator(&stale)
-	m2.ApplyPacket(stale)
+	m2.receive(stale)
 	if m2.Config.GameLength != 42 {
 		t.Errorf("a stale order was obeyed: game length %d", m2.Config.GameLength)
 	}
 }
 
-// The Coordinator can start a new season across the league, and a board carries
+// The Coordinator can reset every board in the league, and a board carries
 // it out once (#65).
 func TestLeagueWideReset(t *testing.T) {
 	roster := []LeagueNode{{Number: 1, Name: "AlphaBBS"}, {Number: 2, Name: "BravoBBS"}}
@@ -919,7 +919,7 @@ func TestLeagueWideReset(t *testing.T) {
 	lc.CoordKey, lc.CoordPub = priv, pub
 	lc.AddHuman("alice", "Alethia")
 
-	if err := lc.DeclareLeagueReset("2026-09-01", "Season two begins."); err != nil {
+	if err := lc.DeclareLeagueReset("2026-09-01", "A new game begins."); err != nil {
 		t.Fatalf("DeclareLeagueReset: %v", err)
 	}
 	if len(lc.Empires) != 0 {
@@ -944,15 +944,21 @@ func TestLeagueWideReset(t *testing.T) {
 	m.LeagueNodes = roster
 	m.CoordPub = pub
 	m.AddHuman("bob", "Bobland")
-	m.ApplyPacket(order)
+	m.receive(order)
 	if len(m.Empires) != 0 {
 		t.Errorf("member board kept %d realms through the league reset", len(m.Empires))
 	}
-	if m.Season != order.Reset.Season {
-		t.Errorf("member is on season %d, the league is on %d", m.Season, order.Reset.Season)
+	if m.StartedDate != "2026-09-01" {
+		t.Errorf("member's new game started %q, the order says 2026-09-01", m.StartedDate)
+	}
+	// The same order delivered again is a replay, and does not wipe the new game.
+	m.AddHuman("carol", "Carolia")
+	m.receive(order)
+	if len(m.Empires) != 1 {
+		t.Errorf("a replayed reset order wiped the new game: %d realms left, want 1", len(m.Empires))
 	}
 
-	// A member cannot start a season itself.
+	// A member cannot reset the league itself.
 	if err := m.DeclareLeagueReset("2026-10-01", ""); err != ErrNotCoordinator {
 		t.Errorf("a member board declared a league reset: %v", err)
 	}
@@ -981,7 +987,7 @@ func TestUnchangedLeagueBroadcastIsQuiet(t *testing.T) {
 		lc.ExportNodeList()
 		lc.StampOutbox()
 		for _, pkt := range lc.Outbox {
-			member.ApplyPacket(pkt)
+			member.receive(pkt)
 		}
 	}
 	broadcast() // first one adopts and reports
@@ -1025,7 +1031,7 @@ func TestCoordinatorRenameStillRecognizedByNode(t *testing.T) {
 	m.CoordPub = coordPub
 	m.LeagueNodes = []LeagueNode{{Number: 1, Name: "OldCoordName"}, {Number: 2, Name: "Member"}}
 
-	m.ApplyPacket(order)
+	m.receive(order)
 
 	found := false
 	for _, n := range m.LeagueNodes {
@@ -1040,7 +1046,7 @@ func TestCoordinatorRenameStillRecognizedByNode(t *testing.T) {
 
 // perBoardConfigFields are the Config fields a league does NOT broadcast. The
 // rule they are the exception to: anything that changes how the local game plays
-// must be the same on every planet, or the season is not a fair one. So a field
+// must be the same on every planet, or the game is not a fair one. So a field
 // earns a place here only by being identity, a file path, or session policy —
 // never by being a rule.
 var perBoardConfigFields = map[string]string{

@@ -48,7 +48,7 @@ func TestEverySpecialOpMakesTheRoundTrip(t *testing.T) {
 				t.Fatal("the packet reads as empty, so it would never be written")
 			}
 
-			answer := to.ApplyPacket(from.Outbox[0])
+			answer := to.receive(from.Outbox[0])
 			if len(answer.Results) != 1 {
 				t.Fatalf("the receiving board answered nothing: %+v", answer.Results)
 			}
@@ -111,7 +111,7 @@ func TestSpecialOpsTellTheReceivingPlanet(t *testing.T) {
 				landNextBombingRun(to) // a run driven off tells nobody but the news
 			}
 			newsBefore := len(to.NewsToday)
-			to.ApplyPacket(from.Outbox[0])
+			to.receive(from.Outbox[0])
 			if len(to.NewsToday) == newsBefore {
 				t.Errorf("the receiving planet's news says nothing about %s", SpecialOpLabel(op))
 			}

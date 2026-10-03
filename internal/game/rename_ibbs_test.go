@@ -87,7 +87,7 @@ func TestExportedScoresCarryTheFormerName(t *testing.T) {
 		return sender.Outbox[0]
 	}
 
-	receiver.ApplyPacket(export()) // the realm as "Old"
+	receiver.receive(export()) // the realm as "Old"
 
 	if err := sender.RenameEmpire(e, "New"); err != nil {
 		t.Fatalf("RenameEmpire: %v", err)
@@ -96,12 +96,12 @@ func TestExportedScoresCarryTheFormerName(t *testing.T) {
 	if len(p.Scores) != 1 || p.Scores[0].Empire != "New" || p.Scores[0].FormerName != "Old" {
 		t.Fatalf("exported scores = %+v; want New, formerly Old", p.Scores)
 	}
-	receiver.ApplyPacket(p)
+	receiver.receive(p)
 	if got := renameNewsCount(receiver, "Old", "New"); got != 1 {
 		t.Fatalf("news on the receiving board = %d, want 1 (news: %v)", got, receiver.NewsToday)
 	}
 	// The next day's export still carries FormerName, and must not re-announce.
-	receiver.ApplyPacket(export())
+	receiver.receive(export())
 	if got := renameNewsCount(receiver, "Old", "New"); got != 1 {
 		t.Errorf("news after the following export = %d, want 1", got)
 	}

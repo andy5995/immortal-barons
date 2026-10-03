@@ -22,7 +22,7 @@ func lockedLeagueBoard(t *testing.T) (dir string, cfg game.Config) {
 	if err := store.SaveConfig(cfg); err != nil {
 		t.Fatal(err)
 	}
-	w := store.NewGame(cfg)
+	w, _ := store.NewGame(cfg)
 	w.AddHuman("alice", "Iron Dominion").DupeLockedBy = "Bravo BBS"
 	if err := store.Save(w, cfg); err != nil {
 		t.Fatal(err)

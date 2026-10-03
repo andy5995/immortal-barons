@@ -152,7 +152,7 @@ func TestOrdersSignedBeforeBulletinsExistedAreStillObeyed(t *testing.T) {
 	if !w.VerifyCoordinatorOrders(p) {
 		t.Fatal("a legacy-shaped signature was refused")
 	}
-	w.ApplyPacket(p)
+	w.receive(p)
 	if w.Config.GameLength != 42 {
 		t.Errorf("the order was verified but not applied: game length %d, want 42", w.Config.GameLength)
 	}
@@ -174,7 +174,7 @@ func TestALegacySignatureCannotCarryBulletins(t *testing.T) {
 	if w.VerifyCoordinatorOrders(p) {
 		t.Fatal("a legacy signature was accepted for a packet carrying bulletins")
 	}
-	w.ApplyPacket(p)
+	w.receive(p)
 	if len(w.BulletinDigest) != 0 {
 		t.Errorf("unsigned bulletins were recorded: %v", w.BulletinDigest)
 	}
@@ -200,7 +200,7 @@ func TestOrdersSignedWithTheCurrentPayloadVerify(t *testing.T) {
 	if !w.VerifyCoordinatorOrders(p) {
 		t.Fatal("a current-shape signature was refused")
 	}
-	w.ApplyPacket(p)
+	w.receive(p)
 	if w.Config.GameLength != 42 {
 		t.Errorf("the order was verified but not applied: game length %d, want 42", w.Config.GameLength)
 	}

@@ -41,7 +41,8 @@ func leagueBoard(t *testing.T) game.Config {
 	if err := os.MkdirAll(cfg.Inbound(), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.Save(store.NewGame(cfg), cfg); err != nil {
+	fresh, _ := store.NewGame(cfg)
+	if err := store.Save(fresh, cfg); err != nil {
 		t.Fatal(err)
 	}
 	return cfg

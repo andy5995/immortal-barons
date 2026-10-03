@@ -2,6 +2,10 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * BREAKING: packet protocol 4; every board in a league must update together
+  * A reset erases the whole world, battles and news included; bbs.cfg, the
+    roster, the keys and the new packet-ledger.json are all that outlive it
+  * A packet with no sequence number or board name is deleted unapplied
+  * -reset is refused while the league is frozen
   * FTN: GameOutbound may be on a different drive from the data directory
   * An interplanetary trade deal's sender is told it arrived, or was lost
   * Recap events and interplanetary reports can be translated

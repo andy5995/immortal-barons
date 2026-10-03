@@ -98,6 +98,11 @@ func (fs *FileStore) reload() error {
 		}
 	}
 	repair(fs.w, fs.cfg)
+	// The ledger is not in world.json (copySaved leaves it alone), so it is read
+	// from its own file: another node may have numbered or applied packets since.
+	if err := loadLedger(fs.w, fs.cfg, data); err != nil {
+		return err
+	}
 	if err := checkClockOffset(fs.w); err != nil {
 		return err
 	}

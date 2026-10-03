@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-// GameDay counts maintenance runs, and seasons (Config.GameLength) are measured
+// GameDay counts maintenance runs, and games (Config.GameLength) are measured
 // in it -- so it has to mean the same thing on a board played every day and one
-// played twice a month, or a league's boards would reach the end of a season at
+// played twice a month, or a league's boards would reach the end of a game at
 // different real-world times. The catch-up is what makes that true: before it,
 // GameDay tracked the game clock exactly but both lagged real time by a day for
 // every day nobody logged in.

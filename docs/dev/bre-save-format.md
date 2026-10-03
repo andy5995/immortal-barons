@@ -383,7 +383,7 @@ The attack resolver never deletes anything: a realm crushed at `BRE.OVR 0xef90`
 just hands over its land and surviving units.
 
 `0x050d74`'s other caller is `confirm_end_game`, which wipes the whole relation
-table at the end of a season.
+table at the end of a game.
 
 Runtime helpers worth recognizing when reading this code:
 

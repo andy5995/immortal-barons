@@ -862,6 +862,12 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		w.NoteProtocolHold(p.FromBoard, p.Protocol)
 		return holdPacket(w.Config.DataDir, path)
 	}
+	if w.RefusedUnnumbered(p) {
+		if verbose {
+			fmt.Printf("  Deleted packet from %s: it has no sequence number or board name\n", p.FromBoard)
+		}
+		return os.Remove(path)
+	}
 	if w.IsPacketSeen(p) {
 		result.AlreadySeen++
 		if verbose {

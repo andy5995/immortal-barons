@@ -14,14 +14,14 @@ import (
 	"github.com/andy5995/immortal-barons/internal/textwrap"
 )
 
-// runLeagueReset is the Coordinator starting a new season for the whole league:
+// runLeagueReset is the Coordinator resetting the whole league:
 // this board resets, and a signed order goes out for every other board to do the
 // same on its next planetary run.
 func runLeagueReset(cfg game.Config, date string) error {
 	return runCoordinatorOrder(cfg, "-league-reset",
 		func(w *game.World) error { return w.DeclareLeagueReset(date, "") },
 		func(w *game.World) {
-			fmt.Printf("Season %d declared, starting %s, and the order is on its way to the other boards.\n", w.Season, date)
+			fmt.Printf("League reset declared, starting %s, and the order is on its way to the other boards.\n", date)
 		})
 }
 

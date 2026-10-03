@@ -41,7 +41,7 @@ func TestInterplanetaryBidRoundTrip(t *testing.T) {
 	if len(sw.Outbox) == 0 {
 		t.Fatal("the seller board queued no scores packet")
 	}
-	bw.ApplyPacket(sw.Outbox[0])
+	bw.receive(sw.Outbox[0])
 	snap := bw.RemoteMarket("Bravo")
 	if len(snap) != 1 || snap[0].Realm != "Redlands" || snap[0].Qty != 100 || snap[0].Price != 500 {
 		t.Fatalf("the buyer sees %+v, want one Redlands tank listing of 100 at 500", snap)
@@ -60,7 +60,7 @@ func TestInterplanetaryBidRoundTrip(t *testing.T) {
 
 	// The bid lands, fills, and the answer comes home.
 	bid := bw.Outbox[len(bw.Outbox)-1]
-	reply := sw.ApplyPacket(bid)
+	reply := sw.receive(bid)
 	if seller.Tanks != 0 {
 		t.Errorf("the seller kept %d tanks in hand; the listing was escrowed", seller.Tanks)
 	}
@@ -70,7 +70,7 @@ func TestInterplanetaryBidRoundTrip(t *testing.T) {
 	if got := sw.MarketProceeds["Redlands"]; got != 20_000 {
 		t.Errorf("the seller is owed %d, want the 20,000 the buyer paid", got)
 	}
-	bw.ApplyPacket(reply)
+	bw.receive(reply)
 	if buyer.Tanks != 40 {
 		t.Errorf("the buyer received %d tanks, want 40", buyer.Tanks)
 	}
@@ -95,14 +95,14 @@ func TestInterplanetaryBidRefundedWhenThePriceMoved(t *testing.T) {
 		t.Fatalf("reprice: %v", err)
 	}
 
-	reply := sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1])
+	reply := sw.receive(bw.Outbox[len(bw.Outbox)-1])
 	if sw.MarketForSale("Redlands", "Tank") != 100 {
 		t.Error("the listing should be untouched by a refused bid")
 	}
 	if sw.MarketProceeds["Redlands"] != 0 {
 		t.Error("the seller was paid for a sale that did not happen")
 	}
-	bw.ApplyPacket(reply)
+	bw.receive(reply)
 	if buyer.Tanks != 0 {
 		t.Errorf("the buyer got %d tanks from a refused bid", buyer.Tanks)
 	}
@@ -130,7 +130,7 @@ func TestInterplanetaryBidFillsPartially(t *testing.T) {
 		t.Fatalf("shrink: %v", err)
 	}
 
-	bw.ApplyPacket(sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1]))
+	bw.receive(sw.receive(bw.Outbox[len(bw.Outbox)-1]))
 	if buyer.Tanks != 30 {
 		t.Errorf("the buyer received %d tanks, want the 30 that were left", buyer.Tanks)
 	}
@@ -226,14 +226,14 @@ func TestInterplanetaryBidRefusedWhenTheAllianceEndsInTransit(t *testing.T) {
 	// Bravo falls out with Alpha while the bid is on its way.
 	sw.SetPlanetRelationWith("Alpha", PlanetEnemy)
 
-	reply := sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1])
+	reply := sw.receive(bw.Outbox[len(bw.Outbox)-1])
 	if left := sw.MarketForSale("Redlands", "Tank"); left != 100 {
 		t.Errorf("the listing lost %d tanks to a bid that should have been refused", 100-left)
 	}
 	if sw.MarketProceeds["Redlands"] != 0 {
 		t.Error("the seller was paid by a planet it is no longer allied with")
 	}
-	bw.ApplyPacket(reply)
+	bw.receive(reply)
 	if buyer.Tanks != 0 {
 		t.Errorf("the buyer received %d tanks from a closed market", buyer.Tanks)
 	}
@@ -259,7 +259,7 @@ func TestInterplanetaryBidRefusedWhenTheFarBoardStopsTrading(t *testing.T) {
 	}
 	sw.Config.IPTrading = false
 
-	bw.ApplyPacket(sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1]))
+	bw.receive(sw.receive(bw.Outbox[len(bw.Outbox)-1]))
 	if buyer.Tanks != 0 || buyer.Gold != goldBefore {
 		t.Errorf("tanks = %d, gold = %d; want nothing bought and %d refunded",
 			buyer.Tanks, buyer.Gold, goldBefore)
@@ -272,7 +272,7 @@ func TestInterplanetaryBidRefusedWhenTheFarBoardStopsTrading(t *testing.T) {
 func TestInterplanetaryBidOnAFreeListing(t *testing.T) {
 	bw, buyer, sw, seller := twoTradingBoards(t, 50, 0)
 	sw.ExportScores()
-	bw.ApplyPacket(sw.Outbox[0])
+	bw.receive(sw.Outbox[0])
 
 	goldBefore := buyer.Gold
 	if _, err := bw.SendTradeBid(buyer, "Bravo", "Redlands", "Tank", 50, 0); err != nil {
@@ -281,7 +281,7 @@ func TestInterplanetaryBidOnAFreeListing(t *testing.T) {
 	if buyer.Gold != goldBefore {
 		t.Errorf("a free bid escrowed %d gold", goldBefore-buyer.Gold)
 	}
-	bw.ApplyPacket(sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1]))
+	bw.receive(sw.receive(bw.Outbox[len(bw.Outbox)-1]))
 	if buyer.Tanks != 50 {
 		t.Errorf("the buyer received %d tanks, want the 50 given away", buyer.Tanks)
 	}

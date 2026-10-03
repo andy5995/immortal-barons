@@ -553,7 +553,7 @@ until your Coordinator says otherwise. A large league routes instead — see
 "Routing" above.
 
 A league with no routing asks two things of your transport, and a broadcast —
-scores, the roster, a ruleset change, a season reset — needs both:
+scores, the roster, a ruleset change, a league reset — needs both:
 
 - **Something that copies one packet to every board.** A shared directory or
   mount does this by being shared. A mailer queue does not: a binkp file box and
@@ -740,7 +740,7 @@ no other board can change the league rules.
 The Coordinator's own `-planetary` run sends the same settings, so a board that
 was down for a broadcast, or joined the league after it, is brought into line on
 the next exchange rather than playing its own numbers for the rest of the
-season. `-league-config` is for pushing a change out immediately.
+game. `-league-config` is for pushing a change out immediately.
 
 ### League bulletins
 
@@ -760,7 +760,7 @@ folder is removed by your next broadcast, so their own bulletins belong in
 
 A new or changed bulletin appears in each board's news, with its title.
 
-### Starting a new season
+### Resetting the league
 
 The Coordinator can restart the whole league on a chosen date:
 
@@ -770,10 +770,11 @@ immortal-barons -league-reset 2026-09-01 -data /path/to/data
 
 The date is `YYYY-MM-DD`. This resets the Coordinator's own board straight away
 and sends a signed order that each member carries out on its next `-planetary`
-run. Every board keeps what identifies it in the league — its roster, its keys
-and its packet history — and starts a fresh world, so nobody re-does the setup.
+run. Every board keeps the files that identify it in the league — its roster,
+its keys, `bbs.cfg` and its packet ledger — and starts a fresh world from its
+settings, so nobody re-does the setup.
 
-Nothing schedules this. Run it when you decide the season is over. A Game
+Nothing schedules this. Run it when you decide the game is over. A Game
 Length setting ends each board's game on that board's own count of days, so
 boards can end on different days.
 
@@ -797,8 +798,8 @@ Each board freezes on its next `-planetary` run. While the league is frozen:
   length of the freeze when it ends;
 - each board applies what reaches it and passes on what it relays, but sends
   nothing of its own. What its game produces waits until the thaw. The
-  Coordinator can still send league settings and roster changes; a new season
-  is refused until the thaw.
+  Coordinator can still send league settings and roster changes; a league reset
+  is refused until the thaw, and so is `-reset` on any board.
 
 Keep `-maint` or `-planetary` running on its schedule on every board: the runs
 are what deliver the last packets, and what later carry the thaw.

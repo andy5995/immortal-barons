@@ -78,7 +78,7 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		genCoordKey:     flag.Bool("gen-coord-key", false, i18n.T(lang, "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)")),
 		coordPub:        flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key `<key>` (the value -gen-coord-key printed), then exit")),
 		genBoardKey:     flag.Bool("gen-board-key", false, i18n.T(lang, "create this board's packet-signing key, print the public half to send to the League Coordinator, then exit")),
-		leagueReset:     flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on `<YYYY-MM-DD>` (node #1 only), then exit")),
+		leagueReset:     flag.String("league-reset", "", i18n.T(lang, "reset every board in the league, starting a new game on `<YYYY-MM-DD>` (node #1 only), then exit")),
 		leagueFreeze:    flag.String("league-freeze", "", i18n.T(lang, "freeze the whole league for an update so every board's packets can drain; callers are shown `\"<string>\"` (node #1 only), then exit")),
 		leagueThaw:      flag.Bool("league-thaw", false, i18n.T(lang, "end a league freeze and let play resume on every board (node #1 only), then exit")),
 		leagueCheck:     flag.Bool("league-check", false, i18n.T(lang, "check this board's league setup — roster, board name, packet directories, keys — and report everything wrong at once, then exit")),

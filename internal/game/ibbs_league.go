@@ -4,12 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
 // ibbs_league.go — the league: its ruleset, its roster of boards, who
-// coordinates it, and the season reset.
+// coordinates it, and the league reset.
 
 // LeagueConfig is the set of game rules the League Coordinator sets for the
 // whole league. The coordinator (board #1) broadcasts it; member boards adopt
@@ -118,7 +117,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 // applyLeagueRuleset copies broadcast league rules into this board's config,
 // leaving per-board fields untouched. What counts as which is decided by one
 // rule: anything that changes how the local game plays has to be the same on
-// every planet, or the season is not a fair one. Only identity, file paths and
+// every planet, or the game is not a fair one. Only identity, file paths and
 // session policy stay local — see perBoardConfigFields, which pins the list.
 func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.GameStartDate = lc.GameStartDate
@@ -195,7 +194,7 @@ func (c Config) RulesetFingerprint() string {
 // comes from node #1 (see ApplyPacket). It goes out on every planetary run,
 // like the roster, so a board that was down for one broadcast — or joined the
 // league after it — heals on the next run instead of playing its own numbers
-// for the rest of the season (#264). The original does the same on its
+// for the rest of the game (#264). The original does the same on its
 // planetary step.
 //
 // Prepended, not appended — see ExportNodeList's doc comment for why: the
@@ -540,24 +539,21 @@ func (w *World) fromCoordinator(p Packet) bool {
 	return p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID()
 }
 
-// applyLeagueReset carries out the Coordinator's order to start a new season.
-// The order names the season it starts, so a board that already ran it — or one
-// replaying an old packet — does nothing (#65).
+// applyLeagueReset carries out the Coordinator's order to reset every board
+// (#65). A copy seen before never reaches it: ApplyPacket drops the packet on
+// the ledger first.
 func (w *World) applyLeagueReset(r *LeagueReset) {
-	if r.Season <= w.Season {
-		return
-	}
-	w.Season = r.Season
-	w.ResetForNewSeason(r.OnDate)
+	w.ResetForLeague(r.OnDate)
 	if r.Announced != "" {
 		w.LeagueDiplomacy = r.Announced
 	}
-	w.postNews(fmt.Sprintf("The League Coordinator has begun season %d. Every realm starts again.", r.Season))
+	w.postNews("The League Coordinator has reset the league. Every realm starts again.")
 }
 
-// DeclareLeagueReset is the Coordinator ordering a new season. It resets this
-// board too and queues the order for every other, signed so no other board can
-// issue one (#65).
+// DeclareLeagueReset is the Coordinator ordering every board to reset. It resets
+// this board too and queues the order for every other, signed so no other board
+// can issue one (#65). The order is queued AFTER this board's own reset, which
+// would otherwise erase it along with the rest of the world.
 func (w *World) DeclareLeagueReset(onDate, announcement string) error {
 	if !w.IsLeagueCoordinator() {
 		return ErrNotCoordinator
@@ -568,18 +564,17 @@ func (w *World) DeclareLeagueReset(onDate, announcement string) error {
 	if w.Frozen {
 		return ErrLeagueFrozen
 	}
-	w.Season++
-	r := &LeagueReset{Season: w.Season, OnDate: onDate, Announced: announcement}
+	r := &LeagueReset{OnDate: onDate, Announced: announcement}
 	p := Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Seq: w.NextSeq(), Reset: r}
 	if err := w.SignAsCoordinator(&p); err != nil {
 		return err
 	}
+	w.ResetForLeague(onDate)
 	w.Outbox = append(w.Outbox, p)
-	w.ResetForNewSeason(onDate)
 	if announcement != "" {
 		w.LeagueDiplomacy = announcement
 	}
-	w.postNews(fmt.Sprintf("Season %d begins. Every realm starts again.", w.Season))
+	w.postNews("The league has been reset. Every realm starts again.")
 	return nil
 }
 

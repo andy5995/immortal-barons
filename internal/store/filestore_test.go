@@ -230,7 +230,7 @@ func TestSessionIgnoresAFutureResetDate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	reset.LastMaintDate = "2026-10-01" // what ResetForNewSeason writes for a future start
+	reset.LastMaintDate = "2026-10-01" // what ResetForLeague writes for a future start
 	if err := Save(reset, cfg); err != nil {
 		t.Fatal(err)
 	}

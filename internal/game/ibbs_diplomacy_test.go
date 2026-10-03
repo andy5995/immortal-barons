@@ -74,13 +74,13 @@ func TestPlanetDiplomacyNeverLeavesTheBoard(t *testing.T) {
 	}
 }
 
-// A new season starts the chart empty: the coordinator who filed it is gone
+// A league reset starts the chart empty: the coordinator who filed it is gone
 // with every other empire.
-func TestSeasonResetClearsPlanetDiplomacy(t *testing.T) {
+func TestLeagueResetClearsPlanetDiplomacy(t *testing.T) {
 	w := NewWorld(DefaultConfig())
 	w.SetPlanetRelationWith("Nova Hub", PlanetAllied)
-	w.ResetForNewSeason("2026-08-08")
+	w.ResetForLeague("2026-08-08")
 	if got := w.PlanetRelationWith("Nova Hub"); got != PlanetNone {
-		t.Errorf("after a season reset = %q, want %q", got, PlanetNone)
+		t.Errorf("after a league reset = %q, want %q", got, PlanetNone)
 	}
 }

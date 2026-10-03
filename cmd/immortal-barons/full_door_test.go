@@ -28,7 +28,8 @@ func TestFullAsADoorReadsTheDropFile(t *testing.T) {
 	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.Save(store.NewGame(cfg), cfg); err != nil {
+	fresh, _ := store.NewGame(cfg)
+	if err := store.Save(fresh, cfg); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(cfg.DataDir, "door.json"), []byte(`{"DropfileFormat":"door32"}`), 0o644); err != nil {

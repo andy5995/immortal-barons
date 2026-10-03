@@ -91,7 +91,8 @@ func cfgIn(dir string) game.Config {
 	}
 	// Load now errors on a missing world, so stand one up first — as a real
 	// deployment does with -reset before the first caller plays.
-	if err := store.Save(store.NewGame(c), c); err != nil {
+	fresh, _ := store.NewGame(c)
+	if err := store.Save(fresh, c); err != nil {
 		panic(err)
 	}
 	return c

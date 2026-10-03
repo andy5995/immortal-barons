@@ -254,7 +254,7 @@ func TestFiringPlanetReadsEveryMissileOutcome(t *testing.T) {
 			if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, tc.op, 6); err != nil {
 				t.Fatalf("SendSpecialOp: %v", err)
 			}
-			answer := to.ApplyPacket(from.Outbox[0])
+			answer := to.receive(from.Outbox[0])
 			res := answer.Results[0]
 			before := len(from.NewsToday)
 			from.applyAttackResult(res, nil)
@@ -289,7 +289,7 @@ func TestFiringPlanetReadsProtectionAndOldFailures(t *testing.T) {
 	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpChemical, 0); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
-	answer := to.ApplyPacket(from.Outbox[0])
+	answer := to.receive(from.Outbox[0])
 	before := len(from.NewsToday)
 	from.applyAttackResult(answer.Results[0], nil)
 	if got := from.NewsToday[before:]; len(got) != 1 ||
@@ -414,7 +414,7 @@ func TestFiringPlanetReadsEveryBombingOutcome(t *testing.T) {
 			if err := from.SendSpecialOp(attacker, "Bravo BBS", "", tc.op, 0); err != nil {
 				t.Fatalf("SendSpecialOp: %v", err)
 			}
-			answer := to.ApplyPacket(from.Outbox[0])
+			answer := to.receive(from.Outbox[0])
 			res := answer.Results[0]
 			there := to.NewsToday[len(to.NewsToday)-1].Text
 			before := len(from.NewsToday)
@@ -566,7 +566,7 @@ func TestMissileOutcomesReachTheOriginalsChannels(t *testing.T) {
 				t.Fatalf("SendSpecialOp: %v", err)
 			}
 			targetEvents, newsThere := len(target.Events), len(to.NewsToday)
-			answer := to.ApplyPacket(from.Outbox[0])
+			answer := to.receive(from.Outbox[0])
 			res := answer.Results[0]
 			o := res.outcome()
 			if res.Backfired {

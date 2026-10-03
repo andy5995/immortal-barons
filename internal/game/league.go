@@ -1,9 +1,9 @@
 package game
 
 // Reset starts a fresh game: this is BRE's sysop "reset". It wipes every empire
-// (humans re-onboard on their next login), and it does NOT crown a winner — crowning happens only when a timed league runs out
-// its length (endGame), which is a separate event. LastMaster and the bulletin
-// persist across the reset.
+// (humans re-onboard on their next login), and it does NOT crown a winner —
+// crowning happens only when a timed league runs out its length (endGame),
+// which is a separate event.
 func (w *World) Reset() { w.initFreshGame() }
 
 // endGame ends a timed league: crown the Planetary Master (planetMaster, the

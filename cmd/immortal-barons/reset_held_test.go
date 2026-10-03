@@ -9,8 +9,8 @@ import (
 )
 
 // A reset archives packets held for a newer protocol along with inbound and
-// outbound (#261): otherwise the upgrade that usually follows a season boundary
-// releases last season's packets into the new world.
+// outbound (#261): otherwise the upgrade that usually follows a reset
+// releases the last game's packets into the new world.
 func TestResetArchivesHeldPackets(t *testing.T) {
 	cfg := leagueBoard(t)
 	held := filepath.Join(cfg.DataDir, store.HeldDir)

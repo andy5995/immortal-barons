@@ -2,14 +2,12 @@ package game
 
 import (
 	"bytes"
+	"cmp"
 	"crypto/ed25519"
-	"crypto/sha256"
-	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -226,97 +224,37 @@ func (w *World) NextSeq() uint64 {
 // packets in ReadInbound — where the caller will call SeenPacket or ApplyPacket
 // afterward and needs the side effects to fire exactly once.
 func (w *World) IsPacketSeen(p Packet) bool {
-	key := packetKey(p)
-	if w.SeenPackets[key] { // reading a nil map is safe
-		return true
+	// An unnumbered packet cannot have been seen; ApplyPacket refuses it.
+	return p.Seq > 0 && p.Seq <= w.HighSeq[p.FromBoard] // reading a nil map is safe
+}
+
+// RefusedUnnumbered refuses a packet with no sequence number or no board name,
+// telling the sysop, and reports whether it did. Replay protection rests on the
+// two, which every board stamps on everything it sends (StampOutbox); a packet
+// without them could be applied any number of times.
+func (w *World) RefusedUnnumbered(p Packet) bool {
+	if p.Seq > 0 && p.FromBoard != "" {
+		return false
 	}
-	if p.Seq > 0 && p.FromBoard != "" && w.HighSeq != nil && p.Seq <= w.HighSeq[p.FromBoard] {
-		return true
-	}
-	return false
+	w.noteSysop("A packet from %s carried no sequence number or board name and was refused.",
+		cmp.Or(p.FromBoard, "an unnamed board"))
+	return true
 }
 
 // SeenPacket reports whether a packet has already been applied here, and records
-// it if not. A packet with no sequence number is fingerprinted by its contents
-// instead, so an older board that sends none is still protected.
-//
-// A numbered packet from a named board is recorded in HighSeq alone. Its
-// SeenPackets key could never refuse anything: the key is stored only once
-// HighSeq has been raised to its number, HighSeq only ever rises, and every
-// number at or below it is refused anyway. Storing it is what made
-// SeenPackets most of a league board's world.json, growing by one entry per
-// packet for the life of the league.
+// it if not. Every packet carries its board's name and a number that only goes
+// up (StampOutbox), so HighSeq, one number per board, covers every packet ever
+// applied: a number at or below it is a replay or a duplicate. ApplyPacket
+// refuses an unnumbered or unnamed packet before it gets here.
 func (w *World) SeenPacket(p Packet) bool {
-	key := packetKey(p)
-	if w.SeenPackets[key] { // reading a nil map is safe
+	if w.IsPacketSeen(p) {
 		return true
 	}
-	// A sequence number that has gone backwards is a replay of something already
-	// superseded, even if this exact packet has not been seen before.
-	if p.Seq > 0 && p.FromBoard != "" {
-		if w.HighSeq == nil {
-			w.HighSeq = map[string]uint64{}
-		}
-		if p.Seq <= w.HighSeq[p.FromBoard] {
-			return true
-		}
-		w.HighSeq[p.FromBoard] = p.Seq
-		return false
+	if w.HighSeq == nil {
+		w.HighSeq = map[string]uint64{}
 	}
-	if w.SeenPackets == nil {
-		w.SeenPackets = map[string]bool{}
-	}
-	w.SeenPackets[key] = true
+	w.HighSeq[p.FromBoard] = p.Seq
 	return false
-}
-
-// PruneSeenPackets removes the SeenPackets entries HighSeq makes redundant. A
-// save written before SeenPacket stopped storing them holds one per numbered
-// packet it applied: a key from a named board at or below that board's
-// HighSeq. Content fingerprints, numbered keys with no board, and anything
-// above HighSeq are kept, as is any key that does not parse as packetKey
-// writes it. It reports how many went.
-func (w *World) PruneSeenPackets() int {
-	n := 0
-	for key := range w.SeenPackets {
-		board, seq, ok := sequencedKey(key)
-		if ok && board != "" && seq <= w.HighSeq[board] {
-			delete(w.SeenPackets, key)
-			n++
-		}
-	}
-	return n
-}
-
-// sequencedKey reads a packetKey written for a numbered packet: the board, then
-// "#", then the number as 16 hex digits. The board is split off at the LAST
-// "#", since a board name may contain one. ok is false for a content
-// fingerprint (64 hex digits) or anything else.
-func sequencedKey(key string) (board string, seq uint64, ok bool) {
-	i := strings.LastIndexByte(key, '#')
-	if i < 0 || len(key)-i-1 != 16 {
-		return "", 0, false
-	}
-	seq, err := strconv.ParseUint(key[i+1:], 16, 64)
-	if err != nil {
-		return "", 0, false
-	}
-	return key[:i], seq, true
-}
-
-// packetKey identifies a packet for replay detection: its sender and sequence
-// when it has one, otherwise a hash of what it carries.
-func packetKey(p Packet) string {
-	if p.Seq > 0 {
-		var b [8]byte
-		binary.BigEndian.PutUint64(b[:], p.Seq)
-		return p.FromBoard + "#" + fmt.Sprintf("%x", b)
-	}
-	body, err := json.Marshal(p)
-	if err != nil {
-		return p.FromBoard + "#" + p.Date
-	}
-	return fmt.Sprintf("%s#%x", p.FromBoard, sha256.Sum256(body))
 }
 
 // StampOutbox numbers every queued packet and signs the ones carrying

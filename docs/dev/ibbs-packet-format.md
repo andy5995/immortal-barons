@@ -247,7 +247,7 @@ map of it, not a second definition.
                                      // signature, like Protocol — see Packet.Ruleset
   "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
   "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
-  "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
+  "Reset": LeagueReset,             // coordinator's league reset order (signed, #65)
   "Freeze": LeagueFreeze,           // coordinator's freeze or thaw order (signed):
                                      // { "Serial": 3, "Frozen": true, "Message": "..." }
   "Quiet": QuietReport,             // a frozen board's report to the coordinator:

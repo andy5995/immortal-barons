@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"math/rand"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -271,7 +272,7 @@ type World struct {
 	GroupAttacks []GroupAttack
 	// NextAttackID is the wire key every interplanetary action takes its id from —
 	// group and individual attacks, special ops, trade deals, spy recon and terror
-	// ops all draw on it, and it is never reused within a season.
+	// ops all draw on it, and it is never reused within a game.
 	//
 	// That makes it a running total of everything the board has sent, which is
 	// exactly what a wire key wants and exactly what a player must not be shown
@@ -356,19 +357,22 @@ type World struct {
 	// outbound packet so other boards can prove where it came from (#118). Read
 	// from board.key at startup like the two above, never serialized.
 	BoardKey []byte `json:"-"`
-	// OutSeq numbers this board's outbound packets. HighSeq and SeenPackets are
-	// what an inbound packet is checked against, so nothing is applied twice:
-	// HighSeq holds the highest number applied from each board, and SeenPackets
-	// only what HighSeq cannot cover, a packet with no number or no board name
-	// (see SeenPacket).
-	OutSeq      uint64
-	HighSeq     map[string]uint64
-	SeenPackets map[string]bool
-	// Season counts league-wide resets, so a board can tell the Coordinator's new
-	// order from one it has already carried out (#65).
-	Season          int
-	LeagueDiplomacy string       // coordinator's league-wide declaration, made with a season reset
-	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
+	// The packet ledger: kept in a file of its own beside the world
+	// (store.LedgerFile), not in it, because it must outlive a reset.
+	//
+	// OutSeq numbers this board's outbound packets. Every other board drops a
+	// packet numbered no higher than the last it applied from this one, so a
+	// board that reset alone and counted from 1 again would have its new game
+	// silently discarded across the league.
+	//
+	// HighSeq holds the highest packet number applied from each board, which is
+	// what an inbound packet is checked against so nothing is applied twice.
+	// Kept across a reset, it is what stops a late or duplicate copy of an old
+	// packet — a league reset order included — being applied to the new game.
+	OutSeq          uint64            `json:"-"`
+	HighSeq         map[string]uint64 `json:"-"`
+	LeagueDiplomacy string            // coordinator's league-wide declaration, made with a league reset
+	LeagueNodes     []LeagueNode      `json:"-"` // league roster, loaded from ibnodes.dat at startup
 	// Transit holds packets that arrived here addressed to another board and are
 	// waiting to be handed on. Kept apart from the Outbox because they must go
 	// out exactly as they came in — see ForwardPacket — so each is the packet's
@@ -378,7 +382,8 @@ type World struct {
 	// else's packet for good. A save that held them as Packets reads back as the
 	// same JSON objects.
 	Transit []json.RawMessage
-	// The league freeze (ibbs_freeze.go). FreezeSerial is the last order applied;
+	// The league freeze (ibbs_freeze.go). FreezeSerial is the last order applied
+	// (the order's packet number), which a quiet report must name to count;
 	// FrozenAt is when this board froze, which the thaw moves every deadline on
 	// by. QuietSince is when this board last applied real traffic while frozen,
 	// and QuietSent the value it last reported. QuietBoards is the Coordinator's
@@ -461,74 +466,46 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 	return w
 }
 
-// ResetForNewSeason wipes this board's world and starts it over, keeping only
-// what identifies the board in its league — the roster, the keys, the season
-// count and the packet history that stops an old order being replayed. Used by
-// the Coordinator's league-wide reset (#65); a stand-alone board resets through
-// -reset instead.
-func (w *World) ResetForNewSeason(startDate string) {
-	nodes, key, pub := w.LeagueNodes, w.CoordKey, w.CoordPub
-	season, outSeq, high, seen := w.Season, w.OutSeq, w.HighSeq, w.SeenPackets
-	outbox, transit := w.Outbox, w.Transit
-	// A season reset is not a thaw: a reset order that reaches a frozen board
-	// leaves it frozen (ibbs_freeze.go).
-	freezeSerial, frozen, freezeMsg, frozenAt := w.FreezeSerial, w.Frozen, w.FreezeMessage, w.FrozenAt
-	quietSince, quietSent, quietBoards, thawedAt := w.QuietSince, w.QuietSent, w.QuietBoards, w.ThawedAt
-	// The bulletins on disk survive a season, so their fingerprints have to as
-	// well: forgetting them would file every one of them as newly posted.
-	digest, known := w.BulletinDigest, w.BulletinsKnown
+// ResetForLeague wipes this board's world and starts it over on the
+// Coordinator's order (#65), as Reset does. One thing outlives it: the packets
+// this board is relaying for others (Transit), which belong to other boards'
+// games, not to this one.
+func (w *World) ResetForLeague(startDate string) {
+	transit := w.Transit
 	w.initFreshGame()
-	w.BulletinDigest, w.BulletinsKnown = digest, known
-	w.LeagueNodes, w.CoordKey, w.CoordPub = nodes, key, pub
-	w.Season, w.OutSeq, w.HighSeq, w.SeenPackets = season, outSeq, high, seen
-	w.Outbox, w.Transit = outbox, transit // mail for the other boards must still go out
-	w.FreezeSerial, w.Frozen, w.FreezeMessage, w.FrozenAt = freezeSerial, frozen, freezeMsg, frozenAt
-	w.QuietSince, w.QuietSent, w.QuietBoards, w.ThawedAt = quietSince, quietSent, quietBoards, thawedAt
+	w.Transit = transit
 	w.StartedDate = startDate
 	w.LastMaintDate = startDate
 }
 
-// initFreshGame installs a brand-new game's state onto w, keeping only its
-// infrastructure (mutex, rng, store) and Config. It is the SINGLE definition of
-// what a fresh game contains, called both at world creation (NewWorldSeed) and
-// on -reset (Reset). Keeping it in one place means a default can never
-// be seeded at creation but forgotten on reset — the drift that stranded the
-// old prices (and would silently carry pirates, news, and the master across a
-// reset). Add any new creation-time world default here, not in NewWorldSeed.
+// initFreshGame installs a brand-new game onto w. A reset is a reset: every
+// field the save holds is erased, and the fresh game's defaults below are
+// applied from the config. What is left alone is what the save does NOT hold —
+// the fields tagged `json:"-"`, which are the config, the roster and keys read
+// from their own files, the packet ledger kept in its own file (OutSeq,
+// HighSeq) and this process's counters — and the unexported machinery: the
+// mutex, which a reset inside a transaction is holding, the random sources and
+// the store. It is the rule store.copySaved
+// applies to a reload, for the same reason: a field added later is covered
+// without anyone having to list it.
+//
+// It is the SINGLE definition of what a fresh game contains, called at world
+// creation (NewWorldSeed) and by every reset. Add any new creation-time world
+// default here, not in NewWorldSeed.
 func (w *World) initFreshGame() {
-	w.Empires = nil
+	v := reflect.ValueOf(w).Elem()
+	for i := range v.NumField() {
+		if f := v.Type().Field(i); f.IsExported() && f.Tag.Get("json") != "-" {
+			v.Field(i).SetZero()
+		}
+	}
 	w.Prices = defaultPrices()
-	w.GameDay = 0
 	w.InvestRate = DefaultInvestRate
 	w.FoodMarketSupply = FoodMarketDailySupply
 	w.RefundPool = QueenRefundPoolSeed
-	w.LastMaintDate = ""
-	w.LastMaintRun = ""
-	w.StartedDate = ""
-	w.NewsToday = nil
-	w.NewsYesterday = nil
-	w.BulletinToday = DailyBulletin{}
-	w.BulletinYesterday = DailyBulletin{}
-	w.Alliances = nil
-	w.Treaties = nil
-	w.LastMaster = ""
-	w.CurrentMaster = ""
-	w.Directives = nil
-	w.RemoteBoards = nil
-	w.Pirates = nil
-	w.Market = nil
-	w.MarketProceeds = nil
-	w.GroupAttacks = nil
-	w.NextAttackID = 0
-	w.Outbox = nil
-	w.Transit = nil
-	w.SpyDatabase = nil
-	w.LeagueDiplomacy = ""
-	w.PlanetDiplomacy = nil
 	// A fresh world has no bulletins, so both scopes start KNOWN and empty: the
 	// silent baseline in RecordBulletins exists for a save made before bulletins
 	// did, not for a board whose first bulletin is genuine news.
-	w.BulletinDigest = nil
 	w.BulletinsKnown = map[string]bool{"league": true, "local": true}
 	// The world's own copies are migration input for older saves (see
 	// prefs.go). A fresh world has no realm to migrate, so they simply hold the
@@ -541,7 +518,6 @@ func (w *World) initFreshGame() {
 	// retirement migration off every new world. TEMPORARY (v0.2.0) — goes with
 	// internal/game/retire_ai.go.
 	w.AIRetired = true
-	w.Pirates = nil
 	if w.Config.Pirates {
 		// seedPirates, not EnsurePirates: a FRESH game gets the starting hoard.
 		// EnsurePirates is the migration path for a save that predates the

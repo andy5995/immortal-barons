@@ -34,7 +34,7 @@ func leagueBoard(t *testing.T) game.Config {
 	cfg.BoardID = "Home BBS"
 	cfg.LeagueNumber = 900
 	cfg.LostForcesDays = 3
-	w := store.NewGame(cfg)
+	w, _ := store.NewGame(cfg)
 	w.LeagueNodes = []game.LeagueNode{
 		{Number: 1, Name: "Home BBS", Address: "1:1/1", City: "A", State: "B", Country: "C"},
 		{Number: 4, Name: "Far BBS", Address: "1:1/4", City: "A", State: "B", Country: "C"},

@@ -69,8 +69,12 @@ func (w *World) DeclareLeagueFreeze(frozen bool, message string) error {
 	if !frozen && !w.Frozen {
 		return ErrNotFrozen
 	}
-	f := &LeagueFreeze{Serial: w.FreezeSerial + 1, Frozen: frozen, Message: message}
-	p := Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Seq: w.NextSeq(), Freeze: f}
+	// The serial is the order's own packet number. It comes from the packet
+	// ledger, which no reset touches, so it keeps rising when the Coordinator's
+	// board resets and every member still sees each new order as newer.
+	p := Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Seq: w.NextSeq()}
+	f := &LeagueFreeze{Serial: int(p.Seq), Frozen: frozen, Message: message}
+	p.Freeze = f
 	if err := w.SignAsCoordinator(&p); err != nil {
 		return err
 	}
@@ -79,12 +83,9 @@ func (w *World) DeclareLeagueFreeze(frozen bool, message string) error {
 	return nil
 }
 
-// applyLeagueFreeze carries out a freeze or thaw order. An order no newer than
-// the last one applied is a replay and does nothing.
+// applyLeagueFreeze carries out a freeze or thaw order. A replayed or
+// out-of-date order never reaches it: the packet ledger drops it first.
 func (w *World) applyLeagueFreeze(f *LeagueFreeze) {
-	if f.Serial <= w.FreezeSerial {
-		return
-	}
 	w.FreezeSerial = f.Serial
 	now := timeNow()
 	switch {
@@ -230,7 +231,7 @@ func FrozenSendable(p Packet) bool {
 	return p.Freeze != nil || p.Quiet != nil || CarriesCoordinatorOrders(p)
 }
 
-// ErrLeagueFrozen refuses a new season while the league is frozen: the order
+// ErrLeagueFrozen refuses a league reset while the league is frozen: the order
 // would land on boards mid-upgrade, and a board wiped then plays nothing until
 // the thaw anyway.
-var ErrLeagueFrozen = errors.New("the league is frozen; thaw it before starting a new season")
+var ErrLeagueFrozen = errors.New("the league is frozen; thaw it before resetting the league")

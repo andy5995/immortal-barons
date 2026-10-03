@@ -508,7 +508,7 @@ The FTN alias is `NNNNCCCC.BRP`:
   Coordinator-assigned league number.
 - `CCCC` is a persistent four-character base-36 counter.
 - The counter advances for every physical handoff, including each broadcast
-  copy, and does not reset with a new game season.
+  copy, and does not reset with a new game.
 
 The counter is reserved before publication, so a crash may skip a value but
 cannot reuse it. Wrap is reported loudly. An existing alias is never

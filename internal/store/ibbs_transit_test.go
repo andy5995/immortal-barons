@@ -218,11 +218,11 @@ func TestAPacketFromAnotherLeagueIsLeftAlone(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 
 	writePacket(t, inbound, "ours", game.Packet{
-		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", League: 42,
+		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", League: 42, Seq: 1,
 		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}},
 	})
 	writePacket(t, inbound, "theirs", game.Packet{
-		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", League: 900,
+		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", League: 900, Seq: 1,
 		Scores: []game.RemoteScore{{Empire: "Oranges", Land: 500}},
 	})
 
@@ -242,8 +242,8 @@ func TestAPacketFromAnotherLeagueIsLeftAlone(t *testing.T) {
 	}
 }
 
-// A packet already recorded in SeenPackets is not applied again, even if the
-// file is still in the inbound directory.
+// A packet already applied is not applied again, even if the file is still in
+// the inbound directory.
 func TestAnAlreadySeenPacketIsSkipped(t *testing.T) {
 	inbound := t.TempDir()
 	cfg := game.DefaultConfig()
@@ -251,12 +251,12 @@ func TestAnAlreadySeenPacketIsSkipped(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 
 	p := game.Packet{
-		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS",
+		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", Seq: 1,
 		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}},
 	}
 	writePacket(t, inbound, "first", p)
 
-	// Apply it once — this records it in SeenPackets and removes the file.
+	// Apply it once — this raises HighSeq and removes the file.
 	result, err := ReadInbound(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound (first): %v", err)

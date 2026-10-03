@@ -31,9 +31,9 @@ func TestForcesAwayKeepTheirNetWorth(t *testing.T) {
 	}
 	wA.InFlight, wA.GroupAttacks = inFlight, parties
 
-	result := wB.ApplyPacket(wA.Outbox[0])
+	result := wB.receive(wA.Outbox[0])
 	wA.Outbox = nil
-	wA.ApplyPacket(result)
+	wA.receive(result)
 	if len(wA.InFlight) != 0 {
 		t.Fatalf("%d strikes still in flight after the answer came home", len(wA.InFlight))
 	}

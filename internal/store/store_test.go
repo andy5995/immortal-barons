@@ -29,7 +29,7 @@ func TestLoadMissingReturnsErrNoWorld(t *testing.T) {
 // back, so a fresh game opens on an empty planet.
 func TestNewGameSeedsNoAI(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	w := NewGame(cfg)
+	w, _ := NewGame(cfg)
 	if len(w.Empires) != 0 {
 		t.Errorf("NewGame should seed no empires, got %d", len(w.Empires))
 	}

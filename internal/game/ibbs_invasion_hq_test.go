@@ -15,7 +15,7 @@ func TestWinningInvasionTakesAFifthOfTheHQ(t *testing.T) {
 		if _, err := wA.CreateIndividualAttack(attacker, "boardB", "Victim", NormalAttack, AttackForce{Troopers: 500_000, Tanks: 5000}); err != nil {
 			t.Fatal(err)
 		}
-		res := wB.ApplyPacket(wA.Outbox[0]).Results[0]
+		res := wB.receive(wA.Outbox[0]).Results[0]
 		if res.Outcome != OutcomeWon {
 			t.Fatalf("outcome %q; the test never reached the branch it covers", res.Outcome)
 		}
@@ -34,7 +34,7 @@ func TestRepelledInvasionLeavesTheHQ(t *testing.T) {
 	if _, err := wA.CreateIndividualAttack(attacker, "boardB", "Victim", NormalAttack, AttackForce{Troopers: 1000}); err != nil {
 		t.Fatal(err)
 	}
-	res := wB.ApplyPacket(wA.Outbox[0]).Results[0]
+	res := wB.receive(wA.Outbox[0]).Results[0]
 	if res.Outcome != OutcomeRepelled {
 		t.Fatalf("outcome %q; the test never reached the branch it covers", res.Outcome)
 	}
@@ -60,7 +60,7 @@ func TestPlanetWideInvasionTakesEveryDefendersHQ(t *testing.T) {
 	if len(wA.Outbox) == 0 || len(wA.Outbox[0].Attacks) == 0 {
 		t.Fatal("the group attack never left")
 	}
-	res := wB.ApplyPacket(wA.Outbox[0]).Results[0]
+	res := wB.receive(wA.Outbox[0]).Results[0]
 	if res.Outcome != OutcomeWon {
 		t.Fatalf("outcome %q; the test never reached the branch it covers", res.Outcome)
 	}

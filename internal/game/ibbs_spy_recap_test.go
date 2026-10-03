@@ -33,7 +33,7 @@ func TestSendSpyRecapCarriesTheFigures(t *testing.T) {
 	if _, err := wA.SendTerror(sender, "boardB", "Victim", 1, TerrorOpSpy); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
-	reply := wB.ApplyPacket(wA.Outbox[0])
+	reply := wB.receive(wA.Outbox[0])
 	if len(reply.Results) != 1 || !reply.Results[0].Won {
 		t.Fatalf("the spy did not get in: %+v", reply.Results)
 	}
@@ -41,7 +41,7 @@ func TestSendSpyRecapCarriesTheFigures(t *testing.T) {
 	reply.ReconReports = append([]SpyReport{sweep}, reply.ReconReports...)
 	before := len(sender.Events)
 
-	wA.ApplyPacket(reply)
+	wA.receive(reply)
 
 	if len(sender.Events) != before+1 {
 		t.Fatalf("sender's recap gained %d entries, want 1", len(sender.Events)-before)
@@ -63,11 +63,11 @@ func TestCaughtSpyRecapHasNoFigures(t *testing.T) {
 		if _, err := wA.SendTerror(sender, "boardB", "Victim", 1, TerrorOpSpy); err != nil {
 			t.Fatalf("SendTerror: %v", err)
 		}
-		reply := wB.ApplyPacket(wA.Outbox[0])
+		reply := wB.receive(wA.Outbox[0])
 		if reply.Results[0].Won {
 			continue // the automatic success let this one through
 		}
-		wA.ApplyPacket(reply)
+		wA.receive(reply)
 		got := sender.Events[len(sender.Events)-1].Text
 		if got != "Victim's security on boardB caught your agent." {
 			t.Errorf("seed %d: a caught spy's report = %q, want the caught line and no figures", seed, got)
@@ -121,7 +121,7 @@ func TestOnlyASpyThatGotInSendsIntel(t *testing.T) {
 		if _, err := wA.SendTerror(sender, "boardB", "Victim", 1, op); err != nil {
 			t.Fatalf("SendTerror: %v", err)
 		}
-		reply := wB.ApplyPacket(wA.Outbox[0])
+		reply := wB.receive(wA.Outbox[0])
 		return reply, reply.Results[0].Won
 	}
 	if reply, won := intel(1, 0, false, TerrorOpSpy); !won || len(reply.ReconReports) != 1 {

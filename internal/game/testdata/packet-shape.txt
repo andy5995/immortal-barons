@@ -255,7 +255,6 @@ BulletinFile:
   Title
   Data
 LeagueReset:
-  Season
   OnDate
   Announced
 LeagueFreeze:

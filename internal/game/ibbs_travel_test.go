@@ -38,7 +38,7 @@ func TestTravelTimeRoundTrip(t *testing.T) {
 	ping := here.Outbox[0]
 
 	advance(3 * time.Hour)
-	echo := there.ApplyPacket(ping)
+	echo := there.receive(ping)
 	if len(echo.TimeChecks) != 1 || echo.TimeChecks[0].Sent != ping.TimeChecks[0].Sent {
 		t.Fatalf("the far board must echo the probe unchanged, got %+v", echo.TimeChecks)
 	}
@@ -47,7 +47,7 @@ func TestTravelTimeRoundTrip(t *testing.T) {
 	}
 
 	advance(3 * time.Hour)
-	here.ApplyPacket(echo)
+	here.receive(echo)
 	// Six hours out and back is 0.25 days; the first sample folds into an empty
 	// average as (0 + 2*0.25)/3.
 	if got, want := here.TravelTimes["The Eclipse"], 0.5/3; math.Abs(got-want) > 1e-9 {
@@ -140,11 +140,11 @@ func TestTravelProbesOverlapWhenTheRoundTripIsSlow(t *testing.T) {
 	// last one was sent, and every echo comes straight home.
 	advance(-12 * time.Hour)
 	for i, p := range inFlight {
-		echo := there.ApplyPacket(p)
+		echo := there.receive(p)
 		if len(echo.TimeChecks) != 1 {
 			t.Fatalf("probe %d was not echoed: %+v", i, echo.TimeChecks)
 		}
-		here.ApplyPacket(echo)
+		here.receive(echo)
 	}
 
 	// Elapsed is 2.5, 1.5 and 0.5 days, each folded as avg = (avg + 2*new)/3:

@@ -31,7 +31,7 @@ func TestIPMailboxIsCapped(t *testing.T) {
 		here.SendIPMessage(here.Empires[0], []string{"The Eclipse"}, false, fmt.Sprint(i))
 	}
 	for _, p := range here.Outbox {
-		there.ApplyPacket(p)
+		there.receive(p)
 	}
 	for _, e := range there.Empires {
 		if len(e.Mail) != MailboxMax {

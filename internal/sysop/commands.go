@@ -47,7 +47,7 @@ var Commands = []Command{
 	{Flag: "-league-thaw", Coordinator: true, Help: "End a league freeze on every board",
 		Confirm: "This resumes play on every board in the league."},
 	{Flag: "-league-reset", Coordinator: true, Arg: "start date, YYYY-MM-DD",
-		Help:    "Start a new season across the whole league",
+		Help:    "Reset every board in the league",
 		Confirm: "This ends the current game on EVERY board in the league. It cannot be undone."},
 	{Flag: "-gen-coord-key", Coordinator: true, Help: "Create the league's Coordinator key"},
 }

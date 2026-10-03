@@ -146,7 +146,7 @@ type BBSInfoRow struct {
 	// rules a board PLAYS BY are a different question from the version it runs,
 	// and until #264 nothing anywhere asked it: a board that missed a ruleset
 	// broadcast, or whose sysop edited config.json after adopting one, played
-	// its own numbers all season with every screen silent about it.
+	// its own numbers all game with every screen silent about it.
 	OtherRules bool
 }
 

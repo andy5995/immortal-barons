@@ -37,7 +37,7 @@ func TestAdoptedRosterHoldsTheNodeNumberRange(t *testing.T) {
 		t.Fatal("the Coordinator queued no roster packet")
 	}
 	for _, p := range lc.Outbox {
-		w.ApplyPacket(p)
+		w.receive(p)
 	}
 
 	if len(w.LeagueNodes) != 2 {

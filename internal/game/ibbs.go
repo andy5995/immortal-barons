@@ -120,7 +120,7 @@ type Packet struct {
 	// give: a board too old to know the field must still see byte-identical
 	// bytes for every packet that does not carry one.
 	Bulletins *BulletinSet `json:",omitempty"`
-	Reset     *LeagueReset // Coordinator's order to start a new season (#65)
+	Reset     *LeagueReset // Coordinator's order to reset every board (#65)
 	// Freeze is the Coordinator's order to freeze or thaw the league, and Quiet
 	// a frozen board's report back to it (ibbs_freeze.go).
 	Freeze *LeagueFreeze `json:",omitempty"`
@@ -238,16 +238,17 @@ func (p Packet) HasPayload() bool {
 		p.Freeze != nil || p.Quiet != nil
 }
 
-// LeagueReset is the Coordinator's order for every board to wipe and start a new
-// season together. BRE lets the Coordinator reset the whole league in one step;
-// without it a new season means every sysop being told out of band and doing it
-// by hand on the same evening (#65).
+// LeagueReset is the Coordinator's order for every board to wipe and start a
+// new game together. BRE lets the Coordinator reset the whole league in one
+// step; without it a new game means every sysop being told out of band and
+// doing it by hand on the same evening.
 //
 // It is one of the payloads the Coordinator has to sign, because a forged one
-// would destroy every world in the league.
+// would destroy every world in the league. A replayed or duplicated order is
+// dropped by the packet ledger like any other packet seen before; the ledger
+// survives the reset it carries out.
 type LeagueReset struct {
-	Season    int    // increments each reset, so a board can tell a new order from an old one
-	OnDate    string // ISO date the new season begins
+	OnDate    string // ISO date the new game begins
 	Announced string // the Coordinator's message to the league
 }
 
@@ -458,6 +459,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// is the remaining gap, and it closes as rosters gain keys.
 	if ok, checked := w.VerifyBoardOrigin(p); checked && !ok {
 		w.noteSysop("A packet claiming to be from %s did not match that board's key and was refused.", p.FromBoard)
+		return Packet{}
+	}
+	if w.RefusedUnnumbered(p) {
 		return Packet{}
 	}
 	// Applying the same packet twice would pay out a strike's results, a

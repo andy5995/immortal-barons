@@ -155,7 +155,9 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-ibbs-reset`** — Start a new game as a board in a league. The same as
   `-reset`, except the settings editor also asks the league settings (board
   name, packet directories, and the interplanetary rules), and it creates the
-  packet directories.
+  packet directories. It is refused while the league is frozen. The packet
+  ledger (`packet-ledger.json`) is kept, so the other boards go on accepting
+  this board's packets.
 - **`-board-id "<name>"`**, **`-game-inbound <dir>`**,
   **`-game-outbound <dir>`** — Settings for `-ibbs-reset`. Giving `-board-id`
   skips the settings editor, so a member board is set up in one command. Use
@@ -233,8 +235,8 @@ These options are for games that link several BBSes together (a "league"). See
   can tell a packet from this board apart from one that only claims to be. The
   private half is written to `board.key` in the data folder — anyone holding it
   can send packets as this board.
-- **`-league-reset <YYYY-MM-DD>`** — Start a new season across the whole league
-  on that date, then exit. Only the coordinator uses this. It resets this board
+- **`-league-reset <YYYY-MM-DD>`** — Reset every board in the league, starting
+  a new game on that date, then exit. Only the coordinator uses this. It resets this board
   and sends a signed order for the other boards to reset on their next
   `-planetary` run. It is refused while the league is frozen.
 - **`-league-freeze "<string>"`** — Freeze the whole league for an update,

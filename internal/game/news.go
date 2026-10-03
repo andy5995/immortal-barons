@@ -290,7 +290,7 @@ type BattleLogEntry struct {
 
 // MaxBattleLog bounds the log. A league that fights hard produces a few dozen
 // entries a day and every one of them rides in a packet, so this is a real
-// bound rather than a formality: without it a busy season grows the world file
+// bound rather than a formality: without it a busy game grows the world file
 // and the wire without limit.
 const MaxBattleLog = 200
 

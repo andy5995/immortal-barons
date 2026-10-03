@@ -36,15 +36,21 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	w, err := store.Load(cfg)
 	switch {
 	case errors.Is(err, store.ErrNoWorld):
-		w = store.NewGame(cfg) // first-ever reset: no prior world to load
+		w, err = store.NewGame(cfg) // first-ever reset: no prior world to load
 	case isMalformedWorld(err):
 		// A reset is the sysop's way out of a world the game can no longer read,
 		// so refusing to run because of what it is about to discard leaves them
 		// stuck. The old file survives as world.json.bak, backed up just above.
 		fmt.Printf("\nThe existing world could not be read (%v).\nStarting from a fresh one; the unreadable file was kept as world.json.bak.\n", err)
-		w = store.NewGame(cfg)
-	case err != nil:
+		w, err = store.NewGame(cfg)
+	}
+	if err != nil {
 		return err
+	}
+	// A frozen board is mid-upgrade with the rest of its league. Resetting it
+	// would thaw it alone, and it would go on playing days the league is not.
+	if w.Frozen {
+		return errors.New("the league is frozen; wait for the Coordinator's thaw before resetting this board")
 	}
 
 	if fromConfig {
@@ -194,14 +200,14 @@ func printBoardConfig(cfg game.Config, ftnLines []string) {
 
 // preparePacketDirs creates the inter-BBS packet directories the reset just
 // configured, and moves aside any packets they still hold. Files left over from
-// the previous season are applied to the fresh world by the next -planetary run —
+// the previous game are applied to the fresh world by the next -planetary run —
 // dead realms' attacks landing on a game that has just started — so they go
 // into a dated archive, and the report goes last, where a sysop watching the
 // reset scroll past will see it.
 //
 // The held directory is swept too (#261). A packet held for a newer protocol is
-// moved back into inbound as soon as this board upgrades, and a season boundary
-// is exactly when boards upgrade, so without this last season's packets reached
+// moved back into inbound as soon as this board upgrades, and a reset
+// is exactly when boards upgrade, so without this the last game's packets reached
 // the new world by the one door the inbound sweep did not watch.
 func preparePacketDirs(cfg game.Config) {
 	if !cfg.InterBBSEnabled() {
@@ -218,7 +224,7 @@ func preparePacketDirs(cfg game.Config) {
 	}
 	held := filepath.Join(cfg.DataDir, store.HeldDir)
 	if moved, archive := archiveLeftoverPackets(held); moved > 0 {
-		fmt.Printf("Moved %d held packet(s) from %s to %s: they belong to the old season\n",
+		fmt.Printf("Moved %d held packet(s) from %s to %s: they belong to the old game\n",
 			moved, held, archive)
 	}
 }

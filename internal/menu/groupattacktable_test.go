@@ -156,7 +156,7 @@ func TestJoinGroupAttackDrawsTheTableAndJoins(t *testing.T) {
 		leader.Troopers, leader.Jets = 500_000, 20_000
 		leader.Gold = 10_000_000 // the strike is charged for (#252)
 		w.GameDay = 0
-		// A season's worth of ids already spent, so the party's own ID is four
+		// A game's worth of ids already spent, so the party's own ID is four
 		// digits while its slot is 1 — the case the two-column Id field exists
 		// for, and the one where selecting by the wrong number joins nothing.
 		w.NextAttackID = 4126

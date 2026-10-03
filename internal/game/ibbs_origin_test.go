@@ -52,7 +52,7 @@ func TestForgedPacketIsRefused(t *testing.T) {
 			Survivors: []Contribution{{Owner: "tester", AttackForce: AttackForce{Troopers: 999999}}}}},
 		Attacks: []RemoteAttack{{ID: 2, FromBoard: "Neighbor", TargetEmpire: "Testland", Offense: 1 << 30}},
 	}
-	w.ApplyPacket(forged)
+	w.receive(forged)
 
 	after := w.FindByOwner("tester")
 	if after.Troopers != before.Troopers {
@@ -93,7 +93,7 @@ func TestSignedPacketIsApplied(t *testing.T) {
 		t.Fatal("StampOutbox left the packet unsigned")
 	}
 
-	w.ApplyPacket(p)
+	w.receive(p)
 	if len(w.RemoteBoards) == 0 {
 		t.Fatalf("a correctly signed packet was not applied; news:\n%s", newsText(w))
 	}
@@ -159,7 +159,7 @@ func TestKeylessRosterStillApplies(t *testing.T) {
 	if _, checked := w.VerifyBoardOrigin(p); checked {
 		t.Error("a roster entry with no key must report itself unchecked, not failed")
 	}
-	w.ApplyPacket(p)
+	w.receive(p)
 	if len(w.RemoteBoards) == 0 {
 		t.Error("an unsigned packet must still apply while the roster names no key")
 	}
@@ -195,7 +195,7 @@ func TestCoordinatorSignatureIsCoveredByTheOriginSignature(t *testing.T) {
 	w := signedBoard(t, "Home", "Attacker", attackerPub)
 	w.CoordPub = coordPub
 	w.LeagueNodes = append([]LeagueNode{{Number: 1, Name: "Coord"}}, w.LeagueNodes[1:]...)
-	w.ApplyPacket(att.Outbox[0])
+	w.receive(att.Outbox[0])
 
 	for _, n := range w.LeagueNodes {
 		if n.Name == "Ninth" {
@@ -239,7 +239,7 @@ func TestEndToEndSignedExchangeOverTheFileDrop(t *testing.T) {
 	if ok, checked := bravo.VerifyBoardOrigin(arrived); !checked || !ok {
 		t.Fatalf("a real packet failed after a JSON round trip: ok=%v checked=%v", ok, checked)
 	}
-	bravo.ApplyPacket(arrived)
+	bravo.receive(arrived)
 	if len(bravo.RemoteBoards) == 0 {
 		t.Fatal("the packet was not applied")
 	}
@@ -262,7 +262,7 @@ func TestForgeryCannotPoisonTheReplayCounter(t *testing.T) {
 	w := NewWorldSeed(Config{BoardID: "Home"}, 1)
 	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "Neighbor", PublicKey: hex.EncodeToString(pub)}}
 
-	w.ApplyPacket(Packet{FromBoard: "Neighbor", ToBoard: "Home", Seq: 999999,
+	w.receive(Packet{FromBoard: "Neighbor", ToBoard: "Home", Seq: 999999,
 		Scores: []RemoteScore{{Empire: "Junk"}}})
 	if got := w.HighSeq["Neighbor"]; got != 0 {
 		t.Errorf("a refused packet moved the replay counter to %d", got)
@@ -273,7 +273,7 @@ func TestForgeryCannotPoisonTheReplayCounter(t *testing.T) {
 	sender.Outbox = []Packet{{FromBoard: "Neighbor", ToBoard: "Home",
 		Scores: []RemoteScore{{Empire: "Farland", NetWorth: 500}}}}
 	sender.StampOutbox()
-	w.ApplyPacket(sender.Outbox[0])
+	w.receive(sender.Outbox[0])
 
 	if len(w.RemoteBoards) == 0 {
 		t.Fatal("a forged packet locked out every genuine packet from that board")

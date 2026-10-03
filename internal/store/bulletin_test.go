@@ -195,6 +195,7 @@ func TestAMemberBoardCannotDictateBulletins(t *testing.T) {
 	w.CoordPub = pub
 	w.ApplyPacket(game.Packet{
 		FromBoard: "Impostor",
+		Seq:       1,
 		Date:      "2026-08-23",
 		Bulletins: &game.BulletinSet{Files: []game.BulletinFile{
 			{Name: "rules.txt", Title: "Surrender now", Data: []byte("Surrender now\n")},

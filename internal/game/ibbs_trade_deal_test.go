@@ -258,14 +258,14 @@ func TestIPTradeDealReceiptReachesTheSender(t *testing.T) {
 		to := far.AddHuman("recv", "Receiver")
 		to.Protection = 0
 		to.Alive = alive
-		reply := far.ApplyPacket(out)
+		reply := far.receive(out)
 		if len(reply.TradeReceipts) != 1 || reply.TradeReceipts[0].Delivered != alive {
 			t.Fatalf("alive=%v: reply carried %+v, want one receipt with Delivered=%v",
 				alive, reply.TradeReceipts, alive)
 		}
 
 		before := len(from.Events)
-		home.ApplyPacket(reply)
+		home.receive(reply)
 		if len(from.Events) != before+1 {
 			t.Fatalf("alive=%v: sender got %d new events, want 1", alive, len(from.Events)-before)
 		}

@@ -118,7 +118,7 @@ type GroupAttack struct {
 	// Slot is the small number the Join Group Attack table shows in its Id
 	// column, and the number a player answers its prompt with. It is NOT the ID:
 	// GroupAttack.ID comes from one monotonic counter shared with individual
-	// attacks, special ops, trade bids and terror ops, so a season's third party
+	// attacks, special ops, trade bids and terror ops, so a game's third party
 	// can be #4127 -- which no two-column field holds and which tells a player
 	// nothing (docs/dev/bre-screens.md). The original numbers its parties by the
 	// slot each occupies in a fixed array, freed when that party's forces come

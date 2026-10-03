@@ -18,7 +18,7 @@ func TestArrivingChemicalStrikeIsAPopulationWeaponAlone(t *testing.T) {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	// Seeded so neither the misfire nor SDI stops it; assert it actually landed.
-	answer := to.ApplyPacket(from.Outbox[0])
+	answer := to.receive(from.Outbox[0])
 	if got := answer.Results[0].outcome(); got != OutcomeWon {
 		t.Fatalf("the strike never landed (outcome %q), so this proves nothing", got)
 	}

@@ -62,11 +62,11 @@ func TestTerrorOpPostsNoNewsOnEitherBoard(t *testing.T) {
 		newsA, newsB := len(wA.NewsToday), len(wB.NewsToday)
 		targetEvents, senderEvents := len(target.Events), len(sender.Events)
 
-		reply := wB.ApplyPacket(wA.Outbox[0])
+		reply := wB.receive(wA.Outbox[0])
 		if len(reply.Results) != 1 || reply.Results[0].Kind != "terror" {
 			t.Fatalf("seed %d: the op was not resolved: %+v", seed, reply.Results)
 		}
-		wA.ApplyPacket(reply)
+		wA.receive(reply)
 
 		if got := wB.NewsToday[newsB:]; len(got) != 0 {
 			t.Errorf("seed %d: the target's planet was told: %v", seed, got)

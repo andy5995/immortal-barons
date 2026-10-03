@@ -17,7 +17,7 @@ func playersWorld(t *testing.T) game.Config {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := store.NewGame(cfg)
+	w, _ := store.NewGame(cfg)
 	w.Empires = nil
 	w.AddHuman("oldhandle", "Selby")
 	w.AddHuman("rival", "Buyar")
@@ -136,7 +136,7 @@ func TestPlayersEditorSaysWhenNobodyIsPlaying(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := store.NewGame(cfg)
+	w, _ := store.NewGame(cfg)
 	w.Empires = nil
 	if err := store.Save(w, cfg); err != nil {
 		t.Fatal(err)

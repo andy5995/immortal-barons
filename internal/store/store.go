@@ -23,11 +23,73 @@ var ErrNoWorld = errors.New("no game found — run with -reset to create one")
 // NewGame builds a fresh, unsaved world from the config. It is the only path
 // that conjures a world from nothing (used by -reset); every other entry point
 // loads an existing one and errors with ErrNoWorld if it is missing.
-func NewGame(cfg game.Config) *game.World {
+func NewGame(cfg game.Config) (*game.World, error) {
 	w := game.NewWorld(cfg)
 	loadLeagueNodes(w, cfg)
 	loadLeagueKeys(w, cfg)
-	return w
+	// A new game on a board that has played before keeps its packet ledger: a
+	// reset from an unreadable world must not number its packets from 1 again.
+	if err := loadLedger(w, cfg, nil); err != nil {
+		return nil, err
+	}
+	return w, nil
+}
+
+// LedgerFile holds the packet ledger (World.OutSeq and HighSeq): the
+// numbering of this board's packets and the record of packets applied here.
+// It is kept apart from world.json because a reset erases the world and must
+// not erase this — see World.OutSeq.
+const LedgerFile = "packet-ledger.json"
+
+// ledger is the file's contents. Its keys are the World fields' own names, so
+// a world.json written before the ledger had a file of its own reads into it
+// too (loadLedger's migration).
+type ledger struct {
+	OutSeq  uint64            `json:",omitempty"`
+	HighSeq map[string]uint64 `json:",omitempty"`
+}
+
+func ledgerPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, LedgerFile) }
+
+// loadLedger puts the ledger on w from its file. A board upgrading from a
+// build that kept the ledger in world.json has no file yet; worldData, the
+// world file just read, is where its ledger still is, and the next save
+// writes it out to the file.
+//
+// A ledger that exists but cannot be read is an error, not an empty ledger:
+// starting OutSeq from 0 would have every other board drop this board's
+// packets as replays, silently, until the count passed where it had been.
+func loadLedger(w *game.World, cfg game.Config, worldData []byte) error {
+	var l ledger
+	data, err := readWorldFile(ledgerPath(cfg))
+	switch {
+	case os.IsNotExist(err):
+		if worldData == nil {
+			return nil
+		}
+		data = worldData
+	case err != nil:
+		return fmt.Errorf("the packet ledger could not be read: %w", err)
+	}
+	if err := json.Unmarshal(data, &l); err != nil {
+		return fmt.Errorf("the packet ledger %s could not be read (%v); restore it from a backup, or delete it to number this board's packets from 1 again", ledgerPath(cfg), err)
+	}
+	w.OutSeq, w.HighSeq = l.OutSeq, l.HighSeq
+	return nil
+}
+
+// saveLedger writes the ledger the way the world is written: a temporary file
+// renamed into place.
+func saveLedger(w *game.World, cfg game.Config) error {
+	data, err := json.MarshalIndent(ledger{w.OutSeq, w.HighSeq}, "", "  ")
+	if err != nil {
+		return err
+	}
+	tmp := ledgerPath(cfg) + ".tmp"
+	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+		return err
+	}
+	return renameWorldFile(tmp, ledgerPath(cfg))
 }
 
 func worldPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, "world.json") }
@@ -93,6 +155,9 @@ func Load(cfg game.Config) (*game.World, error) {
 		return nil, err
 	}
 	repair(w, cfg)
+	if err := loadLedger(w, cfg, data); err != nil {
+		return nil, err
+	}
 	if err := checkClockOffset(w); err != nil {
 		return nil, err
 	}
@@ -236,9 +301,6 @@ func repair(w *game.World, cfg game.Config) {
 	// have only just moved out of their legacy fields. TEMPORARY (v0.2.0) — goes
 	// with internal/game/retire_ai.go.
 	w.RetireAIBarons()
-	// Saves from before SeenPacket stopped recording numbered packets carry
-	// one entry per packet ever applied, which HighSeq already covers.
-	w.PruneSeenPackets()
 	loadLeagueNodes(w, cfg)
 	loadLeagueKeys(w, cfg)
 }
@@ -262,6 +324,11 @@ func Save(w *game.World, cfg game.Config) error {
 		return err
 	}
 	stampClockOffset(w)
+	// The ledger first: a world saved without it would number its next packet
+	// from a count the file never recorded.
+	if err := saveLedger(w, cfg); err != nil {
+		return err
+	}
 	data, err := json.MarshalIndent(w, "", "  ")
 	if err != nil {
 		return err

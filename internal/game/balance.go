@@ -536,5 +536,5 @@ const LostForcesHeldBackstop = 5
 // SpyReportsPerRealm is how many Spy Database entries are kept on any one
 // realm; the oldest goes when another arrives. Two are enough for a before and
 // after around a strike, and the cap is what stops the list growing for a whole
-// season. IB's own.
+// game. IB's own.
 const SpyReportsPerRealm = 5

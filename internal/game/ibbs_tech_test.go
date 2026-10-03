@@ -104,7 +104,7 @@ func TestInvasionReportNamesEveryUnitLost(t *testing.T) {
 	if _, err := wA.CreateIndividualAttack(attacker, "boardB", "Victim", NormalAttack, AttackForce{Troopers: 40_000, Jets: 300}); err != nil {
 		t.Fatal(err)
 	}
-	result := wB.ApplyPacket(wA.Outbox[0])
+	result := wB.receive(wA.Outbox[0])
 	res := result.Results[0]
 	if res.Outcome != OutcomeRepelled {
 		t.Fatalf("outcome %q; the test never reached the branch it covers", res.Outcome)
@@ -154,7 +154,7 @@ func TestEachDefenderOnAPlanetWideStrikeReadsItsOwnLosses(t *testing.T) {
 	if len(wA.Outbox) == 0 || len(wA.Outbox[0].Attacks) == 0 {
 		t.Fatal("the group attack never left")
 	}
-	res := wB.ApplyPacket(wA.Outbox[0]).Results[0]
+	res := wB.receive(wA.Outbox[0]).Results[0]
 	if res.Outcome != OutcomeRepelled && res.Outcome != OutcomeWon {
 		t.Fatalf("outcome %q; no battle was fought", res.Outcome)
 	}
@@ -184,8 +184,8 @@ func TestReturningReportListsUnitsOnOneLine(t *testing.T) {
 	if _, err := wA.CreateIndividualAttack(attacker, "boardB", "Victim", NormalAttack, force); err != nil {
 		t.Fatal(err)
 	}
-	result := wB.ApplyPacket(wA.Outbox[0])
-	wA.ApplyPacket(Packet{FromBoard: "boardB", ToBoard: "boardA", Results: result.Results})
+	result := wB.receive(wA.Outbox[0])
+	wA.receive(Packet{FromBoard: "boardB", ToBoard: "boardA", Results: result.Results})
 	ev := attacker.Events[len(attacker.Events)-1].Text
 	if !strings.Contains(ev, "Normal Attack") {
 		t.Fatalf("never reached the returning report:\n%s", ev)

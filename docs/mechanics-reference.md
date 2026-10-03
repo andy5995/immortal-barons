@@ -445,8 +445,8 @@ flow runs in this order:
    The comparison is a region count, not net worth: the call at `+0x5c` is
    `056d:0ec6`, the same `total_regions` the region-price surcharge reads. This
    section and IB said net worth until 2026-09-24, when a board crowned a realm
-   holding fewer regions; do not "correct" it back. IB crowns a season's
-   `LastMaster` by the same rule (`planetMaster`); the original's end-of-season
+   holding fewer regions; do not "correct" it back. IB crowns a game's
+   `LastMaster` by the same rule (`planetMaster`); the original's end-of-game
    crowning has not been read.
 
    Three news phrasings, chosen by what changed: the holder *keeps* the title,
@@ -1377,7 +1377,7 @@ All three ride the `LeagueConfig` broadcast, since a league has to agree on them
 
 **Which settings the Coordinator broadcasts follows one rule: anything that
 changes how the local game plays has to be the same on every planet, or the
-season is not a fair one.** Only a board's identity, its file paths, and its
+game is not a fair one.** Only a board's identity, its file paths, and its
 session policy (the idle-caller timeout and its warning count) stay local; so
 does the AI count, which a league board never uses. Note this is a WIDER set
 than the fields the Configuration Editor stars — the star means "an inter-BBS
@@ -3452,7 +3452,7 @@ section is a record of what was claimed and how it was settled, so the word
   league's saved cap on load would take gold it had been playing with, and the
   field remains the mechanism whatever sets it later (#202). `LeagueConfig`
   still broadcasts the value, so a league's boards agree on one ceiling
-  mid-season; whether a mod ships it instead is a #202 question.
+  mid-game; whether a mod ships it instead is a #202 question.
 
   Two billion is NOT the largest a 32-bit signed integer holds (that is
   2,147,483,647), so it is a rule the original chose rather than the machine
@@ -4139,7 +4139,7 @@ IB held all seven on the `World` until this was corrected, which made them the
 board's: every caller on a BBS shared one set, and each player's choices
 overwrote the last player's. The world-level fields survive as migration input
 only — `World.EnsurePrefs`, run from `store.repair` on every load, copies them
-onto any realm that has not got its own yet, so a board that upgrades mid-season
+onto any realm that has not got its own yet, so a board that upgrades mid-game
 keeps the settings it was playing with.
 
 Defaults for a new realm are IB's, not BRE's: BRE opens with the three Visit
@@ -4371,9 +4371,9 @@ day that nothing ever gave back, and the gap only grew.
 
 `GameDay` counts maintenance runs, so catching up keeps it level with the
 calendar: a board played twice a month reaches game day 60 on the same date as
-one played daily. Seasons (`Config.GameLength`) are counted in game days, which
+one played daily. Games (`Config.GameLength`) are counted in game days, which
 is why this matters to a league — a board that fell behind used to reach the end
-of a season later in real time than an active one. `GameDay` was never out of
+of a game later in real time than an active one. `GameDay` was never out of
 step with the game clock; the two lagged real time together.
 
 **There is no ceiling on a catch-up.** `MaxCatchUpDays` is the knob and it is
@@ -5927,7 +5927,7 @@ color it prints **Enemy** in (the capture only ever showed the other three, so
 IB infers bright red). The hotkey is settled — BRE's Coordinator Ops menu has
 **four** items keyed `1`-`4` and this screen is `2` (see the table in
 `docs/dev/bre-screens.md`); the "eight-item menu, IB uses `D`" this file used to
-record came from the same misread string that section corrects. A new season clears the chart, since the
+record came from the same misread string that section corrects. A league reset clears the chart, since the
 Coordinator who filed it is cleared with every other empire.
 
 ### Directives from CO — IB's own
@@ -6779,11 +6779,11 @@ Now matching this reference (as of v0.0.4):
   author, written in the same editor local mail uses
 - Travel Times: the average round trip to each planet, measured by a probe the
   far board echoes back
-- A daily Planetary Master, crowned as `LastMaster` when a season ends
+- A daily Planetary Master, crowned as `LastMaster` when a game ends
 
 Still missing against the reference:
 
-- A league season that ends on a schedule across the league. Each board ends
+- A league game that ends on a schedule across the league. Each board ends
   its own game once `GameLength` game days have passed, crowning a Planetary
   Master and starting afresh, but on its own count of days, so boards need not
   end together. Only the Coordinator's `-league-reset` resets them all.
@@ -7037,9 +7037,11 @@ checks.
 - **Anti-replay.** Each outbound packet carries a sequence number. A board tracks
   the highest it has applied from each sender and refuses anything at or below
   it, which covers both a packet processed before and one arriving with a stale
-  number. A packet with no number, or no sender name, is fingerprinted by its
-  contents instead, and only those fingerprints are kept, so the record does not
-  grow with every packet a league exchanges.
+  number. A packet with no number, or no sender name, is deleted unapplied, so
+  the record is one number per board and does not grow with every packet a
+  league exchanges. The numbers live in `packet-ledger.json` beside the world,
+  which no reset touches: a board that reset and numbered its packets from 1
+  again would have every one dropped as stale.
   Without it a saved packet could be dropped back in to pay a strike's results
   out twice, or re-run a reset.
 
@@ -7113,7 +7115,7 @@ The two key pairs answer different questions and are not interchangeable:
 | Answers | May this board dictate league rules? | Did this packet come from the board it names? |
 | Held by | Coordinator (private), everyone (public) | Every board (private), roster (public) |
 | Distributed | Once, by hand | Inside the signed roster |
-| Covers | Ruleset, roster, season reset | The whole packet |
+| Covers | Ruleset, roster, league reset | The whole packet |
 
 **A roster entry with no key is applied unsigned**, which is every league until
 its Coordinator publishes keys. Refusing would break a working league on upgrade

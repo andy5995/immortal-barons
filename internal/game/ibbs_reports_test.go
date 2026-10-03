@@ -141,13 +141,13 @@ func TestOnlyAcceptedPacketsCountAsContact(t *testing.T) {
 	w.LastMaintDate = "2026-08-15"
 	p := Packet{FromBoard: "Bravo BBS", Date: "2026-08-15", Seq: 4, Version: "0.0.5",
 		Scores: []RemoteScore{{Empire: "Redlands"}}}
-	w.ApplyPacket(p)
+	w.receive(p)
 	first := w.LastPacketFrom["Bravo BBS"]
 	if first == "" || w.BoardVersion["Bravo BBS"] != "0.0.5" {
 		t.Fatalf("an accepted packet recorded nothing: %q / %q", first, w.BoardVersion["Bravo BBS"])
 	}
 	w.LastPacketFrom["Bravo BBS"] = "01/01/2000 00:00:00" // pretend time passed
-	w.ApplyPacket(p)                                      // the same packet again
+	w.receive(p)                                          // the same packet again
 	if w.LastPacketFrom["Bravo BBS"] != "01/01/2000 00:00:00" {
 		t.Error("a replayed packet refreshed the contact time, so a silent board would look alive")
 	}
@@ -162,7 +162,7 @@ func TestMinimumVersionGatesPackets(t *testing.T) {
 	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "Alpha BBS"}, {Number: 2, Name: "Bravo BBS"}}
 
 	// Too old: refused, and nothing it carried is applied.
-	w.ApplyPacket(Packet{FromBoard: "Bravo BBS", Seq: 1, Version: "0.0.4",
+	w.receive(Packet{FromBoard: "Bravo BBS", Seq: 1, Version: "0.0.4",
 		Scores: []RemoteScore{{Empire: "Redlands"}}})
 	if len(w.RemoteBoards) != 0 {
 		t.Error("a packet from a board below the minimum was applied")
@@ -176,12 +176,12 @@ func TestMinimumVersionGatesPackets(t *testing.T) {
 		t.Error("a transport fault reached the planet's news")
 	}
 	// A board that states no version cannot prove it meets the bar.
-	w.ApplyPacket(Packet{FromBoard: "Bravo BBS", Seq: 2, Scores: []RemoteScore{{Empire: "Redlands"}}})
+	w.receive(Packet{FromBoard: "Bravo BBS", Seq: 2, Scores: []RemoteScore{{Empire: "Redlands"}}})
 	if len(w.RemoteBoards) != 0 {
 		t.Error("a packet with no version at all was applied under a version requirement")
 	}
 	// At or above it, business as usual.
-	w.ApplyPacket(Packet{FromBoard: "Bravo BBS", Seq: 3, Version: "0.0.5",
+	w.receive(Packet{FromBoard: "Bravo BBS", Seq: 3, Version: "0.0.5",
 		Scores: []RemoteScore{{Empire: "Redlands"}}})
 	if len(w.RemoteBoards) != 1 {
 		t.Fatal("a board meeting the minimum was refused")

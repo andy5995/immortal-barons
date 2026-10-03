@@ -3552,7 +3552,7 @@ number and not with a running total.
 **IB now numbers them the same way** (#251). `NextAttackID` is one monotonic
 counter shared by group attacks, individual attacks, special ops, trade deals,
 spy recon and terror ops, reset only when the world is
-(`internal/game/game.go`), so a season's third group attack can be #4127 — which
+(`internal/game/game.go`), so a game's third group attack can be #4127 — which
 no 2-column field holds and which tells a player nothing. That id stays where it
 was needed, on the packet that pairs a returning result with the strike that
 left; the table instead shows `GroupAttack.Slot`, the lowest number 1..99 no

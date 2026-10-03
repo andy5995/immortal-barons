@@ -32,7 +32,7 @@ func TestSigningBytesMatchesEncodingJSON(t *testing.T) {
 		{FromBoard: "Alpha", LeagueNodes: []LeagueNode{}},
 		{FromBoard: "Alpha", LeagueNodes: []LeagueNode{{Number: 1, Name: "A<B>"}}},
 		{FromBoard: "Alpha", LeagueConfig: &LeagueConfig{}},
-		{FromBoard: "Alpha", Reset: &LeagueReset{Season: 3}},
+		{FromBoard: "Alpha", Reset: &LeagueReset{OnDate: "2026-10-01"}},
 		{FromBoard: "Alpha", Bulletins: &BulletinSet{}},
 		{FromBoard: "Alpha", Bulletins: &BulletinSet{Files: []BulletinFile{{Name: "n", Data: []byte{0, 1, 255}}}}},
 	}

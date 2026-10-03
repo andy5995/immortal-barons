@@ -53,7 +53,7 @@ func TestIndividualStrikeRoundTrip(t *testing.T) {
 	}
 
 	defenderUnits := victim.Troopers + victim.Turrets + victim.Tanks + victim.Jets
-	result := wB.ApplyPacket(wA.Outbox[0])
+	result := wB.receive(wA.Outbox[0])
 	if len(result.Results) != 1 {
 		t.Fatalf("target board returned %d results, want 1", len(result.Results))
 	}
@@ -69,7 +69,7 @@ func TestIndividualStrikeRoundTrip(t *testing.T) {
 	}
 
 	wA.Outbox = nil
-	wA.ApplyPacket(result)
+	wA.receive(result)
 	// The strike overwhelmed the defense, so it was barely touched and nearly the
 	// whole detachment comes home. What it paid is the battle's outcome, not the
 	// type's threshold (#199).
@@ -117,12 +117,12 @@ func TestReturningStrikeVerdicts(t *testing.T) {
 				AttackForce{Troopers: 1000}); err != nil {
 				t.Fatalf("CreateIndividualAttack: %v", err)
 			}
-			result := wB.ApplyPacket(wA.Outbox[0])
+			result := wB.receive(wA.Outbox[0])
 			if got := result.Results[0].Outcome; got != c.want {
 				t.Fatalf("outcome = %q, want %q", got, c.want)
 			}
 			wA.Outbox = nil
-			wA.ApplyPacket(result)
+			wA.receive(result)
 			if attacker.PendingRegions != 0 {
 				t.Errorf("a strike that took nothing parked %d regions", attacker.PendingRegions)
 			}
@@ -192,7 +192,7 @@ func TestLateReturnIsDiscarded(t *testing.T) {
 	}
 
 	// The result finally turns up, days after the forces were written off.
-	w.ApplyPacket(Packet{FromBoard: "faraway", Results: []AttackResult{{
+	w.receive(Packet{FromBoard: "faraway", Results: []AttackResult{{
 		ID: id, TargetBoard: "faraway", TargetEmpire: "Rome", Kind: "Normal Attack",
 		Won: true, LandTaken: 40, Outcome: OutcomeWon,
 		Survivors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 255}}},
@@ -420,7 +420,7 @@ func TestArrivingStrikeIsWordedForTheSideThatWon(t *testing.T) {
 				if _, err := wA.CreateIndividualAttack(attacker, "boardB", "Victim", NormalAttack, c.force); err != nil {
 					t.Fatalf("seed %d: CreateIndividualAttack: %v", seed, err)
 				}
-				result := wB.ApplyPacket(wA.Outbox[0])
+				result := wB.receive(wA.Outbox[0])
 				res := result.Results[0]
 				if res.Outcome != c.want {
 					t.Fatalf("seed %d: outcome = %q, want %q; the test never reached the branch it covers",
@@ -443,7 +443,7 @@ func TestArrivingStrikeIsWordedForTheSideThatWon(t *testing.T) {
 				}
 				// And the attacking planet is told the same thing about it.
 				wA.Outbox, wA.NewsToday = nil, nil
-				wA.ApplyPacket(result)
+				wA.receive(result)
 				home := wA.NewsToday[len(wA.NewsToday)-1].Text
 				if (c.want == OutcomeWon) != strings.Contains(home, "triumph") {
 					t.Errorf("seed %d: the attacking planet's news of a %q reads:\n%s", seed, c.want, home)
@@ -473,12 +473,12 @@ func TestAStrikeThatFoughtNobodyIsNotAnnouncedAsADefeat(t *testing.T) {
 				AttackForce{Troopers: 1000}); err != nil {
 				t.Fatalf("CreateIndividualAttack: %v", err)
 			}
-			result := wB.ApplyPacket(wA.Outbox[0])
+			result := wB.receive(wA.Outbox[0])
 			if got := result.Results[0].Outcome; got != c.want {
 				t.Fatalf("outcome = %q, want %q; the test never reached the branch it covers", got, c.want)
 			}
 			wA.Outbox, wA.NewsToday = nil, nil
-			wA.ApplyPacket(result)
+			wA.receive(result)
 			if len(attacker.Events) == 0 {
 				t.Fatal("the baron was told nothing about their own strike")
 			}

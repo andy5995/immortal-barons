@@ -21,6 +21,23 @@ func freezePair(t *testing.T) (lc, m *World) {
 	return lc, m
 }
 
+// declare has the Coordinator freeze or thaw the league and returns the order
+// it queued for board.
+func declare(t *testing.T, lc *World, frozen bool, message, board string) Packet {
+	t.Helper()
+	if err := lc.DeclareLeagueFreeze(frozen, message); err != nil {
+		t.Fatal(err)
+	}
+	lc.StampOutbox()
+	for i := len(lc.Outbox) - 1; i >= 0; i-- {
+		if p := lc.Outbox[i]; p.Freeze != nil && (p.ToBoard == board || p.ToBoard == "") {
+			return p
+		}
+	}
+	t.Fatalf("no freeze order for %s in the Coordinator's outbox", board)
+	return Packet{}
+}
+
 // orderIn is the freeze order the Coordinator queued, addressed to board.
 func orderIn(t *testing.T, lc *World, board string) Packet {
 	t.Helper()
@@ -45,7 +62,7 @@ func TestLeagueFreezeReachesEveryBoard(t *testing.T) {
 	if !lc.Frozen {
 		t.Error("the Coordinator's own board did not freeze")
 	}
-	m.ApplyPacket(orderIn(t, lc, "BravoBBS"))
+	m.receive(orderIn(t, lc, "BravoBBS"))
 	if !m.Frozen || m.FreezeMessage != "Back in 2-48 hours." {
 		t.Errorf("member frozen=%v message=%q", m.Frozen, m.FreezeMessage)
 	}
@@ -148,7 +165,7 @@ func TestAnUnaddressedQuietReportIsRetried(t *testing.T) {
 // Deadlines kept as instants are moved on by exactly the time spent frozen,
 // and a replayed order does nothing.
 func TestTheThawMovesDeadlinesOnByTheFreeze(t *testing.T) {
-	_, m := freezePair(t)
+	lc, m := freezePair(t)
 	start := time.Date(2026, 9, 1, 12, 0, 0, 0, time.UTC)
 	depart := start.Add(6 * time.Hour)
 	m.GroupAttacks = []GroupAttack{{ID: 1, DepartAt: depart}}
@@ -157,16 +174,17 @@ func TestTheThawMovesDeadlinesOnByTheFreeze(t *testing.T) {
 	defer func() { timeNow = restore }()
 
 	timeNow = func() time.Time { return start }
-	m.applyLeagueFreeze(&LeagueFreeze{Serial: 1, Frozen: true})
+	freeze := declare(t, lc, true, "", "BravoBBS")
+	m.ApplyPacket(freeze)
 	timeNow = func() time.Time { return start.Add(30 * time.Hour) }
-	m.applyLeagueFreeze(&LeagueFreeze{Serial: 2})
+	m.ApplyPacket(declare(t, lc, false, "", "BravoBBS"))
 	if got, want := m.GroupAttacks[0].DepartAt, depart.Add(30*time.Hour); !got.Equal(want) {
 		t.Errorf("DepartAt = %v, want %v", got, want)
 	}
 	if got, want := m.Threats[0].When(), depart.Add(30*time.Hour); !got.Equal(want) {
 		t.Errorf("threat At = %v, want %v", got, want)
 	}
-	m.applyLeagueFreeze(&LeagueFreeze{Serial: 1, Frozen: true})
+	m.ApplyPacket(freeze)
 	if m.Frozen {
 		t.Error("a replayed freeze order froze the board again")
 	}
@@ -179,7 +197,7 @@ func TestAFrozenBoardReportsWhenItGoesQuiet(t *testing.T) {
 	if err := lc.DeclareLeagueFreeze(true, ""); err != nil {
 		t.Fatal(err)
 	}
-	m.ApplyPacket(orderIn(t, lc, "BravoBBS"))
+	m.receive(orderIn(t, lc, "BravoBBS"))
 	m.Outbox = nil
 	m.ReportQuiet()
 	if len(m.Outbox) != 1 || m.Outbox[0].Quiet == nil || m.Outbox[0].ToBoard != "AlphaBBS" {
@@ -191,7 +209,7 @@ func TestAFrozenBoardReportsWhenItGoesQuiet(t *testing.T) {
 	}
 	report := m.Outbox[0]
 	report.Seq = 1
-	lc.ApplyPacket(report)
+	lc.receive(report)
 	if lc.QuietBoards["BravoBBS"] == "" {
 		t.Errorf("the Coordinator did not file the report: %v", lc.QuietBoards)
 	}
@@ -240,7 +258,7 @@ func TestHeldPacketsAreNotDroppedAsReplaysAfterTheThaw(t *testing.T) {
 	if err := lc.DeclareLeagueFreeze(true, ""); err != nil {
 		t.Fatal(err)
 	}
-	m.ApplyPacket(orderIn(t, lc, "BravoBBS"))
+	m.receive(orderIn(t, lc, "BravoBBS"))
 	m.Outbox = []Packet{{FromBoard: "BravoBBS", ToBoard: "AlphaBBS", Notice: "a result held by the freeze"}}
 	m.ReportQuiet()
 	m.StampOutbox()
@@ -252,7 +270,7 @@ func TestHeldPacketsAreNotDroppedAsReplaysAfterTheThaw(t *testing.T) {
 	}
 	m.Outbox = m.Outbox[:1]
 	for _, p := range sent {
-		lc.ApplyPacket(p)
+		lc.receive(p)
 	}
 	m.applyLeagueFreeze(&LeagueFreeze{Serial: m.FreezeSerial + 1})
 	m.StampOutbox()
@@ -265,39 +283,72 @@ func TestHeldPacketsAreNotDroppedAsReplaysAfterTheThaw(t *testing.T) {
 // A freeze order that reaches a board still frozen from an earlier freeze,
 // because the thaw between them was lost, leaves it frozen.
 func TestAFreezeOverAFreezeStaysFrozen(t *testing.T) {
-	_, m := freezePair(t)
-	m.applyLeagueFreeze(&LeagueFreeze{Serial: 1, Frozen: true, Message: "first"})
+	lc, m := freezePair(t)
+	m.ApplyPacket(declare(t, lc, true, "first", "BravoBBS"))
+	thaw := declare(t, lc, false, "", "BravoBBS")
+	second := declare(t, lc, true, "second", "BravoBBS")
 	m.ReportQuiet()
 	m.Outbox = nil
-	m.applyLeagueFreeze(&LeagueFreeze{Serial: 3, Frozen: true, Message: "second"})
+	m.ApplyPacket(second)
 	if !m.Frozen || m.FreezeMessage != "second" {
 		t.Errorf("frozen=%v message=%q, want still frozen with the new message", m.Frozen, m.FreezeMessage)
 	}
-	// Its report answered serial 1, which the Coordinator no longer files, so it
-	// has to report again under 3.
+	// Its report answered the first freeze, which the Coordinator no longer
+	// files, so it has to report again under the second.
 	m.ReportQuiet()
-	if len(m.Outbox) != 1 || m.Outbox[0].Quiet == nil || m.Outbox[0].Quiet.Serial != 3 {
+	if len(m.Outbox) != 1 || m.Outbox[0].Quiet == nil || m.Outbox[0].Quiet.Serial != second.Freeze.Serial {
 		t.Errorf("no fresh quiet report under the new freeze: %+v", m.Outbox)
 	}
-	m.applyLeagueFreeze(&LeagueFreeze{Serial: 2})
+	m.ApplyPacket(thaw)
 	if !m.Frozen {
 		t.Error("the late thaw from before the second freeze opened the board")
 	}
 }
 
-// A new season is refused while frozen, and a reset order that reaches a board
-// already frozen (sent before the freeze, delivered after) leaves it frozen.
-func TestAResetDoesNotThawTheLeague(t *testing.T) {
+// A league reset is refused while frozen. No reset order can then reach a
+// frozen board: one sent before the freeze is numbered below it, so it is
+// applied first or, arriving late, dropped as a replay.
+func TestAResetIsRefusedWhileFrozen(t *testing.T) {
 	lc, m := freezePair(t)
-	if err := lc.DeclareLeagueFreeze(true, ""); err != nil {
+	if err := lc.DeclareLeagueReset("2026-10-01", ""); err != nil {
 		t.Fatal(err)
 	}
-	if err := lc.DeclareLeagueReset("2026-10-01", ""); err != ErrLeagueFrozen {
-		t.Errorf("a new season was declared on a frozen league: %v", err)
+	var reset Packet
+	for _, p := range lc.Outbox {
+		if p.Reset != nil {
+			reset = p
+		}
 	}
-	m.applyLeagueFreeze(&LeagueFreeze{Serial: 1, Frozen: true, Message: "hold"})
-	m.applyLeagueReset(&LeagueReset{Season: m.Season + 1, OnDate: "2026-10-01"})
-	if !m.Frozen || m.FreezeSerial != 1 || m.FreezeMessage != "hold" {
-		t.Errorf("the reset lost the freeze: frozen=%v serial=%d message=%q", m.Frozen, m.FreezeSerial, m.FreezeMessage)
+	if err := lc.DeclareLeagueFreeze(true, "hold"); err != nil {
+		t.Fatal(err)
+	}
+	if err := lc.DeclareLeagueReset("2026-10-02", ""); err != ErrLeagueFrozen {
+		t.Errorf("a league reset was declared on a frozen league: %v", err)
+	}
+
+	// The freeze overtakes the reset sent before it.
+	m.receive(orderIn(t, lc, "BravoBBS"))
+	m.AddHuman("bob", "Bobland")
+	m.receive(reset)
+	if !m.Frozen || len(m.Empires) != 1 {
+		t.Errorf("a reset order older than the freeze was applied: frozen=%v, %d realms", m.Frozen, len(m.Empires))
+	}
+}
+
+// The Coordinator's own board resetting does not set its freeze orders back:
+// the serial is the order's packet number, which the reset leaves alone, so
+// the next freeze is still newer than every one the members have applied.
+func TestAFreezeAfterTheCoordinatorResetsStillApplies(t *testing.T) {
+	lc, m := freezePair(t)
+	m.ApplyPacket(declare(t, lc, true, "", "BravoBBS"))
+	m.ApplyPacket(declare(t, lc, false, "", "BravoBBS"))
+	before := m.FreezeSerial
+
+	lc.Reset()
+	lc.Outbox = nil
+	m.ApplyPacket(declare(t, lc, true, "again", "BravoBBS"))
+	if !m.Frozen || m.FreezeMessage != "again" || m.FreezeSerial <= before {
+		t.Errorf("frozen=%v message=%q serial %d (was %d): the freeze after the reset was dropped",
+			m.Frozen, m.FreezeMessage, m.FreezeSerial, before)
 	}
 }
