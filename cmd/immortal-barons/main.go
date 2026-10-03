@@ -73,6 +73,9 @@ func main() {
 	flag.Parse()
 
 	if *o.help || *o.helpShort {
+		// Asked-for help goes to stdout so it can be piped; only the
+		// bad-invocation short form stays on stderr.
+		flag.CommandLine.SetOutput(os.Stdout)
 		groupedUsage(flag.CommandLine, lang)()
 		return
 	}
