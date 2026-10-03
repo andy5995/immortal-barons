@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"testing"
 )
 
@@ -19,6 +20,9 @@ func TestKeepCrashLogPointsAtTheConfigDirectory(t *testing.T) {
 	}
 	crashLog = ""
 	keepCrashLog()
+	// The runtime holds its own handle on the log, and Windows will not remove
+	// an open file. Cleanups run in reverse, so this one runs before TempDir's.
+	t.Cleanup(func() { debug.SetCrashOutput(nil, debug.CrashOptions{}) })
 	if crashLog == "" {
 		t.Fatal("no crash log was set up")
 	}
