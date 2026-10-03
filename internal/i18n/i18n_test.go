@@ -3,6 +3,7 @@ package i18n
 import (
 	"io/fs"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -86,7 +87,7 @@ func TestCatalogsNoDuplicateMsgids(t *testing.T) {
 }
 
 func TestParsePOContinuation(t *testing.T) {
-	m := parsePO("msgid \"a\"\nmsgstr \"\"\n\"b\"\n\nmsgid \"c\"\nmsgstr \"d\"\n")
+	m, _ := parsePO("msgid \"a\"\nmsgstr \"\"\n\"b\"\n\nmsgid \"c\"\nmsgstr \"d\"\n")
 	if m["a"] != "b" {
 		t.Errorf("continuation msgstr = %q, want b", m["a"])
 	}
@@ -96,7 +97,7 @@ func TestParsePOContinuation(t *testing.T) {
 }
 
 func TestParsePOSkipsHeaderAndEmpty(t *testing.T) {
-	m := parsePO("msgid \"\"\nmsgstr \"Language: de\"\n\nmsgid \"x\"\nmsgstr \"\"\n")
+	m, _ := parsePO("msgid \"\"\nmsgstr \"Language: de\"\n\nmsgid \"x\"\nmsgstr \"\"\n")
 	if _, ok := m[""]; ok {
 		t.Error("header (empty msgid) should be skipped")
 	}
@@ -106,7 +107,7 @@ func TestParsePOSkipsHeaderAndEmpty(t *testing.T) {
 }
 
 func TestParsePOSkipsFuzzy(t *testing.T) {
-	m := parsePO("#, fuzzy\nmsgid \"x\"\nmsgstr \"y\"\n\nmsgid \"z\"\nmsgstr \"w\"\n")
+	m, _ := parsePO("#, fuzzy\nmsgid \"x\"\nmsgstr \"y\"\n\nmsgid \"z\"\nmsgstr \"w\"\n")
 	if _, ok := m["x"]; ok {
 		t.Error("fuzzy entry should be skipped (unvalidated by a human)")
 	}
@@ -187,6 +188,66 @@ func TestCatalogKeyLettersMatch(t *testing.T) {
 			if got := marks(str); strings.Join(got, ",") != strings.Join(want, ",") {
 				t.Errorf("[%s] keys %v shown as %v\n  id:  %q\n  str: %q", lang, want, got, id, str)
 			}
+		}
+	}
+}
+
+func TestParsePOPlural(t *testing.T) {
+	_, pl := parsePO("msgid \"1 day\"\nmsgid_plural \"%d days\"\nmsgstr[0] \"1 Tag\"\nmsgstr[1] \"%d \"\n\"Tage\"\n\n" +
+		"#, fuzzy\nmsgid \"1 hour\"\nmsgid_plural \"%d hours\"\nmsgstr[0] \"x\"\nmsgstr[1] \"y\"\n")
+	if got := pl["1 day"]; len(got) != 2 || got[0] != "1 Tag" || got[1] != "%d Tage" {
+		t.Errorf("plural forms = %q, want [1 Tag, %%d Tage]", got)
+	}
+	if _, ok := pl["1 hour"]; ok {
+		t.Error("a fuzzy plural entry should be skipped")
+	}
+}
+
+// The Russian rule is the one with three forms, so it is the one worth pinning:
+// 1 and 21 take the first, 2-4 and 22 the second, 5-20 and 11-14 the third.
+func TestPluralFormRussian(t *testing.T) {
+	for n, want := range map[int64]int{1: 0, 21: 0, 101: 0, 2: 1, 4: 1, 22: 1, 5: 2, 11: 2, 12: 2, 14: 2, 20: 2, 0: 2, 111: 2} {
+		if got := pluralForm("ru", n); got != want {
+			t.Errorf("ru form for %d = %d, want %d", n, got, want)
+		}
+	}
+	if pluralForm("de", 1) != 0 || pluralForm("de", 0) != 1 || pluralForm("de", 2) != 1 {
+		t.Error("de should take form 0 for exactly one and form 1 otherwise")
+	}
+}
+
+func TestTNFallsBackToEnglish(t *testing.T) {
+	if got := TN("", "1 day", "%d days", 1); got != "1 day" {
+		t.Errorf("English singular = %q", got)
+	}
+	if got := TN("de", "no such one", "no such many", 3); got != "no such many" {
+		t.Errorf("untranslated plural = %q, want the English plural", got)
+	}
+}
+
+// Every catalog's Plural-Forms header must state the nplurals its Go rule
+// picks among, or msgmerge would hand translators the wrong number of forms.
+func TestPluralRulesMatchTheCatalogs(t *testing.T) {
+	entries, err := fs.ReadDir(locale, "locale")
+	if err != nil {
+		t.Fatal(err)
+	}
+	nplurals := regexp.MustCompile(`Plural-Forms: nplurals=(\d+);`)
+	for _, e := range entries {
+		lang := strings.TrimSuffix(e.Name(), ".po")
+		raw, _ := locale.ReadFile("locale/" + e.Name())
+		r, ok := pluralRules[lang]
+		if !ok {
+			t.Errorf("%s has no plural rule in pluralRules", lang)
+			continue
+		}
+		m := nplurals.FindSubmatch(raw)
+		if m == nil {
+			t.Errorf("%s.po has no Plural-Forms header", lang)
+			continue
+		}
+		if string(m[1]) != strconv.Itoa(r.forms) {
+			t.Errorf("%s.po says nplurals=%s, pluralRules says %d", lang, m[1], r.forms)
 		}
 	}
 }

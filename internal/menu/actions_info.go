@@ -342,8 +342,5 @@ func faultLine(s session.Session, n int, since string) string {
 }
 
 func faultCount(s session.Session, n int) string {
-	if n == 1 {
-		return tr(s, "1 fault")
-	}
-	return fmt.Sprintf(tr(s, "%d faults"), n)
+	return plural(s, float64(n), "%.0f fault", "%.0f faults")
 }

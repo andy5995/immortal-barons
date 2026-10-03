@@ -7,6 +7,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -84,9 +85,9 @@ func staleNote(s session.Session, days float64, age time.Duration, known bool) s
 func roughAge(s session.Session, d time.Duration) string {
 	switch days := int(d.Hours() / 24); {
 	case days >= 1:
-		return plural(s, float64(days), "1 day", "%.0f days")
+		return plural(s, float64(days), "%.0f day", "%.0f days")
 	default:
-		return plural(s, math.Round(d.Hours()), "1 hour", "%.0f hours")
+		return plural(s, math.Round(d.Hours()), "%.0f hour", "%.0f hours")
 	}
 }
 
@@ -108,24 +109,20 @@ func turnaroundLabel(s session.Session, days float64) (string, string) {
 	case days <= 0:
 		return tr(s, "No Data"), ansi.FgRed
 	case seconds < game.TravelSecondsCutoff*24*60*60:
-		return plural(s, seconds, "1 second", "%.0f seconds"), ansi.FgBrightGreen
+		return plural(s, seconds, "%.0f second", "%.0f seconds"), ansi.FgBrightGreen
 	case minutes < game.TravelMinutesCutoff*24*60:
-		return plural(s, minutes, "1 minute", "%.0f minutes"), ansi.FgBrightGreen
+		return plural(s, minutes, "%.0f minute", "%.0f minutes"), ansi.FgBrightGreen
 	case hours < game.TravelHoursCutoff*24:
 		return fmt.Sprintf(tr(s, "%.2f hours"), hours), ansi.FgBrightGreen
 	}
 	return fmt.Sprintf(tr(s, "%.2f days"), math.Round(days*100)/100), ansi.FgCyan
 }
 
-// plural renders a whole-number count, picking the singular wording at one. The
-// two forms are separate translatable strings because a PO catalog cannot
-// derive one from the other, and languages do not agree on where the plural
-// starts.
+// plural renders a whole-number count in the form the reader's language gives
+// it: one and many are the English singular and plural, both carrying the
+// count's verb, and a catalog may hold more forms than two (Russian has three).
 func plural(s session.Session, n float64, one, many string) string {
-	if n == 1 {
-		return tr(s, one)
-	}
-	return fmt.Sprintf(tr(s, many), n)
+	return fmt.Sprintf(i18n.TN(sessionLang(s), one, many, int64(n)), n)
 }
 
 // voteCoordinator lets the player cast (or change) their vote for the BBS

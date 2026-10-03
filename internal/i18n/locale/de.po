@@ -7,6 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: internal/menu/actions.go:195
 msgid "  Include carriers?"
@@ -36,21 +37,29 @@ msgstr "# Besitz"
 msgid "##"
 msgstr "##"
 
-#: internal/menu/actions_interbbs.go:87
-msgid "%.0f days"
-msgstr "%.0f Tage"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f day"
+msgid_plural "%.0f days"
+msgstr[0] "%.0f Tag"
+msgstr[1] "%.0f Tage"
 
-#: internal/menu/actions_interbbs.go:89
-msgid "%.0f hours"
-msgstr "%.0f Stunden"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f hour"
+msgid_plural "%.0f hours"
+msgstr[0] "%.0f Stunde"
+msgstr[1] "%.0f Stunden"
 
-#: internal/menu/actions_interbbs.go:113
-msgid "%.0f minutes"
-msgstr "%.0f Minuten"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f minute"
+msgid_plural "%.0f minutes"
+msgstr[0] "%.0f Minute"
+msgstr[1] "%.0f Minuten"
 
-#: internal/menu/actions_interbbs.go:111
-msgid "%.0f seconds"
-msgstr "%.0f Sekunden"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f second"
+msgid_plural "%.0f seconds"
+msgstr[0] "%.0f Sekunde"
+msgstr[1] "%.0f Sekunden"
 
 #: internal/menu/actions_interbbs.go:117
 msgid "%.2f days"
@@ -80,9 +89,11 @@ msgstr "%d Agenten ausgesandt."
 msgid "%d days"
 msgstr "%d Tage"
 
-#: internal/menu/actions_info.go:348
-msgid "%d faults"
-msgstr "%d Fehler"
+#: internal/menu/actions_info.go
+msgid "%.0f fault"
+msgid_plural "%.0f faults"
+msgstr[0] "%.0f Fehler"
+msgstr[1] "%.0f Fehler"
 
 #: internal/menu/turnstages.go:236
 msgid "%d gold is requested to boost popular support."
@@ -293,26 +304,6 @@ msgstr "/-Befehl?"
 #: cmd/ib-sysop/main.go:395
 msgid "0"
 msgstr ""
-
-#: internal/menu/actions_interbbs.go:87
-msgid "1 day"
-msgstr "1 Tag"
-
-#: internal/menu/actions_info.go:346
-msgid "1 fault"
-msgstr "1 Fehler"
-
-#: internal/menu/actions_interbbs.go:89
-msgid "1 hour"
-msgstr "1 Stunde"
-
-#: internal/menu/actions_interbbs.go:113
-msgid "1 minute"
-msgstr "1 Minute"
-
-#: internal/menu/actions_interbbs.go:111
-msgid "1 second"
-msgstr "1 Sekunde"
 
 #: internal/menu/news.go:130
 msgid ": News File"

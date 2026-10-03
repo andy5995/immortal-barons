@@ -40,21 +40,29 @@ msgstr "# Ägda"
 msgid "##"
 msgstr "##"
 
-#: internal/menu/actions_interbbs.go:87
-msgid "%.0f days"
-msgstr "%.0f dagar"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f day"
+msgid_plural "%.0f days"
+msgstr[0] "%.0f dag"
+msgstr[1] "%.0f dagar"
 
-#: internal/menu/actions_interbbs.go:89
-msgid "%.0f hours"
-msgstr "%.0f timmar"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f hour"
+msgid_plural "%.0f hours"
+msgstr[0] "%.0f timme"
+msgstr[1] "%.0f timmar"
 
-#: internal/menu/actions_interbbs.go:113
-msgid "%.0f minutes"
-msgstr "%.0f minuter"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f minute"
+msgid_plural "%.0f minutes"
+msgstr[0] "%.0f minut"
+msgstr[1] "%.0f minuter"
 
-#: internal/menu/actions_interbbs.go:111
-msgid "%.0f seconds"
-msgstr "%.0f sekunder"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f second"
+msgid_plural "%.0f seconds"
+msgstr[0] "%.0f sekund"
+msgstr[1] "%.0f sekunder"
 
 #: internal/menu/actions_interbbs.go:117
 msgid "%.2f days"
@@ -84,9 +92,11 @@ msgstr "%d agenter skickade ut."
 msgid "%d days"
 msgstr "%d dagar"
 
-#: internal/menu/actions_info.go:348
-msgid "%d faults"
-msgstr "%d fel"
+#: internal/menu/actions_info.go
+msgid "%.0f fault"
+msgid_plural "%.0f faults"
+msgstr[0] "%.0f fel"
+msgstr[1] "%.0f fel"
 
 #: internal/menu/turnstages.go:236
 msgid "%d gold is requested to boost popular support."
@@ -293,26 +303,6 @@ msgstr "/-Kommando?"
 #: cmd/ib-sysop/main.go:395
 msgid "0"
 msgstr "0"
-
-#: internal/menu/actions_interbbs.go:87
-msgid "1 day"
-msgstr "1 dag"
-
-#: internal/menu/actions_info.go:346
-msgid "1 fault"
-msgstr "1 fel"
-
-#: internal/menu/actions_interbbs.go:89
-msgid "1 hour"
-msgstr "1 timme"
-
-#: internal/menu/actions_interbbs.go:113
-msgid "1 minute"
-msgstr "1 minut"
-
-#: internal/menu/actions_interbbs.go:111
-msgid "1 second"
-msgstr "1 sekund"
 
 #: internal/menu/news.go:130
 msgid ": News File"

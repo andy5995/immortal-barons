@@ -7,6 +7,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: internal/menu/actions.go:195
 msgid "  Include carriers?"
@@ -36,21 +37,33 @@ msgstr "# Есть"
 msgid "##"
 msgstr "##"
 
-#: internal/menu/actions_interbbs.go:87
-msgid "%.0f days"
-msgstr "%.0f дн."
+#: internal/menu/actions_interbbs.go
+msgid "%.0f day"
+msgid_plural "%.0f days"
+msgstr[0] "%.0f день"
+msgstr[1] "%.0f дня"
+msgstr[2] "%.0f дней"
 
-#: internal/menu/actions_interbbs.go:89
-msgid "%.0f hours"
-msgstr "%.0f ч."
+#: internal/menu/actions_interbbs.go
+msgid "%.0f hour"
+msgid_plural "%.0f hours"
+msgstr[0] "%.0f час"
+msgstr[1] "%.0f часа"
+msgstr[2] "%.0f часов"
 
-#: internal/menu/actions_interbbs.go:113
-msgid "%.0f minutes"
-msgstr "%.0f минут"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f minute"
+msgid_plural "%.0f minutes"
+msgstr[0] "%.0f минута"
+msgstr[1] "%.0f минуты"
+msgstr[2] "%.0f минут"
 
-#: internal/menu/actions_interbbs.go:111
-msgid "%.0f seconds"
-msgstr "%.0f секунд"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f second"
+msgid_plural "%.0f seconds"
+msgstr[0] "%.0f секунда"
+msgstr[1] "%.0f секунды"
+msgstr[2] "%.0f секунд"
 
 #: internal/menu/actions_interbbs.go:117
 msgid "%.2f days"
@@ -80,9 +93,12 @@ msgstr "Отправлено агентов: %d."
 msgid "%d days"
 msgstr "%d дн."
 
-#: internal/menu/actions_info.go:348
-msgid "%d faults"
-msgstr "%d сбоев"
+#: internal/menu/actions_info.go
+msgid "%.0f fault"
+msgid_plural "%.0f faults"
+msgstr[0] "%.0f сбой"
+msgstr[1] "%.0f сбоя"
+msgstr[2] "%.0f сбоев"
 
 #: internal/menu/turnstages.go:236
 msgid "%d gold is requested to boost popular support."
@@ -290,26 +306,6 @@ msgstr "/-Команда?"
 #: cmd/ib-sysop/main.go:395
 msgid "0"
 msgstr ""
-
-#: internal/menu/actions_interbbs.go:87
-msgid "1 day"
-msgstr "1 день"
-
-#: internal/menu/actions_info.go:346
-msgid "1 fault"
-msgstr "1 сбой"
-
-#: internal/menu/actions_interbbs.go:89
-msgid "1 hour"
-msgstr "1 час"
-
-#: internal/menu/actions_interbbs.go:113
-msgid "1 minute"
-msgstr "1 минута"
-
-#: internal/menu/actions_interbbs.go:111
-msgid "1 second"
-msgstr "1 секунда"
 
 #: internal/menu/news.go:130
 msgid ": News File"

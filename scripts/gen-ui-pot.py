@@ -99,7 +99,8 @@ GAME_PATTERNS = [
 
 # plural(s, n, "one", "many") carries BOTH wordings, and the count argument may
 # itself contain commas (math.Max(1, ...)), so match the last two literals in
-# the call rather than counting arguments.
+# the call rather than counting arguments. The pair is ONE catalog entry, a
+# msgid with its msgid_plural, so a language can give it more than two forms.
 PLURAL_PATTERN = re.compile(r'\bplural\(s,.*?' + STR + r',\s*' + STR + r'\)')
 
 def go_files(*subdirs):
@@ -111,9 +112,13 @@ def go_files(*subdirs):
 
 def extract():
     seen = {}  # msgid -> first "file:line"
+    plurals = {}  # msgid -> msgid_plural
     def add(mid, loc):
         if mid and mid not in seen:
             seen[mid] = loc
+    def add_plural(one, many, loc):
+        add(one, loc)
+        plurals[one] = many
     # internal/menu is the bulk of the UI; internal/play holds the first-run
     # onboarding text; cmd holds the -help/usage strings (flag descriptions wrapped
     # in i18n.T so they translate to the locale).
@@ -124,8 +129,7 @@ def extract():
                 for m in pat.finditer(line):
                     add(m.group(1), f"{rel}:{n}")
             for m in PLURAL_PATTERN.finditer(line):
-                add(m.group(1), f"{rel}:{n}")
-                add(m.group(2), f"{rel}:{n}")
+                add_plural(m.group(1), m.group(2), f"{rel}:{n}")
             # The menu's own sentinel errors reach the player through fail(),
             # as internal/game's do. cmd's are for the sysop and stay English.
             if not rel.startswith("cmd"):
@@ -153,10 +157,10 @@ def extract():
             for pat in GAME_PATTERNS:
                 for m in pat.finditer(line):
                     add(m.group(1), f"{rel}:{n}")
-    return seen
+    return seen, plurals
 
 def main():
-    seen = extract()
+    seen, plurals = extract()
     out = os.path.join(ROOT, "po", "ui", "immortal-barons.pot")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -168,7 +172,11 @@ def main():
         for mid in sorted(seen):
             f.write(f'#: {seen[mid]}\n')
             f.write(f'msgid "{mid}"\n')
-            f.write('msgstr ""\n\n')
+            if mid in plurals:
+                f.write(f'msgid_plural "{plurals[mid]}"\n')
+                f.write('msgstr[0] ""\nmsgstr[1] ""\n\n')
+            else:
+                f.write('msgstr ""\n\n')
     print(f"wrote {out} ({len(seen)} strings)")
 
 if __name__ == "__main__":

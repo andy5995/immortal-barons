@@ -40,21 +40,29 @@ msgstr "Aantal"
 msgid "##"
 msgstr "##"
 
-#: internal/menu/actions_interbbs.go:87
-msgid "%.0f days"
-msgstr "%.0f dagen"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f day"
+msgid_plural "%.0f days"
+msgstr[0] "%.0f dag"
+msgstr[1] "%.0f dagen"
 
-#: internal/menu/actions_interbbs.go:89
-msgid "%.0f hours"
-msgstr "%.0f uur"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f hour"
+msgid_plural "%.0f hours"
+msgstr[0] "%.0f uur"
+msgstr[1] "%.0f uur"
 
-#: internal/menu/actions_interbbs.go:113
-msgid "%.0f minutes"
-msgstr "%.0f minuten"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f minute"
+msgid_plural "%.0f minutes"
+msgstr[0] "%.0f minuut"
+msgstr[1] "%.0f minuten"
 
-#: internal/menu/actions_interbbs.go:111
-msgid "%.0f seconds"
-msgstr "%.0f seconden"
+#: internal/menu/actions_interbbs.go
+msgid "%.0f second"
+msgid_plural "%.0f seconds"
+msgstr[0] "%.0f seconde"
+msgstr[1] "%.0f seconden"
 
 #: internal/menu/actions_interbbs.go:117
 msgid "%.2f days"
@@ -84,9 +92,11 @@ msgstr "%d agenten uitgestuurd."
 msgid "%d days"
 msgstr "%d dagen"
 
-#: internal/menu/actions_info.go:348
-msgid "%d faults"
-msgstr "%d fouten"
+#: internal/menu/actions_info.go
+msgid "%.0f fault"
+msgid_plural "%.0f faults"
+msgstr[0] "%.0f fout"
+msgstr[1] "%.0f fouten"
 
 #: internal/menu/turnstages.go:236
 msgid "%d gold is requested to boost popular support."
@@ -297,26 +307,6 @@ msgstr "/-opdracht?"
 #: cmd/ib-sysop/main.go:395
 msgid "0"
 msgstr ""
-
-#: internal/menu/actions_interbbs.go:87
-msgid "1 day"
-msgstr "1 dag"
-
-#: internal/menu/actions_info.go:346
-msgid "1 fault"
-msgstr "1 fout"
-
-#: internal/menu/actions_interbbs.go:89
-msgid "1 hour"
-msgstr "1 uur"
-
-#: internal/menu/actions_interbbs.go:113
-msgid "1 minute"
-msgstr "1 minuut"
-
-#: internal/menu/actions_interbbs.go:111
-msgid "1 second"
-msgstr "1 seconde"
 
 #: internal/menu/news.go:130
 msgid ": News File"
