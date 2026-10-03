@@ -80,10 +80,11 @@ type Packet struct {
 	Market     []RemoteListing `json:",omitempty"` // FromBoard's market, riding its scores
 	// TradeDeals are one-way shipments of goods to a named realm on ToBoard
 	// (#195) — a different mechanic from the bids above, which buy against a
-	// market and get an answer back. Nothing returns for these: the goods are
-	// paid for and gone when the deal is sent. omitempty for the same reason as
-	// every field around it.
-	TradeDeals []IPTradeDeal `json:",omitempty"`
+	// market. The recipient has no say, but each shipment is answered with a
+	// TradeReceipt so the sender learns whether it landed (see IPTradeReceipt).
+	// omitempty for the same reason as every field around it.
+	TradeDeals    []IPTradeDeal    `json:",omitempty"`
+	TradeReceipts []IPTradeReceipt `json:",omitempty"`
 	// Notice is a plain-text bounce: this board refused a packet and is telling
 	// the sender why. It carries NO payload, deliberately — see bounceVersion.
 	Notice string `json:",omitempty"`
@@ -212,7 +213,7 @@ func (p Packet) PacketType() string {
 		return "threats"
 	case len(p.TradeBids) > 0 || len(p.TradeFills) > 0:
 		return "trade"
-	case len(p.TradeDeals) > 0:
+	case len(p.TradeDeals) > 0 || len(p.TradeReceipts) > 0:
 		return "trade deals"
 	case len(p.Market) > 0:
 		return "market"
@@ -232,7 +233,7 @@ func (p Packet) HasPayload() bool {
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
 		len(p.SpyGuys) > 0 || len(p.News) > 0 || len(p.Threats) > 0 ||
-		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || len(p.TradeDeals) > 0 || p.Notice != "" ||
+		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || len(p.TradeDeals) > 0 || len(p.TradeReceipts) > 0 || p.Notice != "" ||
 		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil ||
 		p.Freeze != nil || p.Quiet != nil
 }
@@ -579,16 +580,19 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, m := range p.IPMessages {
 		w.deliverIPMessage(m)
 	}
-	// One-way shipments land straight on the realm they name (#195). Nothing goes
-	// back: the sender paid on the way out and the recipient gets no say.
-	for _, d := range p.TradeDeals {
-		w.deliverIPTradeDeal(d)
-	}
 	// Answers to our own bids: goods or gold, straight to the baron who bid (#47).
 	for _, f := range p.TradeFills {
 		w.applyTradeFill(f)
 	}
+	for _, r := range p.TradeReceipts {
+		w.applyTradeReceipt(p.FromBoard, r)
+	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
+	// One-way shipments land straight on the realm they name (#195). The
+	// recipient gets no say; the sender gets a receipt.
+	for _, d := range p.TradeDeals {
+		result.TradeReceipts = append(result.TradeReceipts, w.deliverIPTradeDeal(d))
+	}
 	// Bids landing HERE are filled or refused against this board's market now,
 	// and the answer rides the reply home.
 	for _, b := range p.TradeBids {

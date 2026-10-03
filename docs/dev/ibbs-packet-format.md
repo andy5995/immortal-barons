@@ -238,6 +238,8 @@ map of it, not a second definition.
   "TradeBids":  [ IPTradeBid ],     // buy orders landing on ToBoard's market (#47)
   "TradeFills": [ IPTradeFill ],    // their answers coming home (#47)
   "Market":  [ RemoteListing ],     // FromBoard's market, riding its scores (#47)
+  "TradeDeals": [ IPTradeDeal ],    // one-way shipments to a realm on ToBoard (#195)
+  "TradeReceipts": [ IPTradeReceipt ], // their receipts coming home: Delivered or lost
   "Version": "0.0.5",               // the sender's game version, for BBSINFO
   "Ruleset": "51511b59",            // fingerprint of the league rules the sender plays
                                      // by (#264). A gate: a packet whose rules are not

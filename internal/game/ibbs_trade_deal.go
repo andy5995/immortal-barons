@@ -14,7 +14,8 @@ import (
 //
 //   - It is ONE-WAY. You may demand nothing in return, and the recipient is
 //     given no choice: the goods land when the packet is processed. There is no
-//     pending offer, no accept, no decline (docs/bre.doc:2088).
+//     pending offer, no accept, no decline (docs/bre.doc:2088). The sender is
+//     still told it arrived (IPTradeReceipt).
 //   - It charges a FLAT fee to send, where the local deal charges over a span of
 //     days. There is no day span here at all, so nothing arrives "on a turn":
 //     it arrives when the packet does.
@@ -37,6 +38,10 @@ import (
 // ErrTradeDealOwnPlanet is returned when an interplanetary deal is addressed to
 // the sender's own planet, which the original's planet picker refuses.
 var ErrTradeDealOwnPlanet = errors.New("A trade deal to your own planet is a local deal; send it from the Trading menu.")
+
+// ErrTradeDealNoRealm refuses a deal that names no realm, which the arriving
+// board would otherwise hand to its top realm (remoteTarget's empty-name case).
+var ErrTradeDealNoRealm = errors.New("A trade deal must name the realm it is for.")
 
 // ErrNotInterBBSGame is returned when an interplanetary action is attempted on a
 // stand-alone board, which has no other planet to reach.
@@ -126,13 +131,16 @@ func (w *World) TradeOfferCost(b TradeBasket) int64 {
 // SendIPTradeDeal ships goods to a named realm on another planet. It charges the
 // flat fee, spends the carriers the basket needs, takes the goods off the sender
 // and queues the shipment. The goods are gone from here the moment it returns
-// nil: there is no pending offer to withdraw and nothing comes back.
+// nil: there is no pending offer to withdraw and the goods never come back.
 func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods TradeBasket) error {
 	if !w.Config.IBBS {
 		return ErrNotInterBBSGame
 	}
 	if toBoard == "" || toBoard == w.Config.BoardID {
 		return ErrTradeDealOwnPlanet
+	}
+	if toEmpire == "" {
+		return ErrTradeDealNoRealm
 	}
 	if from.Protection > 0 {
 		return ErrInProtection
@@ -178,19 +186,53 @@ func (w *World) enqueueIPTradeDeal(board string, d IPTradeDeal) {
 	p.TradeDeals = append(p.TradeDeals, d)
 }
 
-// deliverIPTradeDeal hands an arriving shipment to the realm it names, and says
-// nothing to anyone else: the original files a private report for each side and
-// writes no news, and no .dat template carries a trade-deal news category.
-// A realm that has died since the deal left keeps nothing — there is no return
-// path in the original and none here.
-func (w *World) deliverIPTradeDeal(d IPTradeDeal) {
+// deliverIPTradeDeal hands an arriving shipment to the realm it names and
+// returns the receipt that goes home to the sender. Nobody else hears of it: the
+// original files a private report for each side and writes no news, and no .dat
+// template carries a trade-deal news category. A realm that has died since the
+// deal left keeps nothing — there is no return path in the original and none
+// here — but the receipt says so.
+func (w *World) deliverIPTradeDeal(d IPTradeDeal) IPTradeReceipt {
+	r := IPTradeReceipt{FromEmpire: d.FromEmpire, ToEmpire: d.ToEmpire, Goods: d.Goods}
 	to := w.remoteTarget(d.ToEmpire)
 	if to == nil {
-		return
+		return r
 	}
 	w.addBasket(to, d.Goods)
 	to.addEvent(fmt.Sprintf("%s of %s shipped you a trade deal: %s.",
 		d.FromEmpire, d.FromBoard, describeBasket(d.Goods)))
+	r.Delivered = true
+	return r
+}
+
+// IPTradeReceipt tells the sender of an interplanetary trade deal whether it
+// landed. The delivered case is the original's: resolve_received_trade_offer
+// builds a "Trade Deal arrived at" report keyed to the sender and posts it home
+// through append_report_record (BRE.OVR 0x048b31). The LOST case is IB's own —
+// the original returns before building either report, so a deal to a dead realm
+// looked to its sender like one still in transit.
+type IPTradeReceipt struct {
+	FromEmpire string // the sender, on the board the receipt is addressed to
+	ToEmpire   string
+	Goods      TradeBasket
+	Delivered  bool // false: no living realm of that name was there to take it
+}
+
+// applyTradeReceipt files a returning receipt on its sender's recap. board is
+// the board the shipment went to.
+func (w *World) applyTradeReceipt(board string, r IPTradeReceipt) {
+	// Not remoteTarget: its empty-name fallback picks the board's top realm.
+	from := w.FindByNameOrFormer(r.FromEmpire)
+	if from == nil || !from.Alive {
+		return
+	}
+	if r.Delivered {
+		from.addEvent(fmt.Sprintf("Your trade deal reached %s of %s: %s.",
+			r.ToEmpire, board, describeBasket(r.Goods)))
+		return
+	}
+	from.addEvent(fmt.Sprintf("Your trade deal to %s of %s was lost: no such realm is left there to take it.",
+		r.ToEmpire, board))
 }
 
 // describeBasket lists a basket's contents for an event line, in the canonical

@@ -83,7 +83,11 @@ const Version = "0.2.2-dev"
 // Moved to 3 in v0.2.0 for the unit counts and morale on SpyReport, which the
 // target card before an attack prints. Every report carries them, so omitempty
 // could not keep a report byte-identical for an older board.
-const Protocol = 3
+//
+// Moved to 4 in v0.2.2 for Packet.TradeReceipts, the answer to every
+// interplanetary trade deal: an older board would drop the field and fail to
+// verify the reply packet carrying it.
+const Protocol = 4
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
 // apply. A packet that states no protocol is NOT one of them — see Protocol.

@@ -5176,9 +5176,17 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   reproduces that exactly (`TradeDealCarriers`).
 
   **On arrival** the goods are credited straight onto the named realm, each good
-  capped at two billion, and a private event is filed for each side. **No planet
-  news** — no `.dat` template carries a trade-deal category and the original's
-  arrival routine calls no news writer.
+  capped at two billion, and a private event is filed for each side: the
+  recipient's on the spot, the sender's when a receipt rides the reply packet
+  home (`resolve_received_trade_offer` builds both, posting the sender's through
+  `append_report_record`, 0x048b31). **No planet news** — no `.dat` template
+  carries a trade-deal category and the original's arrival routine calls no news
+  writer.
+
+  **IB's own — the lost receipt.** When no living realm of that name is there to
+  take the deal, the goods are gone, as in the original, but IB still sends a
+  receipt saying so. The original returns before building either report, so its
+  sender cannot tell a lost deal from one still in transit.
 
   **DELIBERATE DIVERGENCE — protection.** The original destroys a deal aimed at a
   realm under New Realm Protection: `resolve_received_trade_offer` (0x043df1)
@@ -5189,12 +5197,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   only counts DOWN and delivery is keyed by realm name, so a realm that was clear
   when the deal left cannot be protected when it lands.
 
-  **On the wire:** `Packet.TradeDeals`, `json:",omitempty"`, so a packet carrying
-  no deal is byte-identical to what an older board produces and no `Protocol`
-  bump is needed (`SpeaksOurProtocol` is exact equality — bumping would make
-  every board on the previous release hold ALL traffic). A packet that DOES carry
-  one, sent to a board too old to know the field, fails origin verification there
-  and is refused; `Config.MinBoardVersion` is the league's gate for that.
+  **On the wire:** `Packet.TradeDeals` out and `Packet.TradeReceipts` back, both
+  `json:",omitempty"`. The receipt moved `Protocol` to 4.
 - **Special Operations** — the cross-planet bombing and missile set; see below.
 - **SDI** — puts gold into the program; the strength it buys is capped at
   `SDIMax` (100%, the original's own clamp). See "The SDI program" below.
@@ -6918,6 +6922,8 @@ checking IB against a capture:
 - **An interplanetary trade deal is refused at the picker when its target is
   under New Realm Protection**, where the original accepts it and destroys it on
   arrival with nobody told. See "Send Trade Deal" above.
+- **A trade deal lost to a dead realm is reported to its sender**, where the
+  original reports only one that arrives. See "Send Trade Deal" above.
 - **Manufacturing is a row of cells, not six sentences.** BRE ends each line
   with "were manufactured by Industrial Zones."; IB says that once as a label and
   lays the figures across the line as the Empire Status block's bracketed

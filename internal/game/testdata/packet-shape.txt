@@ -21,6 +21,7 @@ Packet:
   TradeFills `json:",omitempty"`
   Market `json:",omitempty"`
   TradeDeals `json:",omitempty"`
+  TradeReceipts `json:",omitempty"`
   Notice `json:",omitempty"`
   Version `json:",omitempty"`
   Ruleset `json:",omitempty"`
@@ -234,6 +235,11 @@ TradeBasket:
   Agents
   Tanks
   Carriers
+IPTradeReceipt:
+  FromEmpire
+  ToEmpire
+  Goods
+  Delivered
 BulletinSet:
   Files
 BulletinFile:

@@ -48,7 +48,8 @@ use it.
 
 You cannot ask for anything back. The goods are a gift, and the realm you send
 them to has no say: they arrive and are added to what that realm holds. There is
-no offer to accept or refuse, so nothing is ever returned to you.
+no offer to accept or refuse, so nothing is ever returned to you. You are told
+when the deal arrives, or that it was lost because the realm is gone.
 
 You pay once, not per day, and you need no treaty with the realm or its planet.
 The fee depends on what is in the deal, and it is shown before you confirm. You

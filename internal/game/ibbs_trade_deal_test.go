@@ -139,7 +139,7 @@ func TestIPTradeDealShipsGoodsAndChargesTheSender(t *testing.T) {
 		t.Errorf("queued the wrong shipment: %+v", sent[0])
 	}
 
-	// And it lands on the far board with no answer of any kind.
+	// And it lands on the far board with no planet news.
 	far := NewWorldSeed(cfg, 1)
 	far.Config.BoardID = "there"
 	to := far.AddHuman("recv", "Receiver")
@@ -175,6 +175,12 @@ func TestIPTradeDealRefusals(t *testing.T) {
 		w, e := newSender()
 		if err := w.SendIPTradeDeal(e, "here", "Someone", full); err != ErrTradeDealOwnPlanet {
 			t.Errorf("got %v, want the own-planet refusal", err)
+		}
+	})
+	t.Run("no realm named", func(t *testing.T) {
+		w, e := newSender()
+		if err := w.SendIPTradeDeal(e, "there", "", full); err != ErrTradeDealNoRealm {
+			t.Errorf("got %v, want the no-realm refusal", err)
 		}
 	})
 	t.Run("sender under protection", func(t *testing.T) {
@@ -223,4 +229,53 @@ func TestIPTradeDealRefusals(t *testing.T) {
 			t.Errorf("a refused deal moved goods or gold: %d troopers, %d gold", e.Troopers, e.Gold)
 		}
 	})
+}
+
+// The sender hears back either way: delivered, or lost to a realm that is gone.
+// Driven through ApplyPacket on both boards, so the receipt really rides the
+// reply packet rather than being handed across by the test.
+func TestIPTradeDealReceiptReachesTheSender(t *testing.T) {
+	for _, alive := range []bool{true, false} {
+		cfg := DefaultConfig()
+		cfg.IBBS = true
+		cfg.BoardID = "here"
+		home := NewWorldSeed(cfg, 1)
+		from := home.AddHuman("sender", "Sender")
+		from.Protection = 0
+		from.Troopers, from.Carriers, from.Gold = 10_000, 50, 5_000_000
+		if err := home.SendIPTradeDeal(from, "there", "Receiver", TradeBasket{Troopers: 5_000}); err != nil {
+			t.Fatalf("send: %v", err)
+		}
+		var out Packet
+		for _, p := range home.Outbox {
+			if p.ToBoard == "there" {
+				out = p
+			}
+		}
+
+		far := NewWorldSeed(cfg, 1)
+		far.Config.BoardID = "there"
+		to := far.AddHuman("recv", "Receiver")
+		to.Protection = 0
+		to.Alive = alive
+		reply := far.ApplyPacket(out)
+		if len(reply.TradeReceipts) != 1 || reply.TradeReceipts[0].Delivered != alive {
+			t.Fatalf("alive=%v: reply carried %+v, want one receipt with Delivered=%v",
+				alive, reply.TradeReceipts, alive)
+		}
+
+		before := len(from.Events)
+		home.ApplyPacket(reply)
+		if len(from.Events) != before+1 {
+			t.Fatalf("alive=%v: sender got %d new events, want 1", alive, len(from.Events)-before)
+		}
+		got := from.Events[before].Text
+		want := "Your trade deal reached Receiver of there: 5000 Troopers."
+		if !alive {
+			want = "Your trade deal to Receiver of there was lost: no such realm is left there to take it."
+		}
+		if got != want {
+			t.Errorf("alive=%v: sender was told %q, want %q", alive, got, want)
+		}
+	}
 }
