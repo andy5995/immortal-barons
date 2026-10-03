@@ -408,6 +408,38 @@ func TestTradeDealArrivesNoEarlierInTheDayThanItWasSent(t *testing.T) {
 	}
 }
 
+// The gate holds on the day the deal was sent only: the next day's maintenance
+// lifts it, as the original's pass over the offer list sets every survivor's
+// stamp to 0xFF (pack_trade_offer_list, BRE.OVR 0x050e1a). IB held the deal back
+// every day until it expired.
+func TestTradeDealArrivalGateLiftsAtTheTurnOfTheDay(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
+	pactAll(w, fullDefenseAlliance)
+	w.DailyMaintenance("2026-01-01")
+	from.LastPlayed, to.LastPlayed = "2026-01-01", "2026-01-01" // not reaped as never played
+	from.Tanks, from.Carriers, from.Gold = 500, 1, 10_000_000
+
+	from.TurnsLeft = 1 // the sender's last turn of the day
+	if err := w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{}, TradeDealMaxDays); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+	if w.TradeDealArrived(to.TradeDeals[0], to) {
+		t.Fatal("on the day it was sent, the deal reached a recipient still on turn 1")
+	}
+	w.DailyMaintenance("2026-01-02")
+	if len(to.TradeDeals) != 1 {
+		t.Fatalf("the deal should still be pending, have %d", len(to.TradeDeals))
+	}
+	to.TurnsLeft = cfg.TurnsPerDay // turn 1 of the new day
+	if !w.TradeDealArrived(to.TradeDeals[0], to) {
+		t.Error("the next day, the deal is still held behind the turn it was sent on")
+	}
+}
+
 // A deal saved before arrival turns were recorded carries no stamp, and must go
 // on landing at once rather than waiting for a turn it was never given. The
 // fixture is written out by hand precisely because marshalling a TradeDeal here

@@ -6472,8 +6472,11 @@ and, when the recipient still has more turns left than the sender did, leaves
 the record pending — it is neither shown nor deleted, only re-stamped with its
 integrity word. Because both halves read the same counter, a deal sent on the
 sender's third turn of the day is waiting from the recipient's third turn
-onward, that day and every later day it survives to. A byte of `0xFF` is a
-sentinel for no gate at all; which path writes it is NOT established.
+onward on the day it was sent. The gate does NOT carry over: daily
+maintenance's pass over the offer list (`pack_trade_offer_list`, 0x050e1a)
+sets every surviving record's `+0x60` to `0xFF`, the no-gate value, so from the
+next day the deal meets the recipient on any turn. IB applied the gate on
+every day the deal survived until 2026-10-03.
 
 A held deal is put to the recipient in the SAME sitting, on the turn it lands.
 `process_trade_offer` clears a 32-byte set (`DS:0x2692`) on entry and adds each

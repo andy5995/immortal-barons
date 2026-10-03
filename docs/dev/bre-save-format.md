@@ -343,8 +343,10 @@ tampering. Only one field of it has been read so far:
                 0x238B); read by process_trade_offer (0x24D6B, unit offset
                 0x05B1), which compares it against the RECIPIENT's own +0x285
                 and leaves the offer pending while the recipient has more turns
-                left than the sender did. 0xFF is a sentinel meaning no gate —
-                which path writes it is NOT established.
+                left than the sender did. 0xFF is a sentinel meaning no gate,
+                written on every surviving record by the daily-maintenance
+                pass pack_trade_offer_list (0x050e1a), so the gate holds on
+                the day of sending only.
 ```
 
 The rest of the record is unmapped. See `docs/mechanics-reference.md` for what

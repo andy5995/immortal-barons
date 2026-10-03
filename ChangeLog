@@ -3,9 +3,10 @@ Immortal Barons ChangeLog
 (in-progress:)
   * BREAKING: packet protocol 4; every board in a league must update together
   * An interplanetary trade deal's sender is told it arrived, or was lost
-  * Recap events and interplanetary reports can be translated, with plural forms
-  * Percentage losses of holdings over 21 million no longer wrap on 32-bit builds
+  * Recap events and interplanetary reports can be translated
+  * Losses from holdings over 21 million no longer wrap on 32-bit builds
   * Bomb Trade Routes reaches deals still waiting on a realm that has died
+  * A trade deal's arrival-turn wait lasts only the day it was sent
   * Strike and covert results read as one sentence, with varied failure lines
   * A board that has updated no longer pauses lost forces over an old held packet
   * Net worth counts units away on attacks, up for sale, or in a trade deal

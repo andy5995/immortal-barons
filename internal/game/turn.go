@@ -177,6 +177,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 // advanceOneDay runs one game day of maintenance and steps the clock to the
 // next date. Called once per day being caught up; see DailyMaintenance.
 func (w *World) advanceOneDay(today string, rep *MaintReport) {
+	w.releaseTradeDeals()
 	{
 		rep.step("Paying out trading market sales")
 		w.settleMarketProceeds()                   // "Depositing trading market money" — pay sellers at day-end (#17)

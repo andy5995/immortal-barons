@@ -495,8 +495,8 @@ Four routines in the trade unit were named from this pass:
 - `empire_trade_good_pointer` (slot + good index -> the count to adjust, used
   by both the escrow loop and every accept-branch transfer)
 - `store_trade_offer_record`
-- `pack_trade_offer_packets` (the daily-maintenance step that exports deals to
-  other boards)
+- `pack_trade_offer_list` (the daily-maintenance step that compacts the list;
+  see below)
 
 ### Two catalog names to read with care
 
@@ -520,6 +520,17 @@ key handling is the region-picker's: a type letter, `?` to redisplay the list,
 `*` for the advisors. Enter does NOT leave — it falls to the loop bottom at
 `+0x124c` with the other two, which re-reads the pool and prompts again unless it
 is empty.
+
+`pack_trade_offer_list` (`BRE.OVR 0x050e1a`) was catalogued as
+`pack_trade_offer_packets`, read from the daily-maintenance step that announces
+it as packing trade deals. "Pack" is the Pascal sense — compacting a list — and
+the routine writes no packet: its only callees are the CRC routine and the list
+delete. For each trade-deal record it re-checks the CRC and deletes the record
+when the check fails or its first 32-bit field is not positive (a record
+`clear_trade_offer_record` zeroed). Every survivor gets `+0x60 = 0xFF`, which
+is the "no gate" value of the arrival-turn stamp: a deal waits for the
+recipient's matching turn on the day it was sent only. Renamed the same way as
+the case below.
 
 Renamed in the catalog with `select_regions_to_lose` retired to `aliases`, so
 the old name still resolves — the convention `calculate_crown_tax` already

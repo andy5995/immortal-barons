@@ -1581,9 +1581,9 @@
       "evidence": ["repository_docs: trade offers are constructed and later processed as persistent records", "instruction_behavior: clears exactly one 0x97-byte trade-offer record", "call_graph: shared by create_trade_offer and process_trade_offer"]
     },
     "0x050e1a": {
-      "name": "pack_trade_offer_packets",
-      "confidence": "medium",
-      "evidence": ["call_graph: sole caller is the daily-maintenance step announcing that trade deals are being packed", "instruction_behavior: walks the shared offer list, selects the trade-deal record type, checksums each record and passes it to the packet writer"]
+      "name": "pack_trade_offer_list",
+      "confidence": "high",
+      "evidence": ["call_graph: sole caller is the daily-maintenance step announcing that trade deals are being packed (compacted, not exported)", "instruction_behavior: walks the shared offer list's trade-deal records, re-checks each 0x97-byte record's CRC, deletes a record that fails it or whose first field is not positive (a cleared record), and sets the survivors' +0x60 arrival gate to 0xFF; it writes no packet; the previous name pack_trade_offer_packets read the step as an export"]
     },
     "0x050f23": {
       "name": "store_trade_offer_record",

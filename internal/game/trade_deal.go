@@ -122,12 +122,26 @@ type TradeDeal struct {
 	// moment the deal was sent; the recipient does not meet it until they reach
 	// that turn of their own day. So a deal sent on your third turn is waiting
 	// from their third turn onward — a trade fleet cannot reach someone earlier
-	// in their day than it left yours.
+	// in their day than it left yours. The gate holds on the day of sending
+	// only: daily maintenance clears it (releaseTradeDeals).
 	//
 	// Zero means no gate, and it has to: a deal saved before this was recorded
 	// has no such key, and it must go on arriving at once rather than being
 	// held forever behind a turn it was never stamped with.
 	ArrivesOnTurn int `json:",omitempty"`
+}
+
+// releaseTradeDeals lifts the arrival gate from every pending deal at the turn
+// of the day, dead realms' included. BINARY-VERIFIED: daily maintenance's pass
+// over the offer list (pack_trade_offer_list, BRE.OVR 0x050e1a) sets each
+// surviving record's +0x60 stamp to 0xFF, the no-gate value, so a deal waits for
+// the recipient's matching turn on the day it was sent and on no later day.
+func (w *World) releaseTradeDeals() {
+	for _, e := range w.Empires {
+		for i := range e.TradeDeals {
+			e.TradeDeals[i].ArrivesOnTurn = 0
+		}
+	}
 }
 
 // TurnOfDay is the turn an empire is currently on, counted from 1. It is what
