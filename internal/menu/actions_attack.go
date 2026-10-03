@@ -215,7 +215,8 @@ func regularAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 
-	var outcome game.BattleOutcome
+	var report string
+	var captured int
 	var trimmed bool
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		d := warTargets.find(w, p, name)
@@ -229,7 +230,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 			force.Bombers > p.Bombers || force.Jets > min(p.Jets, p.Carriers*game.JetsPerCarrier)
 		// Deferred capture (autoCapture=false): the defender bleeds its regions but
 		// the attacker gains none yet, so the human can pick the types below (#58).
-		outcome = w.World.AttackDetailed(p, d, force, false)
+		report, captured = w.World.Attack(p, d, force, false)
 		chargeAttackStage(p)
 		return nil
 	})
@@ -238,10 +239,10 @@ func regularAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	warnTrimmedForce(s, trimmed)
-	stageBattle(s, name, outcome)
-	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(outcome.Report)))
-	if outcome.Captured > 0 {
-		allocateCaptured(s, w, outcome.Captured)
+	stageBattle(s, name)
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
+	if captured > 0 {
+		allocateCaptured(s, w, captured)
 	}
 	pause(s)
 	// One attack per turn: leave the War menu so the turn moves forward (BRE-

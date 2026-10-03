@@ -104,24 +104,6 @@ func (w *World) CanBombingOp(e *Empire) bool {
 // composition). captured is 0 on a loss, and excludes any waste taken, which
 // transfers as waste on both paths because nobody chooses to hold ruin.
 func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
-	o := w.AttackDetailed(a, d, f, autoCapture)
-	return o.Report, o.Captured
-}
-
-// BattleOutcome is one battle in structured form, for a caller that needs the
-// figures and not only the finished report. The menu stages an attack's
-// casualties across a few seconds before showing the whole report, which it
-// cannot do from prose it would have to parse back apart.
-type BattleOutcome struct {
-	Report       string
-	Captured     int
-	AttackerLoss UnitLoss
-	DefenderLoss UnitLoss
-}
-
-// AttackDetailed is Attack with the figures kept.
-func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) BattleOutcome {
-	var captured int
 	// No daily counter here: the local attack is limited by the turn, not by a
 	// per-day allowance (see CanAttack). AttacksToday counts interplanetary
 	// individual strikes alone.
@@ -288,12 +270,7 @@ func (w *World) AttackDetailed(a, d *Empire, f AttackForce, autoCapture bool) Ba
 			"who", a.Name, "lost", defenderCas(dloss)))
 		w.postCombatNews(a, d, false, false)
 	}
-	return BattleOutcome{
-		Report:       b.String(),
-		Captured:     captured,
-		AttackerLoss: aloss,
-		DefenderLoss: dloss,
-	}
+	return b.String(), captured
 }
 
 // defenderCas lists a defender's losses by unit type — the attacker's report

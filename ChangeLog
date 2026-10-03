@@ -9,6 +9,7 @@ Immortal Barons ChangeLog
   * A trade deal's arrival-turn wait lasts only the day it was sent
   * Held packets are kept 14 days, not 30; bbs.cfg's HeldPacketDays sets it
   * ib-sysop: the held-packets view can hide a reason or show it alone
+  * An attack's build-up no longer shows running losses; the report has them
   * Strike and covert results read as one sentence, with varied failure lines
   * A board that has updated no longer pauses lost forces over an old held packet
   * Net worth counts units away on attacks, up for sale, or in a trade deal
