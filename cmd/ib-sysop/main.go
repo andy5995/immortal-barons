@@ -57,6 +57,7 @@ func main() {
 			"commands. With no directory, reopens the ones open last time.\n")
 	}
 	flag.Parse()
+	keepCrashLog()
 	saved := loadSession()
 	dirs := flag.Args()
 	if len(dirs) == 0 {

@@ -45,6 +45,9 @@ func (r *runView) init(t *boardTab) {
 	r.list.Axis = layout.Vertical
 	r.list.ScrollToEnd = true
 	r.cmdsL.Axis = layout.Vertical
+	if crashLog != "" {
+		r.say("If the panel ever closes on its own, the reason is written to %s", crashLog)
+	}
 }
 
 // offered is the commands this board may run: the Coordinator's only on node #1.

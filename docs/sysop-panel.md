@@ -66,6 +66,11 @@ follows your desktop's light or dark setting, and checks it again every minute.
 When the desktop does not say, System is light. The panel remembers your
 choice.
 
+If the panel ever closes on its own, the reason is written to
+`immortal-barons/ib-sysop-crash.log` in the same user config directory
+(`%AppData%` on Windows). Each tab's Run view shows the full path. Please send
+that file with a bug report.
+
 ## The views
 
 Each tab has five views. Click a column heading to sort by it. Click it again
