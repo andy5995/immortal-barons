@@ -11,6 +11,7 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 
+	"github.com/andy5995/immortal-barons/internal/store"
 	"github.com/andy5995/immortal-barons/internal/sysop"
 )
 
@@ -44,6 +45,7 @@ type boardTab struct {
 	viewBtns   [len(viewNames)]widget.Clickable
 
 	boards, inFlight, held *table
+	heldFilter             heldFilter
 
 	run runView
 	cfg cfgView
@@ -144,7 +146,7 @@ func (t *boardTab) layout(gtx layout.Context) layout.Dimensions {
 			case viewInFlight:
 				return t.inFlight.layout(gtx, th, t.inFlightRows(), t.emptyText("Nothing is in flight from this board."))
 			case viewHeld:
-				return t.held.layout(gtx, th, t.heldRows(), t.emptyText("No packets are held."))
+				return t.heldLayout(gtx)
 			case viewConfig:
 				return t.cfg.layout(gtx)
 			default:
@@ -272,12 +274,28 @@ func (t *boardTab) inFlightRows() [][]string {
 	return rows
 }
 
-func (t *boardTab) heldRows() [][]string {
-	if t.snap == nil {
-		return nil
+// heldLayout is the held-packets table under its reason filter.
+func (t *boardTab) heldLayout(gtx layout.Context) layout.Dimensions {
+	th := t.u.th
+	var held []store.HeldPacket
+	if t.snap != nil {
+		held = t.snap.Held
 	}
+	empty := t.emptyText("No packets are held.")
+	if len(held) > 0 {
+		empty = "Every held packet is hidden by the reason filter."
+	}
+	return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions { return t.heldFilter.layout(gtx, th, held) }),
+		layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+			return t.held.layout(gtx, th, heldRows(t.heldFilter.shown(held)), empty)
+		}),
+	)
+}
+
+func heldRows(held []store.HeldPacket) [][]string {
 	var rows [][]string
-	for _, h := range t.snap.Held {
+	for _, h := range held {
 		from, typ := h.FromBoard, h.Type
 		if from == "" {
 			from, typ = "?", "?"

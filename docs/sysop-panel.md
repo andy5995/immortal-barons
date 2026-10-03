@@ -84,7 +84,10 @@ to reverse the order.
   lost-forces timer will give it up. An item stays here for the whole round
   trip, which is usually hours.
 - **Held packets:** the files in the held directory, why each one is held, when
-  it expires, and whether it pauses the lost-forces timer.
+  it expires, and whether it pauses the lost-forces timer. The buttons above
+  the table list each reason with its count: pick one, then **Hide** it or
+  **Show only** it; **Show all** brings every row back. This changes the view
+  only, not the files.
 
 - **Run:** runs one `immortal-barons` command and shows its output as it runs.
   **Detailed** adds `-detailed`, and is grayed out for commands that ignore it.
