@@ -9,6 +9,7 @@ Immortal Barons ChangeLog
   * Bomb Trade Routes reaches deals still waiting on a realm that has died
   * A trade deal's arrival-turn wait lasts only the day it was sent
   * Held packets are kept 14 days, not 30; bbs.cfg's HeldPacketDays sets it
+    (1 to 60)
   * ib-sysop: the held-packets view can hide a reason or show it alone
   * ib-sysop: a crash is written to ib-sysop-crash.log in the config directory
   * An attack's build-up no longer shows running losses; the report has them

@@ -225,7 +225,7 @@ held when this board cannot apply it yet: it comes from a different release, it
 failed its signature check, or it was written under rules the league did not
 agree. The days count from when the packet was set aside.
 
-**Values:** a whole number of days, 1 or more. Any other value is ignored with
+**Values:** a whole number of days, from 1 to 60. Any other value is ignored with
 a warning, and the default is used.
 
 **Default:** 14.

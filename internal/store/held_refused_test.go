@@ -91,7 +91,7 @@ func TestHeldPacketDaysComesFromBBSCfg(t *testing.T) {
 	if cfg.HeldMaxAge() != 3*24*time.Hour {
 		t.Errorf("HeldPacketDays 3 gave %v", cfg.HeldMaxAge())
 	}
-	for _, bad := range []string{"0", "-2", "soon"} {
+	for _, bad := range []string{"0", "-2", "61", "soon"} {
 		if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("HeldPacketDays "+bad+"\n"), 0o644); err != nil {
 			t.Fatal(err)
 		}

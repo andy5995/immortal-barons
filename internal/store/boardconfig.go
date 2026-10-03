@@ -85,8 +85,8 @@ var boardSetters = map[string]func(cfg *game.Config, value string) error{
 	keyPirate:   func(cfg *game.Config, v string) error { return setYesNo(&cfg.PirateNews, v) },
 	keyHeldPacketDays: func(cfg *game.Config, v string) error {
 		n, err := strconv.Atoi(v)
-		if err != nil || n < 1 {
-			return fmt.Errorf("want a number of days, 1 or more, got %q", v)
+		if err != nil || n < 1 || n > game.MaxHeldPacketDays {
+			return fmt.Errorf("want a number of days from 1 to %d, got %q", game.MaxHeldPacketDays, v)
 		}
 		cfg.HeldPacketDays = n
 		return nil

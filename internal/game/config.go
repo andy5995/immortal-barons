@@ -554,6 +554,11 @@ func (c Config) GameStarted(today string) bool {
 // backlog; past that a held packet is from a board that will not recover.
 const DefaultHeldPacketDays = 14
 
+// MaxHeldPacketDays is the most bbs.cfg may set HeldPacketDays to. A board two
+// months behind its league is not catching up, and a held packet that old
+// would only replay a game the rest of the league has moved past.
+const MaxHeldPacketDays = 60
+
 // HeldMaxAge is how long a held packet is kept, from when it was set aside.
 func (c Config) HeldMaxAge() time.Duration {
 	days := c.HeldPacketDays
