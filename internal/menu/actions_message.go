@@ -409,8 +409,8 @@ func composeMessage(s session.Session) (string, bool) { return composeMessageFro
 // (false = aborted).
 //
 // A reply starts with the quoted lines already IN the editor, as BRE starts one
-// — they are ordinary lines from there on, numbered, counted against the limit,
-// and cleared by /C along with everything else.
+// — numbered, counted against the limit, and cleared by /C along with everything
+// else, but out of Backspace's reach: the quote cannot be edited.
 func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 	// Banner white, ruler plain cyan — read off a live capture (2026-08-14),
 	// which corrected an earlier note here claiming both were bright cyan
@@ -431,13 +431,16 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 		// what was carried over is told from what is being written.
 		fmt.Fprintf(s, "%s%2d>%s %s\n", ansi.FgBrightBlue, len(lines), ansi.Reset, q)
 	}
+	// The quote is the other realm's words, so it can be cleared whole (/C) but
+	// not edited: backspace stops at the first line after it.
+	quoted := len(lines)
 	// reopenPrev implements BRE's backspace at column 1: the line above is taken
 	// back out of the message and re-opened with the cursor at its end — the way
 	// to undo a wrap you did not want. BRE redraws that line under a fresh prompt
 	// below rather than moving the cursor up a row, and colors the prompt bright
 	// red where a new line is green, so a line being revisited reads as one.
 	reopenPrev := func() []rune {
-		if len(lines) == 0 {
+		if len(lines) <= quoted {
 			return nil
 		}
 		b := []rune(lines[len(lines)-1])
@@ -494,7 +497,7 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 					return trimTrailingBlank(lines), true
 				case 'C':
 					fmt.Fprintf(s, "%s\n", tr(s, "Clear"))
-					lines = nil
+					lines, quoted = nil, 0
 				default:
 					fmt.Fprint(s, "\n")
 				}

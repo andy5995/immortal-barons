@@ -3005,6 +3005,10 @@ a keypress can wrap, so they are never re-flowed however long they are.
 - On line 20 IB stops taking keys at the margin instead of opening a 21st line.
   BRE's 21st line is discarded on save, so the text the player watched himself
   type is lost either way; stopping at the margin keeps the 68 columns.
+- Backspace at column 1 does not reopen a quoted line. BRE holds the quote in
+  the same buffer as typed lines, so its backspace presumably reopens it like
+  any other (not tested live); IB stops at the first line after the quote, so a
+  quote is either kept as written or cleared whole with /C.
 - IB erases nothing on a margin split, so the screen matches what is saved.
 - IB trims the space it broke at rather than storing it.
 - IB draws the banner and ruler bright cyan. That predates this capture and is

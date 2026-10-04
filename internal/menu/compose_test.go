@@ -167,6 +167,23 @@ func TestComposeMessageLeavesQuotedLinesAlone(t *testing.T) {
 	}
 }
 
+// Backspace stops at the quote: a reply cannot edit the words it quotes. The
+// quoted line comes back unchanged, and the extra backspaces do nothing.
+func TestComposeMessageBackspaceDoesNotReopenTheQuote(t *testing.T) {
+	quoted := "> Quote From Alpha"
+	f := &fakeSession{keys: []rune("ab\b\b\b\b\bX\r/S")}
+	text, send := composeMessageFrom(f, []string{quoted})
+	if !send {
+		t.Fatal("editor did not save")
+	}
+	if !strings.Contains(f.out.String(), breRuler) {
+		t.Fatal("never reached the editor: the ruler was not drawn")
+	}
+	if want := quoted + "\nX"; text != want {
+		t.Errorf("text = %q, want %q", text, want)
+	}
+}
+
 func TestComposeMessageBackspaceReopensThePreviousLine(t *testing.T) {
 	// Backspace at column 1 takes the line above back out of the message and
 	// puts the cursor at its end, which is how an unwanted wrap is undone.
