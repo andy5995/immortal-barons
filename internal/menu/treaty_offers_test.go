@@ -120,3 +120,24 @@ func TestPendingOfferIsAnsweredBeforeTheRecapEntries(t *testing.T) {
 			offer, entry, out)
 	}
 }
+
+// An offer put mid-sitting comes up while the player is pressing Enter through
+// screens, so Enter does not answer it; only y or n does.
+func TestMidSittingTreatyOfferIgnoresEnter(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	other := recipients(w)[0]
+	p.TreatyOffers = []game.TreatyOffer{{From: other.Name, Type: "Free Trade Agreement"}}
+
+	f := &fakeSession{keys: []rune("\r\rn")}
+	reviewTreatyOffersMidSitting(f, w)
+	if !strings.Contains(f.out.String(), "proposes") {
+		t.Fatalf("the offer was never put:\n%s", f.out.String())
+	}
+	if w.World.HasTreaty(p, other, "Free Trade Agreement") {
+		t.Error("Enter accepted the offer")
+	}
+	if len(p.TreatyOffers) != 0 {
+		t.Error("the n that followed did not decline the offer")
+	}
+}

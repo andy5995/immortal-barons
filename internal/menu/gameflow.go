@@ -114,6 +114,29 @@ func withPlayer(w *ctx, fn func(p *game.Empire)) bool {
 	return alive
 }
 
+// offersSentSince reports whether another node has sent the player a trade deal
+// or a treaty offer since the opening review, so the head of the next turn can
+// put it to them. BRE asks only on choosing Play Game, which is enough for a
+// single-node game; here a realm on another node can propose while this one is
+// mid-sitting. Every treaty offer is answered at its review, so any still
+// pending is new. A trade deal can be ignored, so only one the last review did
+// not see counts.
+func offersSentSince(w *ctx) (deal, treaty bool) {
+	w.Read(func() {
+		p := w.Player()
+		if p == nil {
+			return
+		}
+		treaty = len(p.TreatyOffers) > 0
+		for _, d := range p.TradeDeals {
+			if !w.dealsSeen[keyOfDeal(d)] && w.World.TradeDealArrived(d, p) {
+				deal = true
+			}
+		}
+	})
+	return deal, treaty
+}
+
 // runTurn is the "Play Game" action. It shows the event log, then walks the
 // per-turn pipeline (industry production, income report, status,
 // spending/attack/covert/trading/message stages, then end-of-turn) for as
@@ -172,8 +195,15 @@ func runTurn(s session.Session, w *ctx) Result {
 		// head of the turn it lands on, not left for the next sitting.
 		var turnOfDay int
 		withPlayer(w, func(p *game.Empire) { turnOfDay = w.World.TurnOfDay(p) })
-		if w.dealTurns[turnOfDay] {
+		var newDeal, newTreaty bool
+		if !firstTurn {
+			newDeal, newTreaty = offersSentSince(w)
+		}
+		if w.dealTurns[turnOfDay] || newDeal {
 			reviewTradeDeals(s, w)
+		}
+		if newTreaty {
+			reviewTreatyOffersMidSitting(s, w)
 		}
 
 		// New mail may arrive between turns (from another node), so check each

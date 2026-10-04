@@ -1728,3 +1728,56 @@ func TestRandomEventClosesTheEndOfTurnBlock(t *testing.T) {
 		t.Errorf("the event should be the last line before the rule, got line %d of %d", event, closing)
 	}
 }
+
+// hookedSession runs at once its script reaches key index at: the moment, mid
+// sitting, that another node changes the world.
+type hookedSession struct {
+	*fakeSession
+	at   int
+	hook func()
+}
+
+func (h *hookedSession) ReadKey() (rune, error) {
+	if h.hook != nil && h.pos == h.at {
+		h.hook()
+		h.hook = nil
+	}
+	return h.fakeSession.ReadKey()
+}
+
+// A treaty offer and a trade deal sent by a realm on another node while the
+// player is mid-sitting are put to them at the head of their next turn, not
+// left until they choose Play Game again. BRE asks only on Play Game; it is
+// single-node, so nothing can arrive in between.
+func TestOffersSentMidSittingArePutAtTheNextTurn(t *testing.T) {
+	perTurn := "  00000n" // two pauses, quit Covert/Bank/Spending/Attack/Trading, decline message
+	// Turn one, play on, decline the deal, accept the treaty (BRE asks in that
+	// order), turn two, stop.
+	keys := perTurn + "y" + "n" + "y" + perTurn + "n"
+	w := newWorld()
+	p := w.Player()
+	p.Prefs.AutoPayMaint = true
+	p.Prefs.VisitCovert, p.Prefs.VisitTrading, p.Prefs.VisitMessage = true, true, true
+	p.Agents = 1
+	rival := recipients(w)[0]
+	f := &hookedSession{fakeSession: &fakeSession{keys: []rune(keys)}, at: len(perTurn), hook: func() {
+		w.World.ProposeTreaty(rival, p, "Free Trade Agreement")
+		p.TradeDeals = append(p.TradeDeals, game.TradeDeal{From: rival.Name})
+	}}
+
+	runTurn(f, w)
+	out := f.out.String()
+
+	if n := strings.Count(out, "proposes a"); n != 1 {
+		t.Errorf("the treaty offer was put %d times, want once:\n%s", n, out)
+	}
+	if n := strings.Count(out, "offers you a trade deal"); n != 1 {
+		t.Errorf("the trade deal was put %d times, want once:\n%s", n, out)
+	}
+	if !w.World.HasTreaty(rival, p, "Free Trade Agreement") {
+		t.Error("accepting the offer at the turn's head formed no treaty")
+	}
+	if len(p.TradeDeals) != 0 {
+		t.Errorf("the declined deal is still pending: %+v", p.TradeDeals)
+	}
+}

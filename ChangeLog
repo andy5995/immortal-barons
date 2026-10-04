@@ -8,6 +8,7 @@ Immortal Barons ChangeLog
   * -reset is refused while the league is frozen
   * Both parties to a trade deal hit by Bomb Trade Routes are told what it lost
   * Backspace in a reply stops at the quoted lines; /C still clears them
+  * A treaty offer or trade deal sent mid-sitting is put at the next turn
   * FTN: GameOutbound may be on a different drive from the data directory
   * An interplanetary trade deal's sender is told it arrived, or was lost
   * Recap events and interplanetary reports can be translated

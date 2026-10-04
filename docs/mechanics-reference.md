@@ -6134,7 +6134,11 @@ answer to #95: it stands until the target accepts, rejects, or is eliminated.
 `process_diplomatic_proposal` (`BRE.OVR` 0x1CF73) walks the same record list a
 trade deal uses and selects proposals by type, then goes straight to the
 identity checks; the timestamp compare that lapses a trade deal has no
-counterpart there, and the proposal record carries no day count to compare. And a **new proposal to the same realm
+counterpart there, and the proposal record carries no day count to compare.
+BRE puts proposals to the player only on entering Play Game (`run_player_turn`
+calls `process_diplomatic_proposal` once, at 0x385A, ahead of its turn loop at
+0x38D7). IB also puts one at the head of the next turn when a realm on another
+node proposed during the sitting, which a single-node game never meets. And a **new proposal to the same realm
 replaces the pending one**, for the same reason a pair holds one relation at a
 time (#88) — only one can ever be agreed, so leaving both live would let a realm
 accept a pact the proposer had already thought better of. Re-sending the
@@ -6504,6 +6508,13 @@ last review are watched: one sent mid-sitting waits for the next entry. IB keeps
 the set as `ctx.dealTurns`; before 2026-10-01 it reviewed only at entry, so a
 baron who played the whole day in one sitting never met a deal sent after the
 sender's first turn, and it expired unseen.
+
+IB also reviews at the head of a turn when a deal has arrived that the last
+review did not see (`offersSentSince`, `ctx.dealsSeen`). BRE is single-node, so
+nothing can be sent to a realm while it is playing; IB is multi-node, and a
+realm on another node can send one mid-sitting. A deal the player answered
+Ignore to is not put again until the next entry or a `dealTurns` turn, as in
+BRE.
 
 IB mirrors this with `TradeDeal.ArrivesOnTurn`, holding the sender's turn of
 the day counted from 1 — the figure BRE prints — so that turns-per-day cancels

@@ -24,6 +24,17 @@ import (
 // where gameflow calls it; unlike a recap entry an offer carries no rule or
 // timestamp, since it is a prompt rather than a log line.
 func reviewTreatyOffers(s session.Session, w *ctx) {
+	reviewTreatyOffersAt(s, w, true)
+}
+
+// reviewTreatyOffersMidSitting puts an offer that arrived while the player was
+// already playing. It comes up between turns, where the player is pressing Enter
+// through screens, so only y or n answers it.
+func reviewTreatyOffersMidSitting(s session.Session, w *ctx) {
+	reviewTreatyOffersAt(s, w, false)
+}
+
+func reviewTreatyOffersAt(s session.Session, w *ctx, enterAnswers bool) {
 	var offers []game.TreatyOffer
 	withPlayer(w, func(p *game.Empire) {
 		offers = append([]game.TreatyOffer(nil), p.TreatyOffers...)
@@ -53,7 +64,7 @@ func reviewTreatyOffers(s session.Session, w *ctx) {
 		fig := func(n int) string { return ansi.FgBrightYellow + comma(n) + ansi.FgWhite }
 		fmt.Fprintf(s, "%s"+tr(s, "Regions: %s │ Net Worth: %s │ Score: %s")+" │ ",
 			ansi.FgWhite, fig(regions), fig(netWorth), fig(score))
-		if askYesNoHere(s, "Accept?", true) {
+		if askYesNoKeys(s, "Accept?", true, enterAnswers) {
 			withPlayer(w, func(p *game.Empire) { w.World.AcceptTreaty(p, o.From, o.Type) })
 		} else {
 			withPlayer(w, func(p *game.Empire) { w.World.DeclineTreaty(p, o.From, o.Type) })

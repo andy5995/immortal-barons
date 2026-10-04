@@ -280,7 +280,9 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		// thing that ever takes one off the list. dealTurns brings the review back
 		// at the head of the turn it lands on (runTurn).
 		w.dealTurns = map[int]bool{}
+		w.dealsSeen = map[dealKey]bool{}
 		for _, d := range p.TradeDeals {
+			w.dealsSeen[keyOfDeal(d)] = true
 			if w.World.TradeDealArrived(d, p) {
 				deals = append(deals, d)
 				continue
@@ -317,6 +319,17 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		}
 	}
 }
+
+// dealKey identifies a pending trade deal across reloads: who sent it and what
+// it carries. Not the whole TradeDeal, whose ArrivesOnTurn daily maintenance
+// clears and whose Expires can come back from a reload in another zone, and
+// either would make an ignored deal look new.
+type dealKey struct {
+	From         string
+	Send, Demand game.TradeBasket
+}
+
+func keyOfDeal(d game.TradeDeal) dealKey { return dealKey{d.From, d.Send, d.Demand} }
 
 // tradeDealOpts are the keys the trade-deal prompt accepts. The prompt is drawn
 // by hand, so only Key is set.

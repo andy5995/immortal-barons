@@ -228,3 +228,22 @@ func TestAcceptingAppliesTheDealShownNotTheSendersFirst(t *testing.T) {
 		t.Errorf("the deal in transit should still be pending, got %+v", p.TradeDeals)
 	}
 }
+
+// A deal the player ignored is not "new" because daily maintenance cleared its
+// arrival turn mid-sitting: the head of the next turn does not put it again.
+func TestIgnoredDealStaysSeenWhenMaintenanceClearsItsTurn(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	rival := recipients(w)[0]
+	p.TradeDeals = []game.TradeDeal{{From: rival.Name, ArrivesOnTurn: 1}}
+
+	f := &fakeSession{keys: []rune("i")}
+	reviewTradeDeals(f, w)
+	if !strings.Contains(f.out.String(), "offers you a trade deal") {
+		t.Fatalf("the deal was never put:\n%s", f.out.String())
+	}
+	p.TradeDeals[0].ArrivesOnTurn = 0 // what releaseTradeDeals does
+	if deal, _ := offersSentSince(w); deal {
+		t.Error("the ignored deal was taken for a new one")
+	}
+}

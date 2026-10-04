@@ -26,8 +26,17 @@ func AskYesNo(s session.Session, msg string, defYes bool) bool {
 // the end of a line it has already started — the treaty-offer stats line ends
 // "…; Score: N; Accept? (Y/n)".
 func askYesNoHere(s session.Session, msg string, defYes bool) bool {
+	return askYesNoKeys(s, msg, defYes, true)
+}
+
+// askYesNoKeys is askYesNoHere with the choice of whether Enter answers. Without
+// it only y or n does, for a question put while the player may be pressing Enter
+// through screens, where a stray key must not answer for them.
+func askYesNoKeys(s session.Session, msg string, defYes, enterAnswers bool) bool {
 	letters := "y/N"
-	if defYes {
+	if !enterAnswers {
+		letters = "y/n"
+	} else if defYes {
 		letters = "Y/n"
 	}
 	// BRE colors the y/n hint: the letters cyan, the parens a slightly darker blue.
@@ -47,6 +56,9 @@ func askYesNoHere(s session.Session, msg string, defYes bool) bool {
 			fmt.Fprint(s, "n\n")
 			return false
 		case '\r', '\n':
+			if !enterAnswers {
+				continue
+			}
 			if defYes {
 				fmt.Fprint(s, "y\n")
 			} else {
