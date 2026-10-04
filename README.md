@@ -235,3 +235,4 @@ Free software under the [MIT License](LICENSE).
 * [Medusa's Barren Realms Elite (BRE) Discord](https://discord.gg/5wTZpstcjM)
 * [X-Bit BBS](https://x-bit.org/info/)
 * [LibreGaming](https://libregaming.org/)
+* [Sysops Finest (Forum)](https://www.sysops-finest.org/)
