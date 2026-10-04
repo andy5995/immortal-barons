@@ -1079,7 +1079,9 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   A raid also grants the
   faction `Random(25)` regions. This supersedes the earlier reading of the
   BRE.EXE table at `0x14ede` — that table is some other set of limits.
-  Military parked in the Trading Market is safe from pirate raids.
+  Military listed on the Trading Market is NOT safe from pirate raids: five of
+  the sixteen faces of the raid die take from the listing rather than the
+  inventory (see "Escrowed goods are safe from attacks, but NOT from pirates").
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
 
