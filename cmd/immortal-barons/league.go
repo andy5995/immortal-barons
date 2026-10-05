@@ -183,6 +183,16 @@ func freezeChecks(cfg game.Config) []store.Check {
 		if stamp, ok := w.QuietBoards[p.Name]; ok {
 			detail = p.Name + ": quiet since " + stamp
 		}
+		// The version of the last packet applied from that board: a board
+		// updated while frozen sends a fresh quiet report, so this shows who
+		// has installed the release before the thaw.
+		version := w.BoardVersion[p.Name]
+		if p.Name == w.Config.BoardID {
+			version = game.Version
+		}
+		if version != "" {
+			detail += ", running " + version
+		}
 		checks = append(checks, store.Check{Name: "Quiet report", OK: true, Detail: detail})
 	}
 	return checks

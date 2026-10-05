@@ -352,3 +352,31 @@ func TestAFreezeAfterTheCoordinatorResetsStillApplies(t *testing.T) {
 			m.Frozen, m.FreezeMessage, m.FreezeSerial, before)
 	}
 }
+
+// A board updated while frozen reports again, though it has heard nothing new,
+// and the Coordinator records the version the report came from. Without it the
+// Coordinator could not see who had installed the release until the thaw.
+func TestAFrozenBoardReportsAgainAfterAnUpdate(t *testing.T) {
+	lc, m := freezePair(t)
+	m.ApplyPacket(declare(t, lc, true, "", "BravoBBS"))
+	m.ReportQuiet()
+	if len(m.Outbox) != 1 || m.Outbox[0].Quiet == nil {
+		t.Fatalf("no first quiet report: %+v", m.Outbox)
+	}
+	m.Outbox = nil
+	m.ReportQuiet()
+	if len(m.Outbox) != 0 {
+		t.Fatalf("a board that heard nothing new reported again: %+v", m.Outbox)
+	}
+
+	m.QuietSentVersion = "0.0.1" // what the board ran when it last reported
+	m.ReportQuiet()
+	if len(m.Outbox) != 1 || m.Outbox[0].Quiet == nil {
+		t.Fatalf("an updated board did not report again: %+v", m.Outbox)
+	}
+	m.StampOutbox()
+	lc.ApplyPacket(m.Outbox[0])
+	if got := lc.BoardVersion["BravoBBS"]; got != Version {
+		t.Errorf("the Coordinator recorded version %q, want %q", got, Version)
+	}
+}

@@ -806,9 +806,14 @@ are what deliver the last packets, and what later carry the thaw.
 
 A frozen board tells the Coordinator when it last received anything. On the
 Coordinator's board, `-league-check` lists every board with the time it went
-quiet, or "no report yet". When every board has been quiet for a full exchange
-round, nothing is left in flight. Now every board installs the new release,
-the Coordinator's included. Then the Coordinator ends the freeze:
+quiet, or "no report yet", and the version it is running. When every board has
+been quiet for a full exchange round, nothing is left in flight. Now every board
+installs the new release, the Coordinator first. A board that updates reports
+again on its next run, so `-league-check` shows which boards have the new
+version. A board that updates before the Coordinator does is reported to the
+Coordinator's sysop as "being held" for a newer protocol: that board has
+updated, and it appears in `-league-check` once the Coordinator has. Then the
+Coordinator ends the freeze:
 
 ```
 immortal-barons -league-thaw -data /path/to/data

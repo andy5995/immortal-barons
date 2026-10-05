@@ -389,15 +389,18 @@ type World struct {
 	// (the order's packet number), which a quiet report must name to count;
 	// FrozenAt is when this board froze, which the thaw moves every deadline on
 	// by. QuietSince is when this board last applied real traffic while frozen,
-	// and QuietSent the value it last reported. QuietBoards is the Coordinator's
-	// record of every board's report.
-	FreezeSerial  int               `json:",omitempty"`
-	Frozen        bool              `json:",omitempty"`
-	FreezeMessage string            `json:",omitempty"`
-	FrozenAt      time.Time         `json:",omitzero"`
-	QuietSince    time.Time         `json:",omitzero"`
-	QuietSent     time.Time         `json:",omitzero"`
-	QuietBoards   map[string]string `json:",omitempty"` // board -> StoredStamp
+	// and QuietSent the value it last reported, and QuietSentVersion the version
+	// it reported it from: a board updated while frozen reports again, so the
+	// Coordinator learns which version each board is now running. QuietBoards
+	// is the Coordinator's record of every board's report.
+	FreezeSerial     int               `json:",omitempty"`
+	Frozen           bool              `json:",omitempty"`
+	FreezeMessage    string            `json:",omitempty"`
+	FrozenAt         time.Time         `json:",omitzero"`
+	QuietSince       time.Time         `json:",omitzero"`
+	QuietSent        time.Time         `json:",omitzero"`
+	QuietSentVersion string            `json:",omitempty"`
+	QuietBoards      map[string]string `json:",omitempty"` // board -> StoredStamp
 	// ThawedAt is when the last freeze ended. Link alarms count a board's
 	// silence from no earlier than this, since nothing moved while frozen.
 	ThawedAt time.Time `json:",omitzero"`

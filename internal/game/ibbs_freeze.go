@@ -109,6 +109,7 @@ func (w *World) applyLeagueFreeze(f *LeagueFreeze) {
 		w.ThawedAt = now
 		w.Frozen = false
 		w.FrozenAt, w.QuietSince, w.QuietSent = time.Time{}, time.Time{}, time.Time{}
+		w.QuietSentVersion = ""
 		w.FreezeMessage = ""
 		w.QuietBoards = nil
 		w.postNews("The League Coordinator has ended the league's pause. Play resumes.")
@@ -189,15 +190,17 @@ func (w *World) noteFrozenTraffic(p Packet) {
 }
 
 // ReportQuiet queues this board's quiet report for the Coordinator when its
-// quiet time has changed since it last reported. The Coordinator's own board
-// files it directly.
+// quiet time has changed since it last reported, or when the board has been
+// updated since: the report carries the version it was sent from, and that is
+// how the Coordinator sees who has updated before the thaw. The Coordinator's
+// own board files it directly.
 func (w *World) ReportQuiet() {
-	if !w.Frozen || w.QuietSince.Equal(w.QuietSent) {
+	if !w.Frozen || (w.QuietSince.Equal(w.QuietSent) && w.QuietSentVersion == Version) {
 		return
 	}
 	r := QuietReport{Serial: w.FreezeSerial, QuietSince: StoredStamp(w.QuietSince)}
 	if w.IsLeagueCoordinator() {
-		w.QuietSent = w.QuietSince
+		w.QuietSent, w.QuietSentVersion = w.QuietSince, Version
 		w.fileQuietReport(w.Config.BoardID, r)
 		return
 	}
@@ -207,7 +210,7 @@ func (w *World) ReportQuiet() {
 	if coord == "" {
 		return
 	}
-	w.QuietSent = w.QuietSince
+	w.QuietSent, w.QuietSentVersion = w.QuietSince, Version
 	w.Outbox = append(w.Outbox, Packet{FromBoard: w.Config.BoardID, ToBoard: coord,
 		Date: w.LastMaintDate, Quiet: &r})
 }
