@@ -30,6 +30,7 @@ const overridesMain = `{% extends "base.html" %}
 {% block extrahead %}
   <link rel="alternate" type="application/atom+xml" title="Immortal Barons releases" href="https://github.com/andy5995/immortal-barons/releases.atom">
   <link rel="alternate" type="application/rss+xml" title="X-News" href="https://x-bit.org/rss/rss.xml">
+  <link rel="alternate" type="application/rss+xml" title="Sysops Finest" href="https://www.sysops-finest.org/forum/forums/-/index.rss">
 {% endblock %}
 `
 
@@ -319,10 +320,10 @@ var languages = func() []siteLang {
 }()
 
 // Assemble reads the doc sources under repoRoot and writes the MkDocs source
-// tree + mkdocs.yml under outDir (which is cleared first). feedURL is the news
-// feed rendered on the News page; an empty string builds that page without
-// fetching anything, which is what the tests and an offline build want.
-func Assemble(repoRoot, outDir, feedURL string) error {
+// tree + mkdocs.yml under outDir (which is cleared first). offline builds the
+// feed pages without fetching anything, which is what the tests and an offline
+// build want.
+func Assemble(repoRoot, outDir string, offline bool) error {
 	siteSrc := filepath.Join(outDir, "site-src")
 	if err := os.RemoveAll(outDir); err != nil {
 		return err
@@ -381,22 +382,25 @@ func Assemble(repoRoot, outDir, feedURL string) error {
 		return err
 	}
 
-	// One fetch feeds both renderings: the News page and the sidebar block.
-	feed := loadNews(feedURL)
-
-	// The News page is English-only; the other languages fall back to it.
-	newsPath := filepath.Join(siteSrc, "en", "news", "index.md")
-	if err := os.MkdirAll(filepath.Dir(newsPath), 0o755); err != nil {
-		return err
-	}
-	if err := os.WriteFile(newsPath, []byte(newsPageMarkdown(feed)), 0o644); err != nil {
-		return err
+	// One fetch per feed serves both renderings: its page and its sidebar block.
+	// The feed pages are English-only; the other languages fall back to them.
+	var feeds []news
+	for _, src := range feedSources {
+		n := loadNews(src, offline)
+		feeds = append(feeds, n)
+		p := filepath.Join(siteSrc, "en", src.slug, "index.md")
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(p, []byte(newsPageMarkdown(n)), 0o644); err != nil {
+			return err
+		}
 	}
 
 	// The custom_dir sits beside mkdocs.yml, not under docs_dir.
 	for _, f := range []struct{ rel, body string }{
 		{"main.html", overridesMain},
-		{filepath.Join("partials", "toc.html"), tocOverride(feed)},
+		{filepath.Join("partials", "toc.html"), tocOverride(feeds)},
 	} {
 		p := filepath.Join(outDir, "overrides", f.rel)
 		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {

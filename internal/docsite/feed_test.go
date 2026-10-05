@@ -1,6 +1,9 @@
 package docsite
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -54,7 +57,7 @@ func TestSummaryKeepsABracketedURLMidText(t *testing.T) {
 // headline, its date and the feed's own text, with the text escaped — it is
 // somebody else's, and it reaches the page as HTML.
 func TestNewsPageShowsTheBlurb(t *testing.T) {
-	n := news{items: []newsItem{{
+	n := news{src: xNews, items: []newsItem{{
 		date:    "05 Aug 2026",
 		title:   "SyncTERM v1.9rc4 released",
 		link:    "https://x-bit.org/a",
@@ -78,7 +81,7 @@ func TestNewsPageShowsTheBlurb(t *testing.T) {
 // TestNewsPageWithoutABlurb checks an item whose feed entry carried no text
 // still renders — headline and date, no empty paragraph.
 func TestNewsPageWithoutABlurb(t *testing.T) {
-	n := news{items: []newsItem{{date: "05 Aug 2026", title: "Quiet item", link: "https://x-bit.org/b"}}}
+	n := news{src: xNews, items: []newsItem{{date: "05 Aug 2026", title: "Quiet item", link: "https://x-bit.org/b"}}}
 	out := newsPageMarkdown(n)
 	if !strings.Contains(out, "Quiet item") {
 		t.Fatalf("headline missing:\n%s", out)
@@ -113,5 +116,46 @@ func TestSummarizeKeepsALinkItsSentenceNeeds(t *testing.T) {
 		if got := summarize(c.in); got != c.want {
 			t.Errorf("%s: summarize(%q)\n got %q\nwant %q", c.name, c.in, got, c.want)
 		}
+	}
+}
+
+// TestFeedFetchNamesItself: the build sends its own user agent, which is what a
+// host is asked to allow, and a feed without blurbs keeps only the headline.
+func TestFeedFetchNamesItself(t *testing.T) {
+	var gotUA string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotUA = r.Header.Get("User-Agent")
+		fmt.Fprint(w, `<rss><channel><item><title>New thread</title><link>https://example.org/t/1</link>`+
+			`<pubDate>Sun, 04 Oct 2026 12:00:00 +0000</pubDate><description>&lt;p&gt;A long post&lt;/p&gt;</description></item></channel></rss>`)
+	}))
+	defer srv.Close()
+
+	n := loadNews(feedSource{name: "Forum", feedURL: srv.URL}, false)
+	if gotUA != feedUserAgent {
+		t.Errorf("User-Agent = %q, want %q", gotUA, feedUserAgent)
+	}
+	if len(n.items) != 1 || n.items[0].title != "New thread" || n.items[0].date != "2026-10-04" {
+		t.Fatalf("items = %+v", n.items)
+	}
+	if n.items[0].summary != "" {
+		t.Errorf("a feed without blurbs kept the post text: %q", n.items[0].summary)
+	}
+}
+
+// TestSidebarHasABlockPerFeed: each feed with headlines gets its own block,
+// linking to its own page; a feed with none draws nothing.
+func TestSidebarHasABlockPerFeed(t *testing.T) {
+	item := []newsItem{{date: "2026-10-04", title: "Headline", link: "https://example.org/a"}}
+	out := tocOverride([]news{{src: xNews, items: item}, {src: sysopsFinest, items: item}})
+	for _, want := range []string{
+		`aria-label="` + xNews.alt + `"`, `{{ base_url }}/news/`,
+		`aria-label="` + sysopsFinest.alt + `"`, `{{ base_url }}/sysops-finest/`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("sidebar missing %q", want)
+		}
+	}
+	if out := tocOverride([]news{{src: xNews}, {src: sysopsFinest, items: item}}); strings.Contains(out, xNews.alt) {
+		t.Error("a feed with no headlines drew a block")
 	}
 }

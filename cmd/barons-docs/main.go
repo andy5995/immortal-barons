@@ -20,10 +20,10 @@ import (
 func main() {
 	repoRoot := flag.String("root", ".", "repository root to read doc sources from")
 	out := flag.String("out", "build/docs", "output directory for site-src/ and mkdocs.yml")
-	feed := flag.String("feed", docsite.XBitFeedURL, "news feed to render (empty to build offline, without headlines)")
+	offline := flag.Bool("offline", false, "build the feed pages without fetching the feeds")
 	flag.Parse()
 
-	if err := docsite.Assemble(*repoRoot, *out, *feed); err != nil {
+	if err := docsite.Assemble(*repoRoot, *out, *offline); err != nil {
 		fmt.Fprintln(os.Stderr, "barons-docs:", err)
 		os.Exit(1)
 	}

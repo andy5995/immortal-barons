@@ -10,22 +10,58 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
-// XBitFeedURL is the BBS-scene news feed rendered on the site's News page, and
-// XBitNewsURL is the page it comes from. The site URL is written out here
-// rather than read from the feed's own <channel><link>, which points back at
-// the XML file instead of at anything a reader would want to open.
-const (
-	XBitFeedURL = "https://x-bit.org/rss/rss.xml"
-	XBitNewsURL = "https://x-bit.org/x-news/"
-	// XBitNewsName is the visible label; XBitNewsAlt is the longer form given
-	// to assistive technology and to the link's tooltip, where "X-News" alone
-	// would not say whose news it is.
-	XBitNewsName = "X-News"
-	XBitNewsAlt  = "X-bit BBS News Feed"
+// feedSource is one outside feed the site renders: a page of its headlines, and
+// a block of the newest under the table of contents. The page URL (siteURL) is
+// written out here rather than read from the feed's own <channel><link>, which
+// for X-News points back at the XML file instead of at anything a reader would
+// want to open.
+type feedSource struct {
+	// name is the visible label; alt is the longer form given to assistive
+	// technology and to the link's tooltip, where "X-News" alone would not say
+	// whose news it is.
+	name, alt string
+	feedURL   string
+	siteURL   string
+	// slug is the site path of the feed's own page.
+	slug string
+	// about follows the link to the source in the page's opening sentence.
+	about string
+	// blurbs shows each item's text under its headline. A forum feed carries
+	// whole posts, in markup, so only a news feed's short blurbs are shown.
+	blurbs bool
+}
+
+var (
+	xNews = feedSource{
+		name:    "X-News",
+		alt:     "X-bit BBS News Feed",
+		feedURL: "https://x-bit.org/rss/rss.xml",
+		siteURL: "https://x-bit.org/x-news/",
+		slug:    "news",
+		about:   "a feed about BBSes, BBS software, door games and the scene",
+		blurbs:  true,
+	}
+	sysopsFinest = feedSource{
+		name:    "Sysops Finest",
+		alt:     "Sysops Finest BBS community forum",
+		feedURL: "https://www.sysops-finest.org/forum/forums/-/index.rss",
+		siteURL: "https://www.sysops-finest.org/",
+		slug:    "sysops-finest",
+		about:   "a forum for BBS sysops; these are its newest threads",
+	}
+	// feedSources is every feed the site renders, in sidebar order.
+	feedSources = []feedSource{xNews, sysopsFinest}
 )
+
+// feedUserAgent names this build to the hosts it fetches from, so a sysop
+// reading a log or a security plugin can tell who is asking and why. Go's
+// default, "Go-http-client/1.1", is the one most scrapers send, and some hosts
+// block it outright.
+const feedUserAgent = "ImmortalBaronsDocs/1.0 (+https://andy5995.github.io/immortal-barons/)"
 
 // pageItems is how many headlines the News page lists; sidebarItems is how many
 // the right-hand column shows before "All headlines". The sidebar list is kept
@@ -58,6 +94,7 @@ type rssItem struct {
 
 // news is a feed reduced to what the site renders, already validated.
 type news struct {
+	src   feedSource
 	items []newsItem
 }
 
@@ -68,38 +105,55 @@ type newsItem struct {
 	summary string // the feed's own blurb, shown on the News page only
 }
 
-// loadNews fetches and validates the feed. A feed that cannot be read is not an
-// error: the site builds without headlines rather than failing because someone
-// else's server had a bad day. An empty feedURL skips the fetch entirely, which
+// loadNews fetches and validates one feed. A feed that cannot be read is not an
+// error: the site builds without its headlines rather than failing because
+// someone else's server had a bad day. offline skips the fetch entirely, which
 // is what the tests and an offline build want.
-func loadNews(feedURL string) news {
-	if feedURL == "" {
-		return news{}
+func loadNews(src feedSource, offline bool) news {
+	out := news{src: src}
+	if offline {
+		return out
 	}
-	ch, err := fetchFeed(feedURL)
+	ch, err := fetchFeed(src.feedURL)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "barons-docs: news feed unavailable (%v); building without headlines\n", err)
-		return news{}
+		fmt.Fprintf(os.Stderr, "barons-docs: %s feed unavailable (%v); building without its headlines\n", src.name, err)
+		noteNetworkOwner()
+		return out
 	}
-	var out news
 	for _, it := range ch.Channel.Items {
 		link, ok := safeLink(it.Link)
 		title := strings.TrimSpace(it.Title)
 		if !ok || title == "" {
 			continue
 		}
-		out.items = append(out.items, newsItem{
-			date:    itemDate(it.PubDate),
-			title:   title,
-			link:    link,
-			summary: summarize(it.Description),
-		})
+		item := newsItem{date: itemDate(it.PubDate), title: title, link: link}
+		if src.blurbs {
+			item.summary = summarize(it.Description)
+		}
+		out.items = append(out.items, item)
 		if len(out.items) == pageItems {
 			break
 		}
 	}
 	return out
 }
+
+// noteNetworkOwner prints which network the build is fetching from, once a
+// build, the first time a feed fails. A host that refuses the build can allow
+// it by network (ASN), and the answer belongs beside the error that raises the
+// question rather than in every green build's log, where nobody reads it.
+var noteNetworkOwner = sync.OnceFunc(func() {
+	client := &http.Client{Timeout: feedTimeout}
+	resp, err := client.Get("https://ipinfo.io/org")
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 256))
+	if org := strings.TrimSpace(string(body)); resp.StatusCode == http.StatusOK && org != "" {
+		fmt.Fprintf(os.Stderr, "barons-docs: this build fetches from %s\n", org)
+	}
+})
 
 // readMoreTail matches how the feed ends most of its blurbs: an invitation and
 // one or more bracketed links to the item's own page. Both are noise here — the
@@ -145,8 +199,13 @@ func tidyLines(s string) string {
 }
 
 func fetchFeed(feedURL string) (*rssChannel, error) {
+	req, err := http.NewRequest(http.MethodGet, feedURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", feedUserAgent)
 	client := &http.Client{Timeout: feedTimeout}
-	resp, err := client.Get(feedURL)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -166,19 +225,19 @@ func fetchFeed(feedURL string) (*rssChannel, error) {
 	return &ch, nil
 }
 
-// newsPageMarkdown renders the News page. With no headlines it still renders,
+// newsPageMarkdown renders a feed's page. With no headlines it still renders,
 // pointing at the feed, so the nav entry and its URL stay valid either way.
 func newsPageMarkdown(n news) string {
+	src := n.src
 	var b strings.Builder
-	b.WriteString("# " + XBitNewsName + "\n\n")
+	b.WriteString("# " + src.name + "\n\n")
 	if len(n.items) == 0 {
-		b.WriteString("Headlines are not available right now. Read them at the\n")
-		b.WriteString("[X-News feed](" + XBitFeedURL + ").\n")
+		b.WriteString("Headlines are not available right now. Read them at\n")
+		b.WriteString("[" + src.alt + "](" + src.siteURL + ").\n")
 		return b.String()
 	}
-	b.WriteString("Headlines from [" + XBitNewsAlt + "](" + XBitNewsURL + "), a feed about\n")
-	b.WriteString("BBSes, BBS software, door games and the scene. The list is rebuilt once a\n")
-	b.WriteString("day.\n\n")
+	b.WriteString("Headlines from [" + src.alt + "](" + src.siteURL + "), " + src.about + ".\n")
+	b.WriteString("The list is rebuilt once a day.\n\n")
 	// Written as HTML rather than Markdown bullets: each entry is a headline, a
 	// date and the feed's own blurb, and the blurb is somebody else's text that
 	// has to be escaped anyway. Escaping it into HTML is one rule instead of two
@@ -212,7 +271,7 @@ func newsPageMarkdown(n news) string {
 // The copied part is Material's generated toc.html verbatim. It is short and it
 // still delegates each entry to the theme's own partials/toc-item.html, so a
 // theme update only reaches this file if Material changes toc.html itself.
-func tocOverride(n news) string {
+func tocOverride(feeds []news) string {
 	var b strings.Builder
 	b.WriteString(`{% set title = lang.t("toc") %}
 {% if config.mdx_configs.toc and config.mdx_configs.toc.title %}
@@ -237,13 +296,22 @@ func tocOverride(n news) string {
   {% endif %}
 </nav>
 `)
-	if len(n.items) == 0 {
-		return b.String()
+	for _, n := range feeds {
+		writeNewsBlock(&b, n)
 	}
+	return b.String()
+}
 
-	b.WriteString(`<nav class="md-nav md-nav--secondary ib-news" aria-label="` + XBitNewsAlt + `">
+// writeNewsBlock is one feed's block under the table of contents. A feed with
+// no headlines draws nothing: its page still says where to read them.
+func writeNewsBlock(b *strings.Builder, n news) {
+	if len(n.items) == 0 {
+		return
+	}
+	src := n.src
+	b.WriteString(`<nav class="md-nav md-nav--secondary ib-news" aria-label="` + src.alt + `">
   <hr class="ib-news__rule">
-  <a class="md-nav__title ib-news__title" href="` + XBitNewsURL + `" title="` + XBitNewsAlt + `">` + XBitNewsName + `</a>
+  <a class="md-nav__title ib-news__title" href="` + src.siteURL + `" title="` + src.alt + `">` + src.name + `</a>
   <ul class="md-nav__list">
 `)
 	for i, it := range n.items {
@@ -256,10 +324,9 @@ func tocOverride(n news) string {
 		b.WriteString("    </li>\n")
 	}
 	b.WriteString(`  </ul>
-  <a class="ib-news__more" href="{{ base_url }}/news/">All headlines</a>
+  <a class="ib-news__more" href="{{ base_url }}/` + src.slug + `/">All headlines</a>
 </nav>
 `)
-	return b.String()
 }
 
 // itemDate renders an RSS pubDate as an ISO date, or an em dash when it cannot

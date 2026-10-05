@@ -4,9 +4,9 @@ on:
   push:
     branches: [trunk, main]
   pull_request:
-  # The X-News headlines are fetched at build time, not in the reader's browser:
-  # x-bit.org sends no Access-Control-Allow-Origin header, so a live fetch from
-  # this site's origin is blocked. A daily rebuild is what keeps them current
+  # The X-News and Sysops Finest headlines are fetched at build time, not in the
+  # reader's browser: x-bit.org sends no Access-Control-Allow-Origin header, so
+  # a live fetch from this site's origin is blocked. A daily rebuild is what keeps them current
   # between pushes. GitHub disables a schedule after 60 days without repository
   # activity; re-enable it from the Actions tab.
   schedule:
