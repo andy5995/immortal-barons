@@ -233,3 +233,66 @@ func TestConstructionIsSecretButFlightIsNot(t *testing.T) {
 		t.Error("a weapon in flight was never announced to its target")
 	}
 }
+
+// The paying planet keeps its own list of the watchers it has out. Like the far
+// board's counter it keeps the longer stay, and it counts down at daily
+// maintenance until the stay is spent.
+func TestSpyGuysOutListsThisPlanetsWatchers(t *testing.T) {
+	ours, _, payer := spyWorlds(t)
+	other := ours.AddHuman("bob", "Bobland")
+	other.Gold = 1_000_000_000
+
+	if err := ours.SendSpyGuy(payer, "Nova Hub", 5); err != nil {
+		t.Fatal(err)
+	}
+	if err := ours.SendSpyGuy(other, "Nova Hub", 2); err != nil {
+		t.Fatal(err)
+	}
+	out := ours.SpyGuysOut()
+	if len(out) != 1 || out[0].Board != "Nova Hub" || out[0].Days != 5 || out[0].By != "Alethia" {
+		t.Fatalf("SpyGuysOut = %+v, want Nova Hub, 5 days, sent by Alethia", out)
+	}
+	if err := ours.SendSpyGuy(other, "Nova Hub", 9); err != nil {
+		t.Fatal(err)
+	}
+	if out := ours.SpyGuysOut(); out[0].Days != 9 || out[0].By != "Bobland" {
+		t.Errorf("a longer stay did not replace the shorter: %+v", out)
+	}
+	for range 8 {
+		ours.expireSpyGuys()
+	}
+	if out := ours.SpyGuysOut(); len(out) != 1 || out[0].Days != 1 {
+		t.Fatalf("after eight days: %+v, want one day left", out)
+	}
+	ours.expireSpyGuys()
+	if out := ours.SpyGuysOut(); len(out) != 0 {
+		t.Errorf("a spent stay is still listed: %+v", out)
+	}
+}
+
+// A planet this board has heard of but cannot route to is refused before
+// anything is charged, and nothing is listed as sent.
+func TestSpyGuyToAnUnroutablePlanetIsRefused(t *testing.T) {
+	ours, _, payer := spyWorlds(t)
+	ours.LeagueNodes = []LeagueNode{{Number: 1, Name: "Wildside"}, {Number: 2, Name: "Nova Hub"}}
+	before := payer.Gold
+	if err := ours.SendSpyGuy(payer, "Far Away", 3); err != ErrSpyGuyNoRoute {
+		t.Fatalf("SendSpyGuy = %v, want ErrSpyGuyNoRoute", err)
+	}
+	if payer.Gold != before || len(ours.SpyGuysSent) != 0 || len(ours.Outbox) != 0 {
+		t.Errorf("a refused send left gold %d (was %d), list %+v, outbox %+v",
+			payer.Gold, before, ours.SpyGuysSent, ours.Outbox)
+	}
+}
+
+// A renamed realm is shown under its new name as the sender.
+func TestSpyGuysOutFollowsARename(t *testing.T) {
+	ours, _, payer := spyWorlds(t)
+	if err := ours.SendSpyGuy(payer, "Nova Hub", 3); err != nil {
+		t.Fatal(err)
+	}
+	ours.rewriteRealmName("Alethia", "Aletheia")
+	if out := ours.SpyGuysOut(); out[0].By != "Aletheia" {
+		t.Errorf("sent by %q after the rename, want Aletheia", out[0].By)
+	}
+}

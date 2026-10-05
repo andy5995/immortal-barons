@@ -87,3 +87,45 @@ func TestSpyGuyStillShortIsRefused(t *testing.T) {
 		t.Errorf("a watcher left despite the refusal:\n%s", out)
 	}
 }
+
+// The Send SpyGuy screen opens with the watchers this planet already has out,
+// so anyone can see them, and a sender can see a planet is already watched.
+func TestSendSpyGuyListsTheWatchersOut(t *testing.T) {
+	w := spyGuyWorld(t, 1_000_000_000, 0)
+	f := &fakeSession{keys: []rune("\r")} // leave at the target prompt
+	sendSpyGuy(f, w)
+	if out := stripANSI(f.out.String()); !strings.Contains(out, "This planet has no SpyGuys out.") {
+		t.Errorf("an empty list was not said:\n%s", out)
+	}
+
+	w.With(func() { w.World.SpyGuysSent = map[string]game.SpyGuyPost{"Mars": {Days: 4, By: "Alethia"}} })
+	f = &fakeSession{keys: []rune("\r")}
+	sendSpyGuy(f, w)
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Mars: 4 days left, sent by Alethia") {
+		t.Errorf("the watcher out was not listed:\n%s", out)
+	}
+	if !strings.Contains(out, "gold per day") {
+		t.Errorf("never reached the price line after the list:\n%s", out)
+	}
+}
+
+// A long planet and realm name wrap inside the screen rather than running off
+// it, as every line of player-visible prose must.
+func TestSpyGuyListFitsTheScreen(t *testing.T) {
+	w := spyGuyWorld(t, 1_000_000_000, 0)
+	board := strings.Repeat("Planet", 7)
+	realm := strings.Repeat("Realm", 6)
+	w.With(func() { w.World.SpyGuysSent = map[string]game.SpyGuyPost{board: {Days: 12, By: realm}} })
+	f := &fakeSession{keys: []rune("\r")}
+	sendSpyGuy(f, w)
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, board) {
+		t.Fatalf("the list was not drawn:\n%s", out)
+	}
+	for _, l := range strings.Split(out, "\n") {
+		if n := len([]rune(l)); n > 80 {
+			t.Errorf("line runs %d columns: %q", n, l)
+		}
+	}
+}

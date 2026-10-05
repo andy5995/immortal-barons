@@ -3,6 +3,8 @@ package game
 import (
 	"errors"
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 )
 
@@ -32,7 +34,37 @@ import (
 var (
 	ErrSpyGuyDays   = fmt.Errorf("A SpyGuy may stay between 1 and %d days.", SpyGuyMaxDays)
 	ErrSpyGuyTarget = errors.New("Name the planet to watch.")
+	// ErrSpyGuyNoRoute refuses a planet this board has heard of but cannot send
+	// a packet to (Routable). The dispatch would be discarded on the way out,
+	// so nothing is charged for it.
+	ErrSpyGuyNoRoute = errors.New("There is no route to that planet, so no SpyGuy can be sent there.")
 )
+
+// SpyGuyPost is one watcher this planet has posted elsewhere: the days left on
+// the stay and the realm that paid for it. It mirrors the far board's counter,
+// which keeps the longer of two stays, so a shorter one sent later changes
+// nothing here either. It counts from the day he was sent rather than the day
+// he arrived, so it can run out a little before he does.
+type SpyGuyPost struct {
+	Days int
+	By   string
+}
+
+// SpyGuyPosted is a SpyGuyPost with the planet it watches, for display.
+type SpyGuyPosted struct {
+	Board string
+	SpyGuyPost
+}
+
+// SpyGuysOut lists this planet's watchers, by planet name.
+func (w *World) SpyGuysOut() []SpyGuyPosted {
+	out := make([]SpyGuyPosted, 0, len(w.SpyGuysSent))
+	for board, post := range w.SpyGuysSent {
+		out = append(out, SpyGuyPosted{board, post})
+	}
+	slices.SortFunc(out, func(a, b SpyGuyPosted) int { return strings.Compare(a.Board, b.Board) })
+	return out
+}
 
 // SpyGuyDispatch rides the packet: a watcher sent by FromBoard for Days days.
 type SpyGuyDispatch struct {
@@ -77,11 +109,20 @@ func (w *World) SendSpyGuy(e *Empire, board string, days int) error {
 	if days < 1 || days > SpyGuyMaxDays {
 		return ErrSpyGuyDays
 	}
+	if !w.Routable(board) {
+		return ErrSpyGuyNoRoute
+	}
 	cost := w.SpyGuyCostPerDay() * int64(days)
 	if e.Gold < cost {
 		return ErrCantAfford
 	}
 	e.Gold -= cost
+	if days > w.SpyGuysSent[board].Days {
+		if w.SpyGuysSent == nil {
+			w.SpyGuysSent = map[string]SpyGuyPost{}
+		}
+		w.SpyGuysSent[board] = SpyGuyPost{Days: days, By: e.Name}
+	}
 	p := w.outboxFor(board)
 	p.SpyGuys = append(p.SpyGuys, SpyGuyDispatch{FromBoard: w.Config.BoardID, Days: days})
 	return nil
@@ -105,7 +146,8 @@ func (w *World) receiveSpyGuy(d SpyGuyDispatch) {
 }
 
 // expireSpyGuys runs once a game day: every watcher's stay is a day shorter,
-// and one whose days are spent is gone. Nobody is told, on either planet.
+// and one whose days are spent is gone, both the watchers posted here and this
+// planet's own list of those it sent. Nobody is told, on either planet.
 func (w *World) expireSpyGuys() {
 	for board, days := range w.SpyGuys {
 		if days <= 1 {
@@ -113,6 +155,14 @@ func (w *World) expireSpyGuys() {
 			continue
 		}
 		w.SpyGuys[board] = days - 1
+	}
+	for board, post := range w.SpyGuysSent {
+		if post.Days <= 1 {
+			delete(w.SpyGuysSent, board)
+			continue
+		}
+		post.Days--
+		w.SpyGuysSent[board] = post
 	}
 }
 

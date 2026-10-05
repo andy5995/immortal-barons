@@ -64,13 +64,19 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	}
 	var planets []string
 	var perDay int64
+	var out []game.SpyGuyPosted
 	w.Read(func() {
 		planets = w.KnownBoards()
 		perDay = w.SpyGuyCostPerDay()
+		out = w.SpyGuysOut()
 	})
+	// A planet this board cannot route to is not offered: the man would be
+	// discarded on the way out (game.ErrSpyGuyNoRoute).
+	planets = addressable(w, planets)
 	if noPlanets(s, len(planets)) {
 		return Stay
 	}
+	showSpyGuysOut(s, out)
 	// The price is quoted before the target is picked, as BRE quotes it: it is
 	// the same on every planet, being drawn from the sender's own size.
 	fmt.Fprintf(s, "\n%s"+tr(s, "A SpyGuy costs %s%s%s gold per day.")+"%s\n",
@@ -102,6 +108,25 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	}
 	ok(s, "Your SpyGuy leaves for %s, and will watch it for %d days.", board, days)
 	return Stay
+}
+
+// showSpyGuysOut lists the watchers this planet already has out, so any baron
+// can see them, and so a sender can see that a planet is already watched: the
+// far board keeps only the longer of two stays, and a shorter one buys nothing.
+// BRE keeps no such list.
+func showSpyGuysOut(s session.Session, out []game.SpyGuyPosted) {
+	if len(out) == 0 {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "This planet has no SpyGuys out."), ansi.Reset)
+		return
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "This planet's SpyGuys:"), ansi.Reset)
+	for _, o := range out {
+		line := fmt.Sprintf(tr(s, "%s: %s left, sent by %s"), o.Board,
+			plural(s, float64(o.Days), "%.0f day", "%.0f days"), o.By)
+		// Wrapped before the names are colored: the escapes are invisible on
+		// screen but would count against the margin.
+		fmt.Fprintf(s, "%s\n", hiTokens(WrapIndented(line, "  "), []string{o.Board, o.By}, ansi.FgBrightCyan))
+	}
 }
 
 // ipSpecialOp drives every item on the interplanetary Special Operations menu

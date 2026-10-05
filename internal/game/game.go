@@ -343,9 +343,12 @@ type World struct {
 	PendingBulletins *BulletinSet `json:"-"`
 
 	// SpyGuys counts, per foreign planet, the game days a watcher of theirs has
-	// left here. It is the WATCHED board that holds this — the planet paying for
-	// the man keeps no record of him at all, which is BRE's arrangement.
+	// left here. It is the WATCHED board that holds this. BRE keeps no record on
+	// the planet paying for the man; IB keeps SpyGuysSent for that.
 	SpyGuys map[string]int `json:",omitempty"`
+	// SpyGuysSent is this planet's own list of the watchers it has posted, per
+	// target planet, so every baron here can see them (Send SpyGuy shows it).
+	SpyGuysSent map[string]SpyGuyPost `json:",omitempty"`
 
 	// League packet authentication (#53). CoordKey is the ed25519 private key,
 	// held only by the Coordinator's board; CoordPub is the matching public key,

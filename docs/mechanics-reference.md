@@ -5139,6 +5139,16 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
     (`show_gooie_arrival_time`, `estimate_attack_arrival`).
   - **Reports are PLANET NEWS on the paying planet**, not mail: every report
     goes out through `append_news_record`, which writes a `NEWS_DATA` packet.
+  - **IB lists the paying planet's SpyGuys; BRE keeps no record of them there.**
+    The Send SpyGuy screen opens with each watcher this planet has out, the days
+    left and the realm that sent him (`World.SpyGuysSent`), so every baron can
+    see them and a sender can see that a planet is already watched. The list
+    keeps the longer stay, as the far board does, and counts down at daily
+    maintenance from the day he was SENT, so it can run out a little before he
+    does. Nothing about it goes on the wire.
+  - **IB refuses a planet it cannot route to** (`ErrSpyGuyNoRoute`), before
+    charging, and does not offer one at the target prompt. It used to charge
+    the full stay and discard the dispatch on the way out.
 
   **IB adds an Incoming view, keyed `I` on the InterPlanetary menu (#268).** The
   original's reports are news lines and nothing else, and a news line is frozen:

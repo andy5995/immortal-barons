@@ -167,6 +167,10 @@ func (w *World) rewriteRealmName(old, name string) {
 		// may sort the other way round.
 		w.Treaties[i].A, w.Treaties[i].B = treatyPair(w.Treaties[i].A, w.Treaties[i].B)
 	}
+	for board, post := range w.SpyGuysSent {
+		swap(&post.By)
+		w.SpyGuysSent[board] = post
+	}
 	for i := range w.CovertQueue {
 		swap(&w.CovertQueue[i].Attacker)
 		swap(&w.CovertQueue[i].Target)

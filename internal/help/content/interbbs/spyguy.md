@@ -12,7 +12,10 @@ sending him spends no agent, he cannot be caught, and he brings back no figures
 for the Spy Database. What he does is send word home the moment his hosts turn
 something on your planet.
 
-Send him from InterPlanetary Operations, under Special Operations.
+Send him from InterPlanetary Operations, under Special Operations. That screen
+opens with every SpyGuy this planet already has out: where he is, the days he
+has left, and who sent him. A planet already watched gains nothing from a
+shorter stay; only the longer of the two counts.
 
 ## What he costs
 
