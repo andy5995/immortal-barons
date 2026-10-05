@@ -27,10 +27,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Temporary: names the network the runner's requests come from, for a
-      # feed host deciding what to allow. Remove once it has been read.
-      - name: Show the runner's network owner
-        run: curl -s --max-time 10 https://ipinfo.io/org || true
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
