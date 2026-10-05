@@ -61,6 +61,31 @@ func basketSummary(s session.Session, b game.TradeBasket) string {
 // inside an int on a 32-bit door build.
 const TradeRequestMax = 1 << 30
 
+// The basket table's widths. Key is "(1) ", Good is padded to 11, and each
+// figure column holds two billion with its separators ("2,000,000,000"), the
+// most one good can hold. The Request side has no Owned column, so its rules
+// are one column shorter.
+const (
+	tradeBasketRuleOne = 4 + 11 + 1 + 13
+	tradeBasketRuleTwo = tradeBasketRuleOne + 1 + 13
+)
+
+// shortOfCarriers refuses a basket the player has too few free carriers to ship,
+// right after it is filled, so they can go back and send less instead of
+// answering every later question first.
+func shortOfCarriers(s session.Session, w *ctx, b game.TradeBasket) bool {
+	short := false
+	w.Read(func() {
+		if p := w.Player(); p != nil {
+			short = !game.CanCarry(p, b)
+		}
+	})
+	if short {
+		fail(s, game.ErrTradeNeedsCarrier)
+	}
+	return short
+}
+
 // buildTradeBasket lets the player assemble a basket of goods: pick a good (1-9),
 // enter a quantity, repeat, and 0/Enter when done. When limitToOwned, quantities
 // are capped at what the player currently holds (the Offer side); the Request
@@ -68,40 +93,42 @@ const TradeRequestMax = 1 << 30
 // and immediate quit is allowed — the caller treats an empty result as cancel).
 func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool) game.TradeBasket {
 	var b game.TradeBasket
+	rule := tradeBasketRuleOne
+	if limitToOwned {
+		rule = tradeBasketRuleTwo
+	}
 	for {
 		p := w.Player()
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, title), ansi.Reset)
 		// Header + aligned columns matching BRE: Key / Good / In Deal / (Owned, on
 		// the Offer side only — the Request side is what you want back).
 		if limitToOwned {
-			fmt.Fprintf(s, "  %s%-4s %-11s %10s %10s%s\n", ansi.FgBrightCyan, tr(s, "Key"), tr(s, "Good"), tr(s, "In Deal"), tr(s, "Owned"), ansi.Reset)
+			fmt.Fprintf(s, "  %s%-3s %-11s %13s %13s%s\n", ansi.FgBrightCyan, tr(s, "Key"), tr(s, "Good"), tr(s, "In Deal"), tr(s, "Owned"), ansi.Reset)
 		} else {
-			fmt.Fprintf(s, "  %s%-4s %-11s %10s%s\n", ansi.FgBrightCyan, tr(s, "Key"), tr(s, "Good"), tr(s, "In Deal"), ansi.Reset)
+			fmt.Fprintf(s, "  %s%-3s %-11s %13s%s\n", ansi.FgBrightCyan, tr(s, "Key"), tr(s, "Good"), tr(s, "In Deal"), ansi.Reset)
 		}
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", 38), ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", rule), ansi.Reset)
 		for _, g := range tradeGoods {
 			if limitToOwned {
-				fmt.Fprintf(s, "  (%s%c%s) %-11s %s%10s%s %s%10s%s\n",
+				fmt.Fprintf(s, "  (%s%c%s) %-11s %s%13s%s %s%13s%s\n",
 					ansi.FgBrightYellow, g.key, ansi.Reset, tr(s, g.name),
 					ansi.FgBrightWhite, comma(*g.field(&b)), ansi.Reset,
 					ansi.Dim, comma(g.owned(p)), ansi.Reset)
 			} else {
-				fmt.Fprintf(s, "  (%s%c%s) %-11s %s%10s%s\n",
+				fmt.Fprintf(s, "  (%s%c%s) %-11s %s%13s%s\n",
 					ansi.FgBrightYellow, g.key, ansi.Reset, tr(s, g.name),
 					ansi.FgBrightWhite, comma(*g.field(&b)), ansi.Reset)
 			}
 		}
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", 38), ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", rule), ansi.Reset)
 		if limitToOwned {
 			// The offered goods need carriers to transport them (BRE's "Trade Deal
 			// requires N Carriers" line), sized to the CARGO rather than one per
 			// deal (#195), so the figure moves as the basket is filled.
 			need := game.TradeDealCarriers(b)
-			// FREE carriers, not carriers held: a basket that is itself shipping
-			// carriers cannot also use them as transport, which is the rule both
-			// SendTradeDeal and SendIPTradeDeal enforce. Comparing against the
-			// total would show no warning and then refuse the deal.
-			free := max(p.Carriers-b.Carriers, 0)
+			// FREE carriers, not carriers held (game.FreeCarriers): comparing
+			// against the total would show no warning and then refuse the deal.
+			free := game.FreeCarriers(p, b)
 			warn := ""
 			if free < need {
 				warn = "  " + ansi.FgBrightRed + tr(s, "(not enough carriers)") + ansi.Reset
@@ -180,6 +207,9 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	toName := to.Name
 
 	send := buildTradeBasket(s, w, "Offer — goods you send:", true)
+	if shortOfCarriers(s, w, send) {
+		return Stay
+	}
 	demand := buildTradeBasket(s, w, "Request — goods you want back:", false)
 	if send.IsEmpty() && demand.IsEmpty() {
 		return Stay

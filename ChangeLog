@@ -11,6 +11,7 @@ Immortal Barons ChangeLog
   * A treaty offer or trade deal sent mid-sitting is put at the next turn
   * Send SpyGuy lists the SpyGuys this planet already has out
   * Send SpyGuy no longer charges for a planet it cannot reach
+  * A trade deal short of carriers is refused as soon as the offer is filled
   * FTN: GameOutbound may be on a different drive from the data directory
   * An interplanetary trade deal's sender is told it arrived, or was lost
   * Recap events and interplanetary reports can be translated

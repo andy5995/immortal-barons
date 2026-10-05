@@ -2,7 +2,6 @@ package game
 
 import (
 	"errors"
-	"fmt"
 )
 
 // The interplanetary trade deal (#195). The original keeps this in a routine of
@@ -149,14 +148,9 @@ func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods Tr
 	if !empireHasBasket(from, goods) {
 		return ErrCantAfford
 	}
-	// Carriers are spent as transport and are NOT part of the basket's own
-	// carrier count if the basket happens to be carrying carriers: the original
-	// checks what is held MINUS what is being shipped against what the shipment
-	// needs (send_trade_offer 0x046d).
 	need := TradeDealCarriers(goods)
-	if from.Carriers-goods.Carriers < need {
-		return fmt.Errorf("This shipment needs %d carriers to transport and you have %d free.",
-			need, max(from.Carriers-goods.Carriers, 0))
+	if !CanCarry(from, goods) {
+		return ErrTradeNeedsCarrier
 	}
 	cost := w.TradeOfferCost(goods)
 	// The fee is paid out of gold in hand AFTER the basket's own gold is set

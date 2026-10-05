@@ -404,3 +404,65 @@ func TestSendTradeDealSpanFollowsTheCargoAndThePurse(t *testing.T) {
 		})
 	}
 }
+
+// An offer the sender has too few carriers for is refused as soon as the Offer
+// basket is done, before the Request basket and the questions after it, and
+// nothing is charged.
+func TestSendTradeDealShortOfCarriersStopsAtTheOffer(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Gold, p.Carriers = 300_000, 0
+	to := recipients(w)[0]
+	p.Protection, to.Protection = 0, 0
+	w.World.ProposeTreaty(p, to, "Full Defense Alliance")
+	w.World.AcceptTreaty(to, p.Name, "Full Defense Alliance")
+	// Pick (A), offer 100 gold (6), done (0), then what the request and the
+	// confirmation would have answered.
+	f := &fakeSession{keys: []rune("A6100\r00y\r")}
+
+	sendTradeDeal(f, w)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "You do not have enough carriers to send this deal.") {
+		t.Fatalf("no carrier refusal:\n%s", out)
+	}
+	if strings.Contains(out, "goods you want back") || strings.Contains(out, "Send Trade Deal?") {
+		t.Errorf("the deal went on past the Offer basket:\n%s", out)
+	}
+	if p.Gold != 300_000 || len(to.TradeDeals) != 0 {
+		t.Errorf("a refused deal moved something: gold %d, deals %+v", p.Gold, to.TradeDeals)
+	}
+}
+
+// Every figure column holds two billion with its separators, so the Gold row
+// does not run its In Deal and Owned figures together.
+func TestTradeBasketColumnsHoldTwoBillion(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Gold = 2_000_000_000
+	f := &fakeSession{keys: []rune("62000000000\r0")}
+	buildTradeBasket(f, w, "Offer — goods you send:", true)
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, " 2,000,000,000 2,000,000,000") {
+		t.Errorf("the Gold row's two figures are not separated:\n%s", out)
+	}
+}
+
+// The basket's header, item rows and rules are all one width, on the Offer side
+// with its two figure columns and on the Request side with one.
+func TestTradeBasketRowsLineUp(t *testing.T) {
+	for _, owned := range []bool{true, false} {
+		w := newWorld()
+		f := &fakeSession{keys: []rune("0")}
+		buildTradeBasket(f, w, "Basket:", owned)
+		widths := map[int]bool{}
+		for _, l := range strings.Split(stripANSI(f.out.String()), "\n") {
+			if strings.HasPrefix(l, "  Key") || strings.HasPrefix(l, "  (1)") || strings.HasPrefix(l, "  ─") {
+				widths[len([]rune(l))] = true
+			}
+		}
+		if len(widths) != 1 {
+			t.Errorf("owned=%v: header, rows and rules run to different widths %v:\n%s", owned, widths, stripANSI(f.out.String()))
+		}
+	}
+}

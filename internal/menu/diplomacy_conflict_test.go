@@ -18,6 +18,7 @@ import (
 func TestSendTradeDealVanishedRecipientConflict(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
 		p.Gold = 100_000_000
+		p.Carriers = 1   // the 1,000 gold needs one, or the offer is refused at once
 		p.Protection = 0 // a sheltered sender is refused before the picker
 	})
 	commitOnFile(t, cfg, func(w *game.World) {

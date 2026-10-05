@@ -43,7 +43,7 @@ func sendIPTradeDeal(s session.Session, w *ctx) Result {
 	// One basket, not two: an interplanetary deal may demand nothing in return
 	// (docs/bre.doc:2088), so there is no Request half to fill in.
 	goods := buildTradeBasket(s, w, "Goods you ship:", true)
-	if goods.IsEmpty() {
+	if goods.IsEmpty() || shortOfCarriers(s, w, goods) {
 		return Stay
 	}
 	var cost int64

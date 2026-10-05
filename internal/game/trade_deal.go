@@ -16,6 +16,15 @@ var ErrTradeSenderGone = errors.New("The empire that sent this deal is gone.")
 // TradeDealCarriers.
 var ErrTradeNeedsCarrier = errors.New("You do not have enough carriers to send this deal.")
 
+// FreeCarriers is how many of e's carriers can transport basket b: those held,
+// less any b is itself shipping, which cannot carry themselves. The original
+// checks the same (send_trade_offer 0x046d). Every check of a deal's transport,
+// local or interplanetary, the screen's warning included, goes through here.
+func FreeCarriers(e *Empire, b TradeBasket) int { return max(e.Carriers-b.Carriers, 0) }
+
+// CanCarry reports whether e has the free carriers basket b needs.
+func CanCarry(e *Empire, b TradeBasket) bool { return FreeCarriers(e, b) >= TradeDealCarriers(b) }
+
 // FindByName returns the empire whose realm name equals name, alive or dead, or
 // nil. Realm names are unique (RealmNameTaken guards onboarding), so this is
 // unambiguous.
@@ -214,9 +223,8 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 		return ErrCantAfford
 	}
 	// The original sizes the transport to the CARGO rather than charging a flat
-	// one per deal (#195): what is held, minus any carriers being shipped, must
-	// cover what the basket needs.
-	if from.Carriers-send.Carriers < TradeDealCarriers(send) {
+	// one per deal (#195).
+	if !CanCarry(from, send) {
 		return ErrTradeNeedsCarrier
 	}
 	if from.Gold < int64(send.Gold)+cost {
