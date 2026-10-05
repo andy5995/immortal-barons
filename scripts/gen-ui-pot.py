@@ -41,6 +41,7 @@ CALL_PATTERNS = [
     re.compile(r'\bpromptSuggestedTight\(s,\s*' + STR),
     re.compile(r'\bAskYesNo\(s,\s*' + STR),
     re.compile(r'\baskYesNoHere\(s,\s*' + STR),
+    re.compile(r'\baskYesNoKeys\(s,\s*' + STR),
     re.compile(r'\bstatLine\(s,\s*[^,]+,\s*' + STR),
     # Wrappers whose CALLER writes the msgid. Found by listing the funcs with a
     # string parameter that reaches tr()/i18n.T and diffing that against this

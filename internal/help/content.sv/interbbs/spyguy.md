@@ -12,7 +12,11 @@ dina agenter: att skicka honom kostar ingen agent, han kan inte tas, och han
 tar inte med sig några siffror till Spy Database. Vad han gör är att skicka
 bud hem i samma stund hans värdar vänder något mot din planet.
 
-Skicka honom från InterPlanetary Operations, under Special Operations.
+Skicka honom från Interplanetära operationer, under Specialoperationer. Den
+skärmen visar först varje SpyGuy som planeten redan har ute: var han är, hur
+många dagar han har kvar och vem som skickade honom. En planet som redan
+bevakas vinner inget på en kortare vistelse; bara den längre av de två
+räknas.
 
 ## Vad han kostar
 

@@ -13,7 +13,10 @@ traz número nenhum para o Banco de Espionagem. O que ele faz é mandar recado
 para casa no instante em que os anfitriões dele apontarem alguma coisa para
 o seu planeta.
 
-Mande-o por Operações Interplanetárias, em Operações Especiais.
+Envie-o pelas Operações Interplanetárias, em Operações Especiais. Essa tela
+abre com cada SpyGuy que este planeta já tem em missão: onde ele está,
+quantos dias lhe restam e quem o enviou. Um planeta já vigiado não ganha
+nada com uma estadia mais curta; só a mais longa das duas conta.
 
 ## Quanto ele custa
 

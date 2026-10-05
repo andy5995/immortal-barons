@@ -1,38 +1,37 @@
 Immortal Barons ChangeLog
 
-(in-progress:)
+2026-10-05 (v0.2.2)
   * BREAKING: packet protocol 4; every board in a league must update together
-  * A reset erases the whole world, battles and news included; bbs.cfg, the
-    roster, the keys and the new packet-ledger.json are all that outlive it
-  * A packet with no sequence number or board name is deleted unapplied
-  * -reset is refused while the league is frozen
-  * Both parties to a trade deal hit by Bomb Trade Routes are told what it lost
-  * Backspace in a reply stops at the quoted lines; /C still clears them
+  * Updating from v0.1.0 or later needs no game reset
+  * A reset erases the world; only bbs.cfg, roster, keys and packet ledger stay
   * A treaty offer or trade deal sent mid-sitting is put at the next turn
-  * Send SpyGuy lists the SpyGuys this planet already has out
-  * Send SpyGuy no longer charges for a planet it cannot reach
-  * A trade deal short of carriers is refused as soon as the offer is filled
-  * FTN: GameOutbound may be on a different drive from the data directory
   * An interplanetary trade deal's sender is told it arrived, or was lost
-  * Recap events and interplanetary reports can be translated
-  * Losses from holdings over 21 million no longer wrap on 32-bit builds
+  * Both parties to a trade deal hit by Bomb Trade Routes are told what it lost
   * Bomb Trade Routes reaches deals still waiting on a realm that has died
   * A trade deal's arrival-turn wait lasts only the day it was sent
-  * Held packets are kept 14 days, not 30; bbs.cfg's HeldPacketDays sets it
-    (1 to 60)
+  * A trade deal short of carriers is refused as soon as the offer is filled
+  * Net worth counts units away on attacks, up for sale, or in a trade deal
+  * Send SpyGuy lists the SpyGuys this planet already has out
+  * Send SpyGuy no longer charges for a planet it cannot reach
+  * Strike and covert results read as one sentence, with varied failure lines
+  * Both sides' interplanetary battle reports are laid out as BRE's
+  * An attack's build-up no longer shows running losses; the report has them
+  * Losses from holdings over 21 million no longer wrap on 32-bit builds
+  * Backspace in a reply stops at the quoted lines; /C still clears them
+  * A figure that fills its Price or # Owned column gets a wider gap
+  * Swedish translation of the interface and help
+  * Recap events and interplanetary reports can be translated
+  * German, Dutch and Portuguese prompts show the keys they accept
+  * A Russian or Swedish figure is no longer split across two lines
+  * -reset is refused while the league is frozen
+  * A packet with no sequence number or board name is deleted unapplied
+  * An updated board no longer pauses lost forces over an old held packet
+  * Held packets are kept 14 days, not 30; HeldPacketDays (1-60) sets it
+  * FTN: GameOutbound may be on a different drive from the data directory
   * ib-sysop: the held-packets view can hide a reason or show it alone
   * ib-sysop: a crash is written to ib-sysop-crash.log in the config directory
-  * An attack's build-up no longer shows running losses; the report has them
-  * Both sides' interplanetary battle reports are laid out as BRE's
-  * Strike and covert results read as one sentence, with varied failure lines
-  * A board that has updated no longer pauses lost forces over an old held packet
-  * Net worth counts units away on attacks, up for sale, or in a trade deal
-  * A figure that fills its Price or # Owned column gets a wider gap
-  * Builds between releases report a -dev version, ranked below that release
-  * German, Dutch and Portuguese prompts show the keys they accept
-  * Swedish translation of the interface and help
-  * A Russian or Swedish figure is no longer split across two lines
   * -help prints to standard output, so it can be piped
+  * Builds between releases report a -dev version, ranked below that release
 
 2026-10-01 (v0.2.1)
   * Updating from v0.1.0 or later needs no game reset

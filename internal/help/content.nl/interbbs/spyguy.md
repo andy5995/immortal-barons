@@ -13,7 +13,11 @@ en hij brengt geen cijfers mee voor de Spionagedatabase. Wat hij wel doet is
 bericht naar huis sturen zodra zijn gastheren iets tegen uw planeet
 ondernemen.
 
-Stuur hem uit via InterPlanetaire Operaties, onder Speciale Operaties.
+Stuur hem vanuit Interplanetaire operaties, onder Speciale operaties. Dat
+scherm opent met elke SpyGuy die deze planeet al op pad heeft: waar hij is,
+hoeveel dagen hij nog heeft en wie hem stuurde. Een planeet die al bekeken
+wordt, wint niets bij een korter verblijf; alleen het langste van de twee
+telt.
 
 ## Wat hij kost
 

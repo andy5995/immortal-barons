@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-03 17:45-0500\n"
+"POT-Creation-Date: 2026-10-05 14:02-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -416,7 +416,16 @@ msgid ""
 "good it is sending, gold included. What the deal asks for in return is not "
 "touched, and neither are standing treaties. Both realms trading a deal that "
 "was hit are told how much it lost."
-msgstr "Handelsroutes bombarderen is een interplanetaire operatie in het menu Speciale operaties. Die treft de handelsovereenkomsten die op een andere planeet onderweg zijn. De meeste aanvallen worden verdreven voordat ze die planeet bereiken. Een aanval die doorkomt treft ongeveer twee op de drie overeenkomsten. Een overeenkomst die de bommenwerpers bereiken verliest een paar procent van elk goed dat ze verstuurt, goud inbegrepen. Wat de overeenkomst in ruil vraagt wordt niet geraakt, en lopende verdragen ook niet. Beide rijken van een getroffen overeenkomst krijgen te horen hoeveel ze verloor."
+msgstr ""
+"Handelsroutes bombarderen is een interplanetaire operatie in het menu "
+"Speciale operaties. Die treft de handelsovereenkomsten die op een andere "
+"planeet onderweg zijn. De meeste aanvallen worden verdreven voordat ze die "
+"planeet bereiken. Een aanval die doorkomt treft ongeveer twee op de drie "
+"overeenkomsten. Een overeenkomst die de bommenwerpers bereiken verliest een "
+"paar procent van elk goed dat ze verstuurt, goud inbegrepen. Wat de "
+"overeenkomst in ruil vraagt wordt niet geraakt, en lopende verdragen ook "
+"niet. Beide rijken van een getroffen overeenkomst krijgen te horen hoeveel "
+"ze verloor."
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trade-routes.md:20
@@ -2972,18 +2981,22 @@ msgstr ""
 "ondernemen."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:16
-msgid "Send him from InterPlanetary Operations, under Special Operations."
-msgstr "Stuur hem uit via InterPlanetaire Operaties, onder Speciale Operaties."
+#: internal/help/content/interbbs/spyguy.md:19
+msgid ""
+"Send him from InterPlanetary Operations, under Special Operations. That "
+"screen opens with every SpyGuy this planet already has out: where he is, the "
+"days he has left, and who sent him. A planet already watched gains nothing "
+"from a shorter stay; only the longer of the two counts."
+msgstr "Stuur hem vanuit Interplanetaire operaties, onder Speciale operaties. Dat scherm opent met elke SpyGuy die deze planeet al op pad heeft: waar hij is, hoeveel dagen hij nog heeft en wie hem stuurde. Een planeet die al bekeken wordt, wint niets bij een korter verblijf; alleen het langste van de twee telt."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:17
+#: internal/help/content/interbbs/spyguy.md:20
 #, no-wrap
 msgid "What he costs"
 msgstr "Wat hij kost"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:23
+#: internal/help/content/interbbs/spyguy.md:26
 msgid ""
 "Gold, by the day, and the whole stay is paid up front. The daily rate is "
 "drawn from the size of **your own** planet — every region every realm here "
@@ -2996,7 +3009,7 @@ msgstr ""
 "tarief wordt genoemd voordat u een doel kiest, want het is overal hetzelfde."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:28
+#: internal/help/content/interbbs/spyguy.md:31
 msgid ""
 "You choose how long he stays, up to fifteen days. If the stay costs more "
 "than you are carrying, the shortfall is named and the bank is opened for "
@@ -3009,13 +3022,13 @@ msgstr ""
 "wordt niets verstuurd en niets in rekening gebracht."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:29
+#: internal/help/content/interbbs/spyguy.md:32
 #, no-wrap
 msgid "What he reports"
 msgstr "Wat hij meldt"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:33
+#: internal/help/content/interbbs/spyguy.md:36
 msgid ""
 "Two things, and both arrive as **planetary news** where everyone here can "
 "read them:"
@@ -3024,7 +3037,7 @@ msgstr ""
 "kan lezen:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:38
+#: internal/help/content/interbbs/spyguy.md:41
 msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
 "on it, with the hours left before it leaves"
@@ -3033,7 +3046,7 @@ msgstr ""
 "rijk erop, met de uren die resten voordat hij vertrekt"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:38
+#: internal/help/content/interbbs/spyguy.md:41
 msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
 "funding is complete, and if it is stood down again"
@@ -3042,7 +3055,7 @@ msgstr ""
 "begint, wanneer de financiering rond is, en of hij weer wordt afgeblazen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:41
+#: internal/help/content/interbbs/spyguy.md:44
 msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
 "sent late is not wasted."
@@ -3051,13 +3064,13 @@ msgstr ""
 "uitgezonden man is niet verspild."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:42
+#: internal/help/content/interbbs/spyguy.md:45
 #, no-wrap
 msgid "Reading what he sends"
 msgstr "Lezen wat hij stuurt"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:47
+#: internal/help/content/interbbs/spyguy.md:50
 msgid ""
 "Each report arrives as planet news, dated, saying what was aimed at you and "
 "how long it had left when he wrote it. That line never changes afterward, so "
@@ -3069,7 +3082,7 @@ msgstr ""
 "er over is."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:52
+#: internal/help/content/interbbs/spyguy.md:55
 #, no-wrap
 msgid ""
 "**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept\n"
@@ -3083,7 +3096,7 @@ msgstr ""
 "wapen dat al onderweg is, staat vermeld met de dagen tot het inslaat.\n"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:55
+#: internal/help/content/interbbs/spyguy.md:58
 msgid ""
 "An empty list does not prove that nobody is coming. Apart from a weapon "
 "already in flight, only a watcher posted on another planet can report "
@@ -3093,13 +3106,13 @@ msgstr ""
 "onderweg is, kan alleen een waarnemer op een andere planeet iets melden."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:56
+#: internal/help/content/interbbs/spyguy.md:59
 #, no-wrap
 msgid "Why it matters"
 msgstr "Waarom het uitmaakt"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:62
+#: internal/help/content/interbbs/spyguy.md:65
 msgid ""
 "A weapon still on the ground is the builders' own business: nobody tells you "
 "it exists. You learn of it when it launches — and by then it is two days out "
@@ -3113,7 +3126,7 @@ msgstr ""
 "nodig hebt om ze op de been te brengen."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:66
+#: internal/help/content/interbbs/spyguy.md:69
 msgid ""
 "The planet you are watching is told nothing. There is no discovery, no "
 "trial, and no execution; when the days you paid for run out, your man simply "
@@ -3124,13 +3137,13 @@ msgstr ""
 "komt uw man gewoon naar huis."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:67
+#: internal/help/content/interbbs/spyguy.md:70
 #, no-wrap
 msgid "Strategy"
 msgstr "Strategie"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:72
+#: internal/help/content/interbbs/spyguy.md:75
 msgid ""
 "Post him where the threat is, not where the grudge is. The planet that just "
 "lost a battle to you is the one assembling the answer, and the rate is the "
@@ -3141,7 +3154,7 @@ msgstr ""
 "tarief is hetzelfde of u nu een rivaal bespiedt of een buur die u vertrouwt."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:76
+#: internal/help/content/interbbs/spyguy.md:79
 msgid ""
 "Sending another SpyGuy to a planet already watched from here does not add "
 "the two stays together. The stay becomes whichever is longer, and you still "
@@ -5121,6 +5134,10 @@ msgstr ""
 "u wel voor hebt betaald, en verzwakt het schild mee. Een grote pot is elke "
 "beurt een grote rekening, dus laat hem groeien in een tempo dat uw inkomsten "
 "aankunnen."
+
+#~ msgid "Send him from InterPlanetary Operations, under Special Operations."
+#~ msgstr ""
+#~ "Stuur hem uit via InterPlanetaire Operaties, onder Speciale Operaties."
 
 #~ msgid ""
 #~ "**Bomb Intelligence** — kills a few percent of their agents, which is "

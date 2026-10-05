@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-10-03 17:46-0500\n"
+"POT-Creation-Date: 2026-10-05 14:03-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2406,19 +2406,23 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:16
+#: internal/help/content/interbbs/spyguy.md:19
 #, markdown-text
-msgid "Send him from InterPlanetary Operations, under Special Operations."
+msgid ""
+"Send him from InterPlanetary Operations, under Special Operations. That "
+"screen opens with every SpyGuy this planet already has out: where he is, the "
+"days he has left, and who sent him. A planet already watched gains nothing "
+"from a shorter stay; only the longer of the two counts."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:17
+#: internal/help/content/interbbs/spyguy.md:20
 #, markdown-text, no-wrap
 msgid "What he costs"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:23
+#: internal/help/content/interbbs/spyguy.md:26
 #, markdown-text
 msgid ""
 "Gold, by the day, and the whole stay is paid up front. The daily rate is "
@@ -2428,7 +2432,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:28
+#: internal/help/content/interbbs/spyguy.md:31
 #, markdown-text
 msgid ""
 "You choose how long he stays, up to fifteen days. If the stay costs more "
@@ -2438,13 +2442,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:29
+#: internal/help/content/interbbs/spyguy.md:32
 #, markdown-text, no-wrap
 msgid "What he reports"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:33
+#: internal/help/content/interbbs/spyguy.md:36
 #, markdown-text
 msgid ""
 "Two things, and both arrive as **planetary news** where everyone here can "
@@ -2452,7 +2456,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:38
+#: internal/help/content/interbbs/spyguy.md:41
 #, markdown-text
 msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
@@ -2460,7 +2464,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:38
+#: internal/help/content/interbbs/spyguy.md:41
 #, markdown-text
 msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
@@ -2468,7 +2472,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:41
+#: internal/help/content/interbbs/spyguy.md:44
 #, markdown-text
 msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
@@ -2476,13 +2480,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:42
+#: internal/help/content/interbbs/spyguy.md:45
 #, markdown-text, no-wrap
 msgid "Reading what he sends"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:47
+#: internal/help/content/interbbs/spyguy.md:50
 #, markdown-text
 msgid ""
 "Each report arrives as planet news, dated, saying what was aimed at you and "
@@ -2491,7 +2495,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:52
+#: internal/help/content/interbbs/spyguy.md:55
 #, markdown-text, no-wrap
 msgid ""
 "**Incoming Attacks**, on the InterPlanetary menu, is the same warnings "
@@ -2504,7 +2508,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:55
+#: internal/help/content/interbbs/spyguy.md:58
 #, markdown-text
 msgid ""
 "An empty list does not prove that nobody is coming. Apart from a weapon "
@@ -2513,13 +2517,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:56
+#: internal/help/content/interbbs/spyguy.md:59
 #, markdown-text, no-wrap
 msgid "Why it matters"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:62
+#: internal/help/content/interbbs/spyguy.md:65
 #, markdown-text
 msgid ""
 "A weapon still on the ground is the builders' own business: nobody tells you "
@@ -2529,7 +2533,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:66
+#: internal/help/content/interbbs/spyguy.md:69
 #, markdown-text
 msgid ""
 "The planet you are watching is told nothing. There is no discovery, no "
@@ -2538,13 +2542,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:67
+#: internal/help/content/interbbs/spyguy.md:70
 #, markdown-text, no-wrap
 msgid "Strategy"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:72
+#: internal/help/content/interbbs/spyguy.md:75
 #, markdown-text
 msgid ""
 "Post him where the threat is, not where the grudge is. The planet that just "
@@ -2553,7 +2557,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:76
+#: internal/help/content/interbbs/spyguy.md:79
 #, markdown-text
 msgid ""
 "Sending another SpyGuy to a planet already watched from here does not add "

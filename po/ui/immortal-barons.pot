@@ -29,7 +29,7 @@ msgstr ""
 msgid "#"
 msgstr ""
 
-#: internal/menu/menu.go:967
+#: internal/menu/menu.go:971
 msgid "# Owned"
 msgstr ""
 
@@ -135,7 +135,7 @@ msgstr ""
 msgid "%s %s purchased."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:378
+#: internal/menu/actions_ipops.go:403
 msgid "%s %s sent out."
 msgstr ""
 
@@ -151,11 +151,11 @@ msgstr ""
 msgid "%s Trading Market"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:163
+#: internal/menu/actions_ipops.go:188
 msgid "%s against which baron?"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:155
+#: internal/menu/actions_ipops.go:180
 msgid "%s against which planet?"
 msgstr ""
 
@@ -195,15 +195,15 @@ msgstr ""
 msgid "%s jets were destroyed in the attack!"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:220
+#: internal/menu/actions_ipops.go:245
 msgid "%s of %s"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:237
+#: internal/menu/actions_diplomacy.go:248
 msgid "%s offers you a %s."
 msgstr ""
 
-#: internal/menu/actions_trade.go:292
+#: internal/menu/actions_trade.go:324
 msgid "%s offers you a trade deal."
 msgstr ""
 
@@ -211,7 +211,7 @@ msgstr ""
 msgid "%s on %s"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:49
+#: internal/menu/actions_diplomacy.go:60
 msgid "%s proposes a %s."
 msgstr ""
 
@@ -243,6 +243,10 @@ msgstr ""
 msgid "%s's allies send %s troopers and %s tanks to aid the defense."
 msgstr ""
 
+#: internal/menu/actions_ipops.go:124
+msgid "%s: %s left, sent by %s"
+msgstr ""
+
 #: internal/menu/turnrecap.go:130
 msgid "(%d times)"
 msgstr ""
@@ -255,7 +259,7 @@ msgstr ""
 msgid "(%s per year)"
 msgstr ""
 
-#: internal/menu/actions_trade.go:107
+#: internal/menu/actions_trade.go:134
 msgid "(not enough carriers)"
 msgstr ""
 
@@ -279,7 +283,7 @@ msgstr ""
 msgid "-* Drop Regions *-"
 msgstr ""
 
-#: internal/menu/actions_message.go:458
+#: internal/menu/actions_message.go:461
 msgid "/-Command?"
 msgstr ""
 
@@ -319,7 +323,7 @@ msgstr ""
 msgid "A Gooie Kablooie landed on the planet — you lost {n} regions."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:76
+#: internal/menu/actions_ipops.go:82
 msgid "A SpyGuy costs %s%s%s gold per day."
 msgstr ""
 
@@ -363,15 +367,15 @@ msgstr ""
 msgid "A strike from another planet hit {who}'s trade deal to you: up to {pct} of what it carries was destroyed."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:42
+#: internal/game/ibbs_trade_deal.go:41
 msgid "A trade deal must name the realm it is for."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:50
+#: internal/game/ibbs_trade_deal.go:49
 msgid "A trade deal must ship something."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:38
+#: internal/game/ibbs_trade_deal.go:37
 msgid "A trade deal to your own planet is a local deal; send it from the Trading menu."
 msgstr ""
 
@@ -407,7 +411,7 @@ msgstr ""
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr ""
 
-#: internal/menu/actions_message.go:490
+#: internal/menu/actions_message.go:493
 msgid "Abort"
 msgstr ""
 
@@ -415,7 +419,7 @@ msgstr ""
 msgid "About"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:238
+#: internal/menu/actions_diplomacy.go:249
 msgid "Accept this treaty?"
 msgstr ""
 
@@ -423,7 +427,7 @@ msgstr ""
 msgid "Accept?"
 msgstr ""
 
-#: internal/menu/actions_trade.go:296
+#: internal/menu/actions_trade.go:328
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr ""
 
@@ -531,7 +535,7 @@ msgstr ""
 msgid "Are you POSITIVE you wish to erase your empire?"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:221
+#: internal/menu/actions_ipops.go:246
 msgid "Arrived"
 msgstr ""
 
@@ -543,7 +547,7 @@ msgstr ""
 msgid "At a %d%% tax rate, a riot breaks out in about %d%% of turns. Each riot costs us people and support."
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:269
+#: internal/menu/actions_diplomacy.go:280
 msgid "Attach a message?"
 msgstr ""
 
@@ -591,7 +595,7 @@ msgstr ""
 msgid "Average Turn Around Times to All BBSes"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:429
+#: internal/menu/actions_diplomacy.go:440
 msgid "Awaiting a reply:"
 msgstr ""
 
@@ -759,7 +763,7 @@ msgstr ""
 msgid "Cause Dissensions"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:233
+#: internal/menu/actions_ipops.go:258
 msgid "Change"
 msgstr ""
 
@@ -787,7 +791,7 @@ msgstr ""
 msgid "Chemical Bombing"
 msgstr ""
 
-#: internal/menu/actions_trade.go:113
+#: internal/menu/actions_trade.go:140
 msgid "Choice?"
 msgstr ""
 
@@ -831,7 +835,7 @@ msgstr ""
 msgid "Civil war! Your realm all but falls apart — %d%% of it is gone."
 msgstr ""
 
-#: internal/menu/actions_message.go:496
+#: internal/menu/actions_message.go:499
 msgid "Clear"
 msgstr ""
 
@@ -863,7 +867,7 @@ msgstr ""
 msgid "Confirm?"
 msgstr ""
 
-#: internal/menu/gameflow.go:384
+#: internal/menu/gameflow.go:414
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -939,7 +943,7 @@ msgstr ""
 msgid "Declaration Of War"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:309
+#: internal/menu/actions_diplomacy.go:320
 msgid "Declare war?"
 msgstr ""
 
@@ -951,7 +955,7 @@ msgstr ""
 msgid "Defender"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:221
+#: internal/menu/actions_ipops.go:246
 msgid "Defense"
 msgstr ""
 
@@ -1043,7 +1047,7 @@ msgstr ""
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr ""
 
-#: internal/menu/actions_message.go:623
+#: internal/menu/actions_message.go:626
 msgid "Do you wish to send another message?"
 msgstr ""
 
@@ -1055,7 +1059,7 @@ msgstr ""
 msgid "Do you wish to visit the bank?"
 msgstr ""
 
-#: internal/menu/actions_trade.go:112
+#: internal/menu/actions_trade.go:139
 msgid "Done"
 msgstr ""
 
@@ -1247,7 +1251,7 @@ msgstr ""
 msgid "Goldie Luck's Bank"
 msgstr ""
 
-#: internal/menu/actions_trade.go:77
+#: internal/menu/actions_trade.go:106
 msgid "Good"
 msgstr ""
 
@@ -1291,7 +1295,7 @@ msgstr ""
 msgid "Help — choose a category:"
 msgstr ""
 
-#: internal/menu/actions_trade.go:137
+#: internal/menu/actions_trade.go:164
 msgid "How many %s?"
 msgstr ""
 
@@ -1299,7 +1303,7 @@ msgstr ""
 msgid "How many Million Gold do you wish to put in?"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:86
+#: internal/menu/actions_ipops.go:92
 msgid "How many days would you like him to remain?"
 msgstr ""
 
@@ -1307,7 +1311,7 @@ msgstr ""
 msgid "How many days would you like to invest for?"
 msgstr ""
 
-#: internal/menu/actions_trade.go:256
+#: internal/menu/actions_trade.go:286
 msgid "How many days would you like to send this deal for?"
 msgstr ""
 
@@ -1363,7 +1367,7 @@ msgstr ""
 msgid "Immortal Barons"
 msgstr ""
 
-#: internal/menu/actions_trade.go:77
+#: internal/menu/actions_trade.go:106
 msgid "In Deal"
 msgstr ""
 
@@ -1439,7 +1443,7 @@ msgstr ""
 msgid "Investments"
 msgstr ""
 
-#: internal/menu/actions_trade.go:222
+#: internal/menu/actions_trade.go:252
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr ""
 
@@ -1447,7 +1451,7 @@ msgstr ""
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr ""
 
-#: internal/menu/menu.go:966
+#: internal/menu/menu.go:970
 msgid "Item"
 msgstr ""
 
@@ -1611,7 +1615,7 @@ msgstr ""
 msgid "Message To  : "
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:272
+#: internal/menu/actions_diplomacy.go:283
 msgid "Message:"
 msgstr ""
 
@@ -1643,7 +1647,7 @@ msgstr ""
 msgid "Mountain"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:126
+#: internal/menu/actions_diplomacy.go:137
 msgid "NONE"
 msgstr ""
 
@@ -1659,7 +1663,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: internal/game/spyguy.go:34
+#: internal/game/spyguy.go:36
 msgid "Name the planet to watch."
 msgstr ""
 
@@ -1687,7 +1691,7 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/menu.go:1205
+#: internal/menu/menu.go:1209
 msgid "No"
 msgstr ""
 
@@ -1719,7 +1723,7 @@ msgstr ""
 msgid "No news."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:398
+#: internal/menu/actions_ipops.go:423
 msgid "No other planets are known yet, so there is nobody to scout."
 msgstr ""
 
@@ -1833,11 +1837,11 @@ msgstr ""
 msgid "Of these, %s units are away on attacks."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:221
+#: internal/menu/actions_ipops.go:246
 msgid "Offense"
 msgstr ""
 
-#: internal/menu/actions_trade.go:182
+#: internal/menu/actions_trade.go:209
 msgid "Offer — goods you send:"
 msgstr ""
 
@@ -2087,7 +2091,7 @@ msgstr ""
 msgid "Price"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:261
+#: internal/menu/actions_diplomacy.go:272
 msgid "Proposed a %s to %s."
 msgstr ""
 
@@ -2135,7 +2139,7 @@ msgstr ""
 msgid "Read,"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:401
+#: internal/menu/actions_ipops.go:426
 msgid "Recon requests created to all %d planets. The reports will reach the Spy Database."
 msgstr ""
 
@@ -2151,7 +2155,7 @@ msgstr ""
 msgid "Regions:"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:54
+#: internal/menu/actions_diplomacy.go:65
 msgid "Regions: %s │ Net Worth: %s │ Score: %s"
 msgstr ""
 
@@ -2159,7 +2163,7 @@ msgstr ""
 msgid "Regular Attack"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:465
+#: internal/menu/actions_diplomacy.go:476
 msgid "Relations"
 msgstr ""
 
@@ -2175,7 +2179,7 @@ msgstr ""
 msgid "Reply,"
 msgstr ""
 
-#: internal/menu/actions_trade.go:183
+#: internal/menu/actions_trade.go:213
 msgid "Request — goods you want back:"
 msgstr ""
 
@@ -2227,7 +2231,7 @@ msgstr ""
 msgid "Sabotage HQ"
 msgstr ""
 
-#: internal/menu/actions_message.go:493
+#: internal/menu/actions_message.go:496
 msgid "Save"
 msgstr ""
 
@@ -2283,11 +2287,11 @@ msgstr ""
 msgid "Send Trade Deal"
 msgstr ""
 
-#: internal/menu/actions_trade.go:191
+#: internal/menu/actions_trade.go:221
 msgid "Send Trade Deal?"
 msgstr ""
 
-#: internal/menu/gameflow.go:340
+#: internal/menu/gameflow.go:370
 msgid "Send a message?"
 msgstr ""
 
@@ -2323,7 +2327,7 @@ msgstr ""
 msgid "Send this Attack?"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:173
+#: internal/menu/actions_ipops.go:198
 msgid "Send this Operation?"
 msgstr ""
 
@@ -2351,7 +2355,7 @@ msgstr ""
 msgid "Set Up"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:138
+#: internal/menu/actions_ipops.go:163
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr ""
 
@@ -2383,11 +2387,11 @@ msgstr ""
 msgid "Sold %d. Gold: %d"
 msgstr ""
 
-#: internal/menu/actions_trade.go:261
+#: internal/menu/actions_trade.go:291
 msgid "Sorry, trade deals must be sent for at least %d days."
 msgstr ""
 
-#: internal/menu/gameflow.go:145
+#: internal/menu/gameflow.go:168
 msgid "Sorry, you have used all of your turns today."
 msgstr ""
 
@@ -2427,7 +2431,7 @@ msgstr ""
 msgid "Spy Database"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:206
+#: internal/menu/actions_ipops.go:231
 msgid "Spy Database:"
 msgstr ""
 
@@ -2649,7 +2653,7 @@ msgstr ""
 msgid "Terrorists went after your streets and got nowhere."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:306
+#: internal/menu/actions_ipops.go:331
 msgid "Terrorize which baron?"
 msgstr ""
 
@@ -2829,7 +2833,7 @@ msgstr ""
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:203
+#: internal/menu/actions_ipops.go:228
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 
@@ -2877,12 +2881,16 @@ msgstr ""
 msgid "There is a %d-day minimum on investments."
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:183
+#: internal/menu/actions_diplomacy.go:194
 msgid "There is no one left to offer that to."
 msgstr ""
 
 #: internal/menu/actions_message.go:212
 msgid "There is no one to reach."
+msgstr ""
+
+#: internal/game/spyguy.go:40
+msgid "There is no route to that planet, so no SpyGuy can be sent there."
 msgstr ""
 
 #: internal/game/economy.go:19
@@ -2893,7 +2901,7 @@ msgstr ""
 msgid "This attack will cost %s gold."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:46
+#: internal/game/ibbs_trade_deal.go:45
 msgid "This board is not part of an inter-BBS league."
 msgstr ""
 
@@ -2905,7 +2913,7 @@ msgstr ""
 msgid "This choice is permanent and cannot be undone."
 msgstr ""
 
-#: internal/menu/actions_trade.go:109
+#: internal/menu/actions_trade.go:136
 msgid "This deal needs %d carrier(s); you have %d free."
 msgstr ""
 
@@ -2913,12 +2921,16 @@ msgstr ""
 msgid "This is year %s of your reign."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:172
+#: internal/menu/actions_ipops.go:197
 msgid "This operation will cost %s gold."
 msgstr ""
 
 #: internal/menu/actions_attack.go:832
 msgid "This planet has no Gooie Kablooie."
+msgstr ""
+
+#: internal/menu/actions_ipops.go:119
+msgid "This planet has no SpyGuys out."
 msgstr ""
 
 #: internal/game/annihilator.go:80
@@ -2929,11 +2941,15 @@ msgstr ""
 msgid "This planet is not building a Gooie Kablooie."
 msgstr ""
 
-#: internal/menu/actions_trade.go:246
+#: internal/menu/actions_ipops.go:122
+msgid "This planet's SpyGuys:"
+msgstr ""
+
+#: internal/menu/actions_trade.go:276
 msgid "This trade deal will cost %s gold per day to send."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:360
+#: internal/menu/actions_ipops.go:385
 msgid "This will cost you %s gold.  Accept?"
 msgstr ""
 
@@ -3001,7 +3017,7 @@ msgstr ""
 msgid "Total For Sale"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:110
+#: internal/menu/actions_diplomacy.go:121
 msgid "Total Forces"
 msgstr ""
 
@@ -3009,19 +3025,19 @@ msgstr ""
 msgid "Trade"
 msgstr ""
 
-#: internal/menu/actions_trade.go:190
+#: internal/menu/actions_trade.go:220
 msgid "Trade Deal requires %d Carriers."
 msgstr ""
 
-#: internal/menu/actions_trade.go:311
+#: internal/menu/actions_trade.go:343
 msgid "Trade deal accepted."
 msgstr ""
 
-#: internal/menu/actions_trade.go:219
+#: internal/menu/actions_trade.go:249
 msgid "Trade deal sent to %s for %d days (%s gold)."
 msgstr ""
 
-#: internal/menu/actions_trade.go:247
+#: internal/menu/actions_trade.go:277
 msgid "Trade deals must be sent for a minimum of %d days."
 msgstr ""
 
@@ -3273,7 +3289,7 @@ msgstr ""
 msgid "Which regions will you give up?"
 msgstr ""
 
-#: internal/menu/menu.go:692
+#: internal/menu/menu.go:696
 msgid "While you were at the menus, this has happened:"
 msgstr ""
 
@@ -3329,7 +3345,7 @@ msgstr ""
 msgid "Writing to:"
 msgstr ""
 
-#: internal/menu/menu.go:1204
+#: internal/menu/menu.go:1208
 msgid "Yes"
 msgstr ""
 
@@ -3337,7 +3353,7 @@ msgstr ""
 msgid "Yesterday's News"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:255
+#: internal/menu/actions_diplomacy.go:266
 msgid "You accepted the %s with %s."
 msgstr ""
 
@@ -3407,11 +3423,11 @@ msgstr ""
 msgid "You crushed %s completely and seized the remains of its military!"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:332
+#: internal/menu/actions_diplomacy.go:343
 msgid "You declared war on %s."
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:334
+#: internal/menu/actions_diplomacy.go:345
 msgid "You declared war on %s. Agreement ended: %s"
 msgstr ""
 
@@ -3435,7 +3451,7 @@ msgstr ""
 msgid "You do not owe that much."
 msgstr ""
 
-#: internal/menu/actions_trade.go:294
+#: internal/menu/actions_trade.go:326
 msgid "You give:    %s"
 msgstr ""
 
@@ -3511,7 +3527,7 @@ msgstr ""
 msgid "You have no bids out."
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:93
+#: internal/menu/actions_diplomacy.go:104
 msgid "You have no defense allies."
 msgstr ""
 
@@ -3535,7 +3551,7 @@ msgstr ""
 msgid "You have started work on your HeadQuarters."
 msgstr ""
 
-#: internal/menu/actions_message.go:559
+#: internal/menu/actions_message.go:562
 msgid "You have used all %d lines."
 msgstr ""
 
@@ -3583,7 +3599,7 @@ msgstr ""
 msgid "You no longer hold the office of BBS Coordinator."
 msgstr ""
 
-#: internal/menu/actions_trade.go:188
+#: internal/menu/actions_trade.go:218
 msgid "You offer %s to %s"
 msgstr ""
 
@@ -3599,7 +3615,7 @@ msgstr ""
 msgid "You owe %s gold on loans that are due. The bank takes a payment from your gold each turn, and what is still unpaid at the end of the day grows."
 msgstr ""
 
-#: internal/menu/actions_trade.go:293
+#: internal/menu/actions_trade.go:325
 msgid "You receive: %s"
 msgstr ""
 
@@ -3607,7 +3623,7 @@ msgstr ""
 msgid "You ship %s to %s of %s."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:177
+#: internal/game/ibbs_trade_deal.go:171
 msgid "You shipped a trade deal to {who} of {board}, at a cost of {gold} gold and {carriers} carriers."
 msgstr ""
 
@@ -3635,15 +3651,15 @@ msgstr ""
 msgid "Your %s force is on its way to %s on %s."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:192
+#: internal/menu/actions_ipops.go:217
 msgid "Your %s is away against %s of %s. Word will come back with the next packet."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:189
+#: internal/menu/actions_ipops.go:214
 msgid "Your %s is away against %s. Word will come back with the next packet."
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:235
+#: internal/menu/actions_diplomacy.go:246
 msgid "Your %s with %s stands, and is holding strong."
 msgstr ""
 
@@ -3689,7 +3705,7 @@ msgstr ""
 msgid "Your SDI Program requires %s gold."
 msgstr ""
 
-#: internal/menu/actions_ipops.go:103
+#: internal/menu/actions_ipops.go:109
 msgid "Your SpyGuy leaves for %s, and will watch it for %d days."
 msgstr ""
 
@@ -3939,7 +3955,7 @@ msgstr[1] ""
 msgid "Your agitators stirred revolts in {who}, and their popular support fell."
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:91
+#: internal/menu/actions_diplomacy.go:102
 msgid "Your allies will send the following to aid you in defense:"
 msgstr ""
 
@@ -3983,7 +3999,7 @@ msgstr ""
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
-#: internal/menu/actions_trade.go:163
+#: internal/menu/actions_trade.go:190
 msgid "Your dominion is still under protection."
 msgstr ""
 
@@ -3995,7 +4011,7 @@ msgstr ""
 msgid "Your efforts against {who} have brought you success!"
 msgstr ""
 
-#: internal/menu/menu.go:703
+#: internal/menu/menu.go:707
 msgid "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."
 msgstr ""
 
@@ -4119,7 +4135,7 @@ msgstr ""
 msgid "Your people seethe with open hatred for your rule."
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:193
+#: internal/menu/actions_diplomacy.go:204
 msgid "Your proposal went to %d realms."
 msgstr ""
 
@@ -4139,7 +4155,7 @@ msgstr ""
 msgid "Your realm is already being played elsewhere."
 msgstr ""
 
-#: internal/menu/gameflow.go:129
+#: internal/menu/gameflow.go:152
 msgid "Your realm is no longer active."
 msgstr ""
 
@@ -4187,15 +4203,15 @@ msgstr ""
 msgid "Your target is no longer there."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:228
+#: internal/game/ibbs_trade_deal.go:222
 msgid "Your trade deal reached {who} of {board}: {goods}."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:232
+#: internal/game/ibbs_trade_deal.go:226
 msgid "Your trade deal to {who} of {board} was lost: no such realm is left there to take it."
 msgstr ""
 
-#: internal/game/trade_deal.go:360
+#: internal/game/trade_deal.go:368
 msgid "Your trade fleet could not find {who}, and has brought the goods home."
 msgstr ""
 
@@ -4311,7 +4327,7 @@ msgstr ""
 msgid "a terror bombing"
 msgstr ""
 
-#: internal/game/trade_deal.go:98
+#: internal/game/trade_deal.go:107
 msgid "a trade deal"
 msgstr ""
 
@@ -4319,11 +4335,11 @@ msgstr ""
 msgid "a unit sale"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:420
+#: internal/menu/actions_ipops.go:445
 msgid "agent"
 msgstr ""
 
-#: internal/menu/actions_ipops.go:422
+#: internal/menu/actions_ipops.go:447
 msgid "agents"
 msgstr ""
 
@@ -4427,7 +4443,7 @@ msgstr ""
 msgid "immortal-barons — a Barren Realms Elite clone. Options:"
 msgstr ""
 
-#: internal/menu/actions_trade.go:189
+#: internal/menu/actions_trade.go:219
 msgid "in return for %s."
 msgstr ""
 
@@ -4639,7 +4655,7 @@ msgstr ""
 msgid "troops deserted due to low morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:225
+#: internal/menu/gameflow.go:255
 msgid "units of Food consumed."
 msgstr ""
 
@@ -4797,7 +4813,7 @@ msgid_plural "{n} Food"
 msgstr[0] ""
 msgstr[1] ""
 
-#: internal/game/ibbs_trade_deal.go:248
+#: internal/game/ibbs_trade_deal.go:242
 msgid "{n} Gold"
 msgstr ""
 
@@ -4889,7 +4905,7 @@ msgstr ""
 msgid "{who} ({board})"
 msgstr ""
 
-#: internal/game/trade_deal.go:285
+#: internal/game/trade_deal.go:293
 msgid "{who} accepted your trade deal."
 msgstr ""
 
@@ -4925,7 +4941,7 @@ msgstr ""
 msgid "{who} is no longer on our planet."
 msgstr ""
 
-#: internal/game/trade_deal.go:329
+#: internal/game/trade_deal.go:337
 msgid "{who} never answered your trade deal, and the goods you sent it with are lost."
 msgstr ""
 
@@ -4941,11 +4957,11 @@ msgstr ""
 msgid "{who} of {board} bought {n} {good} from your market for {gold} gold."
 msgstr ""
 
-#: internal/game/ibbs_trade_deal.go:200
+#: internal/game/ibbs_trade_deal.go:194
 msgid "{who} of {board} shipped you a trade deal: {goods}."
 msgstr ""
 
-#: internal/game/trade_deal.go:310
+#: internal/game/trade_deal.go:318
 msgid "{who} rejected your trade deal."
 msgstr ""
 

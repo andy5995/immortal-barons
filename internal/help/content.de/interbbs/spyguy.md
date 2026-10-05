@@ -13,8 +13,11 @@ Agenten, er kann nicht gefasst werden, und er bringt keine Zahlen für die
 Spionagedatenbank mit. Was er tut, ist Nachricht nach Hause schicken, sobald
 seine Gastgeber etwas gegen Ihren Planeten in Gang setzen.
 
-Schicken Sie ihn aus dem Menü Interplanetare Operationen, unter
-Spezialoperationen.
+Er wird unter Interplanetare Operationen bei den Spezialoperationen
+entsandt. Dieser Bildschirm zeigt zuerst jeden SpyGuy, den dieser Planet
+bereits im Einsatz hat: wo er ist, wie viele Tage er noch bleibt und wer ihn
+gesandt hat. Ein Planet, der schon beobachtet wird, gewinnt durch einen
+kürzeren Aufenthalt nichts; nur der längere der beiden zählt.
 
 ## Was er kostet
 

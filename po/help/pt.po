@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-03 17:45-0500\n"
+"POT-Creation-Date: 2026-10-05 14:02-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -412,7 +412,15 @@ msgid ""
 "good it is sending, gold included. What the deal asks for in return is not "
 "touched, and neither are standing treaties. Both realms trading a deal that "
 "was hit are told how much it lost."
-msgstr "Bombardear as Rotas Comerciais é uma operação interplanetária no menu de Operações Especiais. Ela atinge os acordos comerciais em trânsito em outro planeta. A maioria dos ataques é repelida antes de chegar a esse planeta. Um ataque que passa atinge cerca de dois acordos em cada três. Um acordo alcançado pelos bombardeiros perde alguns por cento de cada mercadoria que envia, ouro incluído. O que o acordo pede em troca não é afetado, nem os tratados em vigor. Os dois reinos de um acordo atingido são informados de quanto ele perdeu."
+msgstr ""
+"Bombardear as Rotas Comerciais é uma operação interplanetária no menu de "
+"Operações Especiais. Ela atinge os acordos comerciais em trânsito em outro "
+"planeta. A maioria dos ataques é repelida antes de chegar a esse planeta. Um "
+"ataque que passa atinge cerca de dois acordos em cada três. Um acordo "
+"alcançado pelos bombardeiros perde alguns por cento de cada mercadoria que "
+"envia, ouro incluído. O que o acordo pede em troca não é afetado, nem os "
+"tratados em vigor. Os dois reinos de um acordo atingido são informados de "
+"quanto ele perdeu."
 
 #. type: Plain text
 #: internal/help/content/covert/bomb-trade-routes.md:20
@@ -2931,18 +2939,22 @@ msgstr ""
 "o seu planeta."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:16
-msgid "Send him from InterPlanetary Operations, under Special Operations."
-msgstr "Mande-o por Operações Interplanetárias, em Operações Especiais."
+#: internal/help/content/interbbs/spyguy.md:19
+msgid ""
+"Send him from InterPlanetary Operations, under Special Operations. That "
+"screen opens with every SpyGuy this planet already has out: where he is, the "
+"days he has left, and who sent him. A planet already watched gains nothing "
+"from a shorter stay; only the longer of the two counts."
+msgstr "Envie-o pelas Operações Interplanetárias, em Operações Especiais. Essa tela abre com cada SpyGuy que este planeta já tem em missão: onde ele está, quantos dias lhe restam e quem o enviou. Um planeta já vigiado não ganha nada com uma estadia mais curta; só a mais longa das duas conta."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:17
+#: internal/help/content/interbbs/spyguy.md:20
 #, no-wrap
 msgid "What he costs"
 msgstr "Quanto ele custa"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:23
+#: internal/help/content/interbbs/spyguy.md:26
 msgid ""
 "Gold, by the day, and the whole stay is paid up front. The daily rate is "
 "drawn from the size of **your own** planet — every region every realm here "
@@ -2955,7 +2967,7 @@ msgstr ""
 "você escolher um alvo, já que é a mesma para onde quer que você o mande."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:28
+#: internal/help/content/interbbs/spyguy.md:31
 msgid ""
 "You choose how long he stays, up to fifteen days. If the stay costs more "
 "than you are carrying, the shortfall is named and the bank is opened for "
@@ -2968,13 +2980,13 @@ msgstr ""
 "nem cobrado."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:29
+#: internal/help/content/interbbs/spyguy.md:32
 #, no-wrap
 msgid "What he reports"
 msgstr "O que ele relata"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:33
+#: internal/help/content/interbbs/spyguy.md:36
 msgid ""
 "Two things, and both arrive as **planetary news** where everyone here can "
 "read them:"
@@ -2983,7 +2995,7 @@ msgstr ""
 "aqui pode ler:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:38
+#: internal/help/content/interbbs/spyguy.md:41
 msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
 "on it, with the hours left before it leaves"
@@ -2992,7 +3004,7 @@ msgstr ""
 "dele, com as horas que faltam para partir"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:38
+#: internal/help/content/interbbs/spyguy.md:41
 msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
 "funding is complete, and if it is stood down again"
@@ -3001,7 +3013,7 @@ msgstr ""
 "quando o financiamento fica completo, e se ele for desativado"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:41
+#: internal/help/content/interbbs/spyguy.md:44
 msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
 "sent late is not wasted."
@@ -3010,13 +3022,13 @@ msgstr ""
 "um homem enviado tarde não é desperdício."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:42
+#: internal/help/content/interbbs/spyguy.md:45
 #, no-wrap
 msgid "Reading what he sends"
 msgstr "Lendo o que ele manda"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:47
+#: internal/help/content/interbbs/spyguy.md:50
 msgid ""
 "Each report arrives as planet news, dated, saying what was aimed at you and "
 "how long it had left when he wrote it. That line never changes afterward, so "
@@ -3027,7 +3039,7 @@ msgstr ""
 "nunca muda depois, então horas mais tarde ela já não diz quanto tempo falta."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:52
+#: internal/help/content/interbbs/spyguy.md:55
 #, no-wrap
 msgid ""
 "**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept\n"
@@ -3041,7 +3053,7 @@ msgstr ""
 "arma já em voo aparece com os dias que faltam para ela pousar.\n"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:55
+#: internal/help/content/interbbs/spyguy.md:58
 msgid ""
 "An empty list does not prove that nobody is coming. Apart from a weapon "
 "already in flight, only a watcher posted on another planet can report "
@@ -3051,13 +3063,13 @@ msgstr ""
 "só um observador colocado em outro planeta pode relatar alguma coisa."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:56
+#: internal/help/content/interbbs/spyguy.md:59
 #, no-wrap
 msgid "Why it matters"
 msgstr "Por que isso importa"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:62
+#: internal/help/content/interbbs/spyguy.md:65
 msgid ""
 "A weapon still on the ground is the builders' own business: nobody tells you "
 "it exists. You learn of it when it launches — and by then it is two days out "
@@ -3070,7 +3082,7 @@ msgstr ""
 "SpyGuy no planeta certo compra os dias de que você precisa para levantá-los."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:66
+#: internal/help/content/interbbs/spyguy.md:69
 msgid ""
 "The planet you are watching is told nothing. There is no discovery, no "
 "trial, and no execution; when the days you paid for run out, your man simply "
@@ -3081,13 +3093,13 @@ msgstr ""
 "simplesmente volta para casa."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:67
+#: internal/help/content/interbbs/spyguy.md:70
 #, no-wrap
 msgid "Strategy"
 msgstr "Estratégia"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:72
+#: internal/help/content/interbbs/spyguy.md:75
 msgid ""
 "Post him where the threat is, not where the grudge is. The planet that just "
 "lost a battle to you is the one assembling the answer, and the rate is the "
@@ -3098,7 +3110,7 @@ msgstr ""
 "a mesma tanto para vigiar um rival quanto um vizinho de confiança."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:76
+#: internal/help/content/interbbs/spyguy.md:79
 msgid ""
 "Sending another SpyGuy to a planet already watched from here does not add "
 "the two stays together. The stay becomes whichever is longer, and you still "
@@ -5055,6 +5067,9 @@ msgstr ""
 "Pague integralmente. Se pagar a menos, o programa encolhe para o que você "
 "pagou, e o escudo enfraquece junto. Um bolo grande é uma conta grande todo "
 "turno, então faça-o crescer num ritmo que a sua renda aguente."
+
+#~ msgid "Send him from InterPlanetary Operations, under Special Operations."
+#~ msgstr "Mande-o por Operações Interplanetárias, em Operações Especiais."
 
 #~ msgid ""
 #~ "**Bomb Intelligence** — kills a few percent of their agents, which is "
