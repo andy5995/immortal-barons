@@ -11,8 +11,8 @@ class ImmortalBarons < Formula
   # This is the vendored-source tarball the release workflow publishes, not the
   # auto-generated tag archive: the repo does not commit vendor/, so only this
   # asset lets the build skip a module download.
-  url "https://github.com/andy5995/immortal-barons/releases/download/v0.2.1/immortal-barons-v0.2.1-vendored-source.tar.gz"
-  sha256 "9a2d4734a259a520ce8e007ff44559ae9883b457db876abc768a0af4e1c1802c"
+  url "https://github.com/andy5995/immortal-barons/releases/download/v0.2.2/immortal-barons-v0.2.2-vendored-source.tar.gz"
+  sha256 "89868018ef7ab3c998e3afabc4b6d799a69063ae50c90c395c28b1f692f4a897"
   license "MIT"
   head "https://github.com/andy5995/immortal-barons.git", branch: "trunk"
 
@@ -33,10 +33,9 @@ class ImmortalBarons < Formula
 
   def install
     system "go", "build", *std_go_args, "./cmd/immortal-barons"
-    # The panel is its own Go module, so it builds from its own directory.
-    # Tarballs from v0.2.2 on vendor its dependencies too; v0.2.1's does not,
-    # so building that one fetches Gio. It goes in bin/ beside
-    # immortal-barons, which it runs for every command.
+    # The panel is its own Go module, so it builds from its own directory,
+    # from the dependencies the tarball vendors for it. It goes in bin/
+    # beside immortal-barons, which it runs for every command.
     # PIE on Linux, as docs/sysop-panel.md builds it: without it the linker
     # leaves text relocations in the cgo binary.
     cd "cmd/ib-sysop" do
@@ -53,7 +52,8 @@ class ImmortalBarons < Formula
                 "docs/command-reference.md", "docs/door-setup.md",
                 "docs/charset.md", "docs/download.md", "docs/translating.md",
                 "docs/inter-bbs.md", "docs/inter-bbs-troubleshooting.md",
-                "docs/ftn-transport.md", "docs/bulletins.md", "docs/bbs-cfg.md"
+                "docs/ftn-transport.md", "docs/bulletins.md", "docs/bbs-cfg.md",
+                "docs/sysop-panel.md"
   end
 
   def caveats
