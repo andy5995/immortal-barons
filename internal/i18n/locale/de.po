@@ -1307,7 +1307,7 @@ msgstr "Ausgedehnte Schlacht"
 msgid "FAILURE"
 msgstr "FEHLSCHLAG"
 
-#: cmd/immortal-barons/league.go:201
+#: cmd/immortal-barons/league.go:211
 msgid "FTN spool"
 msgstr "FTN-Spool"
 
@@ -1528,7 +1528,7 @@ msgid "In Hold"
 msgstr "Einbehalten"
 
 # Menu titles
-#: cmd/immortal-barons/league.go:215
+#: cmd/immortal-barons/league.go:225
 msgid "Inbound pending"
 msgstr "Eingang ausstehend"
 
@@ -2229,7 +2229,7 @@ msgstr ""
 "Unsere {Bergregionen} halten die Gießereien am Limit, %d%% der normalen "
 "Einheitenproduktion."
 
-#: cmd/immortal-barons/league.go:212
+#: cmd/immortal-barons/league.go:222
 msgid "Outbound waiting"
 msgstr "Ausgang wartend"
 
@@ -2359,7 +2359,7 @@ msgstr "Vorstoß..."
 msgid "Quick Strike"
 msgstr "Schneller Schlag"
 
-#: cmd/immortal-barons/league.go:186
+#: cmd/immortal-barons/league.go:196
 msgid "Quiet report"
 msgstr "Ruhemeldung"
 
@@ -2616,7 +2616,7 @@ msgstr "Hineinlegen"
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr "S3-Sabre-Regler einstellen (0-10)"
 
-#: cmd/immortal-barons/league.go:241
+#: cmd/immortal-barons/league.go:251
 msgid "Set-aside packets"
 msgstr "Zurückgelegte Pakete"
 
@@ -3211,7 +3211,9 @@ msgstr "Es ist niemand zu erreichen."
 
 #: internal/game/spyguy.go:40
 msgid "There is no route to that planet, so no SpyGuy can be sent there."
-msgstr "Zu diesem Planeten gibt es keine Route, daher kann kein SpyGuy dorthin gesandt werden."
+msgstr ""
+"Zu diesem Planeten gibt es keine Route, daher kann kein SpyGuy dorthin "
+"gesandt werden."
 
 #: internal/game/economy.go:19
 msgid "There is no unclaimed land left on the planet today."
@@ -3431,11 +3433,11 @@ msgstr "Zonennamen eingeben"
 msgid "UTC — one clock for the whole league (%s)"
 msgstr "UTC - eine Uhr für die ganze Liga (%s)"
 
-#: cmd/immortal-barons/league.go:236
+#: cmd/immortal-barons/league.go:246
 msgid "Unclaimed packet"
 msgstr "Nicht zugeordnetes Paket"
 
-#: cmd/immortal-barons/league.go:231
+#: cmd/immortal-barons/league.go:241
 msgid "Unclaimed packets"
 msgstr "Nicht abgeholte Pakete"
 
@@ -3451,7 +3453,7 @@ msgstr "Unbegrenzt"
 msgid "Unlimited supply today."
 msgstr "Heute unbegrenzter Vorrat."
 
-#: cmd/immortal-barons/league.go:219
+#: cmd/immortal-barons/league.go:229
 msgid "Unreadable journal"
 msgstr "Unlesbares Journal"
 
@@ -4810,11 +4812,11 @@ msgstr "Ihre Panzer holten eine {missile} von {from} herunter."
 msgid "Your target is no longer there."
 msgstr "Ihr Ziel ist nicht mehr da."
 
-#: internal/game/ibbs_trade_deal.go:222
+#: internal/game/ibbs_trade_deal.go:227
 msgid "Your trade deal reached {who} of {board}: {goods}."
 msgstr "Ihr Handelsgeschäft hat {who} von {board} erreicht: {goods}."
 
-#: internal/game/ibbs_trade_deal.go:226
+#: internal/game/ibbs_trade_deal.go:231
 msgid ""
 "Your trade deal to {who} of {board} was lost: no such realm is left there to "
 "take it."
@@ -4822,7 +4824,7 @@ msgstr ""
 "Ihr Handelsgeschäft an {who} von {board} ging verloren: dort gibt es kein "
 "solches Reich mehr, das es annehmen könnte."
 
-#: internal/game/trade_deal.go:368
+#: internal/game/trade_deal.go:391
 msgid "Your trade fleet could not find {who}, and has brought the goods home."
 msgstr ""
 "Ihre Handelsflotte konnte {who} nicht finden und hat die Waren "
@@ -5364,7 +5366,7 @@ msgstr ""
 msgid "the league is already frozen"
 msgstr "die Liga ist bereits eingefroren"
 
-#: internal/game/ibbs_freeze.go:237
+#: internal/game/ibbs_freeze.go:240
 msgid "the league is frozen; thaw it before resetting the league"
 msgstr ""
 "die Liga ist eingefroren; tauen Sie sie auf, bevor Sie die Liga zurücksetzen"
@@ -5621,7 +5623,7 @@ msgid_plural "{n} Food"
 msgstr[0] "{n} Nahrung"
 msgstr[1] "{n} Nahrung"
 
-#: internal/game/ibbs_trade_deal.go:242
+#: internal/game/ibbs_trade_deal.go:247
 msgid "{n} Gold"
 msgstr "{n} Gold"
 
@@ -5717,7 +5719,7 @@ msgstr "{who}"
 msgid "{who} ({board})"
 msgstr "{who} ({board})"
 
-#: internal/game/trade_deal.go:293
+#: internal/game/trade_deal.go:314
 msgid "{who} accepted your trade deal."
 msgstr "{who} hat Ihr Handelsgeschäft angenommen."
 
@@ -5755,7 +5757,7 @@ msgstr "{who} hat keinen Vertrag, den Sie auflösen könnten."
 msgid "{who} is no longer on our planet."
 msgstr "{who} ist nicht mehr auf unserem Planeten."
 
-#: internal/game/trade_deal.go:337
+#: internal/game/trade_deal.go:358
 msgid ""
 "{who} never answered your trade deal, and the goods you sent it with are "
 "lost."
@@ -5779,7 +5781,7 @@ msgstr "{who} von {board} kaufte {n} {good} auf Ihrem Markt für {gold} Gold."
 msgid "{who} of {board} shipped you a trade deal: {goods}."
 msgstr "{who} von {board} hat Ihnen ein Handelsgeschäft geschickt: {goods}."
 
-#: internal/game/trade_deal.go:318
+#: internal/game/trade_deal.go:339
 msgid "{who} rejected your trade deal."
 msgstr "{who} hat Ihr Handelsgeschäft abgelehnt."
 

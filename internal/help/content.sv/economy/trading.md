@@ -36,12 +36,13 @@ hundra jetplan, femtusen stridsvagnar, eller hundra tusen guld. Mat,
 bombplan, agenter och hangarfartyg tar ingen plats alls. Ett
 Skyddshandel-fördrag med det riket gör avgiften billigare.
 
-Dagarna du betalar för är hur länge erbjudandet står kvar. Det du lägger i
-avtalet lämnar ditt rike i samma stund du skickar det. Om erbjudandet
-accepteras får det andra riket det, och du får det du bad om. Ett avslag,
-ett avtal ingen svarar på innan dagarna tar slut, och ett rike som faller
-innan det svarar - allt kostar dig varorna. Skicka till någon som spelar,
-och ge dem tillräckligt med dagar att hinna med det.
+The days you pay for are how long the offer stands. What you put in the deal
+leaves your realm the moment you send it, and so do the carriers. If the
+offer is accepted, the other realm gets it, you get what you asked for, and
+the carriers come home. A refusal, or a deal nobody answers before its days
+run out, costs you the goods and the carriers. If the realm falls before it
+replies, the goods and the carriers come back to you. Send to someone who is
+playing, and give them enough days to get to it.
 
 ## Avtal till en annan planet
 
@@ -49,11 +50,12 @@ I ett ligaspel skickar InterPlanetary Operations-menyn ett avtal till ett
 rike på en annan planet. Det fungerar annorlunda än det ovan, så läs detta
 innan du använder det.
 
-Du kan inte be om något tillbaka. Varorna är en gåva, och riket du skickar
-dem till har ingen talan: de anländer och läggs till det riket har. Det
-finns inget erbjudande att acceptera eller avslå, så inget returneras
-någonsin till dig. Du får veta när avtalet anländer, eller att det gick
-förlorat för att riket inte längre finns.
+You cannot ask for anything back. The goods are a gift, and the realm you
+send them to has no say: they arrive and are added to what that realm
+holds. There is no offer to accept or refuse, so the goods never come back
+to you. You are told when the deal arrives, or that it was lost because the
+realm is gone. The carriers come home when the deal arrives, and are lost
+with a lost deal.
 
 Du betalar en gång, inte per dag, och du behöver inget fördrag med riket
 eller dess planet.  Avgiften beror på vad som finns i avtalet, och den visas

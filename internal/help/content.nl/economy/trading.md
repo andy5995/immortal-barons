@@ -36,13 +36,13 @@ tanks, or a hundred thousand gold. Food, bombers, agents and carriers take
 no room at all. A Protective Trade treaty with that realm makes the fee
 cheaper.
 
-De dagen waarvoor u betaalt bepalen hoe lang het aanbod blijft staan. Wat u
-in de overeenkomst legt verlaat uw rijk op het moment dat u hem
-verstuurt. Wordt het aanbod aangenomen, dan krijgt het andere rijk het, en
-krijgt u wat u vroeg. Een weigering, een overeenkomst die niemand
-beantwoordt voordat de dagen om zijn, en een rijk dat valt voordat het
-antwoordt kosten u in alle drie de gevallen de goederen. Stuur naar iemand
-die speelt, en geef hem genoeg dagen om eraan toe te komen.
+The days you pay for are how long the offer stands. What you put in the deal
+leaves your realm the moment you send it, and so do the carriers. If the
+offer is accepted, the other realm gets it, you get what you asked for, and
+the carriers come home. A refusal, or a deal nobody answers before its days
+run out, costs you the goods and the carriers. If the realm falls before it
+replies, the goods and the carriers come back to you. Send to someone who is
+playing, and give them enough days to get to it.
 
 ## Overeenkomsten naar een andere planeet
 
@@ -50,12 +50,12 @@ In een competitiespel stuurt het menu InterPlanetaire Operaties een
 overeenkomst naar een rijk op een andere planeet. Dat werkt anders dan
 hierboven, dus lees dit voordat u het gebruikt.
 
-U kunt niets terugvragen. De goederen zijn een geschenk, en het rijk waar u
-ze naartoe stuurt heeft er niets over te zeggen: ze komen aan en worden
-toegevoegd aan wat dat rijk bezit. Er is geen aanbod om aan te nemen of te
-weigeren, dus er komt nooit iets bij u terug. U hoort wanneer de
-overeenkomst aankomt, of dat ze verloren ging omdat het rijk er niet meer
-is.
+You cannot ask for anything back. The goods are a gift, and the realm you
+send them to has no say: they arrive and are added to what that realm
+holds. There is no offer to accept or refuse, so the goods never come back
+to you. You are told when the deal arrives, or that it was lost because the
+realm is gone. The carriers come home when the deal arrives, and are lost
+with a lost deal.
 
 U betaalt eenmalig, niet per dag, en u heeft geen verdrag nodig met het rijk
 of zijn planeet.  De vergoeding hangt af van wat er in de overeenkomst zit,

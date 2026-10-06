@@ -36,12 +36,13 @@ tanks, or a hundred thousand gold. Food, bombers, agents and carriers take
 no room at all. A Protective Trade treaty with that realm makes the fee
 cheaper.
 
-Os dias que você paga são por quanto tempo a oferta fica de pé. O que você
-põe no acordo sai do seu reino no instante em que você o envia. Se a oferta
-for aceita, o outro reino recebe as mercadorias, e você recebe o que
-pediu. Uma recusa, um acordo que ninguém responde antes do prazo acabar e um
-reino que cai antes de responder custam a você as mercadorias. Mande para
-quem está jogando, e dê a essa pessoa dias suficientes para chegar até lá.
+The days you pay for are how long the offer stands. What you put in the deal
+leaves your realm the moment you send it, and so do the carriers. If the
+offer is accepted, the other realm gets it, you get what you asked for, and
+the carriers come home. A refusal, or a deal nobody answers before its days
+run out, costs you the goods and the carriers. If the realm falls before it
+replies, the goods and the carriers come back to you. Send to someone who is
+playing, and give them enough days to get to it.
 
 ## Acordos com outro planeta
 
@@ -49,11 +50,12 @@ Num jogo de liga, o menu de Operações Interplanetárias envia um acordo a um
 reino de outro planeta. Ele funciona diferente do de cima, então leia isto
 antes de usá-lo.
 
-Você não pode pedir nada em troca. As mercadorias são um presente, e o reino
-para quem você as manda não opina: elas chegam e são somadas ao que aquele
-reino tem. Não há oferta a aceitar ou recusar, então nada nunca volta para
-você. Você é avisado quando o acordo chega, ou de que ele se perdeu porque o
-reino não existe mais.
+You cannot ask for anything back. The goods are a gift, and the realm you
+send them to has no say: they arrive and are added to what that realm
+holds. There is no offer to accept or refuse, so the goods never come back
+to you. You are told when the deal arrives, or that it was lost because the
+realm is gone. The carriers come home when the deal arrives, and are lost
+with a lost deal.
 
 Você paga uma vez só, não por dia, e não precisa de tratado com o reino nem
 com o planeta dele.  A taxa depende do que está no acordo, e é mostrada

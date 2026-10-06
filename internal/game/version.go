@@ -9,7 +9,7 @@ import "runtime/debug"
 // displayed in the status bar and reported by the front-ends. Between releases
 // it is the next version with a "-dev" suffix, which the release commit removes
 // and the bump after publishing restores (docs/dev/releasing.md).
-const Version = "0.2.3-dev"
+const Version = "0.2.3"
 
 // Protocol is the packet format this build speaks. It moves ONLY when the wire
 // format changes, which is what lets a board take a menu fix or a balance change

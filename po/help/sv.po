@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-05 14:02-0500\n"
+"POT-Creation-Date: 2026-10-05 19:11-0500\n"
 "PO-Revision-Date: 2026-10-02 16:05-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2128,14 +2128,23 @@ msgstr ""
 "fördrag med det riket gör avgiften billigare."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:42
+#: internal/help/content/economy/trading.md:43
+#, fuzzy
+#| msgid ""
+#| "The days you pay for are how long the offer stands. What you put in the "
+#| "deal leaves your realm the moment you send it. If the offer is accepted, "
+#| "the other realm gets it, and you get what you asked for. A refusal, a "
+#| "deal nobody answers before its days run out, and a realm that falls "
+#| "before it replies all cost you the goods. Send to someone who is playing, "
+#| "and give them enough days to get to it."
 msgid ""
 "The days you pay for are how long the offer stands. What you put in the deal "
-"leaves your realm the moment you send it. If the offer is accepted, the "
-"other realm gets it, and you get what you asked for. A refusal, a deal "
-"nobody answers before its days run out, and a realm that falls before it "
-"replies all cost you the goods. Send to someone who is playing, and give "
-"them enough days to get to it."
+"leaves your realm the moment you send it, and so do the carriers. If the "
+"offer is accepted, the other realm gets it, you get what you asked for, and "
+"the carriers come home. A refusal, or a deal nobody answers before its days "
+"run out, costs you the goods and the carriers. If the realm falls before it "
+"replies, the goods and the carriers come back to you. Send to someone who is "
+"playing, and give them enough days to get to it."
 msgstr ""
 "Dagarna du betalar för är hur länge erbjudandet står kvar. Det du lägger i "
 "avtalet lämnar ditt rike i samma stund du skickar det. Om erbjudandet "
@@ -2145,13 +2154,13 @@ msgstr ""
 "och ge dem tillräckligt med dagar att hinna med det."
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:43
+#: internal/help/content/economy/trading.md:44
 #, no-wrap
 msgid "Deals to another planet"
 msgstr "Avtal till en annan planet"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:48
+#: internal/help/content/economy/trading.md:49
 msgid ""
 "In a league game the InterPlanetary Operations menu sends a deal to a realm "
 "on another planet. It works differently from the one above, so read this "
@@ -2162,13 +2171,21 @@ msgstr ""
 "innan du använder det."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:53
+#: internal/help/content/economy/trading.md:55
+#, fuzzy
+#| msgid ""
+#| "You cannot ask for anything back. The goods are a gift, and the realm you "
+#| "send them to has no say: they arrive and are added to what that realm "
+#| "holds. There is no offer to accept or refuse, so nothing is ever returned "
+#| "to you. You are told when the deal arrives, or that it was lost because "
+#| "the realm is gone."
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
 "send them to has no say: they arrive and are added to what that realm holds. "
-"There is no offer to accept or refuse, so nothing is ever returned to you. "
+"There is no offer to accept or refuse, so the goods never come back to you. "
 "You are told when the deal arrives, or that it was lost because the realm is "
-"gone."
+"gone. The carriers come home when the deal arrives, and are lost with a lost "
+"deal."
 msgstr ""
 "Du kan inte be om något tillbaka. Varorna är en gåva, och riket du skickar "
 "dem till har ingen talan: de anländer och läggs till det riket har. Det "
@@ -2177,7 +2194,7 @@ msgstr ""
 "förlorat för att riket inte längre finns."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:58
+#: internal/help/content/economy/trading.md:60
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
 "planet.  The fee depends on what is in the deal, and it is shown before you "
@@ -2192,18 +2209,18 @@ msgstr ""
 "använd avtalet ovan."
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:59
+#: internal/help/content/economy/trading.md:61
 #, no-wrap
 msgid "Getting the most from trade"
 msgstr "Få ut mest av handel"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:62
+#: internal/help/content/economy/trading.md:64
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr "Handel betyder mest när flera riken samarbetar. Några idéer:"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:67
+#: internal/help/content/economy/trading.md:69
 #, no-wrap
 msgid ""
 "**Specialize, then supply your partners.** Your industry can specialize in one\n"
@@ -2217,7 +2234,7 @@ msgstr ""
 "gör ni båda mer av det den andra behöver. Handla med överskottet, så vinner båda riken på det.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:71
+#: internal/help/content/economy/trading.md:73
 #, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so\n"
@@ -2229,7 +2246,7 @@ msgstr ""
 "beväpna en rival istället. Vill du vara säker på att varorna når det rike du menar dem för, skicka ett handelsavtal istället.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:74
+#: internal/help/content/economy/trading.md:76
 #, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, and\n"
@@ -2909,7 +2926,12 @@ msgid ""
 "screen opens with every SpyGuy this planet already has out: where he is, the "
 "days he has left, and who sent him. A planet already watched gains nothing "
 "from a shorter stay; only the longer of the two counts."
-msgstr "Skicka honom från Interplanetära operationer, under Specialoperationer. Den skärmen visar först varje SpyGuy som planeten redan har ute: var han är, hur många dagar han har kvar och vem som skickade honom. En planet som redan bevakas vinner inget på en kortare vistelse; bara den längre av de två räknas."
+msgstr ""
+"Skicka honom från Interplanetära operationer, under Specialoperationer. Den "
+"skärmen visar först varje SpyGuy som planeten redan har ute: var han är, hur "
+"många dagar han har kvar och vem som skickade honom. En planet som redan "
+"bevakas vinner inget på en kortare vistelse; bara den längre av de två "
+"räknas."
 
 #. type: Title ##
 #: internal/help/content/interbbs/spyguy.md:20

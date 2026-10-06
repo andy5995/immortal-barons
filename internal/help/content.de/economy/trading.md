@@ -36,13 +36,13 @@ tanks, or a hundred thousand gold. Food, bombers, agents and carriers take
 no room at all. A Protective Trade treaty with that realm makes the fee
 cheaper.
 
-Die Tage, für die Sie zahlen, sind die Zeit, die das Angebot steht. Was Sie
-in das Geschäft legen, verlässt Ihr Reich in dem Augenblick, in dem Sie es
-senden. Wird das Angebot angenommen, erhält das andere Reich es, und Sie
-erhalten, was Sie verlangt haben. Eine Ablehnung, ein Geschäft, das niemand
-beantwortet, bevor seine Tage ablaufen, und ein Reich, das fällt, bevor es
-antwortet, kosten Sie allesamt die Waren. Senden Sie an jemanden, der
-spielt, und geben Sie ihm genug Tage, um dazu zu kommen.
+The days you pay for are how long the offer stands. What you put in the deal
+leaves your realm the moment you send it, and so do the carriers. If the
+offer is accepted, the other realm gets it, you get what you asked for, and
+the carriers come home. A refusal, or a deal nobody answers before its days
+run out, costs you the goods and the carriers. If the realm falls before it
+replies, the goods and the carriers come back to you. Send to someone who is
+playing, and give them enough days to get to it.
 
 ## Geschäfte zu einem anderen Planeten
 
@@ -50,12 +50,12 @@ In einem Ligaspiel sendet das Menü Interplanetare Operationen ein Geschäft
 an ein Reich auf einem anderen Planeten. Es arbeitet anders als das oben
 beschriebene, lesen Sie dies also, bevor Sie es nutzen.
 
-Sie können nichts dafür verlangen. Die Waren sind ein Geschenk, und das
-Reich, dem Sie sie senden, hat kein Mitspracherecht: Sie treffen ein und
-werden dem hinzugefügt, was dieses Reich hält. Es gibt kein Angebot zum
-Annehmen oder Ablehnen, daher wird Ihnen nie etwas zurückgegeben. Sie
-erfahren, wenn das Geschäft ankommt oder wenn es verloren ging, weil das
-Reich nicht mehr existiert.
+You cannot ask for anything back. The goods are a gift, and the realm you
+send them to has no say: they arrive and are added to what that realm
+holds. There is no offer to accept or refuse, so the goods never come back
+to you. You are told when the deal arrives, or that it was lost because the
+realm is gone. The carriers come home when the deal arrives, and are lost
+with a lost deal.
 
 Sie zahlen einmal, nicht je Tag, und Sie brauchen weder einen Vertrag mit
 dem Reich noch mit seinem Planeten.  Die Gebühr hängt davon ab, was in dem
