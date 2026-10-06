@@ -62,15 +62,23 @@ theme:
     - toc.follow
     - search.suggest
     - content.code.copy
+  # A first visit follows the reader's system setting; the button cycles
+  # system -> light -> dark, and Material remembers the choice per browser.
   palette:
-    - scheme: default
+    - media: "(prefers-color-scheme)"
       toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - scheme: slate
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       toggle:
         icon: material/weather-sunny
-        name: Switch to light mode
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Switch to system preference
 
 plugins:
   - search
