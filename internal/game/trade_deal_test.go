@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// Sending escrows the offered goods, consumes a transport carrier, and charges
-// the per-day fee. Accepting delivers the offered goods to the recipient and
-// pays the demanded goods from the recipient to the sender.
+// Sending escrows the offered goods, takes a transport carrier, and charges the
+// per-day fee. Accepting delivers the offered goods to the recipient, pays the
+// demanded goods from the recipient to the sender, and returns the carrier.
 func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
@@ -47,6 +47,9 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 	}
 	if from.Gold != 300_000-fee+5_000 {
 		t.Errorf("accept should pay the demanded gold to the sender: %d", from.Gold)
+	}
+	if from.Carriers != 1 {
+		t.Errorf("accept should bring the transport carrier home: %d, want 1", from.Carriers)
 	}
 }
 
@@ -365,8 +368,57 @@ func TestRemovingARealmReturnsTheEscrowToTheSender(t *testing.T) {
 	if from.Tanks != 500 {
 		t.Errorf("the escrow should come home: %d tanks, want the full 500 back", from.Tanks)
 	}
+	if from.Carriers != 1 {
+		t.Errorf("the fleet should come home too: %d carriers, want 1", from.Carriers)
+	}
 	if got := from.Events[len(from.Events)-1].Text; !strings.Contains(got, "brought the goods home") {
 		t.Errorf("the sender should be told the goods came back, got %q", got)
+	}
+}
+
+// A strike on the trade routes cuts what a pending deal carries but not the
+// fleet carrying it: accepting still returns every carrier the deal took, as
+// the original refunds the count it stored at sending (record +0x52), not one
+// worked out again from the reduced cargo.
+func TestBombedTradeDealReturnsEveryCarrierItTook(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
+	pactAll(w, fullDefenseAlliance)
+	from.Troopers, from.Carriers, from.Gold = 20_000, 20, 10_000_000
+	if err := w.SendTradeDeal(from, to, TradeBasket{Troopers: 20_000}, TradeBasket{}, TradeDealMinDays); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+	if from.Carriers != 0 {
+		t.Fatalf("20,000 troopers should take all 20 carriers, %d left", from.Carriers)
+	}
+	bombDealBasket(&to.TradeDeals[0].Send, 30)
+	if to.TradeDeals[0].Send.Troopers != 14_000 {
+		t.Fatalf("the strike should leave 14,000 troopers, left %d", to.TradeDeals[0].Send.Troopers)
+	}
+	if err := w.AcceptTradeDeal(to, to.TradeDeals[0]); err != nil {
+		t.Fatalf("accept: %v", err)
+	}
+	if from.Carriers != 20 {
+		t.Errorf("sender holds %d carriers after accept, want all 20 back", from.Carriers)
+	}
+}
+
+// A deal saved before the carrier count was kept still returns its transport,
+// worked out from what it carries.
+func TestTradeDealSavedWithoutACarrierCountStillReturnsOne(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
+	pactAll(w, fullDefenseAlliance)
+	to.TradeDeals = []TradeDeal{{From: from.Name, Send: TradeBasket{Tanks: 100}}}
+	if err := w.AcceptTradeDeal(to, to.TradeDeals[0]); err != nil {
+		t.Fatalf("accept: %v", err)
+	}
+	if from.Carriers != 1 {
+		t.Errorf("sender holds %d carriers, want 1", from.Carriers)
 	}
 }
 

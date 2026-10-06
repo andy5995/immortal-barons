@@ -264,8 +264,16 @@ func TestIPTradeDealReceiptReachesTheSender(t *testing.T) {
 				alive, reply.TradeReceipts, alive)
 		}
 
-		before := len(from.Events)
+		before, carriers := len(from.Events), from.Carriers
 		home.receive(reply)
+		// 5,000 troopers need five carriers; they come home only with a delivery.
+		wantCarriers := carriers
+		if alive {
+			wantCarriers += 5
+		}
+		if from.Carriers != wantCarriers {
+			t.Errorf("alive=%v: sender holds %d carriers, want %d", alive, from.Carriers, wantCarriers)
+		}
 		if len(from.Events) != before+1 {
 			t.Fatalf("alive=%v: sender got %d new events, want 1", alive, len(from.Events)-before)
 		}

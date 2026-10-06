@@ -34,10 +34,11 @@ thousand gold. Food, bombers, agents and carriers take no room at all. A
 Protective Trade treaty with that realm makes the fee cheaper.
 
 The days you pay for are how long the offer stands. What you put in the deal
-leaves your realm the moment you send it. If the offer is accepted, the other
-realm gets it, and you get what you asked for. A refusal, a deal nobody answers
-before its days run out, and a realm that falls before it replies all cost you
-the goods. Send to someone who is
+leaves your realm the moment you send it, and so do the carriers. If the offer
+is accepted, the other realm gets it, you get what you asked for, and the
+carriers come home. A refusal, or a deal nobody answers before its days run
+out, costs you the goods and the carriers. If the realm falls before it
+replies, the goods and the carriers come back to you. Send to someone who is
 playing, and give them enough days to get to it.
 
 ## Deals to another planet
@@ -48,8 +49,9 @@ use it.
 
 You cannot ask for anything back. The goods are a gift, and the realm you send
 them to has no say: they arrive and are added to what that realm holds. There is
-no offer to accept or refuse, so nothing is ever returned to you. You are told
-when the deal arrives, or that it was lost because the realm is gone.
+no offer to accept or refuse, so the goods never come back to you. You are told
+when the deal arrives, or that it was lost because the realm is gone. The
+carriers come home when the deal arrives, and are lost with a lost deal.
 
 You pay once, not per day, and you need no treaty with the realm or its planet.
 The fee depends on what is in the deal, and it is shown before you confirm. You

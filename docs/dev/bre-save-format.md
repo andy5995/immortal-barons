@@ -332,12 +332,18 @@ line — population tax, ore, tourism, solar, industrial, hydro. Nothing else in
 the binary writes it, so bank interest, food sales and plunder do not enter it.
 This is the base for the crown tax (issue #52).
 
-## Trade offer record (one field mapped)
+## Trade offer record (two fields mapped)
 
 A pending trade offer is a 0x97-byte record, which BRE also checks for
-tampering. Only one field of it has been read so far:
+tampering. Two fields of it have been read so far:
 
 ```
+  +0x52  int32  the transport carriers the cargo needed, already taken off the
+                sender. Written by create_trade_offer (its [bp-0x46], the
+                carrier-count helper's result, subtracted from the sender's
+                +0x8a at unit offset 0x23A7); credited back to the SENDER's
+                +0x8a by process_trade_offer's accept branch (0x02563a) and
+                its helper at 0x024961 +0x0231.
   +0x60  byte   the SENDER's turns-remaining-today at the moment of sending.
                 Written by create_trade_offer (BRE.OVR 0x260CD, unit offset
                 0x238B); read by process_trade_offer (0x24D6B, unit offset

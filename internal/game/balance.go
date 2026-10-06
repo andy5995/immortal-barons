@@ -161,10 +161,11 @@ const (
 	MaxCountField = 2_000_000_000
 )
 
-// Trade-deal sending: a deal consumes the carriers its cargo needs
-// (TradeDealCarriers) and costs its cargo-weighted TradeOfferCost per day for a
-// chosen span of TradeDealMinDays..TradeDealMaxDays days; the offered goods are
-// escrowed until the recipient answers.
+// Trade-deal sending: a deal takes the carriers its cargo needs
+// (TradeDealCarriers), returned only if it is accepted, and costs its
+// cargo-weighted TradeOfferCost per day for a chosen span of
+// TradeDealMinDays..TradeDealMaxDays days; the offered goods are escrowed until
+// the recipient answers, and lost if it rejects or never answers.
 const (
 	// TradeDealGoldBase and TradeDealCostDivisor are the two halves of the
 	// original's cost formula: the nine goods are summed against the per-good

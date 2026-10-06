@@ -219,6 +219,11 @@ func (w *World) applyTradeReceipt(board string, r IPTradeReceipt) {
 		return
 	}
 	if r.Delivered {
+		// IB's own: the original never returns an interplanetary deal's carriers
+		// (only send_trade_offer writes the field), while a local deal gets them
+		// back on accept. IB treats the delivered receipt as that accept. A lost
+		// deal loses its carriers with its goods.
+		from.Carriers += TradeDealCarriers(r.Goods)
 		from.addEvent(say("Your trade deal reached {who} of {board}: {goods}.",
 			"who", r.ToEmpire, "board", board, "goods", describeBasket(r.Goods)))
 		return

@@ -2,6 +2,7 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * -league-check shows each frozen board's version, updated as boards update
+  * A trade deal's carriers come home unless it is refused, lapses or is lost
 
 2026-10-05 (v0.2.2)
   * BREAKING: packet protocol 4; every board in a league must update together

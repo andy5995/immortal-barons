@@ -118,7 +118,7 @@ func subBasket(e *Empire, b TradeBasket) {
 // TradeDeal is a pending barter offer recorded on the target empire: the sender
 // gives Send and wants Demand in return. The Send goods are escrowed off the
 // sender when the deal is sent (see SendTradeDeal), so they can't be double-spent
-// while the offer is pending; a decline returns them.
+// while the offer is pending; a decline destroys them (see DeclineTradeDeal).
 type TradeDeal struct {
 	From   string
 	Send   TradeBasket // goods the sender gives the recipient
@@ -138,6 +138,11 @@ type TradeDeal struct {
 	// has no such key, and it must go on arriving at once rather than being
 	// held forever behind a turn it was never stamped with.
 	ArrivesOnTurn int `json:",omitempty"`
+	// Carriers is the transport the deal took off its sender, kept as it was
+	// at sending: Bomb Trade Routes cuts Send in transit and leaves this alone,
+	// as the original's record keeps the count apart from the goods (+0x52).
+	// Read it through transport.
+	Carriers int `json:",omitempty"`
 }
 
 // releaseTradeDeals lifts the arrival gate from every pending deal at the turn
@@ -200,11 +205,11 @@ func (w *World) TradeDealCostBetween(from, to *Empire, send TradeBasket, days in
 }
 
 // SendTradeDeal sends a trade deal from `from` to `to` over `days` days: it
-// consumes the carriers its cargo needs, charges the per-day gold fee, escrows
-// the Send goods, and records a pending deal on `to`, stamped with the turn of the
-// day it left (see TradeDeal.ArrivesOnTurn). Fails if both baskets are empty,
-// `from` lacks the offered goods, lacks the transport carriers, or can't afford
-// the fee.
+// takes the carriers its cargo needs (they come back on accept), charges the
+// per-day gold fee, escrows the Send goods, and records a pending deal on `to`,
+// stamped with the turn of the day it left (see TradeDeal.ArrivesOnTurn). Fails
+// if both baskets are empty, `from` lacks the offered goods, lacks the transport
+// carriers, or can't afford the fee.
 func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days int) error {
 	if from.Protection > 0 {
 		return ErrInProtection
@@ -230,21 +235,33 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	if from.Gold < int64(send.Gold)+cost {
 		return ErrCantAfford
 	}
-	subBasket(from, send)                    // escrow the offered goods
-	from.Carriers -= TradeDealCarriers(send) // the transport is consumed
-	from.Gold -= cost                        // pay the per-day transit fee
+	carriers := TradeDealCarriers(send)
+	subBasket(from, send)     // escrow the offered goods
+	from.Carriers -= carriers // the transport goes with them
+	from.Gold -= cost         // pay the per-day transit fee
 	to.TradeDeals = append(to.TradeDeals, TradeDeal{
 		From:          from.Name,
 		Send:          send,
 		Demand:        demand,
 		Expires:       timeNow().AddDate(0, 0, clampTradeDealDays(days)),
 		ArrivesOnTurn: w.TurnOfDay(from),
+		Carriers:      carriers,
 	})
 	// The offer mails nothing: the recipient meets it at turn start, where the
 	// baskets and the accept prompt are. Same reason a treaty proposal stopped
 	// mailing (a1b309f) — a generated line telling them what the screen is
 	// already asking.
 	return nil
+}
+
+// transport is the carriers the deal took off its sender. A deal saved before
+// the count was kept has none recorded, and gets it worked out from what it
+// still carries.
+func (d TradeDeal) transport() int {
+	if d.Carriers > 0 {
+		return d.Carriers
+	}
+	return TradeDealCarriers(d.Send)
 }
 
 // findDeal returns the index of the pending deal on `to` that is `want`, or -1.
@@ -289,6 +306,10 @@ func (w *World) AcceptTradeDeal(to *Empire, want TradeDeal) error {
 	w.addBasket(to, d.Send)     // deliver the offered goods (escrow released to recipient)
 	subBasket(to, d.Demand)     // recipient pays the demand
 	w.addBasket(from, d.Demand) // sender receives the demand
+	// The transport comes home with a completed deal: the accept branch credits
+	// the record's carrier count back to the sender (process_trade_offer,
+	// BRE.OVR 0x02563a), and a rejection or expiry credits nothing.
+	from.Carriers += d.transport()
 	to.removeDeal(i)
 	notifyTrader(from, to, msgid("{who} accepted your trade deal."))
 	return nil
@@ -357,7 +378,8 @@ func (w *World) ExpireTradeDeals(now time.Time) {
 // trade record (`clear_trade_offer_record` is reached only from
 // `create_trade_offer` and `process_trade_offer`), so a departing realm takes
 // any pending offer with it silently. IB already diverged by telling the sender
-// at all; this carries the goods with the notice.
+// at all; this carries the goods with the notice, and the carriers that
+// shipped them, as an accepted deal would.
 //
 // addBasket is what returns them, so gold lands under the money cap and files
 // its own loss event if the realm is already at it.
@@ -365,6 +387,7 @@ func (w *World) returnPendingDeals(e *Empire) {
 	for _, d := range e.TradeDeals {
 		if from := w.FindByName(d.From); from != nil && from != e {
 			w.addBasket(from, d.Send)
+			from.Carriers += d.transport()
 			from.addEvent(say("Your trade fleet could not find {who}, and has brought the goods home.", "who", e.Name))
 		}
 	}

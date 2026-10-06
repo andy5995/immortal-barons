@@ -5212,6 +5212,15 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   carries a trade-deal category and the original's arrival routine calls no news
   writer.
 
+  **DELIBERATE DIVERGENCE — the carriers come home with a delivered deal.** The
+  original never returns an interplanetary deal's carriers: `send_trade_offer`
+  is the only routine on that path that writes the sender's Carriers field, and
+  neither `resolve_received_trade_offer` nor the report it posts home touches
+  it. A local deal gets its carriers back on accept (below), so IB treats the
+  delivered receipt the same way and credits `TradeDealCarriers` of the goods
+  back to the sender when it arrives. A lost deal loses its carriers with its
+  goods.
+
   **IB's own — the lost receipt.** When no living realm of that name is there to
   take the deal, the goods are gone, as in the original, but IB still sends a
   receipt saying so. The original returns before building either report, so its
@@ -6476,8 +6485,22 @@ Market`. Any empire can list goods for other empires to buy:
 
 Negotiated empire-to-empire trade deals carrying goods with demands (BRE's other
 trading half) are built: `SendTradeDeal` takes a full basket each way, escrows
-what is offered, consumes the carriers the cargo needs and charges the per-day
-transit fee (#17). Interplanetary trading is built too, as its own type (`IPTradeBid`,
+what is offered, takes the carriers the cargo needs and charges the per-day
+transit fee (#17).
+
+**The carriers come back on accept, and only then — BINARY-VERIFIED.**
+`create_trade_offer` subtracts the carrier count from the sender (`BRE.OVR`
+0x260CD, unit offset 0x23A7) and stores it in the offer record at `+0x52`;
+`process_trade_offer`'s accept branch adds `+0x52` back to the sender's Carriers
+(0x02563a, and once more in its helper at 0x024961 +0x0231). A rejection or an
+expiry credits nothing, so those carriers are lost with the goods. The refund
+is the STORED count, so a deal Bomb Trade Routes cut in transit still returns
+every carrier it took; IB keeps it on the deal as `TradeDeal.Carriers`, and a
+deal saved before that field existed works it out from what it still carries.
+A live
+capture agrees: a 20-carrier deal took 565 carriers to 545, and they were back
+at 565 once it was accepted (`cap/kd3-01.cap`). IB consumed them outright until
+2026-10-05. Interplanetary trading is built too, as its own type (`IPTradeBid`,
 a buy order that travels to another planet and is filled there); carrier-moved
 goods remain future work.
 
@@ -6583,7 +6606,7 @@ the other two branches have a reason this one does not, and all three share the
 same record-clearing code. Faithful to the routine, IB would burn a shipment
 because a THIRD party was reaped as idle. `World.returnPendingDeals`
 returns the escrow through `addBasket`, so returned gold lands under the money
-cap.
+cap, and returns the carriers with it, as an accepted deal would.
 
 **A pending deal is put again on every entry, and out of turns is asked
 nothing.** `run_player_turn` calls `process_trade_offer` behind a
