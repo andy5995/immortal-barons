@@ -49,7 +49,7 @@ for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 dar
 	mkdir -p "$dir/docs"
 	cp docs/faq.md docs/playing.md docs/command-reference.md docs/door-setup.md \
 		docs/bbs-cfg.md \
-		docs/bulletins.md docs/inter-bbs.md docs/charset.md docs/download.md \
+		docs/bulletins.md docs/inter-bbs.md docs/charset.md \
 		docs/translating.md docs/ftn-transport.md docs/inter-bbs-troubleshooting.md \
 		docs/sysop-panel.md \
 		"$dir/docs/"

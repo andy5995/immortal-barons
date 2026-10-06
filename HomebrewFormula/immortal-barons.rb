@@ -50,7 +50,7 @@ class ImmortalBarons < Formula
     # "tar tzf <tarball> | grep docs/", not against build-archives.sh.
     doc.install "LICENSE", "README.md", "docs/faq.md", "docs/playing.md",
                 "docs/command-reference.md", "docs/door-setup.md",
-                "docs/charset.md", "docs/download.md", "docs/translating.md",
+                "docs/charset.md", "docs/translating.md",
                 "docs/inter-bbs.md", "docs/inter-bbs-troubleshooting.md",
                 "docs/ftn-transport.md", "docs/bulletins.md", "docs/bbs-cfg.md",
                 "docs/sysop-panel.md"
