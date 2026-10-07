@@ -213,7 +213,8 @@ func TestStrikeReportWearsBREsLayout(t *testing.T) {
 
 // The defender's report is laid out as the original's (eots-ibbs-03.cap): the
 // planet and realm the strike came from, then indented the force, the verdict,
-// the losses and the land. IB adds the strike's kind to the header.
+// the losses and the land. IB adds the strike's kind to the header, and says
+// so when a strike hit the whole planet.
 func TestInvasionReportWearsBREsLayout(t *testing.T) {
 	atk := RemoteAttack{FromBoard: "The Eclipse", FromEmpire: "Pirates Ahoy!", TargetEmpire: "Victim",
 		Kind: NormalAttack, Contributors: []Contribution{{AttackForce: AttackForce{Troopers: 75_000, Jets: 3_338_000, Tanks: 5_727_000}}}}
@@ -230,6 +231,7 @@ func TestInvasionReportWearsBREsLayout(t *testing.T) {
 		Contributors: []Contribution{{AttackForce: AttackForce{Troopers: 1}}}}
 	got = invasionReport(whole, false, UnitLoss{}, 0).English()
 	want = "Global Invasion From Starship Junkyard (group attack)\n" +
+		"  It struck the whole planet.\n" +
 		"  1 Trooper attacked!\n" +
 		"  Your forces won the battle!\n" +
 		"  You lost nothing!"

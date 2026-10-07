@@ -6937,6 +6937,11 @@ checking IB against a capture:
   do the arithmetic. A group attack gets no choice of kind and reports
   `(group attack)`; `AttackKind`'s zero value is `QuickStrike`, so the group
   case is tested first (`invasionReport`).
+- **A planet-wide invasion report says it was planet-wide.** The original's
+  header says only `Global Invasion From X`, which reads as easily as a strike
+  aimed at the reader's own realm. Every unprotected realm's defense was pooled
+  into one battle, and the losses listed are this realm's share of it, so IB
+  adds `It struck the whole planet.` under the header.
 - **The Terrorist Ops rate on the InterPlanetary menu matches what is charged.**
   The original quotes from an integer routine that clamps its ops-today counter
   to 1..100 and bills from a Real48 one that clamps nothing, so it advertises

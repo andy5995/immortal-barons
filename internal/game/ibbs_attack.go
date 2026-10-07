@@ -105,7 +105,7 @@ func (c Contribution) offenseAgainstSDI(sdi int) int {
 type GroupAttack struct {
 	ID           int
 	TargetBoard  string
-	TargetEmpire string // "" = the whole planet (its strongest baron)
+	TargetEmpire string // "" = the whole planet: every unprotected realm defends together
 	// DepartAt is the instant the force leaves. BRE asks for a delay in HOURS
 	// (12-120) and stores the answer as a wall-clock departure, which is what
 	// lets a strike be timed to land before an opponent's next turn; a day
@@ -877,8 +877,13 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) Msg 
 		from = say("{board} by {who}", "board", atk.FromBoard, "who", atk.FromEmpire)
 	}
 	head := say("Invasion From {from} ({kind})", "from", from, "kind", kind)
+	// DELIBERATE DIVERGENCE: the original says only "Global", which reads as
+	// easily as a strike aimed at this realm. The defense was the whole planet's
+	// pooled, and the losses below are this realm's share of it.
+	var whole Msg
 	if atk.TargetEmpire == "" {
 		head = say("Global Invasion From {from} ({kind})", "from", from, "kind", kind)
+		whole = say("It struck the whole planet.")
 	}
 	verdict := say("Your forces won the battle!")
 	var took Msg
@@ -891,6 +896,7 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) Msg 
 		lostLine = say("You lost nothing!")
 	}
 	return lines(head,
+		indent(whole, 2),
 		indent(unitLine(msgid("{units} attacked!"), attackUnits(forceOf(atk.Contributors))), 2),
 		indent(verdict, 2),
 		indent(lostLine, 2),
