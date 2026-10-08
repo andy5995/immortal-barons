@@ -109,3 +109,29 @@ func TestInterplanetaryDealRefusesAProtectedRealm(t *testing.T) {
 		t.Errorf("a refused deal still moved goods: %d troopers, was %d", after, before)
 	}
 }
+
+// Deals Out lists a shipped deal, what it carries and when it comes home.
+func TestDealsOutListsAShippedDeal(t *testing.T) {
+	w := newIPDealCtx(t)
+	empty := &fakeSession{keys: []rune(" ")}
+	ipPendingDeals(empty, w)
+	if !strings.Contains(stripANSI(empty.out.String()), "You have no trade deals out.") {
+		t.Fatalf("an empty list should say so:\n%s", empty.out.String())
+	}
+
+	w.With(func() {
+		w.Config.LostForcesDays = 3
+		if err := w.World.SendIPTradeDeal(w.Player(), "Far BBS", "Open Realm", game.TradeBasket{Troopers: 5_000}); err != nil {
+			t.Fatalf("send: %v", err)
+		}
+	})
+	f := &fakeSession{keys: []rune(" ")}
+	ipPendingDeals(f, w)
+	out := stripANSI(f.out.String())
+	for _, want := range []string{"Trade Deals Awaiting a Receipt", "To Open Realm of Far BBS: 5000 Troopers.",
+		"Comes home in 3 days if no word"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	}
+}

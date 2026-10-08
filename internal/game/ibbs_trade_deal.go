@@ -293,8 +293,11 @@ func describeBasket(b TradeBasket) []Msg {
 	return parts
 }
 
+// Describe is a basket's contents in the reader's language.
+func (b TradeBasket) Describe(lang string) string { return listIn(lang, nil, describeBasket(b)) }
+
 // Summary is a basket's contents in English, for the sysop panel.
-func (b TradeBasket) Summary() string { return listIn("", nil, describeBasket(b)) }
+func (b TradeBasket) Summary() string { return b.Describe("") }
 
 // counted is g.Counted for a count already shaped as a figure (short, comma).
 func counted(g *Good, n Arg) Msg {

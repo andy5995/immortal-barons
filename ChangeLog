@@ -4,6 +4,7 @@ Immortal Barons ChangeLog
   * BREAKING: packet protocol 5; every board in a league must update together
   * A lost interplanetary trade deal, or one whose realm is gone, comes home
   * A refused or lapsed trade deal returns its goods and carriers
+  * Deals Out lists the interplanetary trade deals still awaiting a receipt
 
 2026-10-08 (v0.2.4)
   * Updating from v0.1.0 or later needs no game reset

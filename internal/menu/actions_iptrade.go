@@ -6,6 +6,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -166,6 +167,49 @@ func ipPendingBids(s session.Session, w *ctx) Result {
 			ansi.FgBrightYellow, comma(r.gold), ansi.Reset)
 	}
 	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%s gold is held against these bids."), comma(total))))
+	pause(s)
+	return Stay
+}
+
+// ipPendingDeals lists the interplanetary trade deals this baron has sent that
+// have no receipt yet, and when each comes home if none arrives.
+func ipPendingDeals(s session.Session, w *ctx) Result {
+	type row struct {
+		board, realm string
+		goods        game.TradeBasket
+		left         int
+		timed        bool
+	}
+	var rows []row
+	w.Read(func() {
+		p := w.Player()
+		if p == nil {
+			return
+		}
+		for _, f := range w.World.InFlight {
+			if f.Kind == "deal" && f.Owner == p.Owner && f.Goods != nil {
+				left, timed := w.World.LostForcesDaysLeft(f)
+				rows = append(rows, row{f.TargetBoard, f.TargetEmpire, *f.Goods, left, timed})
+			}
+		}
+	})
+	if len(rows) == 0 {
+		ok(s, "You have no trade deals out.")
+		return Stay
+	}
+	lang := sessionLang(s)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Trade Deals Awaiting a Receipt"), ansi.Reset)
+	for _, r := range rows {
+		line := fmt.Sprintf(tr(s, "To %s of %s: %s."), r.realm, r.board, r.goods.Describe(lang))
+		switch {
+		case r.timed && r.left <= 0:
+			line += " " + tr(s, "Comes home at the next planetary run if no word arrives.")
+		case r.timed:
+			line += " " + fmt.Sprintf(i18n.TN(lang, "Comes home in %d day if no word arrives.",
+				"Comes home in %d days if no word arrives.", int64(r.left)), r.left)
+		}
+		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(line, "  ")))
+	}
 	pause(s)
 	return Stay
 }

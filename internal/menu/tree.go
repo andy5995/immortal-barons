@@ -264,6 +264,7 @@ func BuildMenus() *Menus {
 		{Key: '1', Label: "Send Trade Deal", Do: needsTurnPlayed(sendIPTradeDeal)},
 		{Key: 'M', Label: "Markets", Do: ipMarkets},
 		{Key: 'B', Label: "Bids Out", Do: ipPendingBids},
+		{Key: 'D', Label: "Deals Out", Do: ipPendingDeals},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}

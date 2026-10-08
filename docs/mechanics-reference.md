@@ -5237,7 +5237,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   'lost' forces returned"). The fee is not returned. A receipt that arrives
   after that pays nothing, but a delivered one tells the sender the deal reached
   the realm after all. The deal carries an `ID` that the receipt echoes,
-  which is what moved the packet protocol to 5.
+  which is what moved the packet protocol to 5. Deals Out, on the InterPlanetary
+  Trading menu, lists a baron's deals still waiting for a receipt.
 
   **IB's own — the lost receipt.** When no living realm of that name is there to
   take the deal, the original destroys the goods and the carriers and sends no
