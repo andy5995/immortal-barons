@@ -618,6 +618,13 @@ broadcast, is applied payload by payload:
   bulletin. If nothing is waiting on that result's ID the whole result is
   discarded rather than paid out — the lost-forces timer has already returned
   the army, or this is a duplicate.
+- **Trade receipts** give the sender of an interplanetary trade deal its
+  carriers back, and its goods too when no realm was there to take them. The
+  receipt echoes the deal's `ID` (Protocol 5), and the same rule applies: with
+  nothing waiting on that ID, the lost-forces timer has already returned the
+  deal, and the receipt pays nothing.
+  A receipt with no `ID` answers a deal sent before Protocol 5 and is matched by
+  the sender's realm name.
 - **Recon requests** are answered from live figures.
 - **IP messages** are delivered to the mailboxes they name.
 - **Time checks** naming this board are echoed back untouched; one of this

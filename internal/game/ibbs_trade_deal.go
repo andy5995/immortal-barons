@@ -52,6 +52,9 @@ var ErrEmptyTradeDeal = errors.New("A trade deal must ship something.")
 // It carries no price and no demand: what is in the basket is a gift, already
 // paid for and already taken off the sender.
 type IPTradeDeal struct {
+	// ID matches the deal to its InFlight entry on the sending board, and the
+	// receipt echoes it back. Zero for a deal sent before Protocol 5.
+	ID         int `json:",omitempty"`
 	FromBoard  string
 	FromEmpire string
 	ToEmpire   string // the realm on ToBoard the goods are for
@@ -127,8 +130,9 @@ func (w *World) TradeOfferCost(b TradeBasket) int64 {
 
 // SendIPTradeDeal ships goods to a named realm on another planet. It charges the
 // flat fee, spends the carriers the basket needs, takes the goods off the sender
-// and queues the shipment. The goods are gone from here the moment it returns
-// nil: there is no pending offer to withdraw and the goods never come back.
+// and queues the shipment. There is no pending offer to withdraw. The shipment
+// waits in InFlight for its receipt, so a lost packet gives the goods and the
+// carriers back after LostForcesDays (IB's own; the original keeps no record).
 func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods TradeBasket) error {
 	if !w.Config.IBBS {
 		return ErrNotInterBBSGame
@@ -161,12 +165,19 @@ func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods Tr
 	subBasket(from, goods)
 	from.Carriers -= need
 	from.Gold -= cost
+	w.NextAttackID++
+	id := w.NextAttackID
 	w.enqueueIPTradeDeal(toBoard, IPTradeDeal{
+		ID:         id,
 		FromBoard:  w.Config.BoardID,
 		FromEmpire: from.Name,
 		ToEmpire:   toEmpire,
 		Goods:      goods,
 		When:       StoredStamp(timeNow()),
+	})
+	w.InFlight = append(w.InFlight, InFlightStrike{
+		ID: id, Kind: "deal", TargetBoard: toBoard, TargetEmpire: toEmpire,
+		LaunchedDay: w.GameDay, Owner: from.Owner, Goods: &goods, Carriers: need,
 	})
 	from.addEvent(say("You shipped a trade deal to {who} of {board}, at a cost of {gold} gold and {carriers} carriers.",
 		"who", toEmpire, "board", toBoard, "gold", comma(cost), "carriers", need))
@@ -182,10 +193,10 @@ func (w *World) enqueueIPTradeDeal(board string, d IPTradeDeal) {
 // returns the receipt that goes home to the sender. Nobody else hears of it: the
 // original files a private report for each side and writes no news, and no .dat
 // template carries a trade-deal news category. A realm that has died since the
-// deal left keeps nothing — there is no return path in the original and none
-// here — but the receipt says so.
+// deal left keeps nothing, and the receipt says so; the sender then gets the
+// goods back (applyTradeReceipt), which the original never does.
 func (w *World) deliverIPTradeDeal(d IPTradeDeal) IPTradeReceipt {
-	r := IPTradeReceipt{FromEmpire: d.FromEmpire, ToEmpire: d.ToEmpire, Goods: d.Goods}
+	r := IPTradeReceipt{ID: d.ID, FromEmpire: d.FromEmpire, ToEmpire: d.ToEmpire, Goods: d.Goods}
 	to := w.remoteTarget(d.ToEmpire)
 	if to == nil {
 		return r
@@ -204,6 +215,7 @@ func (w *World) deliverIPTradeDeal(d IPTradeDeal) IPTradeReceipt {
 // the original returns before building either report, so a deal to a dead realm
 // looked to its sender like one still in transit.
 type IPTradeReceipt struct {
+	ID         int    `json:",omitempty"` // the deal's ID, echoed
 	FromEmpire string // the sender, on the board the receipt is addressed to
 	ToEmpire   string
 	Goods      TradeBasket
@@ -213,19 +225,46 @@ type IPTradeReceipt struct {
 // applyTradeReceipt files a returning receipt on its sender's recap. board is
 // the board the shipment went to.
 func (w *World) applyTradeReceipt(board string, r IPTradeReceipt) {
-	// Not remoteTarget: its empty-name fallback picks the board's top realm.
-	from := w.FindByNameOrFormer(r.FromEmpire)
+	var from *Empire
+	var carriers int
+	var goods *TradeBasket
+	if r.ID != 0 {
+		sent, waiting := w.takeInFlight(r.ID)
+		if !waiting {
+			// Already given back by the lost-packet timer, or a duplicate
+			// packet: crediting now would pay twice (see applyTradeFill). A
+			// delivered deal now sits on both planets, so the sender hears of it.
+			if from := w.FindByNameOrFormer(r.FromEmpire); from != nil && from.Alive && r.Delivered {
+				from.addEvent(say("Word came late from {board}: your trade deal reached {who} after all.",
+					"board", board, "who", r.ToEmpire))
+			}
+			return
+		}
+		from, carriers, goods = w.FindByOwner(sent.Owner), sent.Carriers, sent.Goods
+	} else {
+		// A deal sent before Protocol 5 has no InFlight entry to match.
+		// Not remoteTarget: its empty-name fallback picks the board's top realm.
+		from, carriers = w.FindByNameOrFormer(r.FromEmpire), TradeDealCarriers(r.Goods)
+	}
 	if from == nil || !from.Alive {
 		return
 	}
 	if r.Delivered {
 		// IB's own: the original never returns an interplanetary deal's carriers
 		// (only send_trade_offer writes the field), while a local deal gets them
-		// back on accept. IB treats the delivered receipt as that accept. A lost
-		// deal loses its carriers with its goods.
-		from.Carriers += TradeDealCarriers(r.Goods)
+		// back on accept. IB treats the delivered receipt as that accept.
+		from.Carriers += carriers
 		from.addEvent(say("Your trade deal reached {who} of {board}: {goods}.",
 			"who", r.ToEmpire, "board", board, "goods", describeBasket(r.Goods)))
+		return
+	}
+	if goods != nil {
+		// IB's own: a local deal whose target is gone comes home (returnDeal), so
+		// this one does too. A deal sent before Protocol 5 has no record to return.
+		w.addBasket(from, *goods)
+		from.Carriers += carriers
+		from.addEvent(say("Your trade deal to {who} of {board} found no such realm there, and your trade fleet has brought the goods home.",
+			"who", r.ToEmpire, "board", board))
 		return
 	}
 	from.addEvent(say("Your trade deal to {who} of {board} was lost: no such realm is left there to take it.",
@@ -253,6 +292,9 @@ func describeBasket(b TradeBasket) []Msg {
 	}
 	return parts
 }
+
+// Summary is a basket's contents in English, for the sysop panel.
+func (b TradeBasket) Summary() string { return listIn("", nil, describeBasket(b)) }
 
 // counted is g.Counted for a count already shaped as a figure (short, comma).
 func counted(g *Good, n Arg) Msg {

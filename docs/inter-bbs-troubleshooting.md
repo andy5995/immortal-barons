@@ -471,7 +471,7 @@ A strike is the same signal on the same link, and it reaches the baron who sent
 it rather than the sysop. One sent to that board and never heard about turns up
 on that baron's recap opening `No word came back from <board>.`, with the rest
 of the line saying what came home — the agents, the force sent against a realm,
-the gold from a bid. That is the lost-forces timer giving back what it can, and
+the gold from a bid, a trade deal's goods. That is the lost-forces timer giving back what it can, and
 the lines date the outage as well as confirming it. A player seeing a run of
 them against one board has found the same fault from the other end, and it is
 worth passing on.

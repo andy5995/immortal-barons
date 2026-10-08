@@ -84,8 +84,8 @@ to reverse the order.
   held file from before the board upgraded does not count. "Held since" says
   when that hold began. A hold kept by an older version has no recorded time,
   so it shows when its file arrived instead ("arrived …").
-- **In flight:** every strike, terrorist operation, special operation and trade
-  bid that left this board and has no answer yet. Each row shows when the
+- **In flight:** every strike, terrorist operation, special operation, trade
+  bid and trade deal that left this board and has no answer yet. Each row shows when the
   lost-forces timer will give it up. An item stays here for the whole round
   trip, which is usually hours.
 - **Held packets:** the files in the held directory, why each one is held, when

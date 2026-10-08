@@ -228,6 +228,7 @@ RemoteListing:
   Qty
   Price
 IPTradeDeal:
+  ID `json:",omitempty"`
   FromBoard
   FromEmpire
   ToEmpire
@@ -244,6 +245,7 @@ TradeBasket:
   Tanks
   Carriers
 IPTradeReceipt:
+  ID `json:",omitempty"`
   FromEmpire
   ToEmpire
   Goods

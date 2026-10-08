@@ -264,15 +264,17 @@ func TestIPTradeDealReceiptReachesTheSender(t *testing.T) {
 				alive, reply.TradeReceipts, alive)
 		}
 
-		before, carriers := len(from.Events), from.Carriers
+		before := len(from.Events)
 		home.receive(reply)
-		// 5,000 troopers need five carriers; they come home only with a delivery.
-		wantCarriers := carriers
-		if alive {
-			wantCarriers += 5
+		// 5,000 troopers need five carriers, and they come home either way; the
+		// goods come home only when nobody was there to take them.
+		wantTroopers := 5_000
+		if !alive {
+			wantTroopers = 10_000
 		}
-		if from.Carriers != wantCarriers {
-			t.Errorf("alive=%v: sender holds %d carriers, want %d", alive, from.Carriers, wantCarriers)
+		if from.Carriers != 50 || from.Troopers != wantTroopers {
+			t.Errorf("alive=%v: sender holds %d carriers, %d troopers; want 50, %d",
+				alive, from.Carriers, from.Troopers, wantTroopers)
 		}
 		if len(from.Events) != before+1 {
 			t.Fatalf("alive=%v: sender got %d new events, want 1", alive, len(from.Events)-before)
@@ -280,10 +282,104 @@ func TestIPTradeDealReceiptReachesTheSender(t *testing.T) {
 		got := from.Events[before].Text
 		want := "Your trade deal reached Receiver of there: 5000 Troopers."
 		if !alive {
-			want = "Your trade deal to Receiver of there was lost: no such realm is left there to take it."
+			want = "Your trade deal to Receiver of there found no such realm there, and your trade fleet has brought the goods home."
 		}
 		if got != want {
 			t.Errorf("alive=%v: sender was told %q, want %q", alive, got, want)
 		}
+	}
+}
+
+// A deal whose packet goes missing comes home on the lost-forces timer, goods
+// and carriers both, and a receipt that turns up after that pays nothing more.
+func TestIPTradeDealLostPacketComesHome(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.BoardID = "here"
+	cfg.LostForcesDays = 3
+	home := NewWorldSeed(cfg, 1)
+	from := home.AddHuman("sender", "Sender")
+	from.Protection = 0
+	from.Troopers, from.Carriers, from.Gold = 10_000, 50, 5_000_000
+	if err := home.SendIPTradeDeal(from, "there", "Receiver", TradeBasket{Troopers: 5_000, Gold: 1_000}); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+	gold := from.Gold
+	var out Packet
+	for _, p := range home.Outbox {
+		if p.ToBoard == "there" {
+			out = p
+		}
+	}
+
+	home.GameDay += 2
+	if home.ReturnLostForces(nil) != 0 || from.Troopers != 5_000 {
+		t.Fatal("the deal came home before its wait ran out")
+	}
+	home.GameDay++
+	if n := home.ReturnLostForces(nil); n != 1 {
+		t.Fatalf("recovered %d items, want 1", n)
+	}
+	// 5,000 troopers need five carriers; the fee is not refunded.
+	if from.Troopers != 10_000 || from.Carriers != 50 || from.Gold != gold+1_000 {
+		t.Errorf("sender holds %d troopers, %d carriers, %d gold; want 10000, 50, %d",
+			from.Troopers, from.Carriers, from.Gold, gold+1_000)
+	}
+	want := "No word came back from there. Your trade deal to Receiver has come home: 1000 Gold and 5000 Troopers."
+	if got := from.Events[len(from.Events)-1].Text; got != want {
+		t.Errorf("sender was told %q, want %q", got, want)
+	}
+
+	// The packet was only late: its receipt must not return the carriers again,
+	// but the sender learns the goods arrived after all.
+	far := NewWorldSeed(cfg, 1)
+	far.Config.BoardID = "there"
+	far.AddHuman("recv", "Receiver").Protection = 0
+	before := len(from.Events)
+	home.receive(far.receive(out))
+	if from.Carriers != 50 || from.Troopers != 10_000 {
+		t.Errorf("a late receipt paid out: %d carriers, %d troopers", from.Carriers, from.Troopers)
+	}
+	if len(from.Events) != before+1 {
+		t.Fatalf("a late receipt filed %d events, want 1", len(from.Events)-before)
+	}
+	want = "Word came late from there: your trade deal reached Receiver after all."
+	if got := from.Events[before].Text; got != want {
+		t.Errorf("sender was told %q, want %q", got, want)
+	}
+}
+
+// A delivered deal leaves nothing for the timer to hand back.
+func TestIPTradeDealReceiptClearsInFlight(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.BoardID = "here"
+	cfg.LostForcesDays = 3
+	home := NewWorldSeed(cfg, 1)
+	from := home.AddHuman("sender", "Sender")
+	from.Protection = 0
+	from.Troopers, from.Carriers, from.Gold = 10_000, 50, 5_000_000
+	if err := home.SendIPTradeDeal(from, "there", "Receiver", TradeBasket{Troopers: 5_000}); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+	if len(home.InFlight) != 1 || home.InFlight[0].Kind != "deal" {
+		t.Fatalf("in flight: %+v, want one deal", home.InFlight)
+	}
+	var out Packet
+	for _, p := range home.Outbox {
+		if p.ToBoard == "there" {
+			out = p
+		}
+	}
+	far := NewWorldSeed(cfg, 1)
+	far.Config.BoardID = "there"
+	far.AddHuman("recv", "Receiver").Protection = 0
+	home.receive(far.receive(out))
+	if len(home.InFlight) != 0 {
+		t.Fatalf("the receipt left %+v in flight", home.InFlight)
+	}
+	home.GameDay += 10
+	if home.ReturnLostForces(nil) != 0 || from.Troopers != 5_000 {
+		t.Errorf("a delivered deal came home as well: %d troopers", from.Troopers)
 	}
 }

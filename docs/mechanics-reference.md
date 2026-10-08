@@ -1661,7 +1661,8 @@ returning result clears it, and `ReturnLostForces` — run from the planetary st
 after inbound packets are applied — hands back anything that has waited too long
 and posts news. 0 turns the recovery off. The same timer covers every kind of
 item that waits on another board: attacks and group attacks, terror ops,
-Special Operations and interplanetary trade-bid escrow.
+Special Operations, interplanetary trade-bid escrow and interplanetary trade
+deals.
 
 **The timer pauses while the target board's packets are held** for a protocol
 difference (#190, IB's own; BRE has no packet hold). Such a link is stalled, not
@@ -5222,15 +5223,28 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   original never returns an interplanetary deal's carriers: `send_trade_offer`
   is the only routine on that path that writes the sender's Carriers field, and
   neither `resolve_received_trade_offer` nor the report it posts home touches
-  it. A local deal gets its carriers back on accept (below), so IB treats the
+  it. The receiver does not get them either: the arrival routine's only write to
+  a realm is its loop over the nine goods (+0x035a to +0x03bc), so carriers
+  shipped as cargo arrive and the transport is simply gone. A local deal gets its carriers back on accept (below), so IB treats the
   delivered receipt the same way and credits `TradeDealCarriers` of the goods
-  back to the sender when it arrives. A lost deal loses its carriers with its
-  goods.
+  back to the sender when it arrives.
+
+  **IB's own — a lost packet gives the deal back.** The original keeps no record
+  of a deal once it is sent, so a packet that never arrives costs the sender the
+  goods and the carriers, and nobody is told. IB records the deal in
+  `World.InFlight` and returns the goods and the carriers when no receipt comes
+  home within the lost-forces wait, as it does for a strike (see "Days before
+  'lost' forces returned"). The fee is not returned. A receipt that arrives
+  after that pays nothing, but a delivered one tells the sender the deal reached
+  the realm after all. The deal carries an `ID` that the receipt echoes,
+  which is what moved the packet protocol to 5.
 
   **IB's own — the lost receipt.** When no living realm of that name is there to
-  take the deal, the goods are gone, as in the original, but IB still sends a
-  receipt saying so. The original returns before building either report, so its
-  sender cannot tell a lost deal from one still in transit.
+  take the deal, the original destroys the goods and the carriers and sends no
+  report, so its sender cannot tell a lost deal from one still in transit. IB
+  sends a receipt saying so, and the sender gets the goods and the carriers
+  back, as a local deal does when its target is gone. A deal sent before
+  Protocol 5 has no record to return, so its goods stay lost.
 
   **DELIBERATE DIVERGENCE — protection.** The original destroys a deal aimed at a
   realm under New Realm Protection: `resolve_received_trade_offer` (0x043df1)

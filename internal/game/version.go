@@ -87,7 +87,12 @@ const Version = "0.2.5-dev"
 // Moved to 4 in v0.2.2 for Packet.TradeReceipts, the answer to every
 // interplanetary trade deal: an older board would drop the field and fail to
 // verify the reply packet carrying it.
-const Protocol = 4
+//
+// Moved to 5 in v0.2.5 for the ID on IPTradeDeal and IPTradeReceipt. The field
+// is omitempty, so an older board still verifies the packet, but it would answer
+// without the ID, and the sender's lost-packet timer would then give back a deal
+// that had already arrived.
+const Protocol = 5
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
 // apply. A packet that states no protocol is NOT one of them — see Protocol.

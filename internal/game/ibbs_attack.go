@@ -373,7 +373,7 @@ func (r AttackResult) outcome() AttackOutcome {
 // result arrives (#96), rather than being lost with the packet.
 type InFlightStrike struct {
 	ID           int
-	Kind         string // "attack" or "terror"
+	Kind         string // "attack", "terror", "special", "trade" (a bid) or "deal"
 	TargetBoard  string
 	TargetEmpire string
 	LaunchedDay  int
@@ -407,6 +407,10 @@ type InFlightStrike struct {
 	Good  string `json:",omitempty"`
 	Qty   int    `json:",omitempty"`
 	Price int    `json:",omitempty"`
+	// An interplanetary trade deal (Kind "deal"): the goods shipped and the
+	// carriers that took them, given back if no receipt comes home.
+	Goods    *TradeBasket `json:",omitempty"`
+	Carriers int          `json:",omitempty"`
 	// Op is which Special Operation is away (Kind "special"), so a lost-packet
 	// notice can name it.
 	Op SpecialOp `json:",omitempty"`
@@ -1196,6 +1200,15 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 				w.creditGold(e, f.Gold, say("a bid that never came home"))
 				e.addEvent(say("No word came back from {board}. Your bid for {n} {good} was abandoned and the gold returned.",
 					"board", f.TargetBoard, "n", f.Qty, "good", say(f.Good)))
+			}
+			continue
+		}
+		if f.Kind == "deal" {
+			if e := w.FindByOwner(f.Owner); e != nil && f.Goods != nil {
+				w.addBasket(e, *f.Goods)
+				e.Carriers += f.Carriers
+				e.addEvent(say("No word came back from {board}. Your trade deal to {who} has come home: {goods}.",
+					"board", f.TargetBoard, "who", f.TargetEmpire, "goods", describeBasket(*f.Goods)))
 			}
 			continue
 		}

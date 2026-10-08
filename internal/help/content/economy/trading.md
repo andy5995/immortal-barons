@@ -49,9 +49,10 @@ use it.
 
 You cannot ask for anything back. The goods are a gift, and the realm you send
 them to has no say: they arrive and are added to what that realm holds. There is
-no offer to accept or refuse, so the goods never come back to you. You are told
-when the deal arrives, or that it was lost because the realm is gone. The
-carriers come home when the deal arrives, and are lost with a lost deal.
+no offer to accept or refuse, so once delivered the goods are theirs. You are told
+when the deal arrives. The carriers always come home. If the realm is gone, or
+no word comes back from that planet in time, the goods come home too, but the
+fee does not.
 
 You pay once, not per day, and you need no treaty with the realm or its planet.
 The fee depends on what is in the deal, and it is shown before you confirm. You

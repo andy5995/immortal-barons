@@ -238,6 +238,11 @@ func what(f game.InFlightStrike) string {
 		return game.SpecialOpLabel(f.Op)
 	case "trade":
 		return fmt.Sprintf("bid: %d %s at %d", f.Qty, f.Good, f.Price)
+	case "deal":
+		if f.Goods != nil {
+			return "trade deal: " + f.Goods.Summary()
+		}
+		return "trade deal"
 	}
 	kind := "attack"
 	if f.Group {
