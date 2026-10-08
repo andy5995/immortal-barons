@@ -4909,7 +4909,10 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 - **Protection crosses the league.** A scores packet marks each realm still
   under New Realm Protection. The attack and terror target lists bracket those
   realms' letters and refuse the strike when one is picked — matching the local
-  attack list, which flags them the same way (#214). The target board
+  attack list, which flags them the same way (#214). The IP Scores rankings
+  bracket a protected realm's rank the same way, `[  3]` against `(  3)`, and
+  bracket a planet's rank when every realm on it is protected. That is also when
+  Create Group Attack refuses an Entire Planet strike on it. The target board
   still refuses an arriving strike itself, since the flag can go stale while the
   strike is in transit. **Spying is refused too** — a protected realm cannot be
   spied on any more than it can be struck, so every target list flags it and

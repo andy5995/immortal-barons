@@ -25,4 +25,6 @@ safe while you learn the game.
 
 A realm still under protection shows its letter in square brackets in the lists
 of realms — `[C]`, where every other realm shows `(C)` — so you can see who
-cannot be attacked yet.
+cannot be attacked yet. In the interplanetary score rankings, a protected
+realm's rank is in brackets too. A planet's rank is in brackets when every realm
+on it is protected.

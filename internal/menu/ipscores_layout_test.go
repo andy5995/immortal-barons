@@ -76,7 +76,8 @@ func TestIPScoresPlayerTableGeometry(t *testing.T) {
 					// the "(  n) " row marker and the leading "      Name".
 					// A ranked row is "(  n) ": the view picker's own "(1) " items are
 					// narrower and must not be measured as table rows.
-					isRow := len(r) > 6 && r[0] == '(' && r[4] == ')' && r[5] == ' '
+					// A protected realm's rank is bracketed instead, "[  n] ".
+					isRow := len(r) > 6 && (r[0] == '(' && r[4] == ')' || r[0] == '[' && r[4] == ']') && r[5] == ' '
 					if !isRow && !strings.HasPrefix(ln, "      Name") {
 						continue
 					}
@@ -136,6 +137,44 @@ func TestIPScoresPlanetTableGeometry(t *testing.T) {
 		}
 		if n := len([]rune(ln)); n != ipMetricRightEdge {
 			t.Errorf("planet row is %d columns, want %d:\n%q", n, ipMetricRightEdge, ln)
+		}
+	}
+}
+
+// A protected realm's rank is bracketed, and so is a planet's when every realm
+// on it is protected — the same mark the local score tables put on the letter.
+func TestIPScoresBracketProtectedRanks(t *testing.T) {
+	rows := []ipScoreRow{
+		{name: "Shielded", planet: "Quiet BBS", score: 50, protected: true},
+		{name: "Also New", planet: "Quiet BBS", score: 40, protected: true},
+		{name: "Veteran", planet: "Busy BBS", score: 900},
+		{name: "Fresh", planet: "Busy BBS", score: 10, protected: true},
+	}
+	render := func(kind ipRankKind) map[string]string {
+		f := &fakeSession{}
+		renderIPScoreRank(f, Term{UTF8: true}, append([]ipScoreRow(nil), rows...), kind)
+		got := map[string]string{}
+		for _, ln := range strings.Split(stripANSI(f.out.String()), "\n") {
+			for _, r := range rows {
+				for _, name := range []string{r.name, r.planet} {
+					if len(ln) > 6 && strings.Contains(ln[6:], name+" ") && strings.Index(ln, name) == 6 {
+						got[name] = ln[:1]
+					}
+				}
+			}
+		}
+		return got
+	}
+	players := render(ipRankPlayerScore)
+	for name, want := range map[string]string{"Shielded": "[", "Also New": "[", "Fresh": "[", "Veteran": "("} {
+		if players[name] != want {
+			t.Errorf("player view: %s opens with %q, want %q", name, players[name], want)
+		}
+	}
+	planets := render(ipRankPlanetScore)
+	for name, want := range map[string]string{"Quiet BBS": "[", "Busy BBS": "("} {
+		if planets[name] != want {
+			t.Errorf("planet view: %s opens with %q, want %q", name, planets[name], want)
 		}
 	}
 }

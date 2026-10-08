@@ -29,6 +29,7 @@ type ipScoreRow struct {
 	name            string
 	planet          string // empty for planet views
 	score, nw, land int
+	protected       bool // under New Realm Protection: its rank wears brackets, as scoreID's letter does
 }
 
 // ipScoreRows gathers every realm the board knows of -- the league's, from the
@@ -44,22 +45,24 @@ func ipScoreRows(w *ctx) []ipScoreRow {
 					score = sc.NetWorth
 				}
 				rows = append(rows, ipScoreRow{
-					name:   sc.Empire,
-					planet: b.BoardID,
-					score:  score,
-					nw:     sc.NetWorth,
-					land:   sc.Land,
+					name:      sc.Empire,
+					planet:    b.BoardID,
+					score:     score,
+					nw:        sc.NetWorth,
+					land:      sc.Land,
+					protected: sc.Protected,
 				})
 			}
 		}
 		for _, e := range w.Empires {
 			if e.Alive && e.Owner != "" {
 				rows = append(rows, ipScoreRow{
-					name:   e.Name,
-					planet: w.Config.BoardID,
-					score:  e.Score,
-					nw:     w.NetWorth(e),
-					land:   e.Land,
+					name:      e.Name,
+					planet:    w.Config.BoardID,
+					score:     e.Score,
+					nw:        w.NetWorth(e),
+					land:      e.Land,
+					protected: e.Protection > 0,
 				})
 			}
 		}
@@ -154,6 +157,7 @@ func ipScoreViewName(s session.Session, kind ipRankKind) string {
 type planetAgg struct {
 	name            string
 	score, nw, land int
+	protected       bool // every realm on it is under New Realm Protection
 }
 
 // ipScoreRank sorts and renders one BRE ranking view. Planet views aggregate
@@ -213,15 +217,17 @@ func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipR
 	var viewRows []struct {
 		name, planet string
 		val          int
+		protected    bool
 	}
 	if isPlanet {
 		agg := map[string]*planetAgg{}
 		for _, r := range rows {
 			a, ok := agg[r.planet]
 			if !ok {
-				a = &planetAgg{name: r.planet}
+				a = &planetAgg{name: r.planet, protected: true}
 				agg[r.planet] = a
 			}
+			a.protected = a.protected && r.protected
 			a.score += r.score
 			a.nw += r.nw
 			a.land += r.land
@@ -273,7 +279,8 @@ func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipR
 			viewRows = append(viewRows, struct {
 				name, planet string
 				val          int
-			}{a.name, "", val})
+				protected    bool
+			}{a.name, "", val, a.protected})
 		}
 	} else {
 		for _, r := range rows {
@@ -281,7 +288,8 @@ func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipR
 			viewRows = append(viewRows, struct {
 				name, planet string
 				val          int
-			}{r.name, r.planet, val})
+				protected    bool
+			}{r.name, r.planet, val, r.protected})
 		}
 	}
 	viewName := ipScoreViewName(s, kind)
@@ -312,15 +320,21 @@ func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipR
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule, ansi.Reset)
 	for i, r := range viewRows {
+		// A protected realm's rank is bracketed, the mark every other score list
+		// gives it (scoreID); a planet's is when every realm on it is protected.
+		open, shut := "(", ")"
+		if r.protected {
+			open, shut = "[", "]"
+		}
 		if isPlanet {
-			fmt.Fprintf(s, "%s(%s%3d%s) %s%s%s%s%18d%s\n",
-				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
+			fmt.Fprintf(s, "%s%s%s%3d%s%s %s%s%s%s%18d%s\n",
+				ansi.FgRed, open, ansi.FgBrightRed, i+1, ansi.FgRed, shut,
 				ansi.FgWhite, padColumn(term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset)
 		} else {
 			// The Planet column's own width is not captured; 21 ends it on the rule.
-			fmt.Fprintf(s, "%s(%s%3d%s) %s%s%s%s%18d%s     %s%s%s\n",
-				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
+			fmt.Fprintf(s, "%s%s%s%3d%s%s %s%s%s%s%18d%s     %s%s%s\n",
+				ansi.FgRed, open, ansi.FgBrightRed, i+1, ansi.FgRed, shut,
 				ansi.FgWhite, padColumn(term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset,
 				ansi.FgWhite, fitColumn(term, r.planet, 21), ansi.Reset)
