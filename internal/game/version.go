@@ -67,18 +67,14 @@ const Version = "0.2.6-dev"
 // fails — on ordinary scores, not just on the rename. Better that it holds the
 // packet and says why.
 //
-// **The operational rule for a bump, decided 2026-08-31 (#229).** A league does
-// not roll a protocol change through board by board. It closes the game, lets
-// every board finish sending what it has queued, and only then switches to the
-// new release together — so no packet is ever in flight across the boundary.
-//
-// That is what makes the hold behavior acceptable rather than a defect: a held
-// packet is released only when the READER comes to speak the number the packet
-// already carries, so at a staggered upgrade the board that moves FIRST holds
-// everything from the boards still behind it and nothing ever releases it.
-//
-// A bump is therefore a coordinated event, not a rolling one; say so in the
-// release notes whenever this number moves.
+// **Upgrading across a bump (#229).** Boards need not switch together: each
+// holds packets on a number it does not speak. A held packet is released only
+// when the READER comes to speak the number the packet already carries, so at a
+// staggered upgrade the board that moves FIRST holds everything from the boards
+// still behind it and nothing ever releases it. A league that wants to lose
+// nothing closes the game, lets every board finish sending what it has queued,
+// and only then upgrades, so no packet is in flight across the boundary. Say so
+// in the release notes whenever this number moves.
 //
 // Moved to 3 in v0.2.0 for the unit counts and morale on SpyReport, which the
 // target card before an attack prints. Every report carries them, so omitempty

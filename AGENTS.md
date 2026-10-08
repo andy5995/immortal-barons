@@ -353,8 +353,8 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   something else.
 
 **A `game.Protocol` bump goes into the ChangeLog in the same commit.** The first
-line of the in-progress block reads `BREAKING: packet protocol N; every board in
-a league must update together`. It is not left for the release checklist:
+line of the in-progress block reads `BREAKING: packet protocol N`. It is not left
+for the release checklist:
 anyone running trunk between the bump and the release has to see it. Later
 format changes in the same cycle ride the same number and need no new line.
 

@@ -774,11 +774,14 @@ sender switches to bundles:
 Because the unwrap accepts raw JSON packets, steps 1–2 can be completed
 without coordinating an exact cutover minute.
 
-**This is the rolling case, and a protocol change is not.** The order above
-covers the transport container, which the game's `Protocol` number does not
-describe. When a release moves that number, the league closes the game, lets
-every board finish sending what it has queued, and switches together. Its
-release notes will say so.
+**A protocol change is different.** The order above covers the transport
+container, which the game's `Protocol` number does not describe. When a release
+moves that number, a board holds packets on the other number until it speaks
+it. Packets an upgraded board sends wait on an older board until that board
+upgrades, but packets an older board sends before it upgrades never reach a
+board that already has. To lose none, the league closes the game, lets every
+board finish sending what it has queued, and then upgrades. The release notes
+say when this applies.
 
 An `Attach` link with no `AttachDir` set gets one under the data directory (see
 [Stored-message attach settings](#stored-message-attach-settings)). A board

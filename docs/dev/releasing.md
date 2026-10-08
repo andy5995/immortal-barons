@@ -121,18 +121,17 @@ Watch it: a release with no assets is a release nobody can use.
    Set it when a release changes gameplay a league would notice.
 
    **The ChangeLog says so the moment it moves, not here.** The commit that
-   bumps `Protocol` adds `BREAKING: packet protocol N; every board in a league
-   must update together` as the first line of the in-progress block, so anyone
-   building from trunk in between sees it. This step only checks it is there.
+   bumps `Protocol` adds `BREAKING: packet protocol N` as the first line of the
+   in-progress block, so anyone building from trunk in between sees it. This step only checks it is there.
 
-   **If it did move, the release notes must say the upgrade is coordinated.** A
-   league does not roll a protocol change through board by board: it closes the
-   game, drains every board's outbound queue, and switches together (decided
-   2026-08-31, #229). From v0.2.0 on, `-league-freeze` does the closing and
-   reports the draining; point the notes at it. A held packet comes back only when the READER moves
-   to the number it already carries, so a staggered upgrade strands the board
-   that moves first. Saying this in the notes is the whole mechanism; nothing in
-   the code enforces it.
+   **If it did move, the release notes say what a staggered upgrade costs.**
+   Boards need not upgrade together: each holds packets on a protocol it does
+   not speak. But a held packet comes back only when the READER moves to the
+   number it already carries, so what an older board sends before it upgrades
+   never reaches a board that moved first. To lose none, the league closes the
+   game, drains every board's outbound queue, and then upgrades (#229). From
+   v0.2.0 on, `-league-freeze` does the closing and reports the draining; point
+   the notes at it. Nothing in the code enforces this.
 
 10. **Delete any renamed or removed asset** left behind on the snapshot
    prerelease by hand. `replacesArtifacts` only replaces an asset of the same
