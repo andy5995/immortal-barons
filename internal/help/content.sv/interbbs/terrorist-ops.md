@@ -32,14 +32,14 @@ rike är skyddat.
 Varje operation siktar på en sak, och varje agent som kommer igenom gör sin
 egen skada:
 
-- **Skicka spion** - hämtar hem målets mark, anfall, försvar och guld, samt
-  dess soldater, jetplan, kanontorn, stridsvagnar och militär moral. Du ser
-  rapporten när spionen återvänder, och den läggs i
-  Spiondatabasen. Spiondatabasen behåller de senaste fem rapporterna om
-  varje rike och visar hur de två senaste skiljer sig, så en spion skickad
-  före och efter ett anfall visar vad anfallet gjorde.  När du riktar ett
-  anfall mot ett rike du har en rapport om visas dess senaste rapport så
-  snart du väljer det.
+- **Send Spy** — brings home the target's land, offense, defense and gold,
+  and its troopers, jets, turrets, tanks and military morale. You see the
+  report when the spy returns, and it goes into the Spy Database. The Spy
+  Database keeps up to five reports on each realm from the last seven days,
+  and always keeps the newest one however old it is. It shows how the last
+  two differ, so a spy sent before and after a strike shows what the strike
+  did.  When you aim a strike at a realm you have a report on, its latest
+  report is shown once you pick it.
 - **Bomba underrättelser** - förstör några av deras agenter.
 - **Demoralisera** - sänker deras militära moral.
 - **Skapa oenighet** - några av deras soldater deserterar.

@@ -24,6 +24,8 @@ Jogadores novos recebem Proteção de Reino Novo: um número de turnos durante
 os quais você não pode atacar nem ser atacado. Ela só diminui nos turnos que
 você realmente joga, então você fica seguro enquanto aprende o jogo.
 
-Um reino ainda protegido mostra a sua letra entre colchetes nas listas de
-reinos — `[C]`, enquanto todos os outros aparecem como `(C)` — para você ver
-quem ainda não pode ser atacado.
+A realm still under protection shows its letter in square brackets in the
+lists of realms — `[C]`, where every other realm shows `(C)` — so you can
+see who cannot be attacked yet. In the interplanetary score rankings, a
+protected realm's rank is in brackets too. A planet's rank is in brackets
+when every realm on it is protected.

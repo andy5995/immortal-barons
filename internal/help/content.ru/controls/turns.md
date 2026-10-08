@@ -23,6 +23,8 @@ title: 'Ходы и защита'
 которых вы не можете ни атаковать, ни быть атакованными. Это даёт время
 развиться.
 
-Держава, всё ещё находящаяся под защитой, показывает свою букву в квадратных
-скобках в списках держав — `[C]`, тогда как все остальные показаны как
-`(C)`, — так видно, кого пока нельзя атаковать.
+A realm still under protection shows its letter in square brackets in the
+lists of realms — `[C]`, where every other realm shows `(C)` — so you can
+see who cannot be attacked yet. In the interplanetary score rankings, a
+protected realm's rank is in brackets too. A planet's rank is in brackets
+when every realm on it is protected.

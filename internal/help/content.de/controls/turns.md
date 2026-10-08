@@ -24,6 +24,8 @@ Neue Spieler erhalten Neureich-Schutz: eine Anzahl von Zügen, in denen Sie
 weder angreifen noch angegriffen werden können. Das gibt Ihnen Zeit, sich
 aufzubauen.
 
-Ein Reich, das noch unter Schutz steht, zeigt seinen Buchstaben in eckigen
-Klammern in den Listen der Reiche - `[C]`, wo jedes andere Reich `(C)` zeigt
--, so dass Sie sehen, wer noch nicht angegriffen werden kann.
+A realm still under protection shows its letter in square brackets in the
+lists of realms — `[C]`, where every other realm shows `(C)` — so you can
+see who cannot be attacked yet. In the interplanetary score rankings, a
+protected realm's rank is in brackets too. A planet's rank is in brackets
+when every realm on it is protected.

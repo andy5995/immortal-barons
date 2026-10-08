@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-05 19:11-0500\n"
+"POT-Creation-Date: 2026-10-08 13:03-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -340,11 +340,18 @@ msgstr ""
 "aufzubauen."
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:28
+#: internal/help/content/controls/turns.md:30
+#, fuzzy
+#| msgid ""
+#| "A realm still under protection shows its letter in square brackets in the "
+#| "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
+#| "see who cannot be attacked yet."
 msgid ""
 "A realm still under protection shows its letter in square brackets in the "
 "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
-"see who cannot be attacked yet."
+"see who cannot be attacked yet. In the interplanetary score rankings, a "
+"protected realm's rank is in brackets too. A planet's rank is in brackets "
+"when every realm on it is protected."
 msgstr ""
 "Ein Reich, das noch unter Schutz steht, zeigt seinen Buchstaben in eckigen "
 "Klammern in den Listen der Reiche - `[C]`, wo jedes andere Reich `(C)` zeigt "
@@ -3313,7 +3320,7 @@ msgstr ""
 "Agent, der durchkommt, nimmt seinen eigenen Bissen:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, fuzzy
 #| msgid ""
 #| "**Send Spy** — costs the target nothing. A spy that gets in brings home "
@@ -3328,8 +3335,9 @@ msgid ""
 "**Send Spy** — brings home the target's land, offense, defense and gold, and "
 "its troopers, jets, turrets, tanks and military morale. You see the report "
 "when the spy returns, and it goes into the Spy Database. The Spy Database "
-"keeps the last five reports on each realm and shows how the last two differ, "
-"so a spy sent before and after a strike shows what the strike did.  When you "
+"keeps up to five reports on each realm from the last seven days, and always "
+"keeps the newest one however old it is. It shows how the last two differ, so "
+"a spy sent before and after a strike shows what the strike did.  When you "
 "aim a strike at a realm you have a report on, its latest report is shown "
 "once you pick it."
 msgstr ""
@@ -3344,54 +3352,54 @@ msgstr ""
 "Bericht angezeigt, sobald Sie es wählen."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Bomb Intelligence** — destroys some of their agents."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, fuzzy
 #| msgid "**Demoralize** — takes a seventh off military morale."
 msgid "**Demoralize** — lowers their military morale."
 msgstr "**Demoralisieren** - nimmt ein Siebtel der Kampfmoral."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, fuzzy
 #| msgid "**Cause Dissensions** — a few percent of their troopers desert."
 msgid "**Cause Dissensions** — some of their troopers desert."
 msgstr "**Zwietracht säen** - ein paar Prozent ihrer Soldaten laufen davon."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, fuzzy
 #| msgid "**Bomb AirBases** — burns a slice of their jets on the ground."
 msgid "**Bomb AirBases** — destroys some of their jets."
 msgstr "**Luftbasen bombardieren** - verbrennt einen Teil ihrer Jets am Boden."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, fuzzy
 #| msgid "**Stir Emigrations** — drives people out of the realm."
 msgid "**Stir Emigrations** — drives some of their people away."
 msgstr "**Auswanderung schüren** - treibt Menschen aus dem Reich."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, fuzzy
 #| msgid "**Spread Propaganda** — costs them popular support."
 msgid "**Spread Propaganda** — lowers their popular support."
 msgstr "**Propaganda verbreiten** - kostet sie Rückhalt im Volk."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid ""
 "**Bomb Food Stores** — destroys some of their food. The amount varies more "
 "than for any other operation, from nothing to a large share."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, fuzzy
 #| msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
 msgid "**Sabotage HQ** — sets back their HeadQuarters."
@@ -3399,13 +3407,13 @@ msgstr ""
 "**HQ sabotieren** - wirft ihr Hauptquartier um einen festen Betrag zurück."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:51
+#: internal/help/content/interbbs/terrorist-ops.md:52
 #, no-wrap
 msgid "Picking one"
 msgstr "Die Wahl treffen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:56
+#: internal/help/content/interbbs/terrorist-ops.md:57
 #, fuzzy
 #| msgid ""
 #| "Match the operation to what you plan next. Softening a realm before an "
@@ -3424,13 +3432,13 @@ msgstr ""
 "Wachstum kosten: Nahrung, Menschen, Rückhalt."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:57
+#: internal/help/content/interbbs/terrorist-ops.md:58
 #, no-wrap
 msgid "Getting through"
 msgstr "Durchkommen"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:64
+#: internal/help/content/interbbs/terrorist-ops.md:65
 #, fuzzy
 #| msgid ""
 #| "Each agent is rolled for on its own, and the target's agents defend "
@@ -3452,7 +3460,7 @@ msgstr ""
 "kleine Chance in beide Richtungen hängt von keiner der beiden Seiten ab."
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:68
+#: internal/help/content/interbbs/terrorist-ops.md:69
 #, fuzzy
 #| msgid ""
 #| "Committing more agents therefore does more damage on average, but it "

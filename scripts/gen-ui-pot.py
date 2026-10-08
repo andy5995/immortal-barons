@@ -72,6 +72,8 @@ CALL_PATTERNS = [
     # tr(s, t.name), which reads a variable, so the table's own fields are the
     # msgids. The field names are unique to that table.
     re.compile(r'\b(?:name|body):\s*' + STR),
+    # Table column heads ([]tableColumn rows): printTableHead translates c.head.
+    re.compile(r'^\s*\{' + STR + r',\s*(?:\d+|gaWidth\w+)\},'),
 ]
 ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 

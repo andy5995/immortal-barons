@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-10-05 19:11-0500\n"
+"POT-Creation-Date: 2026-10-08 13:03-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -272,12 +272,14 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:28
+#: internal/help/content/controls/turns.md:30
 #, markdown-text
 msgid ""
 "A realm still under protection shows its letter in square brackets in the "
 "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
-"see who cannot be attacked yet."
+"see who cannot be attacked yet. In the interplanetary score rankings, a "
+"protected realm's rank is in brackets too. A planet's rank is in brackets "
+"when every realm on it is protected."
 msgstr ""
 
 #. type: Title #
@@ -2630,56 +2632,57 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid ""
 "**Send Spy** — brings home the target's land, offense, defense and gold, and "
 "its troopers, jets, turrets, tanks and military morale. You see the report "
 "when the spy returns, and it goes into the Spy Database. The Spy Database "
-"keeps the last five reports on each realm and shows how the last two differ, "
-"so a spy sent before and after a strike shows what the strike did.  When you "
+"keeps up to five reports on each realm from the last seven days, and always "
+"keeps the newest one however old it is. It shows how the last two differ, so "
+"a spy sent before and after a strike shows what the strike did.  When you "
 "aim a strike at a realm you have a report on, its latest report is shown "
 "once you pick it."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid "**Bomb Intelligence** — destroys some of their agents."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid "**Demoralize** — lowers their military morale."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid "**Cause Dissensions** — some of their troopers desert."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid "**Bomb AirBases** — destroys some of their jets."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid "**Stir Emigrations** — drives some of their people away."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid "**Spread Propaganda** — lowers their popular support."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid ""
 "**Bomb Food Stores** — destroys some of their food. The amount varies more "
@@ -2687,19 +2690,19 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 #, markdown-text
 msgid "**Sabotage HQ** — sets back their HeadQuarters."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:51
+#: internal/help/content/interbbs/terrorist-ops.md:52
 #, markdown-text, no-wrap
 msgid "Picking one"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:56
+#: internal/help/content/interbbs/terrorist-ops.md:57
 #, markdown-text
 msgid ""
 "Choose the operation for what you plan to do next. Before an interplanetary "
@@ -2708,13 +2711,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:57
+#: internal/help/content/interbbs/terrorist-ops.md:58
 #, markdown-text, no-wrap
 msgid "Getting through"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:64
+#: internal/help/content/interbbs/terrorist-ops.md:65
 #, markdown-text
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
@@ -2725,7 +2728,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:68
+#: internal/help/content/interbbs/terrorist-ops.md:69
 #, markdown-text
 msgid ""
 "So sending more agents does more damage on average, but it never makes one "

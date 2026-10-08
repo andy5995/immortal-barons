@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-05 19:11-0500\n"
+"POT-Creation-Date: 2026-10-08 13:03-0500\n"
 "PO-Revision-Date: 2026-10-02 16:05-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -326,11 +326,18 @@ msgstr ""
 "så du är säker medan du lär dig spelet."
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:28
+#: internal/help/content/controls/turns.md:30
+#, fuzzy
+#| msgid ""
+#| "A realm still under protection shows its letter in square brackets in the "
+#| "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
+#| "see who cannot be attacked yet."
 msgid ""
 "A realm still under protection shows its letter in square brackets in the "
 "lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
-"see who cannot be attacked yet."
+"see who cannot be attacked yet. In the interplanetary score rankings, a "
+"protected realm's rank is in brackets too. A planet's rank is in brackets "
+"when every realm on it is protected."
 msgstr ""
 "Ett rike som fortfarande är skyddat visar sin bokstav inom hakparentes i "
 "rikeslistorna - `[C]`, där varje annat rike visar `(C)` - så att du kan se "
@@ -3185,13 +3192,23 @@ msgstr ""
 "egen skada:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
+#, fuzzy
+#| msgid ""
+#| "**Send Spy** — brings home the target's land, offense, defense and gold, "
+#| "and its troopers, jets, turrets, tanks and military morale. You see the "
+#| "report when the spy returns, and it goes into the Spy Database. The Spy "
+#| "Database keeps the last five reports on each realm and shows how the last "
+#| "two differ, so a spy sent before and after a strike shows what the strike "
+#| "did.  When you aim a strike at a realm you have a report on, its latest "
+#| "report is shown once you pick it."
 msgid ""
 "**Send Spy** — brings home the target's land, offense, defense and gold, and "
 "its troopers, jets, turrets, tanks and military morale. You see the report "
 "when the spy returns, and it goes into the Spy Database. The Spy Database "
-"keeps the last five reports on each realm and shows how the last two differ, "
-"so a spy sent before and after a strike shows what the strike did.  When you "
+"keeps up to five reports on each realm from the last seven days, and always "
+"keeps the newest one however old it is. It shows how the last two differ, so "
+"a spy sent before and after a strike shows what the strike did.  When you "
 "aim a strike at a realm you have a report on, its latest report is shown "
 "once you pick it."
 msgstr ""
@@ -3204,37 +3221,37 @@ msgstr ""
 "har en rapport om visas dess senaste rapport så snart du väljer det."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Bomb Intelligence** — destroys some of their agents."
 msgstr "**Bomba underrättelser** - förstör några av deras agenter."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Demoralize** — lowers their military morale."
 msgstr "**Demoralisera** - sänker deras militära moral."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Cause Dissensions** — some of their troopers desert."
 msgstr "**Skapa oenighet** - några av deras soldater deserterar."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Bomb AirBases** — destroys some of their jets."
 msgstr "**Bomba flygbaser** - förstör några av deras jetplan."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Stir Emigrations** — drives some of their people away."
 msgstr "**Uppmana till utvandring** - driver bort några av deras invånare."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Spread Propaganda** — lowers their popular support."
 msgstr "**Sprid propaganda** - sänker deras folkliga stöd."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid ""
 "**Bomb Food Stores** — destroys some of their food. The amount varies more "
 "than for any other operation, from nothing to a large share."
@@ -3243,18 +3260,18 @@ msgstr ""
 "för någon annan operation, från ingenting till en stor andel."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/terrorist-ops.md:50
+#: internal/help/content/interbbs/terrorist-ops.md:51
 msgid "**Sabotage HQ** — sets back their HeadQuarters."
 msgstr "**Sabotera högkvarter** - sätter tillbaka deras högkvarter."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:51
+#: internal/help/content/interbbs/terrorist-ops.md:52
 #, no-wrap
 msgid "Picking one"
 msgstr "Välja en"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:56
+#: internal/help/content/interbbs/terrorist-ops.md:57
 msgid ""
 "Choose the operation for what you plan to do next. Before an interplanetary "
 "attack, weaken what will fight back: troopers, jets, morale. Against a realm "
@@ -3266,13 +3283,13 @@ msgstr ""
 "befolkning, stöd."
 
 #. type: Title ##
-#: internal/help/content/interbbs/terrorist-ops.md:57
+#: internal/help/content/interbbs/terrorist-ops.md:58
 #, no-wrap
 msgid "Getting through"
 msgstr "Att komma igenom"
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:64
+#: internal/help/content/interbbs/terrorist-ops.md:65
 msgid ""
 "Each agent is rolled for on its own, and the target's agents defend against "
 "it.  The more agents your realm holds, the better each one's chance, but "
@@ -3287,7 +3304,7 @@ msgstr ""
 "hållet beror inte på någon av sidorna."
 
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:68
+#: internal/help/content/interbbs/terrorist-ops.md:69
 msgid ""
 "So sending more agents does more damage on average, but it never makes one "
 "agent more likely to get through. A Terrorist Prevention pact adds part of "

@@ -122,10 +122,6 @@ msgstr "%d regioner är rena igen - välj vilka typer de ska hållas som."
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d regioner gjorde uppror på grund av bristande underhåll."
 
-#: internal/game/combat.go:176
-msgid "%d troopers, %d jets, %d tanks, %d bombers"
-msgstr "%d soldater, %d jetplan, %d stridsvagnar, %d bombplan"
-
 #: internal/menu/turnstages.go:184
 msgid "%d units deserted for lack of pay."
 msgstr "%d enheter deserterade på grund av obetald lön."
@@ -142,7 +138,7 @@ msgstr "%d%% över 10 dagar"
 msgid "%s %s purchased."
 msgstr "%s %s köpta."
 
-#: internal/menu/actions_ipops.go:403
+#: internal/menu/actions_ipops.go:431
 msgid "%s %s sent out."
 msgstr "%s %s skickade ut."
 
@@ -158,11 +154,11 @@ msgstr "%s jetplan och %s hangarfartyg köpta."
 msgid "%s Trading Market"
 msgstr "%s handelsmarknad"
 
-#: internal/menu/actions_ipops.go:188
+#: internal/menu/actions_ipops.go:189
 msgid "%s against which baron?"
 msgstr "%s mot vilken baron?"
 
-#: internal/menu/actions_ipops.go:180
+#: internal/menu/actions_ipops.go:181
 msgid "%s against which planet?"
 msgstr "%s mot vilken planet?"
 
@@ -206,7 +202,7 @@ msgstr ""
 msgid "%s jets were destroyed in the attack!"
 msgstr "%s jetplan förstördes i anfallet!"
 
-#: internal/menu/actions_ipops.go:245
+#: internal/menu/actions_ipops.go:247
 msgid "%s of %s"
 msgstr "%s av %s"
 
@@ -256,7 +252,7 @@ msgstr ""
 "%s:s allierade skickar %s soldater och %s stridsvagnar för att hjälpa "
 "försvaret."
 
-#: internal/menu/actions_ipops.go:124
+#: internal/menu/actions_ipops.go:125
 msgid "%s: %s left, sent by %s"
 msgstr "%s: %s kvar, skickad av %s"
 
@@ -308,7 +304,7 @@ msgstr "0"
 msgid ": News File"
 msgstr ": Nyhetsfil"
 
-#: internal/menu/actions_ipscores.go:289
+#: internal/menu/actions_ipscores.go:297
 msgid "<game name>: <view name>"
 msgstr "<spelnamn>: <vynamn>"
 
@@ -336,7 +332,7 @@ msgstr ">"
 msgid "A Gooie Kablooie landed on the planet — you lost {n} regions."
 msgstr "En Gooie Kablooie landade på planeten - du förlorade {n} regioner."
 
-#: internal/menu/actions_ipops.go:82
+#: internal/menu/actions_ipops.go:83
 msgid "A SpyGuy costs %s%s%s gold per day."
 msgstr "En SpyGuy kostar %s%s%s guld per dag."
 
@@ -457,7 +453,7 @@ msgstr ""
 "En {missile} från {from} for ofarligt förbi; dess stridsspets armerades "
 "aldrig."
 
-#: internal/menu/actions_ipattack.go:474
+#: internal/menu/actions_ipattack.go:494
 msgid "ALL"
 msgstr "ALLA"
 
@@ -597,7 +593,7 @@ msgstr ""
 msgid "An individual attack must name a baron to strike."
 msgstr "Ett individuellt anfall måste namnge en baron att slå mot."
 
-#: internal/game/ibbs_attack.go:744
+#: internal/game/ibbs_attack.go:751
 msgid ""
 "An interplanetary strike from {board} was stopped by your New Realm "
 "Protection."
@@ -624,7 +620,7 @@ msgstr "Lägg till, eller"
 msgid "Are you POSITIVE you wish to erase your empire?"
 msgstr "Är du SÄKER på att du vill radera ditt rike?"
 
-#: internal/menu/actions_ipops.go:246
+#: internal/menu/actions_ipops.go:276
 msgid "Arrived"
 msgstr "Anlände"
 
@@ -652,11 +648,11 @@ msgstr "Anfall"
 msgid "Attack Pirates"
 msgstr "Anfall pirater"
 
-#: internal/menu/actions_ipattack.go:269
+#: internal/menu/actions_ipattack.go:277
 msgid "Attack Type"
 msgstr "Anfallstyp"
 
-#: internal/menu/actions_ipattack.go:250
+#: internal/menu/actions_ipattack.go:258
 msgid "Attack aborted."
 msgstr "Anfall avbrutet."
 
@@ -768,7 +764,7 @@ msgstr "Bomba handelsmarknaden"
 msgid "Bomber"
 msgstr "Bombplan"
 
-#: internal/menu/tree.go:200
+#: internal/menu/groupattacktable.go:58
 msgid "Bombers"
 msgstr "Bombplan"
 
@@ -832,6 +828,11 @@ msgstr "Köpa den?"
 msgid "Buying military units is disabled in this league."
 msgstr "Att köpa militära enheter är inaktiverat i denna liga."
 
+#: internal/menu/groupattacktable.go:52
+#, fuzzy
+msgid "By"
+msgstr "Köp"
+
 #: internal/menu/bulletinfiles.go:275
 msgid "CRUSHED"
 msgstr "KROSSAD"
@@ -868,7 +869,7 @@ msgstr "Kontanthjälp / lån"
 msgid "Cause Dissensions"
 msgstr "Orsaka splittring"
 
-#: internal/menu/actions_ipops.go:258
+#: internal/menu/actions_ipops.go:261
 msgid "Change"
 msgstr "Ändra"
 
@@ -1068,7 +1069,7 @@ msgstr "Nederlag! Dina styrkor drevs bort från fältet."
 msgid "Defender"
 msgstr "Försvarare"
 
-#: internal/menu/actions_ipops.go:246
+#: internal/menu/actions_ipops.go:279
 msgid "Defense"
 msgstr "Försvar"
 
@@ -1178,7 +1179,7 @@ msgstr "Vill du anfalla en Gooie Kablooie?"
 msgid "Do you wish to send another message?"
 msgstr "Vill du skicka ett till meddelande?"
 
-#: internal/menu/actions_ipscores.go:355
+#: internal/menu/actions_ipscores.go:369
 msgid "Do you wish to target (O)ne Dominion or (A)ll?"
 msgstr "Vill du rikta mot (O) ett dominion eller (A) alla?"
 
@@ -1260,7 +1261,7 @@ msgstr "Ange ämne"
 msgid "Enter how many units to bid for."
 msgstr "Ange hur många enheter att lägga bud på."
 
-#: internal/menu/actions_ipscores.go:364
+#: internal/menu/actions_ipscores.go:378
 msgid "Entire Planet"
 msgstr "Hela planeten"
 
@@ -1280,6 +1281,10 @@ msgstr "Radera de aktuella direktiven?"
 msgid "Every contributor gets their forces back. The gold they spent is gone."
 msgstr ""
 "Varje bidragsgivare får sina styrkor tillbaka. Guldet de spenderade är borta."
+
+#: internal/menu/actions_ipattack.go:58
+msgid "Every realm on %s is under New Realm Protection and cannot be attacked."
+msgstr ""
 
 #: internal/menu/tree.go:370
 msgid "Expose Enemy Ops"
@@ -1313,7 +1318,7 @@ msgstr "Matmarknad"
 msgid "For Sale"
 msgstr "Till försäljning"
 
-#: internal/game/ibbs.go:641
+#: internal/game/ibbs.go:650
 msgid "Foreign agents were seen taking an interest in your realm."
 msgstr "Utländska agenter sågs visa intresse för ditt rike."
 
@@ -1365,7 +1370,7 @@ msgstr "Komma igång"
 msgid "Glad you changed your mind!"
 msgstr "Bra att du ändrade dig!"
 
-#: internal/game/ibbs_attack.go:881
+#: internal/game/ibbs_attack.go:895
 msgid "Global Invasion From {from} ({kind})"
 msgstr "Global invasion från {from} ({kind})"
 
@@ -1425,7 +1430,7 @@ msgstr "Högkvarter"
 msgid "Headquarters"
 msgstr "Högkvarter"
 
-#: internal/menu/actions_ipattack.go:276
+#: internal/menu/actions_ipattack.go:284
 msgid "Help"
 msgstr "Hjälp"
 
@@ -1441,7 +1446,7 @@ msgstr "Hur många %s?"
 msgid "How many Million Gold do you wish to put in?"
 msgstr "Hur många miljoner guld vill du sätta in?"
 
-#: internal/menu/actions_ipops.go:92
+#: internal/menu/actions_ipops.go:93
 msgid "How many days would you like him to remain?"
 msgstr "Hur många dagar vill du att han stannar?"
 
@@ -1501,7 +1506,7 @@ msgstr "Ignorera"
 msgid "Ignore, or"
 msgstr "Ignorera, eller"
 
-#: internal/menu/actions_ipscores.go:296
+#: internal/menu/actions_ipscores.go:304
 msgid "Immortal Barons"
 msgstr "Immortal Barons"
 
@@ -1524,6 +1529,10 @@ msgstr "Inkommande anfall"
 #: internal/menu/tree.go:323
 msgid "Indiv. Attack Force"
 msgstr "Ind. anfallsstyrka"
+
+#: internal/menu/groupattacktable.go:54
+msgid "Individual Target"
+msgstr ""
 
 #: internal/game/regions.go:162
 msgid "Industrial"
@@ -1554,7 +1563,7 @@ msgstr "Underrättelseallians"
 msgid "Inter-BBS"
 msgstr "Inter-BBS"
 
-#: internal/menu/actions_ipscores.go:86
+#: internal/menu/actions_ipscores.go:89
 msgid "InterBBS Scores"
 msgstr "InterBBS-poäng"
 
@@ -1574,7 +1583,7 @@ msgstr ""
 "Ogiltigt: ett rikesnamn behöver minst 3 bokstäver eller siffror. Dekoration "
 "runt dem är okej och räknas inte."
 
-#: internal/game/ibbs_attack.go:879
+#: internal/game/ibbs_attack.go:889
 msgid "Invasion From {from} ({kind})"
 msgstr "Invasion från {from} ({kind})"
 
@@ -1593,6 +1602,11 @@ msgstr "Investeringar"
 #: internal/menu/actions_trade.go:252
 msgid "It reaches them no sooner than turn %d of their day."
 msgstr "Det når dem tidigast drag %d i deras dag."
+
+#: internal/game/ibbs_attack.go:896
+#, fuzzy
+msgid "It struck the whole planet."
+msgstr "hela planeten"
 
 #: internal/menu/actions_attack.go:849
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
@@ -1614,7 +1628,7 @@ msgstr "Jetplan"
 msgid "Join Group Attack"
 msgstr "Gå med i gruppanfall"
 
-#: internal/menu/groupattacktable.go:205
+#: internal/menu/groupattacktable.go:216
 msgid "Join which group?"
 msgstr "Gå med i vilken grupp?"
 
@@ -1639,7 +1653,7 @@ msgid "Krane, your war advisor, Sire. I will be brief; the enemy rarely is."
 msgstr ""
 "Krane, din krigsrådgivare, ers nåd. Jag ska vara kort; fienden är det sällan."
 
-#: internal/menu/actions_ipscores.go:189
+#: internal/menu/actions_ipscores.go:193
 msgid "Land"
 msgstr "Mark"
 
@@ -1670,6 +1684,10 @@ msgstr "Senaste planetmästare: %s"
 #: cmd/immortal-barons/league.go:176
 msgid "League frozen"
 msgstr "Liga fryst"
+
+#: internal/menu/groupattacktable.go:59
+msgid "Leave"
+msgstr ""
 
 #: internal/menu/actions_info.go:272
 msgid "Limited daily supply"
@@ -1818,7 +1836,7 @@ msgstr "HITTADES INTE"
 msgid "NOTE: Regions may not be sold, only dropped..."
 msgstr "OBS: Regioner kan inte säljas, bara lämnas..."
 
-#: internal/menu/actions_ipscores.go:309
+#: internal/menu/actions_ipscores.go:317
 msgid "Name"
 msgstr "Namn"
 
@@ -1830,11 +1848,11 @@ msgstr "Namnge planeten att bevaka."
 msgid "Name your Realm:"
 msgstr "Namnge ditt rike:"
 
-#: internal/menu/actions_ipscores.go:181
+#: internal/menu/actions_ipscores.go:185
 msgid "Net Worth"
 msgstr "Nettovärde"
 
-#: internal/menu/actions_ipscores.go:197
+#: internal/menu/actions_ipscores.go:201
 msgid "Net Worth / Region"
 msgstr "Nettovärde/region"
 
@@ -1858,7 +1876,7 @@ msgstr "Nej"
 msgid "No Data"
 msgstr "Inga data"
 
-#: internal/menu/actions_ipattack.go:422
+#: internal/menu/actions_ipattack.go:442
 msgid "No barons are known on that planet yet."
 msgstr "Inga baroner är kända på den planeten än."
 
@@ -1866,11 +1884,11 @@ msgstr "Inga baroner är kända på den planeten än."
 msgid "No battles have been fought yet."
 msgstr "Inga strider har utkämpats än."
 
-#: internal/menu/actions_ipattack.go:105
+#: internal/menu/actions_ipattack.go:113
 msgid "No group attacks are forming right now."
 msgstr "Inga gruppanfall bildas just nu."
 
-#: internal/menu/actions_ipscores.go:76
+#: internal/menu/actions_ipscores.go:79
 msgid "No inter-BBS scores have been imported yet."
 msgstr "Inga inter-BBS-poäng har importerats än."
 
@@ -1882,7 +1900,7 @@ msgstr "Inga träffar. Drottningen tackar för ditt bidrag."
 msgid "No news."
 msgstr "Inga nyheter."
 
-#: internal/menu/actions_ipops.go:423
+#: internal/menu/actions_ipops.go:451
 msgid "No other planets are known yet, so there is nobody to scout."
 msgstr "Inga andra planeter är kända än, så det finns ingen att spana på."
 
@@ -1912,7 +1930,7 @@ msgstr ""
 "Inga poäng har nått oss från det riket, så vapenhandlaren kan inte sätta "
 "pris på en missil för det."
 
-#: internal/game/ibbs_attack.go:1167
+#: internal/game/ibbs_attack.go:1197
 msgid ""
 "No word came back from {board}. Your bid for {n} {good} was abandoned and "
 "the gold returned."
@@ -1920,7 +1938,7 @@ msgstr ""
 "Inget besked kom från {board}. Ditt bud på {n} {good} övergavs och guldet "
 "återlämnades."
 
-#: internal/game/ibbs_attack.go:1202
+#: internal/game/ibbs_attack.go:1232
 msgid ""
 "No word came back from {board}. Your force sent against {target} has "
 "returned home."
@@ -1928,14 +1946,14 @@ msgstr ""
 "Inget besked kom från {board}. Din styrka som skickades mot {target} har "
 "återvänt hem."
 
-#: internal/game/ibbs_attack.go:1175
+#: internal/game/ibbs_attack.go:1205
 msgid "No word came back from {board}. Your {n} agent has returned home."
 msgid_plural ""
 "No word came back from {board}. Your {n} agents have returned home."
 msgstr[0] "Inget besked kom från {board}. Din {n} agent har återvänt hem."
 msgstr[1] "Inget besked kom från {board}. Dina {n} agenter har återvänt hem."
 
-#: internal/game/ibbs_attack.go:1188
+#: internal/game/ibbs_attack.go:1218
 msgid ""
 "No word came back from {board}. Your {op} against {target} is presumed lost."
 msgstr ""
@@ -2029,7 +2047,7 @@ msgstr ""
 msgid "Of these, %s units are away on attacks."
 msgstr "Av dessa är %s enheter ute på anfall."
 
-#: internal/menu/actions_ipops.go:246
+#: internal/menu/actions_ipops.go:278
 msgid "Offense"
 msgstr "Anfall"
 
@@ -2037,7 +2055,7 @@ msgstr "Anfall"
 msgid "Offer — goods you send:"
 msgstr "Erbjudande - varor du skickar:"
 
-#: internal/menu/actions_ipscores.go:367
+#: internal/menu/actions_ipscores.go:381
 msgid "One Dominion"
 msgstr "Ett rike"
 
@@ -2223,7 +2241,7 @@ msgstr "SKYDDAD"
 msgid "Pick your six letters:"
 msgstr "Välj dina sex bokstäver:"
 
-#: internal/menu/actions_ipscores.go:311
+#: internal/menu/actions_ipscores.go:319
 msgid "Planet"
 msgstr "Planet"
 
@@ -2235,7 +2253,7 @@ msgstr "Planetkoordinator"
 msgid "Planet Name"
 msgstr "Planetnamn"
 
-#: internal/menu/actions_ipscores.go:301
+#: internal/menu/actions_ipscores.go:309
 msgid "Planetary Post"
 msgstr "Planetpost"
 
@@ -2333,7 +2351,7 @@ msgstr "Snabbt anfall"
 msgid "Quiet report"
 msgstr "Tyst rapport"
 
-#: internal/menu/actions_ipscores.go:107
+#: internal/menu/actions_ipscores.go:110
 msgid "Quit"
 msgstr "Avsluta"
 
@@ -2357,7 +2375,7 @@ msgstr "Läs meddelanden"
 msgid "Read,"
 msgstr "Läs,"
 
-#: internal/menu/actions_ipops.go:426
+#: internal/menu/actions_ipops.go:454
 msgid ""
 "Recon requests created to all %d planets. The reports will reach the Spy "
 "Database."
@@ -2468,7 +2486,7 @@ msgstr "Sparar..."
 msgid "Savings Interest Rate:"
 msgstr "Sparränta:"
 
-#: internal/menu/actions_ipscores.go:171
+#: internal/menu/actions_ipscores.go:175
 msgid "Score"
 msgstr "Poäng"
 
@@ -2552,7 +2570,7 @@ msgstr "Skicka budet?"
 msgid "Send this Attack?"
 msgstr "Skicka detta anfall?"
 
-#: internal/menu/actions_ipops.go:198
+#: internal/menu/actions_ipops.go:199
 msgid "Send this Operation?"
 msgstr "Skicka denna operation?"
 
@@ -2580,7 +2598,7 @@ msgstr "Ange skattesats"
 msgid "Set Up"
 msgstr "Sätt dit"
 
-#: internal/menu/actions_ipops.go:163
+#: internal/menu/actions_ipops.go:164
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr "Ställ S3-Sabre-ratten (0-10)"
 
@@ -2624,7 +2642,7 @@ msgstr "Tyvärr, handelsavtal måste skickas för minst %d dagar."
 msgid "Sorry, you have used all of your turns today."
 msgstr "Tyvärr, du har använt alla dina drag idag."
 
-#: internal/menu/actions_ipattack.go:120
+#: internal/menu/actions_ipattack.go:128
 msgid "Sorry... You're under new realm protection."
 msgstr "Tyvärr... Du är under Nytt rikes skydd."
 
@@ -2664,7 +2682,7 @@ msgstr "Sprid propaganda"
 msgid "Spy Database"
 msgstr "Spiondatabas"
 
-#: internal/menu/actions_ipops.go:231
+#: internal/menu/actions_ipops.go:232
 msgid "Spy Database:"
 msgstr "Spiondatabas:"
 
@@ -2723,7 +2741,7 @@ msgstr "Stridsvagn"
 msgid "Tanks"
 msgstr "Stridsvagnar"
 
-#: internal/menu/actions_ipattack.go:56
+#: internal/menu/actions_ipattack.go:64
 msgid "Target which baron?"
 msgstr "Vilken baron är målet?"
 
@@ -2899,7 +2917,7 @@ msgstr "Terrorister gick på dina hemligheter utan framgång."
 msgid "Terrorists went after your streets and got nowhere."
 msgstr "Terrorister gick på dina gator utan framgång."
 
-#: internal/menu/actions_ipops.go:331
+#: internal/menu/actions_ipops.go:359
 msgid "Terrorize which baron?"
 msgstr "Vilken baron ska terroriseras?"
 
@@ -3025,6 +3043,11 @@ msgstr ""
 msgid "The S3-Sabre is not part of this game."
 msgstr "S3-Sabre ingår inte i det här spelet."
 
+#: internal/game/ibbs_attack.go:909
+#, fuzzy
+msgid "The attackers lost {units}!"
+msgstr "Du förlorade {units}!"
+
 #: internal/menu/actions_interbbs.go:168
 msgid "The current BBS Coordinator is %s."
 msgstr "Nuvarande BBS-koordinator är %s."
@@ -3052,7 +3075,7 @@ msgstr "Direktiven har publicerats."
 msgid "The empire that sent this deal is gone."
 msgstr "Riket som skickade detta avtal finns inte längre."
 
-#: internal/game/combat.go:238
+#: internal/game/combat.go:236
 msgid "The enemy lost: %s."
 msgstr "Fienden förlorade: %s."
 
@@ -3100,7 +3123,7 @@ msgstr "Riket har ändrats - försök igen."
 msgid "The remaining %d%% is turned into gold."
 msgstr "De återstående %d%% omvandlas till guld."
 
-#: internal/menu/actions_ipops.go:228
+#: internal/menu/actions_ipops.go:229
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 "Spiondatabasen är tom. Spionera på riken på andra planeter för att fylla den."
@@ -3166,7 +3189,7 @@ msgstr ""
 msgid "There is no unclaimed land left on the planet today."
 msgstr "Det finns ingen oanspråkstagen mark kvar på planeten idag."
 
-#: internal/menu/actions_ipattack.go:76
+#: internal/menu/actions_ipattack.go:84
 msgid "This attack will cost %s gold."
 msgstr "Detta anfall kommer att kosta %s guld."
 
@@ -3190,7 +3213,7 @@ msgstr "Detta avtal behöver %d hangarfartyg; du har %d fria."
 msgid "This is year %s of your reign."
 msgstr "Detta är år %s av ditt styre."
 
-#: internal/menu/actions_ipops.go:197
+#: internal/menu/actions_ipops.go:198
 msgid "This operation will cost %s gold."
 msgstr "Denna operation kommer att kosta %s guld."
 
@@ -3198,7 +3221,7 @@ msgstr "Denna operation kommer att kosta %s guld."
 msgid "This planet has no Gooie Kablooie."
 msgstr "Denna planet har ingen Gooie Kablooie."
 
-#: internal/menu/actions_ipops.go:119
+#: internal/menu/actions_ipops.go:120
 msgid "This planet has no SpyGuys out."
 msgstr "Den här planeten har inga SpyGuys ute."
 
@@ -3210,7 +3233,7 @@ msgstr "Denna planet bygger redan en Gooie Kablooie."
 msgid "This planet is not building a Gooie Kablooie."
 msgstr "Denna planet bygger inte en Gooie Kablooie."
 
-#: internal/menu/actions_ipops.go:122
+#: internal/menu/actions_ipops.go:123
 msgid "This planet's SpyGuys:"
 msgstr "Den här planetens SpyGuys:"
 
@@ -3218,7 +3241,7 @@ msgstr "Den här planetens SpyGuys:"
 msgid "This trade deal will cost %s gold per day to send."
 msgstr "Detta handelsavtal kommer att kosta %s guld per dag att skicka."
 
-#: internal/menu/actions_ipops.go:385
+#: internal/menu/actions_ipops.go:413
 msgid "This will cost you %s gold.  Accept?"
 msgstr "Detta kommer att kosta dig %s guld.  Accepterar du?"
 
@@ -3250,35 +3273,35 @@ msgstr "Dagens nyheter"
 msgid "Too long: a realm name may be at most %d characters."
 msgstr "För långt: ett rikes namn får vara högst %d tecken."
 
-#: internal/menu/actions_ipscores.go:139
+#: internal/menu/actions_ipscores.go:142
 msgid "Top Planets by Land"
 msgstr "Bästa planeter efter mark"
 
-#: internal/menu/actions_ipscores.go:137
+#: internal/menu/actions_ipscores.go:140
 msgid "Top Planets by Net Worth"
 msgstr "Bästa planeter efter nettovärde"
 
-#: internal/menu/actions_ipscores.go:141
+#: internal/menu/actions_ipscores.go:144
 msgid "Top Planets by Net Worth Density"
 msgstr "Bästa planeter efter nettovärdesdensitet"
 
-#: internal/menu/actions_ipscores.go:135
+#: internal/menu/actions_ipscores.go:138
 msgid "Top Planets by Score"
 msgstr "Bästa planeter efter poäng"
 
-#: internal/menu/actions_ipscores.go:147
+#: internal/menu/actions_ipscores.go:150
 msgid "Top Players by Land"
 msgstr "Bästa spelare efter mark"
 
-#: internal/menu/actions_ipscores.go:145
+#: internal/menu/actions_ipscores.go:148
 msgid "Top Players by Net Worth"
 msgstr "Bästa spelare efter nettovärde"
 
-#: internal/menu/actions_ipscores.go:149
+#: internal/menu/actions_ipscores.go:152
 msgid "Top Players by Net Worth Density"
 msgstr "Bästa spelare efter nettovärdesdensitet"
 
-#: internal/menu/actions_ipscores.go:143
+#: internal/menu/actions_ipscores.go:146
 msgid "Top Players by Score"
 msgstr "Bästa spelare efter poäng"
 
@@ -3424,7 +3447,7 @@ msgstr ""
 msgid "Version every board must run (blank for no requirement, e.g. 0.0.5):"
 msgstr "Version som varje BBS måste köra (tomt för inget krav, t.ex. 0.0.5):"
 
-#: internal/game/combat.go:239
+#: internal/game/combat.go:237
 msgid "Victory! You captured %d regions."
 msgstr "Seger! Du erövrade %d regioner."
 
@@ -3476,7 +3499,7 @@ msgstr "Besök banken"
 msgid "Vote for (0 to cancel)?"
 msgstr "Rösta på (0 för att avbryta)?"
 
-#: internal/menu/actions_ipattack.go:67
+#: internal/menu/actions_ipattack.go:75
 msgid "Wait how many Hours (%d-%d)?"
 msgstr "Vänta hur många timmar (%d-%d)?"
 
@@ -3668,7 +3691,7 @@ msgstr "Gårdagens nyheter"
 msgid "You accepted the %s with %s."
 msgstr "Du accepterade %s med %s."
 
-#: internal/game/ibbs_attack.go:887
+#: internal/game/ibbs_attack.go:902
 msgid "You also lost {n} region!"
 msgid_plural "You also lost {n} regions!"
 msgstr[0] "Du förlorade också {n} region!"
@@ -3739,7 +3762,7 @@ msgstr "Du satte inte in några styrkor; anfallet avblåses."
 msgid "You could not successfully raid {who}."
 msgstr "Du lyckades inte plundra {who}."
 
-#: internal/game/combat.go:249
+#: internal/game/combat.go:247
 msgid "You crushed %s completely and seized the remains of its military!"
 msgstr "Du krossade %s fullständigt och tog resterna av dess militär!"
 
@@ -3836,7 +3859,7 @@ msgstr "Du har redan avfyrat den missilen idag."
 msgid "You have already made all %d of your attacks for today."
 msgstr "Du har redan gjort alla dina %d anfall för idag."
 
-#: internal/menu/actions_ipattack.go:208
+#: internal/menu/actions_ipattack.go:216
 msgid "You have already sent all %d of your attack forces for today."
 msgstr "Du har redan skickat alla dina %d anfallsstyrkor för idag."
 
@@ -3888,7 +3911,7 @@ msgstr "Du har inga mutade agenter att arbeta genom."
 msgid "You hold the office of %s."
 msgstr "Du innehar ämbetet som %s."
 
-#: internal/game/ibbs_attack.go:891
+#: internal/game/ibbs_attack.go:906
 msgid "You lost nothing!"
 msgstr "Du förlorade ingenting!"
 
@@ -3896,7 +3919,7 @@ msgstr "Du förlorade ingenting!"
 msgid "You lost {l}."
 msgstr "Du förlorade {l}."
 
-#: internal/game/ibbs_attack.go:889
+#: internal/game/ibbs_attack.go:904
 msgid "You lost {units}!"
 msgstr "Du förlorade {units}!"
 
@@ -3910,7 +3933,7 @@ msgstr ""
 "Du får bara handla med en planet som din koordinator har markerat som "
 "allierad."
 
-#: internal/menu/actions_ipops.go:47
+#: internal/menu/actions_ipops.go:48
 msgid ""
 "You must play at least one turn each entry into the game before you can use "
 "this option."
@@ -3968,11 +3991,11 @@ msgstr ""
 msgid "You took {l}."
 msgstr "Du tog {l}."
 
-#: internal/game/diplomacy.go:580
+#: internal/game/diplomacy.go:583
 msgid "You tore up the {treaty} with {who} by declaring war."
 msgstr "Du rev upp {treaty} med {who} genom att förklara krig."
 
-#: internal/game/diplomacy.go:613
+#: internal/game/diplomacy.go:616
 msgid ""
 "You tore up the {treaty} with {who} to attack it. Revolts broke out at home; "
 "support and morale fell sharply."
@@ -3988,16 +4011,16 @@ msgstr "Ditt skydd upphör vid det här dragets slut. Är du säker?"
 msgid "Your %s Jets need %s more Carriers before they can all fly."
 msgstr "Dina %s jetplan behöver %s fler hangarfartyg innan de alla kan flyga."
 
-#: internal/menu/actions_ipattack.go:245
+#: internal/menu/actions_ipattack.go:253
 msgid "Your %s force is on its way to %s on %s."
 msgstr "Din %s-styrka är på väg till %s på %s."
 
-#: internal/menu/actions_ipops.go:217
+#: internal/menu/actions_ipops.go:218
 msgid ""
 "Your %s is away against %s of %s. Word will come back with the next packet."
 msgstr "Din %s är ute mot %s av %s. Besked kommer med nästa paket."
 
-#: internal/menu/actions_ipops.go:214
+#: internal/menu/actions_ipops.go:215
 msgid "Your %s is away against %s. Word will come back with the next packet."
 msgstr "Din %s är ute mot %s. Besked kommer med nästa paket."
 
@@ -4059,7 +4082,7 @@ msgstr "Din S3-Sabre nådde {who} på {board} och skrapade knappt lacken."
 msgid "Your SDI Program requires %s gold."
 msgstr "Ditt SDI-program kräver %s guld."
 
-#: internal/menu/actions_ipops.go:109
+#: internal/menu/actions_ipops.go:110
 msgid "Your SpyGuy leaves for %s, and will watch it for %d days."
 msgstr "Din SpyGuy ger sig av mot %s och bevakar den i %d dagar."
 
@@ -4435,7 +4458,7 @@ msgid "Your bid on {board} was not filled; the gold is back in your treasury."
 msgstr ""
 "Ditt bud på {board} fylldes inte; guldet är tillbaka i din skattkammare."
 
-#: internal/game/combat.go:237
+#: internal/game/combat.go:235
 msgid "Your casualties: %s."
 msgstr "Dina förluster: %s."
 
@@ -4517,7 +4540,7 @@ msgstr ""
 msgid "Your forces found their target was in protection."
 msgstr "Dina styrkor fann att målet stod under skydd."
 
-#: internal/game/ibbs_attack.go:886
+#: internal/game/ibbs_attack.go:901
 msgid "Your forces lost the battle!"
 msgstr "Dina styrkor förlorade slaget!"
 
@@ -4525,7 +4548,7 @@ msgstr "Dina styrkor förlorade slaget!"
 msgid "Your forces were beaten off the field."
 msgstr "Dina styrkor slogs ut från fältet."
 
-#: internal/game/ibbs_attack.go:883
+#: internal/game/ibbs_attack.go:898
 msgid "Your forces won the battle!"
 msgstr "Dina styrkor vann slaget!"
 
@@ -4554,7 +4577,7 @@ msgstr ""
 msgid "Your industry is already specialized in %s."
 msgstr "Din industri är redan specialiserad på %s."
 
-#: internal/game/turn.go:367
+#: internal/game/turn.go:370
 msgid "Your industry is already specialized."
 msgstr "Din industri är redan specialiserad."
 
@@ -4650,7 +4673,7 @@ msgstr "Ditt rike står inte under nybörjarskydd."
 msgid "Your realm will be named %s."
 msgstr "Ditt rike kommer att heta %s."
 
-#: internal/game/combat.go:241
+#: internal/game/combat.go:239
 msgid "Your score rose by %d."
 msgstr "Dina poäng ökade med %d."
 
@@ -4667,7 +4690,7 @@ msgstr ""
 msgid "Your security quietly made {who} disappear."
 msgstr "Din säkerhetstjänst fick {who} att försvinna i tysthet."
 
-#: internal/menu/actions_ipattack.go:174
+#: internal/menu/actions_ipattack.go:182
 msgid "Your share of this attack is now %s%%."
 msgstr "Din andel av det här anfallet är nu %s%%."
 
@@ -4794,7 +4817,7 @@ msgstr "Zon?"
 msgid "[%d Regions left] Your choice?"
 msgstr "[%d regioner kvar] Ditt val?"
 
-#: internal/game/ibbs_attack.go:1166
+#: internal/game/ibbs_attack.go:1196
 msgid "a bid that never came home"
 msgstr "ett bud som aldrig kom hem"
 
@@ -4842,11 +4865,11 @@ msgstr "ett handelsavtal"
 msgid "a unit sale"
 msgstr "en enhetsförsäljning"
 
-#: internal/menu/actions_ipops.go:445
+#: internal/menu/actions_ipops.go:473
 msgid "agent"
 msgstr "agent"
 
-#: internal/menu/actions_ipops.go:447
+#: internal/menu/actions_ipops.go:475
 msgid "agents"
 msgstr "agenter"
 
@@ -4882,7 +4905,7 @@ msgstr "ett ofyllt interplanetärt bud"
 msgid "away"
 msgstr "borta"
 
-#: internal/game/turn.go:444
+#: internal/game/turn.go:447
 msgid "bank interest"
 msgstr "bankränta"
 
@@ -4970,7 +4993,7 @@ msgstr ""
 "frys hela ligan för en uppdatering så att varje BBS:s paket kan tömmas; "
 "uppringare visas `\"<string>\"` (endast nod 1), och avsluta sedan"
 
-#: internal/game/ibbs_attack.go:869
+#: internal/game/ibbs_attack.go:879
 msgid "group attack"
 msgstr "gruppanfall"
 
@@ -5253,7 +5276,7 @@ msgstr "handelsmarknaden"
 msgid "the whole of {board}"
 msgstr "hela {board}"
 
-#: internal/menu/actions_ipattack.go:53
+#: internal/menu/actions_ipattack.go:61
 msgid "the whole planet"
 msgstr "hela planeten"
 
@@ -5335,7 +5358,7 @@ msgstr "{Matförlusten} ligger på %d%% av normala nivåer."
 msgid "{a} and {b}"
 msgstr "{a} och {b}"
 
-#: internal/game/diplomacy.go:399
+#: internal/game/diplomacy.go:401
 msgid ""
 "{a} attacked {d}: you lost {troopers} troopers and {tanks} tanks in the "
 "defense."
@@ -5343,11 +5366,11 @@ msgstr ""
 "{a} anföll {d}: du förlorade {troopers} soldater och {tanks} stridsvagnar i "
 "försvaret."
 
-#: internal/game/ibbs_attack.go:875
+#: internal/game/ibbs_attack.go:885
 msgid "{board}"
 msgstr "{board}"
 
-#: internal/game/ibbs_attack.go:877
+#: internal/game/ibbs_attack.go:887
 msgid "{board} by {who}"
 msgstr "{board}, av {who}"
 
@@ -5549,13 +5572,20 @@ msgstr "{target}:s säkerhetstjänst på {board} grep alla dina {n} agenter."
 msgid "{target}'s security on {board} caught your agent."
 msgstr "{target}:s säkerhetstjänst på {board} grep din agent."
 
-#: internal/game/combat.go:281
+#: internal/game/combat.go:291
+#, fuzzy
+msgid "{troopers} troopers, {jets} jets, {tanks} tanks, {bombers} bombers"
+msgstr ""
+"{troopers} soldater, {turrets} kanontorn, {tanks} stridsvagnar, {jets} "
+"jetplan"
+
+#: internal/game/combat.go:283
 msgid "{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets"
 msgstr ""
 "{troopers} soldater, {turrets} kanontorn, {tanks} stridsvagnar, {jets} "
 "jetplan"
 
-#: internal/game/ibbs_attack.go:894
+#: internal/game/ibbs_attack.go:912
 msgid "{units} attacked!"
 msgstr "{units} anföll!"
 
@@ -5563,7 +5593,7 @@ msgstr "{units} anföll!"
 msgid "{units} returned."
 msgstr "{units} återvände."
 
-#: internal/game/ibbs_attack.go:1123
+#: internal/game/ibbs_attack.go:1153
 msgid "{who}"
 msgstr "{who}"
 
@@ -5575,15 +5605,15 @@ msgstr "{who} ({board})"
 msgid "{who} accepted your trade deal."
 msgstr "{who} accepterade ditt handelsavtal."
 
-#: internal/game/diplomacy.go:505
+#: internal/game/diplomacy.go:508
 msgid "{who} accepted your {treaty} proposal."
 msgstr "{who} accepterade ditt förslag om {treaty}."
 
-#: internal/game/combat.go:251
+#: internal/game/combat.go:250
 msgid "{who} attacked you and took {n} regions. You lost {lost}."
 msgstr "{who} anföll dig och tog {n} regioner. Du förlorade {lost}."
 
-#: internal/game/combat.go:269
+#: internal/game/combat.go:270
 msgid "{who} attacked you and was repelled. You lost {lost}."
 msgstr "{who} anföll dig och slogs tillbaka. Du förlorade {lost}."
 
@@ -5606,6 +5636,11 @@ msgstr "{who} har inget fördrag som du kan bryta upp."
 #: internal/game/ibbs_trade.go:142
 msgid "{who} is no longer on our planet."
 msgstr "{who} finns inte längre på vår planet."
+
+#: internal/game/combat.go:252
+#, fuzzy
+msgid "{who} lost {lost}."
+msgstr "Du förlorade {l}."
 
 #: internal/game/trade_deal.go:358
 msgid ""
@@ -5635,11 +5670,11 @@ msgstr "{who} på {board} skickade dig ett handelsavtal: {goods}."
 msgid "{who} rejected your trade deal."
 msgstr "{who} avvisade ditt handelsavtal."
 
-#: internal/game/diplomacy.go:524
+#: internal/game/diplomacy.go:527
 msgid "{who} rejected your {treaty} proposal."
 msgstr "{who} avvisade ditt förslag om {treaty}."
 
-#: internal/game/diplomacy.go:615
+#: internal/game/diplomacy.go:618
 msgid "{who} tore up the {treaty} between your realms to attack you."
 msgstr "{who} rev upp {treaty} mellan era riken för att anfalla dig."
 
@@ -5670,6 +5705,9 @@ msgstr ""
 #: internal/menu/input.go:479
 msgid "─»>Paused<«─"
 msgstr "─»>Pausad<«─"
+
+#~ msgid "%d troopers, %d jets, %d tanks, %d bombers"
+#~ msgstr "%d soldater, %d jetplan, %d stridsvagnar, %d bombplan"
 
 #~ msgid "Invasion from {who} (group attack)."
 #~ msgstr "Invasion från {who} (gruppanfall)."

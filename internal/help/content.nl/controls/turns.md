@@ -25,6 +25,8 @@ waarin u niet kunt aanvallen en niet aangevallen kunt worden. Die loopt
 alleen terug in beurten die u echt speelt, dus u bent veilig terwijl u het
 spel leert.
 
-Een rijk dat nog beschermd is, toont zijn letter tussen vierkante haken in
-de lijsten met rijken - `[C]`, waar elk ander rijk `(C)` toont - zodat u
-ziet wie nog niet aangevallen kan worden.
+A realm still under protection shows its letter in square brackets in the
+lists of realms — `[C]`, where every other realm shows `(C)` — so you can
+see who cannot be attacked yet. In the interplanetary score rankings, a
+protected realm's rank is in brackets too. A planet's rank is in brackets
+when every realm on it is protected.

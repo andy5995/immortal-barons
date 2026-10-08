@@ -24,6 +24,8 @@ Nya spelare får Nytt rikes skydd: ett antal drag under vilka du inte kan
 anfalla eller bli anfallen. Det tickar bara ner på drag du faktiskt spelar,
 så du är säker medan du lär dig spelet.
 
-Ett rike som fortfarande är skyddat visar sin bokstav inom hakparentes i
-rikeslistorna - `[C]`, där varje annat rike visar `(C)` - så att du kan se
-vem som inte kan anfallas än.
+A realm still under protection shows its letter in square brackets in the
+lists of realms — `[C]`, where every other realm shows `(C)` — so you can
+see who cannot be attacked yet. In the interplanetary score rankings, a
+protected realm's rank is in brackets too. A planet's rank is in brackets
+when every realm on it is protected.
