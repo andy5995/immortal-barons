@@ -18,7 +18,7 @@ func TestInvasionReportNamesTheStrikeKind(t *testing.T) {
 		{"group", RemoteAttack{FromBoard: "Far", Group: true}, "group attack", "Quick Strike"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got := invasionReport(tc.atk, true, UnitLoss{Troopers: 1}, 5).English()
+			got := invasionReport(tc.atk, true, UnitLoss{Troopers: 1}, 5, AttackForce{}).English()
 			if !contains(got, tc.want) {
 				t.Errorf("report does not name %q:\n%s", tc.want, got)
 			}

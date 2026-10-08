@@ -155,7 +155,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	attackerWins, aLoss, dLoss := w.battleAttrition(ap, dp, w.Config.AttackDamage.AttackRetreatPct())
 	aloss := loseCommitted(a, f, aLoss)
 	dloss := loseForces(d, dLoss)
-	w.bleedAllies(a, d, dLoss) // the allies' committed 30% bleeds at the defender's rate, and each is told
+	w.bleedAllies(a, d, dLoss, aloss) // the allies' committed 30% bleeds at the defender's rate, and each is told
 
 	// A beaten defender's HeadQuarters is knocked back, and can be flattened by
 	// repeated defeats. BINARY-VERIFIED (BRE.OVR 0xFFA2: Random(3)+5 subtracted
@@ -172,9 +172,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	// breakdown). The field order mirrors what each side fields: the attacker
 	// commits troopers/jets/tanks/bombers, the defender holds troopers/turrets/
 	// tanks/jets.
-	attackerCas := func(u UnitLoss) string {
-		return fmt.Sprintf(tr("%d troopers, %d jets, %d tanks, %d bombers"), u.Troopers, u.Jets, u.Tanks, u.Bombers)
-	}
+	attackerCas := func(u UnitLoss) string { return attackerCasualties(u).In(a.Language) }
 	defenderCasIn := func(u UnitLoss) string { return defenderCas(u).In(a.Language) }
 
 	if attackerWins {
@@ -248,8 +246,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			w.Kill(d)
 			fmt.Fprintf(&b, "\n"+tr("You crushed %s completely and seized the remains of its military!")+"\n", d.Name)
 		}
-		d.addEvent(say("{who} attacked you and took {n} regions. You lost {lost}.",
-			"who", a.Name, "n", taken, "lost", defenderCas(dloss)))
+		d.addEvent(sentences(
+			say("{who} attacked you and took {n} regions. You lost {lost}.",
+				"who", a.Name, "n", taken, "lost", defenderCas(dloss)),
+			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		// A repelled attack scores nothing for either side. The original's only two
@@ -266,8 +266,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		if a.Morale < 0 {
 			a.Morale = 0
 		}
-		d.addEvent(say("{who} attacked you and was repelled. You lost {lost}.",
-			"who", a.Name, "lost", defenderCas(dloss)))
+		d.addEvent(sentences(
+			say("{who} attacked you and was repelled. You lost {lost}.",
+				"who", a.Name, "lost", defenderCas(dloss)),
+			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String(), captured
@@ -280,6 +282,14 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 func defenderCas(u UnitLoss) Msg {
 	return say("{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets",
 		"troopers", u.Troopers, "turrets", u.Turrets, "tanks", u.Tanks, "jets", u.Jets)
+}
+
+// attackerCasualties is defenderCas for the side that attacked: what it
+// commits, in the order it commits them. DELIBERATE DIVERGENCE where a
+// defender or its allies read it: BRE tells them only their own losses.
+func attackerCasualties(u UnitLoss) Msg {
+	return say("{troopers} troopers, {jets} jets, {tanks} tanks, {bombers} bombers",
+		"troopers", u.Troopers, "jets", u.Jets, "tanks", u.Tanks, "bombers", u.Bombers)
 }
 
 // absorbMilitary transfers a conquered empire's surviving military to the

@@ -6937,6 +6937,13 @@ checking IB against a capture:
   do the arithmetic. A group attack gets no choice of kind and reports
   `(group attack)`; `AttackKind`'s zero value is `QuickStrike`, so the group
   case is tested first (`invasionReport`).
+- **A defender is told what the attacker lost.** The original tells a defender
+  only its own losses, locally and in an interplanetary invasion report, so a
+  realm that beat a strike off cannot tell whether it cost the attacker
+  anything. IB adds the attacker's casualties to all three: the defender's event
+  after a local attack, each ally's event after it helped defend, and an
+  invasion report's `The attackers lost …!` line, which is the same figure the
+  attacker's own returning report gives (`forceLosses`).
 - **A planet-wide invasion report says it was planet-wide.** The original's
   header says only `Global Invasion From X`, which reads as easily as a strike
   aimed at the reader's own realm. Every unprotected realm's defense was pooled

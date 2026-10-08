@@ -38,6 +38,10 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	if strings.Contains(ev, "units") {
 		t.Errorf("the victim's event still totals the losses: %q", ev)
 	}
+	// And what the attacker lost, which BRE never tells a defender.
+	if !strings.Contains(ev, a.Name+" lost ") || !strings.Contains(ev, " bombers") {
+		t.Errorf("the victim's event does not say what the attacker lost: %q", ev)
+	}
 }
 
 // A battle ends the moment one side has lost the share it will accept, so the

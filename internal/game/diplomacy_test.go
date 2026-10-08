@@ -411,7 +411,7 @@ func TestBleedAlliesTellsThePartner(t *testing.T) {
 
 	// The committed 30% (300 troopers / 150 tanks) bleeds at a 20% rate:
 	// 60 troopers and 30 tanks lost from Beta.
-	w.bleedAllies(raider, a, 0.20)
+	w.bleedAllies(raider, a, 0.20, UnitLoss{Troopers: 400, Tanks: 25})
 	if b.Troopers != 940 || b.Tanks != 470 {
 		t.Errorf("want Beta 940 troopers / 470 tanks, got %d / %d", b.Troopers, b.Tanks)
 	}
@@ -419,7 +419,7 @@ func TestBleedAlliesTellsThePartner(t *testing.T) {
 		t.Fatalf("want one event filed on the ally, got %d: %v", len(b.Events), b.Events)
 	}
 	got := b.Events[0].Text
-	for _, want := range []string{"60 troopers", "30 tanks", "Alpha", "Raider"} {
+	for _, want := range []string{"60 troopers", "30 tanks", "Alpha", "Raider", "Raider lost 400 troopers, 0 jets, 25 tanks, 0 bombers."} {
 		if !strings.Contains(got, want) {
 			t.Errorf("ally's event %q omits %q", got, want)
 		}
@@ -445,7 +445,7 @@ func TestBleedAlliesTruncatesTheDetachment(t *testing.T) {
 	if got := w.AllyDefenders(a); len(got) != 1 || got[0].Troopers != 303 || got[0].Tanks != 3271 {
 		t.Fatalf("want the battle to see 303 troopers / 3271 tanks, got %+v", got)
 	}
-	w.bleedAllies(raider, a, 0.34)
+	w.bleedAllies(raider, a, 0.34, UnitLoss{})
 	if b.Troopers != 1009-102 || b.Tanks != 10903-1111 {
 		t.Errorf("want Beta to lose 102 troopers / 1111 tanks, lost %d / %d", 1009-b.Troopers, 10903-b.Tanks)
 	}
@@ -470,7 +470,7 @@ func TestBleedAlliesTellsAPartnerThatLostNothing(t *testing.T) {
 	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
 	b.Events = nil
 
-	w.bleedAllies(raider, a, 0.20)
+	w.bleedAllies(raider, a, 0.20, UnitLoss{})
 	if len(b.Events) != 1 {
 		t.Fatalf("want one event even with nothing lost, got %d: %v", len(b.Events), b.Events)
 	}
@@ -496,7 +496,7 @@ func TestTechnologyAgreementPartnerIsToldAboutTheBattle(t *testing.T) {
 	w.AcceptTreaty(tech, a.Name, technologyAgreement)
 	tech.Events = nil
 
-	w.bleedAllies(raider, a, 0.20)
+	w.bleedAllies(raider, a, 0.20, UnitLoss{})
 	if len(tech.Events) != 1 {
 		t.Fatalf("a Technology Agreement partner is told, got %d events: %v", len(tech.Events), tech.Events)
 	}
@@ -520,7 +520,7 @@ func TestUnalliedRealmsAreNotToldAboutTheBattle(t *testing.T) {
 	w.setRelation(a.Name, foe.Name, RelationEnemy)
 	none.Events, foe.Events = nil, nil
 
-	w.bleedAllies(raider, a, 0.20)
+	w.bleedAllies(raider, a, 0.20, UnitLoss{})
 	if len(none.Events) != 0 || len(foe.Events) != 0 {
 		t.Errorf("only relations above 5 are told, got neutral=%v foe=%v", none.Events, foe.Events)
 	}

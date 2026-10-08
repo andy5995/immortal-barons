@@ -761,6 +761,9 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	won, atkLost, defLost, jetLost := w.remoteBattleAttrition(offense, def, pooledJets, atk.bombers(target), lossPct)
 	res.Survivors = survivorsOfFrac(atk.Contributors, atkLost)
 	// One battle, then the same two fractions applied to everyone who stood in it.
+	// What the attackers lost, for every defender's report: the same reckoning
+	// their own returning report makes (forceLosses).
+	theirs := forceLosses(forceOf(atk.Contributors), forceOf(res.Survivors))
 	// Each realm's OWN losses are kept apart from the planet's total: the report
 	// a realm reads names what it lost, and on a planet-wide strike every realm
 	// that stood used to be handed the planet's figure as if it were its own.
@@ -782,7 +785,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		// who stood is told: a planet-wide strike bleeds every realm, and only
 		// the strongest of them was hearing about it.
 		for i, e := range defenders {
-			e.addEvent(invasionReport(atk, false, losses[i], 0))
+			e.addEvent(invasionReport(atk, false, losses[i], 0, theirs))
 		}
 		// The whole planet hears it: an interplanetary exchange is planet against
 		// planet, and until this the defending board printed nothing at all while
@@ -835,7 +838,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		// The same block knocks a fifth off the realm's HeadQuarters
 		// (InvasionHQLossDivisor), whatever the regions came to.
 		e.HQ -= e.HQ / InvasionHQLossDivisor
-		e.addEvent(invasionReport(atk, true, losses[i], take))
+		e.addEvent(invasionReport(atk, true, losses[i], take, theirs))
 	}
 	if planetWide {
 		w.postNews(fmt.Sprintf("%s struck the whole planet, carrying off %s regions and %s of our forces!",
@@ -857,7 +860,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 // the verdict, what THIS realm lost by unit type, and the regions lost. A type
 // that lost nothing is left out of its line, and a defense that lost nothing
 // says so. The words are IB's, beside the original's line shapes.
-func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) Msg {
+func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int, theirs AttackForce) Msg {
 	// DELIBERATE DIVERGENCE: the defender is told HOW the strike was pressed.
 	// BRE names the type to the attacker ("Extended Battle Results.") and never
 	// to the defender, whose recap says only that a force "attacked!". That gap
@@ -895,12 +898,15 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) Msg 
 	if lostLine.IsZero() {
 		lostLine = say("You lost nothing!")
 	}
+	// DELIBERATE DIVERGENCE: the original tells a defender only its own losses.
+	theirLine := unitLine(msgid("The attackers lost {units}!"), attackUnits(theirs))
 	return lines(head,
 		indent(whole, 2),
 		indent(unitLine(msgid("{units} attacked!"), attackUnits(forceOf(atk.Contributors))), 2),
 		indent(verdict, 2),
 		indent(lostLine, 2),
-		indent(took, 2))
+		indent(took, 2),
+		indent(theirLine, 2))
 }
 
 // forceOf is every unit a strike's contributors committed, taken together.

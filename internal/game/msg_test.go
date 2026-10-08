@@ -218,18 +218,20 @@ func TestStrikeReportWearsBREsLayout(t *testing.T) {
 func TestInvasionReportWearsBREsLayout(t *testing.T) {
 	atk := RemoteAttack{FromBoard: "The Eclipse", FromEmpire: "Pirates Ahoy!", TargetEmpire: "Victim",
 		Kind: NormalAttack, Contributors: []Contribution{{AttackForce: AttackForce{Troopers: 75_000, Jets: 3_338_000, Tanks: 5_727_000}}}}
-	got := invasionReport(atk, true, UnitLoss{Troopers: 8075, Turrets: 1_125_000, Tanks: 23_000}, 1013).English()
+	got := invasionReport(atk, true, UnitLoss{Troopers: 8075, Turrets: 1_125_000, Tanks: 23_000}, 1013,
+		AttackForce{Jets: 412_000, Tanks: 690_000}).English()
 	want := "Invasion From The Eclipse by Pirates Ahoy! (Normal Attack)\n" +
 		"  75k Troopers, 3338k Jets, and 5727k Tanks attacked!\n" +
 		"  Your forces lost the battle!\n" +
 		"  You lost 8075 Troopers, 1125k Turrets, and 23k Tanks!\n" +
-		"  You also lost 1013 regions!"
+		"  You also lost 1013 regions!\n" +
+		"  The attackers lost 412k Jets and 690k Tanks!"
 	if got != want {
 		t.Errorf("report:\n%s\nwant:\n%s", got, want)
 	}
 	whole := RemoteAttack{FromBoard: "Starship Junkyard", Group: true,
 		Contributors: []Contribution{{AttackForce: AttackForce{Troopers: 1}}}}
-	got = invasionReport(whole, false, UnitLoss{}, 0).English()
+	got = invasionReport(whole, false, UnitLoss{}, 0, AttackForce{}).English()
 	want = "Global Invasion From Starship Junkyard (group attack)\n" +
 		"  It struck the whole planet.\n" +
 		"  1 Trooper attacked!\n" +

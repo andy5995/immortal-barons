@@ -1356,6 +1356,18 @@ func TestPlanetWideStrikeFightsEveryRealm(t *testing.T) {
 	if res.LandTaken != (4_000-big.Land)+(4_000-small.Land) {
 		t.Errorf("LandTaken %d does not match what the realms actually lost", res.LandTaken)
 	}
+	// Every realm that stood is told what the attackers lost: the same figure
+	// the attacker's own report gives, from what went out against what came back.
+	theirs := forceLosses(force, forceOf(res.Survivors))
+	if theirs.Empty() {
+		t.Fatal("the attackers lost nothing, so the report line proves nothing")
+	}
+	want := unitLine(msgid("The attackers lost {units}!"), attackUnits(theirs)).English()
+	for _, e := range []*Empire{big, small} {
+		if got := e.Events[len(e.Events)-1].Text; !strings.Contains(got, want) {
+			t.Errorf("%s's report does not say %q:\n%s", e.Name, want, got)
+		}
+	}
 }
 
 // TestAttackSlotsAreSmallAndReused holds the Join Group Attack table's Id to

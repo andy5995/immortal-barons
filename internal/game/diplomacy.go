@@ -352,7 +352,8 @@ func (w *World) allyDefenseBoost(d *Empire) int {
 // partner's committed detachment (its 30% of troopers + tanks, truncated here
 // where the battle rounds it — see allyBled) after a battle in which d was
 // defended — the reinforcements bleed at the same rate as the defender — and
-// tells each partner what it lost and where.
+// tells each partner what it lost and where, and what the attacker lost (IB's
+// own addition; see attackerCasualties).
 //
 // The notice is not optional bookkeeping. Without it a player's troopers and
 // tanks vanish in a battle they were never told about: the loss has no visible
@@ -387,7 +388,7 @@ func (w *World) allyDefenseBoost(d *Empire) int {
 // The zero lines are faithful, not a defect: if play shows them to be noise,
 // suppressing them is a deliberate divergence to be recorded as one, not a bug
 // fix to be quietly applied.
-func (w *World) bleedAllies(a, d *Empire, frac float64) {
+func (w *World) bleedAllies(a, d *Empire, frac float64, aloss UnitLoss) {
 	for _, ally := range w.battleNotified(d) {
 		var troopers, tanks int
 		if w.HasTreaty(d, ally, fullDefenseAlliance) {
@@ -396,8 +397,10 @@ func (w *World) bleedAllies(a, d *Empire, frac float64) {
 			ally.Troopers -= troopers
 			ally.Tanks -= tanks
 		}
-		ally.addEvent(say("{a} attacked {d}: you lost {troopers} troopers and {tanks} tanks in the defense.",
-			"a", a.Name, "d", d.Name, "troopers", troopers, "tanks", tanks))
+		ally.addEvent(sentences(
+			say("{a} attacked {d}: you lost {troopers} troopers and {tanks} tanks in the defense.",
+				"a", a.Name, "d", d.Name, "troopers", troopers, "tanks", tanks),
+			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
 	}
 }
 
