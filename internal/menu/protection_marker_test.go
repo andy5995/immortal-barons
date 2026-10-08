@@ -197,3 +197,32 @@ func TestInterplanetarySpyingIsRefusedOnAProtectedBaron(t *testing.T) {
 		t.Errorf("a refused interplanetary spy was queued anyway (%d)", queued)
 	}
 }
+
+// A planet-wide group attack on a planet whose every realm the last scores
+// packet had protected is refused before the wait and the force are asked for;
+// a planet with one realm open is not.
+func TestGroupAttackRefusesAFullyProtectedPlanet(t *testing.T) {
+	for _, open := range []bool{false, true} {
+		w := newWorld()
+		w.With(func() {
+			w.Config.IBBS = true
+			w.Config.BoardID = "Home BBS"
+			w.Player().Protection = 0
+			w.ImportBoard(game.RemoteBoard{BoardID: "Far BBS", Scores: []game.RemoteScore{
+				{Empire: "Fresh Realm", Land: 20, Protected: true},
+				{Empire: "Other Realm", Land: 30, Protected: !open},
+			}})
+		})
+		f := &fakeSession{keys: []rune("1\r" + "A")}
+		createGroupAttack(f, w)
+		out := stripANSI(f.out.String())
+		if !strings.Contains(out, "Entire Planet") {
+			t.Fatalf("open=%v: never answered the one-or-all question:\n%s", open, out)
+		}
+		refused := strings.Contains(out, "Every realm on Far BBS is under New Realm Protection")
+		asked := strings.Contains(out, "Wait how many Hours")
+		if refused == open || asked != open {
+			t.Errorf("open=%v: refused=%v, asked for the wait=%v:\n%s", open, refused, asked, out)
+		}
+	}
+}

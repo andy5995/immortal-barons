@@ -6944,6 +6944,15 @@ checking IB against a capture:
   after a local attack, each ally's event after it helped defend, and an
   invasion report's `The attackers lost …!` line, which is the same figure the
   attacker's own returning report gives (`forceLosses`).
+- **A planet-wide group attack cannot be aimed at a fully protected planet.**
+  The original's `create_group_attack` and the two pickers it calls carry no
+  protection refusal for the Entire Planet choice (read from their strings), so
+  the strike goes out and bleeds on arrival for nothing. IB refuses it at
+  creation when every realm on the planet's last scores packet is protected.
+  Should it still find every realm protected when it lands (the one open realm
+  died meanwhile), the attackers read `Your forces found their target was in
+  protection.` rather than "no such realm", and the planet's news says its
+  protection held.
 - **A planet-wide invasion report says it was planet-wide.** The original's
   header says only `Global Invasion From X`, which reads as easily as a strike
   aimed at the reader's own realm. Every unprotected realm's defense was pooled

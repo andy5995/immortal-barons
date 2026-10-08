@@ -50,6 +50,14 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if !answered {
 		return Stay
 	}
+	// DELIBERATE DIVERGENCE: the original takes a planet-wide strike against a
+	// planet whose every realm is under New Realm Protection, and the force bleeds
+	// on arrival for nothing. Refused here, from the same last scores packet that
+	// bars a protected realm in the one-baron list.
+	if all && allProtected(scores[board]) {
+		fail(s, fmt.Errorf(tr(s, "Every realm on %s is under New Realm Protection and cannot be attacked."), board))
+		return Stay
+	}
 	pick := tr(s, "the whole planet")
 	var target string
 	if !all {
@@ -292,6 +300,18 @@ func promptAttackKind(s session.Session, w *ctx) (kind game.AttackKind, chose bo
 // protectedNoStrike is the refusal a war list gives for a realm the last scores
 // packet had under New Realm Protection. Takes the realm name.
 const protectedNoStrike = "%s is under New Realm Protection and cannot be attacked."
+
+// allProtected reports whether every baron on a planet's last scores packet was
+// under New Realm Protection. A planet with no barons listed is not: there is
+// nothing to say it is shielded.
+func allProtected(barons []remoteBaron) bool {
+	for _, b := range barons {
+		if !b.protected {
+			return false
+		}
+	}
+	return len(barons) > 0
+}
 
 // remoteBaron is one baron on another planet as this board last heard of them:
 // the name a strike is addressed to, and whether that hearing had them under

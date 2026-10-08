@@ -1370,6 +1370,39 @@ func TestPlanetWideStrikeFightsEveryRealm(t *testing.T) {
 	}
 }
 
+// A planet-wide strike that finds every realm protected was turned away, not
+// lost: the attackers are told their target was in protection, and the planet
+// hears that its protection held. It used to come home as "no such realm".
+func TestPlanetWideStrikeOnAFullyProtectedPlanet(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.BoardID = "here"
+	w := NewWorldSeed(cfg, 5)
+	for _, name := range []string{"Newcomer", "Fresh"} {
+		e := w.AddHuman(name, name)
+		e.Protection = 10
+	}
+	force := AttackForce{Troopers: 1_000}
+	before := len(w.NewsToday)
+	res := w.resolveRemoteAttack(RemoteAttack{
+		ID: 1, FromBoard: "far", TargetEmpire: "", Group: true,
+		Offense:      force.offense(),
+		Contributors: []Contribution{{Owner: "x", AttackForce: force}},
+	})
+	if res.Outcome != OutcomeProtected {
+		t.Errorf("outcome %q, want %q", res.Outcome, OutcomeProtected)
+	}
+	if len(w.NewsToday) != before+1 {
+		t.Errorf("the planet should hear its protection held, got %d new news lines", len(w.NewsToday)-before)
+	}
+
+	// A planet with no realms at all is still "no such realm".
+	empty := NewWorldSeed(cfg, 5)
+	if got := empty.resolveRemoteAttack(RemoteAttack{ID: 2, FromBoard: "far", Group: true,
+		Contributors: []Contribution{{Owner: "x", AttackForce: force}}}).Outcome; got != OutcomeNotFound {
+		t.Errorf("empty planet outcome %q, want %q", got, OutcomeNotFound)
+	}
+}
+
 // TestAttackSlotsAreSmallAndReused holds the Join Group Attack table's Id to
 // what a two-column field can carry: a party takes the lowest free number, keeps
 // it while it is away, and gives it up only when its forces come home — so a

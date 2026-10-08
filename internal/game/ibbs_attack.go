@@ -730,7 +730,14 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 			}
 		}
 		if target == nil {
+			// Realms that are all protected are not "no such realm": the strike
+			// found the planet and was turned away, which is what the attackers
+			// should read and the planet should hear.
 			res.Outcome = OutcomeNotFound
+			if w.anyLivingRealm() {
+				res.Outcome = OutcomeProtected
+				w.postNews(fmt.Sprintf("A strike by %s broke on the planet's New Realm Protection.", raider(atk)))
+			}
 			return res
 		}
 	}
@@ -1093,6 +1100,17 @@ func (w *World) planetDefenders() []*Empire {
 		}
 	}
 	return out
+}
+
+// anyLivingRealm reports whether the planet has a realm a strike could have
+// fought but for its protection: planetDefenders without the protection test.
+func (w *World) anyLivingRealm() bool {
+	for _, e := range w.Empires {
+		if e.Alive && e.Owner != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // takeInFlight removes the strike with this ID from the waiting list and returns
