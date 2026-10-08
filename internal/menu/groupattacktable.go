@@ -38,13 +38,16 @@ const (
 	gaWidthLeave    = 6
 )
 
-// gaColumns is the table read left to right: the heading over each column and
-// the width it occupies. One list, so the head, the rule and every row are
-// sized from the same place and cannot drift apart.
-var gaColumns = []struct {
+// tableColumn is one column of a ruled table: the heading over it and the width
+// it occupies.
+type tableColumn struct {
 	head  string
 	width int
-}{
+}
+
+// gaColumns is the table read left to right. One list, so the head, the rule and
+// every row are sized from the same place and cannot drift apart.
+var gaColumns = []tableColumn{
 	{"Id", gaWidthID},
 	{"By", gaWidthBy},
 	{"Planet", gaWidthPlanet},
@@ -84,8 +87,19 @@ const (
 // separators and rule, a bright-yellow By letter, bright-white names, bright-cyan
 // unit counts and a bright-green Leave.
 func printGroupAttackTable(s session.Session, t Term, rows []gaRow) {
+	fmt.Fprintln(s)
+	printTableHead(s, t, gaColumns)
+	for _, r := range rows {
+		printGroupAttackRow(s, t, r)
+	}
+}
+
+// printTableHead draws a ruled table's heading line and the rule under it, in
+// the Join Group Attack capture's colors: white headings, bright-black
+// separators and rule. The Spy Database draws its tables with it too.
+func printTableHead(s session.Session, t Term, cols []tableColumn) {
 	var head, rule strings.Builder
-	for i, c := range gaColumns {
+	for i, c := range cols {
 		if i > 0 {
 			head.WriteString(ansi.FgBrightBlack + gaSep + ansi.FgWhite)
 			rule.WriteString(gaCross)
@@ -93,11 +107,8 @@ func printGroupAttackTable(s session.Session, t Term, rows []gaRow) {
 		head.WriteString(gaPad(t, tr(s, c.head), c.width, true))
 		rule.WriteString(strings.Repeat("─", c.width))
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, strings.TrimRight(head.String(), " "), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, strings.TrimRight(head.String(), " "), ansi.Reset)
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule.String(), ansi.Reset)
-	for _, r := range rows {
-		printGroupAttackRow(s, t, r)
-	}
 }
 
 // printGroupAttackRow draws one forming attack. A unit count is right-justified

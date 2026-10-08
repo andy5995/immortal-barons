@@ -2,6 +2,7 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * Spy Database reports expire after 7 days; each realm's newest stays
+  * The Spy Database is drawn as a table, with rises marked in green
   * IP Scores bracket protected realms and fully protected planets
   * A group attack on a fully protected planet is refused
   * A defender and its allies are told what the attacker lost

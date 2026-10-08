@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -38,12 +39,20 @@ func TestSpyDatabaseGroupsByRealmWithChange(t *testing.T) {
 	if strings.Count(out, "Victim of boardB") != 1 {
 		t.Errorf("Victim's reports are not under one heading:\n%s", out)
 	}
-	want := fmt.Sprintf("  %-11s %9s %14s %14s %15s", "Change", "-50", "-7,000", "0", "+100,000")
+	want := "   Change    │        -50 │        -7,000 │             0 │       +100,000"
 	if !strings.Contains(out, want) {
 		t.Errorf("no change row %q:\n%s", want, out)
 	}
 	if strings.Count(out, "Change") != 1 {
 		t.Errorf("a realm with one report should have no change row:\n%s", out)
+	}
+	// As on the news screen, figures are bright cyan and only a rise's "+" is
+	// bright green; a fall's sign stays cyan.
+	raw := f.out.String()
+	for _, want := range []string{ansi.FgBrightCyan + "        -50", ansi.FgBrightGreen + "+" + ansi.FgBrightCyan + "100,000", ansi.FgBrightCyan + "             0"} {
+		if !strings.Contains(raw, want) {
+			t.Errorf("change row lacks %q:\n%q", want, raw)
+		}
 	}
 }
 

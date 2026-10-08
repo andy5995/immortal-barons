@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -231,8 +232,9 @@ func spyDatabase(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy Database:"), ansi.Reset)
 	rows := recapHeaderRows
 	for _, reports := range spyReportsByRealm(w.SpyDatabase) {
-		// Heading, column labels, a row per report, a change row, a blank line.
-		block := 3 + len(reports)
+		// A blank line, the realm, the head and its rule, a row per report, and
+		// a change row.
+		block := 4 + len(reports)
 		if len(reports) > 1 {
 			block++
 		}
@@ -242,8 +244,8 @@ func spyDatabase(s session.Session, w *ctx) Result {
 		}
 		rows += block
 		r := reports[0]
-		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, fmt.Sprintf(tr(s, "%s of %s"), r.Empire, r.Board), ansi.Reset)
-		fmt.Fprintf(s, spyRowFormat, tr(s, "Arrived"), tr(s, "Land"), tr(s, "Offense"), tr(s, "Defense"), tr(s, "Gold"))
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, fmt.Sprintf(tr(s, "%s of %s"), r.Empire, r.Board), ansi.Reset)
+		printTableHead(s, w.Term, spyColumns)
 		for _, r := range reports {
 			// Where it is known, when the report arrived: two reports on one realm
 			// often share a game day.
@@ -251,22 +253,48 @@ func spyDatabase(s session.Session, w *ctx) Result {
 			if !r.Filed.IsZero() {
 				when = r.Filed.In(sessionZone(s)).Format("01/02 15:04")
 			}
-			fmt.Fprintf(s, spyRowFormat, when, comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold))
+			printSpyRow(s, w.Term, ansi.FgWhite+gaPad(w.Term, when, spyColumns[0].width, false),
+				[]string{comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold)})
 		}
 		if n := len(reports); n > 1 {
 			a, b := reports[n-2], reports[n-1]
-			fmt.Fprintf(s, spyRowFormat, tr(s, "Change"), signed(int64(b.Land-a.Land)),
-				signed(int64(b.Offense-a.Offense)), signed(int64(b.Defense-a.Defense)), signed(b.Gold-a.Gold))
+			printSpyRow(s, w.Term, ansi.FgBrightWhite+gaPad(w.Term, tr(s, "Change"), spyColumns[0].width, false),
+				[]string{signed(int64(b.Land - a.Land)), signed(int64(b.Offense - a.Offense)),
+					signed(int64(b.Defense - a.Defense)), signed(b.Gold - a.Gold)})
 		}
-		fmt.Fprintln(s)
 	}
 	pause(s)
 	return Stay
 }
 
-// spyRowFormat lays out one Spy Database row; the widths hold a billion-scale
-// figure in each column and keep the row inside 80 columns.
-const spyRowFormat = "  %-11s %9s %14s %14s %15s\n"
+// spyColumns is a Spy Database table read left to right, drawn in the Join
+// Group Attack table's shape (printTableHead). With its sign, Land holds a
+// figure to 99,999,999, Offense and Defense one to two billion, and Gold one to
+// 99 billion; the five come to 75 with their separators, inside an 80-column
+// screen.
+var spyColumns = []tableColumn{
+	{"Arrived", 13},
+	{"Land", 12},
+	{"Offense", 15},
+	{"Defense", 15},
+	{"Gold", 16},
+}
+
+// printSpyRow draws one Spy Database row: the first cell already laid out, then
+// each figure right-justified in its column. Figures are bright cyan and a
+// rise's "+" bright green, as the news screen colors a change: the sign carries
+// the direction, so color is never the only cue.
+func printSpyRow(s session.Session, t Term, first string, figures []string) {
+	cells := []string{first}
+	for i, f := range figures {
+		cell := ansi.FgBrightCyan + gaFigure(f, spyColumns[i+1].width)
+		if strings.HasPrefix(f, "+") {
+			cell = strings.Replace(cell, "+", ansi.FgBrightGreen+"+"+ansi.FgBrightCyan, 1)
+		}
+		cells = append(cells, cell)
+	}
+	fmt.Fprintf(s, "%s%s\n", strings.TrimRight(strings.Join(cells, ansi.FgBrightBlack+gaSep), " "), ansi.Reset)
+}
 
 // spyReportsByRealm groups the database by realm, keeping each realm's reports
 // in arrival order and the realms in the order they first appear.
