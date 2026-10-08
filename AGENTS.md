@@ -421,7 +421,7 @@ that may be sold, which this project's license permits, and they carry their
 authors' contact details. Facts are free to restate, so the file says them in
 its own words and links the originals. Nothing in FidoNet is an RFC.
 
-## Status (v0.2.4 released 2026-10-08; v0.2.5 in development)
+## Status (v0.2.5 released 2026-10-08; v0.2.6 in development)
 
 Persistent, multi-user door game: one shared JSON world, concurrent multi-node
 door play, per-caller empires keyed by BBS handle. Sole front-end:

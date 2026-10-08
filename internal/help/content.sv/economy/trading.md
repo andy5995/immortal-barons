@@ -39,10 +39,9 @@ Skyddshandel-fördrag med det riket gör avgiften billigare.
 The days you pay for are how long the offer stands. What you put in the deal
 leaves your realm the moment you send it, and so do the carriers. If the
 offer is accepted, the other realm gets it, you get what you asked for, and
-the carriers come home. A refusal, or a deal nobody answers before its days
-run out, costs you the goods and the carriers. If the realm falls before it
-replies, the goods and the carriers come back to you. Send to someone who is
-playing, and give them enough days to get to it.
+the carriers come home. If the offer is refused, nobody answers it before
+its days run out, or the realm falls before it replies, the goods and the
+carriers come back to you. Either way, the fee is spent.
 
 ## Avtal till en annan planet
 
@@ -52,10 +51,12 @@ innan du använder det.
 
 You cannot ask for anything back. The goods are a gift, and the realm you
 send them to has no say: they arrive and are added to what that realm
-holds. There is no offer to accept or refuse, so the goods never come back
-to you. You are told when the deal arrives, or that it was lost because the
-realm is gone. The carriers come home when the deal arrives, and are lost
-with a lost deal.
+holds. There is no offer to accept or refuse, so once delivered the goods
+are theirs. You are told when the deal arrives. The carriers always come
+home. If the realm is gone, or no word comes back from that planet in time,
+the goods come home too, but the fee does not. **Deals Out** on the
+InterPlanetary Trading menu lists the deals still waiting for word, and when
+each comes home.
 
 Du betalar en gång, inte per dag, och du behöver inget fördrag med riket
 eller dess planet.  Avgiften beror på vad som finns i avtalet, och den visas

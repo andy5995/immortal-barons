@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-08 13:03-0500\n"
+"POT-Creation-Date: 2026-10-08 18:33-0500\n"
 "PO-Revision-Date: 2026-09-17 04:27-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2167,7 +2167,7 @@ msgstr ""
 "Protegido com aquele reino deixa a taxa mais barata."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:43
+#: internal/help/content/economy/trading.md:42
 #, fuzzy
 #| msgid ""
 #| "The days you pay for are how long the offer stands. What you put in the "
@@ -2180,10 +2180,9 @@ msgid ""
 "The days you pay for are how long the offer stands. What you put in the deal "
 "leaves your realm the moment you send it, and so do the carriers. If the "
 "offer is accepted, the other realm gets it, you get what you asked for, and "
-"the carriers come home. A refusal, or a deal nobody answers before its days "
-"run out, costs you the goods and the carriers. If the realm falls before it "
-"replies, the goods and the carriers come back to you. Send to someone who is "
-"playing, and give them enough days to get to it."
+"the carriers come home. If the offer is refused, nobody answers it before "
+"its days run out, or the realm falls before it replies, the goods and the "
+"carriers come back to you. Either way, the fee is spent."
 msgstr ""
 "Os dias que você paga são por quanto tempo a oferta fica de pé. O que você "
 "põe no acordo sai do seu reino no instante em que você o envia. Se a oferta "
@@ -2193,13 +2192,13 @@ msgstr ""
 "está jogando, e dê a essa pessoa dias suficientes para chegar até lá."
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:44
+#: internal/help/content/economy/trading.md:43
 #, no-wrap
 msgid "Deals to another planet"
 msgstr "Acordos com outro planeta"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:49
+#: internal/help/content/economy/trading.md:48
 msgid ""
 "In a league game the InterPlanetary Operations menu sends a deal to a realm "
 "on another planet. It works differently from the one above, so read this "
@@ -2210,7 +2209,7 @@ msgstr ""
 "antes de usá-lo."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:55
+#: internal/help/content/economy/trading.md:56
 #, fuzzy
 #| msgid ""
 #| "You cannot ask for anything back. The goods are a gift, and the realm you "
@@ -2221,10 +2220,12 @@ msgstr ""
 msgid ""
 "You cannot ask for anything back. The goods are a gift, and the realm you "
 "send them to has no say: they arrive and are added to what that realm holds. "
-"There is no offer to accept or refuse, so the goods never come back to you. "
-"You are told when the deal arrives, or that it was lost because the realm is "
-"gone. The carriers come home when the deal arrives, and are lost with a lost "
-"deal."
+"There is no offer to accept or refuse, so once delivered the goods are "
+"theirs. You are told when the deal arrives. The carriers always come home. "
+"If the realm is gone, or no word comes back from that planet in time, the "
+"goods come home too, but the fee does not. **Deals Out** on the "
+"InterPlanetary Trading menu lists the deals still waiting for word, and when "
+"each comes home."
 msgstr ""
 "Você não pode pedir nada em troca. As mercadorias são um presente, e o reino "
 "para quem você as manda não opina: elas chegam e são somadas ao que aquele "
@@ -2233,7 +2234,7 @@ msgstr ""
 "reino não existe mais."
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:60
+#: internal/help/content/economy/trading.md:61
 msgid ""
 "You pay once, not per day, and you need no treaty with the realm or its "
 "planet.  The fee depends on what is in the deal, and it is shown before you "
@@ -2248,19 +2249,19 @@ msgstr ""
 "isso, use o acordo de cima."
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:61
+#: internal/help/content/economy/trading.md:62
 #, no-wrap
 msgid "Getting the most from trade"
 msgstr "Tirando o máximo do comércio"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:64
+#: internal/help/content/economy/trading.md:65
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 "O comércio rende mais quando vários reinos trabalham juntos. Algumas ideias:"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:69
+#: internal/help/content/economy/trading.md:70
 #, no-wrap
 msgid ""
 "**Specialize, then supply your partners.** Your industry can specialize in one\n"
@@ -2274,7 +2275,7 @@ msgstr ""
 "o outro precisa. Troquem o excedente, e os dois reinos saem ganhando.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:73
+#: internal/help/content/economy/trading.md:74
 #, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so\n"
@@ -2286,7 +2287,7 @@ msgstr ""
 "mercadorias chegam ao reino que você quer, envie um acordo comercial.\n"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:76
+#: internal/help/content/economy/trading.md:77
 #, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialize, and\n"
