@@ -5063,7 +5063,10 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   effect in the sender's own event (at the next turn, or at once as a
   mid-session notice) rather than only in the Spy Database. The database stamps
   each entry with when it arrived here (two reports on one realm can share a
-  game day) and keeps the newest `SpyReportsPerRealm` (5) on each realm. The
+  game day) and keeps the newest `SpyReportsPerRealm` (5) on each realm, none
+  older than `SpyReportMaxAgeDays` (7) real days except the newest on each
+  realm, which stays however old it is. Daily maintenance prunes it as well as
+  each new filing, so old reports go even when nothing new arrives. The
   viewer groups them by realm and ends each realm's rows with the change
   between its last two reports, paged for an 80x24 screen. Neither change
   touches the packet.

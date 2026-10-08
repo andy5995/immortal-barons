@@ -145,3 +145,60 @@ func TestOnlyASpyThatGotInSendsIntel(t *testing.T) {
 	}
 	t.Fatal("no seed produced a caught spy; the test proves nothing")
 }
+
+// A Spy Database entry goes after SpyReportMaxAgeDays — on filing and at
+// maintenance alike — except the newest on each realm, which stays however old.
+// Golden 7 rather than the constant: it is the figure Andy set.
+func TestSpyDatabaseDropsOldReportsButKeepsEachRealmsNewest(t *testing.T) {
+	restore := timeNow
+	t.Cleanup(func() { timeNow = restore })
+	start := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
+	at := func(days int) { timeNow = func() time.Time { return start.AddDate(0, 0, days) } }
+
+	w := NewWorldSeed(DefaultConfig(), 1)
+	at(0)
+	w.fileSpyReport(SpyReport{Board: "Far", Empire: "Old", Land: 1})
+	w.fileSpyReport(SpyReport{Board: "Far", Empire: "Old", Land: 2})
+	w.fileSpyReport(SpyReport{Board: "Far", Empire: "Busy", Land: 10})
+	at(3)
+	w.fileSpyReport(SpyReport{Board: "Far", Empire: "Busy", Land: 11})
+
+	lands := func() map[string][]int {
+		got := map[string][]int{}
+		for _, e := range w.SpyDatabase {
+			got[e.Empire] = append(got[e.Empire], e.Land)
+		}
+		return got
+	}
+
+	// Seven days on, nothing is past the limit yet.
+	at(7)
+	w.pruneSpyDatabase(timeNow())
+	if got := fmt.Sprint(lands()); got != "map[Busy:[10 11] Old:[1 2]]" {
+		t.Errorf("at 7 days kept %s, want everything", got)
+	}
+
+	// Past it, by maintenance alone: Old keeps only its newest, Busy drops the
+	// stale one and keeps the four-day-old one.
+	at(8)
+	w.DailyMaintenance(timeNow().Format("2006-01-02"))
+	if got := fmt.Sprint(lands()); got != "map[Busy:[11] Old:[2]]" {
+		t.Errorf("at 8 days kept %s, want map[Busy:[11] Old:[2]]", got)
+	}
+
+	// A month later each realm still has its last report.
+	at(40)
+	w.pruneSpyDatabase(timeNow())
+	if got := fmt.Sprint(lands()); got != "map[Busy:[11] Old:[2]]" {
+		t.Errorf("at 40 days kept %s, want each realm's newest", got)
+	}
+
+	// A saved entry with no filing time counts as old, but stays if it is newest.
+	w.SpyDatabase = append(w.SpyDatabase,
+		SpyEntry{SpyReport: SpyReport{Board: "Far", Empire: "Legacy", Land: 5}},
+		SpyEntry{SpyReport: SpyReport{Board: "Far", Empire: "Legacy", Land: 6}})
+	w.pruneSpyDatabase(timeNow())
+	if got := lands()["Legacy"]; fmt.Sprint(got) != "[6]" {
+		t.Errorf("legacy entries kept %v, want only the newest [6]", got)
+	}
+}

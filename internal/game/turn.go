@@ -133,6 +133,9 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 	if w.Frozen {
 		return MaintReport{Frozen: true}
 	}
+	// Spy reports age by the clock rather than the game day, so every pass
+	// prunes them, including the ones below that run no day.
+	w.pruneSpyDatabase(timeNow())
 	// The first maintenance that runs with the game underway is the day it began.
 	if w.StartedDate == "" {
 		w.StartedDate = today

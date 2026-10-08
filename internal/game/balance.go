@@ -539,3 +539,9 @@ const LostForcesHeldBackstop = 5
 // after around a strike, and the cap is what stops the list growing for a whole
 // game. IB's own.
 const SpyReportsPerRealm = 5
+
+// SpyReportMaxAgeDays is how long a Spy Database entry is kept, in real days
+// from when it was filed. The newest report on each realm is kept however old
+// it is, so a realm last spied on long ago still shows what was learned. IB's
+// own.
+const SpyReportMaxAgeDays = 7

@@ -34,7 +34,8 @@ damage:
 - **Send Spy** — brings home the target's land, offense, defense and gold, and
   its troopers, jets, turrets, tanks and military morale. You see the report
   when the spy returns, and it goes into the Spy Database. The Spy
-  Database keeps the last five reports on each realm and shows how the last two
+  Database keeps up to five reports on each realm from the last seven days, and
+  always keeps the newest one however old it is. It shows how the last two
   differ, so a spy sent before and after a strike shows what the strike did.
   When you aim a strike at a realm you have a report on, its latest report is
   shown once you pick it.

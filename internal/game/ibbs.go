@@ -366,27 +366,36 @@ func (w *World) fileReconReports(p Packet, spies []int) {
 	}
 }
 
-// fileSpyReport adds r to the Spy Database, stamped with its arrival, and lets
-// the oldest entries on the same realm go past SpyReportsPerRealm.
+// fileSpyReport adds r to the Spy Database, stamped with its arrival, and
+// prunes the database (pruneSpyDatabase).
 func (w *World) fileSpyReport(r SpyReport) {
-	w.SpyDatabase = append(w.SpyDatabase, SpyEntry{SpyReport: r, Filed: timeNow()})
-	n := 0
-	for _, e := range w.SpyDatabase {
-		if e.Board == r.Board && e.Empire == r.Empire {
-			n++
-		}
+	now := timeNow()
+	w.SpyDatabase = append(w.SpyDatabase, SpyEntry{SpyReport: r, Filed: now})
+	w.pruneSpyDatabase(now)
+}
+
+// pruneSpyDatabase keeps at most SpyReportsPerRealm entries on each realm and
+// drops any older than SpyReportMaxAgeDays, except the newest on each realm,
+// which stays whatever its age. Entries are filed in order, so the last one on
+// a realm is its newest. One saved before entries were stamped has no Filed
+// time and counts as old.
+func (w *World) pruneSpyDatabase(now time.Time) {
+	type realm struct{ board, empire string }
+	maxAge := time.Duration(SpyReportMaxAgeDays) * 24 * time.Hour
+	seen := map[realm]int{}
+	keep := make([]bool, len(w.SpyDatabase))
+	for i := len(w.SpyDatabase) - 1; i >= 0; i-- {
+		e := w.SpyDatabase[i]
+		k := realm{e.Board, e.Empire}
+		seen[k]++
+		fresh := !e.Filed.IsZero() && now.Sub(e.Filed) <= maxAge
+		keep[i] = seen[k] == 1 || (seen[k] <= SpyReportsPerRealm && fresh)
 	}
-	if n <= SpyReportsPerRealm {
-		return
-	}
-	drop := n - SpyReportsPerRealm
 	kept := w.SpyDatabase[:0]
-	for _, e := range w.SpyDatabase {
-		if drop > 0 && e.Board == r.Board && e.Empire == r.Empire {
-			drop--
-			continue
+	for i, e := range w.SpyDatabase {
+		if keep[i] {
+			kept = append(kept, e)
 		}
-		kept = append(kept, e)
 	}
 	w.SpyDatabase = kept
 }
