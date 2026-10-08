@@ -124,7 +124,7 @@ func buyMilitaryAllowed(s session.Session, w *ctx) bool {
 // promptQuantity asks how many of a unit to buy, offering as the ceiling what
 // the treasury can afford at that price.
 func promptQuantity(s session.Session, label string, price int, gold int64) int {
-	return promptSuggested(s, fmt.Sprintf("%s — %d gold each. How many?", label, price),
+	return promptSuggested(s, fmt.Sprintf(tr(s, "%s — %d gold each. How many?"), tr(s, label), price),
 		0, game.UnitsAffordable(gold, price))
 }
 
