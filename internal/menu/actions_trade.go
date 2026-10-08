@@ -296,7 +296,7 @@ func tradeDealSpan(s session.Session, w *ctx, toName string, send game.TradeBask
 
 // reviewTradeDeals surfaces each pending trade deal to the player at turn start
 // (mirroring reviewTreatyOffers): what they'd receive vs give, with an Accept?
-// prompt. Accepting completes the barter; declining forfeits the sender's escrow.
+// prompt. Accepting completes the barter; declining sends the escrow home.
 func reviewTradeDeals(s session.Session, w *ctx) {
 	var deals []game.TradeDeal
 	withPlayer(w, func(p *game.Empire) {

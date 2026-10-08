@@ -118,7 +118,7 @@ func subBasket(e *Empire, b TradeBasket) {
 // TradeDeal is a pending barter offer recorded on the target empire: the sender
 // gives Send and wants Demand in return. The Send goods are escrowed off the
 // sender when the deal is sent (see SendTradeDeal), so they can't be double-spent
-// while the offer is pending; a decline destroys them (see DeclineTradeDeal).
+// while the offer is pending; a decline brings them home (see returnDeal).
 type TradeDeal struct {
 	From   string
 	Send   TradeBasket // goods the sender gives the recipient
@@ -308,7 +308,7 @@ func (w *World) AcceptTradeDeal(to *Empire, want TradeDeal) error {
 	w.addBasket(from, d.Demand) // sender receives the demand
 	// The transport comes home with a completed deal: the accept branch credits
 	// the record's carrier count back to the sender (process_trade_offer,
-	// BRE.OVR 0x02563a), and a rejection or expiry credits nothing.
+	// BRE.OVR 0x02563a). Every other outcome returns it too, with the goods.
 	from.Carriers += d.transport()
 	to.removeDeal(i)
 	notifyTrader(from, to, msgid("{who} accepted your trade deal."))
@@ -324,18 +324,38 @@ func notifyTrader(from, to *Empire, answer string) {
 	from.addEvent(say(answer, "who", to.Name))
 }
 
-// DeclineTradeDeal drops a pending deal. The escrow is NOT returned: acceptance
-// is the only outcome in the original that moves the offered goods anywhere.
-// process_trade_offer answers a rejection by filing the notice and zeroing the
-// 0x97-byte record (`clear_trade_offer_record` at 0xDC4), and the whole of its
-// goods-moving code sits in the accept branch — nothing credits the sender back.
-// Sending is therefore a real bet on the answer, and IB used to return the goods.
+// returnDeal hands a deal's escrowed goods, and the carriers that took them,
+// back to the realm that sent it, and returns that realm (nil when it is gone,
+// and then nothing is returned). BINARY-VERIFIED: process_trade_offer calls one
+// nested helper (BRE.OVR 0x024961 +0x00c2) on a rejection (+0x0d73), a lapse
+// (+0x0509) and a target that is gone (+0x0564). It credits each of the nine
+// goods in the record back to the sender, capped at two billion, then the
+// carrier count at +0x52, provided the sender's slot still holds the same
+// realm. Only the fee is spent. The spec said the reverse from #174 until
+// 2026-10-08, from reading that helper as part of the accept branch.
+//
+// IB differs in two small ways: it finds the sender by name rather than checking
+// the slot, and only the gold is capped. addBasket returns the goods, so gold
+// lands under the money cap and files its own loss event if the realm is
+// already at it.
+func (w *World) returnDeal(d TradeDeal) *Empire {
+	from := w.FindByName(d.From)
+	if from == nil {
+		return nil
+	}
+	w.addBasket(from, d.Send)
+	from.Carriers += d.transport()
+	return from
+}
+
+// DeclineTradeDeal drops a pending deal and sends its goods and carriers home
+// (returnDeal).
 func (w *World) DeclineTradeDeal(to *Empire, want TradeDeal) bool {
 	i := findDeal(to, want)
 	if i < 0 {
 		return false
 	}
-	if from := w.FindByName(want.From); from != nil {
+	if from := w.returnDeal(to.TradeDeals[i]); from != nil {
 		notifyTrader(from, to, msgid("{who} rejected your trade deal."))
 	}
 	to.removeDeal(i)
@@ -343,7 +363,7 @@ func (w *World) DeclineTradeDeal(to *Empire, want TradeDeal) bool {
 }
 
 // ExpireTradeDeals drops every pending deal whose span has run out and tells the
-// realm that sent it. The escrow goes with it — see DeclineTradeDeal.
+// realm that sent it. The goods and carriers come home (returnDeal).
 //
 // BRE sweeps lazily, inside the turn-start routine that puts pending deals to a
 // player (process_trade_offer 0x24E5): whoever plays next is who clears the
@@ -354,8 +374,8 @@ func (w *World) ExpireTradeDeals(now time.Time) {
 		kept := e.TradeDeals[:0]
 		for _, d := range e.TradeDeals {
 			if !d.Expires.IsZero() && now.After(d.Expires) {
-				if from := w.FindByName(d.From); from != nil {
-					from.addEvent(say("{who} never answered your trade deal, and the goods you sent it with are lost.", "who", e.Name))
+				if from := w.returnDeal(d); from != nil {
+					from.addEvent(say("{who} never answered your trade deal, and your trade fleet has brought the goods home.", "who", e.Name))
 				}
 				continue
 			}
@@ -367,27 +387,18 @@ func (w *World) ExpireTradeDeals(now time.Time) {
 
 // returnPendingDeals hands each escrowed shipment back to the realm that sent
 // it, and says so. Called when e leaves the world — eliminated, abdicated or
-// reaped as idle.
+// reaped as idle (#248).
 //
-// This is the one forfeit case with nobody to blame for it (#248). A rejection
-// and an expiry both destroy the escrow, and deliberately: the target answered,
-// or could have. A target that is GONE was never offered the choice, so the
-// sender loses goods over something no player did. IB returns them instead.
-//
-// The original settles none of this — nothing on its elimination path clears a
-// trade record (`clear_trade_offer_record` is reached only from
-// `create_trade_offer` and `process_trade_offer`), so a departing realm takes
-// any pending offer with it silently. IB already diverged by telling the sender
-// at all; this carries the goods with the notice, and the carriers that
-// shipped them, as an accepted deal would.
-//
-// addBasket is what returns them, so gold lands under the money cap and files
-// its own loss event if the realm is already at it.
+// The original returns these too, but only when the next turn sweeps the record
+// and finds the target gone (process_trade_offer +0x0562, through returnDeal's
+// helper). Nothing on its elimination path clears a trade record, so IB settles
+// them as the realm leaves instead, which comes to the same goods.
 func (w *World) returnPendingDeals(e *Empire) {
 	for _, d := range e.TradeDeals {
-		if from := w.FindByName(d.From); from != nil && from != e {
-			w.addBasket(from, d.Send)
-			from.Carriers += d.transport()
+		if d.From == e.Name {
+			continue
+		}
+		if from := w.returnDeal(d); from != nil {
 			from.addEvent(say("Your trade fleet could not find {who}, and has brought the goods home.", "who", e.Name))
 		}
 	}

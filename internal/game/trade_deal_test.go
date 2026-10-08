@@ -87,9 +87,9 @@ func TestSendTradeDealNeedsFee(t *testing.T) {
 	}
 }
 
-// Declining drops the deal and keeps nobody's goods moving: the escrow is gone,
-// as it is in the original, where only an acceptance ever moves it.
-func TestDeclineTradeDealForfeitsEscrow(t *testing.T) {
+// Declining drops the deal and sends the escrow home, carriers included, as the
+// original's rejection branch does (process_trade_offer +0x0d73).
+func TestDeclineTradeDealReturnsEscrow(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
@@ -102,11 +102,11 @@ func TestDeclineTradeDealForfeitsEscrow(t *testing.T) {
 	if !w.DeclineTradeDeal(to, to.TradeDeals[0]) {
 		t.Fatal("decline should find and drop the deal")
 	}
-	if from.Tanks != 400 {
-		t.Errorf("decline forfeits the escrow, as the original does: %d, want 400", from.Tanks)
+	if from.Tanks != 500 {
+		t.Errorf("decline returns the escrow, as the original does: %d, want 500", from.Tanks)
 	}
-	if from.Carriers != 0 {
-		t.Errorf("the spent carrier is not returned on decline: %d, want 0", from.Carriers)
+	if from.Carriers != 1 {
+		t.Errorf("decline returns the carrier: %d, want 1", from.Carriers)
 	}
 	if len(from.Events) != 1 {
 		t.Errorf("the sender should be told once, got %v", from.Events)
@@ -295,8 +295,8 @@ func TestTradeDealAnswersAreFiledOnTheProposersRecap(t *testing.T) {
 }
 
 // A deal outlives the span it was sent for by nobody's action: it lapses the
-// next time a turn sweeps the list, the sender is told, and the goods are gone
-// (#175). BRE stores now + days on the record and compares it against the clock
+// next time a turn sweeps the list, the sender is told, and the goods and
+// carriers come home (#175). BRE stores now + days on the record and compares it against the clock
 // at turn start (process_trade_offer 0x24E5).
 func TestTradeDealExpiresAfterItsSpan(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
@@ -324,8 +324,8 @@ func TestTradeDealExpiresAfterItsSpan(t *testing.T) {
 	if len(to.TradeDeals) != 0 {
 		t.Error("a deal past its span should be swept")
 	}
-	if from.Tanks != 400 {
-		t.Errorf("the escrow is forfeit on a lapse: %d tanks, want 400", from.Tanks)
+	if from.Tanks != 500 || from.Carriers != 1 {
+		t.Errorf("a lapse returns the escrow: %d tanks, %d carriers, want 500 and 1", from.Tanks, from.Carriers)
 	}
 	if len(from.Events) != before+1 {
 		t.Fatalf("the sender should be told once, got %v", from.Events[before:])

@@ -342,8 +342,11 @@ tampering. Two fields of it have been read so far:
                 sender. Written by create_trade_offer (its [bp-0x46], the
                 carrier-count helper's result, subtracted from the sender's
                 +0x8a at unit offset 0x23A7); credited back to the SENDER's
-                +0x8a by process_trade_offer's accept branch (0x02563a) and
-                its helper at 0x024961 +0x0231.
+                +0x8a by process_trade_offer's accept branch (0x02563a), and
+                by the nested helper at 0x024961 +0x00c2 (the write at +0x0231)
+                that returns an unaccepted deal on a rejection, a lapse or a
+                missing target. That helper also returns the nine goods, which
+                sit at +0x0a, four bytes each.
   +0x60  byte   the SENDER's turns-remaining-today at the moment of sending.
                 Written by create_trade_offer (BRE.OVR 0x260CD, unit offset
                 0x238B); read by process_trade_offer (0x24D6B, unit offset

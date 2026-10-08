@@ -6508,12 +6508,12 @@ trading half) are built: `SendTradeDeal` takes a full basket each way, escrows
 what is offered, takes the carriers the cargo needs and charges the per-day
 transit fee (#17).
 
-**The carriers come back on accept, and only then — BINARY-VERIFIED.**
+**The carriers always come back — BINARY-VERIFIED.**
 `create_trade_offer` subtracts the carrier count from the sender (`BRE.OVR`
 0x260CD, unit offset 0x23A7) and stores it in the offer record at `+0x52`;
 `process_trade_offer`'s accept branch adds `+0x52` back to the sender's Carriers
-(0x02563a, and once more in its helper at 0x024961 +0x0231). A rejection or an
-expiry credits nothing, so those carriers are lost with the goods. The refund
+(0x02563a), and the helper that returns an unaccepted deal adds it back too
+(0x024961 +0x0231; see "Every unaccepted deal comes home" below). The refund
 is the STORED count, so a deal Bomb Trade Routes cut in transit still returns
 every carrier it took; IB keeps it on the deal as `TradeDeal.Carriers`, and a
 deal saved before that field existed works it out from what it still carries.
@@ -6606,27 +6606,25 @@ and 0x26A39 lowers it to the days the sender's gold in hand, less any gold being
 offered, can pay for. Under two affordable days the deal is refused before the
 prompt. The hint prints both bounds, `(2; 10)`; IB's Enter default is the 2.
 
-Nothing gives the escrow back. The rejection branch files the notice and zeroes
-the 151-byte record (0xDC4) with no goods moving, the lapse branch does the same
-(0x511), and the branch for a target that can no longer be found does the same
-again (0x562) — every routine that moves goods sits inside the accept branch.
-So sending a deal is a bet: the goods leave when it is sent, and they come back
-only if the offer is taken. That settles #174 — the sender is told on all three
-paths, which is what IB now does. IB previously returned the goods on a decline.
+**Every unaccepted deal comes home — BINARY-VERIFIED.** The rejection branch
+(+0x0d73), the lapse branch (+0x0509) and the branch for a target that can no
+longer be found (+0x0564) all call one nested helper (`BRE.OVR` 0x024961
++0x00c2) before they zero the 151-byte record. The helper credits each of the
+nine goods in the record back to the sender, capped at two billion, then the
+carrier count at `+0x52`, provided the sender's slot still holds the same realm.
+Only the fee is spent. IB returns the goods and the carriers on all three paths
+(`World.returnDeal`), and tells the sender on each.
 
-**DELIBERATE DIVERGENCE on the third path: IB brings the goods home when the
-target is GONE** (#248). The other two forfeits stand exactly as the original has
-them, because in both the target answered or could have: a rejection is an answer
-and an expiry is a refusal to give one, so the bet was lost fairly. A target that
-has left the world — eliminated, abdicated, reaped as idle — was never offered
-the choice, and nothing any player did destroyed the shipment. The original does
-forfeit it (`process_trade_offer` 0x562, the branch behind `Your Trade Fleet
-could not find its target.`) — most likely a bug rather than a decision, since
-the other two branches have a reason this one does not, and all three share the
-same record-clearing code. Faithful to the routine, IB would burn a shipment
-because a THIRD party was reaped as idle. `World.returnPendingDeals`
-returns the escrow through `addBasket`, so returned gold lands under the money
-cap, and returns the carriers with it, as an accepted deal would.
+This section said the reverse from #174 until 2026-10-08: it read the helper as
+part of the accept branch and missed its three other callers, and IB destroyed
+the escrow on a rejection or a lapse in that time. The helper also subtracts the
+record's `+0x56` from a field of the sender's record; that field is not yet
+identified.
+
+A target that has left the world — eliminated, abdicated, reaped as idle — is
+settled when it leaves (`World.returnPendingDeals`, #248), where the original
+waits for the next turn to sweep the record and find the target gone. The goods
+are the same either way.
 
 **A pending deal is put again on every entry, and out of turns is asked
 nothing.** `run_player_turn` calls `process_trade_offer` behind a

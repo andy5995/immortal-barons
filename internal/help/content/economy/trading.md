@@ -36,10 +36,9 @@ Protective Trade treaty with that realm makes the fee cheaper.
 The days you pay for are how long the offer stands. What you put in the deal
 leaves your realm the moment you send it, and so do the carriers. If the offer
 is accepted, the other realm gets it, you get what you asked for, and the
-carriers come home. A refusal, or a deal nobody answers before its days run
-out, costs you the goods and the carriers. If the realm falls before it
-replies, the goods and the carriers come back to you. Send to someone who is
-playing, and give them enough days to get to it.
+carriers come home. If the offer is refused, nobody answers it before its days
+run out, or the realm falls before it replies, the goods and the carriers come
+back to you. Either way, the fee is spent.
 
 ## Deals to another planet
 
