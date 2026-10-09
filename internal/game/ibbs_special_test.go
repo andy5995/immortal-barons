@@ -463,3 +463,37 @@ func TestInterplanetaryMissilePricesMatchTheCapture(t *testing.T) {
 		t.Errorf("the interplanetary price is capped at %d: got %d", StrikeCostCap, got)
 	}
 }
+
+// A bomber purchase made against a quote the market has since moved is
+// refused, not charged at the new price.
+func TestBuyBomberShortfallRefusesAMovedQuote(t *testing.T) {
+	w, _, e, _ := specialOpWorlds(t)
+	e.Bombers, e.Gold = 100, 1_000_000_000
+	need, cost := w.BomberShortfall(e)
+	if need != 400 {
+		t.Fatalf("shortfall %d, want 400", need)
+	}
+	if err := w.BuyBomberShortfall(e, need, cost+1); err != ErrBomberQuoteMoved {
+		t.Fatalf("moved quote: %v, want ErrBomberQuoteMoved", err)
+	}
+	if e.Bombers != 100 {
+		t.Errorf("bombers %d after a refused purchase, want 100", e.Bombers)
+	}
+	if err := w.BuyBomberShortfall(e, need, cost); err != nil || e.Bombers != BombingBombersRequired {
+		t.Errorf("buying at the quote: %v, bombers %d", err, e.Bombers)
+	}
+}
+
+// Buy Military switched off after the quote still stops the purchase.
+func TestBuyBomberShortfallHonorsBuyMilitary(t *testing.T) {
+	w, _, e, _ := specialOpWorlds(t)
+	e.Bombers, e.Gold = 100, 1_000_000_000
+	need, cost := w.BomberShortfall(e)
+	w.Config.BuyMilitary = BuyNo
+	if err := w.BuyBomberShortfall(e, need, cost); err != ErrMilitaryNotForSale {
+		t.Fatalf("got %v, want ErrMilitaryNotForSale", err)
+	}
+	if e.Bombers != 100 {
+		t.Errorf("bombers %d, want 100", e.Bombers)
+	}
+}

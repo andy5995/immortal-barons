@@ -178,6 +178,26 @@ func SpecialOpGoldCost(op SpecialOp, targetLand int) int64 {
 	return min(max(int64(targetLand)*rate, IPMissileCostMin), IPMissileCostMax)
 }
 
+// BomberShortfall is how many Bombers e lacks for a Special Operation, and what
+// they cost at e's market price.
+func (w *World) BomberShortfall(e *Empire) (need int, cost int64) {
+	need = max(BombingBombersRequired-e.Bombers, 0)
+	return need, goldCost(need, w.UnitPrice(e, Bomber))
+}
+
+// BuyBomberShortfall buys the Bombers a BomberShortfall quote named, refusing
+// with ErrBomberQuoteMoved when the shortfall or its price is no longer what
+// was quoted, so the player is never charged a figure they were not shown.
+func (w *World) BuyBomberShortfall(e *Empire, need int, cost int64) error {
+	if w.Config.BuyMilitary == BuyNo {
+		return ErrMilitaryNotForSale
+	}
+	if n, c := w.BomberShortfall(e); n != need || c != cost {
+		return ErrBomberQuoteMoved
+	}
+	return w.Buy(e, Bomber, need)
+}
+
 // SendSpecialOp queues an op against targetEmpire on targetBoard. The gold and
 // the 500 Bombers go now and the op is booked in flight, so a packet that never
 // comes back is swept by the same lost-forces timer that returns an attack.

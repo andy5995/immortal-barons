@@ -329,7 +329,12 @@ func offerBank(s session.Session, w *ctx, short int64) (visited bool) {
 // prompt that interrupts a purchase looks like the rest of the game rather than
 // a bare list.
 func drawGoldNeeded(s session.Session, labels []string) {
-	col := ansi.FgBrightCyan // Goldie Luck's Bank's accent
+	drawOfferBox(s, ansi.FgBrightCyan, tr(s, "Gold Needed"), labels) // Goldie Luck's Bank's accent
+}
+
+// drawOfferBox is that box for any short numbered offer: items keyed 1..n, then
+// 0) Quit. The caller reads the answer with ChoiceQuit.
+func drawOfferBox(s session.Session, col, title string, labels []string) {
 	keys := make([]rune, len(labels))
 	for i := range labels {
 		keys[i] = rune('1' + i)
@@ -342,7 +347,7 @@ func drawGoldNeeded(s session.Session, labels []string) {
 			width = n
 		}
 	}
-	fmt.Fprintf(s, "\n%s\n", titleRule(col, tr(s, "Gold Needed"), width))
+	fmt.Fprintf(s, "\n%s\n", titleRule(col, title, width))
 	for i, label := range labels {
 		fmt.Fprintf(s, "  %s(%s%c%s)%s %s%s%s\n",
 			dim(col), col, keys[i], dim(col), ansi.Reset, ansi.FgWhite, label, ansi.Reset)

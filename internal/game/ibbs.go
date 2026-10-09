@@ -30,6 +30,12 @@ var (
 	ErrMissileOpsDisabled  = errors.New("Missile operations are not part of this game.")
 	ErrSabreDisabled       = errors.New("The S3-Sabre is not part of this game.")
 	ErrNeedBombers         = fmt.Errorf("You need at least %d Bombers to deliver a payload.", BombingBombersRequired)
+	// The bombers quoted to make up that floor cost something else by the time
+	// the purchase is made: the market moved, or another node bought some.
+	ErrBomberQuoteMoved = errors.New("The price of the Bombers changed before the purchase. Try again.")
+	// The sysop's Buy Military switch, refused where the purchase is made so a
+	// change made mid-session holds.
+	ErrMilitaryNotForSale = errors.New("Buying military units is disabled in this league.")
 	// A missile is priced off the target's last-known size, so a realm this
 	// board holds no scores for cannot be quoted — and must not be free.
 	ErrNoTargetSize = errors.New("No scores have reached us from that realm, so the arms dealer cannot price a missile for it.")

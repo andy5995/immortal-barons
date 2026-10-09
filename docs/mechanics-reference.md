@@ -5330,6 +5330,14 @@ each missile branch does the same once `prepare_bombing_attack` has charged it
 Bombing Ops switch and count against the daily bombing allowance; the three
 missiles answer to Missile Ops and have their own once-a-day flags.
 
+A baron short of the 500 is offered the missing bombers at the market price
+once the target is picked and the op priced, and the op carries on once they are
+bought (IB's own; the original refuses and stops). The quote names the bombers'
+price and the total with the op; when the gold in hand does not cover the total,
+the bank is offered first. A purchase is refused if the price moved after the
+quote. A league with Buy Military set to No gets the plain refusal, before a
+target is asked for.
+
 **New Realm Protection shields the target from a missile, never from a bombing
 op — BINARY-VERIFIED.** A baron under protection cannot launch either kind: the
 InterPlanetary menu refuses Special Operations as a whole ("The caller's own

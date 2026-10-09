@@ -63,20 +63,7 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 // player has just agreed to should not fail against a bank balance they were
 // never offered the chance to draw on.
 func affordOrBank(s session.Session, w *ctx, cost int64, refusal error) bool {
-	// present reports the caller's own empire; gone is a realm that changed under
-	// the session (another node, a reset). The helper stands aside then rather
-	// than refusing on a zero purse, so the action that follows reports what
-	// actually happened instead of a shortfall that was never the problem.
-	short := func() (n int64, present bool) {
-		var gold int64
-		w.Read(func() {
-			if p := w.Player(); p != nil {
-				gold, present = p.Gold, true
-			}
-		})
-		return cost - gold, present
-	}
-	n, present := short()
+	n, present := shortOf(w, cost)
 	if !present || n <= 0 {
 		return true
 	}
@@ -85,8 +72,15 @@ func affordOrBank(s session.Session, w *ctx, cost int64, refusal error) bool {
 	// between them makes the refusal look like the end of the road, which is
 	// exactly what it no longer is.
 	failNoPause(s, refusal)
-	visited := offerBank(s, w, n)
-	if n, present := short(); !present || n <= 0 {
+	return bankTheShortfall(s, w, cost, n, refusal)
+}
+
+// bankTheShortfall is affordOrBank after its opening refusal, for a caller that
+// has already said why the gold is needed: offer the bank for the shortfall,
+// then measure again.
+func bankTheShortfall(s session.Session, w *ctx, cost, short int64, refusal error) bool {
+	visited := offerBank(s, w, short)
+	if n, present := shortOf(w, cost); !present || n <= 0 {
 		return true
 	}
 	// Came back from the bank no richer: say why nothing is going to happen. The
@@ -96,6 +90,21 @@ func affordOrBank(s session.Session, w *ctx, cost int64, refusal error) bool {
 		fail(s, refusal)
 	}
 	return false
+}
+
+// shortOf is how far the caller's gold in hand falls short of cost. present
+// reports the caller's own empire; gone is a realm that changed under the
+// session (another node, a reset). The helpers above stand aside then rather
+// than refusing on a zero purse, so the action that follows reports what
+// actually happened instead of a shortfall that was never the problem.
+func shortOf(w *ctx, cost int64) (n int64, present bool) {
+	var gold int64
+	w.Read(func() {
+		if p := w.Player(); p != nil {
+			gold, present = p.Gold, true
+		}
+	})
+	return cost - gold, present
 }
 
 // buyer adapts one row to applyBuy's transaction shape.
@@ -114,12 +123,16 @@ func sellGood(g *game.Good) Action {
 // makes players build them through industry instead; Limited mode's daily market
 // pool isn't built yet, so it behaves like Yes.
 func buyMilitaryAllowed(s session.Session, w *ctx) bool {
-	if w.Config.BuyMilitary == game.BuyNo {
-		fail(s, fmt.Errorf("Buying military units is disabled in this league."))
+	if !militaryForSale(w) {
+		fail(s, game.ErrMilitaryNotForSale)
 		return false
 	}
 	return true
 }
+
+// militaryForSale is that gate without the refusal, for a caller that words its
+// own (bombersOrBuy).
+func militaryForSale(w *ctx) bool { return w.Config.BuyMilitary != game.BuyNo }
 
 // promptQuantity asks how many of a unit to buy, offering as the ceiling what
 // the treasury can afford at that price.

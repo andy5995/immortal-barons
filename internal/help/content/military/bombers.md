@@ -12,7 +12,8 @@ Bombers are delivery aircraft. They have an offense of 0 and a defense of 0.
 Every Special Operation except Send SpyGuy needs bombers to deliver its
 payload. You must hold at least 500 bombers to launch one, and each launch uses
 up 500 of them, whether the operation succeeds or not. The Nuclear, Chemical and
-Biological Attacks on your own planet do not need bombers.
+Biological Attacks on your own planet do not need bombers. If you are short,
+the Special Operations menu offers to buy the rest on the spot.
 
 In a strike on another planet, your bombers fight the defender's jets. A strike
 with no bombers destroys none of them.

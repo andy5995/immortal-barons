@@ -111,6 +111,47 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// bombersOrBuy reports whether the caller holds the bombers a Special
+// Operation needs, offering the missing ones when they do not rather than
+// sending the player off to the Spending menu and back. IB's own: the original
+// refuses and stops. It runs once the op is priced, so the quote can show what
+// the bombers and the op come to together, and the bank, when it is needed, is
+// offered for both: bombers bought for an op the gold then cannot send are
+// bombers the player did not want.
+func bombersOrBuy(s session.Session, w *ctx, opCost int64) bool {
+	var need int
+	var cost int64
+	w.Read(func() {
+		if p := w.Player(); p != nil {
+			need, cost = w.BomberShortfall(p)
+		}
+	})
+	if need == 0 {
+		return true
+	}
+	failNoPause(s, game.ErrNeedBombers)
+	bombers := plural(s, float64(need), "%.0f Bomber", "%.0f Bombers")
+	total := cost + opCost
+	okNoPause(s, "Price of %s: %s gold, %s with the operation.", bombers, comma(cost), comma(total))
+	if short, present := shortOf(w, total); present && short > 0 &&
+		!bankTheShortfall(s, w, total, short, game.ErrCantAfford) {
+		return false
+	}
+	drawOfferBox(s, ansi.FgBrightRed, tr(s, "Bombers Needed"),
+		[]string{fmt.Sprintf(tr(s, "Buy %s for %s gold"), bombers, comma(cost))})
+	if ChoiceQuit(s, 1) != 1 {
+		return false
+	}
+	if err := w.mutatePlayer(func(p *game.Empire) error {
+		return w.World.BuyBomberShortfall(p, need, cost)
+	}); err != nil {
+		fail(s, err)
+		return false
+	}
+	okNoPause(s, "%s purchased.", bombers)
+	return true
+}
+
 // showSpyGuysOut lists the watchers this planet already has out, so any baron
 // can see them, and so a sender can see that a planet is already watched: the
 // far board keeps only the longer of two stays, and a shorter one buys nothing.
@@ -144,8 +185,16 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 			return Stay
 		}
 		// Checked before a planet is picked so a baron who cannot deliver a
-		// payload is not walked through choosing a target first.
-		if w.Player().Bombers < game.BombingBombersRequired {
+		// payload, and cannot buy the means, is not walked through choosing a
+		// target first. One who can buy them is offered them once the op is
+		// priced (bombersOrBuy).
+		var short bool
+		w.Read(func() {
+			if p := w.Player(); p != nil {
+				short = p.Bombers < game.BombingBombersRequired
+			}
+		})
+		if short && !militaryForSale(w) {
 			fail(s, game.ErrNeedBombers)
 			return Stay
 		}
@@ -197,6 +246,9 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		cost := game.SpecialOpGoldCost(op, w.World.RemoteLand(board, baron))
 		okNoPause(s, "This operation will cost %s gold.", comma(cost))
 		if !askYesNoHere(s, "Send this Operation?", true) {
+			return Stay
+		}
+		if !bombersOrBuy(s, w, cost) {
 			return Stay
 		}
 		// Accepted but short: the refusal, then the bank, rather than the send
