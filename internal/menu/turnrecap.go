@@ -84,11 +84,27 @@ func openTurnRecap(s session.Session, w *ctx) {
 	spoilsStage(s, w) // a landed interplanetary strike still needs its region types
 }
 
+// eventLog is the Messages menu's Event Log: the turn-start recap, shown on
+// demand. It consumes the events the same way, so Play does not repeat them.
+func eventLog(s session.Session, w *ctx) Result {
+	if !showTurnEvents(s, w) {
+		ok(s, "You have no new events.")
+	}
+	return Stay
+}
+
+// noTurnEvents reports that the recap has nothing to show. Must run under the
+// world lock.
+func noTurnEvents(w *ctx) bool {
+	p := w.Player()
+	return p == nil || (len(p.Events) == 0 && p.MailLost == nil)
+}
+
 // showTurnEvents prints and clears the active empire's accumulated events, if
-// any. The read and clear happen together under w's lock so a concurrent
+// any, and reports whether there were any to print. The read and clear happen together under w's lock so a concurrent
 // maintenance tick or another session's action can't append between the two,
 // and the empire is re-resolved inside the lock so a reload can't rebind it.
-func showTurnEvents(s session.Session, w *ctx) {
+func showTurnEvents(s session.Session, w *ctx) bool {
 	var events []game.Event
 	var realmNames []string
 	var lost *game.MailLoss
@@ -117,7 +133,7 @@ func showTurnEvents(s session.Session, w *ctx) {
 		events = append(events, game.Event{When: lost.At, Text: text})
 	}
 	if len(events) == 0 {
-		return
+		return false
 	}
 	// Realm names and treaty types paint bright-cyan, BRE's color for both in
 	// this recap (docs/dev/bre-screens.md, "Since your last play" capture).
@@ -140,6 +156,7 @@ func showTurnEvents(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When, sessionZone(s)), hiNums(body))
 	}
 	pause(s)
+	return true
 }
 
 // recapPageRows is how much of the recap goes by before it waits for a key, and

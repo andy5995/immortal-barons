@@ -4350,6 +4350,11 @@ Message does; replying to an interplanetary copy does nothing. A planet-wide
 message to the sender's own planet reaches them as received mail as well. Copies
 stay on the board and are never sent in a packet.
 
+**The Messages menu's Event Log (`E`) is the "since your last play" recap, on
+demand (IB's own).** It shows the same entries the recap shows on choosing Play
+Game and consumes them the same way, so Play does not show them again. The item
+is dimmed when there is nothing to show.
+
 ### The game clock, and days nobody played
 
 The world keeps two dates. `LastMaintDate` is the **game clock** — the day the

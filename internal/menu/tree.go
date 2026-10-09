@@ -483,6 +483,9 @@ func BuildMenus() *Menus {
 		{Key: 'S', Label: "Send Message", Do: sendMessage},
 		// IB's own: the player's copies of what they sent.
 		{Key: 'V', Label: "View Sent Messages", Do: viewSentMessages},
+		// IB's own: the "since your last play" events, read ahead of Play. Read
+		// here, they are not shown again when the turn starts.
+		{Key: 'E', Label: "Event Log", Do: eventLog, Dimmed: noTurnEvents},
 		// IB's own: the BBS Coordinator's standing notice to the planet.
 		{Key: 'D', Label: "Directives from CO", Do: directivesMenu, Hidden: ibbsHidden},
 		{Key: '0', Label: "Quit", Do: back},
