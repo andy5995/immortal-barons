@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -482,10 +483,7 @@ func formingGroupRows(s session.Session, w *ctx) []gaRow {
 		if w.Player() == nil {
 			return
 		}
-		for _, ga := range w.GroupAttacks {
-			if ga.Due(now, w.GameDay) {
-				continue
-			}
+		for _, ga := range formingGroups(w, now) {
 			tgt := ga.TargetEmpire
 			if tgt == "" {
 				// A party aimed at the whole planet names no baron, and the
@@ -522,4 +520,22 @@ func formingGroupRows(s session.Session, w *ctx) []gaRow {
 		}
 	})
 	return rows
+}
+
+// formingGroupCount is how many parties are still forming, the figure the Join
+// Group Attack item carries. It runs under the menu's draw lock, so it reads
+// the world directly.
+func formingGroupCount(w *ctx) int { return len(formingGroups(w, game.Now())) }
+
+// formingGroups is the group attacks that have not yet departed: what the Join
+// Group Attack table lists and its menu item counts. Must run under the world
+// lock.
+func formingGroups(w *ctx, now time.Time) []game.GroupAttack {
+	var out []game.GroupAttack
+	for _, ga := range w.GroupAttacks {
+		if !ga.Due(now, w.GameDay) {
+			out = append(out, ga)
+		}
+	}
+	return out
 }

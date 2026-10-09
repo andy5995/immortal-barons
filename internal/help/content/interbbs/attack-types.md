@@ -46,9 +46,10 @@ join it in the meantime, and the delay is how you time it to land before the
 target takes their next turn.
 
 Join Group Attack lists every party still forming, with the troopers, jets,
-tanks and bombers already pooled in it and the hours it has left. Read those
-columns before you commit: they are how you tell a party worth reinforcing from
-one that will not survive the trip.
+tanks and bombers already pooled in each and the hours it has left; the menu
+shows beside the item how many there are. Read those columns before you
+commit: they are how you tell a party worth reinforcing from one that will not
+survive the trip.
 
 Once a force leaves, it is out of your hands and out of your army until the
 other planet's board resolves it and the answer travels back. When it does, you

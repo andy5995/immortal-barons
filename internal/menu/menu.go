@@ -6,6 +6,7 @@ package menu
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -360,6 +361,10 @@ type Item struct {
 	// such an item says plainly why it is refused, so a caller who cannot see
 	// the difference loses nothing.
 	Dimmed func(*ctx) bool
+	// Count, when it returns more than zero, is drawn after the label as
+	// "(n)": white parens around a bright-red figure, the number of things
+	// waiting behind the item.
+	Count func(*ctx) int
 
 	// Price and Owned drive the BRE-style Price / # Owned columns on the
 	// Spending and Sell menus. When any item in a menu sets either, the menu
@@ -378,6 +383,21 @@ func (it *Item) keyColor(g *ctx, menuColor string) string {
 		return dim(menuColor)
 	}
 	return menuColor
+}
+
+// countSuffix is the item's Count as drawn, and its width in columns; both are
+// empty when there is nothing to count.
+func (it *Item) countSuffix(g *ctx) (string, int) {
+	if it.Count == nil {
+		return "", 0
+	}
+	n := it.Count(g)
+	if n <= 0 {
+		return "", 0
+	}
+	fig := strconv.Itoa(n)
+	return fmt.Sprintf(" %s(%s%s%s)%s", ansi.FgWhite, ansi.FgBrightRed, fig, ansi.FgWhite, ansi.Reset),
+		3 + len(fig)
 }
 
 func (it *Item) hidden(g *ctx) bool {
@@ -1005,8 +1025,9 @@ func draw(s session.Session, g *ctx, m *Menu) {
 				if it.Color != "" {
 					lcol = it.Color
 				}
-				fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s\n",
-					dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset)
+				count, _ := it.countSuffix(g)
+				fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s%s\n",
+					dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset, count)
 			}
 		}
 		width := m.fitWidth(&body)
@@ -1047,8 +1068,9 @@ func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, nco
 		if it.Color != "" {
 			lcol = it.Color
 		}
-		s := fmt.Sprintf("  %s(%s%c%s)%s %s%s%s", dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, label, ansi.Reset)
-		return s, 6 + utf8.RuneCountInString(label) // "  (K) " is 6 visible cols
+		count, cw := it.countSuffix(g)
+		s := fmt.Sprintf("  %s(%s%c%s)%s %s%s%s%s", dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, label, ansi.Reset, count)
+		return s, 6 + utf8.RuneCountInString(label) + cw // "  (K) " is 6 visible cols
 	}
 	// renderBlock lays a run of items out column-major. With nrows =
 	// ceil(len/ncol), cell (row r, col c) is item[c*nrows+r]: item indices fill

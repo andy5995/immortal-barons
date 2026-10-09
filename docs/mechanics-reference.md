@@ -6950,6 +6950,8 @@ checking IB against a capture:
 - **The Join Group Attack table counts down in minutes and seconds near the
   end** (#269), where the original's `Leave` column prints whole hours however
   little is left. See "Join Group Attack" in `docs/dev/bre-screens.md`.
+- **Join Group Attack carries the number of parties still forming**, as
+  `(n)` after the label, where the original's item is bare.
 - **A defender's invasion report names the kind of strike.** BRE names it to the
   attacker ("Extended Battle Results.") and never to the defender, whose recap
   says only that a force "attacked!". IB appends it: `Invasion from X (Quick
