@@ -1,5 +1,10 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * Special Operations offer to buy the bombers a launch is short of
+  * Join Group Attack shows how many parties are forming
+  * Messages has an Event Log showing the "since your last play" recap
+
 2026-10-08 (v0.2.5)
   * BREAKING: packet protocol 5
   * A lost interplanetary trade deal, or one whose realm is gone, comes home
