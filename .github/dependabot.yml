@@ -5,9 +5,16 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-  # Keep Go module dependencies current. A no-op while the module is
-  # stdlib-only; activates once go.mod gains deps (e.g. the i18n gettext lib).
+  # Keep Go module dependencies current. The sysop panel is its own module and
+  # builds against the game's through a replace, so a dependency they share has
+  # to move in both go.mod files at once or the panel's build fails; group-by
+  # puts both directories' bump of one dependency into one pull request.
   - package-ecosystem: "gomod"
-    directory: "/"
+    directories:
+      - "/"
+      - "/cmd/ib-sysop"
     schedule:
       interval: "weekly"
+    groups:
+      go-modules:
+        group-by: dependency-name
