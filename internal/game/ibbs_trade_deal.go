@@ -179,8 +179,6 @@ func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods Tr
 		ID: id, Kind: "deal", TargetBoard: toBoard, TargetEmpire: toEmpire,
 		LaunchedDay: w.GameDay, Owner: from.Owner, Goods: &goods, Carriers: need,
 	})
-	from.addEvent(say("You shipped a trade deal to {who} of {board}, at a cost of {gold} gold and {carriers} carriers.",
-		"who", toEmpire, "board", toBoard, "gold", comma(cost), "carriers", need))
 	return nil
 }
 
