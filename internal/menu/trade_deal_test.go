@@ -71,6 +71,9 @@ func TestBasketSummary(t *testing.T) {
 	if !strings.Contains(got, "100 Tanks") || !strings.Contains(got, "5,000 Gold") {
 		t.Errorf("basketSummary = %q, want it to list Tanks and Gold", got)
 	}
+	if got := basketSummary(f, game.TradeBasket{Bombers: 1}); got != "1 Bomber" {
+		t.Errorf("basketSummary of one bomber = %q, want the singular", got)
+	}
 	if basketSummary(f, game.TradeBasket{}) != "nothing" {
 		t.Errorf("empty basket should summarize as %q", "nothing")
 	}

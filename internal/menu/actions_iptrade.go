@@ -6,7 +6,6 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
-	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -197,18 +196,21 @@ func ipPendingDeals(s session.Session, w *ctx) Result {
 		ok(s, "You have no trade deals out.")
 		return Stay
 	}
-	lang := sessionLang(s)
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Trade Deals Awaiting a Receipt"), ansi.Reset)
+	// One block per deal: a cargo of several goods and two long names cannot
+	// share a line, and the full figures match what the send screen showed.
 	for _, r := range rows {
-		line := fmt.Sprintf(tr(s, "To %s of %s: %s."), r.realm, r.board, r.goods.Describe(lang))
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite,
+			WrapIndented(fmt.Sprintf(tr(s, "%s of %s"), r.realm, r.board), "  "), ansi.Reset)
+		cargo := fmt.Sprintf(tr(s, "Cargo: %s"), basketSummary(s, r.goods))
+		fmt.Fprintf(s, "%s\n", hiNums(wrapHanging(cargo, "    ", "      ")))
 		switch {
 		case r.timed && r.left <= 0:
-			line += " " + tr(s, "Comes home at the next planetary run if no word arrives.")
+			fmt.Fprintf(s, "%s\n", WrapIndented(tr(s, "Returns in: next planetary run"), "    "))
 		case r.timed:
-			line += " " + fmt.Sprintf(i18n.TN(lang, "Comes home in %d day if no word arrives.",
-				"Comes home in %d days if no word arrives.", int64(r.left)), r.left)
+			fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(
+				plural(s, float64(r.left), "Returns in: %.0f day", "Returns in: %.0f days"), "    ")))
 		}
-		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(line, "  ")))
 	}
 	pause(s)
 	return Stay

@@ -128,8 +128,8 @@ func TestDealsOutListsAShippedDeal(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")}
 	ipPendingDeals(f, w)
 	out := stripANSI(f.out.String())
-	for _, want := range []string{"Trade Deals Awaiting a Receipt", "To Open Realm of Far BBS: 5000 Troopers.",
-		"Comes home in 3 days if no word"} {
+	for _, want := range []string{"Trade Deals Awaiting a Receipt", "  Open Realm of Far BBS\n",
+		"    Cargo: 5,000 Troopers\n", "    Returns in: 3 days\n"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in:\n%s", want, out)
 		}

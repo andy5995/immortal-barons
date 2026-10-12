@@ -278,24 +278,31 @@ func (w *World) applyTradeReceipt(board string, r IPTradeReceipt) {
 // resolve_received_trade_offer reaches the same helper the score table uses.
 // This is a shipment report, not one of the money screens that print a figure
 // in full — BRE spells gold both ways and which applies is per screen.
-func describeBasket(b TradeBasket) []Msg {
+func describeBasket(b TradeBasket) []Msg { return basketParts(b, short[int]) }
+
+// basketParts is describeBasket with the figure shape left to the caller.
+func basketParts(b TradeBasket, fig func(int) Arg) []Msg {
 	parts := []Msg{}
 	if b.Gold > 0 {
-		parts = append(parts, say("{n} Gold", "n", short(b.Gold)))
+		parts = append(parts, say("{n} Gold", "n", fig(b.Gold)))
 	}
 	for _, g := range MarketGoods {
 		if n := *g.Basket(&b); n > 0 {
-			parts = append(parts, counted(g, short(n)))
+			parts = append(parts, counted(g, fig(n)))
 		}
 	}
 	return parts
 }
 
-// Describe is a basket's contents in the reader's language.
-func (b TradeBasket) Describe(lang string) string { return listIn(lang, nil, describeBasket(b)) }
+// Describe is a basket's contents in the reader's language with every figure
+// in full, for the screens that price or confirm a deal. Only the event lines
+// shorten them (describeBasket).
+func (b TradeBasket) Describe(lang string) string {
+	return listIn(lang, nil, basketParts(b, comma[int]))
+}
 
 // Summary is a basket's contents in English, for the sysop panel.
-func (b TradeBasket) Summary() string { return b.Describe("") }
+func (b TradeBasket) Summary() string { return listIn("", nil, describeBasket(b)) }
 
 // counted is g.Counted for a count already shaped as a figure (short, comma).
 func counted(g *Good, n Arg) Msg {

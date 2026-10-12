@@ -42,18 +42,9 @@ var tradeGoods = []tradeGood{
 	tradeRow('9', game.Carrier),
 }
 
-// basketSummary renders a basket as "100 Tanks, 5,000 Gold", or "nothing".
+// basketSummary renders a basket as "5,000 Gold and 100 Tanks", or "nothing".
 func basketSummary(s session.Session, b game.TradeBasket) string {
-	var parts []string
-	for _, g := range tradeGoods {
-		if n := *g.field(&b); n > 0 {
-			parts = append(parts, comma(n)+" "+tr(s, g.name))
-		}
-	}
-	if len(parts) == 0 {
-		return tr(s, "nothing")
-	}
-	return strings.Join(parts, ", ")
+	return b.Describe(sessionLang(s))
 }
 
 // TradeRequestMax bounds what one basket line may ask for. BRE uses 0xFFFFFFFF
