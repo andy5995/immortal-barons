@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
@@ -331,15 +332,17 @@ func (c Config) netmailDirs() []string {
 // IsLink reports whether value, the part of a bbs.cfg Link line after the
 // key, is written in the transport's Link grammar rather than as the
 // per-neighbor directory bbs.cfg once spelled "Link <node> <dir>". A malformed
-// Obox or BSO line still counts, so LoadConfig names what is wrong with it;
-// the mode alone cannot, since a directory may be named obox, but those two
-// modes always name a directory after it.
+// line still counts, so LoadConfig names what is wrong with it: an Obox or BSO
+// line by its mode, which always names a directory after it (a directory may be
+// named obox), and an Attach line whose node is out of range, which would parse
+// as Attach with a valid one.
 func IsLink(value string) bool {
 	if _, _, err := parseLink(value, ""); err == nil {
 		return true
 	}
 	fields := strings.Fields(value)
-	return len(fields) >= 3 && (strings.EqualFold(fields[1], "obox") || strings.EqualFold(fields[1], "bso"))
+	return len(fields) >= 2 && strings.EqualFold(fields[1], "attach") ||
+		len(fields) >= 3 && (strings.EqualFold(fields[1], "obox") || strings.EqualFold(fields[1], "bso"))
 }
 
 func parseLink(value, dataDir string) (int, Link, error) {
@@ -360,8 +363,8 @@ func parseLink(value, dataDir string) (int, Link, error) {
 		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavor], each optionally followed by Raw or Bundled")
 	}
 	node, err := strconv.Atoi(fields[0])
-	if err != nil || node < 1 || node > 999 {
-		return 0, Link{}, fmt.Errorf("node %q is outside 1..999", fields[0])
+	if err != nil || node < 1 || node > game.MaxNodeNumber {
+		return 0, Link{}, fmt.Errorf("node %q is outside 1..%d", fields[0], game.MaxNodeNumber)
 	}
 	link := Link{Flavor: "Normal"}
 	switch strings.ToLower(fields[1]) {

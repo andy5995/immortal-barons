@@ -69,7 +69,11 @@ var boardSetters = map[string]func(cfg *game.Config, value string) error{
 		// a bare "GameOutbound <dir>" is everyone else's. A directory whose
 		// name is a number still works on its own, since only a number
 		// followed by more is read as a node.
-		if n, dir, ok := perNodeDir(v); ok {
+		n, dir, ok, err := perNodeDir(v)
+		if err != nil {
+			return err
+		}
+		if ok {
 			if cfg.OutboundDirs == nil {
 				cfg.OutboundDirs = map[int]string{}
 			}
@@ -308,18 +312,22 @@ func SplitKey(line string) (key, value string, ok bool) {
 	return line[:i], strings.TrimSpace(line[i+1:]), true
 }
 
-// perNodeDir splits "<node> <dir>" when value starts with a node number and has
-// more after it.
-func perNodeDir(value string) (int, string, bool) {
+// perNodeDir splits "<node> <dir>" when value starts with a number and has more
+// after it. A number outside the node range is an error rather than part of a
+// default directory's name.
+func perNodeDir(value string) (int, string, bool, error) {
 	node, dir, ok := SplitKey(value)
-	if !ok {
-		return 0, "", false
+	if !ok || dir == "" {
+		return 0, "", false, nil
 	}
 	n, err := strconv.Atoi(node)
-	if err != nil || n < 1 || n > game.MaxNodeNumber || dir == "" {
-		return 0, "", false
+	if err != nil {
+		return 0, "", false, nil
 	}
-	return n, dir, true
+	if n < 1 || n > game.MaxNodeNumber {
+		return 0, "", false, fmt.Errorf("node %d is outside 1..%d", n, game.MaxNodeNumber)
+	}
+	return n, dir, true, nil
 }
 
 // LegacyBoardRefusal reports bbs.cfg lines written under names this version no

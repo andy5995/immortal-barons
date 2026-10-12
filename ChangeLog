@@ -1,5 +1,8 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * Node numbers run 1 to 255; a roster board numbered above that is skipped
+
 2026-10-12 (v0.2.6)
   * Updating from v0.1.0 or later needs no game reset
   * Messages has an Event Log showing the "since your last play" recap

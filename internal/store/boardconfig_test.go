@@ -421,3 +421,24 @@ func TestBoardKeyWithNoValueKeepsTheDefault(t *testing.T) {
 			cfg.BoardID, cfg.InboundDir, cfg.OutboundDir, cfg.Lottery)
 	}
 }
+
+// A neighbor's line with a node number out of range is warned about and
+// ignored, not read as the board-wide directory "256 out256".
+func TestGameOutboundNodeOutOfRangeIsWarned(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("GameOutbound 256 out256\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := game.DefaultConfig()
+	want := cfg.OutboundDir
+	if err := LoadBoardConfig(dir, &cfg); err != nil {
+		t.Fatal(err)
+	}
+	if cfg.OutboundDir != want || len(cfg.OutboundDirs) != 0 {
+		t.Errorf("GameOutbound 256 out256 read as %q / %v", cfg.OutboundDir, cfg.OutboundDirs)
+	}
+	warnings := BoardWarnings(dir, nil)
+	if len(warnings) != 1 || !strings.Contains(warnings[0], "node 256 is outside 1..255") {
+		t.Errorf("warnings = %q", warnings)
+	}
+}

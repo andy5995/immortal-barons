@@ -27,8 +27,8 @@ func TestAdoptedRosterHoldsTheNodeNumberRange(t *testing.T) {
 	lc.CoordKey, lc.CoordPub = sec, pub
 	lc.LeagueNodes = []LeagueNode{
 		{Number: 1, Name: "Nova Hub"},
-		{Number: 2, Name: "The Eclipse"},
-		{Number: 1000, Name: "Oversized BBS"},
+		{Number: 2, Name: "The Eclipse", Hosts: []int{3, 256}},
+		{Number: 256, Name: "Oversized BBS"},
 		{Number: 0, Name: "Ghost BBS"},
 	}
 	lc.ExportNodeList()
@@ -47,5 +47,8 @@ func TestAdoptedRosterHoldsTheNodeNumberRange(t *testing.T) {
 		if n.Number < 1 || n.Number > MaxNodeNumber {
 			t.Errorf("node %q was adopted with number %d", n.Name, n.Number)
 		}
+	}
+	if h := w.LeagueNodes[1].Hosts; len(h) != 1 || h[0] != 3 {
+		t.Errorf("The Eclipse was adopted with hosts %v, want [3]", h)
 	}
 }

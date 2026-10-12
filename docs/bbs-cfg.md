@@ -117,7 +117,7 @@ The directory where the game writes packets for the other boards.
 
 - `GameOutbound DIR` — the directory for every board with no line of its own.
 - `GameOutbound N DIR` — the directory for packets whose next hop is node `N`
-  (1 to 999). Give one line for each neighbor. Only a board that forwards
+  (1 to 255). Give one line for each neighbor. Only a board that forwards
   packets for others needs this form.
 
 **Default:** `outbound`, inside the data directory, and no per-node lines.
@@ -360,7 +360,7 @@ bundle](ftn-transport.md#plain-packets-for-boards-that-cannot-read-a-bundle).
 
 How the transport hands packets to one directly connected board.
 
-**Values:** `Link N MODE`, where `N` is the peer's node number (1 to 999) and
+**Values:** `Link N MODE`, where `N` is the peer's node number (1 to 255) and
 `MODE` is one of:
 
 - `Attach` — a netmail message in `OutgoingNetmailDir` with the file attached.

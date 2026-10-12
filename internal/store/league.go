@@ -106,9 +106,7 @@ func parseNodeNumber(line string) (int, []int, error) {
 	// a name it cannot find — handing that board a stranger's roster entry as
 	// its own origin, silently.
 	if n < 1 || n > game.MaxNodeNumber {
-		// The ceiling is the packet filename's, not a matter of taste: the
-		// number goes into every name this board writes in base 36, and the name
-		// has to fit an FTN Type-2 subject beside its directory path (#180).
+		// game.MaxNodeNumber says why the ceiling is where it is.
 		return 0, nil, strconv.ErrRange
 	}
 	var hosts []int
@@ -116,7 +114,7 @@ func parseNodeNumber(line string) (int, []int, error) {
 		if strings.EqualFold(fields[i], "HOST") {
 			continue
 		}
-		if h, err := strconv.Atoi(fields[i]); err == nil {
+		if h, err := strconv.Atoi(fields[i]); err == nil && h >= 1 && h <= game.MaxNodeNumber {
 			hosts = append(hosts, h)
 		}
 	}

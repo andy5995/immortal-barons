@@ -3,6 +3,7 @@ package store
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -146,14 +147,12 @@ func TestNodeListRejectsNodeNumberZero(t *testing.T) {
 	}
 }
 
-// TestNodeListRejectsNodeNumberAboveTheCeiling is #180: a node number is
-// rendered in base 36 into every packet filename its board writes, and that name
-// has to fit an FTN Type-2 subject beside a directory path, so the roster holds
-// the same 1-999 range as the league number.
+// TestNodeListRejectsNodeNumberAboveTheCeiling: the roster holds node numbers
+// to 1-255, the range nova-hub can carry.
 func TestNodeListRejectsNodeNumberAboveTheCeiling(t *testing.T) {
 	path := filepath.Join(t.TempDir(), NodeListFile)
-	body := "1000\nOversized BBS\n1:1/0\nLocal\nXX\nUSA\n\n" +
-		"999\nCeiling BBS\n1:1/1\nLocal\nXX\nUSA\n\n" +
+	body := "256\nOversized BBS\n1:1/0\nLocal\nXX\nUSA\n\n" +
+		"255\nCeiling BBS\n1:1/1\nLocal\nXX\nUSA\n\n" +
 		"2\nBravo BBS\n1:1/2\nLocal\nXX\nUSA\n"
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
@@ -162,9 +161,9 @@ func TestNodeListRejectsNodeNumberAboveTheCeiling(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// 999 is inside the range and must survive: a ceiling that excludes its own
+	// 255 is inside the range and must survive: a ceiling that excludes its own
 	// top value would quietly narrow the documented range.
-	if len(nodes) != 2 || nodes[0].Number != 999 || nodes[1].Number != 2 {
+	if len(nodes) != 2 || nodes[0].Number != 255 || nodes[1].Number != 2 {
 		t.Fatalf("roster parsed as %+v", nodes)
 	}
 	// The dropped board is named, because a board missing from the roster is
@@ -172,7 +171,7 @@ func TestNodeListRejectsNodeNumberAboveTheCeiling(t *testing.T) {
 	if len(problems) != 1 || !strings.Contains(problems[0], "Oversized BBS") {
 		t.Fatalf("problems reported: %v", problems)
 	}
-	if !strings.Contains(problems[0], "1 to 999") {
+	if !strings.Contains(problems[0], "1 to 255") {
 		t.Errorf("the problem does not state the range: %q", problems[0])
 	}
 }
@@ -222,5 +221,21 @@ func TestRosterNameIsCappedFarAboveAnyRealName(t *testing.T) {
 	// An ordinary name is untouched — the cap must never reach a real roster.
 	if nodes[1].Name != "Short BBS" {
 		t.Errorf("ordinary name became %q", nodes[1].Name)
+	}
+}
+
+// A HOST number outside the node range names no board that can exist, so it is
+// dropped the way an out-of-range node is.
+func TestNodeListDropsHostOutOfRange(t *testing.T) {
+	path := filepath.Join(t.TempDir(), NodeListFile)
+	if err := os.WriteFile(path, []byte("1 HOST 2 256 0\nAlpha\n1:1/1\nCity\nST\nUS\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nodes, err := ParseNodeList(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nodes) != 1 || !slices.Equal(nodes[0].Hosts, []int{2}) {
+		t.Errorf("roster parsed as %+v", nodes)
 	}
 }

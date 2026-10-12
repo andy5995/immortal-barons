@@ -357,10 +357,10 @@ The six lines are:
 
 Board number 1 is the League Coordinator.
 
-**A node number is 1 to 999**, the same range as the league number. The number
-goes into the name of every packet file that board sends, and those names have
-to stay short enough to carry over FTN. A board numbered outside the range is
-skipped, and `-league-check` names it.
+**A node number is 1 to 255.** The number goes into the name of every packet
+file that board sends, and those names have to stay short enough to carry over
+FTN. A board numbered outside the range is skipped, and `-league-check` names
+it.
 
 All six lines must have something on them. A blank line is what separates one
 board from the next, so a board written with an empty field is read as a broken

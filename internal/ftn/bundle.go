@@ -224,7 +224,7 @@ func readTransport(data []byte, _ string) (bundleManifest, []transportEntry, err
 func validNodeList(nodes []int) bool {
 	seen := map[int]bool{}
 	for _, node := range nodes {
-		if node < 1 || node > 999 || seen[node] {
+		if node < 1 || node > game.MaxNodeNumber || seen[node] {
 			return false
 		}
 		seen[node] = true
@@ -264,7 +264,7 @@ func bundleTransmitter(entries []transportEntry) (int, bool) {
 			return 0, false
 		}
 		last := entry.Route[len(entry.Route)-1]
-		if last < 1 || last > 999 || transmitter != 0 && transmitter != last {
+		if last < 1 || last > game.MaxNodeNumber || transmitter != 0 && transmitter != last {
 			return 0, false
 		}
 		transmitter = last

@@ -558,7 +558,7 @@ func TestRunInQuarantinesRejectedMembersAfterDeliveringValidOnes(t *testing.T) {
 	data := newBundledSetup(t, "Bravo BBS", "")
 	packets := []game.Packet{
 		{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", FromNode: 1, ToNode: 2, Seq: 22, League: 100},
-		{FromBoard: "Alpha BBS", ToBoard: "Missing BBS", FromNode: 1, ToNode: 999, Seq: 23, League: 100},
+		{FromBoard: "Alpha BBS", ToBoard: "Missing BBS", FromNode: 1, ToNode: 200, Seq: 23, League: 100},
 		{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", FromNode: 1, ToNode: 2, Seq: 24, League: 200},
 	}
 	entries := make([]transportEntry, len(packets))
@@ -586,7 +586,7 @@ func TestRunInQuarantinesRejectedMembersAfterDeliveringValidOnes(t *testing.T) {
 		t.Fatalf("mixed inbound result = %+v", result)
 	}
 	warnings := strings.Join(result.Warnings, " ")
-	if !strings.Contains(warnings, "destination node 999") || !strings.Contains(warnings, "league 200") {
+	if !strings.Contains(warnings, "destination node 200") || !strings.Contains(warnings, "league 200") {
 		t.Fatalf("mixed inbound warnings = %v", result.Warnings)
 	}
 	if _, err := os.Stat(source); !os.IsNotExist(err) {

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 const (
@@ -22,8 +24,8 @@ type counterState struct {
 // exclusive publication because an old cycle's file may remain in a mailer
 // queue. skipped values after a crash are harmless.
 func nextAlias(dataDir, destinationDir string, league, transmitter int) (string, bool, error) {
-	if league < 0 || league > 999 || transmitter < 1 || transmitter > 999 {
-		return "", false, fmt.Errorf("8.3 FTN aliases require a league number in 0..999 and a transmitting node number in 1..999")
+	if league < 0 || league > game.MaxLeagueNumber || transmitter < 1 || transmitter > game.MaxNodeNumber {
+		return "", false, fmt.Errorf("8.3 FTN aliases require a league number in 0..%d and a transmitting node number in 1..%d", game.MaxLeagueNumber, game.MaxNodeNumber)
 	}
 	path := filepath.Join(dataDir, counterFile)
 	var state counterState

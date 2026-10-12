@@ -106,3 +106,15 @@ func TestLegacyBoardKeysAreRefusedWithTheirReplacements(t *testing.T) {
 		t.Errorf("a current bbs.cfg was refused: %v", err)
 	}
 }
+
+// An Attach line whose node is out of range is still a transport Link line, so
+// it is not refused as the old directory syntax with GameOutbound as the cure.
+func TestOutOfRangeAttachLinkIsNotLegacy(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, store.BoardConfigFile), []byte("Link 256 Attach\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.LegacyBoardRefusal(dir, IsLink); err != nil {
+		t.Errorf("Link 256 Attach was refused as legacy: %v", err)
+	}
+}

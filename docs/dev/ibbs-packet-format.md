@@ -170,11 +170,11 @@ filename and exact-byte comparison distinguish that case from a conflicting
 packet using the same identity.
 
 The alias namespace is four base-36 characters for `league*1000 + transmitting
-node`, followed by four characters from a persistent counter. Both numbers are
-limited to 1..999. The counter is reserved before publication, advances once
-per physical copy, and warns on wrap. A receiver discards this alias and
-re-derives each member's canonical name from the decoded JSON; all game identity
-remains in the packet.
+node`, followed by four characters from a persistent counter. The league number
+is limited to 1..999 and the node to 1..255. The counter is reserved before
+publication, advances once per physical copy, and warns on wrap. A receiver
+discards this alias and re-derives each member's canonical name from the
+decoded JSON; all game identity remains in the packet.
 
 A leading JSON object instead of ZIP is accepted as one legacy entry, allowing
 receivers to be upgraded before senders. This is receive-only compatibility,
@@ -657,7 +657,7 @@ Plain text, one board per six-line block, blank line between blocks (BRE's
 into `World.LeagueNodes`.
 
 ```
-1              node number, 1 to 999 (1 = League Coordinator), optionally "1 HOST 2 4"
+1              node number, 1 to 255 (1 = League Coordinator), optionally "1 HOST 2 4"
 Avalon         board / planet name
 363/277        network address
 Orlando        city

@@ -481,7 +481,8 @@ func (w *World) ExportScores() {
 }
 
 // usableNodes drops roster entries this board cannot use: a node number outside
-// 1 to MaxNodeNumber. The roster file's parser refuses the same numbers, so a
+// 1 to MaxNodeNumber, and a HOST number outside it. The roster file's parser
+// refuses the same numbers, so a
 // roster adopted from a packet and one read off disk describe the same league
 // (#180). Dropping the entry rather than the whole roster keeps one bad line
 // from cutting a board off from every other board in the league.
@@ -491,6 +492,13 @@ func usableNodes(nodes []LeagueNode) []LeagueNode {
 		if n.Number < 1 || n.Number > MaxNodeNumber {
 			continue
 		}
+		var hosts []int
+		for _, h := range n.Hosts {
+			if h >= 1 && h <= MaxNodeNumber {
+				hosts = append(hosts, h)
+			}
+		}
+		n.Hosts = hosts
 		out = append(out, n)
 	}
 	return out
