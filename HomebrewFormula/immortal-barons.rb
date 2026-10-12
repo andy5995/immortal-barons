@@ -11,8 +11,8 @@ class ImmortalBarons < Formula
   # This is the vendored-source tarball the release workflow publishes, not the
   # auto-generated tag archive: the repo does not commit vendor/, so only this
   # asset lets the build skip a module download.
-  url "https://github.com/andy5995/immortal-barons/releases/download/v0.2.5/immortal-barons-v0.2.5-vendored-source.tar.gz"
-  sha256 "b92e10a13d243e38d1d3e893ae1303f9a29db040de6d875b83c2950d24ceafd1"
+  url "https://github.com/andy5995/immortal-barons/releases/download/v0.2.6/immortal-barons-v0.2.6-vendored-source.tar.gz"
+  sha256 "029c6fe33b3e4f0a5aacef1de06b262a7ad17271c7491b43f6925f4efd0b0d39"
   license "MIT"
   head "https://github.com/andy5995/immortal-barons.git", branch: "trunk"
 
