@@ -60,11 +60,14 @@ handen när ett lån förfaller, eller betala av det i förtid via Kontanthjälp
 
 ## Investeringar
 
-Du kan låsa in guld som en investering i 2 till 10 dagar. Den betalar
-tillbaka ditt guld plus ränta när den förfaller. Banken betalar ut den under
-den dagen, en lika stor del i början av varje drag du spelar. Spelar du inte
-alla dina drag betalas resten ut nästa dag, nedrundat till ett helt tusental
-guld. Räntesatsen flyter - den stiger och faller med hur mycket alla
-investerar - så kontrollera räntan innan du binder dig.  Ett vanligt knep är
-att hålla flera investeringar igång samtidigt, var och en med olika löptid,
-så att en förfaller varje dag.
+You can lock gold away as an investment for 2 to 10 days. It pays back your
+gold plus interest when it matures. The bank pays it out over that day, an
+equal part at the start of each turn you play. If you do not play all your
+turns, the rest is paid on the next day, rounded down to a whole thousand
+gold. Where that would take a day past the per-date limit, the bank moves
+the extra to the next date that has room, and the List screen shows it
+there. It counts toward that date's limit, like an investment of your
+own. The interest rate floats — it rises and falls with how much everyone is
+investing — so check the rate before you commit.  A common tactic is to keep
+several investments running at once, each for a different length, so one
+matures every day.

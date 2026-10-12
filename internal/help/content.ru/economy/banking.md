@@ -60,11 +60,14 @@ title: Банк
 
 ## Инвестиции
 
-Вы можете вложить золото на срок от 2 до 10 дней. По окончании срока оно
-возвращается с процентами. Банк выплачивает его в течение этого дня, равными
-частями в начале каждого сыгранного вами хода. Если вы сыграете не все свои
-ходы, остаток выплачивается на следующий день, округлённый вниз до целой
-тысячи золота. Процентная ставка плавает - она растёт и падает вместе с тем,
-сколько вкладывают все, - поэтому проверьте её, прежде чем вкладывать.
-Распространённая тактика: держать несколько вкладов сразу, каждый на свой
-срок, чтобы один созревал каждый день.
+You can lock gold away as an investment for 2 to 10 days. It pays back your
+gold plus interest when it matures. The bank pays it out over that day, an
+equal part at the start of each turn you play. If you do not play all your
+turns, the rest is paid on the next day, rounded down to a whole thousand
+gold. Where that would take a day past the per-date limit, the bank moves
+the extra to the next date that has room, and the List screen shows it
+there. It counts toward that date's limit, like an investment of your
+own. The interest rate floats — it rises and falls with how much everyone is
+investing — so check the rate before you commit.  A common tactic is to keep
+several investments running at once, each for a different length, so one
+matures every day.

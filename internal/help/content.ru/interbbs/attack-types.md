@@ -48,10 +48,11 @@ title: 'Виды атак'
 задержка позволяет рассчитать удар так, чтобы он пришёлся до следующего хода
 цели.
 
-«Присоединиться к атаке» показывает все формирующиеся отряды, собранных в
-них солдат, самолёты, танки и бомбардировщики и оставшиеся часы. Прочтите
-эти столбцы, прежде чем вступать: по ним видно, какой отряд стоит усилить, а
-какой не переживёт похода.
+Join Group Attack lists every party still forming, with the troopers, jets,
+tanks and bombers already pooled in each and the hours it has left; the menu
+shows beside the item how many there are. Read those columns before you
+commit: they are how you tell a party worth reinforcing from one that will
+not survive the trip.
 
 Ушедший отряд вам больше не подчиняется и в вашу армию не входит, пока доска
 другой планеты не разрешит бой и ответ не вернётся обратно. Когда он придёт,

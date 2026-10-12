@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-08 18:33-0500\n"
+"POT-Creation-Date: 2026-10-12 10:14-0500\n"
 "PO-Revision-Date: 2026-10-02 16:05-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1442,16 +1442,29 @@ msgid "Investments"
 msgstr "Investeringar"
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:65
+#: internal/help/content/economy/banking.md:68
+#, fuzzy
+#| msgid ""
+#| "You can lock gold away as an investment for 2 to 10 days. It pays back "
+#| "your gold plus interest when it matures. The bank pays it out over that "
+#| "day, an equal part at the start of each turn you play. If you do not play "
+#| "all your turns, the rest is paid on the next day, rounded down to a whole "
+#| "thousand gold. The interest rate floats — it rises and falls with how "
+#| "much everyone is investing — so check the rate before you commit.  A "
+#| "common tactic is to keep several investments running at once, each for a "
+#| "different length, so one matures every day."
 msgid ""
 "You can lock gold away as an investment for 2 to 10 days. It pays back your "
 "gold plus interest when it matures. The bank pays it out over that day, an "
 "equal part at the start of each turn you play. If you do not play all your "
 "turns, the rest is paid on the next day, rounded down to a whole thousand "
-"gold. The interest rate floats — it rises and falls with how much everyone "
-"is investing — so check the rate before you commit.  A common tactic is to "
-"keep several investments running at once, each for a different length, so "
-"one matures every day."
+"gold. Where that would take a day past the per-date limit, the bank moves "
+"the extra to the next date that has room, and the List screen shows it "
+"there. It counts toward that date's limit, like an investment of your own. "
+"The interest rate floats — it rises and falls with how much everyone is "
+"investing — so check the rate before you commit.  A common tactic is to keep "
+"several investments running at once, each for a different length, so one "
+"matures every day."
 msgstr ""
 "Du kan låsa in guld som en investering i 2 till 10 dagar. Den betalar "
 "tillbaka ditt guld plus ränta när den förfaller. Banken betalar ut den under "
@@ -2528,12 +2541,19 @@ msgstr ""
 "tajmar det att landa innan målet tar sitt nästa drag."
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:52
+#: internal/help/content/interbbs/attack-types.md:53
+#, fuzzy
+#| msgid ""
+#| "Join Group Attack lists every party still forming, with the troopers, "
+#| "jets, tanks and bombers already pooled in it and the hours it has left. "
+#| "Read those columns before you commit: they are how you tell a party worth "
+#| "reinforcing from one that will not survive the trip."
 msgid ""
 "Join Group Attack lists every party still forming, with the troopers, jets, "
-"tanks and bombers already pooled in it and the hours it has left. Read those "
-"columns before you commit: they are how you tell a party worth reinforcing "
-"from one that will not survive the trip."
+"tanks and bombers already pooled in each and the hours it has left; the menu "
+"shows beside the item how many there are. Read those columns before you "
+"commit: they are how you tell a party worth reinforcing from one that will "
+"not survive the trip."
 msgstr ""
 "Join Group Attack listar varje grupp som fortfarande bildas, med de "
 "soldater, jetplan, stridsvagnar och bombplan som redan samlats i den och "
@@ -2541,7 +2561,7 @@ msgstr ""
 "skiljer en grupp värd att stärka från en som inte kommer överleva resan."
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:58
+#: internal/help/content/interbbs/attack-types.md:59
 msgid ""
 "Once a force leaves, it is out of your hands and out of your army until the "
 "other planet's board resolves it and the answer travels back. When it does, "
@@ -2558,7 +2578,7 @@ msgstr ""
 "hellre än att räknas som ett nederlag."
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:64
+#: internal/help/content/interbbs/attack-types.md:65
 msgid ""
 "Regions you capture abroad have no type until you give them one, so they "
 "wait for you, and the region picker comes up at the start of your next turn "
@@ -2573,7 +2593,7 @@ msgstr ""
 "och en satsade."
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:67
+#: internal/help/content/interbbs/attack-types.md:68
 msgid ""
 "If the answer never arrives — a board goes quiet, a packet is lost — your "
 "forces come home by themselves after the number of days your sysop has set, "
@@ -3632,12 +3652,21 @@ msgstr ""
 "Bombplan är leveransflygplan. De har ett anfall på 0 och ett försvar på 0."
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:16
+#: internal/help/content/military/bombers.md:17
+#, fuzzy
+#| msgid ""
+#| "Every Special Operation except Send SpyGuy needs bombers to deliver its "
+#| "payload. You must hold at least 500 bombers to launch one, and each "
+#| "launch uses up 500 of them, whether the operation succeeds or not. The "
+#| "Nuclear, Chemical and Biological Attacks on your own planet do not need "
+#| "bombers."
 msgid ""
 "Every Special Operation except Send SpyGuy needs bombers to deliver its "
 "payload. You must hold at least 500 bombers to launch one, and each launch "
 "uses up 500 of them, whether the operation succeeds or not. The Nuclear, "
-"Chemical and Biological Attacks on your own planet do not need bombers."
+"Chemical and Biological Attacks on your own planet do not need bombers. If "
+"you are short, the Special Operations menu offers to buy the rest on the "
+"spot."
 msgstr ""
 "Varje specialoperation utom Skicka SpyGuy behöver bombplan för att leverera "
 "sin last. Du måste ha minst 500 bombplan för att starta en, och varje start "
@@ -3645,7 +3674,7 @@ msgstr ""
 "Kemiska och Biologiska anfall på din egen planet behöver inga bombplan."
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:19
+#: internal/help/content/military/bombers.md:20
 msgid ""
 "In a strike on another planet, your bombers fight the defender's jets. A "
 "strike with no bombers destroys none of them."
@@ -3654,7 +3683,7 @@ msgstr ""
 "jetplan. Ett anfall utan bombplan förstör inga av dem."
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:24
+#: internal/help/content/military/bombers.md:25
 msgid ""
 "Bombers do nothing in an attack on your own planet. They add no strength to "
 "it, and they take casualties with the rest of the force, so sending them "
@@ -3667,7 +3696,7 @@ msgstr ""
 "och använd dem på de anfall som behöver dem."
 
 #. type: Plain text
-#: internal/help/content/military/bombers.md:25
+#: internal/help/content/military/bombers.md:26
 msgid "Bombers add a large amount to your net worth."
 msgstr "Bombplan tillför mycket till ditt nettovärde."
 

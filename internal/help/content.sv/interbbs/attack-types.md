@@ -47,10 +47,11 @@ väntetiden i timmar, mellan 12 och 120, och det ligger på startplattan tills
 då - andra baroner kan ansluta sig under tiden, och fördröjningen är hur du
 tajmar det att landa innan målet tar sitt nästa drag.
 
-Join Group Attack listar varje grupp som fortfarande bildas, med de
-soldater, jetplan, stridsvagnar och bombplan som redan samlats i den och
-timmarna den har kvar. Läs de kolumnerna innan du binder dig: det är så du
-skiljer en grupp värd att stärka från en som inte kommer överleva resan.
+Join Group Attack lists every party still forming, with the troopers, jets,
+tanks and bombers already pooled in each and the hours it has left; the menu
+shows beside the item how many there are. Read those columns before you
+commit: they are how you tell a party worth reinforcing from one that will
+not survive the trip.
 
 När en styrka väl avgår är den ur dina händer och ur din armé tills den
 andra planetens BBS avgör det och svaret färdas tillbaka. När det gör det

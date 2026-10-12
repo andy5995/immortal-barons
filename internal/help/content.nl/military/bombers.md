@@ -13,7 +13,9 @@ een defensief van 0.
 Every Special Operation except Send SpyGuy needs bombers to deliver its
 payload. You must hold at least 500 bombers to launch one, and each launch
 uses up 500 of them, whether the operation succeeds or not. The Nuclear,
-Chemical and Biological Attacks on your own planet do not need bombers.
+Chemical and Biological Attacks on your own planet do not need bombers. If
+you are short, the Special Operations menu offers to buy the rest on the
+spot.
 
 Bij een aanval op een andere planeet vechten uw bommenwerpers tegen de
 jagers van de verdediger. Een aanval zonder bommenwerpers vernietigt er geen

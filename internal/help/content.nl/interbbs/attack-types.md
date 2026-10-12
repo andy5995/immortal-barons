@@ -50,11 +50,11 @@ lanceerplatform staan - andere baronnen kunnen zich er intussen bij
 aansluiten, en met de vertraging zorgt u dat hij landt voordat het doelwit
 zijn volgende beurt speelt.
 
-Deelnemen aan groepsaanval toont elk gezelschap dat nog wordt gevormd, met
-de soldaten, jagers, tanks en bommenwerpers die er al in gebundeld zijn en
-de uren die het nog heeft. Lees die kolommen voordat u zich vastlegt:
-daaraan ziet u het verschil tussen een gezelschap dat versterking waard is
-en een dat de reis niet overleeft.
+Join Group Attack lists every party still forming, with the troopers, jets,
+tanks and bombers already pooled in each and the hours it has left; the menu
+shows beside the item how many there are. Read those columns before you
+commit: they are how you tell a party worth reinforcing from one that will
+not survive the trip.
 
 Zodra een strijdmacht vertrekt, is zij uit uw handen en uit uw leger tot het
 BBS van de andere planeet de slag afhandelt en het antwoord

@@ -12,7 +12,9 @@ title: Бомбардировщики
 Every Special Operation except Send SpyGuy needs bombers to deliver its
 payload. You must hold at least 500 bombers to launch one, and each launch
 uses up 500 of them, whether the operation succeeds or not. The Nuclear,
-Chemical and Biological Attacks on your own planet do not need bombers.
+Chemical and Biological Attacks on your own planet do not need bombers. If
+you are short, the Special Operations menu offers to buy the rest on the
+spot.
 
 При ударе по другой планете ваши бомбардировщики сражаются с самолётами
 защитника. Удар без бомбардировщиков не уничтожает ни одного из них.

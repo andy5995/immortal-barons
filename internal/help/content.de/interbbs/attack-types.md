@@ -53,11 +53,11 @@ bis dahin steht er auf der Rampe - andere Barone können sich in der
 Zwischenzeit anschließen, und über die Verzögerung legen Sie es so, dass er
 landet, bevor das Ziel seinen nächsten Zug nimmt.
 
-Gruppenangriff beitreten listet jede Gruppe auf, die sich noch sammelt, mit
-den Soldaten, Jets, Panzern und Bombern, die schon zusammengelegt sind, und
-den verbleibenden Stunden. Lesen Sie diese Spalten, bevor Sie sich binden:
-An ihnen erkennen Sie eine Gruppe, die eine Verstärkung wert ist, von einer,
-die den Weg nicht überlebt.
+Join Group Attack lists every party still forming, with the troopers, jets,
+tanks and bombers already pooled in each and the hours it has left; the menu
+shows beside the item how many there are. Read those columns before you
+commit: they are how you tell a party worth reinforcing from one that will
+not survive the trip.
 
 Ist eine Streitmacht erst einmal fort, ist sie Ihrer Hand und Ihrer Armee
 entzogen, bis das Board des anderen Planeten sie auswertet und die Antwort

@@ -61,12 +61,14 @@ Geldnood.
 
 ## Investeringen
 
-U kunt goud voor 2 tot 10 dagen als investering vastzetten. Op de vervaldag
-krijgt u uw goud plus rente terug. De bank betaalt het in de loop van die
-dag uit, bij het begin van elke beurt die u speelt een gelijk deel. Als u
-niet al uw beurten speelt, wordt de rest de volgende dag uitbetaald,
-afgerond naar beneden op hele duizenden goud. Het rentetarief zweeft - het
-stijgt en daalt met hoeveel er in totaal wordt geïnvesteerd - dus bekijk het
-tarief voordat u vastlegt.  Een gangbare tactiek is om meerdere
-investeringen tegelijk te laten lopen, elk met een andere looptijd, zodat er
-elke dag een afloopt.
+You can lock gold away as an investment for 2 to 10 days. It pays back your
+gold plus interest when it matures. The bank pays it out over that day, an
+equal part at the start of each turn you play. If you do not play all your
+turns, the rest is paid on the next day, rounded down to a whole thousand
+gold. Where that would take a day past the per-date limit, the bank moves
+the extra to the next date that has room, and the List screen shows it
+there. It counts toward that date's limit, like an investment of your
+own. The interest rate floats — it rises and falls with how much everyone is
+investing — so check the rate before you commit.  A common tactic is to keep
+several investments running at once, each for a different length, so one
+matures every day.

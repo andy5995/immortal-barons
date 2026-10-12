@@ -59,11 +59,14 @@ em mãos quando um empréstimo vencer, ou quite-o antes pelo Auxílio.
 
 ## Investimentos
 
-Você pode trancar ouro num investimento de 2 a 10 dias. Ele devolve o seu
-ouro mais juros quando vence. O banco paga ao longo desse dia, uma parte
-igual no começo de cada turno que você joga. Se você não jogar todos os seus
-turnos, o resto é pago no dia seguinte, arredondado para baixo ao milhar de
-ouro. A taxa flutua, sobe e desce conforme o quanto todo mundo está
-investindo, então confira a taxa antes de aplicar.  Uma tática comum é
-manter vários investimentos ao mesmo tempo, cada um com um prazo diferente,
-para que um vença todo dia.
+You can lock gold away as an investment for 2 to 10 days. It pays back your
+gold plus interest when it matures. The bank pays it out over that day, an
+equal part at the start of each turn you play. If you do not play all your
+turns, the rest is paid on the next day, rounded down to a whole thousand
+gold. Where that would take a day past the per-date limit, the bank moves
+the extra to the next date that has room, and the List screen shows it
+there. It counts toward that date's limit, like an investment of your
+own. The interest rate floats — it rises and falls with how much everyone is
+investing — so check the rate before you commit.  A common tactic is to keep
+several investments running at once, each for a different length, so one
+matures every day.

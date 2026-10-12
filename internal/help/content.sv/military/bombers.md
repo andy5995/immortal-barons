@@ -9,10 +9,12 @@ title: Bombplan
 
 Bombplan är leveransflygplan. De har ett anfall på 0 och ett försvar på 0.
 
-Varje specialoperation utom Skicka SpyGuy behöver bombplan för att leverera
-sin last. Du måste ha minst 500 bombplan för att starta en, och varje start
-förbrukar 500 av dem, oavsett om operationen lyckas eller inte. Kärnvapen-,
-Kemiska och Biologiska anfall på din egen planet behöver inga bombplan.
+Every Special Operation except Send SpyGuy needs bombers to deliver its
+payload. You must hold at least 500 bombers to launch one, and each launch
+uses up 500 of them, whether the operation succeeds or not. The Nuclear,
+Chemical and Biological Attacks on your own planet do not need bombers. If
+you are short, the Special Operations menu offers to buy the rest on the
+spot.
 
 I ett anfall mot en annan planet strider dina bombplan mot försvararens
 jetplan. Ett anfall utan bombplan förstör inga av dem.

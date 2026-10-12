@@ -48,10 +48,11 @@ espera em horas, entre 12 e 120, e ele fica na plataforma até lá — outros
 barões podem entrar nesse meio-tempo, e a espera é como você faz com que ele
 chegue antes de o alvo jogar o próximo turno dele.
 
-Entrar em Ataque em Grupo lista cada grupo ainda se formando, com os
-soldados, caças, tanques e bombardeiros já reunidos nele e as horas que
-faltam. Leia essas colunas antes de entrar: são elas que dizem se vale a
-pena reforçar um grupo ou se ele não vai sobreviver à viagem.
+Join Group Attack lists every party still forming, with the troopers, jets,
+tanks and bombers already pooled in each and the hours it has left; the menu
+shows beside the item how many there are. Read those columns before you
+commit: they are how you tell a party worth reinforcing from one that will
+not survive the trip.
 
 Depois que uma força parte, ela sai das suas mãos e do seu exército até o
 BBS do outro planeta resolver o ataque e a resposta viajar de volta. Quando
