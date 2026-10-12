@@ -55,18 +55,19 @@ func sendIPTradeDeal(s session.Session, w *ctx) Result {
 			held = p.Carriers
 		}
 	})
-	fmt.Fprintf(s, "\n%s"+tr(s, "You ship %s to %s of %s.")+"%s\n",
-		ansi.FgBrightCyan, basketSummary(s, goods), baron, board, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, WrapIndented(fmt.Sprintf(
+		tr(s, "You ship %s to %s of %s."), basketSummary(s, goods), baron, board), ""), ansi.Reset)
 	// The original prices the shipment before asking, and the carrier line is
 	// its own ("Trade Deal requires N Carriers"). Both figures move with the
 	// cargo, so a player who cannot afford one can go back and ship less.
-	fmt.Fprintf(s, "%s"+tr(s, "Sending costs %s gold and %d carriers; you own %d.")+"%s\n",
-		ansi.Dim, comma(cost), carriers, held, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.Dim, WrapIndented(fmt.Sprintf(
+		tr(s, "Sending costs %s gold. Carriers needed: %s (you own %s); they are not used up."),
+		comma(cost), comma(carriers), comma(held)), ""), ansi.Reset)
 	// Say plainly that this is one-way. It is the difference from the local deal
-	// that a player is most likely to be caught by: nothing comes back, and the
-	// other side is not asked.
-	fmt.Fprintf(s, "%s%s%s\n", ansi.Dim,
-		tr(s, "The goods are a gift: the other realm cannot refuse them and sends nothing back."), ansi.Reset)
+	// that a player is most likely to be caught by: the other side sends nothing
+	// back, and is not asked.
+	fmt.Fprintf(s, "%s%s%s\n", ansi.Dim, WrapIndented(
+		tr(s, "The goods are a gift: the other realm cannot refuse them and sends nothing back."), ""), ansi.Reset)
 	if !AskYesNo(s, "Send this trade deal?", true) {
 		return Stay
 	}

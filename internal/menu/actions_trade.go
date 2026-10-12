@@ -133,8 +133,8 @@ func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool
 			if free < need {
 				warn = "  " + ansi.FgBrightRed + tr(s, "(not enough carriers)") + ansi.Reset
 			}
-			fmt.Fprintf(s, "  %s"+tr(s, "This deal needs %d carrier(s); you have %d free.")+"%s%s\n",
-				ansi.Dim, need, free, ansi.Reset, warn)
+			fmt.Fprintf(s, "  %s"+tr(s, "This deal needs %s carrier(s); you have %s free.")+"%s%s\n",
+				ansi.Dim, comma(need), comma(free), ansi.Reset, warn)
 		}
 		fmt.Fprintf(s, "  (%s0%s) %s\n", ansi.FgBrightMagenta, ansi.Reset, tr(s, "Done"))
 		fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, tr(s, "Choice?"), ansi.Reset)
