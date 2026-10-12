@@ -3879,8 +3879,10 @@ The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"):
   **A day's returns are paid a share per turn**, binary-verified. At daily
   maintenance whatever the last day's turns did not pay goes into a hold at
   `+0x2ed`, kept in **thousands** (so up to 999 gold of it is lost); the slots
-  shift, the hold is poured back into the new slot 0 up to the two-billion
-  date limit, and the per-turn share at `+0x2f1` is set to slot 0 over the
+  shift, and one loop over all eleven slots (BRE.OVR 0x8c62-0x8e09) pours the
+  hold into each in turn, today first, up to the two-billion date limit, so
+  what today cannot take goes onto later dates and, at the end, the new tenth
+  day. The per-turn share at `+0x2f1` is set to slot 0 over the
   turns per day, truncated. Each turn played then pays that share into gold in
   hand after the income lines (`process_economic_production`, BRE.OVR
   0x34b83), which is why a capture shows the same figure on every turn of a day
@@ -3889,9 +3891,9 @@ The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"):
   screen shows today's slot as "Today" and the hold as "In Hold". IB paid the
   whole day's returns at maintenance until 2026-09-24; it now keeps
   `InvestDue`, `InvestShare` and `InvestHeld` and pays through `creditGold`.
-  One simplification: where a pour would overflow the date limit, BRE spills the
-  rest into later day slots and IB leaves it in the hold, which reaches the
-  next day's payout either way.
+  Until 2026-10-11 IB poured the hold into today only and kept the rest, so a
+  realm investing every date to the limit saw it stuck In Hold for days; it now
+  pours into the next ten dates as return-only `Investment` records.
 
   **IB diverges — deliberately, and it stays.** `Empire.Investments` is an
   unbounded slice of individual `Investment` records, each with its own amount,

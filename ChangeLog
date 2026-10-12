@@ -4,6 +4,8 @@ Immortal Barons ChangeLog
   * Special Operations offer to buy the bombers a launch is short of
   * Join Group Attack shows how many parties are forming
   * Messages has an Event Log showing the "since your last play" recap
+  * Unpaid investment returns move to later dates with room instead of
+    waiting In Hold
 
 2026-10-08 (v0.2.5)
   * BREAKING: packet protocol 5

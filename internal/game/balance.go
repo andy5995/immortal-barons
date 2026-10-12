@@ -155,6 +155,11 @@ const (
 	// are unbounded up to the money cap.
 	MaxReturnsPerDate int64 = 2_000_000_000
 
+	// InvestHoldDates is how many dates after today the investment hold is
+	// poured into (BINARY-VERIFIED: the loop at BRE.OVR 0x8c62-0x8e09 runs over
+	// day slots 0-10).
+	InvestHoldDates = 10
+
 	// MaxCountField is the largest value a figure held in COUNT width (a plain
 	// int, 32 bits on a 32-bit door) may take: a per-unit market price, a
 	// trade-basket amount. Money is int64 and bounded by MoneyCap instead.

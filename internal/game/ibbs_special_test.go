@@ -329,14 +329,21 @@ func TestBombingDamageMatchesTheOriginal(t *testing.T) {
 		{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 3},
 		{Amount: 1000, Return: 1200, MaturesDay: w.GameDay + 4},
 	}
-	if lost := w.undermineEffect(d, 5); lost != 50 {
-		t.Errorf("undermined %d, want 50 from the near investment alone", lost)
+	if lost := w.undermineEffect(d, 5); lost != 60 {
+		t.Errorf("undermined %d, want 60 from the near investment alone", lost)
 	}
 	if d.Investments[0] != (Investment{Amount: 950, Return: 1140, MaturesDay: w.GameDay + 3}) {
 		t.Errorf("near investment now %+v", d.Investments[0])
 	}
 	if d.Investments[1].Amount != 1000 || d.Investments[1].Return != 1200 {
 		t.Errorf("an investment four days out was touched: %+v", d.Investments[1])
+	}
+
+	// A return poured there from the hold has no principal, and cutting it
+	// still counts as a hit.
+	d.Investments = []Investment{{Return: 1000, MaturesDay: w.GameDay + 1}}
+	if lost := w.undermineEffect(d, 5); lost != 50 {
+		t.Errorf("undermined %d of a return-only investment, want 50", lost)
 	}
 }
 

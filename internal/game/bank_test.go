@@ -528,7 +528,8 @@ func TestInvestmentReturnsPayAShareEachTurn(t *testing.T) {
 	}
 }
 
-// The hold pours into a day only up to the per-date limit; the rest waits.
+// The hold pours into a day only up to the per-date limit; the rest goes to the
+// next date with room, as BRE's run_daily_maintenance pours it into every slot.
 func TestInvestmentHoldRespectsTheDateLimit(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
@@ -536,8 +537,66 @@ func TestInvestmentHoldRespectsTheDateLimit(t *testing.T) {
 	e.InvestHeld = 300_000_000
 	e.Investments = []Investment{{Amount: 1, Return: 1_900_000_000, MaturesDay: 5}}
 	w.matureInvestments(e)
-	if e.InvestDue != 2_000_000_000 || e.InvestHeld != 200_000_000 {
-		t.Errorf("InvestDue=%d InvestHeld=%d, want 2,000,000,000 and 200,000,000", e.InvestDue, e.InvestHeld)
+	if e.InvestDue != 2_000_000_000 || e.InvestHeld != 0 {
+		t.Errorf("InvestDue=%d InvestHeld=%d, want 2,000,000,000 and 0", e.InvestDue, e.InvestHeld)
+	}
+	if len(e.Investments) != 1 || e.Investments[0] != (Investment{Return: 200_000_000, MaturesDay: 6}) {
+		t.Errorf("Investments=%+v, want 200,000,000 returning on day 6", e.Investments)
+	}
+}
+
+// A hold against dates that are all nearly full is not stuck: it fills each
+// date's room in order and the rest lands on the new tenth day, which nothing
+// can have reached yet. The case a player hit with every date invested to the
+// limit and two billion In Hold.
+func TestInvestmentHoldSpreadsOverFullDates(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	w.GameDay = 5
+	e.InvestHeld = 1_999_998_000
+	for d := 5; d <= 14; d++ {
+		e.Investments = append(e.Investments, Investment{Amount: 1, Return: 1_999_999_000, MaturesDay: d})
+	}
+	w.matureInvestments(e)
+	if e.InvestHeld != 0 {
+		t.Fatalf("InvestHeld=%d, want 0", e.InvestHeld)
+	}
+	byDay := map[int]int64{}
+	for _, inv := range e.Investments {
+		byDay[inv.MaturesDay] += inv.Return
+	}
+	for d := 6; d <= 14; d++ {
+		if byDay[d] != 2_000_000_000 {
+			t.Errorf("day %d returns %d, want 2,000,000,000", d, byDay[d])
+		}
+	}
+	// 1,999,998,000 less 1,000 into today and 1,000 into each of days 6-14.
+	if byDay[15] != 1_999_988_000 {
+		t.Errorf("day 15 returns %d, want 1,999,988,000", byDay[15])
+	}
+}
+
+// A date the hold reaches on several days keeps one return-only record.
+func TestInvestmentHoldKeepsOneRecordPerDate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	w.GameDay = 5
+	e.Investments = []Investment{{Amount: 1, Return: 2_000_000_000, MaturesDay: 5}}
+	e.InvestHeld = 100_000_000
+	w.matureInvestments(e)
+	e.InvestDue = 0
+	e.Investments = append(e.Investments, Investment{Amount: 1, Return: 2_000_000_000, MaturesDay: 6})
+	w.GameDay = 6
+	e.InvestHeld = 50_000_000
+	w.matureInvestments(e)
+	var records int
+	for _, inv := range e.Investments {
+		if inv.MaturesDay == 7 {
+			records++
+		}
+	}
+	if records != 1 || e.returnsOn(7) != 50_000_000 {
+		t.Errorf("day 7: %d records returning %d, want 1 returning 50,000,000", records, e.returnsOn(7))
 	}
 }
 

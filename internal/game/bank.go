@@ -42,12 +42,7 @@ func (w *World) Invest(e *Empire, amount int64, days int) (int64, error) {
 func (w *World) MaxInvestPrincipal(e *Empire, days int) int64 {
 	days = clampInvestDays(days)
 	due := w.GameDay + days
-	room := MaxReturnsPerDate
-	for _, inv := range e.Investments {
-		if inv.MaturesDay == due {
-			room -= inv.Return
-		}
-	}
+	room := MaxReturnsPerDate - e.returnsOn(due)
 	if room <= 0 {
 		return 0
 	}
@@ -82,10 +77,13 @@ func PctTenths(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
 // matureInvestments opens a new day's investment payout for e. BINARY-VERIFIED
 // (run_daily_maintenance, BRE.OVR 0x8bbd-0x8f89): what yesterday's turns left
 // unpaid goes into the hold, cut to whole thousands; the returns maturing
-// today become InvestDue; the hold is poured back into InvestDue up to the
-// per-date limit; and InvestShare, the part each turn pays, is InvestDue over
-// the turns per day. Nothing is paid here — collectInvestShare pays it a turn
-// at a time, so a day's turns left unplayed carry their shares into the hold.
+// today become InvestDue; and InvestShare, the part each turn pays, is
+// InvestDue over the turns per day. The hold is poured into today and then
+// each of the next InvestHoldDates dates in order, each up to the per-date
+// limit (the loop at 0x8c62-0x8e09); a later date takes it as a return-only
+// investment, and only what no date can take stays in the hold. Nothing is
+// paid here — collectInvestShare pays it a turn at a time, so a day's turns
+// left unplayed carry their shares into the hold.
 func (w *World) matureInvestments(e *Empire) {
 	e.InvestHeld += e.InvestDue / 1000 * 1000
 	e.InvestDue = 0
@@ -98,12 +96,49 @@ func (w *World) matureInvestments(e *Empire) {
 		}
 	}
 	e.Investments = remaining
-	if room := MaxReturnsPerDate - e.InvestDue; room > 0 && e.InvestHeld > 0 {
-		pour := min(e.InvestHeld, room)
-		e.InvestDue += pour
+	for d := 0; d <= InvestHoldDates && e.InvestHeld > 0; d++ {
+		day := w.GameDay + d
+		due := e.InvestDue
+		if d > 0 {
+			due = e.returnsOn(day)
+		}
+		pour := min(e.InvestHeld, MaxReturnsPerDate-due)
+		if pour <= 0 {
+			continue
+		}
 		e.InvestHeld -= pour
+		if d == 0 {
+			e.InvestDue += pour
+		} else {
+			e.addHeldReturn(day, pour)
+		}
 	}
 	e.InvestShare = e.InvestDue / int64(max(w.Config.TurnsPerDay, 1))
+}
+
+// returnsOn is the total of e's investment returns maturing on day, which
+// MaxReturnsPerDate caps.
+func (e *Empire) returnsOn(day int) int64 {
+	var sum int64
+	for _, inv := range e.Investments {
+		if inv.MaturesDay == day {
+			sum += inv.Return
+		}
+	}
+	return sum
+}
+
+// addHeldReturn puts gold poured from the hold onto day, in the one
+// return-only investment kept for that date, so a date filled from the hold
+// over several days still holds a single record.
+func (e *Empire) addHeldReturn(day int, gold int64) {
+	for i := range e.Investments {
+		if inv := &e.Investments[i]; inv.MaturesDay == day && inv.Amount == 0 {
+			inv.Return += gold
+			return
+		}
+	}
+	e.Investments = append(e.Investments, Investment{Return: gold, MaturesDay: day})
 }
 
 // collectInvestShare pays one turn's share of the day's matured returns into

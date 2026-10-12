@@ -66,10 +66,11 @@ func (w *World) undermineLossPct() int {
 
 // undermineEffect cuts each of d's investments that is at most
 // UndermineReachDays from maturity to undermineKept, Round((x / 100) x
-// (100 - pct)) in Real48, principal and return alike, and reports the principal
-// lost. The original keeps one figure
-// per day left to maturity and cuts the first four; IB keeps each investment
-// apart, so it cuts every one in that window.
+// (100 - pct)) in Real48, principal and return alike, and reports the return
+// lost. The original keeps one figure per day left to maturity, a return, and
+// cuts the first four; IB keeps each investment apart, so it cuts every one in
+// that window. A return poured there from the hold has no principal, which is
+// why the loss is counted in returns.
 func (w *World) undermineEffect(d *Empire, pct int) int64 {
 	var lost int64
 	for i := range d.Investments {
@@ -77,10 +78,10 @@ func (w *World) undermineEffect(d *Empire, pct int) int64 {
 		if inv.MaturesDay-w.GameDay > UndermineReachDays {
 			continue
 		}
-		kept := undermineKept(inv.Amount, pct)
-		lost += inv.Amount - kept
-		inv.Amount = kept
-		inv.Return = undermineKept(inv.Return, pct)
+		inv.Amount = undermineKept(inv.Amount, pct)
+		kept := undermineKept(inv.Return, pct)
+		lost += inv.Return - kept
+		inv.Return = kept
 	}
 	return lost
 }

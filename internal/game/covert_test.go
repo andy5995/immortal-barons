@@ -778,8 +778,8 @@ func TestBombTradingMarketIsNotGatedByAnyRelation(t *testing.T) {
 func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
 	w, _, d := newAttackerAndTarget(t)
 	d.Investments = []Investment{{Amount: 1000, Return: 1100, MaturesDay: w.GameDay + 3}}
-	if lost := w.undermineEffect(d, 2); lost != 20 {
-		t.Errorf("expected 20 principal destroyed, got %d", lost)
+	if lost := w.undermineEffect(d, 2); lost != 22 {
+		t.Errorf("expected 22 of the return destroyed, got %d", lost)
 	}
 	if d.Investments[0].Amount != 980 {
 		t.Errorf("expected 980 principal remaining, got %d", d.Investments[0].Amount)
