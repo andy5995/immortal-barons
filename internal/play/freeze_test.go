@@ -68,3 +68,38 @@ func TestAFrozenLeagueSpeaksTheCallersLanguage(t *testing.T) {
 		t.Errorf("the paused line is not in German:\n%s", out)
 	}
 }
+
+// A caller with no realm yet is stopped at the same point, before the
+// onboarding that would create one.
+func TestAFrozenLeagueCreatesNoRealm(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
+		t.Fatal(err)
+	}
+	w, err := store.Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w.Frozen, w.FreezeMessage = true, "Back in 2-48 hours."
+	if err := store.Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	// The keys that would carry a newcomer through onboarding.
+	f2 := &fakeSession{keys: []rune(" \r1Newland\ry0")}
+	reason, err := Run(f2, Identity{Handle: "Newcomer"}, cfg, "2026-07-04")
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := f2.out.String()
+	if reason != "frozen" || !strings.Contains(out, "Back in 2-48 hours.") {
+		t.Errorf("reason = %q, want \"frozen\" with the message\n%s", reason, out)
+	}
+	if w, err = store.Load(cfg); err != nil {
+		t.Fatal(err)
+	}
+	if e := w.FindByOwner("newcomer"); e != nil {
+		t.Errorf("a frozen league created realm %q", e.Name)
+	}
+}
