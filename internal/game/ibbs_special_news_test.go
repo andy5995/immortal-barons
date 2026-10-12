@@ -544,7 +544,8 @@ func TestEveryOutcomeHasANewsLineOnBothPlanets(t *testing.T) {
 // person of everything but an SDI interception. On the firer's board
 // (process_sabre_return +0x1056) a failed S3-Sabre is news alone, while a
 // nuclear or chemical strike, or a Sabre that landed, is told in person too.
-// Seeds are classified by outcome and every outcome must be reached.
+// IB tells the firer of a failed Sabre in person as well, a deliberate
+// divergence. Seeds are classified by outcome and every outcome must be reached.
 func TestMissileOutcomesReachTheOriginalsChannels(t *testing.T) {
 	for _, op := range []SpecialOp{OpNuclear, OpSabre} {
 		seen := map[AttackOutcome]bool{}
@@ -599,8 +600,8 @@ func TestMissileOutcomesReachTheOriginalsChannels(t *testing.T) {
 				t.Errorf("%s %s: the firer's planet read %d lines, want 1", op, o, len(from.NewsToday)-newsHere)
 			}
 			told = len(attacker.Events) > 0
-			if want := op != OpSabre || o == OutcomeWon; told != want {
-				t.Errorf("%s %s: firer told in person = %v, want %v", op, o, told, want)
+			if !told {
+				t.Errorf("%s %s: firer not told in person", op, o)
 			}
 		}
 		if len(seen) < 4 {

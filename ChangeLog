@@ -6,6 +6,7 @@ Immortal Barons ChangeLog
   * Messages has an Event Log showing the "since your last play" recap
   * Unpaid investment returns move to later dates with room instead of
     waiting In Hold
+  * A failed S3-Sabre is reported to its firer, as nukes and chems are
 
 2026-10-08 (v0.2.5)
   * BREAKING: packet protocol 5

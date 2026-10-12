@@ -5470,7 +5470,8 @@ selectively:
 - **Missile, firer's board.** `process_sabre_return` posts the news line for
   every outcome; a nuclear or chemical strike is then told to the firer in
   person (`+0x10b1`), a Sabre that landed too (`+0x116b`), but a failed Sabre
-  is NOT (`+0x1056` skips it). IB told the firer of every outcome.
+  is NOT (`+0x1056` skips it). IB tells the firer of a failed Sabre in person
+  too, a deliberate divergence (see "Screen output that deliberately diverges").
 - **Bombing ops, both boards.** News only. `resolve_received_bombing` and
   `process_bombing_results` each call the news writer once and the event
   writer never. IB filed an event with every realm on the target planet and
@@ -6906,6 +6907,11 @@ checking IB against a capture:
   with each living party naming the other and the share destroyed
   (`tellDealBombed`); a deal the strike spared, or one that lost nothing after
   rounding, tells nobody.
+- **A failed S3-Sabre is reported to its firer as an event.** BRE tells the
+  firer of a failed nuclear or chemical strike in person but skips that event
+  for the Sabre alone (`process_sabre_return` `+0x1056`), so a failed Sabre
+  shows up only in the planet news and the firer's own recap says nothing. IB
+  files the event for all three missiles; the news line is unchanged.
 - **The Terrorist Ops and Special Operations menus carry a (?) Help browser.**
   The original lists the ops and nothing else — nine numbered items and a Quit
   on Terrorist Ops, eight and a Quit on Special Operations, confirmed across the

@@ -65,7 +65,7 @@ func TestEverySpecialOpMakesTheRoundTrip(t *testing.T) {
 			if got := from.NewsToday[newsBefore:]; len(got) != 1 || !contains(got[0].Text, attacker.Name) {
 				t.Fatalf("the sending planet's news did not name the sender: %v", got)
 			}
-			inPerson := isMissileOp(op) && !(op == OpSabre && sabreReturnFailed(res))
+			inPerson := isMissileOp(op)
 			if !inPerson {
 				if len(attacker.Events) != 0 {
 					t.Errorf("told in person, where the original uses the news alone: %v", attacker.Events)

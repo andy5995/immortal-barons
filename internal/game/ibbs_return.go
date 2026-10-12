@@ -375,16 +375,10 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 		w.postNews(bombingReturnNews(e.Name, sent.Op, board, res))
 		return
 	}
-	// A failed S3-Sabre is news alone too. process_sabre_return (BRE.OVR
-	// 0x046045) posts the failure line at +0x1051 and then, for the Sabre
-	// (+0x1056), skips the event its nuclear and chemical siblings get at
-	// +0x10b1; only a Sabre that landed tells its firer in person (+0x116b).
-	// Protection fails a strike the same way on the target's board, so it is
-	// covered too. IB told the firer in person until 2026-10-01.
-	if sent.Op == OpSabre && sabreReturnFailed(res) {
-		news()
-		return
-	}
+	// A failed S3-Sabre is told to its firer in person, as a failed nuclear or
+	// chemical strike is. DELIBERATE DIVERGENCE: process_sabre_return (BRE.OVR
+	// 0x046045) skips that event for the Sabre alone (+0x1056), so a failed
+	// Sabre reached its firer only through the planet news.
 	switch res.outcome() {
 	case OutcomeNotFound:
 		e.addEvent(say("Your {missile} reached {board} and found no realm called {who}.",
@@ -405,18 +399,6 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	}
 	e.addEvent(report)
 	news()
-}
-
-// sabreReturnFailed reports whether an S3-Sabre's answer is one of the
-// original's failures, which come home as news only: a misfire, an SDI
-// interception, the garrison, New Realm Protection, or a plain failure from an
-// older board. A Sabre that landed, even for negligible damage, is not one.
-func sabreReturnFailed(res AttackResult) bool {
-	switch res.outcome() {
-	case OutcomeMisfire, OutcomeIntercepted, OutcomeGuarded, OutcomeProtected, OutcomeRepelled:
-		return true
-	}
-	return false
 }
 
 // bombingReturnNews is the line the FIRER's planet reads when a bombing run's
