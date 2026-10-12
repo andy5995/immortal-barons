@@ -22,9 +22,9 @@ set -eu
 
 # Pinned deliberately. Bump both lines together, taking the hash from the
 # release page — never from the download.
-VERSION="1.26.8-1"
+VERSION="1.26.9-1"
 ARCHIVE="go-legacy-win7-${VERSION}.linux_amd64.tar.gz"
-SHA256="0e8f70bc5c2f7a31ace600092453717ced935358e20c4f2cc9305309b0e283ee"
+SHA256="31d6c5778d069fcc027dd4b3eb1f26f089579b98cccc07ac54da038124ece99a"
 URL="https://github.com/thongtech/go-legacy-win7/releases/download/v${VERSION}/${ARCHIVE}"
 
 CACHE_DIR="${WIN386_GO_CACHE:-${TMPDIR:-/tmp}/go-legacy-win7-${VERSION}}"
