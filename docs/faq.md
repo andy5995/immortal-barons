@@ -155,8 +155,9 @@ alphabet is not shorter than the same name in another.
   once the first session ends. If a door process hangs after the caller has
   gone, stopping that process frees the realm.
 - If your empire is attacked while you are at the menus, a notice appears the
-  next time you press a key. Orders you already typed are adjusted to what you
-  still hold, and the game tells you when that happens.
+  next time you press a key, and again in your Event Log and at your next Play
+  Game. Orders you already typed are adjusted to what you still hold, and the
+  game tells you when that happens.
 
 ## How do I find out when my league stops exchanging packets?
 

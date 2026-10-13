@@ -6,6 +6,7 @@ Immortal Barons ChangeLog
   * The lost-forces wait no longer counts the day something was sent
   * Interplanetary trade deals and bids wait at least 3 days, whatever the
     lost-forces setting
+  * Events shown mid-session are kept for the next Play Game recap
 
 2026-10-12 (v0.2.6)
   * Updating from v0.1.0 or later needs no game reset

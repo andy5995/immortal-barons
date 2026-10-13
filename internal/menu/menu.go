@@ -680,8 +680,9 @@ func postActionCheck(g *ctx) (news []game.Event, dead bool) {
 }
 
 // takeSessionNews returns the events appended to p since this session last
-// looked, and removes them from p.Events so the turn-start recap won't repeat
-// them. Must run under the world lock, with p freshly resolved. The first call
+// looked. It leaves them in p.Events, so the turn-start recap and the Event Log
+// show them again: the notice has no pause, and a macro or a tall menu can carry
+// it off the screen before it is read. Must run under the world lock, with p freshly resolved. The first call
 // only baselines: the backlog that existed before the session's first action
 // belongs to the "since your last play" recap, not to a mid-session notice.
 func (c *ctx) takeSessionNews(p *game.Empire) []game.Event {
@@ -696,11 +697,8 @@ func (c *ctx) takeSessionNews(p *game.Empire) []game.Event {
 	if len(p.Events) == c.seenEvents {
 		return nil
 	}
-	var news []game.Event
-	for _, ev := range p.Events[c.seenEvents:] {
-		news = append(news, ev)
-	}
-	p.Events = p.Events[:c.seenEvents]
+	news := append([]game.Event(nil), p.Events[c.seenEvents:]...)
+	c.seenEvents = len(p.Events)
 	return news
 }
 

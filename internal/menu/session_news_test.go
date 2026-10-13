@@ -82,8 +82,9 @@ func TestMidSessionAttackNoticeShownOnce(t *testing.T) {
 	if strings.Count(out, "While you were at the menus") != 1 {
 		t.Fatalf("the notice repeated: %q", out)
 	}
-	if evs := committedEmpire(t, cfg, "bob").Events; len(evs) != 0 {
-		t.Fatalf("shown events must be consumed so the recap won't repeat them; still committed: %v", evs)
+	// The notice can scroll away unread, so the recap must still have them.
+	if evs := committedEmpire(t, cfg, "bob").Events; len(evs) == 0 {
+		t.Fatalf("shown events must stay committed for the turn-start recap")
 	}
 }
 
