@@ -3,6 +3,7 @@ package menu
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -134,6 +135,74 @@ func TestDealsOutListsAShippedDeal(t *testing.T) {
 		"    Cargo: 5,000 Troopers\n", "    Returns in: 4 days\n"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	}
+
+	// With the world on the host's date, the line names the moment instead: the
+	// host's midnight four days on, in the reader's zone (UTC by default).
+	now := game.Now()
+	w.With(func() { w.Today = now.Format("2006-01-02") })
+	f = &fakeSession{keys: []rune(" ")}
+	ipPendingDeals(f, w)
+	due := time.Date(now.Year(), now.Month(), now.Day()+4, 0, 0, 0, 0, now.Location())
+	// Wrapping folds the stamp's double space, so compare word by word.
+	got := strings.Join(strings.Fields(stripANSI(f.out.String())), " ")
+	if want := "Returns after: " + strings.Join(strings.Fields(game.Stamp(due, time.UTC)), " "); !strings.Contains(got, want) {
+		t.Errorf("missing %q in:\n%s", want, f.out.String())
+	}
+}
+
+// The day turns at the host's midnight, counted across a month's end.
+func TestBoardMidnight(t *testing.T) {
+	now := time.Date(2026, 10, 30, 21, 15, 0, 0, time.UTC)
+	got, ok := boardMidnight(now, "2026-10-30", 4)
+	if want := time.Date(2026, 11, 3, 0, 0, 0, 0, time.UTC); !ok || !got.Equal(want) {
+		t.Errorf("boardMidnight = %v, %v; want %v", got, ok, want)
+	}
+	if _, ok := boardMidnight(now, "2026-10-29", 4); ok {
+		t.Error("boardMidnight counted from a date the world is not on")
+	}
+}
+
+// While its board is held a trade's countdown is the backstop, the latest it can
+// come home, so the line says "by" rather than "after".
+func TestTradeReturnWhileHeld(t *testing.T) {
+	w := newIPDealCtx(t)
+	f := &fakeSession{}
+	now := time.Date(2026, 10, 13, 9, 0, 0, 0, time.UTC)
+	if got, want := tradeReturn(f, w, now, "2026-10-13", 15, true), "Returns by: 10/28/2026  00:00:00 UTC"; got != want {
+		t.Errorf("held, dated: %q, want %q", got, want)
+	}
+	if got, want := tradeReturn(f, w, now, "2026-10-13", 4, false), "Returns after: 10/17/2026  00:00:00 UTC"; got != want {
+		t.Errorf("dated: %q, want %q", got, want)
+	}
+	if got, want := tradeReturn(f, w, now, "2026-10-12", 15, true), "Returns within: 15 days"; got != want {
+		t.Errorf("held, off the world's date: %q, want %q", got, want)
+	}
+	if got, want := tradeReturn(f, w, now, "2026-10-13", 0, true), "Returns in: next planetary run"; got != want {
+		t.Errorf("wait up: %q, want %q", got, want)
+	}
+}
+
+// Bids Out says when each bid's gold comes home, as Deals Out does for a deal.
+func TestBidsOutSaysWhenTheGoldComesHome(t *testing.T) {
+	w := newIPDealCtx(t)
+	w.With(func() {
+		w.World.InFlight = append(w.World.InFlight, game.InFlightStrike{ID: 1, Kind: "trade", Owner: w.Player().Owner,
+			TargetBoard: "Far BBS", TargetEmpire: "Seller", Good: "Tank", Qty: 40, Gold: 20_000, LaunchedDay: w.GameDay})
+	})
+	now := game.Now()
+	w.With(func() { w.Today = now.Format("2006-01-02") })
+	f := &fakeSession{keys: []rune(" ")}
+	ipPendingBids(f, w)
+	// Sent today, a bid waits game.IPTradeWaitDays full days: home after the
+	// host's midnight four days on. Wrapping folds the stamp's double space.
+	due := time.Date(now.Year(), now.Month(), now.Day()+4, 0, 0, 0, 0, now.Location())
+	out := strings.Join(strings.Fields(stripANSI(f.out.String())), " ")
+	for _, want := range []string{"Bids Awaiting an Answer", "40 Tank from Seller of Far BBS",
+		"Returns after: " + strings.Join(strings.Fields(game.Stamp(due, time.UTC)), " ")} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, f.out.String())
 		}
 	}
 }

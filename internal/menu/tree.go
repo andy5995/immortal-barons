@@ -765,6 +765,17 @@ func gameMenuStatus(w *ctx) string {
 	return strings.Join(lines, "\n")
 }
 
+// boardMidnight is the moment the game day turns days from now: the door host's
+// midnight, which is when the day turns. It reports false when the host's date
+// has moved off the world's own (see planetaryClock), since the count of days
+// would then start from the wrong one.
+func boardMidnight(now time.Time, today string, days int) (time.Time, bool) {
+	if today == "" || now.Format("2006-01-02") != today {
+		return time.Time{}, false
+	}
+	return time.Date(now.Year(), now.Month(), now.Day()+days, 0, 0, 0, 0, now.Location()), true
+}
+
 // planetaryClock reports the door host's wall clock and how long is left of the
 // game day, which turns at that host's local midnight — the player's only way of
 // telling when turns refresh, since the boundary is the server's, not theirs.
@@ -779,10 +790,10 @@ func gameMenuStatus(w *ctx) string {
 // wall clock describing a day the world is not on, and a wrong countdown is
 // worse than none.
 func planetaryClock(now time.Time, today, lang string) string {
-	if today == "" || now.Format("2006-01-02") != today {
+	midnight, ok := boardMidnight(now, today, 1)
+	if !ok {
 		return ""
 	}
-	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, 1)
 	left := midnight.Sub(now)
 	return fmt.Sprintf(i18n.T(lang, "Planetary time: %s   New day in %s"),
 		now.Format("15:04 MST"), fmt.Sprintf("%d:%02d", int(left.Hours()), int(left.Minutes())%60))

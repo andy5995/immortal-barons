@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -140,17 +141,22 @@ func ipPendingBids(s session.Session, w *ctx) Result {
 		board, seller, good string
 		qty                 int
 		gold                int64
+		left                int
+		held                bool
 	}
 	var rows []row
 	var total int64
+	var today string
 	w.Read(func() {
 		p := w.Player()
 		if p == nil {
 			return
 		}
+		today = w.Today
 		for _, f := range w.World.InFlight {
 			if f.Kind == "trade" && f.Owner == p.Owner {
-				rows = append(rows, row{f.TargetBoard, f.TargetEmpire, f.Good, f.Qty, f.Gold})
+				left, _ := w.World.LostForcesDaysLeft(f)
+				rows = append(rows, row{f.TargetBoard, f.TargetEmpire, f.Good, f.Qty, f.Gold, left, f.Held})
 				total += f.Gold
 			}
 		}
@@ -160,10 +166,12 @@ func ipPendingBids(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Bids Awaiting an Answer"), ansi.Reset)
+	now := game.Now()
 	for _, r := range rows {
 		fmt.Fprintf(s, "  %s%s %s%s from %s of %s — %s%s gold held%s\n",
 			ansi.FgBrightWhite, comma(r.qty), tr(s, r.good), ansi.Reset, r.seller, r.board,
 			ansi.FgBrightYellow, comma(r.gold), ansi.Reset)
+		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(tradeReturn(s, w, now, today, r.left, r.held), "    ")))
 	}
 	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%s gold is held against these bids."), comma(total))))
 	pause(s)
@@ -176,19 +184,21 @@ func ipPendingDeals(s session.Session, w *ctx) Result {
 	type row struct {
 		board, realm string
 		goods        game.TradeBasket
-		left         int
-		timed        bool
+		left         int // a trade always has a wait (game.IPTradeWaitDays)
+		held         bool
 	}
 	var rows []row
+	var today string
 	w.Read(func() {
 		p := w.Player()
 		if p == nil {
 			return
 		}
+		today = w.Today
 		for _, f := range w.World.InFlight {
 			if f.Kind == "deal" && f.Owner == p.Owner && f.Goods != nil {
-				left, timed := w.World.LostForcesDaysLeft(f)
-				rows = append(rows, row{f.TargetBoard, f.TargetEmpire, *f.Goods, left, timed})
+				left, _ := w.World.LostForcesDaysLeft(f)
+				rows = append(rows, row{f.TargetBoard, f.TargetEmpire, *f.Goods, left, f.Held})
 			}
 		}
 	})
@@ -199,21 +209,37 @@ func ipPendingDeals(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Trade Deals Awaiting a Receipt"), ansi.Reset)
 	// One block per deal: a cargo of several goods and two long names cannot
 	// share a line, and the full figures match what the send screen showed.
+	now := game.Now()
 	for _, r := range rows {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite,
 			WrapIndented(fmt.Sprintf(tr(s, "%s of %s"), r.realm, r.board), "  "), ansi.Reset)
 		cargo := fmt.Sprintf(tr(s, "Cargo: %s"), basketSummary(s, r.goods))
 		fmt.Fprintf(s, "%s\n", hiNums(wrapHanging(cargo, "    ", "      ")))
-		switch {
-		case r.timed && r.left <= 0:
-			fmt.Fprintf(s, "%s\n", WrapIndented(tr(s, "Returns in: next planetary run"), "    "))
-		case r.timed:
-			fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(
-				plural(s, float64(r.left), "Returns in: %.0f day", "Returns in: %.0f days"), "    ")))
-		}
+		fmt.Fprintf(s, "%s\n", hiNums(WrapIndented(tradeReturn(s, w, now, today, r.left, r.held), "    ")))
 	}
 	pause(s)
 	return Stay
+}
+
+// tradeReturn says when an unanswered trade comes home, given the game days
+// left on its wait. It comes home at the first planetary run after the day
+// turns, so the day turning is the earliest it can. While its board is held,
+// left is the backstop alone, which is the latest it can: the hold may clear
+// and bring it home sooner.
+func tradeReturn(s session.Session, w *ctx, now time.Time, today string, left int, held bool) string {
+	if left <= 0 {
+		return tr(s, "Returns in: next planetary run")
+	}
+	due, dated := boardMidnight(now, today, left)
+	switch {
+	case dated && held:
+		return fmt.Sprintf(tr(s, "Returns by: %s"), game.Stamp(due, playerZone(w)))
+	case dated:
+		return fmt.Sprintf(tr(s, "Returns after: %s"), game.Stamp(due, playerZone(w)))
+	case held:
+		return plural(s, float64(left), "Returns within: %.0f day", "Returns within: %.0f days")
+	}
+	return plural(s, float64(left), "Returns in: %.0f day", "Returns in: %.0f days")
 }
 
 // tradingHeader is the Trading menu's status line: the gold on hand, and what is
