@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	gioui.org v0.10.3
 	github.com/andy5995/immortal-barons v0.0.0
-	golang.org/x/sys v0.48.0
+	golang.org/x/sys v0.49.0
 )
 
 require (
