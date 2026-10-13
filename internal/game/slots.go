@@ -1,5 +1,7 @@
 package game
 
+import "slices"
+
 // PlanetSlots is how many realms one planet holds. BRE keeps its empires in a
 // fixed array of this size and addresses each by the letter that indexes it, so
 // A..Y is both the whole roster and the whole addressable range — the Z key is
@@ -67,8 +69,9 @@ func (w *World) freeSlot() int {
 func (w *World) PlanetFull() bool { return w.freeSlot() == 0 }
 
 // EnsureSlots settles Empire.Slot on a world saved before realms had one, and
-// is idempotent: a world whose slots are all distinct and in range comes back
-// unchanged, so it may run on every reload without renumbering anyone twice.
+// is idempotent: a world whose slots are all distinct and in range keeps them,
+// so it may run on every reload without renumbering anyone twice. It also puts
+// Empires in letter order, which every list a player reads walks as it stands.
 //
 // Slots are handed out in the saved slice order, which is the order the pickers
 // used to letter by, so a live board's realms keep the letters their players
@@ -104,4 +107,16 @@ func (w *World) EnsureSlots() {
 	assign(func(e *Empire) bool { return e.Owner != "" })
 	assign(func(e *Empire) bool { return e.Owner == "" })
 	w.dropEmpires(func(e *Empire) bool { return e.Slot == 0 })
+	w.sortEmpires()
+}
+
+// insertEmpire adds e to Empires in slot order. A freed slot is reused, so
+// appending alone would list a new [A] after [B].
+func (w *World) insertEmpire(e *Empire) {
+	w.Empires = append(w.Empires, e)
+	w.sortEmpires()
+}
+
+func (w *World) sortEmpires() {
+	slices.SortStableFunc(w.Empires, func(a, b *Empire) int { return a.Slot - b.Slot })
 }

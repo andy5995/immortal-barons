@@ -70,7 +70,7 @@ func (w *World) addAIEmpire(name string) *Empire {
 	} else {
 		e.AISkill = AISkillSharp
 	}
-	w.Empires = append(w.Empires, e)
+	w.insertEmpire(e)
 	return e
 }
 
@@ -175,7 +175,7 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 	}
 	e := newEmpire(realm, OwnerKey(handle), w.Config, w.GameDay)
 	e.Slot = slot
-	w.Empires = append(w.Empires, e)
+	w.insertEmpire(e)
 	return e
 }
 

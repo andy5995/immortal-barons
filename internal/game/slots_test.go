@@ -206,3 +206,29 @@ func TestEnsureSlotsDropsAnOverFullWorldsSurplus(t *testing.T) {
 
 func handleFor(i int) string { return string(rune('a'+i)) + "handle" }
 func realmFor(i int) string  { return "Realm" + string(rune('A'+i)) }
+
+// Every realm list walks Empires as it stands, and BRE lists a planet in letter
+// order. A freed A reused after B exists must still be listed first, and a
+// world saved out of order is put back on load.
+func TestEmpiresStayInLetterOrder(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	first := w.AddHuman("a", "Alpha")
+	w.AddHuman("b", "Bravo")
+	w.RemoveEmpire(first)
+	w.AddHuman("c", "Charlie")
+	letters := func() (s string) {
+		for _, e := range w.Empires {
+			s += e.Letter()
+		}
+		return s
+	}
+	if got := letters(); got != "AB" {
+		t.Errorf("after a reused slot the realms are listed %q, want AB", got)
+	}
+
+	w.Empires[0], w.Empires[1] = w.Empires[1], w.Empires[0]
+	w.EnsureSlots()
+	if got := letters(); got != "AB" {
+		t.Errorf("EnsureSlots left a saved world listed %q, want AB", got)
+	}
+}
