@@ -201,8 +201,9 @@ While a board's packets are held for their format, forces, agents and bid gold
 sent to it are not given back by the lost-forces timer: its answer may be among
 the held files. The run says so, naming the board (`Lost-forces recovery is
 paused for what was sent to …`). The wait resumes once that board's traffic
-applies again, and anything still out five times the lost-forces setting after it
-left (15 days at the default) comes home regardless.
+applies again, and anything still out five times its usual wait after it left
+comes home regardless: day 16 for forces at the default setting of 3, and for
+bid gold and trade deals, which wait at least 3 days whatever the setting.
 
 A packet is also held when it was written under rules the league did not agree —
 see "Boards playing by different rules" under [For the League

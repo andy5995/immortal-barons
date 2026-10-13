@@ -17,7 +17,7 @@ func TestReportPlanetarySaysRecoveryIsPaused(t *testing.T) {
 	})
 	got := strings.Join(strings.Fields(out), " ")
 	if !strings.Contains(got, "Lost-forces recovery is paused for what was sent to Far BBS, Near BBS: those boards' packets are held") ||
-		!strings.Contains(got, "15 days") {
+		!strings.Contains(got, "5 times its usual wait") {
 		t.Errorf("the report does not say recovery is paused:\n%s", out)
 	}
 }

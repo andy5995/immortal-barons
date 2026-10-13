@@ -100,7 +100,7 @@ type InFlight struct {
 	TargetBoard string
 	TargetRealm string
 	LaunchedDay int
-	Waiting     int  // game days since it left
+	Waiting     int  // full game days since it left; the launch day does not count
 	HeldDays    int  // game days spent held, the hold in progress included
 	Held        bool // its board's packets are held right now
 	// DaysLeft is the game days until the lost-forces timer returns it; 0 or
@@ -206,12 +206,12 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 	for _, f := range w.InFlight {
 		row := InFlight{ID: f.ID, Kind: f.Kind, What: what(f), Owner: owners(w, f),
 			TargetBoard: f.TargetBoard, TargetRealm: f.TargetEmpire,
-			LaunchedDay: f.LaunchedDay, Waiting: w.GameDay - f.LaunchedDay,
+			LaunchedDay: f.LaunchedDay, Waiting: max(0, w.GameDay-f.LaunchedDay-1),
 			HeldDays: f.HeldDays, Held: f.Held}
 		if f.Held {
 			// f.HeldDays counts only holds that have ended; add the open one,
 			// or a strike paused since launch reads 0 days held.
-			row.HeldDays += w.GameDay - f.HeldSince
+			row.HeldDays += max(0, w.GameDay-f.HeldSince)
 		}
 		switch {
 		case f.Kind == "trade":

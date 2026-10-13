@@ -132,7 +132,7 @@ func (w *World) TradeOfferCost(b TradeBasket) int64 {
 // flat fee, spends the carriers the basket needs, takes the goods off the sender
 // and queues the shipment. There is no pending offer to withdraw. The shipment
 // waits in InFlight for its receipt, so a lost packet gives the goods and the
-// carriers back after LostForcesDays (IB's own; the original keeps no record).
+// carriers back after its wait (waitDays; IB's own, the original keeps no record).
 func (w *World) SendIPTradeDeal(from *Empire, toBoard, toEmpire string, goods TradeBasket) error {
 	if !w.Config.IBBS {
 		return ErrNotInterBBSGame

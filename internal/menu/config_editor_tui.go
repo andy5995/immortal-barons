@@ -110,7 +110,7 @@ const (
 	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
 	helpMaxTerrorOps       = "The most terrorist operations a player may launch in one day. Each agent sent counts as one operation. 0 means no limit."
 	helpMaxBombingOps      = "The most bombing operations a player may launch in one day. 0 means no limit."
-	helpLostForcesDays     = "Game days to wait for a result from another board before giving up. Packets go missing; this stops an army being lost for good. Troops, agents and trade deals come home and market bids are refunded, but gold spent on special operations is not. 0 means never give up."
+	helpLostForcesDays     = "Game days to wait for a result from another board before giving up. Packets go missing; this stops an army being lost for good. Troops and agents come home, but gold spent on special operations does not. 0 means never give up. Interplanetary trade deals and bids wait at least 3 days; a longer setting here lengthens their wait too, and 0 does not apply to them."
 	helpAttackCosts        = "How much gold an attack sent to another board costs to launch."
 	helpTerrorCosts        = "How much gold terrorist operations cost to launch."
 	helpBombingOps         = "Whether players may send the four bombing operations to other boards: Bomb Food Market, Bomb Trading Market, Bomb Trade Routes and Undermine Investments."

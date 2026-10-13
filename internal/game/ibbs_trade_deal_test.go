@@ -312,7 +312,7 @@ func TestIPTradeDealLostPacketComesHome(t *testing.T) {
 		}
 	}
 
-	home.GameDay += 2
+	home.GameDay += 3 // the launch day does not count toward the wait
 	if home.ReturnLostForces(nil) != 0 || from.Troopers != 5_000 {
 		t.Fatal("the deal came home before its wait ran out")
 	}
@@ -381,5 +381,34 @@ func TestIPTradeDealReceiptClearsInFlight(t *testing.T) {
 	home.GameDay += 10
 	if home.ReturnLostForces(nil) != 0 || from.Troopers != 5_000 {
 		t.Errorf("a delivered deal came home as well: %d troopers", from.Troopers)
+	}
+}
+
+// A trade waits at least IPTradeWaitDays: a lost-forces setting of 1 does not
+// cut it short, "never" does not strand it, and a longer one lengthens it.
+func TestIPTradeDealWaitHasAFloor(t *testing.T) {
+	for _, c := range []struct{ lost, home int }{{0, 4}, {1, 4}, {5, 6}} {
+		lost := c.lost
+		cfg := DefaultConfig()
+		cfg.IBBS = true
+		cfg.BoardID = "here"
+		cfg.LostForcesDays = lost
+		w := NewWorldSeed(cfg, 1)
+		from := w.AddHuman("sender", "Sender")
+		from.Protection = 0
+		from.Troopers, from.Carriers, from.Gold = 10_000, 50, 5_000_000
+		if err := w.SendIPTradeDeal(from, "there", "Receiver", TradeBasket{Troopers: 5_000}); err != nil {
+			t.Fatalf("lost-forces %d: send: %v", lost, err)
+		}
+		// Golden: sent on day 0, the launch day does not count, so a wait of 3
+		// ends on day 4 and a wait of 5 on day 6.
+		w.GameDay += c.home - 1
+		if n := w.ReturnLostForces(nil); n != 0 {
+			t.Errorf("lost-forces %d: the deal came home on day %d, want day %d", lost, c.home-1, c.home)
+		}
+		w.GameDay++
+		if n := w.ReturnLostForces(nil); n != 1 || from.Troopers != 10_000 {
+			t.Errorf("lost-forces %d: recovered %d on day %d with %d troopers, want the deal home", lost, n, c.home, from.Troopers)
+		}
 	}
 }

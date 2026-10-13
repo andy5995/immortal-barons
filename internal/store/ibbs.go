@@ -179,7 +179,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	}
 	// Logged but not counted as a fault: the hold that causes it already was.
 	if len(run.RecoveryPaused) > 0 {
-		logNotices = append(append([]string(nil), logNotices...), RecoveryPausedNotice(w.Config, run.RecoveryPaused))
+		logNotices = append(append([]string(nil), logNotices...), RecoveryPausedNotice(run.RecoveryPaused))
 	}
 	AppendPlanetaryLog(w.Config.DataDir, logNotices, time.Now())
 	sent, err := WriteOutbox(w, outboundDir, verbose)
@@ -189,13 +189,13 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 
 // RecoveryPausedNotice words the run report's line for PlanetaryRun.RecoveryPaused,
 // so the console and the planetary log say the same thing.
-func RecoveryPausedNotice(cfg game.Config, boards []string) string {
+func RecoveryPausedNotice(boards []string) string {
 	whose := "that board's"
 	if len(boards) > 1 {
 		whose = "those boards'"
 	}
-	return fmt.Sprintf("Lost-forces recovery is paused for what was sent to %s: %s packets are held, so a missing answer may be among them. The wait resumes when the hold clears; anything still out %d days after it left comes home regardless.",
-		strings.Join(boards, ", "), whose, cfg.LostForcesDays*game.LostForcesHeldBackstop)
+	return fmt.Sprintf("Lost-forces recovery is paused for what was sent to %s: %s packets are held, so a missing answer may be among them. The wait resumes when the hold clears; anything still out %d times its usual wait after it left comes home regardless.",
+		strings.Join(boards, ", "), whose, game.LostForcesHeldBackstop)
 }
 
 // PlanetaryRun is what one inter-BBS step did, so the command line can report

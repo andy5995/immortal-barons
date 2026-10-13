@@ -246,12 +246,17 @@ func orDash(v string) string {
 }
 
 // lostForcesStr says how long a strike waits for a result before its forces are
-// given back, or that they never are.
+// given back, or that they never are. Where the setting is under a trade's
+// floor it names the trade wait too, or "Never" reads as covering deals.
 func lostForcesStr(s session.Session, c game.Config) string {
-	if c.LostForcesDays <= 0 {
-		return tr(s, "Never")
+	str := tr(s, "Never")
+	if c.LostForcesDays > 0 {
+		str = plural(s, float64(c.LostForcesDays), "%.0f day", "%.0f days")
 	}
-	return fmt.Sprintf(tr(s, "%d days"), c.LostForcesDays)
+	if c.LostForcesDays < game.IPTradeWaitDays {
+		str += fmt.Sprintf(tr(s, "; trades %d days"), game.IPTradeWaitDays)
+	}
+	return str
 }
 
 // investRateStr names the investment rate and whether it is pinned there. A

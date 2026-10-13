@@ -229,7 +229,7 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 			run.HeldRules, filepath.Join(cfg.DataDir, store.HeldDir))
 	}
 	if len(run.RecoveryPaused) > 0 {
-		fmt.Println(textwrap.Wrap(store.RecoveryPausedNotice(cfg, run.RecoveryPaused), textwrap.Console, ""))
+		fmt.Println(textwrap.Wrap(store.RecoveryPausedNotice(run.RecoveryPaused), textwrap.Console, ""))
 	}
 	if run.Quarantined > 0 {
 		fmt.Printf("Set aside %d packet(s) that could not be read at all; they are in %s.\n",

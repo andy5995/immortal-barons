@@ -27,7 +27,7 @@ func TestPlanetaryRunPausesLostForcesForAHeldBoard(t *testing.T) {
 	w.GameDay = 10
 	w.InFlight = []game.InFlightStrike{{
 		ID: 1, Kind: "terror", TargetBoard: "Far BBS", TargetEmpire: "Rome",
-		Owner: e.Owner, Agents: 5, LaunchedDay: 7, // the wait is already up
+		Owner: e.Owner, Agents: 5, LaunchedDay: 6, // the wait is already up
 	}}
 	agents := e.Agents
 
@@ -50,7 +50,7 @@ func TestPlanetaryRunPausesLostForcesForAHeldBoard(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(log), "Lost-forces recovery is paused for what was sent to Far BBS") ||
-		!strings.Contains(string(log), "15 days") {
+		!strings.Contains(string(log), "5 times its usual wait") {
 		t.Errorf("the planetary log does not report the pause:\n%s", log)
 	}
 	for _, n := range run.NewFaults {

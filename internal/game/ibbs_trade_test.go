@@ -152,7 +152,7 @@ func TestInterplanetaryBidRefundedWhenThePacketIsLost(t *testing.T) {
 		t.Fatal("the bid escrowed nothing, so the refund proves nothing")
 	}
 
-	bw.GameDay += bw.Config.LostForcesDays // nothing ever came back
+	bw.GameDay += 4 // nothing ever came back: the launch day, then three full days
 	if n := bw.ReturnLostForces(nil); n != 1 {
 		t.Fatalf("recovered %d, want the one abandoned bid", n)
 	}

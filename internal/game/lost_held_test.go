@@ -54,38 +54,40 @@ func launchedStrike(t *testing.T, lostDays int) (*World, *Empire) {
 // LostForcesDays: its answer may be one of the held packets (#190).
 func TestLostForcesPauseWhileTheTargetIsHeld(t *testing.T) {
 	w, e := launchedStrike(t, 3)
-	// Held from launch until day 5: five held days, then the full three.
+	// Held from launch until day 5. The launch day is not counted twice, so
+	// days 1-4 are the held ones, then the full three.
 	if got := recoveryDay(t, w, "faraway", 0, 5, 40); got != 8 {
-		t.Errorf("recovered on day %d, want 8 (3 days' wait + 5 held)", got)
+		t.Errorf("recovered on day %d, want 8 (launch day + 4 held + 3 days' wait)", got)
 	}
 	if e.Troopers != 1000 {
 		t.Errorf("troopers = %d, want all 1000 home", e.Troopers)
 	}
 }
 
-// A hold in the middle of the window extends it by the held span: the day
-// before it counts, the held days do not, and the rest of the wait resumes.
+// A hold in the middle of the window extends it by the held span: the held
+// days do not count, and the wait resumes when it clears.
 func TestLostForcesHoldMidWindowExtendsIt(t *testing.T) {
 	w, _ := launchedStrike(t, 3)
-	// Day 0 counts; held days 1-3; cleared on day 4, two days left to wait.
-	if got := recoveryDay(t, w, "faraway", 1, 4, 40); got != 6 {
-		t.Errorf("recovered on day %d, want 6 (3 days' wait + 3 held)", got)
+	// Day 0 is the launch day, which never counts; held days 1-3; the wait runs
+	// from day 4.
+	if got := recoveryDay(t, w, "faraway", 1, 4, 40); got != 7 {
+		t.Errorf("recovered on day %d, want 7 (launch day + 3 days' wait + 3 held)", got)
 	}
 }
 
 // A hold on some other board changes nothing.
 func TestLostForcesHoldOnAnotherBoardDoesNotPause(t *testing.T) {
 	w, _ := launchedStrike(t, 3)
-	if got := recoveryDay(t, w, "elsewhere", 0, 99, 40); got != 3 {
-		t.Errorf("recovered on day %d, want 3", got)
+	if got := recoveryDay(t, w, "elsewhere", 0, 99, 40); got != 4 {
+		t.Errorf("recovered on day %d, want 4 (launch day + 3 days' wait)", got)
 	}
 }
 
 // A hold that never clears still gives up at the backstop, counted from launch.
 func TestLostForcesBackstopFiresWhileHeld(t *testing.T) {
 	w, e := launchedStrike(t, 3)
-	if got := recoveryDay(t, w, "faraway", 0, 999, 40); got != 15 {
-		t.Errorf("recovered on day %d, want 15 (5 x 3)", got)
+	if got := recoveryDay(t, w, "faraway", 0, 999, 40); got != 16 {
+		t.Errorf("recovered on day %d, want 16 (launch day + 5 x 3)", got)
 	}
 	if e.Troopers != 1000 {
 		t.Errorf("troopers = %d, want all 1000 home", e.Troopers)
@@ -116,7 +118,7 @@ func TestLostTerrorOpPausesWhileHeld(t *testing.T) {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	if got := recoveryDay(t, w, "faraway", 0, 4, 40); got != 7 {
-		t.Errorf("recovered on day %d, want 7 (3 days' wait + 4 held)", got)
+		t.Errorf("recovered on day %d, want 7 (launch day + 3 held + 3 days' wait)", got)
 	}
 	if e.Agents != 20 {
 		t.Errorf("agents = %d, want all 20 home", e.Agents)
@@ -132,7 +134,7 @@ func TestLostTradeBidPausesWhileHeld(t *testing.T) {
 		t.Fatalf("SendTradeBid: %v", err)
 	}
 	if got := recoveryDay(t, bw, "Bravo", 0, 2, 40); got != 5 {
-		t.Errorf("refunded on day %d, want 5 (3 days' wait + 2 held)", got)
+		t.Errorf("refunded on day %d, want 5 (launch day + 1 held + 3 days' wait)", got)
 	}
 	if buyer.Gold != goldBefore {
 		t.Errorf("gold = %d, want the full %d returned", buyer.Gold, goldBefore)
@@ -142,7 +144,19 @@ func TestLostTradeBidPausesWhileHeld(t *testing.T) {
 	if _, err := bw.SendTradeBid(buyer, "Bravo", "Redlands", "Tank", 40, 500); err != nil {
 		t.Fatalf("SendTradeBid: %v", err)
 	}
-	if got := recoveryDay(t, bw, "Bravo", 0, 999, 40); got != 15 {
-		t.Errorf("refunded on day %d under a hold that never clears, want 15", got)
+	if got := recoveryDay(t, bw, "Bravo", 0, 999, 40); got != 16 {
+		t.Errorf("refunded on day %d under a hold that never clears, want 16", got)
+	}
+}
+
+// A wait of 1 is a full day: a strike sent on day 0 is not given up at the next
+// day's run, before its result could make the round trip (#306).
+func TestLostForcesWaitOfOneIsAFullDay(t *testing.T) {
+	w, e := launchedStrike(t, 1)
+	if got := recoveryDay(t, w, "elsewhere", 0, 0, 40); got != 2 {
+		t.Errorf("recovered on day %d, want 2 (launch day + 1 day's wait)", got)
+	}
+	if e.Troopers != 1000 {
+		t.Errorf("troopers = %d, want all 1000 home", e.Troopers)
 	}
 }

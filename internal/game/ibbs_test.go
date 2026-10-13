@@ -416,10 +416,11 @@ func TestLostForcesComeHome(t *testing.T) {
 		t.Fatalf("in flight = %d, want 2 (the strike and the terror op)", len(w.InFlight))
 	}
 
-	// Too soon: the forces are still out there.
-	w.GameDay += 2
+	// Too soon: the forces are still out there. The launch day does not count,
+	// so 3 days on is the last day of the wait.
+	w.GameDay += 3
 	if got := w.ReturnLostForces(nil); got != 0 {
-		t.Errorf("recovered %d strikes after 2 days, want 0 — the wait is %d", got, cfg.LostForcesDays)
+		t.Errorf("recovered %d strikes after 3 days, want 0 — the wait is %d full days", got, cfg.LostForcesDays)
 	}
 	if e.Troopers != 400 {
 		t.Errorf("troopers came home early: %d, want 400", e.Troopers)

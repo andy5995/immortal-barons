@@ -39,9 +39,8 @@ gold is held against them. That gold is invisible everywhere else, so this is
 where to look when your treasury seems short.
 
 Nothing is lost if a packet goes missing. A bid that never gets an answer is
-given up on after the same number of days your sysop set for lost attack forces,
-and your gold is returned. If the answer turns up later than that, it is ignored
-rather than paid twice.
+given up on after at least three full days, and your gold is returned. If the answer
+turns up later than that, it is ignored rather than paid twice.
 
 ## Two things worth knowing
 

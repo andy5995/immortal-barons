@@ -539,6 +539,14 @@ const (
 // own; BRE has no packet hold for it to know about.
 const LostForcesHeldBackstop = 5
 
+// IPTradeWaitDays is the fewest full game days an interplanetary trade deal or
+// bid waits for its answer before its goods or gold come home. A league's
+// Config.LostForcesDays lengthens it for a slow link but cannot shorten it, and
+// its 0 ("never") does not apply: an answer cannot make the round trip in one
+// day, and a trade left out for good strands its goods. A floor in the code
+// keeps it off the wire. IB's own.
+const IPTradeWaitDays = 3
+
 // SpyReportsPerRealm is how many Spy Database entries are kept on any one
 // realm; the oldest goes when another arrives. Two are enough for a before and
 // after around a strike, and the cap is what stops the list growing for a whole

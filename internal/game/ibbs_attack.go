@@ -1158,10 +1158,11 @@ func strikeAim(f InFlightStrike) Msg {
 }
 
 // ReturnLostForces gives back the forces of any strike still unanswered after
-// Config.LostForcesDays, and reports how many strikes it recovered. This is what
+// its wait (waitDays), and reports how many items it recovered. This is what
 // stops a lost packet — a board that stops running transfers, a sysop who drops
 // out — from costing a player their army for good (#96). A LostForcesDays of 0
-// or less turns the recovery off, and the forces wait indefinitely.
+// or less turns the recovery off for forces, which then wait indefinitely; a
+// trade always comes home (waitDays).
 //
 // held names the boards whose packets this board is holding for a protocol
 // difference (the store knows; see store.HeldDir). Days an item spends aimed at
@@ -1175,14 +1176,10 @@ func strikeAim(f InFlightStrike) Msg {
 // Run from the planetary step, after inbound packets have been applied, so a
 // result that did arrive this run is never overtaken by the timer.
 func (w *World) ReturnLostForces(held map[string]bool) int {
-	days := w.Config.LostForcesDays
 	// The pause is tracked even with the recovery off, so a sysop who turns it
 	// on later does not have a hold already under way counted as waiting time.
 	for i := range w.InFlight {
 		w.InFlight[i].trackHold(held[w.InFlight[i].TargetBoard], w.GameDay)
-	}
-	if days <= 0 {
-		return 0
 	}
 	var waiting []InFlightStrike
 	recovered := 0
@@ -1190,7 +1187,8 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 		// Nothing is given up in the middle of a hold, even an item whose wait
 		// ran out before the hold was first seen: its packet may have sat in
 		// inbound for a day before this run met it.
-		if f.lostForcesDaysLeft(w.GameDay, days) > 0 {
+		days := w.waitDays(f)
+		if days <= 0 || f.lostForcesDaysLeft(w.GameDay, days) > 0 {
 			waiting = append(waiting, f)
 			continue
 		}
@@ -1255,22 +1253,37 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 
 // LostForcesDaysLeft is how many more game days f waits for an answer before
 // the planetary step gives it up and returns what it committed; 0 or less means
-// the next run does. ok is false when the league has lost-forces recovery off,
-// and f then waits for good. While f's board is held the countdown is the
-// backstop alone, since the ordinary wait is paused.
+// the next run does. ok is false only for forces and agents in a league with
+// lost-forces recovery off, which then wait for good; a trade always has a wait
+// (waitDays). While f's board is held the countdown is the backstop alone, since
+// the ordinary wait is paused.
 func (w *World) LostForcesDaysLeft(f InFlightStrike) (left int, ok bool) {
-	days := w.Config.LostForcesDays
+	days := w.waitDays(f)
 	if days <= 0 {
 		return 0, false
 	}
 	return f.lostForcesDaysLeft(w.GameDay, days), true
 }
 
+// waitDays is how many full game days f waits for its answer: for a trade the
+// longer of IPTradeWaitDays and the league's LostForcesDays, for everything else
+// LostForcesDays alone. 0 or less is never.
+func (w *World) waitDays(f InFlightStrike) int {
+	if f.Kind == "trade" || f.Kind == "deal" {
+		return max(IPTradeWaitDays, w.Config.LostForcesDays)
+	}
+	return w.Config.LostForcesDays
+}
+
 // lostForcesDaysLeft is the rule ReturnLostForces applies: an item waits while
 // its board is held or its unheld wait is under days, and never past the
 // backstop counted from launch.
+//
+// The launch day does not count: an item sent minutes before the day rolls over
+// would otherwise have a wait of 1 spent before any answer could make the round
+// trip, and come home while the far board still delivers it.
 func (f InFlightStrike) lostForcesDaysLeft(today, days int) int {
-	age := today - f.LaunchedDay
+	age := today - f.LaunchedDay - 1
 	left := days*LostForcesHeldBackstop - age
 	if !f.Held {
 		left = min(left, days-(age-f.HeldDays))
@@ -1282,9 +1295,11 @@ func (f InFlightStrike) lostForcesDaysLeft(today, days int) int {
 func (f *InFlightStrike) trackHold(held bool, today int) {
 	switch {
 	case held && !f.Held:
-		f.Held, f.HeldSince = true, today
+		// The launch day never counts toward the wait, so a hold that covers it
+		// must not take it off a second time.
+		f.Held, f.HeldSince = true, max(today, f.LaunchedDay+1)
 	case !held && f.Held:
-		f.HeldDays += today - f.HeldSince
+		f.HeldDays += max(0, today-f.HeldSince)
 		f.Held, f.HeldSince = false, 0
 	}
 }
@@ -1294,13 +1309,11 @@ func (f *InFlightStrike) trackHold(held bool, today int) {
 // planetary run reports, so a sysop sees the recovery paused rather than broken.
 // Current as of the last ReturnLostForces.
 func (w *World) PausedRecovery() []string {
-	if w.Config.LostForcesDays <= 0 {
-		return nil // nothing is counting, so nothing is paused
-	}
 	seen := map[string]bool{}
 	var boards []string
 	for _, f := range w.InFlight {
-		if f.Held && !seen[f.TargetBoard] {
+		// An item that never comes home is not paused: nothing is counting.
+		if f.Held && w.waitDays(f) > 0 && !seen[f.TargetBoard] {
 			seen[f.TargetBoard] = true
 			boards = append(boards, f.TargetBoard)
 		}

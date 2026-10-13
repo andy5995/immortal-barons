@@ -85,7 +85,7 @@ func TestReadGathersTheBoard(t *testing.T) {
 		t.Fatalf("in flight = %+v", s.InFlight)
 	}
 	f := s.InFlight[0]
-	if f.Owner != "Alethia" || f.What != "Send Spy (5 agents)" || f.Waiting != 1 || !f.Recovers || f.DaysLeft != 2 {
+	if f.Owner != "Alethia" || f.What != "Send Spy (5 agents)" || f.Waiting != 0 || !f.Recovers || f.DaysLeft != 3 {
 		t.Errorf("in-flight row wrong: %+v", f)
 	}
 	after, err := os.ReadFile(filepath.Join(cfg.DataDir, "world.json"))

@@ -3,6 +3,9 @@ Immortal Barons ChangeLog
 (in-progress:)
   * Node numbers run 1 to 255; a roster board numbered above that is skipped
   * Realm lists stay in letter order when a freed letter is reused
+  * The lost-forces wait no longer counts the day something was sent
+  * Interplanetary trade deals and bids wait at least 3 days, whatever the
+    lost-forces setting
 
 2026-10-12 (v0.2.6)
   * Updating from v0.1.0 or later needs no game reset

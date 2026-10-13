@@ -1659,10 +1659,18 @@ detachment back to its owner when no result has come home in that many days. IB
 implements this (#96): `World.InFlight` records every strike that leaves, a
 returning result clears it, and `ReturnLostForces` — run from the planetary step
 after inbound packets are applied — hands back anything that has waited too long
-and posts news. 0 turns the recovery off. The same timer covers every kind of
+and posts news. The day an item is sent does not count toward the wait, so a
+wait of 1 still lasts a full game day; counting it let an item sent just before
+the day changed come home at the next run, before any answer could make the
+round trip. 0 turns the recovery off. The same timer covers every kind of
 item that waits on another board: attacks and group attacks, terror ops,
 Special Operations, interplanetary trade-bid escrow and interplanetary trade
-deals.
+deals. A trade bid or deal waits the longer of `IPTradeWaitDays` (3) and
+`LostForcesDays`: a league can lengthen the wait for a slow link, but a short
+setting cannot hand back a deal the far board is still delivering, and 0
+("never") does not apply, since a trade left out for good strands its goods. It
+is a floor in the code rather than a league setting so that it stays off the
+wire. The hold pause and backstop below apply to it the same way.
 
 **The timer pauses while the target board's packets are held** for a protocol
 difference (#190, IB's own; BRE has no packet hold). Such a link is stalled, not
@@ -1678,16 +1686,18 @@ the held file's arrival time instead; before 2026-10-01 it counted as current
 until the file expired, which paused every strike at a board that had already
 updated. Each
 in-flight item records the game days it spends held (`HeldDays`, plus
-`Held`/`HeldSince` for a hold in progress), and those days do not count toward
+`Held`/`HeldSince` for a hold in progress), counted from the day after launch so
+a hold covering the launch day does not take it off twice, and those days do not
+count toward
 `LostForcesDays`: a hold in the middle of the window extends it by the held
 span, and nothing is given up while its board is held. A strike launched on day
-0 to a board held on days 1–3 comes home on day 6 at the default 3. Holds for
+0 to a board held on days 1–3 comes home on day 7 at the default 3. Holds for
 other reasons (a divergent ruleset, a failed signature) do not pause it, since
 those packets never become an answer.
 
 The pause has a **backstop**: an item is given up while still held once
 `LostForcesHeldBackstop` (5) × `LostForcesDays` days have passed since launch —
-day 15 at the default — so a board that never comes back cannot strand forces for
+day 16 at the default — so a board that never comes back cannot strand forces for
 good. `LostForcesDays` 0 still means never. The planetary run's report and its
 log name each board the recovery is paused for.
 
@@ -5240,8 +5250,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   of a deal once it is sent, so a packet that never arrives costs the sender the
   goods and the carriers, and nobody is told. IB records the deal in
   `World.InFlight` and returns the goods and the carriers when no receipt comes
-  home within the lost-forces wait, as it does for a strike (see "Days before
-  'lost' forces returned"). The fee is not returned. A receipt that arrives
+  home within its wait, as it does for a strike (see "Days before 'lost' forces
+  returned", which also gives a trade's own floor of `IPTradeWaitDays`). The fee is not returned. A receipt that arrives
   after that pays nothing, but a delivered one tells the sender the deal reached
   the realm after all. The deal carries an `ID` that the receipt echoes,
   which is what moved the packet protocol to 5. Deals Out, on the InterPlanetary

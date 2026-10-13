@@ -13,11 +13,11 @@ func TestLostForcesDaysLeft(t *testing.T) {
 		f    InFlightStrike
 		want int
 	}{
-		{"wait just up", InFlightStrike{LaunchedDay: 7}, 0},
-		{"one day in", InFlightStrike{LaunchedDay: 9}, 2},
-		{"held: backstop only", InFlightStrike{LaunchedDay: 7, Held: true}, 12},
-		{"a cleared hold extends it", InFlightStrike{LaunchedDay: 7, HeldDays: 2}, 2},
-		{"backstop caps a long hold", InFlightStrike{LaunchedDay: -4, HeldDays: 14}, 1},
+		{"wait just up", InFlightStrike{LaunchedDay: 6}, 0},
+		{"launched yesterday", InFlightStrike{LaunchedDay: 9}, 3},
+		{"held: backstop only", InFlightStrike{LaunchedDay: 7, Held: true}, 13},
+		{"a cleared hold extends it", InFlightStrike{LaunchedDay: 7, HeldDays: 2}, 3},
+		{"backstop caps a long hold", InFlightStrike{LaunchedDay: -4, HeldDays: 14}, 2},
 	} {
 		got, ok := w.LostForcesDaysLeft(c.f)
 		if !ok || got != c.want {
