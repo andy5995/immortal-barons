@@ -9,6 +9,8 @@ Immortal Barons ChangeLog
   * Events shown mid-session are kept for the next Play Game recap
   * A packet that arrives after a later one from the same board is applied,
     not deleted as already seen
+  * An idle boot at the Welcome menu ends the session instead of reporting
+    that the game could not start
 
 2026-10-12 (v0.2.6)
   * Updating from v0.1.0 or later needs no game reset
