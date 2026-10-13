@@ -310,6 +310,32 @@ func TestIdleBootAtRealmNamePromptCreatesNoRealm(t *testing.T) {
 	}
 }
 
+// An idle boot (or a dropped connection) while a new caller sits at the Welcome
+// menu ends the session cleanly, like the same boot at the realm-name prompt. It
+// used to come back from Run as an error, so the door exited 1 and the caller
+// was told the game "could not start".
+func TestIdleBootAtWelcomeMenuEndsCleanly(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	f := &errAfterSession{
+		keys: []rune(" \r"), // splash dismiss, Enter for English; then the Welcome menu reads
+		err:  session.ErrSessionEnded,
+	}
+	reason, err := Run(f, Identity{Handle: "Bobby"}, cfg, "2026-07-03")
+	if err != nil {
+		t.Fatalf("the session should end cleanly: %v", err)
+	}
+	if !strings.Contains(f.out.String(), "Welcome") {
+		t.Fatalf("the script never reached the Welcome menu:\n%s", f.out.String())
+	}
+	if reason == "" {
+		t.Error("the door log needs a reason for the session ending")
+	}
+	w, _ := store.Load(cfg)
+	if e := w.FindByOwner("bobby"); e != nil {
+		t.Fatalf("a realm was created (%q) for a caller who never named one", e.Name)
+	}
+}
+
 // Every line the onboarding path prints must fit the 80-column terminal. A
 // translated string runs longer than the English it came from — the German
 // invalid-name message is 84 columns, and unwrapped the terminal split "Reich"
