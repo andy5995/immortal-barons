@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -156,34 +157,31 @@ func TestReadInboundBootstrapRosterSurvivesADecoyClaim(t *testing.T) {
 func TestReadInboundKeepsOneOriginsPacketsInSeqOrder(t *testing.T) {
 	inbound := t.TempDir()
 	// Filenames deliberately run opposite to Seq order.
-	writePacket(t, inbound, "1-third", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 3, Notice: "third"})
-	writePacket(t, inbound, "2-first", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 1, Notice: "first"})
-	writePacket(t, inbound, "3-second", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 2, Notice: "second"})
+	writePacket(t, inbound, "1-third", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 3, News: []string{"third"}})
+	writePacket(t, inbound, "2-first", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 1, News: []string{"first"}})
+	writePacket(t, inbound, "3-second", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 2, News: []string{"second"}})
 
 	cfg := game.DefaultConfig()
 	cfg.BoardID = "Receiver BBS"
 	w := game.NewWorldSeed(cfg, 1)
 	w.LeagueNodes = []game.LeagueNode{{Number: 5, Name: "Origin BBS"}, {Number: 9, Name: "Receiver BBS"}}
 
-	// Notice carries no payload (see HasPayload), so nothing but SysopNotices
-	// records the order ApplyPacket saw these in: a refusal notice per Notice
-	// isn't posted for a plain Notice field, so record order a different way --
-	// IsPacketSeen would reject a packet as a replay if it were ever applied
-	// after a higher-Seq sibling already set HighSeq past it.
-	//
-	// result.Applied, not HighSeq, is the assertion that actually catches
-	// that: an out-of-order run (3, 1, 2) sets HighSeq to 3 on the FIRST
-	// packet applied, then silently drops the other two as replays --
-	// HighSeq still ends at 3 either way, so checking only its final value
-	// passes in the exact failure case it claims to catch (review on this
-	// PR). Applied == 3 is true only when every packet actually got
-	// through, which happens only in true Seq order.
+	// The planet news records the order ApplyPacket saw them in. Counting
+	// what applied no longer shows it: a packet applied behind a later one is
+	// still applied (#311), with its state left out (withoutStaleState).
 	result, err := ReadInbound(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
 	if result.Applied != 3 {
-		t.Fatalf("Applied = %d, want 3 (an out-of-order application drops at least one packet as a false replay)", result.Applied)
+		t.Fatalf("Applied = %d, want 3", result.Applied)
+	}
+	var order []string
+	for _, n := range w.NewsToday {
+		order = append(order, n.Text)
+	}
+	if !slices.Equal(order, []string{"first", "second", "third"}) {
+		t.Errorf("applied in the order %q, want first, second, third", order)
 	}
 	if w.HighSeq["Origin BBS"] != 3 {
 		t.Errorf("HighSeq[Origin BBS] = %d, want 3", w.HighSeq["Origin BBS"])
@@ -1252,5 +1250,36 @@ func TestReadInboundSetsAsideABundleOffTheLeague(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(cfg.DataDir, BadDir, "255W01EM.BRP")); err != nil {
 		t.Errorf("the bundle was not set aside in %s: %v", BadDir, err)
+	}
+}
+
+// A packet that reaches this board one run after a later packet from the same
+// board is applied, not deleted as a replay: two routes or a bundle held back for
+// one exchange deliver out of order, and the high-water guard that replaced this
+// lost the earlier packet with nobody told (#311). A second copy of it is still
+// refused.
+func TestReadInboundAppliesAPacketThatArrivesARunLate(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Receiver BBS"
+	w := game.NewWorldSeed(cfg, 1)
+	w.LeagueNodes = []game.LeagueNode{{Number: 5, Name: "Origin BBS"}, {Number: 9, Name: "Receiver BBS"}}
+	run := func(name string, seq uint64) InboundResult {
+		t.Helper()
+		inbound := t.TempDir()
+		writePacket(t, inbound, name, game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: seq, Notice: name})
+		result, err := ReadInbound(w, inbound, false)
+		if err != nil {
+			t.Fatalf("ReadInbound: %v", err)
+		}
+		return result
+	}
+	if r := run("later", 2); r.Applied != 1 {
+		t.Fatalf("the later packet: applied %d, want 1", r.Applied)
+	}
+	if r := run("earlier", 1); r.Applied != 1 || r.AlreadySeen != 0 {
+		t.Fatalf("the earlier packet, a run late: applied %d, already seen %d; want 1 and 0", r.Applied, r.AlreadySeen)
+	}
+	if r := run("earlier-again", 1); r.Applied != 0 || r.AlreadySeen != 1 {
+		t.Errorf("a second copy of it: applied %d, already seen %d; want 0 and 1", r.Applied, r.AlreadySeen)
 	}
 }

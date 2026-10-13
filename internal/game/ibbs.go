@@ -453,6 +453,21 @@ func (w *World) spyIntelIndex(p Packet) []int {
 	return out
 }
 
+// withoutStaleState is a packet that arrived after a later one from the same
+// board, with what the later one has already replaced taken out: the sender's
+// scores and market, the state of a weapon it aims here, and every Coordinator
+// order. Applied, an older roster or ruleset would undo the newer one, and an
+// older reset or thaw would reopen what a later freeze closed. The ruleset,
+// roster and bulletins come again on the Coordinator's next run; a reset or
+// freeze does not, and ApplyPacket tells the sysop when one is set aside.
+// What is left — strikes, results, trades, mail, recon, threat records —
+// happened once, and is lost if refused.
+func withoutStaleState(p Packet) Packet {
+	p.Scores, p.Market, p.Annihilator = nil, nil, nil
+	p.LeagueConfig, p.LeagueNodes, p.Reset, p.Freeze, p.Bulletins = nil, nil, nil, nil, nil
+	return p
+}
+
 // ApplyPacket applies an inbound packet to this board and returns a result
 // packet (attack outcomes) addressed back to the origin.
 func (w *World) ApplyPacket(p Packet) Packet {
@@ -482,8 +497,22 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// Applying the same packet twice would pay out a strike's results, a
 	// broadcast or a reset all over again, so a packet already seen here is
 	// dropped whole (#53).
+	late := p.Seq < w.HighSeq[p.FromBoard]
 	if w.SeenPacket(p) {
 		return Packet{}
+	}
+	// Checked before anything is taken out of the packet: the signature covers
+	// every order it carries, and a refusal is reported for what it claimed.
+	claimsOrders := CarriesCoordinatorOrders(p)
+	orders := w.fromCoordinator(p) && w.VerifyCoordinatorOrders(p)
+	// A packet that arrived behind a later one from the same board still
+	// carries its strikes, trades and mail, but its state is older than what is
+	// already here (#311).
+	if late {
+		if orders && (p.Reset != nil || p.Freeze != nil) {
+			w.noteSysop("A League Coordinator reset or freeze order from %s arrived after a later packet from that board and was set aside.", p.FromBoard)
+		}
+		p = withoutStaleState(p)
 	}
 	// The Coordinator may require a version of the whole league. A board below it
 	// has its packets refused here — the only lever a Coordinator has once the
@@ -517,19 +546,20 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		// quiet?") is about real elapsed time, which a game date cannot answer on
 		// a league whose clock has stalled.
 		w.LastPacketFrom[p.FromBoard] = Recorded(time.Now())
-		if p.Version != "" {
+		if p.Version != "" && !late {
 			if w.BoardVersion == nil {
 				w.BoardVersion = map[string]string{}
 			}
 			w.BoardVersion[p.FromBoard] = p.Version
 		}
-		w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
+		if !late {
+			w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
+		}
 	}
 	// Anything that dictates to this board has to be signed by the Coordinator.
 	// Positional trust — believing whoever names themselves node 1 — is what this
 	// replaces, because the board name in a packet is just a string a file can
 	// claim (#53).
-	orders := w.fromCoordinator(p) && w.VerifyCoordinatorOrders(p)
 	// The Coordinator rebroadcasts on every run, so the news only carries what
 	// actually changed here — otherwise a quiet league fills the planet's paper
 	// with the same line once per exchange.
@@ -566,7 +596,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if p.Bulletins != nil && orders {
 		w.applyBulletins(*p.Bulletins)
 	}
-	if CarriesCoordinatorOrders(p) && !orders {
+	if claimsOrders && !orders {
 		w.noteSysop("A packet from %s claimed to carry League Coordinator orders and was refused: %s.",
 			p.FromBoard, w.CoordRefusalReason(p))
 	}

@@ -372,10 +372,15 @@ type World struct {
 	// what an inbound packet is checked against so nothing is applied twice.
 	// Kept across a reset, it is what stops a late or duplicate copy of an old
 	// packet — a league reset order included — being applied to the new game.
-	OutSeq          uint64            `json:"-"`
-	HighSeq         map[string]uint64 `json:"-"`
-	LeagueDiplomacy string            // coordinator's league-wide declaration, made with a league reset
-	LeagueNodes     []LeagueNode      `json:"-"` // league roster, loaded from ibnodes.dat at startup
+	// ReplayFloor and SeenSeqs let a packet that arrives behind a later one
+	// still apply: every number at or below the floor counts as seen, and
+	// SeenSeqs lists, sorted, those applied above it (IsPacketSeen).
+	OutSeq          uint64              `json:"-"`
+	HighSeq         map[string]uint64   `json:"-"`
+	ReplayFloor     map[string]uint64   `json:"-"`
+	SeenSeqs        map[string][]uint64 `json:"-"`
+	LeagueDiplomacy string              // coordinator's league-wide declaration, made with a league reset
+	LeagueNodes     []LeagueNode        `json:"-"` // league roster, loaded from ibnodes.dat at startup
 	// Transit holds packets that arrived here addressed to another board and are
 	// waiting to be handed on. Kept apart from the Outbox because they must go
 	// out exactly as they came in — see ForwardPacket — so each is the packet's
@@ -489,9 +494,9 @@ func (w *World) ResetForLeague(startDate string) {
 // applied from the config. What is left alone is what the save does NOT hold —
 // the fields tagged `json:"-"`, which are the config, the roster and keys read
 // from their own files, the packet ledger kept in its own file (OutSeq,
-// HighSeq) and this process's counters — and the unexported machinery: the
-// mutex, which a reset inside a transaction is holding, the random sources and
-// the store. It is the rule store.copySaved
+// HighSeq, ReplayFloor, SeenSeqs) and this process's counters — and the
+// unexported machinery: the mutex, which a reset inside a transaction is
+// holding, the random sources and the store. It is the rule store.copySaved
 // applies to a reload, for the same reason: a field added later is covered
 // without anyone having to list it.
 //

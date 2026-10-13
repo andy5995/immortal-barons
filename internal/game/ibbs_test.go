@@ -895,7 +895,8 @@ func TestLeagueOrdersNeedTheCoordinatorsSignature(t *testing.T) {
 		t.Errorf("a replayed order was obeyed a second time: game length %d", m.Config.GameLength)
 	}
 
-	// An older sequence number from the same board is a replay too.
+	// An older sequence number from the same board, arriving after the newer
+	// one, is applied without its orders (withoutStaleState).
 	m2 := newMember()
 	m2.receive(genuine)
 	stale := Packet{FromBoard: "AlphaBBS", Seq: 2, LeagueConfig: &LeagueConfig{GameLength: 5}}

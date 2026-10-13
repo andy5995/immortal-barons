@@ -549,7 +549,8 @@ func (w *World) fromCoordinator(p Packet) bool {
 
 // applyLeagueReset carries out the Coordinator's order to reset every board
 // (#65). A copy seen before never reaches it: ApplyPacket drops the packet on
-// the ledger first.
+// the ledger first, and sets aside one that arrived behind a later packet
+// (withoutStaleState).
 func (w *World) applyLeagueReset(r *LeagueReset) {
 	w.ResetForLeague(r.OnDate)
 	if r.Announced != "" {

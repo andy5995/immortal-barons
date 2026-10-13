@@ -68,7 +68,7 @@ func TestALeagueRoundTripAppliesEachPacketOnce(t *testing.T) {
 	if err := json.Unmarshal(world, &keys); err != nil {
 		t.Fatal(err)
 	}
-	for _, k := range []string{"OutSeq", "HighSeq", "SeenPackets"} {
+	for _, k := range []string{"OutSeq", "HighSeq", "ReplayFloor", "SeenSeqs", "SeenPackets"} {
 		if _, ok := keys[k]; ok {
 			t.Errorf("world.json holds %s; it belongs in %s", k, LedgerFile)
 		}

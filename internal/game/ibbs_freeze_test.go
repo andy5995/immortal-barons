@@ -1,6 +1,8 @@
 package game
 
 import (
+	"slices"
+	"strings"
 	"testing"
 	"time"
 )
@@ -307,7 +309,7 @@ func TestAFreezeOverAFreezeStaysFrozen(t *testing.T) {
 
 // A league reset is refused while frozen. No reset order can then reach a
 // frozen board: one sent before the freeze is numbered below it, so it is
-// applied first or, arriving late, dropped as a replay.
+// applied first or, arriving late, set aside (withoutStaleState).
 func TestAResetIsRefusedWhileFrozen(t *testing.T) {
 	lc, m := freezePair(t)
 	if err := lc.DeclareLeagueReset("2026-10-01", ""); err != nil {
@@ -332,6 +334,9 @@ func TestAResetIsRefusedWhileFrozen(t *testing.T) {
 	m.receive(reset)
 	if !m.Frozen || len(m.Empires) != 1 {
 		t.Errorf("a reset order older than the freeze was applied: frozen=%v, %d realms", m.Frozen, len(m.Empires))
+	}
+	if !slices.ContainsFunc(m.SysopNotices, func(n string) bool { return strings.Contains(n, "was set aside") }) {
+		t.Errorf("the set-aside reset was not reported to the sysop: %q", m.SysopNotices)
 	}
 }
 

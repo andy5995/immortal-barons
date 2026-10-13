@@ -7165,16 +7165,29 @@ checks.
   — is signed, and a board that cannot verify a signature refuses the order
   rather than trusting it. A shared secret could not do this job: every member
   would hold it and could sign with it.
-- **Anti-replay.** Each outbound packet carries a sequence number. A board tracks
-  the highest it has applied from each sender and refuses anything at or below
-  it, which covers both a packet processed before and one arriving with a stale
-  number. A packet with no number, or no sender name, is deleted unapplied, so
-  the record is one number per board and does not grow with every packet a
-  league exchanges. The numbers live in `packet-ledger.json` beside the world,
-  which no reset touches: a board that reset and numbered its packets from 1
-  again would have every one dropped as stale.
+- **Anti-replay.** Each outbound packet carries a sequence number. A board
+  records, for each sender, the highest number it has applied and the exact
+  numbers applied within 4,096 below it (`ReplayWindow`). A number already
+  applied is refused, and so is one 4,096 or more below the highest, so the
+  record stays bounded. A packet with no number, or no sender name, is deleted
+  unapplied. The numbers live in `packet-ledger.json` beside the world, which no
+  reset touches: a board that reset and numbered its packets from 1 again would
+  have every one dropped as stale.
   Without it a saved packet could be dropped back in to pay a strike's results
   out twice, or re-run a reset.
+
+  **A packet that arrives behind a later one is applied (#311).** Two routes,
+  or a mailer holding a bundle back for one exchange, deliver one board's
+  packets out of order across runs. Until 0.2.7 the guard kept only the highest
+  number, so the earlier packet was deleted as "already seen", and its strikes,
+  trades or mail were lost with nobody told. Its state is still older than what
+  is here, so it is applied without the sender's scores and market, the status
+  of a weapon aimed here, its version and ruleset, and every Coordinator order:
+  an older roster, ruleset, reset or thaw must not undo a newer one. The
+  ruleset, roster and bulletins come again on the Coordinator's next run. A
+  reset or freeze does not, so one set aside this way is lost, and the board's
+  sysop is told. A ledger written before the window existed treats every number
+  up to its highest as applied, since it cannot tell them apart.
 
 ## Inter-BBS packet routing (#106)
 

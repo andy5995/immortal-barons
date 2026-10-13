@@ -87,7 +87,7 @@ A run that skipped anything names each reason:
 | could not be read at all | corrupt, truncated, or not a game packet | see [Quarantined packets](#quarantined-packets) |
 | left in place, too new to trust as complete | the file is under five minutes old and may still be mid-transfer | nothing; the next run picks it up |
 | held for a protocol this build does not read | the two boards are on different releases | see [Held packets](#held-packets) |
-| already seen | a duplicate or a replay of a packet already applied | nothing; this is the replay guard working |
+| already seen | a duplicate of a packet already applied, or one so far behind the sender's newest that it cannot be checked | nothing; this is the replay guard working |
 | for another league | its league number is not yours | nothing, if you share an inbound directory with another league. Otherwise, check `LeagueNumber` in `bbs.cfg` on both boards |
 | mesh copy | a copy addressed to somebody else, in a mesh setup | nothing |
 | transport bundle(s) left for the next unwrap | a bundle in `GameInbound` that this run did not unwrap: another run held the transport lock, or the unwrap failed | nothing, if the next run unwraps it. If it stays, read the unwrap warning the run printed |

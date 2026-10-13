@@ -35,7 +35,8 @@ func NewGame(cfg game.Config) (*game.World, error) {
 	return w, nil
 }
 
-// LedgerFile holds the packet ledger (World.OutSeq and HighSeq): the
+// LedgerFile holds the packet ledger (World.OutSeq, HighSeq, ReplayFloor and
+// SeenSeqs): the
 // numbering of this board's packets and the record of packets applied here.
 // It is kept apart from world.json because a reset erases the world and must
 // not erase this — see World.OutSeq.
@@ -45,8 +46,10 @@ const LedgerFile = "packet-ledger.json"
 // a world.json written before the ledger had a file of its own reads into it
 // too (loadLedger's migration).
 type ledger struct {
-	OutSeq  uint64            `json:",omitempty"`
-	HighSeq map[string]uint64 `json:",omitempty"`
+	OutSeq      uint64              `json:",omitempty"`
+	HighSeq     map[string]uint64   `json:",omitempty"`
+	ReplayFloor map[string]uint64   `json:",omitempty"`
+	SeenSeqs    map[string][]uint64 `json:",omitempty"`
 }
 
 func ledgerPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, LedgerFile) }
@@ -74,14 +77,14 @@ func loadLedger(w *game.World, cfg game.Config, worldData []byte) error {
 	if err := json.Unmarshal(data, &l); err != nil {
 		return fmt.Errorf("the packet ledger %s could not be read (%v); restore it from a backup, or delete it to number this board's packets from 1 again", ledgerPath(cfg), err)
 	}
-	w.OutSeq, w.HighSeq = l.OutSeq, l.HighSeq
+	w.OutSeq, w.HighSeq, w.ReplayFloor, w.SeenSeqs = l.OutSeq, l.HighSeq, l.ReplayFloor, l.SeenSeqs
 	return nil
 }
 
 // saveLedger writes the ledger the way the world is written: a temporary file
 // renamed into place.
 func saveLedger(w *game.World, cfg game.Config) error {
-	data, err := json.MarshalIndent(ledger{w.OutSeq, w.HighSeq}, "", "  ")
+	data, err := json.MarshalIndent(ledger{w.OutSeq, w.HighSeq, w.ReplayFloor, w.SeenSeqs}, "", "  ")
 	if err != nil {
 		return err
 	}

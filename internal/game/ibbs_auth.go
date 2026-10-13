@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -219,13 +220,47 @@ func (w *World) NextSeq() uint64 {
 	return w.OutSeq
 }
 
+// ReplayWindow is how far below the highest packet number applied from a board
+// an unseen number is still accepted. Packets from one board can arrive out of
+// order across runs: two routes, or a bundle a mailer holds back for one
+// exchange. A guard holding only the highest number deleted the earlier packet
+// as a replay, unapplied and with nobody told (#311). A board numbers every
+// packet it sends to any board, so the window is in the sender's numbers, and
+// this covers several days of a busy league's traffic.
+const ReplayWindow = 4096
+
 // IsPacketSeen reports whether a packet has already been applied here, without
 // recording it. Use this for a read-only check — for example, counting skipped
 // packets in ReadInbound — where the caller will call SeenPacket or ApplyPacket
 // afterward and needs the side effects to fire exactly once.
+//
+// A number above the board's highest is new. One at or below its floor is
+// refused: the floor trails the highest by ReplayWindow, and a board recorded
+// before the window existed starts with its floor at its highest. Between the
+// two, the number is checked against the exact set applied.
 func (w *World) IsPacketSeen(p Packet) bool {
 	// An unnumbered packet cannot have been seen; ApplyPacket refuses it.
-	return p.Seq > 0 && p.Seq <= w.HighSeq[p.FromBoard] // reading a nil map is safe
+	if p.Seq == 0 {
+		return false
+	}
+	if p.Seq > w.HighSeq[p.FromBoard] { // reading a nil map is safe
+		return false
+	}
+	if p.Seq <= w.replayFloor(p.FromBoard) {
+		return true
+	}
+	_, found := slices.BinarySearch(w.SeenSeqs[p.FromBoard], p.Seq)
+	return found
+}
+
+// replayFloor is the number at or below which every packet from board counts
+// as seen. A board with a highest number and no floor was recorded by a build
+// that kept only the highest, so nothing below it can be told apart.
+func (w *World) replayFloor(board string) uint64 {
+	if f, ok := w.ReplayFloor[board]; ok {
+		return f
+	}
+	return w.HighSeq[board]
 }
 
 // RefusedUnnumbered refuses a packet with no sequence number or no board name,
@@ -243,9 +278,10 @@ func (w *World) RefusedUnnumbered(p Packet) bool {
 
 // SeenPacket reports whether a packet has already been applied here, and records
 // it if not. Every packet carries its board's name and a number that only goes
-// up (StampOutbox), so HighSeq, one number per board, covers every packet ever
-// applied: a number at or below it is a replay or a duplicate. ApplyPacket
-// refuses an unnumbered or unnamed packet before it gets here.
+// up (StampOutbox), so the highest number, a floor below it and the numbers
+// applied in between cover every packet ever applied (IsPacketSeen). The set is
+// pruned as the floor rises, so it holds at most ReplayWindow numbers per board.
+// ApplyPacket refuses an unnumbered or unnamed packet before it gets here.
 func (w *World) SeenPacket(p Packet) bool {
 	if w.IsPacketSeen(p) {
 		return true
@@ -253,7 +289,25 @@ func (w *World) SeenPacket(p Packet) bool {
 	if w.HighSeq == nil {
 		w.HighSeq = map[string]uint64{}
 	}
-	w.HighSeq[p.FromBoard] = p.Seq
+	if w.ReplayFloor == nil {
+		w.ReplayFloor = map[string]uint64{}
+	}
+	if w.SeenSeqs == nil {
+		w.SeenSeqs = map[string][]uint64{}
+	}
+	b := p.FromBoard
+	floor := w.replayFloor(b)
+	seen := w.SeenSeqs[b]
+	i, _ := slices.BinarySearch(seen, p.Seq)
+	seen = slices.Insert(seen, i, p.Seq)
+	if p.Seq > w.HighSeq[b] {
+		w.HighSeq[b] = p.Seq
+	}
+	if high := w.HighSeq[b]; high > ReplayWindow && high-ReplayWindow > floor {
+		floor = high - ReplayWindow
+	}
+	cut, _ := slices.BinarySearch(seen, floor+1)
+	w.ReplayFloor[b], w.SeenSeqs[b] = floor, seen[cut:]
 	return false
 }
 
@@ -272,8 +326,8 @@ func (w *World) StampOutbox() {
 	for i := range w.Outbox {
 		// A packet a frozen board is holding is numbered when it is finally
 		// sent, not now. Numbered now, it would sit below the quiet report that
-		// goes out ahead of it, and the far side drops a sequence number that
-		// has gone backwards as a replay (SeenPacket).
+		// goes out ahead of it, and a board on a build before the replay window
+		// drops a sequence number that has gone backwards as a replay.
 		if w.Frozen && !FrozenSendable(w.Outbox[i]) {
 			continue
 		}

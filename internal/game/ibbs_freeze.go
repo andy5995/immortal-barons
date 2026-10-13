@@ -83,8 +83,9 @@ func (w *World) DeclareLeagueFreeze(frozen bool, message string) error {
 	return nil
 }
 
-// applyLeagueFreeze carries out a freeze or thaw order. A replayed or
-// out-of-date order never reaches it: the packet ledger drops it first.
+// applyLeagueFreeze carries out a freeze or thaw order. A replayed copy never
+// reaches it, since the packet ledger drops it first, and ApplyPacket sets aside
+// one that arrived behind a later packet (withoutStaleState).
 func (w *World) applyLeagueFreeze(f *LeagueFreeze) {
 	w.FreezeSerial = f.Serial
 	now := timeNow()

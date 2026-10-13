@@ -7,6 +7,8 @@ Immortal Barons ChangeLog
   * Interplanetary trade deals and bids wait at least 3 days, whatever the
     lost-forces setting
   * Events shown mid-session are kept for the next Play Game recap
+  * A packet that arrives after a later one from the same board is applied,
+    not deleted as already seen
 
 2026-10-12 (v0.2.6)
   * Updating from v0.1.0 or later needs no game reset
