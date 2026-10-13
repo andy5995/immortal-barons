@@ -308,6 +308,16 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		// is a normal way to end a first visit.
 		create, err := menu.Welcome(s, w, id.Handle, lang, term)
 		if err != nil {
+			// An idle boot or a dropped connection at the Welcome menu ends the
+			// session like it does everywhere else, not as a failure: the door
+			// would otherwise exit 1 and tell the caller it "could not start".
+			if errors.Is(err, session.ErrSessionEnded) || errors.Is(err, io.EOF) {
+				reason = d.Reason()
+				if reason == "" {
+					reason = "disconnect"
+				}
+				return reason, save()
+			}
 			return "", err
 		}
 		if !create {
