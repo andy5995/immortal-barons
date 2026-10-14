@@ -5731,7 +5731,8 @@ A name must be typed in full (case-insensitively) — whether BRE
 accepts an abbreviation was never observed, and guessing would risk sending to
 the wrong planet. An IB divergence: a message addressed to your OWN board is
 delivered locally rather than queued as a packet, which would otherwise leave
-for a transport with nowhere to take it.
+for a transport with nowhere to take it. It reaches every realm there but the
+sender, who keeps the sent copy.
 
 ### Travel Times (binary-verified)
 
@@ -5809,6 +5810,10 @@ Single Planet, Select Planets, All Planets, Allied Planets, Planet Coordinator,
 Quit, drawn as a 25-column cyan box. Naming a planet shows "Our current
 relations with X" first; the text is then written in the same 20-line editor
 local mail uses.
+
+**All Planets includes the sender's own board**, whose realms get the message at
+once, as any message addressed home does; the other boards get a packet each.
+Whether BRE's All Planets reaches the sender's own board has not been checked.
 
 **Single Planet then asks WHO on that planet.** Naming the planet is only half
 the address: BRE follows it with the same `(A-Y,Z=All,?=List) Send to:` toggle

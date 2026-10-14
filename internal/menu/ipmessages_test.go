@@ -52,8 +52,9 @@ func TestIPMessageSinglePlanetReachesEditorAndQueues(t *testing.T) {
 	}
 }
 
-// TestIPMessageAllPlanetsQueuesEachPlanet checks All Planets skips the picker
-// and writes to every other planet, this board excluded.
+// TestIPMessageAllPlanetsQueuesEachPlanet checks All Planets skips the picker,
+// queues a packet for every other planet, and delivers to this board's own
+// realms at once.
 func TestIPMessageAllPlanetsQueuesEachPlanet(t *testing.T) {
 	f := &fakeSession{keys: []rune("Hello league.\r/s")}
 	w := ipWorld()
@@ -67,6 +68,13 @@ func TestIPMessageAllPlanetsQueuesEachPlanet(t *testing.T) {
 	}
 	if len(to) != 2 {
 		t.Fatalf("queued for %v, want the two other planets", to)
+	}
+	neighbor := w.Empires[0] // the computer baron sharing this board
+	if neighbor.Owner != "" || len(neighbor.Mail) != 1 || neighbor.Mail[0].Body != "Hello league." {
+		t.Errorf("a realm on this board did not get the message: %+v", neighbor.Mail)
+	}
+	if mine := w.Player().Mail; len(mine) != 1 || !mine[0].Sent {
+		t.Errorf("the sender should hold only their sent copy: %+v", mine)
 	}
 }
 

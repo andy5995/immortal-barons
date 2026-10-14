@@ -206,7 +206,9 @@ func (w *World) deliverIPMessage(m IPMessage) {
 		return
 	}
 	for _, e := range w.Empires {
-		if !e.Alive {
+		// A message addressed home reaches everyone but its sender, who has the
+		// sent copy already.
+		if !e.Alive || (m.FromBoard == w.Config.BoardID && e.Name == m.FromEmpire) {
 			continue
 		}
 		one := msg

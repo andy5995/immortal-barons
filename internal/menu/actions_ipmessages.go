@@ -570,16 +570,16 @@ func ipMessageSelect(s session.Session, w *ctx) Result {
 	return composeIPMessage(s, w, chosen, false)
 }
 
-// ipMessageAll writes to the rest of the league. It uses KnownBoards rather
-// than the picker's list because "all planets" means the other ones — mailing
-// your own board is only ever a deliberate choice made by naming it.
+// ipMessageAll writes to the whole league, this board included: its own realms
+// are delivered here at once, as a message addressed home always is (sendIP).
 func ipMessageAll(s session.Session, w *ctx) Result {
+	var home string
 	var all []string
-	w.Read(func() { all = w.KnownBoards() })
+	w.Read(func() { home, all = w.Config.BoardID, w.KnownBoards() })
 	if noPlanets(s, len(all)) {
 		return Stay
 	}
-	return composeIPMessage(s, w, all, false)
+	return composeIPMessage(s, w, append([]string{home}, all...), false)
 }
 
 // ipMessageAllied writes to every planet the Coordinator's diplomacy chart

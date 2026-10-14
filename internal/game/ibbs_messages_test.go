@@ -176,15 +176,15 @@ func TestIPMessageToOwnPlanetIsDeliveredLocally(t *testing.T) {
 	if len(w.Outbox) != 0 {
 		t.Errorf("a message home was queued for the transport: %+v", w.Outbox)
 	}
-	for _, e := range w.Empires {
+	for _, e := range w.Empires[1:] {
 		if len(received(e)) != 1 {
 			t.Errorf("%s received %d messages, want 1", e.Name, len(received(e)))
 		}
 	}
-	// The sender is on the planet too, so they receive it; their copy of what
-	// they sent is kept apart from that, as for any message.
-	if n := len(w.Empires[0].Mail); n != 2 {
-		t.Errorf("sender has %d messages, want the one received and the copy", n)
+	// The sender is on the planet too, but holds only the copy of what they sent,
+	// not a second one as a recipient.
+	if mine := w.Empires[0].Mail; len(mine) != 1 || !mine[0].Sent {
+		t.Errorf("sender has %+v, want only the sent copy", mine)
 	}
 }
 
