@@ -191,8 +191,9 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	// Every living realm, computer barons included — the same reach the local
 	// "send to all" has.
 	// A planet-wide message is addressed to everyone, so the letters are this
-	// board's own roster and no list has to ride the packet. Nothing here can
-	// fail this way: there is no address to come up empty.
+	// board's own roster and no list has to ride the packet. With no living realm
+	// here it would reach nobody; the sender's roster of this planet is only as
+	// fresh as the last scores packet, which this board stops sending once empty.
 	var everyone strings.Builder
 	for _, e := range w.Empires {
 		if e.Alive {
@@ -200,6 +201,10 @@ func (w *World) deliverIPMessage(m IPMessage) {
 		}
 	}
 	all := everyone.String()
+	if all == "" {
+		w.bounceIPMessage(m, fmt.Sprintf("Your message to %s could not be delivered. No realm is alive there.", w.Config.BoardID))
+		return
+	}
 	for _, e := range w.Empires {
 		if !e.Alive {
 			continue

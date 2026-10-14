@@ -409,6 +409,34 @@ func TestIPMessageToUnelectedCoordinatorBouncesBack(t *testing.T) {
 	}
 }
 
+// A planet-wide message to a planet where no realm is alive would reach nobody.
+// The sender only knows the planet from its last scores packet, which a board
+// stops sending once it is empty, so only the receiving board can tell.
+func TestIPMessageToEmptyPlanetBouncesBack(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := ipWorld("Nova Hub")
+	there := ipWorld("The Eclipse")
+	for _, e := range there.Empires {
+		there.Kill(e)
+	}
+
+	here.SendIPMessage(here.Empires[0], []string{"The Eclipse"}, false, "Anyone home?")
+	there.receive(here.Outbox[0])
+	if len(there.Outbox) != 1 || len(there.Outbox[0].IPMessages) != 1 {
+		t.Fatalf("no bounce was queued: %+v", there.Outbox)
+	}
+
+	here.receive(there.Outbox[0])
+	sender := here.Empires[0]
+	if len(received(sender)) != 1 {
+		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(received(sender)))
+	}
+	if body := received(sender)[0].Body; !strings.Contains(body, "No realm is alive there") ||
+		!strings.Contains(body, "Anyone home?") {
+		t.Errorf("bounce body should say why and quote the message: %q", body)
+	}
+}
+
 // The loop guard: a bounce is itself an IPMessage with no FromEmpire, so if it
 // ALSO cannot be delivered — the original sender has since died too — nothing
 // sends a second bounce chasing it. Two boards that can no longer reach each

@@ -5877,16 +5877,17 @@ and reporting one addressed to the Coordinator or to a realm that had since
 died — which put private mail in front of the whole planet. Removed 2026-08-18
 (#146).
 
-**A message to a Coordinator on a planet that has elected none, or to a realm
-that has died or was mistyped, now bounces back to its sender — a deliberate
-divergence, decided 2026-09-13, not a fidelity fix.** It went undelivered and
+**A message to a Coordinator on a planet that has elected none, to a realm
+that has died or was mistyped, or to a planet where no realm is alive, now
+bounces back to its sender — a deliberate divergence, decided 2026-09-13, not a
+fidelity fix.** It went undelivered and
 unreported for over a year; disassembling `process_interbbs_message_packet`
 (`BRE.OVR` 0x048f2f) settles what it does on this point too: the handler is
 file I/O only — `rewrite_typed_file`/`seek_typed_record`/`write_typed_record`
 and nothing else — with no check that the addressee exists and no call that
 queues a reply. **BRE has the same silent failure IB just removed for arrivals,
 and never tells the sender either.** IB chooses to do better: `deliverIPMessage`
-sends the two failures back as an ordinary `IPMessage`, addressed to the
+sends these failures back as an ordinary `IPMessage`, addressed to the
 original sender with `FromEmpire` left empty — a notice from the planet, not
 from a baron, which is also the loop guard: a bounce is never generated for a
 message whose own `FromEmpire` is already empty, so a bounce that cannot itself
