@@ -595,8 +595,8 @@ func TestInvestmentHoldKeepsOneRecordPerDate(t *testing.T) {
 			records++
 		}
 	}
-	if records != 1 || e.returnsOn(7) != 50_000_000 {
-		t.Errorf("day 7: %d records returning %d, want 1 returning 50,000,000", records, e.returnsOn(7))
+	if records != 1 || e.ReturnsOn(7) != 50_000_000 {
+		t.Errorf("day 7: %d records returning %d, want 1 returning 50,000,000", records, e.ReturnsOn(7))
 	}
 }
 
@@ -644,5 +644,46 @@ func TestInvestRateRailsUseTheClampedStandardRate(t *testing.T) {
 	}
 	if w.InvestRate != 50 {
 		t.Errorf("rate after 20 days = %d, want 50: a 0 Standard rate is held to 35, whose rails leave 50 alone", w.InvestRate)
+	}
+}
+
+// PendingHoldPour predicts the next maintenance's pour, and must agree with it:
+// the hold fills tomorrow up to the limit, then each later date in turn.
+func TestPendingHoldPourMatchesMaintenance(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	w.GameDay = 5
+	e.Investments = []Investment{
+		{Amount: 1, Return: 1_500_000_000, MaturesDay: 6},
+		{Amount: 1, Return: 1_900_000_000, MaturesDay: 8},
+	}
+	e.InvestHeld = 3_000_000_000
+
+	got := e.PendingHoldPour(w.GameDay)
+	want := []int64{500_000_000, 2_000_000_000, 100_000_000, 400_000_000}
+	for d, g := range want {
+		if got[d] != g {
+			t.Errorf("pour %d days ahead = %d, want %d", d+1, got[d], g)
+		}
+	}
+	for d := len(want); d < len(got); d++ {
+		if got[d] != 0 {
+			t.Errorf("pour %d days ahead = %d, want 0", d+1, got[d])
+		}
+	}
+
+	w.GameDay = 6
+	w.matureInvestments(e)
+	if e.InvestDue != 1_500_000_000+got[0] {
+		t.Errorf("tomorrow due %d, want %d", e.InvestDue, 1_500_000_000+got[0])
+	}
+	for d := 1; d < len(got); d++ {
+		before := map[int]int64{8: 1_900_000_000}[6+d]
+		if r := e.ReturnsOn(6 + d); r != before+got[d] {
+			t.Errorf("day %d returns %d, want %d", 6+d, r, before+got[d])
+		}
+	}
+	if e.InvestHeld != 0 {
+		t.Errorf("hold left %d, want 0", e.InvestHeld)
 	}
 }

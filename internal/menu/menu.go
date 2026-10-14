@@ -434,6 +434,10 @@ type Menu struct {
 	// player to press 0 past a screen that can only refuse them.
 	ExitWhen func(*ctx) bool
 	Status   func(*ctx) string // optional status bar under the menu
+	// Chart is an optional block drawn between the closing rule and Status,
+	// written as given: it carries its own colors and line breaks. It is handed
+	// the box's width to center in. An empty string draws nothing.
+	Chart func(*ctx, int) string
 	// Header is an optional line drawn ABOVE the title rule. BRE puts the game's
 	// start date there, over the opening menu, rather than in a footer.
 	Header func(*ctx) string
@@ -1035,6 +1039,9 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		// menu carries a status line under it (live capture: the Attack Menu has
 		// the rule and no status, the InterPlanetary menu has both).
 		fmt.Fprintf(&b, "%s\n", closingRule(col, width))
+		if m.Chart != nil {
+			b.WriteString(m.Chart(g, width))
+		}
 		if m.Status != nil {
 			// The footer is white with its figures in bright-white — not a single
 			// accent color.

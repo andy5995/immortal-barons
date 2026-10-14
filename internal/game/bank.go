@@ -42,7 +42,7 @@ func (w *World) Invest(e *Empire, amount int64, days int) (int64, error) {
 func (w *World) MaxInvestPrincipal(e *Empire, days int) int64 {
 	days = clampInvestDays(days)
 	due := w.GameDay + days
-	room := MaxReturnsPerDate - e.returnsOn(due)
+	room := MaxReturnsPerDate - e.ReturnsOn(due)
 	if room <= 0 {
 		return 0
 	}
@@ -96,13 +96,7 @@ func (w *World) matureInvestments(e *Empire) {
 		}
 	}
 	e.Investments = remaining
-	for d := 0; d <= InvestHoldDates && e.InvestHeld > 0; d++ {
-		day := w.GameDay + d
-		due := e.InvestDue
-		if d > 0 {
-			due = e.returnsOn(day)
-		}
-		pour := min(e.InvestHeld, MaxReturnsPerDate-due)
+	for d, pour := range e.holdPour(w.GameDay) {
 		if pour <= 0 {
 			continue
 		}
@@ -110,15 +104,45 @@ func (w *World) matureInvestments(e *Empire) {
 		if d == 0 {
 			e.InvestDue += pour
 		} else {
-			e.addHeldReturn(day, pour)
+			e.addHeldReturn(w.GameDay+d, pour)
 		}
 	}
 	e.InvestShare = e.InvestDue / int64(max(w.Config.TurnsPerDay, 1))
 }
 
-// returnsOn is the total of e's investment returns maturing on day, which
+// holdPour is what the hold puts on today and each of the next InvestHoldDates
+// dates, in order, each up to the per-date limit; index d is today+d. Today's
+// due is InvestDue, which already holds today's matured returns.
+func (e *Empire) holdPour(today int) []int64 {
+	pours := make([]int64, InvestHoldDates+1)
+	held := e.InvestHeld
+	for d := range pours {
+		if held <= 0 {
+			break
+		}
+		due := e.InvestDue
+		if d > 0 {
+			due = e.ReturnsOn(today + d)
+		}
+		pours[d] = max(min(held, MaxReturnsPerDate-due), 0)
+		held -= pours[d]
+	}
+	return pours
+}
+
+// PendingHoldPour is what the next day's maintenance will pour from the hold
+// onto each date, indexed by days from today (index 0 is tomorrow). It leaves
+// out yesterday's unpaid shares, which join the hold only then. Tomorrow's due
+// at that point is just its matured returns.
+func (e *Empire) PendingHoldPour(today int) []int64 {
+	next := *e
+	next.InvestDue = e.ReturnsOn(today + 1)
+	return next.holdPour(today + 1)
+}
+
+// ReturnsOn is the total of e's investment returns maturing on day, which
 // MaxReturnsPerDate caps.
-func (e *Empire) returnsOn(day int) int64 {
+func (e *Empire) ReturnsOn(day int) int64 {
 	var sum int64
 	for _, inv := range e.Investments {
 		if inv.MaturesDay == day {

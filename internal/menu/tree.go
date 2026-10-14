@@ -246,6 +246,7 @@ func BuildMenus() *Menus {
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	bank.DefaultOnEnter = quitOnEnter(bank)
+	bank.Chart = investChart
 	bank.Status = func(w *ctx) string {
 		p := w.Player()
 		lang := playerLang(w)

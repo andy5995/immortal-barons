@@ -1273,6 +1273,14 @@ Choice> Quit
 **60 columns** (21 `─`, `[Crazy Gold Bank]`, 22 `─`), closing rule 60 — this
 block drew 61/62 until 2026-08-16.
 
+**IB divergence:** while any investment matures in the next ten days, IB draws
+a chart between the closing rule and the gold line, centered under the box: a
+white heading, a white % scale (100%, 50%, and 0% on a baseline rule), and one
+3-wide column per day ahead, labeled 1-10 in bright green, five rows tall. A
+column fills a half-row (`▄`, then `█`) per 10% of the per-date returns limit,
+rounded down with a floor of one half-row, counting what the hold will pour onto
+that date at the next maintenance. Every column is `93` bright yellow.
+
 Deposit / Withdraw prompt form: `Withdraw how many gold? (0; 7,255,312)` — the
 parenthetical is `(minimum; maximum)`.
 

@@ -65,4 +65,5 @@ date's limit, like an investment of your own. The
 interest rate floats — it rises and
 falls with how much everyone is investing — so check the rate before you commit.
 A common tactic is to keep several investments running at once, each for a
-different length, so one matures every day.
+different length, so one matures every day. The Bank menu charts the next ten
+days, each column showing how much of that date's limit is already taken.
