@@ -42,6 +42,40 @@ func statusRule() string {
 	return ansi.FgBlue + insetRule(statusRuleWidth, statusRuleDouble) + ansi.Reset
 }
 
+// A percent field carries a bar before its figure: one █ per full
+// statusBarStep percent and a ▒ for any remainder, inside white brackets that
+// mark the full length. IB's own addition; the original prints the figure alone.
+const (
+	statusBarCells = 20
+	statusBarStep  = 100 / statusBarCells
+)
+
+// statusBarColor bands a percent where 100 is the goal. Plain red is avoided:
+// it measures 2.71:1 on black, below the 3:1 needed for a graphical object.
+func statusBarColor(pct int) string {
+	switch {
+	case pct <= 10:
+		return ansi.FgBrightRed
+	case pct <= 49:
+		return ansi.FgYellow
+	case pct <= 94:
+		return ansi.FgBrightYellow
+	}
+	return ansi.FgGreen
+}
+
+// statusBar draws a percent as a bracketed bar, handing the line back to white.
+func statusBar(pct int) string {
+	pct = min(max(pct, 0), 100)
+	full := pct / statusBarStep
+	bar := strings.Repeat("█", full)
+	if pct%statusBarStep != 0 {
+		bar += "▒"
+	}
+	pad := strings.Repeat(" ", statusBarCells-utf8.RuneCountInString(bar))
+	return "[" + statusBarColor(pct) + bar + ansi.FgWhite + pad + "]"
+}
+
 // statusItem is one bracketed `[figure Label]` cell. width is its visible width,
 // which the color escapes in text make uncountable.
 type statusItem struct {
@@ -99,7 +133,7 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 	}
 	row("%s: %s (%s: %s%%)", tr(s, "Population"), hiFigure(count(p.People)),
 		tr(s, "Tax Rate"), hiFigure(count(p.Tax)))
-	row("%s: %s%%", tr(s, "Popular Support"), hiFigure(count(p.Support)))
+	row("%s: %s %s%%", tr(s, "Popular Support"), statusBar(p.Support), hiFigure(count(p.Support)))
 	if p.Food > 0 {
 		row("%s: %s", tr(s, "Food"), hiFigure(count(p.Food)))
 	}
@@ -107,7 +141,7 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 		row("%s: %s", tr(s, "Agents"), hiFigure(count(p.Agents)))
 	}
 	if p.HQ > 0 {
-		row("%s: %s%% %s", tr(s, "Headquarters"), hiFigure(count(p.HQ)), tr(s, "Complete"))
+		row("%s: %s %s%% %s", tr(s, "Headquarters"), statusBar(p.HQ), hiFigure(count(p.HQ)), tr(s, "Complete"))
 	}
 
 	// Military, then Regions: a label, its cells, and continuation lines indented
@@ -133,10 +167,10 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 		// Morale rides the Military row on a continuation line of its own, as the
 		// original writes it, and is left out entirely when there is nothing to
 		// have morale.
-		row("%s[%s%% %s]", indent, hiFigure(count(p.Morale)), tr(s, "Morale"))
+		row("%s[%s: %s %s%%]", indent, tr(s, "Morale"), statusBar(p.Morale), hiFigure(count(p.Morale)))
 	}
 	if p.SDI > 0 {
-		row("%s: %s%%", tr(s, "SDI Strength"), hiFigure(count(p.SDI)))
+		row("%s: %s %s%%", tr(s, "SDI Strength"), statusBar(p.SDI), hiFigure(count(p.SDI)))
 	}
 
 	// Regions in the order the rest of the game uses (game.BuyableRegions, the

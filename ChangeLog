@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Empire Status draws a bar beside each percent field except Tax Rate
   * Node numbers run 1 to 255; a roster board numbered above that is skipped
   * Realm lists stay in letter order when a freed letter is reused
   * The lost-forces wait no longer counts the day something was sent

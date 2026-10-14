@@ -3,7 +3,9 @@ package menu
 import (
 	"strings"
 	"testing"
+	"unicode/utf8"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -41,14 +43,14 @@ func TestEmpireStatusMatchesTheCapturedFieldOrder(t *testing.T) {
 		"Gold: 6,156,219",
 		"Bank: 7,255,312",
 		"Population: 3,386 (Tax Rate: 12%)",
-		"Popular Support: 100%",
+		"Popular Support: [████████████████████] 100%",
 		"Food: 6,441",
 		"Agents: 25",
-		"Headquarters: 40% Complete",
+		"Headquarters: [████████            ] 40% Complete",
 		"Military: [42,259 Troopers] [300 Jets] [12 Turrets]",
 		"          [4 Tanks] [5 Bombers] [6 Carriers]",
-		"          [100% Morale]",
-		"SDI Strength: 30%",
+		"          [Morale: [████████████████████] 100%]",
+		"SDI Strength: [██████              ] 30%",
 		"Regions:  [24 Coastal] [14 River] [5 Agricultural] [4 Desert]",
 		"          [3 Industrial] [2 Urban] [1 Mountain] [7 Technology]",
 		"          [9 Waste]",
@@ -163,6 +165,32 @@ func TestEmpireStatusPrintsBillionsInFull(t *testing.T) {
 	for _, want := range []string{"Gold: 1,847,392,104", "Bank: 12,500,000,000"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("block is missing %q:\n%s", want, out)
+		}
+	}
+}
+
+// One █ per full 5%, a ▒ for a remainder, and a color band by how close the
+// figure is to 100.
+func TestStatusBar(t *testing.T) {
+	for _, c := range []struct {
+		pct   int
+		bar   string
+		color string
+	}{
+		{0, "", ansi.FgBrightRed},
+		{1, "▒", ansi.FgBrightRed},
+		{10, "██", ansi.FgBrightRed},
+		{11, "██▒", ansi.FgYellow},
+		{47, "█████████▒", ansi.FgYellow},
+		{50, "██████████", ansi.FgBrightYellow},
+		{94, "██████████████████▒", ansi.FgBrightYellow},
+		{95, "███████████████████", ansi.FgGreen},
+		{99, "███████████████████▒", ansi.FgGreen},
+		{100, "████████████████████", ansi.FgGreen},
+	} {
+		want := "[" + c.color + c.bar + ansi.FgWhite + strings.Repeat(" ", statusBarCells-utf8.RuneCountInString(c.bar)) + "]"
+		if got := statusBar(c.pct); got != want {
+			t.Errorf("statusBar(%d) = %q, want %q", c.pct, got, want)
 		}
 	}
 }

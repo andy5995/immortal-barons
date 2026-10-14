@@ -1217,7 +1217,14 @@ lead with Coastal (`bre-save-format.md`, `+0x96`).
   cell would reach the 80th column. IB's figures carry thousands separators and
   its region counts have passed 250,000 in a long game, where BRE's single break
   overruns the line and the terminal wraps it on top of the next.
-- **Nothing is added.** IB shows BRE's field set and no more — no Debt, no net
+- **Percent fields carry a bar.** Popular Support, Headquarters, Morale and
+  SDI Strength show a 20-cell bar in white brackets before the figure: one `█`
+  per full 5%, a `▒` for any remainder. Bright red to 10%, yellow to 49%, bright
+  yellow to 94%, green from 95%. Plain red is avoided because it measures
+  2.71:1 on black. Tax Rate gets none, since a high tax is not the goal. The
+  Morale cell puts its label first to make room for the bar:
+  `[Morale: [bar] 100%]` where BRE writes `[100% Morale]`.
+- **No field is added.** IB shows BRE's field set and no more — no Debt, no net
   worth. `Score:` is `Empire.Score`, the cumulative score the scores board
   ranks on (BRE reads it from record `+0x286`), not net worth.
 
