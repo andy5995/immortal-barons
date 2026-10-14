@@ -27,8 +27,8 @@ func ipWorld() *ctx {
 // banner AND by the queued packet, so a flow change upstream cannot leave this
 // passing on a script that ran dry.
 func TestIPMessageSinglePlanetReachesEditorAndQueues(t *testing.T) {
-	f := &fakeSession{keys: []rune("?4\rTerms.\r/s")}
-	w := ipWorld()
+	f := &fakeSession{keys: []rune("?4\rB\rTerms.\r/s")}
+	w := ipWorldWithRoster()
 	ipMessageSingle(f, w)
 	out := f.out.String()
 	for _, want := range []string{
@@ -91,8 +91,8 @@ func TestIPMessageSelectPlanetsStopsOnEmptyLine(t *testing.T) {
 // what a script that never got that far leaves behind, so the state check alone
 // would keep passing after any flow change upstream.
 func TestIPMessageAbortSendsNothing(t *testing.T) {
-	f := &fakeSession{keys: []rune("4\rTerms.\r/a")}
-	w := ipWorld()
+	f := &fakeSession{keys: []rune("4\rB\rTerms.\r/a")}
+	w := ipWorldWithRoster()
 	ipMessageSingle(f, w)
 	out := f.out.String()
 	for _, want := range []string{"lines for your message", "Abort"} {
@@ -195,8 +195,9 @@ func unroutableWorld() *ctx {
 // names it and is refused, then names a real planet, so the prompt is proved to
 // have been reached and still working.
 func TestThePickerDoesNotOfferAnUnroutablePlanet(t *testing.T) {
-	f := &fakeSession{keys: []rune("?local\r4\rTerms.\r/s")}
+	f := &fakeSession{keys: []rune("?local\r4\rB\rTerms.\r/s")}
 	w := unroutableWorld()
+	w.RemoteBoards = append(w.RemoteBoards, ipWorldWithRoster().RemoteBoards...)
 	ipMessageSingle(f, w)
 	out := f.out.String()
 	if !strings.Contains(out, "List of Planets") {
@@ -377,23 +378,39 @@ func TestIPMessageEmptyRecipientListSendsNothing(t *testing.T) {
 	}
 }
 
-// A planet this board has no scores for has no roster to letter, so the message
-// goes to the planet as a whole rather than the screen refusing to send. The
-// prompt must NOT appear — a picker over an empty roster would have no key that
-// does anything.
-func TestIPMessageWithoutARosterWritesToTheWholePlanet(t *testing.T) {
-	f := &fakeSession{keys: []rune("3\rTerms.\r/s")}
+// A planet this board has no scores for has no players known to it — a board
+// sends none until it has a human realm, and a new one may not have sent any
+// yet — so the screen refuses rather than guess.
+// The screen says so instead of opening the editor.
+func TestIPMessageWithoutARosterIsRefused(t *testing.T) {
+	f := &fakeSession{keys: []rune("3\r ")}
 	w := ipWorldWithRoster() // scores for The Eclipse only; "3" is Eye of the Storm
 	ipMessageSingle(f, w)
 	out := stripANSI(f.out.String())
-	if strings.Contains(out, "Send to:") {
-		t.Errorf("a planet with no known barons still asked which of them:\n%s", out)
+	if !strings.Contains(out, "No players are known at Eye of the Storm yet") {
+		t.Fatalf("never reached the refusal:\n%s", out)
 	}
+	if strings.Contains(out, "lines for your message") || strings.Contains(out, "Send to:") {
+		t.Errorf("the screen went on past the refusal:\n%s", out)
+	}
+	if len(w.Outbox) != 0 {
+		t.Errorf("a message was queued for a planet with no known players: %+v", w.Outbox)
+	}
+}
+
+// This board keeps no scores for itself, so the roster check that refuses an
+// unknown planet must not refuse home: a message there reaches the planet.
+func TestIPMessageToOwnPlanetWritesToTheWholePlanet(t *testing.T) {
+	f := &fakeSession{keys: []rune("1\rHi home.\r/s ")}
+	w := ipWorldWithRoster() // "1" is Nova Hub, this board
+	ipMessageSingle(f, w)
+	out := stripANSI(f.out.String())
 	if !strings.Contains(out, "lines for your message") {
 		t.Fatalf("never reached the editor:\n%s", out)
 	}
-	if got := ipQueuedTo(w, "Eye of the Storm"); len(got) != 1 || got[0] != "" {
-		t.Fatalf("queued for %q, want one planet-wide message (no ToEmpire)", got)
+	neighbor := w.Empires[0] // the computer baron sharing this board
+	if len(neighbor.Mail) != 1 || neighbor.Mail[0].Body != "Hi home." {
+		t.Errorf("a realm on this board did not get the message: %+v", neighbor.Mail)
 	}
 }
 

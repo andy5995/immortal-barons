@@ -27,8 +27,8 @@ matters.
   you name, or one planet's Coordinator alone. A reply asks whether it is public:
   yes and the sender's whole planet reads it, no and only the baron who wrote
   does.
-  If your board has not yet received that planet's scores, there is no roster to
-  pick from and the letter goes to everyone there.
+  If your board has not yet received that planet's scores, no players are known
+  there and the letter cannot be sent.
 - Diplomacy List — where your board says it stands with each other planet. It
   binds nobody, but it is your Coordinator telling you who to watch.
 - Travel Times — how long a message or a strike actually takes to reach each

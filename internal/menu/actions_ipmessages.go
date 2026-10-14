@@ -458,13 +458,19 @@ func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result 
 	if toCoordinator {
 		return composeIPMessage(s, w, []string{p.Name}, true)
 	}
+	// This board holds no scores for itself, so its own planet has no roster
+	// here; a message home is delivered at once to the whole planet (sendIP).
+	var home string
+	w.Read(func() { home = w.Config.BoardID })
+	if p.Name == home {
+		return composeIPMessage(s, w, []string{p.Name}, false)
+	}
 	rows := remoteRecipients(w, p.Name)
 	if len(rows) == 0 {
-		// No scores packet has arrived from that board yet, so there is no roster
-		// to letter. Writing to the planet still works and is what IB did before
-		// the picker existed, so the message goes planet-wide rather than the
-		// screen refusing to send anything at all.
-		return composeIPMessage(s, w, []string{p.Name}, false)
+		// No scores packet has arrived from that board: it has sent none since it
+		// joined, or it has no human realm to list. No player there is known.
+		ok(s, "No players are known at %s yet, so there is no one to write to.", p.Name)
+		return Stay
 	}
 	picked := runPicker(s, w, rows, 0, pickOpts{
 		prompt: "Send to:", allowAll: true,

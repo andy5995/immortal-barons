@@ -5865,8 +5865,9 @@ screen needs; it is not the letter that realm answers to at home, and a packet
 that arrives with a realm added or gone renumbers the rows below it.
 
 And a planet **no scores packet has arrived from** has no roster to letter, so
-IB skips the prompt and writes to the planet as a whole rather than refusing to
-send. BRE has the array either way and always asks.
+IB refuses to send there, since no player there is known: a board sends no
+scores while it has no human realm, and a newly listed one may not have sent its
+first yet. BRE has the array either way and always asks.
 
 **Arriving mail posts no news, on either planet.** BRE's inbound handler
 (`process_interbbs_message_packet`) writes `DATA\MSG.BRF` and touches no news
