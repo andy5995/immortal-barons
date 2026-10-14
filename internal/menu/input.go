@@ -531,14 +531,25 @@ func WrapIndented(text, indent string) string { return wrapHanging(text, indent,
 // Wrap BEFORE coloring. hiNums and friends insert escape sequences that no
 // terminal displays but every length count sees, so a report wrapped afterward
 // breaks far short of the margin.
-func wrapReport(text string) string {
+func wrapReport(text string) string { return wrapLongLines(text, ansi.ScreenCols-1, " ") }
+
+// wrapLongLines is wrapReport to any width: only a line longer than width is
+// wrapped, and its lead — the run of leadChars it opens with — is repeated on
+// every line it becomes. The mail box passes "> " so a quoted line stays quoted.
+func wrapLongLines(text string, width int, leadChars string) string {
 	lines := strings.Split(text, "\n")
 	for i, l := range lines {
-		if strings.TrimSpace(l) == "" || utf8.RuneCountInString(l) < ansi.ScreenCols {
+		if strings.TrimSpace(l) == "" || utf8.RuneCountInString(l) <= width {
 			continue // a blank line is the report's own spacing; a short one fits
 		}
-		lead := l[:len(l)-len(strings.TrimLeft(l, " "))]
-		lines[i] = wrapHanging(l[len(lead):], lead, lead)
+		lead := l[:len(l)-len(strings.TrimLeft(l, leadChars))]
+		if len(lead) > width/2 {
+			// Repeated on every line, a lead near the width puts each word on a line
+			// of its own behind a full copy of it: output quadratic in a body that
+			// arrived from another board. No real quote nests this deep.
+			lead = ""
+		}
+		lines[i] = wrapHangingTo(l[len(lead):], lead, lead, width)
 	}
 	return strings.Join(lines, "\n")
 }
@@ -546,7 +557,11 @@ func wrapReport(text string) string {
 // wrapHanging is WrapIndented with a different lead on the first line, so a
 // marker can sit outside the text and the continuation still lines up under it.
 func wrapHanging(text, first, cont string) string {
-	lines := strings.Split(help.Wrap(text, ansi.ScreenCols-len(cont)-1), "\n")
+	return wrapHangingTo(text, first, cont, ansi.ScreenCols-1)
+}
+
+func wrapHangingTo(text, first, cont string, width int) string {
+	lines := strings.Split(help.Wrap(text, width-len(cont)), "\n")
 	for i, l := range lines {
 		if i == 0 {
 			lines[i] = first + l

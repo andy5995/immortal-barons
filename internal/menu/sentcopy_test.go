@@ -103,6 +103,32 @@ func TestLongAddressWrapsInsideTheBox(t *testing.T) {
 	}
 }
 
+// A line too long for the box wraps inside it: a bounce notice, written by the
+// engine as one line, and a typed line quoted four replies deep, whose "> "
+// markers carry onto every line it becomes. A line that fits keeps its spacing.
+func TestLongBodyLineWrapsInsideTheBox(t *testing.T) {
+	f := &fakeSession{}
+	bounce := "Your message to The Eightfold Barony of Tentacle BBS could not be delivered. There is no such realm there."
+	typed := strings.TrimSpace(strings.Repeat("quoted ", 9)) + " ends" // 67 columns; the editor allows 68
+	quoted := "> > > > " + typed                                       // 75, past the box's 74
+	messageBox(f, game.Message{FromBoard: "Tentacle BBS", To: "A", Body: bounce + "\n" + quoted + "\n  indented   line"})
+	plain := stripANSI(f.out.String())
+	for _, line := range strings.Split(plain, "\n") {
+		if n := len([]rune(line)); n > mailBoxWidth {
+			t.Errorf("line runs %d columns, past the %d-column box: %q", n, mailBoxWidth, line)
+		}
+	}
+	if !strings.Contains(plain, "│ delivered. There is no such realm there.") {
+		t.Errorf("the wrapped bounce lost its box bar or split a word:\n%s", plain)
+	}
+	if n := strings.Count(plain, "│ > > > > "); n != 2 {
+		t.Errorf("the quoted line became %d lines carrying its markers, want 2:\n%s", n, plain)
+	}
+	if !strings.Contains(plain, "│   indented   line") {
+		t.Errorf("a short typed line was re-flowed:\n%s", plain)
+	}
+}
+
 // A full inbox's losses reach the recap as ONE line however many there were,
 // and the tally clears once shown.
 func TestRecapReportsMailLostOnce(t *testing.T) {
@@ -116,5 +142,17 @@ func TestRecapReportsMailLostOnce(t *testing.T) {
 	}
 	if w.Player().MailLost != nil {
 		t.Error("the tally should clear once the recap has shown it")
+	}
+}
+
+// A body from another board is not size-checked, so a line made of a huge run
+// of quote markers and then many words must not render quadratically: each
+// wrapped line repeating the whole run would turn kilobytes into gigabytes.
+func TestDeepQuoteLeadDoesNotAmplify(t *testing.T) {
+	f := &fakeSession{}
+	line := strings.Repeat(">", 5000) + strings.Repeat(" w", 5000)
+	messageBox(f, game.Message{FromBoard: "Far", To: "A", Body: line})
+	if n := f.out.Len(); n > 10*len(line) {
+		t.Errorf("a %d-byte line rendered as %d bytes", len(line), n)
 	}
 }

@@ -319,6 +319,10 @@ func messageBox(s session.Session, m game.Message) {
 		if strings.HasPrefix(line, ">") {
 			body = ansi.FgBrightBlue
 		}
-		fmt.Fprintf(s, "%s│ %s%s%s\n", ansi.FgCyan, body, line, ansi.Reset)
+		// A bounce notice, or a line quoted a few replies deep, runs past the box,
+		// and the terminal would break it mid-word at column 80 with no bar.
+		for _, l := range strings.Split(wrapLongLines(line, mailBoxWidth-2, "> "), "\n") {
+			fmt.Fprintf(s, "%s│ %s%s%s\n", ansi.FgCyan, body, l, ansi.Reset)
+		}
 	}
 }
