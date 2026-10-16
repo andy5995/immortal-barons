@@ -99,7 +99,7 @@ func drawTradeBasket(s session.Session, p *game.Empire, b game.TradeBasket, titl
 	}
 	keyPad := strings.Repeat(" ", kw-keyCellWidth)
 	key := func(k byte) string {
-		return dim(col) + "(" + col + string(k) + dim(col) + ")" + ansi.Reset + keyPad
+		return dim(col) + "(" + keyHi(col) + string(k) + dim(col) + ")" + ansi.Reset + keyPad
 	}
 
 	var body strings.Builder

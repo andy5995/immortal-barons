@@ -350,7 +350,7 @@ func drawOfferBox(s session.Session, col, title string, labels []string) {
 	fmt.Fprintf(s, "\n%s\n", titleRule(col, title, width))
 	for i, label := range labels {
 		fmt.Fprintf(s, "  %s(%s%c%s)%s %s%s%s\n",
-			dim(col), col, keys[i], dim(col), ansi.Reset, ansi.FgWhite, label, ansi.Reset)
+			dim(col), keyHi(col), keys[i], dim(col), ansi.Reset, ansi.FgWhite, label, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(col), strings.Repeat("─", width), ansi.Reset)
 }

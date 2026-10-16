@@ -107,7 +107,7 @@ func turnaroundLabel(s session.Session, days float64) (string, string) {
 	hours := math.Round(days*24*10) / 10
 	switch {
 	case days <= 0:
-		return tr(s, "No Data"), ansi.FgRed
+		return tr(s, "No Data"), ansi.FgBrightRed
 	case seconds < game.TravelSecondsCutoff*24*60*60:
 		return plural(s, seconds, "%.0f second", "%.0f seconds"), ansi.FgBrightGreen
 	case minutes < game.TravelMinutesCutoff*24*60:

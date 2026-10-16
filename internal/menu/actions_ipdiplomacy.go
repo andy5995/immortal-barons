@@ -48,8 +48,8 @@ func planetaryTreaties(s session.Session, w *ctx) Result {
 	}
 	rule := ansi.FgBrightBlack + insetRule(treatyRuleWidth, treatyRuleDouble) + ansi.Reset
 	fmt.Fprintf(s, "\n%s──%s═%s%s%s═%s──%s\n",
-		ansi.FgRed, ansi.FgBrightRed, ansi.FgBrightWhite, tr(s, "Planetary Treaties"),
-		ansi.FgBrightRed, ansi.FgRed, ansi.Reset)
+		dim(ansi.FgBrightRed), ansi.FgBrightRed, ansi.FgBrightWhite, tr(s, "Planetary Treaties"),
+		ansi.FgBrightRed, dim(ansi.FgBrightRed), ansi.Reset)
 	fmt.Fprintf(s, "%s\n", rule)
 	for _, r := range rows {
 		fmt.Fprintf(s, "%s(%s%2d%s) %s%s%s%s\n",

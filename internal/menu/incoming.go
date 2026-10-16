@@ -55,8 +55,8 @@ func showIncoming(s session.Session, w *ctx) Result {
 	rows := incomingRows(s, w)
 
 	head := tr(s, "Incoming Attacks")
-	banner := ansi.FgRed + "──" + ansi.FgBrightRed + "═" + ansi.FgBrightWhite + head +
-		ansi.FgBrightRed + "═" + ansi.FgRed + "──" + ansi.Reset
+	banner := dim(ansi.FgBrightRed) + "──" + ansi.FgBrightRed + "═" + ansi.FgBrightWhite + head +
+		ansi.FgBrightRed + "═" + dim(ansi.FgBrightRed) + "──" + ansi.Reset
 	indent := (len([]rune(rule)) - (5 + visWidth(w.Term, head))) / 2
 	if indent < 0 {
 		indent = 0
@@ -65,11 +65,11 @@ func showIncoming(s session.Session, w *ctx) Result {
 	// The house inset rule under the banner, as the screens that head a table
 	// draw it; the closing rules are the dim accent the menu engine closes a box
 	// with, so this screen sits among the others rather than beside them.
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed, insetRule(len([]rune(rule)), 12), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), insetRule(len([]rune(rule)), 12), ansi.Reset)
 
 	if len(rows) == 0 {
 		okNoPause(s, "Nothing is aimed at this planet.")
-		fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgRed), rule, ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), rule, ansi.Reset)
 		pause(s)
 		return Stay
 	}
@@ -81,7 +81,7 @@ func showIncoming(s session.Session, w *ctx) Result {
 		padColumn(w.Term, tr(s, "Threat"), inWidthThreat),
 		padColumn(w.Term, tr(s, "Aimed At"), inWidthTarget),
 		inWidthWhen, fitColumn(w.Term, tr(s, "When"), inWidthWhen), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgRed), rule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), rule, ansi.Reset)
 	for _, r := range rows {
 		// A force already away is painted bright red rather than yellow — and it
 		// also says "away" where the others carry a figure, so the color is
@@ -96,7 +96,7 @@ func showIncoming(s session.Session, w *ctx) Result {
 			ansi.FgWhite, padColumn(w.Term, fitColumn(w.Term, r.target, inWidthTarget), inWidthTarget),
 			whenColor, inWidthWhen, fitColumn(w.Term, r.when, inWidthWhen), ansi.Reset)
 	}
-	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgRed), rule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), rule, ansi.Reset)
 	pause(s)
 	return Stay
 }

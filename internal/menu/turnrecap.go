@@ -297,11 +297,11 @@ func manufacturedUnits(s session.Session, made []int) {
 	bar := strings.Repeat("─", utf8.RuneCountInString(label))
 	indent := strings.Repeat(" ", utf8.RuneCountInString(label)+2)
 
-	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, bar, ansi.Reset)
+	fmt.Fprintf(s, "  %s%s%s\n", dim(ansi.FgBrightBlue), bar, ansi.Reset)
 	for _, l := range statusRows("  "+label, indent, cells, statusMilitaryPerLine) {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, l, ansi.Reset)
 	}
-	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, bar, ansi.Reset)
+	fmt.Fprintf(s, "  %s%s%s\n", dim(ansi.FgBrightBlue), bar, ansi.Reset)
 }
 
 // incomeReport itemizes p's per-turn income by source. It shows exactly the
@@ -359,7 +359,7 @@ func incomeReport(s session.Session, w *ctx) {
 	// heading at all (docs/dev/bre-screens.md, "Turn income, status block,
 	// maintenance"). IB drew a blue-backed "Income Report" bar of its own here
 	// until 2026-08-25.
-	fmt.Fprintf(s, "\n%s\n", rule75(ansi.FgBlue))
+	fmt.Fprintf(s, "\n%s\n", rule75(dim(ansi.FgBrightBlue)))
 	amt := func(color string, n int64, text string) {
 		fmt.Fprintf(s, "  %s%*s%s  %s\n", color, width, comma(n), ansi.Reset, i18n.T(sessionLang(s), text))
 	}
@@ -369,7 +369,7 @@ func incomeReport(s session.Session, w *ctx) {
 		}
 	}
 	if total > 0 {
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", width), ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s\n", dim(ansi.FgBrightBlue), strings.Repeat("─", width), ansi.Reset)
 		amt(ansi.FgBrightYellow, int64(total), "gold earned this turn.")
 	}
 	if b.Food > 0 {
@@ -497,7 +497,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	}
 	p := &snap
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
-	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
+	fmt.Fprintf(s, "%s\n", rule75(dim(ansi.FgBrightBlue)))
 	// BRE sets the mood line off with a blank line, and sets the random event
 	// off with another below (cap/kd3-01.cap, raw \r\n).
 	fmt.Fprintf(s, "  %s\n\n", peopleMood(s, p.Support))
@@ -522,7 +522,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	if p.LastRandomEvent != "" {
 		fmt.Fprintf(s, "\n%s\n", hiNums(WrapIndented(tr(s, p.LastRandomEvent), "  ")))
 	}
-	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
+	fmt.Fprintf(s, "%s\n", rule75(dim(ansi.FgBrightBlue)))
 }
 
 // reportCivilUnrest prints what the civil-unrest step did, where the original's

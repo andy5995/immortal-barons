@@ -275,16 +275,16 @@ func promptAttackKind(s session.Session, w *ctx) (kind game.AttackKind, chose bo
 	}
 	for {
 		fmt.Fprintf(s, "\n%s────%s[%s%s%s]%s────%s\n",
-			ansi.FgRed, ansi.FgBrightRed, ansi.FgBrightWhite, tr(s, "Attack Type"),
-			ansi.FgBrightRed, ansi.FgRed, ansi.Reset)
+			dim(ansi.FgBrightRed), ansi.FgBrightRed, ansi.FgBrightWhite, tr(s, "Attack Type"),
+			ansi.FgBrightRed, dim(ansi.FgBrightRed), ansi.Reset)
 		for i, r := range rows {
 			fmt.Fprintf(s, "%s(%s%d%s) %s%s%s\n",
-				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
+				dim(ansi.FgBrightRed), keyHi(ansi.FgBrightRed), i+1, dim(ansi.FgBrightRed),
 				ansi.FgWhite, tr(s, r.label), ansi.Reset)
 		}
-		fmt.Fprintf(s, "%s(%s?%s) %s%s%s\n", ansi.FgRed, ansi.FgBrightRed, ansi.FgRed, ansi.FgWhite, tr(s, "Help"), ansi.Reset)
-		fmt.Fprintf(s, "%s(%s0%s) %s%s%s\n", ansi.FgRed, ansi.FgBrightRed, ansi.FgRed, ansi.FgWhite, tr(s, "Quit"), ansi.Reset)
-		fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed, strings.Repeat("─", 21), ansi.Reset)
+		fmt.Fprintf(s, "%s(%s?%s) %s%s%s\n", dim(ansi.FgBrightRed), keyHi(ansi.FgBrightRed), dim(ansi.FgBrightRed), ansi.FgWhite, tr(s, "Help"), ansi.Reset)
+		fmt.Fprintf(s, "%s(%s0%s) %s%s%s\n", dim(ansi.FgBrightRed), keyHi(ansi.FgBrightRed), dim(ansi.FgBrightRed), ansi.FgWhite, tr(s, "Quit"), ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), strings.Repeat("─", 21), ansi.Reset)
 
 		n, helpWanted := choiceQuitOrHelp(s, len(rows))
 		if helpWanted {

@@ -39,7 +39,7 @@ const (
 )
 
 func statusRule() string {
-	return ansi.FgBlue + insetRule(statusRuleWidth, statusRuleDouble) + ansi.Reset
+	return dim(ansi.FgBrightBlue) + insetRule(statusRuleWidth, statusRuleDouble) + ansi.Reset
 }
 
 // A percent field carries a bar before its figure: one █ per full

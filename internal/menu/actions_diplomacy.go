@@ -108,7 +108,7 @@ func allianceStrength(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "%-*s%*s%*s%*s%s\n", allyNameWidth, tr(s, "Name"),
 		allyColumnWidth, tr(s, "Troopers"), allyColumnWidth, tr(s, "Tanks"),
 		allyColumnWidth, tr(s, "Agents"), ansi.Reset)
-	rule := ansi.FgRed + insetRule(allyRuleWidth, allyRuleDouble) + ansi.Reset
+	rule := dim(ansi.FgBrightRed) + insetRule(allyRuleWidth, allyRuleDouble) + ansi.Reset
 	fmt.Fprintln(s, rule)
 	var total game.AllyContribution
 	for _, d := range defenders {
@@ -472,8 +472,8 @@ func relationsText(s session.Session, held []string) string {
 // the Diplomacy picker's "?" list share it, as they share one routine in the
 // original.
 func writeRelationsTable(s session.Session, t Term, rows []relationsRow) {
-	rule := rule75(ansi.FgBlue)
-	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", ansi.FgBlue, ansi.FgBrightWhite, tr(s, "Relations"), ansi.FgBlue, ansi.Reset)
+	rule := rule75(dim(ansi.FgBrightBlue))
+	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", dim(ansi.FgBrightBlue), ansi.FgBrightWhite, tr(s, "Relations"), dim(ansi.FgBrightBlue), ansi.Reset)
 	fmt.Fprintf(s, "%s%-5s%-*s%s%s\n", ansi.FgBrightWhite,
 		tr(s, "Id"), relationsNameWidth, tr(s, "Empire Name"), tr(s, "Relations"), ansi.Reset)
 	fmt.Fprintln(s, rule)
@@ -485,7 +485,7 @@ func writeRelationsTable(s session.Session, t Term, rows []relationsRow) {
 		// this screen is one of the closest matches to the original. The cost is
 		// that the mark has no heading here; the Scores screen is where a player
 		// meets it labeled.
-		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
+		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", dim(ansi.FgBrightBlue), ansi.FgBrightWhite, r.id, dim(ansi.FgBrightBlue),
 			ansi.Reset,
 			nameCell(s, t, r.name, ansi.FgBrightCyan, r.presence, relationsNameWidth),
 			ansi.FgBrightBlue, r.relations, ansi.Reset)

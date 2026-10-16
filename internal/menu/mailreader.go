@@ -250,7 +250,7 @@ func mailChoice(s session.Session) rune { return readKeys(s, mailOpts, 0, 'Q') }
 
 // mailKey draws one of the reader's action keys: bright cyan in blue brackets.
 func mailKey(k string) string {
-	return fmt.Sprintf("%s[%s%s%s]%s", ansi.FgBlue, ansi.FgBrightCyan, k, ansi.FgBlue, ansi.Reset)
+	return fmt.Sprintf("%s[%s%s%s]%s", dim(ansi.FgBrightBlue), ansi.FgBrightCyan, k, dim(ansi.FgBrightBlue), ansi.Reset)
 }
 
 // keepOpts answer what happens to a message once it has been replied to.

@@ -22,8 +22,6 @@ const (
 	// newsBannerName is the masthead over the planetary news — IB's own flavor
 	// name where BRE has "The Queen's Quadrant". Tunable; a single string.
 	newsBannerName = "The Oligarchy Express"
-	// newsItemArrow leads each planetary-news item: red "──" + bright-red "─".
-	newsItemArrow = ansi.FgRed + "──" + ansi.FgBrightRed + "─" + ansi.Reset
 	// newsItemIndent is the hanging indent under that arrow, 5 spaces as BRE
 	// wraps it — a column wider than the arrow itself.
 	newsItemIndent = "     "
@@ -37,6 +35,10 @@ const (
 	// CP437 0xB3, so it survives the bulletin files' encoding.
 	newsStampRule = "│"
 )
+
+// newsItemArrow leads each planetary-news item: BRE's red "──" and bright-red
+// "─", both bright in IB because red has no dim form (dimAccent).
+var newsItemArrow = dim(ansi.FgBrightRed) + "──" + ansi.FgBrightRed + "─" + ansi.Reset
 
 // renderDailyBulletin draws the boxed blue Daily Bulletin: planet-wide totals
 // with day-over-day change, the change bright cyan behind a bright-green "+" on
@@ -101,9 +103,9 @@ func boxTop(s session.Session, t Term, head string) {
 	left := (newsBoxInner - tw) / 2
 	right := newsBoxInner - tw - left
 	fmt.Fprintf(s, "\n%s%s┌%s%s%s%s%s┐%s\n",
-		newsBoxIndent, ansi.FgBlue,
+		newsBoxIndent, dim(ansi.FgBrightBlue),
 		strings.Repeat("─", left),
-		ansi.FgBrightWhite, head, ansi.FgBlue,
+		ansi.FgBrightWhite, head, dim(ansi.FgBrightBlue),
 		strings.Repeat("─", right), ansi.Reset)
 }
 
@@ -113,14 +115,14 @@ func boxRow(s session.Session, inner string, innerVis int) {
 		pad = 0
 	}
 	fmt.Fprintf(s, "%s%s│%s%s%s%s│%s\n",
-		newsBoxIndent, ansi.FgBlue, ansi.Reset,
+		newsBoxIndent, dim(ansi.FgBrightBlue), ansi.Reset,
 		inner, strings.Repeat(" ", pad),
-		ansi.FgBlue, ansi.Reset)
+		dim(ansi.FgBrightBlue), ansi.Reset)
 }
 
 func boxBottom(s session.Session) {
 	fmt.Fprintf(s, "%s%s└%s┘%s\n",
-		newsBoxIndent, ansi.FgBlue, strings.Repeat("─", newsBoxInner), ansi.Reset)
+		newsBoxIndent, dim(ansi.FgBrightBlue), strings.Repeat("─", newsBoxInner), ansi.Reset)
 }
 
 // renderNewsMasthead prints the news screen's header: the program/version
@@ -145,7 +147,7 @@ func renderNewsMasthead(s session.Session, t Term, date string) {
 	// the Planetary Post one and the Planetary Treaties one all as ──═title═──
 	// (docs/dev/bre-screens.md). The `─»>Paused<«─` bar is a different decoration
 	// and does use guillemets.
-	banner := ansi.FgRed + "──" + ansi.FgBrightRed + "═" + ansi.FgBrightWhite + tr(s, newsBannerName) + ansi.FgBrightRed + "═" + ansi.FgRed + "──" + ansi.Reset
+	banner := dim(ansi.FgBrightRed) + "──" + ansi.FgBrightRed + "═" + ansi.FgBrightWhite + tr(s, newsBannerName) + ansi.FgBrightRed + "═" + dim(ansi.FgBrightRed) + "──" + ansi.Reset
 	bannerVis := 2 + 1 + visWidth(t, tr(s, newsBannerName)) + 1 + 2
 	indent := (len([]rune(rule)) - bannerVis) / 2
 	if indent < 0 {
@@ -241,10 +243,10 @@ func newsHighlightTerms(w *ctx) []hiTerm {
 		terms = append(terms, hiTerm{f, ansi.FgBrightRed})
 	}
 	terms = append(terms, hiTerm{"Planetary Master", ansi.FgBrightWhite})
-	// Bright red, not the arrow's plain red: a rule carrying structure is a
-	// non-text graphical object, and 31 on black is 2.71:1 against the 3:1 floor
-	// (WCAG 2.1 SC 1.4.11) where 1;31 is 6.68:1. The same divergence, for the
-	// same reason, as the pirate factions above.
+	// Bright red, not the plain red BRE draws its news arrows in: a rule carrying
+	// structure is a non-text graphical object, and 31 on black is 2.71:1 against
+	// the 3:1 floor (WCAG 2.1 SC 1.4.11) where 1;31 is 6.68:1. The same
+	// divergence, for the same reason, as the pirate factions above.
 	terms = append(terms, hiTerm{newsStampRule, ansi.FgBrightRed})
 	return terms
 }

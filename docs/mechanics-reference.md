@@ -6901,6 +6901,11 @@ to. These are recent enough to be worth naming here as well, since each replaces
 something the original does line for line and will look like a bug to anyone
 checking IB against a capture:
 
+- **Red and blue are always the bright forms**, `91` and `94`, where BRE draws
+  the rules, parentheses and some text of its red and blue screens in `31` and
+  `34`; the key inside the parentheses is bright white there instead. Both
+  normal forms fall under 3:1 on black. See "IB never draws `31` red or `34`
+  blue" in `docs/dev/bre-screens.md`.
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.

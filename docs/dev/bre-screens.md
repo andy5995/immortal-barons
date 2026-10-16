@@ -869,6 +869,21 @@ The two gray menus put the accent on the rule and the parentheses only: their
 title brackets are plain white `37` and their hotkeys `1;37` bright-white, where
 every other menu brightens its own accent for both.
 
+**IB never draws `31` red or `34` blue: it uses `91` and `94` wherever BRE uses
+them** — the red and blue menus' rules and parentheses, and every hand-drawn
+screen's too (the news boxes and arrows, the turn-recap and Empire Status rules,
+the interplanetary attack, treaty and scores screens), along with the few red
+lines of text. The one exception is the Sharks' faction color, which must stay
+apart from the Nightjackals' bright red. Captures below that name `31` or `34`
+record what BRE draws. A deliberate divergence for contrast: on the VGA palette
+`31` red (#AA0000) measures 2.7:1 on black and `34` blue (#0000AA) 1.6:1, both
+under the 3:1 a border or bracket needs and far under text's 4.5:1; `91` bright
+red is 6.7:1 and `94` bright blue (#5555FF) 4.1:1. Green, yellow, magenta and
+cyan keep BRE's two tones, since their normal forms clear 3:1 (green 6.8, cyan
+7.3, brown 4.1, magenta 3.3). With no dim shade left for the parentheses, the
+key inside them is drawn `97` bright white instead of the accent (`keyHi`), the
+way BRE draws the keys on its gray menus.
+
 Data-value convention (status, income, bank, food, end-of-turn): the **numbers**
 are `96` bright-cyan, the surrounding label text `37` white. Maintenance-paid /
 food-consumed lines and the Spending-Menu Price/#Owned columns use `97`

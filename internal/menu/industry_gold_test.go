@@ -145,13 +145,14 @@ func TestSpecializationBoxIsFourteenColumnsWithAnOverhangingTitle(t *testing.T) 
 	}
 	// No fill either side of the title, and the brackets and title keep the
 	// colors a filled title line uses: dim accent, bright brackets, bright white.
-	const title = "\x1b[31m\x1b[91m[\x1b[97mSpecialization\x1b[91m]\x1b[31m\x1b[0m"
+	// Red has no dim form (dimAccent), so the "dim" runs are bright red too.
+	const title = "\x1b[91m\x1b[91m[\x1b[97mSpecialization\x1b[91m]\x1b[91m\x1b[0m"
 	if !strings.Contains(out, title) {
 		t.Errorf("the title line should overhang the box unfilled, got:\n%q", out)
 	}
-	const rule = "\x1b[31m──────────────\x1b[0m"
+	const rule = "\x1b[91m──────────────\x1b[0m"
 	if !strings.Contains(out, rule) {
-		t.Errorf("expected the 14-column dim-red closing rule, got:\n%q", out)
+		t.Errorf("expected the 14-column red closing rule, got:\n%q", out)
 	}
 }
 

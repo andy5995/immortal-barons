@@ -358,7 +358,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				return "closed", save()
 			}
 			if taken {
-				fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed,
+				fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed,
 					menu.WrapIndented("That realm name was just taken — please choose another.", "  "), ansi.Reset)
 			}
 		}

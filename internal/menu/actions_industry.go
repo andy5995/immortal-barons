@@ -76,7 +76,7 @@ func drawIndustry(s session.Session, w *ctx, p *game.Empire, rows []prodRow) {
 		if i < prodUnitCount {
 			per = int64(proj[i])
 		}
-		fmt.Fprintf(s, "       %s"+tr(s, "(%s per year)")+"%s", ansi.FgRed, comma(per), ansi.Reset)
+		fmt.Fprintf(s, "       %s"+tr(s, "(%s per year)")+"%s", ansi.FgBrightRed, comma(per), ansi.Reset)
 		// The original tags the specialized row at the end of the line, where it
 		// wrote "Specialized"; three spaced asterisks say the same thing without
 		// a word to translate or to run past the margin.

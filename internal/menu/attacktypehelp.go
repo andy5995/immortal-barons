@@ -64,7 +64,7 @@ const (
 )
 
 func topicRule() string {
-	return ansi.FgBlue + strings.Repeat("─", topicRuleSingle) +
+	return dim(ansi.FgBrightBlue) + strings.Repeat("─", topicRuleSingle) +
 		strings.Repeat("═", topicRuleDouble) +
 		strings.Repeat("─", topicRuleWidth-topicRuleSingle-topicRuleDouble) + ansi.Reset
 }
@@ -90,7 +90,7 @@ func showTopicList(s session.Session, topics []attackTypeTopic) {
 // showAttackTypeTopic prints one type: its name bright red, the separator red,
 // the prose white with its figures in cyan.
 func showAttackTypeTopic(s session.Session, t attackTypeTopic) {
-	head := fmt.Sprintf("%s%s%s - %s", ansi.FgBrightRed, tr(s, t.name), ansi.FgRed, ansi.FgWhite)
+	head := fmt.Sprintf("%s%s%s - %s", ansi.FgBrightRed, tr(s, t.name), dim(ansi.FgBrightRed), ansi.FgWhite)
 	body := hiNumsReset(tr(s, t.body), ansi.FgBrightCyan, ansi.FgWhite)
 	fmt.Fprintf(s, "\n   %s\n%s%s\n", head, wrapHanging(body, "     ", "     "), ansi.Reset)
 }

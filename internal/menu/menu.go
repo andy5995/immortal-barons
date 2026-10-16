@@ -382,7 +382,16 @@ func (it *Item) keyColor(g *ctx, menuColor string) string {
 	if it.Dimmed != nil && it.Dimmed(g) {
 		return dim(menuColor)
 	}
-	return menuColor
+	return keyHi(menuColor)
+}
+
+// parenColor is the color of the parentheses around an item's key: the dim
+// form of the item's own color, or of the menu's accent.
+func (it *Item) parenColor(menuColor string) string {
+	if it.Color != "" {
+		return dim(it.Color)
+	}
+	return dim(menuColor)
 }
 
 // countSuffix is the item's Count as drawn, and its width in columns; both are
@@ -784,19 +793,18 @@ var InsetRule = insetRule(len([]rune(rule)), 15)
 
 // dimAccent maps each bright menu accent to its normal-intensity twin. BRE draws
 // the rule dashes and the item parentheses in the normal color and reserves the
-// bright color for the bracketed key characters (live capture).
+// bright color for the bracketed key characters (live capture). Red and blue
+// have no twin here, so their menus draw rules and parentheses bright: on the
+// VGA palette `31` red is 2.7:1 on black and `34` blue 1.6:1, under the 3:1 a
+// border needs (docs/dev/bre-screens.md, "Per-menu accent color").
 var dimAccent = map[string]string{
-	ansi.FgBrightRed:     ansi.FgRed,
 	ansi.FgBrightGreen:   ansi.FgGreen,
 	ansi.FgBrightYellow:  ansi.FgYellow,
-	ansi.FgBrightBlue:    ansi.FgBlue,
 	ansi.FgBrightMagenta: ansi.FgMagenta,
 	ansi.FgBrightCyan:    ansi.FgCyan,
 	ansi.FgBrightWhite:   ansi.FgWhite,
 }
 
-// dim returns the normal-intensity twin of a bright accent, or the color
-// unchanged if it has none.
 // closingRule is the rule that closes a menu box: the accent in its dim form,
 // at the box's width. BRE closes every menu box this way whether or not a
 // status line follows (live capture), so a screen that draws its own box calls
@@ -805,11 +813,24 @@ func closingRule(accent string, width int) string {
 	return dim(accent) + strings.Repeat("─", width) + ansi.Reset
 }
 
+// dim returns the normal-intensity twin of a bright accent, or the color
+// unchanged if it has none.
 func dim(color string) string {
 	if d, ok := dimAccent[color]; ok {
 		return d
 	}
 	return color
+}
+
+// keyHi is the color of a key inside its parentheses: the bright accent, when the
+// parentheses take its dim twin, and bright white when they cannot — red, blue
+// and gray — so the key still stands apart from them. BRE's gray menus draw
+// their keys bright white this way (docs/dev/bre-screens.md).
+func keyHi(accent string) string {
+	if dim(accent) == accent {
+		return ansi.FgBrightWhite
+	}
+	return accent
 }
 
 // titleRule renders a BRE-style header: the bracketed menu title centered on a
@@ -1014,22 +1035,22 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					// white label, bright-white Price, white Owned.
 					if ownedCol {
 						fmt.Fprintf(&body, "  %s(%s%c%s)%s%s %s%s%s %s%*s%s %s%*s%s\n",
-							dim(col), col, it.Key, dim(col), ansi.Reset, keyPad, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
+							dim(col), keyHi(col), it.Key, dim(col), ansi.Reset, keyPad, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, pw, price, ansi.Reset, ansi.FgWhite, ow, owned, ansi.Reset)
 					} else {
 						fmt.Fprintf(&body, "  %s(%s%c%s)%s%s %s%s%s %s%*s%s\n",
-							dim(col), col, it.Key, dim(col), ansi.Reset, keyPad, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
+							dim(col), keyHi(col), it.Key, dim(col), ansi.Reset, keyPad, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, pw, price, ansi.Reset)
 					}
 					continue
 				}
-				kcol, lcol := it.keyColor(g, col), ansi.FgWhite
+				kcol, pcol, lcol := it.keyColor(g, col), it.parenColor(col), ansi.FgWhite
 				if it.Color != "" {
 					lcol = it.Color
 				}
 				count, _ := it.countSuffix(g)
 				fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s%s\n",
-					dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset, count)
+					pcol, kcol, it.Key, pcol, ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset, count)
 			}
 		}
 		width := m.fitWidth(&body)
@@ -1069,12 +1090,12 @@ func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, nco
 	}
 	cell := func(it *Item) (string, int) {
 		label := it.displayLabel(g, lang)
-		kcol, lcol := it.keyColor(g, col), ansi.FgWhite
+		kcol, pcol, lcol := it.keyColor(g, col), it.parenColor(col), ansi.FgWhite
 		if it.Color != "" {
 			lcol = it.Color
 		}
 		count, cw := it.countSuffix(g)
-		s := fmt.Sprintf("  %s(%s%c%s)%s %s%s%s%s", dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, label, ansi.Reset, count)
+		s := fmt.Sprintf("  %s(%s%c%s)%s %s%s%s%s", pcol, kcol, it.Key, pcol, ansi.Reset, lcol, label, ansi.Reset, count)
 		return s, 6 + utf8.RuneCountInString(label) + cw // "  (K) " is 6 visible cols
 	}
 	// renderBlock lays a run of items out column-major. With nrows =

@@ -88,8 +88,8 @@ func TestEmpireStatusUsesTheCapturedColours(t *testing.T) {
 	}
 }
 
-// The rule that brackets the block, as a golden literal off the capture: `34`
-// blue, 70 columns, 5 single + 14 double + 51 single, drawn immediately above
+// The rule that brackets the block, as a golden literal off the capture: blue
+// (`34` in BRE, `94` in IB for contrast), 70 columns, 5 single + 14 double + 51 single, drawn immediately above
 // the title and immediately below the reign line. Written out in full rather
 // than rebuilt from statusRuleWidth, so a retune has to bring new evidence.
 func TestEmpireStatusIsBracketedByTheCapturedRule(t *testing.T) {
@@ -97,7 +97,7 @@ func TestEmpireStatusIsBracketedByTheCapturedRule(t *testing.T) {
 	w.Player().Name = "Testland"
 	out := empireStatusBlock(&fakeSession{}, w)
 
-	const rule = "\x1b[34m─────══════════════───────────────────────────────────────────────────\x1b[0m"
+	const rule = "\x1b[94m─────══════════════───────────────────────────────────────────────────\x1b[0m"
 	if n := strings.Count(out, rule); n != 2 {
 		t.Fatalf("want the 70-column blue inset rule twice, got %d:\n%q", n, out)
 	}

@@ -77,7 +77,7 @@ func TestIncomeReportOpensUnderTheCapturedRule(t *testing.T) {
 	incomeReport(f, w)
 	out := f.out.String()
 
-	const rule = "\x1b[34m─────═══════════════───────────────────────────────────────────────────────\x1b[0m"
+	const rule = "\x1b[94m─────═══════════════───────────────────────────────────────────────────────\x1b[0m"
 	if !strings.HasPrefix(out, "\n"+rule+"\n") {
 		t.Errorf("the income lines should open under the 75-column blue rule, got %q", out)
 	}
@@ -127,7 +127,7 @@ func TestEndOfTurnStatsIsBracketedByTheCapturedRule(t *testing.T) {
 	endOfTurnStats(f, w)
 	out := f.out.String()
 
-	const rule = "\x1b[34m─────═══════════════───────────────────────────────────────────────────────\x1b[0m"
+	const rule = "\x1b[94m─────═══════════════───────────────────────────────────────────────────────\x1b[0m"
 	if n := strings.Count(out, rule); n != 2 {
 		t.Fatalf("want the 75-column blue inset rule twice, got %d:\n%q", n, out)
 	}
@@ -741,7 +741,7 @@ func TestShowBulletinMastheadAndBox(t *testing.T) {
 	if !strings.Contains(out, "└"+strings.Repeat("─", 64)+"┘") {
 		t.Errorf("expected the bulletin box to close at 64 inner columns, got:\n%s", out)
 	}
-	wantBanner := "\x1b[31m──\x1b[91m═\x1b[97m" + newsBannerName + "\x1b[91m═\x1b[31m──"
+	wantBanner := "\x1b[91m──\x1b[91m═\x1b[97m" + newsBannerName + "\x1b[91m═\x1b[91m──"
 	if !strings.Contains(out, wantBanner) {
 		t.Errorf("expected the masthead banner %q, got:\n%s", wantBanner, out)
 	}

@@ -303,11 +303,11 @@ func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipR
 	// here until 2026-08-23.
 	fmt.Fprintf(s, "\n%s%s%s: %s%s%s\n", ansi.FgBrightWhite, tr(s, "Immortal Barons"),
 		ansi.FgBrightBlack, ansi.FgBrightRed, viewName, ansi.Reset)
-	// Planetary Post banner: ──═Planetary Post═── (red ──, bright-red ═, bright-white title).
+	// Planetary Post banner: ──═Planetary Post═── (dim-accent ──, bright-red ═, bright-white title).
 	fmt.Fprintf(s, "%s                          %s──%s═%s%s%s═%s──%s\n",
-		ansi.FgRed, ansi.FgRed, ansi.FgBrightRed,
+		dim(ansi.FgBrightRed), dim(ansi.FgBrightRed), ansi.FgBrightRed,
 		ansi.FgBrightWhite, tr(s, "Planetary Post"), ansi.FgBrightRed,
-		ansi.FgRed, ansi.Reset)
+		dim(ansi.FgBrightRed), ansi.Reset)
 	fmt.Fprintf(s, "\n")
 	// Column header. Both table shapes end their metric on column 46; the player
 	// views then put Planet LAST, beginning on column 52 (docs/dev/bre-screens.md).
@@ -328,13 +328,13 @@ func renderIPScoreRank(s session.Session, term Term, rows []ipScoreRow, kind ipR
 		}
 		if isPlanet {
 			fmt.Fprintf(s, "%s%s%s%3d%s%s %s%s%s%s%18d%s\n",
-				ansi.FgRed, open, ansi.FgBrightRed, i+1, ansi.FgRed, shut,
+				dim(ansi.FgBrightRed), open, keyHi(ansi.FgBrightRed), i+1, dim(ansi.FgBrightRed), shut,
 				ansi.FgWhite, padColumn(term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset)
 		} else {
 			// The Planet column's own width is not captured; 21 ends it on the rule.
 			fmt.Fprintf(s, "%s%s%s%3d%s%s %s%s%s%s%18d%s     %s%s%s\n",
-				ansi.FgRed, open, ansi.FgBrightRed, i+1, ansi.FgRed, shut,
+				dim(ansi.FgBrightRed), open, keyHi(ansi.FgBrightRed), i+1, dim(ansi.FgBrightRed), shut,
 				ansi.FgWhite, padColumn(term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset,
 				ansi.FgWhite, fitColumn(term, r.planet, 21), ansi.Reset)

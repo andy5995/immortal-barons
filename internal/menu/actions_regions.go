@@ -231,7 +231,7 @@ func buyLand(s session.Session, w *ctx) Result {
 			if err != nil {
 				// No pause: the message stays above the next prompt; the player
 				// keeps buying without the region list rescrolling each time.
-				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgRed, tr(s, err.Error()), ansi.Reset)
+				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightRed, tr(s, err.Error()), ansi.Reset)
 			} else {
 				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
 					fmt.Sprintf(tr(s, "%d %s regions purchased. Gold: %d"), n, game.BuyableRegions[t].Name, gold), ansi.Reset)
