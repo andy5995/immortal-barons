@@ -110,12 +110,19 @@ func quitOnEnter(m *Menu) func(*ctx) *Item {
 	return func(g *ctx) *Item { return m.byKey('0', g) }
 }
 
+// The Spending and Sell accents are named because the trade-deal baskets wear
+// them too: what you request is shopping, what you offer is selling.
+const (
+	spendingColor = ansi.FgBrightRed
+	sellColor     = ansi.FgBrightGreen
+)
+
 // BuildMenus constructs the full BRE menu tree. Menus are created first,
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus, Width: 44}
-	sell := &Menu{Title: "Sell", Color: ansi.FgBrightGreen}
+	buy := &Menu{Title: "Spending", Color: spendingColor, ExitOnEnter: true, Status: spendingStatus, Width: 44}
+	sell := &Menu{Title: "Sell", Color: sellColor}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	// Width: BRE's captured Attack box is 23 columns and IB's content measures the
 	// same, so the box fits it exactly (docs/dev/bre-screens.md).

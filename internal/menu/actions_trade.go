@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -52,13 +53,13 @@ func basketSummary(s session.Session, b game.TradeBasket) string {
 // inside an int on a 32-bit door build.
 const TradeRequestMax = 1 << 30
 
-// The basket table's widths. Key is "(1) ", Good is padded to 11, and each
-// figure column holds two billion with its separators ("2,000,000,000"), the
-// most one good can hold. The Request side has no Owned column, so its rules
-// are one column shorter.
+// The basket table's widths. Good is padded to 11, or to the caller's longest
+// name for a good, and each figure column holds two billion with its separators
+// ("2,000,000,000"), the most one good can hold.
 const (
-	tradeBasketRuleOne = 4 + 11 + 1 + 13
-	tradeBasketRuleTwo = tradeBasketRuleOne + 1 + 13
+	tradeNameWidth   = 11
+	tradeFigureWidth = 13
+	tradeTitleFill   = 3 // the least rule drawn either side of the title
 )
 
 // shortOfCarriers refuses a basket the player has too few free carriers to ship,
@@ -77,6 +78,76 @@ func shortOfCarriers(s session.Session, w *ctx, b game.TradeBasket) bool {
 	return short
 }
 
+// drawTradeBasket draws a basket the way the menu engine draws a menu (draw):
+// the accent's title rule, a white header, white labels with bright-white
+// figures, the box sized to what is in it, and the carrier line under the
+// closing rule where a menu's status line goes. The Offer side wears the Sell
+// menu's accent and adds an Owned column; the Request side wears Spending's.
+func drawTradeBasket(s session.Session, p *game.Empire, b game.TradeBasket, title string, limitToOwned bool) {
+	col := spendingColor
+	if limitToOwned {
+		col = sellColor
+	}
+	kw, nw := keyCellWidth, tradeNameWidth
+	if n := utf8.RuneCountInString(tr(s, "Key")); n > kw {
+		kw = n
+	}
+	for _, g := range tradeGoods {
+		if n := utf8.RuneCountInString(tr(s, g.name)); n > nw {
+			nw = n
+		}
+	}
+	keyPad := strings.Repeat(" ", kw-keyCellWidth)
+	key := func(k byte) string {
+		return dim(col) + "(" + col + string(k) + dim(col) + ")" + ansi.Reset + keyPad
+	}
+
+	var body strings.Builder
+	fmt.Fprintf(&body, "%s  %s %s %*s", ansi.FgWhite,
+		padLabel(tr(s, "Key"), kw), padLabel(tr(s, "Good"), nw), tradeFigureWidth, tr(s, "In Deal"))
+	if limitToOwned {
+		fmt.Fprintf(&body, " %*s", tradeFigureWidth, tr(s, "Owned"))
+	}
+	fmt.Fprintf(&body, "%s\n", ansi.Reset)
+	for _, g := range tradeGoods {
+		fmt.Fprintf(&body, "  %s %s%s%s %s%*s%s", key(g.key),
+			ansi.FgWhite, padLabel(tr(s, g.name), nw), ansi.Reset,
+			ansi.FgBrightWhite, tradeFigureWidth, comma(*g.field(&b)), ansi.Reset)
+		if limitToOwned {
+			fmt.Fprintf(&body, " %s%*s%s", ansi.FgWhite, tradeFigureWidth, comma(g.owned(p)), ansi.Reset)
+		}
+		body.WriteString("\n")
+	}
+	fmt.Fprintf(&body, "  %s %s%s%s\n", key('0'), ansi.FgWhite, tr(s, "Done"), ansi.Reset)
+
+	// The title strings end in a colon from when they were a bare line; inside
+	// the brackets it would read as punctuation in the wrong place. The box is
+	// widened to keep a little rule either side of a title as long as the table,
+	// which "[Request — goods you want back]" is.
+	label := strings.TrimSuffix(tr(s, title), ":")
+	width := utf8.RuneCountInString(label) + 2 + 2*tradeTitleFill
+	for _, ln := range strings.Split(body.String(), "\n") {
+		width = max(width, visibleLen(ln))
+	}
+	fmt.Fprintf(s, "\n%s\n%s%s\n", titleRule(col, label, width), body.String(), closingRule(col, width))
+	if limitToOwned {
+		// The offered goods need carriers to transport them (BRE's "Trade Deal
+		// requires N Carriers" line), sized to the CARGO rather than one per
+		// deal (#195), so the figure moves as the basket is filled.
+		need := game.TradeDealCarriers(b)
+		// FREE carriers, not carriers held (game.FreeCarriers): comparing
+		// against the total would show no warning and then refuse the deal.
+		free := game.FreeCarriers(p, b)
+		warn := ""
+		if free < need {
+			warn = "  " + ansi.FgBrightRed + tr(s, "(not enough carriers)") + ansi.Reset
+		}
+		line := fmt.Sprintf(tr(s, "This deal needs %s carrier(s); you have %s free."), comma(need), comma(free))
+		fmt.Fprintf(s, "%s%s%s%s\n", ansi.FgWhite, hiNumsReset(line, ansi.FgBrightWhite, ansi.FgWhite), ansi.Reset, warn)
+	}
+	fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, tr(s, "Choice?"), ansi.Reset)
+}
+
 // buildTradeBasket lets the player assemble a basket of goods: pick a good (1-9),
 // enter a quantity, repeat, and 0/Enter when done. When limitToOwned, quantities
 // are capped at what the player currently holds (the Offer side); the Request
@@ -84,51 +155,9 @@ func shortOfCarriers(s session.Session, w *ctx, b game.TradeBasket) bool {
 // and immediate quit is allowed — the caller treats an empty result as cancel).
 func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool) game.TradeBasket {
 	var b game.TradeBasket
-	rule := tradeBasketRuleOne
-	if limitToOwned {
-		rule = tradeBasketRuleTwo
-	}
 	for {
 		p := w.Player()
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, title), ansi.Reset)
-		// Header + aligned columns matching BRE: Key / Good / In Deal / (Owned, on
-		// the Offer side only — the Request side is what you want back).
-		if limitToOwned {
-			fmt.Fprintf(s, "  %s%-3s %-11s %13s %13s%s\n", ansi.FgBrightCyan, tr(s, "Key"), tr(s, "Good"), tr(s, "In Deal"), tr(s, "Owned"), ansi.Reset)
-		} else {
-			fmt.Fprintf(s, "  %s%-3s %-11s %13s%s\n", ansi.FgBrightCyan, tr(s, "Key"), tr(s, "Good"), tr(s, "In Deal"), ansi.Reset)
-		}
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", rule), ansi.Reset)
-		for _, g := range tradeGoods {
-			if limitToOwned {
-				fmt.Fprintf(s, "  (%s%c%s) %-11s %s%13s%s %s%13s%s\n",
-					ansi.FgBrightYellow, g.key, ansi.Reset, tr(s, g.name),
-					ansi.FgBrightWhite, comma(*g.field(&b)), ansi.Reset,
-					ansi.Dim, comma(g.owned(p)), ansi.Reset)
-			} else {
-				fmt.Fprintf(s, "  (%s%c%s) %-11s %s%13s%s\n",
-					ansi.FgBrightYellow, g.key, ansi.Reset, tr(s, g.name),
-					ansi.FgBrightWhite, comma(*g.field(&b)), ansi.Reset)
-			}
-		}
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", rule), ansi.Reset)
-		if limitToOwned {
-			// The offered goods need carriers to transport them (BRE's "Trade Deal
-			// requires N Carriers" line), sized to the CARGO rather than one per
-			// deal (#195), so the figure moves as the basket is filled.
-			need := game.TradeDealCarriers(b)
-			// FREE carriers, not carriers held (game.FreeCarriers): comparing
-			// against the total would show no warning and then refuse the deal.
-			free := game.FreeCarriers(p, b)
-			warn := ""
-			if free < need {
-				warn = "  " + ansi.FgBrightRed + tr(s, "(not enough carriers)") + ansi.Reset
-			}
-			fmt.Fprintf(s, "  %s"+tr(s, "This deal needs %s carrier(s); you have %s free.")+"%s%s\n",
-				ansi.Dim, comma(need), comma(free), ansi.Reset, warn)
-		}
-		fmt.Fprintf(s, "  (%s0%s) %s\n", ansi.FgBrightMagenta, ansi.Reset, tr(s, "Done"))
-		fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, tr(s, "Choice?"), ansi.Reset)
+		drawTradeBasket(s, p, b, title, limitToOwned)
 		r, err := readKey(s)
 		if err != nil {
 			return b
