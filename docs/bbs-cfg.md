@@ -60,7 +60,7 @@ BBSName          Avalon BBS
 LeagueNumber     900
 GameInbound      inbound
 GameOutbound     outbound
-BulletinDir      bull
+BulletinDir      reports
 Lottery          yes
 PirateNews       yes
 OnFault          ntfy publish mybbs "$IB_FAULTS"

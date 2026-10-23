@@ -13,7 +13,7 @@ terminal, so what a reader sees is what a player sees.
 Set [`BulletinDir`](bbs-cfg.md#bulletindir) in `bbs.cfg` to a directory:
 
 ```
-BulletinDir   /home/bbs/xtrn/imb/bull
+BulletinDir   /sbbs/xtrn/imb/reports
 ```
 
 The game writes the files there whenever it runs its daily or planetary step.
@@ -160,7 +160,7 @@ Four settings in `bbs.cfg` belong to the bulletins. All four are optional except
 `BulletinDir`, without which nothing is written at all.
 
 ```
-BulletinDir   bull
+BulletinDir   reports
 BBSName       The Dog House BBS
 BoardURL      https://doghouse.example/
 BulletinURL   https://doghouse.example/bulletins/
