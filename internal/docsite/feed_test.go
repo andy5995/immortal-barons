@@ -146,16 +146,17 @@ func TestFeedFetchNamesItself(t *testing.T) {
 // linking to its own page; a feed with none draws nothing.
 func TestSidebarHasABlockPerFeed(t *testing.T) {
 	item := []newsItem{{date: "2026-10-04", title: "Headline", link: "https://example.org/a"}}
-	out := tocOverride([]news{{src: xNews, items: item}, {src: sysopsFinest, items: item}})
+	forum := feedSource{name: "Forum", alt: "A BBS forum", slug: "forum"}
+	out := tocOverride([]news{{src: xNews, items: item}, {src: forum, items: item}})
 	for _, want := range []string{
 		`aria-label="` + xNews.alt + `"`, `{{ base_url }}/news/`,
-		`aria-label="` + sysopsFinest.alt + `"`, `{{ base_url }}/sysops-finest/`,
+		`aria-label="` + forum.alt + `"`, `{{ base_url }}/forum/`,
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("sidebar missing %q", want)
 		}
 	}
-	if out := tocOverride([]news{{src: xNews}, {src: sysopsFinest, items: item}}); strings.Contains(out, xNews.alt) {
+	if out := tocOverride([]news{{src: xNews}, {src: forum, items: item}}); strings.Contains(out, xNews.alt) {
 		t.Error("a feed with no headlines drew a block")
 	}
 }

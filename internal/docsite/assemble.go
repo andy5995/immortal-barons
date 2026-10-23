@@ -30,7 +30,6 @@ const overridesMain = `{% extends "base.html" %}
 {% block extrahead %}
   <link rel="alternate" type="application/atom+xml" title="Immortal Barons releases" href="https://github.com/andy5995/immortal-barons/releases.atom">
   <link rel="alternate" type="application/rss+xml" title="X-News" href="https://x-bit.org/rss/rss.xml">
-  <link rel="alternate" type="application/rss+xml" title="Sysops Finest" href="https://www.sysops-finest.org/forum/forums/-/index.rss">
 {% endblock %}
 `
 

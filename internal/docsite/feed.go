@@ -45,16 +45,8 @@ var (
 		about:   "a feed about BBSes, BBS software, door games and the scene",
 		blurbs:  true,
 	}
-	sysopsFinest = feedSource{
-		name:    "Sysops Finest",
-		alt:     "Sysops Finest BBS community forum",
-		feedURL: "https://www.sysops-finest.org/forum/forums/-/index.rss",
-		siteURL: "https://www.sysops-finest.org/",
-		slug:    "sysops-finest",
-		about:   "a forum for BBS sysops; these are its newest threads",
-	}
 	// feedSources is every feed the site renders, in sidebar order.
-	feedSources = []feedSource{xNews, sysopsFinest}
+	feedSources = []feedSource{xNews}
 )
 
 // feedUserAgent names this build to the hosts it fetches from, so a sysop
