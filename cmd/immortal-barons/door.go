@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -196,6 +197,10 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 		// caller's connection under a BBS, so without this it leaves no trace.
 		doorLog(cfg.DataDir, "drop file parse failed: path=%q format=%q err=%v", path, doorCfg.DropfileFormat, err)
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
+		var refusal *door.CharsetRefusal
+		if errors.As(err, &refusal) {
+			tellCharsetRefusal(cfg.DataDir, refusal)
+		}
 		os.Exit(1)
 	}
 	if caller.StdioRedirect {
@@ -263,6 +268,7 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 	// old os.Exit, which lost the turn's progress).
 	id := play.Identity{
 		Handle:   handle,
+		UserKey:  caller.UserKey,
 		TimeLeft: time.Duration(caller.SecondsLeft) * time.Second,
 		Language: i18n.MatchTag(caller.Language),
 	}
@@ -283,4 +289,19 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 		time.Sleep(4 * time.Second)
 		os.Exit(1)
 	}
+}
+
+// tellCharsetRefusal sends a caller whose terminal the game cannot drive the
+// reason, on the connection the drop file named, and holds it long enough to
+// read. It writes the bytes raw: the message is already in the form the spec
+// gives for every terminal it covers.
+func tellCharsetRefusal(dataDir string, r *door.CharsetRefusal) {
+	s, closeSession, err := openSession(r.Caller)
+	if err != nil {
+		doorLog(dataDir, "openSession for the charset refusal failed: %v", err)
+		return
+	}
+	defer closeSession()
+	s.Write(r.Message())
+	time.Sleep(4 * time.Second)
 }

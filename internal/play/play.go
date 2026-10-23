@@ -26,10 +26,52 @@ import (
 // session (a door caller's remaining BBS minutes); 0 means unlimited. Language
 // is a code the game ships translations for, from a drop file that names the
 // caller's own language; "" means the board did not say, or said English.
+// UserKey is the stable per-user key from DOORDROP.INI (USER_KEY); when set it
+// takes precedence over Handle for finding the realm, and an existing realm
+// keyed only by the handle adopts it.
 type Identity struct {
 	Handle   string
+	UserKey  string
 	TimeLeft time.Duration
 	Language string
+}
+
+// userKey is the caller's stable per-user key, or "" when the drop file had
+// none.
+func (id Identity) userKey() string { return strings.TrimSpace(id.UserKey) }
+
+// handleLock names the session lock for a realm owner's handle. The prefix
+// keeps a USER_KEY and a handle of the same text from sharing a lock.
+func handleLock(handle string) string {
+	if h := game.OwnerKey(handle); h != "" {
+		return "handle:" + h
+	}
+	return ""
+}
+
+// findCaller returns the realm belonging to this caller: the per-user key
+// first, then the handle. A keyed caller does not get a realm another account's
+// key already holds: a host may give a freed alias to a new account, and the
+// key is what tells the two apart. It takes no mutation, so it is safe under
+// Read.
+func findCaller(w *game.World, id Identity) *game.Empire {
+	if e := w.FindByUserKey(id.userKey()); e != nil {
+		return e
+	}
+	e := w.FindByOwner(id.Handle)
+	if e != nil && e.UserKey != "" && id.userKey() != "" {
+		return nil
+	}
+	return e
+}
+
+// adoptUserKey records the caller's USER_KEY on a realm that was keyed only by
+// its handle: a realm founded before IB read keys, by a format without one, or
+// reassigned by the sysop. Call it under With, once the realm is bound.
+func adoptUserKey(e *game.Empire, id Identity) {
+	if e != nil && e.UserKey == "" && id.userKey() != "" {
+		e.UserKey = id.userKey()
+	}
 }
 
 // Run plays one session for the given caller. The returned reason describes how
@@ -40,12 +82,15 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// always, and two -local terminals can name the same handle; without this the
 	// same realm could spend its daily allowances in two places at once. The lock
 	// is held for the whole session and the OS drops it if the process dies.
-	held, err := lockRealm(cfg, id.Handle)
-	if errors.Is(err, store.ErrBusy) {
+	busy := func() (string, error) {
 		term := menu.Term{UTF8: session.IsUTF8(s), ASCII: session.IsASCII(s), Plain: !session.HasANSI(s)}
 		lang := menu.FittingLang(term, id.Language)
 		notice(s, i18n.T(lang, "Your realm is already being played elsewhere."))
 		return "busy", nil
+	}
+	held, err := lockRealm(cfg, id)
+	if errors.Is(err, store.ErrBusy) {
+		return busy()
 	}
 	if err != nil {
 		return "", err
@@ -63,6 +108,23 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// could clobber another node's concurrent changes. Load once for a stable
 	// *World pointer, then route every With through the FileStore.
 	w.SetStore(store.NewFileStore(w, cfg))
+
+	// A keyed caller whose alias changed reaches a realm still owned by the old
+	// handle, and a login without a key under that handle reaches it too, so
+	// hold the owner's lock as well as the caller's own.
+	var owner string
+	w.Read(func() {
+		if e := findCaller(w, id); e != nil {
+			owner = e.Owner
+		}
+	})
+	if k := handleLock(owner); held != nil && k != "" && k != handleLock(id.Handle) {
+		if err := held.take(cfg, k); errors.Is(err, store.ErrBusy) {
+			return busy()
+		} else if err != nil {
+			return "", err
+		}
+	}
 	// A transaction that could not be committed ends the session with an error
 	// rather than a normal exit. With() cannot return one (see game.With), so it
 	// records the first failure and this reports it on whichever path Run leaves
@@ -87,11 +149,11 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	w.With(func() {
 		w.Today = today
 		var deadName string
-		if e := w.FindByOwner(id.Handle); e != nil && !e.Alive {
+		if e := findCaller(w, id); e != nil && !e.Alive {
 			deadName = e.Name
 		}
 		maint = w.DailyMaintenance(today)
-		if deadName != "" && w.FindByOwner(id.Handle) == nil {
+		if deadName != "" && findCaller(w, id) == nil {
 			rebornFrom = deadName
 		}
 		// A bulletin the sysop copied in since the last login is news, and the
@@ -108,18 +170,53 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	return Session(s, id, w, cfg, rebornFrom, maint, func() error { return nil })
 }
 
-// lockRealm takes the session lock for handle, without waiting: a second login
-// gets store.ErrBusy. The file is named by a hash of game.OwnerKey(handle), so
-// it matches FindByOwner's notion of a caller, and any handle, however long,
-// makes a valid file name. An empty handle owns no realm and takes no lock
+// realmLock holds the session locks for one caller. A keyed caller takes its
+// USER_KEY lock and its handle lock: the key is the stable identity, but a
+// login through a format without a key still resolves to the same realm by
+// handle, and the two must not play it at once.
+type realmLock struct{ held []*store.FileLock }
+
+func (l *realmLock) Release() {
+	for i := len(l.held) - 1; i >= 0; i-- {
+		l.held[i].Release()
+	}
+}
+
+// take adds the lock named key, without waiting: a lock someone else holds
+// gives store.ErrBusy. Each file is named by a hash of the key, so any key,
+// however long, makes a valid file name.
+func (l *realmLock) take(cfg game.Config, key string) error {
+	sum := sha256.Sum256([]byte(key))
+	held, err := store.LockPath(filepath.Join(cfg.DataDir, "sessions", hex.EncodeToString(sum[:])+".lock"), false)
+	if err != nil {
+		return err
+	}
+	l.held = append(l.held, held)
+	return nil
+}
+
+// lockRealm takes the session locks for a caller, without waiting: a second
+// login gets store.ErrBusy. An empty identity owns no realm and takes no lock
 // (nil, nil).
-func lockRealm(cfg game.Config, handle string) (*store.FileLock, error) {
-	key := game.OwnerKey(handle)
-	if key == "" {
+func lockRealm(cfg game.Config, id Identity) (*realmLock, error) {
+	var keys []string
+	if k := id.userKey(); k != "" {
+		keys = append(keys, "user:"+k)
+	}
+	if k := handleLock(id.Handle); k != "" {
+		keys = append(keys, k)
+	}
+	if len(keys) == 0 {
 		return nil, nil
 	}
-	sum := sha256.Sum256([]byte(key))
-	return store.LockPath(filepath.Join(cfg.DataDir, "sessions", hex.EncodeToString(sum[:])+".lock"), false)
+	l := &realmLock{}
+	for _, key := range keys {
+		if err := l.take(cfg, key); err != nil {
+			l.Release()
+			return nil, err
+		}
+	}
+	return l, nil
 }
 
 // maintNotice tells the caller what the login's daily maintenance did — that the
@@ -174,6 +271,11 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	// A boot/disconnect during the splash or onboarding unwinds via session.End
 	// (GameLoop catches its own, but these run before it). Recover here so the
 	// session ends cleanly and the world is still saved.
+	//
+	// owner starts as the handle because this defer is installed before the
+	// realm is bound; it is replaced with the realm's own owner once known, so a
+	// keyed login that follows an alias change clears the right roster entry.
+	owner := id.Handle
 	defer func() {
 		if r := recover(); r != nil {
 			endErr, ok := session.AsEnd(r)
@@ -191,9 +293,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			if endErr != nil && !errors.Is(endErr, io.EOF) {
 				reason = fmt.Sprintf("%s (%v)", reason, endErr)
 			}
-			// id.Handle, not e.Owner: this defer is installed before e is
-			// declared. FindByOwner lowercases and trims, so both resolve.
-			markOffline(w, id.Handle)
+			markOffline(w, owner)
 			err = save()
 		}
 	}()
@@ -207,7 +307,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	lang := id.Language
 	w.Read(func() {
 		frozen, freezeMsg = w.Frozen, w.FreezeMessage
-		if e := w.FindByOwner(id.Handle); e != nil && e.Language != "" {
+		if e := findCaller(w, id); e != nil && e.Language != "" {
 			lang = e.Language
 		}
 	})
@@ -229,7 +329,8 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	var lockedLang string  // that realm's language, for the offer
 	var dupeJoin string    // a realm erased today whose baron another board still lists
 	w.With(func() {
-		e = w.FindByOwner(id.Handle)
+		e = findCaller(w, id)
+		adoptUserKey(e, id)
 		if e != nil && !e.Alive {
 			if w.GameDay > e.DiedDay {
 				// A past-day husk maintenance hasn't swept: sweep it now and let
@@ -244,7 +345,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				// A baron another board still lists cannot found a new realm, so
 				// the return-later promise below would be a lie. Covers a realm
 				// erased at the dupe offer and any other death the same day.
-				if board := w.DupeElsewhere(id.Handle); board != "" {
+				if board := w.DupeElsewhere(e.Owner); board != "" {
 					dupeJoin = game.DupeJoinMessage(board).In(e.Language)
 				}
 			}
@@ -261,6 +362,9 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			joinDate = w.Config.JoinDate
 		}
 	})
+	if e != nil {
+		owner = e.Owner
+	}
 	if dupeLocked != "" {
 		notice(s, dupeLocked)
 		// BRE offers the way out here, since the baron may be locked out of the
@@ -272,7 +376,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			// baron read the question.
 			var erased, unlocked bool
 			w.With(func() {
-				e := w.FindByOwner(id.Handle)
+				e := findCaller(w, id)
 				switch {
 				case e == nil || !e.Alive:
 				case w.DupeLocked(e):
@@ -379,7 +483,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			var full string
 			var taken bool
 			w.With(func() {
-				if existing := w.FindByOwner(id.Handle); existing != nil {
+				if existing := findCaller(w, id); existing != nil {
 					e = existing
 					return
 				}
@@ -392,7 +496,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 					taken = true
 					return
 				}
-				e = w.AddHuman(id.Handle, realm)
+				e = w.AddHumanKey(id.Handle, id.userKey(), realm)
 				e.Language = lang
 			})
 			if full != "" {
@@ -527,6 +631,12 @@ func notice(s session.Session, text string) {
 // the Max Players Per BBS cap is the sysop's choice and may never move. BRE
 // tells a caller much the same in one message; this is IB's own wording.
 func joinRefusal(w *game.World, handle, lang string) string {
+	// Reached only when findCaller found no realm, so a realm owned by this
+	// handle belongs to another account's key. A second realm under one handle
+	// would leave the roster and packets unable to tell them apart.
+	if w.FindByOwner(handle) != nil {
+		return "Another account's realm is already played under your name. Ask the sysop to sort it out."
+	}
 	if board := w.DupeElsewhere(handle); board != "" {
 		return game.DupeJoinMessage(board).In(lang)
 	}

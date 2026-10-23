@@ -58,7 +58,7 @@ func encodeFor(s session.Session, cs charset) session.Session {
 // default. That is the deliberate direction: a Latin-1 or CP866 terminal sent
 // CP437 renders the box rules and blocks as garbage, while ASCII look-alikes
 // are readable on any of them. ok is false only for an empty name, which is
-// every format except BBSDEV.DRP.
+// every format except BBSDEV.DRP and DOORDROP.INI.
 func charsetNamed(name string) (charset, bool) {
 	switch strings.ToLower(strings.TrimSpace(name)) {
 	case "":

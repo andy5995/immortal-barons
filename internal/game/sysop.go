@@ -56,6 +56,9 @@ func (w *World) RenameOwner(e *Empire, newHandle string) error {
 		return nil
 	}
 	e.Owner = h
+	// The key belonged to the old account; the new owner's next keyed login
+	// adopts theirs.
+	e.UserKey = ""
 	w.rewriteOwner(old, h)
 	return nil
 }

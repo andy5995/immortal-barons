@@ -169,11 +169,19 @@ func (w *World) BoardFull() bool {
 // under the same lock that does the insert, so this is the backstop rather than
 // the refusal a player sees.
 func (w *World) AddHuman(handle, realm string) *Empire {
+	return w.AddHumanKey(handle, "", realm)
+}
+
+// AddHumanKey founds a realm for a caller whose drop file named a stable
+// per-user key. Owner stays the normalized handle; UserKey is the lookup
+// identity that follows the account through an alias change.
+func (w *World) AddHumanKey(handle, userKey, realm string) *Empire {
 	slot := w.freeSlot()
 	if slot == 0 {
 		return nil
 	}
 	e := newEmpire(realm, OwnerKey(handle), w.Config, w.GameDay)
+	e.UserKey = userKey
 	e.Slot = slot
 	e.Founded = Recorded(timeNow())
 	w.insertEmpire(e)
@@ -398,6 +406,21 @@ func (w *World) FindByOwner(handle string) *Empire {
 	}
 	for _, e := range w.Empires {
 		if e.Owner == h {
+			return e
+		}
+	}
+	return nil
+}
+
+// FindByUserKey returns the realm carrying this exact per-user key, or nil.
+// Unlike FindByOwner it does not fold case: USER_KEY is opaque and the host
+// guarantees it is never reused, so the comparison has to be exact.
+func (w *World) FindByUserKey(key string) *Empire {
+	if key == "" {
+		return nil
+	}
+	for _, e := range w.Empires {
+		if e.UserKey == key {
 			return e
 		}
 	}

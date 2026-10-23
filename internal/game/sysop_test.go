@@ -144,3 +144,16 @@ func TestRenameOwnerRefusals(t *testing.T) {
 	}
 	_ = other
 }
+
+// A reassigned realm leaves its old account's USER_KEY behind, or that account
+// would go on finding the realm by key after the sysop gave it away.
+func TestRenameOwnerClearsTheUserKey(t *testing.T) {
+	w, old, _ := renameWorld(t)
+	old.UserKey = "7-1693526400"
+	if err := w.RenameOwner(old, "andy5995"); err != nil {
+		t.Fatalf("RenameOwner: %v", err)
+	}
+	if old.UserKey != "" || w.FindByUserKey("7-1693526400") != nil {
+		t.Errorf("UserKey = %q after a reassignment, want it cleared", old.UserKey)
+	}
+}

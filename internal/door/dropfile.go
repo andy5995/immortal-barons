@@ -4,8 +4,9 @@
 //
 // DOOR32.SYS is the primary format (both Synchronet and Mystic write it,
 // and it cleanly encodes the I/O method). DOOR.SYS, PCBOARD.SYS, and
-// DORINFO1.DEF are supported as widely-used alternatives, and BBSDEV.DRP as a
-// modern one that specifies what the others leave to convention. Field positions were
+// DORINFO1.DEF are supported as widely-used alternatives, BBSDEV.DRP as a
+// modern one that specifies what the others leave to convention, and
+// DOORDROP.INI (1.0) as a named-value one. Field positions were
 // cross-checked against the Synchronet source (src/xpdoor/dropfiles.c), the
 // Synchronet wiki PCBOARD.SYS and DORINFO1.DEF references, and BRE's own
 // INSTALL.CFG.
@@ -41,8 +42,12 @@ type Format struct {
 	File string
 	Env  string
 
-	read    func(path string) (*Caller, error) // parses this format
-	matches func(lowerName string) bool        // nil = the file name equals File
+	read func(path string) (*Caller, error) // parses this format
+	// localNoCaller lets a local launch name no caller. Only DOORDROP.INI
+	// defines one: the older formats map unknown comm types to local, so for
+	// them a blank name is still a corrupt or wrong-format file.
+	localNoCaller bool
+	matches       func(lowerName string) bool // nil = the file name equals File
 }
 
 // Formats lists the supported dropfile formats in menu order.
@@ -55,6 +60,10 @@ var Formats = []Format{
 			return strings.HasPrefix(n, "dorinfo") && strings.HasSuffix(n, ".def")
 		}},
 	{ID: "bbsdev", Name: "BBSDEV.DRP", File: "BBSDEV.DRP", Env: "BBSDEV_DRP", read: fromBytes(parseBBSDev)},
+	{ID: "doordrop", Name: "DOORDROP.INI", File: "DOORDROP.INI", Env: "DOORDROP_INI", read: fromBytes(parseDoorDrop), localNoCaller: true,
+		matches: func(n string) bool { // the spec allows any name that keeps .INI
+			return strings.HasSuffix(n, ".ini")
+		}},
 }
 
 // fromLines adapts a line-based parser to Format.read.
@@ -133,6 +142,7 @@ const (
 type Caller struct {
 	Handle      string // alias/handle (falls back to real name)
 	RealName    string
+	UserKey     string // stable per-user key (DOORDROP.INI USER_KEY), if provided
 	Node        int
 	SecondsLeft int
 	ANSI        bool
@@ -149,9 +159,10 @@ type Caller struct {
 	StdioRedirect bool
 
 	// Charset and Language are what the BBS says about the caller's terminal
-	// and the caller themself. Only BBSDEV.DRP carries them; the older formats
-	// leave both empty, which means "the door decides", as it always has.
-	Charset  string // IANA character-set name, e.g. "IBM437"
+	// and the caller themself. Only BBSDEV.DRP and DOORDROP.INI carry them; the
+	// older formats leave both empty, which means "the door decides", as it
+	// always has.
+	Charset  string // character-set name, e.g. "IBM437" or "CP437"
 	Language string // BCP 47 language tag, e.g. "de-DE"
 }
 
@@ -166,7 +177,7 @@ func ParseDropfileAs(path, format string) (*Caller, error) {
 	if !ok {
 		return nil, fmt.Errorf("unknown dropfile format %q (want %s)", format, formatNames())
 	}
-	c, err := checkCaller(f.read(path))
+	c, err := f.parse(path)
 	if err != nil {
 		return nil, explainFormatMismatch(path, f, err)
 	}
@@ -190,7 +201,7 @@ func explainFormatMismatch(path string, want Format, err error) error {
 	if !ok || f.ID == want.ID {
 		return err
 	}
-	return fmt.Errorf("%s does not parse as %s (%v), and its name says it is a %s: point the door at the %s your BBS writes, or run -set-dropfile and choose %s",
+	return fmt.Errorf("%s does not parse as %s (%w), and its name says it is a %s: point the door at the %s your BBS writes, or run -set-dropfile and choose %s",
 		filepath.Base(path), want.Name, err, f.Name, want.File, f.Name)
 }
 
@@ -199,7 +210,7 @@ func explainFormatMismatch(path string, want Format, err error) error {
 func ParseDropfile(path string) (*Caller, error) {
 	base := filepath.Base(path)
 	if f, ok := formatByFileName(strings.ToLower(base)); ok {
-		return checkCaller(f.read(path))
+		return f.parse(path)
 	}
 	return nil, fmt.Errorf("unsupported dropfile %q (want %s)", base, formatNames())
 }
@@ -234,17 +245,18 @@ func (r *fieldReader) num(n int, what string) int {
 	return v
 }
 
-// checkCaller rejects a drop file that parsed structurally but carries no usable
-// caller identity. A drop file is written by another program, so it is a real
+// parse reads path as f and rejects a drop file that parsed structurally but
+// carries no usable caller identity. A drop file is written by another program, so it is a real
 // boundary: a corrupt or wrong-format file can satisfy the length checks and
 // still yield an empty name. Without this the empty name falls back to a
 // node-numbered handle, so every caller with a malformed drop file would share
 // one empire. Fail the launch instead — the sysop sees it in ib-door.log.
-func checkCaller(c *Caller, err error) (*Caller, error) {
+func (f Format) parse(path string) (*Caller, error) {
+	c, err := f.read(path)
 	if err != nil {
 		return nil, err
 	}
-	if c.Handle == "" {
+	if c.Handle == "" && !(f.localNoCaller && c.IO == IOLocal) {
 		return nil, fmt.Errorf("drop file has no caller name (corrupt, or not the configured format)")
 	}
 	return c, nil
