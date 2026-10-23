@@ -12,8 +12,8 @@ choose.
 - **`-local`** auto-detects from your locale — UTF-8 when your locale is UTF-8
   (common today) — so local play usually needs no option.
 - **A drop file that names the caller's encoding is followed**, since the board
-  knows the terminal and the default is only a guess. Only BBSDEV.DRP carries
-  that field. An encoding the game cannot send becomes ASCII. Any of the three
+  knows the terminal and the default is only a guess. Only BBSDEV.DRP and
+  DOORDROP.INI carry that field. An encoding the game cannot send becomes ASCII. Any of the three
   options above still overrides it.
 
 ## The three character sets
