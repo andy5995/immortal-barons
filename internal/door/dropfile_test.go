@@ -346,7 +346,7 @@ func TestParseTooShortFilesError(t *testing.T) {
 func TestMismatchedNameAndFormatNamesBoth(t *testing.T) {
 	p := write(t, "door32.sys",
 		"2\n7\n57600\nImmortal BBS\n42\nJohn Q Sysop\nKhan\n80\n30\n1\n4\n")
-	for _, format := range []string{"doorsys", "dorinfo", "pcboard", "bbsdev"} {
+	for _, format := range []string{"doorsys", "dorinfo", "pcboard", "bbsdev", "doordrop"} {
 		t.Run(format, func(t *testing.T) {
 			_, err := ParseDropfileAs(p, format)
 			if err == nil {
