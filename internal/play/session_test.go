@@ -81,7 +81,7 @@ func TestOpeningMenuNamesTheBuild(t *testing.T) {
 // and the realm opens again once the first session ends.
 func TestSecondSessionOnARealmIsRefused(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	held, err := lockRealm(cfg, "Khan")
+	held, err := lockRealm(cfg, Identity{Handle: "Khan"})
 	if err != nil {
 		t.Fatalf("lock: %v", err)
 	}
@@ -115,7 +115,7 @@ func TestSecondSessionOnARealmIsRefused(t *testing.T) {
 // name limit still logs in.
 func TestLongHandleStillLocks(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	held, err := lockRealm(cfg, strings.Repeat("x", 400))
+	held, err := lockRealm(cfg, Identity{Handle: strings.Repeat("x", 400)})
 	if err != nil {
 		t.Fatalf("lock for a 400-byte handle: %v", err)
 	}

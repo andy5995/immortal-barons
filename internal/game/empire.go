@@ -24,6 +24,13 @@ type Empire struct {
 	// changed for a player must not cost them theirs.
 	PriorNames []string `json:",omitempty"`
 	Owner      string   // normalized BBS handle; "" for AI
+	// UserKey is the stable per-user key the host supplied in the drop file
+	// (DOORDROP.INI USER_KEY), or "" when the format had none. Owner remains
+	// the handle that inter-BBS packets and the roster address, so dupe
+	// detection keeps working across boards; this is the local lookup identity
+	// that follows an account through an alias change. A realm founded before
+	// IB read keys has it empty until its owner's next keyed login adopts one.
+	UserKey string `json:",omitempty"`
 	// Slot is the realm's permanent place in the planet's fixed roster, 1..25,
 	// and the public identity every screen addresses it by: the Id column and
 	// every picker letter is 'A' + Slot - 1, so slot 1 is A and slot 25 is Y.

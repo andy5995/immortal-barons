@@ -52,8 +52,10 @@ Set up the game as an external program (a "door") in your BBS software.
   The supported formats are **DOOR32.SYS**,
   [**DOOR.SYS**](https://wiki.synchro.net/ref:door.sys),
   [**PCBOARD.SYS**](https://wiki.synchro.net/ref:pcboard.sys),
-  [**DORINFO1.DEF**](https://wiki.synchro.net/ref:dorinfo1.def), and
-  [**BBSDEV.DRP**](https://realdeuce.github.io/bbsdev.drp/). The
+  [**DORINFO1.DEF**](https://wiki.synchro.net/ref:dorinfo1.def),
+  [**BBSDEV.DRP**](https://realdeuce.github.io/bbsdev.drp/), and
+  **DOORDROP.INI** (version 1.0). A host that writes an older draft is not
+  supported, since the keys and their requirements changed. The
   [Synchronet](https://www.synchro.net/) wiki keeps an
   [index of drop file formats](https://wiki.synchro.net/ref:files#drop_files).
   DOOR32.SYS is the one most modern BBS software writes and the best choice when
@@ -65,8 +67,9 @@ Set up the game as an external program (a "door") in your BBS software.
     you install the update. Earlier versions did not have this setting.
 - Point the game at the drop file with `-dropfile`, or let it search the current
   directory for the configured format. With BBSDEV.DRP the game reads the
-  `BBSDEV_DRP` environment variable first, which is how that format expects a
-  BBS to name the file.
+  `BBSDEV_DRP` environment variable first, and with DOORDROP.INI the
+  `DOORDROP_INI` variable, which is how those formats expect a BBS to name the
+  file.
   - `-set-dropfile` and `-dropfile` are separate settings: one names the format,
     the other names the file. Change the format and the command line keeps
     pointing at the old file, so change both. When a drop file fails to load and
@@ -74,7 +77,11 @@ Set up the game as an external program (a "door") in your BBS software.
 - The caller's handle from the drop file becomes the name of their realm.
 - A drop file that names the caller's terminal encoding and language is
   followed: the game sends that encoding, and a new player skips the language
-  question. Only BBSDEV.DRP carries those two fields.
+  question. BBSDEV.DRP and DOORDROP.INI carry those two fields; DOORDROP.INI also
+  carries a stable `USER_KEY` that becomes the identity key for a realm (the
+  handle stays the name the inter-BBS packets address). A DOORDROP.INI caller
+  whose `COMM_CHARSET` is PETSCII or ATASCII is refused at launch: the caller
+  is told why, and the reason also goes to `ib-door.log`.
 
 A typical command line (use the full path to `immortal-barons` only if it is not
 installed on your `PATH`):
@@ -187,9 +194,10 @@ works. If you run the game as a Windows door, please still report how it goes.
 
 The game sends CP437 by default — the character set traditional BBS terminals
 expect. A door does not auto-detect the character set (only `-local` does). It
-uses that default unless you pass `-utf8` or `-cp437`, or a BBSDEV.DRP drop file
-names the caller's encoding. Set the option that fits your board. German, Dutch
-and Swedish work in CP437; Russian and Portuguese need `-utf8`.
+uses that default unless you pass `-utf8` or `-cp437`, or a BBSDEV.DRP or
+DOORDROP.INI drop file names the caller's encoding. Set the option that fits your
+board. German, Dutch and Swedish work in CP437; Russian and Portuguese need
+`-utf8`.
 
 If your board serves callers on different character sets, and your BBS software
 can tell a program the caller's character set (for example, by setting a shell
