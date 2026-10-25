@@ -17,7 +17,7 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	d.Protection = 0
 
 	before := len(d.Events)
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 	if len(d.Events) != before+1 {
 		t.Fatalf("victim should get one event, got %d new", len(d.Events)-before)
 	}
@@ -122,34 +122,29 @@ func TestRegularAttackCaptureFloorAndPercent(t *testing.T) {
 
 	// Large defender: ~10% (500 → capture 50).
 	w, a, d := newFight(500)
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 	if got := 500 - d.Land; got != 50 {
 		t.Errorf("large defender: captured %d, want 50 (10%%, BRE-verified)", got)
 	}
 
 	// Small defender: the floor dominates (100 regions → 10% = 10 < floor 15).
 	w, a, d = newFight(100)
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 	if got := 100 - d.Land; got != 15 {
 		t.Errorf("small defender: captured %d, want the floor 15 (BRE-verified)", got)
 	}
 }
 
-// autoCapture=false places the winner's land as Coastal (#58): the defender
-// loses its regions, the attacker holds them in the same save, and Attack
-// returns the count for the picker to retype. autoCapture=true keeps the loser's
-// proportional mix.
-func TestAttackDeferredCapture(t *testing.T) {
-	newFight := func() (*World, *Empire, *Empire) {
-		w := NewWorldSeed(DefaultConfig(), 1)
-		a := &Empire{Name: "A", Troopers: 1_000_000, Morale: 100, Alive: true}
-		d := &Empire{Name: "D", Turrets: 1, Morale: 100, Land: 500,
-			Regions: RegionMix{Mountain: 500}, People: 1_000_000, Alive: true}
-		return w, a, d
-	}
+// A won attack places the winner's land as Coastal (#58): the defender loses
+// its regions, the attacker holds them in the same save, and Attack returns the
+// count for the picker to retype.
+func TestAttackHoldsCaptureAsCoastal(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := &Empire{Name: "A", Troopers: 1_000_000, Morale: 100, Alive: true}
+	d := &Empire{Name: "D", Turrets: 1, Morale: 100, Land: 500,
+		Regions: RegionMix{Mountain: 500}, People: 1_000_000, Alive: true}
 
-	w, a, d := newFight()
-	_, captured := w.Attack(a, d, FullForce(a), false)
+	_, captured := w.Attack(a, d, FullForce(a))
 	if captured <= 0 {
 		t.Fatalf("won attack should return a positive captured count, got %d", captured)
 	}
@@ -158,12 +153,6 @@ func TestAttackDeferredCapture(t *testing.T) {
 	}
 	if a.Land != captured || a.Regions.Coastal != captured {
 		t.Errorf("the %d captured regions should be held as Coastal, got Land=%d Coastal=%d", captured, a.Land, a.Regions.Coastal)
-	}
-
-	w, a, d = newFight()
-	_, cap2 := w.Attack(a, d, FullForce(a), true)
-	if a.Regions.Total() != cap2 || a.Land != cap2 {
-		t.Errorf("autoCapture should add the %d captured regions to the attacker, got mix=%d Land=%d", cap2, a.Regions.Total(), a.Land)
 	}
 }
 
@@ -177,7 +166,7 @@ func TestAttackScoreIsPerRegionCaptured(t *testing.T) {
 	d := &Empire{Name: "D", Turrets: 1000, Morale: 100, Land: 100,
 		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 1000, Alive: true, Score: 1_000_000}
 
-	_, captured := w.Attack(a, d, FullForce(a), true)
+	_, captured := w.Attack(a, d, FullForce(a))
 	if captured <= 0 {
 		t.Fatalf("the attack captured %d regions; the test proves nothing", captured)
 	}
@@ -198,7 +187,7 @@ func TestTotalConquestScoresHigherPerRegion(t *testing.T) {
 	d := &Empire{Name: "D", Morale: 100, Land: 3, Regions: RegionMix{Mountain: 3},
 		People: 1000, Alive: true}
 
-	_, captured := w.Attack(a, d, FullForce(a), true)
+	_, captured := w.Attack(a, d, FullForce(a))
 	if d.Alive {
 		t.Fatalf("the defender survived with %d land; the test proves nothing", d.Land)
 	}
@@ -213,7 +202,7 @@ func TestRepelledAttackMovesNoScore(t *testing.T) {
 	a := &Empire{Name: "A", Troopers: 200_000, Morale: 100, Alive: true, Score: 1_000_000}
 	d := &Empire{Name: "D", Turrets: 800_000, Morale: 100, Land: 100, People: 1000, Alive: true, Score: 500}
 
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 
 	if a.Score != 1_000_000 {
 		t.Errorf("repelled attacker Score = %d, want it untouched", a.Score)
@@ -233,7 +222,7 @@ func TestAttackPostsPlanetaryNews(t *testing.T) {
 	d.Protection = 0
 
 	before := len(w.NewsToday)
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 	if len(w.NewsToday) != before+1 {
 		t.Fatalf("attack should post one planetary news line, got %d new", len(w.NewsToday)-before)
 	}
@@ -265,7 +254,7 @@ func TestAttackUsesOnlyCommittedForce(t *testing.T) {
 	// The retreat share is NOT a cap. It is where the loop stops, and the losing
 	// side always overshoots it by its last round — so a little over 20% of the
 	// 50 is correct and exactly 20% would be the bug this suite exists to catch.
-	w.Attack(a, d, AttackForce{Troopers: 50}, true)
+	w.Attack(a, d, AttackForce{Troopers: 50})
 	lost := 200 - a.Troopers
 	if lost > 50 {
 		t.Errorf("lost %d from a 50-trooper commitment; the held-back 150 were hit", lost)
@@ -285,7 +274,7 @@ func TestRegularAttackTakesNoGold(t *testing.T) {
 	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true, Gold: 500}
 	d := &Empire{Name: "D", Turrets: 10, Morale: 100, Land: 100,
 		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 100000, Alive: true}
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 	if a.Gold != 500 {
 		t.Errorf("attacker gold changed: got %d, want 500 (a win takes land, not gold)", a.Gold)
 	}
@@ -304,7 +293,7 @@ func TestTotalConquestAbsorbsMilitary(t *testing.T) {
 	d := &Empire{Name: "D", Troopers: 500, Jets: 40, Turrets: 30, Tanks: 20, Carriers: 5, Bombers: 10,
 		Morale: 100, Land: 1, Regions: RegionMix{Mountain: 1}, People: 100, Alive: true}
 
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 
 	if d.Alive {
 		t.Fatalf("an overwhelming attack should conquer the defender")
@@ -345,7 +334,7 @@ func TestLostDefenceDamagesHQ(t *testing.T) {
 	d.HQ = 100
 
 	before := d.HQ
-	w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000}, true)
+	w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000})
 	lost := before - d.HQ
 	if lost < 5 || lost > 7 {
 		t.Fatalf("a lost defense cost the HeadQuarters %d points, want 5..7", lost)
@@ -354,7 +343,7 @@ func TestLostDefenceDamagesHQ(t *testing.T) {
 	// Repeated defeats flatten it, and it never goes negative.
 	for i := 0; i < 40; i++ {
 		d.Troopers = 10
-		w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000}, true)
+		w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000})
 	}
 	if d.HQ != 0 {
 		t.Errorf("HeadQuarters = %d after 40 defeats, want 0", d.HQ)
@@ -378,7 +367,7 @@ func TestRepelledAttackLeavesHQAlone(t *testing.T) {
 		d.Troopers, d.Turrets, d.Land = 5_000_000, 500_000, 100
 		d.HQ = 100
 
-		report, _ := w.Attack(a, d, AttackForce{Troopers: 10}, true)
+		report, _ := w.Attack(a, d, AttackForce{Troopers: 10})
 		if !strings.Contains(report, "Defeat!") {
 			continue // an upset; the win path is the other test's business
 		}
@@ -407,7 +396,7 @@ func TestLostAttackCostsAttackerMorale(t *testing.T) {
 		a.Troopers = 10
 		d.Troopers, d.Turrets, d.Land = 5_000_000, 500_000, 100
 
-		report, _ := w.Attack(a, d, AttackForce{Troopers: 10}, true)
+		report, _ := w.Attack(a, d, AttackForce{Troopers: 10})
 		if !strings.Contains(report, "Defeat!") {
 			continue
 		}
@@ -420,7 +409,7 @@ func TestLostAttackCostsAttackerMorale(t *testing.T) {
 		}
 
 		a.Morale, a.Troopers = 3, 10
-		w.Attack(a, d, AttackForce{Troopers: 10}, true)
+		w.Attack(a, d, AttackForce{Troopers: 10})
 		if a.Morale != 0 {
 			t.Errorf("seed %d: morale 3 after a second loss = %d, want the floor 0", seed, a.Morale)
 		}
@@ -441,7 +430,7 @@ func TestWonAttackLeavesAttackerMorale(t *testing.T) {
 	}
 	a.Troopers, a.Tanks = 5_000_000, 500_000
 	d.Troopers, d.Land = 10, 100
-	report, _ := w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000}, true)
+	report, _ := w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000})
 	if !strings.Contains(report, "Victory!") {
 		t.Fatalf("expected a win:\n%s", report)
 	}
@@ -511,7 +500,7 @@ func TestCombatReportTranslatesInEveryLanguage(t *testing.T) {
 		a.Troopers, a.Bombers, a.Morale = 5_000, 10, 100
 		d.Troopers, d.Turrets, d.Jets, d.Morale = 10, 10, 50, 100
 
-		report, _ := w.Attack(a, d, AttackForce{Troopers: 5_000, Bombers: 10}, true)
+		report, _ := w.Attack(a, d, AttackForce{Troopers: 5_000, Bombers: 10})
 		if strings.TrimSpace(report) == "" {
 			t.Errorf("language %q produced an empty battle report", lang)
 		}
@@ -546,7 +535,7 @@ func TestBombersBleedWithTheRestOfTheForce(t *testing.T) {
 	d.Troopers, d.Turrets, d.Jets = 50_000, 50_000, 5_000
 	jetsBefore := d.Jets
 
-	report, _ := w.Attack(a, d, AttackForce{Troopers: 100_000, Bombers: 100_000}, true)
+	report, _ := w.Attack(a, d, AttackForce{Troopers: 100_000, Bombers: 100_000})
 	if !strings.Contains(report, "Your casualties") {
 		t.Fatalf("never reached the battle:\n%s", report)
 	}
@@ -581,7 +570,7 @@ func TestConquestIsTheLandAlone(t *testing.T) {
 	d.People = 0 // starved out, but still holding land
 	d.Regions = RegionMix{Desert: 5_000}
 	d.syncLand()
-	report, _ := w.Attack(a, d, FullForce(a), true)
+	report, _ := w.Attack(a, d, FullForce(a))
 	if !strings.Contains(report, "Victory") {
 		t.Fatalf("the attacker did not win; the test never reached the capture:\n%s", report)
 	}
@@ -618,7 +607,7 @@ func TestAllyLineGroupsPastFourDigitsAndCasualtiesDoNot(t *testing.T) {
 
 	a.Troopers, a.Tanks = 90_000, 90_000
 	d.Troopers, d.Tanks = 50_000, 50_000
-	report, _ := w.Attack(a, d, AttackForce{Troopers: a.Troopers, Tanks: a.Tanks}, false)
+	report, _ := w.Attack(a, d, AttackForce{Troopers: a.Troopers, Tanks: a.Tanks})
 
 	if !strings.Contains(report, "12,000 troopers") {
 		t.Errorf("a five-digit ally figure was not grouped:\n%s", report)

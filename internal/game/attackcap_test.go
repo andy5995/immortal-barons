@@ -66,7 +66,7 @@ func TestLocalAttacksDoNotSpendTheInterplanetaryAllowance(t *testing.T) {
 	// EVERY attack, so a gate that stopped the second and third would show.
 	for i := 1; i <= 3; i++ {
 		before := d.Turrets
-		w.Attack(a, d, FullForce(a), true)
+		w.Attack(a, d, FullForce(a))
 		if d.Turrets >= before {
 			t.Fatalf("attack %d drew no blood: defender kept all %d turrets", i, before)
 		}

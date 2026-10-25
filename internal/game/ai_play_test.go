@@ -237,7 +237,7 @@ func TestAttackingAPartnerBreachesAndCostsSupportAndMorale(t *testing.T) {
 	a.Troopers = 50_000_000
 	b.Troopers, b.Turrets, b.Tanks, b.Jets = 10, 0, 0, 0
 
-	w.Attack(a, b, FullForce(a), true)
+	w.Attack(a, b, FullForce(a))
 
 	if got := w.Relation(a, b); got != "" {
 		t.Errorf("a breached pact should leave no relation, got %q", got)
@@ -253,7 +253,7 @@ func TestAttackingAPartnerBreachesAndCostsSupportAndMorale(t *testing.T) {
 	c.Protection = 0
 	c.Troopers, c.Turrets, c.Tanks, c.Jets = 10, 0, 0, 0
 	a.Support, a.Morale = 90, 80
-	w.Attack(a, c, FullForce(a), true)
+	w.Attack(a, c, FullForce(a))
 	if a.Support != 90 || a.Morale != 80 {
 		t.Errorf("attacking a non-partner is no breach, 90/80 -> %d/%d", a.Support, a.Morale)
 	}

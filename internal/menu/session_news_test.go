@@ -18,7 +18,7 @@ func commitAttackOn(t *testing.T, cfg game.Config, handle string) {
 	t.Helper()
 	commitOnFile(t, cfg, func(w *game.World) {
 		a, d := w.FindByOwner("mallory"), w.FindByOwner(handle)
-		w.Attack(a, d, game.FullForce(a), true)
+		w.Attack(a, d, game.FullForce(a))
 	})
 }
 
@@ -216,7 +216,7 @@ func TestBuyLandEndsCrushedSession(t *testing.T) {
 			commitOnFile(t, cfg, func(w *game.World) {
 				a, d := w.FindByOwner("mallory"), w.FindByOwner("bob")
 				for i := 0; d.Alive && i < 200; i++ {
-					w.Attack(a, d, game.FullForce(a), true)
+					w.Attack(a, d, game.FullForce(a))
 				}
 				if d.Alive {
 					t.Fatal("could not crush the defender in 200 attacks — test setup is wrong")

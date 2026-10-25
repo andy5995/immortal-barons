@@ -141,12 +141,12 @@ func (w *World) aiWageWar(e *Empire) {
 		// the realm this AI could follow up against, which is the same judgment
 		// a day earlier — where the original puts it.
 		//
-		// autoCapture is false so the AI ALLOCATES what it takes, the way a human
-		// does at the capture prompt (#58), instead of inheriting whatever mix the
-		// loser happened to hold. Attack placed the land as Coastal; it moves to
-		// whichever type this realm is furthest short of, judged without it.
+		// The AI ALLOCATES what it takes, the way a human does at the capture
+		// prompt (#58), instead of inheriting whatever mix the loser happened to
+		// hold. Attack placed the land as Coastal; it moves to whichever type this
+		// realm is furthest short of, judged without it.
 		e.LocalAttacksToday++
-		if _, captured := w.Attack(e, target, FullForce(e), false); captured > 0 {
+		if _, captured := w.Attack(e, target, FullForce(e)); captured > 0 {
 			e.Regions.Coastal -= captured
 			w.GrantRegions(e, e.aiNextRegionType(), captured)
 		}

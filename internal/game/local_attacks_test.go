@@ -40,7 +40,7 @@ func TestLocalAttackScoringOffMovesNoScore(t *testing.T) {
 		d.Troopers, d.Turrets, d.Land = 100, 0, 500
 		d.Regions = RegionMix{Agricultural: 500}
 		a.Score, d.Score = 5_000, 5_000
-		_, captured = w.Attack(a, d, FullForce(a), false)
+		_, captured = w.Attack(a, d, FullForce(a))
 		return a, d, captured
 	}
 

@@ -96,15 +96,13 @@ func (w *World) CanBombingOp(e *Empire) bool {
 }
 
 // Attack resolves a regular attack. On a win the loser bleeds its regions as a
-// proportional mix; the winner captures the same count. autoCapture governs how
-// the winner GAINS that land: true (a test shortcut) adds it as the same mix;
-// false (the menu and the AI) places it all as Coastal and returns the count
-// for the caller to retype (#58 — BRE decouples the loser's mix from the
-// winner's freely-chosen composition).
+// proportional mix, and the winner holds the same count as Coastal, in the same
+// save; captured returns that count for the caller to retype (#58 — BRE
+// decouples the loser's mix from the winner's freely-chosen composition).
 // captured is 0 on a loss, and includes any waste taken: BRE adds the whole
 // count to the winner's untyped pool (BRE.OVR 0x0103db), so ruin
 // changes hands as clean land.
-func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
+func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int) {
 	// No daily counter here: the local attack is limited by the turn, not by a
 	// per-day allowance (see CanAttack). AttacksToday counts interplanetary
 	// individual strikes alone.
@@ -195,19 +193,11 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		if captured > d.Land {
 			captured = d.Land
 		}
-		lost := d.Regions.remove(captured)
+		captured = d.Regions.remove(captured).Total() // remove caps at the defender's land
 		d.syncLand()
-		taken := lost.Total() // remove caps at the defender's land
-		captured = taken
-		if autoCapture {
-			lost.Coastal += lost.Waste
-			lost.Waste = 0
-			a.Regions.addMix(lost)
-		} else {
-			// Placed in this same save, so a session lost before the picker runs
-			// keeps the land; the picker reclaims it from Coastal to retype it.
-			a.Regions.Coastal += captured
-		}
+		// Placed in this same save, so a session lost before the picker runs
+		// keeps the land; the picker reclaims it from Coastal to retype it.
+		a.Regions.Coastal += captured
 		a.syncLand()
 
 		// Score is per REGION taken, and a total conquest pays better than an
@@ -225,14 +215,14 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			if crushed {
 				per = CombatScoreCrushPerRegion
 			}
-			gain = taken * per
+			gain = captured * per
 		}
 		addScore(a, gain)
 
 		fmt.Fprint(&b, tr(returningForces)+"\n")
 		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
 		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCasIn(dloss))
-		fmt.Fprintf(&b, tr("Victory! You captured %d regions.")+"\n", taken)
+		fmt.Fprintf(&b, tr("Victory! You captured %d regions.")+"\n", captured)
 		if gain > 0 {
 			fmt.Fprintf(&b, tr("Your score rose by %d.")+"\n", gain)
 		}
@@ -246,7 +236,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		}
 		d.addEvent(sentences(
 			say("{who} attacked you and took {n} regions. You lost {lost}.",
-				"who", a.Name, "n", taken, "lost", defenderCas(dloss)),
+				"who", a.Name, "n", captured, "lost", defenderCas(dloss)),
 			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {

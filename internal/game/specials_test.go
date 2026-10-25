@@ -544,7 +544,7 @@ func TestCaptureFromARuinedRealmTakesWasteAsCleanLand(t *testing.T) {
 
 	beforeTotal := a.Land + d.Land
 	beforeWaste := a.Regions.Waste
-	_, captured := w.Attack(a, d, AttackForce{Troopers: 500_000, Tanks: 50_000}, false)
+	_, captured := w.Attack(a, d, AttackForce{Troopers: 500_000, Tanks: 50_000})
 
 	if captured != 100 {
 		t.Errorf("captured = %d, want 100 (10%% of 1000)", captured)

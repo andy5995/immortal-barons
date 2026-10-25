@@ -101,15 +101,6 @@ func (r *RegionMix) remove(n int) RegionMix {
 	return result
 }
 
-// addMix adds another mix's counts into this one.
-func (r *RegionMix) addMix(m RegionMix) {
-	rf := r.fields()
-	mf := (&m).fields()
-	for i := range rf {
-		*rf[i] += *mf[i]
-	}
-}
-
 // defaultRegionMix distributes `land` regions across types using the same
 // proportions a new empire starts with (Coastal 40%, Agricultural 25%,
 // Urban 10%, Mountain 10%, Desert 5%, River 10%), giving any rounding

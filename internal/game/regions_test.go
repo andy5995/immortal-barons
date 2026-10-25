@@ -47,14 +47,6 @@ func TestRegionMixRemoveAllWhenNGreaterThanTotal(t *testing.T) {
 	}
 }
 
-func TestRegionMixAddMix(t *testing.T) {
-	r := RegionMix{Coastal: 1, Urban: 2}
-	r.addMix(RegionMix{Coastal: 4, Mountain: 5})
-	if r.Coastal != 5 || r.Mountain != 5 || r.Urban != 2 {
-		t.Errorf("addMix: got %+v", r)
-	}
-}
-
 func TestDefaultRegionMixSumsToLand(t *testing.T) {
 	for _, land := range []int{0, 100, 137} {
 		m := defaultRegionMix(land)
@@ -122,7 +114,7 @@ func TestRegionInvariantAfterBuySellAttackNuke(t *testing.T) {
 	}
 	assertRegionInvariant(t, "after SellRegions", a)
 
-	w.Attack(a, d, FullForce(a), true)
+	w.Attack(a, d, FullForce(a))
 	assertRegionInvariant(t, "after Attack (attacker)", a)
 	assertRegionInvariant(t, "after Attack (defender)", d)
 
