@@ -251,8 +251,8 @@ func TestRaidFactionWinLose(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 
 	// An overwhelming force against the easiest faction (Humans, index 0) wins
-	// against a landed faction: the captured land is DEFERRED (returned for the
-	// menu picker), so the attacker's own land does not change here (#21).
+	// against a landed faction: the captured land is held as Coastal in the
+	// raid's own save, and the count is returned for the menu picker (#21).
 	a.Troopers = 1_000_000
 	a.Jets = 0
 	a.Tanks = 0
@@ -266,8 +266,8 @@ func TestRaidFactionWinLose(t *testing.T) {
 	if captured <= 0 {
 		t.Errorf("expected a positive captured-land count on a win, got %d", captured)
 	}
-	if a.Land != beforeLand {
-		t.Errorf("captured land must be deferred, not auto-added: before=%d after=%d", beforeLand, a.Land)
+	if a.Land != beforeLand+captured {
+		t.Errorf("Land = %d, want %d: the captured land must be held before the picker runs", a.Land, beforeLand+captured)
 	}
 	if a.Land != a.Regions.Total() {
 		t.Errorf("Land/Regions invariant broken: Land=%d Regions.Total()=%d", a.Land, a.Regions.Total())
@@ -527,8 +527,8 @@ func TestDecontaminatePriceUsesFoodTechnology(t *testing.T) {
 
 // Waste captured in a regular attack reaches the winner as clean, untyped land:
 // BRE removes it from the loser with the rest and adds the whole count to the
-// winner's pool (BRE.OVR 0x0103db). The two realms must still
-// hold every region between them once the picker places the count.
+// winner's pool (BRE.OVR 0x0103db). IB holds the whole count as Coastal until
+// the picker retypes it, and the two realms still hold every region.
 func TestCaptureFromARuinedRealmTakesWasteAsCleanLand(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 3)
@@ -555,8 +555,8 @@ func TestCaptureFromARuinedRealmTakesWasteAsCleanLand(t *testing.T) {
 	if a.Regions.Waste != beforeWaste {
 		t.Errorf("attacker waste %d -> %d; captured waste must reach the picker", beforeWaste, a.Regions.Waste)
 	}
-	if got := a.Land + captured + d.Land; got != beforeTotal {
-		t.Errorf("land total = %d after the picker's %d are placed, want %d", got, captured, beforeTotal)
+	if got := a.Land + d.Land; got != beforeTotal {
+		t.Errorf("land total = %d, want %d", got, beforeTotal)
 	}
 	if a.Land != a.Regions.Total() {
 		t.Errorf("Land/Regions invariant broken: Land=%d total=%d", a.Land, a.Regions.Total())

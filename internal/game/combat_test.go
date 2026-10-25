@@ -135,10 +135,10 @@ func TestRegularAttackCaptureFloorAndPercent(t *testing.T) {
 	}
 }
 
-// autoCapture=false defers the winner's land gain (#58): the defender loses its
-// regions and Attack returns the captured count, but the attacker's own regions
-// are untouched — the menu picker allocates the count freely. autoCapture=true
-// keeps the old behavior (the winner gains the loser's proportional mix).
+// autoCapture=false places the winner's land as Coastal (#58): the defender
+// loses its regions, the attacker holds them in the same save, and Attack
+// returns the count for the picker to retype. autoCapture=true keeps the loser's
+// proportional mix.
 func TestAttackDeferredCapture(t *testing.T) {
 	newFight := func() (*World, *Empire, *Empire) {
 		w := NewWorldSeed(DefaultConfig(), 1)
@@ -156,8 +156,8 @@ func TestAttackDeferredCapture(t *testing.T) {
 	if d.Land != 500-captured {
 		t.Errorf("defender should lose %d regions: 500 -> %d", captured, d.Land)
 	}
-	if a.Land != 0 || a.Regions.Total() != 0 {
-		t.Errorf("deferred path must not add land to the attacker yet, got Land=%d mix=%d", a.Land, a.Regions.Total())
+	if a.Land != captured || a.Regions.Coastal != captured {
+		t.Errorf("the %d captured regions should be held as Coastal, got Land=%d Coastal=%d", captured, a.Land, a.Regions.Coastal)
 	}
 
 	w, a, d = newFight()

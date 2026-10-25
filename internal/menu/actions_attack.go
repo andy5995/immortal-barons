@@ -228,8 +228,8 @@ func regularAttack(s session.Session, w *ctx) Result {
 		// only what remains — note it so the player learns the numbers moved.
 		trimmed = force.Troopers > p.Troopers || force.Tanks > p.Tanks ||
 			force.Bombers > p.Bombers || force.Jets > min(p.Jets, p.Carriers*game.JetsPerCarrier)
-		// Deferred capture (autoCapture=false): the defender bleeds its regions but
-		// the attacker gains none yet, so the human can pick the types below (#58).
+		// autoCapture=false: the captured land arrives as Coastal, and the picker
+		// below retypes it (#58).
 		report, captured = w.World.Attack(p, d, force, false)
 		chargeAttackStage(p)
 		return nil

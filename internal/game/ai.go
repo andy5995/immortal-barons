@@ -143,10 +143,11 @@ func (w *World) aiWageWar(e *Empire) {
 		//
 		// autoCapture is false so the AI ALLOCATES what it takes, the way a human
 		// does at the capture prompt (#58), instead of inheriting whatever mix the
-		// loser happened to hold. Captured land goes into whichever type this realm
-		// is furthest short of, the same judgment it uses when buying.
+		// loser happened to hold. Attack placed the land as Coastal; it moves to
+		// whichever type this realm is furthest short of, judged without it.
 		e.LocalAttacksToday++
 		if _, captured := w.Attack(e, target, FullForce(e), false); captured > 0 {
+			e.Regions.Coastal -= captured
 			w.GrantRegions(e, e.aiNextRegionType(), captured)
 		}
 	}

@@ -258,7 +258,7 @@ func regionCapReached(w *ctx, p *game.Empire) bool {
 // captured in a Regular Attack (#58 — BRE decouples the winner's freely-chosen
 // composition from the proportional mix the loser bled).
 func allocateCaptured(s session.Session, w *ctx, n int) {
-	allocateRegions(s, w, n, 0,
+	allocateRegions(s, w, n, n,
 		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n), nil)
 }
 
@@ -300,9 +300,9 @@ func allocateDecontaminated(s session.Session, w *ctx, n int) {
 // session cannot lose captured land.
 //
 // reclaim is how many of the n are ALREADY counted as Coastal and must be taken
-// back before they are shared out, so the total does not double. It is 0 for
-// land that has not been placed yet (a fresh conquest) and n for land restored
-// before the player was asked (decontamination).
+// back before they are shared out, so the total does not double. It is n for
+// land placed in the save that won or cleaned it (a conquest, a pirate raid,
+// decontamination), and 0 for land parked elsewhere (interplanetary spoils).
 //
 // also runs inside the granting transaction, for a caller that has to retire
 // bookkeeping in the same save — the parked interplanetary spoils, which must

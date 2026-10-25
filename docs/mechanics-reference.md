@@ -2487,7 +2487,8 @@ that one pool.
 `total_regions` sums the nine region counts and **excludes** the pool, so
 unallocated land is not territory until it is placed: it does not count toward a
 nuclear strike's damage base, technology dilution, or the scores table's
-Territory column. IB's deferred-capture model already matches this.
+Territory column. IB holds such land as Coastal while its picker is open (see
+the divergence below), so there it counts from the moment it is won.
 
 **The picker cannot be quit.** Its loop (`allocate_unassigned_regions`,
 `BRE.OVR 0x030ebb`) sends Enter, `?` and `*` alike to the bottom at `+0x124c`,
@@ -2498,10 +2499,12 @@ re-prompts, matching this.
 
 **Divergence:** IB has no persisted pool. It runs the picker at the moment the
 land is cleaned (or captured); the original keeps the pool on the empire record
-and `run_player_turn` re-offers whatever is left. Because the gold for
-decontamination is already spent, IB restores the cleaned land as Coastal
-*before* asking, and the picker reclaims it — so a session that drops between the
-payment and the question costs the player the choice of type, never the land.
+and `run_player_turn` re-offers whatever is left. So IB places the land as
+Coastal in the same save that cleaned or won it — decontamination, a regular
+attack, a pirate raid — and the picker reclaims it. A session that drops before
+the question costs the player the choice of type, never the land. (Until
+2026-10-25 captured land waited for the picker's own save, so a door killed
+between the two saves lost it.)
 That dropped session is the one case where a remainder still becomes Coastal.
 
 **Confirmed in live play 2026-09-12** (`cap/nuke-waste-20260912.cap`, and see

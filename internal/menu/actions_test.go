@@ -54,6 +54,18 @@ func TestHiNumsHighlightsFigures(t *testing.T) {
 	}
 }
 
+// placeCaptured holds n regions as Coastal, as a won attack does in its own
+// save, so the picker has land to reclaim.
+func placeCaptured(t *testing.T, w *ctx, n int) {
+	t.Helper()
+	if err := w.mutatePlayer(func(p *game.Empire) error {
+		w.World.GrantRegions(p, &p.Regions.Coastal, n)
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // allocateCaptured lets the winner split the captured regions across types
 // (#58): assign 6 as River then 4 as Mountain; the loop ends when all 10 are
 // placed and the empire gains exactly that split.
@@ -62,6 +74,7 @@ func TestAllocateCapturedSplitsByType(t *testing.T) {
 	p := w.Player()
 	beforeLand, beforeRiver, beforeMtn := p.Land, p.Regions.River, p.Regions.Mountain
 	f := &fakeSession{keys: []rune("R6\rM4\r")} // River 6, Mountain 4 -> 10 placed
+	placeCaptured(t, w, 10)
 	allocateCaptured(f, w, 10)
 	p = w.Player()
 	if p.Regions.River != beforeRiver+6 {
@@ -83,6 +96,7 @@ func TestAllocateCapturedOffersAdvisors(t *testing.T) {
 	p := w.Player()
 	beforeLand := p.Land
 	f := &fakeSession{keys: []rune("*0\rR10\r")} // Advisors, leave it, then place all 10
+	placeCaptured(t, w, 10)
 	allocateCaptured(f, w, 10)
 
 	out := plainLines(f.out.String())
@@ -105,6 +119,7 @@ func TestAllocateCapturedRemainderToCoastal(t *testing.T) {
 	p := w.Player()
 	beforeLand, beforeCoastal, beforeRiver := p.Land, p.Regions.Coastal, p.Regions.River
 	f := &fakeSession{keys: []rune("R3\r")} // River 3, then the stream ends: 7 remain
+	placeCaptured(t, w, 10)
 	allocateCaptured(f, w, 10)
 	p = w.Player()
 	if p.Regions.River != beforeRiver+3 {
@@ -128,6 +143,7 @@ func TestAllocateCapturedZeroDoesNotQuit(t *testing.T) {
 	beforeMtn, beforeCoastal := p.Regions.Mountain, p.Regions.Coastal
 	// '0' twice, then Enter, then the real answer: none of the three may end it.
 	f := &fakeSession{keys: []rune("00\rM10\r")}
+	placeCaptured(t, w, 10)
 	allocateCaptured(f, w, 10)
 	p = w.Player()
 	if p.Regions.Mountain != beforeMtn+10 {
@@ -148,6 +164,7 @@ func TestAllocateCapturedExplainsANumber(t *testing.T) {
 	// A typed line, a bare Enter, then the real answer: one hint per line, not
 	// one per key.
 	f := &fakeSession{keys: []rune("12\r\rM10\r")}
+	placeCaptured(t, w, 10)
 	allocateCaptured(f, w, 10)
 	out := stripANSI(f.out.String())
 	hint := "Press the letter of a region type to place the remaining 10."

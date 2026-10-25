@@ -398,8 +398,8 @@ func raidLosses(troopers, jets, tanks int) []Msg {
 // its jets, turrets and tanks — so draining a fat faction takes several hits.
 // The report names the loot; capturedLand is the number of regions won (0 on a
 // loss or against a landless faction), which the caller lets the player allocate
-// by type through the same picker a Regular Attack uses (#21). Reclaimed gold and
-// military land in the attacker at once; only the land is deferred.
+// by type through the same picker a Regular Attack uses (#21). The land is
+// placed as Coastal here, in the raid's own save, and the picker retypes it.
 func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (report Msg, capturedLand int) {
 	if faction < 0 || faction >= len(w.Pirates) {
 		return say("There are no pirates by that name."), 0
@@ -455,9 +455,8 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		a.Tanks += gotK
 		a.Agents += gotA
 		w.creditGold(a, gotG, say("reclaimed pirate loot"))
-		// The captured land is DEFERRED, not auto-added: the caller opens the
-		// region-type picker so the player chooses the composition (#21). Reclaimed
-		// gold/military above land immediately; only the regions wait.
+		a.Regions.Coastal += gotLand
+		a.syncLand()
 		capturedLand = gotLand
 		addScore(a, PirateScoreBase+w.rng.Intn(PirateScoreRoll))
 		w.postPirateNews(a, p.Name, true)
