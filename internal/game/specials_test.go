@@ -525,11 +525,11 @@ func TestDecontaminatePriceUsesFoodTechnology(t *testing.T) {
 	}
 }
 
-// Capturing land from a realm that is part waste must not create land. The
-// waste transfers as waste, and only the clean remainder is handed to the
-// picker — if the returned count included the waste, the picker would grant it
-// a second time as a type of the winner's choosing.
-func TestCaptureFromARuinedRealmDoesNotCreateLand(t *testing.T) {
+// Waste captured in a regular attack reaches the winner as clean, untyped land:
+// BRE removes it from the loser with the rest and adds the whole count to the
+// winner's pool (BRE.OVR 0x0103db). The two realms must still
+// hold every region between them once the picker places the count.
+func TestCaptureFromARuinedRealmTakesWasteAsCleanLand(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 3)
 	w.AddAIEmpires(1)
@@ -543,15 +543,20 @@ func TestCaptureFromARuinedRealmDoesNotCreateLand(t *testing.T) {
 	d.Troopers, d.Tanks, d.Turrets = 1, 0, 0
 
 	beforeTotal := a.Land + d.Land
+	beforeWaste := a.Regions.Waste
 	_, captured := w.Attack(a, d, AttackForce{Troopers: 500_000, Tanks: 50_000}, false)
 
-	// The picker's share plus the waste that moved on its own equals the whole
-	// transfer, and the two realms still hold every region between them.
+	if captured != 100 {
+		t.Errorf("captured = %d, want 100 (10%% of 1000)", captured)
+	}
+	if d.Regions.Waste != 450 {
+		t.Errorf("defender waste = %d, want 450 (half the capture came from waste)", d.Regions.Waste)
+	}
+	if a.Regions.Waste != beforeWaste {
+		t.Errorf("attacker waste %d -> %d; captured waste must reach the picker", beforeWaste, a.Regions.Waste)
+	}
 	if got := a.Land + captured + d.Land; got != beforeTotal {
 		t.Errorf("land total = %d after the picker's %d are placed, want %d", got, captured, beforeTotal)
-	}
-	if a.Regions.Waste <= 0 {
-		t.Errorf("the attacker took no waste from a half-ruined realm (waste=%d)", a.Regions.Waste)
 	}
 	if a.Land != a.Regions.Total() {
 		t.Errorf("Land/Regions invariant broken: Land=%d total=%d", a.Land, a.Regions.Total())

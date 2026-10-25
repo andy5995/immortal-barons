@@ -97,12 +97,13 @@ func (w *World) CanBombingOp(e *Empire) bool {
 
 // Attack resolves a regular attack. On a win the loser bleeds its regions as a
 // proportional mix; the winner captures the same count. autoCapture governs how
-// the winner GAINS that land: true (AI, group attacks) adds it as the same mix;
-// false (the human menu path) leaves the attacker's regions untouched and
-// returns the captured count so the caller can let the player pick the types
-// (#58 — BRE decouples the loser's mix from the winner's freely-chosen
-// composition). captured is 0 on a loss, and excludes any waste taken, which
-// transfers as waste on both paths because nobody chooses to hold ruin.
+// the winner GAINS that land: true (a test shortcut) adds it as the same mix;
+// false (the menu and the AI) leaves the attacker's regions untouched and
+// returns the captured count so the caller can pick the types (#58 — BRE
+// decouples the loser's mix from the winner's freely-chosen composition).
+// captured is 0 on a loss, and includes any waste taken: BRE adds the whole
+// count to the winner's untyped pool (BRE.OVR 0x0103db), so ruin
+// changes hands as clean land.
 func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
 	// No daily counter here: the local attack is limited by the turn, not by a
 	// per-day allowance (see CanAttack). AttacksToday counts interplanetary
@@ -196,20 +197,13 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		}
 		lost := d.Regions.remove(captured)
 		d.syncLand()
-		// taken is every region that changed hands — what both reports quote.
-		// captured is the subset the winner still has to find a type for, which
-		// is what the caller feeds to the picker.
 		taken := lost.Total() // remove caps at the defender's land
 		captured = taken
 		if autoCapture {
+			lost.Coastal += lost.Waste
+			lost.Waste = 0
 			a.Regions.addMix(lost)
 			a.syncLand()
-		} else if lost.Waste > 0 {
-			// Waste is not something a winner chooses to hold — it transfers as the
-			// ruin it is, and only the clean land reaches the picker.
-			a.Regions.Waste += lost.Waste
-			a.syncLand()
-			captured -= lost.Waste
 		}
 
 		// Score is per REGION taken, and a total conquest pays better than an

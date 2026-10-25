@@ -8,7 +8,8 @@ in_game: true
 # Waste Regions
 
 Waste is a region ruined by a nuclear or chemical strike. You cannot buy it or
-drop it; an enemy gives it to you.
+drop it; an enemy gives it to you. Waste you capture from another realm
+arrives clean, and you choose its type like any other conquered region.
 
 Waste stays on your books. It counts toward your territory, it costs the same
 upkeep as any other region, and it earns you nothing. A realm that takes several

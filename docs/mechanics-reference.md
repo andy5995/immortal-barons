@@ -741,6 +741,14 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   *types*** to take (a region picker); IB does the same on the human path (#58) —
   the winning attacker chooses the captured composition, decoupled from the
   proportional mix the loser bleeds, while the AI and group attacks auto-allocate.
+  **Which regions the loser gives up is not chosen by anyone**: BINARY-VERIFIED,
+  `resolve_regular_attack` passes the count to the proportional remover
+  `056d:11f1` (`BRE.OVR 0x0100dc`), which draws on all nine types, **Waste
+  included**, and then adds that same count to the winner's untyped pool at
+  `+0xba` (`0x0103db`). Nothing adds to the winner's Waste, so **captured ruin
+  changes hands as clean land** the winner types in the picker. IB moved it
+  across as Waste, with only the clean part reaching the picker, until
+  2026-10-25.
   Like BRE, the attacker first picks a **committed force** — how many
   Troopers/Jets/Tanks/Bombers to send (jets usable only up to `Carriers × 100`).
   Only the committed units add offense, and only they take the loss; held-back
