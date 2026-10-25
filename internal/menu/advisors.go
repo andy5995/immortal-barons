@@ -31,6 +31,8 @@ const (
 type advisorData struct {
 	p           game.Empire
 	foodGrown   int // this turn's food production (tech-boosted, incl. rivers)
+	avgAgri     int // expected Agricultural food per turn
+	avgRiver    int // expected river food per turn
 	foodEaten   int // this turn's food consumption
 	foodAtCap   int // consumption once population fills its carrying capacity
 	income      int // this turn's gold income
@@ -47,6 +49,8 @@ func gatherAdvisorData(w *ctx) advisorData {
 	w.Read(func() {
 		d.p = *w.Player()
 		d.foodGrown = w.FoodGrown(&d.p)
+		d.avgAgri = d.p.AvgAgriFood()
+		d.avgRiver = d.p.AvgRiverFood()
 		d.foodEaten = w.FoodDue(&d.p)
 		d.foodAtCap = d.p.FoodUpkeepAtCapacity()
 		d.income = w.IncomeThisTurn(&d.p).Gold()
@@ -175,27 +179,45 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 	switch dom {
 	case advisorCivilian:
 		add(fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), count(p.People), p.Support))
-		brk(fmt.Sprintf(tr(s, "We grow %s units of food each turn, and our people eat %s."), count(d.foodGrown), count(d.foodEaten)))
+		// Averages rather than this turn's roll, so the figures hold still between
+		// turns. Recovering the pre-growth stock below needs the actual growth.
+		switch ag, river := p.Regions.Agricultural > 0, p.Regions.River > 0; {
+		case ag:
+			brk(fmt.Sprintf(tr(s, "Our agricultural regions grow about %s units of food each turn."), count(d.avgAgri)))
+			if river {
+				add(fmt.Sprintf(tr(s, "Our rivers add about %s more."), count(d.avgRiver)))
+			}
+		case river:
+			brk(fmt.Sprintf(tr(s, "Our rivers yield about %s units of food each turn."), count(d.avgRiver)))
+		default:
+			brk(tr(s, "We hold no agricultural regions or rivers, so we grow no food."))
+		}
+		add(fmt.Sprintf(tr(s, "Our people eat %s units each turn."), count(d.foodEaten)))
 		add(fmt.Sprintf(tr(s, "Our stores hold %s units of food."), count(p.Food)))
-		net := d.foodGrown - d.foodEaten
+		avgGrown := d.avgAgri + d.avgRiver
+		net := avgGrown - d.foodEaten
 		// Food is credited at turn start, so p.Food already includes this turn's
-		// growth. The projections below are written against the pre-growth stock, so
+		// growth. The run-out below is measured from the pre-growth stock, so
 		// recover it (p.Food - foodGrown) rather than counting the growth twice.
 		stock := p.Food - d.foodGrown
 		switch {
-		case stock+net < 0:
+		case p.Food < d.foodEaten:
 			// Even with this turn's growth already in, stores can't cover this turn's
 			// consumption, so the turn ends with negative food (turn.go starvation step).
 			advise(tr(s, "Our food will not last the turn. Buy or grow more."))
 		case net < 0:
-			warn(fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), count(-net), stock/(-net)))
-		case d.foodAtCap > d.foodGrown:
+			// The stores cover this turn (the case above), so the run-out is at
+			// least a turn away even when this turn's roll beat the average and
+			// left the pre-growth stock at or below zero.
+			warn(fmt.Sprintf(tr(s, "On average we fall %s units short each turn."), count(-net)))
+			warn(plural(s, float64(max(stock/(-net), 1)), "Our stores will run out in about %.0f turn.", "Our stores will run out in about %.0f turns."))
+		case d.foodAtCap > avgGrown:
 			// Fed now, but the populace is still growing toward a support-driven
 			// capacity whose food need outruns production (see issue #35).
 			advise(fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), count(d.foodAtCap)))
 		default:
 			// The food bottom line pops in yellow whether short or in surplus (BRE).
-			warn(fmt.Sprintf(tr(s, "That leaves %s to spare each turn."), count(net)))
+			warn(fmt.Sprintf(tr(s, "On average that leaves %s to spare each turn."), count(net)))
 		}
 		if p.Support < 50 {
 			advise(tr(s, "Popular support is low. It cuts our coastal income and the number of people our land can hold. Lower taxes or spend on their support."))

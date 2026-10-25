@@ -3064,7 +3064,8 @@ manage agriculture (or the food market) to match a support-driven population,
 not the other way round. The Civilian advisor warns ahead of that wall: when the
 realm is fed now but its food need *at full population* would exceed production,
 it flags "our people are still growing… add agricultural regions before then"
-(issue #35).
+(issue #35). Its food figures are averages per turn, agricultural and river
+on separate lines, and its surplus and shortfall are worked out from them.
 
 **Industrial production:** industrial regions output military units. You
 set production percentages across trooper/jet/turret/tank/bomber/carrier.

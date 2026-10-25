@@ -239,3 +239,43 @@ func TestMaintenanceCostsFollowTheOriginalsLadder(t *testing.T) {
 		}
 	}
 }
+
+// The advisor's per-turn food averages: the base plus the mean of the draw.
+// 10 × (300 + 2) and 4 × (110 + 9.5) × 25%, truncated.
+func TestAverageFoodYields(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Regions = RegionMix{Agricultural: 10, River: 4}
+	e.Land = e.Regions.Total()
+	if got := e.AvgAgriFood(); got != 3020 {
+		t.Errorf("AvgAgriFood: want 3020, got %d", got)
+	}
+	if got := e.AvgRiverFood(); got != 119 {
+		t.Errorf("AvgRiverFood: want 119, got %d", got)
+	}
+}
+
+// The averages must track the yields the turn engine actually pays, with and
+// without food technology, or the advisor drifts from what the realm grows.
+func TestAverageFoodYieldsMatchTheDraw(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Regions = RegionMix{Agricultural: 10, River: 4, Technology: 20}
+	e.Land = e.Regions.Total()
+	for _, slot := range []int{0, 40} {
+		e.TechSlots[TechSlotGold] = slot
+		const days = 2000
+		var agri, river int
+		for d := range days {
+			w.GameDay = d
+			agri += w.FoodProduced(e)
+			river += w.riverFood(e)
+		}
+		if got, want := e.AvgAgriFood(), agri/days; got < want-2 || got > want+2 {
+			t.Errorf("tech slot %d: AvgAgriFood %d, measured mean %d", slot, got, want)
+		}
+		if got, want := e.AvgRiverFood(), river/days; got < want-2 || got > want+2 {
+			t.Errorf("tech slot %d: AvgRiverFood %d, measured mean %d", slot, got, want)
+		}
+	}
+}

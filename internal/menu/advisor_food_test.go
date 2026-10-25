@@ -39,6 +39,7 @@ func TestCivilianAdvisorRunOutUsesPreGrowthStock(t *testing.T) {
 	var d advisorData
 	d.p.Food = 200_000 // post-growth
 	d.foodGrown = 40_000
+	d.avgAgri = 40_000
 	d.foodEaten = 60_000 // shortfall 20,000; pre-growth stock 160,000 -> 160000/20000 = 8 turns
 	d.p.Support = 100
 
@@ -46,5 +47,60 @@ func TestCivilianAdvisorRunOutUsesPreGrowthStock(t *testing.T) {
 	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
 	if !strings.Contains(joined, "run out") || !strings.Contains(joined, "8 turns") {
 		t.Errorf("run-out should be pre-growth stock / shortfall = 8 turns, got:\n%s", joined)
+	}
+}
+
+// The Civilian advisor names agricultural and river food on separate lines, and
+// leaves the river line out for a realm with no rivers.
+func TestCivilianAdvisorSplitsFoodBySource(t *testing.T) {
+	var d advisorData
+	d.p.Food = 100_000
+	d.p.Support = 100
+	d.p.Regions.Agricultural, d.p.Regions.River = 10, 4
+	d.avgAgri, d.avgRiver = 3_020, 119
+
+	s := &fakeSession{}
+	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
+	if !strings.Contains(joined, "agricultural regions grow about 3,020") || !strings.Contains(joined, "rivers add about 119") {
+		t.Errorf("want separate agricultural and river figures, got:\n%s", joined)
+	}
+	d.p.Regions.River = 0
+	if joined = joinAdvisor(advisorReport(s, d, advisorCivilian)); strings.Contains(joined, "rivers") {
+		t.Errorf("no rivers, no river line; got:\n%s", joined)
+	}
+}
+
+// A realm without farms is not told its farms grow nothing: the rivers stand on
+// their own, and a realm with neither says it grows no food at all.
+func TestCivilianAdvisorFoodWithoutFarms(t *testing.T) {
+	var d advisorData
+	d.p.Food = 100_000
+	d.p.Support = 100
+	d.p.Regions.River = 4
+	d.avgRiver = 119
+
+	s := &fakeSession{}
+	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
+	if strings.Contains(joined, "agricultural regions grow") || !strings.Contains(joined, "rivers yield about 119") {
+		t.Errorf("rivers only: want the river line alone, got:\n%s", joined)
+	}
+	d.p.Regions.River, d.avgRiver = 0, 0
+	if joined = joinAdvisor(advisorReport(s, d, advisorCivilian)); !strings.Contains(joined, "we grow no food") {
+		t.Errorf("no food regions: want it said, got:\n%s", joined)
+	}
+}
+
+// A run-out one turn away is "1 turn", not "1 turns".
+func TestCivilianAdvisorRunOutSingular(t *testing.T) {
+	var d advisorData
+	d.p.Food = 70_000
+	d.foodGrown, d.avgAgri = 40_000, 40_000
+	d.foodEaten = 60_000 // pre-growth stock 30,000 / shortfall 20,000 -> 1
+	d.p.Support = 100
+
+	s := &fakeSession{}
+	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
+	if !strings.Contains(joined, "about 1 turn.") {
+		t.Errorf("want a singular run-out, got:\n%s", joined)
 	}
 }

@@ -31,7 +31,16 @@ func (w *World) FoodProduced(e *Empire) int {
 // raises the base and not the draw — the yield routine returns a tech-scaled
 // 300 and its caller adds the draw afterward.
 func (w *World) agriFood(e *Empire) int {
-	return techRaise(FoodAgriBase, e.TechFoodFactor()) + w.regionDraw(e, 6, FoodAgriRate)
+	return e.agriBase() + w.regionDraw(e, 6, FoodAgriRate)
+}
+
+// agriBase is an Agricultural region's yield before the draw.
+func (e *Empire) agriBase() int { return techRaise(FoodAgriBase, e.TechFoodFactor()) }
+
+// AvgAgriFood is the realm's expected Agricultural food per turn: agriFood with
+// the draw replaced by its mean, so the figure holds still from turn to turn.
+func (e *Empire) AvgAgriFood() int {
+	return e.Regions.Agricultural * (2*e.agriBase() + FoodAgriRate - 1) / 2
 }
 
 // ForcesDue and RegionsDue apply the league's Maintenance Costs knob to the

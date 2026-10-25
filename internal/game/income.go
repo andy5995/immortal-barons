@@ -169,8 +169,16 @@ func (e *Empire) taxIncome() int {
 // food, the rest as gold (see riverGold). The haul itself has BRE's shape: a
 // tech-raised base plus one draw per turn.
 func (w *World) riverFood(e *Empire) int {
-	perRegion := techRaise(RiverFishFood, e.TechFoodFactor()) + w.regionDraw(e, 7, RiverFishRate)
+	perRegion := e.riverFishBase() + w.regionDraw(e, 7, RiverFishRate)
 	return pctOf(e.Regions.River*perRegion, RiverFishShare)
+}
+
+// riverFishBase is a river's fishing haul before the draw.
+func (e *Empire) riverFishBase() int { return techRaise(RiverFishFood, e.TechFoodFactor()) }
+
+// AvgRiverFood is riverFood with the draw replaced by its mean.
+func (e *Empire) AvgRiverFood() int {
+	return pctOf(e.Regions.River*(2*e.riverFishBase()+RiverFishRate-1), RiverFishShare) / 2
 }
 
 // FoodGrown is the empire's total food production this turn: its tech-boosted

@@ -692,6 +692,14 @@ This gives the empire a maximum food deficit of 1220 units per year.
 At our current population, we can survive for at least 2 years.
 ```
 
+**Deliberate divergence — IB prints averages, not BRE's minimum.** BRE's two
+food lines are the Agricultural minimum (no draw) and what rivers "occasionally"
+add. IB fishes a share of every river every turn, so both of its lines are the
+expected yield per turn: base plus the mean of the draw, labeled "about", and
+the surplus or shortfall below them says "on average". A realm with no rivers
+gets no river line, and one with no agricultural regions gets the river line
+alone.
+
 ### (2) Economic — income and efficiency
 
 All figures `93` bright-yellow.
