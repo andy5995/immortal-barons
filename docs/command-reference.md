@@ -15,8 +15,8 @@ immortal-barons [options]
 
 With no options, it runs as a BBS door: it looks for the drop file your BBS
 writes (the format you chose with `-set-dropfile`) in the current folder and
-plays over the BBS connection. If that format is BBSDEV.DRP, it reads the
-`BBSDEV_DRP` environment variable first. The options below change that.
+plays over the BBS connection. If that format is BBSDEV.DRP or DOORDROP.INI, it
+reads the `BBSDEV_DRP` or `DOORDROP_INI` environment variable first. The options below change that.
 
 ### Play
 

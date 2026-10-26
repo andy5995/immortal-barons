@@ -4,8 +4,9 @@
 //
 // DOOR32.SYS is the primary format (both Synchronet and Mystic write it,
 // and it cleanly encodes the I/O method). DOOR.SYS, PCBOARD.SYS, and
-// DORINFO1.DEF are supported as widely-used alternatives, and BBSDEV.DRP as a
-// modern one that specifies what the others leave to convention. Field positions were
+// DORINFO1.DEF are supported as widely-used alternatives, BBSDEV.DRP as a
+// modern one that specifies what the others leave to convention, and
+// DOORDROP.INI, still a draft, as a named-value one. Field positions were
 // cross-checked against the Synchronet source (src/xpdoor/dropfiles.c), the
 // Synchronet wiki PCBOARD.SYS and DORINFO1.DEF references, and BRE's own
 // INSTALL.CFG.
@@ -55,6 +56,10 @@ var Formats = []Format{
 			return strings.HasPrefix(n, "dorinfo") && strings.HasSuffix(n, ".def")
 		}},
 	{ID: "bbsdev", Name: "BBSDEV.DRP", File: "BBSDEV.DRP", Env: "BBSDEV_DRP", read: fromBytes(parseBBSDev)},
+	{ID: "doordrop", Name: "DOORDROP.INI", File: "DOORDROP.INI", Env: "DOORDROP_INI", read: fromBytes(parseDoorDrop),
+		matches: func(n string) bool { // the spec allows any name that keeps .INI
+			return strings.HasSuffix(n, ".ini")
+		}},
 }
 
 // fromLines adapts a line-based parser to Format.read.
@@ -149,9 +154,10 @@ type Caller struct {
 	StdioRedirect bool
 
 	// Charset and Language are what the BBS says about the caller's terminal
-	// and the caller themself. Only BBSDEV.DRP carries them; the older formats
-	// leave both empty, which means "the door decides", as it always has.
-	Charset  string // IANA character-set name, e.g. "IBM437"
+	// and the caller themself. Only BBSDEV.DRP and DOORDROP.INI carry them; the
+	// older formats leave both empty, which means "the door decides", as it
+	// always has.
+	Charset  string // character-set name, e.g. "IBM437" or "CP437"
 	Language string // BCP 47 language tag, e.g. "de-DE"
 }
 
