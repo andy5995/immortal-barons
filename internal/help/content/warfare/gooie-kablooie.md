@@ -23,10 +23,11 @@ either way.
 
 ## Being on the receiving end
 
-A weapon that reaches your planet stays there and destroys regions each day. The
-day it lands it takes a tenth of every realm's
+A weapon that reaches your planet stays there and destroys regions each day. At
+the first daily maintenance after it lands, it takes a tenth of every realm's
 regions. Every day after that it takes another twentieth, until five days are up
-and it burns itself out. Left alone it will cost you more than a quarter of
+and it burns itself out. Between landing and that first maintenance it does no
+damage yet, but your jets can already reach it. Left alone it will cost you more than a quarter of
 your regions.
 
 Only jets can reach it. Your realm is asked at the start of your turn whether you

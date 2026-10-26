@@ -10,9 +10,9 @@ import (
 // by the barons who live here rather than bought by any one of them. It is IB's
 // rename of BRE's Gooie Kablooie, and it goes through the original's whole life:
 // a planet starts one against a named target, everyone chips in until it is
-// paid for, it flies for a couple of days in plain sight of the planet it is
-// aimed at, and it arrives with whatever is left of it after that planet's jets
-// have had their turn.
+// paid for, it flies for a couple of days unseen by the planet it is aimed at
+// unless that planet has a SpyGuy posted here, and once it lands it besieges the
+// planet until it burns out or that planet's jets bring it down.
 type Annihilator struct {
 	TargetBoard string // the planet it is aimed at
 	Creator     string // owner handle of the baron who started it
@@ -232,6 +232,7 @@ func (w *World) LaunchDueAnnihilatorAt(now time.Time) {
 	// and means nothing on the target's, which is what the status packet carries.
 	d.ArrivesAt = now.Add(AnnihilatorFlightDays * 24 * time.Hour)
 	w.postNews(fmt.Sprintf("The Gooie Kablooie has launched at %s.", d.TargetBoard))
+	w.reportAnnihilator(d.TargetBoard, d)
 }
 
 // DismantleAnnihilatorByCoordinator stands the weapon down on the elected BBS

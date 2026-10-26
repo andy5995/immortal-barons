@@ -1269,13 +1269,14 @@ indistinguishable, from the funders' side, from one that went missing in transit
 IB's own design.** The original sends nothing at all during the flight and one
 attack packet at arrival: `process_gooie_launch` runs on the BUILDER's board
 (the flag it gates on, written only in `fund_gooie_kablooie`, is the builder's
-own weapon state), compares the weapon's arrival against the clock, and calls
-`write_gooie_attack_packet` when it is due. The packet IS the arrival, so a
+own weapon state), compares the weapon's launch instant against the clock, and
+calls `write_gooie_attack_packet` when it is due, so BRE's flight is the packet's
+transit and nothing else. The packet IS the arrival, so a
 target that was down simply applies it whenever it next reads inbound, and there
 is nothing to announce twice. IB repeats instead so that one lost packet cannot
-leave a planet unwarned — chosen 2026-09-13 over matching the original exactly
-(which loses the warning) and over a single announcement at launch (which
-restores the silent failure the repetition exists to prevent).
+keep the weapon from landing — chosen 2026-09-13 over matching the original
+exactly and over a single announcement at launch, either of which a single lost
+packet turns into a weapon that silently never arrives.
 
 Repeating has a price, and `World.AnnihilatorDone` is it: the arrival instant of
 the last weapon from each builder board this planet has finished with — burned
@@ -1291,12 +1292,23 @@ against `AnnihilatorSiegeDays` a second generation routinely reports during the
 first's siege. A weapon with no instant — from a board that predates the field —
 cannot be recorded either way, and is left to the "already due" test.
 
-The target planet is told when the weapon **launches**, with the arrival time in
-hours, which is the early warning that gives the planet time to raise jets —
-interception itself is only possible once the weapon is on the ground
-(`InterceptAnnihilator` refuses one still aloft, as the original does; #63).
-**It is not told while
-the weapon is being built** — that is what a SpyGuy is for. Both of BRE's
+**The target planet is told nothing on its own, built or flying** — that is
+what a SpyGuy is for. The flight status IB sends is the weapon itself and
+reaches the target unwatched, so it posts no news and draws no Incoming row; a
+watcher on the builder's planet reports the launch with the hours until it
+LANDS, and the Incoming view counts down to that. With no watcher, a planet
+first learns of the weapon from the jets' prompt once it is down. Interception
+is only possible on the ground (`InterceptAnnihilator` refuses one still aloft,
+as the original does; #63).
+
+**The first bite comes at the next daily maintenance after landing, not at the
+landing.** BRE's `run_interbbs_maintenance` calls `run_daily_maintenance` (site
+0x274b, which runs `resolve_gooie_attack`) BEFORE it reads inbound packets
+(`process_incoming_interbbs_data`, 0x2840), and the receiver
+(`validate_gooie_packet`) writes no news and destroys nothing. IB lands the
+weapon on the planetary step and bites in maintenance, the same order. Between
+the two the weapon is on the ground, the jets can reach it, and the news says
+nothing yet. Both of BRE's
 construction strings, "Gooie Kablooie destined for our planet is under
 construction at ..." and "Gooie Kablooie arrives from ... in N Hours.", belong
 to `show_gooie_arrival_time`, whose only caller is the SPY_GUY packet receiver,
@@ -5169,7 +5181,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
     "was found spying on you" to the LOCAL Send Spy.)
   - **What he reports**: a group attack assembled against his planet (or a realm
     on it), with the hours until it leaves, and a Gooie under construction,
-    funded, or dismantled. `breins.txt`: "he(she) will report information on all
+    funded, or dismantled. IB's watcher also reports the launch, with the hours
+    until it lands, because IB's Gooie flies for two days where BRE's packet
+    IS the arrival. `breins.txt`: "he(she) will report information on all
     incoming group attacks and Gooie Kablooies allowing realms to prepare for
     the incoming onslaughts." On arrival he is caught up on both at once
     (`show_gooie_arrival_time`, `estimate_attack_arrival`).

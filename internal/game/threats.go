@@ -117,12 +117,24 @@ func (w *World) expireThreats() {
 	cutoff := timeNow().Add(-ThreatMemoryHours * time.Hour)
 	kept := w.Threats[:0]
 	for _, t := range w.Threats {
-		if at := t.When(); !at.IsZero() && at.Before(cutoff) {
+		if at := t.When(); !at.IsZero() && at.Before(cutoff) && !w.gooieInFlight(t) {
 			continue
 		}
 		kept = append(kept, t)
 	}
 	w.Threats = kept
+}
+
+// gooieInFlight reports whether t is about a Gooie that has launched and not
+// yet landed. Such a record outlives the usual memory: a watcher who left before
+// the launch report never moved it on from the launch hour, and dropping it a
+// day after that would take the warning away a day before the weapon lands.
+func (w *World) gooieInFlight(t Threat) bool {
+	if t.Kind != ThreatGooie {
+		return false
+	}
+	d := w.IncomingFrom(t.FromBoard)
+	return d != nil && d.Launched && d.DaysLeft == 0
 }
 
 // IncomingThreats is everything aimed at this planet, soonest first, for the

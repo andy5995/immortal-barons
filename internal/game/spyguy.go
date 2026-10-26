@@ -189,7 +189,7 @@ func (w *World) reportStandingThreats(board string) {
 			w.reportGroupAttack(board, g)
 		}
 	}
-	if d := w.Annihilator; d != nil && d.TargetBoard == board && !d.Launched {
+	if d := w.Annihilator; d != nil && d.TargetBoard == board && (!d.Launched || timeNow().Before(d.ArrivesAt)) {
 		w.reportAnnihilator(board, d)
 	}
 }
@@ -215,6 +215,11 @@ func (w *World) reportAnnihilator(board string, d *Annihilator) {
 		w.reportThreat(board, Threat{Kind: ThreatGooie})
 		return
 	}
+	if d.Launched {
+		// In the air, the hour that matters is the one it lands.
+		w.reportThreat(board, Threat{Kind: ThreatGooie, At: ThreatAt(d.ArrivesAt)})
+		return
+	}
 	w.reportThreat(board, Threat{Kind: ThreatGooie, At: ThreatAt(d.LaunchAt)})
 }
 
@@ -229,7 +234,7 @@ func hoursUntil(t time.Time) int {
 	if t.IsZero() {
 		return 1
 	}
-	d := time.Until(t)
+	d := t.Sub(timeNow())
 	if d <= 0 {
 		return 1
 	}
@@ -253,6 +258,10 @@ func groupAttackSpyLine(from string, g GroupAttack) string {
 
 // annihilatorSpyLine reports the state of the weapon being built for us.
 func annihilatorSpyLine(from string, d *Annihilator) string {
+	if d.Launched {
+		return fmt.Sprintf("Our agent on %s reports their Gooie Kablooie has launched and lands here in %d hours.",
+			from, hoursUntil(d.ArrivesAt))
+	}
 	if d.Funded {
 		// Off the weapon's own instant, not off the build constant: a watcher
 		// posted after the funding reported a full three days every time. A

@@ -37,7 +37,8 @@ them:
 - a **group attack** being assembled against this planet, or against one realm
   on it, with the hours left before it leaves
 - a **Gooie Kablooie** being built for us — when the work starts, when the
-  funding is complete, and if it is stood down again
+  funding is complete, when it launches and how long until it lands, and if it
+  is stood down again
 
 He also reports whatever is already under way the day he arrives, so a man sent
 late is not wasted.
@@ -50,18 +51,18 @@ later it no longer tells you how long is left.
 
 **Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept
 current: one row per threat, the soonest at the top, counting down as you read —
-`3h`, then `90m`, then `away` once the force has left. A weapon already flying
-is listed with the days until it lands.
+`3h`, then `90m`, then `away` once the force has left. A Gooie Kablooie in
+flight counts down to the hour it lands, and drops off the list once it has.
 
-An empty list does not prove that nobody is coming. Apart from a weapon already
-in flight, only a watcher posted on another planet can report anything.
+An empty list does not prove that nobody is coming. Only a watcher posted on
+another planet can report anything.
 
 ## Why it matters
 
-A weapon still on the ground is the builders' own business: nobody tells you it
-exists. You learn of it when it launches — and by then it is two days out with
-only your jets between it and your regions. A SpyGuy on the right planet buys
-you the days you need to raise them.
+A Gooie Kablooie is the builders' own business: nobody tells you it exists,
+and nobody tells you it has launched. Without a watcher you learn of it when it
+lands, with only your jets between it and your regions. A SpyGuy on the right
+planet buys you the days you need to raise them.
 
 The planet you are watching is told nothing. There is no discovery, no trial,
 and no execution; when the days you paid for run out, your man simply comes

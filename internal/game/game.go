@@ -307,7 +307,7 @@ type World struct {
 	// AnnihilatorDone is the arrival instant of the last weapon from each board
 	// that this planet has finished with — burned out, or shot down. A board
 	// re-announces a weapon in flight on every planetary run so a single lost
-	// packet cannot leave the target unwarned (a divergence: the original sends
+	// packet cannot keep it from landing (a divergence: the original sends
 	// one attack packet at arrival and never repeats), and the price of repeating
 	// is that a copy can outlive the weapon and raise the siege a second time.
 	// Matching the instant is what tells a late copy of a finished weapon from

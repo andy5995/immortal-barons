@@ -57,32 +57,6 @@ func TestIncomingListsWhatIsAimedHere(t *testing.T) {
 	}
 }
 
-// A weapon already in the air is listed once, from the board that launched it,
-// with its arrival — not twice, beside the record of it being built.
-func TestIncomingListsAFlyingWeaponOnce(t *testing.T) {
-	w := newWorld()
-	w.With(func() {
-		w.World.GameDay = 10
-		w.World.Incoming = []*game.Annihilator{{
-			Creator: "The Eclipse", Launched: true, ArrivesDay: 12, Intact: 100,
-		}}
-		w.World.Threats = []game.Threat{
-			{FromBoard: "The Eclipse", Kind: game.ThreatGooie,
-				At: game.ThreatAt(time.Now().Add(-time.Hour))},
-		}
-	})
-	f := &fakeSession{keys: []rune("\r")}
-	showIncoming(f, w)
-
-	out := stripANSI(f.out.String())
-	if n := strings.Count(out, "Gooie Kablooie"); n != 1 {
-		t.Errorf("the weapon is listed %d times, want 1:\n%s", n, out)
-	}
-	if !strings.Contains(out, "2d") {
-		t.Errorf("the flight is not counted in days:\n%s", out)
-	}
-}
-
 // An empty list says so and nothing more: what an empty list means is the
 // SpyGuy topic's business, not a line repeated on every draw of this screen.
 func TestIncomingEmptySaysSo(t *testing.T) {
@@ -97,4 +71,68 @@ func TestIncomingEmptySaysSo(t *testing.T) {
 	if strings.Contains(out, "SpyGuy") {
 		t.Errorf("the screen should not explain itself every time:\n%s", out)
 	}
+}
+
+// A Gooie in the air is listed only from a watcher's report, counting down to
+// its landing; once past that hour it reads "now", and once landed it is off
+// the list, which the jets' picker takes over.
+func TestIncomingShowsAFlightOnlyFromAWatcher(t *testing.T) {
+	now := time.Now()
+	draw := func(arrives time.Time, daysLeft int, watched bool) string {
+		w := newWorld()
+		w.With(func() {
+			w.World.Incoming = []*game.Annihilator{{
+				Creator: "The Eclipse", Launched: true, Intact: 100,
+				ArrivesAt: arrives, DaysLeft: daysLeft,
+			}}
+			if watched {
+				w.World.Threats = []game.Threat{{FromBoard: "The Eclipse",
+					Kind: game.ThreatGooie, At: game.ThreatAt(arrives)}}
+			}
+		})
+		f := &fakeSession{keys: []rune("\r")}
+		showIncoming(f, w)
+		return stripANSI(f.out.String())
+	}
+	if out := draw(now.Add(26*time.Hour+30*time.Minute), 0, false); strings.Contains(out, "The Eclipse") {
+		t.Errorf("an unwatched flight is listed:\n%s", out)
+	}
+	if out := draw(now.Add(26*time.Hour+30*time.Minute), 0, true); !strings.Contains(out, "27h") {
+		t.Errorf("the flight is not counted down to its landing:\n%s", out)
+	}
+	if row := incomingRow(draw(now.Add(-time.Hour), 0, true), "The Eclipse"); !strings.HasSuffix(row, " now") {
+		t.Errorf("a flight past its hour reads %q, want it to end in now", row)
+	}
+	if out := draw(now.Add(-time.Hour), game.AnnihilatorSiegeDays, true); strings.Contains(out, "The Eclipse") {
+		t.Errorf("a landed weapon is still listed as incoming:\n%s", out)
+	}
+}
+
+// A builder can start its next weapon while its last is still besieging us.
+// The landed one is off the list; a report of the new one is not.
+func TestIncomingShowsTheNextGooieDuringASiege(t *testing.T) {
+	w := newWorld()
+	now := time.Now()
+	w.With(func() {
+		w.World.Incoming = []*game.Annihilator{{
+			Creator: "The Eclipse", Launched: true, Intact: 100,
+			ArrivesAt: now.Add(-time.Hour), DaysLeft: game.AnnihilatorSiegeDays,
+		}}
+		w.World.Threats = []game.Threat{{FromBoard: "The Eclipse", Kind: game.ThreatGooie}}
+	})
+	f := &fakeSession{keys: []rune("\r")}
+	showIncoming(f, w)
+	if row := incomingRow(stripANSI(f.out.String()), "The Eclipse"); !strings.HasSuffix(row, " ?") {
+		t.Errorf("the next weapon's row reads %q, want it listed with no hour yet", row)
+	}
+}
+
+// incomingRow is the line of the Incoming table naming planet, trimmed.
+func incomingRow(out, planet string) string {
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(line, planet) {
+			return strings.TrimSpace(line)
+		}
+	}
+	return ""
 }

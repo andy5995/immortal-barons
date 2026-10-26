@@ -20,9 +20,8 @@ import (
 // screen reads the records that ride beside them.
 //
 // It is not a new source of knowledge. Every row came from a SpyGuy posted on
-// the planet it names, or from a weapon already in the air and therefore in
-// plain sight; a planet with no watcher out sees an empty list, exactly as it
-// learns nothing today.
+// the planet it names; a planet with no watcher out sees an empty list, and
+// learns of a Gooie Kablooie only when it lands, as in the original.
 
 // Column widths. Sized to this screen's own content, as BRE sizes each of its
 // boxes: 2 of indent and four columns with a space between them come to the
@@ -107,33 +106,26 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 	var rows []inRow
 	now := game.Now()
 	w.Read(func() {
-		// A weapon already in the air is not a report from anybody: the board that
-		// launched it says so openly, and the whole flight is visible (#63). Its
-		// row comes first because there is nothing left to be done about it but
-		// shoot it down when it lands.
-		flying := map[string]bool{}
-		for _, d := range w.Incoming {
-			if !d.Launched {
-				continue
-			}
-			flying[d.Creator] = true
-			rows = append(rows, inRow{
-				planet: d.Creator,
-				threat: tr(s, "Gooie Kablooie"),
-				color:  ansi.FgBrightRed,
-				target: tr(s, "this planet"),
-				when:   incomingDays(s, d.ArrivesDay-w.GameDay),
-			})
-		}
 		for _, t := range w.IncomingThreats() {
-			// The weapon in the air above and the weapon that was being built are
-			// the same weapon. One row for it, the one that is still true.
-			if t.Kind == game.ThreatGooie && flying[t.FromBoard] {
-				continue
-			}
 			r := inRow{}
 			r.planet = t.FromBoard
 			r.when, r.away = incomingWhen(s, now, t)
+			if t.Kind == game.ThreatGooie {
+				if d := w.IncomingFrom(t.FromBoard); d != nil && d.Launched {
+					// Landed, it is besieging rather than incoming, and the jets'
+					// picker at the top of the turn shows it. Only a record about
+					// THAT weapon is dropped: the builder may already be at work on
+					// its next, and a record naming no hour or a later one is that.
+					// Past its hour but not yet down, it lands on the next planetary
+					// run.
+					if at := t.When(); d.DaysLeft > 0 && !at.IsZero() && !at.After(d.ArrivesAt) {
+						continue
+					}
+					if r.away && !d.ArrivesAt.IsZero() && !now.Before(d.ArrivesAt) {
+						r.when = tr(s, "now")
+					}
+				}
+			}
 			switch t.Kind {
 			case game.ThreatGooie:
 				r.threat, r.color = tr(s, "Gooie Kablooie"), ansi.FgBrightRed
@@ -172,14 +164,4 @@ func incomingWhen(s session.Session, now time.Time, t game.Threat) (string, bool
 	// way it is on its way here and the row stays for a day (ThreatMemoryHours),
 	// because that is the moment the warning matters most.
 	return tr(s, "away"), true
-}
-
-// incomingDays spells a flight measured in whole game days, which is all the
-// weapon's arrival is known to (Annihilator.ArrivesDay). It is deliberately a
-// different unit from the countdowns above, and reads as one.
-func incomingDays(s session.Session, days int) string {
-	if days <= 0 {
-		return tr(s, "now")
-	}
-	return fmt.Sprintf("%dd", days)
 }

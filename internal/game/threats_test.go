@@ -1,6 +1,7 @@
 package game
 
 import (
+	"strings"
 	"testing"
 	"time"
 )
@@ -111,5 +112,58 @@ func TestCallingOffAPartyClearsTheTargetsRecord(t *testing.T) {
 	}
 	if !gone {
 		t.Errorf("the target was not told the party was called off: %+v", w.outboxFor("Wildside").Threats)
+	}
+}
+
+// A launch reaches the target's news and Incoming view only through a watcher,
+// and then names the hour it LANDS, not the hour it left.
+func TestALaunchIsReportedOnlyToAWatcher(t *testing.T) {
+	launch := func(watched bool) *Packet {
+		cfg := DefaultConfig()
+		cfg.IBBS, cfg.BoardID, cfg.GooieKablooie = true, "boardA", true
+		w := NewWorldSeed(cfg, 1)
+		if watched {
+			w.SpyGuys = map[string]int{"Wildside": 3}
+		}
+		now := timeNow()
+		w.Annihilator = &Annihilator{TargetBoard: "Wildside", Funded: true, LaunchAt: now, Intact: 100}
+		w.LaunchDueAnnihilatorAt(now)
+		if !w.Annihilator.Launched {
+			t.Fatal("the weapon did not launch")
+		}
+		return w.outboxFor("Wildside")
+	}
+	if p := launch(false); len(p.News) != 0 || len(p.Threats) != 0 {
+		t.Errorf("an unwatched planet was told of the launch: %+v", p)
+	}
+	p := launch(true)
+	if len(p.News) != 1 || len(p.Threats) != 1 {
+		t.Fatalf("the watcher sent news %v, threats %+v", p.News, p.Threats)
+	}
+	if want := "lands here in 48 hours"; !strings.Contains(p.News[0], want) {
+		t.Errorf("news %q, want %q", p.News[0], want)
+	}
+	if left := time.Until(p.Threats[0].When()); left < 47*time.Hour || left > 48*time.Hour {
+		t.Errorf("the record names %v from now, want the 48h arrival", left)
+	}
+}
+
+// A record left at a Gooie's launch hour, because the watcher went home before
+// the launch report, stays while the weapon is still in the air, and goes once
+// it is down.
+func TestAGooieRecordOutlivesItsLaunchHourInFlight(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	launched := timeNow().Add(-(ThreatMemoryHours + 1) * time.Hour)
+	w.Threats = []Threat{{FromBoard: "far", Kind: ThreatGooie, At: ThreatAt(launched)}}
+	w.Incoming = []*Annihilator{{Creator: "far", Launched: true, Intact: 100,
+		ArrivesAt: launched.Add(AnnihilatorFlightDays * 24 * time.Hour)}}
+	w.expireThreats()
+	if len(w.Threats) != 1 {
+		t.Fatal("the warning was dropped while the weapon is still in the air")
+	}
+	w.Incoming[0].DaysLeft = AnnihilatorSiegeDays
+	w.expireThreats()
+	if len(w.Threats) != 0 {
+		t.Errorf("the record outlived the landing: %+v", w.Threats)
 	}
 }

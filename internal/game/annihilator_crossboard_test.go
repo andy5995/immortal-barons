@@ -51,25 +51,20 @@ func TestAnIncomingGooieLandsWhateverTheLocalDayCounterReads(t *testing.T) {
 	}
 }
 
-// The countdown the planet is told is measured on our clock too. It read
-// "1,392 hours" when the sender's day number was taken for ours.
-func TestTheIncomingGooieCountdownIsMeasuredHere(t *testing.T) {
+// The status is the weapon itself and reaches the target whether or not anyone
+// watches the builder, so it warns nobody: in BRE the target hears nothing until
+// the weapon lands, and only a SpyGuy learns when that will be.
+func TestAnIncomingGooieStatusPostsNoWarning(t *testing.T) {
 	w := incomingWorld(t, 2)
 	w.applyAnnihilatorStatus(&AnnihilatorStatus{
 		FromBoard: "xbit", Funded: true, Launched: true,
 		ArrivesAt: Recorded(timeNow().Add(3 * 24 * time.Hour)), ArrivesDay: 60, Intact: 100,
 	})
-	var line string
-	for _, n := range w.NewsToday {
-		if strings.Contains(n.Text, "Gooie Kablooie arrives") {
-			line = n.Text
-		}
+	if len(w.Incoming) != 1 {
+		t.Fatalf("tracking %d weapons, want 1", len(w.Incoming))
 	}
-	if line == "" {
-		t.Fatal("the planet was never warned")
-	}
-	if !strings.Contains(line, "72 hours") {
-		t.Errorf("countdown reads %q, want 72 hours", line)
+	if news := w.NewsToday.Join("\n"); strings.Contains(news, "xbit") {
+		t.Errorf("an unwatched launch was announced:\n%s", news)
 	}
 }
 
@@ -219,7 +214,7 @@ func TestTheDayFieldStaysOnTheWireSoOlderBoardsStillVerify(t *testing.T) {
 
 // A weapon that has been and gone must not be raised again by a late copy of
 // its own status. IB re-announces a weapon in flight on every planetary run so
-// one lost packet cannot leave the target unwarned, which means a copy can
+// one lost packet cannot keep the weapon from landing, which means a copy can
 // outlive the weapon; the arrival instant is what tells that copy from the first
 // word of a new weapon.
 func TestAFinishedGooieIsNotLandedTwiceByALateStatus(t *testing.T) {
@@ -307,13 +302,6 @@ func TestTwoPlanetsCanAimAtThisOneAtOnce(t *testing.T) {
 	}
 	if len(w.Incoming) != 2 {
 		t.Fatalf("tracking %d weapons, want 2: %+v", len(w.Incoming), w.Incoming)
-	}
-	// Both planets were named to the barons, not just the first.
-	news := w.NewsToday.Join("\n")
-	for _, from := range []string{"xbit", "The Eclipse"} {
-		if !strings.Contains(news, from) {
-			t.Errorf("no warning names %s — that planet's weapon arrives unannounced:\n%s", from, news)
-		}
 	}
 	// And both land.
 	w.GameDay += 2

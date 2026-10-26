@@ -104,7 +104,6 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 	if at, ok := ParseStamp(st.ArrivesAt); ok && !first && !in.ArrivesAt.IsZero() && !at.Equal(in.ArrivesAt) {
 		return
 	}
-	wasFlying := in.Launched
 	in.TargetBoard = w.Config.BoardID
 	// Translated onto OUR day count, so the siege tick and the countdown both
 	// read a number that means something here.
@@ -118,16 +117,12 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 	if st.Intact > 0 && st.Intact < in.Intact {
 		in.Intact = st.Intact
 	}
-	switch {
-	case st.Launched && !wasFlying:
-		hours := days * 24
-		if hours < 0 {
-			hours = 0
-		}
-		w.postNews(fmt.Sprintf("A Gooie Kablooie arrives from %s in %d hours.", st.FromBoard, hours))
-	case first:
-		w.postNews(fmt.Sprintf("A Gooie Kablooie destined for our planet is under construction at %s.", st.FromBoard))
-	}
+	// Nothing is announced here. The status is the weapon itself, sent to the
+	// target whether or not anyone is watching, so a warning posted from it would
+	// tell every target what only a SpyGuy on the builder's planet may learn. In
+	// BRE the target hears nothing until the attack packet lands
+	// (process_gooie_launch writes it at launch; show_gooie_arrival_time, the
+	// only source of an arrival figure, is called only by the SpyGuy receiver).
 }
 
 // ArriveAnnihilator lands an incoming weapon whose flight is over. It does not
