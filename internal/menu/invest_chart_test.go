@@ -8,12 +8,20 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// A column fills a half-row per 10% of the per-date limit, rounded down, so a
-// full column means a full date; anything due shows at least one half-row.
-func TestInvestChartHalves(t *testing.T) {
-	for pct, want := range map[int]int{0: 0, 1: 1, 9: 1, 10: 1, 19: 1, 20: 2, 37: 3, 99: 9, 100: 10} {
-		if got := investChartHalves(pct); got != want {
-			t.Errorf("investChartHalves(%d) = %d, want %d", pct, got, want)
+// A column fills a cell per 20% of the per-date limit, and a remainder caps it
+// with a partly filled cell, so a full column means a full date and anything
+// due shows at least the cap.
+func TestShadeCells(t *testing.T) {
+	type cells struct {
+		full int
+		part bool
+	}
+	for pct, want := range map[int]cells{
+		-5: {0, false}, 0: {0, false}, 1: {0, true}, 19: {0, true}, 20: {1, false}, 37: {1, true},
+		40: {2, false}, 54: {2, true}, 97: {4, true}, 99: {4, true}, 100: {5, false}, 140: {5, false},
+	} {
+		if full, part := shadeCells(pct, investChartRows); full != want.full || part != want.part {
+			t.Errorf("shadeCells(%d, %d) = %d, %v, want %d, %v", pct, investChartRows, full, part, want.full, want.part)
 		}
 	}
 }
@@ -27,8 +35,8 @@ func TestBankMenuDrawsTheInvestmentChart(t *testing.T) {
 	day := w.World.GameDay
 	p.Investments = []game.Investment{
 		{Amount: 1, Return: 2_000_000_000, MaturesDay: day + 1},  // full
-		{Amount: 1, Return: 740_000_000, MaturesDay: day + 3},    // 37%: 3 halves
-		{Amount: 1, Return: 1_000, MaturesDay: day + 10},         // a sliver: 1 half
+		{Amount: 1, Return: 740_000_000, MaturesDay: day + 3},    // 37%: 1 cell and a cap
+		{Amount: 1, Return: 1_000, MaturesDay: day + 10},         // a sliver: a cap
 		{Amount: 1, Return: 2_000_000_000, MaturesDay: day + 11}, // past the chart
 	}
 	f := &fakeSession{}
@@ -37,11 +45,11 @@ func TestBankMenuDrawsTheInvestmentChart(t *testing.T) {
 
 	want := []string{
 		"                   Investment returns by day",
-		"          100% ███",
-		"               ███",
-		"           50% ███",
-		"               ███     ▄▄▄",
-		"               ███     ███                         ▄▄▄",
+		"          100% ▒▒▒",
+		"               ▒▒▒",
+		"           50% ▒▒▒",
+		"               ▒▒▒     ░░░",
+		"               ▒▒▒     ▒▒▒                         ░░░",
 		"            0% ───────────────────────────────────────",
 		"                1   2   3   4   5   6   7   8   9   10",
 	}
@@ -76,10 +84,10 @@ func TestBankMenuDrawsTheInvestmentChart(t *testing.T) {
 			start = i
 		}
 	}
-	if l := strings.TrimRight(got[start+5], " "); l != "               ███ ███" {
+	if l := strings.TrimRight(got[start+5], " "); l != "               ▒▒▒ ▒▒▒" {
 		t.Errorf("hold not counted, bottom row %q", l)
 	}
-	if strings.Contains(out, ansi.FgBrightRed+"█") || !strings.Contains(out, ansi.FgBrightYellow+"███") {
+	if strings.Contains(out, ansi.FgBrightRed+"▒") || !strings.Contains(out, ansi.FgBrightYellow+"▒▒▒") {
 		t.Error("columns not drawn in gold")
 	}
 	p.InvestHeld = 0

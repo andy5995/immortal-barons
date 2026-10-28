@@ -16,29 +16,18 @@ import (
 // column is gold: the height carries the figure. IB's
 // own addition; BRE's Bank menu has no chart.
 //
-// A column is investChartRows tall and fills in half-rows (▄ then █), so each
-// half-row is 100/(2*investChartRows) percent. The fill is rounded down, so a
-// full column always means a full date; a date holding anything at all shows at
-// least one half-row.
+// A column is investChartRows tall and fills in shades (shadeCells), so a full
+// column always means a full date and a date holding anything at all shows at
+// least a partly filled cell.
 const (
-	investChartRows  = 5
-	investChartSteps = 2 * investChartRows
-	investChartDays  = game.MaxInvestDays
+	investChartRows = 5
+	investChartDays = game.MaxInvestDays
 	// investChartCol is a column's width, and investChartGutter the scale's
 	// ("100% ") to the left of the first column.
 	investChartCol    = 3
 	investChartGutter = 5
 	investChartColor  = ansi.FgBrightYellow
 )
-
-// investChartHalves is how many half-rows a column fills for a date whose
-// returns take pct percent of the limit.
-func investChartHalves(pct int) int {
-	if pct <= 0 {
-		return 0
-	}
-	return max(min(pct, 100)*investChartSteps/100, 1)
-}
 
 // investChart draws the chart for the caller's realm, centered in width, or
 // nothing when no investment matures in the next investChartDays days. It is
@@ -83,13 +72,11 @@ func investChart(w *ctx, width int) string {
 			if i > 0 {
 				b.WriteString(" ")
 			}
-			// Half-rows above the rows under this one: 2 or more fill it, 1
-			// reaches its lower half.
-			switch h := investChartHalves(pct) - 2*(row-1); {
-			case h >= 2:
-				fmt.Fprintf(&b, "%s%s%s", investChartColor, strings.Repeat("█", investChartCol), ansi.Reset)
-			case h == 1:
-				fmt.Fprintf(&b, "%s%s%s", investChartColor, strings.Repeat("▄", investChartCol), ansi.Reset)
+			switch full, part := shadeCells(pct, investChartRows); {
+			case row <= full:
+				fmt.Fprintf(&b, "%s%s%s", investChartColor, strings.Repeat(shadeFull, investChartCol), ansi.Reset)
+			case row == full+1 && part:
+				fmt.Fprintf(&b, "%s%s%s", investChartColor, strings.Repeat(shadePart, investChartCol), ansi.Reset)
 			default:
 				b.WriteString(strings.Repeat(" ", investChartCol))
 			}
