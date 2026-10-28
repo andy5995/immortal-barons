@@ -7111,13 +7111,6 @@ checking IB against a capture:
   field — so the same five runes are five columns to a UTF-8 caller and eight to
   a CP437 one. Backspace shares the mechanism and was fixed by it: it had erased
   one column per rune.
-- **A regular attack on a rival realm is drawn over nine seconds**, where BRE
-  prints the whole report at once. "Attacking <realm>...", "Advancing..." and
-  "Pushing..." appear three seconds apart, then the report, which is the
-  original's. The stages carry no figures: running casualty counts were shown
-  until 2026-10-03 and went by too fast to read. Pirate raids get none of it, and neither does any other strike. The wait
-  cannot be skipped, and it runs outside the world lock so it never queues the
-  other nodes.
 - **An interplanetary trade deal is refused at the picker when its target is
   under New Realm Protection**, where the original accepts it and destroys it on
   arrival with nobody told. See "Send Trade Deal" above.

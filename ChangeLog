@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Attacks on a rival realm no longer wait nine seconds before the report
   * Create Group Attack refuses a baron with no group attacks left today before
     asking for a target
   * Joining a group attack no longer counts against Max Group Attacks per day

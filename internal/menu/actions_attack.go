@@ -239,7 +239,6 @@ func regularAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	warnTrimmedForce(s, trimmed)
-	stageBattle(s, name)
 	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
 	if captured > 0 {
 		allocateCaptured(s, w, captured)
