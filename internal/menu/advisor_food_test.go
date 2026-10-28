@@ -18,11 +18,10 @@ func joinAdvisor(lines []advisorLine) string {
 // growth. The Civilian advisor's food projection must not add the growth a
 // second time. Here the post-growth stock cannot cover this turn's consumption,
 // so the advisor must warn it will not last the turn — not project several.
-func TestCivilianAdvisorFoodProjectionDoesNotDoubleCountGrowth(t *testing.T) {
+func TestCivilianAdvisorWarnsWhenUnfedStoresMissTheMeal(t *testing.T) {
 	var d advisorData
-	d.p.Food = 52_000 // post-growth stock
-	d.foodGrown = 47_000
-	d.foodEaten = 60_000 // pre-growth stock 5,000; 5,000 - 60,000 < 0 -> starves this turn
+	d.p.Food = 52_000    // post-growth stock
+	d.foodEaten = 60_000 // more than the stores hold -> starves this turn
 	d.p.Support = 100
 
 	s := &fakeSession{}
@@ -32,21 +31,28 @@ func TestCivilianAdvisorFoodProjectionDoesNotDoubleCountGrowth(t *testing.T) {
 	}
 }
 
-// With ample stock, the run-out is computed from the pre-growth stock divided by
-// the shortfall (not the post-growth stock, which would over-count by a turn's
-// growth).
-func TestCivilianAdvisorRunOutUsesPreGrowthStock(t *testing.T) {
+// After the feed stage, which comes before the menus, the stores are what is
+// left once this turn has eaten. Less than a turn's meal is not a famine then:
+// the next shortfall is a turn away. Taken from play: 4,345 in store against
+// 87,749 eaten and about 87,129 grown.
+func TestCivilianAdvisorAfterFeedingCountsWhatIsLeft(t *testing.T) {
 	var d advisorData
-	d.p.Food = 200_000 // post-growth
-	d.foodGrown = 40_000
-	d.avgAgri = 40_000
-	d.foodEaten = 60_000 // shortfall 20,000; pre-growth stock 160,000 -> 160000/20000 = 8 turns
+	d.p.TurnProgress.Fed = true
+	d.p.Food = 4_345
+	d.avgAgri = 41_445
+	d.avgRiver = 45_684
+	d.foodEaten = 87_749 // shortfall 620; 4,345 / 620 -> 7 turns covered, out on the 8th
+	d.p.Regions.Agricultural, d.p.Regions.River = 1, 1
 	d.p.Support = 100
 
-	s := &fakeSession{}
-	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
-	if !strings.Contains(joined, "run out") || !strings.Contains(joined, "8 turns") {
-		t.Errorf("run-out should be pre-growth stock / shortfall = 8 turns, got:\n%s", joined)
+	joined := joinAdvisor(advisorReport(&fakeSession{}, d, advisorCivilian))
+	if strings.Contains(joined, "will not last the turn") {
+		t.Errorf("a fed realm was told its food will not last the turn:\n%s", joined)
+	}
+	for _, want := range []string{"In all, we grow about 87,129 units", "net loss of about 620 units", "run out in about 8 turns"} {
+		if !strings.Contains(joined, want) {
+			t.Errorf("missing %q:\n%s", want, joined)
+		}
 	}
 }
 
@@ -90,17 +96,58 @@ func TestCivilianAdvisorFoodWithoutFarms(t *testing.T) {
 	}
 }
 
-// A run-out one turn away is "1 turn", not "1 turns".
-func TestCivilianAdvisorRunOutSingular(t *testing.T) {
+// The same turn gets the same forecast either side of the feed stage: the
+// meal moves food out of the stores, not the turn they run out on.
+func TestCivilianAdvisorRunOutIsTheSameFedOrNot(t *testing.T) {
+	var unfed, fed advisorData
+	for _, d := range []*advisorData{&unfed, &fed} {
+		d.avgAgri = 40_000
+		d.foodEaten = 60_000 // shortfall 20,000
+		d.p.Support = 100
+	}
+	unfed.p.Food = 200_000 // the meal still to come
+	fed.p.Food = 140_000   // after it
+	fed.p.TurnProgress.Fed = true
+
+	want := "run out in about 8 turns" // 140,000 / 20,000 = 7 covered, out on the 8th
+	for name, d := range map[string]advisorData{"unfed": unfed, "fed": fed} {
+		if joined := joinAdvisor(advisorReport(&fakeSession{}, d, advisorCivilian)); !strings.Contains(joined, want) {
+			t.Errorf("%s: want %q, got:\n%s", name, want, joined)
+		}
+	}
+}
+
+// Growth that exactly matches the meal is said plainly, not as a gain of 0.
+func TestCivilianAdvisorBalancedFood(t *testing.T) {
 	var d advisorData
-	d.p.Food = 70_000
-	d.foodGrown, d.avgAgri = 40_000, 40_000
-	d.foodEaten = 60_000 // pre-growth stock 30,000 / shortfall 20,000 -> 1
+	d.p.TurnProgress.Fed = true
+	d.p.Food = 1_000
+	d.avgAgri, d.foodEaten = 60_000, 60_000
 	d.p.Support = 100
 
-	s := &fakeSession{}
-	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
-	if !strings.Contains(joined, "about 1 turn.") {
-		t.Errorf("want a singular run-out, got:\n%s", joined)
+	joined := joinAdvisor(advisorReport(&fakeSession{}, d, advisorCivilian))
+	if !strings.Contains(joined, "That leaves nothing to spare.") || strings.Contains(joined, "net gain") {
+		t.Errorf("want the balanced line, got:\n%s", joined)
+	}
+}
+
+// Stores smaller than one turn's shortfall run out next turn, fed or not; "about
+// 1 turn" would leave the reader to work that out.
+func TestCivilianAdvisorRunOutNextTurn(t *testing.T) {
+	for _, fed := range []bool{true, false} {
+		var d advisorData
+		d.p.TurnProgress.Fed = fed
+		d.p.Food = 4_345
+		d.avgAgri = 9_956
+		d.foodEaten = 87_749 // shortfall 77,793
+		if !fed {
+			d.p.Food += d.foodEaten // this turn's meal still to come
+		}
+		d.p.Support = 100
+
+		joined := joinAdvisor(advisorReport(&fakeSession{}, d, advisorCivilian))
+		if !strings.Contains(joined, "Our stores will run out next turn.") || strings.Contains(joined, "run out in") {
+			t.Errorf("fed=%v: want the run-out next turn, got:\n%s", fed, joined)
+		}
 	}
 }

@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Fix and improve Civilian advisor output
   * The Civilian advisor shows average food from agricultural and river
     regions on separate lines
   * The Bank menu charts investment returns due on each of the next ten days
