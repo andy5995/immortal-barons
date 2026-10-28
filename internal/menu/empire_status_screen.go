@@ -42,13 +42,10 @@ func statusRule() string {
 	return dim(ansi.FgBrightBlue) + insetRule(statusRuleWidth, statusRuleDouble) + ansi.Reset
 }
 
-// A percent field carries a bar before its figure: one █ per full
-// statusBarStep percent and a ▒ for any remainder, inside white brackets that
-// mark the full length. IB's own addition; the original prints the figure alone.
-const (
-	statusBarCells = 20
-	statusBarStep  = 100 / statusBarCells
-)
+// A percent field carries a statusBarCells-long bar before its figure, filled
+// in shades (shadeCells) inside white brackets that mark the full length. IB's
+// own addition; the original prints the figure alone.
+const statusBarCells = 20
 
 // statusBarColor bands a percent where 100 is the goal. Plain red is avoided:
 // it measures 2.71:1 on black, below the 3:1 needed for a graphical object.
@@ -67,10 +64,10 @@ func statusBarColor(pct int) string {
 // statusBar draws a percent as a bracketed bar, handing the line back to white.
 func statusBar(pct int) string {
 	pct = min(max(pct, 0), 100)
-	full := pct / statusBarStep
-	bar := strings.Repeat("█", full)
-	if pct%statusBarStep != 0 {
-		bar += "▒"
+	full, part := shadeCells(pct, statusBarCells)
+	bar := strings.Repeat(shadeFull, full)
+	if part {
+		bar += shadePart
 	}
 	pad := strings.Repeat(" ", statusBarCells-utf8.RuneCountInString(bar))
 	return "[" + statusBarColor(pct) + bar + ansi.FgWhite + pad + "]"
