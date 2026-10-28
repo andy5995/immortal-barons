@@ -366,7 +366,7 @@ type Config struct {
 	MaxRegions           int    // most regions a player may buy in one turn; 0 = no limit (owning is uncapped)
 	MaxLocalAttacks      int    // most attacks a player may make on this board per day, on top of one per turn; 0 = unlimited (IB's own: BRE paces a local attack by the turn alone)
 	MaxIndividualAttacks int    // most Individual Attack Forces a player may send to other boards per day; 0 = unlimited (BRE "InterBBS: Max Individual Attacks")
-	MaxGroupAttacks      int    // most group (interplanetary) attacks a player may join or lead per day; 0 = unlimited
+	MaxGroupAttacks      int    // most group (interplanetary) attacks a player may create per day; joining is not limited; 0 = unlimited
 	MaxTerrorOps         int    // most terrorist ops a player may launch per day; 0 = unlimited
 	MaxBombingOps        int    // most bombing ops a player may launch per day; 0 = unlimited
 	LostForcesDays       int    // days before a strike with no result packet gives its forces back (#96); 0 = never

@@ -3,6 +3,7 @@ Immortal Barons ChangeLog
 (in-progress:)
   * Create Group Attack refuses a baron with no group attacks left today before
     asking for a target
+  * Joining a group attack no longer counts against Max Group Attacks per day
   * A board that has taken the league's rules is no longer reported as held
     for packets it sent before
   * The scores show after the last turn of the day is played

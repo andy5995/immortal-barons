@@ -129,6 +129,7 @@ type Empire struct {
 	LocalAttacksToday int `json:",omitempty"`
 	// The interplanetary allowances, counted and reset the same way as
 	// AttacksToday, against Config.MaxGroupAttacks / MaxTerrorOps / MaxBombingOps.
+	// GroupAttacksToday counts the group attacks created; joining one does not count.
 	GroupAttacksToday int
 	TerrorOpsToday    int
 	BombingOpsToday   int

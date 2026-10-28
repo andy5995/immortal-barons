@@ -107,7 +107,7 @@ const (
 	helpSabreDial          = "Which dial Constant handling fires (0-10). Ignored by the other modes."
 	helpMaxLocalAttacks    = "The most attacks a player may make on this board in one day. Regular attacks, nuclear, chemical and biological attacks, and attacks on pirates all count. A player can still make only one per turn. 0 means no daily limit beyond that."
 	helpMaxAttacks         = "The most Individual Attack Forces a player may send to other boards in one day. 0 means no limit. Attacks on this board are limited by Max Local Attacks instead."
-	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
+	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may create in one day. Joining one is not limited. 0 means no limit."
 	helpMaxTerrorOps       = "The most terrorist operations a player may launch in one day. Each agent sent counts as one operation. 0 means no limit."
 	helpMaxBombingOps      = "The most bombing operations a player may launch in one day. 0 means no limit."
 	helpLostForcesDays     = "Game days to wait for a result from another board before giving up. Packets go missing; this stops an army being lost for good. Troops and agents come home, but gold spent on special operations does not. 0 means never give up. Interplanetary trade deals and bids wait at least 3 days; a longer setting here lengthens their wait too, and 0 does not apply to them."

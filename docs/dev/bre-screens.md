@@ -3447,6 +3447,8 @@ naming the limit and returns. IB refuses at the same point and names the limit
 too, as its local-attack refusal does:
 `You have already launched all N of your group attacks for today.`, or
 `your 1 group attack` at a limit of one.
+In IB, joining an attack does not count against the allowance and is never
+refused for it; BRE's join routine was not checked for this.
 
 **A SUCCESSFUL creation prints nothing at all.** The capture above aborts on a
 zero force, but `cap/20240527-134Pho_Lazarus_Public.cap` carries several that go

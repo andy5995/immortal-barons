@@ -535,9 +535,8 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 		if ga.Due(timeNow(), w.GameDay) {
 			return ErrDeparted
 		}
-		if !w.CanGroupAttack(e) {
-			return ErrGroupAttacksExhausted
-		}
+		// Joining is not limited: the daily allowance counts the attacks a baron
+		// creates.
 		cost := w.AttackGoldCost(e, f)
 		if e.Gold < cost {
 			return ErrCantAfford
@@ -546,7 +545,6 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 			return err
 		}
 		e.Gold -= cost
-		e.GroupAttacksToday++
 		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, AttackForce: f, Tech: e.TechMilitaryFactor()})
 		return nil
 	}

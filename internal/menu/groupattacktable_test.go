@@ -197,3 +197,45 @@ func TestJoinGroupAttackDrawsTheTableAndJoins(t *testing.T) {
 		t.Fatalf("contributors = %d, want 2 — the join never landed", n)
 	}
 }
+
+// The daily allowance counts the attacks a baron creates. One who has used it
+// can still read the table and join a party.
+func TestJoinGroupAttackIsNotLimitedByTheDailyAllowance(t *testing.T) {
+	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
+		p.Troopers = 10_000
+		p.Protection = 0
+		p.GroupAttacksToday = 1
+	})
+	var slot int
+	commitOnFile(t, cfg, func(w *game.World) {
+		w.Config.MaxGroupAttacks = 1
+		leader := w.AddHuman("leader", "Leaderland")
+		leader.Troopers = 500_000
+		leader.Gold = 10_000_000
+		ga, err := w.CreateGroupAttack(leader, "Mars", "", game.GroupAttackHoursMax,
+			game.AttackForce{Troopers: 118_000})
+		if err != nil {
+			t.Fatalf("seed group attack: %v", err)
+		}
+		slot = ga.Slot
+	})
+
+	fs := &fakeSession{keys: []rune(strconv.Itoa(slot) + "\r500\r\r\r\ry")}
+	b.turnPlayed = true
+	joinGroupAttack(fs, b)
+
+	out := stripANSI(fs.out.String())
+	if !strings.Contains(out, gaCapturedHead) {
+		t.Fatalf("the table's head was never drawn:\n%s", out)
+	}
+	if strings.Contains(out, "You have already launched") {
+		t.Errorf("a join was refused for the daily allowance:\n%s", out)
+	}
+	w := committedWorld(t, cfg)
+	if n := len(w.GroupAttacks[0].Contributors); n != 2 {
+		t.Fatalf("contributors = %d, want 2 — the join never landed", n)
+	}
+	if got := w.FindByOwner("alice").GroupAttacksToday; got != 1 {
+		t.Errorf("GroupAttacksToday = %d after a join, want 1 — joining must not count", got)
+	}
+}

@@ -684,6 +684,8 @@ Max Group Attacks and Max Terrorist Operations — which `reset.hlp` describes a
 deliberately adjustable so a realm can or cannot destroy "a smaller opponent in
 several strikes at once". IB models those as `Empire.AttacksToday`,
 `GroupAttacksToday` and `TerrorOpsToday` against the matching `Config` caps.
+`GroupAttacksToday` counts only the group attacks a baron creates; joining one
+is not limited.
 
 The Attack Menu is a forced turn stage
 (stage 11 of `run_player_turn`, `BRE.EXE 0x03da5`), and `run_attack_menu`
