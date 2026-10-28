@@ -8,9 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"math/big"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -213,7 +215,7 @@ type PlanetaryRun struct {
 	Refused       int      // packets refused: the sender's signature did not match the roster
 	NewFaults     []string // notices this run that the previous run did not carry (#187)
 	Held          int      // packets set aside: they speak a protocol this build cannot read
-	HeldRules     int      // packets set aside: their sender is not playing the league's rules (#264)
+	HeldRules     int      // packets set aside: written under rules that are not the league's (#264)
 	Quarantined   int      // packets that could not be parsed at all and were set aside
 	Deferred      int      // packets left untouched, too young to trust as a complete write
 	Bundles       int      // FTN transport bundles left in inbound for the unwrap to take (#230)
@@ -414,8 +416,8 @@ type InboundResult struct {
 	AlreadySeen int
 	Refused     int
 	// Held counts packets set aside for a protocol this build cannot read, and
-	// HeldRules those set aside because their sender is not playing the league's
-	// rules. Two counters rather than one because the two need different acts
+	// HeldRules those set aside because they were written under rules that are
+	// not the league's. Two counters rather than one because the two need different acts
 	// from different people — an upgrade on one board or the other, against a
 	// ruleset the sending board has not taken — and a run that reported both as
 	// "held for a protocol" sent the sysop looking for the wrong fault.
@@ -446,6 +448,9 @@ type InboundResult struct {
 	// sysop's planetary log only. See RunPlanetary for where it reaches
 	// AppendPlanetaryLog instead.
 	OrderNotice string
+	// rulesHeld is the newest ruleset-held packet from each board this batch,
+	// reported once the batch is done (reportRulesHolds).
+	rulesHeld map[string]game.Packet
 }
 
 // stagedPacket is an inbound file that parsed cleanly, waiting to be applied
@@ -778,7 +783,34 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			}
 		}
 	}
+	reportRulesHolds(w, &result)
 	return result, nil
+}
+
+// reportRulesHolds records the batch's ruleset holds, tells the sysop and
+// bounces a notice to each board, once the whole batch has been applied. A
+// packet held for its rules stays held until it expires, however the board
+// behaves afterward, so it is re-checked on every run; reporting each re-check
+// told a board that had already taken the Coordinator's ruleset, run after run,
+// to go and take it, and put the stale fingerprint back on BBSINFO. A board
+// whose later packet has applied stating the league's rules is back in step, so
+// its old held packets are left to expire quietly.
+func reportRulesHolds(w *game.World, result *InboundResult) {
+	for _, board := range slices.Sorted(maps.Keys(result.rulesHeld)) {
+		p := result.rulesHeld[board]
+		if w.HighSeq[board] > p.Seq && w.PlayingLeagueRules(board) {
+			continue
+		}
+		// Recorded here as well as on an applied packet: a board that has never
+		// played the league's rules has no applied packet to learn it from, and
+		// BBSINFO would report the one board this is about as "unknown".
+		w.NoteBoardRuleset(board, p.Ruleset)
+		if first := w.NoteRulesetHold(board); first {
+			// The board at fault is the only one that can fix it, and it cannot
+			// see this board's held directory (#187).
+			w.Outbox = append(w.Outbox, w.BounceRuleset(p))
+		}
+	}
 }
 
 // deferOrQuarantine handles a packet file ReadInbound could not read or
@@ -892,17 +924,14 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	// legitimate rules change are the case RulesetGraceDays covers.
 	if reason == HeldRules {
 		result.HeldRules++
-		// Recorded here as well as on an applied packet: a board that has never
-		// played the league's rules has no applied packet to learn it from, and
-		// BBSINFO would report the one board this is about as "unknown".
-		w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
-		if first := w.NoteRulesetHold(p.FromBoard); first {
-			// The board at fault is the only one that can fix it, and it cannot
-			// see this board's held directory (#187).
-			w.Outbox = append(w.Outbox, w.BounceRuleset(p))
+		if result.rulesHeld == nil {
+			result.rulesHeld = map[string]game.Packet{}
+		}
+		if have, ok := result.rulesHeld[p.FromBoard]; !ok || p.Seq > have.Seq {
+			result.rulesHeld[p.FromBoard] = p
 		}
 		if verbose {
-			fmt.Printf("  Held packet from %s (%s): it is not playing the league's rules\n",
+			fmt.Printf("  Held packet from %s (%s): it was written under rules that are not the league's\n",
 				p.FromBoard, p.PacketType())
 		}
 		return holdPacket(w.Config.DataDir, path)

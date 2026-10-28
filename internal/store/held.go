@@ -219,8 +219,10 @@ const (
 	HeldSignature  HeldReason = "signature"
 	HeldRules      HeldReason = "rules"
 	// HeldClear is a packet no check would hold today: the next planetary run
-	// releases a protocol hold on its own, and a signature or rules hold clears
-	// once the file goes back through inbound.
+	// releases a protocol hold on its own, and a signature hold clears once the
+	// file goes back through inbound. A rules hold rarely gets here: the packet
+	// states the rules it was written under, so it clears only inside the grace
+	// after a ruleset change (RulesetGraceDays) and otherwise waits to expire.
 	HeldClear HeldReason = "clear"
 )
 

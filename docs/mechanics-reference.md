@@ -6858,6 +6858,10 @@ that answers a packet from a board below the league's version floor (#187). It i
 the only board that can fix the fault, and it cannot see another board's held
 directory.
 
+Once a later packet from that board applies stating the league's rules, the board
+is back in step: its old held packets stay held until they expire, but they no
+longer record a fingerprint, raise a notice or send a bounce.
+
 ## How Immortal Barons differs right now
 
 Now matching this reference (as of v0.0.4):

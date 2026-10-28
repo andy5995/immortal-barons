@@ -225,7 +225,7 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 			run.Held, filepath.Join(cfg.DataDir, store.HeldDir))
 	}
 	if run.HeldRules > 0 {
-		fmt.Printf("Held %d packet(s) from a board that is not playing the league's rules; they are in %s. The notes below name it.\n",
+		fmt.Printf("Held %d packet(s) written under rules that are not the league's; they are in %s. Any board still out of step is named below.\n",
 			run.HeldRules, filepath.Join(cfg.DataDir, store.HeldDir))
 	}
 	if len(run.RecoveryPaused) > 0 {
@@ -307,7 +307,7 @@ func skipSummary(run store.PlanetaryRun) string {
 		parts = append(parts, fmt.Sprintf("%d held for a protocol this build does not read", run.Held))
 	}
 	if run.HeldRules > 0 {
-		parts = append(parts, fmt.Sprintf("%d held: the sending board is not playing the league's rules", run.HeldRules))
+		parts = append(parts, fmt.Sprintf("%d held: written under rules that are not the league's", run.HeldRules))
 	}
 	if run.AlreadySeen > 0 {
 		parts = append(parts, fmt.Sprintf("%d already seen", run.AlreadySeen))

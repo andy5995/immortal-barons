@@ -563,6 +563,8 @@ game. Each packet states the rules it was written under, so the ones sent while
 it was off never apply, whatever it does afterward; they expire on the ordinary
 held-packet timer. Its traffic flows again as soon as it takes your ruleset, and it
 is told so by a bounce naming the reason — it cannot see your held directory.
+Once its new traffic applies, the bounces and notices stop, and its old packets
+wait out the timer quietly.
 
 Changing the rules yourself costs nothing either way. Boards adopt on their own
 next run, so for a day the ones that have adopted look divergent to the ones that

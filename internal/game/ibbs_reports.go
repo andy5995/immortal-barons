@@ -177,6 +177,13 @@ func (w *World) BBSInfoRows() []BBSInfoRow {
 	return rows
 }
 
+// PlayingLeagueRules reports whether the last packet applied from board stated
+// the league's rules.
+func (w *World) PlayingLeagueRules(board string) bool {
+	fp := w.BoardRuleset[board]
+	return fp != "" && fp == w.leagueRulesetFingerprint()
+}
+
 // OwnRulesDiffer reports that this board is playing rules the League
 // Coordinator has not sent.
 func (w *World) OwnRulesDiffer() bool {

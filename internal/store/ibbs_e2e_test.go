@@ -326,11 +326,52 @@ func TestPacketsFromADivergentBoardAreHeld(t *testing.T) {
 	b.w.SendIPMessage(b.w.Empires[0], []string{"Nova Hub"}, false, "Terms accepted.")
 	b.run(t)
 	deliver(t, b, a)
-	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+	sentBefore, err := filepath.Glob(filepath.Join(a.outbound, "*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false)
+	if err != nil {
 		t.Fatal(err)
 	}
 	if got := len(a.w.Empires[0].Mail); got != 1 {
 		t.Errorf("the Coordinator holds %d messages from a board back in step, want 1", got)
+	}
+
+	// The old packet is still held and re-checked on every run, but the board
+	// has taken the rules: telling it to take them again, or marking it
+	// divergent on BBSINFO, would be the stale fault the e2e rig kept reporting.
+	for i := range 2 {
+		if run.HeldRules == 0 {
+			t.Fatalf("run %d: the packet written under the wrong rules is no longer held", i)
+		}
+		for _, n := range run.Notices {
+			if strings.Contains(n, "being held") {
+				t.Errorf("run %d: a board back in step is still reported held: %s", i, n)
+			}
+		}
+		if got := a.w.BoardRuleset["The Eclipse"]; got != a.w.Config.RulesetFingerprint() {
+			t.Errorf("run %d: BBSINFO records %q for a board back in step, want the league's", i, got)
+		}
+		if run, err = RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+			t.Fatal(err)
+		}
+	}
+	bounces, err := filepath.Glob(filepath.Join(a.outbound, "*"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range bounces {
+		if slices.Contains(sentBefore, f) {
+			continue // the bounces it earned while it really was out of step
+		}
+		data, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(data), "your packets are being held") {
+			t.Errorf("%s tells a board back in step its packets are held", filepath.Base(f))
+		}
 	}
 
 	// And the board is named on BBSINFO throughout, which is the report #264 was
