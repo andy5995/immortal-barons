@@ -90,6 +90,11 @@ jobs:
         echo /home/linuxbrew/.linuxbrew/bin >> "$GITHUB_PATH"
         echo /home/linuxbrew/.linuxbrew/sbin >> "$GITHUB_PATH"
 
+    # The runner image's Homebrew lags the formula API it downloads, and an
+    # older brew can fail to parse a newer dependency's JSON.
+    - name: Update Homebrew
+      run: brew update
+
     # Homebrew refuses a formula that is not in a tap: install by path and by
     # URL are both rejected, and audit by path is disabled. Dropping the file
     # into Library/Taps is enough to make it "local/test/immortal-barons" -- no
