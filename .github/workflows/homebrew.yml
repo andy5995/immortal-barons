@@ -106,6 +106,7 @@ jobs:
         mkdir -p "$TAP/HomebrewFormula"
         cp HomebrewFormula/immortal-barons.rb "$TAP/HomebrewFormula/"
         echo "TAP=$TAP" >> "$GITHUB_ENV"
+        brew trust local/test
         brew info local/test/immortal-barons
 
     # brew style takes a path, but Homebrew's formula rules are keyed to a
