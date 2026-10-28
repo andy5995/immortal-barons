@@ -137,6 +137,13 @@ func offersSentSince(w *ctx) (deal, treaty bool) {
 	return deal, treaty
 }
 
+// outOfTurns tells a baron the day's turns are spent and shows the scores,
+// with no pause between them, as BRE does (cap/eots-ibbs-01.cap).
+func outOfTurns(s session.Session, w *ctx) Result {
+	okNoPause(s, "Sorry, you have used all of your turns today.")
+	return seeScores(s, w)
+}
+
 // runTurn is the "Play Game" action. It shows the event log, then walks the
 // per-turn pipeline (industry production, income report, status,
 // spending/attack/covert/trading/message stages, then end-of-turn) for as
@@ -165,9 +172,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		showDirectives(s, w)
 		showTurnEvents(s, w)
 		readTurnMail(s, w, true)
-		ok(s, "Sorry, you have used all of your turns today.")
-		seeScores(s, w)
-		return Stay
+		return outOfTurns(s, w)
 	}
 
 	showCoordinatorNotice(s, w)
@@ -180,9 +185,7 @@ func runTurn(s session.Session, w *ctx) Result {
 			return abort()
 		}
 		if turnsLeft <= 0 {
-			ok(s, "Sorry, you have used all of your turns today.")
-			seeScores(s, w)
-			return Stay
+			return outOfTurns(s, w)
 		}
 
 		// The turn is now under way, which is what the InterPlanetary menu's gate
@@ -406,10 +409,10 @@ func runTurn(s session.Session, w *ctx) Result {
 		// this into the prompt's own condition, so the last turn ended by
 		// short-circuiting past both the prompt and any message and dropped the
 		// player on the opening menu with no word about why. Same line someone
-		// sees who starts Play with nothing left.
+		// sees who starts Play with nothing left, and the scores follow it as
+		// they do there (cap/eots-ibbs-01.cap).
 		if turnsLeft <= 0 {
-			ok(s, "Sorry, you have used all of your turns today.")
-			return Stay
+			return outOfTurns(s, w)
 		}
 		if !AskYesNo(s, "Continue to your next turn?", true) {
 			return Stay

@@ -1186,8 +1186,12 @@ func TestRunTurnSaysWhenTheLastTurnIsSpent(t *testing.T) {
 	if !strings.Contains(out, "End of Turn Statistics") {
 		t.Fatalf("never reached the end of a turn, so the message could not be due:\n%s", out)
 	}
-	if !strings.Contains(out, "used all of your turns today") {
-		t.Error("spending the last turn should say so rather than returning silently")
+	sorry := strings.Index(out, "used all of your turns today")
+	if sorry < 0 {
+		t.Fatal("spending the last turn should say so rather than returning silently")
+	}
+	if !strings.Contains(out[sorry:], "Net Worth") {
+		t.Errorf("the scores should follow the message, as in BRE:\n%s", out[sorry:])
 	}
 }
 

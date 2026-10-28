@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The scores show after the last turn of the day is played
   * Fix and improve Civilian advisor output
   * The Civilian advisor shows average food from agricultural and river
     regions on separate lines
