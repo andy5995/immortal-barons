@@ -203,6 +203,8 @@ func TestVersionAtLeast(t *testing.T) {
 		{"0.2.2-dev", "0.2.2", false}, {"0.2.2-dev", "0.2.1", true},
 		{"0.2.2", "0.2.2-dev", true}, {"0.2.2-dev", "0.2.2-dev", true},
 		{"0.2.3-dev", "0.2.2", true},
+		{"0.2.2 (9259e3c-dirty)", "0.2.2", true}, {"0.2.2-dev (9259e3c)", "0.2.2", false},
+		{"0.2.2 (9259e3c)", "0.2.2 (1c9655f)", true},
 	} {
 		if got := versionAtLeast(c.have, c.want); got != c.ok {
 			t.Errorf("versionAtLeast(%q, %q) = %v, want %v", c.have, c.want, got, c.ok)
@@ -230,8 +232,8 @@ func TestEveryOutboundPacketStatesItsVersion(t *testing.T) {
 	)
 	w.StampOutbox()
 	for i, p := range w.Outbox {
-		if p.Version != Version {
-			t.Errorf("packet %d states version %q, want %q", i, p.Version, Version)
+		if p.Version != VersionString() {
+			t.Errorf("packet %d states version %q, want %q", i, p.Version, VersionString())
 		}
 		if !w.BoardMeetsMinVersion(p.Version) {
 			t.Errorf("packet %d would be refused by a league requiring the current version", i)

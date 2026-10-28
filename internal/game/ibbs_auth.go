@@ -340,7 +340,7 @@ func (w *World) StampOutbox() {
 		// running the required version all along. Forwarded packets are left
 		// alone — Transit is not stamped here — so a relayed packet keeps the
 		// version of the board that wrote it.
-		w.Outbox[i].Version = Version
+		w.Outbox[i].Version = VersionString()
 		w.Outbox[i].Protocol = Protocol
 		w.Outbox[i].Ruleset = w.Config.RulesetFingerprint()
 		w.Outbox[i].FromNode = w.NodeNumber(w.Config.BoardID)

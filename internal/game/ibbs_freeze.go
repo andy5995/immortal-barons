@@ -196,12 +196,12 @@ func (w *World) noteFrozenTraffic(p Packet) {
 // how the Coordinator sees who has updated before the thaw. The Coordinator's
 // own board files it directly.
 func (w *World) ReportQuiet() {
-	if !w.Frozen || (w.QuietSince.Equal(w.QuietSent) && w.QuietSentVersion == Version) {
+	if !w.Frozen || (w.QuietSince.Equal(w.QuietSent) && w.QuietSentVersion == VersionString()) {
 		return
 	}
 	r := QuietReport{Serial: w.FreezeSerial, QuietSince: StoredStamp(w.QuietSince)}
 	if w.IsLeagueCoordinator() {
-		w.QuietSent, w.QuietSentVersion = w.QuietSince, Version
+		w.QuietSent, w.QuietSentVersion = w.QuietSince, VersionString()
 		w.fileQuietReport(w.Config.BoardID, r)
 		return
 	}
@@ -211,7 +211,7 @@ func (w *World) ReportQuiet() {
 	if coord == "" {
 		return
 	}
-	w.QuietSent, w.QuietSentVersion = w.QuietSince, Version
+	w.QuietSent, w.QuietSentVersion = w.QuietSince, VersionString()
 	w.Outbox = append(w.Outbox, Packet{FromBoard: w.Config.BoardID, ToBoard: coord,
 		Date: w.LastMaintDate, Quiet: &r})
 }

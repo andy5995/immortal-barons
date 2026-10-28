@@ -188,7 +188,7 @@ func freezeChecks(cfg game.Config) []store.Check {
 		// has installed the release before the thaw.
 		version := w.BoardVersion[p.Name]
 		if p.Name == w.Config.BoardID {
-			version = game.Version
+			version = game.VersionString()
 		}
 		if version != "" {
 			detail += ", running " + version

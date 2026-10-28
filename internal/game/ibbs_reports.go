@@ -300,8 +300,11 @@ func ownerGroupLabel(n int) string {
 // so "0.1" reads as "0.1.0" and a board that sends nonsense reads as ancient
 // rather than as passing. A development build ("0.2.2-dev") ranks below the
 // release it leads up to, as semver orders them, so a snapshot taken before a
-// release cannot pass a minimum set at that release.
+// release cannot pass a minimum set at that release. The build in parentheses
+// ("0.2.7 (9259e3c-dirty)") is not compared: its "-dirty" is not a pre-release.
 func versionAtLeast(have, want string) bool {
+	have, _, _ = strings.Cut(have, " (")
+	want, _, _ = strings.Cut(want, " (")
 	part := func(v string, i int) int {
 		f := strings.Split(v, ".")
 		if i >= len(f) {

@@ -244,7 +244,7 @@ map of it, not a second definition.
   "Market":  [ RemoteListing ],     // FromBoard's market, riding its scores (#47)
   "TradeDeals": [ IPTradeDeal ],    // one-way shipments to a realm on ToBoard (#195)
   "TradeReceipts": [ IPTradeReceipt ], // their receipts coming home: Delivered or lost
-  "Version": "0.0.5",               // the sender's game version, for BBSINFO
+  "Version": "0.0.5 (ffdec31)",     // the sender's game version and build, for BBSINFO
   "Ruleset": "51511b59",            // fingerprint of the league rules the sender plays
                                      // by (#264). A gate: a packet whose rules are not
                                      // the league's is HELD. Outside the origin
