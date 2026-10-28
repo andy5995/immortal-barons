@@ -101,6 +101,7 @@ func TestExportedScoresCarryTheFormerName(t *testing.T) {
 		t.Fatalf("news on the receiving board = %d, want 1 (news: %v)", got, receiver.NewsToday)
 	}
 	// The next day's export still carries FormerName, and must not re-announce.
+	sender.ScoresSentHash = "" // as a new day would
 	receiver.receive(export())
 	if got := renameNewsCount(receiver, "Old", "New"); got != 1 {
 		t.Errorf("news after the following export = %d, want 1", got)

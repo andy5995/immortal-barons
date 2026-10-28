@@ -200,6 +200,11 @@ type World struct {
 	// non-zero and runs the sysop's hook: an alarm that fires for a week is an
 	// alarm nobody reads by the second day.
 	LastFaultNotices []string `json:",omitempty"`
+	// ScoresSentHash and ScoresSentDate record the last scores snapshot queued
+	// for the league and the day it went out on, so ExportScores can skip an
+	// unchanged one until the next day. Clearing the hash forces a resend.
+	ScoresSentHash string `json:",omitempty"`
+	ScoresSentDate string `json:",omitempty"`
 	// FaultsSeen counts the transport faults recorded since FaultsSince, for the
 	// line Game Setup shows a sysop (#187). The log and the run report are where
 	// the faults themselves live; this is only the count that gives an operator

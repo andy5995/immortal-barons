@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A board sends its scores only when they change, and once a day
   * Attacks on a rival realm no longer wait nine seconds before the report
   * Create Group Attack refuses a baron with no group attacks left today before
     asking for a target

@@ -455,7 +455,8 @@ func (w *World) BBSCoordinator() *Empire {
 
 // ExportScores queues a broadcast packet of this board's living human empires'
 // scores for the league — it feeds the other boards' interplanetary score
-// screens and gives group attacks targets to choose from.
+// screens and gives group attacks targets to choose from. The packet goes out
+// when the snapshot has changed, and otherwise once a day.
 func (w *World) ExportScores() {
 	var scores []RemoteScore
 	for _, e := range w.Empires {
@@ -473,11 +474,29 @@ func (w *World) ExportScores() {
 	if len(scores) == 0 {
 		return
 	}
-	w.Outbox = append(w.Outbox, Packet{
+	p := Packet{
 		FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores,
 		Market:  w.ExportMarket(), // so allied planets can bid on it (#47)
 		Battles: w.ownBattles(),   // the wars, for every board's world report (#233)
-	})
+	}
+	// An unchanged snapshot is not resent within the day. It still goes out
+	// once a day, because each one replaces the last: that is what repairs a
+	// lost packet. The day is the clock's, not the game's, so a board whose
+	// maintenance has stalled still resends. The hash covers the whole packet
+	// but its Date, so a field added later counts as a change, and the roster,
+	// so a board that joins gets the snapshot on the next run.
+	q := p
+	q.Date = ""
+	today := timeNow().Format("2006-01-02")
+	if data, err := json.Marshal([]any{q, w.LeagueNodes}); err == nil {
+		sum := sha256.Sum256(data)
+		hash := hex.EncodeToString(sum[:])
+		if hash == w.ScoresSentHash && w.ScoresSentDate == today {
+			return
+		}
+		w.ScoresSentHash, w.ScoresSentDate = hash, today
+	}
+	w.Outbox = append(w.Outbox, p)
 }
 
 // usableNodes drops roster entries this board cannot use: a node number outside

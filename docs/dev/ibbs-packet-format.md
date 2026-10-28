@@ -28,7 +28,11 @@ Moving files between boards is external to the game, except over FTN, where the
 game's own transport (`internal/ftn`) moves them when `bbs.cfg` configures it.
 `RunPlanetary` (`immortal-barons -planetary`, also folded into `-maint` when
 IBBS is on) reads and applies inbound packets, launches due group attacks,
-exports this board's scores, and writes the outbox.
+exports this board's scores, and writes the outbox. The scores snapshot (with
+the market and battle log it carries) goes out when it or the roster has
+changed, and once a day by the clock even when neither has, since each one
+replaces the last and a resend is what repairs a lost one. The travel-time
+probes still go out on every run.
 
 ### Generic file handoff contract (#191)
 

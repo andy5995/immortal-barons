@@ -1516,3 +1516,43 @@ func TestScoredBoardsIsNotKnownBoards(t *testing.T) {
 		}
 	}
 }
+
+// An unchanged scores snapshot goes out once a day, not on every run: a change
+// to anything it carries, or to the roster, sends it again at once, and a new
+// day resends it even unchanged, since a resend is what repairs a lost packet.
+func TestScoresResendOnlyOnChangeOrNewDay(t *testing.T) {
+	now := time.Date(2026, 10, 28, 12, 0, 0, 0, time.UTC)
+	restore := timeNow
+	timeNow = func() time.Time { return now }
+	defer func() { timeNow = restore }()
+
+	w, e := dupeWorld(t)
+	sent := func() int {
+		w.Outbox = nil
+		w.ExportScores()
+		return len(w.Outbox)
+	}
+	if n := sent(); n != 1 {
+		t.Fatalf("first run queued %d packets, want 1", n)
+	}
+	if n := sent(); n != 0 {
+		t.Errorf("an unchanged snapshot queued %d packets on the same day, want 0", n)
+	}
+	changes := []struct {
+		what   string
+		change func()
+	}{
+		{"a score", func() { e.Land += 10 }},
+		{"the market", func() { w.Market = append(w.Market, MarketListing{Realm: e.Name, Good: "Tank", Qty: 5, Price: 500}) }},
+		{"the roster", func() { w.LeagueNodes = append(w.LeagueNodes, LeagueNode{Number: 2, Name: "Joined"}) }},
+		// The clock's day, with the game day held still: a board whose
+		// maintenance has stalled still resends.
+		{"the day", func() { now = now.Add(24 * time.Hour) }},
+	}
+	for _, c := range changes {
+		c.change()
+		if n := sent(); n != 1 {
+			t.Errorf("a change to %s queued %d packets, want 1", c.what, n)
+		}
+	}
+}
