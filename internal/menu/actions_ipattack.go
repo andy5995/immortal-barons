@@ -22,6 +22,17 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if blockedByIPProtection(s, w) {
 		return Stay
 	}
+	// Refused before any prompt, as the original's create_group_attack does
+	// first thing (BRE.OVR 0x02c0df). CreateGroupAttack checks again, for an
+	// attack created on another node while the prompts were up.
+	var spent bool
+	w.Read(func() { spent = !w.CanGroupAttack(w.Player()) })
+	if spent {
+		fail(s, errors.New(plural(s, float64(w.Config.MaxGroupAttacks),
+			"You have already launched your %.0f group attack for today.",
+			"You have already launched all %.0f of your group attacks for today.")))
+		return Stay
+	}
 	p := w.Player()
 	// Gathered once, under the lock, and read from the copy afterward (#206).
 	// ImportBoard appends to RemoteBoards as inbound packets are applied, which

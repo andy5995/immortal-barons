@@ -3440,6 +3440,14 @@ Send how many Bombers? (0; 0) 0
 Attack Aborted
 ```
 
+**The daily allowance is checked before any prompt.** `create_group_attack`
+(BRE.OVR 0x02c0df) opens by comparing the baron's group strikes today with
+Maximum Group Attacks Per Day and, at the limit, prints a one-line refusal
+naming the limit and returns. IB refuses at the same point and names the limit
+too, as its local-attack refusal does:
+`You have already launched all N of your group attacks for today.`, or
+`your 1 group attack` at a limit of one.
+
 **A SUCCESSFUL creation prints nothing at all.** The capture above aborts on a
 zero force, but `cap/20240527-134Pho_Lazarus_Public.cap` carries several that go
 through, and every one reads the same way (byte-checked at 131765, 131786,

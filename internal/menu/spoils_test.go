@@ -191,3 +191,37 @@ func TestGroupAttackConfirmationCanDecline(t *testing.T) {
 		t.Errorf("a declined attack cost %d gold", 1_000_000-gold)
 	}
 }
+
+// A baron with no group attacks left today is refused before the first prompt,
+// as the original refuses at the top of create_group_attack, not after the
+// planet, target, wait and force have all been answered.
+func TestGroupAttackRefusedBeforeThePromptsWhenNoneAreLeft(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Config.BoardID = "Alpha"
+		w.World.Config.MaxGroupAttacks = 1
+		w.World.ImportBoard(game.RemoteBoard{
+			BoardID: "Mars",
+			Scores:  []game.RemoteScore{{Empire: "Redlands"}},
+		})
+		p := w.Player()
+		p.Protection = 0
+		p.Troopers = 10_000
+		p.GroupAttacksToday = 1
+	})
+	f := &fakeSession{keys: []rune("1\ra12\r500\r\r\r\ry")}
+	createGroupAttack(f, w)
+
+	out := f.out.String()
+	if !strings.Contains(out, "You have already launched your 1 group attack for today.") {
+		t.Fatalf("no refusal for a spent daily allowance; output was: %q", out)
+	}
+	if strings.Contains(out, "Target which planet?") {
+		t.Error("the planet prompt was drawn before the allowance was checked")
+	}
+	var count int
+	w.Read(func() { count = len(w.World.GroupAttacks) })
+	if count != 0 {
+		t.Errorf("group attacks = %d, want 0", count)
+	}
+}
