@@ -141,7 +141,8 @@ func offersSentSince(w *ctx) (deal, treaty bool) {
 // with no pause between them, as BRE does (cap/eots-ibbs-01.cap).
 func outOfTurns(s session.Session, w *ctx) Result {
 	okNoPause(s, "Sorry, you have used all of your turns today.")
-	return seeScores(s, w)
+	seeScores(s, w)
+	return Stay
 }
 
 // runTurn is the "Play Game" action. It shows the event log, then walks the
@@ -410,8 +411,11 @@ func runTurn(s session.Session, w *ctx) Result {
 		// short-circuiting past both the prompt and any message and dropped the
 		// player on the opening menu with no word about why. Same line someone
 		// sees who starts Play with nothing left, and the scores follow it as
-		// they do there (cap/eots-ibbs-01.cap).
+		// they do there (cap/eots-ibbs-01.cap). The pause first keeps the turn's
+		// statistics on screen: BRE reads a key there with its continue prompt,
+		// which IB does not ask after the last turn (docs/dev/bre-screens.md).
 		if turnsLeft <= 0 {
+			pause(s)
 			return outOfTurns(s, w)
 		}
 		if !AskYesNo(s, "Continue to your next turn?", true) {

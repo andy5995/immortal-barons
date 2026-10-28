@@ -190,14 +190,31 @@ func TestEndOfTurnStatsNoLongerShowsIndustryProduction(t *testing.T) {
 	}
 }
 
+// assertOutOfTurnsEnding checks the way a day of turns ends: the message, then
+// the scores straight after it with no pause between, as in BRE
+// (cap/eots-ibbs-01.cap). It returns where the message starts.
+func assertOutOfTurnsEnding(t *testing.T, out string) int {
+	t.Helper()
+	sorry := strings.Index(out, "used all of your turns today")
+	if sorry < 0 {
+		t.Fatalf("expected the no-turns-left message:\n%s", out)
+	}
+	scores := strings.Index(out[sorry:], "Net Worth")
+	if scores < 0 {
+		t.Fatalf("the scores should follow the message:\n%s", out[sorry:])
+	}
+	if strings.Contains(out[sorry:sorry+scores], "Paused") {
+		t.Errorf("no pause belongs between the message and the scores:\n%s", out[sorry:])
+	}
+	return sorry
+}
+
 func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
-	f := &fakeSession{keys: []rune("  ")} // pause keypress inside ok(), then seeScores' pause
+	f := &fakeSession{keys: []rune(" ")} // the score table's pause
 	w := newWorld()
 	w.Player().TurnsLeft = 0
 	runTurn(f, w)
-	if !strings.Contains(f.out.String(), "used all of your turns today") {
-		t.Error("expected the no-turns-left message")
-	}
+	assertOutOfTurnsEnding(t, f.out.String())
 }
 
 func TestIncomeReportSurfacesAndClearsPirateRaids(t *testing.T) {
@@ -1183,15 +1200,14 @@ func TestRunTurnSaysWhenTheLastTurnIsSpent(t *testing.T) {
 	}()
 
 	out := f.out.String()
-	if !strings.Contains(out, "End of Turn Statistics") {
+	stats := strings.LastIndex(out, "End of Turn Statistics")
+	if stats < 0 {
 		t.Fatalf("never reached the end of a turn, so the message could not be due:\n%s", out)
 	}
-	sorry := strings.Index(out, "used all of your turns today")
-	if sorry < 0 {
-		t.Fatal("spending the last turn should say so rather than returning silently")
-	}
-	if !strings.Contains(out[sorry:], "Net Worth") {
-		t.Errorf("the scores should follow the message, as in BRE:\n%s", out[sorry:])
+	sorry := assertOutOfTurnsEnding(t, out)
+	// The turn's statistics would scroll off under the scores without a key read.
+	if !strings.Contains(out[stats:sorry], "Paused") {
+		t.Errorf("the last turn's statistics should be held on screen before the message:\n%s", out[stats:])
 	}
 }
 
@@ -1422,11 +1438,12 @@ func TestOutOfTurnsStillShowsRecapAndMail(t *testing.T) {
 	runTurn(f, w)
 	out := f.out.String()
 
-	for _, marker := range []string{"dragon", "Postmaster", "used all of your turns"} {
+	for _, marker := range []string{"dragon", "Postmaster"} {
 		if !strings.Contains(out, marker) {
 			t.Errorf("out of turns should still show %q, got:\n%s", marker, out)
 		}
 	}
+	assertOutOfTurnsEnding(t, out)
 	if strings.Contains(out, "offers you a trade deal") {
 		t.Errorf("out of turns should not put the offer prompt, got:\n%s", out)
 	}

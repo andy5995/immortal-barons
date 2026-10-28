@@ -1919,6 +1919,14 @@ both rules** as of 2026-08-16; it drew a bare heading and no rules before. Its
 heading keeps IB's own bright-cyan `End of Turn Statistics:` where BRE writes it
 bright-white without the colon, and its body lines are indented two columns.
 
+**Deliberate divergence — the last turn of the day ends with a pause, not the
+prompt.** BRE asks `Do you wish to continue? (Y/n)` after every turn, the last
+included, and only on `Yes` prints `Sorry, you have used all of your turns
+today.` and the scores (`cap/eots-ibbs-01.cap`, three times). IB asks its own
+`Continue to your next turn?` only while turns remain. After the last one it
+pauses, so the statistics stay readable, then prints the message and the scores
+with no pause between them.
+
 ### Food Unlimited (Food Market)
 
 Cyan accent, single row of options. Preceded by the market line (`available`,
