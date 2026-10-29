@@ -230,8 +230,9 @@ func TestBuyLandAdvisorsThenReturns(t *testing.T) {
 	}
 }
 
-// Buying the last region a player can afford ends the visit: BRE would ask
-// again, leaving them to read "you can afford 0" and quit by hand. The keys
+// Buying the last region a player can afford ends the visit without a word,
+// as BRE's does (cap/20240527-134Pho_Lazarus_Public.cap: "111 Technology
+// regions purchased." and straight back to the Spending Menu). The keys
 // deliberately run past the purchase — anything still being read means the
 // screen did not let go.
 func TestBuyLandLeavesWhenNothingIsAffordable(t *testing.T) {
@@ -247,8 +248,11 @@ func TestBuyLandLeavesWhenNothingIsAffordable(t *testing.T) {
 		t.Fatalf("Coastal = %d, want %d", p.Regions.Coastal, before+1)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "You cannot afford another region.") {
-		t.Errorf("no reason given for leaving:\n%s", out)
+	if !strings.Contains(out, "1 Coastal regions purchased.") {
+		t.Errorf("no purchase line:\n%s", out)
+	}
+	if strings.Contains(out, "cannot afford") {
+		t.Errorf("an affordability notice after buying all that was offered:\n%s", out)
 	}
 	if f.pos != 3 { // "C", "1", Enter — and no more
 		t.Errorf("read %d keys, want 3 — the screen kept prompting after the last purchase", f.pos)

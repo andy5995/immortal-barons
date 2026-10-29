@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Buying regions no longer shows the gold left, or a notice that no more can
+    be bought after taking all that was offered
   * A new Planetary Master claims the title when the old one has abdicated or
     been destroyed, instead of seizing it from them
   * Abdicating posts a line in the planet's news

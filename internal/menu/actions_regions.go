@@ -168,9 +168,10 @@ func promptBuyRegionType(s session.Session) int {
 }
 
 // buyLand is the Buy Regions action. It loops the region-type picker so a
-// player can buy several region types in one visit; the loop only ends when
-// they quit (0) or run out of input. Picking "(*) Advisors" shows the
-// Advisors screen and returns to the region list instead of leaving.
+// player can buy several region types in one visit. It ends when they quit
+// (0), when input runs out, and as soon as no further region can be bought.
+// Picking "(*) Advisors" shows the Advisors screen and returns to the region
+// list instead of leaving.
 func buyLand(s session.Session, w *ctx) Result {
 	p := w.Player()
 	showMenu := func() {
@@ -180,13 +181,12 @@ func buyLand(s session.Session, w *ctx) Result {
 		printRegionTable(s, w.Term, p, true)
 	}
 	// exitIfLimited prints why nothing more can be bought and reports whether
-	// it did, so the caller can leave the screen. It fires both before a
-	// purchase (a player who enters, or returns to the picker, already at
-	// either limit) and right after one that spends the last of it — without
-	// it a capped or gold-out player who picks a region type is asked "Buy
-	// how many X regions? (0; 0)" with no way to tell why the answer can only
-	// be zero. Gold and the day's region cap zero the same count for
-	// different reasons, so the message names which one applies; reusing
+	// it did, so the caller can leave the screen. It fires before a purchase,
+	// for a player who enters already at either limit — without it a capped or
+	// gold-out player who picks a region type is asked "Buy how many X
+	// regions? (0; 0)" with no way to tell why the answer can only be zero.
+	// Gold and the day's region cap zero the same count for different
+	// reasons, so the message names which one applies; reusing
 	// game.ErrRegionCap's text keeps it in one place with BuyRegions' own
 	// refusal. Advisors stays reachable from the System menu, so holding the
 	// screen open for it is not worth the trap.
@@ -219,14 +219,11 @@ func buyLand(s session.Session, w *ctx) Result {
 			if n <= 0 {
 				continue
 			}
-			var gold int64
 			// Re-resolve inside the transaction: BuyRegions re-checks gold and the
 			// per-turn region cap against fresh state, and the region field pointer
 			// must index the reloaded empire, not the stale gather.
 			err := w.mutatePlayer(func(fp *game.Empire) error {
-				e := w.World.BuyRegions(fp, game.BuyableRegions[t].Count(&fp.Regions), n)
-				gold = fp.Gold
-				return e
+				return w.World.BuyRegions(fp, game.BuyableRegions[t].Count(&fp.Regions), n)
 			})
 			if err != nil {
 				// No pause: the message stays above the next prompt; the player
@@ -234,14 +231,16 @@ func buyLand(s session.Session, w *ctx) Result {
 				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightRed, tr(s, err.Error()), ansi.Reset)
 			} else {
 				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
-					fmt.Sprintf(tr(s, "%d %s regions purchased. Gold: %d"), n, game.BuyableRegions[t].Name, gold), ansi.Reset)
+					fmt.Sprintf(tr(s, "%s %s regions purchased."), comma(n), game.BuyableRegions[t].Name), ansi.Reset)
 			}
 			// A concurrent node may have hit this empire while the player was
 			// buying (region losses change the rising land price); surface it
 			// here rather than waiting for the next menu redraw.
 			flushSessionNews(s, w)
 			p = w.Player() // refresh the display pointer for the next iteration
-			if err == nil && exitIfLimited() {
+			// Buying the last of what was offered leaves without a word, as the
+			// original does: the purchase line is reason enough.
+			if err == nil && w.MaxAffordableRegions(p) == 0 {
 				return Stay
 			}
 		}

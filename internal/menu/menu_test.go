@@ -226,10 +226,11 @@ func TestBuyLandAdvisorsThenContinuesLoop(t *testing.T) {
 }
 
 // Reaching the day's region cap leaves the screen the same way running out of
-// gold does. Advisors is a convenience for the act of buying, not a reason to
-// hold the screen open once buying is impossible — it stays reachable from the
-// System menu regardless. The keys run past the cap-hitting purchase; anything
-// still being read means the screen did not let go.
+// gold does, and as silently: the player bought all that was offered. Advisors
+// is a convenience for the act of buying, not a reason to hold the screen open
+// once buying is impossible — it stays reachable from the System menu
+// regardless. The keys run past the cap-hitting purchase; anything still being
+// read means the screen did not let go.
 func TestBuyLandLeavesWhenCapReached(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
@@ -246,8 +247,8 @@ func TestBuyLandLeavesWhenCapReached(t *testing.T) {
 		t.Fatalf("want 5 regions bought before hitting the cap, got %d", got)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "You have reached your region purchase limit for this turn.") {
-		t.Errorf("no reason given for leaving:\n%s", out)
+	if strings.Contains(out, "region purchase limit") {
+		t.Errorf("a limit notice after buying all that was offered:\n%s", out)
 	}
 	if f.pos != 3 { // "C", "5", Enter — and no more
 		t.Errorf("read %d keys, want 3 — the screen kept prompting after hitting the cap", f.pos)

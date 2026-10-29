@@ -4472,11 +4472,12 @@ purpose:
   same list — RETURN still closes it, so letters can be added or removed after.
 - **Diplomacy is on the opening menu as well as System.** BRE lists it under
   System alone.
-- **Buy Regions closes itself the moment nothing more can be bought**, whether
-  from gold or the day's region cap, and says which reason applies; BRE asks
-  again regardless, so a player there reads "You can afford 0 regions" and
-  quits by hand. Advisors is reachable from the System menu, so holding the
-  screen open for it once buying is impossible is not worth the trade.
+- **Buy Regions tells a player who arrives at a limit why nothing can be
+  bought**, gold or the day's region cap, and closes. What BRE does for that
+  player has not been captured. After a purchase that leaves nothing more to
+  buy, IB returns silently to the Spending Menu as BRE does (see "Regions buy
+  screen" in `docs/dev/bre-screens.md`); this note said BRE asked again until
+  2026-10-28.
 - **About lives in the Help browser** (keyed `A`), not on the Game/System menus,
   so `I` stays BRE's InterBBS Scores key.
 - **Menu items carry a 2-space left margin** where BRE's start at column 0 — a
