@@ -6850,13 +6850,15 @@ own turns-per-day or attack limits would otherwise feed that into every other
 board's game. The fingerprint describes the packet, not the board, so a packet
 written while a board was out of step never applies however quickly its sysop
 puts the config back — it is re-checked on each later run and expires on the
-held-packet timer. Three cases are deliberately not divergent:
+held-packet timer. Four cases are deliberately not divergent:
 
 - a packet from the Coordinator, whose ruleset is the league's and whose packets
   carry the change that heals a board
 - a packet stating no fingerprint, from a board older than the field
 - every packet at all on a board that does not yet know what the league's rules
   are, which on a member is until the Coordinator has been heard from
+- a bounce, which carries no game; holding one would hide its notice from the
+  sysop who has to act on it
 
 A rules change is not divergence, and neither direction of one loses traffic. A
 board that has adopted the change looks divergent to one that has not, and those

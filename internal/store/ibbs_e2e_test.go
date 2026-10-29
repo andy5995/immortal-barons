@@ -466,6 +466,82 @@ func TestMembersThatJoinedTogetherStopReportingHolds(t *testing.T) {
 	}
 }
 
+// A board cut off from the Coordinator through a rules change holds what the
+// boards that took it send, and bounces them. Its bounce states the old rules,
+// and once the change is past its grace that fingerprint is divergent too, but
+// a bounce carries no game: holding it would hide the notice from the one sysop
+// who can act on it.
+func TestABounceFromABoardBehindAChangeIsNotHeld(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "The Eclipse"},
+		{Number: 3, Name: "Red Shift"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pub, sec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var all []*board
+	for i, n := range roster {
+		d := filepath.Join(dir, string(rune('a'+i)))
+		b := newBoard(t, d, n.Name, roster)
+		b.w.Config.DataDir = d
+		b.w.CoordPub = pub
+		all = append(all, b)
+	}
+	hub, two, three := all[0], all[1], all[2]
+	hub.w.CoordKey = sec
+	for range 2 {
+		for _, b := range all {
+			b.run(t)
+			broadcastToOthers(t, b, all)
+		}
+	}
+
+	// The Coordinator changes the rules, and only The Eclipse hears of it.
+	hub.w.Config.TurnsPerDay += 2
+	hub.run(t)
+	broadcast(t, hub, two)
+	two.run(t)
+	broadcastToOthers(t, two, all)
+	two.run(t) // takes the new fingerprint as the league's
+	broadcastToOthers(t, two, all)
+	// A week on, the old rules are no longer in their grace.
+	two.w.PrevRulesetAt = game.Recorded(time.Now().Add(-(game.RulesetGraceDays + 1) * 24 * time.Hour))
+
+	three.run(t) // holds The Eclipse's packets and bounces them
+	broadcastToOthers(t, three, all)
+	run := two.run(t)
+
+	got := false
+	for _, n := range run.Notices {
+		if strings.Contains(n, "Red Shift refused our packet") {
+			got = true
+		}
+	}
+	if !got {
+		t.Errorf("The Eclipse was not shown Red Shift's bounce; notices: %v", run.Notices)
+	}
+	held, err := HeldPackets(two.w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, h := range held {
+		data, err := os.ReadFile(filepath.Join(heldPath(two.w.Config.DataDir), h.File))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(data), `"Notice"`) {
+			t.Errorf("The Eclipse holds a bounce: %s", h.File)
+		}
+	}
+}
+
 // A rules change must not destroy the traffic already in flight when it lands:
 // those packets state the rules they were written under, and that fingerprint
 // never becomes current again (#264, RulesetGraceDays).

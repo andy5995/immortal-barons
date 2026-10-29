@@ -216,8 +216,8 @@ func (w *World) ExportLeagueConfig() {
 // own turns-per-day or attack limits feeds scores, strikes and trades into
 // everyone else's game (#264).
 //
-// Three cases are deliberately NOT divergent, and each of them would break the
-// league if they were:
+// Four cases are deliberately NOT divergent, and each of them would do harm if
+// they were:
 //
 //   - a packet from the COORDINATOR, whose ruleset is the league's by
 //     definition. It is also the packet that carries a change, so holding it
@@ -226,9 +226,11 @@ func (w *World) ExportLeagueConfig() {
 //     older than the field;
 //   - anything at all until this board knows what the league's rules are — on a
 //     member that is the Coordinator's last-reported fingerprint, so a board
-//     that has not heard from the Coordinator yet holds nobody.
+//     that has not heard from the Coordinator yet holds nobody;
+//   - a bounce, which carries no game to keep out. Holding one hides the
+//     notice from the sysop who has to act on it.
 func (w *World) RulesetDivergent(p Packet) bool {
-	if p.Ruleset == "" || w.senderIsCoordinator(p) {
+	if p.Ruleset == "" || p.Notice != "" || w.senderIsCoordinator(p) {
 		return false
 	}
 	league := w.leagueRulesetFingerprint()

@@ -294,3 +294,24 @@ func TestBBSInfoFlagsRulesetDivergence(t *testing.T) {
 		t.Errorf("a member's own edited ruleset was not reported:\n%s", got)
 	}
 }
+
+// A packet written under other rules is held, but a bounce carrying the same
+// fingerprint is not: it has no game in it, and holding it would hide the
+// notice from the only sysop who can act on it.
+func TestABounceIsNeverHeldForItsRules(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID = true, "Alpha BBS"
+	w := NewWorldSeed(cfg, 1)
+	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "Alpha BBS"}, {Number: 2, Name: "Bravo BBS"}}
+	other := w.Config
+	other.TurnsPerDay += 2
+
+	p := Packet{FromBoard: "Bravo BBS", FromNode: 2, Seq: 1, Ruleset: other.RulesetFingerprint()}
+	if !w.RulesetDivergent(p) {
+		t.Fatal("a packet written under other rules was not divergent")
+	}
+	p.Notice = "your packets are being held here"
+	if w.RulesetDivergent(p) {
+		t.Error("a bounce was held for the rules it states")
+	}
+}

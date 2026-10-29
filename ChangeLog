@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A refusal notice from another board is no longer held for the rules it
+    states
   * The Sell screen no longer shows the gold left after a sale
   * Buy Regions offers no more than the realm's land allowance covers, and
     refuses a realm with none left before the screen opens
