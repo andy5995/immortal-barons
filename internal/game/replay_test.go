@@ -169,6 +169,24 @@ func TestALateBounceKeepsTheNewerRuleset(t *testing.T) {
 	}
 }
 
+// A bounce shows its sender ran and its transport delivers, so it is heard from
+// like any other accepted packet: two boards trading only bounces must not look
+// quiet to each other.
+func TestABounceRecordsItsSenderAsHeardFrom(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID = true, "here"
+	w := NewWorldSeed(cfg, 1)
+
+	w.ApplyPacket(Packet{FromBoard: "there", Seq: 1, Date: "2026-10-13",
+		Notice: "your packets are being held here", Version: "9.9.9"})
+	if w.LastPacketFrom["there"] == "" {
+		t.Error("a bounce did not record its sender as heard from")
+	}
+	if got := w.BoardVersion["there"]; got != "9.9.9" {
+		t.Errorf("a bounce recorded version %q, want 9.9.9", got)
+	}
+}
+
 // A threat record is a one-off report, so a late packet still files it: the
 // later packet that overtook it never repeated it.
 func TestALatePacketStillFilesItsThreat(t *testing.T) {

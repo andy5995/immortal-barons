@@ -217,11 +217,12 @@ type World struct {
 	heldNoted map[string]bool
 	Pirates   []PirateFaction
 
-	// LastPacketFrom records the game day a packet from each board was PROCESSED
-	// here, and BoardVersion the game version that board last said it was
-	// running. Neither is gameplay: they are what the sysop reports need
-	// (LastPacketReport, BBSInfoReport) to answer "who has gone quiet" and "who
-	// is too old to read our packets", and nothing else reads them.
+	// LastPacketFrom records when (wall-clock) a packet from each board was last
+	// ACCEPTED here, a bounce included, and BoardVersion the game version that
+	// board last said it was running. Neither is gameplay: they are what the
+	// sysop reports need (LastPacketReport, BBSInfoReport) to answer "who has gone
+	// quiet" and "who is too old to read our packets". ProtocolHoldCurrent also
+	// reads LastPacketFrom, to tell a stalled link from a held file left behind.
 	LastPacketFrom map[string]string `json:",omitempty"`
 	BoardVersion   map[string]string `json:",omitempty"`
 	// ProtocolHeldAt is when a packet from each board was last set aside for a

@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A refusal notice counts as hearing from its board, in -lastpacket and the
+    version BBSINFO.LST shows
   * A refusal notice from another board is no longer held for the rules it
     states
   * The Sell screen no longer shows the gold left after a sale

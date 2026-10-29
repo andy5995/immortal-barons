@@ -527,23 +527,12 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if p.FromBoard != "" && p.FromBoard != w.Config.BoardID && !w.BoardMeetsMinVersion(p.Version) {
 		return w.bounceVersion(p)
 	}
-	// Recorded before the bounce return: two boards that held each other's first
-	// packets may send each other nothing BUT bounces, and if those were ignored,
-	// each would keep the other's stale fingerprint and keep bouncing it every
-	// run (#319).
-	if !late {
-		w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
-	}
-	// A bounce carries no payload, so there is nothing to apply and nothing to
-	// answer. Delivering the notice and stopping is what keeps two boards that
-	// both refuse each other from bouncing the same packet back and forth.
-	if p.Notice != "" {
-		w.noteSysop("%s refused our packet: %s", p.FromBoard, p.Notice)
-		return Packet{}
-	}
 	// Past every guard, so this records packets actually ACCEPTED — a forged or
 	// replayed one must not make a silent board look like it is still talking,
-	// which is the whole question LastPacketReport answers.
+	// which is the whole question LastPacketReport answers. A bounce counts: two
+	// boards that held each other's first packets may send each other nothing
+	// else, and ignoring those left each with the other's stale fingerprint,
+	// bouncing it every run (#319).
 	if p.FromBoard != "" && p.FromBoard != w.Config.BoardID {
 		if w.LastPacketFrom == nil {
 			w.LastPacketFrom = map[string]string{}
@@ -559,6 +548,16 @@ func (w *World) ApplyPacket(p Packet) Packet {
 			}
 			w.BoardVersion[p.FromBoard] = p.Version
 		}
+		if !late {
+			w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
+		}
+	}
+	// A bounce carries no payload, so there is nothing to apply and nothing to
+	// answer. Delivering the notice and stopping is what keeps two boards that
+	// both refuse each other from bouncing the same packet back and forth.
+	if p.Notice != "" {
+		w.noteSysop("%s refused our packet: %s", p.FromBoard, p.Notice)
+		return Packet{}
 	}
 	// Anything that dictates to this board has to be signed by the Coordinator.
 	// Positional trust — believing whoever names themselves node 1 — is what this
@@ -849,7 +848,7 @@ func (w *World) NoteProtocolHold(board string, protocol int) {
 }
 
 // ProtocolHoldCurrent reports whether a board with packets in the held
-// directory is still stalled: its latest packet was held rather than applied.
+// directory is still stalled: its latest packet was held rather than accepted.
 // A held file outlives the fault that held it — one from a board that has since
 // moved past our protocol, or come level with it, waits out Config.HeldMaxAge beside
 // that board's newer traffic, which applies normally — so the file alone does
