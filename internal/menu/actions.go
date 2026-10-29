@@ -238,22 +238,19 @@ func sellUnit(label string, owned func(*game.Empire) int, apply func(*game.World
 			return Stay
 		}
 		var sold int
-		var gold int64
 		err := w.mutatePlayer(func(p *game.Empire) error {
 			// The game-level sell clamps to the CURRENT stock, which a concurrent
 			// node's strike may have thinned since the prompt was drawn — report
 			// what was actually sold, not what was asked for.
 			sold = min(n, owned(p))
-			e := apply(w.World, p, n) // apply re-checks stock atomically
-			gold = p.Gold
-			return e
+			return apply(w.World, p, n) // apply re-checks stock atomically
 		})
 		if err != nil {
 			fail(s, err)
 		} else {
 			// No pause: like buyUnit, the Spending/Sell menu redraws with updated
 			// counts right after, so the confirmation stays visible above it.
-			okNoPause(s, "Sold %d. Gold: %d", sold, gold)
+			okNoPause(s, "Sold %s.", comma(sold))
 			if sold < n {
 				fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed,
 					tr(s, "Your holdings changed while you decided — only what remained was sold."),

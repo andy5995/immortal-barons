@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The Sell screen no longer shows the gold left after a sale
   * Buy Regions offers no more than the realm's land allowance covers, and
     refuses a realm with none left before the screen opens
   * Buying regions no longer shows the gold left, or a notice that no more can
