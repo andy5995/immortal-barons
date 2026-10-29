@@ -63,13 +63,13 @@
     "ovr_payload_end": "0x059123",
     "semantic_coverage": {
       "procedures": {
-        "identified": 421,
-        "unclassified": 571
+        "identified": 426,
+        "unclassified": 566
       },
       "blocks": {
-        "contextual": 7079,
-        "identified": 462,
-        "unclassified": 3875
+        "contextual": 7108,
+        "identified": 467,
+        "unclassified": 3841
       },
       "data_chunks": {
         "identified": 282,
@@ -12363,7 +12363,7 @@
       ],
       "callers": [
         {
-          "from": "ovr_0079c1_entry_0000",
+          "from": "delete_empire_record",
           "from_id": "bre0988:ovr:procedure:0079c1",
           "container": "ovr_0079c1",
           "kind": "far_call",
@@ -62632,7 +62632,7 @@
           ]
         },
         {
-          "from": "ovr_0079c1_entry_0000",
+          "from": "delete_empire_record",
           "from_id": "bre0988:ovr:procedure:0079c1",
           "container": "ovr_0079c1",
           "kind": "far_call",
@@ -66988,6 +66988,18 @@
           ]
         },
         {
+          "from": "drop_player_queue_records_kind7",
+          "from_id": "bre0988:ovr:procedure:04ca3c",
+          "container": "ovr_04b9d0",
+          "kind": "far_call",
+          "sites": [
+            "0x1072"
+          ],
+          "site_ids": [
+            "bre0988:ovr:site:04ca42"
+          ]
+        },
+        {
           "from": "format_ai_covert_report",
           "from_id": "bre0988:ovr:procedure:04bc05",
           "container": "ovr_04b9d0",
@@ -67033,18 +67045,6 @@
           ],
           "site_ids": [
             "bre0988:ovr:site:04ca0c"
-          ]
-        },
-        {
-          "from": "ovr_04b9d0_entry_106c",
-          "from_id": "bre0988:ovr:procedure:04ca3c",
-          "container": "ovr_04b9d0",
-          "kind": "far_call",
-          "sites": [
-            "0x1072"
-          ],
-          "site_ids": [
-            "bre0988:ovr:site:04ca42"
           ]
         },
         {
@@ -67696,6 +67696,30 @@
           ]
         },
         {
+          "from": "clear_player_relations",
+          "from_id": "bre0988:ovr:procedure:050d74",
+          "container": "ovr_050ba9",
+          "kind": "far_call",
+          "sites": [
+            "0x01d1"
+          ],
+          "site_ids": [
+            "bre0988:ovr:site:050d7a"
+          ]
+        },
+        {
+          "from": "drop_player_queue_records_kind2",
+          "from_id": "bre0988:ovr:procedure:050ce4",
+          "container": "ovr_050ba9",
+          "kind": "far_call",
+          "sites": [
+            "0x0141"
+          ],
+          "site_ids": [
+            "bre0988:ovr:site:050cea"
+          ]
+        },
+        {
           "from": "ovr_050ba9_entry_0000",
           "from_id": "bre0988:ovr:procedure:050ba9",
           "container": "ovr_050ba9",
@@ -67729,30 +67753,6 @@
           ],
           "site_ids": [
             "bre0988:ovr:site:050cb4"
-          ]
-        },
-        {
-          "from": "ovr_050ba9_entry_013b",
-          "from_id": "bre0988:ovr:procedure:050ce4",
-          "container": "ovr_050ba9",
-          "kind": "far_call",
-          "sites": [
-            "0x0141"
-          ],
-          "site_ids": [
-            "bre0988:ovr:site:050cea"
-          ]
-        },
-        {
-          "from": "ovr_050ba9_entry_01cb",
-          "from_id": "bre0988:ovr:procedure:050d74",
-          "container": "ovr_050ba9",
-          "kind": "far_call",
-          "sites": [
-            "0x01d1"
-          ],
-          "site_ids": [
-            "bre0988:ovr:site:050d7a"
           ]
         },
         {
@@ -67792,6 +67792,18 @@
           ]
         },
         {
+          "from": "drop_player_queue_records_kind1",
+          "from_id": "bre0988:ovr:procedure:050f79",
+          "container": "ovr_050dfb",
+          "kind": "far_call",
+          "sites": [
+            "0x0184"
+          ],
+          "site_ids": [
+            "bre0988:ovr:site:050f7f"
+          ]
+        },
+        {
           "from": "empire_trade_good_pointer",
           "from_id": "bre0988:ovr:procedure:051133",
           "container": "ovr_050dfb",
@@ -67801,18 +67813,6 @@
           ],
           "site_ids": [
             "bre0988:ovr:site:051139"
-          ]
-        },
-        {
-          "from": "ovr_050dfb_entry_017e",
-          "from_id": "bre0988:ovr:procedure:050f79",
-          "container": "ovr_050dfb",
-          "kind": "far_call",
-          "sites": [
-            "0x0184"
-          ],
-          "site_ids": [
-            "bre0988:ovr:site:050f7f"
           ]
         },
         {
@@ -204439,7 +204439,7 @@
             },
             {
               "kind": "overlay_call",
-              "to": "ovr_0079c1_entry_0000",
+              "to": "delete_empire_record",
               "target_address": "0259:0034",
               "sites": [
                 "0x08d8"
@@ -207506,7 +207506,7 @@
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_0079c1:ovr_0079c1_entry_0000",
+            "to": "ovr_0079c1:delete_empire_record",
             "logical_target": "0259:0034",
             "sites": [
               "0x08d8"
@@ -231760,11 +231760,11 @@
       "roots": [
         {
           "id": "bre0988:ovr:procedure:0079c1",
-          "name": "ovr_0079c1_entry_0000",
+          "name": "delete_empire_record",
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "call_graph: called by the daily purge (0x007ed2) and the sysop Delete Empire in manage_players; disassembly: drops the player's queued records, clears relations, then FillChars the record and seeds new-realm defaults (docs/dev/bre-save-format.md)"
           },
           "entry_offset": "0x0000",
           "ovr_offset": "0x0079c1",
@@ -231772,7 +231772,9 @@
             "exe_offset": "0x004f04",
             "logical_target": "0259:0034"
           },
-          "aliases": [],
+          "aliases": [
+            "ovr_0079c1_entry_0000"
+          ],
           "tags": [
             "exported",
             "overlay"
@@ -231816,6 +231818,18 @@
             },
             {
               "kind": "overlay_call",
+              "to": "clear_player_relations",
+              "target_address": "0500:0039",
+              "sites": [
+                "0x0074"
+              ],
+              "to_id": "bre0988:ovr:procedure:050d74",
+              "site_ids": [
+                "bre0988:ovr:site:007a35"
+              ]
+            },
+            {
+              "kind": "overlay_call",
               "to": "delete_report_data",
               "target_address": "04ef:0034",
               "sites": [
@@ -231828,19 +231842,19 @@
             },
             {
               "kind": "overlay_call",
-              "to": "ovr_04b9d0_entry_106c",
-              "target_address": "04dc:0039",
+              "to": "drop_player_queue_records_kind1",
+              "target_address": "0504:0034",
               "sites": [
-                "0x0043"
+                "0x0024"
               ],
-              "to_id": "bre0988:ovr:procedure:04ca3c",
+              "to_id": "bre0988:ovr:procedure:050f79",
               "site_ids": [
-                "bre0988:ovr:site:007a04"
+                "bre0988:ovr:site:0079e5"
               ]
             },
             {
               "kind": "overlay_call",
-              "to": "ovr_050ba9_entry_013b",
+              "to": "drop_player_queue_records_kind2",
               "target_address": "0500:0034",
               "sites": [
                 "0x0062"
@@ -231852,26 +231866,14 @@
             },
             {
               "kind": "overlay_call",
-              "to": "ovr_050ba9_entry_01cb",
-              "target_address": "0500:0039",
+              "to": "drop_player_queue_records_kind7",
+              "target_address": "04dc:0039",
               "sites": [
-                "0x0074"
+                "0x0043"
               ],
-              "to_id": "bre0988:ovr:procedure:050d74",
+              "to_id": "bre0988:ovr:procedure:04ca3c",
               "site_ids": [
-                "bre0988:ovr:site:007a35"
-              ]
-            },
-            {
-              "kind": "overlay_call",
-              "to": "ovr_050dfb_entry_017e",
-              "target_address": "0504:0034",
-              "sites": [
-                "0x0024"
-              ],
-              "to_id": "bre0988:ovr:procedure:050f79",
-              "site_ids": [
-                "bre0988:ovr:site:0079e5"
+                "bre0988:ovr:site:007a04"
               ]
             }
           ],
@@ -232374,7 +232376,7 @@
             },
             {
               "kind": "near_call",
-              "to": "ovr_0079c1_entry_0000",
+              "to": "delete_empire_record",
               "target_address": "0x0079c1",
               "sites": [
                 "0x0659"
@@ -234813,12 +234815,14 @@
       "blocks": [
         {
           "id": "bre0988:ovr:block:0079c1",
-          "name": "ovr_0079c1_entry_0000",
-          "aliases": [],
+          "name": "delete_empire_record",
+          "aliases": [
+            "ovr_0079c1_entry_0000"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "call_graph: called by the daily purge (0x007ed2) and the sysop Delete Empire in manage_players; disassembly: drops the player's queued records, clears relations, then FillChars the record and seeds new-realm defaults (docs/dev/bre-save-format.md)"
           },
           "unit_span": [
             "0x0000",
@@ -248288,18 +248292,18 @@
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_04b9d0:ovr_04b9d0_entry_0000",
-            "logical_target": "04dc:0025",
+            "to": "ovr_04b9d0:drop_player_queue_records_kind7",
+            "logical_target": "04dc:0039",
             "sites": [
-              "0x194b"
+              "0x0043"
             ]
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_04b9d0:ovr_04b9d0_entry_106c",
-            "logical_target": "04dc:0039",
+            "to": "ovr_04b9d0:ovr_04b9d0_entry_0000",
+            "logical_target": "04dc:0025",
             "sites": [
-              "0x0043"
+              "0x194b"
             ]
           },
           {
@@ -248387,6 +248391,22 @@
           },
           {
             "kind": "overlay_call",
+            "to": "ovr_050ba9:clear_player_relations",
+            "logical_target": "0500:0039",
+            "sites": [
+              "0x0074"
+            ]
+          },
+          {
+            "kind": "overlay_call",
+            "to": "ovr_050ba9:drop_player_queue_records_kind2",
+            "logical_target": "0500:0034",
+            "sites": [
+              "0x0062"
+            ]
+          },
+          {
+            "kind": "overlay_call",
             "to": "ovr_050ba9:ovr_050ba9_entry_0000",
             "logical_target": "0500:0025",
             "sites": [
@@ -248395,23 +248415,7 @@
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_050ba9:ovr_050ba9_entry_013b",
-            "logical_target": "0500:0034",
-            "sites": [
-              "0x0062"
-            ]
-          },
-          {
-            "kind": "overlay_call",
-            "to": "ovr_050ba9:ovr_050ba9_entry_01cb",
-            "logical_target": "0500:0039",
-            "sites": [
-              "0x0074"
-            ]
-          },
-          {
-            "kind": "overlay_call",
-            "to": "ovr_050dfb:ovr_050dfb_entry_017e",
+            "to": "ovr_050dfb:drop_player_queue_records_kind1",
             "logical_target": "0504:0034",
             "sites": [
               "0x0024"
@@ -344579,31 +344583,7 @@
             },
             {
               "kind": "overlay_call",
-              "to": "ovr_04b9d0_entry_106c",
-              "target_address": "04dc:0039",
-              "sites": [
-                "0x1a87"
-              ],
-              "to_id": "bre0988:ovr:procedure:04ca3c",
-              "site_ids": [
-                "bre0988:ovr:site:01bd53"
-              ]
-            },
-            {
-              "kind": "overlay_call",
-              "to": "ovr_050ba9_entry_013b",
-              "target_address": "0500:0034",
-              "sites": [
-                "0x1aa6"
-              ],
-              "to_id": "bre0988:ovr:procedure:050ce4",
-              "site_ids": [
-                "bre0988:ovr:site:01bd72"
-              ]
-            },
-            {
-              "kind": "overlay_call",
-              "to": "ovr_050ba9_entry_01cb",
+              "to": "clear_player_relations",
               "target_address": "0500:0039",
               "sites": [
                 "0x1aaf"
@@ -344615,7 +344595,7 @@
             },
             {
               "kind": "overlay_call",
-              "to": "ovr_050dfb_entry_017e",
+              "to": "drop_player_queue_records_kind1",
               "target_address": "0504:0034",
               "sites": [
                 "0x1a68"
@@ -344623,6 +344603,30 @@
               "to_id": "bre0988:ovr:procedure:050f79",
               "site_ids": [
                 "bre0988:ovr:site:01bd34"
+              ]
+            },
+            {
+              "kind": "overlay_call",
+              "to": "drop_player_queue_records_kind2",
+              "target_address": "0500:0034",
+              "sites": [
+                "0x1aa6"
+              ],
+              "to_id": "bre0988:ovr:procedure:050ce4",
+              "site_ids": [
+                "bre0988:ovr:site:01bd72"
+              ]
+            },
+            {
+              "kind": "overlay_call",
+              "to": "drop_player_queue_records_kind7",
+              "target_address": "04dc:0039",
+              "sites": [
+                "0x1a87"
+              ],
+              "to_id": "bre0988:ovr:procedure:04ca3c",
+              "site_ids": [
+                "bre0988:ovr:site:01bd53"
               ]
             }
           ],
@@ -354649,7 +354653,7 @@
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_04b9d0:ovr_04b9d0_entry_106c",
+            "to": "ovr_04b9d0:drop_player_queue_records_kind7",
             "logical_target": "04dc:0039",
             "sites": [
               "0x1a87"
@@ -354665,15 +354669,7 @@
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_050ba9:ovr_050ba9_entry_013b",
-            "logical_target": "0500:0034",
-            "sites": [
-              "0x1aa6"
-            ]
-          },
-          {
-            "kind": "overlay_call",
-            "to": "ovr_050ba9:ovr_050ba9_entry_01cb",
+            "to": "ovr_050ba9:clear_player_relations",
             "logical_target": "0500:0039",
             "sites": [
               "0x1aaf"
@@ -354681,7 +354677,15 @@
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_050dfb:ovr_050dfb_entry_017e",
+            "to": "ovr_050ba9:drop_player_queue_records_kind2",
+            "logical_target": "0500:0034",
+            "sites": [
+              "0x1aa6"
+            ]
+          },
+          {
+            "kind": "overlay_call",
+            "to": "ovr_050dfb:drop_player_queue_records_kind1",
             "logical_target": "0504:0034",
             "sites": [
               "0x1a68"
@@ -551839,6 +551843,18 @@
               ]
             },
             {
+              "from": "drop_player_queue_records_kind7",
+              "from_id": "bre0988:ovr:procedure:04ca3c",
+              "container": "ovr_04b9d0",
+              "kind": "overlay_call",
+              "sites": [
+                "0x10c9"
+              ],
+              "site_ids": [
+                "bre0988:ovr:site:04ca99"
+              ]
+            },
+            {
               "from": "ovr_04b9d0_entry_0000",
               "from_id": "bre0988:ovr:procedure:04b9d0",
               "container": "ovr_04b9d0",
@@ -551848,18 +551864,6 @@
               ],
               "site_ids": [
                 "bre0988:ovr:site:04ba2c"
-              ]
-            },
-            {
-              "from": "ovr_04b9d0_entry_106c",
-              "from_id": "bre0988:ovr:procedure:04ca3c",
-              "container": "ovr_04b9d0",
-              "kind": "overlay_call",
-              "sites": [
-                "0x10c9"
-              ],
-              "site_ids": [
-                "bre0988:ovr:site:04ca99"
               ]
             },
             {
@@ -551875,6 +551879,18 @@
               ]
             },
             {
+              "from": "drop_player_queue_records_kind2",
+              "from_id": "bre0988:ovr:procedure:050ce4",
+              "container": "ovr_050ba9",
+              "kind": "overlay_call",
+              "sites": [
+                "0x01ad"
+              ],
+              "site_ids": [
+                "bre0988:ovr:site:050d56"
+              ]
+            },
+            {
               "from": "ovr_050ba9_entry_0000",
               "from_id": "bre0988:ovr:procedure:050ba9",
               "container": "ovr_050ba9",
@@ -551887,19 +551903,7 @@
               ]
             },
             {
-              "from": "ovr_050ba9_entry_013b",
-              "from_id": "bre0988:ovr:procedure:050ce4",
-              "container": "ovr_050ba9",
-              "kind": "overlay_call",
-              "sites": [
-                "0x01ad"
-              ],
-              "site_ids": [
-                "bre0988:ovr:site:050d56"
-              ]
-            },
-            {
-              "from": "ovr_050dfb_entry_017e",
+              "from": "drop_player_queue_records_kind1",
               "from_id": "bre0988:ovr:procedure:050f79",
               "container": "ovr_050dfb",
               "kind": "overlay_call",
@@ -635213,11 +635217,11 @@
         },
         {
           "id": "bre0988:ovr:procedure:04ca3c",
-          "name": "ovr_04b9d0_entry_106c",
+          "name": "drop_player_queue_records_kind7",
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "medium",
+            "evidence": "call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: walks the list headed at [0x237e] and frees each kind-7 node whose first longint equals the player id argument"
           },
           "entry_offset": "0x106c",
           "ovr_offset": "0x04ca3c",
@@ -635225,7 +635229,9 @@
             "exe_offset": "0x007739",
             "logical_target": "04dc:0039"
           },
-          "aliases": [],
+          "aliases": [
+            "ovr_04b9d0_entry_106c"
+          ],
           "tags": [
             "exported",
             "overlay"
@@ -635270,7 +635276,7 @@
           ],
           "callers": [
             {
-              "from": "ovr_0079c1_entry_0000",
+              "from": "delete_empire_record",
               "from_id": "bre0988:ovr:procedure:0079c1",
               "container": "ovr_0079c1",
               "kind": "overlay_call",
@@ -640680,12 +640686,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca3c",
-          "name": "ovr_04b9d0_entry_106c",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7",
+          "aliases": [
+            "ovr_04b9d0_entry_106c"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "medium",
+            "evidence": "call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: walks the list headed at [0x237e] and frees each kind-7 node whose first longint equals the player id argument"
           },
           "unit_span": [
             "0x106c",
@@ -640714,12 +640722,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca57",
-          "name": "ovr_04b9d0_loc_1087",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__loop_head_1087",
+          "aliases": [
+            "ovr_04b9d0_loc_1087"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural loop head in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x1087",
@@ -640747,12 +640757,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca5f",
-          "name": "ovr_04b9d0_loc_108f",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__branch_108f",
+          "aliases": [
+            "ovr_04b9d0_loc_108f"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x108f",
@@ -640780,12 +640792,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca69",
-          "name": "ovr_04b9d0_loc_1099",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__branch_1099",
+          "aliases": [
+            "ovr_04b9d0_loc_1099"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x1099",
@@ -640813,12 +640827,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca6f",
-          "name": "ovr_04b9d0_loc_109f",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__branch_109f",
+          "aliases": [
+            "ovr_04b9d0_loc_109f"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x109f",
@@ -640846,12 +640862,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca8f",
-          "name": "ovr_04b9d0_loc_10bf",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__branch_10bf",
+          "aliases": [
+            "ovr_04b9d0_loc_10bf"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x10bf",
@@ -640879,12 +640897,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca94",
-          "name": "ovr_04b9d0_loc_10c4",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__branch_10c4",
+          "aliases": [
+            "ovr_04b9d0_loc_10c4"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x10c4",
@@ -640912,12 +640932,14 @@
         },
         {
           "id": "bre0988:ovr:block:04ca9e",
-          "name": "ovr_04b9d0_loc_10ce",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__branch_10ce",
+          "aliases": [
+            "ovr_04b9d0_loc_10ce"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x10ce",
@@ -640957,12 +640979,14 @@
         },
         {
           "id": "bre0988:ovr:block:04cab1",
-          "name": "ovr_04b9d0_loc_10e1",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind7__return_10e1",
+          "aliases": [
+            "ovr_04b9d0_loc_10e1"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural return in identified procedure drop_player_queue_records_kind7"
           },
           "unit_span": [
             "0x10e1",
@@ -660360,7 +660384,7 @@
           ],
           "callers": [
             {
-              "from": "ovr_0079c1_entry_0000",
+              "from": "delete_empire_record",
               "from_id": "bre0988:ovr:procedure:0079c1",
               "container": "ovr_0079c1",
               "kind": "overlay_call",
@@ -672074,11 +672098,11 @@
         },
         {
           "id": "bre0988:ovr:procedure:050ce4",
-          "name": "ovr_050ba9_entry_013b",
+          "name": "drop_player_queue_records_kind2",
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "medium",
+            "evidence": "call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: walks the list headed at [0x237e] and frees each kind-2 node whose first or second longint equals the player id argument"
           },
           "entry_offset": "0x013b",
           "ovr_offset": "0x050ce4",
@@ -672086,7 +672110,9 @@
             "exe_offset": "0x007974",
             "logical_target": "0500:0034"
           },
-          "aliases": [],
+          "aliases": [
+            "ovr_050ba9_entry_013b"
+          ],
           "tags": [
             "exported",
             "overlay"
@@ -672131,7 +672157,7 @@
           ],
           "callers": [
             {
-              "from": "ovr_0079c1_entry_0000",
+              "from": "delete_empire_record",
               "from_id": "bre0988:ovr:procedure:0079c1",
               "container": "ovr_0079c1",
               "kind": "overlay_call",
@@ -672159,11 +672185,11 @@
         },
         {
           "id": "bre0988:ovr:procedure:050d74",
-          "name": "ovr_050ba9_entry_01cb",
+          "name": "clear_player_relations",
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "call_graph: called by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: zeroes the +0x130 relation in both directions for every slot (docs/dev/bre-save-format.md)"
           },
           "entry_offset": "0x01cb",
           "ovr_offset": "0x050d74",
@@ -672171,7 +672197,9 @@
             "exe_offset": "0x007979",
             "logical_target": "0500:0039"
           },
-          "aliases": [],
+          "aliases": [
+            "ovr_050ba9_entry_01cb"
+          ],
           "tags": [
             "exported",
             "overlay"
@@ -672204,7 +672232,7 @@
           ],
           "callers": [
             {
-              "from": "ovr_0079c1_entry_0000",
+              "from": "delete_empire_record",
               "from_id": "bre0988:ovr:procedure:0079c1",
               "container": "ovr_0079c1",
               "kind": "overlay_call",
@@ -673001,12 +673029,14 @@
         },
         {
           "id": "bre0988:ovr:block:050ce4",
-          "name": "ovr_050ba9_entry_013b",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2",
+          "aliases": [
+            "ovr_050ba9_entry_013b"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "medium",
+            "evidence": "call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: walks the list headed at [0x237e] and frees each kind-2 node whose first or second longint equals the player id argument"
           },
           "unit_span": [
             "0x013b",
@@ -673035,12 +673065,14 @@
         },
         {
           "id": "bre0988:ovr:block:050cff",
-          "name": "ovr_050ba9_loc_0156",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__loop_head_0156",
+          "aliases": [
+            "ovr_050ba9_loc_0156"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural loop head in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x0156",
@@ -673068,12 +673100,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d07",
-          "name": "ovr_050ba9_loc_015e",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_015e",
+          "aliases": [
+            "ovr_050ba9_loc_015e"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x015e",
@@ -673101,12 +673135,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d11",
-          "name": "ovr_050ba9_loc_0168",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_0168",
+          "aliases": [
+            "ovr_050ba9_loc_0168"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x0168",
@@ -673134,12 +673170,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d17",
-          "name": "ovr_050ba9_loc_016e",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_016e",
+          "aliases": [
+            "ovr_050ba9_loc_016e"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x016e",
@@ -673167,12 +673205,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d37",
-          "name": "ovr_050ba9_loc_018e",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_018e",
+          "aliases": [
+            "ovr_050ba9_loc_018e"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x018e",
@@ -673200,12 +673240,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d3c",
-          "name": "ovr_050ba9_loc_0193",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_0193",
+          "aliases": [
+            "ovr_050ba9_loc_0193"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x0193",
@@ -673238,12 +673280,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d4c",
-          "name": "ovr_050ba9_loc_01a3",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_01a3",
+          "aliases": [
+            "ovr_050ba9_loc_01a3"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x01a3",
@@ -673271,12 +673315,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d51",
-          "name": "ovr_050ba9_loc_01a8",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_01a8",
+          "aliases": [
+            "ovr_050ba9_loc_01a8"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x01a8",
@@ -673309,12 +673355,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d5b",
-          "name": "ovr_050ba9_loc_01b2",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__branch_01b2",
+          "aliases": [
+            "ovr_050ba9_loc_01b2"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x01b2",
@@ -673354,12 +673402,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d6e",
-          "name": "ovr_050ba9_loc_01c5",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind2__return_01c5",
+          "aliases": [
+            "ovr_050ba9_loc_01c5"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural return in identified procedure drop_player_queue_records_kind2"
           },
           "unit_span": [
             "0x01c5",
@@ -673387,12 +673437,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d74",
-          "name": "ovr_050ba9_entry_01cb",
-          "aliases": [],
+          "name": "clear_player_relations",
+          "aliases": [
+            "ovr_050ba9_entry_01cb"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "call_graph: called by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: zeroes the +0x130 relation in both directions for every slot (docs/dev/bre-save-format.md)"
           },
           "unit_span": [
             "0x01cb",
@@ -673421,12 +673473,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d88",
-          "name": "ovr_050ba9_loc_01df",
-          "aliases": [],
+          "name": "clear_player_relations__loop_head_01df",
+          "aliases": [
+            "ovr_050ba9_loc_01df"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural loop head in identified procedure clear_player_relations"
           },
           "unit_span": [
             "0x01df",
@@ -673454,12 +673508,14 @@
         },
         {
           "id": "bre0988:ovr:block:050d8b",
-          "name": "ovr_050ba9_loc_01e2",
-          "aliases": [],
+          "name": "clear_player_relations__join_01e2",
+          "aliases": [
+            "ovr_050ba9_loc_01e2"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural join in identified procedure clear_player_relations"
           },
           "unit_span": [
             "0x01e2",
@@ -673487,12 +673543,14 @@
         },
         {
           "id": "bre0988:ovr:block:050dd5",
-          "name": "ovr_050ba9_loc_022c",
-          "aliases": [],
+          "name": "clear_player_relations__return_022c",
+          "aliases": [
+            "ovr_050ba9_loc_022c"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural return in identified procedure clear_player_relations"
           },
           "unit_span": [
             "0x022c",
@@ -673864,7 +673922,7 @@
           "naming": {
             "status": "identified",
             "confidence": "high",
-            "evidence": "call_graph: sole caller is the daily-maintenance step announcing that trade deals are being packed (compacted, not exported); instruction_behavior: walks the shared offer list's trade-deal records, re-checks each 0x97-byte record's CRC, deletes a record that fails it or whose first field is not positive (a cleared record), and sets the survivors' +0x60 arrival gate to 0xFF; it writes no packet"
+            "evidence": "call_graph: sole caller is the daily-maintenance step announcing that trade deals are being packed (compacted, not exported); instruction_behavior: walks the shared offer list's trade-deal records, re-checks each 0x97-byte record's CRC, deletes a record that fails it or whose first field is not positive (a cleared record), and sets the survivors' +0x60 arrival gate to 0xFF; it writes no packet; the previous name pack_trade_offer_packets read the step as an export"
           },
           "entry_offset": "0x001f",
           "ovr_offset": "0x050e1a",
@@ -673873,8 +673931,7 @@
             "logical_target": "0504:002a"
           },
           "aliases": [
-            "ovr_050dfb_entry_001f",
-            "pack_trade_offer_packets"
+            "ovr_050dfb_entry_001f"
           ],
           "tags": [
             "exported",
@@ -674037,11 +674094,11 @@
         },
         {
           "id": "bre0988:ovr:procedure:050f79",
-          "name": "ovr_050dfb_entry_017e",
+          "name": "drop_player_queue_records_kind1",
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "medium",
+            "evidence": "call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: walks the list headed at [0x237e] and frees each kind-1 node whose first longint equals the player id argument"
           },
           "entry_offset": "0x017e",
           "ovr_offset": "0x050f79",
@@ -674049,7 +674106,9 @@
             "exe_offset": "0x0079b4",
             "logical_target": "0504:0034"
           },
-          "aliases": [],
+          "aliases": [
+            "ovr_050dfb_entry_017e"
+          ],
           "tags": [
             "exported",
             "overlay"
@@ -674094,7 +674153,7 @@
           ],
           "callers": [
             {
-              "from": "ovr_0079c1_entry_0000",
+              "from": "delete_empire_record",
               "from_id": "bre0988:ovr:procedure:0079c1",
               "container": "ovr_0079c1",
               "kind": "overlay_call",
@@ -674996,13 +675055,12 @@
           "id": "bre0988:ovr:block:050e1a",
           "name": "pack_trade_offer_list",
           "aliases": [
-            "ovr_050dfb_entry_001f",
-            "pack_trade_offer_packets"
+            "ovr_050dfb_entry_001f"
           ],
           "naming": {
             "status": "identified",
             "confidence": "high",
-            "evidence": "call_graph: sole caller is the daily-maintenance step announcing that trade deals are being packed (compacted, not exported); instruction_behavior: walks the shared offer list's trade-deal records, re-checks each 0x97-byte record's CRC, deletes a record that fails it or whose first field is not positive (a cleared record), and sets the survivors' +0x60 arrival gate to 0xFF; it writes no packet"
+            "evidence": "call_graph: sole caller is the daily-maintenance step announcing that trade deals are being packed (compacted, not exported); instruction_behavior: walks the shared offer list's trade-deal records, re-checks each 0x97-byte record's CRC, deletes a record that fails it or whose first field is not positive (a cleared record), and sets the survivors' +0x60 arrival gate to 0xFF; it writes no packet; the previous name pack_trade_offer_packets read the step as an export"
           },
           "unit_span": [
             "0x001f",
@@ -675617,12 +675675,14 @@
         },
         {
           "id": "bre0988:ovr:block:050f79",
-          "name": "ovr_050dfb_entry_017e",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1",
+          "aliases": [
+            "ovr_050dfb_entry_017e"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "medium",
+            "evidence": "call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game; disassembly: walks the list headed at [0x237e] and frees each kind-1 node whose first longint equals the player id argument"
           },
           "unit_span": [
             "0x017e",
@@ -675651,12 +675711,14 @@
         },
         {
           "id": "bre0988:ovr:block:050f94",
-          "name": "ovr_050dfb_loc_0199",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__loop_head_0199",
+          "aliases": [
+            "ovr_050dfb_loc_0199"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural loop head in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x0199",
@@ -675684,12 +675746,14 @@
         },
         {
           "id": "bre0988:ovr:block:050f9c",
-          "name": "ovr_050dfb_loc_01a1",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__branch_01a1",
+          "aliases": [
+            "ovr_050dfb_loc_01a1"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x01a1",
@@ -675717,12 +675781,14 @@
         },
         {
           "id": "bre0988:ovr:block:050fa6",
-          "name": "ovr_050dfb_loc_01ab",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__branch_01ab",
+          "aliases": [
+            "ovr_050dfb_loc_01ab"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x01ab",
@@ -675750,12 +675816,14 @@
         },
         {
           "id": "bre0988:ovr:block:050fac",
-          "name": "ovr_050dfb_loc_01b1",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__branch_01b1",
+          "aliases": [
+            "ovr_050dfb_loc_01b1"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x01b1",
@@ -675783,12 +675851,14 @@
         },
         {
           "id": "bre0988:ovr:block:050fcc",
-          "name": "ovr_050dfb_loc_01d1",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__branch_01d1",
+          "aliases": [
+            "ovr_050dfb_loc_01d1"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x01d1",
@@ -675816,12 +675886,14 @@
         },
         {
           "id": "bre0988:ovr:block:050fd1",
-          "name": "ovr_050dfb_loc_01d6",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__branch_01d6",
+          "aliases": [
+            "ovr_050dfb_loc_01d6"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x01d6",
@@ -675849,12 +675921,14 @@
         },
         {
           "id": "bre0988:ovr:block:050fdb",
-          "name": "ovr_050dfb_loc_01e0",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__branch_01e0",
+          "aliases": [
+            "ovr_050dfb_loc_01e0"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x01e0",
@@ -675894,12 +675968,14 @@
         },
         {
           "id": "bre0988:ovr:block:050fee",
-          "name": "ovr_050dfb_loc_01f3",
-          "aliases": [],
+          "name": "drop_player_queue_records_kind1__return_01f3",
+          "aliases": [
+            "ovr_050dfb_loc_01f3"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural return in identified procedure drop_player_queue_records_kind1"
           },
           "unit_span": [
             "0x01f3",
@@ -753795,7 +753871,7 @@
         ],
         "callers": [
           {
-            "from": "ovr_0079c1_entry_0000",
+            "from": "delete_empire_record",
             "from_id": "bre0988:ovr:procedure:0079c1",
             "container": "ovr_0079c1",
             "kind": "far_call",
@@ -804064,7 +804140,7 @@
             ]
           },
           {
-            "from": "ovr_0079c1_entry_0000",
+            "from": "delete_empire_record",
             "from_id": "bre0988:ovr:procedure:0079c1",
             "container": "ovr_0079c1",
             "kind": "far_call",
@@ -808420,6 +808496,18 @@
             ]
           },
           {
+            "from": "drop_player_queue_records_kind7",
+            "from_id": "bre0988:ovr:procedure:04ca3c",
+            "container": "ovr_04b9d0",
+            "kind": "far_call",
+            "sites": [
+              "0x1072"
+            ],
+            "site_ids": [
+              "bre0988:ovr:site:04ca42"
+            ]
+          },
+          {
             "from": "format_ai_covert_report",
             "from_id": "bre0988:ovr:procedure:04bc05",
             "container": "ovr_04b9d0",
@@ -808465,18 +808553,6 @@
             ],
             "site_ids": [
               "bre0988:ovr:site:04ca0c"
-            ]
-          },
-          {
-            "from": "ovr_04b9d0_entry_106c",
-            "from_id": "bre0988:ovr:procedure:04ca3c",
-            "container": "ovr_04b9d0",
-            "kind": "far_call",
-            "sites": [
-              "0x1072"
-            ],
-            "site_ids": [
-              "bre0988:ovr:site:04ca42"
             ]
           },
           {
@@ -809128,6 +809204,30 @@
             ]
           },
           {
+            "from": "clear_player_relations",
+            "from_id": "bre0988:ovr:procedure:050d74",
+            "container": "ovr_050ba9",
+            "kind": "far_call",
+            "sites": [
+              "0x01d1"
+            ],
+            "site_ids": [
+              "bre0988:ovr:site:050d7a"
+            ]
+          },
+          {
+            "from": "drop_player_queue_records_kind2",
+            "from_id": "bre0988:ovr:procedure:050ce4",
+            "container": "ovr_050ba9",
+            "kind": "far_call",
+            "sites": [
+              "0x0141"
+            ],
+            "site_ids": [
+              "bre0988:ovr:site:050cea"
+            ]
+          },
+          {
             "from": "ovr_050ba9_entry_0000",
             "from_id": "bre0988:ovr:procedure:050ba9",
             "container": "ovr_050ba9",
@@ -809161,30 +809261,6 @@
             ],
             "site_ids": [
               "bre0988:ovr:site:050cb4"
-            ]
-          },
-          {
-            "from": "ovr_050ba9_entry_013b",
-            "from_id": "bre0988:ovr:procedure:050ce4",
-            "container": "ovr_050ba9",
-            "kind": "far_call",
-            "sites": [
-              "0x0141"
-            ],
-            "site_ids": [
-              "bre0988:ovr:site:050cea"
-            ]
-          },
-          {
-            "from": "ovr_050ba9_entry_01cb",
-            "from_id": "bre0988:ovr:procedure:050d74",
-            "container": "ovr_050ba9",
-            "kind": "far_call",
-            "sites": [
-              "0x01d1"
-            ],
-            "site_ids": [
-              "bre0988:ovr:site:050d7a"
             ]
           },
           {
@@ -809224,6 +809300,18 @@
             ]
           },
           {
+            "from": "drop_player_queue_records_kind1",
+            "from_id": "bre0988:ovr:procedure:050f79",
+            "container": "ovr_050dfb",
+            "kind": "far_call",
+            "sites": [
+              "0x0184"
+            ],
+            "site_ids": [
+              "bre0988:ovr:site:050f7f"
+            ]
+          },
+          {
             "from": "empire_trade_good_pointer",
             "from_id": "bre0988:ovr:procedure:051133",
             "container": "ovr_050dfb",
@@ -809233,18 +809321,6 @@
             ],
             "site_ids": [
               "bre0988:ovr:site:051139"
-            ]
-          },
-          {
-            "from": "ovr_050dfb_entry_017e",
-            "from_id": "bre0988:ovr:procedure:050f79",
-            "container": "ovr_050dfb",
-            "kind": "far_call",
-            "sites": [
-              "0x0184"
-            ],
-            "site_ids": [
-              "bre0988:ovr:site:050f7f"
             ]
           },
           {
@@ -1028435,7 +1028511,7 @@
     }
   },
   "validation": {
-    "unique_names": 12690,
+    "unique_names": 12694,
     "overlay_blocks": 8495,
     "overlay_data_chunks": 319,
     "resident_blocks": 2921,

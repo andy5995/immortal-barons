@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Abdicating posts a line in the planet's news
   * Packets carry the build commit with the version, so a board's exact build
     shows on the sysop panel and in BBSINFO.LST
   * A board sends its scores only when they change, and once a day

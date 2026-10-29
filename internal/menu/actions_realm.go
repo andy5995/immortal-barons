@@ -42,7 +42,7 @@ func abdicate(s session.Session, w *ctx) Result {
 	// husk survives to enforce the next-day rebuild rule.
 	w.With(func() {
 		if p := w.Player(); p != nil {
-			w.Kill(p)
+			w.Abdicate(p)
 		}
 	})
 	// The session ENDS here, as the original's does — it signs off and hangs up

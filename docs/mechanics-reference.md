@@ -4490,7 +4490,11 @@ works the same way.
 menu): "Are you POSITIVE you wish to erase your empire?" — yes signs off and
 **ends the session**, no answers "Glad you changed your mind!" IB matches both,
 ending through `session.End` the way an elimination does, though its sign-off is
-IB's own wording rather than the original's two lines. IB adopted the shape in
+IB's own wording rather than the original's two lines. **IB also posts a planet
+news line** naming the realm that abdicated (`World.Abdicate`). The original
+posts none: `confirm_end_game` only zeroes the realm's people and units, drops the
+player's queued records and its diplomacy, and signs off, and
+`game/news.dat` has no section for it. IB adopted the shape in
 2026-08-23; it had asked the player
 to retype their realm name, which is not the original's and rested on the
 mistaken idea that realm names are typed somewhere. They are not — every picker
@@ -7157,6 +7161,9 @@ checking IB against a capture:
 - **An interplanetary recipient letter numbers the rows of a scores packet**,
   where BRE's is the realm's own slot on its home planet, gaps and all. See "IP
   Messages" above: the slot does not ride the wire.
+- **Abdicating posts a planet news line.** BRE's `confirm_end_game` posts none
+  and `game/news.dat` has no section for it, so a realm that abdicated vanished
+  from its rivals' view with no reason given. See "Elimination and restart".
 
 None of these is an oversight to correct back.
 

@@ -262,12 +262,23 @@ func (w *World) dropEmpires(gone func(*Empire) bool) {
 //
 // Every death goes through here — conquest, a Gooie Kablooie, starvation,
 // and abdication — so whatever a future death has to do besides setting these
-// two fields is added in one place. Three of the four call sites were in
-// internal/game and the fourth in the abdication screen, which is how a rule
-// ends up being enforced by a renderer.
+// two fields is added in one place. Abdication reaches it through Abdicate,
+// which adds the news line.
 func (w *World) Kill(e *Empire) {
 	e.Alive = false
 	e.DiedDay = w.GameDay
+}
+
+// Abdicate ends e at its baron's own request and tells the planet. The news
+// line is IB's own: BRE's confirm_end_game posts none, so a realm that
+// abdicated vanished from its rivals' view. A realm already dead, crushed while
+// its baron sat at the confirmation, is left as its death left it.
+func (w *World) Abdicate(e *Empire) {
+	if !e.Alive {
+		return
+	}
+	w.Kill(e)
+	w.postNews(fmt.Sprintf("The baron of %s has abdicated.", e.Name))
 }
 
 // WaiveProtection ends e's new-realm protection at the end of the current turn.

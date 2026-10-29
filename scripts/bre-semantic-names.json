@@ -17,6 +17,11 @@
     }
   },
   "overlay_procedures": {
+    "0x0079c1": {
+      "name": "delete_empire_record",
+      "confidence": "high",
+      "evidence": ["call_graph: called by the daily purge (0x007ed2) and the sysop Delete Empire in manage_players", "disassembly: drops the player's queued records, clears relations, then FillChars the record and seeds new-realm defaults (docs/dev/bre-save-format.md)"]
+    },
     "0x03018a": {"name": "decontamination_price_at_size", "confidence": "high", "evidence": ["call_graph: sole caller is calculate_waste_decontamination_cost, so this prices decontamination rather than a land purchase despite sharing the region-price shape", "disassembly: reads Region Cost Change (config +0x185) into a 4-way switch, calls is_under_protection then total_regions, forms climb = 0x21 + flag*value and returns climb*total + 0x384"]},
     "0x030237": {"name": "region_price_over_range", "confidence": "high", "evidence": ["call_graph: the land-price function proper -- called by purchase_regions, run_buy_regions_menu and run_system_menu, and by itself to split a span at the surcharge threshold", "disassembly: gates on is_under_protection BEFORE comparing the count to 0x12c, so a protected realm never pays the surcharge at any size", "live: one staged 1,000-region realm at Region Cost Change Medium was quoted 33,917 with Protection Turns 100 and 68,934 with 0 (2026-09-08), fixing base 0x384 and the half-step from real_to_integer_round"]},
     "0x01351e": {
@@ -1164,6 +1169,11 @@
       "confidence": "medium",
       "evidence": ["binary_strings: target, user, force, and attack template fields", "call_graph: report formatter called only by AI covert-operation processing"]
     },
+    "0x04ca3c": {
+      "name": "drop_player_queue_records_kind7",
+      "confidence": "medium",
+      "evidence": ["call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game", "disassembly: walks the list headed at [0x237e] and frees each kind-7 node whose first longint equals the player id argument"]
+    },
     "0x04cd9f": {
       "name": "open_spy_data",
       "confidence": "high",
@@ -1313,6 +1323,21 @@
       "name": "save_coordinator_key",
       "confidence": "high",
       "evidence": ["binary_strings: coordinator-key file topic", "call_graph: write path used by reset and initialization"]
+    },
+    "0x050ce4": {
+      "name": "drop_player_queue_records_kind2",
+      "confidence": "medium",
+      "evidence": ["call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game", "disassembly: walks the list headed at [0x237e] and frees each kind-2 node whose first or second longint equals the player id argument"]
+    },
+    "0x050d74": {
+      "name": "clear_player_relations",
+      "confidence": "high",
+      "evidence": ["call_graph: called by delete_empire_record (0x0079c1) and confirm_end_game", "disassembly: zeroes the +0x130 relation in both directions for every slot (docs/dev/bre-save-format.md)"]
+    },
+    "0x050f79": {
+      "name": "drop_player_queue_records_kind1",
+      "confidence": "medium",
+      "evidence": ["call_graph: called only by delete_empire_record (0x0079c1) and confirm_end_game", "disassembly: walks the list headed at [0x237e] and frees each kind-1 node whose first longint equals the player id argument"]
     },
     "0x0517e5": {
       "name": "load_alliance_data",

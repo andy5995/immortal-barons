@@ -82,4 +82,7 @@ func TestAbdicateMarksDeadNotRemoved(t *testing.T) {
 	if e.DiedDay != 4 {
 		t.Errorf("DiedDay = %d, want the current GameDay (4)", e.DiedDay)
 	}
+	if n := w.NewsToday; len(n) == 0 || !strings.Contains(n[len(n)-1].Text, "has abdicated") {
+		t.Errorf("abdication posted no news: %v", n)
+	}
 }
