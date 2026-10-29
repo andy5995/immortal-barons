@@ -220,10 +220,15 @@ func (w *World) postMasterNews() {
 		return
 	}
 	best := master.Name
+	prev := w.FindByName(w.CurrentMaster)
 	switch {
 	case best == w.CurrentMaster:
 		w.postNews(fmt.Sprintf("%s retains the title of Planetary Master.", best))
-	case w.CurrentMaster == "":
+	// A master who abdicated or was crushed is not one the title is taken
+	// from. BRE's sweep wipes that record before the title check, and its
+	// "from" line then names nobody (update_planet_title, BRE.OVR 0x007aeb);
+	// IB uses its no-master line instead.
+	case w.CurrentMaster == "" || prev == nil || !prev.Alive:
 		w.postNews(fmt.Sprintf("%s claims the title of Planetary Master!", best))
 	default:
 		w.postNews(fmt.Sprintf("%s has seized the title of Planetary Master from %s!", best, w.CurrentMaster))

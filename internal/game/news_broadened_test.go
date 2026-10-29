@@ -73,6 +73,50 @@ func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 	}
 }
 
+// TestTitleIsClaimedFromADepartedMaster: once the Planetary Master abdicates or
+// is crushed, the next leader claims the title rather than seizing it from a
+// realm that is gone. A living master still has it seized.
+func TestTitleIsClaimedFromADepartedMaster(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	old := w.AddHuman("old", "Oldmark")
+	old.Land = 1000
+	next := w.AddHuman("next", "Nextland")
+	next.Land = 500
+	w.postMasterNews()
+
+	w.Abdicate(old)
+	if got := w.NewsToday[len(w.NewsToday)-1].Text; got != "The baron of Oldmark has abdicated." {
+		t.Errorf("abdication news = %q", got)
+	}
+	// Before the sweep the husk is still there, dead.
+	w.NewsToday = nil
+	w.postMasterNews()
+	if len(w.NewsToday) != 1 || w.NewsToday[0].Text != "Nextland claims the title of Planetary Master!" {
+		t.Fatalf("after the master abdicated, news = %v", w.NewsToday)
+	}
+	// Daily maintenance sweeps the husk before the title check, so there it
+	// is gone altogether.
+	w.CurrentMaster = old.Name
+	w.GameDay++
+	w.removeDeadHusks()
+	if w.FindByName(old.Name) != nil {
+		t.Fatal("the husk was not swept")
+	}
+	w.NewsToday = nil
+	w.postMasterNews()
+	if len(w.NewsToday) != 1 || w.NewsToday[0].Text != "Nextland claims the title of Planetary Master!" {
+		t.Fatalf("after the husk was swept, news = %v", w.NewsToday)
+	}
+
+	w.NewsToday = nil
+	rival := w.AddHuman("rival", "Rivalia")
+	rival.Land = 2000
+	w.postMasterNews()
+	if len(w.NewsToday) != 1 || w.NewsToday[0].Text != "Rivalia has seized the title of Planetary Master from Nextland!" {
+		t.Fatalf("a living master's title should be seized, news = %v", w.NewsToday)
+	}
+}
+
 // TestStarvationMakesNoNewsButCivilWarDoes: running out of food posts no
 // planet news of its own (the original's news file has no section for it), but
 // the civil war it lights does. A well-fed empire posts nothing.

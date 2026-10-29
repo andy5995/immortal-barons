@@ -455,6 +455,14 @@ flow runs in this order:
    gold. **IB implements all of this** (`postMasterNews` / `payMaster`,
    `MasterAwardPct`), in its own wording.
 
+   **One deliberate divergence: a predecessor who is gone.** The daily sweep
+   that deletes a crushed or abdicated realm runs before this routine and
+   zeroes the whole record, but the stored letter at `+0x49` is left pointing
+   at it, so the original's *takes* line reads its predecessor's name from that
+   zeroed record and should name nobody (read from the disassembly, not
+   captured). IB uses the *claims* line whenever the previous holder is no
+   longer a living realm.
+
    ### The Queen's lottery
 
    The other half of the same first-play block, settled immediately after the
@@ -7164,6 +7172,8 @@ checking IB against a capture:
 - **Abdicating posts a planet news line.** BRE's `confirm_end_game` posts none
   and `game/news.dat` has no section for it, so a realm that abdicated vanished
   from its rivals' view with no reason given. See "Elimination and restart".
+- **A Planetary Master who is gone loses the title to a *claims* line**, not
+  a *takes* line naming them. See "The Planetary Master's share of the purse".
 
 None of these is an oversight to correct back.
 
