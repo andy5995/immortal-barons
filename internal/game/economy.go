@@ -16,7 +16,7 @@ var (
 	ErrHQExists     = errors.New("Your HeadQuarters is already under construction or built.")
 	ErrRegionCap    = errors.New("You have reached your region purchase limit for this turn.")
 	ErrNoFoodSupply = errors.New("The food market is out of food for today.")
-	ErrNoLand       = errors.New("There is no unclaimed land left on the planet today.")
+	ErrNoLand       = errors.New("No land is available at this time.")
 )
 
 // FoodBuyPrice is today's price to buy one unit of food, varying planet-wide
@@ -154,11 +154,14 @@ func (w *World) LandPrice(e *Empire) int {
 }
 
 // MaxAffordableRegions is the most regions e can buy at the current rising
-// price, also bounded by the Max Purchasable Regions cap. Because each
-// successive region costs more (see BuyRegions), a simple gold/price divide
-// overcounts — this sums the real climbing cost.
+// price, also bounded by the Max Purchasable Regions cap and by the realm's
+// own land allowance (LandAvailable), the three limits BuyRegions enforces.
+// BRE's "You can afford N" is the same minimum (docs/dev/bre-screens.md,
+// "Regions buy screen"). Because each successive region costs more (see
+// BuyRegions), a simple gold/price divide overcounts — this sums the real
+// climbing cost.
 func (w *World) MaxAffordableRegions(e *Empire) int {
-	limit := w.regionBuyLimit(e)
+	limit := max(min(w.regionBuyLimit(e), e.LandAvailable), 0)
 	var total int64
 	for n := 0; ; n++ {
 		if n >= limit {

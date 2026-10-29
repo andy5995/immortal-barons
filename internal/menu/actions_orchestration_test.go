@@ -470,3 +470,37 @@ func TestTradeBasketRowsLineUp(t *testing.T) {
 		}
 	}
 }
+
+// The realm's daily land allowance bounds what Buy Regions offers, as BRE's
+// "You can afford N" does (docs/dev/bre-screens.md): buying the last of it
+// leaves the screen, and a realm with none left is refused before it opens.
+func TestBuyLandHonorsTheLandAllowance(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Gold = 1_000_000_000
+	p.LandAvailable = 3
+	before := p.Regions.Coastal
+	f := &fakeSession{keys: []rune("C3\rC1\r")}
+
+	buyLand(f, w)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "(0; 3)") {
+		t.Errorf("the offer was not bounded by the allowance:\n%s", out)
+	}
+	if p.Regions.Coastal != before+3 || p.LandAvailable != 0 {
+		t.Fatalf("Coastal = %d (want %d), LandAvailable = %d (want 0)", p.Regions.Coastal, before+3, p.LandAvailable)
+	}
+	if f.pos != 3 {
+		t.Errorf("read %d keys, want 3 — the screen kept prompting with no land left", f.pos)
+	}
+
+	f = &fakeSession{keys: []rune("C1\r")}
+	buyLand(f, w)
+	if out := f.out.String(); !strings.Contains(out, "No land is available at this time.") || strings.Contains(out, "Buy Regions") {
+		t.Errorf("a realm with no allowance left was not refused before the screen:\n%s", out)
+	}
+	if f.pos != 0 {
+		t.Errorf("read %d keys, want 0", f.pos)
+	}
+}

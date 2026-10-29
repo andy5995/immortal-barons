@@ -174,6 +174,12 @@ func promptBuyRegionType(s session.Session) int {
 // list instead of leaving.
 func buyLand(s session.Session, w *ctx) Result {
 	p := w.Player()
+	// A realm whose land allowance is spent is refused before the screen is
+	// drawn, as the original refuses it (docs/dev/bre-screens.md).
+	if p.LandAvailable <= 0 {
+		okNoPause(s, game.ErrNoLand.Error())
+		return Stay
+	}
 	showMenu := func() {
 		fmt.Fprintf(s, "\n%s"+tr(s, "Buy Regions — %d gold each.")+"%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
 		fmt.Fprintf(s, "%s\n", tr(s, "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."))
@@ -195,7 +201,10 @@ func buyLand(s session.Session, w *ctx) Result {
 			return false
 		}
 		msg := tr(s, "You cannot afford another region.")
-		if regionCapReached(w, p) {
+		switch {
+		case p.LandAvailable <= 0:
+			msg = tr(s, game.ErrNoLand.Error())
+		case regionCapReached(w, p):
 			msg = tr(s, game.ErrRegionCap.Error())
 		}
 		fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightWhite, msg, ansi.Reset)

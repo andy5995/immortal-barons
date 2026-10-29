@@ -3839,6 +3839,12 @@ section is a record of what was claimed and how it was settled, so the word
   ever conquered. A new realm opens with `InitialMarketLand + LandPerDay` so it
   can expand on its first day.
 
+  The Buy Regions screen's "You can afford N" is the least of gold, the day's
+  region cap and this allowance, and a realm with none left is refused before
+  the screen opens, both as the original does. Until 2026-10-28 IB offered the
+  gold figure alone, so a realm short of allowance was offered regions the
+  purchase then refused.
+
 - **Loans** from the bank scale with how many regions you own.
 - **Trade deals** can send gold from one player to another (used by teams
   to stack bank interest across many players).

@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Buy Regions offers no more than the realm's land allowance covers, and
+    refuses a realm with none left before the screen opens
   * Buying regions no longer shows the gold left, or a notice that no more can
     be bought after taking all that was offered
   * A new Planetary Master claims the title when the old one has abdicated or
