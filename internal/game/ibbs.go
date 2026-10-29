@@ -527,6 +527,13 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if p.FromBoard != "" && p.FromBoard != w.Config.BoardID && !w.BoardMeetsMinVersion(p.Version) {
 		return w.bounceVersion(p)
 	}
+	// Recorded before the bounce return: two boards that held each other's first
+	// packets may send each other nothing BUT bounces, and if those were ignored,
+	// each would keep the other's stale fingerprint and keep bouncing it every
+	// run (#319).
+	if !late {
+		w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
+	}
 	// A bounce carries no payload, so there is nothing to apply and nothing to
 	// answer. Delivering the notice and stopping is what keeps two boards that
 	// both refuse each other from bouncing the same packet back and forth.
@@ -551,9 +558,6 @@ func (w *World) ApplyPacket(p Packet) Packet {
 				w.BoardVersion = map[string]string{}
 			}
 			w.BoardVersion[p.FromBoard] = p.Version
-		}
-		if !late {
-			w.NoteBoardRuleset(p.FromBoard, p.Ruleset)
 		}
 	}
 	// Anything that dictates to this board has to be signed by the Coordinator.

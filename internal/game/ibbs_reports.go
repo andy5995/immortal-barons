@@ -177,8 +177,8 @@ func (w *World) BBSInfoRows() []BBSInfoRow {
 	return rows
 }
 
-// PlayingLeagueRules reports whether the last packet applied from board stated
-// the league's rules.
+// PlayingLeagueRules reports whether the last packet accepted from board, a
+// bounce included, stated the league's rules.
 func (w *World) PlayingLeagueRules(board string) bool {
 	fp := w.BoardRuleset[board]
 	return fp != "" && fp == w.leagueRulesetFingerprint()

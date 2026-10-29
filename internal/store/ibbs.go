@@ -793,8 +793,8 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 // behaves afterward, so it is re-checked on every run; reporting each re-check
 // told a board that had already taken the Coordinator's ruleset, run after run,
 // to go and take it, and put the stale fingerprint back on BBSINFO. A board
-// whose later packet has applied stating the league's rules is back in step, so
-// its old held packets are left to expire quietly.
+// whose later packet, a bounce included, has been accepted stating the league's
+// rules is back in step, so its old held packets are left to expire quietly.
 func reportRulesHolds(w *game.World, result *InboundResult) {
 	for _, board := range slices.Sorted(maps.Keys(result.rulesHeld)) {
 		p := result.rulesHeld[board]

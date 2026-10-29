@@ -6879,9 +6879,12 @@ that answers a packet from a board below the league's version floor (#187). It i
 the only board that can fix the fault, and it cannot see another board's held
 directory.
 
-Once a later packet from that board applies stating the league's rules, the board
-is back in step: its old held packets stay held until they expire, but they no
-longer record a fingerprint, raise a notice or send a bounce.
+Once a later packet from that board is accepted stating the league's rules, the
+board is back in step: its old held packets stay held until they expire, but
+they no longer record a fingerprint, raise a notice or send a bounce. A bounce
+counts; a packet held for any reason does not. Two members that joined together
+hold each other's first packets, and after that their bounces may be all they
+send each other (#319).
 
 ## How Immortal Barons differs right now
 

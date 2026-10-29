@@ -147,6 +147,28 @@ func TestALatePacketDeliversButKeepsTheNewerScores(t *testing.T) {
 	}
 }
 
+// A bounce records the rules its sender states, but a late one must not roll
+// that back to the rules of an older run (#319).
+func TestALateBounceKeepsTheNewerRuleset(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID = true, "here"
+	w := NewWorldSeed(cfg, 1)
+	stale := cfg
+	stale.TurnsPerDay += 2
+	notice := "your packets are being held here"
+
+	w.ApplyPacket(Packet{FromBoard: "there", Seq: 9, Date: "2026-10-13",
+		Notice: notice, Ruleset: cfg.RulesetFingerprint()})
+	if got := w.BoardRuleset["there"]; got != cfg.RulesetFingerprint() {
+		t.Fatalf("a bounce did not record its sender's rules: %q", got)
+	}
+	w.ApplyPacket(Packet{FromBoard: "there", Seq: 8, Date: "2026-10-12",
+		Notice: notice, Ruleset: stale.RulesetFingerprint()})
+	if got := w.BoardRuleset["there"]; got != cfg.RulesetFingerprint() {
+		t.Errorf("a late bounce rolled the recorded rules back to %q", got)
+	}
+}
+
 // A threat record is a one-off report, so a late packet still files it: the
 // later packet that overtook it never repeated it.
 func TestALatePacketStillFilesItsThreat(t *testing.T) {

@@ -39,11 +39,13 @@ func newBoard(t *testing.T, dir, name string, roster []game.LeagueNode) *board {
 	return &board{w, cfg.InboundDir, cfg.OutboundDir}
 }
 
-func (b *board) run(t *testing.T) {
+func (b *board) run(t *testing.T) PlanetaryRun {
 	t.Helper()
-	if _, err := RunPlanetary(b.w, b.inbound, b.outbound, false); err != nil {
+	run, err := RunPlanetary(b.w, b.inbound, b.outbound, false)
+	if err != nil {
 		t.Fatal(err)
 	}
+	return run
 }
 
 // deliver hands every packet waiting in one board's outbound directory to a
@@ -133,6 +135,19 @@ func broadcast(t *testing.T, from *board, to ...*board) int {
 	return moved
 }
 
+// broadcastToOthers is broadcast to every board in all but the sender: a mesh
+// league's transport.
+func broadcastToOthers(t *testing.T, from *board, all []*board) int {
+	t.Helper()
+	var peers []*board
+	for _, b := range all {
+		if b != from {
+			peers = append(peers, b)
+		}
+	}
+	return broadcast(t, from, peers...)
+}
+
 // TestThreeBoardsLearnEachOthersScores runs a three-planet league through the
 // real transport until every board holds both other boards' score tables.
 //
@@ -171,13 +186,7 @@ func TestThreeBoardsLearnEachOthersScores(t *testing.T) {
 		b.run(t)
 	}
 	for _, src := range all {
-		var peers []*board
-		for _, dst := range all {
-			if dst != src {
-				peers = append(peers, dst)
-			}
-		}
-		if n := broadcast(t, src, peers...); n == 0 {
+		if n := broadcastToOthers(t, src, all); n == 0 {
 			t.Fatalf("%s wrote no packets", src.w.Config.BoardID)
 		}
 	}
@@ -380,6 +389,80 @@ func TestPacketsFromADivergentBoardAreHeld(t *testing.T) {
 	// recorded one too.
 	if got := a.w.BoardRuleset["The Eclipse"]; got == "" {
 		t.Error("a divergent board's rules were never recorded, so BBSINFO cannot mark it")
+	}
+}
+
+// Two members that join together each hold the other's first packets, and from
+// then on the only traffic between them is their bounces to each other. Those
+// bounces state the rules the sender now plays, so once both have taken the
+// Coordinator's ruleset the holds must stop being reported (#319).
+func TestMembersThatJoinedTogetherStopReportingHolds(t *testing.T) {
+	dir := t.TempDir()
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "The Eclipse"},
+		{Number: 3, Name: "Red Shift"},
+	}
+	t.Chdir(dir)
+	if err := os.MkdirAll("data", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	pub, sec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var all []*board
+	for i, n := range roster {
+		d := filepath.Join(dir, string(rune('a'+i)))
+		b := newBoard(t, d, n.Name, roster)
+		b.w.Config.DataDir = d
+		b.w.CoordPub = pub
+		all = append(all, b)
+	}
+	hub, two, three := all[0], all[1], all[2]
+	hub.w.CoordKey = sec
+	hub.w.Config.TurnsPerDay += 2
+
+	relay := func(src *board) { broadcastToOthers(t, src, all) }
+
+	// Both members run before either has the Coordinator's ruleset.
+	two.run(t)
+	three.run(t)
+	relay(two)
+	relay(three)
+	hub.run(t)
+	relay(hub)
+
+	for round := 1; round <= 4; round++ {
+		r2 := two.run(t)
+		relay(two)
+		h1 := hub.run(t)
+		relay(hub)
+		r3 := three.run(t)
+		relay(three)
+		h2 := hub.run(t)
+		relay(hub)
+
+		if round == 1 {
+			if r2.HeldRules == 0 || r3.HeldRules == 0 {
+				t.Fatalf("the members did not hold each other's first packets (%d, %d)", r2.HeldRules, r3.HeldRules)
+			}
+			continue
+		}
+		for _, r := range []PlanetaryRun{r2, r3, h1, h2} {
+			for _, n := range r.Notices {
+				if strings.Contains(n, "being held") {
+					t.Errorf("round %d: a hold is still reported: %s", round, n)
+				}
+			}
+		}
+		league := hub.w.Config.RulesetFingerprint()
+		if got := two.w.BoardRuleset["Red Shift"]; got != league {
+			t.Errorf("round %d: The Eclipse records %q for Red Shift, want the league's %q", round, got, league)
+		}
+		if got := three.w.BoardRuleset["The Eclipse"]; got != league {
+			t.Errorf("round %d: Red Shift records %q for The Eclipse, want the league's %q", round, got, league)
+		}
 	}
 }
 

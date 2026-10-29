@@ -286,10 +286,11 @@ func (w *World) NoteLeagueRuleset() {
 }
 
 // NoteBoardRuleset records what a board says it is playing by. Called on a
-// packet that is APPLIED and on one that is HELD for divergence: a board that
-// has never played the league's rules has no applied packet to learn it from,
-// and leaving it unrecorded is what kept BBSINFO reporting the very board this
-// was built for as "unknown" rather than divergent.
+// packet that is ACCEPTED, a bounce included, and on one that is HELD for
+// divergence: a board that has never played the league's rules has no applied
+// packet to learn it from, and leaving it unrecorded is what kept BBSINFO
+// reporting the very board this was built for as "unknown" rather than
+// divergent.
 func (w *World) NoteBoardRuleset(board, fingerprint string) {
 	if board == "" || fingerprint == "" || board == w.Config.BoardID {
 		return
