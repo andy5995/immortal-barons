@@ -236,20 +236,34 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	}
 	// One line each from here, naming only the types that took a loss, which is
 	// the shape of the original's returning report (resolve_returning_attack,
-	// BRE.OVR 0x04136c) in two captures. See unitLine.
-	lost := unitLine(msgid("You lost {units}!"), attackUnits(forceLosses(committed, back)))
+	// BRE.OVR 0x04136c) in two captures. An empty tally still prints, as
+	// "nothing" (see unitLineOr).
+	lost := unitLineOr(msgid("You lost {units}!"), msgid("You lost nothing!"), attackUnits(forceLosses(committed, back)))
 	// What the strike destroyed is only known where a battle was fought; a force
-	// that found no realm, or found it shielded, destroyed nothing and says so by
-	// omitting the line.
+	// that found no realm, or found it shielded, fought nobody and has no
+	// destroyed line at all.
 	var destroyed Msg
 	switch res.outcome() {
 	case OutcomeWon, OutcomeRepelled:
-		destroyed = unitLine(msgid("You destroyed {units}!"), defenseUnits(enemy))
+		destroyed = unitLineOr(msgid("You destroyed {units}!"), msgid("You destroyed nothing!"), defenseUnits(enemy))
 	}
 	return lines(head, date, how,
-		indent(unitLine(msgid("{units} returned."), attackUnits(back)), 2),
+		indent(unitLineOr(msgid("{units} returned."), msgid("nothing returned."), attackUnits(back)), 2),
 		indent(lost, 2),
 		indent(destroyed, 2))
+}
+
+// unitLineOr is unitLine, or the sentence none when every count is zero. The
+// original prints a tally even when it is empty — its list formatter (resident
+// 0dc9:0f87) writes "nothing" for an empty list, as in its captured "nothing
+// returned.", "You lost nothing!" and "You destroyed nothing!" — but IB words
+// each as a whole sentence so a catalog never gets a word glued into a template
+// written for a list of units.
+func unitLineOr(t, none string, units []unitCount) Msg {
+	if m := unitLine(t, units); !m.IsZero() {
+		return m
+	}
+	return say(none)
 }
 
 // strikeVerdict is the word the report's Date line gives the outcome: BRE's

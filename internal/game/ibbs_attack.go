@@ -903,10 +903,7 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int, thei
 		verdict = say("Your forces lost the battle!")
 		took = sayN("You also lost {n} region!", "You also lost {n} regions!", "n", "n", regions)
 	}
-	lostLine := unitLine(msgid("You lost {units}!"), defenseUnits(lost))
-	if lostLine.IsZero() {
-		lostLine = say("You lost nothing!")
-	}
+	lostLine := unitLineOr(msgid("You lost {units}!"), msgid("You lost nothing!"), defenseUnits(lost))
 	// DELIBERATE DIVERGENCE: the original tells a defender only its own losses.
 	theirLine := unitLine(msgid("The attackers lost {units}!"), attackUnits(theirs))
 	return lines(head,

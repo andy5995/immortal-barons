@@ -211,6 +211,28 @@ func TestStrikeReportWearsBREsLayout(t *testing.T) {
 	}
 }
 
+// An empty tally still prints, as "nothing": the original's eots-ibbs-03.cap
+// has a beaten one-trooper strike reading "nothing returned." and "You
+// destroyed nothing!", and its winners "You lost nothing!".
+func TestStrikeReportSaysNothingForAnEmptyTally(t *testing.T) {
+	sent := InFlightStrike{TargetBoard: "Starship Junkyard", TargetEmpire: "Imperially"}
+	res := AttackResult{Kind: "Group Attack", TargetBoard: "Starship Junkyard", TargetEmpire: "Imperially",
+		Outcome: OutcomeRepelled}
+	want := "Group Attack Results.  Target: Imperially (Starship Junkyard)\n" +
+		"Result: FAILURE\n" +
+		"Your forces were beaten off the field.\n" +
+		"  nothing returned.\n" +
+		"  You lost 1 Trooper!\n" +
+		"  You destroyed nothing!"
+	if got := strikeReport(sent, res, AttackForce{Troopers: 1}, AttackForce{}, 0, UnitLoss{}).English(); got != want {
+		t.Errorf("report:\n%s\nwant:\n%s", got, want)
+	}
+	res.Outcome, res.Won = OutcomeWon, true
+	if got := strikeReport(sent, res, AttackForce{Troopers: 1}, AttackForce{Troopers: 1}, 0, UnitLoss{}).English(); !strings.Contains(got, "\n  You lost nothing!\n") {
+		t.Errorf("a strike that lost nothing should say so:\n%s", got)
+	}
+}
+
 // The defender's report is laid out as the original's (eots-ibbs-03.cap): the
 // planet and realm the strike came from, then indented the force, the verdict,
 // the losses and the land. IB adds the strike's kind to the header, and says

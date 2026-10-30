@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A returning strike's report says "nothing" for an empty tally instead of
+    leaving the line out
   * A returning group attack's report shows each baron's own share of the
     regions taken and the forces destroyed, not the whole strike's
   * A refusal notice counts as hearing from its board, in -lastpacket and the
