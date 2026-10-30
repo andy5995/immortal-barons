@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"math"
 )
 
 // The origin board's half of an interplanetary strike: what happens when the
@@ -44,8 +45,13 @@ func (w *World) applyAttackResult(res AttackResult, spy *SpyReport) {
 		return
 	}
 	// Return each contributor's surviving forces to their army, and tell them
-	// what the strike cost and did.
-	for _, c := range sent.Contributors {
+	// what their own detachment cost, took and destroyed. Captured land is
+	// parked rather than granted: the winner chooses the region types at home,
+	// exactly as they do after a Regular Attack (#58), and the result arrives
+	// while they are not in a session. The menu asks at the start of their next
+	// turn (menu.spoilsStage).
+	shares := splitSpoils(sent.Contributors, res.LandTaken)
+	for i, c := range sent.Contributors {
 		e := w.FindByOwner(c.Owner)
 		if e == nil {
 			continue
@@ -55,18 +61,13 @@ func (w *World) applyAttackResult(res AttackResult, spy *SpyReport) {
 		e.Jets += back.Jets
 		e.Tanks += back.Tanks
 		e.Bombers += back.Bombers
-		e.addEvent(strikeReport(sent, res, c.AttackForce, back))
-	}
-	// Captured land is parked rather than granted: the winner chooses the region
-	// types at home, exactly as they do after a Regular Attack (#58), and the
-	// result arrives while they are not in a session. The menu asks at the start
-	// of their next turn (menu.spoilsStage).
-	if res.LandTaken > 0 {
-		for _, share := range splitSpoils(sent.Contributors, res.LandTaken) {
-			if e := w.FindByOwner(share.Owner); e != nil {
-				e.PendingRegions += share.Land
-			}
+		land := 0
+		if shares != nil {
+			land = shares[i].Land
 		}
+		e.PendingRegions += land
+		kills := shareOfLoss(res.Enemy, killShare(sent.Contributors, c))
+		e.addEvent(strikeReport(sent, res, c.AttackForce, back, land, kills))
 	}
 	if line := w.returnNews(sent, res); line != "" {
 		w.postNews(line)
@@ -172,6 +173,39 @@ func splitSpoils(cs []Contribution, land int) []LandShare {
 	return shares
 }
 
+// killShare is the part of a strike's kills one detachment's report claims:
+// its offense over the whole force's, technology included. The original's
+// returning routine scales each slot's report this way (BRE.OVR ovr_03f4a0
+// +0x24ca..+0x2986), but over the total plus 1 and with the regions scaled the
+// same, which leaves a token strike only part of its land and lets rounding
+// lose regions. IB keeps splitSpoils for the land and drops the guard here.
+func killShare(cs []Contribution, c Contribution) float64 {
+	total := 0
+	for _, x := range cs {
+		total += x.offense()
+	}
+	if total <= 0 {
+		return 1 / float64(len(cs))
+	}
+	return float64(c.offense()) / float64(total)
+}
+
+// roundShare is n scaled by frac and rounded, where shareOf truncates: the
+// original's returning routine rounds each share it prints.
+func roundShare(n int, frac float64) int {
+	return int(math.Round(float64(n) * frac))
+}
+
+func shareOfLoss(u UnitLoss, frac float64) UnitLoss {
+	return UnitLoss{
+		Troopers: roundShare(u.Troopers, frac),
+		Jets:     roundShare(u.Jets, frac),
+		Turrets:  roundShare(u.Turrets, frac),
+		Tanks:    roundShare(u.Tanks, frac),
+		Bombers:  roundShare(u.Bombers, frac),
+	}
+}
+
 // strikeReport is the private report one baron reads when their force comes
 // home: what it was, where it went, how it went, and what it cost them.
 //
@@ -179,7 +213,10 @@ func splitSpoils(cs []Contribution, land int) []LandShare {
 // a header naming the strike and its target, a Date line with the verdict, the
 // outcome, then the three tallies indented under it — what came back, what was
 // lost, what was destroyed, in that order.
-func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackForce) Msg {
+//
+// land and enemy are this baron's share of the strike's take, not the whole of
+// it (splitSpoils, killShare).
+func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackForce, land int, enemy UnitLoss) Msg {
 	head := say("{kind} Results.  Target: {target}", "kind", say(res.Kind), "target", strikeHeadTarget(sent, res))
 	verdict := say(strikeVerdict(res.outcome()))
 	date := say("Result: {result}", "result", verdict)
@@ -193,7 +230,7 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	case OutcomeProtected:
 		how = say("Your forces found their target was in protection.")
 	case OutcomeWon:
-		how = say("Your forces broke the enemy and captured {n} regions.", "n", res.LandTaken)
+		how = say("Your forces broke the enemy and captured {n} regions.", "n", land)
 	default:
 		how = say("Your forces were beaten off the field.")
 	}
@@ -207,7 +244,7 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	var destroyed Msg
 	switch res.outcome() {
 	case OutcomeWon, OutcomeRepelled:
-		destroyed = unitLine(msgid("You destroyed {units}!"), defenseUnits(res.Enemy))
+		destroyed = unitLine(msgid("You destroyed {units}!"), defenseUnits(enemy))
 	}
 	return lines(head, date, how,
 		indent(unitLine(msgid("{units} returned."), attackUnits(back)), 2),

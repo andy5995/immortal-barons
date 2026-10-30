@@ -4909,8 +4909,15 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
      is **parked** on `Empire.PendingRegions` and the **region picker** — the
      same one a Regular Attack opens (#58) — runs at the start of the baron's
      next turn, because the result arrives while they are not in a session. A
-     group attack's land is split between contributors in proportion to the
-     offense each committed, with the remainder to the largest.
+     A group attack's land is split between contributors in proportion to the
+     offense each committed, with the remainder to the largest, and each
+     contributor's report gives their own share of the regions and of every
+     destroyed count, never the strike's whole take. The original scales each
+     report the same way (`resolve_returning_attack`, BRE.OVR ovr_03f4a0
+     +0x24ca..+0x2986) but divides by the total offense plus 1 and credits the
+     rounded figure, so a token strike keeps only part of its land (one trooper
+     alone keeps a third) and rounding can lose regions. **IB deliberately
+     keeps its own split for the land**, so every region taken is handed out.
 
   **A late or duplicate return is discarded.** If nothing is waiting on the
   result's ID, the lost-forces timer has already given the army back (or this is

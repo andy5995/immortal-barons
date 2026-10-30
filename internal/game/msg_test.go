@@ -198,15 +198,15 @@ func TestStrikeReportWearsBREsLayout(t *testing.T) {
 		"  20k Troopers, 14m Jets, 1505k Tanks, and 49k Bombers returned.\n" +
 		"  You lost 638 Troopers, 433k Jets, 46k Tanks, and 1500 Bombers!\n" +
 		"  You destroyed 53k Troopers, 19k Jets, 515k Turrets, and 2102 Tanks!"
-	if got := strikeReport(sent, res, committed, back).English(); got != want {
+	if got := strikeReport(sent, res, committed, back, res.LandTaken, res.Enemy).English(); got != want {
 		t.Errorf("report:\n%s\nwant:\n%s", got, want)
 	}
 	east := time.FixedZone("EST", -5*3600)
-	if got := strikeReport(sent, res, committed, back).Render("", east); !strings.Contains(got, "Date: 09/01/2026  15:35:16 EST") {
+	if got := strikeReport(sent, res, committed, back, res.LandTaken, res.Enemy).Render("", east); !strings.Contains(got, "Date: 09/01/2026  15:35:16 EST") {
 		t.Errorf("the date should be in the reader's zone:\n%s", got)
 	}
 	sent.Launched = time.Time{}
-	if got := strikeReport(sent, res, committed, back).English(); !strings.Contains(got, "\nResult: SUCCESS\n") {
+	if got := strikeReport(sent, res, committed, back, res.LandTaken, res.Enemy).English(); !strings.Contains(got, "\nResult: SUCCESS\n") {
 		t.Errorf("a strike saved without a departure time should still give its verdict:\n%s", got)
 	}
 }

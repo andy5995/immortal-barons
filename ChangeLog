@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A returning group attack's report shows each baron's own share of the
+    regions taken and the forces destroyed, not the whole strike's
   * A refusal notice counts as hearing from its board, in -lastpacket and the
     version BBSINFO.LST shows
   * A refusal notice from another board is no longer held for the rules it

@@ -134,6 +134,44 @@ func TestReturningStrikeVerdicts(t *testing.T) {
 	}
 }
 
+// Each contributor to a strike reads and is credited their own share of it —
+// regions and kills alike — never the whole: a one-trooper detachment beside a
+// big one reported the strike's full 1427 regions. Land is what splitSpoils
+// hands each baron; the kills are scaled by the same offense share.
+func TestGroupAttackReportsEachContributorsShare(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	alice := w.AddHuman("alice", "Alicia")
+	bob := w.AddHuman("bob", "Bobland")
+	w.InFlight = append(w.InFlight, InFlightStrike{
+		ID: 9, Kind: "attack", Group: true, TargetBoard: "Nite Eyes BBS",
+		Contributors: []Contribution{
+			{Owner: "alice", AttackForce: AttackForce{Troopers: 3000}},
+			{Owner: "bob", AttackForce: AttackForce{Troopers: 1000}},
+		},
+	})
+	w.applyAttackResult(AttackResult{ID: 9, Kind: "Group Attack", TargetBoard: "Nite Eyes BBS",
+		Outcome: OutcomeWon, Won: true, LandTaken: 1427,
+		Enemy: UnitLoss{Troopers: 1_679_000, Turrets: 1_738_000}}, nil)
+	for _, c := range []struct {
+		e            *Empire
+		land         int
+		says, troops string
+	}{
+		// 1427 split 3:1 is 1070 and 356 with the odd region to the larger;
+		// the kills are three quarters and one quarter.
+		{alice, 1071, "captured 1071 regions", "You destroyed 1259k Troopers and 1303k Turrets!"},
+		{bob, 356, "captured 356 regions", "You destroyed 419k Troopers and 434k Turrets!"},
+	} {
+		if c.e.PendingRegions != c.land {
+			t.Errorf("%s was credited %d regions, want %d", c.e.Owner, c.e.PendingRegions, c.land)
+		}
+		last := c.e.Events[len(c.e.Events)-1].Text
+		if !strings.Contains(last, c.says) || !strings.Contains(last, c.troops) {
+			t.Errorf("%s's report should say %q and %q:\n%s", c.e.Owner, c.says, c.troops, last)
+		}
+	}
+}
+
 // A group attack's spoils are split between the barons who paid for them, in
 // proportion to what each committed, and every region is handed to somebody.
 func TestGroupAttackSpoilsSplitByContribution(t *testing.T) {
