@@ -1307,7 +1307,8 @@ white heading, a white % scale (100%, 50%, and 0% on a baseline rule), and one
 3-wide column per day ahead, labeled 1-10 in bright green, five rows tall. A
 column fills a `▒` cell per 20% of the per-date returns limit, and a remainder
 caps it with a lighter `░`, counting what the hold will pour onto
-that date at the next maintenance. Every column is `93` bright yellow. In a
+that date at the next maintenance. A date within 1,000 gold of the limit draws
+full, because one filled from the invest prompt stops a few gold short of it. Every column is `93` bright yellow. In a
 terminal font that blends shades into a flat tint, a `░` cap falls below 3:1
 on black (an estimate; accepted on 2026-10-28); a CP437 bitmap font draws it as
 full-contrast dots.

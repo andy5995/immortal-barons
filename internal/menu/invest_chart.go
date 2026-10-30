@@ -12,9 +12,9 @@ import (
 
 // The Bank menu's investment chart: one column per day ahead, filled by how
 // much of that date's MaxReturnsPerDate limit its returns already take,
-// counting what the hold will pour onto it at the next maintenance. Every
-// column is gold: the height carries the figure. IB's
-// own addition; BRE's Bank menu has no chart.
+// counting what the hold will pour onto it at the next maintenance; a date with
+// no more than a few gold of room left is drawn full. Every column is gold: the height
+// carries the figure. IB's own addition; BRE's Bank menu has no chart.
 //
 // A column is investChartRows tall and fills in shades (shadeCells), so a full
 // column always means a full date and a date holding anything at all shows at
@@ -27,6 +27,11 @@ const (
 	investChartCol    = 3
 	investChartGutter = 5
 	investChartColor  = ansi.FgBrightYellow
+	// investChartFullSlack is how far below MaxReturnsPerDate a date still
+	// draws full. Filling a date from the invest prompt stops a few gold short,
+	// because the principal is truncated (under the growth factor plus one:
+	// about 5 gold at 15%/day for 10 days), and would otherwise draw at 99%.
+	investChartFullSlack = 1_000
 )
 
 // investChart draws the chart for the caller's realm, centered in width, or
@@ -47,9 +52,13 @@ func investChart(w *ctx, width int) string {
 		}
 		pcts[d] = int(r * 100 / game.MaxReturnsPerDate)
 		if r > 0 {
-			// Under 1% floors to 0, which would draw no column at all.
-			pcts[d] = max(pcts[d], 1)
 			due = true
+			if game.MaxReturnsPerDate-r < investChartFullSlack {
+				pcts[d] = 100
+			} else {
+				// Under 1% floors to 0, which would draw no column at all.
+				pcts[d] = max(pcts[d], 1)
+			}
 		}
 	}
 	if !due {

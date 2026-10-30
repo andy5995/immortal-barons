@@ -53,12 +53,7 @@ func TestBankMenuDrawsTheInvestmentChart(t *testing.T) {
 		"            0% ───────────────────────────────────────",
 		"                1   2   3   4   5   6   7   8   9   10",
 	}
-	start := -1
-	for i, l := range got {
-		if l == want[0] {
-			start = i
-		}
-	}
+	start := chartStart(got)
 	if start < 1 || !strings.HasPrefix(got[start-1], "─") {
 		t.Fatalf("chart heading not found under the closing rule:\n%s", strings.Join(got, "\n"))
 	}
@@ -79,10 +74,8 @@ func TestBankMenuDrawsTheInvestmentChart(t *testing.T) {
 	draw(f, w, BuildMenus().Bank)
 	out := f.out.String()
 	got = strings.Split(sgr.ReplaceAllString(out, ""), "\n")
-	for i, l := range got {
-		if l == want[0] {
-			start = i
-		}
+	if start = chartStart(got); start < 0 {
+		t.Fatalf("chart not drawn:\n%s", strings.Join(got, "\n"))
 	}
 	if l := strings.TrimRight(got[start+5], " "); l != "               ▒▒▒ ▒▒▒" {
 		t.Errorf("hold not counted, bottom row %q", l)
@@ -92,10 +85,36 @@ func TestBankMenuDrawsTheInvestmentChart(t *testing.T) {
 	}
 	p.InvestHeld = 0
 
+	// A date filled from the invest prompt stops a few gold short of the limit
+	// and still draws full; one with real room left does not.
+	p.Investments = []game.Investment{
+		{Amount: 1, Return: 1_999_999_996, MaturesDay: day + 1},
+		{Amount: 1, Return: 1_999_990_000, MaturesDay: day + 2},
+	}
+	f = &fakeSession{}
+	draw(f, w, BuildMenus().Bank)
+	got = strings.Split(sgr.ReplaceAllString(f.out.String(), ""), "\n")
+	if start = chartStart(got); start < 0 {
+		t.Fatalf("chart not drawn:\n%s", strings.Join(got, "\n"))
+	}
+	if l := strings.TrimRight(got[start+1], " "); l != "          100% ▒▒▒ ░░░" {
+		t.Errorf("a date a few gold short is not drawn full, top row %q", l)
+	}
+
 	p.Investments = []game.Investment{{Amount: 1, Return: 5, MaturesDay: day + 11}}
 	f = &fakeSession{}
 	draw(f, w, BuildMenus().Bank)
 	if strings.Contains(f.out.String(), "Investment returns by day") {
 		t.Error("chart drawn with nothing maturing in the next ten days")
 	}
+}
+
+// chartStart is the index of the chart's heading line in lines, or -1.
+func chartStart(lines []string) int {
+	for i, l := range lines {
+		if l == "                   Investment returns by day" {
+			return i
+		}
+	}
+	return -1
 }
