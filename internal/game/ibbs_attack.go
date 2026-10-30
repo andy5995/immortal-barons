@@ -198,8 +198,8 @@ func (g GroupAttack) Offense() int {
 	return total
 }
 
-// SharePct is owner's percentage of the strike's offense, every detachment they
-// have committed to it counted together. BINARY-VERIFIED: create_individual_attack
+// SharePct is owner's percentage of the strike's offense: their one detachment
+// (addContribution) over the whole force. BINARY-VERIFIED: create_individual_attack
 // prints it after a join (BRE.OVR ovr_02b783 +0x1be7) as the joiner's slot over
 // the whole force, both valued by calculate_attack_force_offense, with 0.01 added
 // to the divisor so an empty force cannot divide by zero. IB's offense is twice
@@ -545,10 +545,36 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 			return err
 		}
 		e.Gold -= cost
-		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, AttackForce: f, Tech: e.TechMilitaryFactor()})
+		ga.addContribution(e, f)
 		return nil
 	}
 	return ErrNoAttack
+}
+
+// addContribution adds f to e's detachment in g, or opens one. The original
+// keeps one force slot per realm, indexed by the joining realm's own letter
+// (create_individual_attack, BRE.OVR 0x02d2c0), so a baron who joins twice,
+// or joins the party they created, has one detachment and reads one report.
+// A capture shows it: cap/20240527-134Pho_Lazarus_Public.cap has a realm
+// joining its own party with tanks, the row then reading "1 Trooper ... 1000k
+// Tanks" and the share "100.00%". Every join stores the joiner's current
+// technology factor into the slot, replacing the one before, so the whole
+// detachment fights at the factor of the last join — BINARY-VERIFIED,
+// configure_attack_forces (BRE.OVR ovr_02b783 +0x7fe..+0x825).
+func (g *GroupAttack) addContribution(e *Empire, f AttackForce) {
+	tech := e.TechMilitaryFactor()
+	for i := range g.Contributors {
+		c := &g.Contributors[i]
+		if c.Owner == e.Owner {
+			c.Troopers += f.Troopers
+			c.Jets += f.Jets
+			c.Tanks += f.Tanks
+			c.Bombers += f.Bombers
+			c.Tech = tech
+			return
+		}
+	}
+	g.Contributors = append(g.Contributors, Contribution{Owner: e.Owner, AttackForce: f, Tech: tech})
 }
 
 // DisbandGroupAttackByCoordinator calls off a party still forming, on the

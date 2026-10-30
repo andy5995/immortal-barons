@@ -204,6 +204,47 @@ func TestGroupAttackSpoilsSplitByContribution(t *testing.T) {
 	}
 }
 
+// A baron who joins a party twice, or joins the one they created, has ONE
+// detachment, as the original keeps one force slot per realm: their survivors
+// come back once, in full, and they read one report.
+func TestRepeatJoinsAreOneDetachment(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alicia")
+	e.Protection, e.Troopers, e.Tanks, e.Gold = 0, 5000, 5000, 1_000_000_000
+	ga, err := w.CreateGroupAttack(e, "boardB", "", 12, AttackForce{Troopers: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range []AttackForce{{Tanks: 1000}, {Tanks: 2000, Troopers: 10}} {
+		if err := w.JoinGroupAttack(e, ga.ID, f); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(ga.Contributors) != 1 {
+		t.Fatalf("%d detachments for one baron, want 1", len(ga.Contributors))
+	}
+	if got := ga.Contributors[0].AttackForce; got != (AttackForce{Troopers: 11, Tanks: 3000}) {
+		t.Errorf("detachment = %+v, want 11 troopers and 3000 tanks", got)
+	}
+	// Send it, and bring every unit home from a battle it lost without loss.
+	id, survivors := ga.ID, append([]Contribution(nil), ga.Contributors...)
+	w.LaunchDueGroupAttacksAt(ga.DepartAt.Add(time.Hour))
+	if len(w.InFlight) != 1 {
+		t.Fatalf("%d strikes in flight, want the one group attack", len(w.InFlight))
+	}
+	before := len(e.Events)
+	w.applyAttackResult(AttackResult{ID: id, Kind: "Group Attack", TargetBoard: "boardB",
+		Outcome: OutcomeRepelled, Survivors: survivors}, nil)
+	if e.Troopers != 5000 || e.Tanks != 5000 {
+		t.Errorf("army after the return = %d troopers, %d tanks; want all 5000 of each back", e.Troopers, e.Tanks)
+	}
+	if n := len(e.Events) - before; n != 1 {
+		t.Errorf("%d reports for one detachment, want 1", n)
+	}
+}
+
 // A result for a strike nobody is waiting on is discarded whole. BRE does the
 // same and says so ("Duplicate or Late Attack Return Recieved - Packet
 // Deleted"); without it the lost-forces timer and a slow packet between them

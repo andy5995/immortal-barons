@@ -4948,6 +4948,17 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   character Id column in the original's table is sized for), and an individual
   strike now reports no number at all — it is never referred to again, so there
   was nothing for one to mean.
+- **One detachment per baron.** The original keeps one force slot per realm in
+  a group attack, indexed by the joining realm's own letter
+  (`create_individual_attack`, BRE.OVR 0x02d2c0), so joining a party twice, or
+  joining the one you created, adds to the same detachment, and each baron reads
+  one report when it comes home. IB merges a repeat join the same way
+  (`GroupAttack.addContribution`); it used to add a second detachment, which
+  returned the first one's survivors twice and the second's never. Two reports
+  with the same departure time are two group attacks:
+  `cap/20240527-134Pho_Lazarus_Public.cap` has one realm running four parties at
+  once on a board allowing two a day, each joined alone at "100.00%", and two
+  08/13/2024 reports departing at 10:56:05 with different forces returning.
 - **The price of a strike — BINARY-VERIFIED, and it is charged on all three
   paths** (#252). ONE routine prompts for the four counts, quotes the price and
   refuses a baron who cannot pay (`configure_attack_forces`, `BRE.OVR`

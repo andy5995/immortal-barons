@@ -1,6 +1,7 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * Joining a group attack again adds to the baron's detachment
   * A returning strike's report says "nothing" for an empty tally instead of
     leaving the line out
   * A returning group attack's report shows each baron's own share of the
