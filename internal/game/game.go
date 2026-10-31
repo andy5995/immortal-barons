@@ -691,16 +691,23 @@ func (w *World) noteStoreErr(err error) {
 func (w *World) StoreErr() error { return w.storeErr }
 
 // ImportBoard records b's scores, replacing any existing entry for the
-// same BoardID so re-importing updates rather than duplicates.
+// same BoardID so re-importing updates rather than duplicates, and brings the
+// Spy Database's reports on b's realms in line with them.
 func (w *World) ImportBoard(b RemoteBoard) {
 	for i, existing := range w.RemoteBoards {
 		if existing.BoardID == b.BoardID {
 			w.announceRemoteRenames(existing, b)
 			w.RemoteBoards[i] = b
+			// A packet that arrives behind a newer one must not delete the
+			// intel filed on realms the newer one listed.
+			if b.Date >= existing.Date {
+				w.syncRemoteSpyReports(b)
+			}
 			return
 		}
 	}
 	w.RemoteBoards = append(w.RemoteBoards, b)
+	w.syncRemoteSpyReports(b)
 }
 
 // NetWorth is the empire's strategic score at BRE scale: land dominates at

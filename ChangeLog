@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The Spy Database removes another planet's reports on a realm that planet
+    no longer lists, and follows a realm it renamed
   * A local Send Spy that gets in files its report in the Spy Database, readable
     only by the realm that sent it, and Covert Operations lists the Spy Database
   * The Spy Database asks for a planet, offering only those it holds intel on,

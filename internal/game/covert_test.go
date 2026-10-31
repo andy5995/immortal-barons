@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -967,5 +968,42 @@ func TestLocalSpyReportsFollowRenameAndRemoval(t *testing.T) {
 	w.RemoveEmpire(a)
 	if len(w.SpyDatabase) != 1 || w.SpyDatabase[0].By != "" {
 		t.Errorf("removing the buyer left %+v, want only the remote report", w.SpyDatabase)
+	}
+}
+
+// A shared report on another planet's realm goes when that planet's roster
+// stops listing it, follows it through a rename, and leaves other planets'
+// reports and local ones alone.
+func TestRemoteSpyReportsFollowTheRoster(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.SpyDatabase = []SpyEntry{
+		{SpyReport: SpyReport{Board: "Bravo", Empire: "Charlie"}},
+		{SpyReport: SpyReport{Board: "Bravo", Empire: "Delta"}},
+		{SpyReport: SpyReport{Board: "Bravo", Empire: "Echo"}},
+		{SpyReport: SpyReport{Board: "Golf", Empire: "Charlie"}},
+		{SpyReport: SpyReport{Empire: "Charlie"}, By: "Local"},
+	}
+	w.ImportBoard(RemoteBoard{BoardID: "Bravo", Scores: []RemoteScore{
+		{Empire: "Delta"},
+		{Empire: "Foxtrot", FormerName: "Echo"},
+	}})
+	var got []string
+	for _, r := range w.SpyDatabase {
+		got = append(got, r.Board+"/"+r.Empire+"/"+r.By)
+	}
+	want := []string{"Bravo/Delta/", "Bravo/Foxtrot/", "Golf/Charlie/", "/Charlie/Local"}
+	if !slices.Equal(got, want) {
+		t.Errorf("Spy Database holds %q, want %q", got, want)
+	}
+}
+
+// A score packet that arrives behind a newer one leaves the Spy Database alone.
+func TestOlderScorePacketKeepsSpyReports(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.ImportBoard(RemoteBoard{BoardID: "Bravo", Date: "2026-10-02", Scores: []RemoteScore{{Empire: "Golf"}}})
+	w.SpyDatabase = []SpyEntry{{SpyReport: SpyReport{Board: "Bravo", Empire: "Golf"}}}
+	w.ImportBoard(RemoteBoard{BoardID: "Bravo", Date: "2026-10-01", Scores: []RemoteScore{{Empire: "Hotel"}}})
+	if len(w.SpyDatabase) != 1 {
+		t.Errorf("an older packet left %d reports, want the 1 on Golf", len(w.SpyDatabase))
 	}
 }

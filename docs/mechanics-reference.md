@@ -5159,6 +5159,12 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   between its last two reports, paged for an 80x24 screen. Neither change
   touches the packet.
 
+  A planet's score packet lists every living human realm it holds, so when one
+  arrives the reports on that planet's realms it no longer lists go (erased, or
+  eliminated), and a realm its baron renamed keeps its reports under the new
+  name. A packet dated before the roster already held changes nothing. A planet
+  left with no players sends no score packet, so its reports stay (#314).
+
   BRE keeps ONE (BINARY-VERIFIED): `DATA\SPY.BRU` is 255 planet blocks of 25
   31-byte slots, one per realm letter A-Y (`open_spy_data`, BRE.OVR 0x04cd9f),
   and `save_spy_data` (0x04ce41) seeks to `(node-1)*25 + letter-'A'` and

@@ -72,6 +72,34 @@ func (w *World) forgetLocalSpyReports(name string) {
 	})
 }
 
+// syncRemoteSpyReports brings the shared reports on b's realms in line with
+// its roster: a report follows a renamed realm to its new name, and one on a
+// realm no longer listed goes, since b lists every living human realm it holds
+// and a realm erased or eliminated there would otherwise stay here for good.
+func (w *World) syncRemoteSpyReports(b RemoteBoard) {
+	listed := map[string]bool{}
+	renamed := map[string]string{}
+	for _, s := range b.Scores {
+		listed[s.Empire] = true
+		if s.FormerName != "" {
+			renamed[s.FormerName] = s.Empire
+		}
+	}
+	kept := w.SpyDatabase[:0]
+	for _, r := range w.SpyDatabase {
+		if r.By == "" && r.Board == b.BoardID && !listed[r.Empire] {
+			name, ok := renamed[r.Empire]
+			if !ok {
+				continue
+			}
+			r.Empire = name
+		}
+		kept = append(kept, r)
+	}
+	w.SpyDatabase = kept
+	w.pruneSpyDatabase(timeNow())
+}
+
 // spyReport is what this board tells another about one of its realms: the
 // figures as they stand right now, which is what separates a spy's word from
 // the shared score table.
