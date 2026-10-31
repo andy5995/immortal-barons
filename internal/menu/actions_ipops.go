@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -273,50 +274,152 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 }
 
 // spyDatabase is the read-only Spy Database viewer (sending is Special
-// Operations → Send SpyGuy, matching BRE). Reports are grouped by realm, oldest
-// first, and a realm with two or more ends with the change since the one before,
-// which is the before-and-after a spy sent around a strike is for.
+// Operations → Send SpyGuy, matching BRE). It walks the original's
+// select_player_information (BRE.OVR, called from both the System Menu and
+// InterPlanetary Ops): a planet, the players there we hold intel on, then one
+// player's reports, and back to the planet prompt. IB's planet prompt offers
+// only the planets with intel, where the original lists every one and answers
+// an empty player list.
 func spyDatabase(s session.Session, w *ctx) Result {
-	if len(w.SpyDatabase) == 0 {
+	var db []game.SpyEntry
+	w.Read(func() { db = slices.Clone(w.SpyDatabase) })
+	if len(db) == 0 {
 		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy Database:"), ansi.Reset)
-	rows := recapHeaderRows
-	for _, reports := range spyReportsByRealm(w.SpyDatabase) {
-		// A blank line, the realm, the head and its rule, a row per report, and
-		// a change row.
-		block := 4 + len(reports)
-		if len(reports) > 1 {
-			block++
+	for {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Select Planet to view players:"), ansi.Reset)
+		p := pickPlanet(s, w, spyPlanets(w, db))
+		if p == nil {
+			return Stay
 		}
-		if rows+block > recapPageRows {
-			pauseTight(s)
-			rows = 0
+		spyDatabasePlayers(s, w, db, p.Name)
+	}
+}
+
+// spyPlanets is the planet prompt's list for the Spy Database: the planets
+// holding a realm we have intel on, with their roster number and location. A
+// board the roster does not know yet is numbered after the last one it does.
+func spyPlanets(w *ctx, db []game.SpyEntry) []game.LeagueNode {
+	var boards []string
+	for _, r := range db {
+		if !slices.Contains(boards, r.Board) {
+			boards = append(boards, r.Board)
 		}
-		rows += block
-		r := reports[0]
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, fmt.Sprintf(tr(s, "%s of %s"), r.Empire, r.Board), ansi.Reset)
-		printTableHead(s, w.Term, spyColumns)
-		for _, r := range reports {
-			// Where it is known, when the report arrived: two reports on one realm
-			// often share a game day.
-			when := r.Date
-			if !r.Filed.IsZero() {
-				when = r.Filed.In(sessionZone(s)).Format("01/02 15:04")
-			}
-			printSpyRow(s, w.Term, ansi.FgWhite+gaPad(w.Term, when, spyColumns[0].width, false),
-				[]string{comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold)})
+	}
+	var list []game.LeagueNode
+	next := 0
+	for _, p := range knownPlanets(w) {
+		next = max(next, p.Number)
+		if slices.Contains(boards, p.Name) {
+			list = append(list, p)
 		}
-		if n := len(reports); n > 1 {
-			a, b := reports[n-2], reports[n-1]
-			printSpyRow(s, w.Term, ansi.FgBrightWhite+gaPad(w.Term, tr(s, "Change"), spyColumns[0].width, false),
-				[]string{signed(int64(b.Land - a.Land)), signed(int64(b.Offense - a.Offense)),
-					signed(int64(b.Defense - a.Defense)), signed(b.Gold - a.Gold)})
+	}
+	for _, b := range boards {
+		if !slices.ContainsFunc(list, func(p game.LeagueNode) bool { return p.Name == b }) {
+			next++
+			list = append(list, game.LeagueNode{Number: next, Name: b})
+		}
+	}
+	return list
+}
+
+// spyDatabasePlayers lists the realms on board that db holds reports on, as the
+// lettered score table every player list uses, and shows the one picked.
+func spyDatabasePlayers(s session.Session, w *ctx, db []game.SpyEntry, board string) {
+	var groups [][]game.SpyEntry
+	for _, g := range spyReportsByRealm(db) {
+		if g[0].Board == board {
+			groups = append(groups, g)
+		}
+	}
+	rows := spyPlayerRows(w, groups, board)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "We have information on the following players:"), ansi.Reset)
+	name, chosen := pickAttackTarget(s, w.Term, rows, targetPrompt{
+		ask:     tr(s, "Select a player:"),
+		nothing: "We have no information on anyone there.",
+	})
+	if !chosen {
+		return
+	}
+	for _, g := range groups {
+		if g[0].Empire == name {
+			printSpyRealm(s, w, g)
 		}
 	}
 	pause(s)
-	return Stay
+}
+
+// spyPlayerRows is one row per realm in groups, lettered as that realm is on
+// the planet's roster — its place in the last scores packet — with the figures
+// that carries. A realm the packet no longer holds, gone since the report or
+// renamed, takes the first letter left free and the territory its newest
+// report saw.
+func spyPlayerRows(w *ctx, groups [][]game.SpyEntry, board string) []targetRow {
+	rows := make([]targetRow, len(groups))
+	taken := map[string]bool{}
+	w.Read(func() {
+		var scores []game.RemoteScore
+		for _, b := range w.RemoteBoards {
+			if b.BoardID == board {
+				scores = b.Scores
+			}
+		}
+		for i, g := range groups {
+			newest := g[len(g)-1]
+			r := targetRow{name: newest.Empire, letter: "?", land: newest.Land, attackable: true}
+			for j, sc := range scores {
+				if sc.Empire == r.name {
+					r.letter, _ = remoteLetter(j)
+					r.land, r.score, r.netWorth = sc.Land, sc.Score, sc.NetWorth
+				}
+			}
+			if r.letter != "?" && r.letter != "" && !taken[r.letter] {
+				taken[r.letter] = true
+			} else {
+				r.letter = ""
+			}
+			rows[i] = r
+		}
+	})
+	kept := rows[:0]
+	for _, r := range rows {
+		for i := 0; r.letter == "" && i < game.PlanetSlots; i++ {
+			if l, _ := remoteLetter(i); !taken[l] {
+				r.letter = l
+				taken[l] = true
+			}
+		}
+		if r.letter != "" {
+			kept = append(kept, r) // past the 25th there is no letter to pick it by
+		}
+	}
+	return kept
+}
+
+// printSpyRealm draws one realm's reports, oldest first, and when there are two
+// or more the change since the one before the last, which is the before and
+// after a spy sent around a strike is for.
+func printSpyRealm(s session.Session, w *ctx, reports []game.SpyEntry) {
+	r := reports[0]
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, fmt.Sprintf(tr(s, "%s of %s"), r.Empire, r.Board), ansi.Reset)
+	printTableHead(s, w.Term, spyColumns)
+	for _, r := range reports {
+		// Where it is known, when the report arrived: two reports on one realm
+		// often share a game day.
+		when := r.Date
+		if !r.Filed.IsZero() {
+			when = r.Filed.In(sessionZone(s)).Format("01/02 15:04")
+		}
+		printSpyRow(s, w.Term, ansi.FgWhite+gaPad(w.Term, when, spyColumns[0].width, false),
+			[]string{comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold)})
+	}
+	if n := len(reports); n > 1 {
+		a, b := reports[n-2], reports[n-1]
+		printSpyRow(s, w.Term, ansi.FgBrightWhite+gaPad(w.Term, tr(s, "Change"), spyColumns[0].width, false),
+			[]string{signed(int64(b.Land - a.Land)), signed(int64(b.Offense - a.Offense)),
+				signed(int64(b.Defense - a.Defense)), signed(b.Gold - a.Gold)})
+	}
 }
 
 // spyColumns is a Spy Database table read left to right, drawn in the Join

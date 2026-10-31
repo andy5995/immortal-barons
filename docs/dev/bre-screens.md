@@ -1768,13 +1768,22 @@ end of this file for its measurements, colors and the screen that edits it.
 location column (`## Planet Name   Location`); selecting one prints
 `Our current relations with <planet>: <relation>` then any known players.
 
+BRE follows that with `We have information on the following players:`, the
+roster of realms there it holds a record on, and `Select a player:`; a player
+picked shows that record, and the planet prompt comes back
+(`select_player_information`, called from both the System Menu and
+InterPlanetary Ops). IB walks the same three steps.
+
 **IB diverges here, deliberately.** BRE stores one report per realm, and a new
 one overwrites it (see the Send Spy note in `docs/mechanics-reference.md`).
-IB's viewer groups the last five reports on each realm, each stamped with when
-it arrived, under the realm's name with the change between the last two, and a
-Send Spy that gets in also reads its figures out on the sender's own report. A
-spy sent before and after a strike can therefore be compared. No number, cost
-or odds changes.
+IB keeps the last five reports on each realm, each stamped with when it
+arrived, and shows the chosen realm's under its name with the change between
+the last two; a Send Spy that gets in also reads its figures out on the
+sender's own report. A spy sent before and after a strike can therefore be
+compared. No number, cost or odds changes.
+
+**IB's planet prompt offers only the planets it holds intel on**, where BRE's
+`?` lists every planet and a planet with none answers an empty roster.
 
 The planet prompt is shared by every interplanetary screen that asks for one,
 and its colors are (from `cap/eots-ibbs-01.cap`): the label and the trailing

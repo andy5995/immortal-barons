@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * The Spy Database asks for a planet, offering only those it holds intel on,
+    then a player there, and shows that player's reports
   * Joining a group attack again adds to the baron's detachment
   * A returning strike's report says "nothing" for an empty tally instead of
     leaving the line out
