@@ -160,7 +160,14 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 			return nil
 		}
 		if p := matchPlanet(planets, line); p != nil {
-			showRelation(s, w, p.Name)
+			// A planet holds no relation with itself, and a link warning about
+			// it would be about nothing (the Spy Database lists this planet for
+			// its local reports).
+			var home string
+			w.Read(func() { home = w.Config.BoardID })
+			if p.Name != home {
+				showRelation(s, w, p.Name)
+			}
 			return p
 		}
 	}

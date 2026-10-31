@@ -16,3 +16,7 @@ Operations topic explains the odds.
 
 Send Spy answers on the spot. It is one of the few operations that does not wait
 for daily maintenance, which is what makes it useful right before an attack.
+
+A spy that gets in also files the report in your Spy Database, which you open
+from the Covert Operations menu. Only you can read the reports your own spies
+bring home.

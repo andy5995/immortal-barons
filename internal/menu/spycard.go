@@ -29,7 +29,11 @@ func showPlayerIntelligence(s session.Session, w *ctx, board, empire string) {
 	var found bool
 	letter := "?"
 	w.Read(func() {
-		for _, r := range w.SpyDatabase {
+		p := w.Player()
+		if p == nil {
+			return
+		}
+		for _, r := range w.SpyReportsFor(p) {
 			if r.Board == board && r.Empire == empire {
 				rec, found = r, true // newest last
 			}

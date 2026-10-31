@@ -1904,6 +1904,13 @@ The menu's item order, labels, numeric hotkeys (1-9), and per-op costs are
 confirmed from BRE (BRE.OVR string table plus a live capture, #73):
 
 - **(1) Send Spy** — read the enemy's full status. Cost `CostSendSpy` (5,000).
+  **IB files a spy that got in in the Spy Database (IB's own; BRE shows the
+  report once and keeps nothing).** Only the realm that sent it can read the
+  entry (`SpyEntry.By`, `World.SpyReportsFor`), and the per-realm limit and age
+  limit of the interplanetary entries apply to each sender's reports separately,
+  so one baron's spies cannot push out another's. A rename carries the entries
+  with it, and deleting a realm removes those it bought or was the subject of,
+  so a later realm taking the name inherits nothing.
 - **(2) Stir Revolts** — propaganda that lowers popular support by
   `Random(4)+5` POINTS, floored at 5. Cost `CostStirRevolts` (25,000).
 - **(3) Set Up** — trick d and a second realm into believing the other declared

@@ -1783,7 +1783,13 @@ sender's own report. A spy sent before and after a strike can therefore be
 compared. No number, cost or odds changes.
 
 **IB's planet prompt offers only the planets it holds intel on**, where BRE's
-`?` lists every planet and a planet with none answers an empty roster.
+`?` lists every planet and a planet with none answers an empty roster. **IB also
+keeps a LOCAL Send Spy's result**, which BRE only shows once
+(`report_spy_result` saves nothing; `save_spy_data` is reached only from
+`dispatch_incoming_packet`). Only the realm that sent the spy can read it. In
+an inter-BBS game those reports sit under this board's own planet; in a game
+with no league there is no planet to choose, so the viewer goes straight to the
+roster. Covert Operations carries the viewer as `(S)` for that reason.
 
 The planet prompt is shared by every interplanetary screen that asks for one,
 and its colors are (from `cap/eots-ibbs-01.cap`): the label and the trailing
@@ -2401,6 +2407,11 @@ observed counterpart to the queue mechanism read out of the binary.
 **The advertised price for Spy on Relations is a lie.** The menu says 100,000;
 `report_spy_result` subtracts the Send Spy fee of 5,000 for both info ops. The
 screen above is what BRE shows, not what it charges.
+
+**IB adds `(S) Spy Database`** after `(9) Expose Enemy Ops`, the key
+InterPlanetary Ops uses for the same viewer. BRE keeps no local Send Spy result
+(see the Spy Database note under InterPlanetary Ops), so it has nothing to read
+here; IB files each one for the realm that sent it.
 
 ```
 ──────[Covert Operations]───────
@@ -3118,6 +3129,10 @@ Our current relations with Starship Junkyard: Allied
 
 White `37` body, the planet name bright-white `1;37`, the status in its own
 color as above.
+
+IB prints no relations line when the planet named is this board's own. BRE's
+prompt refuses its own planet outright, so the line never had to cover it; IB
+offers it where the Spy Database files local reports, and a send home.
 
 ### Diplomacy Modification (BBS Coordinator only)
 

@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A local Send Spy that gets in files its report in the Spy Database, readable
+    only by the realm that sent it, and Covert Operations lists the Spy Database
   * The Spy Database asks for a planet, offering only those it holds intel on,
     then a player there, and shows that player's reports
   * Joining a group attack again adds to the baron's detachment

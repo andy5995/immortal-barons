@@ -1,6 +1,9 @@
 package game
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 // ibbs_spy.go — spy reports on other planets, and the global recon that
 // gathers them.
@@ -33,6 +36,40 @@ type SpyReport struct {
 type SpyEntry struct {
 	SpyReport
 	Filed time.Time `json:",omitzero"`
+	// By is the realm that bought a LOCAL Send Spy report, the only one that
+	// may read it (SpyReportsFor). Empty for intel from another planet, which
+	// the whole board shares, as in BRE. BRE keeps no local spy results at all;
+	// storing them is IB's own.
+	By string `json:",omitempty"`
+}
+
+// SpyReportsFor is the part of the Spy Database viewer may read: every report
+// from another planet, and the local ones viewer bought.
+func (w *World) SpyReportsFor(viewer *Empire) []SpyEntry {
+	var out []SpyEntry
+	for _, r := range w.SpyDatabase {
+		if r.By == "" || r.By == viewer.Name {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// fileLocalSpyReport keeps what a local Send Spy that got in saw of d, readable
+// only by a.
+func (w *World) fileLocalSpyReport(a, d *Empire) {
+	now := timeNow()
+	w.SpyDatabase = append(w.SpyDatabase, SpyEntry{SpyReport: w.spyReport(d), Filed: now, By: a.Name})
+	w.pruneSpyDatabase(now)
+}
+
+// forgetLocalSpyReports removes the local reports a deleted realm bought or was
+// the subject of. Access is by name, so a later realm taking the name would
+// otherwise read what the old one paid for.
+func (w *World) forgetLocalSpyReports(name string) {
+	w.SpyDatabase = slices.DeleteFunc(w.SpyDatabase, func(r SpyEntry) bool {
+		return r.By != "" && (r.By == name || r.Empire == name)
+	})
 }
 
 // spyReport is what this board tells another about one of its realms: the

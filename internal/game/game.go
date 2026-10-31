@@ -274,7 +274,8 @@ type World struct {
 
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
-	// SpyDatabase holds spy reports shared across the planet.
+	// SpyDatabase holds spy reports: other planets' shared across this one, local
+	// ones private to the buyer (SpyEntry.By).
 	GroupAttacks []GroupAttack
 	// NextAttackID is the wire key every interplanetary action takes its id from —
 	// group and individual attacks, special ops, trade deals, spy recon and terror

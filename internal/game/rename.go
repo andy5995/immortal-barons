@@ -179,6 +179,14 @@ func (w *World) rewriteRealmName(old, name string) {
 	for i := range w.Market {
 		swap(&w.Market[i].Realm)
 	}
+	for i := range w.SpyDatabase {
+		// Only a local report names realms of this board; another planet's names
+		// its own.
+		if r := &w.SpyDatabase[i]; r.By != "" {
+			swap(&r.By)
+			swap(&r.Empire)
+		}
+	}
 	if gold, ok := w.MarketProceeds[old]; ok {
 		delete(w.MarketProceeds, old)
 		if w.MarketProceeds == nil {

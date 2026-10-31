@@ -377,6 +377,9 @@ func BuildMenus() *Menus {
 	}
 	covert.Items = append(covert.Items,
 		Item{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
+		// IB's own: BRE keeps no local spy results, so it has nowhere to read
+		// them. The key is InterPlanetary Ops' for the same database.
+		Item{Key: 'S', Label: "Spy Database", Do: spyDatabase},
 		Item{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		Item{Key: '?', Label: "Help", Do: helpBrowse},
 		Item{Key: '0', Label: "Quit", Do: back},
@@ -609,7 +612,8 @@ func BuildMenus() *Menus {
 			// Specializing is permanent, so hide the option once it's been done.
 			Hidden: func(w *ctx) bool { return w.Player().Specialized != "" }},
 		// BRE lists the Spy Database on the System Menu ('4') as well as on
-		// InterPlanetary Ops ('S'); it holds cross-board intel, so IBBS-only.
+		// InterPlanetary Ops ('S'), and only in an inter-BBS game. A local
+		// game reaches IB's local reports from Covert Operations instead.
 		{Key: '4', Label: "Spy Database", Do: spyDatabase, Hidden: ibbsHidden},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		// BRE: Coordinator Vote is '5', shown only in IBBS games and only once the

@@ -889,3 +889,83 @@ func TestBombTradeRoutesTellsBothPartiesToADealItHit(t *testing.T) {
 		}
 	}
 }
+
+// A local Send Spy that gets in files its figures in the Spy Database for the
+// realm that sent it and nobody else; intel from another planet stays shared.
+func TestLocalSpyReportIsPrivateToTheSpier(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents = covertTries
+	w.SpyDatabase = []SpyEntry{{SpyReport: SpyReport{Board: "Nova Hub", Empire: "Remote"}}}
+	for i := 0; i < covertTries && len(w.SpyDatabase) == 1; i++ {
+		if _, err := w.SendSpy(a, d); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(w.SpyDatabase) != 2 {
+		t.Fatalf("no spy got in, or one filed more than one report: %d entries", len(w.SpyDatabase))
+	}
+	r := w.SpyDatabase[1]
+	if r.By != a.Name || r.Empire != d.Name || r.Land != d.Land {
+		t.Errorf("filed %+v, want %s's figures bought by %s", r, d.Name, a.Name)
+	}
+	if got := w.SpyReportsFor(a); len(got) != 2 {
+		t.Errorf("the spier reads %d reports, want its own and the remote one", len(got))
+	}
+	if got := w.SpyReportsFor(d); len(got) != 1 || got[0].Empire != "Remote" {
+		t.Errorf("another realm reads %+v, want only the remote report", got)
+	}
+}
+
+// One baron's spies cannot push another's private reports on the same realm out.
+func TestSpyDatabasePrunesLocalReportsPerSpier(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	now := timeNow()
+	entry := func(by string) SpyEntry {
+		return SpyEntry{SpyReport: SpyReport{Empire: "Target"}, Filed: now, By: by}
+	}
+	w.SpyDatabase = []SpyEntry{entry("First")}
+	for range SpyReportsPerRealm + 2 {
+		w.SpyDatabase = append(w.SpyDatabase, entry("Second"))
+	}
+	w.pruneSpyDatabase(now)
+	first, second := 0, 0
+	for _, r := range w.SpyDatabase {
+		switch r.By {
+		case "First":
+			first++
+		case "Second":
+			second++
+		}
+	}
+	if first != 1 || second != SpyReportsPerRealm {
+		t.Errorf("kept %d of First's and %d of Second's, want 1 and %d", first, second, SpyReportsPerRealm)
+	}
+}
+
+// A local report follows its buyer and its subject through a rename, and goes
+// when either realm is deleted, so a later realm taking the name reads nothing.
+func TestLocalSpyReportsFollowRenameAndRemoval(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	remote := SpyEntry{SpyReport: SpyReport{Board: "Nova Hub", Empire: d.Name}}
+	w.SpyDatabase = []SpyEntry{
+		{SpyReport: SpyReport{Empire: d.Name}, By: a.Name},
+		remote,
+	}
+	oldTarget := d.Name
+	if err := w.RenameEmpire(a, "Renamed"); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.RenameEmpire(d, "Retitled"); err != nil {
+		t.Fatal(err)
+	}
+	if got := w.SpyReportsFor(a); len(got) != 2 || got[0].By != "Renamed" || got[0].Empire != "Retitled" {
+		t.Fatalf("after the renames the buyer reads %+v", got)
+	}
+	if w.SpyDatabase[1].Empire != oldTarget {
+		t.Errorf("a rename here rewrote another planet's realm: %+v", w.SpyDatabase[1])
+	}
+	w.RemoveEmpire(a)
+	if len(w.SpyDatabase) != 1 || w.SpyDatabase[0].By != "" {
+		t.Errorf("removing the buyer left %+v, want only the remote report", w.SpyDatabase)
+	}
+}

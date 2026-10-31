@@ -382,17 +382,18 @@ func (w *World) fileSpyReport(r SpyReport) {
 
 // pruneSpyDatabase keeps at most SpyReportsPerRealm entries on each realm and
 // drops any older than SpyReportMaxAgeDays, except the newest on each realm,
-// which stays whatever its age. Entries are filed in order, so the last one on
+// which stays whatever its age. Local reports count per buyer, so one
+// baron's spies cannot push another's private reports out. Entries are filed in order, so the last one on
 // a realm is its newest. One saved before entries were stamped has no Filed
 // time and counts as old.
 func (w *World) pruneSpyDatabase(now time.Time) {
-	type realm struct{ board, empire string }
+	type realm struct{ board, empire, by string }
 	maxAge := time.Duration(SpyReportMaxAgeDays) * 24 * time.Hour
 	seen := map[realm]int{}
 	keep := make([]bool, len(w.SpyDatabase))
 	for i := len(w.SpyDatabase) - 1; i >= 0; i-- {
 		e := w.SpyDatabase[i]
-		k := realm{e.Board, e.Empire}
+		k := realm{e.Board, e.Empire, e.By}
 		seen[k]++
 		fresh := !e.Filed.IsZero() && now.Sub(e.Filed) <= maxAge
 		keep[i] = seen[k] == 1 || (seen[k] <= SpyReportsPerRealm && fresh)

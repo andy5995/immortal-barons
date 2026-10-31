@@ -233,6 +233,7 @@ func (w *World) SendSpy(a, d *Empire) (Msg, error) {
 		return Msg{}, err
 	}
 	if w.covertRoll(a, d, OpSendSpy) {
+		w.fileLocalSpyReport(a, d)
 		return say("Intel on {who} — Land {land}, Troops {troops}, Turrets {turrets}, Tanks {tanks}, Offense {offense}, Defense {defense}, Gold {gold}, Agents {agents}",
 			"who", d.Name, "land", d.Land, "troops", d.Troopers, "turrets", d.Turrets, "tanks", d.Tanks,
 			"offense", d.Offense(), "defense", d.Defense(), "gold", d.Gold, "agents", d.Agents), nil

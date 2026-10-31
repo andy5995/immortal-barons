@@ -68,3 +68,49 @@ func TestSpyDatabaseWalksPlanetThenPlayer(t *testing.T) {
 		}
 	}
 }
+
+// With no league there is no planet to pick, so the viewer goes straight to
+// the players, and a baron reads only the local reports it bought.
+func TestSpyDatabaseLocalGameShowsOnlyOwnReports(t *testing.T) {
+	w := newWorld()
+	me := w.Player().Name
+	t0 := time.Date(2026, 9, 22, 14, 10, 0, 0, time.UTC)
+	mine := spyEntry("", "Mine", t0, 900, 1, 2, 3)
+	mine.By = me
+	theirs := spyEntry("", "Theirs", t0, 800, 1, 2, 3)
+	theirs.By = "Someone Else"
+	w.SpyDatabase = []game.SpyEntry{mine, theirs, spyEntry("Nova Hub", "Remote", t0, 1, 1, 1, 1)}
+
+	f := drive(t, w, "A\r\r", spyDatabase)
+	out := stripANSI(f.out.String())
+	if strings.Contains(out, "Enter Planet Name") {
+		t.Errorf("a local game asked for a planet:\n%s", out)
+	}
+	if !strings.Contains(out, "We have information on the following players:") {
+		t.Fatalf("never reached the player list:\n%s", out)
+	}
+	if strings.Contains(out, "Theirs") || strings.Contains(out, "Remote") {
+		t.Errorf("listed a report this baron may not read:\n%s", out)
+	}
+	if strings.Count(out, "Mine") < 2 || !strings.Contains(out, "900") {
+		t.Errorf("never showed the baron's own report:\n%s", out)
+	}
+}
+
+// A baron's own planet is listed for its local reports, and choosing it prints
+// no relations line: a planet holds none with itself.
+func TestSpyDatabaseHomePlanetHasNoRelationLine(t *testing.T) {
+	w := leagueCtx(t)
+	mine := spyEntry("", "Neighbor", time.Now(), 900, 1, 2, 3)
+	mine.By = w.Player().Name
+	w.SpyDatabase = []game.SpyEntry{mine}
+
+	f := drive(t, w, "3\rA\r\r", spyDatabase)
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Neighbor of Eye of the Storm") {
+		t.Fatalf("the local report is not under this planet:\n%s", out)
+	}
+	if strings.Contains(out, "Our current relations") {
+		t.Errorf("printed a relations line for this planet:\n%s", out)
+	}
+}
