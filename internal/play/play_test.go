@@ -98,11 +98,17 @@ func cfgIn(dir string) game.Config {
 	return c
 }
 
+// onboardKeys is the first-run script: splash, English, (1) Create Realm,
+// the realm name, confirm, Quit.
+func onboardKeys(realm string) []rune {
+	return []rune(" \r1" + realm + "\ry0")
+}
+
 func TestOnboardsThenPersists(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// splash dismiss, Enter for the language prompt (English), realm name
 	// "Khanate", then Quit
-	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +143,7 @@ func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f := &fakeSession{keys: []rune(" \r1Surplusia\ry0")}
+	f := &fakeSession{keys: onboardKeys("Surplusia")}
 	reason, err := Run(f, Identity{Handle: "Surplus"}, cfg, "2026-07-03")
 	if err != nil {
 		t.Fatal(err)
@@ -166,7 +172,7 @@ func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
 
 func TestReturningPlayerResumes(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f1 := &fakeSession{keys: onboardKeys("Khanate")}
 	Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	f2 := &fakeSession{keys: []rune(" 0")} // no naming or language prompt second time
 	Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03")
@@ -385,7 +391,7 @@ func stripANSI(s string) string { return ansiEsc.ReplaceAllString(s, "") }
 // it, not merely that some output appeared.
 func TestWelcomeMenuComesBeforeNaming(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")} // splash, English, (1) Create Realm, name, confirm, Quit
+	f := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}

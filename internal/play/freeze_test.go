@@ -11,7 +11,7 @@ import (
 // and goes no further: no maintenance notice, no onboarding, no menu.
 func TestAFrozenLeagueLetsNobodyIn(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f1 := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +47,7 @@ func TestAFrozenLeagueLetsNobodyIn(t *testing.T) {
 // comes before the menu engine that normally supplies it.
 func TestAFrozenLeagueSpeaksTheCallersLanguage(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f1 := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestAFrozenLeagueSpeaksTheCallersLanguage(t *testing.T) {
 // onboarding that would create one.
 func TestAFrozenLeagueCreatesNoRealm(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f1 := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestAFrozenLeagueCreatesNoRealm(t *testing.T) {
 	}
 
 	// The keys that would carry a newcomer through onboarding.
-	f2 := &fakeSession{keys: []rune(" \r1Newland\ry0")}
+	f2 := &fakeSession{keys: onboardKeys("Newland")}
 	reason, err := Run(f2, Identity{Handle: "Newcomer"}, cfg, "2026-07-04")
 	if err != nil {
 		t.Fatal(err)

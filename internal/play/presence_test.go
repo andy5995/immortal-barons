@@ -79,7 +79,7 @@ func TestCallerIsOnlineAtTheOpeningMenu(t *testing.T) {
 // the roster at once instead of leaving them there for the window.
 func TestSessionEndClearsPresence(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}

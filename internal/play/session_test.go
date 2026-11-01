@@ -13,7 +13,7 @@ func TestSessionOnboardsAndSaves(t *testing.T) {
 	cfg := cfgIn(t.TempDir()) // reuse the helper from play_test.go
 	w := game.NewWorldSeed(cfg, 1)
 	saved := false
-	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")} // splash, language (English), realm name, confirm, quit
+	f := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Session(f, Identity{Handle: "Khan"}, w, cfg, "", game.MaintReport{}, func() error { saved = true; return nil }); err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestOpeningMenuNamesTheBuild(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorldSeed(cfg, 1)
 	w.StartedDate = "2026-08-27"
-	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")} // splash, English, realm, confirm, quit
+	f := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Session(f, Identity{Handle: "Khan"}, w, cfg, "", game.MaintReport{}, func() error { return nil }); err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestSecondSessionOnARealmIsRefused(t *testing.T) {
 	if err != nil {
 		t.Fatalf("lock: %v", err)
 	}
-	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f := &fakeSession{keys: onboardKeys("Khanate")}
 	reason, err := Run(f, Identity{Handle: " KHAN "}, cfg, "2026-07-03")
 	if err != nil || reason != "busy" {
 		t.Fatalf("second session: reason %q, err %v; want busy", reason, err)
@@ -98,7 +98,7 @@ func TestSecondSessionOnARealmIsRefused(t *testing.T) {
 	}
 
 	held.Release()
-	f2 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f2 := &fakeSession{keys: onboardKeys("Khanate")}
 	if reason, err := Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil || reason == "busy" {
 		t.Fatalf("after release: reason %q, err %v", reason, err)
 	}

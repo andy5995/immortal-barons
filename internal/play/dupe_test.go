@@ -59,7 +59,7 @@ func TestDupeCallerCannotFoundARealm(t *testing.T) {
 		w.ImportBoard(game.RemoteBoard{BoardID: "Bravo", Scores: far.Outbox[0].Scores})
 	})
 
-	f := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f := &fakeSession{keys: onboardKeys("Khanate")}
 	reason, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	if err != nil {
 		t.Fatal(err)
@@ -84,7 +84,7 @@ func TestDupeLockedBaronMayEraseTheRealm(t *testing.T) {
 		alive bool
 	}{{'n', true}, {'y', false}} {
 		cfg := leagueCfgIn(t)
-		f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+		f1 := &fakeSession{keys: onboardKeys("Khanate")}
 		if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 			t.Fatal(err)
 		}
@@ -114,7 +114,7 @@ func TestDupeLockedBaronMayEraseTheRealm(t *testing.T) {
 // Input that ends at the offer ends the session like any other prompt.
 func TestDupeLockOfferEndsOnEOF(t *testing.T) {
 	cfg := leagueCfgIn(t)
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f1 := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +138,7 @@ func TestDupeLockOfferEndsOnEOF(t *testing.T) {
 // login gets the died-today refusal, not the offer again.
 func TestDupeErasedRealmIsNotOfferedAgain(t *testing.T) {
 	cfg := leagueCfgIn(t)
-	f1 := &fakeSession{keys: []rune(" \r1Khanate\ry0")}
+	f1 := &fakeSession{keys: onboardKeys("Khanate")}
 	if _, err := Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
