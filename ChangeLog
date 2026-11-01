@@ -6,7 +6,6 @@ Immortal Barons ChangeLog
     and spy reports clear, and it is no longer offered as a target
   * Dupe Checking locks only the newer of a baron's two realms
   * Dupe Checking ignores a board whose scores have not arrived for three days
-  * A score packet dated before the one already held is ignored
   * A Dupe Checking lock held by a board that has left the league no longer
     shuts its baron out
   * With Dupe Checking on, a caller another board lists cannot found a realm,

@@ -699,27 +699,24 @@ func (w *World) StoreErr() error { return w.storeErr }
 
 // ImportBoard records b's scores, replacing any existing entry for the
 // same BoardID so re-importing updates rather than duplicates, and brings the
-// Spy Database's reports on b's realms in line with them. It reports false, and
-// changes nothing, for scores dated before the ones already held: a packet that
-// arrived behind a newer one would otherwise bring back realms that have gone.
-func (w *World) ImportBoard(b RemoteBoard) bool {
+// Spy Database's reports on b's realms in line with them. A packet that
+// arrived behind a later one from its board never reaches here with scores:
+// ApplyPacket strips them by sequence number (#311), which orders two packets
+// the game date cannot, such as two sent on one day.
+func (w *World) ImportBoard(b RemoteBoard) {
 	if b.Received.IsZero() {
 		b.Received = timeNow()
 	}
 	for i, existing := range w.RemoteBoards {
 		if existing.BoardID == b.BoardID {
-			if b.Date < existing.Date {
-				return false
-			}
 			w.announceRemoteRenames(existing, b)
 			w.RemoteBoards[i] = b
 			w.syncRemoteSpyReports(b)
-			return true
+			return
 		}
 	}
 	w.RemoteBoards = append(w.RemoteBoards, b)
 	w.syncRemoteSpyReports(b)
-	return true
 }
 
 // NetWorth is the empire's strategic score at BRE scale: land dominates at

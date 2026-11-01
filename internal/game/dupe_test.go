@@ -19,9 +19,8 @@ func dupeWorld(t *testing.T) (*World, *Empire) {
 // receive takes a board's scores the way ApplyPacket does: the roster first,
 // then the duplicate check against it.
 func receive(w *World, board string, scores []RemoteScore) {
-	if w.ImportBoard(RemoteBoard{BoardID: board, Scores: scores}) {
-		w.applyDupeCheck(board, scores)
-	}
+	w.ImportBoard(RemoteBoard{BoardID: board, Scores: scores})
+	w.applyDupeCheck(board, scores)
 }
 
 // A packet naming one of our own barons locks that realm, and a later packet
@@ -218,20 +217,19 @@ func TestPlayerListExplainsALockUnenforcedByInterBBSOff(t *testing.T) {
 	}
 }
 
-// Scores dated before the ones held change nothing: a late packet must not
-// bring back a baron who has since gone, nor lock them again.
-func TestOlderScoresNeitherReplaceTheRosterNorLock(t *testing.T) {
+// Scores in a packet that arrives behind a later one from its board change
+// nothing, even when both carry the same game date (#322): a late packet must
+// not bring back a baron who has since gone, nor lock them again.
+func TestLateScoresNeitherReplaceTheRosterNorLock(t *testing.T) {
 	w, e := dupeWorld(t)
-	w.ImportBoard(RemoteBoard{BoardID: "there", Date: "2026-10-06"})
+	w.ApplyPacket(Packet{FromBoard: "there", Seq: 9, Date: "2026-10-06", Scores: []RemoteScore{{Empire: "Newer"}}})
 	late := []RemoteScore{{Empire: "Far Reach", OwnerHash: dupeHash("alice")}}
-	if w.ImportBoard(RemoteBoard{BoardID: "there", Date: "2026-10-05", Scores: late}) {
-		t.Error("an older packet was imported")
-	}
-	if len(w.RemoteBoards[0].Scores) != 0 || w.RemoteBoards[0].Date != "2026-10-06" {
+	w.ApplyPacket(Packet{FromBoard: "there", Seq: 8, Date: "2026-10-06", Scores: late})
+	if len(w.RemoteBoards[0].Scores) != 1 || w.RemoteBoards[0].Scores[0].Empire != "Newer" {
 		t.Errorf("the roster became %+v, want the newer one kept", w.RemoteBoards[0])
 	}
 	if w.DupeElsewhere("alice") != "" || e.DupeLockedBy != "" {
-		t.Error("an older packet refused or locked alice")
+		t.Error("a late packet refused or locked alice")
 	}
 }
 

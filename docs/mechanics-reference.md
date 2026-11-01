@@ -1415,9 +1415,9 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   arrived for `DupeScoresMaxAgeDays` (3) real days. A board resends its scores
   at least daily, and one left with no players says so (`Packet.NoRealms`,
   #314), which empties its roster here and releases its locks at once; the age
-  rule covers a board that has stopped sending anything. Scores
-  dated before the ones already held are ignored outright, so a late packet
-  cannot bring back a baron who has gone. A lock is only set while checking is
+  rule covers a board that has stopped sending anything. A packet that
+  arrives behind a later one from its board carries no scores here (#311), so
+  a late packet cannot bring back a baron who has gone. A lock is only set while checking is
   on, so every lock comes with the event that announced it. One set earlier
   survives the switch going off and is enforced again when it comes back on; a
   lock that would have started while it was off waits for the next packet.
@@ -5186,7 +5186,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   A planet's score packet lists every living human realm it holds, so when one
   arrives the reports on that planet's realms it no longer lists go (erased, or
   eliminated), and a realm its baron renamed keeps its reports under the new
-  name. A packet dated before the roster already held changes nothing. A planet
+  name. A packet that arrives behind a later one from its board changes
+  nothing (#311). A planet
   left with no players reports that it has none (`Packet.NoRealms`, #314), so
   its reports go too, and it is no longer offered as a target.
 
