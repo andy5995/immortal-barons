@@ -373,15 +373,13 @@ func TestIPMessageToUnknownRealmBouncesBack(t *testing.T) {
 	if got.From != "" || got.FromBoard != "The Eclipse" {
 		t.Errorf("bounce mail From=%q FromBoard=%q, want empty From and the target board", got.From, got.FromBoard)
 	}
-	if !strings.Contains(got.Body, "Ghost Realm of The Eclipse could not be delivered") ||
-		!strings.Contains(got.Body, "no such realm there") {
-		t.Errorf("bounce body should say why: %q", got.Body)
+	// The reason travels as data, for the reader's board to word (#313).
+	if b := got.Bounce; b == nil || b.Reason != BounceNoRealm || b.Realm != "Ghost Realm" ||
+		len(b.To) != 1 || b.To[0] != "Ghost Realm" || b.Sent == "" {
+		t.Errorf("bounce should say why, to whom and when: %+v", got.Bounce)
 	}
-	if !strings.Contains(got.Body, "To: Ghost Realm.") {
-		t.Errorf("bounce body should show the address: %q", got.Body)
-	}
-	if !strings.Contains(got.Body, "Where are you?") {
-		t.Errorf("bounce body should quote the original message: %q", got.Body)
+	if got.Body != "Where are you?" {
+		t.Errorf("bounce body should be the original message alone: %q", got.Body)
 	}
 }
 
@@ -404,8 +402,8 @@ func TestIPMessageToUnelectedCoordinatorBouncesBack(t *testing.T) {
 	if len(received(sender)) != 1 {
 		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(received(sender)))
 	}
-	if !strings.Contains(received(sender)[0].Body, "No Coordinator has been elected") {
-		t.Errorf("bounce body should say why: %q", received(sender)[0].Body)
+	if b := received(sender)[0].Bounce; b == nil || b.Reason != BounceNoCoordinator {
+		t.Errorf("bounce should say why: %+v", b)
 	}
 }
 
@@ -431,9 +429,8 @@ func TestIPMessageToEmptyPlanetBouncesBack(t *testing.T) {
 	if len(received(sender)) != 1 {
 		t.Fatalf("the sender should be told; Mail len = %d, want 1", len(received(sender)))
 	}
-	if body := received(sender)[0].Body; !strings.Contains(body, "No realm is alive there") ||
-		!strings.Contains(body, "Anyone home?") {
-		t.Errorf("bounce body should say why and quote the message: %q", body)
+	if m := received(sender)[0]; m.Bounce == nil || m.Bounce.Reason != BounceNobodyAlive || m.Body != "Anyone home?" {
+		t.Errorf("bounce should say why and hand back the message: %+v", m)
 	}
 }
 
@@ -478,7 +475,7 @@ func TestIPMessageToOwnUnknownRealmBouncesBackLocally(t *testing.T) {
 	if len(received(sender)) != 1 {
 		t.Fatalf("a message to your own unreachable planet should bounce back at once; Mail len = %d, want 1", len(received(sender)))
 	}
-	if !strings.Contains(received(sender)[0].Body, "Ghost Realm") {
-		t.Errorf("bounce body should name the realm: %q", received(sender)[0].Body)
+	if b := received(sender)[0].Bounce; b == nil || b.Realm != "Ghost Realm" {
+		t.Errorf("bounce should name the realm: %+v", b)
 	}
 }

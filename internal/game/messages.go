@@ -21,6 +21,10 @@ type Message struct {
 	// inbox beside the mail they received (IB's own; BRE keeps nothing of what
 	// a player sends). To then names who it went to.
 	Sent bool `json:",omitempty"`
+	// Bounce is set on a bounce for an interplanetary message this baron sent,
+	// with Body the original message; the reader renders the reason (#313). A
+	// bounce stored before it existed has the reason in its Body instead.
+	Bounce *MailBounce `json:",omitempty"`
 }
 
 // UnmarshalJSON accepts a bare string as well as an object, so a world saved
