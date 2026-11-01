@@ -116,3 +116,30 @@ func TestMailStampReadsOnThePlayersClock(t *testing.T) {
 		t.Errorf("the stamp is not on the reader's clock:\n%s", out)
 	}
 }
+
+// A bounce arrives as data and is worded here, by the reader's board: the
+// reason above the message it hands back, and the original send time on the
+// reader's clock, as the header's is (#313).
+func TestBounceIsWordedByTheReadersBoard(t *testing.T) {
+	w := newWorld()
+	w.Player().TimeZone = "Asia/Tokyo"
+	f := &fakeSession{}
+	s := &langSession{Session: f, c: w}
+	sent := game.StoredStamp(time.Date(2026, 7, 30, 0, 24, 5, 0, time.UTC))
+
+	renderMessage(s, game.Message{FromBoard: "The Eclipse", To: "A", Body: "Where are you?", When: sent,
+		Bounce: &game.MailBounce{Reason: game.BounceNoRealm, Realm: "Ghost Realm", Sent: sent, To: []string{"Ghost Realm"}}})
+
+	out := sgr.ReplaceAllString(f.out.String(), "")
+	why := strings.Index(out, "Your message to Ghost Realm of The Eclipse could not be delivered.")
+	body := strings.Index(out, "Where are you?")
+	if why < 0 || body < why {
+		t.Errorf("the reason is missing or not above the message:\n%s", out)
+	}
+	if !strings.Contains(out, "Sent 07/30/2026  09:24:05 JST.") || strings.Contains(out, "UTC") {
+		t.Errorf("the send time is not on the reader's clock:\n%s", out)
+	}
+	if !strings.Contains(out, "To: Ghost Realm.") {
+		t.Errorf("the original address is missing:\n%s", out)
+	}
+}

@@ -6002,11 +6002,12 @@ original sender with `FromEmpire` left empty — a notice from the planet, not
 from a baron, which is also the loop guard: a bounce is never generated for a
 message whose own `FromEmpire` is already empty, so a bounce that cannot itself
 be delivered (the original sender has since died too) dies quietly instead of
-answering forever. No packet field changed and no protocol bump was needed —
-`Packet.IPMessages` already carries realm-addressed mail in both directions.
-The notice reads as an ordinary message quoting the original body, its date,
-and its address (`IPMessage.ToEmpires`, already on the wire) — mail, not a
-recap event. That is deliberately different from how an unreachable strike or
+answering forever. The notice reads as an ordinary message: the reason, then
+the original's date and address, then its body — mail, not a recap event. The
+reason travels as data (`IPMessage.Bounce`, Protocol 6) rather than as words,
+because the board that bounces a message cannot know who will read the bounce;
+the reader's board words it in the reader's language, with the original's date
+on the reader's clock like the stamp above it (#313). That is deliberately different from how an unreachable strike or
 terror op reports home (`applyAttackResult`, `OutcomeNotFound`, a private
 recap line): a message has a natural place to be handed back — the mailbox the
 sender already reads — where a strike has nothing else to show. The two are not

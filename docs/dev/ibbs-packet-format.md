@@ -621,6 +621,13 @@ IPMessage     { "FromBoard": "AlphaBBS", "FromEmpire": "Asgard",
                 "ToCoordinator": false, "ToEmpire": "",
                 "When": "07/04/2026  18:02:11", "Body": "..." }
                 // neither To* set = every realm on ToBoard reads it
+                //
+                // A bounce adds "Bounce": { "Reason": "no-realm",
+                // "Realm": "Ghost", "Sent": "...", "To": [ "Ghost" ] }, with
+                // Body the original message and FromEmpire empty. Reason is
+                // "no-realm", "no-coordinator" or "nobody-alive". It carries
+                // no words: the reader's board renders it in the reader's
+                // language and on the reader's clock (#313). Protocol 6.
 ```
 
 A packet addressed to a specific board (`ToBoard`/`ToNode`) is matched by

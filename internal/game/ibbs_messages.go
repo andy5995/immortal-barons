@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -42,7 +41,32 @@ type IPMessage struct {
 	ToEmpires []string `json:",omitempty"`
 	When      string
 	Body      string
+	// Bounce marks this as a bounce and says why, with Body the original
+	// message. It travels as data, not as words, because the board that bounces
+	// a message cannot know who will read the bounce (#313).
+	Bounce *MailBounce `json:",omitempty"`
 }
+
+// MailBounce is why an interplanetary message could not be delivered, put into
+// words by the reader's board when the bounce is read: in the reader's
+// language, with the send time on the reader's clock. The planet that refused
+// it is the bounce's own FromBoard.
+type MailBounce struct {
+	Reason BounceReason
+	Realm  string   `json:",omitempty"` // the addressee, for BounceNoRealm
+	Sent   string   // the original's When, a stored stamp
+	To     []string `json:",omitempty"` // the original's ToEmpires
+}
+
+// BounceReason is why a message bounced. The values travel the wire, so they
+// are words rather than numbers that a reordering could change.
+type BounceReason string
+
+const (
+	BounceNoRealm       BounceReason = "no-realm"       // no realm by that name there
+	BounceNoCoordinator BounceReason = "no-coordinator" // no Coordinator elected there
+	BounceNobodyAlive   BounceReason = "nobody-alive"   // no living realm there at all
+)
 
 // SendIPMessage queues body for delivery on each of boards. An empty body or an
 // empty board list sends nothing.
@@ -167,11 +191,11 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	if when == "" {
 		when = StoredStamp(timeNow())
 	}
-	msg := Message{From: m.FromEmpire, FromBoard: m.FromBoard, When: when, Body: m.Body}
+	msg := Message{From: m.FromEmpire, FromBoard: m.FromBoard, When: when, Body: m.Body, Bounce: m.Bounce}
 	if m.ToEmpire != "" {
 		to := w.remoteTarget(m.ToEmpire)
 		if to == nil {
-			w.bounceIPMessage(m, fmt.Sprintf("Your message to %s of %s could not be delivered. There is no such realm there.", m.ToEmpire, w.Config.BoardID))
+			w.bounceIPMessage(m, BounceNoRealm)
 			return
 		}
 		msg.To = w.addressLetters(m.ToEmpires, to)
@@ -181,7 +205,7 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	if m.ToCoordinator {
 		co := w.BBSCoordinator()
 		if co == nil {
-			w.bounceIPMessage(m, fmt.Sprintf("Your message to the Coordinator of %s could not be delivered. No Coordinator has been elected there.", w.Config.BoardID))
+			w.bounceIPMessage(m, BounceNoCoordinator)
 			return
 		}
 		msg.To = w.EmpireLetter(co)
@@ -202,7 +226,7 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	}
 	all := everyone.String()
 	if all == "" {
-		w.bounceIPMessage(m, fmt.Sprintf("Your message to %s could not be delivered. No realm is alive there.", w.Config.BoardID))
+		w.bounceIPMessage(m, BounceNobodyAlive)
 		return
 	}
 	for _, e := range w.Empires {
@@ -217,36 +241,30 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	}
 }
 
-// bounceIPMessage tells m's sender their message did not arrive: reason, then a
-// copy of the message itself — its original date and its address — so the
-// sender can judge what to do next (address the planet instead, or give up on
-// a realm that is simply gone). It rides the same IPMessages channel as any
+// bounceIPMessage tells m's sender their message did not arrive: the reason,
+// then a copy of the message itself — its original date and its address — so
+// the sender can judge what to do next (address the planet instead, or give up
+// on a realm that is simply gone). It rides the same IPMessages channel as any
 // other message, addressed back with ToEmpire and no FromEmpire, which is what
 // marks it as the planet speaking rather than a baron.
 //
-// The wording is English and stays English. It is composed on the RECEIVING
-// board, which knows nothing about the reader's language — the reader is a
-// baron on another planet — and it rides the wire as message text, so there is
-// no later render to translate it at. Wrapping it in tr() would pick the wrong
-// board's language, which is worse than leaving it alone.
+// It carries no words. This board knows nothing about the reader, a baron on
+// another planet, so the reason travels as a MailBounce and the mail reader
+// there renders it in their language and on their clock (#313).
 //
 // Never called for a message that is ITSELF such a notice (m.FromEmpire == "")
 // or that names no sender to answer (m.FromBoard == "") — the loop guard: a
 // bounce that could not itself be delivered (the original sender has since
 // died too) must die quietly rather than bounce again.
-func (w *World) bounceIPMessage(m IPMessage, reason string) {
+func (w *World) bounceIPMessage(m IPMessage, reason BounceReason) {
 	if m.FromEmpire == "" || m.FromBoard == "" {
 		return
 	}
-	var b strings.Builder
-	b.WriteString(reason)
-	fmt.Fprintf(&b, "\nSent %s.\n", m.When)
-	if to := strings.Join(m.ToEmpires, ", "); to != "" {
-		fmt.Fprintf(&b, "To: %s.\n", to)
+	bounce := &MailBounce{Reason: reason, Sent: m.When, To: m.ToEmpires}
+	if reason == BounceNoRealm {
+		bounce.Realm = m.ToEmpire
 	}
-	b.WriteString("\n")
-	b.WriteString(m.Body)
-	w.sendIP(nil, []string{m.FromBoard}, IPMessage{ToEmpire: m.FromEmpire, Body: b.String()})
+	w.sendIP(nil, []string{m.FromBoard}, IPMessage{ToEmpire: m.FromEmpire, Body: m.Body, Bounce: bounce})
 }
 
 // ReplyIPMessage answers an interplanetary message. A public reply goes to the

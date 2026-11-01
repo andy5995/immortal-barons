@@ -199,6 +199,12 @@ IPMessage:
   ToEmpires `json:",omitempty"`
   When
   Body
+  Bounce `json:",omitempty"`
+MailBounce:
+  Reason
+  Realm `json:",omitempty"`
+  Sent
+  To `json:",omitempty"`
 SpyGuyDispatch:
   FromBoard
   Days

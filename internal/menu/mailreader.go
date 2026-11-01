@@ -233,6 +233,34 @@ func quoteLines(m game.Message, first, last int) []string {
 	return out
 }
 
+// bounceLines puts a bounce's reason into words above the message it hands
+// back: in the reader's language, and with the send time on the reader's clock
+// like the stamp in the box's header (#313). Nil for any other message, and for
+// a bounce stored before bounces carried their reason as data, whose Body
+// already says it.
+func bounceLines(s session.Session, m game.Message) []string {
+	b := m.Bounce
+	if b == nil {
+		return nil
+	}
+	var why string
+	switch b.Reason {
+	case game.BounceNoRealm:
+		why = fmt.Sprintf(tr(s, "Your message to %s of %s could not be delivered. There is no such realm there."), b.Realm, m.FromBoard)
+	case game.BounceNoCoordinator:
+		why = fmt.Sprintf(tr(s, "Your message to the Coordinator of %s could not be delivered. No Coordinator has been elected there."), m.FromBoard)
+	case game.BounceNobodyAlive:
+		why = fmt.Sprintf(tr(s, "Your message to %s could not be delivered. No realm is alive there."), m.FromBoard)
+	default:
+		why = fmt.Sprintf(tr(s, "Your message to %s could not be delivered."), m.FromBoard)
+	}
+	lines := []string{why, fmt.Sprintf(tr(s, "Sent %s."), game.StampIn(b.Sent, sessionZone(s)))}
+	if len(b.To) > 0 {
+		lines = append(lines, fmt.Sprintf(tr(s, "To: %s."), strings.Join(b.To, ", ")))
+	}
+	return append(lines, "")
+}
+
 // mailOpts are the message reader's four actions.
 var mailOpts = []keyOpt{
 	{Key: 'R', Label: "Reply,"},
@@ -314,7 +342,7 @@ func messageBox(s session.Session, m game.Message) {
 		fmt.Fprintf(s, "%s│ %s%s%s%s%s\n", ansi.FgCyan, ansi.FgWhite, label, ansi.FgBrightGreen, line, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s├%s%s\n", ansi.FgCyan, insetRule(mailSepWidth-1, 8), ansi.Reset)
-	for _, line := range strings.Split(m.Body, "\n") {
+	for _, line := range append(bounceLines(s, m), strings.Split(m.Body, "\n")...) {
 		body := ansi.FgWhite
 		if strings.HasPrefix(line, ">") {
 			body = ansi.FgBrightBlue
