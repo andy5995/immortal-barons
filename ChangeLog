@@ -2,6 +2,8 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * BREAKING: packet protocol 6
+  * A board left with no players tells the league, so its last roster, locks
+    and spy reports clear, and it is no longer offered as a target
   * Dupe Checking locks only the newer of a baron's two realms
   * Dupe Checking ignores a board whose scores have not arrived for three days
   * A score packet dated before the one already held is ignored

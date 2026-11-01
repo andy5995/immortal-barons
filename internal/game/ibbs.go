@@ -47,9 +47,14 @@ type Packet struct {
 	FromBoard string
 	ToBoard   string
 	Date      string
-	Scores    []RemoteScore  // score share (feeds RemoteBoards / IP scores)
-	Attacks   []RemoteAttack // strikes landing on ToBoard
-	Terrors   []RemoteTerror // terror ops landing on ToBoard
+	Scores    []RemoteScore // score share (feeds RemoteBoards / IP scores)
+	// NoRealms says the sender holds no living human realm, which an empty
+	// Scores cannot: a packet carries no scores for most of what it is sent
+	// for. Without it a board whose last baron went sent nothing at all, and
+	// every other board kept that baron on its rosters for good (#314).
+	NoRealms bool           `json:",omitempty"`
+	Attacks  []RemoteAttack // strikes landing on ToBoard
+	Terrors  []RemoteTerror // terror ops landing on ToBoard
 	// SpecialOps are the InterPlanetary Special Operations menu's strikes (#49),
 	// carried apart from Terrors: a different menu, a different per-day
 	// allowance, and no committed agents.
@@ -464,7 +469,7 @@ func (w *World) spyIntelIndex(p Packet) []int {
 // What is left — strikes, results, trades, mail, recon, threat records —
 // happened once, and is lost if refused.
 func withoutStaleState(p Packet) Packet {
-	p.Scores, p.Market, p.Annihilator = nil, nil, nil
+	p.Scores, p.NoRealms, p.Market, p.Annihilator = nil, false, nil, nil
 	p.LeagueConfig, p.LeagueNodes, p.Reset, p.Freeze, p.Bulletins = nil, nil, nil, nil, nil
 	return p
 }
@@ -604,7 +609,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.noteSysop("A packet from %s claimed to carry League Coordinator orders and was refused: %s.",
 			p.FromBoard, w.CoordRefusalReason(p))
 	}
-	if len(p.Scores) > 0 {
+	if len(p.Scores) > 0 || p.NoRealms {
 		if w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores, Market: p.Market}) {
 			w.applyDupeCheck(p.FromBoard, p.Scores)
 		}

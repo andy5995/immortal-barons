@@ -97,7 +97,7 @@ func TestBankVisitThatChangesNothingSaysSoAgain(t *testing.T) {
 		w.World.Config.IBBS = true
 		w.World.Config.BoardID = "Alpha"
 		w.World.Config.BombingOps = true
-		w.World.ImportBoard(game.RemoteBoard{BoardID: "Mars"})
+		w.World.ImportBoard(game.RemoteBoard{BoardID: "Mars", Scores: []game.RemoteScore{{Empire: "Red Reach"}}})
 		p := w.Player()
 		p.Protection = 0
 		p.Bombers = game.BombingBombersRequired
@@ -126,7 +126,7 @@ func TestDecliningTheBankIsNotToldTwice(t *testing.T) {
 		w.World.Config.IBBS = true
 		w.World.Config.BoardID = "Alpha"
 		w.World.Config.BombingOps = true
-		w.World.ImportBoard(game.RemoteBoard{BoardID: "Mars"})
+		w.World.ImportBoard(game.RemoteBoard{BoardID: "Mars", Scores: []game.RemoteScore{{Empire: "Red Reach"}}})
 		p := w.Player()
 		p.Protection = 0
 		p.Bombers = game.BombingBombersRequired
