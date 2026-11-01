@@ -4,6 +4,10 @@
 
 - All features are enabled and free to all sysops and players. There is no
   "registered" or "unregistered" version.
+- A new player can read the instructions, the board's game settings and the
+  scores before creating a realm, and in a league the InterBBS scores too. The
+  InterBBS scores help players choose which board to play on (they can choose
+  based on league balance if they wish). BRE asks for a realm name first.
 - Several BBS nodes can play the same game at the same time, which BRE could not
   do. See [Can several people play as a door at the same time?](#can-several-people-play-as-a-door-at-the-same-time).
 - In a league game you can buy from an allied planet's Trading Market. Your order
