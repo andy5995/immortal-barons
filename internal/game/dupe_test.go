@@ -120,3 +120,45 @@ func TestExportedScoresCarryNoHandle(t *testing.T) {
 		t.Errorf("OwnerHash = %q with Dupe Checking off, want empty", got)
 	}
 }
+
+// A caller another board lists is named, so onboarding can refuse them a realm;
+// nobody is named with checking off, off a league, or for an AI baron.
+func TestDupeElsewhereNamesTheListingBoard(t *testing.T) {
+	w, _ := dupeWorld(t)
+	w.ImportBoard(RemoteBoard{BoardID: "there", Scores: []RemoteScore{{Empire: "Far Reach", OwnerHash: dupeHash("Bob")}}})
+	if got := w.DupeElsewhere("bob"); got != "there" {
+		t.Errorf("DupeElsewhere(bob) = %q, want \"there\"", got)
+	}
+	if got := w.DupeElsewhere("carol"); got != "" {
+		t.Errorf("DupeElsewhere(carol) = %q, want none", got)
+	}
+	if got := w.DupeElsewhere(""); got != "" {
+		t.Errorf("an AI baron was named a duplicate of %q", got)
+	}
+	w.Config.DupeChecking = false
+	if got := w.DupeElsewhere("bob"); got != "" {
+		t.Errorf("with Dupe Checking off, DupeElsewhere(bob) = %q", got)
+	}
+}
+
+// With checking off the lock is not enforced, so the baron is not told it is.
+func TestDupeCheckOffTellsNobody(t *testing.T) {
+	w, e := dupeWorld(t)
+	w.Config.DupeChecking = false
+	w.applyDupeCheck("there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	w.applyDupeCheck("there", nil)
+	if len(e.Events) != 0 {
+		t.Errorf("events with Dupe Checking off: %v", e.Events)
+	}
+}
+
+// A board that has left the league never sends the scores that would lift the
+// refusal, so its last roster refuses nobody.
+func TestDupeElsewhereIgnoresBoardsOffTheRoster(t *testing.T) {
+	w, _ := dupeWorld(t)
+	w.ImportBoard(RemoteBoard{BoardID: "gone", Scores: []RemoteScore{{OwnerHash: dupeHash("bob")}}})
+	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "here"}, {Number: 2, Name: "there"}}
+	if got := w.DupeElsewhere("bob"); got != "" {
+		t.Errorf("a board off the roster refused bob: %q", got)
+	}
+}

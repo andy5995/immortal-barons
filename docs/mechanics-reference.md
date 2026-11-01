@@ -1393,10 +1393,19 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   (until they delete one of their players)". IB does the same from the scores
   packet, and **deliberately diverges on how**: BRE compares handles, IB compares
   a 64-bit hash of the normalized handle (`RemoteScore.OwnerHash`), so a packet
-  that lands on every sysop's board carries nobody's handle. A locked baron is
-  refused at login with the board that reported them; the lock lifts when that
-  board stops listing them, or when the Coordinator turns the switch off —
-  `World.DupeLocked` reads the switch at the gate rather than clearing state.
+  that lands on every sysop's board carries nobody's handle. As in BRE, a
+  caller whose hash another board's last scores list is refused a new realm
+  (`World.DupeElsewhere`), so a caller cannot found a second realm once the
+  other board's scores have arrived. A board no longer on the league roster
+  refuses nobody, since it will never send the scores that lift it. Two realms
+  founded before the boards exchanged scores still lock each other. A locked
+  baron is refused at login with the board that reported them and, as in BRE,
+  asked whether to erase this realm, which is the way out when both are locked
+  (#323). The lock lifts when that board stops listing them, or when the
+  Coordinator turns the switch off — `World.DupeLocked` reads the switch at the
+  gate rather than clearing state. A board left with no human realms sends no
+  scores, so erasing the last one there leaves the other board's lock in place
+  (#314). The lock and unlock events are only filed while checking is on.
   The League Coordinator's `-playerlist` report (`PLAYERLIST.LST`) is where the
   results show. BRE's version names every caller in the league by handle, read
   from its dupe file. IB names this board's callers by handle and other boards'
