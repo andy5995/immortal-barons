@@ -3,6 +3,7 @@ Packet:
   ToBoard
   Date
   Scores
+  NoRealms `json:",omitempty"`
   Attacks
   Terrors
   SpecialOps `json:",omitempty"`

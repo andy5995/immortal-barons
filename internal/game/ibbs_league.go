@@ -418,7 +418,10 @@ func (w *World) KnownBoards() []string {
 func (w *World) ScoredBoards() []string {
 	boards := make([]string, 0, len(w.RemoteBoards))
 	for _, b := range w.RemoteBoards {
-		boards = append(boards, b.BoardID)
+		// A planet that reported it has no realms has nobody to act against.
+		if len(b.Scores) > 0 {
+			boards = append(boards, b.BoardID)
+		}
 	}
 	return boards
 }
@@ -474,11 +477,10 @@ func (w *World) ExportScores() {
 			scores = append(scores, s)
 		}
 	}
-	if len(scores) == 0 {
-		return
-	}
+	// A board with no living human realm still says so, or the other boards
+	// would go on listing the realms it last reported (#314).
 	p := Packet{
-		FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores,
+		FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores, NoRealms: len(scores) == 0,
 		Market:  w.ExportMarket(), // so allied planets can bid on it (#47)
 		Battles: w.ownBattles(),   // the wars, for every board's world report (#233)
 	}

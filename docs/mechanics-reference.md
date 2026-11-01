@@ -1412,9 +1412,10 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   than clearing state, and reads two more things there, because a board that
   sends no more scores can never lift what it set: a board no longer on the
   league roster refuses and locks nobody, and nor does one whose scores have not
-  arrived for `DupeScoresMaxAgeDays` (3) real days. A board with players resends
-  its scores at least daily, while one left with none sends nothing (#314), so
-  the age rule is what releases a baron who erased the last realm there. Scores
+  arrived for `DupeScoresMaxAgeDays` (3) real days. A board resends its scores
+  at least daily, and one left with no players says so (`Packet.NoRealms`,
+  #314), which empties its roster here and releases its locks at once; the age
+  rule covers a board that has stopped sending anything. Scores
   dated before the ones already held are ignored outright, so a late packet
   cannot bring back a baron who has gone. A lock is only set while checking is
   on, so every lock comes with the event that announced it. One set earlier
@@ -5186,7 +5187,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   arrives the reports on that planet's realms it no longer lists go (erased, or
   eliminated), and a realm its baron renamed keeps its reports under the new
   name. A packet dated before the roster already held changes nothing. A planet
-  left with no players sends no score packet, so its reports stay (#314).
+  left with no players reports that it has none (`Packet.NoRealms`, #314), so
+  its reports go too, and it is no longer offered as a target.
 
   BRE keeps ONE (BINARY-VERIFIED): `DATA\SPY.BRU` is 255 planet blocks of 25
   31-byte slots, one per realm letter A-Y (`open_spy_data`, BRE.OVR 0x04cd9f),

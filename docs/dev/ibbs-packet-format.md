@@ -231,6 +231,7 @@ map of it, not a second definition.
   "ToBoard": "",                    // "" = broadcast to the whole league
   "Date": "2026-07-04",             // ISO game date the packet was written
   "Scores":  [ RemoteScore ],       // score share (feeds IP scores / attack targets)
+  "NoRealms": true,                 // the sender has no living human realm; omitted otherwise (#314)
   "Attacks": [ RemoteAttack ],      // strikes landing on ToBoard
   "Terrors": [ RemoteTerror ],      // terrorist ops landing on ToBoard
   "Results": [ AttackResult ],      // outcomes returning to the origin
