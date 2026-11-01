@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -117,5 +118,58 @@ func TestExportedScoresCarryTheFormerName(t *testing.T) {
 	}
 	if len(names) != 1 || names[0] != "New" {
 		t.Errorf("Far BBS snapshot = %v, want [New]", names)
+	}
+}
+
+// A sysop's rename reaches other planets as a baron's does: their spy reports
+// on the realm move to the new name, and the news says it was renamed (#321).
+func TestASysopRenameReachesOtherPlanets(t *testing.T) {
+	sender := NewWorldSeed(DefaultConfig(), 7)
+	sender.Empires = nil
+	sender.Config.BoardID = "Far BBS"
+	e := sender.AddHuman("someone", "Old")
+
+	receiver := NewWorldSeed(DefaultConfig(), 7)
+	receiver.Config.BoardID = "Home BBS"
+	export := func() Packet {
+		t.Helper()
+		sender.Outbox = nil
+		sender.ExportScores()
+		return sender.Outbox[0]
+	}
+	receiver.receive(export())
+	receiver.SpyDatabase = []SpyEntry{{SpyReport: SpyReport{Board: "Far BBS", Empire: "Old"}}}
+
+	if err := sender.SysopRenameEmpire(e, "New"); err != nil {
+		t.Fatal(err)
+	}
+	receiver.receive(export())
+	if got := renameNewsCount(receiver, "Old", "New"); got != 1 {
+		t.Errorf("rename news = %d, want 1", got)
+	}
+	if len(receiver.SpyDatabase) != 1 || receiver.SpyDatabase[0].Empire != "New" {
+		t.Errorf("the spy report did not follow the sysop rename: %+v", receiver.SpyDatabase)
+	}
+}
+
+// A score carries only the newest SentPriorNames of a realm's sysop-rename
+// names, while the realm itself keeps them all against re-use.
+func TestScoresCarryOnlyTheNewestPriorNames(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Name0")
+	for i := 1; i <= SentPriorNames+2; i++ {
+		if err := w.SysopRenameEmpire(e, fmt.Sprintf("Name%d", i)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	w.ExportScores()
+	got := w.Outbox[0].Scores[0].PriorNames
+	if len(got) != SentPriorNames || got[len(got)-1] != fmt.Sprintf("Name%d", SentPriorNames+1) {
+		t.Errorf("sent %v, want the newest %d", got, SentPriorNames)
+	}
+	if len(e.PriorNames) != SentPriorNames+2 {
+		t.Errorf("the realm kept %d prior names, want all %d", len(e.PriorNames), SentPriorNames+2)
 	}
 }

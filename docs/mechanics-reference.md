@@ -4278,7 +4278,8 @@ Other planets see the new name from this board's next score export
 (`ImportBoard` replaces a board's snapshot wholesale, so no ghost row is left),
 which is the same packet round trip every other cross-board fact takes. **They
 are told, too** (#235): the score carries `FormerName`, and each receiving board
-posts the rename to its own news. It posts it once — `Empire.FormerName` is kept
+posts the rename to its own news. A sysop's rename travels the same way in
+`PriorNames` (#321), which carries the newest four. It posts it once — `Empire.FormerName` is kept
 for the life of the realm and so rides in every later export, so the bound is the
 snapshot being replaced. The news is filed only while that snapshot still held a
 realm under the old name, which is true of exactly the import that carries the
@@ -5185,9 +5186,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 
   A planet's score packet lists every living human realm it holds, so when one
   arrives the reports on that planet's realms it no longer lists go (erased, or
-  eliminated), and a realm its baron renamed keeps its reports under the new
-  name. A packet that arrives behind a later one from its board changes
-  nothing (#311). A planet
+  eliminated), and a realm renamed by its baron or the sysop keeps its reports
+  under the new name. A packet that arrives behind a later one from its board
+  changes nothing (#311). A planet
   left with no players reports that it has none (`Packet.NoRealms`, #314), so
   its reports go too, and it is no longer offered as a target.
 

@@ -83,11 +83,30 @@ type RemoteScore struct {
 	// the receiving board is what bounds the announcement: ImportBoard posts the
 	// news only while the snapshot it is replacing still held the old name.
 	FormerName string `json:",omitempty"`
+	// PriorNames are the names a sysop's renames moved this realm off
+	// (Empire.PriorNames), sent so other planets follow those renames as they
+	// follow FormerName: the realm's spy reports move to its new name, and the
+	// news says it was renamed rather than that one realm left and another came
+	// (#321).
+	PriorNames []string `json:",omitempty"`
 	// Founded is the realm's Empire.Founded, sent beside OwnerHash so the board
 	// holding the baron's other realm can tell which is the newer and lock only
 	// that one (#323). Empty when the realm predates the field.
 	Founded string `json:",omitempty"`
 }
+
+// PriorRealmNames returns every name this score's realm used to answer to — the
+// one a player's rename moved it off (FormerName) and any a sysop's did
+// (PriorNames) — so a receiver walks either kind of rename through one place.
+func (s RemoteScore) PriorRealmNames() []string {
+	return priorRealmNames(s.FormerName, s.PriorNames)
+}
+
+// SentPriorNames caps how many of a realm's sysop-rename names a score carries,
+// newest kept. A receiver only needs the name it last knew the realm by, and
+// scores go out whenever they change, so older ones are long since followed;
+// Empire.PriorNames itself is never trimmed, since it holds names against re-use.
+const SentPriorNames = 4
 
 // RemoteBoard is a snapshot of another board's scores, imported via an
 // inter-BBS packet.

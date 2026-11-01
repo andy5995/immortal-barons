@@ -47,6 +47,7 @@ RemoteScore:
   Protected `json:",omitempty"`
   OwnerHash `json:",omitempty"`
   FormerName `json:",omitempty"`
+  PriorNames `json:",omitempty"`
   Founded `json:",omitempty"`
 RemoteAttack:
   ID
