@@ -469,7 +469,7 @@ func (w *World) ExportScores() {
 				Protected: e.Protection > 0, FormerName: e.FormerName,
 			}
 			if w.dupeCheckingOn() {
-				s.OwnerHash = dupeHash(e.Owner)
+				s.OwnerHash, s.Founded = dupeHash(e.Owner), e.Founded
 			}
 			scores = append(scores, s)
 		}

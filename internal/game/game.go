@@ -83,6 +83,10 @@ type RemoteScore struct {
 	// the receiving board is what bounds the announcement: ImportBoard posts the
 	// news only while the snapshot it is replacing still held the old name.
 	FormerName string `json:",omitempty"`
+	// Founded is the realm's Empire.Founded, sent beside OwnerHash so the board
+	// holding the baron's other realm can tell which is the newer and lock only
+	// that one (#323). Empty when the realm predates the field.
+	Founded string `json:",omitempty"`
 }
 
 // RemoteBoard is a snapshot of another board's scores, imported via an
