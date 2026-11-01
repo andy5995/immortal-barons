@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * A Dupe Checking lock held by a board that has left the league no longer
+    shuts its baron out
   * With Dupe Checking on, a caller another board lists cannot found a realm,
     and a locked baron is offered to erase the locked realm
   * The Spy Database removes another planet's reports on a realm that planet

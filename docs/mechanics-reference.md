@@ -1397,8 +1397,10 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   caller whose hash another board's last scores list is refused a new realm
   (`World.DupeElsewhere`), so a caller cannot found a second realm once the
   other board's scores have arrived. A board no longer on the league roster
-  refuses nobody, since it will never send the scores that lift it. Two realms
-  founded before the boards exchanged scores still lock each other. A locked
+  refuses and locks nobody, since it will never send the scores that lift
+  either; `World.DupeLocked` reads the roster at the gate, as it does the
+  switch. Two realms founded before the boards exchanged scores still lock each
+  other. A locked
   baron is refused at login with the board that reported them and, as in BRE,
   asked whether to erase this realm, which is the way out when both are locked
   (#323). The lock lifts when that board stops listing them, or when the
