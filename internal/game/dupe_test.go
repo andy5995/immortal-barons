@@ -162,3 +162,28 @@ func TestDupeElsewhereIgnoresBoardsOffTheRoster(t *testing.T) {
 		t.Errorf("a board off the roster refused bob: %q", got)
 	}
 }
+
+// A lock held by a board that has left the league would never lift, since that
+// board sends no more scores, so it is not enforced.
+func TestDupeLockFromABoardOffTheRosterIsNotEnforced(t *testing.T) {
+	w, e := dupeWorld(t)
+	w.applyDupeCheck("gone", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	if !w.DupeLocked(e) {
+		t.Fatal("with no roster yet, the lock should hold")
+	}
+	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "there"}}
+	if !w.DupeLocked(e) {
+		t.Error("a board the roster does not list yet ruled the lock out")
+	}
+	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "here"}, {Number: 2, Name: "there"}}
+	if w.DupeLocked(e) {
+		t.Error("a lock from a board off the roster is still enforced")
+	}
+	if got := w.PlayerListReport(); !strings.Contains(got, "that board has left the league") {
+		t.Errorf("the report does not say why the lock is not enforced:\n%s", got)
+	}
+	w.LeagueNodes = append(w.LeagueNodes, LeagueNode{Number: 3, Name: "gone"})
+	if !w.DupeLocked(e) {
+		t.Error("a lock from a board on the roster is not enforced")
+	}
+}

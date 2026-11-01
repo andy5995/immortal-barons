@@ -49,9 +49,16 @@ func (w *World) dupeCheckingOn() bool {
 
 // DupeLocked reports whether e is shut out for playing elsewhere in the league.
 // The switch is read here rather than when the lock is set, so a Coordinator who
-// turns Dupe Checking off releases every locked baron at once.
+// turns Dupe Checking off releases every locked baron at once. So is the roster:
+// a board that has left the league sends no more scores to lift its lock.
 func (w *World) DupeLocked(e *Empire) bool {
-	return w.Config.IBBS && w.dupeCheckingOn() && e.DupeLockedBy != ""
+	return w.Config.IBBS && w.dupeCheckingOn() && e.DupeLockedBy != "" && w.inLeague(e.DupeLockedBy)
+}
+
+// inLeague reports whether board is on the league roster. A board the roster
+// does not list yet, itself included, rules nobody out, as Routable does.
+func (w *World) inLeague(board string) bool {
+	return w.NodeNumber(w.Config.BoardID) == 0 || w.NodeNumber(board) != 0
 }
 
 // DupeLockMessage explains the lock to the caller it shut out.
@@ -73,7 +80,7 @@ func (w *World) DupeElsewhere(handle string) string {
 	for _, b := range w.RemoteBoards {
 		// RemoteBoards keeps a board's last scores after it leaves the league,
 		// and one that has left will never send the scores that lift this.
-		if b.BoardID == w.Config.BoardID || len(w.LeagueNodes) > 0 && w.NodeNumber(b.BoardID) == 0 {
+		if b.BoardID == w.Config.BoardID || !w.inLeague(b.BoardID) {
 			continue
 		}
 		for _, s := range b.Scores {
