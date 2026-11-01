@@ -182,27 +182,27 @@ func TestDupeElsewhereIgnoresBoardsOffTheRoster(t *testing.T) {
 }
 
 // A lock held by a board that has left the league would never lift, since that
-// board sends no more scores, so it is not enforced.
-func TestDupeLockFromABoardOffTheRosterIsNotEnforced(t *testing.T) {
+// board sends no more scores, so it is released. Released rather than ignored:
+// a board put back on the roster does not shut the baron out again unannounced.
+func TestDupeLockFromABoardOffTheRosterIsReleased(t *testing.T) {
 	w, e := dupeWorld(t)
 	receive(w, "gone", []RemoteScore{{OwnerHash: dupeHash("alice")}})
-	if !w.DupeLocked(e) {
-		t.Fatal("with no roster yet, the lock should hold")
-	}
 	w.LeagueNodes = []LeagueNode{{Number: 2, Name: "there"}}
+	w.ReleaseDepartedDupeLocks()
 	if !w.DupeLocked(e) {
-		t.Error("a board the roster does not list yet ruled the lock out")
+		t.Fatal("a board the roster does not list yet ruled the lock out")
 	}
 	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "here"}, {Number: 2, Name: "there"}}
-	if w.DupeLocked(e) {
-		t.Error("a lock from a board off the roster is still enforced")
+	w.ReleaseDepartedDupeLocks()
+	if w.DupeLocked(e) || e.DupeLockedBy != "" {
+		t.Errorf("a lock from a board off the roster survived: %q", e.DupeLockedBy)
 	}
-	if got := w.PlayerListReport(); !strings.Contains(got, "that board has left the league") {
-		t.Errorf("the report does not say why the lock is not enforced:\n%s", got)
+	if last := e.Events[len(e.Events)-1].Text; !strings.Contains(last, "left the league") {
+		t.Errorf("the release was not announced, last event %q", last)
 	}
 	w.LeagueNodes = append(w.LeagueNodes, LeagueNode{Number: 3, Name: "gone"})
-	if !w.DupeLocked(e) {
-		t.Error("a lock from a board on the roster is not enforced")
+	if w.DupeLocked(e) {
+		t.Error("putting the board back on the roster brought its old lock back")
 	}
 }
 
@@ -230,26 +230,6 @@ func TestLateScoresNeitherReplaceTheRosterNorLock(t *testing.T) {
 	}
 	if w.DupeElsewhere("alice") != "" || e.DupeLockedBy != "" {
 		t.Error("a late packet refused or locked alice")
-	}
-}
-
-// A board whose scores have stopped arriving, as one left with no players
-// does (#314), neither refuses a new realm nor holds a lock.
-func TestQuietBoardNeitherRefusesNorLocks(t *testing.T) {
-	w, e := dupeWorld(t)
-	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}, {OwnerHash: dupeHash("bob")}})
-	if !w.DupeLocked(e) || w.DupeElsewhere("bob") != "there" {
-		t.Fatal("fresh scores should lock alice and refuse bob")
-	}
-	w.RemoteBoards[0].Received = timeNow().Add(-time.Duration(DupeScoresMaxAgeDays+1) * 24 * time.Hour)
-	if w.DupeLocked(e) {
-		t.Error("a lock from a board gone quiet is still enforced")
-	}
-	if got := w.DupeElsewhere("bob"); got != "" {
-		t.Errorf("a board gone quiet refused bob: %q", got)
-	}
-	if got := w.PlayerListReport(); !strings.Contains(got, "no scores from that board") {
-		t.Errorf("the report does not say why the lock is not enforced:\n%s", got)
 	}
 }
 

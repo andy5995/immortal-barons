@@ -3,7 +3,6 @@ package game
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"time"
 )
 
 // Duplicate-user checking, BRE's "Dupe Checking": a league setting that finds
@@ -49,35 +48,42 @@ func (w *World) dupeCheckingOn() bool {
 
 // DupeLocked reports whether e is shut out for playing elsewhere in the league.
 // The switch is read here rather than when the lock is set, so a Coordinator who
-// turns Dupe Checking off releases every locked baron at once. So are the
-// roster and the age of the locking board's scores: a board that has left the
-// league, or has stopped sending scores, will send none to lift the lock.
+// turns Dupe Checking off releases every locked baron at once.
 func (w *World) DupeLocked(e *Empire) bool {
-	return w.Config.IBBS && w.dupeCheckingOn() && e.DupeLockedBy != "" &&
-		w.inLeague(e.DupeLockedBy) && w.scoresCurrent(e.DupeLockedBy)
+	return e.DupeLockedBy != "" && len(w.dupeLockWaivers()) == 0
 }
 
-// inLeague reports whether board is on the league roster. A board the roster
-// does not list yet, itself included, rules nobody out, as Routable does.
-func (w *World) inLeague(board string) bool {
-	return w.NodeNumber(w.Config.BoardID) == 0 || w.NodeNumber(board) != 0
+// dupeLockWaivers names each setting that keeps a recorded lock from being
+// enforced, nil when none does. DupeLocked and the player list both read it, so
+// the report cannot give a reason the gate does not apply.
+func (w *World) dupeLockWaivers() []string {
+	var why []string
+	if !w.Config.IBBS {
+		why = append(why, "inter-BBS play is off")
+	}
+	if !w.dupeCheckingOn() {
+		why = append(why, "duplicate checking is off")
+	}
+	return why
 }
 
-// scoresCurrent reports whether board's scores arrived within
-// DupeScoresMaxAgeDays. Scores held from before arrivals were stamped count as
-// old; the board's next scores restamp them.
-func (w *World) scoresCurrent(board string) bool {
-	for _, b := range w.RemoteBoards {
-		if b.BoardID == board {
-			return w.receivedRecently(b)
+// ReleaseDepartedDupeLocks releases every lock held by a board the league
+// roster no longer lists. Such a board sends no more scores to lift what it
+// set, so taking a dead board off the roster is how a Coordinator frees the
+// barons it held. The lock is cleared rather than ignored, so a board that later
+// rejoins, or a new one given its name, does not shut a baron out again with
+// nothing said; its next scores lock them afresh, with an event.
+func (w *World) ReleaseDepartedDupeLocks() {
+	for _, e := range w.Empires {
+		if e.DupeLockedBy == "" || w.Routable(e.DupeLockedBy) {
+			continue
+		}
+		board := e.DupeLockedBy
+		e.DupeLockedBy = ""
+		if w.Config.IBBS && w.dupeCheckingOn() {
+			e.addEvent(say("{board} has left the league; this realm is unlocked.", "board", board))
 		}
 	}
-	return false
-}
-
-func (w *World) receivedRecently(b RemoteBoard) bool {
-	maxAge := time.Duration(DupeScoresMaxAgeDays) * 24 * time.Hour
-	return !b.Received.IsZero() && timeNow().Sub(b.Received) <= maxAge
 }
 
 // newerHere reports whether a realm founded at here is newer than one founded at
@@ -99,7 +105,7 @@ func (w *World) DupeLockMessage(e *Empire) Msg {
 		"so this one is locked until you give one of them up.", "board", e.DupeLockedBy)
 }
 
-// DupeElsewhere names a board whose recent scores list handle as one of its
+// DupeElsewhere names a board whose last scores list handle as one of its
 // barons, or "" when none does or Dupe Checking is off. BRE refuses such a
 // caller a new realm rather than letting them found one and locking both. It
 // can only see the scores that have arrived, so a realm founded there since is
@@ -112,7 +118,7 @@ func (w *World) DupeElsewhere(handle string) string {
 	for _, b := range w.RemoteBoards {
 		// RemoteBoards keeps a board's last scores after it leaves the league,
 		// and one that has left will never send the scores that lift this.
-		if b.BoardID == w.Config.BoardID || !w.inLeague(b.BoardID) || !w.receivedRecently(b) {
+		if b.BoardID == w.Config.BoardID || !w.Routable(b.BoardID) {
 			continue
 		}
 		for _, s := range b.Scores {
@@ -175,9 +181,9 @@ func (w *World) applyDupeCheck(fromBoard string, scores []RemoteScore) {
 				}
 			}
 		case listed:
-			// A board the roster does not list rules nobody out, as it does in
-			// DupeLocked, so no lock is recorded and none is announced.
-			if on && w.inLeague(fromBoard) && e.DupeLockedBy != fromBoard {
+			// A board the roster does not list rules nobody out, as in
+			// ReleaseDepartedDupeLocks, so no lock is recorded and none is announced.
+			if on && w.Routable(fromBoard) && e.DupeLockedBy != fromBoard {
 				e.DupeLockedBy = fromBoard
 				e.addEvent(say("Your handle is also playing on {board}. This realm is locked until one of them goes.", "board", fromBoard))
 			}

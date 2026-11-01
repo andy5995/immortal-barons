@@ -104,6 +104,9 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 		}
 		run.RosterUpdated = true
 	}
+	// After the roster has settled for this run, whether it came over the wire
+	// or from a Coordinator's edit to ibnodes.dat.
+	w.ReleaseDepartedDupeLocks()
 	// An inbound league-config packet may have updated w.Config; persist it so
 	// the adopted settings survive the next load (config.json is authoritative).
 	if err := SaveConfig(w.Config); err != nil {

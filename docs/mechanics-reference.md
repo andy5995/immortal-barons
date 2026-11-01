@@ -1409,18 +1409,19 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
 
   The lock lifts when that board stops listing them, or when the Coordinator
   turns the switch off. `World.DupeLocked` reads the switch at the gate rather
-  than clearing state, and reads two more things there, because a board that
-  sends no more scores can never lift what it set: a board no longer on the
-  league roster refuses and locks nobody, and nor does one whose scores have not
-  arrived for `DupeScoresMaxAgeDays` (3) real days. A board resends its scores
-  at least daily, and one left with no players says so (`Packet.NoRealms`,
-  #314), which empties its roster here and releases its locks at once; the age
-  rule covers a board that has stopped sending anything. A packet that
-  arrives behind a later one from its board carries no scores here (#311), so
-  a late packet cannot bring back a baron who has gone. A lock is only set while checking is
-  on, so every lock comes with the event that announced it. One set earlier
-  survives the switch going off and is enforced again when it comes back on; a
-  lock that would have started while it was off waits for the next packet.
+  than clearing state. A board that sends no more scores can never lift what it
+  set, so a board no longer on the league roster refuses and locks nobody, and
+  each planetary run releases the locks it held (`ReleaseDepartedDupeLocks`):
+  taking a dead board off the roster is how a Coordinator frees the barons it
+  held. The lock is cleared, not ignored, so a board put back on the roster
+  locks again only with the event its next scores bring. A board left with no players
+  says so (`Packet.NoRealms`, #314), which empties its roster here and releases
+  its locks at once. A packet that arrives behind a later one from its board
+  carries no scores here (#311), so a late packet cannot bring back a baron who
+  has gone. A lock is only set while checking is on, so every lock comes with
+  the event that announced it. One set earlier survives the switch going off
+  and is enforced again when it comes back on; a lock that would have started
+  while it was off waits for the next packet.
   The League Coordinator's `-playerlist` report (`PLAYERLIST.LST`) is where the
   results show. BRE's version names every caller in the league by handle, read
   from its dupe file. IB names this board's callers by handle and other boards'

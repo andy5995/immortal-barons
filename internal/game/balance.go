@@ -558,10 +558,3 @@ const SpyReportsPerRealm = 5
 // it is, so a realm last spied on long ago still shows what was learned. IB's
 // own.
 const SpyReportMaxAgeDays = 7
-
-// DupeScoresMaxAgeDays is how long a board's scores keep counting for Dupe
-// Checking after they arrive, in real days. A board resends its scores at least
-// daily, with Packet.NoRealms when it has no players, so one silent past this
-// has stopped sending, and its last roster neither refuses a new realm nor holds
-// a lock. IB's own.
-const DupeScoresMaxAgeDays = 3
