@@ -655,7 +655,7 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 		news, dead := postActionCheck(g)
 		printSessionNews(s, news)
 		if dead {
-			endCollapsed(s)
+			endCollapsed(s, g)
 		}
 	}
 	return nil
@@ -733,11 +733,29 @@ func printSessionNews(s session.Session, news []game.Event) {
 // endCollapsed prints the elimination notice and unwinds the whole session via
 // session.End, so it reaches GameLoop even from a nested Run or from inside an
 // action loop.
-func endCollapsed(s session.Session) {
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
-		tr(s, "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."),
-		ansi.Reset)
+func endCollapsed(s session.Session, w *ctx) {
+	if join := dupeJoinRefusal(s, w); join != "" {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+			tr(s, "Your empire has collapsed — you have been eliminated."), ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, WrapIndented(join, ""), ansi.Reset)
+	} else {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+			tr(s, "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."),
+			ansi.Reset)
+	}
 	session.End(io.EOF)
+}
+
+// dupeJoinRefusal is what stands in for the promise of a new realm on a later
+// day when another board lists this baron, since that board's listing refuses
+// them one (game.DupeElsewhere); "" when the promise holds.
+func dupeJoinRefusal(s session.Session, w *ctx) string {
+	var board string
+	w.Read(func() { board = w.DupeElsewhere(w.handle) })
+	if board == "" {
+		return ""
+	}
+	return game.DupeJoinMessage(board).In(sessionLang(s))
 }
 
 // flushSessionNews runs the post-action check immediately, for long in-action
@@ -748,7 +766,7 @@ func flushSessionNews(s session.Session, g *ctx) {
 	news, dead := postActionCheck(g)
 	printSessionNews(s, news)
 	if dead {
-		endCollapsed(s)
+		endCollapsed(s, g)
 	}
 }
 

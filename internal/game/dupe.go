@@ -3,7 +3,7 @@ package game
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
+	"time"
 )
 
 // Duplicate-user checking, BRE's "Dupe Checking": a league setting that finds
@@ -49,10 +49,12 @@ func (w *World) dupeCheckingOn() bool {
 
 // DupeLocked reports whether e is shut out for playing elsewhere in the league.
 // The switch is read here rather than when the lock is set, so a Coordinator who
-// turns Dupe Checking off releases every locked baron at once. So is the roster:
-// a board that has left the league sends no more scores to lift its lock.
+// turns Dupe Checking off releases every locked baron at once. So are the
+// roster and the age of the locking board's scores: a board that has left the
+// league, or has stopped sending scores, will send none to lift the lock.
 func (w *World) DupeLocked(e *Empire) bool {
-	return w.Config.IBBS && w.dupeCheckingOn() && e.DupeLockedBy != "" && w.inLeague(e.DupeLockedBy)
+	return w.Config.IBBS && w.dupeCheckingOn() && e.DupeLockedBy != "" &&
+		w.inLeague(e.DupeLockedBy) && w.scoresCurrent(e.DupeLockedBy)
 }
 
 // inLeague reports whether board is on the league roster. A board the roster
@@ -61,13 +63,30 @@ func (w *World) inLeague(board string) bool {
 	return w.NodeNumber(w.Config.BoardID) == 0 || w.NodeNumber(board) != 0
 }
 
-// DupeLockMessage explains the lock to the caller it shut out.
-func (w *World) DupeLockMessage(e *Empire) string {
-	return fmt.Sprintf("You are also playing on %s. A baron may hold one realm in the league, "+
-		"so this one is locked until you give one of them up.", e.DupeLockedBy)
+// scoresCurrent reports whether board's scores arrived within
+// DupeScoresMaxAgeDays. Scores held from before arrivals were stamped count as
+// old; the board's next scores restamp them.
+func (w *World) scoresCurrent(board string) bool {
+	for _, b := range w.RemoteBoards {
+		if b.BoardID == board {
+			return w.receivedRecently(b)
+		}
+	}
+	return false
 }
 
-// DupeElsewhere names a board whose last scores list handle as one of its
+func (w *World) receivedRecently(b RemoteBoard) bool {
+	maxAge := time.Duration(DupeScoresMaxAgeDays) * 24 * time.Hour
+	return !b.Received.IsZero() && timeNow().Sub(b.Received) <= maxAge
+}
+
+// DupeLockMessage explains the lock to the caller it shut out.
+func (w *World) DupeLockMessage(e *Empire) Msg {
+	return say("You are also playing on {board}. A baron may hold one realm in the league, "+
+		"so this one is locked until you give one of them up.", "board", e.DupeLockedBy)
+}
+
+// DupeElsewhere names a board whose recent scores list handle as one of its
 // barons, or "" when none does or Dupe Checking is off. BRE refuses such a
 // caller a new realm rather than letting them found one and locking both. It
 // can only see the scores that have arrived, so a realm founded there since is
@@ -80,7 +99,7 @@ func (w *World) DupeElsewhere(handle string) string {
 	for _, b := range w.RemoteBoards {
 		// RemoteBoards keeps a board's last scores after it leaves the league,
 		// and one that has left will never send the scores that lift this.
-		if b.BoardID == w.Config.BoardID || !w.inLeague(b.BoardID) {
+		if b.BoardID == w.Config.BoardID || !w.inLeague(b.BoardID) || !w.receivedRecently(b) {
 			continue
 		}
 		for _, s := range b.Scores {
@@ -94,10 +113,10 @@ func (w *World) DupeElsewhere(handle string) string {
 
 // DupeJoinMessage is what a caller DupeElsewhere found is told in place of
 // founding a realm.
-func DupeJoinMessage(board string) string {
-	return fmt.Sprintf("You are already playing on %[1]s. A baron may hold one realm in the league, "+
-		"so you cannot found one here. If you have given that realm up, this lifts once %[1]s's "+
-		"next scores reach this board. If that realm is not yours, tell your sysop.", board)
+func DupeJoinMessage(board string) Msg {
+	return say("You are already playing on {board}. A baron may hold one realm in the league, "+
+		"so you cannot found one here. If you have given that realm up, this lifts once {board}'s "+
+		"next scores reach this board. If that realm is not yours, tell your sysop.", "board", board)
 }
 
 // applyDupeCheck reconciles this board's realms against the owners another board

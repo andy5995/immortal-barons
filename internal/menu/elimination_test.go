@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -85,4 +86,40 @@ func TestAbdicateMarksDeadNotRemoved(t *testing.T) {
 	if n := w.NewsToday; len(n) == 0 || !strings.Contains(n[len(n)-1].Text, "has abdicated") {
 		t.Errorf("abdication posted no news: %v", n)
 	}
+}
+
+// A baron another board lists is refused a new realm (game.DupeElsewhere), so
+// neither abdicating nor collapsing may promise them one on a later day.
+func TestEndOfRealmDoesNotPromiseADupeANewRealm(t *testing.T) {
+	listed := func() *ctx {
+		w := newWorld()
+		w.Config.IBBS, w.Config.DupeChecking, w.Config.BoardID = true, true, "Alpha"
+		far := game.NewWorldSeed(w.Config, 1)
+		far.Config.BoardID = "Bravo"
+		far.AddHuman("tester", "Far Testland")
+		far.ExportScores()
+		w.ImportBoard(game.RemoteBoard{BoardID: "Bravo", Scores: far.Outbox[0].Scores})
+		return w
+	}
+	check := func(name, out string) {
+		t.Helper()
+		if !strings.Contains(out, "already playing on Bravo") || strings.Contains(out, "Return on a later day") {
+			t.Errorf("%s: want the duplicate refusal and no return-later promise:\n%s", name, out)
+		}
+	}
+
+	f := &fakeSession{keys: []rune("y ")}
+	var err error
+	func() {
+		defer session.GuardEnd(&err)
+		abdicate(f, listed())
+	}()
+	check("abdicate", f.out.String())
+
+	fc := &fakeSession{}
+	func() {
+		defer session.GuardEnd(&err)
+		endCollapsed(fc, listed())
+	}()
+	check("collapse", fc.out.String())
 }

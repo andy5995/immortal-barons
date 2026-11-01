@@ -44,8 +44,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	if errors.Is(err, store.ErrBusy) {
 		term := menu.Term{UTF8: session.IsUTF8(s), ASCII: session.IsASCII(s), Plain: !session.HasANSI(s)}
 		lang := menu.FittingLang(term, id.Language)
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(
-			i18n.T(lang, "Your realm is already being played elsewhere."), ""), ansi.Reset)
+		notice(s, i18n.T(lang, "Your realm is already being played elsewhere."))
 		return "busy", nil
 	}
 	if err != nil {
@@ -224,8 +223,11 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	var e *game.Empire
 	var localReborn string // a husk maintenance didn't sweep yet; swept here as a fallback
 	var deadToday string   // realm destroyed today; no play until a later day
+	var deadLang string    // that realm's language, for the refusal
 	var dupeLocked string  // the league's duplicate-user check shut this caller out
 	var lockedRealm string // the realm dupeLocked shut, named in the erase offer
+	var lockedLang string  // that realm's language, for the offer
+	var dupeJoin string    // a realm erased today whose baron another board still lists
 	w.With(func() {
 		e = w.FindByOwner(id.Handle)
 		if e != nil && !e.Alive {
@@ -238,30 +240,34 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			} else {
 				// Died today: keep the husk and end the session; the owner
 				// rebuilds on a later login.
-				deadToday = e.Name
+				deadToday, deadLang = e.Name, e.Language
+				// A baron another board still lists cannot found a new realm, so
+				// the return-later promise below would be a lie. Covers a realm
+				// erased at the dupe offer and any other death the same day.
+				if board := w.DupeElsewhere(id.Handle); board != "" {
+					dupeJoin = game.DupeJoinMessage(board).In(e.Language)
+				}
 			}
 		}
 		// A realm erased at the offer below is dead and still carries the lock,
 		// so it takes the died-today refusal instead of the offer again.
 		if e != nil && e.Alive && w.DupeLocked(e) {
-			dupeLocked = w.DupeLockMessage(e)
-			lockedRealm = e.Name
+			dupeLocked = w.DupeLockMessage(e).In(e.Language)
+			lockedRealm, lockedLang = e.Name, e.Language
 		}
 		if e == nil {
 			joinOpen = w.Config.JoinOpen(w.Today)
-			refusal = joinRefusal(w, id.Handle)
+			refusal = joinRefusal(w, id.Handle, id.Language)
 			joinDate = w.Config.JoinDate
 		}
 	})
 	if dupeLocked != "" {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(dupeLocked, ""), ansi.Reset)
+		notice(s, dupeLocked)
 		// BRE offers the way out here, since the baron may be locked out of the
-		// other board too and could otherwise give up neither realm (#323).
-		// The same warning the menu's Abdicate gives before it erases a realm.
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
-			menu.WrapIndented(fmt.Sprintf("Abdicating deletes %s permanently. This cannot be undone.", lockedRealm), ""),
-			ansi.Reset)
-		if menu.AskYesNo(s, "Would you like to erase this realm?", false) {
+		// other board too and could otherwise give up neither realm (#323). The
+		// warning and the question are the menu's Abdicate's, in the realm's
+		// language.
+		if menu.ConfirmErase(onboardLang{Session: s, lang: lockedLang}, lockedRealm) {
 			// Another node may have lifted the lock, or ended the realm, while the
 			// baron read the question.
 			var erased, unlocked bool
@@ -278,40 +284,43 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			})
 			switch {
 			case erased:
-				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented("This realm has been erased.", ""), ansi.Reset)
+				notice(s, i18n.T(lockedLang, "This realm has been erased."))
 			case unlocked:
-				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
-					menu.WrapIndented("This realm is no longer locked, so it was not erased. Call again to play it.", ""), ansi.Reset)
+				notice(s, i18n.T(lockedLang, "This realm is no longer locked, so it was not erased. Call again to play it."))
 			}
 		}
 		return "dupe", save()
 	}
 	if deadToday != "" {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
-			menu.WrapIndented(fmt.Sprintf("Your realm %s was destroyed. Return on a later day to build a new realm.", deadToday), ""),
-			ansi.Reset)
+		if dupeJoin != "" {
+			notice(s, fmt.Sprintf(i18n.T(deadLang, "Your realm %s was destroyed."), deadToday))
+			notice(s, dupeJoin)
+		} else {
+			notice(s, fmt.Sprintf(i18n.T(deadLang, "Your realm %s was destroyed. Return on a later day to build a new realm."), deadToday))
+		}
 		return "dead", save()
 	}
 	// rebornFrom (captured by the caller before login maintenance swept the husk)
 	// or localReborn (a husk we swept just now): announce the fresh start before
-	// onboarding prompts for a new realm name.
+	// onboarding prompts for a new realm name. A caller refused a new realm below
+	// is told only that the old one fell, in the language of the refusal.
 	if reborn := rebornFrom; reborn != "" || localReborn != "" {
 		if reborn == "" {
 			reborn = localReborn
 		}
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
-			menu.WrapIndented(fmt.Sprintf("Your former realm %s was destroyed; you begin anew.", reborn), ""),
-			ansi.Reset)
+		if joinOpen && refusal == "" {
+			notice(s, fmt.Sprintf(i18n.T(id.Language, "Your former realm %s was destroyed; you begin anew."), reborn))
+		} else {
+			notice(s, fmt.Sprintf(i18n.T(id.Language, "Your realm %s was destroyed."), reborn))
+		}
 	}
 	if e == nil {
 		if !joinOpen {
-			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
-				menu.WrapIndented(fmt.Sprintf("The game is closed to new barons (join cutoff %s has passed).", joinDate), ""),
-				ansi.Reset)
+			notice(s, fmt.Sprintf("The game is closed to new barons (join cutoff %s has passed).", joinDate))
 			return "closed", save()
 		}
 		if refusal != "" {
-			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(refusal, ""), ansi.Reset)
+			notice(s, refusal)
 			return "closed", save()
 		}
 		// First run: a brand-new player picks their UI language once, before
@@ -376,7 +385,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				}
 				// The slot is claimed inside the same lock that checked for one,
 				// so two nodes onboarding at once cannot both take it.
-				if full = joinRefusal(w, id.Handle); full != "" {
+				if full = joinRefusal(w, id.Handle, lang); full != "" {
 					return
 				}
 				if w.RealmNameTaken(realm) {
@@ -387,7 +396,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				e.Language = lang
 			})
 			if full != "" {
-				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(full, ""), ansi.Reset)
+				notice(s, full)
 				return "closed", save()
 			}
 			if taken {
@@ -501,6 +510,12 @@ func (o onboardLang) SetInputLine(line string) {
 // drains after the onboarding Quit?/Confirm? answers) to the inner session.
 func (o onboardLang) DrainInput() { session.Drain(o.Session) }
 
+// notice prints a line the session ends on, or that comes before onboarding, in
+// the yellow every such line takes, wrapped to the screen.
+func notice(s session.Session, text string) {
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(text, ""), ansi.Reset)
+}
+
 // joinRefusal is the sentence shown to a caller who may not found a realm, or
 // "" when they may. Call it under the world lock.
 //
@@ -511,9 +526,9 @@ func (o onboardLang) DrainInput() { session.Drain(o.Session) }
 // free slot has hit the game's own ceiling and will reopen when a realm falls;
 // the Max Players Per BBS cap is the sysop's choice and may never move. BRE
 // tells a caller much the same in one message; this is IB's own wording.
-func joinRefusal(w *game.World, handle string) string {
+func joinRefusal(w *game.World, handle, lang string) string {
 	if board := w.DupeElsewhere(handle); board != "" {
-		return game.DupeJoinMessage(board)
+		return game.DupeJoinMessage(board).In(lang)
 	}
 	if w.PlanetFull() {
 		return fmt.Sprintf("All %d realms of this planet are held. Call back when one has fallen.", game.PlanetSlots)

@@ -218,7 +218,7 @@ func (w *World) leagueRulesetFingerprint() string {
 func (w *World) PlayerListReport() string {
 	type row struct {
 		board, player, hash, lockedBy string
-		enforced, lockerGone          bool
+		enforced, lockerGone, quiet   bool
 		netWorth, score               int
 	}
 	var rows []row
@@ -229,7 +229,8 @@ func (w *World) PlayerListReport() string {
 	for _, e := range w.Empires {
 		if e.Alive && e.Owner != "" {
 			rows = append(rows, row{board: local, player: e.Owner, hash: dupeHash(e.Owner),
-				lockedBy: e.DupeLockedBy, enforced: w.DupeLocked(e), lockerGone: e.DupeLockedBy != "" && !w.inLeague(e.DupeLockedBy), netWorth: w.NetWorth(e), score: e.Score})
+				lockedBy: e.DupeLockedBy, enforced: w.DupeLocked(e), lockerGone: e.DupeLockedBy != "" && !w.inLeague(e.DupeLockedBy),
+				quiet: e.DupeLockedBy != "" && !w.scoresCurrent(e.DupeLockedBy), netWorth: w.NetWorth(e), score: e.Score})
 		}
 	}
 	boards := append([]RemoteBoard(nil), w.RemoteBoards...)
@@ -274,12 +275,20 @@ func (w *World) PlayerListReport() string {
 		b.WriteString(strings.TrimRight(line, " ") + "\n")
 		if r.lockedBy != "" {
 			fmt.Fprintf(&b, "  locked out by duplicate checking: %s\n", FitColumn(r.lockedBy, 43))
-			switch {
-			case r.enforced:
-			case r.lockerGone:
-				b.WriteString("  (not enforced: that board has left the league)\n")
-			default:
-				b.WriteString("  (not enforced while duplicate checking is off)\n")
+			if !r.enforced {
+				// Every reason that applies, so lifting one does not surprise
+				// the reader with another. These are DupeLocked's three clauses.
+				if !w.Config.IBBS {
+					b.WriteString("  (not enforced while inter-BBS play is off)\n")
+				}
+				if !w.dupeCheckingOn() {
+					b.WriteString("  (not enforced while duplicate checking is off)\n")
+				}
+				if r.lockerGone {
+					b.WriteString("  (not enforced: that board has left the league)\n")
+				} else if r.quiet {
+					fmt.Fprintf(&b, "  (not enforced: no scores from that board in %d days)\n", DupeScoresMaxAgeDays)
+				}
 			}
 		}
 	}

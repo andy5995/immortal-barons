@@ -13,6 +13,17 @@ import (
 // standing: give it up, waive its new-realm protection, and spend its one
 // rename.
 
+// ConfirmErase prints the warning that erasing realm is permanent and asks the
+// one yes/no confirmation, defaulting to No. The menu's Abdicate and the
+// login-time dupe offer both erase a realm, and share this so the player is
+// asked the same question in the same words.
+func ConfirmErase(s session.Session, realm string) bool {
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+		WrapIndented(fmt.Sprintf(tr(s, "Abdicating deletes %s permanently. This cannot be undone."), realm), ""),
+		ansi.Reset)
+	return AskYesNo(s, "Are you POSITIVE you wish to erase your empire?", false)
+}
+
 // abdicate ends the player's empire (BRE.DOC: "delete your empire from the game
 // so you may start over the next day").
 //
@@ -29,9 +40,7 @@ import (
 // GameDay passes DiedDay.
 func abdicate(s session.Session, w *ctx) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%s"+tr(s, "Abdicating deletes %s permanently. This cannot be undone.")+"%s\n",
-		ansi.FgBrightRed, p.Name, ansi.Reset)
-	if !AskYesNo(s, "Are you POSITIVE you wish to erase your empire?", false) {
+	if !ConfirmErase(s, p.Name) {
 		okNoPause(s, "Glad you changed your mind!")
 		pause(s)
 		return Stay
@@ -52,7 +61,12 @@ func abdicate(s session.Session, w *ctx) Result {
 	//
 	// The wording is IB's own: the original's two sign-off lines are its display
 	// text, which this project reconstructs rather than copies.
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Return on a later day to build a new realm."), ansi.Reset)
+	if join := dupeJoinRefusal(s, w); join != "" {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more."), ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, WrapIndented(join, ""), ansi.Reset)
+	} else {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Return on a later day to build a new realm."), ansi.Reset)
+	}
 	pause(s)
 	session.End(io.EOF)
 	return Quit
