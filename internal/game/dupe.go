@@ -80,6 +80,19 @@ func (w *World) receivedRecently(b RemoteBoard) bool {
 	return !b.Received.IsZero() && timeNow().Sub(b.Received) <= maxAge
 }
 
+// newerHere reports whether a realm founded at here is newer than one founded at
+// there, both Recorded stamps. A realm with no stamp was founded before stamps
+// existed, so it is the older of a stamped pair. Two unknown stamps, or two
+// equal ones, count as newer, so both boards lock rather than neither.
+func newerHere(here, there string) bool {
+	h, okH := ParseStamp(here)
+	t, okT := ParseStamp(there)
+	if !okH || !okT {
+		return okH || !okT
+	}
+	return !h.Before(t)
+}
+
 // DupeLockMessage explains the lock to the caller it shut out.
 func (w *World) DupeLockMessage(e *Empire) Msg {
 	return say("You are also playing on {board}. A baron may hold one realm in the league, "+
@@ -121,42 +134,56 @@ func DupeJoinMessage(board string) Msg {
 
 // applyDupeCheck reconciles this board's realms against the owners another board
 // has just reported. A local baron whose hash appears in the packet is locked to
-// that board; one previously locked to it and no longer listed there is
-// released, which is how "until they delete one of their players" ends.
+// that board when the realm here is the newer of the two, so the baron keeps
+// playing where they began (#323); one previously locked to it and no longer
+// listed there is released, which is how "until they delete one of their
+// players" ends. When either realm's founding is unknown both are locked, as
+// before the stamp existed, and the erase offer at login is the way out.
 //
-// It runs whatever this board's own switch says, so that turning Dupe Checking
-// back on does not need a packet to arrive before it means anything — DupeLocked
-// is what consults the switch. A packet from a board with the switch off carries
-// no hashes and therefore releases that board's locks, which is the right
-// reading: it has stopped claiming anyone.
+// A lock is set only while this board's checking is on, so every lock on record
+// was announced to its baron when it was set; one that would have started while
+// checking was off waits for the next packet after it is turned on. A lock set
+// earlier survives the switch going off, and DupeLocked, which consults the
+// switch, enforces it again the moment it comes back on. Releases happen either
+// way, since a release can only free a baron. A packet from a board with the
+// switch off carries no hashes and therefore releases that board's locks, which
+// is the right reading: it has stopped claiming anyone.
 func (w *World) applyDupeCheck(fromBoard string, scores []RemoteScore) {
 	if fromBoard == "" || fromBoard == w.Config.BoardID {
 		return
 	}
-	// The events are only true while checking is on: off, DupeLocked lets the
-	// realm play whatever DupeLockedBy says.
-	tell := w.Config.IBBS && w.dupeCheckingOn()
-	remote := make(map[string]bool, len(scores))
+	on := w.Config.IBBS && w.dupeCheckingOn()
+	remote := make(map[string]string, len(scores)) // owner hash -> Founded
 	for _, s := range scores {
 		if s.OwnerHash != "" {
-			remote[s.OwnerHash] = true
+			remote[s.OwnerHash] = s.Founded
 		}
 	}
 	for _, e := range w.Empires {
 		if e.Owner == "" {
 			continue
 		}
+		founded, listed := remote[dupeHash(e.Owner)]
 		switch {
-		case remote[dupeHash(e.Owner)]:
-			if e.DupeLockedBy != fromBoard {
-				e.DupeLockedBy = fromBoard
-				if tell {
-					e.addEvent(say("Your handle is also playing on {board}. This realm is locked until one of them goes.", "board", fromBoard))
+		case listed && !newerHere(e.Founded, founded):
+			// The realm there is the newer one, and that board locks it; this one
+			// stays playable. A lock it took before that was known is released.
+			if e.DupeLockedBy == fromBoard {
+				e.DupeLockedBy = ""
+				if on {
+					e.addEvent(say("The realm on {board} is newer, so this one is unlocked.", "board", fromBoard))
 				}
+			}
+		case listed:
+			// A board the roster does not list rules nobody out, as it does in
+			// DupeLocked, so no lock is recorded and none is announced.
+			if on && w.inLeague(fromBoard) && e.DupeLockedBy != fromBoard {
+				e.DupeLockedBy = fromBoard
+				e.addEvent(say("Your handle is also playing on {board}. This realm is locked until one of them goes.", "board", fromBoard))
 			}
 		case e.DupeLockedBy == fromBoard:
 			e.DupeLockedBy = ""
-			if tell {
+			if on {
 				e.addEvent(say("{board} no longer lists your handle; this realm is unlocked.", "board", fromBoard))
 			}
 		}

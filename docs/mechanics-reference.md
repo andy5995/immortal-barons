@@ -1397,9 +1397,15 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   caller whose hash another board's recent scores list is refused a new realm
   (`World.DupeElsewhere`), so a caller cannot found a second realm once the
   other board's scores have arrived. Two realms founded before the boards
-  exchanged scores still lock each other. A locked baron is refused at login
+  exchanged scores lock only the newer of the two, by the founding stamp each
+  score carries (`RemoteScore.Founded`), so the baron keeps playing where they
+  began (#323). That is IB's own: BRE locks the baron out with no word on which
+  realm. The stamps are each board's own wall clock, so boards whose clocks
+  disagree can pick the wrong one. A realm founded before the stamp existed (no
+  stamp at all) is the older of a stamped pair; equal stamps, or two missing
+  ones, lock both. A locked baron is refused at login
   with the board that reported them and, as in BRE, asked whether to erase this
-  realm, which is the way out when both are locked (#323).
+  realm, which is also the way out if the wrong realm was locked.
 
   The lock lifts when that board stops listing them, or when the Coordinator
   turns the switch off. `World.DupeLocked` reads the switch at the gate rather
@@ -1410,8 +1416,10 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   its scores at least daily, while one left with none sends nothing (#314), so
   the age rule is what releases a baron who erased the last realm there. Scores
   dated before the ones already held are ignored outright, so a late packet
-  cannot bring back a baron who has gone. The lock and unlock events are only
-  filed while checking is on.
+  cannot bring back a baron who has gone. A lock is only set while checking is
+  on, so every lock comes with the event that announced it. One set earlier
+  survives the switch going off and is enforced again when it comes back on; a
+  lock that would have started while it was off waits for the next packet.
   The League Coordinator's `-playerlist` report (`PLAYERLIST.LST`) is where the
   results show. BRE's version names every caller in the league by handle, read
   from its dupe file. IB names this board's callers by handle and other boards'

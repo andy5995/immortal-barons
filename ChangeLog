@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * BREAKING: packet protocol 6
+  * Dupe Checking locks only the newer of a baron's two realms
   * Dupe Checking ignores a board whose scores have not arrived for three days
   * A score packet dated before the one already held is ignored
   * A Dupe Checking lock held by a board that has left the league no longer

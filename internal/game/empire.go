@@ -189,6 +189,11 @@ type Empire struct {
 	// owner is entitled to the day they joined, and on a multi-node board another
 	// caller's login can roll the day over while they are still at the menu.
 	CreatedDay int
+	// Founded is when this realm was founded, as a Recorded stamp. Unlike
+	// CreatedDay it means the same on every board, which is what lets Dupe
+	// Checking tell which of a baron's two realms is the newer. Empty on a realm
+	// founded before the field existed.
+	Founded    string `json:",omitempty"`
 	LastPlayed string
 	// LastActive is the unix time of this baron's most recent menu action, and
 	// feeds only the online indicator on the roster screens. Zeroed on a clean

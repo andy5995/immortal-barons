@@ -88,7 +88,12 @@ const Version = "0.2.7-dev"
 // is omitempty, so an older board still verifies the packet, but it would answer
 // without the ID, and the sender's lost-packet timer would then give back a deal
 // that had already arrived.
-const Protocol = 5
+//
+// Moved to 6 in v0.2.7 for RemoteScore.Founded, which lets Dupe Checking lock
+// only the newer of a baron's two realms (#323). Every score a board with
+// checking on sends carries it, so omitempty cannot keep scores byte-identical
+// for an older board.
+const Protocol = 6
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
 // apply. A packet that states no protocol is NOT one of them — see Protocol.

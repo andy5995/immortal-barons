@@ -175,6 +175,7 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 	}
 	e := newEmpire(realm, OwnerKey(handle), w.Config, w.GameDay)
 	e.Slot = slot
+	e.Founded = Recorded(timeNow())
 	w.insertEmpire(e)
 	return e
 }

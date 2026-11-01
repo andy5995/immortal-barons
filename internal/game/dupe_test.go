@@ -150,14 +150,24 @@ func TestDupeElsewhereNamesTheListingBoard(t *testing.T) {
 	}
 }
 
-// With checking off the lock is not enforced, so the baron is not told it is.
-func TestDupeCheckOffTellsNobody(t *testing.T) {
+// With checking off no lock is recorded, so none can ever exist without the
+// event that announces it; the first packet after checking comes back on sets
+// it, with the event.
+func TestDupeLockIsOnlySetWhileCheckingIsOn(t *testing.T) {
 	w, e := dupeWorld(t)
+	listed := []RemoteScore{{OwnerHash: dupeHash("alice")}}
 	w.Config.DupeChecking = false
-	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
-	receive(w, "there", nil)
-	if len(e.Events) != 0 {
-		t.Errorf("events with Dupe Checking off: %v", e.Events)
+	receive(w, "there", listed)
+	if e.DupeLockedBy != "" || len(e.Events) != 0 {
+		t.Fatalf("with checking off: DupeLockedBy %q, events %v", e.DupeLockedBy, e.Events)
+	}
+	w.Config.DupeChecking = true
+	if w.DupeLocked(e) {
+		t.Fatal("a lock appeared that no packet set while checking was on")
+	}
+	receive(w, "there", listed)
+	if !w.DupeLocked(e) || len(e.Events) != 1 {
+		t.Errorf("after checking came back on: locked %v, events %v", w.DupeLocked(e), e.Events)
 	}
 }
 
@@ -197,6 +207,17 @@ func TestDupeLockFromABoardOffTheRosterIsNotEnforced(t *testing.T) {
 	}
 }
 
+// A saved lock is not enforced with inter-BBS play off, and the player list
+// says which clause of DupeLocked is the one holding it back.
+func TestPlayerListExplainsALockUnenforcedByInterBBSOff(t *testing.T) {
+	w, _ := dupeWorld(t)
+	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	w.Config.IBBS = false
+	if got := w.PlayerListReport(); !strings.Contains(got, "inter-BBS play is off") {
+		t.Errorf("the report does not say why the lock is not enforced:\n%s", got)
+	}
+}
+
 // Scores dated before the ones held change nothing: a late packet must not
 // bring back a baron who has since gone, nor lock them again.
 func TestOlderScoresNeitherReplaceTheRosterNorLock(t *testing.T) {
@@ -231,5 +252,73 @@ func TestQuietBoardNeitherRefusesNorLocks(t *testing.T) {
 	}
 	if got := w.PlayerListReport(); !strings.Contains(got, "no scores from that board") {
 		t.Errorf("the report does not say why the lock is not enforced:\n%s", got)
+	}
+}
+
+// Only the newer of a baron's two realms is locked, so the baron keeps playing
+// where they began (#323). Both boards compare the same two stamps, so exactly
+// one of them locks when the stamps differ. A realm with no stamp predates the
+// field and is the older; two unknown stamps lock both.
+func TestDupeLocksOnlyTheNewerRealm(t *testing.T) {
+	early, late := Recorded(timeNow().Add(-time.Hour)), Recorded(timeNow())
+	for _, tc := range []struct {
+		name        string
+		here, there string
+		lockedHere  bool
+		lockedThere bool
+	}{
+		{"newer here", late, early, true, false},
+		{"older here", early, late, false, true},
+		{"unknown here", "", late, false, true},
+		{"unknown there", early, "", true, false},
+		{"unknown both", "", "", true, true},
+	} {
+		a, ea := dupeWorld(t)
+		b, eb := dupeWorld(t)
+		b.Config.BoardID = "there"
+		ea.Founded, eb.Founded = tc.here, tc.there
+		a.ExportScores()
+		b.ExportScores()
+		receive(a, "there", b.Outbox[0].Scores)
+		receive(b, "here", a.Outbox[0].Scores)
+		if a.DupeLocked(ea) != tc.lockedHere || b.DupeLocked(eb) != tc.lockedThere {
+			t.Errorf("%s: locked here %v there %v, want %v and %v", tc.name,
+				a.DupeLocked(ea), b.DupeLocked(eb), tc.lockedHere, tc.lockedThere)
+		}
+	}
+}
+
+// A lock taken while neither founding was known is released once the other
+// board's realm turns out to be the newer.
+func TestDupeLockOnTheOlderRealmIsReleased(t *testing.T) {
+	w, e := dupeWorld(t)
+	e.Founded = ""
+	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	if !w.DupeLocked(e) {
+		t.Fatal("two unknown foundings should lock")
+	}
+	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice"), Founded: Recorded(timeNow())}})
+	if w.DupeLocked(e) {
+		t.Error("the older realm is still locked once the other is known to be newer")
+	}
+	last := e.Events[len(e.Events)-1].Text
+	if !strings.Contains(last, "newer") || strings.Contains(last, "no longer lists") {
+		t.Errorf("the release should say the other realm is newer, got %q", last)
+	}
+}
+
+// A scores packet from a board the roster does not list records no lock: the
+// baron would be told they were locked, and DupeLocked would never enforce it.
+func TestDupeCheckDoesNotLockFromABoardOffTheRoster(t *testing.T) {
+	w, e := dupeWorld(t)
+	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "here"}, {Number: 2, Name: "there"}}
+	receive(w, "gone", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	if e.DupeLockedBy != "" {
+		t.Errorf("a board off the roster recorded a lock: %q", e.DupeLockedBy)
+	}
+	for _, ev := range e.Events {
+		if strings.Contains(ev.Text, "locked") {
+			t.Errorf("a board off the roster announced a lock: %q", ev.Text)
+		}
 	}
 }

@@ -511,7 +511,8 @@ RemoteListing { "Realm": "Redlands", "Good": "Tank", "Qty": 100, "Price": 500 }
                 // the whole reason bids exist.
 RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
                 "Protected": true, "OwnerHash": "3f6a1c09b2d84e57",
-                "FormerName": "Vanaheim" }
+                "FormerName": "Vanaheim",
+                "Founded": "10/01/2026 18:04:11 UTC" }
                 // Protected = still under New Realm Protection, so the boards
                 // that read this leave it off their target lists. Absent in a
                 // packet written before the field existed, which reads as
@@ -536,6 +537,16 @@ RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
                 // it moved Protocol to 2 — it is signed, and once a realm has
                 // renamed it is in every scores packet, so an older board would
                 // re-marshal without it and fail the origin signature.
+                //
+                // Founded is when the realm was founded, a Recorded stamp,
+                // sent beside OwnerHash so the board holding the same baron's
+                // other realm locks only the newer of the two. Both boards
+                // compare the same two stamps, so exactly one locks when they
+                // differ. A realm with no stamp was founded before the field,
+                // so it is the older of a stamped pair; equal stamps, or two
+                // missing ones, lock both. The stamps are wall-clock UTC,
+                // so boards whose clocks disagree can pick the wrong realm.
+                // Introducing it moved Protocol to 6.
 
 RemoteAttack  { "ID": 1, "FromBoard": "AlphaBBS", "TargetEmpire": "Victim",
                 "Offense": 150000, "Contributors": [ Contribution ] }
