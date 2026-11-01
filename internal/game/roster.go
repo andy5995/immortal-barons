@@ -207,10 +207,16 @@ func (w *World) RealmNameTaken(name string) bool {
 // rename, or that hold a name against re-use, walk this rather than either
 // field, so neither kind of rename can be missed.
 func (e *Empire) PriorRealmNames() []string {
-	if e.FormerName == "" {
-		return e.PriorNames
+	return priorRealmNames(e.FormerName, e.PriorNames)
+}
+
+// priorRealmNames is the one merge of a player's rename (former) and a sysop's
+// (prior), shared by a local realm and a remote score.
+func priorRealmNames(former string, prior []string) []string {
+	if former == "" {
+		return prior
 	}
-	return append([]string{e.FormerName}, e.PriorNames...)
+	return append([]string{former}, prior...)
 }
 
 // dropEmpires removes every empire `gone` selects and forgets what the world

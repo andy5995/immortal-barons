@@ -81,8 +81,10 @@ func (w *World) syncRemoteSpyReports(b RemoteBoard) {
 	renamed := map[string]string{}
 	for _, s := range b.Scores {
 		listed[s.Empire] = true
-		if s.FormerName != "" {
-			renamed[s.FormerName] = s.Empire
+		for _, old := range s.PriorRealmNames() {
+			if old != "" {
+				renamed[old] = s.Empire
+			}
 		}
 	}
 	kept := w.SpyDatabase[:0]

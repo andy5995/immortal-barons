@@ -459,6 +459,14 @@ func (w *World) BBSCoordinator() *Empire {
 	return best
 }
 
+// sentPriorNames is the newest SentPriorNames of names, for a score packet.
+func sentPriorNames(names []string) []string {
+	if len(names) > SentPriorNames {
+		return names[len(names)-SentPriorNames:]
+	}
+	return names
+}
+
 // ExportScores queues a broadcast packet of this board's living human empires'
 // scores for the league — it feeds the other boards' interplanetary score
 // screens and gives group attacks targets to choose from. The packet goes out
@@ -469,7 +477,7 @@ func (w *World) ExportScores() {
 		if e.Alive && e.Owner != "" {
 			s := RemoteScore{
 				Empire: e.Name, NetWorth: w.NetWorth(e), Land: e.Land, Score: e.Score,
-				Protected: e.Protection > 0, FormerName: e.FormerName,
+				Protected: e.Protection > 0, FormerName: e.FormerName, PriorNames: sentPriorNames(e.PriorNames),
 			}
 			if w.dupeCheckingOn() {
 				s.OwnerHash, s.Founded = dupeHash(e.Owner), e.Founded

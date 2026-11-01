@@ -246,15 +246,20 @@ func (w *World) announceRemoteRenames(prev, next RemoteBoard) {
 		return false
 	}
 	for _, s := range next.Scores {
-		if s.Empire == "" || s.FormerName == "" || s.FormerName == s.Empire {
+		if s.Empire == "" || held(s.Empire) {
 			continue
 		}
-		if !held(s.FormerName) || held(s.Empire) {
-			continue
+		// A player's rename and a sysop's alike (#321); only the name this
+		// planet last knew the realm by can be held.
+		for _, old := range s.PriorRealmNames() {
+			if old == "" || old == s.Empire || !held(old) {
+				continue
+			}
+			// setRealmName's wording, with the planet named: this is a realm the
+			// reader knows from the interplanetary screens, not one next door.
+			w.postNews(fmt.Sprintf("%s of %s is henceforth known as %s.", old, next.BoardID, s.Empire))
+			break
 		}
-		// setRealmName's wording, with the planet named: this is a realm the
-		// reader knows from the interplanetary screens, not one next door.
-		w.postNews(fmt.Sprintf("%s of %s is henceforth known as %s.", s.FormerName, next.BoardID, s.Empire))
 	}
 }
 

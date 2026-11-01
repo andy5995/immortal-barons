@@ -92,7 +92,8 @@ const Version = "0.2.7-dev"
 // Moved to 6 in v0.2.7 for RemoteScore.Founded, which lets Dupe Checking lock
 // only the newer of a baron's two realms (#323). Every score a board with
 // checking on sends carries it, so omitempty cannot keep scores byte-identical
-// for an older board. Packet.NoRealms (#314) rides the same number.
+// for an older board. Packet.NoRealms (#314) and RemoteScore.PriorNames (#321)
+// ride the same number.
 const Protocol = 6
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can

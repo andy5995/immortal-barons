@@ -512,7 +512,7 @@ RemoteListing { "Realm": "Redlands", "Good": "Tank", "Qty": 100, "Price": 500 }
                 // the whole reason bids exist.
 RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
                 "Protected": true, "OwnerHash": "3f6a1c09b2d84e57",
-                "FormerName": "Vanaheim",
+                "FormerName": "Vanaheim", "PriorNames": [ "Midgard" ],
                 "Founded": "10/01/2026 18:04:11 UTC" }
                 // Protected = still under New Realm Protection, so the boards
                 // that read this leave it off their target lists. Absent in a
@@ -538,6 +538,13 @@ RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
                 // it moved Protocol to 2 — it is signed, and once a realm has
                 // renamed it is in every scores packet, so an older board would
                 // re-marshal without it and fail the origin signature.
+                //
+                // PriorNames are the names a sysop's renames moved the realm
+                // off, kept apart from FormerName because they do not spend
+                // the player's one rename. They let the receiver follow a
+                // sysop rename as it follows FormerName (#321). Only the
+                // newest four are sent (SentPriorNames); the realm keeps the
+                // rest against re-use.
                 //
                 // Founded is when the realm was founded, a Recorded stamp,
                 // sent beside OwnerHash so the board holding the same baron's
