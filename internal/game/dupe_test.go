@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 )
 
 func dupeWorld(t *testing.T) (*World, *Empire) {
@@ -15,6 +16,14 @@ func dupeWorld(t *testing.T) (*World, *Empire) {
 	return w, w.AddHuman("Alice", "Alethia")
 }
 
+// receive takes a board's scores the way ApplyPacket does: the roster first,
+// then the duplicate check against it.
+func receive(w *World, board string, scores []RemoteScore) {
+	if w.ImportBoard(RemoteBoard{BoardID: board, Scores: scores}) {
+		w.applyDupeCheck(board, scores)
+	}
+}
+
 // A packet naming one of our own barons locks that realm, and a later packet
 // that no longer names them releases it — BRE's "until they delete one of their
 // players".
@@ -22,18 +31,18 @@ func TestDupeCheckLocksAndReleases(t *testing.T) {
 	w, e := dupeWorld(t)
 
 	elsewhere := []RemoteScore{{Empire: "Far Reach", OwnerHash: dupeHash("alice")}}
-	w.applyDupeCheck("there", elsewhere)
+	receive(w, "there", elsewhere)
 	if e.DupeLockedBy != "there" {
 		t.Fatalf("DupeLockedBy = %q, want \"there\"", e.DupeLockedBy)
 	}
 	if !w.DupeLocked(e) {
 		t.Error("a locked baron should be shut out while Dupe Checking is on")
 	}
-	if msg := w.DupeLockMessage(e); !strings.Contains(msg, "there") {
+	if msg := w.DupeLockMessage(e).English(); !strings.Contains(msg, "there") {
 		t.Errorf("the message should name the other board, got %q", msg)
 	}
 
-	w.applyDupeCheck("there", []RemoteScore{{Empire: "Someone Else", OwnerHash: dupeHash("bob")}})
+	receive(w, "there", []RemoteScore{{Empire: "Someone Else", OwnerHash: dupeHash("bob")}})
 	if e.DupeLockedBy != "" {
 		t.Errorf("giving up the other realm should release the lock, got %q", e.DupeLockedBy)
 	}
@@ -43,7 +52,7 @@ func TestDupeCheckLocksAndReleases(t *testing.T) {
 // Dupe Checking off frees everyone without a sweep over the world.
 func TestDupeCheckingOffReleasesLockedBarons(t *testing.T) {
 	w, e := dupeWorld(t)
-	w.applyDupeCheck("there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
 
 	w.Config.DupeChecking = false
 	if w.DupeLocked(e) {
@@ -85,8 +94,8 @@ func TestDupeCheckOverrideReachesTheOutgoingPacket(t *testing.T) {
 // would clear a lock another board is still asserting.
 func TestDupeLockSurvivesAnotherBoardsPacket(t *testing.T) {
 	w, e := dupeWorld(t)
-	w.applyDupeCheck("there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
-	w.applyDupeCheck("elsewhere", []RemoteScore{{OwnerHash: dupeHash("bob")}})
+	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	receive(w, "elsewhere", []RemoteScore{{OwnerHash: dupeHash("bob")}})
 	if e.DupeLockedBy != "there" {
 		t.Errorf("DupeLockedBy = %q, want the lock to survive an unrelated board", e.DupeLockedBy)
 	}
@@ -145,8 +154,8 @@ func TestDupeElsewhereNamesTheListingBoard(t *testing.T) {
 func TestDupeCheckOffTellsNobody(t *testing.T) {
 	w, e := dupeWorld(t)
 	w.Config.DupeChecking = false
-	w.applyDupeCheck("there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
-	w.applyDupeCheck("there", nil)
+	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	receive(w, "there", nil)
 	if len(e.Events) != 0 {
 		t.Errorf("events with Dupe Checking off: %v", e.Events)
 	}
@@ -167,7 +176,7 @@ func TestDupeElsewhereIgnoresBoardsOffTheRoster(t *testing.T) {
 // board sends no more scores, so it is not enforced.
 func TestDupeLockFromABoardOffTheRosterIsNotEnforced(t *testing.T) {
 	w, e := dupeWorld(t)
-	w.applyDupeCheck("gone", []RemoteScore{{OwnerHash: dupeHash("alice")}})
+	receive(w, "gone", []RemoteScore{{OwnerHash: dupeHash("alice")}})
 	if !w.DupeLocked(e) {
 		t.Fatal("with no roster yet, the lock should hold")
 	}
@@ -185,5 +194,42 @@ func TestDupeLockFromABoardOffTheRosterIsNotEnforced(t *testing.T) {
 	w.LeagueNodes = append(w.LeagueNodes, LeagueNode{Number: 3, Name: "gone"})
 	if !w.DupeLocked(e) {
 		t.Error("a lock from a board on the roster is not enforced")
+	}
+}
+
+// Scores dated before the ones held change nothing: a late packet must not
+// bring back a baron who has since gone, nor lock them again.
+func TestOlderScoresNeitherReplaceTheRosterNorLock(t *testing.T) {
+	w, e := dupeWorld(t)
+	w.ImportBoard(RemoteBoard{BoardID: "there", Date: "2026-10-06"})
+	late := []RemoteScore{{Empire: "Far Reach", OwnerHash: dupeHash("alice")}}
+	if w.ImportBoard(RemoteBoard{BoardID: "there", Date: "2026-10-05", Scores: late}) {
+		t.Error("an older packet was imported")
+	}
+	if len(w.RemoteBoards[0].Scores) != 0 || w.RemoteBoards[0].Date != "2026-10-06" {
+		t.Errorf("the roster became %+v, want the newer one kept", w.RemoteBoards[0])
+	}
+	if w.DupeElsewhere("alice") != "" || e.DupeLockedBy != "" {
+		t.Error("an older packet refused or locked alice")
+	}
+}
+
+// A board whose scores have stopped arriving, as one left with no players
+// does (#314), neither refuses a new realm nor holds a lock.
+func TestQuietBoardNeitherRefusesNorLocks(t *testing.T) {
+	w, e := dupeWorld(t)
+	receive(w, "there", []RemoteScore{{OwnerHash: dupeHash("alice")}, {OwnerHash: dupeHash("bob")}})
+	if !w.DupeLocked(e) || w.DupeElsewhere("bob") != "there" {
+		t.Fatal("fresh scores should lock alice and refuse bob")
+	}
+	w.RemoteBoards[0].Received = timeNow().Add(-time.Duration(DupeScoresMaxAgeDays+1) * 24 * time.Hour)
+	if w.DupeLocked(e) {
+		t.Error("a lock from a board gone quiet is still enforced")
+	}
+	if got := w.DupeElsewhere("bob"); got != "" {
+		t.Errorf("a board gone quiet refused bob: %q", got)
+	}
+	if got := w.PlayerListReport(); !strings.Contains(got, "no scores from that board") {
+		t.Errorf("the report does not say why the lock is not enforced:\n%s", got)
 	}
 }

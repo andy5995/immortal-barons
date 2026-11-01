@@ -24,6 +24,7 @@ func lockedLeagueBoard(t *testing.T) (dir string, cfg game.Config) {
 	}
 	w, _ := store.NewGame(cfg)
 	w.AddHuman("alice", "Iron Dominion").DupeLockedBy = "Bravo BBS"
+	w.ImportBoard(game.RemoteBoard{BoardID: "Bravo BBS"}) // the scores that set the lock
 	if err := store.Save(w, cfg); err != nil {
 		t.Fatal(err)
 	}

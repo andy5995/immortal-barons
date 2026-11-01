@@ -95,6 +95,9 @@ type RemoteBoard struct {
 	// to bid on. It is stale by a packet round trip by definition, which is why a
 	// bid is an offer the far board may refuse rather than a purchase.
 	Market []RemoteListing `json:",omitempty"`
+	// Received is when these scores arrived here, which Dupe Checking reads to
+	// tell a board that has gone quiet from one still playing.
+	Received time.Time `json:",omitzero"`
 }
 
 // PlanetTotals is a snapshot of planet-wide aggregates over living empires.
@@ -692,22 +695,27 @@ func (w *World) StoreErr() error { return w.storeErr }
 
 // ImportBoard records b's scores, replacing any existing entry for the
 // same BoardID so re-importing updates rather than duplicates, and brings the
-// Spy Database's reports on b's realms in line with them.
-func (w *World) ImportBoard(b RemoteBoard) {
+// Spy Database's reports on b's realms in line with them. It reports false, and
+// changes nothing, for scores dated before the ones already held: a packet that
+// arrived behind a newer one would otherwise bring back realms that have gone.
+func (w *World) ImportBoard(b RemoteBoard) bool {
+	if b.Received.IsZero() {
+		b.Received = timeNow()
+	}
 	for i, existing := range w.RemoteBoards {
 		if existing.BoardID == b.BoardID {
+			if b.Date < existing.Date {
+				return false
+			}
 			w.announceRemoteRenames(existing, b)
 			w.RemoteBoards[i] = b
-			// A packet that arrives behind a newer one must not delete the
-			// intel filed on realms the newer one listed.
-			if b.Date >= existing.Date {
-				w.syncRemoteSpyReports(b)
-			}
-			return
+			w.syncRemoteSpyReports(b)
+			return true
 		}
 	}
 	w.RemoteBoards = append(w.RemoteBoards, b)
 	w.syncRemoteSpyReports(b)
+	return true
 }
 
 // NetWorth is the empire's strategic score at BRE scale: land dominates at

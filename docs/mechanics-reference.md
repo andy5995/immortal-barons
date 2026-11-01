@@ -1394,20 +1394,24 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   packet, and **deliberately diverges on how**: BRE compares handles, IB compares
   a 64-bit hash of the normalized handle (`RemoteScore.OwnerHash`), so a packet
   that lands on every sysop's board carries nobody's handle. As in BRE, a
-  caller whose hash another board's last scores list is refused a new realm
+  caller whose hash another board's recent scores list is refused a new realm
   (`World.DupeElsewhere`), so a caller cannot found a second realm once the
-  other board's scores have arrived. A board no longer on the league roster
-  refuses and locks nobody, since it will never send the scores that lift
-  either; `World.DupeLocked` reads the roster at the gate, as it does the
-  switch. Two realms founded before the boards exchanged scores still lock each
-  other. A locked
-  baron is refused at login with the board that reported them and, as in BRE,
-  asked whether to erase this realm, which is the way out when both are locked
-  (#323). The lock lifts when that board stops listing them, or when the
-  Coordinator turns the switch off — `World.DupeLocked` reads the switch at the
-  gate rather than clearing state. A board left with no human realms sends no
-  scores, so erasing the last one there leaves the other board's lock in place
-  (#314). The lock and unlock events are only filed while checking is on.
+  other board's scores have arrived. Two realms founded before the boards
+  exchanged scores still lock each other. A locked baron is refused at login
+  with the board that reported them and, as in BRE, asked whether to erase this
+  realm, which is the way out when both are locked (#323).
+
+  The lock lifts when that board stops listing them, or when the Coordinator
+  turns the switch off. `World.DupeLocked` reads the switch at the gate rather
+  than clearing state, and reads two more things there, because a board that
+  sends no more scores can never lift what it set: a board no longer on the
+  league roster refuses and locks nobody, and nor does one whose scores have not
+  arrived for `DupeScoresMaxAgeDays` (3) real days. A board with players resends
+  its scores at least daily, while one left with none sends nothing (#314), so
+  the age rule is what releases a baron who erased the last realm there. Scores
+  dated before the ones already held are ignored outright, so a late packet
+  cannot bring back a baron who has gone. The lock and unlock events are only
+  filed while checking is on.
   The League Coordinator's `-playerlist` report (`PLAYERLIST.LST`) is where the
   results show. BRE's version names every caller in the league by handle, read
   from its dupe file. IB names this board's callers by handle and other boards'
