@@ -1,6 +1,8 @@
 Immortal Barons ChangeLog
 
 (in-progress:)
+  * With Dupe Checking on, a caller another board lists cannot found a realm,
+    and a locked baron is offered to erase the locked realm
   * The Spy Database removes another planet's reports on a realm that planet
     no longer lists, and follows a realm it renamed
   * A local Send Spy that gets in files its report in the Spy Database, readable

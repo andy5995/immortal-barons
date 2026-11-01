@@ -225,6 +225,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	var localReborn string // a husk maintenance didn't sweep yet; swept here as a fallback
 	var deadToday string   // realm destroyed today; no play until a later day
 	var dupeLocked string  // the league's duplicate-user check shut this caller out
+	var lockedRealm string // the realm dupeLocked shut, named in the erase offer
 	w.With(func() {
 		e = w.FindByOwner(id.Handle)
 		if e != nil && !e.Alive {
@@ -240,17 +241,49 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				deadToday = e.Name
 			}
 		}
-		if e != nil && w.DupeLocked(e) {
+		// A realm erased at the offer below is dead and still carries the lock,
+		// so it takes the died-today refusal instead of the offer again.
+		if e != nil && e.Alive && w.DupeLocked(e) {
 			dupeLocked = w.DupeLockMessage(e)
+			lockedRealm = e.Name
 		}
 		if e == nil {
 			joinOpen = w.Config.JoinOpen(w.Today)
-			refusal = joinRefusal(w)
+			refusal = joinRefusal(w, id.Handle)
 			joinDate = w.Config.JoinDate
 		}
 	})
 	if dupeLocked != "" {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(dupeLocked, ""), ansi.Reset)
+		// BRE offers the way out here, since the baron may be locked out of the
+		// other board too and could otherwise give up neither realm (#323).
+		// The same warning the menu's Abdicate gives before it erases a realm.
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+			menu.WrapIndented(fmt.Sprintf("Abdicating deletes %s permanently. This cannot be undone.", lockedRealm), ""),
+			ansi.Reset)
+		if menu.AskYesNo(s, "Would you like to erase this realm?", false) {
+			// Another node may have lifted the lock, or ended the realm, while the
+			// baron read the question.
+			var erased, unlocked bool
+			w.With(func() {
+				e := w.FindByOwner(id.Handle)
+				switch {
+				case e == nil || !e.Alive:
+				case w.DupeLocked(e):
+					w.Abdicate(e)
+					erased = true
+				default:
+					unlocked = true
+				}
+			})
+			switch {
+			case erased:
+				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented("This realm has been erased.", ""), ansi.Reset)
+			case unlocked:
+				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
+					menu.WrapIndented("This realm is no longer locked, so it was not erased. Call again to play it.", ""), ansi.Reset)
+			}
+		}
 		return "dupe", save()
 	}
 	if deadToday != "" {
@@ -343,7 +376,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				}
 				// The slot is claimed inside the same lock that checked for one,
 				// so two nodes onboarding at once cannot both take it.
-				if full = joinRefusal(w); full != "" {
+				if full = joinRefusal(w, id.Handle); full != "" {
 					return
 				}
 				if w.RealmNameTaken(realm) {
@@ -471,11 +504,17 @@ func (o onboardLang) DrainInput() { session.Drain(o.Session) }
 // joinRefusal is the sentence shown to a caller who may not found a realm, or
 // "" when they may. Call it under the world lock.
 //
-// The two refusals are different facts and read differently. A planet with no
+// A caller another board in the league lists as one of its barons is refused
+// first, as BRE refuses them (game.DupeElsewhere).
+//
+// The two capacity refusals are different facts and read differently. A planet with no
 // free slot has hit the game's own ceiling and will reopen when a realm falls;
 // the Max Players Per BBS cap is the sysop's choice and may never move. BRE
 // tells a caller much the same in one message; this is IB's own wording.
-func joinRefusal(w *game.World) string {
+func joinRefusal(w *game.World, handle string) string {
+	if board := w.DupeElsewhere(handle); board != "" {
+		return game.DupeJoinMessage(board)
+	}
 	if w.PlanetFull() {
 		return fmt.Sprintf("All %d realms of this planet are held. Call back when one has fallen.", game.PlanetSlots)
 	}

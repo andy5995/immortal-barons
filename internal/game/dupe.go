@@ -57,7 +57,40 @@ func (w *World) DupeLocked(e *Empire) bool {
 // DupeLockMessage explains the lock to the caller it shut out.
 func (w *World) DupeLockMessage(e *Empire) string {
 	return fmt.Sprintf("You are also playing on %s. A baron may hold one realm in the league, "+
-		"so this one is locked until you give up the other.", e.DupeLockedBy)
+		"so this one is locked until you give one of them up.", e.DupeLockedBy)
+}
+
+// DupeElsewhere names a board whose last scores list handle as one of its
+// barons, or "" when none does or Dupe Checking is off. BRE refuses such a
+// caller a new realm rather than letting them found one and locking both. It
+// can only see the scores that have arrived, so a realm founded there since is
+// caught by the lock instead, once that board's scores do arrive.
+func (w *World) DupeElsewhere(handle string) string {
+	h := dupeHash(handle)
+	if h == "" || !w.Config.IBBS || !w.dupeCheckingOn() {
+		return ""
+	}
+	for _, b := range w.RemoteBoards {
+		// RemoteBoards keeps a board's last scores after it leaves the league,
+		// and one that has left will never send the scores that lift this.
+		if b.BoardID == w.Config.BoardID || len(w.LeagueNodes) > 0 && w.NodeNumber(b.BoardID) == 0 {
+			continue
+		}
+		for _, s := range b.Scores {
+			if s.OwnerHash == h {
+				return b.BoardID
+			}
+		}
+	}
+	return ""
+}
+
+// DupeJoinMessage is what a caller DupeElsewhere found is told in place of
+// founding a realm.
+func DupeJoinMessage(board string) string {
+	return fmt.Sprintf("You are already playing on %[1]s. A baron may hold one realm in the league, "+
+		"so you cannot found one here. If you have given that realm up, this lifts once %[1]s's "+
+		"next scores reach this board. If that realm is not yours, tell your sysop.", board)
 }
 
 // applyDupeCheck reconciles this board's realms against the owners another board
@@ -74,6 +107,9 @@ func (w *World) applyDupeCheck(fromBoard string, scores []RemoteScore) {
 	if fromBoard == "" || fromBoard == w.Config.BoardID {
 		return
 	}
+	// The events are only true while checking is on: off, DupeLocked lets the
+	// realm play whatever DupeLockedBy says.
+	tell := w.Config.IBBS && w.dupeCheckingOn()
 	remote := make(map[string]bool, len(scores))
 	for _, s := range scores {
 		if s.OwnerHash != "" {
@@ -88,11 +124,15 @@ func (w *World) applyDupeCheck(fromBoard string, scores []RemoteScore) {
 		case remote[dupeHash(e.Owner)]:
 			if e.DupeLockedBy != fromBoard {
 				e.DupeLockedBy = fromBoard
-				e.addEvent(say("Your handle is also playing on {board}. This realm is locked until one of them goes.", "board", fromBoard))
+				if tell {
+					e.addEvent(say("Your handle is also playing on {board}. This realm is locked until one of them goes.", "board", fromBoard))
+				}
 			}
 		case e.DupeLockedBy == fromBoard:
 			e.DupeLockedBy = ""
-			e.addEvent(say("{board} no longer lists your handle; this realm is unlocked.", "board", fromBoard))
+			if tell {
+				e.addEvent(say("{board} no longer lists your handle; this realm is unlocked.", "board", fromBoard))
+			}
 		}
 	}
 }
