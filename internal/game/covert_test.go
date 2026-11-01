@@ -997,13 +997,14 @@ func TestRemoteSpyReportsFollowTheRoster(t *testing.T) {
 	}
 }
 
-// A score packet that arrives behind a newer one leaves the Spy Database alone.
-func TestOlderScorePacketKeepsSpyReports(t *testing.T) {
+// A score packet that arrives behind a later one from its board leaves the Spy
+// Database alone, even on the same game date (#322).
+func TestLateScorePacketKeepsSpyReports(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
-	w.ImportBoard(RemoteBoard{BoardID: "Bravo", Date: "2026-10-02", Scores: []RemoteScore{{Empire: "Golf"}}})
+	w.ApplyPacket(Packet{FromBoard: "Bravo", Seq: 9, Date: "2026-10-01", Scores: []RemoteScore{{Empire: "Golf"}}})
 	w.SpyDatabase = []SpyEntry{{SpyReport: SpyReport{Board: "Bravo", Empire: "Golf"}}}
-	w.ImportBoard(RemoteBoard{BoardID: "Bravo", Date: "2026-10-01", Scores: []RemoteScore{{Empire: "Hotel"}}})
+	w.ApplyPacket(Packet{FromBoard: "Bravo", Seq: 8, Date: "2026-10-01", Scores: []RemoteScore{{Empire: "Hotel"}}})
 	if len(w.SpyDatabase) != 1 {
-		t.Errorf("an older packet left %d reports, want the 1 on Golf", len(w.SpyDatabase))
+		t.Errorf("a late packet left %d reports, want the 1 on Golf", len(w.SpyDatabase))
 	}
 }

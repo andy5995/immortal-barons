@@ -610,9 +610,8 @@ func (w *World) ApplyPacket(p Packet) Packet {
 			p.FromBoard, w.CoordRefusalReason(p))
 	}
 	if len(p.Scores) > 0 || p.NoRealms {
-		if w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores, Market: p.Market}) {
-			w.applyDupeCheck(p.FromBoard, p.Scores)
-		}
+		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores, Market: p.Market})
+		w.applyDupeCheck(p.FromBoard, p.Scores)
 	}
 	// Outcomes of our own strikes, returning from the target board.
 	spies := w.spyIntelIndex(p)
