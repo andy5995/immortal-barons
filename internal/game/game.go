@@ -118,9 +118,6 @@ type RemoteBoard struct {
 	// to bid on. It is stale by a packet round trip by definition, which is why a
 	// bid is an offer the far board may refuse rather than a purchase.
 	Market []RemoteListing `json:",omitempty"`
-	// Received is when these scores arrived here, which Dupe Checking reads to
-	// tell a board that has gone quiet from one still playing.
-	Received time.Time `json:",omitzero"`
 }
 
 // PlanetTotals is a snapshot of planet-wide aggregates over living empires.
@@ -723,9 +720,6 @@ func (w *World) StoreErr() error { return w.storeErr }
 // ApplyPacket strips them by sequence number (#311), which orders two packets
 // the game date cannot, such as two sent on one day.
 func (w *World) ImportBoard(b RemoteBoard) {
-	if b.Received.IsZero() {
-		b.Received = timeNow()
-	}
 	for i, existing := range w.RemoteBoards {
 		if existing.BoardID == b.BoardID {
 			w.announceRemoteRenames(existing, b)
