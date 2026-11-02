@@ -34,6 +34,11 @@ const (
 	// newsStampRule divides a news line's clock time from the report itself.
 	// CP437 0xB3, so it survives the bulletin files' encoding.
 	newsStampRule = "│"
+	// newsChromeRows is what the masthead and the Daily Bulletin box spend
+	// before the first news item: 5 masthead rows (blank, header, blank,
+	// banner, rule) and 6 box rows (blank, top, three content rows, bottom).
+	// The first news page starts that far down.
+	newsChromeRows = 11
 )
 
 // newsItemArrow leads each planetary-news item: BRE's red "──" and bright-red

@@ -50,19 +50,36 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	renderDailyBulletin(s, w.Term, bulletin, boardID)
 	if len(news) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
+		pause(s)
 	} else {
 		// Each item led by the red arrow, blank-line separated, with empire /
-		// faction / number highlights over a white body (BRE layout).
+		// faction / number highlights over a white body (BRE layout). A day's
+		// news can run past the screen, so it goes through the shared pager;
+		// the masthead and box above it have already spent newsChromeRows of
+		// the first page.
 		terms := newsHighlightTerms(w)
+		page := &linePager{s: s, perPage: pageLines, count: newsChromeRows}
 		for _, b := range news {
 			// Wrapped continuation lines indent 5 spaces, as BRE draws them
 			// (docs/dev/bre-screens.md). Wrap before coloring: hiNewsItem's
 			// escapes are invisible on screen but count against the margin.
-			fmt.Fprintf(s, "\n%s %s\n", newsItemArrow,
-				hiNewsItem(wrapHanging(newsStamped(s, b), "", newsItemIndent), terms))
+			body := hiNewsItem(wrapHanging(newsStamped(s, b), "", newsItemIndent), terms)
+			keepGoing := page.line("")
+			for i, line := range strings.Split(body, "\n") {
+				if !keepGoing {
+					break
+				}
+				if i == 0 {
+					line = newsItemArrow + " " + line
+				}
+				keepGoing = page.line(line)
+			}
+			if !keepGoing {
+				break
+			}
 		}
+		page.finish()
 	}
-	pause(s)
 	return Stay
 }
 

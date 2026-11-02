@@ -772,6 +772,39 @@ func TestShowBulletinMastheadAndBox(t *testing.T) {
 	}
 }
 
+// A day's news can be longer than the screen. Every item used to be printed
+// before the single end-of-screen pause, so on a terminal without scrollback
+// everything but the last page was lost. The feed now pages with the shared
+// pager, starting the first page below the masthead and bulletin box.
+func TestShowBulletinPagesALongFeed(t *testing.T) {
+	w := newWorld()
+	w.BulletinToday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 100}}
+	for i := 0; i < 40; i++ {
+		w.NewsToday = append(w.NewsToday, game.NewsLine{Text: fmt.Sprintf("item-%02d", i)})
+	}
+
+	f := &fakeSession{keys: []rune(strings.Repeat(" ", 40))}
+	showBulletinToday(f, w)
+	plain := stripANSI(f.out.String())
+
+	firstBreak := strings.Index(plain, "Enter to continue")
+	if firstBreak < 0 {
+		t.Fatalf("expected a long feed to page, got no pager prompt:\n%s", plain)
+	}
+	if strings.Contains(plain[:firstBreak], "item-39") {
+		t.Error("the whole feed fit on the first page; nothing was paged")
+	}
+	if !strings.Contains(plain[firstBreak:], "item-39") {
+		t.Errorf("expected items after the first page break, got:\n%s", plain)
+	}
+	// Paging must not lose any item.
+	for i := 0; i < 40; i++ {
+		if !strings.Contains(plain, fmt.Sprintf("item-%02d", i)) {
+			t.Errorf("item-%02d missing from the paged feed:\n%s", i, plain)
+		}
+	}
+}
+
 // Golden literals from the live capture in cap/kd3-01.cap, not from named
 // constants: these are the fidelity contract, so a retune must fail here and
 // produce new evidence. The other-realm case is the one that matters — BRE
