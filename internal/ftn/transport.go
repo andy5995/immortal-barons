@@ -66,6 +66,10 @@ type batchTarget struct {
 	// later run or check can say why a peer is behind without the sysop having
 	// kept the output of the run that met it.
 	LastError string `json:"last_error,omitempty"`
+	// Packets names the game packet files this target carries, for the packet
+	// log: a mailer logs the alias, the game logs the packet, and this is what
+	// joins the two (#311).
+	Packets []string `json:"packets,omitempty"`
 	// Raw marks a target carrying one unbundled packet, for a peer that cannot
 	// read a bundle. Journaled rather than re-read from the config, so a plan
 	// written before the setting changed still publishes what it planned.
@@ -397,7 +401,7 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 			result.Warnings = append(result.Warnings, fmt.Sprintf("quarantined malformed outbound packet %s: %v", file.Name(), err))
 			continue
 		}
-		te := transportEntry{Name: file.Name(), Raw: raw, Packet: packet, Route: []int{mine}}
+		te := transportEntry{Name: store.PacketFilename(packet, raw), Raw: raw, Packet: packet, Route: []int{mine}}
 		targets, err := packetTargets(packet, world, nodes)
 		if err != nil {
 			if moveErr := quarantineTransport(dataDir, path); moveErr != nil {
@@ -486,6 +490,7 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 					}
 				}
 				rawTarget.BundleFile = fmt.Sprintf("target-%03d-%03d.raw", nodeNumber, i)
+				rawTarget.Packets = entryNames([]transportEntry{entry})
 				if err := replaceFileAtomic(filepath.Join(batch, rawTarget.BundleFile), entry.Raw, 0o644); err != nil {
 					return batchPlan{}, err
 				}
@@ -499,6 +504,7 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 			return batchPlan{}, err
 		}
 		target.BundleFile = fmt.Sprintf("target-%03d.bundle", nodeNumber)
+		target.Packets = entryNames(groups[nodeNumber])
 		if err := replaceFileAtomic(filepath.Join(batch, target.BundleFile), body, 0o644); err != nil {
 			return batchPlan{}, err
 		}
@@ -619,7 +625,7 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 		}
 	}
 	final := filepath.Join(directory, target.Alias)
-	queued := Queued{PacketPath: final, NextHop: target.Name, Address: address}
+	queued := Queued{PacketPath: final, NextHop: target.Name, Address: address, Packets: target.Packets}
 	switch target.Mode {
 	case LinkAttach:
 		if _, _, err := fileAttachSubject(transport, final); err != nil {

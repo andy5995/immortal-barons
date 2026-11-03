@@ -203,6 +203,10 @@ func TestAFailedHandoffKeepsTheWorkAndRaisesTheAlarm(t *testing.T) {
 			if !seen(t, cfg, packet) {
 				t.Error("the planetary work was lost to the failed handoff")
 			}
+			// A scheduler throws the printed alarm away; the log keeps it.
+			if log, _ := os.ReadFile(filepath.Join(cfg.DataDir, store.PlanetaryLogFile)); !strings.Contains(string(log), "FTN handoff failed") {
+				t.Errorf("planetary.log lacks the failed handoff:\n%s", log)
+			}
 			if runtime.GOOS != "windows" {
 				got, err := os.ReadFile(hookOut)
 				if err != nil {
@@ -410,5 +414,45 @@ func TestFTNStatusNamesMailerNone(t *testing.T) {
 	}
 	if !strings.Contains(out, "Sending: Mailer None turns off the netmail") {
 		t.Errorf("-ftn-status output does not name Mailer None:\n%s", out)
+	}
+}
+
+// The packet log names the transport file each game packet came out of and
+// went into, which is what lets a sysop match it against the mailer's log
+// (#311).
+func TestTransportFilesReachThePacketLog(t *testing.T) {
+	cfg := ftnBoard(t, "")
+	alphaPacket(t, filepath.Join(cfg.DataDir, "mailer-in"))
+	var delivered string
+	for _, n := range dirEntries(t, filepath.Join(cfg.DataDir, "mailer-in")) {
+		delivered = n
+	}
+	if err := runPlanetary(cfg, false); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(filepath.Join(cfg.DataDir, store.PacketLogFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	log := string(data)
+	if !strings.Contains(log, "ftn  in   ") || !strings.Contains(log, " from "+delivered+"\n") {
+		t.Errorf("no unwrap line for %s:\n%s", delivered, log)
+	}
+	// The bundle for Alpha names the game packet the step wrote for it.
+	var written string
+	for _, line := range strings.Split(log, "\n") {
+		if _, rest, ok := strings.Cut(line, "out  #"); ok && strings.Contains(rest, "to Alpha BBS") {
+			written = rest[strings.LastIndex(rest, ": ")+2:]
+		}
+	}
+	handed := false
+	for _, line := range strings.Split(log, "\n") {
+		if strings.Contains(line, "ftn  out  ") && strings.Contains(line, "to Alpha BBS (1:1/1, ") &&
+			written != "" && strings.HasSuffix(line, written) {
+			handed = true
+		}
+	}
+	if !handed {
+		t.Errorf("no handoff line naming %q:\n%s", written, log)
 	}
 }

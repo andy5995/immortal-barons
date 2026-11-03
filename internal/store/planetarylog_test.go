@@ -1,9 +1,11 @@
 package store
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -68,4 +70,27 @@ func TestPlanetaryLogStaysAbsentWhenNothingIsWrong(t *testing.T) {
 // A read-only data directory must not fail the planetary step.
 func TestPlanetaryLogSurvivesAnUnwritableDirectory(t *testing.T) {
 	AppendPlanetaryLog(filepath.Join(t.TempDir(), "does-not-exist"), []string{"fault"}, time.Now())
+}
+
+// Writers in separate processes share planetary.log (the FTN transport writes
+// it without the world lock), and its rewrite must not lose another's lines.
+func TestPlanetaryLogKeepsConcurrentWriters(t *testing.T) {
+	dir := t.TempDir()
+	const writers = 40
+	var wg sync.WaitGroup
+	for i := range writers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			AppendPlanetaryLog(dir, []string{fmt.Sprintf("writer %d", i)}, time.Now())
+		}()
+	}
+	wg.Wait()
+	data, err := os.ReadFile(filepath.Join(dir, PlanetaryLogFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strings.Count(string(data), "writer "); got != writers {
+		t.Errorf("kept %d of %d lines", got, writers)
+	}
 }

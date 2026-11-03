@@ -28,11 +28,23 @@ var errBundleTooLarge = errors.New("transport bundle is full")
 // transportEntry carries one immutable game packet plus routing information
 // which may change at an FTN hop. Raw is never re-marshalled.
 type transportEntry struct {
+	// Name is the packet's canonical game file name (store.PacketFilename): the
+	// name the sending board's packet log gives it, which a claimed snapshot's
+	// own file name is not.
 	Name    string
 	Raw     []byte
 	Packet  game.Packet
 	Route   []int
 	Covered []int
+}
+
+// entryNames lists entries' packet names, in order.
+func entryNames(entries []transportEntry) []string {
+	names := make([]string, len(entries))
+	for i, e := range entries {
+		names[i] = e.Name
+	}
+	return names
 }
 
 type bundleManifest struct {

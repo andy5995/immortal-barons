@@ -139,7 +139,9 @@ The log matters more than it looks. The handoff names the peers a snapshot is
 still waiting on and how long they have been behind, and a scheduled run has
 nowhere to print that unless the output is kept. It is also the only record of
 every run: the game's own `planetary.log` gets a line only when a run has
-something to report.
+something to report. `packets.log` records each attachment the handoff queued
+and each packet the unwrap delivered, but not the peers a snapshot is waiting
+on.
 
 Keep it in a file of its own. The game writes `planetary.log` itself and trims
 it to its last 500 lines, so the script's output there would push the game's

@@ -33,6 +33,11 @@ func AppendPacketLog(dataDir string, lines []string, when time.Time) {
 	if len(lines) == 0 {
 		return
 	}
+	lock, err := lockLogs(dataDir)
+	if err != nil {
+		return
+	}
+	defer lock.Release()
 	path := filepath.Join(dataDir, PacketLogFile)
 	if info, err := os.Stat(path); err == nil && info.Size() >= packetLogMaxBytes {
 		os.Rename(path, path+".1")

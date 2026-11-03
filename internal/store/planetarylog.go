@@ -32,6 +32,11 @@ func AppendPlanetaryLog(dataDir string, notices []string, when time.Time) {
 	if len(notices) == 0 {
 		return
 	}
+	lock, err := lockLogs(dataDir)
+	if err != nil {
+		return
+	}
+	defer lock.Release()
 	path := filepath.Join(dataDir, PlanetaryLogFile)
 	// UTC, and marked: a sysop reading this beside another board's log, or beside
 	// a packet's own stamp, is comparing two clocks otherwise (#267).
@@ -51,6 +56,17 @@ func AppendPlanetaryLog(dataDir string, notices []string, when time.Time) {
 		lines = lines[len(lines)-planetaryLogLines:]
 	}
 	os.WriteFile(path, []byte(strings.Join(lines, "\n")+"\n"), 0o644)
+}
+
+// logLockFile serializes the writers of planetary.log and packets.log. The
+// world lock cannot: the FTN transport writes both logs holding only its own
+// lock, which is never taken while the world lock is held, and a rewrite or a
+// rotation racing another one loses lines. Nothing is locked while this is
+// held, so it cannot deadlock with either.
+const logLockFile = "log.lock"
+
+func lockLogs(dataDir string) (*FileLock, error) {
+	return LockPath(filepath.Join(dataDir, logLockFile), true)
 }
 
 // logSafe replaces every control character in a log entry with "?". Board

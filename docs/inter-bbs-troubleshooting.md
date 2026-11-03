@@ -160,6 +160,15 @@ for the same number on the receiving board:
   hub. If the league routes through a hub that runs the game, its log shows a
   `pass` line for each packet it passed on.
 
+With the FTN transport the log has two more kinds of line, and they narrow a
+missing packet down to one side. An `ftn  out` line names the attachment handed
+to the mailer, the peer and the netmail it rides on, followed by the packet
+files inside it, so the packet's file name from its `out` line leads to the
+attachment name the mailer logs. An attachment planned by an older version lists
+no packet files. An `ftn  in` line names each packet unwrapped and the file the
+mailer delivered it in. Transport warnings, and a handoff that failed, are
+written to `planetary.log`.
+
 ## Refused packets
 
 A refusal is the one skip that always means something is wrong somewhere. There
@@ -534,7 +543,7 @@ Work down the path a packet takes:
 - **Is anything stuck in the outbound directory?** Packets written and never
   collected mean the game is fine and the mailer is not moving them.
 - **Does the mailer log show the transfers?** With the FTN transport, the
-  `Queued` lines in the run's own output are the next place to look.
+  `ftn  out` lines in `packets.log` name each attachment to look for.
 
 A run that happens but finds nothing to do still answers probes, so a board that
 is quiet on someone's screen while its own log looks healthy points at the

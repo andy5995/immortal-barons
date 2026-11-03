@@ -14,12 +14,21 @@ type Queued struct {
 	NextHop    string
 	Address    Address
 	Message    string
+	Packets    []string // the game packet files inside, when the plan recorded them
+}
+
+// Arrival is one game packet unwrapped into the game's inbound, and the
+// transport file it came out of.
+type Arrival struct {
+	Source string // the file the mailer delivered
+	Packet string // the game packet's file name
 }
 
 // Result describes one inbound or outbound transport scan.
 type Result struct {
 	Queued    []Queued
 	Delivered int
+	Arrivals  []Arrival
 	// Snapshots and Waiting describe outbound work this run could not finish:
 	// how many claimed snapshots still hold an unpublished target, and which
 	// peers those targets are for. A snapshot is kept whole until every one of

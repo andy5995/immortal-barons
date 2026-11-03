@@ -535,6 +535,7 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 					}
 				}
 				rawTarget.BundleFile = fmt.Sprintf("target-%03d-%03d.raw", number, i)
+				rawTarget.Packets = entryNames([]transportEntry{entry})
 				if err := replaceFileAtomic(filepath.Join(dir, rawTarget.BundleFile), entry.Raw, 0o644); err != nil {
 					return receipt, err
 				}
@@ -548,6 +549,7 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 			return receipt, err
 		}
 		target.BundleFile = fmt.Sprintf("target-%03d.bundle", number)
+		target.Packets = entryNames(groups[number])
 		if err := replaceFileAtomic(filepath.Join(dir, target.BundleFile), body, 0o644); err != nil {
 			return receipt, err
 		}
@@ -602,6 +604,7 @@ func processInboundReceipt(dir, planPath string, receipt *inboundReceipt, board 
 				local.Done = true
 				receipt.Progress = time.Now()
 				result.Delivered++
+				result.Arrivals = append(result.Arrivals, Arrival{Source: filepath.Base(receipt.Source), Packet: name})
 				if err := saveInboundReceipt(planPath, *receipt); err != nil {
 					gameLock.Release()
 					return err

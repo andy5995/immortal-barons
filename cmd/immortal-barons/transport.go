@@ -73,9 +73,9 @@ func mailerIn(cfg game.Config, wait bool, out io.Writer) (busy bool) {
 		fmt.Fprintln(out, "FTN unwrap skipped: another run holds the transport lock and is doing it.")
 		return true
 	}
-	printTransportWarnings(result)
+	recordTransport(cfg, result, "pass")
 	if err != nil {
-		transportWarn(fmt.Sprintf("FTN unwrap failed: %v. Applying what is already in %s.", err, cfg.Inbound()))
+		transportFault(cfg, fmt.Sprintf("FTN unwrap failed: %v. Applying what is already in %s.", err, cfg.Inbound()))
 		return false
 	}
 	for _, queued := range result.Queued {
@@ -102,9 +102,9 @@ func gameInboundIn(cfg game.Config, wait bool, out io.Writer) {
 		fmt.Fprintf(out, "Unwrapping the bundles in %s skipped: another run holds the transport lock and is doing it.\n", cfg.Inbound())
 		return
 	}
-	printTransportWarnings(result)
+	recordTransport(cfg, result, "pass")
 	if err != nil {
-		transportWarn(fmt.Sprintf("Could not unwrap the transport bundles in %s: %v. They stay there for the next run.", cfg.Inbound(), err))
+		transportFault(cfg, fmt.Sprintf("Could not unwrap the transport bundles in %s: %v. They stay there for the next run.", cfg.Inbound(), err))
 		return
 	}
 	if result.Delivered > 0 {
@@ -132,7 +132,7 @@ func transportOut(cfg game.Config, wait bool, out io.Writer) error {
 		fmt.Fprintln(out, "FTN handoff skipped: another run holds the transport lock and is doing it.")
 		return errHandoffSkipped
 	}
-	printTransportWarnings(result)
+	recordTransport(cfg, result, "out")
 	for _, queued := range result.Queued {
 		fmt.Fprintf(out, "Queued %s for %s (%s) as %s\n",
 			queued.PacketPath, queued.NextHop, queued.Address, queued.Message)
@@ -179,6 +179,7 @@ func handoff(cfg game.Config, wait bool, out io.Writer) []string {
 	if fault == "" {
 		return nil
 	}
+	store.AppendPlanetaryLog(cfg.DataDir, []string{fault}, time.Now())
 	if !fresh {
 		transportWarn(fault + " (unchanged since it was reported)")
 		return nil
@@ -191,10 +192,32 @@ func transportWarn(msg string) {
 	fmt.Fprint(os.Stderr, prefix, textwrap.Wrap(msg, textwrap.Console, strings.Repeat(" ", len(prefix))), "\n")
 }
 
-func printTransportWarnings(result ftn.Result) {
+// recordTransport prints a transport run's warnings and keeps them in
+// planetary.log, and puts each file it moved in packets.log: a scheduled run's
+// output is thrown away, and these are the lines that tie a game packet to the
+// file name a mailer logs (#311). kind labels a queued bundle: "out" for this
+// board's own, "pass" for one forwarded during the unwrap.
+func recordTransport(cfg game.Config, result ftn.Result, kind string) {
 	for _, warning := range result.Warnings {
 		transportWarn(warning)
 	}
+	store.AppendPlanetaryLog(cfg.DataDir, result.Warnings, time.Now())
+	var lines []string
+	for _, a := range result.Arrivals {
+		lines = append(lines, fmt.Sprintf("ftn  in   %s from %s", a.Packet, a.Source))
+	}
+	for _, q := range result.Queued {
+		lines = append(lines, fmt.Sprintf("ftn  %-4s %s to %s (%s, %s): %s", kind,
+			filepath.Base(q.PacketPath), q.NextHop, q.Address, q.Message, strings.Join(q.Packets, ", ")))
+	}
+	store.AppendPacketLog(cfg.DataDir, lines, time.Now())
+}
+
+// transportFault is transportWarn for a fault that also belongs in
+// planetary.log.
+func transportFault(cfg game.Config, msg string) {
+	transportWarn(msg)
+	store.AppendPlanetaryLog(cfg.DataDir, []string{msg}, time.Now())
 }
 
 // runFTNStatus answers the question a file count cannot: not how many files
