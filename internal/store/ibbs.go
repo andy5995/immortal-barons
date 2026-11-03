@@ -83,10 +83,12 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	}
 	run.Released = released
 	inResult, err := ReadInbound(w, inboundDir, verbose)
+	// Before the error is raised: what a failing batch did up to that point
+	// happened, and a missing line would read as a packet that never arrived.
+	AppendPacketLog(w.Config.DataDir, inResult.Log, time.Now())
 	if err != nil {
 		return run, err
 	}
-	AppendPacketLog(w.Config.DataDir, inResult.Log, time.Now())
 	run.Applied = inResult.Applied
 	run.OtherLeague = inResult.OtherLeague
 	run.MeshCopy = inResult.MeshCopy
@@ -900,13 +902,15 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		}
 		// In transit. The file goes either way, so a packet that has run out
 		// of hops is not re-read on every later run.
-		w.ForwardPacket(p, raw)
-		result.Log = append(result.Log, inLine(p, "passed on for "+p.ToBoard))
+		fate := "passed on for " + p.ToBoard
+		if !w.ForwardPacket(p, raw) {
+			fate = "destroyed, not passed on for " + p.ToBoard + " (see planetary.log)"
+		}
 		if verbose {
 			fmt.Printf("  Forwarded packet from %s to %s (%s, dated %s)\n",
 				p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
 		}
-		return os.Remove(path)
+		return result.settle(p, fate, os.Remove(path))
 	}
 	// Held, not applied: this build cannot read the format. See HeldDir.
 	// Checked only for a packet addressed HERE — a hub passes on bytes it
@@ -916,23 +920,22 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	if reason == HeldProtocol {
 		result.Held++
 		w.NoteProtocolHold(p.FromBoard, p.Protocol)
-		result.Log = append(result.Log, inLine(p, fmt.Sprintf("held: protocol %d", p.Protocol)))
-		return holdPacket(w.Config.DataDir, path)
+		return result.settle(p, fmt.Sprintf("held: protocol %d", p.Protocol), holdPacket(w.Config.DataDir, path))
 	}
 	if w.RefusedUnnumbered(p) {
-		result.Log = append(result.Log, inLine(p, "deleted: no sequence number or board name"))
 		if verbose {
 			fmt.Printf("  Deleted packet from %s: it has no sequence number or board name\n", p.FromBoard)
 		}
-		return os.Remove(path)
+		return result.settle(p, "deleted: no sequence number or board name", os.Remove(path))
 	}
 	if w.IsPacketSeen(p) {
 		result.AlreadySeen++
-		result.Log = append(result.Log, inLine(p, "deleted: already seen"))
 		if verbose {
 			fmt.Printf("  Skipped packet from %s (already seen)\n", p.FromBoard)
 		}
-		os.Remove(path) // clean up; SeenPacket already recorded it
+		// A failed clean-up is logged and not raised: SeenPacket already
+		// recorded the packet, so the next run deletes it again.
+		result.settle(p, "deleted: already seen", os.Remove(path))
 		return nil
 	}
 	// Asked BEFORE ApplyPacket, which posts the refusal to the planet's
@@ -951,7 +954,6 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	// legitimate rules change are the case RulesetGraceDays covers.
 	if reason == HeldRules {
 		result.HeldRules++
-		result.Log = append(result.Log, inLine(p, "held: not the league's rules"))
 		if result.rulesHeld == nil {
 			result.rulesHeld = map[string]game.Packet{}
 		}
@@ -962,16 +964,15 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 			fmt.Printf("  Held packet from %s (%s): it was written under rules that are not the league's\n",
 				p.FromBoard, p.PacketType())
 		}
-		return holdPacket(w.Config.DataDir, path)
+		return result.settle(p, "held: not the league's rules", holdPacket(w.Config.DataDir, path))
 	}
 	late := w.ArrivedLate(p)
-	applyResult := w.ApplyPacket(p)
+	applyResult, outcome := w.ApplyPacketOutcome(p)
 	if applyResult.HasPayload() {
 		w.Outbox = append(w.Outbox, applyResult)
 	}
 	if refused {
 		result.Refused++
-		result.Log = append(result.Log, inLine(p, "held: does not match that board's key"))
 		if verbose {
 			fmt.Printf("  Held packet from %s (%s): it does not match that board's key\n",
 				p.FromBoard, p.PacketType())
@@ -986,21 +987,25 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		// be gone for good and a re-send would then be discarded as a
 		// duplicate. Config.HeldMaxAge bounds the wait for a board that is simply
 		// forging.
-		return holdPacket(w.Config.DataDir, path)
+		return result.settle(p, "held: does not match that board's key", holdPacket(w.Config.DataDir, path))
 	}
 	result.Applied++
+	fate := "applied"
 	switch {
 	case applyResult.Notice != "":
-		result.Log = append(result.Log, inLine(p, "refused, and the sender told why"))
+		fate = "refused, and the sender told why"
+	case p.Notice != "":
+		fate = "a refusal notice from that board (see planetary.log)"
 	case late:
-		result.Log = append(result.Log, inLine(p, "applied, after a later packet from that board"))
-	default:
-		result.Log = append(result.Log, inLine(p, "applied"))
+		fate = "applied, after a later packet from that board"
+	}
+	if outcome.OrdersRefused {
+		fate += "; its Coordinator orders were refused (see planetary.log)"
 	}
 	if verbose {
 		fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
 	}
-	return os.Remove(path)
+	return result.settle(p, fate, os.Remove(path))
 }
 
 // newNotices returns the notices in now that were not in before. Order is

@@ -167,8 +167,9 @@ func (w *World) routedHop(me, to int) int {
 // news says so. Saying so is the point: a cycle in the roster is one sysop's
 // typo that every board in the league obeys, and a hop count that quietly ate
 // the traffic would leave nobody anything to go on. BRE reported the same thing
-// as "Illegal Route Found from BBS #".
-func (w *World) ForwardPacket(p Packet, raw []byte) {
+// as "Illegal Route Found from BBS #". It reports whether the packet was
+// queued to pass on.
+func (w *World) ForwardPacket(p Packet, raw []byte) bool {
 	// An unroutable destination is hopeless on the first hop, not the
 	// twenty-fifth: no board on the way can place it either. Saying which board
 	// is missing from the roster beats reporting a circle, which describes what
@@ -176,21 +177,22 @@ func (w *World) ForwardPacket(p Packet, raw []byte) {
 	if !w.Routable(p.ToBoard) {
 		w.noteSysop("A packet from %s for %s was destroyed: no board of that name is on the league roster.",
 			p.FromBoard, p.ToBoard)
-		return
+		return false
 	}
 	if p.Hops >= MaxPacketHops {
 		w.noteSysop("A packet from %s bound for %s has been passed between boards %d times and was destroyed. The league's routing sends it in a circle.",
 			p.FromBoard, p.ToBoard, p.Hops)
-		return
+		return false
 	}
 	p.Hops++
 	out, err := relayBytes(p, raw)
 	if err != nil {
 		w.noteSysop("A packet from %s for %s was destroyed: it could not be re-encoded to pass on (%v).",
 			p.FromBoard, p.ToBoard, err)
-		return
+		return false
 	}
 	w.Transit = append(w.Transit, out)
+	return true
 }
 
 // relayBytes is raw with its Hops set to p.Hops, every other field kept

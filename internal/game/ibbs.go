@@ -527,9 +527,29 @@ func withoutStaleState(p Packet) Packet {
 	return p
 }
 
+// ApplyOutcome is what ApplyPacket decided about a packet beyond the reply it
+// returns, for the packet log to report rather than guess at.
+type ApplyOutcome struct {
+	// OrdersRefused means the packet claimed League Coordinator orders and they
+	// failed their check. The reason is in the sysop notices.
+	OrdersRefused bool
+}
+
 // ApplyPacket applies an inbound packet to this board and returns a result
 // packet (attack outcomes) addressed back to the origin.
 func (w *World) ApplyPacket(p Packet) Packet {
+	reply, _ := w.ApplyPacketOutcome(p)
+	return reply
+}
+
+// ApplyPacketOutcome is ApplyPacket, also reporting what it decided.
+func (w *World) ApplyPacketOutcome(p Packet) (Packet, ApplyOutcome) {
+	var outcome ApplyOutcome
+	reply := w.applyPacket(p, &outcome)
+	return reply, outcome
+}
+
+func (w *World) applyPacket(p Packet, outcome *ApplyOutcome) Packet {
 	// Origin BEFORE anything is recorded about the packet, including replay
 	// bookkeeping (#118). SeenPacket raises HighSeq[FromBoard], so checking it
 	// first would let a forged packet with a large sequence number poison the
@@ -659,6 +679,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.applyBulletins(*p.Bulletins)
 	}
 	if claimsOrders && !orders {
+		outcome.OrdersRefused = true
 		w.noteSysop("A packet from %s claimed to carry League Coordinator orders and was refused: %s.",
 			p.FromBoard, w.CoordRefusalReason(p))
 	}

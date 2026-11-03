@@ -328,3 +328,28 @@ func TestBroadcastCopiesVerifyInARoutedLeague(t *testing.T) {
 		}
 	}
 }
+
+// ApplyPacketOutcome reports refused orders only when the refusal was made and
+// noted, so the packet log's "see planetary.log" always has a line to find. A
+// packet bounced for its version never reaches the orders check.
+func TestOrdersRefusedOnlyWhenNoted(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS, cfg.BoardID, cfg.MinBoardVersion = true, "Bravo BBS", "0.0.5"
+	w := NewWorldSeed(cfg, 1)
+	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "Alpha BBS"}, {Number: 2, Name: "Bravo BBS"}}
+	roster := []LeagueNode{{Number: 1, Name: "Alpha BBS"}, {Number: 2, Name: "Bravo BBS", City: "Elsewhere"}}
+
+	_, outcome := w.ApplyPacketOutcome(Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Seq: 1, Version: "0.0.4", LeagueNodes: roster})
+	if outcome.OrdersRefused {
+		t.Error("a version bounce reported refused orders")
+	}
+
+	w.Config.MinBoardVersion = ""
+	_, outcome = w.ApplyPacketOutcome(Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Seq: 2, LeagueNodes: roster})
+	if !outcome.OrdersRefused {
+		t.Fatal("unsigned orders were not reported as refused")
+	}
+	if !strings.Contains(strings.Join(w.SysopNotices, "\n"), "claimed to carry League Coordinator orders") {
+		t.Error("refused orders reported without a sysop notice")
+	}
+}

@@ -91,3 +91,38 @@ func TestPacketLogCannotBeForged(t *testing.T) {
 		}
 	}
 }
+
+// A line says what became of the packet, not what was meant to: a forward that
+// destroyed the packet, or a move that failed, is logged as that (#311).
+func TestPacketLogRecordsWhatHappened(t *testing.T) {
+	dir := t.TempDir()
+	w := game.NewWorld(game.DefaultConfig())
+	w.Config.DataDir = dir
+	w.Config.BoardID = "Hub BBS"
+	w.LeagueNodes = []game.LeagueNode{
+		{Number: 1, Name: "Hub BBS", Hosts: []int{2}},
+		{Number: 2, Name: "Leaf BBS"},
+	}
+	var result InboundResult
+	p := game.Packet{FromBoard: "Leaf BBS", ToBoard: "Nowhere BBS", Seq: 4}
+	path := filepath.Join(dir, "p.brp")
+	if err := os.WriteFile(path, []byte("{}"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := applyStagedPacket(w, &result, path, p, []byte("{}"), false); err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Log) != 1 || !strings.Contains(result.Log[0], "destroyed, not passed on") {
+		t.Errorf("an unroutable forward logged %q", result.Log)
+	}
+
+	result = InboundResult{}
+	gone := filepath.Join(dir, "missing.brp") // removing it fails
+	p = game.Packet{FromBoard: "Leaf BBS", Seq: 0}
+	if err := applyStagedPacket(w, &result, gone, p, nil, false); err == nil {
+		t.Error("a failed delete was not raised")
+	}
+	if len(result.Log) != 1 || !strings.Contains(result.Log[0], "but the file stays in inbound") {
+		t.Errorf("a failed delete logged %q", result.Log)
+	}
+}

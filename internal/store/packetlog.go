@@ -55,6 +55,17 @@ func AppendPacketLog(dataDir string, lines []string, when time.Time) {
 	f.Close()
 }
 
+// settle records an inbound packet's fate once the move or removal that
+// carries it out has run, and returns that step's error. A step that failed
+// left the file in inbound, and the line says so rather than claiming it.
+func (r *InboundResult) settle(p game.Packet, fate string, err error) error {
+	if err != nil {
+		fate += fmt.Sprintf(", but the file stays in inbound: %v", err)
+	}
+	r.Log = append(r.Log, inLine(p, fate))
+	return err
+}
+
 // inLine words one inbound packet's fate for the packet log.
 func inLine(p game.Packet, what string) string {
 	return fmt.Sprintf("in   #%d from %s (%s): %s", p.Seq, p.FromBoard, p.Contents(), what)
