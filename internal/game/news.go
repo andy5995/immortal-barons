@@ -65,13 +65,13 @@ func News(lines ...string) NewsFeed {
 	return f
 }
 
-// postNews appends a system news line to the planetary bulletin, keeping only
-// the most recent entries (same cap as player bulletins).
+// postNews appends a system news line to the day's planetary news. There is no
+// cap, as in the original: BINARY-VERIFIED, its news sink (append_news_event,
+// BRE.OVR) appends every event to the day's files and tests nothing but whether
+// they opened. The day's news is bounded by the daily rollover instead. IB kept
+// only the last 20 lines until 2026-11-03, a figure with no source.
 func (w *World) postNews(line string) {
 	w.NewsToday = append(w.NewsToday, NewsLine{At: StoredStamp(timeNow()), Text: line})
-	if len(w.NewsToday) > 20 {
-		w.NewsToday = w.NewsToday[len(w.NewsToday)-20:]
-	}
 }
 
 // postCombatNews broadcasts the outcome of a regular attack to the planet.

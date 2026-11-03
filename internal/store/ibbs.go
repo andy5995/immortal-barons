@@ -232,8 +232,8 @@ type PlanetaryRun struct {
 	Bulletins      int // league bulletins broadcast (Coordinator's board only)
 	// Notices are transport faults for the sysop -- an undeliverable packet,
 	// orders that failed their check. They are reported here rather than in the
-	// planet's news: no player can act on one, and the news cap would let a
-	// repeating fault delete the day's real events.
+	// planet's news: no player can act on one, and a repeating fault would
+	// bury the day's real events.
 	Notices []string
 }
 

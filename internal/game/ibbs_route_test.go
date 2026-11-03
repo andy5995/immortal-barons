@@ -125,8 +125,8 @@ func TestForwardPacketStopsAtTheHopLimit(t *testing.T) {
 // mail, which is the failure the count exists to make survivable.
 //
 // It is reported to the SYSOP, not to the planet: a player can do nothing about
-// a routing cycle, and the news cap is 20 lines, so a fault that repeats every
-// exchange would delete the day's real events instead.
+// a routing cycle, and a fault that repeats every exchange would bury the
+// day's real events.
 func TestADestroyedPacketIsReported(t *testing.T) {
 	w := &World{}
 	w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Charlie BBS", Hops: MaxPacketHops}, nil)

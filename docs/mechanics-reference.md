@@ -6786,6 +6786,12 @@ BRE keeps two planet-wide news feeds, populated from template files with random
 flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
 (empire), `%P` (planet), `%C` (captured amount):
 
+**Neither feed has a cap** (BINARY-VERIFIED): the news sink appends every event
+to the day's files and checks only that they opened, so a busy day's news is as
+long as the day was. What bounds it is the daily rollover from today's news to
+yesterday's. IB matches this; until 2026-11-03 it kept only the last 20 lines a
+day, a figure with no source.
+
 - **Planetary news** (`game/news.dat`) — written when the event happens, seen
   by everyone on the planet. Categories: `NORMALWIN` / `NORMALLOSS` (regular
   attacks), `TOTALWIN` (an empire is destroyed), `NUKE` / `CHEM` / `BIO`

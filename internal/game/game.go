@@ -213,8 +213,8 @@ type World struct {
 	// for its players: a packet that could not be delivered, orders that failed
 	// their check. They are NOT persisted (json:"-") and are drained by the
 	// planetary step into its run report, because a bulletin is the wrong place
-	// for them — no player can act on one, and the news cap is 20 lines, so a
-	// fault that repeats every exchange silently deletes the day's real events.
+	// for them — no player can act on one, and a fault that repeats every
+	// exchange would bury the day's real events.
 	SysopNotices []string `json:"-"`
 
 	// LastFaultNotices is the previous run's notices, kept so a run can tell a

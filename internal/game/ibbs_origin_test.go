@@ -62,7 +62,7 @@ func TestForgedPacketIsRefused(t *testing.T) {
 		t.Errorf("forged attack took land: %d -> %d", before.Land, after.Land)
 	}
 	// Reported to the SYSOP, not the planet: a player can do nothing about a
-	// forged packet, and the news cap would let a repeat delete the day's events.
+	// forged packet, and a repeat would bury the day's events.
 	if !strings.Contains(strings.Join(w.SysopNotices, "\n"), "did not match that board's key") {
 		t.Errorf("the refusal was not reported to the sysop:\n%s", strings.Join(w.SysopNotices, "\n"))
 	}

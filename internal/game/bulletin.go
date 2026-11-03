@@ -39,7 +39,7 @@ func bulletinKey(scope bulletin.Scope, name string) string { return string(scope
 //
 // The first recording of a scope is silent: a board that already had bulletins
 // when this arrived would otherwise fill a day's news with files nobody
-// touched, and the news cap would push the real events off the page.
+// touched, and the real events would be lost among them.
 func (w *World) RecordBulletins(scope bulletin.Scope, files []BulletinFile) bool {
 	if w.BulletinDigest == nil {
 		w.BulletinDigest = map[string]string{}
