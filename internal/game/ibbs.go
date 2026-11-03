@@ -262,6 +262,8 @@ func (p Packet) Contents() string {
 	add(len(p.Threats), "threats")
 	add(len(p.News), "news")
 	add(len(p.TimeChecks), "time checks")
+	add(len(p.Market), "market listings")
+	add(len(p.Battles), "battles")
 	for _, f := range []struct {
 		on   bool
 		what string

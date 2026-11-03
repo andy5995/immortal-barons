@@ -1592,3 +1592,34 @@ func TestSameRosterSeesAKeyChange(t *testing.T) {
 		t.Fatal("a roster whose key changed compared the same")
 	}
 }
+
+// Every payload a packet can carry alone shows in its contents, so the packet
+// log never calls a packet that carried something "empty". Payloads are every
+// slice and pointer field plus Notice and NoRealms, so a field added later is
+// covered without editing this test.
+func TestContentsNamesEveryPayload(t *testing.T) {
+	notPayload := map[string]bool{"Signature": true, "BoardSig": true}
+	typ := reflect.TypeFor[Packet]()
+	for i := range typ.NumField() {
+		f := typ.Field(i)
+		var p Packet
+		v := reflect.ValueOf(&p).Elem().Field(i)
+		switch {
+		case notPayload[f.Name]:
+			continue
+		case f.Type.Kind() == reflect.Slice:
+			v.Set(reflect.MakeSlice(f.Type, 1, 1))
+		case f.Type.Kind() == reflect.Pointer:
+			v.Set(reflect.New(f.Type.Elem()))
+		case f.Name == "Notice":
+			v.SetString("x")
+		case f.Name == "NoRealms":
+			v.SetBool(true)
+		default:
+			continue
+		}
+		if got := p.Contents(); got == "empty" {
+			t.Errorf("a packet carrying only %s reads as empty", f.Name)
+		}
+	}
+}
