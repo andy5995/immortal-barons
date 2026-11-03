@@ -54,7 +54,7 @@ func checkTransportSettings(cfg game.Config) error {
 func transportIn(cfg game.Config, wait bool, out io.Writer) {
 	tc, err := ftn.LoadConfig(cfg.DataDir)
 	if err != nil {
-		transportWarn(fmt.Sprintf("FTN unwrap skipped: %v. Applying what is already in %s.", err, cfg.Inbound()))
+		transportFault(cfg, fmt.Sprintf("FTN unwrap skipped: %v. Applying what is already in %s.", err, cfg.Inbound()))
 	} else if tc.Receives() && mailerIn(cfg, wait, out) {
 		return
 	}
