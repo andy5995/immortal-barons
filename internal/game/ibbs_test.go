@@ -1578,3 +1578,17 @@ func TestOutboxForNeverFillsABounce(t *testing.T) {
 		t.Fatalf("the far board answered %d strikes, want 1", answered)
 	}
 }
+
+// A Coordinator adding or changing a board's key changes nothing else on the
+// roster, and a member board that compared the rest kept its old copy (#328).
+func TestSameRosterSeesAKeyChange(t *testing.T) {
+	old := []LeagueNode{{Number: 1, Name: "Alpha"}, {Number: 2, Name: "Beta"}}
+	keyed := []LeagueNode{{Number: 1, Name: "Alpha"}, {Number: 2, Name: "Beta", PublicKey: "ab12"}}
+	if SameRoster(old, keyed) {
+		t.Fatal("a roster that gained a key compared the same")
+	}
+	rekeyed := []LeagueNode{{Number: 1, Name: "Alpha"}, {Number: 2, Name: "Beta", PublicKey: "cd34"}}
+	if SameRoster(keyed, rekeyed) {
+		t.Fatal("a roster whose key changed compared the same")
+	}
+}

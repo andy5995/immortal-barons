@@ -554,7 +554,7 @@ func SameRoster(a, b []LeagueNode) bool {
 func sameNode(a, b LeagueNode) bool {
 	if a.Number != b.Number || a.Name != b.Name || a.Address != b.Address ||
 		a.City != b.City || a.State != b.State || a.Country != b.Country ||
-		len(a.Hosts) != len(b.Hosts) {
+		a.PublicKey != b.PublicKey || len(a.Hosts) != len(b.Hosts) {
 		return false
 	}
 	for i := range a.Hosts {
