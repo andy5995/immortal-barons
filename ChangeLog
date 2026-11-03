@@ -2,6 +2,13 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * BREAKING: packet protocol 6
+  * A strike or travel-time probe queued in the same run as a refusal notice
+    to its board is no longer discarded on arrival
+  * Each planetary run logs every packet it sends and takes in to packets.log
+  * A roster change that only adds or changes a board's key reaches member
+    boards (#328)
+  * A lost attack's news names the realm that sent it, or calls it a group
+    attack (#326)
   * A bounced interplanetary message is worded in the reader's language, and
     its send time is on the reader's clock
   * Other planets follow a sysop's realm rename: the news says so, and their spy
