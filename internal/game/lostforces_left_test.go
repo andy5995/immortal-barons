@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 // The countdown the sysop panel shows is the rule ReturnLostForces applies, so
 // an item it says has days left is one the timer keeps.
@@ -37,5 +40,37 @@ func TestLostForcesDaysLeft(t *testing.T) {
 	w.Config.LostForcesDays = 0
 	if _, ok := w.LostForcesDaysLeft(InFlightStrike{}); ok {
 		t.Error("LostForcesDaysLeft reported a countdown with recovery off")
+	}
+}
+
+// The news says whose attack came home and whether it was a group's, and a
+// trade deal, being private, stays out of it (#326).
+func TestLostForcesNewsNamesTheAttack(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.LostForcesDays = 3
+	w.GameDay = 10
+	e := w.AddHuman("baron-a", "Iron Coast")
+	c := []Contribution{{Owner: "baron-a", AttackForce: AttackForce{Troopers: 10}}}
+	w.InFlight = []InFlightStrike{
+		{ID: 1, Kind: "attack", TargetBoard: "Far BBS", TargetEmpire: "Salt Marsh", Contributors: c},
+		{ID: 2, Kind: "attack", TargetBoard: "Far BBS", Group: true, Whole: true, Contributors: c},
+		{ID: 3, Kind: "deal", TargetBoard: "Far BBS", TargetEmpire: "Salt Marsh", Owner: "baron-a", Goods: &TradeBasket{Food: 1}},
+	}
+	if got := w.ReturnLostForces(nil); got != 3 {
+		t.Fatalf("recovered %d, want 3", got)
+	}
+	var news []string
+	for _, n := range w.NewsToday {
+		news = append(news, n.Text)
+	}
+	want := []string{
+		"Iron Coast's attack on Salt Marsh of Far BBS heard nothing back, and its forces came home.",
+		"A group attack on Far BBS heard nothing back, and its forces came home.",
+	}
+	if !slices.Equal(news, want) {
+		t.Fatalf("news = %q, want %q", news, want)
+	}
+	if e.Troopers < 20 {
+		t.Fatalf("troopers not returned: %d", e.Troopers)
 	}
 }

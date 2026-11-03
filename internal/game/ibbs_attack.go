@@ -1178,6 +1178,27 @@ func strikeAim(f InFlightStrike) Msg {
 	return say("{who}", "who", f.TargetEmpire)
 }
 
+// lostForceNews is the planet's news line for an attack given up on: a group
+// attack or the realm that sent it, and where it went (#326). Only attacks make
+// the news. A trade is private to its two realms, a terror op is told to its
+// sender alone (#285), and a Special Operation follows the terror op.
+func lostForceNews(w *World, f InFlightStrike) string {
+	aim := f.TargetBoard
+	if !f.Whole && f.TargetEmpire != "" {
+		aim = f.TargetEmpire + " of " + f.TargetBoard
+	}
+	if f.Group {
+		return fmt.Sprintf("A group attack on %s heard nothing back, and its forces came home.", aim)
+	}
+	who := "A realm"
+	if len(f.Contributors) > 0 {
+		if e := w.FindByOwner(f.Contributors[0].Owner); e != nil {
+			who = e.Name
+		}
+	}
+	return fmt.Sprintf("%s's attack on %s heard nothing back, and its forces came home.", who, aim)
+}
+
 // ReturnLostForces gives back the forces of any strike still unanswered after
 // its wait (waitDays), and reports how many items it recovered. This is what
 // stops a lost packet — a board that stops running transfers, a sysop who drops
@@ -1264,11 +1285,9 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 			e.addEvent(say("No word came back from {board}. Your force sent against {target} has returned home.",
 				"board", f.TargetBoard, "target", strikeAim(f)))
 		}
+		w.postNews(lostForceNews(w, f))
 	}
 	w.InFlight = waiting
-	if recovered > 0 {
-		w.postNews(fmt.Sprintf("%d interplanetary force(s) gave up waiting and came home.", recovered))
-	}
 	return recovered
 }
 

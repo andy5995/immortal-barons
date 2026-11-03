@@ -1713,8 +1713,11 @@ away for the whole packet round trip, and packets go missing; the setting gives 
 detachment back to its owner when no result has come home in that many days. IB
 implements this (#96): `World.InFlight` records every strike that leaves, a
 returning result clears it, and `ReturnLostForces` — run from the planetary step
-after inbound packets are applied — hands back anything that has waited too long
-and posts news. The day an item is sent does not count toward the wait, so a
+after inbound packets are applied — hands back anything that has waited too long.
+Each owner gets an event saying what came home. An attack also gets a news line
+naming the realm that sent it, or calling it a group attack, and its target
+(#326). Trades, terror ops and Special Operations reach only their owner's
+events. The day an item is sent does not count toward the wait, so a
 wait of 1 still lasts a full game day; counting it let an item sent just before
 the day changed come home at the next run, before any answer could make the
 round trip. 0 turns the recovery off. The same timer covers every kind of
