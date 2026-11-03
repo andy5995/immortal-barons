@@ -40,7 +40,12 @@ func AppendPacketLog(dataDir string, lines []string, when time.Time) {
 	defer lock.Release()
 	path := filepath.Join(dataDir, PacketLogFile)
 	if info, err := os.Stat(path); err == nil && info.Size() >= packetLogMaxBytes {
-		os.Rename(path, path+".1")
+		// A rename that fails (on Windows, a viewer holding the file open) would
+		// leave the file growing on every run; past twice the cap it stops
+		// taking lines instead, until a later run can move it.
+		if os.Rename(path, path+".1") != nil && info.Size() >= 2*packetLogMaxBytes {
+			return
+		}
 	}
 	stamp := when.UTC().Format("2006-01-02 15:04:05 MST")
 	var b strings.Builder
