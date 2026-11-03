@@ -1556,3 +1556,25 @@ func TestScoresResendOnlyOnChangeOrNewDay(t *testing.T) {
 		}
 	}
 }
+
+// A bounce is read for its notice and nothing else, so traffic queued to the
+// same board later in the run must travel in a packet of its own (#311).
+func TestOutboxForNeverFillsABounce(t *testing.T) {
+	a := testWorld()
+	a.Config.BoardID = "Alpha"
+	a.Outbox = append(a.Outbox, a.BounceRuleset(Packet{FromBoard: "Beta"}))
+	a.enqueue("Beta", RemoteAttack{ID: 7, TargetEmpire: "Nobody"})
+	if len(a.Outbox) != 2 || len(a.Outbox[0].Attacks) != 0 || a.Outbox[1].Notice != "" {
+		t.Fatalf("the strike was added to the bounce: %+v", a.Outbox)
+	}
+	b := testWorld()
+	b.Config.BoardID = "Beta"
+	var answered int
+	for i, p := range a.Outbox {
+		p.Seq = uint64(i + 1)
+		answered += len(b.ApplyPacket(p).Results)
+	}
+	if answered != 1 {
+		t.Fatalf("the far board answered %d strikes, want 1", answered)
+	}
+}

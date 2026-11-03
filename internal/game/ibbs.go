@@ -336,7 +336,9 @@ func (w *World) outboxFor(board string) *Packet {
 		return &w.unroutableSink
 	}
 	for i := range w.Outbox {
-		if w.Outbox[i].ToBoard == board {
+		// Never a bounce: the far board reads its notice and applies nothing
+		// else in it, so a strike or probe added there was discarded unread.
+		if w.Outbox[i].ToBoard == board && w.Outbox[i].Notice == "" {
 			return &w.Outbox[i]
 		}
 	}
