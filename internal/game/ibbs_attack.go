@@ -1255,9 +1255,9 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 		if f.Kind == "terror" {
 			if e := w.FindByOwner(f.Owner); e != nil {
 				e.Agents += f.Agents
-				e.addEvent(sayN("No word came back from {board}. Your {n} agent has returned home.",
-					"No word came back from {board}. Your {n} agents have returned home.", "n",
-					"board", f.TargetBoard, "n", f.Agents))
+				e.addEvent(sayN("No word came back from {board}. Your {op} against {target} has come home: {n} agent.",
+					"No word came back from {board}. Your {op} against {target} has come home: {n} agents.", "n",
+					"board", f.TargetBoard, "op", say(f.TerrorOp.String()), "target", strikeAim(f), "n", f.Agents))
 			}
 			continue
 		}
@@ -1282,8 +1282,8 @@ func (w *World) ReturnLostForces(held map[string]bool) int {
 			e.Jets += c.Jets
 			e.Tanks += c.Tanks
 			e.Bombers += c.Bombers
-			e.addEvent(say("No word came back from {board}. Your force sent against {target} has returned home.",
-				"board", f.TargetBoard, "target", strikeAim(f)))
+			e.addEvent(say("No word came back from {board}. Your force sent against {target} has come home: {units}.",
+				"board", f.TargetBoard, "target", strikeAim(f), "units", unitList(attackUnits(c.AttackForce), comma[int])))
 		}
 		w.postNews(lostForceNews(w, f))
 	}

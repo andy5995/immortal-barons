@@ -44,7 +44,7 @@ func TestLostForcesDaysLeft(t *testing.T) {
 }
 
 // The news says whose attack came home and whether it was a group's, and a
-// trade deal, being private, stays out of it (#326).
+// trade deal or terror op, being private, stays out of it (#326).
 func TestLostForcesNewsNamesTheAttack(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.Config.LostForcesDays = 3
@@ -55,9 +55,24 @@ func TestLostForcesNewsNamesTheAttack(t *testing.T) {
 		{ID: 1, Kind: "attack", TargetBoard: "Far BBS", TargetEmpire: "Salt Marsh", Contributors: c},
 		{ID: 2, Kind: "attack", TargetBoard: "Far BBS", Group: true, Whole: true, Contributors: c},
 		{ID: 3, Kind: "deal", TargetBoard: "Far BBS", TargetEmpire: "Salt Marsh", Owner: "baron-a", Goods: &TradeBasket{Food: 1}},
+		{ID: 4, Kind: "terror", TargetBoard: "Far BBS", TargetEmpire: "Salt Marsh", Owner: "baron-a", Agents: 3, TerrorOp: TerrorOpDemoralize},
 	}
-	if got := w.ReturnLostForces(nil); got != 3 {
-		t.Fatalf("recovered %d, want 3", got)
+	if got := w.ReturnLostForces(nil); got != 4 {
+		t.Fatalf("recovered %d, want 4", got)
+	}
+	// Each owner hears what came home and from where, whatever the kind.
+	var events []string
+	for _, ev := range e.Events {
+		events = append(events, ev.Text)
+	}
+	wantEvents := []string{
+		"No word came back from Far BBS. Your force sent against Salt Marsh has come home: 10 Troopers.",
+		"No word came back from Far BBS. Your force sent against the whole planet has come home: 10 Troopers.",
+		"No word came back from Far BBS. Your trade deal to Salt Marsh has come home: 1 Food.",
+		"No word came back from Far BBS. Your Demoralize against Salt Marsh has come home: 3 agents.",
+	}
+	if len(events) < len(wantEvents) || !slices.Equal(events[len(events)-len(wantEvents):], wantEvents) {
+		t.Fatalf("events = %q, want them to end %q", events, wantEvents)
 	}
 	var news []string
 	for _, n := range w.NewsToday {
