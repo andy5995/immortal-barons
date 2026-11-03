@@ -304,8 +304,10 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 		// A broadcast that got this far has no roster to address it from, so
 		// there is no next hop to compute: it goes out on the default link for
 		// the transport to fan out.
+		var hop string
 		if p.ToBoard != "" {
-			if link, ok := w.Config.OutboundLink(w.NodeNumber(w.NextHop(p.ToBoard))); ok {
+			hop = w.NextHop(p.ToBoard)
+			if link, ok := w.Config.OutboundLink(w.NodeNumber(hop)); ok {
 				target = link
 			}
 		}
@@ -317,7 +319,7 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 			return 0, err
 		}
 		to := cmp.Or(p.ToBoard, "every board")
-		if hop := w.NextHop(p.ToBoard); p.ToBoard != "" && hop != p.ToBoard {
+		if hop != "" && hop != p.ToBoard {
 			to += " via " + hop
 		}
 		if o.relay {
