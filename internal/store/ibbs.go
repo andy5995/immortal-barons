@@ -2,6 +2,7 @@ package store
 
 import (
 	"bytes"
+	"cmp"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
@@ -85,6 +86,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	if err != nil {
 		return run, err
 	}
+	AppendPacketLog(w.Config.DataDir, inResult.Log, time.Now())
 	run.Applied = inResult.Applied
 	run.OtherLeague = inResult.OtherLeague
 	run.MeshCopy = inResult.MeshCopy
@@ -246,8 +248,9 @@ type PlanetaryRun struct {
 // that hosts others configures a separate one per neighbor.
 func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 	type outgoing struct {
-		p    game.Packet
-		data []byte
+		p     game.Packet
+		data  []byte
+		relay bool // another board's packet, passed on
 	}
 	var packets []outgoing
 	// A frozen board writes only the freeze orders and its quiet report; the
@@ -270,7 +273,7 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		packets = append(packets, outgoing{p, data})
+		packets = append(packets, outgoing{p: p, data: data})
 	}
 	// Transit goes out as the bytes it arrived as (see ForwardPacket), keeping
 	// the stamp of the board that wrote it and every field this build does not
@@ -284,11 +287,15 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 		if err := json.Indent(&data, raw, "", "  "); err != nil {
 			return 0, err
 		}
-		packets = append(packets, outgoing{p, data.Bytes()})
+		packets = append(packets, outgoing{p, data.Bytes(), true})
 	}
 	if len(packets) == 0 {
 		return 0, nil
 	}
+	// Deferred so the packets already written are logged even when a later
+	// one fails.
+	var log []string
+	defer func() { AppendPacketLog(w.Config.DataDir, log, time.Now()) }()
 	for _, o := range packets {
 		p, data := o.p, o.data
 		target := dir
@@ -306,6 +313,15 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 		name := packetFilename(p, data)
 		if err := writePacketAtomic(filepath.Join(target, name), data); err != nil {
 			return 0, err
+		}
+		to := cmp.Or(p.ToBoard, "every board")
+		if hop := w.NextHop(p.ToBoard); p.ToBoard != "" && hop != p.ToBoard {
+			to += " via " + hop
+		}
+		if o.relay {
+			log = append(log, fmt.Sprintf("pass #%d from %s to %s (%s): %s", p.Seq, p.FromBoard, to, p.Contents(), name))
+		} else {
+			log = append(log, fmt.Sprintf("out  #%d to %s (%s): %s", p.Seq, to, p.Contents(), name))
 		}
 		if verbose {
 			board := p.ToBoard
@@ -451,6 +467,9 @@ type InboundResult struct {
 	// sysop's planetary log only. See RunPlanetary for where it reaches
 	// AppendPlanetaryLog instead.
 	OrderNotice string
+	// Log is a line per packet this run took out of inbound or set aside, for
+	// the packet log (PacketLogFile).
+	Log []string
 	// rulesHeld is the newest ruleset-held packet from each board this batch,
 	// reported once the batch is done (reportRulesHolds).
 	rulesHeld map[string]game.Packet
@@ -849,6 +868,7 @@ func deferOrQuarantine(w *game.World, result *InboundResult, path string, e os.D
 		return
 	}
 	result.Quarantined++
+	result.Log = append(result.Log, fmt.Sprintf("in   %s: unreadable, set aside in %s", e.Name(), BadDir))
 	w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
 		"Packet %s could not be read and has been set aside in %s: %v", e.Name(), BadDir, cause))
 	if verbose {
@@ -881,6 +901,7 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		// In transit. The file goes either way, so a packet that has run out
 		// of hops is not re-read on every later run.
 		w.ForwardPacket(p, raw)
+		result.Log = append(result.Log, inLine(p, "passed on for "+p.ToBoard))
 		if verbose {
 			fmt.Printf("  Forwarded packet from %s to %s (%s, dated %s)\n",
 				p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
@@ -895,9 +916,11 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	if reason == HeldProtocol {
 		result.Held++
 		w.NoteProtocolHold(p.FromBoard, p.Protocol)
+		result.Log = append(result.Log, inLine(p, fmt.Sprintf("held: protocol %d", p.Protocol)))
 		return holdPacket(w.Config.DataDir, path)
 	}
 	if w.RefusedUnnumbered(p) {
+		result.Log = append(result.Log, inLine(p, "deleted: no sequence number or board name"))
 		if verbose {
 			fmt.Printf("  Deleted packet from %s: it has no sequence number or board name\n", p.FromBoard)
 		}
@@ -905,6 +928,7 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	}
 	if w.IsPacketSeen(p) {
 		result.AlreadySeen++
+		result.Log = append(result.Log, inLine(p, "deleted: already seen"))
 		if verbose {
 			fmt.Printf("  Skipped packet from %s (already seen)\n", p.FromBoard)
 		}
@@ -927,6 +951,7 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	// legitimate rules change are the case RulesetGraceDays covers.
 	if reason == HeldRules {
 		result.HeldRules++
+		result.Log = append(result.Log, inLine(p, "held: not the league's rules"))
 		if result.rulesHeld == nil {
 			result.rulesHeld = map[string]game.Packet{}
 		}
@@ -939,12 +964,14 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		}
 		return holdPacket(w.Config.DataDir, path)
 	}
+	late := w.ArrivedLate(p)
 	applyResult := w.ApplyPacket(p)
 	if applyResult.HasPayload() {
 		w.Outbox = append(w.Outbox, applyResult)
 	}
 	if refused {
 		result.Refused++
+		result.Log = append(result.Log, inLine(p, "held: does not match that board's key"))
 		if verbose {
 			fmt.Printf("  Held packet from %s (%s): it does not match that board's key\n",
 				p.FromBoard, p.PacketType())
@@ -962,6 +989,14 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		return holdPacket(w.Config.DataDir, path)
 	}
 	result.Applied++
+	switch {
+	case applyResult.Notice != "":
+		result.Log = append(result.Log, inLine(p, "refused, and the sender told why"))
+	case late:
+		result.Log = append(result.Log, inLine(p, "applied, after a later packet from that board"))
+	default:
+		result.Log = append(result.Log, inLine(p, "applied"))
+	}
 	if verbose {
 		fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
 	}

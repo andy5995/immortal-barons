@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // PlanetaryLogFile records transport faults — an undeliverable packet, orders
@@ -44,10 +45,22 @@ func AppendPlanetaryLog(dataDir string, notices []string, when time.Time) {
 		}
 	}
 	for _, n := range notices {
-		lines = append(lines, fmt.Sprintf("%s  %s", stamp, n))
+		lines = append(lines, fmt.Sprintf("%s  %s", stamp, logSafe(n)))
 	}
 	if len(lines) > planetaryLogLines {
 		lines = lines[len(lines)-planetaryLogLines:]
 	}
 	os.WriteFile(path, []byte(strings.Join(lines, "\n")+"\n"), 0o644)
+}
+
+// logSafe replaces every control character in a log entry with "?". Board
+// names and file names reach these logs from packets another board wrote, and
+// a newline in one would forge a whole line of a log kept to settle disputes.
+func logSafe(s string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) {
+			return '?'
+		}
+		return r
+	}, s)
 }

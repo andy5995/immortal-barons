@@ -253,6 +253,12 @@ func (w *World) IsPacketSeen(p Packet) bool {
 	return found
 }
 
+// ArrivedLate reports whether p arrived after a later packet from its board was
+// applied here. Ask it before ApplyPacket, which raises the board's highest.
+func (w *World) ArrivedLate(p Packet) bool {
+	return p.Seq < w.HighSeq[p.FromBoard]
+}
+
 // replayFloor is the number at or below which every packet from board counts
 // as seen. A board with a highest number and no floor was recorded by a build
 // that kept only the highest, so nothing below it can be told apart.

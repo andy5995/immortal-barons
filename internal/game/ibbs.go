@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -233,6 +234,56 @@ func (p Packet) PacketType() string {
 	default:
 		return "empty"
 	}
+}
+
+// Contents lists everything a packet carries, for the packet log. PacketType
+// names only the first kind it finds, and a trade deal riding beside a strike
+// is exactly what a sysop tracing a lost deal needs to see. A payload field
+// added to Packet belongs here as well as in PacketType and HasPayload.
+func (p Packet) Contents() string {
+	var parts []string
+	add := func(n int, what string) {
+		if n > 0 {
+			parts = append(parts, fmt.Sprintf("%d %s", n, what))
+		}
+	}
+	add(len(p.Attacks), "attacks")
+	add(len(p.Terrors), "terror ops")
+	add(len(p.SpecialOps), "special ops")
+	add(len(p.Results), "results")
+	add(len(p.TradeDeals), "trade deals")
+	add(len(p.TradeReceipts), "trade receipts")
+	add(len(p.TradeBids), "trade bids")
+	add(len(p.TradeFills), "trade fills")
+	add(len(p.IPMessages), "messages")
+	add(len(p.Recon), "recon requests")
+	add(len(p.ReconReports), "recon reports")
+	add(len(p.SpyGuys), "spyguys")
+	add(len(p.Threats), "threats")
+	add(len(p.News), "news")
+	add(len(p.TimeChecks), "time checks")
+	for _, f := range []struct {
+		on   bool
+		what string
+	}{
+		{len(p.Scores) > 0 || p.NoRealms, "scores"},
+		{p.Annihilator != nil, "annihilator"},
+		{p.LeagueConfig != nil, "league config"},
+		{len(p.LeagueNodes) > 0, "roster"},
+		{p.Bulletins != nil, "bulletins"},
+		{p.Reset != nil, "reset"},
+		{p.Freeze != nil, "freeze"},
+		{p.Quiet != nil, "quiet report"},
+		{p.Notice != "", "notice"},
+	} {
+		if f.on {
+			parts = append(parts, f.what)
+		}
+	}
+	if len(parts) == 0 {
+		return "empty"
+	}
+	return strings.Join(parts, ", ")
 }
 
 // HasPayload reports whether p carries anything worth sending. The transport
@@ -505,7 +556,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// Applying the same packet twice would pay out a strike's results, a
 	// broadcast or a reset all over again, so a packet already seen here is
 	// dropped whole (#53).
-	late := p.Seq < w.HighSeq[p.FromBoard]
+	late := w.ArrivedLate(p)
 	if w.SeenPacket(p) {
 		return Packet{}
 	}

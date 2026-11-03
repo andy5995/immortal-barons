@@ -11,7 +11,8 @@ somewhere else, which is the question worth answering first.
 1. `immortal-barons -league-check` — is this board's own setup sound?
 2. The last `-planetary` run report — did packets arrive, and what happened to
    them?
-3. `planetary.log` — what did earlier runs complain about?
+3. `planetary.log` — what did earlier runs complain about? `packets.log` —
+   did one particular packet arrive?
 4. Your mailer or file transport — did anything reach the inbound directory at
    all? With the FTN transport, `-ftn-status` answers this without changing
    anything.
@@ -134,6 +135,30 @@ These are the faults it records:
 - **The order a contested batch applied in**, whenever more than one board's
   packets arrived in the same run. See [When two boards disagree about what
   happened](#when-two-boards-disagree-about-what-happened).
+
+### Tracing one lost packet
+
+`packets.log`, beside `planetary.log`, has one line for every packet a run
+writes and every packet it takes out of inbound. Each line gives the packet's
+number, the board at the other end, what the packet carried, and, for a packet
+written, its file name. The file is moved to `packets.log.1` when it reaches
+1 MB, so the two together hold the last few days.
+
+```
+2026-10-28 01:10:16 UTC  out  #5012 to The Eclipse (1 attacks, 1 trade deals): L777-3-...
+2026-10-28 01:20:41 UTC  in   #5012 from Nova Hub (1 attacks, 1 trade deals): applied
+```
+
+A packet number belongs to the board that wrote it. To trace a strike or trade
+deal that never came back, find the `out` line on the sending board, then look
+for the same number on the receiving board:
+
+- **The number is there**, with what became of it: applied, held, or deleted
+  and why.
+- **The number is missing.** The packet never reached that board's inbound
+  directory, so it was lost between the two games: in a mailer, a tosser, or a
+  hub. If the league routes through a hub that runs the game, its log shows a
+  `pass` line for each packet it passed on.
 
 ## Refused packets
 
@@ -499,7 +524,8 @@ Work down the path a packet takes:
 
 - **Is the planetary run happening?** `planetary.log` cannot tell you: the game
   writes it only when a run has something to report, so a healthy board's runs
-  leave nothing there. Check the scheduled script's own log instead (see
+  leave nothing there. `packets.log` can, since a run that is not frozen sends
+  its scores every time. Check the scheduled script's own log as well (see
   [Scheduling it safely](ftn-transport.md#scheduling-it-safely)). A run leaves a line each
   time; a gap in that log is a gap in the service, and the usual cause is a
   scheduler that stopped rather than the game.
