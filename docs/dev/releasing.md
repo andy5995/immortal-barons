@@ -30,6 +30,10 @@ League Coordinator's minimum-version gate.
    scripts/gen-help-translations.sh
    ```
 
+   **Nothing is translated at release.** The passes only keep the catalogs
+   current: a new or changed string stays empty or `#, fuzzy`, and the reader
+   sees English for it. Commit that churn as it comes out.
+
    **Check what the UI extractor is not seeing.** `gen-ui-pot.py` scans for a
    fixed list of call forms, so a print helper added since the last release
    drops out of the catalogs silently — its strings translate at runtime and no
