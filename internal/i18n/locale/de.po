@@ -41,7 +41,7 @@ msgstr "# Besitz"
 msgid "##"
 msgstr "##"
 
-#: internal/menu/actions_ipops.go:134
+#: internal/menu/actions_ipops.go:135
 #, fuzzy
 msgid "%.0f Bomber"
 msgid_plural "%.0f Bombers"
@@ -139,7 +139,7 @@ msgstr "%s %s gekauft."
 msgid "%s %s regions purchased."
 msgstr "%d %s-Regionen gekauft. Gold: %d"
 
-#: internal/menu/actions_ipops.go:631
+#: internal/menu/actions_ipops.go:648
 msgid "%s %s sent out."
 msgstr "%s %s ausgesandt."
 
@@ -155,11 +155,11 @@ msgstr "%s Jets und %s Träger gekauft."
 msgid "%s Trading Market"
 msgstr "Handelsmarkt von %s"
 
-#: internal/menu/actions_ipops.go:239
+#: internal/menu/actions_ipops.go:240
 msgid "%s against which baron?"
 msgstr "%s gegen welchen Baron?"
 
-#: internal/menu/actions_ipops.go:231
+#: internal/menu/actions_ipops.go:232
 msgid "%s against which planet?"
 msgstr "%s gegen welchen Planeten?"
 
@@ -223,7 +223,7 @@ msgstr "%s auf %s"
 msgid "%s proposes a %s."
 msgstr "%s schlägt einen %s vor."
 
-#: internal/menu/actions_ipops.go:152
+#: internal/menu/actions_ipops.go:153
 #, fuzzy
 msgid "%s purchased."
 msgstr "%s %s gekauft."
@@ -263,7 +263,7 @@ msgid "%s's allies send %s troopers and %s tanks to aid the defense."
 msgstr ""
 "Die Verbündeten von %s senden %s Soldaten und %s Panzer zur Verteidigung."
 
-#: internal/menu/actions_ipops.go:167
+#: internal/menu/actions_ipops.go:168
 msgid "%s: %s left, sent by %s"
 msgstr "%s: noch %s, gesandt von %s"
 
@@ -350,7 +350,7 @@ msgstr ""
 "Ein Gooie Kablooie ist auf dem Planeten eingeschlagen - Sie haben {n} "
 "Regionen verloren."
 
-#: internal/menu/actions_ipops.go:84
+#: internal/menu/actions_ipops.go:85
 msgid "A SpyGuy costs %s%s%s gold per day."
 msgstr "Ein SpyGuy kostet %s%s%s Gold pro Tag."
 
@@ -643,7 +643,7 @@ msgstr "Anhängen oder"
 msgid "Are you POSITIVE you wish to erase your empire?"
 msgstr "Sind Sie WIRKLICH sicher, dass Sie Ihr Reich löschen wollen?"
 
-#: internal/menu/actions_ipops.go:476
+#: internal/menu/actions_ipops.go:486
 msgid "Arrived"
 msgstr "Eingetroffen"
 
@@ -711,7 +711,7 @@ msgstr "Warten auf Antwort:"
 msgid "BBS Coordinator"
 msgstr "BBS-Koordinator"
 
-#: internal/menu/spycard.go:63
+#: internal/menu/spycard.go:61
 msgid "BBS Name: "
 msgstr "BBS-Name: "
 
@@ -787,7 +787,7 @@ msgstr "Bomber"
 msgid "Bombers"
 msgstr "Bomber"
 
-#: internal/menu/actions_ipops.go:141
+#: internal/menu/actions_ipops.go:142
 #, fuzzy
 msgid "Bombers Needed"
 msgstr "Bomber"
@@ -828,7 +828,7 @@ msgstr ""
 msgid "Buy"
 msgstr "Kaufen"
 
-#: internal/menu/actions_ipops.go:142
+#: internal/menu/actions_ipops.go:143
 #, fuzzy
 msgid "Buy %s for %s gold"
 msgstr "%s  Ihr habt %s Gold."
@@ -902,7 +902,7 @@ msgstr "Beihilfe / Kredite"
 msgid "Cause Dissensions"
 msgstr "Zwietracht säen"
 
-#: internal/menu/actions_ipops.go:464
+#: internal/menu/actions_ipops.go:472
 msgid "Change"
 msgstr "Ändern"
 
@@ -1072,11 +1072,11 @@ msgstr "Täglicher Aushang"
 msgid "Date"
 msgstr "Datum"
 
-#: internal/menu/spycard.go:64
+#: internal/menu/spycard.go:62
 msgid "Date: "
 msgstr "Datum: "
 
-#: internal/game/ibbs_return.go:224
+#: internal/game/ibbs_return.go:226
 msgid "Date: {when}    Result: {result}"
 msgstr "Datum: {when}    Ergebnis: {result}"
 
@@ -1107,10 +1107,6 @@ msgstr "Niederlage! Ihre Truppen wurden vom Feld geschlagen."
 #: internal/menu/bulletinfiles.go:242
 msgid "Defender"
 msgstr "Verteidiger"
-
-#: internal/menu/actions_ipops.go:479
-msgid "Defense"
-msgstr "Verteidigung"
 
 #: internal/menu/mailreader.go:267
 msgid "Delete"
@@ -1343,7 +1339,7 @@ msgstr "Feindoperationen aufdecken"
 msgid "Extended Battle"
 msgstr "Ausgedehnte Schlacht"
 
-#: internal/game/ibbs_return.go:280
+#: internal/game/ibbs_return.go:282
 msgid "FAILURE"
 msgstr "FEHLSCHLAG"
 
@@ -1495,7 +1491,7 @@ msgstr "Wie viele %s?"
 msgid "How many Million Gold do you wish to put in?"
 msgstr "Wie viele Millionen Gold möchten Sie beisteuern?"
 
-#: internal/menu/actions_ipops.go:94
+#: internal/menu/actions_ipops.go:95
 msgid "How many days would you like him to remain?"
 msgstr "Wie viele Tage soll er bleiben?"
 
@@ -1680,9 +1676,13 @@ msgstr "Posten"
 msgid "Jet"
 msgstr "Jet"
 
-#: internal/menu/spycard.go:73
+#: internal/menu/spycard.go:71
 msgid "Jets"
 msgstr "Jets"
+
+#: internal/game/ibbs_return.go:94
+msgid "Jets {jets}  Turrets {turrets}  Tanks {tanks}"
+msgstr ""
 
 #: internal/menu/tree.go:331
 msgid "Join Group Attack"
@@ -1717,10 +1717,6 @@ msgstr ""
 #: internal/menu/actions_ipscores.go:193
 msgid "Land"
 msgstr "Land"
-
-#: internal/game/ibbs_return.go:91
-msgid "Land {land}  Off {off}  Def {def}  Gold {gold}"
-msgstr "Land {land}  Ang {off}  Vert {def}  Gold {gold}"
 
 # Language picker
 #: internal/menu/tree.go:522
@@ -1869,7 +1865,7 @@ msgstr "Raketenangriffe sind in diesem Spiel nicht vorgesehen."
 msgid "Modify Diplomacy"
 msgstr "Diplomatie ändern"
 
-#: internal/menu/spycard.go:71
+#: internal/menu/spycard.go:69
 msgid "Morale"
 msgstr "Moral"
 
@@ -1889,7 +1885,7 @@ msgstr "Gebirge"
 msgid "NONE"
 msgstr "KEINE"
 
-#: internal/game/ibbs_return.go:276
+#: internal/game/ibbs_return.go:278
 msgid "NOT FOUND"
 msgstr "NICHT GEFUNDEN"
 
@@ -1966,7 +1962,7 @@ msgstr "Keine Treffer. Die Königin dankt für Ihren Beitrag."
 msgid "No news."
 msgstr "Keine Nachrichten."
 
-#: internal/menu/actions_ipops.go:651
+#: internal/menu/actions_ipops.go:668
 msgid "No other planets are known yet, so there is nobody to scout."
 msgstr ""
 "Es sind noch keine anderen Planeten bekannt, also gibt es niemanden "
@@ -2144,10 +2140,6 @@ msgstr ""
 #: internal/menu/advisors.go:268
 msgid "Of these, %s units are away on attacks."
 msgstr "Davon sind %s Einheiten auf Angriffen unterwegs."
-
-#: internal/menu/actions_ipops.go:478
-msgid "Offense"
-msgstr "Angriff"
 
 #: internal/menu/actions_trade.go:229
 msgid "Offer — goods you send:"
@@ -2365,7 +2357,7 @@ msgstr "Ergebnis"
 msgid "Owned"
 msgstr "Besitz"
 
-#: internal/game/ibbs_return.go:278
+#: internal/game/ibbs_return.go:280
 msgid "PROTECTED"
 msgstr "GESCHÜTZT"
 
@@ -2406,7 +2398,7 @@ msgstr "Planetenzeit: %s   Neuer Tag in %s"
 msgid "Play"
 msgstr "Spielen"
 
-#: internal/menu/spycard.go:66
+#: internal/menu/spycard.go:64
 msgid "Player Letter: "
 msgstr "Spielerbuchstabe: "
 
@@ -2414,7 +2406,7 @@ msgstr "Spielerbuchstabe: "
 msgid "Player List"
 msgstr "Spielerliste"
 
-#: internal/menu/spycard.go:65
+#: internal/menu/spycard.go:63
 msgid "Player Name: "
 msgstr "Spielername: "
 
@@ -2463,7 +2455,7 @@ msgstr ""
 msgid "Price"
 msgstr "Preis"
 
-#: internal/menu/actions_ipops.go:136
+#: internal/menu/actions_ipops.go:137
 msgid "Price of %s: %s gold, %s with the operation."
 msgstr ""
 
@@ -2511,7 +2503,7 @@ msgstr "Nachrichten lesen"
 msgid "Read,"
 msgstr "Lesen,"
 
-#: internal/menu/actions_ipops.go:654
+#: internal/menu/actions_ipops.go:671
 msgid ""
 "Recon requests created to all %d planets. The reports will reach the Spy "
 "Database."
@@ -2527,7 +2519,11 @@ msgstr "Regionen"
 msgid "Regions added to your empire. You now hold %d land."
 msgstr "Regionen Ihrem Reich hinzugefügt. Sie halten nun %d Land."
 
-#: internal/menu/spycard.go:68
+#: internal/game/ibbs_return.go:92
+msgid "Regions {regions}  Troopers {troopers}  Morale {morale}%"
+msgstr ""
+
+#: internal/menu/spycard.go:66
 msgid "Regions:"
 msgstr "Regionen:"
 
@@ -2559,7 +2555,7 @@ msgstr "Antworten,"
 msgid "Request — goods you want back:"
 msgstr "Forderung - Waren, die Sie zurück wollen:"
 
-#: internal/game/ibbs_return.go:222
+#: internal/game/ibbs_return.go:224
 msgid "Result: {result}"
 msgstr "Ergebnis: {result}"
 
@@ -2621,7 +2617,7 @@ msgstr "SDI-Programm"
 msgid "SDI Strength"
 msgstr "SDI-Stärke"
 
-#: internal/game/ibbs_return.go:274
+#: internal/game/ibbs_return.go:276
 msgid "SUCCESS"
 msgstr "ERFOLG"
 
@@ -2665,7 +2661,7 @@ msgstr "Punkte ansehen"
 msgid "See Status"
 msgstr "Status ansehen"
 
-#: internal/menu/actions_ipops.go:321
+#: internal/menu/actions_ipops.go:325
 #, fuzzy
 msgid "Select Planet to view players:"
 msgstr "Planeten wählen"
@@ -2674,7 +2670,7 @@ msgstr "Planeten wählen"
 msgid "Select Planets"
 msgstr "Planeten wählen"
 
-#: internal/menu/actions_ipops.go:371
+#: internal/menu/actions_ipops.go:375
 #, fuzzy
 msgid "Select a player:"
 msgstr "Planeten wählen"
@@ -2743,7 +2739,7 @@ msgstr "Gebot senden?"
 msgid "Send this Attack?"
 msgstr "Diesen Angriff senden?"
 
-#: internal/menu/actions_ipops.go:249
+#: internal/menu/actions_ipops.go:250
 msgid "Send this Operation?"
 msgstr "Diese Operation senden?"
 
@@ -2779,7 +2775,7 @@ msgstr "Steuersatz setzen"
 msgid "Set Up"
 msgstr "Hineinlegen"
 
-#: internal/menu/actions_ipops.go:214
+#: internal/menu/actions_ipops.go:215
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr "S3-Sabre-Regler einstellen (0-10)"
 
@@ -2916,7 +2912,7 @@ msgstr "Vergeben: Ein anderes Reich trägt diesen Namen bereits."
 msgid "Tank"
 msgstr "Panzer"
 
-#: internal/menu/spycard.go:75
+#: internal/menu/spycard.go:73
 msgid "Tanks"
 msgstr "Panzer"
 
@@ -3104,7 +3100,7 @@ msgstr ""
 msgid "Terrorists went after your streets and got nowhere."
 msgstr "Terroristen hatten es auf Ihre Straßen abgesehen und kamen nicht weit."
 
-#: internal/menu/actions_ipops.go:559
+#: internal/menu/actions_ipops.go:576
 msgid "Terrorize which baron?"
 msgstr "Welchen Baron terrorisieren?"
 
@@ -3337,7 +3333,7 @@ msgstr ""
 msgid "The remaining %d%% is turned into gold."
 msgstr "Die übrigen %d%% werden zu Gold."
 
-#: internal/menu/actions_ipops.go:312
+#: internal/menu/actions_ipops.go:316
 #, fuzzy
 msgid "The spy database is empty. Spies that get in file their reports here."
 msgstr ""
@@ -3429,7 +3425,7 @@ msgstr "Dieses Geschäft braucht %d Träger; Sie haben %d frei."
 msgid "This is year %s of your reign."
 msgstr "Dies ist das Jahr %s Ihrer Herrschaft."
 
-#: internal/menu/actions_ipops.go:248
+#: internal/menu/actions_ipops.go:249
 msgid "This operation will cost %s gold."
 msgstr "Diese Operation kostet %s Gold."
 
@@ -3437,7 +3433,7 @@ msgstr "Diese Operation kostet %s Gold."
 msgid "This planet has no Gooie Kablooie."
 msgstr "Dieser Planet hat keinen Gooie Kablooie."
 
-#: internal/menu/actions_ipops.go:162
+#: internal/menu/actions_ipops.go:163
 msgid "This planet has no SpyGuys out."
 msgstr "Dieser Planet hat keine SpyGuys im Einsatz."
 
@@ -3449,7 +3445,7 @@ msgstr "Dieser Planet baut bereits einen Gooie Kablooie."
 msgid "This planet is not building a Gooie Kablooie."
 msgstr "Dieser Planet baut keinen Gooie Kablooie."
 
-#: internal/menu/actions_ipops.go:165
+#: internal/menu/actions_ipops.go:166
 msgid "This planet's SpyGuys:"
 msgstr "SpyGuys dieses Planeten:"
 
@@ -3467,7 +3463,7 @@ msgstr ""
 msgid "This trade deal will cost %s gold per day to send."
 msgstr "Dieses Handelsgeschäft kostet %s Gold pro Tag."
 
-#: internal/menu/actions_ipops.go:613
+#: internal/menu/actions_ipops.go:630
 msgid "This will cost you %s gold.  Accept?"
 msgstr "Das kostet Sie %s Gold.  Annehmen?"
 
@@ -3610,7 +3606,7 @@ msgid "Trooper"
 msgstr "Soldat"
 
 # Buy / sell items
-#: internal/menu/spycard.go:70
+#: internal/menu/spycard.go:68
 msgid "Troopers"
 msgstr "Soldaten"
 
@@ -3627,7 +3623,7 @@ msgstr "Züge pro Tag"
 msgid "Turret"
 msgstr "Turm"
 
-#: internal/menu/spycard.go:74
+#: internal/menu/spycard.go:72
 msgid "Turrets"
 msgstr "Türme"
 
@@ -3771,7 +3767,7 @@ msgstr ""
 "Größe wird es etwa %s Nahrung je Zug verbrauchen, mehr als wir erzeugen. "
 "Legen Sie vorher Agrarregionen an."
 
-#: internal/menu/actions_ipops.go:369
+#: internal/menu/actions_ipops.go:373
 msgid "We have information on the following players:"
 msgstr ""
 
@@ -4040,12 +4036,12 @@ msgstr "Sie haben %s den Krieg erklärt."
 msgid "You declared war on %s. Agreement ended: %s"
 msgstr "Sie haben %s den Krieg erklärt. Abkommen beendet: %s"
 
-#: internal/game/ibbs_return.go:248
+#: internal/game/ibbs_return.go:250
 #, fuzzy
 msgid "You destroyed nothing!"
 msgstr "Sie haben {units} vernichtet!"
 
-#: internal/game/ibbs_return.go:248
+#: internal/game/ibbs_return.go:250
 msgid "You destroyed {units}!"
 msgstr "Sie haben {units} vernichtet!"
 
@@ -4217,7 +4213,7 @@ msgstr ""
 "Sie dürfen nur mit einem Planeten handeln, den Ihr Koordinator als verbündet "
 "vermerkt hat."
 
-#: internal/menu/actions_ipops.go:49
+#: internal/menu/actions_ipops.go:50
 msgid ""
 "You must play at least one turn each entry into the game before you can use "
 "this option."
@@ -4290,14 +4286,14 @@ msgstr "Ihre %s Jets brauchen %s weitere Träger, damit alle fliegen können."
 msgid "Your %s force is on its way to %s on %s."
 msgstr "Ihr %s-Verband ist unterwegs nach %s auf %s."
 
-#: internal/menu/actions_ipops.go:271
+#: internal/menu/actions_ipops.go:272
 msgid ""
 "Your %s is away against %s of %s. Word will come back with the next packet."
 msgstr ""
 "Ihr %s ist unterwegs gegen %s von %s. Nachricht kommt mit dem nächsten Paket "
 "zurück."
 
-#: internal/menu/actions_ipops.go:268
+#: internal/menu/actions_ipops.go:269
 msgid "Your %s is away against %s. Word will come back with the next packet."
 msgstr ""
 "Ihr %s ist unterwegs gegen %s. Nachricht kommt mit dem nächsten Paket zurück."
@@ -4361,7 +4357,7 @@ msgstr "Ihr S3-Sabre erreichte {who} von {board} und kratzte kaum am Lack."
 msgid "Your SDI Program requires %s gold."
 msgstr "Dein SDI-Programm benötigt %s Gold."
 
-#: internal/menu/actions_ipops.go:111
+#: internal/menu/actions_ipops.go:112
 msgid "Your SpyGuy leaves for %s, and will watch it for %d days."
 msgstr "Ihr SpyGuy bricht nach %s auf und beobachtet es %d Tage lang."
 
@@ -4606,7 +4602,7 @@ msgstr ""
 "Ihre Agenten fanden Schwächen und ließen das Selbstvertrauen von {who} "
 "sinken."
 
-#: internal/game/ibbs_return.go:106
+#: internal/game/ibbs_return.go:108
 msgid ""
 "Your agents reached {board} and found no realm called {who}, so they came "
 "home."
@@ -4834,7 +4830,7 @@ msgstr ""
 "Ihr Reich besteht nicht mehr. Kehren Sie an einem späteren Tag zurück, um "
 "ein neues Reich aufzubauen."
 
-#: internal/game/ibbs_return.go:233
+#: internal/game/ibbs_return.go:235
 msgid "Your forces broke the enemy and captured {n} regions."
 msgstr "Ihre Streitkräfte schlugen den Feind und eroberten {n} Regionen."
 
@@ -4857,7 +4853,7 @@ msgstr ""
 "Ihre Streitkräfte änderten sich, während Sie den Angriff vorbereiteten - nur "
 "Einheiten, die noch unter Ihrem Befehl standen, wurden gesandt."
 
-#: internal/game/ibbs_return.go:229
+#: internal/game/ibbs_return.go:231
 msgid "Your forces crossed the void and found no such realm waiting."
 msgstr ""
 "Ihre Streitkräfte durchquerten die Leere und fanden kein solches Reich vor."
@@ -4872,7 +4868,7 @@ msgstr ""
 "sie 15 Prozent Verluste erlitten haben, und Sie nehmen den üblichen Anteil "
 "der Regionen des Verteidigers."
 
-#: internal/game/ibbs_return.go:231
+#: internal/game/ibbs_return.go:233
 msgid "Your forces found their target was in protection."
 msgstr "Ihre Streitkräfte stellten fest, dass ihr Ziel unter Schutz stand."
 
@@ -4880,7 +4876,7 @@ msgstr "Ihre Streitkräfte stellten fest, dass ihr Ziel unter Schutz stand."
 msgid "Your forces lost the battle!"
 msgstr "Ihre Streitkräfte haben die Schlacht verloren!"
 
-#: internal/game/ibbs_return.go:235
+#: internal/game/ibbs_return.go:237
 msgid "Your forces were beaten off the field."
 msgstr "Ihre Streitkräfte wurden vom Feld geschlagen."
 
@@ -5139,11 +5135,11 @@ msgstr "Ihre Stimme ist vermerkt. Sie können sie jederzeit ändern."
 msgid "Your well-paid and loyal peasants turned in {who}."
 msgstr "Ihre gut bezahlten und treuen Bauern verrieten {who}."
 
-#: internal/game/ibbs_return.go:412
+#: internal/game/ibbs_return.go:414
 msgid "Your {missile} backfired on {who} of {board}."
 msgstr "Ihre {missile} ging bei {who} von {board} nach hinten los."
 
-#: internal/game/ibbs_return.go:439
+#: internal/game/ibbs_return.go:441
 msgid "Your {missile} bounced off {who}'s New Realm Protection on {board}."
 msgstr "Ihre {missile} prallte am Neureich-Schutz von {who} auf {board} ab."
 
@@ -5162,7 +5158,7 @@ msgstr ""
 "Ihre {missile} prallte auf dem Weg zu {target} von {board} gegen einen "
 "verirrten Asteroiden."
 
-#: internal/game/ibbs_return.go:435
+#: internal/game/ibbs_return.go:437
 msgid "Your {missile} reached {board} and found no realm called {who}."
 msgstr "Ihre {missile} erreichte {board} und fand kein Reich namens {who}."
 
@@ -5182,20 +5178,20 @@ msgstr ""
 "Der Sprengkopf Ihrer {missile} wurde nicht scharf, und sie flog harmlos an "
 "{target} von {board} vorbei."
 
-#: internal/game/ibbs_return.go:447
+#: internal/game/ibbs_return.go:449
 msgid "Your {op} against {target} is over."
 msgstr "Ihre Operation {op} gegen {target} ist beendet."
 
-#: internal/game/ibbs_return.go:120
+#: internal/game/ibbs_return.go:122
 msgid "Your {op} against {who} of {board} destroyed {n} of its forces."
 msgstr ""
 "Ihre Operation {op} gegen {who} von {board} vernichtete {n} seiner Einheiten."
 
-#: internal/game/ibbs_return.go:123
+#: internal/game/ibbs_return.go:125
 msgid "Your {op} against {who} of {board} was turned away."
 msgstr "Ihre Operation {op} gegen {who} von {board} wurde abgewehrt."
 
-#: internal/game/ibbs_return.go:109
+#: internal/game/ibbs_return.go:111
 msgid "Your {op} bounced off {who}'s New Realm Protection on {board}."
 msgstr ""
 "Ihre Operation {op} prallte am Neureich-Schutz von {who} auf {board} ab."
@@ -5256,11 +5252,11 @@ msgstr "Handelsgeschäft"
 msgid "a unit sale"
 msgstr "Einheitenverkauf"
 
-#: internal/menu/actions_ipops.go:673
+#: internal/menu/actions_ipops.go:690
 msgid "agent"
 msgstr "Agent"
 
-#: internal/menu/actions_ipops.go:675
+#: internal/menu/actions_ipops.go:692
 msgid "agents"
 msgstr "Agenten"
 
@@ -5438,7 +5434,7 @@ msgstr "kein gültiges Datum (JJJJ-MM-TT verwenden)"
 msgid "nothing"
 msgstr "nichts"
 
-#: internal/game/ibbs_return.go:251
+#: internal/game/ibbs_return.go:253
 #, fuzzy
 msgid "nothing returned."
 msgstr "{units} kehrten zurück."
@@ -5673,7 +5669,7 @@ msgstr "die Liga ist nicht eingefroren"
 msgid "the trading market"
 msgstr "Handelsmarkt"
 
-#: internal/game/ibbs_return.go:306
+#: internal/game/ibbs_return.go:308
 msgid "the whole of {board}"
 msgstr "ganz {board}"
 
@@ -5891,7 +5887,7 @@ msgstr ""
 "Die Seuche von {from} tötete {troopers} Ihrer Soldaten und {people} Ihrer "
 "Einwohner; eine Hungersnot folgt."
 
-#: internal/game/ibbs_return.go:220
+#: internal/game/ibbs_return.go:222
 msgid "{kind} Results.  Target: {target}"
 msgstr "Ergebnis: {kind}.  Ziel: {target}"
 
@@ -6013,7 +6009,7 @@ msgstr ""
 msgid "{units} attacked!"
 msgstr "{units} griffen an!"
 
-#: internal/game/ibbs_return.go:251
+#: internal/game/ibbs_return.go:253
 msgid "{units} returned."
 msgstr "{units} kehrten zurück."
 
@@ -6021,7 +6017,7 @@ msgstr "{units} kehrten zurück."
 msgid "{who}"
 msgstr "{who}"
 
-#: internal/game/ibbs_return.go:292
+#: internal/game/ibbs_return.go:294
 msgid "{who} ({board})"
 msgstr "{who} ({board})"
 
@@ -6081,7 +6077,7 @@ msgstr ""
 msgid "{who} no longer offers {good}."
 msgstr "{who} bietet {good} nicht mehr an."
 
-#: internal/game/ibbs_return.go:308
+#: internal/game/ibbs_return.go:310
 msgid "{who} of {board}"
 msgstr "{who} von {board}"
 
@@ -6133,6 +6129,15 @@ msgstr ""
 #: internal/menu/input.go:479
 msgid "─»>Paused<«─"
 msgstr "─»>Pause<«─"
+
+#~ msgid "Defense"
+#~ msgstr "Verteidigung"
+
+#~ msgid "Land {land}  Off {off}  Def {def}  Gold {gold}"
+#~ msgstr "Land {land}  Ang {off}  Vert {def}  Gold {gold}"
+
+#~ msgid "Offense"
+#~ msgstr "Angriff"
 
 #~ msgid "%d days"
 #~ msgstr "%d Tage"
