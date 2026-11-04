@@ -18,17 +18,17 @@ em equipe conta.
   determinado. Você fica com tudo em vez de dividir, e escolhe como
   pressionar o ataque (veja Tipos de Ataque).
 - Ver o Placar Interplanetário: veja como os BBSes se classificam entre si.
-- Enviar Mensagem — escreva para outro planeta. Indique o planeta, depois
-  escolha quais barões dele devem ler a carta, usando a mesma lista `Enviar
-  para:` que as telas de Diplomacia e de mensagens usam aqui: uma letra
-  marca um barão, a mesma letra de novo o tira, `Z` marca todo mundo, `?`
-  mostra a lista do planeta, e Enter abre o editor. Enter sem ninguém
-  marcado sai sem enviar. Os outros quatro itens falam com a liga inteira,
-  com os seus planetas aliados, com vários planetas que você indicar, ou só
-  com o Coordenador de um planeta. Uma resposta pergunta se é pública: sim e
-  o planeta inteiro de quem escreveu lê, não e só o barão que escreveu.  Se
-  o seu BBS ainda não recebeu o placar daquele planeta, não há lista para
-  escolher e a carta vai para todo mundo de lá.
+- Send Message — write to another planet. Name the planet, then pick which
+  barons on it should read the letter, using the same `Send to:` list the
+  Diplomacy and message screens use here: a letter marks a baron, the same
+  letter again takes them off, `Z` marks everyone, `?` shows the planet's
+  roster, and Enter opens the editor. Enter with nobody marked leaves
+  without sending. The other four items address the whole league, your
+  allied planets, several planets you name, or one planet's Coordinator
+  alone. A reply asks whether it is public: yes and the sender's whole
+  planet reads it, no and only the baron who wrote does.  If your board has
+  not yet received that planet's scores, no players are known there and the
+  letter cannot be sent.
 - Lista Diplomática — onde o seu BBS diz como está com cada outro
   planeta. Não obriga ninguém, mas é o seu Coordenador dizendo de quem
   desconfiar.

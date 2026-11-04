@@ -38,8 +38,9 @@ kan lezen:
 
 - een **groepsaanval** die tegen deze planeet wordt samengesteld, of tegen
   een rijk erop, met de uren die resten voordat hij vertrekt
-- een **Gooie Kablooie** die tegen ons gebouwd wordt - wanneer het werk
-  begint, wanneer de financiering rond is, en of hij weer wordt afgeblazen
+- a **Gooie Kablooie** being built for us — when the work starts, when the
+  funding is complete, when it launches and how long until it lands, and if
+  it is stood down again
 
 Hij meldt ook wat er al gaande is op de dag dat hij aankomt, dus een laat
 uitgezonden man is niet verspild.
@@ -51,21 +52,20 @@ u gericht was en hoeveel tijd er restte toen hij het schreef. Die regel
 verandert daarna nooit meer, dus uren later zegt hij niet meer hoeveel tijd
 er over is.
 
-**Aanvallen in aantocht**, in het Interplanetaire menu, is dezelfde waarschuwing,
-bijgehouden: een regel per dreiging, de eerstvolgende bovenaan, aftellend terwijl
-u leest - `3h`, dan `90m`, dan `weg` zodra de strijdmacht vertrokken is. Een
-wapen dat al onderweg is, staat vermeld met de dagen tot het inslaat.
+**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept
+current: one row per threat, the soonest at the top, counting down as you read —
+`3h`, then `90m`, then `away` once the force has left. A Gooie Kablooie in
+flight counts down to the hour it lands, and drops off the list once it has.
 
-Een lege lijst bewijst niet dat er niemand komt. Behalve een wapen dat al
-onderweg is, kan alleen een waarnemer op een andere planeet iets melden.
+An empty list does not prove that nobody is coming. Only a watcher posted on
+another planet can report anything.
 
 ## Waarom het uitmaakt
 
-Een wapen dat nog aan de grond staat, is de zaak van de bouwers alleen:
-niemand vertelt u dat het bestaat. U hoort ervan wanneer het gelanceerd
-wordt - en dan is het twee dagen onderweg met alleen uw jagers tussen het
-wapen en uw regio's. Een SpyGuy op de juiste planeet koopt u de dagen die u
-nodig hebt om ze op de been te brengen.
+A Gooie Kablooie is the builders' own business: nobody tells you it exists,
+and nobody tells you it has launched. Without a watcher you learn of it when
+it lands, with only your jets between it and your regions. A SpyGuy on the
+right planet buys you the days you need to raise them.
 
 De planeet die u in de gaten houdt, hoort niets. Er is geen ontdekking, geen
 proces en geen executie; wanneer de dagen waarvoor u betaald hebt op zijn,

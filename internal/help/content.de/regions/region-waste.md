@@ -7,8 +7,9 @@ title: Ödland
 
 # Ödlandregionen
 
-Ödland ist eine Region, die ein nuklearer oder chemischer Schlag verwüstet
-hat. Sie können es weder kaufen noch aufgeben; ein Feind schenkt es Ihnen.
+Waste is a region ruined by a nuclear or chemical strike. You cannot buy it
+or drop it; an enemy gives it to you. Waste you capture from another realm
+arrives clean, and you choose its type like any other conquered region.
 
 Ödland bleibt in Ihren Büchern. Es zählt zu Ihrem Gebiet, kostet denselben
 Unterhalt wie jede andere Region und bringt Ihnen nichts. Ein Reich, das

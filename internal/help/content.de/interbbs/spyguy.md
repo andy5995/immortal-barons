@@ -39,8 +39,9 @@ lesen kann:
 
 - ein **Gruppenangriff**, der gegen diesen Planeten oder gegen ein einzelnes
   Reich darauf zusammengestellt wird, mit den Stunden bis zum Abflug
-- ein **Gooie Kablooie**, der für uns gebaut wird - wann die Arbeit beginnt,
-  wann die Finanzierung steht, und ob er wieder eingestellt wird
+- a **Gooie Kablooie** being built for us — when the work starts, when the
+  funding is complete, when it launches and how long until it lands, and if
+  it is stood down again
 
 Er meldet auch, was an dem Tag seiner Ankunft bereits im Gange ist, ein spät
 geschickter Mann ist also nicht vergeudet.
@@ -52,22 +53,20 @@ Sie gerichtet war und wie viel Zeit ihm blieb, als er schrieb. Diese Zeile
 ändert sich danach nie, Stunden später sagt sie Ihnen also nicht mehr, wie
 viel Zeit noch bleibt.
 
-**Angriffe im Anflug** im InterPlanetary-Menü führt dieselben Warnungen aktuell:
-eine Zeile je Bedrohung, die nächste oben, herunterzählend, während Sie lesen -
-`3h`, dann `90m`, dann `away`, sobald die Truppe fort ist. Eine Waffe, die schon
-fliegt, wird mit den Tagen bis zum Einschlag geführt.
+**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept
+current: one row per threat, the soonest at the top, counting down as you read —
+`3h`, then `90m`, then `away` once the force has left. A Gooie Kablooie in
+flight counts down to the hour it lands, and drops off the list once it has.
 
-Eine leere Liste beweist nicht, dass niemand kommt. Abgesehen von einer
-Waffe, die schon fliegt, kann nur ein Beobachter, den Sie auf einem anderen
-Planeten postiert haben, etwas melden.
+An empty list does not prove that nobody is coming. Only a watcher posted on
+another planet can report anything.
 
 ## Warum das zählt
 
-Eine Waffe, die noch am Boden steht, ist die Sache ihrer Erbauer allein:
-Niemand sagt Ihnen, dass es sie gibt. Sie erfahren davon, wenn sie startet -
-und dann ist sie zwei Tage entfernt, und zwischen ihr und Ihren Regionen
-stehen nur Ihre Jets. Ein SpyGuy auf dem richtigen Planeten erkauft Ihnen
-die Tage, die Sie brauchen, um sie aufzustellen.
+A Gooie Kablooie is the builders' own business: nobody tells you it exists,
+and nobody tells you it has launched. Without a watcher you learn of it when
+it lands, with only your jets between it and your regions. A SpyGuy on the
+right planet buys you the days you need to raise them.
 
 Dem beobachteten Planeten wird nichts gesagt. Es gibt keine Enttarnung,
 keinen Prozess und keine Hinrichtung; sind die bezahlten Tage um, kommt Ihr

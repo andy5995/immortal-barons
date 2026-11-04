@@ -17,17 +17,17 @@ title: 'Лиги и межсистемная (Inter-BBS) игра'
   барону. Добычу вы не делите ни с кем и сами выбираете, как вести бой
   (см. типы атак).
 - Показать очки планет — посмотреть, как доски соотносятся друг с другом.
-- «Отправить сообщение» — письмо на другую планету. Назовите планету, а
-  затем отметьте баронов на ней, которые прочтут письмо, тем же списком
-  `Send to:`, что используют экраны дипломатии и сообщений: буква отмечает
-  барона, та же буква снимает отметку, `Z` отмечает всех, `?` показывает
-  состав планеты, а Enter открывает редактор. Enter без единой отметки
-  просто выходит, ничего не отправив. Остальные четыре пункта адресуют
-  письмо всей лиге, союзным планетам, нескольким названным планетам или
-  одному координатору планеты. При ответе спрашивается, публичен ли он: да —
-  и письмо прочтёт вся планета отправителя, нет — только написавший его
-  барон.  Если ваша доска ещё не получила очки той планеты, выбирать не из
-  кого, и письмо уходит всем, кто там есть.
+- Send Message — write to another planet. Name the planet, then pick which
+  barons on it should read the letter, using the same `Send to:` list the
+  Diplomacy and message screens use here: a letter marks a baron, the same
+  letter again takes them off, `Z` marks everyone, `?` shows the planet's
+  roster, and Enter opens the editor. Enter with nobody marked leaves
+  without sending. The other four items address the whole league, your
+  allied planets, several planets you name, or one planet's Coordinator
+  alone. A reply asks whether it is public: yes and the sender's whole
+  planet reads it, no and only the baron who wrote does.  If your board has
+  not yet received that planet's scores, no players are known there and the
+  letter cannot be sent.
 - «Список дипломатии» — то, как ваша доска относится к каждой из прочих
   планет. Никого ни к чему не обязывает, но это ваш координатор говорит вам,
   за кем следить.

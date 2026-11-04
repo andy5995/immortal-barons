@@ -36,8 +36,9 @@ Två saker, och båda kommer som **planetnyheter** som alla här kan läsa:
 
 - ett **gruppanfall** som sätts samman mot den här planeten, eller mot ett
   rike på den, med antal timmar kvar innan det ger sig av
-- en **Gooie Kablooie** som byggs mot oss - när arbetet startar, när
-  finansieringen är klar, och om den avblåses igen
+- a **Gooie Kablooie** being built for us — when the work starts, when the
+  funding is complete, when it launches and how long until it lands, and if
+  it is stood down again
 
 Han rapporterar också allt som redan är på gång den dag han anländer, så en
 man som skickas sent är inte bortkastad.
@@ -49,21 +50,20 @@ riktat mot dig och hur lång tid som var kvar när han skrev den. Den raden
 ändras aldrig efteråt, så flera timmar senare säger den inte längre hur lång
 tid som är kvar.
 
-**Inkommande anfall**, på InterPlanetary-menyn, håller samma varningar
-aktuella: en rad per hot, det närmaste överst, som räknar ner medan du läser -
-`3h`, sedan `90m`, sedan `iväg` när styrkan har gett sig av. Ett vapen som redan
-flyger listas med antal dagar kvar tills det landar.
+**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept
+current: one row per threat, the soonest at the top, counting down as you read —
+`3h`, then `90m`, then `away` once the force has left. A Gooie Kablooie in
+flight counts down to the hour it lands, and drops off the list once it has.
 
-En tom lista bevisar inte att ingen är på väg. Bortsett från ett vapen som
-redan är i luften kan bara en bevakare utplacerad på en annan planet
-rapportera något.
+An empty list does not prove that nobody is coming. Only a watcher posted on
+another planet can report anything.
 
 ## Varför det spelar roll
 
-Ett vapen som fortfarande är på marken är byggarnas egen sak: ingen berättar
-för dig att det finns. Du får veta om det när det avfyras - och då är det
-två dagar bort med bara dina jetplan mellan det och dina regioner. En SpyGuy
-på rätt planet köper dig de dagar du behöver för att resa dem.
+A Gooie Kablooie is the builders' own business: nobody tells you it exists,
+and nobody tells you it has launched. Without a watcher you learn of it when
+it lands, with only your jets between it and your regions. A SpyGuy on the
+right planet buys you the days you need to raise them.
 
 Planeten du bevakar får inte veta något. Det blir ingen upptäckt, ingen
 rättegång och ingen avrättning; när dagarna du betalat för tar slut kommer

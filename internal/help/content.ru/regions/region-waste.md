@@ -7,8 +7,9 @@ title: Пустошь
 
 # Пустоши
 
-Пустошь — это регион, разорённый ядерным или химическим ударом. Её нельзя ни
-купить, ни сбросить: её дарит вам враг.
+Waste is a region ruined by a nuclear or chemical strike. You cannot buy it
+or drop it; an enemy gives it to you. Waste you capture from another realm
+arrives clean, and you choose its type like any other conquered region.
 
 Пустошь остаётся на вашем балансе. Она считается территорией, стоит столько
 же на содержание, сколько любой регион, и не приносит ничего. Держава,

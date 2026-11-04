@@ -7,8 +7,9 @@ title: Devastada
 
 # Regiões Devastadas
 
-Devastada é uma região arruinada por um ataque nuclear ou químico. Você não
-pode comprá-la nem abrir mão dela; é um inimigo que lhe dá.
+Waste is a region ruined by a nuclear or chemical strike. You cannot buy it
+or drop it; an enemy gives it to you. Waste you capture from another realm
+arrives clean, and you choose its type like any other conquered region.
 
 A região devastada continua nos seus livros. Ela conta no seu território,
 custa a mesma manutenção de qualquer outra região e não lhe rende nada. Um

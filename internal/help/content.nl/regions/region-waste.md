@@ -7,8 +7,9 @@ title: Verwoest
 
 # Verwoeste regio's
 
-Een verwoeste regio is een regio die door een nucleaire of chemische aanval
-is geruïneerd. U kunt hem niet kopen of opgeven; een vijand geeft hem u.
+Waste is a region ruined by a nuclear or chemical strike. You cannot buy it
+or drop it; an enemy gives it to you. Waste you capture from another realm
+arrives clean, and you choose its type like any other conquered region.
 
 Verwoest land blijft op uw balans staan. Het telt mee voor uw grondgebied,
 het kost evenveel onderhoud als elke andere regio, en het levert u niets

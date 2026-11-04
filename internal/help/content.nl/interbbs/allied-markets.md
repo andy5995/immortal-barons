@@ -42,11 +42,9 @@ niet zijn aangekomen.
 staan en hoeveel goud daarvoor wordt vastgehouden. Dat goud is nergens anders
 zichtbaar, dus kijk hier als uw schatkist te krap lijkt.
 
-Er gaat niets verloren als een pakket zoekraakt. Een bod dat nooit antwoord
-krijgt wordt opgegeven na hetzelfde aantal dagen dat uw sysop voor
-verdwaalde aanvalsmachten heeft ingesteld, en uw goud komt terug. Komt het
-antwoord later alsnog, dan wordt het genegeerd in plaats van tweemaal
-uitbetaald.
+Nothing is lost if a packet goes missing. A bid that never gets an answer is
+given up on after at least three full days, and your gold is returned. If
+the answer turns up later than that, it is ignored rather than paid twice.
 
 ## Twee dingen om te weten
 

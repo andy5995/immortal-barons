@@ -38,10 +38,9 @@ title: 'Рынки союзников'
 сколько золота под них удержано. Это золото нигде больше не видно, так что
 сюда и стоит смотреть, когда казна кажется пустее, чем должна быть.
 
-Ничего не пропадает, даже если пакет потерялся. Заявка, оставшаяся без
-ответа, аннулируется через столько же дней, сколько ваш сисоп отвёл
-пропавшим ударным силам, и золото возвращается. Если ответ придёт позже
-этого срока, его не примут, чтобы не заплатить дважды.
+Nothing is lost if a packet goes missing. A bid that never gets an answer is
+given up on after at least three full days, and your gold is returned. If
+the answer turns up later than that, it is ignored rather than paid twice.
 
 ## Две вещи, которые стоит знать
 

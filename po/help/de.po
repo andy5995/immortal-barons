@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-10-12 10:14-0500\n"
+"POT-Creation-Date: 2026-11-03 21:52-0600\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -944,7 +944,7 @@ msgstr ""
 "Verdeckte Operationen erklärt die Aussichten."
 
 #. type: Plain text
-#: internal/help/content/covert/send-spy.md:18
+#: internal/help/content/covert/send-spy.md:19
 msgid ""
 "Send Spy answers on the spot. It is one of the few operations that does not "
 "wait for daily maintenance, which is what makes it useful right before an "
@@ -953,6 +953,14 @@ msgstr ""
 "Spion senden antwortet auf der Stelle. Es ist eine der wenigen Operationen, "
 "die nicht auf die tägliche Verwaltung warten, und genau das macht es "
 "unmittelbar vor einem Angriff nützlich."
+
+#. type: Plain text
+#: internal/help/content/covert/send-spy.md:22
+msgid ""
+"A spy that gets in also files the report in your Spy Database, which you "
+"open from the Covert Operations menu. Only you can read the reports your own "
+"spies bring home."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/covert/set-up.md:1
@@ -1504,7 +1512,7 @@ msgid "Investments"
 msgstr "Investitionen"
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:68
+#: internal/help/content/economy/banking.md:69
 #, fuzzy
 #| msgid ""
 #| "You can lock gold away as an investment for 2 to 10 days. It pays back "
@@ -1526,7 +1534,8 @@ msgid ""
 "The interest rate floats — it rises and falls with how much everyone is "
 "investing — so check the rate before you commit.  A common tactic is to keep "
 "several investments running at once, each for a different length, so one "
-"matures every day."
+"matures every day. The Bank menu charts the next ten days, each column "
+"showing how much of that date's limit is already taken."
 msgstr ""
 "Sie können Gold für 2 bis 10 Tage als Investition anlegen. Es zahlt Ihr Gold "
 "plus Zinsen zurück, wenn die Laufzeit endet. Die Bank zahlt es über diesen "
@@ -2481,12 +2490,17 @@ msgstr ""
 "hier schauen Sie also nach, wenn Ihre Schatzkammer knapp wirkt.\n"
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:45
+#: internal/help/content/interbbs/allied-markets.md:44
+#, fuzzy
+#| msgid ""
+#| "Nothing is lost if a packet goes missing. A bid that never gets an answer "
+#| "is given up on after the same number of days your sysop set for lost "
+#| "attack forces, and your gold is returned. If the answer turns up later "
+#| "than that, it is ignored rather than paid twice."
 msgid ""
 "Nothing is lost if a packet goes missing. A bid that never gets an answer is "
-"given up on after the same number of days your sysop set for lost attack "
-"forces, and your gold is returned. If the answer turns up later than that, "
-"it is ignored rather than paid twice."
+"given up on after at least three full days, and your gold is returned. If "
+"the answer turns up later than that, it is ignored rather than paid twice."
 msgstr ""
 "Geht ein Paket verloren, geht nichts verloren. Ein Gebot, das nie "
 "beantwortet wird, wird nach ebenso vielen Tagen aufgegeben, wie Ihr Sysop "
@@ -2495,13 +2509,13 @@ msgstr ""
 "zweites Mal zu zahlen."
 
 #. type: Title ##
-#: internal/help/content/interbbs/allied-markets.md:46
+#: internal/help/content/interbbs/allied-markets.md:45
 #, no-wrap
 msgid "Two things worth knowing"
 msgstr "Zweierlei, das man wissen sollte"
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:51
+#: internal/help/content/interbbs/allied-markets.md:50
 msgid ""
 "Each planet keeps its own list of who it is allied with. A planet can "
 "therefore stop selling to you before you have heard about it, and your bid "
@@ -2512,7 +2526,7 @@ msgstr ""
 "Ihr Gebot kommt abgelehnt zurück. Das ist kein Fehler."
 
 #. type: Plain text
-#: internal/help/content/interbbs/allied-markets.md:53
+#: internal/help/content/interbbs/allied-markets.md:52
 msgid ""
 "Your sysop can turn this feature off for the whole league, in which case "
 "Trade does not appear on the InterPlanetary Operations menu."
@@ -2759,6 +2773,19 @@ msgstr "IP-Punkte ansehen - sehen, wie die Boards zueinander stehen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:38
+#, fuzzy
+#| msgid ""
+#| "Send Message — write to another planet. Name the planet, then pick which "
+#| "barons on it should read the letter, using the same `Send to:` list the "
+#| "Diplomacy and message screens use here: a letter marks a baron, the same "
+#| "letter again takes them off, `Z` marks everyone, `?` shows the planet's "
+#| "roster, and Enter opens the editor. Enter with nobody marked leaves "
+#| "without sending. The other four items address the whole league, your "
+#| "allied planets, several planets you name, or one planet's Coordinator "
+#| "alone. A reply asks whether it is public: yes and the sender's whole "
+#| "planet reads it, no and only the baron who wrote does.  If your board has "
+#| "not yet received that planet's scores, there is no roster to pick from "
+#| "and the letter goes to everyone there."
 msgid ""
 "Send Message — write to another planet. Name the planet, then pick which "
 "barons on it should read the letter, using the same `Send to:` list the "
@@ -2769,8 +2796,7 @@ msgid ""
 "several planets you name, or one planet's Coordinator alone. A reply asks "
 "whether it is public: yes and the sender's whole planet reads it, no and "
 "only the baron who wrote does.  If your board has not yet received that "
-"planet's scores, there is no roster to pick from and the letter goes to "
-"everyone there."
+"planet's scores, no players are known there and the letter cannot be sent."
 msgstr ""
 "Nachricht senden - an einen anderen Planeten schreiben. Nennen Sie den "
 "Planeten und wählen Sie dann, welche Barone dort den Brief lesen sollen, "
@@ -3124,7 +3150,7 @@ msgstr ""
 "lesen kann:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:41
+#: internal/help/content/interbbs/spyguy.md:42
 msgid ""
 "a **group attack** being assembled against this planet, or against one realm "
 "on it, with the hours left before it leaves"
@@ -3133,16 +3159,21 @@ msgstr ""
 "Reich darauf zusammengestellt wird, mit den Stunden bis zum Abflug"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/spyguy.md:41
+#: internal/help/content/interbbs/spyguy.md:42
+#, fuzzy
+#| msgid ""
+#| "a **Gooie Kablooie** being built for us — when the work starts, when the "
+#| "funding is complete, and if it is stood down again"
 msgid ""
 "a **Gooie Kablooie** being built for us — when the work starts, when the "
-"funding is complete, and if it is stood down again"
+"funding is complete, when it launches and how long until it lands, and if it "
+"is stood down again"
 msgstr ""
 "ein **Gooie Kablooie**, der für uns gebaut wird - wann die Arbeit beginnt, "
 "wann die Finanzierung steht, und ob er wieder eingestellt wird"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:44
+#: internal/help/content/interbbs/spyguy.md:45
 msgid ""
 "He also reports whatever is already under way the day he arrives, so a man "
 "sent late is not wasted."
@@ -3151,13 +3182,13 @@ msgstr ""
 "geschickter Mann ist also nicht vergeudet."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:45
+#: internal/help/content/interbbs/spyguy.md:46
 #, no-wrap
 msgid "Reading what he sends"
 msgstr "Lesen, was er sendet"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:50
+#: internal/help/content/interbbs/spyguy.md:51
 msgid ""
 "Each report arrives as planet news, dated, saying what was aimed at you and "
 "how long it had left when he wrote it. That line never changes afterward, so "
@@ -3169,13 +3200,18 @@ msgstr ""
 "viel Zeit noch bleibt."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:55
-#, no-wrap
+#: internal/help/content/interbbs/spyguy.md:56
+#, fuzzy, no-wrap
+#| msgid ""
+#| "**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept\n"
+#| "current: one row per threat, the soonest at the top, counting down as you read —\n"
+#| "`3h`, then `90m`, then `away` once the force has left. A weapon already flying\n"
+#| "is listed with the days until it lands.\n"
 msgid ""
 "**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept\n"
 "current: one row per threat, the soonest at the top, counting down as you read —\n"
-"`3h`, then `90m`, then `away` once the force has left. A weapon already flying\n"
-"is listed with the days until it lands.\n"
+"`3h`, then `90m`, then `away` once the force has left. A Gooie Kablooie in\n"
+"flight counts down to the hour it lands, and drops off the list once it has.\n"
 msgstr ""
 "**Angriffe im Anflug** im InterPlanetary-Menü führt dieselben Warnungen aktuell:\n"
 "eine Zeile je Bedrohung, die nächste oben, herunterzählend, während Sie lesen -\n"
@@ -3183,29 +3219,39 @@ msgstr ""
 "fliegt, wird mit den Tagen bis zum Einschlag geführt.\n"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:58
+#: internal/help/content/interbbs/spyguy.md:59
+#, fuzzy
+#| msgid ""
+#| "An empty list does not prove that nobody is coming. Apart from a weapon "
+#| "already in flight, only a watcher posted on another planet can report "
+#| "anything."
 msgid ""
-"An empty list does not prove that nobody is coming. Apart from a weapon "
-"already in flight, only a watcher posted on another planet can report "
-"anything."
+"An empty list does not prove that nobody is coming. Only a watcher posted on "
+"another planet can report anything."
 msgstr ""
 "Eine leere Liste beweist nicht, dass niemand kommt. Abgesehen von einer "
 "Waffe, die schon fliegt, kann nur ein Beobachter, den Sie auf einem anderen "
 "Planeten postiert haben, etwas melden."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:59
+#: internal/help/content/interbbs/spyguy.md:60
 #, no-wrap
 msgid "Why it matters"
 msgstr "Warum das zählt"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:65
+#: internal/help/content/interbbs/spyguy.md:66
+#, fuzzy
+#| msgid ""
+#| "A weapon still on the ground is the builders' own business: nobody tells "
+#| "you it exists. You learn of it when it launches — and by then it is two "
+#| "days out with only your jets between it and your regions. A SpyGuy on the "
+#| "right planet buys you the days you need to raise them."
 msgid ""
-"A weapon still on the ground is the builders' own business: nobody tells you "
-"it exists. You learn of it when it launches — and by then it is two days out "
-"with only your jets between it and your regions. A SpyGuy on the right "
-"planet buys you the days you need to raise them."
+"A Gooie Kablooie is the builders' own business: nobody tells you it exists, "
+"and nobody tells you it has launched. Without a watcher you learn of it when "
+"it lands, with only your jets between it and your regions. A SpyGuy on the "
+"right planet buys you the days you need to raise them."
 msgstr ""
 "Eine Waffe, die noch am Boden steht, ist die Sache ihrer Erbauer allein: "
 "Niemand sagt Ihnen, dass es sie gibt. Sie erfahren davon, wenn sie startet - "
@@ -3214,7 +3260,7 @@ msgstr ""
 "die Tage, die Sie brauchen, um sie aufzustellen."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:69
+#: internal/help/content/interbbs/spyguy.md:70
 msgid ""
 "The planet you are watching is told nothing. There is no discovery, no "
 "trial, and no execution; when the days you paid for run out, your man simply "
@@ -3225,13 +3271,13 @@ msgstr ""
 "Mann einfach heim."
 
 #. type: Title ##
-#: internal/help/content/interbbs/spyguy.md:70
+#: internal/help/content/interbbs/spyguy.md:71
 #, no-wrap
 msgid "Strategy"
 msgstr "Strategie"
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:75
+#: internal/help/content/interbbs/spyguy.md:76
 msgid ""
 "Post him where the threat is, not where the grudge is. The planet that just "
 "lost a battle to you is the one assembling the answer, and the rate is the "
@@ -3243,7 +3289,7 @@ msgstr ""
 "beobachten oder einen Nachbarn, dem Sie trauen."
 
 #. type: Plain text
-#: internal/help/content/interbbs/spyguy.md:79
+#: internal/help/content/interbbs/spyguy.md:80
 msgid ""
 "Sending another SpyGuy to a planet already watched from here does not add "
 "the two stays together. The stay becomes whichever is longer, and you still "
@@ -4577,16 +4623,21 @@ msgid "Waste Regions"
 msgstr "Ödlandregionen"
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:12
+#: internal/help/content/regions/region-waste.md:13
+#, fuzzy
+#| msgid ""
+#| "Waste is a region ruined by a nuclear or chemical strike. You cannot buy "
+#| "it or drop it; an enemy gives it to you."
 msgid ""
 "Waste is a region ruined by a nuclear or chemical strike. You cannot buy it "
-"or drop it; an enemy gives it to you."
+"or drop it; an enemy gives it to you. Waste you capture from another realm "
+"arrives clean, and you choose its type like any other conquered region."
 msgstr ""
 "Ödland ist eine Region, die ein nuklearer oder chemischer Schlag verwüstet "
 "hat. Sie können es weder kaufen noch aufgeben; ein Feind schenkt es Ihnen."
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:16
+#: internal/help/content/regions/region-waste.md:17
 msgid ""
 "Waste stays on your books. It counts toward your territory, it costs the "
 "same upkeep as any other region, and it earns you nothing. A realm that "
@@ -4599,7 +4650,7 @@ msgstr ""
 "nichts leisten."
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:19
+#: internal/help/content/regions/region-waste.md:20
 msgid ""
 "Cleaning it up is called decontamination, and it is offered during "
 "maintenance whenever you hold any. Two limits apply:"
@@ -4608,7 +4659,7 @@ msgstr ""
 "sobald Sie welches halten. Es gelten zwei Grenzen:"
 
 #. type: Bullet: '- '
-#: internal/help/content/regions/region-waste.md:25
+#: internal/help/content/regions/region-waste.md:26
 msgid ""
 "You can clean a **fifth of your waste each turn**, but never fewer than **10 "
 "regions** and never more than you actually hold. A big mess takes several "
@@ -4619,7 +4670,7 @@ msgstr ""
 "Verwüstung braucht mehrere Züge, wie reich Sie auch sind."
 
 #. type: Bullet: '- '
-#: internal/help/content/regions/region-waste.md:25
+#: internal/help/content/regions/region-waste.md:26
 msgid ""
 "Each cleaned region costs **half the going price of new regions**. A high "
 "technology level cuts that further, down to a quarter."
@@ -4628,12 +4679,12 @@ msgstr ""
 "Regionen**. Eine hohe Technologiestufe senkt das weiter, bis auf ein Viertel."
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:27
+#: internal/help/content/regions/region-waste.md:28
 msgid "Paying part of the bill cleans part of the waste."
 msgstr "Wer einen Teil der Rechnung zahlt, reinigt einen Teil des Ödlands."
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:31
+#: internal/help/content/regions/region-waste.md:32
 msgid ""
 "Cleaned regions have no type until you give them one. You are asked to share "
 "them out across region types, the same way you share out regions you have "
@@ -4643,7 +4694,7 @@ msgstr ""
 "gebeten, sie auf die Regionsarten aufzuteilen, genau wie eroberte Regionen."
 
 #. type: Plain text
-#: internal/help/content/regions/region-waste.md:33
+#: internal/help/content/regions/region-waste.md:34
 msgid ""
 "Strategy: decontaminate early. You pay upkeep on waste every turn, and you "
 "can clean only part of it each turn."
@@ -4998,12 +5049,21 @@ msgid "Being on the receiving end"
 msgstr "Wenn es Sie trifft"
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:31
+#: internal/help/content/warfare/gooie-kablooie.md:32
+#, fuzzy
+#| msgid ""
+#| "A weapon that reaches your planet stays there and destroys regions each "
+#| "day. The day it lands it takes a tenth of every realm's regions. Every "
+#| "day after that it takes another twentieth, until five days are up and it "
+#| "burns itself out. Left alone it will cost you more than a quarter of your "
+#| "regions."
 msgid ""
 "A weapon that reaches your planet stays there and destroys regions each day. "
-"The day it lands it takes a tenth of every realm's regions. Every day after "
-"that it takes another twentieth, until five days are up and it burns itself "
-"out. Left alone it will cost you more than a quarter of your regions."
+"At the first daily maintenance after it lands, it takes a tenth of every "
+"realm's regions. Every day after that it takes another twentieth, until five "
+"days are up and it burns itself out. Between landing and that first "
+"maintenance it does no damage yet, but your jets can already reach it. Left "
+"alone it will cost you more than a quarter of your regions."
 msgstr ""
 "Eine Waffe, die Ihren Planeten erreicht, bleibt dort und zerstört jeden Tag "
 "Regionen. Am Tag der Landung nimmt sie ein Zehntel der Regionen jedes "
@@ -5012,7 +5072,7 @@ msgstr ""
 "als ein Viertel Ihrer Regionen."
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:34
+#: internal/help/content/warfare/gooie-kablooie.md:35
 msgid ""
 "Only jets can reach it. Your realm is asked at the start of your turn "
 "whether you want to attack it. About a third of the jets you send do not "
@@ -5023,7 +5083,7 @@ msgstr ""
 "nicht heim."
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:36
+#: internal/help/content/warfare/gooie-kablooie.md:37
 msgid ""
 "No single wave can destroy it. It takes jets from many realms on the planet."
 msgstr ""
@@ -5031,7 +5091,7 @@ msgstr ""
 "auf dem Planeten."
 
 #. type: Plain text
-#: internal/help/content/warfare/gooie-kablooie.md:37
+#: internal/help/content/warfare/gooie-kablooie.md:38
 msgid "An SDI program is no help against it. Only your jets are."
 msgstr "Ein SDI-Programm hilft dagegen nicht. Nur Ihre Jets helfen."
 

@@ -18,17 +18,17 @@ betyder något.
   hela vinsten istället för att dela den, och du väljer hur du driver
   anfallet (se Anfallstyper).
 - View IPScores - se hur BBS:erna rankas mot varandra.
-- Send Message - skriv till en annan planet. Namnge planeten, välj sedan
-  vilka baroner där som ska läsa brevet, med samma `Send to:`-lista som
-  Diplomacy- och meddelandeskärmarna använder här: en bokstav märker en
-  baron, samma bokstav igen tar bort markeringen, `Z` märker alla, `?` visar
-  planetens lista, och Enter öppnar redigeraren. Enter med ingen markerad
-  lämnar utan att skicka. De andra fyra alternativen adresserar hela ligan,
-  dina allierade planeter, flera planeter du namnger, eller bara en planets
-  koordinator. Ett svar frågar om det ska vara publikt: ja och hela
-  avsändarens planet läser det, nej och bara baronen som skrev gör det.  Om
-  din BBS ännu inte tagit emot den planetens poängtavla finns ingen lista
-  att välja från och brevet går till alla där.
+- Send Message — write to another planet. Name the planet, then pick which
+  barons on it should read the letter, using the same `Send to:` list the
+  Diplomacy and message screens use here: a letter marks a baron, the same
+  letter again takes them off, `Z` marks everyone, `?` shows the planet's
+  roster, and Enter opens the editor. Enter with nobody marked leaves
+  without sending. The other four items address the whole league, your
+  allied planets, several planets you name, or one planet's Coordinator
+  alone. A reply asks whether it is public: yes and the sender's whole
+  planet reads it, no and only the baron who wrote does.  If your board has
+  not yet received that planet's scores, no players are known there and the
+  letter cannot be sent.
 - Diplomacy List - var din BBS säger var den står med varje annan
   planet. Den binder ingen, men det är din koordinator som talar om vem du
   ska hålla ögonen på.

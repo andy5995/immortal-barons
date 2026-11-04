@@ -23,11 +23,12 @@ spenderat oavsett.
 
 ## Att vara den som drabbas
 
-Ett vapen som når din planet stannar där och förstör regioner varje
-dag. Dagen det landar tar det en tiondel av varje rikes regioner. Varje dag
-därefter tar det ytterligare en tjugondel, tills fem dagar har gått och det
-brinner ut. Lämnat ifred kommer det kosta dig mer än en fjärdedel av dina
-regioner.
+A weapon that reaches your planet stays there and destroys regions each
+day. At the first daily maintenance after it lands, it takes a tenth of
+every realm's regions. Every day after that it takes another twentieth,
+until five days are up and it burns itself out. Between landing and that
+first maintenance it does no damage yet, but your jets can already reach
+it. Left alone it will cost you more than a quarter of your regions.
 
 Bara jetplan kan nå det. Ditt rike tillfrågas i början av ditt drag om du
 vill anfalla det. Ungefär en tredjedel av jetplanen du skickar kommer inte

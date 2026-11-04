@@ -24,11 +24,12 @@ verlässt. Das Gold ist so oder so ausgegeben.
 
 ## Wenn es Sie trifft
 
-Eine Waffe, die Ihren Planeten erreicht, bleibt dort und zerstört jeden Tag
-Regionen. Am Tag der Landung nimmt sie ein Zehntel der Regionen jedes
-Reiches. An jedem Tag danach nimmt sie ein weiteres Zwanzigstel, bis fünf
-Tage um sind und sie ausbrennt. Lässt man sie gewähren, kostet sie Sie mehr
-als ein Viertel Ihrer Regionen.
+A weapon that reaches your planet stays there and destroys regions each
+day. At the first daily maintenance after it lands, it takes a tenth of
+every realm's regions. Every day after that it takes another twentieth,
+until five days are up and it burns itself out. Between landing and that
+first maintenance it does no damage yet, but your jets can already reach
+it. Left alone it will cost you more than a quarter of your regions.
 
 Nur Jets erreichen sie. Ihr Reich wird zu Beginn Ihres Zuges gefragt, ob Sie
 sie angreifen wollen. Etwa ein Drittel der Jets, die Sie schicken, kommt

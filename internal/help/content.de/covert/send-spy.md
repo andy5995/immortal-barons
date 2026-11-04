@@ -18,3 +18,7 @@ Verdeckte Operationen erklärt die Aussichten.
 Spion senden antwortet auf der Stelle. Es ist eine der wenigen Operationen,
 die nicht auf die tägliche Verwaltung warten, und genau das macht es
 unmittelbar vor einem Angriff nützlich.
+
+A spy that gets in also files the report in your Spy Database, which you
+open from the Covert Operations menu. Only you can read the reports your own
+spies bring home.

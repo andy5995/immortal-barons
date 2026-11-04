@@ -38,10 +38,9 @@ inte anlände.
 mycket guld som hålls mot dem. Det guldet är osynligt överallt annars, så
 det är här du ska titta när din skattkammare verkar för liten.
 
-Ingenting går förlorat om ett paket försvinner. Ett bud som aldrig får ett
-svar ges upp efter samma antal dagar din sysop satt för förlorade
-anfallsstyrkor, och ditt guld återbetalas. Om svaret dyker upp senare än det
-ignoreras det hellre än att betalas ut dubbelt.
+Nothing is lost if a packet goes missing. A bid that never gets an answer is
+given up on after at least three full days, and your gold is returned. If
+the answer turns up later than that, it is ignored rather than paid twice.
 
 ## Två saker värda att veta
 

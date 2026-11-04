@@ -23,10 +23,12 @@ ouro é gasto de um jeito ou de outro.
 
 ## Estando do lado que recebe
 
-Uma arma que chega ao seu planeta fica lá e destrói regiões a cada dia. No
-dia em que pousa, leva um décimo das regiões de cada reino. A cada dia
-seguinte leva mais um vigésimo, até completar cinco dias e se
-consumir. Deixada em paz, ela lhe custa mais de um quarto das suas regiões.
+A weapon that reaches your planet stays there and destroys regions each
+day. At the first daily maintenance after it lands, it takes a tenth of
+every realm's regions. Every day after that it takes another twentieth,
+until five days are up and it burns itself out. Between landing and that
+first maintenance it does no damage yet, but your jets can already reach
+it. Left alone it will cost you more than a quarter of your regions.
 
 Só caças conseguem alcançá-la. Perguntam ao seu reino, no começo do turno,
 se você quer atacá-la. Cerca de um terço dos caças que você enviar não

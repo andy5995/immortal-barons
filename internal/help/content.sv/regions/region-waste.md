@@ -7,8 +7,9 @@ title: Ödemark
 
 # Ödemarksregioner
 
-Ödemark är en region förstörd av ett kärnvapen- eller kemiskt anfall. Du kan
-inte köpa den eller göra dig av med den; en fiende ger dig den.
+Waste is a region ruined by a nuclear or chemical strike. You cannot buy it
+or drop it; an enemy gives it to you. Waste you capture from another realm
+arrives clean, and you choose its type like any other conquered region.
 
 Ödemark stannar i dina böcker. Den räknas in i ditt territorium, kostar
 samma underhåll som alla andra regioner, och ger dig ingenting. Ett rike som

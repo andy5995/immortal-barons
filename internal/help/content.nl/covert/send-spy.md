@@ -18,3 +18,7 @@ Geheime Operaties legt de kansen uit.
 Spion Sturen antwoordt ter plekke. Het is een van de weinige operaties die
 niet op het dagelijkse onderhoud wacht, en dat is wat het vlak voor een
 aanval zo nuttig maakt.
+
+A spy that gets in also files the report in your Spy Database, which you
+open from the Covert Operations menu. Only you can read the reports your own
+spies bring home.

@@ -23,11 +23,12 @@ grond komt. Het goud is hoe dan ook uitgegeven.
 
 ## Aan de ontvangende kant
 
-Een wapen dat uw planeet bereikt blijft daar en vernietigt elke dag
-regio's. De dag dat het landt neemt het een tiende van de regio's van elk
-rijk. Elke dag daarna neemt het er nog een twintigste bij, tot er vijf dagen
-om zijn en het zichzelf opbrandt. Laat u het met rust, dan kost het u meer
-dan een kwart van uw regio's.
+A weapon that reaches your planet stays there and destroys regions each
+day. At the first daily maintenance after it lands, it takes a tenth of
+every realm's regions. Every day after that it takes another twentieth,
+until five days are up and it burns itself out. Between landing and that
+first maintenance it does no damage yet, but your jets can already reach
+it. Left alone it will cost you more than a quarter of your regions.
 
 Alleen jagers kunnen het bereiken. Aan uw rijk wordt aan het begin van uw
 beurt gevraagd of u het wilt aanvallen. Ongeveer een derde van de jagers die

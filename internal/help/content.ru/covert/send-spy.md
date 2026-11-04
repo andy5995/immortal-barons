@@ -17,3 +17,7 @@ title: 'Отправить шпиона'
 
 Отправить шпиона отвечает сразу. Это одна из немногих операций, которые не
 ждут ежедневного обслуживания, чем она и полезна прямо перед нападением.
+
+A spy that gets in also files the report in your Spy Database, which you
+open from the Covert Operations menu. Only you can read the reports your own
+spies bring home.

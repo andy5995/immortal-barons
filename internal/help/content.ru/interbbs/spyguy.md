@@ -36,8 +36,9 @@ SpyGuy — это наблюдатель, которого вы размещае
 
 - **групповая атака**, собираемая против этой планеты или против одной
   державы на ней, с указанием часов до её выхода
-- строящийся против нас **Gooie Kablooie** — когда работы начались, когда
-  сбор денег завершён и если его всё же остановили
+- a **Gooie Kablooie** being built for us — when the work starts, when the
+  funding is complete, when it launches and how long until it lands, and if
+  it is stood down again
 
 Он также сообщает обо всём, что уже готовится в день его прибытия, так что
 посланный поздно человек не пропадает зря.
@@ -49,22 +50,20 @@ SpyGuy — это наблюдатель, которого вы размещае
 потом не меняется, так что спустя часы она уже не показывает, сколько
 осталось.
 
-**Атаки на подходе** в межпланетном меню — те же предупреждения, но живые: одна
-строка на угрозу, ближайшая сверху, и отсчёт идёт прямо у вас на глазах —
-`3h`, потом `90m`, потом `away`, когда отряд ушёл. Уже летящее оружие показано
-с числом дней до падения.
+**Incoming Attacks**, on the InterPlanetary menu, is the same warnings kept
+current: one row per threat, the soonest at the top, counting down as you read —
+`3h`, then `90m`, then `away` once the force has left. A Gooie Kablooie in
+flight counts down to the hour it lands, and drops off the list once it has.
 
-Пустой список не доказывает, что к вам никто не идёт. Кроме уже летящего
-оружия, донести о чём-либо может только наблюдатель, размещённый на другой
-планете.
+An empty list does not prove that nobody is coming. Only a watcher posted on
+another planet can report anything.
 
 ## Почему это важно
 
-Оружие, ещё стоящее на земле, — дело одних строителей: о его существовании
-вам никто не скажет. Вы узнаёте о нём при запуске — а к этому времени до
-него два дня пути, и между ним и вашими регионами только ваши
-самолёты. SpyGuy на нужной планете покупает вам дни, за которые их можно
-поднять.
+A Gooie Kablooie is the builders' own business: nobody tells you it exists,
+and nobody tells you it has launched. Without a watcher you learn of it when
+it lands, with only your jets between it and your regions. A SpyGuy on the
+right planet buys you the days you need to raise them.
 
 Планете, за которой вы следите, не говорят ничего. Ни разоблачения, ни суда,
 ни казни: когда оплаченные дни выйдут, ваш человек просто вернётся домой.

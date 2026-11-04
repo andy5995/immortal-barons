@@ -44,11 +44,9 @@ zurück. Für Ware, die nie eintrifft, zahlen Sie nie.
 wie viel Gold dafür zurückgelegt ist. Dieses Gold ist sonst nirgends sichtbar,
 hier schauen Sie also nach, wenn Ihre Schatzkammer knapp wirkt.
 
-Geht ein Paket verloren, geht nichts verloren. Ein Gebot, das nie
-beantwortet wird, wird nach ebenso vielen Tagen aufgegeben, wie Ihr Sysop
-für verschollene Angriffstruppen eingestellt hat, und Ihr Gold kommt
-zurück. Trifft die Antwort später doch noch ein, wird sie verworfen, statt
-ein zweites Mal zu zahlen.
+Nothing is lost if a packet goes missing. A bid that never gets an answer is
+given up on after at least three full days, and your gold is returned. If
+the answer turns up later than that, it is ignored rather than paid twice.
 
 ## Zweierlei, das man wissen sollte
 

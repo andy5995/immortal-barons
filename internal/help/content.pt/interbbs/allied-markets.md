@@ -40,10 +40,9 @@ que não chegou.
 ouro está retido por eles. Esse ouro é invisível em todo o resto, então é
 aqui que se olha quando o tesouro parece curto.
 
-Nada se perde se um pacote sumir. Um lance que nunca recebe resposta é dado
-por perdido depois do mesmo número de dias que o seu sysop definiu para
-forças de ataque perdidas, e o seu ouro volta. Se a resposta aparecer depois
-disso, ela é ignorada em vez de ser paga duas vezes.
+Nothing is lost if a packet goes missing. A bid that never gets an answer is
+given up on after at least three full days, and your gold is returned. If
+the answer turns up later than that, it is ignored rather than paid twice.
 
 ## Duas coisas que vale saber
 

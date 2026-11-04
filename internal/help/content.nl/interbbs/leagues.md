@@ -18,18 +18,17 @@ andere BBS'en te verslaan. Samenwerking telt.
   houdt de hele buit in plaats van hem te delen, en u kiest hoe u de aanval
   doorzet (zie Aanvalstypen).
 - IP-scores bekijken - zie hoe de BBS'en zich tot elkaar verhouden.
-- Bericht sturen - schrijf naar een andere planeet. Noem de planeet en kies
-  daarna welke baronnen daar de brief moeten lezen, met dezelfde `Send
-  to:`-lijst die de diplomatie- en berichtenschermen hier gebruiken: een
-  letter markeert een baron, dezelfde letter opnieuw haalt hem er weer af,
-  `Z` markeert iedereen, `?` toont de namenlijst van de planeet, en Enter
-  opent de editor. Enter zonder iemand gemarkeerd sluit af zonder te
-  versturen. De andere vier items richten zich tot de hele competitie, uw
-  bevriende planeten, meerdere planeten die u noemt, of de coördinator van
-  een planeet alleen. Bij een antwoord wordt gevraagd of het openbaar is: ja
-  en de hele planeet van de afzender leest het, nee en alleen de baron die
-  schreef. Als uw BBS de scores van die planeet nog niet ontvangen heeft, is
-  er geen namenlijst om uit te kiezen en gaat de brief naar iedereen daar.
+- Send Message — write to another planet. Name the planet, then pick which
+  barons on it should read the letter, using the same `Send to:` list the
+  Diplomacy and message screens use here: a letter marks a baron, the same
+  letter again takes them off, `Z` marks everyone, `?` shows the planet's
+  roster, and Enter opens the editor. Enter with nobody marked leaves
+  without sending. The other four items address the whole league, your
+  allied planets, several planets you name, or one planet's Coordinator
+  alone. A reply asks whether it is public: yes and the sender's whole
+  planet reads it, no and only the baron who wrote does.  If your board has
+  not yet received that planet's scores, no players are known there and the
+  letter cannot be sent.
 - Diplomatielijst - waar uw BBS zegt te staan tegenover elke andere
   planeet. Zij bindt niemand, maar het is uw coördinator die u vertelt wie u
   in de gaten moet houden.

@@ -23,11 +23,12 @@ than yours costs more.
 
 ## Когда бьют по вам
 
-Оружие, долетевшее до вашей планеты, остаётся там и каждый день уничтожает
-регионы. В день падения оно забирает десятую часть регионов у каждой
-державы. Каждый следующий день — ещё двадцатую, и так пять дней, пока оно не
-выгорит. Если его не трогать, оно обойдётся вам больше чем в четверть ваших
-регионов.
+A weapon that reaches your planet stays there and destroys regions each
+day. At the first daily maintenance after it lands, it takes a tenth of
+every realm's regions. Every day after that it takes another twentieth,
+until five days are up and it burns itself out. Between landing and that
+first maintenance it does no damage yet, but your jets can already reach
+it. Left alone it will cost you more than a quarter of your regions.
 
 Достать его могут только самолёты. В начале хода вашу державу спрашивают,
 хотите ли вы его атаковать. Около трети отправленных самолётов не

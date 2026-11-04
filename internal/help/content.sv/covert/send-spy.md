@@ -18,3 +18,7 @@ operationer förklarar oddsen.
 Skicka spion svarar på fläcken. Det är en av de få operationer som inte
 väntar på daglig underhåll, vilket är vad som gör den användbar strax före
 ett anfall.
+
+A spy that gets in also files the report in your Spy Database, which you
+open from the Covert Operations menu. Only you can read the reports your own
+spies bring home.

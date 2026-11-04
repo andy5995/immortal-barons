@@ -17,20 +17,17 @@ Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
   behalten die ganze Beute, statt sie zu teilen, und Sie wählen, wie hart
   Sie zuschlagen (siehe Angriffsarten).
 - IP-Punkte ansehen - sehen, wie die Boards zueinander stehen.
-- Nachricht senden - an einen anderen Planeten schreiben. Nennen Sie den
-  Planeten und wählen Sie dann, welche Barone dort den Brief lesen sollen,
-  über dieselbe `Send to:`-Liste, die auch die Diplomatie- und
-  Nachrichtenschirme hier benutzen: Ein Buchstabe markiert einen Baron,
-  derselbe Buchstabe noch einmal nimmt ihn wieder heraus, `Z` markiert alle,
-  `?` zeigt die Liste der Barone des Planeten, und die Eingabetaste öffnet
-  den Editor. Die Eingabetaste ohne Markierung verlässt den Schirm, ohne zu
-  senden. Die vier übrigen Punkte wenden sich an die ganze Liga, an Ihre
-  verbündeten Planeten, an mehrere von Ihnen genannte Planeten oder allein
-  an den Koordinator eines Planeten. Eine Antwort fragt, ob sie öffentlich
-  ist: ja, und der ganze Planet des Absenders liest sie, nein, und nur der
-  Baron, der sie geschrieben hat.  Hat Ihr Board die Punkte jenes Planeten
-  noch nicht erhalten, gibt es keine Liste zum Auswählen, und der Brief geht
-  an alle dort.
+- Send Message — write to another planet. Name the planet, then pick which
+  barons on it should read the letter, using the same `Send to:` list the
+  Diplomacy and message screens use here: a letter marks a baron, the same
+  letter again takes them off, `Z` marks everyone, `?` shows the planet's
+  roster, and Enter opens the editor. Enter with nobody marked leaves
+  without sending. The other four items address the whole league, your
+  allied planets, several planets you name, or one planet's Coordinator
+  alone. A reply asks whether it is public: yes and the sender's whole
+  planet reads it, no and only the baron who wrote does.  If your board has
+  not yet received that planet's scores, no players are known there and the
+  letter cannot be sent.
 - Diplomatieliste - hier sagt Ihr Board, wie es zu jedem anderen Planeten
   steht. Es bindet niemanden, aber es ist Ihr Koordinator, der Ihnen sagt,
   wen Sie im Auge behalten sollten.
