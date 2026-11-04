@@ -323,9 +323,9 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 			to += " via " + hop
 		}
 		if o.relay {
-			log = append(log, fmt.Sprintf("pass #%d from %s to %s (%s): %s", p.Seq, p.FromBoard, to, p.Contents(), name))
+			log = append(log, PacketLogLine("pass", "#%d from %s to %s (%s): %s", p.Seq, p.FromBoard, to, p.Contents(), name))
 		} else {
-			log = append(log, fmt.Sprintf("out  #%d to %s (%s): %s", p.Seq, to, p.Contents(), name))
+			log = append(log, PacketLogLine("out", "#%d to %s (%s): %s", p.Seq, to, p.Contents(), name))
 		}
 		if verbose {
 			board := p.ToBoard
@@ -872,7 +872,7 @@ func deferOrQuarantine(w *game.World, result *InboundResult, path string, e os.D
 		return
 	}
 	result.Quarantined++
-	result.Log = append(result.Log, fmt.Sprintf("in   %s: unreadable, set aside in %s", e.Name(), BadDir))
+	result.Log = append(result.Log, PacketLogLine("in", "%s: unreadable, set aside in %s", e.Name(), BadDir))
 	w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
 		"Packet %s could not be read and has been set aside in %s: %v", e.Name(), BadDir, cause))
 	if verbose {

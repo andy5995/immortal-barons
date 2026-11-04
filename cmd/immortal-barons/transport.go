@@ -204,11 +204,15 @@ func recordTransport(cfg game.Config, result ftn.Result, kind string) {
 	store.AppendPlanetaryLog(cfg.DataDir, result.Warnings, time.Now())
 	var lines []string
 	for _, a := range result.Arrivals {
-		lines = append(lines, fmt.Sprintf("ftn  in   %s from %s", a.Packet, a.Source))
+		lines = append(lines, store.PacketLogLine("ftn", "%s", store.PacketLogLine("in", "%s from %s", a.Packet, a.Source)))
 	}
 	for _, q := range result.Queued {
-		lines = append(lines, fmt.Sprintf("ftn  %-4s %s to %s (%s, %s): %s", kind,
-			filepath.Base(q.PacketPath), q.NextHop, q.Address, q.Message, strings.Join(q.Packets, ", ")))
+		line := fmt.Sprintf("%s to %s (%s, %s)", filepath.Base(q.PacketPath), q.NextHop, q.Address, q.Message)
+		// A plan journaled by an older build did not record its packets.
+		if len(q.Packets) > 0 {
+			line += ": " + strings.Join(q.Packets, ", ")
+		}
+		lines = append(lines, store.PacketLogLine("ftn", "%s", store.PacketLogLine(kind, "%s", line)))
 	}
 	store.AppendPacketLog(cfg.DataDir, lines, time.Now())
 }

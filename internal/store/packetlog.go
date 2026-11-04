@@ -71,7 +71,14 @@ func (r *InboundResult) settle(p game.Packet, fate string, err error) error {
 	return err
 }
 
+// PacketLogLine is one packets.log entry: its kind ("in", "out", "pass", or
+// "ftn" ahead of one of those) in a fixed column, then the text. Every entry is
+// built here, so the columns line up whichever part of the game wrote it.
+func PacketLogLine(kind, format string, a ...any) string {
+	return fmt.Sprintf("%-4s %s", kind, fmt.Sprintf(format, a...))
+}
+
 // inLine words one inbound packet's fate for the packet log.
 func inLine(p game.Packet, what string) string {
-	return fmt.Sprintf("in   #%d from %s (%s): %s", p.Seq, p.FromBoard, p.Contents(), what)
+	return PacketLogLine("in", "#%d from %s (%s): %s", p.Seq, p.FromBoard, p.Contents(), what)
 }
