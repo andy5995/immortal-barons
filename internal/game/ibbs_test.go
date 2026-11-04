@@ -591,12 +591,9 @@ func TestACovertOpBringsBackIntelligence(t *testing.T) {
 	if len(reply.ReconReports) != 1 {
 		t.Fatalf("the far board sent %d reports, want 1", len(reply.ReconReports))
 	}
-	if got := reply.ReconReports[0]; got.Land != 4321 || got.Gold != 99000 || got.Offense == 0 {
-		t.Errorf("report does not carry the target's real figures: %+v", got)
-	}
-	// The military status the original's record holds, for the card a strike
-	// prints before it sets out.
-	if got := reply.ReconReports[0]; got.Troopers != 5000 || got.Jets != 600 || got.Turrets != 700 ||
+	// The figures the original's record holds, for the card a strike prints
+	// before it sets out.
+	if got := reply.ReconReports[0]; got.Land != 4321 || got.Troopers != 5000 || got.Jets != 600 || got.Turrets != 700 ||
 		got.Tanks != 800 || got.Morale != 64 {
 		t.Errorf("report does not carry the target's military status: %+v", got)
 	}

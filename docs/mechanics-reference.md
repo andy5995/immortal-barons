@@ -5175,18 +5175,22 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   files it as an event too (`update_spy_intelligence`).
 
   **IB's Send Spy event carries the figures; this is IB's own.** When the spy
-  got in, the sender's event ends with the land, offense, defense and gold from
-  the intel that came home beside it, so a spy sent after a strike shows its
-  effect in the sender's own event (at the next turn, or at once as a
+  got in, the sender's event ends with the regions, unit counts and military
+  morale from the intel that came home beside it, so a spy sent after a strike
+  shows its effect in the sender's own event (at the next turn, or at once as a
   mid-session notice) rather than only in the Spy Database. The database stamps
   each entry with when it arrived here (two reports on one realm can share a
   game day) and keeps the newest `SpyReportsPerRealm` (5) on each realm, none
   older than `SpyReportMaxAgeDays` (7) real days except the newest on each
   realm, which stays however old it is. Daily maintenance prunes it as well as
-  each new filing, so old reports go even when nothing new arrives. The
-  viewer groups them by realm and ends each realm's rows with the change
-  between its last two reports, paged for an 80x24 screen. Neither change
-  touches the packet.
+  each new filing, so old reports go even when nothing new arrives. The viewer
+  groups them by realm, lists each realm's newest first in the record's own
+  columns (regions, the four unit counts, morale), and puts the change between
+  its two newest reports under those two, paged for an 80x24 screen. A report
+  filed before Protocol 3 carries no unit counts and is left out, as the card
+  before a strike leaves it out. Counts are shortened as the score tables
+  shorten them (`numfmt.Short`), and so is a change's magnitude, with its sign
+  in front. Neither change touches the packet.
 
   A planet's score packet lists every living human realm it holds, so when one
   arrives the reports on that planet's realms it no longer lists go (erased, or
@@ -5208,8 +5212,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   `update_spy_intelligence` (0x04d0c2) prints the four unit counts and morale
   when the intel is filed, and `show_player_intelligence` (0x02dbb0) prints all
   of it. IB's report carried only land, offense, defense and gold until v0.2.0,
-  a shape set before any of this was read; it now carries the unit counts and
-  morale as well (Protocol 3), and keeps its own four beside them.
+  a shape set before any of this was read. It gained the unit counts and morale
+  in Protocol 3, and dropped offense, defense and gold in Protocol 7 (v0.2.8),
+  so it now holds the original's fields and no others.
 
   **The target card before a strike (BINARY-VERIFIED).** `show_player_intelligence`
   is called by `create_individual_attack`, `create_group_attack` and the Join

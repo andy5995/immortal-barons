@@ -37,7 +37,7 @@ func TestSendSpyRecapCarriesTheFigures(t *testing.T) {
 	if len(reply.Results) != 1 || !reply.Results[0].Won {
 		t.Fatalf("the spy did not get in: %+v", reply.Results)
 	}
-	sweep := SpyReport{Board: "boardB", Empire: "Victim", Land: 1, Offense: 1, Defense: 1, Gold: 1}
+	sweep := SpyReport{Board: "boardB", Empire: "Victim", Land: 1, Troopers: 1, Jets: 1, Turrets: 1, Tanks: 1, Morale: 1}
 	reply.ReconReports = append([]SpyReport{sweep}, reply.ReconReports...)
 	before := len(sender.Events)
 
@@ -47,9 +47,9 @@ func TestSendSpyRecapCarriesTheFigures(t *testing.T) {
 		t.Fatalf("sender's recap gained %d entries, want 1", len(sender.Events)-before)
 	}
 	got := sender.Events[len(sender.Events)-1].Text
-	want := fmt.Sprintf("Land %s  Off %s  Def %s  Gold %s",
-		numfmt.Comma(target.Land), numfmt.Comma(target.Offense()),
-		numfmt.Comma(target.Defense()), numfmt.Comma(target.Gold))
+	want := fmt.Sprintf("Regions %s  Troopers %s  Morale %d%%\nJets %s  Turrets %s  Tanks %s",
+		numfmt.Comma(target.Land), numfmt.Comma(target.Troopers), target.Morale,
+		numfmt.Comma(target.Jets), numfmt.Comma(target.Turrets), numfmt.Comma(target.Tanks))
 	if !strings.HasPrefix(got, "Your spy slipped into Victim's files on boardB and came home with a full report.\n") || !strings.HasSuffix(got, "\n"+want) {
 		t.Errorf("sender's report = %q, want it to end with %q", got, want)
 	}

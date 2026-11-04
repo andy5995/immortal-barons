@@ -88,9 +88,11 @@ func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult, spy *Sp
 	// A spy that got in reads its figures out on the recap, not only into the
 	// Spy Database, so a spy sent after a strike shows what the strike did.
 	if spy != nil {
-		report = lines(report, say("Land {land}  Off {off}  Def {def}  Gold {gold}",
-			"land", comma(spy.Land), "off", comma(spy.Offense),
-			"def", comma(spy.Defense), "gold", comma(spy.Gold)))
+		report = lines(report,
+			say("Regions {regions}  Troopers {troopers}  Morale {morale}%",
+				"regions", comma(spy.Land), "troopers", comma(spy.Troopers), "morale", spy.Morale),
+			say("Jets {jets}  Turrets {turrets}  Tanks {tanks}",
+				"jets", comma(spy.Jets), "turrets", comma(spy.Turrets), "tanks", comma(spy.Tanks)))
 	}
 	e.addEvent(report)
 }

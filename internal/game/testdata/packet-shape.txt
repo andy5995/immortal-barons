@@ -171,9 +171,6 @@ SpyReport:
   Empire
   Date
   Land
-  Offense
-  Defense
-  Gold
   Troopers
   Jets
   Turrets

@@ -94,7 +94,11 @@ const Version = "0.2.8-dev"
 // checking on sends carries it, so omitempty cannot keep scores byte-identical
 // for an older board. Packet.NoRealms (#314), RemoteScore.PriorNames (#321)
 // and IPMessage.Bounce (#313) ride the same number.
-const Protocol = 6
+//
+// Moved to 7 in v0.2.8: SpyReport lost Offense, Defense and Gold, which the
+// original's spy record never held. An older board would put them back as zero
+// when it re-marshals a report, and every signature on it would fail.
+const Protocol = 7
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
 // apply. A packet that states no protocol is NOT one of them — see Protocol.

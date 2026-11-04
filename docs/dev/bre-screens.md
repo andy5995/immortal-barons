@@ -1775,12 +1775,13 @@ picked shows that record, and the planet prompt comes back
 InterPlanetary Ops). IB walks the same three steps.
 
 **IB diverges here, deliberately.** BRE stores one report per realm, and a new
-one overwrites it (see the Send Spy note in `docs/mechanics-reference.md`).
-IB keeps the last five reports on each realm, each stamped with when it
-arrived, and shows the chosen realm's under its name with the change between
-the last two; a Send Spy that gets in also reads its figures out on the
-sender's own report. A spy sent before and after a strike can therefore be
-compared. No number, cost or odds changes.
+one overwrites it (see the Send Spy note in `docs/mechanics-reference.md`). IB
+keeps the last five reports on each realm, each stamped with when it arrived,
+and shows the chosen realm's under its name as a table, newest first, in the
+record's own fields, with the change between the newest two; a Send Spy that
+gets in also reads its figures out on the sender's own report. A spy sent
+before and after a strike can therefore be compared. No number, cost or odds
+changes.
 
 **IB's planet prompt offers only the planets it holds intel on**, where BRE's
 `?` lists every planet and a planet with none answers an empty roster. **IB also

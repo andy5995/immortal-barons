@@ -1,5 +1,11 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * BREAKING: packet protocol 7
+  * Spy reports show regions, troopers, jets, turrets, tanks and morale
+    instead of land, offense, defense and gold
+  * The Spy Database lists a realm's newest report first
+
 2026-11-03 (v0.2.7)
   * BREAKING: packet protocol 6
   * Joining a group attack no longer counts against Max Group Attacks per day,

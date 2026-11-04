@@ -54,7 +54,7 @@ func TestIndivAttackShowsTheTargetsSpyRecord(t *testing.T) {
 // and no record at all prints nothing: either way the strike goes straight on.
 func TestIndivAttackWithoutAMilitaryRecordShowsNoCard(t *testing.T) {
 	for name, rec := range map[string]game.SpyReport{
-		"old report":  {Board: "Mars", Empire: "Red Baron", Land: 300, Offense: 10},
+		"old report":  {Board: "Mars", Empire: "Red Baron", Land: 300},
 		"other realm": {Board: "Mars", Empire: "Decoy", Troopers: 5, Morale: 80},
 	} {
 		w := newWorld()

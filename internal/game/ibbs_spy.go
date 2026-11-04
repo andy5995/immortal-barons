@@ -12,21 +12,24 @@ import (
 // Database and readable by every baron here. Filled by the reports terror ops
 // bring home and by the Coordinator's Global Recon sweep.
 type SpyReport struct {
-	Board   string
-	Empire  string
-	Date    string
-	Land    int
-	Offense int
-	Defense int
-	Gold    int64
-	// The military status the original's spy record holds (DATA\SPY.BRU, one
-	// 31-byte slot per realm), which its target card prints before an attack.
-	// Morale is military morale, 0-100.
+	Board  string
+	Empire string
+	Date   string
+	// The figures the original's spy record holds (DATA\SPY.BRU, one 31-byte
+	// slot per realm): regions, the four unit counts and military morale, 0-100.
+	Land     int
 	Troopers int
 	Jets     int
 	Turrets  int
 	Tanks    int
 	Morale   int
+}
+
+// HasMilitary is whether the report carries the unit counts and morale. One
+// filed before reports carried them (Protocol 3) holds none, and showing its
+// zeros would read as a realm with no army at all.
+func (r SpyReport) HasMilitary() bool {
+	return r.Troopers != 0 || r.Jets != 0 || r.Turrets != 0 || r.Tanks != 0 || r.Morale != 0
 }
 
 // SpyEntry is a SpyReport as filed here. Filed is when it arrived on this
@@ -107,14 +110,10 @@ func (w *World) syncRemoteSpyReports(b RemoteBoard) {
 // the shared score table.
 func (w *World) spyReport(e *Empire) SpyReport {
 	return SpyReport{
-		Board:   w.Config.BoardID,
-		Empire:  e.Name,
-		Date:    w.LastMaintDate,
-		Land:    e.Land,
-		Offense: e.Offense(),
-		Defense: e.Defense(),
-		Gold:    e.Gold,
-
+		Board:    w.Config.BoardID,
+		Empire:   e.Name,
+		Date:     w.LastMaintDate,
+		Land:     e.Land,
 		Troopers: e.Troopers,
 		Jets:     e.Jets,
 		Turrets:  e.Turrets,

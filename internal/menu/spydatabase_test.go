@@ -9,26 +9,31 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-func spyEntry(board, empire string, filed time.Time, land, off, def int, gold int64) game.SpyEntry {
+func spyEntry(board, empire string, filed time.Time, land, troopers, jets, turrets, tanks, morale int) game.SpyEntry {
 	return game.SpyEntry{
-		SpyReport: game.SpyReport{Board: board, Empire: empire, Land: land, Offense: off, Defense: def, Gold: gold},
-		Filed:     filed,
+		SpyReport: game.SpyReport{Board: board, Empire: empire, Land: land, Troopers: troopers,
+			Jets: jets, Turrets: turrets, Tanks: tanks, Morale: morale},
+		Filed: filed,
 	}
 }
 
 // The viewer walks planet, then player, then that player's reports. The planet
-// list offers only the planets holding intel, and a realm with more than one
-// report ends with the change since the report before its last.
+// list offers only the planets holding intel, a realm's reports run newest
+// first, and the change between the newest two sits under those two.
 func TestSpyDatabaseWalksPlanetThenPlayer(t *testing.T) {
 	w := leagueCtx(t)
 	t0 := time.Date(2026, 9, 22, 14, 10, 0, 0, time.UTC)
 	w.SpyDatabase = []game.SpyEntry{
-		spyEntry("Nova Hub", "Victim", t0, 1200, 45000, 30000, 2_000_000),
-		spyEntry("Nova Hub", "Other", t0.Add(time.Hour), 500, 10, 20, 30),
-		spyEntry("Nova Hub", "Victim", t0.Add(19*time.Hour), 1150, 38000, 30000, 2_100_000),
-		// The widest figures a report can hold, to prove the table still fits.
-		spyEntry("Nova Hub", "Big", t0, 99_999_999, 2_000_000_000, 2_000_000_000, 99_999_999_999),
-		spyEntry("Nova Hub", "Big", t0.Add(time.Hour), 0, 0, 0, 0),
+		spyEntry("Nova Hub", "Victim", t0.Add(-24*time.Hour), 1000, 40000, 2000, 400, 10000, 60),
+		spyEntry("Nova Hub", "Victim", t0, 1200, 45000, 3000, 500, 20000, 70),
+		// Filed before reports carried the unit counts: it is not listed at all.
+		spyEntry("Nova Hub", "Ghost", t0, 300, 0, 0, 0, 0, 0),
+		spyEntry("Nova Hub", "Other", t0.Add(time.Hour), 500, 10, 20, 30, 40, 50),
+		spyEntry("Nova Hub", "Victim", t0.Add(19*time.Hour), 1150, 38000, 3000, 600, 120000, 65),
+		// The widest figures a report can hold, and the largest fall, to prove the
+		// table still fits.
+		spyEntry("Nova Hub", "Big", t0, 99_999_999, 2_147_483_647, 2_147_483_647, 2_147_483_647, 2_147_483_647, 100),
+		spyEntry("Nova Hub", "Big", t0.Add(time.Hour), 0, 0, 0, 0, 0, 0),
 	}
 	// "?" lists the planets, "1" picks Nova Hub, "A" the first realm with intel.
 	f := drive(t, w, "?1\rA\r1\rC\r\r", spyDatabase)
@@ -50,14 +55,25 @@ func TestSpyDatabaseWalksPlanetThenPlayer(t *testing.T) {
 	if strings.Contains(out, "Other of Nova Hub") {
 		t.Errorf("showed a realm that was not chosen:\n%s", out)
 	}
-	want := "   Change    │        -50 │        -7,000 │             0 │       +100,000"
+	newer, older, oldest := strings.Index(out, "09/23 09:10"), strings.Index(out, "09/22 14:10"),
+		strings.Index(out, "09/21 14:10")
+	if newer < 0 || older < 0 || oldest < 0 || newer > older || older > oldest {
+		t.Errorf("the reports do not run newest first:\n%s", out)
+	}
+	if c := strings.Index(out, "   Change"); c < older || c > oldest {
+		t.Errorf("the change row is not under the two reports it measures:\n%s", out)
+	}
+	if strings.Contains(out, "Ghost") {
+		t.Errorf("listed a report with no military figures:\n%s", out)
+	}
+	want := "   Change   │      -50 │    -7000 │        0 │     +100 │    +100k │     -5"
 	if !strings.Contains(out, want) {
 		t.Errorf("no change row %q:\n%s", want, out)
 	}
 	// As on the news screen, figures are bright cyan and only a rise's "+" is
 	// bright green; a fall's sign stays cyan.
 	raw := f.out.String()
-	for _, want := range []string{ansi.FgBrightCyan + "        -50", ansi.FgBrightGreen + "+" + ansi.FgBrightCyan + "100,000", ansi.FgBrightCyan + "             0"} {
+	for _, want := range []string{ansi.FgBrightCyan + "      -50", ansi.FgBrightGreen + "+" + ansi.FgBrightCyan + "100k", ansi.FgBrightCyan + "        0"} {
 		if !strings.Contains(raw, want) {
 			t.Errorf("change row lacks %q:\n%q", want, raw)
 		}
@@ -75,11 +91,11 @@ func TestSpyDatabaseLocalGameShowsOnlyOwnReports(t *testing.T) {
 	w := newWorld()
 	me := w.Player().Name
 	t0 := time.Date(2026, 9, 22, 14, 10, 0, 0, time.UTC)
-	mine := spyEntry("", "Mine", t0, 900, 1, 2, 3)
+	mine := spyEntry("", "Mine", t0, 900, 1, 2, 3, 4, 5)
 	mine.By = me
-	theirs := spyEntry("", "Theirs", t0, 800, 1, 2, 3)
+	theirs := spyEntry("", "Theirs", t0, 800, 1, 2, 3, 4, 5)
 	theirs.By = "Someone Else"
-	w.SpyDatabase = []game.SpyEntry{mine, theirs, spyEntry("Nova Hub", "Remote", t0, 1, 1, 1, 1)}
+	w.SpyDatabase = []game.SpyEntry{mine, theirs, spyEntry("Nova Hub", "Remote", t0, 1, 1, 1, 1, 1, 1)}
 
 	f := drive(t, w, "A\r\r", spyDatabase)
 	out := stripANSI(f.out.String())
@@ -101,7 +117,7 @@ func TestSpyDatabaseLocalGameShowsOnlyOwnReports(t *testing.T) {
 // no relations line: a planet holds none with itself.
 func TestSpyDatabaseHomePlanetHasNoRelationLine(t *testing.T) {
 	w := leagueCtx(t)
-	mine := spyEntry("", "Neighbor", time.Now(), 900, 1, 2, 3)
+	mine := spyEntry("", "Neighbor", time.Now(), 900, 1, 2, 3, 4, 5)
 	mine.By = w.Player().Name
 	w.SpyDatabase = []game.SpyEntry{mine}
 

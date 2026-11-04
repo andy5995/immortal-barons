@@ -7,6 +7,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -295,6 +296,9 @@ func spyDatabase(s session.Session, w *ctx) Result {
 		ibbs = w.Config.InterBBSEnabled()
 		home = w.Config.BoardID
 	})
+	// A report with no military figures would print a row of zeros, and a
+	// change against it a drop that never happened.
+	db = slices.DeleteFunc(db, func(r game.SpyEntry) bool { return !r.HasMilitary() })
 	// A local report sits under this planet whatever it was called when the
 	// report was filed: a board that joins a league, or renames itself, keeps
 	// its reports at home rather than under a planet that no longer exists.
@@ -438,9 +442,10 @@ func spyPlayerRows(w *ctx, groups [][]game.SpyEntry, board string) []targetRow {
 	return kept
 }
 
-// printSpyRealm draws one realm's reports, oldest first, and when there are two
-// or more the change since the one before the last, which is the before and
-// after a spy sent around a strike is for.
+// printSpyRealm draws one realm's reports, newest first, and under the newest
+// two the change between them, which is the before and after a spy sent around
+// a strike is for. The columns are the figures the
+// original's spy record holds.
 func printSpyRealm(s session.Session, w *ctx, reports []game.SpyEntry, ofBoard bool) {
 	r := reports[0]
 	title := r.Empire
@@ -449,7 +454,9 @@ func printSpyRealm(s session.Session, w *ctx, reports []game.SpyEntry, ofBoard b
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, title, ansi.Reset)
 	printTableHead(s, w.Term, spyColumns)
-	for _, r := range reports {
+	n := len(reports)
+	for i := n - 1; i >= 0; i-- {
+		r := reports[i]
 		// Where it is known, when the report arrived: two reports on one realm
 		// often share a game day.
 		when := r.Date
@@ -457,27 +464,32 @@ func printSpyRealm(s session.Session, w *ctx, reports []game.SpyEntry, ofBoard b
 			when = r.Filed.In(sessionZone(s)).Format("01/02 15:04")
 		}
 		printSpyRow(s, w.Term, ansi.FgWhite+gaPad(w.Term, when, spyColumns[0].width, false),
-			[]string{comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold)})
-	}
-	if n := len(reports); n > 1 {
-		a, b := reports[n-2], reports[n-1]
-		printSpyRow(s, w.Term, ansi.FgBrightWhite+gaPad(w.Term, tr(s, "Change"), spyColumns[0].width, false),
-			[]string{signed(int64(b.Land - a.Land)), signed(int64(b.Offense - a.Offense)),
-				signed(int64(b.Defense - a.Defense)), signed(b.Gold - a.Gold)})
+			[]string{numfmt.Short(r.Land), numfmt.Short(r.Troopers), numfmt.Short(r.Jets),
+				numfmt.Short(r.Turrets), numfmt.Short(r.Tanks), fmt.Sprintf("%d%%", r.Morale)})
+		// The change sits under the two rows it measures, not under the oldest.
+		if i == n-2 {
+			a, b := reports[n-2], reports[n-1]
+			printSpyRow(s, w.Term, ansi.FgBrightWhite+gaPad(w.Term, tr(s, "Change"), spyColumns[0].width, false),
+				[]string{signed(int64(b.Land - a.Land)), signed(int64(b.Troopers - a.Troopers)),
+					signed(int64(b.Jets - a.Jets)), signed(int64(b.Turrets - a.Turrets)),
+					signed(int64(b.Tanks - a.Tanks)), signed(int64(b.Morale - a.Morale))})
+		}
 	}
 }
 
 // spyColumns is a Spy Database table read left to right, drawn in the Join
-// Group Attack table's shape (printTableHead). With its sign, Land holds a
-// figure to 99,999,999, Offense and Defense one to two billion, and Gold one to
-// 99 billion; the five come to 75 with their separators, inside an 80-column
-// screen.
+// Group Attack table's shape (printTableHead). Counts are shortened as that
+// table's are (numfmt.Short), so no figure or change needs more than 6 columns
+// ("+2147m"); the widths are set by the headings, and the seven come to 76 with
+// their separators.
 var spyColumns = []tableColumn{
-	{"Arrived", 13},
-	{"Land", 12},
-	{"Offense", 15},
-	{"Defense", 15},
-	{"Gold", 16},
+	{"Arrived", 12},
+	{"Regions", 10},
+	{"Troopers", 10},
+	{"Jets", 10},
+	{"Turrets", 10},
+	{"Tanks", 10},
+	{"Morale", 8},
 }
 
 // printSpyRow draws one Spy Database row: the first cell already laid out, then
@@ -515,13 +527,18 @@ func spyReportsByRealm(db []game.SpyEntry) [][]game.SpyEntry {
 	return out
 }
 
-// signed renders a change with its sign, so a rise and a fall read apart without
-// relying on color.
+// signed renders a change shortened like the figures beside it, with its sign,
+// so a rise and a fall read apart without relying on color. The magnitude is
+// shortened, not the signed figure: numfmt.Short leaves a negative in full, as
+// the original's score tables do, and a large fall would widen the row.
 func signed(n int64) string {
-	if n > 0 {
-		return "+" + comma(n)
+	switch {
+	case n > 0:
+		return "+" + numfmt.Short(n)
+	case n < 0:
+		return "-" + numfmt.Short(-n)
 	}
-	return comma(n)
+	return "0"
 }
 
 // terrorTarget is the realm the Terrorist Ops menu is aimed at.

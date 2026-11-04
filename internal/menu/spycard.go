@@ -21,9 +21,7 @@ import (
 const spyCardWidth = 78
 
 // showPlayerIntelligence prints the newest spy record on empire of board, if
-// there is one with the military figures in it. A record filed before reports
-// carried them (Protocol 3) holds none, and printing its zeros would read as a
-// realm with no army at all.
+// there is one with the military figures in it (game.SpyReport.HasMilitary).
 func showPlayerIntelligence(s session.Session, w *ctx, board, empire string) {
 	var rec game.SpyEntry
 	var found bool
@@ -51,7 +49,7 @@ func showPlayerIntelligence(s session.Session, w *ctx, board, empire string) {
 			}
 		}
 	})
-	if !found || (rec.Troopers == 0 && rec.Jets == 0 && rec.Turrets == 0 && rec.Tanks == 0 && rec.Morale == 0) {
+	if !found || !rec.HasMilitary() {
 		return
 	}
 	when := rec.Date
