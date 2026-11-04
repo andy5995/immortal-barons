@@ -551,6 +551,17 @@ func SameRoster(a, b []LeagueNode) bool {
 	return true
 }
 
+// withoutKeys is a copy of nodes with every board's key cleared, to compare
+// two rosters on what players can see.
+func withoutKeys(nodes []LeagueNode) []LeagueNode {
+	out := make([]LeagueNode, len(nodes))
+	for i, n := range nodes {
+		n.PublicKey = ""
+		out[i] = n
+	}
+	return out
+}
+
 func sameNode(a, b LeagueNode) bool {
 	if a.Number != b.Number || a.Name != b.Name || a.Address != b.Address ||
 		a.City != b.City || a.State != b.State || a.Country != b.Country ||

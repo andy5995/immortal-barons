@@ -1000,6 +1000,18 @@ func TestUnchangedLeagueBroadcastIsQuiet(t *testing.T) {
 		t.Errorf("an unchanged broadcast posted news: %q", line.Text)
 	}
 
+	// A key is adopted, but players cannot see one, so it is not news (#328).
+	keyed := append([]LeagueNode(nil), roster...)
+	keyed[1].PublicKey = strings.Repeat("ab", 32)
+	lc.LeagueNodes = keyed
+	broadcast()
+	if member.LeagueNodes[1].PublicKey != keyed[1].PublicKey {
+		t.Error("a key-only roster change was not adopted")
+	}
+	for _, line := range member.NewsToday {
+		t.Errorf("a key-only roster change posted news: %q", line.Text)
+	}
+
 	// A roster that really changed is still reported.
 	member.LeagueNodes = roster[:1]
 	broadcast()

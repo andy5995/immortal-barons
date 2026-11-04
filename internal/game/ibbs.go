@@ -660,8 +660,12 @@ func (w *World) applyPacket(p Packet, outcome *ApplyOutcome) Packet {
 	// restart, when re-reading the written file would silently drop it.
 	if len(p.LeagueNodes) > 0 && orders {
 		if nodes := usableNodes(p.LeagueNodes); !SameRoster(w.LeagueNodes, nodes) {
+			// A key change is adopted like any other, but players cannot see a
+			// key, so it is not news.
+			if !SameRoster(withoutKeys(w.LeagueNodes), withoutKeys(nodes)) {
+				w.postNews("The League Coordinator updated the league roster.")
+			}
 			w.LeagueNodes = nodes
-			w.postNews("The League Coordinator updated the league roster.")
 		}
 	}
 	if p.Reset != nil && orders {
