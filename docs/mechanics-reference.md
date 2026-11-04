@@ -6786,12 +6786,6 @@ BRE keeps two planet-wide news feeds, populated from template files with random
 flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
 (empire), `%P` (planet), `%C` (captured amount):
 
-**Neither feed has a cap** (BINARY-VERIFIED): the news sink appends every event
-to the day's files and checks only that they opened, so a busy day's news is as
-long as the day was. What bounds it is the daily rollover from today's news to
-yesterday's. IB matches this; until 2026-11-03 it kept only the last 20 lines a
-day, a figure with no source.
-
 - **Planetary news** (`game/news.dat`) — written when the event happens, seen
   by everyone on the planet. Categories: `NORMALWIN` / `NORMALLOSS` (regular
   attacks), `TOTALWIN` (an empire is destroyed), `NUKE` / `CHEM` / `BIO`
@@ -6805,6 +6799,16 @@ day, a figure with no source.
   special IP ops. The terrorist sections are private events only (#285).
   The bombing and special-operation sections are NOT all private: the resolvers
   pass some of their lines to the news writer.
+
+**Neither feed has a cap** (BINARY-VERIFIED): the news sink appends every event
+to the day's files and checks only that they opened, so a busy day's news is as
+long as the day was. What bounds it is the daily rollover from today's news to
+yesterday's. IB keeps every line too, up to `NewsDayMaxLines` (1000) a day, a
+bound of its own against a board flooding the news through its packets. Past it
+new lines are dropped: a flood cannot push out the day's earlier events, but
+nothing reported later that day reaches the news either, so the planetary step
+tells the sysop when it drops lines. Until 2026-11-03 IB kept only the last 20
+lines a day, a figure with no source.
 
 The clone broadcasts most of these to its planetary bulletin (original wording,
 not BRE's verbatim lines):

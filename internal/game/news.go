@@ -65,12 +65,19 @@ func News(lines ...string) NewsFeed {
 	return f
 }
 
-// postNews appends a system news line to the day's planetary news. There is no
-// cap, as in the original: BINARY-VERIFIED, its news sink (append_news_event,
+// postNews appends a system news line to the day's planetary news. The
+// original keeps every line: BINARY-VERIFIED, its news sink (append_news_event,
 // BRE.OVR) appends every event to the day's files and tests nothing but whether
-// they opened. The day's news is bounded by the daily rollover instead. IB kept
-// only the last 20 lines until 2026-11-03, a figure with no source.
+// they opened. IB kept only the last 20 lines until 2026-11-03, a figure with no
+// source; NewsDayMaxLines now bounds a day only against runaway growth. A full
+// day takes no more lines: a flood cannot push out the events reported before
+// it, but it does silence everything reported after it until the rollover, so
+// the sysop is told when lines are being dropped.
 func (w *World) postNews(line string) {
+	if len(w.NewsToday) >= NewsDayMaxLines {
+		w.noteSysop("Today's planetary news has reached its limit of %d lines, and later news is dropped until the day rolls over.", NewsDayMaxLines)
+		return
+	}
 	w.NewsToday = append(w.NewsToday, NewsLine{At: StoredStamp(timeNow()), Text: line})
 }
 

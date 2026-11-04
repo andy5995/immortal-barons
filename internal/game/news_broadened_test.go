@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -218,5 +219,21 @@ func TestPlanetaryMasterGoesToTheMostRegions(t *testing.T) {
 	wide.syncLand()
 	if got := w.planetMaster(); got != rich {
 		t.Errorf("tie on regions went to %s, want the earlier letter %s", w.EmpireLetter(got), w.EmpireLetter(rich))
+	}
+}
+
+// A day's news keeps every line up to the resource bound, then takes no more,
+// so a flood cannot push out the events reported before it.
+func TestNewsKeepsADayUpToItsBound(t *testing.T) {
+	w := &World{}
+	for i := 0; i < 1001; i++ {
+		w.postNews(fmt.Sprint(i))
+	}
+	if n, first, last := len(w.NewsToday), w.NewsToday[0].Text, w.NewsToday[len(w.NewsToday)-1].Text; n != 1000 || first != "0" || last != "999" {
+		t.Fatalf("kept %d lines, %q to %q; want 1000, \"0\" to \"999\"", n, first, last)
+	}
+	// Dropping lines is not silent: the sysop hears of it once a run.
+	if len(w.SysopNotices) != 1 || !strings.Contains(w.SysopNotices[0], "limit of 1000 lines") {
+		t.Errorf("sysop notices = %q, want one naming the limit", w.SysopNotices)
 	}
 }

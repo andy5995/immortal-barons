@@ -558,3 +558,11 @@ const SpyReportsPerRealm = 5
 // it is, so a realm last spied on long ago still shows what was learned. IB's
 // own.
 const SpyReportMaxAgeDays = 7
+
+// NewsDayMaxLines bounds one day's planetary news. IB's own resource bound, not
+// a fidelity figure: the original keeps every line (see postNews). News also
+// arrives in other boards' packets, and without a bound a faulty or hostile
+// board could grow the saved world without limit until the day rolls over.
+// Past it, new lines are dropped: a flood cannot push out earlier events, but
+// it silences later ones until the day rolls over.
+const NewsDayMaxLines = 1000
