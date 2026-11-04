@@ -346,7 +346,7 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 		if t == inputEndedChoice { // the stream is gone: assign the rest as Coastal
 			break
 		}
-		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", game.BuyableRegions[t].Name), remaining, remaining)
+		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", game.BuyableRegions[t].Name), 0, remaining)
 		if got <= 0 {
 			continue
 		}
