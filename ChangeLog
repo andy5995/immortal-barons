@@ -5,10 +5,13 @@ Immortal Barons ChangeLog
   * A strike or travel-time probe queued in the same run as a refusal notice
     to its board is no longer discarded on arrival
   * Each planetary run logs every packet it sends and takes in to packets.log
+  * The FTN transport logs each attachment and unwrapped packet to packets.log
+  * FTN transport faults are written to planetary.log
   * A roster change that only adds or changes a board's key reaches member
-    boards (#328)
+    boards, without a news line (#328)
   * A lost attack's news names the realm that sent it, or calls it a group
-    attack (#326)
+    attack, and a lost attack's or terror op's event says what came home (#326)
+  * The planetary news keeps up to 1000 lines a day instead of the last 20
   * A bounced interplanetary message is worded in the reader's language, and
     its send time is on the reader's clock
   * Other planets follow a sysop's realm rename: the news says so, and their spy
