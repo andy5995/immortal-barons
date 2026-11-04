@@ -32,6 +32,7 @@ func TestUppercasePacketsAreRead(t *testing.T) {
 	inbound := t.TempDir()
 
 	sender := game.DefaultConfig()
+	sender.DataDir = t.TempDir()
 	sender.BoardID = "Nova Hub"
 	from := game.NewWorldSeed(sender, 1)
 	from.LastMaintDate = "2026-08-23"
@@ -63,6 +64,7 @@ func TestUppercasePacketsAreRead(t *testing.T) {
 	}
 
 	receiver := game.DefaultConfig()
+	receiver.DataDir = t.TempDir()
 	receiver.BoardID = "The Eclipse"
 	to := game.NewWorldSeed(receiver, 1)
 	to.LastMaintDate = "2026-08-23"

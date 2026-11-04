@@ -55,6 +55,7 @@ var ftnRoster = []game.LeagueNode{
 func alphaPacket(t *testing.T, dir string) game.Packet {
 	t.Helper()
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Alpha BBS"
 	cfg.LeagueNumber = 900
 	cfg.IBBS = true

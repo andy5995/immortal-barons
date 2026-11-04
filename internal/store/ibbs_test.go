@@ -15,12 +15,14 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	exchange := t.TempDir() // stands in for the transport that moves files between boards
 
 	cfgA := game.DefaultConfig()
+	cfgA.DataDir = t.TempDir()
 	cfgA.BoardID = "boardA"
 	wA := game.NewWorldSeed(cfgA, 1)
 	leader := wA.AddHuman("leader", "Alpha")
 	leader.Troopers = 1_000_000 // troops to commit
 
 	cfgB := game.DefaultConfig()
+	cfgB.DataDir = t.TempDir()
 	cfgB.BoardID = "boardB"
 	wB := game.NewWorldSeed(cfgB, 1)
 	target := wB.AddHuman("victim", "Victim")
@@ -82,6 +84,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 func TestRunPlanetaryExportsScores(t *testing.T) {
 	in, out := t.TempDir(), t.TempDir()
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "boardA"
 	w := game.NewWorldSeed(cfg, 1)
 	w.AddHuman("p", "Player")

@@ -59,6 +59,7 @@ func fileDropBoard(t *testing.T) game.Config {
 func alphaWrites(t *testing.T, roster []game.LeagueNode, to ...string) ([]game.Packet, [][]byte) {
 	t.Helper()
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Alpha BBS"
 	cfg.LeagueNumber = 900
 	cfg.IBBS = true

@@ -15,6 +15,7 @@ import (
 func TestAFrozenRunWritesOnlyTheFreezesOwnPackets(t *testing.T) {
 	in, out := t.TempDir(), t.TempDir()
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID, cfg.IBBS = "boardA", true
 	w := game.NewWorldSeed(cfg, 1)
 	w.AddHuman("p", "Player")

@@ -37,6 +37,7 @@ func TestAHubForwardsAPacketItIsNotAddressedTo(t *testing.T) {
 	inbound, onward := t.TempDir(), t.TempDir()
 
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Bravo BBS"
 	hub := game.NewWorldSeed(cfg, 1)
 	hub.LeagueNodes = roster
@@ -119,6 +120,7 @@ func TestAMeshBoardDoesNotForwardAPacketForSomeoneElse(t *testing.T) {
 func TestAMeshBoardWritesOneBroadcast(t *testing.T) {
 	out := t.TempDir()
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Alpha BBS"
 	w := game.NewWorldSeed(cfg, 1)
 	w.LeagueNodes = []game.LeagueNode{
@@ -150,6 +152,7 @@ func TestAMeshBoardWritesOneBroadcast(t *testing.T) {
 func TestARoutedBoardAddressesABroadcastPerPlanet(t *testing.T) {
 	out := t.TempDir()
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Alpha BBS"
 	w := game.NewWorldSeed(cfg, 1)
 	w.LeagueNodes = []game.LeagueNode{
@@ -181,6 +184,7 @@ func TestPacketsGoToTheLinkForTheirNextHop(t *testing.T) {
 	base, toCharlie := t.TempDir(), t.TempDir()
 
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Bravo BBS"
 	cfg.OutboundDirs = map[int]string{3: toCharlie}
 	hub := game.NewWorldSeed(cfg, 1)
@@ -287,6 +291,7 @@ func TestAnAlreadySeenPacketIsSkipped(t *testing.T) {
 func TestPacketFilenameCarriesTheLeagueNumber(t *testing.T) {
 	out := t.TempDir()
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Alpha BBS"
 	cfg.LeagueNumber = 42
 	w := game.NewWorldSeed(cfg, 1)
@@ -337,6 +342,7 @@ func TestLeagueZeroBoardsSharingOutboundDoNotOverwrite(t *testing.T) {
 	out := t.TempDir()
 	for _, board := range []string{"Alpha BBS", "Other Alpha"} {
 		cfg := game.DefaultConfig()
+		cfg.DataDir = t.TempDir()
 		cfg.BoardID = board
 		w := game.NewWorldSeed(cfg, 1)
 		w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: board}, {Number: 2, Name: "Target"}}
@@ -449,6 +455,7 @@ func TestBroadcastFilesVerifyOnArrivalInARoutedLeague(t *testing.T) {
 		{Number: 3, Name: "Delta BBS"},
 	}
 	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
 	cfg.BoardID = "Alpha BBS"
 	hub := game.NewWorldSeed(cfg, 1)
 	hub.LeagueNodes = roster
@@ -469,6 +476,7 @@ func TestBroadcastFilesVerifyOnArrivalInARoutedLeague(t *testing.T) {
 	}
 
 	memberCfg := game.DefaultConfig()
+	memberCfg.DataDir = t.TempDir()
 	memberCfg.BoardID = "Bravo BBS"
 	member := game.NewWorldSeed(memberCfg, 1)
 	member.LeagueNodes = roster
