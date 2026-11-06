@@ -957,6 +957,12 @@ Choice> Play Game
 Elite]`, 16 `─`, closing rule 52. That is exactly its content — two 26-column
 item cells (`(1) ` plus a 22-column label field).
 
+**IB moves two of these keys to match the System Menu**: instructions are `(2)
+Show Instructions` and status is `(E) Empire Status`, where BRE's opening menu
+has `(2) See Status` and `(A) Game Instructions` and its System Menu the
+reverse. One key per screen across both menus, at the cost of a BRE player's
+habit of pressing 2 for status.
+
 ### Daily News File / Daily Bulletin
 
 Header line: `93` bright-yellow `Barren Realms Elite ` + `97` `v0.988` + `37`

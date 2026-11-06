@@ -6,7 +6,7 @@ number of turns each day.
 
 ## The player guide is the in-game help
 
-The whole guide is inside the game. On the Entry menu, **(A) Instructions**
+The whole guide is inside the game. On the Entry menu, **(2) Show Instructions**
 shows every topic in order, a screen at a time. **(?) Help** lets you choose one
 category and one topic; most menus have it too. The topics are grouped like
 this:

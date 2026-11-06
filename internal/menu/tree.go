@@ -636,19 +636,21 @@ func BuildMenus() *Menus {
 	gameMenu := &Menu{Title: "Entry", Color: ansi.FgBrightMagenta, Columns: 2}
 	gameMenu.Items = []Item{
 		{Key: '1', Label: "Play", Do: runTurn},
-		{Key: '2', Label: "See Status", Do: empireStatus},
+		// IB's own key (BRE: (2) See Status, (A) Game Instructions), to match
+		// the System menu's. Status moved to (E) for the same reason.
+		{Key: '2', Label: "Show Instructions", Do: showInstructions},
 		{Key: '3', Label: "See Scores", Do: seeScores},
 		{Key: '4', Label: "Today's News", Do: showBulletinToday},
 		{Key: '5', Label: "Yesterday's News", Do: showBulletinYesterday},
 		{Key: '6', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: '8', Label: "Game Bulletins", Do: gameBulletins},
 		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
-		{Key: 'A', Label: "Instructions", Do: showInstructions},
 		// Also on the System menu, as Messages is. BRE has no Diplomacy item here
 		// at all — it sits two menus in, under System — but a treaty is answered
 		// between turns, like mail, so it belongs beside it on the way in (#70
 		// took it out of the pre-turn flow; this is where it lands instead).
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
+		{Key: 'E', Label: "Empire Status", Do: empireStatus}, // BRE: (2); see above
 		// Also on the System menu, where BRE keeps it. Listed here as well because
 		// a player wants the board's rules — turns per day, protection, how long
 		// they may stay away — before starting a turn, not two menus in.

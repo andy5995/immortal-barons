@@ -4107,7 +4107,7 @@ screen that lists it.
 **IB adds a Welcome menu before the naming step (#28), where the original asks
 its one Instructions question afterward.** It stands between the first-run
 language picker and `Name your Realm:`, styled like the opening menu, and
-carries Create Realm, See Scores, Instructions, Game Setup, Help, and — in a
+carries Create Realm, Show Instructions, See Scores, Game Setup, Help, and — in a
 league — InterBBS Scores and Travel Times. Enter takes Create Realm; Quit ends
 the visit with no realm created, which is why the caller is asked rather than
 dropped straight into naming. Travel Times is there because it is the one list
@@ -7045,6 +7045,9 @@ checking IB against a capture:
 - **The opening menu shows a clock and a countdown to the new game day**, where
   BRE shows neither. See "IB's opening menu carries a clock" in
   `docs/dev/bre-screens.md`.
+- **The opening menu has instructions on (2) and status on (E)**, the System
+  menu's keys, where BRE's opening menu has status on (2) and instructions on
+  (A). See "IB moves two of these keys" in `docs/dev/bre-screens.md`.
 - **The Daily Bulletin is drawn live, once, before a board's first-ever
   maintenance has rolled a snapshot.** BRE builds the whole box — Totals AND
   Change — exactly once, inside daily maintenance (`run_daily_maintenance`,

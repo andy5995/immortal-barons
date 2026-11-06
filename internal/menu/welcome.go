@@ -28,8 +28,8 @@ func Welcome(s session.Session, w *game.World, handle, lang string, t Term) (cre
 			create = true
 			return Quit
 		}},
+		{Key: '2', Label: "Show Instructions", Do: showInstructions},
 		{Key: '3', Label: "See Scores", Do: seeScores},
-		{Key: 'A', Label: "Instructions", Do: showInstructions},
 		{Key: 'G', Label: "Game Setup", Do: gameSetup},
 		{Key: 'I', Label: "InterBBS Scores", Do: interbbsScores, Hidden: ibbsHidden},
 		{Key: 'T', Label: "Travel Times", Do: travelTimes, Hidden: ibbsHidden},
