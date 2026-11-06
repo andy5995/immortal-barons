@@ -89,7 +89,9 @@ jobs:
           # PIE on Linux, as docs/sysop-panel.md builds it: without it the
           # linker leaves text relocations in the cgo binary.
           mode=""; [ "$GOOS" = linux ] && mode="-buildmode=pie"
-          mkdir -p "$dir" dist
+          mkdir -p "$dir/docs" dist
+          cp LICENSE "$dir/"
+          cp docs/sysop-panel.md "$dir/docs/"
           go build -C cmd/ib-sysop $mode -trimpath -ldflags "-s -w" \
             -o "$PWD/$dir/ib-sysop${ext}"
           if [ "$GOOS" = windows ]; then
