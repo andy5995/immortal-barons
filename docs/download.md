@@ -33,6 +33,9 @@ Builds are provided for these systems:
 
 There is nothing to install: unpack the archive and run `immortal-barons`.
 
+Archives named `ib-sysop-…` hold only the optional
+[Sysop Panel](sysop-panel.md). The game is in the `immortal-barons-…` archive.
+
 ## Notes before you run it
 
 - **Windows may show a warning.** The binaries are not signed, so Windows

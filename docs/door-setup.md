@@ -8,7 +8,9 @@ To connect your board to others, see [Inter-BBS Leagues](inter-bbs.md).
 ## What you need
 
 The game is one program: `immortal-barons`. It runs as a native door under BBS
-software on any platform Go supports.
+software on any platform Go supports. The optional
+[Sysop Panel](sysop-panel.md), `ib-sysop`, comes in its own archive and needs
+a game that is already set up.
 
 The game keeps all its files in one data directory (default `./data`). Point
 the `-data` option at it.

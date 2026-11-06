@@ -7,13 +7,24 @@ playing the game.
 It builds for Windows, Linux and macOS. It needs a desktop, so it does not run
 on a server you reach only over SSH.
 
+## Before you start
+
+The panel opens a game that already exists. It cannot create one. Set up the
+game first, as [Door Setup](door-setup.md#first-time-setup) describes: run
+`immortal-barons -reset`, which creates the data directory and its
+`world.json`. Until then the panel says "no world.json here: this is not a game
+data directory".
+
 ## Getting it
 
 Each release from v0.2.1 on has an `ib-sysop` archive for every platform,
 beside the game's own archives, and so does the
-[development snapshot](download.md#development-snapshots). Unpack it in the same place as the game
-archive: both unpack into the same folder, so `ib-sysop` ends up next to
-`immortal-barons`. The Homebrew formula installs both programs.
+[development snapshot](download.md#development-snapshots). The `ib-sysop`
+archive holds only the panel and this page. The game is in the
+`immortal-barons` archive, so download both. Extract both to the same folder,
+so `ib-sysop` ends up next to `immortal-barons`. On Windows, Extract All adds
+the archive's name to the destination; remove it for the second archive. The
+Homebrew formula installs both programs.
 
 On macOS, a downloaded binary is blocked until you remove the quarantine flag:
 
