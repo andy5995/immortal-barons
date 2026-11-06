@@ -12,7 +12,7 @@ import (
 // realm too late. It runs after the language picker, so it renders in the
 // language just chosen.
 //
-// It reuses the opening menu's own actions — nothing here is a second rendering
+// It reuses actions other menus already call — nothing here is a second rendering
 // of a screen that already exists — and every one of them reads the world
 // rather than the caller's empire, which is what lets them run with no empire
 // yet. create is false when the caller quit instead of starting a realm.
@@ -32,6 +32,7 @@ func Welcome(s session.Session, w *game.World, handle, lang string, t Term) (cre
 		{Key: 'A', Label: "Instructions", Do: showInstructions},
 		{Key: 'G', Label: "Game Setup", Do: gameSetup},
 		{Key: 'I', Label: "InterBBS Scores", Do: interbbsScores, Hidden: ibbsHidden},
+		{Key: 'T', Label: "Travel Times", Do: travelTimes, Hidden: ibbsHidden},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: '0', Label: "Quit", Do: quit},
 	}

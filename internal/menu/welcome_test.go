@@ -17,9 +17,9 @@ func welcomeWorld(t *testing.T, ibbs bool) *game.World {
 	return w
 }
 
-// InterBBS Scores is on the Welcome menu only where there is a league to score,
-// the same condition that hides it on the System menu.
-func TestWelcomeShowsInterBBSScoresOnlyInALeague(t *testing.T) {
+// InterBBS Scores and Travel Times are on the Welcome menu only in a league:
+// both are league screens, with nothing to show on a lone board.
+func TestWelcomeShowsLeagueScreensOnlyInALeague(t *testing.T) {
 	for _, tc := range []struct {
 		ibbs bool
 		want bool
@@ -32,8 +32,26 @@ func TestWelcomeShowsInterBBSScoresOnlyInALeague(t *testing.T) {
 		if !strings.Contains(out, "[Welcome]") {
 			t.Fatalf("ibbs=%v: the menu was not drawn:\n%s", tc.ibbs, out)
 		}
-		if got := strings.Contains(out, "InterBBS Scores"); got != tc.want {
-			t.Errorf("ibbs=%v: InterBBS Scores shown = %v, want %v", tc.ibbs, got, tc.want)
+		for _, label := range []string{"InterBBS Scores", "Travel Times"} {
+			if got := strings.Contains(out, label); got != tc.want {
+				t.Errorf("ibbs=%v: %s shown = %v, want %v", tc.ibbs, label, got, tc.want)
+			}
+		}
+	}
+}
+
+// Travel Times runs from the Welcome menu, where no empire exists yet.
+func TestWelcomeTravelTimesRunsWithNoEmpire(t *testing.T) {
+	w := welcomeWorld(t, true)
+	w.LeagueNodes = []game.LeagueNode{{Number: 2, Name: "Far Star BBS"}}
+	f := &fakeSession{keys: []rune("T 0")}
+	if _, err := Welcome(f, w, "newcomer", "", Term{UTF8: true}); err != nil {
+		t.Fatal(err)
+	}
+	out := stripANSI(f.out.String())
+	for _, want := range []string{"Average Turn Around Times to All BBSes", "Far Star BBS"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("Travel Times did not render %q:\n%s", want, out)
 		}
 	}
 }

@@ -4,6 +4,7 @@ Immortal Barons ChangeLog
   * When placing won or cleaned regions, Enter at the amount prompt places none
     instead of all of them
   * Sysop panel: clearer error when a folder holds no game data
+  * In a league, the Welcome menu offers Travel Times
 
 2026-11-03 (v0.2.8)
   * Updating from v0.1.0 or later needs no game reset
