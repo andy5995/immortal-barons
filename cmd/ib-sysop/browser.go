@@ -68,14 +68,14 @@ func (b *browser) layout(gtx layout.Context, u *ui) layout.Dimensions {
 		if !ok {
 			break
 		}
-		if _, ok := ev.(widget.SubmitEvent); ok && u.open(b.path.Text()) {
+		if _, ok := ev.(widget.SubmitEvent); ok && u.open(b.path.Text(), true) {
 			u.browsing = false
 		}
 	}
 	if b.up.Clicked(gtx) {
 		b.path.SetText(filepath.Dir(filepath.Clean(b.path.Text())))
 	}
-	if b.open.Clicked(gtx) && u.open(b.path.Text()) {
+	if b.open.Clicked(gtx) && u.open(b.path.Text(), true) {
 		u.browsing = false
 	}
 	for i := range b.dirs {

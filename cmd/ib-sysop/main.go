@@ -15,6 +15,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"image"
@@ -112,7 +113,7 @@ func newUI(w *app.Window, dirs []string, zoom float32, theme themeMode) *ui {
 	// them together once every saved directory has been tried.
 	var failed []string
 	for _, d := range dirs {
-		if !u.open(d) {
+		if !u.open(d, false) {
 			failed = append(failed, u.notice)
 			u.missing = append(u.missing, d)
 		}
@@ -147,11 +148,17 @@ func (u *ui) tick() {
 	}
 }
 
-// open adds a tab for dir, or switches to the one already showing it.
-func (u *ui) open(dir string) bool {
+// open adds a tab for dir, or switches to the one already showing it. advise
+// adds the next step to a failure; startup passes false, since a saved folder
+// that opened before and no longer does is most often a drive not mounted yet.
+func (u *ui) open(dir string, advise bool) bool {
 	abs, err := sysop.Open(dir)
 	if err != nil {
 		u.notice = fmt.Sprintf("%s: %v", dir, err)
+		if advise {
+			fi, serr := os.Stat(dir)
+			u.notice += openAdvice(err, serr == nil && fi.IsDir(), sysop.GameProgram())
+		}
 		return false
 	}
 	u.notice = ""
@@ -168,6 +175,27 @@ func (u *ui) open(dir string) bool {
 	t.refresh()
 	u.saveSession()
 	return true
+}
+
+const (
+	adviseReset    = "\nTo create a game here, run immortal-barons -reset."
+	adviseDownload = "\nThe immortal-barons program is not next to this panel or on PATH: download the game archive, then run immortal-barons -reset to create a game."
+)
+
+// openAdvice is the next step after a folder fails to open, or "". Only an
+// existing folder with no game gets one: a missing folder is a wrong path or a
+// drive not mounted, where -reset would create an empty game in the wrong
+// place. A machine with no game program is most often a panel unpacked
+// without the game archive.
+func openAdvice(err error, dirExists bool, prog string) string {
+	switch {
+	case !errors.Is(err, sysop.ErrNoWorld) || !dirExists:
+		return ""
+	case prog == "":
+		return adviseDownload
+	default:
+		return adviseReset
+	}
 }
 
 func (u *ui) close(i int) {
