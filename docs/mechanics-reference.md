@@ -4422,7 +4422,7 @@ destinations — keyed `P`/`A`/`S` (`BRE.OVR` unit 0x1d75d: the tests sit at
 +0xe02, +0xeb7 and +0xf13). `P` addresses every living realm that was on the
 original message's recipient list except the reader; `S` opens the same
 multi-select picker as Send Message. IB replies to the author alone, and asks its
-two-way `Public Reply?` only for interplanetary mail.
+two-way `Public Reply?` only for interplanetary mail (#333).
 
 **After a reply is sent, IB asks `[D] Delete or [K] Keep original message?`**
 about the message answered; Enter keeps it. BRE asks nothing. A reply abandoned
@@ -6847,9 +6847,9 @@ on both, since it is the planet's doing and naming one of several contributors
 would be a lie. A packet from a board too old to carry the field falls back to
 the planet name, which is all those boards could ever say.
 
-Not yet generated: BRE's finer-grained interplanetary news categories
-(individual vs. group vs. whole-BBS, attack vs. return) as separate `ipnews.dat`
-subtypes.
+Not yet generated: separate returning-strike lines for a group strike on one
+realm and on a whole planet (`IP-RET-GROUPSINGLE` and `IP-RET-GROUPBBS` in
+`ipnews.dat`), and the `IP-RET-KILL` line.
 
 **Keep news prose translatable.** News lines go through the PO catalogs, so each
 line must be a *whole sentence* chosen by event category, with only clearly
@@ -7025,10 +7025,8 @@ Still missing against the reference:
   its own game once `GameLength` game days have passed, crowning a Planetary
   Master and starting afresh, but on its own count of days, so boards need not
   end together. Only the Coordinator's `-league-reset` resets them all.
-- BRE's finer interplanetary news subtypes
-
-A few Diplomacy and Covert menu items are recorded but inert, pending fuller
-subsystems. Each is flagged where it is described above.
+- BRE's split of returning group-strike news into one-realm and whole-planet
+  lines, and its `IP-RET-KILL` line
 
 ### Screen output that deliberately diverges
 

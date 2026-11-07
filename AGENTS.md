@@ -504,11 +504,18 @@ original, so it needs new evidence, not taste. The rest (prices, `LandPriceStep`
 AI behavior, IB's own additions) are the playtest knobs. Keep both matching
 `docs/mechanics-reference.md`.
 
-Stubbed / not built: a TIMED league-wide reset (each board runs `endGame` on its
-own once `GameLength` game days pass, crowning `LastMaster`, and the Coordinator
-can reset every board on demand with `-league-reset`, but nothing schedules a
-reset across the league) and BRE's finer interplanetary news subtypes. A few covert/diplomacy items are recorded-but-inert pending
-fuller subsystems (flagged in `docs/mechanics-reference.md`).
+Stubbed / not built, each flagged where `docs/mechanics-reference.md` describes
+it:
+
+- a TIMED league-wide reset (each board runs `endGame` on its own once
+  `GameLength` game days pass, crowning `LastMaster`, and the Coordinator can
+  reset every board on demand with `-league-reset`, but nothing schedules a
+  reset across the league)
+- BRE's split of returning group-strike news into one-realm and whole-planet
+  lines, and its `IP-RET-KILL` line
+- a sysop-editable random-events file
+- a loan rate that follows the sysop's investment and savings rates
+- BRE's public / author / select prompt when replying to local mail (#333)
 
 ## Primary goal: run as a BBS door
 
