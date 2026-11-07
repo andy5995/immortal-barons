@@ -42,11 +42,12 @@
   twice, or to wait for a reply to a request you never sent.
 - Send Message can write to all your allies at once — every realm on your board
   that you hold a treaty with, of any kind.
-- In a league, the letters used to pick who on another planet reads your message
-  are counted down that planet's scores as your board received them. BRE uses the
-  letter the realm has at home, which leaves gaps where realms have died. The
-  letters here can move when a realm on that planet dies or a new one starts, so
-  read the roster before you pick.
+- In a league, when you send a message to another planet, its realms are
+  lettered A, B, C… in the order of that planet's latest score report, with no
+  gaps. BRE gives each realm the letter it has on its own planet, so dead realms
+  leave gaps. Here the letters are counted again whenever a new report arrives,
+  so a realm's letter can change when someone on that planet dies or joins.
+  Press `?` to see the current list before you pick.
 - In a league, packets that arrive between two runs are applied in a new random
   order each run. The order matters only when two boards ask for the same thing
   at once, such as a bid for the same goods on a Trading Market. BRE applied
@@ -62,11 +63,12 @@
   the Coordinator's bulletins are sent to every board and shown to all players
   under a "Galactic" heading.
 - A reset option turns the pirates off. BRE always has them.
-- Most game values are read out of BRE's own program and match it: region
-  income, the coastal support curve, unit prices and the specialization
-  modifiers, industrial output and the unit pool, the crown tax, and the
-  technology system. A few — some attack rewards and economy rates — are tuning
-  values that BRE never states, and a few mechanics are still being built.
+- Most game values are read out of BRE's own program and match it, including
+  region income, unit prices and upkeep, combat and attack costs, net worth,
+  industrial output, the crown tax and the technology system. The rest, such as
+  starting gold, the penalties for unpaid upkeep and how computer-run realms
+  play, are IB's own: either BRE's program doesn't settle them, or BRE doesn't
+  have the feature.
 
 ## Is winsock supported?
 
