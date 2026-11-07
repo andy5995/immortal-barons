@@ -6,7 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	"unicode"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // PlanetaryLogFile records transport faults — an undeliverable packet, orders
@@ -72,11 +73,4 @@ func lockLogs(dataDir string) (*FileLock, error) {
 // logSafe replaces every control character in a log entry with "?". Board
 // names and file names reach these logs from packets another board wrote, and
 // a newline in one would forge a whole line of a log kept to settle disputes.
-func logSafe(s string) string {
-	return strings.Map(func(r rune) rune {
-		if unicode.IsControl(r) {
-			return '?'
-		}
-		return r
-	}, s)
-}
+func logSafe(s string) string { return game.ScrubText(s) }

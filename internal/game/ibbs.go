@@ -568,6 +568,10 @@ func (w *World) applyPacket(p Packet, outcome *ApplyOutcome) Packet {
 	// every league until its Coordinator publishes one, and refusing would break
 	// a working league on upgrade rather than securing it. That transition state
 	// is the remaining gap, and it closes as rosters gain keys.
+	if p.UnsafeIdentity() {
+		w.noteSysop("A packet naming a board with a control character in it was refused.")
+		return Packet{}
+	}
 	if ok, checked := w.VerifyBoardOrigin(p); checked && !ok {
 		w.noteSysop("A packet claiming to be from %s did not match that board's key and was refused.", p.FromBoard)
 		return Packet{}
@@ -586,6 +590,7 @@ func (w *World) applyPacket(p Packet, outcome *ApplyOutcome) Packet {
 	// every order it carries, and a refusal is reported for what it claimed.
 	claimsOrders := CarriesCoordinatorOrders(p)
 	orders := w.fromCoordinator(p) && w.VerifyCoordinatorOrders(p)
+	scrubPacket(&p)
 	// A packet that arrived behind a later one from the same board still
 	// carries its strikes, trades and mail, but its state is older than what is
 	// already here (#311).

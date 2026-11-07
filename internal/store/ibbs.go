@@ -666,6 +666,17 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			deferOrQuarantine(w, &result, path, e, err, verbose)
 			continue
 		}
+		// Before anything prints or logs the packet's board names, and before
+		// it is grouped by them. ApplyPacket refuses it too; this is what keeps
+		// the raw name off the sysop's terminal and out of the order notice.
+		if p.UnsafeIdentity() {
+			result.Refused++
+			if verbose {
+				fmt.Printf("  Deleted packet from %s: a board name in it holds a control character\n", logSafe(p.FromBoard))
+			}
+			result.settle(p, "deleted: a board name in it holds a control character", os.Remove(path))
+			continue
+		}
 		key := originKey(p)
 		if _, seen := groups[key]; !seen {
 			groupOrder = append(groupOrder, key)

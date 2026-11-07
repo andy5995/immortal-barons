@@ -40,7 +40,7 @@ type IPMessage struct {
 	// planet-wide case, which the receiving board renders from its own roster.
 	ToEmpires []string `json:",omitempty"`
 	When      string
-	Body      string
+	Body      string `scrub:"multiline"` // the one packet text that keeps its newlines (scrubPacket)
 	// Bounce marks this as a bounce and says why, with Body the original
 	// message. It travels as data, not as words, because the board that bounces
 	// a message cannot know who will read the bounce (#313).

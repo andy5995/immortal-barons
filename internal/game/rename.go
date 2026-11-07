@@ -62,11 +62,13 @@ var (
 //
 // A control character is refused outright rather than merely uncounted — an
 // escape in a realm name is printed on every screen that lists it, and would
-// move the cursor or recolor the row.
+// move the cursor or recolor the row. That includes the ones Unicode also counts
+// as spaces (tab, CR, U+0085): another board turns any control character in a
+// name into "?", and the name would then no longer match the realm it came from.
 func ValidRealmName(name string) bool {
 	alnum, total := 0, 0
 	for _, r := range strings.TrimSpace(name) {
-		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {
+		if unicode.IsControl(r) || (!unicode.IsPrint(r) && !unicode.IsSpace(r)) {
 			return false
 		}
 		total++
