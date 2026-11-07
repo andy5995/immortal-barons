@@ -366,9 +366,17 @@ type LeagueNode struct {
 // the coordinator's roster first, which is what carries the numbers and
 // locations a sysop configured, and then any board that has only ever been
 // heard from over a packet, numbered on after the roster. THIS board is in the
-// list, as it is in BRE's own "List of Planets"; KnownBoards is the view that
-// leaves it out.
+// list once the roster names it, as it is in BRE's own "List of Planets";
+// before that it is missing, and AllPlanets is the view that adds it.
+// KnownBoards is the view that leaves it out.
 func (w *World) LeaguePlanets() []LeagueNode {
+	planets, _ := w.leaguePlanets()
+	return planets
+}
+
+// leaguePlanets is LeaguePlanets plus the highest number it gave out, so
+// AllPlanets numbers this board on from the same count.
+func (w *World) leaguePlanets() ([]LeagueNode, int) {
 	var planets []LeagueNode
 	seen := map[string]bool{}
 	next := 0
@@ -390,7 +398,20 @@ func (w *World) LeaguePlanets() []LeagueNode {
 		next++
 		planets = append(planets, LeagueNode{Number: next, Name: b.BoardID})
 	}
-	return planets
+	return planets, next
+}
+
+// AllPlanets is LeaguePlanets with this board guaranteed on it. A roster that
+// has not arrived yet, or does not name this board yet, leaves it off
+// LeaguePlanets; here it is added after the rest with the next free number.
+func (w *World) AllPlanets() []LeagueNode {
+	planets, next := w.leaguePlanets()
+	for _, p := range planets {
+		if p.Name == w.Config.BoardID {
+			return planets
+		}
+	}
+	return append(planets, LeagueNode{Number: next + 1, Name: w.Config.BoardID})
 }
 
 // KnownBoards names every planet BUT this one — who a packet can be addressed

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -71,12 +72,14 @@ func WriteBulletins(w *game.World, dir string) []error {
 		{"tdynews", titled("Today's News"), func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
 		{"yesnews", titled("Yesterday's News"), func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
 	}
-	// The World Report and the eight league rankings are the LEAGUE's. A board
-	// that plays alone has no world to report on, and a page headed "World
-	// Report" listing one planet's skirmishes would promise something the board
-	// does not have; a "Top Planets" table of one planet says as little.
+	// The World Report, the planets list and the eight league rankings are the
+	// LEAGUE's. A board that plays alone has no world to report on, and a page
+	// headed "World Report" listing one planet's skirmishes would promise
+	// something the board does not have; a "Top Planets" table of one planet
+	// says as little.
 	if w.Config.InterBBSEnabled() {
 		bulletins = append(bulletins, bulletinRender{"world", titled("World Report"), writeWorldReport})
+		bulletins = append(bulletins, bulletinRender{"planets", titled("Planets and Players"), writePlanetsBulletin})
 		bulletins = append(bulletins, rankBulletins()...)
 	}
 	// The web pages are drawn from a UTF-8 pass rather than from the CP437 bytes:
@@ -224,14 +227,7 @@ func writeWorldReport(s session.Session, w *ctx) {
 	// Its own heading, not the news masthead: that one names the news file and
 	// draws the planet's banner under it, neither of which belongs on a report
 	// about the whole league.
-	date := w.day
-	fmt.Fprintf(s, "\n%s%s%s v%s%s", ansi.FgBrightYellow, tr(s, "Immortal Barons"),
-		ansi.FgBrightWhite, game.Version, ansi.Reset)
-	fmt.Fprintf(s, "  %s%s%s", ansi.FgWhite, tr(s, "World Report"), ansi.Reset)
-	if date != "" {
-		fmt.Fprintf(s, "%s%s%s", strings.Repeat(" ", 4), ansi.FgWhite, date)
-	}
-	fmt.Fprintf(s, "%s\n%s%s%s\n\n", ansi.Reset, ansi.FgBrightRed, worldRule, ansi.Reset)
+	leagueHeading(s, w.day, "World Report", ansi.FgBrightRed+worldRule+ansi.Reset)
 
 	if len(battles) == 0 {
 		okNoPause(s, "No battles have been fought yet.")
@@ -258,6 +254,69 @@ func writeWorldReport(s session.Session, w *ctx) {
 			color, outcome, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule, ansi.Reset)
+}
+
+// leagueHeading is the masthead of a bulletin about the whole league: the game,
+// the bulletin's name, the game day, and a rule under them.
+func leagueHeading(s session.Session, date, title, rule string) {
+	fmt.Fprintf(s, "\n%s%s%s v%s%s", ansi.FgBrightYellow, tr(s, "Immortal Barons"),
+		ansi.FgBrightWhite, game.Version, ansi.Reset)
+	fmt.Fprintf(s, "  %s%s%s", ansi.FgWhite, tr(s, title), ansi.Reset)
+	if date != "" {
+		fmt.Fprintf(s, "%s%s%s", strings.Repeat(" ", 4), ansi.FgWhite, date)
+	}
+	fmt.Fprintf(s, "%s\n%s\n\n", ansi.Reset, rule)
+}
+
+// writePlanetsBulletin lists every planet in the league with the players on it,
+// including a planet nobody plays on yet. The rankings cannot show that: they
+// are built from realms, so a planet with none never gets a row.
+//
+// Human realms only, as the score packets carry them. A planet on the roster
+// that has not yet sent scores is not shown as empty -- it may have players this
+// board has not heard about -- so it says so instead.
+func writePlanetsBulletin(s session.Session, w *ctx) {
+	type planet struct {
+		node    game.LeagueNode
+		heard   bool
+		players []string
+	}
+	var planets []planet
+	w.Read(func() {
+		players := map[string][]string{}
+		for _, r := range ipScoreRowsLocked(w) {
+			players[r.planet] = append(players[r.planet], r.name)
+		}
+		heard := map[string]bool{w.Config.BoardID: true}
+		for _, b := range w.RemoteBoards {
+			heard[b.BoardID] = true
+		}
+		for _, n := range w.AllPlanets() {
+			p := planet{node: n, heard: heard[n.Name], players: players[n.Name]}
+			sort.Slice(p.players, func(i, j int) bool {
+				return strings.ToLower(p.players[i]) < strings.ToLower(p.players[j])
+			})
+			planets = append(planets, p)
+		}
+	})
+	leagueHeading(s, w.day, "Planets and Players", rule75(ansi.FgBrightRed))
+	for _, p := range planets {
+		fmt.Fprintf(s, "%s%2d %s%s%s\n",
+			ansi.FgBrightRed, p.node.Number,
+			ansi.FgBrightWhite, p.node.Name, ansi.Reset)
+		// Words, not a blank, so an empty planet reads as one and not as a
+		// gap in the file.
+		switch {
+		case !p.heard:
+			fmt.Fprintf(s, "      %s%s%s\n", ansi.FgBrightYellow, tr(s, "(no report yet)"), ansi.Reset)
+		case len(p.players) == 0:
+			fmt.Fprintf(s, "      %s%s%s\n", ansi.FgWhite, tr(s, "(no players)"), ansi.Reset)
+		}
+		for _, name := range p.players {
+			fmt.Fprintf(s, "      %s%s%s\n", ansi.FgBrightCyan, name, ansi.Reset)
+		}
+	}
+	fmt.Fprintf(s, "%s\n", rule75(dim(ansi.FgBrightRed)))
 }
 
 // worldReportOutcome words one battle. Color never carries the meaning on its

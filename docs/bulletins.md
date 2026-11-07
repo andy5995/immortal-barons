@@ -24,7 +24,7 @@ data directory, the same as the packet directories.
 
 ## What gets written
 
-There are twelve bulletins. Every board writes these three:
+There are thirteen bulletins. Every board writes these three:
 
 | Bulletin | Shows |
 | --- | --- |
@@ -32,12 +32,13 @@ There are twelve bulletins. Every board writes these three:
 | `tdynews` | Today's planet news |
 | `yesnews` | Yesterday's planet news |
 
-A board in a league writes nine more. These belong to the league, so a board
+A board in a league writes ten more. These belong to the league, so a board
 playing alone has nothing to put in them and writes none of them:
 
 | Bulletin | Shows |
 | --- | --- |
 | `world` | Every battle and WMD strike fought anywhere in the league |
+| `planets` | Every planet in the league and the realms on it, including planets with none |
 | `bbsscore` | Top planets by score |
 | `bbsworth` | Top planets by net worth |
 | `bbsland` | Top planets by land |
@@ -56,7 +57,7 @@ Each bulletin becomes four files, two for your BBS and two for your website:
 scores.ans   scores.txt   scores.html   scores.inc.html
 ```
 
-So a league board writes 48 of them, and a board playing alone writes 12. The
+So a league board writes 52 of them, and a board playing alone writes 12. The
 three files you can edit, further down, are yours and are not counted here.
 
 ## For your BBS menu

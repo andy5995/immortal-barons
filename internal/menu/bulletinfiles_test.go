@@ -184,10 +184,10 @@ func TestLeagueRankingBulletins(t *testing.T) {
 	}
 }
 
-// A board playing alone has no league, so it writes none of the nine league
+// A board playing alone has no league, so it writes none of the ten league
 // files -- a "Top Planets" table of one planet says as little as a World Report
 // of one planet's skirmishes.
-func TestStandAloneBoardWritesNoLeagueRankings(t *testing.T) {
+func TestStandAloneBoardWritesNoLeagueBulletins(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.BoardID = "Solo BBS"
 	cfg.IBBS = false
@@ -198,7 +198,7 @@ func TestStandAloneBoardWritesNoLeagueRankings(t *testing.T) {
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
 	}
-	for _, base := range []string{"bbsscore", "bbsworth", "bbsland", "bbswland",
+	for _, base := range []string{"planets", "bbsscore", "bbsworth", "bbsland", "bbswland",
 		"plyscore", "plyworth", "plyland", "plywland"} {
 		if _, err := os.Stat(filepath.Join(dir, base+".ans")); err == nil {
 			t.Errorf("a stand-alone board wrote %s.ans", base)
@@ -248,5 +248,73 @@ func TestBulletinsAreCP437NotUTF8(t *testing.T) {
 	}
 	if checked == 0 {
 		t.Fatal("no bulletin carried a rule at all; the test proved nothing")
+	}
+}
+
+// The planets bulletin names every planet in the league with its players, and
+// shows a planet nobody plays on rather than leaving it out as the rankings do.
+func TestPlanetsBulletinListsEveryPlanet(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Alpha BBS"
+	cfg.IBBS = true
+	w := game.NewWorldSeed(cfg, 1)
+	w.Empires = append(w.Empires, &game.Empire{Name: "Zebra Realm", Owner: "zed", Alive: true})
+	w.LeagueNodes = []game.LeagueNode{
+		{Number: 1, Name: "Alpha BBS"}, {Number: 2, Name: "Beta BBS"},
+		{Number: 3, Name: "Gamma BBS"}, {Number: 4, Name: "Delta BBS"},
+	}
+	w.RemoteBoards = []game.RemoteBoard{
+		{BoardID: "Beta BBS", Scores: []game.RemoteScore{{Empire: "Plums"}, {Empire: "apricots"}}},
+		{BoardID: "Gamma BBS"}, // reported no realms
+	}
+	w.LastMaintDate = "2026-11-06"
+	dir := t.TempDir()
+	if errs := WriteBulletins(w, dir); len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	body, err := os.ReadFile(filepath.Join(dir, "planets.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(body)
+	for _, want := range []string{
+		"Planets and Players",
+		" 1 Alpha BBS\n      Zebra Realm\n",
+		" 2 Beta BBS\n      apricots\n      Plums\n", // sorted ignoring case
+		" 3 Gamma BBS\n      (no players)\n",
+		" 4 Delta BBS\n      (no report yet)\n",
+	} {
+		if !strings.Contains(text, want) {
+			t.Errorf("planets.txt lacks %q:\n%s", want, text)
+		}
+	}
+}
+
+// Before the roster names this board, it still heads no list as planet 0: it
+// goes after the rest with the next free number.
+func TestPlanetsBulletinNumbersThisBoardOffRoster(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Alpha BBS"
+	cfg.IBBS = true
+	w := game.NewWorldSeed(cfg, 1)
+	w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: "Beta BBS"}}
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "Gamma BBS"}} // heard from, not on the roster
+	w.LastMaintDate = "2026-11-06"
+	dir := t.TempDir()
+	if errs := WriteBulletins(w, dir); len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	body, err := os.ReadFile(filepath.Join(dir, "planets.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(body)
+	for _, want := range []string{" 1 Beta BBS\n", " 2 Gamma BBS\n", " 3 Alpha BBS\n      (no players)\n"} {
+		if !strings.Contains(text, want) {
+			t.Errorf("planets.txt lacks %q:\n%s", want, text)
+		}
+	}
+	if strings.Contains(text, " 0 ") {
+		t.Errorf("a planet is numbered 0:\n%s", text)
 	}
 }

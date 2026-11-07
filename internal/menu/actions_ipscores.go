@@ -37,36 +37,42 @@ type ipScoreRow struct {
 // on-screen rankings and the bulletin files rank.
 func ipScoreRows(w *ctx) []ipScoreRow {
 	var rows []ipScoreRow
-	w.Read(func() {
-		for _, b := range w.RemoteBoards {
-			for _, sc := range b.Scores {
-				score := sc.Score
-				if score == 0 {
-					score = sc.NetWorth
-				}
-				rows = append(rows, ipScoreRow{
-					name:      sc.Empire,
-					planet:    b.BoardID,
-					score:     score,
-					nw:        sc.NetWorth,
-					land:      sc.Land,
-					protected: sc.Protected,
-				})
+	w.Read(func() { rows = ipScoreRowsLocked(w) })
+	return rows
+}
+
+// ipScoreRowsLocked is ipScoreRows for a caller already inside w.Read, so it
+// can gather the rows and anything else from the same read.
+func ipScoreRowsLocked(w *ctx) []ipScoreRow {
+	var rows []ipScoreRow
+	for _, b := range w.RemoteBoards {
+		for _, sc := range b.Scores {
+			score := sc.Score
+			if score == 0 {
+				score = sc.NetWorth
 			}
+			rows = append(rows, ipScoreRow{
+				name:      sc.Empire,
+				planet:    b.BoardID,
+				score:     score,
+				nw:        sc.NetWorth,
+				land:      sc.Land,
+				protected: sc.Protected,
+			})
 		}
-		for _, e := range w.Empires {
-			if e.Alive && e.Owner != "" {
-				rows = append(rows, ipScoreRow{
-					name:      e.Name,
-					planet:    w.Config.BoardID,
-					score:     e.Score,
-					nw:        w.NetWorth(e),
-					land:      e.Land,
-					protected: e.Protection > 0,
-				})
-			}
+	}
+	for _, e := range w.Empires {
+		if e.Alive && e.Owner != "" {
+			rows = append(rows, ipScoreRow{
+				name:      e.Name,
+				planet:    w.Config.BoardID,
+				score:     e.Score,
+				nw:        w.NetWorth(e),
+				land:      e.Land,
+				protected: e.Protection > 0,
+			})
 		}
-	})
+	}
 	return rows
 }
 
