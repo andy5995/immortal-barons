@@ -269,7 +269,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 // and it is not what a player wants to know after a battle.
 func defenderCas(u UnitLoss) Msg {
 	return say("{troopers} troopers, {turrets} turrets, {tanks} tanks, {jets} jets",
-		"troopers", u.Troopers, "turrets", u.Turrets, "tanks", u.Tanks, "jets", u.Jets)
+		"troopers", comma(u.Troopers), "turrets", comma(u.Turrets), "tanks", comma(u.Tanks), "jets", comma(u.Jets))
 }
 
 // attackerCasualties is defenderCas for the side that attacked: what it
@@ -277,7 +277,7 @@ func defenderCas(u UnitLoss) Msg {
 // defender or its allies read it: BRE tells them only their own losses.
 func attackerCasualties(u UnitLoss) Msg {
 	return say("{troopers} troopers, {jets} jets, {tanks} tanks, {bombers} bombers",
-		"troopers", u.Troopers, "jets", u.Jets, "tanks", u.Tanks, "bombers", u.Bombers)
+		"troopers", comma(u.Troopers), "jets", comma(u.Jets), "tanks", comma(u.Tanks), "bombers", comma(u.Bombers))
 }
 
 // absorbMilitary transfers a conquered empire's surviving military to the

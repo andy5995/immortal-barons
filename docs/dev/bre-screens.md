@@ -2709,9 +2709,14 @@ screen.** The allies line groups past four digits and the casualty lines stay
 bare at any size. Every figure in the capture above is four digits or fewer, so
 it cannot show this; a later one (2026-09-13) has the same line reading
 `8636 Tanks` in one battle and `11,508 Troopers` / `248,073,416 Tanks` in
-another, beside `You lost 4197 Troopers, 81294 Jets`. IB matches both
-(`numfmt.GroupLong` on the allies line, bare on the casualties). Do not tidy the
-screen into one spelling.
+another, beside `You lost 4197 Troopers, 81294 Jets`. IB matches the allies
+line (`numfmt.GroupLong`).
+
+**Deliberate divergence — IB groups the casualty figures.** At late-game scale
+a bare `2472438 Tanks` is hard to read, so the casualty lines group every
+figure (`2,472,438 tanks`), in the attacker's report and in the defender's
+event alike (Andy's call, 2026-11-07). The allies line keeps BRE's spelling, so
+a four-digit ally figure still reads `6000` beside a grouped casualty line.
 
 **Deliberate divergence — the defender-jets figure in a LOSING report.** BRE's
 `You destroyed … and N Jets` slot shows only the bombers-vs-jets air tally, and

@@ -7058,6 +7058,9 @@ checking IB against a capture:
   2026-09-13 the screen recomputed Totals live EVERY day, forever, while Change
   stayed the frozen delta and the written bulletin file used neither override —
   so the screen, the file, and BRE's own model all disagreed with each other.
+- **Battle casualty figures are grouped** (`2,472,438 tanks`), in the
+  attacker's report and the defender's event, where BRE prints them bare at any
+  size. See "IB groups the casualty figures" in `docs/dev/bre-screens.md`.
 - **A trade deal cut by Bomb Trade Routes is reported to both of its parties.**
   BRE writes the strike to each planet's news only, and its success line gives
   no figure for the trade routes, so the sender and recipient of a damaged deal

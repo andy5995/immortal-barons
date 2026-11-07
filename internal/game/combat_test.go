@@ -582,11 +582,10 @@ func TestConquestIsTheLandAlone(t *testing.T) {
 	}
 }
 
-// The allies line groups past four digits where the casualty lines beside it
-// stay bare at any size. Both spellings are the original's, on one screen, and
-// the difference is per line rather than per screen — so a sweep that made the
-// report internally consistent would be a regression.
-func TestAllyLineGroupsPastFourDigitsAndCasualtiesDoNot(t *testing.T) {
+// The allies line groups past four digits, as the original's does. The casualty
+// lines beside it group every figure, which the original does not; that one is
+// a deliberate divergence (TestCasualtyListsGroupFigures).
+func TestAllyLineGroupsPastFourDigits(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 3)
 	a := w.AddHuman("att", "Attacker")
@@ -614,5 +613,18 @@ func TestAllyLineGroupsPastFourDigitsAndCasualtiesDoNot(t *testing.T) {
 	}
 	if !strings.Contains(report, "6000 tanks") {
 		t.Errorf("a four-digit ally figure was grouped; the original leaves it bare:\n%s", report)
+	}
+}
+
+// Battle losses run into the millions, so both casualty lists group their
+// figures. BRE prints them bare; this is a deliberate divergence, recorded in
+// docs/dev/bre-screens.md beside the allies-line note.
+func TestCasualtyListsGroupFigures(t *testing.T) {
+	u := UnitLoss{Troopers: 614200, Jets: 210866, Turrets: 807547, Tanks: 2472438, Bombers: 337940}
+	if got, want := defenderCas(u).English(), "614,200 troopers, 807,547 turrets, 2,472,438 tanks, 210,866 jets"; got != want {
+		t.Errorf("defender casualties = %q, want %q", got, want)
+	}
+	if got, want := attackerCasualties(u).English(), "614,200 troopers, 210,866 jets, 2,472,438 tanks, 337,940 bombers"; got != want {
+		t.Errorf("attacker casualties = %q, want %q", got, want)
 	}
 }
