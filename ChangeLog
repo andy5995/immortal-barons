@@ -9,6 +9,7 @@ Immortal Barons ChangeLog
     on the Entry menu, the same keys as the System menu
   * A league board writes a planets bulletin: every planet and its realms
   * Battle reports and events group casualty figures (2,472,438 tanks)
+  * A notice that ends the session waits for a key before the door exits
 
 2026-11-03 (v0.2.8)
   * Updating from v0.1.0 or later needs no game reset

@@ -122,4 +122,8 @@ func TestEndOfRealmDoesNotPromiseADupeANewRealm(t *testing.T) {
 		endCollapsed(fc, listed())
 	}()
 	check("collapse", fc.out.String())
+	// The door exits right after it, so it waits for a key.
+	if out := fc.out.String(); !strings.Contains(out[strings.Index(out, "collapsed"):], "Paused") {
+		t.Errorf("the collapse notice is not followed by a pause:\n%s", out)
+	}
 }

@@ -482,6 +482,10 @@ func pauseTight(s session.Session) {
 	endPausedLine(s)
 }
 
+// Pause is pause for internal/play, whose closing notices run before the menu
+// engine and would otherwise scroll away the moment the door exits.
+func Pause(s session.Session) { pause(s) }
+
 func pause(s session.Session) {
 	// A boot/disconnect during the pause must unwind (readKey handles it); a
 	// bare io.EOF (test stream) falls through.

@@ -92,7 +92,7 @@ func TestDupeLockedBaronMayEraseTheRealm(t *testing.T) {
 			lockToBravo(w)
 		})
 
-		f2 := &fakeSession{keys: []rune{' ', tc.key}}
+		f2 := &fakeSession{keys: []rune{' ', tc.key, ' '}} // the last dismisses the closing pause
 		reason, err := Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 		if err != nil {
 			t.Fatal(err)
@@ -102,6 +102,9 @@ func TestDupeLockedBaronMayEraseTheRealm(t *testing.T) {
 		}
 		if !strings.Contains(f2.out.String(), "wish to erase your empire?") {
 			t.Errorf("%c: the erase offer never appeared: %q", tc.key, f2.out.String())
+		}
+		if !tc.alive {
+			assertPausedAfter(t, f2.out.String(), "This realm has been erased.")
 		}
 		w, _ := store.Load(cfg)
 		e := w.FindByOwner("khan")
@@ -176,7 +179,7 @@ func TestDupeRebornCallerIsNotPromisedANewRealm(t *testing.T) {
 	cfg := leagueCfgIn(t)
 	w := game.NewWorldSeed(cfg, 1)
 	w.ImportBoard(game.RemoteBoard{BoardID: "Bravo", Scores: bravoScores(cfg)})
-	f := &fakeSession{keys: []rune(" ")}
+	f := &fakeSession{keys: []rune("  ")} // splash, then the closing pause
 	reason, err := Session(f, Identity{Handle: "Khan"}, w, cfg, "Old Khanate", game.MaintReport{}, func() error { return nil })
 	if err != nil {
 		t.Fatal(err)
@@ -185,6 +188,7 @@ func TestDupeRebornCallerIsNotPromisedANewRealm(t *testing.T) {
 	if reason != "closed" || !strings.Contains(out, "already playing on Bravo") {
 		t.Fatalf("reason %q, want the duplicate refusal: %q", reason, out)
 	}
+	assertPausedAfter(t, out, "already playing on Bravo")
 	if !strings.Contains(out, "Old Khanate was destroyed") || strings.Contains(out, "begin anew") {
 		t.Errorf("the reborn notice should report the fall without a fresh start: %q", out)
 	}

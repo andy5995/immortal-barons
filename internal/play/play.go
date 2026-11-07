@@ -86,6 +86,20 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 		term := menu.Term{UTF8: session.IsUTF8(s), ASCII: session.IsASCII(s), Plain: !session.HasANSI(s)}
 		lang := menu.FittingLang(term, id.Language)
 		notice(s, i18n.T(lang, "Your realm is already being played elsewhere."))
+		// The same idle and time-left bounds as a session, so a caller who walks
+		// away from the pause does not hold the node open.
+		var hard time.Time
+		if id.TimeLeft > 0 {
+			hard = time.Now().Add(id.TimeLeft)
+		}
+		d := session.NewDeadline(s, time.Duration(cfg.IdleTimeoutSecs)*time.Second, cfg.MaxIdleWarnings, hard)
+		// A hangup or idle boot there ends the pause; the caller was refused
+		// either way, and Run has nothing to save yet.
+		func() {
+			var ended error
+			defer session.GuardEnd(&ended)
+			farewell(d, term, lang)
+		}()
 		return "busy", nil
 	}
 	held, err := lockRealm(cfg, id)
@@ -392,6 +406,9 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			case unlocked:
 				notice(s, i18n.T(lockedLang, "This realm is no longer locked, so it was not erased. Call again to play it."))
 			}
+			if erased || unlocked {
+				farewell(s, term, lockedLang)
+			}
 		}
 		return "dupe", save()
 	}
@@ -402,6 +419,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		} else {
 			notice(s, fmt.Sprintf(i18n.T(deadLang, "Your realm %s was destroyed. Return on a later day to build a new realm."), deadToday))
 		}
+		farewell(s, term, deadLang)
 		return "dead", save()
 	}
 	// rebornFrom (captured by the caller before login maintenance swept the husk)
@@ -421,10 +439,12 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	if e == nil {
 		if !joinOpen {
 			notice(s, fmt.Sprintf("The game is closed to new barons (join cutoff %s has passed).", joinDate))
+			farewell(s, term, id.Language)
 			return "closed", save()
 		}
 		if refusal != "" {
 			notice(s, refusal)
+			farewell(s, term, id.Language)
 			return "closed", save()
 		}
 		// First run: a brand-new player picks their UI language once, before
@@ -501,6 +521,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			})
 			if full != "" {
 				notice(s, full)
+				farewell(s, term, lang)
 				return "closed", save()
 			}
 			if taken {
@@ -618,6 +639,15 @@ func (o onboardLang) DrainInput() { session.Drain(o.Session) }
 // the yellow every such line takes, wrapped to the screen.
 func notice(s session.Session, text string) {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(text, ""), ansi.Reset)
+}
+
+// farewell holds a closing notice on screen until the caller presses a key:
+// the door exits right after it, and the BBS clears the screen when it does.
+// The language is fitted to the terminal, so a CP437 caller is not shown a bar
+// in a script it cannot draw. term comes from the caller because the session's
+// idle-timeout wrapper does not carry the terminal's markers.
+func farewell(s session.Session, term menu.Term, lang string) {
+	menu.Pause(onboardLang{Session: s, lang: menu.FittingLang(term, lang)})
 }
 
 // joinRefusal is the sentence shown to a caller who may not found a realm, or

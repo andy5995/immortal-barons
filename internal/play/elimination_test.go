@@ -1,7 +1,6 @@
 package play
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -47,9 +46,8 @@ func TestLoginDeadSameDayEndsSession(t *testing.T) {
 	if reason != "dead" {
 		t.Errorf("reason = %q, want \"dead\"", reason)
 	}
-	if !strings.Contains(f2.out.String(), "Return on a later day") {
-		t.Errorf("expected the return-later notice, got %q", f2.out.String())
-	}
+	out := f2.out.String()
+	assertPausedAfter(t, out, "Return on a later day")
 	w, _ := store.Load(cfg)
 	e := w.FindByOwner("khan")
 	if e == nil {

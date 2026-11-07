@@ -90,9 +90,7 @@ func TestSecondSessionOnARealmIsRefused(t *testing.T) {
 	if err != nil || reason != "busy" {
 		t.Fatalf("second session: reason %q, err %v; want busy", reason, err)
 	}
-	if !strings.Contains(f.out.String(), "already being played elsewhere") {
-		t.Errorf("no refusal shown:\n%s", f.out.String())
-	}
+	assertPausedAfter(t, f.out.String(), "already being played elsewhere")
 	if strings.Contains(f.out.String(), "Khanate") {
 		t.Error("the refused session went on to onboard")
 	}

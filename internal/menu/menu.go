@@ -743,6 +743,7 @@ func endCollapsed(s session.Session, w *ctx) {
 			tr(s, "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."),
 			ansi.Reset)
 	}
+	pause(s)
 	session.End(io.EOF)
 }
 

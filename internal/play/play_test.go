@@ -16,6 +16,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/i18n"
+	"github.com/andy5995/immortal-barons/internal/menu"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
@@ -69,6 +70,20 @@ func TestReadErrorDuringOnboardingSurfacesInReason(t *testing.T) {
 	reason, _ := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	if !strings.Contains(reason, "winsock-boom-10054") {
 		t.Errorf("expected the underlying read error in the reason, got %q", reason)
+	}
+}
+
+// assertPausedAfter checks that a closing notice is followed by the pause bar.
+// The door exits right after it and the BBS clears the screen, so a notice with
+// no pause after it is gone before the caller can read it.
+func assertPausedAfter(t *testing.T, out, notice string) {
+	t.Helper()
+	i := strings.Index(out, notice)
+	if i < 0 {
+		t.Fatalf("the notice %q never appeared: %q", notice, out)
+	}
+	if !strings.Contains(out[i:], "Paused") {
+		t.Errorf("the notice %q is not followed by a pause: %q", notice, out[i:])
 	}
 }
 
@@ -155,6 +170,7 @@ func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
 	if strings.Contains(out, "Name your Realm") {
 		t.Error("a refused caller should not reach the realm-name prompt")
 	}
+	assertPausedAfter(t, out, "All 25 realms of this planet are held")
 	if reason != "closed" {
 		t.Errorf("session reason = %q, want %q", reason, "closed")
 	}
@@ -424,5 +440,37 @@ func TestQuittingTheWelcomeMenuCreatesNoRealm(t *testing.T) {
 	w, _ := store.Load(cfg)
 	if e := w.FindByOwner("khan"); e != nil {
 		t.Errorf("a realm was created for a caller who quit: %q", e.Name)
+	}
+}
+
+// A caller after the join cutoff is told the game is closed, and the notice
+// waits for a key before the door exits.
+func TestJoinCutoffRefusalPauses(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	cfg.JoinDate = "2026-07-01"
+	f := &fakeSession{keys: []rune("  ")}
+	reason, err := Run(f, Identity{Handle: "Late"}, cfg, "2026-07-03")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reason != "closed" {
+		t.Errorf("reason = %q, want \"closed\"", reason)
+	}
+	assertPausedAfter(t, f.out.String(), "closed to new barons")
+}
+
+// The closing pause is fitted to the terminal, not to the session wrapper: a
+// Russian caller on a CP437 door gets the English bar it can draw, and the same
+// caller on UTF-8 gets the translation.
+func TestFarewellFitsTheTerminal(t *testing.T) {
+	cp437 := &fakeSession{keys: []rune(" ")}
+	farewell(cp437, menu.Term{}, "ru")
+	if !strings.Contains(cp437.out.String(), "─»>Paused<«─") {
+		t.Errorf("a CP437 terminal did not get the English bar: %q", cp437.out.String())
+	}
+	utf8 := &fakeSession{keys: []rune(" ")}
+	farewell(utf8, menu.Term{UTF8: true}, "ru")
+	if strings.Contains(utf8.out.String(), "─»>Paused<«─") {
+		t.Errorf("a UTF-8 terminal got the English bar for a Russian caller: %q", utf8.out.String())
 	}
 }
