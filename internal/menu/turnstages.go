@@ -409,8 +409,9 @@ func showQueenRefund(s session.Session, w *ctx) {
 	if paid <= 0 {
 		return
 	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale opens her coffers and refunds you %s gold!")+"%s\n",
-		ansi.FgWhite, ansi.FgBrightYellow+comma(paid)+ansi.FgWhite, ansi.Reset)
+	refund := fmt.Sprintf(tr(s, "The Queen Royale opens her coffers and refunds you %s gold!"), comma(paid))
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite,
+		hiNumsReset(WrapIndented(refund, ""), ansi.FgBrightYellow, ansi.FgWhite), ansi.Reset)
 }
 
 // showCoordinatorNotice tells an inter-BBS caller where they stand on the BBS
@@ -515,7 +516,7 @@ func showLottery(s session.Session, w *ctx) {
 		prize = w.World.PayLotteryPrize(p, matches)
 	})
 
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgWhite, tr(s, "Drawn:"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Drawn:"), ansi.Reset)
 	for i, c := range draw {
 		// A matched letter is bright yellow and an unmatched one bright red, but
 		// the count below says the same thing in words: color alone must not be
@@ -528,11 +529,16 @@ func showLottery(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "%s%c%s", color, c, ansi.Reset)
 	}
 	fmt.Fprint(s, "\n")
-	if prize <= 0 {
-		ok(s, "No matches. The Queen thanks you for your contribution.")
-		return
+	// The result is a gray sentence with its figures picked out, as the
+	// original's is, so the count and the prize read at a glance. Yellow, the
+	// figure color of the tax refund printed just above it.
+	result := tr(s, "No matches. The Queen thanks you for your contribution.")
+	if prize > 0 {
+		result = fmt.Sprintf(tr(s, "%d matched! You win %s gold, paid straight into your bank."), matches, comma(prize))
 	}
-	ok(s, "%d matched! You win %s gold, paid straight into your bank.", matches, comma(prize))
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite,
+		hiNumsReset(WrapIndented(result, "  "), ansi.FgBrightYellow, ansi.FgWhite), ansi.Reset)
+	pause(s)
 }
 
 // readLotteryTicket reads the six letters of a ticket, one keypress each,
@@ -550,7 +556,7 @@ func readLotteryTicket(s session.Session, w *ctx) []byte {
 		}
 	})
 
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgWhite, tr(s, "Pick your six letters:"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Pick your six letters:"), ansi.Reset)
 	ticket := make([]byte, 0, game.LotteryLetters)
 	for len(ticket) < game.LotteryLetters {
 		r, err := readKey(s)

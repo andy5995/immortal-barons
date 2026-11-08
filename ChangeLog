@@ -11,6 +11,7 @@ Immortal Barons ChangeLog
   * Battle reports and events group casualty figures (2,472,438 tanks)
   * A notice that ends the session waits for a key before the door exits
   * Names and text from other boards can no longer carry terminal escape codes
+  * The lottery result picks out the match count and the prize
 
 2026-11-03 (v0.2.8)
   * Updating from v0.1.0 or later needs no game reset

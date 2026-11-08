@@ -3714,6 +3714,12 @@ Winning Letters: ESC[0;40;31m D ESC[31m K ESC[31m M ESC[31m M ESC[1;33m I ESC[0;
 | ticket letters, as they are typed | `1;36` bright cyan |
 | a drawn letter that matched | `1;33` yellow |
 | a drawn letter that did not | `0;40;31` dark red |
+| the two labels | `1;37` bright white |
+| the result sentence | `37` gray, its prize figure `1;36` bright cyan |
+
+The result is one gray sentence with the prize picked out (`You won 2500
+gold!` with `2500` in bright cyan); a draw with no match is the same gray, with
+no figure in it.
 
 That one capture proves the whole scoring rule on its own: the ticket is
 `AGNTYI`, the draw `DKMMIU`, and the single yellow letter is the `I` — which
@@ -3725,10 +3731,12 @@ each accepted only if it is A–Z; the count of echoed characters after the prom
 is what shows this. Enter fills the slot with a random letter, so the echo never
 stalls on a player who just wants it over with.
 
-**IB deviates on two points.** An unmatched letter is drawn in bright red, not
-dark red, which sits at about 2:1 against black; and the result line states the
-match count in words, so nothing depends on telling two colors apart. Both are
-deliberate — see `docs/mechanics-reference.md`.
+**IB deviates on three points.** An unmatched letter is drawn in bright red, not
+dark red, which sits at about 2:1 against black; the result line states the
+match count in words, so nothing depends on telling two colors apart; and its
+figures (the count and the prize) are bright yellow rather than cyan, the
+figure color of the tax refund line printed just above it. The first two are
+recorded in `docs/mechanics-reference.md`.
 
 ## The Coordinator notice (top of every InterBBS turn)
 
