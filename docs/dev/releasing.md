@@ -85,9 +85,13 @@ League Coordinator's minimum-version gate.
 Push trunk, then draft the release on GitHub and let publishing create the tag.
 Do not tag or push tags from the command line.
 
+Paste `.github/archive-note.md` into the release notes. The snapshot
+prerelease gets the same note from `snapshot.yml`.
+
 The **Release** workflow builds on publish and attaches the assets — Linux,
 macOS and Windows archives, the vendored source tarball, and `SHA256SUMS`.
-Watch it: a release with no assets is a release nobody can use.
+The Sysop Panel workflow attaches the `ib-sysop-…` archives. Watch both: a
+release with no assets is a release nobody can use.
 
 ## After publishing
 

@@ -33,8 +33,11 @@ Builds are provided for these systems:
 
 There is nothing to install: unpack the archive and run `immortal-barons`.
 
-Archives named `ib-sysop-…` hold only the optional
-[Sysop Panel](sysop-panel.md). The game is in the `immortal-barons-…` archive.
+<!-- Same text as .github/archive-note.md; change both. -->
+The game is in the `immortal-barons-…` archives. The `ib-sysop-…` archives
+contain the [Sysop Panel](sysop-panel.md), an optional graphical tool for
+troubleshooting and administration. It is mostly for League Coordinators and
+sysops in a league, but it can also help a sysop running a local game.
 
 ## Notes before you run it
 

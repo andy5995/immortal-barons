@@ -1,6 +1,6 @@
 # Sysop Panel
 
-`ib-sysop` is a desktop window for a sysop or League Coordinator. It shows a
+`ib-sysop` is a graphical tool for a sysop or League Coordinator. It shows a
 board's league state and runs the game's maintenance commands. It is not for
 playing the game.
 

@@ -46,7 +46,9 @@ jobs:
             "Not a stable release." \
             "Binaries are unsigned; Windows SmartScreen may warn on first run." \
             "The Windows/winsock door path has not been tested against a live BBS." \
+            "" \
             > "$RUNNER_TEMP/notes.md"
+          cat .github/archive-note.md >> "$RUNNER_TEMP/notes.md"
           # Create the "snapshot" prerelease once, then just swap its assets on
           # later pushes. Editing (rather than delete+recreate) means watchers
           # are not re-notified on every trunk build.
