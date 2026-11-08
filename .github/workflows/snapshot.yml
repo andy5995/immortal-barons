@@ -45,7 +45,6 @@ jobs:
             "" \
             "Not a stable release." \
             "Binaries are unsigned; Windows SmartScreen may warn on first run." \
-            "The Windows/winsock door path has not been tested against a live BBS." \
             "" \
             > "$RUNNER_TEMP/notes.md"
           cat .github/archive-note.md >> "$RUNNER_TEMP/notes.md"
