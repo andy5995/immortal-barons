@@ -14,6 +14,13 @@ The first menu you see when you enter the game.
 
 ![The Entry menu: two columns of options, including Play, status, scores, news, messages, instructions and preferences.](screenshots/entry.png)
 
+## Empire Status
+
+A new realm's figures: turns, gold, population, support, food, military and
+regions.
+
+![Empire Status for a new realm: turns, score, gold, population and tax rate, bars for popular support and morale, food, troopers, and its regions by type.](screenshots/status.png)
+
 ## Spending menu
 
 Where you buy military units and regions during a turn.
@@ -23,6 +30,12 @@ Where you buy military units and regions during a turn.
 ## System menu
 
 ![The System menu: two columns of options, including advisors, diplomacy, the bank, messages and preferences.](screenshots/system.png)
+
+## Bank
+
+The chart shows how full each of the coming days is with investment returns.
+
+![Goldie Luck's Bank: options for loans, deposits, withdrawals and investments, above a bar chart of investment returns due on each of the coming days.](screenshots/bank.png)
 
 ## Preferences
 

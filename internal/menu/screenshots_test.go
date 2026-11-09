@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -181,6 +182,24 @@ func TestScreenshots(t *testing.T) {
 		w := newWorld()
 		GameLoop(s, w.World, w.handle, Term{})
 	}
+	// The chart draws only when returns are due, so this realm fills a share of
+	// every date it can invest to.
+	invested := func(s session.Session) {
+		w := newWorld()
+		p := w.Player()
+		p.Gold = 20_000_000_000
+		pattern := []int64{60, 100, 35, 0, 80, 20, 100, 45, 70}
+		for days := game.MinInvestDays; days <= game.MaxInvestDays; days++ {
+			pct := pattern[(days-game.MinInvestDays)%len(pattern)]
+			if amt := w.MaxInvestPrincipal(p, days) * pct / 100; amt > 0 {
+				if _, err := w.Invest(p, amt, days); err != nil {
+					t.Fatal(err)
+				}
+			}
+		}
+		p.Gold = 1_250_000
+		GameLoop(s, w.World, w.handle, Term{})
+	}
 	shots := []struct {
 		name, keys, marker string
 		play               func(s session.Session)
@@ -191,6 +210,9 @@ func TestScreenshots(t *testing.T) {
 		{"spending", "\r  \r", "[Spending]", opening},
 		// The System menu opens from inside a turn, off Spending.
 		{"system", "\r  \r*", "[System]", opening},
+		{"status", "E", "Popular Support", opening},
+		// The bank opens off System, inside a turn.
+		{"bank", "\r  \r*V", "Investment returns by day", invested},
 		{"preferences", "P", "[Preferences]", opening},
 		// Help, jump to About.
 		{"about", "?A\r", "An independent tribute", opening},
