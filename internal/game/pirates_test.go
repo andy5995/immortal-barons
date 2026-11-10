@@ -471,7 +471,7 @@ func TestPirateHoldingClampsToCap(t *testing.T) {
 func TestRaidReportMatchesBREsShape(t *testing.T) {
 	got := raidWin(say(raidWinLines[0], "who", "Dunkleoids"), raidLoot(4999, 6, 104, 62, 116, 19, 4), 0, 0, 0).English()
 	want := "Your efforts against Dunkleoids have brought you success!\n" +
-		"You took 4999 Gold, 6 Regions, 104 Troopers, 62 Jets, 116 Turrets, 19 Tanks, and 4 Agents."
+		"You took 4999 Gold, 6 Regions, 4 Agents, 104 Troopers, 62 Jets, 116 Turrets, and 19 Tanks."
 	if got != want {
 		t.Errorf("raid win report:\n got %q\nwant %q", got, want)
 	}
@@ -481,7 +481,7 @@ func TestRaidReportMatchesBREsShape(t *testing.T) {
 }
 
 // Regions drop out when the faction holds no land — recorded from BRE's own
-// screen — while the unit fields stay put so the tally reads the same every time.
+// screen.
 func TestRaidLootOmitsRegionsWhenTheFactionHoldsNoLand(t *testing.T) {
 	with := list(raidLoot(500, 8, 1, 2, 3, 4, 0))
 	without := list(raidLoot(500, 0, 1, 2, 3, 4, 0))
@@ -696,4 +696,17 @@ func TestPirateRaidFactionKeepsThreeTimesTheGold(t *testing.T) {
 		return
 	}
 	t.Error("no raid ever reached the gold")
+}
+
+// Every field that came to zero is left out, gold included, as in BRE's
+// captured tallies ("You took 13 Regions, 75 Troopers, ..."). A win that takes
+// nothing at all drops the "You took" line rather than print an empty list.
+func TestRaidLootOmitsZeroFields(t *testing.T) {
+	if got, want := list(raidLoot(0, 13, 75, 709, 0, 20_000, 0)), "13 Regions, 75 Troopers, 709 Jets, and 20k Tanks"; got != want {
+		t.Errorf("tally = %q, want %q", got, want)
+	}
+	got := raidWin(say(raidWinLines[0], "who", "Dunkleoids"), raidLoot(0, 0, 0, 0, 0, 0, 0), 0, 0, 0).English()
+	if want := "Your efforts against Dunkleoids have brought you success!"; got != want {
+		t.Errorf("empty win = %q, want %q", got, want)
+	}
 }

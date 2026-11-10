@@ -321,32 +321,31 @@ func (w *World) pirateRaidVictim(slot int, v *Empire) {
 	}
 }
 
-// raidLoot is the "You took" tally. The order is BRE's, from the captured
-// screen in docs/dev/bre-screens.md. Regions are omitted when the faction holds
-// no land, which that capture records as BRE's own behavior; Agents have no
-// BRE counterpart and follow the units it does list.
+// raidLoot is the "You took" tally, in BRE's order: Gold, Regions, Agents,
+// Troopers, Jets, Turrets, Tanks. A field that came to zero is left out, Gold
+// included -- over thirty captured tallies show both ("You took 13 Regions, 75
+// Troopers, ...", "You took 10k Gold, 3 Regions, 19k Jets, ...").
 //
 // EVERY field is shortened (numfmt.Short), gold and unit counts alike — the
 // original's raid line runs "You took 111k Gold, 5 Regions, 8568 Agents, ...
 // 13k Turrets", shortening each one past 10,000 and leaving the rest bare.
 // Its launch_pirate_raid reaches the same helper the score table's Score and
-// Net Worth columns use.
-//
-// Zero entries are kept, as BRE keeps them, so the same fields appear every time
-// and a missing one means the unit does not take part rather than that none
-// were lost. The list is joined in the reader's language (listIn).
+// Net Worth columns use. The list is joined in the reader's language (listIn).
 func raidLoot(gold int64, regions, troopers, jets, turrets, tanks, agents int) []Msg {
-	parts := []Msg{say("{n} Gold", "n", short(gold))}
+	var parts []Msg
+	if gold > 0 {
+		parts = append(parts, say("{n} Gold", "n", short(gold)))
+	}
 	if regions > 0 {
 		parts = append(parts, sayN("{n} Region", "{n} Regions", "n", "n", short(regions)))
 	}
-	parts = append(parts,
-		counted(Trooper, short(troopers)),
-		counted(Jet, short(jets)),
-		counted(Turret, short(turrets)),
-		counted(Tank, short(tanks)))
-	if agents > 0 {
-		parts = append(parts, counted(Agent, short(agents)))
+	for _, u := range []struct {
+		g *Good
+		n int
+	}{{Agent, agents}, {Trooper, troopers}, {Jet, jets}, {Turret, turrets}, {Tank, tanks}} {
+		if u.n > 0 {
+			parts = append(parts, counted(u.g, short(u.n)))
+		}
 	}
 	return parts
 }
@@ -360,7 +359,7 @@ var raidWinLines = []string{
 	msgid("Your efforts against {who} have brought you success!"),
 	msgid("Your forces broke the {who} and came home loaded."),
 	msgid("The {who} scattered before your assault."),
-	msgid("You overran the {who} and took back what you could."),
+	msgid("You overran the {who}."),
 	msgid("The {who} could not hold what they had taken."),
 }
 
@@ -380,7 +379,14 @@ func raidWin(headline Msg, loot []Msg, troopers, jets, tanks int) Msg {
 	if troopers > 0 || jets > 0 || tanks > 0 {
 		lost = say("You lost {l}.", "l", raidLosses(troopers, jets, tanks))
 	}
-	return lines(headline, say("You took {l}.", "l", loot), lost)
+	// No capture shows a win against a faction holding nothing, so what BRE
+	// prints then is not known; IB leaves the tally out rather than print an
+	// empty "You took .".
+	var took Msg
+	if len(loot) > 0 {
+		took = say("You took {l}.", "l", loot)
+	}
+	return lines(headline, took, lost)
 }
 
 // raidLosses is the "You lost" tally — the three types a raid may commit.

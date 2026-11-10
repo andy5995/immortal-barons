@@ -19,6 +19,8 @@ Immortal Barons ChangeLog
   * New pirate factions start with no agents and different tank, jet and
     turret stocks
   * A pirate faction keeps three times what it steals
+  * A won pirate raid lists agents after regions and leaves out anything
+    that came to zero
 
 2026-11-03 (v0.2.8)
   * Updating from v0.1.0 or later needs no game reset

@@ -8,7 +8,7 @@ import "testing"
 // Agents, ... 13k Turrets" and "They shipped 1000k Turrets and 188m Gold."
 func TestRaidLootWearsBREShortening(t *testing.T) {
 	got := list(raidLoot(111_222, 5, 27_000, 3876, 13_400, 20_500, 8568))
-	want := "111k Gold, 5 Regions, 27k Troopers, 3876 Jets, 13k Turrets, 20k Tanks, and 8568 Agents"
+	want := "111k Gold, 5 Regions, 8568 Agents, 27k Troopers, 3876 Jets, 13k Turrets, and 20k Tanks"
 	if got != want {
 		t.Errorf("raidLoot =\n %q\nwant\n %q", got, want)
 	}

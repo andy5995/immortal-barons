@@ -533,9 +533,13 @@ raids commit Troopers / Jets / Tanks (no Turrets/Bombers).
 ### Post-raid result (WIN)
 
 The faction name keeps its list color. Loot **taken** numbers are `93`
-bright-yellow; labels `37` white; own **losses** are `97` bright-white. Regions
-appear in the loot line **only when the faction holds land**; otherwise the loot
-line omits "Regions" and no picker opens.
+bright-yellow; labels `37` white; own **losses** are `97` bright-white. The loot
+line runs Gold, Regions, Agents, Troopers, Jets, Turrets, Tanks, and **leaves
+out any field that came to zero**, Gold and Regions included (over thirty
+captured tallies, e.g. `You took 13 Regions, 75 Troopers, 709 Jets, 2420
+Turrets, and 20k Tanks.`). With no Regions, no picker opens. IB kept zero
+fields and put Agents last until 2026-11-10. No capture shows a win that took
+nothing at all; IB then prints the headline alone.
 
 ```
 Your efforts against Xandorians have brought you success!
