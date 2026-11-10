@@ -187,6 +187,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	pair("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate),
 		"Investment rate", investRateStr(s, c, investRate))
 	row("Food market", foodMarketStr(s, c))
+	row("Full bank at start", onOffStr(c.FullBankStart))
 	// The money cap had a row here until 2026-09-01. It stopped earning one when
 	// the setting stopped being editable (#205): every new game gets the same 2
 	// billion, so the row told a player something they could not have found

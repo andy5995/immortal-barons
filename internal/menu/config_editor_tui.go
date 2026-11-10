@@ -97,6 +97,7 @@ const (
 	helpMaxTax             = "The highest tax rate a player is allowed to set."
 	helpPlanetaryTax       = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold goes to the Queen's purse, which she refunds a share of to each baron at the start of their playing day."
 	helpFoodUnlimited      = "When on, the food market never runs short — its daily supply is unlimited."
+	helpFullBankStart      = "When on, a new realm starts with its savings full and the most allowed returning on each of the next 10 days, starting the day it is created. Those returns count as heavy investing, so the investment rate falls while new realms join, unless Steady Investment Rate is on."
 	helpBuyMilitary        = "Whether players may buy military units. Yes: they may buy them freely. No: they must build them with industry. Limited is not built yet and works like Yes."
 	helpMaintCosts         = "Upkeep cost for regions and forces: High, Medium, Low, or None."
 	helpTradeCosts         = "Cost of trade deals: High, Medium, Low, or None."
@@ -215,6 +216,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(econ, "Max Tax Rate", helpMaxTax, c.MaxTaxRate, 0, game.MaxPlayerTaxRate, func(c *game.Config, n int) { c.MaxTaxRate = n })
 	t.addInt(econ, "Planetary Tax Rate (%)", helpPlanetaryTax, c.PlanetaryTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.PlanetaryTaxRate = n })
 	t.addBool(econ, "Food Unlimited", helpFoodUnlimited, c.FoodUnlimited, func(c *game.Config, b bool) { c.FoodUnlimited = b })
+	t.addBool(econ, "Full Bank Start", helpFullBankStart, c.FullBankStart, func(c *game.Config, b bool) { c.FullBankStart = b })
 
 	mil := tview.NewForm()
 	addChoice(t, mil, "Buy Military", helpBuyMilitary, buyOpts, buyVals, c.BuyMilitary, func(c *game.Config, v game.BuyMode) { c.BuyMilitary = v })

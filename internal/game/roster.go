@@ -184,6 +184,9 @@ func (w *World) AddHumanKey(handle, userKey, realm string) *Empire {
 	e.UserKey = userKey
 	e.Slot = slot
 	e.Founded = Recorded(timeNow())
+	if w.Config.FullBankStart {
+		w.fillBank(e)
+	}
 	w.insertEmpire(e)
 	return e
 }

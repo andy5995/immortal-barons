@@ -73,9 +73,9 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// old note naming 48 cannot land on a different setting. 21 was the AI-baron
 	// count, retired with the barons themselves in v0.2.0, and its number is held
 	// back the same way. 49 (local attacks per day) and 50 (the S3-Sabre Constant
-	// Dial) are IB's own.
-	const fields = 47
-	for n := 1; n <= 50; n++ {
+	// Dial) and 51 (Full Bank Start) are IB's own.
+	const fields = 48
+	for n := 1; n <= 51; n++ {
 		if n == 21 || n == 22 || n == 48 {
 			continue
 		}

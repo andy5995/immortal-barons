@@ -687,3 +687,41 @@ func TestPendingHoldPourMatchesMaintenance(t *testing.T) {
 		t.Errorf("hold left %d, want 0", e.InvestHeld)
 	}
 }
+
+// Full Bank Start fills a new realm's savings and ten dates of returns, today
+// first, and today's are paid from its first turn.
+func TestFullBankStart(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.FullBankStart = true
+	cfg.TurnsPerDay = 10
+	w := NewWorldSeed(cfg, 1)
+	w.LastMaintDate = "2026-01-01"
+	e := w.AddHuman("tester", "Testland")
+
+	if e.Bank != 2_000_000_000 {
+		t.Errorf("Bank = %d, want 2,000,000,000", e.Bank)
+	}
+	if e.InvestDue != 2_000_000_000 {
+		t.Errorf("InvestDue = %d, want 2,000,000,000 due today", e.InvestDue)
+	}
+	for d := 1; d <= 9; d++ {
+		if got := e.ReturnsOn(w.GameDay + d); got != 2_000_000_000 {
+			t.Errorf("returns on today+%d = %d, want 2,000,000,000", d, got)
+		}
+	}
+	if got := e.ReturnsOn(w.GameDay + 10); got != 0 {
+		t.Errorf("returns on today+10 = %d, want 0: ten dates counting today", got)
+	}
+
+	w.CollectBankPayments(e)
+	if e.InvestPaid != 200_000_000 || e.InvestDue != 1_800_000_000 {
+		t.Errorf("first turn paid %d leaving %d due, want 200,000,000 and 1,800,000,000",
+			e.InvestPaid, e.InvestDue)
+	}
+
+	off := NewWorldSeed(DefaultConfig(), 1).AddHuman("other", "Otherland")
+	if off.Bank != 0 || off.InvestDue != 0 || len(off.Investments) != 0 {
+		t.Errorf("default config: Bank %d, InvestDue %d, %d investments; want none",
+			off.Bank, off.InvestDue, len(off.Investments))
+	}
+}

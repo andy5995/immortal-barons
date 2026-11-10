@@ -14,6 +14,8 @@ Immortal Barons ChangeLog
   * The lottery result picks out the match count and the prize
   * A planetary run that stops before saving no longer loses the inbound
     packets it had applied, or reuses the numbers of packets it had sent
+  * config-during-reset: a new Full Bank Start setting (off) starts each new
+    realm with full savings and ten days of full investment returns
 
 2026-11-03 (v0.2.8)
   * Updating from v0.1.0 or later needs no game reset

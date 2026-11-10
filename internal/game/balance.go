@@ -160,6 +160,10 @@ const (
 	// day slots 0-10).
 	InvestHoldDates = 10
 
+	// FullBankDates is how many dates, today first, Full Bank Start fills with
+	// returns. IB's own setting, so IB's own number.
+	FullBankDates = 10
+
 	// MaxCountField is the largest value a figure held in COUNT width (a plain
 	// int, 32 bits on a 32-bit door) may take: a per-unit market price, a
 	// trade-basket amount. Money is int64 and bounded by MoneyCap instead.

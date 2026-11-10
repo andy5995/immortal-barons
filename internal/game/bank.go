@@ -107,6 +107,11 @@ func (w *World) matureInvestments(e *Empire) {
 			e.addHeldReturn(w.GameDay+d, pour)
 		}
 	}
+	w.setInvestShare(e)
+}
+
+// setInvestShare sets what each of the day's turns pays of e's InvestDue.
+func (w *World) setInvestShare(e *Empire) {
 	e.InvestShare = e.InvestDue / int64(max(w.Config.TurnsPerDay, 1))
 }
 
@@ -163,6 +168,18 @@ func (e *Empire) addHeldReturn(day int, gold int64) {
 		}
 	}
 	e.Investments = append(e.Investments, Investment{Return: gold, MaturesDay: day})
+}
+
+// fillBank gives a new realm the league's Full Bank Start: savings at the money
+// cap, and returns at the per-date limit on FullBankDates dates, today first. Today's are paid out a share a turn from the realm's
+// first turn, as if they had matured at this morning's maintenance.
+func (w *World) fillBank(e *Empire) {
+	e.Bank = w.MoneyCap()
+	e.InvestDue = MaxReturnsPerDate
+	w.setInvestShare(e)
+	for d := 1; d < FullBankDates; d++ {
+		e.addHeldReturn(w.GameDay+d, MaxReturnsPerDate)
+	}
 }
 
 // collectInvestShare pays one turn's share of the day's matured returns into

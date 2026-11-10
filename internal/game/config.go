@@ -361,6 +361,7 @@ type Config struct {
 	StdInvestRate        int    // standard investment rate (BRE: % over 10 days)
 	SteadyInvest         bool   // steady (fixed) investment rate instead of floating
 	FoodUnlimited        bool   // food market has no daily supply limit (BRE "Food Unlimited"; default false = limited)
+	FullBankStart        bool   // a new realm starts with every investment date and its savings full (IB's own; default off)
 	MaxTaxRate           int    // highest tax rate a player may set (IB divergence: BRE caps nothing)
 	PlanetaryTaxRate     int    // crown tax on each turn's gold income, as a whole percent (5 = 5%)
 	MaxRegions           int    // most regions a player may buy in one turn; 0 = no limit (owning is uncapped)
@@ -610,6 +611,7 @@ func DefaultConfig() Config {
 		LostForcesDays:       3,
 		MinBoardVersion:      "",   // no requirement until a Coordinator sets one
 		IPTrading:            true, // IB's own feature; a league that wants it off says so
+		FullBankStart:        false,
 		Pirates:              true, // the original has no switch; on is what it does
 		BombingOps:           true,
 		MissileOps:           true,

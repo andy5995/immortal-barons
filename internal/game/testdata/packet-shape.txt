@@ -152,6 +152,7 @@ LeagueConfig:
   AttackRewards
   SabreHandling `json:"SlappenheimerHandling"`
   SabreConstantDial `json:",omitempty"`
+  FullBankStart `json:",omitempty"`
 LeagueNode:
   Number
   Name

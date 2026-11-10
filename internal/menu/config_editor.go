@@ -261,6 +261,9 @@ func configPages(ibbs bool) []cfgPage {
 		toggle(26, "Food Unlimited",
 			func(c *game.Config) bool { return c.FoodUnlimited },
 			func(c *game.Config, v bool) { c.FoodUnlimited = v }),
+		toggle(51, "Full Bank Start",
+			func(c *game.Config) bool { return c.FullBankStart },
+			func(c *game.Config, v bool) { c.FullBankStart = v }),
 	}
 
 	mil := []cfgField{

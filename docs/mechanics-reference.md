@@ -4066,6 +4066,9 @@ The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"):
   - A move of 0.2 or more makes the news; 0.1 moves post nothing.
   - With **Steady** on, the rate is pinned to the Standard rate and none of the
     above runs.
+  - Under IB's Full Bank Start (see New-player start), each new realm's returns
+    count toward that average like any other, so the rate falls while new
+    realms join.
   - Separately, the Queen occasionally raises or lowers the rate by 1% as a
     random event (BRE.OVR 0x4f282). **IB does not have this event.**
 
@@ -4121,6 +4124,16 @@ too late. Every item reuses the action the opening, System or Interplanetary
 menu calls, so nothing here is a second rendering of an existing screen, and
 each reads the world rather than the caller's empire, which is what lets them
 run before one exists.
+
+**Deliberate divergence: Full Bank Start (IB's own league setting, off by
+default).** When on, a new realm is founded with its savings at the money cap
+and investment returns at the per-date limit on ten dates: today and the next
+nine. Today's are paid a share per turn from the realm's first turn, the same
+as returns that matured at that morning's maintenance. Every realm founded
+gets it, whatever the game day, including one founded again after its first was
+destroyed. Those returns count toward the average that moves the floating
+investment rate (Banking and investments), so the rate falls while new realms
+join; Steady Investment Rate stops that. The original has no such setting.
 
 ## Computer barons: retired in v0.2.0
 

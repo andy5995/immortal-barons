@@ -2214,6 +2214,12 @@ Sabre Handling                : User Select/Original Setting
 * = InterBBS Setting Only   [PG-UP] For More Options   [ESC] to Save & Quit
 ```
 
+**Deliberate divergence: Full Bank Start.** IB's editor carries a setting the
+original has no counterpart for. On, it founds every new realm with full
+savings and ten dates of full investment returns, starting the day it is
+created (`docs/mechanics-reference.md`, New-player start). Off by default, so a
+league that does not ask for it plays as the original does.
+
 ### Editing a field — the help screen IS the edit screen
 
 Enter on a field replaces the list with a full-screen page (captured 2026-08-16):

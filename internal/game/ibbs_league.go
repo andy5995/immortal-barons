@@ -60,6 +60,7 @@ type LeagueConfig struct {
 	AttackRewards      Level
 	SabreHandling      SabreMode `json:"SlappenheimerHandling"`
 	SabreConstantDial  int       `json:",omitempty"`
+	FullBankStart      bool      `json:",omitempty"` // omitted while off, so such a league's packets are unchanged
 }
 
 // leagueRuleset extracts the league-wide rules from this board's config, for the
@@ -82,6 +83,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		StdInvestRate:        c.StdInvestRate,
 		SteadyInvest:         c.SteadyInvest,
 		FoodUnlimited:        c.FoodUnlimited,
+		FullBankStart:        c.FullBankStart,
 		MaxTaxRate:           c.MaxTaxRate,
 		PlanetaryTaxRate:     c.PlanetaryTaxRate,
 		MaxRegions:           c.MaxRegions,
@@ -133,6 +135,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.StdInvestRate = lc.StdInvestRate
 	c.SteadyInvest = lc.SteadyInvest
 	c.FoodUnlimited = lc.FoodUnlimited
+	c.FullBankStart = lc.FullBankStart
 	c.MaxTaxRate = lc.MaxTaxRate
 	c.PlanetaryTaxRate = lc.PlanetaryTaxRate
 	c.MaxRegions = lc.MaxRegions
