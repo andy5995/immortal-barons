@@ -642,3 +642,58 @@ func TestEnsurePiratesIsIdempotentAndSeedsNoHoard(t *testing.T) {
 		}
 	}
 }
+
+// A raiding faction banks three times what the victim loses (BRE.OVR, the
+// steal ladder in resolve_pirate_attack: mul_i32 by 3 before the add). IB
+// credited 1x until 2026-11-10, so its factions refilled at a third of the rate.
+func TestPirateRaidFactionKeepsThreeTimesTheTake(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	v := w.AddHuman("me", "Mine")
+	p := &w.Pirates[0]
+	for i := 0; i < 300; i++ {
+		v.Jets, v.Turrets, v.Tanks, v.Agents, v.Gold = 0, 0, 0, 0, 0
+		v.Troopers = 33_000
+		w.Market = nil
+		v.PirateHits = nil
+		p.LootTroopers = 0
+
+		w.pirateRaidVictim(0, v)
+
+		if len(v.PirateHits) == 0 {
+			continue
+		}
+		if v.Troopers != 32_000 {
+			t.Fatalf("victim troopers = %d, want 32000", v.Troopers)
+		}
+		if p.LootTroopers != 3_000 {
+			t.Fatalf("faction troopers = %d, want 3000", p.LootTroopers)
+		}
+		return
+	}
+	t.Error("no raid ever reached the troopers")
+}
+
+// Gold takes its own branch, so it gets its own check.
+func TestPirateRaidFactionKeepsThreeTimesTheGold(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	v := w.AddHuman("me", "Mine")
+	p := &w.Pirates[0]
+	for i := 0; i < 300; i++ {
+		v.Troopers, v.Jets, v.Turrets, v.Tanks, v.Agents = 0, 0, 0, 0, 0
+		v.Gold = 33_000
+		w.Market = nil
+		v.PirateHits = nil
+		p.Gold = 0
+
+		w.pirateRaidVictim(0, v)
+
+		if len(v.PirateHits) == 0 {
+			continue
+		}
+		if v.Gold != 32_000 || p.Gold != 3_000 {
+			t.Fatalf("victim gold %d, faction gold %d; want 32000 and 3000", v.Gold, p.Gold)
+		}
+		return
+	}
+	t.Error("no raid ever reached the gold")
+}

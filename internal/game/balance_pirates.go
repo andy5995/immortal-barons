@@ -51,6 +51,13 @@ const (
 	PirateRaidCapBase     = 24_000 // binary
 	PirateRaidCapJitter   = 1_000  // binary
 	PirateRaidLandMax     = 25     // binary: Random(25) regions granted to a faction per raid
+	// The faction banks THREE times what the victim loses. BINARY-VERIFIED
+	// (resolve_pirate_attack +0x342 to +0x553, BRE.OVR 0x36018 to 0x36229):
+	// every face of the ladder
+	// subtracts the take from the victim once and adds take x 3 (mul_i32 by 3,
+	// then add_i32_indirect) to the faction's field. IB credited 1x until
+	// 2026-11-10, so its factions refilled at a third of the original's rate.
+	PirateRaidKeepMult = 3 // binary
 
 	// Hard caps on faction holdings, clamped at the end of every raid and again
 	// after a player beats the faction. No bombers/carriers — a faction never

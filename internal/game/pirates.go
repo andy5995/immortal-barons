@@ -295,21 +295,22 @@ func (w *World) pirateRaidVictim(slot int, v *Empire) {
 	if draw.Spoil == SpoilGold {
 		took = w.pirateTake(v.Gold)
 		v.Gold -= took
-		p.Gold = capAdd(p.Gold, took, PirateCapGold)
+		p.Gold = capAdd(p.Gold, took*PirateRaidKeepMult, PirateCapGold)
 	} else if src != nil {
 		took = w.pirateTake(int64(*src))
 		*src -= int(took)
+		kept := int(took) * PirateRaidKeepMult
 		switch draw.Spoil {
 		case SpoilTroopers:
-			p.LootTroopers = capAdd(p.LootTroopers, int(took), PirateCapTroopers)
+			p.LootTroopers = capAdd(p.LootTroopers, kept, PirateCapTroopers)
 		case SpoilJets:
-			p.LootJets = capAdd(p.LootJets, int(took), PirateCapJets)
+			p.LootJets = capAdd(p.LootJets, kept, PirateCapJets)
 		case SpoilTurrets:
-			p.LootTurrets = capAdd(p.LootTurrets, int(took), PirateCapTurrets)
+			p.LootTurrets = capAdd(p.LootTurrets, kept, PirateCapTurrets)
 		case SpoilTanks:
-			p.LootTanks = capAdd(p.LootTanks, int(took), PirateCapTanks)
+			p.LootTanks = capAdd(p.LootTanks, kept, PirateCapTanks)
 		case SpoilAgents:
-			p.LootAgents = capAdd(p.LootAgents, int(took), PirateCapAgents)
+			p.LootAgents = capAdd(p.LootAgents, kept, PirateCapAgents)
 		}
 	}
 	p.Land = capAdd(p.Land, w.rng.Intn(PirateRaidLandMax), PirateCapRegions)

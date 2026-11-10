@@ -1052,6 +1052,15 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   The earlier reconstructed "5%, capped at 24,999" was about two-thirds too
   harsh and read the jitter's top as a flat cap.
 
+  **The faction keeps three times what the victim loses** (BINARY-VERIFIED,
+  `resolve_pirate_attack` `+0x342` to `+0x553`, `BRE.OVR` `0x36018` to `0x36229`): every face subtracts the take
+  from the victim once and adds `take × 3` to the faction's slot (`mul_i32` by 3,
+  then `add_i32_indirect`), before the caps clamp it. A raid that costs you 1,000
+  troopers puts 3,000 in the faction. IB credited 1× until 2026-11-10, so its
+  factions refilled at a third of the original's rate and paid little to attack.
+  Read from the code only; no capture shows a faction's holdings before and
+  after a raid on a player.
+
   One capture detail unexplained: **Gold** takes are tiny (38, 58, 258, 8,581)
   against treasuries in the millions, so the field a raid draws gold from is not
   the treasury at the moment shown. The likely reading is that the raid resolves
