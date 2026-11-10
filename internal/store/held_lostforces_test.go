@@ -32,7 +32,7 @@ func TestPlanetaryRunPausesLostForcesForAHeldBoard(t *testing.T) {
 	agents := e.Agents
 
 	writePacket(t, inbound, "far-1", game.Packet{FromBoard: "Far BBS", Seq: 1, Protocol: game.Protocol + 1})
-	run, err := RunPlanetary(w, inbound, outbound, false)
+	run, err := RunPlanetary(w, inbound, outbound, false, noSave)
 	if err != nil {
 		t.Fatalf("RunPlanetary: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestPlanetaryRunPausesLostForcesForAHeldBoard(t *testing.T) {
 	}
 
 	// Next run, nothing new arrives: the packet is still held, so still paused.
-	if run, err = RunPlanetary(w, inbound, outbound, false); err != nil {
+	if run, err = RunPlanetary(w, inbound, outbound, false, noSave); err != nil {
 		t.Fatal(err)
 	}
 	if len(w.InFlight) != 1 || len(run.RecoveryPaused) != 1 {
@@ -72,7 +72,7 @@ func TestPlanetaryRunPausesLostForcesForAHeldBoard(t *testing.T) {
 	// while held, so the original three are up and the agents come home.
 	w.ProtocolHeldAt["Far BBS"] = game.Recorded(time.Now().Add(-time.Hour))
 	writePacket(t, inbound, "far-2", game.Packet{FromBoard: "Far BBS", Seq: 2})
-	if run, err = RunPlanetary(w, inbound, outbound, false); err != nil {
+	if run, err = RunPlanetary(w, inbound, outbound, false, noSave); err != nil {
 		t.Fatal(err)
 	}
 	if run.Applied != 1 {

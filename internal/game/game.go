@@ -314,8 +314,15 @@ type World struct {
 	// InFlight holds strikes that have left this board and are waiting for a
 	// result packet. A result clears the matching entry; one that waits too long
 	// has its forces given back instead (Config.LostForcesDays, #96).
-	InFlight    []InFlightStrike
-	Outbox      []Packet
+	InFlight []InFlightStrike
+	Outbox   []Packet
+	// Outgoing holds packets that are numbered and signed and waiting to be
+	// written to the outbound directory (SealOutbox). They are saved with the
+	// world BEFORE their files are written and are never changed afterward, so
+	// a run that stops between the two writes the same packets again under the
+	// same numbers, and the far board drops the second copy. Empty except
+	// across such a stop.
+	Outgoing    []Packet `json:",omitempty"`
 	SpyDatabase []SpyEntry
 	// Annihilator is this planet's own doomsday weapon, one at a time, from the day a
 	// baron starts it until it flies. Incoming is one aimed AT this planet that
@@ -405,6 +412,10 @@ type World struct {
 	// ReplayFloor and SeenSeqs let a packet that arrives behind a later one
 	// still apply: every number at or below the floor counts as seen, and
 	// SeenSeqs lists, sorted, those applied above it (IsPacketSeen).
+	//
+	// LedgerGen counts the saves of the world and ledger as a pair, and belongs
+	// to the store (store.Save), which writes it into both files.
+	LedgerGen       uint64              `json:"-"`
 	OutSeq          uint64              `json:"-"`
 	HighSeq         map[string]uint64   `json:"-"`
 	ReplayFloor     map[string]uint64   `json:"-"`
@@ -415,9 +426,9 @@ type World struct {
 	// waiting to be handed on. Kept apart from the Outbox because they must go
 	// out exactly as they came in — see ForwardPacket — so each is the packet's
 	// own JSON rather than a Packet, which would drop the fields this build does
-	// not know. Saved with the world, as the Outbox is: the inbound file is gone
-	// by now, so a run that dies before writing would otherwise lose someone
-	// else's packet for good. A save that held them as Packets reads back as the
+	// not know. Saved with the world before the files are written, so a run that
+	// dies before writing does not lose someone else's packet. A save that held
+	// them as Packets reads back as the
 	// same JSON objects.
 	Transit []json.RawMessage
 	// The league freeze (ibbs_freeze.go). FreezeSerial is the last order applied

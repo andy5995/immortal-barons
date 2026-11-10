@@ -12,6 +12,8 @@ Immortal Barons ChangeLog
   * A notice that ends the session waits for a key before the door exits
   * Names and text from other boards can no longer carry terminal escape codes
   * The lottery result picks out the match count and the prize
+  * A planetary run that stops before saving no longer loses the inbound
+    packets it had applied, or reuses the numbers of packets it had sent
 
 2026-11-03 (v0.2.8)
   * Updating from v0.1.0 or later needs no game reset

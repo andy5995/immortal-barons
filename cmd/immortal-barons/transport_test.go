@@ -64,7 +64,7 @@ func alphaPacket(t *testing.T, dir string) game.Packet {
 	w.SendIPMessage(w.AddHuman("alpha", "Alpha Realm"), []string{"Bravo BBS"}, false, "Hello, Bravo.")
 	w.StampOutbox()
 	staging := t.TempDir()
-	if _, err := store.WriteOutbox(w, staging, false); err != nil {
+	if _, err := store.SendOutbox(w, staging, false, func() error { return nil }); err != nil {
 		t.Fatal(err)
 	}
 	entries, err := os.ReadDir(staging)

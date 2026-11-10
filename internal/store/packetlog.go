@@ -60,8 +60,8 @@ func AppendPacketLog(dataDir string, lines []string, when time.Time) {
 	f.Close()
 }
 
-// settle records an inbound packet's fate once the move or removal that
-// carries it out has run, and returns that step's error. A step that failed
+// settle records an inbound packet's fate once the move that carries it out
+// has run, and returns that step's error. A step that failed
 // left the file in inbound, and the line says so rather than claiming it.
 func (r *InboundResult) settle(p game.Packet, fate string, err error) error {
 	if err != nil {
@@ -69,6 +69,29 @@ func (r *InboundResult) settle(p game.Packet, fate string, err error) error {
 	}
 	r.Log = append(r.Log, inLine(p, fate))
 	return err
+}
+
+// discard records an inbound packet's fate and marks its file as finished
+// with. The file itself goes once the world is saved (removeTaken).
+func (r *InboundResult) discard(p game.Packet, path, fate string) {
+	r.Log = append(r.Log, inLine(p, fate))
+	r.taken = append(r.taken, path)
+}
+
+// removeTaken deletes the inbound files this run finished with, and returns a
+// notice for each it could not delete. Call it only after the world is saved.
+// A file that stays is deleted as already seen on a later run. One in transit
+// for another board is passed on again instead, and that board drops the copy.
+func (r *InboundResult) removeTaken() []string {
+	var failed []string
+	for _, path := range r.taken {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			failed = append(failed, fmt.Sprintf(
+				"Packet %s was dealt with but could not be removed from inbound: %v", filepath.Base(path), err))
+		}
+	}
+	r.taken = nil
+	return failed
 }
 
 // PacketLogLine is one packets.log entry: its kind ("in", "out", "pass", or

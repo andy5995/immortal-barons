@@ -39,7 +39,7 @@ func TestUppercasePacketsAreRead(t *testing.T) {
 	from.AddHuman("baron", "Ironhold")
 	from.ExportScores()
 	from.StampOutbox()
-	if _, err := WriteOutbox(from, inbound, false); err != nil {
+	if _, err := SendOutbox(from, inbound, false, noSave); err != nil {
 		t.Fatal(err)
 	}
 
@@ -68,7 +68,7 @@ func TestUppercasePacketsAreRead(t *testing.T) {
 	receiver.BoardID = "The Eclipse"
 	to := game.NewWorldSeed(receiver, 1)
 	to.LastMaintDate = "2026-08-23"
-	result, err := ReadInbound(to, inbound, false)
+	result, err := readInboundAndRemove(to, inbound, false)
 	if err != nil {
 		t.Fatal(err)
 	}

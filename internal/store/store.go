@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -50,49 +51,161 @@ type ledger struct {
 	HighSeq     map[string]uint64   `json:",omitempty"`
 	ReplayFloor map[string]uint64   `json:",omitempty"`
 	SeenSeqs    map[string][]uint64 `json:",omitempty"`
+	// Gen is the save this ledger was written by, and world.json carries the
+	// same number (savedWorld). The ledger is renamed into place first, so a
+	// save that stops between the two renames leaves it one ahead of the world:
+	// it then records packets as applied that the world on disk never took, and
+	// the next run would delete them unread (#311). Before is what undoes that.
+	Gen uint64 `json:",omitempty"`
+	// Before holds, for each board whose record of applied packets this save
+	// changed, that record as it stood. Only a planetary run changes one, so it
+	// is empty after a player's save.
+	Before map[string]seenRecord `json:",omitempty"`
+}
+
+// seenRecord is one board's record of applied packets: its entries in HighSeq,
+// ReplayFloor and SeenSeqs. A nil ReplayFloor means the board had none.
+type seenRecord struct {
+	HighSeq     uint64   `json:",omitempty"`
+	ReplayFloor *uint64  `json:",omitempty"`
+	SeenSeqs    []uint64 `json:",omitempty"`
+}
+
+func (l *ledger) record(board string) seenRecord {
+	r := seenRecord{HighSeq: l.HighSeq[board], SeenSeqs: l.SeenSeqs[board]}
+	if f, ok := l.ReplayFloor[board]; ok {
+		r.ReplayFloor = &f
+	}
+	return r
+}
+
+func (r seenRecord) equal(o seenRecord) bool {
+	if (r.ReplayFloor == nil) != (o.ReplayFloor == nil) || (r.ReplayFloor != nil && *r.ReplayFloor != *o.ReplayFloor) {
+		return false
+	}
+	return r.HighSeq == o.HighSeq && slices.Equal(r.SeenSeqs, o.SeenSeqs)
+}
+
+// rollBack returns the record of applied packets to what it was before the
+// save that wrote this ledger. OutSeq is left alone: packets may have gone out
+// under the numbers it counts, and a number is never used twice.
+func (l *ledger) rollBack() {
+	for board, was := range l.Before {
+		setOrDelete(&l.HighSeq, board, was.HighSeq, was.HighSeq != 0)
+		setOrDelete(&l.SeenSeqs, board, was.SeenSeqs, len(was.SeenSeqs) > 0)
+		if was.ReplayFloor != nil {
+			setOrDelete(&l.ReplayFloor, board, *was.ReplayFloor, true)
+		} else {
+			delete(l.ReplayFloor, board)
+		}
+	}
+	l.Before = nil
+}
+
+func setOrDelete[V any](m *map[string]V, key string, v V, set bool) {
+	if !set {
+		delete(*m, key)
+		return
+	}
+	if *m == nil {
+		*m = map[string]V{}
+	}
+	(*m)[key] = v
+}
+
+// changedSince lists each board whose record differs between was and l, with
+// the record it had in was.
+func (l *ledger) changedSince(was *ledger) map[string]seenRecord {
+	var before map[string]seenRecord
+	for _, m := range []map[string]uint64{l.HighSeq, l.ReplayFloor, was.HighSeq, was.ReplayFloor} {
+		for board := range m {
+			if old := was.record(board); !old.equal(l.record(board)) {
+				if before == nil {
+					before = map[string]seenRecord{}
+				}
+				before[board] = old
+			}
+		}
+	}
+	return before
 }
 
 func ledgerPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, LedgerFile) }
 
+// readLedger reads the ledger file as the world saved at generation worldGen
+// should see it: a ledger one save ahead of that world is rolled back. found
+// is false when there is no file.
+func readLedger(cfg game.Config, worldGen uint64) (l ledger, found bool, err error) {
+	data, err := readWorldFile(ledgerPath(cfg))
+	if os.IsNotExist(err) {
+		return l, false, nil
+	}
+	if err != nil {
+		return l, false, fmt.Errorf("the packet ledger could not be read: %w", err)
+	}
+	if err := json.Unmarshal(data, &l); err != nil {
+		return l, false, fmt.Errorf("the packet ledger %s could not be read (%v); restore it from a backup, or delete it to number this board's packets from 1 again", ledgerPath(cfg), err)
+	}
+	if l.Gen == worldGen+1 {
+		l.rollBack()
+	}
+	return l, true, nil
+}
+
 // loadLedger puts the ledger on w from its file. A board upgrading from a
 // build that kept the ledger in world.json has no file yet; worldData, the
 // world file just read, is where its ledger still is, and the next save
-// writes it out to the file.
+// writes it out to the file. worldData is nil for a new game, which has no
+// world file and takes the ledger as it stands.
 //
 // A ledger that exists but cannot be read is an error, not an empty ledger:
 // starting OutSeq from 0 would have every other board drop this board's
 // packets as replays, silently, until the count passed where it had been.
 func loadLedger(w *game.World, cfg game.Config, worldData []byte) error {
-	var l ledger
-	data, err := readWorldFile(ledgerPath(cfg))
-	switch {
-	case os.IsNotExist(err):
-		if worldData == nil {
-			return nil
-		}
-		data = worldData
-	case err != nil:
-		return fmt.Errorf("the packet ledger could not be read: %w", err)
+	var saved struct{ LedgerGen uint64 }
+	if worldData != nil {
+		// The world has already been decoded from these bytes.
+		json.Unmarshal(worldData, &saved)
 	}
-	if err := json.Unmarshal(data, &l); err != nil {
-		return fmt.Errorf("the packet ledger %s could not be read (%v); restore it from a backup, or delete it to number this board's packets from 1 again", ledgerPath(cfg), err)
-	}
-	w.OutSeq, w.HighSeq, w.ReplayFloor, w.SeenSeqs = l.OutSeq, l.HighSeq, l.ReplayFloor, l.SeenSeqs
-	return nil
-}
-
-// saveLedger writes the ledger the way the world is written: a temporary file
-// renamed into place.
-func saveLedger(w *game.World, cfg game.Config) error {
-	data, err := json.MarshalIndent(ledger{w.OutSeq, w.HighSeq, w.ReplayFloor, w.SeenSeqs}, "", "  ")
+	l, found, err := readLedger(cfg, saved.LedgerGen)
 	if err != nil {
 		return err
 	}
-	tmp := ledgerPath(cfg) + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
-		return err
+	switch {
+	case worldData == nil:
+		saved.LedgerGen = l.Gen
+	case !found:
+		if err := json.Unmarshal(worldData, &l); err != nil {
+			return err
+		}
 	}
-	return renameWorldFile(tmp, ledgerPath(cfg))
+	w.OutSeq, w.HighSeq, w.ReplayFloor, w.SeenSeqs = l.OutSeq, l.HighSeq, l.ReplayFloor, l.SeenSeqs
+	w.LedgerGen = saved.LedgerGen
+	return nil
+}
+
+// writeLedgerTemp writes w's ledger, as generation gen, to a temporary file
+// beside the ledger's own and returns that file's path for Save to rename into
+// place.
+func writeLedgerTemp(w *game.World, cfg game.Config, gen uint64) (string, error) {
+	was, _, err := readLedger(cfg, w.LedgerGen)
+	if err != nil {
+		return "", err
+	}
+	l := ledger{OutSeq: w.OutSeq, HighSeq: w.HighSeq, ReplayFloor: w.ReplayFloor, SeenSeqs: w.SeenSeqs, Gen: gen}
+	l.Before = l.changedSince(&was)
+	data, err := json.MarshalIndent(l, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	tmp := ledgerPath(cfg) + ".tmp"
+	return tmp, os.WriteFile(tmp, data, 0o644)
+}
+
+// savedWorld is world.json: the world, and the generation its ledger carries.
+type savedWorld struct {
+	*game.World
+	LedgerGen uint64
 }
 
 func worldPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, "world.json") }
@@ -327,12 +440,13 @@ func Save(w *game.World, cfg game.Config) error {
 		return err
 	}
 	stampClockOffset(w)
-	// The ledger first: a world saved without it would number its next packet
-	// from a count the file never recorded.
-	if err := saveLedger(w, cfg); err != nil {
-		return err
-	}
-	data, err := json.MarshalIndent(w, "", "  ")
+	// Both files are written in full before either is renamed into place, so a
+	// write that fails (a full disk) leaves the pair on disk as it was. The
+	// ledger is renamed first: a world saved without it would number its next
+	// packet from a count the file never recorded. A save that stops between
+	// the two renames is what the generation is for (ledger.Gen).
+	gen := w.LedgerGen + 1
+	data, err := json.MarshalIndent(savedWorld{w, gen}, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -340,7 +454,18 @@ func Save(w *game.World, cfg game.Config) error {
 	if err := os.WriteFile(tmp, data, 0o644); err != nil {
 		return err
 	}
-	return renameWorldFile(tmp, worldPath(cfg))
+	ledgerTmp, err := writeLedgerTemp(w, cfg, gen)
+	if err != nil {
+		return err
+	}
+	if err := renameWorldFile(ledgerTmp, ledgerPath(cfg)); err != nil {
+		return err
+	}
+	if err := renameWorldFile(tmp, worldPath(cfg)); err != nil {
+		return err
+	}
+	w.LedgerGen = gen
+	return nil
 }
 
 // BackupWorld copies the current world file to world.json.bak, so a destructive

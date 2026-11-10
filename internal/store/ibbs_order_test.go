@@ -62,7 +62,7 @@ func TestReadInboundAppliesCoordinatorPacketBeforeOthers(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 	w.CoordPub = pub
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -130,7 +130,7 @@ func TestReadInboundBootstrapRosterSurvivesADecoyClaim(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 	w.CoordPub = pub
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -169,7 +169,7 @@ func TestReadInboundKeepsOneOriginsPacketsInSeqOrder(t *testing.T) {
 	// The planet news records the order ApplyPacket saw them in. Counting
 	// what applied no longer shows it: a packet applied behind a later one is
 	// still applied (#311), with its state left out (withoutStaleState).
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -259,7 +259,7 @@ func TestReadInboundGroupsSameBoardTogetherRegardlessOfFromNode(t *testing.T) {
 		w := game.NewWorldSeed(cfg, 1)
 		w.LeagueNodes = []game.LeagueNode{{Number: 7, Name: "Origin BBS"}, {Number: 9, Name: "Receiver BBS"}}
 
-		result, err := ReadInbound(w, inbound, false)
+		result, err := readInboundAndRemove(w, inbound, false)
 		if err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
@@ -291,7 +291,7 @@ func TestReadInboundGroupsCoordinatorPacketsTogetherRegardlessOfFromNode(t *test
 		w := game.NewWorldSeed(cfg, 1)
 		w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}, {Number: 9, Name: "Receiver BBS"}}
 
-		result, err := ReadInbound(w, inbound, false)
+		result, err := readInboundAndRemove(w, inbound, false)
 		if err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
@@ -335,7 +335,7 @@ func TestReadInboundForgedCoordinatorClaimDoesNotJumpTheQueue(t *testing.T) {
 			{Number: 9, Name: "Receiver BBS"},
 		}
 
-		if _, err := ReadInbound(w, inbound, false); err != nil {
+		if _, err := readInboundAndRemove(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
 		forgerAt, honestAt := -1, -1
@@ -429,7 +429,7 @@ func TestReadInboundQuarantinesUnreadablePacket(t *testing.T) {
 	cfg.DataDir = t.TempDir()
 	w := game.NewWorldSeed(cfg, 1)
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound should not abort the batch on a corrupt packet, got: %v", err)
 	}
@@ -495,7 +495,7 @@ func TestReadInboundUnreadableFileDoesNotAbortTheRun(t *testing.T) {
 	cfg.DataDir = t.TempDir()
 	w := game.NewWorldSeed(cfg, 1)
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound aborted the whole run over one unreadable file: %v", err)
 	}
@@ -539,7 +539,7 @@ func TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod(t *testing.T)
 	cfg.DataDir = t.TempDir()
 	w := game.NewWorldSeed(cfg, 1)
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -714,7 +714,7 @@ func TestReadInboundCoordinatorGroupWithoutLeagueUpdateDoesNotJumpQueue(t *testi
 			{Number: 9, Name: "Receiver BBS"},
 		}
 
-		if _, err := ReadInbound(w, inbound, false); err != nil {
+		if _, err := readInboundAndRemove(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
 		coordAt, honestAt := -1, -1
@@ -786,7 +786,7 @@ func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing
 			{Number: 9, Name: "Receiver BBS"},
 		}
 
-		if _, err := ReadInbound(w, inbound, false); err != nil {
+		if _, err := readInboundAndRemove(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
 		if len(w.NewsToday) < 2 || w.NewsToday[0].Text != "COORD" {
@@ -857,7 +857,7 @@ func TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority(t *tes
 			{Number: 9, Name: "Receiver BBS"},
 		}
 
-		if _, err := ReadInbound(w, inbound, false); err != nil {
+		if _, err := readInboundAndRemove(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
 		coordAt, honestAt := -1, -1
@@ -921,7 +921,7 @@ func TestReadInboundUnsignedLeagueUpdateDoesNotJumpQueue(t *testing.T) {
 			{Number: 9, Name: "Receiver BBS"},
 		}
 
-		if _, err := ReadInbound(w, inbound, false); err != nil {
+		if _, err := readInboundAndRemove(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
 		coordAt, honestAt := -1, -1
@@ -981,7 +981,7 @@ func TestReadInboundAppliedOrderIsReproducibleWithFixedShuffleSource(t *testing.
 			{Number: 4, Name: "Gamma BBS"}, {Number: 9, Name: "Receiver BBS"},
 		}
 
-		if _, err := ReadInbound(w, inbound, false); err != nil {
+		if _, err := readInboundAndRemove(w, inbound, false); err != nil {
 			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
 		}
 		orders = append(orders, w.NewsToday.Join(","))
@@ -1022,7 +1022,7 @@ func TestReadInboundOrderNoticeIncludesCoordinatorGroupAndFiresOnContestedPair(t
 		{Number: 9, Name: "Receiver BBS"},
 	}
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -1079,7 +1079,7 @@ func TestReadInboundOrderNoticeLabelsASplitCoordinatorGroupDistinctly(t *testing
 		{Number: 9, Name: "Receiver BBS"},
 	}
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -1124,7 +1124,7 @@ func TestRunPlanetaryOrderNoticeReachesLogNotTheReport(t *testing.T) {
 		{Number: 9, Name: "Receiver BBS"},
 	}
 
-	run, err := RunPlanetary(w, inbound, outbound, false)
+	run, err := RunPlanetary(w, inbound, outbound, false, noSave)
 	if err != nil {
 		t.Fatalf("RunPlanetary: %v", err)
 	}
@@ -1174,7 +1174,7 @@ func TestQuarantinePacketFailureLeavesFileInPlaceAndDoesNotAbortBatch(t *testing
 	cfg.DataDir = notADir
 	w := game.NewWorldSeed(cfg, 1)
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("a quarantine failure must not abort the batch by returning an error, got: %v", err)
 	}
@@ -1241,7 +1241,7 @@ func TestReadInboundSetsAsideABundleOffTheLeague(t *testing.T) {
 	cfg.DataDir = t.TempDir()
 	w := game.NewWorldSeed(cfg, 1)
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1267,7 +1267,7 @@ func TestReadInboundAppliesAPacketThatArrivesARunLate(t *testing.T) {
 		t.Helper()
 		inbound := t.TempDir()
 		writePacket(t, inbound, name, game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: seq, Notice: name})
-		result, err := ReadInbound(w, inbound, false)
+		result, err := readInboundAndRemove(w, inbound, false)
 		if err != nil {
 			t.Fatalf("ReadInbound: %v", err)
 		}

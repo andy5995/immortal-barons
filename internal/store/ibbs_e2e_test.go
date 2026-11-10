@@ -41,7 +41,7 @@ func newBoard(t *testing.T, dir, name string, roster []game.LeagueNode) *board {
 
 func (b *board) run(t *testing.T) PlanetaryRun {
 	t.Helper()
-	run, err := RunPlanetary(b.w, b.inbound, b.outbound, false)
+	run, err := RunPlanetary(b.w, b.inbound, b.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -307,7 +307,7 @@ func TestPacketsFromADivergentBoardAreHeld(t *testing.T) {
 	if n := deliver(t, b, a); n == 0 {
 		t.Fatal("The Eclipse wrote no packets")
 	}
-	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +324,7 @@ func TestPacketsFromADivergentBoardAreHeld(t *testing.T) {
 	// The board comes into line — but the packet it already sent states the
 	// rules it was written under, so releasing it must not apply it.
 	b.w.Config.TurnsPerDay = 10
-	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false, noSave); err != nil {
 		t.Fatal(err)
 	}
 	if got := len(a.w.Empires[0].Mail); got != 0 {
@@ -339,7 +339,7 @@ func TestPacketsFromADivergentBoardAreHeld(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false)
+	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -362,7 +362,7 @@ func TestPacketsFromADivergentBoardAreHeld(t *testing.T) {
 		if got := a.w.BoardRuleset["The Eclipse"]; got != a.w.Config.RulesetFingerprint() {
 			t.Errorf("run %d: BBSINFO records %q for a board back in step, want the league's", i, got)
 		}
-		if run, err = RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+		if run, err = RunPlanetary(a.w, a.inbound, a.outbound, false, noSave); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -577,7 +577,7 @@ func TestARulesChangeDoesNotDestroyPacketsInFlight(t *testing.T) {
 	deliver(t, b, a)
 	a.w.Config.TurnsPerDay = 12
 
-	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -616,7 +616,7 @@ func TestOnlyANewFaultRaisesTheAlarm(t *testing.T) {
 	// First offense: the fault is new, so the run reports it as one.
 	b.run(t)
 	deliver(t, b, a)
-	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -628,7 +628,7 @@ func TestOnlyANewFaultRaisesTheAlarm(t *testing.T) {
 	// but no longer new.
 	b.run(t)
 	deliver(t, b, a)
-	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false)
+	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -662,7 +662,7 @@ func TestASilentBoardReachesTheSysopThroughTheRun(t *testing.T) {
 	// from is new rather than quiet and is deliberately not reported.
 	b.run(t)
 	deliver(t, b, a)
-	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false); err != nil {
+	if _, err := RunPlanetary(a.w, a.inbound, a.outbound, false, noSave); err != nil {
 		t.Fatal(err)
 	}
 	if a.w.LinkSilentDays("The Eclipse", time.Now()) != 0 {
@@ -673,7 +673,7 @@ func TestASilentBoardReachesTheSysopThroughTheRun(t *testing.T) {
 	// week of its mailer not running looks like from here.
 	a.w.LastPacketFrom["The Eclipse"] = game.Recorded(time.Now().Add(-(game.LinkSilentAlarmDays + 1) * 24 * time.Hour))
 
-	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false)
+	run, err := RunPlanetary(a.w, a.inbound, a.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -686,7 +686,7 @@ func TestASilentBoardReachesTheSysopThroughTheRun(t *testing.T) {
 
 	// Still quiet on the next run: still reported, no longer new — the count is a
 	// measure of how much is wrong, not of how often the step runs.
-	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false)
+	run, err = RunPlanetary(a.w, a.inbound, a.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -752,7 +752,7 @@ func TestAGooieKablooieCrossesBetweenBoardsAndLands(t *testing.T) {
 	// The status rides a real packet to the target.
 	a.run(t)
 	deliver(t, a, b)
-	if _, err := RunPlanetary(b.w, b.inbound, b.outbound, false); err != nil {
+	if _, err := RunPlanetary(b.w, b.inbound, b.outbound, false, noSave); err != nil {
 		t.Fatal(err)
 	}
 	if len(b.w.Incoming) == 0 {

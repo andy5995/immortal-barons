@@ -323,7 +323,7 @@ func (w *World) SeenPacket(p Packet) bool {
 //
 // The broadcast fan-out happens FIRST, so each addressed copy is signed with
 // the destination it will carry. It used to happen further down, in
-// store.WriteOutbox, which left every copy signed as the unaddressed broadcast
+// the store's outbox writer, which left every copy signed as the unaddressed broadcast
 // it was made from and refused by every board that checked it. The fan-out
 // belongs with the signing for that reason: separate them again and the
 // signature stops covering what is sent.
@@ -370,6 +370,27 @@ func (w *World) StampOutbox() {
 		w.Outbox[i].BoardSig = nil
 		_ = w.SignAsBoard(&w.Outbox[i])
 	}
+}
+
+// SealOutbox moves every packet this board may send now from the Outbox to
+// Outgoing, where nothing adds to it again. Call it after StampOutbox and save
+// the world before writing the files (store.SendOutbox). A packet a frozen
+// board is holding stays in the Outbox, unnumbered, for the thaw.
+//
+// Without it a packet was written before the world that numbered it was
+// saved. A run that stopped between the two gave the same number to the next
+// packet for that board, with whatever had been queued since, and the far
+// board deleted it as already seen (#311).
+func (w *World) SealOutbox() {
+	var waiting []Packet
+	for _, p := range w.Outbox {
+		if w.Frozen && !FrozenSendable(p) {
+			waiting = append(waiting, p)
+			continue
+		}
+		w.Outgoing = append(w.Outgoing, p)
+	}
+	w.Outbox = waiting
 }
 
 // Per-board packet origin (#118).

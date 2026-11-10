@@ -72,7 +72,7 @@ func alphaWrites(t *testing.T, roster []game.LeagueNode, to ...string) ([]game.P
 	for i, board := range to {
 		w.SendIPMessage(from, []string{board}, false, fmt.Sprintf("Message %d.", i))
 		w.StampOutbox()
-		if _, err := store.WriteOutbox(w, staging, false); err != nil {
+		if _, err := store.SendOutbox(w, staging, false, func() error { return nil }); err != nil {
 			t.Fatal(err)
 		}
 	}

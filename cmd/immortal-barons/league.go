@@ -59,17 +59,14 @@ func runCoordinatorOrder(cfg game.Config, name string, order func(*game.World) e
 		lock.Release()
 		return err
 	}
-	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
-	if err != nil {
-		lock.Release()
-		return err
-	}
-	reportPlanetary(cfg, run)
-	err = store.Save(w, cfg)
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false, func() error {
+		return store.Save(w, cfg)
+	})
 	lock.Release()
 	if err != nil {
 		return err
 	}
+	reportPlanetary(cfg, run)
 	if cfg.InterBBSEnabled() {
 		run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
 	}
@@ -359,11 +356,9 @@ func runLeagueConfig(cfg game.Config) error {
 		return fmt.Errorf("this board (%q) is not the League Coordinator (node #1 in %s)", cfg.BoardID, store.NodeListFile)
 	}
 	w.ExportLeagueConfig()
-	// Sign and number it. Every other outbound path reaches this through
-	// RunPlanetary; this one writes the outbox directly, and an unsigned ruleset
-	// is refused by every board that receives it.
-	w.StampOutbox()
-	if _, err := store.WriteOutbox(w, cfg.Outbound(), false); err != nil {
+	if _, err := store.SendOutbox(w, cfg.Outbound(), false, func() error {
+		return store.Save(w, cfg)
+	}); err != nil {
 		return err
 	}
 	// A routed league writes one copy per member, each to its own link, so
@@ -374,7 +369,7 @@ func runLeagueConfig(cfg game.Config) error {
 	}
 	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
 		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, where)
-	return store.Save(w, cfg)
+	return nil
 }
 
 // leagueSetup is the per-board half of a league reset (-ibbs-reset): the

@@ -22,7 +22,7 @@ func TestHeldPacketsSaysWhy(t *testing.T) {
 	w.InFlight = []game.InFlightStrike{{ID: 1, Kind: "special", TargetBoard: "Far BBS", LaunchedDay: 9}}
 
 	writePacket(t, inbound, "far-1", game.Packet{FromBoard: "Far BBS", Seq: 1, Protocol: game.Protocol + 1})
-	if _, err := RunPlanetary(w, inbound, outbound, false); err != nil {
+	if _, err := RunPlanetary(w, inbound, outbound, false, noSave); err != nil {
 		t.Fatalf("RunPlanetary: %v", err)
 	}
 	if err := os.WriteFile(filepath.Join(heldPath(cfg.DataDir), "junk"+PacketExt), []byte("not json"), 0o644); err != nil {

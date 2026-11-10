@@ -51,7 +51,7 @@ func TestAHubForwardsAPacketItIsNotAddressedTo(t *testing.T) {
 		Scores:    []game.RemoteScore{{Empire: "Apples", Land: 500}},
 	})
 
-	result, err := ReadInbound(hub, inbound, false)
+	result, err := readInboundAndRemove(hub, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -63,8 +63,8 @@ func TestAHubForwardsAPacketItIsNotAddressedTo(t *testing.T) {
 	}
 
 	hub.StampOutbox()
-	if _, err := WriteOutbox(hub, onward, false); err != nil {
-		t.Fatalf("WriteOutbox: %v", err)
+	if _, err := SendOutbox(hub, onward, false, noSave); err != nil {
+		t.Fatalf("SendOutbox: %v", err)
 	}
 	files := packetFiles(t, onward)
 	if len(files) != 1 {
@@ -102,7 +102,7 @@ func TestAMeshBoardDoesNotForwardAPacketForSomeoneElse(t *testing.T) {
 	}
 	writePacket(t, inbound, "alpha-to-charlie", game.Packet{FromBoard: "Alpha BBS", ToBoard: "Charlie BBS"})
 
-	if _, err := ReadInbound(w, inbound, false); err != nil {
+	if _, err := readInboundAndRemove(w, inbound, false); err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
 	if len(w.Transit) != 0 {
@@ -131,8 +131,8 @@ func TestAMeshBoardWritesOneBroadcast(t *testing.T) {
 	w.Outbox = []game.Packet{{FromBoard: "Alpha BBS", Date: "2026-08-09",
 		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}}}}
 	w.StampOutbox()
-	if _, err := WriteOutbox(w, out, false); err != nil {
-		t.Fatalf("WriteOutbox: %v", err)
+	if _, err := SendOutbox(w, out, false, noSave); err != nil {
+		t.Fatalf("SendOutbox: %v", err)
 	}
 
 	files := packetFiles(t, out)
@@ -163,8 +163,8 @@ func TestARoutedBoardAddressesABroadcastPerPlanet(t *testing.T) {
 	w.Outbox = []game.Packet{{FromBoard: "Alpha BBS", Date: "2026-08-09",
 		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}}}}
 	w.StampOutbox()
-	if _, err := WriteOutbox(w, out, false); err != nil {
-		t.Fatalf("WriteOutbox: %v", err)
+	if _, err := SendOutbox(w, out, false, noSave); err != nil {
+		t.Fatalf("SendOutbox: %v", err)
 	}
 
 	files := packetFiles(t, out)
@@ -201,8 +201,8 @@ func TestPacketsGoToTheLinkForTheirNextHop(t *testing.T) {
 		{FromBoard: "Bravo BBS", ToBoard: "Delta BBS", Date: "2026-08-09"},
 	}
 	hub.StampOutbox()
-	if _, err := WriteOutbox(hub, base, false); err != nil {
-		t.Fatalf("WriteOutbox: %v", err)
+	if _, err := SendOutbox(hub, base, false, noSave); err != nil {
+		t.Fatalf("SendOutbox: %v", err)
 	}
 
 	if got := len(packetFiles(t, toCharlie)); got != 1 {
@@ -230,7 +230,7 @@ func TestAPacketFromAnotherLeagueIsLeftAlone(t *testing.T) {
 		Scores: []game.RemoteScore{{Empire: "Oranges", Land: 500}},
 	})
 
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -261,7 +261,7 @@ func TestAnAlreadySeenPacketIsSkipped(t *testing.T) {
 	writePacket(t, inbound, "first", p)
 
 	// Apply it once — this raises HighSeq and removes the file.
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound (first): %v", err)
 	}
@@ -271,7 +271,7 @@ func TestAnAlreadySeenPacketIsSkipped(t *testing.T) {
 
 	// Write the same packet again. SeenPacket should recognize it.
 	writePacket(t, inbound, "second", p)
-	result, err = ReadInbound(w, inbound, false)
+	result, err = readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound (second): %v", err)
 	}
@@ -297,8 +297,8 @@ func TestPacketFilenameCarriesTheLeagueNumber(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 	w.Outbox = []game.Packet{{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Date: "2026-08-09"}}
 	w.StampOutbox()
-	if _, err := WriteOutbox(w, out, false); err != nil {
-		t.Fatalf("WriteOutbox: %v", err)
+	if _, err := SendOutbox(w, out, false, noSave); err != nil {
+		t.Fatalf("SendOutbox: %v", err)
 	}
 	files := packetFiles(t, out)
 	if len(files) != 1 || !strings.HasPrefix(files[0], "L042-") {
@@ -348,8 +348,8 @@ func TestLeagueZeroBoardsSharingOutboundDoNotOverwrite(t *testing.T) {
 		w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: board}, {Number: 2, Name: "Target"}}
 		w.Outbox = []game.Packet{{FromBoard: board, ToBoard: "Target", Date: "2026-08-16"}}
 		w.StampOutbox()
-		if _, err := WriteOutbox(w, out, false); err != nil {
-			t.Fatalf("WriteOutbox %s: %v", board, err)
+		if _, err := SendOutbox(w, out, false, noSave); err != nil {
+			t.Fatalf("SendOutbox %s: %v", board, err)
 		}
 	}
 	if files := packetFiles(t, out); len(files) != 2 {
@@ -442,7 +442,7 @@ func packetFiles(t *testing.T, dir string) []string {
 }
 
 // TestBroadcastFilesVerifyOnArrivalInARoutedLeague walks the whole path a
-// broadcast takes — enqueue, StampOutbox, WriteOutbox, read the file back, check
+// broadcast takes — enqueue, SendOutbox, read the file back, check
 // the origin — because the fault it guards against lived in the seam between the
 // two layers. Signing happened in game, the fan-out in store, and each was
 // correct on its own: the copies went to the right boards and every packet was
@@ -467,9 +467,9 @@ func TestBroadcastFilesVerifyOnArrivalInARoutedLeague(t *testing.T) {
 	hub.StampOutbox()
 
 	outbound := t.TempDir()
-	sent, err := WriteOutbox(hub, outbound, false)
+	sent, err := SendOutbox(hub, outbound, false, noSave)
 	if err != nil {
-		t.Fatalf("WriteOutbox: %v", err)
+		t.Fatalf("SendOutbox: %v", err)
 	}
 	if sent != 2 {
 		t.Fatalf("wrote %d files for a broadcast, want one per member board", sent)

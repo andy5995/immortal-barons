@@ -7339,6 +7339,30 @@ checks.
   sysop is told. A ledger written before the window existed treats every number
   up to its highest as applied, since it cannot tell them apart.
 
+  **A planetary run saves before it deletes or sends anything (#311).** It
+  applies the inbound batch, numbers and signs its own packets, and saves the
+  world. Only then does it delete the inbound files, write the outbound files,
+  and save again to record them as sent. Until 0.2.9 each inbound file went as
+  its packet was applied and the outbound files were written before the save, so
+  a run that stopped in between lost the packets it had applied, with neither
+  board told, and gave the numbers it had used to its next packets.
+
+  A numbered packet waits in `Outgoing` in `world.json`, where nothing adds to
+  it, so a run that stops before the second save writes the same packets under
+  the same numbers next time and the far board drops the second copy. An
+  inbound file that outlives the save is deleted as already seen on the next
+  run; one in transit for another board is passed on again, and that board
+  drops the copy. A file that cannot be deleted is reported in `planetary.log`
+  and does not stop the run, and neither does a failure to write the outbound
+  files once the batch is saved: it is reported as a fault and the packets go
+  out on the next run.
+
+  The world and the ledger are saved as a pair. Both are written in full before
+  either is renamed into place, the ledger first, and both carry the same save
+  count. A ledger one count ahead of its world belongs to a save that stopped
+  between the two renames; on load its record of applied packets is put back to
+  what the world's save left, while its count of packets sent is kept.
+
 ## Inter-BBS packet routing (#106)
 
 BRE routes a league as a tree rather than a mesh, and the Coordinator owns the

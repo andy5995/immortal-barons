@@ -28,7 +28,9 @@ Moving files between boards is external to the game, except over FTN, where the
 game's own transport (`internal/ftn`) moves them when `bbs.cfg` configures it.
 `RunPlanetary` (`immortal-barons -planetary`, also folded into `-maint` when
 IBBS is on) reads and applies inbound packets, launches due group attacks,
-exports this board's scores, and writes the outbox. The scores snapshot (with
+exports this board's scores, and sends the outbox: the packets are numbered,
+moved to `World.Outgoing` and saved with the world before their files are
+written (`SendOutbox`), and inbound files are deleted only after that save. The scores snapshot (with
 the market and battle log it carries) goes out when it or the roster has
 changed, and once a day by the clock even when neither has, since each one
 replaces the last and a resend is what repairs a lost one. The travel-time
@@ -826,7 +828,7 @@ to board, days — in IB's own shape.
   addressed, how an arriving one is applied. The mechanics that ride in it sit
   beside it as `ibbs_attack.go`, `ibbs_terror.go`, `ibbs_league.go`,
   `ibbs_spy.go`, `ibbs_annihilator.go` and the rest of the `ibbs_*.go` family.
-- `internal/store/ibbs.go` — `WriteOutbox`, `ReadInbound`, `RunPlanetary`.
+- `internal/store/ibbs.go` — `SendOutbox`, `ReadInbound`, `RunPlanetary`.
 - `internal/game/ibbs_route.go` — `NextHop`, `ForwardPacket`, the HOST tree.
 - `internal/store/league.go` — `ParseNodeList`, `ParseBoardConfig`.
 - `scripts/ibbs-smoke.sh` — end-to-end 3-board exchange with the real binary.

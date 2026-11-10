@@ -468,7 +468,7 @@ See the `ftn` skill's Myths table.
 only briefly to claim or deliver packets, so it never blocks a node mid-turn.
 `-full` does not even wait for the transport lock: when another run holds it,
 that half is skipped and said so on stderr.
-It reads only complete packets, because `WriteOutbox` publishes each one under a
+It reads only complete packets, because the outbox writer (`store.SendOutbox`) publishes each one under a
 temporary name and renames it into place.
 
 The `.msg` numbering restarts from 1 each run. SBBSecho deletes the message once

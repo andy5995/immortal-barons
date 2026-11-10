@@ -28,7 +28,7 @@ func TestReadInboundDeletesControlInBoardName(t *testing.T) {
 	if err := os.WriteFile(path, data, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatal(err)
 	}

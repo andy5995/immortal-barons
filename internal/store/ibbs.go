@@ -68,8 +68,14 @@ func IsBundleFile(path string) bool {
 // reads and applies inbound packets, launches any group attacks whose day has
 // come, exports this board's scores to the league, and writes the outbox. Run
 // it on a schedule (or on the door's -maint pass) — can run several times a day.
-func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (PlanetaryRun, error) {
-	var run PlanetaryRun
+//
+// save writes the world. It is called once the batch is applied and the
+// outbox numbered, and again after the packet files are written (SendOutbox).
+// Inbound files are removed only after the first call succeeds: a run that
+// stops earlier used to leave their packets deleted and unapplied, with
+// neither board told (#311). One left behind by a run that stopped after the
+// save is deleted as already seen on the next.
+func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool, save func() error) (run PlanetaryRun, err error) {
 	before := w.LeagueNodes
 	// Before anything else: a packet held for a protocol this build could not
 	// read may be readable now, and it has been waiting since it arrived.
@@ -83,9 +89,15 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	}
 	run.Released = released
 	inResult, err := ReadInbound(w, inboundDir, verbose)
-	// Before the error is raised: what a failing batch did up to that point
-	// happened, and a missing line would read as a packet that never arrived.
-	AppendPacketLog(w.Config.DataDir, inResult.Log, time.Now())
+	// A batch the run could not save is logged with that said, or its packets
+	// would read as applied when the next run applies them again.
+	saved := false
+	defer func() {
+		if !saved && len(inResult.Log) > 0 {
+			AppendPacketLog(w.Config.DataDir, append(inResult.Log, PacketLogLine("in",
+				"the run stopped before the world was saved (%v): the packets it applied stay in inbound, and the next run applies them", err)), time.Now())
+		}
+	}()
 	if err != nil {
 		return run, err
 	}
@@ -157,7 +169,6 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 		w.NoteUnansweredProbes(time.Now())
 		w.ExportAnnihilatorStatus()
 	}
-	w.StampOutbox()
 	run.Forwarded = len(w.Transit)
 	// Drained, not copied: they belong to this run, and leaving them on the
 	// world would repeat them in the next one.
@@ -191,8 +202,29 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 		logNotices = append(append([]string(nil), logNotices...), RecoveryPausedNotice(run.RecoveryPaused))
 	}
 	AppendPlanetaryLog(w.Config.DataDir, logNotices, time.Now())
-	sent, err := WriteOutbox(w, outboundDir, verbose)
-	run.Sent = sent
+	run.Sent, err = SendOutbox(w, outboundDir, verbose, func() error {
+		if err := save(); err != nil {
+			return err
+		}
+		if !saved {
+			// Logged before the files go, so a run killed here still leaves a
+			// line for every packet it applied.
+			saved = true
+			AppendPacketLog(w.Config.DataDir, inResult.Log, time.Now())
+			AppendPlanetaryLog(w.Config.DataDir, inResult.removeTaken(), time.Now())
+		}
+		return nil
+	})
+	if err != nil && saved {
+		// The batch is applied and saved, so this is a fault to report and not
+		// a failed run: the caller still has its report, its handoff and its
+		// alarm to raise. The packets wait in World.Outgoing.
+		notice := fmt.Sprintf("This run's outbound packets could not be written, or could not be recorded as sent, and are written again on the next run: %v", err)
+		run.Notices = append(run.Notices, notice)
+		run.NewFaults = append(run.NewFaults, notice)
+		AppendPlanetaryLog(w.Config.DataDir, []string{notice}, time.Now())
+		err = nil
+	}
 	return run, err
 }
 
@@ -239,8 +271,9 @@ type PlanetaryRun struct {
 	Notices []string
 }
 
-// WriteOutbox atomically publishes each queued packet as a JSON file and clears
-// the world's Outbox and Transit queues. How the files then reach other boards
+// writeOutbox atomically publishes each packet in World.Outgoing and Transit as
+// a JSON file and clears both. SendOutbox is the way in: it numbers, seals and
+// saves the packets first. How the files then reach other boards
 // (a sync tool, FidoNet, scp, a shared mount) is the operator's concern — this
 // is the Option A transport from the design spec.
 //
@@ -248,21 +281,14 @@ type PlanetaryRun struct {
 // with HOST routing in the roster, everything a leaf board sends lands in the
 // one directory its uplink collects from (#106). dir is that directory; a board
 // that hosts others configures a separate one per neighbor.
-func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
+func writeOutbox(w *game.World, dir string, verbose bool) (int, error) {
 	type outgoing struct {
 		p     game.Packet
 		data  []byte
 		relay bool // another board's packet, passed on
 	}
 	var packets []outgoing
-	// A frozen board writes only the freeze orders and its quiet report; the
-	// rest of its Outbox waits for the thaw (game/ibbs_freeze.go).
-	var waiting []game.Packet
-	for _, p := range w.Outbox {
-		if w.Frozen && !game.FrozenSendable(p) {
-			waiting = append(waiting, p)
-			continue
-		}
+	for _, p := range w.Outgoing {
 		// Backstop the protocol stamp. StampOutbox sets it on everything this
 		// board authored, and every production path calls it — but this is the
 		// last point before bytes reach disk, and a packet that goes out stating
@@ -335,8 +361,25 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 			fmt.Printf("  Wrote packet to %s (%s, dated %s)\n", board, p.PacketType(), p.Date)
 		}
 	}
-	w.Outbox, w.Transit = waiting, nil
+	w.Outgoing, w.Transit = nil, nil
 	return len(packets), nil
+}
+
+// SendOutbox numbers and signs the queued packets, saves the world, writes the
+// packet files, and saves again once they are out. The first save is what
+// makes a packet's number and contents final before any copy of it leaves; see
+// World.SealOutbox. Every path that sends goes through here.
+func SendOutbox(w *game.World, dir string, verbose bool, save func() error) (int, error) {
+	w.StampOutbox()
+	w.SealOutbox()
+	if err := save(); err != nil {
+		return 0, err
+	}
+	sent, err := writeOutbox(w, dir, verbose)
+	if err != nil || sent == 0 {
+		return sent, err
+	}
+	return sent, save()
 }
 
 // packetFilename gives private game directories a canonical, stable name.
@@ -474,6 +517,9 @@ type InboundResult struct {
 	// Log is a line per packet this run took out of inbound or set aside, for
 	// the packet log (PacketLogFile).
 	Log []string
+	// taken is the inbound files this run is finished with. They are removed
+	// only once the world that applied them is saved (removeTaken).
+	taken []string
 	// rulesHeld is the newest ruleset-held packet from each board this batch,
 	// reported once the batch is done (reportRulesHolds).
 	rulesHeld map[string]game.Packet
@@ -674,7 +720,7 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			if verbose {
 				fmt.Printf("  Deleted packet from %s: a board name in it holds a control character\n", logSafe(p.FromBoard))
 			}
-			result.settle(p, "deleted: a board name in it holds a control character", os.Remove(path))
+			result.discard(p, path, "deleted: a board name in it holds a control character")
 			continue
 		}
 		key := originKey(p)
@@ -923,7 +969,8 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 			fmt.Printf("  Forwarded packet from %s to %s (%s, dated %s)\n",
 				p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
 		}
-		return result.settle(p, fate, os.Remove(path))
+		result.discard(p, path, fate)
+		return nil
 	}
 	// Held, not applied: this build cannot read the format. See HeldDir.
 	// Checked only for a packet addressed HERE — a hub passes on bytes it
@@ -939,16 +986,15 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 		if verbose {
 			fmt.Printf("  Deleted packet from %s: it has no sequence number or board name\n", p.FromBoard)
 		}
-		return result.settle(p, "deleted: no sequence number or board name", os.Remove(path))
+		result.discard(p, path, "deleted: no sequence number or board name")
+		return nil
 	}
 	if w.IsPacketSeen(p) {
 		result.AlreadySeen++
 		if verbose {
 			fmt.Printf("  Skipped packet from %s (already seen)\n", p.FromBoard)
 		}
-		// A failed clean-up is logged and not raised: SeenPacket already
-		// recorded the packet, so the next run deletes it again.
-		result.settle(p, "deleted: already seen", os.Remove(path))
+		result.discard(p, path, "deleted: already seen")
 		return nil
 	}
 	// Asked BEFORE ApplyPacket, which posts the refusal to the planet's
@@ -1018,7 +1064,8 @@ func applyStagedPacket(w *game.World, result *InboundResult, path string, p game
 	if verbose {
 		fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
 	}
-	return result.settle(p, fate, os.Remove(path))
+	result.discard(p, path, fate)
+	return nil
 }
 
 // newNotices returns the notices in now that were not in before. Order is

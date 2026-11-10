@@ -72,27 +72,29 @@ func runMaint(cfg game.Config, today string, verbose bool) error {
 	default:
 		fmt.Println("Daily maintenance already ran today.")
 	}
+	save := func() error { return store.Save(w, cfg) }
 	var run store.PlanetaryRun
 	if cfg.InterBBSEnabled() {
-		run, err = store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
-		if err != nil {
-			lock.Release()
-			return err
+		// The planetary step saves the world itself, before it removes the
+		// inbound packets it applied.
+		run, err = store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose, save)
+		if err == nil {
+			reportPlanetary(cfg, run)
 		}
-		reportPlanetary(cfg, run)
-	} else if _, err := store.SyncBulletins(w); err != nil {
+	} else if _, err = store.SyncBulletins(w); err == nil {
 		// A league board reconciles its bulletins inside the planetary step
 		// above; a stand-alone one has no such step, so this is where a bulletin
 		// the sysop added reaches the news.
-		lock.Release()
-		return err
+		err = save()
 	}
-	// Here as well as in the planetary step: a stand-alone board never runs that
-	// one, and its scoreboard and news are as worth showing on a bulletin menu
-	// as a league board's. It writes no World Report -- that one is the LEAGUE's
-	// wars, and a board playing alone has no world to report on (#233).
-	writeBulletins(cfg, w)
-	err = store.Save(w, cfg)
+	if err == nil {
+		// Here as well as in the planetary step: a stand-alone board never runs
+		// that one, and its scoreboard and news are as worth showing on a
+		// bulletin menu as a league board's. It writes no World Report -- that
+		// one is the LEAGUE's wars, and a board playing alone has no world to
+		// report on (#233).
+		writeBulletins(cfg, w)
+	}
 	lock.Release()
 	if err != nil {
 		return err
@@ -136,18 +138,17 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 		lock.Release()
 		return err
 	}
-	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
-	if err != nil {
-		lock.Release()
-		return err
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose, func() error {
+		return store.Save(w, cfg)
+	})
+	if err == nil {
+		writeBulletins(cfg, w)
 	}
-	reportPlanetary(cfg, run)
-	writeBulletins(cfg, w)
-	err = store.Save(w, cfg)
 	lock.Release()
 	if err != nil {
 		return err
 	}
+	reportPlanetary(cfg, run)
 	if cfg.InterBBSEnabled() {
 		run.NewFaults = append(run.NewFaults, handoff(cfg, true, os.Stdout)...)
 	}
@@ -396,16 +397,13 @@ func fullInbound(cfg game.Config, verbose bool) error {
 		lock.Release()
 		return err
 	}
-	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
-	if err != nil {
-		lock.Release()
-		return err
-	}
-	if err := store.Save(w, cfg); err != nil {
-		lock.Release()
-		return err
-	}
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose, func() error {
+		return store.Save(w, cfg)
+	})
 	lock.Release()
+	if err != nil {
+		return err
+	}
 	reportPlanetary(cfg, run)
 	// The hook, but not the exit code: this run has a caller waiting behind it,
 	// and a door that exits non-zero on a league fault is a door the BBS reports
@@ -427,13 +425,9 @@ func fullOutbound(cfg game.Config, verbose bool) error {
 		lock.Release()
 		return err
 	}
-	w.StampOutbox()
-	sent, err := store.WriteOutbox(w, cfg.Outbound(), verbose)
-	if err != nil {
-		lock.Release()
-		return err
-	}
-	err = store.Save(w, cfg)
+	sent, err := store.SendOutbox(w, cfg.Outbound(), verbose, func() error {
+		return store.Save(w, cfg)
+	})
 	lock.Release()
 	if err != nil {
 		return err

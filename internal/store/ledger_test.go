@@ -89,7 +89,7 @@ func TestALeagueRoundTripAppliesEachPacketOnce(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	run, err := RunPlanetary(b.w, b.inbound, b.outbound, false)
+	run, err := RunPlanetary(b.w, b.inbound, b.outbound, false, noSave)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -191,7 +191,7 @@ func TestAnUnnumberedPacketIsDeletedUnapplied(t *testing.T) {
 		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS",
 		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}},
 	})
-	result, err := ReadInbound(w, inbound, false)
+	result, err := readInboundAndRemove(w, inbound, false)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -155,6 +155,9 @@ for the same number on the receiving board:
 
 - **The number is there**, with what became of it: applied, held, or deleted
   and why.
+- **The number is there, followed by "the run stopped before the world was
+  saved".** The packets that run applied stay in inbound and the next run
+  applies them.
 - **The number is missing.** The packet never reached that board's inbound
   directory, so it was lost between the two games: in a mailer, a tosser, or a
   hub. If the league routes through a hub that runs the game, its log shows a

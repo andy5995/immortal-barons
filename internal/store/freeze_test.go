@@ -24,7 +24,7 @@ func TestAFrozenRunWritesOnlyTheFreezesOwnPackets(t *testing.T) {
 		{FromBoard: "boardA", ToBoard: "boardB", Notice: "a reply that must wait"},
 		{FromBoard: "boardA", Freeze: &game.LeagueFreeze{Serial: 1, Frozen: true}},
 	}
-	if _, err := RunPlanetary(w, in, out, false); err != nil {
+	if _, err := RunPlanetary(w, in, out, false, noSave); err != nil {
 		t.Fatalf("RunPlanetary: %v", err)
 	}
 	entries, _ := os.ReadDir(out)
