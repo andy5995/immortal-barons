@@ -980,19 +980,29 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   stolen has nothing to take back. The figures come from **54 faction records
   across six live resets** (`cap/pirate-seed-20260912*.cap`), read out of
   `game.dat`, where the table sits in the 541 bytes past the 25 empire slots —
-  base 25, stride 57, eight int32 fields, the sixth always zero (the slot a
-  faction never holds). In memory it is `DS:0x7940`, same stride.
+  base 25, stride 57, a 25-byte name then eight int32 fields. In memory the
+  fields start at `DS:0x7940`, same stride.
 
-  | field | generator | read at |
-  | --- | --- | --- |
-  | troopers | `Random(7000)` | `mov ax,0x1b58` |
-  | jets | `Random(4000)` | `mov ax,0x0fa0` |
-  | turrets | `Random(7000)` | `mov ax,0x1b58` |
-  | tanks | `Random(9000)` | `mov ax,0x2328` |
-  | regions | `Random(75)` | `mov ax,0x004b` |
-  | (unused) | always 0 | `xor ax,ax` into +0x2d |
-  | agents | **50 + `Random(1000)`** | `mov ax,0x3e8` then `add ax,0x32` |
-  | gold | **500,000 + `Random(300)` × `Random(300)`** | two draws, `mul dx`, `add ax,0xa120` / `adc dx,0x7` |
+  | slot | holds | generator | read at |
+  | --- | --- | --- | --- |
+  | +0x00 | troopers | `Random(7000)` | `mov ax,0x1b58` |
+  | +0x04 | tanks | `Random(4000)` | `mov ax,0x0fa0` |
+  | +0x08 | jets | `Random(7000)` | `mov ax,0x1b58` |
+  | +0x0c | turrets | `Random(9000)` | `mov ax,0x2328` |
+  | +0x10 | regions | `Random(75)` | `mov ax,0x004b` |
+  | +0x14 | agents | **always 0** | `xor ax,ax` |
+  | +0x18 | (nothing) | 50 + `Random(1000)` | `mov ax,0x3e8` then `add ax,0x32` |
+  | +0x1c | gold | **500,000 + `Random(300)` × `Random(300)`** | two draws, `mul dx`, `add ax,0xa120` / `adc dx,0x7` |
+
+  **Which unit is in which slot comes from the code that reads the record**,
+  not from the seeder: the steal ladder in `resolve_pirate_attack` pairs each
+  slot with its spoil name (troopers +0x00, jets +0x08, turrets +0x0c, tanks
+  +0x04, gold +0x1c, agents +0x14, regions +0x10), and the reclaim in
+  `launch_pirate_raid` divides the same slots by 3 or 4 to match. Nothing in
+  either binary references +0x18, so the 50 + `Random(1000)` roll is dead and a
+  new faction holds no agents. Until 2026-11-10 IB labeled the slots in the
+  spoil-name table's order, which gave jets, turrets and tanks the wrong rolls
+  and seeded agents from +0x18.
 
   The loop runs nine times (`cmp word [bp-0x2],0x9`), one per faction.
 
@@ -1012,11 +1022,12 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   `DS:0x7960` — and a `BPM` on that region caught the seeder mid-write
   (`1398:797E - 00 -> 03`). The recipe is in the `bre-gather` skill.
 
-  Fitting 54 live samples had got five of the seven right and both of the others
-  wrong in a way the samples could not show: agents looked like a flat
-  `Random(1050)` because its floor of 50 is invisible in a range, and gold's
-  product-of-two-draws looked like a wide flat roll fitted to the mean. A
-  distribution fit can match an average and still be the wrong mechanism.
+  Fitting 54 live samples got gold's shape wrong in a way the samples could not
+  show: its product of two draws looked like a wide flat roll fitted to the
+  mean. The fit also read the 50 + `Random(1000)` slot as agents, because the
+  fields were labeled in the spoil-name table's order; the code that reads the
+  record says otherwise (above). A distribution fit can match an average and
+  still be the wrong mechanism.
 
   **How often**: the roll is `Random(20) <= min(6, regions/1200 + 2)`
   (`0x35db5`), so exposure RISES WITH THE REALM — 3-in-20 for a small realm up
@@ -1026,17 +1037,10 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   5% "second raid by a different faction" was a guess; neither shape is in the
   binary.
 
-  **Open: the faction's own defense.** IB computes it as
-  `tanks + turrets/2 + troopers/3` (`PirateFaction.Defense`). The original's
-  raid resolver builds its faction strength at `launch_pirate_raid +0x0a45` as
-  `[rec+0x0c]/2 + [rec+0x00]/3 + [rec+0x04]` — the same SHAPE (one term whole,
-  one halved, one in thirds) but over faction-record offsets whose mapping to
-  unit types has not been pinned. If the record follows the order of the
-  captured-spoil name table (troopers, jets, turrets, tanks, gold, agents) then
-  the original weighs *jets* whole and *tanks* halved and ignores turrets, which
-  is not what IB does. Not changed on that reading: the field order is a
-  hypothesis, and the check that would settle it is the six add-sites in
-  `resolve_pirate_attack` that credit a faction with what it stole.
+  **The faction's defense** (BINARY-VERIFIED, settled 2026-11-10) is
+  `turrets/2 + troopers/3 + tanks`, built at `launch_pirate_raid +0x0a45` from
+  slots +0x0c, +0x00 and +0x04, which the slot mapping in the starting-hoard
+  table names. IB's `PirateFaction.Defense` already matched.
 
   How much it takes is BINARY-VERIFIED too (`BRE.OVR` at `0x35f66`: a 32-bit
   divide by `0x21`, then a min against `0x5dc0 + Random(0x3e8)`):
@@ -1055,13 +1059,12 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   whatever was left in hand — but that is inference, not read from the binary.
   **A faction's army is nothing but stolen goods.** BRE keeps no strength stat for
   a faction: its defense is computed live from its loot as
-  **`tanks + turrets/2 + troopers/3`** (`BRE.OVR` `0x3671b`), and the only
-  writes to a faction's record anywhere in the overlay are the raid-steal path
-  and the raid-resolution path — nothing seeds one. A new game therefore opens
-  with nine empty factions. That is not a contradiction: **a raid on a player is
-  not a battle**, so an empty faction robs you exactly as well as a fat one and
-  arms itself from the proceeds. Faction strength is consulted only when *you*
-  attack *them*.
+  **`tanks + turrets/2 + troopers/3`** (`BRE.OVR` `0x3671b`). Apart from the
+  reset's seeder, the only writes to a faction's record are the raid-steal path
+  and the raid-resolution path. **A raid on a player is not a battle**, so a
+  faction whose stock has been beaten down robs you exactly as well as a fat one
+  and arms itself from the proceeds. Faction strength is consulted only when
+  *you* attack *them*.
 
   A player's raid commits troopers/jets/tanks at **`troopers/2 + jets +
   tanks*2`** and wins on strictly greater. **Both sides take casualties either

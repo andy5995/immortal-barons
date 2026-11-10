@@ -68,16 +68,21 @@ const (
 	// This mattered because IB seeded NOTHING, so a new league's factions held
 	// nothing to steal back and raiding paid zero until players had been robbed
 	// for days. The original's factions are worth attacking from the first turn.
-	PirateSeedTroopersRoll = 7_000 // mov ax,0x1b58
-	PirateSeedJetsRoll     = 4_000 // mov ax,0x0fa0
-	PirateSeedTurretsRoll  = 7_000 // mov ax,0x1b58
-	PirateSeedTanksRoll    = 9_000 // mov ax,0x2328
-	PirateSeedRegionsRoll  = 75    // mov ax,0x004b
-	// Agents alone carry a floor: `call Random(1000)` then `add ax,0x32`, so the
-	// band is 50..1049 rather than 0..999. Fitting 54 samples read that as a flat
-	// Random(1050) -- close on the mean, wrong at both ends.
-	PirateSeedAgentsRoll = 1_000
-	PirateSeedAgentsBase = 50
+	//
+	// Which unit sits in which slot is taken from the code that READS the record
+	// (the steal ladder's spoil names and the reclaim's /3 and /4 divisors):
+	// +0x00 troopers, +0x04 tanks, +0x08 jets, +0x0c turrets, +0x10 regions,
+	// +0x14 agents, +0x18 unused, +0x1c gold. The seeder writes them in that
+	// order. Until 2026-11-10 IB labeled the slots by the spoil-name list's order
+	// instead, which put jets, turrets and tanks on the wrong rolls and seeded
+	// agents from +0x18 -- the one slot nothing references.
+	PirateSeedTroopersRoll = 7_000 // +0x00: mov ax,0x1b58
+	PirateSeedTanksRoll    = 4_000 // +0x04: mov ax,0x0fa0
+	PirateSeedJetsRoll     = 7_000 // +0x08: mov ax,0x1b58
+	PirateSeedTurretsRoll  = 9_000 // +0x0c: mov ax,0x2328
+	PirateSeedRegionsRoll  = 75    // +0x10: mov ax,0x004b
+	// Agents (+0x14) are zeroed (`xor ax,ax`), so a new faction holds none. The
+	// 50 + Random(1000) roll lands in +0x18, which no code reads.
 	// Gold is 500,000 plus the PRODUCT of two Random(300) draws
 	// (`mul dx` at +0x1ed, then `add ax,0xa120` / `adc dx,0x7`). A product of two
 	// uniforms is right-skewed, which is why 54 samples would not fit a flat roll

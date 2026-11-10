@@ -1479,6 +1479,11 @@
       "confidence": "high",
       "evidence": ["binary_strings: pirate name and color setting topics", "call_graph: configuration reader"]
     },
+    "0x057308": {
+      "name": "initialize_new_game__seed_pirate_factions",
+      "confidence": "high",
+      "evidence": ["disassembly: loops 1..9 over the faction records at DS:0x7927 + 57*i, writing Random rolls to each int32 slot", "call_graph: only caller is initialize_new_game", "docs/mechanics-reference.md: starting-hoard table"]
+    },
     "0x057453": {
       "name": "read_registration_data",
       "confidence": "high",

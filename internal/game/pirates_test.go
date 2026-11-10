@@ -24,8 +24,10 @@ func TestSeedPiratesStartWithAHoard(t *testing.T) {
 		if p.Gold < PirateSeedGoldBase || p.Gold > hi {
 			t.Errorf("%s gold %d outside [%d,%d]", p.Name, p.Gold, PirateSeedGoldBase, hi)
 		}
-		if p.LootAgents < PirateSeedAgentsBase {
-			t.Errorf("%s agents %d is under the floor %d", p.Name, p.LootAgents, PirateSeedAgentsBase)
+		// The original zeroes the agents slot; its agents roll lands in a slot
+		// nothing reads.
+		if p.LootAgents != 0 {
+			t.Errorf("%s starts with %d agents, want 0", p.Name, p.LootAgents)
 		}
 		for _, f := range fields(&p) {
 			if f.got < 0 || f.got >= f.max {
@@ -53,12 +55,13 @@ type seedField struct {
 
 func fields(p *PirateFaction) []seedField {
 	return []seedField{
-		{"troopers", p.LootTroopers, PirateSeedTroopersRoll},
-		{"jets", p.LootJets, PirateSeedJetsRoll},
-		{"turrets", p.LootTurrets, PirateSeedTurretsRoll},
-		{"tanks", p.LootTanks, PirateSeedTanksRoll},
-		{"agents", p.LootAgents - PirateSeedAgentsBase, PirateSeedAgentsRoll},
-		{"land", p.Land, PirateSeedRegionsRoll},
+		// Golden bounds from the seeder (BRE.OVR 0x57320 onward), mapped to units
+		// by the slots the raid and reclaim code read.
+		{"troopers", p.LootTroopers, 7000},
+		{"tanks", p.LootTanks, 4000},
+		{"jets", p.LootJets, 7000},
+		{"turrets", p.LootTurrets, 9000},
+		{"land", p.Land, 75},
 	}
 }
 

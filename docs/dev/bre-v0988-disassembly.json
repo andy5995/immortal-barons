@@ -63,13 +63,13 @@
     "ovr_payload_end": "0x059123",
     "semantic_coverage": {
       "procedures": {
-        "identified": 426,
-        "unclassified": 566
+        "identified": 427,
+        "unclassified": 565
       },
       "blocks": {
-        "contextual": 7108,
-        "identified": 467,
-        "unclassified": 3841
+        "contextual": 7112,
+        "identified": 468,
+        "unclassified": 3836
       },
       "data_chunks": {
         "identified": 282,
@@ -68620,6 +68620,18 @@
           ]
         },
         {
+          "from": "initialize_new_game__seed_pirate_factions",
+          "from_id": "bre0988:ovr:procedure:057308",
+          "container": "ovr_0571fe",
+          "kind": "far_call",
+          "sites": [
+            "0x0110"
+          ],
+          "site_ids": [
+            "bre0988:ovr:site:05730e"
+          ]
+        },
+        {
           "from": "load_pirate_settings",
           "from_id": "bre0988:ovr:procedure:057215",
           "container": "ovr_0571fe",
@@ -68629,18 +68641,6 @@
           ],
           "site_ids": [
             "bre0988:ovr:site:05721b"
-          ]
-        },
-        {
-          "from": "ovr_0571fe_entry_010a",
-          "from_id": "bre0988:ovr:procedure:057308",
-          "container": "ovr_0571fe",
-          "kind": "far_call",
-          "sites": [
-            "0x0110"
-          ],
-          "site_ids": [
-            "bre0988:ovr:site:05730e"
           ]
         },
         {
@@ -125707,7 +125707,7 @@
           ]
         },
         {
-          "from": "ovr_0571fe_entry_010a",
+          "from": "initialize_new_game__seed_pirate_factions",
           "from_id": "bre0988:ovr:procedure:057308",
           "container": "ovr_0571fe",
           "kind": "far_call",
@@ -587759,6 +587759,18 @@
             },
             {
               "kind": "overlay_call",
+              "to": "initialize_new_game__seed_pirate_factions",
+              "target_address": "083e:0025",
+              "sites": [
+                "0x050f"
+              ],
+              "to_id": "bre0988:ovr:procedure:057308",
+              "site_ids": [
+                "bre0988:ovr:site:044e7d"
+              ]
+            },
+            {
+              "kind": "overlay_call",
               "to": "initialize_planet_data",
               "target_address": "04f9:0025",
               "sites": [
@@ -587791,18 +587803,6 @@
               "to_id": "bre0988:ovr:procedure:0475d1",
               "site_ids": [
                 "bre0988:ovr:site:044e4a"
-              ]
-            },
-            {
-              "kind": "overlay_call",
-              "to": "ovr_0571fe_entry_010a",
-              "target_address": "083e:0025",
-              "sites": [
-                "0x050f"
-              ],
-              "to_id": "bre0988:ovr:procedure:057308",
-              "site_ids": [
-                "bre0988:ovr:site:044e7d"
               ]
             },
             {
@@ -590422,7 +590422,7 @@
           },
           {
             "kind": "overlay_call",
-            "to": "ovr_0571fe:ovr_0571fe_entry_010a",
+            "to": "ovr_0571fe:initialize_new_game__seed_pirate_factions",
             "logical_target": "083e:0025",
             "sites": [
               "0x050f"
@@ -724297,7 +724297,7 @@
           ],
           "callers": [
             {
-              "from": "ovr_0571fe_entry_010a",
+              "from": "initialize_new_game__seed_pirate_factions",
               "from_id": "bre0988:ovr:procedure:057308",
               "container": "ovr_0571fe",
               "kind": "near_call",
@@ -724313,11 +724313,11 @@
         },
         {
           "id": "bre0988:ovr:procedure:057308",
-          "name": "ovr_0571fe_entry_010a",
+          "name": "initialize_new_game__seed_pirate_factions",
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "disassembly: loops 1..9 over the faction records at DS:0x7927 + 57*i, writing Random rolls to each int32 slot; call_graph: only caller is initialize_new_game; docs/mechanics-reference.md: starting-hoard table"
           },
           "entry_offset": "0x010a",
           "ovr_offset": "0x057308",
@@ -724325,7 +724325,9 @@
             "exe_offset": "0x00ad45",
             "logical_target": "083e:0025"
           },
-          "aliases": [],
+          "aliases": [
+            "ovr_0571fe_entry_010a"
+          ],
           "tags": [
             "exported",
             "overlay"
@@ -724702,12 +724704,14 @@
         },
         {
           "id": "bre0988:ovr:block:057308",
-          "name": "ovr_0571fe_entry_010a",
-          "aliases": [],
+          "name": "initialize_new_game__seed_pirate_factions",
+          "aliases": [
+            "ovr_0571fe_entry_010a"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "disassembly: loops 1..9 over the faction records at DS:0x7927 + 57*i, writing Random rolls to each int32 slot; call_graph: only caller is initialize_new_game; docs/mechanics-reference.md: starting-hoard table"
           },
           "unit_span": [
             "0x010a",
@@ -724736,12 +724740,14 @@
         },
         {
           "id": "bre0988:ovr:block:05731d",
-          "name": "ovr_0571fe_loc_011f",
-          "aliases": [],
+          "name": "initialize_new_game__seed_pirate_factions__loop_head_011f",
+          "aliases": [
+            "ovr_0571fe_loc_011f"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural loop head in identified procedure initialize_new_game__seed_pirate_factions"
           },
           "unit_span": [
             "0x011f",
@@ -724769,12 +724775,14 @@
         },
         {
           "id": "bre0988:ovr:block:057320",
-          "name": "ovr_0571fe_loc_0122",
-          "aliases": [],
+          "name": "initialize_new_game__seed_pirate_factions__join_0122",
+          "aliases": [
+            "ovr_0571fe_loc_0122"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural join in identified procedure initialize_new_game__seed_pirate_factions"
           },
           "unit_span": [
             "0x0122",
@@ -724802,12 +724810,14 @@
         },
         {
           "id": "bre0988:ovr:block:057406",
-          "name": "ovr_0571fe_loc_0208",
-          "aliases": [],
+          "name": "initialize_new_game__seed_pirate_factions__branch_0208",
+          "aliases": [
+            "ovr_0571fe_loc_0208"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure initialize_new_game__seed_pirate_factions"
           },
           "unit_span": [
             "0x0208",
@@ -724835,12 +724845,14 @@
         },
         {
           "id": "bre0988:ovr:block:057409",
-          "name": "ovr_0571fe_loc_020b",
-          "aliases": [],
+          "name": "initialize_new_game__seed_pirate_factions__return_020b",
+          "aliases": [
+            "ovr_0571fe_loc_020b"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural return in identified procedure initialize_new_game__seed_pirate_factions"
           },
           "unit_span": [
             "0x020b",
@@ -810128,6 +810140,18 @@
             ]
           },
           {
+            "from": "initialize_new_game__seed_pirate_factions",
+            "from_id": "bre0988:ovr:procedure:057308",
+            "container": "ovr_0571fe",
+            "kind": "far_call",
+            "sites": [
+              "0x0110"
+            ],
+            "site_ids": [
+              "bre0988:ovr:site:05730e"
+            ]
+          },
+          {
             "from": "load_pirate_settings",
             "from_id": "bre0988:ovr:procedure:057215",
             "container": "ovr_0571fe",
@@ -810137,18 +810161,6 @@
             ],
             "site_ids": [
               "bre0988:ovr:site:05721b"
-            ]
-          },
-          {
-            "from": "ovr_0571fe_entry_010a",
-            "from_id": "bre0988:ovr:procedure:057308",
-            "container": "ovr_0571fe",
-            "kind": "far_call",
-            "sites": [
-              "0x0110"
-            ],
-            "site_ids": [
-              "bre0988:ovr:site:05730e"
             ]
           },
           {
@@ -867215,7 +867227,7 @@
             ]
           },
           {
-            "from": "ovr_0571fe_entry_010a",
+            "from": "initialize_new_game__seed_pirate_factions",
             "from_id": "bre0988:ovr:procedure:057308",
             "container": "ovr_0571fe",
             "kind": "far_call",
@@ -1028511,7 +1028523,7 @@
     }
   },
   "validation": {
-    "unique_names": 12694,
+    "unique_names": 12695,
     "overlay_blocks": 8495,
     "overlay_data_chunks": 319,
     "resident_blocks": 2921,

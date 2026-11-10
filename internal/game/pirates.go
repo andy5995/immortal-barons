@@ -38,12 +38,12 @@ type PirateFaction struct {
 // Defense is what a faction fields when a player raids it, computed live from
 // the loot it is sitting on: BINARY-VERIFIED as tanks + turrets/2 + troopers/3
 // (BRE.OVR 0x3671b). A faction has no strength of its own — it fights with what it
-// stole, so draining its hoard is what actually weakens it, and a faction that
-// has robbed nobody cannot defend itself at all.
+// holds — its starting hoard plus what it stole — so draining it is what
+// actually weakens a faction.
 //
 // Note this does NOT gate raiding: a raid on a player is not a battle (the
-// steal path never reads these fields), so day-one empty factions rob players and
-// arm themselves from the proceeds.
+// steal path never reads these fields), so a faction beaten down to nothing
+// still robs players and arms itself from the proceeds.
 func (p *PirateFaction) Defense() int {
 	return p.LootTanks + p.LootTurrets/2 + p.LootTroopers/3
 }
@@ -66,10 +66,9 @@ func (w *World) seedPirates() {
 		w.Pirates[i] = PirateFaction{
 			Name:         name,
 			LootTroopers: w.setupRng.Intn(PirateSeedTroopersRoll),
+			LootTanks:    w.setupRng.Intn(PirateSeedTanksRoll),
 			LootJets:     w.setupRng.Intn(PirateSeedJetsRoll),
 			LootTurrets:  w.setupRng.Intn(PirateSeedTurretsRoll),
-			LootTanks:    w.setupRng.Intn(PirateSeedTanksRoll),
-			LootAgents:   PirateSeedAgentsBase + w.setupRng.Intn(PirateSeedAgentsRoll),
 			Land:         w.setupRng.Intn(PirateSeedRegionsRoll),
 			// Two draws multiplied, as the original does it: the product is what
 			// makes a rich faction rare rather than a flat one-in-N.
