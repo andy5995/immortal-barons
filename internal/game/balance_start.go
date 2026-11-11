@@ -16,12 +16,16 @@ const (
 	StartMountain     = 5
 	StartCoastal      = 3
 	StartTroopers     = 100
-	// StartRegions is the land a new realm opens with, and the only thing besides
-	// its troopers that its net worth is made of — which is what ScorePerTurn is
-	// derived from.
+	// StartRegions is BRE's starting land: the default, and the floor, for the
+	// Starting Regions setting (Config.StartingRegions), which scales this whole
+	// block. At the default, land and troopers are all a new realm's net worth
+	// is made of — which is what ScorePerTurn is derived from.
 	StartRegions = StartAgricultural + StartDesert + StartMountain + StartCoastal
 	StartFood    = 1000
 	StartGold    = 10000
 	StartPeople  = 2000
 	StartTax     = 15
 )
+
+// MaxStartingRegions bounds the Starting Regions setting. IB's own number.
+const MaxStartingRegions = 20_000

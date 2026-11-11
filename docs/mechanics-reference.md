@@ -4147,6 +4147,25 @@ destroyed. Those returns count toward the average that moves the floating
 investment rate (Banking and investments), so the rate falls while new realms
 join; Steady Investment Rate stops that. The original has no such setting.
 
+**Deliberate divergence: Starting Regions (IB's own league setting, default
+15, maximum 20,000).** A new realm is founded with this many regions, split in
+the original's 2/5/5/3 Agricultural/Desert/Mountain/Coastal proportions by
+largest remainder (10,000 gives 1,334/3,333/3,333/2,000). Its troopers, food and
+gold scale by the same factor (n / 15, truncated), so gold income keeps the
+original's ratio to region upkeep: about 3.75 to 1 at Medium maintenance.
+
+People do not scale with the land. Population capacity includes a fixed base of
+50 that is a large share of it at 15 regions and almost none at 10,000, so
+scaled people would open a large realm 39% over capacity, losing people from
+its first turn. Instead a realm opens at the share of capacity the original's
+start holds, 2,000 of 2,436, and grows: 787,392 people at 10,000 regions. The
+same base gives a large realm more food to spare than the original's start.
+
+The day-one land allowance does not scale: it is market supply, not part of
+the realm. A value outside the bounds is held to them when the config is loaded
+or a league ruleset is applied. At 15 the start is the original's exactly. The
+original has no such setting.
+
 ## Computer barons: retired in v0.2.0
 
 A baron is an empire with an empty `Owner`, played by `aiPlay` at daily

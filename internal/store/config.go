@@ -32,6 +32,7 @@ func LoadConfig(dataDir string) (game.Config, error) {
 		return cfg, err
 	}
 	cfg.DataDir = dataDir
+	cfg.StartingRegions = game.ClampStartingRegions(cfg.StartingRegions)
 	// The S3-Sabre setting was renumbered onto the original's encoding, and 0
 	// changed meaning, so a file written before that has to be read through its
 	// old key. Which key the document carries is the only way to tell the two

@@ -179,6 +179,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		"Land at game start", comma(c.InitialMarketLand))
 	pair("New land per realm/day", comma(c.LandPerDay),
 		"Region costs", tr(s, c.RegionCosts.String()))
+	row("Regions at start", comma(c.StartingRegions))
 	group("Money")
 	pair("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate),
 		"Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))

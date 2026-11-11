@@ -58,8 +58,8 @@ func (w *World) addAIEmpire(name string) *Empire {
 	}
 	e := newEmpire(name, "", w.Config, w.GameDay)
 	e.Slot = slot
-	e.Jets = 5
-	e.Turrets = 40
+	e.Jets = AIStartJets * w.Config.StartingRegions / StartRegions
+	e.Turrets = AIStartTurrets * w.Config.StartingRegions / StartRegions
 	// Spread personalities evenly across the AI pool (#36) so a game gets a mix
 	// of diplomats, balanced realms, and aggressors rather than all alike.
 	e.AIProfile = aiProfiles[len(w.AIEmpires())%len(aiProfiles)]
@@ -114,13 +114,18 @@ func (w *World) AddAIEmpires(n int) int {
 func newEmpire(name, owner string, cfg Config, day int) *Empire {
 	// BRE's starting realm (verified from a live BRE new-empire screen): 15
 	// regions — 2 Agricultural, 5 Desert, 5 Mountain, 3 Coastal — with 100
-	// troopers, 1000 food, full morale, and no other units.
-	regions := RegionMix{Agricultural: StartAgricultural, Desert: StartDesert, Mountain: StartMountain, Coastal: StartCoastal}
-	return &Empire{
+	// troopers, 1000 food, full morale, and no other units. Starting Regions
+	// scales the land, troopers, food and gold by one factor; people are set by
+	// startPeople instead, since population capacity does not scale with land.
+	n := cfg.StartingRegions
+	regions := startMix(n)
+	e := &Empire{
 		Name: name, Owner: owner, Alive: true,
-		Gold: StartGold, Food: StartFood, Land: regions.Total(), People: StartPeople,
+		Gold:     StartGold * int64(n) / StartRegions,
+		Food:     StartFood * n / StartRegions,
+		Land:     regions.Total(),
 		Regions:  regions,
-		Troopers: StartTroopers, Tax: StartTax, Support: 100, Morale: 100,
+		Troopers: StartTroopers * n / StartRegions, Tax: StartTax, Support: 100, Morale: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
 		CreatedDay: day,
 		// A new realm opens with one day's land allowance already granted, plus
@@ -135,6 +140,55 @@ func newEmpire(name, owner string, cfg Config, day int) *Empire {
 		ProdInitialized: true, // so a player's later all-zero setting isn't overwritten
 		Prefs:           DefaultPrefs(),
 	}
+	e.People = startPeople(e)
+	return e
+}
+
+// startPeople is a new realm's population: the same share of its capacity
+// that BRE's start holds (2000 of 2436, so it opens just under capacity and
+// grows). Scaling the people with the land would not keep that share, because
+// capacity carries a fixed base (PopCapBase) that does not scale; a 10,000-region
+// realm would open 39% over capacity and shed people from its first turn.
+// Held in int64: capacity times StartPeople passes 2^31 at the larger sizes.
+func startPeople(e *Empire) int {
+	base := Empire{Regions: startMix(StartRegions), Support: e.Support, Tax: e.Tax}
+	return int(int64(e.popCapacity()) * StartPeople / int64(base.popCapacity()))
+}
+
+// ClampStartingRegions holds a Starting Regions value to its bounds, reading 0
+// (a Config not built from DefaultConfig, or a league ruleset at the default)
+// as StartRegions. Applied where the value enters a config, so every reader
+// sees the figure the game plays by.
+func ClampStartingRegions(n int) int {
+	return min(max(n, StartRegions), MaxStartingRegions)
+}
+
+// startMix shares n regions out in BRE's 2/5/5/3 starting proportions by
+// largest remainder: each type takes its floor, then the regions left over go
+// one each to the largest fractions, earlier types winning ties. The total is
+// always exactly n, and n = StartRegions gives BRE's mix.
+func startMix(n int) RegionMix {
+	var m RegionMix
+	fields := [...]*int{&m.Agricultural, &m.Desert, &m.Mountain, &m.Coastal}
+	parts := [...]int{StartAgricultural, StartDesert, StartMountain, StartCoastal}
+	var rem [len(parts)]int
+	left := n
+	for i, p := range parts {
+		*fields[i] = n * p / StartRegions
+		rem[i] = n * p % StartRegions
+		left -= *fields[i]
+	}
+	for ; left > 0; left-- {
+		best := 0
+		for i := range rem {
+			if rem[i] > rem[best] {
+				best = i
+			}
+		}
+		*fields[best]++
+		rem[best] = -1
+	}
+	return m
 }
 
 // HumanCount is the number of human (caller-owned) empires in the world.

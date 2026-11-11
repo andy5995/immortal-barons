@@ -61,6 +61,7 @@ type LeagueConfig struct {
 	SabreHandling      SabreMode `json:"SlappenheimerHandling"`
 	SabreConstantDial  int       `json:",omitempty"`
 	FullBankStart      bool      `json:",omitempty"` // omitted while off, so such a league's packets are unchanged
+	StartingRegions    int       `json:",omitempty"` // 0 = StartRegions, so a league at the default sends what it sent before
 }
 
 // leagueRuleset extracts the league-wide rules from this board's config, for the
@@ -113,7 +114,17 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		AttackRewards:        c.AttackRewards,
 		SabreHandling:        c.SabreHandling,
 		SabreConstantDial:    c.SabreConstantDial,
+		StartingRegions:      leagueStartingRegions(ClampStartingRegions(c.StartingRegions)),
 	}
+}
+
+// leagueStartingRegions is the Starting Regions value a ruleset carries: 0 for
+// the default, so the default league's packets and fingerprint are unchanged.
+func leagueStartingRegions(n int) int {
+	if n == StartRegions {
+		return 0
+	}
+	return n
 }
 
 // applyLeagueRuleset copies broadcast league rules into this board's config,
@@ -165,6 +176,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.AttackRewards = lc.AttackRewards
 	c.SabreHandling = lc.SabreHandling
 	c.SabreConstantDial = lc.SabreConstantDial
+	c.StartingRegions = ClampStartingRegions(lc.StartingRegions)
 }
 
 // CoordinatorBoardID is the name of node #1 in the roster — the League

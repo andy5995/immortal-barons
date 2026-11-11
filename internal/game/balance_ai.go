@@ -4,6 +4,15 @@ package game
 // Split out of balance.go; the provenance rules in that file's header
 // apply here too, and each section below carries its own.
 
+// --- AI starting forces (IB's own) ---
+//
+// A seeded computer baron's units on top of the standard start, at the default
+// Starting Regions; addAIEmpire scales them with the rest of the start.
+const (
+	AIStartJets    = 5
+	AIStartTurrets = 40
+)
+
 // --- AI economic behavior (reconstructed / tunable) ---
 //
 // The AI mimics a human managing its realm: it keeps a few turns of food in

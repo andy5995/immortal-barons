@@ -264,6 +264,9 @@ func configPages(ibbs bool) []cfgPage {
 		toggle(51, "Full Bank Start",
 			func(c *game.Config) bool { return c.FullBankStart },
 			func(c *game.Config, v bool) { c.FullBankStart = v }),
+		num(52, "Starting Regions", "Starting Regions",
+			func(c *game.Config) int { return c.StartingRegions },
+			func(c *game.Config, v int) { c.StartingRegions = v }, game.StartRegions, game.MaxStartingRegions),
 	}
 
 	mil := []cfgField{

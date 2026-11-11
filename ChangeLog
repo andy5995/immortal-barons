@@ -16,6 +16,8 @@ Immortal Barons ChangeLog
     packets it had applied, or reuses the numbers of packets it had sent
   * config-during-reset: a new Full Bank Start setting (off) starts each new
     realm with full savings and ten days of full investment returns
+  * config-during-reset: a new Starting Regions setting (15) sets the land a
+    new realm starts with; its troops, food, gold and population grow with it
   * New pirate factions start with no agents and different tank, jet and
     turret stocks
   * A pirate faction keeps three times what it steals

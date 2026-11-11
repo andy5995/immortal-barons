@@ -2224,6 +2224,11 @@ savings and ten dates of full investment returns, starting the day it is
 created (`docs/mechanics-reference.md`, New-player start). Off by default, so a
 league that does not ask for it plays as the original does.
 
+**Deliberate divergence: Starting Regions.** Also IB's own: the land a new
+realm is founded with, with its people, troopers, food and gold scaled to match
+(`docs/mechanics-reference.md`, New-player start). The default of 15 is the
+original's start.
+
 ### Editing a field — the help screen IS the edit screen
 
 Enter on a field replaces the list with a full-screen page (captured 2026-08-16):

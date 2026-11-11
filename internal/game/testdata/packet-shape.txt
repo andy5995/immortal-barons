@@ -153,6 +153,7 @@ LeagueConfig:
   SabreHandling `json:"SlappenheimerHandling"`
   SabreConstantDial `json:",omitempty"`
   FullBankStart `json:",omitempty"`
+  StartingRegions `json:",omitempty"`
 LeagueNode:
   Number
   Name

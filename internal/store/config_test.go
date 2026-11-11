@@ -36,6 +36,7 @@ func TestSaveConfig_LoadConfig_RoundTrip(t *testing.T) {
 	cfg.DataDir = dir
 	cfg.TurnsPerDay = 15
 	cfg.GameLength = 30
+	cfg.StartingRegions = 1000 // LoadConfig clamps it, and fillValue's 7 is below the floor
 
 	if err := SaveConfig(cfg); err != nil {
 		t.Fatalf("SaveConfig: %v", err)

@@ -98,6 +98,7 @@ const (
 	helpPlanetaryTax       = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold goes to the Queen's purse, which she refunds a share of to each baron at the start of their playing day."
 	helpFoodUnlimited      = "When on, the food market never runs short — its daily supply is unlimited."
 	helpFullBankStart      = "When on, a new realm starts with its savings full and the most allowed returning on each of the next 10 days, starting the day it is created. Those returns count as heavy investing, so the investment rate falls while new realms join, unless Steady Investment Rate is on."
+	helpStartingRegions    = "How many regions a new realm is founded with (default 15, maximum 20,000). Its troopers, food and gold scale by the same factor, its people start just under the realm's capacity, and its land is split in the same proportions as the default 2 Agricultural, 5 Desert, 5 Mountain and 3 Coastal."
 	helpBuyMilitary        = "Whether players may buy military units. Yes: they may buy them freely. No: they must build them with industry. Limited is not built yet and works like Yes."
 	helpMaintCosts         = "Upkeep cost for regions and forces: High, Medium, Low, or None."
 	helpTradeCosts         = "Cost of trade deals: High, Medium, Low, or None."
@@ -217,6 +218,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(econ, "Planetary Tax Rate (%)", helpPlanetaryTax, c.PlanetaryTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.PlanetaryTaxRate = n })
 	t.addBool(econ, "Food Unlimited", helpFoodUnlimited, c.FoodUnlimited, func(c *game.Config, b bool) { c.FoodUnlimited = b })
 	t.addBool(econ, "Full Bank Start", helpFullBankStart, c.FullBankStart, func(c *game.Config, b bool) { c.FullBankStart = b })
+	t.addInt(econ, "Starting Regions", helpStartingRegions, c.StartingRegions, game.StartRegions, game.MaxStartingRegions, func(c *game.Config, n int) { c.StartingRegions = n })
 
 	mil := tview.NewForm()
 	addChoice(t, mil, "Buy Military", helpBuyMilitary, buyOpts, buyVals, c.BuyMilitary, func(c *game.Config, v game.BuyMode) { c.BuyMilitary = v })
