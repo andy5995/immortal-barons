@@ -228,9 +228,10 @@ func regularAttack(s session.Session, w *ctx) Result {
 		// only what remains — note it so the player learns the numbers moved.
 		trimmed = force.Troopers > p.Troopers || force.Tanks > p.Tanks ||
 			force.Bombers > p.Bombers || force.Jets > min(p.Jets, p.Carriers*game.JetsPerCarrier)
-		// The captured land arrives as Coastal, and the picker below retypes it
-		// (#58).
+		// The captured land arrives as Coastal; park it untyped in the same save
+		// so the picker below types it (#58) and a dropped session cannot lose it.
 		report, captured = w.World.Attack(p, d, force)
+		w.World.ParkUntyped(p, captured)
 		chargeAttackStage(p)
 		return nil
 	})

@@ -171,6 +171,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarized bool) {
 		regionsLost = w.World.PayRegions(p, regionsGold)
 		w.World.PaySDI(p, sdiGold)
 		cleaned = w.World.Decontaminate(p, deconGold)
+		w.World.ParkUntyped(p, cleaned)
 		// Both boosts are points bought against the turn's pending penalties,
 		// not a raise on the spot; the original prints nothing for either.
 		w.World.BoostSupport(p, supportGold)
@@ -268,22 +269,23 @@ func decontaminateStage(s session.Session, w *ctx) {
 		return
 	}
 	var cleaned int
-	if !withPlayer(w, func(p *game.Empire) { cleaned = w.World.Decontaminate(p, give) }) {
+	if !withPlayer(w, func(p *game.Empire) {
+		cleaned = w.World.Decontaminate(p, give)
+		w.World.ParkUntyped(p, cleaned)
+	}) {
 		return
 	}
-	// Decontaminate restored the land as Coastal so the payment is never in
-	// limbo; the picker then re-types it, since cleaned land has no type of its
-	// own until the owner names one.
+	// The cleaned land is parked untyped in the same save as the payment, so it
+	// is never in limbo; the picker then names its types.
 	if cleaned > 0 {
 		allocateDecontaminated(s, w, cleaned)
 	}
 }
 
-// spoilsStage hands over land captured on another planet. The strike resolved
-// on the target's board while its owner was not in a session, so the regions
-// have been parked with no type since (game.Empire.PendingRegions); this is the
-// first point in the turn there is anybody to ask, and it sits right after the
-// recap that told them the strike had come home (#107).
+// spoilsStage hands over untyped land parked on game.Empire.PendingRegions:
+// land captured on another planet while its owner was not in a session (#107),
+// or what a picker left unplaced when its session ended. This is the first point
+// in the turn there is anybody to ask, right after the turn's recap.
 func spoilsStage(s session.Session, w *ctx) {
 	var pending int
 	if !withPlayer(w, func(p *game.Empire) { pending = p.PendingRegions }) {

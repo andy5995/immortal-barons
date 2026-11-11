@@ -217,6 +217,20 @@ func (w *World) GrantRegions(e *Empire, field *int, n int) {
 	e.syncLand()
 }
 
+// ParkUntyped moves n regions that a won attack or a decontamination has just
+// placed as Coastal into PendingRegions, the untyped pool the owner's region
+// picker drains. The original puts such land straight into that pool (+0xBA);
+// Attack and Decontaminate place it as Coastal because the AI keeps it that way,
+// so a session with a player behind it parks it here in the same save.
+func (w *World) ParkUntyped(e *Empire, n int) {
+	if n <= 0 {
+		return
+	}
+	e.Regions.Coastal -= n
+	e.PendingRegions += n
+	e.syncLand()
+}
+
 // BuyLand is a thin wrapper over BuyRegions that buys Coastal regions, kept
 // for callers that don't care about region type.
 func (w *World) BuyLand(e *Empire, n int) error {

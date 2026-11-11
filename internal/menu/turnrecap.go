@@ -98,7 +98,7 @@ func openTurnRecap(s session.Session, w *ctx) {
 	reviewTradeDeals(s, w)   // pending trade-deal barters (accept/decline)
 	reviewTreatyOffers(s, w) // pending treaty offers, with proposer stats
 	showTurnEvents(s, w)
-	spoilsStage(s, w) // a landed interplanetary strike still needs its region types
+	spoilsStage(s, w) // parked untyped land still needs its region types
 }
 
 // eventLog is the Messages menu's Event Log: the turn-start recap, shown on

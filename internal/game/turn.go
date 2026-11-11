@@ -228,7 +228,7 @@ func (w *World) advanceOneDay(today string, rep *MaintReport) {
 			}
 		}
 		for _, e := range w.Empires {
-			if e.Alive && (e.Land <= 0 || e.People <= 0) {
+			if e.Alive && (e.landless() || e.People <= 0) {
 				w.Kill(e)
 			}
 		}

@@ -231,12 +231,14 @@ type Empire struct {
 	// realm, never blanket, and it is bought against one realm at a time.
 	ExposedFrom map[string]int `json:"exposedFrom,omitempty"`
 
-	// PendingRegions is land captured on ANOTHER planet and waiting for its owner
-	// to say what to hold it as. A Regular Attack asks at the moment of victory,
-	// but an interplanetary strike resolves days later on a board its owner is not
-	// logged in to, so the land is parked here and the picker runs at the start of
-	// their next turn (#107). It is real land the realm owns; it just has no type
-	// yet, which is why it is counted nowhere until it is allocated.
+	// PendingRegions is untyped land waiting for its owner to say what to hold it
+	// as: won in an attack or raid, cleaned of waste, or captured on ANOTHER
+	// planet, where the strike resolves days later on a board its owner is not
+	// logged in to (#107). The picker runs at once when the owner is present, and
+	// at the start of their next turn for whatever is left. It is real land the
+	// realm owns; it just has no type yet, which is why it is counted nowhere
+	// until it is allocated, just as the original's region total leaves its pool
+	// (+0xBA) out. The fallen-realm checks do count it (landless).
 	PendingRegions int `json:"pendingRegions,omitempty"`
 
 	// CoordinatorVote is the owner handle this baron votes for as the BBS
@@ -375,6 +377,13 @@ type TurnProgress struct {
 	TradingDone        bool
 	InterPlanetaryDone bool
 	MessageDone        bool
+}
+
+// landless reports whether the realm owns no land at all, untyped land waiting
+// in PendingRegions included: a realm whose only land is in the picker's pool
+// still owns it, and must not fall for want of having typed it yet.
+func (e *Empire) landless() bool {
+	return e.Land+e.PendingRegions <= 0
 }
 
 // syncLand resyncs the authoritative Land total from Regions. Every place

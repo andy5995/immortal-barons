@@ -282,12 +282,9 @@ func (w *World) DecontaminateCost(e *Empire) int64 {
 // so a baron who cannot cover the whole allowance still makes progress.
 //
 // Cleaned land has no type of its own in the original, which parks it in a pool
-// of unallocated regions until the owner names the types. IB has no such pool,
-// so the land comes back as Coastal and a caller with someone at the keyboard
-// offers to re-type it (see allocateDecontaminated). Restoring it here rather
-// than leaving it untyped is deliberate: gold has already changed hands, and a
-// session that drops between the payment and the picker must not take the land
-// with it.
+// of unallocated regions until the owner names the types. Here it comes back as
+// Coastal, which is where the AI keeps it; a caller with a player behind it
+// moves it to the pool in the same save (ParkUntyped) and runs the picker.
 func (w *World) Decontaminate(e *Empire, gold int64) int {
 	price := w.DecontaminatePrice(e)
 	gold = min(gold, e.Gold)

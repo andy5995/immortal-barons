@@ -30,16 +30,19 @@ func TestAttackCannotBeRepeatedByLeavingAfterIt(t *testing.T) {
 		keys     string // from the Attack menu to the strike
 		report   string // printed only once the strike has been applied
 		endsAt   string // the prompt the session ends at, after the report
+		resume   string // answers the resumed turn needs before its end
 	}{
 		// target A, full force, confirm
-		{"regular loss", 0, "RA\r\r\r\r\r", "Defeat!", "Paused<«─"},
+		{"regular loss", 0, "RA\r\r\r\r\r", "Defeat!", "Paused<«─", ""},
 		// a win ends at the captured-region picker instead of the pause
-		{"regular win", 100_000, "RA\r\r\r\r\r", "You captured", "Regions left] Your choice?"},
-		{"nuclear", 0, "NAy", "Your nuclear strike turned", "Paused<«─"}, // target A, buy the missile
-		{"chemical", 0, "CAy", "Your gas laid waste", "Paused<«─"},
-		{"biological", 0, "BAy", "Your plague killed", "Paused<«─"},
+		{"regular win", 100_000, "RA\r\r\r\r\r", "You captured", "Regions left] Your choice?",
+			// the land the boot left untyped is offered again, as BRE does
+			"C15\r"},
+		{"nuclear", 0, "NAy", "Your nuclear strike turned", "Paused<«─", ""}, // target A, buy the missile
+		{"chemical", 0, "CAy", "Your gas laid waste", "Paused<«─", ""},
+		{"biological", 0, "BAy", "Your plague killed", "Paused<«─", ""},
 		// faction 1, 100 troopers, no jets or tanks
-		{"pirates", 0, "P1100\r\r\r", "Your raid on the Humans", "Paused<«─"},
+		{"pirates", 0, "P1100\r\r\r", "Your raid on the Humans", "Paused<«─", ""},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -85,7 +88,8 @@ func TestAttackCannotBeRepeatedByLeavingAfterIt(t *testing.T) {
 				news1[n.Text] = true
 			}
 			w2 := &ctx{World: w.World, handle: w.handle, Term: w.Term}
-			f2 := &fakeSession{keys: []rune(" n"), boot: true} // status pause, decline the next turn
+			// status pause, any parked land, decline the next turn
+			f2 := &fakeSession{keys: []rune(" " + tc.resume + "n"), boot: true}
 			runTurnUntilEnd(f2, w2)
 			out := stripANSI(f2.out.String())
 			if strings.Contains(out, "[Attack]") {

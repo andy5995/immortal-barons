@@ -3,6 +3,8 @@ Immortal Barons ChangeLog
 (in-progress:)
   * When placing won or cleaned regions, Enter at the amount prompt places none
     instead of all of them
+  * The table for placing won or cleaned regions no longer counts them as
+    Coastal; regions left unplaced are offered again next turn
   * Sysop panel: clearer error when a folder holds no game data
   * In a league, the Welcome menu offers Travel Times
   * Instructions are (2) on the Entry and Welcome menus, and Empire Status (E)

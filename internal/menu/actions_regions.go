@@ -263,69 +263,62 @@ func regionCapReached(w *ctx, p *game.Empire) bool {
 }
 
 // allocateCaptured lets a winning attacker choose the region types for the land
-// captured in a Regular Attack (#58 — BRE decouples the winner's freely-chosen
-// composition from the proportional mix the loser bled).
+// captured in a Regular Attack or a pirate raid (#58 — BRE decouples the
+// winner's freely-chosen composition from the proportional mix the loser bled).
+// The land is already parked on Empire.PendingRegions by the save that won it.
 func allocateCaptured(s session.Session, w *ctx, n int) {
-	allocateRegions(s, w, n, n,
-		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n), nil)
+	allocateRegions(s, w, n,
+		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n))
 }
 
-// allocateSpoils is the same picker for land taken on ANOTHER planet. The strike
-// resolved days ago on a board this baron was not logged in to, so the land has
-// been parked on Empire.PendingRegions ever since; this is the first moment
-// there is anybody to ask (#107). The pending count is cleared inside the same
-// transaction that grants the land, so a session that drops mid-picker cannot
-// hand it over twice.
+// allocateSpoils is the same picker for land waiting on Empire.PendingRegions at
+// the start of a turn: taken on ANOTHER planet days ago on a board this baron was
+// not logged in to (#107), or left over from a picker whose session ended.
 func allocateSpoils(s session.Session, w *ctx, n int) {
-	allocateRegions(s, w, n, 0,
-		fmt.Sprintf(tr(s, "Your forces brought home %d regions — choose which types to hold them as."), n),
-		func(fp *game.Empire) { fp.PendingRegions -= min(n, fp.PendingRegions) })
+	allocateRegions(s, w, n,
+		fmt.Sprintf(tr(s, "%d regions are waiting for a type — choose which types to hold them as."), n))
 }
 
-// allocateDecontaminated re-types land just cleaned of waste. The original pools
+// allocateDecontaminated types land just cleaned of waste. The original pools
 // cleaned land with conquered land and asks the same question about both,
-// because neither has a type of its own until the owner gives it one. IB has
-// already restored the land as Coastal by this point — the gold is spent, so it
-// must not be in limbo if the session drops — hence reclaim: the n regions come
-// back out of Coastal and are shared out again.
+// because neither has a type of its own until the owner gives it one; the save
+// that took the payment has already parked it on Empire.PendingRegions.
 func allocateDecontaminated(s session.Session, w *ctx, n int) {
-	allocateRegions(s, w, n, n,
-		fmt.Sprintf(tr(s, "%d regions are clean again — choose which types to hold them as."), n), nil)
+	allocateRegions(s, w, n,
+		fmt.Sprintf(tr(s, "%d regions are clean again — choose which types to hold them as."), n))
 }
 
 // allocateRegions reuses the Buy Regions table and picker as an allocate-N loop
-// (no gold): the player assigns n untyped regions across types until none
-// remain. There is no quitting it — '0', Enter and any other key that is not a
-// region letter print a hint and ask again, because untyped land is not a state
-// the empire can hold. BRE does the same: its picker
-// (select_regions_to_lose, BRE.OVR 0x030ebb) sends CR, '?' and '*' alike to the
-// bottom of the loop at +0x124c, which reloads the remaining count and jumps
-// back to the prompt unless it has reached zero. IB used to treat '0' as quit
-// and dump the rest into Coastal, which silently retyped land the player was
-// still choosing for.
+// (no gold): the player assigns n of the untyped regions parked on
+// Empire.PendingRegions across types until none remain. There is no quitting it
+// — '0', Enter and any other key that is not a region letter print a hint and
+// ask again. BRE does the same: its picker (select_regions_to_lose, BRE.OVR
+// 0x030ebb) sends CR, '?' and '*' alike to the bottom of the loop at +0x124c,
+// which reloads the remaining count and jumps back to the prompt unless it has
+// reached zero.
 //
-// Anything left when the INPUT ends still defaults to Coastal, so a dropped
-// session cannot lose captured land.
+// The table shows the land actually held plus what has been placed so far, never
+// the untyped land: BRE's total_regions skips its pool too, and a table that
+// counted the pending land as Coastal read as land lost once it was typed.
 //
-// reclaim is how many of the n are ALREADY counted as Coastal and must be taken
-// back before they are shared out, so the total does not double. It is n for
-// land placed in the save that won or cleaned it (a conquest, a pirate raid,
-// decontamination), and 0 for land parked elsewhere (interplanetary spoils).
-//
-// also runs inside the granting transaction, for a caller that has to retire
-// bookkeeping in the same save — the parked interplanetary spoils, which must
-// not survive the picker that hands them over.
-func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string, also func(*game.Empire)) {
+// When the INPUT ends, what was placed is granted and the rest stays parked; the
+// spoils stage offers it at the start of the next turn, as BRE's run_player_turn
+// re-offers its pool.
+func allocateRegions(s session.Session, w *ctx, n int, headline string) {
 	if n <= 0 {
 		return
 	}
+	alloc := make([]int, len(game.BuyableRegions))
 	showTable := func() {
+		view := *w.Player()
+		for i, cnt := range alloc {
+			*game.BuyableRegions[i].Count(&view.Regions) += cnt
+		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, headline, ansi.Reset)
-		printRegionTable(s, w.Term, w.Player(), true)
+		printRegionTable(s, w.Term, &view, true)
 	}
 	showTable()
 
-	alloc := make([]int, len(game.BuyableRegions))
 	remaining := n
 	for remaining > 0 {
 		// BRE's captured-region prompt: "[N Regions left] Your choice?" then
@@ -343,7 +336,7 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 			showTable()
 			continue
 		}
-		if t == inputEndedChoice { // the stream is gone: assign the rest as Coastal
+		if t == inputEndedChoice { // the stream is gone: the rest stays parked
 			break
 		}
 		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", game.BuyableRegions[t].Name), 0, remaining)
@@ -353,17 +346,17 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 		alloc[t] += got
 		remaining -= got
 	}
-	alloc[0] += remaining // BuyableRegions[0] is Coastal: soak up any unassigned remainder
+	if remaining == n {
+		return
+	}
 
 	if err := w.mutatePlayer(func(fp *game.Empire) error {
-		// Reclaim and re-grant inside ONE transaction: a save between the two would
-		// leave the land missing if the session dropped in the gap.
-		fp.Regions.Coastal -= min(reclaim, fp.Regions.Coastal)
+		// Take the grant out of the pool in the same save, clamped to what the
+		// fresh record still holds, so no land is handed over twice.
 		for i, cnt := range alloc {
+			cnt = min(cnt, fp.PendingRegions)
+			fp.PendingRegions -= cnt
 			w.World.GrantRegions(fp, game.BuyableRegions[i].Count(&fp.Regions), cnt)
-		}
-		if also != nil {
-			also(fp)
 		}
 		return nil
 	}); err != nil {

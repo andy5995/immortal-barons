@@ -405,7 +405,8 @@ func raidLosses(troopers, jets, tanks int) []Msg {
 // The report names the loot; capturedLand is the number of regions won (0 on a
 // loss or against a landless faction), which the caller lets the player allocate
 // by type through the same picker a Regular Attack uses (#21). The land is
-// placed as Coastal here, in the raid's own save, and the picker retypes it.
+// parked untyped on PendingRegions here, in the raid's own save, and the picker
+// types it.
 func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (report Msg, capturedLand int) {
 	if faction < 0 || faction >= len(w.Pirates) {
 		return say("There are no pirates by that name."), 0
@@ -461,8 +462,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		a.Tanks += gotK
 		a.Agents += gotA
 		w.creditGold(a, gotG, say("reclaimed pirate loot"))
-		a.Regions.Coastal += gotLand
-		a.syncLand()
+		a.PendingRegions += gotLand
 		capturedLand = gotLand
 		addScore(a, PirateScoreBase+w.rng.Intn(PirateScoreRoll))
 		w.postPirateNews(a, p.Name, true)

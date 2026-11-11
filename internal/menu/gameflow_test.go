@@ -1190,10 +1190,11 @@ func TestDecontaminateStageOffersAndSpends(t *testing.T) {
 	if p.Regions.Industrial != 40 {
 		t.Errorf("Industrial = %d, want the 40 cleaned regions", p.Regions.Industrial)
 	}
-	// ...and it is not counted twice: the restore parked it in Coastal, the
-	// picker took it back out again.
-	if p.Regions.Coastal != 1000 {
-		t.Errorf("Coastal = %d, want 1000 — the reclaimed regions were double-counted", p.Regions.Coastal)
+	// ...and it is not counted twice: it went through the untyped pool, not
+	// Coastal as well.
+	if p.Regions.Coastal != 1000 || p.PendingRegions != 0 {
+		t.Errorf("Coastal = %d, pending = %d; want 1000, 0 — the cleaned regions were double-counted",
+			p.Regions.Coastal, p.PendingRegions)
 	}
 	if p.Land != before {
 		t.Errorf("land changed across the clean-and-allocate round trip: %d -> %d", before, p.Land)

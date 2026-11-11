@@ -251,7 +251,7 @@ func TestRaidFactionWinLose(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 
 	// An overwhelming force against the easiest faction (Humans, index 0) wins
-	// against a landed faction: the captured land is held as Coastal in the
+	// against a landed faction: the captured land is parked untyped in the
 	// raid's own save, and the count is returned for the menu picker (#21).
 	a.Troopers = 1_000_000
 	a.Jets = 0
@@ -266,8 +266,10 @@ func TestRaidFactionWinLose(t *testing.T) {
 	if captured <= 0 {
 		t.Errorf("expected a positive captured-land count on a win, got %d", captured)
 	}
-	if a.Land != beforeLand+captured {
-		t.Errorf("Land = %d, want %d: the captured land must be held before the picker runs", a.Land, beforeLand+captured)
+	// Held untyped in the raid's own save, so the picker has it to place.
+	if a.PendingRegions != captured || a.Land != beforeLand {
+		t.Errorf("pending = %d, Land = %d; want %d, %d: the captured land must be parked before the picker runs",
+			a.PendingRegions, a.Land, captured, beforeLand)
 	}
 	if a.Land != a.Regions.Total() {
 		t.Errorf("Land/Regions invariant broken: Land=%d Regions.Total()=%d", a.Land, a.Regions.Total())

@@ -25,7 +25,7 @@ func TestSpoilsStageOffersThePicker(t *testing.T) {
 
 	// The screen this test is for, not just "some output": the spoils headline is
 	// the picker's own and appears nowhere else.
-	if out := f.out.String(); !strings.Contains(out, "brought home") {
+	if out := f.out.String(); !strings.Contains(out, "waiting for a type") {
 		t.Fatalf("the spoils picker never ran; output was: %q", out)
 	}
 	p := w.Player()
@@ -52,9 +52,9 @@ func TestSpoilsStageSilentWithNothingParked(t *testing.T) {
 	}
 }
 
-// A session that drops in the picker still hands the land over (as Coastal) and
-// still clears the parked count, so it cannot be claimed a second time next turn.
-func TestSpoilsStageQuitStillClearsPending(t *testing.T) {
+// A session that drops in the picker before placing anything leaves the land
+// parked, so the next turn offers it again rather than typing it as Coastal.
+func TestSpoilsStageQuitLeavesLandParked(t *testing.T) {
 	w := newWorld()
 	var beforeLand int
 	w.With(func() {
@@ -65,11 +65,11 @@ func TestSpoilsStageQuitStillClearsPending(t *testing.T) {
 	f := &fakeSession{}
 	spoilsStage(f, w)
 	p := w.Player()
-	if p.Land != beforeLand+10 {
-		t.Errorf("Land = %d, want %d — captured land was lost", p.Land, beforeLand+10)
+	if p.Land != beforeLand {
+		t.Errorf("Land = %d, want %d — untyped land was placed without an answer", p.Land, beforeLand)
 	}
-	if p.PendingRegions != 0 {
-		t.Errorf("PendingRegions = %d, want 0", p.PendingRegions)
+	if p.PendingRegions != 10 {
+		t.Errorf("PendingRegions = %d, want 10", p.PendingRegions)
 	}
 }
 

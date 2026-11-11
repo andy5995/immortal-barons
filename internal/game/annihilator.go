@@ -435,7 +435,7 @@ func (w *World) tickOneAnnihilator(d *Annihilator) {
 		}
 		e.Regions.remove(lost)
 		e.syncLand()
-		if e.Land <= 0 || e.People <= 0 {
+		if e.landless() || e.People <= 0 {
 			w.Kill(e)
 		}
 		total += lost

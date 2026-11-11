@@ -54,12 +54,12 @@ func TestHiNumsHighlightsFigures(t *testing.T) {
 	}
 }
 
-// placeCaptured holds n regions as Coastal, as a won attack does in its own
-// save, so the picker has land to reclaim.
+// placeCaptured parks n untyped regions, as a won attack does in its own save,
+// so the picker has land to place.
 func placeCaptured(t *testing.T, w *ctx, n int) {
 	t.Helper()
 	if err := w.mutatePlayer(func(p *game.Empire) error {
-		w.World.GrantRegions(p, &p.Regions.Coastal, n)
+		p.PendingRegions += n
 		return nil
 	}); err != nil {
 		t.Fatal(err)
@@ -112,9 +112,10 @@ func TestAllocateCapturedOffersAdvisors(t *testing.T) {
 	}
 }
 
-// A session that drops mid-picker must not lose captured land: the unassigned
-// remainder defaults to Coastal so Land still rises by the full captured count.
-func TestAllocateCapturedRemainderToCoastal(t *testing.T) {
+// A session that drops mid-picker must not lose captured land: what was placed
+// is granted and the rest stays parked for the next turn's picker, not typed
+// as Coastal behind the player's back.
+func TestAllocateCapturedRemainderStaysParked(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	beforeLand, beforeCoastal, beforeRiver := p.Land, p.Regions.Coastal, p.Regions.River
@@ -125,11 +126,44 @@ func TestAllocateCapturedRemainderToCoastal(t *testing.T) {
 	if p.Regions.River != beforeRiver+3 {
 		t.Errorf("River = %d, want %d", p.Regions.River, beforeRiver+3)
 	}
-	if p.Regions.Coastal != beforeCoastal+7 {
-		t.Errorf("Coastal (remainder) = %d, want %d", p.Regions.Coastal, beforeCoastal+7)
+	if p.Regions.Coastal != beforeCoastal {
+		t.Errorf("Coastal = %d, want %d — the remainder was typed for the player", p.Regions.Coastal, beforeCoastal)
 	}
-	if p.Land != beforeLand+10 {
-		t.Errorf("Land = %d, want %d (no captured land lost)", p.Land, beforeLand+10)
+	if p.PendingRegions != 7 {
+		t.Errorf("PendingRegions = %d, want 7 (the unplaced remainder)", p.PendingRegions)
+	}
+	if p.Land != beforeLand+3 {
+		t.Errorf("Land = %d, want %d", p.Land, beforeLand+3)
+	}
+}
+
+// The picker's table shows land held, not the land being placed, and a redraw
+// shows what has been placed so far. It used to count the untyped land as
+// Coastal, so a player placing 31 of 33 as Coastal watched Coastal fall by 2
+// and reported the regions lost.
+func TestAllocateCapturedTableExcludesUnplacedLand(t *testing.T) {
+	w := newWorld()
+	coastal := w.Player().Regions.Coastal
+	f := &fakeSession{keys: []rune("C31\r?D2\r")}
+	placeCaptured(t, w, 33)
+	allocateCaptured(f, w, 33)
+
+	out := plainLines(f.out.String())
+	var rows []string
+	for _, l := range out {
+		if strings.Contains(l, "(C) Coastal") {
+			rows = append(rows, strings.Join(strings.Fields(l), " "))
+		}
+	}
+	want := []string{
+		fmt.Sprintf("(C) Coastal %d", coastal),
+		fmt.Sprintf("(C) Coastal %d", coastal+31),
+	}
+	if len(rows) != 2 || rows[0] != want[0] || rows[1] != want[1] {
+		t.Errorf("Coastal rows = %q, want %q", rows, want)
+	}
+	if p := w.Player(); p.Regions.Coastal != coastal+31 || p.PendingRegions != 0 {
+		t.Errorf("Coastal = %d, pending = %d; want %d, 0", p.Regions.Coastal, p.PendingRegions, coastal+31)
 	}
 }
 

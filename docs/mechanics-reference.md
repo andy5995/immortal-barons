@@ -2556,8 +2556,7 @@ that one pool.
 `total_regions` sums the nine region counts and **excludes** the pool, so
 unallocated land is not territory until it is placed: it does not count toward a
 nuclear strike's damage base, technology dilution, or the scores table's
-Territory column. IB holds such land as Coastal while its picker is open (see
-the divergence below), so there it counts from the moment it is won.
+Territory column. IB's pool is `PendingRegions`, and it is excluded the same way.
 
 **The picker cannot be quit.** Its loop (`allocate_unassigned_regions`,
 `BRE.OVR 0x030ebb`) sends Enter, `?` and `*` alike to the bottom at `+0x124c`,
@@ -2566,15 +2565,14 @@ Untyped land is not a state a realm can hold, so there is no answer that leaves.
 IB used to take `0` as quit and retype the remainder as Coastal; it now
 re-prompts, matching this.
 
-**Divergence:** IB has no persisted pool. It runs the picker at the moment the
-land is cleaned (or captured); the original keeps the pool on the empire record
-and `run_player_turn` re-offers whatever is left. So IB places the land as
-Coastal in the same save that cleaned or won it — decontamination, a regular
-attack, a pirate raid — and the picker reclaims it. A session that drops before
-the question costs the player the choice of type, never the land. (Until
-2026-10-25 captured land waited for the picker's own save, so a door killed
-between the two saves lost it.)
-That dropped session is the one case where a remainder still becomes Coastal.
+IB parks the land in its pool (`PendingRegions`) in the same save that cleaned
+or won it — decontamination, a regular attack, a pirate raid — and runs the
+picker straight away. A session that ends before every region is placed keeps
+what was placed and leaves the rest in the pool, which the start of the next
+turn offers again, as the original's `run_player_turn` does. The land is never
+lost and never typed without an answer. (Until 2026-11-11 IB held the land as
+Coastal while the picker was open, so the picker's table showed it there and a
+player placing it read Coastal falling as land lost.)
 
 **Confirmed in live play 2026-09-12** (`cap/nuke-waste-20260912.cap`, and see
 "Nuclear strike, waste, and decontamination" in `docs/dev/bre-screens.md`). A

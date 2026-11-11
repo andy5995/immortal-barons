@@ -195,8 +195,8 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		}
 		captured = d.Regions.remove(captured).Total() // remove caps at the defender's land
 		d.syncLand()
-		// Placed in this same save, so a session lost before the picker runs
-		// keeps the land; the picker reclaims it from Coastal to retype it.
+		// Placed in this same save as Coastal, where the AI keeps it; a player's
+		// session parks it untyped for the picker (ParkUntyped).
 		a.Regions.Coastal += captured
 		a.syncLand()
 
