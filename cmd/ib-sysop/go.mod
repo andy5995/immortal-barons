@@ -2,6 +2,8 @@ module github.com/andy5995/immortal-barons/cmd/ib-sysop
 
 go 1.26.4
 
+toolchain go1.26.11
+
 require (
 	gioui.org v0.10.3
 	github.com/andy5995/immortal-barons v0.0.0
