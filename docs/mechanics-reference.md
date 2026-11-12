@@ -5345,7 +5345,10 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   already in the air is listed from the status packet that announces it (#63)
   rather than twice, with its arrival in whole days, which is all `ArrivesDay`
   knows. Records are dropped when the threat is called off, and
-  `ThreatMemoryHours` (24) after its hour has passed.
+  `ThreatMemoryHours` (24) after its hour has passed. The menu item carries
+  the number still to come, as `(n)` after the label, the way Join Group Attack
+  carries its forming parties: a group attack until it departs (nothing records
+  when it lands), a Gooie until it lands.
 
   IB implements all of it. **What IB had before was its own invention** — a
   per-baron Send Recon that spent an agent, warned the target, and filed figures

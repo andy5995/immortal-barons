@@ -107,24 +107,16 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 	now := game.Now()
 	w.Read(func() {
 		for _, t := range w.IncomingThreats() {
+			d, listed := incomingListed(w, t)
+			if !listed {
+				continue
+			}
 			r := inRow{}
 			r.planet = t.FromBoard
 			r.when, r.away = incomingWhen(s, now, t)
-			if t.Kind == game.ThreatGooie {
-				if d := w.IncomingFrom(t.FromBoard); d != nil && d.Launched {
-					// Landed, it is besieging rather than incoming, and the jets'
-					// picker at the top of the turn shows it. Only a record about
-					// THAT weapon is dropped: the builder may already be at work on
-					// its next, and a record naming no hour or a later one is that.
-					// Past its hour but not yet down, it lands on the next planetary
-					// run.
-					if at := t.When(); d.DaysLeft > 0 && !at.IsZero() && !at.After(d.ArrivesAt) {
-						continue
-					}
-					if r.away && !d.ArrivesAt.IsZero() && !now.Before(d.ArrivesAt) {
-						r.when = tr(s, "now")
-					}
-				}
+			// Past its hour but not yet down, it lands on the next planetary run.
+			if d != nil && r.away && !d.ArrivesAt.IsZero() && !now.Before(d.ArrivesAt) {
+				r.when = tr(s, "now")
 			}
 			switch t.Kind {
 			case game.ThreatGooie:
@@ -143,6 +135,44 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 		}
 	})
 	return rows
+}
+
+// incomingListed reports whether the Incoming view lists t, and for a Gooie
+// Kablooie the launched weapon it is about, if any. A Gooie that has landed is
+// besieging rather than incoming, and the jets' picker at the top of the turn
+// shows it. Only a record about THAT weapon is left out: the builder may
+// already be at work on its next, and a record naming no hour or a later one is
+// that. Must run under the world lock.
+func incomingListed(w *ctx, t game.Threat) (*game.Annihilator, bool) {
+	if t.Kind != game.ThreatGooie {
+		return nil, true
+	}
+	d := w.IncomingFrom(t.FromBoard)
+	if d == nil || !d.Launched {
+		return nil, true
+	}
+	if at := t.When(); d.DaysLeft > 0 && !at.IsZero() && !at.After(d.ArrivesAt) {
+		return d, false
+	}
+	return d, true
+}
+
+// incomingCount is the number the Incoming Attacks menu item carries: the
+// threats still to come. A group attack stops counting once it departs, since
+// nothing here records when it lands; a Gooie counts while the view lists it,
+// which is until it lands. Must run under the world lock.
+func incomingCount(w *ctx) int {
+	now := game.Now()
+	n := 0
+	for _, t := range w.Threats {
+		if _, listed := incomingListed(w, t); !listed {
+			continue
+		}
+		if at := t.When(); t.Kind == game.ThreatGooie || at.IsZero() || at.After(now) {
+			n++
+		}
+	}
+	return n
 }
 
 // incomingWhen spells the wait in the short form the Join Group Attack table
