@@ -17,11 +17,11 @@ msgstr "  Träger einschließen?"
 msgid "  {who} with {other}: {treaty}"
 msgstr "  {who} mit {other}: {treaty}"
 
-#: internal/menu/actions_info.go:269
+#: internal/menu/actions_info.go:271
 msgid " (floating)"
 msgstr " (variabel)"
 
-#: internal/menu/actions_info.go:267
+#: internal/menu/actions_info.go:269
 msgid " (steady)"
 msgstr " (fest)"
 
@@ -29,11 +29,11 @@ msgstr " (fest)"
 msgid " — choose a topic:"
 msgstr " - Thema wählen:"
 
-#: internal/menu/actions_attack.go:941
+#: internal/menu/actions_attack.go:942
 msgid "#"
 msgstr "#"
 
-#: internal/menu/menu.go:1032
+#: internal/menu/menu.go:1033
 msgid "# Owned"
 msgstr "# Besitz"
 
@@ -48,13 +48,13 @@ msgid_plural "%.0f Bombers"
 msgstr[0] "Bomber"
 msgstr[1] "Bomber"
 
-#: internal/menu/actions_info.go:254
+#: internal/menu/actions_info.go:256
 msgid "%.0f day"
 msgid_plural "%.0f days"
 msgstr[0] "%.0f Tag"
 msgstr[1] "%.0f Tage"
 
-#: internal/menu/actions_info.go:350
+#: internal/menu/actions_info.go:352
 msgid "%.0f fault"
 msgid_plural "%.0f faults"
 msgstr[0] "%.0f Fehler"
@@ -90,7 +90,7 @@ msgstr "%.2f Stunden"
 msgid "%d %s bought."
 msgstr "%d %s gekauft."
 
-#: internal/menu/actions_regions.go:410
+#: internal/menu/actions_regions.go:403
 msgid "%d %s regions dropped. You now hold %d land."
 msgstr "%d %s-Regionen aufgegeben. Sie halten nun %d Land."
 
@@ -98,35 +98,40 @@ msgstr "%d %s-Regionen aufgegeben. Sie halten nun %d Land."
 msgid "%d agents sent out."
 msgstr "%d Agenten ausgesandt."
 
-#: internal/menu/turnstages.go:236
+#: internal/menu/turnstages.go:237
 msgid "%d gold is requested to boost popular support."
 msgstr "%d Gold werden erbeten, um den Rückhalt zu stärken."
 
-#: internal/menu/turnstages.go:251
+#: internal/menu/turnstages.go:252
 msgid "%d gold is requested to improve military morale."
 msgstr "%d Gold werden erbeten, um die Moral der Truppen zu heben."
 
-#: internal/menu/turnstages.go:535
+#: internal/menu/turnstages.go:539
 msgid "%d matched! You win %s gold, paid straight into your bank."
 msgstr "%d Treffer! Sie gewinnen %s Gold, direkt auf Ihr Bankkonto."
 
-#: internal/menu/actions_regions.go:293
+#: internal/menu/actions_regions.go:288
 msgid "%d regions are clean again — choose which types to hold them as."
 msgstr "%d Regionen sind wieder sauber - wählen Sie ihre Typen."
 
-#: internal/menu/turnstages.go:187
+#: internal/menu/actions_regions.go:279
+#, fuzzy
+msgid "%d regions are waiting for a type — choose which types to hold them as."
+msgstr "%d Regionen sind wieder sauber - wählen Sie ihre Typen."
+
+#: internal/menu/turnstages.go:188
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d Regionen rebellierten mangels Unterhalt."
 
-#: internal/menu/turnstages.go:184
+#: internal/menu/turnstages.go:185
 msgid "%d units deserted for lack of pay."
 msgstr "%d Einheiten desertierten mangels Sold."
 
-#: internal/menu/actions_attack.go:992
+#: internal/menu/actions_attack.go:993
 msgid "%d%% of the Gooie Kablooie destroyed!"
 msgstr "%d%% des Gooie Kablooie zerstört!"
 
-#: internal/menu/actions_info.go:187
+#: internal/menu/actions_info.go:188
 msgid "%d%% over 10 days"
 msgstr "%d%% über 10 Tage"
 
@@ -143,7 +148,7 @@ msgstr "%d %s-Regionen gekauft. Gold: %d"
 msgid "%s %s sent out."
 msgstr "%s %s ausgesandt."
 
-#: internal/menu/actions_attack.go:736
+#: internal/menu/actions_attack.go:737
 msgid "%s Gold added."
 msgstr "%s Gold hinzugefügt."
 
@@ -175,7 +180,7 @@ msgstr "%s Gold ist für diese Gebote zurückgelegt."
 msgid "%s gold is required to maintain your regions."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
-#: internal/menu/turnstages.go:215
+#: internal/menu/turnstages.go:216
 msgid "%s gold will decontaminate %s of your %s waste regions."
 msgstr "%s Gold entseuchen %s deiner %s Ödland-Regionen."
 
@@ -199,7 +204,7 @@ msgstr ""
 "%s steht in %s, das das Spiel nur liest und nie schreibt. Bearbeiten Sie "
 "diese Datei."
 
-#: internal/menu/actions_attack.go:987
+#: internal/menu/actions_attack.go:988
 msgid "%s jets were destroyed in the attack!"
 msgstr "%s Jets wurden beim Angriff zerstört!"
 
@@ -228,11 +233,11 @@ msgstr "%s schlägt einen %s vor."
 msgid "%s purchased."
 msgstr "%s %s gekauft."
 
-#: internal/menu/actions_info.go:346
+#: internal/menu/actions_info.go:348
 msgid "%s since %s — see planetary.log"
 msgstr "%s seit %s - siehe planetary.log"
 
-#: internal/menu/actions_attack.go:409
+#: internal/menu/actions_attack.go:410
 msgid "%s stands between you and %s."
 msgstr "%s steht zwischen Ihnen und %s."
 
@@ -241,7 +246,7 @@ msgstr "%s steht zwischen Ihnen und %s."
 msgid "%s turns"
 msgstr "%s Züge"
 
-#: internal/menu/tree.go:734
+#: internal/menu/tree.go:736
 msgid "%s units of food available today."
 msgstr "%s Einheiten Nahrung heute verfügbar."
 
@@ -250,11 +255,11 @@ msgstr "%s Einheiten Nahrung heute verfügbar."
 msgid "%s — %d gold each. How many?"
 msgstr "Regionen kaufen - je %d Gold."
 
-#: internal/menu/actions_attack.go:460
+#: internal/menu/actions_attack.go:461
 msgid "%s — an arms broker wants %s gold for the missile."
 msgstr "%s - ein Waffenhändler verlangt %s Gold für die Rakete."
 
-#: internal/menu/actions_info.go:344
+#: internal/menu/actions_info.go:346
 msgid "%s — see planetary.log"
 msgstr "%s - siehe planetary.log"
 
@@ -279,6 +284,14 @@ msgstr "(%s alt)"
 msgid "(%s per year)"
 msgstr "(%s pro Jahr)"
 
+#: internal/menu/bulletinfiles.go:313
+msgid "(no players)"
+msgstr ""
+
+#: internal/menu/bulletinfiles.go:311
+msgid "(no report yet)"
+msgstr ""
+
 #: internal/menu/actions_trade.go:143
 msgid "(not enough carriers)"
 msgstr "(nicht genug Träger)"
@@ -287,7 +300,7 @@ msgstr "(nicht genug Träger)"
 msgid "(your current vote)"
 msgstr "(Ihre aktuelle Stimme)"
 
-#: cmd/ib-sysop/main.go:393
+#: cmd/ib-sysop/main.go:421
 msgid "+"
 msgstr "+"
 
@@ -295,11 +308,11 @@ msgstr "+"
 msgid ", "
 msgstr ", "
 
-#: cmd/ib-sysop/main.go:395
+#: cmd/ib-sysop/main.go:423
 msgid "-"
 msgstr "-"
 
-#: internal/menu/actions_regions.go:390
+#: internal/menu/actions_regions.go:383
 msgid "-* Drop Regions *-"
 msgstr "-* Regionen aufgeben *-"
 
@@ -307,7 +320,7 @@ msgstr "-* Regionen aufgeben *-"
 msgid "/-Command?"
 msgstr "/-Befehl?"
 
-#: cmd/ib-sysop/main.go:396
+#: cmd/ib-sysop/main.go:424
 msgid "0"
 msgstr "0"
 
@@ -315,16 +328,16 @@ msgstr "0"
 msgid ": News File"
 msgstr ": Nachrichtendatei"
 
-#: internal/menu/actions_info.go:257
+#: internal/menu/actions_info.go:259
 #, fuzzy
 msgid "; trades %d days"
 msgstr "Handelsgeschäft"
 
-#: internal/menu/actions_ipscores.go:297
+#: internal/menu/actions_ipscores.go:303
 msgid "<game name>: <view name>"
 msgstr "<Spielname>: <Ansichtsname>"
 
-#: cmd/ib-sysop/main.go:394
+#: cmd/ib-sysop/main.go:422
 msgid "="
 msgstr "="
 
@@ -508,7 +521,7 @@ msgstr "Annehmen?"
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr "Annehmen? [Y] Ja, [N] Nein, [I] Ignorieren"
 
-#: internal/menu/actions_attack.go:712
+#: internal/menu/actions_attack.go:713
 msgid "Add how much gold for funding?"
 msgstr "Wie viel Gold zur Finanzierung beisteuern?"
 
@@ -537,7 +550,7 @@ msgstr "Aufwiegler säten Unmut in Ihrer Armee, und {n} Soldaten desertierten."
 msgid "Agitators stirred revolts in your realm, and your popular support fell."
 msgstr "Aufwiegler schürten Aufstände in Ihrem Reich, und Ihr Rückhalt sank."
 
-#: internal/menu/actions_attack.go:425
+#: internal/menu/actions_attack.go:426
 msgid ""
 "Agreement broken! Revolts spread through your realm — your people will not "
 "be ruled by an oath-breaker, and the army's morale goes with them."
@@ -667,7 +680,7 @@ msgstr "Nachricht anhängen?"
 msgid "Attack"
 msgstr "Angriff"
 
-#: internal/menu/actions_attack.go:631
+#: internal/menu/actions_attack.go:632
 msgid "Attack Pirates"
 msgstr "Piraten angreifen"
 
@@ -687,7 +700,7 @@ msgstr "Angriffsgruppe #%d wurde abgesagt und ihre Truppen heimgeschickt."
 msgid "Attack which realm? (letter, RETURN to abort)"
 msgstr "Welches Reich angreifen? (Buchstabe, EINGABE bricht ab)"
 
-#: internal/menu/bulletinfiles.go:241
+#: internal/menu/bulletinfiles.go:237
 msgid "Attacker"
 msgstr "Angreifer"
 
@@ -707,7 +720,7 @@ msgstr "Mittlere Laufzeiten zu allen Boards"
 msgid "Awaiting a reply:"
 msgstr "Warten auf Antwort:"
 
-#: internal/menu/turnstages.go:460
+#: internal/menu/turnstages.go:463
 msgid "BBS Coordinator"
 msgstr "BBS-Koordinator"
 
@@ -796,7 +809,7 @@ msgstr "Bomber"
 msgid "Bombing operations are not part of this game."
 msgstr "Bombardierungen sind in diesem Spiel nicht vorgesehen."
 
-#: internal/menu/actions_attack.go:411
+#: internal/menu/actions_attack.go:412
 msgid "Break the agreement?"
 msgstr "Das Abkommen brechen?"
 
@@ -849,7 +862,7 @@ msgstr "Vom Markt kaufen:"
 msgid "Buy how many %s"
 msgstr "Wie viele %s kaufen"
 
-#: internal/menu/actions_attack.go:464
+#: internal/menu/actions_attack.go:465
 msgid "Buy it?"
 msgstr "Kaufen?"
 
@@ -862,7 +875,7 @@ msgstr "Der Kauf von Militäreinheiten ist in dieser Liga abgeschaltet."
 msgid "By"
 msgstr "Kaufen"
 
-#: internal/menu/bulletinfiles.go:275
+#: internal/menu/bulletinfiles.go:334
 msgid "CRUSHED"
 msgstr "VERNICHTET"
 
@@ -878,7 +891,7 @@ msgstr "Absagen?"
 msgid "Canceled — no changes were saved."
 msgstr "Abgebrochen - nichts wurde gespeichert."
 
-#: internal/menu/turnstages.go:499
+#: internal/menu/turnstages.go:502
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr "Möchten Sie Ihr Glück in der Lotterie der Königin versuchen?"
 
@@ -942,7 +955,7 @@ msgstr "Wählen (0 = aktuelle behalten)?"
 msgid "Choose a Target (0 to cancel)?"
 msgstr "Ziel wählen (0 = Abbruch)?"
 
-#: internal/menu/actions_attack.go:446
+#: internal/menu/actions_attack.go:447
 msgid "Choose a target (letter, RETURN to abort)"
 msgstr "Ziel wählen (Buchstabe, EINGABE bricht ab)"
 
@@ -992,15 +1005,15 @@ msgstr "Löschen"
 msgid "Coastal"
 msgstr "Küste"
 
-#: internal/menu/actions_attack.go:647
+#: internal/menu/actions_attack.go:648
 msgid "Commit how many Jets?"
 msgstr "Wie viele Jets einsetzen?"
 
-#: internal/menu/actions_attack.go:648
+#: internal/menu/actions_attack.go:649
 msgid "Commit how many Tanks?"
 msgstr "Wie viele Panzer einsetzen?"
 
-#: internal/menu/actions_attack.go:646
+#: internal/menu/actions_attack.go:647
 msgid "Commit how many Troopers?"
 msgstr "Wie viele Soldaten einsetzen?"
 
@@ -1052,7 +1065,7 @@ msgstr "Gruppenangriff erstellen"
 msgid "Create Realm"
 msgstr "Reich gründen"
 
-#: internal/menu/actions_attack.go:737
+#: internal/menu/actions_attack.go:738
 msgid "Current SDI Strength: %s%%"
 msgstr "Derzeitige SDI-Stärke: %s%%"
 
@@ -1080,11 +1093,11 @@ msgstr "Datum: "
 msgid "Date: {when}    Result: {result}"
 msgstr "Datum: {when}    Ergebnis: {result}"
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:943
 msgid "Days Until Self-Destruct"
 msgstr "Tage bis zur Selbstzerstörung"
 
-#: internal/menu/config_editor.go:344
+#: internal/menu/config_editor.go:350
 msgid "Days before lost forces return (0 = never)"
 msgstr "Tage bis verlorene Truppen zurückkehren (0 = nie)"
 
@@ -1104,7 +1117,7 @@ msgstr "Krieg erklären?"
 msgid "Defeat! Your forces were beaten off the field."
 msgstr "Niederlage! Ihre Truppen wurden vom Feld geschlagen."
 
-#: internal/menu/bulletinfiles.go:242
+#: internal/menu/bulletinfiles.go:238
 msgid "Defender"
 msgstr "Verteidiger"
 
@@ -1209,7 +1222,7 @@ msgstr "Gooie demontieren"
 msgid "Dismantling it refunds nothing — the gold is spent."
 msgstr "Der Abbau erstattet nichts - das Gold ist ausgegeben."
 
-#: internal/menu/actions_attack.go:928
+#: internal/menu/actions_attack.go:929
 msgid "Do you wish to attack a Gooie Kablooie?"
 msgstr "Möchten Sie einen Gooie Kablooie angreifen?"
 
@@ -1217,7 +1230,7 @@ msgstr "Möchten Sie einen Gooie Kablooie angreifen?"
 msgid "Do you wish to send another message?"
 msgstr "Möchtest du eine weitere Nachricht senden?"
 
-#: internal/menu/actions_ipscores.go:369
+#: internal/menu/actions_ipscores.go:375
 msgid "Do you wish to target (O)ne Dominion or (A)ll?"
 msgstr "Ziel: (O) ein Herrschaftsgebiet oder (A)lle?"
 
@@ -1229,7 +1242,7 @@ msgstr "Möchtest du die Bank aufsuchen?"
 msgid "Done"
 msgstr "Fertig"
 
-#: internal/menu/turnstages.go:518
+#: internal/menu/turnstages.go:521
 msgid "Drawn:"
 msgstr "Gezogen:"
 
@@ -1241,7 +1254,7 @@ msgstr ""
 "Vertreibt 4 bis 10 Prozent der Bevölkerung des Ziels. Seine Bevölkerung "
 "zahlt seine Steuern und isst seine Nahrung."
 
-#: internal/menu/actions_regions.go:385
+#: internal/menu/actions_regions.go:378
 msgid "Drop regions?"
 msgstr "Regionen aufgeben?"
 
@@ -1263,7 +1276,7 @@ msgstr "Welches Makro bearbeiten [D,E,F,R,I,O,K,L]?"
 msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
 msgstr "Makro Strg-%c bearbeiten    Strg-%c beendet die Eingabe."
 
-#: internal/menu/actions_info.go:314
+#: internal/menu/actions_info.go:316
 msgid "Empire"
 msgstr "Imperium"
 
@@ -1283,7 +1296,7 @@ msgstr "Schutz beenden"
 msgid "End of Turn Statistics:"
 msgstr "Statistik am Zugende:"
 
-#: internal/menu/actions_attack.go:958
+#: internal/menu/actions_attack.go:959
 msgid "Enter Gooie Number (0 to cancel)?"
 msgstr "Gooie-Nummer eingeben (0 = Abbruch)?"
 
@@ -1299,7 +1312,7 @@ msgstr "Thema eingeben"
 msgid "Enter how many units to bid for."
 msgstr "Geben Sie an, auf wie viele Einheiten Sie bieten."
 
-#: internal/menu/actions_ipscores.go:378
+#: internal/menu/actions_ipscores.go:384
 msgid "Entire Planet"
 msgstr "Ganzer Planet"
 
@@ -1343,7 +1356,7 @@ msgstr "Ausgedehnte Schlacht"
 msgid "FAILURE"
 msgstr "FEHLSCHLAG"
 
-#: cmd/immortal-barons/league.go:211
+#: cmd/immortal-barons/league.go:208
 msgid "FTN spool"
 msgstr "FTN-Spool"
 
@@ -1363,7 +1376,7 @@ msgstr "Nahrungsmarkt"
 msgid "For Sale"
 msgstr "Zu verkaufen"
 
-#: internal/game/ibbs.go:775
+#: internal/game/ibbs.go:780
 msgid "Foreign agents were seen taking an interest in your realm."
 msgstr "Fremde Agenten zeigten auffälliges Interesse an Ihrem Reich."
 
@@ -1383,7 +1396,7 @@ msgstr "Freihandelsabkommen"
 msgid "Free software under the MIT License."
 msgstr "Freie Software unter der MIT-Lizenz."
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:943
 msgid "From"
 msgstr "Von"
 
@@ -1403,7 +1416,7 @@ msgstr "Spieleinstellungen"
 msgid "Game length in days (0 = endless)"
 msgstr "Spieldauer in Tagen (0 = endlos)"
 
-#: internal/menu/tree.go:770
+#: internal/menu/tree.go:772
 msgid "Game started on %s"
 msgstr "Spiel begann am %s"
 
@@ -1447,7 +1460,7 @@ msgstr "Ware"
 msgid "Goods you ship:"
 msgstr "Waren, die Sie senden:"
 
-#: internal/menu/incoming.go:131
+#: internal/menu/incoming.go:125
 msgid "Gooie Kablooie"
 msgstr "Gooie Kablooie"
 
@@ -1455,7 +1468,7 @@ msgstr "Gooie Kablooie"
 msgid "Gooie Kablooie Ops"
 msgstr "Gooie-Kablooie-Ops"
 
-#: internal/menu/actions_attack.go:761
+#: internal/menu/actions_attack.go:762
 msgid "Gooie Kablooie operations are switched off in this game."
 msgstr "Gooie-Kablooie-Operationen sind in diesem Spiel abgeschaltet."
 
@@ -1463,7 +1476,7 @@ msgstr "Gooie-Kablooie-Operationen sind in diesem Spiel abgeschaltet."
 msgid "Group Attack"
 msgstr "Gruppenangriff"
 
-#: internal/menu/incoming.go:134
+#: internal/menu/incoming.go:128
 msgid "Group attack"
 msgstr "Gruppenangriff"
 
@@ -1487,7 +1500,7 @@ msgstr "Hilfe - Kategorie wählen:"
 msgid "How many %s?"
 msgstr "Wie viele %s?"
 
-#: internal/menu/actions_attack.go:802
+#: internal/menu/actions_attack.go:803
 msgid "How many Million Gold do you wish to put in?"
 msgstr "Wie viele Millionen Gold möchten Sie beisteuern?"
 
@@ -1535,11 +1548,11 @@ msgstr "IP-Nachrichten"
 msgid "Id"
 msgstr "Id"
 
-#: internal/menu/config_editor.go:353
+#: internal/menu/config_editor.go:359
 msgid "Idle timeout in seconds (0 = never)"
 msgstr "Leerlauf-Zeitlimit in Sekunden (0 = nie)"
 
-#: internal/menu/config_editor.go:358
+#: internal/menu/config_editor.go:364
 msgid "Idle warnings before boot"
 msgstr "Leerlauf-Warnungen vor Rauswurf"
 
@@ -1551,7 +1564,7 @@ msgstr "Ignorieren"
 msgid "Ignore, or"
 msgstr "Ignorieren oder"
 
-#: internal/menu/actions_ipscores.go:304
+#: internal/menu/actions_ipscores.go:310
 msgid "Immortal Barons"
 msgstr "Immortal Barons"
 
@@ -1569,7 +1582,7 @@ msgid "In all, we grow about %s units of food each turn."
 msgstr "Wir erzeugen jeden Zug %s Einheiten Nahrung, und unser Volk isst %s."
 
 # Menu titles
-#: cmd/immortal-barons/league.go:225
+#: cmd/immortal-barons/league.go:222
 msgid "Inbound pending"
 msgstr "Eingang ausstehend"
 
@@ -1593,10 +1606,6 @@ msgstr "Industrie"
 msgid "Industrial Production"
 msgstr "Industrieproduktion"
 
-#: internal/menu/welcome.go:32
-msgid "Instructions"
-msgstr "Anleitung"
-
 #: internal/game/covert.go:237
 msgid ""
 "Intel on {who} — Land {land}, Troops {troops}, Turrets {turrets}, Tanks "
@@ -1614,7 +1623,7 @@ msgstr "Geheimdienstbündnis"
 msgid "Inter-BBS"
 msgstr "Inter-BBS"
 
-#: internal/menu/actions_ipscores.go:89
+#: internal/menu/actions_ipscores.go:95
 msgid "InterBBS Scores"
 msgstr "InterBBS-Punkte"
 
@@ -1622,7 +1631,7 @@ msgstr "InterBBS-Punkte"
 msgid "InterPlanetary Operations"
 msgstr "Interplanetare Operationen"
 
-#: internal/menu/tree.go:645
+#: internal/menu/tree.go:647
 msgid "InterPlanetary Ops"
 msgstr "Interplanetare Ops"
 
@@ -1664,11 +1673,11 @@ msgstr "Es erreicht sie frühestens in Zug %d ihres Tages."
 msgid "It struck the whole planet."
 msgstr "der ganze Planet"
 
-#: internal/menu/actions_attack.go:848
+#: internal/menu/actions_attack.go:849
 msgid "It will cost your planet %s Million Gold to fund.  Accept?"
 msgstr "Die Finanzierung kostet Ihren Planeten %s Millionen Gold.  Annehmen?"
 
-#: internal/menu/menu.go:1031
+#: internal/menu/menu.go:1032
 msgid "Item"
 msgstr "Posten"
 
@@ -1714,7 +1723,7 @@ msgstr ""
 "Krane, Euer Kriegsberater, Sire. Ich fasse mich kurz; der Feind tut es "
 "selten."
 
-#: internal/menu/actions_ipscores.go:193
+#: internal/menu/actions_ipscores.go:199
 msgid "Land"
 msgstr "Land"
 
@@ -1739,7 +1748,7 @@ msgstr "Letzte zu zitierende Zeile"
 msgid "Last Planetary Master: %s"
 msgstr "Letzter Planetenmeister: %s"
 
-#: cmd/immortal-barons/league.go:176
+#: cmd/immortal-barons/league.go:173
 msgid "League frozen"
 msgstr "Liga eingefroren"
 
@@ -1747,7 +1756,7 @@ msgstr "Liga eingefroren"
 msgid "Leave"
 msgstr ""
 
-#: internal/menu/actions_info.go:277
+#: internal/menu/actions_info.go:279
 msgid "Limited daily supply"
 msgstr "Begrenzter Tagesvorrat"
 
@@ -1813,27 +1822,27 @@ msgstr "Unterhalt:"
 msgid "Markets"
 msgstr "Märkte"
 
-#: internal/menu/config_editor.go:297
+#: internal/menu/config_editor.go:303
 msgid "Max Bombing Ops/Day (0 = unlimited)"
 msgstr "Max. Bombenops/Tag (0 = unbegrenzt)"
 
-#: internal/menu/config_editor.go:291
+#: internal/menu/config_editor.go:297
 msgid "Max Group Attacks/Day (0 = unlimited)"
 msgstr "Max. Gruppenangriffe/Tag (0 = unbegrenzt)"
 
-#: internal/menu/config_editor.go:288
+#: internal/menu/config_editor.go:294
 msgid "Max Individual Attacks/Day (0 = unlimited)"
 msgstr "Max. Einzelangriffe/Tag (0 = unbegrenzt)"
 
-#: internal/menu/config_editor.go:323
+#: internal/menu/config_editor.go:329
 msgid "Max Local Attacks/Day (0 = unlimited)"
 msgstr "Max. lokale Angriffe/Tag (0 = unbegrenzt)"
 
-#: internal/menu/config_editor.go:294
+#: internal/menu/config_editor.go:300
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr "Max. Terrorops/Tag (0 = unbegrenzt)"
 
-#: internal/menu/actions_attack.go:707
+#: internal/menu/actions_attack.go:708
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr "Höchste sinnvolle Ausgabe in diesem Jahr: %s Gold."
 
@@ -1889,11 +1898,11 @@ msgstr "KEINE"
 msgid "NOT FOUND"
 msgstr "NICHT GEFUNDEN"
 
-#: internal/menu/actions_regions.go:384
+#: internal/menu/actions_regions.go:377
 msgid "NOTE: Regions may not be sold, only dropped..."
 msgstr "HINWEIS: Regionen können nicht verkauft, nur aufgegeben werden..."
 
-#: internal/menu/actions_ipscores.go:317
+#: internal/menu/actions_ipscores.go:323
 msgid "Name"
 msgstr "Name"
 
@@ -1905,15 +1914,15 @@ msgstr "Nennen Sie den zu beobachtenden Planeten."
 msgid "Name your Realm:"
 msgstr "Benenne dein Reich:"
 
-#: internal/menu/actions_ipscores.go:185
+#: internal/menu/actions_ipscores.go:191
 msgid "Net Worth"
 msgstr "Vermögen"
 
-#: internal/menu/actions_ipscores.go:201
+#: internal/menu/actions_ipscores.go:207
 msgid "Net Worth / Region"
 msgstr "Vermögen / Region"
 
-#: internal/menu/actions_info.go:252
+#: internal/menu/actions_info.go:254
 msgid "Never"
 msgstr "Nie"
 
@@ -1925,7 +1934,7 @@ msgstr "Neue Menge %s zum Verkauf"
 msgid "New tax rate?"
 msgstr "Neuer Steuersatz?"
 
-#: internal/menu/menu.go:1275
+#: internal/menu/menu.go:1276
 msgid "No"
 msgstr "Nein"
 
@@ -1937,7 +1946,7 @@ msgstr "Keine Daten"
 msgid "No barons are known on that planet yet."
 msgstr "Auf diesem Planeten sind noch keine Barone bekannt."
 
-#: internal/menu/bulletinfiles.go:237
+#: internal/menu/bulletinfiles.go:233
 msgid "No battles have been fought yet."
 msgstr "Es wurden noch keine Schlachten geschlagen."
 
@@ -1945,7 +1954,7 @@ msgstr "Es wurden noch keine Schlachten geschlagen."
 msgid "No group attacks are forming right now."
 msgstr "Zurzeit formiert sich kein Gruppenangriff."
 
-#: internal/menu/actions_ipscores.go:79
+#: internal/menu/actions_ipscores.go:85
 msgid "No inter-BBS scores have been imported yet."
 msgstr "Es wurden noch keine Inter-BBS-Wertungen importiert."
 
@@ -1954,11 +1963,11 @@ msgstr "Es wurden noch keine Inter-BBS-Wertungen importiert."
 msgid "No land is available at this time."
 msgstr "Nichts ist auf diesen Planeten gerichtet."
 
-#: internal/menu/turnstages.go:532
+#: internal/menu/turnstages.go:537
 msgid "No matches. The Queen thanks you for your contribution."
 msgstr "Keine Treffer. Die Königin dankt für Ihren Beitrag."
 
-#: internal/menu/bulletinfiles.go:189
+#: internal/menu/bulletinfiles.go:192
 msgid "No news."
 msgstr "Keine Nachrichten."
 
@@ -2091,11 +2100,11 @@ msgstr ""
 "Hinweis: Regionspreise steigen mit der Expansion, der gezeigte Preis gilt\n"
 "      nur für die erste gekaufte Region."
 
-#: internal/menu/actions_attack.go:711
+#: internal/menu/actions_attack.go:712
 msgid "Note: You should only fund the SDI in increments of %d Gold."
 msgstr "Hinweis: Finanzieren Sie die SDI nur in Schritten von %d Gold."
 
-#: internal/menu/actions_attack.go:733
+#: internal/menu/actions_attack.go:734
 msgid "Nothing added: the SDI is funded in whole thousands of Gold."
 msgstr ""
 "Nichts hinzugefügt: Das SDI wird nur in vollen Tausend Gold finanziert."
@@ -2145,7 +2154,7 @@ msgstr "Davon sind %s Einheiten auf Angriffen unterwegs."
 msgid "Offer — goods you send:"
 msgstr "Angebot - Waren, die Sie senden:"
 
-#: internal/menu/actions_ipscores.go:381
+#: internal/menu/actions_ipscores.go:387
 msgid "One Dominion"
 msgstr "Ein Herrschaftsgebiet"
 
@@ -2211,7 +2220,7 @@ msgid_plural "{n} of your other agents were turned in by the locals."
 msgstr[0] "Einer Ihrer anderen Agenten wurde von den Einheimischen verraten."
 msgstr[1] "{n} Ihrer anderen Agenten wurden von den Einheimischen verraten."
 
-#: internal/menu/actions_attack.go:932
+#: internal/menu/actions_attack.go:933
 msgid "Only jets can attack a Gooie Kablooie, and you have none."
 msgstr "Nur Jets können einen Gooie Kablooie angreifen, und Sie haben keine."
 
@@ -2345,11 +2354,11 @@ msgstr ""
 "Unsere {Bergregionen} halten die Gießereien am Limit, %d%% der normalen "
 "Einheitenproduktion."
 
-#: cmd/immortal-barons/league.go:222
+#: cmd/immortal-barons/league.go:219
 msgid "Outbound waiting"
 msgstr "Ausgang wartend"
 
-#: internal/menu/bulletinfiles.go:242
+#: internal/menu/bulletinfiles.go:238
 msgid "Outcome"
 msgstr "Ergebnis"
 
@@ -2361,11 +2370,11 @@ msgstr "Besitz"
 msgid "PROTECTED"
 msgstr "GESCHÜTZT"
 
-#: internal/menu/turnstages.go:553
+#: internal/menu/turnstages.go:561
 msgid "Pick your six letters:"
 msgstr "Wählen Sie Ihre sechs Buchstaben:"
 
-#: internal/menu/actions_ipscores.go:319
+#: internal/menu/actions_ipscores.go:325
 msgid "Planet"
 msgstr "Planet"
 
@@ -2377,7 +2386,7 @@ msgstr "Planetenkoordinator"
 msgid "Planet Name"
 msgstr "Planetenname"
 
-#: internal/menu/actions_ipscores.go:309
+#: internal/menu/actions_ipscores.go:315
 msgid "Planetary Post"
 msgstr "Planetenpost"
 
@@ -2389,9 +2398,14 @@ msgstr "Planetensteuersatz (%)"
 msgid "Planetary Treaties"
 msgstr "Planetenverträge"
 
-#: internal/menu/tree.go:810
+#: internal/menu/tree.go:812
 msgid "Planetary time: %s   New day in %s"
 msgstr "Planetenzeit: %s   Neuer Tag in %s"
+
+#: internal/menu/bulletinfiles.go:82
+#, fuzzy
+msgid "Planets and Players"
+msgstr "Planeten wählen"
 
 # Main game menu
 #: internal/menu/tree.go:638
@@ -2402,7 +2416,7 @@ msgstr "Spielen"
 msgid "Player Letter: "
 msgstr "Spielerbuchstabe: "
 
-#: internal/menu/actions_info.go:313
+#: internal/menu/actions_info.go:315
 msgid "Player List"
 msgstr "Spielerliste"
 
@@ -2446,7 +2460,7 @@ msgstr ""
 msgid "Preferences"
 msgstr "Einstellungen"
 
-#: internal/menu/actions_regions.go:336
+#: internal/menu/actions_regions.go:329
 msgid "Press the letter of a region type to place the remaining %d."
 msgstr ""
 "Drücke den Buchstaben eines Regionstyps, um die restlichen %d zu platzieren."
@@ -2475,15 +2489,15 @@ msgstr "Öffentlich antworten?"
 msgid "Quick Strike"
 msgstr "Schneller Schlag"
 
-#: cmd/immortal-barons/league.go:196
+#: cmd/immortal-barons/league.go:193
 msgid "Quiet report"
 msgstr "Ruhemeldung"
 
-#: internal/menu/actions_ipscores.go:110
+#: internal/menu/actions_ipscores.go:116
 msgid "Quit"
 msgstr "Beenden"
 
-#: internal/play/play.go:673
+#: internal/play/play.go:703
 msgid "Quit?"
 msgstr "Beenden?"
 
@@ -2515,7 +2529,7 @@ msgstr ""
 msgid "Regions"
 msgstr "Regionen"
 
-#: internal/menu/actions_regions.go:373
+#: internal/menu/actions_regions.go:366
 msgid "Regions added to your empire. You now hold %d land."
 msgstr "Regionen Ihrem Reich hinzugefügt. Sie halten nun %d Land."
 
@@ -2645,21 +2659,17 @@ msgstr "Speichern..."
 msgid "Savings Interest Rate:"
 msgstr "Sparzins:"
 
-#: internal/menu/actions_ipscores.go:175
+#: internal/menu/actions_ipscores.go:181
 msgid "Score"
 msgstr "Punkte"
 
-#: internal/menu/bulletinfiles.go:70
+#: internal/menu/bulletinfiles.go:71
 msgid "Scoreboard"
 msgstr "Punktetafel"
 
-#: internal/menu/welcome.go:31
+#: internal/menu/welcome.go:32
 msgid "See Scores"
 msgstr "Punkte ansehen"
-
-#: internal/menu/tree.go:639
-msgid "See Status"
-msgstr "Status ansehen"
 
 #: internal/menu/actions_ipops.go:325
 #, fuzzy
@@ -2723,7 +2733,7 @@ msgstr "Wie viele Panzer senden?"
 msgid "Send how many Troopers?"
 msgstr "Wie viele Soldaten senden?"
 
-#: internal/menu/actions_attack.go:971
+#: internal/menu/actions_attack.go:972
 msgid "Send how many jets?"
 msgstr "Wie viele Jets senden?"
 
@@ -2779,7 +2789,7 @@ msgstr "Hineinlegen"
 msgid "Set the S3-Sabre dial (0-10)"
 msgstr "S3-Sabre-Regler einstellen (0-10)"
 
-#: cmd/immortal-barons/league.go:251
+#: cmd/immortal-barons/league.go:248
 msgid "Set-aside packets"
 msgstr "Zurückgelegte Pakete"
 
@@ -2792,7 +2802,7 @@ msgstr ""
 "Hauptquartier macht seine Panzer stärker, also schwächt dies jeden seiner "
 "Panzer."
 
-#: internal/menu/tree.go:610
+#: internal/menu/welcome.go:31
 msgid "Show Instructions"
 msgstr "Anleitung zeigen"
 
@@ -2877,7 +2887,7 @@ msgstr "Auswanderung schüren"
 msgid "Stir Revolts"
 msgstr "Aufstände schüren"
 
-#: internal/menu/actions_attack.go:942
+#: internal/menu/actions_attack.go:943
 msgid "Strength"
 msgstr "Stärke"
 
@@ -2920,7 +2930,7 @@ msgstr "Panzer"
 msgid "Target which baron?"
 msgstr "Welchen Baron ins Visier nehmen?"
 
-#: internal/menu/actions_attack.go:840
+#: internal/menu/actions_attack.go:841
 msgid "Target which planet?"
 msgstr "Welchen Planeten ins Visier nehmen?"
 
@@ -3187,28 +3197,28 @@ msgstr "Der Gooie Kablooie ist auf %s gerichtet."
 msgid "The Gooie Kablooie is already paid for."
 msgstr "Der Gooie Kablooie ist bereits bezahlt."
 
-#: internal/menu/actions_attack.go:779
+#: internal/menu/actions_attack.go:780
 msgid "The Gooie Kablooie is complete and launches at %s on the next run."
 msgstr ""
 "Der Gooie Kablooie ist fertig und startet beim nächsten Durchlauf nach %s."
 
-#: internal/menu/actions_attack.go:782
+#: internal/menu/actions_attack.go:783
 msgid "The Gooie Kablooie is complete. It launches at %s in %s."
 msgstr "Der Gooie Kablooie ist fertig. Er startet in %s nach %s."
 
-#: internal/menu/actions_attack.go:770
+#: internal/menu/actions_attack.go:771
 msgid "The Gooie Kablooie is on its way. Nothing more can be done with it."
 msgstr "Der Gooie Kablooie ist unterwegs. Mehr lässt sich nicht mehr tun."
 
-#: internal/menu/actions_attack.go:989
+#: internal/menu/actions_attack.go:990
 msgid "The Gooie Kablooie was DESTROYED!"
 msgstr "Der Gooie Kablooie wurde ZERSTÖRT!"
 
-#: internal/menu/turnstages.go:412
+#: internal/menu/turnstages.go:414
 msgid "The Queen Royale opens her coffers and refunds you %s gold!"
 msgstr "Die Queen Royale öffnet ihre Truhen und erstattet Ihnen %s Gold!"
 
-#: internal/menu/actions_attack.go:867
+#: internal/menu/actions_attack.go:868
 msgid "The Queen Royale puts %d million gold toward the Gooie Kablooie."
 msgstr "Die Queen Royale steuert %d Millionen Gold zum Gooie Kablooie bei."
 
@@ -3281,7 +3291,7 @@ msgstr "Der Feind verlor: %s."
 msgid "The food market is out of food for today."
 msgstr "Der Nahrungsmarkt hat für heute keine Nahrung mehr."
 
-#: internal/menu/tree.go:766
+#: internal/menu/tree.go:768
 msgid "The game begins %s."
 msgstr "Das Spiel beginnt %s."
 
@@ -3340,19 +3350,19 @@ msgstr ""
 "Die Spionagedatenbank ist leer. Spionieren Sie Reiche auf anderen Planeten "
 "aus, um sie zu füllen."
 
-#: internal/game/pirates.go:364
+#: internal/game/pirates.go:363
 msgid "The {who} could not hold what they had taken."
 msgstr "Die {who} konnten nicht halten, was sie erobert hatten."
 
-#: internal/game/pirates.go:370
+#: internal/game/pirates.go:369
 msgid "The {who} drove your forces back."
 msgstr "Die {who} trieben Ihre Streitkräfte zurück."
 
-#: internal/game/pirates.go:372
+#: internal/game/pirates.go:371
 msgid "The {who} held against everything you sent."
 msgstr "Die {who} hielten allem stand, was Sie schickten."
 
-#: internal/game/pirates.go:362
+#: internal/game/pirates.go:361
 msgid "The {who} scattered before your assault."
 msgstr "Die {who} zerstreuten sich vor Ihrem Angriff."
 
@@ -3368,7 +3378,7 @@ msgstr "Es gibt keine Aushänge zu lesen."
 msgid "There are no directives from the BBS Coordinator."
 msgstr "Es gibt keine Direktiven vom BBS-Koordinator."
 
-#: internal/game/pirates.go:405
+#: internal/game/pirates.go:412
 msgid "There are no pirates by that name."
 msgstr "Es gibt keine Piraten mit diesem Namen."
 
@@ -3378,7 +3388,7 @@ msgstr ""
 "Es sind keine gegnerischen Reiche mehr da, die man angreifen könnte.Es sind "
 "keine gegnerischen Imperien mehr übrig, die du angreifen kannst."
 
-#: internal/menu/actions_attack.go:969
+#: internal/menu/actions_attack.go:970
 msgid "There are only %d to choose from."
 msgstr "Es stehen nur %d zur Auswahl."
 
@@ -3429,7 +3439,7 @@ msgstr "Dies ist das Jahr %s Ihrer Herrschaft."
 msgid "This operation will cost %s gold."
 msgstr "Diese Operation kostet %s Gold."
 
-#: internal/menu/actions_attack.go:831
+#: internal/menu/actions_attack.go:832
 msgid "This planet has no Gooie Kablooie."
 msgstr "Dieser Planet hat keinen Gooie Kablooie."
 
@@ -3449,12 +3459,12 @@ msgstr "Dieser Planet baut keinen Gooie Kablooie."
 msgid "This planet's SpyGuys:"
 msgstr "SpyGuys dieses Planeten:"
 
-#: internal/play/play.go:391
+#: internal/play/play.go:405
 #, fuzzy
 msgid "This realm has been erased."
 msgstr "Die Direktiven wurden entfernt."
 
-#: internal/play/play.go:393
+#: internal/play/play.go:407
 msgid ""
 "This realm is no longer locked, so it was not erased. Call again to play it."
 msgstr ""
@@ -3492,7 +3502,7 @@ msgstr "%s auf %s"
 msgid "Today"
 msgstr "Heute"
 
-#: internal/menu/bulletinfiles.go:71
+#: internal/menu/bulletinfiles.go:72
 msgid "Today's News"
 msgstr "Heutige Nachrichten"
 
@@ -3500,35 +3510,35 @@ msgstr "Heutige Nachrichten"
 msgid "Too long: a realm name may be at most %d characters."
 msgstr "Zu lang: Ein Reichsname darf höchstens %d Zeichen haben."
 
-#: internal/menu/actions_ipscores.go:142
+#: internal/menu/actions_ipscores.go:148
 msgid "Top Planets by Land"
 msgstr "Top-Planeten nach Land"
 
-#: internal/menu/actions_ipscores.go:140
+#: internal/menu/actions_ipscores.go:146
 msgid "Top Planets by Net Worth"
 msgstr "Top-Planeten nach Vermögen"
 
-#: internal/menu/actions_ipscores.go:144
+#: internal/menu/actions_ipscores.go:150
 msgid "Top Planets by Net Worth Density"
 msgstr "Top-Planeten nach Vermögensdichte"
 
-#: internal/menu/actions_ipscores.go:138
+#: internal/menu/actions_ipscores.go:144
 msgid "Top Planets by Score"
 msgstr "Top-Planeten nach Punkten"
 
-#: internal/menu/actions_ipscores.go:150
+#: internal/menu/actions_ipscores.go:156
 msgid "Top Players by Land"
 msgstr "Top-Spieler nach Land"
 
-#: internal/menu/actions_ipscores.go:148
+#: internal/menu/actions_ipscores.go:154
 msgid "Top Players by Net Worth"
 msgstr "Top-Spieler nach Vermögen"
 
-#: internal/menu/actions_ipscores.go:152
+#: internal/menu/actions_ipscores.go:158
 msgid "Top Players by Net Worth Density"
 msgstr "Top-Spieler nach Vermögensdichte"
 
-#: internal/menu/actions_ipscores.go:146
+#: internal/menu/actions_ipscores.go:152
 msgid "Top Players by Score"
 msgstr "Top-Spieler nach Punkten"
 
@@ -3577,7 +3587,7 @@ msgstr "Handelsmarkt"
 msgid "Trading with other planets is turned off in this league."
 msgstr "Der Handel mit anderen Planeten ist in dieser Liga abgeschaltet."
 
-#: internal/menu/tree.go:345
+#: internal/menu/welcome.go:35
 msgid "Travel Times"
 msgstr "Reisezeiten"
 
@@ -3635,11 +3645,11 @@ msgstr "Zonennamen eingeben"
 msgid "UTC — one clock for the whole league (%s)"
 msgstr "UTC - eine Uhr für die ganze Liga (%s)"
 
-#: cmd/immortal-barons/league.go:246
+#: cmd/immortal-barons/league.go:243
 msgid "Unclaimed packet"
 msgstr "Nicht zugeordnetes Paket"
 
-#: cmd/immortal-barons/league.go:241
+#: cmd/immortal-barons/league.go:238
 msgid "Unclaimed packets"
 msgstr "Nicht abgeholte Pakete"
 
@@ -3647,15 +3657,15 @@ msgstr "Nicht abgeholte Pakete"
 msgid "Undermine Investments"
 msgstr "Investitionen untergraben"
 
-#: internal/menu/actions_info.go:275
+#: internal/menu/actions_info.go:277
 msgid "Unlimited"
 msgstr "Unbegrenzt"
 
-#: internal/menu/tree.go:732
+#: internal/menu/tree.go:734
 msgid "Unlimited supply today."
 msgstr "Heute unbegrenzter Vorrat."
 
-#: cmd/immortal-barons/league.go:229
+#: cmd/immortal-barons/league.go:226
 msgid "Unreadable journal"
 msgstr "Unlesbares Journal"
 
@@ -3680,7 +3690,7 @@ msgstr ""
 "Vell, Euer Schatzmeister, Sire. Ich zähle die Münzen zweimal - einmal für "
 "die Hoffnung, einmal für die Wahrheit."
 
-#: internal/menu/config_editor.go:338
+#: internal/menu/config_editor.go:344
 msgid "Version every board must run (blank for no requirement, e.g. 0.0.5):"
 msgstr ""
 "Version, die jedes Board haben muss (leer für keine Anforderung, z.B. 0.0.5):"
@@ -3851,7 +3861,7 @@ msgstr "Wann möchten Sie den Kredit zurückzahlen [Anzahl Tage]?"
 msgid "Which part of the world?"
 msgstr "Welcher Teil der Welt?"
 
-#: internal/menu/actions_regions.go:392
+#: internal/menu/actions_regions.go:385
 msgid "Which regions will you give up?"
 msgstr "Welche Regionen geben Sie auf?"
 
@@ -3896,11 +3906,11 @@ msgid "Word came late from {board}: your trade deal reached {who} after all."
 msgstr "Von {board} kam keine Antwort. Ihr {n} Agent ist heimgekehrt."
 
 # Turn pipeline — headers
-#: internal/menu/bulletinfiles.go:79
+#: internal/menu/bulletinfiles.go:81
 msgid "World Report"
 msgstr "Weltbericht"
 
-#: internal/menu/actions_attack.go:832
+#: internal/menu/actions_attack.go:833
 msgid "Would you like to begin construction?"
 msgstr "Möchten Sie mit dem Bau beginnen?"
 
@@ -3924,11 +3934,11 @@ msgstr "Schreiben,"
 msgid "Writing to:"
 msgstr "Schreiben an:"
 
-#: internal/menu/menu.go:1274
+#: internal/menu/menu.go:1275
 msgid "Yes"
 msgstr "Ja"
 
-#: internal/menu/bulletinfiles.go:72
+#: internal/menu/bulletinfiles.go:73
 msgid "Yesterday's News"
 msgstr "Gestrige Nachrichten"
 
@@ -3972,7 +3982,7 @@ msgstr ""
 msgid "You can afford %s%d%s regions."
 msgstr "Du kannst dir %s%d%s Regionen leisten."
 
-#: internal/menu/turnstages.go:476
+#: internal/menu/turnstages.go:479
 msgid "You can change it from the System menu."
 msgstr "Sie können es im Systemmenü ändern."
 
@@ -3988,7 +3998,7 @@ msgstr "Sie können sich zu diesem Preis nicht eine Einheit leisten."
 msgid "You cannot buy from your own listing."
 msgstr "Sie können nicht von Ihrem eigenen Angebot kaufen."
 
-#: internal/menu/turnstages.go:473
+#: internal/menu/turnstages.go:476
 msgid ""
 "You cannot change it until your new-realm protection ends, %d turns from now."
 msgstr ""
@@ -3998,7 +4008,7 @@ msgstr ""
 msgid "You cannot cover all your maintenance this turn."
 msgstr "Du kannst diesen Zug nicht deinen gesamten Unterhalt decken."
 
-#: internal/game/bank.go:257
+#: internal/game/bank.go:274
 msgid ""
 "You cannot hold more than {cap} gold in hand — {over} gold from {source} was "
 "lost."
@@ -4010,7 +4020,7 @@ msgstr ""
 msgid "You cannot trade while under new realm protection."
 msgstr "Unter Neureich-Schutz kannst du nicht handeln."
 
-#: internal/menu/actions_regions.go:270
+#: internal/menu/actions_regions.go:271
 msgid "You captured %d regions — choose which types to hold them as."
 msgstr ""
 "Sie haben %d Regionen erobert - wählen Sie, als welche Typen Sie sie halten."
@@ -4019,7 +4029,7 @@ msgstr ""
 msgid "You committed no forces; the attack is called off."
 msgstr "Sie haben keine Truppen eingesetzt, der Angriff wird abgeblasen."
 
-#: internal/game/pirates.go:368
+#: internal/game/pirates.go:367
 msgid "You could not successfully raid {who}."
 msgstr "Ihr Überfall auf {who} ist gescheitert."
 
@@ -4074,19 +4084,19 @@ msgstr ""
 msgid "You have %s Troopers, %s usable Jets, %s Tanks, and %s Bombers."
 msgstr "Sie haben %s Soldaten, %s einsetzbare Jets, %s Panzer und %s Bomber."
 
-#: internal/menu/tree.go:721
+#: internal/menu/tree.go:723
 msgid "You have %s gold and %d agents."
 msgstr "Sie haben %s Gold und %d Agenten."
 
-#: internal/menu/tree.go:707
+#: internal/menu/tree.go:709
 msgid "You have %s gold and %d turns."
 msgstr "Ihr habt %s Gold und %d Züge."
 
-#: internal/menu/tree.go:743
+#: internal/menu/tree.go:745
 msgid "You have %s gold and %s units of food."
 msgstr "Du hast %s Gold und %s Einheiten Nahrung."
 
-#: internal/menu/tree.go:705
+#: internal/menu/tree.go:707
 msgid "You have %s gold and 1 turn."
 msgstr "Ihr habt %s Gold und 1 Zug."
 
@@ -4094,7 +4104,7 @@ msgstr "Ihr habt %s Gold und 1 Zug."
 msgid "You have %s gold in hand and %s gold in the bank."
 msgstr "Sie haben %s Gold zur Hand und %s Gold auf der Bank."
 
-#: internal/menu/tree.go:716
+#: internal/menu/tree.go:718
 msgid "You have %s gold."
 msgstr "Sie haben %s Gold."
 
@@ -4122,7 +4132,7 @@ msgstr "Sie haben Ihre Terroroperationen für heute bereits alle gestartet."
 msgid "You have already launched that missile today."
 msgstr "Sie haben diese Rakete heute bereits gestartet."
 
-#: internal/menu/actions_attack.go:271
+#: internal/menu/actions_attack.go:272
 msgid "You have already made all %d of your attacks for today."
 msgstr "Sie haben heute bereits alle Ihre %d Angriffe durchgeführt."
 
@@ -4185,7 +4195,7 @@ msgstr "Sie haben keinen bestochenen Agenten in diesem Reich."
 msgid "You hold no bribed agents to work through."
 msgstr "Sie haben keine bestochenen Agenten, durch die Sie wirken könnten."
 
-#: internal/menu/turnstages.go:461
+#: internal/menu/turnstages.go:464
 msgid "You hold the office of %s."
 msgstr "Sie bekleiden das Amt des %s."
 
@@ -4193,7 +4203,7 @@ msgstr "Sie bekleiden das Amt des %s."
 msgid "You lost nothing!"
 msgstr "Sie haben nichts verloren!"
 
-#: internal/game/pirates.go:381
+#: internal/game/pirates.go:380
 msgid "You lost {l}."
 msgstr "Sie verloren {l}."
 
@@ -4234,9 +4244,10 @@ msgstr "Sie bekleiden das Amt des BBS-Koordinators nicht mehr."
 msgid "You offer %s to %s"
 msgstr "Sie bieten %s an %s"
 
-#: internal/game/pirates.go:363
-msgid "You overran the {who} and took back what you could."
-msgstr "Sie überrannten die {who} und holten zurück, was Sie konnten."
+#: internal/game/pirates.go:362
+#, fuzzy
+msgid "You overran the {who}."
+msgstr "Ihr Sicherheitsdienst fasste {who}."
 
 #: internal/menu/actions_bank.go:86
 msgid "You owe %s gold in %d Days."
@@ -4258,7 +4269,7 @@ msgstr "Sie erhalten: %s"
 msgid "You ship %s to %s of %s."
 msgstr "Sie senden %s an %s von %s."
 
-#: internal/game/pirates.go:383
+#: internal/game/pirates.go:387
 msgid "You took {l}."
 msgstr "Sie erbeuteten {l}."
 
@@ -4750,11 +4761,11 @@ msgid "Your armed forces require %s gold."
 msgstr "Deine Streitkräfte benötigen %s Gold."
 
 # Turn pipeline — maintenance
-#: internal/menu/turnstages.go:361
+#: internal/menu/turnstages.go:363
 msgid "Your armed forces require %s units of food."
 msgstr "Deine Streitkräfte benötigen %s Einheiten Nahrung."
 
-#: internal/game/pirates.go:371
+#: internal/game/pirates.go:370
 msgid "Your attack on the {who} was beaten off."
 msgstr "Ihr Angriff auf die {who} wurde zurückgeschlagen."
 
@@ -4800,7 +4811,7 @@ msgstr "Ihr Reich steht noch unter Schutz."
 msgid "Your dominion lost %s%s%s people."
 msgstr "Ihr Herrschaftsgebiet verlor %s%s%s Menschen."
 
-#: internal/game/pirates.go:360
+#: internal/game/pirates.go:359
 msgid "Your efforts against {who} have brought you success!"
 msgstr "Ihre Bemühungen gegen {who} waren erfolgreich!"
 
@@ -4834,18 +4845,11 @@ msgstr ""
 msgid "Your forces broke the enemy and captured {n} regions."
 msgstr "Ihre Streitkräfte schlugen den Feind und eroberten {n} Regionen."
 
-#: internal/game/pirates.go:361
+#: internal/game/pirates.go:360
 msgid "Your forces broke the {who} and came home loaded."
 msgstr "Ihre Streitkräfte schlugen die {who} und kehrten beladen heim."
 
-#: internal/menu/actions_regions.go:281
-msgid ""
-"Your forces brought home %d regions — choose which types to hold them as."
-msgstr ""
-"Ihre Streitkräfte brachten %d Regionen heim - wählen Sie, als welche Typen "
-"Sie sie halten."
-
-#: internal/menu/actions_attack.go:283
+#: internal/menu/actions_attack.go:284
 msgid ""
 "Your forces changed while you prepared the attack — only units still under "
 "your command were sent."
@@ -4892,7 +4896,7 @@ msgstr ""
 "Ihre gefälschte Kriegserklärung brachte {a} und {b} dazu, {n} Verträge zu "
 "zerreißen."
 
-#: internal/play/play.go:416
+#: internal/play/play.go:434
 msgid "Your former realm %s was destroyed; you begin anew."
 msgstr ""
 
@@ -4980,7 +4984,7 @@ msgstr "Ihr Volk erträgt Ihre Herrschaft, aber ohne viel Freude."
 msgid "Your people go about their business, content enough."
 msgstr "Ihr Volk geht seinen Geschäften nach und ist zufrieden genug."
 
-#: internal/menu/turnstages.go:360
+#: internal/menu/turnstages.go:362
 msgid "Your people need %s units of food."
 msgstr "Ihr Volk braucht %s Einheiten Nahrung."
 
@@ -5001,16 +5005,16 @@ msgstr "Ihr Volk kocht vor offenem Hass auf Ihre Herrschaft."
 msgid "Your proposal went to %d realms."
 msgstr "Ihr Vorschlag ging an %d Reiche."
 
-#: internal/game/pirates.go:369
+#: internal/game/pirates.go:368
 msgid "Your raid on the {who} came to nothing."
 msgstr "Ihr Überfall auf die {who} blieb ohne Ergebnis."
 
-#: internal/play/play.go:400
+#: internal/play/play.go:417
 #, fuzzy
 msgid "Your realm %s was destroyed."
 msgstr "{pct} jedes Angebots wurden vernichtet."
 
-#: internal/play/play.go:403
+#: internal/play/play.go:420
 #, fuzzy
 msgid ""
 "Your realm %s was destroyed. Return on a later day to build a new realm."
@@ -5123,7 +5127,7 @@ msgstr "Ihre Soldaten holten eine {missile} von {from} herunter."
 msgid "Your turrets brought down a {missile} from {from}."
 msgstr "Ihre Türme holten eine {missile} von {from} herunter."
 
-#: internal/menu/turnstages.go:467
+#: internal/menu/turnstages.go:470
 msgid "Your vote for BBS Coordinator is %s."
 msgstr "Ihre Stimme für den BBS-Koordinator ist %s."
 
@@ -5200,7 +5204,7 @@ msgstr ""
 msgid "Zone?"
 msgstr "Zone?"
 
-#: internal/menu/actions_regions.go:335
+#: internal/menu/actions_regions.go:328
 msgid "[%d Regions left] Your choice?"
 msgstr "[%d Regionen übrig] Ihre Wahl?"
 
@@ -5212,7 +5216,7 @@ msgstr "nie heimgekehrtes Gebot"
 msgid "a bribery attempt"
 msgstr "einem Bestechungsversuch"
 
-#: internal/game/economy.go:279
+#: internal/game/economy.go:293
 msgid "a food sale"
 msgstr "Nahrungsverkauf"
 
@@ -5224,11 +5228,11 @@ msgstr "Kredit"
 msgid "a lottery win"
 msgstr "Lotteriegewinn"
 
-#: internal/game/bank.go:178
+#: internal/game/bank.go:195
 msgid "a matured investment"
 msgstr "fällige Investition"
 
-#: internal/game/economy.go:487
+#: internal/game/economy.go:501
 msgid "a region sale"
 msgstr "Regionsverkauf"
 
@@ -5248,7 +5252,7 @@ msgstr "einem Terroranschlag"
 msgid "a trade deal"
 msgstr "Handelsgeschäft"
 
-#: internal/game/economy.go:453
+#: internal/game/economy.go:467
 msgid "a unit sale"
 msgstr "Einheitenverkauf"
 
@@ -5264,7 +5268,7 @@ msgstr "Agenten"
 msgid "an agent behind {attempt}, in {who}'s pay"
 msgstr "einen Agenten hinter {attempt}, im Sold von {who}"
 
-#: internal/game/economy.go:471
+#: internal/game/economy.go:485
 msgid "an agent sale"
 msgstr "Agentenverkauf"
 
@@ -5288,7 +5292,7 @@ msgstr "einem Versuch, Ihre Beziehungen auszuspähen"
 msgid "an unfilled interplanetary bid"
 msgstr "unerfülltes interplanetares Gebot"
 
-#: internal/menu/incoming.go:166
+#: internal/menu/incoming.go:198
 msgid "away"
 msgstr "weg"
 
@@ -5386,11 +5390,11 @@ msgstr ""
 msgid "group attack"
 msgstr "Gruppenangriff"
 
-#: internal/menu/bulletinfiles.go:281
+#: internal/menu/bulletinfiles.go:340
 msgid "held"
 msgstr "gehalten"
 
-#: internal/menu/bulletinfiles.go:248
+#: internal/menu/bulletinfiles.go:244
 msgid "here"
 msgstr "hier"
 
@@ -5410,7 +5414,7 @@ msgstr ""
 "die Spieler auflisten und den Namen eines Anrufers ändern, sein Reich "
 "umbenennen oder entfernen, dann beenden"
 
-#: internal/game/ibbs_auth.go:439
+#: internal/game/ibbs_auth.go:460
 msgid "no board key is loaded"
 msgstr "kein Boardschlüssel geladen"
 
@@ -5418,7 +5422,7 @@ msgstr "kein Boardschlüssel geladen"
 msgid "no coordinator key is loaded"
 msgstr "kein Koordinatorschlüssel geladen"
 
-#: internal/menu/turnstages.go:465
+#: internal/menu/turnstages.go:468
 msgid "no one"
 msgstr "niemand"
 
@@ -5426,7 +5430,7 @@ msgstr "niemand"
 msgid "no such group attack"
 msgstr "kein solcher Gruppenangriff"
 
-#: internal/menu/config_editor.go:447
+#: internal/menu/config_editor.go:453
 msgid "not a valid date (use YYYY-MM-DD)"
 msgstr "kein gültiges Datum (JJJJ-MM-TT verwenden)"
 
@@ -5439,7 +5443,7 @@ msgstr "nichts"
 msgid "nothing returned."
 msgstr "{units} kehrten zurück."
 
-#: internal/menu/incoming.go:125
+#: internal/menu/incoming.go:121
 msgid "now"
 msgstr "jetzt"
 
@@ -5495,7 +5499,7 @@ msgstr ""
 "ausgeben, an welches Board die Pakete jedes Planeten gehen und in welches "
 "Verzeichnis sie geschrieben werden, dann beenden"
 
-#: internal/game/pirates.go:457
+#: internal/game/pirates.go:464
 msgid "reclaimed pirate loot"
 msgstr "zurückgeholte Piratenbeute"
 
@@ -5691,7 +5695,7 @@ msgstr ""
 "angegeben, entfällt der Einstellungseditor, für ein Mitgliedsboard, das "
 "seine Regeln vom Koordinator übernimmt"
 
-#: internal/menu/incoming.go:132
+#: internal/menu/incoming.go:126
 msgid "this planet"
 msgstr "dieser Planet"
 
@@ -5699,7 +5703,7 @@ msgstr "dieser Planet"
 msgid "this turn's income"
 msgstr "Einnahmen dieses Zuges"
 
-#: internal/menu/bulletinfiles.go:277
+#: internal/menu/bulletinfiles.go:336
 msgid "took %d"
 msgstr "nahm %d"
 
@@ -5719,7 +5723,7 @@ msgstr "Nahrungseinheiten sind verdorben."
 msgid "usage: immortal-barons [options]"
 msgstr "Aufruf: immortal-barons [Optionen]"
 
-#: internal/menu/bulletinfiles.go:279
+#: internal/menu/bulletinfiles.go:338
 msgid "won"
 msgstr "gewann"
 
@@ -5867,7 +5871,7 @@ msgstr "Der S3-Sabre von {from} traf Ihre Wohngebiete und vernichtete {lost}."
 msgid "{from}'s chemical strike killed {n} of your people."
 msgstr "Der Chemieangriff von {from} tötete {n} Ihrer Einwohner."
 
-#: internal/game/specials.go:331
+#: internal/game/specials.go:328
 msgid ""
 "{from}'s chemical strike laid waste to {n} of your regions and killed "
 "{people} of your people; famine follows."
@@ -5879,7 +5883,7 @@ msgstr ""
 msgid "{from}'s nuclear strike turned {n} of your regions into waste."
 msgstr "Der Atomschlag von {from} verwandelte {n} Ihrer Regionen in Ödland."
 
-#: internal/game/specials.go:367
+#: internal/game/specials.go:364
 msgid ""
 "{from}'s plague killed {troopers} of your troopers and {people} of your "
 "people; famine follows."
@@ -6129,6 +6133,21 @@ msgstr ""
 #: internal/menu/input.go:479
 msgid "─»>Paused<«─"
 msgstr "─»>Pause<«─"
+
+#~ msgid "Instructions"
+#~ msgstr "Anleitung"
+
+#~ msgid "See Status"
+#~ msgstr "Status ansehen"
+
+#~ msgid "You overran the {who} and took back what you could."
+#~ msgstr "Sie überrannten die {who} und holten zurück, was Sie konnten."
+
+#~ msgid ""
+#~ "Your forces brought home %d regions — choose which types to hold them as."
+#~ msgstr ""
+#~ "Ihre Streitkräfte brachten %d Regionen heim - wählen Sie, als welche "
+#~ "Typen Sie sie halten."
 
 #~ msgid "Defense"
 #~ msgstr "Verteidigung"
