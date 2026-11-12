@@ -115,7 +115,9 @@ func incomingRows(s session.Session, w *ctx) []inRow {
 			r.planet = t.FromBoard
 			r.when, r.away = incomingWhen(s, now, t)
 			// Past its hour but not yet down, it lands on the next planetary run.
-			if d != nil && r.away && !d.ArrivesAt.IsZero() && !now.Before(d.ArrivesAt) {
+			// A weapon already down is besieging, so a row it shares a builder
+			// with is about the next one, whose arrival d does not hold.
+			if d != nil && d.DaysLeft == 0 && r.away && !d.ArrivesAt.IsZero() && !now.Before(d.ArrivesAt) {
 				r.when = tr(s, "now")
 			}
 			switch t.Kind {
