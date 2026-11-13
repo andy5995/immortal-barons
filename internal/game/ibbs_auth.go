@@ -433,9 +433,8 @@ func boardSigningBytes(p Packet) ([]byte, error) {
 	p.BoardSig = nil
 	p.Hops = 0
 	p.Protocol = 0
-	p.Ruleset = ""  // see Packet.Ruleset: excluded for Protocol's reason, and it buys nothing signed
-	p.Battles = nil // see Packet.Battles: unsigned so it can be added at all
-	// A Gooie's arrival instant is excluded for Battles' reason, and it is not
+	p.Ruleset = "" // see Packet.Ruleset: excluded for Protocol's reason, and it buys nothing signed
+	// A Gooie's arrival instant is excluded for Ruleset's reason, and it is not
 	// optional. Signing covers the marshalled packet, so a board that predates
 	// the field drops it on parse, re-marshals without it, and the signature
 	// fails — the whole status is refused rather than merely arriving without an

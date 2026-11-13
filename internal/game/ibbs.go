@@ -173,15 +173,10 @@ type Packet struct {
 	// for byte what an older board produces -- inserting it anywhere else would
 	// have moved every field after it, and json emits in declaration order.
 	//
-	// Excluded from the origin signature in boardSigningBytes, for the same
-	// reason Protocol is: an older board drops the field it does not know and
-	// re-marshals without it, so a signature that covered it could never verify
-	// there. What that costs is that a hostile hop could add a battle nobody
-	// fought to a report, or, with an entry numbered far ahead, keep the sending
-	// board's real battles out of it -- prose in a bulletin, with no effect on
-	// play -- and what it buys is that every ordinary packet still verifies
-	// across the change. A hop cannot touch another board's entries: only those
-	// naming the packet's signed sender are taken in (mergeBattles).
+	// Covered by the origin signature since Protocol 8. It was left out at
+	// first so older boards could verify packets carrying it, but once entries
+	// were numbered (BattleLogEntry.Seq), a hop that added one entry numbered
+	// far ahead could keep the sender's real battles out of every report.
 	Battles []BattleLogEntry `json:",omitempty"`
 }
 

@@ -98,7 +98,10 @@ const Version = "0.2.10-dev"
 // Moved to 7 in v0.2.8: SpyReport lost Offense, Defense and Gold, which the
 // original's spy record never held. An older board would put them back as zero
 // when it re-marshals a report, and every signature on it would fail.
-const Protocol = 7
+//
+// Moved to 8 in v0.2.10: Packet.Battles is now signed, which an older board,
+// still removing it before checking, would fail to verify.
+const Protocol = 8
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
 // apply. A packet that states no protocol is NOT one of them — see Protocol.

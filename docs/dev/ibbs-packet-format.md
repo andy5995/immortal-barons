@@ -265,7 +265,7 @@ map of it, not a second definition.
                                      // FromBoard is proven rather than claimed (#118).
                                      // boardSigningBytes zeroes the fields that must not be
                                      // signed first: BoardSig itself, Hops (which every hub
-                                     // increments), Protocol, Ruleset and Battles.
+                                     // increments), Protocol and Ruleset.
                                      // Signature IS covered, so a coordinator order cannot be
                                      // lifted out of one packet and grafted into another.
   "League": 42,                     // league number; a board in two leagues ignores the other's.

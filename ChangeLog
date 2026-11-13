@@ -1,5 +1,8 @@
 Immortal Barons ChangeLog
 
+(in-progress:)
+  * BREAKING: packet protocol 8
+
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset
   * config-during-reset: a new Full Bank Start setting (off) starts each new

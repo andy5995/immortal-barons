@@ -291,17 +291,11 @@ type BattleLogEntry struct {
 	// attack -- "nuclear", "chemical", "biological". Empty for a conventional
 	// battle, which is every entry written before strikes were logged, so an
 	// older board's packets read as attacks and are right to.
-	//
-	// NO PROTOCOL BUMP for this field, deliberately. Battles are stripped before
-	// signing (see StampOutbox), so the signed bytes do not change; the tag is
-	// omitempty, so an older board never sees it; and SpeaksOurProtocol is an
-	// exact match, so bumping would HOLD every packet from a board still on the
-	// old build for a purely additive field. See the golden shape test.
 	Weapon string `json:",omitempty"`
-	// Seq numbers the board's own entries so two real battles never compare
-	// equal: mergeBattles drops exact matches to absorb a resent packet, and a
-	// realm beating the same neighbor twice in a day otherwise reached the other
-	// boards once. Zero on entries logged before it existed.
+	// Seq numbers the board's own entries in order, which is how the other
+	// boards tell a new entry from a resent one (mergeBattles). Matching on
+	// content instead let a realm that beat the same neighbor twice in a day
+	// reach them once. Zero on entries logged before it existed.
 	Seq int `json:",omitempty"`
 }
 
@@ -332,8 +326,8 @@ func (w *World) appendBattle(e BattleLogEntry) {
 }
 
 // mergeBattles takes in the log a board sent, keeping only the entries that
-// name that board: Battles is not signed (see Packet.Battles), and the board
-// that signed the packet is the one whose wars it may report.
+// name that board: a board reports its own wars and forwards nobody else's
+// (ownBattles).
 //
 // Every packet resends the sender's whole log, oldest first, so most of it is
 // already here. A numbered entry is new only above the highest number taken

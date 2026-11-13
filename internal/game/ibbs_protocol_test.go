@@ -85,3 +85,30 @@ func TestProtocolHoldIsAnnouncedOncePerBoard(t *testing.T) {
 		}
 	}
 }
+
+// The battle log is signed: a hop that renumbers one entry must break the
+// signature, or a single entry numbered far ahead could keep the sender's
+// battles out of every World Report (mergeBattles).
+func TestBattleLogIsSigned(t *testing.T) {
+	pub, priv, err := ed25519.GenerateKey(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := &World{}
+	w.Config.BoardID = "Alpha BBS"
+	w.BoardKey = priv
+	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "Alpha BBS", PublicKey: hex.EncodeToString(pub)}, {Number: 2, Name: "Bravo BBS"}}
+
+	p := Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Seq: 7,
+		Battles: []BattleLogEntry{{Planet: "Alpha BBS", Attacker: "A", Defender: "D", Seq: 3}}}
+	if err := w.SignAsBoard(&p); err != nil {
+		t.Fatal(err)
+	}
+	if ok, checked := w.VerifyBoardOrigin(p); !checked || !ok {
+		t.Fatal("an untouched packet did not verify")
+	}
+	p.Battles = []BattleLogEntry{{Planet: "Alpha BBS", Attacker: "A", Defender: "D", Seq: 999999999}}
+	if ok, _ := w.VerifyBoardOrigin(p); ok {
+		t.Error("a renumbered battle entry still verified")
+	}
+}
