@@ -238,7 +238,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 			say("{who} attacked you and took {n} regions. You lost {lost}.",
 				"who", a.Name, "n", captured, "lost", defenderCas(dloss)),
 			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
-		w.postCombatNews(a, d, true, !d.Alive)
+		w.postCombatNews(a, d, true, !d.Alive, captured)
 	} else {
 		// A repelled attack scores nothing for either side. The original's only two
 		// Score writes are on the winning-ATTACK paths, and neither touches a
@@ -258,7 +258,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 			say("{who} attacked you and was repelled. You lost {lost}.",
 				"who", a.Name, "lost", defenderCas(dloss)),
 			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
-		w.postCombatNews(a, d, false, false)
+		w.postCombatNews(a, d, false, false, 0)
 	}
 	return b.String(), captured
 }

@@ -284,3 +284,4 @@ BattleLogEntry:
   Crushed
   Remote
   Weapon `json:",omitempty"`
+  Seq `json:",omitempty"`

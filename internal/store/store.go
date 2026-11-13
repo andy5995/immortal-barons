@@ -36,8 +36,8 @@ func NewGame(cfg game.Config) (*game.World, error) {
 	return w, nil
 }
 
-// LedgerFile holds the packet ledger (World.OutSeq, HighSeq, ReplayFloor and
-// SeenSeqs): the
+// LedgerFile holds the packet ledger (World.OutSeq, HighSeq, ReplayFloor,
+// SeenSeqs and BattleSeq): the
 // numbering of this board's packets and the record of packets applied here.
 // It is kept apart from world.json because a reset erases the world and must
 // not erase this — see World.OutSeq.
@@ -51,6 +51,7 @@ type ledger struct {
 	HighSeq     map[string]uint64   `json:",omitempty"`
 	ReplayFloor map[string]uint64   `json:",omitempty"`
 	SeenSeqs    map[string][]uint64 `json:",omitempty"`
+	BattleSeq   int                 `json:",omitempty"`
 	// Gen is the save this ledger was written by, and world.json carries the
 	// same number (savedWorld). The ledger is renamed into place first, so a
 	// save that stops between the two renames leaves it one ahead of the world:
@@ -180,6 +181,7 @@ func loadLedger(w *game.World, cfg game.Config, worldData []byte) error {
 		}
 	}
 	w.OutSeq, w.HighSeq, w.ReplayFloor, w.SeenSeqs = l.OutSeq, l.HighSeq, l.ReplayFloor, l.SeenSeqs
+	w.BattleSeq = l.BattleSeq
 	w.LedgerGen = saved.LedgerGen
 	return nil
 }
@@ -192,7 +194,7 @@ func writeLedgerTemp(w *game.World, cfg game.Config, gen uint64) (string, error)
 	if err != nil {
 		return "", err
 	}
-	l := ledger{OutSeq: w.OutSeq, HighSeq: w.HighSeq, ReplayFloor: w.ReplayFloor, SeenSeqs: w.SeenSeqs, Gen: gen}
+	l := ledger{OutSeq: w.OutSeq, HighSeq: w.HighSeq, ReplayFloor: w.ReplayFloor, SeenSeqs: w.SeenSeqs, BattleSeq: w.BattleSeq, Gen: gen}
 	l.Before = l.changedSince(&was)
 	data, err := json.MarshalIndent(l, "", "  ")
 	if err != nil {

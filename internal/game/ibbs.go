@@ -177,9 +177,11 @@ type Packet struct {
 	// reason Protocol is: an older board drops the field it does not know and
 	// re-marshals without it, so a signature that covered it could never verify
 	// there. What that costs is that a hostile hop could add a battle nobody
-	// fought to a report -- prose in a bulletin, with no effect on play -- and
-	// what it buys is that every ordinary packet still verifies across the
-	// change.
+	// fought to a report, or, with an entry numbered far ahead, keep the sending
+	// board's real battles out of it -- prose in a bulletin, with no effect on
+	// play -- and what it buys is that every ordinary packet still verifies
+	// across the change. A hop cannot touch another board's entries: only those
+	// naming the packet's signed sender are taken in (mergeBattles).
 	Battles []BattleLogEntry `json:",omitempty"`
 }
 
@@ -760,7 +762,7 @@ func (w *World) applyPacket(p Packet, outcome *ApplyOutcome) Packet {
 	}
 	// Another planet's wars, for the world report. Kept apart from the news:
 	// these are records, not sentences, and the report renders them itself.
-	w.mergeBattles(p.Battles)
+	w.mergeBattles(p.FromBoard, p.Battles)
 	// Scouting asked of us: answer with what is true here and now.
 	for _, req := range p.Recon {
 		// An empty TargetEmpire is a GLOBAL request — the Coordinator's sweep of

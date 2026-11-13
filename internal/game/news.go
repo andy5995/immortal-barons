@@ -82,7 +82,7 @@ func (w *World) postNews(line string) {
 }
 
 // postCombatNews broadcasts the outcome of a regular attack to the planet.
-func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
+func (w *World) postCombatNews(a, d *Empire, won, conquered bool, land int) {
 	// Every conventional battle funnels through here, so this is the honest place
 	// to tally them for the -spectate balance probe. Counting them by matching the
 	// news prose below would break the moment the wording changes.
@@ -93,7 +93,7 @@ func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
 	// Recorded here for the same reason it is counted here: every conventional
 	// battle passes through, and the alternative is reading it back out of the
 	// prose below.
-	w.logBattle(BattleLogEntry{Attacker: a.Name, Defender: d.Name, Won: won, Crushed: conquered})
+	w.logBattle(BattleLogEntry{Attacker: a.Name, Defender: d.Name, Won: won, Land: land, Crushed: conquered})
 	var lines []string
 	switch {
 	case conquered:
@@ -298,6 +298,11 @@ type BattleLogEntry struct {
 	// exact match, so bumping would HOLD every packet from a board still on the
 	// old build for a purely additive field. See the golden shape test.
 	Weapon string `json:",omitempty"`
+	// Seq numbers the board's own entries so two real battles never compare
+	// equal: mergeBattles drops exact matches to absorb a resent packet, and a
+	// realm beating the same neighbor twice in a day otherwise reached the other
+	// boards once. Zero on entries logged before it existed.
+	Seq int `json:",omitempty"`
 }
 
 // MaxBattleLog bounds the log. A league that fights hard produces a few dozen
@@ -306,40 +311,70 @@ type BattleLogEntry struct {
 // and the wire without limit.
 const MaxBattleLog = 200
 
-// logBattle records one attack, newest last, discarding the oldest once the log
-// is full.
+// logBattle records one attack fought here, newest last, numbering it so the
+// other boards can tell it from every other entry this board has sent.
 func (w *World) logBattle(e BattleLogEntry) {
 	if e.Date == "" {
 		e.Date = w.LastMaintDate
 	}
+	w.BattleSeq++
+	e.Seq = w.BattleSeq
+	w.appendBattle(e)
+}
+
+// appendBattle adds an entry as it stands, discarding the oldest once the log
+// is full.
+func (w *World) appendBattle(e BattleLogEntry) {
 	w.Battles = append(w.Battles, e)
 	if len(w.Battles) > MaxBattleLog {
 		w.Battles = w.Battles[len(w.Battles)-MaxBattleLog:]
 	}
 }
 
-// mergeBattles takes in another board's log, ignoring any entry that names no
-// planet -- a board stamps its own name on the way out, so a blank one is
-// either malformed or would masquerade as a battle fought here.
+// mergeBattles takes in the log a board sent, keeping only the entries that
+// name that board: Battles is not signed (see Packet.Battles), and the board
+// that signed the packet is the one whose wars it may report.
 //
-// A resend repeats entries the board already holds, so they are matched on
-// their content rather than trusted to arrive once: a packet can be replayed,
-// and a world report that counted the same battle twice would be worse than
-// one a day out of date.
-func (w *World) mergeBattles(in []BattleLogEntry) {
-	if len(in) == 0 {
+// Every packet resends the sender's whole log, oldest first, so most of it is
+// already here. A numbered entry is new only above the highest number taken
+// from that board: matching against the log instead would take back every
+// entry the cap had already discarded, as the newest. The mark only rises, so a
+// packet arriving behind a later one (SeenPacket) adds nothing. Entries logged
+// before numbering are matched on content.
+func (w *World) mergeBattles(from string, in []BattleLogEntry) {
+	if len(in) == 0 || from == "" {
 		return
 	}
-	seen := make(map[BattleLogEntry]bool, len(w.Battles))
-	for _, b := range w.Battles {
-		seen[b] = true
-	}
+	var seen map[BattleLogEntry]bool
+	mark := w.BattleSeen[from]
 	for _, b := range in {
-		if b.Planet == "" || seen[b] {
+		if b.Planet != from {
 			continue
 		}
-		seen[b] = true
-		w.logBattle(b)
+		if b.Seq > 0 {
+			if b.Seq <= mark {
+				continue
+			}
+			mark = b.Seq
+		} else {
+			if seen == nil {
+				seen = make(map[BattleLogEntry]bool, len(w.Battles))
+				for _, h := range w.Battles {
+					seen[h] = true
+				}
+			}
+			if seen[b] {
+				continue
+			}
+			seen[b] = true
+		}
+		w.appendBattle(b)
+	}
+	if mark > w.BattleSeen[from] {
+		if w.BattleSeen == nil {
+			w.BattleSeen = map[string]int{}
+		}
+		w.BattleSeen[from] = mark
 	}
 }
 

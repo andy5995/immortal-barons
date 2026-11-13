@@ -180,6 +180,8 @@ type World struct {
 	// travels with the scores broadcast, so every board can show the whole
 	// league's wars rather than only its own (#233).
 	Battles []BattleLogEntry `json:",omitempty"`
+	// BattleSeen is the highest Seq taken in from each board, by board ID.
+	BattleSeen map[string]int `json:",omitempty"`
 
 	// BattlesTotal/ConquestsTotal count conventional battles and outright
 	// conquests for the lifetime of the process. Not persisted: they exist so the
@@ -413,10 +415,16 @@ type World struct {
 	// still apply: every number at or below the floor counts as seen, and
 	// SeenSeqs lists, sorted, those applied above it (IsPacketSeen).
 	//
+	// BattleSeq is the last number handed to an entry in this board's battle
+	// log. In the ledger for OutSeq's reason: the other boards remember the
+	// highest number they took from this one (BattleSeen), so restarting from 1
+	// after a reset would have them ignore this board's battles.
+	//
 	// LedgerGen counts the saves of the world and ledger as a pair, and belongs
 	// to the store (store.Save), which writes it into both files.
 	LedgerGen       uint64              `json:"-"`
 	OutSeq          uint64              `json:"-"`
+	BattleSeq       int                 `json:"-"`
 	HighSeq         map[string]uint64   `json:"-"`
 	ReplayFloor     map[string]uint64   `json:"-"`
 	SeenSeqs        map[string][]uint64 `json:"-"`
