@@ -74,7 +74,7 @@ func TestWorldReportShowsAttacksAndNamesTheOutcome(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(body)
-	for _, want := range []string{"Apples", "Bananas", "took 12", "CRUSHED", "Delta BBS", "held"} {
+	for _, want := range []string{"Apples", "Bananas", "took 12", "CRUSHED", "Delta BBS", "held", "2026-08-27"} {
 		if !strings.Contains(text, want) {
 			t.Errorf("the world report does not mention %q:\n%s", want, text)
 		}

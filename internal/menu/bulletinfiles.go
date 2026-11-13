@@ -201,11 +201,17 @@ func writeNewsBulletin(s session.Session, w *ctx, today bool) {
 // names have to fit side by side, and BRE sizes each screen to its own content
 // rather than to a house width. Still inside 80 columns.
 const (
-	planetCol = 20
-	sideCol   = 18
+	dateCol   = 10 // YYYY-MM-DD
+	planetCol = 17
+	sideCol   = 17
 )
 
-var worldRule = strings.Repeat("─", 2+planetCol+1+sideCol+1+sideCol+1+8)
+// worldRule is the report's rule, with junction where it crosses the bar
+// after the date column ("─" where nothing crosses it).
+func worldRule(junction string) string {
+	return strings.Repeat("─", 2+dateCol+1) + junction +
+		strings.Repeat("─", 1+planetCol+1+sideCol+1+sideCol+1+8)
+}
 
 // writeWorldReport draws the league's wars: every attack fought anywhere the
 // board has heard from, newest first. Asked for by a sysop who had each board's
@@ -227,16 +233,18 @@ func writeWorldReport(s session.Session, w *ctx) {
 	// Its own heading, not the news masthead: that one names the news file and
 	// draws the planet's banner under it, neither of which belongs on a report
 	// about the whole league.
-	leagueHeading(s, w.day, "World Report", ansi.FgBrightRed+worldRule+ansi.Reset)
+	leagueHeading(s, w.day, "World Report", ansi.FgBrightRed+worldRule("─")+ansi.Reset)
 
 	if len(battles) == 0 {
 		okNoPause(s, "No battles have been fought yet.")
 		return
 	}
-	fmt.Fprintf(s, "%s  %-*s %-*s %-*s %s%s\n", ansi.FgBrightCyan,
+	bar := dim(ansi.FgBrightRed) + "│" + ansi.Reset
+	fmt.Fprintf(s, "%s  %s %s%s %-*s %-*s %-*s %s%s\n", ansi.FgBrightCyan,
+		padColumn(w.Term, tr(s, "Date"), dateCol), bar, ansi.FgBrightCyan,
 		planetCol, tr(s, "Planet"), sideCol, tr(s, "Attacker"),
 		sideCol, tr(s, "Defender"), tr(s, "Outcome"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule("┼"), ansi.Reset)
 	for i := len(battles) - 1; i >= 0; i-- {
 		b := battles[i]
 		planet := b.Planet
@@ -247,13 +255,14 @@ func writeWorldReport(s session.Session, w *ctx) {
 		// and the WORDS differ too, so the plain file and a monochrome terminal
 		// say the same thing color alone would.
 		outcome, color := worldReportOutcome(s, b)
-		fmt.Fprintf(s, "  %s%s %s %s %s%s%s\n",
-			ansi.FgWhite, padColumn(w.Term, planet, planetCol),
+		fmt.Fprintf(s, "  %s%s %s%s %s %s %s %s%s%s\n",
+			ansi.FgWhite, padColumn(w.Term, b.Date, dateCol), bar, ansi.FgWhite,
+			padColumn(w.Term, planet, planetCol),
 			padColumn(w.Term, b.Attacker, sideCol),
 			padColumn(w.Term, b.Defender, sideCol),
 			color, outcome, ansi.Reset)
 	}
-	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule("┴"), ansi.Reset)
 }
 
 // leagueHeading is the masthead of a bulletin about the whole league: the game,
