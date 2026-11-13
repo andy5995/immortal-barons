@@ -674,7 +674,7 @@ func (w *World) MarkReloaded() { w.reloadGen++ }
 // mutate-or-snapshot window — never around player input.
 //
 // A Transact that fails is recorded rather than returned: the error is the same
-// for all 74 call sites (the world on disk did not accept this mutation) and
+// for every call site (the world on disk did not accept this mutation) and
 // none of them can do anything useful with it locally. It is session-fatal, not
 // action-local — every later action would build on state that was never
 // persisted — so Run reports it once and ends the session. Discarding it here
