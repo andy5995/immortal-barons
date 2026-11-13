@@ -147,9 +147,16 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// Windows CI failure read as "its process's write was lost" with no error
 	// anywhere in the log.
 	defer func() {
-		if err == nil {
-			if storeErr := w.StoreErr(); storeErr != nil {
-				err = fmt.Errorf("the world could not be saved, so this session was not recorded: %w", storeErr)
+		// Added to an existing error, not only filled in when err is nil: a path
+		// that leaves with its own error (a failed bulletin sync at login) would
+		// otherwise hide the failed save that came with it. One line, because the
+		// door prints it to a raw terminal and a one-line-per-entry log.
+		if storeErr := w.StoreErr(); storeErr != nil {
+			saveErr := fmt.Errorf("the world could not be saved, so this session was not recorded: %w", storeErr)
+			if err == nil {
+				err = saveErr
+			} else {
+				err = fmt.Errorf("%w; %w", err, saveErr)
 			}
 		}
 	}()
