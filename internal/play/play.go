@@ -151,12 +151,17 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 		// that leaves with its own error (a failed bulletin sync at login) would
 		// otherwise hide the failed save that came with it. One line, because the
 		// door prints it to a raw terminal and a one-line-per-entry log.
+		var worldErr error
 		if storeErr := w.StoreErr(); storeErr != nil {
-			saveErr := fmt.Errorf("the world could not be saved, so this session was not recorded: %w", storeErr)
+			worldErr = fmt.Errorf("the world could not be saved, so this session was not recorded: %w", storeErr)
+		} else if readErr := w.ReadErr(); readErr != nil {
+			worldErr = fmt.Errorf("the world could not be read, so a screen showed stale figures: %w", readErr)
+		}
+		if worldErr != nil {
 			if err == nil {
-				err = saveErr
+				err = worldErr
 			} else {
-				err = fmt.Errorf("%w; %w", err, saveErr)
+				err = fmt.Errorf("%w; %w", err, worldErr)
 			}
 		}
 	}()
@@ -184,6 +189,11 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	})
 	if bulletinErr != nil {
 		return "", bulletinErr
+	}
+	// A login that could not be saved ends here, before the caller plays a whole
+	// session nothing can record. The deferred check above supplies the error.
+	if w.StoreErr() != nil {
+		return "", nil
 	}
 
 	// Each action already persisted via its Transact; the session-end save is a

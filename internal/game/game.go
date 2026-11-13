@@ -501,6 +501,9 @@ type World struct {
 	// deliberately unexported and unserialized: it describes this process's
 	// failure to write the file, not anything about the world's own state.
 	storeErr error
+	// readErr holds the first Snapshot (Read) that failed. Kept apart from
+	// storeErr because nothing was lost: a read writes nothing back.
+	readErr error
 	// reloadGen counts wholesale reloads of the empire set. The door's FileStore
 	// bumps it on every reload (which replaces every *Empire); a per-session
 	// cache of the active empire (menu.ctx) re-resolves its handle when the count
@@ -705,10 +708,13 @@ func (w *World) With(fn func()) {
 //
 // Same rule as With about player input — never prompt inside one. The lock is
 // held for the duration.
+//
+// A failed Snapshot is recorded apart from a failed With (see ReadErr): fn did
+// not run, so what it gathered is stale, but nothing was lost.
 func (w *World) Read(fn func()) {
 	if w.store != nil {
-		if err := w.store.Snapshot(fn); err != nil {
-			w.noteStoreErr(err)
+		if err := w.store.Snapshot(fn); err != nil && w.readErr == nil {
+			w.readErr = err
 		}
 		return
 	}
@@ -731,6 +737,11 @@ func (w *World) noteStoreErr(err error) {
 // nil if every one committed. A non-nil result means at least one mutation was
 // lost and the session cannot be trusted to have been saved.
 func (w *World) StoreErr() error { return w.storeErr }
+
+// ReadErr reports the first Read that failed during this session, or nil. Unlike
+// StoreErr it means no change was lost, only that a screen was drawn from a
+// world that could not be reloaded.
+func (w *World) ReadErr() error { return w.readErr }
 
 // ImportBoard records b's scores, replacing any existing entry for the
 // same BoardID so re-importing updates rather than duplicates, and brings the
