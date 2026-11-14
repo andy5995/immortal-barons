@@ -70,10 +70,16 @@ plans.
 ## Game Bulletins
 
 Your sysop can put up notices for players to read. Choose **Game Bulletins**
-from the opening menu to see the list, then pick one by its number. In a linked
+from the opening menu to see the list, then pick one by its number. In a league
 game the league's own notices are listed first, under "Galactic", and every
 planet in the league sees the same ones. When a notice is put up or changed, it
 is named in the day's news.
+
+## World Report
+
+In a league game, **World Report** on the opening menu lists the recent attacks
+and WMD strikes from across the league that your board has heard about, newest
+first, with who won.
 
 ## Reading the rest
 

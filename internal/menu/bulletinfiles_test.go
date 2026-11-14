@@ -2,8 +2,10 @@ package menu
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -316,5 +318,36 @@ func TestPlanetsBulletinNumbersThisBoardOffRoster(t *testing.T) {
 	}
 	if strings.Contains(text, " 0 ") {
 		t.Errorf("a planet is numbered 0:\n%s", text)
+	}
+}
+
+// #343: the Entry menu's World Report pages a long log through to its oldest
+// row, where the bulletin file has no reader to answer a pause, and never asks
+// for a second key straight after a page break. Every log length up to two
+// pages is tried, so one of them ends exactly on a page boundary.
+func TestWorldReportScreenPagesToTheOldestBattle(t *testing.T) {
+	doubled := regexp.MustCompile(`Enter to continue, Q to quit<«─\s*─»>Paused`)
+	for n := 1; n <= 2*pageLines; n++ {
+		w := newWorld()
+		w.Config.BoardID = "Alpha BBS"
+		w.Config.IBBS = true
+		w.LastMaintDate = "2026-11-13"
+		for i := range n {
+			w.Battles = append(w.Battles, game.BattleLogEntry{
+				Date: "2026-11-13", Attacker: fmt.Sprintf("Raider%d", i), Defender: "Figs"})
+		}
+		f := &fakeSession{keys: []rune(strings.Repeat("\r", 10))}
+		showWorldReport(f, w)
+		out := stripANSI(f.out.String())
+		// The news screen's date form, not the bulletin file's ISO one.
+		if !strings.Contains(out, "World Report") || !strings.Contains(out, "11-13-2026") {
+			t.Fatalf("%d battles: the World Report heading and date are missing:\n%s", n, out)
+		}
+		if !strings.Contains(out, "Raider0 ") {
+			t.Errorf("%d battles: the report did not reach its oldest battle:\n%s", n, out)
+		}
+		if doubled.MatchString(out) {
+			t.Errorf("%d battles: a page break is followed by a second pause:\n%s", n, out)
+		}
 	}
 }

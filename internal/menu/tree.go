@@ -644,6 +644,7 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Today's News", Do: showBulletinToday},
 		{Key: '5', Label: "Yesterday's News", Do: showBulletinYesterday},
 		{Key: '6', Label: "Messages", Do: gotoMenu(messages)},
+		{Key: '7', Label: "World Report", Do: showWorldReport, Hidden: ibbsHidden},
 		{Key: '8', Label: "Game Bulletins", Do: gameBulletins},
 		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
 		// Also on the System menu, as Messages is. BRE has no Diplomacy item here

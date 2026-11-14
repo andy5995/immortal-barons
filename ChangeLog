@@ -2,6 +2,7 @@ Immortal Barons ChangeLog
 
 (in-progress:)
   * BREAKING: packet protocol 8
+  * The World Report can be read in the game, from (7) on the opening menu
 
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset

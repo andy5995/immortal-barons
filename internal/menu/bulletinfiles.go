@@ -226,14 +226,18 @@ func worldRule(junction string) string {
 func writeWorldReport(s session.Session, w *ctx) {
 	var battles []game.BattleLogEntry
 	var here string
+	date := w.day
 	w.Read(func() {
 		here = w.Config.BoardID
 		battles = append(battles, w.Battles...)
+		if date == "" { // in-game: the game day, in the news screen's form
+			date = newsDate(w.LastMaintDate)
+		}
 	})
 	// Its own heading, not the news masthead: that one names the news file and
 	// draws the planet's banner under it, neither of which belongs on a report
 	// about the whole league.
-	leagueHeading(s, w.day, "World Report", ansi.FgBrightRed+worldRule("─")+ansi.Reset)
+	leagueHeading(s, date, "World Report", ansi.FgBrightRed+worldRule("─")+ansi.Reset)
 
 	if len(battles) == 0 {
 		okNoPause(s, "No battles have been fought yet.")
@@ -263,6 +267,23 @@ func writeWorldReport(s session.Session, w *ctx) {
 			color, outcome, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule("┴"), ansi.Reset)
+}
+
+// showWorldReport is the Entry menu's World Report (#343). The report can run
+// to MaxBattleLog rows, so it is drawn into a buffer and paged; drawing through
+// the pager directly would cut the bulletin file at its first page, since a
+// file has no key to answer the pause with.
+func showWorldReport(s session.Session, w *ctx) Result {
+	var buf bytes.Buffer
+	writeWorldReport(&langSession{Session: session.NewWriter(&buf), c: w}, w)
+	page := &linePager{s: s, perPage: pageLines}
+	for _, line := range strings.Split(strings.TrimSuffix(buf.String(), "\n"), "\n") {
+		if !page.line(line) {
+			return Stay
+		}
+	}
+	page.finish()
+	return Stay
 }
 
 // leagueHeading is the masthead of a bulletin about the whole league: the game,

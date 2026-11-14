@@ -967,6 +967,10 @@ has `(2) See Status` and `(A) Game Instructions` and its System Menu the
 reverse. One key per screen across both menus, at the cost of a BRE player's
 habit of pressing 2 for status.
 
+**IB's `(7)` is World Report**, shown only on a league board (#343). BRE's `(6)`
+and `(7)` read and send messages; IB's `(6) Messages` opens a menu that does
+both, which left `(7)` free beside the news.
+
 ### Daily News File / Daily Bulletin
 
 Header line: `93` bright-yellow `Barren Realms Elite ` + `97` `v0.988` + `37`
