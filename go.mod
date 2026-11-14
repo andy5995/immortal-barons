@@ -5,7 +5,7 @@ go 1.26.4
 toolchain go1.26.11
 
 require (
-	golang.org/x/term v0.47.0
+	golang.org/x/term v0.48.0
 	golang.org/x/text v0.44.0
 )
 
