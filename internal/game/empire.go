@@ -329,6 +329,12 @@ type Empire struct {
 	// that shows it are separate door runs.
 	LastInterest int64 `json:"lastInterest,omitempty"`
 	InvestPaid   int64 `json:"investPaid,omitempty"`
+	// TurnStartGoldLost is what the money cap cut off this turn's income and
+	// matured investments as they were paid in at the start of the turn. The
+	// turn-start block zeroes it and each credit adds to it. It is shown under
+	// the Spending menu, so it survives the save for a turn replayed after an
+	// idle-boot.
+	TurnStartGoldLost int64 `json:"turnStartGoldLost,omitempty"`
 	// LoanPaid is what this turn's loan installment took from gold in hand, for
 	// the turn's income report (collectLoanInstallment).
 	LoanPaid int64 `json:"loanPaid,omitempty"`

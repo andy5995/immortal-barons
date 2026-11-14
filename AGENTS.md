@@ -226,9 +226,11 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 - **Every path that pays gold in goes through `World.creditGold`.** It holds
   gold in hand at the configured cap (`World.MoneyCap`, the sysop's
   `MoneyCapBillions`) and files an event naming what was lost and where it came
-  from. `Withdraw` is the one exception: it draws only what fits and leaves the
-  remainder banked, so it destroys nothing. A credit site that assigns
-  `e.Gold +=` directly reintroduces the silent loss this replaced.
+  from. The turn-start credits (income, a matured investment's share) call its
+  core, `addGold`, and record the loss in `TurnStartGoldLost`, which the
+  Spending menu shows. `Withdraw` is the one exception: it draws only what fits
+  and leaves the remainder banked, so it destroys nothing. A credit site that
+  assigns `e.Gold +=` directly reintroduces the silent loss this replaced.
 - **Separate data from code: every tunable gameplay/economy number is a named
   constant in a dedicated data file, not a bare literal in the formula code.**
   Those files are `internal/game/balance*.go`, split by subject — `_regions`,

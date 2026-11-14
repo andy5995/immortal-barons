@@ -443,6 +443,10 @@ type Menu struct {
 	// player to press 0 past a screen that can only refuse them.
 	ExitWhen func(*ctx) bool
 	Status   func(*ctx) string // optional status bar under the menu
+	// Notice is an optional block drawn under Status, just above the prompt,
+	// written as given (it carries its own colors and line breaks). It is handed
+	// the box's width to wrap to. An empty string draws nothing.
+	Notice func(*ctx, int) string
 	// Chart is an optional block drawn between the closing rule and Status,
 	// written as given: it carries its own colors and line breaks. It is handed
 	// the box's width to center in. An empty string draws nothing.
@@ -1087,6 +1091,9 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			// accent color.
 			footer := hiNumsReset(m.Status(g), ansi.FgBrightWhite, ansi.FgWhite)
 			fmt.Fprintf(&b, "%s%s%s\n", ansi.FgWhite, footer, ansi.Reset)
+		}
+		if m.Notice != nil {
+			b.WriteString(m.Notice(g, width))
 		}
 		b.WriteString("\n")
 	})

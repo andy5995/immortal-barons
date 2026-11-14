@@ -7,6 +7,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
@@ -121,7 +122,7 @@ const (
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending", Color: spendingColor, ExitOnEnter: true, Status: spendingStatus, Width: 44}
+	buy := &Menu{Title: "Spending", Color: spendingColor, ExitOnEnter: true, Status: spendingStatus, Notice: spendingNotice, Width: 44}
 	sell := &Menu{Title: "Sell", Color: sellColor}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	// Width: BRE's captured Attack box is 23 columns and IB's content measures the
@@ -707,6 +708,37 @@ func spendingStatus(w *ctx) string {
 		return fmt.Sprintf(i18n.T(lang, "You have %s gold and 1 turn."), formatGold(p.Gold, lang))
 	}
 	return fmt.Sprintf(i18n.T(lang, "You have %s gold and %d turns."), formatGold(p.Gold, lang), turns)
+}
+
+// spendingNotice reports, under the Spending menu's footer, gold the money cap
+// cut off what was paid in at the start of this turn, and warns when the end of
+// this turn or the start of the next looks set to overflow it too (see
+// TurnStartOverflowAhead), while there is still time to spend or bank the
+// difference. The loss is shown here rather than as news because it is the
+// baron's own turn, not something that happened while they were away.
+func spendingNotice(w *ctx, width int) string {
+	p := w.Player()
+	lang := playerLang(w)
+	capGold := formatGold(w.World.MoneyCap(), lang)
+	var b strings.Builder
+	line := func(color, text string) {
+		fmt.Fprintf(&b, "%s%s%s\n", color, help.Wrap(text, width), ansi.Reset)
+	}
+	if lost := p.TurnStartGoldLost; lost > 0 {
+		line(ansi.FgBrightRed, fmt.Sprintf(
+			i18n.T(lang, "Treasury full: %s gold paid in at the start of this turn was lost (the limit in hand is %s)."),
+			formatGold(lost, lang), capGold))
+	}
+	if ahead := w.World.TurnStartOverflowAhead(p); ahead > 0 {
+		// With the end-of-turn deposit on, a loss is left only when the bank has
+		// no room, so banking more cannot help.
+		msg := i18n.T(lang, "Warning: about %s gold will be lost by the start of next turn unless you spend or bank it.")
+		if p.Prefs.DepositEndTurn {
+			msg = i18n.T(lang, "Warning: about %s gold will be lost by the start of next turn unless you spend it. Your bank has no room for it.")
+		}
+		line(ansi.FgBrightYellow, fmt.Sprintf(msg, formatGold(ahead, lang)))
+	}
+	return b.String()
 }
 
 // covertStatus is the Covert Operations footer: gold on hand and agents held

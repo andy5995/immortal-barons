@@ -16,8 +16,9 @@ func (w *World) aiPlay(today string) {
 			// military it then couldn't maintain, so its forces deserted and its
 			// regions revolted every turn — a self-inflicted boom-bust.
 			w.aiSetProduction(e) // point industry at units this profile uses, not BRE's even split
-			w.Manufacture(e)     // industry production at turn start (#71)
-			w.CollectIncome(e)   // income in hand before anything is spent
+			e.TurnStartGoldLost = 0
+			w.Manufacture(e)   // industry production at turn start (#71)
+			w.CollectIncome(e) // income in hand before anything is spent
 			w.CollectBankPayments(e)
 			w.GrowFood(e) // food credited at turn start too, so aiManageEconomy sees it (matches the human flow)
 			// Borrow BEFORE paying: a loan taken after the shortfall has already

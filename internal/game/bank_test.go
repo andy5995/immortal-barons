@@ -408,7 +408,7 @@ func TestGoldLostToTheCapRaisesAnEvent(t *testing.T) {
 	e.Gold = w.MoneyCap() - 1_000
 	before := len(e.Events)
 
-	w.creditGold(e, 5_000, say("a matured investment"))
+	w.creditGold(e, 5_000, say("the trading market"))
 
 	if e.Gold != w.MoneyCap() {
 		t.Errorf("gold = %d, want it held at the %d cap", e.Gold, w.MoneyCap())
@@ -417,7 +417,7 @@ func TestGoldLostToTheCapRaisesAnEvent(t *testing.T) {
 		t.Fatalf("got %d new events, want exactly one", len(e.Events)-before)
 	}
 	msg := e.Events[len(e.Events)-1].Text
-	for _, want := range []string{"4,000", "a matured investment", "2,000,000,000"} {
+	for _, want := range []string{"4,000", "the trading market", "2,000,000,000"} {
 		if !strings.Contains(msg, want) {
 			t.Errorf("event %q should name %q — the amount lost and where it came from", msg, want)
 		}
@@ -432,7 +432,7 @@ func TestCreditThatFitsIsSilent(t *testing.T) {
 	e.Gold = 1_000
 	before := len(e.Events)
 
-	w.creditGold(e, 5_000, say("a matured investment"))
+	w.creditGold(e, 5_000, say("the trading market"))
 
 	if e.Gold != 6_000 {
 		t.Errorf("gold = %d, want 6,000", e.Gold)
@@ -536,7 +536,7 @@ func TestInvestmentHoldRespectsTheDateLimit(t *testing.T) {
 	w.GameDay = 5
 	e.InvestHeld = 300_000_000
 	e.Investments = []Investment{{Amount: 1, Return: 1_900_000_000, MaturesDay: 5}}
-	w.matureInvestments(e)
+	w.matureInvestments(e, w.GameDay)
 	if e.InvestDue != 2_000_000_000 || e.InvestHeld != 0 {
 		t.Errorf("InvestDue=%d InvestHeld=%d, want 2,000,000,000 and 0", e.InvestDue, e.InvestHeld)
 	}
@@ -557,7 +557,7 @@ func TestInvestmentHoldSpreadsOverFullDates(t *testing.T) {
 	for d := 5; d <= 14; d++ {
 		e.Investments = append(e.Investments, Investment{Amount: 1, Return: 1_999_999_000, MaturesDay: d})
 	}
-	w.matureInvestments(e)
+	w.matureInvestments(e, w.GameDay)
 	if e.InvestHeld != 0 {
 		t.Fatalf("InvestHeld=%d, want 0", e.InvestHeld)
 	}
@@ -583,12 +583,12 @@ func TestInvestmentHoldKeepsOneRecordPerDate(t *testing.T) {
 	w.GameDay = 5
 	e.Investments = []Investment{{Amount: 1, Return: 2_000_000_000, MaturesDay: 5}}
 	e.InvestHeld = 100_000_000
-	w.matureInvestments(e)
+	w.matureInvestments(e, w.GameDay)
 	e.InvestDue = 0
 	e.Investments = append(e.Investments, Investment{Amount: 1, Return: 2_000_000_000, MaturesDay: 6})
 	w.GameDay = 6
 	e.InvestHeld = 50_000_000
-	w.matureInvestments(e)
+	w.matureInvestments(e, w.GameDay)
 	var records int
 	for _, inv := range e.Investments {
 		if inv.MaturesDay == 7 {
@@ -673,7 +673,7 @@ func TestPendingHoldPourMatchesMaintenance(t *testing.T) {
 	}
 
 	w.GameDay = 6
-	w.matureInvestments(e)
+	w.matureInvestments(e, w.GameDay)
 	if e.InvestDue != 1_500_000_000+got[0] {
 		t.Errorf("tomorrow due %d, want %d", e.InvestDue, 1_500_000_000+got[0])
 	}
@@ -723,5 +723,75 @@ func TestFullBankStart(t *testing.T) {
 	if off.Bank != 0 || off.InvestDue != 0 || len(off.Investments) != 0 {
 		t.Errorf("default config: Bank %d, InvestDue %d, %d investments; want none",
 			off.Bank, off.InvestDue, len(off.Investments))
+	}
+}
+
+// The end-of-turn auto-deposit banks gold before next turn's income arrives,
+// so a baron who has it on, with room in the bank, is not warned.
+func TestOverflowAheadCountsTheAutoDeposit(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("rich", "Croesus")
+	e.Gold = w.MoneyCap()
+	e.Bank = 0
+
+	e.Prefs.DepositEndTurn = false
+	if w.TurnStartOverflowAhead(e) <= 0 {
+		t.Fatalf("a full purse with deposit off should be warned")
+	}
+	e.Prefs.DepositEndTurn = true
+	if got := w.TurnStartOverflowAhead(e); got != 0 {
+		t.Errorf("deposit on with an empty bank: overflow ahead = %d, want 0", got)
+	}
+	e.Bank = w.MoneyCap()
+	if w.TurnStartOverflowAhead(e) <= 0 {
+		t.Errorf("deposit on but the bank full: should still be warned")
+	}
+}
+
+// Next turn's investment payout counts toward the warning: the day's next
+// share within a day, and on the day's last turn the share the new day opens
+// with.
+func TestOverflowAheadCountsTheInvestmentPayout(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("rich", "Croesus")
+	e.Prefs.DepositEndTurn = false
+	e.Gold = w.MoneyCap() - int64(w.IncomeThisTurn(e).Gold())
+	if got := w.TurnStartOverflowAhead(e); got != 0 {
+		t.Fatalf("income alone fills the purse exactly: overflow ahead = %d, want 0", got)
+	}
+
+	e.TurnsLeft = 3
+	e.InvestDue, e.InvestShare = 9_000, 3_000
+	if got := w.TurnStartOverflowAhead(e); got != 3_000 {
+		t.Errorf("mid-day: overflow ahead = %d, want the 3,000 share", got)
+	}
+
+	e.TurnsLeft = 1
+	e.InvestDue, e.InvestShare = 0, 0
+	e.Investments = []Investment{{MaturesDay: w.GameDay + 1, Return: 50_000}}
+	want := int64(50_000 / max(w.Config.TurnsPerDay, 1))
+	if got := w.TurnStartOverflowAhead(e); got != want {
+		t.Errorf("last turn: overflow ahead = %d, want tomorrow's share %d", got, want)
+	}
+}
+
+// A full bank's interest spills into gold in hand at the end of the turn, so
+// a purse that next turn's income alone would not overflow is still warned.
+func TestOverflowAheadCountsAFullBanksInterest(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("rich", "Croesus")
+	e.Prefs.DepositEndTurn = false
+	e.Gold = w.MoneyCap() - int64(w.IncomeThisTurn(e).Gold())
+	e.Bank = 0
+	if got := w.TurnStartOverflowAhead(e); got != 0 {
+		t.Fatalf("empty bank: overflow ahead = %d, want 0", got)
+	}
+	e.Bank = w.MoneyCap()
+	want := savingsInterest(e.Bank, w.Config.InterestRate, int64(max(w.Config.TurnsPerDay, 1)))
+	if want <= 0 {
+		t.Fatalf("default config pays no interest; the test needs a rate")
+	}
+	if got := w.TurnStartOverflowAhead(e); got != want {
+		t.Errorf("full bank: overflow ahead = %d, want the %d interest", got, want)
 	}
 }

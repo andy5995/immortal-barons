@@ -3567,11 +3567,18 @@ section is a record of what was claimed and how it was settled, so the word
   banks only what fits under 2,000,000,000 and adds the remainder to gold in
   hand.
 - **Gold destroyed by the cap raises an event**, naming the amount and its
-  source ("a matured investment", "this turn's income", "the trading market").
-  Every path that pays gold in runs through `World.creditGold`, which is what
-  holds gold in hand at the cap and files the notice; `Withdraw` is the
-  deliberate exception, since it draws only what fits and leaves the remainder
-  banked. BRE reports nothing here — it just stops counting.
+  source ("a lottery win", "the trading market"). Every path that pays gold in
+  runs through `World.creditGold`, which is what holds gold in hand at the cap
+  and files the notice; `Withdraw` is the deliberate exception, since it draws
+  only what fits and leaves the remainder banked. The turn-start credits (the
+  turn's income and a matured investment's share) file no event: what they
+  lose is shown under the Spending menu's footer, above its prompt, beside a
+  warning whenever gold looks set to be lost by the start of next turn. The
+  warning allows for the end-of-turn auto-deposit and a full bank's interest
+  spilling into gold in hand, then adds next turn's income (taken to be this
+  turn's) and the investment share that turn will pay (a new day's share on
+  the day's last turn), so it is an estimate. BRE reports nothing here — it just
+  stops counting.
 - **Figures of a billion or more are printed in full, grouped — BRE-VERIFIED.**
   1,000,000,000 renders `1,000,000,000` and 1,847,392,104 renders
   `1,847,392,104`, with the locale thousands separator (de `1.847.392.104`, ru
@@ -3985,7 +3992,9 @@ The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"):
   unplayed carries their shares into the next day through the hold. The List
   screen shows today's slot as "Today" and the hold as "In Hold". IB paid the
   whole day's returns at maintenance until 2026-09-24; it now keeps
-  `InvestDue`, `InvestShare` and `InvestHeld` and pays through `creditGold`.
+  `InvestDue`, `InvestShare` and `InvestHeld` and pays each share into gold in
+  hand at the start of a turn, where a loss to the money cap is shown under the
+  Spending menu.
   Until 2026-10-11 IB poured the hold into today only and kept the rest, so a
   realm investing every date to the limit saw it stuck In Hold for days; it now
   pours into the next ten dates as return-only `Investment` records.

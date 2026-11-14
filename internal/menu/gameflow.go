@@ -54,6 +54,7 @@ func collectTurnIncome(w *ctx) bool {
 		if p.TurnProgress.IncomeCollected {
 			return
 		}
+		p.TurnStartGoldLost = 0  // the credits below add what the cap cuts off
 		w.World.Manufacture(p)   // industry production at turn start, alongside income (#71)
 		w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
 		w.World.CollectBankPayments(p)

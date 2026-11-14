@@ -260,7 +260,7 @@ func (w *World) advanceOneDay(today string, rep *MaintReport) {
 				// Paid a share per turn, so every turn of the day reports the
 				// same figure, which is how BRE shows it (cap/eots-ibbs-01.cap:
 				// 14,699,020 on all ten turns of one day).
-				w.matureInvestments(e)
+				w.matureInvestments(e, w.GameDay)
 				w.matureLoans(e)
 			}
 		}
@@ -405,6 +405,38 @@ func savingsInterest(bank int64, rate int, turnsPerDay int64) int64 {
 	return (2*bank*int64(rate) + d) / (2 * d)
 }
 
+// bankEndOfTurn runs the end-of-turn banking: the auto-deposit, then the
+// turn's savings interest. It returns the interest a full bank could not hold,
+// which the caller pays into gold in hand. TurnStartOverflowAhead runs it on a
+// copy to predict the spill.
+func (w *World) bankEndOfTurn(e *Empire) int64 {
+	// "Deposit gold at End of Turn" is banked HERE, ahead of the interest, so the
+	// turn's takings earn on the turn they were made rather than sitting idle
+	// until the next one. It ran in the menu flow after PlayTurn until 2026-08-25,
+	// which meant the deposit always missed that turn's interest. It stays behind
+	// the pirate raid at the top of PlayTurn — banking early must not become a way
+	// to keep gold out of the raiders' reach. Only a caller's realm has menu
+	// preferences; the AI manages its own treasury.
+	if e.Owner != "" && e.Prefs.DepositEndTurn && e.Gold > 0 {
+		_ = w.Deposit(e, e.Gold)
+	}
+	interest := savingsInterest(e.Bank, w.Config.InterestRate, w.turnsPerDay())
+	e.Bank += interest
+	// Reported at the start of the next turn (#216), so it has to survive the
+	// save between the two door runs.
+	e.LastInterest = interest
+	// A bank sitting at the cap pays its interest into the treasury rather than
+	// having it destroyed: the cap limits what one purse holds, and a full purse
+	// is no reason to burn the earnings. Gold has the same cap, so a baron whose
+	// hand is full too still loses the overflow when processEconomy credits it.
+	// BINARY-VERIFIED: process_end_of_turn +0x1722 banks only what fits under
+	// 2,000,000,000 and adds the rest to gold in hand (+0x66, the field run_bank
+	// prints as "gold in hand").
+	over := max(0, e.Bank-w.MoneyCap())
+	e.Bank -= over
+	return over
+}
+
 func (w *World) processEconomy(e *Empire) {
 	// Savings interest (BRE-faithful, config-help verified): the Interest Rate knob
 	// is "the interest the bank gives in 10 days", so config/10 is the DAILY rate
@@ -416,34 +448,7 @@ func (w *World) processEconomy(e *Empire) {
 	// The whole balance earns. IB used to stop paying interest above 1.6 billion,
 	// a figure that came from a player guide and turned out to be in neither
 	// binary; the money cap is the only ceiling the bank has.
-	tpd := int64(w.Config.TurnsPerDay)
-	if tpd < 1 {
-		tpd = 1
-	}
-	// "Deposit gold at End of Turn" is banked HERE, ahead of the interest, so the
-	// turn's takings earn on the turn they were made rather than sitting idle
-	// until the next one. It ran in the menu flow after PlayTurn until 2026-08-25,
-	// which meant the deposit always missed that turn's interest. It stays behind
-	// the pirate raid at the top of PlayTurn — banking early must not become a way
-	// to keep gold out of the raiders' reach. Only a caller's realm has menu
-	// preferences; the AI manages its own treasury.
-	if e.Owner != "" && e.Prefs.DepositEndTurn && e.Gold > 0 {
-		_ = w.Deposit(e, e.Gold)
-	}
-	interest := savingsInterest(e.Bank, w.Config.InterestRate, tpd)
-	e.Bank += interest
-	// Reported at the start of the next turn (#216), so it has to survive the
-	// save between the two door runs.
-	e.LastInterest = interest
-	// A bank sitting at the cap pays its interest into the treasury rather than
-	// having it destroyed: the cap limits what one purse holds, and a full purse
-	// is no reason to burn the earnings. Gold has the same cap, so a baron whose
-	// hand is full too still loses the overflow — the clamp at the end of this
-	// function. BINARY-VERIFIED: process_end_of_turn +0x1722 banks only what
-	// fits under 2,000,000,000 and adds the rest to gold in hand (+0x66, the
-	// field run_bank prints as "gold in hand").
-	if over := e.Bank - w.MoneyCap(); over > 0 {
-		e.Bank = w.MoneyCap()
+	if over := w.bankEndOfTurn(e); over > 0 {
 		w.creditGold(e, over, say("bank interest"))
 	}
 

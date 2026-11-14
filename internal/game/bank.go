@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 )
 
 // ErrInvestDateFull refuses an investment whose return would push the returns
@@ -84,19 +85,19 @@ func PctTenths(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
 // investment, and only what no date can take stays in the hold. Nothing is
 // paid here — collectInvestShare pays it a turn at a time, so a day's turns
 // left unplayed carry their shares into the hold.
-func (w *World) matureInvestments(e *Empire) {
+func (w *World) matureInvestments(e *Empire, today int) {
 	e.InvestHeld += e.InvestDue / 1000 * 1000
 	e.InvestDue = 0
 	var remaining []Investment
 	for _, inv := range e.Investments {
-		if w.GameDay >= inv.MaturesDay {
+		if today >= inv.MaturesDay {
 			e.InvestDue += inv.Return
 		} else {
 			remaining = append(remaining, inv)
 		}
 	}
 	e.Investments = remaining
-	for d, pour := range e.holdPour(w.GameDay) {
+	for d, pour := range e.holdPour(today) {
 		if pour <= 0 {
 			continue
 		}
@@ -104,7 +105,7 @@ func (w *World) matureInvestments(e *Empire) {
 		if d == 0 {
 			e.InvestDue += pour
 		} else {
-			e.addHeldReturn(w.GameDay+d, pour)
+			e.addHeldReturn(today+d, pour)
 		}
 	}
 	w.setInvestShare(e)
@@ -112,8 +113,11 @@ func (w *World) matureInvestments(e *Empire) {
 
 // setInvestShare sets what each of the day's turns pays of e's InvestDue.
 func (w *World) setInvestShare(e *Empire) {
-	e.InvestShare = e.InvestDue / int64(max(w.Config.TurnsPerDay, 1))
+	e.InvestShare = e.InvestDue / w.turnsPerDay()
 }
+
+// turnsPerDay is the configured turns per day as a divisor: never below 1.
+func (w *World) turnsPerDay() int64 { return int64(max(w.Config.TurnsPerDay, 1)) }
 
 // holdPour is what the hold puts on today and each of the next InvestHoldDates
 // dates, in order, each up to the per-date limit; index d is today+d. Today's
@@ -191,9 +195,9 @@ func (w *World) collectInvestShare(e *Empire) int64 {
 		return 0
 	}
 	e.InvestDue -= share
-	before := e.Gold
-	w.creditGold(e, share, say("a matured investment"))
-	return e.Gold - before
+	lost := w.addGold(e, share)
+	e.TurnStartGoldLost += lost
+	return share - lost
 }
 
 // steadyInvestRate is the fixed daily rate the league's Standard Investment Rate
@@ -256,23 +260,57 @@ func (w *World) adjustInvestRate() {
 // where the gold came from, so the recap says WHAT was lost rather than only
 // that something was.
 //
-// Every path that pays gold in goes through this. Silent destruction is what
-// made the old hard-coded 2-billion limit read as a bug rather than a rule: a
-// baron watched the number stop growing with nothing on screen to explain it.
-// Withdraw is the deliberate exception — it draws only what fits and leaves the
-// remainder safely in the bank, so nothing is ever lost there to report.
+// Every path that pays gold in goes through this or addGold. Silent destruction
+// is what made the old hard-coded 2-billion limit read as a bug rather than a
+// rule: a baron watched the number stop growing with nothing on screen to
+// explain it. The turn-start credits use addGold and report their loss under
+// the Spending menu instead (TurnStartGoldLost). Withdraw is the deliberate
+// exception — it draws only what fits and leaves the remainder safely in the
+// bank, so nothing is ever lost there to report.
 func (w *World) creditGold(e *Empire, n int64, source Msg) {
+	if over := w.addGold(e, n); over > 0 {
+		e.addEvent(say("You cannot hold more than {cap} gold in hand — {over} gold from {source} was lost.",
+			"cap", comma(w.MoneyCap()), "over", comma(over), "source", source))
+	}
+}
+
+// addGold is creditGold without the event: it pays n into gold in hand, holds
+// it at the cap and returns what the cap cut off. The turn-start credits use it
+// directly, because their loss is reported under the Spending menu
+// (TurnStartGoldLost) rather than as news.
+func (w *World) addGold(e *Empire, n int64) int64 {
 	if n <= 0 {
-		return
+		return 0
 	}
 	e.Gold += n
 	over := e.Gold - w.MoneyCap()
 	if over <= 0 {
-		return
+		return 0
 	}
 	e.Gold = w.MoneyCap()
-	e.addEvent(say("You cannot hold more than {cap} gold in hand — {over} gold from {source} was lost.",
-		"cap", comma(w.MoneyCap()), "over", comma(over), "source", source))
+	return over
+}
+
+// TurnStartOverflowAhead estimates how much gold the money cap would cut off
+// between now and the start of next turn if the turn ended with gold in hand as
+// it stands now. It runs the real end-of-turn banking (bankEndOfTurn) and, on
+// the day's last turn, the new day's investment maturing on a copy of e, then
+// adds next turn's income and investment share. Next turn's income is taken to
+// be this turn's, and the region draws, population and support all move
+// between turns, so it is an estimate and the caller words it as one. 0 when
+// nothing would be lost.
+func (w *World) TurnStartOverflowAhead(e *Empire) int64 {
+	next := *e
+	next.Investments = slices.Clone(e.Investments) // addHeldReturn edits elements in place
+	spill := w.bankEndOfTurn(&next)
+	// The day's last turn is the only one whose next turn opens a new day: a
+	// day that rolls mid-session has already matured today's InvestDue.
+	if next.TurnsLeft <= 1 {
+		w.matureInvestments(&next, w.GameDay+1)
+	}
+	share := max(0, min(next.InvestShare, next.InvestDue))
+	in := spill + int64(w.IncomeThisTurn(e).Gold()) + share
+	return max(0, next.Gold+in-w.MoneyCap())
 }
 
 // CollectBankPayments settles the bank's per-turn business at the start of a

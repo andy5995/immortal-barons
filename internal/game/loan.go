@@ -120,7 +120,7 @@ func (w *World) matureLoans(e *Empire) {
 		e.Debt = min(e.Debt+l.Owed, w.MoneyCap())
 	}
 	e.Loans = remaining
-	e.LoanInstallment = max(e.Debt/int64(max(w.Config.TurnsPerDay, 1)), LoanMinInstallment)
+	e.LoanInstallment = max(e.Debt/w.turnsPerDay(), LoanMinInstallment)
 }
 
 // loanOverdueTenths is the daily growth of an unpaid loan, in tenths of a
