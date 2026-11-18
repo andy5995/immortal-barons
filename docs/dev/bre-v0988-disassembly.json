@@ -63,13 +63,13 @@
     "ovr_payload_end": "0x059123",
     "semantic_coverage": {
       "procedures": {
-        "identified": 427,
-        "unclassified": 565
+        "identified": 428,
+        "unclassified": 564
       },
       "blocks": {
-        "contextual": 7112,
-        "identified": 468,
-        "unclassified": 3836
+        "contextual": 7119,
+        "identified": 469,
+        "unclassified": 3828
       },
       "data_chunks": {
         "identified": 282,
@@ -63784,18 +63784,6 @@
           ]
         },
         {
-          "from": "ovr_01d75d_proc_0000",
-          "from_id": "bre0988:ovr:procedure:01d75d",
-          "container": "ovr_01d75d",
-          "kind": "far_call",
-          "sites": [
-            "0x0006"
-          ],
-          "site_ids": [
-            "bre0988:ovr:site:01d763"
-          ]
-        },
-        {
           "from": "read_local_messages",
           "from_id": "bre0988:ovr:procedure:01dcee",
           "container": "ovr_01d75d",
@@ -63805,6 +63793,18 @@
           ],
           "site_ids": [
             "bre0988:ovr:site:01dcf4"
+          ]
+        },
+        {
+          "from": "read_local_messages__select_destinations",
+          "from_id": "bre0988:ovr:procedure:01d75d",
+          "container": "ovr_01d75d",
+          "kind": "far_call",
+          "sites": [
+            "0x0006"
+          ],
+          "site_ids": [
+            "bre0988:ovr:site:01d763"
           ]
         },
         {
@@ -343292,7 +343292,7 @@
               ]
             },
             {
-              "from": "ovr_01d75d_proc_0000",
+              "from": "read_local_messages__select_destinations",
               "from_id": "bre0988:ovr:procedure:01d75d",
               "container": "ovr_01d75d",
               "kind": "overlay_call",
@@ -344016,7 +344016,7 @@
               ]
             },
             {
-              "from": "ovr_01d75d_proc_0000",
+              "from": "read_local_messages__select_destinations",
               "from_id": "bre0988:ovr:procedure:01d75d",
               "container": "ovr_01d75d",
               "kind": "overlay_call",
@@ -366783,11 +366783,11 @@
       "roots": [
         {
           "id": "bre0988:ovr:procedure:01d75d",
-          "name": "ovr_01d75d_proc_0000",
+          "name": "read_local_messages__select_destinations",
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "call_graph: sole caller is read_local_messages at its Select Destinations branch (+0xf5c); call_graph: runs the empire selection routine at BRE.OVR 0x1b65e, then writes each chosen realm's id into the caller's reply destination list (param - 0xff + 4 * letter), the list Public and Author fill"
           },
           "entry_offset": "0x0000",
           "entry_span": [
@@ -366796,7 +366796,9 @@
           ],
           "ovr_offset": "0x01d75d",
           "stub": null,
-          "aliases": [],
+          "aliases": [
+            "ovr_01d75d_proc_0000"
+          ],
           "tags": [
             "near-call-target",
             "overlay"
@@ -367077,7 +367079,7 @@
             },
             {
               "kind": "near_call",
-              "to": "ovr_01d75d_proc_0000",
+              "to": "read_local_messages__select_destinations",
               "target_address": "0x01d75d",
               "sites": [
                 "0x0112"
@@ -368233,7 +368235,7 @@
             },
             {
               "kind": "near_call",
-              "to": "ovr_01d75d_proc_0000",
+              "to": "read_local_messages__select_destinations",
               "target_address": "0x01d75d",
               "sites": [
                 "0x0f5c"
@@ -368711,12 +368713,14 @@
       "blocks": [
         {
           "id": "bre0988:ovr:block:01d75d",
-          "name": "ovr_01d75d_proc_0000",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations",
+          "aliases": [
+            "ovr_01d75d_proc_0000"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "identified",
+            "confidence": "high",
+            "evidence": "call_graph: sole caller is read_local_messages at its Select Destinations branch (+0xf5c); call_graph: runs the empire selection routine at BRE.OVR 0x1b65e, then writes each chosen realm's id into the caller's reply destination list (param - 0xff + 4 * letter), the list Public and Author fill"
           },
           "unit_span": [
             "0x0000",
@@ -368749,12 +368753,14 @@
         },
         {
           "id": "bre0988:ovr:block:01d792",
-          "name": "ovr_01d75d_loc_0035",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations__branch_0035",
+          "aliases": [
+            "ovr_01d75d_loc_0035"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure read_local_messages__select_destinations"
           },
           "unit_span": [
             "0x0035",
@@ -368782,12 +368788,14 @@
         },
         {
           "id": "bre0988:ovr:block:01d794",
-          "name": "ovr_01d75d_loc_0037",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations__branch_0037",
+          "aliases": [
+            "ovr_01d75d_loc_0037"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure read_local_messages__select_destinations"
           },
           "unit_span": [
             "0x0037",
@@ -368815,12 +368823,14 @@
         },
         {
           "id": "bre0988:ovr:block:01d799",
-          "name": "ovr_01d75d_loc_003c",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations__branch_003c",
+          "aliases": [
+            "ovr_01d75d_loc_003c"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure read_local_messages__select_destinations"
           },
           "unit_span": [
             "0x003c",
@@ -368853,12 +368863,14 @@
         },
         {
           "id": "bre0988:ovr:block:01d7a1",
-          "name": "ovr_01d75d_loc_0044",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations__loop_head_0044",
+          "aliases": [
+            "ovr_01d75d_loc_0044"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural loop head in identified procedure read_local_messages__select_destinations"
           },
           "unit_span": [
             "0x0044",
@@ -368890,12 +368902,14 @@
         },
         {
           "id": "bre0988:ovr:block:01d7a9",
-          "name": "ovr_01d75d_loc_004c",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations__join_004c",
+          "aliases": [
+            "ovr_01d75d_loc_004c"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural join in identified procedure read_local_messages__select_destinations"
           },
           "unit_span": [
             "0x004c",
@@ -368923,12 +368937,14 @@
         },
         {
           "id": "bre0988:ovr:block:01d806",
-          "name": "ovr_01d75d_loc_00a9",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations__branch_00a9",
+          "aliases": [
+            "ovr_01d75d_loc_00a9"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural branch in identified procedure read_local_messages__select_destinations"
           },
           "unit_span": [
             "0x00a9",
@@ -368956,12 +368972,14 @@
         },
         {
           "id": "bre0988:ovr:block:01d80b",
-          "name": "ovr_01d75d_loc_00ae",
-          "aliases": [],
+          "name": "read_local_messages__select_destinations__return_00ae",
+          "aliases": [
+            "ovr_01d75d_loc_00ae"
+          ],
           "naming": {
-            "status": "unclassified",
-            "confidence": "none",
-            "evidence": "address-derived fallback; behavior has not yet been established"
+            "status": "contextual",
+            "confidence": "structural",
+            "evidence": "intraprocedural return in identified procedure read_local_messages__select_destinations"
           },
           "unit_span": [
             "0x00ae",
@@ -805304,18 +805322,6 @@
             ]
           },
           {
-            "from": "ovr_01d75d_proc_0000",
-            "from_id": "bre0988:ovr:procedure:01d75d",
-            "container": "ovr_01d75d",
-            "kind": "far_call",
-            "sites": [
-              "0x0006"
-            ],
-            "site_ids": [
-              "bre0988:ovr:site:01d763"
-            ]
-          },
-          {
             "from": "read_local_messages",
             "from_id": "bre0988:ovr:procedure:01dcee",
             "container": "ovr_01d75d",
@@ -805325,6 +805331,18 @@
             ],
             "site_ids": [
               "bre0988:ovr:site:01dcf4"
+            ]
+          },
+          {
+            "from": "read_local_messages__select_destinations",
+            "from_id": "bre0988:ovr:procedure:01d75d",
+            "container": "ovr_01d75d",
+            "kind": "far_call",
+            "sites": [
+              "0x0006"
+            ],
+            "site_ids": [
+              "bre0988:ovr:site:01d763"
             ]
           },
           {
@@ -1028523,7 +1028541,7 @@
     }
   },
   "validation": {
-    "unique_names": 12695,
+    "unique_names": 12696,
     "overlay_blocks": 8495,
     "overlay_data_chunks": 319,
     "resident_blocks": 2921,

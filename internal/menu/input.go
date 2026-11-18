@@ -633,6 +633,26 @@ func drawKeys(s session.Session, opts []keyOpt) {
 	fmt.Fprintf(s, "%s> %s", ansi.FgCyan, ansi.Reset)
 }
 
+// drawInitialKeys prints a prompt whose keys are the initials of its words,
+// bright white in a gray label and with no brackets ("Public Reply, Author
+// only, or Select Destinations?"), as BRE draws the local reply question. A
+// translated label that does not begin with its key shows the key in front.
+func drawInitialKeys(s session.Session, opts []keyOpt) {
+	for i, o := range opts {
+		if i > 0 {
+			fmt.Fprint(s, " ")
+		}
+		label := tr(s, o.Label)
+		first, size := utf8.DecodeRuneInString(label)
+		if unicode.ToUpper(first) == o.Key {
+			fmt.Fprintf(s, "%s%c%s%s", ansi.FgBrightWhite, first, ansi.FgWhite, label[size:])
+			continue
+		}
+		fmt.Fprintf(s, "%s%c%s %s", ansi.FgBrightWhite, o.Key, ansi.FgWhite, label)
+	}
+	fmt.Fprintf(s, " %s", ansi.FgBrightWhite)
+}
+
 // readKeys waits for one of opts' keys, in either case, echoes it and returns
 // it. enter is the key Enter stands for, or 0 to ignore Enter like any other
 // unlisted key; ended is returned once input has ended.

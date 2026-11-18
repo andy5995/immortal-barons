@@ -62,6 +62,11 @@ letter on every screen — the `Id` column on See Scores is that letter too, whi
 is why those rows are not in letter order. The letters of everyone a message
 went to appear at the top of it when it is read.
 
+Replying to a message from a realm on this planet asks who the reply goes to:
+`P` sends it to everyone the message went to, `A` to its author only, and `S`
+lets you choose with the same prompt as Send Message. The author always gets
+it.
+
 A letter is freed when the realm holding it is swept from the map, and a later
 baron may be given it. So a letter names whoever holds it today, not whoever
 held it when an old message was written.

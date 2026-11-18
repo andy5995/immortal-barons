@@ -4467,13 +4467,21 @@ composition then goes to every selected realm, and every copy carries the same
 
 Editor: 20 lines under a 68-column ruler, `/S` save, `/A` abort, `/C` clear.
 
-**Not yet built (verified, from the binary).** BRE's *local* reader answers `R`
-with a three-way destination prompt — public reply, author only, or select
-destinations — keyed `P`/`A`/`S` (`BRE.OVR` unit 0x1d75d: the tests sit at
-+0xe02, +0xeb7 and +0xf13). `P` addresses every living realm that was on the
-original message's recipient list except the reader; `S` opens the same
-multi-select picker as Send Message. IB replies to the author alone, and asks its
-two-way `Public Reply?` only for interplanetary mail (#333).
+**Replying to local mail asks who the reply goes to** (`BRE.OVR` unit 0x1d75d:
+the tests sit at +0xe02, +0xeb7 and +0xf13). `R` asks `Public Reply, Author
+only, or Select Destinations?`, keyed `P`/`A`/`S`; Enter and any other key do
+nothing. `P` addresses every living realm on the original message's address
+except the reader, so a reply to a message sent to everyone reaches everyone on
+the board; `S` opens the same picker as Send Message. **The author is added
+after every answer** (+0x10fc), so `S` with nobody picked is a reply to the
+author alone. Local mail stays on this board whatever the answer; interplanetary
+mail asks its own two-way `Public Reply?` instead (below).
+
+**IB checks the address by name where BRE checks the letter (IB's choice).**
+BRE sends a public reply to whoever holds each letter today, so a realm given a
+swept realm's letter receives replies to mail it was never sent. IB records the
+realm names with each message (`Message.ToNames`) and matches those, following a
+rename. Mail stored before that field existed falls back to the letters.
 
 **After a reply is sent, IB asks `[D] Delete or [K] Keep original message?`**
 about the message answered; Enter keeps it. BRE asks nothing. A reply abandoned

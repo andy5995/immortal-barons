@@ -2823,6 +2823,17 @@ Colors: frame cyan `36`; timestamp bright-white `1;37`; the `Message From:` /
 bright-green `1;32`; body white, quoted lines bright-blue `1;34`; the action keys
 bright-cyan `1;36` inside blue `34` brackets.
 
+**The reply question** (`cap/kd3-01.cap`, `cap/eots-ibbs-01.cap`). `R` echoes
+`Reply`, then a blank line and:
+
+```
+Public Reply, Author only, or Select Destinations? Author Only
+```
+
+Each initial bright-white `1;37`, the rest white `37`, no brackets, no `>`. The
+echo is bright white: `Public Reply`, `Author Only` or `Select Empires`; the last
+is followed by the Send Message picker. `Quote Message?` comes next.
+
 **When the reader runs.** BRE reads mail once per Play Game, not once per turn:
 `run_player_turn` calls `read_local_messages` at `BRE.EXE 0x3869`, before the
 turn loop whose head is `0x38D7`, and nothing in the loop calls it again (the

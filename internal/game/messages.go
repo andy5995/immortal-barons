@@ -2,6 +2,8 @@ package game
 
 import (
 	"encoding/json"
+	"slices"
+	"strings"
 	"time"
 )
 
@@ -25,6 +27,33 @@ type Message struct {
 	// with Body the original message; the reader renders the reason (#313). A
 	// bounce stored before it existed has the reason in its Body instead.
 	Bounce *MailBounce `json:",omitempty"`
+	// ToNames is who the letters in To named when the message was sent, one
+	// realm name per line (a name holds no control characters). A letter is
+	// given to a new realm once its holder is swept from the map, so a public
+	// reply checks these names rather than trusting today's letters, and a
+	// stranger who inherited a letter does not receive a reply to mail it was
+	// never sent. A string rather than a slice keeps Message comparable: the
+	// reader keys a map on it. Empty on mail sent before it existed.
+	ToNames string `json:",omitempty"`
+}
+
+// WentTo reports whether e was on m's address. It matches e's current name or
+// any name it has been renamed from; mail stored before ToNames falls back to
+// e's letter, which is what BRE itself goes by.
+func (m Message) WentTo(e *Empire) bool {
+	if m.ToNames == "" {
+		return e.Letter() != "?" && strings.Contains(m.To, e.Letter())
+	}
+	names := strings.Split(m.ToNames, "\n")
+	if slices.Contains(names, e.Name) {
+		return true
+	}
+	for _, n := range e.PriorRealmNames() {
+		if slices.Contains(names, n) {
+			return true
+		}
+	}
+	return false
 }
 
 // UnmarshalJSON accepts a bare string as well as an object, so a world saved

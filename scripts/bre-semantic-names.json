@@ -389,6 +389,11 @@
       "confidence": "high",
       "evidence": ["binary_strings: proposal, acceptance, rejection, war, and treaty-result topics", "call_graph: player-turn handler for pending diplomatic state"]
     },
+    "0x01d75d": {
+      "name": "read_local_messages__select_destinations",
+      "confidence": "high",
+      "evidence": ["call_graph: sole caller is read_local_messages at its Select Destinations branch (+0xf5c)", "call_graph: runs the empire selection routine at BRE.OVR 0x1b65e, then writes each chosen realm's id into the caller's reply destination list (param - 0xff + 4 * letter), the list Public and Author fill"]
+    },
     "0x01d844": {
       "name": "send_local_message",
       "confidence": "high",

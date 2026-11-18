@@ -20,8 +20,8 @@ const (
 )
 
 type mailReply struct {
-	// toNames are the local realms a reply goes to: the author of the message
-	// answered, or whoever the player picked when answering their own copy.
+	// toNames are the local realms a reply goes to: whoever localReplyTo
+	// settled on, or whoever the player picked when answering their own copy.
 	// On an interplanetary reply the one name is the author there.
 	toNames []string
 	// board names the planet an interplanetary reply goes back to, and is empty
@@ -63,13 +63,14 @@ func mailReader(s session.Session, w *ctx, skipIgnored, sent bool) {
 		case 'D':
 			deleted = append(deleted, m)
 		case 'R':
-			if (m.Sent && m.FromBoard != "") || (m.FromBoard != "" && m.From == "") {
+			if (m.Sent && m.FromBoard != "") || m.From == "" {
 				// Nobody to answer here. A copy of the player's own interplanetary
 				// message would need the planet picker to readdress. A notice from
 				// the planet itself (deliverIPMessage's bounce for a message that
 				// could not be delivered) is from no baron, and an empty ToEmpire
-				// would otherwise read as a planet-wide reply and broadcast it.
-				// Treat either like any other unhandled key.
+				// would otherwise read as a planet-wide reply and broadcast it. Mail
+				// from a save old enough to hold bare strings has no sender at all.
+				// Treat each like any other unhandled key.
 				w.ignoreMail(m)
 				break
 			}
@@ -81,13 +82,19 @@ func mailReader(s session.Session, w *ctx, skipIgnored, sent bool) {
 			public := false
 			switch {
 			case m.Sent:
-				to = pickedNames(w, pickRecipients(s, w, pickOpts{prompt: "Send to:", allowAll: true}))
+				to = pickReplyNames(s, w)
 				if len(to) == 0 {
 					w.ignoreMail(m)
 					continue
 				}
 			case m.FromBoard != "":
 				public = AskYesNo(s, "Public Reply?", false)
+			default:
+				var ok bool
+				if to, ok = localReplyTo(s, w, m); !ok {
+					applyMailActions(w, deleted, replies)
+					return
+				}
 			}
 			body, send := composeMessageFrom(s, askQuote(s, m))
 			if send && strings.TrimSpace(body) != "" {
@@ -114,6 +121,56 @@ func mailReader(s session.Session, w *ctx, skipIgnored, sent bool) {
 		}
 	}
 	applyMailActions(w, deleted, replies)
+}
+
+// replyOpts are the local reader's three answers to who a reply goes to.
+var replyOpts = []keyOpt{
+	{Key: 'P', Label: "Public Reply,", Echo: "Public Reply"},
+	{Key: 'A', Label: "Author only, or", Echo: "Author Only"},
+	{Key: 'S', Label: "Select Destinations?", Echo: "Select Empires"},
+}
+
+// localReplyTo asks BRE's three-way question for a reply to local mail and
+// returns who it goes to. The author is always among them, whatever the
+// answer: BRE adds the author after every choice (read_local_messages, BRE.OVR
+// unit 0x1d75d +0x10fc). Public adds every realm the message went to that still
+// stands, less the reader, checked by name where BRE checks the letter
+// (Message.WentTo); Select adds whoever the picker chooses, and choosing
+// nobody leaves the author alone, as in BRE. Enter is not an answer — the key
+// set is P, A and S only. ok is false once input has ended, and the reader
+// stops as it does on Quit.
+func localReplyTo(s session.Session, w *ctx, m game.Message) (to []string, ok bool) {
+	fmt.Fprint(s, "\n")
+	drawInitialKeys(s, replyOpts)
+	choice := readKeys(s, replyOpts, 0, 0)
+	fmt.Fprint(s, ansi.Reset)
+	to = []string{m.From}
+	switch choice {
+	case 0:
+		return nil, false
+	case 'P':
+		w.Read(func() {
+			p := w.Player()
+			for _, e := range w.Empires {
+				if e.Alive && e != p && e.Name != m.From && m.WentTo(e) {
+					to = append(to, e.Name)
+				}
+			}
+		})
+	case 'S':
+		for _, name := range pickReplyNames(s, w) {
+			if name != m.From {
+				to = append(to, name)
+			}
+		}
+	}
+	return to, true
+}
+
+// pickReplyNames runs Send Message's picker for a reply and returns the names
+// chosen.
+func pickReplyNames(s session.Session, w *ctx) []string {
+	return pickedNames(w, pickRecipients(s, w, pickOpts{prompt: "Send to:", allowAll: true}))
 }
 
 // pickedNames is the names of the realms the picker returned, read under the

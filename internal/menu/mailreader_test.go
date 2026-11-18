@@ -47,9 +47,10 @@ func TestMailReaderQuitKeepsRemaining(t *testing.T) {
 }
 
 func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
-	// r, Enter (Quote Message? = Yes), the reply text, /s, then d to delete the
-	// original. The message is one line, so no line range is asked for (#244).
-	f := &fakeSession{keys: []rune("r\rthanks\r/sd")}
+	// r, a (Author only), Enter (Quote Message? = Yes), the reply text, /s,
+	// then d to delete the original. The message is one line, so no line range
+	// is asked for (#244).
+	f := &fakeSession{keys: []rune("ra\rthanks\r/sd")}
 	w := newWorld()
 	// A real recipient empire is the sender, so the reply can find them.
 	var sender *game.Empire
@@ -90,7 +91,7 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 // TestMailReaderReplyEnterKeepsOriginal: Enter at the Delete-or-Keep question
 // after a sent reply keeps the message, and the reply still goes out.
 func TestMailReaderReplyEnterKeepsOriginal(t *testing.T) {
-	f := &fakeSession{keys: []rune("r\rthanks\r/s\r")}
+	f := &fakeSession{keys: []rune("ra\rthanks\r/s\r")}
 	w := newWorld()
 	var sender *game.Empire
 	w.With(func() { sender = recipients(w)[0] })
@@ -135,8 +136,8 @@ func TestMailReaderReplyToSystemNoticeIsANoOp(t *testing.T) {
 // started, then aborted with /a, leaves the original message in the inbox — only
 // a reply that actually goes out removes it.
 func TestMailReaderAbortedReplyKeepsMessage(t *testing.T) {
-	// r, n (decline quote), /a (abort the editor).
-	f := &fakeSession{keys: []rune("rn/a")}
+	// r, a (Author only), n (decline quote), /a (abort the editor).
+	f := &fakeSession{keys: []rune("ran/a")}
 	w := newWorld()
 	var sender *game.Empire
 	w.With(func() { sender = recipients(w)[0] })
@@ -160,8 +161,8 @@ func TestMailReaderAbortedReplyKeepsMessage(t *testing.T) {
 // numbering. Asserts the editor was reached too, so a flow change upstream
 // cannot leave this passing on a script that ran dry.
 func TestMailReaderQuoteRange(t *testing.T) {
-	// r, y (quote), 2 (first), 3 (last), the reply text, /s.
-	f := &fakeSession{keys: []rune("ry2\r3\rmy answer\r/s")}
+	// r, a (Author only), y (quote), 2 (first), 3 (last), the reply text, /s.
+	f := &fakeSession{keys: []rune("ray2\r3\rmy answer\r/s")}
 	w := newWorld()
 	var sender *game.Empire
 	w.With(func() { sender = recipients(w)[0] })
@@ -191,7 +192,7 @@ func TestMailReaderQuoteRange(t *testing.T) {
 // TestMailReaderQuoteDeclined checks answering No leaves the editor empty, so a
 // reply carries only what was typed.
 func TestMailReaderQuoteDeclined(t *testing.T) {
-	f := &fakeSession{keys: []rune("rnjust this\r/s")}
+	f := &fakeSession{keys: []rune("ranjust this\r/s")}
 	w := newWorld()
 	var sender *game.Empire
 	w.With(func() { sender = recipients(w)[0] })
@@ -213,9 +214,9 @@ func TestMailReaderQuoteDeclined(t *testing.T) {
 // every over-max entry behaves (#9). An earlier version of this test called the
 // clamp directly and so proved nothing about what a player meets.
 func TestMailReaderQuoteClampsRangeAtThePrompt(t *testing.T) {
-	// r, y (quote), 1 + Enter (first), 20 + Enter (corrected to 3) + Enter
-	// (commit), the reply text, /s.
-	f := &fakeSession{keys: []rune("ry1\r20\r\rmy answer\r/s")}
+	// r, a (Author only), y (quote), 1 + Enter (first), 20 + Enter (corrected
+	// to 3) + Enter (commit), the reply text, /s.
+	f := &fakeSession{keys: []rune("ray1\r20\r\rmy answer\r/s")}
 	w := newWorld()
 	var sender *game.Empire
 	w.With(func() { sender = recipients(w)[0] })
@@ -302,9 +303,10 @@ func TestAnAbandonedReplyCountsAsIgnored(t *testing.T) {
 		game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "second thoughts"},
 	)
 
-	// r, Enter (Quote Message? = Yes), then abandon the editor; q at the second
-	// message. Both are one line, so no line range is asked for (#244).
-	f := &fakeSession{keys: []rune("r\r/Aq")}
+	// r, a (Author only), Enter (Quote Message? = Yes), then abandon the editor;
+	// q at the second message. Both are one line, so no line range is asked for
+	// (#244).
+	f := &fakeSession{keys: []rune("ra\r/Aq")}
 	mailReader(f, w, true, false)
 	if got := len(w.Player().Mail); got != 2 {
 		t.Fatalf("nothing was sent, so nothing should be removed; Mail len = %d, want 2", got)
@@ -325,8 +327,9 @@ func TestAnAbandonedReplyCountsAsIgnored(t *testing.T) {
 // it (#244) and quotes the line. Asserts the editor was reached, so a flow
 // change upstream cannot leave this passing on a script that ran dry.
 func TestMailReaderOneLineMessageSkipsTheRangePrompts(t *testing.T) {
-	// r, y (quote), the reply text, /s — with no answer for a range prompt.
-	f := &fakeSession{keys: []rune("rymy answer\r/s")}
+	// r, a (Author only), y (quote), the reply text, /s — with no answer for a
+	// range prompt.
+	f := &fakeSession{keys: []rune("raymy answer\r/s")}
 	w := newWorld()
 	var sender *game.Empire
 	w.With(func() { sender = recipients(w)[0] })
@@ -411,5 +414,127 @@ func TestReadMessagesShowsNoNews(t *testing.T) {
 	}
 	if strings.Contains(out, "Planetary Master") || strings.Contains(out, "Bulletin") {
 		t.Errorf("Read Messages printed the news:\n%s", out)
+	}
+}
+
+// replyWorld seats four computer realms beside the player: the author of a
+// message, a realm it also went to, one it did not go to, and a fallen realm it
+// went to.
+func replyWorld(t *testing.T) (w *ctx, author, cc, other, fallen *game.Empire) {
+	t.Helper()
+	w = newWorld()
+	w.With(func() { w.AddAIEmpires(3) })
+	r := recipients(w)
+	if len(r) < 4 {
+		t.Fatalf("want 4 other realms, have %d", len(r))
+	}
+	author, cc, other, fallen = r[0], r[1], r[2], r[3]
+	fallen.Alive = false
+	to := w.Player().Letter() + cc.Letter() + fallen.Letter()
+	seedMail(w, game.Message{From: author.Name, To: to, When: "07/24/2026", Body: "to the three of you"})
+	return w, author, cc, other, fallen
+}
+
+// A public reply to local mail reaches the author and every realm the message
+// went to that still stands, and nobody else; Enter is not an answer to the
+// question.
+func TestLocalPublicReplyReachesTheWholeAddress(t *testing.T) {
+	w, author, cc, other, fallen := replyWorld(t)
+	// r, Enter (ignored), p, n (no quote), the text, /s, d.
+	f := &fakeSession{keys: []rune("r\rpnall of you\r/sd")}
+	mailReader(f, w, false, false)
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Public Reply, Author only, or Select Destinations? Public Reply") {
+		t.Fatalf("never reached the destination question:\n%s", out)
+	}
+	for _, e := range []*game.Empire{author, cc} {
+		if len(e.Mail) != 1 || e.Mail[0].Body != "all of you" {
+			t.Errorf("%s should get the reply; Mail = %+v", e.Name, e.Mail)
+		}
+	}
+	for _, e := range []*game.Empire{other, fallen} {
+		if len(e.Mail) != 0 {
+			t.Errorf("%s should not get the reply; Mail = %+v", e.Name, e.Mail)
+		}
+	}
+}
+
+// Select Destinations opens the Send Message picker, and the author is added
+// to whoever is chosen.
+func TestLocalSelectReplyAddsTheAuthor(t *testing.T) {
+	w, author, cc, other, _ := replyWorld(t)
+	// r, s, pick the other realm + Enter, n (no quote), the text, /s, d.
+	f := &fakeSession{keys: []rune("rs" + other.Letter() + "\rnpicked\r/sd")}
+	mailReader(f, w, false, false)
+
+	if !strings.Contains(f.out.String(), "Send to:") {
+		t.Fatalf("never reached the recipient picker:\n%s", f.out.String())
+	}
+	for _, e := range []*game.Empire{author, other} {
+		if len(e.Mail) != 1 || e.Mail[0].Body != "picked" {
+			t.Errorf("%s should get the reply; Mail = %+v", e.Name, e.Mail)
+		}
+	}
+	if len(cc.Mail) != 0 {
+		t.Errorf("%s was not picked; Mail = %+v", cc.Name, cc.Mail)
+	}
+}
+
+// A public reply goes by the names the address held when the message was sent:
+// a realm that inherited a swept realm's letter since does not receive it, and a
+// realm renamed since still does.
+func TestLocalPublicReplyFollowsNamesNotLetters(t *testing.T) {
+	w := newWorld()
+	w.With(func() { w.AddAIEmpires(3) })
+	r := recipients(w)
+	author, cc, swept, newcomer := r[0], r[1], r[2], r[3]
+	p := w.Player()
+	w.With(func() {
+		if err := mailRealms(w, author, []string{p.Name, cc.Name, swept.Name}, "07/24/2026", "the old crowd"); err != nil {
+			t.Fatal(err)
+		}
+	})
+	// swept leaves the map and newcomer is given its letter; cc is renamed.
+	for i, e := range w.Empires {
+		if e == swept {
+			w.Empires = append(w.Empires[:i], w.Empires[i+1:]...)
+			break
+		}
+	}
+	newcomer.Slot = swept.Slot
+	cc.FormerName, cc.Name = cc.Name, "Renamedland"
+
+	// r, p, n (no quote), the text, /s, d.
+	f := &fakeSession{keys: []rune("rpnstill here\r/sd")}
+	mailReader(f, w, false, false)
+
+	if !strings.Contains(stripANSI(f.out.String()), "Destinations? Public Reply") {
+		t.Fatalf("never reached the destination question:\n%s", f.out.String())
+	}
+	// Each already holds a copy of the original: the author's sent copy, cc's
+	// received one. The reply is the message after it.
+	for _, e := range []*game.Empire{author, cc} {
+		if len(e.Mail) != 2 || e.Mail[1].Body != "still here" {
+			t.Errorf("%s should get the reply; Mail = %+v", e.Name, e.Mail)
+		}
+	}
+	if len(newcomer.Mail) != 0 {
+		t.Errorf("the realm holding a reused letter got the reply; Mail = %+v", newcomer.Mail)
+	}
+}
+
+// Mail from a save old enough to store bare strings has no sender, so Reply
+// asks nothing and sends nothing.
+func TestMailReaderReplyToSenderlessMailIsANoOp(t *testing.T) {
+	f := &fakeSession{keys: []rune("r")}
+	w := newWorld()
+	seedMail(w, game.Message{Body: "from long ago"})
+	mailReader(f, w, false, false)
+	if strings.Contains(f.out.String(), "Destinations?") {
+		t.Errorf("a message with no sender should not ask who to reply to:\n%s", f.out.String())
+	}
+	if got := len(w.Player().Mail); got != 1 {
+		t.Errorf("the message should be kept; Mail len = %d, want 1", got)
 	}
 }

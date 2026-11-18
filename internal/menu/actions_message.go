@@ -589,17 +589,20 @@ func mailRealms(w *ctx, p *game.Empire, names []string, when, text string) error
 	// Every copy carries the same "Message To  :" letters, in letter order as
 	// BRE prints them.
 	var letters strings.Builder
+	var held []string
 	for _, e := range w.Empires {
 		for _, r := range recips {
 			if r == e {
 				letters.WriteString(w.EmpireLetter(e))
+				held = append(held, e.Name)
 				break
 			}
 		}
 	}
 	addressed := letters.String()
+	toNames := strings.Join(held, "\n")
 	for _, e := range recips {
-		w.World.SendMail(p, e, game.Message{To: addressed, When: when, Body: text})
+		w.World.SendMail(p, e, game.Message{To: addressed, ToNames: toNames, When: when, Body: text})
 	}
 	game.KeepSentCopy(p, "", addressed, when, text)
 	return nil

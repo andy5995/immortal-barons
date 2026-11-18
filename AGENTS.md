@@ -517,7 +517,6 @@ it:
   lines, and its `IP-RET-KILL` line
 - a sysop-editable random-events file
 - a loan rate that follows the sysop's investment and savings rates
-- BRE's public / author / select prompt when replying to local mail (#333)
 
 ## Primary goal: run as a BBS door
 
