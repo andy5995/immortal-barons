@@ -1179,7 +1179,7 @@ func TestDecontaminateStageOffersAndSpends(t *testing.T) {
 	if !strings.Contains(out, "decontaminate") {
 		t.Fatalf("expected the decontamination offer; got:\n%s", out)
 	}
-	if !strings.Contains(out, "clean again") {
+	if !strings.Contains(out, "regions decontaminated") {
 		t.Fatalf("cleaned land should go through the type picker; got:\n%s", out)
 	}
 	p = w.Player()

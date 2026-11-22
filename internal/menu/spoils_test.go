@@ -25,7 +25,7 @@ func TestSpoilsStageOffersThePicker(t *testing.T) {
 
 	// The screen this test is for, not just "some output": the spoils headline is
 	// the picker's own and appears nowhere else.
-	if out := f.out.String(); !strings.Contains(out, "waiting for a type") {
+	if out := f.out.String(); !strings.Contains(out, "regions waiting. Choose their types") {
 		t.Fatalf("the spoils picker never ran; output was: %q", out)
 	}
 	p := w.Player()

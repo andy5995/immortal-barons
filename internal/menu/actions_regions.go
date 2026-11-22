@@ -267,16 +267,20 @@ func regionCapReached(w *ctx, p *game.Empire) bool {
 // winner's freely-chosen composition from the proportional mix the loser bled).
 // The land is already parked on Empire.PendingRegions by the save that won it.
 func allocateCaptured(s session.Session, w *ctx, n int) {
-	allocateRegions(s, w, n,
-		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n))
+	if allocateRegions(s, w, n,
+		fmt.Sprintf(tr(s, "%d regions captured. Choose their types."), n)) {
+		okNoPause(s, "Regions added to your empire. You now hold %d land.", w.Player().Land)
+	}
 }
 
 // allocateSpoils is the same picker for land waiting on Empire.PendingRegions at
 // the start of a turn: taken on ANOTHER planet days ago on a board this baron was
 // not logged in to (#107), or left over from a picker whose session ended.
 func allocateSpoils(s session.Session, w *ctx, n int) {
-	allocateRegions(s, w, n,
-		fmt.Sprintf(tr(s, "%d regions are waiting for a type — choose which types to hold them as."), n))
+	if allocateRegions(s, w, n,
+		fmt.Sprintf(tr(s, "%d regions waiting. Choose their types."), n)) {
+		okNoPause(s, "Regions added to your empire. You now hold %d land.", w.Player().Land)
+	}
 }
 
 // allocateDecontaminated types land just cleaned of waste. The original pools
@@ -284,8 +288,10 @@ func allocateSpoils(s session.Session, w *ctx, n int) {
 // because neither has a type of its own until the owner gives it one; the save
 // that took the payment has already parked it on Empire.PendingRegions.
 func allocateDecontaminated(s session.Session, w *ctx, n int) {
-	allocateRegions(s, w, n,
-		fmt.Sprintf(tr(s, "%d regions are clean again — choose which types to hold them as."), n))
+	if allocateRegions(s, w, n,
+		fmt.Sprintf(tr(s, "%d regions decontaminated. Choose their types."), n)) {
+		okNoPause(s, "Decontaminated regions restored.")
+	}
 }
 
 // allocateRegions reuses the Buy Regions table and picker as an allocate-N loop
@@ -303,10 +309,11 @@ func allocateDecontaminated(s session.Session, w *ctx, n int) {
 //
 // When the INPUT ends, what was placed is granted and the rest stays parked; the
 // spoils stage offers it at the start of the next turn, as BRE's run_player_turn
-// re-offers its pool.
-func allocateRegions(s session.Session, w *ctx, n int, headline string) {
+// re-offers its pool. Reports whether any land was typed, so the caller can say
+// what kind of land it was.
+func allocateRegions(s session.Session, w *ctx, n int, headline string) bool {
 	if n <= 0 {
-		return
+		return false
 	}
 	alloc := make([]int, len(game.BuyableRegions))
 	showTable := func() {
@@ -347,7 +354,7 @@ func allocateRegions(s session.Session, w *ctx, n int, headline string) {
 		remaining -= got
 	}
 	if remaining == n {
-		return
+		return false
 	}
 
 	if err := w.mutatePlayer(func(fp *game.Empire) error {
@@ -361,9 +368,9 @@ func allocateRegions(s session.Session, w *ctx, n int, headline string) {
 		return nil
 	}); err != nil {
 		fail(s, err)
-		return
+		return false
 	}
-	okNoPause(s, "Regions added to your empire. You now hold %d land.", w.Player().Land)
+	return true
 }
 
 // sellLand is the Sell menu's Regions item, and it drops rather than sells —
