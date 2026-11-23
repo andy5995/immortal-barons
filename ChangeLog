@@ -9,6 +9,14 @@ Immortal Barons ChangeLog
     on a stand-alone board, turned on from the settings editor; see
     docs/mods.md and -check-mod
   * A mod can carry a Starlark script that decides pirate raids
+  * Mods can change the HeadQuarters: its price, build rate, battle loss and
+    the strength it adds to tanks
+  * Mods can change what each region type yields and costs (gold, food,
+    population room, upkeep, unit production, research), and give any type a
+    yield it lacks, such as food from deserts
+  * A mod can carry a Starlark script for each region type, regions/<type>.star,
+    that changes that type's figures realm by realm
+  * A mod with a script names the script_api it was written for in mod.toml
   * The sysop panel lists each board's mods and runs -check-mod on them
 
 2026-11-11 (v0.2.9)
