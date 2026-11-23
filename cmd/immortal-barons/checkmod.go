@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/mod"
@@ -11,7 +14,14 @@ import (
 // limits a reset uses, and prints every value it changes from the base game.
 // It checks the mod on its own; a reset also checks the mods it applies
 // together, so two mods that pass here can still fail there as a pair.
-func runCheckMod(path string) error {
+//
+// arg is a folder, or a mod's name as config.json lists it, which is looked up
+// in the data directory's mods folder.
+func runCheckMod(arg, dataDir string) error {
+	path := arg
+	if _, err := os.Stat(arg); err != nil && !strings.ContainsAny(arg, `/\`) {
+		path = filepath.Join(dataDir, mod.Dir, arg)
+	}
 	m, r, err := mod.Check(path)
 	if err != nil {
 		return err

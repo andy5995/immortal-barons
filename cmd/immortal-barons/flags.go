@@ -98,7 +98,7 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		ibbsReset:       flag.Bool("ibbs-reset", false, i18n.T(lang, "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings")),
 		resetFromConfig: flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)")),
 		spectate:        flag.Int("spectate", 0, i18n.T(lang, "play the game forward `<n>` days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms")),
-		checkMod:        flag.String("check-mod", "", i18n.T(lang, "check the mod in folder `<dir>` on its own, with the limits a reset uses, print what it changes, then exit")),
+		checkMod:        flag.String("check-mod", "", i18n.T(lang, "check the mod `<dir>` on its own, with the limits a reset uses, print what it changes, then exit. <dir> is a folder, or a mod's name in the data directory's mods folder")),
 		printBaseMod:    flag.Bool("print-base-mod", false, i18n.T(lang, "print every value a mod can change, as the base game sets it, in the form of a values.toml, then exit")),
 		dump:            flag.Bool("dump", false, i18n.T(lang, "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)")),
 		dupeCheck:       flag.String("dupe-check", "", i18n.T(lang, "force Dupe Checking `on|off` for this run only, for testing a league lockout. Nothing is saved: the sysop's setting is left as it is")),

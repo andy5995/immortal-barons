@@ -90,7 +90,7 @@ func main() {
 		return
 	}
 	if *o.checkMod != "" {
-		exitOn("-check-mod", runCheckMod(*o.checkMod))
+		exitOn("-check-mod", runCheckMod(*o.checkMod, *o.dataDir))
 		return
 	}
 

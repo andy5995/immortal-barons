@@ -75,8 +75,11 @@ or any other file in the folder is an error.
 ## Checking a mod
 
 ```
-immortal-barons -check-mod data/mods/cheap-tanks
+immortal-barons -check-mod cheap-tanks
 ```
+
+A plain name is looked up in the `mods` folder of the data directory. You can
+also give the path to any mod folder, such as `-check-mod ~/my-mods/cheap-tanks`.
 
 This checks the mod on its own, with the same limits a reset uses, and lists
 every value it changes:

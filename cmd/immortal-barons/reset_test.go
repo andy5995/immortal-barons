@@ -257,3 +257,22 @@ func TestResetGetsPastModsThatNoLongerLoad(t *testing.T) {
 		t.Errorf("after the reset: mods %v, err %v", loaded, err)
 	}
 }
+
+// -check-mod takes a mod's name, as config.json lists it, as well as a path.
+func TestCheckModFindsAModByName(t *testing.T) {
+	dir := t.TempDir()
+	m := filepath.Join(dir, "mods", "cheap-tanks")
+	if err := os.MkdirAll(m, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(m, "mod.toml"), []byte("name = \"cheap-tanks\"\nversion = \"1\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for _, arg := range []string{"cheap-tanks", m} {
+		var err error
+		out := captureStdout(t, func() { err = runCheckMod(arg, dir) })
+		if err != nil || !strings.Contains(out, "cheap-tanks 1") {
+			t.Errorf("-check-mod %s: err %v, output %q", arg, err, out)
+		}
+	}
+}
