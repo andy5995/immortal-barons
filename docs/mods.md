@@ -13,7 +13,8 @@ nothing yet sends a mod to the other boards.
 
 ## What a mod can change
 
-This first version can change seven figures for each of the six military units:
+A mod can change seven figures for each of the six military units, the
+HeadQuarters, and the figures of each region type. The units first:
 
 | Key | Meaning | Limits |
 | --- | --- | --- |
@@ -72,13 +73,55 @@ interplanetary battle's own tank figures, the share a winning invasion takes,
 and what a Sabotage HQ agent takes. Those only happen in a league, where mods
 are not allowed.
 
+### Regions
+
+Each region type has its own `[regions.<id>]` section in `values.toml`. The
+types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `urban`,
+`industrial`, `technology` and `waste`. Every key is optional, and every type
+takes every key: the base game has only rivers fish and only Industrial regions
+pay idle gold, but a mod may give a desert food or an urban region gold, and the
+game works it out the same way. All figures are whole numbers.
+
+| Key | Meaning | Limits |
+| --- | --- | --- |
+| `gold_base`, `gold_rate` | Gold one region pays each turn: `gold_base` plus a random 0 up to one less than `gold_rate`, drawn once a turn for the whole type | 0 to 1,000,000 |
+| `gold_share` | Percent of that gold paid out as gold (a river's other 25 percent is fish) | 0 to 100 |
+| `support_share` | Percent of the gold that follows popular support, as coastal regions' does. The rest is paid in full | 0 to 100 |
+| `idle_gold_base`, `idle_gold_rate` | Gold one region pays, as Industrial regions do, on the part of the realm's production not allocated to units: `idle_gold_base` plus a random 0 up to one less than `idle_gold_rate` when none is allocated, and that share of it otherwise | 0 to 1,000,000 |
+| `food_base`, `food_rate` | Food one region grows each turn: `food_base`, raised by food technology, plus a random 0 up to one less than `food_rate` | 0 to 100,000 |
+| `food_share` | Percent of that food that is produced | 0 to 100 |
+| `pop_cap` | The type's weight in the population capacity | 0 to 10,000 |
+| `upkeep` | Gold one region costs to keep each turn, before technology and the Maintenance Costs setting | 0 to 100,000 |
+| `unit_points` | Production a region adds to the realm's unit pool | 0 to 100,000 |
+| `production_boost` | The unit pool rises by this many times the type's share of all the realm's land; the whole boost is capped at 150 percent of normal | 0 to 100 |
+| `research` | The type's weight in the realm's research count | 0 to 100 |
+
+Gold is `(gold_base + draw) x gold_share percent`, scaled by popular support for
+the `support_share` part of it, then raised by gold technology. Idle gold is not
+raised by technology.
+
+Waste is ruined land: it may change only `upkeep`, `gold_share` and
+`food_share`, and every other key must stay 0. A type that pays gold or food a
+mod gave it gets its own line in the turn report.
+
+For example, deserts that can be farmed a little, and cheaper land to keep:
+
+```toml
+[regions.desert]
+food_base = 150
+food_rate = 100
+
+[regions.agricultural]
+upkeep = 600
+```
+
 To see every value a mod can change, as the game sets it without mods, run:
 
 ```
 immortal-barons -print-base-mod
 ```
 
-It prints them, the `[hq]` section included, in the form of a `values.toml`. Copy the sections you want into
+It prints them, the `[hq]` and `[regions.<id>]` sections included, in the form of a `values.toml`. Copy the sections you want into
 your mod and change them.
 
 ## Making a mod
@@ -103,7 +146,8 @@ label = "Cheap Tanks"       # shown on the Game Setup screen; blank shows the na
 description = "Tanks cost less to buy, build and keep."
 ```
 
-`values.toml` holds the changes, one section per unit. List only what changes:
+`values.toml` holds the changes, one section per unit, plus `[hq]` and one
+section per region type. List only what changes:
 
 ```toml
 [units.tank]

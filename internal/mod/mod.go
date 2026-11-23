@@ -85,6 +85,8 @@ func (m *Mod) Ref() game.ModRef {
 type values struct {
 	Units map[string]map[string]any `toml:"units"`
 	HQ    map[string]any            `toml:"hq"`
+	// Regions is one section per region type (regions.go).
+	Regions map[string]map[string]any `toml:"regions"`
 }
 
 // number takes a TOML integer or float, so `upkeep = 1` and `upkeep = 0.4`
@@ -293,6 +295,9 @@ func (m *Mod) Apply(r *game.Rules) error {
 		r.Units[g] = u
 	}
 	if err := m.applyHQ(r); err != nil {
+		errs = append(errs, err)
+	}
+	if err := m.applyRegions(r); err != nil {
 		errs = append(errs, err)
 	}
 	if m.pirates != nil {
