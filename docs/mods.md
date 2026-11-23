@@ -146,6 +146,9 @@ label = "Cheap Tanks"       # shown on the Game Setup screen; blank shows the na
 description = "Tanks cost less to buy, build and keep."
 ```
 
+A mod that holds a script also needs `script_api` (see
+[Script versions](#script-versions)).
+
 `values.toml` holds the changes, one section per unit, plus `[hq]` and one
 section per region type. List only what changes:
 
@@ -168,8 +171,8 @@ and `regions.star` is an error.
 A mod may also hold scripts: `pirates.star`, which decides pirate raids, and
 `regions.star`, which decides what each realm's regions do. They are written
 in [Starlark](https://github.com/bazelbuild/starlark), a small language that
-looks like Python. When two mods in the list have the same script, the later
-mod's is used.
+looks like Python. When two mods in the list both have `pirates.star`, the
+later mod's is used. Region scripts combine instead: see below.
 
 ### Pirate raids
 
@@ -248,10 +251,39 @@ answer each time it is asked the same question, or a screen would show one
 figure and the turn pay another. Gold is left out of `realm` for the same
 reason, since it changes during a turn.
 
-If the script fails, because of an error, by running out of steps, or by
-returning a figure outside its limits, that realm plays the figures in `rows`.
-The game writes the reason to its error output once each time the game runs,
-naming the mod.
+When more than one mod in the list has `regions.star`, every one of them runs,
+in the order the mods are listed. Each is given, as `rows`, the figures the one
+before it returned, so a mod that makes deserts farmable and a mod that makes
+coasts richer both take effect. Where two scripts change the same figure, the
+later mod wins, as it does in `values.toml`.
+
+If a script fails, because of an error, by running out of steps, or by
+returning a figure outside its limits, its own changes are dropped for that
+realm and the next script is given the `rows` it was given. The game writes
+the reason to its error output once each time the game runs, naming the mod.
+
+### Script versions
+
+A mod that holds a script says in `mod.toml` which version of the script
+interface it was written for:
+
+```toml
+script_api = 1
+```
+
+The script interface is what a script is given (`realm`, `rows`, `factions`
+and their fields) and what it may return. This version of the game runs
+version 1. When a later version of the game changes it in a way that could
+break a script that worked before (a field renamed or removed, a function's
+parameters changed), the version goes up and the ChangeLog says what changed.
+The game then refuses a mod written for a version it does not run, before the
+game starts, and says which mod and why, rather than letting the script fail
+during play. A mod written for a newer version than the game runs is refused
+the same way.
+
+Adding something new, a field a script may read or a key it may return, does
+not raise the version, so a mod keeps working until a change actually affects
+it. A mod with no script does not need `script_api`.
 
 ### What every script may do
 
