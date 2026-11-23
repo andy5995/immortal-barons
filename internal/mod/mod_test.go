@@ -198,3 +198,50 @@ func TestRestoreRefusesAModSavedTwice(t *testing.T) {
 		t.Errorf("err = %v, want the duplicate refused", err)
 	}
 }
+
+func hqMod(t *testing.T, body string) (*game.Rules, error) {
+	t.Helper()
+	dir := writeMod(t, t.TempDir(), "hq", map[string]string{ManifestFile: manifest("hq"), ValuesFile: body})
+	_, r, err := Check(dir)
+	return r, err
+}
+
+func TestHQSectionChangesTheRulesAndDiff(t *testing.T) {
+	r, err := hqMod(t, "[hq]\nprice_base = 6000\nbuild_per_turn = 10\ntank_bonus = 0.02\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.HQ.PriceBase != 6000 || r.HQ.BuildPerTurn != 10 || r.HQ.TankPerHQ != 2 {
+		t.Errorf("rules HQ = %+v", r.HQ)
+	}
+	got := strings.Join(Diff(game.BaseRules(), r), "\n")
+	want := "hq.tank_bonus: 0.01 -> 0.02\nhq.build_per_turn: 5 -> 10\nhq.price_base: 5000 -> 6000"
+	if got != want {
+		t.Errorf("diff:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestHQSectionRefusesWhatItShould(t *testing.T) {
+	for body, want := range map[string]string{
+		"[hq]\nprice_cap = 100\n":        "price_cap 100 must be at least price_base (5000)",
+		"[hq]\nbattle_loss_jitter = 0\n": "battle_loss_jitter 0 is outside 1 to 100",
+		"[hq]\nbogus = 1\n":              "hq.bogus: unknown key",
+		"[hq]\nprice_base = 1.5\n":       "hq.price_base: want a whole number",
+	} {
+		if _, err := hqMod(t, body); err == nil || !strings.Contains(err.Error(), want) {
+			t.Errorf("%q: err = %v, want it to say %q", body, err, want)
+		}
+	}
+}
+
+func TestBaseValuesPrintTheHQSection(t *testing.T) {
+	text := Values(game.BaseRules(), "h")
+	for _, want := range []string{"[hq]\n", "tank_bonus = 0.01", "build_start = 5", "build_per_turn = 5",
+		"battle_loss_min = 5", "battle_loss_jitter = 3", "invasion_loss_divisor = 5",
+		"price_base = 5000", "price_per_turn = 75", "price_jitter = 300",
+		"price_cap = 100000", "price_cap_jitter = 1000", "sabotage_points = 15"} {
+		if !strings.Contains(text, want+"\n") && !strings.HasSuffix(want, "\n") {
+			t.Errorf("output lacks %q:\n%s", want, text)
+		}
+	}
+}
