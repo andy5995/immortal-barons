@@ -12,8 +12,9 @@
 // for a file in the folder this version does not use: a mod carrying one would
 // otherwise load here and play without it.
 //
-// A mod may also carry a script, pirates.star, which decides pirate raids
-// (script.go).
+// A mod may also carry scripts: pirates.star, which decides pirate raids
+// (script.go), and one regions/<type>.star per region type it changes, which
+// decides what that type yields and costs for each realm (region_script.go).
 package mod
 
 import (
@@ -40,7 +41,7 @@ import (
 // Dir is the folder under the data directory that holds the mods.
 const Dir = "mods"
 
-// The files a mod folder may hold, besides PiratesFile. values.toml is
+// The files a mod folder may hold, besides PiratesFile and the RegionsDir folder. values.toml is
 // optional: a mod that changes nothing yet is still a mod.
 const (
 	ManifestFile = "mod.toml"
@@ -59,7 +60,19 @@ type Manifest struct {
 	// Label is what the Game Setup screen shows; blank shows Name.
 	Label       string `toml:"label"`
 	Description string `toml:"description"`
+	// ScriptAPI is the version of the script interface the mod's scripts were
+	// written for. It is required of a mod that carries a script: see
+	// ScriptAPI.
+	ScriptAPI int `toml:"script_api"`
 }
+
+// ScriptAPI is the version of the script interface this game runs: what a
+// script is given and what it may return. A change that could break a script
+// written for it raises the number, so the game can tell a sysop which mods
+// need updating instead of failing in play; adding a field a script may read,
+// or a key it may return, does not. A mod declares the version its scripts
+// were written for as script_api in mod.toml.
+const ScriptAPI = 1
 
 // Mod is one mod folder, read and hashed.
 type Mod struct {
@@ -73,6 +86,7 @@ type Mod struct {
 	Files   map[string]string
 	values  values
 	pirates *pirateScript
+	regions map[*game.Region]*regionScript
 }
 
 // Ref is what a world records about m.
@@ -163,21 +177,43 @@ func Available(dataDir string) ([]Entry, error) {
 	return out, nil
 }
 
-// Read reads the mod folder at path.
+// Read reads the mod folder at path, and its RegionsDir folder if it has one.
+// A file in RegionsDir is keyed "regions/<name>", with a forward slash on
+// every system.
 func Read(path string) (*Mod, error) {
-	entries, err := os.ReadDir(path)
-	if err != nil {
+	files := map[string]string{}
+	if err := readFiles(path, "", files); err != nil {
 		return nil, err
 	}
-	files := map[string]string{}
-	for _, e := range entries {
-		data, err := os.ReadFile(filepath.Join(path, e.Name()))
-		if err != nil {
-			return nil, err
-		}
-		files[e.Name()] = string(data)
-	}
 	return parse(path, files)
+}
+
+// readFiles reads dir's files into files, each keyed prefix + its name. Only
+// the mod folder itself may hold a folder, and only RegionsDir: parse names
+// anything else as a mistake.
+func readFiles(dir, prefix string, files map[string]string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		full := filepath.Join(dir, e.Name())
+		if e.IsDir() {
+			if prefix != "" || e.Name() != RegionsDir {
+				return fmt.Errorf("%s: a folder in a mod may only be %s, holding a script for each region type it changes", full, RegionsDir)
+			}
+			if err := readFiles(full, RegionsDir+"/", files); err != nil {
+				return err
+			}
+			continue
+		}
+		data, err := os.ReadFile(full)
+		if err != nil {
+			return err
+		}
+		files[prefix+e.Name()] = string(data)
+	}
+	return nil
 }
 
 // parse reads a mod from its files, keyed by name. path is the folder they
@@ -190,8 +226,11 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	var haveManifest bool
 	for _, name := range names {
 		data := []byte(files[name])
-		if name != ManifestFile && name != ValuesFile && name != PiratesFile {
-			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s and %s", path, name, ManifestFile, ValuesFile, PiratesFile)
+		if name != ManifestFile && name != ValuesFile && name != PiratesFile && regionScriptType(name) == nil {
+			if strings.HasPrefix(name, RegionsDir+"/") {
+				return nil, fmt.Errorf("%s: %s is not a region script; %s holds a <type>.star for each region type the mod changes (%s)", path, name, RegionsDir, strings.Join(regionIDs(), ", "))
+			}
+			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s, %s and a %s folder", path, name, ManifestFile, ValuesFile, PiratesFile, RegionsDir)
 		}
 		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(data))
 		hash.Write(data)
@@ -228,6 +267,9 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		}
 	}
 	m.Hash = hex.EncodeToString(hash.Sum(nil)[:8])
+	if err := checkScriptAPI(path, m.ScriptAPI, files); err != nil {
+		return nil, err
+	}
 	if src, ok := files[PiratesFile]; ok {
 		s, err := newPirateScript(path, m.Name, m.Hash, src)
 		if err != nil {
@@ -235,7 +277,42 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		}
 		m.pirates = s
 	}
+	for _, g := range game.RegionTypes {
+		src, ok := files[regionScriptFile(g)]
+		if !ok {
+			continue
+		}
+		s, err := newRegionScript(path, m.Name, m.Hash, g, src)
+		if err != nil {
+			return nil, err
+		}
+		if m.regions == nil {
+			m.regions = map[*game.Region]*regionScript{}
+		}
+		m.regions[g] = s
+	}
 	return m, nil
+}
+
+// checkScriptAPI holds a mod with a script to the script interface it
+// declares, before any script is compiled.
+func checkScriptAPI(path string, api int, files map[string]string) error {
+	_, script := files[PiratesFile]
+	for name := range files {
+		script = script || regionScriptType(name) != nil
+	}
+	file := filepath.Join(path, ManifestFile)
+	switch {
+	case api < 0:
+		return fmt.Errorf("%s: script_api %d is not a version", file, api)
+	case api == 0 && script:
+		return fmt.Errorf("%s: a mod with a script must say which script interface it was written for; this version of the game runs script_api = %d", file, ScriptAPI)
+	case api > ScriptAPI:
+		return fmt.Errorf("%s: written for script_api %d, but this version of the game runs script_api %d; it needs a newer version of the game", file, api, ScriptAPI)
+	case api < ScriptAPI && script:
+		return fmt.Errorf("%s: written for script_api %d, but this version of the game runs script_api %d; its scripts need updating", file, api, ScriptAPI)
+	}
+	return nil
 }
 
 // decodeStrict decodes TOML into v and fails on any key v has no field for.
@@ -302,6 +379,14 @@ func (m *Mod) Apply(r *game.Rules) error {
 	}
 	if m.pirates != nil {
 		r.Pirates = m.pirates
+	}
+	// A later mod's script for a type replaces an earlier one's, as a later
+	// mod's figure in values.toml does.
+	for g, s := range m.regions {
+		if r.RegionBrains == nil {
+			r.RegionBrains = map[*game.Region]game.RegionBrain{}
+		}
+		r.RegionBrains[g] = s
 	}
 	if err := errors.Join(errs...); err != nil {
 		return fmt.Errorf("%s: %w", filepath.Join(m.Path, ValuesFile), err)
