@@ -146,6 +146,9 @@ label = "Cheap Tanks"       # shown on the Game Setup screen; blank shows the na
 description = "Tanks cost less to buy, build and keep."
 ```
 
+A mod that holds a script also needs `script_api` (see
+[Script versions](#script-versions)).
+
 `values.toml` holds the changes, one section per unit, plus `[hq]` and one
 section per region type. List only what changes:
 
@@ -160,17 +163,25 @@ price_high = 900
 Both files are [TOML](https://toml.io/). Lines starting with `#` are comments.
 
 The game reads a mod strictly. A key it does not know, a unit it does not know,
-or any file in the folder other than `mod.toml`, `values.toml` and
-`pirates.star` is an error.
+or any file in the folder other than `mod.toml`, `values.toml`, `pirates.star`
+and the region scripts in a `regions` folder is an error.
 
 ## Scripts
 
-A mod may also hold `pirates.star`, a script that decides pirate raids. It is
-written in [Starlark](https://github.com/bazelbuild/starlark), a small
-language that looks like Python. When two mods in the list have one, the later
-mod's script is used.
+A mod may also hold scripts: `pirates.star`, which decides pirate raids, and a
+`regions` folder with a script for each region type the mod changes, which
+decides what that type does realm by realm. They are written in
+[Starlark](https://github.com/bazelbuild/starlark), a small language that looks
+like Python.
 
-The script must define `raid(realm, factions)`. Each turn a realm plays, after
+Scripts follow the same rule as `values.toml`: when two mods in the list have
+the same script, the later mod's is used and the earlier one's does not run.
+Which mods work together, and in what order, is for the people who make them
+to say; the game only applies them in the order they are listed.
+
+### Pirate raids
+
+`pirates.star` must define `raid(realm, factions)`. Each turn a realm plays, after
 the usual checks (pirates are on, the realm is out of protection), the game
 calls `raid` instead of rolling for a raid itself.
 
@@ -204,24 +215,110 @@ Two built-in functions are added to Starlark's own:
   random numbers.
 - `day()` returns the game day.
 
-A script cannot read files, the clock, or other scripts (`load` is not
-available). `while` loops and recursion are not allowed, and neither are
-`if` and `for` at the top level of the file: put them inside a function. Each call to `raid`
-may run for at most 1,000,000 steps, and so may the top level of the file
-when it loads.
-
 If the script fails in a turn, because of an error, by running out of steps,
 or by returning a raid the game does not allow, that realm's turn uses the
 normal pirate raid instead. The game writes the reason to its error output
 once each time the game runs, naming the mod.
 
+### Region figures
+
+A script for one region type goes in the mod's `regions` folder, named for the
+type: `regions/desert.star`, `regions/coastal.star`, and so on for any of the
+nine types listed under [Regions](#regions). A mod has a script only for the
+types it changes:
+
+```
+data/
+  mods/
+    farmland/
+      mod.toml
+      regions/
+        desert.star
+```
+
+Each script must define `region(realm, row)`. It changes the type's figures
+for one realm at a time, so a realm's land can do more or less depending on
+the realm: a bonus for small realms, deserts that farm only once a realm has
+played a hundred turns.
+
+`realm` is the realm whose land is asked about. Its fields are `name`, `day`
+(the game day), `land`, `people`, `support`, `tax`, `turns_played`, and
+`regions`, which holds how many regions of each type it has, by the type's
+name: `realm.regions.mountain`.
+
+`row` holds the type's figures as every realm plays them, the base game's with
+`values.toml` applied, by the keys in the table under [Regions](#regions):
+`row.food_base`.
+
+`region` returns the figures it changes for this realm, or `{}` to change
+nothing. A key it leaves out keeps its value in `row`:
+
+```python
+def region(realm, row):
+    if realm.turns_played < 100:
+        return {}
+    return {"food_base": row.food_base + 150, "food_rate": 100}
+```
+
+The answers must stay inside the limits in the table, and a script for waste
+may change only the keys waste may change in `values.toml`.
+
+The game asks for a realm's figures whenever it needs them: for the turn, but
+also for each screen that shows a projection, such as the income a realm can
+expect. So a region script has no `rand()` or `day()`: it must give the same
+answer each time it is asked the same question, or a screen would show one
+figure and the turn pay another. Gold is left out of `realm` for the same
+reason, since it changes during a turn.
+
+The other fields of `realm` change between turns, so a projection holds for
+the realm as it stands. A script that reads `turns_played`, `people` or
+`support` can pay next turn a figure this turn's screen did not show: in the
+example above, the screen on turn 99 shows the deserts' figures without the
+bonus, and turn 100 pays them with it.
+
+If a script fails, because of an error, by running out of steps, or by
+returning a figure outside its limits, that realm plays the type's figures
+from `row` unchanged. The game writes the reason to its error output once each
+time the game runs, naming the mod and the script.
+
+### Script versions
+
+A mod that holds a script says in `mod.toml` which version of the script
+interface it was written for:
+
+```toml
+script_api = 1
+```
+
+The script interface is what a script is given (`realm`, `row`, `factions`
+and their fields) and what it may return. This version of the game runs
+version 1. When a later version of the game changes it in a way that could
+break a script that worked before (a field renamed or removed, a function's
+parameters changed), the version goes up and the ChangeLog says what changed.
+The game then refuses a mod written for a version it does not run, before the
+game starts, and says which mod and why, rather than letting the script fail
+during play. A mod written for a newer version than the game runs is refused
+the same way.
+
+Adding something new, a field a script may read or a key it may return, does
+not raise the version, so a mod keeps working until a change actually affects
+it. A mod with no script does not need `script_api`.
+
+### What every script may do
+
+A script cannot read files, the clock, or other scripts (`load` is not
+available). `while` loops and recursion are not allowed, and neither are
+`if` and `for` at the top level of the file: put them inside a function. Each
+call to `raid` or `region` may run for at most 1,000,000 steps, and so may the
+top level of the file when it loads.
+
 A script is as trusted as the rest of the mod folder. It runs inside the game
 itself, and nothing limits how much memory it uses, so install only scripts
 you have read.
 
-`-check-mod` loads the script and checks that it defines `raid` with two
-parameters. It cannot check what `raid` returns, because that depends on the
-game. Watch the error output once the game has played some turns.
+`-check-mod` loads each script and checks that it defines `raid` or `region`
+with two parameters. It cannot check what they return, because that depends on
+the game. Watch the error output once the game has played some turns.
 
 ## Checking a mod
 
