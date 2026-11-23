@@ -262,7 +262,7 @@ const (
 // "Medium") ---
 //
 // Per-unit maintenance per turn, in TENTHS of a gold (Technology reduces the
-// total via TechFactor — see Empire.ForcesUpkeep). These are literal gold, not a
+// total via TechFactor — see World.ForcesUpkeep). These are literal gold, not a
 // ratio to scale: a turret-only empire was charged exactly trunc(0.9 × turrets)
 // at five army sizes from 49,691 turrets (44,721 gold) to 219,032 (197,128).
 //

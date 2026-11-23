@@ -49,7 +49,7 @@ func TestPayForcesFullNoDesertion(t *testing.T) {
 	e := w.AddHuman("me", "Mine")
 	e.Gold = 100000
 	before := e.Troopers
-	req := e.ForcesUpkeep()
+	req := w.ForcesUpkeep(e)
 
 	if lost := w.PayForces(e, req); lost != 0 {
 		t.Errorf("paying in full should cause no desertion, lost %d", lost)

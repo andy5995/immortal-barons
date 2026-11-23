@@ -25,10 +25,11 @@ func TestGoodRowsAreComplete(t *testing.T) {
 		if (g.Stored == nil) == (g.Price == nil) {
 			t.Errorf("%s: a good takes a stored walk price or a rule of its own, not both and not neither", g.Plural)
 		}
-		if g.Stored != nil && (g.WalkLo <= 0 || g.WalkHi <= g.WalkLo || g.WalkStep <= 0 || g.WalkTag == "") {
+		u := baseRules.Units[g]
+		if g.Stored != nil && (u.PriceLo <= 0 || u.PriceHi <= u.PriceLo || u.PriceStep <= 0 || g.WalkTag == "") {
 			t.Errorf("%s: a stored price needs its band, its step and its draw tag", g.Plural)
 		}
-		if g.Military && (g.Prod == nil || g.Made == nil || g.Cost <= 0 || g.NetWorth <= 0) {
+		if g.Military && (g.Prod == nil || g.Made == nil || u.Cost <= 0 || u.NetWorth <= 0) {
 			t.Errorf("%s: a unit Industrial builds needs its production fields, cost and net worth", g.Plural)
 		}
 		if !g.Military && (g.Prod != nil || g.Made != nil) {

@@ -135,9 +135,12 @@ type DailyBulletin struct {
 }
 
 type World struct {
-	Empires    []*Empire
-	Prices     Prices
-	Config     Config `json:"-"` // authoritative copy is config.json; Load sets this
+	Empires []*Empire
+	Prices  Prices
+	Config  Config `json:"-"` // authoritative copy is config.json; Load sets this
+	// Rules are the values this world plays by; nil plays the base rules
+	// (rules.go).
+	Rules      *Rules `json:"-"`
 	GameDay    int
 	InvestRate int // tenths of a percent per day, floats each daily maintenance
 	// FoodMarketSupply is the shared planet-wide pool of food available to buy
@@ -562,7 +565,7 @@ func (w *World) initFreshGame() {
 			v.Field(i).SetZero()
 		}
 	}
-	w.Prices = defaultPrices()
+	w.Prices = w.defaultPrices()
 	w.InvestRate = DefaultInvestRate
 	w.FoodMarketSupply = FoodMarketDailySupply
 	w.RefundPool = QueenRefundPoolSeed
@@ -649,10 +652,11 @@ func (w *World) TodaysBulletin() DailyBulletin {
 // current prices instead of carrying the old world's stale ones. Each unit starts
 // at the center of its walk band, which is where BRE's mean-reverting walk keeps
 // pulling it back to anyway.
-func defaultPrices() Prices {
+func (w *World) defaultPrices() Prices {
 	p := Prices{Land: RegionPriceBase}
 	for _, g := range MilitaryGoods {
-		*g.Stored(&p) = midPrice(g.WalkLo, g.WalkHi)
+		u := w.unit(g)
+		*g.Stored(&p) = midPrice(u.PriceLo, u.PriceHi)
 	}
 	return p
 }
@@ -791,16 +795,16 @@ func (w *World) NetWorth(e *Empire) int {
 	// the arithmetic is widened. Storage/return stay int.
 	thou := int64(e.Land) * NetWorthLand
 	for _, g := range AllGoods {
-		thou += int64(*g.Count(e)) * g.NetWorth
+		thou += int64(*g.Count(e)) * w.unit(g).NetWorth
 	}
 	for _, g := range MarketGoods {
-		thou += int64(w.MarketForSale(e.Name, g.Singular)) * g.NetWorth
+		thou += int64(w.MarketForSale(e.Name, g.Singular)) * w.unit(g).NetWorth
 	}
 	for _, o := range w.Empires {
 		for _, d := range o.TradeDeals {
 			if d.From == e.Name {
 				for _, g := range MarketGoods {
-					thou += int64(*g.Basket(&d.Send)) * g.NetWorth
+					thou += int64(*g.Basket(&d.Send)) * w.unit(g).NetWorth
 				}
 			}
 		}
@@ -808,7 +812,7 @@ func (w *World) NetWorth(e *Empire) int {
 	away := w.ForcesAway(e.Owner)
 	for _, g := range MilitaryGoods {
 		if g.Force != nil {
-			thou += int64(*g.Force(&away)) * g.NetWorth
+			thou += int64(*g.Force(&away)) * w.unit(g).NetWorth
 		}
 	}
 	return int(thou / 1000)

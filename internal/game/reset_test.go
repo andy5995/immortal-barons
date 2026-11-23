@@ -68,6 +68,9 @@ func TestResetErasesEverythingSaved(t *testing.T) {
 		}
 	}
 	w.Config = cfg
+	// The filled rule set would price the reset's fresh market; a fresh world
+	// plays the base rules, which is what nil means.
+	w.Rules = nil
 	unsaved := map[string]any{}
 	for i := range v.NumField() {
 		if f := v.Type().Field(i); f.IsExported() && f.Tag.Get("json") == "-" {

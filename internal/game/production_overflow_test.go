@@ -66,13 +66,13 @@ func TestExactProductionMatchesTheOldFormula(t *testing.T) {
 				for _, spec := range []int{100 - SpecialtyPenaltyPct, 100, 100 + SpecialtyBonusPct} {
 					for _, tech := range []int{TechFactorUnit, 14000} {
 						for _, g := range MilitaryGoods {
-							want, ok := old(ind, pct, spec, bn, bd, tech, g.Cost)
+							want, ok := old(ind, pct, spec, bn, bd, tech, baseRules.Units[g].Cost)
 							if !ok {
 								continue
 							}
-							if got := unitsMade(ind, pct, spec, bn, bd, tech, g.Cost); got != want {
+							if got := unitsMade(ind, pct, spec, bn, bd, tech, baseRules.Units[g].Cost); got != want {
 								t.Fatalf("ind=%d m=%d pct=%d spec=%d tech=%d cost=%d: got %d, want %d",
-									ind, m, pct, spec, tech, g.Cost, got, want)
+									ind, m, pct, spec, tech, baseRules.Units[g].Cost, got, want)
 							}
 						}
 					}

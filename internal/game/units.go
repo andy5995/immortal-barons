@@ -19,6 +19,9 @@ package game
 // Good is one tradeable holding: its two names, the accessors for an Empire's
 // count and production, and the balance figures that go with it.
 type Good struct {
+	// ID names the good in a mod's values file ("trooper"). Like the two
+	// names below it is an identity key, so it stays English and never changes.
+	ID string
 	// Singular is the market's name for it ("Trooper") and Plural the name
 	// every other screen shows ("Troopers"). Both are stored in save files —
 	// see the package comment above.
@@ -51,16 +54,10 @@ type Good struct {
 	// value stepPrices advances once a turn, and the world's own base behind it.
 	// Nil for a good whose price takes no walk (agents, food, regions).
 	Stored func(p *Prices) *int
-	// Walk is the band that price wanders inside and the step it moves by. The
-	// tag keys the draw, so it is part of the save's arithmetic and must not be
-	// renamed: change it and every realm's prices jump (#210, draw.go).
-	WalkLo, WalkHi, WalkStep int
-	WalkTag                  string
-	// Cost is the production cost in points, and NetWorth the good's weight in
-	// net worth, in thousandths. Both are 0 where they do not apply; the
-	// figures themselves live in balance.go.
-	Cost     int
-	NetWorth int64
+	// WalkTag keys the draw that walks the price (the band and step are in
+	// Rules), so it is part of the save's arithmetic and must not be renamed:
+	// change it and every realm's prices jump (#210, draw.go).
+	WalkTag string
 	// ShipWeight is the good's weight in a trade deal's cost formula, in
 	// hundredths (shipWeightScale), and CarrierPer how many of it one carrier
 	// holds. Both are BINARY-VERIFIED; a CarrierPer of 0 means the good needs no
@@ -78,85 +75,78 @@ type Good struct {
 // drift out of step with the field it labels.
 var (
 	Trooper = &Good{
-		Singular: "Trooper", Plural: "Troopers", Counted: msgidN("{n} Trooper", "{n} Troopers"), Military: true,
-		Count:  func(e *Empire) *int { return &e.Troopers },
-		Prod:   func(e *Empire) *int { return &e.ProdTroopers },
-		Made:   func(e *Empire) *int { return &e.MadeTroopers },
-		Basket: func(b *TradeBasket) *int { return &b.Troopers },
-		Force:  func(f *AttackForce) *int { return &f.Troopers },
-		Stored: func(p *Prices) *int { return &p.Trooper },
-		WalkLo: PriceLoTrooper, WalkHi: PriceHiTrooper, WalkStep: PriceStepTrooper, WalkTag: "trooper",
-		Cost: CostTrooper, NetWorth: NetWorthTrooper,
+		ID: "trooper", Singular: "Trooper", Plural: "Troopers", Counted: msgidN("{n} Trooper", "{n} Troopers"), Military: true,
+		Count:      func(e *Empire) *int { return &e.Troopers },
+		Prod:       func(e *Empire) *int { return &e.ProdTroopers },
+		Made:       func(e *Empire) *int { return &e.MadeTroopers },
+		Basket:     func(b *TradeBasket) *int { return &b.Troopers },
+		Force:      func(f *AttackForce) *int { return &f.Troopers },
+		Stored:     func(p *Prices) *int { return &p.Trooper },
+		WalkTag:    "trooper",
 		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Jet = &Good{
-		Singular: "Jet", Plural: "Jets", Counted: msgidN("{n} Jet", "{n} Jets"), Military: true,
-		Count:  func(e *Empire) *int { return &e.Jets },
-		Prod:   func(e *Empire) *int { return &e.ProdJets },
-		Made:   func(e *Empire) *int { return &e.MadeJets },
-		Basket: func(b *TradeBasket) *int { return &b.Jets },
-		Force:  func(f *AttackForce) *int { return &f.Jets },
-		Stored: func(p *Prices) *int { return &p.Jet },
-		WalkLo: PriceLoJet, WalkHi: PriceHiJet, WalkStep: PriceStepJet, WalkTag: "jet",
-		Cost: CostJet, NetWorth: NetWorthJet,
+		ID: "jet", Singular: "Jet", Plural: "Jets", Counted: msgidN("{n} Jet", "{n} Jets"), Military: true,
+		Count:      func(e *Empire) *int { return &e.Jets },
+		Prod:       func(e *Empire) *int { return &e.ProdJets },
+		Made:       func(e *Empire) *int { return &e.MadeJets },
+		Basket:     func(b *TradeBasket) *int { return &b.Jets },
+		Force:      func(f *AttackForce) *int { return &f.Jets },
+		Stored:     func(p *Prices) *int { return &p.Jet },
+		WalkTag:    "jet",
 		ShipWeight: 100, CarrierPer: 100,
 	}
 	Turret = &Good{
-		Singular: "Turret", Plural: "Turrets", Counted: msgidN("{n} Turret", "{n} Turrets"), Military: true,
-		Count:  func(e *Empire) *int { return &e.Turrets },
-		Prod:   func(e *Empire) *int { return &e.ProdTurrets },
-		Made:   func(e *Empire) *int { return &e.MadeTurrets },
-		Basket: func(b *TradeBasket) *int { return &b.Turrets },
-		Stored: func(p *Prices) *int { return &p.Turret },
-		WalkLo: PriceLoTurret, WalkHi: PriceHiTurret, WalkStep: PriceStepTurret, WalkTag: "turret",
-		Cost: CostTurret, NetWorth: NetWorthTurret,
+		ID: "turret", Singular: "Turret", Plural: "Turrets", Counted: msgidN("{n} Turret", "{n} Turrets"), Military: true,
+		Count:      func(e *Empire) *int { return &e.Turrets },
+		Prod:       func(e *Empire) *int { return &e.ProdTurrets },
+		Made:       func(e *Empire) *int { return &e.MadeTurrets },
+		Basket:     func(b *TradeBasket) *int { return &b.Turrets },
+		Stored:     func(p *Prices) *int { return &p.Turret },
+		WalkTag:    "turret",
 		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Bomber = &Good{
-		Singular: "Bomber", Plural: "Bombers", Counted: msgidN("{n} Bomber", "{n} Bombers"), Military: true,
-		Count:  func(e *Empire) *int { return &e.Bombers },
-		Prod:   func(e *Empire) *int { return &e.ProdBombers },
-		Made:   func(e *Empire) *int { return &e.MadeBombers },
-		Basket: func(b *TradeBasket) *int { return &b.Bombers },
-		Force:  func(f *AttackForce) *int { return &f.Bombers },
-		Stored: func(p *Prices) *int { return &p.Bomber },
-		WalkLo: PriceLoBomber, WalkHi: PriceHiBomber, WalkStep: PriceStepBomber, WalkTag: "bomber",
-		Cost: CostBomber, NetWorth: NetWorthBomber,
+		ID: "bomber", Singular: "Bomber", Plural: "Bombers", Counted: msgidN("{n} Bomber", "{n} Bombers"), Military: true,
+		Count:      func(e *Empire) *int { return &e.Bombers },
+		Prod:       func(e *Empire) *int { return &e.ProdBombers },
+		Made:       func(e *Empire) *int { return &e.MadeBombers },
+		Basket:     func(b *TradeBasket) *int { return &b.Bombers },
+		Force:      func(f *AttackForce) *int { return &f.Bombers },
+		Stored:     func(p *Prices) *int { return &p.Bomber },
+		WalkTag:    "bomber",
 		ShipWeight: 300, CarrierPer: 0,
 	}
 	Tank = &Good{
-		Singular: "Tank", Plural: "Tanks", Counted: msgidN("{n} Tank", "{n} Tanks"), Military: true,
-		Count:  func(e *Empire) *int { return &e.Tanks },
-		Prod:   func(e *Empire) *int { return &e.ProdTanks },
-		Made:   func(e *Empire) *int { return &e.MadeTanks },
-		Basket: func(b *TradeBasket) *int { return &b.Tanks },
-		Force:  func(f *AttackForce) *int { return &f.Tanks },
-		Stored: func(p *Prices) *int { return &p.Tank },
-		WalkLo: PriceLoTank, WalkHi: PriceHiTank, WalkStep: PriceStepTank, WalkTag: "tank",
-		Cost: CostTank, NetWorth: NetWorthTank,
+		ID: "tank", Singular: "Tank", Plural: "Tanks", Counted: msgidN("{n} Tank", "{n} Tanks"), Military: true,
+		Count:      func(e *Empire) *int { return &e.Tanks },
+		Prod:       func(e *Empire) *int { return &e.ProdTanks },
+		Made:       func(e *Empire) *int { return &e.MadeTanks },
+		Basket:     func(b *TradeBasket) *int { return &b.Tanks },
+		Force:      func(f *AttackForce) *int { return &f.Tanks },
+		Stored:     func(p *Prices) *int { return &p.Tank },
+		WalkTag:    "tank",
 		ShipWeight: 100, CarrierPer: 5000,
 	}
 	Carrier = &Good{
-		Singular: "Carrier", Plural: "Carriers", Counted: msgidN("{n} Carrier", "{n} Carriers"), Military: true,
-		Count:  func(e *Empire) *int { return &e.Carriers },
-		Prod:   func(e *Empire) *int { return &e.ProdCarriers },
-		Made:   func(e *Empire) *int { return &e.MadeCarriers },
-		Basket: func(b *TradeBasket) *int { return &b.Carriers },
-		Stored: func(p *Prices) *int { return &p.Carrier },
-		WalkLo: PriceLoCarrier, WalkHi: PriceHiCarrier, WalkStep: PriceStepCarrier, WalkTag: "carrier",
-		Cost: CostCarrier, NetWorth: NetWorthCarrier,
+		ID: "carrier", Singular: "Carrier", Plural: "Carriers", Counted: msgidN("{n} Carrier", "{n} Carriers"), Military: true,
+		Count:      func(e *Empire) *int { return &e.Carriers },
+		Prod:       func(e *Empire) *int { return &e.ProdCarriers },
+		Made:       func(e *Empire) *int { return &e.MadeCarriers },
+		Basket:     func(b *TradeBasket) *int { return &b.Carriers },
+		Stored:     func(p *Prices) *int { return &p.Carrier },
+		WalkTag:    "carrier",
 		ShipWeight: 100, CarrierPer: 0,
 	}
 	Agent = &Good{
-		Singular: "Agent", Plural: "Agents", Counted: msgidN("{n} Agent", "{n} Agents"),
+		ID: "agent", Singular: "Agent", Plural: "Agents", Counted: msgidN("{n} Agent", "{n} Agents"),
 		Count:      func(e *Empire) *int { return &e.Agents },
 		Basket:     func(b *TradeBasket) *int { return &b.Agents },
 		Price:      func(w *World, e *Empire) int { return w.AgentPrice(e) },
-		NetWorth:   NetWorthAgent,
 		ShipWeight: 50, CarrierPer: 0,
 	}
 	Food = &Good{
-		Singular: "Food", Plural: "Food", Counted: msgidN("{n} Food", "{n} Food"),
+		ID: "food", Singular: "Food", Plural: "Food", Counted: msgidN("{n} Food", "{n} Food"),
 		Count:      func(e *Empire) *int { return &e.Food },
 		Basket:     func(b *TradeBasket) *int { return &b.Food },
 		Price:      func(w *World, e *Empire) int { return w.FoodBuyPrice() },

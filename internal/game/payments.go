@@ -3,13 +3,21 @@ package game
 // ForcesUpkeep is the gold the armed forces require this turn. Technology
 // regions lower it (same factor income uses); this is the formula the old
 // auto-deducted maintenance used.
-// Per-unit maintenance follows BRE's Medium table (Trooper 0.60, Jet 1.20,
-// Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn), held in tenths
-// and truncated once on the total — BRE charged exactly trunc(0.9 × turrets)
-// for a turret-only army.
-func (e *Empire) ForcesUpkeep() int64 {
-	tenths := e.Troopers*MaintTrooperTenths + e.Jets*MaintJetTenths + e.Turrets*MaintTurretTenths + e.Bombers*MaintBomberTenths + e.Tanks*MaintTankTenths + e.Carriers*MaintCarrierTenths
-	return techLower(int64(tenths/MaintTenthsPerGold), e.TechMaintFactor())
+// Per-unit maintenance follows BRE's Medium table (Trooper 0.40, Jet 1.20,
+// Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn, under the base
+// rules), held in tenths and truncated once on the total — BRE charged exactly
+// trunc(0.9 × turrets) for a turret-only army.
+func (w *World) ForcesUpkeep(e *Empire) int64 { return w.unitUpkeep(e, e) }
+
+// unitUpkeep is that formula over the military counts held in units, at e's
+// Technology. int64 throughout: a mod may raise a unit's upkeep far enough for
+// count times rate to pass 2^31 on a 32-bit build.
+func (w *World) unitUpkeep(units, e *Empire) int64 {
+	var tenths int64
+	for _, g := range MilitaryGoods {
+		tenths += int64(*g.Count(units)) * w.unit(g).UpkeepTenths
+	}
+	return techLower(tenths/MaintTenthsPerGold, e.TechMaintFactor())
 }
 
 // RegionUpkeep is the gold required to maintain the empire's regions. Technology
@@ -48,7 +56,7 @@ func (e *Empire) AvgAgriFood() int {
 // High (Level.MaintCostScaled). These are the amounts actually charged and
 // displayed; the Empire methods above give the unscaled baseline.
 func (w *World) ForcesDue(e *Empire) int64 {
-	return w.Config.MaintCosts.MaintCostScaled(e.ForcesUpkeep() + w.listedForcesUpkeep(e))
+	return w.Config.MaintCosts.MaintCostScaled(w.ForcesUpkeep(e) + w.listedForcesUpkeep(e))
 }
 
 // listedForcesUpkeep is the maintenance owed on this empire's military units that
@@ -58,10 +66,7 @@ func (w *World) ForcesDue(e *Empire) int64 {
 // ForcesUpkeep; food and agents have no upkeep.
 func (w *World) listedForcesUpkeep(e *Empire) int64 {
 	l := w.listedUnits(e)
-	tenths := l.Troopers*MaintTrooperTenths + l.Jets*MaintJetTenths +
-		l.Turrets*MaintTurretTenths + l.Bombers*MaintBomberTenths +
-		l.Tanks*MaintTankTenths + l.Carriers*MaintCarrierTenths
-	return techLower(int64(tenths/MaintTenthsPerGold), e.TechMaintFactor())
+	return w.unitUpkeep(&l, e)
 }
 
 // listedUnits is the military this empire has escrowed on the Trading Market.

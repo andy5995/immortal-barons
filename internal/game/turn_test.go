@@ -165,7 +165,7 @@ func TestCollectIncomeCoversStartingMaintenance(t *testing.T) {
 	e := w.AddHuman("h", "Realm")
 	e.Gold = 0 // as if auto-deposit banked everything at the end of last turn
 	w.CollectIncome(e)
-	if due := e.ForcesUpkeep() + e.RegionUpkeep(); e.Gold < due {
+	if due := w.ForcesUpkeep(e) + e.RegionUpkeep(); e.Gold < due {
 		t.Errorf("collected income %d does not cover maintenance %d", e.Gold, due)
 	}
 }
@@ -208,7 +208,7 @@ func TestForcesUpkeepFormula(t *testing.T) {
 	if want != 40 {
 		t.Fatalf("a 100-trooper realm should owe the captured 40 gold, not %d", want)
 	}
-	if got := e.ForcesUpkeep(); got != want {
+	if got := w.ForcesUpkeep(e); got != want {
 		t.Errorf("ForcesUpkeep: want %d, got %d", want, got)
 	}
 }
@@ -229,7 +229,7 @@ func TestUpkeepMatchesLiveBRE(t *testing.T) {
 	for _, c := range forces {
 		e := w.AddHuman("f"+string(rune(c.turrets%26+'a')), "Fortress")
 		e.Troopers, e.Turrets = 0, c.turrets
-		if got := e.ForcesUpkeep(); got != c.want {
+		if got := w.ForcesUpkeep(e); got != c.want {
 			t.Errorf("ForcesUpkeep(%d turrets) = %d, want %d", c.turrets, got, c.want)
 		}
 	}

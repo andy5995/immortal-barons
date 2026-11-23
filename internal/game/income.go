@@ -274,7 +274,7 @@ func (w *World) ProjectedProduction(e *Empire) []int {
 	}
 	out := make([]int, len(MilitaryGoods))
 	for i, g := range MilitaryGoods {
-		out[i] = made(g.Plural, *g.Prod(e), g.Cost)
+		out[i] = made(g.Plural, *g.Prod(e), w.unit(g).Cost)
 	}
 	return out
 }

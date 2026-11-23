@@ -381,7 +381,8 @@ func (w *World) stepPrices(e *Empire) {
 	// does not reach the numbers (draw.go).
 	for _, g := range MilitaryGoods {
 		slot := g.Stored(&e.Prices)
-		*slot = w.stepPrice(e, *slot, g.WalkLo, g.WalkHi, g.WalkStep, g.WalkTag)
+		u := w.unit(g)
+		*slot = w.stepPrice(e, *slot, u.PriceLo, u.PriceHi, u.PriceStep, g.WalkTag)
 	}
 }
 
