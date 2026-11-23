@@ -465,7 +465,7 @@ func (w *World) Offense(e *Empire) int {
 func (w *World) Defense(e *Empire) int {
 	var sum int64
 	for _, g := range MilitaryGoods {
-		sum += unitStrength(g, *g.Count(e), w.unit(g).Defense, e.HQ)
+		sum += w.unitStrength(g, *g.Count(e), w.unit(g).Defense, e.HQ)
 	}
 	return techStrength(sum, e)
 }

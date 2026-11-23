@@ -21,6 +21,30 @@ type Rules struct {
 	Regions map[*Region]RegionRules
 	// Pirates, when set, decides pirate raids in place of the built-in roll.
 	Pirates PirateBrain
+	// HQ are the HeadQuarters figures.
+	HQ HQRules
+}
+
+// HQRules are the HeadQuarters figures. What only interplanetary play does to
+// a HeadQuarters is not here — the resolver's own tank curve
+// (RemoteTankStrength*), the fifth a winning invasion takes
+// (InvasionHQLossDivisor) and a landed Sabotage HQ agent's points
+// (TerrorHQSabotagePoints): those only happen in a league, and a league board
+// refuses mods, so a key for them could never take effect.
+type HQRules struct {
+	// TankPerHQ is the part of a tank's strength a point of HeadQuarters
+	// completion adds, over TankStrengthPctBase (the curve's fixed reference).
+	TankPerHQ int
+	// BuildStart is the completion percent a new HeadQuarters begins at, and
+	// BuildPerTurn what it gains each turn until it reaches 100.
+	BuildStart, BuildPerTurn int
+	// BattleLossMin and BattleLossJitter: a lost defense costs the
+	// HeadQuarters BattleLossMin + Random(BattleLossJitter) points.
+	BattleLossMin, BattleLossJitter int
+	// PriceBase, PricePerTurn and PriceJitter make the price: PriceBase +
+	// PricePerTurn x turns played + Random(PriceJitter), held under PriceCap
+	// minus Random(PriceCapJitter). Gold.
+	PriceBase, PricePerTurn, PriceJitter, PriceCap, PriceCapJitter int64
 }
 
 // UnitRules are one unit's figures. Units with no production or price walk
@@ -65,11 +89,17 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 	Food:  {},
 },
 	Regions: baseRegionRules(),
+	HQ: HQRules{
+		TankPerHQ: TankStrengthPctPerHQ, BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
+		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
+		PriceBase: HQPriceBase, PricePerTurn: HQPricePerTurn, PriceJitter: HQPriceJitter,
+		PriceCap: HQPriceCap, PriceCapJitter: HQPriceCapJitter,
+	},
 }
 
 // BaseRules returns a copy of the base rules for a mod to change.
 func BaseRules() *Rules {
-	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions)}
+	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions), HQ: baseRules.HQ}
 }
 
 // rules is the set w plays by: the base set unless mods were loaded.
