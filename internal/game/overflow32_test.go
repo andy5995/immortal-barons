@@ -12,12 +12,12 @@ import "testing"
 // gold in region maintenance, because Land*913*10000 wrapped inside techLower.
 func TestRegionUpkeepStaysPositiveAtDoorScale(t *testing.T) {
 	for _, land := range []int{235, 710, 6883, 20000} {
-		e := &Empire{Land: land}
-		if got := e.RegionUpkeep(); got <= 0 {
+		e := &Empire{Land: land, Regions: RegionMix{Coastal: land}}
+		if got := (&World{}).RegionUpkeep(e); got <= 0 {
 			t.Errorf("land=%d: region upkeep came out %d, want a positive charge", land, got)
 		}
-		if want := int64(land * RegionUpkeepPerLand); e.RegionUpkeep() != want {
-			t.Errorf("land=%d: region upkeep %d, want %d with no technology", land, e.RegionUpkeep(), want)
+		if want := int64(land * RegionUpkeepPerLand); (&World{}).RegionUpkeep(e) != want {
+			t.Errorf("land=%d: region upkeep %d, want %d with no technology", land, (&World{}).RegionUpkeep(e), want)
 		}
 	}
 }
@@ -85,5 +85,36 @@ func TestSDIMathSurvivesFundingScale(t *testing.T) {
 	w.PaySDI(e, w.SDIMaintenance(e)/2)
 	if e.SDIFunding != 500_000 {
 		t.Errorf("funding after a half payment = %d, want 500,000", e.SDIFunding)
+	}
+}
+
+// A mod may set a region figure far above the base game's (region_rules.go's
+// limits), which brings the region-count products into int32's reach at a few
+// thousand regions: 30,000 Deserts at food_base 100,000 grow 3e9 food. On a
+// 32-bit build the totals saturate rather than wrap negative.
+func TestModdedRegionTotalsSaturate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Rules = BaseRules()
+	e := w.AddHuman("a", "Alpha")
+	e.Regions = RegionMix{Desert: 30_000}
+	e.Land = e.Regions.Total()
+	rr := w.Rules.Regions[Desert]
+	rr.FoodBase, rr.FoodRate, rr.PopCap, rr.GoldBase, rr.GoldRate = ModRegionFoodMax, 0, ModRegionPopCapMax, ModRegionGoldMax, 0
+	w.Rules.Regions[Desert] = rr
+	if err := w.Rules.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	want := fitInt(3_000_000_000)
+	if got := w.FoodGrown(e); got != want {
+		t.Errorf("FoodGrown = %d, want %d", got, want)
+	}
+	if got := w.AvgFood(e, Desert); got != want {
+		t.Errorf("AvgFood = %d, want %d", got, want)
+	}
+	if got := w.popCapacity(e); got <= 0 {
+		t.Errorf("popCapacity = %d, want a positive capacity", got)
+	}
+	if got := w.IncomeThisTurn(e).Gold(); got <= 0 {
+		t.Errorf("income = %d, want positive", got)
 	}
 }

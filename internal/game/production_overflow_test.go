@@ -61,7 +61,7 @@ func TestExactProductionMatchesTheOldFormula(t *testing.T) {
 	}
 	for ind := 1; ind <= 6000; ind += 13 {
 		for _, m := range []int{0, 1, 500, 3000} {
-			bn, bd := industryMountainBoost(RegionMix{Industrial: ind, Mountain: m})
+			bn, bd := (&World{}).productionBoost(&Empire{Regions: RegionMix{Industrial: ind, Mountain: m}})
 			for _, pct := range []int{1, 17, 100} {
 				for _, spec := range []int{100 - SpecialtyPenaltyPct, 100, 100 + SpecialtyBonusPct} {
 					for _, tech := range []int{TechFactorUnit, 14000} {
@@ -70,7 +70,7 @@ func TestExactProductionMatchesTheOldFormula(t *testing.T) {
 							if !ok {
 								continue
 							}
-							if got := unitsMade(ind, pct, spec, bn, bd, tech, baseRules.Units[g].Cost); got != want {
+							if got := unitsMade(int64(ind)*UnitPointsPerRegion, pct, spec, bn, bd, tech, baseRules.Units[g].Cost); got != want {
 								t.Fatalf("ind=%d m=%d pct=%d spec=%d tech=%d cost=%d: got %d, want %d",
 									ind, m, pct, spec, tech, baseRules.Units[g].Cost, got, want)
 							}

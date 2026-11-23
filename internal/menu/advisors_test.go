@@ -125,3 +125,27 @@ func TestMilitaryAdvisorForceTableShortensAndCountsAwayForces(t *testing.T) {
 		}
 	}
 }
+
+// A mod that gives another type the production boost or the research weight
+// is not told it holds none: the "we hold no" advice follows the rules, not the
+// type's name.
+func TestAdvisorsFollowModdedRegionRules(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Rules = game.BaseRules()
+		d := w.World.Rules.Regions[game.Desert]
+		d.ProductionBoost, d.Research = 2, 1
+		w.World.Rules.Regions[game.Desert] = d
+		w.Player().Regions = game.RegionMix{Desert: 10, Industrial: 90}
+	})
+	f := &fakeSession{}
+	renderAdvisor(f, w, advisorMilitary)
+	if out := f.out.String(); strings.Contains(out, "We hold no") || !strings.Contains(out, ansi.FgBrightWhite+"120") {
+		t.Errorf("a modded boost on deserts: want its figure and no 'hold no' advice, got:\n%s", out)
+	}
+	f = &fakeSession{}
+	renderAdvisor(f, w, advisorTechnology)
+	if out := f.out.String(); strings.Contains(out, "We have no Technology regions") {
+		t.Errorf("modded research on deserts: told it has none:\n%s", out)
+	}
+}

@@ -10,25 +10,54 @@ import (
 
 // IncomeBreakdown itemizes a turn's income by source (gold), plus the food
 // grown. The income report and the actual gold credit both derive from this,
-// so what the player is shown equals what is credited to the last coin. Urban
-// and Technology regions produce no direct gold (BRE-verified), so they are
-// not listed here.
+// so what the player is shown equals what is credited to the last coin.
+//
+// Region income is kept per region type, indexed by mixOrder (GoldFrom,
+// FoodFrom): which types pay what is a matter of the rules (RegionRules), not
+// of fields here. In the base rules five types pay gold (Mountain ore, Coastal
+// tourism, Desert solar, River hydropower, Industrial's idle share) and two
+// produce food (Agricultural, River); Urban and Technology produce neither
+// (BRE-verified).
 type IncomeBreakdown struct {
-	Taxes, Ore, Tourism, Solar, Rivers, Industrial, Trade int
-	Food                                                  int // grown by Agricultural regions
-	RiverFood                                             int // fished from rivers this turn (0 on a hydropower turn)
+	Taxes, Trade int
+	RegionGold   [regionKinds]int
+	RegionFood   [regionKinds]int
+}
+
+// GoldFrom is the gold r's regions earned.
+func (b IncomeBreakdown) GoldFrom(r *Region) int { return b.RegionGold[r.index] }
+
+// FoodFrom is the food r's regions produced.
+func (b IncomeBreakdown) FoodFrom(r *Region) int { return b.RegionFood[r.index] }
+
+// regionGold sums the region gold.
+func (b IncomeBreakdown) regionGold() int64 {
+	var sum int64
+	for _, n := range b.RegionGold {
+		sum += int64(n)
+	}
+	return sum
+}
+
+// Food is the food every region type produced.
+func (b IncomeBreakdown) Food() int {
+	var sum int64
+	for _, n := range b.RegionFood {
+		sum += int64(n)
+	}
+	return fitInt(sum)
 }
 
 // Gold sums the gold-producing sources.
 func (b IncomeBreakdown) Gold() int {
-	return b.Taxes + b.Ore + b.Tourism + b.Solar + b.Rivers + b.Industrial + b.Trade
+	return fitInt(int64(b.Taxes) + b.regionGold() + int64(b.Trade))
 }
 
 // CrownTaxBase is the income the crown tax is levied on: the six region/tax
 // income lines, excluding Trade. BRE accumulates its base at exactly six sites,
 // one per income line, and trading proceeds are not among them.
 func (b IncomeBreakdown) CrownTaxBase() int {
-	return b.Taxes + b.Ore + b.Tourism + b.Solar + b.Rivers + b.Industrial
+	return fitInt(int64(b.Taxes) + b.regionGold())
 }
 
 // CrownTax is the Queen Royale's per-turn tax: a flat share of the turn's gross
@@ -62,10 +91,11 @@ func (w *World) regionDraw(e *Empire, salt, n int) int {
 	return newDraw().num(w.GameDay).num(salt).text(e.Name).roll(n)
 }
 
-// industrialGold is the empire's TOTAL industrial gold this turn (not per
-// region). The UNALLOCATED share of production — what is left after the six unit
-// percentages — is paid out as gold, so allocating to units trades directly
-// against it and a realm at 100% allocation earns none.
+// industrialGold is the empire's TOTAL idle gold this turn (not per region):
+// what its Industrial regions pay, under the base rules. The UNALLOCATED share
+// of production — what is left after the six unit percentages — is paid out as
+// gold, so allocating to units trades directly against it and a realm at 100%
+// allocation earns none.
 //
 // Binary-verified (BRE.OVR 0x34545–0x345D1), including the order of operations:
 //
@@ -76,72 +106,90 @@ func (w *World) regionDraw(e *Empire, salt, n int) int {
 // why industry is the one region type whose total does not divide evenly by its
 // region count — the division discards the remainder.
 func (w *World) industrialGold(e *Empire) int64 {
+	return w.ProjectedIndustrialGold(e, e.idleShare())
+}
+
+// idleShare is the percent of production not allocated to units.
+func (e *Empire) idleShare() int {
 	allocated := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
 	// Whatever is not building units pays gold, whether the player set it aside
 	// on the Gold row or simply left it unallocated.
-	unalloc := 100 - allocated
-	if unalloc < 0 {
-		unalloc = 0
-	}
-	return w.ProjectedIndustrialGold(e, unalloc)
+	return max(0, 100-allocated)
 }
 
-// ProjectedIndustrialGold is the gold that pct% of this empire's industrial
-// capacity pays out this turn. Shared with the Set Industries screen so the
+// ProjectedIndustrialGold is the idle gold that pct% of this empire's
+// production pays out this turn. Shared with the Set Industries screen so the
 // figure a player is shown is the one industrialGold will credit — regionDraw
 // varies by empire and game day, not per call, so the two always agree.
 func (w *World) ProjectedIndustrialGold(e *Empire, pct int) int64 {
-	if pct <= 0 {
+	var sum int64
+	for _, g := range RegionTypes {
+		sum += w.idleGold(e, g, pct)
+	}
+	return sum
+}
+
+// idleGold is what g's regions pay on pct% of idle production.
+func (w *World) idleGold(e *Empire, g *Region, pct int) int64 {
+	rr := w.regionsOf(e)[g]
+	n := *g.Count(&e.Regions)
+	if pct <= 0 || n <= 0 || rr.IdleGoldBase+rr.IdleGoldRate == 0 {
 		return 0
 	}
-	perRegion := w.regionDraw(e, 5, IndustryGoldRate) + IndustryGoldBase
+	perRegion := w.regionDraw(e, g.idleSalt, rr.IdleGoldRate) + rr.IdleGoldBase
 	// int64 for the reason every other money line is: `int` is 32 bits on the
 	// 32-bit door builds, and this product is a per-region rate in the thousands
 	// times a region count, which passes int32 at about 840,000 regions — the
 	// same shape of overflow the unit pool had (see unitsMade).
-	return int64(perRegion) * int64(e.Regions.Industrial) / 100 * int64(pct)
+	return int64(perRegion) * int64(n) / 100 * int64(pct)
 }
 
-// riverGold is one River region's hydropower gold this turn: the full yield
-// less the share taken as food (see RiverFishShare). Rivers have the highest
-// base, and no bad year — BRE's own river either runs hydropower or fishes,
-// with nothing else to roll (BRE.OVR, the production routine's river block).
-func (w *World) riverGold(e *Empire) int {
-	yield := w.regionDraw(e, 4, RiverRate) + RiverBase
-	return yield * (100 - RiverFishShare) / 100
+// regionGold is the gold g's regions earn this turn, before technology:
+//
+//	yield = (GoldBase + [0, GoldRate)) x GoldShare / 100
+//	gold  = yield x support factor / 100 x count
+//
+// The support factor is (100 - SupportShare) + SupportShare x support/100, so
+// a type with no SupportShare is unscaled. Under the base rules that is BRE's
+// perRegion x count for ore and solar; Coastal tourism scaled by 0.10 +
+// 0.90·support; and a River's hydropower, which has the highest base and no
+// bad year — BRE's own river either runs hydropower or fishes, with nothing
+// else to roll (BRE.OVR, the production routine's river block) — less the
+// share taken as food (see RiverFishShare).
+func (w *World) regionGold(e *Empire, g *Region) int64 {
+	rr := w.regionsOf(e)[g]
+	n := *g.Count(&e.Regions)
+	if n <= 0 || rr.GoldBase+rr.GoldRate == 0 {
+		return 0
+	}
+	yield := (w.regionDraw(e, g.goldSalt, rr.GoldRate) + rr.GoldBase) * rr.GoldShare / 100
+	support := 100 - rr.SupportShare + rr.SupportShare*e.Support/100
+	return int64(yield) * int64(support) / 100 * int64(n)
 }
 
-// IncomeThisTurn itemizes e's income for the current turn. Each region's gold
-// is BRE's perRegion = Base + [0, Rate) times its region count; Coastal is
-// additionally scaled by a support floor (0.10 + 0.90·support, so tourism never
-// zeroes out); the population tax is scaled by support in full, with no floor.
-// The gold technology factor scales each REGION gold source, as it
-// does in the original; industrial gold and the trade bonus are untouched by it.
-// Products are widened to int64 so they stay correct on 32-bit builds even at
+// IncomeThisTurn itemizes e's income for the current turn (see regionGold and
+// regionFood); the population tax is scaled by support in full, with no floor.
+// The gold technology factor scales each REGION gold source, as it does in
+// the original; idle gold and the trade bonus are untouched by it. Products
+// are widened to int64 so they stay correct on 32-bit builds even at
 // money-cap scale.
 func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	// Region income draws on a different research slot from the population tax
 	// (see taxIncome), so the two scale independently.
 	gold := int64(e.TechGoldFactor())
-	scale := func(n int64) int { return int(n * gold / TechFactorUnit) }
-	perRegion := func(salt, rate, base int) int { return w.regionDraw(e, salt, rate) + base }
-
-	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
-	riverGold := w.riverGold(e)
-	return IncomeBreakdown{
-		Taxes:   e.taxIncome(),
-		Ore:     scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
-		Tourism: scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
-		Solar:   scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
-		Rivers:  scale(int64(riverGold) * int64(e.Regions.River)),
-		// Industrial gold is NOT technology-scaled: every other gold block in
-		// BRE's production routine opens with technology_factor(1.5, slot 0)
-		// and the industrial one does not.
-		Industrial: int(w.industrialGold(e)),
-		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
-		Food:       w.FoodProduced(e),
-		RiverFood:  w.riverFood(e),
+	b := IncomeBreakdown{
+		Taxes: e.taxIncome(),
+		Trade: w.tradeIncome(e), // trade-treaty bonus (population-scaled)
 	}
+	idle := e.idleShare()
+	for _, g := range RegionTypes {
+		// Idle gold is NOT technology-scaled: every other gold block in BRE's
+		// production routine opens with technology_factor(1.5, slot 0) and the
+		// industrial one does not.
+		b.RegionGold[g.index] = fitInt(w.regionGold(e, g)*gold/TechFactorUnit + w.idleGold(e, g, idle))
+		b.RegionFood[g.index] = w.regionFood(e, g)
+	}
+	return b
 }
 
 // taxIncome is this turn's population tax (see TaxGoldNumerator):
@@ -163,29 +211,47 @@ func (e *Empire) taxIncome() int {
 	return int((n/den*tech + n%den*tech/den) / TechFactorUnit)
 }
 
-// riverFood is the food e's rivers fish this turn. Unlike BRE, where a river
-// runs hydropower OR fishes and the empire finds out which only when the income
-// report prints, IB's rivers always do both — RiverFishShare of the yield as
-// food, the rest as gold (see riverGold). The haul itself has BRE's shape: a
-// tech-raised base plus one draw per turn.
-func (w *World) riverFood(e *Empire) int {
-	perRegion := e.riverFishBase() + w.regionDraw(e, 7, RiverFishRate)
-	return pctOf(e.Regions.River*perRegion, RiverFishShare)
+// regionFood is the food g's regions produce this turn: a tech-raised base
+// plus one draw per turn, shared by every region of the type (so a total
+// always divides exactly by the region count), taken at FoodShare percent.
+//
+// BINARY-VERIFIED for Agricultural regions: Technology raises the base and not
+// the draw — the yield routine returns a tech-scaled 300 and its caller adds
+// the draw afterward. A River's haul has the same shape. Unlike BRE, where a
+// river runs hydropower OR fishes and the empire finds out which only when the
+// income report prints, IB's rivers always do both — RiverFishShare of the
+// yield as food, the rest as gold (see regionGold).
+func (w *World) regionFood(e *Empire, g *Region) int {
+	rr := w.regionsOf(e)[g]
+	n := *g.Count(&e.Regions)
+	if n <= 0 || rr.FoodBase+rr.FoodRate == 0 {
+		return 0
+	}
+	perRegion := techRaise(int64(rr.FoodBase), e.TechFoodFactor()) + int64(w.regionDraw(e, g.foodSalt, rr.FoodRate))
+	return fitInt(pctOf(int64(n)*perRegion, rr.FoodShare))
 }
 
-// riverFishBase is a river's fishing haul before the draw.
-func (e *Empire) riverFishBase() int { return techRaise(RiverFishFood, e.TechFoodFactor()) }
-
-// AvgRiverFood is riverFood with the draw replaced by its mean.
-func (e *Empire) AvgRiverFood() int {
-	return pctOf(e.Regions.River*(2*e.riverFishBase()+RiverFishRate-1), RiverFishShare) / 2
+// AvgFood is g's expected food per turn: regionFood with the draw replaced by
+// its mean, so the figure holds still from turn to turn.
+func (w *World) AvgFood(e *Empire, g *Region) int {
+	rr := w.regionsOf(e)[g]
+	n := *g.Count(&e.Regions)
+	if n <= 0 || rr.FoodBase+rr.FoodRate == 0 {
+		return 0
+	}
+	base := techRaise(int64(rr.FoodBase), e.TechFoodFactor())
+	return fitInt(pctOf(int64(n)*(2*base+int64(max(rr.FoodRate, 1))-1), rr.FoodShare) / 2)
 }
 
-// FoodGrown is the empire's total food production this turn: its tech-boosted
-// food-region output (FoodProduced) plus river fishing. The single source of
-// truth for produced food, so the turn engine, the AI, and the advisors agree.
+// FoodGrown is the empire's total food production this turn, every region
+// type's together. The single source of truth for produced food, so the turn
+// engine, the AI, and the advisors agree.
 func (w *World) FoodGrown(e *Empire) int {
-	return w.FoodProduced(e) + w.riverFood(e)
+	var sum int64
+	for _, g := range RegionTypes {
+		sum += int64(w.regionFood(e, g))
+	}
+	return fitInt(sum)
 }
 
 // GrowFood credits this turn's food yield (region output + river fishing) at the
@@ -211,37 +277,63 @@ func (w *World) CollectIncome(e *Empire) {
 	e.TurnStartGoldLost += w.addGold(e, int64(w.IncomeThisTurn(e).Gold()))
 }
 
-// Industrial production tuning (v1, tunable — see docs/mechanics-reference.md).
-// Industrial gold is credited via IncomeThisTurn (see industrialGold); this
-// governs unit production only.
-// industryMountainBoost is the multiplier Mountain regions give to unit
-// manufacturing, returned as an exact fraction num/den: BRE computes
-// 1 + MountainIndustryNum*Mountain/Total in floating point and truncates only
-// the final unit count, so rounding it to whole percent here costs real units.
+// productionBoost is the multiplier a realm's land gives to unit
+// manufacturing, returned as an exact fraction num/den: each type's
+// ProductionBoost times its share of the land, which under the base rules is
+// Mountain's. BRE computes 1 + MountainIndustryNum*Mountain/Total in floating
+// point and truncates only the final unit count, so rounding it to whole
+// percent here costs real units.
 //
 // BRE ties industrial output to the *share* of the realm that is mountains, so
 // the boost dilutes as an empire expands elsewhere — a realm cannot hold the cap
 // without buying mountains alongside everything else.
-func industryMountainBoost(r RegionMix) (num, den int) {
-	total := r.Total()
+func (w *World) productionBoost(e *Empire) (num, den int) {
+	total := e.Regions.Total()
 	if total == 0 {
 		return 1, 1
 	}
-	// Capped once MountainIndustryNum*Mountain/Total exceeds the cap's fraction.
-	if (100 + MountainIndustryNum*100*r.Mountain/total) > MountainIndustryCapPct {
+	boost := w.boostPoints(e)
+	// Capped once boost/Total exceeds the cap's fraction.
+	if (100 + 100*boost/int64(total)) > MountainIndustryCapPct {
 		return MountainIndustryCapPct, 100
 	}
-	return total + MountainIndustryNum*r.Mountain, total
+	return total + int(boost), total
 }
 
-// MountainIndustryPercent reports industryMountainBoost as a whole percent, for
-// the Military advisor to quote. Display only — production itself uses the
-// exact fraction.
-func MountainIndustryPercent(r RegionMix) int {
-	num, den := industryMountainBoost(r)
+// boostPoints is each type's ProductionBoost times its count: Mountain's
+// MountainIndustryNum per region under the base rules.
+func (w *World) boostPoints(e *Empire) int64 {
+	rows := w.regionsOf(e)
+	var boost int64
+	for _, g := range RegionTypes {
+		boost += int64(rows[g].ProductionBoost) * int64(*g.Count(&e.Regions))
+	}
+	return boost
+}
+
+// HasProductionBoost reports whether any of e's land boosts unit production:
+// under the base rules, whether it holds a Mountain region.
+func (w *World) HasProductionBoost(e *Empire) bool { return w.boostPoints(e) > 0 }
+
+// ProductionBoostPercent reports productionBoost as a whole percent, for the
+// Military advisor to quote. Display only — production itself uses the exact
+// fraction.
+func (w *World) ProductionBoostPercent(e *Empire) int {
+	num, den := w.productionBoost(e)
 	// int64: the fraction is a pair of raw land counts, and `int` is 32 bits on
 	// the 32-bit door builds this project supports.
 	return int((int64(num)*100 + int64(den)/2) / int64(den))
+}
+
+// unitPoints is the realm's unit pool before the boost: each type's
+// UnitPoints times its count, Industrial's alone under the base rules.
+func (w *World) unitPoints(e *Empire) int64 {
+	rows := w.regionsOf(e)
+	var points int64
+	for _, g := range RegionTypes {
+		points += int64(rows[g].UnitPoints) * int64(*g.Count(&e.Regions))
+	}
+	return points
 }
 
 // ProjectedProduction computes the units e would manufacture this turn at its
@@ -252,7 +344,7 @@ func MountainIndustryPercent(r RegionMix) int {
 // The percentage split always governs how points are allocated. On top of that,
 // specialization applies a per-unit efficiency modifier — a bonus to the
 // specialized unit, a penalty to everything else — and Mountain regions boost
-// the whole pool (see industryMountainBoost).
+// the whole pool (see productionBoost).
 //
 // Binary-verified against BRE.OVR: the unit pool is UnitPointsPerRegion, which
 // is NOT the gold pool, and BRE keeps the whole chain in floating point and
@@ -261,7 +353,8 @@ func MountainIndustryPercent(r RegionMix) int {
 // truncating instead of rounding is off by one unit whenever the fraction
 // exceeds a half (which is what the 1086-industrial live sample caught).
 func (w *World) ProjectedProduction(e *Empire) []int {
-	boostNum, boostDen := industryMountainBoost(e.Regions)
+	boostNum, boostDen := w.productionBoost(e)
+	points := w.unitPoints(e)
 	made := func(name string, pct, cost int) int {
 		spec := 100
 		switch {
@@ -270,7 +363,7 @@ func (w *World) ProjectedProduction(e *Empire) []int {
 		case e.Specialized != "":
 			spec = 100 - SpecialtyPenaltyPct
 		}
-		return unitsMade(e.Regions.Industrial, pct, spec, boostNum, boostDen, e.TechUnitFactor(), cost)
+		return unitsMade(points, pct, spec, boostNum, boostDen, e.TechUnitFactor(), cost)
 	}
 	out := make([]int, len(MilitaryGoods))
 	for i, g := range MilitaryGoods {
@@ -294,12 +387,15 @@ func (w *World) ProjectedProduction(e *Empire) []int {
 // rounding, which is binary-verified: BRE keeps the whole chain in floating
 // point and rounds once (see ProjectedProduction). This keeps every figure the
 // engine produced below the old ceiling exactly as it was.
-func unitsMade(industrial, pct, spec, boostNum, boostDen, tech, cost int) int {
-	if industrial <= 0 || pct <= 0 || cost <= 0 || boostDen <= 0 {
+//
+// points is the pool before the boost (World.unitPoints): Industrial regions
+// times UnitPointsPerRegion under the base rules.
+func unitsMade(points int64, pct, spec, boostNum, boostDen, tech, cost int) int {
+	if points <= 0 || pct <= 0 || cost <= 0 || boostDen <= 0 {
 		return 0
 	}
-	n := big.NewInt(int64(industrial))
-	for _, f := range []int64{UnitPointsPerRegion, int64(pct), int64(spec), int64(boostNum), int64(tech)} {
+	n := big.NewInt(points)
+	for _, f := range []int64{int64(pct), int64(spec), int64(boostNum), int64(tech)} {
 		n.Mul(n, big.NewInt(f))
 	}
 	d := big.NewInt(int64(cost))
