@@ -70,6 +70,11 @@ func Diff(a, b *game.Rules) []string {
 	if from, to := brainName(a), brainName(b); from != to {
 		out = append(out, fmt.Sprintf("pirate raids: %s -> %s", from, to))
 	}
+	for _, g := range game.RegionTypes {
+		if from, to := regionBrainName(a, g), regionBrainName(b, g); from != to {
+			out = append(out, fmt.Sprintf("%s script: %s -> %s", g.ID, from, to))
+		}
+	}
 	return out
 }
 
@@ -79,6 +84,14 @@ func brainName(r *game.Rules) string {
 		return s.mod + "/" + PiratesFile + " (" + s.hash + ")"
 	}
 	return "built in"
+}
+
+// regionBrainName is how Diff names the script r runs for type g.
+func regionBrainName(r *game.Rules, g *game.Region) string {
+	if s, ok := r.RegionBrains[g].(*regionScript); ok {
+		return s.mod + "/" + regionScriptFile(g) + " (" + s.hash + ")"
+	}
+	return "none"
 }
 
 // Values prints every value a mod can change, as a values.toml would set it.

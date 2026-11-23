@@ -21,6 +21,9 @@ type Rules struct {
 	Regions map[*Region]RegionRules
 	// Pirates, when set, decides pirate raids in place of the built-in roll.
 	Pirates PirateBrain
+	// RegionBrains change a region type's row for each realm, at most one per
+	// type (region_brain.go).
+	RegionBrains map[*Region]RegionBrain
 	// HQ are the HeadQuarters figures.
 	HQ HQRules
 }
