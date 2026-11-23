@@ -197,3 +197,26 @@ func TestAFailingRegionScriptKeepsTheOnesBefore(t *testing.T) {
 		t.Errorf("urban food %d, want none: the broken script's changes are dropped whole", got)
 	}
 }
+
+// A mod with a script says which script interface it was written for, so a
+// change that breaks scripts can be told apart from a mistake.
+func TestAScriptNeedsAScriptAPI(t *testing.T) {
+	for _, c := range []struct{ name, manifest, want string }{
+		{"missing", "name = \"m\"\nversion = \"1\"\n", "must say which script interface it was written for; this version of the game runs script_api = 1"},
+		{"newer", "name = \"m\"\nversion = \"1\"\nscript_api = 2\n", "written for script_api 2, but this version of the game runs script_api 1; it needs a newer version of the game"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			for _, file := range []string{RegionsFile, PiratesFile} {
+				dir := writeMod(t, t.TempDir(), "m", map[string]string{ManifestFile: c.manifest, file: desertFood})
+				if _, _, err := Check(dir); err == nil || !strings.Contains(err.Error(), c.want) {
+					t.Errorf("%s: err %v, want %q", file, err, c.want)
+				}
+			}
+		})
+	}
+	// A mod with no script needs no version.
+	dir := writeMod(t, t.TempDir(), "plain", map[string]string{ManifestFile: "name = \"plain\"\nversion = \"1\"\n"})
+	if _, _, err := Check(dir); err != nil {
+		t.Errorf("a mod with no script was refused: %v", err)
+	}
+}

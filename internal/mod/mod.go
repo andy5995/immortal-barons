@@ -60,7 +60,19 @@ type Manifest struct {
 	// Label is what the Game Setup screen shows; blank shows Name.
 	Label       string `toml:"label"`
 	Description string `toml:"description"`
+	// ScriptAPI is the version of the script interface the mod's scripts were
+	// written for. It is required of a mod that carries a script: see
+	// ScriptAPI.
+	ScriptAPI int `toml:"script_api"`
 }
+
+// ScriptAPI is the version of the script interface this game runs: what a
+// script is given and what it may return. A change that could break a script
+// written for it raises the number, so the game can tell a sysop which mods
+// need updating instead of failing in play; adding a field a script may read,
+// or a key it may return, does not. A mod declares the version its scripts
+// were written for as script_api in mod.toml.
+const ScriptAPI = 1
 
 // Mod is one mod folder, read and hashed.
 type Mod struct {
@@ -230,6 +242,9 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		}
 	}
 	m.Hash = hex.EncodeToString(hash.Sum(nil)[:8])
+	if err := checkScriptAPI(path, m.ScriptAPI, files); err != nil {
+		return nil, err
+	}
 	if src, ok := files[PiratesFile]; ok {
 		s, err := newPirateScript(path, m.Name, m.Hash, src)
 		if err != nil {
@@ -245,6 +260,23 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		m.regions = s
 	}
 	return m, nil
+}
+
+// checkScriptAPI holds a mod with a script to the script interface it
+// declares, before any script is compiled.
+func checkScriptAPI(path string, api int, files map[string]string) error {
+	_, pirates := files[PiratesFile]
+	_, regions := files[RegionsFile]
+	file := filepath.Join(path, ManifestFile)
+	switch {
+	case api < 0:
+		return fmt.Errorf("%s: script_api %d is not a version", file, api)
+	case api == 0 && (pirates || regions):
+		return fmt.Errorf("%s: a mod with a script must say which script interface it was written for; this version of the game runs script_api = %d", file, ScriptAPI)
+	case api > ScriptAPI:
+		return fmt.Errorf("%s: written for script_api %d, but this version of the game runs script_api %d; it needs a newer version of the game", file, api, ScriptAPI)
+	}
+	return nil
 }
 
 // decodeStrict decodes TOML into v and fails on any key v has no field for.

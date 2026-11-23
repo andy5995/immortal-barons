@@ -25,7 +25,7 @@ func writeMod(t *testing.T, dataDir, name string, files map[string]string) strin
 }
 
 func manifest(name string) string {
-	return "name = \"" + name + "\"\nversion = \"1.0\"\n"
+	return "name = \"" + name + "\"\nversion = \"1.0\"\nscript_api = 1\n"
 }
 
 func TestBaseRulesAreWithinTheModLimits(t *testing.T) {
