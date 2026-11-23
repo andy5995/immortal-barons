@@ -38,12 +38,17 @@ func (w *World) FoodSellPrice() int { return w.FoodBuyPrice() / 3 }
 // lifetime turn count — the constants and the shape are BRE's (see balance.go).
 // The jitter is keyed per empire and turn, like stepPrice, so the price a player
 // is shown is the price they are charged.
+//
+// Gold is int64, so the sum is worked in it: base + per-turn x turns would pass
+// 2^31 on a 32-bit build for a long-lived realm under a modded rate. The cap
+// is held to what an int holds (Rules.Validate), so the result fits.
 func (w *World) HQPrice(e *Empire) int {
-	price := HQPriceBase + HQPricePerTurn*e.TurnsPlayed + w.priceJitter(e, "hq", HQPriceJitter)
-	if cap := HQPriceCap - w.priceJitter(e, "hqcap", HQPriceCapJitter); price > cap {
+	hq := w.rules().HQ
+	price := hq.PriceBase + hq.PricePerTurn*int64(e.TurnsPlayed) + int64(w.priceJitter(e, "hq", int(hq.PriceJitter)))
+	if cap := hq.PriceCap - int64(w.priceJitter(e, "hqcap", int(hq.PriceCapJitter))); price > cap {
 		price = cap
 	}
-	return price
+	return int(price)
 }
 
 // priceJitter is a deterministic draw in [0, n) for empire e this turn.
@@ -63,7 +68,7 @@ func (w *World) StartHQ(e *Empire) error {
 		return ErrCantAfford
 	}
 	e.Gold -= price
-	e.HQ = HQBuildStart
+	e.HQ = w.rules().HQ.BuildStart
 	return nil
 }
 

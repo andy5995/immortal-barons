@@ -213,7 +213,7 @@ func TestHQBoostsTanks(t *testing.T) {
 // Troopers" as a base rather than as the mid-point of the HQ term.
 func TestTankStrengthMatchesBRE(t *testing.T) {
 	for _, c := range []struct{ hq, want int }{{0, 350}, {25, 375}, {50, 400}, {75, 425}, {100, 450}} {
-		if got := unitStrength(Tank, 100, TankStrengthPctBase, c.hq); got != int64(c.want) {
+		if got := (&World{}).unitStrength(Tank, 100, TankStrengthPctBase, c.hq); got != int64(c.want) {
 			t.Errorf("unitStrength(100 tanks, HQ %d) = %d troopers, want %d", c.hq, got, c.want)
 		}
 	}

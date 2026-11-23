@@ -65,7 +65,7 @@ func remoteTankStrength(n, hq int) int {
 }
 
 // unitStrength is n of g at pct hundredths of a trooper apiece, in whole
-// troopers, for a same-planet battle. A tank's pct is its strength with no
+// troopers, for a same-planet battle under w's HeadQuarters rules. A tank's pct is its strength with no
 // HeadQuarters, and the HeadQuarters raises it in the binary's proportion,
 // (TankStrengthPctBase + TankStrengthPctPerHQ*hq) / TankStrengthPctBase, so a
 // mod's tank weight keeps the same HQ curve and a weight of 0 stays 0. At the
@@ -73,9 +73,10 @@ func remoteTankStrength(n, hq int) int {
 //
 // int64 throughout: n reaches 2^31 and pct ModUnitStrengthMax, so the tank's
 // product is under 2^31 x 10^4 x 450, about 9.7e15 — far inside int64.
-func unitStrength(g *Good, n int, pct int64, hq int) int64 {
+func (w *World) unitStrength(g *Good, n int, pct int64, hq int) int64 {
 	if g == Tank {
-		return int64(n) * pct * int64(TankStrengthPctBase+TankStrengthPctPerHQ*hq) / (TankStrengthPctBase * 100)
+		perHQ := int64(w.rules().HQ.TankPerHQ)
+		return int64(n) * pct * (TankStrengthPctBase + perHQ*int64(hq)) / (TankStrengthPctBase * 100)
 	}
 	return int64(n) * pct / 100
 }
