@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -174,7 +173,7 @@ func TestRestoreRebuildsTheScript(t *testing.T) {
 	if len(e.PirateHits) != 1 || e.PirateHits[0].Slot != 1 || e.PirateHits[0].Spoil != game.SpoilJets {
 		t.Errorf("hits %+v, want one jet raid by faction 1", e.PirateHits)
 	}
-	if got := Diff(game.BaseRules(), r); !reflect.DeepEqual(got, []string{"pirate raids: built in -> " + filepath.Join("pirates", PiratesFile) + " (" + r.Pirates.(*pirateScript).hash + ")"}) {
+	if got := Diff(game.BaseRules(), r); !reflect.DeepEqual(got, []string{"pirate raids: built in -> pirates/" + PiratesFile + " (" + r.Pirates.(*pirateScript).hash + ")"}) {
 		t.Errorf("diff %q", got)
 	}
 }
