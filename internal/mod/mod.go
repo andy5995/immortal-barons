@@ -327,11 +327,8 @@ func Resolve(dataDir string, names []string) (*game.Rules, []game.ModRef, error)
 	r := game.BaseRules()
 	refs := make([]game.ModRef, 0, len(names))
 	for i, name := range names {
-		if !validName.MatchString(name) {
-			return nil, nil, fmt.Errorf("mod %q: a mod's name may hold only lowercase letters, digits, - and _", name)
-		}
-		if slices.Contains(names[:i], name) {
-			return nil, nil, fmt.Errorf("mod %q is listed twice", name)
+		if err := checkListed(name, names[:i]); err != nil {
+			return nil, nil, fmt.Errorf("mod %w", err)
 		}
 		m, err := Read(filepath.Join(dataDir, Dir, name))
 		if err != nil {
@@ -348,6 +345,18 @@ func Resolve(dataDir string, names []string) (*game.Rules, []game.ModRef, error)
 	return r, refs, nil
 }
 
+// checkListed is the check a mod's name in a list passes before it becomes a
+// path: a plain name, not listed earlier in the same list.
+func checkListed(name string, earlier []string) error {
+	if !validName.MatchString(name) {
+		return fmt.Errorf("%q: a mod's name may hold only lowercase letters, digits, - and _", name)
+	}
+	if slices.Contains(earlier, name) {
+		return fmt.Errorf("%q is listed twice", name)
+	}
+	return nil
+}
+
 // Restore rebuilds the rules a world was reset with from the copies of its
 // mods saved in the world. A game's rules change only at a reset, so a mod
 // folder edited or removed since then does not reach the game in progress: each
@@ -360,6 +369,12 @@ func Restore(dataDir string, recorded []game.ModRef) (rules *game.Rules, warning
 	r := game.BaseRules()
 	var names []string
 	for _, ref := range recorded {
+		// The name comes from world.json, which a reset wrote but anyone with
+		// the file can edit; held to a plain name it cannot leave the mods folder,
+		// and checked as a reset checks the list.
+		if err := checkListed(ref.Name, names); err != nil {
+			return nil, nil, fmt.Errorf("this game's saved mod %w", err)
+		}
 		names = append(names, ref.Name)
 		path := filepath.Join(dataDir, Dir, ref.Name)
 		m, err := parse(path, ref.Files)

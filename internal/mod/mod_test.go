@@ -179,3 +179,22 @@ func TestBaseValuesReadBackUnchanged(t *testing.T) {
 		}
 	}
 }
+
+// A saved mod's name is checked before it becomes a path: world.json can be
+// edited by hand, and "../x" would read a folder outside the mods folder.
+func TestRestoreRefusesANameThatLeavesTheModsFolder(t *testing.T) {
+	ref := game.ModRef{Name: "../x", Version: "1", Hash: "h", Files: map[string]string{
+		ManifestFile: manifest("../x"),
+	}}
+	if _, _, err := Restore(t.TempDir(), []game.ModRef{ref}); err == nil || !strings.Contains(err.Error(), "may hold only") {
+		t.Errorf("err = %v, want the name refused", err)
+	}
+}
+
+// A saved list naming one mod twice is refused, as a reset's list is.
+func TestRestoreRefusesAModSavedTwice(t *testing.T) {
+	ref := game.ModRef{Name: "a", Version: "1", Hash: "h", Files: map[string]string{ManifestFile: manifest("a")}}
+	if _, _, err := Restore(t.TempDir(), []game.ModRef{ref, ref}); err == nil || !strings.Contains(err.Error(), "listed twice") {
+		t.Errorf("err = %v, want the duplicate refused", err)
+	}
+}
