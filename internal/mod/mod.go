@@ -12,8 +12,9 @@
 // for a file in the folder this version does not use: a mod carrying one would
 // otherwise load here and play without it.
 //
-// A mod may also carry a script, pirates.star, which decides pirate raids
-// (script.go).
+// A mod may also carry scripts: pirates.star, which decides pirate raids
+// (script.go), and regions.star, which decides what each realm's regions yield
+// and cost (region_script.go).
 package mod
 
 import (
@@ -40,7 +41,7 @@ import (
 // Dir is the folder under the data directory that holds the mods.
 const Dir = "mods"
 
-// The files a mod folder may hold, besides PiratesFile. values.toml is
+// The files a mod folder may hold, besides PiratesFile and RegionsFile. values.toml is
 // optional: a mod that changes nothing yet is still a mod.
 const (
 	ManifestFile = "mod.toml"
@@ -73,6 +74,7 @@ type Mod struct {
 	Files   map[string]string
 	values  values
 	pirates *pirateScript
+	regions *regionScript
 }
 
 // Ref is what a world records about m.
@@ -190,8 +192,8 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	var haveManifest bool
 	for _, name := range names {
 		data := []byte(files[name])
-		if name != ManifestFile && name != ValuesFile && name != PiratesFile {
-			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s and %s", path, name, ManifestFile, ValuesFile, PiratesFile)
+		if name != ManifestFile && name != ValuesFile && name != PiratesFile && name != RegionsFile {
+			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s, %s and %s", path, name, ManifestFile, ValuesFile, PiratesFile, RegionsFile)
 		}
 		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(data))
 		hash.Write(data)
@@ -234,6 +236,13 @@ func parse(path string, files map[string]string) (*Mod, error) {
 			return nil, err
 		}
 		m.pirates = s
+	}
+	if src, ok := files[RegionsFile]; ok {
+		s, err := newRegionScript(path, m.Name, m.Hash, src)
+		if err != nil {
+			return nil, err
+		}
+		m.regions = s
 	}
 	return m, nil
 }
@@ -302,6 +311,9 @@ func (m *Mod) Apply(r *game.Rules) error {
 	}
 	if m.pirates != nil {
 		r.Pirates = m.pirates
+	}
+	if m.regions != nil {
+		r.RegionBrain = m.regions
 	}
 	if err := errors.Join(errs...); err != nil {
 		return fmt.Errorf("%s: %w", filepath.Join(m.Path, ValuesFile), err)

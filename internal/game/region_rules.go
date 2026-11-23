@@ -156,6 +156,3 @@ func (rr RegionRules) Validate(g *Region) []error {
 	}
 	return errs
 }
-
-// regionsOf is the region rules e's land plays by.
-func (w *World) regionsOf(e *Empire) map[*Region]RegionRules { return w.rules().Regions }

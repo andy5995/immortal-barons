@@ -70,6 +70,9 @@ func Diff(a, b *game.Rules) []string {
 	if from, to := brainName(a), brainName(b); from != to {
 		out = append(out, fmt.Sprintf("pirate raids: %s -> %s", from, to))
 	}
+	if from, to := regionBrainName(a), regionBrainName(b); from != to {
+		out = append(out, fmt.Sprintf("regions: %s -> %s", from, to))
+	}
 	return out
 }
 
@@ -79,6 +82,15 @@ func brainName(r *game.Rules) string {
 		return s.mod + "/" + PiratesFile + " (" + s.hash + ")"
 	}
 	return "built in"
+}
+
+// regionBrainName is how Diff names what decides r's region figures realm by
+// realm.
+func regionBrainName(r *game.Rules) string {
+	if s, ok := r.RegionBrain.(*regionScript); ok {
+		return s.mod + "/" + RegionsFile + " (" + s.hash + ")"
+	}
+	return "the values every realm plays by"
 }
 
 // Values prints every value a mod can change, as a values.toml would set it.
