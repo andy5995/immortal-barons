@@ -116,8 +116,8 @@ A mod can change each unit's Offense and Defense for same-planet battles
 (`docs/mods.md`); the figures above are the base game's. A mod can also change
 the HeadQuarters figures (build rate, battle loss, price, tank curve); the
 HeadQuarters section below gives the base values. A mod can also change the
-figures of each region type (`docs/mods.md`), which the region sections give
-for the base game.
+figures of each region type, for every realm or, with a script, realm by
+realm (`docs/mods.md`); the region sections give them for the base game.
 
 So combat must track a separate **offense score** and **defense score**,
 not one shared value. Jets add only offense; turrets add only defense.

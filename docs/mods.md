@@ -160,17 +160,20 @@ price_high = 900
 Both files are [TOML](https://toml.io/). Lines starting with `#` are comments.
 
 The game reads a mod strictly. A key it does not know, a unit it does not know,
-or any file in the folder other than `mod.toml`, `values.toml` and
-`pirates.star` is an error.
+or any file in the folder other than `mod.toml`, `values.toml`, `pirates.star`
+and `regions.star` is an error.
 
 ## Scripts
 
-A mod may also hold `pirates.star`, a script that decides pirate raids. It is
-written in [Starlark](https://github.com/bazelbuild/starlark), a small
-language that looks like Python. When two mods in the list have one, the later
-mod's script is used.
+A mod may also hold scripts: `pirates.star`, which decides pirate raids, and
+`regions.star`, which decides what each realm's regions do. They are written
+in [Starlark](https://github.com/bazelbuild/starlark), a small language that
+looks like Python. When two mods in the list have the same script, the later
+mod's is used.
 
-The script must define `raid(realm, factions)`. Each turn a realm plays, after
+### Pirate raids
+
+`pirates.star` must define `raid(realm, factions)`. Each turn a realm plays, after
 the usual checks (pirates are on, the realm is out of protection), the game
 calls `raid` instead of rolling for a raid itself.
 
@@ -204,24 +207,67 @@ Two built-in functions are added to Starlark's own:
   random numbers.
 - `day()` returns the game day.
 
-A script cannot read files, the clock, or other scripts (`load` is not
-available). `while` loops and recursion are not allowed, and neither are
-`if` and `for` at the top level of the file: put them inside a function. Each call to `raid`
-may run for at most 1,000,000 steps, and so may the top level of the file
-when it loads.
-
 If the script fails in a turn, because of an error, by running out of steps,
 or by returning a raid the game does not allow, that realm's turn uses the
 normal pirate raid instead. The game writes the reason to its error output
 once each time the game runs, naming the mod.
 
+### Region figures
+
+`regions.star` must define `regions(realm, rows)`. It changes the figures of
+[Regions](#regions) for one realm at a time, so a realm's land can do more or
+less depending on the realm: a bonus for small realms, deserts that farm only
+once a realm has played a hundred turns.
+
+`realm` is the realm whose land is asked about. Its fields are `name`, `day`
+(the game day), `land`, `people`, `support`, `tax`, `turns_played`, and
+`regions`, which holds how many regions of each type it has, by the type's
+name: `realm.regions.desert`.
+
+`rows` holds the figures every realm plays by, the base game's with your
+`values.toml` sections applied, by the type's name: `rows["coastal"].gold_base`.
+
+`regions` returns the figures it changes for this realm, by type and key, or
+`{}` to change nothing. A type or key it leaves out keeps the value in `rows`:
+
+```python
+def regions(realm, rows):
+    if realm.land >= 500:
+        return {}
+    coastal = rows["coastal"]
+    return {"coastal": {"gold_base": coastal.gold_base * 2}}
+```
+
+The answers must stay inside the limits in the table above, and waste may still
+change only the keys it may change in `values.toml`.
+
+The game asks for a realm's figures whenever it needs them: for the turn, but
+also for each screen that shows a projection, such as the income a realm can
+expect. So a region script has no `rand()` or `day()`: it must give the same
+answer each time it is asked the same question, or a screen would show one
+figure and the turn pay another. Gold is left out of `realm` for the same
+reason, since it changes during a turn.
+
+If the script fails, because of an error, by running out of steps, or by
+returning a figure outside its limits, that realm plays the figures in `rows`.
+The game writes the reason to its error output once each time the game runs,
+naming the mod.
+
+### What every script may do
+
+A script cannot read files, the clock, or other scripts (`load` is not
+available). `while` loops and recursion are not allowed, and neither are
+`if` and `for` at the top level of the file: put them inside a function. Each
+call to `raid` or `regions` may run for at most 1,000,000 steps, and so may the
+top level of the file when it loads.
+
 A script is as trusted as the rest of the mod folder. It runs inside the game
 itself, and nothing limits how much memory it uses, so install only scripts
 you have read.
 
-`-check-mod` loads the script and checks that it defines `raid` with two
-parameters. It cannot check what `raid` returns, because that depends on the
-game. Watch the error output once the game has played some turns.
+`-check-mod` loads each script and checks that it defines `raid` or `regions`
+with two parameters. It cannot check what they return, because that depends on
+the game. Watch the error output once the game has played some turns.
 
 ## Checking a mod
 
