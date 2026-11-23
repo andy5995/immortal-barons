@@ -161,7 +161,8 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 	// from the defender's HQ field, then clamped at zero). IB had no HQ damage
 	// at all, which made a finished HeadQuarters permanent once built.
 	if attackerWins && d.HQ > 0 {
-		d.HQ -= HQBattleLossMin + w.rng.Intn(HQBattleLossJitter)
+		hq := w.rules().HQ
+		d.HQ -= hq.BattleLossMin + w.rng.Intn(hq.BattleLossJitter)
 		if d.HQ < 0 {
 			d.HQ = 0
 		}
@@ -469,7 +470,7 @@ func (w *World) groundOffense(f AttackForce, e *Empire) int {
 	var sum int64
 	for _, g := range MilitaryGoods {
 		if g.Force != nil {
-			sum += unitStrength(g, *g.Force(&f), w.unit(g).Offense, e.HQ)
+			sum += w.unitStrength(g, *g.Force(&f), w.unit(g).Offense, e.HQ)
 		}
 	}
 	return techStrength(sum, e)

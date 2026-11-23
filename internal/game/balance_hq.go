@@ -73,11 +73,24 @@ func remoteTankStrength(n, hq int) int {
 //
 // int64 throughout: n reaches 2^31 and pct ModUnitStrengthMax, so the tank's
 // product is under 2^31 x 10^4 x 450, about 9.7e15 — far inside int64.
+//
+// This form uses the base HQ curve; the engine goes through World.unitStrength,
+// which reads the world's.
 func unitStrength(g *Good, n int, pct int64, hq int) int64 {
+	return unitStrengthAt(g, n, pct, hq, TankStrengthPctPerHQ)
+}
+
+// unitStrengthAt is unitStrength with the tank curve's per-HQ term given.
+func unitStrengthAt(g *Good, n int, pct int64, hq, perHQ int) int64 {
 	if g == Tank {
-		return int64(n) * pct * int64(TankStrengthPctBase+TankStrengthPctPerHQ*hq) / (TankStrengthPctBase * 100)
+		return int64(n) * pct * (TankStrengthPctBase + int64(perHQ)*int64(hq)) / (TankStrengthPctBase * 100)
 	}
 	return int64(n) * pct / 100
+}
+
+// unitStrength is the free function's form under w's HeadQuarters rules.
+func (w *World) unitStrength(g *Good, n int, pct int64, hq int) int64 {
+	return unitStrengthAt(g, n, pct, hq, w.rules().HQ.TankPerHQ)
 }
 
 // HQBuildStart is the completion percent a newly bought HeadQuarters begins at,

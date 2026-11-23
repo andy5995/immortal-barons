@@ -19,6 +19,32 @@ type Rules struct {
 	Units map[*Good]UnitRules
 	// Pirates, when set, decides pirate raids in place of the built-in roll.
 	Pirates PirateBrain
+	// HQ are the HeadQuarters figures.
+	HQ HQRules
+}
+
+// HQRules are the HeadQuarters figures. The interplanetary resolver's own tank
+// curve (RemoteTankStrength*) is not here: those battles only happen in a
+// league, and a league board refuses mods.
+type HQRules struct {
+	// TankPerHQ is the part of a tank's strength a point of HeadQuarters
+	// completion adds, over TankStrengthPctBase (the curve's fixed reference).
+	TankPerHQ int
+	// BuildStart is the completion percent a new HeadQuarters begins at, and
+	// BuildPerTurn what it gains each turn until it reaches 100.
+	BuildStart, BuildPerTurn int
+	// BattleLossMin and BattleLossJitter: a lost defense costs the
+	// HeadQuarters BattleLossMin + Random(BattleLossJitter) points.
+	BattleLossMin, BattleLossJitter int
+	// InvasionLossDivisor: a winning interplanetary strike takes 1/divisor of
+	// the HeadQuarters of each realm it takes regions from.
+	InvasionLossDivisor int
+	// PriceBase, PricePerTurn and PriceJitter make the price: PriceBase +
+	// PricePerTurn x turns played + Random(PriceJitter), held under PriceCap
+	// minus Random(PriceCapJitter). Gold.
+	PriceBase, PricePerTurn, PriceJitter, PriceCap, PriceCapJitter int64
+	// SabotagePoints is what a landed Sabotage HQ agent takes off the target.
+	SabotagePoints int
 }
 
 // UnitRules are one unit's figures. Units with no production or price walk
@@ -61,11 +87,20 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 		PriceLo: PriceLoCarrier, PriceHi: PriceHiCarrier, PriceStep: PriceStepCarrier},
 	Agent: {NetWorth: NetWorthAgent},
 	Food:  {},
-}}
+},
+	HQ: HQRules{
+		TankPerHQ: TankStrengthPctPerHQ, BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
+		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
+		InvasionLossDivisor: InvasionHQLossDivisor,
+		PriceBase:           HQPriceBase, PricePerTurn: HQPricePerTurn, PriceJitter: HQPriceJitter,
+		PriceCap: HQPriceCap, PriceCapJitter: HQPriceCapJitter,
+		SabotagePoints: TerrorHQSabotagePoints,
+	},
+}
 
 // BaseRules returns a copy of the base rules for a mod to change.
 func BaseRules() *Rules {
-	return &Rules{Units: maps.Clone(baseRules.Units)}
+	return &Rules{Units: maps.Clone(baseRules.Units), HQ: baseRules.HQ}
 }
 
 // rules is the set w plays by: the base set unless mods were loaded.
