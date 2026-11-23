@@ -236,7 +236,7 @@ func (w *World) SendSpy(a, d *Empire) (Msg, error) {
 		w.fileLocalSpyReport(a, d)
 		return say("Intel on {who} — Land {land}, Troops {troops}, Turrets {turrets}, Tanks {tanks}, Offense {offense}, Defense {defense}, Gold {gold}, Agents {agents}",
 			"who", d.Name, "land", d.Land, "troops", d.Troopers, "turrets", d.Turrets, "tanks", d.Tanks,
-			"offense", d.Offense(), "defense", d.Defense(), "gold", d.Gold, "agents", d.Agents), nil
+			"offense", w.Offense(d), "defense", w.Defense(d), "gold", d.Gold, "agents", d.Agents), nil
 	}
 	a.Agents--
 	return w.covertFoiled(a, d, say("a spying attempt")), nil

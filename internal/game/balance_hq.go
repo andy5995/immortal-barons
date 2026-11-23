@@ -22,7 +22,16 @@ import "math"
 // An earlier reading had the base a half-trooper low and the HQ term twice too
 // steep (300 rising to 500), which undervalued tanks in a realm with no
 // HeadQuarters and overvalued them in one with a finished HeadQuarters.
+//
+// The other units' weights from the same builder, in the same hundredths. These
+// are the base values of a mod's offense and defense keys (Rules); a tank's keys
+// start from TankStrengthPctBase.
 const (
+	OffenseTrooperPct = 100 // binary: 0.5, doubled to trooper units
+	DefenseTrooperPct = 100 // binary: 0.5, doubled
+	OffenseJetPct     = 200 // binary: 1, doubled
+	DefenseTurretPct  = 200 // binary: 1, doubled
+
 	TankStrengthPctBase  = 350 // binary
 	TankStrengthPctPerHQ = 1   // binary: HQ/200 doubled to trooper units
 )
@@ -55,10 +64,20 @@ func remoteTankStrength(n, hq int) int {
 	return int(min(wide, math.MaxInt32))
 }
 
-// tankStrength values n tanks in troopers, given HQ completion percent.
-func tankStrength(n, hq int) int {
-	wide := int64(n) * int64(TankStrengthPctBase+TankStrengthPctPerHQ*hq) / 100
-	return int(min(wide, math.MaxInt32))
+// unitStrength is n of g at pct hundredths of a trooper apiece, in whole
+// troopers, for a same-planet battle. A tank's pct is its strength with no
+// HeadQuarters, and the HeadQuarters raises it in the binary's proportion,
+// (TankStrengthPctBase + TankStrengthPctPerHQ*hq) / TankStrengthPctBase, so a
+// mod's tank weight keeps the same HQ curve and a weight of 0 stays 0. At the
+// base weight that is exactly the binary's 1.75 + HQ/200 doubled.
+//
+// int64 throughout: n reaches 2^31 and pct ModUnitStrengthMax, so the tank's
+// product is under 2^31 x 10^4 x 450, about 9.7e15 — far inside int64.
+func unitStrength(g *Good, n int, pct int64, hq int) int64 {
+	if g == Tank {
+		return int64(n) * pct * int64(TankStrengthPctBase+TankStrengthPctPerHQ*hq) / (TankStrengthPctBase * 100)
+	}
+	return int64(n) * pct / 100
 }
 
 // HQBuildStart is the completion percent a newly bought HeadQuarters begins at,

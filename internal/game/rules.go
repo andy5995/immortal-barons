@@ -31,20 +31,30 @@ type UnitRules struct {
 	// PriceLo, PriceHi and PriceStep are the band a realm's own price for the
 	// unit walks inside, and how far it moves in a turn (stepPrice).
 	PriceLo, PriceHi, PriceStep int
+	// Offense and Defense are the unit's strength in a same-planet battle, in
+	// hundredths of a trooper. A tank's are its strength with no HeadQuarters;
+	// unitStrength raises them with HQ. A unit that cannot be sent on an attack
+	// (turret, carrier) has no Offense. Pirate raids, an ally's aid and the
+	// interplanetary resolvers value units by their own constants.
+	Offense, Defense int64
 }
 
 // baseRules is the original game, built once from the constants.
 var baseRules = &Rules{Units: map[*Good]UnitRules{
 	Trooper: {Cost: CostTrooper, NetWorth: NetWorthTrooper, UpkeepTenths: MaintTrooperTenths,
-		PriceLo: PriceLoTrooper, PriceHi: PriceHiTrooper, PriceStep: PriceStepTrooper},
+		PriceLo: PriceLoTrooper, PriceHi: PriceHiTrooper, PriceStep: PriceStepTrooper,
+		Offense: OffenseTrooperPct, Defense: DefenseTrooperPct},
 	Jet: {Cost: CostJet, NetWorth: NetWorthJet, UpkeepTenths: MaintJetTenths,
-		PriceLo: PriceLoJet, PriceHi: PriceHiJet, PriceStep: PriceStepJet},
+		PriceLo: PriceLoJet, PriceHi: PriceHiJet, PriceStep: PriceStepJet,
+		Offense: OffenseJetPct},
 	Turret: {Cost: CostTurret, NetWorth: NetWorthTurret, UpkeepTenths: MaintTurretTenths,
-		PriceLo: PriceLoTurret, PriceHi: PriceHiTurret, PriceStep: PriceStepTurret},
+		PriceLo: PriceLoTurret, PriceHi: PriceHiTurret, PriceStep: PriceStepTurret,
+		Defense: DefenseTurretPct},
 	Bomber: {Cost: CostBomber, NetWorth: NetWorthBomber, UpkeepTenths: MaintBomberTenths,
 		PriceLo: PriceLoBomber, PriceHi: PriceHiBomber, PriceStep: PriceStepBomber},
 	Tank: {Cost: CostTank, NetWorth: NetWorthTank, UpkeepTenths: MaintTankTenths,
-		PriceLo: PriceLoTank, PriceHi: PriceHiTank, PriceStep: PriceStepTank},
+		PriceLo: PriceLoTank, PriceHi: PriceHiTank, PriceStep: PriceStepTank,
+		Offense: TankStrengthPctBase, Defense: TankStrengthPctBase},
 	Carrier: {Cost: CostCarrier, NetWorth: NetWorthCarrier, UpkeepTenths: MaintCarrierTenths,
 		PriceLo: PriceLoCarrier, PriceHi: PriceHiCarrier, PriceStep: PriceStepCarrier},
 	Agent: {NetWorth: NetWorthAgent},
@@ -76,6 +86,12 @@ const (
 	ModUnitUpkeepMax    = 10_000     // tenths: 1,000 gold a unit a turn
 	ModUnitPriceMax     = 1_000_000
 	ModUnitPriceBandMin = max(PriceFloorJitter, PriceCeilJitter) // stepPrice's clamps land inside a band this wide
+	// Hundredths: 100 troopers' strength a unit. A unit count is at most 2^31,
+	// so a strength sum is under 2^31 x 10^4 (x 4.5/3.5 for a tank at a full
+	// HeadQuarters), about 2.8e13. unitStrength multiplies before it divides,
+	// so its largest intermediate is 2^31 x 10^4 x 450, about 9.7e15: both are
+	// int64, and the sum is held at the 32-bit ceiling before it reaches an int.
+	ModUnitStrengthMax = 10_000
 )
 
 // Validate reports every value outside its limits, so a sysop fixing a mod sees
@@ -106,6 +122,15 @@ func (r *Rules) Validate() error {
 		if u.PriceHi-u.PriceLo < ModUnitPriceBandMin {
 			bad(g, "price_high must be at least %d above price_low", ModUnitPriceBandMin)
 		}
+		if u.Offense < 0 || u.Offense > ModUnitStrengthMax {
+			bad(g, "offense %s is outside 0 to %s", hundredths(u.Offense), hundredths(ModUnitStrengthMax))
+		}
+		if g.Force == nil && u.Offense != 0 {
+			bad(g, "offense must be 0: a %s is never sent on an attack", g.ID)
+		}
+		if u.Defense < 0 || u.Defense > ModUnitStrengthMax {
+			bad(g, "defense %s is outside 0 to %s", hundredths(u.Defense), hundredths(ModUnitStrengthMax))
+		}
 		if u.PriceStep < 1 || u.PriceStep > u.PriceHi-u.PriceLo {
 			bad(g, "price_step %d is outside 1 to the width of the band", u.PriceStep)
 		}
@@ -117,6 +142,7 @@ func (r *Rules) Validate() error {
 // it, so a limit in an error message reads like the value that broke it.
 func thousandths(v int64) string { return FixedPoint(v, 1000) }
 func tenths(v int64) string      { return FixedPoint(v, 10) }
+func hundredths(v int64) string  { return FixedPoint(v, 100) }
 
 // FixedPoint prints v, a count of 1/scale units where scale is a power of ten,
 // as a decimal with no trailing zeros: FixedPoint(250, 1000) is "0.25".

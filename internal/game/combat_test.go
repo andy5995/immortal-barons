@@ -241,10 +241,10 @@ func TestAttackUsesOnlyCommittedForce(t *testing.T) {
 	d.Morale = 100
 
 	// Offense scales with the committed force (no HQ/Tech → 1 per trooper).
-	if got := (AttackForce{Troopers: 50}).groundOffense(a); got != 50 {
+	if got := w.groundOffense(AttackForce{Troopers: 50}, a); got != 50 {
 		t.Errorf("committed offense = %d, want 50", got)
 	}
-	if got := FullForce(a).groundOffense(a); got != 200 {
+	if got := w.groundOffense(FullForce(a), a); got != 200 {
 		t.Errorf("full offense = %d, want 200", got)
 	}
 

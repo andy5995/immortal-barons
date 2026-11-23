@@ -302,7 +302,7 @@ func TestInvasionUsesItsOwnDefenceArithmetic(t *testing.T) {
 		{50, 400, 400},
 		{100, 450, 500},
 	} {
-		if got := tankStrength(100, c.hq); got != c.local {
+		if got := int(unitStrength(Tank, 100, TankStrengthPctBase, c.hq)); got != c.local {
 			t.Errorf("HQ %d%%: local tank strength = %d, want %d", c.hq, got, c.local)
 		}
 		if got := remoteTankStrength(100, c.hq); got != c.remote {
@@ -324,7 +324,7 @@ func TestInvasionUsesItsOwnDefenceArithmetic(t *testing.T) {
 	// And the two reach the field differently: Defense() leaves morale to its
 	// caller, remoteDefense() folds it in.
 	e := &Empire{Troopers: 1_000, Turrets: 1_000, Tanks: 1_000, HQ: 0, Morale: 100}
-	if got, want := e.Defense(), 1_000+2_000+tankStrength(1_000, 0); got != want {
+	if got, want := (&World{}).Defense(e), 1_000+2_000+int(unitStrength(Tank, 1_000, TankStrengthPctBase, 0)); got != want {
 		t.Errorf("local defense = %d, want %d", got, want)
 	}
 	if got, want := e.remoteDefense(), (1_000+2_000+remoteTankStrength(1_000, 0))*107/100; got != want {

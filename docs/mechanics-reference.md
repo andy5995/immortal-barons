@@ -112,6 +112,9 @@ One limit worth stating: the scan sees the two displacement idioms, not the
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
 | HeadQuarters | — | — | Raises tank effectiveness; enemies bomb it to weaken your tanks. |
 
+A mod can change each unit's Offense and Defense for same-planet battles
+(`docs/mods.md`); the figures above are the base game's.
+
 So combat must track a separate **offense score** and **defense score**,
 not one shared value. Jets add only offense; turrets add only defense.
 

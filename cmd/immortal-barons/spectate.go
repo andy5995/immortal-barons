@@ -98,7 +98,7 @@ func runSpectate(cfg game.Config, days int) error {
 		}
 		fmt.Printf("%-18.18s %-10s %-6s %8d %10d %9d %8d %8d %6d %6d %6d %4d\n",
 			e.Name, e.AIProfile, e.AISkill, e.Land, w.NetWorth(e), e.Score,
-			e.Offense(), e.Defense(), e.Jets, e.Carriers, e.Agents, e.Tax)
+			w.Offense(e), w.Defense(e), e.Jets, e.Carriers, e.Agents, e.Tax)
 	}
 	return store.Save(w, cfg)
 }
@@ -119,8 +119,8 @@ func spectateSnapshot(w *game.World) spectateTotals {
 		s.land += e.Land
 		s.people += e.People
 		s.gold += e.Gold + e.Bank
-		s.offense += e.Offense()
-		s.defense += e.Defense()
+		s.offense += w.Offense(e)
+		s.defense += w.Defense(e)
 	}
 	return s
 }

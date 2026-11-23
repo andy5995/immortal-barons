@@ -68,6 +68,9 @@ func TestReadRefusesWhatItDoesNotKnow(t *testing.T) {
 		{"unused file", map[string]string{"brain.star": "x"}, "brain.star is not a file"},
 		{"too many places", map[string]string{ValuesFile: "[units.tank]\nupkeep = 0.25\n"}, "more decimal places than 0.1 allows"},
 		{"out of range", map[string]string{ValuesFile: "[units.tank]\nbuild_cost = 0\n"}, "build_cost 0 is outside"},
+		{"offense out of range", map[string]string{ValuesFile: "[units.jet]\noffense = 100.01\n"}, "offense 100.01 is outside 0 to 100"},
+		{"turret offense", map[string]string{ValuesFile: "[units.turret]\noffense = 1\n"}, "turret: offense must be 0"},
+		{"defense below zero", map[string]string{ValuesFile: "[units.trooper]\ndefense = -1\n"}, "defense -1 is outside 0 to 100"},
 		{"wraps an int32", map[string]string{ValuesFile: "[units.tank]\nbuild_cost = 5000000000\n"}, "out of range"},
 		{"control character", map[string]string{ManifestFile: manifest("m") + "label = \"a\\u001b[2J\"\n"}, "may not hold control characters"},
 		{"narrow band", map[string]string{ValuesFile: "[units.tank]\nprice_low = 2200\n"}, "price_high must be at least"},
@@ -170,7 +173,9 @@ func TestBaseValuesReadBackUnchanged(t *testing.T) {
 	if diff := Diff(game.BaseRules(), r); len(diff) != 0 {
 		t.Errorf("the base values read back changed: %v", diff)
 	}
-	if !strings.Contains(text, "[units.tank]") || !strings.Contains(text, "upkeep = 0.6") {
-		t.Errorf("unexpected output:\n%s", text)
+	for _, want := range []string{"[units.tank]", "upkeep = 0.6", "offense = 3.5", "defense = 3.5"} {
+		if !strings.Contains(text, want) {
+			t.Errorf("output lacks %q:\n%s", want, text)
+		}
 	}
 }

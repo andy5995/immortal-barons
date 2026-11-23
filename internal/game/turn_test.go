@@ -507,7 +507,7 @@ func TestAIBuildsDefensiveForceMix(t *testing.T) {
 	if e.Tanks == 0 {
 		t.Error("AI should buy tanks, got 0")
 	}
-	if e.Defense() == 0 {
+	if w.Defense(e) == 0 {
 		t.Error("AI should have a defensive posture, got 0 Defense")
 	}
 }

@@ -429,8 +429,8 @@ func remoteMoraleFactor(morale int) int {
 }
 
 // remoteDefense is what a realm brings to an ARRIVING interplanetary strike:
-// the same units as Defense(), valued by the invasion resolver's own tank
-// constant, and then scaled by morale — which Defense() does not do because its
+// the same units as World.Defense, valued by the invasion resolver's own tank
+// constant, and then scaled by morale — which World.Defense does not do because its
 // callers apply moraleFactor themselves.
 func (e *Empire) remoteDefense() int {
 	sum := e.Troopers + e.Turrets*2 + remoteTankStrength(e.Tanks, e.HQ)
@@ -454,13 +454,25 @@ func (e *Empire) EnsureProduction() {
 	}
 }
 
-// Offense is the empire's full attack strength — every usable unit committed (see
-// FullForce/AttackForce.offense). A regular attack may commit less (force select).
-func (e *Empire) Offense() int {
-	return FullForce(e).groundOffense(e)
+// Offense is e's full attack strength — every usable unit committed (see
+// FullForce/groundOffense). A regular attack may commit less (force select).
+func (w *World) Offense(e *Empire) int {
+	return w.groundOffense(FullForce(e), e)
 }
 
-func (e *Empire) Defense() int {
-	sum := e.Troopers + e.Turrets*2 + tankStrength(e.Tanks, e.HQ)
-	return techRaise(sum, e.TechMilitaryFactor())
+// Defense is what e's units hold off a same-planet attack with, each valued by
+// its Defense under w's rules and scaled by Technology. Callers apply morale.
+func (w *World) Defense(e *Empire) int {
+	var sum int64
+	for _, g := range MilitaryGoods {
+		sum += unitStrength(g, *g.Count(e), w.unit(g).Defense, e.HQ)
+	}
+	return techStrength(sum, e)
+}
+
+// techStrength is a unit-strength sum scaled by e's Technology. The sum is held
+// at the 32-bit ceiling before the multiplier and the result after it, so
+// neither wraps on a 32-bit build.
+func techStrength(sum int64, e *Empire) int {
+	return int(min(techRaise(min(sum, math.MaxInt32), e.TechMilitaryFactor()), math.MaxInt32))
 }

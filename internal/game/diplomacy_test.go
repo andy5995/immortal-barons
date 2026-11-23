@@ -631,7 +631,7 @@ func TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes(t *testing
 	// gap this wide makes the outcome name which defense was counted.
 	res := w.resolveRemoteAttack(RemoteAttack{
 		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: NormalAttack,
-		Offense:      victim.Defense() * 20,
+		Offense:      w.Defense(victim) * 20,
 		Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
 	})
 	if !res.Won {

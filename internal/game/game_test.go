@@ -178,12 +178,12 @@ func TestHQBoostsTanks(t *testing.T) {
 	e.Tanks = 10
 
 	e.HQ = 0
-	baseOffense := e.Offense()
-	baseDefense := e.Defense()
+	baseOffense := w.Offense(e)
+	baseDefense := w.Defense(e)
 
 	e.HQ = 100
-	boostedOffense := e.Offense()
-	boostedDefense := e.Defense()
+	boostedOffense := w.Offense(e)
+	boostedDefense := w.Defense(e)
 
 	if boostedOffense <= baseOffense {
 		t.Errorf("Offense should rise with HQ=100: base=%d boosted=%d", baseOffense, boostedOffense)
@@ -213,8 +213,8 @@ func TestHQBoostsTanks(t *testing.T) {
 // Troopers" as a base rather than as the mid-point of the HQ term.
 func TestTankStrengthMatchesBRE(t *testing.T) {
 	for _, c := range []struct{ hq, want int }{{0, 350}, {25, 375}, {50, 400}, {75, 425}, {100, 450}} {
-		if got := tankStrength(100, c.hq); got != c.want {
-			t.Errorf("tankStrength(100 tanks, HQ %d) = %d troopers, want %d", c.hq, got, c.want)
+		if got := unitStrength(Tank, 100, TankStrengthPctBase, c.hq); got != int64(c.want) {
+			t.Errorf("unitStrength(100 tanks, HQ %d) = %d troopers, want %d", c.hq, got, c.want)
 		}
 	}
 }
@@ -415,12 +415,13 @@ func TestTechBoostsMilitary(t *testing.T) {
 	tech := &Empire{Land: 100, Regions: RegionMix{Technology: 40},
 		Troopers: 100, Jets: 20, Carriers: 1, Turrets: 30, Tanks: 10}
 	tech.TechSlots[TechSlotMilitary] = 200 // well-researched military
+	w0 := &World{}
 
-	if tech.Offense() <= base.Offense() {
-		t.Errorf("Offense should rise with Technology regions: base=%d tech=%d", base.Offense(), tech.Offense())
+	if w0.Offense(tech) <= w0.Offense(base) {
+		t.Errorf("Offense should rise with Technology regions: base=%d tech=%d", w0.Offense(base), w0.Offense(tech))
 	}
-	if tech.Defense() <= base.Defense() {
-		t.Errorf("Defense should rise with Technology regions: base=%d tech=%d", base.Defense(), tech.Defense())
+	if w0.Defense(tech) <= w0.Defense(base) {
+		t.Errorf("Defense should rise with Technology regions: base=%d tech=%d", w0.Defense(base), w0.Defense(tech))
 	}
 }
 

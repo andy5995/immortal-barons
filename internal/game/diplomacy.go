@@ -260,7 +260,7 @@ func tradePactIncome(e, other *Empire, perHead, selfCut, partnerCut int) int64 {
 // So the three helpers below feed the local battle (combat.go's Attack) and the
 // Alliance Strength screen, and nothing in the interplanetary path may call
 // them: resolveRemoteAttack meets an arriving strike with the target's own
-// Defense() alone. Pinned by
+// World.Defense alone. Pinned by
 // TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes.
 
 // AllyContribution is one row of BRE's Alliance Strength screen: what a partner
@@ -332,7 +332,7 @@ func allyBled(n int, frac float64) int {
 // allyDefenseBoost is the extra battle power d's Full Defense Alliance partners
 // add when d is attacked: each sends 30% of its troopers + tanks (agents are
 // covert, turrets stay home). The detachment is valued the original's way, not
-// as the ally's own Defense() would weigh it: tanks count a flat
+// as the ally's own World.Defense would weigh it: tanks count a flat
 // AllyDefenseTankWeight troopers with no HeadQuarters term, there is no
 // technology factor, and morale scales it by allyMorale/2 + 25 percent — 25% at
 // broken morale, 75% at full — where a defender's own army uses moraleFactor.

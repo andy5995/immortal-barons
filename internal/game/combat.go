@@ -145,8 +145,8 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 	// There is no jitter on the inputs: the variance lives inside the battle,
 	// where BRE puts it, and rolling the strengths beforehand as well would
 	// double-count it.
-	ap := float64(f.groundOffense(a)) * float64(moraleFactor(a.Morale)) / 100
-	dp := float64(d.Defense())*float64(moraleFactor(d.Morale))/100 + float64(w.allyDefenseBoost(d))
+	ap := float64(w.groundOffense(f, a)) * float64(moraleFactor(a.Morale)) / 100
+	dp := float64(w.Defense(d))*float64(moraleFactor(d.Morale))/100 + float64(w.allyDefenseBoost(d))
 
 	// Fight it out. Both sides grind each other down until one has lost the share
 	// of its force it is willing to lose, so the loser always pays the full
@@ -459,14 +459,20 @@ func (f AttackForce) clampTo(e *Empire) AttackForce {
 	}
 }
 
-// groundOffense is the committed force's regular-attack strength, mirroring
-// Empire.Offense on the sent units (troopers 1, jets 2, tanks 3.5–4.5 by HQ), scaled by
-// Technology. Bombers are excluded: the original's local resolver keeps them out
-// of the offense sum (docs/mechanics-reference.md) though it bleeds them with
-// the rest. (Distinct from offense(), which values a group-attack detachment flat.)
-func (f AttackForce) groundOffense(e *Empire) int {
-	sum := f.Troopers + f.Jets*2 + tankStrength(f.Tanks, e.HQ)
-	return techRaise(sum, e.TechMilitaryFactor())
+// groundOffense is the committed force f's regular-attack strength, each sent
+// unit valued by its Offense under w's rules (base: troopers 1, jets 2, tanks
+// 3.5–4.5 by HQ), scaled by e's Technology. Bombers weigh 0 in the base rules:
+// the original's local resolver keeps them out of the offense sum
+// (docs/mechanics-reference.md) though it bleeds them with the rest.
+// (Distinct from offense(), which values a group-attack detachment flat.)
+func (w *World) groundOffense(f AttackForce, e *Empire) int {
+	var sum int64
+	for _, g := range MilitaryGoods {
+		if g.Force != nil {
+			sum += unitStrength(g, *g.Force(&f), w.unit(g).Offense, e.HQ)
+		}
+	}
+	return techStrength(sum, e)
 }
 
 // loseCommitted removes frac of the committed force from e, every type at the

@@ -104,8 +104,8 @@ func aiWarMargin(profile string) int {
 // effectiveDefense is a realm's total defensive strength as the battle math
 // sees it: its unit defense plus the per-region land bonus. The AI uses this to
 // judge whether a target is winnable (#36).
-func effectiveDefense(e *Empire) int {
-	return e.Defense() + e.Land*LandDefenseBonus
+func (w *World) effectiveDefense(e *Empire) int {
+	return w.Defense(e) + e.Land*LandDefenseBonus
 }
 
 // aiWageWar lets an AI strike the weakest valid target when it is clearly
@@ -127,14 +127,14 @@ func (w *World) aiWageWar(e *Empire) {
 	}
 	var target *Empire
 	for _, t := range w.Targets(e) {
-		if target == nil || effectiveDefense(t) < effectiveDefense(target) {
+		if target == nil || w.effectiveDefense(t) < w.effectiveDefense(target) {
 			target = t
 		}
 	}
 	if target == nil {
 		return
 	}
-	if e.Offense() > effectiveDefense(target)*margin/100 {
+	if w.Offense(e) > w.effectiveDefense(target)*margin/100 {
 		// No pre-battle covert strike here any more: an agent sent now lands at
 		// the NEXT daily maintenance, so it can no longer soften the target of
 		// the attack being launched in this turn. aiCovertOps already demoralizes
@@ -301,7 +301,7 @@ func (w *World) aiCovertOps(e *Empire) {
 	// Revolts are the cheaper op and hit income through popular support;
 	// demoralizing is the pre-battle one and is reserved for a realm this AI
 	// could actually follow up against.
-	if spare >= CostDemoralizeForces && e.Offense() > effectiveDefense(target) {
+	if spare >= CostDemoralizeForces && w.Offense(e) > w.effectiveDefense(target) {
 		w.DemoralizeForces(e, target)
 		return
 	}
@@ -317,7 +317,7 @@ func (w *World) aiCovertOps(e *Empire) {
 func (w *World) aiCovertTarget(e *Empire) *Empire {
 	var weakest, strongest *Empire
 	for _, t := range w.Targets(e) {
-		if weakest == nil || effectiveDefense(t) < effectiveDefense(weakest) {
+		if weakest == nil || w.effectiveDefense(t) < w.effectiveDefense(weakest) {
 			weakest = t
 		}
 		if strongest == nil || w.NetWorth(t) > w.NetWorth(strongest) {
@@ -441,7 +441,7 @@ func (w *World) aiSetProduction(e *Empire) {
 // Allies are excluded: a Full Defense Alliance partner is not a threat, and
 // panicking about one would make defense pacts pointless.
 func (w *World) aiUnderThreat(e *Empire) bool {
-	trigger := effectiveDefense(e)
+	trigger := w.effectiveDefense(e)
 	if e.aiSkill() == AISkillDull {
 		trigger *= AIDullThreatFactor
 	}
@@ -449,7 +449,7 @@ func (w *World) aiUnderThreat(e *Empire) bool {
 		if other == e || !other.Alive || w.AreAllied(e, other) {
 			continue
 		}
-		if other.Offense() > trigger {
+		if w.Offense(other) > trigger {
 			return true
 		}
 	}

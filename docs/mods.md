@@ -13,17 +13,29 @@ nothing yet sends a mod to the other boards.
 
 ## What a mod can change
 
-This first version can change five figures for each of the six military units:
+This first version can change seven figures for each of the six military units:
 
 | Key | Meaning | Limits |
 | --- | --- | --- |
 | `build_cost` | Production points an Industrial region spends to build one unit (not the purchase price) | 1 to 1,000,000 |
 | `networth` | Net worth of one unit, in gold (up to 3 decimal places) | 0 to 10,000 |
 | `upkeep` | Gold to maintain one unit per turn at the Medium Maintenance Costs setting (up to 1 decimal place) | 0 to 1,000 |
+| `offense` | Strength of one unit when it attacks another realm on this planet, in troopers (up to 2 decimal places). For a tank, its strength with no HeadQuarters | 0 to 100; 0 for `turret` and `carrier` |
+| `defense` | Strength of one unit when its realm is attacked from this planet, in troopers (up to 2 decimal places). For a tank, its strength with no HeadQuarters | 0 to 100 |
 | `price_low`, `price_high` | The range a realm's price for the unit moves inside | 1 to 1,000,000, at least 100 apart |
 | `price_step` | How far that price can move in one turn | 1 to the width of the range |
 
 The units are `trooper`, `jet`, `turret`, `bomber`, `tank` and `carrier`.
+
+Without mods, a trooper is 1 on attack and defense, a jet 2 on attack, a
+turret 2 on defense and a tank 3.5 on both; bombers and carriers are 0. Rules
+that belong to a unit stay in force under a mod: only jets that carriers can
+move go into an attack, every unit the realm holds defends (jets included,
+whether or not a carrier could move them), and a HeadQuarters
+raises a tank's strength by the same proportion as without mods, up to 4.5/3.5
+of its `offense` and `defense` when finished. Technology and morale scale the
+total as usual. Pirate raids and the help an alliance sends use their own
+figures, which a mod does not change.
 
 The Maintenance Costs setting still applies to a mod's `upkeep`: None charges
 nothing, Low a quarter of it and High four times it.

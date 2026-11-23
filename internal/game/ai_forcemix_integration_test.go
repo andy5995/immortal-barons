@@ -19,7 +19,7 @@ func TestAIForceMixFiresInSeededGame(t *testing.T) {
 	}
 	withTurrets := 0
 	for _, e := range w.AIEmpires() {
-		if e.Alive && e.Turrets > 0 && e.Defense() > 0 {
+		if e.Alive && e.Turrets > 0 && w.Defense(e) > 0 {
 			withTurrets++
 		}
 	}

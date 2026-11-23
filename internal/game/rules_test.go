@@ -92,3 +92,42 @@ func TestPlanetNetWorthHoldsAtTheCeiling(t *testing.T) {
 		t.Errorf("planet net worth = %d, want it held at %d", got, math.MaxInt32)
 	}
 }
+
+// A mod's offense and defense reach the same-planet battle's strength sums.
+// Golden figures: 1,000 jets at 3.25 attack for 3,250 (2,000 at the base 2) and
+// defend for 1,500 at 1.5 (none at the base 0); 100 tanks at 7 with a finished
+// HeadQuarters keep the HQ curve, 7 x 4.5/3.5 = 9 apiece, so 900.
+func TestModdedStrengthReachesTheBattle(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("h", "Hosts")
+	e.Troopers, e.Turrets, e.Bombers, e.Tanks = 0, 0, 0, 0
+	e.Jets, e.Carriers = 1000, 10 // every jet carried, so all of them fly
+	if got := w.Offense(e); got != 2000 {
+		t.Fatalf("base offense %d, want 2000 (jet 2)", got)
+	}
+
+	w.Rules = BaseRules()
+	j := w.Rules.Units[Jet]
+	j.Offense, j.Defense = 325, 150
+	w.Rules.Units[Jet] = j
+	k := w.Rules.Units[Tank]
+	k.Offense = 700
+	w.Rules.Units[Tank] = k
+	if err := w.Rules.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if got := w.Offense(e); got != 3250 {
+		t.Errorf("offense with jets at 3.25 = %d, want 3250", got)
+	}
+	if got := w.Defense(e); got != 1500 {
+		t.Errorf("defense with jets at 1.5 = %d, want 1500", got)
+	}
+
+	e.Jets, e.Tanks, e.HQ = 0, 100, 100
+	if got := w.Offense(e); got != 900 {
+		t.Errorf("100 tanks at 7 with a finished HQ = %d, want 900", got)
+	}
+	if got := w.Defense(e); got != 450 {
+		t.Errorf("tank defense left at the base = %d, want 450", got)
+	}
+}
