@@ -84,13 +84,18 @@ func brainName(r *game.Rules) string {
 	return "built in"
 }
 
-// regionBrainName is how Diff names what decides r's region figures realm by
-// realm.
+// regionBrainName is how Diff names the region scripts r runs, in order.
 func regionBrainName(r *game.Rules) string {
-	if s, ok := r.RegionBrain.(*regionScript); ok {
-		return s.mod + "/" + RegionsFile + " (" + s.hash + ")"
+	var names []string
+	for _, b := range r.RegionBrains {
+		if s, ok := b.(*regionScript); ok {
+			names = append(names, s.mod+"/"+RegionsFile+" ("+s.hash+")")
+		}
 	}
-	return "the values every realm plays by"
+	if len(names) == 0 {
+		return "no script"
+	}
+	return strings.Join(names, ", then ")
 }
 
 // Values prints every value a mod can change, as a values.toml would set it.

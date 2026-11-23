@@ -313,7 +313,7 @@ func (m *Mod) Apply(r *game.Rules) error {
 		r.Pirates = m.pirates
 	}
 	if m.regions != nil {
-		r.RegionBrain = m.regions
+		r.RegionBrains = append(r.RegionBrains, m.regions)
 	}
 	if err := errors.Join(errs...); err != nil {
 		return fmt.Errorf("%s: %w", filepath.Join(m.Path, ValuesFile), err)

@@ -131,7 +131,7 @@ func TestDiffNamesTheRegionScript(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := "regions: the values every realm plays by -> lands/" + RegionsFile + " (" + m.Hash + ")"
+	want := "regions: no script -> lands/" + RegionsFile + " (" + m.Hash + ")"
 	if got := Diff(game.BaseRules(), r); len(got) != 1 || got[0] != want {
 		t.Errorf("Diff %q, want [%q]", got, want)
 	}
@@ -151,5 +151,49 @@ func TestRegionScriptSeesTheModsValues(t *testing.T) {
 	w, e := regionWorld(r, game.RegionMix{Desert: 10})
 	if got := w.FoodGrown(e); got != 1000 {
 		t.Errorf("food grown %d, want 1000 (10 deserts x 50 x 2)", got)
+	}
+}
+
+// Two mods' region scripts both take effect: each is given the rows the one
+// before it returned, so scripts that change different types combine, and a
+// later one sees and builds on an earlier one's figures.
+func TestRegionScriptsChainInModOrder(t *testing.T) {
+	data := t.TempDir()
+	writeMod(t, data, "farms", map[string]string{ManifestFile: manifest("farms"),
+		RegionsFile: "def regions(realm, rows):\n    return {\"desert\": {\"food_base\": 100}}\n"})
+	writeMod(t, data, "more-farms", map[string]string{ManifestFile: manifest("more-farms"),
+		RegionsFile: "def regions(realm, rows):\n    return {\"desert\": {\"food_base\": rows[\"desert\"].food_base + 50}, \"urban\": {\"food_base\": 10}}\n"})
+	r, _, err := Resolve(data, []string{"farms", "more-farms"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, e := regionWorld(r, game.RegionMix{Desert: 10, Urban: 10})
+	if got := w.IncomeThisTurn(e).FoodFrom(game.Desert); got != 1500 {
+		t.Errorf("desert food %d, want 1500 (10 x (100 + 50))", got)
+	}
+	if got := w.IncomeThisTurn(e).FoodFrom(game.Urban); got != 100 {
+		t.Errorf("urban food %d, want 100", got)
+	}
+}
+
+// A failing script drops only its own changes: the scripts before it still
+// count.
+func TestAFailingRegionScriptKeepsTheOnesBefore(t *testing.T) {
+	captureWarnings(t)
+	data := t.TempDir()
+	writeMod(t, data, "farms", map[string]string{ManifestFile: manifest("farms"), RegionsFile: desertFood})
+	writeMod(t, data, "broken", map[string]string{ManifestFile: manifest("broken"),
+		RegionsFile: "def regions(realm, rows):\n    return {\"urban\": {\"food_base\": 10}, \"desert\": {\"gold_share\": 500}}\n"})
+	r, _, err := Resolve(data, []string{"farms", "broken"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, e := regionWorld(r, game.RegionMix{Desert: 10, Urban: 10})
+	b := w.IncomeThisTurn(e)
+	if got := b.FoodFrom(game.Desert); got != 1000 {
+		t.Errorf("desert food %d, want farms' 1000", got)
+	}
+	if got := b.FoodFrom(game.Urban); got != 0 {
+		t.Errorf("urban food %d, want none: the broken script's changes are dropped whole", got)
 	}
 }

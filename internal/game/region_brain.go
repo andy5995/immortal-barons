@@ -6,20 +6,22 @@ import (
 )
 
 // RegionBrain changes what a realm's regions do (#202). A mod supplies one
-// through Rules.RegionBrain; internal/mod runs it as a script, so this package
+// through Rules.RegionBrains; internal/mod runs it as a script, so this package
 // never sees the scripting language.
 //
-// Regions is given the realm and the rules every realm plays by (Rules.Regions,
-// values.toml applied), and returns the rows this realm's land plays by
-// instead. The engine asks wherever it needs a region figure — the income
+// Brains chain, in mod order. The first is given the realm and the rules every
+// realm plays by (Rules.Regions, values.toml applied); each after it is given
+// the rows the one before returned. So two mods that change different region
+// types both take effect, and where they change the same figure the later mod
+// wins, as it does in values.toml. The engine asks wherever it needs a region figure — the income
 // report, a projection on a screen, the turn itself — so the answer must
 // depend on nothing but its arguments: a brain that drew random numbers would
 // show a player one figure and credit another. RegionView holds no gold for
 // the same reason, since gold moves within a turn.
 //
 // When Regions fails, or returns a row outside the limits (RegionRules.Validate),
-// the game calls Failed with the reason and that realm plays the rules every
-// realm plays by.
+// the game calls Failed with the reason and passes on the rows that brain was
+// given, so a failing brain drops only its own changes.
 type RegionBrain interface {
 	Regions(v RegionView, rows map[*Region]RegionRules) (map[*Region]RegionRules, error)
 	Failed(err error)
@@ -39,17 +41,22 @@ type RegionView struct {
 	TurnsPlayed int
 }
 
-// regionsOf is the region rules e's land plays by: the world's, or a brain's
-// answer for e when the rules carry one.
+// regionsOf is the region rules e's land plays by: the world's, as each of
+// the rules' brains in turn changes them for e.
 func (w *World) regionsOf(e *Empire) map[*Region]RegionRules {
 	r := w.rules()
-	if r.RegionBrain == nil {
-		return r.Regions
+	rows := r.Regions
+	if len(r.RegionBrains) == 0 {
+		return rows
 	}
-	rows, err := askRegionBrain(r.RegionBrain, w.regionView(e), r.Regions)
-	if err != nil {
-		r.RegionBrain.Failed(err)
-		return r.Regions
+	v := w.regionView(e)
+	for _, b := range r.RegionBrains {
+		out, err := askRegionBrain(b, v, rows)
+		if err != nil {
+			b.Failed(err)
+			continue
+		}
+		rows = out
 	}
 	return rows
 }
