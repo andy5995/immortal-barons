@@ -1,0 +1,176 @@
+package mod
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
+)
+
+// writeMod creates <dataDir>/mods/<name> holding the given files.
+func writeMod(t *testing.T, dataDir, name string, files map[string]string) string {
+	t.Helper()
+	dir := filepath.Join(dataDir, Dir, name)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for f, body := range files {
+		if err := os.WriteFile(filepath.Join(dir, f), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return dir
+}
+
+func manifest(name string) string {
+	return "name = \"" + name + "\"\nversion = \"1.0\"\n"
+}
+
+func TestBaseRulesAreWithinTheModLimits(t *testing.T) {
+	// A base value outside the limits would make every mod fail to load.
+	if err := game.BaseRules().Validate(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestApplyOverridesOnlyWhatItNames(t *testing.T) {
+	dir := writeMod(t, t.TempDir(), "cheap-tanks", map[string]string{
+		ManifestFile: manifest("cheap-tanks"),
+		ValuesFile: `
+# comments are allowed, which is why the format is TOML
+[units.tank]
+cost = 400
+networth = 1.5
+upkeep = 0.3
+`,
+	})
+	_, r, err := Check(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := strings.Join(Diff(game.BaseRules(), r), "\n")
+	want := "tank.cost: 500 -> 400\ntank.networth: 1.25 -> 1.5\ntank.upkeep: 0.6 -> 0.3"
+	if got != want {
+		t.Errorf("diff:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestReadRefusesWhatItDoesNotKnow(t *testing.T) {
+	cases := []struct {
+		name  string
+		files map[string]string
+		want  string
+	}{
+		{"misspelled key", map[string]string{ValuesFile: "[units.tank]\ncots = 1\n"}, "units.tank.cots: unknown key"},
+		{"unknown unit", map[string]string{ValuesFile: "[units.dragon]\ncost = 1\n"}, "units.dragon: not a unit"},
+		{"unused file", map[string]string{"brain.star": "x"}, "brain.star is not a file"},
+		{"too many places", map[string]string{ValuesFile: "[units.tank]\nupkeep = 0.25\n"}, "more decimal places than 0.1 allows"},
+		{"out of range", map[string]string{ValuesFile: "[units.tank]\ncost = 0\n"}, "cost 0 is outside"},
+		{"wraps an int32", map[string]string{ValuesFile: "[units.tank]\ncost = 5000000000\n"}, "out of range"},
+		{"control character", map[string]string{ManifestFile: manifest("m") + "label = \"a\\u001b[2J\"\n"}, "may not hold control characters"},
+		{"narrow band", map[string]string{ValuesFile: "[units.tank]\nprice_low = 2200\n"}, "price_high must be at least"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			files := map[string]string{ManifestFile: manifest("m")}
+			for k, v := range c.files {
+				files[k] = v
+			}
+			_, _, err := Check(writeMod(t, t.TempDir(), "m", files))
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Errorf("err = %v, want one containing %q", err, c.want)
+			}
+		})
+	}
+}
+
+func TestManifestMustNameItsFolder(t *testing.T) {
+	_, _, err := Check(writeMod(t, t.TempDir(), "a", map[string]string{ManifestFile: manifest("b")}))
+	if err == nil || !strings.Contains(err.Error(), "must match the folder") {
+		t.Errorf("err = %v", err)
+	}
+}
+
+func TestResolveAppliesInOrderLaterWins(t *testing.T) {
+	data := t.TempDir()
+	writeMod(t, data, "one", map[string]string{ManifestFile: manifest("one"), ValuesFile: "[units.tank]\ncost = 400\n[units.jet]\ncost = 100\n"})
+	writeMod(t, data, "two", map[string]string{ManifestFile: manifest("two"), ValuesFile: "[units.tank]\ncost = 600\n"})
+	r, refs, err := Resolve(data, []string{"one", "two"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Units[game.Tank].Cost; got != 600 {
+		t.Errorf("tank cost %d, want the later mod's 600", got)
+	}
+	if got := r.Units[game.Jet].Cost; got != 100 {
+		t.Errorf("jet cost %d, want the earlier mod's 100 kept", got)
+	}
+	if len(refs) != 2 || refs[0].Name != "one" || refs[1].Name != "two" || refs[0].Hash == "" {
+		t.Errorf("refs = %+v", refs)
+	}
+	if _, _, err := Resolve(data, []string{"../one"}); err == nil {
+		t.Error("a name with a path in it must be refused")
+	}
+}
+
+// A mod edited or removed mid-game is reported, and the game keeps playing the
+// values it was reset with.
+func TestRestoreKeepsTheOldValuesOfAnEditedMod(t *testing.T) {
+	data := t.TempDir()
+	dir := writeMod(t, data, "m", map[string]string{ManifestFile: manifest("m"), ValuesFile: "[units.tank]\ncost = 400\n"})
+	_, refs, err := Resolve(data, []string{"m"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, warnings, err := Restore(data, refs)
+	if err != nil || len(warnings) != 0 || r.Units[game.Tank].Cost != 400 {
+		t.Fatalf("an unchanged mod restores silently: warnings %v, err %v", warnings, err)
+	}
+
+	if err := os.WriteFile(filepath.Join(dir, ValuesFile), []byte("[units.tank]\ncost = 450\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r, warnings, err = Restore(data, refs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Units[game.Tank].Cost != 400 {
+		t.Errorf("tank cost %d, want the value the game was reset with, 400", r.Units[game.Tank].Cost)
+	}
+	if len(warnings) != 1 || !strings.Contains(warnings[0], "keeps the mod's old values") {
+		t.Errorf("warnings = %v", warnings)
+	}
+
+	if err := os.RemoveAll(dir); err != nil {
+		t.Fatal(err)
+	}
+	r, warnings, err = Restore(data, refs)
+	if err != nil {
+		t.Fatalf("a removed mod must still restore: %v", err)
+	}
+	if got := r.Units[game.Tank].Cost; got != 400 {
+		t.Errorf("a removed mod: tank cost %d, want the saved copy's 400", got)
+	}
+	if len(warnings) != 1 {
+		t.Errorf("a removed mod: warnings %v, want one", warnings)
+	}
+}
+
+// What -print-base-mod writes reads back as a mod that changes nothing, so
+// every key it prints is one a values file accepts, in a form it accepts.
+func TestBaseValuesReadBackUnchanged(t *testing.T) {
+	text := Values(game.BaseRules(), "header\nsecond line")
+	dir := writeMod(t, t.TempDir(), "m", map[string]string{ManifestFile: manifest("m"), ValuesFile: text})
+	_, r, err := Check(dir)
+	if err != nil {
+		t.Fatalf("%v\n%s", err, text)
+	}
+	if diff := Diff(game.BaseRules(), r); len(diff) != 0 {
+		t.Errorf("the base values read back changed: %v", diff)
+	}
+	if !strings.Contains(text, "[units.tank]") || !strings.Contains(text, "upkeep = 0.6") {
+		t.Errorf("unexpected output:\n%s", text)
+	}
+}

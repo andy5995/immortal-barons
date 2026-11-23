@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/BurntSushi/toml v1.6.0
 	github.com/gdamore/tcell/v2 v2.13.10
 	github.com/rivo/tview v0.42.0
 	golang.org/x/sys v0.50.0

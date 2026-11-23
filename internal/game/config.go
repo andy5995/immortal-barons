@@ -278,6 +278,11 @@ type Config struct {
 	// Per-board (not part of the league ruleset).
 	DataDir string
 	IBBS    bool // participate in inter-BBS play (gates the interplanetary menus)
+	// Mods are the folders under <DataDir>/mods the NEXT reset applies, in
+	// order, a later one winning (#202). The game in progress plays the mods
+	// World.Mods recorded at its reset, never this list. A league board refuses
+	// them until a reset packet can carry them to every member.
+	Mods []string `json:",omitempty"`
 
 	// This board's own identity and packet directories. Stored in bbs.cfg, not
 	// config.json — a Coordinator's broadcast rewrites config.json, and these are

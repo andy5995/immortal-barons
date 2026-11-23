@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"math"
 	"math/rand"
 	"reflect"
 	"sync"
@@ -138,9 +139,12 @@ type World struct {
 	Empires []*Empire
 	Prices  Prices
 	Config  Config `json:"-"` // authoritative copy is config.json; Load sets this
-	// Rules are the values this world plays by; nil plays the base rules
-	// (rules.go).
-	Rules      *Rules `json:"-"`
+	// Rules are the values this world plays by, resolved from Mods when the
+	// world is loaded; nil plays the base rules (rules.go). Mods names the mods
+	// the game was reset with, which outlive a timed end of game and change
+	// only at the next sysop reset (#202).
+	Rules      *Rules   `json:"-"`
+	Mods       []ModRef `json:",omitempty"`
 	GameDay    int
 	InvestRate int // tenths of a percent per day, floats each daily maintenance
 	// FoodMarketSupply is the shared planet-wide pool of food available to buy
@@ -559,12 +563,14 @@ func (w *World) ResetForLeague(startDate string) {
 // creation (NewWorldSeed) and by every reset. Add any new creation-time world
 // default here, not in NewWorldSeed.
 func (w *World) initFreshGame() {
+	mods := w.Mods
 	v := reflect.ValueOf(w).Elem()
 	for i := range v.NumField() {
 		if f := v.Type().Field(i); f.IsExported() && f.Tag.Get("json") != "-" {
 			v.Field(i).SetZero()
 		}
 	}
+	w.Mods = mods
 	w.Prices = w.defaultPrices()
 	w.InvestRate = DefaultInvestRate
 	w.FoodMarketSupply = FoodMarketDailySupply
@@ -621,7 +627,9 @@ func planetTotals(w *World) PlanetTotals {
 		}
 		t.Population += e.People
 		t.Regions += e.Land
-		t.NetWorth += w.NetWorth(e)
+		// Summed wide and held at the 32-bit ceiling, like NetWorth itself:
+		// two realms at that ceiling would wrap an int sum on a 32-bit door.
+		t.NetWorth = int(min(int64(t.NetWorth)+int64(w.NetWorth(e)), math.MaxInt32))
 	}
 	return t
 }
@@ -815,5 +823,7 @@ func (w *World) NetWorth(e *Empire) int {
 			thou += int64(*g.Force(&away)) * w.unit(g).NetWorth
 		}
 	}
-	return int(thou / 1000)
+	// Held at the 32-bit ceiling rather than wrapped: a mod can weight a unit
+	// heavily enough for an ordinary army to pass it on a 32-bit door.
+	return int(min(thou/1000, math.MaxInt32))
 }

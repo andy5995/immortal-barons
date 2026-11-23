@@ -184,7 +184,8 @@ func gameSetup(s session.Session, w *ctx) Result {
 	pair("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate),
 		"Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
 	var investRate int
-	w.Read(func() { investRate = w.World.InvestRate })
+	var mods []game.ModRef
+	w.Read(func() { investRate, mods = w.World.InvestRate, w.World.Mods })
 	pair("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate),
 		"Investment rate", investRateStr(s, c, investRate))
 	row("Food market", foodMarketStr(s, c))
@@ -212,6 +213,18 @@ func gameSetup(s session.Session, w *ctx) Result {
 		"Inter-BBS play", onOffStr(c.IBBS))
 	if c.GameStartDate != "" || c.JoinDate != "" {
 		pair("Game starts", orDash(c.GameStartDate), "Joining closes", orDash(c.JoinDate))
+	}
+
+	// A modded game is not the original, and a player comparing notes with
+	// another board should be able to see why the numbers differ (#202).
+	if len(mods) > 0 {
+		group("Mods")
+		// Printed as the sysop wrote them: row would pass the label through
+		// the catalogs, and neither field has a width limit of its own.
+		for _, m := range mods {
+			fmt.Fprintf(s, "  %s\n", cell(fitColumn(w.Term, m.DisplayName(), labelW),
+				fitColumn(w.Term, m.Version, setupRule-labelW-5), 0))
+		}
 	}
 
 	if c.IBBS {

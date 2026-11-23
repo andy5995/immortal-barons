@@ -273,6 +273,9 @@ func Load(cfg game.Config) (*game.World, error) {
 		return nil, err
 	}
 	repair(w, cfg)
+	if err := loadMods(w, cfg); err != nil {
+		return nil, err
+	}
 	if err := loadLedger(w, cfg, data); err != nil {
 		return nil, err
 	}

@@ -114,3 +114,28 @@ func TestGameSetupPanelsFitTheScreen(t *testing.T) {
 		}
 	}
 }
+
+// A modded game says so, naming each mod, and an unmodded one shows no group.
+func TestGameSetupListsTheMods(t *testing.T) {
+	f := &fakeSession{keys: []rune("  ")}
+	w := newWorld()
+	gameSetup(f, w)
+	if strings.Contains(f.out.String(), "Mods") {
+		t.Errorf("an unmodded game shows a Mods group:\n%s", f.out.String())
+	}
+
+	f = &fakeSession{keys: []rune("  ")}
+	w.Mods = []game.ModRef{{Name: "cheap-tanks", Version: "1.0", Label: "Cheap Tanks"}, {Name: "bare", Version: strings.Repeat("9", 100)}}
+	gameSetup(f, w)
+	out := stripANSI(f.out.String())
+	for _, want := range []string{"Mods", "Cheap Tanks", "1.0", "bare", "Paused"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("Game Setup missing %q:\n%s", want, out)
+		}
+	}
+	for _, ln := range strings.Split(out, "\n") {
+		if n := len([]rune(strings.TrimRight(ln, " "))); n > 80 {
+			t.Errorf("a %d-column line: %q", n, ln)
+		}
+	}
+}

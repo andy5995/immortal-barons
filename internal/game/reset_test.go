@@ -71,6 +71,7 @@ func TestResetErasesEverythingSaved(t *testing.T) {
 	// The filled rule set would price the reset's fresh market; a fresh world
 	// plays the base rules, which is what nil means.
 	w.Rules = nil
+	mods := w.Mods
 	unsaved := map[string]any{}
 	for i := range v.NumField() {
 		if f := v.Type().Field(i); f.IsExported() && f.Tag.Get("json") == "-" {
@@ -89,6 +90,14 @@ func TestResetErasesEverythingSaved(t *testing.T) {
 			continue
 		}
 		got := after.Field(i).Interface()
+		if f.Name == "Mods" {
+			// A game's mods outlive a timed end of game; only a sysop reset,
+			// which sets them before calling Reset, changes them (#202).
+			if !reflect.DeepEqual(got, mods) {
+				t.Errorf("Mods changed in a reset: %v, want %v kept", got, mods)
+			}
+			continue
+		}
 		if want, ok := unsaved[f.Name]; ok {
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("%s is not in the save, so a reset must leave it alone, but it changed", f.Name)

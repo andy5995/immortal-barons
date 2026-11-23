@@ -29,6 +29,16 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		return err
 	}
 	defer lock.Release()
+	// The mods this reset will apply are checked before the backup, so a
+	// refused reset leaves the previous world.json.bak alone. The league flag
+	// is the one the reset will use: -reset and -ibbs-reset set it themselves.
+	pre := cfg
+	if !fromConfig {
+		pre.IBBS = league != nil
+	}
+	if err := store.CheckResetMods(pre); err != nil {
+		return err
+	}
 	backedUp, err := store.BackupWorld(cfg)
 	if err != nil {
 		return err
@@ -37,11 +47,12 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	switch {
 	case errors.Is(err, store.ErrNoWorld):
 		w, err = store.NewGame(cfg) // first-ever reset: no prior world to load
-	case isMalformedWorld(err):
+	case isMalformedWorld(err), errors.Is(err, store.ErrWorldMods):
 		// A reset is the sysop's way out of a world the game can no longer read,
-		// so refusing to run because of what it is about to discard leaves them
-		// stuck. The old file survives as world.json.bak, backed up just above.
-		fmt.Printf("\nThe existing world could not be read (%v).\nStarting from a fresh one; the unreadable file was kept as world.json.bak.\n", err)
+		// or whose mods no longer load, so refusing to run because of what it is
+		// about to discard leaves them stuck. The old file survives as
+		// world.json.bak, backed up just above.
+		fmt.Printf("\nThe existing world could not be loaded (%v).\nStarting from a fresh one; the old file was kept as world.json.bak.\n", err)
 		w, err = store.NewGame(cfg)
 	}
 	if err != nil {
@@ -55,11 +66,15 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 
 	if fromConfig {
 		w.Config = cfg // keep the current config.json untouched
+		if err := store.ApplyResetMods(w, w.Config); err != nil {
+			return err
+		}
 		w.Reset()
 		if err := store.Save(w, cfg); err != nil {
 			return err
 		}
 		fmt.Println("\nWorld cleared and re-seeded using the current config.json.")
+		printMods(w)
 		if backedUp {
 			fmt.Println("The previous world was backed up to world.json.bak.")
 		}
@@ -73,6 +88,9 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	// config.json on exit (S); Q cancels the whole reset.
 	def := game.DefaultConfig()
 	def.DataDir = cfg.DataDir
+	// The editor has no page for mods yet, so the list carries over from the
+	// current config.json rather than being reset with everything else (#202).
+	def.Mods = cfg.Mods
 	// Whether this board is in a league is chosen by which reset command was run,
 	// not by a setting: it decides which questions the editor asks, and BRE's own
 	// model is that the ruleset is fixed at reset and never edited mid-game.
@@ -98,6 +116,11 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		}
 	}
 	w.Config = def
+	// Before the editor, so a mod that will not load is reported before the
+	// sysop has spent time on the settings.
+	if err := store.ApplyResetMods(w, w.Config); err != nil {
+		return err
+	}
 
 	// A board named on the command line has said everything the editor would
 	// ask that is its own to answer, so it is not opened.
@@ -167,6 +190,7 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		return err
 	}
 	fmt.Println("\nGame started with the new settings (config reset to defaults). Empires cleared and AI re-seeded.")
+	printMods(w)
 	if backedUp {
 		fmt.Println("The previous world was backed up to world.json.bak.")
 	}
@@ -263,4 +287,16 @@ func archiveLeftoverPackets(dir string) (int, string) {
 		moved++
 	}
 	return moved, archive
+}
+
+// printMods names the mods a reset applied, since the editor does not show
+// them and a sysop should not learn of a carried-over mod from a player.
+func printMods(w *game.World) {
+	if len(w.Mods) == 0 {
+		return
+	}
+	fmt.Println("Mods in play:")
+	for _, m := range w.Mods {
+		fmt.Printf("  %s %s\n", m.Name, m.Version)
+	}
 }

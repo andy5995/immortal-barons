@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 // Every figure a mod can set reaches the code that uses it. A read site left on
 // a constant would play the base value under a mod and pass every other test.
@@ -14,6 +17,9 @@ func TestModdedRulesReachTheEngine(t *testing.T) {
 	u.UpkeepTenths = 60 // ten times
 	u.PriceLo, u.PriceHi, u.PriceStep = 5000, 6000, 10
 	modded.Rules.Units[Tank] = u
+	if err := modded.Rules.Validate(); err != nil {
+		t.Fatal(err)
+	}
 	modded.Reset() // prices the fresh market under the rules
 
 	if got := *Tank.Stored(&modded.Prices); got != 5500 {
@@ -53,5 +59,36 @@ func TestModdedRulesReachTheEngine(t *testing.T) {
 		if p := *Tank.Stored(&em.Prices); p < 5000 || p > 6000 {
 			t.Fatalf("tank price walked to %d, outside the modded band", p)
 		}
+	}
+}
+
+// Net worth is held at the 32-bit ceiling instead of wrapping when a mod
+// weights a unit heavily, so a 32-bit door ranks a large realm as the largest.
+func TestNetWorthHoldsAtTheCeiling(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Rules = BaseRules()
+	u := w.Rules.Units[Trooper]
+	u.NetWorth = ModUnitNetWorthMax
+	w.Rules.Units[Trooper] = u
+	e := w.AddHuman("h", "Heavy")
+	e.Troopers = 1_000_000 // 10 billion of net worth at 10,000 apiece
+	if got := w.NetWorth(e); got != math.MaxInt32 {
+		t.Errorf("NetWorth = %d, want it held at %d", got, math.MaxInt32)
+	}
+}
+
+// The planet's total net worth is held at the same ceiling, so two realms at it
+// do not wrap the daily bulletin on a 32-bit door.
+func TestPlanetNetWorthHoldsAtTheCeiling(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Rules = BaseRules()
+	u := w.Rules.Units[Trooper]
+	u.NetWorth = ModUnitNetWorthMax
+	w.Rules.Units[Trooper] = u
+	for _, name := range []string{"a", "b"} {
+		w.AddHuman(name, "Heavy "+name).Troopers = 1_000_000
+	}
+	if got := planetTotals(w).NetWorth; got != math.MaxInt32 {
+		t.Errorf("planet net worth = %d, want it held at %d", got, math.MaxInt32)
 	}
 }

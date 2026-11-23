@@ -209,3 +209,51 @@ func TestIBBSResetLeavesAnExistingBoardConfigAlone(t *testing.T) {
 		t.Errorf("the board lost its own settings: %+v", after)
 	}
 }
+
+// A world whose saved mods no longer load can still be reset, and a reset
+// refused for its own mods leaves the previous backup alone (#202).
+func TestResetGetsPastModsThatNoLongerLoad(t *testing.T) {
+	dir := t.TempDir()
+	cfg, err := store.LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := store.NewGame(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A saved copy a later version would reject: cost 0 is under the limit.
+	w.Mods = []game.ModRef{{Name: "m", Version: "1", Hash: "x", Files: map[string]string{
+		"mod.toml":    "name = \"m\"\nversion = \"1\"\n",
+		"values.toml": "[units.tank]\ncost = 0\n",
+	}}}
+	if err := store.Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Load(cfg); err == nil {
+		t.Fatal("the broken saved mod should stop a load")
+	}
+
+	// A reset asked to apply a mod that is not there is refused before the
+	// backup is taken.
+	bad := cfg
+	bad.Mods = []string{"missing"}
+	if err := runReset(bad, true, nil, charsetUTF8, true); err == nil {
+		t.Fatal("a reset naming a missing mod must be refused")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "world.json.bak")); !os.IsNotExist(err) {
+		t.Errorf("a refused reset wrote world.json.bak (stat: %v)", err)
+	}
+
+	var runErr error
+	out := captureStdout(t, func() { runErr = runReset(cfg, true, nil, charsetUTF8, true) })
+	if runErr != nil {
+		t.Fatalf("runReset: %v (output: %s)", runErr, out)
+	}
+	if !strings.Contains(out, "Starting from a fresh one") {
+		t.Errorf("output does not say the old world was set aside:\n%s", out)
+	}
+	if loaded, err := store.Load(cfg); err != nil || len(loaded.Mods) != 0 {
+		t.Errorf("after the reset: mods %v, err %v", loaded, err)
+	}
+}

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/mod"
 )
 
 func cfgIn(dir string) game.Config {
@@ -343,6 +344,14 @@ func TestSaveLoadRoundTripAllFields(t *testing.T) {
 	e := w.AddHuman("khan", "Khan's Realm")
 	fillValue(reflect.ValueOf(e).Elem())
 	fillValue(reflect.ValueOf(w).Elem())
+	// Load verifies the mods a world records against their folders, so the
+	// filled reference has to name a real one.
+	writeTestMod(t, cfg.DataDir, "x", "")
+	_, refs, err := mod.Resolve(cfg.DataDir, []string{"x"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w.Mods = refs
 	e.Land = e.Regions.Total() // EnsureRegions reconciles the mix against Land on load
 	// SDI is likewise derived on load, from SDIFunding — which needs a value big
 	// enough to show as at least 1%, or the derived field reads as lost.

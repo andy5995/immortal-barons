@@ -1090,6 +1090,9 @@ var perBoardConfigFields = map[string]string{
 	"PirateNews":     "whether pirate raids reach this board's news feed",
 	"OnFault":        "a command on THIS machine, run when a planetary run meets a new transport fault (#187)",
 	"HeldPacketDays": "how long THIS board keeps packets it set aside; its own disk and its own patience with a link",
+	// A rule, but one a league board refuses outright until the reset packet
+	// can carry a mod to every member (#202), so it is never broadcast yet.
+	"Mods": "the mods this board's next reset applies; refused on a league board",
 }
 
 // TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config

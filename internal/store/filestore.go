@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -82,6 +83,7 @@ func (fs *FileStore) reload() error {
 	if err := json.Unmarshal(data, nw); err != nil {
 		return err
 	}
+	mods := fs.w.Mods
 	copySaved(fs.w, nw)
 	// Today is the session's own date and is not saved, so another process's
 	// maintenance -- a -maint timer, or a caller logging in -- can move the game
@@ -98,6 +100,13 @@ func (fs *FileStore) reload() error {
 		}
 	}
 	repair(fs.w, fs.cfg)
+	// Only a reset changes the mods, so the rules are resolved again only when
+	// another process has reset the world under this one.
+	if !slices.EqualFunc(mods, fs.w.Mods, func(a, b game.ModRef) bool { return a.Hash == b.Hash }) {
+		if err := loadMods(fs.w, fs.cfg); err != nil {
+			return err
+		}
+	}
 	// The ledger is not in world.json (copySaved leaves it alone), so it is read
 	// from its own file: another node may have numbered or applied packets since.
 	if err := loadLedger(fs.w, fs.cfg, data); err != nil {

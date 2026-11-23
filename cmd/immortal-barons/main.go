@@ -85,6 +85,15 @@ func main() {
 		return
 	}
 
+	if *o.printBaseMod {
+		runPrintBaseMod()
+		return
+	}
+	if *o.checkMod != "" {
+		exitOn("-check-mod", runCheckMod(*o.checkMod))
+		return
+	}
+
 	if n := btoi(*o.utf8) + btoi(*o.cp437) + btoi(*o.asciiOut); n > 1 {
 		fmt.Fprintln(os.Stderr, "immortal-barons: use only one of -utf8, -cp437 and -ascii")
 		os.Exit(2)
