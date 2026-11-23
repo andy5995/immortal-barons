@@ -405,7 +405,9 @@ the four `bbs.cfg` lines, the six header tokens and the stylesheet. A new
 rather than the page — `sitePages` and the linker map (`internal/docsite`), the
 nav in `buildNav`, the fixture in `assemble_test.go` (its nav check fails on a
 page it cannot find), and `scripts/build-archives.sh`, which no `--include=*.go`
-grep will ever match.
+grep will ever match. NOT the Homebrew formula: it installs from the last
+release's tarball, so the page joins its doc list only when the pin moves
+(`docs/dev/releasing.md`); adding it early broke the formula's CI job once.
 
 `docs/dev/releasing.md` is the release checklist — the translation passes, the
 ChangeLog stamp, what to verify, and the **version bump after publishing**,
