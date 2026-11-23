@@ -359,23 +359,23 @@ func TestAIThreatResponseBySkill(t *testing.T) {
 	}
 	// A rival just strong enough to win: the sharp baron sees it, the dull one not.
 	w, sharp, bully := mk(AISkillSharp)
-	bully.Troopers = w.effectiveDefense(sharp) + 1
+	bully.Troopers = int(w.effectiveDefense(sharp) + 1)
 	if !w.aiUnderThreat(sharp) {
 		t.Error("a sharp baron should react as soon as a rival can beat it")
 	}
 	w2, dull, bully2 := mk(AISkillDull)
-	bully2.Troopers = w2.effectiveDefense(dull) + 1
+	bully2.Troopers = int(w2.effectiveDefense(dull) + 1)
 	if w2.aiUnderThreat(dull) {
 		t.Error("a dull baron should not yet react to a rival only just ahead")
 	}
-	bully2.Troopers = w2.effectiveDefense(dull)*AIDullThreatFactor + 1
+	bully2.Troopers = int(w2.effectiveDefense(dull)*AIDullThreatFactor + 1)
 	if !w2.aiUnderThreat(dull) {
 		t.Error("a dull baron should react once badly outgunned")
 	}
 
 	// An ally is never a threat, or defense pacts would be pointless.
 	w3, e, ally := mk(AISkillSharp)
-	ally.Troopers = w3.effectiveDefense(e) * 100
+	ally.Troopers = int(w3.effectiveDefense(e) * 100)
 	w3.ProposeTreaty(e, ally, "Full Defense Alliance")
 	w3.AcceptTreaty(ally, e.Name, "Full Defense Alliance")
 	if w3.aiUnderThreat(e) {
@@ -421,7 +421,7 @@ func TestThreatResponseReachesBuildForces(t *testing.T) {
 		e.Gold = 50_000_000
 		bully := w.AddHuman("b", "Bully")
 		if threatened {
-			bully.Troopers = w.effectiveDefense(e) * 10
+			bully.Troopers = int(w.effectiveDefense(e) * 10)
 		} else {
 			bully.Troopers = 0
 		}

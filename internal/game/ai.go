@@ -103,9 +103,11 @@ func aiWarMargin(profile string) int {
 
 // effectiveDefense is a realm's total defensive strength as the battle math
 // sees it: its unit defense plus the per-region land bonus. The AI uses this to
-// judge whether a target is winnable (#36).
-func (w *World) effectiveDefense(e *Empire) int {
-	return w.Defense(e) + e.Land*LandDefenseBonus
+// judge whether a target is winnable (#36). It is int64 because the callers
+// scale it by a margin, and a defense near the 32-bit limit would wrap on the
+// 32-bit door builds.
+func (w *World) effectiveDefense(e *Empire) int64 {
+	return int64(w.Defense(e)) + int64(e.Land)*LandDefenseBonus
 }
 
 // aiWageWar lets an AI strike the weakest valid target when it is clearly
@@ -126,15 +128,16 @@ func (w *World) aiWageWar(e *Empire) {
 		return // Max Local Attacks/Day binds a computer baron as it binds a player
 	}
 	var target *Empire
+	var targetDef int64
 	for _, t := range w.Targets(e) {
-		if target == nil || w.effectiveDefense(t) < w.effectiveDefense(target) {
-			target = t
+		if d := w.effectiveDefense(t); target == nil || d < targetDef {
+			target, targetDef = t, d
 		}
 	}
 	if target == nil {
 		return
 	}
-	if w.Offense(e) > w.effectiveDefense(target)*margin/100 {
+	if int64(w.Offense(e)) > w.effectiveDefense(target)*int64(margin)/100 {
 		// No pre-battle covert strike here any more: an agent sent now lands at
 		// the NEXT daily maintenance, so it can no longer soften the target of
 		// the attack being launched in this turn. aiCovertOps already demoralizes
@@ -301,7 +304,7 @@ func (w *World) aiCovertOps(e *Empire) {
 	// Revolts are the cheaper op and hit income through popular support;
 	// demoralizing is the pre-battle one and is reserved for a realm this AI
 	// could actually follow up against.
-	if spare >= CostDemoralizeForces && w.Offense(e) > w.effectiveDefense(target) {
+	if spare >= CostDemoralizeForces && int64(w.Offense(e)) > w.effectiveDefense(target) {
 		w.DemoralizeForces(e, target)
 		return
 	}
@@ -316,9 +319,10 @@ func (w *World) aiCovertOps(e *Empire) {
 // meaningless.
 func (w *World) aiCovertTarget(e *Empire) *Empire {
 	var weakest, strongest *Empire
+	var weakestDef int64
 	for _, t := range w.Targets(e) {
-		if weakest == nil || w.effectiveDefense(t) < w.effectiveDefense(weakest) {
-			weakest = t
+		if d := w.effectiveDefense(t); weakest == nil || d < weakestDef {
+			weakest, weakestDef = t, d
 		}
 		if strongest == nil || w.NetWorth(t) > w.NetWorth(strongest) {
 			strongest = t
@@ -449,7 +453,7 @@ func (w *World) aiUnderThreat(e *Empire) bool {
 		if other == e || !other.Alive || w.AreAllied(e, other) {
 			continue
 		}
-		if w.Offense(other) > trigger {
+		if int64(w.Offense(other)) > trigger {
 			return true
 		}
 	}
