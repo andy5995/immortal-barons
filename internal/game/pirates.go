@@ -1,7 +1,5 @@
 package game
 
-import ()
-
 // PirateFactions are the nine raidable pirate factions. Their strength is
 // randomized per game (NOT an easiest-to-hardest ladder), so any faction can
 // turn out the strongest.
@@ -162,6 +160,16 @@ func (w *World) maybePirateRaid(e *Empire) {
 	if !w.Config.Pirates || !e.Alive || e.Protection > 0 || len(w.Pirates) == 0 {
 		return
 	}
+	if b := w.rules().Pirates; b != nil {
+		orders, err := w.askPirateBrain(b, e)
+		if err == nil {
+			for _, o := range orders {
+				w.pirateRaid(o.Slot, e, pirateDraw{Spoil: o.Spoil, FromMarket: o.FromMarket})
+			}
+			return
+		}
+		b.Failed(err)
+	}
 	for {
 		faction := w.rng.Intn(len(w.Pirates))
 		if w.rng.Intn(PirateRaidChanceOutOf) <= pirateRaidChance(e) {
@@ -277,8 +285,13 @@ type PirateHit struct {
 // holdings are clamped to their caps. Bombers and carriers are never a target —
 // they are absent from BRE's name table.
 func (w *World) pirateRaidVictim(slot int, v *Empire) {
+	w.pirateRaid(slot, v, pirateSpoilWeights[w.rng.Intn(len(pirateSpoilWeights))])
+}
+
+// pirateRaid carries out one raid by faction slot on v, taking what draw names.
+// The built-in roll and a mod's PirateBrain both end here.
+func (w *World) pirateRaid(slot int, v *Empire, draw pirateDraw) {
 	p := &w.Pirates[slot]
-	draw := pirateSpoilWeights[w.rng.Intn(len(pirateSpoilWeights))]
 
 	// A market face drains the victim's listing instead of its inventory. Gold
 	// is not traded, so it has no market face.

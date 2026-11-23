@@ -35,7 +35,7 @@ whether or not a carrier could move them), and a HeadQuarters
 raises a tank's strength by the same proportion as without mods, up to 4.5/3.5
 of its `offense` and `defense` when finished. Technology and morale scale the
 total as usual. Pirate raids and the help an alliance sends use their own
-figures, which a mod does not change.
+figures, which `values.toml` does not change.
 
 The Maintenance Costs setting still applies to a mod's `upkeep`: None charges
 nothing, Low a quarter of it and High four times it.
@@ -84,7 +84,68 @@ price_high = 900
 Both files are [TOML](https://toml.io/). Lines starting with `#` are comments.
 
 The game reads a mod strictly. A key it does not know, a unit it does not know,
-or any other file in the folder is an error.
+or any file in the folder other than `mod.toml`, `values.toml` and
+`pirates.star` is an error.
+
+## Scripts
+
+A mod may also hold `pirates.star`, a script that decides pirate raids. It is
+written in [Starlark](https://github.com/bazelbuild/starlark), a small
+language that looks like Python. When two mods in the list have one, the later
+mod's script is used.
+
+The script must define `raid(realm, factions)`. Each turn a realm plays, after
+the usual checks (pirates are on, the realm is out of protection), the game
+calls `raid` instead of rolling for a raid itself.
+
+`realm` is the realm that is playing. Its fields are `name`, `regions`,
+`gold`, `troopers`, `jets`, `turrets`, `tanks` and `agents`, plus `market`,
+which holds the `troopers`, `jets`, `turrets`, `tanks` and `agents` the realm
+has for sale on the Trading Market.
+
+`factions` is a list of the pirate factions. Each has `slot` (its number,
+starting at 0), `name`, `regions`, `gold`, and the `troopers`, `jets`,
+`turrets`, `tanks` and `agents` it holds.
+
+`raid` returns a list of raids, or `[]` for none:
+
+```python
+def raid(realm, factions):
+    if realm.jets < 10000 or rand(5) != 0:
+        return []
+    return [{"faction": 1, "take": "jets", "market": False}]
+```
+
+`take` is one of `troopers`, `jets`, `turrets`, `tanks`, `gold` and `agents`.
+`market` is optional: `True` takes from the realm's Trading Market listing
+instead of what it holds. Gold is not sold there, so it cannot be taken that
+way. A realm may get up to 10 raids in one turn. Each raid takes as much as a
+normal raid would, and grants the faction regions the same way.
+
+Two built-in functions are added to Starlark's own:
+
+- `rand(n)` returns a whole number from 0 to n - 1, drawn from the game's own
+  random numbers.
+- `day()` returns the game day.
+
+A script cannot read files, the clock, or other scripts (`load` is not
+available). `while` loops and recursion are not allowed, and neither are
+`if` and `for` at the top level of the file: put them inside a function. Each call to `raid`
+may run for at most 1,000,000 steps, and so may the top level of the file
+when it loads.
+
+If the script fails in a turn, because of an error, by running out of steps,
+or by returning a raid the game does not allow, that realm's turn uses the
+normal pirate raid instead. The game writes the reason to its error output
+once each time the game runs, naming the mod.
+
+A script is as trusted as the rest of the mod folder. It runs inside the game
+itself, and nothing limits how much memory it uses, so install only scripts
+you have read.
+
+`-check-mod` loads the script and checks that it defines `raid` with two
+parameters. It cannot check what `raid` returns, because that depends on the
+game. Watch the error output once the game has played some turns.
 
 ## Checking a mod
 

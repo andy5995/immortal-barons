@@ -17,6 +17,8 @@ import (
 // every other number is still a constant.
 type Rules struct {
 	Units map[*Good]UnitRules
+	// Pirates, when set, decides pirate raids in place of the built-in roll.
+	Pirates PirateBrain
 }
 
 // UnitRules are one unit's figures. Units with no production or price walk

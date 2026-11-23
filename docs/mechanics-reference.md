@@ -1040,6 +1040,10 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   5% "second raid by a different faction" was a guess; neither shape is in the
   binary.
 
+  A mod's `pirates.star` can replace this decision: which faction raids, what
+  it takes, and how many times (`docs/mods.md`). How much each raid takes, the
+  faction's share and the regions it is granted stay as described here.
+
   **The faction's defense** (BINARY-VERIFIED, settled 2026-11-10) is
   `turrets/2 + troopers/3 + tanks`, built at `launch_pirate_raid +0x0a45` from
   slots +0x0c, +0x00 and +0x04, which the slot mapping in the starting-hoard

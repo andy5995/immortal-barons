@@ -9,8 +9,11 @@
 // A mod is read strictly. A key this version does not know is an error rather
 // than something skipped, because a misspelled key that was silently ignored
 // would leave a sysop believing a value changed when it had not. The same goes
-// for a file in the folder this version does not use: a mod carrying a script
-// would otherwise load here and play without it.
+// for a file in the folder this version does not use: a mod carrying one would
+// otherwise load here and play without it.
+//
+// A mod may also carry a script, pirates.star, which decides pirate raids
+// (script.go).
 package mod
 
 import (
@@ -37,8 +40,8 @@ import (
 // Dir is the folder under the data directory that holds the mods.
 const Dir = "mods"
 
-// The files a mod folder may hold. values.toml is optional: a mod that
-// changes nothing yet is still a mod.
+// The files a mod folder may hold, besides PiratesFile. values.toml is
+// optional: a mod that changes nothing yet is still a mod.
 const (
 	ManifestFile = "mod.toml"
 	ValuesFile   = "values.toml"
@@ -67,8 +70,9 @@ type Mod struct {
 	Hash string
 	// Files are the folder's contents, kept so a world can go on playing the
 	// mod exactly as it was reset with.
-	Files  map[string]string
-	values values
+	Files   map[string]string
+	values  values
+	pirates *pirateScript
 }
 
 // Ref is what a world records about m.
@@ -183,8 +187,8 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	var haveManifest bool
 	for _, name := range names {
 		data := []byte(files[name])
-		if name != ManifestFile && name != ValuesFile {
-			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s", path, name, ManifestFile, ValuesFile)
+		if name != ManifestFile && name != ValuesFile && name != PiratesFile {
+			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s and %s", path, name, ManifestFile, ValuesFile, PiratesFile)
 		}
 		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(data))
 		hash.Write(data)
@@ -221,6 +225,13 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		}
 	}
 	m.Hash = hex.EncodeToString(hash.Sum(nil)[:8])
+	if src, ok := files[PiratesFile]; ok {
+		s, err := newPirateScript(path, m.Name, m.Hash, src)
+		if err != nil {
+			return nil, err
+		}
+		m.pirates = s
+	}
 	return m, nil
 }
 
@@ -279,6 +290,9 @@ func (m *Mod) Apply(r *game.Rules) error {
 			}
 		}
 		r.Units[g] = u
+	}
+	if m.pirates != nil {
+		r.Pirates = m.pirates
 	}
 	if err := errors.Join(errs...); err != nil {
 		return fmt.Errorf("%s: %w", filepath.Join(m.Path, ValuesFile), err)

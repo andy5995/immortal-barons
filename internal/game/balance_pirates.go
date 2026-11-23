@@ -106,3 +106,9 @@ const (
 	PirateCapTurrets  = 400_000     // binary (0x61a80)
 	PirateCapTanks    = 200_000     // binary (0x30d40)
 )
+
+// ModPirateOrdersMax is the most raids a mod's pirate script (PirateBrain) may
+// order on one realm in one turn; an answer with more is refused. IB's own
+// number: the built-in roll's 1-in-10 retry makes even three raids in a turn
+// rare.
+const ModPirateOrdersMax = 10

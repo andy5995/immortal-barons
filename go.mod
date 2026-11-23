@@ -13,6 +13,7 @@ require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/gdamore/tcell/v2 v2.13.10
 	github.com/rivo/tview v0.42.0
+	go.starlark.net v0.0.0-20261021141710-4f4267fb140d
 	golang.org/x/sys v0.50.0
 )
 
