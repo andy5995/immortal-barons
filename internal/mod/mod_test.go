@@ -245,3 +245,73 @@ func TestBaseValuesPrintTheHQSection(t *testing.T) {
 		}
 	}
 }
+
+func TestModChangesRegionFigures(t *testing.T) {
+	dir := writeMod(t, t.TempDir(), "rich-coast", map[string]string{
+		ManifestFile: manifest("rich-coast"),
+		ValuesFile:   "[regions.coastal]\ngold_base = 4000\n\n[regions.desert]\nfood_base = 200\nfood_rate = 100\n",
+	})
+	_, r, err := Check(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Regions[game.Coastal].GoldBase; got != 4000 {
+		t.Errorf("coastal gold_base %d, want 4000", got)
+	}
+	if got := game.BaseRules().Regions[game.Coastal].GoldBase; got != 3750 {
+		t.Errorf("the base rules changed: coastal gold_base %d", got)
+	}
+	got := strings.Join(Diff(game.BaseRules(), r), "\n")
+	want := "coastal.gold_base: 3750 -> 4000\ndesert.food_base: 0 -> 200\ndesert.food_rate: 0 -> 100"
+	if got != want {
+		t.Errorf("diff:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestReadRefusesBadRegionSections(t *testing.T) {
+	cases := []struct{ name, values, want string }{
+		{"unknown region", "[regions.swamp]\ngold_base = 1\n", "regions.swamp: not a region type (coastal,"},
+		{"unknown key", "[regions.coastal]\ngold = 1\n", "regions.coastal.gold: unknown key (gold_base,"},
+		{"not whole", "[regions.coastal]\ngold_base = 1.5\n", "regions.coastal.gold_base: want a whole number"},
+		{"too high", "[regions.coastal]\ngold_base = 2000000\n", "coastal: gold_base 2000000 is outside 0 to 1000000"},
+		{"share over 100", "[regions.river]\nfood_share = 101\n", "river: food_share 101 is outside 0 to 100"},
+		{"negative", "[regions.urban]\nupkeep = -1\n", "urban: upkeep -1 is outside 0 to 100000"},
+		{"waste food", "[regions.waste]\nfood_base = 10\n", "waste: food_base must be 0"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, _, err := Check(writeMod(t, t.TempDir(), "m", map[string]string{ManifestFile: manifest("m"), ValuesFile: c.values}))
+			if err == nil || !strings.Contains(err.Error(), c.want) {
+				t.Errorf("err = %v, want one containing %q", err, c.want)
+			}
+		})
+	}
+	// Waste may still change its upkeep.
+	if _, _, err := Check(writeMod(t, t.TempDir(), "m", map[string]string{ManifestFile: manifest("m"), ValuesFile: "[regions.waste]\nupkeep = 0\n"})); err != nil {
+		t.Errorf("waste upkeep refused: %v", err)
+	}
+}
+
+func TestPrintedBaseValuesHoldTheRegionSections(t *testing.T) {
+	out := Values(game.BaseRules(), "base")
+	for _, want := range []string{
+		"[regions.coastal]", "gold_base = 3750", "support_share = 90",
+		"[regions.river]", "gold_share = 75", "food_share = 25",
+		"[regions.industrial]", "idle_gold_base = 2500", "unit_points = 2100",
+		"[regions.urban]", "pop_cap = 102", "upkeep = 913",
+		"[regions.waste]",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("-print-base-mod output has no %q", want)
+		}
+	}
+	// What it prints reads back as no change.
+	dir := writeMod(t, t.TempDir(), "same", map[string]string{ManifestFile: manifest("same"), ValuesFile: out})
+	_, r, err := Check(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d := Diff(game.BaseRules(), r); len(d) != 0 {
+		t.Errorf("the base values changed something: %v", d)
+	}
+}
