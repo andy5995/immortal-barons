@@ -15,7 +15,8 @@ Immortal Barons ChangeLog
     population room, upkeep, unit production, research), and give any type a
     yield it lacks, such as food from deserts
   * A mod can carry a Starlark script, regions.star, that changes those region
-    figures realm by realm
+    figures realm by realm; the region scripts of several mods combine
+  * A mod with a script names the script_api it was written for in mod.toml
   * The sysop panel lists each board's mods and runs -check-mod on them
 
 2026-11-11 (v0.2.9)
