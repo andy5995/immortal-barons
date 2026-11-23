@@ -20,11 +20,12 @@ const (
 	viewBoards = iota
 	viewInFlight
 	viewHeld
+	viewMods
 	viewRun
 	viewConfig
 )
 
-var viewNames = [...]string{"Boards", "In flight", "Held packets", "Run", "bbs.cfg"}
+var viewNames = [...]string{"Boards", "In flight", "Held packets", "Mods", "Run", "bbs.cfg"}
 
 // boardTab is one open data directory. Everything a background read or a
 // running command writes into it is guarded by ui.mu, which the frame holds.
@@ -47,8 +48,9 @@ type boardTab struct {
 	boards, inFlight, held *table
 	heldFilter             heldFilter
 
-	run runView
-	cfg cfgView
+	run  runView
+	cfg  cfgView
+	mods modsView
 }
 
 func newBoardTab(u *ui, dir string) *boardTab {
@@ -59,6 +61,7 @@ func newBoardTab(u *ui, dir string) *boardTab {
 	}
 	t.run.init(t)
 	t.cfg.init(t)
+	t.mods.init(t)
 	return t
 }
 
@@ -147,6 +150,8 @@ func (t *boardTab) layout(gtx layout.Context) layout.Dimensions {
 				return t.inFlight.layout(gtx, th, t.inFlightRows(), t.emptyText("Nothing is in flight from this board."))
 			case viewHeld:
 				return t.heldLayout(gtx)
+			case viewMods:
+				return t.mods.layout(gtx)
 			case viewConfig:
 				return t.cfg.layout(gtx)
 			default:

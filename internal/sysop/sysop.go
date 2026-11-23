@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/mod"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
@@ -43,6 +44,22 @@ type Snapshot struct {
 	Boards         []Board
 	InFlight       []InFlight
 	Held           []store.HeldPacket
+	// Playing is the mods the world was reset with, in the order applied;
+	// empty is the base game.
+	Playing []Mod
+	// Found is the folders in the data directory's mods folder, by name.
+	// FoundErr is a mods folder that could not be listed at all.
+	Found    []Mod
+	FoundErr error
+}
+
+// Mod is one mod, as a world recorded it or as its folder reads. Err is a
+// folder that does not read as a mod; Version and Display are then empty.
+type Mod struct {
+	Name    string // the folder's name, which config.json lists
+	Display string // the label a screen shows, or the name
+	Version string
+	Err     error
 }
 
 // Board is one other board in the league.
@@ -148,12 +165,35 @@ func Read(dir string, now time.Time) (Snapshot, error) {
 	if err != nil {
 		return Snapshot{}, err
 	}
-	defer lock.Release()
 	w, err := store.Load(cfg)
 	if err != nil {
+		lock.Release()
 		return Snapshot{}, err
 	}
-	return gather(w, now)
+	s, err := gather(w, now)
+	lock.Release()
+	if err != nil {
+		return s, err
+	}
+	// The mods folder is no part of the world, so it is read after the lock is
+	// released: every node waits on that lock while it is held.
+	s.Found, s.FoundErr = found(dir)
+	return s, nil
+}
+
+// found lists the mod folders in dir's mods folder, read as -check-mod reads
+// one, without applying them.
+func found(dir string) ([]Mod, error) {
+	entries, err := mod.Available(dir)
+	var out []Mod
+	for _, e := range entries {
+		m := Mod{Name: e.Name, Err: e.Err}
+		if e.Mod != nil {
+			m.Display, m.Version = e.Mod.Ref().DisplayName(), e.Mod.Version
+		}
+		out = append(out, m)
+	}
+	return out, err
 }
 
 func gather(w *game.World, now time.Time) (Snapshot, error) {
@@ -173,6 +213,9 @@ func gather(w *game.World, now time.Time) (Snapshot, error) {
 		return s, err
 	}
 	s.Held = held
+	for _, m := range w.Mods {
+		s.Playing = append(s.Playing, Mod{Name: m.Name, Display: m.DisplayName(), Version: m.Version})
+	}
 	// A board is held when one of its held packets pauses the lost-forces
 	// timer: the store's own rule, so this tab and In flight cannot disagree.
 	heldFrom := map[string]bool{}

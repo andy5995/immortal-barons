@@ -84,7 +84,7 @@ that file with a bug report.
 
 ## The views
 
-Each tab has five views. Click a column heading to sort by it. Click it again
+Each tab has six views. Click a column heading to sort by it. Click it again
 to reverse the order.
 
 - **Boards:** every other board in the league, as the `-bbsinfo` report lists
@@ -104,7 +104,11 @@ to reverse the order.
   the table list each reason with its count: pick one, then **Hide** it or
   **Show only** it; **Show all** brings every row back. This changes the view
   only, not the files.
-
+- **Mods:** the [mods](mods.md) this board's game was reset with, and every
+  folder in its `mods` folder with its version, or why it does not load.
+  **Check** beside a folder runs `immortal-barons -check-mod` on it and shows
+  the output in the Run view. To change which mods a game plays, run
+  `immortal-barons -reset`.
 - **Run:** runs one `immortal-barons` command and shows its output as it runs.
   **Detailed** adds `-detailed`, and is grayed out for commands that ignore it.
   The League Coordinator's commands appear only on node #1. The two that act on

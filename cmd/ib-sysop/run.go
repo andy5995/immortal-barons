@@ -78,9 +78,9 @@ func (r *runView) say(format string, a ...any) {
 	}
 }
 
-// start runs c. Called with ui.mu held.
-func (r *runView) start(c sysop.Command) {
-	args, err := c.Args(r.t.dir, r.detailed.Value, r.arg.Text())
+// start runs c with arg as its value. Called with ui.mu held.
+func (r *runView) start(c sysop.Command, arg string) {
+	args, err := c.Args(r.t.dir, r.detailed.Value, arg)
 	if err != nil {
 		r.say("! %v", err)
 		return
@@ -139,11 +139,11 @@ func (r *runView) layout(gtx layout.Context) layout.Dimensions {
 		} else if sel.Confirm != "" {
 			r.confirming = sel
 		} else {
-			r.start(*sel)
+			r.start(*sel, r.arg.Text())
 		}
 	}
 	if r.yesBtn.Clicked(gtx) && r.confirming != nil && r.proc == nil {
-		r.start(*r.confirming)
+		r.start(*r.confirming, r.arg.Text())
 		r.confirming = nil
 	}
 	if r.noBtn.Clicked(gtx) {

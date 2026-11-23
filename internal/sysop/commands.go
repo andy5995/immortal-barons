@@ -52,6 +52,12 @@ var Commands = []Command{
 	{Flag: "-gen-coord-key", Coordinator: true, Help: "Create the league's Coordinator key"},
 }
 
+// CheckMod is -check-mod, which the Mods view runs for one folder in the
+// board's mods folder. It is not in Commands: its value is a mod the view
+// lists, not one the sysop types.
+var CheckMod = Command{Flag: "-check-mod", Arg: "mod name",
+	Help: "Check one mod and print what it changes"}
+
 var dateArg = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 
 // Args is the command line for c against dataDir. It refuses a missing or

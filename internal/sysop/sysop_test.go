@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/mod"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
@@ -280,5 +281,77 @@ func TestInFlightHeldDaysCountTheOpenHold(t *testing.T) {
 	}
 	if f := s.InFlight[0]; !f.Held || f.HeldDays != 3 {
 		t.Errorf("held %v for %d days, want held for 3 (2 ended + 1 open)", f.Held, f.HeldDays)
+	}
+}
+
+// The Mods view: what the game was reset with, from the world, and what the
+// mods folder holds now, a folder that does not load included. A league board
+// cannot play mods yet, so this one stands alone.
+func TestReadGathersMods(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
+	if err := store.SaveConfig(cfg); err != nil {
+		t.Fatal(err)
+	}
+	write := func(name, manifest string) string {
+		dir := filepath.Join(cfg.DataDir, mod.Dir, name)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, mod.ManifestFile), []byte(manifest), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return dir
+	}
+	tanks := write("cheap-tanks", "name = \"cheap-tanks\"\nversion = \"1.2\"\nlabel = \"Cheap Tanks\"\n")
+	write("broken", "name = \"other\"\nversion = \"1\"\n")
+	write("plain", "name = \"plain\"\nversion = \"0.1\"\n")
+	m, err := mod.Read(tanks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, _ := store.NewGame(cfg)
+	w.Mods = []game.ModRef{m.Ref()}
+	if err := store.Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	s, err := Read(cfg.DataDir, time.Now())
+	if err != nil {
+		t.Fatalf("Read: %v", err)
+	}
+	if len(s.Playing) != 1 || s.Playing[0] != (Mod{Name: "cheap-tanks", Display: "Cheap Tanks", Version: "1.2"}) {
+		t.Errorf("Playing = %+v", s.Playing)
+	}
+	if s.FoundErr != nil || len(s.Found) != 3 {
+		t.Fatalf("Found = %+v, %v; want three folders", s.Found, s.FoundErr)
+	}
+	b, c, p := s.Found[0], s.Found[1], s.Found[2]
+	if b.Name != "broken" || b.Err == nil || b.Version != "" {
+		t.Errorf("broken folder = %+v, want its load error", b)
+	}
+	if c != (Mod{Name: "cheap-tanks", Display: "Cheap Tanks", Version: "1.2"}) {
+		t.Errorf("cheap-tanks = %+v", c)
+	}
+	if p != (Mod{Name: "plain", Display: "plain", Version: "0.1"}) {
+		t.Errorf("plain = %+v", p)
+	}
+}
+
+// A board with no mods folder and no mods is not an error.
+func TestReadWithNoMods(t *testing.T) {
+	s, err := Read(leagueBoard(t).DataDir, time.Now())
+	if err != nil || len(s.Playing) != 0 || len(s.Found) != 0 || s.FoundErr != nil {
+		t.Errorf("no mods: %+v, %+v, %v, %v", s.Playing, s.Found, s.FoundErr, err)
+	}
+}
+
+func TestCheckModArgs(t *testing.T) {
+	got, err := CheckMod.Args("/d", true, "cheap-tanks")
+	if err != nil || strings.Join(got, " ") != "-data /d -check-mod cheap-tanks" {
+		t.Errorf("-check-mod = %v, %v", got, err)
+	}
+	if _, err := CheckMod.Args("/d", false, ""); err == nil {
+		t.Error("-check-mod ran with no mod named")
 	}
 }
