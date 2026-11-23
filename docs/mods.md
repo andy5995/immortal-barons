@@ -17,7 +17,7 @@ This first version can change five figures for each of the six military units:
 
 | Key | Meaning | Limits |
 | --- | --- | --- |
-| `cost` | Production points to build one unit | 1 to 1,000,000 |
+| `build_cost` | Production points an Industrial region spends to build one unit (not the purchase price) | 1 to 1,000,000 |
 | `networth` | Net worth of one unit, in gold (up to 3 decimal places) | 0 to 10,000 |
 | `upkeep` | Gold to maintain one unit per turn at the Medium Maintenance Costs setting (up to 1 decimal place) | 0 to 1,000 |
 | `price_low`, `price_high` | The range a realm's price for the unit moves inside | 1 to 1,000,000, at least 100 apart |
@@ -56,15 +56,17 @@ data/
 name = "cheap-tanks"
 version = "1.0"
 label = "Cheap Tanks"       # shown on the Game Setup screen; blank shows the name
-description = "Tanks cost less to build and keep."
+description = "Tanks cost less to buy, build and keep."
 ```
 
 `values.toml` holds the changes, one section per unit. List only what changes:
 
 ```toml
 [units.tank]
-cost = 250      # the standard cost is 500
+build_cost = 250  # the standard build cost is 500
 upkeep = 0.3
+price_low = 500
+price_high = 900
 ```
 
 Both files are [TOML](https://toml.io/). Lines starting with `#` are comments.
@@ -85,11 +87,13 @@ This checks the mod on its own, with the same limits a reset uses, and lists
 every value it changes:
 
 ```
-Cheap Tanks 1.0 (f9296d291178373f): OK
-Tanks cost less to build and keep.
+Cheap Tanks 1.0 (029923dee3137351): OK
+Tanks cost less to buy, build and keep.
 Changes from the base game:
-  tank.cost: 500 -> 250
+  tank.build_cost: 500 -> 250
   tank.upkeep: 0.6 -> 0.3
+  tank.price_low: 1125 -> 500
+  tank.price_high: 2250 -> 900
 ```
 
 ## Turning mods on

@@ -33,7 +33,7 @@ func TestModsSurviveSaveAndLoad(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.DataDir = t.TempDir()
 	cfg.Mods = []string{"cheap-tanks"}
-	writeTestMod(t, cfg.DataDir, "cheap-tanks", "[units.tank]\ncost = 250\n")
+	writeTestMod(t, cfg.DataDir, "cheap-tanks", "[units.tank]\nbuild_cost = 250\n")
 
 	w := game.NewWorldSeed(cfg, 1)
 	if err := ApplyResetMods(w, cfg); err != nil {
@@ -69,7 +69,7 @@ func TestModsSurviveSaveAndLoad(t *testing.T) {
 	}
 
 	// An edit mid-game is warned about and does not reach the game in progress.
-	writeTestMod(t, cfg.DataDir, "cheap-tanks", "[units.tank]\ncost = 300\n")
+	writeTestMod(t, cfg.DataDir, "cheap-tanks", "[units.tank]\nbuild_cost = 300\n")
 	loaded, err = Load(cfg)
 	if err != nil {
 		t.Fatal(err)

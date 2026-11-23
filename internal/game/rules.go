@@ -92,7 +92,7 @@ func (r *Rules) Validate() error {
 			continue
 		}
 		if u.Cost < 1 || u.Cost > ModUnitCostMax {
-			bad(g, "cost %d is outside 1 to %d", u.Cost, ModUnitCostMax)
+			bad(g, "build_cost %d is outside 1 to %d", u.Cost, ModUnitCostMax)
 		}
 		if u.NetWorth < 0 || u.NetWorth > ModUnitNetWorthMax {
 			bad(g, "networth %s is outside 0 to %s", thousandths(u.NetWorth), thousandths(ModUnitNetWorthMax))

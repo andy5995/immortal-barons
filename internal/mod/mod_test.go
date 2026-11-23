@@ -41,7 +41,7 @@ func TestApplyOverridesOnlyWhatItNames(t *testing.T) {
 		ValuesFile: `
 # comments are allowed, which is why the format is TOML
 [units.tank]
-cost = 400
+build_cost = 400
 networth = 1.5
 upkeep = 0.3
 `,
@@ -51,7 +51,7 @@ upkeep = 0.3
 		t.Fatal(err)
 	}
 	got := strings.Join(Diff(game.BaseRules(), r), "\n")
-	want := "tank.cost: 500 -> 400\ntank.networth: 1.25 -> 1.5\ntank.upkeep: 0.6 -> 0.3"
+	want := "tank.build_cost: 500 -> 400\ntank.networth: 1.25 -> 1.5\ntank.upkeep: 0.6 -> 0.3"
 	if got != want {
 		t.Errorf("diff:\n%s\nwant:\n%s", got, want)
 	}
@@ -64,11 +64,11 @@ func TestReadRefusesWhatItDoesNotKnow(t *testing.T) {
 		want  string
 	}{
 		{"misspelled key", map[string]string{ValuesFile: "[units.tank]\ncots = 1\n"}, "units.tank.cots: unknown key"},
-		{"unknown unit", map[string]string{ValuesFile: "[units.dragon]\ncost = 1\n"}, "units.dragon: not a unit"},
+		{"unknown unit", map[string]string{ValuesFile: "[units.dragon]\nbuild_cost = 1\n"}, "units.dragon: not a unit"},
 		{"unused file", map[string]string{"brain.star": "x"}, "brain.star is not a file"},
 		{"too many places", map[string]string{ValuesFile: "[units.tank]\nupkeep = 0.25\n"}, "more decimal places than 0.1 allows"},
-		{"out of range", map[string]string{ValuesFile: "[units.tank]\ncost = 0\n"}, "cost 0 is outside"},
-		{"wraps an int32", map[string]string{ValuesFile: "[units.tank]\ncost = 5000000000\n"}, "out of range"},
+		{"out of range", map[string]string{ValuesFile: "[units.tank]\nbuild_cost = 0\n"}, "build_cost 0 is outside"},
+		{"wraps an int32", map[string]string{ValuesFile: "[units.tank]\nbuild_cost = 5000000000\n"}, "out of range"},
 		{"control character", map[string]string{ManifestFile: manifest("m") + "label = \"a\\u001b[2J\"\n"}, "may not hold control characters"},
 		{"narrow band", map[string]string{ValuesFile: "[units.tank]\nprice_low = 2200\n"}, "price_high must be at least"},
 	}
@@ -95,8 +95,8 @@ func TestManifestMustNameItsFolder(t *testing.T) {
 
 func TestResolveAppliesInOrderLaterWins(t *testing.T) {
 	data := t.TempDir()
-	writeMod(t, data, "one", map[string]string{ManifestFile: manifest("one"), ValuesFile: "[units.tank]\ncost = 400\n[units.jet]\ncost = 100\n"})
-	writeMod(t, data, "two", map[string]string{ManifestFile: manifest("two"), ValuesFile: "[units.tank]\ncost = 600\n"})
+	writeMod(t, data, "one", map[string]string{ManifestFile: manifest("one"), ValuesFile: "[units.tank]\nbuild_cost = 400\n[units.jet]\nbuild_cost = 100\n"})
+	writeMod(t, data, "two", map[string]string{ManifestFile: manifest("two"), ValuesFile: "[units.tank]\nbuild_cost = 600\n"})
 	r, refs, err := Resolve(data, []string{"one", "two"})
 	if err != nil {
 		t.Fatal(err)
@@ -119,7 +119,7 @@ func TestResolveAppliesInOrderLaterWins(t *testing.T) {
 // values it was reset with.
 func TestRestoreKeepsTheOldValuesOfAnEditedMod(t *testing.T) {
 	data := t.TempDir()
-	dir := writeMod(t, data, "m", map[string]string{ManifestFile: manifest("m"), ValuesFile: "[units.tank]\ncost = 400\n"})
+	dir := writeMod(t, data, "m", map[string]string{ManifestFile: manifest("m"), ValuesFile: "[units.tank]\nbuild_cost = 400\n"})
 	_, refs, err := Resolve(data, []string{"m"})
 	if err != nil {
 		t.Fatal(err)
@@ -129,7 +129,7 @@ func TestRestoreKeepsTheOldValuesOfAnEditedMod(t *testing.T) {
 		t.Fatalf("an unchanged mod restores silently: warnings %v, err %v", warnings, err)
 	}
 
-	if err := os.WriteFile(filepath.Join(dir, ValuesFile), []byte("[units.tank]\ncost = 450\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, ValuesFile), []byte("[units.tank]\nbuild_cost = 450\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	r, warnings, err = Restore(data, refs)

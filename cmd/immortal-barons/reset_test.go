@@ -225,7 +225,7 @@ func TestResetGetsPastModsThatNoLongerLoad(t *testing.T) {
 	// A saved copy a later version would reject: cost 0 is under the limit.
 	w.Mods = []game.ModRef{{Name: "m", Version: "1", Hash: "x", Files: map[string]string{
 		"mod.toml":    "name = \"m\"\nversion = \"1\"\n",
-		"values.toml": "[units.tank]\ncost = 0\n",
+		"values.toml": "[units.tank]\nbuild_cost = 0\n",
 	}}}
 	if err := store.Save(w, cfg); err != nil {
 		t.Fatal(err)

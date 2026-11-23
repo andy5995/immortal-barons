@@ -18,7 +18,7 @@ type field struct {
 }
 
 var unitFields = []field{
-	{"cost",
+	{"build_cost",
 		func(u game.UnitRules) string { return fmt.Sprint(u.Cost) },
 		func(u *game.UnitRules, v any) (err error) { u.Cost, err = whole(v); return }},
 	{"networth",
@@ -48,7 +48,7 @@ func unitField(key string) *field {
 }
 
 // Diff lists every value that differs between a and b, as
-// "tank.cost: 500 -> 600", unit by unit in MilitaryGoods order.
+// "tank.build_cost: 500 -> 600", unit by unit in MilitaryGoods order.
 func Diff(a, b *game.Rules) []string {
 	var out []string
 	for _, g := range game.MilitaryGoods {
