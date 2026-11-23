@@ -333,7 +333,7 @@ func (w *World) DateForDay(day int) string {
 // popCapacity is the carrying capacity migration pulls the population toward.
 // BINARY-VERIFIED against BRE's end-of-turn routine (BRE.OVR 0xD08A-0xD213):
 //
-//	capacity = Σ(regions × PopCapWeight) × support/90 × 10/max(3, tax) + 50
+//	capacity = Σ(regions × PopCap) × support/90 × 10/max(3, tax) + 50
 //
 // converted from BRE's population unit to IB's by PopBREUnitScale.
 //
@@ -343,16 +343,12 @@ func (w *World) DateForDay(day int) string {
 // realm with poor support has a fraction of the capacity its land could hold.
 // Selling urban land or losing support lowers the capacity and people then
 // drain away toward it, rather than via a separate housing-loss hit.
-func (e *Empire) popCapacity() int {
-	cap := e.Regions.Coastal*PopCapCoastal +
-		e.Regions.River*PopCapRiver +
-		e.Regions.Agricultural*PopCapAgricultural +
-		e.Regions.Desert*PopCapDesert +
-		e.Regions.Industrial*PopCapIndustrial +
-		e.Regions.Urban*PopCapUrban +
-		e.Regions.Mountain*PopCapMountain +
-		e.Regions.Technology*PopCapTechnology +
-		e.Regions.Waste*PopCapWaste // zero, and deliberately spelled out
+func (w *World) popCapacity(e *Empire) int {
+	rows := w.regionsOf(e)
+	cap := 0
+	for _, g := range RegionTypes {
+		cap += *g.Count(&e.Regions) * rows[g].PopCap // Waste's weight is zero
+	}
 	// The weights are BRE's, one unit to a million; IB counts twenty people to
 	// that unit. Convert before the divisions rather than after, so the capacity
 	// keeps its granularity instead of rounding in steps of twenty.
@@ -501,7 +497,7 @@ func (w *World) processEconomy(e *Empire) {
 	// popCapacity for the capacity itself and docs/mechanics-reference.md for
 	// the whole model.
 	e.LastPopGrowth = 0
-	capacity := e.popCapacity()
+	capacity := w.popCapacity(e)
 	// A percentage of the HEADROOM, not of the population, so a realm far below
 	// capacity fills fast and one near it barely moves.
 	growth := pctOf(capacity-e.People, w.rng.Intn(PopMoveJitter)+PopMoveMinPct)

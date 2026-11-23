@@ -32,6 +32,8 @@ type advisorData struct {
 	p           game.Empire
 	avgAgri     int // expected Agricultural food per turn
 	avgRiver    int // expected river food per turn
+	avgOther    int // expected food per turn from every other type (a mod's)
+	boost       int // the unit-production boost, as a percent of normal
 	foodEaten   int // this turn's food consumption
 	foodAtCap   int // consumption once population fills its carrying capacity
 	income      int // this turn's gold income
@@ -47,10 +49,16 @@ func gatherAdvisorData(w *ctx) advisorData {
 	var d advisorData
 	w.Read(func() {
 		d.p = *w.Player()
-		d.avgAgri = d.p.AvgAgriFood()
-		d.avgRiver = d.p.AvgRiverFood()
+		d.avgAgri = w.AvgFood(&d.p, game.Agricultural)
+		d.avgRiver = w.AvgFood(&d.p, game.River)
+		for _, g := range game.RegionTypes {
+			if g != game.Agricultural && g != game.River {
+				d.avgOther += w.AvgFood(&d.p, g)
+			}
+		}
+		d.boost = w.ProductionBoostPercent(&d.p)
 		d.foodEaten = w.FoodDue(&d.p)
-		d.foodAtCap = d.p.FoodUpkeepAtCapacity()
+		d.foodAtCap = w.FoodUpkeepAtCapacity(&d.p)
 		d.income = w.IncomeThisTurn(&d.p).Gold()
 		d.away = w.ForcesAway(d.p.Owner)
 		for _, e := range w.Empires {
@@ -193,7 +201,8 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			brk(tr(s, "We hold no agricultural regions or rivers, so we grow no food."))
 		}
 		brk(fmt.Sprintf(tr(s, "Our people eat %s units each turn."), count(d.foodEaten)))
-		avgGrown := d.avgAgri + d.avgRiver
+		// Every type's food, which a mod may give to types other than these two.
+		avgGrown := d.avgAgri + d.avgRiver + d.avgOther
 		net := avgGrown - d.foodEaten
 		// The food bottom line pops in yellow whether short or in surplus (BRE).
 		switch {
@@ -281,7 +290,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		if int64(p.Carriers)*game.JetsPerCarrier*100 < int64(p.Jets)*game.AdvisorCarrierWarnPct {
 			advise(tr(s, "We have more {jets} than our {carriers} can carry. Build more {carriers}."))
 		}
-		mtn := game.MountainIndustryPercent(p.Regions)
+		mtn := d.boost
 		switch {
 		case p.Regions.Mountain == 0:
 			advise(tr(s, "We hold no {mountain} regions. Their ore would make our factories build units faster."))

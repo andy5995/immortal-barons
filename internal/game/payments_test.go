@@ -11,36 +11,36 @@ func TestTechnologyLowersRegionUpkeep(t *testing.T) {
 	e.Land = e.Regions.Total() // 100
 	e.TechSlots[TechSlotMaint] = 40
 	base := int64(e.Land * RegionUpkeepPerLand)
-	if want, got := techLower(base, e.TechMaintFactor()), e.RegionUpkeep(); got != want {
+	if want, got := techLower(base, e.TechMaintFactor()), w.RegionUpkeep(e); got != want {
 		t.Errorf("RegionUpkeep with tech: want %d, got %d", want, got)
 	}
-	if e.RegionUpkeep() >= base {
-		t.Errorf("technology should lower region upkeep: %d not < %d", e.RegionUpkeep(), base)
+	if w.RegionUpkeep(e) >= base {
+		t.Errorf("technology should lower region upkeep: %d not < %d", w.RegionUpkeep(e), base)
 	}
 }
 
 // TestTechnologyRaisesFoodProduced locks #20: food-region output is raised by
 // the Technology factor ("increased region output"). BRE raises the 300 base
-// and leaves the per-turn draw alone, so the factor lands inside agriFood.
+// and leaves the per-turn draw alone, so the factor lands inside the per-region yield.
 func TestTechnologyRaisesFoodProduced(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
 	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
 	e.Land = e.Regions.Total()
 	draw := w.regionDraw(e, 6, FoodAgriRate)
-	plain := w.agriFood(e)
+	plain := w.regionFood(e, Agricultural) / 80
 	if want := 300 + draw; plain != want { // 300 is BRE's, not a tunable
 		t.Errorf("unteched yield per region: want %d, got %d", want, plain)
 	}
-	if got, want := w.FoodProduced(e), 80*plain; got != want {
-		t.Errorf("FoodProduced: want %d, got %d", want, got)
+	if got, want := w.regionFood(e, Agricultural), 80*plain; got != want {
+		t.Errorf("Agricultural food: want %d, got %d", want, got)
 	}
 	e.TechSlots[TechSlotGold] = 40
-	if want, got := techRaise(300, e.TechFoodFactor())+draw, w.agriFood(e); got != want {
+	if want, got := techRaise(300, e.TechFoodFactor())+draw, w.regionFood(e, Agricultural)/80; got != want {
 		t.Errorf("teched yield per region: want %d, got %d", want, got)
 	}
-	if w.agriFood(e) <= plain {
-		t.Errorf("technology should raise food output: %d not > %d", w.agriFood(e), plain)
+	if w.regionFood(e, Agricultural)/80 <= plain {
+		t.Errorf("technology should raise food output: %d not > %d", w.regionFood(e, Agricultural)/80, plain)
 	}
 }
 
@@ -247,11 +247,11 @@ func TestAverageFoodYields(t *testing.T) {
 	e := w.AddHuman("me", "Mine")
 	e.Regions = RegionMix{Agricultural: 10, River: 4}
 	e.Land = e.Regions.Total()
-	if got := e.AvgAgriFood(); got != 3020 {
-		t.Errorf("AvgAgriFood: want 3020, got %d", got)
+	if got := w.AvgFood(e, Agricultural); got != 3020 {
+		t.Errorf("AvgFood(Agricultural): want 3020, got %d", got)
 	}
-	if got := e.AvgRiverFood(); got != 119 {
-		t.Errorf("AvgRiverFood: want 119, got %d", got)
+	if got := w.AvgFood(e, River); got != 119 {
+		t.Errorf("AvgFood(River): want 119, got %d", got)
 	}
 }
 
@@ -268,14 +268,14 @@ func TestAverageFoodYieldsMatchTheDraw(t *testing.T) {
 		var agri, river int
 		for d := range days {
 			w.GameDay = d
-			agri += w.FoodProduced(e)
-			river += w.riverFood(e)
+			agri += w.regionFood(e, Agricultural)
+			river += w.regionFood(e, River)
 		}
-		if got, want := e.AvgAgriFood(), agri/days; got < want-2 || got > want+2 {
-			t.Errorf("tech slot %d: AvgAgriFood %d, measured mean %d", slot, got, want)
+		if got, want := w.AvgFood(e, Agricultural), agri/days; got < want-2 || got > want+2 {
+			t.Errorf("tech slot %d: AvgFood(Agricultural) %d, measured mean %d", slot, got, want)
 		}
-		if got, want := e.AvgRiverFood(), river/days; got < want-2 || got > want+2 {
-			t.Errorf("tech slot %d: AvgRiverFood %d, measured mean %d", slot, got, want)
+		if got, want := w.AvgFood(e, River), river/days; got < want-2 || got > want+2 {
+			t.Errorf("tech slot %d: AvgFood(River) %d, measured mean %d", slot, got, want)
 		}
 	}
 }

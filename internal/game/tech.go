@@ -87,18 +87,29 @@ func TechPercent(factor int, lowered bool) int {
 // With no Technology regions this returns immediately: research stops and the
 // banked levels FREEZE. They are never decremented anywhere.
 func (w *World) advanceTech(e *Empire) {
-	tech := e.Regions.Technology
+	tech := w.researchRegions(e)
 	total := e.Regions.Total()
 	if tech <= 0 || total <= 0 {
 		return
 	}
 	points := TechResearchMul * techResearchPoints(tech, total)
 	for _, ally := range w.alliesOf(e, technologyAgreement) {
-		points += techResearchPoints(min(tech, ally.Regions.Technology), total)
+		points += techResearchPoints(min(tech, w.researchRegions(ally)), total)
 	}
 	for range points {
 		e.TechSlots[w.rng.Intn(TechSlotCount)]++
 	}
+}
+
+// researchRegions is the realm's research count: each type's Research weight
+// times its count, which under the base rules is its Technology regions.
+func (w *World) researchRegions(e *Empire) int {
+	rows := w.regionsOf(e)
+	n := 0
+	for _, g := range RegionTypes {
+		n += rows[g].Research * *g.Count(&e.Regions)
+	}
+	return n
 }
 
 // techResearchPoints is round((n^2 / total)^0.75), the original's own shape. It

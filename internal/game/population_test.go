@@ -18,7 +18,7 @@ func TestANewRealmStartsBelowItsCapacity(t *testing.T) {
 	e.Regions.Mountain = StartMountain
 	e.Regions.Coastal = StartCoastal
 
-	capacity := e.popCapacity()
+	capacity := (&World{}).popCapacity(e)
 	if capacity <= e.People {
 		t.Errorf("a new realm holds %d people against a capacity of %d, so it drains from its first turn",
 			e.People, capacity)
@@ -44,7 +44,7 @@ func TestPopulationMovesTowardCapacity(t *testing.T) {
 		// the direction of migration itself rather than the turn's net figure.
 		if e.LastPopGrowth <= 0 {
 			t.Errorf("seed %d: a realm %d under capacity migrated by %d; it should be gaining",
-				seed, e.popCapacity()-before, e.LastPopGrowth)
+				seed, (&World{}).popCapacity(e)-before, e.LastPopGrowth)
 		}
 	}
 }
@@ -84,11 +84,11 @@ func TestAnEmptyGranaryDoesNotStopGrowth(t *testing.T) {
 func TestWasteHousesNobody(t *testing.T) {
 	base := &Empire{Support: 90, Tax: 10}
 	base.Regions.Urban = 10
-	before := base.popCapacity()
+	before := (&World{}).popCapacity(base)
 
 	ruined := *base
 	ruined.Regions.Waste = 500
-	if got := ruined.popCapacity(); got != before {
+	if got := (&World{}).popCapacity(&ruined); got != before {
 		t.Errorf("500 waste regions changed capacity from %d to %d; waste must house nobody", before, got)
 	}
 
@@ -96,7 +96,7 @@ func TestWasteHousesNobody(t *testing.T) {
 	// passing because popCapacity ignores its input.
 	moved := *base
 	moved.Regions.Desert = 500
-	if moved.popCapacity() == before {
+	if (&World{}).popCapacity(&moved) == before {
 		t.Error("desert regions should raise capacity; the comparison above proves nothing")
 	}
 }

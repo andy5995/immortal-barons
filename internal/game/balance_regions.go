@@ -29,10 +29,16 @@ const (
 	RiverRate, RiverBase       = 100, 5000  // hydro — highest base
 )
 
+// CoastalSupportShare is the part of a Coastal region's tourism that follows
+// popular support: the gold is scaled by (100 - share) + share x support/100
+// percent, 0.10 + 0.90·support, so tourism never zeroes out however unpopular
+// the realm.
+const CoastalSupportShare = 90
+
 // A River's hydropower has NO "bad year": IB carried a RiverDudChancePct of 10
 // that halved the yield, and the production routine in the original binary has
 // no such branch — its only fork is the Random(4) fishing roll. Removing it is
-// what makes IB's river pay BRE's expected gold exactly (see riverGold).
+// what makes IB's river pay BRE's expected gold exactly (see World.regionGold).
 
 // CrownTaxSupportPenalty bounds the popular support a baron loses by failing to
 // pay the Queen's tax in full. It is a ceiling the penalty approaches but never

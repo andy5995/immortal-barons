@@ -36,7 +36,7 @@ func TestCoastalSupportFloor(t *testing.T) {
 	e.syncLand()
 	e.Support = 0
 	e.People, e.Tax = 0, 0
-	if got := w.IncomeThisTurn(e).Tourism; got <= 0 {
+	if got := w.IncomeThisTurn(e).GoldFrom(Coastal); got <= 0 {
 		t.Errorf("Coastal tourism at 0%% support should be > 0 (10%% floor), got %d", got)
 	}
 }
@@ -69,7 +69,7 @@ func TestIndustrialGoldCreditedOnce(t *testing.T) {
 		t.Fatalf("Manufacture credited gold (%d); it should produce units only", e.Gold)
 	}
 
-	wantIndustrial := int64(w.IncomeThisTurn(e).Industrial)
+	wantIndustrial := int64(w.IncomeThisTurn(e).GoldFrom(Industrial))
 	w.CollectIncome(e)
 	if e.Gold != wantIndustrial {
 		t.Errorf("CollectIncome credited %d, want the single Industrial figure %d", e.Gold, wantIndustrial)
@@ -86,10 +86,12 @@ func TestIndustrialGoldCreditedOnce(t *testing.T) {
 func TestRiverGoldHasNoBadYear(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("h", "Realm")
+	e.Regions = RegionMix{River: 1} // one region, so its gold is the per-region figure
+	e.syncLand()
 	for day := 0; day < 200; day++ {
 		w.GameDay = day
-		if g := w.riverGold(e); g < 3750 || g > 3824 {
-			t.Fatalf("day %d: riverGold=%d, want 3750..3824", day, g)
+		if g := w.regionGold(e, River); g < 3750 || g > 3824 {
+			t.Fatalf("day %d: river gold %d, want 3750..3824", day, g)
 		}
 	}
 }
