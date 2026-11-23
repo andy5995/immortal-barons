@@ -29,15 +29,15 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		return err
 	}
 	defer lock.Release()
-	// The mods this reset will apply are checked before the backup, so a
-	// refused reset leaves the previous world.json.bak alone. The league flag
-	// is the one the reset will use: -reset and -ibbs-reset set it themselves.
-	pre := cfg
-	if !fromConfig {
-		pre.IBBS = league != nil
-	}
-	if err := store.CheckResetMods(pre); err != nil {
-		return err
+	// -reset-from-config applies the mods config.json lists, so they are
+	// checked before the backup, and a refused reset leaves the previous
+	// world.json.bak alone. The other resets start from defaults, which hold
+	// no mods; the editor's Mods page turns them on and will not save a list
+	// that does not load.
+	if fromConfig {
+		if err := store.CheckResetMods(cfg); err != nil {
+			return err
+		}
 	}
 	backedUp, err := store.BackupWorld(cfg)
 	if err != nil {
@@ -88,9 +88,6 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	// config.json on exit (S); Q cancels the whole reset.
 	def := game.DefaultConfig()
 	def.DataDir = cfg.DataDir
-	// The editor has no page for mods yet, so the list carries over from the
-	// current config.json rather than being reset with everything else (#202).
-	def.Mods = cfg.Mods
 	// Whether this board is in a league is chosen by which reset command was run,
 	// not by a setting: it decides which questions the editor asks, and BRE's own
 	// model is that the ruleset is fixed at reset and never edited mid-game.
@@ -116,8 +113,8 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		}
 	}
 	w.Config = def
-	// Before the editor, so a mod that will not load is reported before the
-	// sysop has spent time on the settings.
+	// Clears the rules the old world played: the board-ID path below resets
+	// without the editor, and the editor path installs its list once it saves.
 	if err := store.ApplyResetMods(w, w.Config); err != nil {
 		return err
 	}
@@ -183,6 +180,10 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	if !saved {
 		fmt.Println("\nCancelled. The game was left unchanged.")
 		return errCancelled
+	}
+	// The editor's Mods page may have changed the list.
+	if err := store.ApplyResetMods(w, w.Config); err != nil {
+		return err
 	}
 
 	w.Reset()
@@ -289,8 +290,8 @@ func archiveLeftoverPackets(dir string) (int, string) {
 	return moved, archive
 }
 
-// printMods names the mods a reset applied, since the editor does not show
-// them and a sysop should not learn of a carried-over mod from a player.
+// printMods names the mods a reset applied, so the sysop sees what the new
+// game plays as the reset finishes, whichever path chose the mods.
 func printMods(w *game.World) {
 	if len(w.Mods) == 0 {
 		return

@@ -104,6 +104,10 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			page = (page - 1 + len(pages)) % len(pages)
 			continue
 		case "s", "save":
+			if err := modsError(*c); err != nil {
+				fail(s, fmt.Errorf("not saved: %w", err))
+				continue
+			}
 			if err := store.SaveConfig(*c); err != nil {
 				fail(s, err)
 			} else {
@@ -153,8 +157,8 @@ type cfgPage struct {
 	fields []cfgField
 }
 
-// configPages groups the settings into the same four topics the tview editor
-// uses as tabs, so a sysop sees one layout whichever editor they land in — and,
+// configPages groups the settings into the same topics the tview editor uses
+// as tabs (four, and Mods on a stand-alone board), so a sysop sees one layout whichever editor they land in — and,
 // unlike the single 38-field list this replaces, each page fits an 80x24 screen
 // (issue #100).
 func configPages(ibbs bool) []cfgPage {
@@ -375,6 +379,8 @@ func configPages(ibbs bool) []cfgPage {
 		for i := range pages {
 			pages[i].fields = withoutIBBSFields(pages[i].fields)
 		}
+		// A league board refuses mods, so only a stand-alone one is asked.
+		pages = append(pages, cfgPage{modsTitle, []cfgField{modsField()}})
 	}
 	return pages
 }

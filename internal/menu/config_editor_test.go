@@ -3,10 +3,15 @@ package menu
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
+
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/mod"
 )
 
 func TestConfigEditorEditsAndSaves(t *testing.T) {
@@ -73,7 +78,9 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// old note naming 48 cannot land on a different setting. 21 was the AI-baron
 	// count, retired with the barons themselves in v0.2.0, and its number is held
 	// back the same way. 49 (local attacks per day) and 50 (the S3-Sabre Constant
-	// Dial), 51 (Full Bank Start) and 52 (Starting Regions) are IB's own.
+	// Dial), 51 (Full Bank Start) and 52 (Starting Regions) are IB's own. 53
+	// (Mods) is on a stand-alone board's Mods page, which configPages(true)
+	// does not build; TestConfigEditorModsPage covers it.
 	const fields = 49
 	for n := 1; n <= 52; n++ {
 		if n == 21 || n == 22 || n == 48 {
@@ -105,7 +112,7 @@ func TestConfigEditorEditsAcrossPages(t *testing.T) {
 		t.Errorf("expected max tax rate 25, got %d", w.Config.MaxTaxRate)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "page 3 of 4") {
+	if !strings.Contains(out, "page 3 of 5") {
 		t.Errorf("two N presses should reach page 3, got:\n%s", out)
 	}
 }
@@ -116,7 +123,7 @@ func TestConfigEditorPreviousPageWraps(t *testing.T) {
 	w.Config.DataDir = t.TempDir()
 	f := &fakeSession{keys: []rune("p\rq\r ")}
 	ConfigEditor(f, w.World)
-	if out := f.out.String(); !strings.Contains(out, "page 4 of 4") {
+	if out := f.out.String(); !strings.Contains(out, "page 5 of 5") {
 		t.Errorf("P on the first page should wrap to the last, got:\n%s", out)
 	}
 }
@@ -274,4 +281,116 @@ func TestKnobsCycleThroughEveryValue(t *testing.T) {
 			}
 		}
 	})
+}
+
+// writeTestMod creates <dataDir>/mods/<name> with a manifest and values.toml.
+func writeTestMod(t *testing.T, dataDir, name, values string) {
+	t.Helper()
+	dir := filepath.Join(dataDir, mod.Dir, name)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	files := map[string]string{
+		mod.ManifestFile: "name = \"" + name + "\"\nversion = \"1.0\"\n",
+		mod.ValuesFile:   values,
+	}
+	for f, body := range files {
+		if err := os.WriteFile(filepath.Join(dir, f), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// The Mods page turns a mod on, and refuses one that will not load rather than
+// leaving it for the reset to reject after the sysop has saved.
+func TestConfigEditorModsPage(t *testing.T) {
+	dir := t.TempDir()
+	writeTestMod(t, dir, "a-cheap", "[units.tank]\nbuild_cost = 400\n")
+	writeTestMod(t, dir, "b-broken", "[units.tank]\nbuild_cost = 0\n")
+	w := newWorld()
+	w.Config.DataDir = dir
+
+	// Page 5 is Mods. 53 opens the list; 1 turns a-cheap on, 2 tries b-broken
+	// (refused, with a pause), 0 leaves the list, S saves. The list reads one
+	// key per choice.
+	f := &fakeSession{keys: []rune("53\r12 0s\r ")}
+	ConfigEditor(f, w.World)
+
+	out := f.out.String()
+	if !strings.Contains(out, "[x] a-cheap 1.0") {
+		t.Fatalf("the list never showed a-cheap turned on:\n%s", out)
+	}
+	if !strings.Contains(out, "Configuration saved.") || !strings.Contains(out, "build_cost") {
+		t.Errorf("the refusal or the save never happened:\n%s", out)
+	}
+	if got := strings.Join(w.Config.Mods, ","); got != "a-cheap" {
+		t.Errorf("Mods = %q, want a-cheap alone", got)
+	}
+}
+
+// The tview Mods tab saves the checked mods, and a league board has no Mods tab.
+func TestConfigTUIModsTab(t *testing.T) {
+	dir := t.TempDir()
+	writeTestMod(t, dir, "a-cheap", "[units.tank]\nbuild_cost = 400\n")
+	writeTestMod(t, dir, "z-cheap", "[units.jet]\nbuild_cost = 400\n")
+	w := newWorld()
+	w.Config.DataDir = dir
+	w.Config.Mods = []string{"z-cheap"}
+
+	tui := newConfigTUI(w.World)
+	if got := tui.titles[len(tui.titles)-1]; got != modsTitle {
+		t.Fatalf("last tab is %q, want %q", got, modsTitle)
+	}
+	form := tui.forms[len(tui.forms)-1]
+	// Item 0 is the note, then the enabled z-cheap, then a-cheap. Toggling as a
+	// sysop would (Space) keeps the order mods were turned on in: z-cheap off
+	// and on again lands after a-cheap, as it does in the line editor.
+	toggle := func(i int) {
+		b := form.GetFormItem(i).(*styledField).FormItem.(*tview.Checkbox)
+		b.InputHandler()(tcell.NewEventKey(tcell.KeyRune, ' ', tcell.ModNone), func(tview.Primitive) {})
+	}
+	toggle(2)
+	if got := strings.Join(tui.collect().Mods, ","); got != "z-cheap,a-cheap" {
+		t.Errorf("Mods = %q, want z-cheap,a-cheap", got)
+	}
+	toggle(1)
+	toggle(1)
+	if got := strings.Join(tui.collect().Mods, ","); got != "a-cheap,z-cheap" {
+		t.Errorf("Mods = %q, want a-cheap,z-cheap", got)
+	}
+
+	w.Config.IBBS = true
+	if got := newConfigTUI(w.World).titles; slices.Contains(got, modsTitle) {
+		t.Errorf("a league board got a Mods tab: %v", got)
+	}
+}
+
+// Neither editor saves a mod list that will not load: the reset after a save
+// would refuse it with config.json already rewritten.
+func TestEditorsRefuseToSaveABrokenModList(t *testing.T) {
+	dir := t.TempDir()
+	writeTestMod(t, dir, "b-broken", "[units.tank]\nbuild_cost = 0\n")
+	w := newWorld()
+	w.Config.DataDir = dir
+	w.Config.Mods = []string{"b-broken"}
+
+	f := &fakeSession{keys: []rune("s\r q\r ")}
+	if ConfigEditor(f, w.World) {
+		t.Error("the line editor reported a save")
+	}
+	if !strings.Contains(f.out.String(), "not saved") {
+		t.Errorf("no refusal shown:\n%s", f.out.String())
+	}
+	if _, err := os.Stat(filepath.Join(dir, "config.json")); err == nil {
+		t.Error("the line editor wrote config.json")
+	}
+
+	tui := newConfigTUI(w.World)
+	tui.save()
+	if tui.saved {
+		t.Error("the tview editor saved")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "config.json")); err == nil {
+		t.Error("the tview editor wrote config.json")
+	}
 }

@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io/fs"
 	"maps"
 	"math"
 	"os"
@@ -123,6 +124,36 @@ func whole(v any) (int, error) {
 		return 0, fmt.Errorf("%d is out of range", n)
 	}
 	return int(n), nil
+}
+
+// Entry is one folder in the mods directory. Mod is nil when the folder does
+// not read as a mod, and Err says why.
+type Entry struct {
+	Name string
+	Mod  *Mod
+	Err  error
+}
+
+// Available lists the folders in dataDir's mods directory, by name, for the
+// settings editor. A missing mods directory is an empty list, not an error.
+func Available(dataDir string) ([]Entry, error) {
+	dir := filepath.Join(dataDir, Dir)
+	des, err := os.ReadDir(dir)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var out []Entry
+	for _, de := range des {
+		if !de.IsDir() {
+			continue
+		}
+		m, err := Read(filepath.Join(dir, de.Name()))
+		out = append(out, Entry{Name: de.Name(), Mod: m, Err: err})
+	}
+	return out, nil
 }
 
 // Read reads the mod folder at path.

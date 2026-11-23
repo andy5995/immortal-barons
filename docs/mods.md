@@ -98,8 +98,9 @@ Changes from the base game:
 
 ## Turning mods on
 
-Mods change only when a new game starts. List them in `config.json` under
-`Mods`, then reset the game:
+Mods change only when a new game starts. Turn them on in the settings editor
+that `-reset` opens, on its Mods page, or list them in `config.json` under
+`Mods` and run `-reset-from-config`:
 
 ```json
 "Mods": ["cheap-tanks"]
@@ -109,13 +110,14 @@ When two mods change the same value, the one later in the list wins. The reset
 checks the combined values against the limits, so two mods that each pass
 `-check-mod` can still be refused together.
 
-`-reset` and `-reset-from-config` both use the list. The settings editor has no
-page for mods yet, so `-reset` keeps the list from `config.json` instead of
-clearing it. The reset prints the mods it applied.
+`-reset` starts from the default settings, which turn no mods on, so pick
+them again on the Mods page each time. `-reset-from-config` uses the list in
+`config.json` as it stands. The Mods page refuses a mod that will not load,
+alone or with the mods already on, and the reset prints the mods it applied.
 
 A game keeps the mods it started with until the next reset:
 
-- Changing `Mods` in `config.json` affects only the next reset.
+- Changing `Mods` in `config.json` affects only the next `-reset-from-config`.
 - The game saves a copy of each mod when it starts. If you edit or delete a
   mod's folder during a game, the game keeps the copy and writes a warning to
   its error output (stderr) each time it starts. Under a BBS, that output goes

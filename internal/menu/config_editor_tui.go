@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -15,7 +16,8 @@ import (
 
 // The tview Configuration Editor: the polished, tabbed form used when -reset
 // runs on a real terminal. Fields are grouped into four tabs so the whole
-// ruleset never overflows a screen (issue #7); a ★ marks the league-ruleset
+// ruleset never overflows a screen (issue #7), with a fifth, Mods, on a
+// stand-alone board; a ★ marks the league-ruleset
 // fields (the inter-BBS ones, marked as BRE marks them). When stdin is
 // not a terminal (piped -reset, CI) the caller falls back to the line-based
 // runConfigEditor, which shares the same clamping/validation intent.
@@ -34,7 +36,11 @@ const (
 // field, so the star never appears and the legend would explain a mark that is
 // not on screen.
 func footerKeys(ibbs bool) string {
-	keys := " F1–F4 / Ctrl-N,P: tabs · Tab/Shift-Tab: move · ↑↓ or click: change a choice · Ctrl-S: save · Esc: cancel"
+	last := "F5" // the Mods tab, which a league board does not get
+	if ibbs {
+		last = "F4"
+	}
+	keys := " F1–" + last + " / Ctrl-N,P: tabs · Tab/Shift-Tab: move · ↑↓ or click: change a choice · Ctrl-S: save · Esc: cancel"
 	if ibbs {
 		keys += " · ★ = inter-BBS option"
 	}
@@ -142,6 +148,7 @@ type configTUI struct {
 	app       *tview.Application
 	pages     *tview.Pages
 	tabs      *tview.TextView
+	titles    []string        // the tabs' titles, configTabTitles plus Mods off a league
 	help      *tview.TextView // right-hand pane; shows the focused field's help
 	forms     []*tview.Form
 	root      tview.Primitive // the main layout, restored after a modal
@@ -267,13 +274,18 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(caps, "Idle warnings before boot", helpIdleWarnings, c.MaxIdleWarnings, 1, 100, func(c *game.Config, n int) { c.MaxIdleWarnings = n })
 
 	t.forms = []*tview.Form{timing, econ, mil, caps}
+	t.titles = slices.Clone(configTabTitles)
+	if !ibbs {
+		t.forms = append(t.forms, t.modsForm())
+		t.titles = append(t.titles, modsTitle)
+	}
 	t.pages = tview.NewPages()
 	for i, f := range t.forms {
 		f.AddButton("Save", t.save).AddButton("Cancel", t.cancel).AddButton("Load Defaults", t.loadDefaults)
 		// No blank line between fields, so all fields + the buttons fit above the
 		// help pane on an 80x25 screen.
 		f.SetItemPadding(0)
-		f.SetBorder(true).SetTitle(" " + configTabTitles[i] + " ")
+		f.SetBorder(true).SetTitle(" " + t.titles[i] + " ")
 		f.SetFieldBackgroundColor(fieldBgColor).
 			SetFieldTextColor(tcell.ColorWhite).
 			SetLabelColor(tcell.ColorSkyblue)
@@ -335,7 +347,7 @@ func (t *configTUI) showHelp(text string) {
 	t.help.SetText(text)
 }
 
-// onKey is the global key handler. Tabs switch via F1–F4, Ctrl-N/P, or a mouse
+// onKey is the global key handler. Tabs switch via F1–F5, Ctrl-N/P, or a mouse
 // click; Tab/Shift-Tab move within the current form (tview's own wrap). Up/Down
 // cycle a focused choice field but are otherwise inert (they don't navigate
 // between fields, and inertness dodges tview's InputField eating ↓ for
@@ -355,6 +367,10 @@ func (t *configTUI) onKey(ev *tcell.EventKey) *tcell.EventKey {
 		t.gotoTab(2)
 	case tcell.KeyF4:
 		t.gotoTab(3)
+	case tcell.KeyF5:
+		if n > 4 {
+			t.gotoTab(4)
+		}
 	case tcell.KeyCtrlN:
 		t.gotoTab((t.cur + 1) % n)
 	case tcell.KeyCtrlP:
@@ -376,7 +392,7 @@ func (t *configTUI) onKey(ev *tcell.EventKey) *tcell.EventKey {
 
 func (t *configTUI) renderTabs() {
 	var sb strings.Builder
-	for i, name := range configTabTitles {
+	for i, name := range t.titles {
 		if i == t.cur {
 			fmt.Fprintf(&sb, ` ["%d"][black:white] F%d %s [-:-][""]`, i, i+1, name)
 		} else {
@@ -407,6 +423,10 @@ func (t *configTUI) collect() game.Config {
 
 func (t *configTUI) save() {
 	c := t.collect()
+	if err := modsError(c); err != nil {
+		t.showError(err)
+		return
+	}
 	if err := store.SaveConfig(c); err != nil {
 		t.showError(err)
 		return
