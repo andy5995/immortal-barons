@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"math"
 )
 
 var (
@@ -16,6 +17,7 @@ var (
 	ErrHQExists     = errors.New("Your HeadQuarters is already under construction or built.")
 	ErrRegionCap    = errors.New("You have reached your region purchase limit for this turn.")
 	ErrNoFoodSupply = errors.New("The food market is out of food for today.")
+	ErrUnitCap      = errors.New("Your realm cannot hold that many.")
 	ErrNoLand       = errors.New("No land is available at this time.")
 )
 
@@ -400,7 +402,23 @@ func (w *World) Sell(e *Empire, g *Good, n int) error {
 
 // buyUnit buys n of a unit at its current price, the mirror of sellUnit: spend
 // (which validates n and affordability), then credit the stock.
+// MaxUnits is the most of one unit a realm can hold. A count is an int, 32 bits
+// on the door builds, and adding past this wraps it negative: within reach in a
+// long game, and in a couple of purchases under a mod that makes a unit cheap.
+const MaxUnits = math.MaxInt32
+
+// addUnits is a + n held at MaxUnits.
+func addUnits(a, n int) int {
+	if n > MaxUnits-a {
+		return MaxUnits
+	}
+	return a + n
+}
+
 func buyUnit(stock *int, n, price int, e *Empire) error {
+	if n > MaxUnits-*stock {
+		return ErrUnitCap
+	}
 	if err := e.spend(n, price); err != nil {
 		return err
 	}

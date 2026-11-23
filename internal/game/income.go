@@ -331,7 +331,8 @@ func unitsMade(industrial, pct, spec, boostNum, boostDen, tech, cost int) int {
 func (w *World) Manufacture(e *Empire) {
 	proj := w.ProjectedProduction(e)
 	for i, g := range MilitaryGoods {
-		*g.Made(e) = proj[i]
-		*g.Count(e) += proj[i]
+		before := *g.Count(e)
+		*g.Count(e) = addUnits(before, proj[i])
+		*g.Made(e) = *g.Count(e) - before // what arrived, not what the cap turned away
 	}
 }
