@@ -65,6 +65,7 @@ func Diff(a, b *game.Rules) []string {
 			}
 		}
 	}
+	out = append(out, diffHQ(a, b)...)
 	if from, to := brainName(a), brainName(b); from != to {
 		out = append(out, fmt.Sprintf("pirate raids: %s -> %s", from, to))
 	}
@@ -92,5 +93,6 @@ func Values(r *game.Rules, header string) string {
 			fmt.Fprintf(&b, "%s = %s\n", f.key, f.get(r.Units[g]))
 		}
 	}
+	writeHQ(&b, r)
 	return b.String()
 }

@@ -21,6 +21,30 @@ type Rules struct {
 	Regions map[*Region]RegionRules
 	// Pirates, when set, decides pirate raids in place of the built-in roll.
 	Pirates PirateBrain
+	// HQ are the HeadQuarters figures.
+	HQ HQRules
+}
+
+// HQRules are the HeadQuarters figures. What only interplanetary play does to
+// a HeadQuarters is not here — the resolver's own tank curve
+// (RemoteTankStrength*), the fifth a winning invasion takes
+// (InvasionHQLossDivisor) and a landed Sabotage HQ agent's points
+// (TerrorHQSabotagePoints): those only happen in a league, and a league board
+// refuses mods, so a key for them could never take effect.
+type HQRules struct {
+	// TankPerHQ is the part of a tank's strength a point of HeadQuarters
+	// completion adds, over TankStrengthPctBase (the curve's fixed reference).
+	TankPerHQ int
+	// BuildStart is the completion percent a new HeadQuarters begins at, and
+	// BuildPerTurn what it gains each turn until it reaches 100.
+	BuildStart, BuildPerTurn int
+	// BattleLossMin and BattleLossJitter: a lost defense costs the
+	// HeadQuarters BattleLossMin + Random(BattleLossJitter) points.
+	BattleLossMin, BattleLossJitter int
+	// PriceBase, PricePerTurn and PriceJitter make the price: PriceBase +
+	// PricePerTurn x turns played + Random(PriceJitter), held under PriceCap
+	// minus Random(PriceCapJitter). Gold.
+	PriceBase, PricePerTurn, PriceJitter, PriceCap, PriceCapJitter int64
 }
 
 // UnitRules are one unit's figures. Units with no production or price walk
@@ -65,11 +89,17 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 	Food:  {},
 },
 	Regions: baseRegionRules(),
+	HQ: HQRules{
+		TankPerHQ: TankStrengthPctPerHQ, BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
+		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
+		PriceBase: HQPriceBase, PricePerTurn: HQPricePerTurn, PriceJitter: HQPriceJitter,
+		PriceCap: HQPriceCap, PriceCapJitter: HQPriceCapJitter,
+	},
 }
 
 // BaseRules returns a copy of the base rules for a mod to change.
 func BaseRules() *Rules {
-	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions)}
+	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions), HQ: baseRules.HQ}
 }
 
 // rules is the set w plays by: the base set unless mods were loaded.
@@ -98,6 +128,18 @@ const (
 	// so its largest intermediate is 2^31 x 10^4 x 450, about 9.7e15: both are
 	// int64, and the sum is held at the 32-bit ceiling before it reaches an int.
 	ModUnitStrengthMax = 10_000
+)
+
+// Limits for the HeadQuarters figures. The price limits keep price_base +
+// price_per_turn x turns played inside int64 for any realm that could exist, and
+// the price itself inside an int on a 32-bit build; the percent figures are
+// percent of a HeadQuarters that tops out at 100.
+const (
+	ModHQTankBonusMax    = 10 // hundredths of a trooper a tank gains per HQ point (base: 0.01)
+	ModHQPercentMax      = 100
+	ModHQPriceMax        = 1_000_000_000
+	ModHQPricePerTurnMax = 1_000_000
+	ModHQPriceJitterMax  = 1_000_000
 )
 
 // Validate reports every value outside its limits, so a sysop fixing a mod sees
@@ -149,7 +191,48 @@ func (r *Rules) Validate() error {
 		}
 		errs = append(errs, rr.Validate(g)...)
 	}
+	r.validateHQ(func(format string, a ...any) {
+		errs = append(errs, fmt.Errorf("hq: %s", fmt.Sprintf(format, a...)))
+	})
 	return errors.Join(errs...)
+}
+
+// validateHQ reports each HeadQuarters value outside its limits through bad.
+// Every jitter that feeds Random(n) is at least 1 where the engine's helper
+// would panic on 0; the price jitters may be 0 (a fixed price) because the
+// draw they feed yields 0 for a bound of 0.
+func (r *Rules) validateHQ(bad func(format string, a ...any)) {
+	h := r.HQ
+	if h.TankPerHQ < 0 || h.TankPerHQ > ModHQTankBonusMax {
+		bad("tank_bonus %s is outside 0 to %s", hundredths(int64(h.TankPerHQ)), hundredths(ModHQTankBonusMax))
+	}
+	if h.BuildStart < 1 || h.BuildStart > ModHQPercentMax {
+		bad("build_start %d is outside 1 to %d", h.BuildStart, ModHQPercentMax)
+	}
+	if h.BuildPerTurn < 1 || h.BuildPerTurn > ModHQPercentMax {
+		bad("build_per_turn %d is outside 1 to %d", h.BuildPerTurn, ModHQPercentMax)
+	}
+	if h.BattleLossMin < 0 || h.BattleLossMin > ModHQPercentMax {
+		bad("battle_loss_min %d is outside 0 to %d", h.BattleLossMin, ModHQPercentMax)
+	}
+	if h.BattleLossJitter < 1 || h.BattleLossJitter > ModHQPercentMax {
+		bad("battle_loss_jitter %d is outside 1 to %d", h.BattleLossJitter, ModHQPercentMax)
+	}
+	if h.PriceBase < 1 || h.PriceBase > ModHQPriceMax {
+		bad("price_base %d is outside 1 to %d", h.PriceBase, ModHQPriceMax)
+	}
+	if h.PricePerTurn < 0 || h.PricePerTurn > ModHQPricePerTurnMax {
+		bad("price_per_turn %d is outside 0 to %d", h.PricePerTurn, ModHQPricePerTurnMax)
+	}
+	if h.PriceJitter < 0 || h.PriceJitter > ModHQPriceJitterMax {
+		bad("price_jitter %d is outside 0 to %d", h.PriceJitter, ModHQPriceJitterMax)
+	}
+	if h.PriceCap < h.PriceBase || h.PriceCap > ModHQPriceMax {
+		bad("price_cap %d must be at least price_base (%d) and at most %d", h.PriceCap, h.PriceBase, ModHQPriceMax)
+	}
+	if h.PriceCapJitter < 0 || h.PriceCapJitter >= h.PriceCap {
+		bad("price_cap_jitter %d is outside 0 to one below price_cap (%d)", h.PriceCapJitter, h.PriceCap)
+	}
 }
 
 // thousandths and tenths print a fixed-point figure the way a mod file writes
