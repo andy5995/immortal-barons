@@ -9,7 +9,7 @@ import "runtime/debug"
 // displayed in the status bar and reported by the front-ends. Between releases
 // it is the next version with a "-dev" suffix, which the release commit removes
 // and the bump after publishing restores (docs/dev/releasing.md).
-const Version = "0.2.10-dev"
+const Version = "0.3.0-dev"
 
 // Protocol is the packet format this build speaks. It moves ONLY when the wire
 // format changes, which is what lets a board take a menu fix or a balance change
@@ -99,7 +99,7 @@ const Version = "0.2.10-dev"
 // original's spy record never held. An older board would put them back as zero
 // when it re-marshals a report, and every signature on it would fail.
 //
-// Moved to 8 in v0.2.10: Packet.Battles is now signed, which an older board,
+// Moved to 8 in v0.3.0: Packet.Battles is now signed, which an older board,
 // still removing it before checking, would fail to verify.
 const Protocol = 8
 
