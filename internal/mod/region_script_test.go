@@ -136,3 +136,20 @@ func TestDiffNamesTheRegionScript(t *testing.T) {
 		t.Errorf("Diff %q, want [%q]", got, want)
 	}
 }
+
+// rows carries the mod's own values.toml figures, so a script builds on them.
+func TestRegionScriptSeesTheModsValues(t *testing.T) {
+	dir := writeMod(t, t.TempDir(), "lands", map[string]string{
+		ManifestFile: manifest("lands"),
+		ValuesFile:   "[regions.desert]\nfood_base = 50\n",
+		RegionsFile:  "def regions(realm, rows):\n    return {\"desert\": {\"food_base\": rows[\"desert\"].food_base * 2}}\n",
+	})
+	_, r, err := Check(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, e := regionWorld(r, game.RegionMix{Desert: 10})
+	if got := w.FoodGrown(e); got != 1000 {
+		t.Errorf("food grown %d, want 1000 (10 deserts x 50 x 2)", got)
+	}
+}

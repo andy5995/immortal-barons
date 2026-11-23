@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"go.starlark.net/starlark"
@@ -45,19 +46,15 @@ type regionScript struct {
 // was given, both comparable.
 type regionKey struct {
 	view game.RegionView
-	rows [len(regionIDs)]game.RegionRules
+	rows [regionTypeCount]game.RegionRules
 }
 
-// regionIDs fixes regionKey's array length to the number of region types; a
-// type added without updating it fails to compile here.
-var regionIDs = [9]string{}
+// regionTypeCount is how many region types there are, for regionKey's array.
+const regionTypeCount = 9
 
 func init() {
-	if len(game.RegionTypes) != len(regionIDs) {
-		panic("mod: regionIDs does not match game.RegionTypes")
-	}
-	for i, g := range game.RegionTypes {
-		regionIDs[i] = g.ID
+	if len(game.RegionTypes) != regionTypeCount {
+		panic("mod: regionTypeCount does not match game.RegionTypes")
 	}
 }
 
@@ -200,7 +197,7 @@ func readRegionRows(res starlark.Value, rows map[*game.Region]game.RegionRules) 
 		id, ok := starlark.AsString(kv[0])
 		g := game.RegionByID(id)
 		if !ok || g == nil {
-			return nil, fmt.Errorf("%s is not a region type (%s)", kv[0], joinIDs())
+			return nil, fmt.Errorf("%s is not a region type (%s)", kv[0], strings.Join(regionIDs(), ", "))
 		}
 		changes, ok := kv[1].(*starlark.Dict)
 		if !ok {
@@ -222,15 +219,4 @@ func readRegionRows(res starlark.Value, rows map[*game.Region]game.RegionRules) 
 		out[g] = rr
 	}
 	return out, nil
-}
-
-func joinIDs() string {
-	s := ""
-	for i, id := range regionIDs {
-		if i > 0 {
-			s += ", "
-		}
-		s += id
-	}
-	return s
 }
