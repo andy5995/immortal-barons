@@ -178,8 +178,8 @@ func TestEnsureSlotsDropsAnOverFullWorldsSurplus(t *testing.T) {
 		e.Slot = 0
 	}
 	// Two more realms than the planet holds, as an unbounded save could carry.
-	w.Empires = append(w.Empires, newEmpire("Surplus One", "", w.Config, w.GameDay))
-	w.Empires = append(w.Empires, newEmpire("Surplus Two", "", w.Config, w.GameDay))
+	w.Empires = append(w.Empires, w.newEmpire("Surplus One", "", w.Config, w.GameDay))
+	w.Empires = append(w.Empires, w.newEmpire("Surplus Two", "", w.Config, w.GameDay))
 
 	w.EnsureSlots()
 

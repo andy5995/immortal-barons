@@ -12,12 +12,12 @@ import "testing"
 // gold in region maintenance, because Land*913*10000 wrapped inside techLower.
 func TestRegionUpkeepStaysPositiveAtDoorScale(t *testing.T) {
 	for _, land := range []int{235, 710, 6883, 20000} {
-		e := &Empire{Land: land}
-		if got := e.RegionUpkeep(); got <= 0 {
+		e := &Empire{Land: land, Regions: RegionMix{Coastal: land}}
+		if got := (&World{}).RegionUpkeep(e); got <= 0 {
 			t.Errorf("land=%d: region upkeep came out %d, want a positive charge", land, got)
 		}
-		if want := int64(land * RegionUpkeepPerLand); e.RegionUpkeep() != want {
-			t.Errorf("land=%d: region upkeep %d, want %d with no technology", land, e.RegionUpkeep(), want)
+		if want := int64(land * RegionUpkeepPerLand); (&World{}).RegionUpkeep(e) != want {
+			t.Errorf("land=%d: region upkeep %d, want %d with no technology", land, (&World{}).RegionUpkeep(e), want)
 		}
 	}
 }

@@ -249,7 +249,7 @@ func TestPaymentStageAutoPays(t *testing.T) {
 	p := w.Player()
 	p.Gold = 100000
 	before := p.Gold
-	want := w.World.ForcesUpkeep(p) + p.RegionUpkeep() + w.World.CrownTax(p)
+	want := w.World.ForcesUpkeep(p) + w.World.RegionUpkeep(p) + w.World.CrownTax(p)
 
 	paymentStage(f, w, BuildMenus().Bank)
 
@@ -373,7 +373,7 @@ func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 	p.Gold = 100000
 	p.Support = 100 // skips the optional support-boost prompt
 	beforeTroopers := p.Troopers
-	want := w.World.ForcesUpkeep(p) + p.RegionUpkeep() + w.World.CrownTax(p)
+	want := w.World.ForcesUpkeep(p) + w.World.RegionUpkeep(p) + w.World.CrownTax(p)
 	before := p.Gold
 
 	paymentStage(f, w, BuildMenus().Bank)

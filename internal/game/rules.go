@@ -17,6 +17,8 @@ import (
 // every other number is still a constant.
 type Rules struct {
 	Units map[*Good]UnitRules
+	// Regions is what each region type yields and costs (region_rules.go).
+	Regions map[*Region]RegionRules
 	// Pirates, when set, decides pirate raids in place of the built-in roll.
 	Pirates PirateBrain
 }
@@ -61,11 +63,13 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 		PriceLo: PriceLoCarrier, PriceHi: PriceHiCarrier, PriceStep: PriceStepCarrier},
 	Agent: {NetWorth: NetWorthAgent},
 	Food:  {},
-}}
+},
+	Regions: baseRegionRules(),
+}
 
 // BaseRules returns a copy of the base rules for a mod to change.
 func BaseRules() *Rules {
-	return &Rules{Units: maps.Clone(baseRules.Units)}
+	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions)}
 }
 
 // rules is the set w plays by: the base set unless mods were loaded.
@@ -136,6 +140,14 @@ func (r *Rules) Validate() error {
 		if u.PriceStep < 1 || u.PriceStep > u.PriceHi-u.PriceLo {
 			bad(g, "price_step %d is outside 1 to the width of the band", u.PriceStep)
 		}
+	}
+	for _, g := range RegionTypes {
+		rr, ok := r.Regions[g]
+		if !ok {
+			errs = append(errs, fmt.Errorf("%s: missing", g.ID))
+			continue
+		}
+		errs = append(errs, rr.Validate(g)...)
 	}
 	return errors.Join(errs...)
 }

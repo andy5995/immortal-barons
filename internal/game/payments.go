@@ -20,35 +20,18 @@ func (w *World) unitUpkeep(units, e *Empire) int64 {
 	return techLower(tenths/MaintTenthsPerGold, e.TechMaintFactor())
 }
 
-// RegionUpkeep is the gold required to maintain the empire's regions. Technology
-// lowers it (same factor military upkeep uses); BRE lists "maintenance costs on
-// regions" among technology's effects (#20).
-func (e *Empire) RegionUpkeep() int64 {
-	return techLower(int64(e.Land)*RegionUpkeepPerLand, e.TechMaintFactor())
-}
-
-// FoodProduced is the empire's food-region output this turn. The Technology
-// bonus is inside agriFood, on the base, where BRE applies it.
-func (w *World) FoodProduced(e *Empire) int {
-	return e.Regions.foodProduced(w.agriFood(e))
-}
-
-// agriFood is this turn's food yield per Agricultural region: BRE's
-// Base + Random(Rate), one roll per turn shared by every Agricultural region
-// (so the printed total always divides exactly by the region count). Technology
-// raises the base and not the draw — the yield routine returns a tech-scaled
-// 300 and its caller adds the draw afterward.
-func (w *World) agriFood(e *Empire) int {
-	return e.agriBase() + w.regionDraw(e, 6, FoodAgriRate)
-}
-
-// agriBase is an Agricultural region's yield before the draw.
-func (e *Empire) agriBase() int { return techRaise(FoodAgriBase, e.TechFoodFactor()) }
-
-// AvgAgriFood is the realm's expected Agricultural food per turn: agriFood with
-// the draw replaced by its mean, so the figure holds still from turn to turn.
-func (e *Empire) AvgAgriFood() int {
-	return e.Regions.Agricultural * (2*e.agriBase() + FoodAgriRate - 1) / 2
+// RegionUpkeep is the gold required to maintain the empire's regions: each
+// type's Upkeep (RegionUpkeepPerLand under the base rules, the same for every
+// type) times its count. Technology lowers it (same factor military upkeep
+// uses); BRE lists "maintenance costs on regions" among technology's effects
+// (#20).
+func (w *World) RegionUpkeep(e *Empire) int64 {
+	rows := w.regionsOf(e)
+	var gold int64
+	for _, g := range RegionTypes {
+		gold += int64(*g.Count(&e.Regions)) * int64(rows[g].Upkeep)
+	}
+	return techLower(gold, e.TechMaintFactor())
 }
 
 // ForcesDue and RegionsDue apply the league's Maintenance Costs knob to the
@@ -84,7 +67,7 @@ func (w *World) listedUnits(e *Empire) Empire {
 	return listed
 }
 func (w *World) RegionsDue(e *Empire) int64 {
-	return w.Config.MaintCosts.MaintCostScaled(e.RegionUpkeep())
+	return w.Config.MaintCosts.MaintCostScaled(w.RegionUpkeep(e))
 }
 
 // MaintenanceDue is the whole maintenance bill for one turn: the armed forces,
@@ -179,9 +162,9 @@ func (w *World) FoodDue(e *Empire) int {
 // decoupled from food (as in BRE), so a high-support realm can sit at a food
 // surplus now yet outgrow its production later; the advisor uses this to warn
 // before that happens. Never projects below the current population.
-func (e *Empire) FoodUpkeepAtCapacity() int {
+func (w *World) FoodUpkeepAtCapacity(e *Empire) int {
 	people := e.People
-	if cap := e.popCapacity(); cap > people {
+	if cap := w.popCapacity(e); cap > people {
 		people = cap
 	}
 	return peopleFood(people) + e.ForcesFoodUpkeep()

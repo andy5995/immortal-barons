@@ -343,21 +343,28 @@ func incomeReport(s session.Session, w *ctx) {
 		return
 	}
 
-	golds := []struct {
+	type line struct {
 		amount int
 		text   string
-	}{
-		{b.Taxes, "gold was earned in taxes."},
-		{b.Ore, "gold was produced from the Ore Mines."},
-		{b.Tourism, "gold was earned in Tourism."},
-		{b.Solar, "gold was earned by Solar Power Generators."},
-		{b.Rivers, "gold was earned from Rivers."},
-		{b.Industrial, "gold was earned from Industrial Zones."},
-		{b.Trade, "gold was earned from Trade."},
+	}
+	// Each region type's lines come from its row (game.Region's GoldText and
+	// FoodText), in game.GoldReportOrder: the original's five gold lines in its
+	// order, then any type a mod has made pay.
+	golds := []line{{b.Taxes, "gold was earned in taxes."}}
+	for _, g := range game.GoldReportOrder {
+		golds = append(golds, line{b.GoldFrom(g), g.GoldText})
+	}
+	golds = append(golds, line{b.Trade, "gold was earned from Trade."})
+	var foods []line
+	for _, g := range game.FoodReportOrder {
+		foods = append(foods, line{b.FoodFrom(g), g.FoodText})
 	}
 	// Right-align every amount to one column width so the report scans cleanly.
 	total := 0
-	width := len(comma(b.Food))
+	width := 0
+	for _, l := range foods {
+		width = max(width, len(comma(l.amount)))
+	}
 	for _, l := range golds {
 		if l.amount > 0 {
 			total += l.amount
@@ -389,11 +396,10 @@ func incomeReport(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "  %s%s%s\n", dim(ansi.FgBrightBlue), strings.Repeat("─", width), ansi.Reset)
 		amt(ansi.FgBrightYellow, int64(total), "gold earned this turn.")
 	}
-	if b.Food > 0 {
-		amt(ansi.FgBrightCyan, int64(b.Food), "Food units were grown.")
-	}
-	if b.RiverFood > 0 {
-		amt(ansi.FgBrightCyan, int64(b.RiverFood), "Food units were fished from the rivers.")
+	for _, l := range foods {
+		if l.amount > 0 {
+			amt(ansi.FgBrightCyan, int64(l.amount), l.text)
+		}
 	}
 	manufacturedUnits(s, made)
 	// The bank's two returns close the report, interest first (#216) and then the

@@ -10,10 +10,12 @@ func TestRegionMixTotalIncomeFood(t *testing.T) {
 	if got, want := r.Total(), 18; got != want {
 		t.Errorf("Total: want %d, got %d", want, got)
 	}
-	// Agricultural only; river fishing is conditional (World.riverFood, #29).
-	wantFood := 4 * FoodAgriBase
-	if got := r.foodProduced(FoodAgriBase); got != wantFood {
-		t.Errorf("foodProduced: want %d, got %d", wantFood, got)
+	// Agricultural food is its count times one shared per-region yield.
+	w := &World{}
+	e := &Empire{Regions: r}
+	wantFood := 4 * (FoodAgriBase + w.regionDraw(e, Agricultural.foodSalt, FoodAgriRate))
+	if got := w.regionFood(e, Agricultural); got != wantFood {
+		t.Errorf("Agricultural food: want %d, got %d", wantFood, got)
 	}
 }
 

@@ -31,16 +31,16 @@ func TestStartMix(t *testing.T) {
 func TestStartingRegionsScalesTheWholeStart(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.StartingRegions = 10000
-	e := newEmpire("Big", "big", cfg, 1)
+	e := (&World{}).newEmpire("Big", "big", cfg, 1)
 	if e.Land != 10000 || e.Troopers != 66_666 || e.Food != 666_666 || e.Gold != 6_666_666 {
 		t.Errorf("land %d troopers %d food %d gold %d", e.Land, e.Troopers, e.Food, e.Gold)
 	}
 	// People are not scaled with the land: they open at the default's share of
 	// capacity (2000 of 2436), so the realm grows rather than shedding people.
-	if e.People != 787_392 || e.People >= e.popCapacity() {
-		t.Errorf("people %d, capacity %d", e.People, e.popCapacity())
+	if e.People != 787_392 || e.People >= (&World{}).popCapacity(e) {
+		t.Errorf("people %d, capacity %d", e.People, (&World{}).popCapacity(e))
 	}
-	if e := newEmpire("Std", "std", DefaultConfig(), 1); e.People != 2000 {
+	if e := (&World{}).newEmpire("Std", "std", DefaultConfig(), 1); e.People != 2000 {
 		t.Errorf("default start: people %d, want 2000", e.People)
 	}
 }
