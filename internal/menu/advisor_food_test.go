@@ -94,6 +94,16 @@ func TestCivilianAdvisorFoodWithoutFarms(t *testing.T) {
 	if joined = joinAdvisor(advisorReport(s, d, advisorCivilian)); !strings.Contains(joined, "we grow no food") {
 		t.Errorf("no food regions: want it said, got:\n%s", joined)
 	}
+	// A mod's food from another type is food: the realm is not told it grows
+	// none, and the total counts it.
+	d.avgOther = 500
+	if joined = joinAdvisor(advisorReport(s, d, advisorCivilian)); strings.Contains(joined, "grow no food") || !strings.Contains(joined, "regions grow about 500") {
+		t.Errorf("a modded food type alone: want its figure, got:\n%s", joined)
+	}
+	d.p.Regions.River, d.avgRiver = 4, 119
+	if joined = joinAdvisor(advisorReport(s, d, advisorCivilian)); !strings.Contains(joined, "other regions add about 500") || !strings.Contains(joined, "In all, we grow about 619") {
+		t.Errorf("rivers and a modded food type: want both and the total, got:\n%s", joined)
+	}
 }
 
 // The same turn gets the same forecast either side of the feed stage: the

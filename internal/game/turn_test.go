@@ -84,11 +84,11 @@ func TestRiversPayGoldAndFoodEveryTurn(t *testing.T) {
 	for d := 0; d < 40; d++ {
 		w.GameDay = d
 		b := w.IncomeThisTurn(e)
-		if b.Rivers <= 0 {
-			t.Fatalf("day %d: rivers should always pay hydropower gold, got %d", d, b.Rivers)
+		if b.GoldFrom(River) <= 0 {
+			t.Fatalf("day %d: rivers should always pay hydropower gold, got %d", d, b.GoldFrom(River))
 		}
-		if b.RiverFood < lo || b.RiverFood > hi {
-			t.Fatalf("day %d: river food %d outside [%d, %d]", d, b.RiverFood, lo, hi)
+		if b.FoodFrom(River) < lo || b.FoodFrom(River) > hi {
+			t.Fatalf("day %d: river food %d outside [%d, %d]", d, b.FoodFrom(River), lo, hi)
 		}
 	}
 }
@@ -102,11 +102,11 @@ func TestRiverYieldSplitByShare(t *testing.T) {
 	e := w.AddHuman("t", "T")
 	e.Regions = RegionMix{River: 1}
 	e.syncLand()
-	gold := w.riverGold(e)
+	gold := int(w.regionGold(e, River))
 	if lo, hi := RiverBase/2*(100-RiverFishShare)/100, (RiverBase+RiverRate)*(100-RiverFishShare)/100; gold < lo || gold > hi {
 		t.Errorf("river gold %d outside the share-scaled yield band [%d, %d]", gold, lo, hi)
 	}
-	if got, want := w.riverFood(e), (110+w.regionDraw(e, 7, RiverFishRate))*RiverFishShare/100; got != want {
+	if got, want := w.regionFood(e, River), (110+w.regionDraw(e, 7, RiverFishRate))*RiverFishShare/100; got != want {
 		t.Errorf("river food want %d, got %d", want, got)
 	}
 }
@@ -165,7 +165,7 @@ func TestCollectIncomeCoversStartingMaintenance(t *testing.T) {
 	e := w.AddHuman("h", "Realm")
 	e.Gold = 0 // as if auto-deposit banked everything at the end of last turn
 	w.CollectIncome(e)
-	if due := w.ForcesUpkeep(e) + e.RegionUpkeep(); e.Gold < due {
+	if due := w.ForcesUpkeep(e) + w.RegionUpkeep(e); e.Gold < due {
 		t.Errorf("collected income %d does not cover maintenance %d", e.Gold, due)
 	}
 }
@@ -182,7 +182,7 @@ func TestAgriFoodBandMatchesLiveBRE(t *testing.T) {
 	seen := map[int]bool{}
 	for d := 0; d < 400; d++ {
 		w.GameDay = d
-		total := w.FoodProduced(e)
+		total := w.regionFood(e, Agricultural)
 		if total%144 != 0 {
 			t.Fatalf("day %d: total %d does not divide by the region count — the draw is not shared", d, total)
 		}
@@ -245,7 +245,7 @@ func TestUpkeepMatchesLiveBRE(t *testing.T) {
 		e := w.AddHuman("r"+string(rune(c.land%26+'a')), "Realm")
 		e.Regions = RegionMix{Coastal: c.land}
 		e.Land = c.land
-		if got := e.RegionUpkeep(); got != c.want {
+		if got := w.RegionUpkeep(e); got != c.want {
 			t.Errorf("RegionUpkeep(%d regions) = %d, want %d", c.land, got, c.want)
 		}
 	}

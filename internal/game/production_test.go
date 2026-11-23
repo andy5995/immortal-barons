@@ -34,7 +34,7 @@ func TestProjectedProductionMatchesBRE(t *testing.T) {
 // no boost, and a mountain-heavy realm is held at the cap.
 func TestIndustryMountainBoost(t *testing.T) {
 	ratio := func(r RegionMix) float64 {
-		num, den := industryMountainBoost(r)
+		num, den := (&World{}).productionBoost(&Empire{Regions: r})
 		return float64(num) / float64(den)
 	}
 	if got := ratio(RegionMix{Industrial: 100}); got != 1.0 {

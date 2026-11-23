@@ -18,6 +18,11 @@ type number interface{ ~int | ~int64 }
 // budget negative and makes it buy nothing at all.
 func pctOf[T number](v T, p int) T { return T(int64(v) * int64(p) / 100) }
 
+// fitInt holds a non-negative int64 figure to what an int holds, so a total
+// past 2^31 on a 32-bit door build saturates instead of wrapping negative. A
+// modded region figure times a large region count reaches that (#202).
+func fitInt(v int64) int { return int(min(v, math.MaxInt)) }
+
 // goldCost is the price of n units at `unit` gold each, in money width. Always
 // int64: a large order at a high price passes 2^31, which on a 32-bit door
 // wrapped the bill negative and handed the goods over for free.

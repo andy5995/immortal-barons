@@ -30,13 +30,17 @@ const (
 // world-average figures.
 type advisorData struct {
 	p           game.Empire
-	avgAgri     int // expected Agricultural food per turn
-	avgRiver    int // expected river food per turn
-	foodEaten   int // this turn's food consumption
-	foodAtCap   int // consumption once population fills its carrying capacity
-	income      int // this turn's gold income
-	worldIncome int // Σ income over living empires
-	worldLand   int // Σ Land over living empires
+	avgAgri     int  // expected Agricultural food per turn
+	avgRiver    int  // expected river food per turn
+	avgOther    int  // expected food per turn from every other type (a mod's)
+	boost       int  // the unit-production boost, as a percent of normal
+	boosted     bool // some of our land boosts production (Mountain, unmodded)
+	research    int  // our research count (Technology regions, unmodded)
+	foodEaten   int  // this turn's food consumption
+	foodAtCap   int  // consumption once population fills its carrying capacity
+	income      int  // this turn's gold income
+	worldIncome int  // Σ income over living empires
+	worldLand   int  // Σ Land over living empires
 	// away is this realm's forces committed to group attacks, whether still
 	// waiting to leave or in flight. They have left the army, and the Military
 	// advisor counts them in its totals as the original does (#239).
@@ -47,10 +51,18 @@ func gatherAdvisorData(w *ctx) advisorData {
 	var d advisorData
 	w.Read(func() {
 		d.p = *w.Player()
-		d.avgAgri = d.p.AvgAgriFood()
-		d.avgRiver = d.p.AvgRiverFood()
+		d.avgAgri = w.AvgFood(&d.p, game.Agricultural)
+		d.avgRiver = w.AvgFood(&d.p, game.River)
+		for _, g := range game.RegionTypes {
+			if g != game.Agricultural && g != game.River {
+				d.avgOther += w.AvgFood(&d.p, g)
+			}
+		}
+		d.boost = w.ProductionBoostPercent(&d.p)
+		d.boosted = w.HasProductionBoost(&d.p)
+		d.research = w.ResearchRegions(&d.p)
 		d.foodEaten = w.FoodDue(&d.p)
-		d.foodAtCap = d.p.FoodUpkeepAtCapacity()
+		d.foodAtCap = w.FoodUpkeepAtCapacity(&d.p)
 		d.income = w.IncomeThisTurn(&d.p).Gold()
 		d.away = w.ForcesAway(d.p.Owner)
 		for _, e := range w.Empires {
@@ -180,20 +192,29 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		// Averages rather than this turn's roll, so the figures hold still between
 		// turns. Three groups: what we grow, what we eat and the difference, then
 		// the stores and how long they last.
-		switch ag, river := p.Regions.Agricultural > 0, p.Regions.River > 0; {
+		// Every type's food, which a mod may give to types other than these two.
+		avgGrown := d.avgAgri + d.avgRiver + d.avgOther
+		ag, river, other := p.Regions.Agricultural > 0, p.Regions.River > 0, d.avgOther > 0
+		switch {
 		case ag:
 			brk(fmt.Sprintf(tr(s, "Our agricultural regions grow about %s units of food each turn."), count(d.avgAgri)))
 			if river {
 				add(fmt.Sprintf(tr(s, "Our rivers add about %s more."), count(d.avgRiver)))
-				add(fmt.Sprintf(tr(s, "In all, we grow about %s units of food each turn."), count(d.avgAgri+d.avgRiver)))
 			}
 		case river:
 			brk(fmt.Sprintf(tr(s, "Our rivers yield about %s units of food each turn."), count(d.avgRiver)))
+		case other:
+			brk(fmt.Sprintf(tr(s, "Our regions grow about %s units of food each turn."), count(d.avgOther)))
 		default:
 			brk(tr(s, "We hold no agricultural regions or rivers, so we grow no food."))
 		}
+		if other && (ag || river) {
+			add(fmt.Sprintf(tr(s, "Our other regions add about %s more."), count(d.avgOther)))
+		}
+		if ag && river || other && (ag || river) {
+			add(fmt.Sprintf(tr(s, "In all, we grow about %s units of food each turn."), count(avgGrown)))
+		}
 		brk(fmt.Sprintf(tr(s, "Our people eat %s units each turn."), count(d.foodEaten)))
-		avgGrown := d.avgAgri + d.avgRiver
 		net := avgGrown - d.foodEaten
 		// The food bottom line pops in yellow whether short or in surplus (BRE).
 		switch {
@@ -281,9 +302,9 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		if int64(p.Carriers)*game.JetsPerCarrier*100 < int64(p.Jets)*game.AdvisorCarrierWarnPct {
 			advise(tr(s, "We have more {jets} than our {carriers} can carry. Build more {carriers}."))
 		}
-		mtn := game.MountainIndustryPercent(p.Regions)
+		mtn := d.boost
 		switch {
-		case p.Regions.Mountain == 0:
+		case !d.boosted:
 			advise(tr(s, "We hold no {mountain} regions. Their ore would make our factories build units faster."))
 		case mtn >= game.MountainIndustryCapPct:
 			brk(fmt.Sprintf(tr(s, "Our {mountain} regions have the foundries at their limit, %d%% of normal unit output."), mtn))
@@ -314,7 +335,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		researched := gold > 100 || food > 100 || units > 100 || mil > 100 ||
 			maint < 100 || sdi < 100 || decay < 100
 		switch {
-		case !researched && p.Regions.Technology == 0:
+		case !researched && d.research == 0:
 			add(tr(s, "We have no Technology regions."))
 			advise(tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
 		case !researched:
@@ -327,7 +348,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			add(fmt.Sprintf(tr(s, "Our {maintenance costs} have been reduced to %d%% of standard costs."), maint))
 			add(fmt.Sprintf(tr(s, "Our {SDI yearly funding} needs have been lowered to %d%% normal expenses."), sdi))
 			add(fmt.Sprintf(tr(s, "{Food decay} is at %d%% of standard levels."), decay))
-			if p.Regions.Technology == 0 {
+			if d.research == 0 {
 				add(tr(s, "We hold no Technology regions, so our research has halted — but what we have already learned is not lost."))
 			}
 			// BRE closes this advisor with a set-apart NOTE saying the same

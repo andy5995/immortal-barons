@@ -56,7 +56,7 @@ func (w *World) addAIEmpire(name string) *Empire {
 	if slot == 0 {
 		return nil
 	}
-	e := newEmpire(name, "", w.Config, w.GameDay)
+	e := w.newEmpire(name, "", w.Config, w.GameDay)
 	e.Slot = slot
 	e.Jets = AIStartJets * w.Config.StartingRegions / StartRegions
 	e.Turrets = AIStartTurrets * w.Config.StartingRegions / StartRegions
@@ -111,7 +111,7 @@ func (w *World) AddAIEmpires(n int) int {
 	return added
 }
 
-func newEmpire(name, owner string, cfg Config, day int) *Empire {
+func (w *World) newEmpire(name, owner string, cfg Config, day int) *Empire {
 	// BRE's starting realm (verified from a live BRE new-empire screen): 15
 	// regions — 2 Agricultural, 5 Desert, 5 Mountain, 3 Coastal — with 100
 	// troopers, 1000 food, full morale, and no other units. Starting Regions
@@ -140,7 +140,7 @@ func newEmpire(name, owner string, cfg Config, day int) *Empire {
 		ProdInitialized: true, // so a player's later all-zero setting isn't overwritten
 		Prefs:           DefaultPrefs(),
 	}
-	e.People = startPeople(e)
+	e.People = w.startPeople(e)
 	return e
 }
 
@@ -150,9 +150,9 @@ func newEmpire(name, owner string, cfg Config, day int) *Empire {
 // capacity carries a fixed base (PopCapBase) that does not scale; a 10,000-region
 // realm would open 39% over capacity and shed people from its first turn.
 // Held in int64: capacity times StartPeople passes 2^31 at the larger sizes.
-func startPeople(e *Empire) int {
+func (w *World) startPeople(e *Empire) int {
 	base := Empire{Regions: startMix(StartRegions), Support: e.Support, Tax: e.Tax}
-	return int(int64(e.popCapacity()) * StartPeople / int64(base.popCapacity()))
+	return int(int64(w.popCapacity(e)) * StartPeople / int64(max(1, w.popCapacity(&base))))
 }
 
 // ClampStartingRegions holds a Starting Regions value to its bounds, reading 0
@@ -234,7 +234,7 @@ func (w *World) AddHumanKey(handle, userKey, realm string) *Empire {
 	if slot == 0 {
 		return nil
 	}
-	e := newEmpire(realm, OwnerKey(handle), w.Config, w.GameDay)
+	e := w.newEmpire(realm, OwnerKey(handle), w.Config, w.GameDay)
 	e.UserKey = userKey
 	e.Slot = slot
 	e.Founded = Recorded(timeNow())
