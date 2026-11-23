@@ -23,9 +23,12 @@ type Rules struct {
 	HQ HQRules
 }
 
-// HQRules are the HeadQuarters figures. The interplanetary resolver's own tank
-// curve (RemoteTankStrength*) is not here: those battles only happen in a
-// league, and a league board refuses mods.
+// HQRules are the HeadQuarters figures. What only interplanetary play does to
+// a HeadQuarters is not here — the resolver's own tank curve
+// (RemoteTankStrength*), the fifth a winning invasion takes
+// (InvasionHQLossDivisor) and a landed Sabotage HQ agent's points
+// (TerrorHQSabotagePoints): those only happen in a league, and a league board
+// refuses mods, so a key for them could never take effect.
 type HQRules struct {
 	// TankPerHQ is the part of a tank's strength a point of HeadQuarters
 	// completion adds, over TankStrengthPctBase (the curve's fixed reference).
@@ -36,15 +39,10 @@ type HQRules struct {
 	// BattleLossMin and BattleLossJitter: a lost defense costs the
 	// HeadQuarters BattleLossMin + Random(BattleLossJitter) points.
 	BattleLossMin, BattleLossJitter int
-	// InvasionLossDivisor: a winning interplanetary strike takes 1/divisor of
-	// the HeadQuarters of each realm it takes regions from.
-	InvasionLossDivisor int
 	// PriceBase, PricePerTurn and PriceJitter make the price: PriceBase +
 	// PricePerTurn x turns played + Random(PriceJitter), held under PriceCap
 	// minus Random(PriceCapJitter). Gold.
 	PriceBase, PricePerTurn, PriceJitter, PriceCap, PriceCapJitter int64
-	// SabotagePoints is what a landed Sabotage HQ agent takes off the target.
-	SabotagePoints int
 }
 
 // UnitRules are one unit's figures. Units with no production or price walk
@@ -91,10 +89,8 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 	HQ: HQRules{
 		TankPerHQ: TankStrengthPctPerHQ, BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
 		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
-		InvasionLossDivisor: InvasionHQLossDivisor,
-		PriceBase:           HQPriceBase, PricePerTurn: HQPricePerTurn, PriceJitter: HQPriceJitter,
+		PriceBase: HQPriceBase, PricePerTurn: HQPricePerTurn, PriceJitter: HQPriceJitter,
 		PriceCap: HQPriceCap, PriceCapJitter: HQPriceCapJitter,
-		SabotagePoints: TerrorHQSabotagePoints,
 	},
 }
 
@@ -136,13 +132,11 @@ const (
 // the price itself inside an int on a 32-bit build; the percent figures are
 // percent of a HeadQuarters that tops out at 100.
 const (
-	ModHQTankBonusMax      = 10 // hundredths of a trooper a tank gains per HQ point (base: 0.01)
-	ModHQPercentMax        = 100
-	ModHQDivisorMax        = 1000
-	ModHQPriceMax          = 1_000_000_000
-	ModHQPricePerTurnMax   = 1_000_000
-	ModHQPriceJitterMax    = 1_000_000
-	ModHQSabotagePointsMax = 100
+	ModHQTankBonusMax    = 10 // hundredths of a trooper a tank gains per HQ point (base: 0.01)
+	ModHQPercentMax      = 100
+	ModHQPriceMax        = 1_000_000_000
+	ModHQPricePerTurnMax = 1_000_000
+	ModHQPriceJitterMax  = 1_000_000
 )
 
 // Validate reports every value outside its limits, so a sysop fixing a mod sees
@@ -213,9 +207,6 @@ func (r *Rules) validateHQ(bad func(format string, a ...any)) {
 	if h.BattleLossJitter < 1 || h.BattleLossJitter > ModHQPercentMax {
 		bad("battle_loss_jitter %d is outside 1 to %d", h.BattleLossJitter, ModHQPercentMax)
 	}
-	if h.InvasionLossDivisor < 1 || h.InvasionLossDivisor > ModHQDivisorMax {
-		bad("invasion_loss_divisor %d is outside 1 to %d", h.InvasionLossDivisor, ModHQDivisorMax)
-	}
 	if h.PriceBase < 1 || h.PriceBase > ModHQPriceMax {
 		bad("price_base %d is outside 1 to %d", h.PriceBase, ModHQPriceMax)
 	}
@@ -230,9 +221,6 @@ func (r *Rules) validateHQ(bad func(format string, a ...any)) {
 	}
 	if h.PriceCapJitter < 0 || h.PriceCapJitter >= h.PriceCap {
 		bad("price_cap_jitter %d is outside 0 to one below price_cap (%d)", h.PriceCapJitter, h.PriceCap)
-	}
-	if h.SabotagePoints < 0 || h.SabotagePoints > ModHQSabotagePointsMax {
-		bad("sabotage_points %d is outside 0 to %d", h.SabotagePoints, ModHQSabotagePointsMax)
 	}
 }
 

@@ -237,9 +237,9 @@ func TestHQSectionRefusesWhatItShould(t *testing.T) {
 func TestBaseValuesPrintTheHQSection(t *testing.T) {
 	text := Values(game.BaseRules(), "h")
 	for _, want := range []string{"[hq]\n", "tank_bonus = 0.01", "build_start = 5", "build_per_turn = 5",
-		"battle_loss_min = 5", "battle_loss_jitter = 3", "invasion_loss_divisor = 5",
+		"battle_loss_min = 5", "battle_loss_jitter = 3",
 		"price_base = 5000", "price_per_turn = 75", "price_jitter = 300",
-		"price_cap = 100000", "price_cap_jitter = 1000", "sabotage_points = 15"} {
+		"price_cap = 100000", "price_cap_jitter = 1000"} {
 		if !strings.Contains(text, want+"\n") && !strings.HasSuffix(want, "\n") {
 			t.Errorf("output lacks %q:\n%s", want, text)
 		}

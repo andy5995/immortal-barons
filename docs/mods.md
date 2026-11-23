@@ -52,13 +52,11 @@ section in `values.toml`, not one per unit. Every key is optional:
 | `build_per_turn` | Percent it gains each turn until it reaches 100 | 1 to 100 |
 | `battle_loss_min` | Completion percent a HeadQuarters loses when its realm loses a defense | 0 to 100 |
 | `battle_loss_jitter` | A random 0 up to one less than this is added to that loss | 1 to 100 |
-| `invasion_loss_divisor` | A winning interplanetary strike takes one part in this many of a realm's HeadQuarters (the base game's 5 is a fifth) | 1 to 1,000 |
 | `price_base` | Gold a HeadQuarters costs a realm that has played no turns | 1 to 1,000,000,000 |
 | `price_per_turn` | Gold the price rises with each turn the realm has played | 0 to 1,000,000 |
 | `price_jitter` | A random 0 up to one less than this is added to the price. 0 makes the price exact | 0 to 1,000,000 |
 | `price_cap` | The price never rises past this, less its own random draw | `price_base` to 1,000,000,000 |
 | `price_cap_jitter` | A random 0 up to one less than this is taken off the cap | 0 to one less than `price_cap` |
-| `sabotage_points` | Completion percent each agent that lands a Sabotage HQ operation takes off | 0 to 100 |
 
 For example, a HeadQuarters that is cheap and quick to build:
 
@@ -69,8 +67,10 @@ price_per_turn = 10
 build_per_turn = 10
 ```
 
-The interplanetary battle's own tank figures are not changed by a mod, since
-interplanetary battles only happen in a league.
+What interplanetary play does to a HeadQuarters is not changed by a mod: the
+interplanetary battle's own tank figures, the share a winning invasion takes,
+and what a Sabotage HQ agent takes. Those only happen in a league, where mods
+are not allowed.
 
 To see every value a mod can change, as the game sets it without mods, run:
 

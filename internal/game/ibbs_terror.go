@@ -335,7 +335,7 @@ func (w *World) applyTerrorOp(op TerrorOpType, target *Empire) bool {
 		if target.HQ <= 0 {
 			return false
 		}
-		target.HQ -= w.rules().HQ.SabotagePoints
+		target.HQ -= TerrorHQSabotagePoints
 		if target.HQ < 0 {
 			target.HQ = 0
 		}

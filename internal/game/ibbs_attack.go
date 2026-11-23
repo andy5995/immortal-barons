@@ -872,7 +872,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		land += take
 		// The same block knocks a fifth off the realm's HeadQuarters
 		// (InvasionHQLossDivisor), whatever the regions came to.
-		e.HQ -= e.HQ / w.rules().HQ.InvasionLossDivisor
+		e.HQ -= e.HQ / InvasionHQLossDivisor
 		e.addEvent(invasionReport(atk, true, losses[i], take, theirs))
 	}
 	if planetWide {

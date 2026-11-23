@@ -15,7 +15,6 @@ func TestModdedHQReachesTheEngine(t *testing.T) {
 	w.Rules.HQ.PriceJitter = 0
 	w.Rules.HQ.BuildStart = 10
 	w.Rules.HQ.BuildPerTurn = 10
-	w.Rules.HQ.SabotagePoints = 40
 	if err := w.Rules.Validate(); err != nil {
 		t.Fatal(err)
 	}
@@ -34,11 +33,6 @@ func TestModdedHQReachesTheEngine(t *testing.T) {
 	w.PlayTurn(e, "2026-07-03")
 	if e.HQ != 20 {
 		t.Errorf("HQ after one turn %d, want 20 (start 10, plus 10)", e.HQ)
-	}
-
-	e.HQ = 100
-	if !w.applyTerrorOp(TerrorOpSabotageHQ, e) || e.HQ != 60 {
-		t.Errorf("sabotage left HQ at %d, want 60", e.HQ)
 	}
 }
 
@@ -72,7 +66,6 @@ func TestHQRulesAreRefusedOutOfRange(t *testing.T) {
 		{"start", func(h *HQRules) { h.BuildStart = 0 }, "build_start 0 is outside 1 to 100"},
 		{"per turn", func(h *HQRules) { h.BuildPerTurn = 101 }, "build_per_turn 101 is outside 1 to 100"},
 		{"loss jitter zero", func(h *HQRules) { h.BattleLossJitter = 0 }, "battle_loss_jitter 0 is outside 1 to 100"},
-		{"divisor zero", func(h *HQRules) { h.InvasionLossDivisor = 0 }, "invasion_loss_divisor 0 is outside 1 to 1000"},
 		{"price base", func(h *HQRules) { h.PriceBase = 0 }, "price_base 0 is outside 1 to 1000000000"},
 		{"cap below base", func(h *HQRules) { h.PriceCap = 4999 }, "price_cap 4999 must be at least price_base (5000)"},
 		{"cap jitter", func(h *HQRules) { h.PriceCapJitter = h.PriceCap }, "price_cap_jitter 100000 is outside 0 to one below price_cap"},

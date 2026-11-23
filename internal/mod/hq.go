@@ -41,9 +41,6 @@ var hqFields = []hqField{
 	{"battle_loss_jitter",
 		func(h game.HQRules) string { return fmt.Sprint(h.BattleLossJitter) },
 		func(h *game.HQRules, v any) (err error) { h.BattleLossJitter, err = whole(v); return }},
-	{"invasion_loss_divisor",
-		func(h game.HQRules) string { return fmt.Sprint(h.InvasionLossDivisor) },
-		func(h *game.HQRules, v any) (err error) { h.InvasionLossDivisor, err = whole(v); return }},
 	{"price_base",
 		func(h game.HQRules) string { return fmt.Sprint(h.PriceBase) },
 		func(h *game.HQRules, v any) (err error) { h.PriceBase, err = whole64(v); return }},
@@ -59,9 +56,6 @@ var hqFields = []hqField{
 	{"price_cap_jitter",
 		func(h game.HQRules) string { return fmt.Sprint(h.PriceCapJitter) },
 		func(h *game.HQRules, v any) (err error) { h.PriceCapJitter, err = whole64(v); return }},
-	{"sabotage_points",
-		func(h game.HQRules) string { return fmt.Sprint(h.SabotagePoints) },
-		func(h *game.HQRules, v any) (err error) { h.SabotagePoints, err = whole(v); return }},
 }
 
 func hqKey(key string) *hqField {
