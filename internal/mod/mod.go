@@ -84,6 +84,7 @@ func (m *Mod) Ref() game.ModRef {
 // checked against unitFields, so the keys a file may use are named only there.
 type values struct {
 	Units map[string]map[string]any `toml:"units"`
+	HQ    map[string]any            `toml:"hq"`
 }
 
 // number takes a TOML integer or float, so `upkeep = 1` and `upkeep = 0.4`
@@ -290,6 +291,9 @@ func (m *Mod) Apply(r *game.Rules) error {
 			}
 		}
 		r.Units[g] = u
+	}
+	if err := m.applyHQ(r); err != nil {
+		errs = append(errs, err)
 	}
 	if m.pirates != nil {
 		r.Pirates = m.pirates
