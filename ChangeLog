@@ -5,8 +5,11 @@ Immortal Barons ChangeLog
   * The World Report can be read in the game, from (7) on the opening menu
   * Replying to local mail asks whether it goes to everyone the message went
     to, the author only, or chosen realms
-  * Mods can change unit costs, net worth, upkeep and prices on a stand-alone
-    board; see docs/mods.md and -check-mod
+  * Mods can change unit costs, net worth, upkeep, prices, offense and defense
+    on a stand-alone board, turned on from the settings editor; see
+    docs/mods.md and -check-mod
+  * A mod can carry a Starlark script that decides pirate raids
+  * The sysop panel lists each board's mods and runs -check-mod on them
 
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset
