@@ -53,7 +53,6 @@ class ImmortalBarons < Formula
                 "docs/charset.md", "docs/translating.md",
                 "docs/inter-bbs.md", "docs/inter-bbs-troubleshooting.md",
                 "docs/ftn-transport.md", "docs/bulletins.md", "docs/bbs-cfg.md",
-                "docs/mods.md",
                 "docs/sysop-panel.md"
   end
 
