@@ -153,7 +153,7 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	for _, name := range names {
 		data := []byte(files[name])
 		if name != ManifestFile && name != ValuesFile {
-			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod", path, name)
+			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s", path, name, ManifestFile, ValuesFile)
 		}
 		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(data))
 		hash.Write(data)
