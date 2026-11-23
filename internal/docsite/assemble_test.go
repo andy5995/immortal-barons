@@ -16,6 +16,7 @@ func writeFixture(t *testing.T, root string) {
 		"docs/door-setup.md":                          "# Door Setup\n\nSetup. See [leagues](docs/inter-bbs.md).\n",
 		"docs/bbs-cfg.md":                             "# bbs.cfg Reference\n\nEvery setting.\n",
 		"docs/bulletins.md":                           "# Bulletin Files\n\nWhat the game writes for your BBS menu and your website.\n",
+		"docs/mods.md":                                "# Mods\n\nChanging the numbers the game plays by.\n",
 		"docs/inter-bbs.md":                           "# Inter-BBS Leagues\n\nLeague play.\n",
 		"docs/inter-bbs-troubleshooting.md":           "# Inter-BBS Troubleshooting\n\nWhen packets stop arriving.\n",
 		"docs/ftn-transport.md":                       "# FTN Transport\n\nTransport setup.\n",

@@ -5,6 +5,8 @@ Immortal Barons ChangeLog
   * The World Report can be read in the game, from (7) on the opening menu
   * Replying to local mail asks whether it goes to everyone the message went
     to, the author only, or chosen realms
+  * Mods can change unit costs, net worth, upkeep and prices on a stand-alone
+    board; see docs/mods.md and -check-mod
 
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset

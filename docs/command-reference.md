@@ -85,6 +85,11 @@ then exit.
 - **`-reset-from-config`** — Start a new game using the current `config.json`,
   without opening the editor. It clears all empires and rebuilds the world. The
   old world is saved first.
+- **`-check-mod <dir>`** — Check the mod in folder `<dir>` on its own, with the
+  limits a reset uses, print every value it changes, then exit. See
+  [Mods](mods.md).
+- **`-print-base-mod`** — Print every value a mod can change, as the game sets
+  it without mods, in the form of a `values.toml`, then exit.
 - **`-players`** — List the players and edit one of them, then exit. This is the
   original's `VIEW` command. Pick a realm by its Id letter, then choose
   **D**elete realm, **P**layer name, **R**ealm name, or **Q**uit. Deleting asks
