@@ -143,6 +143,10 @@ func TestScriptGameReplaysForASeed(t *testing.T) {
 		if len(e.PirateHits) == 0 {
 			t.Fatal("the script never raided")
 		}
+		// Founded is the wall-clock moment the realm was made, to the second,
+		// which no seed decides: two plays a second boundary apart differ there
+		// and nowhere else.
+		e.Founded = ""
 		b, err := json.Marshal([]any{e, w.Pirates})
 		if err != nil {
 			t.Fatal(err)
