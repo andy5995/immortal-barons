@@ -152,7 +152,10 @@ stream). Front-ends attach different streams; the engine is unchanged.
   board's league state and running the game's commands as child processes. It
   is its OWN module (`cmd/ib-sysop/go.mod`, replacing the game module with
   `../..`), so Gio never enters the game's `go.mod`, `./...` never reaches it,
-  and CI builds it in its own `sysop-panel` job. It never writes a world
+  and CI builds it in its own `sysop-panel` job. It never writes a world.
+  **A new dependency of the game module needs `go mod tidy` in
+  `cmd/ib-sysop` too**: the panel imports most of `internal/`, and nothing
+  local catches the missing entry (TOML broke every panel build this way)
 - `internal/sysop` — what the panel reads and runs, kept in the game module so
   it is tested with the rest of the tree: a read-only snapshot through the
   world lock, and the command list
