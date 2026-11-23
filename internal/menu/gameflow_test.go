@@ -1836,3 +1836,33 @@ func TestOffersSentMidSittingArePutAtTheNextTurn(t *testing.T) {
 		t.Errorf("the declined deal is still pending: %+v", p.TradeDeals)
 	}
 }
+
+// A region type a mod gives food or gold gets its own line in the income
+// report, read from the type's row; the base game's lines come out as before.
+func TestIncomeReportListsAModdedRegionsYield(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	r := game.BaseRules()
+	desert := r.Regions[game.Desert]
+	desert.FoodBase = 100
+	r.Regions[game.Desert] = desert
+	urban := r.Regions[game.Urban]
+	urban.GoldBase = 1000
+	r.Regions[game.Urban] = urban
+	w.World.Rules = r
+	p := w.Player()
+	p.Regions = game.RegionMix{Desert: 10, Urban: 10, Agricultural: 10}
+	p.Land = p.Regions.Total()
+	incomeReport(f, w)
+	out := f.out.String()
+	for _, want := range []string{
+		"Food units were produced by Desert regions.",
+		"gold was earned from Urban regions.",
+		"Food units were grown.",
+		"gold was earned by Solar Power Generators.",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("income report is missing %q:\n%s", want, out)
+		}
+	}
+}
