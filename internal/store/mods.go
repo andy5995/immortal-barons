@@ -54,7 +54,7 @@ func ReloadMods(w *game.World, cfg game.Config) ([]string, error) {
 	if cfg.IBBS {
 		return nil, ErrModsInLeague
 	}
-	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods)
+	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods, cfg.ModOptions)
 	if err != nil {
 		return nil, fmt.Errorf("the mods were not reloaded: %w", err)
 	}
@@ -93,7 +93,7 @@ func resolveResetMods(cfg game.Config) (*game.Rules, []game.ModRef, error) {
 	if len(cfg.Mods) > 0 && cfg.IBBS {
 		return nil, nil, ErrModsInLeague
 	}
-	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods)
+	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods, cfg.ModOptions)
 	if err != nil {
 		return nil, nil, fmt.Errorf("the reset was not made: %w", err)
 	}

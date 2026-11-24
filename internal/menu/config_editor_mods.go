@@ -81,7 +81,7 @@ func modRows(dataDir string, enabled []string) ([]modRow, error) {
 // editors refuse to save while it is not nil, since the reset that follows a
 // save would refuse the list after config.json had already been written.
 func modsError(c game.Config) error {
-	_, _, err := mod.Resolve(c.DataDir, c.Mods)
+	_, _, err := mod.Resolve(c.DataDir, c.Mods, c.ModOptions)
 	return err
 }
 
@@ -94,12 +94,12 @@ func noMods(dataDir string) string {
 // mod on loads the whole new list as a reset would, so a mod that will not load,
 // or that breaks a limit together with the others, is refused here rather than
 // when the sysop saves.
-func toggleMod(dataDir string, list []string, name string) ([]string, error) {
+func toggleMod(dataDir string, options map[string]map[string]int64, list []string, name string) ([]string, error) {
 	if i := slices.Index(list, name); i >= 0 {
 		return slices.Delete(slices.Clone(list), i, i+1), nil
 	}
 	next := append(slices.Clone(list), name)
-	if _, _, err := mod.Resolve(dataDir, next); err != nil {
+	if _, _, err := mod.Resolve(dataDir, next, options); err != nil {
 		return list, err
 	}
 	return next, nil
@@ -162,7 +162,7 @@ func editMods(s session.Session, c *game.Config) {
 			fail(s, r.err)
 			continue
 		}
-		next, err := toggleMod(c.DataDir, c.Mods, r.name)
+		next, err := toggleMod(c.DataDir, c.ModOptions, c.Mods, r.name)
 		if err != nil {
 			fail(s, err)
 			continue
@@ -254,7 +254,7 @@ func (t *configTUI) modsForm() *tview.Form {
 			}
 			b.SetDisabled(r.err != nil && !on)
 			msg, top := help, modsNote(c.DataDir, order)
-			if _, _, err := mod.Resolve(c.DataDir, order); err != nil {
+			if _, _, err := mod.Resolve(c.DataDir, order, c.ModOptions); err != nil {
 				msg = "This list will not load, so it cannot be saved: " + err.Error()
 				top = err.Error()
 			}

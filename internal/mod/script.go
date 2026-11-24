@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -40,7 +41,8 @@ const viewKey = "ib.view"
 
 // predeclared are the names a script sees besides Starlark's own built-ins.
 // Nothing here reads a clock or a file, so a script's answer depends only on
-// what the game hands it.
+// what the game hands it. option() is added at compile time: its values are
+// fixed for the game being loaded.
 var predeclared = starlark.StringDict{
 	"rand": starlark.NewBuiltin("rand", func(th *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		var n int
@@ -68,6 +70,18 @@ var predeclared = starlark.StringDict{
 	}),
 }
 
+// predeclaredFor adds a mod's chosen options to the names a script sees. The
+// base dict is never written to: the same process compiles mods with different
+// options at the same time.
+func predeclaredFor(options *optionValues) starlark.StringDict {
+	out := starlark.StringDict{}
+	maps.Copy(out, predeclared)
+	if options != nil {
+		out["option"] = options.builtin()
+	}
+	return out
+}
+
 // pirateScript is a compiled pirates.star: the game.PirateBrain a mod adds to
 // its rules.
 type pirateScript struct {
@@ -87,8 +101,8 @@ func newThread(name string) *starlark.Thread {
 // compilePirates runs src's top level and checks that it defines raid with two
 // parameters. Starlark's defaults stay on: no while loops, no recursion, and
 // no load(), since the thread has no loader.
-func compilePirates(file, src string) (*starlark.Function, error) {
-	globals, err := starlark.ExecFileOptions(&syntax.FileOptions{}, newThread(file), file, src, predeclared)
+func compilePirates(file, src string, options *optionValues) (*starlark.Function, error) {
+	globals, err := starlark.ExecFileOptions(&syntax.FileOptions{}, newThread(file), file, src, predeclaredFor(options))
 	var ee *starlark.EvalError
 	if errors.As(err, &ee) {
 		return nil, fmt.Errorf("%s: %w", file, scriptError(err))
@@ -289,14 +303,14 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 	return orders, nil
 }
 
-// newPirateScript compiles a mod's pirates.star.
-func newPirateScript(path, name, hash, src string) (*pirateScript, error) {
+// newPirateScript compiles a mod's pirates.star with its chosen options.
+func newPirateScript(path, name, hash, src string, options *optionValues) (*pirateScript, error) {
 	file := filepath.Join(path, PiratesFile)
-	key := file + "\x00" + src
+	key := file + "\x00" + src + options.key()
 	if fn, ok := compiled.Load(key); ok {
 		return &pirateScript{mod: name, hash: hash, file: file, raid: fn.(*starlark.Function)}, nil
 	}
-	fn, err := compilePirates(file, src)
+	fn, err := compilePirates(file, src, options)
 	if err != nil {
 		return nil, err
 	}

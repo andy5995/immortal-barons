@@ -1095,7 +1095,8 @@ var perBoardConfigFields = map[string]string{
 	"HeldPacketDays": "how long THIS board keeps packets it set aside; its own disk and its own patience with a link",
 	// A rule, but one a league board refuses outright until the reset packet
 	// can carry a mod to every member (#202), so it is never broadcast yet.
-	"Mods": "the mods this board's next reset applies; refused on a league board",
+	"Mods":       "the mods this board's next reset applies; refused on a league board",
+	"ModOptions": "this board's choices for its next reset's mods; refused on a league board, whose reset order carries the Coordinator's choices",
 }
 
 // TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config

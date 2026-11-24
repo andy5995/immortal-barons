@@ -347,7 +347,7 @@ func TestSaveLoadRoundTripAllFields(t *testing.T) {
 	// Load verifies the mods a world records against their folders, so the
 	// filled reference has to name a real one.
 	writeTestMod(t, cfg.DataDir, "x", "")
-	_, refs, err := mod.Resolve(cfg.DataDir, []string{"x"})
+	_, refs, err := mod.Resolve(cfg.DataDir, []string{"x"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

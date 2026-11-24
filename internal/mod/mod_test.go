@@ -104,7 +104,7 @@ func TestResolveAppliesInOrderLaterWins(t *testing.T) {
 	data := t.TempDir()
 	writeMod(t, data, "one", map[string]string{ManifestFile: manifest("one"), ValuesFile: "[units.tank]\nbuild_cost = 400\n[units.jet]\nbuild_cost = 100\n"})
 	writeMod(t, data, "two", map[string]string{ManifestFile: manifest("two"), ValuesFile: "[units.tank]\nbuild_cost = 600\n"})
-	r, refs, err := Resolve(data, []string{"one", "two"})
+	r, refs, err := Resolve(data, []string{"one", "two"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestResolveAppliesInOrderLaterWins(t *testing.T) {
 	if len(refs) != 2 || refs[0].Name != "one" || refs[1].Name != "two" || refs[0].Hash == "" {
 		t.Errorf("refs = %+v", refs)
 	}
-	if _, _, err := Resolve(data, []string{"../one"}); err == nil {
+	if _, _, err := Resolve(data, []string{"../one"}, nil); err == nil {
 		t.Error("a name with a path in it must be refused")
 	}
 }
@@ -127,7 +127,7 @@ func TestResolveAppliesInOrderLaterWins(t *testing.T) {
 func TestRestoreKeepsTheOldValuesOfAnEditedMod(t *testing.T) {
 	data := t.TempDir()
 	dir := writeMod(t, data, "m", map[string]string{ManifestFile: manifest("m"), ValuesFile: "[units.tank]\nbuild_cost = 400\n"})
-	_, refs, err := Resolve(data, []string{"m"})
+	_, refs, err := Resolve(data, []string{"m"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
