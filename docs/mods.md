@@ -217,8 +217,9 @@ Two built-in functions are added to Starlark's own:
 
 If the script fails in a turn, because of an error, by running out of steps,
 or by returning a raid the game does not allow, that realm's turn uses the
-normal pirate raid instead. The game writes the reason to its error output
-once each time the game runs, naming the mod.
+normal pirate raid instead. The game writes the reason to its error output,
+naming the mod: once for each different reason, up to five, each time the
+game runs.
 
 ### Region figures
 
@@ -278,8 +279,9 @@ bonus, and turn 100 pays them with it.
 
 If a script fails, because of an error, by running out of steps, or by
 returning a figure outside its limits, that realm plays the type's figures
-from `row` unchanged. The game writes the reason to its error output once each
-time the game runs, naming the mod and the script.
+from `row` unchanged. The game writes the reason to its error output, naming
+the mod and the script: once for each different reason, up to five, each time
+the game runs.
 
 ### Script versions
 
@@ -311,6 +313,10 @@ available). `while` loops and recursion are not allowed, and neither are
 `if` and `for` at the top level of the file: put them inside a function. Each
 call to `raid` or `region` may run for at most 1,000,000 steps, and so may the
 top level of the file when it loads.
+
+A script keeps nothing from one call to the next. Values set at the top level
+of the file are frozen once it has loaded: `raid` and `region` can read a list
+or dict made there, but changing it is an error.
 
 A script is as trusted as the rest of the mod folder. It runs inside the game
 itself, and nothing limits how much memory it uses, so install only scripts

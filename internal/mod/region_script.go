@@ -137,18 +137,10 @@ func (s *regionScript) Region(v game.RegionView, row game.RegionRules) (game.Reg
 	return out, nil
 }
 
-// Failed reports why a realm played the type's row unchanged, once per script
-// per process, as pirateScript.Failed does.
+// Failed reports why a realm played the type's row unchanged (warnScript).
 func (s *regionScript) Failed(err error) {
-	warnMu.Lock()
-	defer warnMu.Unlock()
-	key := regionScriptFile(s.region) + "\x00" + s.mod + "\x00" + s.hash
-	if warned[key] {
-		return
-	}
-	warned[key] = true
-	fmt.Fprintf(warnOut, "immortal-barons: mod %q: %s: %v; %s regions use the mod's values where it fails (reported once)\n",
-		s.mod, regionScriptFile(s.region), err, s.region.Name)
+	file := regionScriptFile(s.region)
+	warnScript(s.mod+"\x00"+s.hash+"\x00"+file, s.mod, file, err, s.region.Name+" regions use the mod's values where it fails")
 }
 
 // regionRealmValue is region()'s first argument: a read-only struct, with the
