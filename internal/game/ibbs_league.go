@@ -681,11 +681,12 @@ func (w *World) applyLeagueReset(r *LeagueReset) {
 		}
 		if err != nil {
 			w.PendingLeagueReset = r
+			w.PendingLeagueNumber, w.PendingLeagueKey = w.Config.LeagueNumber, hex.EncodeToString(w.CoordPub)
 			w.noteSysop("The League Coordinator reset the league with mods this board cannot play, so this board did not reset: %v. It resets on the first planetary run after it can play them.", err)
 			return
 		}
 	}
-	w.PendingLeagueReset = nil
+	w.clearPendingLeagueReset()
 	w.Rules, w.Mods = rules, r.Mods
 	w.ResetForLeague(r.OnDate)
 	if r.Announced != "" {
@@ -703,10 +704,25 @@ func (w *World) applyLeagueReset(r *LeagueReset) {
 // Not while the league is frozen: a reset clears every saved field, Frozen
 // with it, so a retry would thaw this board alone while the rest of the
 // league stays frozen. The order waits for the thaw.
+//
+// A board that has moved to another league since (a different league number
+// or Coordinator key) discards the order: it would reset this board onto a
+// game its new league is not playing.
 func (w *World) RetryPendingLeagueReset() {
-	if r := w.PendingLeagueReset; r != nil && !w.Frozen {
-		w.applyLeagueReset(r)
+	r := w.PendingLeagueReset
+	if r == nil || w.Frozen {
+		return
 	}
+	if w.PendingLeagueNumber != w.Config.LeagueNumber || w.PendingLeagueKey != hex.EncodeToString(w.CoordPub) {
+		w.clearPendingLeagueReset()
+		w.noteSysop("A reset order this board refused came from a league it is no longer in, so that order was discarded.")
+		return
+	}
+	w.applyLeagueReset(r)
+}
+
+func (w *World) clearPendingLeagueReset() {
+	w.PendingLeagueReset, w.PendingLeagueNumber, w.PendingLeagueKey = nil, 0, ""
 }
 
 // DeclareLeagueReset is the Coordinator ordering every board to reset. It resets

@@ -100,7 +100,9 @@ The League Coordinator chooses the mods; members install nothing.
   retried at the start of every planetary run: once the sysop makes the mods
   playable, that order resets the board with its original date and mods. Its
   old game is held apart by the ruleset check until then. A reset under other
-  rules would feed a different game into everyone else's.
+  rules would feed a different game into everyone else's. The order is kept
+  through any reset of the board's own, and discarded once the board is in
+  another league (a different league number or Coordinator key).
 - **Scripts run on a member only when its sysop allows it** (`AcceptLeagueScripts`
   in `bbs.cfg`, off by default). The check must come before anything compiles a
   script, since compiling runs its top level.

@@ -497,8 +497,10 @@ hold its packets.
 Scripts are another choice. A mod that carries `pirates.star` or a script in
 `regions` runs only on a board whose sysop sets `AcceptLeagueScripts Yes` in
 `bbs.cfg`. The setting defaults to `no`. A board with the default refuses a
-scripted reset until its sysop turns the setting on. Scripts run on that
-machine with no memory limit, so read them before you allow them.
+scripted reset and keeps the order. It resets at its first planetary run after
+its sysop turns the setting on. If the board moves to another league first, the
+order is discarded. Scripts run on that machine with no memory limit, so read
+them before you allow them.
 
 ## Testing a mod
 

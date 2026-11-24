@@ -98,6 +98,9 @@ func TestResetErasesEverythingSaved(t *testing.T) {
 			}
 			continue
 		}
+		if f.Name == "PendingLeagueNumber" || f.Name == "PendingLeagueKey" {
+			continue // kept with PendingLeagueReset, checked below
+		}
 		if f.Name == "PendingLeagueReset" {
 			// A refused league order waits for a game that can play it, so it
 			// outlives the game that was running when it came.

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"crypto/ed25519"
 	"errors"
 	"reflect"
 	"strings"
@@ -232,6 +233,55 @@ func TestPendingLeagueResetWaitsForTheThaw(t *testing.T) {
 	m.RetryPendingLeagueReset()
 	if m.PendingLeagueReset != nil || len(m.Mods) != 1 {
 		t.Errorf("after the thaw: pending %v, mods %v; want the order applied", m.PendingLeagueReset, m.Mods)
+	}
+}
+
+// An order refused in one league is discarded once the board is in another:
+// carried out there, it would reset the board onto a game nobody plays.
+func TestPendingLeagueResetFromAnotherLeagueIsDiscarded(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		move func(m *World)
+	}{
+		{"new league number", func(m *World) { m.Config.LeagueNumber++ }},
+		{"new Coordinator key", func(m *World) {
+			pub, _, err := ed25519.GenerateKey(nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			m.CoordPub = pub
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			lc, m := freezePair(t)
+			refs := []ModRef{{Name: "scripted", Version: "1.0", Hash: strings.Repeat("c", 64),
+				Files: map[string]string{"values.toml": ""}}}
+			accept := false
+			stubLeagueMods(t, func([]ModRef, bool) (*Rules, error) {
+				if !accept {
+					return nil, errors.New("this board does not accept scripts")
+				}
+				return BaseRules(), nil
+			})
+			m.AddHuman("bob", "Bobland")
+			m.receive(leagueResetOrder(t, lc, m.Config.BoardID, BaseRules(), refs))
+			if m.PendingLeagueReset == nil {
+				t.Fatal("the refused order was not kept")
+			}
+			tc.move(m)
+			accept = true
+			m.SysopNotices = nil
+
+			m.RetryPendingLeagueReset()
+
+			if m.PendingLeagueReset != nil || len(m.Empires) != 1 || len(m.Mods) != 0 {
+				t.Errorf("an order from the old league was applied or kept: pending %v, %d realms, mods %v",
+					m.PendingLeagueReset, len(m.Empires), m.Mods)
+			}
+			if !strings.Contains(strings.Join(m.SysopNotices, "\n"), "no longer in") {
+				t.Errorf("the sysop was not told the order was discarded: %q", m.SysopNotices)
+			}
+		})
 	}
 }
 
