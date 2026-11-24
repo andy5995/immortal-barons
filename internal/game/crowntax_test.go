@@ -11,12 +11,12 @@ func TestCrownTaxIsShareOfIncome(t *testing.T) {
 	e.syncLand()
 
 	b := w.IncomeThisTurn(e)
-	if want := int64(b.CrownTaxBase() * w.Config.PlanetaryTaxRate / 100); w.CrownTax(e) != want {
+	if want := b.CrownTaxBase() * int64(w.Config.PlanetaryTaxRate) / 100; w.CrownTax(e) != want {
 		t.Errorf("CrownTax = %d, want %d", w.CrownTax(e), want)
 	}
 	// Trading proceeds are outside the base — BRE accumulates it at the six
 	// region/tax income sites only.
-	if b.CrownTaxBase() != b.Gold()-b.Trade {
+	if b.CrownTaxBase() != b.Gold()-int64(b.Trade) {
 		t.Errorf("base %d should be Gold %d minus Trade %d", b.CrownTaxBase(), b.Gold(), b.Trade)
 	}
 	// Rate 0 means no tax at all; the sysop can switch it off.

@@ -20,12 +20,15 @@ import (
 // (BRE-verified).
 type IncomeBreakdown struct {
 	Taxes, Trade int
-	RegionGold   [regionKinds]int
-	RegionFood   [regionKinds]int
+	// RegionGold is money, so int64: a modded type can pay past 2^31 a turn,
+	// which a 32-bit int would have to cut off before creditGold's cap could
+	// record the loss.
+	RegionGold [regionKinds]int64
+	RegionFood [regionKinds]int
 }
 
 // GoldFrom is the gold r's regions earned.
-func (b IncomeBreakdown) GoldFrom(r *Region) int { return b.RegionGold[r.index] }
+func (b IncomeBreakdown) GoldFrom(r *Region) int64 { return b.RegionGold[r.index] }
 
 // FoodFrom is the food r's regions produced.
 func (b IncomeBreakdown) FoodFrom(r *Region) int { return b.RegionFood[r.index] }
@@ -34,7 +37,7 @@ func (b IncomeBreakdown) FoodFrom(r *Region) int { return b.RegionFood[r.index] 
 func (b IncomeBreakdown) regionGold() int64 {
 	var sum int64
 	for _, n := range b.RegionGold {
-		sum += int64(n)
+		sum += n
 	}
 	return sum
 }
@@ -49,15 +52,15 @@ func (b IncomeBreakdown) Food() int {
 }
 
 // Gold sums the gold-producing sources.
-func (b IncomeBreakdown) Gold() int {
-	return fitInt(int64(b.Taxes) + b.regionGold() + int64(b.Trade))
+func (b IncomeBreakdown) Gold() int64 {
+	return int64(b.Taxes) + b.regionGold() + int64(b.Trade)
 }
 
 // CrownTaxBase is the income the crown tax is levied on: the six region/tax
 // income lines, excluding Trade. BRE accumulates its base at exactly six sites,
 // one per income line, and trading proceeds are not among them.
-func (b IncomeBreakdown) CrownTaxBase() int {
-	return fitInt(int64(b.Taxes) + b.regionGold())
+func (b IncomeBreakdown) CrownTaxBase() int64 {
+	return int64(b.Taxes) + b.regionGold()
 }
 
 // CrownTax is the Queen Royale's per-turn tax: a flat share of the turn's gross
@@ -72,7 +75,7 @@ func (b IncomeBreakdown) CrownTaxBase() int {
 // shown as 5.0%); IB stores whole percent instead, so a sysop and the config
 // editor deal in one unit rather than two. Same arithmetic, one fewer trap.
 func (w *World) CrownTax(e *Empire) int64 {
-	return pctOf(int64(w.IncomeThisTurn(e).CrownTaxBase()), w.Config.PlanetaryTaxRate)
+	return pctOf(w.IncomeThisTurn(e).CrownTaxBase(), w.Config.PlanetaryTaxRate)
 }
 
 // regionDraw returns this turn's income draw for empire e's region type
@@ -186,7 +189,7 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 		// Idle gold is NOT technology-scaled: every other gold block in BRE's
 		// production routine opens with technology_factor(1.5, slot 0) and the
 		// industrial one does not.
-		b.RegionGold[g.index] = fitInt(w.regionGold(e, g)*gold/TechFactorUnit + w.idleGold(e, g, idle))
+		b.RegionGold[g.index] = w.regionGold(e, g)*gold/TechFactorUnit + w.idleGold(e, g, idle)
 		b.RegionFood[g.index] = w.regionFood(e, g)
 	}
 	return b
@@ -274,7 +277,7 @@ func (w *World) GrowFood(e *Empire) {
 // behind. manufacture is likewise called at turn start, alongside this, so
 // freshly-produced units are on hand the same turn (#71).
 func (w *World) CollectIncome(e *Empire) {
-	e.TurnStartGoldLost += w.addGold(e, int64(w.IncomeThisTurn(e).Gold()))
+	e.TurnStartGoldLost += w.addGold(e, w.IncomeThisTurn(e).Gold())
 }
 
 // productionBoost is the multiplier a realm's land gives to unit

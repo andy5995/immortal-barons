@@ -309,7 +309,7 @@ func (w *World) TurnStartOverflowAhead(e *Empire) int64 {
 		w.matureInvestments(&next, w.GameDay+1)
 	}
 	share := max(0, min(next.InvestShare, next.InvestDue))
-	in := spill + int64(w.IncomeThisTurn(e).Gold()) + share
+	in := spill + w.IncomeThisTurn(e).Gold() + share
 	return max(0, next.Gold+in-w.MoneyCap())
 }
 
