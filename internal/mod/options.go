@@ -147,7 +147,7 @@ func (m *Mod) OptionDiff() []string {
 	for _, id := range m.SortedOptionIDs() {
 		o := m.Manifest.Options[id]
 		if got := m.Chosen(id); got != o.Value() {
-			out = append(out, fmt.Sprintf("%s: %s -> %s", o.Label, optionWord(o, o.Value()), optionWord(o, got)))
+			out = append(out, fmt.Sprintf("%s: %s -> %s", o.Label, OptionValueWord(o, o.Value()), OptionValueWord(o, got)))
 		}
 	}
 	return out
@@ -160,11 +160,17 @@ func boolWord(v int64) string {
 	return "False"
 }
 
-func optionWord(o *Option, v int64) string {
+// OptionValueWord renders a chosen value the way OptionDiff and the editors do.
+func OptionValueWord(o *Option, v int64) string {
 	if o.Type == OptionBool {
 		return boolWord(v)
 	}
 	return fmt.Sprint(v)
+}
+
+// OptionValueLine describes one option with its chosen value, for editor rows.
+func OptionValueLine(o *Option, v int64) string {
+	return fmt.Sprintf("%s: %s", o.Label, OptionValueWord(o, v))
 }
 
 // optionValues is what a script sees: each option's type and the value chosen

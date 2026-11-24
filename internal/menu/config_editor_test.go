@@ -301,6 +301,88 @@ func writeTestMod(t *testing.T, dataDir, name, values string) {
 	}
 }
 
+// writeTestOptionMod adds two options to a mod: a bool that switches a section
+// and a number that sets a figure. Both editors must offer them.
+func writeTestOptionMod(t *testing.T, dataDir, name string) {
+	t.Helper()
+	dir := filepath.Join(dataDir, mod.Dir, name)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	manifest := "name = \"" + name + "\"\nversion = \"1.0\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n" +
+		"[options.fast_start]\ntype = \"bool\"\nlabel = \"Fast start\"\ndescription = \"Cheap jets\"\ndefault = 0\n" +
+		"[options.tank_cost]\ntype = \"number\"\nlabel = \"Tank cost\"\ndescription = \"What one tank costs\"\ndefault = 500\nmin = 1\nmax = 1000\n"
+	values := "[units.tank]\nbuild_cost = { option = \"tank_cost\" }\n[when.fast_start.units.jet]\nbuild_cost = 500\n"
+	for f, body := range map[string]string{mod.ManifestFile: manifest, mod.ValuesFile: values} {
+		if err := os.WriteFile(filepath.Join(dir, f), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+// The line editor's Mods page offers an options row, and a number choice that
+// is outside the mod's range is refused with the range named.
+func TestConfigEditorModOptions(t *testing.T) {
+	dir := t.TempDir()
+	writeTestOptionMod(t, dir, "opt")
+	w := newWorld()
+	w.Config.DataDir = dir
+	w.Config.Mods = []string{"opt"}
+
+	f := &fakeSession{keys: []rune("53\r22\r700\r2\r7000\r800\r0\r0s\r")}
+	ConfigEditor(f, w.World)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Options for the mods in play") || !strings.Contains(out, "Tank cost: 800") {
+		t.Fatalf("the option screen or its new value never appeared:\n%s", out)
+	}
+	if !strings.Contains(out, "Enter a whole number from 1 to 1000") {
+		t.Errorf("the out-of-range refusal did not name the range:\n%s", out)
+	}
+	if got := w.Config.ModOptions["opt"]["tank_cost"]; got != 800 {
+		t.Errorf("tank_cost = %d, want 800", got)
+	}
+}
+
+// The tview Mods tab holds one field per option, writes its choice into
+// ModOptions, and refuses a number outside the bounds when the field ends.
+func TestConfigTUIModOptions(t *testing.T) {
+	dir := t.TempDir()
+	writeTestOptionMod(t, dir, "opt")
+	w := newWorld()
+	w.Config.DataDir = dir
+	w.Config.Mods = []string{"opt"}
+	tui := newConfigTUI(w.World)
+	form := tui.forms[len(tui.forms)-1]
+
+	field := func(label string) *tview.InputField {
+		for i := 0; i < form.GetFormItemCount(); i++ {
+			item := form.GetFormItem(i)
+			if sf, ok := item.(*styledField); ok {
+				item = sf.FormItem
+			}
+			if f, ok := item.(*tview.InputField); ok && strings.HasPrefix(f.GetLabel(), label) {
+				return f
+			}
+		}
+		t.Fatalf("no option field %q on the Mods tab", label)
+		return nil
+	}
+	cost := field(noStar + "opt: Tank cost")
+	cost.SetText("800")
+	if got := tui.collect().ModOptions["opt"]["tank_cost"]; got != 800 {
+		t.Errorf("collected tank_cost = %d, want 800", got)
+	}
+	cost.SetText("9999")
+	cost.InputHandler()(tcell.NewEventKey(tcell.KeyTab, 0, tcell.ModNone), func(tview.Primitive) {})
+	if !tui.modalUp || !strings.Contains(cost.GetText(), "500") {
+		t.Errorf("an out-of-range option was not refused (modal %v, text %q)", tui.modalUp, cost.GetText())
+	}
+	if got := tui.collect().ModOptions["opt"]["tank_cost"]; got != 500 {
+		t.Errorf("collected tank_cost = %d, want the default after refusal", got)
+	}
+}
+
 // The Mods page turns a mod on, and refuses one that will not load rather than
 // leaving it for the reset to reject after the sysop has saved.
 func TestConfigEditorModsPage(t *testing.T) {

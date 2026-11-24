@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -77,6 +78,80 @@ func modRows(dataDir string, enabled []string) ([]modRow, error) {
 	return rows, nil
 }
 
+// optionRow is one choice a mod in c.Mods offers. The manifest is read with
+// the game's choices so its label, bounds and diff all come from the same mod
+// copy the editors will save.
+type optionRow struct {
+	modName     string
+	id          string
+	label       string
+	line        string // type, default and range, as -check-mod prints it
+	description string
+	def         *mod.Option
+}
+
+// optionRows lists the options of the enabled mods, in list order, each mod's
+// ids in manifest order. An unreadable mod is skipped here: modsError and the
+// mod list row already say why it cannot be part of the next reset.
+func optionRows(dataDir string, enabled []string, choices map[string]map[string]int64) []optionRow {
+	var out []optionRow
+	for _, name := range enabled {
+		m, err := mod.ReadWithOptions(filepath.Join(dataDir, mod.Dir, name), choices[name])
+		if err != nil {
+			continue
+		}
+		for _, id := range m.SortedOptionIDs() {
+			o := m.Manifest.Options[id]
+			out = append(out, optionRow{
+				modName: name, id: id, label: o.Label, line: m.OptionLine(id),
+				description: o.Description, def: o,
+			})
+		}
+	}
+	return out
+}
+
+// optionChosen is the value a game plays: its explicit choice, or the default.
+func optionChosen(row optionRow, choices map[string]map[string]int64) int64 {
+	if v, ok := choices[row.modName][row.id]; ok {
+		return v
+	}
+	return row.def.Value()
+}
+
+// setOptionChoice records one choice, making the maps only when there is one.
+func setOptionChoice(c *game.Config, name, id string, v int64) {
+	if c.ModOptions == nil {
+		c.ModOptions = map[string]map[string]int64{}
+	}
+	if c.ModOptions[name] == nil {
+		c.ModOptions[name] = map[string]int64{}
+	}
+	c.ModOptions[name][id] = v
+}
+
+// clearOptionChoice puts a new choice back to its default.
+func clearOptionChoice(c *game.Config, name, id string) {
+	if choices := c.ModOptions[name]; choices != nil {
+		delete(choices, id)
+	}
+}
+
+// optionDiffs spells out the choices that differ from a mod's defaults, for
+// the editor's one-line summary and the help shown while a field has focus.
+func optionDiffs(c game.Config) []string {
+	var out []string
+	for _, row := range optionRows(c.DataDir, c.Mods, c.ModOptions) {
+		v := optionChosen(row, c.ModOptions)
+		if v == row.def.Value() {
+			continue
+		}
+		out = append(out, fmt.Sprintf("%s: %s: %s -> %s", row.modName, row.label,
+			mod.OptionValueWord(row.def, row.def.Value()), mod.OptionValueWord(row.def, v)))
+	}
+	return out
+}
+
 // modsError is why c's mod list would not load at a reset, or nil. Both
 // editors refuse to save while it is not nil, since the reset that follows a
 // save would refuse the list after config.json had already been written.
@@ -109,13 +184,26 @@ func toggleMod(dataDir string, options map[string]map[string]int64, list []strin
 // number and label, so a long list is summed up rather than spelled out.
 func modsValue(c *game.Config) string {
 	list := strings.Join(c.Mods, ", ")
+	var value string
 	switch {
 	case len(c.Mods) == 0:
-		return "none"
+		value = "none"
 	case len(list) > 40:
-		return fmt.Sprintf("%d mods", len(c.Mods))
+		value = fmt.Sprintf("%d mods", len(c.Mods))
+	default:
+		value = list
 	}
-	return list
+	if n := len(optionDiffs(*c)); n > 0 {
+		value += fmt.Sprintf(" (%d option%s changed)", n, pluralS(n))
+	}
+	return value
+}
+
+func pluralS(n int) string {
+	if n == 1 {
+		return ""
+	}
+	return "s"
 }
 
 // modsField is the line editor's Mods page: one field, which opens the list.
@@ -152,10 +240,16 @@ func editMods(s session.Session, c *game.Config) {
 			}
 			fmt.Fprintln(s, wrapHanging(fmt.Sprintf("%2d) %s %s", i+1, mark, r.label), "  ", "          "))
 		}
+		optionsRow := len(rows) + 1
+		fmt.Fprintf(s, "%2d) %s\n", optionsRow, i18n.T(sessionLang(s), "Options for the mods in play"))
 		fmt.Fprintf(s, "   0) %s\n", i18n.T(sessionLang(s), "Quit"))
-		n := pickMod(s, len(rows))
+		n := pickMod(s, optionsRow)
 		if n == 0 {
 			return
+		}
+		if n == optionsRow {
+			editModOptions(s, c)
+			continue
 		}
 		r := rows[n-1]
 		if r.err != nil && !r.on {
@@ -169,6 +263,76 @@ func editMods(s session.Session, c *game.Config) {
 		}
 		c.Mods = next
 	}
+}
+
+// editModOptions is the line editor's choices for the mods in play. A number
+// opens one option; a bool flips, a number asks for a value in the mod's range.
+func editModOptions(s session.Session, c *game.Config) {
+	rows := optionRows(c.DataDir, c.Mods, c.ModOptions)
+	if len(rows) == 0 {
+		ok(s, "%s", i18n.T(sessionLang(s), "None of the mods in play has options."))
+		return
+	}
+	for {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan,
+			i18n.T(sessionLang(s), "Options for the mods in play"), ansi.Reset)
+		for i, row := range rows {
+			v := optionChosen(row, c.ModOptions)
+			fmt.Fprintln(s, wrapHanging(fmt.Sprintf("%2d) %s", i+1,
+				fmt.Sprintf("%s: %s", row.modName, mod.OptionValueLine(row.def, v))), "  ", "      "))
+			if row.description != "" {
+				fmt.Fprintln(s, WrapIndented(row.description, "      "))
+			}
+		}
+		n := pickOption(s, len(rows))
+		if n == 0 {
+			return
+		}
+		row := rows[n-1]
+		old, existed := c.ModOptions[row.modName][row.id]
+		want := optionChosen(row, c.ModOptions)
+		if row.def.Type == mod.OptionBool {
+			want = 1 - want
+		} else {
+			msg := fmt.Sprintf(i18n.T(sessionLang(s), "%s (now %s; from %d to %d)?"),
+				row.label, mod.OptionValueWord(row.def, want), *row.def.Min, *row.def.Max)
+			for {
+				line := strings.TrimSpace(prompt(s, msg))
+				if line == "" {
+					return
+				}
+				v, err := strconv.ParseInt(line, 10, 64)
+				if err != nil || v < *row.def.Min || v > *row.def.Max {
+					failNoPause(s, fmt.Errorf(i18n.T(sessionLang(s), "Enter a whole number from %d to %d."),
+						*row.def.Min, *row.def.Max))
+					continue
+				}
+				want = v
+				break
+			}
+		}
+		setOptionChoice(c, row.modName, row.id, want)
+		if err := modsError(*c); err != nil {
+			if existed {
+				setOptionChoice(c, row.modName, row.id, old)
+			} else {
+				clearOptionChoice(c, row.modName, row.id)
+			}
+			fail(s, err)
+		}
+	}
+}
+
+// pickOption reads a row number, 0 to quit. Option rows are usually shorter
+// than the mod list, but they take a typed number throughout: the next step
+// reads a whole line too, so a one-key ChoiceQuit here would leave its Enter
+// behind for the value prompt to swallow.
+func pickOption(s session.Session, rows int) int {
+	n, err := strconv.Atoi(strings.TrimSpace(prompt(s, i18n.T(sessionLang(s), "Change which option (0 = quit)?"))))
+	if err != nil || n < 0 || n > rows {
+		return 0
+	}
+	return n
 }
 
 // modsOrderNote heads the list in both editors. A literal passed through a
@@ -266,5 +430,67 @@ func (t *configTUI) modsForm() *tview.Form {
 	}
 	t.resetters = append(t.resetters, func() { order = slices.Clone(opening) })
 	t.binders = append(t.binders, func(c *game.Config) { c.Mods = slices.Clone(order) })
+	t.addModOptions(form, &c)
 	return form
+}
+
+// addModOptions puts each enabled mod's choices after its checkbox. The mod's
+// label and description name what it changes; the field's help carries the
+// type, default and range, which is the same line -check-mod prints.
+func (t *configTUI) addModOptions(form *tview.Form, c *game.Config) {
+	rows := optionRows(c.DataDir, c.Mods, c.ModOptions)
+	if len(rows) == 0 {
+		return
+	}
+	form.AddFormItem(tview.NewTextView().SetText(tview.Escape("Options for the mods in play")).SetSize(1, 0))
+	for _, row := range rows {
+		label := noStar + row.modName + ": " + row.label
+		help := row.line
+		if row.description != "" {
+			help = row.description + "\n" + help
+		}
+		opening := optionChosen(row, c.ModOptions)
+		if row.def.Type == mod.OptionBool {
+			b := tview.NewCheckbox().SetLabel(label).SetChecked(opening != 0)
+			b.SetFocusFunc(func() { t.showHelp(help) })
+			form.AddFormItem(zebra(form, b))
+			t.resetters = append(t.resetters, func() { b.SetChecked(opening != 0) })
+			t.binders = append(t.binders, func(c *game.Config) {
+				var v int64
+				if b.IsChecked() {
+					v = 1
+				}
+				setOptionChoice(c, row.modName, row.id, v)
+			})
+			continue
+		}
+		f := tview.NewInputField().SetLabel(label).SetText(strconv.FormatInt(opening, 10)).
+			SetFieldWidth(12).SetAcceptanceFunc(tview.InputFieldInteger)
+		f.SetFocusFunc(func() { t.showHelp(help) })
+		valid := func(text string) (int64, bool) {
+			v, err := strconv.ParseInt(strings.TrimSpace(text), 10, 64)
+			return v, err == nil && v >= *row.def.Min && v <= *row.def.Max
+		}
+		f.SetDoneFunc(func(tcell.Key) {
+			if v, ok := valid(f.GetText()); ok {
+				f.SetText(strconv.FormatInt(v, 10))
+				return
+			}
+			f.SetText(strconv.FormatInt(opening, 10))
+			t.showOptionError(fmt.Sprintf("%s must be from %d to %d.", row.label, *row.def.Min, *row.def.Max))
+		})
+		form.AddFormItem(zebra(form, f))
+		t.resetters = append(t.resetters, func() { f.SetText(strconv.FormatInt(opening, 10)) })
+		t.binders = append(t.binders, func(c *game.Config) {
+			if v, ok := valid(f.GetText()); ok {
+				setOptionChoice(c, row.modName, row.id, v)
+			}
+		})
+	}
+}
+
+func (t *configTUI) showOptionError(msg string) {
+	t.showModal(tview.NewModal().SetText(msg).
+		AddButtons([]string{"OK"}).
+		SetDoneFunc(func(int, string) { t.dismissModal() }))
 }
