@@ -85,6 +85,10 @@ then exit.
 - **`-reset-from-config`** — Start a new game using the current `config.json`,
   without opening the editor. It clears all empires and rebuilds the world. The
   old world is saved first.
+- **`-init-mod <dir>`** — Create an empty mod, with a `mod.toml` and a
+  `values.toml`, then exit. `<dir>` is a folder, or a name, which is created in
+  the `mods` folder of the data directory. It refuses a folder that already
+  exists. See [Mods](mods.md).
 - **`-check-mod <dir>`** — Check a mod on its own, with the limits a reset
   uses, print every value it changes, then exit. `<dir>` is a mod folder, or a
   mod's name in the `mods` folder of the data directory. See [Mods](mods.md).

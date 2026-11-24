@@ -309,6 +309,41 @@ func hashFiles(files map[string]string) string {
 	return hex.EncodeToString(hash.Sum(nil)[:8])
 }
 
+// DefaultLicense is the license Init writes into a new mod's mod.toml, for its
+// author to change.
+const DefaultLicense = "MIT"
+
+// Init creates a new, empty mod in dir: a mod.toml with the folder's name, a
+// first version, this game's ModAPI and DefaultLicense, and a values.toml that
+// changes nothing yet. It refuses a dir that already exists, or whose name
+// config.json could not list.
+func Init(dir string) error {
+	name := filepath.Base(dir)
+	if !validName.MatchString(name) {
+		return fmt.Errorf("%q: a mod's name may hold only lowercase letters, digits, - and _", name)
+	}
+	if _, err := os.Stat(dir); err == nil {
+		return fmt.Errorf("%s already exists", dir)
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+	manifest := fmt.Sprintf(`name = %q
+version = "0.1.0"
+mod_api = %d
+license = %q
+# label = ""        # shown on the Game Setup screen; blank shows the name
+# description = ""
+`, name, ModAPI, DefaultLicense)
+	values := `# What this mod changes from the base game. List only what changes.
+# immortal-barons -print-base-mod prints every value a mod can set.
+`
+	if err := os.WriteFile(filepath.Join(dir, ManifestFile), []byte(manifest), 0o644); err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(dir, ValuesFile), []byte(values), 0o644)
+}
+
 // checkModAPI holds a mod to the mod format it says it was written for,
 // before any of its values are applied or its scripts compiled.
 func checkModAPI(path string, api int) error {

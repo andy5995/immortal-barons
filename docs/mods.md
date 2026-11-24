@@ -132,6 +132,17 @@ your mod and change them.
 A mod is a folder under `mods` in the data directory. The folder's name is the
 mod's name. It may use lowercase letters, digits, `-` and `_`.
 
+`-init-mod` creates a new, empty mod to start from. It refuses a folder that
+already exists:
+
+```
+immortal-barons -init-mod cheap-tanks
+```
+
+It writes a `mod.toml` with the name, a first version, the current `mod_api`
+and the MIT license, and a `values.toml` that changes nothing yet. Give it a
+path instead of a name to create the mod somewhere else.
+
 ```
 data/
   mods/
