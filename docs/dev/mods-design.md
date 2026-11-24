@@ -26,6 +26,33 @@ mods are read, applied, checked or sent.
   records what its cap discards. A new key needs a limit chosen this way, and a
   `GOARCH=386` test when it multiplies a count.
 
+## Options
+
+- **The manifest declares the option IDs a mod accepts.** An ID uses the same
+  name rule as a mod folder. Only `bool` and `number` exist. A number needs a
+  default from `min` to `max`; a bool's default is 0 or 1. The reader checks
+  all of this before it compiles a script.
+- **One set of chosen values, carried everywhere.** `Config.ModOptions` holds
+  what the next reset will use, by mod name and option ID. A reset records the
+  values in each `ModRef.Options`, which travels in the world, the packet and
+  the league reset order. A missing ID means the declaration's default. This
+  keeps a reader that has only the config, only the world or only the order on
+  the same value.
+- **Options enter through the same resolver as written figures.** A number
+  used by `values.toml` is checked against its own range and then against the
+  key's normal limit. A bool selects a `when` section after the plain values
+  have been read. A script gets the chosen value through `option()`, and its
+  compiled copy is keyed by the values, so two games with different choices do
+  not share a script instance.
+- **Screens read a mod with the game's choices, not with defaults.**
+  `ReadWithOptions` and `ManifestFromRef` let the editors, `-check-mod` and
+  Game Setup show the values in force. A screen that only reads never writes
+  to the world.
+- **Chosen values are part of the ruleset fingerprint.** Two boards with
+  different options hold each other's packets, as they do with different mod
+  hashes. Adding a new option does not raise `mod_api`; changing what an
+  existing ID means does.
+
 ## When a mod changes
 
 - **Rules change only at a reset.** A game keeps the copy of each mod saved

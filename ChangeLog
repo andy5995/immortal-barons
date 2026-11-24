@@ -17,6 +17,8 @@ Immortal Barons ChangeLog
   * A mod can carry a Starlark script for each region type, regions/<type>.star,
     that changes that type's figures realm by realm
   * A mod names the mod format it was written for, mod_api, in mod.toml
+  * Mods can declare options, bools and number ranges, that the sysop sets at
+    reset
   * -reload-mods puts a changed mod into a game in progress, for testing
   * -init-mod creates an empty mod to start from
   * The sysop panel lists each board's mods and runs -check-mod on them

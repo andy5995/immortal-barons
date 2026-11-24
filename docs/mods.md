@@ -4,8 +4,8 @@ This page is for the BBS operator (the sysop). Players do not need to read it.
 
 A mod changes some of the numbers the game plays by. Without mods, the game
 plays the standard Immortal Barons rules. A game with a mod is a
-different game, and the Game Setup screen lists every mod in play so players
-can see that.
+different game, and the Game Setup screen lists every mod in play and its
+option values, so players can see that.
 
 On a stand-alone board, you choose mods for the next reset. In a
 [league](#in-a-league), the Coordinator chooses them and `-league-reset` sends
@@ -193,6 +193,60 @@ The game reads a mod strictly. A key it does not know, a unit it does not know,
 or any file in the folder other than `mod.toml`, `values.toml`, `pirates.star`
 and the region scripts in a `regions` folder is an error.
 
+## Options
+
+A mod can let the sysop choose a few values when a game starts. Put the choices
+in `[options.<id>]` tables in `mod.toml`. `-init-mod` writes a commented
+example. Each table takes these fields:
+
+- `type`: `number` or `bool`.
+- `label`: the short name shown in the editors, `-check-mod` and Game Setup.
+- `description`: a line saying what the option changes.
+- `default`: the value used when the sysop makes no choice. A bool is `0`
+  (False) or `1` (True).
+- `min` and `max`: required for a number, and refused for a bool.
+
+For example:
+
+```toml
+[options.tank_cost]
+type = "number"
+label = "Tank cost"
+description = "Production points to build one tank"
+default = 500
+min = 1
+max = 1000
+
+[options.fast_start]
+type = "bool"
+label = "Fast start"
+description = "Use the cheap starting values"
+default = 0
+```
+
+A number option can stand in for a figure in `values.toml`:
+
+```toml
+[units.tank]
+build_cost = { option = "tank_cost" }
+```
+
+A bool option selects a section whose name begins with `when`:
+
+```toml
+[when.fast_start.units.tank]
+build_cost = 400
+```
+
+That section applies only when the bool is True. It is read after the plain
+values, so it overrides them. A script reads either kind with `option("<id>")`:
+a number is a whole number, and a bool is `True` or `False`. A chosen number
+still has to pass the figure's normal limit from the tables above.
+
+The sysop makes the choices on the Mods page of either settings editor, or in
+`config.json` under `ModOptions`. A game keeps its choices until the next
+reset, and a league reset carries them to every board.
+
 ## Scripts
 
 A mod may also hold scripts: `pirates.star`, which decides pirate raids, and a
@@ -242,6 +296,8 @@ Two built-in functions are added to Starlark's own:
 - `rand(n)` returns a whole number from 0 to n - 1, drawn from the game's own
   random numbers.
 - `day()` returns the game day.
+- `option(id)` returns the value the sysop chose for a declared option. A
+  number is a whole number; a bool is `True` or `False`.
 
 If the script fails in a turn, because of an error, by running out of steps,
 or by returning a raid the game does not allow, that realm's turn uses the
@@ -358,12 +414,18 @@ A plain name is looked up in the `mods` folder of the data directory. You can
 also give the path to any mod folder, such as `-check-mod ~/my-mods/cheap-tanks`.
 
 This checks the mod on its own, with the same limits a reset uses, and lists
-every value it changes:
+every value it changes. It also lists the options and shows any choice from
+`config.json` that differs from the default:
 
 ```
 Cheap Tanks 1.0 (029923dee3137351): OK
 Tanks cost less to buy, build and keep.
 License: CC-BY-4.0
+Options:
+  Tank cost: number, default 500, from 1 to 1000
+  Fast start: bool, default False
+Options changed from their defaults:
+  Tank cost: 500 -> 250
 Changes from the base game:
   tank.build_cost: 500 -> 250
   tank.upkeep: 0.6 -> 0.3
@@ -378,8 +440,14 @@ in the settings editor that `-reset` opens, on its Mods page, or list them in
 `config.json` under `Mods` and run `-reset-from-config`:
 
 ```json
-"Mods": ["cheap-tanks"]
+"Mods": ["cheap-tanks"],
+"ModOptions": {"cheap-tanks": {"tank_cost": 250}}
 ```
+
+`ModOptions` is by mod name, then option ID. Leave out an ID to use its
+default. The Mods page has an options row for the mods in play, so the settings
+editors set the same values. `-check-mod` shows the choices it reads from
+`config.json`.
 
 When two mods change the same value, the one later in the list wins. The reset
 checks the combined values against the limits, so two mods that each pass
@@ -392,7 +460,9 @@ alone or with the mods already on, and the reset prints the mods it applied.
 
 A game keeps the mods it started with until the next reset:
 
-- Changing `Mods` in `config.json` affects only the next `-reset-from-config`.
+- Changing `Mods` or `ModOptions` in `config.json` affects only the next
+  `-reset-from-config`.
+- The game saves the chosen option values with each mod when it starts.
 - The game saves a copy of each mod when it starts. If you edit or delete a
   mod's folder during a game, the game keeps the copy and writes a warning to
   its error output (stderr) each time it starts. Under a BBS, that output goes
@@ -406,8 +476,9 @@ A game keeps the mods it started with until the next reset:
 
 The Coordinator chooses the mods for every board. Put the names in the
 Coordinator's `config.json` under `Mods`, then run `-league-reset <date>`. The
-signed reset order carries every file of each mod, so member boards do not need
-their own copies. The command prints the mods it is carrying.
+signed reset order carries every file of each mod and the Coordinator's option
+choices, so member boards do not need their own copies. The command prints the
+mods it is carrying.
 
 Member boards leave `Mods` out of their own `config.json`. On their next
 `-planetary` run, they check the files against the hashes in the order and play
@@ -418,9 +489,10 @@ board keeps the order and tries it again on each later `-planetary` run. Once
 the board can play the mods, that order starts the new game, with its original
 date and mods. The Coordinator does not need to reset the league again.
 
-Every packet a board sends carries a fingerprint of the league's rules, the
-mods' hashes included. If someone edits a board's copy of a mod in
-`world.json`, the fingerprint changes and the other boards hold its packets.
+Every packet a board sends carries a fingerprint of the league's rules, with
+each mod's hash and chosen option values included. If someone edits a board's
+copy of a mod in `world.json`, the fingerprint changes and the other boards
+hold its packets.
 
 Scripts are another choice. A mod that carries `pirates.star` or a script in
 `regions` runs only on a board whose sysop sets `AcceptLeagueScripts Yes` in
