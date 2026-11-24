@@ -224,7 +224,7 @@ func TestResetGetsPastModsThatNoLongerLoad(t *testing.T) {
 	}
 	// A saved copy a later version would reject: cost 0 is under the limit.
 	w.Mods = []game.ModRef{{Name: "m", Version: "1", Hash: "x", Files: map[string]string{
-		"mod.toml":    "name = \"m\"\nversion = \"1\"\n",
+		"mod.toml":    "name = \"m\"\nversion = \"1\"\nmod_api = 1\n",
 		"values.toml": "[units.tank]\nbuild_cost = 0\n",
 	}}}
 	if err := store.Save(w, cfg); err != nil {
@@ -265,7 +265,7 @@ func TestCheckModFindsAModByName(t *testing.T) {
 	if err := os.MkdirAll(m, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(m, "mod.toml"), []byte("name = \"cheap-tanks\"\nversion = \"1\"\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(m, "mod.toml"), []byte("name = \"cheap-tanks\"\nversion = \"1\"\nmod_api = 1\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	for _, arg := range []string{"cheap-tanks", m} {

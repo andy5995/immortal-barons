@@ -237,25 +237,23 @@ func TestRestoreRebuildsTheRegionScripts(t *testing.T) {
 	}
 }
 
-// A mod with a script says which script interface it was written for, so a
-// change that breaks scripts can be told apart from a mistake.
-func TestAScriptNeedsAScriptAPI(t *testing.T) {
+// Every mod says which mod format it was written for, so a change that breaks
+// mods is told apart from a mistake, before any value is applied.
+func TestAModNeedsAModAPI(t *testing.T) {
 	for _, c := range []struct{ name, manifest, want string }{
-		{"missing", "name = \"m\"\nversion = \"1\"\n", "must say which script interface it was written for; this version of the game runs script_api = 1"},
-		{"newer", "name = \"m\"\nversion = \"1\"\nscript_api = 2\n", "written for script_api 2, but this version of the game runs script_api 1; it needs a newer version of the game"},
+		{"missing", "name = \"m\"\nversion = \"1\"\n", "mod_api is required; this version of the game reads mod_api = 1"},
+		{"newer", "name = \"m\"\nversion = \"1\"\nmod_api = 2\n", "written for mod_api 2, but this version of the game reads mod_api 1; it needs a newer version of the game"},
+		{"not a version", "name = \"m\"\nversion = \"1\"\nmod_api = -1\n", "mod_api -1 is not a version"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			for _, file := range []string{desertScript, PiratesFile} {
-				dir := writeMod(t, t.TempDir(), "m", map[string]string{ManifestFile: c.manifest, file: desertFood})
+			// With a script, and without one: the format covers values.toml too.
+			for _, files := range []map[string]string{{desertScript: desertFood}, {ValuesFile: "[units.tank]\nbuild_cost = 250\n"}} {
+				files[ManifestFile] = c.manifest
+				dir := writeMod(t, t.TempDir(), "m", files)
 				if _, _, err := Check(dir); err == nil || !strings.Contains(err.Error(), c.want) {
-					t.Errorf("%s: err %v, want %q", file, err, c.want)
+					t.Errorf("err %v, want %q", err, c.want)
 				}
 			}
 		})
-	}
-	// A mod with no script needs no version.
-	dir := writeMod(t, t.TempDir(), "plain", map[string]string{ManifestFile: "name = \"plain\"\nversion = \"1\"\n"})
-	if _, _, err := Check(dir); err != nil {
-		t.Errorf("a mod with no script was refused: %v", err)
 	}
 }

@@ -60,19 +60,19 @@ type Manifest struct {
 	// Label is what the Game Setup screen shows; blank shows Name.
 	Label       string `toml:"label"`
 	Description string `toml:"description"`
-	// ScriptAPI is the version of the script interface the mod's scripts were
-	// written for. It is required of a mod that carries a script: see
-	// ScriptAPI.
-	ScriptAPI int `toml:"script_api"`
+	// ModAPI is the version of the mod format the mod was written for. Every
+	// mod must give it: see ModAPI.
+	ModAPI int `toml:"mod_api"`
 }
 
-// ScriptAPI is the version of the script interface this game runs: what a
-// script is given and what it may return. A change that could break a script
-// written for it raises the number, so the game can tell a sysop which mods
-// need updating instead of failing in play; adding a field a script may read,
-// or a key it may return, does not. A mod declares the version its scripts
-// were written for as script_api in mod.toml.
-const ScriptAPI = 1
+// ModAPI is the version of the mod format this game reads: the folder's
+// layout, the keys values.toml may set and what each one means, and what a
+// script is given and may return. A change that could make a mod that worked
+// before fail to load, or load and play differently, raises the number, so
+// the game refuses an out-of-date mod by name before the game starts. Adding
+// a key or a field does not raise it. A mod gives the version it was written
+// for as mod_api in mod.toml.
+const ModAPI = 1
 
 // Mod is one mod folder, read and hashed.
 type Mod struct {
@@ -264,7 +264,7 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		}
 	}
 	m.Hash = hashFiles(files)
-	if err := checkScriptAPI(path, m.ScriptAPI, files); err != nil {
+	if err := checkModAPI(path, m.ModAPI); err != nil {
 		return nil, err
 	}
 	if src, ok := files[PiratesFile]; ok {
@@ -302,23 +302,19 @@ func hashFiles(files map[string]string) string {
 	return hex.EncodeToString(hash.Sum(nil)[:8])
 }
 
-// checkScriptAPI holds a mod with a script to the script interface it
-// declares, before any script is compiled.
-func checkScriptAPI(path string, api int, files map[string]string) error {
-	_, script := files[PiratesFile]
-	for name := range files {
-		script = script || regionScriptType(name) != nil
-	}
+// checkModAPI holds a mod to the mod format it says it was written for,
+// before any of its values are applied or its scripts compiled.
+func checkModAPI(path string, api int) error {
 	file := filepath.Join(path, ManifestFile)
 	switch {
+	case api == 0:
+		return fmt.Errorf("%s: mod_api is required; this version of the game reads mod_api = %d", file, ModAPI)
 	case api < 0:
-		return fmt.Errorf("%s: script_api %d is not a version", file, api)
-	case api == 0 && script:
-		return fmt.Errorf("%s: a mod with a script must say which script interface it was written for; this version of the game runs script_api = %d", file, ScriptAPI)
-	case api > ScriptAPI:
-		return fmt.Errorf("%s: written for script_api %d, but this version of the game runs script_api %d; it needs a newer version of the game", file, api, ScriptAPI)
-	case api < ScriptAPI && script:
-		return fmt.Errorf("%s: written for script_api %d, but this version of the game runs script_api %d; its scripts need updating", file, api, ScriptAPI)
+		return fmt.Errorf("%s: mod_api %d is not a version", file, api)
+	case api > ModAPI:
+		return fmt.Errorf("%s: written for mod_api %d, but this version of the game reads mod_api %d; it needs a newer version of the game", file, api, ModAPI)
+	case api < ModAPI:
+		return fmt.Errorf("%s: written for mod_api %d, but this version of the game reads mod_api %d; the mod needs updating (the ChangeLog says what changed)", file, api, ModAPI)
 	}
 	return nil
 }
