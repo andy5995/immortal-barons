@@ -442,7 +442,7 @@ func decodeTOML(data []byte, v any, allowOption bool) error {
 	var keys []string
 	for _, k := range md.Undecoded() {
 		name := k.String()
-		if allowOption && (name == "option" || strings.HasSuffix(name, ".option") || strings.Contains(name, ".option.")) {
+		if allowOption && isOptionReference(k) {
 			continue
 		}
 		keys = append(keys, name)
@@ -451,6 +451,26 @@ func decodeTOML(data []byte, v any, allowOption bool) error {
 		return fmt.Errorf("unknown key %s", strings.Join(keys, ", "))
 	}
 	return nil
+}
+
+// isOptionReference reports whether an undecoded key is the option of a
+// { option = "id" } inline table standing in for a figure: units.<id>.<key>,
+// hq.<key> or regions.<id>.<key>, each also under when.<bool>. Any other key
+// named option is a stray, and stays unknown.
+func isOptionReference(k toml.Key) bool {
+	if len(k) < 3 || k[len(k)-1] != "option" {
+		return false
+	}
+	if k[0] == "when" {
+		k = k[2:]
+	}
+	switch {
+	case len(k) == 4 && (k[0] == "units" || k[0] == "regions"):
+		return true
+	case len(k) == 3 && k[0] == "hq":
+		return true
+	}
+	return false
 }
 
 // moddableUnits are the goods a values file may name, by ID.
