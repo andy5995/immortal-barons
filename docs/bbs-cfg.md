@@ -96,6 +96,20 @@ it.
 
 More: [Joining a league](inter-bbs.md#joining-a-league-member-boards).
 
+### `AcceptLeagueScripts`
+
+Whether this board plays a league mod that carries scripts. The scripts come
+from the Coordinator's signed `-league-reset` order and run on this machine, so
+each sysop makes this call. A board with the setting off refuses a reset whose
+mods carry scripts. Its `-planetary` run prints the reason and records it in
+`planetary.log`.
+
+**Values:** a [switch](#switches).
+
+**Default:** `no`.
+
+More: [Mods in a league](mods.md#in-a-league).
+
 ## The game's packet directories
 
 ### `GameInbound`

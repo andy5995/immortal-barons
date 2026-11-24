@@ -107,8 +107,10 @@ to reverse the order.
 - **Mods:** the [mods](mods.md) this board's game was reset with, and every
   folder in its `mods` folder with its version, or why it does not load.
   **Check** beside a folder runs `immortal-barons -check-mod` on it and shows
-  the output in the Run view. To change which mods a game plays, run
-  `immortal-barons -reset`.
+  the output in the Run view. On a stand-alone board, run
+  `immortal-barons -reset`
+  to change which mods a game plays. In a league, the Coordinator runs
+  `-league-reset`, which sends the mods to every board.
 - **Run:** runs one `immortal-barons` command and shows its output as it runs.
   **Detailed** adds `-detailed`, and is grayed out for commands that ignore it.
   The League Coordinator's commands appear only on node #1. The two that act on

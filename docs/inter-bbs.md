@@ -237,6 +237,11 @@ Set `Lottery` to `no` and this board never offers the Queen's lottery; set
 though they go on happening and the raider is still told how theirs went. Boards in one league may answer these differently, so a league
 that wants everyone on the same footing has to agree them between themselves.
 
+[`AcceptLeagueScripts`](bbs-cfg.md#acceptleaguescripts) is each sysop's own
+choice. A league reset can carry mods with scripts, and the scripts run on this
+machine. The default is `no`, so a board with no line refuses a scripted reset
+until its sysop sets the line to `Yes`. See [Mods](mods.md#in-a-league).
+
 ## Being told when the league stops moving
 
 The game cannot raise an alarm by itself. A board is a server, usually headless
@@ -773,6 +778,14 @@ and sends a signed order that each member carries out on its next `-planetary`
 run. Every board keeps the files that identify it in the league — its roster,
 its keys, `bbs.cfg` and its packet ledger — and starts a fresh world from its
 settings, so nobody re-does the setup.
+
+The order carries the mods in the Coordinator's `config.json`, with every file
+each mod needs. Member boards install them from the order; they leave `Mods`
+out of their own config. A mod with scripts needs
+[`AcceptLeagueScripts Yes`](bbs-cfg.md#acceptleaguescripts) on each member
+board. A board that cannot load the mods does not reset. Its `-planetary` run
+prints the reason and records it in `planetary.log`. See
+[Mods](mods.md#in-a-league).
 
 Nothing schedules this. Run it when you decide the game is over. A Game
 Length setting ends each board's game on that board's own count of days, so

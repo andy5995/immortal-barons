@@ -94,8 +94,8 @@ then exit.
   mod's name in the `mods` folder of the data directory. See [Mods](mods.md).
 - **`-reload-mods`** — Put the mods `config.json` lists, as their folders are
   now, into the game in progress without starting a new one, print what
-  changed, then exit. It is for testing a mod in a game of its own; see
-  [Mods](mods.md).
+  changed, then exit. It is for testing a mod in a game of its own. A league
+  board refuses it; see [Mods](mods.md).
 - **`-print-base-mod`** — Print every value a mod can change, as the game sets
   it without mods, in the form of a `values.toml`, then exit.
 - **`-players`** — List the players and edit one of them, then exit. This is the
@@ -252,7 +252,11 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-league-reset <YYYY-MM-DD>`** — Reset every board in the league, starting
   a new game on that date, then exit. Only the coordinator uses this. It resets this board
   and sends a signed order for the other boards to reset on their next
-  `-planetary` run. It is refused while the league is frozen.
+  `-planetary` run. The order carries the mods in the Coordinator's
+  `config.json`, so a member board needs no mod folder of its own. A board
+  refuses one that carries scripts unless its sysop sets
+  `AcceptLeagueScripts Yes` in `bbs.cfg`. See
+  [Mods](mods.md#in-a-league). It is refused while the league is frozen.
 - **`-league-freeze "<string>"`** — Freeze the whole league for an update,
   then exit. Only the coordinator uses this. Callers see the string instead of
   the game, the game day stops, and each board sends nothing of its own until
