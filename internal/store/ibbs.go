@@ -83,6 +83,10 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool, s
 	// now, and what it took them to be before that (#264).
 	w.BeginRun()
 	w.NoteLeagueRuleset()
+	// A reset order refused on an earlier run is still pending on this board.
+	// The ledger will not deliver it twice, so this is where a sysop who made
+	// its mods playable gets the new game without another league-wide reset.
+	w.RetryPendingLeagueReset()
 	released, err := releaseHeld(w.Config.DataDir, inboundDir, w.Config.HeldMaxAge())
 	if err != nil {
 		return run, err

@@ -82,6 +82,7 @@ func TestUnplayableLeagueModsLeaveTheMemberUnreset(t *testing.T) {
 	})
 	m.AddHuman("bob", "Bobland")
 	started := m.StartedDate
+	m.PendingLeagueReset = &LeagueReset{OnDate: "2026-09-01"} // an older order
 
 	m.receive(leagueResetOrder(t, lc, m.Config.BoardID, BaseRules(), refs))
 
@@ -92,6 +93,83 @@ func TestUnplayableLeagueModsLeaveTheMemberUnreset(t *testing.T) {
 	joined := strings.Join(m.SysopNotices, "\n")
 	if !strings.Contains(joined, "did not reset") || !strings.Contains(joined, "this board does not accept scripts") {
 		t.Errorf("the sysop was not told why the reset was refused: %q", joined)
+	}
+	if !strings.Contains(joined, "resets on the first planetary run after it can play them") {
+		t.Errorf("the sysop was not told the order will be retried: %q", joined)
+	}
+	if pending := m.PendingLeagueReset; pending == nil || pending.OnDate != "2026-10-01" ||
+		!reflect.DeepEqual(pending.Mods, refs) {
+		t.Errorf("the refused order was not kept in place of the older one: %+v", pending)
+	}
+}
+
+// A sysop who makes the mods playable gets the refused order carried out on the
+// next planetary run, with the order's rules, mods and date — not a fresh order.
+func TestPendingLeagueResetAppliesOnRetry(t *testing.T) {
+	lc, m := freezePair(t)
+	refs := []ModRef{{Name: "cheap-tanks", Version: "1.0", Hash: strings.Repeat("a", 64),
+		Files: map[string]string{"values.toml": "[units.tank]\nbuild_cost = 250\n"}}}
+	allowed := false
+	called := 0
+	stubLeagueMods(t, func(got []ModRef, scripts bool) (*Rules, error) {
+		called++
+		if !reflect.DeepEqual(got, refs) {
+			t.Errorf("the loader got %+v, want the order's %+v", got, refs)
+		}
+		if scripts != allowed {
+			t.Errorf("the loader got scripts=%v, want %v", scripts, allowed)
+		}
+		if !allowed {
+			return nil, errors.New("this board does not accept scripts")
+		}
+		r := BaseRules()
+		unit := r.Units[Tank]
+		unit.Cost = 250
+		r.Units[Tank] = unit
+		return r, nil
+	})
+	m.AddHuman("bob", "Bobland")
+
+	m.receive(leagueResetOrder(t, lc, m.Config.BoardID, BaseRules(), refs))
+	if m.PendingLeagueReset == nil {
+		t.Fatal("the refused order was not kept")
+	}
+	m.Config.AcceptLeagueScripts = true
+	allowed = true
+	m.SysopNotices = nil // the refusal belongs to the earlier run
+
+	m.RetryPendingLeagueReset()
+
+	if called != 2 {
+		t.Errorf("the loader was called %d times, want a refusal and a retry", called)
+	}
+	if m.PendingLeagueReset != nil {
+		t.Errorf("the applied retry left an order pending: %+v", m.PendingLeagueReset)
+	}
+	if !reflect.DeepEqual(m.Mods, refs) || m.Rules == nil || m.Rules.Units[Tank].Cost != 250 {
+		t.Errorf("the retry did not install the order's mods: mods %+v, rules %+v", m.Mods, m.Rules)
+	}
+	if len(m.Empires) != 0 || m.StartedDate != "2026-10-01" {
+		t.Errorf("the retry kept its old game: %d realms, started %q", len(m.Empires), m.StartedDate)
+	}
+	if len(m.SysopNotices) != 0 {
+		t.Errorf("a successful retry reported a fault: %q", m.SysopNotices)
+	}
+}
+
+// A later order that can be played clears the one that was refused.
+func TestAppliedLeagueResetClearsThePendingOrder(t *testing.T) {
+	lc, m := freezePair(t)
+	m.PendingLeagueReset = &LeagueReset{OnDate: "2026-09-01"}
+	stubLeagueMods(t, func([]ModRef, bool) (*Rules, error) { return BaseRules(), nil })
+
+	m.receive(leagueResetOrder(t, lc, m.Config.BoardID, BaseRules(), nil))
+
+	if m.PendingLeagueReset != nil {
+		t.Errorf("an applied reset left the older order pending: %+v", m.PendingLeagueReset)
+	}
+	if m.StartedDate != "2026-10-01" {
+		t.Errorf("the new order did not start the game: started %q", m.StartedDate)
 	}
 }
 
@@ -109,5 +187,35 @@ func TestWorldFingerprintIncludesMods(t *testing.T) {
 		Files: map[string]string{"values.toml": "[units.tank]\nbuild_cost = 250\n"}}}
 	if got := w.RulesetFingerprint(); got == want {
 		t.Error("a modded board kept the settings' fingerprint")
+	}
+}
+
+// A frozen board keeps its refused order until the thaw: a reset clears every
+// saved field, so retrying it would thaw this board alone.
+func TestPendingLeagueResetWaitsForTheThaw(t *testing.T) {
+	lc, m := freezePair(t)
+	refs := []ModRef{{Name: "scripted", Version: "1.0", Hash: strings.Repeat("c", 64),
+		Files: map[string]string{"values.toml": ""}}}
+	accept := false
+	stubLeagueMods(t, func([]ModRef, bool) (*Rules, error) {
+		if !accept {
+			return nil, errors.New("this board does not accept scripts")
+		}
+		return BaseRules(), nil
+	})
+	m.receive(leagueResetOrder(t, lc, m.Config.BoardID, BaseRules(), refs))
+	if m.PendingLeagueReset == nil {
+		t.Fatal("the refused order was not kept")
+	}
+	m.Frozen = true
+	accept = true
+	m.RetryPendingLeagueReset()
+	if m.PendingLeagueReset == nil || !m.Frozen || len(m.Mods) != 0 {
+		t.Fatalf("a frozen board retried its order: pending %v, frozen %v, mods %v", m.PendingLeagueReset, m.Frozen, m.Mods)
+	}
+	m.Frozen = false
+	m.RetryPendingLeagueReset()
+	if m.PendingLeagueReset != nil || len(m.Mods) != 1 {
+		t.Errorf("after the thaw: pending %v, mods %v; want the order applied", m.PendingLeagueReset, m.Mods)
 	}
 }

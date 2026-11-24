@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -120,5 +121,38 @@ func TestRunPlanetaryExportsScores(t *testing.T) {
 	}
 	if !found {
 		t.Error(`no outbound packet scored the "Player" empire`)
+	}
+}
+
+// The retry hook belongs to the planetary run, not just to the game package:
+// a board that refused an order and then allowed its scripts starts the new
+// game at the beginning of its next run, without another league-wide reset.
+func TestRunPlanetaryRetriesPendingLeagueReset(t *testing.T) {
+	in, out := t.TempDir(), t.TempDir()
+	cfg := game.DefaultConfig()
+	cfg.DataDir = t.TempDir()
+	cfg.BoardID = "boardA"
+	w := game.NewWorldSeed(cfg, 1)
+	w.AddHuman("p", "Player")
+	refs := []game.ModRef{{Name: "cheap-tanks", Version: "1.0", Hash: strings.Repeat("a", 64)}}
+	w.PendingLeagueReset = &game.LeagueReset{OnDate: "2026-10-01", Mods: refs}
+	w.Config.AcceptLeagueScripts = true
+	old := game.LoadLeagueMods
+	game.LoadLeagueMods = func(got []game.ModRef, scripts bool) (*game.Rules, error) {
+		if !reflect.DeepEqual(got, refs) || !scripts {
+			t.Errorf("the loader got %+v, scripts=%v; want the pending order and true", got, scripts)
+		}
+		return game.BaseRules(), nil
+	}
+	t.Cleanup(func() { game.LoadLeagueMods = old })
+
+	if _, err := RunPlanetary(w, in, out, false, noSave); err != nil {
+		t.Fatalf("RunPlanetary: %v", err)
+	}
+	if w.PendingLeagueReset != nil {
+		t.Errorf("the applied retry left an order pending: %+v", w.PendingLeagueReset)
+	}
+	if len(w.Empires) != 0 || w.StartedDate != "2026-10-01" {
+		t.Errorf("the retry kept its old game: %d realms, started %q", len(w.Empires), w.StartedDate)
 	}
 }
