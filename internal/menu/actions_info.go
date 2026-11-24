@@ -2,12 +2,15 @@ package menu
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/help"
+	"github.com/andy5995/immortal-barons/internal/mod"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -117,6 +120,46 @@ func gameSetup(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "\n%s── %s %s%s\n",
 			dim(ansi.FgBrightCyan), text, strings.Repeat("─", fill), ansi.Reset)
 	}
+	// printMods is the third screen, and the only one a player sees when the
+	// game plays mods. Options come from the copy of the mod saved in the world,
+	// not from the sysop's folder: a league board plays the Coordinator's copy.
+	printMods := func(mods []game.ModRef) {
+		type modLine struct {
+			label, value string
+			indented     bool
+		}
+		var rows []modLine
+		for _, r := range mods {
+			rows = append(rows, modLine{r.DisplayName(), r.Version, false})
+			man, err := mod.ManifestFromRef(r)
+			if err != nil {
+				continue
+			}
+			for _, id := range slices.Sorted(maps.Keys(man.Options)) {
+				o := man.Options[id]
+				v := o.Value()
+				if chosen, ok := r.Options[id]; ok {
+					v = chosen
+				}
+				rows = append(rows, modLine{o.Label, mod.OptionValueWord(o, v), true})
+			}
+		}
+		const linesPerPage = 18
+		pages := (len(rows) + linesPerPage - 1) / linesPerPage
+		for p := 0; p < pages; p++ {
+			group(fmt.Sprintf(tr(s, "Mods (page %d of %d)"), p+1, pages))
+			end := min((p+1)*linesPerPage, len(rows))
+			for _, ln := range rows[p*linesPerPage : end] {
+				if ln.indented {
+					fmt.Fprintln(s, WrapIndented(fmt.Sprintf("%s: %s", tr(s, ln.label), ln.value), "    "))
+					continue
+				}
+				fmt.Fprintf(s, "  %s\n", cell(fitColumn(w.Term, ln.label, labelW),
+					fitColumn(w.Term, ln.value, setupRule-labelW-5), 0))
+			}
+			pause(s)
+		}
+	}
 
 	// The league comes first, because on a league board it is the frame for
 	// everything under it: none of these rules are the local sysop's, and a
@@ -175,7 +218,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	pair("Game length", daysOr(c.GameLength, "Endless"),
 		"Removed if unplayed", daysOr(c.IdleDaysRemove, "Never"))
 	group("Land")
-	pair("Regions bought per turn", countOr(c.MaxRegions, "Unlimited"),
+	pair("Regions bought/turn", countOr(c.MaxRegions, "Unlimited"),
 		"Land at game start", comma(c.InitialMarketLand))
 	pair("New land per realm/day", comma(c.LandPerDay),
 		"Region costs", tr(s, c.RegionCosts.String()))
@@ -215,18 +258,6 @@ func gameSetup(s session.Session, w *ctx) Result {
 		pair("Game starts", orDash(c.GameStartDate), "Joining closes", orDash(c.JoinDate))
 	}
 
-	// A modded game is not the original, and a player comparing notes with
-	// another board should be able to see why the numbers differ (#202).
-	if len(mods) > 0 {
-		group("Mods")
-		// Printed as the sysop wrote them: row would pass the label through
-		// the catalogs, and neither field has a width limit of its own.
-		for _, m := range mods {
-			fmt.Fprintf(s, "  %s\n", cell(fitColumn(w.Term, m.DisplayName(), labelW),
-				fitColumn(w.Term, m.Version, setupRule-labelW-5), 0))
-		}
-	}
-
 	if c.IBBS {
 		// The interplanetary rules only mean anything once this board is in a
 		// league, so they stay hidden on a stand-alone board.
@@ -236,7 +267,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		if !c.MissileOps || !c.BombingOps {
 			pair("Missile ops", onOffStr(c.MissileOps), "Bombing ops", onOffStr(c.BombingOps))
 		}
-		pair("Individual attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"),
+		pair("Individual attacks/day", countOr(c.MaxIndividualAttacks, "Unlimited"),
 			"Group attacks per day", countOr(c.MaxGroupAttacks, "Unlimited"))
 		pair("Terrorist ops per day", countOr(c.MaxTerrorOps, "Unlimited"),
 			"Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"))
@@ -248,6 +279,12 @@ func gameSetup(s session.Session, w *ctx) Result {
 			"Local attack scoring", onOffStr(c.LocalAttackScoring))
 	}
 	pause(s)
+	// A modded game is not the original, and a player comparing notes with
+	// another board should be able to see why the numbers differ (#202). Its
+	// own page keeps the second panel inside 80x25 (issue #355).
+	if len(mods) > 0 {
+		printMods(mods)
+	}
 	return Stay
 }
 

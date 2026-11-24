@@ -108,6 +108,20 @@ func (m *Mod) Ref() game.ModRef {
 	}
 }
 
+// ManifestFromRef reads just the manifest from a mod saved in a world. A
+// screen showing what a game plays needs the option labels but not its scripts.
+func ManifestFromRef(ref game.ModRef) (*Manifest, error) {
+	data, ok := ref.Files[ManifestFile]
+	if !ok {
+		return nil, fmt.Errorf("%s: no %s", ref.Name, ManifestFile)
+	}
+	var man Manifest
+	if err := decodeStrict([]byte(data), &man); err != nil {
+		return nil, fmt.Errorf("%s/%s: %w", ref.Name, ManifestFile, err)
+	}
+	return &man, nil
+}
+
 // values is values.toml. Each unit's section is read into a plain map and
 // checked against unitFields, so the keys a file may use are named only there.
 type values struct {
