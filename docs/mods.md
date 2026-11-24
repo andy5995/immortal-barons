@@ -13,6 +13,9 @@ them to every board. Member boards play the copy in that order and do not need
 mod folders of their own. A mod with scripts plays only on a board whose sysop
 has set `AcceptLeagueScripts Yes` in `bbs.cfg`.
 
+A complete [example mod](examples/mods/example/) uses most of what a mod can
+do, with comments in each file.
+
 ## What a mod can change
 
 A mod can change seven figures for each of the six military units, the
