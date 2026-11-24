@@ -520,6 +520,7 @@ var sitePages = []struct{ src, slug string }{
 	{"docs/bbs-cfg.md", "bbs-cfg"},
 	{"docs/bulletins.md", "bulletins"},
 	{"docs/mods.md", "mods"},
+	{"docs/mod-reference.md", "mod-reference"},
 	{"docs/inter-bbs.md", "inter-bbs"},
 	{"docs/inter-bbs-troubleshooting.md", "inter-bbs-troubleshooting"},
 	{"docs/ftn-transport.md", "ftn-transport"},

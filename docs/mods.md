@@ -51,21 +51,12 @@ option.
 
 ## What a mod can change
 
-A mod can change seven figures for each of the six military units, the
-HeadQuarters, and the figures of each region type. The units first:
-
-| Key | Meaning | Limits |
-| --- | --- | --- |
-| `build_cost` | Production points an Industrial region spends to build one unit (not the purchase price) | 1 to 1,000,000 |
-| `networth` | Net worth of one unit, in gold (up to 3 decimal places) | 0 to 10,000 |
-| `upkeep` | Gold to maintain one unit per turn at the Medium Maintenance Costs setting (up to 1 decimal place) | 0 to 1,000 |
-| `offense` | Strength of one unit when it attacks another realm on this planet, in troopers (up to 2 decimal places). For a tank, its strength with no HeadQuarters | 0 to 100; 0 for `turret` and `carrier` |
-| `defense` | Strength of one unit when its realm is attacked from this planet, in troopers (up to 2 decimal places). For a tank, its strength with no HeadQuarters | 0 to 100 |
-| `hq_bonus` | How much the unit gains for each point of HeadQuarters completion, in troopers (up to 2 decimal places), when its `offense` or `defense` is 3.5. A unit with another strength gains in the same proportion, so a finished HeadQuarters multiplies its strength by `1 + 100 x hq_bonus / 3.5`: 4.5/3.5 at the tank's 0.01, 13.5/3.5 at 0.1. Without mods only tanks have one | 0 to 0.1 |
-| `price_low`, `price_high` | The range a realm's price for the unit moves inside | 1 to 1,000,000, at least 100 apart |
-| `price_step` | How far that price can move in one turn | 1 to the width of the range |
-
-The units are `trooper`, `jet`, `turret`, `bomber`, `tank` and `carrier`.
+A mod can change the figures of each of the six military units, the
+HeadQuarters, and the figures of each region type. The
+[Mod Reference](mod-reference.md) lists every key with what it means and its
+limits. The units are `trooper`, `jet`, `turret`, `bomber`, `tank` and
+`carrier`; their keys are under
+[Units](mod-reference.md#units).
 
 Without mods, a trooper is 1 on attack and defense, a jet 2 on attack, a
 turret 2 on defense and a tank 3.5 on both; bombers and carriers are 0. Rules
@@ -84,19 +75,8 @@ nothing, Low a quarter of it and High four times it.
 
 The HeadQuarters is one building per realm, so its figures are one `[hq]`
 section in `values.toml`, not one per unit. The strength it adds to units is
-each unit's `hq_bonus`, above. Every key is optional:
-
-| Key | Meaning | Limits |
-| --- | --- | --- |
-| `build_start` | Completion percent a newly bought HeadQuarters begins at | 1 to 100 |
-| `build_per_turn` | Percent it gains each turn until it reaches 100 | 1 to 100 |
-| `battle_loss_min` | Completion percent a HeadQuarters loses when its realm loses a defense | 0 to 100 |
-| `battle_loss_jitter` | A random 0 up to one less than this is added to that loss | 1 to 100 |
-| `price_base` | Gold a HeadQuarters costs a realm that has played no turns | 1 to 1,000,000,000 |
-| `price_per_turn` | Gold the price rises with each turn the realm has played | 0 to 1,000,000 |
-| `price_jitter` | A random 0 up to one less than this is added to the price. 0 makes the price exact | 0 to 1,000,000 |
-| `price_cap` | The price never rises past this, less its own random draw | `price_base` to 1,000,000,000 |
-| `price_cap_jitter` | A random 0 up to one less than this is taken off the cap | 0 to one less than `price_cap` |
+each unit's `hq_bonus`. Every key is optional; see
+[HeadQuarters](mod-reference.md#headquarters) for the keys.
 
 For example, a HeadQuarters that is cheap and quick to build:
 
@@ -118,28 +98,15 @@ types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `urban`,
 `industrial`, `technology` and `waste`. Every key is optional, and every type
 takes every key: the base game has only rivers fish and only Industrial regions
 pay idle gold, but a mod may give a desert food or an urban region gold, and the
-game works it out the same way. All figures are whole numbers.
-
-| Key | Meaning | Limits |
-| --- | --- | --- |
-| `gold_base`, `gold_rate` | Gold one region pays each turn: `gold_base` plus a random 0 up to one less than `gold_rate`, drawn once a turn for the whole type | 0 to 1,000,000 |
-| `gold_share` | Percent of that gold paid out as gold (a river's other 25 percent is fish) | 0 to 100 |
-| `support_share` | Percent of the gold that follows popular support, as coastal regions' does. The rest is paid in full | 0 to 100 |
-| `idle_gold_base`, `idle_gold_rate` | Gold one region pays, as Industrial regions do, on the part of the realm's production not allocated to units: `idle_gold_base` plus a random 0 up to one less than `idle_gold_rate` when none is allocated, and that share of it otherwise | 0 to 1,000,000 |
-| `food_base`, `food_rate` | Food one region grows each turn: `food_base`, raised by food technology, plus a random 0 up to one less than `food_rate` | 0 to 100,000 |
-| `food_share` | Percent of that food that is produced | 0 to 100 |
-| `pop_cap` | The type's weight in the population capacity | 0 to 10,000 |
-| `upkeep` | Gold one region costs to keep each turn, before technology and the Maintenance Costs setting | 0 to 100,000 |
-| `unit_points` | Production a region adds to the realm's unit pool | 0 to 100,000 |
-| `production_boost` | The unit pool rises by this many times the type's share of all the realm's land; the whole boost is capped at 150 percent of normal | 0 to 100 |
-| `research` | The type's weight in the realm's research count, which never passes the realm's land | 0 to 100 |
+game works it out the same way. All figures are whole numbers. The keys and
+their limits are under [Regions](mod-reference.md#regions).
 
 Gold is `(gold_base + draw) x gold_share percent`, scaled by popular support for
 the `support_share` part of it, then raised by gold technology. Idle gold is not
 raised by technology.
 
-Waste is ruined land: it may change only `upkeep`, `gold_share` and
-`food_share`, and every other key must stay 0. A type that pays gold or food a
+Waste is ruined land: it may change only the keys the reference marks, and
+every other key must stay 0. A type that pays gold or food a
 mod gave it gets its own line in the turn report, and the advisors and the
 turn report name whichever types the mod has boosting production, doing
 research or building units.
@@ -161,7 +128,8 @@ To see every value a mod can change, as the game sets it without mods, use
 ## Making a mod
 
 A mod is a folder under `mods` in the data directory. The folder's name is the
-mod's name. It may use lowercase letters, digits, `-` and `_`.
+mod's name. It may use lowercase letters, digits, `-` and `_`, and must start
+with a letter or digit.
 
 [`-init-mod`](#command-line-options-and-settings) creates a new, empty mod to
 start from:
@@ -225,15 +193,9 @@ the region scripts in a `regions` folder and a license file is an error.
 ## Options
 
 A mod can let the sysop choose a few values when a game starts. Put the choices
-in `[options.<id>]` tables in `mod.toml`. `-init-mod` writes a commented
-example. Each table takes these fields:
-
-- `type`: `number` or `bool`.
-- `label`: the short name shown in the editors, `-check-mod` and Game Setup.
-- `description`: a line saying what the option changes.
-- `default`: the value used when the sysop makes no choice. A number is a
-  whole number. A bool is `true` or `false`; `0` and `1` are refused.
-- `min` and `max`: required for a number, and refused for a bool.
+in `[options.<id>]` tables in `mod.toml`. [`-init-mod`](#command-line-options-and-settings)
+writes a commented example. The fields of a table are under
+[Options](mod-reference.md#options).
 
 For example:
 
@@ -270,7 +232,7 @@ build_cost = 400
 That section applies only when the bool is True. It is read after the plain
 values, so it overrides them. A script reads either kind with `option("<id>")`:
 a number is a whole number, and a bool is `True` or `False`. A chosen number
-still has to pass the figure's normal limit from the tables above.
+still has to pass the figure's normal limit in the [Mod Reference](mod-reference.md).
 
 The sysop makes the choices on the Mods page of either settings editor, or in
 `config.json` under `ModOptions`. A game keeps its choices until the next
@@ -361,7 +323,7 @@ played a hundred turns.
 name: `realm.regions.mountain`.
 
 `row` holds the type's figures as every realm plays them, the base game's with
-`values.toml` applied, by the keys in the table under [Regions](#regions):
+`values.toml` applied, by the keys under [Regions](mod-reference.md#regions):
 `row.food_base`.
 
 `region` returns the figures it changes for this realm, or `{}` to change
@@ -374,7 +336,7 @@ def region(realm, row):
     return {"food_base": row.food_base + 150, "food_rate": 100}
 ```
 
-The answers must stay inside the limits in the table, and a script for waste
+The answers must stay inside the [limits](mod-reference.md#regions), and a script for waste
 may change only the keys waste may change in `values.toml`.
 
 The game asks for a realm's figures whenever it needs them: for the turn, but

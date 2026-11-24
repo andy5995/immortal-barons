@@ -87,6 +87,9 @@ type RegionField struct {
 	// WasteMay marks a figure ruined land may keep: its upkeep and the shares
 	// that decide what the rest of its figures pay.
 	WasteMay bool
+	// Desc is one sentence saying what the figure means; the generated mod
+	// reference prints it.
+	Desc string
 }
 
 // The limits a mod's region figures must stay inside. Each keeps the engine's
@@ -107,20 +110,20 @@ const (
 // RegionFields are the figures a mod can set on a region type, in the order
 // -print-base-mod writes them.
 var RegionFields = []RegionField{
-	{"gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldBase }, func(r *RegionRules, v int) { r.GoldBase = v }, false},
-	{"gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldRate }, func(r *RegionRules, v int) { r.GoldRate = v }, false},
-	{"gold_share", 0, 100, func(r RegionRules) int { return r.GoldShare }, func(r *RegionRules, v int) { r.GoldShare = v }, true},
-	{"support_share", 0, 100, func(r RegionRules) int { return r.SupportShare }, func(r *RegionRules, v int) { r.SupportShare = v }, false},
-	{"idle_gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldBase }, func(r *RegionRules, v int) { r.IdleGoldBase = v }, false},
-	{"idle_gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldRate }, func(r *RegionRules, v int) { r.IdleGoldRate = v }, false},
-	{"food_base", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodBase }, func(r *RegionRules, v int) { r.FoodBase = v }, false},
-	{"food_rate", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodRate }, func(r *RegionRules, v int) { r.FoodRate = v }, false},
-	{"food_share", 0, 100, func(r RegionRules) int { return r.FoodShare }, func(r *RegionRules, v int) { r.FoodShare = v }, true},
-	{"pop_cap", 0, ModRegionPopCapMax, func(r RegionRules) int { return r.PopCap }, func(r *RegionRules, v int) { r.PopCap = v }, false},
-	{"upkeep", 0, ModRegionUpkeepMax, func(r RegionRules) int { return r.Upkeep }, func(r *RegionRules, v int) { r.Upkeep = v }, true},
-	{"unit_points", 0, ModRegionUnitPointsMax, func(r RegionRules) int { return r.UnitPoints }, func(r *RegionRules, v int) { r.UnitPoints = v }, false},
-	{"production_boost", 0, ModRegionBoostMax, func(r RegionRules) int { return r.ProductionBoost }, func(r *RegionRules, v int) { r.ProductionBoost = v }, false},
-	{"research", 0, ModRegionResearchMax, func(r RegionRules) int { return r.Research }, func(r *RegionRules, v int) { r.Research = v }, false},
+	{"gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldBase }, func(r *RegionRules, v int) { r.GoldBase = v }, false, "Gold one region pays each turn, before the random part (`gold_rate`)."},
+	{"gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldRate }, func(r *RegionRules, v int) { r.GoldRate = v }, false, "A random 0 up to one less than this is added to `gold_base`, drawn once a turn for the whole type."},
+	{"gold_share", 0, 100, func(r RegionRules) int { return r.GoldShare }, func(r *RegionRules, v int) { r.GoldShare = v }, true, "Percent of that gold paid out as gold. A river's other 25 percent is fish."},
+	{"support_share", 0, 100, func(r RegionRules) int { return r.SupportShare }, func(r *RegionRules, v int) { r.SupportShare = v }, false, "Percent of the gold that follows popular support, as coastal regions' does. The rest is paid in full."},
+	{"idle_gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldBase }, func(r *RegionRules, v int) { r.IdleGoldBase = v }, false, "Gold one region pays, as Industrial regions do, on the part of the realm's production not allocated to units, when none is allocated."},
+	{"idle_gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldRate }, func(r *RegionRules, v int) { r.IdleGoldRate = v }, false, "A random 0 up to one less than this is added to `idle_gold_base`. When some production is allocated, the idle share of the total is paid."},
+	{"food_base", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodBase }, func(r *RegionRules, v int) { r.FoodBase = v }, false, "Food one region grows each turn, before the random part. Food technology raises it."},
+	{"food_rate", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodRate }, func(r *RegionRules, v int) { r.FoodRate = v }, false, "A random 0 up to one less than this is added to `food_base`."},
+	{"food_share", 0, 100, func(r RegionRules) int { return r.FoodShare }, func(r *RegionRules, v int) { r.FoodShare = v }, true, "Percent of that food that is produced."},
+	{"pop_cap", 0, ModRegionPopCapMax, func(r RegionRules) int { return r.PopCap }, func(r *RegionRules, v int) { r.PopCap = v }, false, "The type's weight in the realm's population capacity."},
+	{"upkeep", 0, ModRegionUpkeepMax, func(r RegionRules) int { return r.Upkeep }, func(r *RegionRules, v int) { r.Upkeep = v }, true, "Gold one region costs to keep each turn, before technology and the Maintenance Costs setting."},
+	{"unit_points", 0, ModRegionUnitPointsMax, func(r RegionRules) int { return r.UnitPoints }, func(r *RegionRules, v int) { r.UnitPoints = v }, false, "Production a region adds to the realm's unit pool."},
+	{"production_boost", 0, ModRegionBoostMax, func(r RegionRules) int { return r.ProductionBoost }, func(r *RegionRules, v int) { r.ProductionBoost = v }, false, "The unit pool rises by this many times the type's share of all the realm's land. The whole boost is capped at 150 percent of normal."},
+	{"research", 0, ModRegionResearchMax, func(r RegionRules) int { return r.Research }, func(r *RegionRules, v int) { r.Research = v }, false, "The type's weight in the realm's research count, which never passes the realm's land."},
 }
 
 // RegionFieldByKey is the field named key, or nil.

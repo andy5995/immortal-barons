@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // field is one key a [units.<id>] section may set: how to read it from a
@@ -13,36 +14,57 @@ import (
 // named in one place.
 type field struct {
 	key string
-	get func(u game.UnitRules) string
-	set func(u *game.UnitRules, v any) error
+	// desc says what the figure means and limits states its bounds; the
+	// generated mod reference prints both (reference.go).
+	desc, limits string
+	get          func(u game.UnitRules) string
+	set          func(u *game.UnitRules, v any) error
 }
 
 var unitFields = []field{
 	{"build_cost",
+		"Production points an Industrial region spends to build one unit. This is not the purchase price.",
+		"1 to " + numfmt.Comma(game.ModUnitCostMax),
 		func(u game.UnitRules) string { return fmt.Sprint(u.Cost) },
 		func(u *game.UnitRules, v any) (err error) { u.Cost, err = whole(v); return }},
 	{"networth",
+		"Net worth of one unit, in gold, with up to 3 decimal places.",
+		"0 to " + numfmt.Comma(game.ModUnitNetWorthMax/1000),
 		func(u game.UnitRules) string { return game.FixedPoint(u.NetWorth, 1000) },
 		func(u *game.UnitRules, v any) (err error) { u.NetWorth, err = fixed(v, 1000); return }},
 	{"upkeep",
+		"Gold to maintain one unit per turn at the Medium Maintenance Costs setting, with up to 1 decimal place. None charges nothing, Low a quarter of it and High four times it.",
+		"0 to " + numfmt.Comma(game.ModUnitUpkeepMax/10),
 		func(u game.UnitRules) string { return game.FixedPoint(u.UpkeepTenths, 10) },
 		func(u *game.UnitRules, v any) (err error) { u.UpkeepTenths, err = fixed(v, 10); return }},
 	{"offense",
+		"Strength of one unit when it attacks another realm on this planet, in troopers, with up to 2 decimal places. For a tank, its strength with no HeadQuarters.",
+		"0 to " + numfmt.Comma(game.ModUnitStrengthMax/100) + "; 0 for `turret` and `carrier`",
 		func(u game.UnitRules) string { return game.FixedPoint(u.Offense, 100) },
 		func(u *game.UnitRules, v any) (err error) { u.Offense, err = fixed(v, 100); return }},
 	{"defense",
+		"Strength of one unit when its realm is attacked from this planet, in troopers, with up to 2 decimal places. For a tank, its strength with no HeadQuarters.",
+		"0 to " + numfmt.Comma(game.ModUnitStrengthMax/100),
 		func(u game.UnitRules) string { return game.FixedPoint(u.Defense, 100) },
 		func(u *game.UnitRules, v any) (err error) { u.Defense, err = fixed(v, 100); return }},
 	{"hq_bonus",
+		"How much the unit gains for each point of HeadQuarters completion, in troopers, with up to 2 decimal places, when its `offense` or `defense` is 3.5. A unit with another strength gains in the same proportion, so a finished HeadQuarters multiplies its strength by `1 + 100 x hq_bonus / 3.5`: 4.5/3.5 at the tank's 0.01, 13.5/3.5 at 0.1. Without mods only tanks have one.",
+		"0 to " + game.FixedPoint(game.ModUnitHQBonusMax, 100),
 		func(u game.UnitRules) string { return game.FixedPoint(u.HQBonus, 100) },
 		func(u *game.UnitRules, v any) (err error) { u.HQBonus, err = fixed(v, 100); return }},
 	{"price_low",
+		"Bottom of the range a realm's price for the unit moves inside.",
+		"1 to " + numfmt.Comma(game.ModUnitPriceMax) + ", at least " + numfmt.Comma(game.ModUnitPriceBandMin) + " below `price_high`",
 		func(u game.UnitRules) string { return fmt.Sprint(u.PriceLo) },
 		func(u *game.UnitRules, v any) (err error) { u.PriceLo, err = whole(v); return }},
 	{"price_high",
+		"Top of the range a realm's price for the unit moves inside.",
+		"1 to " + numfmt.Comma(game.ModUnitPriceMax) + ", at least " + numfmt.Comma(game.ModUnitPriceBandMin) + " above `price_low`",
 		func(u game.UnitRules) string { return fmt.Sprint(u.PriceHi) },
 		func(u *game.UnitRules, v any) (err error) { u.PriceHi, err = whole(v); return }},
 	{"price_step",
+		"How far the price can move in one turn.",
+		"1 to the width of the range",
 		func(u game.UnitRules) string { return fmt.Sprint(u.PriceStep) },
 		func(u *game.UnitRules, v any) (err error) { u.PriceStep, err = whole(v); return }},
 }

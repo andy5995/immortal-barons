@@ -420,6 +420,11 @@ applied, checked or sent.
 ChangeLog stamp, what to verify, and the **version bump after publishing**,
 which was missed on v0.0.5.
 
+`docs/mod-reference.md` is generated from the mod key tables (`internal/mod`
+`Reference`) and a test fails when it is stale. Rewrite it with `go test
+./internal/mod -run TestModReferenceIsCurrent -update`; never edit it by hand.
+Give a new mod key a description in its table row.
+
 `docs/dev/` holds deeper reference material: `bre-screens.md` (BRE's literal
 on-screen output, layout, and ANSI colors, captured live — the source of truth
 for UI fidelity), `bre-save-format.md` (its binary `game.dat` layout, mapped by
