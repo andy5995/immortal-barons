@@ -305,7 +305,9 @@ func newPirateScript(path, name, hash, src string) (*pirateScript, error) {
 }
 
 // compiled holds each script compiled once per process, keyed by its file and
-// source. A door loads the world, and its mods, on every screen drawn, and a
-// script's top level may run up to ScriptSteps; its globals are frozen once
-// run, so one compiled function is safe to share.
+// source. A script's top level may run up to ScriptSteps, and the settings
+// editor reads the whole mod list again on every change to it. A game in
+// progress reads its mods once, and again only when another process has reset
+// the world (store's FileStore). A script's globals are frozen once run, so one
+// compiled function is safe to share.
 var compiled sync.Map
