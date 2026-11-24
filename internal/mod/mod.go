@@ -270,7 +270,7 @@ func parse(path string, files map[string]string) (*Mod, error) {
 			return nil, fmt.Errorf("%s: %s may not hold control characters", filepath.Join(path, ManifestFile), key)
 		}
 	}
-	m.Hash = hashFiles(files)
+	m.Hash = HashFiles(files)
 	if err := checkModAPI(path, m.ModAPI); err != nil {
 		return nil, err
 	}
@@ -298,9 +298,9 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	return m, nil
 }
 
-// hashFiles is a mod's hash: its files' names and contents, in name order so
+// HashFiles is a mod's hash: its files' names and contents, in name order so
 // it is stable.
-func hashFiles(files map[string]string) string {
+func HashFiles(files map[string]string) string {
 	hash := sha256.New()
 	for _, name := range slices.Sorted(maps.Keys(files)) {
 		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(files[name]))
@@ -348,9 +348,6 @@ license = %q
 	}
 	return os.WriteFile(filepath.Join(dir, ValuesFile), []byte(values), 0o644)
 }
-
-// HashFiles is the hash a mod with these files has, as Mod.Hash.
-func HashFiles(files map[string]string) string { return hashFiles(files) }
 
 // checkModAPI holds a mod to the mod format it says it was written for,
 // before any of its values are applied or its scripts compiled.
@@ -665,7 +662,7 @@ func Restore(dataDir string, recorded []game.ModRef, folders bool) (rules *game.
 				switch err := readFiles(path, "", disk); {
 				case err != nil:
 					warnings = append(warnings, fmt.Sprintf("mod %q could not be read (%v); this game keeps the values it was reset with until the next reset", ref.Name, err))
-				case hashFiles(disk) != ref.Hash:
+				case HashFiles(disk) != ref.Hash:
 					warnings = append(warnings, fmt.Sprintf("mod %q has changed since this game was reset; this game keeps the mod's old values until the next reset", ref.Name))
 				}
 			}
