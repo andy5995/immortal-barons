@@ -94,7 +94,7 @@ game works it out the same way. All figures are whole numbers.
 | `upkeep` | Gold one region costs to keep each turn, before technology and the Maintenance Costs setting | 0 to 100,000 |
 | `unit_points` | Production a region adds to the realm's unit pool | 0 to 100,000 |
 | `production_boost` | The unit pool rises by this many times the type's share of all the realm's land; the whole boost is capped at 150 percent of normal | 0 to 100 |
-| `research` | The type's weight in the realm's research count | 0 to 100 |
+| `research` | The type's weight in the realm's research count, which never passes the realm's land | 0 to 100 |
 
 Gold is `(gold_base + draw) x gold_share percent`, scaled by popular support for
 the `support_share` part of it, then raised by gold technology. Idle gold is not

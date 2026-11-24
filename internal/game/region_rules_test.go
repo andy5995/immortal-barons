@@ -55,3 +55,22 @@ func TestModdedRegionRowsReachTheEngine(t *testing.T) {
 		t.Errorf("10 Agricultural regions at upkeep 100 cost %d, want 1000", got)
 	}
 }
+
+// A research weight above 1 cannot lift the research count past the realm's
+// land, so a modded realm researches no faster than an all-Technology one.
+func TestResearchCountIsHeldToTheLand(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Rules = BaseRules()
+	tr := w.Rules.Regions[Technology]
+	tr.Research = ModRegionResearchMax
+	w.Rules.Regions[Technology] = tr
+	e := w.AddHuman("a", "Alpha")
+	e.Regions = RegionMix{Technology: 1_000}
+	if got := w.researchRegions(e); got != 1_000 {
+		t.Errorf("research count %d, want the land, 1000", got)
+	}
+	e.Regions = RegionMix{Technology: 10, Desert: 990}
+	if got := w.researchRegions(e); got != 1_000 {
+		t.Errorf("research count %d, want 1000 (10 x 100)", got)
+	}
+}
