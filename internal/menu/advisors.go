@@ -225,7 +225,9 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		// the stores and how long they last.
 		// Every type's food, which a mod may give to types other than these two.
 		avgGrown := d.avgAgri + d.avgRiver + d.avgOther
-		ag, river, other := p.Regions.Agricultural > 0, p.Regions.River > 0, d.avgOther > 0
+		// By what each source grows, not by what the realm holds: a mod can leave
+		// farms that grow nothing.
+		ag, river, other := d.avgAgri > 0, d.avgRiver > 0, d.avgOther > 0
 		switch {
 		case ag:
 			brk(fmt.Sprintf(tr(s, "Our agricultural regions grow about %s units of food each turn."), count(d.avgAgri)))
@@ -236,8 +238,10 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			brk(fmt.Sprintf(tr(s, "Our rivers yield about %s units of food each turn."), count(d.avgRiver)))
 		case other:
 			brk(fmt.Sprintf(tr(s, "Our regions grow about %s units of food each turn."), count(d.avgOther)))
-		default:
+		case p.Regions.Agricultural == 0 && p.Regions.River == 0:
 			brk(tr(s, "We hold no agricultural regions or rivers, so we grow no food."))
+		default:
+			brk(tr(s, "Our land grows no food."))
 		}
 		if other && (ag || river) {
 			add(fmt.Sprintf(tr(s, "Our other regions add about %s more."), count(d.avgOther)))

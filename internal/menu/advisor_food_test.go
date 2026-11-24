@@ -70,7 +70,7 @@ func TestCivilianAdvisorSplitsFoodBySource(t *testing.T) {
 	if !strings.Contains(joined, "agricultural regions grow about 3,020") || !strings.Contains(joined, "rivers add about 119") {
 		t.Errorf("want separate agricultural and river figures, got:\n%s", joined)
 	}
-	d.p.Regions.River = 0
+	d.p.Regions.River, d.avgRiver = 0, 0
 	if joined = joinAdvisor(advisorReport(s, d, advisorCivilian)); strings.Contains(joined, "rivers") {
 		t.Errorf("no rivers, no river line; got:\n%s", joined)
 	}
@@ -159,5 +159,22 @@ func TestCivilianAdvisorRunOutNextTurn(t *testing.T) {
 		if !strings.Contains(joined, "Our stores will run out next turn.") || strings.Contains(joined, "run out in") {
 			t.Errorf("fed=%v: want the run-out next turn, got:\n%s", fed, joined)
 		}
+	}
+}
+
+// Farms a mod has left growing nothing are not reported as growing 0.
+func TestCivilianAdvisorSkipsBarrenFarms(t *testing.T) {
+	var d advisorData
+	d.p.Food = 100_000
+	d.p.Support = 100
+	d.p.Regions.Agricultural = 10
+	s := &fakeSession{}
+	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
+	if strings.Contains(joined, "grow about 0") || !strings.Contains(joined, "Our land grows no food") {
+		t.Errorf("barren farms: want no zero figure, got:\n%s", joined)
+	}
+	d.avgOther = 500
+	if joined = joinAdvisor(advisorReport(s, d, advisorCivilian)); strings.Contains(joined, "agricultural") || !strings.Contains(joined, "regions grow about 500") {
+		t.Errorf("barren farms and a modded food type: want only the food type, got:\n%s", joined)
 	}
 }
