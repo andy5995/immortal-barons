@@ -260,3 +260,19 @@ func TestRestoreDoesNotCompileTheFolder(t *testing.T) {
 		t.Fatalf("err %v, warnings %q", err, warnings)
 	}
 }
+
+// A saved copy edited in world.json no longer matches the hash the reset
+// recorded, and is reported.
+func TestRestoreReportsAnEditedSavedCopy(t *testing.T) {
+	dataDir := t.TempDir()
+	writeMod(t, dataDir, "pirates", map[string]string{ManifestFile: manifest("pirates"), PiratesFile: raidJets})
+	_, refs, err := Resolve(dataDir, []string{"pirates"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	refs[0].Files[PiratesFile] = "def raid(realm, factions):\n    return []\n"
+	_, warnings, err := Restore(dataDir, refs)
+	if err != nil || len(warnings) != 1 || !strings.Contains(warnings[0], "saved with this game has been edited") {
+		t.Fatalf("err %v, warnings %q", err, warnings)
+	}
+}

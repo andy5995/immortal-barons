@@ -517,6 +517,11 @@ func Restore(dataDir string, recorded []game.ModRef) (rules *game.Rules, warning
 		if err := m.Apply(r); err != nil {
 			return nil, nil, fmt.Errorf("the copy of mod %q saved with this game: %w", ref.Name, err)
 		}
+		// The copy is in world.json, which anyone with the file can edit. It is
+		// played as it stands, but not silently.
+		if m.Hash != ref.Hash {
+			warnings = append(warnings, fmt.Sprintf("the copy of mod %q saved with this game has been edited since the reset; this game plays it as it now stands", ref.Name))
+		}
 		// Only the hash is wanted from the folder, so its files are read and not
 		// parsed: a script there is compiled at the next reset, not here.
 		disk := map[string]string{}
