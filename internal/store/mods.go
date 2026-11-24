@@ -8,11 +8,12 @@ import (
 	"github.com/andy5995/immortal-barons/internal/mod"
 )
 
-// ErrModsInLeague refuses mods on a league board. Every board in a league must
-// play the same rules, and nothing yet carries a mod to the other members: a
-// mod enabled on one board would be that board quietly playing a different
-// game (#202).
-var ErrModsInLeague = errors.New("mods cannot be used on a league board yet; remove Mods from config.json")
+// ErrModsInLeague refuses a league board choosing mods for itself. Every board
+// in a league must play the same rules, so the League Coordinator chooses the
+// mods and its -league-reset carries them to every board (#202).
+var ErrModsInLeague = errors.New("on a league board the League Coordinator chooses the mods and -league-reset carries them to every board; remove Mods from this board's config.json")
+
+func init() { game.LoadLeagueMods = mod.LoadForLeague }
 
 // ErrWorldMods is wrapped around any failure to restore the mods a saved world
 // was reset with. A reset discards them, so it treats this like an unreadable
@@ -25,15 +26,20 @@ var ErrWorldMods = errors.New("this game's mods could not be loaded")
 // the sysop's log under a BBS rather than the caller's screen), and the game
 // plays on with the copy it saved.
 func loadMods(w *game.World, cfg game.Config) error {
-	if len(w.Mods) > 0 && cfg.IBBS {
-		return fmt.Errorf("%w: %w", ErrWorldMods, ErrModsInLeague)
-	}
-	r, warnings, err := mod.Restore(cfg.DataDir, w.Mods)
+	r, warnings, err := mod.Restore(cfg.DataDir, w.Mods, !cfg.IBBS)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrWorldMods, err)
 	}
 	for _, msg := range warnings {
 		mod.Warn(msg)
+	}
+	// A league board's packets state the hash of the copy it plays, not the one
+	// recorded with it, so a copy edited in world.json is held by the rest of
+	// the league like any other difference in the rules.
+	if cfg.IBBS {
+		for i := range w.Mods {
+			w.Mods[i].Hash = mod.HashFiles(w.Mods[i].Files)
+		}
 	}
 	w.Rules = r
 	return nil

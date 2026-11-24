@@ -1,6 +1,7 @@
 package store
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"path/filepath"
@@ -79,28 +80,65 @@ func TestModsSurviveSaveAndLoad(t *testing.T) {
 	}
 }
 
-func TestLeagueBoardRefusesMods(t *testing.T) {
+// A league board does not choose mods for itself: the Coordinator's
+// -league-reset carries them. A world that holds the league's mods loads and
+// plays them with no mod folder on the board, and a copy edited in world.json
+// changes the fingerprint its packets carry.
+func TestLeagueBoardPlaysTheLeaguesMods(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.DataDir = t.TempDir()
 	cfg.IBBS = true
 	cfg.Mods = []string{"m"}
-	writeTestMod(t, cfg.DataDir, "m", "")
+	writeTestMod(t, cfg.DataDir, "m", "[units.tank]\nbuild_cost = 250\n")
 	if err := ApplyResetMods(game.NewWorldSeed(cfg, 1), cfg); !errors.Is(err, ErrModsInLeague) {
 		t.Errorf("err = %v, want ErrModsInLeague", err)
 	}
 
-	// A world already holding mods on a board now set to IBBS does not load,
-	// and says so in the form a reset knows to get past.
-	cfg.IBBS = false
-	w := game.NewWorldSeed(cfg, 1)
-	if err := ApplyResetMods(w, cfg); err != nil {
+	// The world as a league reset leaves it: the mods recorded, no folder.
+	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods)
+	if err != nil {
 		t.Fatal(err)
 	}
+	if err := os.RemoveAll(filepath.Join(cfg.DataDir, mod.Dir)); err != nil {
+		t.Fatal(err)
+	}
+	cfg.Mods = nil
+	w := game.NewWorldSeed(cfg, 1)
+	w.Rules, w.Mods = r, refs
+	fp := w.RulesetFingerprint()
 	if err := Save(w, cfg); err != nil {
 		t.Fatal(err)
 	}
-	cfg.IBBS = true
-	if _, err := Load(cfg); !errors.Is(err, ErrWorldMods) || !errors.Is(err, ErrModsInLeague) {
-		t.Errorf("err = %v, want ErrWorldMods wrapping ErrModsInLeague", err)
+	out := captureModWarnings(t)
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
 	}
+	if got.Rules == nil || got.Rules.Units[game.Tank].Cost != 250 || got.RulesetFingerprint() != fp {
+		t.Errorf("loaded rules %v, fingerprint %q (want tank cost 250 and %q)", got.Rules, got.RulesetFingerprint(), fp)
+	}
+	if out.Len() != 0 {
+		t.Errorf("a league board warned about its mod folder: %q", out.String())
+	}
+
+	got.Mods[0].Files[mod.ValuesFile] = "[units.tank]\nbuild_cost = 100\n"
+	if err := Save(got, cfg); err != nil {
+		t.Fatal(err)
+	}
+	edited, err := Load(cfg)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if edited.RulesetFingerprint() == fp {
+		t.Error("a copy edited in world.json kept the league's fingerprint")
+	}
+}
+
+// captureModWarnings sends the mod package's warnings to a buffer for the
+// length of the test.
+func captureModWarnings(t *testing.T) *bytes.Buffer {
+	var buf bytes.Buffer
+	mod.SetWarnOutput(&buf)
+	t.Cleanup(func() { mod.SetWarnOutput(os.Stderr) })
+	return &buf
 }

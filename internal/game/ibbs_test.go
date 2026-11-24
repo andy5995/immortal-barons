@@ -918,7 +918,7 @@ func TestLeagueWideReset(t *testing.T) {
 	lc.CoordKey, lc.CoordPub = priv, pub
 	lc.AddHuman("alice", "Alethia")
 
-	if err := lc.DeclareLeagueReset("2026-09-01", "A new game begins."); err != nil {
+	if err := lc.DeclareLeagueReset("2026-09-01", "A new game begins.", nil, nil); err != nil {
 		t.Fatalf("DeclareLeagueReset: %v", err)
 	}
 	if len(lc.Empires) != 0 {
@@ -958,7 +958,7 @@ func TestLeagueWideReset(t *testing.T) {
 	}
 
 	// A member cannot reset the league itself.
-	if err := m.DeclareLeagueReset("2026-10-01", ""); err != ErrNotCoordinator {
+	if err := m.DeclareLeagueReset("2026-10-01", "", nil, nil); err != ErrNotCoordinator {
 		t.Errorf("a member board declared a league reset: %v", err)
 	}
 }
@@ -1084,6 +1084,9 @@ var perBoardConfigFields = map[string]string{
 	// than hidden — a league whose boards disagree about the lottery is a league
 	// where one planet has a faucet the other does not.
 	"Lottery": "each sysop's call in the original, per-install and never broadcast",
+	// A trust decision, not a rule: whether this machine runs a league mod's
+	// scripts. Broadcasting it would let the Coordinator make it for everyone.
+	"AcceptLeagueScripts": "each sysop's call whether this machine runs league scripts",
 	// Display, not a rule: it decides whether a raid is written up in the news,
 	// never whether it happens or what it takes. The original keeps its
 	// LOCALPIRATENEWS switch in RESOURCE.DAT for the same reason.

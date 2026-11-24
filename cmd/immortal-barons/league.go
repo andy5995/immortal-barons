@@ -19,7 +19,7 @@ import (
 // same on its next planetary run.
 func runLeagueReset(cfg game.Config, date string) error {
 	return runCoordinatorOrder(cfg, "-league-reset",
-		func(w *game.World) error { return w.DeclareLeagueReset(date, "") },
+		func(w *game.World) error { return w.DeclareLeagueReset(date, "", nil, nil) },
 		func(w *game.World) {
 			fmt.Printf("League reset declared, starting %s, and the order is on its way to the other boards.\n", date)
 		})

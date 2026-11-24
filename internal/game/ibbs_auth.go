@@ -348,7 +348,7 @@ func (w *World) StampOutbox() {
 		// version of the board that wrote it.
 		w.Outbox[i].Version = VersionString()
 		w.Outbox[i].Protocol = Protocol
-		w.Outbox[i].Ruleset = w.Config.RulesetFingerprint()
+		w.Outbox[i].Ruleset = w.RulesetFingerprint()
 		w.Outbox[i].FromNode = w.NodeNumber(w.Config.BoardID)
 		if w.Outbox[i].ToBoard != "" {
 			w.Outbox[i].ToNode = w.NodeNumber(w.Outbox[i].ToBoard)

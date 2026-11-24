@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -202,6 +204,28 @@ func (c Config) RulesetFingerprint() string {
 	}
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:4])
+}
+
+// RulesetFingerprint is the fingerprint this board's packets carry: the
+// league settings (Config.RulesetFingerprint) and, when the game plays mods,
+// each mod's name and hash, so a board playing other mods, or an edited copy
+// of the league's, is held like one playing other settings (#202). With no
+// mods it is exactly the settings' fingerprint, so a league without mods sees
+// no change.
+func (w *World) RulesetFingerprint() string {
+	if len(w.Mods) == 0 {
+		return w.Config.RulesetFingerprint()
+	}
+	b, err := json.Marshal(w.Config.leagueRuleset())
+	if err != nil {
+		return ""
+	}
+	h := sha256.New()
+	h.Write(b)
+	for _, m := range w.Mods {
+		fmt.Fprintf(h, "\x00%s\x00%s", m.Name, m.Hash)
+	}
+	return hex.EncodeToString(h.Sum(nil)[:4])
 }
 
 // ExportLeagueConfig queues a broadcast packet carrying this board's league
@@ -626,11 +650,37 @@ func (w *World) fromCoordinator(p Packet) bool {
 	return p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID()
 }
 
+// LoadLeagueMods rebuilds the rules a league's mods play by, from the files a
+// reset order carries, refusing one with scripts unless scripts is set.
+// internal/mod supplies it (internal/store installs it), since this package
+// cannot import the mod reader; with none installed a modded reset is refused.
+var LoadLeagueMods func(refs []ModRef, scripts bool) (*Rules, error)
+
 // applyLeagueReset carries out the Coordinator's order to reset every board
 // (#65). A copy seen before never reaches it: ApplyPacket drops the packet on
 // the ledger first, and sets aside one that arrived behind a later packet
 // (withoutStaleState).
+//
+// A board that cannot play the order's mods does not reset at all, and says
+// why: an old game is held apart from the league by the ruleset check until
+// its sysop acts, where a reset under other rules would feed a different game
+// into everyone else's.
 func (w *World) applyLeagueReset(r *LeagueReset) {
+	var rules *Rules
+	if len(r.Mods) > 0 {
+		var err error
+		switch {
+		case LoadLeagueMods == nil:
+			err = errors.New("this build cannot read mods")
+		default:
+			rules, err = LoadLeagueMods(r.Mods, w.Config.AcceptLeagueScripts)
+		}
+		if err != nil {
+			w.noteSysop("The League Coordinator reset the league with mods this board cannot play, so this board did not reset: %v", err)
+			return
+		}
+	}
+	w.Rules, w.Mods = rules, r.Mods
 	w.ResetForLeague(r.OnDate)
 	if r.Announced != "" {
 		w.LeagueDiplomacy = r.Announced
@@ -642,7 +692,10 @@ func (w *World) applyLeagueReset(r *LeagueReset) {
 // this board too and queues the order for every other, signed so no other board
 // can issue one (#65). The order is queued AFTER this board's own reset, which
 // would otherwise erase it along with the rest of the world.
-func (w *World) DeclareLeagueReset(onDate, announcement string) error {
+//
+// rules and mods are the mods the new game plays, read from this board's mods
+// folder (nil for none); the order carries them to every other board.
+func (w *World) DeclareLeagueReset(onDate, announcement string, rules *Rules, mods []ModRef) error {
 	if !w.IsLeagueCoordinator() {
 		return ErrNotCoordinator
 	}
@@ -652,11 +705,12 @@ func (w *World) DeclareLeagueReset(onDate, announcement string) error {
 	if w.Frozen {
 		return ErrLeagueFrozen
 	}
-	r := &LeagueReset{OnDate: onDate, Announced: announcement}
+	r := &LeagueReset{OnDate: onDate, Announced: announcement, Mods: mods}
 	p := Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Seq: w.NextSeq(), Reset: r}
 	if err := w.SignAsCoordinator(&p); err != nil {
 		return err
 	}
+	w.Rules, w.Mods = rules, mods
 	w.ResetForLeague(onDate)
 	w.Outbox = append(w.Outbox, p)
 	if announcement != "" {

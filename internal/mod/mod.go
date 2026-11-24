@@ -349,6 +349,9 @@ license = %q
 	return os.WriteFile(filepath.Join(dir, ValuesFile), []byte(values), 0o644)
 }
 
+// HashFiles is the hash a mod with these files has, as Mod.Hash.
+func HashFiles(files map[string]string) string { return hashFiles(files) }
+
 // checkModAPI holds a mod to the mod format it says it was written for,
 // before any of its values are applied or its scripts compiled.
 func checkModAPI(path string, api int) error {
@@ -533,12 +536,54 @@ func checkListed(name string, earlier []string) error {
 	return nil
 }
 
+// LoadForLeague rebuilds the rules a league reset's mods play by, from the
+// files the Coordinator's order carries (game.LoadLeagueMods). Each copy is
+// checked as a stand-alone reset checks a mod folder, in the order listed, and
+// the result against the limits. A mod with a script is refused unless scripts
+// is set: that is this board's AcceptLeagueScripts, its sysop's choice.
+func LoadForLeague(refs []game.ModRef, scripts bool) (*game.Rules, error) {
+	r := game.BaseRules()
+	var names []string
+	for _, ref := range refs {
+		if err := checkListed(ref.Name, names); err != nil {
+			return nil, fmt.Errorf("the league's mod %w", err)
+		}
+		names = append(names, ref.Name)
+		// Before parse, which compiles each script, and compiling runs its top
+		// level: a board that does not accept scripts must run none of it.
+		if !scripts {
+			for file := range ref.Files {
+				if file == PiratesFile || strings.HasPrefix(file, RegionsDir+"/") {
+					return nil, fmt.Errorf("the league's mod %q carries scripts, and this board does not accept them; set AcceptLeagueScripts Yes in bbs.cfg to play it", ref.Name)
+				}
+			}
+		}
+		m, err := parse(ref.Name, ref.Files)
+		if err != nil {
+			return nil, fmt.Errorf("the league's mod %q: %w", ref.Name, err)
+		}
+		if m.Hash != ref.Hash {
+			return nil, fmt.Errorf("the league's mod %q does not match the hash the Coordinator sent", ref.Name)
+		}
+		if err := m.Apply(r); err != nil {
+			return nil, fmt.Errorf("the league's mod %q: %w", ref.Name, err)
+		}
+	}
+	if err := r.Validate(); err != nil {
+		return nil, fmt.Errorf("the league's mods %s: %w", strings.Join(names, ", "), err)
+	}
+	return r, nil
+}
+
 // Restore rebuilds the rules a world was reset with from the copies of its
 // mods saved in the world. A game's rules change only at a reset, so a mod
 // folder edited or removed since then does not reach the game in progress: each
 // such mod is named in a warning, and the saved copy is played until the next
 // reset (#202).
-func Restore(dataDir string, recorded []game.ModRef) (rules *game.Rules, warnings []string, err error) {
+//
+// folders says whether to compare each saved copy with its folder in dataDir.
+// A league board has no folders: its mods came from the Coordinator.
+func Restore(dataDir string, recorded []game.ModRef, folders bool) (rules *game.Rules, warnings []string, err error) {
 	if len(recorded) == 0 {
 		return nil, nil, nil
 	}
@@ -567,6 +612,9 @@ func Restore(dataDir string, recorded []game.ModRef) (rules *game.Rules, warning
 		}
 		// Only the hash is wanted from the folder, so its files are read and not
 		// parsed: a script there is compiled at the next reset, not here.
+		if !folders {
+			continue
+		}
 		disk := map[string]string{}
 		switch err := readFiles(path, "", disk); {
 		case err != nil:

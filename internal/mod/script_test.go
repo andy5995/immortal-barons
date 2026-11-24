@@ -207,7 +207,7 @@ func TestRestoreRebuildsTheScript(t *testing.T) {
 	if err := os.RemoveAll(dir); err != nil {
 		t.Fatal(err)
 	}
-	r, warnings, err := Restore(dataDir, refs)
+	r, warnings, err := Restore(dataDir, refs, true)
 	if err != nil || len(warnings) != 1 {
 		t.Fatalf("err %v, warnings %q", err, warnings)
 	}
@@ -257,7 +257,7 @@ func TestRestoreDoesNotCompileTheFolder(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeMod(t, dataDir, "pirates", map[string]string{PiratesFile: "def raid(:\n"})
-	_, warnings, err := Restore(dataDir, refs)
+	_, warnings, err := Restore(dataDir, refs, true)
 	if err != nil || len(warnings) != 1 || !strings.Contains(warnings[0], "has changed since this game was reset") {
 		t.Fatalf("err %v, warnings %q", err, warnings)
 	}
@@ -273,7 +273,7 @@ func TestRestoreReportsAnEditedSavedCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 	refs[0].Files[PiratesFile] = "def raid(realm, factions):\n    return []\n"
-	_, warnings, err := Restore(dataDir, refs)
+	_, warnings, err := Restore(dataDir, refs, true)
 	if err != nil || len(warnings) != 1 || !strings.Contains(warnings[0], "saved with this game has been edited") {
 		t.Fatalf("err %v, warnings %q", err, warnings)
 	}
@@ -288,5 +288,21 @@ func TestTooManyRaidsAreRefusedUnread(t *testing.T) {
 	_, err := readOrders(starlark.NewList(list))
 	if err == nil || !strings.Contains(err.Error(), "raids ordered") {
 		t.Errorf("err %v, want the count refused", err)
+	}
+}
+
+// A board that does not accept league scripts refuses a scripted mod before
+// compiling it, since compiling runs a script's top level: a script that would
+// fail to compile is refused for being a script, not for its syntax.
+func TestLeagueScriptsAreRefusedBeforeCompiling(t *testing.T) {
+	for _, file := range []string{PiratesFile, "regions/desert.star"} {
+		files := map[string]string{ManifestFile: manifest("m"), file: "def broken(:\n"}
+		ref := game.ModRef{Name: "m", Hash: HashFiles(files), Files: files}
+		if _, err := LoadForLeague([]game.ModRef{ref}, false); err == nil || !strings.Contains(err.Error(), "does not accept them") {
+			t.Errorf("%s: err %v, want the script refused unread", file, err)
+		}
+		if _, err := LoadForLeague([]game.ModRef{ref}, true); err == nil || strings.Contains(err.Error(), "does not accept them") {
+			t.Errorf("%s, scripts allowed: err %v, want the syntax error", file, err)
+		}
 	}
 }
