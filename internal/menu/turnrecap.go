@@ -351,23 +351,23 @@ func incomeReport(s session.Session, w *ctx) {
 	}
 
 	type line struct {
-		amount int
+		amount int64
 		text   string
 	}
 	// Each region type's lines come from its row (game.Region's GoldText and
 	// FoodText), in game.GoldReportOrder: the original's five gold lines in its
 	// order, then any type a mod has made pay.
-	golds := []line{{b.Taxes, "gold was earned in taxes."}}
+	golds := []line{{int64(b.Taxes), "gold was earned in taxes."}}
 	for _, g := range game.GoldReportOrder {
 		golds = append(golds, line{b.GoldFrom(g), g.GoldText})
 	}
-	golds = append(golds, line{b.Trade, "gold was earned from Trade."})
+	golds = append(golds, line{int64(b.Trade), "gold was earned from Trade."})
 	var foods []line
 	for _, g := range game.FoodReportOrder {
-		foods = append(foods, line{b.FoodFrom(g), g.FoodText})
+		foods = append(foods, line{int64(b.FoodFrom(g)), g.FoodText})
 	}
 	// Right-align every amount to one column width so the report scans cleanly.
-	total := 0
+	var total int64
 	width := 0
 	for _, l := range foods {
 		width = max(width, len(comma(l.amount)))
@@ -380,7 +380,7 @@ func incomeReport(s session.Session, w *ctx) {
 			}
 		}
 	}
-	for _, n := range []int64{int64(total), interest, invested, loanPaid} {
+	for _, n := range []int64{total, interest, invested, loanPaid} {
 		if w := len(comma(n)); w > width {
 			width = w
 		}
@@ -396,16 +396,16 @@ func incomeReport(s session.Session, w *ctx) {
 	}
 	for _, l := range golds {
 		if l.amount > 0 {
-			amt(ansi.FgBrightCyan, int64(l.amount), l.text)
+			amt(ansi.FgBrightCyan, l.amount, l.text)
 		}
 	}
 	if total > 0 {
 		fmt.Fprintf(s, "  %s%s%s\n", dim(ansi.FgBrightBlue), strings.Repeat("─", width), ansi.Reset)
-		amt(ansi.FgBrightYellow, int64(total), "gold earned this turn.")
+		amt(ansi.FgBrightYellow, total, "gold earned this turn.")
 	}
 	for _, l := range foods {
 		if l.amount > 0 {
-			amt(ansi.FgBrightCyan, int64(l.amount), l.text)
+			amt(ansi.FgBrightCyan, l.amount, l.text)
 		}
 	}
 	manufacturedUnits(s, made, producers)

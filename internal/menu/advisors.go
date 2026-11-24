@@ -38,11 +38,11 @@ type advisorData struct {
 	// research: Mountain and Technology under the base rules, but a mod may
 	// move either, so the advice names what the rules say.
 	boostTypes, researchTypes []*game.Region
-	foodEaten                 int // this turn's food consumption
-	foodAtCap                 int // consumption once population fills its carrying capacity
-	income                    int // this turn's gold income
-	worldIncome               int // Σ income over living empires
-	worldLand                 int // Σ Land over living empires
+	foodEaten                 int   // this turn's food consumption
+	foodAtCap                 int   // consumption once population fills its carrying capacity
+	income                    int64 // this turn's gold income
+	worldIncome               int64 // Σ income over living empires
+	worldLand                 int   // Σ Land over living empires
 	// away is this realm's forces committed to group attacks, whether still
 	// waiting to leave or in flight. They have left the army, and the Military
 	// advisor counts them in its totals as the original does (#239).
@@ -296,19 +296,19 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		if p.Debt > 0 {
 			add(fmt.Sprintf(tr(s, "We owe %s gold on loans. The bank takes a payment each turn, and what is unpaid at the end of the day grows."), num(p.Debt)))
 		}
-		share := 0
+		var share int64
 		if d.worldIncome > 0 {
 			share = d.income * 100 / d.worldIncome
 		}
-		add(fmt.Sprintf(tr(s, "We earn about %s gold each turn, %d%% of the world total."), count(d.income), share))
-		perRegion, avg := 0, 0
+		add(fmt.Sprintf(tr(s, "We earn about %s gold each turn, %d%% of the world total."), num(d.income), share))
+		var perRegion, avg int64
 		if p.Land > 0 {
-			perRegion = d.income / p.Land
+			perRegion = d.income / int64(p.Land)
 		}
 		if d.worldLand > 0 {
-			avg = d.worldIncome / d.worldLand
+			avg = d.worldIncome / int64(d.worldLand)
 		}
-		add(fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), count(perRegion), count(avg)))
+		add(fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), num(perRegion), num(avg)))
 		if p.Gold <= 0 && p.Bank <= 0 {
 			advise(tr(s, "Our treasury is empty, Sire. We should raise gold soon."))
 		}

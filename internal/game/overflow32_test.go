@@ -114,7 +114,9 @@ func TestModdedRegionTotalsSaturate(t *testing.T) {
 	if got := w.popCapacity(e); got <= 0 {
 		t.Errorf("popCapacity = %d, want a positive capacity", got)
 	}
-	if got := w.IncomeThisTurn(e).Gold(); got <= 0 {
-		t.Errorf("income = %d, want positive", got)
+	// Income is money, held in int64 all the way to creditGold's cap: 30,000
+	// Deserts at gold_base 1,000,000 pay 3e10 before taxes and trade.
+	if got := w.IncomeThisTurn(e).Gold(); got < 30_000_000_000 {
+		t.Errorf("income = %d, want at least 30,000,000,000", got)
 	}
 }
