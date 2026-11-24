@@ -132,5 +132,6 @@ lists what it may say.
 	}
 	b.WriteString("\n")
 
+	writeScripts(&b)
 	return b.String()
 }

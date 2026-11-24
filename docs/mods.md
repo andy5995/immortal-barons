@@ -258,14 +258,9 @@ to say; the game only applies them in the order they are listed.
 the usual checks (pirates are on, the realm is out of protection), the game
 calls `raid` instead of rolling for a raid itself.
 
-`realm` is the realm that is playing. Its fields are `name`, `regions`,
-`gold`, `troopers`, `jets`, `turrets`, `tanks` and `agents`, plus `market`,
-which holds the `troopers`, `jets`, `turrets`, `tanks` and `agents` the realm
-has for sale on the Trading Market.
-
-`factions` is a list of the pirate factions. Each has `slot` (its number,
-starting at 0), `name`, `regions`, `gold`, and the `troopers`, `jets`,
-`turrets`, `tanks` and `agents` it holds.
+`realm` is the realm that is playing, and `factions` is a list of the pirate
+factions. The fields of each are under
+[`raid`](mod-reference.md#pirate-script).
 
 `raid` returns a list of raids, or `[]` for none:
 
@@ -276,19 +271,11 @@ def raid(realm, factions):
     return [{"faction": 1, "take": "jets", "market": False}]
 ```
 
-`take` is one of `troopers`, `jets`, `turrets`, `tanks`, `gold` and `agents`.
-`market` is optional: `True` takes from the realm's Trading Market listing
-instead of what it holds. Gold is not sold there, so it cannot be taken that
-way. A realm may get up to 10 raids in one turn. Each raid takes as much as a
-normal raid would, and grants the faction regions the same way.
-
-Two built-in functions are added to Starlark's own:
-
-- `rand(n)` returns a whole number from 0 to n - 1, drawn from the game's own
-  random numbers.
-- `day()` returns the game day.
-- `option(id)` returns the value the sysop chose for a declared option. A
-  number is a whole number; a bool is `True` or `False`.
+`take` and `market` are described in the reference. A realm may get up to 10
+raids in one turn. Each raid takes as much as a normal raid would, and grants
+the faction regions the same way. The built-in functions `rand`, `day` and
+`option` are listed under
+[Built-in functions](mod-reference.md#built-in-functions).
 
 If the script fails in a turn, because of an error, by running out of steps,
 or by returning a raid the game does not allow, that realm's turn uses the
@@ -317,14 +304,11 @@ for one realm at a time, so a realm's land can do more or less depending on
 the realm: a bonus for small realms, deserts that farm only once a realm has
 played a hundred turns.
 
-`realm` is the realm whose land is asked about. Its fields are `name`, `day`
-(the game day), `land`, `people`, `support`, `tax`, `turns_played`, and
-`regions`, which holds how many regions of each type it has, by the type's
-name: `realm.regions.mountain`.
-
-`row` holds the type's figures as every realm plays them, the base game's with
-`values.toml` applied, by the keys under [Regions](mod-reference.md#regions):
-`row.food_base`.
+`realm` is the realm whose land is asked about, and `row` holds the type's
+figures as every realm plays them, the base game's with `values.toml` applied,
+by the keys of [Regions](mod-reference.md#regions): `row.food_base`. Their
+fields are under
+[`region`](mod-reference.md#region-script).
 
 `region` returns the figures it changes for this realm, or `{}` to change
 nothing. A key it leaves out keeps its value in `row`:

@@ -94,3 +94,70 @@ The region types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `
 | `production_boost` | The unit pool rises by this many times the type's share of all the realm's land. The whole boost is capped at 150 percent of normal. | 0 to 100 | must be 0 |
 | `research` | The type's weight in the realm's research count, which never passes the realm's land. | 0 to 100 | must be 0 |
 
+## Scripts
+
+A script is a [Starlark](https://github.com/bazelbuild/starlark) file. The rules every script follows are under [Scripts](mods.md#scripts). Each entry point is called with the arguments below and must return the value described.
+
+### Pirate script
+
+`pirates.star` defines `raid(realm, factions)`. It is called once per realm per turn, after the usual checks. `realm` is a read-only struct:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `name` | text | The realm's name. |
+| `regions` | number | How many regions the realm has. |
+| `gold` | number | The realm's gold in hand. |
+| `troopers`, `jets`, `turrets`, `tanks`, `agents` | number | How many of each unit the realm holds. |
+| `market` | struct | What the realm has for sale on the Trading Market, as a struct with the same unit names: `realm.market.jets`. |
+
+`factions` is a frozen list with one struct per pirate faction, in slot order:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `slot` | number | The faction's number, starting at 0. A raid names a faction by it. |
+| `name` | text | The faction's name. |
+| `regions` | number | How many regions the faction has. |
+| `gold` | number | The faction's gold. |
+| `troopers`, `jets`, `turrets`, `tanks`, `agents` | number | How many of each unit the faction holds. |
+
+`raid` returns a list of at most 10 raids, or `[]` for none. Each raid is a dict:
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `faction` | number | The `slot` of the faction that raids. Required. |
+| `take` | text | What the raid takes: one of `troopers`, `jets`, `turrets`, `tanks`, `gold`, `agents`. Required. |
+| `market` | bool | `True` takes from the realm's Trading Market listing instead of what it holds. Optional. Gold is not sold there, so `gold` cannot be taken that way. |
+
+### Region script
+
+`regions/<type>.star` defines `region(realm, row)`. It is called for one realm at a time, whenever the game needs the figures of the region type the file is named for. `realm` is a read-only struct:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `name` | text | The realm's name. |
+| `day` | number | The game day. |
+| `land` | number | The realm's total land. |
+| `regions` | struct | How many regions of each type the realm has, by the type's ID: `realm.regions.mountain`. The IDs are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `urban`, `industrial`, `technology`, `waste`. |
+| `people` | number | The realm's population. |
+| `support` | number | The realm's popular support. |
+| `tax` | number | The realm's tax rate, in percent. |
+| `turns_played` | number | How many turns the realm has played. |
+
+`row` is a read-only struct of the type's figures:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `gold_base`, `gold_rate`, `gold_share`, `support_share`, `idle_gold_base`, `idle_gold_rate`, `food_base`, `food_rate`, `food_share`, `pop_cap`, `upkeep`, `unit_points`, `production_boost`, `research` | number | The type's figures as every realm plays them: the base game's with `values.toml` applied. Each is described under [Regions](#regions). |
+
+`region` returns a dict of the figures it changes, with the keys of `row`, or `{}` to change nothing. A key it leaves out keeps its value in `row`. Every figure must stay inside its limit above, and a script for waste may change only the keys waste may change.
+
+### Built-in functions
+
+These are added to Starlark's own. A region script has no `rand()` or `day()`: it must give the same answer every time it is asked the same question.
+
+| Function | Meaning | Available to |
+| --- | --- | --- |
+| `rand(n)` | A whole number from 0 to n - 1, drawn from the game's own random numbers. `n` must be at least 1. | pirates |
+| `day()` | The game day. | pirates |
+| `option(id)` | The value the sysop chose for an option the mod declares. A number is a whole number; a bool is `True` or `False`. | pirates and regions |
+

@@ -423,7 +423,8 @@ which was missed on v0.0.5.
 `docs/mod-reference.md` is generated from the mod key tables (`internal/mod`
 `Reference`) and a test fails when it is stale. Rewrite it with `go test
 ./internal/mod -run TestModReferenceIsCurrent -update`; never edit it by hand.
-Give a new mod key a description in its table row.
+Give a new mod key a description in its table row, and a new script field a row
+in `reference_scripts.go`.
 
 `docs/dev/` holds deeper reference material: `bre-screens.md` (BRE's literal
 on-screen output, layout, and ANSI colors, captured live — the source of truth
