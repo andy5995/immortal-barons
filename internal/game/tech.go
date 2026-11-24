@@ -102,14 +102,17 @@ func (w *World) advanceTech(e *Empire) {
 }
 
 // researchRegions is the realm's research count: each type's Research weight
-// times its count, which under the base rules is its Technology regions.
+// times its count, which under the base rules is its Technology regions. It is
+// held to the realm's land, the most the base game can reach: advanceTech
+// draws once per point, so a weight that let the count pass the land would
+// slow every turn of a large realm.
 func (w *World) researchRegions(e *Empire) int {
 	rows := w.regionsOf(e)
 	var n int64
 	for _, g := range RegionTypes {
 		n += int64(rows[g].Research) * int64(*g.Count(&e.Regions))
 	}
-	return fitInt(n)
+	return fitInt(min(n, int64(e.Regions.Total())))
 }
 
 // techResearchPoints is round((n^2 / total)^0.75), the original's own shape. It
