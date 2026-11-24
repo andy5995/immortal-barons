@@ -303,9 +303,9 @@ func TestReadGathersMods(t *testing.T) {
 		}
 		return dir
 	}
-	tanks := write("cheap-tanks", "name = \"cheap-tanks\"\nversion = \"1.2\"\nlabel = \"Cheap Tanks\"\nmod_api = 1\n")
-	write("broken", "name = \"other\"\nversion = \"1\"\nmod_api = 1\n")
-	write("plain", "name = \"plain\"\nversion = \"0.1\"\nmod_api = 1\n")
+	tanks := write("cheap-tanks", "name = \"cheap-tanks\"\nversion = \"1.2\"\nlabel = \"Cheap Tanks\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n")
+	write("broken", "name = \"other\"\nversion = \"1\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n")
+	write("plain", "name = \"plain\"\nversion = \"0.1\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n")
 	m, err := mod.Read(tanks)
 	if err != nil {
 		t.Fatal(err)

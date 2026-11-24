@@ -140,17 +140,20 @@ data/
       values.toml
 ```
 
-`mod.toml` describes the mod. `name`, `version` and `mod_api` are required:
+`mod.toml` describes the mod. `name`, `version`, `mod_api` and `license` are
+required:
 
 ```toml
 name = "cheap-tanks"
 version = "1.0"
 mod_api = 1                 # the mod format this mod was written for
+license = "CC-BY-4.0"       # an SPDX identifier, https://spdx.org/licenses/
 label = "Cheap Tanks"       # shown on the Game Setup screen; blank shows the name
 description = "Tanks cost less to buy, build and keep."
 ```
 
 `version` is the mod's own version, for its author to change as they like.
+`license` says how others may use and share the mod; `-check-mod` prints it.
 `mod_api` is the version of the mod format the game reads; see
 [Mod format versions](#mod-format-versions).
 
@@ -341,6 +344,7 @@ every value it changes:
 ```
 Cheap Tanks 1.0 (029923dee3137351): OK
 Tanks cost less to buy, build and keep.
+License: CC-BY-4.0
 Changes from the base game:
   tank.build_cost: 500 -> 250
   tank.upkeep: 0.6 -> 0.3

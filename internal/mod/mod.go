@@ -60,6 +60,10 @@ type Manifest struct {
 	// Label is what the Game Setup screen shows; blank shows Name.
 	Label       string `toml:"label"`
 	Description string `toml:"description"`
+	// License is the mod's license, as an SPDX identifier (GPL-3.0-or-later,
+	// CC-BY-4.0). It is required, so a sysop can tell whether they may share a
+	// mod before passing it on.
+	License string `toml:"license"`
 	// ModAPI is the version of the mod format the mod was written for. Every
 	// mod must give it: see ModAPI.
 	ModAPI int `toml:"mod_api"`
@@ -256,9 +260,12 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	if m.Version == "" {
 		return nil, fmt.Errorf("%s: version is required", filepath.Join(path, ManifestFile))
 	}
+	if strings.TrimSpace(m.License) == "" {
+		return nil, fmt.Errorf("%s: license is required, as an SPDX identifier such as GPL-3.0-or-later or CC-BY-4.0", filepath.Join(path, ManifestFile))
+	}
 	// The label and version are printed on every player's Game Setup screen,
 	// where a control character would reach the terminal as a command.
-	for key, v := range map[string]string{"label": m.Label, "version": m.Version, "description": m.Description} {
+	for key, v := range map[string]string{"label": m.Label, "version": m.Version, "description": m.Description, "license": m.License} {
 		if strings.ContainsFunc(v, unicode.IsControl) {
 			return nil, fmt.Errorf("%s: %s may not hold control characters", filepath.Join(path, ManifestFile), key)
 		}

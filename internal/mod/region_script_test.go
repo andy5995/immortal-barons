@@ -241,9 +241,9 @@ func TestRestoreRebuildsTheRegionScripts(t *testing.T) {
 // mods is told apart from a mistake, before any value is applied.
 func TestAModNeedsAModAPI(t *testing.T) {
 	for _, c := range []struct{ name, manifest, want string }{
-		{"missing", "name = \"m\"\nversion = \"1\"\n", "mod_api is required; this version of the game reads mod_api = 1"},
-		{"newer", "name = \"m\"\nversion = \"1\"\nmod_api = 2\n", "written for mod_api 2, but this version of the game reads mod_api 1; it needs a newer version of the game"},
-		{"not a version", "name = \"m\"\nversion = \"1\"\nmod_api = -1\n", "mod_api -1 is not a version"},
+		{"missing", "name = \"m\"\nversion = \"1\"\nlicense = \"CC0-1.0\"\n", "mod_api is required; this version of the game reads mod_api = 1"},
+		{"newer", "name = \"m\"\nversion = \"1\"\nlicense = \"CC0-1.0\"\nmod_api = 2\n", "written for mod_api 2, but this version of the game reads mod_api 1; it needs a newer version of the game"},
+		{"not a version", "name = \"m\"\nversion = \"1\"\nlicense = \"CC0-1.0\"\nmod_api = -1\n", "mod_api -1 is not a version"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			// With a script, and without one: the format covers values.toml too.

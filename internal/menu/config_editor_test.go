@@ -291,7 +291,7 @@ func writeTestMod(t *testing.T, dataDir, name, values string) {
 		t.Fatal(err)
 	}
 	files := map[string]string{
-		mod.ManifestFile: "name = \"" + name + "\"\nversion = \"1.0\"\nmod_api = 1\n",
+		mod.ManifestFile: "name = \"" + name + "\"\nversion = \"1.0\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n",
 		mod.ValuesFile:   values,
 	}
 	for f, body := range files {
