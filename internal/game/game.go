@@ -150,8 +150,13 @@ type World struct {
 	// planetary run can carry out the same order once the sysop makes the mods
 	// playable; an applied order replaces or clears it.
 	PendingLeagueReset *LeagueReset `json:",omitempty"`
-	GameDay            int
-	InvestRate         int // tenths of a percent per day, floats each daily maintenance
+	// PendingLeagueNumber and PendingLeagueKey are the league the pending
+	// order came from: its number and the hex of its Coordinator's public key.
+	// A board that has since moved to another league discards the order.
+	PendingLeagueNumber int    `json:",omitempty"`
+	PendingLeagueKey    string `json:",omitempty"`
+	GameDay             int
+	InvestRate          int // tenths of a percent per day, floats each daily maintenance
 	// FoodMarketSupply is the shared planet-wide pool of food available to buy
 	// today; buying depletes it, selling replenishes it, and it resets to
 	// FoodMarketDailySupply each day's maintenance (issue #19).
@@ -568,7 +573,7 @@ func (w *World) ResetForLeague(startDate string) {
 // creation (NewWorldSeed) and by every reset. Add any new creation-time world
 // default here, not in NewWorldSeed.
 func (w *World) initFreshGame() {
-	mods, pending := w.Mods, w.PendingLeagueReset
+	mods, pending, pendingNum, pendingKey := w.Mods, w.PendingLeagueReset, w.PendingLeagueNumber, w.PendingLeagueKey
 	v := reflect.ValueOf(w).Elem()
 	for i := range v.NumField() {
 		if f := v.Type().Field(i); f.IsExported() && f.Tag.Get("json") != "-" {
@@ -578,6 +583,7 @@ func (w *World) initFreshGame() {
 	// A refused league order outlives the game that was running when it came;
 	// applyLeagueReset clears it once an order is carried out.
 	w.Mods, w.PendingLeagueReset = mods, pending
+	w.PendingLeagueNumber, w.PendingLeagueKey = pendingNum, pendingKey
 	w.Prices = w.defaultPrices()
 	w.InvestRate = DefaultInvestRate
 	w.FoodMarketSupply = FoodMarketDailySupply
