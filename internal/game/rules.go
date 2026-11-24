@@ -138,7 +138,7 @@ const (
 // the price itself inside an int on a 32-bit build; the percent figures are
 // percent of a HeadQuarters that tops out at 100.
 const (
-	ModHQTankBonusMax    = 10 // hundredths of a trooper a tank gains per HQ point (base: 0.01)
+	ModHQTankBonusMax    = 10 // TankPerHQ: 0.10 a point against the base 0.01, in troopers at a tank's base 3.5
 	ModHQPercentMax      = 100
 	ModHQPriceMax        = 1_000_000_000
 	ModHQPricePerTurnMax = 1_000_000
