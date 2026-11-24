@@ -162,6 +162,9 @@ type HQField struct {
 	Paired bool
 	Get    func(h HQRules) int64
 	Set    func(h *HQRules, v int64)
+	// Desc is one sentence saying what the figure means; the generated mod
+	// reference prints it.
+	Desc string
 }
 
 // HQFields are the figures a mod can set on the HeadQuarters, in the order
@@ -169,31 +172,31 @@ type HQField struct {
 var HQFields = []HQField{
 	{"build_start", 1, ModHQPercentMax, false, false,
 		func(h HQRules) int64 { return int64(h.BuildStart) },
-		func(h *HQRules, v int64) { h.BuildStart = int(v) }},
+		func(h *HQRules, v int64) { h.BuildStart = int(v) }, "Completion percent a newly bought HeadQuarters begins at."},
 	{"build_per_turn", 1, ModHQPercentMax, false, false,
 		func(h HQRules) int64 { return int64(h.BuildPerTurn) },
-		func(h *HQRules, v int64) { h.BuildPerTurn = int(v) }},
+		func(h *HQRules, v int64) { h.BuildPerTurn = int(v) }, "Percent a HeadQuarters gains each turn until it reaches 100."},
 	{"battle_loss_min", 0, ModHQPercentMax, false, false,
 		func(h HQRules) int64 { return int64(h.BattleLossMin) },
-		func(h *HQRules, v int64) { h.BattleLossMin = int(v) }},
+		func(h *HQRules, v int64) { h.BattleLossMin = int(v) }, "Completion percent a HeadQuarters loses when its realm loses a defense."},
 	{"battle_loss_jitter", 1, ModHQPercentMax, false, false,
 		func(h HQRules) int64 { return int64(h.BattleLossJitter) },
-		func(h *HQRules, v int64) { h.BattleLossJitter = int(v) }},
+		func(h *HQRules, v int64) { h.BattleLossJitter = int(v) }, "A random 0 up to one less than this is added to that loss."},
 	{"price_base", 1, ModHQPriceMax, true, false,
 		func(h HQRules) int64 { return h.PriceBase },
-		func(h *HQRules, v int64) { h.PriceBase = v }},
+		func(h *HQRules, v int64) { h.PriceBase = v }, "Gold a HeadQuarters costs a realm that has played no turns."},
 	{"price_per_turn", 0, ModHQPricePerTurnMax, true, false,
 		func(h HQRules) int64 { return h.PricePerTurn },
-		func(h *HQRules, v int64) { h.PricePerTurn = v }},
+		func(h *HQRules, v int64) { h.PricePerTurn = v }, "Gold the price rises with each turn the realm has played."},
 	{"price_jitter", 0, ModHQPriceJitterMax, true, false,
 		func(h HQRules) int64 { return h.PriceJitter },
-		func(h *HQRules, v int64) { h.PriceJitter = v }},
+		func(h *HQRules, v int64) { h.PriceJitter = v }, "A random 0 up to one less than this is added to the price. 0 makes the price exact."},
 	{"price_cap", 0, ModHQPriceMax, true, true,
 		func(h HQRules) int64 { return h.PriceCap },
-		func(h *HQRules, v int64) { h.PriceCap = v }},
+		func(h *HQRules, v int64) { h.PriceCap = v }, "The price never rises past this, less its own random draw. At least `price_base`."},
 	{"price_cap_jitter", 0, ModHQPriceMax, true, true,
 		func(h HQRules) int64 { return h.PriceCapJitter },
-		func(h *HQRules, v int64) { h.PriceCapJitter = v }},
+		func(h *HQRules, v int64) { h.PriceCapJitter = v }, "A random 0 up to one less than this is taken off the cap. Less than `price_cap`."},
 }
 
 // HQFieldByKey is the field named key, or nil.

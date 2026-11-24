@@ -1,7 +1,7 @@
 # Mod system: decisions and invariants
 
-`docs/mods.md` is the user contract: every key, limit, file and command. The
-code is how each part works. This page holds what neither states as a rule:
+`docs/mods.md` and the generated `docs/mod-reference.md` are the user
+contract: every key, limit, file and command. The code is how each part works. This page holds what neither states as a rule:
 the decisions behind the mod system and the invariants a change must keep. The
 design came out of discussion #202 and PR #350. Read this before changing how
 mods are read, applied, checked or sent.
