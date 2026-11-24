@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"flag"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/i18n"
+	"github.com/andy5995/immortal-barons/internal/mod"
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -122,6 +124,15 @@ func runLocal(cfg game.Config, name, today string, cs charset, noANSI bool) erro
 	if strings.TrimSpace(name) == "" {
 		name = defaultName()
 	}
+	// Here stderr is the player's own terminal: a mod's warning written there
+	// would land in the middle of the screen. They are held until the console is
+	// closed (defers run last first) and printed after the game.
+	var held bytes.Buffer
+	mod.SetWarnOutput(&held)
+	defer func() {
+		mod.SetWarnOutput(os.Stderr)
+		os.Stderr.Write(held.Bytes())
+	}()
 	c := session.NewConsole()
 	defer c.Close()
 

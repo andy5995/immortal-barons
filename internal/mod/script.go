@@ -146,6 +146,21 @@ var (
 	warned            = map[string]map[string]bool{}
 )
 
+// SetWarnOutput sends what the mods report while a game runs, a failed script
+// or a mod changed since the reset, to w instead of standard error.
+func SetWarnOutput(w io.Writer) {
+	warnMu.Lock()
+	defer warnMu.Unlock()
+	warnOut = w
+}
+
+// Warn reports msg about the mods in play where SetWarnOutput says.
+func Warn(msg string) {
+	warnMu.Lock()
+	defer warnMu.Unlock()
+	fmt.Fprintln(warnOut, "immortal-barons: "+msg)
+}
+
 // warnScript reports that script file of mod failed with err, and what the
 // game did instead. Each reason is reported once per run: a script that fails
 // one way usually fails that way every turn, and the sysop's log needs the
