@@ -84,6 +84,9 @@ type RegionField struct {
 	Min, Max int
 	Get      func(r RegionRules) int
 	Set      func(r *RegionRules, v int)
+	// WasteMay marks a figure ruined land may keep: its upkeep and the shares
+	// that decide what the rest of its figures pay.
+	WasteMay bool
 }
 
 // The limits a mod's region figures must stay inside. Each keeps the engine's
@@ -104,20 +107,20 @@ const (
 // RegionFields are the figures a mod can set on a region type, in the order
 // -print-base-mod writes them.
 var RegionFields = []RegionField{
-	{"gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldBase }, func(r *RegionRules, v int) { r.GoldBase = v }},
-	{"gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldRate }, func(r *RegionRules, v int) { r.GoldRate = v }},
-	{"gold_share", 0, 100, func(r RegionRules) int { return r.GoldShare }, func(r *RegionRules, v int) { r.GoldShare = v }},
-	{"support_share", 0, 100, func(r RegionRules) int { return r.SupportShare }, func(r *RegionRules, v int) { r.SupportShare = v }},
-	{"idle_gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldBase }, func(r *RegionRules, v int) { r.IdleGoldBase = v }},
-	{"idle_gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldRate }, func(r *RegionRules, v int) { r.IdleGoldRate = v }},
-	{"food_base", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodBase }, func(r *RegionRules, v int) { r.FoodBase = v }},
-	{"food_rate", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodRate }, func(r *RegionRules, v int) { r.FoodRate = v }},
-	{"food_share", 0, 100, func(r RegionRules) int { return r.FoodShare }, func(r *RegionRules, v int) { r.FoodShare = v }},
-	{"pop_cap", 0, ModRegionPopCapMax, func(r RegionRules) int { return r.PopCap }, func(r *RegionRules, v int) { r.PopCap = v }},
-	{"upkeep", 0, ModRegionUpkeepMax, func(r RegionRules) int { return r.Upkeep }, func(r *RegionRules, v int) { r.Upkeep = v }},
-	{"unit_points", 0, ModRegionUnitPointsMax, func(r RegionRules) int { return r.UnitPoints }, func(r *RegionRules, v int) { r.UnitPoints = v }},
-	{"production_boost", 0, ModRegionBoostMax, func(r RegionRules) int { return r.ProductionBoost }, func(r *RegionRules, v int) { r.ProductionBoost = v }},
-	{"research", 0, ModRegionResearchMax, func(r RegionRules) int { return r.Research }, func(r *RegionRules, v int) { r.Research = v }},
+	{"gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldBase }, func(r *RegionRules, v int) { r.GoldBase = v }, false},
+	{"gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.GoldRate }, func(r *RegionRules, v int) { r.GoldRate = v }, false},
+	{"gold_share", 0, 100, func(r RegionRules) int { return r.GoldShare }, func(r *RegionRules, v int) { r.GoldShare = v }, true},
+	{"support_share", 0, 100, func(r RegionRules) int { return r.SupportShare }, func(r *RegionRules, v int) { r.SupportShare = v }, false},
+	{"idle_gold_base", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldBase }, func(r *RegionRules, v int) { r.IdleGoldBase = v }, false},
+	{"idle_gold_rate", 0, ModRegionGoldMax, func(r RegionRules) int { return r.IdleGoldRate }, func(r *RegionRules, v int) { r.IdleGoldRate = v }, false},
+	{"food_base", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodBase }, func(r *RegionRules, v int) { r.FoodBase = v }, false},
+	{"food_rate", 0, ModRegionFoodMax, func(r RegionRules) int { return r.FoodRate }, func(r *RegionRules, v int) { r.FoodRate = v }, false},
+	{"food_share", 0, 100, func(r RegionRules) int { return r.FoodShare }, func(r *RegionRules, v int) { r.FoodShare = v }, true},
+	{"pop_cap", 0, ModRegionPopCapMax, func(r RegionRules) int { return r.PopCap }, func(r *RegionRules, v int) { r.PopCap = v }, false},
+	{"upkeep", 0, ModRegionUpkeepMax, func(r RegionRules) int { return r.Upkeep }, func(r *RegionRules, v int) { r.Upkeep = v }, true},
+	{"unit_points", 0, ModRegionUnitPointsMax, func(r RegionRules) int { return r.UnitPoints }, func(r *RegionRules, v int) { r.UnitPoints = v }, false},
+	{"production_boost", 0, ModRegionBoostMax, func(r RegionRules) int { return r.ProductionBoost }, func(r *RegionRules, v int) { r.ProductionBoost = v }, false},
+	{"research", 0, ModRegionResearchMax, func(r RegionRules) int { return r.Research }, func(r *RegionRules, v int) { r.Research = v }, false},
 }
 
 // RegionFieldByKey is the field named key, or nil.
@@ -150,7 +153,7 @@ func (rr RegionRules) Validate(g *Region) []error {
 		if v < f.Min || v > f.Max {
 			errs = append(errs, fmt.Errorf("%s: %s %d is outside %d to %d", g.ID, f.Key, v, f.Min, f.Max))
 		}
-		if g == Waste && f.Key != "upkeep" && f.Key != "gold_share" && f.Key != "food_share" && v != 0 {
+		if g == Waste && !f.WasteMay && v != 0 {
 			errs = append(errs, fmt.Errorf("waste: %s must be 0: ruined land produces nothing", f.Key))
 		}
 	}
