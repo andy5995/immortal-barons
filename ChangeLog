@@ -18,6 +18,7 @@ Immortal Barons ChangeLog
     that changes that type's figures realm by realm
   * A mod names the mod format it was written for, mod_api, in mod.toml
   * -reload-mods puts a changed mod into a game in progress, for testing
+  * -init-mod creates an empty mod to start from
   * The sysop panel lists each board's mods and runs -check-mod on them
 
 2026-11-11 (v0.2.9)

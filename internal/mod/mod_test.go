@@ -333,3 +333,22 @@ func TestAModNeedsALicense(t *testing.T) {
 		}
 	}
 }
+
+// Init writes a mod that Check accepts as it stands, and never touches a
+// folder that is already there.
+func TestInitWritesAModCheckAccepts(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "mods", "fresh")
+	if err := Init(dir); err != nil {
+		t.Fatal(err)
+	}
+	m, _, err := Check(dir)
+	if err != nil {
+		t.Fatalf("Check of a new mod: %v", err)
+	}
+	if m.Name != "fresh" || m.ModAPI != ModAPI || m.License != DefaultLicense {
+		t.Errorf("new mod %+v", m.Manifest)
+	}
+	if err := Init(dir); err == nil || !strings.Contains(err.Error(), "already exists") {
+		t.Errorf("second Init: err %v, want it refused", err)
+	}
+}

@@ -89,6 +89,10 @@ func main() {
 		runPrintBaseMod()
 		return
 	}
+	if *o.initMod != "" {
+		exitOn("-init-mod", runInitMod(*o.initMod, *o.dataDir))
+		return
+	}
 	if *o.checkMod != "" {
 		exitOn("-check-mod", runCheckMod(*o.checkMod, *o.dataDir))
 		return

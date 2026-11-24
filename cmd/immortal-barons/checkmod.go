@@ -80,6 +80,22 @@ func runReloadMods(cfg game.Config) error {
 	return nil
 }
 
+// runInitMod is -init-mod: it creates an empty mod, which -check-mod accepts
+// as it stands. arg is a folder, or a plain name, which is created in the data
+// directory's mods folder as -check-mod looks it up.
+func runInitMod(arg, dataDir string) error {
+	dir := arg
+	if !strings.ContainsAny(arg, `/\`) {
+		dir = filepath.Join(dataDir, mod.Dir, arg)
+	}
+	if err := mod.Init(dir); err != nil {
+		return err
+	}
+	fmt.Printf("Created %s with %s and %s.\n", dir, mod.ManifestFile, mod.ValuesFile)
+	fmt.Printf("Its license is %s; change it in %s if you want another.\n", mod.DefaultLicense, mod.ManifestFile)
+	return nil
+}
+
 // runPrintBaseMod is -print-base-mod: every value a mod can change, as the base
 // game sets it, in the form a values.toml takes.
 func runPrintBaseMod() {
