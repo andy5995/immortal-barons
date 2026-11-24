@@ -568,14 +568,16 @@ func (w *World) ResetForLeague(startDate string) {
 // creation (NewWorldSeed) and by every reset. Add any new creation-time world
 // default here, not in NewWorldSeed.
 func (w *World) initFreshGame() {
-	mods := w.Mods
+	mods, pending := w.Mods, w.PendingLeagueReset
 	v := reflect.ValueOf(w).Elem()
 	for i := range v.NumField() {
 		if f := v.Type().Field(i); f.IsExported() && f.Tag.Get("json") != "-" {
 			v.Field(i).SetZero()
 		}
 	}
-	w.Mods = mods
+	// A refused league order outlives the game that was running when it came;
+	// applyLeagueReset clears it once an order is carried out.
+	w.Mods, w.PendingLeagueReset = mods, pending
 	w.Prices = w.defaultPrices()
 	w.InvestRate = DefaultInvestRate
 	w.FoodMarketSupply = FoodMarketDailySupply
