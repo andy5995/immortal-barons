@@ -199,11 +199,17 @@ func Available(dataDir string) ([]Entry, error) {
 // A file in RegionsDir is keyed "regions/<name>", with a forward slash on
 // every system.
 func Read(path string) (*Mod, error) {
+	return ReadWithOptions(path, nil)
+}
+
+// ReadWithOptions reads a mod with one game's chosen option values, for the
+// settings editors and reports that show what that game would play.
+func ReadWithOptions(path string, options map[string]int64) (*Mod, error) {
 	files := map[string]string{}
 	if err := readFiles(path, "", files); err != nil {
 		return nil, err
 	}
-	return parse(path, files)
+	return parseWithOptions(path, files, options, filepath.Join(path, ValuesFile))
 }
 
 // readFiles reads dir's files into files, each keyed prefix + its name. Only
@@ -481,11 +487,7 @@ func Check(path string) (*Mod, *game.Rules, error) {
 // CheckWithOptions reads the mod at path with one game's chosen options, which
 // lets -check-mod show what config.json would play rather than only defaults.
 func CheckWithOptions(path string, options map[string]int64) (*Mod, *game.Rules, error) {
-	files := map[string]string{}
-	if err := readFiles(path, "", files); err != nil {
-		return nil, nil, err
-	}
-	m, err := parseWithOptions(path, files, options, "config.json")
+	m, err := ReadWithOptions(path, options)
 	if err != nil {
 		return nil, nil, err
 	}
