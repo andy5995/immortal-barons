@@ -377,3 +377,37 @@ A game keeps the mods it started with until the next reset:
   mod's folder during a game, the game keeps the copy and writes a warning to
   its error output (stderr) each time it starts. Under a BBS, that output goes
   to the sysop's log.
+- `-reload-mods` is the one exception. It puts the mods `config.json` lists,
+  as their folders are now, into the game in progress, and prints what changed.
+  It is for testing (see below).
+
+## Testing a mod
+
+Test a mod in a game of its own, in a separate data directory, so that nothing
+in a real game changes. Start the game once:
+
+```
+immortal-barons -data ./mod-test -reset-from-config
+```
+
+`./mod-test/config.json` lists the mod under `Mods`, and the mod's folder is in
+`./mod-test/mods`. Play it with `-local`:
+
+```
+immortal-barons -data ./mod-test -local
+```
+
+After you change the mod, load the change into the same game:
+
+```
+immortal-barons -data ./mod-test -reload-mods
+```
+
+It prints each value that changed, and the next turn plays by them. The game
+keeps everything else: the realms, the land, and the market prices set when the
+game started. A mod that will not load is refused, and the game keeps the
+values it had. Start a new game with `-reset-from-config` when you want to see
+the mod from the start.
+
+`-reload-mods` does not work on a league board, because a league board cannot
+use mods.
