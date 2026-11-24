@@ -208,3 +208,20 @@ func TestAdvisorNamesManyBoostingTypesWithinTheBox(t *testing.T) {
 		}
 	}
 }
+
+// The HeadQuarters advice names the units a mod's hq_bonus strengthens.
+func TestHQAdviceNamesTheBoostedUnits(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Rules = game.BaseRules()
+		tr := w.World.Rules.Units[game.Trooper]
+		tr.HQBonus = 1
+		w.World.Rules.Units[game.Trooper] = tr
+		w.Player().HQ = 0
+	})
+	f := &fakeSession{}
+	renderAdvisor(f, w, advisorMilitary)
+	if out := strings.Join(strings.Fields(stripANSI(f.out.String())), " "); !strings.Contains(out, "strengthen our Troopers and Tanks") {
+		t.Errorf("want troopers and tanks named, got:\n%s", out)
+	}
+}

@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -38,11 +39,14 @@ type advisorData struct {
 	// research: Mountain and Technology under the base rules, but a mod may
 	// move either, so the advice names what the rules say.
 	boostTypes, researchTypes []*game.Region
-	foodEaten                 int   // this turn's food consumption
-	foodAtCap                 int   // consumption once population fills its carrying capacity
-	income                    int64 // this turn's gold income
-	worldIncome               int64 // Σ income over living empires
-	worldLand                 int   // Σ Land over living empires
+	// hqUnits are the units a HeadQuarters strengthens: tanks, unless a mod
+	// gives others an hq_bonus.
+	hqUnits     []*game.Good
+	foodEaten   int   // this turn's food consumption
+	foodAtCap   int   // consumption once population fills its carrying capacity
+	income      int64 // this turn's gold income
+	worldIncome int64 // Σ income over living empires
+	worldLand   int   // Σ Land over living empires
 	// away is this realm's forces committed to group attacks, whether still
 	// waiting to leave or in flight. They have left the army, and the Military
 	// advisor counts them in its totals as the original does (#239).
@@ -62,6 +66,7 @@ func gatherAdvisorData(w *ctx) advisorData {
 		}
 		d.boost = w.ProductionBoostPercent(&d.p)
 		d.boostTypes = w.RegionTypesWith(&d.p, func(r game.RegionRules) bool { return r.ProductionBoost > 0 })
+		d.hqUnits = w.UnitsWithHQBonus()
 		d.researchTypes = w.RegionTypesWith(&d.p, func(r game.RegionRules) bool { return r.Research > 0 })
 		d.foodEaten = w.FoodDue(&d.p)
 		d.foodAtCap = w.FoodUpkeepAtCapacity(&d.p)
@@ -131,7 +136,16 @@ func regionList(s session.Session, types []*game.Region, emph bool) string {
 	names := make([]string, len(types))
 	for i, g := range types {
 		names[i] = tr(s, g.Name)
-		if emph {
+	}
+	return nameList(s, names, emph)
+}
+
+// nameList joins translated names for a sentence: "A", "A and B", "A, B and
+// C", each braced on its own for hiTerms when emph is set.
+func nameList(s session.Session, names []string, emph bool) string {
+	if emph {
+		names = slices.Clone(names)
+		for i := range names {
 			names[i] = "{" + names[i] + "}"
 		}
 	}
@@ -328,7 +342,16 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			// The price climbs with every turn played (World.HQPrice), so "soon" is
 			// the actionable half of this advice. The figure itself belongs to the
 			// Spending Menu, which quotes the live price.
-			advise(tr(s, "We have no {HeadQuarters}. Building one would strengthen our {tanks}, and it costs more with every turn we wait."))
+			switch {
+			case len(d.hqUnits) == 1 && d.hqUnits[0] == game.Tank:
+				advise(tr(s, "We have no {HeadQuarters}. Building one would strengthen our {tanks}, and it costs more with every turn we wait."))
+			case len(d.hqUnits) > 0:
+				names := make([]string, len(d.hqUnits))
+				for i, g := range d.hqUnits {
+					names[i] = tr(s, g.Plural)
+				}
+				advise(fmt.Sprintf(tr(s, "We have no {HeadQuarters}. Building one would strengthen our %s, and it costs more with every turn we wait."), nameList(s, names, true)))
+			}
 		case p.HQ < 100:
 			brk(fmt.Sprintf(tr(s, "Our {HeadQuarters} is %d%% built."), p.HQ))
 		default:

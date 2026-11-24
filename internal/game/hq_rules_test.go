@@ -1,6 +1,7 @@
 package game
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -45,9 +46,11 @@ func TestModdedTankBonusScalesTheDefense(t *testing.T) {
 	e.Tanks, e.HQ = 100, 100
 	// Base: 3.5 -> 4.5 troopers a tank at a finished HeadQuarters.
 	before := w.Defense(e)
-	w.Rules.HQ.TankPerHQ = 2
+	tank := w.Rules.Units[Tank]
+	tank.HQBonus = 2
+	w.Rules.Units[Tank] = tank
 	after := w.Defense(e)
-	if before >= after || w.rules().HQ.TankPerHQ != 2 {
+	if before >= after {
 		t.Errorf("defense %d then %d, want a bigger bonus to raise it", before, after)
 	}
 	// (350 + 2*100) / 350 of a tank's 350 hundredths, 100 tanks: 550 troopers
@@ -70,7 +73,6 @@ func TestHQRulesAreRefusedOutOfRange(t *testing.T) {
 		{"cap below base", func(h *HQRules) { h.PriceCap = 4999 }, "price_cap 4999 must be at least price_base (5000)"},
 		{"cap jitter", func(h *HQRules) { h.PriceCapJitter = h.PriceCap }, "price_cap_jitter 100000 is outside 0 to one below price_cap"},
 		{"per turn", func(h *HQRules) { h.PricePerTurn = 2_000_000 }, "price_per_turn 2000000 is outside 0 to 1000000"},
-		{"tank bonus", func(h *HQRules) { h.TankPerHQ = 11 }, "tank_bonus 0.11 is outside 0 to 0.1"},
 	}
 	for _, c := range cases {
 		r := BaseRules()
@@ -96,5 +98,33 @@ func TestHQPriceAtTheLimitsDoesNotWrap(t *testing.T) {
 	e.TurnsPlayed = 2_000_000_000
 	if got := w.HQPrice(e); got <= 0 || got > ModHQPriceMax {
 		t.Errorf("HQ price %d, want a positive price within %d", got, ModHQPriceMax)
+	}
+}
+
+// A HeadQuarters strengthens whichever units carry an HQ bonus: troopers given
+// the tank's 0.01 gain the tank's proportion, and the tank keeps its own.
+func TestHQBonusOnOtherUnits(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Rules = BaseRules()
+	// 350 x 100 troopers' worth of pct at HQ 100: (350 + 100) / 350 of 1.00 each.
+	if got := w.unitStrength(Trooper, 350, 100, 100); got != 350 {
+		t.Fatalf("troopers with no bonus = %d, want 350", got)
+	}
+	tr := w.Rules.Units[Trooper]
+	tr.HQBonus = 1
+	w.Rules.Units[Trooper] = tr
+	if err := w.Rules.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if got := w.unitStrength(Trooper, 350, 100, 100); got != 450 {
+		t.Errorf("350 troopers with bonus 0.01 at HQ 100 = %d, want 450", got)
+	}
+	if got, want := w.UnitsWithHQBonus(), []*Good{Trooper, Tank}; !slices.Equal(got, want) {
+		t.Errorf("UnitsWithHQBonus = %v, want troopers and tanks", got)
+	}
+	tr.HQBonus = ModUnitHQBonusMax + 1
+	w.Rules.Units[Trooper] = tr
+	if err := w.Rules.Validate(); err == nil || !strings.Contains(err.Error(), "trooper: hq_bonus 0.11 is outside 0 to 0.1") {
+		t.Errorf("err %v, want the bonus refused", err)
 	}
 }

@@ -23,6 +23,7 @@ HeadQuarters, and the figures of each region type. The units first:
 | `upkeep` | Gold to maintain one unit per turn at the Medium Maintenance Costs setting (up to 1 decimal place) | 0 to 1,000 |
 | `offense` | Strength of one unit when it attacks another realm on this planet, in troopers (up to 2 decimal places). For a tank, its strength with no HeadQuarters | 0 to 100; 0 for `turret` and `carrier` |
 | `defense` | Strength of one unit when its realm is attacked from this planet, in troopers (up to 2 decimal places). For a tank, its strength with no HeadQuarters | 0 to 100 |
+| `hq_bonus` | How much the unit gains for each point of HeadQuarters completion, in troopers (up to 2 decimal places), when its `offense` or `defense` is 3.5. A unit with another strength gains in the same proportion, so a finished HeadQuarters multiplies its strength by `1 + 100 x hq_bonus / 3.5`: 4.5/3.5 at the tank's 0.01, 13.5/3.5 at 0.1. Without mods only tanks have one | 0 to 0.1 |
 | `price_low`, `price_high` | The range a realm's price for the unit moves inside | 1 to 1,000,000, at least 100 apart |
 | `price_step` | How far that price can move in one turn | 1 to the width of the range |
 
@@ -32,9 +33,9 @@ Without mods, a trooper is 1 on attack and defense, a jet 2 on attack, a
 turret 2 on defense and a tank 3.5 on both; bombers and carriers are 0. Rules
 that belong to a unit stay in force under a mod: only jets that carriers can
 move go into an attack, every unit the realm holds defends (jets included,
-whether or not a carrier could move them), and a HeadQuarters
-raises a tank's strength in proportion to its `offense` and `defense`: to
-4.5/3.5 of them when finished, unless `tank_bonus` (below) changes that. Technology and morale scale the
+whether or not a carrier could move them), and a HeadQuarters raises the
+strength of each unit with an `hq_bonus`, which without mods is the tank alone,
+to 4.5/3.5 of its `offense` and `defense` when finished. Technology and morale scale the
 total as usual. Pirate raids and the help an alliance sends use their own
 figures, which `values.toml` does not change.
 
@@ -44,11 +45,11 @@ nothing, Low a quarter of it and High four times it.
 ### HeadQuarters
 
 The HeadQuarters is one building per realm, so its figures are one `[hq]`
-section in `values.toml`, not one per unit. Every key is optional:
+section in `values.toml`, not one per unit. The strength it adds to units is
+each unit's `hq_bonus`, above. Every key is optional:
 
 | Key | Meaning | Limits |
 | --- | --- | --- |
-| `tank_bonus` | How much a tank gains for each point of HeadQuarters completion, in troopers (up to 2 decimal places), when a tank's `offense` or `defense` is at its base of 3.5. A tank with another weight gains in the same proportion, so a finished HeadQuarters multiplies every tank's strength by `1 + 100 x tank_bonus / 3.5`: 4.5/3.5 at the base 0.01, 13.5/3.5 at 0.1 | 0 to 0.1 |
 | `build_start` | Completion percent a newly bought HeadQuarters begins at | 1 to 100 |
 | `build_per_turn` | Percent it gains each turn until it reaches 100 | 1 to 100 |
 | `battle_loss_min` | Completion percent a HeadQuarters loses when its realm loses a defense | 0 to 100 |
