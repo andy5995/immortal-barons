@@ -30,9 +30,9 @@ const PiratesFile = "pirates.star"
 // a turn. A million steps take well under a second.
 const ScriptSteps = 1_000_000
 
-// spoilNames are the names a script's "take" may use, in game.PirateSpoil
-// order.
-var spoilNames = []string{"troopers", "jets", "turrets", "tanks", "gold", "agents"}
+// spoilName is what a script calls s, as a holding and as a "take": the
+// spoil's own label, lowercased ("jets", "gold").
+func spoilName(s game.PirateSpoil) string { return strings.ToLower(s.Label()) }
 
 // viewKey holds the current call's game.PirateView on the thread, for the
 // rand and day builtins.
@@ -155,13 +155,11 @@ func (s *pirateScript) Failed(err error) {
 }
 
 func holdings(h game.PirateHoldings) starlark.StringDict {
-	return starlark.StringDict{
-		"troopers": starlark.MakeInt(h.Troopers),
-		"jets":     starlark.MakeInt(h.Jets),
-		"turrets":  starlark.MakeInt(h.Turrets),
-		"tanks":    starlark.MakeInt(h.Tanks),
-		"agents":   starlark.MakeInt(h.Agents),
+	d := starlark.StringDict{}
+	for s, n := range h {
+		d[spoilName(s)] = starlark.MakeInt(n)
 	}
+	return d
 }
 
 // realmValue is raid()'s first argument: a read-only struct.
@@ -219,11 +217,16 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 				o.Slot, haveFaction = n, true
 			case "take":
 				name, _ := starlark.AsString(kv[1])
-				k := slices.Index(spoilNames, name)
+				spoils := game.PirateSpoils()
+				k := slices.IndexFunc(spoils, func(s game.PirateSpoil) bool { return spoilName(s) == name })
 				if k < 0 {
-					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, kv[1], strings.Join(spoilNames, ", "))
+					var names []string
+					for _, s := range spoils {
+						names = append(names, spoilName(s))
+					}
+					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, kv[1], strings.Join(names, ", "))
 				}
-				o.Spoil, haveTake = game.PirateSpoil(k), true
+				o.Spoil, haveTake = spoils[k], true
 			case "market":
 				b, ok := kv[1].(starlark.Bool)
 				if !ok {

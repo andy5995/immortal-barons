@@ -46,7 +46,7 @@ func TestPirateBrainOrderRunsTheSharedRaid(t *testing.T) {
 	if e.Jets != 32_000 || w.Pirates[1].LootJets-before != 3000 {
 		t.Errorf("jets %d, faction gained %d; want 32000 and 3000", e.Jets, w.Pirates[1].LootJets-before)
 	}
-	if v := b.seen[0]; v.Realm.Units.Jets != 33_000 || len(v.Factions) != len(w.Pirates) || v.Factions[1].Slot != 1 {
+	if v := b.seen[0]; v.Realm.Units[SpoilJets] != 33_000 || len(v.Factions) != len(w.Pirates) || v.Factions[1].Slot != 1 {
 		t.Errorf("view %+v", v)
 	}
 }

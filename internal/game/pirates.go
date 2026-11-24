@@ -194,6 +194,33 @@ const (
 	SpoilAgents
 )
 
+// PirateSpoils is every spoil, in PirateSpoil order.
+func PirateSpoils() []PirateSpoil {
+	var out []PirateSpoil
+	for s := SpoilTroopers; s <= SpoilAgents; s++ {
+		out = append(out, s)
+	}
+	return out
+}
+
+// loot is the faction's hoard of s and the cap it is held to, or nil for gold,
+// which a faction keeps as Gold.
+func (p *PirateFaction) loot(s PirateSpoil) (*int, int) {
+	switch s {
+	case SpoilTroopers:
+		return &p.LootTroopers, PirateCapTroopers
+	case SpoilJets:
+		return &p.LootJets, PirateCapJets
+	case SpoilTurrets:
+		return &p.LootTurrets, PirateCapTurrets
+	case SpoilTanks:
+		return &p.LootTanks, PirateCapTanks
+	case SpoilAgents:
+		return &p.LootAgents, PirateCapAgents
+	}
+	return nil, 0
+}
+
 // pirateDraw is one face of BRE's sixteen-sided raid die: what the raid takes,
 // and whether it comes out of the victim's own inventory or its Trading Market
 // listing.
@@ -312,18 +339,8 @@ func (w *World) pirateRaid(slot int, v *Empire, draw pirateDraw) {
 	} else if src != nil {
 		took = w.pirateTake(int64(*src))
 		*src -= int(took)
-		kept := int(took) * PirateRaidKeepMult
-		switch draw.Spoil {
-		case SpoilTroopers:
-			p.LootTroopers = capAdd(p.LootTroopers, kept, PirateCapTroopers)
-		case SpoilJets:
-			p.LootJets = capAdd(p.LootJets, kept, PirateCapJets)
-		case SpoilTurrets:
-			p.LootTurrets = capAdd(p.LootTurrets, kept, PirateCapTurrets)
-		case SpoilTanks:
-			p.LootTanks = capAdd(p.LootTanks, kept, PirateCapTanks)
-		case SpoilAgents:
-			p.LootAgents = capAdd(p.LootAgents, kept, PirateCapAgents)
+		if hoard, cap := p.loot(draw.Spoil); hoard != nil {
+			*hoard = capAdd(*hoard, int(took)*PirateRaidKeepMult, cap)
 		}
 	}
 	p.Land = capAdd(p.Land, w.rng.Intn(PirateRaidLandMax), PirateCapRegions)

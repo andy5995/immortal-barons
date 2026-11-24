@@ -1,6 +1,9 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 // PirateBrain decides pirate raids in place of the built-in roll (#202). A mod
 // supplies one through Rules.Pirates; internal/mod runs it as a script, so this
@@ -46,10 +49,9 @@ type PirateRealmView struct {
 	Units, Market PirateHoldings
 }
 
-// PirateHoldings counts the five kinds of unit a raid can take.
-type PirateHoldings struct {
-	Troopers, Jets, Turrets, Tanks, Agents int
-}
+// PirateHoldings counts each kind of unit a raid can take, by its spoil. Gold
+// is not a holding: it is a field of its own.
+type PirateHoldings map[PirateSpoil]int
 
 // PirateFactionView is one faction, at index Slot of World.Pirates.
 type PirateFactionView struct {
@@ -61,29 +63,32 @@ type PirateFactionView struct {
 }
 
 func (w *World) pirateView(e *Empire) PirateView {
-	listed := func(g *Good) int { return w.MarketForSale(e.Name, g.Singular) }
+	units, market := PirateHoldings{}, PirateHoldings{}
+	for _, s := range PirateSpoils() {
+		if g := s.Good(); g != nil {
+			units[s] = *g.Count(e)
+			market[s] = w.MarketForSale(e.Name, g.Singular)
+		}
+	}
 	v := PirateView{
 		Day: w.GameDay,
 		Realm: PirateRealmView{
 			Name: e.Name, Regions: e.Land, Gold: e.Gold,
-			Units: PirateHoldings{
-				Troopers: e.Troopers, Jets: e.Jets, Turrets: e.Turrets, Tanks: e.Tanks, Agents: e.Agents,
-			},
-			Market: PirateHoldings{
-				Troopers: listed(Trooper), Jets: listed(Jet), Turrets: listed(Turret),
-				Tanks: listed(Tank), Agents: listed(Agent),
-			},
+			Units: units, Market: market,
 		},
 		Factions: make([]PirateFactionView, len(w.Pirates)),
 		Rand:     w.rng.Intn,
 	}
-	for i, p := range w.Pirates {
+	for i := range w.Pirates {
+		p := &w.Pirates[i]
+		loot := PirateHoldings{}
+		for _, s := range PirateSpoils() {
+			if hoard, _ := p.loot(s); hoard != nil {
+				loot[s] = *hoard
+			}
+		}
 		v.Factions[i] = PirateFactionView{
-			Slot: i, Name: p.Name, Regions: p.Land, Gold: p.Gold,
-			Loot: PirateHoldings{
-				Troopers: p.LootTroopers, Jets: p.LootJets, Turrets: p.LootTurrets,
-				Tanks: p.LootTanks, Agents: p.LootAgents,
-			},
+			Slot: i, Name: p.Name, Regions: p.Land, Gold: p.Gold, Loot: loot,
 		}
 	}
 	return v
@@ -103,7 +108,7 @@ func (w *World) askPirateBrain(b PirateBrain, e *Empire) ([]PirateOrder, error) 
 		switch {
 		case o.Slot < 0 || o.Slot >= len(w.Pirates):
 			return nil, fmt.Errorf("raid %d: faction %d is outside 0 to %d", i, o.Slot, len(w.Pirates)-1)
-		case o.Spoil < SpoilTroopers || o.Spoil > SpoilAgents:
+		case !slices.Contains(PirateSpoils(), o.Spoil):
 			return nil, fmt.Errorf("raid %d: %d is not something a raid takes", i, o.Spoil)
 		case o.Spoil == SpoilGold && o.FromMarket:
 			return nil, fmt.Errorf("raid %d: gold is not traded, so it cannot be taken from the market", i)
