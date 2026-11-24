@@ -102,7 +102,9 @@ raised by technology.
 
 Waste is ruined land: it may change only `upkeep`, `gold_share` and
 `food_share`, and every other key must stay 0. A type that pays gold or food a
-mod gave it gets its own line in the turn report.
+mod gave it gets its own line in the turn report, and the advisors and the
+turn report name whichever types the mod has boosting production, doing
+research or building units.
 
 For example, deserts that can be farmed a little, and cheaper land to keep:
 

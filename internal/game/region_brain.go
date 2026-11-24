@@ -68,6 +68,20 @@ func (w *World) regionsOf(e *Empire) map[*Region]RegionRules {
 	return rows
 }
 
+// RegionTypesWith is every region type whose figures for e satisfy has, in
+// RegionTypes order: the types that give e research, say, which a screen names
+// rather than assuming the base game's.
+func (w *World) RegionTypesWith(e *Empire, has func(RegionRules) bool) []*Region {
+	rows := w.regionsOf(e)
+	var out []*Region
+	for _, g := range RegionTypes {
+		if has(rows[g]) {
+			out = append(out, g)
+		}
+	}
+	return out
+}
+
 func (w *World) regionView(e *Empire) RegionView {
 	return RegionView{
 		Name: e.Name, Day: w.GameDay, Land: e.Land, Regions: e.Regions,

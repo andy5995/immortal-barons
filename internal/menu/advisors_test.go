@@ -140,12 +140,71 @@ func TestAdvisorsFollowModdedRegionRules(t *testing.T) {
 	})
 	f := &fakeSession{}
 	renderAdvisor(f, w, advisorMilitary)
-	if out := f.out.String(); strings.Contains(out, "We hold no") || !strings.Contains(out, ansi.FgBrightWhite+"120") {
-		t.Errorf("a modded boost on deserts: want its figure and no 'hold no' advice, got:\n%s", out)
+	if out := f.out.String(); strings.Contains(out, "We hold no") || !strings.Contains(out, ansi.FgBrightWhite+"120") ||
+		!strings.Contains(out, "Desert") || strings.Contains(out, "Mountain") {
+		t.Errorf("a modded boost on deserts: want its figure, credited to Desert, got:\n%s", out)
 	}
 	f = &fakeSession{}
 	renderAdvisor(f, w, advisorTechnology)
-	if out := f.out.String(); strings.Contains(out, "We have no Technology regions") {
-		t.Errorf("modded research on deserts: told it has none:\n%s", out)
+	if out := f.out.String(); strings.Contains(out, "We have no") || !strings.Contains(out, "Our Desert regions are new") {
+		t.Errorf("modded research on deserts: want the deserts named as new, got:\n%s", out)
+	}
+	// With the realm's deserts gone, the advice names the types that would help,
+	// Mountain still among them.
+	w.With(func() { w.Player().Regions = game.RegionMix{Industrial: 100} })
+	f = &fakeSession{}
+	renderAdvisor(f, w, advisorMilitary)
+	if out := stripANSI(f.out.String()); !strings.Contains(out, "Mountain and Desert") {
+		t.Errorf("want both boosting types named, got:\n%s", out)
+	}
+}
+
+// The turn report keeps the original's label while Industrial alone builds,
+// and names the types a mod has building otherwise.
+func TestManufacturedLabelNamesTheBuilders(t *testing.T) {
+	made := make([]int, len(game.MilitaryGoods))
+	made[0] = 5
+	for _, c := range []struct {
+		producers []*game.Region
+		want      string
+	}{
+		{[]*game.Region{game.Industrial}, "Your Industrial Zones built:"},
+		{[]*game.Region{game.Desert}, "Your Desert regions built:"},
+		{[]*game.Region{game.Coastal, game.Desert, game.Industrial}, "Your Coastal, Desert and Industrial regions built:"},
+	} {
+		f := &fakeSession{}
+		manufacturedUnits(f, made, c.producers)
+		if !strings.Contains(f.out.String(), c.want) {
+			t.Errorf("producers %v: want %q, got:\n%s", c.producers, c.want, f.out.String())
+		}
+	}
+}
+
+// A mod that gives every type a production boost names them all, and the
+// advice still wraps inside the advisor box.
+func TestAdvisorNamesManyBoostingTypesWithinTheBox(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Rules = game.BaseRules()
+		for _, g := range game.RegionTypes {
+			if g == game.Waste {
+				continue
+			}
+			r := w.World.Rules.Regions[g]
+			r.ProductionBoost = 1
+			w.World.Rules.Regions[g] = r
+		}
+		w.Player().Regions = game.RegionMix{}
+	})
+	f := &fakeSession{}
+	renderAdvisor(f, w, advisorMilitary)
+	out := f.out.String()
+	if !strings.Contains(out, "Technology") {
+		t.Fatalf("the last boosting type is not named:\n%s", out)
+	}
+	for _, line := range strings.Split(out, "\n") {
+		if n := len([]rune(stripANSI(line))); n > 76 {
+			t.Errorf("line of %d columns: %q", n, stripANSI(line))
+		}
 	}
 }
