@@ -12,6 +12,22 @@ import (
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
+// modArg reads a mod argument the same way in every command: anything with a
+// slash is a path, and a bare name is a mod in dataDir's mods folder. Checking
+// an existing mod also accepts a bare name that is a folder here; creating one
+// must not, since the folder it names does not exist yet.
+func modArg(arg, dataDir string, existing bool) string {
+	if strings.ContainsAny(arg, `/\`) {
+		return arg
+	}
+	if existing {
+		if _, err := os.Stat(arg); err == nil {
+			return arg
+		}
+	}
+	return filepath.Join(dataDir, mod.Dir, arg)
+}
+
 // runCheckMod is -check-mod: it reads one mod folder with the same reader and
 // limits a reset uses, and prints every value it changes from the base game.
 // It checks the mod on its own; a reset also checks the mods it applies
@@ -20,11 +36,7 @@ import (
 // arg is a folder, or a mod's name as config.json lists it, which is looked up
 // in the data directory's mods folder.
 func runCheckMod(arg, dataDir string) error {
-	path := arg
-	if _, err := os.Stat(arg); err != nil && !strings.ContainsAny(arg, `/\`) {
-		path = filepath.Join(dataDir, mod.Dir, arg)
-	}
-	m, r, err := mod.Check(path)
+	m, r, err := mod.Check(modArg(arg, dataDir, true))
 	if err != nil {
 		return err
 	}
@@ -84,10 +96,7 @@ func runReloadMods(cfg game.Config) error {
 // as it stands. arg is a folder, or a plain name, which is created in the data
 // directory's mods folder as -check-mod looks it up.
 func runInitMod(arg, dataDir string) error {
-	dir := arg
-	if !strings.ContainsAny(arg, `/\`) {
-		dir = filepath.Join(dataDir, mod.Dir, arg)
-	}
+	dir := modArg(arg, dataDir, false)
 	if err := mod.Init(dir); err != nil {
 		return err
 	}
