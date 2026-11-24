@@ -28,16 +28,14 @@ type Rules struct {
 	HQ HQRules
 }
 
-// HQRules are the HeadQuarters figures. What only interplanetary play does to
+// HQRules are the HeadQuarters figures. The strength it adds to each unit is a
+// unit's figure (UnitRules.HQBonus). What only interplanetary play does to
 // a HeadQuarters is not here — the resolver's own tank curve
 // (RemoteTankStrength*), the fifth a winning invasion takes
 // (InvasionHQLossDivisor) and a landed Sabotage HQ agent's points
 // (TerrorHQSabotagePoints): those only happen in a league, and a league board
 // refuses mods, so a key for them could never take effect.
 type HQRules struct {
-	// TankPerHQ is the part of a tank's strength a point of HeadQuarters
-	// completion adds, over TankStrengthPctBase (the curve's fixed reference).
-	TankPerHQ int
 	// BuildStart is the completion percent a new HeadQuarters begins at, and
 	// BuildPerTurn what it gains each turn until it reaches 100.
 	BuildStart, BuildPerTurn int
@@ -68,6 +66,11 @@ type UnitRules struct {
 	// (turret, carrier) has no Offense. Pirate raids, an ally's aid and the
 	// interplanetary resolvers value units by their own constants.
 	Offense, Defense int64
+	// HQBonus is the part of the unit's strength a point of HeadQuarters
+	// completion adds, over TankStrengthPctBase (the curve's fixed reference):
+	// hundredths of a trooper for a unit at the tank's base strength of 3.5.
+	// Only tanks have one in the base rules.
+	HQBonus int64
 }
 
 // baseRules is the original game, built once from the constants.
@@ -85,7 +88,7 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 		PriceLo: PriceLoBomber, PriceHi: PriceHiBomber, PriceStep: PriceStepBomber},
 	Tank: {Cost: CostTank, NetWorth: NetWorthTank, UpkeepTenths: MaintTankTenths,
 		PriceLo: PriceLoTank, PriceHi: PriceHiTank, PriceStep: PriceStepTank,
-		Offense: TankStrengthPctBase, Defense: TankStrengthPctBase},
+		Offense: TankStrengthPctBase, Defense: TankStrengthPctBase, HQBonus: TankStrengthPctPerHQ},
 	Carrier: {Cost: CostCarrier, NetWorth: NetWorthCarrier, UpkeepTenths: MaintCarrierTenths,
 		PriceLo: PriceLoCarrier, PriceHi: PriceHiCarrier, PriceStep: PriceStepCarrier},
 	Agent: {NetWorth: NetWorthAgent},
@@ -93,7 +96,7 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 },
 	Regions: baseRegionRules(),
 	HQ: HQRules{
-		TankPerHQ: TankStrengthPctPerHQ, BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
+		BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
 		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
 		PriceBase: HQPriceBase, PricePerTurn: HQPricePerTurn, PriceJitter: HQPriceJitter,
 		PriceCap: HQPriceCap, PriceCapJitter: HQPriceCapJitter,
@@ -138,7 +141,7 @@ const (
 // the price itself inside an int on a 32-bit build; the percent figures are
 // percent of a HeadQuarters that tops out at 100.
 const (
-	ModHQTankBonusMax    = 10 // TankPerHQ: 0.10 a point against the base 0.01, in troopers at a tank's base 3.5
+	ModUnitHQBonusMax    = 10 // HQBonus: 0.10 a point against the tank's base 0.01
 	ModHQPercentMax      = 100
 	ModHQPriceMax        = 1_000_000_000
 	ModHQPricePerTurnMax = 1_000_000
@@ -182,6 +185,9 @@ func (r *Rules) Validate() error {
 		if u.Defense < 0 || u.Defense > ModUnitStrengthMax {
 			bad(g, "defense %s is outside 0 to %s", hundredths(u.Defense), hundredths(ModUnitStrengthMax))
 		}
+		if u.HQBonus < 0 || u.HQBonus > ModUnitHQBonusMax {
+			bad(g, "hq_bonus %s is outside 0 to %s", hundredths(u.HQBonus), hundredths(ModUnitHQBonusMax))
+		}
 		if u.PriceStep < 1 || u.PriceStep > u.PriceHi-u.PriceLo {
 			bad(g, "price_step %d is outside 1 to the width of the band", u.PriceStep)
 		}
@@ -206,9 +212,6 @@ func (r *Rules) Validate() error {
 // draw they feed yields 0 for a bound of 0.
 func (r *Rules) validateHQ(bad func(format string, a ...any)) {
 	h := r.HQ
-	if h.TankPerHQ < 0 || h.TankPerHQ > ModHQTankBonusMax {
-		bad("tank_bonus %s is outside 0 to %s", hundredths(int64(h.TankPerHQ)), hundredths(ModHQTankBonusMax))
-	}
 	if h.BuildStart < 1 || h.BuildStart > ModHQPercentMax {
 		bad("build_start %d is outside 1 to %d", h.BuildStart, ModHQPercentMax)
 	}

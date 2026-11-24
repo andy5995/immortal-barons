@@ -211,15 +211,15 @@ func hqMod(t *testing.T, body string) (*game.Rules, error) {
 }
 
 func TestHQSectionChangesTheRulesAndDiff(t *testing.T) {
-	r, err := hqMod(t, "[hq]\nprice_base = 6000\nbuild_per_turn = 10\ntank_bonus = 0.02\n")
+	r, err := hqMod(t, "[hq]\nprice_base = 6000\nbuild_per_turn = 10\n")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if r.HQ.PriceBase != 6000 || r.HQ.BuildPerTurn != 10 || r.HQ.TankPerHQ != 2 {
+	if r.HQ.PriceBase != 6000 || r.HQ.BuildPerTurn != 10 {
 		t.Errorf("rules HQ = %+v", r.HQ)
 	}
 	got := strings.Join(Diff(game.BaseRules(), r), "\n")
-	want := "hq.tank_bonus: 0.01 -> 0.02\nhq.build_per_turn: 5 -> 10\nhq.price_base: 5000 -> 6000"
+	want := "hq.build_per_turn: 5 -> 10\nhq.price_base: 5000 -> 6000"
 	if got != want {
 		t.Errorf("diff:\n%s\nwant:\n%s", got, want)
 	}
@@ -240,7 +240,7 @@ func TestHQSectionRefusesWhatItShould(t *testing.T) {
 
 func TestBaseValuesPrintTheHQSection(t *testing.T) {
 	text := Values(game.BaseRules(), "h")
-	for _, want := range []string{"[hq]\n", "tank_bonus = 0.01", "build_start = 5", "build_per_turn = 5",
+	for _, want := range []string{"[hq]\n", "build_start = 5", "build_per_turn = 5",
 		"battle_loss_min = 5", "battle_loss_jitter = 3",
 		"price_base = 5000", "price_per_turn = 75", "price_jitter = 300",
 		"price_cap = 100000", "price_cap_jitter = 1000"} {

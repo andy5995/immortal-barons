@@ -65,20 +65,32 @@ func remoteTankStrength(n, hq int) int {
 }
 
 // unitStrength is n of g at pct hundredths of a trooper apiece, in whole
-// troopers, for a same-planet battle under w's HeadQuarters rules. A tank's pct is its strength with no
-// HeadQuarters, and the HeadQuarters raises it in the binary's proportion,
-// (TankStrengthPctBase + TankStrengthPctPerHQ*hq) / TankStrengthPctBase, so a
-// mod's tank weight keeps the same HQ curve and a weight of 0 stays 0. At the
-// base weight that is exactly the binary's 1.75 + HQ/200 doubled.
+// troopers, for a same-planet battle. pct is the unit's strength with no
+// HeadQuarters, which raises it by the unit's HQBonus in the binary's
+// proportion, (TankStrengthPctBase + HQBonus*hq) / TankStrengthPctBase, so a
+// mod's weight keeps the same curve and a weight of 0 stays 0. At the tank's
+// base weight and bonus that is exactly the binary's 1.75 + HQ/200 doubled; a
+// unit with no bonus is n x pct / 100 either way.
 //
 // int64 throughout: n reaches 2^31 and pct ModUnitStrengthMax, so the tank's
 // product is under 2^31 x 10^4 x 450, about 9.7e15 — far inside int64.
 func (w *World) unitStrength(g *Good, n int, pct int64, hq int) int64 {
-	if g == Tank {
-		perHQ := int64(w.rules().HQ.TankPerHQ)
+	if perHQ := w.unit(g).HQBonus; perHQ > 0 {
 		return int64(n) * pct * (TankStrengthPctBase + perHQ*int64(hq)) / (TankStrengthPctBase * 100)
 	}
 	return int64(n) * pct / 100
+}
+
+// UnitsWithHQBonus is the military units a HeadQuarters strengthens under w's
+// rules, in MilitaryGoods order: tanks alone without a mod.
+func (w *World) UnitsWithHQBonus() []*Good {
+	var out []*Good
+	for _, g := range MilitaryGoods {
+		if w.unit(g).HQBonus > 0 {
+			out = append(out, g)
+		}
+	}
+	return out
 }
 
 // HQBuildStart is the completion percent a newly bought HeadQuarters begins at,

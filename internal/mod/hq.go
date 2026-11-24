@@ -21,14 +21,6 @@ type hqField struct {
 }
 
 var hqFields = []hqField{
-	{"tank_bonus",
-		func(h game.HQRules) string { return game.FixedPoint(int64(h.TankPerHQ), 100) },
-		func(h *game.HQRules, v any) (err error) {
-			var n int64
-			n, err = fixed(v, 100)
-			h.TankPerHQ = int(n)
-			return
-		}},
 	{"build_start",
 		func(h game.HQRules) string { return fmt.Sprint(h.BuildStart) },
 		func(h *game.HQRules, v any) (err error) { h.BuildStart, err = whole(v); return }},
