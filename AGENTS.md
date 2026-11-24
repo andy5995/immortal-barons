@@ -104,8 +104,10 @@ Point a test run at a temporary directory rather than that one; the
 
 Go 1.26. Prefer the standard library, but a dependency is fine when it clearly
 earns its place (current deps: `golang.org/x/term`, `golang.org/x/text`,
-`golang.org/x/sys`, and `tcell/v2` + `tview` for the config-editor TUI; Gio
-for the sysop panel, in that command's own module only).
+`golang.org/x/sys`, `tcell/v2` + `tview` for the config-editor TUI,
+`BurntSushi/toml` for a mod's `mod.toml` and `values.toml`, and
+`go.starlark.net` for its scripts; Gio for the sysop panel, in that command's
+own module only).
 Keep the set small and justified. Commit `go.mod`/`go.sum`; do NOT commit
 `vendor/` (distros build against their own packaged deps or fetch at build); a
 release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
