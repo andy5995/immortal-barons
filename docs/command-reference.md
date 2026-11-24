@@ -88,6 +88,10 @@ then exit.
 - **`-check-mod <dir>`** — Check a mod on its own, with the limits a reset
   uses, print every value it changes, then exit. `<dir>` is a mod folder, or a
   mod's name in the `mods` folder of the data directory. See [Mods](mods.md).
+- **`-reload-mods`** — Put the mods `config.json` lists, as their folders are
+  now, into the game in progress without starting a new one, print what
+  changed, then exit. It is for testing a mod in a game of its own; see
+  [Mods](mods.md).
 - **`-print-base-mod`** — Print every value a mod can change, as the game sets
   it without mods, in the form of a `values.toml`, then exit.
 - **`-players`** — List the players and edit one of them, then exit. This is the

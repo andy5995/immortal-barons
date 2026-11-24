@@ -21,7 +21,7 @@ var usageGroups = []struct {
 }{
 	{"Play", []string{"local", "name", "dropfile", "data"}},
 	{"Terminal (output)", []string{"utf8", "cp437", "ascii", "no-ansi"}},
-	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "maint", "players", "check-mod", "print-base-mod"}},
+	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "maint", "players", "check-mod", "reload-mods", "print-base-mod"}},
 	{"Inter-BBS", []string{"ibbs-reset", "board-id", "game-inbound", "game-outbound", "import-bbs-cfg", "planetary", "full", "detailed", "league-routes", "league-config", "league-freeze", "league-thaw", "ftn-status"}},
 	// Development tools, kept out of the sysop section: a board never needs
 	// these, and they advance, expose or override game state.

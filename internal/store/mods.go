@@ -39,6 +39,31 @@ func loadMods(w *game.World, cfg game.Config) error {
 	return nil
 }
 
+// ReloadMods replaces the mods w plays by with the ones cfg.Mods names, read
+// from their folders as they stand now, without starting a new game. It is for
+// testing a mod in a scratch game: everything else in the world, the market
+// prices set at the reset included, stays as it was. It returns what changed,
+// as -check-mod lists it. A league board refuses it, as it refuses mods.
+func ReloadMods(w *game.World, cfg game.Config) ([]string, error) {
+	if cfg.IBBS {
+		return nil, ErrModsInLeague
+	}
+	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods)
+	if err != nil {
+		return nil, fmt.Errorf("the mods were not reloaded: %w", err)
+	}
+	from, to := w.Rules, r
+	if from == nil {
+		from = game.BaseRules()
+	}
+	if to == nil {
+		to = game.BaseRules()
+	}
+	changes := mod.Diff(from, to)
+	w.Rules, w.Mods = r, refs
+	return changes, nil
+}
+
 // CheckResetMods reports whether a reset could apply the mods cfg.Mods names.
 // A reset runs it before it backs up the old world, so a mod error does not
 // cost the sysop the previous backup.

@@ -248,6 +248,11 @@ func main() {
 		return
 	}
 
+	if *o.reloadMods {
+		exitOn("-reload-mods", runReloadMods(cfg))
+		return
+	}
+
 	if *o.resetFromConfig {
 		// The ibbs argument seeds the editor, which this mode never opens: it
 		// keeps whatever config.json already says, league board or not.
