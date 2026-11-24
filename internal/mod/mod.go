@@ -221,8 +221,7 @@ func readFiles(dir, prefix string, files map[string]string) error {
 // the name the manifest must carry.
 func parse(path string, files map[string]string) (*Mod, error) {
 	m := &Mod{Path: path, Files: files}
-	names := slices.Sorted(maps.Keys(files)) // so the hash is stable
-	hash := sha256.New()
+	names := slices.Sorted(maps.Keys(files))
 	var haveManifest bool
 	for _, name := range names {
 		data := []byte(files[name])
@@ -232,8 +231,6 @@ func parse(path string, files map[string]string) (*Mod, error) {
 			}
 			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s, %s and a %s folder", path, name, ManifestFile, ValuesFile, PiratesFile, RegionsDir)
 		}
-		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(data))
-		hash.Write(data)
 		file := filepath.Join(path, name)
 		switch name {
 		case ManifestFile:
@@ -266,7 +263,7 @@ func parse(path string, files map[string]string) (*Mod, error) {
 			return nil, fmt.Errorf("%s: %s may not hold control characters", filepath.Join(path, ManifestFile), key)
 		}
 	}
-	m.Hash = hex.EncodeToString(hash.Sum(nil)[:8])
+	m.Hash = hashFiles(files)
 	if err := checkScriptAPI(path, m.ScriptAPI, files); err != nil {
 		return nil, err
 	}
@@ -292,6 +289,17 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		m.regions[g] = s
 	}
 	return m, nil
+}
+
+// hashFiles is a mod's hash: its files' names and contents, in name order so
+// it is stable.
+func hashFiles(files map[string]string) string {
+	hash := sha256.New()
+	for _, name := range slices.Sorted(maps.Keys(files)) {
+		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(files[name]))
+		hash.Write([]byte(files[name]))
+	}
+	return hex.EncodeToString(hash.Sum(nil)[:8])
 }
 
 // checkScriptAPI holds a mod with a script to the script interface it
@@ -509,10 +517,13 @@ func Restore(dataDir string, recorded []game.ModRef) (rules *game.Rules, warning
 		if err := m.Apply(r); err != nil {
 			return nil, nil, fmt.Errorf("the copy of mod %q saved with this game: %w", ref.Name, err)
 		}
-		switch disk, err := Read(path); {
+		// Only the hash is wanted from the folder, so its files are read and not
+		// parsed: a script there is compiled at the next reset, not here.
+		disk := map[string]string{}
+		switch err := readFiles(path, "", disk); {
 		case err != nil:
 			warnings = append(warnings, fmt.Sprintf("mod %q could not be read (%v); this game keeps the values it was reset with until the next reset", ref.Name, err))
-		case disk.Hash != ref.Hash:
+		case hashFiles(disk) != ref.Hash:
 			warnings = append(warnings, fmt.Sprintf("mod %q has changed since this game was reset; this game keeps the mod's old values until the next reset", ref.Name))
 		}
 	}
