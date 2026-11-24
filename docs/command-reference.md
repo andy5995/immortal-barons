@@ -84,7 +84,8 @@ then exit.
   `-ibbs-reset` for a board that joins a league.
 - **`-reset-from-config`** — Start a new game using the current `config.json`,
   without opening the editor. It clears all empires and rebuilds the world. The
-  old world is saved first.
+  old world is saved first. It plays the mods `config.json` lists; see
+  [Mods](mods.md#command-line-options-and-settings).
 - **`-init-mod <dir>`** — Create an empty mod, with a `mod.toml` and a
   `values.toml`, then exit. `<dir>` is a folder, or a name, which is created in
   the `mods` folder of the data directory. It refuses a folder that already
@@ -95,9 +96,10 @@ then exit.
 - **`-reload-mods`** — Put the mods `config.json` lists, as their folders are
   now, into the game in progress without starting a new one, print what
   changed, then exit. It is for testing a mod in a game of its own. A league
-  board refuses it; see [Mods](mods.md).
+  board refuses it; see [Mods](mods.md#command-line-options-and-settings).
 - **`-print-base-mod`** — Print every value a mod can change, as the game sets
-  it without mods, in the form of a `values.toml`, then exit.
+  it without mods, in the form of a `values.toml`, then exit. See
+  [Mods](mods.md#command-line-options-and-settings).
 - **`-players`** — List the players and edit one of them, then exit. This is the
   original's `VIEW` command. Pick a realm by its Id letter, then choose
   **D**elete realm, **P**layer name, **R**ealm name, or **Q**uit. Deleting asks
