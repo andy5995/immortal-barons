@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 // A changed region row reaches the engine: the figures are read from the rules,
 // not from the constants they came from.
@@ -53,6 +56,23 @@ func TestModdedRegionRowsReachTheEngine(t *testing.T) {
 	w.Rules.Regions[Agricultural] = ar
 	if got := w.RegionUpkeep(e); got != 1000 {
 		t.Errorf("10 Agricultural regions at upkeep 100 cost %d, want 1000", got)
+	}
+}
+
+// The three figures ruined land may keep are marked on their fields, so an
+// exemption cannot drift away from the figure it belongs to.
+func TestWasteExemptionsLiveOnTheFields(t *testing.T) {
+	allowed := map[string]bool{"upkeep": true, "gold_share": true, "food_share": true}
+	for _, f := range RegionFields {
+		if f.WasteMay != allowed[f.Key] {
+			t.Errorf("%s: WasteMay = %v, want %v", f.Key, f.WasteMay, allowed[f.Key])
+		}
+	}
+	rr := baseRegionRules()[Waste]
+	rr.GoldBase, rr.Upkeep = 1, ModRegionUpkeepMax
+	errs := rr.Validate(Waste)
+	if len(errs) != 1 || !strings.Contains(errs[0].Error(), "waste: gold_base must be 0: ruined land produces nothing") {
+		t.Errorf("Validate = %v, want only gold_base refused", errs)
 	}
 }
 
