@@ -254,7 +254,10 @@ map of it, not a second definition.
                                      // signature, like Protocol — see Packet.Ruleset
   "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
   "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
-  "Reset": LeagueReset,             // coordinator's league reset order (signed, #65)
+  "Reset": LeagueReset,             // coordinator's reset order (signed, #65):
+                                     // { OnDate, Announced, Mods: [ModRef] },
+                                     // ModRef { Name, Version, Label, Hash,
+                                     // Files }; members install the mods
   "Freeze": LeagueFreeze,           // coordinator's freeze or thaw order (signed):
                                      // { "Serial": 3, "Frozen": true, "Message": "..." }
   "Quiet": QuietReport,             // a frozen board's report to the coordinator:
@@ -726,8 +729,8 @@ table, held by the Coordinator, is what remains.
 ## Board config: `bbs.cfg`
 
 The per-board settings — `BoardID`, `LeagueNumber`, `GameInbound`,
-`GameOutbound`, `Lottery`, `PirateNews`, and the FTN transport's own lines —
-live here rather than in
+`GameOutbound`, `Lottery`, `PirateNews`, `AcceptLeagueScripts`, and the FTN
+transport's own lines — live here rather than in
 `config.json`, and are marked
 `json:"-"` on `game.Config` so they cannot land in both. `config.json` is
 rewritten by a Coordinator's ruleset broadcast, which is no place for settings
@@ -752,6 +755,11 @@ per-install `RESOURCE.DAT`, so they are each sysop's, not the league's. They tak
 yes/no, on/off or true/false, and an unreadable value leaves the default (on)
 alone. `PirateNews no` suppresses the news line a pirate raid posts and nothing
 else — the raid, its loot, its losses and the raider's own report are unchanged.
+
+`AcceptLeagueScripts` is a trust switch, not a rule. A reset order can carry
+mods with Starlark scripts; each sysop chooses whether that machine runs them.
+It defaults to `no`. A board with it off refuses a scripted reset and writes
+the reason to its error output. See [Mods](../mods.md#in-a-league).
 
 Not BRE's seven positional lines (sysop, planet, address, inbound, netmail dir,
 league, mailer), because:

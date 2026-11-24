@@ -20,6 +20,8 @@ Immortal Barons ChangeLog
   * -reload-mods puts a changed mod into a game in progress, for testing
   * -init-mod creates an empty mod to start from
   * The sysop panel lists each board's mods and runs -check-mod on them
+  * League games can play mods: the Coordinator's -league-reset carries them to
+    every board
 
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset

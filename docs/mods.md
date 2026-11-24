@@ -7,9 +7,11 @@ plays the standard Immortal Barons rules. A game with a mod is a
 different game, and the Game Setup screen lists every mod in play so players
 can see that.
 
-Mods work on a stand-alone board only for now. A board in an inter-BBS league
-refuses them, because every board in a league must play the same rules and
-nothing yet sends a mod to the other boards.
+On a stand-alone board, you choose mods for the next reset. In a
+[league](#in-a-league), the Coordinator chooses them and `-league-reset` sends
+them to every board. Member boards play the copy in that order and do not need
+mod folders of their own. A mod with scripts plays only on a board whose sysop
+has set `AcceptLeagueScripts Yes` in `bbs.cfg`.
 
 ## What a mod can change
 
@@ -71,8 +73,7 @@ build_per_turn = 10
 
 What interplanetary play does to a HeadQuarters is not changed by a mod: the
 interplanetary battle's own tank figures, the share a winning invasion takes,
-and what a Sabotage HQ agent takes. Those only happen in a league, where mods
-are not allowed.
+and what a Sabotage HQ agent takes. League mods use those same figures.
 
 ### Regions
 
@@ -372,9 +373,9 @@ Changes from the base game:
 
 ## Turning mods on
 
-Mods change only when a new game starts. Turn them on in the settings editor
-that `-reset` opens, on its Mods page, or list them in `config.json` under
-`Mods` and run `-reset-from-config`:
+Mods change only when a new game starts. On a stand-alone board, turn them on
+in the settings editor that `-reset` opens, on its Mods page, or list them in
+`config.json` under `Mods` and run `-reset-from-config`:
 
 ```json
 "Mods": ["cheap-tanks"]
@@ -396,9 +397,33 @@ A game keeps the mods it started with until the next reset:
   mod's folder during a game, the game keeps the copy and writes a warning to
   its error output (stderr) each time it starts. Under a BBS, that output goes
   to the sysop's log.
-- `-reload-mods` is the one exception. It puts the mods `config.json` lists,
-  as their folders are now, into the game in progress, and prints what changed.
-  It is for testing (see below).
+- `-reload-mods` is the one exception on a stand-alone board. It puts the mods
+  `config.json` lists, as their folders are now, into the game in progress, and
+  prints what changed. It is for testing (see below). A league board refuses
+  it; see [In a league](#in-a-league).
+
+## In a league
+
+The Coordinator chooses the mods for every board. Put the names in the
+Coordinator's `config.json` under `Mods`, then run `-league-reset <date>`. The
+signed reset order carries every file of each mod, so member boards do not need
+their own copies. The command prints the mods it is carrying.
+
+Member boards leave `Mods` out of their own `config.json`. On their next
+`-planetary` run, they check the files against the hashes in the order and play
+those mods. The mods must load together and pass the same limits as on a
+stand-alone reset. A board that cannot load them does not reset. Its
+`-planetary` run prints the reason and records it in `planetary.log`.
+
+Every packet a board sends carries a fingerprint of the league's rules, the
+mods' hashes included. If someone edits a board's copy of a mod in
+`world.json`, the fingerprint changes and the other boards hold its packets.
+
+Scripts are another choice. A mod that carries `pirates.star` or a script in
+`regions` runs only on a board whose sysop sets `AcceptLeagueScripts Yes` in
+`bbs.cfg`. The setting defaults to `no`. A board with the default refuses a
+scripted reset until its sysop turns the setting on. Scripts run on that
+machine with no memory limit, so read them before you allow them.
 
 ## Testing a mod
 
@@ -428,5 +453,5 @@ game started. A mod that will not load is refused, and the game keeps the
 values it had. Start a new game with `-reset-from-config` when you want to see
 the mod from the start.
 
-`-reload-mods` does not work on a league board, because a league board cannot
-use mods.
+`-reload-mods` is for testing on a stand-alone board. A league board refuses it
+because its mods come from the Coordinator's reset order.

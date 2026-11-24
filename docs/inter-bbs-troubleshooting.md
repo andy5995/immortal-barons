@@ -585,8 +585,11 @@ sees.
 **A league reset.** `-league-reset <YYYY-MM-DD>` resets your board and sends a signed
 order for the others to reset on their next `-planetary` run. A board that
 refuses your orders will not reset, and will then be a board playing a different
-game from everyone else. Confirm with `-bbsinfo` that every board is being
-heard from *before* you send it.
+game from everyone else. A member with `AcceptLeagueScripts` off refuses an
+order whose mods carry scripts, and its `-planetary` run prints the reason and
+records it in `planetary.log`.
+Confirm with `-bbsinfo` that every board is being heard from *before* you send
+it.
 
 **Boards playing by different rules.** Your ruleset goes out on every
 `-planetary` run of yours, so a board that was down for one broadcast is brought
