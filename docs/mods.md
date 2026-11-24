@@ -176,6 +176,7 @@ like Python.
 
 Scripts follow the same rule as `values.toml`: when two mods in the list have
 the same script, the later mod's is used and the earlier one's does not run.
+The settings editor's mod list names each script that does not run this way.
 Which mods work together, and in what order, is for the people who make them
 to say; the game only applies them in the order they are listed.
 

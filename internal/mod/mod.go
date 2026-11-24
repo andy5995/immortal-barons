@@ -439,6 +439,37 @@ func Resolve(dataDir string, names []string) (*game.Rules, []game.ModRef, error)
 	return r, refs, nil
 }
 
+// Replacement is a script in a mod list that never runs: mod By carries a
+// script File that replaces Over's.
+type Replacement struct{ File, By, Over string }
+
+// Replaced is each script in the mods names lists that a later mod's script of
+// the same name replaces. It is for the editors that build the list, which
+// word it in the reader's language; a list Resolve refuses gives nothing here.
+func Replaced(dataDir string, names []string) []Replacement {
+	owner := map[string]string{}
+	var out []Replacement
+	for i, name := range names {
+		if checkListed(name, names[:i]) != nil {
+			return nil
+		}
+		m, err := Read(filepath.Join(dataDir, Dir, name))
+		if err != nil {
+			return nil
+		}
+		for _, file := range slices.Sorted(maps.Keys(m.Files)) {
+			if file != PiratesFile && regionScriptType(file) == nil {
+				continue
+			}
+			if prev, ok := owner[file]; ok {
+				out = append(out, Replacement{File: file, By: name, Over: prev})
+			}
+			owner[file] = name
+		}
+	}
+	return out
+}
+
 // checkListed is the check a mod's name in a list passes before it becomes a
 // path: a plain name, not listed earlier in the same list.
 func checkListed(name string, earlier []string) error {

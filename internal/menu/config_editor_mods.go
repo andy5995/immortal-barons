@@ -141,6 +141,10 @@ func editMods(s session.Session, c *game.Config) {
 		if err := modsError(*c); err != nil {
 			failNoPause(s, err)
 		}
+		for _, r := range mod.Replaced(c.DataDir, c.Mods) {
+			line := fmt.Sprintf(i18n.T(sessionLang(s), "%s's %s replaces %s's, which does not run."), r.By, r.File, r.Over)
+			fmt.Fprintln(s, WrapIndented(line, "  "))
+		}
 		for i, r := range rows {
 			mark := "[ ]"
 			if r.on {
@@ -172,6 +176,20 @@ func editMods(s session.Session, c *game.Config) {
 // again in its i18n.T call.
 const modsOrderNote = "Where two mods change the same value, the one turned on later wins."
 
+// modsReplacedNote words a mod.Replacement. Like modsOrderNote, the line editor
+// names it again in its i18n.T call, where scripts/gen-ui-pot.py can see it.
+const modsReplacedNote = "%s's %s replaces %s's, which does not run."
+
+// modsNote is the TUI's line above the list: modsOrderNote, then any script a
+// later mod in list replaces.
+func modsNote(dataDir string, list []string) string {
+	lines := []string{modsOrderNote}
+	for _, r := range mod.Replaced(dataDir, list) {
+		lines = append(lines, fmt.Sprintf(modsReplacedNote, r.By, r.File, r.Over))
+	}
+	return strings.Join(lines, " ")
+}
+
 // pickMod reads a row number, 0 to quit. ChoiceQuit reads one key, so it
 // serves up to nine rows; a longer list takes a typed number.
 func pickMod(s session.Session, rows int) int {
@@ -200,7 +218,7 @@ func (t *configTUI) modsForm() *tview.Form {
 		form.AddTextView("", tview.Escape(msg), 0, 2, true, false)
 		return form
 	}
-	note := modsOrderNote
+	note := modsNote(c.DataDir, c.Mods)
 	if err := modsError(c); err != nil {
 		note = err.Error()
 	}
@@ -235,7 +253,7 @@ func (t *configTUI) modsForm() *tview.Form {
 				order = append(order, r.name)
 			}
 			b.SetDisabled(r.err != nil && !on)
-			msg, top := help, modsOrderNote
+			msg, top := help, modsNote(c.DataDir, order)
 			if _, _, err := mod.Resolve(c.DataDir, order); err != nil {
 				msg = "This list will not load, so it cannot be saved: " + err.Error()
 				top = err.Error()

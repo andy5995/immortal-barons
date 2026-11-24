@@ -218,3 +218,28 @@ func TestRestoreRebuildsTheScript(t *testing.T) {
 		t.Errorf("diff %q", got)
 	}
 }
+
+// Two mods carrying the same script are allowed, the later one's running; the
+// editors are told which one does not run.
+func TestReplacedNamesTheScriptThatDoesNotRun(t *testing.T) {
+	data := t.TempDir()
+	for _, name := range []string{"a", "b", "c"} {
+		files := map[string]string{ManifestFile: manifest(name)}
+		if name != "c" {
+			files[PiratesFile] = "def raid(realm, factions):\n    return []\n"
+			files["regions/desert.star"] = "def region(realm, row):\n    return {}\n"
+		}
+		writeMod(t, data, name, files)
+	}
+	got := Replaced(data, []string{"a", "c", "b"})
+	want := []Replacement{
+		{File: PiratesFile, By: "b", Over: "a"},
+		{File: "regions/desert.star", By: "b", Over: "a"},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Replaced = %q, want %q", got, want)
+	}
+	if got := Replaced(data, []string{"a", "c"}); len(got) != 0 {
+		t.Errorf("one script each: Replaced = %q, want none", got)
+	}
+}
