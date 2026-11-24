@@ -151,7 +151,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 			end := min((p+1)*linesPerPage, len(rows))
 			for _, ln := range rows[p*linesPerPage : end] {
 				if ln.indented {
-					fmt.Fprintln(s, WrapIndented(fmt.Sprintf("%s: %s", tr(s, ln.label), ln.value), "    "))
+					fmt.Fprintln(s, WrapIndented(fmt.Sprintf("%s: %s", ln.label, ln.value), "    "))
 					continue
 				}
 				fmt.Fprintf(s, "  %s\n", cell(fitColumn(w.Term, ln.label, labelW),
