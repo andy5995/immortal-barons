@@ -466,29 +466,77 @@ func Check(path string) (*Mod, *game.Rules, error) {
 	return m, r, nil
 }
 
+// modLoader is one way of loading a list of mods. Every caller checks the names,
+// applies each mod in order and validates the combined result; its own checks
+// and wording live in source and the three error helpers.
+type modLoader struct {
+	// source reads one mod. A caller's extra checks belong here: the league
+	// reader refuses scripts before parse compiles one, and Restore compares a
+	// saved copy with the folder it came from.
+	source      func(name string) (*Mod, error)
+	listErr     func(error) error
+	applyErr    func(name string, err error) error
+	validateErr func(names []string, err error) error
+}
+
+// load applies the mods in names, in order, to a fresh copy of the base rules.
+func (l modLoader) load(names []string) (*game.Rules, error) {
+	r := game.BaseRules()
+	var seen []string
+	for _, name := range names {
+		if err := checkListed(name, seen); err != nil {
+			return nil, l.listErr(err)
+		}
+		seen = append(seen, name)
+		m, err := l.source(name)
+		if err != nil {
+			return nil, err
+		}
+		if err := m.Apply(r); err != nil {
+			return nil, l.applyErr(name, err)
+		}
+	}
+	if err := r.Validate(); err != nil {
+		return nil, l.validateErr(seen, err)
+	}
+	return r, nil
+}
+
+// modRefs indexes refs by the name a list names them by. A list with a name
+// twice is refused by load before its source can look one up.
+func modRefs(refs []game.ModRef) map[string]game.ModRef {
+	byName := make(map[string]game.ModRef, len(refs))
+	for _, ref := range refs {
+		byName[ref.Name] = ref
+	}
+	return byName
+}
+
 // Resolve reads the named mods from dataDir and applies them, in order, to the
 // base rules. It returns the rules and what a world records about each mod.
 func Resolve(dataDir string, names []string) (*game.Rules, []game.ModRef, error) {
 	if len(names) == 0 {
 		return nil, nil, nil
 	}
-	r := game.BaseRules()
 	refs := make([]game.ModRef, 0, len(names))
-	for i, name := range names {
-		if err := checkListed(name, names[:i]); err != nil {
-			return nil, nil, fmt.Errorf("mod %w", err)
-		}
-		m, err := Read(filepath.Join(dataDir, Dir, name))
-		if err != nil {
-			return nil, nil, err
-		}
-		if err := m.Apply(r); err != nil {
-			return nil, nil, err
-		}
-		refs = append(refs, m.Ref())
+	l := modLoader{
+		source: func(name string) (*Mod, error) {
+			m, err := Read(filepath.Join(dataDir, Dir, name))
+			if err != nil {
+				return nil, err
+			}
+			refs = append(refs, m.Ref())
+			return m, nil
+		},
+		listErr:  func(err error) error { return fmt.Errorf("mod %w", err) },
+		applyErr: func(_ string, err error) error { return err },
+		validateErr: func(names []string, err error) error {
+			return fmt.Errorf("mods %s: %w", strings.Join(names, ", "), err)
+		},
 	}
-	if err := r.Validate(); err != nil {
-		return nil, nil, fmt.Errorf("mods %s: %w", strings.Join(names, ", "), err)
+	r, err := l.load(names)
+	if err != nil {
+		return nil, nil, err
 	}
 	return r, refs, nil
 }
@@ -542,37 +590,39 @@ func checkListed(name string, earlier []string) error {
 // the result against the limits. A mod with a script is refused unless scripts
 // is set: that is this board's AcceptLeagueScripts, its sysop's choice.
 func LoadForLeague(refs []game.ModRef, scripts bool) (*game.Rules, error) {
-	r := game.BaseRules()
-	var names []string
+	byName := modRefs(refs)
+	names := make([]string, 0, len(refs))
 	for _, ref := range refs {
-		if err := checkListed(ref.Name, names); err != nil {
-			return nil, fmt.Errorf("the league's mod %w", err)
-		}
 		names = append(names, ref.Name)
-		// Before parse, which compiles each script, and compiling runs its top
-		// level: a board that does not accept scripts must run none of it.
-		if !scripts {
-			for file := range ref.Files {
-				if file == PiratesFile || strings.HasPrefix(file, RegionsDir+"/") {
-					return nil, fmt.Errorf("the league's mod %q carries scripts, and this board does not accept them; set AcceptLeagueScripts Yes in bbs.cfg to play it", ref.Name)
+	}
+	l := modLoader{
+		source: func(name string) (*Mod, error) {
+			ref := byName[name]
+			// Before parse, which compiles each script, and compiling runs its top
+			// level: a board that does not accept scripts must run none of it.
+			if !scripts {
+				for file := range ref.Files {
+					if file == PiratesFile || strings.HasPrefix(file, RegionsDir+"/") {
+						return nil, fmt.Errorf("the league's mod %q carries scripts, and this board does not accept them; set AcceptLeagueScripts Yes in bbs.cfg to play it", ref.Name)
+					}
 				}
 			}
-		}
-		m, err := parse(ref.Name, ref.Files)
-		if err != nil {
-			return nil, fmt.Errorf("the league's mod %q: %w", ref.Name, err)
-		}
-		if m.Hash != ref.Hash {
-			return nil, fmt.Errorf("the league's mod %q does not match the hash the Coordinator sent", ref.Name)
-		}
-		if err := m.Apply(r); err != nil {
-			return nil, fmt.Errorf("the league's mod %q: %w", ref.Name, err)
-		}
+			m, err := parse(ref.Name, ref.Files)
+			if err != nil {
+				return nil, fmt.Errorf("the league's mod %q: %w", ref.Name, err)
+			}
+			if m.Hash != ref.Hash {
+				return nil, fmt.Errorf("the league's mod %q does not match the hash the Coordinator sent", ref.Name)
+			}
+			return m, nil
+		},
+		listErr:  func(err error) error { return fmt.Errorf("the league's mod %w", err) },
+		applyErr: func(name string, err error) error { return fmt.Errorf("the league's mod %q: %w", name, err) },
+		validateErr: func(names []string, err error) error {
+			return fmt.Errorf("the league's mods %s: %w", strings.Join(names, ", "), err)
+		},
 	}
-	if err := r.Validate(); err != nil {
-		return nil, fmt.Errorf("the league's mods %s: %w", strings.Join(names, ", "), err)
-	}
-	return r, nil
+	return l.load(names)
 }
 
 // Restore rebuilds the rules a world was reset with from the copies of its
@@ -587,47 +637,54 @@ func Restore(dataDir string, recorded []game.ModRef, folders bool) (rules *game.
 	if len(recorded) == 0 {
 		return nil, nil, nil
 	}
-	r := game.BaseRules()
-	var names []string
+	byName := modRefs(recorded)
+	names := make([]string, 0, len(recorded))
 	for _, ref := range recorded {
-		// The name comes from world.json, which a reset wrote but anyone with
-		// the file can edit; held to a plain name it cannot leave the mods folder,
-		// and checked as a reset checks the list.
-		if err := checkListed(ref.Name, names); err != nil {
-			return nil, nil, fmt.Errorf("this game's saved mod %w", err)
-		}
 		names = append(names, ref.Name)
-		path := filepath.Join(dataDir, Dir, ref.Name)
-		m, err := parse(path, ref.Files)
-		if err != nil {
-			return nil, nil, fmt.Errorf("the copy of mod %q saved with this game: %w", ref.Name, err)
-		}
-		if err := m.Apply(r); err != nil {
-			return nil, nil, fmt.Errorf("the copy of mod %q saved with this game: %w", ref.Name, err)
-		}
-		// The copy is in world.json, which anyone with the file can edit. It is
-		// played as it stands, but not silently.
-		if m.Hash != ref.Hash {
-			warnings = append(warnings, fmt.Sprintf("the copy of mod %q saved with this game has been edited since the reset; this game plays it as it now stands", ref.Name))
-		}
-		// Only the hash is wanted from the folder, so its files are read and not
-		// parsed: a script there is compiled at the next reset, not here.
-		if !folders {
-			continue
-		}
-		disk := map[string]string{}
-		switch err := readFiles(path, "", disk); {
-		case err != nil:
-			warnings = append(warnings, fmt.Sprintf("mod %q could not be read (%v); this game keeps the values it was reset with until the next reset", ref.Name, err))
-		case hashFiles(disk) != ref.Hash:
-			warnings = append(warnings, fmt.Sprintf("mod %q has changed since this game was reset; this game keeps the mod's old values until the next reset", ref.Name))
-		}
 	}
-	// A newer version of the game may have tightened a limit the saved values
-	// met when the game was reset. That is an error, not a warning: the limits
-	// are what keep the arithmetic safe.
-	if err := r.Validate(); err != nil {
-		return nil, nil, fmt.Errorf("this game's mods %s: %w", strings.Join(names, ", "), err)
+	l := modLoader{
+		source: func(name string) (*Mod, error) {
+			ref := byName[name]
+			// The name comes from world.json, which a reset wrote but anyone with
+			// the file can edit; load holds it to a plain name so it cannot leave
+			// the mods folder, and checks it as a reset checks the list.
+			path := filepath.Join(dataDir, Dir, ref.Name)
+			m, err := parse(path, ref.Files)
+			if err != nil {
+				return nil, fmt.Errorf("the copy of mod %q saved with this game: %w", ref.Name, err)
+			}
+			// The copy is in world.json, which anyone with the file can edit. It is
+			// played as it stands, but not silently.
+			if m.Hash != ref.Hash {
+				warnings = append(warnings, fmt.Sprintf("the copy of mod %q saved with this game has been edited since the reset; this game plays it as it now stands", ref.Name))
+			}
+			// Only the hash is wanted from the folder, so its files are read and not
+			// parsed: a script there is compiled at the next reset, not here.
+			if folders {
+				disk := map[string]string{}
+				switch err := readFiles(path, "", disk); {
+				case err != nil:
+					warnings = append(warnings, fmt.Sprintf("mod %q could not be read (%v); this game keeps the values it was reset with until the next reset", ref.Name, err))
+				case hashFiles(disk) != ref.Hash:
+					warnings = append(warnings, fmt.Sprintf("mod %q has changed since this game was reset; this game keeps the mod's old values until the next reset", ref.Name))
+				}
+			}
+			return m, nil
+		},
+		listErr: func(err error) error { return fmt.Errorf("this game's saved mod %w", err) },
+		applyErr: func(name string, err error) error {
+			return fmt.Errorf("the copy of mod %q saved with this game: %w", name, err)
+		},
+		// A newer version of the game may have tightened a limit the saved
+		// values met at the reset. That is an error, not a warning: the limits
+		// are what keep the arithmetic safe.
+		validateErr: func(names []string, err error) error {
+			return fmt.Errorf("this game's mods %s: %w", strings.Join(names, ", "), err)
+		},
 	}
-	return r, warnings, nil
+	rules, err = l.load(names)
+	if err != nil {
+		return nil, nil, err
+	}
+	return rules, warnings, nil
 }
