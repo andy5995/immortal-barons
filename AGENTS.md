@@ -411,6 +411,11 @@ grep will ever match. NOT the Homebrew formula: it installs from the last
 release's tarball, so the page joins its doc list only when the pin moves
 (`docs/dev/releasing.md`); adding it early broke the formula's CI job once.
 
+`docs/dev/mods-design.md` holds the mod system's decisions and invariants (the
+league trust model, `mod_api`, what scripts may see). `docs/mods.md` is the
+user contract. Read the design page before changing how mods are read,
+applied, checked or sent.
+
 `docs/dev/releasing.md` is the release checklist — the translation passes, the
 ChangeLog stamp, what to verify, and the **version bump after publishing**,
 which was missed on v0.0.5.
