@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"go.starlark.net/starlark"
+
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -274,5 +276,17 @@ func TestRestoreReportsAnEditedSavedCopy(t *testing.T) {
 	_, warnings, err := Restore(dataDir, refs)
 	if err != nil || len(warnings) != 1 || !strings.Contains(warnings[0], "saved with this game has been edited") {
 		t.Fatalf("err %v, warnings %q", err, warnings)
+	}
+}
+
+// A list of raids past the limit is refused before its orders are read.
+func TestTooManyRaidsAreRefusedUnread(t *testing.T) {
+	list := make([]starlark.Value, game.ModPirateOrdersMax+1)
+	for i := range list {
+		list[i] = starlark.None // not a dict: reading it would fail differently
+	}
+	_, err := readOrders(starlark.NewList(list))
+	if err == nil || !strings.Contains(err.Error(), "raids ordered") {
+		t.Errorf("err %v, want the count refused", err)
 	}
 }

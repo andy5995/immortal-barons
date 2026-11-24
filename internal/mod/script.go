@@ -237,7 +237,12 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 	if !ok {
 		return nil, fmt.Errorf("raid returned a %s; it must return a list", res.Type())
 	}
-	orders := make([]game.PirateOrder, 0, min(list.Len(), game.ModPirateOrdersMax))
+	// game.askPirateBrain holds the count too, but only after every order is
+	// read; refusing a long list here spares reading it.
+	if list.Len() > game.ModPirateOrdersMax {
+		return nil, fmt.Errorf("%d raids ordered; at most %d are allowed", list.Len(), game.ModPirateOrdersMax)
+	}
+	orders := make([]game.PirateOrder, 0, list.Len())
 	for i := range list.Len() {
 		d, ok := list.Index(i).(*starlark.Dict)
 		if !ok {
