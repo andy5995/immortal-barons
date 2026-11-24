@@ -243,3 +243,20 @@ func TestReplacedNamesTheScriptThatDoesNotRun(t *testing.T) {
 		t.Errorf("one script each: Replaced = %q, want none", got)
 	}
 }
+
+// Restore only hashes the mod folder: a script edited there since the reset is
+// reported as changed, not compiled, so a broken one is not reported as a
+// folder that could not be read.
+func TestRestoreDoesNotCompileTheFolder(t *testing.T) {
+	dataDir := t.TempDir()
+	writeMod(t, dataDir, "pirates", map[string]string{ManifestFile: manifest("pirates"), PiratesFile: raidJets})
+	_, refs, err := Resolve(dataDir, []string{"pirates"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeMod(t, dataDir, "pirates", map[string]string{PiratesFile: "def raid(:\n"})
+	_, warnings, err := Restore(dataDir, refs)
+	if err != nil || len(warnings) != 1 || !strings.Contains(warnings[0], "has changed since this game was reset") {
+		t.Fatalf("err %v, warnings %q", err, warnings)
+	}
+}
