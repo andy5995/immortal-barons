@@ -32,6 +32,7 @@ func runCheckMod(arg, dataDir string) error {
 	if m.Description != "" {
 		fmt.Println(m.Description)
 	}
+	fmt.Println("License: " + m.License)
 	changes := mod.Diff(game.BaseRules(), r)
 	if len(changes) == 0 {
 		fmt.Println("It changes nothing from the base game.")

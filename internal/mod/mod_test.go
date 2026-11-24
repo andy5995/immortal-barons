@@ -29,7 +29,7 @@ func writeMod(t *testing.T, dataDir, name string, files map[string]string) strin
 }
 
 func manifest(name string) string {
-	return "name = \"" + name + "\"\nversion = \"1.0\"\nmod_api = 1\n"
+	return "name = \"" + name + "\"\nversion = \"1.0\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n"
 }
 
 func TestBaseRulesAreWithinTheModLimits(t *testing.T) {
@@ -317,5 +317,19 @@ func TestPrintedBaseValuesHoldTheRegionSections(t *testing.T) {
 	}
 	if d := Diff(game.BaseRules(), r); len(d) != 0 {
 		t.Errorf("the base values changed something: %v", d)
+	}
+}
+
+// A mod must say how it is licensed, so a sysop can tell whether they may pass
+// it on.
+func TestAModNeedsALicense(t *testing.T) {
+	for _, manifest := range []string{
+		"name = \"m\"\nversion = \"1\"\nmod_api = 1\n",
+		"name = \"m\"\nversion = \"1\"\nmod_api = 1\nlicense = \"  \"\n",
+	} {
+		dir := writeMod(t, t.TempDir(), "m", map[string]string{ManifestFile: manifest})
+		if _, _, err := Check(dir); err == nil || !strings.Contains(err.Error(), "license is required") {
+			t.Errorf("%q: err %v, want the license required", manifest, err)
+		}
 	}
 }
