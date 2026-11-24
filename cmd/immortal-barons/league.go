@@ -10,6 +10,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ftn"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/mod"
 	"github.com/andy5995/immortal-barons/internal/store"
 	"github.com/andy5995/immortal-barons/internal/textwrap"
 )
@@ -18,10 +19,26 @@ import (
 // this board resets, and a signed order goes out for every other board to do the
 // same on its next planetary run.
 func runLeagueReset(cfg game.Config, date string) error {
+	var carried []game.ModRef
 	return runCoordinatorOrder(cfg, "-league-reset",
-		func(w *game.World) error { return w.DeclareLeagueReset(date, "", nil, nil) },
+		func(w *game.World) error {
+			rules, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods)
+			if err != nil {
+				return fmt.Errorf("the league reset was not declared: %w", err)
+			}
+			carried = refs
+			return w.DeclareLeagueReset(date, "", rules, refs)
+		},
 		func(w *game.World) {
-			fmt.Printf("League reset declared, starting %s, and the order is on its way to the other boards.\n", date)
+			names := make([]string, 0, len(carried))
+			for _, ref := range carried {
+				names = append(names, ref.DisplayName())
+			}
+			if len(names) == 0 {
+				names = append(names, "no mods")
+			}
+			fmt.Printf("League reset declared, starting %s, carrying %s, and the order is on its way to the other boards.\n",
+				date, strings.Join(names, ", "))
 		})
 }
 

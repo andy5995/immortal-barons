@@ -9,8 +9,79 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/mod"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
+
+// -league-reset reads the Coordinator's mods and puts them in the signed order.
+// A member board then plays them without having the mod folder itself.
+func TestLeagueResetCarriesTheCoordinatorsMods(t *testing.T) {
+	cfg := leagueBoard(t)
+	cfg.Mods = []string{"cheap-tanks"}
+	dir := filepath.Join(cfg.DataDir, mod.Dir, "cheap-tanks")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for name, body := range map[string]string{
+		mod.ManifestFile: "name = \"cheap-tanks\"\nversion = \"1.0\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n",
+		mod.ValuesFile:   "[units.tank]\nbuild_cost = 250\n",
+	} {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := store.GenerateCoordKey(cfg.DataDir); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.WriteNodeList(filepath.Join(cfg.DataDir, store.NodeListFile), []game.LeagueNode{
+		{Number: 1, Name: cfg.BoardID, Address: "1:1/1", City: "Here", State: "ST", Country: "USA"},
+		{Number: 2, Name: "Other Board", Address: "1:1/2", City: "There", State: "ST", Country: "USA"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	var err error
+	out := captureStdout(t, func() { err = runLeagueReset(cfg, "2026-10-01") })
+	if err != nil {
+		t.Fatalf("runLeagueReset: %v", err)
+	}
+	if !strings.Contains(out, "cheap-tanks") {
+		t.Errorf("the success message does not name the mod it carries: %q", out)
+	}
+	got, err := store.Load(cfg)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if len(got.Mods) != 1 || got.Mods[0].Name != "cheap-tanks" || got.Mods[0].Hash == "" {
+		t.Fatalf("the reset did not record the mod: %+v", got.Mods)
+	}
+	if got.Rules == nil || got.Rules.Units[game.Tank].Cost != 250 {
+		t.Errorf("the Coordinator does not play the mod's rules: %+v", got.Rules)
+	}
+	files, err := filepath.Glob(filepath.Join(cfg.Outbound(), "*.brp"))
+	if err != nil || len(files) == 0 {
+		t.Fatalf("outbound packets = %v (%v), want the signed order", files, err)
+	}
+	var reset *game.LeagueReset
+	for _, file := range files {
+		raw, err := os.ReadFile(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var p game.Packet
+		if err := json.Unmarshal(raw, &p); err != nil {
+			t.Fatal(err)
+		}
+		if p.Reset != nil {
+			reset = p.Reset
+			break
+		}
+	}
+	if reset == nil || len(reset.Mods) != 1 || reset.Mods[0].Name != "cheap-tanks" ||
+		reset.Mods[0].Hash != got.Mods[0].Hash {
+		t.Errorf("the order did not carry the mod: %+v", reset)
+	}
+}
 
 // #228: the run that met a failure is long gone by the time a sysop asks why a
 // board has gone quiet, so -league-check reads the spool journals rather than
