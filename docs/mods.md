@@ -11,10 +11,43 @@ On a stand-alone board, you choose mods for the next reset. In a
 [league](#in-a-league), the Coordinator chooses them and `-league-reset` sends
 them to every board. Member boards play the copy in that order and do not need
 mod folders of their own. A mod with scripts plays only on a board whose sysop
-has set `AcceptLeagueScripts Yes` in `bbs.cfg`.
+has set `AcceptLeagueScripts Yes` in `bbs.cfg`; see
+[Command-line options and settings](#command-line-options-and-settings).
 
 A complete [example mod](examples/mods/example/) uses most of what a mod can
 do, with comments in each file.
+
+## Command-line options and settings
+
+- `-init-mod <dir>`: create an empty mod, with a `mod.toml` and a
+  `values.toml`, then exit. `<dir>` is a name, which is created in the `mods`
+  folder of the data directory, or a path. It refuses a folder that already
+  exists. See [Making a mod](#making-a-mod).
+- `-check-mod <dir>`: check one mod on its own, with the limits a reset uses,
+  print what it changes, then exit. `<dir>` is a name in the `mods` folder or a
+  path. See [Checking a mod](#checking-a-mod).
+- `-print-base-mod`: print every value a mod can change, as the game sets it
+  without mods, in the form of a `values.toml`, then exit. The `[hq]` and
+  `[regions.<id>]` sections are included. Copy the sections you want into your
+  mod and change them.
+- `-reset`: start a new game after the settings editor. The editor starts from
+  the default settings, which turn no mods on, so pick them again on its Mods
+  page each time. See [Turning mods on](#turning-mods-on).
+- `-reset-from-config`: start a new game with the mods that `config.json` lists
+  under `Mods`, with their `ModOptions`. See [Turning mods on](#turning-mods-on).
+- `-reload-mods`: put the mods `config.json` lists, as their folders are now,
+  into the game in progress, and print what changed. It is for testing on a
+  stand-alone board; a league board refuses it. See
+  [Testing a mod](#testing-a-mod).
+- `-league-reset <YYYY-MM-DD>`: the Coordinator resets every board in the
+  league, and the order carries the mods in the Coordinator's `config.json`.
+  See [In a league](#in-a-league).
+- `AcceptLeagueScripts Yes` in `bbs.cfg`: lets a board play a league mod that
+  carries scripts. The default is `no`. See [In a league](#in-a-league) and
+  [`AcceptLeagueScripts`](bbs-cfg.md#acceptleaguescripts).
+
+The [Command Reference](command-reference.md) lists these with every other
+option.
 
 ## What a mod can change
 
@@ -122,22 +155,16 @@ food_rate = 100
 upkeep = 600
 ```
 
-To see every value a mod can change, as the game sets it without mods, run:
-
-```
-immortal-barons -print-base-mod
-```
-
-It prints them, the `[hq]` and `[regions.<id>]` sections included, in the form of a `values.toml`. Copy the sections you want into
-your mod and change them.
+To see every value a mod can change, as the game sets it without mods, use
+[`-print-base-mod`](#command-line-options-and-settings).
 
 ## Making a mod
 
 A mod is a folder under `mods` in the data directory. The folder's name is the
 mod's name. It may use lowercase letters, digits, `-` and `_`.
 
-`-init-mod` creates a new, empty mod to start from. It refuses a folder that
-already exists:
+[`-init-mod`](#command-line-options-and-settings) creates a new, empty mod to
+start from:
 
 ```
 immortal-barons -init-mod cheap-tanks
@@ -145,8 +172,7 @@ immortal-barons -init-mod cheap-tanks
 
 It writes a `mod.toml` with the name, a first version, the current `mod_api`
 and the MIT license, and a `values.toml` that changes nothing yet. Add the
-license's text as a `LICENSE` file before you share the mod. Give it a
-path instead of a name to create the mod somewhere else.
+license's text as a `LICENSE` file before you share the mod.
 
 ```
 data/
@@ -169,7 +195,7 @@ description = "Tanks cost less to buy, build and keep."
 ```
 
 `version` is the mod's own version, for its author to change as they like.
-`license` says how others may use and share the mod; `-check-mod` prints it.
+`license` says how others may use and share the mod; [`-check-mod`](#checking-a-mod) prints it.
 
 Put the license's full text in the mod folder too, as `LICENSE`, `LICENSE.txt`,
 `LICENSE.md` or `COPYING`. Immortal Barons is under the MIT license, so choose
@@ -193,8 +219,8 @@ price_high = 900
 Both files are [TOML](https://toml.io/). Lines starting with `#` are comments.
 
 The game reads a mod strictly. A key it does not know, a unit it does not know,
-or any file in the folder other than `mod.toml`, `values.toml`, `pirates.star`
-and the region scripts in a `regions` folder is an error.
+or any file in the folder other than `mod.toml`, `values.toml`, `pirates.star`,
+the region scripts in a `regions` folder and a license file is an error.
 
 ## Options
 
@@ -386,7 +412,7 @@ A script is as trusted as the rest of the mod folder. It runs inside the game
 itself, and nothing limits how much memory it uses, so install only scripts
 you have read.
 
-`-check-mod` loads each script and checks that it defines `raid` or `region`
+[`-check-mod`](#checking-a-mod) loads each script and checks that it defines `raid` or `region`
 with two parameters. It cannot check what they return, because that depends on
 the game. Watch the error output once the game has played some turns.
 
@@ -413,11 +439,9 @@ actually affects it.
 immortal-barons -check-mod cheap-tanks
 ```
 
-A plain name is looked up in the `mods` folder of the data directory. You can
-also give the path to any mod folder, such as `-check-mod ~/my-mods/cheap-tanks`.
-
-This checks the mod on its own, with the same limits a reset uses, and lists
-every value it changes. It also lists the options and shows any choice from
+[`-check-mod`](#command-line-options-and-settings) takes a name or the path to
+any mod folder, such as `-check-mod ~/my-mods/cheap-tanks`. It lists
+every value the mod changes. It also lists the options and shows any choice from
 `config.json` that differs from the default:
 
 ```
@@ -439,8 +463,9 @@ Changes from the base game:
 ## Turning mods on
 
 Mods change only when a new game starts. On a stand-alone board, turn them on
-in the settings editor that `-reset` opens, on its Mods page, or list them in
-`config.json` under `Mods` and run `-reset-from-config`:
+in the settings editor that [`-reset`](#command-line-options-and-settings) opens,
+on its Mods page, or list them in `config.json` under `Mods` and run
+[`-reset-from-config`](#command-line-options-and-settings):
 
 ```json
 "Mods": ["cheap-tanks"],
@@ -456,9 +481,7 @@ When two mods change the same value, the one later in the list wins. The reset
 checks the combined values against the limits, so two mods that each pass
 `-check-mod` can still be refused together.
 
-`-reset` starts from the default settings, which turn no mods on, so pick
-them again on the Mods page each time. `-reset-from-config` uses the list in
-`config.json` as it stands. The Mods page refuses a mod that will not load,
+`-reset-from-config` uses the list in `config.json` as it stands. The Mods page refuses a mod that will not load,
 alone or with the mods already on, and the reset prints the mods it applied.
 
 A game keeps the mods it started with until the next reset:
@@ -470,15 +493,15 @@ A game keeps the mods it started with until the next reset:
   mod's folder during a game, the game keeps the copy and writes a warning to
   its error output (stderr) each time it starts. Under a BBS, that output goes
   to the sysop's log.
-- `-reload-mods` is the one exception on a stand-alone board. It puts the mods
-  `config.json` lists, as their folders are now, into the game in progress, and
-  prints what changed. It is for testing (see below). A league board refuses
-  it; see [In a league](#in-a-league).
+- [`-reload-mods`](#command-line-options-and-settings) is the one exception on
+  a stand-alone board. It is for testing (see [Testing a mod](#testing-a-mod)).
+  A league board refuses it; see [In a league](#in-a-league).
 
 ## In a league
 
 The Coordinator chooses the mods for every board. Put the names in the
-Coordinator's `config.json` under `Mods`, then run `-league-reset <date>`. The
+Coordinator's `config.json` under `Mods`, then run
+[`-league-reset <date>`](#command-line-options-and-settings). The
 signed reset order carries every file of each mod and the Coordinator's option
 choices, so member boards do not need their own copies. The command prints the
 mods it is carrying.
@@ -498,7 +521,8 @@ copy of a mod in `world.json`, the fingerprint changes and the other boards
 hold its packets.
 
 Scripts are another choice. A mod that carries `pirates.star` or a script in
-`regions` runs only on a board whose sysop sets `AcceptLeagueScripts Yes` in
+`regions` runs only on a board whose sysop sets
+[`AcceptLeagueScripts Yes`](#command-line-options-and-settings) in
 `bbs.cfg`. The setting defaults to `no`. A board with the default refuses a
 scripted reset and keeps the order. It resets at its first planetary run after
 its sysop turns the setting on. If the board moves to another league first, the
@@ -533,5 +557,5 @@ game started. A mod that will not load is refused, and the game keeps the
 values it had. Start a new game with `-reset-from-config` when you want to see
 the mod from the start.
 
-`-reload-mods` is for testing on a stand-alone board. A league board refuses it
+A league board refuses [`-reload-mods`](#command-line-options-and-settings)
 because its mods come from the Coordinator's reset order.
