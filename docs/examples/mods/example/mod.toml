@@ -1,0 +1,35 @@
+# The mod's folder name must match this name.
+name = "example"
+version = "1.0"
+# The mod format this mod was written for.
+mod_api = 1
+# An SPDX identifier. The text is in the LICENSE file beside this one.
+license = "MIT"
+# Shown on the Game Setup screen. Blank shows the name.
+label = "Example Mod"
+description = "Cheaper jets, a stronger HeadQuarters, farmable deserts and raids on jet stockpiles."
+
+# A number option. values.toml uses it for the tank's build cost.
+[options.tank_cost]
+type = "number"
+label = "Tank cost"
+description = "Production points to build one tank"
+default = 400
+min = 100
+max = 1000
+
+# A bool option. values.toml has a [when.cheap_hq] section for it.
+[options.cheap_hq]
+type = "bool"
+label = "Cheap HeadQuarters"
+description = "The HeadQuarters costs less and finishes faster"
+default = false
+
+# A number option read by a script, regions/desert.star, through option().
+[options.farm_turns]
+type = "number"
+label = "Turns before deserts farm"
+description = "Turns a realm must have played before its deserts grow food"
+default = 50
+min = 0
+max = 500

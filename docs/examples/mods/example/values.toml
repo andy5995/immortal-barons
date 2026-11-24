@@ -1,0 +1,35 @@
+# List only what changes. immortal-barons -print-base-mod prints every value.
+
+[units.trooper]
+upkeep = 0.3              # gold per turn to maintain one (base game 0.4)
+hq_bonus = 0.01           # a finished HeadQuarters now strengthens troopers
+
+[units.jet]
+build_cost = 120          # production points to build one (base game 140)
+price_low = 220           # the range a realm's price for jets moves inside (base game 250 to 400)
+price_high = 380
+
+[units.turret]
+defense = 2.5             # strength when its realm is attacked, in troopers (base game 2)
+hq_bonus = 0.02
+
+[units.tank]
+build_cost = { option = "tank_cost" }   # the sysop's choice of the tank_cost option
+hq_bonus = 0.02           # (base game 0.01)
+
+[hq]
+price_base = 4000         # gold for a HeadQuarters on a realm's first turn (base game 5000)
+build_per_turn = 8        # completion percent gained each turn (base game 5)
+
+# Applies only when the sysop turns cheap_hq on. It is read after the plain
+# values above, so it overrides them.
+[when.cheap_hq.hq]
+price_base = 1500
+build_per_turn = 15
+
+# Region figures. Each type takes the same keys.
+[regions.agricultural]
+upkeep = 800              # gold to keep one region each turn (base game 913)
+
+[regions.mountain]
+gold_base = 3700          # gold one region pays before the random part (base game 3550)

@@ -53,6 +53,8 @@ for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 dar
 		docs/translating.md docs/ftn-transport.md docs/inter-bbs-troubleshooting.md \
 		docs/sysop-panel.md \
 		"$dir/docs/"
+	mkdir -p "$dir/docs/examples"
+	cp -R docs/examples/mods "$dir/docs/examples/"
 	if [ "$os" = windows ]; then
 		zip -qr "dist/${name}.zip" "$dir"
 	else
