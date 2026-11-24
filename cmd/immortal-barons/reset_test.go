@@ -276,3 +276,45 @@ func TestCheckModFindsAModByName(t *testing.T) {
 		}
 	}
 }
+
+// -check-mod names each option, its bounds, and where config.json chooses
+// something other than the default.
+func TestCheckModListsOptions(t *testing.T) {
+	dir := t.TempDir()
+	m := filepath.Join(dir, "mods", "options")
+	if err := os.MkdirAll(m, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	manifest := "name = \"options\"\nversion = \"1\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n" +
+		"[options.tank_cost]\nlabel = \"Tank cost\"\ndescription = \"What one tank costs\"\n" +
+		"type = \"number\"\ndefault = 500\nmin = 1\nmax = 1000\n"
+	files := map[string]string{
+		"mod.toml":    manifest,
+		"values.toml": "[units.tank]\nbuild_cost = { option = \"tank_cost\" }\n",
+		"config.json": `{"ModOptions":{"options":{"tank_cost":400}}}`,
+	}
+	for name, body := range files {
+		path := filepath.Join(m, name)
+		if name == "config.json" {
+			path = filepath.Join(dir, name)
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var err error
+	out := captureStdout(t, func() { err = runCheckMod("options", dir) })
+	if err != nil {
+		t.Fatalf("runCheckMod: %v (output: %s)", err, out)
+	}
+	for _, want := range []string{
+		"Tank cost: number, default 500, from 1 to 1000",
+		"Options changed from their defaults:",
+		"Tank cost: 500 -> 400",
+		"tank.build_cost: 500 -> 400",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("-check-mod output misses %q:\n%s", want, out)
+		}
+	}
+}

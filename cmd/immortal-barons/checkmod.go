@@ -36,7 +36,12 @@ func modArg(arg, dataDir string, existing bool) string {
 // arg is a folder, or a mod's name as config.json lists it, which is looked up
 // in the data directory's mods folder.
 func runCheckMod(arg, dataDir string) error {
-	m, r, err := mod.Check(modArg(arg, dataDir, true))
+	path := modArg(arg, dataDir, true)
+	cfg, err := store.LoadConfig(dataDir)
+	if err != nil {
+		return err
+	}
+	m, r, err := mod.CheckWithOptions(path, cfg.ModOptions[filepath.Base(path)])
 	if err != nil {
 		return err
 	}
@@ -45,6 +50,18 @@ func runCheckMod(arg, dataDir string) error {
 		fmt.Println(m.Description)
 	}
 	fmt.Println("License: " + m.License)
+	if ids := m.SortedOptionIDs(); len(ids) > 0 {
+		fmt.Println("Options:")
+		for _, id := range ids {
+			fmt.Println("  " + m.OptionLine(id))
+		}
+		if diff := m.OptionDiff(); len(diff) > 0 {
+			fmt.Println("Options changed from their defaults:")
+			for _, line := range diff {
+				fmt.Println("  " + line)
+			}
+		}
+	}
 	changes := mod.Diff(game.BaseRules(), r)
 	if len(changes) == 0 {
 		fmt.Println("It changes nothing from the base game.")
