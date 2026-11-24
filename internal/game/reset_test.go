@@ -71,7 +71,7 @@ func TestResetErasesEverythingSaved(t *testing.T) {
 	// The filled rule set would price the reset's fresh market; a fresh world
 	// plays the base rules, which is what nil means.
 	w.Rules = nil
-	mods := w.Mods
+	mods, pending := w.Mods, w.PendingLeagueReset
 	unsaved := map[string]any{}
 	for i := range v.NumField() {
 		if f := v.Type().Field(i); f.IsExported() && f.Tag.Get("json") == "-" {
@@ -95,6 +95,14 @@ func TestResetErasesEverythingSaved(t *testing.T) {
 			// which sets them before calling Reset, changes them (#202).
 			if !reflect.DeepEqual(got, mods) {
 				t.Errorf("Mods changed in a reset: %v, want %v kept", got, mods)
+			}
+			continue
+		}
+		if f.Name == "PendingLeagueReset" {
+			// A refused league order waits for a game that can play it, so it
+			// outlives the game that was running when it came.
+			if !reflect.DeepEqual(got, pending) {
+				t.Errorf("PendingLeagueReset changed in a reset: %v, want %v kept", got, pending)
 			}
 			continue
 		}

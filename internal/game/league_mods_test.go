@@ -174,6 +174,20 @@ func TestAppliedLeagueResetClearsThePendingOrder(t *testing.T) {
 	}
 }
 
+// A game that ends on its timer starts a fresh one, and the refused order
+// still waits for the board to be able to play it.
+func TestTimedGameEndKeepsThePendingLeagueReset(t *testing.T) {
+	m := NewWorldSeed(DefaultConfig(), 1)
+	want := &LeagueReset{OnDate: "2026-10-01"}
+	m.PendingLeagueReset = want
+
+	m.endGame()
+
+	if m.PendingLeagueReset != want {
+		t.Errorf("the pending order after a game end is %+v, want %+v", m.PendingLeagueReset, want)
+	}
+}
+
 // A board with no mods still stamps packets with the settings' fingerprint, so
 // adding mods to a league does not move the ruleset of a game without them.
 func TestWorldFingerprintIncludesMods(t *testing.T) {
