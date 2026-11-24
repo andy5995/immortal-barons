@@ -209,19 +209,17 @@ func (c Config) RulesetFingerprint() string {
 // RulesetFingerprint is the fingerprint this board's packets carry: the
 // league settings (Config.RulesetFingerprint) and, when the game plays mods,
 // each mod's name and hash, so a board playing other mods, or an edited copy
-// of the league's, is held like one playing other settings (#202). With no
-// mods it is exactly the settings' fingerprint, so a league without mods sees
-// no change.
+// of the league's, is held like one playing other settings (#202). The modded
+// form hashes the settings' fingerprint rather than marshaling the ruleset
+// again. With no mods it is exactly the settings' fingerprint, so a league
+// without mods sees no change.
 func (w *World) RulesetFingerprint() string {
+	base := w.Config.RulesetFingerprint()
 	if len(w.Mods) == 0 {
-		return w.Config.RulesetFingerprint()
-	}
-	b, err := json.Marshal(w.Config.leagueRuleset())
-	if err != nil {
-		return ""
+		return base
 	}
 	h := sha256.New()
-	h.Write(b)
+	h.Write([]byte(base))
 	for _, m := range w.Mods {
 		fmt.Fprintf(h, "\x00%s\x00%s", m.Name, m.Hash)
 	}
