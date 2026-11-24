@@ -274,6 +274,7 @@ ModRef:
   Label `json:",omitempty"`
   Hash
   Files
+  Options `json:",omitempty"`
 LeagueFreeze:
   Serial
   Frozen

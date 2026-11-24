@@ -60,15 +60,15 @@ func whole64(v any) (int64, error) {
 }
 
 // applyHQ writes the [hq] section's keys into r.
-func (m *Mod) applyHQ(r *game.Rules) error {
+func (v values) applyHQ(r *game.Rules) error {
 	var errs []error
-	for _, key := range slices.Sorted(maps.Keys(m.values.HQ)) {
+	for _, key := range slices.Sorted(maps.Keys(v.HQ)) {
 		f := hqKey(key)
 		if f == nil {
 			errs = append(errs, fmt.Errorf("hq.%s: unknown key", key))
 			continue
 		}
-		if err := f.set(&r.HQ, m.values.HQ[key]); err != nil {
+		if err := f.set(&r.HQ, v.HQ[key]); err != nil {
 			errs = append(errs, fmt.Errorf("hq.%s: %w", key, err))
 		}
 	}

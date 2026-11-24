@@ -22,7 +22,7 @@ func runLeagueReset(cfg game.Config, date string) error {
 	var carried []game.ModRef
 	return runCoordinatorOrder(cfg, "-league-reset",
 		func(w *game.World) error {
-			rules, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods)
+			rules, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods, cfg.ModOptions)
 			if err != nil {
 				return fmt.Errorf("the league reset was not declared: %w", err)
 			}

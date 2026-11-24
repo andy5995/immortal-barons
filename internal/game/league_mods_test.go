@@ -37,7 +37,8 @@ func TestLeagueResetInstallsTheCoordinatorsMods(t *testing.T) {
 	lc, m := freezePair(t)
 	m.Config.AcceptLeagueScripts = true
 	refs := []ModRef{{Name: "cheap-tanks", Version: "1.0", Hash: strings.Repeat("a", 64),
-		Files: map[string]string{"values.toml": "[units.tank]\nbuild_cost = 250\n"}}}
+		Files:   map[string]string{"values.toml": "[units.tank]\nbuild_cost = 250\n"},
+		Options: map[string]int64{"tank_cost": 250}}}
 	called := false
 	stubLeagueMods(t, func(got []ModRef, scripts bool) (*Rules, error) {
 		called = true
@@ -217,5 +218,22 @@ func TestPendingLeagueResetWaitsForTheThaw(t *testing.T) {
 	m.RetryPendingLeagueReset()
 	if m.PendingLeagueReset != nil || len(m.Mods) != 1 {
 		t.Errorf("after the thaw: pending %v, mods %v; want the order applied", m.PendingLeagueReset, m.Mods)
+	}
+}
+
+// A mod option is part of what a board plays: changing its value gives the
+// world a different fingerprint, so a league cannot quietly disagree on it.
+func TestModOptionsChangeTheFingerprint(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Mods = []ModRef{{Name: "m", Hash: "h", Options: map[string]int64{"tank_cost": 400}}}
+	one := w.RulesetFingerprint()
+	w.Mods[0].Options["tank_cost"] = 450
+	two := w.RulesetFingerprint()
+	if one == two {
+		t.Errorf("changing tank_cost left the fingerprint at %s", one)
+	}
+	w.Mods[0].Options = nil
+	if missing := w.RulesetFingerprint(); missing == one || missing == two {
+		t.Errorf("a missing option matched a played value: %s", missing)
 	}
 }

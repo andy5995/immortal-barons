@@ -131,7 +131,7 @@ func TestALaterModsRegionScriptReplacesAnEarlierOnes(t *testing.T) {
 		urbanScript:  "def region(realm, row):\n    return {\"food_base\": 10}\n"})
 	writeMod(t, data, "better-farms", map[string]string{ManifestFile: manifest("better-farms"),
 		desertScript: "def region(realm, row):\n    return {\"food_base\": 300}\n"})
-	r, _, err := Resolve(data, []string{"farms", "better-farms"})
+	r, _, err := Resolve(data, []string{"farms", "better-farms"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +223,7 @@ func TestDiffNamesTheRegionScripts(t *testing.T) {
 func TestRestoreRebuildsTheRegionScripts(t *testing.T) {
 	data := t.TempDir()
 	writeMod(t, data, "lands", map[string]string{ManifestFile: manifest("lands"), desertScript: desertFood})
-	_, refs, err := Resolve(data, []string{"lands"})
+	_, refs, err := Resolve(data, []string{"lands"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

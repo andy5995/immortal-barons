@@ -95,7 +95,7 @@ func TestLeagueBoardPlaysTheLeaguesMods(t *testing.T) {
 	}
 
 	// The world as a league reset leaves it: the mods recorded, no folder.
-	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods)
+	r, refs, err := mod.Resolve(cfg.DataDir, cfg.Mods, cfg.ModOptions)
 	if err != nil {
 		t.Fatal(err)
 	}

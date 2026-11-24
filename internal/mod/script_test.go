@@ -200,7 +200,7 @@ func TestScriptGameReplaysForASeed(t *testing.T) {
 func TestRestoreRebuildsTheScript(t *testing.T) {
 	dataDir := t.TempDir()
 	dir := writeMod(t, dataDir, "pirates", map[string]string{ManifestFile: manifest("pirates"), PiratesFile: raidJets})
-	_, refs, err := Resolve(dataDir, []string{"pirates"})
+	_, refs, err := Resolve(dataDir, []string{"pirates"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -252,7 +252,7 @@ func TestReplacedNamesTheScriptThatDoesNotRun(t *testing.T) {
 func TestRestoreDoesNotCompileTheFolder(t *testing.T) {
 	dataDir := t.TempDir()
 	writeMod(t, dataDir, "pirates", map[string]string{ManifestFile: manifest("pirates"), PiratesFile: raidJets})
-	_, refs, err := Resolve(dataDir, []string{"pirates"})
+	_, refs, err := Resolve(dataDir, []string{"pirates"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -268,7 +268,7 @@ func TestRestoreDoesNotCompileTheFolder(t *testing.T) {
 func TestRestoreReportsAnEditedSavedCopy(t *testing.T) {
 	dataDir := t.TempDir()
 	writeMod(t, dataDir, "pirates", map[string]string{ManifestFile: manifest("pirates"), PiratesFile: raidJets})
-	_, refs, err := Resolve(dataDir, []string{"pirates"})
+	_, refs, err := Resolve(dataDir, []string{"pirates"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

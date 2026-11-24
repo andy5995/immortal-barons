@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 	"time"
 )
 
@@ -222,6 +224,9 @@ func (w *World) RulesetFingerprint() string {
 	h.Write([]byte(base))
 	for _, m := range w.Mods {
 		fmt.Fprintf(h, "\x00%s\x00%s", m.Name, m.Hash)
+		for _, id := range slices.Sorted(maps.Keys(m.Options)) {
+			fmt.Fprintf(h, "\x00%s=%d", id, m.Options[id])
+		}
 	}
 	return hex.EncodeToString(h.Sum(nil)[:4])
 }

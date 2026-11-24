@@ -326,6 +326,13 @@ type ModRef struct {
 	// above are scrubbed like the rest of the packet, so a Label or Version a
 	// screen shows is safe whatever the order said.
 	Files map[string]string `scrub:"-"`
+	// Options are the values the sysop chose for this game, by option id.
+	// Bools are 0 (False) or 1 (True). They travel with the mod in a league
+	// reset order, so every board plays the same game. A missing id means the
+	// mod's default, which keeps an order from an older game readable.
+	// The keys are option ids checked against the mod's manifest before use,
+	// and neither the id nor this map is shown unchecked on a screen.
+	Options map[string]int64 `json:",omitempty" scrub:"-"`
 }
 
 // DisplayName is what a screen calls the mod: its label, or its name when it

@@ -283,6 +283,11 @@ type Config struct {
 	// World.Mods recorded at its reset, never this list. A league board refuses
 	// them until a reset packet can carry them to every member.
 	Mods []string `json:",omitempty"`
+	// ModOptions holds the values this board will use at its next reset, by
+	// mod name and option id. A missing entry means the mod's default. Like
+	// Mods it is per-board: a league board's options come from the
+	// Coordinator's reset order, carried on each ModRef.
+	ModOptions map[string]map[string]int64 `json:",omitempty"`
 
 	// This board's own identity and packet directories. Stored in bbs.cfg, not
 	// config.json — a Coordinator's broadcast rewrites config.json, and these are

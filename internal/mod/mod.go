@@ -67,6 +67,9 @@ type Manifest struct {
 	// ModAPI is the version of the mod format the mod was written for. Every
 	// mod must give it: see ModAPI.
 	ModAPI int `toml:"mod_api"`
+	// Options are the [options.<id>] tables a sysop may set at a reset. A mod
+	// without options leaves this empty.
+	Options map[string]*Option `toml:"options"`
 }
 
 // ModAPI is the version of the mod format this game reads: the folder's
@@ -87,7 +90,11 @@ type Mod struct {
 	Hash string
 	// Files are the folder's contents, kept so a world can go on playing the
 	// mod exactly as it was reset with.
-	Files   map[string]string
+	Files map[string]string
+	// chosen is every option's value for the game being loaded: the default
+	// for one the sysop did not set. Scripts compile against these values, so
+	// they stay fixed for the whole game.
+	chosen  map[string]int64
 	values  values
 	pirates *pirateScript
 	regions map[*game.Region]*regionScript
@@ -95,7 +102,10 @@ type Mod struct {
 
 // Ref is what a world records about m.
 func (m *Mod) Ref() game.ModRef {
-	return game.ModRef{Name: m.Name, Version: m.Version, Label: m.Label, Hash: m.Hash, Files: m.Files}
+	return game.ModRef{
+		Name: m.Name, Version: m.Version, Label: m.Label,
+		Hash: m.Hash, Files: m.Files, Options: maps.Clone(m.chosen),
+	}
 }
 
 // values is values.toml. Each unit's section is read into a plain map and
@@ -105,6 +115,10 @@ type values struct {
 	HQ    map[string]any            `toml:"hq"`
 	// Regions is one section per region type (regions.go).
 	Regions map[string]map[string]any `toml:"regions"`
+	// When holds sections selected by a bool option. Its shape is this same
+	// struct, so [when.fast_start.units.tank] is written just like its
+	// top-level counterpart.
+	When map[string]values `toml:"when"`
 }
 
 // number takes a TOML integer or float, so `upkeep = 1` and `upkeep = 0.4`
@@ -220,10 +234,19 @@ func readFiles(dir, prefix string, files map[string]string) error {
 	return nil
 }
 
-// parse reads a mod from its files, keyed by name. path is the folder they
-// came from, or would have, for a copy saved in a world: its last element is
-// the name the manifest must carry.
+// parse reads a mod from its files with its options' defaults. It is what
+// -check-mod and the editors use when they only look at a mod; the game calls
+// parseWithOptions with the values the sysop chose at the reset.
 func parse(path string, files map[string]string) (*Mod, error) {
+	return parseWithOptions(path, files, nil, filepath.Join(path, ValuesFile))
+}
+
+// parseWithOptions reads a mod from its files, keyed by name. path is the
+// folder they came from, or would have, for a copy saved in a world: its last
+// element is the name the manifest must carry. given holds the values chosen
+// for this game; source names where they came from in an error (config.json,
+// world.json, or the league's reset order).
+func parseWithOptions(path string, files map[string]string, given map[string]int64, source string) (*Mod, error) {
 	m := &Mod{Path: path, Files: files}
 	names := slices.Sorted(maps.Keys(files))
 	var haveManifest bool
@@ -243,7 +266,7 @@ func parse(path string, files map[string]string) (*Mod, error) {
 				return nil, fmt.Errorf("%s: %w", file, err)
 			}
 		case ValuesFile:
-			if err := decodeStrict(data, &m.values); err != nil {
+			if err := decodeValues(data, &m.values); err != nil {
 				return nil, fmt.Errorf("%s: %w", file, err)
 			}
 		}
@@ -274,8 +297,15 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	if err := checkModAPI(path, m.ModAPI); err != nil {
 		return nil, err
 	}
+	if err := checkOptions(m.Manifest.Options, filepath.Join(path, ManifestFile)); err != nil {
+		return nil, err
+	}
+	var err error
+	if m.chosen, err = chosenValues(m.Manifest.Options, given, source); err != nil {
+		return nil, err
+	}
 	if src, ok := files[PiratesFile]; ok {
-		s, err := newPirateScript(path, m.Name, m.Hash, src)
+		s, err := newPirateScript(path, m.Name, m.Hash, src, m.scriptOptions())
 		if err != nil {
 			return nil, err
 		}
@@ -286,7 +316,7 @@ func parse(path string, files map[string]string) (*Mod, error) {
 		if !ok {
 			continue
 		}
-		s, err := newRegionScript(path, m.Name, m.Hash, g, src)
+		s, err := newRegionScript(path, m.Name, m.Hash, g, src, m.scriptOptions())
 		if err != nil {
 			return nil, err
 		}
@@ -339,6 +369,16 @@ mod_api = %d
 license = %q
 # label = ""        # shown on the Game Setup screen; blank shows the name
 # description = ""
+
+# A sysop can change an option at each reset. Delete the # marks to use this
+# one, and change the id to what your values.toml and scripts call.
+# [options.example]
+# type = "number"
+# label = "Example option"
+# description = "What this option changes"
+# default = 100
+# min = 1
+# max = 1000
 `, name, ModAPI, DefaultLicense)
 	values := `# What this mod changes from the base game. List only what changes.
 # immortal-barons -print-base-mod prints every value a mod can set.
@@ -367,16 +407,27 @@ func checkModAPI(path string, api int) error {
 }
 
 // decodeStrict decodes TOML into v and fails on any key v has no field for.
-func decodeStrict(data []byte, v any) error {
+func decodeStrict(data []byte, v any) error { return decodeTOML(data, v, false) }
+
+// decodeValues reads values.toml. BurntSushi reports the nested keys of an
+// inline table decoded into any, so option = "id" would look like an unknown
+// key; optionValue checks that table itself and refuses anything else in it.
+func decodeValues(data []byte, v any) error { return decodeTOML(data, v, true) }
+
+func decodeTOML(data []byte, v any, allowOption bool) error {
 	md, err := toml.NewDecoder(bytes.NewReader(data)).Decode(v)
 	if err != nil {
 		return err
 	}
-	if extra := md.Undecoded(); len(extra) > 0 {
-		keys := make([]string, len(extra))
-		for i, k := range extra {
-			keys[i] = k.String()
+	var keys []string
+	for _, k := range md.Undecoded() {
+		name := k.String()
+		if allowOption && (name == "option" || strings.HasSuffix(name, ".option") || strings.Contains(name, ".option.")) {
+			continue
 		}
+		keys = append(keys, name)
+	}
+	if len(keys) > 0 {
 		return fmt.Errorf("unknown key %s", strings.Join(keys, ", "))
 	}
 	return nil
@@ -394,40 +445,15 @@ func moddableUnit(id string) *game.Good {
 
 // Apply writes m's overrides into r. It checks only that each value converts;
 // whether the result is playable is r.Validate's question, asked once every
-// mod has been applied.
+// mod has been applied. Option references are replaced before the figures go
+// through the same conversion and limit checks as a figure written directly.
 func (m *Mod) Apply(r *game.Rules) error {
-	var errs []error
-	ids := slices.Sorted(maps.Keys(m.values.Units)) // errors in a stable order
-	for _, id := range ids {
-		g := moddableUnit(id)
-		if g == nil {
-			var known []string
-			for _, g := range game.MilitaryGoods {
-				known = append(known, g.ID)
-			}
-			errs = append(errs, fmt.Errorf("units.%s: not a unit a mod can change (%s)", id, strings.Join(known, ", ")))
-			continue
-		}
-		u := r.Units[g]
-		keys := slices.Sorted(maps.Keys(m.values.Units[id]))
-		for _, key := range keys {
-			f := unitField(key)
-			if f == nil {
-				errs = append(errs, fmt.Errorf("units.%s.%s: unknown key", id, key))
-				continue
-			}
-			if err := f.set(&u, m.values.Units[id][key]); err != nil {
-				errs = append(errs, fmt.Errorf("units.%s.%s: %w", id, key, err))
-			}
-		}
-		r.Units[g] = u
+	plain, err := m.resolveValues(m.values)
+	if err != nil {
+		return fmt.Errorf("%s: %w", filepath.Join(m.Path, ValuesFile), err)
 	}
-	if err := m.applyHQ(r); err != nil {
-		errs = append(errs, err)
-	}
-	if err := m.applyRegions(r); err != nil {
-		errs = append(errs, err)
-	}
+	errs := plain.apply(r, m)
+	errs = append(errs, m.applyWhen(r)...)
 	if m.pirates != nil {
 		r.Pirates = m.pirates
 	}
@@ -470,7 +496,11 @@ type modLoader struct {
 	// source reads one mod. A caller's extra checks belong here: the league
 	// reader refuses scripts before parse compiles one, and Restore compares a
 	// saved copy with the folder it came from.
-	source      func(name string) (*Mod, error)
+	source func(name string, options map[string]int64) (*Mod, error)
+	// options supplies the values chosen for one mod. A loader reading a
+	// saved game takes them from the world; one applying config.json takes
+	// them from there. A nil map means "use the defaults".
+	options     func(name string) map[string]int64
 	listErr     func(error) error
 	applyErr    func(name string, err error) error
 	validateErr func(names []string, err error) error
@@ -485,7 +515,11 @@ func (l modLoader) load(names []string) (*game.Rules, error) {
 			return nil, l.listErr(err)
 		}
 		seen = append(seen, name)
-		m, err := l.source(name)
+		var chosen map[string]int64
+		if l.options != nil {
+			chosen = l.options(name)
+		}
+		m, err := l.source(name, chosen)
 		if err != nil {
 			return nil, err
 		}
@@ -510,15 +544,22 @@ func modRefs(refs []game.ModRef) map[string]game.ModRef {
 }
 
 // Resolve reads the named mods from dataDir and applies them, in order, to the
-// base rules. It returns the rules and what a world records about each mod.
-func Resolve(dataDir string, names []string) (*game.Rules, []game.ModRef, error) {
+// base rules. options is config.json's ModOptions: mod name, option id, value.
+// It returns the rules and what a world records about each mod, options filled
+// in with defaults where the sysop made no choice.
+func Resolve(dataDir string, names []string, options map[string]map[string]int64) (*game.Rules, []game.ModRef, error) {
 	if len(names) == 0 {
 		return nil, nil, nil
 	}
 	refs := make([]game.ModRef, 0, len(names))
 	l := modLoader{
-		source: func(name string) (*Mod, error) {
-			m, err := Read(filepath.Join(dataDir, Dir, name))
+		options: func(name string) map[string]int64 { return options[name] },
+		source: func(name string, given map[string]int64) (*Mod, error) {
+			files := map[string]string{}
+			if err := readFiles(filepath.Join(dataDir, Dir, name), "", files); err != nil {
+				return nil, err
+			}
+			m, err := parseWithOptions(filepath.Join(dataDir, Dir, name), files, given, "config.json")
 			if err != nil {
 				return nil, err
 			}
@@ -593,7 +634,8 @@ func LoadForLeague(refs []game.ModRef, scripts bool) (*game.Rules, error) {
 		names = append(names, ref.Name)
 	}
 	l := modLoader{
-		source: func(name string) (*Mod, error) {
+		options: func(name string) map[string]int64 { return byName[name].Options },
+		source: func(name string, given map[string]int64) (*Mod, error) {
 			ref := byName[name]
 			// Before parse, which compiles each script, and compiling runs its top
 			// level: a board that does not accept scripts must run none of it.
@@ -604,7 +646,7 @@ func LoadForLeague(refs []game.ModRef, scripts bool) (*game.Rules, error) {
 					}
 				}
 			}
-			m, err := parse(ref.Name, ref.Files)
+			m, err := parseWithOptions(ref.Name, ref.Files, given, "the league's reset order")
 			if err != nil {
 				return nil, fmt.Errorf("the league's mod %q: %w", ref.Name, err)
 			}
@@ -640,13 +682,14 @@ func Restore(dataDir string, recorded []game.ModRef, folders bool) (rules *game.
 		names = append(names, ref.Name)
 	}
 	l := modLoader{
-		source: func(name string) (*Mod, error) {
+		options: func(name string) map[string]int64 { return byName[name].Options },
+		source: func(name string, given map[string]int64) (*Mod, error) {
 			ref := byName[name]
 			// The name comes from world.json, which a reset wrote but anyone with
 			// the file can edit; load holds it to a plain name so it cannot leave
 			// the mods folder, and checks it as a reset checks the list.
 			path := filepath.Join(dataDir, Dir, ref.Name)
-			m, err := parse(path, ref.Files)
+			m, err := parseWithOptions(path, ref.Files, given, "world.json")
 			if err != nil {
 				return nil, fmt.Errorf("the copy of mod %q saved with this game: %w", ref.Name, err)
 			}

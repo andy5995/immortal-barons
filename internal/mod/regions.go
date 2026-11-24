@@ -24,16 +24,16 @@ func regionIDs() []string {
 }
 
 // applyRegions writes the [regions.*] sections' keys into r.
-func (m *Mod) applyRegions(r *game.Rules) error {
+func (v values) applyRegions(r *game.Rules) error {
 	var errs []error
-	for _, id := range slices.Sorted(maps.Keys(m.values.Regions)) {
+	for _, id := range slices.Sorted(maps.Keys(v.Regions)) {
 		g := game.RegionByID(id)
 		if g == nil {
 			errs = append(errs, fmt.Errorf("regions.%s: not a region type (%s)", id, strings.Join(regionIDs(), ", ")))
 			continue
 		}
 		rr := r.Regions[g]
-		for _, key := range slices.Sorted(maps.Keys(m.values.Regions[id])) {
+		for _, key := range slices.Sorted(maps.Keys(v.Regions[id])) {
 			f := game.RegionFieldByKey(key)
 			if f == nil {
 				var known []string
@@ -43,7 +43,7 @@ func (m *Mod) applyRegions(r *game.Rules) error {
 				errs = append(errs, fmt.Errorf("regions.%s.%s: unknown key (%s)", id, key, strings.Join(known, ", ")))
 				continue
 			}
-			n, err := whole(m.values.Regions[id][key])
+			n, err := whole(v.Regions[id][key])
 			if err != nil {
 				errs = append(errs, fmt.Errorf("regions.%s.%s: %w", id, key, err))
 				continue

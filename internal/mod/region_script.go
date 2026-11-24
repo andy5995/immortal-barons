@@ -3,6 +3,7 @@ package mod
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -47,6 +48,8 @@ const regionCacheMax = 4096
 // built-ins: nothing. Unlike a pirate script it has no rand() or day(): its
 // answer must be the same each time it is asked, or a screen would show one
 // figure and the turn credit another; the day is a field of realm instead.
+// option() is added at compile time and is fixed for the game being loaded,
+// so it does not make an answer change from one screen to the next.
 var regionPredeclared = starlark.StringDict{}
 
 // regionScript is one compiled regions/<type>.star: the game.RegionBrain a mod
@@ -70,8 +73,13 @@ type regionKey struct {
 
 // compileRegion runs src's top level and checks that it defines region with
 // two parameters, under the same rules as compilePirates.
-func compileRegion(file, src string) (*starlark.Function, error) {
-	globals, err := starlark.ExecFileOptions(&syntax.FileOptions{}, newThread(file), file, src, regionPredeclared)
+func compileRegion(file, src string, options *optionValues) (*starlark.Function, error) {
+	pre := starlark.StringDict{}
+	maps.Copy(pre, regionPredeclared)
+	if options != nil {
+		pre["option"] = options.builtin()
+	}
+	globals, err := starlark.ExecFileOptions(&syntax.FileOptions{}, newThread(file), file, src, pre)
 	var ee *starlark.EvalError
 	if errors.As(err, &ee) {
 		return nil, fmt.Errorf("%s: %w", file, scriptError(err))
@@ -89,17 +97,17 @@ func compileRegion(file, src string) (*starlark.Function, error) {
 	return fn, nil
 }
 
-// newRegionScript compiles a mod's script for type g, once per process for a
-// given file and source (see compiled).
-func newRegionScript(path, name, hash string, g *game.Region, src string) (*regionScript, error) {
+// newRegionScript compiles a mod's script for type g with its chosen options,
+// once per process for a given file, source and option values (see compiled).
+func newRegionScript(path, name, hash string, g *game.Region, src string, options *optionValues) (*regionScript, error) {
 	file := filepath.Join(path, RegionsDir, g.ID+".star")
-	key := "region\x00" + file + "\x00" + src
+	key := "region\x00" + file + "\x00" + src + options.key()
 	s := &regionScript{mod: name, hash: hash, file: file, region: g, cache: map[regionKey]game.RegionRules{}}
 	if fn, ok := compiled.Load(key); ok {
 		s.fn = fn.(*starlark.Function)
 		return s, nil
 	}
-	fn, err := compileRegion(file, src)
+	fn, err := compileRegion(file, src, options)
 	if err != nil {
 		return nil, err
 	}
