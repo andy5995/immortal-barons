@@ -35,13 +35,23 @@ max = 1
 default = 100
 `, "min and max are required"},
 		{"bool bound", good + `type = "bool"
-default = 0
+default = false
 min = 0
 max = 1
 `, "min and max are for number options only"},
-		{"bool default", good + `type = "bool"
-default = 2
-`, "default 2 is not 0 (False) or 1 (True)"},
+		{"bool default number", good + `type = "bool"
+default = 1
+`, "default of a bool must be true or false, not 1"},
+		{"number default bool", good + `type = "number"
+default = true
+min = 1
+max = 200
+`, "default of a number must be a whole number, not true"},
+		{"number default float", good + `type = "number"
+default = 1.5
+min = 1
+max = 200
+`, "default of a number must be a whole number, not 1.5"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -101,7 +111,7 @@ func TestValuesRefuseAnOptionItCannotUse(t *testing.T) {
 		{"bool in a figure", `[options.fast_start]
 label = "Fast"
 type = "bool"
-default = 0
+default = false
 `, "[units.tank]\nbuild_cost = { option = \"fast_start\" }\n", "is a bool, not a number"},
 		{"extra key", `[options.cost]
 label = "Cost"
@@ -130,7 +140,7 @@ func TestBoolOptionSelectsAWhenSection(t *testing.T) {
 	const options = `[options.fast_start]
 label = "Fast start"
 type = "bool"
-default = 0
+default = false
 `
 	writeMod(t, data, "m", map[string]string{
 		ManifestFile: optionManifest("m", options),
@@ -215,7 +225,7 @@ max = 100
 [options.fast_start]
 type = "bool"
 label = "Fast start"
-default = 0
+default = false
 `
 	files := map[string]string{
 		ManifestFile: optionManifest("m", options),
@@ -305,5 +315,35 @@ max = 1000
 	}
 	if got := r.Units[game.Tank].Cost; got != 450 {
 		t.Errorf("league tank cost %d, want 450", got)
+	}
+}
+
+// Game Setup reads a saved game's manifest without checking it again, so an
+// option's default must come out right from the decoded manifest alone.
+func TestManifestFromRefGivesOptionDefaults(t *testing.T) {
+	ref := game.ModRef{Name: "m", Files: map[string]string{ManifestFile: `name = "m"
+version = "1"
+mod_api = 1
+license = "MIT"
+[options.fast]
+type = "bool"
+label = "Fast"
+default = true
+[options.cost]
+type = "number"
+label = "Cost"
+default = 500
+min = 1
+max = 900
+`}}
+	man, err := ManifestFromRef(ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := man.Options["fast"].Value(); got != 1 {
+		t.Errorf("bool default true read back as %d, want 1", got)
+	}
+	if got := man.Options["cost"].Value(); got != 500 {
+		t.Errorf("number default read back as %d, want 500", got)
 	}
 }

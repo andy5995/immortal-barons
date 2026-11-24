@@ -12,8 +12,9 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// Option types a mod may declare. A bool is stored as 0 or 1, a number as the
-// whole value the sysop chose (within min..max).
+// Option types a mod may declare. A bool is written true or false in mod.toml
+// and stored as 0 or 1, a number as the whole value the sysop chose (within
+// min..max).
 const (
 	OptionBool   = "bool"
 	OptionNumber = "number"
@@ -25,18 +26,24 @@ type Option struct {
 	Type        string `toml:"type"`
 	Label       string `toml:"label"`
 	Description string `toml:"description"`
-	Default     *int64 `toml:"default"`
+	Default     any    `toml:"default"`
 	Min         *int64 `toml:"min"`
 	Max         *int64 `toml:"max"`
 }
 
-// Value is the option's default, the value a missing entry in config.json
-// means.
+// Value is the option's default as a stored value (0 or 1 for a bool), the
+// value a missing entry in config.json means. It reads Default itself, so a
+// manifest that was decoded without check (ManifestFromRef) gives the same.
 func (o *Option) Value() int64 {
-	if o.Default == nil {
-		return 0
+	switch d := o.Default.(type) {
+	case bool:
+		if d {
+			return 1
+		}
+	case int64:
+		return d
 	}
-	return *o.Default
+	return 0
 }
 
 // check refuses an option a script or a values file could not use safely.
@@ -58,11 +65,12 @@ func (o *Option) check(id, file string) error {
 		if o.Min != nil || o.Max != nil {
 			return fmt.Errorf("%s: min and max are for number options only", where)
 		}
-		if o.Default == nil {
+		switch d := o.Default.(type) {
+		case nil:
 			return fmt.Errorf("%s: default is required", where)
-		}
-		if *o.Default != 0 && *o.Default != 1 {
-			return fmt.Errorf("%s: default %d is not 0 (False) or 1 (True)", where, *o.Default)
+		case bool:
+		default:
+			return fmt.Errorf("%s: default of a bool must be true or false, not %v", where, d)
 		}
 	case OptionNumber:
 		if o.Min == nil || o.Max == nil {
@@ -71,11 +79,15 @@ func (o *Option) check(id, file string) error {
 		if *o.Min > *o.Max {
 			return fmt.Errorf("%s: min %d is greater than max %d", where, *o.Min, *o.Max)
 		}
-		if o.Default == nil {
+		switch d := o.Default.(type) {
+		case nil:
 			return fmt.Errorf("%s: default is required", where)
-		}
-		if *o.Default < *o.Min || *o.Default > *o.Max {
-			return fmt.Errorf("%s: default %d is outside %d to %d", where, *o.Default, *o.Min, *o.Max)
+		case int64:
+			if d < *o.Min || d > *o.Max {
+				return fmt.Errorf("%s: default %d is outside %d to %d", where, d, *o.Min, *o.Max)
+			}
+		default:
+			return fmt.Errorf("%s: default of a number must be a whole number, not %v", where, d)
 		}
 	default:
 		return fmt.Errorf("%s: type %q is unknown; use %q or %q", where, o.Type, OptionBool, OptionNumber)

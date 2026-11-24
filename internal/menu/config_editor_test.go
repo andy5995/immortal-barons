@@ -310,7 +310,7 @@ func writeTestOptionMod(t *testing.T, dataDir, name string) {
 		t.Fatal(err)
 	}
 	manifest := "name = \"" + name + "\"\nversion = \"1.0\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n" +
-		"[options.fast_start]\ntype = \"bool\"\nlabel = \"Fast start\"\ndescription = \"Cheap jets\"\ndefault = 0\n" +
+		"[options.fast_start]\ntype = \"bool\"\nlabel = \"Fast start\"\ndescription = \"Cheap jets\"\ndefault = false\n" +
 		"[options.tank_cost]\ntype = \"number\"\nlabel = \"Tank cost\"\ndescription = \"What one tank costs\"\ndefault = 500\nmin = 1\nmax = 1000\n"
 	values := "[units.tank]\nbuild_cost = { option = \"tank_cost\" }\n[when.fast_start.units.jet]\nbuild_cost = 500\n"
 	for f, body := range map[string]string{mod.ManifestFile: manifest, mod.ValuesFile: values} {
