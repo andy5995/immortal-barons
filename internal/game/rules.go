@@ -274,7 +274,13 @@ type ModRef struct {
 	Version string
 	Label   string `json:",omitempty"`
 	Hash    string
-	Files   map[string]string
+	// Files are not scrubbed when they arrive in a league reset: their tabs and
+	// newlines are part of what Hash covers, and none of it reaches a screen
+	// unchecked, since the mod reader takes only the file names it knows and
+	// refuses a control character in every manifest field it shows. The fields
+	// above are scrubbed like the rest of the packet, so a Label or Version a
+	// screen shows is safe whatever the order said.
+	Files map[string]string `scrub:"-"`
 }
 
 // DisplayName is what a screen calls the mod: its label, or its name when it

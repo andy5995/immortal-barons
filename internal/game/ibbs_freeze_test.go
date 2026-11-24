@@ -312,7 +312,7 @@ func TestAFreezeOverAFreezeStaysFrozen(t *testing.T) {
 // applied first or, arriving late, set aside (withoutStaleState).
 func TestAResetIsRefusedWhileFrozen(t *testing.T) {
 	lc, m := freezePair(t)
-	if err := lc.DeclareLeagueReset("2026-10-01", ""); err != nil {
+	if err := lc.DeclareLeagueReset("2026-10-01", "", nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	var reset Packet
@@ -324,7 +324,7 @@ func TestAResetIsRefusedWhileFrozen(t *testing.T) {
 	if err := lc.DeclareLeagueFreeze(true, "hold"); err != nil {
 		t.Fatal(err)
 	}
-	if err := lc.DeclareLeagueReset("2026-10-02", ""); err != ErrLeagueFrozen {
+	if err := lc.DeclareLeagueReset("2026-10-02", "", nil, nil); err != ErrLeagueFrozen {
 		t.Errorf("a league reset was declared on a frozen league: %v", err)
 	}
 

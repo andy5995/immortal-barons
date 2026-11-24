@@ -267,6 +267,13 @@ BulletinFile:
 LeagueReset:
   OnDate
   Announced
+  Mods `json:",omitempty"`
+ModRef:
+  Name
+  Version
+  Label `json:",omitempty"`
+  Hash
+  Files
 LeagueFreeze:
   Serial
   Frozen

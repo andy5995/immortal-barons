@@ -354,8 +354,8 @@ func TestBoardWarningsNameUnknownKeysAndBadSwitches(t *testing.T) {
 // and the count pins it against a key being added to the constants alone.
 func TestKnownBoardKeysRaiseNoWarning(t *testing.T) {
 	keys := BoardKeys()
-	if len(keys) != 12 {
-		t.Errorf("BoardKeys has %d keys, want 12: %q", len(keys), keys)
+	if len(keys) != 13 {
+		t.Errorf("BoardKeys has %d keys, want 13: %q", len(keys), keys)
 	}
 	dir := t.TempDir()
 	var body strings.Builder
@@ -440,5 +440,24 @@ func TestGameOutboundNodeOutOfRangeIsWarned(t *testing.T) {
 	warnings := BoardWarnings(dir, nil)
 	if len(warnings) != 1 || !strings.Contains(warnings[0], "node 256 is outside 1..255") {
 		t.Errorf("warnings = %q", warnings)
+	}
+}
+
+// AcceptLeagueScripts is off unless bbs.cfg turns it on, and BoardConfigText
+// writes it back only when it is on.
+func TestAcceptLeagueScriptsSetting(t *testing.T) {
+	dir := t.TempDir()
+	cfg := game.DefaultConfig()
+	if err := LoadBoardConfig(dir, &cfg); err != nil || cfg.AcceptLeagueScripts {
+		t.Fatalf("no bbs.cfg: err %v, AcceptLeagueScripts %v, want off", err, cfg.AcceptLeagueScripts)
+	}
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte("AcceptLeagueScripts Yes\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := LoadBoardConfig(dir, &cfg); err != nil || !cfg.AcceptLeagueScripts {
+		t.Fatalf("set Yes: err %v, AcceptLeagueScripts %v, want on", err, cfg.AcceptLeagueScripts)
+	}
+	if !strings.Contains(BoardConfigText(cfg), "AcceptLeagueScripts yes") {
+		t.Error("BoardConfigText left the setting out")
 	}
 }

@@ -41,6 +41,7 @@ const (
 	keyPirate         = "PirateNews"
 	keyOnFault        = "OnFault"
 	keyHeldPacketDays = "HeldPacketDays"
+	keyLeagueScripts  = "AcceptLeagueScripts"
 )
 
 // boardSetters applies each bbs.cfg keyword this reader recognizes to a
@@ -85,8 +86,11 @@ var boardSetters = map[string]func(cfg *game.Config, value string) error{
 	},
 	keyBulletin: func(cfg *game.Config, v string) error { cfg.BulletinDir = v; return nil },
 	keyLottery:  func(cfg *game.Config, v string) error { return setYesNo(&cfg.Lottery, v) },
-	keyOnFault:  func(cfg *game.Config, v string) error { cfg.OnFault = v; return nil },
-	keyPirate:   func(cfg *game.Config, v string) error { return setYesNo(&cfg.PirateNews, v) },
+	keyLeagueScripts: func(cfg *game.Config, v string) error {
+		return setYesNo(&cfg.AcceptLeagueScripts, v)
+	},
+	keyOnFault: func(cfg *game.Config, v string) error { cfg.OnFault = v; return nil },
+	keyPirate:  func(cfg *game.Config, v string) error { return setYesNo(&cfg.PirateNews, v) },
 	keyHeldPacketDays: func(cfg *game.Config, v string) error {
 		n, err := strconv.Atoi(v)
 		if err != nil || n < 1 || n > game.MaxHeldPacketDays {
@@ -265,6 +269,9 @@ func BoardConfigText(cfg game.Config) string {
 	fmt.Fprintf(&b, "%s %s\n", keyBulletin, cfg.BulletinDir)
 	fmt.Fprintf(&b, "%s %s\n", keyLottery, yesNo(cfg.Lottery))
 	fmt.Fprintf(&b, "%s %s\n", keyPirate, yesNo(cfg.PirateNews))
+	if cfg.AcceptLeagueScripts {
+		fmt.Fprintf(&b, "%s %s\n", keyLeagueScripts, yesNo(true))
+	}
 	if cfg.OnFault != "" {
 		fmt.Fprintf(&b, "%s %s\n", keyOnFault, cfg.OnFault)
 	}

@@ -227,7 +227,7 @@ func TestRestoreRebuildsTheRegionScripts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r, _, err := Restore(data, refs)
+	r, _, err := Restore(data, refs, true)
 	if err != nil {
 		t.Fatal(err)
 	}

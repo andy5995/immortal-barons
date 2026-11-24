@@ -188,7 +188,7 @@ func (w *World) PlayingLeagueRules(board string) bool {
 // Coordinator has not sent.
 func (w *World) OwnRulesDiffer() bool {
 	league := w.leagueRulesetFingerprint()
-	return league != "" && w.Config.RulesetFingerprint() != league
+	return league != "" && w.RulesetFingerprint() != league
 }
 
 // leagueRulesetFingerprint is the fingerprint of the rules the league is
@@ -198,7 +198,7 @@ func (w *World) OwnRulesDiffer() bool {
 // reference must flag nobody rather than flag everybody.
 func (w *World) leagueRulesetFingerprint() string {
 	if w.IsLeagueCoordinator() {
-		return w.Config.RulesetFingerprint()
+		return w.RulesetFingerprint()
 	}
 	return w.BoardRuleset[w.CoordinatorBoardID()]
 }

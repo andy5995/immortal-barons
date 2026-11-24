@@ -311,6 +311,12 @@ func (p Packet) HasPayload() bool {
 type LeagueReset struct {
 	OnDate    string // ISO date the new game begins
 	Announced string // the Coordinator's message to the league
+	// Mods are the mods the new game plays, every file of each (#202). The
+	// Coordinator chooses them and members install nothing: each board takes
+	// them from here, checked as a reset on a stand-alone board checks its
+	// own. omitempty, so an order with none signs as it did before mods. Each
+	// mod's Files are left unscrubbed (see ModRef).
+	Mods []ModRef `json:",omitempty"`
 }
 
 // AnnihilatorStatus tells a planet about a Gooie Kablooie aimed at it — while it is

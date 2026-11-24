@@ -329,6 +329,13 @@ type Config struct {
 	// a sysop who wants the raids out of the news wants them out.
 	PirateNews bool `json:"-"`
 
+	// AcceptLeagueScripts is whether this board plays a league mod that carries
+	// scripts, default off. It is each sysop's call and lives in bbs.cfg: a
+	// script runs on this machine, and nothing limits the memory it uses, so a
+	// board takes one from the League Coordinator only when its sysop says so.
+	// A board with it off refuses a scripted league reset and says why.
+	AcceptLeagueScripts bool `json:"-"`
+
 	// OnFault is a command the sysop supplies, run after a planetary run that
 	// recorded a NEW transport fault (#187). The game cannot notify anybody
 	// itself: a board is a headless server, often reached only over ssh and

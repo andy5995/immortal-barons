@@ -131,7 +131,7 @@ func TestRestoreKeepsTheOldValuesOfAnEditedMod(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r, warnings, err := Restore(data, refs)
+	r, warnings, err := Restore(data, refs, true)
 	if err != nil || len(warnings) != 0 || r.Units[game.Tank].Cost != 400 {
 		t.Fatalf("an unchanged mod restores silently: warnings %v, err %v", warnings, err)
 	}
@@ -139,7 +139,7 @@ func TestRestoreKeepsTheOldValuesOfAnEditedMod(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, ValuesFile), []byte("[units.tank]\nbuild_cost = 450\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	r, warnings, err = Restore(data, refs)
+	r, warnings, err = Restore(data, refs, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +153,7 @@ func TestRestoreKeepsTheOldValuesOfAnEditedMod(t *testing.T) {
 	if err := os.RemoveAll(dir); err != nil {
 		t.Fatal(err)
 	}
-	r, warnings, err = Restore(data, refs)
+	r, warnings, err = Restore(data, refs, true)
 	if err != nil {
 		t.Fatalf("a removed mod must still restore: %v", err)
 	}
@@ -190,7 +190,7 @@ func TestRestoreRefusesANameThatLeavesTheModsFolder(t *testing.T) {
 	ref := game.ModRef{Name: "../x", Version: "1", Hash: "h", Files: map[string]string{
 		ManifestFile: manifest("../x"),
 	}}
-	if _, _, err := Restore(t.TempDir(), []game.ModRef{ref}); err == nil || !strings.Contains(err.Error(), "may hold only") {
+	if _, _, err := Restore(t.TempDir(), []game.ModRef{ref}, true); err == nil || !strings.Contains(err.Error(), "may hold only") {
 		t.Errorf("err = %v, want the name refused", err)
 	}
 }
@@ -198,7 +198,7 @@ func TestRestoreRefusesANameThatLeavesTheModsFolder(t *testing.T) {
 // A saved list naming one mod twice is refused, as a reset's list is.
 func TestRestoreRefusesAModSavedTwice(t *testing.T) {
 	ref := game.ModRef{Name: "a", Version: "1", Hash: "h", Files: map[string]string{ManifestFile: manifest("a")}}
-	if _, _, err := Restore(t.TempDir(), []game.ModRef{ref, ref}); err == nil || !strings.Contains(err.Error(), "listed twice") {
+	if _, _, err := Restore(t.TempDir(), []game.ModRef{ref, ref}, true); err == nil || !strings.Contains(err.Error(), "listed twice") {
 		t.Errorf("err = %v, want the duplicate refused", err)
 	}
 }

@@ -2,6 +2,7 @@ package game
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -123,6 +124,9 @@ func TestScrubPacketReachesEveryString(t *testing.T) {
 					t.Errorf("%s.%s is unexported, and scrubPacket cannot set it", path, f.Name)
 					continue
 				}
+				if f.Tag.Get("scrub") == "-" {
+					continue // exempt by declaration; scrubValue skips it too
+				}
 				walk(f.Type, path+"."+f.Name)
 			}
 		}
@@ -133,5 +137,22 @@ func TestScrubPacketReachesEveryString(t *testing.T) {
 		if !seen[want] {
 			t.Errorf("the walk never reached %s", want)
 		}
+	}
+}
+
+// A league reset's mod files arrive as sent, since their hash covers them, but
+// a mod's label and version, which a screen shows, are scrubbed.
+func TestScrubKeepsModFilesAndCleansModLabels(t *testing.T) {
+	p := Packet{Reset: &LeagueReset{Mods: []ModRef{{
+		Name: "m", Version: "1\x1b[2J", Label: "Evil\x1b]0;x\x07",
+		Files: map[string]string{"values.toml": "[units.tank]\n\tbuild_cost = 250\n"},
+	}}}}
+	scrubPacket(&p)
+	ref := p.Reset.Mods[0]
+	if strings.ContainsRune(ref.Version+ref.Label, '\x1b') {
+		t.Errorf("label %q, version %q kept an escape", ref.Label, ref.Version)
+	}
+	if ref.Files["values.toml"] != "[units.tank]\n\tbuild_cost = 250\n" {
+		t.Errorf("a mod file was changed: %q", ref.Files["values.toml"])
 	}
 }

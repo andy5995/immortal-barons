@@ -51,8 +51,9 @@ func unsafeRune(multiline bool) func(rune) bool {
 }
 
 // scrubPacket replaces every control character in every other string a packet
-// carries with "?". The one exception is a field tagged `scrub:"multiline"` (a
-// mail body), which keeps its newlines. Realm names,
+// carries with "?". A field tagged `scrub:"multiline"` (a mail body) keeps its
+// newlines, and one tagged `scrub:"-"` is left alone, because its own reader
+// checks it (a mod's files in a league reset). Realm names,
 // mail, news and reports from another board reach players' screens and the
 // bulletin files, and an ESC in one is a terminal escape sequence written into
 // somebody else's session. C1 controls count too: U+009B is the one-character
@@ -93,7 +94,11 @@ func scrubValue(v reflect.Value, multiline bool) bool {
 	case reflect.Struct:
 		t := v.Type()
 		for i := 0; i < v.NumField(); i++ {
-			changed = scrubValue(v.Field(i), t.Field(i).Tag.Get("scrub") == "multiline") || changed
+			tag := t.Field(i).Tag.Get("scrub")
+			if tag == "-" {
+				continue // checked by its own reader; see the field
+			}
+			changed = scrubValue(v.Field(i), tag == "multiline") || changed
 		}
 	case reflect.Slice:
 		if v.Type().Elem().Kind() == reflect.Uint8 {
