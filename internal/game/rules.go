@@ -148,6 +148,64 @@ const (
 	ModHQPriceJitterMax  = 1_000_000
 )
 
+// HQField is one figure of HQRules as a mod names it: the key in a values.toml
+// [hq] section, its limits, and how to read and write it. Validation and the mod
+// reader go through HQFields, so a figure is named and bounded in one place.
+// Wide marks an int64 figure, which a mod may set past what an int holds on the
+// 32-bit door builds; the others are read through an int.
+type HQField struct {
+	Key      string
+	Min, Max int64
+	Wide     bool
+	// Paired marks a figure checked against another rather than against Min
+	// and Max alone (price_cap against price_base, its jitter against it).
+	Paired bool
+	Get    func(h HQRules) int64
+	Set    func(h *HQRules, v int64)
+}
+
+// HQFields are the figures a mod can set on the HeadQuarters, in the order
+// -print-base-mod writes them and validation reports them.
+var HQFields = []HQField{
+	{"build_start", 1, ModHQPercentMax, false, false,
+		func(h HQRules) int64 { return int64(h.BuildStart) },
+		func(h *HQRules, v int64) { h.BuildStart = int(v) }},
+	{"build_per_turn", 1, ModHQPercentMax, false, false,
+		func(h HQRules) int64 { return int64(h.BuildPerTurn) },
+		func(h *HQRules, v int64) { h.BuildPerTurn = int(v) }},
+	{"battle_loss_min", 0, ModHQPercentMax, false, false,
+		func(h HQRules) int64 { return int64(h.BattleLossMin) },
+		func(h *HQRules, v int64) { h.BattleLossMin = int(v) }},
+	{"battle_loss_jitter", 1, ModHQPercentMax, false, false,
+		func(h HQRules) int64 { return int64(h.BattleLossJitter) },
+		func(h *HQRules, v int64) { h.BattleLossJitter = int(v) }},
+	{"price_base", 1, ModHQPriceMax, true, false,
+		func(h HQRules) int64 { return h.PriceBase },
+		func(h *HQRules, v int64) { h.PriceBase = v }},
+	{"price_per_turn", 0, ModHQPricePerTurnMax, true, false,
+		func(h HQRules) int64 { return h.PricePerTurn },
+		func(h *HQRules, v int64) { h.PricePerTurn = v }},
+	{"price_jitter", 0, ModHQPriceJitterMax, true, false,
+		func(h HQRules) int64 { return h.PriceJitter },
+		func(h *HQRules, v int64) { h.PriceJitter = v }},
+	{"price_cap", 0, ModHQPriceMax, true, true,
+		func(h HQRules) int64 { return h.PriceCap },
+		func(h *HQRules, v int64) { h.PriceCap = v }},
+	{"price_cap_jitter", 0, ModHQPriceMax, true, true,
+		func(h HQRules) int64 { return h.PriceCapJitter },
+		func(h *HQRules, v int64) { h.PriceCapJitter = v }},
+}
+
+// HQFieldByKey is the field named key, or nil.
+func HQFieldByKey(key string) *HQField {
+	for i := range HQFields {
+		if HQFields[i].Key == key {
+			return &HQFields[i]
+		}
+	}
+	return nil
+}
+
 // Validate reports every value outside its limits, so a sysop fixing a mod sees
 // all of its mistakes at once rather than one per run.
 func (r *Rules) Validate() error {
@@ -212,26 +270,13 @@ func (r *Rules) Validate() error {
 // draw they feed yields 0 for a bound of 0.
 func (r *Rules) validateHQ(bad func(format string, a ...any)) {
 	h := r.HQ
-	if h.BuildStart < 1 || h.BuildStart > ModHQPercentMax {
-		bad("build_start %d is outside 1 to %d", h.BuildStart, ModHQPercentMax)
-	}
-	if h.BuildPerTurn < 1 || h.BuildPerTurn > ModHQPercentMax {
-		bad("build_per_turn %d is outside 1 to %d", h.BuildPerTurn, ModHQPercentMax)
-	}
-	if h.BattleLossMin < 0 || h.BattleLossMin > ModHQPercentMax {
-		bad("battle_loss_min %d is outside 0 to %d", h.BattleLossMin, ModHQPercentMax)
-	}
-	if h.BattleLossJitter < 1 || h.BattleLossJitter > ModHQPercentMax {
-		bad("battle_loss_jitter %d is outside 1 to %d", h.BattleLossJitter, ModHQPercentMax)
-	}
-	if h.PriceBase < 1 || h.PriceBase > ModHQPriceMax {
-		bad("price_base %d is outside 1 to %d", h.PriceBase, ModHQPriceMax)
-	}
-	if h.PricePerTurn < 0 || h.PricePerTurn > ModHQPricePerTurnMax {
-		bad("price_per_turn %d is outside 0 to %d", h.PricePerTurn, ModHQPricePerTurnMax)
-	}
-	if h.PriceJitter < 0 || h.PriceJitter > ModHQPriceJitterMax {
-		bad("price_jitter %d is outside 0 to %d", h.PriceJitter, ModHQPriceJitterMax)
+	for _, f := range HQFields {
+		if f.Paired {
+			continue // checked against each other below
+		}
+		if v := f.Get(h); v < f.Min || v > f.Max {
+			bad("%s %d is outside %d to %d", f.Key, v, f.Min, f.Max)
+		}
 	}
 	if h.PriceCap < h.PriceBase || h.PriceCap > ModHQPriceMax {
 		bad("price_cap %d must be at least price_base (%d) and at most %d", h.PriceCap, h.PriceBase, ModHQPriceMax)

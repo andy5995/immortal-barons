@@ -10,49 +10,40 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// hqField is one key of values.toml's [hq] section. The HeadQuarters is one
-// building per realm, so its figures are one section, not one per unit. Like
-// unitFields, this table is the only place a key is named: reading, Diff and
-// Values all go through it.
+// hqField is one key of values.toml's [hq] section: a game.HQField with the
+// reader that writes its value. The HeadQuarters is one building per realm, so
+// its figures are one section, not one per unit. Keys, limits, Diff and Values
+// all come from game.HQFields.
 type hqField struct {
-	key string
-	get func(h game.HQRules) string
+	game.HQField
 	set func(h *game.HQRules, v any) error
 }
 
-var hqFields = []hqField{
-	{"build_start",
-		func(h game.HQRules) string { return fmt.Sprint(h.BuildStart) },
-		func(h *game.HQRules, v any) (err error) { h.BuildStart, err = whole(v); return }},
-	{"build_per_turn",
-		func(h game.HQRules) string { return fmt.Sprint(h.BuildPerTurn) },
-		func(h *game.HQRules, v any) (err error) { h.BuildPerTurn, err = whole(v); return }},
-	{"battle_loss_min",
-		func(h game.HQRules) string { return fmt.Sprint(h.BattleLossMin) },
-		func(h *game.HQRules, v any) (err error) { h.BattleLossMin, err = whole(v); return }},
-	{"battle_loss_jitter",
-		func(h game.HQRules) string { return fmt.Sprint(h.BattleLossJitter) },
-		func(h *game.HQRules, v any) (err error) { h.BattleLossJitter, err = whole(v); return }},
-	{"price_base",
-		func(h game.HQRules) string { return fmt.Sprint(h.PriceBase) },
-		func(h *game.HQRules, v any) (err error) { h.PriceBase, err = whole64(v); return }},
-	{"price_per_turn",
-		func(h game.HQRules) string { return fmt.Sprint(h.PricePerTurn) },
-		func(h *game.HQRules, v any) (err error) { h.PricePerTurn, err = whole64(v); return }},
-	{"price_jitter",
-		func(h game.HQRules) string { return fmt.Sprint(h.PriceJitter) },
-		func(h *game.HQRules, v any) (err error) { h.PriceJitter, err = whole64(v); return }},
-	{"price_cap",
-		func(h game.HQRules) string { return fmt.Sprint(h.PriceCap) },
-		func(h *game.HQRules, v any) (err error) { h.PriceCap, err = whole64(v); return }},
-	{"price_cap_jitter",
-		func(h game.HQRules) string { return fmt.Sprint(h.PriceCapJitter) },
-		func(h *game.HQRules, v any) (err error) { h.PriceCapJitter, err = whole64(v); return }},
-}
+var hqFields = func() []hqField {
+	out := make([]hqField, 0, len(game.HQFields))
+	for _, f := range game.HQFields {
+		parse := func(v any) (int64, error) { n, err := whole(v); return int64(n), err }
+		if f.Wide {
+			parse = whole64
+		}
+		out = append(out, hqField{
+			HQField: f,
+			set: func(h *game.HQRules, v any) error {
+				n, err := parse(v)
+				if err != nil {
+					return err
+				}
+				f.Set(h, n)
+				return nil
+			},
+		})
+	}
+	return out
+}()
 
 func hqKey(key string) *hqField {
 	for i := range hqFields {
-		if hqFields[i].key == key {
+		if hqFields[i].Key == key {
 			return &hqFields[i]
 		}
 	}
@@ -88,8 +79,8 @@ func (m *Mod) applyHQ(r *game.Rules) error {
 func diffHQ(a, b *game.Rules) []string {
 	var out []string
 	for _, f := range hqFields {
-		if from, to := f.get(a.HQ), f.get(b.HQ); from != to {
-			out = append(out, fmt.Sprintf("hq.%s: %s -> %s", f.key, from, to))
+		if from, to := f.Get(a.HQ), f.Get(b.HQ); from != to {
+			out = append(out, fmt.Sprintf("hq.%s: %d -> %d", f.Key, from, to))
 		}
 	}
 	return out
@@ -99,6 +90,6 @@ func diffHQ(a, b *game.Rules) []string {
 func writeHQ(b *strings.Builder, r *game.Rules) {
 	b.WriteString("\n[hq]\n")
 	for _, f := range hqFields {
-		fmt.Fprintf(b, "%s = %s\n", f.key, f.get(r.HQ))
+		fmt.Fprintf(b, "%s = %d\n", f.Key, f.Get(r.HQ))
 	}
 }
