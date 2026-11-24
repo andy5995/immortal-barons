@@ -3,7 +3,6 @@ package store
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/mod"
@@ -22,9 +21,9 @@ var ErrModsInLeague = errors.New("mods cannot be used on a league board yet; rem
 var ErrWorldMods = errors.New("this game's mods could not be loaded")
 
 // loadMods rebuilds the rules w was reset with into w.Rules. A mod changed or
-// removed since the reset is reported on stderr, which reaches the sysop's log
-// under a BBS rather than the caller's screen, and the game plays on with the
-// copy it saved.
+// removed since the reset is reported through mod.Warn (stderr, which reaches
+// the sysop's log under a BBS rather than the caller's screen), and the game
+// plays on with the copy it saved.
 func loadMods(w *game.World, cfg game.Config) error {
 	if len(w.Mods) > 0 && cfg.IBBS {
 		return fmt.Errorf("%w: %w", ErrWorldMods, ErrModsInLeague)
@@ -34,7 +33,7 @@ func loadMods(w *game.World, cfg game.Config) error {
 		return fmt.Errorf("%w: %w", ErrWorldMods, err)
 	}
 	for _, msg := range warnings {
-		fmt.Fprintln(os.Stderr, "immortal-barons: "+msg)
+		mod.Warn(msg)
 	}
 	w.Rules = r
 	return nil
