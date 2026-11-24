@@ -293,7 +293,7 @@ func readTurnMail(s session.Session, w *ctx, atEntry bool) {
 // repeated six times for the sake of six figures. Recorded in
 // docs/dev/bre-screens.md and docs/mechanics-reference.md; do not "fix" it back
 // to match a capture.
-func manufacturedUnits(s session.Session, made []int) {
+func manufacturedUnits(s session.Session, made []int, producers []*game.Region) {
 	var cells []statusItem
 	for i, g := range game.MilitaryGoods {
 		if made[i] == 0 {
@@ -310,7 +310,12 @@ func manufacturedUnits(s session.Session, made []int) {
 	}
 	// The label is laid out plain and colored on the way out: statusRows
 	// measures it with a rune count, which an escape sequence would inflate.
+	// The original's own label while Industrial alone builds, as it does in
+	// every game without a mod; otherwise the types the rules have building.
 	label := tr(s, "Your Industrial Zones built:") + " "
+	if len(producers) != 1 || producers[0] != game.Industrial {
+		label = fmt.Sprintf(tr(s, "Your %s regions built:"), regionList(s, producers, false)) + " "
+	}
 	bar := strings.Repeat("─", utf8.RuneCountInString(label))
 	indent := strings.Repeat(" ", utf8.RuneCountInString(label)+2)
 
@@ -328,7 +333,9 @@ func incomeReport(s session.Session, w *ctx) {
 	var raids []game.PirateHit
 	var interest, invested, loanPaid int64
 	made := make([]int, len(game.MilitaryGoods))
+	var producers []*game.Region
 	if !withPlayer(w, func(p *game.Empire) {
+		producers = heldRegions(p, w.RegionTypesWith(p, func(r game.RegionRules) bool { return r.UnitPoints > 0 }))
 		b = w.IncomeThisTurn(p)
 		raids = p.PirateHits
 		p.PirateHits = nil
@@ -401,7 +408,7 @@ func incomeReport(s session.Session, w *ctx) {
 			amt(ansi.FgBrightCyan, int64(l.amount), l.text)
 		}
 	}
-	manufacturedUnits(s, made)
+	manufacturedUnits(s, made, producers)
 	// The bank's two returns close the report, interest first (#216) and then the
 	// matured investments — which is where BRE puts that line, after the
 	// manufacturing figures (cap/eots-ibbs-01.cap). BRE prints no interest line at

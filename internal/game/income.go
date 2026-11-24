@@ -311,10 +311,6 @@ func (w *World) boostPoints(e *Empire) int64 {
 	return boost
 }
 
-// HasProductionBoost reports whether any of e's land boosts unit production:
-// under the base rules, whether it holds a Mountain region.
-func (w *World) HasProductionBoost(e *Empire) bool { return w.boostPoints(e) > 0 }
-
 // ProductionBoostPercent reports productionBoost as a whole percent, for the
 // Military advisor to quote. Display only — production itself uses the exact
 // fraction.

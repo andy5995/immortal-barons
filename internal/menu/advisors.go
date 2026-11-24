@@ -29,18 +29,20 @@ const (
 // Status). The world totals feed the Economic advisor's share-of-world and
 // world-average figures.
 type advisorData struct {
-	p           game.Empire
-	avgAgri     int  // expected Agricultural food per turn
-	avgRiver    int  // expected river food per turn
-	avgOther    int  // expected food per turn from every other type (a mod's)
-	boost       int  // the unit-production boost, as a percent of normal
-	boosted     bool // some of our land boosts production (Mountain, unmodded)
-	research    int  // our research count (Technology regions, unmodded)
-	foodEaten   int  // this turn's food consumption
-	foodAtCap   int  // consumption once population fills its carrying capacity
-	income      int  // this turn's gold income
-	worldIncome int  // Σ income over living empires
-	worldLand   int  // Σ Land over living empires
+	p        game.Empire
+	avgAgri  int // expected Agricultural food per turn
+	avgRiver int // expected river food per turn
+	avgOther int // expected food per turn from every other type (a mod's)
+	boost    int // the unit-production boost, as a percent of normal
+	// The region types whose figures give a boost to unit production, and
+	// research: Mountain and Technology under the base rules, but a mod may
+	// move either, so the advice names what the rules say.
+	boostTypes, researchTypes []*game.Region
+	foodEaten                 int // this turn's food consumption
+	foodAtCap                 int // consumption once population fills its carrying capacity
+	income                    int // this turn's gold income
+	worldIncome               int // Σ income over living empires
+	worldLand                 int // Σ Land over living empires
 	// away is this realm's forces committed to group attacks, whether still
 	// waiting to leave or in flight. They have left the army, and the Military
 	// advisor counts them in its totals as the original does (#239).
@@ -59,8 +61,8 @@ func gatherAdvisorData(w *ctx) advisorData {
 			}
 		}
 		d.boost = w.ProductionBoostPercent(&d.p)
-		d.boosted = w.HasProductionBoost(&d.p)
-		d.research = w.ResearchRegions(&d.p)
+		d.boostTypes = w.RegionTypesWith(&d.p, func(r game.RegionRules) bool { return r.ProductionBoost > 0 })
+		d.researchTypes = w.RegionTypesWith(&d.p, func(r game.RegionRules) bool { return r.Research > 0 })
 		d.foodEaten = w.FoodDue(&d.p)
 		d.foodAtCap = w.FoodUpkeepAtCapacity(&d.p)
 		d.income = w.IncomeThisTurn(&d.p).Gold()
@@ -119,6 +121,35 @@ type advisorLine struct {
 	// Break starts a new group of figures: a blank line goes before it, so a
 	// report reads as a few short blocks rather than one run of lines.
 	Break bool
+}
+
+// regionList names region types for a sentence, translated: "Mountain",
+// "Mountain and Desert", "Coastal, Mountain and Desert". With emph each name is
+// braced on its own for hiTerms: a braced run is never split across lines, so
+// bracing the whole list could push a long one past the box.
+func regionList(s session.Session, types []*game.Region, emph bool) string {
+	names := make([]string, len(types))
+	for i, g := range types {
+		names[i] = tr(s, g.Name)
+		if emph {
+			names[i] = "{" + names[i] + "}"
+		}
+	}
+	if len(names) < 2 {
+		return strings.Join(names, "")
+	}
+	return fmt.Sprintf(tr(s, "%s and %s"), strings.Join(names[:len(names)-1], ", "), names[len(names)-1])
+}
+
+// heldRegions is the types in types that p holds any of.
+func heldRegions(p *game.Empire, types []*game.Region) []*game.Region {
+	var out []*game.Region
+	for _, g := range types {
+		if *g.Count(&p.Regions) > 0 {
+			out = append(out, g)
+		}
+	}
+	return out
 }
 
 // hiTerms replaces each {braced} run in s with emph-colored text, returning to
@@ -303,13 +334,16 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			advise(tr(s, "We have more {jets} than our {carriers} can carry. Build more {carriers}."))
 		}
 		mtn := d.boost
+		held := heldRegions(p, d.boostTypes)
 		switch {
-		case !d.boosted:
-			advise(tr(s, "We hold no {mountain} regions. Their ore would make our factories build units faster."))
+		case len(d.boostTypes) == 0:
+			// No land boosts production in this game, so there is nothing to say.
+		case len(held) == 0:
+			advise(fmt.Sprintf(tr(s, "We hold no %s regions. They would make our factories build units faster."), regionList(s, d.boostTypes, true)))
 		case mtn >= game.MountainIndustryCapPct:
-			brk(fmt.Sprintf(tr(s, "Our {mountain} regions have the foundries at their limit, %d%% of normal unit output."), mtn))
+			brk(fmt.Sprintf(tr(s, "Our %s regions have the foundries at their limit, %d%% of normal unit output."), regionList(s, held, true), mtn))
 		default:
-			brk(fmt.Sprintf(tr(s, "With our {mountain} regions, our factories build units at %d%% of normal. The figure depends on their share of our land, so buying other regions lowers it."), mtn))
+			brk(fmt.Sprintf(tr(s, "With our %s regions, our factories build units at %d%% of normal. The figure depends on their share of our land, so buying other regions lowers it."), regionList(s, held, true), mtn))
 		}
 		brk(fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
 		if p.Morale < game.MoraleDesertBandTop {
@@ -334,12 +368,15 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		decay := game.TechPercent(p.TechDecayFactor(), true)
 		researched := gold > 100 || food > 100 || units > 100 || mil > 100 ||
 			maint < 100 || sdi < 100 || decay < 100
+		researching := heldRegions(p, d.researchTypes)
 		switch {
-		case !researched && d.research == 0:
-			add(tr(s, "We have no Technology regions."))
+		case !researched && len(d.researchTypes) == 0:
+			add(tr(s, "No land does research in this game."))
+		case !researched && len(researching) == 0:
+			add(fmt.Sprintf(tr(s, "We have no %s regions."), regionList(s, d.researchTypes, false)))
 			advise(tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
 		case !researched:
-			add(tr(s, "Our Technology regions are new. Their benefits will build up as we hold them."))
+			add(fmt.Sprintf(tr(s, "Our %s regions are new. Their benefits will build up as we hold them."), regionList(s, researching, false)))
 		default:
 			add(fmt.Sprintf(tr(s, "Our {military forces} are functioning at %d%% strength."), mil))
 			add(fmt.Sprintf(tr(s, "Our {gold producing regions} are at %d%% of normal production."), gold))
@@ -348,8 +385,8 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			add(fmt.Sprintf(tr(s, "Our {maintenance costs} have been reduced to %d%% of standard costs."), maint))
 			add(fmt.Sprintf(tr(s, "Our {SDI yearly funding} needs have been lowered to %d%% normal expenses."), sdi))
 			add(fmt.Sprintf(tr(s, "{Food decay} is at %d%% of standard levels."), decay))
-			if d.research == 0 {
-				add(tr(s, "We hold no Technology regions, so our research has halted — but what we have already learned is not lost."))
+			if len(researching) == 0 {
+				add(tr(s, "Our research has halted, since none of our land does research — but what we have already learned is not lost."))
 			}
 			// BRE closes this advisor with a set-apart NOTE saying the same
 			// thing, so it is the last line whether or not research has halted.
