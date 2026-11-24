@@ -120,6 +120,10 @@ default = 100
 min = 1
 max = 200
 `, "[units.tank]\nbuild_cost = { option = \"cost\", other = 1 }\n", "unknown key units.tank.build_cost.other"},
+		{"top-level option", "", "option = \"x\"\n", "unknown key option"},
+		{"option beside a unit", "", "[units.tank]\noption = { x = 1 }\n", "unknown key units.tank.option.x"},
+		{"option in a section", "", "[hq]\n[hq.option]\nx = 1\n", "unknown key hq.option.x"},
+		{"option in a when section", "", "[when.fast]\noption = \"x\"\n", "unknown key when.fast.option"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -345,5 +349,41 @@ max = 900
 	}
 	if got := man.Options["cost"].Value(); got != 500 {
 		t.Errorf("number default read back as %d, want 500", got)
+	}
+}
+
+// An option reference is accepted wherever a figure is, in hq, regions and
+// under a when section, while a stray key named option is not.
+func TestOptionReferencesInEverySection(t *testing.T) {
+	data := t.TempDir()
+	writeMod(t, data, "m", map[string]string{
+		ManifestFile: optionManifest("m", `[options.n]
+label = "N"
+type = "number"
+default = 25
+min = 1
+max = 100
+[options.on]
+label = "On"
+type = "bool"
+default = true
+`),
+		ValuesFile: `
+[hq]
+build_per_turn = { option = "n" }
+[regions.coastal]
+gold_base = { option = "n" }
+[when.on.hq]
+build_per_turn = { option = "n" }
+[when.on.regions.coastal]
+gold_base = { option = "n" }
+`,
+	})
+	r, _, err := Resolve(data, []string{"m"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.HQ.BuildPerTurn; got != 25 {
+		t.Errorf("HQ build per turn %d, want 25", got)
 	}
 }
