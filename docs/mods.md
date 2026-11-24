@@ -139,17 +139,19 @@ data/
       values.toml
 ```
 
-`mod.toml` describes the mod. `name` and `version` are required:
+`mod.toml` describes the mod. `name`, `version` and `mod_api` are required:
 
 ```toml
 name = "cheap-tanks"
 version = "1.0"
+mod_api = 1                 # the mod format this mod was written for
 label = "Cheap Tanks"       # shown on the Game Setup screen; blank shows the name
 description = "Tanks cost less to buy, build and keep."
 ```
 
-A mod that holds a script also needs `script_api` (see
-[Script versions](#script-versions)).
+`version` is the mod's own version, for its author to change as they like.
+`mod_api` is the version of the mod format the game reads; see
+[Mod format versions](#mod-format-versions).
 
 `values.toml` holds the changes, one section per unit, plus `[hq]` and one
 section per region type. List only what changes:
@@ -286,29 +288,6 @@ from `row` unchanged. The game writes the reason to its error output, naming
 the mod and the script: once for each different reason, up to five, each time
 the game runs.
 
-### Script versions
-
-A mod that holds a script says in `mod.toml` which version of the script
-interface it was written for:
-
-```toml
-script_api = 1
-```
-
-The script interface is what a script is given (`realm`, `row`, `factions`
-and their fields) and what it may return. This version of the game runs
-version 1. When a later version of the game changes it in a way that could
-break a script that worked before (a field renamed or removed, a function's
-parameters changed), the version goes up and the ChangeLog says what changed.
-The game then refuses a mod written for a version it does not run, before the
-game starts, and says which mod and why, rather than letting the script fail
-during play. A mod written for a newer version than the game runs is refused
-the same way.
-
-Adding something new, a field a script may read or a key it may return, does
-not raise the version, so a mod keeps working until a change actually affects
-it. A mod with no script does not need `script_api`.
-
 ### What every script may do
 
 A script cannot read files, the clock, or other scripts (`load` is not
@@ -328,6 +307,23 @@ you have read.
 `-check-mod` loads each script and checks that it defines `raid` or `region`
 with two parameters. It cannot check what they return, because that depends on
 the game. Watch the error output once the game has played some turns.
+
+## Mod format versions
+
+`mod_api` in `mod.toml` says which version of the mod format a mod was written
+for. The mod format is the folder's layout, the keys `values.toml` may set and
+what each one means, and what a script is given and may return. This version
+of the game reads `mod_api = 1`.
+
+When a later version of the game changes the format in a way that could make a
+mod that worked before fail to load, or load and play differently, the number
+goes up and the ChangeLog says what changed. The game then refuses a mod
+written for another version before the game starts, and names the mod. A mod
+written for a newer version than the game reads is refused the same way.
+
+Adding something new, a key `values.toml` may set or a field a script may
+read, does not raise the number, so a mod keeps working until a change
+actually affects it.
 
 ## Checking a mod
 

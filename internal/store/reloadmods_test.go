@@ -23,7 +23,7 @@ func TestReloadModsTakesTheFolderAsItStands(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write("mod.toml", "name = \"cheap\"\nversion = \"1.0\"\n")
+	write("mod.toml", "name = \"cheap\"\nversion = \"1.0\"\nmod_api = 1\n")
 	write("values.toml", "[units.tank]\nbuild_cost = 250\n")
 
 	cfg := game.DefaultConfig()
