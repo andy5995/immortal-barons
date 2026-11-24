@@ -20,6 +20,7 @@ package mod
 import (
 	"bytes"
 	"crypto/sha256"
+	_ "embed"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -30,6 +31,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -364,6 +366,15 @@ func HashFiles(files map[string]string) string {
 // does, a league's boards included.
 var LicenseFiles = []string{"LICENSE", "LICENSE.txt", "LICENSE.md", "COPYING"}
 
+// The starting files -init-mod copies. {{MOD_NAME}} and {{MOD_API}} in
+// template/mod.toml are filled when a mod is created.
+var (
+	//go:embed template/mod.toml
+	templateManifest []byte
+	//go:embed template/values.toml
+	templateValues []byte
+)
+
 // DefaultLicense is the license Init writes into a new mod's mod.toml, for its
 // author to change.
 const DefaultLicense = "MIT"
@@ -380,33 +391,18 @@ func Init(dir string) error {
 	if _, err := os.Stat(dir); err == nil {
 		return fmt.Errorf("%s already exists", dir)
 	}
+	manifest := strings.NewReplacer("{{MOD_NAME}}", name, "{{MOD_API}}", strconv.Itoa(ModAPI)).
+		Replace(string(templateManifest))
+	if strings.Contains(manifest, "{{") {
+		return fmt.Errorf("the mod template has a placeholder Init does not fill")
+	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
-	manifest := fmt.Sprintf(`name = %q
-version = "0.1.0"
-mod_api = %d
-license = %q
-# label = ""        # shown on the Game Setup screen; blank shows the name
-# description = ""
-
-# A sysop can change an option at each reset. Delete the # marks to use this
-# one, and change the id to what your values.toml and scripts call.
-# [options.example]
-# type = "number"
-# label = "Example option"
-# description = "What this option changes"
-# default = 100
-# min = 1
-# max = 1000
-`, name, ModAPI, DefaultLicense)
-	values := `# What this mod changes from the base game. List only what changes.
-# immortal-barons -print-base-mod prints every value a mod can set.
-`
 	if err := os.WriteFile(filepath.Join(dir, ManifestFile), []byte(manifest), 0o644); err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(dir, ValuesFile), []byte(values), 0o644)
+	return os.WriteFile(filepath.Join(dir, ValuesFile), templateValues, 0o644)
 }
 
 // checkModAPI holds a mod to the mod format it says it was written for,

@@ -1,0 +1,16 @@
+name = "{{MOD_NAME}}"
+version = "0.1.0"
+mod_api = {{MOD_API}}
+license = "MIT"
+# label = ""        # shown on the Game Setup screen; blank shows the name
+# description = ""
+
+# A sysop can change an option at each reset. Delete the # marks to use this
+# one, and change the id to what your values.toml and scripts call.
+# [options.example]
+# type = "number"
+# label = "Example option"
+# description = "What this option changes"
+# default = 100
+# min = 1
+# max = 1000

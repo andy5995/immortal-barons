@@ -348,8 +348,24 @@ func TestInitWritesAModCheckAccepts(t *testing.T) {
 	if m.Name != "fresh" || m.ModAPI != ModAPI || m.License != DefaultLicense {
 		t.Errorf("new mod %+v", m.Manifest)
 	}
+	for _, name := range []string{ManifestFile, ValuesFile} {
+		got, err := os.ReadFile(filepath.Join(dir, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(got), "{{") {
+			t.Errorf("%s still holds a placeholder:\n%s", name, got)
+		}
+	}
 	if err := Init(dir); err == nil || !strings.Contains(err.Error(), "already exists") {
 		t.Errorf("second Init: err %v, want it refused", err)
+	}
+	bad := filepath.Join(t.TempDir(), "Bad Name")
+	if err := Init(bad); err == nil {
+		t.Error("Init accepted an invalid name")
+	}
+	if _, err := os.Stat(bad); err == nil {
+		t.Error("Init left a folder for an invalid name")
 	}
 }
 
