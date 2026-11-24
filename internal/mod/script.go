@@ -133,25 +133,49 @@ func (s *pirateScript) Raid(v game.PirateView) ([]game.PirateOrder, error) {
 	return readOrders(res)
 }
 
-// warnOut is where a failed script is reported; tests replace it.
+// ScriptWarnings is how many different reasons one script's failures are
+// reported for in a run. Like ScriptSteps it is not a gameplay number: it
+// keeps a script that fails a new way for every realm from filling the log.
+const ScriptWarnings = 5
+
+// warnOut is where a failed script is reported; tests replace it. warned holds,
+// for each script, the reasons already reported.
 var (
 	warnMu  sync.Mutex
 	warnOut io.Writer = os.Stderr
-	warned            = map[string]bool{}
+	warned            = map[string]map[string]bool{}
 )
 
-// Failed reports why the game raided the built-in way, once per mod per
-// process: a script that fails once will usually fail every turn, and the
-// sysop's log needs the reason, not a copy for every realm.
-func (s *pirateScript) Failed(err error) {
+// warnScript reports that script file of mod failed with err, and what the
+// game did instead. Each reason is reported once per run: a script that fails
+// one way usually fails that way every turn, and the sysop's log needs the
+// reason, not a copy for every realm. A script that fails only for some realms
+// can fail a second way later, so a new reason is reported too, up to
+// ScriptWarnings of them.
+func warnScript(id, mod, file string, err error, instead string) {
 	warnMu.Lock()
 	defer warnMu.Unlock()
-	key := s.mod + "\x00" + s.hash
-	if warned[key] {
+	seen := warned[id]
+	if seen == nil {
+		seen = map[string]bool{}
+		warned[id] = seen
+	}
+	reason := err.Error()
+	switch {
+	case seen[reason] || len(seen) > ScriptWarnings:
+		return
+	case len(seen) == ScriptWarnings:
+		seen[reason] = true
+		fmt.Fprintf(warnOut, "immortal-barons: mod %q: %s has failed in more than %d ways; no more are reported\n", mod, file, ScriptWarnings)
 		return
 	}
-	warned[key] = true
-	fmt.Fprintf(warnOut, "immortal-barons: mod %q: %s: %v; pirate raids use the built-in rules where it fails (reported once)\n", s.mod, PiratesFile, err)
+	seen[reason] = true
+	fmt.Fprintf(warnOut, "immortal-barons: mod %q: %s: %v; %s\n", mod, file, err, instead)
+}
+
+// Failed reports why the game raided the built-in way (warnScript).
+func (s *pirateScript) Failed(err error) {
+	warnScript(s.mod+"\x00"+s.hash+"\x00"+PiratesFile, s.mod, PiratesFile, err, "pirate raids use the built-in rules where it fails")
 }
 
 func holdings(h game.PirateHoldings) starlark.StringDict {

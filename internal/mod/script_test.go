@@ -41,7 +41,7 @@ func captureWarnings(t *testing.T) *bytes.Buffer {
 	var buf bytes.Buffer
 	warnMu.Lock()
 	old := warnOut
-	warnOut, warned = &buf, map[string]bool{}
+	warnOut, warned = &buf, map[string]map[string]bool{}
 	warnMu.Unlock()
 	t.Cleanup(func() {
 		warnMu.Lock()
@@ -102,6 +102,43 @@ func TestFailingScriptFallsBack(t *testing.T) {
 				t.Errorf("warning %q, want one line naming the mod and %q", got, c.reason)
 			}
 		})
+	}
+}
+
+// A script that fails a new way later is reported again, so a failure that
+// hits only some realms is not hidden behind the first. Writing to a global is
+// one such failure: the top level is frozen once it has run.
+func TestScriptFailingANewWayIsReported(t *testing.T) {
+	out := captureWarnings(t)
+	w, e := scriptWorld(scriptRules(t, `
+SEEN = {}
+def raid(realm, factions):
+    if day() > 1:
+        SEEN[realm.name] = day()
+    return [factions[99]]
+`), 1)
+	for range 3 {
+		w.PlayTurn(e, "2026-11-23")
+		w.GameDay++
+	}
+	got := out.String()
+	if strings.Count(got, "\n") != 2 || !strings.Contains(got, "list index 99") || !strings.Contains(got, "frozen") {
+		t.Errorf("want one line for each of the two failures, got:\n%s", got)
+	}
+}
+
+// The warnings stop after ScriptWarnings different reasons, with a line
+// saying so.
+func TestScriptWarningsAreCapped(t *testing.T) {
+	out := captureWarnings(t)
+	w, e := scriptWorld(scriptRules(t, "def raid(realm, factions):\n    return [factions[90 + day()]]\n"), 1)
+	for range ScriptWarnings + 5 {
+		w.PlayTurn(e, "2026-11-23")
+		w.GameDay++
+	}
+	got := out.String()
+	if strings.Count(got, "\n") != ScriptWarnings+1 || !strings.Contains(got, "no more are reported") {
+		t.Errorf("want %d reasons and a closing line, got:\n%s", ScriptWarnings, got)
 	}
 }
 
