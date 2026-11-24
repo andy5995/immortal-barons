@@ -475,7 +475,17 @@ func (m *Mod) Apply(r *game.Rules) error {
 // what -check-mod runs: the same reading and the same limits a reset uses, but
 // for this mod only. It returns the rules the mod would play.
 func Check(path string) (*Mod, *game.Rules, error) {
-	m, err := Read(path)
+	return CheckWithOptions(path, nil)
+}
+
+// CheckWithOptions reads the mod at path with one game's chosen options, which
+// lets -check-mod show what config.json would play rather than only defaults.
+func CheckWithOptions(path string, options map[string]int64) (*Mod, *game.Rules, error) {
+	files := map[string]string{}
+	if err := readFiles(path, "", files); err != nil {
+		return nil, nil, err
+	}
+	m, err := parseWithOptions(path, files, options, "config.json")
 	if err != nil {
 		return nil, nil, err
 	}
