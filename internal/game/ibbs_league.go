@@ -664,7 +664,8 @@ var LoadLeagueMods func(refs []ModRef, scripts bool) (*Rules, error)
 // A board that cannot play the order's mods does not reset at all, and says
 // why: an old game is held apart from the league by the ruleset check until
 // its sysop acts, where a reset under other rules would feed a different game
-// into everyone else's.
+// into everyone else's. The order is kept on the world so the next planetary
+// run can try it again.
 func (w *World) applyLeagueReset(r *LeagueReset) {
 	var rules *Rules
 	if len(r.Mods) > 0 {
@@ -676,16 +677,33 @@ func (w *World) applyLeagueReset(r *LeagueReset) {
 			rules, err = LoadLeagueMods(r.Mods, w.Config.AcceptLeagueScripts)
 		}
 		if err != nil {
-			w.noteSysop("The League Coordinator reset the league with mods this board cannot play, so this board did not reset: %v", err)
+			w.PendingLeagueReset = r
+			w.noteSysop("The League Coordinator reset the league with mods this board cannot play, so this board did not reset: %v. It resets on the first planetary run after it can play them.", err)
 			return
 		}
 	}
+	w.PendingLeagueReset = nil
 	w.Rules, w.Mods = rules, r.Mods
 	w.ResetForLeague(r.OnDate)
 	if r.Announced != "" {
 		w.LeagueDiplomacy = r.Announced
 	}
 	w.postNews("The League Coordinator has reset the league. Every realm starts again.")
+}
+
+// RetryPendingLeagueReset carries out an order this board refused earlier, if
+// it can play the mods now. Called at the start of each planetary run: the
+// packet ledger will not deliver the order again, and a sysop who changed
+// AcceptLeagueScripts must not be left playing the old game. The same rules,
+// mods and OnDate are used; a refusal keeps the order and reports it again.
+//
+// Not while the league is frozen: a reset clears every saved field, Frozen
+// with it, so a retry would thaw this board alone while the rest of the
+// league stays frozen. The order waits for the thaw.
+func (w *World) RetryPendingLeagueReset() {
+	if r := w.PendingLeagueReset; r != nil && !w.Frozen {
+		w.applyLeagueReset(r)
+	}
 }
 
 // DeclareLeagueReset is the Coordinator ordering every board to reset. It resets

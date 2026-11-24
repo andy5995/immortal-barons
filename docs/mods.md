@@ -413,7 +413,10 @@ Member boards leave `Mods` out of their own `config.json`. On their next
 `-planetary` run, they check the files against the hashes in the order and play
 those mods. The mods must load together and pass the same limits as on a
 stand-alone reset. A board that cannot load them does not reset. Its
-`-planetary` run prints the reason and records it in `planetary.log`.
+`-planetary` run prints the reason and records it in `planetary.log`. The
+board keeps the order and tries it again on each later `-planetary` run. Once
+the board can play the mods, that order starts the new game, with its original
+date and mods. The Coordinator does not need to reset the league again.
 
 Every packet a board sends carries a fingerprint of the league's rules, the
 mods' hashes included. If someone edits a board's copy of a mod in

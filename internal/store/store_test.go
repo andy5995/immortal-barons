@@ -391,6 +391,29 @@ func TestSaveLoadRoundTripAllFields(t *testing.T) {
 	}
 }
 
+// A refused reset order has to survive the save: the packet ledger will not
+// deliver it again, so world.json is the only place it waits for the next run.
+func TestPendingLeagueResetSurvivesSave(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	w := game.NewWorldSeed(cfg, 1)
+	want := &game.LeagueReset{
+		OnDate: "2026-10-01", Announced: "A new game",
+		Mods: []game.ModRef{{Name: "cheap-tanks", Version: "1.0", Hash: strings.Repeat("a", 64)}},
+	}
+	w.PendingLeagueReset = want
+
+	if err := Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got.PendingLeagueReset, want) {
+		t.Errorf("the pending order came back as %+v, want %+v", got.PendingLeagueReset, want)
+	}
+}
+
 // drop filters names present in skip.
 func drop(names []string, skip map[string]bool) []string {
 	var out []string

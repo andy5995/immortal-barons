@@ -143,10 +143,15 @@ type World struct {
 	// world is loaded; nil plays the base rules (rules.go). Mods names the mods
 	// the game was reset with, which outlive a timed end of game and change
 	// only at the next sysop reset (#202).
-	Rules      *Rules   `json:"-"`
-	Mods       []ModRef `json:",omitempty"`
-	GameDay    int
-	InvestRate int // tenths of a percent per day, floats each daily maintenance
+	Rules *Rules   `json:"-"`
+	Mods  []ModRef `json:",omitempty"`
+	// PendingLeagueReset is the Coordinator's reset order this board refused
+	// because it could not play its mods. It stays on the world so a later
+	// planetary run can carry out the same order once the sysop makes the mods
+	// playable; an applied order replaces or clears it.
+	PendingLeagueReset *LeagueReset `json:",omitempty"`
+	GameDay            int
+	InvestRate         int // tenths of a percent per day, floats each daily maintenance
 	// FoodMarketSupply is the shared planet-wide pool of food available to buy
 	// today; buying depletes it, selling replenishes it, and it resets to
 	// FoodMarketDailySupply each day's maintenance (issue #19).
