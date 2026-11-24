@@ -30,7 +30,7 @@ mods are read, applied, checked or sent.
 
 - **The manifest declares the option IDs a mod accepts.** An ID uses the same
   name rule as a mod folder. Only `bool` and `number` exist. A number needs a
-  default from `min` to `max`; a bool's default is 0 or 1. The reader checks
+  default from `min` to `max`; a bool's default is `true` or `false`. The reader checks
   all of this before it compiles a script.
 - **One set of chosen values, carried everywhere.** `Config.ModOptions` holds
   what the next reset will use, by mod name and option ID. A reset records the

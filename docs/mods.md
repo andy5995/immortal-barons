@@ -202,8 +202,8 @@ example. Each table takes these fields:
 - `type`: `number` or `bool`.
 - `label`: the short name shown in the editors, `-check-mod` and Game Setup.
 - `description`: a line saying what the option changes.
-- `default`: the value used when the sysop makes no choice. A bool is `0`
-  (False) or `1` (True).
+- `default`: the value used when the sysop makes no choice. A number is a
+  whole number. A bool is `true` or `false`; `0` and `1` are refused.
 - `min` and `max`: required for a number, and refused for a bool.
 
 For example:
@@ -221,7 +221,7 @@ max = 1000
 type = "bool"
 label = "Fast start"
 description = "Use the cheap starting values"
-default = 0
+default = false
 ```
 
 A number option can stand in for a figure in `values.toml`:
