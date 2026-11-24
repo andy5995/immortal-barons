@@ -92,7 +92,7 @@ func runInitMod(arg, dataDir string) error {
 		return err
 	}
 	fmt.Printf("Created %s with %s and %s.\n", dir, mod.ManifestFile, mod.ValuesFile)
-	fmt.Printf("Its license is %s; change it in %s if you want another.\n", mod.DefaultLicense, mod.ManifestFile)
+	fmt.Printf("Its license is %s; change it in %s if you want another, and add the\nlicense's text as a LICENSE file before you share the mod.\n", mod.DefaultLicense, mod.ManifestFile)
 	return nil
 }
 

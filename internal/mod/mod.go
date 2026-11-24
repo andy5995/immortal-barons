@@ -229,11 +229,11 @@ func parse(path string, files map[string]string) (*Mod, error) {
 	var haveManifest bool
 	for _, name := range names {
 		data := []byte(files[name])
-		if name != ManifestFile && name != ValuesFile && name != PiratesFile && regionScriptType(name) == nil {
+		if name != ManifestFile && name != ValuesFile && name != PiratesFile && regionScriptType(name) == nil && !slices.Contains(LicenseFiles, name) {
 			if strings.HasPrefix(name, RegionsDir+"/") {
 				return nil, fmt.Errorf("%s: %s is not a region script; %s holds a <type>.star for each region type the mod changes (%s)", path, name, RegionsDir, strings.Join(regionIDs(), ", "))
 			}
-			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s, %s and a %s folder", path, name, ManifestFile, ValuesFile, PiratesFile, RegionsDir)
+			return nil, fmt.Errorf("%s: %s is not a file this version of the game uses in a mod; a mod holds %s and, optionally, %s, %s, a %s folder and a license file (%s)", path, name, ManifestFile, ValuesFile, PiratesFile, RegionsDir, strings.Join(LicenseFiles, ", "))
 		}
 		file := filepath.Join(path, name)
 		switch name {
@@ -308,6 +308,11 @@ func hashFiles(files map[string]string) string {
 	}
 	return hex.EncodeToString(hash.Sum(nil)[:8])
 }
+
+// LicenseFiles are the names a mod's license text may have. A license file is
+// hashed and carried with the rest of the mod, so it goes wherever the mod
+// does, a league's boards included.
+var LicenseFiles = []string{"LICENSE", "LICENSE.txt", "LICENSE.md", "COPYING"}
 
 // DefaultLicense is the license Init writes into a new mod's mod.toml, for its
 // author to change.

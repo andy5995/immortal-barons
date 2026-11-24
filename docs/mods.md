@@ -140,7 +140,8 @@ immortal-barons -init-mod cheap-tanks
 ```
 
 It writes a `mod.toml` with the name, a first version, the current `mod_api`
-and the MIT license, and a `values.toml` that changes nothing yet. Give it a
+and the MIT license, and a `values.toml` that changes nothing yet. Add the
+license's text as a `LICENSE` file before you share the mod. Give it a
 path instead of a name to create the mod somewhere else.
 
 ```
@@ -165,6 +166,12 @@ description = "Tanks cost less to buy, build and keep."
 
 `version` is the mod's own version, for its author to change as they like.
 `license` says how others may use and share the mod; `-check-mod` prints it.
+
+Put the license's full text in the mod folder too, as `LICENSE`, `LICENSE.txt`,
+`LICENSE.md` or `COPYING`. Immortal Barons is under the MIT license, so choose
+a license that is compatible with it. It must also let others copy and share
+the mod: a league's Coordinator sends the mod, license file included, to every
+board in the league.
 `mod_api` is the version of the mod format the game reads; see
 [Mod format versions](#mod-format-versions).
 

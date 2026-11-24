@@ -352,3 +352,18 @@ func TestInitWritesAModCheckAccepts(t *testing.T) {
 		t.Errorf("second Init: err %v, want it refused", err)
 	}
 }
+
+// A mod may carry its license text, which is hashed with the rest of it.
+func TestAModMayCarryALicenseFile(t *testing.T) {
+	files := map[string]string{ManifestFile: manifest("m"), "LICENSE": "MIT License\n"}
+	m, _, err := Check(writeMod(t, t.TempDir(), "m", files))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := m.Files["LICENSE"]; !ok {
+		t.Error("the license file is not part of the mod")
+	}
+	if _, _, err := Check(writeMod(t, t.TempDir(), "n", map[string]string{ManifestFile: manifest("n"), "NOTES.txt": "x"})); err == nil {
+		t.Error("a file that is not a license was accepted")
+	}
+}
