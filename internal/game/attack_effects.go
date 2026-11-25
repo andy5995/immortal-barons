@@ -27,6 +27,19 @@ const (
 	// the first on a win and the second when the attacker is repelled.
 	EffectConventionalWon  EffectKind = "conventional.won"
 	EffectConventionalLost EffectKind = "conventional.lost"
+	// A missile that arrives from another board resolves here, against this
+	// board's own rules; only its Target set applies, because the attacker is
+	// not on this board.
+	EffectIPNuclear  EffectKind = "ip.nuclear"
+	EffectIPChemical EffectKind = "ip.chemical"
+	// One kind for each row of the S3-Sabre's dial. The dial's aim, its
+	// backfire and the gates it meets stay built in.
+	EffectSabreIntelligence  EffectKind = "sabre.intelligence"
+	EffectSabrePeople        EffectKind = "sabre.people"
+	EffectSabreMilitaryBases EffectKind = "sabre.military_bases"
+	EffectSabreAirbases      EffectKind = "sabre.airbases"
+	EffectSabreRegions       EffectKind = "sabre.regions"
+	EffectSabreFood          EffectKind = "sabre.food"
 )
 
 // Roll is a percentage drawn as Pct + Random(Up) - Random(Down), held to 0..100.
@@ -115,6 +128,29 @@ type attackKindRow struct {
 	// the attacker, like the battle's own capture, and counted in it (see
 	// Attack), so the caller parks one total.
 	CaptureAsCoastal bool
+	// RemoteTarget marks a kind that arrives from another board: only its
+	// Target set applies, and that set cannot capture, since the attacker's
+	// realm is not here to receive the land (see Rules.Validate).
+	RemoteTarget bool
+	// WasteCap and PeopleCap, when above 0, hold the regions made waste and the
+	// people killed by one strike to that many, whatever a mod sets.
+	WasteCap, PeopleCap int
+	// KeptShare: the kill, people and food effects are worked as the share
+	// that is KEPT, truncated (lost = n - n x (100 - pct) / 100), as the
+	// S3-Sabre does, not as the share lost.
+	KeptShare bool
+	// Exact, by effect key, is the original's own arithmetic for a row that
+	// is not the integer percent it stands for (Real48 on the Sabre's
+	// agents, airbases and food). It gets n and the raw Random() draw and
+	// returns what is kept. It is used only while that effect holds its base
+	// value; a modded value uses the generic arithmetic.
+	Exact map[string]func(n, draw int) int
+	// Arrive is the target's event and the firing board's report for an arriving
+	// missile, for the headline's effects.
+	Arrive func(from, who, board string, l AttackLoss) (event, report Msg)
+	// DestroyedAs words a region count in a loss list; the default is
+	// lostDestroyed.
+	DestroyedAs forms
 	// Headline is the target's event and the attacker's report when the
 	// headline's effects are in play. Nil for a kind whose attack writes its
 	// own report.
@@ -144,7 +180,29 @@ var attackKinds = []attackKindRow{
 		}},
 	{Kind: EffectConventionalWon, CaptureAsCoastal: true},
 	{Kind: EffectConventionalLost},
+	{Kind: EffectIPNuclear, Weapon: msgid("nuclear strike"), NamesWaste: true, RemoteTarget: true, WasteCap: IPMissileRegionCap,
+		Arrive: func(from, who, board string, l AttackLoss) (Msg, Msg) {
+			return say("{from}'s nuclear strike turned {n} of your regions into waste.", "from", from, "n", l.Waste),
+				say("Your nuclear strike turned {n} of {who}'s regions on {board} into waste.", "n", l.Waste, "who", who, "board", board)
+		}},
+	{Kind: EffectIPChemical, Weapon: msgid("chemical strike"), NamesPeople: true, RemoteTarget: true, PeopleCap: IPMissilePeopleCap,
+		Arrive: func(from, who, board string, l AttackLoss) (Msg, Msg) {
+			return say("{from}'s chemical strike killed {n} of your people.", "from", from, "n", l.People),
+				say("Your chemical strike killed {n} of {who}'s people on {board}.", "n", l.People, "who", who, "board", board)
+		}},
+	{Kind: EffectSabreIntelligence, RemoteTarget: true, KeptShare: true, DestroyedAs: sabreRegions,
+		Exact: map[string]func(n, draw int) int{killKey(Agent): sabreIntelKept}},
+	{Kind: EffectSabrePeople, RemoteTarget: true, KeptShare: true, DestroyedAs: sabreRegions},
+	{Kind: EffectSabreMilitaryBases, RemoteTarget: true, KeptShare: true, DestroyedAs: sabreRegions},
+	{Kind: EffectSabreAirbases, RemoteTarget: true, KeptShare: true, DestroyedAs: sabreRegions,
+		Exact: map[string]func(n, draw int) int{killKey(Jet): sabreAirbaseKept}},
+	{Kind: EffectSabreRegions, RemoteTarget: true, DestroyedAs: sabreRegions},
+	{Kind: EffectSabreFood, RemoteTarget: true, KeptShare: true, DestroyedAs: sabreRegions,
+		Exact: map[string]func(n, draw int) int{keyFood: sabreFoodKept}},
 }
+
+// sabreRegions words a region count in an S3-Sabre report.
+var sabreRegions = msgidN("{n} Region", "{n} Regions")
 
 // EffectKinds are the kinds of attack a mod can set, in the order they are
 // listed and validated.
@@ -179,6 +237,15 @@ func baseAttackEffects() map[EffectKind]AttackEffects {
 	bio.People = Roll{BioPopKillPct, BioPopKillJitterUp, BioPopKillJitterDown}
 	bio.Morale, bio.Support = Fraction{1, BioMoraleDivisor}, support
 	bio.Kill[KillIndex(Trooper)] = Roll{BioTroopKillPct, BioTroopKillJitterUp, BioTroopKillJitterDn}
+	ipNuke := noEffect()
+	ipNuke.Waste = Roll{IPNukeWastePctBase, IPNukeWastePctRoll, 0}
+	ipChem := noEffect()
+	ipChem.People = Roll{IPChemKillPctBase, IPChemKillPctRoll, 0}
+	sabreSet := func(set func(e *EffectSet)) EffectSet {
+		e := noEffect()
+		set(&e)
+		return e
+	}
 	return map[EffectKind]AttackEffects{
 		EffectNuclear:    {Target: nuke, Attacker: noEffect()},
 		EffectChemical:   {Target: chem, Attacker: noEffect()},
@@ -186,6 +253,28 @@ func baseAttackEffects() map[EffectKind]AttackEffects {
 		// The battle, its capture and its losses stay in Attack; a mod adds to them.
 		EffectConventionalWon:  {Target: noEffect(), Attacker: noEffect()},
 		EffectConventionalLost: {Target: noEffect(), Attacker: noEffect()},
+		EffectIPNuclear:        {Target: ipNuke, Attacker: noEffect()},
+		EffectIPChemical:       {Target: ipChem, Attacker: noEffect()},
+		EffectSabreIntelligence: {Target: sabreSet(func(e *EffectSet) {
+			e.Kill[KillIndex(Agent)] = Roll{100 - SabreIntelKeepBasePct, 0, SabreIntelKeepSpread}
+		}), Attacker: noEffect()},
+		EffectSabrePeople: {Target: sabreSet(func(e *EffectSet) {
+			e.People = Roll{100 - SabrePeopleKeepBasePct, 0, SabrePeopleKeepSpread}
+		}), Attacker: noEffect()},
+		EffectSabreMilitaryBases: {Target: sabreSet(func(e *EffectSet) {
+			for _, g := range []*Good{Trooper, Jet, Turret, Tank} {
+				e.Kill[KillIndex(g)] = Roll{100 - SabreBasesKeepBasePct, 0, SabreBasesKeepSpread}
+			}
+		}), Attacker: noEffect()},
+		EffectSabreAirbases: {Target: sabreSet(func(e *EffectSet) {
+			e.Kill[KillIndex(Jet)] = Roll{100 - SabreAirbaseKeepBasePct, 0, SabreAirbaseKeepSpread}
+		}), Attacker: noEffect()},
+		EffectSabreRegions: {Target: sabreSet(func(e *EffectSet) {
+			e.Destroy = Roll{SabreRegionLossBasePct, SabreRegionLossSpread, 0}
+		}), Attacker: noEffect()},
+		EffectSabreFood: {Target: sabreSet(func(e *EffectSet) {
+			e.Food = Roll{100, 0, SabreFoodKeepSpread}
+		}), Attacker: noEffect()},
 	}
 }
 
@@ -224,19 +313,36 @@ func keep(v int, f Fraction, rounded bool) int {
 	return v * f.Num / f.Den
 }
 
+// share draws r and returns how much of n it takes. Where the kind works in
+// the share KEPT, or has the original's own arithmetic for the effect at its
+// base value, that is used instead of a truncated share lost.
+func (w *World) share(row *attackKindRow, key string, n int, r, base Roll) int {
+	pct := w.roll(r)
+	if hook := row.Exact[key]; hook != nil && r == base {
+		return n - hook(n, r.Pct-pct) // the draw: Up is 0, so pct = Pct - draw
+	}
+	if row.KeptShare {
+		return n - pctOf(n, 100-pct)
+	}
+	return pctOf(n, pct)
+}
+
 // applySet runs one effect set against victim; other is the realm a capture
 // goes to. It returns what the set took.
 func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire, coastal bool) AttackLoss {
 	var l AttackLoss
+	base := baseRules.Attacks[row.Kind].Target
 	if fx.IsZero() && fx.Morale.keepsAll() && fx.Support.keepsAll() {
 		return l
 	}
 	if !fx.Waste.IsZero() {
-		l.Waste = ruinToWaste(victim, w.roll(fx.Waste))
+		l.Waste = ruinToWasteCapped(victim, w.roll(fx.Waste), row.WasteCap)
 	}
 	if !fx.Destroy.IsZero() {
 		l.Destroyed = victim.Regions.remove(pctOf(victim.Land, w.roll(fx.Destroy))).Total()
-		victim.syncLand()
+		if l.Destroyed > 0 {
+			victim.syncLand()
+		}
 	}
 	if !fx.Capture.IsZero() {
 		l.Captured = victim.Regions.remove(pctOf(victim.Land, w.roll(fx.Capture))).Total()
@@ -252,20 +358,23 @@ func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire
 		}
 	}
 	if !fx.People.IsZero() {
-		// int64 through the multiply: a big urban realm's head count times a
+		// share works in int64: a big urban realm's head count times a
 		// percentage passes 2^31 on the 32-bit door builds.
-		l.People = int(int64(victim.People) * int64(w.roll(fx.People)) / 100)
+		l.People = w.share(row, keyPeople, victim.People, fx.People, base.People)
+		if row.PeopleCap > 0 {
+			l.People = min(l.People, row.PeopleCap)
+		}
 		victim.People -= l.People
 	}
 	for i, g := range AttackKillGoods {
 		if !fx.Kill[i].IsZero() {
 			n := g.Count(victim)
-			l.Units[i] = pctOf(*n, w.roll(fx.Kill[i]))
+			l.Units[i] = w.share(row, killKey(g), *n, fx.Kill[i], base.Kill[i])
 			*n -= l.Units[i]
 		}
 	}
 	if !fx.Food.IsZero() {
-		l.Food = pctOf(victim.Food, w.roll(fx.Food))
+		l.Food = w.share(row, keyFood, victim.Food, fx.Food, base.Food)
 		victim.Food -= l.Food
 	}
 	victim.Morale = keep(victim.Morale, fx.Morale, row.MoraleRounded)
@@ -307,7 +416,11 @@ func (l AttackLoss) parts(row *attackKindRow, extra bool) []Msg {
 	if !(extra && row.NamesWaste) {
 		add(lostWaste, l.Waste)
 	}
-	add(lostDestroyed, l.Destroyed)
+	destroyed := lostDestroyed
+	if row.DestroyedAs != (forms{}) {
+		destroyed = row.DestroyedAs
+	}
+	add(destroyed, l.Destroyed)
 	add(lostCaptured, l.Captured)
 	if !(extra && row.NamesPeople) {
 		add(lostPeople, l.People)
@@ -332,36 +445,56 @@ func attackCost(row *attackKindRow, from string, at AttackLoss) (event, report M
 	return say("It also cost {from} {lost}.", "from", from, "lost", own), say("It also cost you {lost}.", "lost", own)
 }
 
+// alsoTook is the sentence listing losses beyond what a line already names,
+// or zero when there are none.
+func alsoTook(lost []Msg) Msg {
+	if len(lost) == 0 {
+		return Msg{}
+	}
+	return say("It also took {lost}.", "lost", lost)
+}
+
+// lossNews words a strike whose kind's headline is not in play: the loss list,
+// or that it took nothing. board names the target's board in a report sent to
+// another board, and is "" for a strike on this one. The headline reads right
+// only when every effect it names is in play; with one zeroed it would say
+// "laid waste to 0 of your regions".
+func lossNews(row *attackKindRow, from, who, board string, l AttackLoss) (event, report Msg) {
+	weapon := say(row.Weapon)
+	lost := l.parts(row, false)
+	switch {
+	case len(lost) > 0 && board == "":
+		report = say("Your {weapon} hit {who}'s realm, taking {lost}.", "weapon", weapon, "who", who, "lost", lost)
+	case len(lost) > 0:
+		report = say("Your {weapon} hit {who}'s realm on {board}, taking {lost}.", "weapon", weapon, "who", who, "board", board, "lost", lost)
+	case board == "":
+		report = say("Your {weapon} hit {who}'s realm and took nothing from it.", "weapon", weapon, "who", who)
+	default:
+		report = say("Your {weapon} hit {who}'s realm on {board} and took nothing from it.", "weapon", weapon, "who", who, "board", board)
+	}
+	if len(lost) > 0 {
+		return say("{from}'s {weapon} hit your realm, taking {lost}.", "from", from, "weapon", weapon, "lost", lost), report
+	}
+	return say("{from}'s {weapon} hit your realm and took nothing from it.", "from", from, "weapon", weapon), report
+}
+
 // attackNews words a landed strike: the event the target reads and the report
 // the attacker gets. The kind's own headline leads while every effect it names
-// is in play, and what else the target lost follows in one sentence. A mod
-// that sets any effect the headline names to zero gets a headline built from
-// the loss list instead of "turned 0 regions into waste". What the attacker
-// lost is added to both.
+// is in play, and what else the target lost follows in one sentence; otherwise
+// lossNews words it. What the attacker lost is added to both.
 func (w *World) attackNews(row *attackKindRow, from, who string, t, at AttackLoss) (Msg, string) {
-	fx := w.attackEffects(row.Kind).Target
-	// The headline reads right only when every effect it names is in play;
-	// with one zeroed it would say "laid waste to 0 of your regions".
-	named := !(row.NamesWaste && fx.Waste.IsZero()) && !(row.NamesPeople && fx.People.IsZero()) &&
-		!(row.NamesTroopers && fx.Kill[KillIndex(Trooper)].IsZero())
 	var ev Msg
 	var report string
-	if !named {
-		weapon := say(row.Weapon)
-		if lost := t.parts(row, false); len(lost) > 0 {
-			ev = say("{from}'s {weapon} hit your realm, taking {lost}.", "from", from, "weapon", weapon, "lost", lost)
-			report = say("Your {weapon} hit {who}'s realm, taking {lost}.", "weapon", weapon, "who", who, "lost", lost).English()
-		} else {
-			ev = say("{from}'s {weapon} hit your realm and took nothing from it.", "from", from, "weapon", weapon)
-			report = say("Your {weapon} hit {who}'s realm and took nothing from it.", "weapon", weapon, "who", who).English()
-		}
-	} else {
+	if w.headlineInPlay(row) {
 		ev, report = row.Headline(from, who, t)
-		if more := t.parts(row, true); len(more) > 0 {
-			also := say("It also took {lost}.", "lost", more)
+		if also := alsoTook(t.parts(row, true)); !also.IsZero() {
 			ev = sentences(ev, also)
 			report += " " + also.English()
 		}
+	} else {
+		var rep Msg
+		ev, rep = lossNews(row, from, who, "", t)
+		report = rep.English()
 	}
 	cost, costReport := attackCost(row, from, at)
 	ev = sentences(ev, cost)
@@ -410,10 +543,31 @@ func (w *World) conventionalEffects(kind EffectKind, a, d *Empire) (event, repor
 	if row.CaptureAsCoastal {
 		captured, t.Captured = t.Captured, 0
 	}
-	var took Msg
-	if lost := t.parts(row, false); len(lost) > 0 {
-		took = say("It also took {lost}.", "lost", lost)
-	}
+	took := alsoTook(t.parts(row, false))
 	costEv, costRep := attackCost(row, a.Name, at)
 	return sentences(took, costEv), sentences(took, costRep), captured
+}
+
+// arrivingEffects applies kind's Target set to d for a missile that arrived
+// from another board, and words it: the event for d and the report for the
+// firing board. Only the target is here, so the attacker's set is not applied.
+// A kind whose headline effects are not all in play is worded by lossNews, as
+// a local missile is.
+func (w *World) arrivingEffects(kind EffectKind, d *Empire, from string) (event, report Msg) {
+	row := attackKindOf(kind)
+	l := w.applySet(w.attackEffects(kind).Target, row, d, nil, false)
+	board := w.Config.BoardID
+	if !w.headlineInPlay(row) {
+		return lossNews(row, from, d.Name, board, l)
+	}
+	event, report = row.Arrive(from, d.Name, board, l)
+	also := alsoTook(l.parts(row, true))
+	return sentences(event, also), sentences(report, also)
+}
+
+// headlineInPlay reports whether every effect row's headline names is set.
+func (w *World) headlineInPlay(row *attackKindRow) bool {
+	fx := w.attackEffects(row.Kind).Target
+	return !(row.NamesWaste && fx.Waste.IsZero()) && !(row.NamesPeople && fx.People.IsZero()) &&
+		!(row.NamesTroopers && fx.Kill[KillIndex(Trooper)].IsZero())
 }

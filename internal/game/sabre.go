@@ -54,9 +54,12 @@ func (w *World) SabreAim(dial int) SabreEffect {
 // list of what was destroyed (empty if the roll removed nothing). The effect
 // decides WHAT is hit and the row's own formula how much — both the original's,
 // read from its effect switch (the Sabre*Keep* and SabreRegionLoss* constants
-// carry the addresses).
+// carry the addresses). The figures are the base rows of the attack table
+// (attack_effects.go), one kind per dial row, so a mod may change them; at their
+// base values the three rows that are Real48 in the original keep that
+// arithmetic.
 //
-// The field each branch touches, own-record: covert agents at +0x26f for the
+// The field each row touches, own-record: covert agents at +0x26f for the
 // Intelligence Headquarters (it never touches the HeadQuarters at +0x26b),
 // population at +0x62, food at +0x6e, jets alone at +0x7e for airbases, and all
 // four of troopers, jets, turrets and tanks for military bases, each with its
@@ -67,82 +70,34 @@ func (w *World) sabreDamage(e *Empire, eff SabreEffect) []Msg {
 	if !ok {
 		return nil
 	}
-	s := &sabreStrike{w: w, e: e}
-	row.hit(s)
-	return s.parts
+	l := w.applySet(w.attackEffects(row.kind).Target, attackKindOf(row.kind), e, nil, false)
+	return l.parts(attackKindOf(row.kind), false)
 }
 
 // sabreRow is one of the six damage rows: the target's event when a hit takes
-// nothing ({from}) and when it does ({from}, {lost}), and what it does.
+// nothing ({from}) and when it does ({from}, {lost}), and the kind of the
+// attack table that holds its figures.
 type sabreRow struct {
 	harmless string
 	hurt     string
-	hit      func(s *sabreStrike)
+	kind     EffectKind
 }
 
 // sabreRows is the one table of the dial's damage rows. SabreDevelopRegions is
 // not in it: a backfire applies that row directly (sabreDevelop).
 var sabreRows = map[SabreEffect]sabreRow{
 	SabreHitIntelligence: {msgid("{from}'s S3-Sabre hit your Intelligence Headquarters and did little harm."),
-		msgid("{from}'s S3-Sabre hit your Intelligence Headquarters, destroying {lost}."),
-		func(s *sabreStrike) {
-			s.keep(Agent.Counted, Agent.Count(s.e), SabreIntelKeepSpread, sabreIntelKept)
-		}},
+		msgid("{from}'s S3-Sabre hit your Intelligence Headquarters, destroying {lost}."), EffectSabreIntelligence},
 	SabreHitPeople: {msgid("{from}'s S3-Sabre hit your residential zones and did little harm."),
-		msgid("{from}'s S3-Sabre hit your residential zones, destroying {lost}."),
-		func(s *sabreStrike) {
-			s.keep(msgidN("{n} Person", "{n} People"), &s.e.People, SabrePeopleKeepSpread, func(n, roll int) int {
-				return pctOf(n, SabrePeopleKeepBasePct+roll)
-			})
-		}},
+		msgid("{from}'s S3-Sabre hit your residential zones, destroying {lost}."), EffectSabrePeople},
 	SabreHitMilitaryBases: {msgid("{from}'s S3-Sabre hit your military bases and did little harm."),
-		msgid("{from}'s S3-Sabre hit your military bases, destroying {lost}."),
-		func(s *sabreStrike) {
-			for _, g := range []*Good{Trooper, Jet, Turret, Tank} {
-				s.keep(g.Counted, g.Count(s.e), SabreBasesKeepSpread, func(n, roll int) int {
-					return pctOf(n, SabreBasesKeepBasePct+roll)
-				})
-			}
-		}},
+		msgid("{from}'s S3-Sabre hit your military bases, destroying {lost}."), EffectSabreMilitaryBases},
 	SabreHitAirbases: {msgid("{from}'s S3-Sabre hit your airbases and did little harm."),
-		msgid("{from}'s S3-Sabre hit your airbases, destroying {lost}."),
-		func(s *sabreStrike) {
-			s.keep(Jet.Counted, Jet.Count(s.e), SabreAirbaseKeepSpread, sabreAirbaseKept)
-		}},
+		msgid("{from}'s S3-Sabre hit your airbases, destroying {lost}."), EffectSabreAirbases},
 	SabreHitRegions: {msgid("{from}'s S3-Sabre hit your regions and did little harm."),
-		msgid("{from}'s S3-Sabre hit your regions, destroying {lost}."),
-		func(s *sabreStrike) {
-			e := s.e
-			lost := pctOf(e.Land, SabreRegionLossBasePct+s.w.rng.Intn(SabreRegionLossSpread))
-			if lost > 0 {
-				lost = e.Regions.remove(lost).Total()
-				e.syncLand()
-				s.parts = append(s.parts, sayN("{n} Region", "{n} Regions", "n", "n", lost))
-			}
-		}},
+		msgid("{from}'s S3-Sabre hit your regions, destroying {lost}."), EffectSabreRegions},
 	SabreHitFood: {msgid("{from}'s S3-Sabre hit your food supply and did little harm."),
-		msgid("{from}'s S3-Sabre hit your food supply, destroying {lost}."),
-		func(s *sabreStrike) {
-			s.keep(Food.Counted, Food.Count(s.e), SabreFoodKeepSpread, sabreFoodKept)
-		}},
-}
-
-// sabreStrike is one landed hit in progress: the realm it struck and the list
-// of what it destroyed.
-type sabreStrike struct {
-	w     *World
-	e     *Empire
-	parts []Msg
-}
-
-// keep leaves *n at kept(*n, Random(spread)) and records what went; what names
-// the count, {n}, in the singular and the plural.
-func (s *sabreStrike) keep(what forms, n *int, spread int, kept func(n, roll int) int) {
-	left := kept(*n, s.w.rng.Intn(spread))
-	if lost := *n - left; lost > 0 {
-		*n = left
-		s.parts = append(s.parts, sayIn(what, "n", "n", lost))
-	}
+		msgid("{from}'s S3-Sabre hit your food supply, destroying {lost}."), EffectSabreFood},
 }
 
 // The three rows below are the ones whose Real48 share is not the integer

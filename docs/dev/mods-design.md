@@ -136,9 +136,26 @@ The League Coordinator chooses the mods; members install nothing.
   newlines are part of what the hash covers. Every other field of a mod
   reference is scrubbed like the rest of the packet, and the mod reader refuses
   a control character in each manifest field it shows.
-- **What only interplanetary play uses stays constant**: the remote tank curve,
-  the share of a HeadQuarters a winning invasion takes, and a Sabotage HQ
-  agent's points. Moving them into mods needs every board's resolver to agree.
+- **Arriving missiles and the S3-Sabre are moddable; the rest of
+  interplanetary play is not.** An arriving missile resolves on the target's
+  board under that board's rules, and every board in a league plays the same
+  mods (the ruleset fingerprint holds a packet from a board whose rules
+  differ), so the kinds `ip.nuclear`, `ip.chemical` and `sabre.*` read the
+  attack table. Only their target set applies, since the attacker's realm is
+  on another board, and `Rules.Validate` refuses an attacker set or a
+  `capture` on them; no packet carries a second realm's change. Still
+  constant, with no key yet: the remote tank curve, the share of a
+  HeadQuarters a winning invasion takes, a Sabotage HQ agent's points, and the
+  interplanetary conventional attack (`ibbs_attack.go`), whose resolver is
+  tied to the packet's strengths. A key for one needs every board's resolver
+  to agree, which the fingerprint now enforces.
+- **The gates, the dial and the caps stay built in.** The misfire, SDI and
+  garrison rolls, the Sabre's aim, jitter and backfire, and the score draw are
+  not effects. The per-kind caps (`IPMissileRegionCap`, `IPMissilePeopleCap`)
+  and how a row rounds (the Sabre truncates what is kept, and three of its
+  rows keep the original's Real48 arithmetic while their figure is the base
+  one) are fixed properties of the kind in `attackKinds`, because the
+  binary-verified figures depend on them.
 
 ## Not moddable yet
 

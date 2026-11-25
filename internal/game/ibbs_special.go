@@ -571,7 +571,6 @@ func (w *World) applyPlanetOp(op SpecialOp) (report Msg, outcome specialOutcome)
 // branches here, from when they were aimed at one baron, which no packet could
 // reach once they were aimed at the planet; they were removed on 2026-09-23.
 func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (report Msg, score int, outcome specialOutcome, gained int) {
-	board := w.Config.BoardID
 	switch op {
 	// The three missiles do NOT run the local helpers of the same name (#255).
 	// The receiving board resolves all three in one routine with its own gates
@@ -582,21 +581,19 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string, dial int) (
 		if stopped, why := w.stopArrivingMissile(d, op, from); why != specialHit {
 			return stopped, 0, why, 0
 		}
-		regions := w.arrivingNuclearEffect(d)
+		event, report := w.arrivingEffects(EffectIPNuclear, d, from)
 		score = w.rng.Intn(NukeScoreRoll)
-		d.addEvent(say("{from}'s nuclear strike turned {n} of your regions into waste.", "from", from, "n", regions))
-		return say("Your nuclear strike turned {n} of {who}'s regions on {board} into waste.",
-			"n", regions, "who", d.Name, "board", board), score, specialHit, 0
+		d.addEvent(event)
+		return report, score, specialHit, 0
 
 	case OpChemical:
 		if stopped, why := w.stopArrivingMissile(d, op, from); why != specialHit {
 			return stopped, 0, why, 0
 		}
-		people := w.arrivingChemicalEffect(d)
+		event, report := w.arrivingEffects(EffectIPChemical, d, from)
 		score = w.rng.Intn(ChemScoreRoll)
-		d.addEvent(say("{from}'s chemical strike killed {n} of your people.", "from", from, "n", people))
-		return say("Your chemical strike killed {n} of {who}'s people on {board}.",
-			"n", people, "who", d.Name, "board", board), score, specialHit, 0
+		d.addEvent(event)
+		return report, score, specialHit, 0
 
 	case OpSabre:
 		report, outcome, gained = w.sabreEffect(d, from, dial)
@@ -688,21 +685,4 @@ func (w *World) stopArrivingMissile(d *Empire, op SpecialOp, from string) (Msg, 
 func missileGuarded(guard, regions, roll int, intn func(int) int) bool {
 	perRegion := int64(guard) / (int64(regions) + 1)
 	return int64(roll) < perRegion && intn(MissileDefenseSides) > MissileDefenseThrough
-}
-
-// arrivingNuclearEffect and arrivingChemicalEffect are the damage an arriving
-// missile does, which is NOT what the local missile of the same name does. The
-// bands are the receiving resolver's own (see balance_costs.go), and the
-// chemical one touches nothing but the population — no land, no morale, no
-// support, where the local strike takes all three.
-func (w *World) arrivingNuclearEffect(d *Empire) int {
-	pct := IPNukeWastePctBase + w.rng.Intn(IPNukeWastePctRoll)
-	return ruinToWasteCapped(d, pct, IPMissileRegionCap)
-}
-
-func (w *World) arrivingChemicalEffect(d *Empire) int {
-	pct := IPChemKillPctBase + w.rng.Intn(IPChemKillPctRoll)
-	dead := min(pctOf(d.People, pct), IPMissilePeopleCap)
-	d.People -= dead
-	return dead
 }

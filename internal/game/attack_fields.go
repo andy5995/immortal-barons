@@ -15,6 +15,15 @@ const (
 	ModAttackDenMax    = 1000
 )
 
+// The keys the attack table's Exact hooks are looked up by, spelled once.
+const (
+	keyPeople = "people"
+	keyFood   = "food"
+)
+
+// killKey is the key of the kill effect on g.
+func killKey(g *Good) string { return "kill_" + g.ID }
+
 // AttackField is one key of an effect set as a mod names it: the key in a
 // values.toml [attacks.<kind>.<side>] section, and how to reach its figure.
 // Exactly one of Roll and Fraction is set. Validation and the mod reader both go
@@ -39,15 +48,15 @@ var AttackFields = func() []AttackField {
 			Desc: "Percent of the realm's regions destroyed outright."},
 		{Key: "capture", Roll: func(s *EffectSet) *Roll { return &s.Capture },
 			Desc: "Percent of the realm's regions taken by the other side, as land it types at the start of its next turn."},
-		{Key: "people", Roll: func(s *EffectSet) *Roll { return &s.People },
+		{Key: keyPeople, Roll: func(s *EffectSet) *Roll { return &s.People },
 			Desc: "Percent of the realm's people killed."},
 	}
 	for i, g := range AttackKillGoods {
-		f = append(f, AttackField{Key: "kill_" + g.ID, Roll: func(s *EffectSet) *Roll { return &s.Kill[i] },
+		f = append(f, AttackField{Key: killKey(g), Roll: func(s *EffectSet) *Roll { return &s.Kill[i] },
 			Desc: fmt.Sprintf("Percent of the realm's %s killed.", g.Plural)})
 	}
 	return append(f,
-		AttackField{Key: "food", Roll: func(s *EffectSet) *Roll { return &s.Food },
+		AttackField{Key: keyFood, Roll: func(s *EffectSet) *Roll { return &s.Food },
 			Desc: "Percent of the realm's food destroyed."},
 		AttackField{Key: "morale", Fraction: func(s *EffectSet) *Fraction { return &s.Morale },
 			Desc: "The part of the realm's morale that is kept, as `[num, den]`. `[1, 1]` leaves it alone."},
@@ -89,6 +98,14 @@ func (r *Rules) validateAttacks(bad func(format string, a ...any)) {
 		if !ok {
 			bad("attacks.%s: missing", kind)
 			continue
+		}
+		if row := attackKindOf(kind); row.RemoteTarget {
+			if fx.Attacker != noEffect() {
+				bad("attacks.%s.attacker: this missile comes from another board, so it has no attacker effects", kind)
+			}
+			if !fx.Target.Capture.IsZero() {
+				bad("attacks.%s.target.capture: the attacker is on another board and cannot receive land", kind)
+			}
 		}
 		for _, side := range AttackSides {
 			set := *fx.Side(side)

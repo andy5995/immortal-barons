@@ -128,8 +128,10 @@ To see every value a mod can change, as the game sets it without mods, use
 ### Attack effects
 
 What a missile does is set by a table of effects, one for each kind of attack:
-`nuclear`, `chemical`, `biological`, `conventional.won` and
-`conventional.lost`. Each kind has two tables.
+`nuclear`, `chemical`, `biological`, `conventional.won`, `conventional.lost`,
+`ip.nuclear`, `ip.chemical` and one for each part of the S3-Sabre's dial:
+`sabre.intelligence`, `sabre.people`, `sabre.military_bases`, `sabre.airbases`,
+`sabre.regions` and `sabre.food`. Each same-planet kind has two tables.
 `[attacks.<kind>.target]` is what the attack does to the realm it hits.
 `[attacks.<kind>.attacker]` is what it does back to the realm that fired it.
 The base game has nothing in the attacker tables.
@@ -144,7 +146,15 @@ report, its score and the regions the winner types. A realm left with no
 people, or with no land by anything but a won same-planet attack, falls at the
 next daily check and not at once.
 
-Any kind may use any effect. The effects are `waste`, `destroy` and `capture`
+The `ip` and `sabre` kinds are missiles that arrive from another board, and
+they act on the board that receives them. Only their `target` table is used:
+the attacker is on another board, so a non-zero `attacker` table or a `capture`
+on these kinds is an error. What stays built in is whether a missile gets
+through (the misfire, SDI and garrison rolls), where the Sabre's dial lands,
+its backfire and the score. Every board in a league plays the same mods.
+
+Any kind may use any effect, except as said above for the `ip` and `sabre`
+kinds. The effects are `waste`, `destroy` and `capture`
 (a percent of the regions), `people`, one `kill_<unit>` for each unit, `food`,
 `morale`, `support` and `hq`. In the attacker table, `capture` gives the
 target that share of the attacker's regions. Captured regions arrive untyped,

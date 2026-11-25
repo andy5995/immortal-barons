@@ -36,8 +36,10 @@ type Rules struct {
 // a HeadQuarters is not here — the resolver's own tank curve
 // (RemoteTankStrength*), the fifth a winning invasion takes
 // (InvasionHQLossDivisor) and a landed Sabotage HQ agent's points
-// (TerrorHQSabotagePoints): those only happen in a league, and a league board
-// refuses mods, so a key for them could never take effect.
+// (TerrorHQSabotagePoints) have no key yet. A league can carry mods (every board
+// plays the same set, and the ruleset fingerprint holds packets from a board
+// whose rules differ), so they could be added. The arriving missiles and the
+// S3-Sabre are already in Rules.Attacks.
 type HQRules struct {
 	// BuildStart is the completion percent a new HeadQuarters begins at, and
 	// BuildPerTurn what it gains each turn until it reaches 100.
