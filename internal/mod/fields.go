@@ -92,6 +92,7 @@ func Diff(a, b *game.Rules) []string {
 	}
 	out = append(out, diffHQ(a, b)...)
 	out = append(out, diffRegions(a, b)...)
+	out = append(out, diffAttacks(a, b)...)
 	if from, to := brainName(a), brainName(b); from != to {
 		out = append(out, fmt.Sprintf("pirate raids: %s -> %s", from, to))
 	}
@@ -134,5 +135,6 @@ func Values(r *game.Rules, header string) string {
 	}
 	writeHQ(&b, r)
 	writeRegions(&b, r)
+	writeAttacks(&b, r)
 	return b.String()
 }

@@ -269,6 +269,9 @@ func (r *Rules) Validate() error {
 	r.validateHQ(func(format string, a ...any) {
 		errs = append(errs, fmt.Errorf("hq: %s", fmt.Sprintf(format, a...)))
 	})
+	r.validateAttacks(func(format string, a ...any) {
+		errs = append(errs, fmt.Errorf(format, a...))
+	})
 	return errors.Join(errs...)
 }
 

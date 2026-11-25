@@ -131,6 +131,9 @@ type values struct {
 	HQ    map[string]any            `toml:"hq"`
 	// Regions is one section per region type (regions.go).
 	Regions map[string]map[string]any `toml:"regions"`
+	// Attacks holds the [attacks.<kind>.<side>] tables, as nested tables
+	// whose depth depends on the kind (attacks.go).
+	Attacks map[string]any `toml:"attacks"`
 	// When holds sections selected by a bool option. Its shape is this same
 	// struct, so [when.fast_start.units.tank] is written just like its
 	// top-level counterpart.
@@ -438,6 +441,12 @@ func decodeTOML(data []byte, v any, allowOption bool) error {
 	var keys []string
 	for _, k := range md.Undecoded() {
 		name := k.String()
+		// The decoder reports every key under an interface-typed table as
+		// undecoded. attacks.go reads these tables in a values file and names
+		// its own errors; anywhere else they are unknown keys.
+		if allowOption && isAttackKey(k) {
+			continue
+		}
 		if allowOption && isOptionReference(k) {
 			continue
 		}
@@ -447,6 +456,11 @@ func decodeTOML(data []byte, v any, allowOption bool) error {
 		return fmt.Errorf("unknown key %s", strings.Join(keys, ", "))
 	}
 	return nil
+}
+
+// isAttackKey reports whether k lies under [attacks] or [when.<id>.attacks].
+func isAttackKey(k toml.Key) bool {
+	return len(k) > 1 && (k[0] == "attacks" || (k[0] == "when" && len(k) > 2 && k[2] == "attacks"))
 }
 
 // isOptionReference reports whether an undecoded key is the option of a

@@ -7,7 +7,7 @@ mod_api = 1
 license = "MIT"
 # Shown on the Game Setup screen. Blank shows the name.
 label = "Example Mod"
-description = "Cheaper jets, a stronger HeadQuarters, farmable deserts and raids on jet stockpiles."
+description = "Cheaper jets, a stronger HeadQuarters, farmable deserts, raids on jet stockpiles and nuclear fallout."
 
 # A number option. values.toml uses it for the tank's build cost.
 [options.tank_cost]

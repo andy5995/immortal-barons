@@ -27,9 +27,9 @@ do, with comments in each file.
   print what it changes, then exit. `<dir>` is a name in the `mods` folder or a
   path. See [Checking a mod](#checking-a-mod).
 - `-print-base-mod`: print every value a mod can change, as the game sets it
-  without mods, in the form of a `values.toml`, then exit. The `[hq]` and
-  `[regions.<id>]` sections are included. Copy the sections you want into your
-  mod and change them.
+  without mods, in the form of a `values.toml`, then exit. The `[hq]`,
+  `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
+  the sections you want into your mod and change them.
 - `-reset`: start a new game after the settings editor. The editor starts from
   the default settings, which turn no mods on, so pick them again on its Mods
   page each time. See [Turning mods on](#turning-mods-on).
@@ -125,6 +125,41 @@ upkeep = 600
 To see every value a mod can change, as the game sets it without mods, use
 [`-print-base-mod`](#command-line-options-and-settings).
 
+### Attack effects
+
+What a missile does is set by a table of effects, one for each kind of attack:
+`nuclear`, `chemical` and `biological`. Each kind has two tables.
+`[attacks.<kind>.target]` is what the attack does to the realm it hits.
+`[attacks.<kind>.attacker]` is what it does back to the realm that fired it.
+The base game has nothing in the attacker tables.
+
+Any kind may use any effect. The effects are `waste`, `destroy` and `capture`
+(a percent of the regions), `people`, one `kill_<unit>` for each unit, `food`,
+`morale`, `support` and `hq`. In the attacker table, `capture` gives the
+target that share of the attacker's regions. Captured regions arrive untyped,
+and their owner chooses the types at the start of the next turn.
+
+A percent is a whole number, or `[pct, up, down]` for a percent that varies:
+`pct + Random(up) - Random(down)`. The base nuclear strike is `waste = [7, 3, 3]`.
+`morale` and `support` are the part that is kept, as `[num, den]`. `[3, 4]`
+keeps three quarters, and `[1, 1]` keeps all of it. `hq` is points of
+HeadQuarters completion, not percent. The limits are under
+[Attacks](mod-reference.md#attacks).
+
+A strike's report names what it took. If a mod sets any effect the usual
+report is built around to zero, the report lists what was taken instead.
+
+For example, a nuclear strike that also destroys a fifth of the turrets and
+leaves a little fallout on the realm that fired it:
+
+```toml
+[attacks.nuclear.target]
+kill_turret = 20
+
+[attacks.nuclear.attacker]
+people = [1, 2, 0]
+```
+
 ## Making a mod
 
 A mod is a folder under `mods` in the data directory. The folder's name is the
@@ -173,8 +208,9 @@ board in the league.
 `mod_api` is the version of the mod format the game reads; see
 [Mod format versions](#mod-format-versions).
 
-`values.toml` holds the changes, one section per unit, plus `[hq]` and one
-section per region type. List only what changes:
+`values.toml` holds the changes, one section per unit, plus `[hq]`, one
+section per region type and the `[attacks.<kind>.<side>]` sections. List only
+what changes:
 
 ```toml
 [units.tank]

@@ -39,7 +39,8 @@ These are the tables a `values.toml` may hold. Any other table or key is an erro
 | `units` | One `[units.<id>]` table per unit. List only what changes. |
 | `hq` | The one `[hq]` table. |
 | `regions` | One `[regions.<id>]` table per region type. |
-| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]` and `[when.<option>.regions.<id>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
+| `attacks` | One `[attacks.<kind>.target]` and one `[attacks.<kind>.attacker]` table per kind of attack. |
+| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
 
 ### Units
 
@@ -93,6 +94,30 @@ The region types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `
 | `unit_points` | Production a region adds to the realm's unit pool. | 0 to 100,000 | must be 0 |
 | `production_boost` | The unit pool rises by this many times the type's share of all the realm's land. The whole boost is capped at 150 percent of normal. | 0 to 100 | must be 0 |
 | `research` | The type's weight in the realm's research count, which never passes the realm's land. | 0 to 100 | must be 0 |
+
+### Attacks
+
+The kinds of attack are `nuclear`, `chemical`, `biological`. Each kind has two tables. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes.
+
+A key marked as a percent takes a whole number, a flat percent, or `[pct, up, down]`: the percent drawn as `pct + Random(up) - Random(down)` and held to 0 to 100. A draw is made only when `up` or `down` is above 0. Every `pct`, `up` and `down` is 0 to 100. `morale` and `support` take `[num, den]`, with `den` 1 to 1,000 and `num` 0 to `den`. In the attacker's table, `capture` gives the target that share of the attacker's regions.
+
+| Key | Meaning | Form |
+| --- | --- | --- |
+| `waste` | Percent of the realm's regions turned to waste. The regions stay on its books but earn nothing until cleaned. | percent |
+| `destroy` | Percent of the realm's regions destroyed outright. | percent |
+| `capture` | Percent of the realm's regions taken by the other side, as land it types at the start of its next turn. | percent |
+| `people` | Percent of the realm's people killed. | percent |
+| `kill_trooper` | Percent of the realm's Troopers killed. | percent |
+| `kill_jet` | Percent of the realm's Jets killed. | percent |
+| `kill_turret` | Percent of the realm's Turrets killed. | percent |
+| `kill_bomber` | Percent of the realm's Bombers killed. | percent |
+| `kill_tank` | Percent of the realm's Tanks killed. | percent |
+| `kill_carrier` | Percent of the realm's Carriers killed. | percent |
+| `kill_agent` | Percent of the realm's Agents killed. | percent |
+| `food` | Percent of the realm's food destroyed. | percent |
+| `morale` | The part of the realm's morale that is kept, as `[num, den]`. `[1, 1]` leaves it alone. | `[num, den]` |
+| `support` | The part of the realm's popular support that is kept, as `[num, den]`. `[1, 1]` leaves it alone. | `[num, den]` |
+| `hq` | HeadQuarters completion points lost, taken off the realm's percent complete and never below 0. | points |
 
 ## Scripts
 
