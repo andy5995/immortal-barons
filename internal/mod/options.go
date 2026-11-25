@@ -326,9 +326,10 @@ func (m *Mod) applyWhen(r *game.Rules) []error {
 			continue
 		}
 		if m.Chosen(id) == 0 {
-			// Conversion errors are errors even in a section switched off, but
-			// nothing there reaches the game this time.
-			errs = append(errs, section.apply(game.BaseRules(), m)...)
+			// Nothing in a section switched off reaches the game this time, but
+			// its errors are reported as if it were on, so turning the option on
+			// later cannot be what first refuses the mod.
+			errs = append(errs, offSectionErrors(id, section, r, m)...)
 			continue
 		}
 		errs = append(errs, section.apply(r, m)...)
@@ -372,6 +373,33 @@ func (v values) apply(r *game.Rules, m *Mod) []error {
 	}
 	if err := v.applyAttacks(r); err != nil {
 		errs = append(errs, err)
+	}
+	return errs
+}
+
+// offSectionErrors applies a section whose option is off to a copy of r and
+// returns what would be refused were it on: its conversion errors, and the
+// limits it breaks that r alone does not.
+func offSectionErrors(id string, section values, r *game.Rules, m *Mod) []error {
+	off := r.Clone()
+	if errs := section.apply(off, m); len(errs) > 0 {
+		return errs
+	}
+	err := off.Validate()
+	if err == nil {
+		return nil
+	}
+	already := map[string]bool{}
+	if base := r.Validate(); base != nil {
+		for _, line := range strings.Split(base.Error(), "\n") {
+			already[line] = true
+		}
+	}
+	var errs []error
+	for _, line := range strings.Split(err.Error(), "\n") {
+		if !already[line] {
+			errs = append(errs, fmt.Errorf("when.%s: %s", id, line))
+		}
 	}
 	return errs
 }
