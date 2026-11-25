@@ -317,3 +317,31 @@ func TestModdedIPLostSetCapturesOnARepelledBattle(t *testing.T) {
 		}
 	}
 }
+
+// Every figure an attack table takes reaches home: a field added to AttackLoss
+// and left out of EffectLoss would be taken on the defending board and never
+// reported. Captured stays behind, since it travels as LandTaken.
+func TestEffectLossCarriesEveryFigure(t *testing.T) {
+	var l AttackLoss
+	v := reflect.ValueOf(&l).Elem()
+	n := 1
+	for i := 0; i < v.NumField(); i++ {
+		switch f := v.Field(i); f.Kind() {
+		case reflect.Int:
+			f.SetInt(int64(n))
+			n++
+		case reflect.Array:
+			for j := 0; j < f.Len(); j++ {
+				f.Index(j).SetInt(int64(n))
+				n++
+			}
+		default:
+			t.Fatalf("AttackLoss.%s is a %s; fill it here", v.Type().Field(i).Name, f.Kind())
+		}
+	}
+	want := l
+	want.Captured = 0
+	if got := optLoss(l).loss(); got != want {
+		t.Errorf("round trip lost a figure:\n got %+v\nwant %+v", got, want)
+	}
+}
