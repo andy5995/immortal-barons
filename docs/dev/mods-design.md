@@ -109,7 +109,8 @@ mods are read, applied, checked or sent.
 
 ## Leagues
 
-The League Coordinator chooses the mods; members install nothing.
+A stand-alone board's sysop chooses its mods. In a league the Coordinator
+chooses them, and members install nothing.
 
 - **The Coordinator's `-league-reset` order carries every file of every mod**,
   and the Coordinator's signature covers it. A member rebuilds its rules from
