@@ -321,6 +321,10 @@ type AttackResult struct {
 	// until Protocol 4.
 	Report *Msg `json:"ReportMsg,omitempty"`
 	Score  int  `json:",omitempty"`
+	// Extra is what a mod's ip.attack effects took from the defenders, as
+	// figures rather than words, so the attacker's board can split it among
+	// the contributors as it splits Enemy. Nil in the base rules.
+	Extra *EffectLoss `json:",omitempty"`
 	// Backfired says an S3-Sabre turned on the realm that fired it. The
 	// target's board has already opened the land for the target; the firer's
 	// board only reads the report.
@@ -803,6 +807,9 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// a realm reads names what it lost, and on a planet-wide strike every realm
 	// that stood used to be handed the planet's figure as if it were its own.
 	losses := make([]UnitLoss, len(defenders))
+	// What a mod's effects took from the realms that stood, for the attacker's
+	// report. Empty in the base rules.
+	var extra AttackLoss
 	for i, e := range defenders {
 		losses[i] = loseForcesSplit(e, defLost, jetLost)
 		res.Enemy.Troopers += losses[i].Troopers
@@ -820,8 +827,15 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		// who stood is told: a planet-wide strike bleeds every realm, and only
 		// the strongest of them was hearing about it.
 		for i, e := range defenders {
-			e.addEvent(invasionReport(atk, false, losses[i], 0, theirs))
+			also, got := w.remoteAttackEffects(EffectIPAttackLost, e, &extra)
+			res.LandTaken += got
+			ev := invasionReport(atk, false, losses[i], got, theirs)
+			if got > 0 {
+				ev = sentences(ev, sayN("You also lost {n} region!", "You also lost {n} regions!", "n", "n", got))
+			}
+			e.addEvent(sentences(ev, also))
 		}
+		res.Extra = optLoss(extra)
 		// The whole planet hears it: an interplanetary exchange is planet against
 		// planet, and until this the defending board printed nothing at all while
 		// its scores moved (#108).
@@ -873,8 +887,11 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		// The same block knocks a fifth off the realm's HeadQuarters
 		// (InvasionHQLossDivisor), whatever the regions came to.
 		e.HQ -= e.HQ / InvasionHQLossDivisor
-		e.addEvent(invasionReport(atk, true, losses[i], take, theirs))
+		also, got := w.remoteAttackEffects(EffectIPAttackWon, e, &extra)
+		land += got
+		e.addEvent(sentences(invasionReport(atk, true, losses[i], take+got, theirs), also))
 	}
+	res.Extra = optLoss(extra)
 	if planetWide {
 		w.postNews(fmt.Sprintf("%s struck the whole planet, carrying off %s regions and %s of our forces!",
 			raider(atk), numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
@@ -886,6 +903,38 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	res.Won = true
 	res.Outcome = OutcomeWon
 	return res
+}
+
+// EffectLoss is an AttackLoss on the wire. Units is in AttackKillGoods order.
+type EffectLoss struct {
+	Waste     int   `json:",omitempty"`
+	Destroyed int   `json:",omitempty"`
+	People    int   `json:",omitempty"`
+	Food      int   `json:",omitempty"`
+	HQ        int   `json:",omitempty"`
+	Morale    int   `json:",omitempty"`
+	Support   int   `json:",omitempty"`
+	Units     []int `json:",omitempty"`
+}
+
+// optLoss is l to send home, or nil when it took nothing. Captured stays
+// behind: it travels as LandTaken.
+func optLoss(l AttackLoss) *EffectLoss {
+	l.Captured = 0
+	if l == (AttackLoss{}) {
+		return nil
+	}
+	return &EffectLoss{Waste: l.Waste, Destroyed: l.Destroyed, People: l.People, Food: l.Food,
+		HQ: l.HQ, Morale: l.Morale, Support: l.Support, Units: l.Units[:]}
+}
+
+// loss is e back as an AttackLoss. A Units list of another length fills what
+// it can.
+func (e *EffectLoss) loss() AttackLoss {
+	l := AttackLoss{Waste: e.Waste, Destroyed: e.Destroyed, People: e.People, Food: e.Food,
+		HQ: e.HQ, Morale: e.Morale, Support: e.Support}
+	copy(l.Units[:], e.Units)
+	return l
 }
 
 // invasionReport is the private report a realm reads after an interplanetary

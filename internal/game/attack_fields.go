@@ -99,13 +99,17 @@ func (r *Rules) validateAttacks(bad func(format string, a ...any)) {
 			bad("attacks.%s: missing", kind)
 			continue
 		}
-		if row := attackKindOf(kind); row.RemoteTarget {
+		row := attackKindOf(kind)
+		if row.RemoteTarget {
 			if fx.Attacker != noEffect() {
 				bad("attacks.%s.attacker: this missile comes from another board, so it has no attacker effects", kind)
 			}
 			if !fx.Target.Capture.IsZero() {
 				bad("attacks.%s.target.capture: the attacker is on another board and cannot receive land", kind)
 			}
+		}
+		if row.AttackerAway && !fx.Attacker.Capture.IsZero() {
+			bad("attacks.%s.attacker.capture: the target is on another board and cannot receive land", kind)
 		}
 		for _, side := range AttackSides {
 			set := *fx.Side(side)

@@ -196,14 +196,16 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		}
 		captured = d.Regions.remove(captured).Total() // remove caps at the defender's land
 		d.syncLand()
+		// A mod's effects for a win come before the total-conquest test, so one
+		// that takes the last regions is a conquest, and before the capture is
+		// placed, so an attacker set that wastes or destroys land cannot reach
+		// regions the session is about to park. Empty in the base rules.
+		wonEvent, wonReport, modCaptured := w.conventionalEffects(EffectConventionalWon, a, d)
+		captured += modCaptured
 		// Placed in this same save as Coastal, where the AI keeps it; a player's
 		// session parks it untyped for the picker (ParkUntyped).
 		a.Regions.Coastal += captured
 		a.syncLand()
-		// A mod's effects for a win come before the total-conquest test, so one
-		// that takes the last regions is a conquest. Empty in the base rules.
-		wonEvent, wonReport, modCaptured := w.conventionalEffects(EffectConventionalWon, a, d)
-		captured += modCaptured
 
 		// Score is per REGION taken, and a total conquest pays better than an
 		// ordinary win — BRE's two award sites in resolve_regular_attack, told

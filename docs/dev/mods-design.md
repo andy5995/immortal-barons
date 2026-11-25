@@ -136,19 +136,36 @@ The League Coordinator chooses the mods; members install nothing.
   newlines are part of what the hash covers. Every other field of a mod
   reference is scrubbed like the rest of the packet, and the mod reader refuses
   a control character in each manifest field it shows.
-- **Arriving missiles and the S3-Sabre are moddable; the rest of
-  interplanetary play is not.** An arriving missile resolves on the target's
-  board under that board's rules, and every board in a league plays the same
-  mods (the ruleset fingerprint holds a packet from a board whose rules
-  differ), so the kinds `ip.nuclear`, `ip.chemical` and `sabre.*` read the
-  attack table. Only their target set applies, since the attacker's realm is
-  on another board, and `Rules.Validate` refuses an attacker set or a
+- **Arriving missiles, the S3-Sabre and interplanetary attacks are moddable;
+  the rest of interplanetary play is not.** An arriving missile resolves on
+  the target's board under that board's rules, and every board in a league
+  plays the same mods (the ruleset fingerprint holds a packet from a board
+  whose rules differ), so the kinds `ip.nuclear`, `ip.chemical` and `sabre.*`
+  read the attack table. Only their target set applies, since the attacker's
+  realm is on another board, and `Rules.Validate` refuses an attacker set or a
   `capture` on them; no packet carries a second realm's change. Still
   constant, with no key yet: the remote tank curve, the share of a
-  HeadQuarters a winning invasion takes, a Sabotage HQ agent's points, and the
-  interplanetary conventional attack (`ibbs_attack.go`), whose resolver is
-  tied to the packet's strengths. A key for one needs every board's resolver
-  to agree, which the fingerprint now enforces.
+  HeadQuarters a winning invasion takes, and a Sabotage HQ agent's points.
+  Bombing runs and terror ops are out of scope: they hit planets and markets,
+  not a realm's effect set.
+- **One pair of kinds, `ip.attack.won` and `ip.attack.lost`, serves every
+  interplanetary attack** (Quick Strike, Normal Attack, Extended Battle and
+  Group Attack). The resolver's battle, capture, losses and HQ share stay
+  built in (`resolveRemoteAttack` is not moved into the table); the sets add
+  to them, and only when a battle was fought, never for NOT FOUND or
+  PROTECTED. The Target set runs on the defending board in
+  `resolveRemoteAttack`, after the built-in outcome, on each realm that stood.
+  Its `capture` is added to `LandTaken`, so it travels home and the existing
+  spoils code splits it among the contributors; nobody on the defending board
+  receives it. The Attacker set runs on the attacker's own board in
+  `applyAttackResult`, picked by `res.Won`, on each contributor's realm there,
+  in full, as if it had attacked alone; its `capture` is refused by `Validate`
+  because the target is on another board. Both halves read the local board's
+  rules, which is safe because a league plays one mod set. What the target
+  set took travels home as figures, `AttackResult.Extra` (an omitempty
+  field, so a packet without it is byte-identical; it rides Protocol 8),
+  and not as words, because the home board splits it among the contributors
+  by the same share as their kills. Words could not be split.
 - **The gates, the dial and the caps stay built in.** The misfire, SDI and
   garrison rolls, the Sabre's aim, jitter and backfire, and the score draw are
   not effects. The per-kind caps (`IPMissileRegionCap`, `IPMissilePeopleCap`)

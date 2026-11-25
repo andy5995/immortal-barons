@@ -39,7 +39,8 @@ type Rules struct {
 // (TerrorHQSabotagePoints) have no key yet. A league can carry mods (every board
 // plays the same set, and the ruleset fingerprint holds packets from a board
 // whose rules differ), so they could be added. The arriving missiles and the
-// S3-Sabre are already in Rules.Attacks.
+// S3-Sabre, and the effects an interplanetary attack adds to its battle, are
+// already in Rules.Attacks.
 type HQRules struct {
 	// BuildStart is the completion percent a new HeadQuarters begins at, and
 	// BuildPerTurn what it gains each turn until it reaches 100.

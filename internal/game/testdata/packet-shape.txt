@@ -94,6 +94,7 @@ AttackResult:
   Enemy `json:",omitempty"`
   Report `json:"ReportMsg,omitempty"`
   Score `json:",omitempty"`
+  Extra `json:",omitempty"`
   Backfired `json:",omitempty"`
 UnitLoss:
   Troopers
@@ -109,6 +110,15 @@ Msg:
   J `json:"j,omitempty"`
   R `json:"r,omitempty"`
   I `json:"i,omitempty"`
+EffectLoss:
+  Waste `json:",omitempty"`
+  Destroyed `json:",omitempty"`
+  People `json:",omitempty"`
+  Food `json:",omitempty"`
+  HQ `json:",omitempty"`
+  Morale `json:",omitempty"`
+  Support `json:",omitempty"`
+  Units `json:",omitempty"`
 LeagueConfig:
   GameStartDate
   JoinDate
