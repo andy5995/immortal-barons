@@ -16,7 +16,7 @@ mods are read, applied, checked or sent.
   loader change rules for one world without touching any other test running in
   parallel, and one world plays one mod set.
 - **Every key is named in one table** (`unitFields`, `hqFields`,
-  `game.RegionFields`). Reading, `-check-mod`, `-print-base-mod` and `Diff` all
+  `game.RegionFields`, `game.AttackFields`). Reading, `-check-mod`, `-print-base-mod` and `Diff` all
   go through it, so a key cannot be readable in one place and missing in
   another.
 - **Every figure has limits tighter than its type**, chosen so the engine's
@@ -25,6 +25,26 @@ mods are read, applied, checked or sent.
   than wraps (`fitInt`). Money stays `int64` all the way to `creditGold`, which
   records what its cap discards. A new key needs a limit chosen this way, and a
   `GOARCH=386` test when it multiplies a count.
+
+## Attack effects
+
+- **One effect set, two sides.** Every kind of attack has a `target` set and an
+  `attacker` set of the same effects (`game.EffectSet`), applied target first,
+  each in the fixed order of `AttackFields`. That order and the rule that a
+  `Roll` draws a random number only when its `up` or `down` is above 0 are part
+  of the contract: they decide every later draw. A mod that sets nothing draws
+  nothing, so the base game is draw-for-draw the original (the equivalence test
+  keeps the original routines as references).
+- **Rounding is not a key.** Whether morale is rounded or truncated is a fixed
+  property of the kind (`attackKinds`), because the original's two missiles
+  differ and the binary-verified figures depend on it.
+- **A kind is a dotted name, so a section's depth varies.** `[attacks.nuclear.target]`
+  is kind `nuclear`; a kind with cases later is `conventional.won`. The reader
+  walks the nested tables down to `target` or `attacker` (`attackSections`).
+- **An option reference stands for a flat percent.** An array holds plain
+  numbers. The TOML decoder reports every key under `[attacks]` as undecoded
+  because the tables are read as `any`, so `decodeTOML` skips that subtree and
+  `applyAttacks` reports anything unknown itself.
 
 ## Options
 

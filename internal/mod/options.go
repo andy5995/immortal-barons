@@ -295,6 +295,12 @@ func (m *Mod) resolveValues(v values) (values, error) {
 			}
 		}
 	}
+	if v.Attacks != nil {
+		var err error
+		if out.Attacks, err = m.resolveAttacks(v.Attacks, "attacks", false); err != nil {
+			return values{}, err
+		}
+	}
 	return out, nil
 }
 
@@ -362,6 +368,9 @@ func (v values) apply(r *game.Rules, m *Mod) []error {
 		errs = append(errs, err)
 	}
 	if err := v.applyRegions(r); err != nil {
+		errs = append(errs, err)
+	}
+	if err := v.applyAttacks(r); err != nil {
 		errs = append(errs, err)
 	}
 	return errs

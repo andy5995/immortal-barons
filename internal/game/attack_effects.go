@@ -69,8 +69,20 @@ type EffectSet struct {
 	HQ Roll
 }
 
+// noEffect is the set that does nothing: every roll zero, all morale and
+// support kept. It is what a side with no effects holds.
+func noEffect() EffectSet {
+	return EffectSet{Morale: Fraction{1, 1}, Support: Fraction{1, 1}}
+}
+
 // IsZero reports whether the set does nothing and draws nothing.
-func (s EffectSet) IsZero() bool { return s == EffectSet{} }
+func (s EffectSet) IsZero() bool {
+	s.Morale, s.Support = Fraction{}, Fraction{}
+	return s == EffectSet{}
+}
+
+// keepsAll reports whether f leaves a figure alone.
+func (f Fraction) keepsAll() bool { return f.Num == f.Den }
 
 // AttackEffects is both sides of one kind of attack. The Target set runs
 // first, then the Attacker set. An Attacker set's Capture gives the TARGET that
@@ -122,6 +134,16 @@ var attackKinds = []attackKindRow{
 		}},
 }
 
+// EffectKinds are the kinds of attack a mod can set, in the order they are
+// listed and validated.
+func EffectKinds() []EffectKind {
+	var out []EffectKind
+	for _, r := range attackKinds {
+		out = append(out, r.Kind)
+	}
+	return out
+}
+
 func attackKindOf(k EffectKind) *attackKindRow {
 	for i := range attackKinds {
 		if attackKinds[i].Kind == k {
@@ -134,26 +156,21 @@ func attackKindOf(k EffectKind) *attackKindRow {
 // baseAttackEffects are the original's figures for each kind (balance_costs.go).
 // Nothing is set on the Attacker side: a missile costs its sender only gold.
 func baseAttackEffects() map[EffectKind]AttackEffects {
-	keepAll := Fraction{1, 1}
 	support := Fraction{StrikeSupportKeepNum, StrikeSupportKeepDen}
-	nuke := EffectSet{
-		Waste:  Roll{NukeWastePct, NukeWasteJitter, NukeWasteJitter},
-		Morale: keepAll, Support: keepAll,
-	}
-	chem := EffectSet{
-		Waste:  Roll{ChemWastePct, ChemWasteJitter, ChemWasteJitter},
-		People: Roll{Pct: ChemPopKillPct},
-		Morale: Fraction{ChemMoraleKeepNum, ChemMoraleKeepDen}, Support: support,
-	}
-	bio := EffectSet{
-		People: Roll{BioPopKillPct, BioPopKillJitterUp, BioPopKillJitterDown},
-		Morale: Fraction{1, BioMoraleDivisor}, Support: support,
-	}
+	nuke := noEffect()
+	nuke.Waste = Roll{NukeWastePct, NukeWasteJitter, NukeWasteJitter}
+	chem := noEffect()
+	chem.Waste = Roll{ChemWastePct, ChemWasteJitter, ChemWasteJitter}
+	chem.People = Roll{Pct: ChemPopKillPct}
+	chem.Morale, chem.Support = Fraction{ChemMoraleKeepNum, ChemMoraleKeepDen}, support
+	bio := noEffect()
+	bio.People = Roll{BioPopKillPct, BioPopKillJitterUp, BioPopKillJitterDown}
+	bio.Morale, bio.Support = Fraction{1, BioMoraleDivisor}, support
 	bio.Kill[KillIndex(Trooper)] = Roll{BioTroopKillPct, BioTroopKillJitterUp, BioTroopKillJitterDn}
 	return map[EffectKind]AttackEffects{
-		EffectNuclear:    {Target: nuke},
-		EffectChemical:   {Target: chem},
-		EffectBiological: {Target: bio},
+		EffectNuclear:    {Target: nuke, Attacker: noEffect()},
+		EffectChemical:   {Target: chem, Attacker: noEffect()},
+		EffectBiological: {Target: bio, Attacker: noEffect()},
 	}
 }
 
@@ -183,7 +200,7 @@ func (w *World) roll(r Roll) int {
 
 // keep is v scaled by f, rounded to the nearest or truncated.
 func keep(v int, f Fraction, rounded bool) int {
-	if f.Num == f.Den {
+	if f.keepsAll() {
 		return v
 	}
 	if rounded {
@@ -196,7 +213,7 @@ func keep(v int, f Fraction, rounded bool) int {
 // goes to. It returns what the set took.
 func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire) AttackLoss {
 	var l AttackLoss
-	if fx.IsZero() {
+	if fx.IsZero() && fx.Morale.keepsAll() && fx.Support.keepsAll() {
 		return l
 	}
 	if !fx.Waste.IsZero() {

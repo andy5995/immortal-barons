@@ -54,6 +54,16 @@ func TestExampleModFigures(t *testing.T) {
 	if got := r.Regions[game.Agricultural].Upkeep; got != 800 {
 		t.Errorf("agricultural upkeep %d, want 800", got)
 	}
+	nuke := r.Attacks[game.EffectNuclear]
+	if got := nuke.Target.Kill[game.KillIndex(game.Turret)]; got != (game.Roll{Pct: 20}) {
+		t.Errorf("nuclear turret kill %+v, want a flat 20", got)
+	}
+	if got := nuke.Attacker.People; got != (game.Roll{Pct: 1, Up: 2}) {
+		t.Errorf("nuclear blowback on people %+v, want 1 up 2", got)
+	}
+	if nuke.Target.Waste != base.Attacks[game.EffectNuclear].Target.Waste {
+		t.Error("the example changed the nuclear waste band")
+	}
 	if r.Units[game.Bomber] != base.Units[game.Bomber] {
 		t.Error("the example changed bombers")
 	}

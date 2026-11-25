@@ -33,3 +33,12 @@ upkeep = 800              # gold to keep one region each turn (base game 913)
 
 [regions.mountain]
 gold_base = 3700          # gold one region pays before the random part (base game 3550)
+
+# What an attack does. A whole number is a percent; [pct, up, down] is
+# pct + Random(up) - Random(down). The target table is the realm hit, the
+# attacker table is blowback on the realm that fired.
+[attacks.nuclear.target]
+kill_turret = 20          # a nuclear strike also destroys a fifth of the turrets
+
+[attacks.nuclear.attacker]
+people = [1, 2, 0]        # fallout kills 1 to 2 percent of the firing realm's people
