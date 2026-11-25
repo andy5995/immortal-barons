@@ -200,6 +200,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		// session parks it untyped for the picker (ParkUntyped).
 		a.Regions.Coastal += captured
 		a.syncLand()
+		// A mod's effects for a win come before the total-conquest test, so one
+		// that takes the last regions is a conquest. Empty in the base rules.
+		wonEvent, wonReport, modCaptured := w.conventionalEffects(EffectConventionalWon, a, d)
+		captured += modCaptured
 
 		// Score is per REGION taken, and a total conquest pays better than an
 		// ordinary win — BRE's two award sites in resolve_regular_attack, told
@@ -235,10 +239,14 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 			w.Kill(d)
 			fmt.Fprintf(&b, "\n"+tr("You crushed %s completely and seized the remains of its military!")+"\n", d.Name)
 		}
+		if !wonReport.IsZero() {
+			fmt.Fprintf(&b, "\n%s\n", wonReport.In(a.Language))
+		}
 		d.addEvent(sentences(
 			say("{who} attacked you and took {n} regions. You lost {lost}.",
 				"who", a.Name, "n", captured, "lost", defenderCas(dloss)),
-			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
+			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss)),
+			wonEvent))
 		w.postCombatNews(a, d, true, !d.Alive, captured)
 	} else {
 		// A repelled attack scores nothing for either side. The original's only two
@@ -255,10 +263,15 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		if a.Morale < 0 {
 			a.Morale = 0
 		}
+		lostEvent, lostReport, _ := w.conventionalEffects(EffectConventionalLost, a, d)
+		if !lostReport.IsZero() {
+			fmt.Fprintf(&b, "\n%s\n", lostReport.In(a.Language))
+		}
 		d.addEvent(sentences(
 			say("{who} attacked you and was repelled. You lost {lost}.",
 				"who", a.Name, "lost", defenderCas(dloss)),
-			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss))))
+			say("{who} lost {lost}.", "who", a.Name, "lost", attackerCasualties(aloss)),
+			lostEvent))
 		w.postCombatNews(a, d, false, false, 0)
 	}
 	return b.String(), captured

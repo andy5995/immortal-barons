@@ -63,7 +63,7 @@ func TestAttackValuesAreRefusedWithAClearMessage(t *testing.T) {
 		{"fraction as number", "[attacks.nuclear.target]\nmorale = 2\n", "want [num, den]"},
 		{"roll of wrong length", "[attacks.nuclear.target]\nwaste = [1, 2]\n", "want a whole number or [pct, up, down]"},
 		{"unknown key", "[attacks.nuclear.target]\nburn = 1\n", "attacks.nuclear.target.burn: unknown key"},
-		{"unknown kind", "[attacks.laser.target]\nwaste = 1\n", "attacks.laser: not an attack a mod can change (nuclear, chemical, biological)"},
+		{"unknown kind", "[attacks.laser.target]\nwaste = 1\n", "attacks.laser: not an attack a mod can change (nuclear, chemical, biological, conventional.won, conventional.lost)"},
 		{"keys outside a side", "[attacks.nuclear]\nwaste = 1\n", "effects go in [attacks.<kind>.target]"},
 	}
 	for _, c := range cases {
@@ -140,5 +140,31 @@ func TestPrintedBaseModReadsBackAsTheBase(t *testing.T) {
 	}
 	if d := Diff(game.BaseRules(), r); len(d) != 0 {
 		t.Errorf("the printed base mod differs from the base: %v", d)
+	}
+}
+
+func TestConventionalKindsTakeADottedSection(t *testing.T) {
+	r, err := checkValues(t, "", `
+[attacks.conventional.won.target]
+waste = 5
+kill_tank = 10
+
+[attacks.conventional.lost.attacker]
+people = 2
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Attacks[game.EffectConventionalWon].Target; got.Waste.Pct != 5 || got.Kill[game.KillIndex(game.Tank)].Pct != 10 {
+		t.Errorf("won target %+v", got)
+	}
+	if got := r.Attacks[game.EffectConventionalLost].Attacker.People.Pct; got != 2 {
+		t.Errorf("lost attacker people %d, want 2", got)
+	}
+	text := Values(game.BaseRules(), "base")
+	for _, want := range []string{"[attacks.conventional.won.target]", "[attacks.conventional.lost.attacker]"} {
+		if !strings.Contains(text, want) {
+			t.Errorf("printed base mod lacks %q", want)
+		}
 	}
 }

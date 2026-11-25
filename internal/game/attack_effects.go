@@ -23,6 +23,10 @@ const (
 	EffectNuclear    EffectKind = "nuclear"
 	EffectChemical   EffectKind = "chemical"
 	EffectBiological EffectKind = "biological"
+	// A same-planet attack's own battle is not in the table; these add to it,
+	// the first on a win and the second when the attacker is repelled.
+	EffectConventionalWon  EffectKind = "conventional.won"
+	EffectConventionalLost EffectKind = "conventional.lost"
 )
 
 // Roll is a percentage drawn as Pct + Random(Up) - Random(Down), held to 0..100.
@@ -97,7 +101,8 @@ type attackKindRow struct {
 	// Weapon names the attack in a headline built from the loss list.
 	Weapon string
 	// ScoreRoll is the Score a launch pays the attacker, drawn Random(ScoreRoll),
-	// and ScoreFirst says whether the draw comes before the damage.
+	// and ScoreFirst says whether the draw comes before the damage. A
+	// ScoreRoll of 0 draws nothing: the conventional kinds are not launches.
 	ScoreRoll  int
 	ScoreFirst bool
 	// MoraleRounded: morale is rounded to the nearest, as the chemical strike
@@ -106,8 +111,13 @@ type attackKindRow struct {
 	// The headline names these effects of the Target set. A loss one of them
 	// took is in the headline; any other loss follows as an extra sentence.
 	NamesWaste, NamesPeople, NamesTroopers bool
+	// CaptureAsCoastal: land the Target set captures is placed as Coastal for
+	// the attacker, like the battle's own capture, and counted in it (see
+	// Attack), so the caller parks one total.
+	CaptureAsCoastal bool
 	// Headline is the target's event and the attacker's report when the
-	// headline's effects are in play.
+	// headline's effects are in play. Nil for a kind whose attack writes its
+	// own report.
 	Headline func(from, who string, l AttackLoss) (Msg, string)
 }
 
@@ -132,6 +142,8 @@ var attackKinds = []attackKindRow{
 					"from", from, "troopers", t, "people", l.People),
 				fmt.Sprintf("Your plague killed %d of %s's troopers and %d civilians, and took half their morale with it.", t, who, l.People)
 		}},
+	{Kind: EffectConventionalWon, CaptureAsCoastal: true},
+	{Kind: EffectConventionalLost},
 }
 
 // EffectKinds are the kinds of attack a mod can set, in the order they are
@@ -171,6 +183,9 @@ func baseAttackEffects() map[EffectKind]AttackEffects {
 		EffectNuclear:    {Target: nuke, Attacker: noEffect()},
 		EffectChemical:   {Target: chem, Attacker: noEffect()},
 		EffectBiological: {Target: bio, Attacker: noEffect()},
+		// The battle, its capture and its losses stay in Attack; a mod adds to them.
+		EffectConventionalWon:  {Target: noEffect(), Attacker: noEffect()},
+		EffectConventionalLost: {Target: noEffect(), Attacker: noEffect()},
 	}
 }
 
@@ -211,7 +226,7 @@ func keep(v int, f Fraction, rounded bool) int {
 
 // applySet runs one effect set against victim; other is the realm a capture
 // goes to. It returns what the set took.
-func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire) AttackLoss {
+func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire, coastal bool) AttackLoss {
 	var l AttackLoss
 	if fx.IsZero() && fx.Morale.keepsAll() && fx.Support.keepsAll() {
 		return l
@@ -227,8 +242,9 @@ func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire
 		l.Captured = victim.Regions.remove(pctOf(victim.Land, w.roll(fx.Capture))).Total()
 		victim.syncLand()
 		// An AI realm never types untyped land (only a player's turn does), so
-		// it gets the land as Coastal, where the AI keeps it.
-		if other.Owner == "" {
+		// it gets the land as Coastal, where the AI keeps it. So does a
+		// battle's winner, whose caller parks the whole capture at once.
+		if other.Owner == "" || coastal {
 			other.Regions.Coastal += l.Captured
 			other.syncLand()
 		} else {
@@ -266,8 +282,8 @@ func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire
 func (w *World) applyAttack(kind EffectKind, a, d *Empire) (target, attacker AttackLoss) {
 	row := attackKindOf(kind)
 	fx := w.attackEffects(kind)
-	target = w.applySet(fx.Target, row, d, a)
-	attacker = w.applySet(fx.Attacker, row, a, d)
+	target = w.applySet(fx.Target, row, d, a, row.CaptureAsCoastal)
+	attacker = w.applySet(fx.Attacker, row, a, d, false)
 	return target, attacker
 }
 
@@ -306,6 +322,16 @@ func (l AttackLoss) parts(row *attackKindRow, extra bool) []Msg {
 	return p
 }
 
+// attackCost words what an attack cost its own side, for the target's event
+// and for the attacker's report; both are zero when it cost nothing.
+func attackCost(row *attackKindRow, from string, at AttackLoss) (event, report Msg) {
+	own := at.parts(row, false)
+	if len(own) == 0 {
+		return Msg{}, Msg{}
+	}
+	return say("It also cost {from} {lost}.", "from", from, "lost", own), say("It also cost you {lost}.", "lost", own)
+}
+
 // attackNews words a landed strike: the event the target reads and the report
 // the attacker gets. The kind's own headline leads while every effect it names
 // is in play, and what else the target lost follows in one sentence. A mod
@@ -337,9 +363,10 @@ func (w *World) attackNews(row *attackKindRow, from, who string, t, at AttackLos
 			report += " " + also.English()
 		}
 	}
-	if own := at.parts(row, false); len(own) > 0 {
-		ev = sentences(ev, say("It also cost {from} {lost}.", "from", from, "lost", own))
-		report += " " + say("It also cost you {lost}.", "lost", own).English()
+	cost, costReport := attackCost(row, from, at)
+	ev = sentences(ev, cost)
+	if !costReport.IsZero() {
+		report += " " + costReport.English()
 	}
 	return ev, report
 }
@@ -358,15 +385,35 @@ func (w *World) localStrike(kind EffectKind, a, d *Empire, cost int64) (string, 
 	// The Score is a draw, not a share of the damage: a strike that took
 	// nothing still scores. The plague's lands on the sale, before any damage
 	// is rolled; the other two follow the damage.
-	if row.ScoreFirst {
+	if row.ScoreFirst && row.ScoreRoll > 0 {
 		addScore(a, w.rng.Intn(row.ScoreRoll))
 	}
 	t, at := w.applyAttack(kind, a, d)
-	if !row.ScoreFirst {
+	if !row.ScoreFirst && row.ScoreRoll > 0 {
 		addScore(a, w.rng.Intn(row.ScoreRoll))
 	}
 	ev, report := w.attackNews(row, a.Name, d.Name, t, at)
 	d.addEvent(ev)
 	w.postStrikeNews(a, d, string(kind))
 	return report, nil
+}
+
+// conventionalEffects applies a conventional attack's won or lost set and words
+// what it took, as a line for the defender's event and one for the attacker's
+// report. Both are zero when nothing was taken, which is always so in the base
+// rules, where the sets are empty. captured is the land a won set took for the
+// attacker, placed as Coastal and left for the battle to count with its own
+// capture, so the sentence does not repeat it.
+func (w *World) conventionalEffects(kind EffectKind, a, d *Empire) (event, report Msg, captured int) {
+	row := attackKindOf(kind)
+	t, at := w.applyAttack(kind, a, d)
+	if row.CaptureAsCoastal {
+		captured, t.Captured = t.Captured, 0
+	}
+	var took Msg
+	if lost := t.parts(row, false); len(lost) > 0 {
+		took = say("It also took {lost}.", "lost", lost)
+	}
+	costEv, costRep := attackCost(row, a.Name, at)
+	return sentences(took, costEv), sentences(took, costRep), captured
 }

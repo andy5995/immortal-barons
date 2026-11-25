@@ -128,10 +128,21 @@ To see every value a mod can change, as the game sets it without mods, use
 ### Attack effects
 
 What a missile does is set by a table of effects, one for each kind of attack:
-`nuclear`, `chemical` and `biological`. Each kind has two tables.
+`nuclear`, `chemical`, `biological`, `conventional.won` and
+`conventional.lost`. Each kind has two tables.
 `[attacks.<kind>.target]` is what the attack does to the realm it hits.
 `[attacks.<kind>.attacker]` is what it does back to the realm that fired it.
 The base game has nothing in the attacker tables.
+
+The battle of a same-planet attack does not change: its losses, its capture of
+regions and its score are as before. The two `conventional` kinds add to it,
+`conventional.won` when the attacker wins and `conventional.lost` when the
+attacker is repelled. They are empty in the base game. The sections are written
+as `[attacks.conventional.won.target]` and so on. Regions that
+`conventional.won` captures count as captured by the battle: they are in its
+report, its score and the regions the winner types. A realm left with no
+people, or with no land by anything but a won same-planet attack, falls at the
+next daily check and not at once.
 
 Any kind may use any effect. The effects are `waste`, `destroy` and `capture`
 (a percent of the regions), `people`, one `kill_<unit>` for each unit, `food`,

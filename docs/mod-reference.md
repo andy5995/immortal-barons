@@ -97,7 +97,7 @@ The region types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `
 
 ### Attacks
 
-The kinds of attack are `nuclear`, `chemical`, `biological`. Each kind has two tables. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes.
+The kinds of attack are `nuclear`, `chemical`, `biological`, `conventional.won`, `conventional.lost`. Each kind has two tables. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes. The two `conventional` kinds do not replace the same-planet attack's battle, its capture or its losses, which are not moddable: they add to it, `conventional.won` when the attacker wins and `conventional.lost` when it is repelled, and are empty in the base game.
 
 A key marked as a percent takes a whole number, a flat percent, or `[pct, up, down]`: the percent drawn as `pct + Random(up) - Random(down)` and held to 0 to 100. A draw is made only when `up` or `down` is above 0. Every `pct`, `up` and `down` is 0 to 100. `morale` and `support` take `[num, den]`, with `den` 1 to 1,000 and `num` 0 to `den`. In the attacker's table, `capture` gives the target that share of the attacker's regions.
 
