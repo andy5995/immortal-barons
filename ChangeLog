@@ -5,25 +5,7 @@ Immortal Barons ChangeLog
   * The World Report can be read in the game, from (7) on the opening menu
   * Replying to local mail asks whether it goes to everyone the message went
     to, the author only, or chosen realms
-  * Mods can change unit costs, net worth, upkeep, prices, offense and defense
-    on a stand-alone board, turned on from the settings editor; see
-    docs/mods.md and -check-mod
-  * A mod can carry a Starlark script that decides pirate raids
-  * Mods can change the HeadQuarters: its price, build rate, battle loss, and
-    the strength it adds to any unit
-  * Mods can change what each region type yields and costs (gold, food,
-    population room, upkeep, unit production, research), and give any type a
-    yield it lacks, such as food from deserts
-  * A mod can carry a Starlark script for each region type, regions/<type>.star,
-    that changes that type's figures realm by realm
-  * A mod names the mod format it was written for, mod_api, in mod.toml
-  * Mods can declare options, bools and number ranges, that the sysop sets at
-    reset
-  * -reload-mods puts a changed mod into a game in progress, for testing
-  * -init-mod creates an empty mod to start from
-  * The sysop panel lists each board's mods and runs -check-mod on them
-  * League games can play mods: the Coordinator's -league-reset carries them to
-    every board
+  * Initial mod support; see docs/mods.md
 
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset
