@@ -66,8 +66,18 @@ func (w *World) applyAttackResult(res AttackResult, spy *SpyReport) {
 			land = shares[i].Land
 		}
 		e.PendingRegions += land
-		kills := shareOfLoss(res.Enemy, killShare(sent.Contributors, c))
-		e.addEvent(strikeReport(sent, res, c.AttackForce, back, land, kills))
+		frac := killShare(sent.Contributors, c)
+		kills := shareOfLoss(res.Enemy, frac)
+		report := strikeReport(sent, res, c.AttackForce, back, land, kills)
+		// A battle was fought only when the answer is a win or a repulse. What a
+		// mod's effects took from the defenders, this realm's share as with its
+		// kills, and what they cost this realm (each contributor as if it had
+		// attacked alone), are told after it.
+		if o := res.outcome(); o == OutcomeWon || o == OutcomeRepelled {
+			took := remoteAttackTook(res.Won, res.Extra, frac, land)
+			report = lines(report, sentences(took, w.homeAttackEffects(res.Won, e)))
+		}
+		e.addEvent(report)
 	}
 	if line := w.returnNews(sent, res); line != "" {
 		w.postNews(line)

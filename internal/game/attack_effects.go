@@ -32,6 +32,13 @@ const (
 	// not on this board.
 	EffectIPNuclear  EffectKind = "ip.nuclear"
 	EffectIPChemical EffectKind = "ip.chemical"
+	// An interplanetary attack of any type, Group Attack included, that fought
+	// a battle. The Target set runs on the defending board after the resolver's
+	// own outcome; the Attacker set runs on the attacker's board when the
+	// answer comes home, on each realm that contributed.
+	EffectIPAttackWon  EffectKind = "ip.attack.won"
+	EffectIPAttackLost EffectKind = "ip.attack.lost"
+
 	// One kind for each row of the S3-Sabre's dial. The dial's aim, its
 	// backfire and the gates it meets stay built in.
 	EffectSabreIntelligence  EffectKind = "sabre.intelligence"
@@ -123,15 +130,18 @@ type attackKindRow struct {
 	MoraleRounded bool
 	// The headline names these effects of the Target set. A loss one of them
 	// took is in the headline; any other loss follows as an extra sentence.
-	NamesWaste, NamesPeople, NamesTroopers bool
-	// CaptureAsCoastal: land the Target set captures is placed as Coastal for
-	// the attacker, like the battle's own capture, and counted in it (see
-	// Attack), so the caller parks one total.
+	NamesWaste, NamesPeople, NamesTroopers, NamesMorale bool
+	// CaptureAsCoastal: land the Target set captures is left for the caller,
+	// which places it as Coastal with the battle's own capture and counts it
+	// there (see Attack), so the session parks one total.
 	CaptureAsCoastal bool
 	// RemoteTarget marks a kind that arrives from another board: only its
 	// Target set applies, and that set cannot capture, since the attacker's
 	// realm is not here to receive the land (see Rules.Validate).
 	RemoteTarget bool
+	// AttackerAway marks a kind whose target is on another board when its
+	// Attacker set runs, so that set cannot capture (see Rules.Validate).
+	AttackerAway bool
 	// WasteCap and PeopleCap, when above 0, hold the regions made waste and the
 	// people killed by one strike to that many, whatever a mod sets.
 	WasteCap, PeopleCap int
@@ -164,14 +174,14 @@ var attackKinds = []attackKindRow{
 				fmt.Sprintf("Your nuclear strike turned %d of %s's regions into waste.", l.Waste, who)
 		}},
 	{Kind: EffectChemical, Weapon: msgid("chemical strike"), ScoreRoll: ChemScoreRoll, MoraleRounded: true,
-		NamesWaste: true, NamesPeople: true,
+		NamesWaste: true, NamesPeople: true, NamesMorale: true,
 		Headline: func(from, who string, l AttackLoss) (Msg, string) {
 			return say("{from}'s chemical strike laid waste to {n} of your regions and killed {people} of your people; famine follows.",
 					"from", from, "n", l.Waste, "people", l.People),
 				fmt.Sprintf("Your gas laid waste to %d of %s's regions and killed %d of their people; their morale and support are broken.", l.Waste, who, l.People)
 		}},
 	{Kind: EffectBiological, Weapon: msgid("plague"), ScoreRoll: BioScoreRoll, ScoreFirst: true,
-		NamesPeople: true, NamesTroopers: true,
+		NamesPeople: true, NamesTroopers: true, NamesMorale: true,
 		Headline: func(from, who string, l AttackLoss) (Msg, string) {
 			t := l.Units[KillIndex(Trooper)]
 			return say("{from}'s plague killed {troopers} of your troopers and {people} of your people; famine follows.",
@@ -180,6 +190,8 @@ var attackKinds = []attackKindRow{
 		}},
 	{Kind: EffectConventionalWon, CaptureAsCoastal: true},
 	{Kind: EffectConventionalLost},
+	{Kind: EffectIPAttackWon, AttackerAway: true},
+	{Kind: EffectIPAttackLost, AttackerAway: true},
 	{Kind: EffectIPNuclear, Weapon: msgid("nuclear strike"), NamesWaste: true, RemoteTarget: true, WasteCap: IPMissileRegionCap,
 		Arrive: func(from, who, board string, l AttackLoss) (Msg, Msg) {
 			return say("{from}'s nuclear strike turned {n} of your regions into waste.", "from", from, "n", l.Waste),
@@ -253,6 +265,8 @@ func baseAttackEffects() map[EffectKind]AttackEffects {
 		// The battle, its capture and its losses stay in Attack; a mod adds to them.
 		EffectConventionalWon:  {Target: noEffect(), Attacker: noEffect()},
 		EffectConventionalLost: {Target: noEffect(), Attacker: noEffect()},
+		EffectIPAttackWon:      {Target: noEffect(), Attacker: noEffect()},
+		EffectIPAttackLost:     {Target: noEffect(), Attacker: noEffect()},
 		EffectIPNuclear:        {Target: ipNuke, Attacker: noEffect()},
 		EffectIPChemical:       {Target: ipChem, Attacker: noEffect()},
 		EffectSabreIntelligence: {Target: sabreSet(func(e *EffectSet) {
@@ -287,7 +301,9 @@ func (w *World) attackEffects(kind EffectKind) AttackEffects {
 // AttackLoss is what one application of an effect set took.
 type AttackLoss struct {
 	Waste, Destroyed, Captured, People, Food, HQ int
-	Units                                        [numKillGoods]int
+	// Morale and Support are the points of each lost.
+	Morale, Support int
+	Units           [numKillGoods]int
 }
 
 // roll draws r.
@@ -347,14 +363,18 @@ func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire
 	if !fx.Capture.IsZero() {
 		l.Captured = victim.Regions.remove(pctOf(victim.Land, w.roll(fx.Capture))).Total()
 		victim.syncLand()
-		// An AI realm never types untyped land (only a player's turn does), so
-		// it gets the land as Coastal, where the AI keeps it. So does a
-		// battle's winner, whose caller parks the whole capture at once.
-		if other.Owner == "" || coastal {
-			other.Regions.Coastal += l.Captured
-			other.syncLand()
-		} else {
-			other.PendingRegions += l.Captured
+		// With no receiving realm here (other is nil) the land is carried to
+		// its new owner on another board. With coastal set, the caller places
+		// it with the battle's own capture.
+		if other != nil && !coastal {
+			// An AI realm never types untyped land (only a player's turn does),
+			// so it gets the land as Coastal, where the AI keeps it.
+			if other.Owner == "" {
+				other.Regions.Coastal += l.Captured
+				other.syncLand()
+			} else {
+				other.PendingRegions += l.Captured
+			}
 		}
 	}
 	if !fx.People.IsZero() {
@@ -377,8 +397,10 @@ func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire
 		l.Food = w.share(row, keyFood, victim.Food, fx.Food, base.Food)
 		victim.Food -= l.Food
 	}
+	morale, support := victim.Morale, victim.Support
 	victim.Morale = keep(victim.Morale, fx.Morale, row.MoraleRounded)
 	victim.Support = keep(victim.Support, fx.Support, true)
+	l.Morale, l.Support = morale-victim.Morale, support-victim.Support
 	if !fx.HQ.IsZero() {
 		l.HQ = min(w.roll(fx.HQ), victim.HQ)
 		victim.HQ -= l.HQ
@@ -402,6 +424,8 @@ var (
 	lostCaptured  = msgidN("{n} Region seized", "{n} Regions seized")
 	lostPeople    = msgidN("{n} Person", "{n} People")
 	lostHQ        = msgidN("{n} HeadQuarters Point", "{n} HeadQuarters Points")
+	lostMorale    = msgidN("{n} point of morale", "{n} points of morale")
+	lostSupport   = msgidN("{n} point of support", "{n} points of support")
 )
 
 // parts lists the losses as counted phrases, in the order of EffectSet. With
@@ -431,6 +455,12 @@ func (l AttackLoss) parts(row *attackKindRow, extra bool) []Msg {
 		}
 	}
 	add(Food.Counted, l.Food)
+	// A headline that names morale covers support too: both kinds that name
+	// it break the two together.
+	if !(extra && row.NamesMorale) {
+		add(lostMorale, l.Morale)
+		add(lostSupport, l.Support)
+	}
 	add(lostHQ, l.HQ)
 	return p
 }
@@ -535,11 +565,18 @@ func (w *World) localStrike(kind EffectKind, a, d *Empire, cost int64) (string, 
 // what it took, as a line for the defender's event and one for the attacker's
 // report. Both are zero when nothing was taken, which is always so in the base
 // rules, where the sets are empty. captured is the land a won set took for the
-// attacker, placed as Coastal and left for the battle to count with its own
+// attacker, not yet placed: the battle places and counts it with its own
 // capture, so the sentence does not repeat it.
 func (w *World) conventionalEffects(kind EffectKind, a, d *Empire) (event, report Msg, captured int) {
 	row := attackKindOf(kind)
-	t, at := w.applyAttack(kind, a, d)
+	fx := w.attackEffects(kind)
+	t := w.applySet(fx.Target, row, d, a, row.CaptureAsCoastal)
+	// A realm the attack has left with no land is conquered and receives
+	// nothing, so the attacker set's capture is not taken.
+	if d.Land <= 0 {
+		fx.Attacker.Capture = Roll{}
+	}
+	at := w.applySet(fx.Attacker, row, a, d, false)
 	if row.CaptureAsCoastal {
 		captured, t.Captured = t.Captured, 0
 	}
@@ -569,5 +606,84 @@ func (w *World) arrivingEffects(kind EffectKind, d *Empire, from string) (event,
 func (w *World) headlineInPlay(row *attackKindRow) bool {
 	fx := w.attackEffects(row.Kind).Target
 	return !(row.NamesWaste && fx.Waste.IsZero()) && !(row.NamesPeople && fx.People.IsZero()) &&
-		!(row.NamesTroopers && fx.Kill[KillIndex(Trooper)].IsZero())
+		!(row.NamesTroopers && fx.Kill[KillIndex(Trooper)].IsZero()) &&
+		!(row.NamesMorale && fx.Morale.keepsAll())
+}
+
+// add sums o into l, for the effects one strike has on several realms.
+func (l *AttackLoss) add(o AttackLoss) {
+	l.Waste += o.Waste
+	l.Destroyed += o.Destroyed
+	l.Captured += o.Captured
+	l.People += o.People
+	l.Food += o.Food
+	l.HQ += o.HQ
+	l.Morale += o.Morale
+	l.Support += o.Support
+	for i := range l.Units {
+		l.Units[i] += o.Units[i]
+	}
+}
+
+// shareOf is frac of every figure of l, rounded as a returning strike's kills
+// are, for one contributor's part of what a group strike took.
+func (l AttackLoss) shareOf(frac float64) AttackLoss {
+	s := AttackLoss{
+		Waste: roundShare(l.Waste, frac), Destroyed: roundShare(l.Destroyed, frac),
+		Captured: roundShare(l.Captured, frac), People: roundShare(l.People, frac),
+		Food: roundShare(l.Food, frac), HQ: roundShare(l.HQ, frac),
+		Morale: roundShare(l.Morale, frac), Support: roundShare(l.Support, frac),
+	}
+	for i := range l.Units {
+		s.Units[i] = roundShare(l.Units[i], frac)
+	}
+	return s
+}
+
+// remoteAttackEffects applies kind's Target set to a realm that stood against
+// an interplanetary attack, and returns the sentence for its event and the
+// regions the set captured. The captured regions are left out of the sentence:
+// the caller counts them with the battle's own (LandTaken), which carries them
+// home. sum collects what the set took from every realm that stood.
+func (w *World) remoteAttackEffects(kind EffectKind, e *Empire, sum *AttackLoss) (also Msg, captured int) {
+	row := attackKindOf(kind)
+	t := w.applySet(w.attackEffects(kind).Target, row, e, nil, false)
+	captured, t.Captured = t.Captured, 0
+	sum.add(t)
+	return alsoTook(t.parts(row, false)), captured
+}
+
+// remoteAttackKind is the kind of the effects an interplanetary attack's
+// outcome sets off.
+func remoteAttackKind(won bool) EffectKind {
+	if won {
+		return EffectIPAttackWon
+	}
+	return EffectIPAttackLost
+}
+
+// remoteAttackTook is the sentence for one contributor's report of what a
+// mod's ip.attack target set took from the defenders: its share of extra, and
+// on a repelled strike the regions it was given, which no battle line names.
+func remoteAttackTook(won bool, extra *EffectLoss, frac float64, land int) Msg {
+	var share AttackLoss
+	if extra != nil {
+		share = extra.loss().shareOf(frac)
+	}
+	share.Captured = 0
+	if !won {
+		share.Captured = land
+	}
+	return alsoTook(share.parts(attackKindOf(remoteAttackKind(won)), false))
+}
+
+// homeAttackEffects applies an interplanetary attack's Attacker set to one
+// realm of this board that contributed to it, as if it had attacked alone, and
+// returns the sentence for its report, zero when it cost nothing.
+func (w *World) homeAttackEffects(won bool, e *Empire) Msg {
+	kind := remoteAttackKind(won)
+	row := attackKindOf(kind)
+	l := w.applySet(w.attackEffects(kind).Attacker, row, e, nil, false)
+	_, report := attackCost(row, "", l)
+	return report
 }

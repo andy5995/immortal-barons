@@ -63,9 +63,10 @@ func TestAttackValuesAreRefusedWithAClearMessage(t *testing.T) {
 		{"fraction as number", "[attacks.nuclear.target]\nmorale = 2\n", "want [num, den]"},
 		{"roll of wrong length", "[attacks.nuclear.target]\nwaste = [1, 2]\n", "want a whole number or [pct, up, down]"},
 		{"unknown key", "[attacks.nuclear.target]\nburn = 1\n", "attacks.nuclear.target.burn: unknown key"},
-		{"unknown kind", "[attacks.laser.target]\nwaste = 1\n", "attacks.laser: not an attack a mod can change (nuclear, chemical, biological, conventional.won, conventional.lost, ip.nuclear, ip.chemical, sabre.intelligence, sabre.people, sabre.military_bases, sabre.airbases, sabre.regions, sabre.food)"},
+		{"unknown kind", "[attacks.laser.target]\nwaste = 1\n", "attacks.laser: not an attack a mod can change (nuclear, chemical, biological, conventional.won, conventional.lost, ip.attack.won, ip.attack.lost, ip.nuclear, ip.chemical, sabre.intelligence, sabre.people, sabre.military_bases, sabre.airbases, sabre.regions, sabre.food)"},
 		{"attacker on a remote missile", "[attacks.ip.chemical.attacker]\npeople = 1\n", "attacks.ip.chemical.attacker: this missile comes from another board"},
 		{"capture on a remote missile", "[attacks.sabre.food.target]\ncapture = 1\n", "attacks.sabre.food.target.capture: the attacker is on another board"},
+		{"capture in an ip attack's attacker set", "[attacks.ip.attack.won.attacker]\ncapture = 1\n", "attacks.ip.attack.won.attacker.capture: the target is on another board"},
 		{"keys outside a side", "[attacks.nuclear]\nwaste = 1\n", "effects go in [attacks.<kind>.target]"},
 	}
 	for _, c := range cases {
@@ -168,5 +169,25 @@ people = 2
 		if !strings.Contains(text, want) {
 			t.Errorf("printed base mod lacks %q", want)
 		}
+	}
+}
+
+func TestInterplanetaryAttackKindsLoad(t *testing.T) {
+	r, err := checkValues(t, "", `
+[attacks.ip.attack.won.target]
+capture = 5
+kill_tank = 10
+
+[attacks.ip.attack.lost.attacker]
+people = 2
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := r.Attacks[game.EffectIPAttackWon].Target; got.Capture.Pct != 5 || got.Kill[game.KillIndex(game.Tank)].Pct != 10 {
+		t.Errorf("won target %+v", got)
+	}
+	if got := r.Attacks[game.EffectIPAttackLost].Attacker.People.Pct; got != 2 {
+		t.Errorf("lost attacker people %d, want 2", got)
 	}
 }

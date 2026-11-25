@@ -185,3 +185,40 @@ func TestModdedWonSetThatTakesTheLastRegionsIsATotalConquest(t *testing.T) {
 		}
 	}
 }
+
+// A won set's attacker side runs before the capture is placed, so it cannot
+// waste or destroy regions the session then parks for the picker.
+func TestWonAttackerSetLeavesTheCaptureToBeParked(t *testing.T) {
+	w, a, d, f := battleWorld(8, 1000, 1_000_000, 10_000, 5_000_000)
+	moddedConventional(w, EffectConventionalWon, func(fx *AttackEffects) {
+		fx.Attacker.Destroy = Roll{Pct: 50}
+		fx.Attacker.Waste = Roll{Pct: 20}
+	})
+	a.Regions = RegionMix{Agricultural: 100}
+	a.syncLand()
+	report, captured := w.Attack(a, d, f)
+	if !strings.Contains(report, "Victory") || captured == 0 {
+		t.Fatalf("setup: the attack should win and capture land:\n%s", report)
+	}
+	w.ParkUntyped(a, captured)
+	if a.Regions.Coastal != 0 || a.PendingRegions != captured {
+		t.Errorf("coastal %d pending %d, want 0 and the %d captured", a.Regions.Coastal, a.PendingRegions, captured)
+	}
+}
+
+// A realm the won set conquers receives nothing back from the attacker set.
+func TestConqueredRealmTakesNoCaptureBack(t *testing.T) {
+	w, a, d, f := battleWorld(8, 1000, 1_000_000, 10_000, 5_000_000)
+	moddedConventional(w, EffectConventionalWon, func(fx *AttackEffects) {
+		fx.Target.Destroy = Roll{Pct: 100}
+		fx.Attacker.Capture = Roll{Pct: 10}
+	})
+	before := a.Land
+	report, captured := w.Attack(a, d, f)
+	if !strings.Contains(report, "You crushed") || d.Alive || d.Land != 0 {
+		t.Fatalf("land %d alive %v, want a conquest:\n%s", d.Land, d.Alive, report)
+	}
+	if a.Land != before+captured {
+		t.Errorf("attacker land %d, want %d + %d captured", a.Land, before, captured)
+	}
+}

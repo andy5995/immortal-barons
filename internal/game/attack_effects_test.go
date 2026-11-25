@@ -183,7 +183,7 @@ func TestModdedBlowbackHitsTheAttacker(t *testing.T) {
 	if a.Troopers != 900 || a.Morale != 40 || a.Land != 90 || d.Regions.Coastal != coastal+10 {
 		t.Errorf("attacker troopers %d morale %d land %d, target coastal %d", a.Troopers, a.Morale, a.Land, d.Regions.Coastal)
 	}
-	want := "Your nuclear strike hit " + d.Name + "'s realm and took nothing from it. It also cost you 10 Regions seized and 100 Troopers."
+	want := "Your nuclear strike hit " + d.Name + "'s realm and took nothing from it. It also cost you 10 Regions seized, 100 Troopers, and 40 points of morale."
 	if report != want {
 		t.Errorf("report %q, want %q", report, want)
 	}
@@ -246,7 +246,7 @@ func TestHeadlineNeedsEveryEffectItNames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := "Your chemical strike hit " + d.Name + "'s realm, taking 200000 People."; report != want {
+	if want := "Your chemical strike hit " + d.Name + "'s realm, taking 200000 People, 11 points of morale, and 11 points of support."; report != want {
 		t.Errorf("report %q, want %q", report, want)
 	}
 }
