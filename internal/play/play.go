@@ -453,6 +453,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			notice(s, fmt.Sprintf(i18n.T(id.Language, "Your realm %s was destroyed."), reborn))
 		}
 	}
+	created := e == nil
 	if e == nil {
 		if !joinOpen {
 			notice(s, fmt.Sprintf("The game is closed to new barons (join cutoff %s has passed).", joinDate))
@@ -545,6 +546,21 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed,
 					menu.WrapIndented("That realm name was just taken — please choose another.", "  "), ansi.Reset)
 			}
+		}
+	}
+	// A realm founded before the scheduled start can be built but not played yet.
+	// Say so now, while they are still looking at the screen that made it, and
+	// point them at the instructions rather than leave them to find the refusal.
+	if created {
+		var begins string
+		w.Read(func() {
+			if !w.Config.GameStarted(w.Today) {
+				begins = w.Config.GameStartDate
+			}
+		})
+		if begins != "" {
+			notice(s, fmt.Sprintf(i18n.T(lang, "The game has not started yet; it begins %s. Until then, you may read the game instructions from the main menu."), begins))
+			farewell(s, term, lang)
 		}
 	}
 	// The "since your last play" events are shown by runTurn after the caller

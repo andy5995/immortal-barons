@@ -93,7 +93,7 @@ const (
 	helpProtection         = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
 	helpGameLength         = "Game days before this board's game ends. The realm with the most regions is crowned Planetary Master, every realm is removed, and a new game starts. 0 means the game never ends."
 	helpIdleRemove         = "Days a realm may go unplayed before it is removed. A realm whose owner never played a turn is removed the next day. 0 never removes anything."
-	helpStartDate          = "The date the game starts. Before it, players can join and play their first turns, but no new day begins. Blank starts the game right away."
+	helpStartDate          = "The date the game starts. Before it, players can join and read the instructions, but cannot play and no new day begins. Blank starts the game right away."
 	helpJoinDate           = "New players may not join after this date. Blank leaves joining open."
 	helpInitialLand        = "Extra regions each new realm may buy when it is created, on top of its first day's allowance."
 	helpLandPerDay         = "Regions added each day to what each realm may buy."
