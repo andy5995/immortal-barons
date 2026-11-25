@@ -387,3 +387,38 @@ gold_base = { option = "n" }
 		t.Errorf("HQ build per turn %d, want 25", got)
 	}
 }
+
+// A section whose bool option is off is still held to the limits, so a sysop
+// who turns the option on later is not the first to find the mod refused.
+func TestSwitchedOffSectionIsHeldToTheLimits(t *testing.T) {
+	opts := `
+[options.harsh]
+type = "bool"
+label = "Harsh"
+default = false
+`
+	values := `
+[units.tank]
+build_cost = 0
+
+[when.harsh.units.tank]
+build_cost = 0
+
+[when.harsh.attacks.nuclear.target]
+waste = 101
+`
+	dir := writeMod(t, t.TempDir(), "harsh", map[string]string{ManifestFile: manifest("harsh") + opts, ValuesFile: values})
+	_, _, err := Check(dir)
+	if err == nil {
+		t.Fatal("Check passed a switched-off section over the limits")
+	}
+	msg := err.Error()
+	if !strings.Contains(msg, "when.harsh: attacks.nuclear.target.waste: percent 101 is outside 0 to 100") {
+		t.Errorf("the off section's limit is not reported:\n%s", msg)
+	}
+	// The tank's cost is already wrong without the section; it is not
+	// reported a second time against it.
+	if strings.Contains(msg, "when.harsh: tank") {
+		t.Errorf("an error of the plain values was blamed on the section:\n%s", msg)
+	}
+}

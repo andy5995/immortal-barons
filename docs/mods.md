@@ -299,7 +299,9 @@ build_cost = 400
 ```
 
 That section applies only when the bool is True. It is read after the plain
-values, so it overrides them. A script reads either kind with `option("<id>")`:
+values, so it overrides them. A section whose bool is False is still checked
+against the limits, so the mod is refused now rather than when the option is
+turned on. A script reads either kind with `option("<id>")`:
 a number is a whole number, and a bool is `True` or `False`. A chosen number
 still has to pass the figure's normal limit in the [Mod Reference](mod-reference.md).
 

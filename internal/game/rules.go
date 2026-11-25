@@ -111,9 +111,14 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 }
 
 // BaseRules returns a copy of the base rules for a mod to change.
-func BaseRules() *Rules {
-	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions), HQ: baseRules.HQ,
-		Attacks: maps.Clone(baseRules.Attacks)}
+func BaseRules() *Rules { return baseRules.Clone() }
+
+// Clone is a copy of r whose tables can be changed without touching r's.
+func (r *Rules) Clone() *Rules {
+	c := *r
+	c.Units, c.Regions = maps.Clone(r.Units), maps.Clone(r.Regions)
+	c.RegionBrains, c.Attacks = maps.Clone(r.RegionBrains), maps.Clone(r.Attacks)
+	return &c
 }
 
 // rules is the set w plays by: the base set unless mods were loaded.
