@@ -385,21 +385,27 @@ func offSectionErrors(id string, section values, r *game.Rules, m *Mod) []error 
 	if errs := section.apply(off, m); len(errs) > 0 {
 		return errs
 	}
-	err := off.Validate()
-	if err == nil {
-		return nil
-	}
 	already := map[string]bool{}
-	if base := r.Validate(); base != nil {
-		for _, line := range strings.Split(base.Error(), "\n") {
-			already[line] = true
-		}
+	for _, e := range joined(r.Validate()) {
+		already[e.Error()] = true
 	}
 	var errs []error
-	for _, line := range strings.Split(err.Error(), "\n") {
-		if !already[line] {
-			errs = append(errs, fmt.Errorf("when.%s: %s", id, line))
+	for _, e := range joined(off.Validate()) {
+		if !already[e.Error()] {
+			errs = append(errs, fmt.Errorf("when.%s: %w", id, e))
 		}
 	}
 	return errs
+}
+
+// joined is the errors err was joined from, err alone when it was not joined,
+// or none.
+func joined(err error) []error {
+	if j, ok := err.(interface{ Unwrap() []error }); ok {
+		return j.Unwrap()
+	}
+	if err == nil {
+		return nil
+	}
+	return []error{err}
 }
