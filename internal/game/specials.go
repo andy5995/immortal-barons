@@ -1,9 +1,5 @@
 package game
 
-import (
-	"fmt"
-)
-
 // Strike/SDI gold costs (ChemCost, BioCost, AnnihilatorCost and the nuclear
 // pricing constants) live in balance.go, as do the SDI figures; the nuclear
 // price itself is computed per target, by NukeCostForLand below.
@@ -217,32 +213,17 @@ func ruinToWasteCapped(d *Empire, pct, cap int) int {
 func roundDiv(a, b int) int { return (2*a + b) / (2 * b) }
 
 // NuclearStrike ruins a band of the defender's regions, converting them to
-// waste. No land changes hands and nobody dies: the defender keeps every region
-// on its books, still pays upkeep on them, and earns nothing from them until
-// they are decontaminated (see DecontaminateAllowance).
+// waste. In the base rules no land changes hands and nobody dies: the defender
+// keeps every region on its books, still pays upkeep on them, and earns
+// nothing from them until they are decontaminated (see DecontaminateAllowance).
+// What a strike does is the nuclear row of Rules.Attacks (attack_effects.go),
+// which a mod may change.
 //
 // The strike is not intercepted. Nothing in the original's local nuclear path
 // consults the target's SDI or turrets — SDI shoots down interplanetary
 // missiles, not a neighbor's.
 func (w *World) NuclearStrike(a, d *Empire) (string, error) {
-	if err := payArmsDealer(a, w.NukeCost(d)); err != nil {
-		return "", err
-	}
-	// A missile aimed at a pact partner tears the pact up and costs support and
-	// morale, exactly as a regular attack does — all four share one target picker
-	// in the original (see BreachTreaty). The menu asks first.
-	w.BreachTreaty(a, d)
-
-	regions := w.nuclearEffect(d)
-
-	// The award is a draw, not a share of the damage: a strike on a small realm
-	// that ruined nothing still scores.
-	addScore(a, w.rng.Intn(NukeScoreRoll))
-
-	d.addEvent(say("{from}'s nuclear strike turned {n} of your regions into waste.", "from", a.Name, "n", regions))
-
-	w.postStrikeNews(a, d, "nuclear")
-	return fmt.Sprintf("Your nuclear strike turned %d of %s's regions into waste.", regions, d.Name), nil
+	return w.localStrike(EffectNuclear, a, d, w.NukeCost(d))
 }
 
 // DecontaminateAllowance is the most waste regions e may clean this turn: a
@@ -306,87 +287,21 @@ func (w *World) Decontaminate(e *Empire, gold int64) int {
 // does, and gasses a flat fifth of its people on top. Morale and popular
 // support both fall as well, which is the part that outlasts the casualties:
 // a gassed realm produces and fights worse for as long as it takes to win the
-// two back.
+// two back. These are the base rules' effects; a mod may change them
+// (attack_effects.go).
 //
 // Like the nuclear strike it is not intercepted — nothing in the original's
 // local chemical path reads the target's SDI, turrets or tanks — and it cannot
 // eliminate a realm: the land stays on the target's books as waste, and a
 // percentage of a population never reaches zero.
 func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
-	if err := payArmsDealer(a, w.ChemCost(d)); err != nil {
-		return "", err
-	}
-	// A missile aimed at a pact partner tears the pact up and costs support and
-	// morale, exactly as a regular attack does — all four share one target picker
-	// in the original (see BreachTreaty). The menu asks first.
-	w.BreachTreaty(a, d)
-
-	regions, people := w.chemicalEffect(d)
-
-	addScore(a, w.rng.Intn(ChemScoreRoll))
-
-	d.addEvent(say("{from}'s chemical strike laid waste to {n} of your regions and killed {people} of your people; famine follows.",
-		"from", a.Name, "n", regions, "people", people))
-
-	w.postStrikeNews(a, d, "chemical")
-	return fmt.Sprintf("Your gas laid waste to %d of %s's regions and killed %d of their people; their morale and support are broken.", regions, d.Name, people), nil
+	return w.localStrike(EffectChemical, a, d, w.ChemCost(d))
 }
 
-// BiologicalStrike kills people and troopers and halves military morale. It
-// leaves the land alone entirely — the original's routine never reaches the
-// region-to-waste helper the other two share — and, like them, it cannot
-// eliminate a realm.
+// BiologicalStrike kills people and troopers and halves military morale. In the
+// base rules it leaves the land alone entirely — the original's routine never
+// reaches the region-to-waste helper the other two share — and, like them, it
+// cannot eliminate a realm. A mod may change these effects (attack_effects.go).
 func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
-	if err := payArmsDealer(a, w.BioCost(d)); err != nil {
-		return "", err
-	}
-	// A missile aimed at a pact partner tears the pact up and costs support and
-	// morale, exactly as a regular attack does — all four share one target picker
-	// in the original (see BreachTreaty). The menu asks first.
-	w.BreachTreaty(a, d)
-	// The Score lands on the sale, before any damage is rolled, so a plague
-	// that kills nobody still pays.
-	addScore(a, w.rng.Intn(BioScoreRoll))
-
-	popPct := BioPopKillPct + w.rng.Intn(BioPopKillJitterUp) - w.rng.Intn(BioPopKillJitterDown)
-	people := int(int64(d.People) * int64(popPct) / 100) // int64: see ChemicalStrike
-	d.People -= people
-
-	troopPct := BioTroopKillPct + w.rng.Intn(BioTroopKillJitterUp) - w.rng.Intn(BioTroopKillJitterDn)
-	troops := pctOf(d.Troopers, troopPct)
-	d.Troopers -= troops
-	// A plague is worse for the army than gas and the same for the public: morale
-	// halved, support cut by a third (BRE.OVR 0x115FE / 0x11645). The halving is
-	// an integer divide, not the rounded real the chemical strike uses.
-	d.Morale /= BioMoraleDivisor
-	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
-
-	d.addEvent(say("{from}'s plague killed {troopers} of your troopers and {people} of your people; famine follows.",
-		"from", a.Name, "troopers", troops, "people", people))
-
-	w.postStrikeNews(a, d, "biological")
-	return fmt.Sprintf("Your plague killed %d of %s's troopers and %d civilians, and took half their morale with it.", troops, d.Name, people), nil
-}
-
-// nuclearEffect ruins a share of d's land into waste and reports the regions.
-// 7% ± a two-draw jitter, so the band is 5-9% and the extremes are rarer than
-// the middle.
-func (w *World) nuclearEffect(d *Empire) int {
-	pct := NukeWastePct + w.rng.Intn(NukeWasteJitter) - w.rng.Intn(NukeWasteJitter)
-	return ruinToWaste(d, pct)
-}
-
-// chemicalEffect ruins land, gasses a share of the people, and breaks morale
-// and support. 3% ± a two-draw jitter, so 1-5% — a third of the nuclear band.
-func (w *World) chemicalEffect(d *Empire) (regions, people int) {
-	pct := ChemWastePct + w.rng.Intn(ChemWasteJitter) - w.rng.Intn(ChemWasteJitter)
-	regions = ruinToWaste(d, pct)
-	// The population kill has no roll behind it at all: it is a flat share.
-	// int64 through the multiply — a big urban realm's head count times a
-	// percentage passes 2^31 on the 32-bit door builds.
-	people = int(int64(d.People) * ChemPopKillPct / 100)
-	d.People -= people
-	d.Morale = roundDiv(d.Morale*ChemMoraleKeepNum, ChemMoraleKeepDen)
-	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
-	return regions, people
+	return w.localStrike(EffectBiological, a, d, w.BioCost(d))
 }
