@@ -26,6 +26,9 @@ type Rules struct {
 	RegionBrains map[*Region]RegionBrain
 	// HQ are the HeadQuarters figures.
 	HQ HQRules
+	// Attacks is what each kind of attack does, to its target and back to its
+	// attacker (attack_effects.go).
+	Attacks map[EffectKind]AttackEffects
 }
 
 // HQRules are the HeadQuarters figures. The strength it adds to each unit is a
@@ -95,6 +98,7 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 	Food:  {},
 },
 	Regions: baseRegionRules(),
+	Attacks: baseAttackEffects(),
 	HQ: HQRules{
 		BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
 		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
@@ -105,7 +109,8 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 
 // BaseRules returns a copy of the base rules for a mod to change.
 func BaseRules() *Rules {
-	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions), HQ: baseRules.HQ}
+	return &Rules{Units: maps.Clone(baseRules.Units), Regions: maps.Clone(baseRules.Regions), HQ: baseRules.HQ,
+		Attacks: maps.Clone(baseRules.Attacks)}
 }
 
 // rules is the set w plays by: the base set unless mods were loaded.
