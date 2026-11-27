@@ -110,7 +110,11 @@ func (v values) applyAttacks(r *game.Rules) error {
 				for _, f := range game.AttackFields {
 					known = append(known, f.Key)
 				}
-				errs = append(errs, fmt.Errorf("%s: unknown key (%s)", where, strings.Join(known, ", ")))
+				hint := ""
+				if key == "capture" {
+					hint = " (did you mean capture_regions?)"
+				}
+				errs = append(errs, fmt.Errorf("%s: unknown key%s (%s)", where, hint, strings.Join(known, ", ")))
 				continue
 			}
 			var err error

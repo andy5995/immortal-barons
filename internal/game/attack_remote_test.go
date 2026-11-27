@@ -199,7 +199,7 @@ func TestRemoteKindsRefuseAnAttackerSetAndCapture(t *testing.T) {
 	r.Attacks[EffectSabreFood] = fx
 	err := r.Validate()
 	if err == nil || !strings.Contains(err.Error(), "attacks.sabre.food.attacker: this missile comes from another board") ||
-		!strings.Contains(err.Error(), "attacks.sabre.food.target.capture: the attacker is on another board") {
+		!strings.Contains(err.Error(), "attacks.sabre.food.target.capture_regions: the attacker is on another board") {
 		t.Errorf("Validate: %v", err)
 	}
 }

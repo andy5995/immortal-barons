@@ -227,8 +227,8 @@ func TestIPAttackerSetCannotCapture(t *testing.T) {
 	fx.Target.Capture = Roll{Pct: 1} // allowed: the land is carried home
 	r.Attacks[EffectIPAttackLost] = fx
 	err := r.Validate()
-	if err == nil || !strings.Contains(err.Error(), "attacks.ip.attack.lost.attacker.capture: the target is on another board") ||
-		strings.Contains(err.Error(), "target.capture") {
+	if err == nil || !strings.Contains(err.Error(), "attacks.ip.attack.lost.attacker.capture_regions: the target is on another board") ||
+		strings.Contains(err.Error(), "target.capture_regions") {
 		t.Errorf("Validate: %v", err)
 	}
 }

@@ -22,7 +22,7 @@ func TestAttackSectionsChangeTheRules(t *testing.T) {
 [attacks.nuclear.target]
 waste = [10, 2, 2]
 kill_turret = 30
-capture = 5
+capture_regions = 5
 
 [attacks.nuclear.attacker]
 people = 2
@@ -43,7 +43,7 @@ morale = [3, 4]
 	}
 	want := strings.Join([]string{
 		"attacks.nuclear.target.waste: [7, 3, 3] -> [10, 2, 2]",
-		"attacks.nuclear.target.capture: 0 -> 5",
+		"attacks.nuclear.target.capture_regions: 0 -> 5",
 		"attacks.nuclear.target.kill_turret: 0 -> 30",
 		"attacks.nuclear.attacker.people: 0 -> 2",
 		"attacks.nuclear.attacker.morale: [1, 1] -> [3, 4]",
@@ -65,8 +65,8 @@ func TestAttackValuesAreRefusedWithAClearMessage(t *testing.T) {
 		{"unknown key", "[attacks.nuclear.target]\nburn = 1\n", "attacks.nuclear.target.burn: unknown key"},
 		{"unknown kind", "[attacks.laser.target]\nwaste = 1\n", "attacks.laser: not an attack a mod can change (nuclear, chemical, biological, conventional.won, conventional.lost, ip.attack.won, ip.attack.lost, ip.nuclear, ip.chemical, sabre.intelligence, sabre.people, sabre.military_bases, sabre.airbases, sabre.regions, sabre.food)"},
 		{"attacker on a remote missile", "[attacks.ip.chemical.attacker]\npeople = 1\n", "attacks.ip.chemical.attacker: this missile comes from another board"},
-		{"capture on a remote missile", "[attacks.sabre.food.target]\ncapture = 1\n", "attacks.sabre.food.target.capture: the attacker is on another board"},
-		{"capture in an ip attack's attacker set", "[attacks.ip.attack.won.attacker]\ncapture = 1\n", "attacks.ip.attack.won.attacker.capture: the target is on another board"},
+		{"capture on a remote missile", "[attacks.sabre.food.target]\ncapture_regions = 1\n", "attacks.sabre.food.target.capture_regions: the attacker is on another board"},
+		{"capture in an ip attack's attacker set", "[attacks.ip.attack.won.attacker]\ncapture_regions = 1\n", "attacks.ip.attack.won.attacker.capture_regions: the target is on another board"},
 		{"keys outside a side", "[attacks.nuclear]\nwaste = 1\n", "effects go in [attacks.<kind>.target]"},
 	}
 	for _, c := range cases {
@@ -175,7 +175,7 @@ people = 2
 func TestInterplanetaryAttackKindsLoad(t *testing.T) {
 	r, err := checkValues(t, "", `
 [attacks.ip.attack.won.target]
-capture = 5
+capture_regions = 5
 kill_tank = 10
 
 [attacks.ip.attack.lost.attacker]

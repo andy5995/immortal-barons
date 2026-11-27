@@ -261,7 +261,7 @@ chooses them, and members install nothing.
   whose rules differ), so the kinds `ip.nuclear`, `ip.chemical` and `sabre.*`
   read the attack table. Only their target set applies, since the attacker's
   realm is on another board, and `Rules.Validate` refuses an attacker set or a
-  `capture` on them; no packet carries a second realm's change. Still
+  `capture_regions` on them; no packet carries a second realm's change. Still
   constant, with no key yet: the remote tank curve, the share of a
   HeadQuarters a winning invasion takes, and a Sabotage HQ agent's points.
   Bombing runs and terror ops are out of scope: they hit planets and markets,
@@ -274,11 +274,11 @@ chooses them, and members install nothing.
   to them, and only when a battle was fought, never for NOT FOUND or
   PROTECTED. The Target set runs on the defending board in
   `resolveRemoteAttack`, after the built-in outcome, on each realm that stood.
-  Its `capture` is added to `LandTaken`, so it travels home and the existing
+  Its `capture_regions` is added to `LandTaken`, so it travels home and the existing
   spoils code splits it among the contributors; nobody on the defending board
   receives it. The Attacker set runs on the attacker's own board in
   `applyAttackResult`, picked by `res.Won`, on each contributor's realm there,
-  in full, as if it had attacked alone; its `capture` is refused by `Validate`
+  in full, as if it had attacked alone; its `capture_regions` is refused by `Validate`
   because the target is on another board. The one exception is its unit
   capture (below), which runs on the defending board. Both halves read the local board's
   rules, which is safe because a league plays one mod set. What the target

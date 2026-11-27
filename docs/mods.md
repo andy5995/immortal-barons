@@ -195,25 +195,25 @@ next daily check and not at once.
 The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack
 of any type, Group Attack included, that fought a battle. The resolver's battle,
 capture and losses do not change. The `target` table runs on the defending board
-after the battle, and a `capture` there is carried home with the battle's own
+after the battle, and a `capture_regions` there is carried home with the battle's own
 regions and split among the contributors. Each contributor's report gives its
 own share of what the table took, as it does for the battle's kills. The
 `attacker` table runs on the attacker's board when the result comes home, on
 each realm of that board that contributed, as if it had attacked alone. It
-cannot `capture` regions, because the target is on another board. Its unit
+cannot use `capture_regions`, because the target is on another board. Its unit
 capture is the exception, and runs on the defending board (see below).
 
 The `ip.nuclear`, `ip.chemical` and `sabre` kinds are missiles that arrive from
 another board, and they act on the board that receives them. Only their
 `target` table is used: the attacker is on another board, so a non-zero
-`attacker` table or a `capture` on these kinds is an error. What stays built in
+`attacker` table or a `capture_regions` on these kinds is an error. What stays built in
 is whether a missile gets through (the misfire, SDI and garrison rolls), where
 the Sabre's dial lands, its backfire and the score. Every board in a league
 plays the same mods.
 
 Apart from those limits, any kind may use any effect, except that only the four battle kinds (`conventional.won`, `conventional.lost`, `ip.attack.won` and `ip.attack.lost`) can capture units. The effects are `waste`, `destroy` and
-`capture` (a percent of the regions), `people`, one `kill_<unit>` for each
-unit, `food`, `morale`, `support` and `hq`. In the attacker table, `capture`
+`capture_regions` (a percent of the regions), `people`, one `kill_<unit>` for each
+unit, `food`, `morale`, `support` and `hq`. In the attacker table, `capture_regions`
 gives the target that share of the attacker's regions. Captured regions arrive
 untyped for a player, who chooses the types at the start of the next turn, and
 as coastal regions for an AI baron.

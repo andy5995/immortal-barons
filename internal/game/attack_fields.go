@@ -49,7 +49,7 @@ var AttackFields = func() []AttackField {
 			Desc: "Percent of the realm's regions turned to waste. The regions stay on its books but earn nothing until cleaned."},
 		{Key: "destroy", Roll: func(s *EffectSet) *Roll { return &s.Destroy },
 			Desc: "Percent of the realm's regions destroyed outright."},
-		{Key: "capture", Roll: func(s *EffectSet) *Roll { return &s.Capture },
+		{Key: "capture_regions", Roll: func(s *EffectSet) *Roll { return &s.Capture },
 			Desc: "Percent of the realm's regions taken by the other side, as land it types at the start of its next turn."},
 		{Key: keyPeople, Roll: func(s *EffectSet) *Roll { return &s.People },
 			Desc: "Percent of the realm's people killed."},
@@ -116,11 +116,11 @@ func (r *Rules) validateAttacks(bad func(format string, a ...any)) {
 				bad("attacks.%s.attacker: this missile comes from another board, so it has no attacker effects", kind)
 			}
 			if !fx.Target.Capture.IsZero() {
-				bad("attacks.%s.target.capture: the attacker is on another board and cannot receive land", kind)
+				bad("attacks.%s.target.capture_regions: the attacker is on another board and cannot receive land", kind)
 			}
 		}
 		if row.AttackerAway && !fx.Attacker.Capture.IsZero() {
-			bad("attacks.%s.attacker.capture: the target is on another board and cannot receive land", kind)
+			bad("attacks.%s.attacker.capture_regions: the target is on another board and cannot receive land", kind)
 		}
 		if !row.CapturesUnits {
 			for _, side := range AttackSides {
