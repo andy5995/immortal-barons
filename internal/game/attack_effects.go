@@ -74,8 +74,8 @@ var AttackKillGoods = append(slices.Clone(MilitaryGoods), Agent)
 func KillIndex(g *Good) int { return slices.Index(AttackKillGoods, g) }
 
 // EffectSet is what an attack does to one realm, applied in this order: waste,
-// destroy, capture, people, Kill (in AttackKillGoods order), food, morale,
-// support, HQ.
+// destroy, capture, people, Kill (in AttackKillGoods order), CaptureUnits (in
+// MilitaryGoods order) and CaptureRandom, food, morale, support, HQ.
 type EffectSet struct {
 	// Waste, Destroy and Capture are percents of the realm's land: turned to
 	// waste, removed outright, and taken by the other side as untyped land.
@@ -84,6 +84,15 @@ type EffectSet struct {
 	People Roll
 	// Kill is the percent of each unit killed, by index in AttackKillGoods.
 	Kill [numKillGoods]Roll
+	// CaptureUnits is the percent of each military unit still alive after the
+	// kills that the other side takes, by index in MilitaryGoods (#373).
+	// CaptureRandom is that share of all the surviving units together, drawn at
+	// random across the types. CaptureFromStock, in a Target set, widens the
+	// base of a defender's capture from the units that stood in the defense to
+	// its whole remaining stock; 0 or 1.
+	CaptureUnits     [numCaptureGoods]Roll
+	CaptureRandom    Roll
+	CaptureFromStock int
 	// Food is the percent of the realm's food destroyed.
 	Food Roll
 	// Morale and Support are the part of each that is kept.
@@ -142,6 +151,9 @@ type attackKindRow struct {
 	// AttackerAway marks a kind whose target is on another board when its
 	// Attacker set runs, so that set cannot capture (see Rules.Validate).
 	AttackerAway bool
+	// CapturesUnits marks a kind whose battle lets a mod capture units: only the
+	// four that fought one.
+	CapturesUnits bool
 	// WasteCap and PeopleCap, when above 0, hold the regions made waste and the
 	// people killed by one strike to that many, whatever a mod sets.
 	WasteCap, PeopleCap int
@@ -188,10 +200,10 @@ var attackKinds = []attackKindRow{
 					"from", from, "troopers", t, "people", l.People),
 				fmt.Sprintf("Your plague killed %d of %s's troopers and %d civilians, and took half their morale with it.", t, who, l.People)
 		}},
-	{Kind: EffectConventionalWon, CaptureAsCoastal: true},
-	{Kind: EffectConventionalLost},
-	{Kind: EffectIPAttackWon, AttackerAway: true},
-	{Kind: EffectIPAttackLost, AttackerAway: true},
+	{Kind: EffectConventionalWon, CaptureAsCoastal: true, CapturesUnits: true},
+	{Kind: EffectConventionalLost, CapturesUnits: true},
+	{Kind: EffectIPAttackWon, AttackerAway: true, CapturesUnits: true},
+	{Kind: EffectIPAttackLost, AttackerAway: true, CapturesUnits: true},
 	{Kind: EffectIPNuclear, Weapon: msgid("nuclear strike"), NamesWaste: true, RemoteTarget: true, WasteCap: IPMissileRegionCap,
 		Arrive: func(from, who, board string, l AttackLoss) (Msg, Msg) {
 			return say("{from}'s nuclear strike turned {n} of your regions into waste.", "from", from, "n", l.Waste),
@@ -312,6 +324,8 @@ type AttackLoss struct {
 	// Morale and Support are the points of each lost.
 	Morale, Support int
 	Units           [numKillGoods]int
+	// Taken is the military units a capture took, in MilitaryGoods order.
+	Taken unitCounts
 }
 
 // roll draws r.
@@ -353,7 +367,7 @@ func (w *World) share(row *attackKindRow, key string, n int, r, base Roll) int {
 
 // applySet runs one effect set against victim; other is the realm a capture
 // goes to. It returns what the set took.
-func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire, coastal bool) AttackLoss {
+func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire, coastal bool, cx *captureCtx) AttackLoss {
 	var l AttackLoss
 	base := baseRules.Attacks[row.Kind].Target
 	if fx.IsZero() && fx.Morale.keepsAll() && fx.Support.keepsAll() {
@@ -401,6 +415,11 @@ func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire
 			*n -= l.Units[i]
 		}
 	}
+	var own unitCounts
+	own, l.Taken = w.takeFrom(fx, victim, other, cx)
+	if cx != nil {
+		cx.own = own
+	}
 	if !fx.Food.IsZero() {
 		l.Food = w.share(row, keyFood, victim.Food, fx.Food, base.Food)
 		victim.Food -= l.Food
@@ -421,8 +440,8 @@ func (w *World) applySet(fx EffectSet, row *attackKindRow, victim, other *Empire
 func (w *World) applyAttack(kind EffectKind, a, d *Empire) (target, attacker AttackLoss) {
 	row := attackKindOf(kind)
 	fx := w.attackEffects(kind)
-	target = w.applySet(fx.Target, row, d, a, row.CaptureAsCoastal)
-	attacker = w.applySet(fx.Attacker, row, a, d, false)
+	target = w.applySet(fx.Target, row, d, a, row.CaptureAsCoastal, nil)
+	attacker = w.applySet(fx.Attacker, row, a, d, false, nil)
 	return target, attacker
 }
 
@@ -575,22 +594,61 @@ func (w *World) localStrike(kind EffectKind, a, d *Empire, cost int64) (string, 
 // rules, where the sets are empty. captured is the land a won set took for the
 // attacker, not yet placed: the battle places and counts it with its own
 // capture, so the sentence does not repeat it.
-func (w *World) conventionalEffects(kind EffectKind, a, d *Empire) (event, report Msg, captured int) {
+func (w *World) conventionalEffects(kind EffectKind, a, d *Empire, bf battleForces) (event, report Msg, captured int) {
 	row := attackKindOf(kind)
 	fx := w.attackEffects(kind)
-	t := w.applySet(fx.Target, row, d, a, row.CaptureAsCoastal)
+	tcx := &captureCtx{allies: bf.allies}
+	t := w.applySet(fx.Target, row, d, a, row.CaptureAsCoastal, tcx)
 	// A realm the attack has left with no land is conquered and receives
-	// nothing, so the attacker set's capture is not taken.
+	// nothing, so the attacker set's captures are not taken: the conqueror
+	// seizes what it holds.
 	if d.Land <= 0 {
 		fx.Attacker.Capture = Roll{}
+		fx.Attacker.CaptureUnits = [numCaptureGoods]Roll{}
+		fx.Attacker.CaptureRandom = Roll{}
 	}
-	at := w.applySet(fx.Attacker, row, a, d, false)
+	at := w.applySet(fx.Attacker, row, a, d, false, &captureCtx{sent: &bf.sent})
 	if row.CaptureAsCoastal {
 		captured, t.Captured = t.Captured, 0
 	}
 	took := alsoTook(t.parts(row, false))
 	costEv, costRep := attackCost(row, a.Name, at)
-	return sentences(took, costEv), sentences(took, costRep), captured
+	// The defender is told of its own units only; each ally was told of its own.
+	evCap := sentences(unitsTaken(tcx.own, msgid("{who} captured {units} of your forces."), "who", a.Name),
+		unitsTaken(at.Taken, msgid("You captured {units} of {who}'s forces."), "who", a.Name))
+	repCap := sentences(unitsTaken(t.Taken, msgid("You captured {units} of the enemy's forces.")),
+		unitsTaken(at.Taken, msgid("{who} captured {units} of your forces."), "who", d.Name))
+	return sentences(took, costEv, evCap), sentences(took, costRep, repCap), captured
+}
+
+// battleForces is what a battle left of the sides' units that a capture draws
+// on: the survivors of the attacker's committed force and of each ally's
+// detachment.
+type battleForces struct {
+	sent   unitCounts
+	allies []allyDetachment
+}
+
+// survivingForce is what is left of the committed force f after losses l.
+func survivingForce(f AttackForce, l UnitLoss) unitCounts {
+	lost := AttackForce{Troopers: l.Troopers, Jets: l.Jets, Tanks: l.Tanks, Bombers: l.Bombers}
+	var u unitCounts
+	for i, g := range MilitaryGoods {
+		if g.Force != nil {
+			u[i] = max(*g.Force(&f)-*g.Force(&lost), 0)
+		}
+	}
+	return u
+}
+
+// unitsTaken is the sentence t, a msgid with a {units} place, with u's units
+// listed there, or zero when u holds nothing.
+func unitsTaken(u unitCounts, t string, kv ...any) Msg {
+	list := capturedList(u)
+	if len(list) == 0 {
+		return Msg{}
+	}
+	return say(t, append(kv, "units", list)...)
 }
 
 // arrivingEffects applies kind's Target set to d for a missile that arrived
@@ -600,7 +658,7 @@ func (w *World) conventionalEffects(kind EffectKind, a, d *Empire) (event, repor
 // a local missile is.
 func (w *World) arrivingEffects(kind EffectKind, d *Empire, from string) (event, report Msg) {
 	row := attackKindOf(kind)
-	l := w.applySet(w.attackEffects(kind).Target, row, d, nil, false)
+	l := w.applySet(w.attackEffects(kind).Target, row, d, nil, false, nil)
 	board := w.Config.BoardID
 	if !w.headlineInPlay(row) {
 		return lossNews(row, from, d.Name, board, l)
@@ -631,6 +689,9 @@ func (l *AttackLoss) add(o AttackLoss) {
 	for i := range l.Units {
 		l.Units[i] += o.Units[i]
 	}
+	for i := range l.Taken {
+		l.Taken[i] = addUnits(l.Taken[i], o.Taken[i])
+	}
 }
 
 // shareOf is frac of every figure of l, rounded as a returning strike's kills
@@ -655,10 +716,11 @@ func (l AttackLoss) shareOf(frac float64) AttackLoss {
 // home. sum collects what the set took from every realm that stood.
 func (w *World) remoteAttackEffects(kind EffectKind, e *Empire, sum *AttackLoss) (also Msg, captured int) {
 	row := attackKindOf(kind)
-	t := w.applySet(w.attackEffects(kind).Target, row, e, nil, false)
+	t := w.applySet(w.attackEffects(kind).Target, row, e, nil, false, nil)
 	captured, t.Captured = t.Captured, 0
 	sum.add(t)
-	return alsoTook(t.parts(row, false)), captured
+	return sentences(alsoTook(t.parts(row, false)),
+		unitsTaken(t.Taken, msgid("The attackers captured {units} of your forces."))), captured
 }
 
 // remoteAttackKind is the kind of the effects an interplanetary attack's
@@ -691,7 +753,11 @@ func remoteAttackTook(won bool, extra *EffectLoss, frac float64, land int) Msg {
 func (w *World) homeAttackEffects(won bool, e *Empire) Msg {
 	kind := remoteAttackKind(won)
 	row := attackKindOf(kind)
-	l := w.applySet(w.attackEffects(kind).Attacker, row, e, nil, false)
+	// Its unit capture was settled on the defending board, where the units
+	// are, and is not taken again here.
+	fx := w.attackEffects(kind).Attacker
+	fx.CaptureUnits, fx.CaptureRandom, fx.CaptureFromStock = [numCaptureGoods]Roll{}, Roll{}, 0
+	l := w.applySet(fx, row, e, nil, false, nil)
 	_, report := attackCost(row, "", l)
 	return report
 }

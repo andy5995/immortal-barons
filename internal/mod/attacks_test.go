@@ -191,3 +191,51 @@ people = 2
 		t.Errorf("lost attacker people %d, want 2", got)
 	}
 }
+
+// The defender who repels an attack keeps some of the attacker's units; a
+// missile kind refuses the same keys.
+func TestUnitCaptureKeysLoadAndMissilesRefuseThem(t *testing.T) {
+	r, err := checkValues(t, "", `
+[attacks.conventional.lost.attacker]
+capture_tank = 10
+capture_random = [2, 3, 1]
+
+[attacks.conventional.won.target]
+capture_trooper = 5
+capture_from_stock = 1
+`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lost := r.Attacks[game.EffectConventionalLost].Attacker
+	if lost.CaptureUnits[slicesIndex(game.Tank)].Pct != 10 || lost.CaptureRandom != (game.Roll{Pct: 2, Up: 3, Down: 1}) {
+		t.Errorf("lost attacker %+v", lost)
+	}
+	won := r.Attacks[game.EffectConventionalWon].Target
+	if won.CaptureUnits[slicesIndex(game.Trooper)].Pct != 5 || won.CaptureFromStock != 1 {
+		t.Errorf("won target %+v", won)
+	}
+	text := Values(r, "x")
+	for _, want := range []string{"capture_tank = 10", "capture_random = [2, 3, 1]", "capture_from_stock = 1"} {
+		if !strings.Contains(text, want) {
+			t.Errorf("printed mod lacks %q", want)
+		}
+	}
+	if _, err := checkValues(t, "", "[attacks.nuclear.target]\ncapture_tank = 10\n"); err == nil ||
+		!strings.Contains(err.Error(), "only a battle can capture units") {
+		t.Errorf("a nuclear strike captured units: %v", err)
+	}
+	if _, err := checkValues(t, "", "[attacks.ip.attack.won.target]\ncapture_from_stock = 2\n"); err == nil ||
+		!strings.Contains(err.Error(), "capture_from_stock: 2 is outside 0 to 1") {
+		t.Errorf("a switch of 2: %v", err)
+	}
+}
+
+func slicesIndex(g *game.Good) int {
+	for i, m := range game.MilitaryGoods {
+		if m == g {
+			return i
+		}
+	}
+	return -1
+}

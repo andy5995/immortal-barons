@@ -593,6 +593,15 @@ AttackResult  { "ID": 1, "TargetBoard": "BravoBBS", "TargetEmpire": "Victim",
                 // Enemy is what the strike destroyed, by unit type; absent
                 // likewise, and an absent one reports nothing destroyed rather
                 // than guessing.
+                // "Extra" (absent in the base rules) is what a mod's ip.attack
+                // target set took from the defenders as figures; its "Taken"
+                // lists the military units the attackers captured, in the
+                // order troopers, jets, turrets, bombers, tanks, carriers. The
+                // origin credits them to the contributors only for a unit its
+                // own rules let that kind capture. "Seized" lists, per owner,
+                // what the defenders captured of each detachment (Survivors
+                // are already net of it). Both are omitempty and ride
+                // Protocol 8 (#373).
                 // "ReportMsg" (absent above) is what the target board wrote
                 // for a terror op or Special Operation, as a Msg (below). It
                 // was English text under "Report" until Protocol 4; a board

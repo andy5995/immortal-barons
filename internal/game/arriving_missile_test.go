@@ -47,7 +47,7 @@ func TestArrivingNuclearStrikeUsesTheWiderBand(t *testing.T) {
 	for i := 0; i < 200; i++ {
 		d.Regions = RegionMix{}
 		w.GrantRegions(d, Desert.Count(&d.Regions), 1000)
-		ruined := w.applySet(w.attackEffects(EffectIPNuclear).Target, attackKindOf(EffectIPNuclear), d, nil, false).Waste
+		ruined := w.applySet(w.attackEffects(EffectIPNuclear).Target, attackKindOf(EffectIPNuclear), d, nil, false, nil).Waste
 		if ruined < 100 || ruined > 140 {
 			t.Fatalf("ruined %d of 1000 regions, want the 10-14%% band", ruined)
 		}

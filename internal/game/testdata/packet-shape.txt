@@ -96,6 +96,7 @@ AttackResult:
   Score `json:",omitempty"`
   Extra `json:",omitempty"`
   Backfired `json:",omitempty"`
+  Seized `json:",omitempty"`
 UnitLoss:
   Troopers
   Jets
@@ -119,6 +120,7 @@ EffectLoss:
   Morale `json:",omitempty"`
   Support `json:",omitempty"`
   Units `json:",omitempty"`
+  Taken `json:",omitempty"`
 LeagueConfig:
   GameStartDate
   JoinDate

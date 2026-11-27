@@ -153,6 +153,9 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 	// retreat share and the winner pays whatever the strength ratio cost it.
 	attackerWins, aLoss, dLoss := w.battleAttrition(ap, dp, w.rules().Combat.Retreat.At(w.Config.AttackDamage))
 	aloss := loseCommitted(a, f, aLoss)
+	// What a mod's unit capture may take: the attacker's survivors and each
+	// ally's surviving detachment, read before the allies bleed.
+	bf := battleForces{sent: survivingForce(f, aloss), allies: w.allyDetachments(d, dLoss)}
 	dloss := loseForces(d, dLoss)
 	w.bleedAllies(a, d, dLoss, aloss) // the allies' committed 30% bleeds at the defender's rate, and each is told
 
@@ -201,7 +204,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		// that takes the last regions is a conquest, and before the capture is
 		// placed, so an attacker set that wastes or destroys land cannot reach
 		// regions the session is about to park. Empty in the base rules.
-		wonEvent, wonReport, modCaptured := w.conventionalEffects(EffectConventionalWon, a, d)
+		wonEvent, wonReport, modCaptured := w.conventionalEffects(EffectConventionalWon, a, d, bf)
 		captured += modCaptured
 		// Placed in this same save as Coastal, where the AI keeps it; a player's
 		// session parks it untyped for the picker (ParkUntyped).
@@ -266,7 +269,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		if a.Morale < 0 {
 			a.Morale = 0
 		}
-		lostEvent, lostReport, _ := w.conventionalEffects(EffectConventionalLost, a, d)
+		lostEvent, lostReport, _ := w.conventionalEffects(EffectConventionalLost, a, d, bf)
 		if !lostReport.IsZero() {
 			fmt.Fprintf(&b, "\n%s\n", lostReport.In(a.Language))
 		}

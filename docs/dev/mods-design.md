@@ -32,7 +32,7 @@ mods are read, applied, checked or sent.
   `attacker` set of the same effects (`game.EffectSet`), applied target first,
   each in the fixed order of `AttackFields`. That order and the rule that a
   `Roll` draws a random number only when its `up` or `down` is above 0 are part
-  of the contract: they decide every later draw. A mod that sets nothing draws
+  of the contract (`capture_random` too: its draw is made only when it is set): they decide every later draw. A mod that sets nothing draws
   nothing, so the base game is draw-for-draw the original (the equivalence test
   keeps the original routines as references).
 - **Rounding is not a key.** Whether morale is rounded or truncated is a fixed
@@ -162,12 +162,42 @@ chooses them, and members install nothing.
   receives it. The Attacker set runs on the attacker's own board in
   `applyAttackResult`, picked by `res.Won`, on each contributor's realm there,
   in full, as if it had attacked alone; its `capture` is refused by `Validate`
-  because the target is on another board. Both halves read the local board's
+  because the target is on another board. The one exception is its unit
+  capture (below), which runs on the defending board. Both halves read the local board's
   rules, which is safe because a league plays one mod set. What the target
   set took travels home as figures, `AttackResult.Extra` (an omitempty
   field, so a packet without it is byte-identical; it rides Protocol 8),
   and not as words, because the home board splits it among the contributors
   by the same share as their kills. Words could not be split.
+- **Unit capture is the one attacker-set effect that runs on the defending
+  board (#373).** `capture_<unit>` (a percent per military unit),
+  `capture_random` and `capture_from_stock` are allowed on the four battle
+  kinds only (`conventional.won/lost`, `ip.attack.won/lost`); `Validate`
+  refuses them on every missile kind. A capture runs after the kills of the
+  same set, so a unit a kill destroyed is not captured, and its base is the
+  units still alive: the attacker's base is the survivors of the force it sent
+  (never what it held back); a defender's is the units that stood in the
+  defense (`defenseGoods`: troopers, jets, turrets, tanks), or with
+  `capture_from_stock` in a target set its whole remaining stock; an ally's is
+  the survivors of the 30% detachment it sent, never its stock, and
+  `capture_from_stock` does not widen it. A percent is drawn once per unit and
+  applied to every holding. `capture_random` takes its share of all the
+  holdings' units together, spread across them by the normal approximation of
+  the hypergeometric draw (one draw per holding, so cost does not follow the
+  unit count); it is drawn only when set, so the base game makes no new draw.
+  Interplanetary: the target set's captured units are `EffectLoss.Taken`
+  (inside `AttackResult.Extra`) and are split among the contributors by
+  `splitSpoils`, exactly, like the land. The attacker set cannot run at home,
+  where the defenders' realms are not, so `remoteSeize` runs it on the
+  defending board while the result is built: it takes from `res.Survivors`,
+  gives the units to the defenders that stood (evenly, remainder to the
+  first), and lists what it took in `AttackResult.Seized` so each contributor
+  is told; `homeAttackEffects` leaves the unit keys out. The home board does
+  not believe the packet for units: `capturedHome` credits only a unit its own
+  rules let that kind capture, never below 0 and never past `MaxUnits`, and
+  `seizedOf` holds the report's figure to what the contributor sent. Both
+  fields are omitempty and ride Protocol 8. A `capture_turret` or
+  `capture_carrier` in an attacker set is refused, since no attack sends them.
 - **The combat levels are one table per figure, and an interplanetary capture
   resolves on the defending board (#359).** `[combat]` holds a percent for
   each Attack Rewards level (same-planet and interplanetary) and each Attack

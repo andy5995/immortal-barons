@@ -114,9 +114,12 @@ func (v values) applyAttacks(r *game.Rules) error {
 				continue
 			}
 			var err error
-			if f.Roll != nil {
+			switch {
+			case f.Roll != nil:
 				*f.Roll(set), err = readRoll(s.keys[key])
-			} else {
+			case f.Whole != nil:
+				*f.Whole(set), err = whole(s.keys[key])
+			default:
 				*f.Fraction(set), err = readFraction(s.keys[key])
 			}
 			if err != nil {
@@ -172,6 +175,9 @@ func formatFraction(f game.Fraction) string { return fmt.Sprintf("[%d, %d]", f.N
 func attackValue(f game.AttackField, s *game.EffectSet) string {
 	if f.Roll != nil {
 		return formatRoll(*f.Roll(s))
+	}
+	if f.Whole != nil {
+		return fmt.Sprint(*f.Whole(s))
 	}
 	return formatFraction(*f.Fraction(s))
 }

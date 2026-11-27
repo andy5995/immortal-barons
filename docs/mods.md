@@ -193,7 +193,8 @@ regions and split among the contributors. Each contributor's report gives its
 own share of what the table took, as it does for the battle's kills. The
 `attacker` table runs on the attacker's board when the result comes home, on
 each realm of that board that contributed, as if it had attacked alone. It
-cannot `capture`, because the target is on another board.
+cannot `capture` regions, because the target is on another board. Its unit
+capture is the exception, and runs on the defending board (see below).
 
 The `ip.nuclear`, `ip.chemical` and `sabre` kinds are missiles that arrive from
 another board, and they act on the board that receives them. Only their
@@ -203,12 +204,47 @@ is whether a missile gets through (the misfire, SDI and garrison rolls), where
 the Sabre's dial lands, its backfire and the score. Every board in a league
 plays the same mods.
 
-Apart from those limits, any kind may use any effect. The effects are `waste`, `destroy` and
+Apart from those limits, any kind may use any effect, except that only the four battle kinds (`conventional.won`, `conventional.lost`, `ip.attack.won` and `ip.attack.lost`) can capture units. The effects are `waste`, `destroy` and
 `capture` (a percent of the regions), `people`, one `kill_<unit>` for each
 unit, `food`, `morale`, `support` and `hq`. In the attacker table, `capture`
 gives the target that share of the attacker's regions. Captured regions arrive
 untyped for a player, who chooses the types at the start of the next turn, and
 as coastal regions for an AI baron.
+
+### Capturing units
+
+`capture_<unit>` takes a percent of that military unit (`capture_trooper`,
+`capture_jet`, `capture_turret`, `capture_bomber`, `capture_tank`,
+`capture_carrier`), and `capture_random` takes a percent of all the surviving
+units together, drawn at random across the types. A unit left unset is never
+captured. In a `target` table the attacker takes the units. In an `attacker`
+table the target takes them, so a defender who repels an attack can keep some
+of the attacker's tanks:
+
+```toml
+[attacks.conventional.lost.attacker]
+capture_tank = 10
+```
+
+The percent is of the units still alive after the kills in the same table, so a
+unit a `kill_<unit>` destroyed cannot also be captured. What the percent is of:
+
+- From an attacker, the survivors of the force it sent. Units it held back are
+  safe, and an attacker table cannot capture turrets or carriers, which an
+  attack never sends.
+- From a defender, the survivors among the units that stood in the defense:
+  troopers, jets, turrets and tanks. `capture_from_stock = 1` in a `target`
+  table widens that to the defender's whole remaining stock, bombers and
+  carriers included. It is not allowed in an `attacker` table.
+- From an ally that sent troops to the defense, the same percent of the part of
+  its detachment that survived, never its stock.
+
+A kind may capture in both tables. The `target` table runs first. On an
+interplanetary win or a repelled strike, the units the `target` table captures
+come home with the result and are shared among the contributors like regions.
+An `attacker` table's capture on an interplanetary kind is made on the
+defending board: the arriving force's survivors lose the units before they go
+home, and the defending realms keep them.
 
 A percent is a whole number, or `[pct, up, down]` for a percent that varies:
 `pct + Random(up) - Random(down)`. The base nuclear strike is `waste = [7, 3, 3]`.
