@@ -56,7 +56,7 @@ func (w *World) applyAttackResult(res AttackResult, spy *SpyReport) {
 		if e == nil {
 			continue
 		}
-		back := survivorFor(res.Survivors, c.Owner)
+		back := survivorFor(res.Survivors, c.Owner).within(c.AttackForce)
 		e.Troopers += back.Troopers
 		e.Jets += back.Jets
 		e.Tanks += back.Tanks
@@ -138,6 +138,19 @@ func terrorReturnReport(sent InFlightStrike, res AttackResult) Msg {
 // survivorFor picks one owner's returning detachment out of the result. An owner
 // the target board did not answer for gets nothing back, which is the safe
 // reading: the alternative is inventing units.
+// within holds each figure of a returning force to 0..what was sent. The
+// result packet is written by the defending board, and only the sender knows
+// what left home: no more can come back than went out.
+func (f AttackForce) within(sent AttackForce) AttackForce {
+	clamp := func(n, most int) int { return min(max(n, 0), max(most, 0)) }
+	return AttackForce{
+		Troopers: clamp(f.Troopers, sent.Troopers),
+		Jets:     clamp(f.Jets, sent.Jets),
+		Tanks:    clamp(f.Tanks, sent.Tanks),
+		Bombers:  clamp(f.Bombers, sent.Bombers),
+	}
+}
+
 func survivorFor(cs []Contribution, owner string) AttackForce {
 	for _, c := range cs {
 		if c.Owner == owner {

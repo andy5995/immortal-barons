@@ -1639,3 +1639,39 @@ func TestContentsNamesEveryPayload(t *testing.T) {
 		}
 	}
 }
+
+// A result packet is written by the defending board, so a forged or broken one
+// must not hand back more units than left home, nor a negative count.
+func TestReturningSurvivorsAreHeldToWhatWasSent(t *testing.T) {
+	cfgA := DefaultConfig()
+	cfgA.BoardID = "boardA"
+	wA := NewWorldSeed(cfgA, 1)
+	leader := wA.AddHuman("leader", "Leader")
+	leader.Troopers, leader.Tanks, leader.Jets = 100_000, 1000, 500
+
+	cfgB := DefaultConfig()
+	cfgB.BoardID = "boardB"
+	wB := NewWorldSeed(cfgB, 1)
+	target := wB.AddHuman("victim", "Victim")
+	target.Protection = 0
+	target.Regions = RegionMix{Coastal: 100}
+	target.syncLand()
+	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0
+
+	leader.Gold = 10_000_000
+	if _, err := wA.CreateGroupAttack(leader, "boardB", "Victim", GroupAttackHoursMin, AttackForce{Troopers: 100_000, Tanks: 1000}); err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	wA.LaunchDueGroupAttacksAt(afterDeparture())
+	result := wB.receive(wA.Outbox[0])
+	if len(result.Results) != 1 || len(result.Results[0].Survivors) != 1 {
+		t.Fatalf("want one result with one contribution, got %+v", result.Results)
+	}
+	result.Results[0].Survivors[0].AttackForce = AttackForce{Troopers: 9_000_000, Tanks: 50_000, Jets: -40, Bombers: 7}
+	wA.receive(result)
+
+	if leader.Troopers != 100_000 || leader.Tanks != 1000 || leader.Jets != 500 || leader.Bombers != 0 {
+		t.Errorf("have %d troopers, %d tanks, %d jets, %d bombers; want 100000, 1000, 500 (kept home), 0",
+			leader.Troopers, leader.Tanks, leader.Jets, leader.Bombers)
+	}
+}
