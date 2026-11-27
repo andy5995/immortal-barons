@@ -666,8 +666,18 @@ path, like `-check-mod`.
 
 Each world plays `-sim-days` days (60) with `-sim-realms` barons (8). It runs
 `-sim-seeds` seeds (8), because one run is one storyline and a property such as
-"the leader runs away with the game" shows only across many. The report reads
-the worlds at five points over the run and gives, for each figure, the mean
+"the leader runs away with the game" shows only across many.
+
+Read the first table first. "What the mechanics did" counts, over the whole
+run, the battles fought, the attacker's wins, the regions captured, the units a
+capture took from each side, the units a battle's effects destroyed, the pirate
+raids by spoil and what they took, and
+how often a mod's script was asked and fell back to the built-in rules. Base and
+mod are side by side, so it shows whether the mod does what you meant: a
+`capture_tank` that never takes a tank, or a script that falls back every time,
+shows here. A counter that is zero in both games is left out. Everything after
+it shows how the AI plays the mod, which is a different question. The report
+then reads the worlds at up to five points over the run and gives, for each figure, the mean
 across the seeds for the base game and the mod, and the difference. A second
 table gives the lowest and highest seed on the last day. The figures are the
 realms still alive and the number eliminated, the leader's and the median
@@ -684,10 +694,11 @@ error. The report header lists every option's value, defaults included. The
 option flag works only with `-sim-mod`. To compare values of one option, run the
 command once per value and give each its own `-sim-csv`.
 
-A script that fails is reported under the table, and the game falls back to the
+A script that fails is reported under the tables, and the game falls back to the
 built-in rules where it failed, as in a real game. The `ip.*` and `sabre.*`
-attack kinds need more than one board, so they are not simulated; the report
-lists them when the mod sets any.
+attack kinds and the `ip_capture_*` shares need more than one board, and the AI
+barons fire no missiles, so none of these is simulated; the report lists them
+when the mod sets any.
 
 The barons play by their own code and do not adapt to a mod. The report shows
 what a change does mechanically, such as a cheap unit compounding a winner's

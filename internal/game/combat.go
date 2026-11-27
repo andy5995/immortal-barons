@@ -210,6 +210,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		// session parks it untyped for the picker (ParkUntyped).
 		a.Regions.Coastal += captured
 		a.syncLand()
+		w.Tally.battle(true, captured)
 
 		// Score is per REGION taken, and a total conquest pays better than an
 		// ordinary win — BRE's two award sites in resolve_regular_attack, told
@@ -269,6 +270,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		if a.Morale < 0 {
 			a.Morale = 0
 		}
+		w.Tally.battle(false, 0)
 		lostEvent, lostReport, _ := w.conventionalEffects(EffectConventionalLost, a, d, bf)
 		if !lostReport.IsZero() {
 			fmt.Fprintf(&b, "\n%s\n", lostReport.In(a.Language))

@@ -86,9 +86,13 @@ type Report struct {
 	Realms    int
 	SampleDay []int
 	Rows      []Row
+	// Counters are what the mechanics did, totalled over each whole run. A
+	// counter that is zero in every run of both games is left out.
+	Counters []Row
 	// Changes is what the mod changes from the base game, as -check-mod lists it.
 	Changes []string
-	// OutOfScope names changed inter-BBS kinds, which one board cannot play.
+	// OutOfScope names the changes the run cannot play: inter-BBS ones, and the
+	// missiles, which the AI never fires.
 	OutOfScope []string
 	// ScriptFailures are the distinct reasons a mod script failed and the game
 	// fell back to the built-in rules.
@@ -196,10 +200,11 @@ func sampleDays(days int) []int {
 
 // playOne plays one world forward and reads it at each sample day. rules nil is
 // the base game. The same seed gives the same start under either rule set.
-func playOne(rules *game.Rules, seed int64, days, realms int, sample []int) [][]float64 {
+func playOne(rules *game.Rules, seed int64, days, realms int, sample []int) ([][]float64, []float64) {
 	w := game.NewWorldSeed(game.DefaultConfig(), seed)
 	w.Rules = rules
 	w.Reset()
+	w.Tally = game.NewTally()
 	w.AddAIEmpires(realms)
 	start := 0
 	for _, e := range w.Empires {
@@ -220,7 +225,7 @@ func playOne(rules *game.Rules, seed int64, days, realms int, sample []int) [][]
 			next++
 		}
 	}
-	return out
+	return out, counterValues(w.Tally)
 }
 
 // Run plays the comparison. Seeds run in parallel, bounded by GOMAXPROCS. Script
@@ -258,16 +263,17 @@ func Run(o Options) (*Report, error) {
 		rep.Options = append(rep.Options, fmt.Sprintf("%s (%s): %s", o.Label, id, mod.OptionValueWord(o, m.Chosen(id))))
 	}
 	for _, c := range rep.Changes {
-		for _, k := range game.EffectKinds() {
-			if game.InterBBSKind(k) && strings.HasPrefix(c, "attacks."+string(k)+".") {
-				rep.OutOfScope = append(rep.OutOfScope, c)
-			}
+		if notSimulated(c) {
+			rep.OutOfScope = append(rep.OutOfScope, c)
 		}
 	}
 
 	// Each job gets its own rules: a script's state is then never shared
 	// between worlds running at once.
-	type result struct{ base, mod [][]float64 }
+	type result struct {
+		base, mod           [][]float64
+		baseTally, modTally []float64
+	}
 	results := make([]result, o.Seeds)
 	errs := make([]error, o.Seeds)
 	sem := make(chan struct{}, runtime.GOMAXPROCS(0))
@@ -284,10 +290,10 @@ func Run(o Options) (*Report, error) {
 				return
 			}
 			seed := int64(i + 1)
-			results[i] = result{
-				base: playOne(nil, seed, o.Days, o.Realms, rep.SampleDay),
-				mod:  playOne(r, seed, o.Days, o.Realms, rep.SampleDay),
-			}
+			var res result
+			res.base, res.baseTally = playOne(nil, seed, o.Days, o.Realms, rep.SampleDay)
+			res.mod, res.modTally = playOne(r, seed, o.Days, o.Realms, rep.SampleDay)
+			results[i] = res
 		}()
 	}
 	wg.Wait()
@@ -307,6 +313,17 @@ func Run(o Options) (*Report, error) {
 				Base: stat(b), Mod: stat(mo)})
 		}
 	}
+	for ci, name := range counterNames() {
+		var b, mo []float64
+		for _, r := range results {
+			b = append(b, r.baseTally[ci])
+			mo = append(mo, r.modTally[ci])
+		}
+		row := Row{Metric: name, Day: o.Days, Count: name != "regions per win", Base: stat(b), Mod: stat(mo)}
+		if row.Base.Max != 0 || row.Mod.Max != 0 {
+			rep.Counters = append(rep.Counters, row)
+		}
+	}
 	for _, line := range strings.Split(strings.TrimSpace(warned.String()), "\n") {
 		if line != "" {
 			rep.ScriptFailures = append(rep.ScriptFailures, strings.TrimPrefix(line, "immortal-barons: "))
@@ -314,6 +331,59 @@ func Run(o Options) (*Report, error) {
 	}
 	rep.Elapsed = time.Since(began)
 	return rep, nil
+}
+
+// counterNames is the fixed order counterValues returns its figures in.
+func counterNames() []string {
+	n := []string{"battles", "attacker wins", "regions captured", "regions per win"}
+	for _, g := range game.MilitaryGoods {
+		n = append(n, "took from defender: "+strings.ToLower(g.Plural))
+	}
+	for _, g := range game.MilitaryGoods {
+		n = append(n, "took from attacker: "+strings.ToLower(g.Plural))
+	}
+	for _, g := range game.AttackKillGoods {
+		n = append(n, "killed by effects: "+strings.ToLower(g.Plural))
+	}
+	for _, sp := range game.PirateSpoils() {
+		n = append(n, "raids for "+strings.ToLower(sp.Label()), "raided "+strings.ToLower(sp.Label()))
+	}
+	for _, id := range scriptIDs() {
+		n = append(n, "script calls: "+id, "script fell back: "+id)
+	}
+	return n
+}
+
+func scriptIDs() []string {
+	ids := []string{"pirates"}
+	for _, g := range game.RegionTypes {
+		ids = append(ids, g.ID)
+	}
+	return ids
+}
+
+// counterValues reads a world's tally in counterNames order.
+func counterValues(t *game.Tally) []float64 {
+	v := []float64{float64(t.Battles), float64(t.Wins), float64(t.RegionsTaken), 0}
+	if t.Wins > 0 {
+		v[3] = float64(t.RegionsTaken) / float64(t.Wins)
+	}
+	for i := range game.MilitaryGoods {
+		v = append(v, float64(t.FromDefender[i]))
+	}
+	for i := range game.MilitaryGoods {
+		v = append(v, float64(t.FromAttacker[i]))
+	}
+	for i := range game.AttackKillGoods {
+		v = append(v, float64(t.Killed[i]))
+	}
+	for _, sp := range game.PirateSpoils() {
+		v = append(v, float64(t.Raids[sp]), float64(t.RaidTook[sp]))
+	}
+	for _, id := range scriptIDs() {
+		v = append(v, float64(t.ScriptCalls[id]), float64(t.ScriptFallbacks[id]))
+	}
+	return v
 }
 
 func stat(v []float64) Stat {
@@ -364,6 +434,17 @@ func (r *Report) Text() string {
 	if len(r.Changes) == 0 {
 		b.WriteString("The mod changes nothing from the base game, so every difference is zero.\n")
 	}
+	b.WriteString("\nWhat the mechanics did (totals over the run, mean per seed):\n")
+	if len(r.Counters) == 0 {
+		b.WriteString("  Nothing was counted: no battle or raid happened in either game.\n")
+	} else {
+		fmt.Fprintf(&b, "%-30s %9s %9s %9s\n", "counter", "base", "mod", "delta")
+		for _, row := range r.Counters {
+			fmt.Fprintf(&b, "%-30s %9s %9s %9s\n", row.Metric, Format(row.Base.Mean, row.Count),
+				Format(row.Mod.Mean, row.Count), signed(row.Delta(), row.Count))
+		}
+	}
+	b.WriteString("\nFrom here on, the AI barons' reaction to the mod, not the mod's own effect.\n")
 	b.WriteString("\nMeans across seeds, base game against mod:\n")
 	fmt.Fprintf(&b, "%-22s %4s %9s %9s %9s %8s\n", "metric", "day", "base", "mod", "delta", "delta %")
 	last := ""
@@ -396,7 +477,7 @@ func (r *Report) Text() string {
 		}
 	}
 	if len(r.OutOfScope) > 0 {
-		b.WriteString("\nNot simulated: this mod sets inter-BBS kinds (ip.*, sabre.*), which need more than\none board. The figures above leave them out:\n")
+		b.WriteString("\nNot simulated: the run has one board and the AI barons fire no missiles, so the\nfigures above leave out these changes:\n")
 		for _, c := range r.OutOfScope {
 			b.WriteString("  " + c + "\n")
 		}
@@ -427,12 +508,10 @@ func (r *Report) CSV() string {
 	}
 	b.WriteString("metric,day,base_mean,base_min,base_max,mod_mean,mod_min,mod_max,delta,delta_pct\n")
 	for _, row := range r.Rows {
-		pct := ""
-		if p, ok := row.Percent(); ok {
-			pct = fmt.Sprintf("%.4f", p)
-		}
-		fmt.Fprintf(&b, "%s,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%s\n", row.Metric, row.Day,
-			row.Base.Mean, row.Base.Min, row.Base.Max, row.Mod.Mean, row.Mod.Min, row.Mod.Max, row.Delta(), pct)
+		writeCSVRow(&b, row.Metric, row)
+	}
+	for _, row := range r.Counters {
+		writeCSVRow(&b, "total "+row.Metric, row)
 	}
 	return b.String()
 }
@@ -442,4 +521,28 @@ func csvField(s string) string {
 		return `"` + strings.ReplaceAll(s, `"`, `""`) + `"`
 	}
 	return s
+}
+
+func writeCSVRow(b *strings.Builder, name string, row Row) {
+	pct := ""
+	if p, ok := row.Percent(); ok {
+		pct = fmt.Sprintf("%.4f", p)
+	}
+	fmt.Fprintf(b, "%s,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%s\n", csvField(name), row.Day,
+		row.Base.Mean, row.Base.Min, row.Base.Max, row.Mod.Mean, row.Mod.Min, row.Mod.Max, row.Delta(), pct)
+}
+
+// notSimulated reports whether a change listed by mod.Diff is one the run
+// cannot play: an attack kind other than the same-planet battle's, or an
+// interplanetary capture share.
+func notSimulated(change string) bool {
+	if strings.HasPrefix(change, "combat.ip_") {
+		return true
+	}
+	for _, k := range game.EffectKinds() {
+		if k != game.EffectConventionalWon && k != game.EffectConventionalLost && strings.HasPrefix(change, "attacks."+string(k)+".") {
+			return true
+		}
+	}
+	return false
 }

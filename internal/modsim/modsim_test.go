@@ -191,6 +191,7 @@ func TestInterBBSKinds(t *testing.T) {
 		}
 	}
 }
+
 // Script failures are reported once per run, so a second Run in the same
 // process must report a failing script again rather than find it already told.
 func TestEveryRunReportsItsScriptFailures(t *testing.T) {
@@ -206,6 +207,45 @@ func TestEveryRunReportsItsScriptFailures(t *testing.T) {
 		}
 		if len(r.ScriptFailures) == 0 {
 			t.Errorf("run %d reported no script failures", run)
+		}
+	}
+}
+
+func counter(r *Report, name string) Row {
+	for _, c := range r.Counters {
+		if c.Metric == name {
+			return c
+		}
+	}
+	return Row{Metric: name}
+}
+
+// A mod that captures tanks shows tanks captured; the base game takes none.
+func TestCaptureShowsInTheCounters(t *testing.T) {
+	r, err := Run(opts(writeMod(t, "[attacks.conventional.won.target]\ncapture_tank = 10\n")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := counter(r, "took from defender: tanks")
+	if c.Mod.Mean <= 0 || c.Base.Mean != 0 {
+		t.Errorf("tanks taken: base %v, mod %v; want 0 and a positive count", c.Base.Mean, c.Mod.Mean)
+	}
+	if !strings.Contains(r.Text(), "What the mechanics did") || !strings.Contains(r.CSV(), "total took from defender: tanks") {
+		t.Error("the counters are missing from the text or the CSV")
+	}
+}
+
+func TestEmptyModCountersAreEqual(t *testing.T) {
+	r, err := Run(opts(writeMod(t, "")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if counter(r, "battles").Base.Mean == 0 {
+		t.Fatal("no battles counted")
+	}
+	for _, c := range r.Counters {
+		if c.Delta() != 0 {
+			t.Errorf("%s: delta %v, want 0", c.Metric, c.Delta())
 		}
 	}
 }

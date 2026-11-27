@@ -59,6 +59,7 @@ func (w *World) regionsOf(e *Empire) map[*Region]RegionRules {
 			continue
 		}
 		row, err := askRegionBrain(b, g, v, rows[g])
+		w.Tally.script(g.ID, err)
 		if err != nil {
 			b.Failed(err)
 			continue

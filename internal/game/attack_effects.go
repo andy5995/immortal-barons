@@ -611,6 +611,7 @@ func (w *World) conventionalEffects(kind EffectKind, a, d *Empire, bf battleForc
 	if row.CaptureAsCoastal {
 		captured, t.Captured = t.Captured, 0
 	}
+	w.Tally.effects(t, at)
 	took := alsoTook(t.parts(row, false))
 	costEv, costRep := attackCost(row, a.Name, at)
 	// The defender is told of its own units only; each ally was told of its own.

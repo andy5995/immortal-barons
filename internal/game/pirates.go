@@ -162,6 +162,7 @@ func (w *World) maybePirateRaid(e *Empire) {
 	}
 	if b := w.rules().Pirates; b != nil {
 		orders, err := w.askPirateBrain(b, e)
+		w.Tally.script("pirates", err)
 		if err == nil {
 			for _, o := range orders {
 				w.pirateRaid(o.Slot, e, pirateDraw{Spoil: o.Spoil, FromMarket: o.FromMarket})
@@ -343,6 +344,7 @@ func (w *World) pirateRaid(slot int, v *Empire, draw pirateDraw) {
 			*hoard = capAdd(*hoard, int(took)*PirateRaidKeepMult, cap)
 		}
 	}
+	w.Tally.raid(draw.Spoil, took)
 	p.Land = capAdd(p.Land, w.rng.Intn(PirateRaidLandMax), PirateCapRegions)
 
 	// Only humans read the notice; the raid itself still hits AI victims.
