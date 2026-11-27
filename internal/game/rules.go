@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 )
 
 // Rules are the gameplay values one world plays by (#202). A world with no mods
@@ -32,6 +33,10 @@ type Rules struct {
 	// Attacks is what each kind of attack does, to its target and back to its
 	// attacker (attack_effects.go).
 	Attacks map[EffectKind]AttackEffects
+	// PirateFigures are the pirate raid's and the faction's numbers
+	// (pirate_rules.go). Pirates above is who decides the raids; these are what
+	// a raid does.
+	PirateFigures PirateRules
 }
 
 // HQRules are the HeadQuarters figures. The strength it adds to each unit is a
@@ -103,9 +108,10 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 	Agent: {NetWorth: NetWorthAgent},
 	Food:  {},
 },
-	Regions: baseRegionRules(),
-	Attacks: baseAttackEffects(),
-	Combat:  baseCombatRules(),
+	Regions:       baseRegionRules(),
+	Attacks:       baseAttackEffects(),
+	Combat:        baseCombatRules(),
+	PirateFigures: basePirateRules(),
 	HQ: HQRules{
 		BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
 		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
@@ -122,6 +128,7 @@ func (r *Rules) Clone() *Rules {
 	c := *r
 	c.Units, c.Regions = maps.Clone(r.Units), maps.Clone(r.Regions)
 	c.RegionBrains, c.Attacks = maps.Clone(r.RegionBrains), maps.Clone(r.Attacks)
+	c.PirateFigures.Names = slices.Clone(r.PirateFigures.Names)
 	return &c
 }
 
@@ -309,6 +316,9 @@ func (r *Rules) Validate() error {
 	})
 	r.validateCombat(func(format string, a ...any) {
 		errs = append(errs, fmt.Errorf("combat: %s", fmt.Sprintf(format, a...)))
+	})
+	r.validatePirates(func(format string, a ...any) {
+		errs = append(errs, fmt.Errorf("pirates: %s", fmt.Sprintf(format, a...)))
 	})
 	r.validateAttacks(func(format string, a ...any) {
 		errs = append(errs, fmt.Errorf(format, a...))

@@ -39,7 +39,7 @@ do, with comments in each file.
   See [Testing how a mod plays](#testing-how-a-mod-plays).
 - `-print-base-mod`: print every value a mod can change, as the game sets it
   without mods, in the form of a `values.toml`, then exit. The `[hq]`,
-  `[combat]`, `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
+  `[combat]`, `[pirates]`, `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
   the sections you want into your mod and change them.
 - `-reset`: start a new game after the settings editor. The editor starts from
   the default settings, which turn no mods on, so pick them again on its Mods
@@ -63,8 +63,8 @@ option.
 ## What a mod can change
 
 A mod can change the figures of each of the six military units, the
-HeadQuarters, what the Attack Rewards and Attack Damage levels mean, and the
-figures of each region type. The
+HeadQuarters, what the Attack Rewards and Attack Damage levels mean, the
+figures of each region type, and the pirates. The
 [Mod Reference](mod-reference.md) lists every key with what it means and its
 limits. The units are `trooper`, `jet`, `turret`, `bomber`, `tank` and
 `carrier`; their keys are under
@@ -77,8 +77,9 @@ move go into an attack, every unit the realm holds defends (jets included,
 whether or not a carrier could move them), and a HeadQuarters raises the
 strength of each unit with an `hq_bonus`, which without mods is the tank alone,
 to 4.5/3.5 of its `offense` and `defense` when finished. Technology and morale scale the
-total as usual. Pirate raids and the help an alliance sends use their own
-figures, which `values.toml` does not change.
+total as usual. Pirate raids use the figures of the [`[pirates]`](#pirates)
+section, and the help an alliance sends its own, which `values.toml` does not
+change.
 
 The Maintenance Costs setting still applies to a mod's `upkeep`: None charges
 nothing, Low a quarter of it and High four times it.
@@ -134,6 +135,42 @@ score_win = 100
 What an interplanetary battle loses stays the attack type's own rate, rescaled
 by the Attack Damage level, and an interplanetary attack's minimum capture
 stays 10 regions. A mod does not change either.
+
+### Pirates
+
+The `[pirates]` section in `values.toml` changes the pirates' numbers. Every key
+is optional, and all are whole numbers except `names`; see
+[Pirates](mod-reference.md#pirates) for the keys and limits.
+
+- `raid_chance_*` and `raid_regions_per_step` set how often a realm is raided:
+  a roll of `raid_chance_out_of` faces lands when it is at most the realm's
+  regions divided by `raid_regions_per_step`, plus `raid_chance_base`, held to
+  `raid_chance_cap`. A [pirate script](#pirate-raids) replaces this roll.
+- `raid_take_divisor`, `raid_take_cap` and `raid_take_cap_jitter` set how much
+  one raid carries off, `raid_keep_multiple` how many times that the faction
+  banks, and `raid_land_max` the regions it is granted.
+- `cap_*` are the most a faction holds of each thing, and `seed_*` what each
+  faction starts a game with. The starting hoard takes effect at a reset.
+- `attacker_loss_*` and `defender_loss_*` are the percent each side loses when a
+  player attacks a faction, and `reclaim_divisor_main` and
+  `reclaim_divisor_armour` set what a win takes back.
+- `names` is the nine faction names, in slot order. They are shown on screens
+  and in the news; colors and rules go by slot. Each must be text a CP437 door
+  can show.
+
+`-print-base-mod` shows the base values. For example, rarer and smaller raids by
+renamed factions:
+
+```toml
+[pirates]
+raid_chance_cap = 3
+raid_take_divisor = 100
+names = ["Reavers", "Corsairs", "Wreckers", "Marauders", "Brigands",
+         "Buccaneers", "Raiders", "Smugglers", "Privateers"]
+```
+
+Pirate figures are in force on the board that resolves the raid or the attack,
+and every board in a league plays the same mods, so a league needs nothing more.
 
 ### Regions
 
@@ -322,7 +359,7 @@ board in the league.
 `mod_api` is the version of the mod format the game reads; see
 [Mod format versions](#mod-format-versions).
 
-`values.toml` holds the changes, one section per unit, plus `[hq]`, `[combat]`, one
+`values.toml` holds the changes, one section per unit, plus `[hq]`, `[combat]`, `[pirates]`, one
 section per region type and the `[attacks.<kind>.<side>]` sections. List only
 what changes:
 
@@ -485,8 +522,11 @@ def raid(realm, factions):
 ```
 
 `take` and `market` are described in the reference. A realm may get up to 10
-raids in one turn. Each raid takes as much as a normal raid would, and grants
-the faction regions the same way. The built-in functions `rand`, `day` and
+raids in one turn. Unless it says otherwise, each raid takes as much as a normal
+raid would, and grants the faction regions the same way. A raid may name a
+`share`, the percent of a normal take it carries off, and `land`, the regions it
+grants: `{"faction": 1, "take": "gold", "share": 0, "land": 10}` takes nothing
+and still grows the faction. Out-of-range figures count as a failed script. The built-in functions `rand`, `day` and
 `option` are listed under
 [Built-in functions](mod-reference.md#built-in-functions).
 

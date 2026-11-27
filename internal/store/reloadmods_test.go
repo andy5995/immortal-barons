@@ -43,3 +43,33 @@ func TestReloadModsTakesTheFolderAsItStands(t *testing.T) {
 		t.Errorf("league board: err %v, want ErrModsInLeague", err)
 	}
 }
+
+// A reload changes the names the factions already carry, not only the rules.
+func TestReloadModsRenamesTheFactions(t *testing.T) {
+	dir := t.TempDir()
+	modDir := filepath.Join(dir, "mods", "names")
+	if err := os.MkdirAll(modDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	files := map[string]string{
+		"mod.toml":    "name = \"names\"\nversion = \"1.0\"\nmod_api = 1\nlicense = \"CC0-1.0\"\n",
+		"values.toml": "[pirates]\nnames = [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\"]\n",
+	}
+	for name, body := range files {
+		if err := os.WriteFile(filepath.Join(modDir, name), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cfg := game.DefaultConfig()
+	cfg.DataDir, cfg.Mods, cfg.Pirates = dir, []string{"names"}, true
+	w := game.NewWorldSeed(cfg, 1)
+	if w.Pirates[0].Name != "Humans" {
+		t.Fatalf("a world with no mods names slot 0 %q", w.Pirates[0].Name)
+	}
+	if _, err := ReloadMods(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	if w.Pirates[0].Name != "A" || w.Pirates[8].Name != "I" {
+		t.Errorf("after the reload the factions are %q ... %q", w.Pirates[0].Name, w.Pirates[8].Name)
+	}
+}

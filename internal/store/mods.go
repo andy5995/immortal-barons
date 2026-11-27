@@ -45,6 +45,7 @@ func loadMods(w *game.World, cfg game.Config) error {
 		}
 	}
 	w.Rules = r
+	w.SyncPirateNames()
 	return nil
 }
 
@@ -70,6 +71,7 @@ func ReloadMods(w *game.World, cfg game.Config) ([]string, error) {
 	}
 	changes := mod.Diff(from, to)
 	w.Rules, w.Mods = r, refs
+	w.SyncPirateNames()
 	return changes, nil
 }
 

@@ -50,9 +50,10 @@ These are the tables a `values.toml` may hold. Any other table or key is an erro
 | `units` | One `[units.<id>]` table per unit. List only what changes. |
 | `hq` | The one `[hq]` table. |
 | `combat` | The one `[combat]` table. |
+| `pirates` | The one `[pirates]` table. |
 | `regions` | One `[regions.<id>]` table per region type. |
 | `attacks` | One `[attacks.<kind>.target]` and one `[attacks.<kind>.attacker]` table per kind of attack. |
-| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.combat]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
+| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.combat]`, `[when.<option>.pirates]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
 
 ### Units
 
@@ -107,6 +108,43 @@ The `[combat]` table redefines what the sysop's Attack Rewards and Attack Damage
 | `capture_floor` | The fewest regions a winning same-planet attack takes, up to all the defender holds. | 0 to 1,000,000 |
 | `score_win` | Score the attacker gains for each region an ordinary same-planet win captures. | 0 to 100,000 |
 | `score_crush` | The same when the capture takes every region the defender had. | 0 to 100,000 |
+
+### Pirates
+
+The `[pirates]` table changes what a pirate raid does, what a faction holds and starts with, and what a player's attack on a faction costs and wins. Every key but `names` is a whole number. These figures are in force on the board that resolves the raid or the attack, and a league plays one mod set. Which raids happen is the [pirate script](#pirate-script)'s business; with no script, `raid_chance_*` decide it.
+
+| Key | Meaning | Limits |
+| --- | --- | --- |
+| `raid_chance_out_of` | Faces of the die rolled for each raid attempt. A raid lands when a roll from 0 up to one less than this is at most the chance below. | 1 to 1,000 |
+| `raid_chance_base` | The chance, in that many faces, before a realm's size adds to it. | 0 to 1,000 |
+| `raid_chance_cap` | The chance never rises past this, however large the realm. | 0 to 1,000 |
+| `raid_regions_per_step` | Regions a realm needs for each extra face of chance. | 1 to 1,000,000 |
+| `raid_take_divisor` | A raid takes this fraction of the holding it hits: 1 over this. 1 takes all of it. | 1 to 1,000,000 |
+| `raid_take_cap` | A raid takes at most this much, plus a random 0 up to one less than `raid_take_cap_jitter`. | 0 to 1,000,000,000 |
+| `raid_take_cap_jitter` | The random part of that cap. 1 makes the cap exact. | 1 to 1,000,000,000 |
+| `raid_keep_multiple` | The faction banks this many times what the realm loses. 1 banks exactly what was taken, 0 destroys it. | 0 to 1,000 |
+| `raid_land_max` | A raid grants its faction a random 0 up to one less than this many regions. 0 grants none. | 0 to 1,000 |
+| `cap_gold` | The most gold a faction holds. | 0 to 1,000,000,000,000 |
+| `cap_regions` | The most regions a faction holds. | 0 to 1,000,000 |
+| `cap_agents` | The most agents a faction holds. | 0 to 1,000,000,000 |
+| `cap_troopers` | The most troopers a faction holds. | 0 to 1,000,000,000 |
+| `cap_jets` | The most jets a faction holds. | 0 to 1,000,000,000 |
+| `cap_turrets` | The most turrets a faction holds. | 0 to 1,000,000,000 |
+| `cap_tanks` | The most tanks a faction holds. | 0 to 1,000,000,000 |
+| `seed_troopers` | At a reset each faction starts with a random 0 up to one less than this many troopers, held to its cap. | 0 to 1,000,000,000 |
+| `seed_tanks` | The same for tanks. | 0 to 1,000,000,000 |
+| `seed_jets` | The same for jets. | 0 to 1,000,000,000 |
+| `seed_turrets` | The same for turrets. | 0 to 1,000,000,000 |
+| `seed_regions` | The same for regions. | 0 to 1,000,000 |
+| `seed_gold_base` | Gold every faction starts with, before the random part. | 0 to 1,000,000,000 |
+| `seed_gold_roll` | Two random numbers, each from 0 up to one less than this, are multiplied and added to the starting gold. Most products are small, so a rich faction is rare. | 0 to 1,000,000 |
+| `attacker_loss_min` | When a player attacks a faction, the player loses this percent of what it committed, plus a random 0 up to one less than `attacker_loss_jitter`, win or lose. | 0 to 100 |
+| `attacker_loss_jitter` | The random part of that loss. The minimum plus this, less one, stays at 100 or less. | 1 to 100 |
+| `defender_loss_min` | The faction loses this percent of its troopers, jets and tanks, plus a random 0 up to one less than `defender_loss_jitter`, win or lose. | 0 to 100 |
+| `defender_loss_jitter` | The random part of that loss. The minimum plus this, less one, stays at 100 or less. | 1 to 100 |
+| `reclaim_divisor_main` | A winning attack takes 1 over this of the faction's gold, regions, agents and troopers. 1 takes all of them. | 1 to 1,000 |
+| `reclaim_divisor_armour` | The same for its jets, turrets and tanks. | 1 to 1,000 |
+| `names` | The nine faction names, in slot order, as a list of text. They are only shown on screens: colors and rules go by slot. Each is 1 to 20 characters a CP437 door can show, with no control or format characters, no space at either end, and none repeated. | exactly 9 names |
 
 ### Regions
 
@@ -195,6 +233,8 @@ A script is a [Starlark](https://github.com/bazelbuild/starlark) file. The rules
 | `faction` | number | The `slot` of the faction that raids. Required. |
 | `take` | text | What the raid takes: one of `troopers`, `jets`, `turrets`, `tanks`, `gold`, `agents`. Required. |
 | `market` | bool | `True` takes from the realm's Trading Market listing instead of what it holds. Optional. Gold is not sold there, so `gold` cannot be taken that way. |
+| `share` | number | Percent of a normal raid's take the raid carries off, 0 to 100. 0 takes nothing. Left out, the raid takes a normal share. Optional. |
+| `land` | number | Regions the raid grants its faction, 0 to 1,000. Held to `cap_regions` in `[pirates]`. A raid that names it grants it even when it took nothing. Left out, a raid that took something grants the usual random amount (`raid_land_max`) and one that took nothing grants none. Optional. |
 
 ### Region script
 

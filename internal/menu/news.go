@@ -239,12 +239,20 @@ func isDigit(r rune) bool { return r >= '0' && r <= '9' }
 // to `1;31` within the same hue (docs/dev/bre-screens.md records it).
 func newsHighlightTerms(w *ctx) []hiTerm {
 	var terms []hiTerm
+	var factions []string
 	w.Read(func() {
 		for _, e := range w.Empires {
 			terms = append(terms, hiTerm{e.Name, ansi.FgBrightYellow})
 		}
+		// The names the world's factions carry: a mod may have renamed them.
+		for _, p := range w.Pirates {
+			factions = append(factions, p.Name)
+		}
 	})
-	for _, f := range game.PirateFactions {
+	if len(factions) == 0 {
+		factions = game.PirateFactions
+	}
+	for _, f := range factions {
 		terms = append(terms, hiTerm{f, ansi.FgBrightRed})
 	}
 	terms = append(terms, hiTerm{"Planetary Master", ansi.FgBrightWhite})

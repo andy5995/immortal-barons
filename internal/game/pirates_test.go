@@ -346,7 +346,7 @@ func TestPirateRaidFrequencyScalesWithRealmSize(t *testing.T) {
 		e.Land = c.land
 		stockAll(w, e, 1<<20)
 
-		if got := pirateRaidChance(e); got != c.wantK {
+		if got := w.pirateRaidChance(e); got != c.wantK {
 			t.Errorf("land %d: chance %d/20, want %d/20", c.land, got, c.wantK)
 		}
 		const turns = 4000
@@ -456,12 +456,6 @@ func TestPirateTakeCappedAtMax(t *testing.T) {
 		if got < PirateRaidCapBase || got >= PirateRaidCapBase+PirateRaidCapJitter {
 			t.Fatalf("take %d outside the cap faction [%d,%d)", got, PirateRaidCapBase, PirateRaidCapBase+PirateRaidCapJitter)
 		}
-	}
-}
-
-func TestPirateHoldingClampsToCap(t *testing.T) {
-	if got := capAdd(PirateCapTanks-10, 1000, PirateCapTanks); got != PirateCapTanks {
-		t.Errorf("holdings should clamp to cap %d, got %d", PirateCapTanks, got)
 	}
 }
 

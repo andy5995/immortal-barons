@@ -148,6 +148,9 @@ type values struct {
 	// Combat is the one [combat] table: what the Attack Rewards and Attack
 	// Damage levels mean (combat.go).
 	Combat map[string]any `toml:"combat"`
+	// Pirates is the one [pirates] table: the raid and faction figures and the
+	// faction names (pirates.go).
+	Pirates map[string]any `toml:"pirates"`
 	// Regions is one section per region type (regions.go).
 	Regions map[string]map[string]any `toml:"regions"`
 	// Attacks holds the [attacks.<kind>.<side>] tables, as nested tables
@@ -568,7 +571,7 @@ func isAttackKey(k toml.Key) bool {
 
 // isOptionReference reports whether an undecoded key is the option of a
 // { option = "id" } inline table standing in for a figure: units.<id>.<key>,
-// hq.<key>, combat.<key> or regions.<id>.<key>, each also under when.<bool>. Any other key
+// hq.<key>, combat.<key>, pirates.<key> or regions.<id>.<key>, each also under when.<bool>. Any other key
 // named option is a stray, and stays unknown.
 func isOptionReference(k toml.Key) bool {
 	if len(k) < 3 || k[len(k)-1] != "option" {
@@ -580,7 +583,7 @@ func isOptionReference(k toml.Key) bool {
 	switch {
 	case len(k) == 4 && (k[0] == "units" || k[0] == "regions"):
 		return true
-	case len(k) == 3 && (k[0] == "hq" || k[0] == "combat"):
+	case len(k) == 3 && (k[0] == "hq" || k[0] == "combat" || k[0] == "pirates"):
 		return true
 	}
 	return false

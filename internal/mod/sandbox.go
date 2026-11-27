@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 
+	"github.com/andy5995/immortal-barons/internal/game"
 	"go.starlark.net/starlark"
 	"go.starlark.net/syntax"
 )
@@ -57,12 +57,12 @@ var (
 // characters), becomes a \u escape. Anything a script or a mod file chose
 // goes through it before it is shown.
 func clean(s string) string {
-	if !strings.ContainsFunc(s, unsafeRune) {
+	if !strings.ContainsFunc(s, game.UnsafeText) {
 		return s
 	}
 	var b strings.Builder
 	for _, r := range s {
-		if unsafeRune(r) {
+		if game.UnsafeText(r) {
 			fmt.Fprintf(&b, "\\u%04x", r)
 		} else {
 			b.WriteRune(r)
@@ -74,10 +74,8 @@ func clean(s string) string {
 // Clean is clean for a screen outside this package that shows what a mod said.
 func Clean(s string) string { return clean(s) }
 
-func unsafeRune(r rune) bool { return unicode.IsControl(r) || unicode.Is(unicode.Cf, r) }
-
 // hasUnsafe reports whether s holds a character clean would escape.
-func hasUnsafe(s string) bool { return strings.ContainsFunc(s, unsafeRune) }
+func hasUnsafe(s string) bool { return strings.ContainsFunc(s, game.UnsafeText) }
 
 // scriptFileOptions is what every script is parsed with: Starlark's defaults,
 // all off. There is no while loop, no recursion, no set(), no reassigning a

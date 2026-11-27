@@ -103,3 +103,30 @@ func TestBuiltinTableMatchesWhatScriptsSee(t *testing.T) {
 		t.Errorf("region scripts see %v, the reference lists %v", regions, got)
 	}
 }
+
+// The raid dict's keys the reference lists are the ones the reader accepts.
+func TestRaidKeysInTheReferenceAreTheOnesReadOrdersAccepts(t *testing.T) {
+	text := Reference()
+	start := strings.Index(text, "Each raid is a dict:")
+	table := text[start : start+strings.Index(text[start:], "### Region script")]
+	var keys []string
+	for _, line := range strings.Split(table, "\n") {
+		if strings.HasPrefix(line, "| `") {
+			keys = append(keys, strings.Split(line, "`")[1])
+		}
+	}
+	if want := []string{"faction", "take", "market", "share", "land"}; !slices.Equal(keys, want) {
+		t.Fatalf("the reference lists %v, want %v", keys, want)
+	}
+	values := map[string]starlark.Value{
+		"faction": starlark.MakeInt(0), "take": starlark.String("jets"),
+		"market": starlark.False, "share": starlark.MakeInt(1), "land": starlark.MakeInt(1),
+	}
+	d := starlark.NewDict(len(keys))
+	for _, k := range keys {
+		d.SetKey(starlark.String(k), values[k])
+	}
+	if _, err := readOrders(starlark.NewList([]starlark.Value{d})); err != nil {
+		t.Errorf("readOrders refused a raid with every documented key: %v", err)
+	}
+}

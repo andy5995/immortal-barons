@@ -53,9 +53,10 @@ var valuesSections = []docKey{
 	{"units", "One `[units.<id>]` table per unit. List only what changes.", ""},
 	{"hq", "The one `[hq]` table.", ""},
 	{"combat", "The one `[combat]` table.", ""},
+	{"pirates", "The one `[pirates]` table.", ""},
 	{"regions", "One `[regions.<id>]` table per region type.", ""},
 	{"attacks", "One `[attacks.<kind>.target]` and one `[attacks.<kind>.attacker]` table per kind of attack.", ""},
-	{"when", "`[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.combat]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them.", ""},
+	{"when", "`[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.combat]`, `[when.<option>.pirates]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them.", ""},
 }
 
 func kindNames() []string {
@@ -147,6 +148,14 @@ lists what it may say.
 	for _, f := range game.CombatFields {
 		rows = append(rows, docKey{f.Key, f.Desc, numfmt.Comma(int(f.Min)) + " to " + numfmt.Comma(int(f.Max))})
 	}
+	writeKeyTable(&b, "Key", "Limits", rows)
+
+	b.WriteString("### Pirates\n\nThe `[pirates]` table changes what a pirate raid does, what a faction holds and starts with, and what a player's attack on a faction costs and wins. Every key but `names` is a whole number. These figures are in force on the board that resolves the raid or the attack, and a league plays one mod set. Which raids happen is the [pirate script](#pirate-script)'s business; with no script, `raid_chance_*` decide it.\n\n")
+	rows = nil
+	for _, f := range game.PirateFields {
+		rows = append(rows, docKey{f.Key, f.Desc, numfmt.Comma(f.Min) + " to " + numfmt.Comma(f.Max)})
+	}
+	rows = append(rows, docKey{"names", fmt.Sprintf("The nine faction names, in slot order, as a list of text. They are only shown on screens: colors and rules go by slot. Each is 1 to %d characters a CP437 door can show, with no control or format characters, no space at either end, and none repeated.", game.ModPirateNameMax), "exactly 9 names"})
 	writeKeyTable(&b, "Key", "Limits", rows)
 
 	b.WriteString("### Regions\n\nThe region types are " + codeList(regionIDs()) + ". Each `[regions.<id>]` table takes these keys, all whole numbers. Every type takes every key. Waste is ruined land: it may change only the keys marked in the last column, and every other key must stay 0.\n\n")

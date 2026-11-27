@@ -1,5 +1,7 @@
 package game
 
+import "math"
+
 // PirateFactions are the nine raidable pirate factions. Their strength is
 // randomized per game (NOT an easiest-to-hardest ladder), so any faction can
 // turn out the strongest.
@@ -59,25 +61,44 @@ func (p *PirateFaction) Defense() int {
 //
 // The rolls are in balance_pirates.go, read out of the seeding loop.
 func (w *World) seedPirates() {
-	w.Pirates = make([]PirateFaction, len(PirateFactions))
-	for i, name := range PirateFactions {
+	pr := w.pirateFigures()
+	roll := func(n, cap int64) int64 {
+		if n <= 0 {
+			return 0
+		}
+		return min(int64(w.setupRng.Intn(int(n))), cap)
+	}
+	w.Pirates = make([]PirateFaction, len(pr.Names))
+	for i, name := range pr.Names {
 		w.Pirates[i] = PirateFaction{
 			Name:         name,
-			LootTroopers: w.setupRng.Intn(PirateSeedTroopersRoll),
-			LootTanks:    w.setupRng.Intn(PirateSeedTanksRoll),
-			LootJets:     w.setupRng.Intn(PirateSeedJetsRoll),
-			LootTurrets:  w.setupRng.Intn(PirateSeedTurretsRoll),
-			Land:         w.setupRng.Intn(PirateSeedRegionsRoll),
-			// Two draws multiplied, as the original does it: the product is what
-			// makes a rich faction rare rather than a flat one-in-N.
-			Gold: PirateSeedGoldBase +
-				int64(w.setupRng.Intn(PirateSeedGoldRoll))*int64(w.setupRng.Intn(PirateSeedGoldRoll)),
+			LootTroopers: int(roll(pr.SeedTroopers, pr.CapTroopers)),
+			LootTanks:    int(roll(pr.SeedTanks, pr.CapTanks)),
+			LootJets:     int(roll(pr.SeedJets, pr.CapJets)),
+			LootTurrets:  int(roll(pr.SeedTurrets, pr.CapTurrets)),
+			Land:         int(roll(pr.SeedRegions, pr.CapRegions)),
 		}
+		// Two draws multiplied, as the original does it: the product is what
+		// makes a rich faction rare rather than a flat one-in-N.
+		w.Pirates[i].Gold = min(pr.SeedGoldBase+roll(pr.SeedGoldRoll, math.MaxInt64)*roll(pr.SeedGoldRoll, math.MaxInt64), pr.CapGold)
+	}
+}
+
+// SyncPirateNames makes the factions carry the names the rules give them, so
+// the rules are the one source of the displayed name. A mod loaded or reloaded
+// after the factions exist (a repair, -reload-mods) changes them here.
+func (w *World) SyncPirateNames() {
+	names := w.pirateFigures().Names
+	if len(names) != len(w.Pirates) {
+		return
+	}
+	for i := range w.Pirates {
+		w.Pirates[i].Name = names[i]
 	}
 }
 
 // battleLoss is a percentage casualty, rounded as BRE rounds it.
-func battleLoss(have, pct int) int { return have * pct / 100 }
+func battleLoss(have, pct int) int { return int(int64(have) * int64(pct) / 100) }
 
 // EnsurePirates seeds the factions after loading a save that predates them, and
 // again if the sysop turns pirates back on. Turning them OFF leaves the factions'
@@ -107,8 +128,9 @@ func (w *World) EnsurePirates() {
 	// that is now the ONLY caller of seedPirates, just as the store's repair
 	// pass is the only caller of this, so neither path can drift into the
 	// other's job without someone noticing.
-	w.Pirates = make([]PirateFaction, len(PirateFactions))
-	for i, name := range PirateFactions {
+	names := w.pirateFigures().Names
+	w.Pirates = make([]PirateFaction, len(names))
+	for i, name := range names {
 		w.Pirates[i] = PirateFaction{Name: name}
 	}
 }
@@ -119,31 +141,20 @@ func (w *World) EnsurePirates() {
 // have/33 exactly, and the three largest takes seen (24,048 / 24,415 / 24,546)
 // are the jittered cap rather than a flat ceiling.
 func (w *World) pirateTake(have int64) int64 {
-	t := have / PirateRaidTakeDivisor
-	if cap := int64(PirateRaidCapBase + w.rng.Intn(PirateRaidCapJitter)); t > cap {
+	pr := w.pirateFigures()
+	t := have / pr.RaidTakeDivisor
+	if cap := pr.RaidCapBase + int64(w.rng.Intn(int(pr.RaidCapJitter))); t > cap {
 		t = cap
 	}
 	return t
 }
 
-// capAdd adds delta to cur, clamped to cap.
-func capAdd[T number](cur, delta, cap T) T {
-	cur += delta
-	if cur > cap {
-		cur = cap
-	}
-	return cur
-}
-
 // pirateRaidChance is how many of the twenty faces of BRE's die let a raid
 // through: regions/1200 + 2, held to 6. A big realm is a bigger target — the
 // figure is 3-in-20 for a realm of any modest size and tops out at 7-in-20.
-func pirateRaidChance(e *Empire) int {
-	k := e.Land/PirateRaidRegionsPerStep + PirateRaidChanceBase
-	if k > PirateRaidChanceCap {
-		k = PirateRaidChanceCap
-	}
-	return k
+func (w *World) pirateRaidChance(e *Empire) int {
+	pr := w.pirateFigures()
+	return int(min(int64(e.Land)/pr.RaidRegionsPerStep+pr.RaidChanceBase, pr.RaidChanceCap))
 }
 
 // maybePirateRaid gives one empire its per-turn exposure to pirates (#21 — BRE
@@ -152,10 +163,10 @@ func pirateRaidChance(e *Empire) int {
 // victim's notice surfaces at the next turn's income (BRE's "since your last
 // play" timing).
 //
-// BRE writes the retry as a recursive call to its own entry point, reached
-// whether or not the attempt raided, so the loop below is that recursion
-// flattened: roll, maybe raid, then a 1-in-10 roll to go round again with a
-// freshly picked faction.
+// BRE writes the retry as a recursive call to its own entry point, so the loop
+// below is that recursion flattened: roll, maybe raid, then a 1-in-10 roll to
+// go round again with a freshly picked faction. A missed roll reaches the
+// retry; a raid that took nothing does not.
 func (w *World) maybePirateRaid(e *Empire) {
 	if !w.Config.Pirates || !e.Alive || e.Protection > 0 || len(w.Pirates) == 0 {
 		return
@@ -165,7 +176,7 @@ func (w *World) maybePirateRaid(e *Empire) {
 		w.Tally.script("pirates", err)
 		if err == nil {
 			for _, o := range orders {
-				w.pirateRaid(o.Slot, e, pirateDraw{Spoil: o.Spoil, FromMarket: o.FromMarket})
+				w.pirateRaid(o.Slot, e, pirateDraw{Spoil: o.Spoil, FromMarket: o.FromMarket, Share: o.Share, Land: o.Land})
 			}
 			return
 		}
@@ -173,8 +184,12 @@ func (w *World) maybePirateRaid(e *Empire) {
 	}
 	for {
 		faction := w.rng.Intn(len(w.Pirates))
-		if w.rng.Intn(PirateRaidChanceOutOf) <= pirateRaidChance(e) {
-			w.pirateRaidVictim(faction, e)
+		// A raid that takes nothing ends the routine: no regions, no notice and
+		// no retry (BRE.OVR 0x35f9b). A missed chance roll still reaches the
+		// retry (0x35df7).
+		if w.rng.Intn(int(w.pirateFigures().RaidChanceOutOf)) <= w.pirateRaidChance(e) &&
+			w.pirateRaidVictim(faction, e) == 0 {
+			return
 		}
 		if w.rng.Intn(PirateRaidRetryOutOf) != 0 {
 			return
@@ -206,18 +221,18 @@ func PirateSpoils() []PirateSpoil {
 
 // loot is the faction's hoard of s and the cap it is held to, or nil for gold,
 // which a faction keeps as Gold.
-func (p *PirateFaction) loot(s PirateSpoil) (*int, int) {
+func (p *PirateFaction) loot(s PirateSpoil, pr *PirateRules) (*int, int64) {
 	switch s {
 	case SpoilTroopers:
-		return &p.LootTroopers, PirateCapTroopers
+		return &p.LootTroopers, pr.CapTroopers
 	case SpoilJets:
-		return &p.LootJets, PirateCapJets
+		return &p.LootJets, pr.CapJets
 	case SpoilTurrets:
-		return &p.LootTurrets, PirateCapTurrets
+		return &p.LootTurrets, pr.CapTurrets
 	case SpoilTanks:
-		return &p.LootTanks, PirateCapTanks
+		return &p.LootTanks, pr.CapTanks
 	case SpoilAgents:
-		return &p.LootAgents, PirateCapAgents
+		return &p.LootAgents, pr.CapAgents
 	}
 	return nil, 0
 }
@@ -225,9 +240,14 @@ func (p *PirateFaction) loot(s PirateSpoil) (*int, int) {
 // pirateDraw is one face of BRE's sixteen-sided raid die: what the raid takes,
 // and whether it comes out of the victim's own inventory or its Trading Market
 // listing.
+//
+// Share and Land, when set, size a scripted raid: the percent of a normal
+// raid's take and the regions granted. Nil leaves them to the usual roll.
 type pirateDraw struct {
 	Spoil      PirateSpoil
 	FromMarket bool
+	Share      *int
+	Land       *int
 }
 
 // pirateSpoilWeights is BRE's draw for what a raid takes: one Random(16) over
@@ -312,13 +332,17 @@ type PirateHit struct {
 // and grows p; the game grants it new regions rather than taking v's. All
 // holdings are clamped to their caps. Bombers and carriers are never a target —
 // they are absent from BRE's name table.
-func (w *World) pirateRaidVictim(slot int, v *Empire) {
-	w.pirateRaid(slot, v, pirateSpoilWeights[w.rng.Intn(len(pirateSpoilWeights))])
+func (w *World) pirateRaidVictim(slot int, v *Empire) int64 {
+	return w.pirateRaid(slot, v, pirateSpoilWeights[w.rng.Intn(len(pirateSpoilWeights))])
 }
 
 // pirateRaid carries out one raid by faction slot on v, taking what draw names.
 // The built-in roll and a mod's PirateBrain both end here.
-func (w *World) pirateRaid(slot int, v *Empire, draw pirateDraw) {
+//
+// It returns what the raid took. A raid that takes nothing aborts before it
+// grants any land and sends no notice (BRE.OVR 0x35f9b); only a scripted order
+// that names its own land still grants it.
+func (w *World) pirateRaid(slot int, v *Empire, draw pirateDraw) int64 {
 	p := &w.Pirates[slot]
 
 	// A market face drains the victim's listing instead of its inventory. Gold
@@ -332,25 +356,46 @@ func (w *World) pirateRaid(slot int, v *Empire, draw pirateDraw) {
 		src = g.Count(v)
 	}
 
+	pr := w.pirateFigures()
 	var took int64
 	if draw.Spoil == SpoilGold {
-		took = w.pirateTake(v.Gold)
+		took = w.sizedTake(v.Gold, draw)
 		v.Gold -= took
-		p.Gold = capAdd(p.Gold, took*PirateRaidKeepMult, PirateCapGold)
+		p.Gold = bank(p.Gold, mulSat(took, pr.RaidKeepMult), pr.CapGold)
 	} else if src != nil {
-		took = w.pirateTake(int64(*src))
+		took = w.sizedTake(int64(*src), draw)
 		*src -= int(took)
-		if hoard, cap := p.loot(draw.Spoil); hoard != nil {
-			*hoard = capAdd(*hoard, int(took)*PirateRaidKeepMult, cap)
+		if hoard, cap := p.loot(draw.Spoil, pr); hoard != nil {
+			*hoard = int(bank(int64(*hoard), mulSat(took, pr.RaidKeepMult), cap))
 		}
 	}
 	w.Tally.raid(draw.Spoil, took)
-	p.Land = capAdd(p.Land, w.rng.Intn(PirateRaidLandMax), PirateCapRegions)
+	if took == 0 && draw.Land == nil {
+		return 0
+	}
+	var land int64
+	if draw.Land != nil {
+		land = int64(*draw.Land)
+	} else if pr.RaidLandMax > 0 {
+		land = int64(w.rng.Intn(int(pr.RaidLandMax)))
+	}
+	p.Land = int(bank(int64(p.Land), land, pr.CapRegions))
 
 	// Only humans read the notice; the raid itself still hits AI victims.
 	if v.Owner != "" && took > 0 {
 		v.PirateHits = append(v.PirateHits, PirateHit{Faction: p.Name, Slot: slot, Spoil: draw.Spoil, Amount: took})
 	}
+	return took
+}
+
+// sizedTake is pirateTake, cut to a scripted raid's share when it names one.
+// The draw is made either way, so a share changes the figure and not the stream.
+func (w *World) sizedTake(have int64, draw pirateDraw) int64 {
+	t := w.pirateTake(have)
+	if draw.Share != nil {
+		t = scaleShare(t, *draw.Share)
+	}
+	return t
 }
 
 // raidLoot is the "You took" tally, in BRE's order: Gold, Regions, Agents,
@@ -455,15 +500,18 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 	// Both sides pay, win or lose: BRE charges the attacker a slice of what it
 	// committed and the faction a slice of what it holds BEFORE testing who won
 	// (BRE.OVR 0x367ad-0x369ff, the losses are straight-line above the compare).
-	tLost := battleLoss(troopers, w.rng.Intn(PirateAttackerLossJitter)+PirateAttackerLossMin)
-	jLost := battleLoss(jets, w.rng.Intn(PirateAttackerLossJitter)+PirateAttackerLossMin)
-	kLost := battleLoss(tanks, w.rng.Intn(PirateAttackerLossJitter)+PirateAttackerLossMin)
+	pr := w.pirateFigures()
+	attackerLoss := func() int { return w.rng.Intn(int(pr.AttackerLossJitter)) + int(pr.AttackerLossMin) }
+	defenderLoss := func() int { return w.rng.Intn(int(pr.DefenderLossJitter)) + int(pr.DefenderLossMin) }
+	tLost := battleLoss(troopers, attackerLoss())
+	jLost := battleLoss(jets, attackerLoss())
+	kLost := battleLoss(tanks, attackerLoss())
 	a.Troopers -= tLost
 	a.Jets -= jLost
 	a.Tanks -= kLost
-	p.LootTroopers -= battleLoss(p.LootTroopers, w.rng.Intn(PirateDefenderLossJitter)+PirateDefenderLossMin)
-	p.LootJets -= battleLoss(p.LootJets, w.rng.Intn(PirateDefenderLossJitter)+PirateDefenderLossMin)
-	p.LootTanks -= battleLoss(p.LootTanks, w.rng.Intn(PirateDefenderLossJitter)+PirateDefenderLossMin)
+	p.LootTroopers -= battleLoss(p.LootTroopers, defenderLoss())
+	p.LootJets -= battleLoss(p.LootJets, defenderLoss())
+	p.LootTanks -= battleLoss(p.LootTanks, defenderLoss())
 
 	if offense > defense {
 		// A win hands back a third of the faction's gold, regions, agents and
@@ -472,13 +520,13 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		// three consecutive raids on one faction in cap/kde3-01.cap, where the
 		// untouched-by-combat fields decay by exactly 2/3 (gold, agents) and
 		// exactly 3/4 (turrets).
-		gotT := p.LootTroopers / PirateReclaimDivMain
-		gotJ := p.LootJets / PirateReclaimDivArmour
-		gotU := p.LootTurrets / PirateReclaimDivArmour
-		gotK := p.LootTanks / PirateReclaimDivArmour
-		gotA := p.LootAgents / PirateReclaimDivMain
-		gotG := p.Gold / PirateReclaimDivMain
-		gotLand := p.Land / PirateReclaimDivMain
+		gotT := p.LootTroopers / int(pr.ReclaimDivMain)
+		gotJ := p.LootJets / int(pr.ReclaimDivArmour)
+		gotU := p.LootTurrets / int(pr.ReclaimDivArmour)
+		gotK := p.LootTanks / int(pr.ReclaimDivArmour)
+		gotA := p.LootAgents / int(pr.ReclaimDivMain)
+		gotG := p.Gold / pr.ReclaimDivMain
+		gotLand := p.Land / int(pr.ReclaimDivMain)
 
 		p.LootTroopers -= gotT
 		p.LootJets -= gotJ
@@ -488,13 +536,15 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		p.Gold -= gotG
 		p.Land -= gotLand
 
-		a.Troopers += gotT
-		a.Jets += gotJ
-		a.Turrets += gotU
-		a.Tanks += gotK
-		a.Agents += gotA
+		// Saturating: a realm near MaxUnits must not wrap on a win, and a mod
+		// can make the faction's hoard as large as a billion.
+		a.Troopers = addUnits(a.Troopers, gotT)
+		a.Jets = addUnits(a.Jets, gotJ)
+		a.Turrets = addUnits(a.Turrets, gotU)
+		a.Tanks = addUnits(a.Tanks, gotK)
+		a.Agents = addUnits(a.Agents, gotA)
 		w.creditGold(a, gotG, say("reclaimed pirate loot"))
-		a.PendingRegions += gotLand
+		a.PendingRegions = addUnits(a.PendingRegions, gotLand)
 		capturedLand = gotLand
 		addScore(a, PirateScoreBase+w.rng.Intn(PirateScoreRoll))
 		w.postPirateNews(a, p.Name, true)

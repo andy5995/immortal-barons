@@ -277,6 +277,20 @@ chooses them, and members install nothing.
   newlines are part of what the hash covers. Every other field of a mod
   reference is scrubbed like the rest of the packet, and the mod reader refuses
   a control character in each manifest field it shows.
+- **The pirate figures are `Rules.PirateFigures`, read where a raid or an
+  attack on a faction resolves (#351).** A raid hits a realm on its own board
+  under that board's rules and every board in a league plays the same mods,
+  so no pirate figure travels in a packet: a `PirateHit` is a notice on the
+  victim's own board, and the factions live in each board's own world. The
+  binary-verified constants of `balance_pirates.go` remain the base values, and
+  `-print-base-mod` prints them. Two limits are not about size: the loss
+  minimum plus its jitter stays at 101 so a side never loses more than it
+  holds, and the raid retry is not a key because a retry chance of 1 in 1 would
+  never end. A scripted raid's `share` and `land` ride the worker's JSON reply
+  as optional pointers; the parent checks them again in `askPirateBrain`,
+  since a worker's reply is not trusted. Names are display only, checked like
+  other mod text (no control or format characters, 20 characters) and held to
+  exactly nine, distinct.
 - **Arriving missiles, the S3-Sabre and interplanetary attacks are moddable;
   the rest of interplanetary play is not.** An arriving missile resolves on
   the target's board under that board's rules, and every board in a league
@@ -368,4 +382,3 @@ chooses them, and members install nothing.
 - **The AI.** It is lowest priority (Andy, 2026-11-24).
 - **New units, and the number of pirate factions.** Both are fixed in the save
   format and the packets.
-- **Further pirate figures** are #351.

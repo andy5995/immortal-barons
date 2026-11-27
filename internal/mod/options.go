@@ -291,6 +291,16 @@ func (m *Mod) resolveValues(v values) (values, error) {
 			out.Combat[key] = got
 		}
 	}
+	if v.Pirates != nil {
+		out.Pirates = map[string]any{}
+		for key, raw := range v.Pirates {
+			got, err := m.optionValue(raw, "pirates."+key)
+			if err != nil {
+				return values{}, err
+			}
+			out.Pirates[key] = got
+		}
+	}
 	if v.Regions != nil {
 		out.Regions = map[string]map[string]any{}
 		for region, fields := range v.Regions {
@@ -378,6 +388,9 @@ func (v values) apply(r *game.Rules, m *Mod) []error {
 		errs = append(errs, err)
 	}
 	if err := applyFields("combat", game.CombatFields, v.Combat, &r.Combat); err != nil {
+		errs = append(errs, err)
+	}
+	if err := v.applyPirates(r); err != nil {
 		errs = append(errs, err)
 	}
 	if err := v.applyRegions(r); err != nil {

@@ -279,7 +279,8 @@ func factionsValue(v game.PirateView) starlark.Value {
 }
 
 // readOrders reads raid()'s answer: a list of dicts such as
-// {"faction": 0, "take": "jets", "market": False}. "market" may be left out.
+// {"faction": 0, "take": "jets", "market": False}. "market", "share" and "land"
+// may be left out.
 // Whether each order is one the game allows is game.askPirateBrain's check.
 func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 	list, ok := res.(*starlark.List)
@@ -326,12 +327,25 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 					return nil, fmt.Errorf("raid %d: market must be True or False", i)
 				}
 				o.FromMarket = bool(b)
+			case "share", "land":
+				n, err := starlark.AsInt32(kv[1])
+				if err != nil {
+					return nil, fmt.Errorf("raid %d: %s: %s", i, key, clean(truncate(err.Error(), 100)))
+				}
+				if key == "share" {
+					o.Share = &n
+				} else {
+					o.Land = &n
+				}
 			default:
 				return nil, fmt.Errorf("raid %d: unknown key %s", i, show(kv[0]))
 			}
 		}
 		if !haveFaction || !haveTake {
 			return nil, fmt.Errorf("raid %d: needs both \"faction\" and \"take\"", i)
+		}
+		if err := game.CheckPirateOrder(i, o); err != nil {
+			return nil, err
 		}
 		orders = append(orders, o)
 	}
