@@ -151,7 +151,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 	// Fight it out. Both sides grind each other down until one has lost the share
 	// of its force it is willing to lose, so the loser always pays the full
 	// retreat share and the winner pays whatever the strength ratio cost it.
-	attackerWins, aLoss, dLoss := w.battleAttrition(ap, dp, w.Config.AttackDamage.AttackRetreatPct())
+	attackerWins, aLoss, dLoss := w.battleAttrition(ap, dp, w.rules().Combat.Retreat.At(w.Config.AttackDamage))
 	aloss := loseCommitted(a, f, aLoss)
 	dloss := loseForces(d, dLoss)
 	w.bleedAllies(a, d, dLoss, aloss) // the allies' committed 30% bleeds at the defender's rate, and each is told
@@ -187,9 +187,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		// decisive win on a small realm take (up to) all of it. IB multiplied a
 		// net-worth density factor into the share until #200; the original reads
 		// the defender's region count and the level constant and nothing else.
-		captured = int(int64(d.Land) * int64(w.Config.AttackRewards.AttackCapturePct()) / 100)
-		if captured < RegularAttackCaptureFloor {
-			captured = RegularAttackCaptureFloor
+		cr := w.rules().Combat
+		captured = int(int64(d.Land) * int64(cr.Capture.At(w.Config.AttackRewards)) / 100)
+		if captured < cr.CaptureFloor {
+			captured = cr.CaptureFloor
 		}
 		if captured > d.Land {
 			captured = d.Land
@@ -218,11 +219,11 @@ func (w *World) Attack(a, d *Empire, f AttackForce) (report string, captured int
 		crushed := d.Land <= 0
 		gain := 0
 		if w.localAttacksScore() {
-			per := CombatScoreWinPerRegion
+			per := cr.ScoreWin
 			if crushed {
-				per = CombatScoreCrushPerRegion
+				per = cr.ScoreCrush
 			}
-			gain = captured * per
+			gain = fitInt(int64(captured) * int64(per))
 		}
 		addScore(a, gain)
 
@@ -520,10 +521,7 @@ func shareOf(n int, frac float64) int {
 
 // addScore adjusts an empire's Score, never letting it fall below zero.
 func addScore(e *Empire, n int) {
-	e.Score += n
-	if e.Score < 0 {
-		e.Score = 0
-	}
+	e.Score = fitInt(max(int64(e.Score)+int64(n), 0))
 }
 
 // CarrierShortfall is how many more carriers the realm needs before every jet it

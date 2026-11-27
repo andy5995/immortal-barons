@@ -43,6 +43,11 @@ func TestEveryModKeyHasADescription(t *testing.T) {
 			t.Errorf("hq.%s: description empty", f.Key)
 		}
 	}
+	for _, f := range game.CombatFields {
+		if f.Desc == "" {
+			t.Errorf("combat.%s: description empty", f.Key)
+		}
+	}
 	for _, f := range game.RegionFields {
 		if f.Desc == "" {
 			t.Errorf("regions.<id>.%s: description empty", f.Key)

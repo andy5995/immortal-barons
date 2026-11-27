@@ -865,7 +865,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	//
 	// IB used to take a share of the MARGIN and quarter it, which is its own and
 	// had no support.
-	pct := float64(w.Config.AttackRewards.InterplanetaryCapturePct()) *
+	pct := float64(w.rules().Combat.InterplanetaryCapture.At(w.Config.AttackRewards)) *
 		float64(returnsPct) / 100 * float64(kind.capturePct()) / 100
 	// The share is charged against each realm that stood, because the capture
 	// reads total_regions on the realm it is taking from (+0x1862) and a

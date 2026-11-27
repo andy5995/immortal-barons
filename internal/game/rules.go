@@ -26,6 +26,9 @@ type Rules struct {
 	RegionBrains map[*Region]RegionBrain
 	// HQ are the HeadQuarters figures.
 	HQ HQRules
+	// Combat is what the Attack Rewards and Attack Damage levels mean and what a
+	// same-planet win pays (combat_rules.go).
+	Combat CombatRules
 	// Attacks is what each kind of attack does, to its target and back to its
 	// attacker (attack_effects.go).
 	Attacks map[EffectKind]AttackEffects
@@ -102,6 +105,7 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 },
 	Regions: baseRegionRules(),
 	Attacks: baseAttackEffects(),
+	Combat:  baseCombatRules(),
 	HQ: HQRules{
 		BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
 		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
@@ -276,6 +280,9 @@ func (r *Rules) Validate() error {
 	}
 	r.validateHQ(func(format string, a ...any) {
 		errs = append(errs, fmt.Errorf("hq: %s", fmt.Sprintf(format, a...)))
+	})
+	r.validateCombat(func(format string, a ...any) {
+		errs = append(errs, fmt.Errorf("combat: %s", fmt.Sprintf(format, a...)))
 	})
 	r.validateAttacks(func(format string, a ...any) {
 		errs = append(errs, fmt.Errorf(format, a...))

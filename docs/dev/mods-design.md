@@ -16,7 +16,7 @@ mods are read, applied, checked or sent.
   loader change rules for one world without touching any other test running in
   parallel, and one world plays one mod set.
 - **Every key is named in one table** (`unitFields`, `hqFields`,
-  `game.RegionFields`, `game.AttackFields`). Reading, `-check-mod`, `-print-base-mod` and `Diff` all
+  `game.CombatFields`, `game.RegionFields`, `game.AttackFields`). Reading, `-check-mod`, `-print-base-mod` and `Diff` all
   go through it, so a key cannot be readable in one place and missing in
   another.
 - **Every figure has limits tighter than its type**, chosen so the engine's
@@ -152,7 +152,8 @@ chooses them, and members install nothing.
 - **One pair of kinds, `ip.attack.won` and `ip.attack.lost`, serves every
   interplanetary attack** (Quick Strike, Normal Attack, Extended Battle and
   Group Attack). The resolver's battle, capture, losses and HQ share stay
-  built in (`resolveRemoteAttack` is not moved into the table); the sets add
+  built in (`resolveRemoteAttack` is not moved into the table), except the
+  capture share's level ladder, which `[combat]` sets; the sets add
   to them, and only when a battle was fought, never for NOT FOUND or
   PROTECTED. The Target set runs on the defending board in
   `resolveRemoteAttack`, after the built-in outcome, on each realm that stood.
@@ -167,6 +168,23 @@ chooses them, and members install nothing.
   field, so a packet without it is byte-identical; it rides Protocol 8),
   and not as words, because the home board splits it among the contributors
   by the same share as their kills. Words could not be split.
+- **The combat levels are one table per figure, and an interplanetary capture
+  resolves on the defending board (#359).** `[combat]` holds a percent for
+  each Attack Rewards level (same-planet and interplanetary) and each Attack
+  Damage level, the same-planet capture floor and the score per region
+  (`game.CombatRules`). The sysop's level picks the figure, so a mod
+  redefines a level and never reads which one is chosen; there is no offset
+  key, because a per-level table already expresses one and can also reorder
+  the levels. `resolveRemoteAttack` runs on the defending board and reads
+  that board's rules and its own `Config.AttackRewards`, the same as the
+  arriving missiles do. That is the right place because the ruleset
+  fingerprint covers each mod's name, hash and chosen options, so a packet
+  from a board playing other figures is held, and a league plays one mod set.
+  Nothing new travels: the share is applied there and its result comes home
+  as the existing `LandTaken`, so there is no protocol change. Still
+  constant: an interplanetary battle's loss (the attack type's own rate
+  rescaled by the Attack Damage level, which has no per-level table of its
+  own) and the interplanetary floor of 10.
 - **The gates, the dial and the caps stay built in.** The misfire, SDI and
   garrison rolls, the Sabre's aim, jitter and backfire, and the score draw are
   not effects. The per-kind caps (`IPMissileRegionCap`, `IPMissilePeopleCap`)

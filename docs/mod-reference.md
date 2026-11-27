@@ -38,9 +38,10 @@ These are the tables a `values.toml` may hold. Any other table or key is an erro
 | --- | --- |
 | `units` | One `[units.<id>]` table per unit. List only what changes. |
 | `hq` | The one `[hq]` table. |
+| `combat` | The one `[combat]` table. |
 | `regions` | One `[regions.<id>]` table per region type. |
 | `attacks` | One `[attacks.<kind>.target]` and one `[attacks.<kind>.attacker]` table per kind of attack. |
-| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
+| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.combat]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
 
 ### Units
 
@@ -74,6 +75,28 @@ The `[hq]` table takes these keys.
 | `price_cap` | The price never rises past this, less its own random draw. At least `price_base`. | `price_base` to 1,000,000,000 |
 | `price_cap_jitter` | A random 0 up to one less than this is taken off the cap. Less than `price_cap`. | 0 to one less than `price_cap` |
 
+### Combat
+
+The `[combat]` table redefines what the sysop's Attack Rewards and Attack Damage levels mean, and what a winning same-planet attack pays. The sysop still chooses the level. Every key is a whole number. `capture_*` and `ip_capture_*` are percents of the defender's regions by Attack Rewards level, for a same-planet and an interplanetary attack. An interplanetary share is then scaled by the attack's type and, for an individual strike, doubled. `retreat_*` are percents of a side's own force it loses before it breaks off a same-planet battle, by Attack Damage level; an interplanetary battle's loss stays the attack type's own rate rescaled by the level.
+
+| Key | Meaning | Limits |
+| --- | --- | --- |
+| `capture_none` | Percent of the defender's regions a winning same-planet attack takes when Attack Rewards is None. | 0 to 100 |
+| `capture_low` | The same at Attack Rewards Low. | 0 to 100 |
+| `capture_medium` | The same at Attack Rewards Medium. | 0 to 100 |
+| `capture_high` | The same at Attack Rewards High. | 0 to 100 |
+| `ip_capture_none` | Percent of each defending realm's regions a winning interplanetary attack takes when Attack Rewards is None. It is then scaled by the attack's type. | 0 to 100 |
+| `ip_capture_low` | The same at Attack Rewards Low. | 0 to 100 |
+| `ip_capture_medium` | The same at Attack Rewards Medium. | 0 to 100 |
+| `ip_capture_high` | The same at Attack Rewards High. | 0 to 100 |
+| `retreat_none` | Percent of its own force a side loses in a same-planet battle before it breaks off, when Attack Damage is None. | 1 to 100 |
+| `retreat_low` | The same at Attack Damage Low. | 1 to 100 |
+| `retreat_medium` | The same at Attack Damage Medium. | 1 to 100 |
+| `retreat_high` | The same at Attack Damage High. | 1 to 100 |
+| `capture_floor` | The fewest regions a winning same-planet attack takes, up to all the defender holds. | 0 to 1,000,000 |
+| `score_win` | Score the attacker gains for each region an ordinary same-planet win captures. | 0 to 100,000 |
+| `score_crush` | The same when the capture takes every region the defender had. | 0 to 100,000 |
+
 ### Regions
 
 The region types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `urban`, `industrial`, `technology`, `waste`. Each `[regions.<id>]` table takes these keys, all whole numbers. Every type takes every key. Waste is ruined land: it may change only the keys marked in the last column, and every other key must stay 0.
@@ -97,7 +120,7 @@ The region types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `
 
 ### Attacks
 
-The kinds of attack are `nuclear`, `chemical`, `biological`, `conventional.won`, `conventional.lost`, `ip.attack.won`, `ip.attack.lost`, `ip.nuclear`, `ip.chemical`, `sabre.intelligence`, `sabre.people`, `sabre.military_bases`, `sabre.airbases`, `sabre.regions`, `sabre.food`. Each kind has two tables, except the missile kinds below. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes. The two `conventional` kinds do not replace the same-planet attack's battle, its capture or its losses, which are not moddable: they add to it, `conventional.won` when the attacker wins and `conventional.lost` when it is repelled, and are empty in the base game. The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack of any type, Group Attack included, that fought a battle; the resolver's battle, capture and losses are not moddable. The `target` table runs on the defending board after the battle, and a `capture` there is carried home with the battle's own. The `attacker` table runs on the attacker's board when the result comes home, on each realm of that board that contributed, as if it had attacked alone; it cannot `capture`. The `ip.nuclear`, `ip.chemical` and `sabre.*` kinds are missiles that arrive from another board and act on the receiving board, so only their `target` table is used: a non-zero `attacker` table or a `capture` on them is an error.
+The kinds of attack are `nuclear`, `chemical`, `biological`, `conventional.won`, `conventional.lost`, `ip.attack.won`, `ip.attack.lost`, `ip.nuclear`, `ip.chemical`, `sabre.intelligence`, `sabre.people`, `sabre.military_bases`, `sabre.airbases`, `sabre.regions`, `sabre.food`. Each kind has two tables, except the missile kinds below. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes. The two `conventional` kinds do not replace the same-planet attack's battle, its capture or its losses, whose figures are set in `[combat]`: they add to it, `conventional.won` when the attacker wins and `conventional.lost` when it is repelled, and are empty in the base game. The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack of any type, Group Attack included, that fought a battle; the resolver's battle, capture and losses are not set here; `[combat]` changes the capture share. The `target` table runs on the defending board after the battle, and a `capture` there is carried home with the battle's own. The `attacker` table runs on the attacker's board when the result comes home, on each realm of that board that contributed, as if it had attacked alone; it cannot `capture`. The `ip.nuclear`, `ip.chemical` and `sabre.*` kinds are missiles that arrive from another board and act on the receiving board, so only their `target` table is used: a non-zero `attacker` table or a `capture` on them is an error.
 
 A key marked as a percent takes a whole number, a flat percent, or `[pct, up, down]`: the percent drawn as `pct + Random(up) - Random(down)` and held to 0 to 100. A draw is made only when `up` or `down` is above 0. Every `pct`, `up` and `down` is 0 to 100. `morale` and `support` take `[num, den]`, with `den` 1 to 1,000 and `num` 0 to `den`. In the attacker's table, `capture` gives the target that share of the attacker's regions.
 

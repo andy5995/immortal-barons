@@ -2992,6 +2992,10 @@ byte at `+0x181`, where the constants are what *survives* — `0.99`, `0.90`,
 not nothing. `attack.hlp`'s flat "15%" and "20%" describe the interplanetary
 variants, not this table.
 
+A mod can redefine every figure in this table, the interplanetary ladder, the
+floor, and the score per region captured listed under "Score (distinct from
+Net Worth)" (`[combat]`, #359). The values here are the base game's.
+
 Capture is `min(defenderRegions, max(15, round(defenderRegions × share)))` —
 the floor of **15** is pushed at `0x1009f` and the defender's own region count
 into the min at `0x100c3`. Capture depends on nothing else: not on the strength

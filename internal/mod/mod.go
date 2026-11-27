@@ -129,6 +129,9 @@ func ManifestFromRef(ref game.ModRef) (*Manifest, error) {
 type values struct {
 	Units map[string]map[string]any `toml:"units"`
 	HQ    map[string]any            `toml:"hq"`
+	// Combat is the one [combat] table: what the Attack Rewards and Attack
+	// Damage levels mean (combat.go).
+	Combat map[string]any `toml:"combat"`
 	// Regions is one section per region type (regions.go).
 	Regions map[string]map[string]any `toml:"regions"`
 	// Attacks holds the [attacks.<kind>.<side>] tables, as nested tables
@@ -465,7 +468,7 @@ func isAttackKey(k toml.Key) bool {
 
 // isOptionReference reports whether an undecoded key is the option of a
 // { option = "id" } inline table standing in for a figure: units.<id>.<key>,
-// hq.<key> or regions.<id>.<key>, each also under when.<bool>. Any other key
+// hq.<key>, combat.<key> or regions.<id>.<key>, each also under when.<bool>. Any other key
 // named option is a stray, and stays unknown.
 func isOptionReference(k toml.Key) bool {
 	if len(k) < 3 || k[len(k)-1] != "option" {
@@ -477,7 +480,7 @@ func isOptionReference(k toml.Key) bool {
 	switch {
 	case len(k) == 4 && (k[0] == "units" || k[0] == "regions"):
 		return true
-	case len(k) == 3 && k[0] == "hq":
+	case len(k) == 3 && (k[0] == "hq" || k[0] == "combat"):
 		return true
 	}
 	return false

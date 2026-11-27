@@ -282,6 +282,16 @@ func (m *Mod) resolveValues(v values) (values, error) {
 			out.HQ[key] = got
 		}
 	}
+	if v.Combat != nil {
+		out.Combat = map[string]any{}
+		for key, raw := range v.Combat {
+			got, err := m.optionValue(raw, "combat."+key)
+			if err != nil {
+				return values{}, err
+			}
+			out.Combat[key] = got
+		}
+	}
 	if v.Regions != nil {
 		out.Regions = map[string]map[string]any{}
 		for region, fields := range v.Regions {
@@ -366,6 +376,9 @@ func (v values) apply(r *game.Rules, m *Mod) []error {
 		r.Units[g] = u
 	}
 	if err := v.applyHQ(r); err != nil {
+		errs = append(errs, err)
+	}
+	if err := v.applyCombat(r); err != nil {
 		errs = append(errs, err)
 	}
 	if err := v.applyRegions(r); err != nil {

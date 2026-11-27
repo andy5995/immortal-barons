@@ -28,7 +28,7 @@ do, with comments in each file.
   path. See [Checking a mod](#checking-a-mod).
 - `-print-base-mod`: print every value a mod can change, as the game sets it
   without mods, in the form of a `values.toml`, then exit. The `[hq]`,
-  `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
+  `[combat]`, `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
   the sections you want into your mod and change them.
 - `-reset`: start a new game after the settings editor. The editor starts from
   the default settings, which turn no mods on, so pick them again on its Mods
@@ -52,7 +52,8 @@ option.
 ## What a mod can change
 
 A mod can change the figures of each of the six military units, the
-HeadQuarters, and the figures of each region type. The
+HeadQuarters, what the Attack Rewards and Attack Damage levels mean, and the
+figures of each region type. The
 [Mod Reference](mod-reference.md) lists every key with what it means and its
 limits. The units are `trooper`, `jet`, `turret`, `bomber`, `tank` and
 `carrier`; their keys are under
@@ -90,6 +91,38 @@ build_per_turn = 10
 What interplanetary play does to a HeadQuarters is not changed by a mod: the
 interplanetary battle's own tank figures, the share a winning invasion takes,
 and what a Sabotage HQ agent takes. League mods use those same figures.
+
+### Combat
+
+The sysop chooses an Attack Rewards level and an Attack Damage level, each
+None, Low, Medium or High. The `[combat]` section in `values.toml` redefines
+what each level means, and the sysop still chooses the level. Every key is
+optional; see [Combat](mod-reference.md#combat) for the keys and limits.
+
+- `capture_none`, `capture_low`, `capture_medium` and `capture_high` are the
+  percent of the defender's regions a winning same-planet attack takes, by
+  Attack Rewards. `ip_capture_*` are the same for an interplanetary attack,
+  which has its own ladder in the base game.
+- `retreat_*` are the percent of its own force a side loses in a same-planet
+  battle before it breaks off, by Attack Damage.
+- `capture_floor` is the fewest regions a winning same-planet attack takes.
+- `score_win` and `score_crush` are the score for each region captured, in an
+  ordinary win and in a total conquest.
+
+Each level has its own key, so a mod that wants "5 points more than the base"
+writes each base value plus 5; `-print-base-mod` shows the base values. For
+example, a game where a High reward takes a third of a realm and a win pays
+more:
+
+```toml
+[combat]
+capture_high = 33
+score_win = 100
+```
+
+What an interplanetary battle loses stays the attack type's own rate, rescaled
+by the Attack Damage level, and an interplanetary attack's minimum capture
+stays 10 regions. A mod does not change either.
 
 ### Regions
 
@@ -137,8 +170,9 @@ Each kind has two tables, except the missiles described below.
 `[attacks.<kind>.attacker]` is what it does back to the realm that fired it.
 The base game has nothing in the attacker tables.
 
-The battle of a same-planet attack does not change: its losses, its capture of
-regions and its score are as before. The two `conventional` kinds add to it,
+The battle of a same-planet attack does not change here: its losses, its capture
+of regions and its score are as before, unless the [`[combat]`](#combat)
+section changes them. The two `conventional` kinds add to it,
 `conventional.won` when the attacker wins and `conventional.lost` when the
 attacker is repelled. They are empty in the base game. The sections are written
 as `[attacks.conventional.won.target]` and so on. Regions that
@@ -241,7 +275,7 @@ board in the league.
 `mod_api` is the version of the mod format the game reads; see
 [Mod format versions](#mod-format-versions).
 
-`values.toml` holds the changes, one section per unit, plus `[hq]`, one
+`values.toml` holds the changes, one section per unit, plus `[hq]`, `[combat]`, one
 section per region type and the `[attacks.<kind>.<side>]` sections. List only
 what changes:
 
