@@ -168,6 +168,14 @@ func SetWarnOutput(w io.Writer) {
 	warnOut = w
 }
 
+// ResetWarnings forgets which script failures were already reported, so a new
+// run in the same process, such as a second simulation, reports them again.
+func ResetWarnings() {
+	warnMu.Lock()
+	defer warnMu.Unlock()
+	warned = map[string]map[string]bool{}
+}
+
 // Warn reports msg about the mods in play where SetWarnOutput says.
 func Warn(msg string) {
 	warnMu.Lock()

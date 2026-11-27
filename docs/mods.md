@@ -26,6 +26,10 @@ do, with comments in each file.
 - `-check-mod <dir>`: check one mod on its own, with the limits a reset uses,
   print what it changes, then exit. `<dir>` is a name in the `mods` folder or a
   path. See [Checking a mod](#checking-a-mod).
+- `-sim-mod <dir>`: play the mod against the base game in throwaway worlds of
+  computer barons and print how they differ, then exit. It takes `-sim-days`,
+  `-sim-seeds`, `-sim-realms`, `-sim-csv <file>` and `-mod-option <id>=<value>`.
+  See [Testing how a mod plays](#testing-how-a-mod-plays).
 - `-print-base-mod`: print every value a mod can change, as the game sets it
   without mods, in the form of a `values.toml`, then exit. The `[hq]`,
   `[combat]`, `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
@@ -610,3 +614,46 @@ the mod from the start.
 
 A league board refuses [`-reload-mods`](#command-line-options-and-settings)
 because its mods come from the Coordinator's reset order.
+
+## Testing how a mod plays
+
+```
+immortal-barons -sim-mod cheap-tanks
+```
+
+[`-sim-mod`](#command-line-options-and-settings) plays the mod and the base
+game side by side in throwaway worlds of computer barons, with the same seeds
+and settings, and prints how they differ. It runs in memory: it reads the mod's folder
+(for a bare name, it looks in the `mods` folder of the data directory), reads no
+game and writes nothing except the CSV file you ask for. It takes a name or a
+path, like `-check-mod`.
+
+Each world plays `-sim-days` days (60) with `-sim-realms` barons (8). It runs
+`-sim-seeds` seeds (8), because one run is one storyline and a property such as
+"the leader runs away with the game" shows only across many. The report reads
+the worlds at five points over the run and gives, for each figure, the mean
+across the seeds for the base game and the mod, and the difference. A second
+table gives the lowest and highest seed on the last day. The figures are the
+realms still alive and the number eliminated, the leader's and the median
+realm's net worth and regions, the ratio of the two net worths, gold in hand
+and banked, and the total of each unit. `-sim-csv <file>` writes every figure,
+spread included, as CSV for a spreadsheet, after `#` comment lines giving the
+mod, its version and hash, the run's settings and every option's value. The
+limits are 1000 seeds, 3650 days and 25 realms, the planet's slots.
+
+Set an option for the run with `-mod-option <id>=<value>`, as often as needed.
+A bool takes `true`, `false`, `on`, `off`, `yes` or `no`, and a number takes digits; an id
+the mod does not declare, a value of the wrong type or a repeated id is an
+error. The report header lists every option's value, defaults included. The
+option flag works only with `-sim-mod`. To compare values of one option, run the
+command once per value and give each its own `-sim-csv`.
+
+A script that fails is reported under the table, and the game falls back to the
+built-in rules where it failed, as in a real game. The `ip.*` and `sabre.*`
+attack kinds need more than one board, so they are not simulated; the report
+lists them when the mod sets any.
+
+The barons play by their own code and do not adapt to a mod. The report shows
+what a change does mechanically, such as a cheap unit compounding a winner's
+lead, and not how a person would use it. It is a first check before
+play-testing, not a replacement for it.

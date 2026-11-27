@@ -93,6 +93,11 @@ func main() {
 		exitOn("-init-mod", runInitMod(*o.initMod, *o.dataDir))
 		return
 	}
+	if *o.simMod != "" {
+		exitOn("-sim-mod", runSimMod(o))
+		return
+	}
+	exitOn("-sim-mod", checkSimCompanions())
 	if *o.checkMod != "" {
 		exitOn("-check-mod", runCheckMod(*o.checkMod, *o.dataDir))
 		return

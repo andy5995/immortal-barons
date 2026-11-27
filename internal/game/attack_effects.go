@@ -226,6 +226,14 @@ func EffectKinds() []EffectKind {
 	return out
 }
 
+// InterBBSKind reports whether k acts across boards: a missile that arrives
+// from another board, or an interplanetary attack's result, which a single
+// board cannot play out.
+func InterBBSKind(k EffectKind) bool {
+	r := attackKindOf(k)
+	return r.RemoteTarget || r.AttackerAway
+}
+
 func attackKindOf(k EffectKind) *attackKindRow {
 	for i := range attackKinds {
 		if attackKinds[i].Kind == k {
