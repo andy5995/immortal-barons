@@ -13,7 +13,6 @@ import (
 
 	"go.starlark.net/starlark"
 	"go.starlark.net/starlarkstruct"
-	"go.starlark.net/syntax"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -102,13 +101,9 @@ func newThread(name string) *starlark.Thread {
 // parameters. Starlark's defaults stay on: no while loops, no recursion, and
 // no load(), since the thread has no loader.
 func compilePirates(file, src string, options *optionValues) (*starlark.Function, error) {
-	globals, err := starlark.ExecFileOptions(&syntax.FileOptions{}, newThread(file), file, src, predeclaredFor(options))
-	var ee *starlark.EvalError
-	if errors.As(err, &ee) {
-		return nil, fmt.Errorf("%s: %w", file, scriptError(err))
-	}
+	globals, err := compileScript(file, src, predeclaredFor(options))
 	if err != nil {
-		return nil, err // a syntax error, which names the file already
+		return nil, scriptFailure(file, err)
 	}
 	fn, ok := globals["raid"].(*starlark.Function)
 	if !ok {
@@ -120,8 +115,20 @@ func compilePirates(file, src string, options *optionValues) (*starlark.Function
 	return fn, nil
 }
 
+// scriptFailure is err from compiling file, with the file's name on a runtime
+// error. A syntax error names the file already.
+func scriptFailure(file string, err error) error {
+	var ee *starlark.EvalError
+	if errors.As(err, &ee) {
+		return fmt.Errorf("%s: %w", file, scriptError(err))
+	}
+	return errors.New(clean(err.Error()))
+}
+
 // scriptError puts the script's line in a Starlark runtime error, which
-// otherwise names only what went wrong.
+// otherwise names only what went wrong. The text is cleaned: it can hold a
+// string the script chose, such as a fail() message, and it is printed on the
+// sysop's terminal and written to a log.
 func scriptError(err error) error {
 	var ee *starlark.EvalError
 	if errors.As(err, &ee) {
@@ -129,18 +136,23 @@ func scriptError(err error) error {
 		// built-in has no line; the first frame with one is the script's.
 		for i := range len(ee.CallStack) {
 			if line := ee.CallStack.At(i).Pos.Line; line > 0 {
-				return fmt.Errorf("line %d: %s", line, ee.Msg)
+				return fmt.Errorf("line %d: %s", line, clean(ee.Msg))
 			}
 		}
+		return errors.New(clean(ee.Msg))
 	}
-	return err
+	return errors.New(clean(err.Error()))
 }
 
 // Raid calls the script's raid() with v and reads its answer.
 func (s *pirateScript) Raid(v game.PirateView) ([]game.PirateOrder, error) {
 	th := newThread(s.file)
 	th.SetLocal(viewKey, &v)
-	res, err := starlark.Call(th, s.raid, starlark.Tuple{realmValue(v), factionsValue(v)}, nil)
+	var res starlark.Value
+	err := runScript(th, func() (err error) {
+		res, err = starlark.Call(th, s.raid, starlark.Tuple{realmValue(v), factionsValue(v)}, nil)
+		return err
+	})
 	if err != nil {
 		return nil, scriptError(err)
 	}
@@ -180,7 +192,7 @@ func ResetWarnings() {
 func Warn(msg string) {
 	warnMu.Lock()
 	defer warnMu.Unlock()
-	fmt.Fprintln(warnOut, "immortal-barons: "+msg)
+	fmt.Fprintln(warnOut, "immortal-barons: "+clean(msg))
 }
 
 // warnScript reports that script file of mod failed with err, and what the
@@ -197,6 +209,7 @@ func warnScript(id, mod, file string, err error, instead string) {
 		seen = map[string]bool{}
 		warned[id] = seen
 	}
+	err = errors.New(clean(err.Error()))
 	reason := err.Error()
 	switch {
 	case seen[reason] || len(seen) > ScriptWarnings:
@@ -290,7 +303,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 					for _, s := range spoils {
 						names = append(names, spoilName(s))
 					}
-					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, kv[1], strings.Join(names, ", "))
+					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, clean(fmt.Sprint(kv[1])), strings.Join(names, ", "))
 				}
 				o.Spoil, haveTake = spoils[k], true
 			case "market":
@@ -300,7 +313,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 				}
 				o.FromMarket = bool(b)
 			default:
-				return nil, fmt.Errorf("raid %d: unknown key %s", i, kv[0])
+				return nil, fmt.Errorf("raid %d: unknown key %s", i, clean(fmt.Sprint(kv[0])))
 			}
 		}
 		if !haveFaction || !haveTake {

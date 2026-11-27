@@ -5,7 +5,6 @@ import (
 	"maps"
 	"slices"
 	"strings"
-	"unicode"
 
 	"go.starlark.net/starlark"
 
@@ -56,7 +55,7 @@ func (o *Option) check(id, file string) error {
 		return fmt.Errorf("%s: label is required", where)
 	}
 	for key, v := range map[string]string{"label": o.Label, "description": o.Description} {
-		if strings.ContainsFunc(v, unicode.IsControl) {
+		if hasUnsafe(v) {
 			return fmt.Errorf("%s: %s may not hold control characters", where, key)
 		}
 	}

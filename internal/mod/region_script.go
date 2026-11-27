@@ -1,7 +1,6 @@
 package mod
 
 import (
-	"errors"
 	"fmt"
 	"maps"
 	"path/filepath"
@@ -10,7 +9,6 @@ import (
 
 	"go.starlark.net/starlark"
 	"go.starlark.net/starlarkstruct"
-	"go.starlark.net/syntax"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -79,13 +77,9 @@ func compileRegion(file, src string, options *optionValues) (*starlark.Function,
 	if options != nil {
 		pre["option"] = options.builtin()
 	}
-	globals, err := starlark.ExecFileOptions(&syntax.FileOptions{}, newThread(file), file, src, pre)
-	var ee *starlark.EvalError
-	if errors.As(err, &ee) {
-		return nil, fmt.Errorf("%s: %w", file, scriptError(err))
-	}
+	globals, err := compileScript(file, src, pre)
 	if err != nil {
-		return nil, err
+		return nil, scriptFailure(file, err)
 	}
 	fn, ok := globals["region"].(*starlark.Function)
 	if !ok {
@@ -128,7 +122,12 @@ func (s *regionScript) Region(v game.RegionView, row game.RegionRules) (game.Reg
 	}
 	s.mu.Unlock()
 
-	res, err := starlark.Call(newThread(s.file), s.fn, starlark.Tuple{regionRealmValue(v), regionRowValue(row)}, nil)
+	var res starlark.Value
+	th := newThread(s.file)
+	err := runScript(th, func() (err error) {
+		res, err = starlark.Call(th, s.fn, starlark.Tuple{regionRealmValue(v), regionRowValue(row)}, nil)
+		return err
+	})
 	if err != nil {
 		return row, scriptError(err)
 	}
@@ -196,7 +195,7 @@ func readRegionRow(res starlark.Value, row game.RegionRules) (game.RegionRules, 
 		key, _ := starlark.AsString(kv[0])
 		f := game.RegionFieldByKey(key)
 		if f == nil {
-			return row, fmt.Errorf("unknown key %s", kv[0])
+			return row, fmt.Errorf("unknown key %s", clean(fmt.Sprint(kv[0])))
 		}
 		n, err := starlark.AsInt32(kv[1])
 		if err != nil {

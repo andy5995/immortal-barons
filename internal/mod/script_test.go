@@ -82,7 +82,7 @@ func TestScriptEmptyListMeansNoRaid(t *testing.T) {
 // A script that fails raids the built-in way, and says why once.
 func TestFailingScriptFallsBack(t *testing.T) {
 	for _, c := range []struct{ name, script, reason string }{
-		{"step cap", "def raid(realm, factions):\n    for i in range(100000000):\n        pass\n    return []\n", "too many steps"},
+		{"step cap", "def raid(realm, factions):\n    for i in range(1000):\n        for j in range(1000):\n            for k in range(2):\n                pass\n    return []\n", "too many steps"},
 		{"slot", "def raid(realm, factions):\n    return [{\"faction\": 99, \"take\": \"jets\"}]\n", "faction 99 is outside"},
 		{"bombers", "def raid(realm, factions):\n    return [{\"faction\": 0, \"take\": \"bombers\"}]\n", `take "bombers" is not one of`},
 		{"gold from market", "def raid(realm, factions):\n    return [{\"faction\": 0, \"take\": \"gold\", \"market\": True}]\n", "gold is not traded"},

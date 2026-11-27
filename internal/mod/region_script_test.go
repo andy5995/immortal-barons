@@ -154,7 +154,7 @@ func TestFailingRegionScriptFallsBack(t *testing.T) {
 		{"unknown key", desertScript, "def region(realm, row):\n    return {\"ore\": 1}\n", "unknown key \"ore\""},
 		{"out of range", desertScript, "def region(realm, row):\n    return {\"gold_share\": 101}\n", "desert: gold_share 101 is outside 0 to 100"},
 		{"waste", RegionsDir + "/waste.star", "def region(realm, row):\n    return {\"food_base\": 5}\n", "waste: food_base must be 0"},
-		{"step cap", desertScript, "def region(realm, row):\n    for i in range(100000000):\n        pass\n", "too many steps"},
+		{"step cap", desertScript, "def region(realm, row):\n    for i in range(1000):\n        for j in range(1000):\n            for k in range(2):\n                pass\n", "too many steps"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			out := captureWarnings(t)

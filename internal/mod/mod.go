@@ -33,7 +33,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/BurntSushi/toml"
 
@@ -120,6 +119,16 @@ func ManifestFromRef(ref game.ModRef) (*Manifest, error) {
 	var man Manifest
 	if err := decodeStrict([]byte(data), &man); err != nil {
 		return nil, fmt.Errorf("%s/%s: %w", ref.Name, ManifestFile, err)
+	}
+	// The copy came from a world or a league order, and its labels reach a
+	// player's screen: hold them to what a mod folder's are.
+	for key, v := range map[string]string{"label": man.Label, "version": man.Version, "description": man.Description} {
+		if hasUnsafe(v) {
+			return nil, fmt.Errorf("%s/%s: %s may not hold control characters", clean(ref.Name), ManifestFile, key)
+		}
+	}
+	if err := checkOptions(man.Options, ref.Name+"/"+ManifestFile); err != nil {
+		return nil, err
 	}
 	return &man, nil
 }
@@ -236,28 +245,77 @@ func ReadWithOptions(path string, options map[string]int64) (*Mod, error) {
 
 // readFiles reads dir's files into files, each keyed prefix + its name. Only
 // the mod folder itself may hold a folder, and only RegionsDir: parse names
-// anything else as a mistake.
+// anything else as a mistake. A file must be a regular file of at most
+// MaxModFileSize, and a link must lead to one inside the mod folder, so a mod
+// cannot name a file elsewhere on the system or a device that never ends.
 func readFiles(dir, prefix string, files map[string]string) error {
+	root, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return err
+	}
+	return readFilesIn(dir, root, prefix, files)
+}
+
+func readFilesIn(dir, root, prefix string, files map[string]string) error {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}
+	if len(entries) > MaxModFiles {
+		return fmt.Errorf("%s: more than %d files", dir, MaxModFiles)
+	}
 	for _, e := range entries {
 		full := filepath.Join(dir, e.Name())
-		if e.IsDir() {
+		real, err := filepath.EvalSymlinks(full)
+		if err != nil {
+			return err
+		}
+		if rel, err := filepath.Rel(root, real); err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return fmt.Errorf("%s: a link in a mod may not lead outside the mod's folder", full)
+		}
+		fi, err := os.Stat(real)
+		if err != nil {
+			return err
+		}
+		if fi.IsDir() {
 			if prefix != "" || e.Name() != RegionsDir {
 				return fmt.Errorf("%s: a folder in a mod may only be %s, holding a script for each region type it changes", full, RegionsDir)
 			}
-			if err := readFiles(full, RegionsDir+"/", files); err != nil {
+			if err := readFilesIn(real, root, RegionsDir+"/", files); err != nil {
 				return err
 			}
 			continue
 		}
-		data, err := os.ReadFile(full)
+		if !fi.Mode().IsRegular() {
+			return fmt.Errorf("%s: not a regular file", full)
+		}
+		if fi.Size() > MaxModFileSize {
+			return fmt.Errorf("%s: %d bytes; a file in a mod may hold at most %d", full, fi.Size(), MaxModFileSize)
+		}
+		data, err := os.ReadFile(real)
 		if err != nil {
 			return err
 		}
+		// The file may have grown since the stat.
+		if len(data) > MaxModFileSize {
+			return fmt.Errorf("%s: a file in a mod may hold at most %d bytes", full, MaxModFileSize)
+		}
 		files[prefix+e.Name()] = string(data)
+	}
+	return nil
+}
+
+// checkFileSet refuses a set of mod files that is too many or too large, ahead
+// of anything that parses or compiles them. It holds whatever the files came
+// from: a folder, a copy saved in a world, a league's reset order.
+func checkFileSet(path string, files map[string]string) error {
+	if len(files) > MaxModFiles {
+		return fmt.Errorf("%s: %d files; a mod may hold at most %d", path, len(files), MaxModFiles)
+	}
+	for _, name := range slices.Sorted(maps.Keys(files)) {
+		if len(files[name]) > MaxModFileSize {
+			return fmt.Errorf("%s: %s is %d bytes; a file in a mod may hold at most %d", path, clean(name), len(files[name]), MaxModFileSize)
+		}
 	}
 	return nil
 }
@@ -275,12 +333,16 @@ func parse(path string, files map[string]string) (*Mod, error) {
 // for this game; source names where they came from in an error (config.json,
 // world.json, or the league's reset order).
 func parseWithOptions(path string, files map[string]string, given map[string]int64, source string) (*Mod, error) {
+	if err := checkFileSet(path, files); err != nil {
+		return nil, err
+	}
 	m := &Mod{Path: path, Files: files}
 	names := slices.Sorted(maps.Keys(files))
 	var haveManifest bool
 	for _, name := range names {
 		data := []byte(files[name])
 		if name != ManifestFile && name != ValuesFile && name != PiratesFile && regionScriptType(name) == nil && !slices.Contains(LicenseFiles, name) {
+			name := clean(name)
 			if strings.HasPrefix(name, RegionsDir+"/") {
 				return nil, fmt.Errorf("%s: %s is not a region script; %s holds a <type>.star for each region type the mod changes (%s)", path, name, RegionsDir, strings.Join(regionIDs(), ", "))
 			}
@@ -317,7 +379,7 @@ func parseWithOptions(path string, files map[string]string, given map[string]int
 	// The label and version are printed on every player's Game Setup screen,
 	// where a control character would reach the terminal as a command.
 	for key, v := range map[string]string{"label": m.Label, "version": m.Version, "description": m.Description, "license": m.License} {
-		if strings.ContainsFunc(v, unicode.IsControl) {
+		if hasUnsafe(v) {
 			return nil, fmt.Errorf("%s: %s may not hold control characters", filepath.Join(path, ManifestFile), key)
 		}
 	}

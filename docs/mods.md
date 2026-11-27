@@ -2,6 +2,15 @@
 
 This page is for the BBS operator (the sysop). Players do not need to read it.
 
+**Mods with scripts run inside the game. Read this before you install one.**
+Starlark gives a script no access to files, the network or other programs, and
+Immortal Barons adds none. The realistic harm from a bad script is to the
+game's availability: it can use up memory or CPU, hang, or crash the game
+process, and with it the door session or maintenance run. The limits in
+[What every script may do](#what-every-script-may-do) are best effort. They
+were written by an LLM (Claude) and no human security expert has reviewed
+them. Install only mods whose scripts you trust or have read.
+
 A mod changes some of the numbers the game plays by. Without mods, the game
 plays the standard Immortal Barons rules. A game with a mod is a
 different game, and the Game Setup screen lists every mod in play and its
@@ -385,6 +394,23 @@ reset, and a league reset carries them to every board.
 
 ## Scripts
 
+**Warning: a script runs inside the game process.**
+[Starlark](https://github.com/bazelbuild/starlark) is not a low-level
+language. It is a small Python-like language made to be embedded safely (it was
+written for Bazel's build files). It has no pointers or direct memory access,
+and no file, network or program access unless the host game provides it.
+Immortal Barons provides none. So a hostile script cannot read or change files
+on your system. What it can try is to harm the availability of the game: use
+up memory, use up CPU, hang, or crash the process. That ends the door session
+or maintenance run it was running in.
+
+Immortal Barons limits a script (see
+[What every script may do](#what-every-script-may-do)), but it cannot
+completely prevent this. The limits are best effort and have known gaps,
+listed there. They were written by an LLM (Claude), and no human security
+expert has reviewed them. Only install mods whose scripts you trust or have
+read. In a league, `AcceptLeagueScripts` is off by default for this reason.
+
 A mod may also hold scripts: `pirates.star`, which decides pirate raids, and a
 `regions` folder with a script for each region type the mod changes, which
 decides what that type does realm by realm. They are written in
@@ -495,13 +521,46 @@ available). `while` loops and recursion are not allowed, and neither are
 call to `raid` or `region` may run for at most 1,000,000 steps, and so may the
 top level of the file when it loads.
 
+The game also limits each run of a script, and a run that goes past a limit
+fails like any other failing script:
+
+- **Time.** A run may take at most 2 seconds. If it is stuck where the game
+  cannot stop it, the game gives up on it, and no script runs again until the
+  process ends.
+- **Memory.** A run that makes the game process grow by more than 256 MiB is
+  stopped. This is sampled every few milliseconds, so one operation that
+  allocates a lot at once can pass it.
+- **Size of what it builds.** `range()`, a repeated string, list or tuple
+  (`x * n`), a formatted string (`%`), and anything printed by `str()`,
+  `repr()` or `fail()` may not pass 1,000,000 elements or characters. An
+  integer product may not pass 4,096 bits. The same cap holds for the result
+  of `join`, `replace` and `format`; they work as usual below it. Those three
+  may be called only as `x.join(...)`: using one as a value (`f = x.join`) or
+  through `getattr` is refused. `print` does nothing.
+- **Files.** A file in a mod may hold at most 262,144 bytes, and a mod at most
+  64 files. This includes a mod that arrives in a league's reset order.
+
+Known gaps, which these limits do not close:
+
+- A script can build a value whose parts are shared many times over, such as a
+  list holding another list a thousand times, three levels deep. It is small in
+  memory, but comparing or hashing it takes as long as its fully expanded size.
+  Those operations cannot be interrupted, so the game abandons the run after
+  the time limit and stops running scripts. The abandoned run keeps using the
+  CPU until the game process ends.
+- Memory is measured for the whole process, not for one script. A script can
+  pass the limit by one large step, and an unrelated allocation can end a
+  script that did nothing wrong.
+- Go can stop the process outright when it runs out of memory, which nothing in
+  the game can catch.
+
 A script keeps nothing from one call to the next. Values set at the top level
 of the file are frozen once it has loaded: `raid` and `region` can read a list
 or dict made there, but changing it is an error.
 
 A script is as trusted as the rest of the mod folder. It runs inside the game
-itself, and nothing limits how much memory it uses, so install only scripts
-you have read.
+itself, and the limits above are best effort, so install only scripts you have
+read.
 
 [`-check-mod`](#checking-a-mod) loads each script and checks that it defines `raid` or `region`
 with two parameters. It cannot check what they return, because that depends on
@@ -617,8 +676,9 @@ Scripts are another choice. A mod that carries `pirates.star` or a script in
 `bbs.cfg`. The setting defaults to `no`. A board with the default refuses a
 scripted reset and keeps the order. It resets at its first planetary run after
 its sysop turns the setting on. If the board moves to another league first, the
-order is discarded. Scripts run on that machine with no memory limit, so read
-them before you allow them.
+order is discarded. Scripts run inside the game on that machine, and their
+limits are best effort (see [Scripts](#scripts)), so read them before you allow
+them.
 
 ## Testing a mod
 

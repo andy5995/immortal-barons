@@ -130,7 +130,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		}
 		var rows []modLine
 		for _, r := range mods {
-			rows = append(rows, modLine{r.DisplayName(), r.Version, false})
+			rows = append(rows, modLine{mod.Clean(r.DisplayName()), mod.Clean(r.Version), false})
 			man, err := mod.ManifestFromRef(r)
 			if err != nil {
 				continue
@@ -141,7 +141,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 				if chosen, ok := r.Options[id]; ok {
 					v = chosen
 				}
-				rows = append(rows, modLine{o.Label, mod.OptionValueWord(o, v), true})
+				rows = append(rows, modLine{mod.Clean(o.Label), mod.OptionValueWord(o, v), true})
 			}
 		}
 		const linesPerPage = 18

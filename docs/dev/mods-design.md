@@ -93,9 +93,79 @@ mods are read, applied, checked or sent.
 
 ## Scripts
 
-- **Starlark, run in the game process, with a step cap and no memory cap.**
-  `starlark-go` has no memory limit, so a script is as trusted as the folder it
-  came in. A hard limit would need a child process with an OS limit.
+- **Starlark, run in the game process, under best-effort limits.** The
+  threat model is a sysop who installs a mod, or accepts a league's, without
+  reading its scripts. Starlark has no file, network, exec or clock access and
+  the only names IB adds are `rand`, `day` and `option`, so the harm left is
+  to availability: CPU, memory, a crash, or text that reaches a terminal. All of
+  it is in `internal/mod/sandbox.go`; every call into a script goes through
+  `runScript` and every compile through `compileScript`.
+  - Per run (top level at load, each `raid()` / `region()` call):
+    `ScriptSteps` (1M), `ScriptTimeout` (2 s, `thread.Cancel` from a timer),
+    and `ScriptMemory` (256 MiB of heap growth). The memory watchdog is one
+    goroutine for the process, started by the first run and ended with the
+    last; it reads `/memory/classes/heap/objects:bytes` every 5 ms, and on
+    a breach runs the collector once before cancelling, because that figure
+    counts unswept garbage. Heap is process-wide, so concurrent runs and the
+    game's own allocation are attributed to the script: a coarse limit, set high
+    so false positives are rare. Measured cost of a run's limits: about 1.5 us
+    (`BenchmarkRunScriptOverhead`), against turns that take milliseconds.
+  - **A run that will not stop is abandoned.** `runScript` runs the script on a
+    goroutine. Past `ScriptTimeout` plus a grace period it returns an error and
+    leaves the goroutine, and sets a flag that makes every later run fail at
+    once. The callers' existing fallback handles it. This costs the process the
+    CPU of the stuck goroutine, not the session.
+  - **Go panics are recovered** in `runScript`, so a bug in the interpreter or
+    a builtin is a failed script.
+  - **The parse tree is rewritten before compiling** (`guard`). `x * y`,
+    `x *= y`, `x % y`, `x %= y` become calls to checked builtins that refuse a
+    repeat, a formatted string or an integer product past `ScriptSequenceMax`
+    / `ScriptIntBits`. Starlark's own limit on a repeat is 2^30 elements, which
+    for a list is 16 GiB. A call `x.join(...)`, `x.replace(...)` or
+    `x.format(...)` becomes `__ib_call("join", x, ...)`: for a string `x` the
+    result's size is worked out from the arguments first (each can multiply its
+    argument in one uninterruptible call) and refused past the cap, then
+    Starlark's own method runs, so results are unchanged. Another receiver, such
+    as a struct with a field named `join`, gets an ordinary attribute call. The
+    methods used as a value (`f = x.join`) or through `getattr` are refused:
+    nothing could check the later call. `range`, `str`, `repr`,
+    `fail` and `print` are shadowed in the predeclared dict: `range` refuses
+    a length past the cap, `str`/`repr`/`fail` refuse a value that would print
+    past it (a list holding one list a thousand times, three levels deep, is a
+    few KB and a billion elements printed), and `print` does nothing. The names
+    the rewrite uses are reserved. A file option set is `syntax.FileOptions{}`:
+    no `while`, recursion, `set`, global reassignment or top-level `if`/`for`,
+    and `load()` is refused. `TestScriptSurfaceIsPinned` fails when the
+    predeclared names or Starlark's own universe gain a name, so a go.starlark.net
+    upgrade that adds a builtin needs a look at what it can allocate.
+  - **Mod files**: at most `MaxModFileSize` (256 KiB) each and `MaxModFiles`
+    (64), checked on the folder reader, a saved copy and a league order alike
+    (`checkFileSet`, before anything parses). The folder reader follows a
+    symlink only to a regular file inside the mod folder.
+  - **Text**: every string a script chose that reaches stderr or a log
+    (error messages, `fail()` text, raid keys) goes through `clean`, which
+    writes control characters and Unicode format characters (bidi overrides
+    among them) as `\uXXXX`. Manifest and option text is refused if it holds one
+    (it was control characters only; format characters are new). `ManifestFromRef`
+    holds a saved copy to the same checks, since a screen reads it without
+    `Read`. The Game Setup screen cleans what it prints as well.
+  - **Residual risk, not closed.** (1) *Shared structure*: a script can build, in
+    a few thousand steps, values whose expanded form is astronomically large
+    (`a = [0]*1000; b = [a]*1000; c = [b]*1000`). Comparing two such values,
+    hashing one, or sorting a list of them is one uninterruptible Go call;
+    `runScript` abandons it (the CPU stays burned until the process exits).
+    Text built from one is refused by `str`/`repr`/`fail`, but an error message
+    Starlark builds itself from a value is not checked. (2) *One big step*: the
+    memory watchdog samples, so one operation can allocate before it looks.
+    Repeats, formats and products are capped, but `x + x` doubles a string or
+    list per step, so growth stops at about two to three times the memory cap.
+    (3) *Go out-of-memory and stack overflow are fatal*, not panics; nothing
+    here can catch them. (4) *Attribution*: process-wide heap, see above.
+    (5) *Many failing runs*: each failing run can take up to the timeout, and a
+    script that fails per realm per turn repeats it; there is no circuit breaker
+    short of abandonment. (6) The interpreter and its limits are LLM-written
+    and have had no review by a human security expert; the user docs say so.
+    A hard limit would need a child process with an OS limit.
 - **A region script must answer the same question the same way.** It gets no
   `rand()` and no `day()` builtin, and `realm` carries no gold, because a screen
   asks for a projection and the turn asks again when it pays. What the view does
