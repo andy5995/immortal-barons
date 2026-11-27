@@ -90,8 +90,8 @@ func Diff(a, b *game.Rules) []string {
 			}
 		}
 	}
-	out = append(out, diffHQ(a, b)...)
-	out = append(out, diffCombat(a, b)...)
+	out = append(out, diffFields("hq", game.HQFields, a.HQ, b.HQ)...)
+	out = append(out, diffFields("combat", game.CombatFields, a.Combat, b.Combat)...)
 	out = append(out, diffRegions(a, b)...)
 	out = append(out, diffAttacks(a, b)...)
 	if from, to := brainName(a), brainName(b); from != to {
@@ -134,8 +134,8 @@ func Values(r *game.Rules, header string) string {
 			fmt.Fprintf(&b, "%s = %s\n", f.key, f.get(r.Units[g]))
 		}
 	}
-	writeHQ(&b, r)
-	writeCombat(&b, r)
+	writeFields(&b, "hq", game.HQFields, r.HQ)
+	writeFields(&b, "combat", game.CombatFields, r.Combat)
 	writeRegions(&b, r)
 	writeAttacks(&b, r)
 	return b.String()

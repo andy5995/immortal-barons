@@ -66,19 +66,14 @@ const (
 	ModCombatScoreMax = 100_000
 )
 
-// CombatField is one figure of CombatRules as a mod names it, like HQField.
-type CombatField struct {
-	Key      string
-	Min, Max int64
-	Get      func(c CombatRules) int64
-	Set      func(c *CombatRules, v int64)
-	Desc     string
-}
+// CombatField is one figure of CombatRules as a mod names it (see Field).
+type CombatField = Field[CombatRules]
 
 func pctField(key, desc string, min int64, table func(c *CombatRules) *LevelPcts, level func(p *LevelPcts) *int) CombatField {
-	return CombatField{key, min, ModCombatPctMax,
-		func(c CombatRules) int64 { return int64(*level(table(&c))) },
-		func(c *CombatRules, v int64) { *level(table(c)) = int(v) }, desc}
+	return CombatField{Key: key, Min: min, Max: ModCombatPctMax,
+		Get:  func(c CombatRules) int64 { return int64(*level(table(&c))) },
+		Set:  func(c *CombatRules, v int64) { *level(table(c)) = int(v) },
+		Desc: desc}
 }
 
 // CombatFields are the figures a mod can set under [combat], in the order
@@ -104,35 +99,21 @@ var CombatFields = func() []CombatField {
 		pctField("retreat_low", "The same at Attack Damage Low.", 1, retreat, low),
 		pctField("retreat_medium", "The same at Attack Damage Medium.", 1, retreat, medium),
 		pctField("retreat_high", "The same at Attack Damage High.", 1, retreat, high),
-		{"capture_floor", 0, ModCombatFloorMax,
-			func(c CombatRules) int64 { return int64(c.CaptureFloor) },
-			func(c *CombatRules, v int64) { c.CaptureFloor = int(v) },
-			"The fewest regions a winning same-planet attack takes, up to all the defender holds."},
-		{"score_win", 0, ModCombatScoreMax,
-			func(c CombatRules) int64 { return int64(c.ScoreWin) },
-			func(c *CombatRules, v int64) { c.ScoreWin = int(v) },
-			"Score the attacker gains for each region an ordinary same-planet win captures."},
-		{"score_crush", 0, ModCombatScoreMax,
-			func(c CombatRules) int64 { return int64(c.ScoreCrush) },
-			func(c *CombatRules, v int64) { c.ScoreCrush = int(v) },
-			"The same when the capture takes every region the defender had."},
+		{Key: "capture_floor", Min: 0, Max: ModCombatFloorMax,
+			Get:  func(c CombatRules) int64 { return int64(c.CaptureFloor) },
+			Set:  func(c *CombatRules, v int64) { c.CaptureFloor = int(v) },
+			Desc: "The fewest regions a winning same-planet attack takes, up to all the defender holds."},
+		{Key: "score_win", Min: 0, Max: ModCombatScoreMax,
+			Get:  func(c CombatRules) int64 { return int64(c.ScoreWin) },
+			Set:  func(c *CombatRules, v int64) { c.ScoreWin = int(v) },
+			Desc: "Score the attacker gains for each region an ordinary same-planet win captures."},
+		{Key: "score_crush", Min: 0, Max: ModCombatScoreMax,
+			Get:  func(c CombatRules) int64 { return int64(c.ScoreCrush) },
+			Set:  func(c *CombatRules, v int64) { c.ScoreCrush = int(v) },
+			Desc: "The same when the capture takes every region the defender had."},
 	}
 }()
 
-// CombatFieldByKey is the field named key, or nil.
-func CombatFieldByKey(key string) *CombatField {
-	for i := range CombatFields {
-		if CombatFields[i].Key == key {
-			return &CombatFields[i]
-		}
-	}
-	return nil
-}
-
 func (r *Rules) validateCombat(bad func(format string, a ...any)) {
-	for _, f := range CombatFields {
-		if v := f.Get(r.Combat); v < f.Min || v > f.Max {
-			bad("%s %d is outside %d to %d", f.Key, v, f.Min, f.Max)
-		}
-	}
+	validateFields(CombatFields, r.Combat, bad)
 }

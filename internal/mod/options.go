@@ -374,10 +374,10 @@ func (v values) apply(r *game.Rules, m *Mod) []error {
 		}
 		r.Units[g] = u
 	}
-	if err := v.applyHQ(r); err != nil {
+	if err := applyFields("hq", game.HQFields, v.HQ, &r.HQ); err != nil {
 		errs = append(errs, err)
 	}
-	if err := v.applyCombat(r); err != nil {
+	if err := applyFields("combat", game.CombatFields, v.Combat, &r.Combat); err != nil {
 		errs = append(errs, err)
 	}
 	if err := v.applyRegions(r); err != nil {
