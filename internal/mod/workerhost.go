@@ -44,6 +44,19 @@ var errNoWorker = errors.New("a script worker process could not be started")
 type scriptRef struct {
 	id, kind, file, src string
 	options             *optionValues
+	// who is the mod, its hash and the compiled script's id, which the
+	// circuit breaker counts a script's timeouts by: the id covers the chosen
+	// option values, so the same file played with other options is counted on
+	// its own. shown names it in the sysop's warning. Both are set by the
+	// mod's script constructors.
+	who, shown string
+}
+
+// named says which script of which mod r is.
+func (r *scriptRef) named(mod, hash, shown string) *scriptRef {
+	r.who = mod + "/" + hash + "/" + r.id
+	r.shown = fmt.Sprintf("mod %q: %s", clean(mod), clean(shown))
+	return r
 }
 
 func newScriptRef(kind, file, src string, options *optionValues) *scriptRef {
@@ -85,6 +98,15 @@ func (r *scriptRef) validate() error {
 // its answer. onRand answers the worker's draws from the game's generator while
 // the call runs. Any failure is an ordinary failed script to the caller.
 func callWorker(r *scriptRef, call wireMsg, onRand func(n int) (int, error)) (wireMsg, error) {
+	if r.skipped() {
+		return wireMsg{}, errScriptSkipped
+	}
+	res, err := callWorkerOnce(r, call, onRand)
+	r.record(err)
+	return res, err
+}
+
+func callWorkerOnce(r *scriptRef, call wireMsg, onRand func(n int) (int, error)) (wireMsg, error) {
 	w, err := pool.get()
 	if err != nil {
 		return wireMsg{}, errors.New(clean(err.Error()))
@@ -242,7 +264,7 @@ func (w *worker) roundTrip(req wireMsg, onRand func(n int) (int, error)) (wireMs
 		w.close()
 		switch {
 		case timedOut.Load():
-			return wireMsg{}, fmt.Errorf("the script ran for more than %v; its worker process was stopped, and the next script run starts a new one", timeout)
+			return wireMsg{}, &timeoutError{fmt.Sprintf("the script ran for more than %v; its worker process was stopped, and the next script run starts a new one", timeout)}
 		default:
 			tail := clean(truncate(firstLine(w.stderr.String()), 200))
 			if tail != "" {
@@ -308,6 +330,81 @@ func firstLine(s string) string {
 		s = s[:i]
 	}
 	return s
+}
+
+// timeoutError is a run that went past ScriptTimeout, as the circuit breaker
+// tells it from any other failure.
+type timeoutError struct{ msg string }
+
+func (e *timeoutError) Error() string { return e.msg }
+
+// errScriptSkipped is what a call of a skipped script returns, at once and
+// without starting a worker. warnScript does not report it: the warning was
+// made when the script was first skipped.
+var errScriptSkipped = errors.New("the script is skipped until the game restarts, after timing out too many times in a row")
+
+// The circuit breaker. A script that times out costs its caller the whole
+// timeout, and the game asks again for every realm and turn, so a script that
+// always hangs would hold each of them up. After ScriptTimeoutsToSkip timeouts
+// in a row it is skipped, and only it: the game plays the built-in rules where
+// it fails, and other scripts go on. The streak is kept in memory. A script
+// that has been skipped is also written to a file in the data directory (see
+// state.go), since each caller session on a door is a process of its own, and
+// stays skipped for ScriptSkipHold.
+var breaker = struct {
+	mu      sync.Mutex
+	streak  map[string]int
+	skipped map[string]skipEntry // until when
+	told    map[string]bool      // announced in this process
+	loaded  string               // the state directory the file was read from
+}{streak: map[string]int{}, skipped: map[string]skipEntry{}, told: map[string]bool{}}
+
+func (r *scriptRef) skipped() bool {
+	if r.who == "" {
+		return false
+	}
+	breaker.mu.Lock()
+	loadSkipsLocked()
+	e, ok := breaker.skipped[r.who]
+	if ok && !e.heldAt(skipClock()) {
+		delete(breaker.skipped, r.who)
+		ok = false
+	}
+	announce := ok && !breaker.told[r.who]
+	if ok {
+		breaker.told[r.who] = true
+	}
+	breaker.mu.Unlock()
+	if announce {
+		Warn(fmt.Sprintf("%s is still skipped after timing out (until %s)", r.shown, skipUntil(e)))
+	}
+	return ok
+}
+
+// record counts the outcome of a call: a timeout adds to the streak, a success
+// ends it, and any other failure leaves it as it was.
+func (r *scriptRef) record(err error) {
+	if r.who == "" {
+		return
+	}
+	var te *timeoutError
+	breaker.mu.Lock()
+	switch {
+	case err == nil:
+		delete(breaker.streak, r.who)
+	case errors.As(err, &te):
+		breaker.streak[r.who]++
+		if breaker.streak[r.who] >= ScriptTimeoutsToSkip {
+			if _, held := breaker.skipped[r.who]; !held {
+				e := skipEntry{Tripped: skipClock().UTC(), Script: r.shown}
+				breaker.skipped[r.who] = e
+				breaker.told[r.who] = true
+				saveSkipLocked(r.who, e)
+				defer Warn(fmt.Sprintf("%s ran past the time limit %d times in a row, so it is skipped until %s, and the built-in rules play where it would have run.%s", r.shown, ScriptTimeoutsToSkip, skipUntil(e), skipFileHint()))
+			}
+		}
+	}
+	breaker.mu.Unlock()
 }
 
 // workerPool holds the idle workers, and counts all of them.
@@ -378,6 +475,7 @@ func (p *workerPool) flush() {
 		w.close()
 	}
 	validated.Clear()
+	resetBreaker()
 }
 
 var (

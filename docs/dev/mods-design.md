@@ -151,7 +151,8 @@ mods are read, applied, checked or sent.
     worker and sent as JSON.
   - **Limits.** *Time* is the game's: `ScriptTimeout` (3 s) from sending a
     request, then `Process.Kill`. The call fails, the worker is dropped, and
-    the next call starts a new one and recompiles; there is no global switch.
+    the next call starts a new one and recompiles. There is no global switch, but
+    a per-script circuit breaker (below).
     *Memory* (`ScriptMemory`, 256 MiB): on Linux and the BSDs the worker sets
     its own `RLIMIT_DATA` to that plus 128 MiB before it reads anything (on
     Linux it counts private writable mappings, which is Go's heap; measured:
@@ -204,8 +205,30 @@ mods are read, applied, checked or sent.
     trip (`BenchmarkWorkerRegionCall`, `BenchmarkWorkerRaidWithDraws`);
     100 scripted turns of a one-realm world took 9.5 ms against 3.3 ms in
     process. Region answers are cached, so a screen pays once per view.
-  - **Residual risk.** (1) A script that fails every call costs up to the timeout
-    each time and a worker start; there is no circuit breaker. (2) Memory is per
+  - **Circuit breaker** (`scriptRef.record`, workerhost.go). A timeout costs a
+    caller the whole timeout, and the game asks again for every realm and turn.
+    After `ScriptTimeoutsToSkip` timeouts in a row of one script, keyed by mod
+    name, hash and compiled script id (which covers the option values),
+    `callWorker` refuses it at once with `errScriptSkipped`, with no worker
+    started, and the game uses the built-in rules there. Only a timeout counts;
+    a success resets the streak, any other failure leaves it.
+    Each door session and maintenance run is its own process, so a skip is also
+    written to `script-skips.json` beside `world.json` (`state.go`) and holds
+    for `ScriptSkipHold` (24 h). It is not in the World: screens read the world
+    through `World.Read`, which may not write. `mod.SetStateDir` names the
+    directory; `store.loadMods` calls it, so a program that only checks or
+    simulates a mod (`-check-mod`, `-sim-mod`) keeps its breaker in memory and
+    writes nothing. Writes are temp file plus rename in the same directory,
+    after a fresh read so other processes' entries are kept; the last writer
+    wins, which at worst makes one session pay its timeouts again. A file that
+    cannot be read, is not JSON, or is over 64 KiB is treated as empty, and
+    at most 256 entries are kept, newest first; expired entries are dropped
+    on every write. A changed mod or option is a different key, so its old
+    entry just never matches. One warning is written when a script trips, with
+    when it ends, and one short line per process that finds it skipped.
+    `warnScript` ignores the skipped error. Other scripts are unaffected.
+  - **Residual risk.** (1) A script that hangs costs `ScriptTimeoutsToSkip` (3) timeouts
+    before the breaker skips it. (2) Memory is per
     worker; four can each use their limit. (3) macOS has no system limit, and the
     watchdog samples, so one large allocation can pass it. (4) The BSD and Windows
     limits are written to the platform's documentation and have not been run.

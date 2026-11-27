@@ -578,8 +578,9 @@ machine has cores, up to four). The limits are these:
   macOS no such limit applies, so the worker watches its own heap every few
   milliseconds and ends itself over the limit; one operation that allocates
   more than that at once can get through. A worker that goes over is killed,
-  and the call fails like a timeout. The Linux limit is the one that has been
-  tested; the BSD and Windows ones have not been run.
+  the call fails, and the next call starts a new worker. Unlike a timeout, it
+  does not count toward skipping the script. The Linux limit is the one that
+  has been tested; the BSD and Windows ones have not been run.
 - **CPU.** Apart from the time limit, a worker that is somehow left running is
   stopped by the system after 10 CPU seconds on systems that support it.
 - **Steps.** A call, or the top level of the file, may run at most 1,000,000
@@ -596,10 +597,21 @@ game instead.
 
 Known gaps, which these limits do not close:
 
-- **A script that fails on every call is slow, not stopped.** Each failed call
-  can take up to the time limit, and the game starts a new worker for the next
-  one. A script that fails for every realm every turn can make turns slow. The
-  error output names the script.
+- **A script that hangs costs three timeouts before it is skipped.** Each one
+  takes up to the time limit and a new worker. After 3 timeouts in a row, the
+  game skips that script, and only that script, for 24 hours: the built-in
+  rules play where it would have run. A run that succeeds in between starts the
+  count again. Other failures (an error, too many steps) are not counted, so a
+  script that fails quickly on every call is not skipped.
+  Each caller on a door is a separate process, so the skip is kept in
+  `script-skips.json` in the data directory, beside `world.json`. The error
+  output says when a script is skipped, naming it and when the skip ends, and
+  then once for each later process that finds it skipped. **Delete
+  `script-skips.json` to run the script again at once.** The script is a new one
+  to the game, and is not skipped, if the mod's files or its option values
+  change. The file is safe to delete or lose at any time; the worst case is that
+  the next session waits out the timeouts again. `-check-mod` and `-sim-mod` do
+  not read or write it.
 - **Memory is limited per worker, not for all of them together.** Four workers
   can each use their limit at once.
 - **macOS has no system memory limit,** and the check there is a sample, as

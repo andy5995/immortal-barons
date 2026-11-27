@@ -97,7 +97,7 @@ func compileRegion(file, src string, options *optionValues) (*starlark.Function,
 // validated).
 func newRegionScript(path, name, hash string, g *game.Region, src string, options *optionValues) (*regionScript, error) {
 	file := filepath.Join(path, RegionsDir, g.ID+".star")
-	ref := newScriptRef(kindRegion, file, src, options)
+	ref := newScriptRef(kindRegion, file, src, options).named(name, hash, regionScriptFile(g))
 	if err := ref.validate(); err != nil {
 		return nil, err
 	}

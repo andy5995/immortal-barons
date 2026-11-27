@@ -219,6 +219,9 @@ func warnScript(id, mod, file string, err error, instead string) {
 		seen = map[string]bool{}
 		warned[id] = seen
 	}
+	if errors.Is(err, errScriptSkipped) {
+		return
+	}
 	err = errors.New(clean(err.Error()))
 	reason := err.Error()
 	switch {
@@ -339,7 +342,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 // once per process for a given file, source and option values (see validated).
 func newPirateScript(path, name, hash, src string, options *optionValues) (*pirateScript, error) {
 	file := filepath.Join(path, PiratesFile)
-	ref := newScriptRef(kindPirates, file, src, options)
+	ref := newScriptRef(kindPirates, file, src, options).named(name, hash, PiratesFile)
 	if err := ref.validate(); err != nil {
 		return nil, err
 	}

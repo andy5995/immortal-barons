@@ -26,6 +26,9 @@ var ErrWorldMods = errors.New("this game's mods could not be loaded")
 // the sysop's log under a BBS rather than the caller's screen), and the game
 // plays on with the copy it saved.
 func loadMods(w *game.World, cfg game.Config) error {
+	// A game being played keeps a script that keeps timing out skipped across
+	// sessions, in a file in its data directory.
+	mod.SetStateDir(cfg.DataDir)
 	r, warnings, err := mod.Restore(cfg.DataDir, w.Mods, !cfg.IBBS)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrWorldMods, err)

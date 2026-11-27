@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -23,6 +24,8 @@ func lowerLimits(t *testing.T) {
 	pool.flush()
 	t.Cleanup(func() {
 		limTimeout, limMemory, noSystemLimit = to, mem, false
+		SetStateDir("")
+		skipClock = time.Now
 		pool.flush()
 	})
 }
@@ -333,5 +336,259 @@ func TestTheVariableAloneMakesNoWorker(t *testing.T) {
 	out, err := cmd.CombinedOutput()
 	if err != nil || !strings.Contains(string(out), "PASS") {
 		t.Fatalf("the test binary ran as a worker: %v, %q", err, out)
+	}
+}
+
+// A region script that hangs for a realm with one region, and is quick for the
+// rest. The views differ, so the answers are not remembered between calls.
+const hangsForOne = "def region(realm, row):\n    if realm.land == 1:\n        s = 'a' * 10000000\n        for i in range(300000):\n            s.count('a')\n    return {\"food_base\": 7}\n"
+
+func regionCall(t *testing.T, s *regionScript, land int) error {
+	t.Helper()
+	_, err := s.Region(game.RegionView{Land: land}, game.RegionRules{})
+	return err
+}
+
+func TestAScriptThatTimesOutThreeTimesInARowIsSkipped(t *testing.T) {
+	lowerLimits(t)
+	limTimeout = 300 * time.Millisecond
+	buf := captureWarnings(t)
+	bad, err := newRegionScript(t.TempDir(), "m", "h", game.Desert, hangsForOne, &optionValues{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	other, err := newRegionScript(t.TempDir(), "n", "h", game.Desert, quick, &optionValues{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := range ScriptTimeoutsToSkip {
+		// A failed answer is not remembered, so the same view can be asked again.
+		if err := regionCall(t, bad, 1); err == nil || !strings.Contains(err.Error(), "ran for more than") {
+			t.Fatalf("call %d: err = %v, want a timeout", i+1, err)
+		}
+	}
+	if !strings.Contains(buf.String(), "is skipped until") || !strings.Contains(buf.String(), `mod "m"`) {
+		t.Errorf("no warning naming the script: %q", buf.String())
+	}
+	// The next call is refused at once, with no worker started.
+	old := executable
+	executable = func() (string, error) { t.Error("a worker was started"); return "", errors.New("no") }
+	defer func() { executable = old }()
+	start := time.Now()
+	if err := regionCall(t, bad, 1); !errors.Is(err, errScriptSkipped) {
+		t.Fatalf("err = %v, want the script skipped", err)
+	}
+	if err := regionCall(t, bad, 2); !errors.Is(err, errScriptSkipped) {
+		t.Fatalf("a view that would have succeeded: err = %v, want the script skipped", err)
+	}
+	if time.Since(start) > 100*time.Millisecond {
+		t.Errorf("a skipped call took %v", time.Since(start))
+	}
+	executable = old
+	// Another script goes on running, and the skipped one's later calls add no warning.
+	if err := regionCall(t, other, 5); err != nil {
+		t.Errorf("another script: %v", err)
+	}
+	bad.Failed(errScriptSkipped)
+	if strings.Count(buf.String(), "\n") != 1 {
+		t.Errorf("more than the one warning: %q", buf.String())
+	}
+}
+
+func TestASuccessBetweenTimeoutsStartsTheCountAgain(t *testing.T) {
+	lowerLimits(t)
+	limTimeout = 300 * time.Millisecond
+	s, err := newRegionScript(t.TempDir(), "m", "h", game.Desert, hangsForOne, &optionValues{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for round := range 3 {
+		for range ScriptTimeoutsToSkip - 1 {
+			if err := regionCall(t, s, 1); err == nil {
+				t.Fatalf("round %d: the hanging call returned", round)
+			}
+		}
+		if err := regionCall(t, s, 2+round); err != nil {
+			t.Fatalf("round %d: the quick call failed: %v", round, err)
+		}
+	}
+	if err := regionCall(t, s, 1); errors.Is(err, errScriptSkipped) {
+		t.Fatal("the script was skipped though no three timeouts came in a row")
+	}
+}
+
+func TestAnotherFailureDoesNotCountAsATimeout(t *testing.T) {
+	lowerLimits(t)
+	s, err := newRegionScript(t.TempDir(), "m", "h", game.Desert, "def region(realm, row):\n    fail('no')\n", &optionValues{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for range 2 * ScriptTimeoutsToSkip {
+		if err := regionCall(t, s, 1); err == nil || errors.Is(err, errScriptSkipped) {
+			t.Fatalf("err = %v, want an ordinary failure every time", err)
+		}
+	}
+}
+
+// The same script played with other option values is a different script to the
+// breaker: tripping it with one choice leaves the other running.
+func TestTheBreakerCountsEachOptionChoiceOnItsOwn(t *testing.T) {
+	lowerLimits(t)
+	limTimeout = 300 * time.Millisecond
+	captureWarnings(t)
+	src := "def region(realm, row):\n    if option(\"slow\"):\n        s = 'a' * 10000000\n        for i in range(300000):\n            s.count('a')\n    return {\"food_base\": 7}\n"
+	defs := map[string]*Option{"slow": {Type: OptionBool, Label: "Slow", Default: false}}
+	with := func(v int64) *regionScript {
+		t.Helper()
+		s, err := newRegionScript(t.TempDir(), "m", "h", game.Desert, src, &optionValues{defs: defs, chosen: map[string]int64{"slow": v}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return s
+	}
+	slowOne := with(1)
+	for i := range ScriptTimeoutsToSkip {
+		if err := regionCall(t, slowOne, i+1); err == nil {
+			t.Fatalf("call %d did not time out", i+1)
+		}
+	}
+	if err := regionCall(t, slowOne, 9); !errors.Is(err, errScriptSkipped) {
+		t.Fatalf("err = %v, want the slow choice skipped", err)
+	}
+	if err := regionCall(t, with(0), 1); err != nil {
+		t.Errorf("the other choice was skipped too: %v", err)
+	}
+}
+
+// trip trips the breaker for a script that hangs for one view, in the
+// state directory dir, and returns the script.
+func trip(t *testing.T, dir string, optionValue int64) *regionScript {
+	t.Helper()
+	SetStateDir(dir)
+	limTimeout = 300 * time.Millisecond
+	s := hangingScript(t, "h", optionValue)
+	for range ScriptTimeoutsToSkip {
+		if err := regionCall(t, s, 1); err == nil {
+			t.Fatal("the hanging call returned")
+		}
+	}
+	return s
+}
+
+func hangingScript(t *testing.T, hash string, optionValue int64) *regionScript {
+	opts := &optionValues{defs: map[string]*Option{"x": {Type: OptionNumber}}, chosen: map[string]int64{"x": optionValue}}
+	s, err := newRegionScript("mods/m", "m", hash, game.Desert, hangsForOne, opts)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return s
+}
+
+func refuseWorkers(t *testing.T) {
+	old := executable
+	executable = func() (string, error) { t.Error("a worker was started"); return "", errors.New("no") }
+	t.Cleanup(func() { executable = old })
+}
+
+func TestASkippedScriptStaysSkippedForTheNextProcess(t *testing.T) {
+	lowerLimits(t)
+	dir := t.TempDir()
+	buf := captureWarnings(t)
+	trip(t, dir, 1)
+	if !strings.Contains(buf.String(), "is skipped until") || !strings.Contains(buf.String(), skipFile) {
+		t.Errorf("the warning does not say until when, or where: %q", buf.String())
+	}
+	if _, err := os.Stat(filepath.Join(dir, skipFile)); err != nil {
+		t.Fatalf("no file: %v", err)
+	}
+
+	// A new process: nothing in memory, the same script.
+	resetBreaker()
+	buf = captureWarnings(t)
+	refuseWorkers(t)
+	s := hangingScript(t, "h", 1)
+	for range 3 {
+		if err := regionCall(t, s, 1); !errors.Is(err, errScriptSkipped) {
+			t.Fatalf("err = %v, want the script skipped from the file", err)
+		}
+		s.Failed(errScriptSkipped)
+	}
+	if got := buf.String(); strings.Count(got, "\n") != 1 || !strings.Contains(got, "is still skipped after timing out (until ") {
+		t.Errorf("want one short line, got %q", got)
+	}
+}
+
+func TestASkipEndsAfterADay(t *testing.T) {
+	lowerLimits(t)
+	dir := t.TempDir()
+	trip(t, dir, 1)
+	resetBreaker()
+	now := time.Now()
+	skipClock = func() time.Time { return now.Add(ScriptSkipHold - time.Minute) }
+	if err := regionCall(t, hangingScript(t, "h", 1), 2); !errors.Is(err, errScriptSkipped) {
+		t.Fatalf("a minute short of a day: err = %v, want it still skipped", err)
+	}
+	resetBreaker()
+	skipClock = func() time.Time { return now.Add(ScriptSkipHold + time.Minute) }
+	if err := regionCall(t, hangingScript(t, "h", 1), 2); err != nil {
+		t.Fatalf("a day on: err = %v, want it to run again", err)
+	}
+}
+
+func TestAChangedModOrOptionIsNotSkipped(t *testing.T) {
+	lowerLimits(t)
+	dir := t.TempDir()
+	trip(t, dir, 1)
+	resetBreaker()
+	for name, s := range map[string]*regionScript{
+		"another option value": hangingScript(t, "h", 2),
+		"another mod hash":     hangingScript(t, "other", 1),
+	} {
+		if err := regionCall(t, s, 2); err != nil {
+			t.Errorf("%s: err = %v, want it to run", name, err)
+		}
+	}
+}
+
+func TestABadSkipFileIsIgnored(t *testing.T) {
+	lowerLimits(t)
+	dir := t.TempDir()
+	big := `{"skipped":{},"pad":"` + strings.Repeat("x", skipFileMax) + `"}`
+	for name, content := range map[string]string{"garbage": "not json {", "empty": "", "too big": big} {
+		os.WriteFile(filepath.Join(dir, skipFile), []byte(content), 0o644)
+		resetBreaker()
+		SetStateDir(dir)
+		if err := regionCall(t, hangingScript(t, "h", 1), 2); err != nil {
+			t.Errorf("%s: err = %v, want the file ignored", name, err)
+		}
+	}
+}
+
+func TestSavingASkipLeavesNoTempFileAndNoStateDirNoFile(t *testing.T) {
+	lowerLimits(t)
+	dir := t.TempDir()
+	trip(t, dir, 1)
+	entries, _ := os.ReadDir(dir)
+	if len(entries) != 1 || entries[0].Name() != skipFile {
+		t.Errorf("the directory holds %v, want only %s", entries, skipFile)
+	}
+
+	// No state directory, as in -check-mod and -sim-mod: nothing is written.
+	resetBreaker()
+	empty := t.TempDir()
+	SetStateDir("")
+	limTimeout = 300 * time.Millisecond
+	s := hangingScript(t, "h2", 1)
+	for range ScriptTimeoutsToSkip {
+		regionCall(t, s, 1)
+	}
+	if err := regionCall(t, s, 1); !errors.Is(err, errScriptSkipped) {
+		t.Fatalf("not skipped in memory: %v", err)
+	}
+	if entries, _ := os.ReadDir(empty); len(entries) != 0 {
+		t.Errorf("files appeared: %v", entries)
+	}
+	if b, _ := os.ReadFile(filepath.Join(dir, skipFile)); strings.Contains(string(b), "h2") {
+		t.Error("an entry was written with no state directory set")
 	}
 }

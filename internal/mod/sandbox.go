@@ -23,6 +23,17 @@ const (
 	// worker's start-up included. A run past it is killed with its worker.
 	ScriptTimeout = 3 * time.Second
 
+	// ScriptTimeoutsToSkip is how many runs of one script in a row may time out
+	// before the game stops running it for the rest of the process. Another
+	// kind of failure does not count, and a run that succeeds starts the count
+	// again.
+	ScriptTimeoutsToSkip = 3
+
+	// ScriptSkipHold is how long a skipped script stays skipped, across runs of
+	// the program, once it has timed out ScriptTimeoutsToSkip times. A mod's
+	// files or options changing makes it a different script, which is not held.
+	ScriptSkipHold = 24 * time.Hour
+
 	// ScriptMemory is how much memory a worker may use. The operating system
 	// enforces it where it can (Linux, the BSDs, Windows); a watchdog in the
 	// worker enforces it everywhere, by sampling the heap.
