@@ -28,6 +28,14 @@ var manifestKeys = []docKey{
 	{"label", "The name the Game Setup screen shows. Blank shows `name`.", "optional"},
 	{"description", "A line saying what the mod does.", "optional"},
 	{"options", "The [`[options.<id>]`](#options) tables the sysop may set at a reset.", "optional"},
+	{"prefs", fmt.Sprintf("The [`[prefs.<id>]`](#player-preferences) tables, yes/no choices each player makes for their own realm and the mod's scripts read. At most %d per mod and %d across the mods in a game.", MaxPrefs, MaxWorldPrefs), "optional"},
+}
+
+// prefKeys are the fields of a [prefs.<id>] table.
+var prefKeys = []docKey{
+	{"label", fmt.Sprintf("The name on the player's Preferences menu, at most %d characters. It is shown as written, not translated.", MaxPrefLabel), "required"},
+	{"description", fmt.Sprintf("A line saying what the preference changes, shown under the Preferences menu. At most %d characters.", MaxPrefDescription), "optional"},
+	{"default", "What a player who has made no choice gets: `true` or `false`.", "required"},
 }
 
 // optionKeys are the fields of an [options.<id>] table.
@@ -109,6 +117,9 @@ lists what it may say.
 
 	b.WriteString("### Options\n\nEach `[options.<id>]` table takes these fields. See [Options](mods.md#options).\n\n")
 	writeKeyTable(&b, "Field", "Needed", optionKeys)
+
+	b.WriteString("### Player preferences\n\nEach `[prefs.<id>]` table takes these fields. See [Player preferences](mods.md#player-preferences).\n\n")
+	writeKeyTable(&b, "Field", "Needed", prefKeys)
 
 	b.WriteString("## values.toml\n\nThese are the tables a `values.toml` may hold. Any other table or key is an error.\n\n")
 	writeKeyTable(&b, "Table", "", valuesSections)

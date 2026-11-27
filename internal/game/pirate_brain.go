@@ -47,6 +47,8 @@ type PirateRealmView struct {
 	// Units is what the realm holds, Market what it has listed on the Trading
 	// Market.
 	Units, Market PirateHoldings
+	// ModPrefs is the realm's recorded mod preferences (see ParseModPrefs).
+	ModPrefs string
 }
 
 // PirateHoldings counts each kind of unit a raid can take, by its spoil. Gold
@@ -74,7 +76,7 @@ func (w *World) pirateView(e *Empire) PirateView {
 		Day: w.GameDay,
 		Realm: PirateRealmView{
 			Name: e.Name, Regions: e.Land, Gold: e.Gold,
-			Units: units, Market: market,
+			Units: units, Market: market, ModPrefs: e.modPrefsText(),
 		},
 		Factions: make([]PirateFactionView, len(w.Pirates)),
 		Rand:     w.rng.Intn,

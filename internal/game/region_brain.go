@@ -39,6 +39,10 @@ type RegionView struct {
 	Tax     int
 	// TurnsPlayed is the realm's lifetime turn count.
 	TurnsPlayed int
+	// ModPrefs is the realm's recorded mod preferences (see ParseModPrefs). It
+	// is part of the view so an answer remembered for one choice is not given
+	// for another.
+	ModPrefs string
 }
 
 // regionsOf is the region rules e's land plays by: the world's, with each type
@@ -87,6 +91,7 @@ func (w *World) regionView(e *Empire) RegionView {
 	return RegionView{
 		Name: e.Name, Day: w.GameDay, Land: e.Land, Regions: e.Regions,
 		People: e.People, Support: e.Support, Tax: e.Tax, TurnsPlayed: e.TurnsPlayed,
+		ModPrefs: e.modPrefsText(),
 	}
 }
 

@@ -57,6 +57,7 @@ type regionScript struct {
 	file      string // for messages: the path in the mod folder
 	region    *game.Region
 	fn        *starlark.Function
+	prefs     *prefValues
 
 	mu    sync.Mutex
 	cache map[regionKey]game.RegionRules
@@ -125,7 +126,7 @@ func (s *regionScript) Region(v game.RegionView, row game.RegionRules) (game.Reg
 	var res starlark.Value
 	th := newThread(s.file)
 	err := runScript(th, func() (err error) {
-		res, err = starlark.Call(th, s.fn, starlark.Tuple{regionRealmValue(v), regionRowValue(row)}, nil)
+		res, err = starlark.Call(th, s.fn, starlark.Tuple{regionRealmValue(v, s.prefs), regionRowValue(row)}, nil)
 		return err
 	})
 	if err != nil {
@@ -152,7 +153,7 @@ func (s *regionScript) Failed(err error) {
 
 // regionRealmValue is region()'s first argument: a read-only struct, with the
 // realm's land as a struct of counts by type ID.
-func regionRealmValue(v game.RegionView) starlark.Value {
+func regionRealmValue(v game.RegionView, prefs *prefValues) starlark.Value {
 	counts := starlark.StringDict{}
 	mix := v.Regions
 	for _, g := range game.RegionTypes {
@@ -167,6 +168,7 @@ func regionRealmValue(v game.RegionView) starlark.Value {
 		"support":      starlark.MakeInt(v.Support),
 		"tax":          starlark.MakeInt(v.Tax),
 		"turns_played": starlark.MakeInt(v.TurnsPlayed),
+		"pref":         prefs.builtin(v.ModPrefs),
 	})
 }
 

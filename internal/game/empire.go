@@ -11,6 +11,10 @@ type Empire struct {
 	// Prefs are this player's own menu settings; see prefs.go. Held per realm
 	// rather than per board.
 	Prefs Prefs
+	// ModPrefs are this player's answers to the preferences the mods in play
+	// declare, keyed "<mod>/<id>" (modprefs.go). Only an explicit choice is
+	// kept; a missing key means the mod's default. Never sent in a packet.
+	ModPrefs map[string]bool `json:",omitempty"`
 	// FormerName is the name this realm carried before its one permitted rename
 	// (see RenameEmpire), and "" for a realm that has never been renamed — which
 	// is also what makes the rename once-only. It stays readable for the realm's

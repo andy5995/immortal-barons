@@ -16,6 +16,7 @@ lists what it may say.
 | `label` | The name the Game Setup screen shows. Blank shows `name`. | optional |
 | `description` | A line saying what the mod does. | optional |
 | `options` | The [`[options.<id>]`](#options) tables the sysop may set at a reset. | optional |
+| `prefs` | The [`[prefs.<id>]`](#player-preferences) tables, yes/no choices each player makes for their own realm and the mod's scripts read. At most 8 per mod and 25 across the mods in a game. | optional |
 
 ### Options
 
@@ -29,6 +30,16 @@ Each `[options.<id>]` table takes these fields. See [Options](mods.md#options).
 | `default` | The value used when the sysop makes no choice. A number is a whole number. A bool is `true` or `false`; `0` and `1` are refused. | required |
 | `min` | Lowest value a number option may take. | required for a number, refused for a bool |
 | `max` | Highest value a number option may take. | required for a number, refused for a bool |
+
+### Player preferences
+
+Each `[prefs.<id>]` table takes these fields. See [Player preferences](mods.md#player-preferences).
+
+| Field | Meaning | Needed |
+| --- | --- | --- |
+| `label` | The name on the player's Preferences menu, at most 40 characters. It is shown as written, not translated. | required |
+| `description` | A line saying what the preference changes, shown under the Preferences menu. At most 200 characters. | optional |
+| `default` | What a player who has made no choice gets: `true` or `false`. | required |
 
 ## values.toml
 
@@ -164,6 +175,7 @@ A script is a [Starlark](https://github.com/bazelbuild/starlark) file. The rules
 | `regions` | number | How many regions the realm has. |
 | `gold` | number | The realm's gold in hand. |
 | `troopers`, `jets`, `turrets`, `tanks`, `agents` | number | How many of each unit the realm holds. |
+| `pref` | function | `realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error. |
 | `market` | struct | What the realm has for sale on the Trading Market, as a struct with the same unit names: `realm.market.jets`. |
 
 `factions` is a frozen list with one struct per pirate faction, in slot order:
@@ -198,6 +210,7 @@ A script is a [Starlark](https://github.com/bazelbuild/starlark) file. The rules
 | `support` | number | The realm's popular support. |
 | `tax` | number | The realm's tax rate, in percent. |
 | `turns_played` | number | How many turns the realm has played. |
+| `pref` | function | `realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error. |
 
 `row` is a read-only struct of the type's figures:
 

@@ -58,7 +58,7 @@ func TestEveryModKeyHasADescription(t *testing.T) {
 			t.Errorf("attacks.<kind>.<side>.%s: description empty", f.Key)
 		}
 	}
-	for _, r := range slices.Concat(manifestKeys, optionKeys, valuesSections) {
+	for _, r := range slices.Concat(manifestKeys, optionKeys, prefKeys, valuesSections) {
 		if r.key == "" || r.desc == "" {
 			t.Errorf("reference row %q: description empty", r.key)
 		}
@@ -92,6 +92,7 @@ func TestReferenceKeysMatchTheStructsTheReaderDecodes(t *testing.T) {
 	}{
 		{"mod.toml", reflect.TypeFor[Manifest](), manifestKeys},
 		{"options", reflect.TypeFor[Option](), optionKeys},
+		{"prefs", reflect.TypeFor[Pref](), prefKeys},
 		{"values.toml", reflect.TypeFor[values](), valuesSections},
 	} {
 		got, want := docKeyNames(c.rows), tomlKeys(c.typ)

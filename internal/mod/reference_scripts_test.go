@@ -48,8 +48,8 @@ func TestScriptFieldTablesMatchWhatScriptsAreGiven(t *testing.T) {
 		}
 	}
 
-	check("raid realm", attrNames(t, realmValue(view)), pirateRealmFields())
-	market := realmValue(view).(*starlarkstruct.Struct)
+	check("raid realm", attrNames(t, realmValue(view, nil)), pirateRealmFields())
+	market := realmValue(view, nil).(*starlarkstruct.Struct)
 	m, _ := market.Attr("market")
 	if got, want := attrNames(t, m), spoilNames(); !slices.Equal(got, sortedCopy(want)) {
 		t.Errorf("raid realm.market: the script is given %v, the reference says %v", got, want)
@@ -57,8 +57,8 @@ func TestScriptFieldTablesMatchWhatScriptsAreGiven(t *testing.T) {
 	f := factionsValue(view).(*starlark.List).Index(0)
 	check("raid faction", attrNames(t, f), pirateFactionFields())
 
-	check("region realm", attrNames(t, regionRealmValue(game.RegionView{})), regionRealmFields())
-	rv := regionRealmValue(game.RegionView{}).(*starlarkstruct.Struct)
+	check("region realm", attrNames(t, regionRealmValue(game.RegionView{}, nil)), regionRealmFields())
+	rv := regionRealmValue(game.RegionView{}, nil).(*starlarkstruct.Struct)
 	regs, _ := rv.Attr("regions")
 	if got, want := attrNames(t, regs), sortedCopy(regionIDs()); !slices.Equal(got, want) {
 		t.Errorf("realm.regions: the script is given %v, the reference says %v", got, want)

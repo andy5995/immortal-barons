@@ -71,6 +71,9 @@ type Manifest struct {
 	// Options are the [options.<id>] tables a sysop may set at a reset. A mod
 	// without options leaves this empty.
 	Options map[string]*Option `toml:"options"`
+	// Prefs are the [prefs.<id>] yes/no choices each player makes for their own
+	// realm, read by the mod's scripts (prefs.go).
+	Prefs map[string]*Pref `toml:"prefs"`
 }
 
 // ModAPI is the version of the mod format this game reads: the folder's
@@ -128,6 +131,9 @@ func ManifestFromRef(ref game.ModRef) (*Manifest, error) {
 		}
 	}
 	if err := checkOptions(man.Options, ref.Name+"/"+ManifestFile); err != nil {
+		return nil, err
+	}
+	if err := checkPrefs(man.Prefs, ref.Name+"/"+ManifestFile); err != nil {
 		return nil, err
 	}
 	return &man, nil
@@ -390,6 +396,9 @@ func parseWithOptions(path string, files map[string]string, given map[string]int
 	if err := checkOptions(m.Manifest.Options, filepath.Join(path, ManifestFile)); err != nil {
 		return nil, err
 	}
+	if err := checkPrefs(m.Manifest.Prefs, filepath.Join(path, ManifestFile)); err != nil {
+		return nil, err
+	}
 	var err error
 	if m.chosen, err = chosenValues(m.Manifest.Options, given, source); err != nil {
 		return nil, err
@@ -399,6 +408,7 @@ func parseWithOptions(path string, files map[string]string, given map[string]int
 		if err != nil {
 			return nil, err
 		}
+		s.prefs = m.scriptPrefs()
 		m.pirates = s
 	}
 	for _, g := range game.RegionTypes {
@@ -410,6 +420,7 @@ func parseWithOptions(path string, files map[string]string, given map[string]int
 		if err != nil {
 			return nil, err
 		}
+		s.prefs = m.scriptPrefs()
 		if m.regions == nil {
 			m.regions = map[*game.Region]*regionScript{}
 		}
@@ -631,6 +642,7 @@ type modLoader struct {
 func (l modLoader) load(names []string) (*game.Rules, error) {
 	r := game.BaseRules()
 	var seen []string
+	var loaded []*Mod
 	for _, name := range names {
 		if err := checkListed(name, seen); err != nil {
 			return nil, l.listErr(err)
@@ -647,6 +659,10 @@ func (l modLoader) load(names []string) (*game.Rules, error) {
 		if err := m.Apply(r); err != nil {
 			return nil, l.applyErr(name, err)
 		}
+		loaded = append(loaded, m)
+	}
+	if err := checkWorldPrefs(loaded); err != nil {
+		return nil, l.validateErr(seen, err)
 	}
 	if err := r.Validate(); err != nil {
 		return nil, l.validateErr(seen, err)

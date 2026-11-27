@@ -87,6 +87,7 @@ type pirateScript struct {
 	mod, hash string
 	file      string // for messages: the mod folder's pirates.star
 	raid      *starlark.Function
+	prefs     *prefValues
 }
 
 // newThread is a thread for one run, with the step cap set and print
@@ -150,7 +151,7 @@ func (s *pirateScript) Raid(v game.PirateView) ([]game.PirateOrder, error) {
 	th.SetLocal(viewKey, &v)
 	var res starlark.Value
 	err := runScript(th, func() (err error) {
-		res, err = starlark.Call(th, s.raid, starlark.Tuple{realmValue(v), factionsValue(v)}, nil)
+		res, err = starlark.Call(th, s.raid, starlark.Tuple{realmValue(v, s.prefs), factionsValue(v)}, nil)
 		return err
 	})
 	if err != nil {
@@ -237,12 +238,13 @@ func holdings(h game.PirateHoldings) starlark.StringDict {
 }
 
 // realmValue is raid()'s first argument: a read-only struct.
-func realmValue(v game.PirateView) starlark.Value {
+func realmValue(v game.PirateView, prefs *prefValues) starlark.Value {
 	r := v.Realm
 	d := holdings(r.Units)
 	d["name"] = starlark.String(r.Name)
 	d["regions"] = starlark.MakeInt(r.Regions)
 	d["gold"] = starlark.MakeInt64(r.Gold)
+	d["pref"] = prefs.builtin(r.ModPrefs)
 	d["market"] = starlarkstruct.FromStringDict(starlarkstruct.Default, holdings(r.Market))
 	return starlarkstruct.FromStringDict(starlarkstruct.Default, d)
 }

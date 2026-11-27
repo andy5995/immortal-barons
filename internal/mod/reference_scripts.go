@@ -48,6 +48,7 @@ func pirateRealmFields() []scriptField {
 		{[]string{"regions"}, "number", "How many regions the realm has."},
 		{[]string{"gold"}, "number", "The realm's gold in hand."},
 		{spoilNames(), "number", "How many of each unit the realm holds."},
+		{[]string{"pref"}, "function", "`realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error."},
 		{[]string{"market"}, "struct", "What the realm has for sale on the Trading Market, as a struct with the same unit names: `realm.market.jets`."},
 	}
 }
@@ -72,6 +73,7 @@ func regionRealmFields() []scriptField {
 		{[]string{"support"}, "number", "The realm's popular support."},
 		{[]string{"tax"}, "number", "The realm's tax rate, in percent."},
 		{[]string{"turns_played"}, "number", "How many turns the realm has played."},
+		{[]string{"pref"}, "function", "`realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error."},
 	}
 }
 

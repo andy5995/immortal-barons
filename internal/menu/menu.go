@@ -373,6 +373,24 @@ type Item struct {
 	Owned func(*ctx) int
 }
 
+// itemsFor is the menu's items for this caller: Items, with whatever Extra
+// supplies spliced in at ExtraAt. Extra is for a menu whose rows depend on
+// the world (the mods in play), which BuildMenus cannot know.
+func (m *Menu) itemsFor(g *ctx) []Item {
+	if m.Extra == nil {
+		return m.Items
+	}
+	extra := m.Extra(g)
+	if len(extra) == 0 {
+		return m.Items
+	}
+	at := min(max(m.ExtraAt, 0), len(m.Items))
+	out := make([]Item, 0, len(m.Items)+len(extra))
+	out = append(out, m.Items[:at]...)
+	out = append(out, extra...)
+	return append(out, m.Items[at:]...)
+}
+
 // keyColor is the accent this item's key is drawn in: its own Color override, a
 // dimmed item's normal-intensity accent, or the menu's own color.
 func (it *Item) keyColor(g *ctx, menuColor string) string {
@@ -427,6 +445,10 @@ type Menu struct {
 	Title string
 	Color string // ansi color escape for the title and item hotkeys; "" uses a default
 	Items []Item
+	// Extra, when set, supplies items that depend on the world, spliced into
+	// Items at index ExtraAt wherever the menu is drawn or a key is looked up.
+	Extra   func(*ctx) []Item
+	ExtraAt int
 	// ExitOnEnter marks a turn-pipeline menu whose '0' item is a safe exit
 	// (back, not session quit). When the player's EnterExitsBuy preference is
 	// on, that item is offered as the default and Enter selects it.
@@ -530,8 +552,9 @@ func (it *Item) selectable(g *ctx) bool {
 // byKey returns the selectable item whose Key case-insensitively equals r.
 func (m *Menu) byKey(r rune, g *ctx) *Item {
 	key := unicode.ToUpper(r)
-	for i := range m.Items {
-		it := &m.Items[i]
+	items := m.itemsFor(g)
+	for i := range items {
+		it := &items[i]
 		if it.selectable(g) && it.Key != 0 && unicode.ToUpper(it.Key) == key {
 			return it
 		}
@@ -881,8 +904,9 @@ func titleRule(color, title string, width int) string {
 // hasColumns reports whether any visible item carries a Price/Owned column, so
 // the menu draws the BRE-style "Price / # Owned" table (Spending, Sell).
 func (m *Menu) hasColumns(g *ctx) bool {
-	for i := range m.Items {
-		it := &m.Items[i]
+	items := m.itemsFor(g)
+	for i := range items {
+		it := &items[i]
 		if it.hidden(g) {
 			continue
 		}
@@ -900,8 +924,9 @@ func (m *Menu) hasColumns(g *ctx) bool {
 // the English it came from, so the width cannot be a constant.
 func (m *Menu) labelWidth(g *ctx, lang string) int {
 	w := 18
-	for i := range m.Items {
-		it := &m.Items[i]
+	items := m.itemsFor(g)
+	for i := range items {
+		it := &items[i]
 		if it.hidden(g) || it.Do == nil {
 			continue
 		}
@@ -923,10 +948,11 @@ func (m *Menu) labelWidth(g *ctx, lang string) int {
 // because each one calls into shared world state, which is read once here
 // rather than again while drawing.
 func (m *Menu) columnCells(g *ctx, lang string) (price, owned []string, pw, ow int) {
-	price, owned = make([]string, len(m.Items)), make([]string, len(m.Items))
+	items := m.itemsFor(g)
+	price, owned = make([]string, len(items)), make([]string, len(items))
 	pw, ow = 8, 9
-	for i := range m.Items {
-		it := &m.Items[i]
+	for i := range items {
+		it := &items[i]
 		if it.hidden(g) || it.Do == nil {
 			continue
 		}
@@ -964,8 +990,9 @@ func padLabel(s string, w int) string {
 // price-only menu (BRE's Covert Operations) omits the "# Owned" column entirely
 // rather than trailing an empty one.
 func (m *Menu) hasOwnedColumn(g *ctx) bool {
-	for i := range m.Items {
-		it := &m.Items[i]
+	items := m.itemsFor(g)
+	for i := range items {
+		it := &items[i]
 		if !it.hidden(g) && it.Owned != nil {
 			return true
 		}
@@ -1043,8 +1070,9 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		if m.Columns >= 2 && !cols {
 			drawItemsColumns(&body, g, m, col, lang, m.Columns)
 		} else {
-			for i := range m.Items {
-				it := &m.Items[i]
+			items := m.itemsFor(g)
+			for i := range items {
+				it := &items[i]
 				if it.hidden(g) {
 					continue
 				}
@@ -1156,8 +1184,9 @@ func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, nco
 		}
 	}
 	var block []*Item
-	for i := range m.Items {
-		it := &m.Items[i]
+	items := m.itemsFor(g)
+	for i := range items {
+		it := &items[i]
 		if it.hidden(g) {
 			continue
 		}
@@ -1231,14 +1260,14 @@ type toggleRow struct {
 // toggleItems turns a group of Yes/No rows into menu items whose values line up
 // with each other. The accessor is written once per row and used for both the
 // label and the toggle.
-func toggleItems(rows []toggleRow) []Item {
+func toggleItems(rows []toggleRow, extra ...func(*ctx) []string) []Item {
 	group := make([]string, len(rows))
 	for i, r := range rows {
 		group[i] = r.Name
 	}
 	items := make([]Item, 0, len(rows))
 	for _, r := range rows {
-		items = append(items, Item{Key: r.Key, LabelFn: onOff(group, r.Name, r.Get), Do: toggle(r.Get)})
+		items = append(items, Item{Key: r.Key, LabelFn: onOffRow(group, joinLabels(extra), r.Name, true, r.Get), Do: toggle(r.Get)})
 	}
 	return items
 }
@@ -1283,7 +1312,24 @@ const (
 	toggleNo  = "No"
 )
 
-func onOff(group []string, name string, get func(*ctx) *bool) func(*ctx) string {
+// joinLabels is the labels of every func in fs, or nil when there are none.
+func joinLabels(fs []func(*ctx) []string) func(*ctx) []string {
+	if len(fs) == 0 {
+		return nil
+	}
+	return func(g *ctx) []string {
+		var out []string
+		for _, f := range fs {
+			out = append(out, f(g)...)
+		}
+		return out
+	}
+}
+
+// onOffRow renders one Yes/No row. extra names labels that are not in group
+// but share its value column (a mod's preferences), and are measured as
+// written. translate is false for a label that is a mod's own text.
+func onOffRow(group []string, extra func(*ctx) []string, name string, translate bool, get func(*ctx) *bool) func(*ctx) string {
 	return func(g *ctx) string {
 		// BRE shows a bare, right-aligned Yes/No (no brackets), verified against a
 		// live Preferences capture. The words are translated -- they are prose the
@@ -1293,8 +1339,17 @@ func onOff(group []string, name string, get func(*ctx) *bool) func(*ctx) string 
 			state = toggleYes
 		}
 		lang := playerLang(g)
-		label, value := i18n.T(lang, name), i18n.T(lang, state)
-		pad := toggleLabelWidth(lang, group) - utf8.RuneCountInString(label) + 1
+		label, value := name, i18n.T(lang, state)
+		if translate {
+			label = i18n.T(lang, name)
+		}
+		width := toggleLabelWidth(lang, group)
+		if extra != nil {
+			for _, n := range extra(g) {
+				width = max(width, utf8.RuneCountInString(n))
+			}
+		}
+		pad := width - utf8.RuneCountInString(label) + 1
 		if pad < 1 {
 			pad = 1
 		}

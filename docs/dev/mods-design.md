@@ -73,6 +73,28 @@ mods are read, applied, checked or sent.
   hashes. Adding a new option does not raise `mod_api`; changing what an
   existing ID means does.
 
+## Player preferences
+
+- **A preference is read by scripts only.** Rules are world-wide, so a
+  player's choice cannot select a `values.toml` section; `realm.pref(id)` in
+  `raid` and `region` is the whole surface. Adding it did not raise `mod_api`:
+  it is a new manifest table and a new field of `realm`.
+- **Stored per realm, as an explicit choice only.** `Empire.ModPrefs` is keyed
+  `<mod>/<id>` and `omitempty`. A missing key means the manifest's default,
+  which the mod package resolves, so the game package holds no mod logic and an
+  old save loads unchanged. A mod that is no longer in play leaves keys nobody
+  reads; a reset clears them with the empires.
+- **Never transmitted.** No packet carries an `Empire`, so there is no
+  `game.Protocol` change and a remote board never sees a player's choice. The
+  declarations ride in the manifest, which the mod's hash already covers.
+- **The views carry the choices as one comparable string.** `RegionView` is a
+  cache key, so `ModPrefs` is part of it and a toggle cannot return a stale
+  answer. A script is given only its own mod's keys. Reading one draws no
+  random number.
+- **The menu adds rows through the engine** (`Menu.Extra`), after the built-in
+  toggles and sharing their column. Mod text goes through the same escape
+  filter as every other mod label, and a toggle is the only write.
+
 ## When a mod changes
 
 - **Rules change only at a reset.** A game keeps the copy of each mod saved

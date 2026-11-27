@@ -507,7 +507,7 @@ func BuildMenus() *Menus {
 	// Item set and order mirror BRE's Preferences submenu (the three "Visit …
 	// Menu" skip-toggles, then the four behavior toggles). The 'L' language and
 	// 'T' time-zone pickers are IB's own additions, kept at the end.
-	prefs.Items = append(toggleItems([]toggleRow{
+	prefRows := []toggleRow{
 		{Key: '1', Name: "Visit Covert Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitCovert }},
 		{Key: '2', Name: "Visit Trading Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitTrading }},
 		{Key: '3', Name: "Visit Message Menu", Get: func(w *ctx) *bool { return &w.prefs().VisitMessage }},
@@ -515,7 +515,8 @@ func BuildMenus() *Menus {
 		{Key: '5', Name: "Deposit gold at End of Turn", Get: func(w *ctx) *bool { return &w.prefs().DepositEndTurn }},
 		{Key: '6', Name: "Auto-Pay Maintenance", Get: func(w *ctx) *bool { return &w.prefs().AutoPayMaint }},
 		{Key: '7', Name: "Auto-Feed Empire", Get: func(w *ctx) *bool { return &w.prefs().AutoFeed }},
-	}), []Item{
+	}
+	prefs.Items = append(toggleItems(prefRows, modPrefLabels), []Item{
 		{Key: 'L', LabelFn: func(w *ctx) string {
 			// playerLang, not the raw stored code: on a CP437 session it names the
 			// language actually rendering (the CP437-safe fallback), and its
@@ -534,6 +535,14 @@ func BuildMenus() *Menus {
 			Dimmed: func(w *ctx) bool { return w.Player().Protection > 0 }},
 		{Key: '0', Label: "Quit", Do: back},
 	}...)
+	// The mods in play add their own yes/no rows after the seven above; the
+	// Language row and the rest of IB's own follow them.
+	prefGroup := make([]string, len(prefRows))
+	for i, r := range prefRows {
+		prefGroup[i] = r.Name
+	}
+	prefs.Extra = func(g *ctx) []Item { return modPrefItems(g, prefGroup) }
+	prefs.ExtraAt, prefs.Notice = len(prefRows), modPrefNotice
 	prefs.DefaultOnEnter = quitOnEnter(prefs)
 
 	// The Coordinator Menu belongs to the elected BBS Coordinator (see the

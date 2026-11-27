@@ -392,6 +392,46 @@ The sysop makes the choices on the Mods page of either settings editor, or in
 `config.json` under `ModOptions`. A game keeps its choices until the next
 reset, and a league reset carries them to every board.
 
+## Player preferences
+
+A mod can let each player choose for their own realm. Declare the choices in
+`[prefs.<id>]` tables in `mod.toml`; each has a `label`, an optional
+`description` and a `default` of `true` or `false`. A mod may declare 8 at
+most and all the mods in a game 25 together, which a reset refuses naming the
+mods. A label may be 40 characters and a description 200. The fields are under
+[Player preferences](mod-reference.md#player-preferences).
+
+```toml
+[prefs.fierce]
+label = "Fiercer pirate raids"
+description = "Pirates raid you every turn."
+default = false
+```
+
+Each mod in play adds a row for every preference to the player's Preferences
+menu, after the built-in rows, with Yes or No in the same column. The label and
+description are shown as written and are not translated. A player who has made
+no choice gets the `default`; a new default affects only players who have not
+chosen.
+
+Only scripts read a preference, because the rules are the same for every realm
+and a player's choice cannot select a `values.toml` section. In `raid` and
+`region`, `realm.pref("<id>")` is `True` or `False` for the realm being asked
+about. A script sees only its own mod's preferences, and an id the mod does not
+declare is an error like any other failing script. A choice takes effect on the
+next call. This `pirates.star` raids a realm that opted in:
+
+```python
+def raid(realm, factions):
+    if realm.pref("fierce") and realm.jets > 0:
+        return [{"faction": 1, "take": "jets"}]
+    return []
+```
+
+The choices are kept on the board where the realm plays and never sent to
+another board. A new game starts with none, and a mod that is no longer in play
+has its choices ignored. [`-check-mod`](#checking-a-mod) lists the preferences.
+
 ## Scripts
 
 **Warning: a script runs inside the game process.**
