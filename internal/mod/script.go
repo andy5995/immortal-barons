@@ -34,8 +34,8 @@ const ScriptSteps = 1_000_000
 // spoil's own label, lowercased ("jets", "gold").
 func spoilName(s game.PirateSpoil) string { return strings.ToLower(s.Label()) }
 
-// viewKey holds the current call's game.PirateView on the thread, for the
-// rand and day builtins.
+// viewKey holds the current call's callContext on the thread, for the rand and
+// day builtins.
 const viewKey = "ib.view"
 
 // predeclared are the names a script sees besides Starlark's own built-ins.
@@ -48,24 +48,28 @@ var predeclared = starlark.StringDict{
 		if err := starlark.UnpackPositionalArgs(b.Name(), args, kwargs, 1, &n); err != nil {
 			return nil, err
 		}
-		v, ok := th.Local(viewKey).(*game.PirateView)
+		c, ok := th.Local(viewKey).(*callContext)
 		if !ok {
 			return nil, errors.New("rand may be called only inside raid()")
 		}
 		if n < 1 {
 			return nil, fmt.Errorf("rand(%d): n must be at least 1", n)
 		}
-		return starlark.MakeInt(v.Rand(n)), nil
+		r, err := c.rand(n)
+		if err != nil {
+			return nil, fmt.Errorf("rand: %v", err)
+		}
+		return starlark.MakeInt(r), nil
 	}),
 	"day": starlark.NewBuiltin("day", func(th *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		if err := starlark.UnpackPositionalArgs(b.Name(), args, kwargs, 0); err != nil {
 			return nil, err
 		}
-		v, ok := th.Local(viewKey).(*game.PirateView)
+		c, ok := th.Local(viewKey).(*callContext)
 		if !ok {
 			return nil, errors.New("day may be called only inside raid()")
 		}
-		return starlark.MakeInt(v.Day), nil
+		return starlark.MakeInt(c.day), nil
 	}),
 }
 
@@ -86,8 +90,8 @@ func predeclaredFor(options *optionValues) starlark.StringDict {
 type pirateScript struct {
 	mod, hash string
 	file      string // for messages: the mod folder's pirates.star
-	raid      *starlark.Function
 	prefs     *prefValues
+	ref       *scriptRef
 }
 
 // newThread is a thread for one run, with the step cap set and print
@@ -98,11 +102,17 @@ func newThread(name string) *starlark.Thread {
 	return th
 }
 
+// execScript runs src's top level in the worker. scriptFileOptions leaves
+// Starlark's defaults as they are: no while loops, no recursion, and no load(),
+// since the thread has no loader.
+func execScript(file, src string, pre starlark.StringDict) (starlark.StringDict, error) {
+	return starlark.ExecFileOptions(scriptFileOptions, newThread(file), file, src, pre)
+}
+
 // compilePirates runs src's top level and checks that it defines raid with two
-// parameters. Starlark's defaults stay on: no while loops, no recursion, and
-// no load(), since the thread has no loader.
+// parameters. It runs in the worker.
 func compilePirates(file, src string, options *optionValues) (*starlark.Function, error) {
-	globals, err := compileScript(file, src, predeclaredFor(options))
+	globals, err := execScript(file, src, predeclaredFor(options))
 	if err != nil {
 		return nil, scriptFailure(file, err)
 	}
@@ -145,19 +155,18 @@ func scriptError(err error) error {
 	return errors.New(clean(err.Error()))
 }
 
-// Raid calls the script's raid() with v and reads its answer.
+// Raid asks the script's raid() about v, in a worker, and reads its answer.
 func (s *pirateScript) Raid(v game.PirateView) ([]game.PirateOrder, error) {
-	th := newThread(s.file)
-	th.SetLocal(viewKey, &v)
-	var res starlark.Value
-	err := runScript(th, func() (err error) {
-		res, err = starlark.Call(th, s.raid, starlark.Tuple{realmValue(v, s.prefs), factionsValue(v)}, nil)
-		return err
-	})
-	if err != nil {
-		return nil, scriptError(err)
+	call := wireMsg{
+		Op: "call", ID: s.ref.id,
+		Pirate: &wirePirate{Day: v.Day, Realm: v.Realm, Factions: v.Factions},
 	}
-	return readOrders(res)
+	call.PrefMod, call.Prefs = prefsToWire(s.prefs)
+	res, err := callWorker(s.ref, call, func(n int) (int, error) { return v.Rand(n), nil })
+	if err != nil {
+		return nil, err
+	}
+	return res.Orders, nil
 }
 
 // ScriptWarnings is how many different reasons one script's failures are
@@ -293,7 +302,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 			case "faction":
 				n, err := starlark.AsInt32(kv[1])
 				if err != nil {
-					return nil, fmt.Errorf("raid %d: faction: %v", i, err)
+					return nil, fmt.Errorf("raid %d: faction: %s", i, clean(truncate(err.Error(), 100)))
 				}
 				o.Slot, haveFaction = n, true
 			case "take":
@@ -305,7 +314,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 					for _, s := range spoils {
 						names = append(names, spoilName(s))
 					}
-					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, clean(fmt.Sprint(kv[1])), strings.Join(names, ", "))
+					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, show(kv[1]), strings.Join(names, ", "))
 				}
 				o.Spoil, haveTake = spoils[k], true
 			case "market":
@@ -315,7 +324,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 				}
 				o.FromMarket = bool(b)
 			default:
-				return nil, fmt.Errorf("raid %d: unknown key %s", i, clean(fmt.Sprint(kv[0])))
+				return nil, fmt.Errorf("raid %d: unknown key %s", i, show(kv[0]))
 			}
 		}
 		if !haveFaction || !haveTake {
@@ -326,25 +335,13 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 	return orders, nil
 }
 
-// newPirateScript compiles a mod's pirates.star with its chosen options.
+// newPirateScript checks a mod's pirates.star compiles with its chosen options,
+// once per process for a given file, source and option values (see validated).
 func newPirateScript(path, name, hash, src string, options *optionValues) (*pirateScript, error) {
 	file := filepath.Join(path, PiratesFile)
-	key := file + "\x00" + src + options.key()
-	if fn, ok := compiled.Load(key); ok {
-		return &pirateScript{mod: name, hash: hash, file: file, raid: fn.(*starlark.Function)}, nil
-	}
-	fn, err := compilePirates(file, src, options)
-	if err != nil {
+	ref := newScriptRef(kindPirates, file, src, options)
+	if err := ref.validate(); err != nil {
 		return nil, err
 	}
-	compiled.Store(key, fn)
-	return &pirateScript{mod: name, hash: hash, file: file, raid: fn}, nil
+	return &pirateScript{mod: name, hash: hash, file: file, ref: ref}, nil
 }
-
-// compiled holds each script compiled once per process, keyed by its file and
-// source. A script's top level may run up to ScriptSteps, and the settings
-// editor reads the whole mod list again on every change to it. A game in
-// progress reads its mods once, and again only when another process has reset
-// the world (store's FileStore). A script's globals are frozen once run, so one
-// compiled function is safe to share.
-var compiled sync.Map

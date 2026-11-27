@@ -24,6 +24,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"maps"
 	"math"
@@ -295,20 +296,46 @@ func readFilesIn(dir, root, prefix string, files map[string]string) error {
 		if !fi.Mode().IsRegular() {
 			return fmt.Errorf("%s: not a regular file", full)
 		}
-		if fi.Size() > MaxModFileSize {
-			return fmt.Errorf("%s: %d bytes; a file in a mod may hold at most %d", full, fi.Size(), MaxModFileSize)
-		}
-		data, err := os.ReadFile(real)
+		data, err := readModFile(real, full)
 		if err != nil {
 			return err
-		}
-		// The file may have grown since the stat.
-		if len(data) > MaxModFileSize {
-			return fmt.Errorf("%s: a file in a mod may hold at most %d bytes", full, MaxModFileSize)
 		}
 		files[prefix+e.Name()] = string(data)
 	}
 	return nil
+}
+
+// readModFile reads a regular file of at most MaxModFileSize. The file is
+// opened, and what was opened is checked, not the path it was found by: the
+// path could be swapped for a link or a pipe between a check and the open. A
+// file with more than one hard link is refused (see linkCount).
+func readModFile(real, shown string) ([]byte, error) {
+	f, err := openModFile(real)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	fi, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !fi.Mode().IsRegular() {
+		return nil, fmt.Errorf("%s: not a regular file", shown)
+	}
+	if linkCount(f, fi) > 1 {
+		return nil, fmt.Errorf("%s: a file in a mod may not have other hard links", shown)
+	}
+	if fi.Size() > MaxModFileSize {
+		return nil, fmt.Errorf("%s: %d bytes; a file in a mod may hold at most %d", shown, fi.Size(), MaxModFileSize)
+	}
+	data, err := io.ReadAll(io.LimitReader(f, MaxModFileSize+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > MaxModFileSize {
+		return nil, fmt.Errorf("%s: a file in a mod may hold at most %d bytes", shown, MaxModFileSize)
+	}
+	return data, nil
 }
 
 // checkFileSet refuses a set of mod files that is too many or too large, ahead

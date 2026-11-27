@@ -2,14 +2,12 @@
 
 This page is for the BBS operator (the sysop). Players do not need to read it.
 
-**Mods with scripts run inside the game. Read this before you install one.**
-Starlark gives a script no access to files, the network or other programs, and
-Immortal Barons adds none. The realistic harm from a bad script is to the
-game's availability: it can use up memory or CPU, hang, or crash the game
-process, and with it the door session or maintenance run. The limits in
-[What every script may do](#what-every-script-may-do) are best effort. They
-were written by an LLM (Claude) and no human security expert has reviewed
-them. Install only mods whose scripts you trust or have read.
+**Mods with scripts run code on your machine. Read the
+[warning under Scripts](#scripts) before you install one.** The language gives a
+script no access to files, the network or other programs, so the realistic harm
+is to the game's availability (memory, CPU, a hang), not to your files. The
+limits that contain it were written by an LLM (Claude) and no human security
+expert has reviewed them. Install only mods whose scripts you trust or have read.
 
 A mod changes some of the numbers the game plays by. Without mods, the game
 plays the standard Immortal Barons rules. A game with a mod is a
@@ -434,22 +432,26 @@ has its choices ignored. [`-check-mod`](#checking-a-mod) lists the preferences.
 
 ## Scripts
 
-**Warning: a script runs inside the game process.**
+**Warning: a script is code, and it runs on your machine.**
 [Starlark](https://github.com/bazelbuild/starlark) is not a low-level
 language. It is a small Python-like language made to be embedded safely (it was
 written for Bazel's build files). It has no pointers or direct memory access,
 and no file, network or program access unless the host game provides it.
 Immortal Barons provides none. So a hostile script cannot read or change files
 on your system. What it can try is to harm the availability of the game: use
-up memory, use up CPU, hang, or crash the process. That ends the door session
-or maintenance run it was running in.
+up memory, use up CPU, or hang.
 
-Immortal Barons limits a script (see
-[What every script may do](#what-every-script-may-do)), but it cannot
-completely prevent this. The limits are best effort and have known gaps,
-listed there. They were written by an LLM (Claude), and no human security
-expert has reviewed them. Only install mods whose scripts you trust or have
-read. In a league, `AcceptLeagueScripts` is off by default for this reason.
+To contain that, the game runs scripts in a separate worker process (a copy of
+the game's own program) with limits on its time and memory, and stops the
+worker if a script goes past them. A script that fails this way is an ordinary
+failed script. The limits are described under
+[What every script may do](#what-every-script-may-do), with the gaps that
+remain. The worker has the same user rights as the game: it is a way to stop a
+bad script from taking the game down, not a security boundary against a bug in
+Go or in the Starlark interpreter. The limits were written by an LLM (Claude),
+and no human security expert has reviewed them. Only install mods whose scripts
+you trust or have read. In a league, `AcceptLeagueScripts` is off by default for
+this reason.
 
 A mod may also hold scripts: `pirates.star`, which decides pirate raids, and a
 `regions` folder with a script for each region type the mod changes, which
@@ -561,46 +563,60 @@ available). `while` loops and recursion are not allowed, and neither are
 call to `raid` or `region` may run for at most 1,000,000 steps, and so may the
 top level of the file when it loads.
 
-The game also limits each run of a script, and a run that goes past a limit
-fails like any other failing script:
+The game runs scripts in a worker process, which is started when the first
+script is needed and kept for later calls. It gets no data directory, nothing
+of the game's environment, and none of the game's input or output: on a door
+that is the caller's connection. A few workers may run at once (as many as the
+machine has cores, up to four). The limits are these:
 
-- **Time.** A run may take at most 2 seconds. If it is stuck where the game
-  cannot stop it, the game gives up on it, and no script runs again until the
-  process ends.
-- **Memory.** A run that makes the game process grow by more than 256 MiB is
-  stopped. This is sampled every few milliseconds, so one operation that
-  allocates a lot at once can pass it.
-- **Size of what it builds.** `range()`, a repeated string, list or tuple
-  (`x * n`), a formatted string (`%`), and anything printed by `str()`,
-  `repr()` or `fail()` may not pass 1,000,000 elements or characters. An
-  integer product may not pass 4,096 bits. The same cap holds for the result
-  of `join`, `replace` and `format`; they work as usual below it. Those three
-  may be called only as `x.join(...)`: using one as a value (`f = x.join`) or
-  through `getattr` is refused. `print` does nothing.
+- **Time.** A call may take at most 3 seconds, counting from when the request
+  is sent. At that point the game kills the worker. The call fails, and the
+  next call starts a new worker. Calls running in other workers are not
+  affected. This holds on every system.
+- **Memory.** A worker may use about 256 MiB. Linux and the BSDs enforce this
+  on the worker (a data size limit), and Windows does it with a job object. On
+  macOS no such limit applies, so the worker watches its own heap every few
+  milliseconds and ends itself over the limit; one operation that allocates
+  more than that at once can get through. A worker that goes over is killed,
+  and the call fails like a timeout. The Linux limit is the one that has been
+  tested; the BSD and Windows ones have not been run.
+- **CPU.** Apart from the time limit, a worker that is somehow left running is
+  stopped by the system after 10 CPU seconds on systems that support it.
+- **Steps.** A call, or the top level of the file, may run at most 1,000,000
+  steps, as before.
 - **Files.** A file in a mod may hold at most 262,144 bytes, and a mod at most
-  64 files. This includes a mod that arrives in a league's reset order.
+  64 files. This includes a mod that arrives in a league's reset order. A link
+  in a mod folder must lead to a regular file inside the folder, and a file with
+  more than one hard link is refused.
+
+If a worker cannot be started at all, the game says so once in its error
+output, mods with scripts load, and each script call fails; the game plays its
+built-in rules where a script fails. It does not run the script inside the
+game instead.
 
 Known gaps, which these limits do not close:
 
-- A script can build a value whose parts are shared many times over, such as a
-  list holding another list a thousand times, three levels deep. It is small in
-  memory, but comparing or hashing it takes as long as its fully expanded size.
-  Those operations cannot be interrupted, so the game abandons the run after
-  the time limit and stops running scripts. The abandoned run keeps using the
-  CPU until the game process ends.
-- Memory is measured for the whole process, not for one script. A script can
-  pass the limit by one large step, and an unrelated allocation can end a
-  script that did nothing wrong.
-- Go can stop the process outright when it runs out of memory, which nothing in
-  the game can catch.
+- **A script that fails on every call is slow, not stopped.** Each failed call
+  can take up to the time limit, and the game starts a new worker for the next
+  one. A script that fails for every realm every turn can make turns slow. The
+  error output names the script.
+- **Memory is limited per worker, not for all of them together.** Four workers
+  can each use their limit at once.
+- **macOS has no system memory limit,** and the check there is a sample, as
+  above.
+- **The worker is not a sandbox.** It runs with the game's user rights. What
+  keeps a script from files and the network is that Starlark has no way to
+  reach them. A flaw in Go or in the Starlark interpreter that let a script do
+  more would not be contained by the worker. None is known.
+- **The limits are untested on some systems:** the BSDs and Windows, as above.
 
 A script keeps nothing from one call to the next. Values set at the top level
 of the file are frozen once it has loaded: `raid` and `region` can read a list
 or dict made there, but changing it is an error.
 
-A script is as trusted as the rest of the mod folder. It runs inside the game
-itself, and the limits above are best effort, so install only scripts you have
-read.
+Install only scripts you trust or have read. The limits above are there to
+stop mistakes and most abuse, and they have not been reviewed by a human security
+expert.
 
 [`-check-mod`](#checking-a-mod) loads each script and checks that it defines `raid` or `region`
 with two parameters. It cannot check what they return, because that depends on
@@ -716,8 +732,8 @@ Scripts are another choice. A mod that carries `pirates.star` or a script in
 `bbs.cfg`. The setting defaults to `no`. A board with the default refuses a
 scripted reset and keeps the order. It resets at its first planetary run after
 its sysop turns the setting on. If the board moves to another league first, the
-order is discarded. Scripts run inside the game on that machine, and their
-limits are best effort (see [Scripts](#scripts)), so read them before you allow
+order is discarded. Scripts run on that machine, and their limits have not been reviewed by a
+human security expert (see [Scripts](#scripts)), so read them before you allow
 them.
 
 ## Testing a mod

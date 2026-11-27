@@ -56,8 +56,8 @@ type regionScript struct {
 	mod, hash string
 	file      string // for messages: the path in the mod folder
 	region    *game.Region
-	fn        *starlark.Function
 	prefs     *prefValues
+	ref       *scriptRef
 
 	mu    sync.Mutex
 	cache map[regionKey]game.RegionRules
@@ -78,7 +78,7 @@ func compileRegion(file, src string, options *optionValues) (*starlark.Function,
 	if options != nil {
 		pre["option"] = options.builtin()
 	}
-	globals, err := compileScript(file, src, pre)
+	globals, err := execScript(file, src, pre)
 	if err != nil {
 		return nil, scriptFailure(file, err)
 	}
@@ -92,28 +92,21 @@ func compileRegion(file, src string, options *optionValues) (*starlark.Function,
 	return fn, nil
 }
 
-// newRegionScript compiles a mod's script for type g with its chosen options,
-// once per process for a given file, source and option values (see compiled).
+// newRegionScript checks a mod's script for type g compiles with its chosen
+// options, once per process for a given file, source and option values (see
+// validated).
 func newRegionScript(path, name, hash string, g *game.Region, src string, options *optionValues) (*regionScript, error) {
 	file := filepath.Join(path, RegionsDir, g.ID+".star")
-	key := "region\x00" + file + "\x00" + src + options.key()
-	s := &regionScript{mod: name, hash: hash, file: file, region: g, cache: map[regionKey]game.RegionRules{}}
-	if fn, ok := compiled.Load(key); ok {
-		s.fn = fn.(*starlark.Function)
-		return s, nil
-	}
-	fn, err := compileRegion(file, src, options)
-	if err != nil {
+	ref := newScriptRef(kindRegion, file, src, options)
+	if err := ref.validate(); err != nil {
 		return nil, err
 	}
-	compiled.Store(key, fn)
-	s.fn = fn
-	return s, nil
+	return &regionScript{mod: name, hash: hash, file: file, region: g, ref: ref, cache: map[regionKey]game.RegionRules{}}, nil
 }
 
-// Region calls the script's region() with v and row and reads its answer: a
-// dict of the figures it changes, such as {"food_base": 100}. A figure it
-// leaves out keeps its value from row.
+// Region asks the script's region() about v and row, in a worker, and reads its
+// answer: a dict of the figures it changes, such as {"food_base": 100}. A figure
+// it leaves out keeps its value from row.
 func (s *regionScript) Region(v game.RegionView, row game.RegionRules) (game.RegionRules, error) {
 	key := regionKey{view: v, row: row}
 	s.mu.Lock()
@@ -123,19 +116,13 @@ func (s *regionScript) Region(v game.RegionView, row game.RegionRules) (game.Reg
 	}
 	s.mu.Unlock()
 
-	var res starlark.Value
-	th := newThread(s.file)
-	err := runScript(th, func() (err error) {
-		res, err = starlark.Call(th, s.fn, starlark.Tuple{regionRealmValue(v, s.prefs), regionRowValue(row)}, nil)
-		return err
-	})
-	if err != nil {
-		return row, scriptError(err)
-	}
-	out, err := readRegionRow(res, row)
+	call := wireMsg{Op: "call", ID: s.ref.id, Region: &wireRegion{View: v, Row: row}}
+	call.PrefMod, call.Prefs = prefsToWire(s.prefs)
+	res, err := callWorker(s.ref, call, nil)
 	if err != nil {
 		return row, err
 	}
+	out := *res.Row
 	s.mu.Lock()
 	if len(s.cache) >= regionCacheMax {
 		clear(s.cache)
@@ -197,11 +184,11 @@ func readRegionRow(res starlark.Value, row game.RegionRules) (game.RegionRules, 
 		key, _ := starlark.AsString(kv[0])
 		f := game.RegionFieldByKey(key)
 		if f == nil {
-			return row, fmt.Errorf("unknown key %s", clean(fmt.Sprint(kv[0])))
+			return row, fmt.Errorf("unknown key %s", show(kv[0]))
 		}
 		n, err := starlark.AsInt32(kv[1])
 		if err != nil {
-			return row, fmt.Errorf("%s: %v", key, err)
+			return row, fmt.Errorf("%s: %s", key, clean(truncate(err.Error(), 100)))
 		}
 		f.Set(&out, n)
 	}

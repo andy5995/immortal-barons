@@ -115,79 +115,104 @@ mods are read, applied, checked or sent.
 
 ## Scripts
 
-- **Starlark, run in the game process, under best-effort limits.** The
-  threat model is a sysop who installs a mod, or accepts a league's, without
-  reading its scripts. Starlark has no file, network, exec or clock access and
-  the only names IB adds are `rand`, `day` and `option`, so the harm left is
-  to availability: CPU, memory, a crash, or text that reaches a terminal. All of
-  it is in `internal/mod/sandbox.go`; every call into a script goes through
-  `runScript` and every compile through `compileScript`.
-  - Per run (top level at load, each `raid()` / `region()` call):
-    `ScriptSteps` (1M), `ScriptTimeout` (2 s, `thread.Cancel` from a timer),
-    and `ScriptMemory` (256 MiB of heap growth). The memory watchdog is one
-    goroutine for the process, started by the first run and ended with the
-    last; it reads `/memory/classes/heap/objects:bytes` every 5 ms, and on
-    a breach runs the collector once before cancelling, because that figure
-    counts unswept garbage. Heap is process-wide, so concurrent runs and the
-    game's own allocation are attributed to the script: a coarse limit, set high
-    so false positives are rare. Measured cost of a run's limits: about 1.5 us
-    (`BenchmarkRunScriptOverhead`), against turns that take milliseconds.
-  - **A run that will not stop is abandoned.** `runScript` runs the script on a
-    goroutine. Past `ScriptTimeout` plus a grace period it returns an error and
-    leaves the goroutine, and sets a flag that makes every later run fail at
-    once. The callers' existing fallback handles it. This costs the process the
-    CPU of the stuck goroutine, not the session.
-  - **Go panics are recovered** in `runScript`, so a bug in the interpreter or
-    a builtin is a failed script.
-  - **The parse tree is rewritten before compiling** (`guard`). `x * y`,
-    `x *= y`, `x % y`, `x %= y` become calls to checked builtins that refuse a
-    repeat, a formatted string or an integer product past `ScriptSequenceMax`
-    / `ScriptIntBits`. Starlark's own limit on a repeat is 2^30 elements, which
-    for a list is 16 GiB. A call `x.join(...)`, `x.replace(...)` or
-    `x.format(...)` becomes `__ib_call("join", x, ...)`: for a string `x` the
-    result's size is worked out from the arguments first (each can multiply its
-    argument in one uninterruptible call) and refused past the cap, then
-    Starlark's own method runs, so results are unchanged. Another receiver, such
-    as a struct with a field named `join`, gets an ordinary attribute call. The
-    methods used as a value (`f = x.join`) or through `getattr` are refused:
-    nothing could check the later call. `range`, `str`, `repr`,
-    `fail` and `print` are shadowed in the predeclared dict: `range` refuses
-    a length past the cap, `str`/`repr`/`fail` refuse a value that would print
-    past it (a list holding one list a thousand times, three levels deep, is a
-    few KB and a billion elements printed), and `print` does nothing. The names
-    the rewrite uses are reserved. A file option set is `syntax.FileOptions{}`:
-    no `while`, recursion, `set`, global reassignment or top-level `if`/`for`,
-    and `load()` is refused. `TestScriptSurfaceIsPinned` fails when the
-    predeclared names or Starlark's own universe gain a name, so a go.starlark.net
-    upgrade that adds a builtin needs a look at what it can allocate.
+- **Starlark, run in a worker process the OS can limit.** The threat model is
+  a sysop who installs a mod, or accepts a league's, without reading its
+  scripts. Starlark has no file, network, exec or clock access and the only
+  names IB adds are `rand`, `day`, `option` and a realm's `pref`, so the harm
+  left is to availability: CPU, memory, a hang. Starlark has no allocation
+  accounting, and an in-process limit cannot stop a built-in stuck in Go. An
+  earlier version rewrote the script's parse tree to size-check operators and
+  abandoned a stuck goroutine; it made scripts behave unlike plain Starlark,
+  could not stop everything, and switched all scripts off for the process after
+  one stuck run. It was removed for this.
+  - **The worker** is the game's own executable, started with
+    `IB_SCRIPT_WORKER=1`. `init()` in `internal/mod` (`worker.go`) takes over
+    before `main`, so every binary and test binary that imports the package is
+    its own worker with nothing to wire; the parent finds itself with
+    `os.Executable()`. The game talks to it in JSON lines over pipes made by
+    `exec.Cmd`. The worker's stdin and stdout are those pipes, never the
+    game's (on a door they are the caller), its stderr goes to a 2 KB buffer
+    that names the cause when it dies, its environment is two variables, and it
+    is given no data directory. It `os.Stdout = os.Stderr` first, so a stray
+    write cannot corrupt the conversation. On Unix the game marks every descriptor
+    from 3 up close-on-exec before it starts one (`protectInheritedFDs`): Go
+    sets the flag on what it opens, but one the BBS passed down may lack it.
+    Windows needs nothing, since `exec.Cmd` passes only the standard handles.
+  - **Protocol** (`wireMsg`): `compile` (script id, kind, file name, source,
+    option values) and `call` (id, the view, the mod's preference defaults) from
+    the game; `result` from the worker. The worker holds compiled globals, the
+    game never holds a Starlark value, and keeps only sources, so a new worker
+    is sent `compile` again before its first call of a script (`worker.ensure`).
+    `rand(n)` inside `raid()` sends a `rand` request mid-call and the game answers
+    from `PirateView.Rand`, so the world's generator is drawn in the order the
+    script asks, as before (`TestRandRoundTripsInOrder`,
+    `TestScriptGameReplaysForASeed`). `day()` and a realm's preferences travel
+    in the view. The orders and the region row are read into Go values in the
+    worker and sent as JSON.
+  - **Limits.** *Time* is the game's: `ScriptTimeout` (3 s) from sending a
+    request, then `Process.Kill`. The call fails, the worker is dropped, and
+    the next call starts a new one and recompiles; there is no global switch.
+    *Memory* (`ScriptMemory`, 256 MiB): on Linux and the BSDs the worker sets
+    its own `RLIMIT_DATA` to that plus 128 MiB before it reads anything (on
+    Linux it counts private writable mappings, which is Go's heap; measured:
+    the runtime runs with 8 MiB over a 64 MiB limit, and a single 1 GB string
+    dies of `cannot allocate memory`); on Windows the game puts it in a Job
+    Object with a process memory limit and kill-on-close; on macOS the system
+    enforces neither, so the worker's own watchdog (`workerWatchdog`, heap
+    objects sampled every 5 ms, a collection before it decides, `os.Exit(3)`)
+    is the limit. The watchdog runs everywhere (a test turns the system limit off
+    to prove it). `RLIMIT_AS` was not used: the race detector and the Go runtime
+    reserve address space that it counts. Under the race detector (tests only)
+    the system limit is skipped for the same reason (`race_on.go`). *CPU*:
+    before each request the worker sets `RLIMIT_CPU` soft to what it has used
+    plus 10 s, and exits on the `SIGXCPU` that follows (the Go runtime ignores
+    it unless asked), so a worker left running by a dead game stops; the parent's pipe
+    closing ends an idle one. *Steps*: `ScriptSteps` stays in the worker.
+  - **Pool.** Workers are made on demand, as many as `GOMAXPROCS` up to four
+    (`workerPoolMax`), one call in flight on each; a goroutine that finds all
+    busy waits. A single worker behind a mutex would have made one slow script
+    block every other and a kill fail the calls queued behind it; separate
+    processes make a kill touch one call. Each can hold `ScriptMemory`, so four
+    is the cap on that, too.
+  - **No worker is not in-process.** If `os.Executable()` or the start fails,
+    `validate` warns once and the mod loads; every call of its scripts fails
+    with the reason and the game plays its built-in rules.
+    `TestNoWorkerMeansAClearFailureNotAnInProcessRun`.
+  - **Pinned surface and language options.** `scriptFileOptions` is
+    `syntax.FileOptions{}`: no `while`, recursion, `set`, global reassignment
+    or top-level `if`/`for`, and `load()` is refused. `print` is discarded.
+    `TestScriptSurfaceIsPinned` fails when the predeclared names or Starlark's
+    own universe gain one.
   - **Mod files**: at most `MaxModFileSize` (256 KiB) each and `MaxModFiles`
-    (64), checked on the folder reader, a saved copy and a league order alike
-    (`checkFileSet`, before anything parses). The folder reader follows a
-    symlink only to a regular file inside the mod folder.
-  - **Text**: every string a script chose that reaches stderr or a log
-    (error messages, `fail()` text, raid keys) goes through `clean`, which
-    writes control characters and Unicode format characters (bidi overrides
-    among them) as `\uXXXX`. Manifest and option text is refused if it holds one
-    (it was control characters only; format characters are new). `ManifestFromRef`
-    holds a saved copy to the same checks, since a screen reads it without
-    `Read`. The Game Setup screen cleans what it prints as well.
-  - **Residual risk, not closed.** (1) *Shared structure*: a script can build, in
-    a few thousand steps, values whose expanded form is astronomically large
-    (`a = [0]*1000; b = [a]*1000; c = [b]*1000`). Comparing two such values,
-    hashing one, or sorting a list of them is one uninterruptible Go call;
-    `runScript` abandons it (the CPU stays burned until the process exits).
-    Text built from one is refused by `str`/`repr`/`fail`, but an error message
-    Starlark builds itself from a value is not checked. (2) *One big step*: the
-    memory watchdog samples, so one operation can allocate before it looks.
-    Repeats, formats and products are capped, but `x + x` doubles a string or
-    list per step, so growth stops at about two to three times the memory cap.
-    (3) *Go out-of-memory and stack overflow are fatal*, not panics; nothing
-    here can catch them. (4) *Attribution*: process-wide heap, see above.
-    (5) *Many failing runs*: each failing run can take up to the timeout, and a
-    script that fails per realm per turn repeats it; there is no circuit breaker
-    short of abandonment. (6) The interpreter and its limits are LLM-written
-    and have had no review by a human security expert; the user docs say so.
-    A hard limit would need a child process with an OS limit.
+    (64), on the folder reader, a saved copy and a league order alike
+    (`checkFileSet`). The folder reader follows a link only to a regular file
+    inside the mod folder, opens it with `O_NOFOLLOW`, checks the file it
+    opened (`Fstat`: regular, size, link count) and reads through a limit;
+    a file with more than one hard link is refused, since a hard link to,
+    say, `/etc/passwd` would otherwise ride a league's reset order to every
+    board (`files_unix.go`, and `files_windows.go`, which reads the count from
+    the open handle; Windows has no `O_NOFOLLOW`, so there the folder walk's
+    link check is the only one).
+  - **Text**: everything a script or mod chose that reaches stderr or a log goes
+    through `clean`, which writes control characters and Unicode format
+    characters (bidi overrides among them) as `\uXXXX`. An error names a script's
+    value by its type, or by a string cut to 40 characters and cleaned (`show`).
+    The worker's reply is cleaned and cut again by the game, and so is its
+    stderr. Manifest and option text is refused if it holds one, and
+    `ManifestFromRef` holds a saved copy to the same checks.
+  - **Cost.** About 28 us a call over the pipe, 32 us with one `rand` round
+    trip (`BenchmarkWorkerRegionCall`, `BenchmarkWorkerRaidWithDraws`);
+    100 scripted turns of a one-realm world took 9.5 ms against 3.3 ms in
+    process. Region answers are cached, so a screen pays once per view.
+  - **Residual risk.** (1) A script that fails every call costs up to the timeout
+    each time and a worker start; there is no circuit breaker. (2) Memory is per
+    worker; four can each use their limit. (3) macOS has no system limit, and the
+    watchdog samples, so one large allocation can pass it. (4) The BSD and Windows
+    limits are written to the platform's documentation and have not been run.
+    (5) The worker has the game's user rights; it contains a script, it is not
+    a boundary against a flaw in Go or the interpreter. (6) The code that
+    limits scripts was written by an LLM and has had no review by a human
+    security expert; the user docs say so.
 - **A region script must answer the same question the same way.** It gets no
   `rand()` and no `day()` builtin, and `realm` carries no gold, because a screen
   asks for a projection and the turn asks again when it pays. What the view does
