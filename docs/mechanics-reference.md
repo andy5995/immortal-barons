@@ -834,6 +834,14 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   chosen. It is a league rule, carried in the ruleset with `omitempty`, so a
   league that leaves it at 0 sends the same bytes and fingerprint as before it
   existed.
+
+  **The computer barons carry a daily cap of their own,
+  `AIMaxLocalAttacksPerDay` (3, `balance_ai.go`).** IB's own: the AI's pacing is
+  IB's design, and a human keeps the turn's one attack with no daily limit. Left
+  uncapped, a bot attacks on every turn it judges favorable and eliminates about
+  4.8 of 8 realms in 60 days; at 3 it is about 1.7 (24 seeds, 2026-11-27). It
+  counts in the same `LocalAttacksToday`, which resets at daily maintenance, and
+  a lower `MaxLocalAttacks` still wins.
 - **Nuclear attack** — turns enemy regions into waste. BINARY-VERIFIED
   (`BRE.OVR` `launch_nuclear_attack`, unit `ovr_00e809` +0x225e):
 

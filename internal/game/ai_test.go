@@ -378,3 +378,41 @@ func TestAIInvestsWhatTheDateHolds(t *testing.T) {
 		t.Errorf("invested %d, want 1..%d", got, room)
 	}
 }
+
+func TestAILocalAttacksCappedPerDay(t *testing.T) {
+	w, agg, vic := warWorld(t)
+	vic.Regions = RegionMix{Desert: 400} // enough land that no attack runs into the capture floor
+	vic.syncLand()
+	w.Config.IdleDaysRemove = 0 // maintenance would erase these never-played test realms
+	agg.Troopers, agg.Tanks = 50000, 5000
+	for i := 0; i < AIMaxLocalAttacksPerDay+4; i++ {
+		w.aiWageWar(agg)
+	}
+	if agg.LocalAttacksToday != AIMaxLocalAttacksPerDay || w.BattlesTotal != AIMaxLocalAttacksPerDay {
+		t.Fatalf("day 1: counter %d, battles %d, want %d each",
+			agg.LocalAttacksToday, w.BattlesTotal, AIMaxLocalAttacksPerDay)
+	}
+	w.DailyMaintenance("2026-09-01")
+	w.DailyMaintenance("2026-09-02")
+	if agg.LocalAttacksToday != 0 {
+		t.Fatalf("counter should reset with the day, got %d", agg.LocalAttacksToday)
+	}
+	before := w.BattlesTotal
+	w.aiWageWar(agg)
+	if w.BattlesTotal != before+1 || agg.LocalAttacksToday != 1 {
+		t.Errorf("day 2: battles %d -> %d, counter %d, want one more attack",
+			before, w.BattlesTotal, agg.LocalAttacksToday)
+	}
+}
+
+func TestAISysopLocalCapLowerThanAIsWins(t *testing.T) {
+	w, agg, _ := warWorld(t)
+	w.Config.MaxLocalAttacks = 1
+	agg.Troopers, agg.Tanks = 50000, 5000
+	for i := 0; i < 4; i++ {
+		w.aiWageWar(agg)
+	}
+	if agg.LocalAttacksToday != 1 {
+		t.Errorf("counter %d, want 1 under a sysop cap of 1", agg.LocalAttacksToday)
+	}
+}

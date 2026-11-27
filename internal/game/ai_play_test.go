@@ -660,7 +660,9 @@ func TestGroundDownRealmsGetFinished(t *testing.T) {
 				seed, w.BattlesTotal)
 		}
 	}
-	// Measured 1.75 per run across 24 seeds (2026-08-26), with no seed at zero.
+	// Measured 1.67 per run across 24 seeds (2026-11-27). 900eb432 removed the old
+	// daily cap on the AI (4.83 uncapped); AIMaxLocalAttacksPerDay restores one.
+	// It read 1.75 across 24 seeds (2026-08-26), with no seed at zero.
 	// It read 3.5 at 20 turns of protection and 2.7 at 15 while IB's capture
 	// carried a net-worth density boost of its own; that boost let a soft realm
 	// lose twice the original's share and was removed under #200, which is what
