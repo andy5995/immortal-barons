@@ -569,6 +569,17 @@ func (c Config) GameStarted(today string) bool {
 	return c.GameStartDate == "" || today >= c.GameStartDate
 }
 
+// PendingStart returns the scheduled Game Start Date while it is still ahead of
+// w.Today, and "" once the game has begun, when no start was scheduled, or when
+// no session date is set. Every screen that refuses or announces a scheduled
+// start asks this, so they cannot disagree. Call it under the world lock.
+func (w *World) PendingStart() string {
+	if w.Config.GameStartDate == "" || w.Today == "" || w.Config.GameStarted(w.Today) {
+		return ""
+	}
+	return w.Config.GameStartDate
+}
+
 // DefaultHeldPacketDays is HeldPacketDays when bbs.cfg does not set it. Long enough for a
 // Coordinator to notice a board with no key and publish one, which rescues the
 // backlog; past that a held packet is from a board that will not recover.

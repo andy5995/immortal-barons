@@ -4640,6 +4640,20 @@ holds:
   7, per `docs/bre.doc`)
 - it was created and never played and the game is more than three days old
 
+IB follows that rule: `removeUnplayedEmpires` collects a human realm that was
+founded and never played, but only once today is more than
+`UnplayedRealmGraceDays` (3) calendar days past `StartedDate`, the day the game
+began, or past a later Game Start Date set on a running board. BRE makes the same test on dates (`BRE.OVR 0x7fd4`: start + 3 < today),
+and IB does not use `GameDay` for it because a game with a scheduled start
+already reads day 1 on its launch day. The grace runs on the game's age, so a
+young game keeps every early signup, including a realm founded before a
+scheduled Game Start Date. Play is refused until that date, with the date
+shown, and the caller stays at the opening menu; a caller who founds a realm
+before it is told so at once. Whether BRE refuses Play the same way has not
+been checked against a capture or the disassembly. After the grace, a realm
+founded and never played is collected by the next maintenance that moves the
+game on a day.
+
 The slot in play is exempt. Two things follow. A crushed realm stays visible for
 the rest of the game day, which is why the loser's neighbors can still see what
 happened — IB's one-day husk (`removeDeadHusks`) is the same window. And

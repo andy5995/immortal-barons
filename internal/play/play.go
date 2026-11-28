@@ -453,6 +453,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			notice(s, fmt.Sprintf(i18n.T(id.Language, "Your realm %s was destroyed."), reborn))
 		}
 	}
+	var created bool // this session founded the realm, not another node
 	if e == nil {
 		if !joinOpen {
 			notice(s, fmt.Sprintf("The game is closed to new barons (join cutoff %s has passed).", joinDate))
@@ -534,6 +535,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 					return
 				}
 				e = w.AddHumanKey(id.Handle, id.userKey(), realm)
+				created = true
 				e.Language = lang
 			})
 			if full != "" {
@@ -546,6 +548,9 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 					menu.WrapIndented("That realm name was just taken — please choose another.", "  "), ansi.Reset)
 			}
 		}
+	}
+	if created {
+		announcePendingStart(s, w, e, term)
 	}
 	// The "since your last play" events are shown by runTurn after the caller
 	// hits Play (their first turn of the day), matching BRE — not here before the
@@ -658,8 +663,26 @@ func notice(s session.Session, text string) {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(text, ""), ansi.Reset)
 }
 
-// farewell holds a closing notice on screen until the caller presses a key:
-// the door exits right after it, and the BBS clears the screen when it does.
+// announcePendingStart tells a caller who has just founded a realm before the
+// scheduled start that it cannot be played yet. Say so now, while they are still
+// looking at the screen that made it, and point them at the instructions rather
+// than leave them to find the refusal. It speaks the realm's language, which a
+// newcomer picked in the language menu a moment ago.
+func announcePendingStart(s session.Session, w *game.World, e *game.Empire, term menu.Term) {
+	var begins, lang string
+	w.Read(func() { begins, lang = w.PendingStart(), e.Language })
+	if begins == "" {
+		return
+	}
+	nl := menu.FittingLang(term, lang)
+	notice(s, fmt.Sprintf(i18n.T(nl, "The game has not started yet; it begins %s."), begins)+" "+
+		i18n.T(nl, "Until then, you may read the game instructions from the main menu."))
+	farewell(s, term, lang)
+}
+
+// farewell holds a notice on screen until the caller presses a key. Most callers
+// use it for a closing notice, where the door exits right after it and the BBS
+// clears the screen; the not-yet-started notice goes on to the opening menu.
 // The language is fitted to the terminal, so a CP437 caller is not shown a bar
 // in a script it cannot draw. term comes from the caller because the session's
 // idle-timeout wrapper does not carry the terminal's markers.

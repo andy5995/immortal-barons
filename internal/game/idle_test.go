@@ -5,11 +5,13 @@ import (
 	"testing"
 )
 
-// A caller who creates a realm and never takes a turn is erased at the next
-// maintenance, and may build a fresh realm normally afterward.
+// In a game more than three days old, a caller who creates a realm and never
+// takes a turn is erased at the next maintenance, and may build a fresh realm
+// normally afterward.
 func TestUnplayedRealmErasedAtMaintenance(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-07-01"
+	w.StartedDate = "2026-06-01" // an established game
 	e := w.AddHuman("caller", "Neverplayed")
 	if e.CreatedDay != w.GameDay {
 		t.Fatalf("setup: CreatedDay %d should be the current game day %d", e.CreatedDay, w.GameDay)
@@ -27,12 +29,32 @@ func TestUnplayedRealmErasedAtMaintenance(t *testing.T) {
 	}
 }
 
+// BRE leaves never-played realms alone until the game is more than three days
+// old, so a young game keeps every early signup however long it sits idle.
+func TestUnplayedRealmSpared_WhileGameIsYoung(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-07-01"
+	w.AddHuman("caller", "Early")
+	// The game starts 07-02; through 07-05 it is at most three days old.
+	for d := 2; d <= 5; d++ {
+		w.DailyMaintenance(fmt.Sprintf("2026-07-%02d", d))
+		if w.FindByOwner("caller") == nil {
+			t.Fatalf("realm erased on 2026-07-%02d, inside the grace (started %s)", d, w.StartedDate)
+		}
+	}
+	w.DailyMaintenance("2026-07-06")
+	if w.FindByOwner("caller") != nil {
+		t.Error("once the game is past the grace, a never-played realm is collected")
+	}
+}
+
 // The realm is safe on the day it was created: its owner is entitled to the day
 // they joined, and on a multi-node board another caller's login can roll the day
 // over while they are still at the menu.
 func TestUnplayedRealmSurvivesTheDayItWasCreated(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-07-01"
+	w.StartedDate = "2026-06-01"
 	e := w.AddHuman("caller", "Fresh")
 	e.CreatedDay = w.GameDay + 1 // as if created after this maintenance advanced
 

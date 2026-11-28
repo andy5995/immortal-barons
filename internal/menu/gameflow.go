@@ -152,6 +152,12 @@ func outOfTurns(s session.Session, w *ctx) Result {
 // many turns as the player wants to play (#70). Diplomacy and Change Production
 // are no longer pre-turn stops here — they stay reachable from the System menu.
 func runTurn(s session.Session, w *ctx) Result {
+	// Before a scheduled start nobody plays. The caller goes back to the opening
+	// menu, not out of the game.
+	if begins := gameNotStarted(w); begins != "" {
+		ok(s, "The game has not started yet; it begins %s.", begins)
+		return Stay
+	}
 	menus := BuildMenus()
 	// abort ends the turn cleanly when the active empire has been eliminated by
 	// another node mid-turn (withPlayer returned false). The active *Empire is
@@ -423,4 +429,12 @@ func runTurn(s session.Session, w *ctx) Result {
 			return Stay
 		}
 	}
+}
+
+// gameNotStarted returns the scheduled start date while the game has not begun,
+// and "" once it has (or when no start was scheduled).
+func gameNotStarted(w *ctx) string {
+	var begins string
+	w.Read(func() { begins = w.PendingStart() })
+	return begins
 }

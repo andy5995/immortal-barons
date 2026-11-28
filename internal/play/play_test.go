@@ -459,6 +459,35 @@ func TestJoinCutoffRefusalPauses(t *testing.T) {
 	assertPausedAfter(t, f.out.String(), "closed to new barons")
 }
 
+// A realm founded before the scheduled start is told the game has not begun,
+// in the language the newcomer just picked, and the session goes on to the
+// opening menu rather than ending.
+func TestFoundingBeforeTheStartIsAnnounced(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	cfg.GameStartDate = "2026-07-10"
+	// splash dismiss, "2" (Deutsch), Create Realm, name, confirm, dismiss the
+	// notice's pause, Quit at the opening menu
+	f := &fakeSession{keys: []rune(" 2\r1Khanate\ry 0")}
+	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
+		t.Fatal(err)
+	}
+	out := f.out.String()
+	i := strings.Index(out, "it begins 2026-07-10.")
+	if i < 0 {
+		t.Fatalf("the not-started notice never appeared:\n%s", out)
+	}
+	if !strings.Contains(out[i:], "»>Pause<«") {
+		t.Errorf("the notice's pause is not in the realm's language (German):\n%s", out[i:])
+	}
+	if f.pos != len(f.keys) {
+		t.Errorf("%d keys unread: the session ended before the opening menu's Quit", len(f.keys)-f.pos)
+	}
+	w, _ := store.Load(cfg)
+	if w.FindByOwner("khan") == nil {
+		t.Error("the realm founded before the start was not kept")
+	}
+}
+
 // The closing pause is fitted to the terminal, not to the session wrapper: a
 // Russian caller on a CP437 door gets the English bar it can draw, and the same
 // caller on UTF-8 gets the translation.

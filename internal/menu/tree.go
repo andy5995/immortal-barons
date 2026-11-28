@@ -797,8 +797,8 @@ func gameMenuStatus(w *ctx) string {
 	lang := playerLang(w)
 	lines := []string{game.NameVersion()}
 	switch {
-	case w.Config.GameStartDate != "" && w.Today != "" && !w.Config.GameStarted(w.Today):
-		lines = append(lines, fmt.Sprintf(i18n.T(lang, "The game begins %s."), w.Config.GameStartDate))
+	case w.PendingStart() != "":
+		lines = append(lines, fmt.Sprintf(i18n.T(lang, "The game begins %s."), w.PendingStart()))
 	case w.StartedDate == "":
 		// No maintenance has run yet, so the game has not begun.
 	default:
