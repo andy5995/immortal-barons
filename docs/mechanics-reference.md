@@ -4640,6 +4640,15 @@ holds:
   7, per `docs/bre.doc`)
 - it was created and never played and the game is more than three days old
 
+IB follows that rule: `removeUnplayedEmpires` collects a human realm that was
+founded and never played, but only once the game's own day counter is past
+`UnplayedRealmGraceDays` (3). The age that counts is the game's, not the
+realm's, so a young game keeps every early signup, and a realm founded before a
+scheduled Game Start Date (which cannot be played until that date) is covered
+too, since the game's days count only from the launch. After the grace, a realm
+founded and never played is collected by the next maintenance that moves the
+game on a day.
+
 The slot in play is exempt. Two things follow. A crushed realm stays visible for
 the rest of the game day, which is why the loser's neighbors can still see what
 happened — IB's one-day husk (`removeDeadHusks`) is the same window. And

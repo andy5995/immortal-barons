@@ -50,6 +50,12 @@ const InvestRateRailTenths = 5
 
 // --- Other economy tunables ---
 const (
+	// UnplayedRealmGraceDays is how old the GAME must be before a realm that was
+	// created and never played is collected (BRE.OVR 0x007ed2: "created and never
+	// played and the game is more than three days old"). It is the game's age, not
+	// the realm's, so a young game keeps every early signup.
+	UnplayedRealmGraceDays = 3
+
 	// --- Technology (BRE-verified: BRE.OVR 0x33E85-0x34029 and 056d:1a07) ---
 	//
 	// Research is fifteen independent counters, of which only six do anything —

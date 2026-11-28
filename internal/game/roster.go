@@ -384,7 +384,8 @@ func (w *World) removeDeadHusks() {
 // so the same caller can build a fresh realm normally the next time they show
 // up — nothing is held against them.
 //
-// Governed by Config.IdleDaysRemove: 0 disables realm removal entirely.
+// Governed by Config.IdleDaysRemove: 0 disables realm removal entirely. Nothing
+// is collected until the game is more than UnplayedRealmGraceDays old.
 //
 // Only human realms are eligible: AI barons are driven by aiPlay and always have
 // LastPlayed set, and an empty Owner is what marks a baron as AI.
@@ -400,6 +401,11 @@ func (w *World) removeUnplayedEmpires() {
 	// Config.IdleDaysRemove to 0 ("never remove") keeps abandoned AND never-played
 	// realms alike.
 	if w.Config.IdleDaysRemove <= 0 {
+		return
+	}
+	// BRE does not reap never-played realms until the game itself is more than
+	// three days old, so a board's opening days leave every signup alone.
+	if w.GameDay <= UnplayedRealmGraceDays {
 		return
 	}
 	w.dropEmpires(func(e *Empire) bool {
