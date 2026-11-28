@@ -6,6 +6,8 @@ Immortal Barons ChangeLog
   * Replying to local mail asks whether it goes to everyone the message went
     to, the author only, or chosen realms
   * Initial mod support; see docs/mods.md
+  * Play is refused before a scheduled Game Start Date
+  * A realm never played is removed only once the game is over three days old
 
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset
