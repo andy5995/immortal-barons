@@ -152,8 +152,8 @@ func outOfTurns(s session.Session, w *ctx) Result {
 // many turns as the player wants to play (#70). Diplomacy and Change Production
 // are no longer pre-turn stops here — they stay reachable from the System menu.
 func runTurn(s session.Session, w *ctx) Result {
-	// Before a scheduled start nobody plays: BRE refuses the same way. The caller
-	// goes back to the opening menu, not out of the game.
+	// Before a scheduled start nobody plays. The caller goes back to the opening
+	// menu, not out of the game.
 	if begins := gameNotStarted(w); begins != "" {
 		ok(s, "The game has not started yet; it begins %s.", begins)
 		return Stay
@@ -432,14 +432,9 @@ func runTurn(s session.Session, w *ctx) Result {
 }
 
 // gameNotStarted returns the scheduled start date while the game has not begun,
-// and "" once it has (or when no start was scheduled). It answers by the same
-// test as the opening menu's header, so the two never disagree.
+// and "" once it has (or when no start was scheduled).
 func gameNotStarted(w *ctx) string {
-	begins := ""
-	w.Read(func() {
-		if w.Config.GameStartDate != "" && w.Today != "" && !w.Config.GameStarted(w.Today) {
-			begins = w.Config.GameStartDate
-		}
-	})
+	var begins string
+	w.Read(func() { begins = w.PendingStart() })
 	return begins
 }

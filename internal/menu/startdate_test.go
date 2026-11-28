@@ -27,8 +27,9 @@ func TestPlayRefusedBeforeScheduledStart(t *testing.T) {
 	}
 }
 
-// From the start date the same Play is not refused.
-func TestPlayAllowedOnStartDate(t *testing.T) {
+// From the start date the game counts as started, and with no start date it
+// always has.
+func TestGameNotStartedOnStartDate(t *testing.T) {
 	w := newWorld()
 	w.Config.GameStartDate = "2026-07-03"
 	if got := gameNotStarted(w); got != "" {
