@@ -6,6 +6,10 @@ Immortal Barons ChangeLog
   * Replying to local mail asks whether it goes to everyone the message went
     to, the author only, or chosen realms
   * Initial mod support; see docs/mods.md
+  * AI barons make at most three local attacks a day
+  * A returning force brings home no more units than it sent
+  * A pirate raid that takes nothing grants its faction no land and gives no
+    chance of another raid that turn
 
 2026-11-11 (v0.2.9)
   * Updating from v0.1.0 or later needs no game reset
