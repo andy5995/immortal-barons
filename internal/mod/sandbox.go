@@ -71,6 +71,9 @@ func clean(s string) string {
 	return b.String()
 }
 
+// shownValue is a value a mod file gave, as an error may print it.
+func shownValue(v any) string { return clean(truncate(fmt.Sprint(v), maxShown)) }
+
 // Clean is clean for a screen outside this package that shows what a mod said.
 func Clean(s string) string { return clean(s) }
 

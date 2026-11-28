@@ -78,7 +78,7 @@ func readRoll(v any) (game.Roll, error) {
 	}
 	n, ok := wholes(v, 3)
 	if !ok {
-		return game.Roll{}, fmt.Errorf("want a whole number or [pct, up, down], got %v", v)
+		return game.Roll{}, fmt.Errorf("want a whole number or [pct, up, down], got %s", shownValue(v))
 	}
 	return game.Roll{Pct: n[0], Up: n[1], Down: n[2]}, nil
 }
@@ -87,7 +87,7 @@ func readRoll(v any) (game.Roll, error) {
 func readFraction(v any) (game.Fraction, error) {
 	n, ok := wholes(v, 2)
 	if !ok {
-		return game.Fraction{}, fmt.Errorf("want [num, den], got %v", v)
+		return game.Fraction{}, fmt.Errorf("want [num, den], got %s", shownValue(v))
 	}
 	return game.Fraction{Num: n[0], Den: n[1]}, nil
 }

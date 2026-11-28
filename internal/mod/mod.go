@@ -171,7 +171,7 @@ func number(v any) (float64, error) {
 	case float64:
 		return n, nil
 	}
-	return 0, fmt.Errorf("want a number, got %v", v)
+	return 0, fmt.Errorf("want a number, got %s", shownValue(v))
 }
 
 // fixed reads v as a count of 1/scale units, refusing a value with more
@@ -198,7 +198,7 @@ func fixed(v any, scale int64) (int64, error) {
 func whole(v any) (int, error) {
 	n, ok := v.(int64)
 	if !ok {
-		return 0, fmt.Errorf("want a whole number, got %v", v)
+		return 0, fmt.Errorf("want a whole number, got %s", shownValue(v))
 	}
 	if n < math.MinInt32 || n > math.MaxInt32 {
 		return 0, fmt.Errorf("%d is out of range", n)

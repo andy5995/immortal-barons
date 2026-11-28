@@ -69,7 +69,7 @@ func (o *Option) check(id, file string) error {
 			return fmt.Errorf("%s: default is required", where)
 		case bool:
 		default:
-			return fmt.Errorf("%s: default of a bool must be true or false, not %v", where, d)
+			return fmt.Errorf("%s: default of a bool must be true or false, not %s", where, shownValue(d))
 		}
 	case OptionNumber:
 		if o.Min == nil || o.Max == nil {
@@ -86,7 +86,7 @@ func (o *Option) check(id, file string) error {
 				return fmt.Errorf("%s: default %d is outside %d to %d", where, d, *o.Min, *o.Max)
 			}
 		default:
-			return fmt.Errorf("%s: default of a number must be a whole number, not %v", where, d)
+			return fmt.Errorf("%s: default of a number must be a whole number, not %s", where, shownValue(d))
 		}
 	default:
 		return fmt.Errorf("%s: type %q is unknown; use %q or %q", where, o.Type, OptionBool, OptionNumber)

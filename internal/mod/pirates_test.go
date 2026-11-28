@@ -65,6 +65,9 @@ func TestPirateNameErrorIsCleaned(t *testing.T) {
 	if err == nil || strings.ContainsRune(err.Error(), 0x1b) {
 		t.Errorf("err = %q holds the escape character", err)
 	}
+	if _, err := hqMod(t, "[pirates]\ncap_jets = \"\\u001b[2J\"\n"); err == nil || strings.ContainsRune(err.Error(), 0x1b) {
+		t.Errorf("a wrongly typed value: err = %q, want an error without the escape character", err)
+	}
 	if _, err := hqMod(t, "[pirates]\nnames = [\"é\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\"]\n"); err != nil {
 		t.Errorf("a plain accented name was refused: %v", err)
 	}

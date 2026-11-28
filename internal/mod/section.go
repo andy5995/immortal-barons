@@ -18,7 +18,7 @@ import (
 func whole64(v any) (int64, error) {
 	n, ok := v.(int64)
 	if !ok {
-		return 0, fmt.Errorf("want a whole number, got %v", v)
+		return 0, fmt.Errorf("want a whole number, got %s", shownValue(v))
 	}
 	return n, nil
 }
