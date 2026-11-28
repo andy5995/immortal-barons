@@ -78,14 +78,39 @@ func TestRealmFoundedBeforeStartSurvivesTheOpeningDays(t *testing.T) {
 		t.Errorf("TurnsLeft = %d on launch day, want %d", e.TurnsLeft, cfg.TurnsPerDay)
 	}
 
-	for d := 11; w.GameDay <= UnplayedRealmGraceDays; d++ {
+	// Launched 07-10, so the game is at most three days old through 07-13.
+	// GameDay already reads 1 on the launch day, so it cannot be the clock.
+	for d := 11; d <= 13; d++ {
 		w.DailyMaintenance(fmt.Sprintf("2026-07-%02d", d))
-		if w.GameDay <= UnplayedRealmGraceDays && w.FindByOwner("early") == nil {
-			t.Fatalf("realm erased on game day %d, inside the grace", w.GameDay)
+		if w.FindByOwner("early") == nil {
+			t.Fatalf("realm erased on 2026-07-%02d, inside the grace", d)
 		}
 	}
-	w.DailyMaintenance("2026-07-20")
+	w.DailyMaintenance("2026-07-14")
 	if w.FindByOwner("early") != nil {
 		t.Error("an unplayed realm should be collected once the game is past the grace")
+	}
+}
+
+// A start date set on a board already running pauses it; a realm founded during
+// the pause gets its grace from that start date, not from the old StartedDate.
+func TestStartDateSetMidGameGivesTheGrace(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	w.StartedDate = "2026-06-01"
+	w.LastMaintDate = "2026-07-04"
+	w.GameDay = 30
+	w.Config.GameStartDate = "2026-07-10"
+	w.DailyMaintenance("2026-07-05") // paused
+	w.AddHuman("late", "Lateland")
+	for d := 10; d <= 13; d++ {
+		w.DailyMaintenance(fmt.Sprintf("2026-07-%02d", d))
+		if w.FindByOwner("late") == nil {
+			t.Fatalf("realm founded during the pause erased on 2026-07-%02d, inside the grace", d)
+		}
+	}
+	w.DailyMaintenance("2026-07-14")
+	if w.FindByOwner("late") != nil {
+		t.Error("an unplayed realm should be collected once the restarted game is past the grace")
 	}
 }

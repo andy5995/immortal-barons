@@ -385,7 +385,7 @@ func (w *World) removeDeadHusks() {
 // up — nothing is held against them.
 //
 // Governed by Config.IdleDaysRemove: 0 disables realm removal entirely. Nothing
-// is collected until the game is more than UnplayedRealmGraceDays old.
+// is collected until today is more than UnplayedRealmGraceDays past StartedDate.
 //
 // Only human realms are eligible: AI barons are driven by aiPlay and always have
 // LastPlayed set, and an empty Owner is what marks a baron as AI.
@@ -396,7 +396,7 @@ func (w *World) removeDeadHusks() {
 // the same reason this must only run on a day that actually advances, never on
 // the already-ran-today path, or a second login would erase a realm the player
 // had not had a chance to play yet.
-func (w *World) removeUnplayedEmpires() {
+func (w *World) removeUnplayedEmpires(today string) {
 	// One switch governs whether this board reaps realms at all: a sysop who sets
 	// Config.IdleDaysRemove to 0 ("never remove") keeps abandoned AND never-played
 	// realms alike.
@@ -404,8 +404,17 @@ func (w *World) removeUnplayedEmpires() {
 		return
 	}
 	// BRE does not reap never-played realms until the game itself is more than
-	// three days old, so a board's opening days leave every signup alone.
-	if w.GameDay <= UnplayedRealmGraceDays {
+	// three days old, so a board's opening days leave every signup alone. It
+	// counts calendar days from the start (BRE.OVR 0x7fd4: start + 3 < today), not
+	// GameDay, which already reads 1 on the launch day of a scheduled start. A
+	// start date set on a running board is later than StartedDate, and the realms
+	// founded while it was pending get their grace from it.
+	start := w.StartedDate
+	if w.Config.GameStartDate > start {
+		start = w.Config.GameStartDate
+	}
+	started, err := time.Parse("2006-01-02", start)
+	if err != nil || today <= started.AddDate(0, 0, UnplayedRealmGraceDays).Format("2006-01-02") {
 		return
 	}
 	w.dropEmpires(func(e *Empire) bool {

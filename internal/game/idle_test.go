@@ -6,11 +6,12 @@ import (
 )
 
 // In a game more than three days old, a caller who creates a realm and never
-// takes a turn is erased at the next maintenance, and may build a fresh realm normally afterward.
+// takes a turn is erased at the next maintenance, and may build a fresh realm
+// normally afterward.
 func TestUnplayedRealmErasedAtMaintenance(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-07-01"
-	w.GameDay = UnplayedRealmGraceDays + 1 // an established game
+	w.StartedDate = "2026-06-01" // an established game
 	e := w.AddHuman("caller", "Neverplayed")
 	if e.CreatedDay != w.GameDay {
 		t.Fatalf("setup: CreatedDay %d should be the current game day %d", e.CreatedDay, w.GameDay)
@@ -34,13 +35,14 @@ func TestUnplayedRealmSpared_WhileGameIsYoung(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-07-01"
 	w.AddHuman("caller", "Early")
-	for d := 2; w.GameDay <= UnplayedRealmGraceDays; d++ {
+	// The game starts 07-02; through 07-05 it is at most three days old.
+	for d := 2; d <= 5; d++ {
 		w.DailyMaintenance(fmt.Sprintf("2026-07-%02d", d))
-		if w.GameDay <= UnplayedRealmGraceDays && w.FindByOwner("caller") == nil {
-			t.Fatalf("realm erased on game day %d, inside the %d-day grace", w.GameDay, UnplayedRealmGraceDays)
+		if w.FindByOwner("caller") == nil {
+			t.Fatalf("realm erased on 2026-07-%02d, inside the grace (started %s)", d, w.StartedDate)
 		}
 	}
-	w.DailyMaintenance("2026-07-09")
+	w.DailyMaintenance("2026-07-06")
 	if w.FindByOwner("caller") != nil {
 		t.Error("once the game is past the grace, a never-played realm is collected")
 	}
@@ -52,7 +54,7 @@ func TestUnplayedRealmSpared_WhileGameIsYoung(t *testing.T) {
 func TestUnplayedRealmSurvivesTheDayItWasCreated(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-07-01"
-	w.GameDay = UnplayedRealmGraceDays + 1
+	w.StartedDate = "2026-06-01"
 	e := w.AddHuman("caller", "Fresh")
 	e.CreatedDay = w.GameDay + 1 // as if created after this maintenance advanced
 

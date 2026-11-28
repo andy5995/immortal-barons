@@ -38,8 +38,8 @@ func TestPostNewsLandsInNewsToday(t *testing.T) {
 func TestRollNewsRotatesBulletinAndNews(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
-	w.Pirates = nil                        // keep news deterministic: no random pirate-raid lines
-	w.GameDay = UnplayedRealmGraceDays + 1 // past the grace, as the test assumes
+	w.Pirates = nil              // keep news deterministic: no random pirate-raid lines
+	w.StartedDate = "2026-06-01" // past the unplayed-realm grace, as the test assumes
 	e := w.AddHuman("h", "Realm")
 	w.LastMaintDate = "2026-07-01"
 

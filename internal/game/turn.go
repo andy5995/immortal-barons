@@ -121,10 +121,9 @@ func (r *MaintReport) dedupeSteps() {
 // in on the same day run it once between them. The first call on a brand-new
 // world just records the date. Returns a MaintReport summarizing what it did.
 func (w *World) DailyMaintenance(today string) MaintReport {
-	// Before the configured Game Start Date, players may sign up (but not play)
-	// and the game
-	// does not advance. Pin the clock to today so it doesn't catch up when the
-	// start date arrives.
+	// Before the configured Game Start Date, players may sign up but not play,
+	// and the game does not advance. Pin the clock to today so it doesn't catch
+	// up when the start date arrives.
 	if !w.Config.GameStarted(today) {
 		w.LastMaintDate = today
 		return MaintReport{NotStarted: true}
@@ -251,7 +250,7 @@ func (w *World) advanceOneDay(today string, rep *MaintReport) {
 		// A caller who created a realm and never played a turn is erased; they may
 		// start fresh whenever they next log in.
 		before := len(w.Empires)
-		w.removeUnplayedEmpires()
+		w.removeUnplayedEmpires(today)
 		w.removeIdleEmpires(today) // abandoned realms fade out (#83)
 		if len(w.Empires) < before {
 			rep.step("Clearing away abandoned realms")
