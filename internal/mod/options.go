@@ -5,7 +5,6 @@ import (
 	"maps"
 	"slices"
 	"strings"
-	"unicode"
 
 	"go.starlark.net/starlark"
 
@@ -56,7 +55,7 @@ func (o *Option) check(id, file string) error {
 		return fmt.Errorf("%s: label is required", where)
 	}
 	for key, v := range map[string]string{"label": o.Label, "description": o.Description} {
-		if strings.ContainsFunc(v, unicode.IsControl) {
+		if hasUnsafe(v) {
 			return fmt.Errorf("%s: %s may not hold control characters", where, key)
 		}
 	}
@@ -70,7 +69,7 @@ func (o *Option) check(id, file string) error {
 			return fmt.Errorf("%s: default is required", where)
 		case bool:
 		default:
-			return fmt.Errorf("%s: default of a bool must be true or false, not %v", where, d)
+			return fmt.Errorf("%s: default of a bool must be true or false, not %s", where, shownValue(d))
 		}
 	case OptionNumber:
 		if o.Min == nil || o.Max == nil {
@@ -87,7 +86,7 @@ func (o *Option) check(id, file string) error {
 				return fmt.Errorf("%s: default %d is outside %d to %d", where, d, *o.Min, *o.Max)
 			}
 		default:
-			return fmt.Errorf("%s: default of a number must be a whole number, not %v", where, d)
+			return fmt.Errorf("%s: default of a number must be a whole number, not %s", where, shownValue(d))
 		}
 	default:
 		return fmt.Errorf("%s: type %q is unknown; use %q or %q", where, o.Type, OptionBool, OptionNumber)
@@ -282,6 +281,26 @@ func (m *Mod) resolveValues(v values) (values, error) {
 			out.HQ[key] = got
 		}
 	}
+	if v.Combat != nil {
+		out.Combat = map[string]any{}
+		for key, raw := range v.Combat {
+			got, err := m.optionValue(raw, "combat."+key)
+			if err != nil {
+				return values{}, err
+			}
+			out.Combat[key] = got
+		}
+	}
+	if v.Pirates != nil {
+		out.Pirates = map[string]any{}
+		for key, raw := range v.Pirates {
+			got, err := m.optionValue(raw, "pirates."+key)
+			if err != nil {
+				return values{}, err
+			}
+			out.Pirates[key] = got
+		}
+	}
 	if v.Regions != nil {
 		out.Regions = map[string]map[string]any{}
 		for region, fields := range v.Regions {
@@ -365,7 +384,13 @@ func (v values) apply(r *game.Rules, m *Mod) []error {
 		}
 		r.Units[g] = u
 	}
-	if err := v.applyHQ(r); err != nil {
+	if err := applyFields("hq", game.HQFields, v.HQ, &r.HQ); err != nil {
+		errs = append(errs, err)
+	}
+	if err := applyFields("combat", game.CombatFields, v.Combat, &r.Combat); err != nil {
+		errs = append(errs, err)
+	}
+	if err := v.applyPirates(r); err != nil {
 		errs = append(errs, err)
 	}
 	if err := v.applyRegions(r); err != nil {

@@ -16,6 +16,7 @@ lists what it may say.
 | `label` | The name the Game Setup screen shows. Blank shows `name`. | optional |
 | `description` | A line saying what the mod does. | optional |
 | `options` | The [`[options.<id>]`](#options) tables the sysop may set at a reset. | optional |
+| `prefs` | The [`[prefs.<id>]`](#player-preferences) tables, yes/no choices each player makes for their own realm and the mod's scripts read. At most 8 per mod and 25 across the mods in a game. | optional |
 
 ### Options
 
@@ -30,6 +31,16 @@ Each `[options.<id>]` table takes these fields. See [Options](mods.md#options).
 | `min` | Lowest value a number option may take. | required for a number, refused for a bool |
 | `max` | Highest value a number option may take. | required for a number, refused for a bool |
 
+### Player preferences
+
+Each `[prefs.<id>]` table takes these fields. See [Player preferences](mods.md#player-preferences).
+
+| Field | Meaning | Needed |
+| --- | --- | --- |
+| `label` | The name on the player's Preferences menu, at most 40 characters. It is shown as written, not translated. | required |
+| `description` | A line saying what the preference changes, shown under the Preferences menu. At most 200 characters. | optional |
+| `default` | What a player who has made no choice gets: `true` or `false`. | required |
+
 ## values.toml
 
 These are the tables a `values.toml` may hold. Any other table or key is an error.
@@ -38,9 +49,11 @@ These are the tables a `values.toml` may hold. Any other table or key is an erro
 | --- | --- |
 | `units` | One `[units.<id>]` table per unit. List only what changes. |
 | `hq` | The one `[hq]` table. |
+| `combat` | The one `[combat]` table. |
+| `pirates` | The one `[pirates]` table. |
 | `regions` | One `[regions.<id>]` table per region type. |
 | `attacks` | One `[attacks.<kind>.target]` and one `[attacks.<kind>.attacker]` table per kind of attack. |
-| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
+| `when` | `[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.combat]`, `[when.<option>.pirates]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them. |
 
 ### Units
 
@@ -74,6 +87,65 @@ The `[hq]` table takes these keys.
 | `price_cap` | The price never rises past this, less its own random draw. At least `price_base`. | `price_base` to 1,000,000,000 |
 | `price_cap_jitter` | A random 0 up to one less than this is taken off the cap. Less than `price_cap`. | 0 to one less than `price_cap` |
 
+### Combat
+
+The `[combat]` table redefines what the sysop's Attack Rewards and Attack Damage levels mean, and what a winning same-planet attack pays. The sysop still chooses the level. Every key is a whole number. `capture_*` and `ip_capture_*` are percents of the defender's regions by Attack Rewards level, for a same-planet and an interplanetary attack. An interplanetary share is then scaled by the attack's type and, for an individual strike, doubled. `retreat_*` are percents of a side's own force it loses before it breaks off a same-planet battle, by Attack Damage level; an interplanetary battle's loss stays the attack type's own rate rescaled by the level.
+
+| Key | Meaning | Limits |
+| --- | --- | --- |
+| `capture_none` | Percent of the defender's regions a winning same-planet attack takes when Attack Rewards is None. | 0 to 100 |
+| `capture_low` | The same at Attack Rewards Low. | 0 to 100 |
+| `capture_medium` | The same at Attack Rewards Medium. | 0 to 100 |
+| `capture_high` | The same at Attack Rewards High. | 0 to 100 |
+| `ip_capture_none` | Percent of each defending realm's regions a winning interplanetary attack takes when Attack Rewards is None. It is then scaled by the attack's type. | 0 to 100 |
+| `ip_capture_low` | The same at Attack Rewards Low. | 0 to 100 |
+| `ip_capture_medium` | The same at Attack Rewards Medium. | 0 to 100 |
+| `ip_capture_high` | The same at Attack Rewards High. | 0 to 100 |
+| `retreat_none` | Percent of its own force a side loses in a same-planet battle before it breaks off, when Attack Damage is None. | 1 to 100 |
+| `retreat_low` | The same at Attack Damage Low. | 1 to 100 |
+| `retreat_medium` | The same at Attack Damage Medium. | 1 to 100 |
+| `retreat_high` | The same at Attack Damage High. | 1 to 100 |
+| `capture_floor` | The fewest regions a winning same-planet attack takes, up to all the defender holds. | 0 to 1,000,000 |
+| `score_win` | Score the attacker gains for each region an ordinary same-planet win captures. | 0 to 100,000 |
+| `score_crush` | The same when the capture takes every region the defender had. | 0 to 100,000 |
+
+### Pirates
+
+The `[pirates]` table changes what a pirate raid does, what a faction holds and starts with, and what a player's attack on a faction costs and wins. Every key but `names` is a whole number. These figures are in force on the board that resolves the raid or the attack, and a league plays one mod set. Which raids happen is the [pirate script](#pirate-script)'s business; with no script, `raid_chance_*` decide it.
+
+| Key | Meaning | Limits |
+| --- | --- | --- |
+| `raid_chance_out_of` | Faces of the die rolled for each raid attempt. A raid lands when a roll from 0 up to one less than this is at most the chance below. | 1 to 1,000 |
+| `raid_chance_base` | The chance, in that many faces, before a realm's size adds to it. | 0 to 1,000 |
+| `raid_chance_cap` | The chance never rises past this, however large the realm. | 0 to 1,000 |
+| `raid_regions_per_step` | Regions a realm needs for each extra face of chance. | 1 to 1,000,000 |
+| `raid_take_divisor` | A raid takes this fraction of the holding it hits: 1 over this. 1 takes all of it. | 1 to 1,000,000 |
+| `raid_take_cap` | A raid takes at most this much, plus a random 0 up to one less than `raid_take_cap_jitter`. | 0 to 1,000,000,000 |
+| `raid_take_cap_jitter` | The random part of that cap. 1 makes the cap exact. | 1 to 1,000,000,000 |
+| `raid_keep_multiple` | The faction banks this many times what the realm loses. 1 banks exactly what was taken, 0 destroys it. | 0 to 1,000 |
+| `raid_land_max` | A raid grants its faction a random 0 up to one less than this many regions. 0 grants none. | 0 to 1,000 |
+| `cap_gold` | The most gold a faction holds. | 0 to 1,000,000,000,000 |
+| `cap_regions` | The most regions a faction holds. | 0 to 1,000,000 |
+| `cap_agents` | The most agents a faction holds. | 0 to 1,000,000,000 |
+| `cap_troopers` | The most troopers a faction holds. | 0 to 1,000,000,000 |
+| `cap_jets` | The most jets a faction holds. | 0 to 1,000,000,000 |
+| `cap_turrets` | The most turrets a faction holds. | 0 to 1,000,000,000 |
+| `cap_tanks` | The most tanks a faction holds. | 0 to 1,000,000,000 |
+| `seed_troopers` | At a reset each faction starts with a random 0 up to one less than this many troopers, held to its cap. | 0 to 1,000,000,000 |
+| `seed_tanks` | The same for tanks. | 0 to 1,000,000,000 |
+| `seed_jets` | The same for jets. | 0 to 1,000,000,000 |
+| `seed_turrets` | The same for turrets. | 0 to 1,000,000,000 |
+| `seed_regions` | The same for regions. | 0 to 1,000,000 |
+| `seed_gold_base` | Gold every faction starts with, before the random part. | 0 to 1,000,000,000 |
+| `seed_gold_roll` | Two random numbers, each from 0 up to one less than this, are multiplied and added to the starting gold. Most products are small, so a rich faction is rare. | 0 to 1,000,000 |
+| `attacker_loss_min` | When a player attacks a faction, the player loses this percent of what it committed, plus a random 0 up to one less than `attacker_loss_jitter`, win or lose. | 0 to 100 |
+| `attacker_loss_jitter` | The random part of that loss. The minimum plus this, less one, stays at 100 or less. | 1 to 100 |
+| `defender_loss_min` | The faction loses this percent of its troopers, jets and tanks, plus a random 0 up to one less than `defender_loss_jitter`, win or lose. | 0 to 100 |
+| `defender_loss_jitter` | The random part of that loss. The minimum plus this, less one, stays at 100 or less. | 1 to 100 |
+| `reclaim_divisor_main` | A winning attack takes 1 over this of the faction's gold, regions, agents and troopers. 1 takes all of them. | 1 to 1,000 |
+| `reclaim_divisor_armour` | The same for its jets, turrets and tanks. | 1 to 1,000 |
+| `names` | The nine faction names, in slot order, as a list of text. They are only shown on screens: colors and rules go by slot. Each is 1 to 20 characters a CP437 door can show, with no control or format characters, no space at either end, and none repeated. | exactly 9 names |
+
 ### Regions
 
 The region types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `urban`, `industrial`, `technology`, `waste`. Each `[regions.<id>]` table takes these keys, all whole numbers. Every type takes every key. Waste is ruined land: it may change only the keys marked in the last column, and every other key must stay 0.
@@ -97,15 +169,15 @@ The region types are `coastal`, `mountain`, `desert`, `river`, `agricultural`, `
 
 ### Attacks
 
-The kinds of attack are `nuclear`, `chemical`, `biological`, `conventional.won`, `conventional.lost`, `ip.attack.won`, `ip.attack.lost`, `ip.nuclear`, `ip.chemical`, `sabre.intelligence`, `sabre.people`, `sabre.military_bases`, `sabre.airbases`, `sabre.regions`, `sabre.food`. Each kind has two tables, except the missile kinds below. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes. The two `conventional` kinds do not replace the same-planet attack's battle, its capture or its losses, which are not moddable: they add to it, `conventional.won` when the attacker wins and `conventional.lost` when it is repelled, and are empty in the base game. The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack of any type, Group Attack included, that fought a battle; the resolver's battle, capture and losses are not moddable. The `target` table runs on the defending board after the battle, and a `capture` there is carried home with the battle's own. The `attacker` table runs on the attacker's board when the result comes home, on each realm of that board that contributed, as if it had attacked alone; it cannot `capture`. The `ip.nuclear`, `ip.chemical` and `sabre.*` kinds are missiles that arrive from another board and act on the receiving board, so only their `target` table is used: a non-zero `attacker` table or a `capture` on them is an error.
+The kinds of attack are `nuclear`, `chemical`, `biological`, `conventional.won`, `conventional.lost`, `ip.attack.won`, `ip.attack.lost`, `ip.nuclear`, `ip.chemical`, `sabre.intelligence`, `sabre.people`, `sabre.military_bases`, `sabre.airbases`, `sabre.regions`, `sabre.food`. Each kind has two tables, except the missile kinds below. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes. The two `conventional` kinds do not replace the same-planet attack's battle, its capture or its losses, whose figures are set in `[combat]`: they add to it, `conventional.won` when the attacker wins and `conventional.lost` when it is repelled, and are empty in the base game. The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack of any type, Group Attack included, that fought a battle; the resolver's battle, capture and losses are not set here; `[combat]` changes the capture share. The `target` table runs on the defending board after the battle, and a `capture_regions` there is carried home with the battle's own. The `attacker` table runs on the attacker's board when the result comes home, on each realm of that board that contributed, as if it had attacked alone; it cannot `capture_regions`. The one part of an `ip.attack` `attacker` table that runs on the defending board is its unit capture, since that is where the arriving force is. The `ip.nuclear`, `ip.chemical` and `sabre.*` kinds are missiles that arrive from another board and act on the receiving board, so only their `target` table is used: a non-zero `attacker` table or a `capture_regions` on them is an error.
 
-A key marked as a percent takes a whole number, a flat percent, or `[pct, up, down]`: the percent drawn as `pct + Random(up) - Random(down)` and held to 0 to 100. A draw is made only when `up` or `down` is above 0. Every `pct`, `up` and `down` is 0 to 100. `morale` and `support` take `[num, den]`, with `den` 1 to 1,000 and `num` 0 to `den`. In the attacker's table, `capture` gives the target that share of the attacker's regions.
+A key marked as a percent takes a whole number, a flat percent, or `[pct, up, down]`: the percent drawn as `pct + Random(up) - Random(down)` and held to 0 to 100. A draw is made only when `up` or `down` is above 0. Every `pct`, `up` and `down` is 0 to 100. `morale` and `support` take `[num, den]`, with `den` 1 to 1,000 and `num` 0 to `den`. In the attacker's table, `capture_regions` gives the target that share of the attacker's regions. The `capture_<unit>` and `capture_random` keys give the other side that share of the military units still alive after the battle's kills, and only the four battle kinds (`conventional.won`, `conventional.lost`, `ip.attack.won`, `ip.attack.lost`) may set them or `capture_from_stock`. An attack sends no turrets or carriers, so an `attacker` table cannot capture them. On an interplanetary win the captured units travel home with the result and are shared among the contributors like the regions.
 
 | Key | Meaning | Form |
 | --- | --- | --- |
 | `waste` | Percent of the realm's regions turned to waste. The regions stay on its books but earn nothing until cleaned. | percent |
 | `destroy` | Percent of the realm's regions destroyed outright. | percent |
-| `capture` | Percent of the realm's regions taken by the other side, as land it types at the start of its next turn. | percent |
+| `capture_regions` | Percent of the realm's regions taken by the other side, as land it types at the start of its next turn. | percent |
 | `people` | Percent of the realm's people killed. | percent |
 | `kill_trooper` | Percent of the realm's Troopers killed. | percent |
 | `kill_jet` | Percent of the realm's Jets killed. | percent |
@@ -114,6 +186,14 @@ A key marked as a percent takes a whole number, a flat percent, or `[pct, up, do
 | `kill_tank` | Percent of the realm's Tanks killed. | percent |
 | `kill_carrier` | Percent of the realm's Carriers killed. | percent |
 | `kill_agent` | Percent of the realm's Agents killed. | percent |
+| `capture_trooper` | Percent of the realm's Troopers still alive after the battle and the kills that the other side takes. Only a battle can capture units. In a `target` table the defender's base is the units that stood in the defense and, for the troops an ally sent, what survived of that detachment; in an `attacker` table it is the survivors of the force the attacker sent. | percent |
+| `capture_jet` | Percent of the realm's Jets still alive after the battle and the kills that the other side takes. Only a battle can capture units. In a `target` table the defender's base is the units that stood in the defense and, for the troops an ally sent, what survived of that detachment; in an `attacker` table it is the survivors of the force the attacker sent. | percent |
+| `capture_turret` | Percent of the realm's Turrets still alive after the battle and the kills that the other side takes. Only a battle can capture units. In a `target` table the defender's base is the units that stood in the defense and, for the troops an ally sent, what survived of that detachment; in an `attacker` table it is the survivors of the force the attacker sent. | percent |
+| `capture_bomber` | Percent of the realm's Bombers still alive after the battle and the kills that the other side takes. Only a battle can capture units. In a `target` table the defender's base is the units that stood in the defense and, for the troops an ally sent, what survived of that detachment; in an `attacker` table it is the survivors of the force the attacker sent. | percent |
+| `capture_tank` | Percent of the realm's Tanks still alive after the battle and the kills that the other side takes. Only a battle can capture units. In a `target` table the defender's base is the units that stood in the defense and, for the troops an ally sent, what survived of that detachment; in an `attacker` table it is the survivors of the force the attacker sent. | percent |
+| `capture_carrier` | Percent of the realm's Carriers still alive after the battle and the kills that the other side takes. Only a battle can capture units. In a `target` table the defender's base is the units that stood in the defense and, for the troops an ally sent, what survived of that detachment; in an `attacker` table it is the survivors of the force the attacker sent. | percent |
+| `capture_random` | Percent of all the surviving units together, drawn at random across the unit types, that the other side takes. The base is the same as for `capture_<unit>`, after those are taken. | percent |
+| `capture_from_stock` | In a `target` table, 1 widens the base of a defender's unit capture from the units that stood in the defense to its whole remaining stock of each unit (including bombers and carriers). Not allowed in an `attacker` table. | 0 or 1 |
 | `food` | Percent of the realm's food destroyed. | percent |
 | `morale` | The part of the realm's morale that is kept, as `[num, den]`. `[1, 1]` leaves it alone. | `[num, den]` |
 | `support` | The part of the realm's popular support that is kept, as `[num, den]`. `[1, 1]` leaves it alone. | `[num, den]` |
@@ -133,6 +213,7 @@ A script is a [Starlark](https://github.com/bazelbuild/starlark) file. The rules
 | `regions` | number | How many regions the realm has. |
 | `gold` | number | The realm's gold in hand. |
 | `troopers`, `jets`, `turrets`, `tanks`, `agents` | number | How many of each unit the realm holds. |
+| `pref` | function | `realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error. |
 | `market` | struct | What the realm has for sale on the Trading Market, as a struct with the same unit names: `realm.market.jets`. |
 
 `factions` is a frozen list with one struct per pirate faction, in slot order:
@@ -152,6 +233,8 @@ A script is a [Starlark](https://github.com/bazelbuild/starlark) file. The rules
 | `faction` | number | The `slot` of the faction that raids. Required. |
 | `take` | text | What the raid takes: one of `troopers`, `jets`, `turrets`, `tanks`, `gold`, `agents`. Required. |
 | `market` | bool | `True` takes from the realm's Trading Market listing instead of what it holds. Optional. Gold is not sold there, so `gold` cannot be taken that way. |
+| `share` | number | Percent of a normal raid's take the raid carries off, 0 to 100. 0 takes nothing. Left out, the raid takes a normal share. Optional. |
+| `land` | number | Regions the raid grants its faction, 0 to 1,000. Held to `cap_regions` in `[pirates]`. A raid that names it grants it even when it took nothing. Left out, a raid that took something grants the usual random amount (`raid_land_max`) and one that took nothing grants none. Optional. |
 
 ### Region script
 
@@ -167,6 +250,7 @@ A script is a [Starlark](https://github.com/bazelbuild/starlark) file. The rules
 | `support` | number | The realm's popular support. |
 | `tax` | number | The realm's tax rate, in percent. |
 | `turns_played` | number | How many turns the realm has played. |
+| `pref` | function | `realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error. |
 
 `row` is a read-only struct of the type's figures:
 

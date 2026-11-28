@@ -13,7 +13,6 @@ import (
 
 	"go.starlark.net/starlark"
 	"go.starlark.net/starlarkstruct"
-	"go.starlark.net/syntax"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -35,8 +34,8 @@ const ScriptSteps = 1_000_000
 // spoil's own label, lowercased ("jets", "gold").
 func spoilName(s game.PirateSpoil) string { return strings.ToLower(s.Label()) }
 
-// viewKey holds the current call's game.PirateView on the thread, for the
-// rand and day builtins.
+// viewKey holds the current call's callContext on the thread, for the rand and
+// day builtins.
 const viewKey = "ib.view"
 
 // predeclared are the names a script sees besides Starlark's own built-ins.
@@ -49,24 +48,28 @@ var predeclared = starlark.StringDict{
 		if err := starlark.UnpackPositionalArgs(b.Name(), args, kwargs, 1, &n); err != nil {
 			return nil, err
 		}
-		v, ok := th.Local(viewKey).(*game.PirateView)
+		c, ok := th.Local(viewKey).(*callContext)
 		if !ok {
 			return nil, errors.New("rand may be called only inside raid()")
 		}
 		if n < 1 {
 			return nil, fmt.Errorf("rand(%d): n must be at least 1", n)
 		}
-		return starlark.MakeInt(v.Rand(n)), nil
+		r, err := c.rand(n)
+		if err != nil {
+			return nil, fmt.Errorf("rand: %v", err)
+		}
+		return starlark.MakeInt(r), nil
 	}),
 	"day": starlark.NewBuiltin("day", func(th *starlark.Thread, b *starlark.Builtin, args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 		if err := starlark.UnpackPositionalArgs(b.Name(), args, kwargs, 0); err != nil {
 			return nil, err
 		}
-		v, ok := th.Local(viewKey).(*game.PirateView)
+		c, ok := th.Local(viewKey).(*callContext)
 		if !ok {
 			return nil, errors.New("day may be called only inside raid()")
 		}
-		return starlark.MakeInt(v.Day), nil
+		return starlark.MakeInt(c.day), nil
 	}),
 }
 
@@ -87,7 +90,8 @@ func predeclaredFor(options *optionValues) starlark.StringDict {
 type pirateScript struct {
 	mod, hash string
 	file      string // for messages: the mod folder's pirates.star
-	raid      *starlark.Function
+	prefs     *prefValues
+	ref       *scriptRef
 }
 
 // newThread is a thread for one run, with the step cap set and print
@@ -98,17 +102,19 @@ func newThread(name string) *starlark.Thread {
 	return th
 }
 
+// execScript runs src's top level in the worker. scriptFileOptions leaves
+// Starlark's defaults as they are: no while loops, no recursion, and no load(),
+// since the thread has no loader.
+func execScript(file, src string, pre starlark.StringDict) (starlark.StringDict, error) {
+	return starlark.ExecFileOptions(scriptFileOptions, newThread(file), file, src, pre)
+}
+
 // compilePirates runs src's top level and checks that it defines raid with two
-// parameters. Starlark's defaults stay on: no while loops, no recursion, and
-// no load(), since the thread has no loader.
+// parameters. It runs in the worker.
 func compilePirates(file, src string, options *optionValues) (*starlark.Function, error) {
-	globals, err := starlark.ExecFileOptions(&syntax.FileOptions{}, newThread(file), file, src, predeclaredFor(options))
-	var ee *starlark.EvalError
-	if errors.As(err, &ee) {
-		return nil, fmt.Errorf("%s: %w", file, scriptError(err))
-	}
+	globals, err := execScript(file, src, predeclaredFor(options))
 	if err != nil {
-		return nil, err // a syntax error, which names the file already
+		return nil, scriptFailure(file, err)
 	}
 	fn, ok := globals["raid"].(*starlark.Function)
 	if !ok {
@@ -120,8 +126,20 @@ func compilePirates(file, src string, options *optionValues) (*starlark.Function
 	return fn, nil
 }
 
+// scriptFailure is err from compiling file, with the file's name on a runtime
+// error. A syntax error names the file already.
+func scriptFailure(file string, err error) error {
+	var ee *starlark.EvalError
+	if errors.As(err, &ee) {
+		return fmt.Errorf("%s: %w", file, scriptError(err))
+	}
+	return errors.New(clean(err.Error()))
+}
+
 // scriptError puts the script's line in a Starlark runtime error, which
-// otherwise names only what went wrong.
+// otherwise names only what went wrong. The text is cleaned: it can hold a
+// string the script chose, such as a fail() message, and it is printed on the
+// sysop's terminal and written to a log.
 func scriptError(err error) error {
 	var ee *starlark.EvalError
 	if errors.As(err, &ee) {
@@ -129,22 +147,26 @@ func scriptError(err error) error {
 		// built-in has no line; the first frame with one is the script's.
 		for i := range len(ee.CallStack) {
 			if line := ee.CallStack.At(i).Pos.Line; line > 0 {
-				return fmt.Errorf("line %d: %s", line, ee.Msg)
+				return fmt.Errorf("line %d: %s", line, clean(ee.Msg))
 			}
 		}
+		return errors.New(clean(ee.Msg))
 	}
-	return err
+	return errors.New(clean(err.Error()))
 }
 
-// Raid calls the script's raid() with v and reads its answer.
+// Raid asks the script's raid() about v, in a worker, and reads its answer.
 func (s *pirateScript) Raid(v game.PirateView) ([]game.PirateOrder, error) {
-	th := newThread(s.file)
-	th.SetLocal(viewKey, &v)
-	res, err := starlark.Call(th, s.raid, starlark.Tuple{realmValue(v), factionsValue(v)}, nil)
-	if err != nil {
-		return nil, scriptError(err)
+	call := wireMsg{
+		Op: "call", ID: s.ref.id,
+		Pirate: &wirePirate{Day: v.Day, Realm: v.Realm, Factions: v.Factions},
 	}
-	return readOrders(res)
+	call.PrefMod, call.Prefs = prefsToWire(s.prefs)
+	res, err := callWorker(s.ref, call, func(n int) (int, error) { return v.Rand(n), nil })
+	if err != nil {
+		return nil, err
+	}
+	return res.Orders, nil
 }
 
 // ScriptWarnings is how many different reasons one script's failures are
@@ -168,11 +190,19 @@ func SetWarnOutput(w io.Writer) {
 	warnOut = w
 }
 
+// ResetWarnings forgets which script failures were already reported, so a new
+// run in the same process, such as a second simulation, reports them again.
+func ResetWarnings() {
+	warnMu.Lock()
+	defer warnMu.Unlock()
+	warned = map[string]map[string]bool{}
+}
+
 // Warn reports msg about the mods in play where SetWarnOutput says.
 func Warn(msg string) {
 	warnMu.Lock()
 	defer warnMu.Unlock()
-	fmt.Fprintln(warnOut, "immortal-barons: "+msg)
+	fmt.Fprintln(warnOut, "immortal-barons: "+clean(msg))
 }
 
 // warnScript reports that script file of mod failed with err, and what the
@@ -189,6 +219,10 @@ func warnScript(id, mod, file string, err error, instead string) {
 		seen = map[string]bool{}
 		warned[id] = seen
 	}
+	if errors.Is(err, errScriptSkipped) {
+		return
+	}
+	err = errors.New(clean(err.Error()))
 	reason := err.Error()
 	switch {
 	case seen[reason] || len(seen) > ScriptWarnings:
@@ -216,12 +250,13 @@ func holdings(h game.PirateHoldings) starlark.StringDict {
 }
 
 // realmValue is raid()'s first argument: a read-only struct.
-func realmValue(v game.PirateView) starlark.Value {
+func realmValue(v game.PirateView, prefs *prefValues) starlark.Value {
 	r := v.Realm
 	d := holdings(r.Units)
 	d["name"] = starlark.String(r.Name)
 	d["regions"] = starlark.MakeInt(r.Regions)
 	d["gold"] = starlark.MakeInt64(r.Gold)
+	d["pref"] = prefs.builtin(r.ModPrefs)
 	d["market"] = starlarkstruct.FromStringDict(starlarkstruct.Default, holdings(r.Market))
 	return starlarkstruct.FromStringDict(starlarkstruct.Default, d)
 }
@@ -244,7 +279,8 @@ func factionsValue(v game.PirateView) starlark.Value {
 }
 
 // readOrders reads raid()'s answer: a list of dicts such as
-// {"faction": 0, "take": "jets", "market": False}. "market" may be left out.
+// {"faction": 0, "take": "jets", "market": False}. "market", "share" and "land"
+// may be left out.
 // Whether each order is one the game allows is game.askPirateBrain's check.
 func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 	list, ok := res.(*starlark.List)
@@ -270,7 +306,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 			case "faction":
 				n, err := starlark.AsInt32(kv[1])
 				if err != nil {
-					return nil, fmt.Errorf("raid %d: faction: %v", i, err)
+					return nil, fmt.Errorf("raid %d: faction: %s", i, clean(truncate(err.Error(), 100)))
 				}
 				o.Slot, haveFaction = n, true
 			case "take":
@@ -282,7 +318,7 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 					for _, s := range spoils {
 						names = append(names, spoilName(s))
 					}
-					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, kv[1], strings.Join(names, ", "))
+					return nil, fmt.Errorf("raid %d: take %s is not one of %s", i, show(kv[1]), strings.Join(names, ", "))
 				}
 				o.Spoil, haveTake = spoils[k], true
 			case "market":
@@ -291,37 +327,38 @@ func readOrders(res starlark.Value) ([]game.PirateOrder, error) {
 					return nil, fmt.Errorf("raid %d: market must be True or False", i)
 				}
 				o.FromMarket = bool(b)
+			case "share", "land":
+				n, err := starlark.AsInt32(kv[1])
+				if err != nil {
+					return nil, fmt.Errorf("raid %d: %s: %s", i, key, clean(truncate(err.Error(), 100)))
+				}
+				if key == "share" {
+					o.Share = &n
+				} else {
+					o.Land = &n
+				}
 			default:
-				return nil, fmt.Errorf("raid %d: unknown key %s", i, kv[0])
+				return nil, fmt.Errorf("raid %d: unknown key %s", i, show(kv[0]))
 			}
 		}
 		if !haveFaction || !haveTake {
 			return nil, fmt.Errorf("raid %d: needs both \"faction\" and \"take\"", i)
+		}
+		if err := game.CheckPirateOrder(i, o); err != nil {
+			return nil, err
 		}
 		orders = append(orders, o)
 	}
 	return orders, nil
 }
 
-// newPirateScript compiles a mod's pirates.star with its chosen options.
+// newPirateScript checks a mod's pirates.star compiles with its chosen options,
+// once per process for a given file, source and option values (see validated).
 func newPirateScript(path, name, hash, src string, options *optionValues) (*pirateScript, error) {
 	file := filepath.Join(path, PiratesFile)
-	key := file + "\x00" + src + options.key()
-	if fn, ok := compiled.Load(key); ok {
-		return &pirateScript{mod: name, hash: hash, file: file, raid: fn.(*starlark.Function)}, nil
-	}
-	fn, err := compilePirates(file, src, options)
-	if err != nil {
+	ref := newScriptRef(kindPirates, file, src, options).named(name, hash, PiratesFile)
+	if err := ref.validate(); err != nil {
 		return nil, err
 	}
-	compiled.Store(key, fn)
-	return &pirateScript{mod: name, hash: hash, file: file, raid: fn}, nil
+	return &pirateScript{mod: name, hash: hash, file: file, ref: ref}, nil
 }
-
-// compiled holds each script compiled once per process, keyed by its file and
-// source. A script's top level may run up to ScriptSteps, and the settings
-// editor reads the whole mod list again on every change to it. A game in
-// progress reads its mods once, and again only when another process has reset
-// the world (store's FileStore). A script's globals are frozen once run, so one
-// compiled function is safe to share.
-var compiled sync.Map

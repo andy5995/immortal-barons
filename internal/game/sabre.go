@@ -70,7 +70,7 @@ func (w *World) sabreDamage(e *Empire, eff SabreEffect) []Msg {
 	if !ok {
 		return nil
 	}
-	l := w.applySet(w.attackEffects(row.kind).Target, attackKindOf(row.kind), e, nil, false)
+	l := w.applySet(w.attackEffects(row.kind).Target, attackKindOf(row.kind), e, nil, false, nil)
 	return l.parts(attackKindOf(row.kind), false)
 }
 

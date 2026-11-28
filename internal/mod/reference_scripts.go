@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // The script half of docs/mod-reference.md: what each entry point is given and
@@ -48,6 +49,7 @@ func pirateRealmFields() []scriptField {
 		{[]string{"regions"}, "number", "How many regions the realm has."},
 		{[]string{"gold"}, "number", "The realm's gold in hand."},
 		{spoilNames(), "number", "How many of each unit the realm holds."},
+		{[]string{"pref"}, "function", "`realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error."},
 		{[]string{"market"}, "struct", "What the realm has for sale on the Trading Market, as a struct with the same unit names: `realm.market.jets`."},
 	}
 }
@@ -72,6 +74,7 @@ func regionRealmFields() []scriptField {
 		{[]string{"support"}, "number", "The realm's popular support."},
 		{[]string{"tax"}, "number", "The realm's tax rate, in percent."},
 		{[]string{"turns_played"}, "number", "How many turns the realm has played."},
+		{[]string{"pref"}, "function", "`realm.pref(id)` is `True` or `False`: the player's answer to a preference the mod declares, or its default when they have made none. An id the mod does not declare is an error."},
 	}
 }
 
@@ -114,7 +117,9 @@ func writeScripts(b *strings.Builder) {
 	b.WriteString("| Key | Type | Meaning |\n| --- | --- | --- |\n")
 	b.WriteString("| `faction` | number | The `slot` of the faction that raids. Required. |\n")
 	b.WriteString("| `take` | text | What the raid takes: one of " + codeList(spoils) + ". Required. |\n")
-	b.WriteString("| `market` | bool | `True` takes from the realm's Trading Market listing instead of what it holds. Optional. Gold is not sold there, so `gold` cannot be taken that way. |\n\n")
+	b.WriteString("| `market` | bool | `True` takes from the realm's Trading Market listing instead of what it holds. Optional. Gold is not sold there, so `gold` cannot be taken that way. |\n")
+	fmt.Fprintf(b, "| `share` | number | Percent of a normal raid's take the raid carries off, 0 to %d. 0 takes nothing. Left out, the raid takes a normal share. Optional. |\n", game.ModPirateShareMax)
+	fmt.Fprintf(b, "| `land` | number | Regions the raid grants its faction, 0 to %s. Held to `cap_regions` in `[pirates]`. A raid that names it grants it even when it took nothing. Left out, a raid that took something grants the usual random amount (`raid_land_max`) and one that took nothing grants none. Optional. |\n\n", numfmt.Comma(game.ModPirateRaidLandMax))
 
 	b.WriteString("### Region script\n\n`regions/<type>.star` defines `region(realm, row)`. It is called for one realm at a time, whenever the game needs the figures of the region type the file is named for. `realm` is a read-only struct:\n\n")
 	writeFieldTable(b, regionRealmFields())

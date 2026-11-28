@@ -2,6 +2,13 @@
 
 This page is for the BBS operator (the sysop). Players do not need to read it.
 
+**Mods with scripts run code on your machine. Read the
+[warning under Scripts](#scripts) before you install one.** The language gives a
+script no access to files, the network or other programs, so the realistic harm
+is to the game's availability (memory, CPU, a hang), not to your files. The
+limits that contain it were written by an LLM (Claude) and no human security
+expert has reviewed them. Install only mods whose scripts you trust or have read.
+
 A mod changes some of the numbers the game plays by. Without mods, the game
 plays the standard Immortal Barons rules. A game with a mod is a
 different game, and the Game Setup screen lists every mod in play and its
@@ -26,9 +33,13 @@ do, with comments in each file.
 - `-check-mod <dir>`: check one mod on its own, with the limits a reset uses,
   print what it changes, then exit. `<dir>` is a name in the `mods` folder or a
   path. See [Checking a mod](#checking-a-mod).
+- `-sim-mod <dir>`: play the mod against the base game in throwaway worlds of
+  computer barons and print how they differ, then exit. It takes `-sim-days`,
+  `-sim-seeds`, `-sim-realms`, `-sim-csv <file>` and `-mod-option <id>=<value>`.
+  See [Testing how a mod plays](#testing-how-a-mod-plays).
 - `-print-base-mod`: print every value a mod can change, as the game sets it
   without mods, in the form of a `values.toml`, then exit. The `[hq]`,
-  `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
+  `[combat]`, `[pirates]`, `[regions.<id>]` and `[attacks.<kind>.<side>]` sections are included. Copy
   the sections you want into your mod and change them.
 - `-reset`: start a new game after the settings editor. The editor starts from
   the default settings, which turn no mods on, so pick them again on its Mods
@@ -52,7 +63,8 @@ option.
 ## What a mod can change
 
 A mod can change the figures of each of the six military units, the
-HeadQuarters, and the figures of each region type. The
+HeadQuarters, what the Attack Rewards and Attack Damage levels mean, the
+figures of each region type, and the pirates. The
 [Mod Reference](mod-reference.md) lists every key with what it means and its
 limits. The units are `trooper`, `jet`, `turret`, `bomber`, `tank` and
 `carrier`; their keys are under
@@ -65,8 +77,9 @@ move go into an attack, every unit the realm holds defends (jets included,
 whether or not a carrier could move them), and a HeadQuarters raises the
 strength of each unit with an `hq_bonus`, which without mods is the tank alone,
 to 4.5/3.5 of its `offense` and `defense` when finished. Technology and morale scale the
-total as usual. Pirate raids and the help an alliance sends use their own
-figures, which `values.toml` does not change.
+total as usual. Pirate raids use the figures of the [`[pirates]`](#pirates)
+section, and the help an alliance sends its own, which `values.toml` does not
+change.
 
 The Maintenance Costs setting still applies to a mod's `upkeep`: None charges
 nothing, Low a quarter of it and High four times it.
@@ -90,6 +103,74 @@ build_per_turn = 10
 What interplanetary play does to a HeadQuarters is not changed by a mod: the
 interplanetary battle's own tank figures, the share a winning invasion takes,
 and what a Sabotage HQ agent takes. League mods use those same figures.
+
+### Combat
+
+The sysop chooses an Attack Rewards level and an Attack Damage level, each
+None, Low, Medium or High. The `[combat]` section in `values.toml` redefines
+what each level means, and the sysop still chooses the level. Every key is
+optional; see [Combat](mod-reference.md#combat) for the keys and limits.
+
+- `capture_none`, `capture_low`, `capture_medium` and `capture_high` are the
+  percent of the defender's regions a winning same-planet attack takes, by
+  Attack Rewards. `ip_capture_*` are the same for an interplanetary attack,
+  which has its own ladder in the base game.
+- `retreat_*` are the percent of its own force a side loses in a same-planet
+  battle before it breaks off, by Attack Damage.
+- `capture_floor` is the fewest regions a winning same-planet attack takes.
+- `score_win` and `score_crush` are the score for each region captured, in an
+  ordinary win and in a total conquest.
+
+Each level has its own key, so a mod that wants "5 points more than the base"
+writes each base value plus 5; `-print-base-mod` shows the base values. For
+example, a game where a High reward takes a third of a realm and a win pays
+more:
+
+```toml
+[combat]
+capture_high = 33
+score_win = 100
+```
+
+What an interplanetary battle loses stays the attack type's own rate, rescaled
+by the Attack Damage level, and an interplanetary attack's minimum capture
+stays 10 regions. A mod does not change either.
+
+### Pirates
+
+The `[pirates]` section in `values.toml` changes the pirates' numbers. Every key
+is optional, and all are whole numbers except `names`; see
+[Pirates](mod-reference.md#pirates) for the keys and limits.
+
+- `raid_chance_*` and `raid_regions_per_step` set how often a realm is raided:
+  a roll of `raid_chance_out_of` faces lands when it is at most the realm's
+  regions divided by `raid_regions_per_step`, plus `raid_chance_base`, held to
+  `raid_chance_cap`. A [pirate script](#pirate-raids) replaces this roll.
+- `raid_take_divisor`, `raid_take_cap` and `raid_take_cap_jitter` set how much
+  one raid carries off, `raid_keep_multiple` how many times that the faction
+  banks, and `raid_land_max` the regions it is granted.
+- `cap_*` are the most a faction holds of each thing, and `seed_*` what each
+  faction starts a game with. The starting hoard takes effect at a reset.
+- `attacker_loss_*` and `defender_loss_*` are the percent each side loses when a
+  player attacks a faction, and `reclaim_divisor_main` and
+  `reclaim_divisor_armour` set what a win takes back.
+- `names` is the nine faction names, in slot order. They are shown on screens
+  and in the news; colors and rules go by slot. Each must be text a CP437 door
+  can show.
+
+`-print-base-mod` shows the base values. For example, rarer and smaller raids by
+renamed factions:
+
+```toml
+[pirates]
+raid_chance_cap = 3
+raid_take_divisor = 100
+names = ["Reavers", "Corsairs", "Wreckers", "Marauders", "Brigands",
+         "Buccaneers", "Raiders", "Smugglers", "Privateers"]
+```
+
+Pirate figures are in force on the board that resolves the raid or the attack,
+and every board in a league plays the same mods, so a league needs nothing more.
 
 ### Regions
 
@@ -137,8 +218,9 @@ Each kind has two tables, except the missiles described below.
 `[attacks.<kind>.attacker]` is what it does back to the realm that fired it.
 The base game has nothing in the attacker tables.
 
-The battle of a same-planet attack does not change: its losses, its capture of
-regions and its score are as before. The two `conventional` kinds add to it,
+The battle of a same-planet attack does not change here: its losses, its capture
+of regions and its score are as before, unless the [`[combat]`](#combat)
+section changes them. The two `conventional` kinds add to it,
 `conventional.won` when the attacker wins and `conventional.lost` when the
 attacker is repelled. They are empty in the base game. The sections are written
 as `[attacks.conventional.won.target]` and so on. Regions that
@@ -150,27 +232,63 @@ next daily check and not at once.
 The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack
 of any type, Group Attack included, that fought a battle. The resolver's battle,
 capture and losses do not change. The `target` table runs on the defending board
-after the battle, and a `capture` there is carried home with the battle's own
+after the battle, and a `capture_regions` there is carried home with the battle's own
 regions and split among the contributors. Each contributor's report gives its
 own share of what the table took, as it does for the battle's kills. The
 `attacker` table runs on the attacker's board when the result comes home, on
 each realm of that board that contributed, as if it had attacked alone. It
-cannot `capture`, because the target is on another board.
+cannot use `capture_regions`, because the target is on another board. Its unit
+capture is the exception, and runs on the defending board (see below).
 
 The `ip.nuclear`, `ip.chemical` and `sabre` kinds are missiles that arrive from
 another board, and they act on the board that receives them. Only their
 `target` table is used: the attacker is on another board, so a non-zero
-`attacker` table or a `capture` on these kinds is an error. What stays built in
+`attacker` table or a `capture_regions` on these kinds is an error. What stays built in
 is whether a missile gets through (the misfire, SDI and garrison rolls), where
 the Sabre's dial lands, its backfire and the score. Every board in a league
 plays the same mods.
 
-Apart from those limits, any kind may use any effect. The effects are `waste`, `destroy` and
-`capture` (a percent of the regions), `people`, one `kill_<unit>` for each
-unit, `food`, `morale`, `support` and `hq`. In the attacker table, `capture`
+Apart from those limits, any kind may use any effect, except that only the four battle kinds (`conventional.won`, `conventional.lost`, `ip.attack.won` and `ip.attack.lost`) can capture units. The effects are `waste`, `destroy` and
+`capture_regions` (a percent of the regions), `people`, one `kill_<unit>` for each
+unit, `food`, `morale`, `support` and `hq`. In the attacker table, `capture_regions`
 gives the target that share of the attacker's regions. Captured regions arrive
 untyped for a player, who chooses the types at the start of the next turn, and
 as coastal regions for an AI baron.
+
+### Capturing units
+
+`capture_<unit>` takes a percent of that military unit (`capture_trooper`,
+`capture_jet`, `capture_turret`, `capture_bomber`, `capture_tank`,
+`capture_carrier`), and `capture_random` takes a percent of all the surviving
+units together, drawn at random across the types. A unit left unset is never
+captured. In a `target` table the attacker takes the units. In an `attacker`
+table the target takes them, so a defender who repels an attack can keep some
+of the attacker's tanks:
+
+```toml
+[attacks.conventional.lost.attacker]
+capture_tank = 10
+```
+
+The percent is of the units still alive after the kills in the same table, so a
+unit a `kill_<unit>` destroyed cannot also be captured. What the percent is of:
+
+- From an attacker, the survivors of the force it sent. Units it held back are
+  safe, and an attacker table cannot capture turrets or carriers, which an
+  attack never sends.
+- From a defender, the survivors among the units that stood in the defense:
+  troopers, jets, turrets and tanks. `capture_from_stock = 1` in a `target`
+  table widens that to the defender's whole remaining stock, bombers and
+  carriers included. It is not allowed in an `attacker` table.
+- From an ally that sent troops to the defense, the same percent of the part of
+  its detachment that survived, never its stock.
+
+A kind may capture in both tables. The `target` table runs first. On an
+interplanetary win or a repelled strike, the units the `target` table captures
+come home with the result and are shared among the contributors like regions.
+An `attacker` table's capture on an interplanetary kind is made on the
+defending board: the arriving force's survivors lose the units before they go
+home, and the defending realms keep them.
 
 A percent is a whole number, or `[pct, up, down]` for a percent that varies:
 `pct + Random(up) - Random(down)`. The base nuclear strike is `waste = [7, 3, 3]`.
@@ -241,7 +359,7 @@ board in the league.
 `mod_api` is the version of the mod format the game reads; see
 [Mod format versions](#mod-format-versions).
 
-`values.toml` holds the changes, one section per unit, plus `[hq]`, one
+`values.toml` holds the changes, one section per unit, plus `[hq]`, `[combat]`, `[pirates]`, one
 section per region type and the `[attacks.<kind>.<side>]` sections. List only
 what changes:
 
@@ -309,7 +427,68 @@ The sysop makes the choices on the Mods page of either settings editor, or in
 `config.json` under `ModOptions`. A game keeps its choices until the next
 reset, and a league reset carries them to every board.
 
+## Player preferences
+
+A mod can let each player choose for their own realm. Declare the choices in
+`[prefs.<id>]` tables in `mod.toml`; each has a `label`, an optional
+`description` and a `default` of `true` or `false`. A mod may declare 8 at
+most and all the mods in a game 25 together, which a reset refuses naming the
+mods. A label may be 40 characters and a description 200. The fields are under
+[Player preferences](mod-reference.md#player-preferences).
+
+```toml
+[prefs.fierce]
+label = "Fiercer pirate raids"
+description = "Pirates raid you every turn."
+default = false
+```
+
+Each mod in play adds a row for every preference to the player's Preferences
+menu, after the built-in rows, with Yes or No in the same column. The label and
+description are shown as written and are not translated. A player who has made
+no choice gets the `default`; a new default affects only players who have not
+chosen.
+
+Only scripts read a preference, because the rules are the same for every realm
+and a player's choice cannot select a `values.toml` section. In `raid` and
+`region`, `realm.pref("<id>")` is `True` or `False` for the realm being asked
+about. A script sees only its own mod's preferences, and an id the mod does not
+declare is an error like any other failing script. A choice takes effect on the
+next call. This `pirates.star` raids a realm that opted in:
+
+```python
+def raid(realm, factions):
+    if realm.pref("fierce") and realm.jets > 0:
+        return [{"faction": 1, "take": "jets"}]
+    return []
+```
+
+The choices are kept on the board where the realm plays and never sent to
+another board. A new game starts with none, and a mod that is no longer in play
+has its choices ignored. [`-check-mod`](#checking-a-mod) lists the preferences.
+
 ## Scripts
+
+**Warning: a script is code, and it runs on your machine.**
+[Starlark](https://github.com/bazelbuild/starlark) is not a low-level
+language. It is a small Python-like language made to be embedded safely (it was
+written for Bazel's build files). It has no pointers or direct memory access,
+and no file, network or program access unless the host game provides it.
+Immortal Barons provides none. So a hostile script cannot read or change files
+on your system. What it can try is to harm the availability of the game: use
+up memory, use up CPU, or hang.
+
+To contain that, the game runs scripts in a separate worker process (a copy of
+the game's own program) with limits on its time and memory, and stops the
+worker if a script goes past them. A script that fails this way is an ordinary
+failed script. The limits are described under
+[What every script may do](#what-every-script-may-do), with the gaps that
+remain. The worker has the same user rights as the game: it is a way to stop a
+bad script from taking the game down, not a security boundary against a bug in
+Go or in the Starlark interpreter. The limits were written by an LLM (Claude),
+and no human security expert has reviewed them. Only install mods whose scripts
+you trust or have read. In a league, `AcceptLeagueScripts` is off by default for
+this reason.
 
 A mod may also hold scripts: `pirates.star`, which decides pirate raids, and a
 `regions` folder with a script for each region type the mod changes, which
@@ -343,8 +522,11 @@ def raid(realm, factions):
 ```
 
 `take` and `market` are described in the reference. A realm may get up to 10
-raids in one turn. Each raid takes as much as a normal raid would, and grants
-the faction regions the same way. The built-in functions `rand`, `day` and
+raids in one turn. Unless it says otherwise, each raid takes as much as a normal
+raid would, and grants the faction regions the same way. A raid may name a
+`share`, the percent of a normal take it carries off, and `land`, the regions it
+grants: `{"faction": 1, "take": "gold", "share": 0, "land": 10}` takes nothing
+and still grows the faction. Out-of-range figures count as a failed script. The built-in functions `rand`, `day` and
 `option` are listed under
 [Built-in functions](mod-reference.md#built-in-functions).
 
@@ -421,13 +603,72 @@ available). `while` loops and recursion are not allowed, and neither are
 call to `raid` or `region` may run for at most 1,000,000 steps, and so may the
 top level of the file when it loads.
 
+The game runs scripts in a worker process, which is started when the first
+script is needed and kept for later calls. It gets no data directory, nothing
+of the game's environment, and none of the game's input or output: on a door
+that is the caller's connection. A few workers may run at once (as many as the
+machine has cores, up to four). The limits are these:
+
+- **Time.** A call may take at most 3 seconds, counting from when the request
+  is sent. At that point the game kills the worker. The call fails, and the
+  next call starts a new worker. Calls running in other workers are not
+  affected. This holds on every system.
+- **Memory.** A worker may use about 256 MiB. Linux and the BSDs enforce this
+  on the worker (a data size limit), and Windows does it with a job object. On
+  macOS no such limit applies, so the worker watches its own heap every few
+  milliseconds and ends itself over the limit; one operation that allocates
+  more than that at once can get through. A worker that goes over is killed,
+  the call fails, and the next call starts a new worker. Unlike a timeout, it
+  does not count toward skipping the script. The Linux limit is the one that
+  has been tested; the BSD and Windows ones have not been run.
+- **CPU.** Apart from the time limit, a worker that is somehow left running is
+  stopped by the system after 10 CPU seconds on systems that support it.
+- **Steps.** A call, or the top level of the file, may run at most 1,000,000
+  steps, as before.
+- **Files.** A file in a mod may hold at most 262,144 bytes, and a mod at most
+  64 files. This includes a mod that arrives in a league's reset order. A link
+  in a mod folder must lead to a regular file inside the folder, and a file with
+  more than one hard link is refused.
+
+If a worker cannot be started at all, the game says so once in its error
+output, mods with scripts load, and each script call fails; the game plays its
+built-in rules where a script fails. It does not run the script inside the
+game instead.
+
+Known gaps, which these limits do not close:
+
+- **A script that hangs costs three timeouts before it is skipped.** Each one
+  takes up to the time limit and a new worker. After 3 timeouts in a row, the
+  game skips that script, and only that script, for 24 hours: the built-in
+  rules play where it would have run. A run that succeeds in between starts the
+  count again. Other failures (an error, too many steps) are not counted, so a
+  script that fails quickly on every call is not skipped.
+  Each caller on a door is a separate process, so the skip is kept in
+  `script-skips.json` in the data directory, beside `world.json`. The error
+  output says when a script is skipped, naming it and when the skip ends, and
+  then once for each later process that finds it skipped. **Delete
+  `script-skips.json` to run the script again at once.** The script is a new one
+  to the game, and is not skipped, if the mod's files or its option values
+  change. The file is safe to delete or lose at any time; the worst case is that
+  the next session waits out the timeouts again. `-check-mod` and `-sim-mod` do
+  not read or write it.
+- **Memory is limited per worker, not for all of them together.** Four workers
+  can each use their limit at once.
+- **macOS has no system memory limit,** and the check there is a sample, as
+  above.
+- **The worker is not a sandbox.** It runs with the game's user rights. What
+  keeps a script from files and the network is that Starlark has no way to
+  reach them. A flaw in Go or in the Starlark interpreter that let a script do
+  more would not be contained by the worker. None is known.
+- **The limits are untested on some systems:** the BSDs and Windows, as above.
+
 A script keeps nothing from one call to the next. Values set at the top level
 of the file are frozen once it has loaded: `raid` and `region` can read a list
 or dict made there, but changing it is an error.
 
-A script is as trusted as the rest of the mod folder. It runs inside the game
-itself, and nothing limits how much memory it uses, so install only scripts
-you have read.
+Install only scripts you trust or have read. The limits above are there to
+stop mistakes and most abuse, and they have not been reviewed by a human security
+expert.
 
 [`-check-mod`](#checking-a-mod) loads each script and checks that it defines `raid` or `region`
 with two parameters. It cannot check what they return, because that depends on
@@ -543,8 +784,9 @@ Scripts are another choice. A mod that carries `pirates.star` or a script in
 `bbs.cfg`. The setting defaults to `no`. A board with the default refuses a
 scripted reset and keeps the order. It resets at its first planetary run after
 its sysop turns the setting on. If the board moves to another league first, the
-order is discarded. Scripts run on that machine with no memory limit, so read
-them before you allow them.
+order is discarded. Scripts run on that machine, and their limits have not been reviewed by a
+human security expert (see [Scripts](#scripts)), so read them before you allow
+them.
 
 ## Testing a mod
 
@@ -576,3 +818,57 @@ the mod from the start.
 
 A league board refuses [`-reload-mods`](#command-line-options-and-settings)
 because its mods come from the Coordinator's reset order.
+
+## Testing how a mod plays
+
+```
+immortal-barons -sim-mod cheap-tanks
+```
+
+[`-sim-mod`](#command-line-options-and-settings) plays the mod and the base
+game side by side in throwaway worlds of computer barons, with the same seeds
+and settings, and prints how they differ. It runs in memory: it reads the mod's folder
+(for a bare name, it looks in the `mods` folder of the data directory), reads no
+game and writes nothing except the CSV file you ask for. It takes a name or a
+path, like `-check-mod`.
+
+Each world plays `-sim-days` days (60) with `-sim-realms` barons (8). It runs
+`-sim-seeds` seeds (8), because one run is one storyline and a property such as
+"the leader runs away with the game" shows only across many.
+
+Read the first table first. "What the mechanics did" counts, over the whole
+run, the battles fought, the attacker's wins, the regions captured, the units a
+capture took from each side, the units a battle's effects destroyed, the pirate
+raids by spoil and what they took, and
+how often a mod's script was asked and fell back to the built-in rules. Base and
+mod are side by side, so it shows whether the mod does what you meant: a
+`capture_tank` that never takes a tank, or a script that falls back every time,
+shows here. A counter that is zero in both games is left out. Everything after
+it shows how the AI plays the mod, which is a different question. The report
+then reads the worlds at up to five points over the run and gives, for each figure, the mean
+across the seeds for the base game and the mod, and the difference. A second
+table gives the lowest and highest seed on the last day. The figures are the
+realms still alive and the number eliminated, the leader's and the median
+realm's net worth and regions, the ratio of the two net worths, gold in hand
+and banked, and the total of each unit. `-sim-csv <file>` writes every figure,
+spread included, as CSV for a spreadsheet, after `#` comment lines giving the
+mod, its version and hash, the run's settings and every option's value. The
+limits are 1000 seeds, 3650 days and 25 realms, the planet's slots.
+
+Set an option for the run with `-mod-option <id>=<value>`, as often as needed.
+A bool takes `true`, `false`, `on`, `off`, `yes` or `no`, and a number takes digits; an id
+the mod does not declare, a value of the wrong type or a repeated id is an
+error. The report header lists every option's value, defaults included. The
+option flag works only with `-sim-mod`. To compare values of one option, run the
+command once per value and give each its own `-sim-csv`.
+
+A script that fails is reported under the tables, and the game falls back to the
+built-in rules where it failed, as in a real game. The `ip.*` and `sabre.*`
+attack kinds and the `ip_capture_*` shares need more than one board, and the AI
+barons fire no missiles, so none of these is simulated; the report lists them
+when the mod sets any.
+
+The barons play by their own code and do not adapt to a mod. The report shows
+what a change does mechanically, such as a cheap unit compounding a winner's
+lead, and not how a person would use it. It is a first check before
+play-testing, not a replacement for it.

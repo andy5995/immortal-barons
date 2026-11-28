@@ -16,7 +16,8 @@ turn does not come back to that step. On a side menu (like the Bank or the
 System Menu), Quit takes you back to where you were.
 
 The System Menu opens with the `*` key from the Spending menu. It holds extra
-options like Preferences, Set Tax Rate, and Show Instructions.
+options like Preferences, Set Tax Rate, and Show Instructions. A mod in play
+may add its own yes/no choices to Preferences, after the usual ones.
 
 Pressing Enter with no other key also chooses Quit. The prompt shows "Quit" so
 you can see what Enter will do. On the Spending menu this happens only if you

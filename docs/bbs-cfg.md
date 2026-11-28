@@ -100,7 +100,8 @@ More: [Joining a league](inter-bbs.md#joining-a-league-member-boards).
 
 Whether this board plays a league mod that carries scripts. The scripts come
 from the Coordinator's signed `-league-reset` order and run on this machine, so
-each sysop makes this call. A board with the setting off refuses a reset whose
+each sysop makes this call. A script's limits were not reviewed by a human
+security expert; see [Scripts](mods.md#scripts). A board with the setting off refuses a reset whose
 mods carry scripts. Its `-planetary` run prints the reason and records it in
 `planetary.log`.
 

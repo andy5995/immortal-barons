@@ -25,7 +25,7 @@ var usageGroups = []struct {
 	{"Inter-BBS", []string{"ibbs-reset", "board-id", "game-inbound", "game-outbound", "import-bbs-cfg", "planetary", "full", "detailed", "league-routes", "league-config", "league-freeze", "league-thaw", "ftn-status"}},
 	// Development tools, kept out of the sysop section: a board never needs
 	// these, and they advance, expose or override game state.
-	{"Testing and balance", []string{"dump", "spectate", "dupe-check"}},
+	{"Testing and balance", []string{"dump", "spectate", "sim-mod", "sim-days", "sim-seeds", "sim-realms", "sim-csv", "mod-option", "dupe-check"}},
 	{"Info", []string{"version", "help", "h"}},
 }
 

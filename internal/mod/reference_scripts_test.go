@@ -48,8 +48,8 @@ func TestScriptFieldTablesMatchWhatScriptsAreGiven(t *testing.T) {
 		}
 	}
 
-	check("raid realm", attrNames(t, realmValue(view)), pirateRealmFields())
-	market := realmValue(view).(*starlarkstruct.Struct)
+	check("raid realm", attrNames(t, realmValue(view, nil)), pirateRealmFields())
+	market := realmValue(view, nil).(*starlarkstruct.Struct)
 	m, _ := market.Attr("market")
 	if got, want := attrNames(t, m), spoilNames(); !slices.Equal(got, sortedCopy(want)) {
 		t.Errorf("raid realm.market: the script is given %v, the reference says %v", got, want)
@@ -57,8 +57,8 @@ func TestScriptFieldTablesMatchWhatScriptsAreGiven(t *testing.T) {
 	f := factionsValue(view).(*starlark.List).Index(0)
 	check("raid faction", attrNames(t, f), pirateFactionFields())
 
-	check("region realm", attrNames(t, regionRealmValue(game.RegionView{})), regionRealmFields())
-	rv := regionRealmValue(game.RegionView{}).(*starlarkstruct.Struct)
+	check("region realm", attrNames(t, regionRealmValue(game.RegionView{}, nil)), regionRealmFields())
+	rv := regionRealmValue(game.RegionView{}, nil).(*starlarkstruct.Struct)
 	regs, _ := rv.Attr("regions")
 	if got, want := attrNames(t, regs), sortedCopy(regionIDs()); !slices.Equal(got, want) {
 		t.Errorf("realm.regions: the script is given %v, the reference says %v", got, want)
@@ -101,5 +101,32 @@ func TestBuiltinTableMatchesWhatScriptsSee(t *testing.T) {
 	slices.Sort(regions)
 	if got := names("regions"); !slices.Equal(got, regions) {
 		t.Errorf("region scripts see %v, the reference lists %v", regions, got)
+	}
+}
+
+// The raid dict's keys the reference lists are the ones the reader accepts.
+func TestRaidKeysInTheReferenceAreTheOnesReadOrdersAccepts(t *testing.T) {
+	text := Reference()
+	start := strings.Index(text, "Each raid is a dict:")
+	table := text[start : start+strings.Index(text[start:], "### Region script")]
+	var keys []string
+	for _, line := range strings.Split(table, "\n") {
+		if strings.HasPrefix(line, "| `") {
+			keys = append(keys, strings.Split(line, "`")[1])
+		}
+	}
+	if want := []string{"faction", "take", "market", "share", "land"}; !slices.Equal(keys, want) {
+		t.Fatalf("the reference lists %v, want %v", keys, want)
+	}
+	values := map[string]starlark.Value{
+		"faction": starlark.MakeInt(0), "take": starlark.String("jets"),
+		"market": starlark.False, "share": starlark.MakeInt(1), "land": starlark.MakeInt(1),
+	}
+	d := starlark.NewDict(len(keys))
+	for _, k := range keys {
+		d.SetKey(starlark.String(k), values[k])
+	}
+	if _, err := readOrders(starlark.NewList([]starlark.Value{d})); err != nil {
+		t.Errorf("readOrders refused a raid with every documented key: %v", err)
 	}
 }

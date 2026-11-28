@@ -62,6 +62,12 @@ func runCheckMod(arg, dataDir string) error {
 			}
 		}
 	}
+	if ids := m.SortedPrefIDs(); len(ids) > 0 {
+		fmt.Println("Player preferences:")
+		for _, id := range ids {
+			fmt.Println("  " + m.PrefLine(id))
+		}
+	}
 	changes := mod.Diff(game.BaseRules(), r)
 	if len(changes) == 0 {
 		fmt.Println("It changes nothing from the base game.")

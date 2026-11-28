@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 )
 
 // Rules are the gameplay values one world plays by (#202). A world with no mods
@@ -26,9 +27,16 @@ type Rules struct {
 	RegionBrains map[*Region]RegionBrain
 	// HQ are the HeadQuarters figures.
 	HQ HQRules
+	// Combat is what the Attack Rewards and Attack Damage levels mean and what a
+	// same-planet win pays (combat_rules.go).
+	Combat CombatRules
 	// Attacks is what each kind of attack does, to its target and back to its
 	// attacker (attack_effects.go).
 	Attacks map[EffectKind]AttackEffects
+	// PirateFigures are the pirate raid's and the faction's numbers
+	// (pirate_rules.go). Pirates above is who decides the raids; these are what
+	// a raid does.
+	PirateFigures PirateRules
 }
 
 // HQRules are the HeadQuarters figures. The strength it adds to each unit is a
@@ -100,8 +108,10 @@ var baseRules = &Rules{Units: map[*Good]UnitRules{
 	Agent: {NetWorth: NetWorthAgent},
 	Food:  {},
 },
-	Regions: baseRegionRules(),
-	Attacks: baseAttackEffects(),
+	Regions:       baseRegionRules(),
+	Attacks:       baseAttackEffects(),
+	Combat:        baseCombatRules(),
+	PirateFigures: basePirateRules(),
 	HQ: HQRules{
 		BuildStart: HQBuildStart, BuildPerTurn: HQBuildPerTurn,
 		BattleLossMin: HQBattleLossMin, BattleLossJitter: HQBattleLossJitter,
@@ -118,6 +128,7 @@ func (r *Rules) Clone() *Rules {
 	c := *r
 	c.Units, c.Regions = maps.Clone(r.Units), maps.Clone(r.Regions)
 	c.RegionBrains, c.Attacks = maps.Clone(r.RegionBrains), maps.Clone(r.Attacks)
+	c.PirateFigures.Names = slices.Clone(r.PirateFigures.Names)
 	return &c
 }
 
@@ -161,65 +172,91 @@ const (
 	ModHQPriceJitterMax  = 1_000_000
 )
 
-// HQField is one figure of HQRules as a mod names it: the key in a values.toml
-// [hq] section, its limits, and how to read and write it. Validation and the mod
-// reader go through HQFields, so a figure is named and bounded in one place.
-// Wide marks an int64 figure, which a mod may set past what an int holds on the
-// 32-bit door builds; the others are read through an int.
-type HQField struct {
+// HQField is one figure of HQRules as a mod names it (see Field).
+type HQField = Field[HQRules]
+
+// HQFields are the figures a mod can set on the HeadQuarters, in the order
+// -print-base-mod writes them and validation reports them.
+var HQFields = []HQField{
+	{Key: "build_start", Min: 1, Max: ModHQPercentMax,
+		Get:  func(h HQRules) int64 { return int64(h.BuildStart) },
+		Set:  func(h *HQRules, v int64) { h.BuildStart = int(v) },
+		Desc: "Completion percent a newly bought HeadQuarters begins at."},
+	{Key: "build_per_turn", Min: 1, Max: ModHQPercentMax,
+		Get:  func(h HQRules) int64 { return int64(h.BuildPerTurn) },
+		Set:  func(h *HQRules, v int64) { h.BuildPerTurn = int(v) },
+		Desc: "Percent a HeadQuarters gains each turn until it reaches 100."},
+	{Key: "battle_loss_min", Min: 0, Max: ModHQPercentMax,
+		Get:  func(h HQRules) int64 { return int64(h.BattleLossMin) },
+		Set:  func(h *HQRules, v int64) { h.BattleLossMin = int(v) },
+		Desc: "Completion percent a HeadQuarters loses when its realm loses a defense."},
+	{Key: "battle_loss_jitter", Min: 1, Max: ModHQPercentMax,
+		Get:  func(h HQRules) int64 { return int64(h.BattleLossJitter) },
+		Set:  func(h *HQRules, v int64) { h.BattleLossJitter = int(v) },
+		Desc: "A random 0 up to one less than this is added to that loss."},
+	{Key: "price_base", Min: 1, Max: ModHQPriceMax, Wide: true,
+		Get:  func(h HQRules) int64 { return h.PriceBase },
+		Set:  func(h *HQRules, v int64) { h.PriceBase = v },
+		Desc: "Gold a HeadQuarters costs a realm that has played no turns."},
+	{Key: "price_per_turn", Min: 0, Max: ModHQPricePerTurnMax, Wide: true,
+		Get:  func(h HQRules) int64 { return h.PricePerTurn },
+		Set:  func(h *HQRules, v int64) { h.PricePerTurn = v },
+		Desc: "Gold the price rises with each turn the realm has played."},
+	{Key: "price_jitter", Min: 0, Max: ModHQPriceJitterMax, Wide: true,
+		Get:  func(h HQRules) int64 { return h.PriceJitter },
+		Set:  func(h *HQRules, v int64) { h.PriceJitter = v },
+		Desc: "A random 0 up to one less than this is added to the price. 0 makes the price exact."},
+	{Key: "price_cap", Min: 0, Max: ModHQPriceMax, Wide: true, Paired: true,
+		Get:  func(h HQRules) int64 { return h.PriceCap },
+		Set:  func(h *HQRules, v int64) { h.PriceCap = v },
+		Desc: "The price never rises past this, less its own random draw. At least `price_base`."},
+	{Key: "price_cap_jitter", Min: 0, Max: ModHQPriceMax, Wide: true, Paired: true,
+		Get:  func(h HQRules) int64 { return h.PriceCapJitter },
+		Set:  func(h *HQRules, v int64) { h.PriceCapJitter = v },
+		Desc: "A random 0 up to one less than this is taken off the cap. Less than `price_cap`."},
+}
+
+// Field is one figure of a flat section of Rules (HQRules, CombatRules, ...) as
+// a mod names it: the key in a values.toml table, its limits, and how to read and
+// write it. Validation and the mod reader go through the section's slice of
+// fields, so a figure is named and bounded in one place. Wide marks an int64
+// figure, which a mod may set past what an int holds on the 32-bit door builds;
+// the others are read through an int.
+type Field[T any] struct {
 	Key      string
 	Min, Max int64
 	Wide     bool
 	// Paired marks a figure checked against another rather than against Min
 	// and Max alone (price_cap against price_base, its jitter against it).
 	Paired bool
-	Get    func(h HQRules) int64
-	Set    func(h *HQRules, v int64)
+	Get    func(v T) int64
+	Set    func(v *T, n int64)
 	// Desc is one sentence saying what the figure means; the generated mod
 	// reference prints it.
 	Desc string
 }
 
-// HQFields are the figures a mod can set on the HeadQuarters, in the order
-// -print-base-mod writes them and validation reports them.
-var HQFields = []HQField{
-	{"build_start", 1, ModHQPercentMax, false, false,
-		func(h HQRules) int64 { return int64(h.BuildStart) },
-		func(h *HQRules, v int64) { h.BuildStart = int(v) }, "Completion percent a newly bought HeadQuarters begins at."},
-	{"build_per_turn", 1, ModHQPercentMax, false, false,
-		func(h HQRules) int64 { return int64(h.BuildPerTurn) },
-		func(h *HQRules, v int64) { h.BuildPerTurn = int(v) }, "Percent a HeadQuarters gains each turn until it reaches 100."},
-	{"battle_loss_min", 0, ModHQPercentMax, false, false,
-		func(h HQRules) int64 { return int64(h.BattleLossMin) },
-		func(h *HQRules, v int64) { h.BattleLossMin = int(v) }, "Completion percent a HeadQuarters loses when its realm loses a defense."},
-	{"battle_loss_jitter", 1, ModHQPercentMax, false, false,
-		func(h HQRules) int64 { return int64(h.BattleLossJitter) },
-		func(h *HQRules, v int64) { h.BattleLossJitter = int(v) }, "A random 0 up to one less than this is added to that loss."},
-	{"price_base", 1, ModHQPriceMax, true, false,
-		func(h HQRules) int64 { return h.PriceBase },
-		func(h *HQRules, v int64) { h.PriceBase = v }, "Gold a HeadQuarters costs a realm that has played no turns."},
-	{"price_per_turn", 0, ModHQPricePerTurnMax, true, false,
-		func(h HQRules) int64 { return h.PricePerTurn },
-		func(h *HQRules, v int64) { h.PricePerTurn = v }, "Gold the price rises with each turn the realm has played."},
-	{"price_jitter", 0, ModHQPriceJitterMax, true, false,
-		func(h HQRules) int64 { return h.PriceJitter },
-		func(h *HQRules, v int64) { h.PriceJitter = v }, "A random 0 up to one less than this is added to the price. 0 makes the price exact."},
-	{"price_cap", 0, ModHQPriceMax, true, true,
-		func(h HQRules) int64 { return h.PriceCap },
-		func(h *HQRules, v int64) { h.PriceCap = v }, "The price never rises past this, less its own random draw. At least `price_base`."},
-	{"price_cap_jitter", 0, ModHQPriceMax, true, true,
-		func(h HQRules) int64 { return h.PriceCapJitter },
-		func(h *HQRules, v int64) { h.PriceCapJitter = v }, "A random 0 up to one less than this is taken off the cap. Less than `price_cap`."},
-}
-
-// HQFieldByKey is the field named key, or nil.
-func HQFieldByKey(key string) *HQField {
-	for i := range HQFields {
-		if HQFields[i].Key == key {
-			return &HQFields[i]
+// FieldByKey is the field of fields named key, or nil.
+func FieldByKey[T any](fields []Field[T], key string) *Field[T] {
+	for i := range fields {
+		if fields[i].Key == key {
+			return &fields[i]
 		}
 	}
 	return nil
+}
+
+// validateFields reports each figure of v outside its Min and Max, skipping the
+// paired ones, which the caller checks against each other.
+func validateFields[T any](fields []Field[T], v T, bad func(format string, a ...any)) {
+	for _, f := range fields {
+		if f.Paired {
+			continue
+		}
+		if n := f.Get(v); n < f.Min || n > f.Max {
+			bad("%s %d is outside %d to %d", f.Key, n, f.Min, f.Max)
+		}
+	}
 }
 
 // Validate reports every value outside its limits, so a sysop fixing a mod sees
@@ -277,6 +314,12 @@ func (r *Rules) Validate() error {
 	r.validateHQ(func(format string, a ...any) {
 		errs = append(errs, fmt.Errorf("hq: %s", fmt.Sprintf(format, a...)))
 	})
+	r.validateCombat(func(format string, a ...any) {
+		errs = append(errs, fmt.Errorf("combat: %s", fmt.Sprintf(format, a...)))
+	})
+	r.validatePirates(func(format string, a ...any) {
+		errs = append(errs, fmt.Errorf("pirates: %s", fmt.Sprintf(format, a...)))
+	})
 	r.validateAttacks(func(format string, a ...any) {
 		errs = append(errs, fmt.Errorf(format, a...))
 	})
@@ -289,14 +332,7 @@ func (r *Rules) Validate() error {
 // draw they feed yields 0 for a bound of 0.
 func (r *Rules) validateHQ(bad func(format string, a ...any)) {
 	h := r.HQ
-	for _, f := range HQFields {
-		if f.Paired {
-			continue // checked against each other below
-		}
-		if v := f.Get(h); v < f.Min || v > f.Max {
-			bad("%s %d is outside %d to %d", f.Key, v, f.Min, f.Max)
-		}
-	}
+	validateFields(HQFields, h, bad) // the paired two are checked below
 	if h.PriceCap < h.PriceBase || h.PriceCap > ModHQPriceMax {
 		bad("price_cap %d must be at least price_base (%d) and at most %d", h.PriceCap, h.PriceBase, ModHQPriceMax)
 	}

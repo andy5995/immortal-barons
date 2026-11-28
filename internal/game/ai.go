@@ -127,6 +127,9 @@ func (w *World) aiWageWar(e *Empire) {
 	if !w.CanAttackLocally(e) {
 		return // Max Local Attacks/Day binds a computer baron as it binds a player
 	}
+	if e.LocalAttacksToday >= AIMaxLocalAttacksPerDay {
+		return // the AI's own daily pacing; humans are held to the turn alone
+	}
 	var target *Empire
 	var targetDef int64
 	for _, t := range w.Targets(e) {

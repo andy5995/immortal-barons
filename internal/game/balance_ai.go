@@ -177,6 +177,12 @@ const (
 	AIWarOffenseMargin         = 130
 	AIWarOffenseMarginCautious = 300
 
+	// Most local attacks one AI makes per game day. IB's own: the AI's pacing is
+	// IB's design, and humans keep BRE's one attack per turn. Measured 2026-11-27:
+	// 1.67 mean eliminations per 60-day 8-realm run across 24 seeds, against 4.83
+	// uncapped. A sysop's lower Max Local Attacks/Day still wins.
+	AIMaxLocalAttacksPerDay = 3
+
 	// Tax policy (#73). The AI used to sit on its starting rate forever. Popular
 	// support drifts by -(Tax-SupportTaxNeutral)/SupportTaxDivisor each turn, so
 	// anything below the neutral rate GAINS support for free while riot risk is

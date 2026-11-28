@@ -93,6 +93,14 @@ then exit.
 - **`-check-mod <dir>`** — Check a mod on its own, with the limits a reset
   uses, print every value it changes, then exit. `<dir>` is a mod folder, or a
   mod's name in the `mods` folder of the data directory. See [Mods](mods.md).
+- **`-sim-mod <dir>`** — Play a mod against the base game in throwaway worlds
+  of computer barons, with the same seeds, print how the two differ, then exit.
+  Nothing is read from or written to a game. `<dir>` is a mod folder, or a
+  mod's name in the `mods` folder. Companions: **`-sim-days <n>`** (default
+  60), **`-sim-seeds <n>`** (8), **`-sim-realms <n>`** (8), **`-sim-csv
+  <file>`** (also write every figure as CSV) and **`-mod-option <id>=<value>`**
+  (set a mod option; repeat for more). See
+  [Mods](mods.md#testing-how-a-mod-plays).
 - **`-reload-mods`** — Put the mods `config.json` lists, as their folders are
   now, into the game in progress without starting a new one, print what
   changed, then exit. It is for testing a mod in a game of its own. A league

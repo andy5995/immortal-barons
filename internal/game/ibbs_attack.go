@@ -329,6 +329,11 @@ type AttackResult struct {
 	// target's board has already opened the land for the target; the firer's
 	// board only reads the report.
 	Backfired bool `json:",omitempty"`
+	// Seized is what the defenders captured of each contributor's force, by owner,
+	// from a mod's capture_<unit> effects in the attacker table (#373). The
+	// Survivors are already net of it; it is here so each contributor can be
+	// told. Empty in the base rules.
+	Seized []Contribution `json:",omitempty"`
 }
 
 // AttackOutcome is a returning strike's verdict, matching the four BRE prints
@@ -836,6 +841,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 			e.addEvent(sentences(ev, also))
 		}
 		res.Extra = optLoss(extra)
+		w.remoteSeize(false, &res, defenders)
 		// The whole planet hears it: an interplanetary exchange is planet against
 		// planet, and until this the defending board printed nothing at all while
 		// its scores moved (#108).
@@ -865,7 +871,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	//
 	// IB used to take a share of the MARGIN and quarter it, which is its own and
 	// had no support.
-	pct := float64(w.Config.AttackRewards.InterplanetaryCapturePct()) *
+	pct := float64(w.rules().Combat.InterplanetaryCapture.At(w.Config.AttackRewards)) *
 		float64(returnsPct) / 100 * float64(kind.capturePct()) / 100
 	// The share is charged against each realm that stood, because the capture
 	// reads total_regions on the realm it is taking from (+0x1862) and a
@@ -892,6 +898,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		e.addEvent(sentences(invasionReport(atk, true, losses[i], take+got, theirs), also))
 	}
 	res.Extra = optLoss(extra)
+	w.remoteSeize(true, &res, defenders)
 	if planetWide {
 		w.postNews(fmt.Sprintf("%s struck the whole planet, carrying off %s regions and %s of our forces!",
 			raider(atk), numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
@@ -915,6 +922,10 @@ type EffectLoss struct {
 	Morale    int   `json:",omitempty"`
 	Support   int   `json:",omitempty"`
 	Units     []int `json:",omitempty"`
+	// Taken is the military units the attackers captured from the defenders,
+	// in MilitaryGoods order, which come home with the result and are split
+	// among the contributors (#373).
+	Taken []int `json:",omitempty"`
 }
 
 // optLoss is l to send home, or nil when it took nothing. Captured stays
@@ -924,8 +935,12 @@ func optLoss(l AttackLoss) *EffectLoss {
 	if l == (AttackLoss{}) {
 		return nil
 	}
-	return &EffectLoss{Waste: l.Waste, Destroyed: l.Destroyed, People: l.People, Food: l.Food,
+	e := &EffectLoss{Waste: l.Waste, Destroyed: l.Destroyed, People: l.People, Food: l.Food,
 		HQ: l.HQ, Morale: l.Morale, Support: l.Support, Units: l.Units[:]}
+	if !l.Taken.isZero() {
+		e.Taken = l.Taken[:]
+	}
+	return e
 }
 
 // loss is e back as an AttackLoss. A Units list of another length fills what
@@ -934,6 +949,7 @@ func (e *EffectLoss) loss() AttackLoss {
 	l := AttackLoss{Waste: e.Waste, Destroyed: e.Destroyed, People: e.People, Food: e.Food,
 		HQ: e.HQ, Morale: e.Morale, Support: e.Support}
 	copy(l.Units[:], e.Units)
+	copy(l.Taken[:], e.Taken)
 	return l
 }
 
@@ -1493,4 +1509,63 @@ func (w *World) EnsureAttackSlots() {
 	for i := range w.GroupAttacks {
 		assign(&w.GroupAttacks[i].Slot)
 	}
+}
+
+// remoteSeize runs the attacker table's unit capture of an interplanetary
+// attack that fought a battle, here on the defending board, where the units
+// are: the defenders take their share of what the arriving force has left, and
+// res.Survivors loses it before it goes home (#373). The capture is of each
+// contributor's own survivors, drawn once for the whole force. What was taken
+// is shared out evenly among the defenders that stood, the remainder going to
+// the first, and noted on res.Seized so each contributor is told.
+func (w *World) remoteSeize(won bool, res *AttackResult, defenders []*Empire) {
+	fx := w.attackEffects(remoteAttackKind(won)).Attacker
+	if !fx.capturesUnits() || len(defenders) == 0 {
+		return
+	}
+	srcs := make([]captureSource, len(res.Survivors))
+	for i := range res.Survivors {
+		srcs[i] = forceSource(&res.Survivors[i].AttackForce)
+	}
+	var total [numCaptureGoods]int64
+	anyTaken := false
+	for i, t := range w.takeUnits(fx, srcs) {
+		if t.isZero() {
+			continue
+		}
+		res.Seized = append(res.Seized, Contribution{Owner: res.Survivors[i].Owner, AttackForce: forceOfCounts(t)})
+		for j := range t {
+			total[j] += int64(t[j]) // int64: contributors near MaxUnits wrap a 32-bit int
+		}
+		anyTaken = true
+	}
+	if !anyTaken {
+		return
+	}
+	n := int64(len(defenders))
+	for k, e := range defenders {
+		var got unitCounts
+		for j, g := range MilitaryGoods {
+			share := total[j] / n
+			if k == 0 {
+				share += total[j] % n
+			}
+			got[j] = int(min(share, MaxUnits))
+			*g.Count(e) = addUnits(*g.Count(e), got[j])
+		}
+		if ev := unitsTaken(got, msgid("You captured {units} of the attacking force.")); !ev.IsZero() {
+			e.addEvent(ev)
+		}
+	}
+}
+
+// forceOfCounts is u as a detachment: the units one can carry.
+func forceOfCounts(u unitCounts) AttackForce {
+	var f AttackForce
+	for i, g := range MilitaryGoods {
+		if g.Force != nil {
+			*g.Force(&f) = u[i]
+		}
+	}
+	return f
 }

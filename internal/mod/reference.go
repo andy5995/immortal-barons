@@ -28,6 +28,14 @@ var manifestKeys = []docKey{
 	{"label", "The name the Game Setup screen shows. Blank shows `name`.", "optional"},
 	{"description", "A line saying what the mod does.", "optional"},
 	{"options", "The [`[options.<id>]`](#options) tables the sysop may set at a reset.", "optional"},
+	{"prefs", fmt.Sprintf("The [`[prefs.<id>]`](#player-preferences) tables, yes/no choices each player makes for their own realm and the mod's scripts read. At most %d per mod and %d across the mods in a game.", MaxPrefs, MaxWorldPrefs), "optional"},
+}
+
+// prefKeys are the fields of a [prefs.<id>] table.
+var prefKeys = []docKey{
+	{"label", fmt.Sprintf("The name on the player's Preferences menu, at most %d characters. It is shown as written, not translated.", MaxPrefLabel), "required"},
+	{"description", fmt.Sprintf("A line saying what the preference changes, shown under the Preferences menu. At most %d characters.", MaxPrefDescription), "optional"},
+	{"default", "What a player who has made no choice gets: `true` or `false`.", "required"},
 }
 
 // optionKeys are the fields of an [options.<id>] table.
@@ -44,9 +52,11 @@ var optionKeys = []docKey{
 var valuesSections = []docKey{
 	{"units", "One `[units.<id>]` table per unit. List only what changes.", ""},
 	{"hq", "The one `[hq]` table.", ""},
+	{"combat", "The one `[combat]` table.", ""},
+	{"pirates", "The one `[pirates]` table.", ""},
 	{"regions", "One `[regions.<id>]` table per region type.", ""},
 	{"attacks", "One `[attacks.<kind>.target]` and one `[attacks.<kind>.attacker]` table per kind of attack.", ""},
-	{"when", "`[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them.", ""},
+	{"when", "`[when.<option>.units.<id>]`, `[when.<option>.hq]`, `[when.<option>.combat]`, `[when.<option>.pirates]`, `[when.<option>.regions.<id>]` and `[when.<option>.attacks.<kind>.<side>]`: the same tables, applied only when the bool option `<option>` is true. Read after the plain values, so they override them.", ""},
 }
 
 func kindNames() []string {
@@ -109,6 +119,9 @@ lists what it may say.
 	b.WriteString("### Options\n\nEach `[options.<id>]` table takes these fields. See [Options](mods.md#options).\n\n")
 	writeKeyTable(&b, "Field", "Needed", optionKeys)
 
+	b.WriteString("### Player preferences\n\nEach `[prefs.<id>]` table takes these fields. See [Player preferences](mods.md#player-preferences).\n\n")
+	writeKeyTable(&b, "Field", "Needed", prefKeys)
+
 	b.WriteString("## values.toml\n\nThese are the tables a `values.toml` may hold. Any other table or key is an error.\n\n")
 	writeKeyTable(&b, "Table", "", valuesSections)
 
@@ -130,6 +143,21 @@ lists what it may say.
 	}
 	writeKeyTable(&b, "Key", "Limits", rows)
 
+	b.WriteString("### Combat\n\nThe `[combat]` table redefines what the sysop's Attack Rewards and Attack Damage levels mean, and what a winning same-planet attack pays. The sysop still chooses the level. Every key is a whole number. `capture_*` and `ip_capture_*` are percents of the defender's regions by Attack Rewards level, for a same-planet and an interplanetary attack. An interplanetary share is then scaled by the attack's type and, for an individual strike, doubled. `retreat_*` are percents of a side's own force it loses before it breaks off a same-planet battle, by Attack Damage level; an interplanetary battle's loss stays the attack type's own rate rescaled by the level.\n\n")
+	rows = nil
+	for _, f := range game.CombatFields {
+		rows = append(rows, docKey{f.Key, f.Desc, numfmt.Comma(int(f.Min)) + " to " + numfmt.Comma(int(f.Max))})
+	}
+	writeKeyTable(&b, "Key", "Limits", rows)
+
+	b.WriteString("### Pirates\n\nThe `[pirates]` table changes what a pirate raid does, what a faction holds and starts with, and what a player's attack on a faction costs and wins. Every key but `names` is a whole number. These figures are in force on the board that resolves the raid or the attack, and a league plays one mod set. Which raids happen is the [pirate script](#pirate-script)'s business; with no script, `raid_chance_*` decide it.\n\n")
+	rows = nil
+	for _, f := range game.PirateFields {
+		rows = append(rows, docKey{f.Key, f.Desc, numfmt.Comma(f.Min) + " to " + numfmt.Comma(f.Max)})
+	}
+	rows = append(rows, docKey{"names", fmt.Sprintf("The nine faction names, in slot order, as a list of text. They are only shown on screens: colors and rules go by slot. Each is 1 to %d characters a CP437 door can show, with no control or format characters, no space at either end, and none repeated.", game.ModPirateNameMax), "exactly 9 names"})
+	writeKeyTable(&b, "Key", "Limits", rows)
+
 	b.WriteString("### Regions\n\nThe region types are " + codeList(regionIDs()) + ". Each `[regions.<id>]` table takes these keys, all whole numbers. Every type takes every key. Waste is ruined land: it may change only the keys marked in the last column, and every other key must stay 0.\n\n")
 	b.WriteString("| Key | Meaning | Limits | Waste |\n| --- | --- | --- | --- |\n")
 	for _, f := range game.RegionFields {
@@ -141,14 +169,16 @@ lists what it may say.
 	}
 	b.WriteString("\n")
 
-	b.WriteString("### Attacks\n\nThe kinds of attack are " + codeList(kindNames()) + ". Each kind has two tables, except the missile kinds below. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes. The two `conventional` kinds do not replace the same-planet attack's battle, its capture or its losses, which are not moddable: they add to it, `conventional.won` when the attacker wins and `conventional.lost` when it is repelled, and are empty in the base game. The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack of any type, Group Attack included, that fought a battle; the resolver's battle, capture and losses are not moddable. The `target` table runs on the defending board after the battle, and a `capture` there is carried home with the battle's own. The `attacker` table runs on the attacker's board when the result comes home, on each realm of that board that contributed, as if it had attacked alone; it cannot `capture`. The `ip.nuclear`, `ip.chemical` and `sabre.*` kinds are missiles that arrive from another board and act on the receiving board, so only their `target` table is used: a non-zero `attacker` table or a `capture` on them is an error.\n\n")
-	b.WriteString("A key marked as a percent takes a whole number, a flat percent, or `[pct, up, down]`: the percent drawn as `pct + Random(up) - Random(down)` and held to 0 to 100. A draw is made only when `up` or `down` is above 0. Every `pct`, `up` and `down` is 0 to " + fmt.Sprint(game.ModAttackPctMax) + ". `morale` and `support` take `[num, den]`, with `den` 1 to " + numfmt.Comma(game.ModAttackDenMax) + " and `num` 0 to `den`. In the attacker's table, `capture` gives the target that share of the attacker's regions.\n\n")
+	b.WriteString("### Attacks\n\nThe kinds of attack are " + codeList(kindNames()) + ". Each kind has two tables, except the missile kinds below. `[attacks.<kind>.target]` is what the attack does to the realm it hits. `[attacks.<kind>.attacker]` is what it does back to the realm that launched it, and is empty in the base game. The target's effects are applied first. Each table takes these keys, in the order they are applied; list only what changes. The two `conventional` kinds do not replace the same-planet attack's battle, its capture or its losses, whose figures are set in `[combat]`: they add to it, `conventional.won` when the attacker wins and `conventional.lost` when it is repelled, and are empty in the base game. The `ip.attack.won` and `ip.attack.lost` kinds add to an interplanetary attack of any type, Group Attack included, that fought a battle; the resolver's battle, capture and losses are not set here; `[combat]` changes the capture share. The `target` table runs on the defending board after the battle, and a `capture_regions` there is carried home with the battle's own. The `attacker` table runs on the attacker's board when the result comes home, on each realm of that board that contributed, as if it had attacked alone; it cannot `capture_regions`. The one part of an `ip.attack` `attacker` table that runs on the defending board is its unit capture, since that is where the arriving force is. The `ip.nuclear`, `ip.chemical` and `sabre.*` kinds are missiles that arrive from another board and act on the receiving board, so only their `target` table is used: a non-zero `attacker` table or a `capture_regions` on them is an error.\n\n")
+	b.WriteString("A key marked as a percent takes a whole number, a flat percent, or `[pct, up, down]`: the percent drawn as `pct + Random(up) - Random(down)` and held to 0 to 100. A draw is made only when `up` or `down` is above 0. Every `pct`, `up` and `down` is 0 to " + fmt.Sprint(game.ModAttackPctMax) + ". `morale` and `support` take `[num, den]`, with `den` 1 to " + numfmt.Comma(game.ModAttackDenMax) + " and `num` 0 to `den`. In the attacker's table, `capture_regions` gives the target that share of the attacker's regions. The `capture_<unit>` and `capture_random` keys give the other side that share of the military units still alive after the battle's kills, and only the four battle kinds (`conventional.won`, `conventional.lost`, `ip.attack.won`, `ip.attack.lost`) may set them or `capture_from_stock`. An attack sends no turrets or carriers, so an `attacker` table cannot capture them. On an interplanetary win the captured units travel home with the result and are shared among the contributors like the regions.\n\n")
 	rows = nil
 	for _, f := range game.AttackFields {
 		limits := "percent"
 		switch {
 		case f.Fraction != nil:
 			limits = "`[num, den]`"
+		case f.Whole != nil:
+			limits = "0 or 1"
 		case f.Points:
 			limits = "points"
 		}

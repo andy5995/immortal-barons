@@ -143,7 +143,9 @@ type World struct {
 	// world is loaded; nil plays the base rules (rules.go). Mods names the mods
 	// the game was reset with, which outlive a timed end of game and change
 	// only at the next sysop reset (#202).
-	Rules *Rules   `json:"-"`
+	Rules *Rules `json:"-"`
+	// Tally counts what the mechanics did, for a simulation; nil in play.
+	Tally *Tally   `json:"-"`
 	Mods  []ModRef `json:",omitempty"`
 	// PendingLeagueReset is the Coordinator's reset order this board refused
 	// because it could not play its mods. It stays on the world so a later

@@ -834,6 +834,14 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   chosen. It is a league rule, carried in the ruleset with `omitempty`, so a
   league that leaves it at 0 sends the same bytes and fingerprint as before it
   existed.
+
+  **The computer barons carry a daily cap of their own,
+  `AIMaxLocalAttacksPerDay` (3, `balance_ai.go`).** IB's own: the AI's pacing is
+  IB's design, and a human keeps the turn's one attack with no daily limit. Left
+  uncapped, a bot attacks on every turn it judges favorable and eliminates about
+  4.8 of 8 realms in 60 days; at 3 it is about 1.7 (24 seeds, 2026-11-27). It
+  counts in the same `LocalAttacksToday`, which resets at daily maintenance, and
+  a lower `MaxLocalAttacks` still wins.
 - **Nuclear attack** — turns enemy regions into waste. BINARY-VERIFIED
   (`BRE.OVR` `launch_nuclear_attack`, unit `ovr_00e809` +0x225e):
 
@@ -1037,17 +1045,29 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   record says otherwise (above). A distribution fit can match an average and
   still be the wrong mechanism.
 
+  The raid chance, the take, the faction's share, the land a raid grants, the
+  caps, the seed rolls, the battle losses and the reclaim divisors below are
+  the base values of `[pirates]` in a mod's `values.toml` (#351); the numbers
+  here are what an unmodded game uses. The 1-in-10 retry is not a key: a retry
+  chance of 1 in 1 would never end.
+
   **How often**: the roll is `Random(20) <= min(6, regions/1200 + 2)`
   (`0x35db5`), so exposure RISES WITH THE REALM — 3-in-20 for a small realm up
-  to a 7-in-20 ceiling at 4,800 regions. Afterward, landed or not, a 1-in-10
+  to a 7-in-20 ceiling at 4,800 regions. Afterward a 1-in-10
   roll re-runs the whole routine with a freshly picked faction (`0x363ba`, a
-  recursive call), so a turn can carry several raids. IB's old flat 20% plus a
+  recursive call), so a turn can carry several raids. A missed roll still
+  reaches it (`0x35df7`). A raid that takes nothing does not: a zero take jumps
+  straight to the routine's end (`0x35f9b`), so it grants no regions, sends no
+  notice and rolls no retry. Any holding under 33 takes nothing, as does a
+  market face with no listing. IB's old flat 20% plus a
   5% "second raid by a different faction" was a guess; neither shape is in the
   binary.
 
   A mod's `pirates.star` can replace this decision: which faction raids, what
-  it takes, and how many times (`docs/mods.md`). How much each raid takes, the
-  faction's share and the regions it is granted stay as described here.
+  it takes, and how many times (`docs/mods.md`). Unless an order names a
+  `share` or a `land`, how much each raid takes and the regions it is granted
+  are as described here; an order that names `land` grants it even when the
+  raid took nothing.
 
   **The faction's defense** (BINARY-VERIFIED, settled 2026-11-10) is
   `turrets/2 + troopers/3 + tanks`, built at `launch_pirate_raid +0x0a45` from
@@ -1118,7 +1138,7 @@ resumed after a boot or a dropped connection goes on past the Attack Menu.
   - regions **300**
   - gold **600,000,000**
 
-  A raid also grants the
+  A raid that takes something also grants the
   faction `Random(25)` regions. This supersedes the earlier reading of the
   BRE.EXE table at `0x14ede` — that table is some other set of limits.
   Military listed on the Trading Market is NOT safe from pirate raids: five of
@@ -2991,6 +3011,10 @@ byte at `+0x181`, where the constants are what *survives* — `0.99`, `0.90`,
 `0.80`, `0.70` — so the losses are their complements. Note **None still costs 1%**,
 not nothing. `attack.hlp`'s flat "15%" and "20%" describe the interplanetary
 variants, not this table.
+
+A mod can redefine every figure in this table, the interplanetary ladder, the
+floor, and the score per region captured listed under "Score (distinct from
+Net Worth)" (`[combat]`, #359). The values here are the base game's.
 
 Capture is `min(defenderRegions, max(15, round(defenderRegions × share)))` —
 the floor of **15** is pushed at `0x1009f` and the defender's own region count

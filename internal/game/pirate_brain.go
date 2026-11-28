@@ -27,6 +27,11 @@ type PirateOrder struct {
 	Slot       int
 	Spoil      PirateSpoil
 	FromMarket bool
+	// Share is the percent of a normal raid's take the raid carries off, and
+	// Land the regions it grants its faction. Nil leaves each to the usual
+	// roll; set, they are held to 0..ModPirateShareMax and
+	// 0..ModPirateRaidLandMax.
+	Share, Land *int `json:",omitempty"`
 }
 
 // PirateView is what a PirateBrain sees: copies, so nothing it does reaches
@@ -47,6 +52,8 @@ type PirateRealmView struct {
 	// Units is what the realm holds, Market what it has listed on the Trading
 	// Market.
 	Units, Market PirateHoldings
+	// ModPrefs is the realm's recorded mod preferences (see ParseModPrefs).
+	ModPrefs string
 }
 
 // PirateHoldings counts each kind of unit a raid can take, by its spoil. Gold
@@ -74,16 +81,17 @@ func (w *World) pirateView(e *Empire) PirateView {
 		Day: w.GameDay,
 		Realm: PirateRealmView{
 			Name: e.Name, Regions: e.Land, Gold: e.Gold,
-			Units: units, Market: market,
+			Units: units, Market: market, ModPrefs: e.modPrefsText(),
 		},
 		Factions: make([]PirateFactionView, len(w.Pirates)),
 		Rand:     w.rng.Intn,
 	}
+	pr := w.pirateFigures()
 	for i := range w.Pirates {
 		p := &w.Pirates[i]
 		loot := PirateHoldings{}
 		for _, s := range PirateSpoils() {
-			if hoard, _ := p.loot(s); hoard != nil {
+			if hoard, _ := p.loot(s, pr); hoard != nil {
 				loot[s] = *hoard
 			}
 		}
@@ -112,6 +120,9 @@ func (w *World) askPirateBrain(b PirateBrain, e *Empire) ([]PirateOrder, error) 
 			return nil, fmt.Errorf("raid %d: %d is not something a raid takes", i, o.Spoil)
 		case o.Spoil == SpoilGold && o.FromMarket:
 			return nil, fmt.Errorf("raid %d: gold is not traded, so it cannot be taken from the market", i)
+		}
+		if err := CheckPirateOrder(i, o); err != nil {
+			return nil, err
 		}
 	}
 	return orders, nil

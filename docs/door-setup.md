@@ -273,6 +273,13 @@ in) and start again at day one. Neither picks a winner. Each saves the old
 world to `world.json.bak` in the data directory first, so you can restore it if
 you reset by mistake.
 
+### Other files in the data directory
+
+Besides `world.json` and `config.json`, the game may write `script-skips.json`.
+It lists mod scripts that timed out three times in a row, each skipped for 24
+hours, so that a caller's session does not wait through the timeouts again.
+Delete it to run those scripts at once. See [Mods](mods.md#scripts).
+
 ### The config file is portable
 
 The game's rules live in `config.json` in the data directory, and that file can be

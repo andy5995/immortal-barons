@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"math"
+	"slices"
 )
 
 // The origin board's half of an interplanetary strike: what happens when the
@@ -51,12 +52,19 @@ func (w *World) applyAttackResult(res AttackResult, spy *SpyReport) {
 	// while they are not in a session. The menu asks at the start of their next
 	// turn (menu.spoilsStage).
 	shares := splitSpoils(sent.Contributors, res.LandTaken)
+	// The units a mod's effects captured from the defenders, split the same way
+	// the land is; each count is held to what the rules allow and a realm can
+	// hold, since the packet is the target board's word.
+	var unitShares [numCaptureGoods][]LandShare
+	for u, n := range w.capturedHome(res) {
+		unitShares[u] = splitSpoils(sent.Contributors, n)
+	}
 	for i, c := range sent.Contributors {
 		e := w.FindByOwner(c.Owner)
 		if e == nil {
 			continue
 		}
-		back := survivorFor(res.Survivors, c.Owner)
+		back := survivorFor(res.Survivors, c.Owner).within(c.AttackForce)
 		e.Troopers += back.Troopers
 		e.Jets += back.Jets
 		e.Tanks += back.Tanks
@@ -75,7 +83,18 @@ func (w *World) applyAttackResult(res AttackResult, spy *SpyReport) {
 		// attacked alone), are told after it.
 		if o := res.outcome(); o == OutcomeWon || o == OutcomeRepelled {
 			took := remoteAttackTook(res.Won, res.Extra, frac, land)
-			report = lines(report, sentences(took, w.homeAttackEffects(res.Won, e)))
+			var got unitCounts
+			for u, g := range MilitaryGoods {
+				if unitShares[u] != nil {
+					got[u] = unitShares[u][i].Land
+					*g.Count(e) = addUnits(*g.Count(e), got[u])
+				}
+			}
+			seized := survivorFor(res.Seized, c.Owner)
+			report = lines(report, sentences(took,
+				unitsTaken(got, msgid("You also captured {units} from the defenders.")),
+				unitsTaken(seizedOf(c.AttackForce, seized), msgid("The defenders captured {units} of your returning force.")),
+				w.homeAttackEffects(res.Won, e)))
 		}
 		e.addEvent(report)
 	}
@@ -138,6 +157,19 @@ func terrorReturnReport(sent InFlightStrike, res AttackResult) Msg {
 // survivorFor picks one owner's returning detachment out of the result. An owner
 // the target board did not answer for gets nothing back, which is the safe
 // reading: the alternative is inventing units.
+// within holds each figure of a returning force to 0..what was sent. The
+// result packet is written by the defending board, and only the sender knows
+// what left home: no more can come back than went out.
+func (f AttackForce) within(sent AttackForce) AttackForce {
+	clamp := func(n, most int) int { return min(max(n, 0), max(most, 0)) }
+	return AttackForce{
+		Troopers: clamp(f.Troopers, sent.Troopers),
+		Jets:     clamp(f.Jets, sent.Jets),
+		Tanks:    clamp(f.Tanks, sent.Tanks),
+		Bombers:  clamp(f.Bombers, sent.Bombers),
+	}
+}
+
 func survivorFor(cs []Contribution, owner string) AttackForce {
 	for _, c := range cs {
 		if c.Owner == owner {
@@ -175,7 +207,7 @@ func splitSpoils(cs []Contribution, land int) []LandShare {
 		if weight <= 0 && total == len(cs) {
 			weight = 1
 		}
-		shares[i] = LandShare{Owner: c.Owner, Land: land * weight / total}
+		shares[i] = LandShare{Owner: c.Owner, Land: int(int64(land) * int64(weight) / int64(total))}
 		left -= shares[i].Land
 		if weight > cs[biggest].offense() {
 			biggest = i
@@ -534,4 +566,42 @@ func missileReturnNews(firer, missile, target, board string, res AttackResult) s
 		return fmt.Sprintf("New Realm Protection turned aside %s's %s.", firer, missile)
 	}
 	return fmt.Sprintf("%s's %s against %s of %s failed.", firer, missile, target, board)
+}
+
+// capturedHome is the units a returning result says were captured from the
+// defenders. A unit counts only if this board's rules could have captured it:
+// the kind's target set names it (capture_<unit>) or sets capture_random, and a
+// unit that never stands in a defense (bombers, carriers) also needs
+// capture_from_stock. The figure itself is held to 0 and what a realm can hold;
+// the rules cannot say how many the defender had, so that part is the target
+// board's word. A negative or ineligible figure is not credited.
+func (w *World) capturedHome(res AttackResult) unitCounts {
+	var out unitCounts
+	if o := res.outcome(); res.Extra == nil || (o != OutcomeWon && o != OutcomeRepelled) {
+		return out
+	}
+	fx := w.attackEffects(remoteAttackKind(res.Won)).Target
+	for i := range out {
+		if i >= len(res.Extra.Taken) || (fx.CaptureUnits[i].IsZero() && fx.CaptureRandom.IsZero()) {
+			continue
+		}
+		if !slices.Contains(defenseGoods, MilitaryGoods[i]) && fx.CaptureFromStock == 0 {
+			continue
+		}
+		out[i] = min(max(res.Extra.Taken[i], 0), MaxUnits)
+	}
+	return out
+}
+
+// seizedOf is what of a contributor's force a result says was captured, held to
+// what that contributor sent, for the report alone: the survivors are already
+// net of it.
+func seizedOf(sent, seized AttackForce) unitCounts {
+	var out unitCounts
+	for i, g := range MilitaryGoods {
+		if g.Force != nil {
+			out[i] = min(max(*g.Force(&seized), 0), *g.Force(&sent))
+		}
+	}
+	return out
 }

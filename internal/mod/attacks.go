@@ -78,7 +78,7 @@ func readRoll(v any) (game.Roll, error) {
 	}
 	n, ok := wholes(v, 3)
 	if !ok {
-		return game.Roll{}, fmt.Errorf("want a whole number or [pct, up, down], got %v", v)
+		return game.Roll{}, fmt.Errorf("want a whole number or [pct, up, down], got %s", shownValue(v))
 	}
 	return game.Roll{Pct: n[0], Up: n[1], Down: n[2]}, nil
 }
@@ -87,7 +87,7 @@ func readRoll(v any) (game.Roll, error) {
 func readFraction(v any) (game.Fraction, error) {
 	n, ok := wholes(v, 2)
 	if !ok {
-		return game.Fraction{}, fmt.Errorf("want [num, den], got %v", v)
+		return game.Fraction{}, fmt.Errorf("want [num, den], got %s", shownValue(v))
 	}
 	return game.Fraction{Num: n[0], Den: n[1]}, nil
 }
@@ -110,13 +110,20 @@ func (v values) applyAttacks(r *game.Rules) error {
 				for _, f := range game.AttackFields {
 					known = append(known, f.Key)
 				}
-				errs = append(errs, fmt.Errorf("%s: unknown key (%s)", where, strings.Join(known, ", ")))
+				hint := ""
+				if key == "capture" {
+					hint = " (did you mean capture_regions?)"
+				}
+				errs = append(errs, fmt.Errorf("%s: unknown key%s (%s)", where, hint, strings.Join(known, ", ")))
 				continue
 			}
 			var err error
-			if f.Roll != nil {
+			switch {
+			case f.Roll != nil:
 				*f.Roll(set), err = readRoll(s.keys[key])
-			} else {
+			case f.Whole != nil:
+				*f.Whole(set), err = whole(s.keys[key])
+			default:
 				*f.Fraction(set), err = readFraction(s.keys[key])
 			}
 			if err != nil {
@@ -172,6 +179,9 @@ func formatFraction(f game.Fraction) string { return fmt.Sprintf("[%d, %d]", f.N
 func attackValue(f game.AttackField, s *game.EffectSet) string {
 	if f.Roll != nil {
 		return formatRoll(*f.Roll(s))
+	}
+	if f.Whole != nil {
+		return fmt.Sprint(*f.Whole(s))
 	}
 	return formatFraction(*f.Fraction(s))
 }

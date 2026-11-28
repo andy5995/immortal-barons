@@ -16,7 +16,7 @@ mods are read, applied, checked or sent.
   loader change rules for one world without touching any other test running in
   parallel, and one world plays one mod set.
 - **Every key is named in one table** (`unitFields`, `hqFields`,
-  `game.RegionFields`, `game.AttackFields`). Reading, `-check-mod`, `-print-base-mod` and `Diff` all
+  `game.CombatFields`, `game.RegionFields`, `game.AttackFields`). Reading, `-check-mod`, `-print-base-mod` and `Diff` all
   go through it, so a key cannot be readable in one place and missing in
   another.
 - **Every figure has limits tighter than its type**, chosen so the engine's
@@ -32,7 +32,7 @@ mods are read, applied, checked or sent.
   `attacker` set of the same effects (`game.EffectSet`), applied target first,
   each in the fixed order of `AttackFields`. That order and the rule that a
   `Roll` draws a random number only when its `up` or `down` is above 0 are part
-  of the contract: they decide every later draw. A mod that sets nothing draws
+  of the contract (`capture_random` too: its draw is made only when it is set): they decide every later draw. A mod that sets nothing draws
   nothing, so the base game is draw-for-draw the original (the equivalence test
   keeps the original routines as references).
 - **Rounding is not a key.** Whether morale is rounded or truncated is a fixed
@@ -73,6 +73,28 @@ mods are read, applied, checked or sent.
   hashes. Adding a new option does not raise `mod_api`; changing what an
   existing ID means does.
 
+## Player preferences
+
+- **A preference is read by scripts only.** Rules are world-wide, so a
+  player's choice cannot select a `values.toml` section; `realm.pref(id)` in
+  `raid` and `region` is the whole surface. Adding it did not raise `mod_api`:
+  it is a new manifest table and a new field of `realm`.
+- **Stored per realm, as an explicit choice only.** `Empire.ModPrefs` is keyed
+  `<mod>/<id>` and `omitempty`. A missing key means the manifest's default,
+  which the mod package resolves, so the game package holds no mod logic and an
+  old save loads unchanged. A mod that is no longer in play leaves keys nobody
+  reads; a reset clears them with the empires.
+- **Never transmitted.** No packet carries an `Empire`, so there is no
+  `game.Protocol` change and a remote board never sees a player's choice. The
+  declarations ride in the manifest, which the mod's hash already covers.
+- **The views carry the choices as one comparable string.** `RegionView` is a
+  cache key, so `ModPrefs` is part of it and a toggle cannot return a stale
+  answer. A script is given only its own mod's keys. Reading one draws no
+  random number.
+- **The menu adds rows through the engine** (`Menu.Extra`), after the built-in
+  toggles and sharing their column. Mod text goes through the same escape
+  filter as every other mod label, and a toggle is the only write.
+
 ## When a mod changes
 
 - **Rules change only at a reset.** A game keeps the copy of each mod saved
@@ -93,9 +115,127 @@ mods are read, applied, checked or sent.
 
 ## Scripts
 
-- **Starlark, run in the game process, with a step cap and no memory cap.**
-  `starlark-go` has no memory limit, so a script is as trusted as the folder it
-  came in. A hard limit would need a child process with an OS limit.
+- **Starlark, run in a worker process the OS can limit.** The threat model is
+  a sysop who installs a mod, or accepts a league's, without reading its
+  scripts. Starlark has no file, network, exec or clock access and the only
+  names IB adds are `rand`, `day`, `option` and a realm's `pref`, so the harm
+  left is to availability: CPU, memory, a hang. Starlark has no allocation
+  accounting, and an in-process limit cannot stop a built-in stuck in Go. An
+  earlier version rewrote the script's parse tree to size-check operators and
+  abandoned a stuck goroutine; it made scripts behave unlike plain Starlark,
+  could not stop everything, and switched all scripts off for the process after
+  one stuck run. It was removed for this.
+  - **The worker** is the game's own executable, started with
+    `IB_SCRIPT_WORKER=1`. `init()` in `internal/mod` (`worker.go`) takes over
+    before `main`, so every binary and test binary that imports the package is
+    its own worker with nothing to wire; the parent finds itself with
+    `os.Executable()`. The game talks to it in JSON lines over pipes made by
+    `exec.Cmd`. The worker's stdin and stdout are those pipes, never the
+    game's (on a door they are the caller), its stderr goes to a 2 KB buffer
+    that names the cause when it dies, its environment is two variables, and it
+    is given no data directory. It `os.Stdout = os.Stderr` first, so a stray
+    write cannot corrupt the conversation. On Unix the game marks every descriptor
+    from 3 up close-on-exec before it starts one (`protectInheritedFDs`): Go
+    sets the flag on what it opens, but one the BBS passed down may lack it.
+    Windows needs nothing, since `exec.Cmd` passes only the standard handles.
+  - **Protocol** (`wireMsg`): `compile` (script id, kind, file name, source,
+    option values) and `call` (id, the view, the mod's preference defaults) from
+    the game; `result` from the worker. The worker holds compiled globals, the
+    game never holds a Starlark value, and keeps only sources, so a new worker
+    is sent `compile` again before its first call of a script (`worker.ensure`).
+    `rand(n)` inside `raid()` sends a `rand` request mid-call and the game answers
+    from `PirateView.Rand`, so the world's generator is drawn in the order the
+    script asks, as before (`TestRandRoundTripsInOrder`,
+    `TestScriptGameReplaysForASeed`). `day()` and a realm's preferences travel
+    in the view. The orders and the region row are read into Go values in the
+    worker and sent as JSON.
+  - **Limits.** *Time* is the game's: `ScriptTimeout` (3 s) from sending a
+    request, then `Process.Kill`. The call fails, the worker is dropped, and
+    the next call starts a new one and recompiles. There is no global switch, but
+    a per-script circuit breaker (below).
+    *Memory* (`ScriptMemory`, 256 MiB): on Linux and the BSDs the worker sets
+    its own `RLIMIT_DATA` to that plus 128 MiB before it reads anything (on
+    Linux it counts private writable mappings, which is Go's heap; measured:
+    the runtime runs with 8 MiB over a 64 MiB limit, and a single 1 GB string
+    dies of `cannot allocate memory`); on Windows the game puts it in a Job
+    Object with a process memory limit and kill-on-close; on macOS the system
+    enforces neither, so the worker's own watchdog (`workerWatchdog`, heap
+    objects sampled every 5 ms, a collection before it decides, `os.Exit(3)`)
+    is the limit. The watchdog runs everywhere (a test turns the system limit off
+    to prove it). `RLIMIT_AS` was not used: the race detector and the Go runtime
+    reserve address space that it counts. Under the race detector (tests only)
+    the system limit is skipped for the same reason (`race_on.go`). *CPU*:
+    before each request the worker sets `RLIMIT_CPU` soft to what it has used
+    plus 10 s, and exits on the `SIGXCPU` that follows (the Go runtime ignores
+    it unless asked), so a worker left running by a dead game stops; the parent's pipe
+    closing ends an idle one. *Steps*: `ScriptSteps` stays in the worker.
+  - **Pool.** Workers are made on demand, as many as `GOMAXPROCS` up to four
+    (`workerPoolMax`), one call in flight on each; a goroutine that finds all
+    busy waits. A single worker behind a mutex would have made one slow script
+    block every other and a kill fail the calls queued behind it; separate
+    processes make a kill touch one call. Each can hold `ScriptMemory`, so four
+    is the cap on that, too.
+  - **No worker is not in-process.** If `os.Executable()` or the start fails,
+    `validate` warns once and the mod loads; every call of its scripts fails
+    with the reason and the game plays its built-in rules.
+    `TestNoWorkerMeansAClearFailureNotAnInProcessRun`.
+  - **Pinned surface and language options.** `scriptFileOptions` is
+    `syntax.FileOptions{}`: no `while`, recursion, `set`, global reassignment
+    or top-level `if`/`for`, and `load()` is refused. `print` is discarded.
+    `TestScriptSurfaceIsPinned` fails when the predeclared names or Starlark's
+    own universe gain one.
+  - **Mod files**: at most `MaxModFileSize` (256 KiB) each and `MaxModFiles`
+    (64), on the folder reader, a saved copy and a league order alike
+    (`checkFileSet`). The folder reader follows a link only to a regular file
+    inside the mod folder, opens it with `O_NOFOLLOW`, checks the file it
+    opened (`Fstat`: regular, size, link count) and reads through a limit;
+    a file with more than one hard link is refused, since a hard link to,
+    say, `/etc/passwd` would otherwise ride a league's reset order to every
+    board (`files_unix.go`, and `files_windows.go`, which reads the count from
+    the open handle; Windows has no `O_NOFOLLOW`, so there the folder walk's
+    link check is the only one).
+  - **Text**: everything a script or mod chose that reaches stderr or a log goes
+    through `clean`, which writes control characters and Unicode format
+    characters (bidi overrides among them) as `\uXXXX`. An error names a script's
+    value by its type, or by a string cut to 40 characters and cleaned (`show`).
+    The worker's reply is cleaned and cut again by the game, and so is its
+    stderr. Manifest and option text is refused if it holds one, and
+    `ManifestFromRef` holds a saved copy to the same checks.
+  - **Cost.** About 28 us a call over the pipe, 32 us with one `rand` round
+    trip (`BenchmarkWorkerRegionCall`, `BenchmarkWorkerRaidWithDraws`);
+    100 scripted turns of a one-realm world took 9.5 ms against 3.3 ms in
+    process. Region answers are cached, so a screen pays once per view.
+  - **Circuit breaker** (`scriptRef.record`, workerhost.go). A timeout costs a
+    caller the whole timeout, and the game asks again for every realm and turn.
+    After `ScriptTimeoutsToSkip` timeouts in a row of one script, keyed by mod
+    name, hash and compiled script id (which covers the option values),
+    `callWorker` refuses it at once with `errScriptSkipped`, with no worker
+    started, and the game uses the built-in rules there. Only a timeout counts;
+    a success resets the streak, any other failure leaves it.
+    Each door session and maintenance run is its own process, so a skip is also
+    written to `script-skips.json` beside `world.json` (`state.go`) and holds
+    for `ScriptSkipHold` (24 h). It is not in the World: screens read the world
+    through `World.Read`, which may not write. `mod.SetStateDir` names the
+    directory; `store.loadMods` calls it, so a program that only checks or
+    simulates a mod (`-check-mod`, `-sim-mod`) keeps its breaker in memory and
+    writes nothing. Writes are temp file plus rename in the same directory,
+    after a fresh read so other processes' entries are kept; the last writer
+    wins, which at worst makes one session pay its timeouts again. A file that
+    cannot be read, is not JSON, or is over 64 KiB is treated as empty, and
+    at most 256 entries are kept, newest first; expired entries are dropped
+    on every write. A changed mod or option is a different key, so its old
+    entry just never matches. One warning is written when a script trips, with
+    when it ends, and one short line per process that finds it skipped.
+    `warnScript` ignores the skipped error. Other scripts are unaffected.
+  - **Residual risk.** (1) A script that hangs costs `ScriptTimeoutsToSkip` (3) timeouts
+    before the breaker skips it. (2) Memory is per
+    worker; four can each use their limit. (3) macOS has no system limit, and the
+    watchdog samples, so one large allocation can pass it. (4) The BSD and Windows
+    limits are written to the platform's documentation and have not been run.
+    (5) The worker has the game's user rights; it contains a script, it is not
+    a boundary against a flaw in Go or the interpreter. (6) The code that
+    limits scripts was written by an LLM and has had no review by a human
+    security expert; the user docs say so.
 - **A region script must answer the same question the same way.** It gets no
   `rand()` and no `day()` builtin, and `realm` carries no gold, because a screen
   asks for a projection and the turn asks again when it pays. What the view does
@@ -137,6 +277,20 @@ chooses them, and members install nothing.
   newlines are part of what the hash covers. Every other field of a mod
   reference is scrubbed like the rest of the packet, and the mod reader refuses
   a control character in each manifest field it shows.
+- **The pirate figures are `Rules.PirateFigures`, read where a raid or an
+  attack on a faction resolves (#351).** A raid hits a realm on its own board
+  under that board's rules and every board in a league plays the same mods,
+  so no pirate figure travels in a packet: a `PirateHit` is a notice on the
+  victim's own board, and the factions live in each board's own world. The
+  binary-verified constants of `balance_pirates.go` remain the base values, and
+  `-print-base-mod` prints them. Two limits are not about size: the loss
+  minimum plus its jitter stays at 101 so a side never loses more than it
+  holds, and the raid retry is not a key because a retry chance of 1 in 1 would
+  never end. A scripted raid's `share` and `land` ride the worker's JSON reply
+  as optional pointers; the parent checks them again in `askPirateBrain`,
+  since a worker's reply is not trusted. Names are display only, checked like
+  other mod text (no control or format characters, 20 characters) and held to
+  exactly nine, distinct.
 - **Arriving missiles, the S3-Sabre and interplanetary attacks are moddable;
   the rest of interplanetary play is not.** An arriving missile resolves on
   the target's board under that board's rules, and every board in a league
@@ -144,7 +298,7 @@ chooses them, and members install nothing.
   whose rules differ), so the kinds `ip.nuclear`, `ip.chemical` and `sabre.*`
   read the attack table. Only their target set applies, since the attacker's
   realm is on another board, and `Rules.Validate` refuses an attacker set or a
-  `capture` on them; no packet carries a second realm's change. Still
+  `capture_regions` on them; no packet carries a second realm's change. Still
   constant, with no key yet: the remote tank curve, the share of a
   HeadQuarters a winning invasion takes, and a Sabotage HQ agent's points.
   Bombing runs and terror ops are out of scope: they hit planets and markets,
@@ -152,21 +306,69 @@ chooses them, and members install nothing.
 - **One pair of kinds, `ip.attack.won` and `ip.attack.lost`, serves every
   interplanetary attack** (Quick Strike, Normal Attack, Extended Battle and
   Group Attack). The resolver's battle, capture, losses and HQ share stay
-  built in (`resolveRemoteAttack` is not moved into the table); the sets add
+  built in (`resolveRemoteAttack` is not moved into the table), except the
+  capture share's level ladder, which `[combat]` sets; the sets add
   to them, and only when a battle was fought, never for NOT FOUND or
   PROTECTED. The Target set runs on the defending board in
   `resolveRemoteAttack`, after the built-in outcome, on each realm that stood.
-  Its `capture` is added to `LandTaken`, so it travels home and the existing
+  Its `capture_regions` is added to `LandTaken`, so it travels home and the existing
   spoils code splits it among the contributors; nobody on the defending board
   receives it. The Attacker set runs on the attacker's own board in
   `applyAttackResult`, picked by `res.Won`, on each contributor's realm there,
-  in full, as if it had attacked alone; its `capture` is refused by `Validate`
-  because the target is on another board. Both halves read the local board's
+  in full, as if it had attacked alone; its `capture_regions` is refused by `Validate`
+  because the target is on another board. The one exception is its unit
+  capture (below), which runs on the defending board. Both halves read the local board's
   rules, which is safe because a league plays one mod set. What the target
   set took travels home as figures, `AttackResult.Extra` (an omitempty
   field, so a packet without it is byte-identical; it rides Protocol 8),
   and not as words, because the home board splits it among the contributors
   by the same share as their kills. Words could not be split.
+- **Unit capture is the one attacker-set effect that runs on the defending
+  board (#373).** `capture_<unit>` (a percent per military unit),
+  `capture_random` and `capture_from_stock` are allowed on the four battle
+  kinds only (`conventional.won/lost`, `ip.attack.won/lost`); `Validate`
+  refuses them on every missile kind. A capture runs after the kills of the
+  same set, so a unit a kill destroyed is not captured, and its base is the
+  units still alive: the attacker's base is the survivors of the force it sent
+  (never what it held back); a defender's is the units that stood in the
+  defense (`defenseGoods`: troopers, jets, turrets, tanks), or with
+  `capture_from_stock` in a target set its whole remaining stock; an ally's is
+  the survivors of the 30% detachment it sent, never its stock, and
+  `capture_from_stock` does not widen it. A percent is drawn once per unit and
+  applied to every holding. `capture_random` takes its share of all the
+  holdings' units together, spread across them by the normal approximation of
+  the hypergeometric draw (one draw per holding, so cost does not follow the
+  unit count); it is drawn only when set, so the base game makes no new draw.
+  Interplanetary: the target set's captured units are `EffectLoss.Taken`
+  (inside `AttackResult.Extra`) and are split among the contributors by
+  `splitSpoils`, exactly, like the land. The attacker set cannot run at home,
+  where the defenders' realms are not, so `remoteSeize` runs it on the
+  defending board while the result is built: it takes from `res.Survivors`,
+  gives the units to the defenders that stood (evenly, remainder to the
+  first), and lists what it took in `AttackResult.Seized` so each contributor
+  is told; `homeAttackEffects` leaves the unit keys out. The home board does
+  not believe the packet for units: `capturedHome` credits only a unit its own
+  rules let that kind capture, never below 0 and never past `MaxUnits`, and
+  `seizedOf` holds the report's figure to what the contributor sent. Both
+  fields are omitempty and ride Protocol 8. A `capture_turret` or
+  `capture_carrier` in an attacker set is refused, since no attack sends them.
+- **The combat levels are one table per figure, and an interplanetary capture
+  resolves on the defending board (#359).** `[combat]` holds a percent for
+  each Attack Rewards level (same-planet and interplanetary) and each Attack
+  Damage level, the same-planet capture floor and the score per region
+  (`game.CombatRules`). The sysop's level picks the figure, so a mod
+  redefines a level and never reads which one is chosen; there is no offset
+  key, because a per-level table already expresses one and can also reorder
+  the levels. `resolveRemoteAttack` runs on the defending board and reads
+  that board's rules and its own `Config.AttackRewards`, the same as the
+  arriving missiles do. That is the right place because the ruleset
+  fingerprint covers each mod's name, hash and chosen options, so a packet
+  from a board playing other figures is held, and a league plays one mod set.
+  Nothing new travels: the share is applied there and its result comes home
+  as the existing `LandTaken`, so there is no protocol change. Still
+  constant: an interplanetary battle's loss (the attack type's own rate
+  rescaled by the Attack Damage level, which has no per-level table of its
+  own) and the interplanetary floor of 10.
 - **The gates, the dial and the caps stay built in.** The misfire, SDI and
   garrison rolls, the Sabre's aim, jitter and backfire, and the score draw are
   not effects. The per-kind caps (`IPMissileRegionCap`, `IPMissilePeopleCap`)
@@ -180,4 +382,3 @@ chooses them, and members install nothing.
 - **The AI.** It is lowest priority (Andy, 2026-11-24).
 - **New units, and the number of pirate factions.** Both are fixed in the save
   format and the packets.
-- **Further pirate figures** are #351.

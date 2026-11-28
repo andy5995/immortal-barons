@@ -145,7 +145,7 @@ func TestSabreRealArithmeticIsGatedOnTheBaseValue(t *testing.T) {
 	d.Agents, d.Jets = 300, 200
 	fx := baseRules.Attacks[EffectSabreIntelligence].Target
 	fx.Kill[KillIndex(Jet)] = Roll{Pct: 10}
-	l := w.applySet(fx, row, d, nil, false)
+	l := w.applySet(fx, row, d, nil, false, nil)
 	if l.Units[KillIndex(Agent)] != 82 || d.Agents != 218 || d.Jets != 180 {
 		t.Errorf("agents lost %d (left %d), jets left %d; want 82, 218 and 180", l.Units[KillIndex(Agent)], d.Agents, d.Jets)
 	}
@@ -199,7 +199,7 @@ func TestRemoteKindsRefuseAnAttackerSetAndCapture(t *testing.T) {
 	r.Attacks[EffectSabreFood] = fx
 	err := r.Validate()
 	if err == nil || !strings.Contains(err.Error(), "attacks.sabre.food.attacker: this missile comes from another board") ||
-		!strings.Contains(err.Error(), "attacks.sabre.food.target.capture: the attacker is on another board") {
+		!strings.Contains(err.Error(), "attacks.sabre.food.target.capture_regions: the attacker is on another board") {
 		t.Errorf("Validate: %v", err)
 	}
 }

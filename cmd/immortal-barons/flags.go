@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"github.com/andy5995/immortal-barons/internal/i18n"
+	"github.com/andy5995/immortal-barons/internal/modsim"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
@@ -45,6 +46,12 @@ type opts struct {
 	ibbsReset       *bool
 	resetFromConfig *bool
 	spectate        *int
+	simMod          *string
+	simDays         *int
+	simSeeds        *int
+	simRealms       *int
+	simCSV          *string
+	modOptions      *modOptionFlag
 	dump            *bool
 	checkMod        *string
 	initMod         *string
@@ -100,6 +107,12 @@ func defineFlags(lang string, preDoor store.DoorConfig) *opts {
 		ibbsReset:       flag.Bool("ibbs-reset", false, i18n.T(lang, "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings")),
 		resetFromConfig: flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)")),
 		spectate:        flag.Int("spectate", 0, i18n.T(lang, "play the game forward `<n>` days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms")),
+		simMod:          flag.String("sim-mod", "", i18n.T(lang, "play the mod `<dir>` against the base game in throwaway worlds of computer barons, with the same seeds, print how the two differ, then exit. Nothing is read from or written to a game. <dir> is a folder, or a name in the data directory's mods folder")),
+		simDays:         flag.Int("sim-days", modsim.DefaultDays, i18n.T(lang, "with -sim-mod, play each world `<n>` days")),
+		simSeeds:        flag.Int("sim-seeds", modsim.DefaultSeeds, i18n.T(lang, "with -sim-mod, play `<n>` seeds; one run is one storyline")),
+		simRealms:       flag.Int("sim-realms", modsim.DefaultRealms, i18n.T(lang, "with -sim-mod, start each world with `<n>` computer barons")),
+		simCSV:          flag.String("sim-csv", "", i18n.T(lang, "with -sim-mod, also write every figure to the CSV `<file>`, for a spreadsheet")),
+		modOptions:      modOptionVar(lang),
 		initMod:         flag.String("init-mod", "", i18n.T(lang, "create an empty mod in `<dir>`, with a mod.toml and a values.toml, then exit. <dir> is a folder, or a name, which is created in the data directory's mods folder")),
 		checkMod:        flag.String("check-mod", "", i18n.T(lang, "check the mod `<dir>` on its own, with the limits a reset uses, print what it changes, then exit. <dir> is a folder, or a mod's name in the data directory's mods folder")),
 		reloadMods:      flag.Bool("reload-mods", false, i18n.T(lang, "play the mods config.json lists, as their folders stand now, in the current game without starting a new one, then exit; for testing a mod")),
@@ -124,7 +137,7 @@ func (o *opts) explicitMode() bool {
 	return *o.maint || *o.planetary || *o.full || *o.leagueConfig || *o.leagueRoutes || *o.ftnStatus ||
 		*o.leagueCheck || *o.reset || *o.resetFromConfig || *o.ibbsReset ||
 		*o.lastPacket || *o.bbsInfo || *o.playerList || *o.players ||
-		*o.dump || *o.checkMod != "" || *o.initMod != "" || *o.printBaseMod || *o.reloadMods || *o.spectate > 0 || *o.local || *o.setDrop ||
+		*o.dump || *o.checkMod != "" || *o.initMod != "" || *o.printBaseMod || *o.reloadMods || *o.spectate > 0 || *o.simMod != "" || *o.local || *o.setDrop ||
 		*o.leagueReset != "" || *o.leagueFreeze != "" || *o.leagueThaw ||
 		*o.genCoordKey || *o.genBoardKey || *o.coordPub != ""
 }

@@ -20,9 +20,10 @@ const (
 	PirateRaidChanceCap      = 6    // binary: min against 6
 	PirateRaidRegionsPerStep = 1200 // binary: one extra chance in 20 per 1,200 regions
 
-	// After a raid attempt — landed or not — a 1-in-10 roll runs the whole
-	// routine again, faction re-picked (BRE.OVR 0x363ba, a recursive call into
-	// its own entry). So a turn can carry several raids, each less likely than
+	// After a raid attempt, a 1-in-10 roll runs the whole routine again,
+	// faction re-picked (BRE.OVR 0x363ba, a recursive call into its own entry).
+	// A missed chance roll reaches it; a raid that took nothing does not
+	// (0x35f9b). So a turn can carry several raids, each less likely than
 	// the last. IB's old model was a flat 5% chance of exactly one extra raid,
 	// forced to be a DIFFERENT faction; neither is in the binary.
 	PirateRaidRetryOutOf = 10 // binary: Random(10) == 0

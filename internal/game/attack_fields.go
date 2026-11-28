@@ -26,12 +26,15 @@ func killKey(g *Good) string { return "kill_" + g.ID }
 
 // AttackField is one key of an effect set as a mod names it: the key in a
 // values.toml [attacks.<kind>.<side>] section, and how to reach its figure.
-// Exactly one of Roll and Fraction is set. Validation and the mod reader both go
+// Exactly one of Roll, Fraction and Whole is set. Validation and the mod reader both go
 // through AttackFields, so a key is named and bounded in one place.
 type AttackField struct {
 	Key      string
 	Roll     func(s *EffectSet) *Roll
 	Fraction func(s *EffectSet) *Fraction
+	// Whole is a plain whole number from 0 to Max (a switch, 0 or 1).
+	Whole func(s *EffectSet) *int
+	Max   int
 	// Points marks a Roll read as points, not percent (hq).
 	Points bool
 	// Desc is one sentence saying what the figure means; the generated mod
@@ -46,7 +49,7 @@ var AttackFields = func() []AttackField {
 			Desc: "Percent of the realm's regions turned to waste. The regions stay on its books but earn nothing until cleaned."},
 		{Key: "destroy", Roll: func(s *EffectSet) *Roll { return &s.Destroy },
 			Desc: "Percent of the realm's regions destroyed outright."},
-		{Key: "capture", Roll: func(s *EffectSet) *Roll { return &s.Capture },
+		{Key: "capture_regions", Roll: func(s *EffectSet) *Roll { return &s.Capture },
 			Desc: "Percent of the realm's regions taken by the other side, as land it types at the start of its next turn."},
 		{Key: keyPeople, Roll: func(s *EffectSet) *Roll { return &s.People },
 			Desc: "Percent of the realm's people killed."},
@@ -55,7 +58,15 @@ var AttackFields = func() []AttackField {
 		f = append(f, AttackField{Key: killKey(g), Roll: func(s *EffectSet) *Roll { return &s.Kill[i] },
 			Desc: fmt.Sprintf("Percent of the realm's %s killed.", g.Plural)})
 	}
+	for i, g := range MilitaryGoods {
+		f = append(f, AttackField{Key: captureKey(g), Roll: func(s *EffectSet) *Roll { return &s.CaptureUnits[i] },
+			Desc: fmt.Sprintf("Percent of the realm's %s still alive after the battle and the kills that the other side takes. Only a battle can capture units. In a `target` table the defender's base is the units that stood in the defense and, for the troops an ally sent, what survived of that detachment; in an `attacker` table it is the survivors of the force the attacker sent.", g.Plural)})
+	}
 	return append(f,
+		AttackField{Key: keyCaptureRandom, Roll: func(s *EffectSet) *Roll { return &s.CaptureRandom },
+			Desc: "Percent of all the surviving units together, drawn at random across the unit types, that the other side takes. The base is the same as for `capture_<unit>`, after those are taken."},
+		AttackField{Key: keyCaptureFromStock, Whole: func(s *EffectSet) *int { return &s.CaptureFromStock }, Max: 1,
+			Desc: "In a `target` table, 1 widens the base of a defender's unit capture from the units that stood in the defense to its whole remaining stock of each unit (including bombers and carriers). Not allowed in an `attacker` table."},
 		AttackField{Key: keyFood, Roll: func(s *EffectSet) *Roll { return &s.Food },
 			Desc: "Percent of the realm's food destroyed."},
 		AttackField{Key: "morale", Fraction: func(s *EffectSet) *Fraction { return &s.Morale },
@@ -105,11 +116,26 @@ func (r *Rules) validateAttacks(bad func(format string, a ...any)) {
 				bad("attacks.%s.attacker: this missile comes from another board, so it has no attacker effects", kind)
 			}
 			if !fx.Target.Capture.IsZero() {
-				bad("attacks.%s.target.capture: the attacker is on another board and cannot receive land", kind)
+				bad("attacks.%s.target.capture_regions: the attacker is on another board and cannot receive land", kind)
 			}
 		}
 		if row.AttackerAway && !fx.Attacker.Capture.IsZero() {
-			bad("attacks.%s.attacker.capture: the target is on another board and cannot receive land", kind)
+			bad("attacks.%s.attacker.capture_regions: the target is on another board and cannot receive land", kind)
+		}
+		if !row.CapturesUnits {
+			for _, side := range AttackSides {
+				if set := *fx.Side(side); set.capturesUnits() || set.CaptureFromStock != 0 {
+					bad("attacks.%s.%s: only a battle can capture units (conventional.won, conventional.lost, ip.attack.won, ip.attack.lost)", kind, side)
+				}
+			}
+		}
+		if fx.Attacker.CaptureFromStock != 0 {
+			bad("attacks.%s.attacker.%s: an attacker's capture is always of the force it sent", kind, keyCaptureFromStock)
+		}
+		for i, g := range MilitaryGoods {
+			if g.Force == nil && !fx.Attacker.CaptureUnits[i].IsZero() {
+				bad("attacks.%s.attacker.%s: an attack sends no %s", kind, captureKey(g), g.Plural)
+			}
 		}
 		for _, side := range AttackSides {
 			set := *fx.Side(side)
@@ -126,6 +152,12 @@ func (r *Rules) validateAttacks(bad func(format string, a ...any)) {
 						bad("%s: percent %d is outside 0 to %d", where, v.Pct, limit)
 					case v.Up < 0 || v.Up > ModAttackJitterMax || v.Down < 0 || v.Down > ModAttackJitterMax:
 						bad("%s: up %d and down %d must each be 0 to %d", where, v.Up, v.Down, ModAttackJitterMax)
+					}
+					continue
+				}
+				if f.Whole != nil {
+					if v := *f.Whole(&set); v < 0 || v > f.Max {
+						bad("%s: %d is outside 0 to %d", where, v, f.Max)
 					}
 					continue
 				}
